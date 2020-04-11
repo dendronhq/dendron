@@ -4,5 +4,8 @@
       "path": "."
     }
   ],
-  "settings": {}
+  "settings": {
+    "files.autoSave": "on",
+    "eslint.workingDirectories": [{ "pattern": "./packages/*", "mode": "auto" }]
+  }
 }

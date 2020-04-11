@@ -36,7 +36,5 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {
-    "@storybook/preset-create-react-app": "^2.1.1"
-  }
+  "devDependencies": {}
 }

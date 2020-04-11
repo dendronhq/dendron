@@ -1,8 +1,11 @@
 import "./App.css";
 
+import { Route, Router, Switch } from "react-router-dom";
+
 import { CReduxComp } from "./sample/ReduxComp";
 import { Provider } from "react-redux";
 import React from "react";
+import { getOrCreateHistory } from "./utils/history";
 import logo from "./logo.svg";
 import { setupStore } from "./redux";
 
@@ -11,26 +14,25 @@ const store = setupStore();
 
 // } Init End
 
+function DummyComp() {
+  return <div>DummyComp</div>;
+}
+
+function AppSwitch() {
+  return (
+    <Switch>
+      <Route exact path="/test1" component={CReduxComp} />
+      <Route exact path="/test2" component={DummyComp} />
+    </Switch>
+  );
+}
+
 function App() {
   return (
     <Provider store={store}>
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <CReduxComp />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <Router history={getOrCreateHistory() as any}>
+        <AppSwitch></AppSwitch>
+      </Router>
     </Provider>
   );
 }

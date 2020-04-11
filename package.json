@@ -11,5 +11,8 @@
   ],
   "npmClient": "yarn",
   "version": "independent",
-  "useWorkspaces": false
+  "useWorkspaces": false,
+  "dependencies": {
+    "@types/react-redux": "^7.1.7"
+  }
 }

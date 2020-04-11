@@ -13,7 +13,9 @@
     "jest": true
   },
   "rules": {
-    "prettier/prettier": ["error", { "singleQuote": true }]
+    "prettier/prettier": ["error", { "singleQuote": false }],
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/no-explicit-any": "off"
   },
   "settings": {
     "react": {

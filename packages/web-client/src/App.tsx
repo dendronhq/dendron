@@ -7,10 +7,11 @@ import { ErrorBoundary } from "./base/ErrorBoundary";
 import { Layout } from "antd";
 import { Provider } from "react-redux";
 import React from "react";
+import { TopBarComponent } from "./nav/TopBar";
 import { getOrCreateHistory } from "./utils/history";
 import { setupStore } from "./redux";
 
-// === Init Begin {
+// === Init Start {
 const store = setupStore();
 
 // } Init End
@@ -34,6 +35,7 @@ function App() {
       <Router history={getOrCreateHistory() as any}>
         <ErrorBoundary>
           <Layout>
+            <TopBarComponent />
             <AppSwitch></AppSwitch>
           </Layout>
         </ErrorBoundary>

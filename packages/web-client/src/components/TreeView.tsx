@@ -1,8 +1,44 @@
 import { DComponentProps, dims } from "../config";
 
 import React from "react";
+import { SchemaNode } from "../node-common";
 import Tree from "react-d3-tree";
 import styled from "styled-components";
+
+const TREE_TRANSITION_DURATION = 400;
+
+const SAMPLE_YAML = `
+  name: project
+  schema:
+      root:
+        children:
+          quickstart: 
+          topic: 
+          version: 
+          dev: 
+          features:
+          rel:
+      features:
+        desc: what does it do
+      ref:
+        kind: namespace
+        choices:
+            competitors: 
+            shortcuts:
+      rel:
+        desc: relative
+      version:
+        children:
+          version-major: 
+          version-minor: 
+          version-breaking: 
+      plan:
+        children:
+          requirements:
+            alias: req
+          timeline:
+            desc: "how long will it take"
+`;
 
 const STreeDiv = styled.div`
   ${dims("Tree", "global", { forStyledComp: true })}
@@ -11,7 +47,6 @@ interface TreeViewProps {}
 interface TreeViewState {
   translate: { x: number; y: number };
 }
-const TREE_TRANSITION_DURATION = 400;
 
 export class TreeView extends React.PureComponent<
   TreeViewProps,
@@ -36,6 +71,8 @@ export class TreeView extends React.PureComponent<
   onMouseOver = () => {};
 
   render() {
+    const yamlData = SchemaNode.deserialize(SAMPLE_YAML);
+    console.log(yamlData);
     const data = [
       {
         name: "Parent Node",

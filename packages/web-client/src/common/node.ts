@@ -2,15 +2,15 @@ import {
   SchemaDataKey,
   SchemaNode,
   SchemaNodeStub,
-  SchemaYAML,
-  SchemaYAMLEntry,
+  SchemaYAMLEntryRaw,
+  SchemaYAMLRaw,
 } from "./types";
 
 import YAML from "yamljs";
 import _ from "lodash";
 
-interface DataDefaults {
-  default: any;
+interface YAMLEntryOpts {
+  id: string;
 }
 
 export class SchemaStubWrapper {
@@ -18,8 +18,11 @@ export class SchemaStubWrapper {
     return _.omit(node, "children", "parent");
   }
 
-  static fromSchemaYAMLEntry(entry: SchemaYAMLEntry): SchemaNodeStub {
-    const { id } = entry;
+  static fromSchemaYAMLEntry(
+    entry: SchemaYAMLEntryRaw,
+    opts: YAMLEntryOpts
+  ): SchemaNodeStub {
+    const { id } = opts;
     const schemaDataKeysDefaults: {
       [key in SchemaDataKey]: any;
     } = {
@@ -43,10 +46,16 @@ export class SchemaStubWrapper {
 }
 
 export class SchemaNodeWrapper {
-  static fromSchemaYAMLEntry(entry: SchemaYAMLEntry): SchemaNode {
-    const schemaStub = SchemaStubWrapper.fromSchemaYAMLEntry(entry);
+  static fromSchemaYAMLEntry(
+    entry: SchemaYAMLEntryRaw,
+    opts: YAMLEntryOpts
+  ): SchemaNode {
+    entry = _.defaults(entry, { children: [] });
+    const schemaStub = SchemaStubWrapper.fromSchemaYAMLEntry(entry, opts);
     const parent = null;
-    const children: any[] = [];
+    const children = _.map(entry.children, (entry, id: string) => {
+      return SchemaStubWrapper.fromSchemaYAMLEntry(entry, { id });
+    });
     const schemaNode = { ...schemaStub, parent, children };
     return schemaNode;
   }
@@ -67,41 +76,45 @@ export class SchemaTree {
     this.name = name;
     this.root = root;
     this.nodes = {};
+    this.addChild(root, null);
   }
 
-  addChild(child: SchemaNode, parent: SchemaNode) {
-    const parentNode = this.nodes[parent.logicalId];
-    if (_.isUndefined(parentNode)) {
-      throw `no parent with ${parent.id} found`;
-    }
+  addChild(child: SchemaNode, parent: SchemaNode | null) {
     const childStub = SchemaStubWrapper.fromSchemaNode(child);
-    parentNode.children.push(childStub);
+    if (parent) {
+      const parentNode = this.nodes[parent.logicalId];
+      if (_.isUndefined(parentNode)) {
+        throw `no parent with ${parent.id} found`;
+      }
+      parentNode.children.push(childStub);
+    }
     this.nodes[child.logicalId] = child;
   }
 
   static fromSchemaYAML(yamlString: string): SchemaTree {
-    const schemaYAML: SchemaYAML = YAML.parse(yamlString);
+    const schemaYAML: SchemaYAMLRaw = YAML.parse(yamlString);
     const { name, schema } = schemaYAML;
 
-    const root = SchemaNodeWrapper.fromSchemaYAMLEntry({
-      ...schema.root,
+    const root = SchemaNodeWrapper.fromSchemaYAMLEntry(schema.root, {
       id: "root",
     });
     const tree = new SchemaTree(name, root);
-    let parent = root;
-    _.map(tree.root.children, (v: any, childId: string) => {
-      // @ts-ignore
-      const entry: SchemaYAMLEntry = schema[childId];
 
-      const childNode = SchemaNodeWrapper.fromSchemaYAMLEntry({
-        ...entry,
-        id: entry.id,
+    const unvisited: SchemaNode[] = [root];
+    while (!_.isEmpty(unvisited)) {
+      const parent: SchemaNode = unvisited.pop() as SchemaNode;
+      _.map(parent.children, ({ id: childId }: SchemaNodeStub) => {
+        // @ts-ignore
+        const entry: SchemaYAMLEntryRaw = schema[childId];
+
+        const childNode = SchemaNodeWrapper.fromSchemaYAMLEntry(entry, {
+          id: childId,
+        });
+        // NOTE: parent relationships already defined in yaml
+        tree.addChild(childNode, null);
+        unvisited.push(childNode);
       });
-      tree.addChild(childNode, parent);
-    });
-    // tree.root.children.forEach((childId: string) => {
-    //   const childEntry = schema[childId];
-    // });
+    }
     return tree;
   }
 

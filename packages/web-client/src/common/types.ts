@@ -55,12 +55,11 @@ export type SchemaNodeKind = "namespace";
 export type SchemaNodeStub = NodeStub<SchemaData>;
 export type SchemaNode = Node<SchemaData>;
 
-export type SchemaYAML = {
+export type SchemaYAMLRaw = {
   name: string;
-  schema: { [key: string]: SchemaYAMLEntry } | { root: SchemaYAMLEntry };
+  schema: { [key: string]: SchemaYAMLEntryRaw } | { root: SchemaYAMLEntryRaw };
 };
-export type SchemaYAMLEntry = SchemaData & {
-  id: string;
+export type SchemaYAMLEntryRaw = SchemaData & {
   children: { [key: string]: any };
 };
 

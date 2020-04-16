@@ -36,7 +36,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint:fix": "eslint './src/**/*.{ts,tsx}'",
-    "test:unit:watch": "stage=test jest --watch '.*/__test__/.*\\.unit\\.test\\.ts'"
+    "test:unit:watch": "stage=test jest --watch '.*/__test__/.*\\.unit\\.test\\.ts'",
+    "test:unit:debug": "stage=test node --inspect-brk node_modules/.bin/jest "
   },
   "eslintConfig": {
     "extends": "react-app"

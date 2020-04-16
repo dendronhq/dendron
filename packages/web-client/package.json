@@ -35,7 +35,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint:fix": "eslint './src/**/*.{ts,tsx}'"
+    "lint:fix": "eslint './src/**/*.{ts,tsx}'",
+    "test:unit:watch": "stage=test jest --watch '.*/__test__/.*\\.unit\\.test\\.ts'"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -60,6 +61,7 @@
     "eslint-config-react": "^1.1.7",
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-react": "^7.19.0",
-    "prettier": "^2.0.4"
+    "prettier": "^2.0.4",
+    "ts-jest": "^25.3.1"
   }
 }

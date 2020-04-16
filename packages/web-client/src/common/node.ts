@@ -4,7 +4,7 @@ import {
   SchemaNodeStub,
   SchemaYAML,
   SchemaYAMLEntry,
-} from "./common-types";
+} from "./types";
 
 import YAML from "yamljs";
 import _ from "lodash";

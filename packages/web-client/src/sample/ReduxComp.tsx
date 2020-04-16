@@ -2,6 +2,7 @@ import React, { ReactElement } from "react";
 
 import { ReduxState } from "../redux/reducers";
 import { connect } from "react-redux";
+import { sampleActions } from "../redux/reducers/sampleReducer";
 
 const mapStateToProps = (state: ReduxState) => ({
   value: state.sampleReducer.value,

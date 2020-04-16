@@ -1,7 +1,7 @@
 import { DComponentProps, dims } from "../config";
 
 import React from "react";
-import { SchemaNode } from "../node-common";
+import { SchemaTree } from "../common-node";
 import Tree from "react-d3-tree";
 import styled from "styled-components";
 
@@ -18,6 +18,8 @@ const SAMPLE_YAML = `
           dev: 
           features:
           rel:
+      quickstart:
+        desc: get started with project
       features:
         desc: what does it do
       ref:
@@ -71,7 +73,7 @@ export class TreeView extends React.PureComponent<
   onMouseOver = () => {};
 
   render() {
-    const yamlData = SchemaNode.deserialize(SAMPLE_YAML);
+    const yamlData = SchemaTree.fromSchemaYAML(SAMPLE_YAML);
     console.log(yamlData);
     const data = [
       {

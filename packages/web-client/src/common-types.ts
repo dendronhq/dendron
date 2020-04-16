@@ -12,7 +12,7 @@ export interface Node<TData> {
   children: NodeStub<TData>[];
 }
 
-type NodeStub<TData> = Omit<Node<TData>, "parent" | "children" | "body">;
+type NodeStub<TData> = Omit<Node<TData>, "parent" | "children">;
 
 interface NodeData {
   title: string;
@@ -28,16 +28,41 @@ export interface SchemaData extends NodeData {
    * If namespace exists, display it here
    */
   //namespace?: string;
+  //   language:
+  //     kind: namespace
+  //     choices:
+  //         python:
+  //         ruby:
+  //         ts:
+  //     children:
+  //         data
+  //         flow
 }
 
+export type SchemaDataKey = keyof SchemaData;
+
+export type RequiredSchemaDataKey = "title" | "desc";
+export const RequiredSchemaDataKeyValues: RequiredSchemaDataKey[] = [
+  "title",
+  "desc",
+];
+
+export type OptionalSchemaDataKey = Exclude<
+  keyof SchemaData,
+  RequiredSchemaDataKey
+>;
 export type SchemaNodeKind = "namespace";
 export type SchemaNodeStub = NodeStub<SchemaData>;
+export type SchemaNode = Node<SchemaData>;
 
 export type SchemaYAML = {
   name: string;
-  schema: { [key: string]: SchemaYAMLEntry };
+  schema: { [key: string]: SchemaYAMLEntry } | { root: SchemaYAMLEntry };
 };
-type SchemaYAMLEntry = SchemaData | { children: { [key: string]: any } };
+export type SchemaYAMLEntry = SchemaData & {
+  id: string;
+  children: { [key: string]: any };
+};
 
 /*
 global:

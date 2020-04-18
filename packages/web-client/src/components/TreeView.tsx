@@ -1,8 +1,10 @@
 import { DComponentProps, dims } from "../config";
 
 import React from "react";
-import { SchemaTree } from "../common-node";
+import { ReduxState } from "../redux/reducers";
+import { SchemaTree } from "../common/node";
 import Tree from "react-d3-tree";
+import { connect } from "react-redux";
 import styled from "styled-components";
 
 const TREE_TRANSITION_DURATION = 400;
@@ -45,15 +47,15 @@ const SAMPLE_YAML = `
 const STreeDiv = styled.div`
   ${dims("Tree", "global", { forStyledComp: true })}
 `;
-interface TreeViewProps {}
+const mapStateToProps = (state: ReduxState) => ({
+  schemaDict: state.nodeReducer.schemaDict,
+});
+type TreeViewProps = ReturnType<typeof mapStateToProps>;
 interface TreeViewState {
   translate: { x: number; y: number };
 }
 
-export class TreeView extends React.PureComponent<
-  TreeViewProps,
-  TreeViewState
-> {
+class TreeView extends React.PureComponent<TreeViewProps, TreeViewState> {
   constructor(props: TreeViewProps) {
     super(props);
     const treeDims: Required<DComponentProps> = dims(
@@ -63,8 +65,8 @@ export class TreeView extends React.PureComponent<
     const { width, height } = treeDims;
     this.state = {
       translate: {
-        x: width / 5,
-        y: height / 1.5,
+        x: width / 2,
+        y: height / 3,
       },
     };
   }
@@ -73,46 +75,9 @@ export class TreeView extends React.PureComponent<
   onMouseOver = () => {};
 
   render() {
-    const yamlData = SchemaTree.fromSchemaYAML(SAMPLE_YAML);
-    console.log(yamlData);
-    const data = [
-      {
-        name: "Parent Node",
-        attributes: {
-          keyA: "val A",
-          keyB: "val B",
-          keyC: "val C",
-        },
-        nodeSvgShape: {
-          shapeProps: {
-            fill: "blue",
-          },
-        },
-        children: [
-          {
-            name: "Inner Node",
-            attributes: {
-              keyA: "val A",
-              keyB: "val B",
-              keyC: "val C",
-            },
-            nodeSvgShape: {
-              shape: "rect",
-              shapeProps: {
-                width: 20,
-                height: 20,
-                x: -10,
-                y: -10,
-                fill: "red",
-              },
-            },
-          },
-          {
-            name: "Level 2: B",
-          },
-        ],
-      },
-    ];
+    const { schemaDict } = this.props;
+    const tree = new SchemaTree("root", schemaDict.root, schemaDict);
+    const data = tree.toD3Tree();
     return (
       <STreeDiv>
         TreeView
@@ -129,3 +94,7 @@ export class TreeView extends React.PureComponent<
     );
   }
 }
+
+export const CTreeView = connect(mapStateToProps, null, null, {
+  forwardRef: true,
+})(TreeView);

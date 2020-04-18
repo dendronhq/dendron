@@ -1,6 +1,8 @@
+import { NodeSvgShape, ReactD3TreeItem } from "react-d3-tree";
 import {
   SchemaDataKey,
   SchemaNode,
+  SchemaNodeDict,
   SchemaNodeStub,
   SchemaYAMLEntryRaw,
   SchemaYAMLRaw,
@@ -12,6 +14,17 @@ import _ from "lodash";
 interface YAMLEntryOpts {
   id: string;
 }
+
+type ReactD3TreeItemV2<T> = {
+  logicalId: string;
+  name: string;
+  attributes: {
+    [key in keyof T]: string;
+  };
+  children?: ReactD3TreeItem[];
+  _collapsed?: boolean;
+  nodeSvgShape?: NodeSvgShape;
+};
 
 export class SchemaStubWrapper {
   static fromSchemaNode(node: SchemaNode): SchemaNodeStub {
@@ -70,13 +83,24 @@ export class SchemaNodeWrapper {
 export class SchemaTree {
   public name: string;
   public root: SchemaNode;
-  public nodes: { [key: string]: SchemaNode };
+  public nodes: SchemaNodeDict;
 
-  constructor(name: string, root: SchemaNode) {
+  constructor(name: string, root: SchemaNode, nodes?: SchemaNodeDict) {
     this.name = name;
     this.root = root;
-    this.nodes = {};
+    this.nodes = _.cloneDeep(nodes) || {};
     this.addChild(root, null);
+  }
+
+  /**
+   * Add a subtree and merge all nodes
+   * @param tree
+   * @param parent
+   */
+  addSubTree(tree: SchemaTree, parentLogicalId: string) {
+    const parent = this.nodes[parentLogicalId];
+    this.addChild(tree.root, parent);
+    this.nodes = _.merge(this.nodes, tree.nodes);
   }
 
   addChild(child: SchemaNode, parent: SchemaNode | null) {
@@ -96,7 +120,7 @@ export class SchemaTree {
     const { name, schema } = schemaYAML;
 
     const root = SchemaNodeWrapper.fromSchemaYAMLEntry(schema.root, {
-      id: "root",
+      id: name,
     });
     const tree = new SchemaTree(name, root);
 
@@ -119,7 +143,27 @@ export class SchemaTree {
   }
 
   toD3Tree() {
-    // TODO
-    return;
+    const schemaNode2D3Node = (
+      node: SchemaNode,
+      nodeDict: SchemaNodeDict
+    ): ReactD3TreeItemV2<any> => {
+      if (!node) {
+        console.log("foo");
+      }
+      const { title } = node.data;
+      const { logicalId } = node;
+      return {
+        name: title,
+        logicalId,
+        attributes: {},
+        children: _.map(node.children, (ch) =>
+          schemaNode2D3Node(nodeDict[ch.logicalId], nodeDict)
+        ),
+      };
+    };
+    const out = schemaNode2D3Node(this.root, this.nodes);
+    // replace `root` with name of schema
+    out.name = this.name;
+    return out;
   }
 }

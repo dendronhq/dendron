@@ -3,12 +3,12 @@ import "./App.css";
 import { Route, Router, Switch } from "react-router-dom";
 
 import { CReduxComp } from "./sample/ReduxComp";
+import { CTreeView } from "./components/TreeView";
 import { ErrorBoundary } from "./base/ErrorBoundary";
 import { Layout } from "antd";
 import { Provider } from "react-redux";
 import React from "react";
 import { TopBarComponent } from "./nav/TopBar";
-import { TreeView } from "./components/TreeView";
 import { getOrCreateHistory } from "./utils/history";
 import { setupStore } from "./redux";
 
@@ -24,7 +24,7 @@ function DummyComp() {
 function AppSwitch() {
   return (
     <Switch>
-      <Route exact path="/" component={TreeView} />
+      <Route exact path="/" component={CTreeView} />
       <Route exact path="/test1" component={CReduxComp} />
       <Route exact path="/test2" component={DummyComp} />
     </Switch>

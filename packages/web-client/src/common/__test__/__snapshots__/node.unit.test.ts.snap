@@ -1,6 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SchemaTree basic 1`] = `
+exports[`SchemaTree foo: foo-snap 1`] = `
+SchemaTree {
+  "name": "foo",
+  "nodes": Object {
+    "foo": Object {
+      "children": Array [],
+      "data": Object {
+        "desc": "foo",
+        "title": "foo",
+      },
+      "id": "foo",
+      "logicalId": "foo",
+      "parent": null,
+    },
+  },
+  "root": Object {
+    "children": Array [],
+    "data": Object {
+      "desc": "foo",
+      "title": "foo",
+    },
+    "id": "foo",
+    "logicalId": "foo",
+    "parent": null,
+  },
+}
+`;
+
+exports[`SchemaTree fromSchemaYAML: fromSchemaYAML 1`] = `
 SchemaTree {
   "name": "project",
   "nodes": Object {
@@ -30,33 +58,7 @@ SchemaTree {
       "logicalId": "features",
       "parent": null,
     },
-    "quickstart": Object {
-      "children": Array [],
-      "data": Object {
-        "aliases": Array [],
-        "choices": Array [],
-        "desc": "get started with project",
-        "kind": undefined,
-        "title": "quickstart",
-      },
-      "id": "quickstart",
-      "logicalId": "quickstart",
-      "parent": null,
-    },
-    "rel": Object {
-      "children": Array [],
-      "data": Object {
-        "aliases": Array [],
-        "choices": Array [],
-        "desc": "relative",
-        "kind": undefined,
-        "title": "rel",
-      },
-      "id": "rel",
-      "logicalId": "rel",
-      "parent": null,
-    },
-    "root": Object {
+    "project": Object {
       "children": Array [
         Object {
           "data": Object {
@@ -130,10 +132,36 @@ SchemaTree {
         "choices": Array [],
         "desc": "",
         "kind": undefined,
-        "title": "root",
+        "title": "project",
       },
-      "id": "root",
-      "logicalId": "root",
+      "id": "project",
+      "logicalId": "project",
+      "parent": null,
+    },
+    "quickstart": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "get started with project",
+        "kind": undefined,
+        "title": "quickstart",
+      },
+      "id": "quickstart",
+      "logicalId": "quickstart",
+      "parent": null,
+    },
+    "rel": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "relative",
+        "kind": undefined,
+        "title": "rel",
+      },
+      "id": "rel",
+      "logicalId": "rel",
       "parent": null,
     },
     "topic": Object {
@@ -310,6 +338,90 @@ SchemaTree {
       "choices": Array [],
       "desc": "",
       "kind": undefined,
+      "title": "project",
+    },
+    "id": "project",
+    "logicalId": "project",
+    "parent": null,
+  },
+}
+`;
+
+exports[`SchemaTree root/foo: root/foo-snap 1`] = `
+SchemaTree {
+  "name": "root",
+  "nodes": Object {
+    "foo": Object {
+      "children": Array [],
+      "data": Object {
+        "desc": "foo",
+        "title": "foo",
+      },
+      "id": "foo",
+      "logicalId": "foo",
+      "parent": null,
+    },
+    "root": Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "desc": "foo",
+            "title": "foo",
+          },
+          "id": "foo",
+          "logicalId": "foo",
+        },
+      ],
+      "data": Object {
+        "desc": "root",
+        "title": "root",
+      },
+      "id": "root",
+      "logicalId": "root",
+      "parent": null,
+    },
+  },
+  "root": Object {
+    "children": Array [
+      Object {
+        "data": Object {
+          "desc": "foo",
+          "title": "foo",
+        },
+        "id": "foo",
+        "logicalId": "foo",
+      },
+    ],
+    "data": Object {
+      "desc": "root",
+      "title": "root",
+    },
+    "id": "root",
+    "logicalId": "root",
+    "parent": null,
+  },
+}
+`;
+
+exports[`SchemaTree root: root-snap 1`] = `
+SchemaTree {
+  "name": "root",
+  "nodes": Object {
+    "root": Object {
+      "children": Array [],
+      "data": Object {
+        "desc": "root",
+        "title": "root",
+      },
+      "id": "root",
+      "logicalId": "root",
+      "parent": null,
+    },
+  },
+  "root": Object {
+    "children": Array [],
+    "data": Object {
+      "desc": "root",
       "title": "root",
     },
     "id": "root",

@@ -51,6 +51,7 @@ export type OptionalSchemaDataKey = Exclude<
   keyof SchemaData,
   RequiredSchemaDataKey
 >;
+export type SchemaNodeDict = { [key: string]: SchemaNode };
 export type SchemaNodeKind = "namespace";
 export type SchemaNodeStub = NodeStub<SchemaData>;
 export type SchemaNode = Node<SchemaData>;

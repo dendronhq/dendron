@@ -8,8 +8,25 @@ import {
   SchemaYAMLRaw,
 } from "./types";
 
+import { IconType } from "antd/lib/notification";
 import YAML from "yamljs";
 import _ from "lodash";
+
+export interface DataNode {
+  checkable?: boolean;
+  children?: DataNode[];
+  disabled?: boolean;
+  disableCheckbox?: boolean;
+  icon?: IconType;
+  isLeaf?: boolean;
+  key: string | number;
+  title?: React.ReactNode;
+  selectable?: boolean;
+  switcherIcon?: IconType;
+  /** Set style of TreeNode. This is not recommend if you don't have any force requirement */
+  className?: string;
+  style?: React.CSSProperties;
+}
 
 interface YAMLEntryOpts {
   id: string;
@@ -142,14 +159,32 @@ export class SchemaTree {
     return tree;
   }
 
+  toAntDTree() {
+    const schemaNode2AntDNode = (
+      node: SchemaNode,
+      nodeDict: SchemaNodeDict
+    ): DataNode => {
+      const { title } = node.data;
+      const { logicalId } = node;
+      return {
+        title,
+        key: logicalId,
+        children: _.map(node.children, (ch) =>
+          schemaNode2AntDNode(nodeDict[ch.logicalId], nodeDict)
+        ),
+      };
+    };
+    const out = schemaNode2AntDNode(this.root, this.nodes);
+    // replace `root` with name of schema
+    out.title = this.name;
+    return out;
+  }
+
   toD3Tree() {
     const schemaNode2D3Node = (
       node: SchemaNode,
       nodeDict: SchemaNodeDict
     ): ReactD3TreeItemV2<any> => {
-      if (!node) {
-        console.log("foo");
-      }
       const { title } = node.data;
       const { logicalId } = node;
       return {

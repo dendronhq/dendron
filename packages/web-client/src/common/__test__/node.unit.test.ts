@@ -1,23 +1,7 @@
 import { SchemaNode } from "../types";
 import { SchemaTree } from "../node";
 
-const rootSchemaNode: SchemaNode = {
-  id: "root",
-  logicalId: "root",
-  children: [],
-  parent: null,
-  data: { title: "root", desc: "root" },
-};
-
-const fooSchemaNode: SchemaNode = {
-  id: "foo",
-  logicalId: "foo",
-  children: [],
-  parent: null,
-  data: { title: "foo", desc: "foo" },
-};
-
-const SAMPLE_YAML = `
+const YAML_PROJECT_BASE = `
   name: project
   schema:
       root:
@@ -25,7 +9,6 @@ const SAMPLE_YAML = `
           quickstart: 
           topic: 
           version: 
-          dev: 
           features:
           rel:
       quickstart:
@@ -53,24 +36,100 @@ const SAMPLE_YAML = `
       version-major:
         desc: the major version
 `;
+const YAML_PROJECT_DEV = `
+  name: dev project
+  schema: 
+    root:
+      children: 
+        upgrade:
+        dev:
+        ref:
+    dev:
+      children:
+        dev-layout: 
+        architecture:
+          alias: arch        
+        qa:
+        ops:
+    ref:
+      children:
+        config:
+        lifecycle:
+    config: 
+`;
 
+function treeTest(
+  testFunc: typeof test,
+  name: string,
+  treeFunc: () => SchemaTree
+) {
+  testFunc("basic", () => {
+    expect(treeFunc()).toMatchSnapshot(`${name}-snap`);
+  });
+  testFunc("toAntDTree", () => {
+    const antTree = treeFunc().toAntDTree();
+    expect(antTree).toMatchSnapshot(`${name}-antdTree`);
+    console.log(JSON.stringify(antTree));
+  });
+}
+
+let rootSchemaNode: SchemaNode;
+let fooSchemaNode: SchemaNode;
 describe("SchemaTree", () => {
-  test("root", () => {
-    const tree = new SchemaTree("root", rootSchemaNode);
-    expect(tree).toMatchSnapshot("root-snap");
+  beforeEach(() => {
+    rootSchemaNode = {
+      id: "root",
+      logicalId: "root",
+      children: [],
+      parent: null,
+      data: { title: "root", desc: "root" },
+    };
+
+    fooSchemaNode = {
+      id: "foo",
+      logicalId: "foo",
+      children: [],
+      parent: null,
+      data: { title: "foo", desc: "foo" },
+    };
   });
-  test("foo", () => {
-    const tree = new SchemaTree("foo", fooSchemaNode);
-    expect(tree).toMatchSnapshot("foo-snap");
+
+  describe("root", () => {
+    treeTest(test, "root", () => {
+      return new SchemaTree("root", rootSchemaNode);
+    });
   });
-  test("root/foo", () => {
-    const tree1 = new SchemaTree("root", rootSchemaNode);
-    const tree2 = new SchemaTree("foo", fooSchemaNode);
-    tree1.addSubTree(tree2, "root");
-    expect(tree1).toMatchSnapshot("root/foo-snap");
+
+  describe("foo", () => {
+    treeTest(test, "foo", () => {
+      return new SchemaTree("foo", fooSchemaNode);
+    });
   });
-  test("fromSchemaYAML", () => {
-    const tree = SchemaTree.fromSchemaYAML(SAMPLE_YAML);
-    expect(tree).toMatchSnapshot("fromSchemaYAML");
+
+  describe("root.foo", () => {
+    treeTest(test, "root.foo", () => {
+      const tree1 = new SchemaTree("root", rootSchemaNode);
+      const tree2 = new SchemaTree("foo", fooSchemaNode);
+      tree1.addSubTree(tree2, "root");
+      return tree1;
+    });
   });
+
+  describe.only("yamlSchema", () => {
+    treeTest(test, "yamlSchema", () => {
+      const initialTree = new SchemaTree("root", rootSchemaNode);
+      const treeProjectBase = SchemaTree.fromSchemaYAML(YAML_PROJECT_BASE);
+      const treeProjectDev = SchemaTree.fromSchemaYAML(YAML_PROJECT_DEV);
+      initialTree.addSubTree(treeProjectBase, rootSchemaNode.logicalId);
+      initialTree.addSubTree(treeProjectDev, rootSchemaNode.logicalId);
+      return initialTree;
+      //return SchemaTree.fromSchemaYAML(SAMPLE_YAML);
+    });
+  });
+
+  //   describe.only("yaml1.yaml2", () => {
+  //     treeTest(test, "yam1.yaml2", () => {
+  //       const tree1 = SchemaTree.fromSchemaYAML(SAMPLE_YAML);
+  //     });
+  //   });
 });

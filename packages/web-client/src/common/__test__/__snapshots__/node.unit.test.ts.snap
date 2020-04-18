@@ -1,39 +1,83 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SchemaTree foo: foo-snap 1`] = `
+exports[`SchemaTree yamlSchema basic: yamlSchema-snap 1`] = `
 SchemaTree {
-  "name": "foo",
+  "name": "root",
   "nodes": Object {
-    "foo": Object {
+    "architecture": Object {
       "children": Array [],
       "data": Object {
-        "desc": "foo",
-        "title": "foo",
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "architecture",
       },
-      "id": "foo",
-      "logicalId": "foo",
+      "id": "architecture",
+      "logicalId": "architecture",
       "parent": null,
     },
-  },
-  "root": Object {
-    "children": Array [],
-    "data": Object {
-      "desc": "foo",
-      "title": "foo",
-    },
-    "id": "foo",
-    "logicalId": "foo",
-    "parent": null,
-  },
-}
-`;
-
-exports[`SchemaTree fromSchemaYAML: fromSchemaYAML 1`] = `
-SchemaTree {
-  "name": "project",
-  "nodes": Object {
-    "dev": Object {
+    "config": Object {
       "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "config",
+      },
+      "id": "config",
+      "logicalId": "config",
+      "parent": null,
+    },
+    "dev": Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "dev-layout",
+          },
+          "id": "dev-layout",
+          "logicalId": "dev-layout",
+        },
+        Object {
+          "data": Object {
+            "alias": "arch",
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "architecture",
+          },
+          "id": "architecture",
+          "logicalId": "architecture",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "qa",
+          },
+          "id": "qa",
+          "logicalId": "qa",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "ops",
+          },
+          "id": "ops",
+          "logicalId": "ops",
+        },
+      ],
       "data": Object {
         "aliases": Array [],
         "choices": Array [],
@@ -43,6 +87,66 @@ SchemaTree {
       },
       "id": "dev",
       "logicalId": "dev",
+      "parent": null,
+    },
+    "dev project": Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "upgrade",
+          },
+          "id": "upgrade",
+          "logicalId": "upgrade",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "dev",
+          },
+          "id": "dev",
+          "logicalId": "dev",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "ref",
+          },
+          "id": "ref",
+          "logicalId": "ref",
+        },
+      ],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "dev project",
+      },
+      "id": "dev project",
+      "logicalId": "dev project",
+      "parent": null,
+    },
+    "dev-layout": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "dev-layout",
+      },
+      "id": "dev-layout",
+      "logicalId": "dev-layout",
       "parent": null,
     },
     "features": Object {
@@ -56,6 +160,32 @@ SchemaTree {
       },
       "id": "features",
       "logicalId": "features",
+      "parent": null,
+    },
+    "lifecycle": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "lifecycle",
+      },
+      "id": "lifecycle",
+      "logicalId": "lifecycle",
+      "parent": null,
+    },
+    "ops": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "ops",
+      },
+      "id": "ops",
+      "logicalId": "ops",
       "parent": null,
     },
     "project": Object {
@@ -99,17 +229,6 @@ SchemaTree {
             "choices": Array [],
             "desc": "",
             "kind": undefined,
-            "title": "dev",
-          },
-          "id": "dev",
-          "logicalId": "dev",
-        },
-        Object {
-          "data": Object {
-            "aliases": Array [],
-            "choices": Array [],
-            "desc": "",
-            "kind": undefined,
             "title": "features",
           },
           "id": "features",
@@ -138,6 +257,19 @@ SchemaTree {
       "logicalId": "project",
       "parent": null,
     },
+    "qa": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "qa",
+      },
+      "id": "qa",
+      "logicalId": "qa",
+      "parent": null,
+    },
     "quickstart": Object {
       "children": Array [],
       "data": Object {
@@ -149,6 +281,42 @@ SchemaTree {
       },
       "id": "quickstart",
       "logicalId": "quickstart",
+      "parent": null,
+    },
+    "ref": Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "config",
+          },
+          "id": "config",
+          "logicalId": "config",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "lifecycle",
+          },
+          "id": "lifecycle",
+          "logicalId": "lifecycle",
+        },
+      ],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "ref",
+      },
+      "id": "ref",
+      "logicalId": "ref",
       "parent": null,
     },
     "rel": Object {
@@ -164,6 +332,39 @@ SchemaTree {
       "logicalId": "rel",
       "parent": null,
     },
+    "root": Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "project",
+          },
+          "id": "project",
+          "logicalId": "project",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "dev project",
+          },
+          "id": "dev project",
+          "logicalId": "dev project",
+        },
+      ],
+      "data": Object {
+        "desc": "root",
+        "title": "root",
+      },
+      "id": "root",
+      "logicalId": "root",
+      "parent": null,
+    },
     "topic": Object {
       "children": Array [],
       "data": Object {
@@ -175,6 +376,19 @@ SchemaTree {
       },
       "id": "topic",
       "logicalId": "topic",
+      "parent": null,
+    },
+    "upgrade": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "upgrade",
+      },
+      "id": "upgrade",
+      "logicalId": "upgrade",
       "parent": null,
     },
     "version": Object {
@@ -272,10 +486,10 @@ SchemaTree {
           "choices": Array [],
           "desc": "",
           "kind": undefined,
-          "title": "quickstart",
+          "title": "project",
         },
-        "id": "quickstart",
-        "logicalId": "quickstart",
+        "id": "project",
+        "logicalId": "project",
       },
       Object {
         "data": Object {
@@ -283,150 +497,128 @@ SchemaTree {
           "choices": Array [],
           "desc": "",
           "kind": undefined,
-          "title": "topic",
+          "title": "dev project",
         },
-        "id": "topic",
-        "logicalId": "topic",
-      },
-      Object {
-        "data": Object {
-          "aliases": Array [],
-          "choices": Array [],
-          "desc": "",
-          "kind": undefined,
-          "title": "version",
-        },
-        "id": "version",
-        "logicalId": "version",
-      },
-      Object {
-        "data": Object {
-          "aliases": Array [],
-          "choices": Array [],
-          "desc": "",
-          "kind": undefined,
-          "title": "dev",
-        },
-        "id": "dev",
-        "logicalId": "dev",
-      },
-      Object {
-        "data": Object {
-          "aliases": Array [],
-          "choices": Array [],
-          "desc": "",
-          "kind": undefined,
-          "title": "features",
-        },
-        "id": "features",
-        "logicalId": "features",
-      },
-      Object {
-        "data": Object {
-          "aliases": Array [],
-          "choices": Array [],
-          "desc": "",
-          "kind": undefined,
-          "title": "rel",
-        },
-        "id": "rel",
-        "logicalId": "rel",
+        "id": "dev project",
+        "logicalId": "dev project",
       },
     ],
     "data": Object {
-      "aliases": Array [],
-      "choices": Array [],
-      "desc": "",
-      "kind": undefined,
-      "title": "project",
+      "desc": "root",
+      "title": "root",
     },
-    "id": "project",
-    "logicalId": "project",
+    "id": "root",
+    "logicalId": "root",
     "parent": null,
   },
 }
 `;
 
-exports[`SchemaTree root/foo: root/foo-snap 1`] = `
-SchemaTree {
-  "name": "root",
-  "nodes": Object {
-    "foo": Object {
-      "children": Array [],
-      "data": Object {
-        "desc": "foo",
-        "title": "foo",
-      },
-      "id": "foo",
-      "logicalId": "foo",
-      "parent": null,
-    },
-    "root": Object {
+exports[`SchemaTree yamlSchema toAntDTree: yamlSchema-antdTree 1`] = `
+Object {
+  "children": Array [
+    Object {
       "children": Array [
         Object {
-          "data": Object {
-            "desc": "foo",
-            "title": "foo",
-          },
-          "id": "foo",
-          "logicalId": "foo",
+          "children": Array [],
+          "key": "quickstart",
+          "title": "quickstart",
+        },
+        Object {
+          "children": Array [],
+          "key": "topic",
+          "title": "topic",
+        },
+        Object {
+          "children": Array [
+            Object {
+              "children": Array [],
+              "key": "version-major",
+              "title": "version-major",
+            },
+            Object {
+              "children": Array [],
+              "key": "version-minor",
+              "title": "version-minor",
+            },
+            Object {
+              "children": Array [],
+              "key": "version-breaking",
+              "title": "version-breaking",
+            },
+          ],
+          "key": "version",
+          "title": "version",
+        },
+        Object {
+          "children": Array [],
+          "key": "features",
+          "title": "features",
+        },
+        Object {
+          "children": Array [],
+          "key": "rel",
+          "title": "rel",
         },
       ],
-      "data": Object {
-        "desc": "root",
-        "title": "root",
-      },
-      "id": "root",
-      "logicalId": "root",
-      "parent": null,
+      "key": "project",
+      "title": "project",
     },
-  },
-  "root": Object {
-    "children": Array [
-      Object {
-        "data": Object {
-          "desc": "foo",
-          "title": "foo",
+    Object {
+      "children": Array [
+        Object {
+          "children": Array [],
+          "key": "upgrade",
+          "title": "upgrade",
         },
-        "id": "foo",
-        "logicalId": "foo",
-      },
-    ],
-    "data": Object {
-      "desc": "root",
-      "title": "root",
+        Object {
+          "children": Array [
+            Object {
+              "children": Array [],
+              "key": "dev-layout",
+              "title": "dev-layout",
+            },
+            Object {
+              "children": Array [],
+              "key": "architecture",
+              "title": "architecture",
+            },
+            Object {
+              "children": Array [],
+              "key": "qa",
+              "title": "qa",
+            },
+            Object {
+              "children": Array [],
+              "key": "ops",
+              "title": "ops",
+            },
+          ],
+          "key": "dev",
+          "title": "dev",
+        },
+        Object {
+          "children": Array [
+            Object {
+              "children": Array [],
+              "key": "config",
+              "title": "config",
+            },
+            Object {
+              "children": Array [],
+              "key": "lifecycle",
+              "title": "lifecycle",
+            },
+          ],
+          "key": "ref",
+          "title": "ref",
+        },
+      ],
+      "key": "dev project",
+      "title": "dev project",
     },
-    "id": "root",
-    "logicalId": "root",
-    "parent": null,
-  },
-}
-`;
-
-exports[`SchemaTree root: root-snap 1`] = `
-SchemaTree {
-  "name": "root",
-  "nodes": Object {
-    "root": Object {
-      "children": Array [],
-      "data": Object {
-        "desc": "root",
-        "title": "root",
-      },
-      "id": "root",
-      "logicalId": "root",
-      "parent": null,
-    },
-  },
-  "root": Object {
-    "children": Array [],
-    "data": Object {
-      "desc": "root",
-      "title": "root",
-    },
-    "id": "root",
-    "logicalId": "root",
-    "parent": null,
-  },
+  ],
+  "key": "root",
+  "title": "root",
 }
 `;

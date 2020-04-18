@@ -4,7 +4,7 @@ import { SchemaTree } from "../../common/node";
 import { createSlice } from "@reduxjs/toolkit";
 
 // === BEGIN PROTO {
-const YAML_PROJECT = `
+const YAML_PROJECT_BASE = `
   name: project
   schema:
       root:
@@ -12,7 +12,6 @@ const YAML_PROJECT = `
           quickstart: 
           topic: 
           version: 
-          dev: 
           features:
           rel:
       quickstart:
@@ -37,6 +36,8 @@ const YAML_PROJECT = `
             alias: req
           timeline:
             desc: "how long will it take"
+      version-major:
+        desc: the major version
 `;
 const YAML_PROJECT_DEV = `
   name: dev project
@@ -46,7 +47,6 @@ const YAML_PROJECT_DEV = `
         upgrade:
         dev:
         ref:
-        features:
     dev:
       children:
         dev-layout: 
@@ -69,7 +69,7 @@ const rootSchemaNode: SchemaNode = {
   data: { title: "root", desc: "root" },
 };
 const initialTree = new SchemaTree("root", rootSchemaNode);
-const treeProjectBase = SchemaTree.fromSchemaYAML(YAML_PROJECT);
+const treeProjectBase = SchemaTree.fromSchemaYAML(YAML_PROJECT_BASE);
 const treeProjectDev = SchemaTree.fromSchemaYAML(YAML_PROJECT_DEV);
 initialTree.addSubTree(treeProjectBase, rootSchemaNode.logicalId);
 initialTree.addSubTree(treeProjectDev, rootSchemaNode.logicalId);

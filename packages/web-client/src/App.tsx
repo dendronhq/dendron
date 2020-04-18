@@ -1,12 +1,11 @@
 import "./App.css";
 
-import { Col, Layout } from "antd";
 import { Route, Router, Switch } from "react-router-dom";
 
 import { CReduxComp } from "./sample/ReduxComp";
 import { CSider } from "./nav/Sider";
-import { CTreeView } from "./components/TreeView";
 import { ErrorBoundary } from "./base/ErrorBoundary";
+import { Layout } from "antd";
 import { Provider } from "react-redux";
 import React from "react";
 import { TopBarComponent } from "./nav/TopBar";
@@ -14,7 +13,7 @@ import { getOrCreateHistory } from "./utils/history";
 import { setupStore } from "./redux";
 import styled from "styled-components";
 
-const { Header, Content, Sider, Footer } = Layout;
+const { Content, Sider, Footer } = Layout;
 // === Init Start {
 const store = setupStore();
 

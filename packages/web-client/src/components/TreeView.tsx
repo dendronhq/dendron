@@ -9,46 +9,12 @@ import styled from "styled-components";
 
 const TREE_TRANSITION_DURATION = 400;
 
-const SAMPLE_YAML = `
-  name: project
-  schema:
-      root:
-        children:
-          quickstart: 
-          topic: 
-          version: 
-          dev: 
-          features:
-          rel:
-      quickstart:
-        desc: get started with project
-      features:
-        desc: what does it do
-      ref:
-        kind: namespace
-        choices:
-            competitors: 
-            shortcuts:
-      rel:
-        desc: relative
-      version:
-        children:
-          version-major: 
-          version-minor: 
-          version-breaking: 
-      plan:
-        children:
-          requirements:
-            alias: req
-          timeline:
-            desc: "how long will it take"
-`;
-
 const STreeDiv = styled.div`
   ${dims("Tree", "global", { forStyledComp: true })}
 `;
 const mapStateToProps = (state: ReduxState) => ({
   schemaDict: state.nodeReducer.schemaDict,
+  treeOrientation: state.nodeReducer.treeOrientation,
 });
 type TreeViewProps = ReturnType<typeof mapStateToProps>;
 interface TreeViewState {
@@ -63,11 +29,33 @@ class TreeView extends React.PureComponent<TreeViewProps, TreeViewState> {
       "global"
     ) as Required<DComponentProps>;
     const { width, height } = treeDims;
+    const genTranslateForOrientation = (
+      orientation: "vertical" | "horizontal",
+      width: number,
+      height: number
+    ): {
+      x: number;
+      y: number;
+    } => {
+      if (orientation === "vertical") {
+        return {
+          x: width / 2,
+          y: height / 3,
+        };
+      } else {
+        return {
+          x: width / 5,
+          y: height / 2,
+        };
+      }
+    };
+    const translate = genTranslateForOrientation(
+      props.treeOrientation,
+      width,
+      height
+    );
     this.state = {
-      translate: {
-        x: width / 2,
-        y: height / 3,
-      },
+      translate,
     };
   }
 
@@ -75,7 +63,7 @@ class TreeView extends React.PureComponent<TreeViewProps, TreeViewState> {
   onMouseOver = () => {};
 
   render() {
-    const { schemaDict } = this.props;
+    const { schemaDict, treeOrientation } = this.props;
     const tree = new SchemaTree("root", schemaDict.root, schemaDict);
     const data = tree.toD3Tree();
     return (
@@ -83,7 +71,7 @@ class TreeView extends React.PureComponent<TreeViewProps, TreeViewState> {
         TreeView
         <Tree
           data={data}
-          orientation={"horizontal"}
+          orientation={treeOrientation}
           separation={{ siblings: 0.3, nonSiblings: 1 }}
           translate={this.state.translate}
           onClick={this.onNodeClick}

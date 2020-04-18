@@ -4,7 +4,7 @@ import { SchemaTree } from "../../common/node";
 import { createSlice } from "@reduxjs/toolkit";
 
 // === BEGIN PROTO {
-const SAMPLE_YAML = `
+const YAML_PROJECT = `
   name: project
   schema:
       root:
@@ -38,6 +38,28 @@ const SAMPLE_YAML = `
           timeline:
             desc: "how long will it take"
 `;
+const YAML_PROJECT_DEV = `
+  name: dev project
+  schema: 
+    root:
+      children: 
+        upgrade:
+        dev:
+        ref:
+        features:
+    dev:
+      children:
+        dev-layout: 
+        architecture:
+          alias: arch        
+        qa:
+        ops:
+    ref:
+      children:
+        config:
+        lifecycle:
+    config: 
+`;
 
 const rootSchemaNode: SchemaNode = {
   id: "root",
@@ -47,17 +69,21 @@ const rootSchemaNode: SchemaNode = {
   data: { title: "root", desc: "root" },
 };
 const initialTree = new SchemaTree("root", rootSchemaNode);
-const yamlData = SchemaTree.fromSchemaYAML(SAMPLE_YAML);
-initialTree.addSubTree(yamlData, rootSchemaNode.logicalId);
+const treeProjectBase = SchemaTree.fromSchemaYAML(YAML_PROJECT);
+const treeProjectDev = SchemaTree.fromSchemaYAML(YAML_PROJECT_DEV);
+initialTree.addSubTree(treeProjectBase, rootSchemaNode.logicalId);
+initialTree.addSubTree(treeProjectDev, rootSchemaNode.logicalId);
 
 // === } END PROTO
 
 export interface NodeState {
   schemaDict: SchemaNodeDict;
+  treeOrientation: "vertical" | "horizontal";
 }
 
 const initialState: NodeState = {
   schemaDict: { ...initialTree.nodes },
+  treeOrientation: "horizontal",
 };
 
 const nodeSlice = createSlice({

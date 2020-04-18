@@ -14,7 +14,7 @@ export type DComponentProps = Partial<CSSDims>;
 
 // === Component Start {
 const TopBar = {
-  height: 75,
+  height: 64,
 };
 const Logo = {
   height: 50,

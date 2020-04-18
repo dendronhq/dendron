@@ -1,17 +1,20 @@
 import "./App.css";
 
+import { Col, Layout } from "antd";
 import { Route, Router, Switch } from "react-router-dom";
 
 import { CReduxComp } from "./sample/ReduxComp";
+import { CSider } from "./nav/Sider";
 import { CTreeView } from "./components/TreeView";
 import { ErrorBoundary } from "./base/ErrorBoundary";
-import { Layout } from "antd";
 import { Provider } from "react-redux";
 import React from "react";
 import { TopBarComponent } from "./nav/TopBar";
 import { getOrCreateHistory } from "./utils/history";
 import { setupStore } from "./redux";
+import styled from "styled-components";
 
+const { Header, Content, Sider, Footer } = Layout;
 // === Init Start {
 const store = setupStore();
 
@@ -24,23 +27,36 @@ function DummyComp() {
 function AppSwitch() {
   return (
     <Switch>
-      <Route exact path="/" component={CTreeView} />
+      <Route exact path="/" component={DummyComp} />
       <Route exact path="/test1" component={CReduxComp} />
       <Route exact path="/test2" component={DummyComp} />
     </Switch>
   );
 }
+const SSider = styled(Sider)``;
+
+const SContent = styled(Content)`
+  background: green;
+`;
 
 function App() {
   return (
     <Provider store={store}>
       <Router history={getOrCreateHistory() as any}>
-        <ErrorBoundary>
-          <Layout>
+        <Layout>
+          <ErrorBoundary>
             <TopBarComponent />
-            <AppSwitch></AppSwitch>
-          </Layout>
-        </ErrorBoundary>
+            <Layout>
+              <SSider theme="light">
+                <CSider />
+              </SSider>
+              <SContent>
+                <AppSwitch></AppSwitch>
+              </SContent>
+            </Layout>
+          </ErrorBoundary>
+          <Footer>Footer</Footer>
+        </Layout>
       </Router>
     </Provider>
   );

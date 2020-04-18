@@ -19,7 +19,6 @@ function Logo({ logoImg }: { logoImg: any }) {
 
 const SHeader = styled(Header)`
   background: black;
-  ${dims("TopBar", "global", { forStyledComp: true })}
 `;
 
 export class TopBarComponent extends PureComponent {

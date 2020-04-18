@@ -9,10 +9,17 @@ const mapStateToProps = (state: ReduxState) => ({
 });
 
 type ReduxCompProps = ReturnType<typeof mapStateToProps>;
+sampleActions.setValue({ value: 5 });
 
 function ReduxComp(props: ReduxCompProps): ReactElement {
   console.log(props);
   return <div> ReduxComp value: {props.value}</div>;
+}
+
+export class ReduxPureComp extends React.PureComponent<ReduxCompProps> {
+  render() {
+    return <div> </div>;
+  }
 }
 
 export const CReduxComp = connect(mapStateToProps, null, null, {

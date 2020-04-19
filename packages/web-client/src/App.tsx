@@ -2,9 +2,11 @@ import "./App.css";
 
 import { Route, Router, Switch } from "react-router-dom";
 
+import Amplify from "@aws-amplify/core";
 import { CReduxComp } from "./sample/ReduxComp";
 import { CSider } from "./nav/Sider";
 import { ErrorBoundary } from "./base/ErrorBoundary";
+import { HomeComp } from "./components/Home";
 import { Layout } from "antd";
 import { Provider } from "react-redux";
 import React from "react";
@@ -16,27 +18,21 @@ import styled from "styled-components";
 const { Content, Sider, Footer } = Layout;
 // === Init Start {
 const store = setupStore();
+Amplify.Logger.LOG_LEVEL = "DEBUG";
 
 // } Init End
-
-function DummyComp() {
-  return <div>DummyComp</div>;
-}
 
 function AppSwitch() {
   return (
     <Switch>
-      <Route exact path="/" component={DummyComp} />
+      <Route exact path="/" component={HomeComp} />
       <Route exact path="/test1" component={CReduxComp} />
-      <Route exact path="/test2" component={DummyComp} />
     </Switch>
   );
 }
 const SSider = styled(Sider)``;
 
-const SContent = styled(Content)`
-  background: green;
-`;
+const SContent = styled(Content)``;
 
 function App() {
   return (

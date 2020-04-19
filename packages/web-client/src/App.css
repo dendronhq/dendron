@@ -1,1 +1,6 @@
 @import "~antd/dist/antd.css";
+
+.react-autosuggest__container {
+  position: relative;
+  display: inline-block;
+}

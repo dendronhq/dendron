@@ -13,6 +13,7 @@ export interface Node<TData> {
 }
 
 type NodeStub<TData> = Omit<Node<TData>, "parent" | "children">;
+export type NodeDict<TData> = { [logicalId: string]: Node<TData> };
 
 interface NodeData {
   title: string;

@@ -73,6 +73,7 @@ const treeProjectBase = SchemaTree.fromSchemaYAML(YAML_PROJECT_BASE);
 const treeProjectDev = SchemaTree.fromSchemaYAML(YAML_PROJECT_DEV);
 initialTree.addSubTree(treeProjectBase, rootSchemaNode.logicalId);
 initialTree.addSubTree(treeProjectDev, rootSchemaNode.logicalId);
+console.log(initialTree);
 
 // === } END PROTO
 

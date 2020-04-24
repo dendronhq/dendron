@@ -3,4 +3,11 @@
 .react-autosuggest__container {
   position: relative;
   display: inline-block;
+  width: 100%;
+  /* ant line height: 64px */
+  line-height: 40px;
+}
+
+.react-autosuggest__input {
+  width: 100%;
 }

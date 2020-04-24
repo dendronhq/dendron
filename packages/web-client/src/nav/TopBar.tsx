@@ -1,6 +1,7 @@
+import { Col, Layout, Row } from "antd";
 import React, { PureComponent } from "react";
 
-import { Layout } from "antd";
+import { CLookupComp } from "../components/Lookup";
 import { dims } from "../config";
 import logo from "./../logo.svg";
 import styled from "styled-components";
@@ -18,7 +19,7 @@ function Logo({ logoImg }: { logoImg: any }) {
 }
 
 const SHeader = styled(Header)`
-  background: black;
+  background: white;
 `;
 
 export class TopBarComponent extends PureComponent {
@@ -27,8 +28,16 @@ export class TopBarComponent extends PureComponent {
   }
   render() {
     return (
-      <SHeader>
-        <Logo logoImg={logo} />
+      <SHeader theme="light">
+        <Row>
+          <Col span={4}>
+            <Logo logoImg={logo} />
+          </Col>
+          <Col span={18}>
+            <CLookupComp />
+          </Col>
+          <Col span={2}>Menu</Col>
+        </Row>
       </SHeader>
     );
   }

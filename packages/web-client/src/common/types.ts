@@ -43,6 +43,8 @@ export interface SchemaData extends NodeData {
 export interface NoteData extends NodeData {}
 export type NoteNode = Node<NoteData>;
 export type NoteNodeStub = NodeStub<NoteData>;
+export type NoteNodeDict = { [key: string]: NoteNode };
+export type NoteStubDict = { [key: string]: NoteNodeStub };
 
 export type SchemaDataKey = keyof SchemaData;
 

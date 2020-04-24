@@ -6,6 +6,7 @@ import { Logger } from "@aws-amplify/core";
 import { NoteNodeStub } from "../common/types";
 import React from "react";
 import { ReduxState } from "../redux/reducers";
+import _ from "lodash";
 import { connect } from "react-redux";
 
 /*
@@ -15,36 +16,17 @@ import { sampleActions } from "../redux/reducers/sampleReducer";
 const logger = new Logger("Lookup");
 const mapStateToProps = (state: ReduxState) => ({
   schemaDict: state.nodeReducer.schemaDict,
+  noteStubDict: state.nodeReducer.noteStubDict,
 });
 
 type LookupSuggestion = NoteNodeStub;
 
 type LookupCompProps = ReturnType<typeof mapStateToProps> & { style?: any };
 
-const sampleNoteStub1: NoteNodeStub = {
-  id: "root",
-  logicalId: "root",
-  data: { title: "root", desc: "root" },
-};
-
-const sampleNoteStub2: NoteNodeStub = {
-  id: "bond",
-  logicalId: "bond",
-  data: { title: "bond", desc: "bond" },
-};
-
 interface LookupCompState {
   rawValue: string;
   suggestions: LookupSuggestion[];
 }
-
-// export class LookupComp extends Autosuggest {
-//   constructor(props: LookupCompProps) {
-//     super({ alwaysRenderSuggestions: true });
-//   }
-// }
-
-const ALL_SUGGESTIONS = [sampleNoteStub1, sampleNoteStub2];
 
 export class LookupComp extends React.PureComponent<
   LookupCompProps,
@@ -55,7 +37,7 @@ export class LookupComp extends React.PureComponent<
     super(props);
     this.state = {
       rawValue: "",
-      suggestions: ALL_SUGGESTIONS,
+      suggestions: _.values(this.props.noteStubDict),
     };
   }
   getSuggestions = (value: string) => {
@@ -64,7 +46,7 @@ export class LookupComp extends React.PureComponent<
     const suggestions = this.state.suggestions;
 
     return inputLength === 0
-      ? ALL_SUGGESTIONS
+      ? _.values(this.props.noteStubDict)
       : suggestions.filter(
           (sugg) =>
             sugg.data.title.toLowerCase().slice(0, inputLength) === inputValue

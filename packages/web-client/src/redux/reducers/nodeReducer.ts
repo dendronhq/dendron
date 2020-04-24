@@ -1,4 +1,9 @@
-import { SchemaNode, SchemaNodeDict } from "../../common/types";
+import {
+  NoteNodeStub,
+  NoteStubDict,
+  SchemaNode,
+  SchemaNodeDict,
+} from "../../common/types";
 
 import { SchemaTree } from "../../common/node";
 import { createSlice } from "@reduxjs/toolkit";
@@ -75,15 +80,33 @@ initialTree.addSubTree(treeProjectBase, rootSchemaNode.logicalId);
 initialTree.addSubTree(treeProjectDev, rootSchemaNode.logicalId);
 console.log(initialTree);
 
+const rootStub: NoteNodeStub = {
+  id: "root",
+  logicalId: "root",
+  data: { title: "root", desc: "root" },
+};
+
+const bondStub: NoteNodeStub = {
+  id: "bond2",
+  logicalId: "bond2",
+  data: { title: "bond2", desc: "bond2" },
+};
+const initialNoteStubs = {
+  root: rootStub,
+  bond: bondStub,
+};
+
 // === } END PROTO
 
 export interface NodeState {
   schemaDict: SchemaNodeDict;
+  noteStubDict: NoteStubDict;
   treeOrientation: "vertical" | "horizontal";
 }
 
 const initialState: NodeState = {
   schemaDict: { ...initialTree.nodes },
+  noteStubDict: { ...initialNoteStubs },
   treeOrientation: "horizontal",
 };
 

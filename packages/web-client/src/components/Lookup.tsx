@@ -3,6 +3,7 @@ import Autosuggest, {
 } from "react-autosuggest";
 
 import { Logger } from "@aws-amplify/core";
+import { NoteNodeStub } from "../common/types";
 import React from "react";
 import { ReduxState } from "../redux/reducers";
 import { connect } from "react-redux";
@@ -16,9 +17,21 @@ const mapStateToProps = (state: ReduxState) => ({
   schemaDict: state.nodeReducer.schemaDict,
 });
 
-interface LookupSuggestion {}
+type LookupSuggestion = NoteNodeStub;
 
 type LookupCompProps = ReturnType<typeof mapStateToProps> & { style?: any };
+
+const sampleNoteStub1: NoteNodeStub = {
+  id: "root",
+  logicalId: "root",
+  data: { title: "root", desc: "root" },
+};
+
+const sampleNoteStub2: NoteNodeStub = {
+  id: "bond",
+  logicalId: "bond",
+  data: { title: "bond", desc: "bond" },
+};
 
 interface LookupCompState {
   rawValue: string;
@@ -31,6 +44,8 @@ interface LookupCompState {
 //   }
 // }
 
+const ALL_SUGGESTIONS = [sampleNoteStub1, sampleNoteStub2];
+
 export class LookupComp extends React.PureComponent<
   LookupCompProps,
   LookupCompState
@@ -40,13 +55,24 @@ export class LookupComp extends React.PureComponent<
     super(props);
     this.state = {
       rawValue: "",
-      suggestions: [],
+      suggestions: ALL_SUGGESTIONS,
     };
   }
+  getSuggestions = (value: string) => {
+    const inputValue = value.trim().toLowerCase();
+    const inputLength = inputValue.length;
+    const suggestions = this.state.suggestions;
+
+    return inputLength === 0
+      ? ALL_SUGGESTIONS
+      : suggestions.filter(
+          (sugg) =>
+            sugg.data.title.toLowerCase().slice(0, inputLength) === inputValue
+        );
+  };
 
   getSuggestionValue = (suggestion: LookupSuggestion) => {
-    // TODO
-    return "";
+    return suggestion.data.title;
   };
 
   onChange = (event: React.FormEvent<any>, { newValue, method }: any) => {
@@ -70,29 +96,7 @@ export class LookupComp extends React.PureComponent<
   };
 
   onRenderSuggestion = (suggestion: LookupSuggestion) => {
-    // let parent: string | null = _.get(suggestion.edge, "parentTitle", null);
-    // if (!_.isNull(parent)) {
-    //   if (parent === "__root") {
-    //     parent = null;
-    //   } else {
-    //     parent = `${parent}/`;
-    //   }
-    // }
-    // if (suggestion.prefix === "new") {
-    //   return (
-    //     <div className="result">
-    //       <span>{parent}</span>
-    //       No results found
-    //     </div>
-    //   );
-    // }
-    return (
-      <div className="result">
-        Suggestions
-        {/* <span>{parent}</span>
-        {suggestion.name} */}
-      </div>
-    );
+    return <div className="result">{suggestion.data.title}</div>;
   };
 
   onSuggestionsClearRequested = () => {
@@ -101,17 +105,20 @@ export class LookupComp extends React.PureComponent<
     });
   };
 
-  async onSuggestionsFetchRequested({
+  onSuggestionsFetchRequested = ({
     value,
     reason,
-  }: SuggestionsFetchRequestedParams) {
+  }: SuggestionsFetchRequestedParams) => {
     logger.info({
       meth: "onSuggestionsFetchRequested",
       ctx: "enter",
       value,
       reason,
     });
-  }
+    this.setState({
+      suggestions: this.getSuggestions(value),
+    });
+  };
 
   render() {
     const { suggestions, rawValue } = this.state;
@@ -136,7 +143,7 @@ export class LookupComp extends React.PureComponent<
         inputProps={inputProps}
         //   highlightFirstSuggestion={false}
         //   onSuggestionHighlighted={this.onSuggestionHighlighted}
-        //   alwaysRenderSuggestions={false}
+        alwaysRenderSuggestions={true}
         multiSection={false}
         //   getSectionSuggestions={this.getSectionSuggestions}
         //   renderSectionTitle={this.renderSectionTitle}

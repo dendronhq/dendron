@@ -1,4 +1,3 @@
-import { CLookupComp } from "./Lookup";
 import React from "react";
 import styled from "styled-components";
 
@@ -15,7 +14,6 @@ export function HomeComp() {
   return (
     <CenterStyle>
       <h1 style={{}}>Alphacortex </h1>
-      <CLookupComp />
     </CenterStyle>
   );
 }

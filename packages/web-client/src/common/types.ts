@@ -40,6 +40,10 @@ export interface SchemaData extends NodeData {
   //         flow
 }
 
+export interface NoteData extends NodeData {}
+export type NoteNode = Node<NoteData>;
+export type NoteNodeStub = NodeStub<NoteData>;
+
 export type SchemaDataKey = keyof SchemaData;
 
 export type RequiredSchemaDataKey = "title" | "desc";

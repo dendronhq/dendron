@@ -13,7 +13,23 @@ export interface Node<TData> {
 }
 
 type NodeStub<TData> = Omit<Node<TData>, "parent" | "children">;
+export type NodeStubDict<TData> = { [logicalId: string]: NodeStub<TData> };
 export type NodeDict<TData> = { [logicalId: string]: Node<TData> };
+function fromStubs<TData>(stubs: NodeStubDict<TData>): NodeDict<TData> {
+  let keys = Object.keys(stubs).sort();
+  let out: NodeDict<TData> = {};
+  let helper = (i: number, parent: Node<TData>) => {
+    while (i < keys.length && keys[i].startsWith(parent.logicalId)) {
+      parent.children.push({...stubs[keys[i]]});
+      out[keys[i]] = {...stubs[keys[i]], parent: {...stubs[parent.logicalId]}, children: []};
+      i++;
+      helper(i, out[keys[i]]);
+    }
+  }
+  out[keys[0]] = {...stubs[keys[0]], parent: null, children: []};
+  helper(1, out[keys[0]]);
+  return out;
+}
 
 interface NodeData {
   title: string;

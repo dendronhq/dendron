@@ -1,9 +1,9 @@
-import { Storage } from "./engine";
-import { Node, NodeDict } from "../common/types";
-export default class InMemoryStore<TData> implements Storage<TData> {
-  public data: NodeDict<TData> = {};
-  query(regex: RegExp): NodeDict<TData> {
-    let out: NodeDict<TData> = {}; 
+import { NodeStore } from "./engine";
+import { NodeStubDict } from "../common/types";
+export default class InMemoryStore<TData> implements NodeStore<TData> {
+  public data: NodeStubDict<TData> = {};
+  query(regex: RegExp): NodeStubDict<TData> {
+    let out: NodeStubDict<TData> = {};
     for (let row in this.data) {
       if (regex.test(row)) {
         out[row] = this.data[row];
@@ -11,7 +11,7 @@ export default class InMemoryStore<TData> implements Storage<TData> {
     }
     return out;
   }
-  write(rows: NodeDict<any>): boolean {
+  write(rows: NodeStubDict<any>): boolean {
     this.data = {...this.data, ...rows}
     return true;
   }

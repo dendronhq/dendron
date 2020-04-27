@@ -13,14 +13,12 @@ export default class Engine<TData> {
   }
 
   public query(query: string): NodeStubDict<TData> {
+    console.log(query);
     let regexes = this.query_to_regexes(query);
-    console.log(regexes);
     let filters = regexes.map(regex => regex[0]).filter(filter => filter.length != 0);
-    console.log(filters);
     let combined_regex = RegExp(
       "(?=.*" + filters.join(")(?=.*") + ")(?:(?:.*" + filters.join("$)|(?:.*") + "$))"
     ); // intersection of regexes
-    console.log(combined_regex);
     return this.update_path(this.storage.query(combined_regex), regexes);
   }
 
@@ -34,7 +32,6 @@ export default class Engine<TData> {
     if (!terms[0].includes("=")) filter_groups.push([]); // create first group
     for (let term of terms) {
       let [filter, replacement] = this.split_term(term);
-      console.log([filter, replacement]);
       if (filter.indexOf("=") > 0) { // nonempty explicit match (/foo=bar/ and /foo=/)
         i = 1;
         if (filter.indexOf("=") == filter.length - 1) { // match the schema with any value

@@ -55,6 +55,7 @@ test.each([
   ["**/python->rattlesnake", [["category=languages/language=rattlesnake", "python", "Python is a snake"]]],
   ["*/java->coffee", [["category=languages/language=coffee", "java", "Java will do"], ["category=dishes/dish=coffee", "java", "Java is coffee"]]],
   ["languages/->good_ones/python", [["category=languages/good_ones/language=python", "python", "Python is a snake"]]],
+  ["category->collection=languages/->good_ones/python", [["collection=languages/good_ones/language=python", "python", "Python is a snake"]]],
   ["category=languages->/python", [["language=python", "python", "Python is a snake"]]],
   ["languages->/python", [["language=python", "python", "Python is a snake"]]],
   ["*->/python", [["language=python", "python", "Python is a snake"]]],

@@ -8,25 +8,32 @@ export interface Node<TData> {
    */
   logicalId: string;
   data: TData;
+  // currently string, in the future, this might be a tree of nodes
+  body?: string;
   parent: NodeStub<TData> | null;
   children: NodeStub<TData>[];
 }
 
-type NodeStub<TData> = Omit<Node<TData>, "parent" | "children">;
+type NodeStub<TData> = Omit<Node<TData>, "parent" | "children" | "body">;
 export type NodeStubDict<TData> = { [logicalId: string]: NodeStub<TData> };
 export type NodeDict<TData> = { [logicalId: string]: Node<TData> };
+
 function fromStubs<TData>(stubs: NodeStubDict<TData>): NodeDict<TData> {
-  let keys = Object.keys(stubs).sort();
-  let out: NodeDict<TData> = {};
-  let helper = (i: number, parent: Node<TData>) => {
+  const keys = Object.keys(stubs).sort();
+  const out: NodeDict<TData> = {};
+  const helper = (i: number, parent: Node<TData>) => {
     while (i < keys.length && keys[i].startsWith(parent.logicalId)) {
-      parent.children.push({...stubs[keys[i]]});
-      out[keys[i]] = {...stubs[keys[i]], parent: {...stubs[parent.logicalId]}, children: []};
+      parent.children.push({ ...stubs[keys[i]] });
+      out[keys[i]] = {
+        ...stubs[keys[i]],
+        parent: { ...stubs[parent.logicalId] },
+        children: [],
+      };
       i++;
       helper(i, out[keys[i]]);
     }
-  }
-  out[keys[0]] = {...stubs[keys[0]], parent: null, children: []};
+  };
+  out[keys[0]] = { ...stubs[keys[0]], parent: null, children: [] };
   helper(1, out[keys[0]]);
   return out;
 }
@@ -122,3 +129,54 @@ global:
     ref:
       desc: catchall
 */
+
+type NodeType = "stub" | "full";
+type DataType = "schema" | "note";
+
+type NodeGetResp<T> = {
+  item: Node<T> | NodeStub<T>;
+  nodeType: NodeType;
+  dataType: DataType;
+};
+
+type NodeGetRootResp<T> = {
+  item: Node<T>;
+  dataType: DataType;
+};
+
+interface NodeQueryResp<T> {
+  items: NodeGetResp<T>[];
+  nodeType: NodeType;
+  dataType: DataType;
+}
+interface Scope {
+  username: string;
+}
+
+export interface NodeStorageAPI {
+  /**
+   * Get node based on logicalId
+   */
+  get: <T>(
+    scope: Scope,
+    logicalId: string,
+    nodeType: NodeType,
+    dataType: DataType
+  ) => Promise<NodeGetResp<T>>;
+
+  getRoot: <T>(scope: Scope, dataType: DataType) => Promise<NodeGetRootResp<T>>;
+
+  /**
+   * Get node based on query
+   */
+  query: <T>(
+    scope: Scope,
+    queryString: string,
+    nodeType: NodeType,
+    dataType: DataType
+  ) => Promise<NodeQueryResp<T>>;
+  /**
+   * Write node to db
+   */
+  write: <T>(scope: Scope, node: Node<T>, dataType: DataType) => Promise<void>;
+}

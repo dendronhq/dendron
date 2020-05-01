@@ -3,10 +3,6 @@ export interface Node<TData> {
    * Local ID
    */
   id: string;
-  /**
-   * Absolute unique id
-   */
-  logicalId: string;
   data: TData;
   // currently string, in the future, this might be a tree of nodes
   body?: string;
@@ -14,19 +10,22 @@ export interface Node<TData> {
   children: NodeStub<TData>[];
 }
 
+/**
+ */
+
 type NodeStub<TData> = Omit<Node<TData>, "parent" | "children" | "body">;
-export type NodeStubDict<TData> = { [logicalId: string]: NodeStub<TData> };
-export type NodeDict<TData> = { [logicalId: string]: Node<TData> };
+export type NodeStubDict<TData> = { [id: string]: NodeStub<TData> };
+export type NodeDict<TData> = { [id: string]: Node<TData> };
 
 function fromStubs<TData>(stubs: NodeStubDict<TData>): NodeDict<TData> {
   const keys = Object.keys(stubs).sort();
   const out: NodeDict<TData> = {};
   const helper = (i: number, parent: Node<TData>) => {
-    while (i < keys.length && keys[i].startsWith(parent.logicalId)) {
+    while (i < keys.length && keys[i].startsWith(parent.id)) {
       parent.children.push({ ...stubs[keys[i]] });
       out[keys[i]] = {
         ...stubs[keys[i]],
-        parent: { ...stubs[parent.logicalId] },
+        parent: { ...stubs[parent.id] },
         children: [],
       };
       i++;
@@ -145,29 +144,47 @@ type NodeGetRootResp<T> = {
 };
 
 interface NodeQueryResp<T> {
-  items: NodeGetResp<T>[];
+  items: NodeDict<T>;
   nodeType: NodeType;
   dataType: DataType;
+  error: Error;
 }
 interface Scope {
   username: string;
 }
 
-export interface NodeStorageAPI {
+export interface DendronEngine {
   /**
-   * Get node based on logicalId
+   * Get node based on id
+   * get(id: ...)
    */
   get: <T>(
     scope: Scope,
-    logicalId: string,
+    id: string,
     nodeType: NodeType,
     dataType: DataType
   ) => Promise<NodeGetResp<T>>;
 
-  getRoot: <T>(scope: Scope, dataType: DataType) => Promise<NodeGetRootResp<T>>;
+  // load alphacortex
+  /**
+   * NodeStorageAPI.getRoot()
+   * {
+   *   parent: null
+   *   children:
+   *     - Alphacortex
+   * }
+   *
+   * welcome page
+   * sider
+   */
+  // getRoot: <T>(scope: Scope, dataType: DataType) => Promise<NodeGetRootResp<T>>;
 
   /**
    * Get node based on query
+   * query(scope: {username: lukesernau}, queryString: "Project", nodeType: stub, dataType: note})
+   * - []
+   * - [Node(id: ..., title: project, children: [])]
+   *
    */
   query: <T>(
     scope: Scope,
@@ -175,8 +192,20 @@ export interface NodeStorageAPI {
     nodeType: NodeType,
     dataType: DataType
   ) => Promise<NodeQueryResp<T>>;
+
   /**
    * Write node to db
    */
   write: <T>(scope: Scope, node: Node<T>, dataType: DataType) => Promise<void>;
+
+  /**
+   * Write list of nodes
+   */
+  writeBatch: <T>(
+    scope: Scope,
+    nodes: NodeDict<T>[],
+    dataType: DataType
+  ) => Promise<void>;
 }
+
+// convert to dictionary, in return

@@ -33,7 +33,7 @@ interface YAMLEntryOpts {
 }
 
 type ReactD3TreeItemV2<T> = {
-  logicalId: string;
+  id: string;
   name: string;
   attributes: {
     [key in keyof T]: string;
@@ -69,8 +69,7 @@ export class SchemaStubWrapper {
       _.omit(entry, "children"),
       schemaDataKeysDefaults
     );
-    const logicalId = id;
-    const schemaNode = { data, id, logicalId };
+    const schemaNode = { data, id };
     return schemaNode;
   }
 }
@@ -114,8 +113,8 @@ export class SchemaTree {
    * @param tree
    * @param parent
    */
-  addSubTree(tree: SchemaTree, parentLogicalId: string) {
-    const parent = this.nodes[parentLogicalId];
+  addSubTree(tree: SchemaTree, id: string) {
+    const parent = this.nodes[id];
     this.addChild(tree.root, parent);
     this.nodes = _.merge(this.nodes, tree.nodes);
   }
@@ -123,13 +122,13 @@ export class SchemaTree {
   addChild(child: SchemaNode, parent: SchemaNode | null) {
     const childStub = SchemaStubWrapper.fromSchemaNode(child);
     if (parent) {
-      const parentNode = this.nodes[parent.logicalId];
+      const parentNode = this.nodes[parent.id];
       if (_.isUndefined(parentNode)) {
         throw `no parent with ${parent.id} found`;
       }
       parentNode.children.push(childStub);
     }
-    this.nodes[child.logicalId] = child;
+    this.nodes[child.id] = child;
   }
 
   static fromSchemaYAML(yamlString: string): SchemaTree {
@@ -165,12 +164,12 @@ export class SchemaTree {
       nodeDict: SchemaNodeDict
     ): DataNode => {
       const { title } = node.data;
-      const { logicalId } = node;
+      const { id } = node;
       return {
         title,
-        key: logicalId,
+        key: id,
         children: _.map(node.children, (ch) =>
-          schemaNode2AntDNode(nodeDict[ch.logicalId], nodeDict)
+          schemaNode2AntDNode(nodeDict[ch.id], nodeDict)
         ),
       };
     };
@@ -186,13 +185,13 @@ export class SchemaTree {
       nodeDict: SchemaNodeDict
     ): ReactD3TreeItemV2<any> => {
       const { title } = node.data;
-      const { logicalId } = node;
+      const { id } = node;
       return {
         name: title,
-        logicalId,
+        id,
         attributes: {},
         children: _.map(node.children, (ch) =>
-          schemaNode2D3Node(nodeDict[ch.logicalId], nodeDict)
+          schemaNode2D3Node(nodeDict[ch.id], nodeDict)
         ),
       };
     };

@@ -14,7 +14,6 @@ SchemaTree {
         "title": "architecture",
       },
       "id": "architecture",
-      "logicalId": "architecture",
       "parent": null,
     },
     "config": Object {
@@ -27,7 +26,6 @@ SchemaTree {
         "title": "config",
       },
       "id": "config",
-      "logicalId": "config",
       "parent": null,
     },
     "dev": Object {
@@ -41,7 +39,6 @@ SchemaTree {
             "title": "dev-layout",
           },
           "id": "dev-layout",
-          "logicalId": "dev-layout",
         },
         Object {
           "data": Object {
@@ -53,7 +50,6 @@ SchemaTree {
             "title": "architecture",
           },
           "id": "architecture",
-          "logicalId": "architecture",
         },
         Object {
           "data": Object {
@@ -64,7 +60,6 @@ SchemaTree {
             "title": "qa",
           },
           "id": "qa",
-          "logicalId": "qa",
         },
         Object {
           "data": Object {
@@ -75,7 +70,6 @@ SchemaTree {
             "title": "ops",
           },
           "id": "ops",
-          "logicalId": "ops",
         },
       ],
       "data": Object {
@@ -86,7 +80,6 @@ SchemaTree {
         "title": "dev",
       },
       "id": "dev",
-      "logicalId": "dev",
       "parent": null,
     },
     "dev project": Object {
@@ -100,7 +93,6 @@ SchemaTree {
             "title": "upgrade",
           },
           "id": "upgrade",
-          "logicalId": "upgrade",
         },
         Object {
           "data": Object {
@@ -111,7 +103,6 @@ SchemaTree {
             "title": "dev",
           },
           "id": "dev",
-          "logicalId": "dev",
         },
         Object {
           "data": Object {
@@ -122,7 +113,6 @@ SchemaTree {
             "title": "ref",
           },
           "id": "ref",
-          "logicalId": "ref",
         },
       ],
       "data": Object {
@@ -133,7 +123,6 @@ SchemaTree {
         "title": "dev project",
       },
       "id": "dev project",
-      "logicalId": "dev project",
       "parent": null,
     },
     "dev-layout": Object {
@@ -146,7 +135,6 @@ SchemaTree {
         "title": "dev-layout",
       },
       "id": "dev-layout",
-      "logicalId": "dev-layout",
       "parent": null,
     },
     "features": Object {
@@ -159,7 +147,6 @@ SchemaTree {
         "title": "features",
       },
       "id": "features",
-      "logicalId": "features",
       "parent": null,
     },
     "lifecycle": Object {
@@ -172,7 +159,6 @@ SchemaTree {
         "title": "lifecycle",
       },
       "id": "lifecycle",
-      "logicalId": "lifecycle",
       "parent": null,
     },
     "ops": Object {
@@ -185,7 +171,6 @@ SchemaTree {
         "title": "ops",
       },
       "id": "ops",
-      "logicalId": "ops",
       "parent": null,
     },
     "project": Object {
@@ -199,7 +184,6 @@ SchemaTree {
             "title": "quickstart",
           },
           "id": "quickstart",
-          "logicalId": "quickstart",
         },
         Object {
           "data": Object {
@@ -210,7 +194,6 @@ SchemaTree {
             "title": "topic",
           },
           "id": "topic",
-          "logicalId": "topic",
         },
         Object {
           "data": Object {
@@ -221,7 +204,6 @@ SchemaTree {
             "title": "version",
           },
           "id": "version",
-          "logicalId": "version",
         },
         Object {
           "data": Object {
@@ -232,7 +214,6 @@ SchemaTree {
             "title": "features",
           },
           "id": "features",
-          "logicalId": "features",
         },
         Object {
           "data": Object {
@@ -243,7 +224,6 @@ SchemaTree {
             "title": "rel",
           },
           "id": "rel",
-          "logicalId": "rel",
         },
       ],
       "data": Object {
@@ -254,7 +234,6 @@ SchemaTree {
         "title": "project",
       },
       "id": "project",
-      "logicalId": "project",
       "parent": null,
     },
     "qa": Object {
@@ -267,7 +246,6 @@ SchemaTree {
         "title": "qa",
       },
       "id": "qa",
-      "logicalId": "qa",
       "parent": null,
     },
     "quickstart": Object {
@@ -280,7 +258,6 @@ SchemaTree {
         "title": "quickstart",
       },
       "id": "quickstart",
-      "logicalId": "quickstart",
       "parent": null,
     },
     "ref": Object {
@@ -294,7 +271,6 @@ SchemaTree {
             "title": "config",
           },
           "id": "config",
-          "logicalId": "config",
         },
         Object {
           "data": Object {
@@ -305,7 +281,6 @@ SchemaTree {
             "title": "lifecycle",
           },
           "id": "lifecycle",
-          "logicalId": "lifecycle",
         },
       ],
       "data": Object {
@@ -316,7 +291,6 @@ SchemaTree {
         "title": "ref",
       },
       "id": "ref",
-      "logicalId": "ref",
       "parent": null,
     },
     "rel": Object {
@@ -329,7 +303,6 @@ SchemaTree {
         "title": "rel",
       },
       "id": "rel",
-      "logicalId": "rel",
       "parent": null,
     },
     "root": Object {
@@ -343,7 +316,6 @@ SchemaTree {
             "title": "project",
           },
           "id": "project",
-          "logicalId": "project",
         },
         Object {
           "data": Object {
@@ -354,7 +326,6 @@ SchemaTree {
             "title": "dev project",
           },
           "id": "dev project",
-          "logicalId": "dev project",
         },
       ],
       "data": Object {
@@ -362,7 +333,6 @@ SchemaTree {
         "title": "root",
       },
       "id": "root",
-      "logicalId": "root",
       "parent": null,
     },
     "topic": Object {
@@ -375,7 +345,6 @@ SchemaTree {
         "title": "topic",
       },
       "id": "topic",
-      "logicalId": "topic",
       "parent": null,
     },
     "upgrade": Object {
@@ -388,7 +357,6 @@ SchemaTree {
         "title": "upgrade",
       },
       "id": "upgrade",
-      "logicalId": "upgrade",
       "parent": null,
     },
     "version": Object {
@@ -402,7 +370,6 @@ SchemaTree {
             "title": "version-major",
           },
           "id": "version-major",
-          "logicalId": "version-major",
         },
         Object {
           "data": Object {
@@ -413,7 +380,6 @@ SchemaTree {
             "title": "version-minor",
           },
           "id": "version-minor",
-          "logicalId": "version-minor",
         },
         Object {
           "data": Object {
@@ -424,7 +390,6 @@ SchemaTree {
             "title": "version-breaking",
           },
           "id": "version-breaking",
-          "logicalId": "version-breaking",
         },
       ],
       "data": Object {
@@ -435,7 +400,6 @@ SchemaTree {
         "title": "version",
       },
       "id": "version",
-      "logicalId": "version",
       "parent": null,
     },
     "version-breaking": Object {
@@ -448,7 +412,6 @@ SchemaTree {
         "title": "version-breaking",
       },
       "id": "version-breaking",
-      "logicalId": "version-breaking",
       "parent": null,
     },
     "version-major": Object {
@@ -461,7 +424,6 @@ SchemaTree {
         "title": "version-major",
       },
       "id": "version-major",
-      "logicalId": "version-major",
       "parent": null,
     },
     "version-minor": Object {
@@ -474,7 +436,6 @@ SchemaTree {
         "title": "version-minor",
       },
       "id": "version-minor",
-      "logicalId": "version-minor",
       "parent": null,
     },
   },
@@ -489,7 +450,6 @@ SchemaTree {
           "title": "project",
         },
         "id": "project",
-        "logicalId": "project",
       },
       Object {
         "data": Object {
@@ -500,7 +460,6 @@ SchemaTree {
           "title": "dev project",
         },
         "id": "dev project",
-        "logicalId": "dev project",
       },
     ],
     "data": Object {
@@ -508,7 +467,6 @@ SchemaTree {
       "title": "root",
     },
     "id": "root",
-    "logicalId": "root",
     "parent": null,
   },
 }

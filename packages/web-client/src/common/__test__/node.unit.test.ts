@@ -79,7 +79,6 @@ describe("SchemaTree", () => {
   beforeEach(() => {
     rootSchemaNode = {
       id: "root",
-      logicalId: "root",
       children: [],
       parent: null,
       data: { title: "root", desc: "root" },
@@ -87,7 +86,6 @@ describe("SchemaTree", () => {
 
     fooSchemaNode = {
       id: "foo",
-      logicalId: "foo",
       children: [],
       parent: null,
       data: { title: "foo", desc: "foo" },
@@ -120,8 +118,8 @@ describe("SchemaTree", () => {
       const initialTree = new SchemaTree("root", rootSchemaNode);
       const treeProjectBase = SchemaTree.fromSchemaYAML(YAML_PROJECT_BASE);
       const treeProjectDev = SchemaTree.fromSchemaYAML(YAML_PROJECT_DEV);
-      initialTree.addSubTree(treeProjectBase, rootSchemaNode.logicalId);
-      initialTree.addSubTree(treeProjectDev, rootSchemaNode.logicalId);
+      initialTree.addSubTree(treeProjectBase, rootSchemaNode.id);
+      initialTree.addSubTree(treeProjectDev, rootSchemaNode.id);
       return initialTree;
       //return SchemaTree.fromSchemaYAML(SAMPLE_YAML);
     });

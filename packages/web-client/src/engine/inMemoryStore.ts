@@ -11,7 +11,7 @@ export default class InMemoryStore<TData> implements NodeStore<TData> {
     }
     return out;
   }
-  write(rows: NodeStubDict<any>): boolean {
+  write(rows: NodeStubDict<TData>): boolean {
     this.data = {...this.data, ...rows}
     return true;
   }

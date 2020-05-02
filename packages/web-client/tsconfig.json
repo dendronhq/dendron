@@ -14,7 +14,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react",
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "typeRoots": ["@types", "src/@types/**/*"]
   },
   "include": ["src"]

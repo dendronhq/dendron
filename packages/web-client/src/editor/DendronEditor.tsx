@@ -1,9 +1,7 @@
 import { Editor } from "slate-react";
-import { MarkdownPlugin } from "slate-md-editor";
 import React from "react";
 import { Value } from "slate";
 
-const plugins = [MarkdownPlugin()];
 const initialValue = Value.fromJSON({
   document: {
     nodes: [
@@ -34,12 +32,6 @@ export class DendronEditor extends React.Component {
 
   // Render the editor.
   render() {
-    return (
-      <Editor
-        plugins={plugins}
-        value={this.state.value}
-        onChange={this.onChange}
-      />
-    );
+    return <Editor value={this.state.value} onChange={this.onChange} />;
   }
 }

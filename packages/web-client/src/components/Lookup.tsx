@@ -125,7 +125,7 @@ export class LookupComp extends React.PureComponent<
         inputProps={inputProps}
         //   highlightFirstSuggestion={false}
         //   onSuggestionHighlighted={this.onSuggestionHighlighted}
-        alwaysRenderSuggestions={true}
+        alwaysRenderSuggestions={false}
         multiSection={false}
         //   getSectionSuggestions={this.getSectionSuggestions}
         //   renderSectionTitle={this.renderSectionTitle}

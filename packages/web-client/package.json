@@ -16,6 +16,8 @@
     "@types/react-autosuggest": "^9.3.13",
     "@types/react-dom": "^16.9.0",
     "@types/react-redux": "^7.1.7",
+    "@types/slate": "0.47",
+    "@types/slate-react": "^0.22.9",
     "@types/styled-components": "^5.0.1",
     "@types/yamljs": "^0.2.30",
     "antd": "^4.1.2",
@@ -29,6 +31,9 @@
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
     "redux-logger": "^3.0.6",
+    "slate": "0.47",
+    "slate-md-plugin": "^1.4.4",
+    "slate-react": "0.22.10",
     "styled-components": "^5.1.0",
     "typescript": "~3.7.2",
     "yamljs": "^0.3.0"

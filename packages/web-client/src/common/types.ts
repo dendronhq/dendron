@@ -13,29 +13,9 @@ export interface Node<TData> {
 /**
  */
 
-type NodeStub<TData> = Omit<Node<TData>, "parent" | "children" | "body">;
+type NodeStub<TData> = Omit<Node<TData>, "parent" | "children">;
 export type NodeStubDict<TData> = { [id: string]: NodeStub<TData> };
 export type NodeDict<TData> = { [id: string]: Node<TData> };
-
-function fromStubs<TData>(stubs: NodeStubDict<TData>): NodeDict<TData> {
-  const keys = Object.keys(stubs).sort();
-  const out: NodeDict<TData> = {};
-  const helper = (i: number, parent: Node<TData>) => {
-    while (i < keys.length && keys[i].startsWith(parent.id)) {
-      parent.children.push({ ...stubs[keys[i]] });
-      out[keys[i]] = {
-        ...stubs[keys[i]],
-        parent: { ...stubs[parent.id] },
-        children: [],
-      };
-      i++;
-      helper(i, out[keys[i]]);
-    }
-  };
-  out[keys[0]] = { ...stubs[keys[0]], parent: null, children: [] };
-  helper(1, out[keys[0]]);
-  return out;
-}
 
 interface NodeData {
   title: string;
@@ -129,27 +109,27 @@ global:
       desc: catchall
 */
 
-type NodeType = "stub" | "full";
-type DataType = "schema" | "note";
+export type NodeType = "stub" | "full";
+export type DataType = "schema" | "note";
 
-type NodeGetResp<T> = {
+export type NodeGetResp<T> = {
   item: Node<T> | NodeStub<T>;
   nodeType: NodeType;
   dataType: DataType;
 };
 
-type NodeGetRootResp<T> = {
+export type NodeGetRootResp<T> = {
   item: Node<T>;
   dataType: DataType;
 };
 
-interface NodeQueryResp<T> {
+export interface NodeQueryResp<T> {
   items: NodeDict<T>;
   nodeType: NodeType;
   dataType: DataType;
   error: Error;
 }
-interface Scope {
+export interface Scope {
   username: string;
 }
 

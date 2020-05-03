@@ -5,6 +5,7 @@ import { Route, Router, Switch } from "react-router-dom";
 import Amplify from "@aws-amplify/core";
 import { CReduxComp } from "./sample/ReduxComp";
 import { CSider } from "./nav/Sider";
+import { DIVIDER_COLOR } from "./config";
 import { ErrorBoundary } from "./base/ErrorBoundary";
 import { HomeComp } from "./components/Home";
 import { Layout } from "antd";
@@ -30,9 +31,13 @@ function AppSwitch() {
     </Switch>
   );
 }
-const SSider = styled(Sider)``;
+const SSider = styled(Sider)`
+  border-right: 3px solid ${DIVIDER_COLOR};
+`;
 
-const SContent = styled(Content)``;
+const SContent = styled(Content)`
+  background-color: white;
+`;
 
 function App() {
   return (

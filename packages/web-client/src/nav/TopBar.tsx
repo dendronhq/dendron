@@ -1,8 +1,8 @@
 import { Col, Layout, Row } from "antd";
+import { DIVIDER_COLOR, dims } from "../config";
 import React, { PureComponent } from "react";
 
 import { CLookupComp } from "../components/Lookup";
-import { dims } from "../config";
 import logo from "./../logo.svg";
 import styled from "styled-components";
 
@@ -20,6 +20,7 @@ function Logo({ logoImg }: { logoImg: any }) {
 
 const SHeader = styled(Header)`
   background: white;
+  border-bottom: 3px solid ${DIVIDER_COLOR};
 `;
 
 export class TopBarComponent extends PureComponent {

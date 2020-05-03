@@ -1,5 +1,9 @@
 import _ from "lodash";
 
+// === Colors
+
+export const DIVIDER_COLOR = "#EBEBEB";
+
 // === Types Start {
 export type ViewPortSize = "small" | "large" | "global";
 // type CSSUnit = "px";

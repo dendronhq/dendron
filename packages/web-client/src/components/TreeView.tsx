@@ -59,7 +59,9 @@ class TreeView extends React.PureComponent<TreeViewProps, TreeViewState> {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   onNodeClick = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   onMouseOver = () => {};
 
   render() {

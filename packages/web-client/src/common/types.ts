@@ -17,7 +17,7 @@ type NodeStub<TData> = Omit<Node<TData>, "parent" | "children" | "body">;
 export type NodeStubDict<TData> = { [id: string]: NodeStub<TData> };
 export type NodeDict<TData> = { [id: string]: Node<TData> };
 
-function fromStubs<TData>(stubs: NodeStubDict<TData>): NodeDict<TData> {
+export function fromStubs<TData>(stubs: NodeStubDict<TData>): NodeDict<TData> {
   const keys = Object.keys(stubs).sort();
   const out: NodeDict<TData> = {};
   const helper = (i: number, parent: Node<TData>) => {
@@ -138,7 +138,7 @@ type NodeGetResp<T> = {
   dataType: DataType;
 };
 
-type NodeGetRootResp<T> = {
+export type NodeGetRootResp<T> = {
   item: Node<T>;
   dataType: DataType;
 };

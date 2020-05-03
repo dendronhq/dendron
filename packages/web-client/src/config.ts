@@ -2,7 +2,7 @@ import _ from "lodash";
 
 // === Types Start {
 export type ViewPortSize = "small" | "large" | "global";
-type CSSUnit = "px";
+// type CSSUnit = "px";
 type CSSDims = {
   width?: number;
   height?: number;
@@ -34,6 +34,7 @@ const ALL_COMPONENTS: { [key in DComponentName]: DComponentProps } = {
 
 export function dims(
   comp: DComponentName,
+  // @ts-ignore
   viewport: ViewPortSize,
   opts?: {
     forStyledComp?: boolean;

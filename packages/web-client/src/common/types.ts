@@ -1,31 +1,34 @@
-export interface Node<TData> {
+export interface Node {
   /**
    * Local ID
    */
   id: string;
-  data: TData;
+  data: NodeData;
   // currently string, in the future, this might be a tree of nodes
   body?: string;
-  parent: NodeStub<TData> | null;
-  children: NodeStub<TData>[];
+  parent: NodeStub | null;
+  children: NodeStub[];
 }
 
 /**
  */
 
-type NodeStub<TData> = Omit<Node<TData>, "parent" | "children">;
-export type NodeStubDict<TData> = { [id: string]: NodeStub<TData> };
-export type NodeDict<TData> = { [id: string]: Node<TData> };
+export type NodeStub = Omit<Node, "parent" | "children">;
+export type NodeStubDict = { [id: string]: NodeStub };
+export type NodeDict = { [id: string]: Node };
+export function toStub(node: Node | NodeStub): NodeStub { return { id: node.id, body: node.body, data: node.data } }
 
 interface NodeData {
+  schemaId: string;
   title: string;
   desc: string;
+  type: DataType;
 }
 export interface SchemaData extends NodeData {
   aliases?: string[];
   kind?: SchemaNodeKind;
   // match: SchemaNodeMatchRule[];
-  choices?: { [key: string]: SchemaNodeStub };
+  choices?: { [key: string]: NodeStub };
   // links: SchemaNodeLink[];
   /**
    * If namespace exists, display it here
@@ -43,10 +46,6 @@ export interface SchemaData extends NodeData {
 }
 
 export interface NoteData extends NodeData {}
-export type NoteNode = Node<NoteData>;
-export type NoteNodeStub = NodeStub<NoteData>;
-export type NoteNodeDict = { [key: string]: NoteNode };
-export type NoteStubDict = { [key: string]: NoteNodeStub };
 
 export type SchemaDataKey = keyof SchemaData;
 
@@ -60,10 +59,7 @@ export type OptionalSchemaDataKey = Exclude<
   keyof SchemaData,
   RequiredSchemaDataKey
 >;
-export type SchemaNodeDict = { [key: string]: SchemaNode };
 export type SchemaNodeKind = "namespace";
-export type SchemaNodeStub = NodeStub<SchemaData>;
-export type SchemaNode = Node<SchemaData>;
 
 export type SchemaYAMLRaw = {
   name: string;
@@ -112,22 +108,24 @@ global:
 export type NodeType = "stub" | "full";
 export type DataType = "schema" | "note";
 
-export type NodeGetResp<T> = {
-  item: Node<T> | NodeStub<T>;
+export type NodeGetResp = {
+  item: Node | NodeStub;
   nodeType: NodeType;
-  dataType: DataType;
 };
 
-export type NodeGetRootResp<T> = {
-  item: Node<T>;
-  dataType: DataType;
+export type NodeGetBatchResp = {
+  item: NodeDict | NodeStubDict;
+  nodeType: NodeType;
 };
 
-export interface NodeQueryResp<T> {
-  items: NodeDict<T>;
+export type NodeGetRootResp = {
+  item: Node;
+};
+
+export interface NodeQueryResp {
+  item: NodeDict | NodeStubDict;
   nodeType: NodeType;
-  dataType: DataType;
-  error: Error;
+  error: Error | null;
 }
 export interface Scope {
   username: string;
@@ -138,13 +136,17 @@ export interface DendronEngine {
    * Get node based on id
    * get(id: ...)
    */
-  get: <T>(
+  get: (
     scope: Scope,
     id: string,
     nodeType: NodeType,
-    dataType: DataType
-  ) => Promise<NodeGetResp<T>>;
+  ) => Promise<NodeGetResp>;
 
+  getBatch: (
+    scope: Scope,
+    ids: string[],
+    nodeType: NodeType,
+  ) => Promise<NodeGetBatchResp>;
   // load alphacortex
   /**
    * NodeStorageAPI.getRoot()
@@ -157,7 +159,7 @@ export interface DendronEngine {
    * welcome page
    * sider
    */
-  // getRoot: <T>(scope: Scope, dataType: DataType) => Promise<NodeGetRootResp<T>>;
+  // getRoot: (scope: Scope, dataType: DataType) => Promise<NodeGetRootResp>;
 
   /**
    * Get node based on query
@@ -166,25 +168,23 @@ export interface DendronEngine {
    * - [Node(id: ..., title: project, children: [])]
    *
    */
-  query: <T>(
+  query: (
     scope: Scope,
     queryString: string,
     nodeType: NodeType,
-    dataType: DataType
-  ) => Promise<NodeQueryResp<T>>;
+  ) => Promise<NodeQueryResp>;
 
   /**
    * Write node to db
    */
-  write: <T>(scope: Scope, node: Node<T>, dataType: DataType) => Promise<void>;
+  write: (scope: Scope, node: Node) => Promise<void>;
 
   /**
    * Write list of nodes
    */
-  writeBatch: <T>(
+  writeBatch: (
     scope: Scope,
-    nodes: NodeDict<T>[],
-    dataType: DataType
+    nodes: NodeDict,
   ) => Promise<void>;
 }
 

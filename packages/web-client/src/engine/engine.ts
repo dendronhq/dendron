@@ -1,25 +1,25 @@
-import { Node, NodeStubDict } from "../common/types"
+import { NodeStubDict, Scope, NodeType, NodeDict, DendronEngine, Node, NodeStub, NodeGetBatchResp, toStub, NodeQueryResp } from "../common/types"
 // Any datastore that can store regex searchable paths can implement Storage
-export interface NodeStore<TData> {
-  query: (regex: RegExp) => NodeStubDict<TData>;
-  write: (rows: NodeStubDict<TData>) => boolean;
-}
+export type IdDict = { [path: string]: string };
+export type NodeStore = { query: (scope: Scope, regex: RegExp) => Promise<IdDict> } &
+            Pick<DendronEngine, "getBatch" | "writeBatch">;
+export default class Engine {
+  public storage: NodeStore;
 
-export default class Engine<TData> {
-  private storage: NodeStore<TData>;
-
-  constructor(storage: NodeStore<TData>) {
+  constructor(storage: NodeStore) {
     this.storage = storage
   }
 
-  public query(query: string): NodeStubDict<TData> {
-    console.log(query);
-    let regexes = this.query_to_regexes(query);
+  public async query(scope: Scope, queryString: string, nodeType: NodeType): Promise<NodeQueryResp> {
+    let regexes = this.query_to_regexes(queryString);
     let filters = regexes.map(regex => regex[0]).filter(filter => filter.length != 0);
     let combined_regex = RegExp(
       "(?=.*" + filters.join(")(?=.*") + ")(?:(?:.*" + filters.join("$)|(?:.*") + "$))"
     ); // intersection of regexes
-    return this.update_path(this.storage.query(combined_regex), regexes);
+    let ids = await this.storage.query(scope, combined_regex);
+    let nodes = await this.storage.getBatch(scope, Object.values(ids), nodeType);
+    if (nodeType == "stub") { return { error: null, ...nodes}; }
+    return { item: this.fromStubs(this.update_paths(ids, regexes), nodes.item), error: null, ...nodes }
   }
 
   // The basic strategy is to create groups of positionally-matched values,
@@ -59,12 +59,12 @@ export default class Engine<TData> {
   }
 
   // puts the returned path into the requested order, and fills in all missing information
-  private update_path(results: NodeStubDict<TData>, regexes: [string, string][]): NodeStubDict<TData> {
+  private update_paths(paths: IdDict, regexes: [string, string][]): IdDict {
     let regexps: [RegExp, string][] = regexes.map(r => [RegExp(r[0]), r[1]]);
-    let out: NodeStubDict<TData> = {};
-    for (let logicalId in results) {
-      let key = regexps.map(r => (logicalId.match(r[0]) || [""])[0].replace(r[0], r[1])).join('/');
-      out[key] = { ...results[logicalId], logicalId: key };
+    let out: IdDict = {};
+    for (let path in paths) {
+      let key = regexps.map(r => (path.match(r[0]) || [""])[0].replace(r[0], r[1])).join('/');
+      out[key] = paths[path];
     }
     return out;
   }
@@ -79,5 +79,26 @@ export default class Engine<TData> {
       (match[3] || "") + (match[1] || match[4] || "") + (match[6] || ""),
       (match[3] || "") + (match[2] || match[5] || "") + (match[6] || "")
     ]
+  }
+  public fromStubs (ids: IdDict, stubs: NodeStubDict | NodeDict): NodeDict {
+    const paths = Object.keys(ids).sort();
+    if (paths.length == 0) { return {}; }
+    const out: NodeDict = {};
+    const helper = (i: number, parent_path: string) => {
+      while (i < paths.length && paths[i].startsWith(parent_path)) {
+        out[ids[parent_path]].children.push(toStub(stubs[ids[paths[i]]]));
+        out[ids[paths[i]]] = {
+          ...stubs[ids[paths[i]]],
+          parent: toStub(stubs[ids[parent_path]]),
+          children: (stubs[ids[paths[i]]] as Node).children || [],
+        };
+        i++;
+        if (i < paths.length && paths[i].startsWith(paths[i - 1])) { out[ids[paths[i - 1]]].children = []; } // clear implicit children if there are explicit ones
+        helper(i, paths[i - 1]);
+      }
+    };
+    out[ids[paths[0]]] = { ...stubs[ids[paths[0]]], parent: (stubs[ids[paths[0]]] as Node).parent || null, children: [] };
+    helper(1, paths[0]);
+    return out;
   }
 }

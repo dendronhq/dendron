@@ -81,14 +81,14 @@ describe("SchemaTree", () => {
       id: "root",
       children: [],
       parent: null,
-      data: { title: "root", desc: "root" },
+      data: { title: "root", desc: "root", type: "schema" },
     };
 
     fooSchemaNode = {
       id: "foo",
       children: [],
       parent: null,
-      data: { title: "foo", desc: "foo" },
+      data: { title: "foo", desc: "foo", type: "schema" },
     };
   });
 

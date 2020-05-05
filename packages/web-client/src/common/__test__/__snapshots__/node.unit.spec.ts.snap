@@ -331,6 +331,7 @@ SchemaTree {
       "data": Object {
         "desc": "root",
         "title": "root",
+        "type": "schema",
       },
       "id": "root",
       "parent": null,
@@ -465,6 +466,7 @@ SchemaTree {
     "data": Object {
       "desc": "root",
       "title": "root",
+      "type": "schema",
     },
     "id": "root",
     "parent": null,

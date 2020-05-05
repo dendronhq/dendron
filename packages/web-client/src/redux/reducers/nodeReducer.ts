@@ -70,7 +70,7 @@ const rootSchemaNode: SchemaNode = {
   id: "root",
   children: [],
   parent: null,
-  data: { title: "root", desc: "root" },
+  data: { title: "root", desc: "root", type: "schema" },
 };
 const initialTree = new SchemaTree("root", rootSchemaNode);
 const treeProjectBase = SchemaTree.fromSchemaYAML(YAML_PROJECT_BASE);
@@ -81,12 +81,12 @@ console.log(initialTree);
 
 const rootStub: NoteNodeStub = {
   id: "root",
-  data: { title: "root", desc: "root" },
+  data: { title: "root", desc: "root", type: "note", schemaId: "-1" },
 };
 
 const bondStub: NoteNodeStub = {
   id: "bond2",
-  data: { title: "bond2", desc: "bond2" },
+  data: { title: "bond2", desc: "bond2", type: "note", schemaId: "-1" },
 };
 const initialNoteStubs = {
   root: rootStub,

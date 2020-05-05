@@ -10,23 +10,26 @@ export interface Node {
   children: NodeStub[];
 }
 
-/**
- */
-
-export type NodeStub = Omit<Node, "parent" | "children">;
-export type NodeStubDict = { [id: string]: NodeStub };
-export type NodeDict = { [id: string]: Node };
-export type NoteNodeStub = Omit<NodeStub, "data"> & { data: NoteData };
-
-export function toStub(node: Node | NodeStub): NodeStub {
-  return { id: node.id, body: node.body, data: node.data };
-}
-
 interface NodeData {
   title: string;
   desc: string;
   type: DataType;
 }
+export type NodeStub = Omit<Node, "parent" | "children">;
+export type NodeStubDict = { [id: string]: NodeStub };
+export type NodeDict = { [id: string]: Node };
+
+// --- Notes
+export interface NoteData extends NodeData {
+  schemaId: string;
+}
+export type NoteNodeStub = Omit<NodeStub, "data"> & { data: NoteData };
+export type NoteStubDict = { [id: string]: NoteNodeStub };
+export function toStub(node: Node | NodeStub): NodeStub {
+  return { id: node.id, body: node.body, data: node.data };
+}
+
+// --- Schemas
 export interface SchemaData extends NodeData {
   aliases?: string[];
   kind?: SchemaNodeKind;
@@ -48,13 +51,12 @@ export interface SchemaData extends NodeData {
   //         flow
 }
 
-export interface NoteData extends NodeData {
-  schemaId: string;
-}
-
 export type SchemaNode = Omit<Node, "data"> & { data: SchemaData };
+export type SchemaNodeStub = Omit<NodeStub, "data"> & { data: SchemaData };
+export type SchemaNodeDict = { [id: string]: SchemaNode };
 export type SchemaDataKey = keyof SchemaData;
 
+// --- Other
 export type RequiredSchemaDataKey = "title" | "desc";
 export const RequiredSchemaDataKeyValues: RequiredSchemaDataKey[] = [
   "title",

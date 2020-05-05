@@ -61,6 +61,7 @@ export class SchemaStubWrapper {
       choices: [],
       title: id,
       desc: "",
+      type: "schema",
     };
     //const title = entry.title ? entry.title : entry.id;
 

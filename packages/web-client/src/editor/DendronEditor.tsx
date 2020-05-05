@@ -3,8 +3,6 @@ import OutlineEditor from "rich-markdown-editor";
 import React from "react";
 import { Value } from "slate";
 
-// const plugins = [MarkdownPlugin()];
-
 const initialValue = Value.fromJSON({
   document: {
     nodes: [

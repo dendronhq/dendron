@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`simple queries:  1`] = `Object {}`;
+
+exports[`simple queries: basic: basic 1`] = `
+Object {
+  "1": Object {
+    "children": Array [],
+    "data": Object {
+      "desc": "Python is a snake",
+      "title": "python",
+      "type": "note",
+    },
+    "id": "1",
+    "parent": Object {
+      "body": undefined,
+      "data": Object {
+        "desc": "Some languages",
+        "title": "languages",
+        "type": "note",
+      },
+      "id": "0",
+    },
+  },
+}
+`;

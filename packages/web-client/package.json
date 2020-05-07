@@ -73,6 +73,7 @@
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
     "lint:fix": "eslint './src/**/*.{ts,tsx}'",
+    "test:unit:single": "stage=test jest --watch",
     "test:unit:watch": "stage=test jest --watch '.*/__test__/.*\\.unit\\.test\\.ts'",
     "test:unit:debug": "stage=test node --inspect-brk node_modules/.bin/jest "
   },

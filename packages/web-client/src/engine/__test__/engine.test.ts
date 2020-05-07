@@ -1,18 +1,22 @@
-import Engine from '../engine'
-import InMemoryStore from '../inMemoryStore'
-import { NodeDict, toStub } from '../../common/types';
-import { strict } from 'assert';
-import localAPI from '../localApi';
-let api = new localAPI();
+import { NodeDict, toStub } from "../../common/types";
+
+import localAPI from "../localApi";
+
+const api = new localAPI();
 function makeNodes(specs: string[][]): NodeDict {
-  let out: NodeDict = {};
+  const out: NodeDict = {};
   for (let i = 0; i < specs.length; i++) {
     out[i.toString()] = {
       id: i.toString(),
-      data: { schemaId: specs[i][0], title: specs[i][1], desc: specs[i][2], type: "note" },
+      data: {
+        //schemaId: specs[i][0],
+        title: specs[i][1],
+        desc: specs[i][2],
+        type: "note",
+      },
       parent: null,
-      children: []
-    }
+      children: [],
+    };
   }
   for (let i = 0; i < specs.length; i++) {
     if (specs[i][3] != "") {
@@ -22,7 +26,7 @@ function makeNodes(specs: string[][]): NodeDict {
   }
   return out;
 }
-let notes = makeNodes([
+const notes = makeNodes([
   ["category", "languages", "Some languages", ""],
   ["language", "python", "Python is a snake", "0"],
   ["language", "java", "Java will do", "0"],
@@ -34,12 +38,12 @@ let notes = makeNodes([
 api.engine.storage.writeBatch({ username: "test" }, notes);
 
 test.each([
-  ["languages/python", {"1": notes["1"]}],
-  ["languages/language=java", {"2": notes["2"]}],
-  ["language=java", {"2": notes["2"]}],
-  ["java", {}],
-  ["category=languages/language=java", {"2": notes["2"]}],
-  ["language=java/category=languages", {"2": notes["2"]}],
+  ["basic", "languages/python", { "1": notes["1"] }],
+  ["named", "languages/language=java", { "2": notes["2"] }],
+  ["", "language=java", { "2": notes["2"] }],
+  ["", "java", {}],
+  ["", "category=languages/language=java", { "2": notes["2"] }],
+  ["", "language=java/category=languages", { "2": notes["2"] }],
   //["language=java/category=languages", [["language=java/category=languages", "java", "Java will do"]]],
   //["java/category=languages", []],
   //["java/languages", []],
@@ -50,12 +54,16 @@ test.each([
   //["**/python", [["category=languages/language=python", "python", "Python is a snake"]]],
   //["*/java", [["category=languages/language=java", "java", "Java will do"], ["category=dishes/dish=java", "java", "Java is coffee"]]],
   //["category=/java", [["category=languages/language=java", "java", "Java will do"], ["category=dishes/dish=java", "java", "Java is coffee"]]],
-])('simple queries, reordering, and wildcards', async (query: string, expected: NodeDict) => {
-  let response = await api.query({ username: "test"}, query, "full");
-  console.log(response.item);
-  console.log(expected);
-  expect(response.item).toEqual(expected);
-});
+])(
+  "simple queries: %s",
+  async (desc: any, query: string, expected: NodeDict) => {
+    const response = await api.query({ username: "test" }, query, "full");
+    console.log(response.item);
+    console.log(expected);
+    expect(response.item).toEqual(expected);
+    expect(response.item).toMatchSnapshot(desc);
+  }
+);
 
 //test.each([
 //  ["languages->dialects/python", [["category=dialects/language=python", "python", "Python is a snake"]]],

@@ -1,20 +1,37 @@
-import { NodeStore, IdDict } from "./engine";
-import { NodeStubDict, Scope, NodeDict, NodeType, NodeGetBatchResp, NodeStub, Node, toStub } from "../common/types";
+import {
+  DNode,
+  NodeDict,
+  NodeGetBatchResp,
+  NodeStub,
+  NodeStubDict,
+  NodeType,
+  Scope,
+  toStub,
+} from "../common/types";
+import { IdDict, NodeStore } from "./engine";
 export default class InMemoryStore implements NodeStore {
   private nodes: NodeDict = {};
   private ids: IdDict = {};
-  async getBatch(scope: Scope, ids: string[], nodeType: NodeType): Promise<NodeGetBatchResp> {
-    let out: NodeDict | NodeStubDict = {}
+  async getBatch(
+    scope: Scope,
+    ids: string[],
+    nodeType: NodeType
+  ): Promise<NodeGetBatchResp> {
+    const out: NodeDict | NodeStubDict = {};
     if (nodeType == "stub") {
-      for(let id of ids) { out[id] = toStub(this.nodes[id]); }
+      for (const id of ids) {
+        out[id] = toStub(this.nodes[id]);
+      }
     } else {
-      for(let id of ids) { out[id] = this.nodes[id]; }
+      for (const id of ids) {
+        out[id] = this.nodes[id];
+      }
     }
-    return { item: out, nodeType: nodeType }
+    return { item: out, nodeType: nodeType };
   }
   async query(scope: Scope, regex: RegExp): Promise<IdDict> {
-    let out: IdDict = {};
-    for (let row in this.ids) {
+    const out: IdDict = {};
+    for (const row in this.ids) {
       if (regex.test(row)) {
         out[row] = this.ids[row];
       }
@@ -22,15 +39,18 @@ export default class InMemoryStore implements NodeStore {
     return out;
   }
   async writeBatch(scope: Scope, nodes: NodeDict): Promise<void> {
-    this.nodes = {...this.nodes, ...nodes}
-    for (let node of Object.values(nodes)) {
+    this.nodes = { ...this.nodes, ...nodes };
+    for (const node of Object.values(nodes)) {
       let current = node.id;
-      let path = [nodes[current].data.schemaId + "=" + nodes[current].data.title];
+      const path = [
+        nodes[current].data.schemaId + "=" + nodes[current].data.title,
+      ];
       while (nodes[current].parent != null) {
         current = (nodes[current].parent as NodeStub).id;
-        path.push(nodes[current].data.schemaId + "=" + nodes[current].data.title);
+        path.push;
+        nodes[current].data.schemaId + "=" + nodes[current].data.title();
       }
-      this.ids[path.reverse().join('/')] = node.id;
+      this.ids[path.reverse().join("/")] = node.id;
     }
   }
 }

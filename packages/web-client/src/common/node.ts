@@ -1,5 +1,5 @@
-import { NodeSvgShape, ReactD3TreeItem } from "react-d3-tree";
 import {
+  DNode,
   SchemaDataKey,
   SchemaNode,
   SchemaNodeDict,
@@ -7,6 +7,7 @@ import {
   SchemaYAMLEntryRaw,
   SchemaYAMLRaw,
 } from "./types";
+import { NodeSvgShape, ReactD3TreeItem } from "react-d3-tree";
 
 import { IconType } from "antd/lib/notification";
 import YAML from "yamljs";
@@ -95,6 +96,17 @@ export class SchemaNodeWrapper {
   //   const tree = SchemaTree.fromSchemaYAML(schema);
   //   return tree;
   // }
+}
+
+export class NodeWrapper {
+  public node: DNode;
+  constructor(node: DNode) {
+    this.node = node;
+  }
+
+  static renderBody(node: DNode) {
+    return node.body || "";
+  }
 }
 
 export class SchemaTree {

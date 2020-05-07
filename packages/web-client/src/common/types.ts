@@ -1,4 +1,4 @@
-export interface Node {
+export interface DNode {
   /**
    * Local ID
    */
@@ -15,9 +15,9 @@ interface NodeData {
   desc: string;
   type: DataType;
 }
-export type NodeStub = Omit<Node, "parent" | "children">;
+export type NodeStub = Omit<DNode, "parent" | "children">;
 export type NodeStubDict = { [id: string]: NodeStub };
-export type NodeDict = { [id: string]: Node };
+export type NodeDict = { [id: string]: DNode };
 
 // --- Notes
 export interface NoteData extends NodeData {
@@ -25,7 +25,7 @@ export interface NoteData extends NodeData {
 }
 export type NoteNodeStub = Omit<NodeStub, "data"> & { data: NoteData };
 export type NoteStubDict = { [id: string]: NoteNodeStub };
-export function toStub(node: Node | NodeStub): NodeStub {
+export function toStub(node: DNode | NodeStub): NodeStub {
   return { id: node.id, body: node.body, data: node.data };
 }
 
@@ -51,7 +51,7 @@ export interface SchemaData extends NodeData {
   //         flow
 }
 
-export type SchemaNode = Omit<Node, "data"> & { data: SchemaData };
+export type SchemaNode = Omit<DNode, "data"> & { data: SchemaData };
 export type SchemaNodeStub = Omit<NodeStub, "data"> & { data: SchemaData };
 export type SchemaNodeDict = { [id: string]: SchemaNode };
 export type SchemaDataKey = keyof SchemaData;
@@ -117,7 +117,7 @@ export type NodeType = "stub" | "full";
 export type DataType = "schema" | "note";
 
 export type NodeGetResp = {
-  item: Node | NodeStub;
+  item: DNode | NodeStub;
   nodeType: NodeType;
 };
 
@@ -127,7 +127,7 @@ export type NodeGetBatchResp = {
 };
 
 export type NodeGetRootResp = {
-  item: Node;
+  item: DNode;
 };
 
 export interface NodeQueryResp {
@@ -181,7 +181,7 @@ export interface DendronEngine {
   /**
    * Write node to db
    */
-  write: (scope: Scope, node: Node) => Promise<void>;
+  write: (scope: Scope, node: DNode) => Promise<void>;
 
   /**
    * Write list of nodes

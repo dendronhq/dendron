@@ -1,4 +1,5 @@
 import {
+  NodeDict,
   NoteNodeStub,
   NoteStubDict,
   SchemaNode,
@@ -80,7 +81,7 @@ initialTree.addSubTree(treeProjectDev, rootSchemaNode.id);
 console.log(initialTree);
 
 const rootStub: NoteNodeStub = {
-  id: "root",
+  id: "root/note",
   data: { title: "root", desc: "root", type: "note", schemaId: "-1" },
 };
 
@@ -88,9 +89,25 @@ const bondStub: NoteNodeStub = {
   id: "bond2",
   data: { title: "bond2", desc: "bond2", type: "note", schemaId: "-1" },
 };
+
 const initialNoteStubs = {
   root: rootStub,
   bond: bondStub,
+};
+
+const initialNodes: NodeDict = {
+  [rootStub.id]: {
+    ...rootStub,
+    body: "This is the root",
+    parent: null,
+    children: [bondStub],
+  },
+  [bondStub.id]: {
+    ...bondStub,
+    body: "This is the bond node",
+    parent: rootStub,
+    children: [],
+  },
 };
 
 // === } END PROTO
@@ -99,12 +116,16 @@ export interface NodeState {
   schemaDict: SchemaNodeDict;
   noteStubDict: NoteStubDict;
   treeOrientation: "vertical" | "horizontal";
+  nodeDict: NodeDict;
+  activeNodeId: string;
 }
 
 const initialState: NodeState = {
   schemaDict: { ...initialTree.nodes },
   noteStubDict: { ...initialNoteStubs },
   treeOrientation: "horizontal",
+  activeNodeId: "root/note",
+  nodeDict: { ...initialNodes },
 };
 
 const nodeSlice = createSlice({

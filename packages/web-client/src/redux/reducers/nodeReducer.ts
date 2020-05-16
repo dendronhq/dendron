@@ -1,13 +1,10 @@
-import {
-  NodeDict,
-  NoteNodeStub,
-  NoteStubDict,
-  SchemaNode,
-  SchemaNodeDict,
-} from "../../common/types";
+// import { SchemaTree } from "../../common/node";
+import { ThunkAction, createSlice } from "@reduxjs/toolkit";
 
-import { SchemaTree } from "../../common/node";
-import { createSlice } from "@reduxjs/toolkit";
+import { Action } from "./types";
+import { DNode } from "../../common/types";
+import { ProtoEngine } from "../../proto/engine";
+import { ReduxState } from ".";
 
 // === BEGIN PROTO {
 const YAML_PROJECT_BASE = `
@@ -67,77 +64,90 @@ const YAML_PROJECT_DEV = `
     config: 
 `;
 
-const rootSchemaNode: SchemaNode = {
-  id: "root",
-  children: [],
-  parent: null,
-  data: { title: "root", desc: "root", type: "schema" },
-};
-const initialTree = new SchemaTree("root", rootSchemaNode);
-const treeProjectBase = SchemaTree.fromSchemaYAML(YAML_PROJECT_BASE);
-const treeProjectDev = SchemaTree.fromSchemaYAML(YAML_PROJECT_DEV);
-initialTree.addSubTree(treeProjectBase, rootSchemaNode.id);
-initialTree.addSubTree(treeProjectDev, rootSchemaNode.id);
-console.log(initialTree);
+// const rootSchemaNode: SchemaNode = {
+//   id: "root",
+//   children: [],
+//   parent: null,
+//   data: { title: "root", desc: "root", type: "schema" },
+// };
+// const initialTree = new SchemaTree("root", rootSchemaNode);
+// const treeProjectBase = SchemaTree.fromSchemaYAML(YAML_PROJECT_BASE);
+// const treeProjectDev = SchemaTree.fromSchemaYAML(YAML_PROJECT_DEV);
+// initialTree.addSubTree(treeProjectBase, rootSchemaNode.id);
+// initialTree.addSubTree(treeProjectDev, rootSchemaNode.id);
+// console.log(initialTree);
 
-const rootStub: NoteNodeStub = {
-  id: "root/note",
-  data: { title: "root", desc: "root", type: "note", schemaId: "-1" },
-};
-
-const bondStub: NoteNodeStub = {
-  id: "bond2",
-  data: { title: "bond2", desc: "bond2", type: "note", schemaId: "-1" },
-};
-
-const initialNoteStubs = {
-  root: rootStub,
-  bond: bondStub,
-};
-
-const initialNodes: NodeDict = {
-  [rootStub.id]: {
-    ...rootStub,
-    body: "This is the root",
-    parent: null,
-    children: [bondStub],
-  },
-  [bondStub.id]: {
-    ...bondStub,
-    body: "This is the bond node",
-    parent: rootStub,
-    children: [],
-  },
-};
+// const rootStub: NoteNodeStub = {
+//   id: "root/note",
+//   data: { title: "root", desc: "root", type: "note", schemaId: "-1" },
+// };
 
 // === } END PROTO
 
 export interface NodeState {
-  schemaDict: SchemaNodeDict;
-  noteStubDict: NoteStubDict;
-  treeOrientation: "vertical" | "horizontal";
-  nodeDict: NodeDict;
+  // schemaDict: SchemaNodeDict;
+  // noteStubDict: NoteStubDict;
+  // treeOrientation: "vertical" | "horizontal";
   activeNodeId: string;
 }
 
+export interface SetActiveNodeIdAction extends Action<{ id: string }> {
+  payload: {
+    id: string;
+  };
+}
+
 const initialState: NodeState = {
-  schemaDict: { ...initialTree.nodes },
-  noteStubDict: { ...initialNoteStubs },
-  treeOrientation: "horizontal",
-  activeNodeId: "root/note",
-  nodeDict: { ...initialNodes },
+  // get(): Promise<DNode>
+  //
+  // schemaDict: { ...initialTree.nodes },
+  // noteStubDict: { ...initialNoteStubs },
+  // treeOrientation: "horizontal",
+  activeNodeId: "",
+  // engine.get(activeNodeID)
+  // engine
 };
 
 const nodeSlice = createSlice({
   name: "node",
   initialState,
-  reducers: {},
+  reducers: {
+    setActiveNodeId(state: NodeState, action: SetActiveNodeIdAction) {
+      state.activeNodeId = action.payload.id;
+    },
+  },
 });
 
+type FetchNodeThunk = ThunkAction<
+  Promise<DNode>,
+  ReduxState,
+  null,
+  Action<string>
+>;
+
+type GetNodeThunk = ThunkAction<
+  Promise<DNode>,
+  ReduxState,
+  null,
+  Action<string>
+>;
+
 const effects = {
-  nodeEffect: () => {
-    // some function with an effect
-    return;
+  fetchNode: (query: string): FetchNodeThunk => async () => {
+    //TODO
+    const scope = { username: "kevin" };
+    const engine = ProtoEngine.getEngine();
+    const resp = await engine.query(scope, query);
+    // FIXME: verify
+    return resp.item[0];
+  },
+  getNode: (id: string): GetNodeThunk => async () => {
+    //TODO
+    const scope = { username: "kevin" };
+    const engine = ProtoEngine.getEngine();
+    const resp = await engine.get(scope, id);
+    // FIXME: verify
+    return resp.item;
   },
 };
 

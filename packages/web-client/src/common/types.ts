@@ -9,9 +9,23 @@ export interface DNode {
   parent: DNode | null;
   children: DNode[];
   body?: string;
+
+  renderBody(): string;
+  toDocument(): any;
+}
+export interface DNodeProps {
+  id?: string;
+  title: string;
+  desc: string;
+  type: DNodeType;
+  updated?: string;
+  created?: string;
+  parent: DNode | null;
+  children: DNode[];
+  body?: string;
 }
 export type DNodeDict = { [id: string]: DNode };
-export interface DNodeRaw<T extends NoteData | SchemaData> {
+export interface DNodeRaw<T extends INoteData | SchemaData> {
   id: string;
   title: string;
   desc: string;
@@ -25,8 +39,10 @@ export interface DNodeRaw<T extends NoteData | SchemaData> {
 }
 export type DNodeType = "note" | "schema";
 
-export type Note = DNode & NoteData;
-export type NoteData = {
+export type INote = DNode & INoteData;
+export type INoteProps = DNodeProps & Partial<INoteData>;
+
+export type INoteData = {
   schemaId: string;
 };
 
@@ -62,7 +78,7 @@ export type NodeGetRootResp = {
 };
 
 export interface NodeQueryResp {
-  item: DNodeDict;
+  item: DNode[];
   error: Error | null;
 }
 export interface Scope {

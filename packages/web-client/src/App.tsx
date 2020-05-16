@@ -1,5 +1,6 @@
 import "./App.css";
 
+import { CPane, PaneComp } from "./editor/Pane";
 import { Route, Router, Switch } from "react-router-dom";
 
 import Amplify from "@aws-amplify/core";
@@ -27,6 +28,7 @@ function AppSwitch() {
   return (
     <Switch>
       <Route exact path="/" component={HomeComp} />
+      <Route exact path="/doc/:id" component={CPane} />
       <Route exact path="/test1" component={CReduxComp} />
     </Switch>
   );

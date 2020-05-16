@@ -1,18 +1,24 @@
-import { NodeDict } from "../common/types";
-import { NodeWrapper } from "../common/node";
+import { DNode, DNodeDict } from "../common/types";
+import { nodeActions, nodeEffects } from "../redux/reducers/nodeReducer";
+
 import OutlineEditor from "rich-markdown-editor";
-// import { MarkdownPlugin } from "slate-md-editor";
 import React from "react";
 import { ReduxState } from "../redux/reducers";
+import { RouteComponentProps } from "react-router-dom";
 import { Value } from "slate";
 import { connect } from "react-redux";
+import { engine } from "../proto/engine";
 import { getOrThrow } from "../common/env";
+import { loadingActions } from "../redux/reducers/loadingReducer";
 
 const mapStateToProps = (state: ReduxState) => ({
-  activeNodeId: state.nodeReducer.activeNodeId,
-  nodeDict: state.nodeReducer.nodeDict,
+  nodeState: state.nodeReducer,
+  loadingState: state.loadingReducer,
 });
 
+const { setActiveNodeId } = nodeActions;
+const { setLoadingState } = loadingActions;
+const { fetchNode, getNode } = nodeEffects;
 // const exampleText = `
 // # Welcome
 
@@ -21,31 +27,62 @@ const mapStateToProps = (state: ReduxState) => ({
 // const savedText = localStorage.getItem("saved");
 // const defaultValue = savedText || exampleText;
 
-type PaneProps = ReturnType<typeof mapStateToProps>;
+interface PaneRouterProps {
+  id: string;
+}
 
-export class PaneComp extends React.Component<PaneProps> {
+type PaneProps = ReturnType<typeof mapStateToProps> & {
+  dispatch: any;
+} & RouteComponentProps<PaneRouterProps>;
+type PaneState = { readOnly: boolean; dark: boolean };
+
+export class PaneComp extends React.Component<PaneProps, PaneState> {
   public editor?: OutlineEditor;
-  // Set the initial value when the app is first constructed.
+  constructor(props: PaneProps) {
+    super(props);
+
+    // get root from query or "root"
+    const queryInit = "root";
+    const nodeId = this.props.match.params.id;
+    console.log({ bond: 0, props: props, nodeId });
+    props.dispatch(getNode(nodeId)).then((nodeInit: DNode) => {
+      props.dispatch(setActiveNodeId({ id: nodeInit.id }));
+      props.dispatch(setLoadingState({ key: "FETCHING_INIT", value: false }));
+    });
+    // props.dispatch(fetchNode(queryInit)).then((nodeInit: DNode) => {
+    //   console.log({ nodeInit });
+    //   props.dispatch(setActiveNodeId({ id: nodeInit.id }));
+    //   props.dispatch(setLoadingState({ key: "FETCHING_INIT", value: false }));
+    // });
+  }
+
   state = {
     readOnly: false,
     dark: localStorage.getItem("dark") === "enabled",
   };
+  // Set the initial value when the app is first constructed.
 
   //getEditorText: () => string = () => this.props.document.text;
 
   // On change, update the app's React state with the new editor value.
   onChange = ({ value }: { value: Value }) => {
-    this.setState({ value });
+    // this.setState({ value });
   };
+
   setEditorRef = (ref: OutlineEditor) => {
     this.editor = ref;
   };
 
   // Render the editor.
   render() {
-    const { activeNodeId, nodeDict } = this.props;
-    const node = getOrThrow<NodeDict>(nodeDict, activeNodeId);
-    const defaultValue = NodeWrapper.renderBody(node);
+    const { nodeState, loadingState } = this.props;
+    if (loadingState.FETCHING_INIT) {
+      return "Loading...";
+    }
+    const node = getOrThrow<DNodeDict>(engine().nodes, nodeState.activeNodeId);
+    const defaultValue = node.renderBody();
+    this.editor?.setState({ editorValue: defaultValue });
+    console.log({ ctx: "Pane/render", defaultValue });
     return (
       <OutlineEditor
         id="example"

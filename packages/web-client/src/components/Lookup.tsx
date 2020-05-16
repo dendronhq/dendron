@@ -1,27 +1,35 @@
 import Autosuggest, {
   SuggestionsFetchRequestedParams,
 } from "react-autosuggest";
+import { nodeActions, nodeEffects } from "../redux/reducers/nodeReducer";
 
+import { DNode } from "../common/types";
 import { Logger } from "@aws-amplify/core";
-import { NoteNodeStub } from "../common/types";
 import React from "react";
 import { ReduxState } from "../redux/reducers";
 import _ from "lodash";
 import { connect } from "react-redux";
+import { engine } from "../proto/engine";
 
 /*
 import { sampleActions } from "../redux/reducers/sampleReducer";
 */
 
+const { setActiveNodeId } = nodeActions;
+const { fetchNode } = nodeEffects;
 const logger = new Logger("Lookup");
 const mapStateToProps = (state: ReduxState) => ({
-  schemaDict: state.nodeReducer.schemaDict,
-  noteStubDict: state.nodeReducer.noteStubDict,
+  nodeState: state.nodeReducer,
+  //schemaDict: state.nodeReducer.schemaDict,
+  //noteStubDict: state.nodeReducer.noteStubDict,
 });
 
-type LookupSuggestion = NoteNodeStub;
+type LookupSuggestion = DNode;
 
-type LookupCompProps = ReturnType<typeof mapStateToProps> & { style?: any };
+type LookupCompProps = ReturnType<typeof mapStateToProps> & {
+  style?: any;
+  dispatch: any;
+};
 
 interface LookupCompState {
   rawValue: string;
@@ -37,24 +45,47 @@ export class LookupComp extends React.PureComponent<
     super(props);
     this.state = {
       rawValue: "",
-      suggestions: _.values(this.props.noteStubDict),
+      suggestions: _.values(engine().nodes),
     };
   }
-  getSuggestions = (value: string) => {
+
+  fetchResult = async (
+    value: string,
+    reason:
+      | SuggestionsFetchRequestedParams["reason"]
+      | "enter"
+      | "suggestion-tabbed"
+  ) => {
+    logger.info({
+      ctx: "fetchResult:enter",
+      value,
+      reason,
+    });
+    const { dispatch } = this.props;
+    const node = await dispatch(fetchNode(value));
+    logger.info({
+      ctx: "fetchResult",
+      node,
+    });
+    dispatch(setActiveNodeId({ id: node.id }));
+  };
+
+  getSuggestions = async (value: string) => {
     const inputValue = value.trim().toLowerCase();
     const inputLength = inputValue.length;
-    const suggestions = this.state.suggestions;
+    const nodes = engine().nodes;
+    const suggestions = _.values(nodes);
 
     return inputLength === 0
-      ? _.values(this.props.noteStubDict)
+      ? _.values(suggestions)
       : suggestions.filter(
           (sugg) =>
-            sugg.data.title.toLowerCase().slice(0, inputLength) === inputValue
+            sugg.title.toLowerCase().slice(0, inputLength) === inputValue
         );
   };
 
   getSuggestionValue = (suggestion: LookupSuggestion) => {
-    return suggestion.data.title;
+    return suggestion.title;
   };
 
   onChange = (event: React.FormEvent<any>, { newValue, method }: any) => {
@@ -75,10 +106,15 @@ export class LookupComp extends React.PureComponent<
       ctx: "enter",
       keyCode,
     });
+    switch (keyCode) {
+      case 13: // enter
+        this.fetchResult(this.state.rawValue, "enter");
+        break;
+    }
   };
 
   onRenderSuggestion = (suggestion: LookupSuggestion) => {
-    return <div className="result">{suggestion.data.title}</div>;
+    return <div className="result">{suggestion.title}</div>;
   };
 
   onSuggestionsClearRequested = () => {
@@ -87,7 +123,7 @@ export class LookupComp extends React.PureComponent<
     });
   };
 
-  onSuggestionsFetchRequested = ({
+  onSuggestionsFetchRequested = async ({
     value,
     reason,
   }: SuggestionsFetchRequestedParams) => {
@@ -97,8 +133,9 @@ export class LookupComp extends React.PureComponent<
       value,
       reason,
     });
+    const suggestions = await this.getSuggestions(value);
     this.setState({
-      suggestions: this.getSuggestions(value),
+      suggestions,
     });
   };
 

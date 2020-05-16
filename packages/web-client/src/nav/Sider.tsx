@@ -1,6 +1,6 @@
 import React from "react";
 import { ReduxState } from "../redux/reducers";
-import { SchemaTree } from "../common/node";
+// import { SchemaTree } from "../common/node";
 import { Tree } from "antd";
 import { connect } from "react-redux";
 import styled from "styled-components";
@@ -8,7 +8,7 @@ import styled from "styled-components";
 const { DirectoryTree } = Tree;
 
 const mapStateToProps = (state: ReduxState) => ({
-  schemaDict: state.nodeReducer.schemaDict,
+  schemaDict: {},
 });
 
 type SiderCompProps = ReturnType<typeof mapStateToProps>;
@@ -20,8 +20,8 @@ const StyledSiderDiv = styled.div<any>`
 class SiderComp extends React.PureComponent<SiderCompProps> {
   render() {
     const { schemaDict } = this.props;
-    const tree = new SchemaTree("root", schemaDict.root, schemaDict);
-    const treeData = [tree.toAntDTree()];
+    // const tree = new SchemaTree("root", schemaDict.root, schemaDict);
+    // const treeData = [tree.toAntDTree()];
     const onSelect = () => {
       console.log("Trigger Select");
     };
@@ -32,13 +32,13 @@ class SiderComp extends React.PureComponent<SiderCompProps> {
     const isMobile = false;
     return (
       <StyledSiderDiv isMobile={isMobile}>
-        <DirectoryTree
+        {/* <DirectoryTree
           multiple
           defaultExpandAll
           onSelect={onSelect}
           onExpand={onExpand}
-          treeData={treeData}
-        />
+          treeData={{}}
+        /> */}
       </StyledSiderDiv>
     );
   }

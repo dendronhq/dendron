@@ -7,8 +7,10 @@ import Amplify from "@aws-amplify/core";
 import { CReduxComp } from "./sample/ReduxComp";
 import { CSider } from "./nav/Sider";
 import { DIVIDER_COLOR } from "./config";
+import DataLoader from "./editor/DataLoader";
 import { ErrorBoundary } from "./base/ErrorBoundary";
 import { HomeComp } from "./components/Home";
+import KeyedPane from "./editor/KeyedPane";
 import { Layout } from "antd";
 import { Provider } from "react-redux";
 import React from "react";
@@ -28,7 +30,7 @@ function AppSwitch() {
   return (
     <Switch>
       <Route exact path="/" component={HomeComp} />
-      <Route exact path="/doc/:id" component={CPane} />
+      <Route exact path="/doc/:id" component={KeyedPane} />
       <Route exact path="/test1" component={CReduxComp} />
     </Switch>
   );

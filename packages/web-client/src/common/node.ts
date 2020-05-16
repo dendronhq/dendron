@@ -1,15 +1,7 @@
-import {
-  DNode,
-  DNodeType,
-  INote,
-  INoteProps,
-  SchemaYAMLEntryRaw,
-  SchemaYAMLRaw,
-} from "./types";
+import { DNodeProps, DNodeType, IDNode, INoteProps } from "./types";
 import { NodeSvgShape, ReactD3TreeItem } from "react-d3-tree";
 
 import { IconType } from "antd/lib/notification";
-import YAML from "yamljs";
 import _ from "lodash";
 
 export interface DataNode {
@@ -43,19 +35,18 @@ type ReactD3TreeItemV2<T> = {
   nodeSvgShape?: NodeSvgShape;
 };
 
-export class Note implements INote {
+export abstract class DNode implements IDNode {
   public id: string;
   public title: string;
   public desc: string;
   public type: DNodeType;
   public updated: string;
   public created: string;
-  public parent: DNode | null;
-  public children: DNode[];
+  public parent: IDNode | null;
+  public children: IDNode[];
   public body?: string;
-  public schemaId: string;
 
-  constructor(props: INoteProps) {
+  constructor(props: DNodeProps) {
     const {
       id,
       title,
@@ -66,7 +57,6 @@ export class Note implements INote {
       parent,
       children,
       body,
-      schemaId,
     } = _.defaults(props, {
       updated: "TODO",
       created: "TODO",
@@ -82,7 +72,10 @@ export class Note implements INote {
     this.parent = parent;
     this.children = children;
     this.body = body;
-    this.schemaId = schemaId;
+  }
+
+  get url(): string {
+    return `/doc/${this.id}`;
   }
 
   renderBody(): string {
@@ -106,6 +99,15 @@ export class Note implements INote {
         ],
       },
     };
+  }
+}
+
+export class Note extends DNode {
+  public schemaId: string;
+
+  constructor(props: INoteProps) {
+    super(props);
+    this.schemaId = props.schemaId || "-1";
   }
 }
 

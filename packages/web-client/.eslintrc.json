@@ -21,6 +21,7 @@
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/no-empty-interface": "off",
     "@typescript-eslint/camelcase": "off",
+    "@typescript-eslint/interface-name-prefix": "off",
     "react/no-children-prop": "off",
     "react/prop-types": "off"
   },

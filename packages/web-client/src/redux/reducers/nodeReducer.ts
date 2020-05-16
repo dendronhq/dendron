@@ -2,7 +2,7 @@
 import { ThunkAction, createSlice } from "@reduxjs/toolkit";
 
 import { Action } from "./types";
-import { DNode } from "../../common/types";
+import { IDNode } from "../../common/types";
 import { ProtoEngine } from "../../proto/engine";
 import { ReduxState } from ".";
 
@@ -119,14 +119,14 @@ const nodeSlice = createSlice({
 });
 
 type FetchNodeThunk = ThunkAction<
-  Promise<DNode>,
+  Promise<IDNode>,
   ReduxState,
   null,
   Action<string>
 >;
 
 type GetNodeThunk = ThunkAction<
-  Promise<DNode>,
+  Promise<IDNode>,
   ReduxState,
   null,
   Action<string>

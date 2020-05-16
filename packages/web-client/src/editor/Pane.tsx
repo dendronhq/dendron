@@ -1,24 +1,22 @@
-import { DNode, DNodeDict } from "../common/types";
-import { nodeActions, nodeEffects } from "../redux/reducers/nodeReducer";
-
+import { DNode } from "../common/node";
+import { Logger } from "@aws-amplify/core";
 import OutlineEditor from "rich-markdown-editor";
+import { PaneRouteProps } from "./types";
 import React from "react";
 import { ReduxState } from "../redux/reducers";
-import { RouteComponentProps } from "react-router-dom";
 import { Value } from "slate";
 import { connect } from "react-redux";
-import { engine } from "../proto/engine";
-import { getOrThrow } from "../common/env";
-import { loadingActions } from "../redux/reducers/loadingReducer";
+
+const logger = new Logger("Pane");
 
 const mapStateToProps = (state: ReduxState) => ({
   nodeState: state.nodeReducer,
   loadingState: state.loadingReducer,
 });
 
-const { setActiveNodeId } = nodeActions;
-const { setLoadingState } = loadingActions;
-const { fetchNode, getNode } = nodeEffects;
+// const { setActiveNodeId } = nodeActions;
+// const { setLoadingState } = loadingActions;
+// const { fetchNode, getNode } = nodeEffects;
 // const exampleText = `
 // # Welcome
 
@@ -27,13 +25,10 @@ const { fetchNode, getNode } = nodeEffects;
 // const savedText = localStorage.getItem("saved");
 // const defaultValue = savedText || exampleText;
 
-interface PaneRouterProps {
-  id: string;
-}
-
 type PaneProps = ReturnType<typeof mapStateToProps> & {
   dispatch: any;
-} & RouteComponentProps<PaneRouterProps>;
+  node: DNode;
+};
 type PaneState = { readOnly: boolean; dark: boolean };
 
 export class PaneComp extends React.Component<PaneProps, PaneState> {
@@ -41,28 +36,16 @@ export class PaneComp extends React.Component<PaneProps, PaneState> {
   constructor(props: PaneProps) {
     super(props);
 
-    // get root from query or "root"
-    const queryInit = "root";
-    const nodeId = this.props.match.params.id;
-    console.log({ bond: 0, props: props, nodeId });
-    props.dispatch(getNode(nodeId)).then((nodeInit: DNode) => {
-      props.dispatch(setActiveNodeId({ id: nodeInit.id }));
-      props.dispatch(setLoadingState({ key: "FETCHING_INIT", value: false }));
+    logger.info({
+      ctx: "constructor:enter",
+      props,
     });
-    // props.dispatch(fetchNode(queryInit)).then((nodeInit: DNode) => {
-    //   console.log({ nodeInit });
-    //   props.dispatch(setActiveNodeId({ id: nodeInit.id }));
-    //   props.dispatch(setLoadingState({ key: "FETCHING_INIT", value: false }));
-    // });
   }
 
   state = {
     readOnly: false,
     dark: localStorage.getItem("dark") === "enabled",
   };
-  // Set the initial value when the app is first constructed.
-
-  //getEditorText: () => string = () => this.props.document.text;
 
   // On change, update the app's React state with the new editor value.
   onChange = ({ value }: { value: Value }) => {
@@ -75,17 +58,16 @@ export class PaneComp extends React.Component<PaneProps, PaneState> {
 
   // Render the editor.
   render() {
-    const { nodeState, loadingState } = this.props;
+    const { loadingState, node } = this.props;
     if (loadingState.FETCHING_INIT) {
       return "Loading...";
     }
-    const node = getOrThrow<DNodeDict>(engine().nodes, nodeState.activeNodeId);
     const defaultValue = node.renderBody();
     this.editor?.setState({ editorValue: defaultValue });
     console.log({ ctx: "Pane/render", defaultValue });
     return (
       <OutlineEditor
-        id="example"
+        id={node.id}
         readOnly={this.state.readOnly}
         defaultValue={defaultValue}
         onSave={(options: any) => {
@@ -131,6 +113,6 @@ export class PaneComp extends React.Component<PaneProps, PaneState> {
   }
 }
 
-export const CPane = connect(mapStateToProps, null, null, {
+export default connect(mapStateToProps, null, null, {
   forwardRef: true,
 })(PaneComp);

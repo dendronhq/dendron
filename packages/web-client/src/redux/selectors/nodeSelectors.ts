@@ -1,4 +1,4 @@
-import { DNode } from "../../common/types";
+import { IDNode } from "../../common/types";
 import { NodeState } from "../reducers/nodeReducer";
 import { ReduxState } from "../reducers";
 import { createSelector } from "@reduxjs/toolkit";
@@ -10,7 +10,7 @@ export const createActiveNoteSelector = createSelector(
       return state.nodeReducer;
     },
   ],
-  (state: NodeState): DNode => {
+  (state: NodeState): IDNode => {
     const { activeNodeId } = state;
     return engine().nodes[activeNodeId];
   }

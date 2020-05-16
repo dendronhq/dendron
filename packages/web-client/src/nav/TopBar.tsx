@@ -3,6 +3,7 @@ import { DIVIDER_COLOR, dims } from "../config";
 import React, { PureComponent } from "react";
 
 import { CLookupComp } from "../components/Lookup";
+import { Link } from "react-router-dom";
 import logo from "./../logo.svg";
 import styled from "styled-components";
 
@@ -15,7 +16,11 @@ const StyledLogoImg = styled.img`
 `;
 
 function Logo({ logoImg }: { logoImg: any }) {
-  return <StyledLogoImg src={logoImg} />;
+  return (
+    <Link to={{ pathname: "/home" }}>
+      <StyledLogoImg src={logoImg} />
+    </Link>
+  );
 }
 
 const SHeader = styled(Header)`

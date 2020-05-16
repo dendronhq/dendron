@@ -1,7 +1,7 @@
 import {
   DEngine,
-  DNode,
   DNodeDict,
+  IDNode,
   NodeQueryResp,
   Scope,
 } from "../common/types";
@@ -31,7 +31,7 @@ export interface FuseOptions {
   // useExtendedSearch?: boolean
 }
 
-function createFuse(initList: DNode[], opts: FuseOptions) {
+function createFuse(initList: IDNode[], opts: FuseOptions) {
   const options = {
     shouldSort: true,
     threshold: opts.exactMatch ? 0.0 : 0.6,
@@ -85,7 +85,7 @@ class MockDataStore {
 }
 
 export class ProtoEngine implements DEngine {
-  public fuse: Fuse<DNode, any>;
+  public fuse: Fuse<IDNode, any>;
   public nodes: DNodeDict;
 
   static getEngine() {
@@ -101,12 +101,19 @@ export class ProtoEngine implements DEngine {
     this.fuse = createFuse(fuseList, { exactMatch: false });
   }
 
-  updateLocalCollection(collection: DNode[]) {
+  updateLocalCollection(collection: IDNode[]) {
     this.fuse.setCollection(collection);
   }
 
   async get(_scope: Scope, id: string) {
     //FIXME: check if exist
+    const node = this.nodes[id];
+    return { item: node };
+  }
+
+  async getByUrl(url: string) {
+    // TODO: do more then id
+    const id = "";
     const node = this.nodes[id];
     return { item: node };
   }

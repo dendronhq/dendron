@@ -1,14 +1,15 @@
 // === Node Types
-export interface DNode {
+export interface IDNode {
   id: string;
   title: string;
   desc: string;
   type: DNodeType;
   updated: string;
   created: string;
-  parent: DNode | null;
-  children: DNode[];
+  parent: IDNode | null;
+  children: IDNode[];
   body?: string;
+  url: string;
 
   renderBody(): string;
   toDocument(): any;
@@ -20,11 +21,11 @@ export interface DNodeProps {
   type: DNodeType;
   updated?: string;
   created?: string;
-  parent: DNode | null;
-  children: DNode[];
+  parent: IDNode | null;
+  children: IDNode[];
   body?: string;
 }
-export type DNodeDict = { [id: string]: DNode };
+export type DNodeDict = { [id: string]: IDNode };
 export interface DNodeRaw<T extends INoteData | SchemaData> {
   id: string;
   title: string;
@@ -39,14 +40,14 @@ export interface DNodeRaw<T extends INoteData | SchemaData> {
 }
 export type DNodeType = "note" | "schema";
 
-export type INote = DNode & INoteData;
+export type INote = IDNode & INoteData;
 export type INoteProps = DNodeProps & Partial<INoteData>;
 
 export type INoteData = {
   schemaId: string;
 };
 
-export type Schema = DNode & SchemaData;
+export type Schema = IDNode & SchemaData;
 export type SchemaData = {
   pattern: string;
 };
@@ -66,7 +67,7 @@ export type SchemaYAMLEntryRaw = SchemaData & {
 // === Engine Types
 
 export type NodeGetResp = {
-  item: DNode;
+  item: IDNode;
 };
 
 export type NodeGetBatchResp = {
@@ -74,11 +75,11 @@ export type NodeGetBatchResp = {
 };
 
 export type NodeGetRootResp = {
-  item: DNode;
+  item: IDNode;
 };
 
 export interface NodeQueryResp {
-  item: DNode[];
+  item: IDNode[];
   error: Error | null;
 }
 export interface Scope {
@@ -106,7 +107,7 @@ export interface DEngine {
   /**
    * Write node to db
    */
-  write: (scope: Scope, node: DNode) => Promise<void>;
+  write: (scope: Scope, node: IDNode) => Promise<void>;
 
   /**
    * Write list of nodes

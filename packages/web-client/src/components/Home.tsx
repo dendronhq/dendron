@@ -1,4 +1,3 @@
-import { CPane } from "../editor/Pane";
 import React from "react";
 import styled from "styled-components";
 
@@ -9,9 +8,5 @@ const WindowStyle = styled.div`
 `;
 
 export function HomeComp() {
-  return (
-    <WindowStyle>
-      <CPane />
-    </WindowStyle>
-  );
+  return <WindowStyle></WindowStyle>;
 }

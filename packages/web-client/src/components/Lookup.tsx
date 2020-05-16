@@ -3,8 +3,9 @@ import Autosuggest, {
 } from "react-autosuggest";
 import { nodeActions, nodeEffects } from "../redux/reducers/nodeReducer";
 
-import { DNode } from "../common/types";
+import { IDNode } from "../common/types";
 import { Logger } from "@aws-amplify/core";
+import { NodePreview } from "./NodePreview";
 import React from "react";
 import { ReduxState } from "../redux/reducers";
 import _ from "lodash";
@@ -24,7 +25,7 @@ const mapStateToProps = (state: ReduxState) => ({
   //noteStubDict: state.nodeReducer.noteStubDict,
 });
 
-type LookupSuggestion = DNode;
+type LookupSuggestion = IDNode;
 
 type LookupCompProps = ReturnType<typeof mapStateToProps> & {
   style?: any;
@@ -114,7 +115,11 @@ export class LookupComp extends React.PureComponent<
   };
 
   onRenderSuggestion = (suggestion: LookupSuggestion) => {
-    return <div className="result">{suggestion.title}</div>;
+    return (
+      <div className="result">
+        <NodePreview node={suggestion} />
+      </div>
+    );
   };
 
   onSuggestionsClearRequested = () => {

@@ -1,8 +1,10 @@
 import Autosuggest, {
   SuggestionsFetchRequestedParams,
 } from "react-autosuggest";
+import { RouteComponentProps, withRouter } from "react-router-dom";
 import { nodeActions, nodeEffects } from "../redux/reducers/nodeReducer";
 
+import { AppDispatch } from "../App";
 import { IDNode } from "../common/types";
 import { Logger } from "@aws-amplify/core";
 import { NodePreview } from "./NodePreview";
@@ -29,8 +31,8 @@ type LookupSuggestion = IDNode;
 
 type LookupCompProps = ReturnType<typeof mapStateToProps> & {
   style?: any;
-  dispatch: any;
-};
+  dispatch: AppDispatch;
+} & RouteComponentProps;
 
 interface LookupCompState {
   rawValue: string;
@@ -62,13 +64,9 @@ export class LookupComp extends React.PureComponent<
       value,
       reason,
     });
-    const { dispatch } = this.props;
+    const { history, dispatch } = this.props;
     const node = await dispatch(fetchNode(value));
-    logger.info({
-      ctx: "fetchResult",
-      node,
-    });
-    dispatch(setActiveNodeId({ id: node.id }));
+    history.push(node.url);
   };
 
   getSuggestions = async (value: string) => {
@@ -180,6 +178,8 @@ export class LookupComp extends React.PureComponent<
   }
 }
 
-export const CLookupComp = connect(mapStateToProps, null, null, {
-  forwardRef: true,
-})(LookupComp);
+export const CLookupComp = withRouter(
+  connect(mapStateToProps, null, null, {
+    forwardRef: true,
+  })(LookupComp)
+);

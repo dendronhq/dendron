@@ -1,13 +1,11 @@
 import "./App.css";
 
-import { CPane, PaneComp } from "./editor/Pane";
 import { Route, Router, Switch } from "react-router-dom";
 
 import Amplify from "@aws-amplify/core";
 import { CReduxComp } from "./sample/ReduxComp";
 import { CSider } from "./nav/Sider";
 import { DIVIDER_COLOR } from "./config";
-import DataLoader from "./editor/DataLoader";
 import { ErrorBoundary } from "./base/ErrorBoundary";
 import { HomeComp } from "./components/Home";
 import KeyedPane from "./editor/KeyedPane";
@@ -22,6 +20,8 @@ import styled from "styled-components";
 const { Content, Sider, Footer } = Layout;
 // === Init Start {
 const store = setupStore();
+export type AppDispatch = typeof store.dispatch;
+
 Amplify.Logger.LOG_LEVEL = "DEBUG";
 
 // } Init End

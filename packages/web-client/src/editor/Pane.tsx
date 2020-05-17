@@ -1,7 +1,7 @@
+import { AppDispatch } from "../App";
 import { DNode } from "../common/node";
 import { Logger } from "@aws-amplify/core";
 import OutlineEditor from "rich-markdown-editor";
-import { PaneRouteProps } from "./types";
 import React from "react";
 import { ReduxState } from "../redux/reducers";
 import { Value } from "slate";
@@ -26,7 +26,7 @@ const mapStateToProps = (state: ReduxState) => ({
 // const defaultValue = savedText || exampleText;
 
 type PaneProps = ReturnType<typeof mapStateToProps> & {
-  dispatch: any;
+  dispatch: AppDispatch;
   node: DNode;
 };
 type PaneState = { readOnly: boolean; dark: boolean };

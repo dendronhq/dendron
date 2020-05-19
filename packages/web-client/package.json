@@ -46,6 +46,7 @@
     "react-d3-tree": "^1.16.1",
     "react-dev-utils": "^10.2.1",
     "react-dom": "^16.13.1",
+    "react-keydown": "^1.9.12",
     "react-redux": "^7.2.0",
     "react-router-dom": "^5.1.2",
     "redux-logger": "^3.0.6",

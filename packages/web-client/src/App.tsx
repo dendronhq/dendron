@@ -1,15 +1,14 @@
 import "./App.css";
 
-import { Route, Router, Switch } from "react-router-dom";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 
 import Amplify from "@aws-amplify/core";
-import { CReduxComp } from "./sample/ReduxComp";
 import DendronLayout from "./components/DendronLayout";
 import { HomeComp } from "./components/Home";
 import KeyedPane from "./editor/KeyedPane";
 import { Provider } from "react-redux";
 import React from "react";
-import { getOrCreateHistory } from "./utils/history";
+import Test from "./test";
 import { setupStore } from "./redux";
 
 // === Init Start {
@@ -25,19 +24,20 @@ function AppSwitch() {
     <Switch>
       <Route exact path="/" component={HomeComp} />
       <Route exact path="/doc/:id" component={KeyedPane} />
-      <Route exact path="/test1" component={CReduxComp} />
+      <Route exact path="/test1" component={Test} />
     </Switch>
   );
 }
 
 function App() {
+  // <Router history={getOrCreateHistory() as any}></Router>
   return (
     <Provider store={store}>
-      <Router history={getOrCreateHistory() as any}>
+      <BrowserRouter>
         <DendronLayout>
           <AppSwitch />
         </DendronLayout>
-      </Router>
+      </BrowserRouter>
     </Provider>
   );
 }

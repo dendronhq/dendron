@@ -20,10 +20,12 @@ export interface DataNode {
   style?: React.CSSProperties;
 }
 
+// @ts-ignore
 interface YAMLEntryOpts {
   id: string;
 }
 
+// @ts-ignore
 type ReactD3TreeItemV2<T> = {
   id: string;
   name: string;

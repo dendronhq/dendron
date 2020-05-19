@@ -2,7 +2,6 @@ import Autosuggest, {
   SuggestionsFetchRequestedParams,
 } from "react-autosuggest";
 import { RouteComponentProps, withRouter } from "react-router-dom";
-import { nodeActions, nodeEffects } from "../redux/reducers/nodeReducer";
 
 import { AppDispatch } from "../App";
 import { IDNode } from "../common/types";
@@ -13,12 +12,12 @@ import { ReduxState } from "../redux/reducers";
 import _ from "lodash";
 import { connect } from "react-redux";
 import { engine } from "../proto/engine";
+import { nodeEffects } from "../redux/reducers/nodeReducer";
 
 /*
 import { sampleActions } from "../redux/reducers/sampleReducer";
 */
 
-const { setActiveNodeId } = nodeActions;
 const { fetchNode } = nodeEffects;
 const logger = new Logger("Lookup");
 const mapStateToProps = (state: ReduxState) => ({
@@ -43,6 +42,7 @@ export class LookupComp extends React.PureComponent<
   LookupCompProps,
   LookupCompState
 > {
+  protected autosuggest?: Autosuggest;
   static defaultProps = { style: {} };
   constructor(props: LookupCompProps) {
     super(props);
@@ -52,6 +52,17 @@ export class LookupComp extends React.PureComponent<
     };
   }
 
+  storeInputRef = (input: Autosuggest) => {
+    if (input !== null) {
+      this.autosuggest = input;
+    }
+  };
+  // --- LifeCycle
+  componentDidMount() {
+    this.focus();
+  }
+
+  // ---
   fetchResult = async (
     value: string,
     reason:
@@ -67,6 +78,13 @@ export class LookupComp extends React.PureComponent<
     const { history, dispatch } = this.props;
     const node = await dispatch(fetchNode(value));
     history.push(node.url);
+  };
+
+  focus = () => {
+    const autosuggest = this.autosuggest;
+    if (autosuggest && autosuggest.input) {
+      autosuggest.input.focus();
+    }
   };
 
   getSuggestions = async (value: string) => {
@@ -172,14 +190,14 @@ export class LookupComp extends React.PureComponent<
         //   onSuggestionSelected={this.onSuggestionSelected}
         //   renderInputComponent={this.renderInputComponent}
         //   renderSuggestionsContainer={this.onRenderSuggestionsContainer}
-        //   ref={this.storeInputRef}
+        ref={this.storeInputRef}
       />
     );
   }
 }
 
-export const CLookupComp = withRouter(
-  connect(mapStateToProps, null, null, {
-    forwardRef: true,
-  })(LookupComp)
+const CLookupComp = connect(mapStateToProps, null, null, { forwardRef: true })(
+  LookupComp
 );
+export type ILookup = LookupComp;
+export default withRouter<LookupCompProps, typeof CLookupComp>(CLookupComp);

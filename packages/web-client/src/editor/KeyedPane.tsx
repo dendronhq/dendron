@@ -12,7 +12,7 @@ class KeyedPane extends React.Component<PaneRouteProps> {
     // for the key.
     // const urlParts = documentSlug ? documentSlug.split("-") : [];
     // const urlId = urlParts.length ? urlParts[urlParts.length - 1] : undefined;
-    const urlId = id;
+    // const urlId = id
     return <DataLoader key={[id].join("/")} {...this.props} />;
   }
 }

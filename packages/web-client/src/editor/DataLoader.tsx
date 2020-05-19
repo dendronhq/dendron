@@ -1,5 +1,6 @@
 import { nodeActions, nodeEffects } from "../redux/reducers/nodeReducer";
 
+import { AppDispatch } from "../App";
 import { DNode } from "../common/node";
 import { IDNode } from "../common/types";
 import { Logger } from "@aws-amplify/core";
@@ -20,9 +21,10 @@ const mapStateToProps = (_state: ReduxState) => ({
   nodeState: _state.nodeReducer,
 });
 
-type DataLoaderProps = ReturnType<typeof mapStateToProps> & {
-  dispatch: any;
-} & PaneRouteProps;
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = { dispatch: AppDispatch };
+
+type DataLoaderProps = PaneRouteProps & StateProps & DispatchProps;
 
 class DataLoader extends React.PureComponent<DataLoaderProps> {
   public node?: DNode;
@@ -51,4 +53,8 @@ class DataLoader extends React.PureComponent<DataLoaderProps> {
   }
 }
 
-export default withRouter(connect(mapStateToProps, null)(DataLoader));
+const CDataLoader = connect<StateProps, {}, {}, ReduxState>(mapStateToProps)(
+  DataLoader
+);
+
+export default withRouter<PaneRouteProps, typeof CDataLoader>(CDataLoader);

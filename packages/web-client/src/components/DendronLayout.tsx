@@ -1,3 +1,5 @@
+import Lookup, { ILookup } from "./Lookup";
+
 import { CSider } from "../nav/Sider";
 import { DIVIDER_COLOR } from "../config";
 import { Layout } from "antd";
@@ -17,11 +19,11 @@ const SContent = styled(Content)`
 `;
 // === Init Start {
 export default class DendronLayout extends React.PureComponent {
-  public topbar?: TopBarComponent;
+  public lookup?: ILookup;
 
-  storeTopBar = (comp: TopBarComponent) => {
-    if (!this.topbar) {
-      this.topbar = comp;
+  storeLookup = (comp: ILookup) => {
+    if (!this.lookup) {
+      this.lookup = comp;
     }
   };
 
@@ -29,17 +31,24 @@ export default class DendronLayout extends React.PureComponent {
   goToSearch(ev: Event) {
     ev.preventDefault();
     ev.stopPropagation();
-    if (this.topbar) {
+    if (this.lookup) {
+      this.lookup.focus();
       // TODO
       console.log("bond");
+    } else {
+      console.log("non-bond");
     }
   }
 
   render() {
+    // needed because withRouter types is a cluster
+    const TLookup: any = Lookup;
     return (
       <Layout>
         <Layout>
-          <TopBarComponent ref={this.storeTopBar} />
+          <TopBarComponent>
+            <TLookup wrappedComponentRef={this.storeLookup} />
+          </TopBarComponent>
           <Layout>
             <SSider theme="light">
               <CSider />

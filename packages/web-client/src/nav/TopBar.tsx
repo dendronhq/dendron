@@ -2,7 +2,6 @@ import { Col, Layout, Row } from "antd";
 import { DIVIDER_COLOR, dims } from "../config";
 import React, { PureComponent } from "react";
 
-import { CLookupComp } from "../components/Lookup";
 import { Link } from "react-router-dom";
 import logo from "./../logo.svg";
 import styled from "styled-components";
@@ -39,9 +38,7 @@ export class TopBarComponent extends PureComponent {
           <Col span={4}>
             <Logo logoImg={logo} />
           </Col>
-          <Col span={18}>
-            <CLookupComp />
-          </Col>
+          <Col span={18}>{this.props.children}</Col>
           <Col span={2}>Menu</Col>
         </Row>
       </SHeader>

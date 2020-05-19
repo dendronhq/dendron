@@ -1,3 +1,7 @@
+// Global Types
+
+export type Stage = "dev" | "prod";
+
 // === Node Types
 export interface IDNode {
   id: string;

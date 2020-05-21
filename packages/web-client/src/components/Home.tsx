@@ -56,7 +56,7 @@ export class Home extends React.PureComponent<HomeProps> {
   render() {
     const { userState } = this.props;
     if (userState.authState == "signedIn") {
-      return <Redirect to="/test1" />;
+      return <Redirect to="/doc/root" />;
     } else {
       return <div>Redirect Landing</div>;
     }

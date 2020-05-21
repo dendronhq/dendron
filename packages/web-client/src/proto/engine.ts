@@ -63,13 +63,14 @@ class MockDataStore {
       body: "first child body",
     });
     const rootNote = new Note({
-      id: "a5f919f8-e46d-4709-9449-7aa1ea980f98",
+      id: "root",
       title: "root",
       desc: "root",
       type: "note",
       schemaId: "-1",
       parent: null,
       children: [firstChildNote],
+      body: "The root node",
     });
 
     const initialNodes: DNodeDict = {

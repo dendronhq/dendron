@@ -1,8 +1,14 @@
 import React, { ReactElement } from "react";
 
+import { AppDispatch } from "../App";
 import { ReduxState } from "../redux/reducers";
 import { connect } from "react-redux";
 import { sampleActions } from "../redux/reducers/sampleReducer";
+
+// const { setActiveNodeId } = nodeActions;
+// const { } = userActions;
+// const { setLoadingState } = loadingActions;
+// const { fetchNode, getNode } = nodeEffects;
 
 const mapStateToProps = (state: ReduxState) => ({
   userState: state.userReducer,
@@ -10,7 +16,11 @@ const mapStateToProps = (state: ReduxState) => ({
   value: state.sampleReducer.value,
 });
 
-type ReduxCompProps = ReturnType<typeof mapStateToProps>;
+type ReduxCompOwnProps = {};
+
+type ReduxCompProps = ReturnType<typeof mapStateToProps> & {
+  dispatch: AppDispatch;
+} & ReduxCompOwnProps;
 sampleActions.setValue({ value: 5 });
 
 function ReduxComp(props: ReduxCompProps): ReactElement {

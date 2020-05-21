@@ -35,10 +35,42 @@
     lodash "^4.17.15"
     resize-observer-polyfill "^1.5.0"
 
+"@aws-amplify/auth@^3.2.7":
+  version "3.2.7"
+  resolved "https://registry.yarnpkg.com/@aws-amplify/auth/-/auth-3.2.7.tgz#cab35a8f14e07625ee402dd5051bc29dc4fa6ec5"
+  integrity sha512-GOin1tb8/LjppSNNwGPSj5/TJtvT5sO8DGN/lYE/nOFboFdnOHkOkoeR7oso5mIzN38uMFsgpdzkPZ9Coihcxg==
+  dependencies:
+    "@aws-amplify/cache" "^3.1.10"
+    "@aws-amplify/core" "^3.2.7"
+    amazon-cognito-identity-js "^4.2.4"
+    crypto-js "^3.3.0"
+
+"@aws-amplify/cache@^3.1.10":
+  version "3.1.10"
+  resolved "https://registry.yarnpkg.com/@aws-amplify/cache/-/cache-3.1.10.tgz#7e2b94cbc52b1e085e9d7b42c701e5f51eaedc17"
+  integrity sha512-yCLpEO7UEzJYV3CU2/BEV10jVud6N4VF52LuEw/4C42+TwsIoiPnp2ajH6boHzd6Hj+3U/cej5e68v7RhBZHTQ==
+  dependencies:
+    "@aws-amplify/core" "^3.2.7"
+
 "@aws-amplify/core@^3.2.4":
   version "3.2.6"
   resolved "https://registry.yarnpkg.com/@aws-amplify/core/-/core-3.2.6.tgz#832c9551e7b7da38b6f30590611f1d5ff45eca5e"
   integrity sha512-dkbd/s+4rmMDGtomL9Pj0kas1KIZWvZuZhwlKpU8r1y6cOwgGVpMOAoJ+evBFQ5JlPovRh4nxG/5yAnmuJlsPA==
+  dependencies:
+    "@aws-crypto/sha256-js" "1.0.0-alpha.0"
+    "@aws-sdk/client-cognito-identity" "1.0.0-beta.5"
+    "@aws-sdk/credential-provider-cognito-identity" "1.0.0-beta.5"
+    "@aws-sdk/node-http-handler" "1.0.0-beta.4"
+    "@aws-sdk/types" "1.0.0-beta.4"
+    "@aws-sdk/util-hex-encoding" "1.0.0-beta.2"
+    "@aws-sdk/util-user-agent-browser" "1.0.0-beta.4"
+    url "^0.11.0"
+    zen-observable-ts "0.8.19"
+
+"@aws-amplify/core@^3.2.7":
+  version "3.2.7"
+  resolved "https://registry.yarnpkg.com/@aws-amplify/core/-/core-3.2.7.tgz#5e36f8dcaefdf40fbd7c28caaf6be8b822600f5f"
+  integrity sha512-fMpRT+lgTC9pkMdMBuiNReapDLsbtydqeuX/h+VFPJghEgiTZ7FIegB10k2CWzMPM8nzFpBNQuNoO/F25sTxTw==
   dependencies:
     "@aws-crypto/sha256-js" "1.0.0-alpha.0"
     "@aws-sdk/client-cognito-identity" "1.0.0-beta.5"
@@ -2568,6 +2600,15 @@ alphanum-sort@^1.0.0:
   resolved "https://registry.yarnpkg.com/alphanum-sort/-/alphanum-sort-1.0.2.tgz#97a1119649b211ad33691d9f9f486a8ec9fbe0a3"
   integrity sha1-l6ERlkmyEa0zaR2fn0hqjsn74KM=
 
+amazon-cognito-identity-js@^4.2.4:
+  version "4.2.4"
+  resolved "https://registry.yarnpkg.com/amazon-cognito-identity-js/-/amazon-cognito-identity-js-4.2.4.tgz#48ba35af825e55c1d00b92e5ca97ce8d4ecf76a0"
+  integrity sha512-kznU1XF6NFpdP62OTX/IMLD+b2RWL/ePcfv60uo8BdDylG+HW9BgzFALLOLHr8NYy6ouJyohJ8jmR30NcTKuog==
+  dependencies:
+    buffer "4.9.1"
+    crypto-js "^3.3.0"
+    js-cookie "^2.1.4"
+
 ansi-colors@^3.0.0:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-3.2.4.tgz#e3a3da4bfbae6c86a9c285625de124a234026fbf"
@@ -3457,6 +3498,15 @@ buffer-xor@^1.0.3:
   resolved "https://registry.yarnpkg.com/buffer-xor/-/buffer-xor-1.0.3.tgz#26e61ed1422fb70dd42e6e36729ed51d855fe8d9"
   integrity sha1-JuYe0UIvtw3ULm42cp7VHYVf6Nk=
 
+buffer@4.9.1:
+  version "4.9.1"
+  resolved "https://registry.yarnpkg.com/buffer/-/buffer-4.9.1.tgz#6d1bb601b07a4efced97094132093027c95bc298"
+  integrity sha1-bRu2AbB6TvztlwlBMgkwJ8lbwpg=
+  dependencies:
+    base64-js "^1.0.2"
+    ieee754 "^1.1.4"
+    isarray "^1.0.0"
+
 buffer@^4.3.0:
   version "4.9.2"
   resolved "https://registry.yarnpkg.com/buffer/-/buffer-4.9.2.tgz#230ead344002988644841ab0244af8c44bbe3ef8"
@@ -4175,6 +4225,11 @@ crypto-browserify@^3.11.0:
     public-encrypt "^4.0.0"
     randombytes "^2.0.0"
     randomfill "^1.0.3"
+
+crypto-js@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-3.3.0.tgz#846dd1cce2f68aacfa156c8578f926a609b7976b"
+  integrity sha512-DIT51nX0dCfKltpRiXV+/TVZq+Qq2NgF4644+K7Ttnla7zEzqc+kjJyiB96BHNyUTBxyjzRcZYpUdZa+QAqi6Q==
 
 css-animation@1.x, css-animation@^1.3.2, css-animation@^1.5.0:
   version "1.6.1"
@@ -7364,6 +7419,11 @@ jest@24.9.0:
   dependencies:
     import-local "^2.0.0"
     jest-cli "^24.9.0"
+
+js-cookie@^2.1.4:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/js-cookie/-/js-cookie-2.2.1.tgz#69e106dc5d5806894562902aa5baec3744e9b2b8"
+  integrity sha512-HvdH2LzI/EAZcUwA8+0nKNtWHqS+ZmijLA30RwZA0bo7ToCckjK5MkGhjED9KoRcXO6BaGI3I9UIzSA1FKFPOQ==
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"

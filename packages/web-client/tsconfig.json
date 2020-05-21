@@ -16,7 +16,8 @@
     "noEmit": true,
     "jsx": "react",
     "noImplicitAny": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "outDir": "./lib"
   },
   "include": ["src"]
 }

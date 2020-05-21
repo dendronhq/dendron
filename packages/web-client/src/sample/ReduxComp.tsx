@@ -5,6 +5,8 @@ import { connect } from "react-redux";
 import { sampleActions } from "../redux/reducers/sampleReducer";
 
 const mapStateToProps = (state: ReduxState) => ({
+  userState: state.userReducer,
+  loadingState: state.loadingReducer,
   value: state.sampleReducer.value,
 });
 
@@ -18,10 +20,14 @@ function ReduxComp(props: ReduxCompProps): ReactElement {
 
 export class ReduxPureComp extends React.PureComponent<ReduxCompProps> {
   render() {
+    const { loadingState } = this.props;
+    if (loadingState.FETCHING_INIT) {
+      return "Loading...";
+    }
     return <div> </div>;
   }
 }
 
-export const CReduxComp = connect(mapStateToProps, null, null, {
+export default connect(mapStateToProps, null, null, {
   forwardRef: true,
 })(ReduxComp);

@@ -1,15 +1,29 @@
+import { userActions, userReducer } from "../redux/reducers/userReducer";
+
+import { AppDispatch } from "../App";
 import { Auth } from "@aws-amplify/auth";
+import { Logger } from "@aws-amplify/core";
 import React from "react";
+import { Redirect } from "react-router-dom";
 import { ReduxState } from "../redux/reducers";
 import { connect } from "react-redux";
 import styled from "styled-components";
+
+const { setAuthState } = userActions;
+
+const logger = new Logger("Home");
 
 const mapStateToProps = (state: ReduxState) => ({
   value: state.sampleReducer.value,
   loadingState: state.loadingReducer,
   userState: state.userReducer,
 });
-type ReduxCompProps = ReturnType<typeof mapStateToProps>;
+
+type HomeOwnProps = {};
+
+type HomeProps = ReturnType<typeof mapStateToProps> & {
+  dispatch: AppDispatch;
+} & HomeOwnProps;
 
 const WindowStyle = styled.div`
   margin: auto;
@@ -23,16 +37,28 @@ const WindowStyle = styled.div`
 //   return null;
 // });
 
-export class Home extends React.PureComponent<ReduxCompProps> {
+export class Home extends React.PureComponent<HomeProps> {
+  constructor(props: HomeProps) {
+    super(props);
+    Auth.currentAuthenticatedUser().then(
+      (user) => {
+        logger.info({ user });
+        // optimization because all child components check for a user object
+        // fetch here first
+        this.props.dispatch(setAuthState({ authState: "signedIn" }));
+      },
+      (err) => {
+        logger.info({ status: "no user" });
+      }
+    );
+  }
+
   render() {
-    const { loadingState, userState } = this.props;
-    // if (loadingState.FETCHING_INIT) {
-    //   return "Loading...";
-    // }
+    const { userState } = this.props;
     if (userState.authState == "signedIn") {
-      return <div>Signed In</div>;
+      return <Redirect to="/test1" />;
     } else {
-      return <div>Landing Page</div>;
+      return <div>Redirect Landing</div>;
     }
   }
 }

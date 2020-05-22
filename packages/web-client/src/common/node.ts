@@ -76,8 +76,24 @@ export abstract class DNode implements IDNode {
     this.body = body;
   }
 
+  get path(): string {
+    if (this.title === "root") {
+      return "";
+    }
+    if (this.parent && this.parent.title !== "root") {
+      return [this.parent.path, this.title].join("/");
+    } else {
+      return this.title;
+    }
+  }
+
   get url(): string {
     return `/doc/${this.id}`;
+  }
+
+  addChild(node: IDNode) {
+    this.children.push(node);
+    node.parent = this;
   }
 
   renderBody(): string {
@@ -108,7 +124,7 @@ export class Note extends DNode {
   public schemaId: string;
 
   constructor(props: INoteProps) {
-    super(props);
+    super({ ...props, parent: null, children: [] });
     this.schemaId = props.schemaId || "-1";
   }
 }

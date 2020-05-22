@@ -19,7 +19,7 @@ export class NodePreview extends React.PureComponent<NodePreviewProps> {
         }}
         {...rest}
       >
-        <div>{node.title}</div>
+        <div>{node.path}</div>
       </NodeLink>
     );
   }

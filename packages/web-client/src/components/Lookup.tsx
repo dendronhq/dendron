@@ -18,7 +18,7 @@ import { nodeEffects } from "../redux/reducers/nodeReducer";
 import { sampleActions } from "../redux/reducers/sampleReducer";
 */
 
-const { fetchNode } = nodeEffects;
+const { fetchNode, fetchNodes } = nodeEffects;
 const logger = new Logger("Lookup");
 const mapStateToProps = (state: ReduxState) => ({
   nodeState: state.nodeReducer,
@@ -76,6 +76,9 @@ export class LookupComp extends React.PureComponent<
       reason,
     });
     const { history, dispatch } = this.props;
+    if (value === "") {
+      value = "root";
+    }
     const node = await dispatch(fetchNode(value));
     history.push(node.url);
   };
@@ -88,21 +91,12 @@ export class LookupComp extends React.PureComponent<
   };
 
   getSuggestions = async (value: string) => {
-    const inputValue = value.trim().toLowerCase();
-    const inputLength = inputValue.length;
-    const nodes = engine().nodes;
-    const suggestions = _.values(nodes);
-
-    return inputLength === 0
-      ? _.values(suggestions)
-      : suggestions.filter(
-          (sugg) =>
-            sugg.title.toLowerCase().slice(0, inputLength) === inputValue
-        );
+    const suggestions = await this.props.dispatch(fetchNodes(value));
+    return suggestions;
   };
 
   getSuggestionValue = (suggestion: LookupSuggestion) => {
-    return suggestion.title;
+    return suggestion.path;
   };
 
   onChange = (event: React.FormEvent<any>, { newValue, method }: any) => {

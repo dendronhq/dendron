@@ -124,6 +124,12 @@ type FetchNodeThunk = ThunkAction<
   null,
   Action<string>
 >;
+type FetchNodesThunk = ThunkAction<
+  Promise<IDNode[]>,
+  ReduxState,
+  null,
+  Action<string>
+>;
 
 type GetNodeThunk = ThunkAction<
   Promise<IDNode>,
@@ -140,6 +146,14 @@ const effects = {
     const resp = await engine.query(scope, query);
     // FIXME: verify
     return resp.item[0];
+  },
+  fetchNodes: (query: string): FetchNodesThunk => async () => {
+    //TODO
+    const scope = { username: "kevin" };
+    const engine = ProtoEngine.getEngine();
+    const resp = await engine.query(scope, query);
+    // FIXME: verify
+    return resp.item;
   },
   getNode: (id: string): GetNodeThunk => async () => {
     //TODO

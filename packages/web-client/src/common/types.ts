@@ -14,7 +14,9 @@ export interface IDNode {
   children: IDNode[];
   body?: string;
   url: string;
+  path: string;
 
+  addChild(node: IDNode): void;
   renderBody(): string;
   toDocument(): any;
 }
@@ -45,7 +47,8 @@ export interface DNodeRaw<T extends INoteData | SchemaData> {
 export type DNodeType = "note" | "schema";
 
 export type INote = IDNode & INoteData;
-export type INoteProps = DNodeProps & Partial<INoteData>;
+export type INoteProps = Omit<DNodeProps, "parent" | "children"> &
+  Partial<INoteData>;
 
 export type INoteData = {
   schemaId: string;

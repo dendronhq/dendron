@@ -39,8 +39,10 @@ function createFuse(initList: IDNode[], opts: FuseOptions) {
     distance: 100,
     maxPatternLength: 32,
     minMatchCharLength: 1,
-    keys: ["title"],
+    keys: ["title", "path"],
   };
+  // initList = _.map(initList, (n) => ({ ...n, treePath: n.path }));
+  // console.log({ initList, bond: true });
   const fuse = new Fuse(initList, options); // "list" is the item array
   return fuse;
 }
@@ -52,15 +54,21 @@ interface DEngineStore {
 class MockDataStore {
   public data: DNodeDict;
   constructor() {
-    const firstChildNote = new Note({
-      id: "fe4a234a-618d-4037-a70f-6892dadafac2",
-      title: "first child",
+    const secondChildNote = new Note({
+      id: "manifesto",
+      title: "manifesto",
       desc: "first child desc",
       type: "note",
       schemaId: "-1",
-      parent: null,
-      children: [],
-      body: "first child body",
+      body: "Dendron Manifesto",
+    });
+    const firstChildNote = new Note({
+      id: "dendron",
+      title: "dendron",
+      desc: "first child desc",
+      type: "note",
+      schemaId: "-1",
+      body: "Dendron Project",
     });
     const rootNote = new Note({
       id: "root",
@@ -68,14 +76,15 @@ class MockDataStore {
       desc: "root",
       type: "note",
       schemaId: "-1",
-      parent: null,
-      children: [firstChildNote],
       body: "The root node",
     });
+    rootNote.addChild(firstChildNote);
+    firstChildNote.addChild(secondChildNote);
 
     const initialNodes: DNodeDict = {
       [rootNote.id]: rootNote,
       [firstChildNote.id]: firstChildNote,
+      [secondChildNote.id]: secondChildNote,
     };
     this.data = initialNodes;
   }

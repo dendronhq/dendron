@@ -12,6 +12,7 @@ import { ReduxState } from "../redux/reducers";
 import _ from "lodash";
 import { connect } from "react-redux";
 import { engine } from "../proto/engine";
+import { loadingActions } from "../redux/reducers/loadingReducer";
 import { nodeEffects } from "../redux/reducers/nodeReducer";
 
 /*
@@ -19,6 +20,7 @@ import { sampleActions } from "../redux/reducers/sampleReducer";
 */
 
 const { fetchNode, fetchNodes } = nodeEffects;
+const { setLoadingState } = loadingActions;
 const logger = new Logger("Lookup");
 const mapStateToProps = (state: ReduxState) => ({
   nodeState: state.nodeReducer,
@@ -79,7 +81,13 @@ export class LookupComp extends React.PureComponent<
     if (value === "") {
       value = "root";
     }
+    this.props.dispatch(
+      setLoadingState({ key: "FETCHING_FULL_NODE", value: true })
+    );
     const node = await dispatch(fetchNode(value));
+    this.props.dispatch(
+      setLoadingState({ key: "FETCHING_FULL_NODE", value: false })
+    );
     history.push(node.url);
   };
 

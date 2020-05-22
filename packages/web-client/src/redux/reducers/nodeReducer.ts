@@ -1,10 +1,11 @@
+import { FetchNodeOpts, IDNode } from "../../common/types";
 // import { SchemaTree } from "../../common/node";
 import { ThunkAction, createSlice } from "@reduxjs/toolkit";
 
 import { Action } from "./types";
-import { IDNode } from "../../common/types";
 import { ProtoEngine } from "../../proto/engine";
 import { ReduxState } from ".";
+import _ from "lodash";
 
 // === BEGIN PROTO {
 const YAML_PROJECT_BASE = `
@@ -139,19 +140,26 @@ type GetNodeThunk = ThunkAction<
 >;
 
 const effects = {
+  /**
+   * Fetch full node
+   */
   fetchNode: (query: string): FetchNodeThunk => async () => {
     //TODO
     const scope = { username: "kevin" };
     const engine = ProtoEngine.getEngine();
-    const resp = await engine.query(scope, query);
+    const resp = await engine.query(scope, query, { fullNode: true });
     // FIXME: verify
     return resp.item[0];
   },
-  fetchNodes: (query: string): FetchNodesThunk => async () => {
+  fetchNodes: (
+    query: string,
+    opts?: FetchNodeOpts
+  ): FetchNodesThunk => async () => {
     //TODO
+    opts = _.defaults(opts || {}, { fullNode: false });
     const scope = { username: "kevin" };
     const engine = ProtoEngine.getEngine();
-    const resp = await engine.query(scope, query);
+    const resp = await engine.query(scope, query, opts);
     // FIXME: verify
     return resp.item;
   },
@@ -159,7 +167,7 @@ const effects = {
     //TODO
     const scope = { username: "kevin" };
     const engine = ProtoEngine.getEngine();
-    const resp = await engine.get(scope, id);
+    const resp = await engine.get(scope, id, { fullNode: true });
     // FIXME: verify
     return resp.item;
   },

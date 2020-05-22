@@ -93,12 +93,20 @@ export interface Scope {
   username: string;
 }
 
+export interface FetchNodeOpts {
+  fullNode?: boolean;
+}
+export interface DEngineStore {
+  fetchInitial: () => DNodeDict;
+  get: (scope: Scope, id: string) => Promise<NodeGetResp>;
+}
+
 export interface DEngine {
   /**
    * Get node based on id
    * get(id: ...)
    */
-  get: (scope: Scope, id: string) => Promise<NodeGetResp>;
+  get: (scope: Scope, id: string, opts?: FetchNodeOpts) => Promise<NodeGetResp>;
 
   getBatch: (scope: Scope, ids: string[]) => Promise<NodeGetBatchResp>;
 
@@ -109,7 +117,11 @@ export interface DEngine {
    * - [Node(id: ..., title: project, children: [])]
    *
    */
-  query: (scope: Scope, queryString: string) => Promise<NodeQueryResp>;
+  query: (
+    scope: Scope,
+    queryString: string,
+    opts?: FetchNodeOpts
+  ) => Promise<NodeQueryResp>;
 
   /**
    * Write node to db

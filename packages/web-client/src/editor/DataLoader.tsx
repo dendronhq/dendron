@@ -19,6 +19,7 @@ const logger = new Logger("DataLoader");
 
 const mapStateToProps = (_state: ReduxState) => ({
   nodeState: _state.nodeReducer,
+  loadState: _state.loadingReducer,
 });
 
 type StateProps = ReturnType<typeof mapStateToProps>;
@@ -36,16 +37,21 @@ class DataLoader extends React.PureComponent<DataLoaderProps> {
   loadNode = () => {
     const { props } = this;
     const nodeId = this.props.match.params.id;
+    props.dispatch(setLoadingState({ key: "FETCHING_FULL_NODE", value: true }));
     props.dispatch(getNode(nodeId)).then((node: IDNode) => {
       this.node = node;
-      props.dispatch(setActiveNodeId({ id: node.id }));
+      props.dispatch(
+        setLoadingState({ key: "FETCHING_FULL_NODE", value: false })
+      );
       props.dispatch(setLoadingState({ key: "FETCHING_INIT", value: false }));
+      props.dispatch(setActiveNodeId({ id: node.id }));
       logger.info({ ctx: "loadNode", status: "done", node });
     });
   };
 
   render() {
-    if (!this.node) {
+    const fetchNode = this.props.loadState.FETCHING_FULL_NODE;
+    if (fetchNode || !this.node) {
       return "DataLoader Loading";
     } else {
       return <Pane node={this.node} />;

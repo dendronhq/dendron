@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 export interface LoadingState {
   FETCHING_INIT: boolean;
+  FETCHING_FULL_NODE: boolean;
 }
 
 interface LoadingKeyValue {
@@ -26,6 +27,7 @@ export interface SetLoadingAction extends Action<LoadingKeyValue> {
 
 const initialState: LoadingState = {
   FETCHING_INIT: true,
+  FETCHING_FULL_NODE: true,
 };
 
 const loadingSlice = createSlice({

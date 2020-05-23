@@ -158,7 +158,10 @@ const effects = {
     //TODO
     const scope = { username: "kevin" };
     const engine = ProtoEngine.getEngine();
-    const resp = await engine.query(scope, query, { fullNode: true });
+    const resp = await engine.query(scope, query, {
+      fullNode: true,
+      queryOne: true,
+    });
     logger.debug({ ctx: "queryOne:exit", resp });
     // FIXME: verify
     return resp.data[0];

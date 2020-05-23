@@ -189,9 +189,7 @@ export class ProtoEngine implements DEngine {
     if (opts?.fullNode && !this.fullNodes.has(id)) {
       const fnResp = await this.store.get(_scope, id, {
         ...opts,
-        hints: {
-          webClient: true,
-        },
+        webClient: true,
       });
       logger.debug({ ctx: "get:store.get:post", id, opts, fnResp });
       this.refreshNodes([fnResp.data], opts);
@@ -219,7 +217,13 @@ export class ProtoEngine implements DEngine {
     // TODO: fetch remote
     const results = this.fuse.search(queryString);
     logger.debug({ ctx: "query:fuse.search:post", results, queryString });
-    const items = _.map(results, (resp) => resp.item);
+    let items: IDNode[];
+    if (opts.queryOne) {
+      items = [results[0].item];
+    } else {
+      items = _.map(results, (resp) => resp.item);
+    }
+
     if (opts.fullNode) {
       const fetchedFullNodes = await Promise.all(
         _.map<IDNode, Promise<IDNode | null>>(items, async (ent) => {

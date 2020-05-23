@@ -45,7 +45,7 @@ export class DropboxStorage implements DEngineStore {
     }
     console.log({ resp });
     let body: string = "Empty Doc";
-    if (opts?.hints?.webClient) {
+    if (opts?.webClient) {
       body = await resp.fileBlob.text();
     } else {
       body = binaryToUtf8(resp.fileBinary);

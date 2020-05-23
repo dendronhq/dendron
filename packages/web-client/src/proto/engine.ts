@@ -19,6 +19,42 @@ function makeResponse<T>(resp: T) {
   });
 }
 let PROTO_ENGINE: null | ProtoEngine = null;
+function createMockData() {
+  const secondChildNote = new Note({
+    id: "manifesto",
+    title: "manifesto",
+    desc: "first child desc",
+    type: "note",
+    schemaId: "-1",
+    // body: "Dendron Manifesto",
+  });
+  const firstChildNote = new Note({
+    id: "dendron",
+    title: "dendron",
+    desc: "first child desc",
+    type: "note",
+    schemaId: "-1",
+    // body: "Dendron Project",
+  });
+  const rootNote = new Note({
+    id: "root",
+    title: "root",
+    desc: "root",
+    type: "note",
+    schemaId: "-1",
+    // body: "The root node",
+  });
+  rootNote.addChild(firstChildNote);
+  firstChildNote.addChild(secondChildNote);
+
+  const initialNodes: DNodeDict = {
+    [rootNote.id]: rootNote,
+    [firstChildNote.id]: firstChildNote,
+    [secondChildNote.id]: secondChildNote,
+  };
+  return initialNodes;
+}
+const INITIAL_DATA = createMockData();
 
 export interface FuseOptions {
   exactMatch?: boolean;
@@ -53,39 +89,7 @@ function createFuse(initList: IDNode[], opts: FuseOptions) {
 class MockDataStore implements DEngineStore {
   public data: DNodeDict;
   constructor() {
-    const secondChildNote = new Note({
-      id: "manifesto",
-      title: "manifesto",
-      desc: "first child desc",
-      type: "note",
-      schemaId: "-1",
-      // body: "Dendron Manifesto",
-    });
-    const firstChildNote = new Note({
-      id: "dendron",
-      title: "dendron",
-      desc: "first child desc",
-      type: "note",
-      schemaId: "-1",
-      // body: "Dendron Project",
-    });
-    const rootNote = new Note({
-      id: "root",
-      title: "root",
-      desc: "root",
-      type: "note",
-      schemaId: "-1",
-      // body: "The root node",
-    });
-    rootNote.addChild(firstChildNote);
-    firstChildNote.addChild(secondChildNote);
-
-    const initialNodes: DNodeDict = {
-      [rootNote.id]: rootNote,
-      [firstChildNote.id]: firstChildNote,
-      [secondChildNote.id]: secondChildNote,
-    };
-    this.data = initialNodes;
+    this.data = INITIAL_DATA;
   }
 
   fetchInitial() {
@@ -96,14 +100,18 @@ class MockDataStore implements DEngineStore {
     // TODO
     return new Promise((resolve) => {
       setTimeout(() => {
-        const note = new Note({
+        const note = _.get(
+          INITIAL_DATA,
           id,
-          title: "sample",
-          desc: "sample",
-          type: "note",
-          schemaId: "-1",
-          body: `content for ${id}`,
-        });
+          new Note({
+            id,
+            title: "sample",
+            desc: "sample",
+            type: "note",
+            schemaId: "-1",
+          })
+        );
+        note.body = `content for ${id}`;
         resolve({ item: note });
       }, 1200);
     });

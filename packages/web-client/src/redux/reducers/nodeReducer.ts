@@ -161,7 +161,7 @@ const effects = {
     const resp = await engine.query(scope, query, { fullNode: true });
     logger.debug({ ctx: "queryOne:exit", resp });
     // FIXME: verify
-    return resp.item[0];
+    return resp.data[0];
   },
   query: (query: string, opts?: QueryOpts): FetchNodesThunk => async () => {
     //TODO
@@ -170,7 +170,7 @@ const effects = {
     const engine = ProtoEngine.getEngine();
     const resp = await engine.query(scope, query, opts);
     // FIXME: verify
-    return resp.item;
+    return resp.data;
   },
   getNode: (id: string): GetNodeThunk => async () => {
     //TODO
@@ -180,13 +180,13 @@ const effects = {
       fullNode: true,
     });
     // FIXME: verify
-    return resp.item;
+    return resp.data;
   },
   getAllStubs: (): GetAllStubsThunk => async () => {
     const scope = { username: "kevin" };
     const engine = ProtoEngine.getEngine();
     const resp = await engine.query(scope, "**/*", { fullNode: false });
-    return resp.item;
+    return resp.data;
   },
 };
 

@@ -72,23 +72,15 @@ export type SchemaYAMLEntryRaw = SchemaData & {
 };
 
 // === Engine Types
-
-export type NodeGetResp = {
-  item: IDNode;
-};
-
-export type NodeGetBatchResp = {
-  item: DNodeDict;
-};
-
-export type NodeGetRootResp = {
-  item: IDNode;
-};
-
-export interface NodeQueryResp {
-  item: IDNode[];
-  error: Error | null;
+export interface Resp<T> {
+  data: T;
+  error?: Error | null;
 }
+
+export type NodeGetResp = Resp<IDNode>;
+
+export type NodeQueryResp = Resp<IDNode[]>;
+
 export interface Scope {
   username: string;
 }

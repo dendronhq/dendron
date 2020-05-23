@@ -80,12 +80,13 @@ function createFuse(initList: IDNode[], opts: FuseOptions) {
   };
   // initList = _.map(initList, (n) => ({ ...n, treePath: n.path }));
   // console.log({ initList, bond: true });
-  const fuse = new Fuse(initList, options); // "list" is the item array
+  const fuse = new Fuse(initList, options);
   return fuse;
 }
 
-// @ts-ignore - used for testing
-class MockDataStore implements DEngineStore {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// @ts-ignore
+export class MockDataStore implements DEngineStore {
   public data: DNodeDict;
   constructor() {
     this.data = INITIAL_DATA;
@@ -95,7 +96,7 @@ class MockDataStore implements DEngineStore {
     return this.data;
   }
 
-  async get(scope: Scope, id: string): Promise<NodeGetResp> {
+  async get(_scope: Scope, id: string): Promise<NodeGetResp> {
     // TODO
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -111,7 +112,7 @@ class MockDataStore implements DEngineStore {
           })
         );
         note.body = `content for ${id}`;
-        resolve({ item: note });
+        resolve({ data: note });
       }, 1200);
     });
   }
@@ -193,19 +194,11 @@ export class ProtoEngine implements DEngine {
         },
       });
       logger.debug({ ctx: "get:store.get:post", id, opts, fnResp });
-      this.refreshNodes([fnResp.item], opts);
+      this.refreshNodes([fnResp.data], opts);
       return fnResp;
     } else {
-      return { item: node };
+      return { data: node };
     }
-  }
-
-  // TODO
-  async getByUrl(_url: string) {
-    // TODO: do more then id
-    const id = "";
-    const node = this.nodes[id];
-    return { item: node };
   }
 
   async query(scope: Scope, queryString: string, opts?: QueryOpts) {
@@ -216,7 +209,7 @@ export class ProtoEngine implements DEngine {
     // TODO: hack
     if (queryString === "**/*") {
       const data = await this.store.query(scope, "**/*", opts);
-      this.refreshNodes(data.item);
+      this.refreshNodes(data.data);
       return data;
     }
     // FIXME: assuem we have everything
@@ -237,7 +230,7 @@ export class ProtoEngine implements DEngine {
             });
             // FIXME: ratelimit
             const fn = await this.get(scope, ent.id);
-            return fn.item;
+            return fn.data;
           } else {
             logger.debug({
               ctx: "query:fuse.search:post",
@@ -255,7 +248,7 @@ export class ProtoEngine implements DEngine {
     }
     logger.debug({ ctx: "query:exit", items });
     return makeResponse<NodeQueryResp>({
-      item: _.map(items, (item) => this.nodes[item.id]),
+      data: _.map(items, (item) => this.nodes[item.id]),
       error: null,
     });
   }

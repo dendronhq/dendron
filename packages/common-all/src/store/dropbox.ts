@@ -87,9 +87,9 @@ export class DropboxStorage implements DEngineStore {
     } else {
       body = binaryToUtf8(resp.fileBinary);
     }
-    const item = this._fileToNote(resp, body);
+    const data = this._fileToNote(resp, body);
     return {
-      item
+      data
     };
   }
 
@@ -103,7 +103,7 @@ export class DropboxStorage implements DEngineStore {
         path: ""
       })) as ListFolderResultSimple;
       const data = resp.entries.map(ent => this._fileToNote(ent));
-      return makeResponse<NodeQueryResp>({ item: data, error: null });
+      return makeResponse<NodeQueryResp>({ data: data, error: null });
     } else {
       throw `unsupported ${queryString}`;
     }

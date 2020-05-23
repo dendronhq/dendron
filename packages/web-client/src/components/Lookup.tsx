@@ -19,7 +19,7 @@ import { nodeEffects } from "../redux/reducers/nodeReducer";
 import { sampleActions } from "../redux/reducers/sampleReducer";
 */
 
-const { fetchNode, fetchNodes } = nodeEffects;
+const { queryOne, query } = nodeEffects;
 const { setLoadingState } = loadingActions;
 const logger = new Logger("Lookup");
 const mapStateToProps = (state: ReduxState) => ({
@@ -61,6 +61,7 @@ export class LookupComp extends React.PureComponent<
   };
   // --- LifeCycle
   componentDidMount() {
+    logger.info({ ctx: "componentDidMount" });
     this.focus();
   }
 
@@ -84,10 +85,14 @@ export class LookupComp extends React.PureComponent<
     this.props.dispatch(
       setLoadingState({ key: "FETCHING_FULL_NODE", value: true })
     );
-    const node = await dispatch(fetchNode(value));
+    const node = await dispatch(queryOne(value));
     this.props.dispatch(
       setLoadingState({ key: "FETCHING_FULL_NODE", value: false })
     );
+    logger.info({
+      ctx: "fetchResult:exit",
+      node,
+    });
     history.push(node.url);
   };
 
@@ -99,7 +104,7 @@ export class LookupComp extends React.PureComponent<
   };
 
   getSuggestions = async (value: string) => {
-    const suggestions = await this.props.dispatch(fetchNodes(value));
+    const suggestions = await this.props.dispatch(query(value));
     return suggestions;
   };
 

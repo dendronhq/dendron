@@ -5,6 +5,7 @@
   "dependencies": {
     "@aws-amplify/auth": "^3.2.7",
     "@aws-amplify/ui-react": "^0.2.6",
+    "@dendron/common-all": "^0.0.0",
     "antd": "^4.1.2",
     "babel-eslint": "10.1.0",
     "babel-jest": "^24.9.0",

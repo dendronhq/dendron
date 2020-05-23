@@ -3,8 +3,11 @@ import { DIVIDER_COLOR, dims } from "../config";
 import React, { PureComponent } from "react";
 
 import { Link } from "react-router-dom";
+import { Logger } from "@aws-amplify/core";
 import logo from "./../logo.svg";
 import styled from "styled-components";
+
+const logger = new Logger("TopBar");
 
 const { Header } = Layout;
 
@@ -32,6 +35,7 @@ export class TopBarComponent extends PureComponent {
     super(props);
   }
   render() {
+    logger.debug({ ctx: "render" });
     return (
       <SHeader theme="light">
         <Row>

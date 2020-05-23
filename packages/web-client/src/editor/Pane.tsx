@@ -1,5 +1,5 @@
 import { AppDispatch } from "../App";
-import { DNode } from "../common/node";
+import { DNode } from "@dendron/common-all";
 import { Logger } from "@aws-amplify/core";
 import OutlineEditor from "rich-markdown-editor";
 import React from "react";
@@ -16,7 +16,6 @@ const mapStateToProps = (state: ReduxState) => ({
 
 // const { setActiveNodeId } = nodeActions;
 // const { setLoadingState } = loadingActions;
-// const { fetchNode, getNode } = nodeEffects;
 // const exampleText = `
 // # Welcome
 

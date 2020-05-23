@@ -1,14 +1,17 @@
-import { FetchNodeOpts, IDNode } from "../../common/types";
-// import { SchemaTree } from "../../common/node";
+import { IDNode, QueryOpts } from "../../common/types";
 import { ThunkAction, createSlice } from "@reduxjs/toolkit";
 
 import { Action } from "./types";
+import { Logger } from "@aws-amplify/core";
 import { ProtoEngine } from "../../proto/engine";
 import { ReduxState } from ".";
 import _ from "lodash";
 
+const logger = new Logger("nodeReducer");
+
 // === BEGIN PROTO {
-const YAML_PROJECT_BASE = `
+// @ts-ignore - TODO
+export const YAML_PROJECT_BASE = `
   name: project
   schema:
       root:
@@ -43,7 +46,8 @@ const YAML_PROJECT_BASE = `
       version-major:
         desc: the major version
 `;
-const YAML_PROJECT_DEV = `
+// @ts-ignore TODO
+export const YAML_PROJECT_DEV = `
   name: dev project
   schema: 
     root:
@@ -139,22 +143,27 @@ type GetNodeThunk = ThunkAction<
   Action<string>
 >;
 
+type GetAllStubsThunk = ThunkAction<
+  Promise<IDNode[]>,
+  ReduxState,
+  null,
+  Action<string>
+>;
+
 const effects = {
   /**
    * Fetch full node
    */
-  fetchNode: (query: string): FetchNodeThunk => async () => {
+  queryOne: (query: string): FetchNodeThunk => async () => {
     //TODO
     const scope = { username: "kevin" };
     const engine = ProtoEngine.getEngine();
     const resp = await engine.query(scope, query, { fullNode: true });
+    logger.debug({ ctx: "queryOne:exit", resp });
     // FIXME: verify
     return resp.item[0];
   },
-  fetchNodes: (
-    query: string,
-    opts?: FetchNodeOpts
-  ): FetchNodesThunk => async () => {
+  query: (query: string, opts?: QueryOpts): FetchNodesThunk => async () => {
     //TODO
     opts = _.defaults(opts || {}, { fullNode: false });
     const scope = { username: "kevin" };
@@ -167,8 +176,16 @@ const effects = {
     //TODO
     const scope = { username: "kevin" };
     const engine = ProtoEngine.getEngine();
-    const resp = await engine.get(scope, id, { fullNode: true });
+    const resp = await engine.get(scope, id, {
+      fullNode: true,
+    });
     // FIXME: verify
+    return resp.item;
+  },
+  getAllStubs: (): GetAllStubsThunk => async () => {
+    const scope = { username: "kevin" };
+    const engine = ProtoEngine.getEngine();
+    const resp = await engine.query(scope, "**/*", { fullNode: false });
     return resp.item;
   },
 };

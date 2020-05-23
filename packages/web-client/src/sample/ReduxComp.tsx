@@ -3,12 +3,13 @@ import React, { ReactElement } from "react";
 import { AppDispatch } from "../App";
 import { ReduxState } from "../redux/reducers";
 import { connect } from "react-redux";
+import { loadingActions } from "../redux/reducers/loadingReducer";
 import { sampleActions } from "../redux/reducers/sampleReducer";
 
 // const { setActiveNodeId } = nodeActions;
 // const { } = userActions;
-// const { setLoadingState } = loadingActions;
-// const { fetchNode, getNode } = nodeEffects;
+const { setLoadingState } = loadingActions;
+// const { queryOne, getNode } = nodeEffects;
 
 const mapStateToProps = (state: ReduxState) => ({
   userState: state.userReducer,
@@ -29,6 +30,13 @@ function ReduxComp(props: ReduxCompProps): ReactElement {
 }
 
 export class ReduxPureComp extends React.PureComponent<ReduxCompProps> {
+  loadingExample() {
+    const { dispatch } = this.props;
+
+    dispatch(setLoadingState({ key: "FETCHING_INIT", value: true }));
+    // do action
+    dispatch(setLoadingState({ key: "FETCHING_INIT", value: false }));
+  }
   render() {
     const { loadingState } = this.props;
     if (loadingState.FETCHING_INIT) {

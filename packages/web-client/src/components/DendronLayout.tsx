@@ -3,10 +3,13 @@ import Lookup, { ILookup } from "./Lookup";
 import { CSider } from "../nav/Sider";
 import { DIVIDER_COLOR } from "../config";
 import { Layout } from "antd";
+import { Logger } from "@aws-amplify/core";
 import React from "react";
 import { TopBarComponent } from "../nav/TopBar";
 import keydown from "react-keydown";
 import styled from "styled-components";
+
+const logger = new Logger("DendronLayout");
 
 const { Content, Sider, Footer } = Layout;
 
@@ -41,6 +44,7 @@ export default class DendronLayout extends React.PureComponent {
   }
 
   render() {
+    logger.debug({ ctx: "render" });
     // needed because withRouter types is a cluster
     const TLookup: any = Lookup;
     return (

@@ -2,23 +2,21 @@ import {
   DEngine,
   DEngineStore,
   DNodeDict,
-  FetchNodeOpts,
   IDNode,
   NodeGetResp,
   NodeQueryResp,
+  QueryOpts,
   Scope,
 } from "../common/types";
+import { DropboxStorage, Note, makeResponse } from "@dendron/common-all";
 
 import Fuse from "fuse.js";
-import { Note } from "../common/node";
+import { Logger } from "@aws-amplify/core";
 import _ from "lodash";
 
-function makeResponse<T>(resp: T) {
-  return Promise.resolve({
-    ...resp,
-  });
-}
-let PROTO_ENGINE: null | ProtoEngine = null;
+const logger = new Logger("DEngine");
+
+let PROTO_ENGINE: ProtoEngine;
 function createMockData() {
   const secondChildNote = new Note({
     id: "manifesto",
@@ -86,6 +84,7 @@ function createFuse(initList: IDNode[], opts: FuseOptions) {
   return fuse;
 }
 
+// @ts-ignore - used for testing
 class MockDataStore implements DEngineStore {
   public data: DNodeDict;
   constructor() {
@@ -118,6 +117,7 @@ class MockDataStore implements DEngineStore {
   }
 }
 
+// @ts-ignore - TODO: implement interface
 export class ProtoEngine implements DEngine {
   public fuse: Fuse<IDNode, any>;
   public nodes: DNodeDict;
@@ -125,15 +125,18 @@ export class ProtoEngine implements DEngine {
   public queries: Set<string>;
   public store: DEngineStore;
 
-  static getEngine() {
+  static getEngine(): DEngine {
     if (!PROTO_ENGINE) {
-      PROTO_ENGINE = new ProtoEngine(new MockDataStore());
+      // PROTO_ENGINE = new ProtoEngine(new MockDataStore());
+      PROTO_ENGINE = new ProtoEngine(new DropboxStorage());
+      return PROTO_ENGINE;
     }
     return PROTO_ENGINE;
   }
 
   constructor(store: DEngineStore) {
-    this.nodes = store.fetchInitial();
+    //this.nodes = store.fetchInitial();
+    this.nodes = {};
     this.store = store;
     const fuseList = _.values(this.nodes);
     this.fuse = createFuse(fuseList, { exactMatch: false });
@@ -141,7 +144,7 @@ export class ProtoEngine implements DEngine {
     this.queries = new Set();
   }
 
-  _nodeInCache(node: IDNode, opts?: FetchNodeOpts) {
+  _nodeInCache(node: IDNode, opts?: QueryOpts) {
     const hasStub = _.has(this.nodes, node.id);
     const fufillsFull = opts?.fullNode ? true : this.fullNodes.has(node.id);
     return hasStub && fufillsFull;
@@ -158,7 +161,7 @@ export class ProtoEngine implements DEngine {
    * @param nodes
    * @param opts
    */
-  refreshNodes(nodes: IDNode[], opts?: FetchNodeOpts) {
+  refreshNodes(nodes: IDNode[], opts?: QueryOpts) {
     nodes.forEach((node: IDNode) => {
       const { id } = node;
       // add if not exist
@@ -171,17 +174,26 @@ export class ProtoEngine implements DEngine {
         }
       }
     });
+    this.updateLocalCollection(_.values(this.nodes));
   }
 
   updateLocalCollection(collection: IDNode[]) {
     this.fuse.setCollection(collection);
   }
 
-  async get(_scope: Scope, id: string, opts?: FetchNodeOpts) {
+  async get(_scope: Scope, id: string, opts?: QueryOpts) {
     //FIXME: check if exist
     const node = this.nodes[id];
+    opts = _.defaults(opts || {}, { fullNode: true });
     if (opts?.fullNode && !this.fullNodes.has(id)) {
-      const fnResp = await this.store.get(_scope, id);
+      const fnResp = await this.store.get(_scope, id, {
+        ...opts,
+        hints: {
+          webClient: true,
+        },
+      });
+      logger.debug({ ctx: "get:store.get:post", id, opts, fnResp });
+      this.refreshNodes([fnResp.item], opts);
       return fnResp;
     } else {
       return { item: node };
@@ -196,26 +208,41 @@ export class ProtoEngine implements DEngine {
     return { item: node };
   }
 
-  async query(scope: Scope, queryString: string, opts?: FetchNodeOpts) {
-    console.log({ scope, queryString });
+  async query(scope: Scope, queryString: string, opts?: QueryOpts) {
+    console.log({ scope, queryString, opts });
     opts = _.defaults(opts || {}, {
       fullNode: false,
     });
+    // TODO: hack
+    if (queryString === "**/*") {
+      const data = await this.store.query(scope, "**/*", opts);
+      this.refreshNodes(data.item);
+      return data;
+    }
     // FIXME: assuem we have everything
     // if (!this._queryInCache(queryString)) {
     //   await this.store.query(scope, queryString, opts);
     // }
     // TODO: fetch remote
     const results = this.fuse.search(queryString);
+    logger.debug({ ctx: "query:fuse.search:post", results, queryString });
     const items = _.map(results, (resp) => resp.item);
     if (opts.fullNode) {
       const fetchedFullNodes = await Promise.all(
         _.map<IDNode, Promise<IDNode | null>>(items, async (ent) => {
           if (!this.fullNodes.has(ent.id)) {
+            logger.debug({
+              ctx: "query:fuse.search:post",
+              status: "fetch full node from store",
+            });
             // FIXME: ratelimit
-            const fn = await this.store.get(scope, ent.id);
+            const fn = await this.get(scope, ent.id);
             return fn.item;
           } else {
+            logger.debug({
+              ctx: "query:fuse.search:post",
+              status: "fetch full node from cache",
+            });
             return null;
           }
         })
@@ -224,7 +251,9 @@ export class ProtoEngine implements DEngine {
         _.filter(fetchedFullNodes, (ent) => !_.isNull(ent)) as IDNode[],
         { fullNode: true }
       );
+      logger.debug({ ctx: "query:fetchedFullNodes:exit", fetchedFullNodes });
     }
+    logger.debug({ ctx: "query:exit", items });
     return makeResponse<NodeQueryResp>({
       item: _.map(items, (item) => this.nodes[item.id]),
       error: null,

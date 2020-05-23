@@ -1,13 +1,13 @@
 {
-  "name": "common-all",
+  "name": "@dendron/common-all",
   "version": "0.0.0",
   "description": "common-all",
   "license": "MIT",
   "repository": "",
   "author": {
     "name": "",
-    "email": "",
-    "url": ""
+    "email": "kevin@thence.io",
+    "url": "https://kevinslin.com"
   },
   "keywords": [
     ""
@@ -30,8 +30,10 @@
     "watch:test": "jest --watch"
   },
   "dependencies": {
+    "@types/lodash": "^4.14.152",
     "dropbox": "^4.0.30",
-    "isomorphic-fetch": "^2.2.1"
+    "isomorphic-fetch": "^2.2.1",
+    "lodash": "^4.17.15"
   },
   "devDependencies": {
     "@types/jest": "^23.3.3",

@@ -1,41 +1,28 @@
 import { DNodeProps, DNodeType, IDNode, INoteProps } from "./types";
-import { NodeSvgShape, ReactD3TreeItem } from "react-d3-tree";
 
-import { IconType } from "antd/lib/notification";
+// import { IconType } from "antd/lib/notification";
 import _ from "lodash";
 
-export interface DataNode {
-  checkable?: boolean;
-  children?: DataNode[];
-  disabled?: boolean;
-  disableCheckbox?: boolean;
-  icon?: IconType;
-  isLeaf?: boolean;
-  key: string | number;
-  title?: React.ReactNode;
-  selectable?: boolean;
-  switcherIcon?: IconType;
-  /** Set style of TreeNode. This is not recommend if you don't have any force requirement */
-  className?: string;
-  style?: React.CSSProperties;
-}
+// export interface DataNode {
+//   checkable?: boolean;
+//   children?: DataNode[];
+//   disabled?: boolean;
+//   disableCheckbox?: boolean;
+//   icon?: IconType;
+//   isLeaf?: boolean;
+//   key: string | number;
+//   title?: React.ReactNode;
+//   selectable?: boolean;
+//   switcherIcon?: IconType;
+//   /** Set style of TreeNode. This is not recommend if you don't have any force requirement */
+//   className?: string;
+//   style?: React.CSSProperties;
+// }
 
 // @ts-ignore
 interface YAMLEntryOpts {
   id: string;
 }
-
-// @ts-ignore
-type ReactD3TreeItemV2<T> = {
-  id: string;
-  name: string;
-  attributes: {
-    [key in keyof T]: string;
-  };
-  children?: ReactD3TreeItem[];
-  _collapsed?: boolean;
-  nodeSvgShape?: NodeSvgShape;
-};
 
 export abstract class DNode implements IDNode {
   public id: string;
@@ -58,12 +45,12 @@ export abstract class DNode implements IDNode {
       created,
       parent,
       children,
-      body,
+      body
     } = _.defaults(props, {
       updated: "TODO",
       created: "TODO",
       id: "TODO",
-      schemaId: -1,
+      schemaId: -1
     });
     this.id = id;
     this.title = title;
@@ -110,12 +97,12 @@ export abstract class DNode implements IDNode {
             nodes: [
               {
                 object: "text",
-                text: this.renderBody(),
-              },
-            ],
-          },
-        ],
-      },
+                text: this.renderBody()
+              }
+            ]
+          }
+        ]
+      }
     };
   }
 }

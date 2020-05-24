@@ -1,0 +1,624 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SchemaTree yamlSchema basic: yamlSchema-snap 1`] = `
+SchemaTree {
+  "name": "root",
+  "nodes": Object {
+    "architecture": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "architecture",
+        "type": "schema",
+      },
+      "id": "architecture",
+      "parent": null,
+    },
+    "config": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "config",
+        "type": "schema",
+      },
+      "id": "config",
+      "parent": null,
+    },
+    "dev": Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "dev-layout",
+            "type": "schema",
+          },
+          "id": "dev-layout",
+        },
+        Object {
+          "data": Object {
+            "alias": "arch",
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "architecture",
+            "type": "schema",
+          },
+          "id": "architecture",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "qa",
+            "type": "schema",
+          },
+          "id": "qa",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "ops",
+            "type": "schema",
+          },
+          "id": "ops",
+        },
+      ],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "dev",
+        "type": "schema",
+      },
+      "id": "dev",
+      "parent": null,
+    },
+    "dev project": Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "upgrade",
+            "type": "schema",
+          },
+          "id": "upgrade",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "dev",
+            "type": "schema",
+          },
+          "id": "dev",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "ref",
+            "type": "schema",
+          },
+          "id": "ref",
+        },
+      ],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "dev project",
+        "type": "schema",
+      },
+      "id": "dev project",
+      "parent": null,
+    },
+    "dev-layout": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "dev-layout",
+        "type": "schema",
+      },
+      "id": "dev-layout",
+      "parent": null,
+    },
+    "features": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "what does it do",
+        "kind": undefined,
+        "title": "features",
+        "type": "schema",
+      },
+      "id": "features",
+      "parent": null,
+    },
+    "lifecycle": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "lifecycle",
+        "type": "schema",
+      },
+      "id": "lifecycle",
+      "parent": null,
+    },
+    "ops": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "ops",
+        "type": "schema",
+      },
+      "id": "ops",
+      "parent": null,
+    },
+    "project": Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "quickstart",
+            "type": "schema",
+          },
+          "id": "quickstart",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "topic",
+            "type": "schema",
+          },
+          "id": "topic",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "version",
+            "type": "schema",
+          },
+          "id": "version",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "features",
+            "type": "schema",
+          },
+          "id": "features",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "rel",
+            "type": "schema",
+          },
+          "id": "rel",
+        },
+      ],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "project",
+        "type": "schema",
+      },
+      "id": "project",
+      "parent": null,
+    },
+    "qa": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "qa",
+        "type": "schema",
+      },
+      "id": "qa",
+      "parent": null,
+    },
+    "quickstart": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "get started with project",
+        "kind": undefined,
+        "title": "quickstart",
+        "type": "schema",
+      },
+      "id": "quickstart",
+      "parent": null,
+    },
+    "ref": Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "config",
+            "type": "schema",
+          },
+          "id": "config",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "lifecycle",
+            "type": "schema",
+          },
+          "id": "lifecycle",
+        },
+      ],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "ref",
+        "type": "schema",
+      },
+      "id": "ref",
+      "parent": null,
+    },
+    "rel": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "relative",
+        "kind": undefined,
+        "title": "rel",
+        "type": "schema",
+      },
+      "id": "rel",
+      "parent": null,
+    },
+    "root": Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "project",
+            "type": "schema",
+          },
+          "id": "project",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "dev project",
+            "type": "schema",
+          },
+          "id": "dev project",
+        },
+      ],
+      "data": Object {
+        "desc": "root",
+        "title": "root",
+        "type": "schema",
+      },
+      "id": "root",
+      "parent": null,
+    },
+    "topic": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "topic",
+        "type": "schema",
+      },
+      "id": "topic",
+      "parent": null,
+    },
+    "upgrade": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "upgrade",
+        "type": "schema",
+      },
+      "id": "upgrade",
+      "parent": null,
+    },
+    "version": Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "version-major",
+            "type": "schema",
+          },
+          "id": "version-major",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "version-minor",
+            "type": "schema",
+          },
+          "id": "version-minor",
+        },
+        Object {
+          "data": Object {
+            "aliases": Array [],
+            "choices": Array [],
+            "desc": "",
+            "kind": undefined,
+            "title": "version-breaking",
+            "type": "schema",
+          },
+          "id": "version-breaking",
+        },
+      ],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "version",
+        "type": "schema",
+      },
+      "id": "version",
+      "parent": null,
+    },
+    "version-breaking": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "version-breaking",
+        "type": "schema",
+      },
+      "id": "version-breaking",
+      "parent": null,
+    },
+    "version-major": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "the major version",
+        "kind": undefined,
+        "title": "version-major",
+        "type": "schema",
+      },
+      "id": "version-major",
+      "parent": null,
+    },
+    "version-minor": Object {
+      "children": Array [],
+      "data": Object {
+        "aliases": Array [],
+        "choices": Array [],
+        "desc": "",
+        "kind": undefined,
+        "title": "version-minor",
+        "type": "schema",
+      },
+      "id": "version-minor",
+      "parent": null,
+    },
+  },
+  "root": Object {
+    "children": Array [
+      Object {
+        "data": Object {
+          "aliases": Array [],
+          "choices": Array [],
+          "desc": "",
+          "kind": undefined,
+          "title": "project",
+          "type": "schema",
+        },
+        "id": "project",
+      },
+      Object {
+        "data": Object {
+          "aliases": Array [],
+          "choices": Array [],
+          "desc": "",
+          "kind": undefined,
+          "title": "dev project",
+          "type": "schema",
+        },
+        "id": "dev project",
+      },
+    ],
+    "data": Object {
+      "desc": "root",
+      "title": "root",
+      "type": "schema",
+    },
+    "id": "root",
+    "parent": null,
+  },
+}
+`;
+
+exports[`SchemaTree yamlSchema toAntDTree: yamlSchema-antdTree 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "children": Array [],
+          "key": "quickstart",
+          "title": "quickstart",
+        },
+        Object {
+          "children": Array [],
+          "key": "topic",
+          "title": "topic",
+        },
+        Object {
+          "children": Array [
+            Object {
+              "children": Array [],
+              "key": "version-major",
+              "title": "version-major",
+            },
+            Object {
+              "children": Array [],
+              "key": "version-minor",
+              "title": "version-minor",
+            },
+            Object {
+              "children": Array [],
+              "key": "version-breaking",
+              "title": "version-breaking",
+            },
+          ],
+          "key": "version",
+          "title": "version",
+        },
+        Object {
+          "children": Array [],
+          "key": "features",
+          "title": "features",
+        },
+        Object {
+          "children": Array [],
+          "key": "rel",
+          "title": "rel",
+        },
+      ],
+      "key": "project",
+      "title": "project",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "children": Array [],
+          "key": "upgrade",
+          "title": "upgrade",
+        },
+        Object {
+          "children": Array [
+            Object {
+              "children": Array [],
+              "key": "dev-layout",
+              "title": "dev-layout",
+            },
+            Object {
+              "children": Array [],
+              "key": "architecture",
+              "title": "architecture",
+            },
+            Object {
+              "children": Array [],
+              "key": "qa",
+              "title": "qa",
+            },
+            Object {
+              "children": Array [],
+              "key": "ops",
+              "title": "ops",
+            },
+          ],
+          "key": "dev",
+          "title": "dev",
+        },
+        Object {
+          "children": Array [
+            Object {
+              "children": Array [],
+              "key": "config",
+              "title": "config",
+            },
+            Object {
+              "children": Array [],
+              "key": "lifecycle",
+              "title": "lifecycle",
+            },
+          ],
+          "key": "ref",
+          "title": "ref",
+        },
+      ],
+      "key": "dev project",
+      "title": "dev project",
+    },
+  ],
+  "key": "root",
+  "title": "root",
+}
+`;

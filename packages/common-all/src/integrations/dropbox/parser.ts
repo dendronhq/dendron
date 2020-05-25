@@ -1,19 +1,19 @@
-import { ListFolderResultSimple, MetadataReference } from "./types";
-import { dxId2DendronId, fileNameToTreePath } from "./utils";
+import { ListFolderResultSimple, MetadataReference } from './types';
+import { dxId2DendronId, fileNameToTreePath } from './utils';
 
-import { IDNode } from "../../types";
-import { Note } from "../../node";
-import _ from "lodash";
+import { IDNode } from '../../types';
+import { Note } from '../../node';
+import _ from 'lodash';
 
 interface PathEnt<T> {
   path: string[];
   data: T;
-  size: number
+  size: number;
 }
 
 type PathDict<T> = { [key: string]: PathEnt<T> };
 
-class DropboxTreeParser {
+export class DropboxTreeParser {
   public seed: ListFolderResultSimple;
   public pathDict: PathDict<MetadataReference>;
 
@@ -27,21 +27,20 @@ class DropboxTreeParser {
     this.seed.entries.forEach(ent => {
       const { name } = ent;
       const treePath = fileNameToTreePath(name);
-      const size = treePath.length
-      this.pathDict[treePath.join(".")] = { path: treePath, data: ent, size };
+      const size = treePath.length;
+      this.pathDict[treePath.join('.')] = { path: treePath, data: ent, size };
     });
   }
 
   execute(): Note[] {
-    const currentLvl = _.pickBy(this.pathDict, {size: 1})
-
-    prefixes where {size: 1}
-    
-    const nodes = this.getTopLevelNodes();
-    nodes.forEach(n => {
-      this.parse(n);
-    });
-    return nodes;
+    // const currentLvl = _.pickBy(this.pathDict, {size: 1})
+    // prefixes where {size: 1}
+    // const nodes = this.getTopLevelNodes();
+    // nodes.forEach(n => {
+    //   this.parse(n);
+    // });
+    // return nodes;
+    return [];
   }
 
   parse(node: Note) {}

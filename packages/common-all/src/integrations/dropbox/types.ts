@@ -1,4 +1,4 @@
-import { files } from "dropbox";
+import { files } from 'dropbox';
 
 export type MetadataReference =
   | files.FileMetadataReference

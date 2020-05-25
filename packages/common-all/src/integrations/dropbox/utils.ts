@@ -1,6 +1,6 @@
-import { Note } from "../../node";
-import { files } from "dropbox";
-import path from "path";
+import { Note } from '../../node';
+import { files } from 'dropbox';
+import path from 'path';
 
 export function denddronId2DxId(did: string): string {
   return `id:${did}`;
@@ -16,7 +16,7 @@ export function fileNameToTitle(name: string): string {
 
 export function fileNameToTreePath(name: string): string[] {
   const title = fileNameToTitle(name);
-  return title.split(".");
+  return title.split('.');
 }
 
 export function fileToNote(
@@ -31,10 +31,10 @@ export function fileToNote(
   const note = new Note({
     id,
     title,
-    desc: "TODO",
-    type: "note",
-    schemaId: "-1",
-    body
+    desc: 'TODO',
+    type: 'note',
+    schemaId: '-1',
+    body,
   });
   return note;
 }

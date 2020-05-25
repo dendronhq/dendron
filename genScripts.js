@@ -13,6 +13,15 @@ const electronClientDeps = [
   DEPENDENCIES.CLIENT_ELECTRON,
   DEPENDENCIES.COMMON_CLIENT,
 ];
+const webClientDeps = [
+  DEPENDENCIES.CLIENT_WEB,
+  DEPENDENCIES.COMMON_ALL,
+  DEPENDENCIES.COMMON_CLIENT,
+];
+const packages = {
+  "electron-client": electronClientDeps,
+  "web-client": webClientDeps,
+};
 
 function generateFrontCommonScripts() {
   let scope = frontCommonDeps.join(" --scope ");
@@ -22,10 +31,12 @@ function generateFrontCommonScripts() {
 }
 
 function generateClientScripts() {
-  let scope = electronClientDeps.join(" --scope ");
-  const group = "electron-client";
-  generateBootstrapScript({ scope, group });
-  generateBuildScript({ scope, group });
+  _.each(packages, (deps, pkg) => {
+    let scope = deps.join(" --scope ");
+    const group = pkg;
+    generateBootstrapScript({ scope, group });
+    generateBuildScript({ scope, group });
+  });
 }
 
 // --- Lib

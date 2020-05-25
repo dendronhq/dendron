@@ -1,1 +1,1 @@
-export { DropboxStorage } from "./store";
+export { DropboxStorage } from './store';

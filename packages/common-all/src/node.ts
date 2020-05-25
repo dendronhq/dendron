@@ -1,7 +1,7 @@
-import { DNodeProps, DNodeType, IDNode, INoteProps } from "./types";
+import { DNodeProps, DNodeType, IDNode, INoteProps } from './types';
 
 // import { IconType } from "antd/lib/notification";
-import _ from "lodash";
+import _ from 'lodash';
 
 // export interface DataNode {
 //   checkable?: boolean;
@@ -45,12 +45,12 @@ export abstract class DNode implements IDNode {
       created,
       parent,
       children,
-      body
+      body,
     } = _.defaults(props, {
-      updated: "TODO",
-      created: "TODO",
-      id: "TODO",
-      schemaId: -1
+      updated: 'TODO',
+      created: 'TODO',
+      id: 'TODO',
+      schemaId: -1,
     });
     this.id = id;
     this.title = title;
@@ -64,11 +64,11 @@ export abstract class DNode implements IDNode {
   }
 
   get path(): string {
-    if (this.title === "root") {
-      return "";
+    if (this.title === 'root') {
+      return '';
     }
-    if (this.parent && this.parent.title !== "root") {
-      return [this.parent.path, this.title].join("/");
+    if (this.parent && this.parent.title !== 'root') {
+      return [this.parent.path, this.title].join('/');
     } else {
       return this.title;
     }
@@ -84,7 +84,7 @@ export abstract class DNode implements IDNode {
   }
 
   renderBody(): string {
-    return this.body || "Empty Document";
+    return this.body || 'Empty Document';
   }
 
   toDocument() {
@@ -92,17 +92,17 @@ export abstract class DNode implements IDNode {
       document: {
         nodes: [
           {
-            object: "block",
-            type: "paragraph",
+            object: 'block',
+            type: 'paragraph',
             nodes: [
               {
-                object: "text",
-                text: this.renderBody()
-              }
-            ]
-          }
-        ]
-      }
+                object: 'text',
+                text: this.renderBody(),
+              },
+            ],
+          },
+        ],
+      },
     };
   }
 }
@@ -112,7 +112,7 @@ export class Note extends DNode {
 
   constructor(props: INoteProps) {
     super({ ...props, parent: null, children: [] });
-    this.schemaId = props.schemaId || "-1";
+    this.schemaId = props.schemaId || '-1';
   }
 }
 

@@ -1,5 +1,5 @@
 {
-    "name": "@dendron/bond",
+    "name": "@dendron/common-client",
     "version": "1.0.1",
     "description": "React Boilerplate Component for npm",
     "homepage": "http://jasonwatmore.com/post/2018/04/14/react-npm-how-to-publish-a-react-component-to-npm",

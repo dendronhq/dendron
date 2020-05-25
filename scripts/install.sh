@@ -1,4 +1,3 @@
-#!/bin/bash
 
 function run() {
     cmd=$@
@@ -12,6 +11,7 @@ function install() {
     suffix=""
     if [[ -z $package || -z $scope ]]; then
         echo "install {package} {scope}"
+        exit 0
     fi
     echo "install, args: $package $scope"
     if [ $scope ]; then
@@ -22,3 +22,5 @@ function install() {
     cmd="lerna add -D @types/$package"
     run $cmd $suffix
 }
+
+install $1 $2

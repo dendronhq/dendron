@@ -2,17 +2,30 @@ const fs = require("fs");
 const _ = require("lodash");
 
 const DEPENDENCIES = {
-  CLIENT_WEB: "@dendron/client-web",
+  CLIENT_WEB: "@dendron/web-client",
+  CLIENT_ELECTRON: "@dendron/electron-client",
   COMMON_ALL: "@dendron/common-all",
+  COMMON_CLIENT: "@dendron/common-client",
 };
 
 const frontCommonDeps = [DEPENDENCIES.COMMON_ALL];
+const electronClientDeps = [
+  DEPENDENCIES.CLIENT_ELECTRON,
+  DEPENDENCIES.COMMON_CLIENT,
+];
 
 function generateFrontCommonScripts() {
   let scope = frontCommonDeps.join(" --scope ");
   const group = "front-common";
   generateBootstrapScript({ scope, group });
   //generateBuildScript({ scope, group, standalone });
+}
+
+function generateClientScripts() {
+  let scope = electronClientDeps.join(" --scope ");
+  const group = "electron-client";
+  generateBootstrapScript({ scope, group });
+  generateBuildScript({ scope, group });
 }
 
 // --- Lib
@@ -24,6 +37,7 @@ async function main() {
   // generateBackendFrontendScripts();
   // generateFrontendScripts();
   generateFrontCommonScripts();
+  generateClientScripts();
   console.log("done");
 }
 

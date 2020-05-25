@@ -15,7 +15,7 @@
     "main": "./lib/BoilerplateComponent.js",
     "license": "MIT",
     "scripts": {
-        "build": "webpack"
+        "build": "node scripts/build.js"
     },
     "peerDependencies": {
         "prop-types": "^15.6.0",
@@ -23,16 +23,25 @@
         "react-dom": "^16.0.0"
     },
     "devDependencies": {
-        "babel-core": "^6.21.0",
-        "babel-loader": "^7.1.4",
-        "babel-preset-env": "^1.6.1",
-        "babel-preset-react": "^6.16.0",
-        "babel-preset-stage-0": "^6.24.1",
+        "babel-eslint": "10.1.0",
+        "babel-jest": "^24.9.0",
+        "babel-loader": "8.1.0",
+        "babel-plugin-named-asset-import": "^0.3.6",
+        "babel-preset-react-app": "^9.1.2",
         "path": "^0.12.7",
         "prop-types": "^15.6.0",
         "react": "^16.0.0",
         "react-dom": "^16.0.0",
         "webpack": "^4.5.0",
         "webpack-cli": "^3.2.1"
+    },
+    "dependencies": {
+        "css-loader": "^3.5.3",
+        "file-loader": "^6.0.0",
+        "mini-css-extract-plugin": "^0.9.0",
+        "postcss-loader": "^3.0.0",
+        "resolve-url-loader": "^3.1.1",
+        "sass-loader": "^8.0.2",
+        "style-loader": "^1.2.1"
     }
 }

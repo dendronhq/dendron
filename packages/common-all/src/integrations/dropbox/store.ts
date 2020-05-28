@@ -3,22 +3,20 @@ import {
   NodeGetResp,
   NodeQueryResp,
   QueryOpts,
-  Scope,
-} from '../../types';
-import { Dropbox, files } from 'dropbox';
-import { dxId2DendronId, fileToNote } from './utils';
+  Scope
+} from "../../types";
+import { Dropbox, files } from "dropbox";
 
-import { ListFolderResultSimple } from './types';
-import { Note } from '../../node';
-import _ from 'lodash';
-import { makeResponse } from '../../helpers';
-import path from 'path';
+import { ListFolderResultSimple } from "./types";
+import _ from "lodash";
+import { fileToNote } from "./utils";
+import { makeResponse } from "../../helpers";
 
-require('isomorphic-fetch');
+require("isomorphic-fetch");
 
 function binaryToUtf8(data: any): string {
-  const fileBuffer = new Buffer(data, 'binary');
-  return fileBuffer.toString('utf8');
+  const fileBuffer = new Buffer(data, "binary");
+  return fileBuffer.toString("utf8");
 }
 
 export class DropboxStorage implements DEngineStore {
@@ -27,7 +25,7 @@ export class DropboxStorage implements DEngineStore {
     this.client = new Dropbox({
       // TODO: don't hardcode
       accessToken:
-        'AxthRhvjDPAAAAAAAACiPVhX_A4isFrjeyDXsV8H1yqARcM9fCInltiA0eZukImA',
+        "AxthRhvjDPAAAAAAAACiPVhX_A4isFrjeyDXsV8H1yqARcM9fCInltiA0eZukImA"
     });
   }
 
@@ -36,7 +34,7 @@ export class DropboxStorage implements DEngineStore {
 
     let resp: files.FileMetadata & { fileBlob: any; fileBinary: any };
     // check if root
-    if (id === 'root') {
+    if (id === "root") {
       // @ts-ignore
       resp = await this.client.filesDownload({ path: `/root.md` });
     } else {
@@ -44,7 +42,7 @@ export class DropboxStorage implements DEngineStore {
       resp = await this.client.filesDownload({ path: `id:${id}` });
     }
     console.log({ resp });
-    let body: string = 'Empty Doc';
+    let body: string = "Empty Doc";
     if (opts?.webClient) {
       body = await resp.fileBlob.text();
     } else {
@@ -52,7 +50,7 @@ export class DropboxStorage implements DEngineStore {
     }
     const data = fileToNote(resp, body);
     return {
-      data,
+      data
     };
   }
 
@@ -61,9 +59,9 @@ export class DropboxStorage implements DEngineStore {
     queryString: string,
     _opts?: QueryOpts
   ): Promise<NodeQueryResp> {
-    if (queryString === '**/*') {
+    if (queryString === "**/*") {
       const resp = (await this.client.filesListFolder({
-        path: '',
+        path: ""
       })) as ListFolderResultSimple;
       const data = resp.entries.map(ent => fileToNote(ent));
       return makeResponse<NodeQueryResp>({ data: data, error: null });

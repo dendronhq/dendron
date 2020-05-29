@@ -1,6 +1,6 @@
 // Global Types
 
-export type Stage = 'dev' | 'prod';
+export type Stage = "dev" | "prod";
 
 // === Node Types
 export interface IDNode {
@@ -44,10 +44,10 @@ export interface DNodeRaw<T extends INoteData | SchemaData> {
   data: T;
   body?: string;
 }
-export type DNodeType = 'note' | 'schema';
+export type DNodeType = "note" | "schema";
 
 export type INote = IDNode & INoteData;
-export type INoteProps = Omit<DNodeProps, 'parent' | 'children'> &
+export type INoteProps = Omit<DNodeProps, "parent" | "children"> &
   Partial<INoteData>;
 
 export type INoteData = {
@@ -98,6 +98,7 @@ export interface DEngineStore {
     queryString: string,
     opts?: QueryOpts
   ) => Promise<NodeQueryResp>;
+  write: (scope: Scope, node: IDNode) => Promise<void>;
 }
 
 /**
@@ -126,6 +127,7 @@ export interface DEngine {
     opts?: QueryOpts
   ) => Promise<NodeQueryResp>;
 
+  write: (scope: Scope, node: IDNode) => Promise<void>;
   // /**
   //  * Write node to db
   //  */

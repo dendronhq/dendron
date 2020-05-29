@@ -1,5 +1,6 @@
 import {
   DEngineStore,
+  IDNode,
   NodeGetResp,
   NodeQueryResp,
   QueryOpts,
@@ -68,6 +69,11 @@ export class DropboxStorage implements DEngineStore {
     } else {
       throw `unsupported ${queryString}`;
     }
+  }
+
+  async write(_scope: Scope, _node: IDNode) {
+    throw Error("not implemented");
+    return;
   }
 }
 

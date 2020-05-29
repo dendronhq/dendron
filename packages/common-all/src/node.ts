@@ -1,7 +1,7 @@
-import { DNodeProps, DNodeType, IDNode, INoteProps } from './types';
+import { DNodeProps, DNodeType, IDNode, INoteProps } from "./types";
 
 // import { IconType } from "antd/lib/notification";
-import _ from 'lodash';
+import _ from "lodash";
 
 // export interface DataNode {
 //   checkable?: boolean;
@@ -34,6 +34,8 @@ export abstract class DNode implements IDNode {
   public parent: IDNode | null;
   public children: IDNode[];
   public body?: string;
+  public parentId: string | null;
+  public childrenIds: string[];
 
   constructor(props: DNodeProps) {
     const {
@@ -46,11 +48,15 @@ export abstract class DNode implements IDNode {
       parent,
       children,
       body,
+      parentId,
+      childrenIds
     } = _.defaults(props, {
-      updated: 'TODO',
-      created: 'TODO',
-      id: 'TODO',
+      updated: "TODO",
+      created: "TODO",
+      id: "TODO",
       schemaId: -1,
+      childrenIds: [],
+      parentId: null
     });
     this.id = id;
     this.title = title;
@@ -61,14 +67,16 @@ export abstract class DNode implements IDNode {
     this.parent = parent;
     this.children = children;
     this.body = body;
+    this.parentId = parentId;
+    this.childrenIds = childrenIds;
   }
 
   get path(): string {
-    if (this.title === 'root') {
-      return '';
+    if (this.title === "root") {
+      return "";
     }
-    if (this.parent && this.parent.title !== 'root') {
-      return [this.parent.path, this.title].join('/');
+    if (this.parent && this.parent.title !== "root") {
+      return [this.parent.path, this.title].join("/");
     } else {
       return this.title;
     }
@@ -84,7 +92,7 @@ export abstract class DNode implements IDNode {
   }
 
   renderBody(): string {
-    return this.body || 'Empty Document';
+    return this.body || "Empty Document";
   }
 
   toDocument() {
@@ -92,17 +100,17 @@ export abstract class DNode implements IDNode {
       document: {
         nodes: [
           {
-            object: 'block',
-            type: 'paragraph',
+            object: "block",
+            type: "paragraph",
             nodes: [
               {
-                object: 'text',
-                text: this.renderBody(),
-              },
-            ],
-          },
-        ],
-      },
+                object: "text",
+                text: this.renderBody()
+              }
+            ]
+          }
+        ]
+      }
     };
   }
 }
@@ -112,7 +120,7 @@ export class Note extends DNode {
 
   constructor(props: INoteProps) {
     super({ ...props, parent: null, children: [] });
-    this.schemaId = props.schemaId || '-1';
+    this.schemaId = props.schemaId || "-1";
   }
 }
 

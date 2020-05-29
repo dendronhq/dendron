@@ -3,47 +3,60 @@
 export type Stage = "dev" | "prod";
 
 // === Node Types
-export interface IDNode {
+type OptionalDnodeMetaProps =
+  | "id"
+  | "updated"
+  | "created"
+  | "parentId"
+  | "childrenIds";
+
+export interface IDNodeMeta {
   id: string;
   title: string;
   desc: string;
-  type: DNodeType;
   updated: string;
   created: string;
+  parentId: string | null;
+  childrenIds: string[];
+}
+export type IDNodeMetaProps = Omit<IDNodeMeta, OptionalDnodeMetaProps> &
+  Pick<Partial<IDNodeMeta>, OptionalDnodeMetaProps>;
+
+export interface IDNode extends IDNodeMeta {
+  type: DNodeType;
   parent: IDNode | null;
   children: IDNode[];
   body?: string;
-  url: string;
   path: string;
+  // generated
+  url: string;
 
   addChild(node: IDNode): void;
   renderBody(): string;
   toDocument(): any;
 }
-export interface DNodeProps {
-  id?: string;
-  title: string;
-  desc: string;
+export interface DNodeProps extends IDNodeMetaProps {
   type: DNodeType;
-  updated?: string;
-  created?: string;
   parent: IDNode | null;
   children: IDNode[];
   body?: string;
 }
 export type DNodeDict = { [id: string]: IDNode };
-export interface DNodeRaw<T extends INoteData | SchemaData> {
-  id: string;
-  title: string;
-  desc: string;
-  type: string;
-  updated: string;
-  created: string;
-  parent: string | null;
-  children: string[];
-  data: T;
-  body?: string;
-}
+
+// DEPRECATE: not used
+// export interface DNodeRaw<T extends INoteData | SchemaData> {
+//   id: string;
+//   title: string;
+//   desc: string;
+//   type: string;
+//   updated: string;
+//   created: string;
+//   parent: string | null;
+//   children: string[];
+//   data: T;
+//   body?: string;
+// }
+
 export type DNodeType = "note" | "schema";
 
 export type INote = IDNode & INoteData;

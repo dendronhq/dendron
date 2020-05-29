@@ -2,9 +2,9 @@ import {
   DEngine,
   DEngineStore,
   DNodeDict,
+  EngineGetResp,
+  EngineQueryResp,
   IDNode,
-  NodeGetResp,
-  NodeQueryResp,
   QueryOpts,
   Scope,
 } from "../common/types";
@@ -96,7 +96,7 @@ export class MockDataStore implements DEngineStore {
     return this.data;
   }
 
-  async get(_scope: Scope, id: string): Promise<NodeGetResp> {
+  async get(_scope: Scope, id: string): Promise<EngineGetResp> {
     // TODO
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -251,7 +251,7 @@ export class ProtoEngine implements DEngine {
       logger.debug({ ctx: "query:fetchedFullNodes:exit", fetchedFullNodes });
     }
     logger.debug({ ctx: "query:exit", items });
-    return makeResponse<NodeQueryResp>({
+    return makeResponse<EngineQueryResp>({
       data: _.map(items, (item) => this.nodes[item.id]),
       error: null,
     });

@@ -1,6 +1,7 @@
-import { Note } from '../../node';
-import { files } from 'dropbox';
-import path from 'path';
+import { Note } from "../../node";
+import _ from "lodash";
+import { files } from "dropbox";
+import path from "path";
 
 export function denddronId2DxId(did: string): string {
   return `id:${did}`;
@@ -16,7 +17,7 @@ export function fileNameToTitle(name: string): string {
 
 export function fileNameToTreePath(name: string): string[] {
   const title = fileNameToTitle(name);
-  return title.split('.');
+  return title.split(".");
 }
 
 export function fileToNote(
@@ -25,16 +26,19 @@ export function fileToNote(
     | files.FileMetadataReference
     | files.FolderMetadataReference,
   body?: string
-) {
+): Note {
   const title = fileNameToTitle(meta.name);
   const id = dxId2DendronId(meta.id);
+  if (_.isUndefined(body)) {
+    body = "";
+  }
   const note = new Note({
     id,
     title,
-    desc: 'TODO',
-    type: 'note',
-    schemaId: '-1',
-    body,
+    desc: "TODO",
+    type: "note",
+    schemaId: "-1",
+    body
   });
   return note;
 }

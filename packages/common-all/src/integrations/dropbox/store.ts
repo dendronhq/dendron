@@ -1,8 +1,8 @@
 import {
   DEngineStore,
+  EngineGetResp,
+  EngineQueryResp,
   IDNode,
-  NodeGetResp,
-  NodeQueryResp,
   QueryOpts,
   Scope
 } from "../../types";
@@ -30,7 +30,11 @@ export class DropboxStorage implements DEngineStore {
     });
   }
 
-  async get(_scope: Scope, id: string, opts?: QueryOpts): Promise<NodeGetResp> {
+  async get(
+    _scope: Scope,
+    id: string,
+    opts?: QueryOpts
+  ): Promise<EngineGetResp> {
     opts = _.defaults(opts || {}, {});
 
     let resp: files.FileMetadata & { fileBlob: any; fileBinary: any };
@@ -59,13 +63,13 @@ export class DropboxStorage implements DEngineStore {
     _scope: Scope,
     queryString: string,
     _opts?: QueryOpts
-  ): Promise<NodeQueryResp> {
+  ): Promise<EngineQueryResp> {
     if (queryString === "**/*") {
       const resp = (await this.client.filesListFolder({
         path: ""
       })) as ListFolderResultSimple;
       const data = resp.entries.map(ent => fileToNote(ent));
-      return makeResponse<NodeQueryResp>({ data: data, error: null });
+      return makeResponse<EngineQueryResp>({ data: data, error: null });
     } else {
       throw `unsupported ${queryString}`;
     }

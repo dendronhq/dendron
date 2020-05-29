@@ -5,7 +5,9 @@
     }
   ],
   "settings": {
-    "files.autoSave": "on",
+    "files.exclude": {
+      "*.d.ts": true
+    },
     "eslint.workingDirectories": [{ "pattern": "./packages/*", "mode": "auto" }]
   }
 }

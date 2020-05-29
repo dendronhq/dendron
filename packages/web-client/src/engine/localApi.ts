@@ -2,10 +2,10 @@ import {
   DNode,
   DataType,
   DendronEngine,
+  EngineGetResp,
+  EngineQueryResp,
   NodeDict,
   NodeGetBatchResp,
-  NodeGetResp,
-  NodeQueryResp,
   NodeStubDict,
   NodeType,
   Scope,
@@ -23,7 +23,7 @@ export default class LocalAPI implements DendronEngine {
     scope: Scope,
     id: string,
     nodeType: NodeType
-  ): Promise<NodeGetResp> {
+  ): Promise<EngineGetResp> {
     const response = await this.engine.storage.getBatch(scope, [id], nodeType);
     const x: any = { item: Object.values(response.item)[0], ...response }; // appease typechecker
     return x;
@@ -41,7 +41,7 @@ export default class LocalAPI implements DendronEngine {
     scope: Scope,
     queryString: string,
     nodeType: NodeType
-  ): Promise<NodeQueryResp> {
+  ): Promise<EngineQueryResp> {
     return await this.engine.query(scope, queryString, nodeType);
   }
 
@@ -49,7 +49,7 @@ export default class LocalAPI implements DendronEngine {
     scope: Scope,
     queryString: string,
     nodeType: NodeType
-  ): Promise<NodeQueryResp> {
+  ): Promise<EngineQueryResp> {
     return await this.engine.query(scope, queryString, nodeType);
   }
 

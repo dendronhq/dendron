@@ -1,4 +1,4 @@
-import { DNodeProps, DNodeType, IDNode, INoteProps } from "./types";
+import { IDNode, IDNodeOpts, IDNodeType, INote, INoteOpts } from "./types";
 
 // import { IconType } from "antd/lib/notification";
 import _ from "lodash";
@@ -28,16 +28,16 @@ export abstract class DNode implements IDNode {
   public id: string;
   public title: string;
   public desc: string;
-  public type: DNodeType;
+  public type: IDNodeType;
   public updated: string;
   public created: string;
   public parent: IDNode | null;
   public children: IDNode[];
-  public body?: string;
+  public body: string;
   public parentId: string | null;
   public childrenIds: string[];
 
-  constructor(props: DNodeProps) {
+  constructor(opts: IDNodeOpts) {
     const {
       id,
       title,
@@ -50,13 +50,16 @@ export abstract class DNode implements IDNode {
       body,
       parentId,
       childrenIds
-    } = _.defaults(props, {
+    } = _.defaults(opts, {
       updated: "TODO",
       created: "TODO",
       id: "TODO",
       schemaId: -1,
+      children: [],
       childrenIds: [],
-      parentId: null
+      parentId: null,
+      parent: null,
+      body: ""
     });
     this.id = id;
     this.title = title;
@@ -115,10 +118,10 @@ export abstract class DNode implements IDNode {
   }
 }
 
-export class Note extends DNode {
+export class Note extends DNode implements INote {
   public schemaId: string;
 
-  constructor(props: INoteProps) {
+  constructor(props: INoteOpts) {
     super({ ...props, parent: null, children: [] });
     this.schemaId = props.schemaId || "-1";
   }

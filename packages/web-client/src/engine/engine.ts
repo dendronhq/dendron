@@ -1,8 +1,8 @@
 import {
   DNode,
   DendronEngine,
+  EngineQueryResp,
   NodeDict,
-  NodeQueryResp,
   NodeStubDict,
   NodeType,
   Scope,
@@ -24,7 +24,7 @@ export default class Engine {
     scope: Scope,
     queryString: string,
     nodeType: NodeType
-  ): Promise<NodeQueryResp> {
+  ): Promise<EngineQueryResp> {
     const regexes = this.query_to_regexes(queryString);
     const filters = regexes
       .map((regex) => regex[0])

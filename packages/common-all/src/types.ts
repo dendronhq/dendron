@@ -94,12 +94,12 @@ export interface QueryOpts {
 }
 export interface DEngineStore {
   // fetchInitial: () => DNodeDict;
-  get: (scope: Scope, id: string, opts?: QueryOpts) => Promise<StoreGetResp>;
+  get: (scope: Scope, id: string, opts?: QueryOpts) => Promise<EngineGetResp>;
   query: (
     scope: Scope,
     queryString: string,
     opts?: QueryOpts
-  ) => Promise<StoreQueryResp>;
+  ) => Promise<EngineQueryResp>;
   write: (scope: Scope, node: IDNode) => Promise<void>;
 }
 

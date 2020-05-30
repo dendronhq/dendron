@@ -83,9 +83,6 @@ export abstract class DNode implements IDNode {
   }
 
   get path(): string {
-    if (this.title === "root") {
-      return "";
-    }
     if (this.parent && this.parent.title !== "root") {
       return [this.parent.path, this.title].join(".");
     } else {

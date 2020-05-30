@@ -54,6 +54,7 @@ export abstract class DNode implements IDNode {
       updated: "TODO",
       created: "TODO",
       id: "TODO",
+      desc: "",
       schemaId: -1,
       children: [],
       childrenIds: [],
@@ -79,7 +80,7 @@ export abstract class DNode implements IDNode {
       return "";
     }
     if (this.parent && this.parent.title !== "root") {
-      return [this.parent.path, this.title].join("/");
+      return [this.parent.path, this.title].join(".");
     } else {
       return this.title;
     }

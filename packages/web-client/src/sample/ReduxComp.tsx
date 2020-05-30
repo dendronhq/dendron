@@ -1,10 +1,14 @@
 import React, { ReactElement } from "react";
 
 import { AppDispatch } from "../App";
+import { Logger } from "@aws-amplify/core";
 import { ReduxState } from "../redux/reducers";
 import { connect } from "react-redux";
 import { loadingActions } from "../redux/reducers/loadingReducer";
 import { sampleActions } from "../redux/reducers/sampleReducer";
+
+const logger = new Logger("Sample");
+logger.info("foo");
 
 // const { setActiveNodeId } = nodeActions;
 // const { } = userActions;

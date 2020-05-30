@@ -1,4 +1,11 @@
-import { IDNode, IDNodeOpts, IDNodeType, INote, INoteOpts } from "./types";
+import {
+  DNodeRawProps,
+  IDNode,
+  IDNodeOpts,
+  IDNodeType,
+  INote,
+  INoteOpts
+} from "./types";
 
 // import { IconType } from "antd/lib/notification";
 import _ from "lodash";
@@ -116,6 +123,21 @@ export abstract class DNode implements IDNode {
         ]
       }
     };
+  }
+
+  toRawProps(): DNodeRawProps {
+    const props = _.pick(this, [
+      "id",
+      "title",
+      "desc",
+      "type",
+      "updated",
+      "created",
+      "body",
+      "parentId",
+      "childrenIds"
+    ]);
+    return props;
   }
 }
 

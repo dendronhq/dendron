@@ -41,6 +41,7 @@ export type IDNode = IDNodeProps & {
   addChild(node: IDNode): void;
   renderBody(): string;
   toDocument(): any;
+  toRawProps(): DNodeRawProps;
 };
 
 // Other

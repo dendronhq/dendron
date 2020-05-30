@@ -33,11 +33,13 @@
     "@types/lodash": "^4.14.152",
     "dropbox": "^4.0.30",
     "isomorphic-fetch": "^2.2.1",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.15",
+    "pino": "^6.3.1"
   },
   "devDependencies": {
     "@types/jest": "^23.3.3",
     "@types/node": "^10.11.4",
+    "@types/pino": "^6.0.1",
     "coveralls": "^3.0.2",
     "jest": "^23.6.0",
     "prettier": "^1.14.3",

@@ -14,20 +14,30 @@ export function getStage(): Stage {
   if (stageOut === "production") {
     stageOut = "prod";
   }
+  // fallback, assume dev
+  if (!stageOut) {
+    stageOut = "dev";
+  }
   return stageOut as Stage;
 }
 
-export function getOrThrow<T = any>(obj: T, k: keyof T) {
+export function getOrThrow<T = any>(
+  obj: T,
+  k: keyof T,
+  opts?: { shouldThrow?: boolean }
+) {
+  opts = _.defaults(opts, { shouldThrow: true });
   const maybeValue = obj[k];
-  if (_.isUndefined(maybeValue)) {
-    throw `no ${k} in ${obj}`;
+  if (_.isUndefined(maybeValue) && opts.shouldThrow) {
+    throw `no ${k} in ${JSON.stringify(obj)}`;
   }
   return maybeValue;
 }
 
-export function env(name: ConfigKey): any {
+export function env(name: ConfigKey, opts?: { shouldThrow?: boolean }): any {
   const stage = getStage();
-  const val = getOrThrow(config[stage], name);
+  // @ts-ignore: multiple configs
+  const val = getOrThrow(config[stage], name, opts);
   const override = process.env[name];
   return override || val;
 }

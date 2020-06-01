@@ -35,6 +35,7 @@ export abstract class DNode implements IDNode {
   public id: string;
   public title: string;
   public desc: string;
+  public fname: string;
   public type: IDNodeType;
   public updated: string;
   public created: string;
@@ -49,6 +50,7 @@ export abstract class DNode implements IDNode {
       id,
       title,
       desc,
+      fname,
       type,
       updated,
       created,
@@ -72,6 +74,7 @@ export abstract class DNode implements IDNode {
     this.id = id;
     this.title = title;
     this.desc = desc;
+    this.fname = fname;
     this.type = type;
     this.updated = updated;
     this.created = created;
@@ -130,7 +133,8 @@ export abstract class DNode implements IDNode {
       "type",
       "updated",
       "created",
-      "body"
+      "body",
+      "fname"
     ]);
     const parentId = this.parent?.id ?? null;
     const childrenIds = this.children.map(c => c.id);

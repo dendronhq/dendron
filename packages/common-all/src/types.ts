@@ -11,6 +11,7 @@ export type DNodeRawOpts = {
   desc: string;
   updated?: string;
   created?: string;
+  fname: string;
   parentId?: string | null;
   childrenIds?: string[];
   body?: string;

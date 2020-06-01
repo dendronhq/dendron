@@ -86,11 +86,12 @@ export abstract class DNode implements IDNode {
   }
 
   get path(): string {
-    if (this.parent && this.parent.title !== "root") {
-      return [this.parent.path, this.title].join(".");
-    } else {
-      return this.title;
-    }
+    return this.fname;
+    // if (this.parent && this.parent.title !== "root") {
+    //   return [this.parent.path, this.title].join(".");
+    // } else {
+    //   return this.title;
+    // }
   }
 
   get url(): string {

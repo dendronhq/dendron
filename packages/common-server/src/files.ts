@@ -1,8 +1,10 @@
-import { Note, genUUID } from "@dendron/common-all";
+import { DNodeRawOpts, IDNode, Note, genUUID } from "@dendron/common-all";
 import fs, { Dirent } from "fs";
 
 import _ from "lodash";
+import matter from "gray-matter";
 import minimatch from "minimatch";
+import path from "path";
 
 interface FileMeta {
   name: string;
@@ -13,7 +15,7 @@ type getAllFilesOpts = {
   exclude?: string[];
 };
 
-export function fileToNote(body: string, meta: FileMeta) {
+export function fileMeta2Node(body: string, meta: FileMeta): Note {
   const title = meta.name;
   // read id from file or generate one based on thte tile
   const id = genUUID();
@@ -54,4 +56,44 @@ export function globMatch(patterns: string[] | string, fname: string): boolean {
     return minimatch(fname, patterns);
   }
   return _.some(patterns, pattern => minimatch(fname, pattern));
+}
+
+export function mdFile2Node(fpath: string): Note {
+  // NOTE: gray matter cache old date, need to pass empty options
+  // to bypass
+  // see https://github.com/jonschlinkert/gray-matter/issues/43
+  const { data, content: body } = (matter.read(fpath, {}) as unknown) as {
+    data: DNodeRawOpts;
+    content: string;
+  };
+  const { name } = path.parse(fpath);
+  if (!data.title) {
+    data.title = name.split(".").slice(-1)[0];
+  }
+  if (!data.id) {
+    data.id = genUUID();
+  }
+  const note = new Note({ ...data, type: "note", body, fname: name });
+  return note;
+}
+
+export function node2MdFile(node: IDNode, opts: { root: string }) {
+  const { root } = opts;
+  const { body, path: nodePath } = node;
+  const meta = _.pick(node, [
+    "id",
+    "title",
+    "desc",
+    "updated",
+    "created",
+    "url",
+    "path"
+  ]);
+  const parentId = node.parent?.id || null;
+  const childrenIds = node.children.map(c => c.id);
+  const filePath = path.join(root, `${nodePath}.md`);
+  return fs.writeFileSync(
+    filePath,
+    matter.stringify(body || "", { ...meta, parentId, childrenIds })
+  );
 }

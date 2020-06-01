@@ -146,7 +146,7 @@ export class Note extends DNode implements INote {
   public schemaId: string;
 
   constructor(props: INoteOpts) {
-    super({ ...props, parent: null, children: [] });
+    super({ ..._.defaults(props, { parent: null, children: [] }) });
     this.schemaId = props.schemaId || "-1";
   }
 }

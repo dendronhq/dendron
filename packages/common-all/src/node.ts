@@ -65,7 +65,7 @@ export abstract class DNode implements IDNode {
       schemaId: -1,
       children: [],
       childrenIds: [],
-      parentId: null,
+      parentId: "not_set",
       parent: null,
       body: ""
     });
@@ -130,11 +130,11 @@ export abstract class DNode implements IDNode {
       "type",
       "updated",
       "created",
-      "body",
-      "parentId",
-      "childrenIds"
+      "body"
     ]);
-    return props;
+    const parentId = this.parent?.id ?? null;
+    const childrenIds = this.children.map(c => c.id);
+    return { ...props, parentId, childrenIds };
   }
 }
 

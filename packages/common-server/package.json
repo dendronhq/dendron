@@ -1,5 +1,5 @@
 {
-  "name": "common-server",
+  "name": "@dendron/common-server",
   "version": "0.0.0",
   "description": "common-server",
   "license": "MIT",
@@ -29,9 +29,15 @@
     "watch": "npm run build -- --watch",
     "watch:test": "jest --watch"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@dendron/common-all": "^0.0.0",
+    "lodash": "^4.17.15",
+    "minimatch": "^3.0.4"
+  },
   "devDependencies": {
     "@types/jest": "^23.3.3",
+    "@types/lodash": "^4.14.154",
+    "@types/minimatch": "^3.0.3",
     "@types/node": "^10.11.4",
     "coveralls": "^3.0.2",
     "jest": "^23.6.0",

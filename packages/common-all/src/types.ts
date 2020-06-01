@@ -36,6 +36,7 @@ export type IDNodeProps = Required<IDNodeOpts>;
 export type IDNode = IDNodeProps & {
   // generated
   path: string;
+  queryPath: string;
   // generated
   url: string;
 

@@ -85,6 +85,15 @@ export abstract class DNode implements IDNode {
     this.childrenIds = childrenIds;
   }
 
+  // used in query
+  get queryPath(): string {
+    if (this.title === "root") {
+      return "";
+    }
+    return this.path;
+  }
+
+  // used in parsing
   get path(): string {
     return this.fname;
     // if (this.parent && this.parent.title !== "root") {

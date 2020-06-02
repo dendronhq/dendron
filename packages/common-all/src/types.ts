@@ -7,8 +7,8 @@ export type Stage = "dev" | "prod";
 // --- Node Raw
 export type DNodeRawOpts = {
   id?: string;
-  title: string;
-  desc: string;
+  title?: string;
+  desc?: string;
   updated?: string;
   created?: string;
   fname: string;
@@ -40,6 +40,7 @@ export type IDNode = IDNodeProps & {
   // generated
   url: string;
 
+  equal(node: IDNode): boolean;
   addChild(node: IDNode): void;
   renderBody(): string;
   toDocument(): any;
@@ -51,7 +52,7 @@ export type DNodeDict = { [id: string]: IDNode };
 export type DNodeRawDict = { [id: string]: DNodeRawProps };
 
 // --- Notes
-export type INoteOpts = IDNodeOpts & {
+export type INoteOpts = Omit<IDNodeOpts, "type"> & {
   schemaId?: string;
 };
 export type INoteProps = Required<INoteOpts>;
@@ -95,6 +96,7 @@ export interface QueryOpts {
   fullNode?: boolean;
   webClient?: boolean;
   queryOne?: boolean;
+  createIfNew?: boolean;
 }
 export interface DEngineStore {
   // fetchInitial: () => DNodeDict;

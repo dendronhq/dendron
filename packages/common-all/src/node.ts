@@ -9,6 +9,7 @@ import {
 
 // import { IconType } from "antd/lib/notification";
 import _ from "lodash";
+import { genUUID } from "./uuid";
 
 // export interface DataNode {
 //   checkable?: boolean;
@@ -62,7 +63,7 @@ export abstract class DNode implements IDNode {
     } = _.defaults(opts, {
       updated: "TODO",
       created: "TODO",
-      id: "TODO",
+      id: genUUID(),
       desc: "",
       schemaId: -1,
       children: [],
@@ -72,7 +73,7 @@ export abstract class DNode implements IDNode {
       body: ""
     });
     this.id = id;
-    this.title = title;
+    this.title = title || fname.split(".").slice(-1)[0];
     this.desc = desc;
     this.fname = fname;
     this.type = type;
@@ -110,6 +111,15 @@ export abstract class DNode implements IDNode {
   addChild(node: IDNode) {
     this.children.push(node);
     node.parent = this;
+  }
+
+  equal(node: IDNode) {
+    const props1 = this.toRawProps();
+    const props2 = node.toRawProps();
+    return _.every([
+      _.isEqual(_.omit(props1, "body"), _.omit(props2, "body")),
+      _.trim(props1.body) == _.trim(props2.body)
+    ]);
   }
 
   renderBody(): string {
@@ -156,7 +166,13 @@ export class Note extends DNode implements INote {
   public schemaId: string;
 
   constructor(props: INoteOpts) {
-    super({ ..._.defaults(props, { parent: null, children: [] }) });
+    super({
+      type: "note",
+      ..._.defaults(props, {
+        parent: null,
+        children: []
+      })
+    });
     this.schemaId = props.schemaId || "-1";
   }
 }

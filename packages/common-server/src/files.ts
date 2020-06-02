@@ -23,7 +23,6 @@ export function fileMeta2Node(body: string, meta: FileMeta): Note {
     id,
     title,
     desc: "TODO",
-    type: "note",
     schemaId: "-1",
     body,
     fname: meta.name
@@ -73,7 +72,7 @@ export function mdFile2Node(fpath: string): Note {
   if (!data.id) {
     data.id = genUUID();
   }
-  const note = new Note({ ...data, type: "note", body, fname: name });
+  const note = new Note({ ...data, body, fname: name });
   return note;
 }
 

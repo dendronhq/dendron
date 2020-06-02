@@ -48,6 +48,7 @@ export type IDNode = IDNodeProps & {
 
 // Other
 export type DNodeDict = { [id: string]: IDNode };
+export type DNodeRawDict = { [id: string]: DNodeRawProps };
 
 // --- Notes
 export type INoteOpts = IDNodeOpts & {

@@ -53,6 +53,7 @@ export class PaneComp extends React.Component<PaneProps, PaneState> {
 
   setEditorRef = (ref: OutlineEditor) => {
     this.editor = ref;
+    ref.this.editor.focusAtEnd();
   };
 
   // Render the editor.
@@ -105,7 +106,7 @@ export class PaneComp extends React.Component<PaneProps, PaneState> {
           return AComp;
         }}
         dark={this.state.dark}
-        autoFocus={false}
+        autoFocus={true}
         toc
       />
     );

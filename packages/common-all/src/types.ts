@@ -94,9 +94,11 @@ export interface Scope {
 
 export interface QueryOpts {
   fullNode?: boolean;
-  webClient?: boolean;
   queryOne?: boolean;
   createIfNew?: boolean;
+  // hints
+  webClient?: boolean;
+  initialQuery?: boolean;
 }
 export interface DEngineStore {
   // fetchInitial: () => DNodeDict;

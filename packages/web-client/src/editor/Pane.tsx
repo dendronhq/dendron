@@ -46,6 +46,12 @@ export class PaneComp extends React.Component<PaneProps, PaneState> {
     dark: localStorage.getItem("dark") === "enabled",
   };
 
+  componentDidUpdate() {
+    // @ts-ignore
+    window.DEBUG_EDITOR = this.editor;
+    this.editor?.focusAtEnd();
+  }
+
   // On change, update the app's React state with the new editor value.
   onChange = ({ value }: { value: Value }) => {
     console.log("TODO" + value);
@@ -53,7 +59,7 @@ export class PaneComp extends React.Component<PaneProps, PaneState> {
 
   setEditorRef = (ref: OutlineEditor) => {
     this.editor = ref;
-    ref.this.editor.focusAtEnd();
+    logger.info({ ctx: "setEditorRef", ref });
   };
 
   // Render the editor.
@@ -70,6 +76,7 @@ export class PaneComp extends React.Component<PaneProps, PaneState> {
         id={node.id}
         readOnly={this.state.readOnly}
         defaultValue={defaultValue}
+        ref={this.setEditorRef}
         onSave={(options: any) => {
           console.log("Save triggered", options);
           console.log({ state: this.state });

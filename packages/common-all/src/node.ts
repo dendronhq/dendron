@@ -123,7 +123,7 @@ export abstract class DNode implements IDNode {
   }
 
   renderBody(): string {
-    return this.body || "Empty Document";
+    return this.body;
   }
 
   toDocument() {

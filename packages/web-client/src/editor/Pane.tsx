@@ -1,7 +1,7 @@
 import { AppDispatch } from "../App";
 import { DNode } from "@dendron/common-all";
 import { Logger } from "@aws-amplify/core";
-import OutlineEditor from "rich-markdown-editor";
+import OutlineEditor from "@dendron-vendor/rich-markdown-editor";
 import React from "react";
 import { ReduxState } from "../redux/reducers";
 import { Value } from "slate";

@@ -2,6 +2,9 @@
   "folders": [
     {
       "path": "."
+    },
+    {
+      "path": "../vendor/rich-markdown-editor"
     }
   ],
   "settings": {

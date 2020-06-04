@@ -1,4 +1,5 @@
 import {
+  DNodeRawOpts,
   DNodeRawProps,
   IDNode,
   IDNodeOpts,
@@ -32,6 +33,42 @@ interface YAMLEntryOpts {
   id: string;
 }
 
+export class DNodeRaw {
+  static createProps(opts: DNodeRawOpts): DNodeRawProps {
+    const {
+      id,
+      desc,
+      fname,
+      updated,
+      created,
+      parent,
+      children,
+      body
+    } = _.defaults(opts, {
+      updated: "TODO",
+      created: "TODO",
+      id: genUUID(),
+      desc: "",
+      schemaId: -1,
+      children: [],
+      parent: "not_set",
+      body: ""
+    });
+    const title = opts.title || fname;
+    return {
+      id,
+      title,
+      desc,
+      fname,
+      updated,
+      created,
+      parent,
+      children,
+      body
+    };
+  }
+}
+
 export abstract class DNode implements IDNode {
   public id: string;
   public title: string;
@@ -43,8 +80,6 @@ export abstract class DNode implements IDNode {
   public parent: IDNode | null;
   public children: IDNode[];
   public body: string;
-  public parentId: string | null;
-  public childrenIds: string[];
 
   constructor(opts: IDNodeOpts) {
     const {
@@ -57,19 +92,15 @@ export abstract class DNode implements IDNode {
       created,
       parent,
       children,
-      body,
-      parentId,
-      childrenIds
+      body
     } = _.defaults(opts, {
       updated: "TODO",
       created: "TODO",
       id: genUUID(),
       desc: "",
       schemaId: -1,
-      children: [],
-      childrenIds: [],
-      parentId: "not_set",
       parent: null,
+      children: [],
       body: ""
     });
     this.id = id;
@@ -82,8 +113,6 @@ export abstract class DNode implements IDNode {
     this.parent = parent;
     this.children = children;
     this.body = body;
-    this.parentId = parentId;
-    this.childrenIds = childrenIds;
   }
 
   // used in query
@@ -118,7 +147,7 @@ export abstract class DNode implements IDNode {
     const props2 = node.toRawProps();
     return _.every([
       _.isEqual(_.omit(props1, "body"), _.omit(props2, "body")),
-      _.trim(props1.body) == _.trim(props2.body)
+      _.trim(props1.body) === _.trim(props2.body)
     ]);
   }
 
@@ -156,9 +185,9 @@ export abstract class DNode implements IDNode {
       "body",
       "fname"
     ]);
-    const parentId = this.parent?.id ?? null;
-    const childrenIds = this.children.map(c => c.id);
-    return { ...props, parentId, childrenIds };
+    const parent = this.parent?.id ?? null;
+    const children = this.children.map(c => c.id);
+    return { ...props, parent, children };
   }
 }
 

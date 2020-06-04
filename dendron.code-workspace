@@ -17,6 +17,19 @@
     "files.exclude": {
       "*.d.ts": true
     },
-    "eslint.workingDirectories": [{ "pattern": "./packages/*", "mode": "auto" }]
+    "eslint.workingDirectories": [
+      {
+        "pattern": "./packages/*",
+        "mode": "auto"
+      }
+    ],
+    "spellright.language": [
+      "en"
+    ],
+    "spellright.documentTypes": [
+      "markdown",
+      "latex",
+      "plaintext"
+    ]
   }
 }

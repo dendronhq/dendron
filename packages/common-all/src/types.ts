@@ -12,8 +12,8 @@ export type DNodeRawOpts = {
   updated?: string;
   created?: string;
   fname: string;
-  parentId?: string | null;
-  childrenIds?: string[];
+  parent?: string | null | "not_set";
+  children?: string[];
   body?: string;
 };
 
@@ -22,17 +22,15 @@ export type DNodeRawProps = Required<DNodeRawOpts>;
 // --- Node Full
 export type IDNodeType = "note" | "schema";
 
-// TODO: remove parentId and children Ids ?
-export type IDNodeOpts = {
+export type IDNodeOpts = Omit<DNodeRawOpts, "parent" | "children"> & {
   type: IDNodeType;
   parent?: IDNode | null;
   children?: IDNode[];
-} & DNodeRawOpts;
+};
 
-export type IDNodeProps = Required<IDNodeOpts> & Required<DNodeRawOpts>;
-//type IDNodePropsKeysPartial = "parent" | "children";
-// export type IDNodeOpts = DNodeRawOpts &
-//   Omit<_IDNodeProps, IDNodePropsKeysPartial>;
+export type IDNodeProps = Required<Omit<DNodeRawOpts, "parent" | "children">> &
+  Required<IDNodeOpts>;
+// type foo = IDNodeProps["parent"]
 
 export type IDNode = IDNodeProps & {
   // generated

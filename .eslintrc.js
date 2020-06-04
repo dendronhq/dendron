@@ -25,6 +25,9 @@ module.exports = {
     "array-callback-return": "off",
     "lines-between-class-members": "off",
     "arrow-parens": "off",
+    // duplicates
+    "no-unused-vars": "off",
+    // rest
     // A temporary hack related to IDE not resolving correct package.json
     "import/no-extraneous-dependencies": "off",
     // copy from packages/web-client/.eslintrc.json
@@ -34,15 +37,7 @@ module.exports = {
     "@typescript-eslint/no-empty-interface": "off",
     "@typescript-eslint/camelcase": "off",
     "@typescript-eslint/interface-name-prefix": "off",
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      {
-        vars: "all",
-        args: "after-used",
-        ignoreRestSiblings: false,
-        varsIgnorePattern: "_.*",
-      },
-    ],
+    "@typescript-eslint/no-unused-vars": "off",
     "react/no-children-prop": "off",
     "react/prop-types": "off",
     "import/order": "off",

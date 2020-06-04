@@ -1,7 +1,7 @@
 {
   "folders": [
     {
-      "path": "."
+      "path": "packages/common-all"
     },
     {
       "path": "packages/common-server"

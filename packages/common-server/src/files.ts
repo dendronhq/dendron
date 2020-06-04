@@ -1,10 +1,10 @@
-import { DNodeRawOpts, IDNode, Note, genUUID } from "@dendron/common-all";
-import fs, { Dirent } from "fs";
+import { DNodeRawOpts, IDNode, Note, genUUID } from '@dendron/common-all';
+import fs, { Dirent } from 'fs';
 
-import _ from "lodash";
-import matter from "gray-matter";
-import minimatch from "minimatch";
-import path from "path";
+import _ from 'lodash';
+import matter from 'gray-matter';
+import minimatch from 'minimatch';
+import path from 'path';
 
 interface FileMeta {
   name: string;
@@ -22,17 +22,21 @@ export function fileMeta2Node(body: string, meta: FileMeta): Note {
   const note = new Note({
     id,
     title,
-    desc: "TODO",
-    schemaId: "-1",
+    desc: 'TODO',
+    schemaId: '-1',
     body,
-    fname: meta.name
+    fname: meta.name,
   });
   return note;
 }
 
+export function deleteFile(fpath: string) {
+  return fs.unlinkSync(fpath);
+}
+
 export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
   const { root } = _.defaults(opts, {
-    exclude: [".git", "Icon\r", ".*"]
+    exclude: ['.git', 'Icon\r', '.*'],
   });
   const allFiles = fs.readdirSync(root, { withFileTypes: true });
   return _.reject(
@@ -67,7 +71,7 @@ export function mdFile2Node(fpath: string): Note {
   };
   const { name } = path.parse(fpath);
   if (!data.title) {
-    data.title = name.split(".").slice(-1)[0];
+    data.title = name.split('.').slice(-1)[0];
   }
   if (!data.id) {
     data.id = genUUID();
@@ -80,19 +84,19 @@ export function node2MdFile(node: IDNode, opts: { root: string }) {
   const { root } = opts;
   const { body, path: nodePath } = node;
   const meta = _.pick(node, [
-    "id",
-    "title",
-    "desc",
-    "updated",
-    "created",
-    "url",
-    "path"
+    'id',
+    'title',
+    'desc',
+    'updated',
+    'created',
+    'url',
+    'path',
   ]);
   const parentId = node.parent?.id || null;
   const childrenIds = node.children.map(c => c.id);
   const filePath = path.join(root, `${nodePath}.md`);
   return fs.writeFileSync(
     filePath,
-    matter.stringify(body || "", { ...meta, parentId, childrenIds })
+    matter.stringify(body || '', { ...meta, parentId, childrenIds })
   );
 }

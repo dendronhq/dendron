@@ -4,6 +4,12 @@
       "path": "."
     },
     {
+      "path": "packages/common-server"
+    },
+    {
+      "path": "packages/electron-client"
+    },
+    {
       "path": "../vendor/rich-markdown-editor"
     }
   ],

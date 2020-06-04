@@ -28,7 +28,8 @@ export type IDNodeOpts = {
   parent?: IDNode | null;
   children?: IDNode[];
 } & DNodeRawOpts;
-export type IDNodeProps = Required<IDNodeOpts>;
+
+export type IDNodeProps = Required<IDNodeOpts> & Required<DNodeRawOpts>;
 //type IDNodePropsKeysPartial = "parent" | "children";
 // export type IDNodeOpts = DNodeRawOpts &
 //   Omit<_IDNodeProps, IDNodePropsKeysPartial>;
@@ -102,6 +103,7 @@ export interface QueryOpts {
 }
 export interface DEngineStore {
   // fetchInitial: () => DNodeDict;
+  delete: (id: string) => Promise<void>;
   get: (scope: Scope, id: string, opts?: QueryOpts) => Promise<EngineGetResp>;
   query: (
     scope: Scope,
@@ -117,6 +119,8 @@ export interface DEngineStore {
  */
 export interface DEngine {
   nodes: DNodeDict;
+
+  delete: (id: string) => Promise<void>;
   /**
    * Get node based on id
    * get(id: ...)

@@ -1,6 +1,7 @@
+export class AssertionError extends Error {}
 export function assert(statement: boolean, msg: string) {
   if (!statement) {
-    throw new Error(msg);
+    throw new AssertionError(msg);
   } else {
     return true;
   }

@@ -93,6 +93,10 @@ export interface Scope {
   username: string;
 }
 
+export interface NodeWriteOpts {
+  newNode?: boolean;
+}
+
 export interface QueryOpts {
   fullNode?: boolean;
   queryOne?: boolean;

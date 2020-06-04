@@ -1,4 +1,11 @@
-import { DNodeRawOpts, IDNode, Note, genUUID } from '@dendron/common-all';
+import {
+  DNodeRaw,
+  DNodeRawOpts,
+  DNodeRawProps,
+  IDNode,
+  Note,
+  genUUID,
+} from '@dendron/common-all';
 import fs, { Dirent } from 'fs';
 
 import _ from 'lodash';
@@ -34,6 +41,13 @@ export function deleteFile(fpath: string) {
   return fs.unlinkSync(fpath);
 }
 
+export function globMatch(patterns: string[] | string, fname: string): boolean {
+  if (_.isString(patterns)) {
+    return minimatch(fname, patterns);
+  }
+  return _.some(patterns, pattern => minimatch(fname, pattern));
+}
+
 export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
   const { root } = _.defaults(opts, {
     exclude: ['.git', 'Icon\r', '.*'],
@@ -54,14 +68,7 @@ export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
   ) as Dirent[] | string[];
 }
 
-export function globMatch(patterns: string[] | string, fname: string): boolean {
-  if (_.isString(patterns)) {
-    return minimatch(fname, patterns);
-  }
-  return _.some(patterns, pattern => minimatch(fname, pattern));
-}
-
-export function mdFile2Node(fpath: string): Note {
+export function mdFile2NodeProps(fpath: string): DNodeRawProps {
   // NOTE: gray matter cache old date, need to pass empty options
   // to bypass
   // see https://github.com/jonschlinkert/gray-matter/issues/43
@@ -69,16 +76,29 @@ export function mdFile2Node(fpath: string): Note {
     data: DNodeRawOpts;
     content: string;
   };
-  const { name } = path.parse(fpath);
-  if (!data.title) {
-    data.title = name.split('.').slice(-1)[0];
-  }
-  if (!data.id) {
-    data.id = genUUID();
-  }
-  const note = new Note({ ...data, body, fname: name });
-  return note;
+  const { name: fname } = path.parse(fpath);
+  const dataProps = DNodeRaw.createProps({ ...data, fname, body });
+  return dataProps;
 }
+
+// export function mdFile2Node(fpath: string): Note {
+//   // NOTE: gray matter cache old date, need to pass empty options
+//   // to bypass
+//   // see https://github.com/jonschlinkert/gray-matter/issues/43
+//   const { data, content: body } = (matter.read(fpath, {}) as unknown) as {
+//     data: DNodeRawOpts;
+//     content: string;
+//   };
+//   const { name } = path.parse(fpath);
+//   if (!data.title) {
+//     data.title = name.split(".").slice(-1)[0];
+//   }
+//   if (!data.id) {
+//     data.id = genUUID();
+//   }
+//   const note = new Note({ ...data, body, fname: name });
+//   return note;
+// }
 
 export function node2MdFile(node: IDNode, opts: { root: string }) {
   const { root } = opts;
@@ -92,11 +112,11 @@ export function node2MdFile(node: IDNode, opts: { root: string }) {
     'url',
     'path',
   ]);
-  const parentId = node.parent?.id || null;
-  const childrenIds = node.children.map(c => c.id);
+  const parent = node.parent?.id || null;
+  const children = node.children.map(c => c.id);
   const filePath = path.join(root, `${nodePath}.md`);
   return fs.writeFileSync(
     filePath,
-    matter.stringify(body || '', { ...meta, parentId, childrenIds })
+    matter.stringify(body || '', { ...meta, parent, children })
   );
 }

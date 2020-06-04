@@ -106,7 +106,7 @@ export interface QueryOpts {
 export interface DEngineStore {
   // fetchInitial: () => DNodeDict;
   delete: (id: string) => Promise<void>;
-  get: (scope: Scope, id: string, opts?: QueryOpts) => Promise<EngineGetResp>;
+  get: (scope: Scope, id: string, opts?: QueryOpts) => Promise<StoreGetResp>;
   query: (
     scope: Scope,
     queryString: string,

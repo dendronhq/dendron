@@ -1,6 +1,6 @@
 // Global Types
 
-export type Stage = "dev" | "prod";
+export type Stage = "dev" | "prod" | "test";
 
 // === Node Types
 

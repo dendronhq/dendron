@@ -43,6 +43,7 @@ module.exports = {
     "import/order": "off",
     "import/no-cycle": "off",
     "react/destructuring-assignment": "off",
+    "react/jsx-curly-newline": "off",
     "react/jsx-props-no-spreading": "off",
     "react/jsx-indent": "off",
     "react/jsx-indent-props": "off",

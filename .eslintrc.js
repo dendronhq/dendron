@@ -44,6 +44,8 @@ module.exports = {
     "import/no-cycle": "off",
     "react/destructuring-assignment": "off",
     "react/jsx-props-no-spreading": "off",
+    "react/jsx-indent": "off",
+    "react/jsx-indent-props": "off",
     "react/static-property-placement": "off",
     "react/prefer-stateless-function": "off",
     "react/no-did-update-set-state": "off",

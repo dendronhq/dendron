@@ -11,6 +11,7 @@ import {
 // import { IconType } from "antd/lib/notification";
 import _ from "lodash";
 import { genUUID } from "./uuid";
+import { getStage } from "./env";
 
 // export interface DataNode {
 //   checkable?: boolean;
@@ -105,6 +106,9 @@ export abstract class DNode implements IDNode {
     });
     this.id = id;
     this.title = title || fname.split(".").slice(-1)[0];
+    if (getStage() === "test") {
+      this.id = fname;
+    }
     this.desc = desc;
     this.fname = fname;
     this.type = type;

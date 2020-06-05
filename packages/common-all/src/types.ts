@@ -143,7 +143,7 @@ export interface DEngine {
     opts?: QueryOpts
   ) => Promise<EngineQueryResp>;
 
-  write: (scope: Scope, node: IDNode) => Promise<void>;
+  write: (scope: Scope, node: IDNode, opts?: NodeWriteOpts) => Promise<void>;
   // /**
   //  * Write node to db
   //  */

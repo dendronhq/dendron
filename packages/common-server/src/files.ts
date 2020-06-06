@@ -4,14 +4,15 @@ import {
   DNodeRawProps,
   IDNode,
   Note,
-  genUUID,
-} from '@dendron/common-all';
-import fs, { Dirent } from 'fs';
+  NoteData,
+  genUUID
+} from "@dendron/common-all";
+import fs, { Dirent } from "fs";
 
-import _ from 'lodash';
-import matter from 'gray-matter';
-import minimatch from 'minimatch';
-import path from 'path';
+import _ from "lodash";
+import matter from "gray-matter";
+import minimatch from "minimatch";
+import path from "path";
 
 interface FileMeta {
   name: string;
@@ -29,10 +30,12 @@ export function fileMeta2Node(body: string, meta: FileMeta): Note {
   const note = new Note({
     id,
     title,
-    desc: 'TODO',
-    schemaId: '-1',
+    desc: "TODO",
+    data: {
+      schemaId: "-1"
+    },
     body,
-    fname: meta.name,
+    fname: meta.name
   });
   return note;
 }
@@ -50,7 +53,7 @@ export function globMatch(patterns: string[] | string, fname: string): boolean {
 
 export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
   const { root } = _.defaults(opts, {
-    exclude: ['.git', 'Icon\r', '.*'],
+    exclude: [".git", "Icon\r", ".*"]
   });
   const allFiles = fs.readdirSync(root, { withFileTypes: true });
   return _.reject(
@@ -68,12 +71,12 @@ export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
   ) as Dirent[] | string[];
 }
 
-export function mdFile2NodeProps(fpath: string): DNodeRawProps {
+export function mdFile2NodeProps(fpath: string): DNodeRawProps<NoteData> {
   // NOTE: gray matter cache old date, need to pass empty options
   // to bypass
   // see https://github.com/jonschlinkert/gray-matter/issues/43
   const { data, content: body } = (matter.read(fpath, {}) as unknown) as {
-    data: DNodeRawOpts;
+    data: DNodeRawOpts<NoteData>;
     content: string;
   };
   const { name: fname } = path.parse(fpath);
@@ -104,19 +107,19 @@ export function node2MdFile(node: IDNode, opts: { root: string }) {
   const { root } = opts;
   const { body, path: nodePath } = node;
   const meta = _.pick(node, [
-    'id',
-    'title',
-    'desc',
-    'updated',
-    'created',
-    'url',
-    'path',
+    "id",
+    "title",
+    "desc",
+    "updated",
+    "created",
+    "url",
+    "path"
   ]);
   const parent = node.parent?.id || null;
   const children = node.children.map(c => c.id);
   const filePath = path.join(root, `${nodePath}.md`);
   return fs.writeFileSync(
     filePath,
-    matter.stringify(body || '', { ...meta, parent, children })
+    matter.stringify(body || "", { ...meta, parent, children })
   );
 }

@@ -1,4 +1,5 @@
 import {
+  DNodeData,
   DNodeRawOpts,
   DNodeRawProps,
   IDNode,
@@ -76,7 +77,7 @@ export class DNodeRaw {
   }
 }
 
-export abstract class DNode<T> implements IDNode<T> {
+export abstract class DNode<T = DNodeData> implements IDNode<T> {
   public id: string;
   public title: string;
   public desc: string;

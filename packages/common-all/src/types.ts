@@ -14,6 +14,8 @@ export type SchemaData = {
 export type DNodeData = SchemaData | NoteData;
 export type IDNodeType = "note" | "schema";
 
+export type QueryMode = IDNodeType;
+
 // --- Node Raw
 export type DNodeRawOpts<T extends DNodeData> = {
   id?: string;
@@ -28,19 +30,22 @@ export type DNodeRawOpts<T extends DNodeData> = {
   data?: T;
 };
 
-export type DNodeRawProps<T> = Required<DNodeRawOpts<T>>;
+export type DNodeRawProps<T = DNodeData> = Required<DNodeRawOpts<T>>;
 
 // --- Node Full
 
-export type IDNodeOpts<T> = Omit<DNodeRawOpts<T>, "parent" | "children"> & {
+export type IDNodeOpts<T = DNodeData> = Omit<
+  DNodeRawOpts<T>,
+  "parent" | "children"
+> & {
   type: IDNodeType;
   parent?: IDNode<T> | null;
   children?: IDNode<T>[];
 };
 
-export type IDNodeProps<T> = Required<IDNodeOpts<T>>;
+export type IDNodeProps<T = DNodeData> = Required<IDNodeOpts<T>>;
 
-export type IDNode<T> = IDNodeProps<T> & {
+export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   // generated
   path: string;
   queryPath: string;
@@ -55,8 +60,8 @@ export type IDNode<T> = IDNodeProps<T> & {
 };
 
 // Other
-export type DNodeDict<T> = { [id: string]: IDNode<T> };
-export type DNodeRawDict<T> = { [id: string]: DNodeRawProps<T> };
+export type DNodeDict<T = DNodeData> = { [id: string]: IDNode<T> };
+export type DNodeRawDict<T = DNodeData> = { [id: string]: DNodeRawProps<T> };
 
 // --- Notes
 export type INoteOpts = Omit<IDNodeOpts<NoteData>, "type">;
@@ -68,35 +73,16 @@ export type ISchemaOpts = Omit<IDNodeOpts<SchemaData>, "type">;
 export type ISchemaProps = Required<ISchemaOpts>;
 export type ISchema = ISchemaProps;
 
-// TODO: EXPERIMENTAL
-// --- Schema
-// export type Schema = IDNode & SchemaData;
-// export type SchemaData = {
-//   pattern: string;
-// };
-
-/**
- * YAML reprsentation of a Schema
- * Used in Kevin's schema notation
- */
-// export type SchemaYAMLRaw = {
-//   name: string;
-//   schema: { [key: string]: SchemaYAMLEntryRaw } | { root: SchemaYAMLEntryRaw };
-// };
-// export type SchemaYAMLEntryRaw = SchemaData & {
-//   children: { [key: string]: any };
-// };
-
 // === Engine Types
 export interface Resp<T> {
   data: T;
   error?: Error | null;
 }
 
-export type EngineGetResp<T> = Resp<IDNode<T>>;
-export type EngineQueryResp<T> = Resp<IDNode<T>[]>;
-export type StoreGetResp<T> = Resp<DNodeRawProps<T>>;
-export type StoreQueryResp<T> = Resp<DNodeRawProps<T>[]>;
+export type EngineGetResp<T = DNodeData> = Resp<IDNode<T>>;
+export type EngineQueryResp<T = DNodeData> = Resp<IDNode<T>[]>;
+export type StoreGetResp<T = DNodeData> = Resp<DNodeRawProps<T>>;
+export type StoreQueryResp<T = DNodeData> = Resp<DNodeRawProps<T>[]>;
 
 export interface Scope {
   username: string;
@@ -113,16 +99,13 @@ export interface QueryOpts {
   // hints
   webClient?: boolean;
   initialQuery?: boolean;
+  mode?: QueryMode;
 }
-export interface DEngineStore {
+export interface DEngineStore<T = DNodeData> {
   // fetchInitial: () => DNodeDict;
   delete: (id: string) => Promise<void>;
-  get: <T>(
-    scope: Scope,
-    id: string,
-    opts?: QueryOpts
-  ) => Promise<StoreGetResp<T>>;
-  query: <T>(
+  get: (scope: Scope, id: string, opts?: QueryOpts) => Promise<StoreGetResp<T>>;
+  query: (
     scope: Scope,
     queryString: string,
     opts?: QueryOpts

@@ -1,10 +1,10 @@
 import {
   DNodeRaw,
   DNodeRawOpts,
-  DNodeRawProps,
   IDNode,
   Note,
   NoteData,
+  NoteRawProps,
   genUUID
 } from "@dendron/common-all";
 import fs, { Dirent } from "fs";
@@ -71,7 +71,7 @@ export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
   ) as Dirent[] | string[];
 }
 
-export function mdFile2NodeProps(fpath: string): DNodeRawProps<NoteData> {
+export function mdFile2NodeProps(fpath: string): NoteRawProps {
   // NOTE: gray matter cache old date, need to pass empty options
   // to bypass
   // see https://github.com/jonschlinkert/gray-matter/issues/43

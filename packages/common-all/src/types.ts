@@ -1,5 +1,7 @@
 // Global Types
 
+import { Schema } from "./node";
+
 export type Stage = "dev" | "prod" | "test";
 
 // === Node Types
@@ -64,14 +66,17 @@ export type DNodeDict<T = DNodeData> = { [id: string]: IDNode<T> };
 export type DNodeRawDict<T = DNodeData> = { [id: string]: DNodeRawProps<T> };
 
 // --- Notes
+export type NoteRawProps = DNodeRawProps<NoteData>;
 export type INoteOpts = Omit<IDNodeOpts<NoteData>, "type">;
 export type INoteProps = Required<INoteOpts>;
 export type INote = INoteProps;
 
 // Schema
+export type SchemaRawProps = DNodeRawProps<SchemaData>;
 export type ISchemaOpts = Omit<IDNodeOpts<SchemaData>, "type">;
 export type ISchemaProps = Required<ISchemaOpts>;
 export type ISchema = ISchemaProps;
+export type SchemaDict = { [id: string]: Schema };
 
 // === Engine Types
 export interface Resp<T> {
@@ -108,6 +113,7 @@ export interface DEngineStore<T = DNodeData> {
   query: (
     scope: Scope,
     queryString: string,
+    mode: QueryMode,
     opts?: QueryOpts
   ) => Promise<EngineQueryResp<T>>;
   write: <T>(scope: Scope, node: IDNode<T>) => Promise<void>;
@@ -142,6 +148,7 @@ export interface DEngine {
   query: (
     scope: Scope,
     queryString: string,
+    mode: QueryMode,
     opts?: QueryOpts
   ) => Promise<EngineQueryResp<DNodeData>>;
 

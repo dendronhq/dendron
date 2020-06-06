@@ -5,7 +5,11 @@ import {
   IDNodeOpts,
   IDNodeType,
   INote,
-  INoteOpts
+  INoteOpts,
+  ISchema,
+  ISchemaOpts,
+  NoteData,
+  SchemaData
 } from "./types";
 
 // import { IconType } from "antd/lib/notification";
@@ -35,7 +39,7 @@ interface YAMLEntryOpts {
 }
 
 export class DNodeRaw {
-  static createProps(opts: DNodeRawOpts): DNodeRawProps {
+  static createProps<T>(opts: DNodeRawOpts<T>): DNodeRawProps<T> {
     const {
       id,
       desc,
@@ -44,16 +48,17 @@ export class DNodeRaw {
       created,
       parent,
       children,
-      body
+      body,
+      data
     } = _.defaults(opts, {
       updated: "TODO",
       created: "TODO",
       id: genUUID(),
       desc: "",
-      schemaId: -1,
       children: [],
       parent: "not_set",
-      body: ""
+      body: "",
+      data: {}
     });
     const title = opts.title || fname;
     return {
@@ -65,12 +70,13 @@ export class DNodeRaw {
       created,
       parent,
       children,
-      body
+      body,
+      data
     };
   }
 }
 
-export abstract class DNode implements IDNode {
+export abstract class DNode<T> implements IDNode<T> {
   public id: string;
   public title: string;
   public desc: string;
@@ -78,11 +84,12 @@ export abstract class DNode implements IDNode {
   public type: IDNodeType;
   public updated: string;
   public created: string;
-  public parent: IDNode | null;
-  public children: IDNode[];
+  public parent: IDNode<T> | null;
+  public children: IDNode<T>[];
   public body: string;
+  public data: T;
 
-  constructor(opts: IDNodeOpts) {
+  constructor(opts: IDNodeOpts<T>) {
     const {
       id,
       title,
@@ -93,7 +100,8 @@ export abstract class DNode implements IDNode {
       created,
       parent,
       children,
-      body
+      body,
+      data
     } = _.defaults(opts, {
       updated: "TODO",
       created: "TODO",
@@ -102,7 +110,8 @@ export abstract class DNode implements IDNode {
       schemaId: -1,
       parent: null,
       children: [],
-      body: ""
+      body: "",
+      data: {}
     });
     this.id = id;
     this.title = title || fname.split(".").slice(-1)[0];
@@ -117,6 +126,7 @@ export abstract class DNode implements IDNode {
     this.parent = parent;
     this.children = children;
     this.body = body;
+    this.data = data;
   }
 
   // used in query
@@ -141,12 +151,12 @@ export abstract class DNode implements IDNode {
     return `/doc/${this.id}`;
   }
 
-  addChild(node: IDNode) {
+  addChild(node: IDNode<T>) {
     this.children.push(node);
     node.parent = this;
   }
 
-  equal(node: IDNode) {
+  equal(node: IDNode<T>) {
     const props1 = this.toRawProps();
     const props2 = node.toRawProps();
     return _.every([
@@ -178,7 +188,7 @@ export abstract class DNode implements IDNode {
     };
   }
 
-  toRawProps(): DNodeRawProps {
+  toRawProps(): DNodeRawProps<T> {
     const props = _.pick(this, [
       "id",
       "title",
@@ -187,7 +197,8 @@ export abstract class DNode implements IDNode {
       "updated",
       "created",
       "body",
-      "fname"
+      "fname",
+      "data"
     ]);
     const parent = this.parent?.id ?? null;
     const children = this.children.map(c => c.id);
@@ -195,7 +206,7 @@ export abstract class DNode implements IDNode {
   }
 }
 
-export class Note extends DNode implements INote {
+export class Note extends DNode<NoteData> implements INote {
   public schemaId: string;
 
   constructor(props: INoteOpts) {
@@ -206,7 +217,26 @@ export class Note extends DNode implements INote {
         children: []
       })
     });
-    this.schemaId = props.schemaId || "-1";
+    this.schemaId = props?.data?.schemaId || "-1";
+  }
+}
+
+export class Schema extends DNode<SchemaData> implements ISchema {
+  public namespace: boolean;
+
+  constructor(props: ISchemaOpts) {
+    const dataDefaults = {
+      namespace: false
+    };
+    super({
+      type: "schema",
+      ..._.defaults(props, {
+        parent: null,
+        children: [],
+        data: dataDefaults
+      })
+    });
+    this.namespace = props.data?.namespace || dataDefaults.namespace;
   }
 }
 

@@ -129,6 +129,13 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
     this.data = data;
   }
 
+  get domain(): DNode<T> {
+    if (this.parent?.title === "root" || _.isNull(this.parent)) {
+      return this;
+    }
+    return this.parent.domain;
+  }
+
   // used in query
   get queryPath(): string {
     if (this.title === "root") {

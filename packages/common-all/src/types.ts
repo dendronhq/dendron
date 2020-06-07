@@ -51,6 +51,7 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   // generated
   path: string;
   queryPath: string;
+  domain: IDNode<T>;
   // generated
   url: string;
 

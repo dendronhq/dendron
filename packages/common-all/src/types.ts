@@ -125,6 +125,7 @@ export interface DEngineStore<T = DNodeData> {
  */
 export interface DEngine {
   nodes: DNodeDict<DNodeData>;
+  schemas: SchemaDict;
 
   delete: (id: string) => Promise<void>;
   /**

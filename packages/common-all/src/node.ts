@@ -108,7 +108,6 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
       created: "TODO",
       id: genUUID(),
       desc: "",
-      schemaId: -1,
       parent: null,
       children: [],
       body: "",

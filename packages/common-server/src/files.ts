@@ -81,6 +81,7 @@ export function mdFile2NodeProps(fpath: string): NoteRawProps {
   };
   const { name: fname } = path.parse(fpath);
   const dataProps = DNodeRaw.createProps({ ...data, fname, body });
+  // DEBUG: data: {data}, fpath: {fpath}, dataProps: {dataProps}
   return dataProps;
 }
 

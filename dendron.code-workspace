@@ -4,6 +4,10 @@
       "path": "packages/common-all"
     },
     {
+      "name": "root",
+      "path": "."
+    },
+    {
       "path": "packages/common-server"
     },
     {
@@ -15,7 +19,8 @@
   ],
   "settings": {
     "files.exclude": {
-      "*.d.ts": true
+      "*.d.ts": true,
+      "packages": true
     },
     "eslint.workingDirectories": [
       {
@@ -23,13 +28,7 @@
         "mode": "auto"
       }
     ],
-    "spellright.language": [
-      "en"
-    ],
-    "spellright.documentTypes": [
-      "markdown",
-      "latex",
-      "plaintext"
-    ]
+    "spellright.language": ["en"],
+    "spellright.documentTypes": ["markdown", "latex", "plaintext"]
   }
 }

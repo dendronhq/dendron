@@ -1,6 +1,6 @@
 // Global Types
 
-import { Schema } from "./node";
+import { Note, Schema } from "./node";
 
 export type Stage = "dev" | "prod" | "test";
 
@@ -70,6 +70,7 @@ export type NoteRawProps = DNodeRawProps<NoteData>;
 export type INoteOpts = Omit<IDNodeOpts<NoteData>, "type">;
 export type INoteProps = Required<INoteOpts>;
 export type INote = INoteProps;
+export type NoteDict = { [id: string]: Note };
 
 // Schema
 export type SchemaRawProps = DNodeRawProps<SchemaData>;
@@ -124,7 +125,7 @@ export interface DEngineStore<T = DNodeData> {
  * Get: id based
  */
 export interface DEngine {
-  nodes: DNodeDict<DNodeData>;
+  notes: NoteDict;
   schemas: SchemaDict;
 
   delete: (id: string) => Promise<void>;
@@ -156,6 +157,7 @@ export interface DEngine {
   write: (
     scope: Scope,
     node: IDNode<DNodeData>,
+    mode: QueryMode,
     opts?: NodeWriteOpts
   ) => Promise<void>;
   // /**

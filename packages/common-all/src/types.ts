@@ -18,23 +18,20 @@ export type IDNodeType = "note" | "schema";
 
 export type QueryMode = IDNodeType;
 
-// --- Node Raw
+// --- Nodes
 export type DNodeRawOpts<T extends DNodeData> = {
   id?: string;
   title?: string;
   desc?: string;
   updated?: string;
   created?: string;
-  fname: string;
+  fname?: string;
   parent?: string | null | "not_set";
   children?: string[];
   body?: string;
   data?: T;
 };
-
 export type DNodeRawProps<T = DNodeData> = Required<DNodeRawOpts<T>>;
-
-// --- Node Full
 
 export type IDNodeOpts<T = DNodeData> = Omit<
   DNodeRawOpts<T>,
@@ -44,11 +41,11 @@ export type IDNodeOpts<T = DNodeData> = Omit<
   parent?: IDNode<T> | null;
   children?: IDNode<T>[];
 };
-
 export type IDNodeProps<T = DNodeData> = Required<IDNodeOpts<T>>;
 
 export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   // generated
+  nodes: IDNode<T>[];
   path: string;
   queryPath: string;
   domain: IDNode<T>;
@@ -56,15 +53,14 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   url: string;
 
   equal(node: IDNode<T>): boolean;
+  // match(identifier: string): boolean;
   addChild(node: IDNode<T>): void;
   renderBody(): string;
   toDocument(): any;
   toRawProps(): DNodeRawProps<T>;
 };
-
-// Other
-export type DNodeDict<T = DNodeData> = { [id: string]: IDNode<T> };
 export type DNodeRawDict<T = DNodeData> = { [id: string]: DNodeRawProps<T> };
+export type DNodeDict<T = DNodeData> = { [id: string]: IDNode<T> };
 
 // --- Notes
 export type NoteRawProps = DNodeRawProps<NoteData>;
@@ -73,7 +69,8 @@ export type INoteProps = Required<INoteOpts>;
 export type INote = INoteProps;
 export type NoteDict = { [id: string]: Note };
 
-// Schema
+// --- Schema
+export type SchemaRawOpts = DNodeRawOpts<SchemaData>;
 export type SchemaRawProps = DNodeRawProps<SchemaData>;
 export type ISchemaOpts = Omit<IDNodeOpts<SchemaData>, "type">;
 export type ISchemaProps = Required<ISchemaOpts>;
@@ -108,7 +105,8 @@ export interface QueryOpts {
   initialQuery?: boolean;
   mode?: QueryMode;
 }
-export interface DEngineStore<T = DNodeData> {
+export interface DEngineStore<T = DNodeData, O = any> {
+  opts: O;
   // fetchInitial: () => DNodeDict;
   delete: (id: string) => Promise<void>;
   get: (scope: Scope, id: string, opts?: QueryOpts) => Promise<StoreGetResp<T>>;

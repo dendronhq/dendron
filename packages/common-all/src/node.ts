@@ -10,13 +10,14 @@ import {
   ISchema,
   ISchemaOpts,
   NoteData,
-  SchemaData
+  SchemaData,
+  SchemaRawOpts,
+  SchemaRawProps
 } from "./types";
 
 // import { IconType } from "antd/lib/notification";
 import _ from "lodash";
 import { genUUID } from "./uuid";
-import { getStage } from "./env";
 
 // export interface DataNode {
 //   checkable?: boolean;
@@ -59,7 +60,8 @@ export class DNodeRaw {
       children: [],
       parent: "not_set",
       body: "",
-      data: {}
+      data: {},
+      fname: "not_set"
     });
     const title = opts.title || fname;
     return {
@@ -74,6 +76,19 @@ export class DNodeRaw {
       body,
       data
     };
+  }
+}
+
+/*
+- id: b111db5b-bc52-4977-893b-307522f89ea3
+  title: "foo",
+  parent: null
+  children:
+    - one
+*/
+export class SchemaNodeRaw {
+  static createProps(opts: SchemaRawOpts): SchemaRawProps {
+    return DNodeRaw.createProps<SchemaData>(opts);
   }
 }
 
@@ -99,31 +114,19 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
       type,
       updated,
       created,
-      parent,
-      children,
       body,
-      data
-    } = _.defaults(opts, {
-      updated: "TODO",
-      created: "TODO",
-      id: genUUID(),
-      desc: "",
-      parent: null,
-      children: [],
-      body: "",
-      data: {}
-    });
+      data,
+      children
+    } = _.defaults(opts, { children: [] }, DNodeRaw.createProps(opts));
+
     this.id = id;
     this.title = title || fname.split(".").slice(-1)[0];
-    if (getStage() === "test") {
-      this.id = fname;
-    }
     this.desc = desc;
     this.fname = fname;
     this.type = type;
     this.updated = updated;
     this.created = created;
-    this.parent = parent;
+    this.parent = opts.parent ? opts.parent : null;
     this.children = children;
     this.body = body;
     this.data = data;
@@ -134,6 +137,16 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
       return this;
     }
     return this.parent.domain;
+  }
+
+  /**
+   * Self and all children
+   */
+  get nodes(): DNode<T>[] {
+    const out: DNode<T>[] = [this as DNode<T>].concat(
+      this.children.map(c => c.nodes).flat()
+    );
+    return out;
   }
 
   // used in query
@@ -171,6 +184,8 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
       _.trim(props1.body) === _.trim(props2.body)
     ]);
   }
+
+  // abstract match(identifier: any): boolean;
 
   renderBody(): string {
     return this.body;
@@ -226,10 +241,21 @@ export class Note extends DNode<NoteData> implements INote {
     });
     this.schemaId = props?.data?.schemaId || "-1";
   }
+
+  // match(identifier: string) {
+  //   // TODO
+  //   throw Error("implement");
+  //   // id, title, alias
+  // }
 }
 
 export class Schema extends DNode<SchemaData> implements ISchema {
   public namespace: boolean;
+
+  static createRoot() {
+    const props = SchemaNodeRaw.createProps({ fname: "root" });
+    return new Schema({ ...props, parent: null, children: [] });
+  }
 
   constructor(props: ISchemaOpts) {
     const dataDefaults = {
@@ -245,6 +271,11 @@ export class Schema extends DNode<SchemaData> implements ISchema {
     });
     this.namespace = props.data?.namespace || dataDefaults.namespace;
   }
+
+  // match(identifier: string) {
+  //   // id, title, alias
+  //   return _.some([this.title === identifier]);
+  // }
 }
 
 // === Old

@@ -18,8 +18,9 @@ interface FileMeta {
   name: string;
 }
 
-type getAllFilesOpts = {
+export type getAllFilesOpts = {
   root: string;
+  include?: string[];
   exclude?: string[];
 };
 
@@ -63,6 +64,10 @@ export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
       if (
         _.some([dirent.isDirectory(), globMatch(opts.exclude || [], fname)])
       ) {
+        return null;
+      }
+      // match inclusion
+      if (opts.include && !globMatch(opts.include, fname)) {
         return null;
       }
       return dirent.name;

@@ -14,7 +14,8 @@
       "path": "packages/electron-client"
     },
     {
-      "path": "../vendor/rich-markdown-editor"
+      "name": "editor",
+      "path": "vendor/rich-markdown-editor"
     }
   ],
   "settings": {

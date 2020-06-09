@@ -15,6 +15,7 @@ import {
   SchemaRawProps
 } from "./types";
 
+import YAML from "yamljs";
 // import { IconType } from "antd/lib/notification";
 import _ from "lodash";
 import { genUUID } from "./uuid";
@@ -270,6 +271,19 @@ export class Schema extends DNode<SchemaData> implements ISchema {
       })
     });
     this.namespace = props.data?.namespace || dataDefaults.namespace;
+  }
+
+  _renderBody(): any[] {
+    const parent = _.pick(this, ["id", "namespace", "title"]);
+    // @ts-ignore
+    const children = this.children.map((ch: Schema) => ch._renderBody());
+    const out = [parent].concat(children);
+    return out.flat();
+  }
+
+  renderBody() {
+    const out = this._renderBody();
+    return "```" + YAML.stringify(out, 4) + "```";
   }
 
   // match(identifier: string) {

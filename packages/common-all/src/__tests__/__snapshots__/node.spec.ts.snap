@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`schema domainRoot at child: fooChild_body 1`] = `
+"\`\`\`-
+    id: foo.child
+    namespace: false
+    title: foo.child
+-
+    id: foo.grandchild
+    namespace: false
+    title: foo.grandchild
+\`\`\`"
+`;
+
+exports[`schema domainRoot at root: foo_body 1`] = `
+"\`\`\`-
+    id: foo.root
+    namespace: false
+    title: foo.root
+-
+    id: foo.child
+    namespace: false
+    title: foo.child
+-
+    id: foo.grandchild
+    namespace: false
+    title: foo.grandchild
+\`\`\`"
+`;

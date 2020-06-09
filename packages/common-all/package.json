@@ -27,7 +27,7 @@
     "test": "jest",
     "coverage": "jest --coverage",
     "watch": "npm run build -- --watch",
-    "watch:test": "jest --watch"
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@types/lodash": "^4.14.152",
@@ -35,13 +35,15 @@
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.15",
     "pino": "^6.3.1",
-    "uuid": "^8.1.0"
+    "uuid": "^8.1.0",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "@types/jest": "^23.3.3",
     "@types/node": "^10.11.4",
     "@types/pino": "^6.0.1",
     "@types/uuid": "^8.0.0",
+    "@types/yamljs": "^0.2.31",
     "coveralls": "^3.0.2",
     "jest": "^23.6.0",
     "prettier": "^1.14.3",

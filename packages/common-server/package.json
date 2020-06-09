@@ -27,7 +27,7 @@
     "test": "jest",
     "coverage": "jest --coverage",
     "watch": "npm run build -- --watch",
-    "watch:test": "jest --watch"
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@dendron/common-all": "^0.0.0",

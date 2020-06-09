@@ -45,11 +45,13 @@ describe("schema", () => {
     test("at root", () => {
       const { foo } = schemas;
       expect(foo.domain.id).toEqual(foo.id);
+      expect(foo.renderBody()).toMatchSnapshot("foo_body");
     });
 
     test("at child", () => {
       const { fooChild, foo } = schemas;
       expect(fooChild.domain.id).toEqual(foo.id);
+      expect(fooChild.renderBody()).toMatchSnapshot("fooChild_body");
     });
 
     test("at grand child", () => {

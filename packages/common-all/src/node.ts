@@ -227,6 +227,10 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
     const children = this.children.map(c => c.id);
     return { ...props, parent, children };
   }
+
+  validate(): boolean {
+    return true;
+  }
 }
 
 export class Note extends DNode<NoteData> implements INote {
@@ -242,12 +246,6 @@ export class Note extends DNode<NoteData> implements INote {
     });
     this.schemaId = props?.data?.schemaId || "-1";
   }
-
-  // match(identifier: string) {
-  //   // TODO
-  //   throw Error("implement");
-  //   // id, title, alias
-  // }
 }
 
 export class Schema extends DNode<SchemaData> implements ISchema {

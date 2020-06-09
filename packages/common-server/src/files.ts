@@ -5,6 +5,7 @@ import {
   Note,
   NoteData,
   NoteRawProps,
+  Schema,
   genUUID
 } from "@dendron/common-all";
 import fs, { Dirent } from "fs";
@@ -128,4 +129,11 @@ export function node2MdFile(node: IDNode, opts: { root: string }) {
     filePath,
     matter.stringify(body || "", { ...meta, parent, children })
   );
+}
+
+export function schema2YMLFile(schema: Schema, opts: { root: string }) {
+  const { root } = opts;
+  const { fname } = schema;
+  const filePath = path.join(root, `${fname}.yml`);
+  return fs.writeFileSync(filePath, schema.renderBody());
 }

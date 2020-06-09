@@ -58,6 +58,7 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   renderBody(): string;
   toDocument(): any;
   toRawProps(): DNodeRawProps<T>;
+  validate(): boolean;
 };
 export type DNodeRawDict<T = DNodeData> = { [id: string]: DNodeRawProps<T> };
 export type DNodeDict<T = DNodeData> = { [id: string]: IDNode<T> };
@@ -157,7 +158,6 @@ export interface DEngine {
   write: (
     scope: Scope,
     node: IDNode<DNodeData>,
-    mode: QueryMode,
     opts?: NodeWriteOpts
   ) => Promise<void>;
   // /**

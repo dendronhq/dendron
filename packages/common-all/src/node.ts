@@ -283,7 +283,7 @@ export class Schema extends DNode<SchemaData> implements ISchema {
 
   renderBody() {
     const out = this._renderBody();
-    return "```" + YAML.stringify(out, 4) + "```";
+    return ["```", YAML.stringify(out, null, 4), "```"].join("\n");
   }
 
   // match(identifier: string) {

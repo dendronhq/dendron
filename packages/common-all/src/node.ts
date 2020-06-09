@@ -274,7 +274,13 @@ export class Schema extends DNode<SchemaData> implements ISchema {
   }
 
   _renderBody(): any[] {
-    const parent = _.pick(this, ["id", "namespace", "title"]);
+    const parent = _.pick(this.toRawProps(), [
+      "id",
+      "namespace",
+      "title",
+      "parent",
+      "children"
+    ]);
     // @ts-ignore
     const children = this.children.map((ch: Schema) => ch._renderBody());
     const out = [parent].concat(children);
@@ -283,7 +289,7 @@ export class Schema extends DNode<SchemaData> implements ISchema {
 
   renderBody() {
     const out = this._renderBody();
-    return ["```", YAML.stringify(out, null, 4), "```"].join("\n");
+    return ["```", YAML.stringify(out, undefined, 4), "```"].join("\n");
   }
 
   // match(identifier: string) {

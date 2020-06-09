@@ -135,6 +135,7 @@ export interface DEngine {
   get: (
     scope: Scope,
     id: string,
+    mode: QueryMode,
     opts?: QueryOpts
   ) => Promise<EngineGetResp<DNodeData>>;
 

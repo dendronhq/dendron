@@ -4,12 +4,14 @@ exports[`schema domainRoot at child: fooChild_body 1`] = `
 "\`\`\`
 -
     id: foo.child
-    namespace: false
     title: foo.child
+    parent: foo.root
+    children: [foo.grandchild]
 -
     id: foo.grandchild
-    namespace: false
     title: foo.grandchild
+    parent: foo.child
+    children: []
 
 \`\`\`"
 `;
@@ -18,16 +20,19 @@ exports[`schema domainRoot at root: foo_body 1`] = `
 "\`\`\`
 -
     id: foo.root
-    namespace: false
     title: foo.root
+    parent: null
+    children: [foo.child]
 -
     id: foo.child
-    namespace: false
     title: foo.child
+    parent: foo.root
+    children: [foo.grandchild]
 -
     id: foo.grandchild
-    namespace: false
     title: foo.grandchild
+    parent: foo.child
+    children: []
 
 \`\`\`"
 `;

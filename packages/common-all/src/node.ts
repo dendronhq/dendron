@@ -4,13 +4,13 @@ import {
   DNodeRawProps,
   IDNode,
   IDNodeOpts,
+  IDNodeProps,
   IDNodeType,
   INote,
   INoteOpts,
   ISchema,
   ISchemaOpts,
   NoteData,
-  NoteRawProps,
   SchemaData,
   SchemaRawOpts,
   SchemaRawProps
@@ -19,7 +19,6 @@ import {
 import YAML from "yamljs";
 // import { IconType } from "antd/lib/notification";
 import _ from "lodash";
-import { assert } from "./assert";
 import { genUUID } from "./uuid";
 
 // export interface DataNode {
@@ -298,11 +297,59 @@ export class Schema extends DNode<SchemaData> implements ISchema {
     const out = this.toRawPropsRecursive();
     return ["```", YAML.stringify(out, undefined, 4), "```"].join("\n");
   }
+}
 
-  // match(identifier: string) {
-  //   // id, title, alias
-  //   return _.some([this.title === identifier]);
-  // }
+const matchSchemaPropsToId = (
+  id: string,
+  props: SchemaRawProps[]
+): SchemaRawProps => {
+  const out = _.find(props, p => _.some([p.id === id]));
+  if (_.isUndefined(out)) {
+    throw Error(`no match found for ${id}, props: ${props}`);
+  }
+  return out;
+};
+
+export class NodeBuilder {
+  getDomainsRoot<T extends DNodeData>(
+    nodes: DNodeRawProps<T>[]
+  ): DNodeRawProps<T>[] {
+    // nodes: {nodes}
+    const rootNodes = _.filter(
+      nodes,
+      ent => _.isNull(ent.parent) || ent.parent === "root"
+    );
+    if (_.isEmpty(rootNodes)) {
+      throw Error("no root node found");
+    }
+    return rootNodes;
+  }
+
+  toSchema(item: SchemaRawProps, parent: Schema, props: SchemaRawProps[]) {
+    // DEBUG: item: {item}, parents: {parents}
+    const node = new Schema({ ...item, parent, children: [] });
+    item.children.forEach(chId => {
+      const match = matchSchemaPropsToId(chId, props);
+      return this.toSchema(match, node, props);
+    });
+    parent.addChild(node);
+    return node;
+  }
+
+  buildSchemaFromProps(props: SchemaRawProps[]) {
+    const root = Schema.createRoot();
+    const rootDomains: SchemaRawProps[] = this.getDomainsRoot<SchemaData>(
+      props
+    );
+    let out = [root];
+    rootDomains.forEach(rootRaw => {
+      const domain = this.toSchema(rootRaw, root, props);
+      root.addChild(domain);
+      out = out.concat(domain.nodes as Schema[]);
+    });
+    // DEBUG ctx: "parseSchema", out:
+    return out;
+  }
 }
 
 // === Old

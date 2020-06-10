@@ -31,7 +31,7 @@ export type DNodeRawOpts<T extends DNodeData> = {
   body?: string;
   data?: T;
 };
-export type DNodeRawProps<T = DNodeData> = Required<DNodeRawOpts<T>>;
+export type DNodeRawProps<T extends DNodeData> = Required<DNodeRawOpts<T>>;
 
 export type IDNodeOpts<T = DNodeData> = Omit<
   DNodeRawOpts<T>,
@@ -96,6 +96,7 @@ export interface Scope {
 
 export interface NodeWriteOpts {
   newNode?: boolean;
+  body?: string;
 }
 
 export interface QueryOpts {
@@ -107,6 +108,13 @@ export interface QueryOpts {
   initialQuery?: boolean;
   mode?: QueryMode;
 }
+
+export interface DEngineParser<TOpts = any> {
+  // parse: <T>(content: any, mode: QueryMode, opts: TOpts) => DNodeRawProps<T>[];
+  parseSchema(data: any, opts: TOpts): SchemaRawProps[];
+  parseNote(data: any, opts: TOpts): NoteRawProps[];
+}
+
 export interface DEngineStore<T = DNodeData, O = any> {
   opts: O;
   // fetchInitial: () => DNodeDict;

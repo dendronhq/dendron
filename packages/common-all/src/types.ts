@@ -26,7 +26,7 @@ export type DNodeRawOpts<T extends DNodeData> = {
   updated?: string;
   created?: string;
   fname?: string;
-  parent?: string | null | "not_set";
+  parent?: string | null | "not_set" | "root";
   children?: string[];
   body?: string;
   data?: T;

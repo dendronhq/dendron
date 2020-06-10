@@ -94,7 +94,7 @@ export class SchemaNodeRaw {
   }
 }
 
-export abstract class DNode<T = DNodeData> implements IDNode<T> {
+export abstract class DNode<T extends DNodeData> implements IDNode<T> {
   public id: string;
   public title: string;
   public desc: string;
@@ -236,7 +236,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
   }
 
   toRawPropsRecursive(): DNodeRawProps<T>[] {
-    const parent: SchemaRawProps = this.toRawProps();
+    const parent: DNodeRawProps<T> = this.toRawProps();
     const children: DNodeRawProps<T>[] = this.children
       .map(
         (ch: DNode<T>) =>
@@ -245,6 +245,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
         // eslint-disable-next-line function-paren-newline
       )
       .flat();
+    // @ts-ignore
     const out = [parent].concat(children);
     return out.flat();
   }
@@ -315,10 +316,7 @@ export class NodeBuilder {
     nodes: DNodeRawProps<T>[]
   ): DNodeRawProps<T>[] {
     // nodes: {nodes}
-    const rootNodes = _.filter(
-      nodes,
-      ent => _.isNull(ent.parent) || ent.parent === "root"
-    );
+    const rootNodes = _.filter(nodes, ent => ent.parent === "root");
     if (_.isEmpty(rootNodes)) {
       throw Error("no root node found");
     }
@@ -344,7 +342,6 @@ export class NodeBuilder {
     let out = [root];
     rootDomains.forEach(rootRaw => {
       const domain = this.toSchema(rootRaw, root, props);
-      root.addChild(domain);
       out = out.concat(domain.nodes as Schema[]);
     });
     // DEBUG ctx: "parseSchema", out:

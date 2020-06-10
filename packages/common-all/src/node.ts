@@ -10,6 +10,7 @@ import {
   ISchema,
   ISchemaOpts,
   NoteData,
+  NoteRawProps,
   SchemaData,
   SchemaRawOpts,
   SchemaRawProps
@@ -18,6 +19,7 @@ import {
 import YAML from "yamljs";
 // import { IconType } from "antd/lib/notification";
 import _ from "lodash";
+import { assert } from "./assert";
 import { genUUID } from "./uuid";
 
 // export interface DataNode {
@@ -223,10 +225,33 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
       "fname",
       "data"
     ]);
-    const parent = this.parent?.id ?? null;
+    let parent;
+    if (this.parent?.title === "root") {
+      parent = "root";
+    } else {
+      // TODO: this should never happen
+      parent = this.parent?.id ?? "root";
+    }
     const children = this.children.map(c => c.id);
     return { ...props, parent, children };
   }
+
+  toRawPropsRecursive(): DNodeRawProps<T>[] {
+    const parent: SchemaRawProps = this.toRawProps();
+    const children: DNodeRawProps<T>[] = this.children
+      .map(
+        (ch: DNode<T>) =>
+          // @ts-ignore
+          ch.toRawPropsRecursive()
+        // eslint-disable-next-line function-paren-newline
+      )
+      .flat();
+    const out = [parent].concat(children);
+    return out.flat();
+  }
+  //othrow Error("to implement");
+  //   return [];
+  // }
 
   validate(): boolean {
     return true;
@@ -249,44 +274,28 @@ export class Note extends DNode<NoteData> implements INote {
 }
 
 export class Schema extends DNode<SchemaData> implements ISchema {
-  public namespace: boolean;
-
   static createRoot() {
     const props = SchemaNodeRaw.createProps({ fname: "root" });
     return new Schema({ ...props, parent: null, children: [] });
   }
 
   constructor(props: ISchemaOpts) {
-    const dataDefaults = {
-      namespace: false
-    };
     super({
       type: "schema",
       ..._.defaults(props, {
         parent: null,
         children: [],
-        data: dataDefaults
+        data: {}
       })
     });
-    this.namespace = props.data?.namespace || dataDefaults.namespace;
   }
 
-  _renderBody(): any[] {
-    const parent = _.pick(this.toRawProps(), [
-      "id",
-      "namespace",
-      "title",
-      "parent",
-      "children"
-    ]);
-    // @ts-ignore
-    const children = this.children.map((ch: Schema) => ch._renderBody());
-    const out = [parent].concat(children);
-    return out.flat();
+  get namespace(): boolean {
+    return this.data?.namespace || false;
   }
 
   renderBody() {
-    const out = this._renderBody();
+    const out = this.toRawPropsRecursive();
     return ["```", YAML.stringify(out, undefined, 4), "```"].join("\n");
   }
 

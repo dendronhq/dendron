@@ -10,6 +10,7 @@ import {
 } from "@dendron/common-all";
 import fs, { Dirent } from "fs";
 
+import YAML from "yamljs";
 import _ from "lodash";
 import matter from "gray-matter";
 import minimatch from "minimatch";
@@ -135,5 +136,6 @@ export function schema2YMLFile(schema: Schema, opts: { root: string }) {
   const { root } = opts;
   const { fname } = schema;
   const filePath = path.join(root, `${fname}.yml`);
-  return fs.writeFileSync(filePath, schema.renderBody());
+  const out = YAML.stringify(schema.toRawPropsRecursive(), undefined, 4);
+  return fs.writeFileSync(filePath, out);
 }

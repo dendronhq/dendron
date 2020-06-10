@@ -58,6 +58,7 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   renderBody(): string;
   toDocument(): any;
   toRawProps(): DNodeRawProps<T>;
+  toRawPropsRecursive(): DNodeRawProps<T>[];
   validate(): boolean;
 };
 export type DNodeRawDict<T = DNodeData> = { [id: string]: DNodeRawProps<T> };

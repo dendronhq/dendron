@@ -26,6 +26,7 @@ module.exports = {
     "array-callback-return": "off",
     "lines-between-class-members": "off",
     "arrow-parens": "off",
+    "no-else-return": "off",
     "implicit-arrow-linebreak": "off",
     // duplicates
     "no-unused-vars": "off",

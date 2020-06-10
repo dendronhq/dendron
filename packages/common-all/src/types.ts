@@ -72,7 +72,8 @@ export type INote = INoteProps;
 export type NoteDict = { [id: string]: Note };
 
 // --- Schema
-export type SchemaRawOpts = DNodeRawOpts<SchemaData>;
+export type SchemaRawOpts = DNodeRawOpts<SchemaData> &
+  Required<Pick<DNodeRawOpts<SchemaData>, "id" | "fname">>;
 export type SchemaRawProps = DNodeRawProps<SchemaData>;
 export type ISchemaOpts = Omit<IDNodeOpts<SchemaData>, "type">;
 export type ISchemaProps = Required<ISchemaOpts>;

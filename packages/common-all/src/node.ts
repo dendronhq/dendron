@@ -159,9 +159,6 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
 
   // used in lookup
   get queryPath(): string {
-    if (this.title === "root") {
-      return "";
-    }
     return this.path;
   }
 
@@ -298,6 +295,10 @@ export class Schema extends DNode<SchemaData> implements ISchema {
     });
   }
 
+  get queryPath(): string {
+    return this.id;
+  }
+
   get namespace(): boolean {
     return this.data?.namespace || false;
   }
@@ -313,6 +314,7 @@ export class Schema extends DNode<SchemaData> implements ISchema {
         "title",
         "desc",
         "children",
+        "parent",
         "data",
         "fname"
       ]);

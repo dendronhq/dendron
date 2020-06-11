@@ -29,9 +29,9 @@ module.exports = {
     "arrow-parens": "off",
     "no-else-return": "off",
     "implicit-arrow-linebreak": "off",
-    // duplicates
     "no-unused-vars": "off",
     // rest
+    "import/no-extraneous-dependencies": "on",
     // A temporary hack related to IDE not resolving correct package.json
     "import/no-extraneous-dependencies": "off",
     // copy from packages/web-client/.eslintrc.json

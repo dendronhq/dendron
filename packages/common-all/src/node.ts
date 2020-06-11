@@ -122,7 +122,10 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
       body,
       data,
       children
-    } = _.defaults(opts, { children: [] }, DNodeRaw.createProps(opts));
+    } = _.defaults(
+      opts,
+      DNodeRaw.createProps(_.defaults(opts, { parent: null, children: [] }))
+    );
 
     this.id = id;
     this.title = title || fname.split(".").slice(-1)[0];

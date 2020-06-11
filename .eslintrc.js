@@ -23,6 +23,7 @@ module.exports = {
     quotes: "off",
     "comma-dangle": "off",
     "object-curly-newline": "off",
+    "arrow-body-style": "off",
     "array-callback-return": "off",
     "lines-between-class-members": "off",
     "arrow-parens": "off",

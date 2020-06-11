@@ -10,12 +10,14 @@ import {
   ISchema,
   ISchemaOpts,
   NoteData,
+  NoteRawProps,
   SchemaData,
   SchemaRawOpts,
   SchemaRawProps
 } from "./types";
 
 import YAML from "yamljs";
+/* eslint-disable no-loop-func */
 // import { IconType } from "antd/lib/notification";
 import _ from "lodash";
 import { genUUID } from "./uuid";
@@ -321,6 +323,20 @@ const matchSchemaPropsToId = (
   return out;
 };
 
+// TODO:move to node
+function getRoot(nodes: NoteRawProps[]) {
+  // nodes: {nodes}
+  const rootNode = _.find(
+    nodes,
+    ent => ent.title === "root" || _.isNull(ent.parent)
+  );
+  if (!rootNode) {
+    throw Error("no root node found");
+  }
+  const node = new Note({ ...rootNode, parent: null, children: [] });
+  return { node, childrenIds: rootNode.children };
+}
+
 export class NodeBuilder {
   getDomainsRoot<T extends DNodeData>(
     nodes: DNodeRawProps<T>[]
@@ -333,6 +349,14 @@ export class NodeBuilder {
     return rootNodes;
   }
 
+  toNote(item: NoteRawProps, parents: Note[]) {
+    const node = new Note({ ...item, parent: null, children: [] });
+    const { parent: parentId, children } = item;
+    const parent: Note = _.find(parents, { id: parentId }) as Note;
+    parent.addChild(node);
+    return { node, parent, children };
+  }
+
   toSchema(item: SchemaRawProps, parent: Schema, props: SchemaRawProps[]) {
     // DEBUG: item: {item}, parents: {parents}
     const node = new Schema({ ...item, parent, children: [] });
@@ -342,6 +366,35 @@ export class NodeBuilder {
     });
     parent.addChild(node);
     return node;
+  }
+
+  buildNoteFromProps(props: NoteRawProps[]): Note[] {
+    const { node: rootNode, childrenIds } = getRoot(props);
+    const out = [];
+    // const { node: rootNode, children: rootChildrenIds } = this.toNote(
+    //   rootRaw,
+    //   []
+    // );
+    out.push([rootNode]);
+
+    let parentNodes = [rootNode];
+    let nodeIds = childrenIds;
+
+    while (!_.isEmpty(nodeIds)) {
+      const currentNodes: Note[] = [];
+
+      nodeIds = nodeIds
+        .map((id: string) => {
+          const nodeProps = props.find(ent => ent.id === id) as NoteRawProps;
+          const { node, children } = this.toNote(nodeProps, parentNodes);
+          currentNodes.push(node);
+          return children;
+        })
+        .flat();
+      out.push(currentNodes);
+      parentNodes = currentNodes;
+    }
+    return out.flat();
   }
 
   buildSchemaFromProps(props: SchemaRawProps[]) {

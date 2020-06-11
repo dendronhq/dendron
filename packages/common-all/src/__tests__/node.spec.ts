@@ -1,14 +1,10 @@
-import { DNodeRaw, Schema } from "../node";
+import { DNodeRaw, NodeBuilder, Schema } from "../node";
 
 import { ISchemaOpts } from "../types";
 
 test("adds 1 + 2 to equal 3", () => {
   expect(1 + 2).toBe(3);
 });
-
-function createSchema(opts: ISchemaOpts) {
-  return new Schema(opts);
-}
 
 function setup() {
   const foo = new Schema({
@@ -60,3 +56,25 @@ describe("schema", () => {
     });
   });
 });
+
+// describe("NodeBuilder", () => {
+//   // let store: FileStorage;
+//   let root: string;
+//   beforeAll(() => {
+//     root = setupTmpDendronDir();
+//     // store = createFileStorage(root);
+//   });
+
+// test("convert from raw", async () => {
+//   const resp = await store.query(createScope(), "**/*", {});
+//   const rawProps = resp.data.map(n => n.toRawProps());
+//   const p = new NodeBuilder();
+//   const nodes = p.parse(rawProps);
+//   const nodesRaw = _.sortBy(rawProps, [ent => ent.title]);
+//   const nodesParsedRaw = _.sortBy(
+//     nodes.map(n => n.toRawProps()),
+//     [ent => ent.title]
+//   );
+//   expect(nodesParsedRaw).toEqual(nodesRaw);
+// });
+// });

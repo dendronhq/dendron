@@ -46,10 +46,14 @@ export type IDNodeProps<T = DNodeData> = Required<IDNodeOpts<T>>;
 export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   // generated
   nodes: IDNode<T>[];
+  // NOTE: currently equal to `fname`
   path: string;
+  // how to display path in lookup
+  // used to special case `root` node to be empty string
   queryPath: string;
+  // the root of domain
   domain: IDNode<T>;
-  // generated
+  // absolute url to node id
   url: string;
 
   equal(node: IDNode<T>): boolean;

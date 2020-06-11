@@ -157,7 +157,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
     return out;
   }
 
-  // used in query
+  // used in lookup
   get queryPath(): string {
     if (this.title === "root") {
       return "";

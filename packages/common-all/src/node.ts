@@ -97,7 +97,7 @@ export class SchemaNodeRaw {
   }
 }
 
-export abstract class DNode<T extends DNodeData> implements IDNode<T> {
+export abstract class DNode<T = DNodeData> implements IDNode<T> {
   public id: string;
   public title: string;
   public desc: string;

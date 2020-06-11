@@ -175,9 +175,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
     // }
   }
 
-  get url(): string {
-    return `/doc/${this.id}`;
-  }
+  abstract get url(): string;
 
   addChild(node: IDNode<T>) {
     this.children.push(node);
@@ -277,6 +275,10 @@ export class Note extends DNode<NoteData> implements INote {
     });
     this.schemaId = props?.data?.schemaId || "-1";
   }
+
+  get url(): string {
+    return `/doc/${this.id}`;
+  }
 }
 
 export class Schema extends DNode<SchemaData> implements ISchema {
@@ -298,6 +300,10 @@ export class Schema extends DNode<SchemaData> implements ISchema {
 
   get namespace(): boolean {
     return this.data?.namespace || false;
+  }
+
+  get url(): string {
+    return `/schema/${this.id}`;
   }
 
   renderBody() {

@@ -31,7 +31,9 @@ export type DNodeRawOpts<T extends DNodeData> = {
   body?: string;
   data?: T;
 };
-export type DNodeRawProps<T extends DNodeData> = Required<DNodeRawOpts<T>>;
+export type DNodeRawProps<T extends DNodeData = DNodeData> = Required<
+  DNodeRawOpts<T>
+>;
 
 export type IDNodeOpts<T = DNodeData> = Omit<
   DNodeRawOpts<T>,

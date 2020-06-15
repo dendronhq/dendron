@@ -1,0 +1,16 @@
+- hosts: localhost # use all for remote
+  vars:
+    ts_module: "qs"
+  tasks:
+    - name: Ansible Basic Variable Example
+      debug:
+        msg: "{{ root }}"
+    - name: Create dir
+      file:
+        path: "{{root}}/app/@types/{{ts_module}}"
+        state: directory
+        mode: "0755"
+    - name: Create type file
+      template:
+        src: ../templates/type.d.ts.jinja
+        dest: "{{root}}/app/@types/{{ts_module}}/index.d.ts"

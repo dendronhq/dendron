@@ -24,6 +24,7 @@ export type getAllFilesOpts = {
   root: string;
   include?: string[];
   exclude?: string[];
+  withFileTypes?: boolean;
 };
 
 export function fileMeta2Node(body: string, meta: FileMeta): Note {
@@ -55,8 +56,9 @@ export function globMatch(patterns: string[] | string, fname: string): boolean {
 }
 
 export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
-  const { root } = _.defaults(opts, {
-    exclude: [".git", "Icon\r", ".*"]
+  const { root, withFileTypes } = _.defaults(opts, {
+    exclude: [".git", "Icon\r", ".*"],
+    withFileTypes: false
   });
   const allFiles = fs.readdirSync(root, { withFileTypes: true });
   return _.reject(
@@ -72,7 +74,11 @@ export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
       if (opts.include && !globMatch(opts.include, fname)) {
         return null;
       }
-      return dirent.name;
+      if (withFileTypes) {
+        return dirent;
+      } else {
+        return dirent.name;
+      }
     }),
     _.isNull
   ) as Dirent[] | string[];

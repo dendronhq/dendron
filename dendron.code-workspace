@@ -11,11 +11,11 @@
       "path": "packages/common-server"
     },
     {
-      "path": "packages/electron-client"
+      "path": "packages/dendron-plugin"
     },
     {
-      "name": "editor",
-      "path": "vendor/rich-markdown-editor"
+      "name": "engine",
+      "path": "packages/engine-server"
     }
   ],
   "settings": {

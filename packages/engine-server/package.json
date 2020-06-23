@@ -1,5 +1,5 @@
 {
-  "name": "dendron-engine",
+  "name": "@dendron/engine-server",
   "version": "0.0.0",
   "description": "dendron-engine",
   "license": "MIT",
@@ -29,7 +29,15 @@
     "watch": "npm run build -- --watch",
     "watch:test": "jest --watch"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@dendron/common-all": "^0.0.0",
+    "@dendron/common-server": "^0.0.0",
+    "@types/fs-extra": "^9.0.1",
+    "@types/lodash": "^4.14.156",
+    "fs-extra": "^9.0.1",
+    "fuse.js": "^6.3.0",
+    "lodash": "^4.17.15"
+  },
   "devDependencies": {
     "@types/jest": "^23.3.3",
     "@types/node": "^10.11.4",

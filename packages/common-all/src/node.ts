@@ -13,14 +13,14 @@ import {
   NoteRawProps,
   SchemaData,
   SchemaRawOpts,
-  SchemaRawProps
-} from "./types";
+  SchemaRawProps,
+} from './types';
 
-import YAML from "yamljs";
+import YAML from 'yamljs';
 /* eslint-disable no-loop-func */
 // import { IconType } from "antd/lib/notification";
-import _ from "lodash";
-import { genUUID } from "./uuid";
+import _ from 'lodash';
+import { genUUID } from './uuid';
 
 // export interface DataNode {
 //   checkable?: boolean;
@@ -54,17 +54,17 @@ export class DNodeRaw {
       parent,
       children,
       body,
-      data
+      data,
     } = _.defaults(opts, {
-      updated: "TODO",
-      created: "TODO",
+      updated: 'TODO',
+      created: 'TODO',
       id: genUUID(),
-      desc: "",
+      desc: '',
       children: [],
-      parent: "not_set",
-      body: "",
+      parent: 'not_set',
+      body: '',
       data: {},
-      fname: "not_set"
+      fname: 'not_set',
     });
     const title = opts.title || fname;
     return {
@@ -77,7 +77,7 @@ export class DNodeRaw {
       parent,
       children,
       body,
-      data
+      data,
     };
   }
 }
@@ -121,14 +121,14 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
       created,
       body,
       data,
-      children
+      children,
     } = _.defaults(
       opts,
       DNodeRaw.createProps(_.defaults(opts, { parent: null, children: [] }))
     );
 
     this.id = id;
-    this.title = title || fname.split(".").slice(-1)[0];
+    this.title = title || fname.split('.').slice(-1)[0];
     this.desc = desc;
     this.fname = fname;
     this.type = type;
@@ -141,7 +141,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
   }
 
   get domain(): DNode<T> {
-    if (this.parent?.title === "root" || _.isNull(this.parent)) {
+    if (this.parent?.title === 'root' || _.isNull(this.parent)) {
       return this;
     }
     return this.parent.domain;
@@ -183,8 +183,8 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
     const props1 = this.toRawProps();
     const props2 = node.toRawProps();
     return _.every([
-      _.isEqual(_.omit(props1, "body"), _.omit(props2, "body")),
-      _.trim(props1.body) === _.trim(props2.body)
+      _.isEqual(_.omit(props1, 'body'), _.omit(props2, 'body')),
+      _.trim(props1.body) === _.trim(props2.body),
     ]);
   }
 
@@ -199,38 +199,38 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
       document: {
         nodes: [
           {
-            object: "block",
-            type: "paragraph",
+            object: 'block',
+            type: 'paragraph',
             nodes: [
               {
-                object: "text",
-                text: this.renderBody()
-              }
-            ]
-          }
-        ]
-      }
+                object: 'text',
+                text: this.renderBody(),
+              },
+            ],
+          },
+        ],
+      },
     };
   }
 
   toRawProps(): DNodeRawProps<T> {
     const props = _.pick(this, [
-      "id",
-      "title",
-      "desc",
-      "type",
-      "updated",
-      "created",
-      "body",
-      "fname",
-      "data"
+      'id',
+      'title',
+      'desc',
+      'type',
+      'updated',
+      'created',
+      'body',
+      'fname',
+      'data',
     ]);
     let parent;
-    if (this.parent?.title === "root") {
-      parent = "root";
+    if (this.parent?.title === 'root') {
+      parent = 'root';
     } else {
       // TODO: this should never happen
-      parent = this.parent?.id ?? "root";
+      parent = this.parent?.id ?? 'root';
     }
     const children = this.children.map(c => c.id);
     return { ...props, parent, children };
@@ -264,13 +264,13 @@ export class Note extends DNode<NoteData> implements INote {
 
   constructor(props: INoteOpts) {
     super({
-      type: "note",
+      type: 'note',
       ..._.defaults(props, {
         parent: null,
-        children: []
-      })
+        children: [],
+      }),
     });
-    this.schemaId = props?.data?.schemaId || "-1";
+    this.schemaId = props?.data?.schemaId || '-1';
   }
 
   get url(): string {
@@ -280,18 +280,18 @@ export class Note extends DNode<NoteData> implements INote {
 
 export class Schema extends DNode<SchemaData> implements ISchema {
   static createRoot() {
-    const props = SchemaNodeRaw.createProps({ id: "root", fname: "root" });
+    const props = SchemaNodeRaw.createProps({ id: 'root', fname: 'root' });
     return new Schema({ ...props, parent: null, children: [] });
   }
 
   constructor(props: ISchemaOpts) {
     super({
-      type: "schema",
+      type: 'schema',
       ..._.defaults(props, {
         parent: null,
         children: [],
-        data: {}
-      })
+        data: {},
+      }),
     });
   }
 
@@ -310,16 +310,16 @@ export class Schema extends DNode<SchemaData> implements ISchema {
   renderBody() {
     const out = _.map(this.toRawPropsRecursive(), props => {
       return _.pick(props, [
-        "id",
-        "title",
-        "desc",
-        "children",
-        "parent",
-        "data",
-        "fname"
+        'id',
+        'title',
+        'desc',
+        'children',
+        'parent',
+        'data',
+        'fname',
       ]);
     });
-    return ["```", YAML.stringify(out, undefined, 4), "```"].join("\n");
+    return ['```', YAML.stringify(out, undefined, 4), '```'].join('\n');
   }
 }
 
@@ -339,10 +339,10 @@ function getRoot(nodes: NoteRawProps[]) {
   // nodes: {nodes}
   const rootNode = _.find(
     nodes,
-    ent => ent.title === "root" || _.isNull(ent.parent)
+    ent => ent.title === 'root' || _.isNull(ent.parent)
   );
   if (!rootNode) {
-    throw Error("no root node found");
+    throw Error('no root node found');
   }
   const node = new Note({ ...rootNode, parent: null, children: [] });
   return { node, childrenIds: rootNode.children };
@@ -353,9 +353,9 @@ export class NodeBuilder {
     nodes: DNodeRawProps<T>[]
   ): DNodeRawProps<T>[] {
     // nodes: {nodes}
-    const rootNodes = _.filter(nodes, ent => ent.parent === "root");
+    const rootNodes = _.filter(nodes, ent => ent.parent === 'root');
     if (_.isEmpty(rootNodes)) {
-      throw Error("no root node found");
+      throw Error('no root node found');
     }
     return rootNodes;
   }

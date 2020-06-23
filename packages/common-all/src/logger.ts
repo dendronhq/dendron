@@ -1,9 +1,9 @@
-import { env } from "./env";
-import pino from "pino";
+import { env } from './env';
+import pino from 'pino';
 
 function createLogger(name?: string) {
-  const level = env("LOG_LEVEL", { shouldThrow: false }) || "debug";
-  const nameClean = name || env("LOG_NAME");
+  const level = env('LOG_LEVEL', { shouldThrow: false }) || 'debug';
+  const nameClean = name || env('LOG_NAME');
   return pino({ name: nameClean, level });
 }
 

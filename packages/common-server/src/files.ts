@@ -6,15 +6,15 @@ import {
   NoteData,
   NoteRawProps,
   Schema,
-  genUUID
-} from "@dendron/common-all";
-import fs, { Dirent } from "fs";
+  genUUID,
+} from '@dendron/common-all';
+import fs, { Dirent } from 'fs';
 
-import YAML from "yamljs";
-import _ from "lodash";
-import matter from "gray-matter";
-import minimatch from "minimatch";
-import path from "path";
+import YAML from 'yamljs';
+import _ from 'lodash';
+import matter from 'gray-matter';
+import minimatch from 'minimatch';
+import path from 'path';
 
 interface FileMeta {
   name: string;
@@ -34,12 +34,12 @@ export function fileMeta2Node(body: string, meta: FileMeta): Note {
   const note = new Note({
     id,
     title,
-    desc: "TODO",
+    desc: 'TODO',
     data: {
-      schemaId: "-1"
+      schemaId: '-1',
     },
     body,
-    fname: meta.name
+    fname: meta.name,
   });
   return note;
 }
@@ -57,8 +57,8 @@ export function globMatch(patterns: string[] | string, fname: string): boolean {
 
 export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
   const { root, withFileTypes } = _.defaults(opts, {
-    exclude: [".git", "Icon\r", ".*"],
-    withFileTypes: false
+    exclude: ['.git', 'Icon\r', '.*'],
+    withFileTypes: false,
   });
   const allFiles = fs.readdirSync(root, { withFileTypes: true });
   return _.reject(
@@ -121,20 +121,20 @@ export function node2MdFile(node: IDNode, opts: { root: string }) {
   const { root } = opts;
   const { body, path: nodePath } = node;
   const meta = _.pick(node, [
-    "id",
-    "title",
-    "desc",
-    "updated",
-    "created",
-    "url",
-    "path"
+    'id',
+    'title',
+    'desc',
+    'updated',
+    'created',
+    'url',
+    'path',
   ]);
   const parent = node.parent?.id || null;
   const children = node.children.map(c => c.id);
   const filePath = path.join(root, `${nodePath}.md`);
   return fs.writeFileSync(
     filePath,
-    matter.stringify(body || "", { ...meta, parent, children })
+    matter.stringify(body || '', { ...meta, parent, children })
   );
 }
 

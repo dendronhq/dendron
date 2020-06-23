@@ -1,8 +1,8 @@
 // Global Types
 
-import { Note, Schema } from "./node";
+import { Note, Schema } from './node';
 
-export type Stage = "dev" | "prod" | "test";
+export type Stage = 'dev' | 'prod' | 'test';
 
 // === Node Types
 
@@ -14,7 +14,7 @@ export type SchemaData = {
   namespace?: boolean;
 };
 export type DNodeData = SchemaData | NoteData;
-export type IDNodeType = "note" | "schema";
+export type IDNodeType = 'note' | 'schema';
 
 export type QueryMode = IDNodeType;
 
@@ -26,7 +26,7 @@ export type DNodeRawOpts<T extends DNodeData> = {
   updated?: string;
   created?: string;
   fname?: string;
-  parent?: string | null | "not_set" | "root";
+  parent?: string | null | 'not_set' | 'root';
   children?: string[];
   body?: string;
   data?: T;
@@ -37,7 +37,7 @@ export type DNodeRawProps<T extends DNodeData = DNodeData> = Required<
 
 export type IDNodeOpts<T = DNodeData> = Omit<
   DNodeRawOpts<T>,
-  "parent" | "children"
+  'parent' | 'children'
 > & {
   type: IDNodeType;
   parent?: IDNode<T> | null;
@@ -72,16 +72,16 @@ export type DNodeDict<T = DNodeData> = { [id: string]: IDNode<T> };
 
 // --- Notes
 export type NoteRawProps = DNodeRawProps<NoteData>;
-export type INoteOpts = Omit<IDNodeOpts<NoteData>, "type">;
+export type INoteOpts = Omit<IDNodeOpts<NoteData>, 'type'>;
 export type INoteProps = Required<INoteOpts>;
 export type INote = INoteProps;
 export type NoteDict = { [id: string]: Note };
 
 // --- Schema
 export type SchemaRawOpts = DNodeRawOpts<SchemaData> &
-  Required<Pick<DNodeRawOpts<SchemaData>, "id" | "fname">>;
+  Required<Pick<DNodeRawOpts<SchemaData>, 'id' | 'fname'>>;
 export type SchemaRawProps = DNodeRawProps<SchemaData>;
-export type ISchemaOpts = Omit<IDNodeOpts<SchemaData>, "type">;
+export type ISchemaOpts = Omit<IDNodeOpts<SchemaData>, 'type'>;
 export type ISchemaProps = Required<ISchemaOpts>;
 export type ISchema = ISchemaProps;
 export type SchemaDict = { [id: string]: Schema };

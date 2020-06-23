@@ -1,6 +1,6 @@
-const ROOT_PATH = "/doc/root";
+const ROOT_PATH = '/doc/root';
 
 export const CONSTANTS = {
   ROOT_PATH,
-  ALL_QUERY: "**/*"
+  ALL_QUERY: '**/*',
 };

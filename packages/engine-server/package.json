@@ -25,6 +25,7 @@
     "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
     "build": "tsc --pretty",
     "test": "jest",
+    "test:unit:all": "cross-env LOG_LEVEL=error yarn test",
     "coverage": "jest --coverage",
     "watch": "npm run build -- --watch",
     "watch:test": "jest --watch"
@@ -32,16 +33,20 @@
   "dependencies": {
     "@dendron/common-all": "^0.0.0",
     "@dendron/common-server": "^0.0.0",
-    "@types/fs-extra": "^9.0.1",
-    "@types/lodash": "^4.14.156",
     "fs-extra": "^9.0.1",
     "fuse.js": "^6.3.0",
-    "lodash": "^4.17.15"
+    "gray-matter": "^4.0.2",
+    "lodash": "^4.17.15",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "@types/fs-extra": "^9.0.1",
     "@types/jest": "^23.3.3",
-    "@types/node": "^10.11.4",
+    "@types/lodash": "^4.14.156",
+    "@types/node": "12",
+    "@types/yamljs": "^0.2.31",
     "coveralls": "^3.0.2",
+    "cross-env": "^7.0.2",
     "jest": "^23.6.0",
     "prettier": "^1.14.3",
     "rimraf": "^2.6.2",

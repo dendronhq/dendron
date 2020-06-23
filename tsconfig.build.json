@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@dendron/*": ["packages/*/src"]
+    },
     "module": "commonjs",
     "target": "ES2019",
     "sourceMap": true,

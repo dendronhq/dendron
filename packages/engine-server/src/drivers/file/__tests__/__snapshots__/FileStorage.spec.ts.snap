@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`main notes query all: raw-props 1`] = `
+Object {
+  "body": "",
+  "children": Array [],
+  "created": "TODO",
+  "data": Object {},
+  "desc": "",
+  "fname": "foo.one",
+  "parent": "foo",
+  "title": "foo.one",
+  "type": "note",
+  "updated": "TODO",
+}
+`;
+
+exports[`main notes write writeQuery: data snapshot 1`] = `
+"bond
+"
+`;

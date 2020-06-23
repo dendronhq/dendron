@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.build.json",
   "compilerOptions": {
     "declaration": true,
     "module": "commonjs",
@@ -7,7 +8,6 @@
     "target": "es2015",
     "outDir": "./lib",
     "removeComments": true,
-    "inlineSourceMap": true,
     "inlineSources": true,
     "preserveConstEnums": true,
     "experimentalDecorators": true,
@@ -20,5 +20,6 @@
     "esModuleInterop": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*-spec.ts"]
+  "exclude": ["node_modules", "**/*-spec.ts"],
+  "compileOnSave": true
 }

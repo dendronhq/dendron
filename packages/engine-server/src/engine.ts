@@ -108,13 +108,7 @@ export class ProtoEngine implements DEngine {
         new FileStorage(opts as { root: string }),
         opts
       );
-      // if (!_.isUndefined(window)) {
-      //   // @ts-ignore
-      //   window.ENGINE = PROTO_ENGINE;
-      // }
       logger.info({ ctx: 'getEngine:exit', opts, stage });
-      // @ts-ignore
-      window.DEBUG_ENGINE = PROTO_ENGINE;
       return PROTO_ENGINE;
     }
     return PROTO_ENGINE;

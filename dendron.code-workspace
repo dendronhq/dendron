@@ -20,6 +20,9 @@
       "path": "packages/web-server"
     },
     {
+      "path": "packages/infra"
+    },
+    {
       "path": "/Users/kevinlin/projects/vscode-extension/ref/vscode"
     }
   ],

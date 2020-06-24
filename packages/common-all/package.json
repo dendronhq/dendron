@@ -5,12 +5,13 @@
   "license": "MIT",
   "repository": "",
   "author": {
-    "name": "",
+    "name": "Kevin Lin",
     "email": "kevin@thence.io",
-    "url": "https://kevinslin.com"
+    "url": "https://kevinslin.com",
+    "organization": true
   },
   "keywords": [
-    ""
+    "common"
   ],
   "files": [
     "lib"

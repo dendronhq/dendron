@@ -41,8 +41,6 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@dendron/common-all": "^0.0.0",
-    "@dendron/common-server": "^0.0.0",
     "@types/glob": "^7.1.1",
     "@types/lodash": "^4.14.155",
     "@types/mocha": "^7.0.2",
@@ -58,6 +56,8 @@
   },
   "dependencies": {
     "@dendron/engine-server": "^0.0.0",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.15",
+    "@dendron/common-all": "^0.0.0",
+    "@dendron/common-server": "^0.0.0"
   }
 }

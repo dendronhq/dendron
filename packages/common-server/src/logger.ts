@@ -1,6 +1,7 @@
 // import pino from "pino";
 
 import { env } from "@dendron/common-all";
+import pino from "pino";
 
 export class Logger {
   public name: string;
@@ -28,15 +29,9 @@ export class Logger {
 function createLogger(name?: string) {
   const level = env("LOG_LEVEL", { shouldThrow: false }) || "debug";
   const nameClean = name || env("LOG_NAME");
-  // pino(
-  //   pino.destination({
-  //     dest: "./my-file",
-  //     minLength: 4096, // Buffer before writing
-  //     sync: false // Asynchronous logging
-  //   })
-  // );
-  return new Logger({ name: nameClean, level });
-  //return pino({ name: nameClean, level });
+  const logDst =
+    env("LOG_DST", { shouldThrow: false }) || "/tmp/dendron-dev.log";
+  return pino(pino.destination(logDst)).child({ name: nameClean, level });
 }
 
 export { createLogger };

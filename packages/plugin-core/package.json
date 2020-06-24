@@ -3,7 +3,7 @@
   "displayName": "dendron",
   "description": "schema based note taking",
   "publisher": "dendron",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "engines": {
     "vscode": "^1.46.0"
   },
@@ -55,9 +55,9 @@
     "vscode-test": "^1.3.0"
   },
   "dependencies": {
-    "@dendron/common-all": "^0.1.4",
-    "@dendron/common-server": "^0.1.4",
-    "@dendron/engine-server": "^0.1.4",
+    "@dendron/common-all": "^0.1.5",
+    "@dendron/common-server": "^0.1.5",
+    "@dendron/engine-server": "^0.1.5",
     "lodash": "^4.17.15"
   }
 }

@@ -11,11 +11,18 @@
       "path": "packages/common-server"
     },
     {
-      "path": "packages/dendron-plugin"
+      "path": "packages/plugin-core"
     },
     {
       "name": "engine",
       "path": "packages/engine-server"
+    },
+    {
+      "name": "engine",
+      "path": "packages/engine-server"
+    },
+    {
+      "path": "/Users/kevinlin/projects/vscode-extension/ref/vscode"
     }
   ],
   "settings": {

@@ -14,16 +14,13 @@
     "husky": "^4.2.5",
     "lerna": "^3.19.0",
     "prettier": "^2.0.4",
-    "typescript": "^3.9.5"
+    "typescript": "^3.9.5",
+    "lodash": "^4.17.15"
   },
   "packages": [
     "packages/*",
     "vendor/*"
   ],
   "npmClient": "yarn",
-  "version": "independent",
-  "useWorkspaces": false,
-  "dependencies": {
-    "lodash": "^4.17.15"
-  }
+  "useWorkspaces": false
 }

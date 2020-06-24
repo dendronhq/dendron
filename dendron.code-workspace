@@ -14,12 +14,10 @@
       "path": "packages/plugin-core"
     },
     {
-      "name": "engine",
       "path": "packages/engine-server"
     },
     {
-      "name": "engine",
-      "path": "packages/engine-server"
+      "path": "packages/web-server"
     },
     {
       "path": "/Users/kevinlin/projects/vscode-extension/ref/vscode"

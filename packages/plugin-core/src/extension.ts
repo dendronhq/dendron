@@ -5,7 +5,9 @@ import * as vscode from "vscode";
 
 import { QuickPickItem, Uri } from "vscode";
 
+import { LookupController } from "./components/lookup/LookupController";
 import { QuickAccessController } from "./vs/platform/quickinput/browser/quickAccess";
+import { engine } from "@dendron/engine-server";
 
 // import { DisposableStore, MutableDisposable } from "vs/base/common/lifecycle";
 // import { AnythingQuickAccessProvider } from "./components/search/anythingQuickAccess";
@@ -57,6 +59,14 @@ function getFirstWorkspaceFolder(opts: {
 export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
+  engine()
+    .query({ username: "DUMMY" }, "**/*", "note", {
+      fullNode: false,
+      initialQuery: true,
+    })
+    .then((resp) => {
+      console.log("engine init");
+    });
   console.log('Congratulations, your extension "dendron" is now active!');
 
   // The command has been defined in the package.json file
@@ -73,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
     "dendron.lookup",
     async () => {
       vscode.window.showInformationMessage("BOND!");
-      const controller = new QuickAccessController();
+      const controller = new LookupController();
       controller.show();
       // TODO: dispose
 

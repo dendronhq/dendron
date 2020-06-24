@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable no-use-before-define */
 const fs = require("fs");
 const _ = require("lodash");
 
@@ -6,6 +8,8 @@ const DEPENDENCIES = {
   CLIENT_ELECTRON: "@dendron/electron-client",
   COMMON_ALL: "@dendron/common-all",
   COMMON_CLIENT: "@dendron/common-client",
+  COMMON_SERVER: "@dendron/common-server",
+  PLUGIN_CORE: "@dendron/plugin-core",
 };
 
 const frontCommonDeps = [DEPENDENCIES.COMMON_ALL];
@@ -18,13 +22,22 @@ const webClientDeps = [
   DEPENDENCIES.COMMON_ALL,
   DEPENDENCIES.COMMON_CLIENT,
 ];
+
+const codePluginDeps = [
+  DEPENDENCIES.COMMON_ALL,
+  DEPENDENCIES.COMMON_CLIENT,
+  DEPENDENCIES.COMMON_SERVER,
+  DEPENDENCIES.PLUGIN_CORE,
+];
+
 const packages = {
   "electron-client": electronClientDeps,
   "web-client": webClientDeps,
+  "code-plugin": codePluginDeps,
 };
 
 function generateFrontCommonScripts() {
-  let scope = frontCommonDeps.join(" --scope ");
+  const scope = frontCommonDeps.join(" --scope ");
   const group = "front-common";
   generateBootstrapScript({ scope, group });
   //generateBuildScript({ scope, group, standalone });
@@ -32,10 +45,11 @@ function generateFrontCommonScripts() {
 
 function generateClientScripts() {
   _.each(packages, (deps, pkg) => {
-    let scope = deps.join(" --scope ");
+    const scope = deps.join(" --scope ");
     const group = pkg;
     generateBootstrapScript({ scope, group });
     generateBuildScript({ scope, group });
+    generateWatchScript({ scope, group });
   });
 }
 
@@ -99,7 +113,7 @@ function generateBootstrapScript({ scope, group, standalone }) {
 lerna bootstrap --scope ${standalone}
 `;
 
-  let script = `
+  const script = `
 #!/usr/bin/env sh
 
 ${standalone ? standaloneSection : ""}
@@ -114,7 +128,7 @@ function generateBuildScript({ scope, group, standalone }) {
 lerna run build --parallel --scope ${standalone}
 `;
 
-  script = `
+  const script = `
 #!/usr/bin/env sh
 
 ${standalone ? standaloneSection : ""}
@@ -138,7 +152,7 @@ function generateScript({
   if (skipDev) {
     scope = _.reject(scope, { dev: true });
   }
-  let left = [...scope];
+  const left = [...scope];
   let pushed = [];
   if (ignorePhase) {
     lines.push(scope);
@@ -160,6 +174,7 @@ function generateScript({
 #!/usr/bin/env sh
 ${lines
   .map(
+    // eslint-disable-next-line prefer-template
     (l) => prefix + l.map((ent) => ent.name).join(" --scope ") + ` ${suffix}`
   )
   .join("\n")}
@@ -184,8 +199,8 @@ function writeScript(scriptPath, script) {
 // === Main
 
 function generateScraperScripts() {
-  let scope = scraperDependencies.join(" --scope ");
-  let group = "scraper";
+  const scope = scraperDependencies.join(" --scope ");
+  const group = "scraper";
   let script = `
 #!/usr/bin/env sh
 
@@ -209,7 +224,7 @@ lerna run watch --parallel --scope ${scope}`;
 }
 
 function generateBackendFrontendScripts() {
-  let scope = backendDependencies
+  const scope = backendDependencies
     .concat(frontendDependencies)
     .join(" --scope ");
   const group = "front_back";
@@ -219,8 +234,8 @@ function generateBackendFrontendScripts() {
 }
 
 function generateFrontendScripts() {
-  let scope = frontendDependencies.join(" --scope ");
-  let standalone = frontendStandaloneDependencies.join(" --scope ");
+  const scope = frontendDependencies.join(" --scope ");
+  const standalone = frontendStandaloneDependencies.join(" --scope ");
   const group = "frontend";
   generateBootstrapScript({ scope, group });
   generateBuildScript({ scope, group, standalone });
@@ -228,7 +243,7 @@ function generateFrontendScripts() {
 
 function generateBackendScripts() {
   let prefix;
-  let scope = backendDependencies.join(" --scope ");
+  const scope = backendDependencies.join(" --scope ");
 
   // bootstrap prod
   prefix = "lerna bootstrap --scope ";

@@ -20,7 +20,6 @@ module.exports = {
   plugins: ["react", "@typescript-eslint", "jest"],
   rules: {
     // don't care
-    quotes: "off",
     "comma-dangle": "off",
     "object-curly-newline": "off",
     "arrow-body-style": "off",
@@ -30,6 +29,11 @@ module.exports = {
     "no-else-return": "off",
     "implicit-arrow-linebreak": "off",
     "no-unused-vars": "off",
+    // prettier
+    indent: "off",
+    quotes: "off",
+    // runs into max-len issue
+    "operator-linebreak": "off",
     // rest
     "import/no-extraneous-dependencies": "on",
     // A temporary hack related to IDE not resolving correct package.json

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@dendron/*": ["packages/*/src"]
+      "@dendronhq/*": ["packages/*/src"]
     },
     "module": "commonjs",
     "target": "ES2019",

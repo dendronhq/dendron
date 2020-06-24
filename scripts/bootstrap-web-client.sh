@@ -3,4 +3,4 @@
 
 
 
-lerna bootstrap --scope @dendron/web-client --scope @dendron/common-all --scope @dendron/common-client
+lerna bootstrap --scope @dendronhq/web-client --scope @dendronhq/common-all --scope @dendronhq/common-client

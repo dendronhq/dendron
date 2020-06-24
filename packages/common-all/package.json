@@ -1,5 +1,5 @@
 {
-  "name": "@dendron/common-all",
+  "name": "@dendronhq/common-all",
   "version": "0.1.6",
   "description": "common-all",
   "license": "MIT",
@@ -61,5 +61,5 @@
   "jest": {
     "preset": "ts-jest"
   },
-  "gitHead": "90bf620ebc5d4b7208807b9197b30a509e10c30c"
+  "gitHead": "403eb012f8b34bc115dd7dd86f80c76b39329f3b"
 }

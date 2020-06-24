@@ -1,5 +1,5 @@
 {
-  "name": "@dendron/engine-server",
+  "name": "@dendronhq/engine-server",
   "version": "0.1.6",
   "description": "dendron-engine",
   "license": "MIT",
@@ -32,8 +32,8 @@
     "watch:test": "jest --watch"
   },
   "dependencies": {
-    "@dendron/common-all": "^0.1.6",
-    "@dendron/common-server": "^0.1.6",
+    "@dendronhq/common-all": "^0.1.6",
+    "@dendronhq/common-server": "^0.1.6",
     "fs-extra": "^9.0.1",
     "fuse.js": "^6.3.0",
     "gray-matter": "^4.0.2",
@@ -63,5 +63,5 @@
   "jest": {
     "preset": "ts-jest"
   },
-  "gitHead": "90bf620ebc5d4b7208807b9197b30a509e10c30c"
+  "gitHead": "403eb012f8b34bc115dd7dd86f80c76b39329f3b"
 }

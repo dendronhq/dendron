@@ -4,7 +4,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@dendron/*": ["packages/*/src"]
+      "@dendronhq/*": ["packages/*/src"]
     }
   }
 }

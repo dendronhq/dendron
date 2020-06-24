@@ -1,8 +1,8 @@
 import { QuickPick, QuickPickItem } from "vscode";
 
-import { Note } from "@dendron/common-all";
-import { createLogger } from "@dendron/common-server";
-import { engine } from "@dendron/engine-server";
+import { Note } from "@dendronhq/common-all";
+import { createLogger } from "@dendronhq/common-server";
+import { engine } from "@dendronhq/engine-server";
 
 const L = createLogger("LookupProvider");
 

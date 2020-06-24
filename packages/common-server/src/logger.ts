@@ -1,6 +1,6 @@
 // import pino from "pino";
 
-import { env } from "@dendron/common-all";
+import { env } from "@dendronhq/common-all";
 import pino from "pino";
 
 export class Logger {

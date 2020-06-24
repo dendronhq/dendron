@@ -3,4 +3,4 @@
 
 
 
-lerna run build --parallel  --scope @dendron/electron-client --scope @dendron/common-client
+lerna run build --parallel  --scope @dendronhq/electron-client --scope @dendronhq/common-client

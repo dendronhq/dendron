@@ -2,8 +2,8 @@ import * as vscode from "vscode";
 
 import { LookupProvider } from "./LookupProvider";
 import _ from "lodash";
-import { createLogger } from "@dendron/common-server";
-import { engine } from "@dendron/engine-server";
+import { createLogger } from "@dendronhq/common-server";
+import { engine } from "@dendronhq/engine-server";
 
 let LOOKUP_PROVIDER: null | LookupProvider = null;
 const L = createLogger("LookupController");

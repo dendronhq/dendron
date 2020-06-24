@@ -4,12 +4,12 @@ const fs = require("fs");
 const _ = require("lodash");
 
 const DEPENDENCIES = {
-  CLIENT_WEB: "@dendron/web-client",
-  CLIENT_ELECTRON: "@dendron/electron-client",
-  COMMON_ALL: "@dendron/common-all",
-  COMMON_CLIENT: "@dendron/common-client",
-  COMMON_SERVER: "@dendron/common-server",
-  ENGINE_SERVER: "@dendron/engine-server",
+  CLIENT_WEB: "@dendronhq/web-client",
+  CLIENT_ELECTRON: "@dendronhq/electron-client",
+  COMMON_ALL: "@dendronhq/common-all",
+  COMMON_CLIENT: "@dendronhq/common-client",
+  COMMON_SERVER: "@dendronhq/common-server",
+  ENGINE_SERVER: "@dendronhq/engine-server",
   PLUGIN_CORE: "dendron-plugin-core",
 };
 

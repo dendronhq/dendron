@@ -21,20 +21,20 @@ import {
   assertExists,
   createLogger,
   getStage,
-  makeResponse,
-} from '@dendron/common-all';
+  makeResponse
+} from "@dendronhq/common-all";
 
-import { BodyParser } from './drivers/raw/BodyParser';
-import FileStorage from './drivers/file/store';
-import Fuse from 'fuse.js';
-import _ from 'lodash';
-import fs from 'fs-extra';
+import { BodyParser } from "./drivers/raw/BodyParser";
+import FileStorage from "./drivers/file/store";
+import Fuse from "fuse.js";
+import _ from "lodash";
+import fs from "fs-extra";
 
 let PROTO_ENGINE: ProtoEngine;
-const logger = createLogger('DEngine');
+const logger = createLogger("DEngine");
 
 function isAllQuery(qs: string): boolean {
-  return qs === '**/*';
+  return qs === "**/*";
 }
 
 export interface FuseOptions {
@@ -60,10 +60,10 @@ function createFuse<T>(initList: T[], opts: FuseOptions) {
     distance: 100,
     maxPatternLength: 32,
     minMatchCharLength: 1,
-    keys: ['title', 'path'],
+    keys: ["title", "path"]
   };
-  if (opts.preset === 'schema') {
-    options.keys = ['title', 'id'];
+  if (opts.preset === "schema") {
+    options.keys = ["title", "id"];
   }
   // initList = _.map(initList, (n) => ({ ...n, treePath: n.path }));
   const fuse = new Fuse(initList, options);
@@ -98,7 +98,7 @@ export class ProtoEngine implements DEngine {
       const stage = getStage();
       opts = _.defaults(opts || {}, {
         // TODO: remove hardcoded value
-        root: '/Users/kevinlin/Dropbox/Apps/Noah/notesv2',
+        root: "/Users/kevinlin/Dropbox/Apps/Noah/notesv2"
       });
       if (_.isUndefined(opts.root)) {
         throw Error(`root must be defined`);
@@ -108,7 +108,7 @@ export class ProtoEngine implements DEngine {
         new FileStorage(opts as { root: string }),
         opts
       );
-      logger.info({ ctx: 'getEngine:exit', opts, stage });
+      logger.info({ ctx: "getEngine:exit", opts, stage });
       return PROTO_ENGINE;
     }
     return PROTO_ENGINE;
@@ -119,7 +119,7 @@ export class ProtoEngine implements DEngine {
     //this.nodes = store.fetchInitial();
     this.notes = {};
     this.store = store;
-    this.fuse = createFuse<Note>([], { exactMatch: false, preset: 'note' });
+    this.fuse = createFuse<Note>([], { exactMatch: false, preset: "note" });
     this.fullNodes = new Set();
     this.queries = new Set();
 
@@ -127,13 +127,13 @@ export class ProtoEngine implements DEngine {
     this.schemas = {};
     this.schemaFuse = createFuse<Schema>([], {
       exactMatch: false,
-      preset: 'schema',
+      preset: "schema"
     });
 
     this.opts = _.defaults(opts, {
-      cacheDir: '/tmp/dendronCache',
-      root: '/Users/kevinlin/Dropbox/Apps/Dendron',
-      forceNew: false,
+      cacheDir: "/tmp/dendronCache",
+      root: "/Users/kevinlin/Dropbox/Apps/Dendron",
+      forceNew: false
     });
     [opts.cacheDir, opts.root].forEach(fpath => {
       if (!fs.existsSync(fpath as string)) {
@@ -161,12 +161,12 @@ export class ProtoEngine implements DEngine {
       return;
     }
     const mode = nodes[0].type;
-    if (mode === 'schema') {
+    if (mode === "schema") {
       const schemas = nodes as Schema[];
       schemas.forEach((node: Schema) => {
         this.schemas[node.id] = node;
       });
-      this.updateLocalCollection(_.values(this.schemas), 'schema');
+      this.updateLocalCollection(_.values(this.schemas), "schema");
       return;
     } else {
       nodes.forEach((node: IDNode) => {
@@ -180,8 +180,8 @@ export class ProtoEngine implements DEngine {
         } else {
           // exists, merge it
           logger.debug({
-            ctx: 'refreshNodes:existingNode',
-            node: node.toRawProps(),
+            ctx: "refreshNodes:existingNode",
+            node: node.toRawProps()
           });
           _.merge(this.notes[id], node);
         }
@@ -194,14 +194,14 @@ export class ProtoEngine implements DEngine {
       const newNodes = _.map(nodes, n => ({ title: n.title, id: n.id }));
       const allNodes = _.map(this.notes, n => ({
         title: n.title,
-        id: n.id,
+        id: n.id
       }));
       logger.debug({
-        ctx: 'refreshNodes',
+        ctx: "refreshNodes",
         newNodes,
-        allNodes,
+        allNodes
       });
-      this.updateLocalCollection(_.values(this.notes), 'note');
+      this.updateLocalCollection(_.values(this.notes), "note");
       return;
     }
   }
@@ -223,7 +223,7 @@ export class ProtoEngine implements DEngine {
   }
 
   updateLocalCollection(collection: IDNode[], mode: QueryMode) {
-    if (mode === 'schema') {
+    if (mode === "schema") {
       return this.schemaFuse.setCollection(collection as Schema[]);
     } else {
       return this.fuse.setCollection(collection as Note[]);
@@ -245,9 +245,9 @@ export class ProtoEngine implements DEngine {
   async get(_scope: Scope, id: string, mode: QueryMode, opts?: QueryOpts) {
     opts = _.defaults(opts || {}, { fullNode: true, createIfNew: true });
     let nodeDict;
-    logger.debug({ ctx: 'get', id, opts });
+    logger.debug({ ctx: "get", id, opts });
 
-    if (mode === 'schema') {
+    if (mode === "schema") {
       nodeDict = this.schemas;
       const node = nodeDict[id];
       return { data: node };
@@ -258,19 +258,19 @@ export class ProtoEngine implements DEngine {
 
     // a full node has a body and is fully resolved
     if (opts?.fullNode && !this.fullNodes.has(id)) {
-      logger.debug({ ctx: 'get:fetchFromStore:pre', id });
+      logger.debug({ ctx: "get:fetchFromStore:pre", id });
       const fnResp = await this.store.get(_scope, id, {
         ...opts,
-        webClient: true,
+        webClient: true
       });
-      logger.debug({ ctx: 'get:fetchFromStore:post', id, opts, fnResp });
+      logger.debug({ ctx: "get:fetchFromStore:post", id, opts, fnResp });
       const fullNode = await this.resolveIds(fnResp.data, this.notes);
-      logger.debug({ ctx: 'get:resolve:post', fnResp });
+      logger.debug({ ctx: "get:resolve:post", fnResp });
       // TODO:
       this.refreshNodes([fullNode], opts);
       return { data: fullNode };
     }
-    logger.debug({ ctx: 'get:exit', node });
+    logger.debug({ ctx: "get:exit", node });
     return { data: node };
   }
 
@@ -283,14 +283,14 @@ export class ProtoEngine implements DEngine {
     opts = _.defaults(opts || {}, {
       fullNode: false,
       createIfNew: true,
-      initialQuery: false,
+      initialQuery: false
     });
     let data: EngineQueryResp;
 
     // handle all query case
     if (isAllQuery(queryString)) {
-      logger.debug({ ctx: 'query:queryAll:pre', mode });
-      data = await this.store.query(scope, '**/*', mode, opts);
+      logger.debug({ ctx: "query:queryAll:pre", mode });
+      data = await this.store.query(scope, "**/*", mode, opts);
       if (opts.initialQuery) {
         this.refreshNodes(data.data);
       }
@@ -299,7 +299,7 @@ export class ProtoEngine implements DEngine {
     }
 
     // handle schema query
-    if (mode === 'schema') {
+    if (mode === "schema") {
       const results = this.schemaFuse.search(queryString);
       let items: Schema[];
       const nodes = this.schemas;
@@ -308,10 +308,10 @@ export class ProtoEngine implements DEngine {
       } else {
         items = _.map(results, resp => resp.item);
       }
-      logger.debug({ ctx: 'query:exit:schema', items });
+      logger.debug({ ctx: "query:exit:schema", items });
       return makeResponse<EngineQueryResp>({
         data: _.map(items, item => nodes[item.id]),
-        error: null,
+        error: null
       });
     } else {
       // handle note query
@@ -325,9 +325,9 @@ export class ProtoEngine implements DEngine {
 
       if (opts.queryOne && items[0]?.path !== queryString && opts.createIfNew) {
         logger.debug({
-          ctx: 'query:write:pre',
+          ctx: "query:write:pre",
           queryString,
-          item: items[0],
+          item: items[0]
         });
         const nodeBlank = new Note({ fname: queryString });
         await this.write(scope, nodeBlank, { newNode: true });
@@ -335,7 +335,7 @@ export class ProtoEngine implements DEngine {
         this.refreshNodes([nodeFull], { fullNode: true });
         return makeResponse<EngineQueryResp>({
           data: [nodeFull],
-          error: null,
+          error: null
         });
       }
 
@@ -344,16 +344,16 @@ export class ProtoEngine implements DEngine {
           _.map<IDNode, Promise<IDNode | null>>(items, async ent => {
             if (!this.fullNodes.has(ent.id)) {
               logger.debug({
-                ctx: 'query:fuse.search:post',
-                status: 'fetch full node from store',
+                ctx: "query:fuse.search:post",
+                status: "fetch full node from store"
               });
               // FIXME: ratelimit
               const fn = await this.get(scope, ent.id, mode);
               return fn.data;
             }
             logger.debug({
-              ctx: 'query:fuse.search:post',
-              status: 'fetch full node from cache',
+              ctx: "query:fuse.search:post",
+              status: "fetch full node from cache"
             });
             return null;
           })
@@ -363,28 +363,28 @@ export class ProtoEngine implements DEngine {
           { fullNode: true }
         );
         logger.debug({
-          ctx: 'query:fetchedFullNodes:exit',
-          fetchedFullNodes,
+          ctx: "query:fetchedFullNodes:exit",
+          fetchedFullNodes
         });
       }
-      logger.debug({ ctx: 'query:exit:note', items });
+      logger.debug({ ctx: "query:exit:note", items });
       return makeResponse<EngineQueryResp>({
         data: _.map(items, item => this.notes[item.id]),
-        error: null,
+        error: null
       });
     }
   }
 
   async write(scope: Scope, node: IDNode, opts?: NodeWriteOpts): Promise<void> {
-    opts = _.defaults(opts, { newNode: false, body: '' });
-    if (node.type === 'schema') {
-      assertExists(opts.body, 'body must exist');
+    opts = _.defaults(opts, { newNode: false, body: "" });
+    if (node.type === "schema") {
+      assertExists(opts.body, "body must exist");
       // convert body
       const props: SchemaRawProps[] = new BodyParser().parseSchema(
         opts.body as string,
         {
           node,
-          fname: node.fname,
+          fname: node.fname
         }
       );
       const schemas = new NodeBuilder().buildSchemaFromProps(props);
@@ -394,13 +394,13 @@ export class ProtoEngine implements DEngine {
       }
       node = schemaNew;
       // reset body
-      node.body = '';
+      node.body = "";
       await this.store.write(scope, node);
       if (opts.newNode) {
-        const parentPath = 'root';
+        const parentPath = "root";
         const parentNode = _.find(this.schemas, n => n.title === parentPath);
         if (!parentNode) {
-          throw Error('no parent found');
+          throw Error("no parent found");
         }
         (parentNode as Schema).addChild(node as Schema);
       }
@@ -409,15 +409,15 @@ export class ProtoEngine implements DEngine {
       await this.store.write(scope, note);
       if (opts.newNode) {
         let parentPath = note.fname
-          .split('.')
+          .split(".")
           .slice(0, -1)
-          .join('.');
+          .join(".");
         if (_.isEmpty(parentPath)) {
-          parentPath = 'root';
+          parentPath = "root";
         }
         const parentNode = _.find(this.notes, n => n.path === parentPath);
         if (!parentNode) {
-          throw Error('no parent found');
+          throw Error("no parent found");
         }
         parentNode.addChild(note);
       }

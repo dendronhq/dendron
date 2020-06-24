@@ -2,6 +2,11 @@
   "packages": [
     "packages/*"
   ],
-  "version": "0.1.3",
-  "npmClient": "npm"
+  "version": "0.1.4",
+  "npmClient": "npm",
+  "command": {
+    "publish": {
+      "registry": "https://npm.pkg.github.com"
+    }
+  }
 }

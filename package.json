@@ -22,5 +22,7 @@
   "npmClient": "yarn",
   "version": "independent",
   "useWorkspaces": false,
-  "dependencies": {}
+  "dependencies": {
+    "lodash": "^4.17.15"
+  }
 }

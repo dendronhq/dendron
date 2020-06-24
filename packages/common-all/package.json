@@ -30,7 +30,6 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@types/lodash": "^4.14.152",
     "dropbox": "^4.0.30",
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.15",
@@ -39,6 +38,7 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.152",
     "@types/jest": "^23.3.3",
     "@types/node": "^10.11.4",
     "@types/pino": "^6.0.1",

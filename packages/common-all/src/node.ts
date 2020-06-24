@@ -97,7 +97,36 @@ export class SchemaNodeRaw {
   }
 }
 
-export abstract class DNode<T = DNodeData> implements IDNode<T> {
+type QuickPickItem = {
+  label: string;
+
+  /**
+   * A human-readable string which is rendered less prominent in the same line. Supports rendering of
+   * [theme icons](#ThemeIcon) via the `$(<name>)`-syntax.
+   */
+  description?: string;
+
+  /**
+   * A human-readable string which is rendered less prominent in a separate line. Supports rendering of
+   * [theme icons](#ThemeIcon) via the `$(<name>)`-syntax.
+   */
+  detail?: string;
+
+  /**
+   * Optional flag indicating if this item is picked initially.
+   * (Only honored when the picker allows multiple selections.)
+   *
+   * @see [QuickPickOptions.canPickMany](#QuickPickOptions.canPickMany)
+   */
+  picked?: boolean;
+
+  /**
+   * Always show this item.
+   */
+  alwaysShow?: boolean;
+};
+
+export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
   public id: string;
   public title: string;
   public desc: string;
@@ -109,6 +138,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
   public children: IDNode<T>[];
   public body: string;
   public data: T;
+  public label: string;
 
   constructor(opts: IDNodeOpts<T>) {
     const {
@@ -138,6 +168,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T> {
     this.children = children;
     this.body = body;
     this.data = data;
+    this.label = this.title;
   }
 
   get domain(): DNode<T> {

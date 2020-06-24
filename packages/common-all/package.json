@@ -3,7 +3,7 @@
   "version": "0.1.6",
   "description": "common-all",
   "license": "MIT",
-  "repository": "",
+  "repository": "https://github.com/dendronhq/dendron",
   "author": {
     "name": "Kevin Lin",
     "email": "kevin@thence.io",
@@ -61,5 +61,5 @@
   "jest": {
     "preset": "ts-jest"
   },
-  "gitHead": "ff26a1fe8650b10846c94d3ebc9f7784a69e83eb"
+  "gitHead": "90bf620ebc5d4b7208807b9197b30a509e10c30c"
 }

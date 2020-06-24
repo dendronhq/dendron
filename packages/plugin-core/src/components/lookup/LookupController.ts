@@ -1,11 +1,9 @@
 import * as vscode from "vscode";
 
-import { Disposable } from "../../vs/base/common/lifecycle";
 import { LookupProvider } from "./LookupProvider";
 import _ from "lodash";
 import { createLogger } from "@dendron/common-server";
 import { engine } from "@dendron/engine-server";
-import { once } from "../../vs/base/common/functional";
 
 let LOOKUP_PROVIDER: null | LookupProvider = null;
 const L = createLogger("LookupController");
@@ -29,9 +27,10 @@ export class LookupController {
     quickpick.title = "quickpick title";
     quickpick.placeholder = "quickpick placeholder";
     quickpick.ignoreFocusOut = true;
+    quickpick.items = _.values(engine().notes);
 
     // cleanup quickpick
-    once(quickpick.onDidHide)(() => {
+    quickpick.onDidHide(() => {
       quickpick.dispose();
     });
     provider.provide(quickpick);

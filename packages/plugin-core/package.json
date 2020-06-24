@@ -1,7 +1,8 @@
 {
-  "name": "@dendron/plugin-core",
+  "name": "dendron-plugin-core",
   "displayName": "dendron",
   "description": "schema based note taking",
+  "publisher": "dendron",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.46.0"

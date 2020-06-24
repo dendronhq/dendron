@@ -6,7 +6,6 @@ import * as vscode from "vscode";
 import { QuickPickItem, Uri } from "vscode";
 
 import { LookupController } from "./components/lookup/LookupController";
-import { QuickAccessController } from "./vs/platform/quickinput/browser/quickAccess";
 import { engine } from "@dendron/engine-server";
 
 // import { DisposableStore, MutableDisposable } from "vs/base/common/lifecycle";

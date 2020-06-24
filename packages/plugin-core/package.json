@@ -37,9 +37,9 @@
     "compile": "tsc -p ./",
     "lint": "eslint src --ext ts",
     "watch": "tsc -watch -p ./",
-    "pretest": "yarn run compile && yarn run lint",
+    "pretest": "npm run compile && yarn run lint",
     "test": "node ./out/test/runTest.js",
-    "build": "yarn run compile"
+    "build": "npm run compile"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",

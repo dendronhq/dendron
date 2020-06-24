@@ -5,13 +5,19 @@ exports[`schema domainRoot at child: fooChild_body 1`] = `
 -
     id: foo.child
     title: foo.child
-    parent: foo.root
+    desc: \\"\\"
     children: [foo.grandchild]
+    parent: foo.root
+    data: {}
+    fname: foo.child
 -
     id: foo.grandchild
     title: foo.grandchild
-    parent: foo.child
+    desc: \\"\\"
     children: []
+    parent: foo.child
+    data: {}
+    fname: foo.grandchild
 
 \`\`\`"
 `;
@@ -21,18 +27,27 @@ exports[`schema domainRoot at root: foo_body 1`] = `
 -
     id: foo.root
     title: foo.root
-    parent: null
+    desc: \\"\\"
     children: [foo.child]
+    parent: root
+    data: {}
+    fname: foo.root
 -
     id: foo.child
     title: foo.child
-    parent: foo.root
+    desc: \\"\\"
     children: [foo.grandchild]
+    parent: foo.root
+    data: {}
+    fname: foo.child
 -
     id: foo.grandchild
     title: foo.grandchild
-    parent: foo.child
+    desc: \\"\\"
     children: []
+    parent: foo.child
+    data: {}
+    fname: foo.grandchild
 
 \`\`\`"
 `;

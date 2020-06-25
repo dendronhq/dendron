@@ -19,5 +19,5 @@
     "emitDecoratorMetadata": true
   },
   "compileOnSave": true,
-  "exclude": ["node_modules", "lib", "local", ".vscode-test"]
+  "exclude": ["node_modules", "lib", "local", ".vscode-test", "out"]
 }

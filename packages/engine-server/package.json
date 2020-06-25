@@ -20,8 +20,8 @@
   "files": [
     "lib"
   ],
-  "main": "lib/engine-server/src/index",
-  "types": "lib/engine-server/src/index",
+  "main": "lib/index",
+  "types": "lib/index",
   "scripts": {
     "clean": "rimraf lib && rimraf coverage",
     "format": "",

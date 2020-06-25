@@ -4,6 +4,5 @@
     "outDir": "out",
     "rootDir": "src"
   },
-    "exclude": ["node_modules", "lib", "local", ".vscode-test", "out"]
-
+  "exclude": ["node_modules", "lib", "local", ".vscode-test", "out"]
 }

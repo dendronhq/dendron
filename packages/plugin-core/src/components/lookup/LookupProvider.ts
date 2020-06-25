@@ -50,7 +50,6 @@ export class LookupProvider {
         querystring,
         "note"
       );
-      const notesData = resp.data as Note[];
       L.info({ ctx: ctx + ":engine:query:post" });
       //const pickerItems = notesData.map((ent) => ({ label: ent.title }));
       picker.items = resp.data;
@@ -84,7 +83,7 @@ export class LookupProvider {
           .write({ username: "DUMMY" }, new Note({ title: value, fname }), {
             newNode: true,
           })
-          .then((resp) => {
+          .then(() => {
             L.info({ ctx: `${ctx}:write:done`, value });
           });
       } else {

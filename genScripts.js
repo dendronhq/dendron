@@ -10,7 +10,7 @@ const DEPENDENCIES = {
   COMMON_CLIENT: "@dendronhq/common-client",
   COMMON_SERVER: "@dendronhq/common-server",
   ENGINE_SERVER: "@dendronhq/engine-server",
-  PLUGIN_CORE: "dendron-plugin-core",
+  PLUGIN_CORE: "@dendronhq/plugin-core",
 };
 
 const frontCommonDeps = [DEPENDENCIES.COMMON_ALL];

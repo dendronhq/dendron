@@ -19,7 +19,6 @@ import {
   Scope,
   assert,
   assertExists,
-  createLogger,
   getStage,
   makeResponse
 } from "@dendronhq/common-all";
@@ -28,6 +27,7 @@ import { BodyParser } from "./drivers/raw/BodyParser";
 import FileStorage from "./drivers/file/store";
 import Fuse from "fuse.js";
 import _ from "lodash";
+import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 
 let PROTO_ENGINE: ProtoEngine;

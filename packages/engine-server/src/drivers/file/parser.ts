@@ -5,10 +5,13 @@ import {
   SchemaNodeRaw,
   SchemaRawOpts,
   SchemaRawProps,
-  assert,
-  createLogger
+  assert
 } from "@dendronhq/common-all";
-import { globMatch, mdFile2NodeProps } from "@dendronhq/common-server";
+import {
+  createLogger,
+  globMatch,
+  mdFile2NodeProps
+} from "@dendronhq/common-server";
 
 import YAML from "yamljs";
 import _ from "lodash";

@@ -15,10 +15,10 @@ import {
   Scope,
   StoreGetResp,
   assert,
-  createLogger,
   makeResponse
 } from "@dendronhq/common-all";
 import {
+  createLogger,
   deleteFile,
   getAllFiles,
   mdFile2NodeProps,

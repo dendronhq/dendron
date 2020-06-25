@@ -1,9 +1,19 @@
-import { QuickPick, QuickPickItem, TaskScope, window } from "vscode";
+import { DEngine, Note } from "@dendronhq/common-all";
+import {
+  ExtensionContext,
+  QuickDiffProvider,
+  QuickPick,
+  QuickPickItem,
+  TaskScope,
+  Uri,
+  window,
+  workspace,
+} from "vscode";
+import { ProtoEngine, engine } from "@dendronhq/engine-server";
 
 import { CREATE_NEW_LABEL } from "./constants";
-import { Note } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
-import { engine } from "@dendronhq/engine-server";
+import path from "path";
 
 const L = createLogger("LookupProvider");
 
@@ -19,8 +29,15 @@ function isCreateNewPick(item: QuickPickItem): boolean {
 }
 
 class PickerUtils {
-  static getValue(picker: QuickPick<any>) {
+  static getValue<T extends QuickPickItem = QuickPickItem>(
+    picker: QuickPick<T>
+  ) {
     return picker.value;
+  }
+  static getSelection<T extends QuickPickItem = QuickPickItem>(
+    picker: QuickPick<T>
+  ): T {
+    return picker.selectedItems[0];
   }
 }
 
@@ -58,7 +75,8 @@ export class LookupProvider {
     picker.onDidAccept(() => {
       const ctx = "onDidAccept";
       L.info({ ctx });
-      const selectedItem = picker.selectedItems[0];
+      // const selectedItem = picker.selectedItems[0];
+      const selectedItem = PickerUtils.getSelection<Note>(picker);
       L.info({ ctx: "onDidAccept", selectedItem });
       if (isCreateNewPick(selectedItem)) {
         const value = PickerUtils.getValue(picker);
@@ -72,7 +90,18 @@ export class LookupProvider {
             L.info({ ctx: `${ctx}:write:done`, value });
           });
       } else {
-        window.showInformationMessage("open existing");
+        const engine: DEngine = ProtoEngine.getEngine();
+        const mode = "note";
+        engine
+          .get({ username: "DUMMY" }, selectedItem.id, mode)
+          .then(async (resp) => {
+            // TODO: don't hardcode extension
+            const fpath = path.join(engine.opts.root, resp.data.fname + ".md");
+            const selectedFile = Uri.file(fpath);
+            const document = await workspace.openTextDocument(selectedFile);
+            window.showTextDocument(document);
+          });
+        // window.showInformationMessage(`open existing ${absPath}`);
       }
     });
     picker.onDidChangeSelection((inputs: QuickPickItem[]) => {

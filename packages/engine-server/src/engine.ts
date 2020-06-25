@@ -74,7 +74,10 @@ type ProtoEngineOpts = {
   root?: string;
   cacheDir?: string;
   forceNew?: boolean;
+  store: DEngineStore;
 };
+type ProtoEngineGetOpts = ProtoEngineOpts &
+  Required<Pick<ProtoEngineOpts, "store">>;
 
 type ProtoEngineProps = Required<ProtoEngineOpts>;
 
@@ -93,22 +96,24 @@ export class ProtoEngine implements DEngine {
 
   public store: DEngineStore;
 
-  static getEngine(opts?: ProtoEngineOpts): DEngine {
-    if (!PROTO_ENGINE || opts?.forceNew) {
+  static getEngine(opts?: ProtoEngineGetOpts): DEngine {
+    // TODO
+    const root = "/Users/kevinlin/Dropbox/Apps/Noah/notesv2";
+    const optsClean: Required<ProtoEngineOpts> = _.defaults(opts || {}, {
+      forceNew: false,
+      store: new FileStorage({ root }),
+      root,
+      // TODO
+      cacheDir: "/tmp/dendronCache"
+    });
+    if (!PROTO_ENGINE || optsClean.forceNew) {
       const stage = getStage();
-      opts = _.defaults(opts || {}, {
-        // TODO: remove hardcoded value
-        root: "/Users/kevinlin/Dropbox/Apps/Noah/notesv2"
-      });
-      if (_.isUndefined(opts.root)) {
+      if (_.isUndefined(optsClean.root)) {
         throw Error(`root must be defined`);
       }
       // TODO
-      PROTO_ENGINE = new ProtoEngine(
-        new FileStorage(opts as { root: string }),
-        opts
-      );
-      logger.info({ ctx: "getEngine:exit", opts, stage });
+      PROTO_ENGINE = new ProtoEngine(optsClean.store, optsClean);
+      logger.info({ ctx: "getEngine:exit", optsClean, stage });
       return PROTO_ENGINE;
     }
     return PROTO_ENGINE;
@@ -135,7 +140,7 @@ export class ProtoEngine implements DEngine {
       root: "/Users/kevinlin/Dropbox/Apps/Dendron",
       forceNew: false
     });
-    [opts.cacheDir, opts.root].forEach(fpath => {
+    [opts.root].forEach(fpath => {
       if (!fs.existsSync(fpath as string)) {
         throw Error(`${fpath} doesn't exist`);
       }
@@ -427,6 +432,6 @@ export class ProtoEngine implements DEngine {
   }
 }
 
-export function engine() {
-  return ProtoEngine.getEngine();
+export function engine(opts?: ProtoEngineOpts) {
+  return ProtoEngine.getEngine(opts);
 }

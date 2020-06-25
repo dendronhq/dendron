@@ -5,7 +5,9 @@ import * as vscode from "vscode";
 
 import { QuickPickItem, Uri } from "vscode";
 
+import { DEFAULT_ROOT } from "./components/lookup/constants";
 import { LookupController } from "./components/lookup/LookupController";
+import { VSCodeStorage } from "./drivers/VSCodeStore";
 import { engine } from "@dendronhq/engine-server";
 
 // import { DisposableStore, MutableDisposable } from "vs/base/common/lifecycle";

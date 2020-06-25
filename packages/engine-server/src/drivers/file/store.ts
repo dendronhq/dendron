@@ -51,9 +51,8 @@ const CACHE_KEYS = {
   QUERY_ALL: "QUERY_ALL"
 };
 
-class FileStorage implements DEngineStore {
+export abstract class FileStorageBase implements DEngineStore {
   opts: FileStorageOpts;
-
   public idToPath: { [key: string]: string };
 
   public rootId: string;
@@ -64,7 +63,38 @@ class FileStorage implements DEngineStore {
     this.rootId = "";
   }
 
-  _getFile(id: string): DNodeRawProps<DNodeData> {
+  abstract doGetFile(id: string): DNodeRawProps<DNodeData>;
+
+  isRoot(id: string) {
+    return id === "root";
+  }
+
+  async getRoot() {
+    logger.debug({ ctx: "getRoot", rootId: this.rootId });
+    return this.doGetFile(this.rootId);
+  }
+
+  async get(
+    _scope: Scope,
+    id: string,
+    _opts?: QueryOpts
+  ): Promise<StoreGetResp> {
+    let resp: DNodeRawProps<DNodeData>;
+    logger.debug({ ctx: "get:presGetFile", id });
+    if (this.isRoot(id)) {
+      resp = await this.getRoot();
+    } else {
+      resp = this.doGetFile(id);
+    }
+    logger.debug({ ctx: "get:postGetFile", resp });
+    return {
+      data: resp
+    };
+  }
+}
+
+class FileStorage extends FileStorageBase implements DEngineStore {
+  doGetFile(id: string): DNodeRawProps<DNodeData> {
     const { root } = this.opts;
     const fpath = this.idToPath[id];
     assert(!_.isUndefined(fpath), `id ${id} should be in fpath`);
@@ -108,17 +138,8 @@ class FileStorage implements DEngineStore {
     return node2MdFile(node, { root: this.opts.root });
   }
 
-  isRoot(id: string) {
-    return id === "root";
-  }
-
   isQueryAll(qs: string) {
     return qs === "**/*";
-  }
-
-  async getRoot() {
-    logger.debug({ ctx: "getRoot", rootId: this.rootId });
-    return this._getFile(this.rootId);
   }
 
   /**
@@ -136,24 +157,6 @@ class FileStorage implements DEngineStore {
     deleteFile(uri);
     this.deleteFromIdToPath(id);
     return;
-  }
-
-  async get(
-    _scope: Scope,
-    id: string,
-    _opts?: QueryOpts
-  ): Promise<StoreGetResp> {
-    let resp: DNodeRawProps<DNodeData>;
-    logger.debug({ ctx: "get:presGetFile", id });
-    if (this.isRoot(id)) {
-      resp = await this.getRoot();
-    } else {
-      resp = this._getFile(id);
-    }
-    logger.debug({ ctx: "get:postGetFile", resp });
-    return {
-      data: resp
-    };
   }
 
   async query(

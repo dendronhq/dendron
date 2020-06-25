@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 
 import { CREATE_NEW_LABEL } from "./constants";
+import { ExtensionContext } from "vscode";
 import { LookupProvider } from "./LookupProvider";
 import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
@@ -10,16 +11,6 @@ let LOOKUP_PROVIDER: null | LookupProvider = null;
 const L = createLogger("LookupController");
 
 export class LookupController {
-  // constructor() {
-  //   engine()
-  //     .query({ username: "DUMMY" }, "**/*", "note", {
-  //       initialQuery: true,
-  //     })
-  //     .then(() => {
-  //       L.info({ ctx: "cons:exit" });
-  //     });
-  // }
-
   show(value = "") {
     const provider = this.getOrInstantiateProvider(value);
 

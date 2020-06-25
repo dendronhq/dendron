@@ -1,9 +1,14 @@
 {
-  "name": "dendron-plugin-core",
+  "name": "@dendronhq/plugin-core",
   "displayName": "dendron",
   "description": "schema based note taking",
   "publisher": "dendron",
   "version": "0.1.6",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/dendronhq/dendron.git",
+    "directory": "packages/plugin-core"
+  },
   "engines": {
     "vscode": "^1.46.0"
   },
@@ -33,7 +38,7 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "",
+    "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "lint": "eslint src --ext ts",
     "watch": "tsc -watch -p ./",

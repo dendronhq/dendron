@@ -3,7 +3,11 @@
   "version": "0.1.6",
   "description": "dendron-engine",
   "license": "MIT",
-  "repository": "https://github.com/dendronhq/dendron",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/dendronhq/dendron.git",
+    "directory": "packages/engine-server"
+  },
   "author": {
     "name": "Kevin Lin",
     "email": "kevin@thence.io",

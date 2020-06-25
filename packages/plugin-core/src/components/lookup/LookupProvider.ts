@@ -100,6 +100,7 @@ export class LookupProvider {
             const selectedFile = Uri.file(fpath);
             const document = await workspace.openTextDocument(selectedFile);
             window.showTextDocument(document);
+            picker.hide();
           });
         // window.showInformationMessage(`open existing ${absPath}`);
       }

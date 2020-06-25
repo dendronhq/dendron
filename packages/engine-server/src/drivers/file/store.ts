@@ -51,6 +51,7 @@ const CACHE_KEYS = {
   QUERY_ALL: "QUERY_ALL"
 };
 
+// @ts-ignore: TODO
 export abstract class FileStorageBase implements DEngineStore {
   opts: FileStorageOpts;
   public idToPath: { [key: string]: string };

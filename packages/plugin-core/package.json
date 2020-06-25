@@ -40,10 +40,11 @@
   "scripts": {
     "vscode:prepublish": "npm run build",
     "lint": "eslint src --ext ts",
-    "watch": "npm run build -- --watch",
+    "watch": "npm run compile -- --watch",
+    "build": "npm run compile",
+    "compile": "tsc -p tsconfig.build.json",
     "pretest": "npm run build && yarn run lint",
-    "test": "node ./out/test/runTest.js",
-    "build": "tsc -p tsconfig.build.json"
+    "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",

@@ -28,11 +28,12 @@
     "lint": "",
     "prepublishOnly": "npm run build",
     "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "npm run compile",
+    "compile": "tsc -p tsconfig.build.json",
     "test": "jest",
     "test:unit:all": "cross-env LOG_LEVEL=error yarn test",
     "coverage": "jest --coverage",
-    "watch": "npm run build -- --watch",
+    "watch": "npm run compile -- --watch",
     "watch:test": "jest --watch"
   },
   "dependencies": {

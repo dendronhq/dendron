@@ -17,14 +17,30 @@ const L = createLogger("extension");
 export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
-  engine({ root: DEFAULT_ROOT })
-    .query({ username: "DUMMY" }, "**/*", "note", {
-      fullNode: false,
-      initialQuery: true,
-    })
-    .then(() => {
-      console.log("engine init");
-    });
+  const ctx = "activate";
+  Promise.all([
+    engine({ root: DEFAULT_ROOT }).query(
+      { username: "DUMMY" },
+      "**/*",
+      "note",
+      {
+        fullNode: false,
+        initialQuery: true,
+      }
+    ),
+    engine({ root: DEFAULT_ROOT }).query(
+      { username: "DUMMY" },
+      "**/*",
+      "schema",
+      {
+        fullNode: false,
+        initialQuery: true,
+      }
+    ),
+  ]).then(() => {
+    console.log("engine init");
+    L.info({ ctx: ctx + ":engine:init:post", schemas: engine().schemas });
+  });
   console.log('Congratulations, your extension "dendron" is now active!');
 
   // The command has been defined in the package.json file

@@ -74,10 +74,10 @@ type ProtoEngineOpts = {
   root?: string;
   cacheDir?: string;
   forceNew?: boolean;
-  store?: DEngineStore;
+  store: DEngineStore;
 };
-type ProtoEngineGetOpts = ProtoEngineOpts &
-  Required<Pick<ProtoEngineOpts, "root">>;
+
+type ProtoEngineGetOpts = Partial<ProtoEngineOpts>;
 
 type ProtoEngineProps = Required<ProtoEngineOpts>;
 

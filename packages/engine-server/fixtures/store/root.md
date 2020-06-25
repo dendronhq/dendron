@@ -1,3 +1,4 @@
 ---
 id: root
+title: root
 ---

@@ -2,10 +2,10 @@
   title: "foo"
   parent: root
   children:
-      - 5291f68b-e266-405a-bd56-ee5980aad10c
+    - 5291f68b-e266-405a-bd56-ee5980aad10c
 - id: 5291f68b-e266-405a-bd56-ee5980aad10c
   title: "one"
   children:
-      - foo.two
+    - foo.two
 - id: foo.two
   title: foo.two

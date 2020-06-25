@@ -38,13 +38,12 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
+    "vscode:prepublish": "npm run build",
     "lint": "eslint src --ext ts",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && yarn run lint",
+    "pretest": "npm run build && yarn run lint",
     "test": "node ./out/test/runTest.js",
-    "build": "npm run compile"
+    "build": "tsc -p tsconfig.build.json"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",

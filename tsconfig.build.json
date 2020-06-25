@@ -1,22 +1,23 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@dendronhq/*": ["packages/*/src"]
-    },
     "module": "commonjs",
     "target": "ES2019",
+    "lib": ["es2019"],
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "declaration": true,
     "strict": true,
+    // --- checks
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    // --- language features
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "compileOnSave": true,
-  "exclude": ["node_modules", "lib"]
+  "exclude": ["node_modules", "lib", "local", ".vscode-test"]
 }

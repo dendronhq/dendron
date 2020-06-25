@@ -1,15 +1,6 @@
 import { DEngine, Note } from "@dendronhq/common-all";
-import {
-  ExtensionContext,
-  QuickDiffProvider,
-  QuickPick,
-  QuickPickItem,
-  TaskScope,
-  Uri,
-  window,
-  workspace,
-} from "vscode";
 import { ProtoEngine, engine } from "@dendronhq/engine-server";
+import { QuickPick, QuickPickItem, Uri, window, workspace } from "vscode";
 
 import { CREATE_NEW_LABEL } from "./constants";
 import { createLogger } from "@dendronhq/common-server";

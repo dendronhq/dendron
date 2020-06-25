@@ -28,7 +28,7 @@
     "lint": "",
     "prepublishOnly": "npm run build",
     "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
-    "build": "tsc --pretty",
+    "build": "tsc -p tsconfig.build.json",
     "test": "jest",
     "coverage": "jest --coverage",
     "watch": "npm run build -- --watch",

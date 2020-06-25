@@ -1,56 +1,12 @@
-import * as _ from "lodash";
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 
-import { QuickPickItem, Uri } from "vscode";
-
-import { DEFAULT_ROOT } from "./components/lookup/constants";
 import { LookupController } from "./components/lookup/LookupController";
-import { VSCodeStorage } from "./drivers/VSCodeStore";
+import { createLogger } from "@dendronhq/common-server";
+// The module 'vscode' contains the VS Code extensibility API
+// Import the module and reference it with the alias vscode in your code below
 import { engine } from "@dendronhq/engine-server";
 
-// import { DisposableStore, MutableDisposable } from "vs/base/common/lifecycle";
-// import { AnythingQuickAccessProvider } from "./components/search/anythingQuickAccess";
-
-// === Split
-function createPickFromValue(value: string): QuickPickItem {
-  return {
-    label: value,
-    detail: "new value",
-    alwaysShow: true,
-  };
-}
-
-function getQuickPickItems(): QuickPickItem[] {
-  return [
-    {
-      label: "foo.exists",
-      description: "description $(list-tree)",
-      detail: "detail. this detail will go on for a while",
-    },
-    {
-      label: "foo.no_exist",
-      description: "description $(list-tree)",
-      detail: "detail. this detail will go on for a while",
-    },
-  ];
-}
-
-function getFirstWorkspaceFolder(opts: {
-  asUri?: boolean;
-}): null | string | Uri {
-  opts = { asUri: false, ...opts };
-  if (vscode.workspace.workspaceFolders) {
-    const firstFolder = vscode.workspace.workspaceFolders[0];
-    if (opts.asUri) {
-      return firstFolder.uri;
-    } else {
-      return firstFolder.uri.fsPath.toString();
-    }
-  }
-  return null;
-}
+const L = createLogger("extension");
 
 // --- VSCode
 
@@ -65,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
       fullNode: false,
       initialQuery: true,
     })
-    .then((resp) => {
+    .then(() => {
       console.log("engine init");
     });
   console.log('Congratulations, your extension "dendron" is now active!');
@@ -83,8 +39,11 @@ export function activate(context: vscode.ExtensionContext) {
   let dendronLookupDisposable = vscode.commands.registerCommand(
     "dendron.lookup",
     async () => {
+      const ctx = "registerCommand";
       vscode.window.showInformationMessage("BOND!");
+      L.info({ ctx: ctx + ":LookupController:pre" });
       const controller = new LookupController();
+      L.info({ ctx: ctx + ":LookupController:post" });
       controller.show();
       // TODO: dispose
 

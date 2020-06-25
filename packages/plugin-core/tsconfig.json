@@ -1,21 +1,3 @@
 {
-  "compilerOptions": {
-    //"baseUrl": "./src",
-    "module": "commonjs",
-    "target": "es6",
-    "outDir": "out",
-    "lib": ["es6"],
-    // "paths": {
-    //   "vs/*": ["./src/vs/*"]
-    // },
-    "sourceMap": true,
-    "rootDir": "src",
-    "strict": true /* enable all strict type-checking options */,
-    "esModuleInterop": true
-    /* Additional Checks */
-    // "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
-    // "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
-    // "noUnusedParameters": true,  /* Report errors on unused parameters. */
-  },
-  "exclude": ["node_modules", ".vscode-test", "local"]
+  "extends": "../../tsconfig.json"
 }

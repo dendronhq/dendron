@@ -20,8 +20,8 @@
   "files": [
     "lib"
   ],
-  "main": "lib/index",
-  "types": "lib/index",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "clean": "rimraf lib && rimraf coverage",
     "format": "",

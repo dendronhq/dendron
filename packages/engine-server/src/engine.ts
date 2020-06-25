@@ -74,10 +74,10 @@ type ProtoEngineOpts = {
   root?: string;
   cacheDir?: string;
   forceNew?: boolean;
-  store: DEngineStore;
+  store?: DEngineStore;
 };
 type ProtoEngineGetOpts = ProtoEngineOpts &
-  Required<Pick<ProtoEngineOpts, "store">>;
+  Required<Pick<ProtoEngineOpts, "root">>;
 
 type ProtoEngineProps = Required<ProtoEngineOpts>;
 
@@ -98,7 +98,7 @@ export class ProtoEngine implements DEngine {
 
   static getEngine(opts?: ProtoEngineGetOpts): DEngine {
     // TODO
-    const root = "/Users/kevinlin/Dropbox/Apps/Noah/notesv2";
+    const root = opts?.root || "/Users/kevinlin/Dropbox/Apps/Noah/notesv2";
     const optsClean: Required<ProtoEngineOpts> = _.defaults(opts || {}, {
       forceNew: false,
       store: new FileStorage({ root }),
@@ -432,6 +432,6 @@ export class ProtoEngine implements DEngine {
   }
 }
 
-export function engine(opts?: ProtoEngineOpts) {
+export function engine(opts?: ProtoEngineGetOpts) {
   return ProtoEngine.getEngine(opts);
 }

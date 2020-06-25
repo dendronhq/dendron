@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 
+import { DEFAULT_ROOT } from "./components/lookup/constants";
 import { LookupController } from "./components/lookup/LookupController";
 import { createLogger } from "@dendronhq/common-server";
 // The module 'vscode' contains the VS Code extensibility API
@@ -16,7 +17,7 @@ const L = createLogger("extension");
 export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
-  engine()
+  engine({ root: DEFAULT_ROOT })
     .query({ username: "DUMMY" }, "**/*", "note", {
       fullNode: false,
       initialQuery: true,

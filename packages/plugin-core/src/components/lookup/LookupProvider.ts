@@ -3,6 +3,7 @@ import { ProtoEngine, engine } from "@dendronhq/engine-server";
 import { QuickPick, QuickPickItem, Uri, window, workspace } from "vscode";
 
 import { CREATE_NEW_LABEL } from "./constants";
+import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
 import path from "path";
 
@@ -32,14 +33,24 @@ class PickerUtils {
   }
 }
 
+type LookupProviderState = {
+  lastLookupItem: null | Note;
+};
+
 export class LookupProvider {
-  public lastLookupValue: string;
+  public state: LookupProviderState;
 
   constructor() {
-    this.lastLookupValue = "";
+    this.state = {
+      lastLookupItem: null,
+    };
   }
+
   provide(picker: QuickPick<any>) {
-    picker.value = this.lastLookupValue;
+    if (!_.isNull(this.state.lastLookupItem)) {
+      picker.value = this.state.lastLookupItem.queryPath;
+      picker.activeItems = [this.state.lastLookupItem];
+    }
 
     const updatePickerItems = async () => {
       const ctx = "updatePickerItems";
@@ -97,7 +108,7 @@ export class LookupProvider {
             const selectedFile = Uri.file(fpath);
             const document = await workspace.openTextDocument(selectedFile);
             window.showTextDocument(document);
-            this.lastLookupValue = resp.data.fname;
+            this.state.lastLookupItem = selectedItem;
             picker.hide();
           });
         // window.showInformationMessage(`open existing ${absPath}`);

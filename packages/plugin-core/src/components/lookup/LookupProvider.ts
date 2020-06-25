@@ -68,7 +68,8 @@ export class LookupProvider {
       // check if root query
       if (querystring === "") {
         L.info({ ctx, status: "no qs" });
-        picker.items = [engine().notes["root"]];
+        //picker.items = [engine().notes["root"]];
+        picker.items = _.values(engine().notes);
       } else if (picker.activeItems.length === 0 && querystring.length === 1) {
         // doesn't make active if single letter match
         picker.activeItems = picker.items;

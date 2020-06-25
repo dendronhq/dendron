@@ -304,6 +304,14 @@ export class Note extends DNode<NoteData> implements INote {
     this.schemaId = props?.data?.schemaId || "-1";
   }
 
+  get detail(): string | undefined {
+    if (this.schemaId) {
+      return this.schemaId;
+    } else {
+      return undefined;
+    }
+  }
+
   get url(): string {
     return `/doc/${this.id}`;
   }

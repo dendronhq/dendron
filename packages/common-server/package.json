@@ -32,13 +32,14 @@
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.1.6",
-    "@types/pino": "^6.3.0",
     "gray-matter": "^4.0.2",
     "lodash": "^4.17.15",
     "minimatch": "^3.0.4",
-    "pino": "^6.3.2"
+    "pino": "^6.3.2",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "@types/pino": "^6.3.0",
     "@types/jest": "^23.3.3",
     "@types/lodash": "^4.14.154",
     "@types/minimatch": "^3.0.3",
@@ -52,8 +53,7 @@
     "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
     "tslint-config-prettier": "^1.15.0",
-    "typescript": "^3.1.1",
-    "yamljs": "^0.3.0"
+    "typescript": "^3.1.1"
   },
   "engines": {
     "node": ">=10.0.0"

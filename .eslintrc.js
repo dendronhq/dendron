@@ -32,6 +32,8 @@ module.exports = {
     // prettier
     indent: "off",
     quotes: "off",
+    "function-paren-newline": "off",
+    "brace-style": "off",
     // runs into max-len issue
     "operator-linebreak": "off",
     // rest

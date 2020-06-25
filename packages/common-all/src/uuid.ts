@@ -1,7 +1,6 @@
-// @ts-ignore
-import uuidv4 from 'uuid/v4';
+import { v4 } from "uuid";
 
 function genUUID() {
-  return uuidv4();
+  return v4();
 }
 export { genUUID };

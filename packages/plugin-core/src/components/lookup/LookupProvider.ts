@@ -42,7 +42,14 @@ class PickerUtils {
 }
 
 export class LookupProvider {
+  public lastLookupValue: string;
+
+  constructor() {
+    this.lastLookupValue = "";
+  }
   provide(picker: QuickPick<any>) {
+    picker.value = this.lastLookupValue;
+
     const updatePickerItems = async () => {
       const ctx = "updatePickerItems";
       const querystring = picker.value;
@@ -100,6 +107,7 @@ export class LookupProvider {
             const selectedFile = Uri.file(fpath);
             const document = await workspace.openTextDocument(selectedFile);
             window.showTextDocument(document);
+            this.lastLookupValue = resp.data.fname;
             picker.hide();
           });
         // window.showInformationMessage(`open existing ${absPath}`);

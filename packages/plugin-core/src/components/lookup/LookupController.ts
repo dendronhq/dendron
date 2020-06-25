@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 
+import { CREATE_NEW_LABEL } from "./constants";
 import { LookupProvider } from "./LookupProvider";
 import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
@@ -33,6 +34,7 @@ export class LookupController {
     quickpick.onDidHide(() => {
       quickpick.dispose();
     });
+
     provider.provide(quickpick);
     // show
     quickpick.show();

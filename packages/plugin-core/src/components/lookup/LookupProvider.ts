@@ -1,5 +1,6 @@
-import { QuickPick, QuickPickItem } from "vscode";
+import { QuickPick, QuickPickItem, TaskScope, window } from "vscode";
 
+import { CREATE_NEW_LABEL } from "./constants";
 import { Note } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import { engine } from "@dendronhq/engine-server";
@@ -8,9 +9,19 @@ const L = createLogger("LookupProvider");
 
 function createNoActiveItem(): QuickPickItem {
   return {
-    label: "Note does not exist. Create?",
+    label: CREATE_NEW_LABEL,
     alwaysShow: true,
   };
+}
+
+function isCreateNewPick(item: QuickPickItem): boolean {
+  return item.label === CREATE_NEW_LABEL;
+}
+
+class PickerUtils {
+  static getValue(picker: QuickPick<any>) {
+    return picker.value;
+  }
 }
 
 export class LookupProvider {
@@ -43,6 +54,31 @@ export class LookupProvider {
       }
       L.info({ ctx: ctx + ":exit", querystring });
     };
+
+    picker.onDidAccept(() => {
+      const ctx = "onDidAccept";
+      L.info({ ctx });
+      const selectedItem = picker.selectedItems[0];
+      L.info({ ctx: "onDidAccept", selectedItem });
+      if (isCreateNewPick(selectedItem)) {
+        const value = PickerUtils.getValue(picker);
+        window.showInformationMessage(`create new ${value}`);
+        const fname = value;
+        engine()
+          .write({ username: "DUMMY" }, new Note({ title: value, fname }), {
+            newNode: true,
+          })
+          .then((resp) => {
+            L.info({ ctx: `${ctx}:write:done`, value });
+          });
+      } else {
+        window.showInformationMessage("open existing");
+      }
+    });
+    picker.onDidChangeSelection((inputs: QuickPickItem[]) => {
+      const ctx = "onDidChangeSelection";
+      L.info({ ctx, inputs });
+    });
     picker.onDidChangeValue(() => updatePickerItems());
     updatePickerItems();
   }

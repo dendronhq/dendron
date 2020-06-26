@@ -58,14 +58,15 @@ export class Directory implements vscode.FileStat {
     } else {
       this.node = nodeOrString;
       this.name = nodeOrString.title;
+      this.entries.set("index", new File(nodeOrString));
       nodeOrString.children.forEach((n) => {
         if (n.children.length === 0) {
           this.entries.set(n.title, new File(n));
         } else {
           this.entries.set(n.title, new Directory(n));
         }
-        this.size += 1;
       });
+      this.size = nodeOrString.children.length + 1;
     }
   }
 }
@@ -133,6 +134,7 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     if (_.isNull(_DendronFileSystemProvider)) {
       const ctx = "cons";
       return new Promise((resolve, _reject) => {
+        // TODO: order matters, schema should be loaded before files
         Promise.all([
           engine({ root: DEFAULT_ROOT }).query(
             { username: "DUMMY" },

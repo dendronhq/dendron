@@ -63,7 +63,6 @@ export class LookupProvider {
         "note"
       );
       L.info({ ctx: ctx + ":engine:query:post" });
-      //const pickerItems = notesData.map((ent) => ({ label: ent.title }));
       picker.items = resp.data;
 
       // check if root query

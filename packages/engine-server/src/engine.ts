@@ -335,6 +335,7 @@ export class ProtoEngine implements DEngine {
         items = _.map(results, resp => resp.item);
       }
 
+      // found a result but it doesn't match
       if (opts.queryOne && items[0]?.path !== queryString && opts.createIfNew) {
         logger.debug({
           ctx: "query:write:pre",

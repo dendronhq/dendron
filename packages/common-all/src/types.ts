@@ -105,6 +105,9 @@ export interface Scope {
 }
 
 export interface NodeWriteOpts {
+  /**
+   * If newNode, will add it to the parent
+   */
   newNode?: boolean;
   body?: string;
 }
@@ -112,6 +115,9 @@ export interface NodeWriteOpts {
 export interface QueryOpts {
   fullNode?: boolean;
   queryOne?: boolean;
+  /**
+   * If node does not exist, create it?
+   */
   createIfNew?: boolean;
   // hints
   webClient?: boolean;

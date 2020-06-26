@@ -14,7 +14,10 @@ import path from "path";
 const L = createLogger("extension");
 
 function uriToFname(uri: vscode.Uri): string {
-  return _.trimStart(uri.path, "/").replace(/\//g, ".");
+  // folder: /foo/index
+  return _.trimStart(uri.path, "/")
+    .replace(/\/index$/, "")
+    .replace(/\//g, ".");
 }
 
 export class File implements vscode.FileStat {
@@ -290,16 +293,14 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     let note: Note;
     const fname = uriToFname(uri);
     const body = new TextDecoder("utf-8").decode(content);
-    if (options.create) {
-      note = new Note({ fname, body });
-    } else {
-      note = (
-        await engine().query({ username: "DUMMY" }, fname, "note", {
-          queryOne: true,
-        })
-      ).data[0] as Note;
-    }
-    return engine().write({ username: "DUMMY" }, note, { newNode: true });
+    note = (
+      await engine().query({ username: "DUMMY" }, fname, "note", {
+        queryOne: true,
+        createIfNew: true,
+      })
+    ).data[0] as Note;
+    note.body = body;
+    return engine().write({ username: "DUMMY" }, note);
   }
 
   async writeFile(

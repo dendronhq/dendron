@@ -74,12 +74,6 @@ export class LookupProvider {
         picker.items = _.values(engine().notes);
         return;
       }
-
-      // check if end with slash
-      // if (_.some([querystring.endsWith("/")])) {
-      //   picker.activeItems = picker.items;
-      // }
-
       // check if single item query
       if (picker.activeItems.length === 0 && querystring.length === 1) {
         // doesn't make active if single letter match
@@ -104,51 +98,59 @@ export class LookupProvider {
       const selectedItem = PickerUtils.getSelection<Note>(picker);
       L.info({ ctx: "onDidAccept", selectedItem });
 
+      const fnameToUri = async (fname: string): Promise<Uri> => {
+        let uri = Uri.parse(`denfs:/${fname.replace(/\./g, "/")}`);
+        const fs = await DendronFileSystemProvider.getOrCreate();
+        if (fs.stat(uri).type === FileType.Directory) {
+          uri = await fnameToUri(fname + ".index");
+        }
+        return uri;
+      };
+
       if (isCreateNewPick(selectedItem)) {
         const value = PickerUtils.getValue(picker);
         window.showInformationMessage(`create new ${value}`);
         const fname = value;
-        engine()
+        return engine()
           .write({ username: "DUMMY" }, new Note({ title: value, fname }), {
             newNode: true,
           })
           .then(() => {
             L.info({ ctx: `${ctx}:write:done`, value });
           });
-      } else {
-        const fnameToUri = (fname: string): Uri => {
-          return Uri.parse(`denfs:/${fname.replace(/\./g, "/")}`);
-        };
-        const fname = selectedItem.fname;
-        let uri = fnameToUri(fname);
-        const fs = await DendronFileSystemProvider.getOrCreate();
-        if (fs.stat(uri).type === FileType.Directory) {
-          uri = fnameToUri(fname + ".index");
-        }
-        L.info({ ctx: "onDidAccept:showTextDocument:pre", uri });
-
-        window.showTextDocument(uri).then(
-          () => {
-            picker.hide();
-          },
-          (err) => {
-            L.error({ ctx, err });
-            throw err;
-          }
-        );
-        // engine
-        //   .get({ username: "DUMMY" }, selectedItem.id, mode)
-        //   .then(async (resp) => {
-        //     // TODO: don't hardcode extension
-        //     const fpath = path.join(engine.opts.root, resp.data.fname + ".md");
-        //     Uri.parse(`denfs:`);
-        //     const selectedFile = Uri.file(fpath);
-        //     window.showTextDocument(selectedFile);
-        //     this.state.lastLookupItem = selectedItem;
-        //     picker.hide();
-        //   });
-        // window.showInformationMessage(`open existing ${absPath}`);
       }
+
+      let uri: Uri;
+      if (PickerUtils.getValue(picker) === "") {
+        uri = await fnameToUri("/index");
+      } else {
+        // default
+        const fname = selectedItem.fname;
+        uri = await fnameToUri(fname);
+      }
+      L.info({ ctx: "onDidAccept:showTextDocument:pre", uri });
+
+      window.showTextDocument(uri).then(
+        () => {
+          picker.hide();
+        },
+        (err) => {
+          L.error({ ctx, err });
+          throw err;
+        }
+      );
+      // engine
+      //   .get({ username: "DUMMY" }, selectedItem.id, mode)
+      //   .then(async (resp) => {
+      //     // TODO: don't hardcode extension
+      //     const fpath = path.join(engine.opts.root, resp.data.fname + ".md");
+      //     Uri.parse(`denfs:`);
+      //     const selectedFile = Uri.file(fpath);
+      //     window.showTextDocument(selectedFile);
+      //     this.state.lastLookupItem = selectedItem;
+      //     picker.hide();
+      //   });
+      // window.showInformationMessage(`open existing ${absPath}`);
     });
     picker.onDidChangeSelection((inputs: QuickPickItem[]) => {
       const ctx = "onDidChangeSelection";

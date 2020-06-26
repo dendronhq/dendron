@@ -3,12 +3,17 @@ import * as vscode from "vscode";
 import { DEngine, DNode, Note } from "@dendronhq/common-all";
 
 import { DEFAULT_ROOT } from "../lookup/constants";
+import { TextDecoder } from "util";
 import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
 import { engine } from "@dendronhq/engine-server";
 import path from "path";
 
 const L = createLogger("extension");
+
+function uriToFname(uri: vscode.Uri): string {
+  return _.trimStart(uri.path, "/").replace(/\//g, ".");
+}
 
 export class File implements vscode.FileStat {
   type: vscode.FileType;
@@ -258,6 +263,26 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     );
   }
 
+  async _writeToEngine(
+    uri: vscode.Uri,
+    content: Uint8Array,
+    options: { create: boolean; overwrite: boolean }
+  ) {
+    let note: Note;
+    const fname = uriToFname(uri);
+    const body = new TextDecoder("utf-8").decode(content);
+    if (options.create) {
+      note = new Note({ fname, body });
+    } else {
+      note = (
+        await engine().query({ username: "DUMMY" }, fname, "note", {
+          queryOne: true,
+        })
+      ).data[0] as Note;
+    }
+    return engine().write({ username: "DUMMY" }, note, { newNode: true });
+  }
+
   writeFile(
     uri: vscode.Uri,
     content: Uint8Array,
@@ -283,7 +308,7 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     entry.mtime = Date.now();
     entry.size = content.byteLength;
     entry.data = content;
-
+    this._writeToEngine(uri, content, options);
     this._fireSoon({ type: vscode.FileChangeType.Changed, uri });
   }
 

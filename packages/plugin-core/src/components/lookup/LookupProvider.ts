@@ -85,7 +85,9 @@ export class LookupProvider {
     const updatePickerItems = async () => {
       const ctx = "updatePickerItems";
       const querystring = picker.value;
-      L.info({ ctx: ctx + ":enter", querystring });
+      let activeItems = picker.activeItems.map((ent) => ent.label);
+      let items = picker.items.map((ent) => ent.label);
+      L.info({ ctx: ctx + ":enter", querystring, activeItems, items });
       const resp = await engine().query(
         { username: "dummy" },
         slashToDot(querystring),
@@ -109,12 +111,16 @@ export class LookupProvider {
       }
 
       // new item
-      if (picker.activeItems.length === 0) {
+      if (picker.items.length === 0) {
         // check if empty
         L.info({ ctx, status: "no active items" });
         picker.items = [createNoActiveItem()];
       }
-      L.info({ ctx: ctx + ":exit", querystring });
+      // DEBUG
+
+      activeItems = picker.activeItems.map((ent) => ent.label);
+      items = picker.items.map((ent) => ent.label);
+      L.info({ ctx: ctx + ":exit", querystring, activeItems, items });
       return;
     };
 
@@ -122,21 +128,20 @@ export class LookupProvider {
       const ctx = "onDidAccept";
       L.info({ ctx });
       // const selectedItem = picker.selectedItems[0];
+      const value = PickerUtils.getValue(picker);
       const selectedItem = PickerUtils.getSelection<Note>(picker);
-      L.info({ ctx: "onDidAccept", selectedItem });
+      L.info({ ctx: "onDidAccept", selectedItem, value });
 
       if (isCreateNewPick(selectedItem)) {
-        const value = PickerUtils.getValue(picker);
-        window.showInformationMessage(`create new ${value}`);
         const fname = value;
-        await engine().write(
-          { username: "DUMMY" },
-          new Note({ title: value, fname }),
-          {
-            newNode: true,
-          }
-        );
-        L.info({ ctx: `${ctx}:write:done`, value });
+        // await engine().write(
+        //   { username: "DUMMY" },
+        //   new Note({ title: value, fname }),
+        //   {
+        //     newNode: true,
+        //   }
+        // );
+        // L.info({ ctx: `${ctx}:write:done`, value });
         const uri = await fnameToUri(fname, { checkIfDirectoryFile: false });
         await (await DendronFileSystemProvider.getOrCreate()).writeFile(
           uri,

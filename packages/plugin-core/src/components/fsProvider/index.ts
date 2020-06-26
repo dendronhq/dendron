@@ -2,11 +2,13 @@ import * as vscode from "vscode";
 
 import { DEngine, DNode, Note } from "@dendronhq/common-all";
 
+import { BodyParser } from "packages/engine-server/src/drivers/raw/BodyParser";
 import { DEFAULT_ROOT } from "../lookup/constants";
 import { TextDecoder } from "util";
 import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
 import { engine } from "@dendronhq/engine-server";
+import { fnameToUri } from "../lookup/utils";
 import path from "path";
 
 const L = createLogger("extension");
@@ -114,12 +116,29 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     return entry;
   }
 
-  private _lookupAsDirectory(uri: vscode.Uri, silent: boolean): Directory {
+  private async _lookupAsDirectory(
+    uri: vscode.Uri,
+    silent: boolean
+  ): Promise<Directory> {
     let entry = this._lookup(uri, silent);
     if (entry instanceof Directory) {
       return entry;
+    } else {
+      let qs = uriToFname(uri);
+      const fileNode = await engine().query({ username: "DUMMY" }, qs, "note", {
+        queryOne: true,
+      });
+      await this.delete(uri);
+      await this.createDirectory(uri);
+      qs += ".index";
+      const uriNew = await fnameToUri(qs, { checkIfDirectoryFile: false });
+      await this.writeFile(uriNew, Buffer.from(fileNode.data[0].body), {
+        create: true,
+        overwrite: true,
+        writeToEngine: false,
+      });
+      return this._lookupAsDirectory(uri, false);
     }
-    throw vscode.FileSystemError.FileNotADirectory(uri);
   }
 
   private _lookupAsFile(uri: vscode.Uri, silent: boolean): File {
@@ -130,7 +149,7 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     throw vscode.FileSystemError.FileIsADirectory(uri);
   }
 
-  private _lookupParentDirectory(uri: vscode.Uri): Directory {
+  private async _lookupParentDirectory(uri: vscode.Uri): Promise<Directory> {
     const dirname = uri.with({ path: path.posix.dirname(uri.path) });
     return this._lookupAsDirectory(dirname, false);
   }
@@ -181,10 +200,10 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
   }
 
   // --- manage files/folders
-  createDirectory(uri: vscode.Uri): void {
+  async createDirectory(uri: vscode.Uri): Promise<void> {
     let basename = path.posix.basename(uri.path);
     let dirname = uri.with({ path: path.posix.dirname(uri.path) });
-    let parent = this._lookupAsDirectory(dirname, false);
+    let parent = await this._lookupAsDirectory(dirname, false);
 
     let entry = new Directory(basename);
     parent.entries.set(entry.name, entry);
@@ -196,10 +215,10 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     );
   }
 
-  delete(uri: vscode.Uri): void {
+  async delete(uri: vscode.Uri): Promise<void> {
     let dirname = uri.with({ path: path.posix.dirname(uri.path) });
     let basename = path.posix.basename(uri.path);
-    let parent = this._lookupAsDirectory(dirname, false);
+    let parent = await this._lookupAsDirectory(dirname, false);
     if (!parent.entries.has(basename)) {
       throw vscode.FileSystemError.FileNotFound(uri);
     }
@@ -212,8 +231,8 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     );
   }
 
-  readDirectory(uri: vscode.Uri): [string, vscode.FileType][] {
-    const entry = this._lookupAsDirectory(uri, false);
+  async readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
+    const entry = await this._lookupAsDirectory(uri, false);
     let result: [string, vscode.FileType][] = [];
     for (const [name, child] of entry.entries) {
       result.push([name, child.type]);
@@ -238,19 +257,19 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     return new vscode.Disposable(() => {});
   }
 
-  rename(
+  async rename(
     oldUri: vscode.Uri,
     newUri: vscode.Uri,
     options: { overwrite: boolean }
-  ): void {
+  ): Promise<void> {
     if (!options.overwrite && this._lookup(newUri, true)) {
       throw vscode.FileSystemError.FileExists(newUri);
     }
 
     let entry = this._lookup(oldUri, false);
-    let oldParent = this._lookupParentDirectory(oldUri);
+    let oldParent = await this._lookupParentDirectory(oldUri);
 
-    let newParent = this._lookupParentDirectory(newUri);
+    let newParent = await this._lookupParentDirectory(newUri);
     let newName = path.posix.basename(newUri.path);
 
     oldParent.entries.delete(entry.name);
@@ -283,13 +302,14 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     return engine().write({ username: "DUMMY" }, note, { newNode: true });
   }
 
-  writeFile(
+  async writeFile(
     uri: vscode.Uri,
     content: Uint8Array,
-    options: { create: boolean; overwrite: boolean }
-  ): void {
+    options: { create: boolean; overwrite: boolean; writeToEngine?: boolean }
+  ): Promise<void> {
+    options = _.defaults(options, { writeToEngine: true });
     let basename = path.posix.basename(uri.path);
-    let parent = this._lookupParentDirectory(uri);
+    let parent = await this._lookupParentDirectory(uri);
     let entry = parent.entries.get(basename);
     if (entry instanceof Directory) {
       throw vscode.FileSystemError.FileIsADirectory(uri);
@@ -308,7 +328,9 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     entry.mtime = Date.now();
     entry.size = content.byteLength;
     entry.data = content;
-    this._writeToEngine(uri, content, options);
+    if (options.writeToEngine) {
+      await this._writeToEngine(uri, content, options);
+    }
     this._fireSoon({ type: vscode.FileChangeType.Changed, uri });
   }
 

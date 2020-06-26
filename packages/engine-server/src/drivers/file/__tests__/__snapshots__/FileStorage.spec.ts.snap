@@ -15,6 +15,66 @@ Object {
 }
 `;
 
+exports[`main notes query with missing: missing snapshots 1`] = `
+Array [
+  Object {
+    "body": "",
+    "children": Array [
+      "foo",
+    ],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "parent": "root",
+    "title": "root",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.one",
+      "foo.two",
+    ],
+    "created": "TODO",
+    "data": Object {
+      "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
+    },
+    "desc": "",
+    "fname": "foo",
+    "parent": "root",
+    "title": "foo",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.one",
+    "parent": "foo",
+    "title": "foo.one",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.two",
+    "parent": "foo",
+    "title": "foo.two",
+    "type": "note",
+    "updated": "TODO",
+  },
+]
+`;
+
 exports[`main notes write writeQuery: data snapshot 1`] = `
 "bond
 "

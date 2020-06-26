@@ -21,7 +21,6 @@ import YAML from "yamljs";
 // import { IconType } from "antd/lib/notification";
 import _ from "lodash";
 import { genUUID } from "./uuid";
-import path from "path";
 
 // export interface DataNode {
 //   checkable?: boolean;
@@ -42,6 +41,15 @@ import path from "path";
 // @ts-ignore
 interface YAMLEntryOpts {
   id: string;
+}
+
+export class DNodeUtils {
+  static dirName(nodePath: string) {
+    return nodePath
+      .split(".")
+      .slice(0, -1)
+      .join(".");
+  }
 }
 
 export class DNodeRaw {

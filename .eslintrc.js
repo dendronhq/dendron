@@ -31,6 +31,8 @@ module.exports = {
     "no-unused-vars": "off",
     "max-len": "off",
     "prefer-template": "off",
+    // don't agree with
+    "dot-notation": "off",
     // prettier
     indent: "off",
     quotes: "off",

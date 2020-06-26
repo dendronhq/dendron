@@ -5,6 +5,7 @@ import {
   Schema
 } from "@dendronhq/common-all";
 import {
+  FileUtils,
   createFileStorage,
   createScope,
   expectSnapshot,
@@ -83,6 +84,18 @@ describe("main", () => {
      *   - foo.two
      */
     describe("query", () => {
+      test("with missing", async () => {
+        FileUtils.writeMDFile(
+          root,
+          "bar.one.alpha.md",
+          {},
+          "bar alpha content"
+        );
+        store = createFileStorage(root);
+        const resp = await store.query(createScope(), "**/*", queryMode, {});
+        expect(1).toEqual(1);
+        expectSnapshot(expect, "missing snapshots", resp.data);
+      });
       test("all", async () => {
         const resp = await store.query(createScope(), "**/*", queryMode, {});
         const rootNode = _.find(resp.data, n => n.title === "root") as Schema;

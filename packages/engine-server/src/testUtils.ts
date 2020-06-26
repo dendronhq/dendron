@@ -40,6 +40,13 @@ export const SCHEMA_FOO_PARENT_ID = "root.schema";
 export const TMP_DATA_DIR = "/tmp/dendron-tmp";
 const CACHE_DIR = "/tmp/dendron-test-cache";
 
+export class FileUtils {
+  static writeMDFile = (root: string, fname: string, fm: any, body: string) {
+    const fmAndBody = matter.stringify(body, fm)
+    return fs.writeFileSync(path.join(root, fname), fmAndBody)
+  }
+}
+
 export function createFileStorage(root: string) {
   // TODO: update
   return new FileStorage({

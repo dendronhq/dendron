@@ -34,7 +34,7 @@
     "test:unit:all": "cross-env LOG_LEVEL=error yarn test",
     "coverage": "jest --coverage",
     "watch": "npm run compile -- --watch",
-    "watch:test": "jest --watch"
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.1.6",

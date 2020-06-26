@@ -14,7 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
   console.log("activate");
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
-  DendronFileSystemProvider.create().then((fs) => {
+  DendronFileSystemProvider.getOrCreate().then((fs) => {
     context.subscriptions.push(
       vscode.workspace.registerFileSystemProvider("denfs", fs, {
         isCaseSensitive: true,

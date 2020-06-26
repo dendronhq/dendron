@@ -72,7 +72,10 @@ export class Directory implements vscode.FileStat {
 
 export type Entry = File | Directory;
 
+let _DendronFileSystemProvider: DendronFileSystemProvider | null = null;
+
 export class DendronFileSystemProvider implements vscode.FileSystemProvider {
+  static initialized = false;
   public engine: DEngine;
   public rootNoteDir: Directory;
 
@@ -83,7 +86,6 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
   private _lookup(uri: vscode.Uri, silent: false): Entry;
   private _lookup(uri: vscode.Uri, silent: boolean): Entry | undefined;
   private _lookup(uri: vscode.Uri, silent: boolean): Entry | undefined {
-    const engine = this.engine;
     let parts = uri.path.split("/");
     let entry: Entry = this.root;
     for (const part of parts) {
@@ -127,34 +129,39 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     return this._lookupAsDirectory(dirname, false);
   }
 
-  static async create(): Promise<DendronFileSystemProvider> {
-    const ctx = "cons";
-    return new Promise((resolve, _reject) => {
-      Promise.all([
-        engine({ root: DEFAULT_ROOT }).query(
-          { username: "DUMMY" },
-          "**/*",
-          "note",
-          {
-            fullNode: false,
-            initialQuery: true,
-          }
-        ),
-        engine({ root: DEFAULT_ROOT }).query(
-          { username: "DUMMY" },
-          "**/*",
-          "schema",
-          {
-            fullNode: false,
-            initialQuery: true,
-          }
-        ),
-      ]).then(async () => {
-        console.log("engine init");
-        L.info({ ctx: ctx + ":engine:init:post", schemas: engine().schemas });
-        resolve(new DendronFileSystemProvider(engine()));
+  static async getOrCreate(): Promise<DendronFileSystemProvider> {
+    if (_.isNull(_DendronFileSystemProvider)) {
+      const ctx = "cons";
+      return new Promise((resolve, _reject) => {
+        Promise.all([
+          engine({ root: DEFAULT_ROOT }).query(
+            { username: "DUMMY" },
+            "**/*",
+            "note",
+            {
+              fullNode: false,
+              initialQuery: true,
+            }
+          ),
+          engine({ root: DEFAULT_ROOT }).query(
+            { username: "DUMMY" },
+            "**/*",
+            "schema",
+            {
+              fullNode: false,
+              initialQuery: true,
+            }
+          ),
+        ]).then(async () => {
+          console.log("engine init");
+          L.info({ ctx: ctx + ":engine:init:post", schemas: engine().schemas });
+          _DendronFileSystemProvider = new DendronFileSystemProvider(engine());
+          resolve(_DendronFileSystemProvider);
+        });
       });
-    });
+    } else {
+      return _DendronFileSystemProvider;
+    }
   }
 
   constructor(engine: DEngine) {

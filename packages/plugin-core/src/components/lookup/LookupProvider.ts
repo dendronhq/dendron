@@ -3,6 +3,7 @@ import { ProtoEngine, engine } from "@dendronhq/engine-server";
 import { QuickPick, QuickPickItem, Uri, window, workspace } from "vscode";
 
 import { CREATE_NEW_LABEL } from "./constants";
+import { DendronFileSystemProvider } from "../fsProvider";
 import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
 import path from "path";
@@ -101,17 +102,24 @@ export class LookupProvider {
       } else {
         const engine: DEngine = ProtoEngine.getEngine();
         const mode = "note";
-        engine
-          .get({ username: "DUMMY" }, selectedItem.id, mode)
-          .then(async (resp) => {
-            // TODO: don't hardcode extension
-            const fpath = path.join(engine.opts.root, resp.data.fname + ".md");
-            const selectedFile = Uri.file(fpath);
-            const document = await workspace.openTextDocument(selectedFile);
-            window.showTextDocument(document);
-            this.state.lastLookupItem = selectedItem;
-            picker.hide();
-          });
+        const fnameToUri = (fname: string): Uri => {
+          return Uri.parse(`denfs:/${fname.replace(/\./g, "/")}`);
+        };
+        const fname = selectedItem.fname;
+        window.showTextDocument(fnameToUri(fname)).then(() => {
+          picker.hide();
+        });
+        // engine
+        //   .get({ username: "DUMMY" }, selectedItem.id, mode)
+        //   .then(async (resp) => {
+        //     // TODO: don't hardcode extension
+        //     const fpath = path.join(engine.opts.root, resp.data.fname + ".md");
+        //     Uri.parse(`denfs:`);
+        //     const selectedFile = Uri.file(fpath);
+        //     window.showTextDocument(selectedFile);
+        //     this.state.lastLookupItem = selectedItem;
+        //     picker.hide();
+        //   });
         // window.showInformationMessage(`open existing ${absPath}`);
       }
     });

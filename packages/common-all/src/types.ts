@@ -50,6 +50,7 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   nodes: IDNode<T>[];
   // NOTE: currently equal to `fname`
   path: string;
+  logicalPath: string;
   // how to display path in lookup
   // used to special case `root` node to be empty string
   queryPath: string;
@@ -137,8 +138,11 @@ export interface DEngineStore<T = DNodeData, O = any> {
   write: <T>(scope: Scope, node: IDNode<T>) => Promise<void>;
 }
 
+export type DEngineMode = "exact" | "fuzzy";
+
 export type DEngineOpts = {
   root: string;
+  mode?: DEngineMode;
 };
 
 /**
@@ -148,7 +152,7 @@ export type DEngineOpts = {
 export interface DEngine {
   notes: NoteDict;
   schemas: SchemaDict;
-  opts: DEngineOpts;
+  opts: Required<DEngineOpts>;
 
   delete: (id: string) => Promise<void>;
   /**

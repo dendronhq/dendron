@@ -21,6 +21,7 @@ import YAML from "yamljs";
 // import { IconType } from "antd/lib/notification";
 import _ from "lodash";
 import { genUUID } from "./uuid";
+import path from "path";
 
 // export interface DataNode {
 //   checkable?: boolean;
@@ -188,6 +189,10 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     return out;
   }
 
+  get logicalPath(): string {
+    return this.fname.replace(/\./g, "/");
+  }
+
   // used in lookup
   get queryPath(): string {
     return this.path;
@@ -304,12 +309,9 @@ export class Note extends DNode<NoteData> implements INote {
     this.schemaId = props?.data?.schemaId || "-1";
   }
 
+  // vscode detail pane
   get detail(): string | undefined {
-    if (this.schemaId) {
-      return this.schemaId;
-    } else {
-      return undefined;
-    }
+    return path.dirname(this.logicalPath);
   }
 
   get url(): string {

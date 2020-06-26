@@ -20,6 +20,9 @@ function createNoActiveItem(): QuickPickItem {
 function isCreateNewPick(item: QuickPickItem): boolean {
   return item.label === CREATE_NEW_LABEL;
 }
+function slashToDot(ent: string) {
+  return ent.replace(/\//g, ".");
+}
 
 class PickerUtils {
   static getValue<T extends QuickPickItem = QuickPickItem>(
@@ -59,7 +62,7 @@ export class LookupProvider {
       L.info({ ctx: ctx + ":enter", querystring });
       const resp = await engine().query(
         { username: "dummy" },
-        querystring,
+        slashToDot(querystring),
         "note"
       );
       L.info({ ctx: ctx + ":engine:query:post" });

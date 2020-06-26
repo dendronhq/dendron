@@ -22,6 +22,7 @@ export class LookupController {
     quickpick.placeholder = "quickpick placeholder";
     quickpick.ignoreFocusOut = true;
     quickpick.items = _.values(engine().notes);
+    quickpick.matchOnDetail = true;
 
     // cleanup quickpick
     quickpick.onDidHide(() => {

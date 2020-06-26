@@ -1,5 +1,6 @@
 import {
   DEngine,
+  DEngineMode,
   DEngineStore,
   DNodeData,
   DNodeDict,
@@ -60,7 +61,7 @@ function createFuse<T>(initList: T[], opts: FuseOptions) {
     distance: 100,
     maxPatternLength: 32,
     minMatchCharLength: 1,
-    keys: ["title", "path"]
+    keys: ["title", "logicalPath"]
   };
   if (opts.preset === "schema") {
     options.keys = ["title", "id"];
@@ -75,6 +76,7 @@ type ProtoEngineOpts = {
   cacheDir?: string;
   forceNew?: boolean;
   store: DEngineStore;
+  mode?: DEngineMode;
 };
 
 type ProtoEngineGetOpts = Partial<ProtoEngineOpts>;
@@ -99,7 +101,7 @@ export class ProtoEngine implements DEngine {
   static getEngine(opts?: ProtoEngineGetOpts): DEngine {
     // TODO
     const root = opts?.root || "/Users/kevinlin/Dropbox/Apps/Noah/notesv2";
-    const optsClean: Required<ProtoEngineOpts> = _.defaults(opts || {}, {
+    const optsClean: ProtoEngineOpts = _.defaults(opts || {}, {
       forceNew: false,
       store: new FileStorage({ root }),
       root,
@@ -123,23 +125,27 @@ export class ProtoEngine implements DEngine {
     // eslint-disable-next-line spaced-comment
     //this.nodes = store.fetchInitial();
     this.notes = {};
+    this.opts = _.defaults(opts, {
+      cacheDir: "/tmp/dendronCache",
+      root: "/Users/kevinlin/Dropbox/Apps/Dendron",
+      forceNew: false,
+      mode: "exact"
+    });
     this.store = store;
-    this.fuse = createFuse<Note>([], { exactMatch: false, preset: "note" });
+    this.fuse = createFuse<Note>([], {
+      exactMatch: this.opts.mode === "exact",
+      preset: "note"
+    });
     this.fullNodes = new Set();
     this.queries = new Set();
 
     // setup schemas
     this.schemas = {};
     this.schemaFuse = createFuse<Schema>([], {
-      exactMatch: false,
+      exactMatch: this.opts.mode === "exact",
       preset: "schema"
     });
 
-    this.opts = _.defaults(opts, {
-      cacheDir: "/tmp/dendronCache",
-      root: "/Users/kevinlin/Dropbox/Apps/Dendron",
-      forceNew: false
-    });
     [opts.root].forEach(fpath => {
       if (!fs.existsSync(fpath as string)) {
         throw Error(`${fpath} doesn't exist`);

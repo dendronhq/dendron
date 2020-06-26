@@ -31,6 +31,7 @@ export class File implements vscode.FileStat {
     } else {
       this.node = nodeOrString;
       this.name = nodeOrString.title;
+      this.data = Buffer.from(nodeOrString.body);
     }
   }
 }

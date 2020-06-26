@@ -50,6 +50,10 @@ export class DNodeUtils {
       .slice(0, -1)
       .join(".");
   }
+
+  static domainName(nodePath: string) {
+    return nodePath.split("."[0]);
+  }
 }
 
 export class DNodeRaw {
@@ -61,6 +65,7 @@ export class DNodeRaw {
       updated,
       created,
       parent,
+      stub,
       children,
       body,
       data
@@ -70,6 +75,7 @@ export class DNodeRaw {
       id: genUUID(),
       desc: "",
       children: [],
+      stub: false,
       parent: "not_set",
       body: "",
       data: {},
@@ -85,6 +91,7 @@ export class DNodeRaw {
       created,
       parent,
       children,
+      stub,
       body,
       data
     };
@@ -148,6 +155,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
   public body: string;
   public data: T;
   public label: string;
+  public stub: boolean;
 
   constructor(opts: IDNodeOpts<T>) {
     const {
@@ -158,6 +166,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
       type,
       updated,
       created,
+      stub,
       body,
       data,
       children
@@ -178,6 +187,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     this.body = body;
     this.data = data;
     this.label = this.logicalPath;
+    this.stub = stub;
   }
 
   get domain(): DNode<T> {
@@ -201,9 +211,17 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     return out;
   }
 
+  /**
+   * dot delimited path
+   *    - for root node, its ""
+   *    - for everything else, its the dot delimited name
+   */
   get logicalPath(): string {
-    return this.fname;
-    //return this.fname.replace(/\./g, "/");
+    if (this.fname === "root") {
+      return "";
+    } else {
+      return this.fname;
+    }
   }
 
   // used in lookup
@@ -272,7 +290,8 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
       "created",
       "body",
       "fname",
-      "data"
+      "data",
+      "stub"
     ]);
     let parent;
     if (this.parent?.title === "root") {
@@ -310,6 +329,10 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
 
 export class Note extends DNode<NoteData> implements INote {
   public schemaId: string;
+
+  static createStub(fname: string): Note {
+    return new Note({ stub: true, fname });
+  }
 
   constructor(props: INoteOpts) {
     super({
@@ -486,5 +509,29 @@ export class NodeBuilder {
     });
     // DEBUG ctx: "parseSchema", out:
     return out;
+  }
+}
+
+export class NoteUtils {
+  static createStubNotes(from: Note, to: Note) {
+    // ""
+    const fromPath = from.logicalPath;
+    // ""
+    const toPath = to.logicalPath;
+    const diffPath = _.difference(toPath.split("."), fromPath.split("."));
+    let stubPath = fromPath;
+    let parent = from;
+    diffPath.slice(0, -1).forEach(part => {
+      if (_.isEmpty(stubPath)) {
+        stubPath = part;
+      } else {
+        stubPath += `.${part}`;
+      }
+      const n = Note.createStub(stubPath);
+      parent.addChild(n);
+      parent = n;
+    });
+    parent.addChild(to);
+    return to;
   }
 }

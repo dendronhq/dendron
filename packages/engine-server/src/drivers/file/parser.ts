@@ -7,6 +7,7 @@ import {
   Note,
   NoteDict,
   NoteRawProps,
+  NoteUtils,
   SchemaNodeRaw,
   SchemaRawOpts,
   SchemaRawProps,
@@ -48,7 +49,32 @@ function getFileMeta(fpaths: string[]): FileMetaDict {
 }
 
 function findClosestParent(fpath: string, nodes: DNodeDict): IDNode {
-  fpath;
+  const dirname = DNodeUtils.dirName(fpath);
+  if (dirname === "") {
+    return nodes["root"];
+  }
+  const maybeNode = _.find(nodes, { fname: dirname });
+  if (maybeNode) {
+    return maybeNode;
+  } else {
+    return findClosestParent(dirname, nodes);
+  }
+  // (_.find(nodes, { fname:  }))
+
+  // let acc = 0;
+  // if
+  // //_.eachRight(parts, () => {
+  // parts.forEach(() => {
+  //   acc -= 1;
+  //   const cand = parts.slice(acc);
+  //   const resp = _.find(nodes, { fname: cand.join(".") });
+  //   if (resp) {
+  //     return resp;
+  //   }
+  //   return undefined;
+  // });
+  // // default parent to rootkk
+  // return nodes["root"];
 }
 
 type FileParserOpts = {
@@ -226,7 +252,11 @@ export class FileParser {
             errorOnBadParse: this.opts.errorOnBadParse
           });
           if (missing) {
-            const closetParent = findClosestParent(node, nodesStore);
+            const closetParent = findClosestParent(
+              (node as Note).logicalPath,
+              nodesStore
+            );
+            NoteUtils.createStubNotes(closetParent as Note, node as Note);
             this.missing.add(missing);
           }
           return node;

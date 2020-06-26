@@ -1,8 +1,25 @@
-import { Schema } from "../node";
+import { DNode, Note, NoteUtils, Schema } from "../node";
 
-test("adds 1 + 2 to equal 3", () => {
-  expect(1 + 2).toBe(3);
-});
+import { DNodeData } from "../types";
+import _ from "lodash";
+import { expectSnapshot } from "../testUtils";
+
+function setupNotes() {
+  const foo = new Note({
+    fname: "foo"
+  });
+  const fooChild = new Note({
+    fname: "foo.one"
+  });
+  const fooTwoBeta = new Note({
+    fname: "foo.two.beta"
+  });
+  const barChild = new Note({ fname: "bar.one" });
+  const root = new Note({ id: "root", fname: "root" });
+  foo.addChild(fooChild);
+  root.addChild(foo);
+  return { foo, fooChild, barChild, root, fooTwoBeta };
+}
 
 function setup() {
   const foo = new Schema({
@@ -27,6 +44,27 @@ function setup() {
   fooChild.addChild(fooGrandChild);
   return { foo, fooChild, fooGrandChild };
 }
+
+describe("NoteUtils", () => {
+  let notes: ReturnType<typeof setupNotes>;
+  test("createStubNotes, root -> bar.one", () => {
+    notes = setupNotes();
+    NoteUtils.createStubNotes(notes.root, notes.barChild);
+    expect(notes.barChild.parent).not.toBeNull();
+    expect(notes.barChild.parent?.stub).toBe(true);
+    expect(notes.root.children.length).toEqual(2);
+    expectSnapshot(expect, "barChild", notes.barChild.nodes);
+  });
+
+  test("createStubNotes, foo -> foo.two.beta", () => {
+    notes = setupNotes();
+    NoteUtils.createStubNotes(notes.foo, notes.fooTwoBeta);
+    expect(notes.fooTwoBeta.parent).not.toBeNull();
+    expect(notes.fooTwoBeta.parent?.stub).toBe(true);
+    expect(notes.root.children.length).toEqual(1);
+    expect(notes.foo.children.length).toEqual(2);
+  });
+});
 
 describe("schema", () => {
   let schemas: ReturnType<typeof setup>;

@@ -33,6 +33,8 @@
     "test": "jest",
     "coverage": "jest --coverage",
     "watch": "npm run compile -- --watch",
+    "test:unit": "jest ",
+    "test:unit:debug": "NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:watch": "jest --watch"
   },
   "dependencies": {

@@ -23,6 +23,7 @@ export type DNodeRawOpts<T extends DNodeData> = {
   id?: string;
   title?: string;
   desc?: string;
+  stub?: boolean;
   updated?: string;
   created?: string;
   fname?: string;

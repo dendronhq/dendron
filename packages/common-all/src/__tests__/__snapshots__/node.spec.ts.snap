@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`NoteUtils createStubNotes, root -> bar.one: barChild 1`] = `
+Array [
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one",
+    "parent": "bar",
+    "stub": false,
+    "title": "bar.one",
+    "type": "note",
+    "updated": "TODO",
+  },
+]
+`;
+
 exports[`schema domainRoot at child: fooChild_body 1`] = `
 "\`\`\`
 -

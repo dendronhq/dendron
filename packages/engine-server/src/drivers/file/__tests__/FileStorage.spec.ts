@@ -84,7 +84,7 @@ describe("main", () => {
      *   - foo.two
      */
     describe("query", () => {
-      test("with missing", async () => {
+      test.only("with missing", async () => {
         FileUtils.writeMDFile(
           root,
           "bar.one.alpha.md",
@@ -93,7 +93,6 @@ describe("main", () => {
         );
         store = createFileStorage(root);
         const resp = await store.query(createScope(), "**/*", queryMode, {});
-        expect(1).toEqual(1);
         expectSnapshot(expect, "missing snapshots", resp.data);
       });
       test("all", async () => {

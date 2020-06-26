@@ -1,11 +1,8 @@
 import * as vscode from "vscode";
 
-import { DEFAULT_ROOT } from "./components/lookup/constants";
+import { DendronFileSystemProvider } from "./components/fsProvider";
 import { LookupController } from "./components/lookup/LookupController";
 import { createLogger } from "@dendronhq/common-server";
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import { engine } from "@dendronhq/engine-server";
 
 const L = createLogger("extension");
 
@@ -13,35 +10,18 @@ const L = createLogger("extension");
 
 // === Main
 // this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+  console.log("activate");
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
-  const ctx = "activate";
-  Promise.all([
-    engine({ root: DEFAULT_ROOT }).query(
-      { username: "DUMMY" },
-      "**/*",
-      "note",
-      {
-        fullNode: false,
-        initialQuery: true,
-      }
-    ),
-    engine({ root: DEFAULT_ROOT }).query(
-      { username: "DUMMY" },
-      "**/*",
-      "schema",
-      {
-        fullNode: false,
-        initialQuery: true,
-      }
-    ),
-  ]).then(() => {
-    console.log("engine init");
-    L.info({ ctx: ctx + ":engine:init:post", schemas: engine().schemas });
+  DendronFileSystemProvider.create().then((fs) => {
+    context.subscriptions.push(
+      vscode.workspace.registerFileSystemProvider("denfs", fs, {
+        isCaseSensitive: true,
+      })
+    );
+    console.log("fs initialized");
   });
-  console.log('Congratulations, your extension "dendron" is now active!');
 
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with registerCommand
@@ -154,9 +134,21 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  context.subscriptions.push(
+    vscode.commands.registerCommand("dendron.workspaceInit", () => {
+      vscode.window.showInformationMessage("Init workspace");
+      vscode.workspace.updateWorkspaceFolders(0, 0, {
+        uri: vscode.Uri.parse("denfs:/"),
+        name: "Dendron",
+      });
+    })
+  );
+
   context.subscriptions.push(disposable);
   context.subscriptions.push(dendronLookupDisposable);
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+  console.log("deactivate");
+}

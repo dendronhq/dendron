@@ -28,6 +28,10 @@
       {
         "command": "dendron.lookup",
         "title": "Lookup"
+      },
+      {
+        "command": "dendron.workspaceInit",
+        "title": "Setup"
       }
     ],
     "keybindings": [

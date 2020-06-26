@@ -1,12 +1,11 @@
 import { DEngine, Note } from "@dendronhq/common-all";
+import { FileType, QuickPick, QuickPickItem, Uri, window } from "vscode";
 import { ProtoEngine, engine } from "@dendronhq/engine-server";
-import { QuickPick, QuickPickItem, Uri, window, workspace } from "vscode";
 
 import { CREATE_NEW_LABEL } from "./constants";
 import { DendronFileSystemProvider } from "../fsProvider";
 import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
-import path from "path";
 
 const L = createLogger("LookupProvider");
 
@@ -73,23 +72,38 @@ export class LookupProvider {
         L.info({ ctx, status: "no qs" });
         //picker.items = [engine().notes["root"]];
         picker.items = _.values(engine().notes);
-      } else if (picker.activeItems.length === 0 && querystring.length === 1) {
+        return;
+      }
+
+      // check if end with slash
+      // if (_.some([querystring.endsWith("/")])) {
+      //   picker.activeItems = picker.items;
+      // }
+
+      // check if single item query
+      if (picker.activeItems.length === 0 && querystring.length === 1) {
         // doesn't make active if single letter match
         picker.activeItems = picker.items;
-      } else if (picker.activeItems.length === 0) {
+        return;
+      }
+
+      // new item
+      if (picker.activeItems.length === 0) {
         // check if empty
         L.info({ ctx, status: "no active items" });
         picker.items = [createNoActiveItem()];
       }
       L.info({ ctx: ctx + ":exit", querystring });
+      return;
     };
 
-    picker.onDidAccept(() => {
+    picker.onDidAccept(async () => {
       const ctx = "onDidAccept";
       L.info({ ctx });
       // const selectedItem = picker.selectedItems[0];
       const selectedItem = PickerUtils.getSelection<Note>(picker);
       L.info({ ctx: "onDidAccept", selectedItem });
+
       if (isCreateNewPick(selectedItem)) {
         const value = PickerUtils.getValue(picker);
         window.showInformationMessage(`create new ${value}`);
@@ -102,15 +116,26 @@ export class LookupProvider {
             L.info({ ctx: `${ctx}:write:done`, value });
           });
       } else {
-        const engine: DEngine = ProtoEngine.getEngine();
-        const mode = "note";
         const fnameToUri = (fname: string): Uri => {
           return Uri.parse(`denfs:/${fname.replace(/\./g, "/")}`);
         };
         const fname = selectedItem.fname;
-        window.showTextDocument(fnameToUri(fname)).then(() => {
-          picker.hide();
-        });
+        let uri = fnameToUri(fname);
+        const fs = await DendronFileSystemProvider.getOrCreate();
+        if (fs.stat(uri).type === FileType.Directory) {
+          uri = fnameToUri(fname + ".index");
+        }
+        L.info({ ctx: "onDidAccept:showTextDocument:pre", uri });
+
+        window.showTextDocument(uri).then(
+          () => {
+            picker.hide();
+          },
+          (err) => {
+            L.error({ ctx, err });
+            throw err;
+          }
+        );
         // engine
         //   .get({ username: "DUMMY" }, selectedItem.id, mode)
         //   .then(async (resp) => {

@@ -169,7 +169,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     this.children = children;
     this.body = body;
     this.data = data;
-    this.label = this.title;
+    this.label = this.logicalPath;
   }
 
   get domain(): DNode<T> {
@@ -177,6 +177,10 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
       return this;
     }
     return this.parent.domain;
+  }
+
+  get basename(): string {
+    return this.logicalPath.split(".").slice(-1)[0];
   }
 
   /**
@@ -190,7 +194,8 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
   }
 
   get logicalPath(): string {
-    return this.fname.replace(/\./g, "/");
+    return this.fname;
+    //return this.fname.replace(/\./g, "/");
   }
 
   // used in lookup
@@ -310,8 +315,20 @@ export class Note extends DNode<NoteData> implements INote {
   }
 
   // vscode detail pane
-  get detail(): string | undefined {
-    return path.dirname(this.logicalPath);
+  get detail(): string {
+    const cleanPath = this.logicalPath
+      .split(".")
+      .slice(0, -1)
+      .join(".");
+    if (_.isEmpty(cleanPath)) {
+      return this.logicalPath;
+    } else {
+      return cleanPath + ".";
+    }
+  }
+
+  get description(): string {
+    return "description";
   }
 
   get url(): string {

@@ -50,6 +50,7 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   nodes: IDNode<T>[];
   // NOTE: currently equal to `fname`
   path: string;
+  basename: string;
   logicalPath: string;
   // how to display path in lookup
   // used to special case `root` node to be empty string

@@ -30,7 +30,7 @@ export class File implements vscode.FileStat {
       this.node = null;
     } else {
       this.node = nodeOrString;
-      this.name = nodeOrString.title;
+      this.name = nodeOrString.basename;
       this.data = Buffer.from(nodeOrString.body);
     }
   }
@@ -57,13 +57,13 @@ export class Directory implements vscode.FileStat {
       this.node = null;
     } else {
       this.node = nodeOrString;
-      this.name = nodeOrString.title;
+      this.name = nodeOrString.basename;
       this.entries.set("index", new File(nodeOrString));
       nodeOrString.children.forEach((n) => {
         if (n.children.length === 0) {
-          this.entries.set(n.title, new File(n));
+          this.entries.set(n.basename, new File(n));
         } else {
-          this.entries.set(n.title, new Directory(n));
+          this.entries.set(n.basename, new Directory(n));
         }
       });
       this.size = nodeOrString.children.length + 1;

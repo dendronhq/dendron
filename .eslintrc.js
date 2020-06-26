@@ -30,6 +30,7 @@ module.exports = {
     "implicit-arrow-linebreak": "off",
     "no-unused-vars": "off",
     "max-len": "off",
+    "prefer-template": "off",
     // prettier
     indent: "off",
     quotes: "off",

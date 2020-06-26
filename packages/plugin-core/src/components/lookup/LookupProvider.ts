@@ -16,11 +16,38 @@ function createNoActiveItem(): QuickPickItem {
   };
 }
 
+const fnameToUri = async (
+  fname: string,
+  opts?: { checkIfDirectoryFile?: boolean }
+): Promise<Uri> => {
+  opts = _.defaults(opts, { checkIfDirectoryFile: true });
+  let uri = Uri.parse(`denfs:/${fname.replace(/\./g, "/")}`);
+  if (opts.checkIfDirectoryFile) {
+    const fs = await DendronFileSystemProvider.getOrCreate();
+    if (fs.stat(uri).type === FileType.Directory) {
+      uri = await fnameToUri(fname + ".index");
+    }
+  }
+  return uri;
+};
+
 function isCreateNewPick(item: QuickPickItem): boolean {
   return item.label === CREATE_NEW_LABEL;
 }
 function slashToDot(ent: string) {
   return ent.replace(/\//g, ".");
+}
+
+function showDocAndHidePicker(uri: Uri, picker: QuickPick<any>) {
+  window.showTextDocument(uri).then(
+    () => {
+      picker.hide();
+    },
+    (err) => {
+      L.error({ err });
+      throw err;
+    }
+  );
 }
 
 class PickerUtils {
@@ -98,26 +125,25 @@ export class LookupProvider {
       const selectedItem = PickerUtils.getSelection<Note>(picker);
       L.info({ ctx: "onDidAccept", selectedItem });
 
-      const fnameToUri = async (fname: string): Promise<Uri> => {
-        let uri = Uri.parse(`denfs:/${fname.replace(/\./g, "/")}`);
-        const fs = await DendronFileSystemProvider.getOrCreate();
-        if (fs.stat(uri).type === FileType.Directory) {
-          uri = await fnameToUri(fname + ".index");
-        }
-        return uri;
-      };
-
       if (isCreateNewPick(selectedItem)) {
         const value = PickerUtils.getValue(picker);
         window.showInformationMessage(`create new ${value}`);
         const fname = value;
-        return engine()
-          .write({ username: "DUMMY" }, new Note({ title: value, fname }), {
+        await engine().write(
+          { username: "DUMMY" },
+          new Note({ title: value, fname }),
+          {
             newNode: true,
-          })
-          .then(() => {
-            L.info({ ctx: `${ctx}:write:done`, value });
-          });
+          }
+        );
+        L.info({ ctx: `${ctx}:write:done`, value });
+        const uri = await fnameToUri(fname, { checkIfDirectoryFile: false });
+        await (await DendronFileSystemProvider.getOrCreate()).writeFile(
+          uri,
+          Buffer.from("new file"),
+          { create: true, overwrite: true }
+        );
+        return showDocAndHidePicker(uri, picker);
       }
 
       let uri: Uri;

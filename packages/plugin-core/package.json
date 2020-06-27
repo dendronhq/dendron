@@ -48,7 +48,7 @@
     "build": "npm run compile",
     "compile": "tsc -p tsconfig.build.json",
     "pretest": "npm run build && yarn run lint",
-    "test": "node ./out/test/runTest.js"
+    "test": ""
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",

@@ -4,10 +4,6 @@
       "path": "packages/common-all"
     },
     {
-      "name": "root",
-      "path": "."
-    },
-    {
       "path": "packages/common-server"
     },
     {

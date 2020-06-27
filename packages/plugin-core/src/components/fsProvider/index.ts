@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 
 import { DEngine, DNode, Note } from "@dendronhq/common-all";
 
-import { BodyParser } from "packages/engine-server/src/drivers/raw/BodyParser";
 import { DEFAULT_ROOT } from "../lookup/constants";
 import { TextDecoder } from "util";
 import _ from "lodash";
@@ -127,8 +126,11 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
         child = entry.entries.get(part);
       }
       if (!child && opts.createStubDirs) {
-        const partsAccUri = vscode.Uri.parse(`${uri.scheme}:${partsAcc.join("/")}`, true);
-        await this.createDirectory(partsAccUri, {writeToEngine: true});
+        const partsAccUri = vscode.Uri.parse(
+          `${uri.scheme}:${partsAcc.join("/")}`,
+          true
+        );
+        await this.createDirectory(partsAccUri, { writeToEngine: true });
         child = await this._lookupAsDirectory(partsAccUri, false);
       }
 
@@ -234,13 +236,16 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
 
   // --- manage files/folders
   /**
-   * 
-   * @param uri 
+   *
+   * @param uri
    * @param opts
-   *   - NOTE: writeToEngine: if specified, write to engine as stub 
+   *   - NOTE: writeToEngine: if specified, write to engine as stub
    */
-  async createDirectory(uri: vscode.Uri, opts?: {writeToEngine?: boolean}): Promise<void> {
-    opts = _.defaults(opts, {writeToEngine: false})
+  async createDirectory(
+    uri: vscode.Uri,
+    opts?: { writeToEngine?: boolean }
+  ): Promise<void> {
+    opts = _.defaults(opts, { writeToEngine: false });
     let basename = path.posix.basename(uri.path);
     let dirname = uri.with({ path: path.posix.dirname(uri.path) });
     let parent = await this._lookupAsDirectory(dirname, false);
@@ -250,13 +255,13 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     parent.mtime = Date.now();
     parent.size += 1;
     if (opts.writeToEngine) {
-      await this._writeToEngine(uri, null, {writeStub: true});
+      await this._writeToEngine(uri, null, { writeStub: true });
     }
     this._fireSoon(
       { type: vscode.FileChangeType.Changed, uri: dirname },
       { type: vscode.FileChangeType.Created, uri }
     );
-    return 
+    return;
   }
 
   async delete(uri: vscode.Uri): Promise<void> {
@@ -328,13 +333,13 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
 
   async _writeToEngine(
     uri: vscode.Uri,
-    content: Uint8Array|null,
-    opts?: {writeStub?: boolean}
+    content: Uint8Array | null,
+    opts?: { writeStub?: boolean }
   ) {
-    opts = _.defaultTo(opts, {writeStub: false});
+    opts = _.defaultTo(opts, { writeStub: false });
     let note: Note;
     const fname = uriToFname(uri);
-    let body = ""
+    let body = "";
     if (content) {
       body = new TextDecoder("utf-8").decode(content);
     }
@@ -342,11 +347,13 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
       await engine().query({ username: "DUMMY" }, fname, "note", {
         queryOne: true,
         createIfNew: true,
-        stub: opts.writeStub
+        stub: opts.writeStub,
       })
     ).data[0] as Note;
     note.body = body;
-    return engine().write({ username: "DUMMY" }, note, {stub: opts.writeStub});
+    return engine().write({ username: "DUMMY" }, note, {
+      stub: opts.writeStub,
+    });
   }
 
   async writeFile(
@@ -356,7 +363,9 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
   ): Promise<void> {
     options = _.defaults(options, { writeToEngine: true });
     let basename = path.posix.basename(uri.path);
-    let parent = await this._lookupParentDirectory(uri, {createStubDirs: true});
+    let parent = await this._lookupParentDirectory(uri, {
+      createStubDirs: true,
+    });
     let entry = parent.entries.get(basename);
     if (entry instanceof Directory) {
       throw vscode.FileSystemError.FileIsADirectory(uri);

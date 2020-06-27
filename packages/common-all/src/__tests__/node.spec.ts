@@ -1,7 +1,5 @@
-import { DNode, DNodeUtils, Note, NoteUtils, Schema } from "../node";
-import _, { before } from "lodash";
+import { DNodeUtils, Note, NoteUtils, Schema } from "../node";
 
-import { DNodeData } from "../types";
 import { expectSnapshot } from "../testUtils";
 
 function setupNotes() {

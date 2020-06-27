@@ -5,6 +5,7 @@ import {
   DNodeData,
   DNodeDict,
   DNodeRawProps,
+  DNodeUtils,
   EngineQueryResp,
   IDNode,
   INoteOpts,
@@ -21,15 +22,13 @@ import {
   assert,
   assertExists,
   getStage,
-  makeResponse,
-  DNodeUtils
+  makeResponse
 } from "@dendronhq/common-all";
 
 import { BodyParser } from "./drivers/raw/BodyParser";
 import FileStorage from "./drivers/file/store";
 import Fuse from "fuse.js";
 import _ from "lodash";
-import { basename } from "path";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 

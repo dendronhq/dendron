@@ -1,11 +1,11 @@
-import { DEngine, Note } from "@dendronhq/common-all";
-import { FileType, QuickPick, QuickPickItem, Uri, window } from "vscode";
-import { ProtoEngine, engine } from "@dendronhq/engine-server";
+import { QuickPick, QuickPickItem, Uri, window } from "vscode";
 
 import { CREATE_NEW_LABEL } from "./constants";
 import { DendronFileSystemProvider } from "../fsProvider";
+import { Note } from "@dendronhq/common-all";
 import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
+import { engine } from "@dendronhq/engine-server";
 import { fnameToUri } from "./utils";
 
 const L = createLogger("LookupProvider");

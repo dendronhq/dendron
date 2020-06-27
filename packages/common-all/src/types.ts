@@ -127,7 +127,7 @@ export interface QueryOpts {
    * Use with `createIfNew`
    * If true, create a stub node
    */
-  stub?: boolean
+  stub?: boolean;
   /**
    * If node does not exist, create it?
    */
@@ -149,8 +149,8 @@ export type DEngineStoreWriteOpts = {
   /**
    * If set, don't write to file
    */
-  stub?: boolean
-}
+  stub?: boolean;
+};
 
 export interface DEngineStore<T = DNodeData, O = any> {
   opts: O;
@@ -163,7 +163,11 @@ export interface DEngineStore<T = DNodeData, O = any> {
     mode: QueryMode,
     opts?: QueryOpts
   ) => Promise<EngineQueryResp<T>>;
-  write: <T>(scope: Scope, node: IDNode<T>, opts?: DEngineStoreWriteOpts) => Promise<void>;
+  write: <T>(
+    scope: Scope,
+    node: IDNode<T>,
+    opts?: DEngineStoreWriteOpts
+  ) => Promise<void>;
 }
 
 export type DEngineMode = "exact" | "fuzzy";
@@ -171,6 +175,7 @@ export type DEngineMode = "exact" | "fuzzy";
 export type DEngineOpts = {
   root: string;
   mode?: DEngineMode;
+  initialize?: boolean;
 };
 
 /**

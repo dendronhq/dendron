@@ -78,6 +78,7 @@ type ProtoEngineOpts = {
   forceNew?: boolean;
   store: DEngineStore;
   mode?: DEngineMode;
+  initialize?: boolean;
 };
 
 type ProtoEngineGetOpts = Partial<ProtoEngineOpts>;
@@ -130,7 +131,8 @@ export class ProtoEngine implements DEngine {
       cacheDir: "/tmp/dendronCache",
       root: "/Users/kevinlin/Dropbox/Apps/Dendron",
       forceNew: false,
-      mode: "exact"
+      mode: "exact",
+      initialize: false
     });
     this.store = store;
     this.fuse = createFuse<Note>([], {
@@ -439,5 +441,9 @@ export class ProtoEngine implements DEngine {
 }
 
 export function engine(opts?: ProtoEngineGetOpts) {
+  return ProtoEngine.getEngine(opts);
+}
+
+export function getOrCreateEngine(opts?: ProtoEngineGetOpts) {
   return ProtoEngine.getEngine(opts);
 }

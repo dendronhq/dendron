@@ -6,8 +6,8 @@ import { DEFAULT_ROOT } from "../lookup/constants";
 import { TextDecoder } from "util";
 import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
-import { engine } from "@dendronhq/engine-server";
 import { fnameToUri } from "../lookup/utils";
+import { getOrCreateEngine } from "@dendronhq/engine-server";
 import path from "path";
 
 const L = createLogger("extension");
@@ -25,6 +25,11 @@ type LookupOpts = {
 
 type GetOrCreateOpts = {
   root?: string;
+  initializeEngine?: boolean;
+};
+
+type InitializeEngineOpts = {
+  root: string;
 };
 
 export class File implements vscode.FileStat {
@@ -95,7 +100,7 @@ let _DendronFileSystemProvider: DendronFileSystemProvider | null = null;
 export class DendronFileSystemProvider implements vscode.FileSystemProvider {
   static initialized = false;
   public engine: DEngine;
-  public rootNoteDir: Directory;
+  public rootNoteDir: Directory | null;
 
   private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
   readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this
@@ -119,6 +124,9 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     opts = _.defaults(opts, { createStubDirs: false });
     let parts = uri.path.split("/");
     let partsAcc: string[] = [];
+    if (_.isNull(this.root)) {
+      throw new Error("root not initialized");
+    }
     let entry: Entry = this.root;
     for (const part of parts) {
       if (!part) {
@@ -130,8 +138,10 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
         child = entry.entries.get(part);
       }
       if (!child && opts.createStubDirs) {
+        // check if absolute path
+        let prefix = (path.isAbsolute(uri.path) ? "/" : "");
         const partsAccUri = vscode.Uri.parse(
-          `${uri.scheme}:${partsAcc.join("/")}`,
+          `${uri.scheme}:${prefix}${partsAcc.join("/")}`,
           true
         );
         await this.createDirectory(partsAccUri, { writeToEngine: true });
@@ -161,9 +171,14 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     } else {
       // create dir if it is currently a file
       let qs = uriToFname(uri);
-      const fileNode = await engine().query({ username: "DUMMY" }, qs, "note", {
-        queryOne: true,
-      });
+      const fileNode = await getOrCreateEngine().query(
+        { username: "DUMMY" },
+        qs,
+        "note",
+        {
+          queryOne: true,
+        }
+      );
       await this.delete(uri);
       await this.createDirectory(uri);
       qs += ".index";
@@ -196,49 +211,45 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
   static async getOrCreate(
     opts?: GetOrCreateOpts
   ): Promise<DendronFileSystemProvider> {
-    const optsClean = _.defaults(opts, { root: DEFAULT_ROOT });
+    const optsClean = _.defaults(opts, {
+      root: DEFAULT_ROOT,
+      initializeEngine: true,
+    });
     if (_.isNull(_DendronFileSystemProvider)) {
-      const ctx = "cons";
-      return new Promise((resolve, _reject) => {
-        // TODO: order matters, schema should be loaded before files
-        Promise.all([
-          engine({ root: optsClean.root }).query(
-            { username: "DUMMY" },
-            "**/*",
-            "note",
-            {
-              fullNode: false,
-              initialQuery: true,
-            }
-          ),
-          engine({ root: optsClean.root }).query(
-            { username: "DUMMY" },
-            "**/*",
-            "schema",
-            {
-              fullNode: false,
-              initialQuery: true,
-            }
-          ),
-        ]).then(async () => {
-          console.log("engine init");
-          L.info({ ctx: ctx + ":engine:init:post", schemas: engine().schemas });
-          _DendronFileSystemProvider = new DendronFileSystemProvider(engine());
-          resolve(_DendronFileSystemProvider);
-        });
-      });
-    } else {
-      return _DendronFileSystemProvider;
+      _DendronFileSystemProvider = new DendronFileSystemProvider(
+        getOrCreateEngine({ initialize: optsClean.initializeEngine, root: opts?.root })
+      );
     }
+    return _DendronFileSystemProvider;
   }
 
   constructor(engine: DEngine) {
     this.engine = engine;
-    this.rootNoteDir = new Directory(this.engine.notes["root"]);
+    this.rootNoteDir = null
+    if (engine.opts.initialize) {
+      this.initialize({root: this.engine.opts.root});
+    }
   }
 
   get root() {
     return this.rootNoteDir;
+  }
+
+  // --- engine
+  // TODO: move this method into engine
+  async initialize(opts: InitializeEngineOpts) {
+    const engine = await getOrCreateEngine({ root: opts.root, forceNew: true });
+    this.engine = engine
+    await engine.query({ username: "DUMMY" }, "**/*", "schema", {
+      fullNode: false,
+      initialQuery: true,
+    });
+    await engine.query({ username: "DUMMY" }, "**/*", "note", {
+      fullNode: false,
+      initialQuery: true,
+    });
+    this.rootNoteDir = new Directory(engine.notes["root"]);
+    return;
   }
 
   // --- manage files/folders
@@ -351,14 +362,14 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
       body = new TextDecoder("utf-8").decode(content);
     }
     note = (
-      await engine().query({ username: "DUMMY" }, fname, "note", {
+      await getOrCreateEngine().query({ username: "DUMMY" }, fname, "note", {
         queryOne: true,
         createIfNew: true,
         stub: opts.writeStub,
       })
     ).data[0] as Note;
     note.body = body;
-    return engine().write({ username: "DUMMY" }, note, {
+    return getOrCreateEngine().write({ username: "DUMMY" }, note, {
       stub: opts.writeStub,
     });
   }

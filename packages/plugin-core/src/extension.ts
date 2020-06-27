@@ -26,10 +26,10 @@ export function activate(context: vscode.ExtensionContext) {
         })
       );
       console.log("fs initialized");
-      // vscode.workspace.updateWorkspaceFolders(0, 0, {
-      //   uri: vscode.Uri.parse("denfs:/"),
-      //   name: "Dendron",
-      // });
+      vscode.workspace.updateWorkspaceFolders(0, 0, {
+        uri: vscode.Uri.parse("denfs:/"),
+        name: "Dendron",
+      });
     });
   }
 

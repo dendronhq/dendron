@@ -1,5 +1,55 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`DNodeUtils findClosestParent, parent grandchild -> domain root: main 1`] = `
+Object {
+  "body": "",
+  "children": Array [],
+  "created": "TODO",
+  "data": Object {},
+  "desc": "",
+  "fname": "baz",
+  "parent": "root",
+  "stub": false,
+  "title": "baz",
+  "type": "note",
+  "updated": "TODO",
+}
+`;
+
+exports[`DNodeUtils findClosestParent, parent grandchild -> parent: main 1`] = `
+Object {
+  "body": "",
+  "children": Array [],
+  "created": "TODO",
+  "data": Object {},
+  "desc": "",
+  "fname": "foo.one",
+  "parent": "foo",
+  "stub": false,
+  "title": "foo.one",
+  "type": "note",
+  "updated": "TODO",
+}
+`;
+
+exports[`DNodeUtils findClosestParent, parent grandchild -> root: main 1`] = `
+Object {
+  "body": "",
+  "children": Array [
+    "foo",
+  ],
+  "created": "TODO",
+  "data": Object {},
+  "desc": "",
+  "fname": "root",
+  "parent": "root",
+  "stub": false,
+  "title": "root",
+  "type": "note",
+  "updated": "TODO",
+}
+`;
+
 exports[`NoteUtils createStubNotes, root -> bar.one: barChild 1`] = `
 Array [
   Object {

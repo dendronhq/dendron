@@ -1,10 +1,13 @@
-import { DNode, Note, NoteUtils, Schema } from "../node";
+import { DNode, DNodeUtils, Note, NoteUtils, Schema } from "../node";
+import _, { before } from "lodash";
 
 import { DNodeData } from "../types";
-import _ from "lodash";
 import { expectSnapshot } from "../testUtils";
 
 function setupNotes() {
+  const baz = new Note({
+    fname: "baz"
+  });
   const foo = new Note({
     fname: "foo"
   });
@@ -18,7 +21,7 @@ function setupNotes() {
   const root = new Note({ id: "root", fname: "root" });
   foo.addChild(fooChild);
   root.addChild(foo);
-  return { foo, fooChild, barChild, root, fooTwoBeta };
+  return { foo, fooChild, barChild, root, fooTwoBeta, baz };
 }
 
 function setup() {
@@ -44,6 +47,33 @@ function setup() {
   fooChild.addChild(fooGrandChild);
   return { foo, fooChild, fooGrandChild };
 }
+
+describe(DNodeUtils, () => {
+  let notes: ReturnType<typeof setupNotes>;
+  describe("findClosestParent, parent", () => {
+    beforeEach(() => {
+      notes = setupNotes();
+    });
+
+    test("grandchild -> parent", () => {
+      const resp = DNodeUtils.findClosestParent("foo.one.alpha", notes);
+      resp.fname = "foo.one";
+      expectSnapshot(expect, "main", resp);
+    });
+
+    test("grandchild -> domain root", () => {
+      const resp = DNodeUtils.findClosestParent("baz.one.alpha", notes);
+      resp.fname = "baz";
+      expectSnapshot(expect, "main", resp);
+    });
+
+    test("grandchild -> root", () => {
+      const resp = DNodeUtils.findClosestParent("bond.one.alpha", notes);
+      resp.fname = "root";
+      expectSnapshot(expect, "main", resp);
+    });
+  });
+});
 
 describe("NoteUtils", () => {
   let notes: ReturnType<typeof setupNotes>;

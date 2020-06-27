@@ -1,9 +1,6 @@
 import {
   DEngineStore,
-  DNode,
-  DNodeDict,
   DNodeUtils,
-  IDNode,
   Note,
   NoteDict,
   NoteRawProps,
@@ -46,35 +43,6 @@ function getFileMeta(fpaths: string[]): FileMetaDict {
     metaDict[lvl].push({ prefix: name, fpath });
   });
   return metaDict;
-}
-
-function findClosestParent(fpath: string, nodes: DNodeDict): IDNode {
-  const dirname = DNodeUtils.dirName(fpath);
-  if (dirname === "") {
-    return nodes["root"];
-  }
-  const maybeNode = _.find(nodes, { fname: dirname });
-  if (maybeNode) {
-    return maybeNode;
-  } else {
-    return findClosestParent(dirname, nodes);
-  }
-  // (_.find(nodes, { fname:  }))
-
-  // let acc = 0;
-  // if
-  // //_.eachRight(parts, () => {
-  // parts.forEach(() => {
-  //   acc -= 1;
-  //   const cand = parts.slice(acc);
-  //   const resp = _.find(nodes, { fname: cand.join(".") });
-  //   if (resp) {
-  //     return resp;
-  //   }
-  //   return undefined;
-  // });
-  // // default parent to rootkk
-  // return nodes["root"];
 }
 
 type FileParserOpts = {
@@ -199,19 +167,17 @@ export class FileParser {
       return [];
     }
     // used to reconstruct missing notes
-    const nodesStore: NoteDict = {};
+    const nodesStoreByFname: NoteDict = {};
     const store = this.store;
     const fileMetaDict: FileMetaDict = getFileMeta(data);
     // logger.debug({ ctx: "parse:getFileMeta:post", fileMetaDict })
-    const out = [];
     const root = fileMetaDict[1].find(n => n.fpath === "root.md") as FileMeta;
     assert(!_.isUndefined(root), "no root found");
     const { node: rootNode } = this.toNode(root, [], store, {
       isRoot: true,
       errorOnBadParse: this.opts.errorOnBadParse
     }) as { node: Note };
-    out.push(rootNode);
-    nodesStore["root"] = rootNode;
+    nodesStoreByFname["root"] = rootNode;
 
     // domain root
     let lvl = 2;
@@ -229,9 +195,8 @@ export class FileParser {
       ) as Note[];
     prevNodes.forEach(n => {
       rootNode.addChild(n);
-      nodesStore[n.fname] = n;
+      nodesStoreByFname[n.fname] = n;
     });
-    out.push(prevNodes);
 
     // domain root children
     while (_.has(fileMetaDict, lvl)) {
@@ -252,11 +217,18 @@ export class FileParser {
             errorOnBadParse: this.opts.errorOnBadParse
           });
           if (missing) {
-            const closetParent = findClosestParent(
+            const closetParent = DNodeUtils.findClosestParent(
               (node as Note).logicalPath,
-              nodesStore
+              nodesStoreByFname
             );
-            NoteUtils.createStubNotes(closetParent as Note, node as Note);
+            const stubNodes = NoteUtils.createStubNotes(
+              closetParent as Note,
+              node as Note
+            );
+            stubNodes.forEach(ent2 => {
+              nodesStoreByFname[ent2.fname] = ent2;
+            });
+            // TODO: add stub nodes to dict and return dict
             this.missing.add(missing);
           }
           return node;
@@ -264,14 +236,12 @@ export class FileParser {
         .filter(Boolean) as Note[];
       lvl += 1;
       currNodes.forEach(n => {
-        nodesStore[n.fname] = n;
+        nodesStoreByFname[n.fname] = n;
       });
       // TODO: remove
-      out.push(currNodes);
       prevNodes = currNodes;
     }
-    // TODO: replace with _.values(nodeStore)
-    return _.flatten(out);
+    return _.values(nodesStoreByFname);
   }
 
   report() {

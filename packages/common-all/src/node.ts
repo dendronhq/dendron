@@ -1,5 +1,6 @@
 import {
   DNodeData,
+  DNodeDict,
   DNodeRawOpts,
   DNodeRawProps,
   IDNode,
@@ -53,6 +54,19 @@ export class DNodeUtils {
 
   static domainName(nodePath: string) {
     return nodePath.split("."[0]);
+  }
+
+  static findClosestParent(fpath: string, nodes: DNodeDict): IDNode {
+    const dirname = DNodeUtils.dirName(fpath);
+    if (dirname === "") {
+      return nodes["root"];
+    }
+    const maybeNode = _.find(nodes, { fname: dirname });
+    if (maybeNode) {
+      return maybeNode;
+    } else {
+      return DNodeUtils.findClosestParent(dirname, nodes);
+    }
   }
 }
 
@@ -513,7 +527,8 @@ export class NodeBuilder {
 }
 
 export class NoteUtils {
-  static createStubNotes(from: Note, to: Note) {
+  static createStubNotes(from: Note, to: Note): Note[] {
+    const stubNodes: Note[] = [];
     // ""
     const fromPath = from.logicalPath;
     // ""
@@ -528,10 +543,11 @@ export class NoteUtils {
         stubPath += `.${part}`;
       }
       const n = Note.createStub(stubPath);
+      stubNodes.push(n);
       parent.addChild(n);
       parent = n;
     });
     parent.addChild(to);
-    return to;
+    return stubNodes;
   }
 }

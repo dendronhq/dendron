@@ -84,7 +84,7 @@ describe("main", () => {
      *   - foo.two
      */
     describe("query", () => {
-      test.only("with missing", async () => {
+      test("with missing", async () => {
         FileUtils.writeMDFile(
           root,
           "bar.one.alpha.md",
@@ -93,8 +93,15 @@ describe("main", () => {
         );
         store = createFileStorage(root);
         const resp = await store.query(createScope(), "**/*", queryMode, {});
+        const bar = _.find(resp.data, { fname: "bar" });
+        const barOne = _.find(resp.data, { fname: "bar.one" });
+        expect(bar).not.toBeNull();
+        expect(bar?.stub).toBeTruthy();
+        expect(barOne).not.toBeNull();
+        expect(barOne?.stub).toBeTruthy();
         expectSnapshot(expect, "missing snapshots", resp.data);
       });
+
       test("all", async () => {
         const resp = await store.query(createScope(), "**/*", queryMode, {});
         const rootNode = _.find(resp.data, n => n.title === "root") as Schema;

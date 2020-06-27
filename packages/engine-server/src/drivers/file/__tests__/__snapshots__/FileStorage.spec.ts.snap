@@ -1,0 +1,131 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`main notes query all: raw-props 1`] = `
+Object {
+  "body": "",
+  "children": Array [],
+  "created": "TODO",
+  "data": Object {},
+  "desc": "",
+  "fname": "foo.one",
+  "parent": "foo",
+  "stub": false,
+  "title": "foo.one",
+  "type": "note",
+  "updated": "TODO",
+}
+`;
+
+exports[`main notes query with missing: missing snapshots 1`] = `
+Array [
+  Object {
+    "body": "",
+    "children": Array [
+      "foo",
+      "bar",
+    ],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "parent": "root",
+    "stub": false,
+    "title": "root",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.one",
+      "foo.two",
+    ],
+    "created": "TODO",
+    "data": Object {
+      "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
+    },
+    "desc": "",
+    "fname": "foo",
+    "parent": "root",
+    "stub": false,
+    "title": "foo",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "bar.one",
+    ],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "parent": "root",
+    "stub": true,
+    "title": "bar",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.one",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.one",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.two",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.two",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "bar.one.alpha",
+    ],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one",
+    "parent": "bar",
+    "stub": true,
+    "title": "bar.one",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "bar alpha content
+",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one.alpha",
+    "parent": "bar.one",
+    "stub": false,
+    "title": "bar.one.alpha",
+    "type": "note",
+    "updated": "TODO",
+  },
+]
+`;
+
+exports[`main notes write writeQuery: data snapshot 1`] = `
+"bond
+"
+`;

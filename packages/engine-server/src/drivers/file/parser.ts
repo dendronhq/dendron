@@ -109,7 +109,7 @@ export class FileParser {
     let parent: Note | null;
     let parentPath: string | null = null;
     let missing: null | string = null;
-    if (noteProps.parent === "not_set") {
+    if (_.isNull(noteProps.parent)) {
       parentPath = DNodeUtils.dirName(ent.prefix);
       parent = _.find(parents, p => p.path === parentPath) || null;
     } else {

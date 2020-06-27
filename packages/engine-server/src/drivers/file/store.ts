@@ -15,7 +15,8 @@ import {
   Scope,
   StoreGetResp,
   assert,
-  makeResponse
+  makeResponse,
+  DEngineStoreWriteOpts
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -211,8 +212,11 @@ class FileStorage extends FileStorageBase implements DEngineStore {
     });
   }
 
-  async write(_scope: Scope, node: IDNode) {
-    await this._writeFile(node);
+  async write(_scope: Scope, node: IDNode, opts?: DEngineStoreWriteOpts) {
+    opts = _.defaults(opts, { stub: false });
+    if (!opts.stub) {
+      await this._writeFile(node);
+    }
     // FIXME:OPT: only do for new nodes
     this.refreshIdToPath([node]);
     return;

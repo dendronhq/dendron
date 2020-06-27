@@ -129,7 +129,8 @@ export function node2MdFile(node: IDNode, opts: { root: string }) {
     "url",
     "path"
   ]);
-  const parent = node.parent?.id || null;
+  // only save parent id if parent is not a stub
+  const parent = (node.parent && !node.parent.stub ? node.parent.id : null);
   const children = node.children.map(c => c.id);
   const filePath = path.join(root, `${nodePath}.md`);
   return fs.writeFileSync(

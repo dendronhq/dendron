@@ -21,7 +21,8 @@ import {
   assert,
   assertExists,
   getStage,
-  makeResponse
+  makeResponse,
+  DNodeUtils
 } from "@dendronhq/common-all";
 
 import { BodyParser } from "./drivers/raw/BodyParser";
@@ -295,7 +296,8 @@ export class ProtoEngine implements DEngine {
     opts = _.defaults(opts || {}, {
       fullNode: false,
       createIfNew: true,
-      initialQuery: false
+      initialQuery: false,
+      stub: false
     });
     let data: EngineQueryResp;
 
@@ -342,8 +344,8 @@ export class ProtoEngine implements DEngine {
           queryString,
           item: items[0]
         });
-        const nodeBlank = new Note({ fname: queryString });
-        await this.write(scope, nodeBlank, { newNode: true });
+        const nodeBlank = new Note({ fname: queryString, stub: opts.stub });
+        await this.write(scope, nodeBlank, { newNode: true, stub: opts.stub });
         const { data: nodeFull } = await this.get(scope, nodeBlank.id, mode);
         this.refreshNodes([nodeFull], { fullNode: true });
         return makeResponse<EngineQueryResp>({
@@ -389,7 +391,7 @@ export class ProtoEngine implements DEngine {
   }
 
   async write(scope: Scope, node: IDNode, opts?: NodeWriteOpts): Promise<void> {
-    opts = _.defaults(opts, { newNode: false, body: "" });
+    opts = _.defaults(opts, { newNode: false, body: "", stub: false });
     if (node.type === "schema") {
       assertExists(opts.body, "body must exist");
       // convert body
@@ -408,7 +410,7 @@ export class ProtoEngine implements DEngine {
       node = schemaNew;
       // reset body
       node.body = "";
-      await this.store.write(scope, node);
+      await this.store.write(scope, node, { stub: opts.stub });
       if (opts.newNode) {
         const parentPath = "root";
         const parentNode = _.find(this.schemas, n => n.title === parentPath);
@@ -419,12 +421,9 @@ export class ProtoEngine implements DEngine {
       }
     } else {
       const note = node as Note;
-      await this.store.write(scope, note);
+      await this.store.write(scope, note, { stub: opts.stub });
       if (opts.newNode) {
-        let parentPath = note.fname
-          .split(".")
-          .slice(0, -1)
-          .join(".");
+        let parentPath = DNodeUtils.dirName(note.fname);
         if (_.isEmpty(parentPath)) {
           parentPath = "root";
         }

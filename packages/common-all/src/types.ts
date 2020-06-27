@@ -27,7 +27,7 @@ export type DNodeRawOpts<T extends DNodeData> = {
   updated?: string;
   created?: string;
   fname?: string;
-  parent?: string | null | "not_set" | "root";
+  parent?: string | null | "root";
   children?: string[];
   body?: string;
   data?: T;
@@ -111,16 +111,29 @@ export interface NodeWriteOpts {
    */
   newNode?: boolean;
   body?: string;
+  /**
+   * See QueryOpts.stub
+   */
+  stub?: boolean;
 }
 
 export interface QueryOpts {
   fullNode?: boolean;
+  /**
+   * Just get one result
+   */
   queryOne?: boolean;
+  /**
+   * Use with `createIfNew`
+   * If true, create a stub node
+   */
+  stub?: boolean
   /**
    * If node does not exist, create it?
    */
   createIfNew?: boolean;
-  // hints
+  // --- hints
+  // DEPPRECATE
   webClient?: boolean;
   initialQuery?: boolean;
   mode?: QueryMode;
@@ -130,6 +143,13 @@ export interface DEngineParser<TOpts = any> {
   // parse: <T>(content: any, mode: QueryMode, opts: TOpts) => DNodeRawProps<T>[];
   parseSchema(data: any, opts: TOpts): SchemaRawProps[];
   parseNote(data: any, opts: TOpts): NoteRawProps[];
+}
+
+export type DEngineStoreWriteOpts = {
+  /**
+   * If set, don't write to file
+   */
+  stub?: boolean
 }
 
 export interface DEngineStore<T = DNodeData, O = any> {
@@ -143,7 +163,7 @@ export interface DEngineStore<T = DNodeData, O = any> {
     mode: QueryMode,
     opts?: QueryOpts
   ) => Promise<EngineQueryResp<T>>;
-  write: <T>(scope: Scope, node: IDNode<T>) => Promise<void>;
+  write: <T>(scope: Scope, node: IDNode<T>, opts?: DEngineStoreWriteOpts) => Promise<void>;
 }
 
 export type DEngineMode = "exact" | "fuzzy";

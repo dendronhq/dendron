@@ -11,7 +11,7 @@ export const fnameToUri = async (
   let uri = Uri.parse(`denfs:/${fname.replace(/\./g, "/")}`);
   if (opts.checkIfDirectoryFile) {
     const fs = await DendronFileSystemProvider.getOrCreate();
-    if (fs.stat(uri).type === FileType.Directory) {
+    if ((await fs.stat(uri)).type === FileType.Directory) {
       uri = await fnameToUri(fname + ".index");
     }
   }

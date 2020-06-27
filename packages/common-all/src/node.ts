@@ -90,10 +90,10 @@ export class DNodeRaw {
       desc: "",
       children: [],
       stub: false,
-      parent: "not_set",
+      parent: null,
       body: "",
       data: {},
-      fname: "not_set"
+      fname: null,
     });
     const title = opts.title || fname;
     return {

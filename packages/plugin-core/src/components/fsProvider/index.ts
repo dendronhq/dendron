@@ -23,6 +23,10 @@ type LookupOpts = {
   createStubDirs?: boolean;
 };
 
+type GetOrCreateOpts = {
+  root?: string;
+};
+
 export class File implements vscode.FileStat {
   type: vscode.FileType;
   ctime: number;
@@ -189,13 +193,16 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
     return this._lookupAsDirectory(dirname, false, opts);
   }
 
-  static async getOrCreate(): Promise<DendronFileSystemProvider> {
+  static async getOrCreate(
+    opts?: GetOrCreateOpts
+  ): Promise<DendronFileSystemProvider> {
+    const optsClean = _.defaults(opts, { root: DEFAULT_ROOT });
     if (_.isNull(_DendronFileSystemProvider)) {
       const ctx = "cons";
       return new Promise((resolve, _reject) => {
         // TODO: order matters, schema should be loaded before files
         Promise.all([
-          engine({ root: DEFAULT_ROOT }).query(
+          engine({ root: optsClean.root }).query(
             { username: "DUMMY" },
             "**/*",
             "note",
@@ -204,7 +211,7 @@ export class DendronFileSystemProvider implements vscode.FileSystemProvider {
               initialQuery: true,
             }
           ),
-          engine({ root: DEFAULT_ROOT }).query(
+          engine({ root: optsClean.root }).query(
             { username: "DUMMY" },
             "**/*",
             "schema",

@@ -23,8 +23,11 @@
         "--extensionDevelopmentPath=${workspaceFolder}",
         "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
       ],
-      "outFiles": ["${workspaceFolder}/out/test/**/*.js"],
-      "preLaunchTask": "${defaultBuildTask}"
+      "env": {
+        "STAGE": "test"
+      },
+      "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
+      // "preLaunchTask": "${defaultBuildTask}"
     }
   ]
 }

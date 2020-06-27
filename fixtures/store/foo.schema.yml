@@ -1,0 +1,11 @@
+- id: b111db5b-bc52-4977-893b-307522f89ea3
+  title: "foo"
+  parent: root
+  children:
+    - 5291f68b-e266-405a-bd56-ee5980aad10c
+- id: 5291f68b-e266-405a-bd56-ee5980aad10c
+  title: "one"
+  children:
+    - foo.two
+- id: foo.two
+  title: foo.two

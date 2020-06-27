@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 
+import { env, getStage } from "@dendronhq/common-all";
+
 import { DendronFileSystemProvider } from "./components/fsProvider";
 import { LookupController } from "./components/lookup/LookupController";
 import { createLogger } from "@dendronhq/common-server";
@@ -12,20 +14,24 @@ const L = createLogger("extension");
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   console.log("activate");
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
-  DendronFileSystemProvider.getOrCreate().then((fs) => {
-    context.subscriptions.push(
-      vscode.workspace.registerFileSystemProvider("denfs", fs, {
-        isCaseSensitive: true,
-      })
-    );
-    console.log("fs initialized");
-    vscode.workspace.updateWorkspaceFolders(0, 0, {
-      uri: vscode.Uri.parse("denfs:/"),
-      name: "Dendron",
+
+  if (getStage() !== "test") {
+    const root = env("DENDRON_FS_ROOT");
+    // Use the console to output diagnostic information (console.log) and errors (console.error)
+    // This line of code will only be executed once when your extension is activated
+    DendronFileSystemProvider.getOrCreate({ root }).then((fs) => {
+      context.subscriptions.push(
+        vscode.workspace.registerFileSystemProvider("denfs", fs, {
+          isCaseSensitive: true,
+        })
+      );
+      console.log("fs initialized");
+      // vscode.workspace.updateWorkspaceFolders(0, 0, {
+      //   uri: vscode.Uri.parse("denfs:/"),
+      //   name: "Dendron",
+      // });
     });
-  });
+  }
 
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with registerCommand

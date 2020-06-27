@@ -30,3 +30,9 @@ export function expectNodeEqual(
 ) {
   expect(n1.id).toEqual(n2.id);
 }
+
+export const testUtils = {
+  expectNodeEqual,
+  expectSnapshot,
+  toSnapshotProps
+};

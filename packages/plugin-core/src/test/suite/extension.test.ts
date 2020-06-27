@@ -1,13 +1,15 @@
 import * as assert from "assert";
-import * as extension from "../../extension";
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
 import * as vscode from "vscode";
 
+import { beforeEach, describe } from "mocha";
+
 import { DendronFileSystemProvider } from "../../components/fsProvider";
-import { beforeEach } from "mocha";
-import { fstat } from "fs";
+import _ from "lodash";
+import { fnameToUri } from "../../components/lookup/utils";
 import path from "path";
+import { testUtils } from "@dendronhq/common-server";
 
 class DevWorkspaceUtils {
   static getRootDir() {
@@ -22,8 +24,11 @@ class DevWorkspaceUtils {
 async function setup() {
   const fixtures = DevWorkspaceUtils.getFixturesDir();
   const storeDir = path.join(fixtures, "store");
-  console.log(storeDir);
-  const fsp = await DendronFileSystemProvider.getOrCreate({ root: storeDir });
+  const testRoot = testUtils.setupTmpDendronDir({
+    fixturesDir: storeDir,
+    tmpDir: "/tmp/dendron/plugin-core",
+  });
+  const fsp = await DendronFileSystemProvider.getOrCreate({ root: testRoot });
   vscode.workspace.registerFileSystemProvider("denfs", fsp, {
     isCaseSensitive: true,
   });
@@ -31,20 +36,33 @@ async function setup() {
     uri: vscode.Uri.parse("denfs:/"),
     name: "Dendron",
   });
-  return { fsp };
+  console.log({ testRoot });
+  return { fsp, testRoot };
 }
 
 suite("Extension Test Suite", () => {
   vscode.window.showInformationMessage("Start all tests.");
-  let fsp: DendronFileSystemProvider;
 
-  beforeEach(async () => {
-    ({ fsp } = await setup());
-  });
+  describe("DendronFileSystemProvider", () => {
+    let fsp: DendronFileSystemProvider;
+    beforeEach(async () => {
+      ({ fsp } = await setup());
+    });
 
-  test("real test", () => {
-    console.log("done");
-    const root = fsp.root;
-    assert.equal(1, 1);
+    describe("create new", () => {
+      describe("parent: root", () => {
+        test("child", async () => {
+          const uri = await fnameToUri("baz", { checkIfDirectoryFile: false });
+          await fsp.writeFile(uri, Buffer.from("baz.body"), {
+            create: true,
+            overwrite: true,
+            writeToEngine: true,
+          });
+          const note = _.find(fsp.engine.notes, { fname: "baz" });
+          assert.ok(!_.isUndefined(note));
+          //testUtils.expectSnapshot(expect, "main", _.values(fsp.engine.notes));
+        });
+      });
+    });
   });
 });

@@ -10,3 +10,7 @@ export function resolveTilde(filePath: string) {
   }
   return filePath;
 }
+
+export function getPlatform() {
+  return process.platform;
+}

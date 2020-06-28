@@ -32,16 +32,12 @@
     },
     "commands": [
       {
-        "command": "dendron.helloWorld",
-        "title": "Hello World"
-      },
-      {
         "command": "dendron.lookup",
         "title": "Lookup"
       },
       {
-        "command": "dendron.workspaceInit",
-        "title": "Setup"
+        "command": "dendron.init",
+        "title": "Initialize Dendron Workspace"
       }
     ],
     "keybindings": [
@@ -52,11 +48,11 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run build",
+    "vscode:prepublish": "npm run build || true",
     "lint": "eslint src --ext ts",
     "watch": "npm run compile -- --watch",
     "build": "npm run compile",
-    "compile": "tsc -p tsconfig.build.json || true",
+    "compile": "tsc -p tsconfig.build.json",
     "pretest": "",
     "test": "node ./out/test/runTest.js"
   },

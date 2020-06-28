@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-server",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "common-server",
   "license": "MIT",
   "repository": {
@@ -36,7 +36,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.1.6",
+    "@dendronhq/common-all": "^0.2.0",
     "fs-extra": "^9.0.1",
     "gray-matter": "^4.0.2",
     "lodash": "^4.17.15",

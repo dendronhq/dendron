@@ -68,6 +68,9 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   equal(node: IDNode<T>): boolean;
   // match(identifier: string): boolean;
   addChild(node: IDNode<T>): void;
+  /**
+   * Render body for rich-markdown-editor
+   */
   renderBody(): string;
   toDocument(): any;
   toRawProps(): DNodeRawProps<T>;
@@ -178,7 +181,6 @@ export type DEngineMode = "exact" | "fuzzy";
 export type DEngineOpts = {
   root: string;
   mode?: DEngineMode;
-  initialize?: boolean;
 };
 
 /**
@@ -189,6 +191,11 @@ export interface DEngine {
   notes: NoteDict;
   schemas: SchemaDict;
   opts: Required<DEngineOpts>;
+
+  /**
+   * Load all nodes
+   */
+  init: () => Promise<void>;
 
   delete: (id: string) => Promise<void>;
   /**

@@ -1,12 +1,11 @@
 import { QuickPick, QuickPickItem, Uri, window } from "vscode";
+import { node2Uri } from "./utils";
 
 import { CREATE_NEW_LABEL } from "./constants";
-import { DendronFileSystemProvider } from "../fsProvider";
 import { Note } from "@dendronhq/common-all";
 import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
 import { engine } from "@dendronhq/engine-server";
-import { fnameToUri } from "./utils";
 
 const L = createLogger("LookupProvider");
 
@@ -119,7 +118,7 @@ export class LookupProvider {
       L.info({ ctx: "onDidAccept", selectedItem, value });
 
       if (isCreateNewPick(selectedItem)) {
-        const fname = value;
+        //const fname = value;
         // await engine().write(
         //   { username: "DUMMY" },
         //   new Note({ title: value, fname }),
@@ -128,23 +127,18 @@ export class LookupProvider {
         //   }
         // );
         // L.info({ ctx: `${ctx}:write:done`, value });
-        const uri = await fnameToUri(fname, { checkIfDirectoryFile: false });
-        await (await DendronFileSystemProvider.getOrCreate()).writeFile(
-          uri,
-          Buffer.from("new file"),
-          { create: true, overwrite: true }
-        );
-        return showDocAndHidePicker(uri, picker);
+        // const uri = await fnameToUri(fname, { checkIfDirectoryFile: false });
+        // await (await DendronFileSystemProvider.getOrCreate()).writeFile(
+        //   uri,
+        //   Buffer.from("new file"),
+        //   { create: true, overwrite: true }
+        // );
+        throw Error("not implemented");
+        //return showDocAndHidePicker(uri, picker);
       }
 
       let uri: Uri;
-      if (PickerUtils.getValue(picker) === "") {
-        uri = await fnameToUri("/index");
-      } else {
-        // default
-        const fname = selectedItem.fname;
-        uri = await fnameToUri(fname);
-      }
+      uri = node2Uri(selectedItem);
       L.info({ ctx: "onDidAccept:showTextDocument:pre", uri });
 
       window.showTextDocument(uri).then(

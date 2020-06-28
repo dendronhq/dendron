@@ -19,30 +19,8 @@ import {
 
 import YAML from "yamljs";
 /* eslint-disable no-loop-func */
-// import { IconType } from "antd/lib/notification";
 import _ from "lodash";
 import { genUUID } from "./uuid";
-
-// export interface DataNode {
-//   checkable?: boolean;
-//   children?: DataNode[];
-//   disabled?: boolean;
-//   disableCheckbox?: boolean;
-//   icon?: IconType;
-//   isLeaf?: boolean;
-//   key: string | number;
-//   title?: React.ReactNode;
-//   selectable?: boolean;
-//   switcherIcon?: IconType;
-//   /** Set style of TreeNode. This is not recommend if you don't have any force requirement */
-//   className?: string;
-//   style?: React.CSSProperties;
-// }
-
-// @ts-ignore
-interface YAMLEntryOpts {
-  id: string;
-}
 
 export class DNodeUtils {
   static dirName(nodePath: string) {
@@ -67,6 +45,10 @@ export class DNodeUtils {
     } else {
       return DNodeUtils.findClosestParent(dirname, nodes);
     }
+  }
+
+  static isRoot(node: DNode): boolean {
+    return node.id === "root";
   }
 }
 
@@ -200,7 +182,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     this.children = children;
     this.body = body;
     this.data = data;
-    this.label = this.logicalPath;
+    this.label = DNodeUtils.isRoot(this) ? "root" : this.logicalPath;
     this.stub = stub;
   }
 

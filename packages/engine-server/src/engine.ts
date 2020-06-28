@@ -78,7 +78,6 @@ type ProtoEngineOpts = {
   forceNew?: boolean;
   store: DEngineStore;
   mode?: DEngineMode;
-  initialize?: boolean;
 };
 
 type ProtoEngineGetOpts = Partial<ProtoEngineOpts>;
@@ -132,7 +131,6 @@ export class ProtoEngine implements DEngine {
       root: "/Users/kevinlin/Dropbox/Apps/Dendron",
       forceNew: false,
       mode: "exact",
-      initialize: false
     });
     this.store = store;
     this.fuse = createFuse<Note>([], {
@@ -154,6 +152,18 @@ export class ProtoEngine implements DEngine {
         throw Error(`${fpath} doesn't exist`);
       }
     });
+  }
+
+  async init() {
+    await this.query({ username: "DUMMY" }, "**/*", "schema", {
+      fullNode: false,
+      initialQuery: true,
+    });
+    await this.query({ username: "DUMMY" }, "**/*", "note", {
+      fullNode: false,
+      initialQuery: true,
+    });
+    return;
   }
 
   deleteFromNodes(id: string) {

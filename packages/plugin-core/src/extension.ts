@@ -1,10 +1,10 @@
-import * as vscode from "vscode";
-
 import { env, getStage } from "@dendronhq/common-all";
-
-import { DendronFileSystemProvider } from "./components/fsProvider";
-import { LookupController } from "./components/lookup/LookupController";
 import { createLogger } from "@dendronhq/common-server";
+import { getOrCreateEngine } from "@dendronhq/engine-server";
+import * as vscode from "vscode";
+import { LookupController } from "./components/lookup/LookupController";
+
+
 
 const L = createLogger("extension");
 
@@ -17,19 +17,13 @@ export function activate(context: vscode.ExtensionContext) {
 
   if (getStage() !== "test") {
     const root = env("DENDRON_FS_ROOT");
-    // Use the console to output diagnostic information (console.log) and errors (console.error)
-    // This line of code will only be executed once when your extension is activated
-    DendronFileSystemProvider.getOrCreate({ root }).then((fs) => {
-      context.subscriptions.push(
-        vscode.workspace.registerFileSystemProvider("denfs", fs, {
-          isCaseSensitive: true,
-        })
-      );
-      console.log("fs initialized");
-      vscode.workspace.updateWorkspaceFolders(0, 0, {
-        uri: vscode.Uri.parse("denfs:/"),
-        name: "Dendron",
-      });
+    vscode.workspace.updateWorkspaceFolders(0, 0, {
+      uri: vscode.Uri.parse(root),
+      name: "Dendron",
+    });
+    const engine = getOrCreateEngine({root, mode: "exact"});
+    engine.init().then(() => {
+      console.log("engine initialized");
     });
   }
 

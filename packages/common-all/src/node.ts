@@ -75,7 +75,7 @@ export class DNodeRaw {
       parent: null,
       body: "",
       data: {},
-      fname: null,
+      fname: null
     });
     const title = opts.title || fname;
     return {
@@ -509,6 +509,11 @@ export class NodeBuilder {
 }
 
 export class NoteUtils {
+  /**
+   * Last note in this list is parent
+   * @param from
+   * @param to
+   */
   static createStubNotes(from: Note, to: Note): Note[] {
     const stubNodes: Note[] = [];
     // ""

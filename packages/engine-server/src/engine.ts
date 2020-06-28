@@ -22,7 +22,9 @@ import {
   assert,
   assertExists,
   getStage,
-  makeResponse
+  makeResponse,
+  NoteUtils,
+  DNode
 } from "@dendronhq/common-all";
 
 import { BodyParser } from "./drivers/raw/BodyParser";
@@ -414,7 +416,8 @@ export class ProtoEngine implements DEngine {
   }
 
   async write(scope: Scope, node: IDNode, opts?: NodeWriteOpts): Promise<void> {
-    opts = _.defaults(opts, { newNode: false, body: "", stub: false });
+    opts = _.defaults(opts, { newNode: false, body: "", stub: false, parentsAsStubs: false });
+    const refreshList: DNode[] = [node];
     if (node.type === "schema") {
       assertExists(opts.body, "body must exist");
       // convert body
@@ -450,15 +453,27 @@ export class ProtoEngine implements DEngine {
         if (_.isEmpty(parentPath)) {
           parentPath = "root";
         }
-        const parentNode = _.find(this.notes, n => n.path === parentPath);
+        let parentNode = _.find(this.notes, n => n.path === parentPath);
         if (!parentNode) {
+         if (opts.parentsAsStubs) {
+          const closestParent = DNodeUtils.findClosestParent(note.logicalPath, this.notes);
+          const stubNodes = NoteUtils.createStubNotes(
+            closestParent as Note,
+            node as Note
+          );
+          stubNodes.forEach(ent2 => {
+            refreshList.push(ent2);
+          });
+          parentNode = stubNodes.slice(-1)[0];
+        } else {
           throw Error("no parent found");
+        }
         }
         parentNode.addChild(note);
       }
     }
     // TODO
-    return this.refreshNodes([node], { fullNode: opts.newNode });
+    return this.refreshNodes(refreshList, { fullNode: opts.newNode });
   }
 }
 

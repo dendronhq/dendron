@@ -121,6 +121,10 @@ export interface NodeWriteOpts {
    * See QueryOpts.stub
    */
   stub?: boolean;
+  /**
+   * If parents don't exist, create stubs
+   */
+  parentsAsStubs?: boolean;
 }
 
 export interface QueryOpts {

@@ -117,51 +117,33 @@ export class LookupProvider {
       const selectedItem = PickerUtils.getSelection<Note>(picker);
       L.info({ ctx: "onDidAccept", selectedItem, value });
 
+      let uri: Uri;
       if (isCreateNewPick(selectedItem)) {
-        //const fname = value;
-        // await engine().write(
-        //   { username: "DUMMY" },
-        //   new Note({ title: value, fname }),
-        //   {
-        //     newNode: true,
-        //   }
-        // );
-        // L.info({ ctx: `${ctx}:write:done`, value });
+        const fname = value;
+        let nodeNew = new Note({ title: value, fname });
+        await engine().write(
+          { username: "DUMMY" },
+          nodeNew,
+          {
+            newNode: true,
+            parentsAsStubs: true,
+          }
+        );
+        L.info({ ctx: `${ctx}:write:done`, value });
+        uri = node2Uri(nodeNew);
         // const uri = await fnameToUri(fname, { checkIfDirectoryFile: false });
         // await (await DendronFileSystemProvider.getOrCreate()).writeFile(
         //   uri,
         //   Buffer.from("new file"),
         //   { create: true, overwrite: true }
         // );
-        throw Error("not implemented");
+        // throw Error("not implemented");
         //return showDocAndHidePicker(uri, picker);
+      } else {
+        uri = node2Uri(selectedItem);
       }
-
-      let uri: Uri;
-      uri = node2Uri(selectedItem);
       L.info({ ctx: "onDidAccept:showTextDocument:pre", uri });
-
-      window.showTextDocument(uri).then(
-        () => {
-          picker.hide();
-        },
-        (err) => {
-          L.error({ ctx, err });
-          throw err;
-        }
-      );
-      // engine
-      //   .get({ username: "DUMMY" }, selectedItem.id, mode)
-      //   .then(async (resp) => {
-      //     // TODO: don't hardcode extension
-      //     const fpath = path.join(engine.opts.root, resp.data.fname + ".md");
-      //     Uri.parse(`denfs:`);
-      //     const selectedFile = Uri.file(fpath);
-      //     window.showTextDocument(selectedFile);
-      //     this.state.lastLookupItem = selectedItem;
-      //     picker.hide();
-      //   });
-      // window.showInformationMessage(`open existing ${absPath}`);
+      return showDocAndHidePicker(uri, picker);
     });
     picker.onDidChangeSelection((inputs: QuickPickItem[]) => {
       const ctx = "onDidChangeSelection";

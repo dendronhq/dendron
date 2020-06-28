@@ -49,7 +49,7 @@
     "@types/jest": "^23.3.3",
     "@types/lodash": "^4.14.154",
     "@types/minimatch": "^3.0.3",
-    "@types/node": "^10.11.4",
+    "@types/node": "13.11.0",
     "@types/pino": "^6.3.0",
     "@types/yamljs": "^0.2.31",
     "coveralls": "^3.0.2",
@@ -68,5 +68,5 @@
   "jest": {
     "preset": "ts-jest"
   },
-  "gitHead": "403eb012f8b34bc115dd7dd86f80c76b39329f3b"
+  "gitHead": "cd6fa6e68a9f167671d38c28285b5c23fbb34764"
 }

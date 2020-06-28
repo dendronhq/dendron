@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.build.json",
   "compilerOptions": {
     "outDir": "out",
-    "rootDir": "src"
+    "rootDir": "src",
+    "declaration": false
   },
   "exclude": ["node_modules", "lib", "local", ".vscode-test", "out"]
 }

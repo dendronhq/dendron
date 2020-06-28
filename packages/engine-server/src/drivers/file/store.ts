@@ -1,6 +1,7 @@
 // @ts-ignore
 import {
   DEngineStore,
+  DEngineStoreWriteOpts,
   DNodeData,
   DNodeRawProps,
   EngineQueryResp,
@@ -15,8 +16,7 @@ import {
   Scope,
   StoreGetResp,
   assert,
-  makeResponse,
-  DEngineStoreWriteOpts
+  makeResponse
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -52,8 +52,7 @@ const CACHE_KEYS = {
   QUERY_ALL: "QUERY_ALL"
 };
 
-// @ts-ignore: TODO
-export abstract class FileStorageBase implements DEngineStore {
+export abstract class FileStorageBase {
   opts: FileStorageOpts;
   public idToPath: { [key: string]: string };
 

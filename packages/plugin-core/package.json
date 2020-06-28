@@ -56,7 +56,7 @@
     "lint": "eslint src --ext ts",
     "watch": "npm run compile -- --watch",
     "build": "npm run compile",
-    "compile": "tsc -p tsconfig.build.json",
+    "compile": "tsc -p tsconfig.build.json || true",
     "pretest": "",
     "test": "node ./out/test/runTest.js"
   },
@@ -82,5 +82,5 @@
     "@dendronhq/engine-server": "^0.2.0",
     "lodash": "^4.17.15"
   },
-  "gitHead": "403eb012f8b34bc115dd7dd86f80c76b39329f3b"
+  "gitHead": "cd6fa6e68a9f167671d38c28285b5c23fbb34764"
 }

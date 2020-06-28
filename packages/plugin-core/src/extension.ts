@@ -1,23 +1,16 @@
 import * as vscode from "vscode";
 
-import { env, getStage } from "@dendronhq/common-all";
-
 import { LookupController } from "./components/lookup/LookupController";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
-import { getOrCreateEngine } from "@dendronhq/engine-server";
+import { getStage } from "@dendronhq/common-all";
+//import { getOrCreateEngine } from "@dendronhq/engine-server";
 import path from "path";
-import process from "process";
 import { resolveTilde } from "./utils";
 
 const L = createLogger("extension");
 
 // --- VSCode
-
-function getPlatform() {
-  const platform = process.platform;
-  return platform;
-}
 
 function writeWSFile(fpath: string, opts: { rootDir: string }) {
   const jsonBody = {
@@ -38,7 +31,7 @@ function writeWSFile(fpath: string, opts: { rootDir: string }) {
 
 async function setupWorkspace(
   rootDirRaw: string,
-  config: vscode.WorkspaceConfiguration
+  _config: vscode.WorkspaceConfiguration
 ) {
   const rootDir = resolveTilde(rootDirRaw);
   const notesDir: string = path.join(rootDir, "notes");

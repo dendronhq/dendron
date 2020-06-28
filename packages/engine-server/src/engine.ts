@@ -284,7 +284,6 @@ export class ProtoEngine implements DEngine {
       this.refreshNodes([fullNode], opts);
       return { data: fullNode };
     }
-    logger.debug({ ctx: "get:exit", node });
     return { data: node };
   }
 
@@ -296,7 +295,7 @@ export class ProtoEngine implements DEngine {
   ) {
     opts = _.defaults(opts || {}, {
       fullNode: false,
-      createIfNew: true,
+      createIfNew: false,
       initialQuery: false,
       stub: false
     });
@@ -329,32 +328,45 @@ export class ProtoEngine implements DEngine {
         error: null
       });
     } else {
-      // handle note query
-      const results = this.fuse.search(queryString);
       let items: IDNode[];
-      if (opts.queryOne) {
-        items = [results[0]?.item];
+      // shortcut for root query
+      if (queryString === "") {
+        items = [this.notes.root];
       } else {
-        items = _.map(results, resp => resp.item);
+        // handle note query
+        const results = this.fuse.search(queryString);
+        if (opts.queryOne) {
+          items = [results[0]?.item];
+        } else {
+          items = _.map(results, resp => resp.item);
+        }
+
+        // found a result but it doesn't match
+        if (
+          opts.queryOne &&
+          items[0]?.path !== queryString &&
+          opts.createIfNew
+        ) {
+          logger.debug({
+            ctx: "query:write:pre",
+            queryString,
+            item: items[0]
+          });
+          const nodeBlank = new Note({ fname: queryString, stub: opts.stub });
+          await this.write(scope, nodeBlank, {
+            newNode: true,
+            stub: opts.stub
+          });
+          const { data: nodeFull } = await this.get(scope, nodeBlank.id, mode);
+          this.refreshNodes([nodeFull], { fullNode: true });
+          return makeResponse<EngineQueryResp>({
+            data: [nodeFull],
+            error: null
+          });
+        }
       }
 
-      // found a result but it doesn't match
-      if (opts.queryOne && items[0]?.path !== queryString && opts.createIfNew) {
-        logger.debug({
-          ctx: "query:write:pre",
-          queryString,
-          item: items[0]
-        });
-        const nodeBlank = new Note({ fname: queryString, stub: opts.stub });
-        await this.write(scope, nodeBlank, { newNode: true, stub: opts.stub });
-        const { data: nodeFull } = await this.get(scope, nodeBlank.id, mode);
-        this.refreshNodes([nodeFull], { fullNode: true });
-        return makeResponse<EngineQueryResp>({
-          data: [nodeFull],
-          error: null
-        });
-      }
-
+      // found result but want full node
       if (opts.fullNode) {
         const fetchedFullNodes = await Promise.all(
           _.map<IDNode, Promise<IDNode | null>>(items, async ent => {

@@ -26,6 +26,9 @@ export type DNodeRawOpts<T extends DNodeData> = {
   stub?: boolean;
   updated?: string;
   created?: string;
+  /**
+   * Same as uri
+   */
   fname?: string;
   parent?: string | null | "root";
   children?: string[];

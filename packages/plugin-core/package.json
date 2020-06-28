@@ -20,6 +20,16 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "Root Dir",
+      "properties": {
+        "dendron.rootDir": {
+          "type": "string",
+          "default": false,
+          "description": "Where dendron will store notes"
+        }
+      }
+    },
     "commands": [
       {
         "command": "dendron.helloWorld",

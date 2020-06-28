@@ -1,30 +1,115 @@
-import { env, getStage } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-server";
-import { getOrCreateEngine } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
+
+import { env, getStage } from "@dendronhq/common-all";
+
 import { LookupController } from "./components/lookup/LookupController";
-
-
+import { createLogger } from "@dendronhq/common-server";
+import fs from "fs-extra";
+import { getOrCreateEngine } from "@dendronhq/engine-server";
+import path from "path";
+import process from "process";
+import { resolveTilde } from "./utils";
 
 const L = createLogger("extension");
 
 // --- VSCode
 
+function getPlatform() {
+  const platform = process.platform;
+  return platform;
+}
+
+function writeWSFile(fpath: string, opts: { rootDir: string }) {
+  const jsonBody = {
+    folders: [
+      {
+        path: "notes",
+      },
+    ],
+    settings: {
+      "spellright.language": ["en"],
+      "spellright.documentTypes": ["markdown", "latex", "plaintext"],
+      "editor.minimap.enabled": false,
+      "dendron.rootDir": opts.rootDir,
+    },
+  };
+  fs.writeJsonSync(fpath, jsonBody);
+}
+
+async function setupWorkspace(
+  rootDirRaw: string,
+  config: vscode.WorkspaceConfiguration
+) {
+  const rootDir = resolveTilde(rootDirRaw);
+  const notesDir: string = path.join(rootDir, "notes");
+  [rootDir, notesDir].forEach((dirPath: string) => {
+    fs.ensureDirSync(dirPath);
+  });
+  // TODO: hardcoded
+  const dotVscodeDefault =
+    "/Users/kevinlin/projects/dendronv2/dendron/packages/plugin-core/assets/.vscode";
+  fs.copySync(dotVscodeDefault, path.join(rootDir, ".vscode"));
+  writeWSFile(path.join(rootDir, "dendron.code-workspace"), { rootDir });
+  //fs.copySync(codeWsFile, path.join(rootDir, "default.code-workspace"));
+  vscode.commands.executeCommand(
+    "vscode.openFolder",
+    vscode.Uri.parse(path.join(rootDir, "dendron.code-workspace"))
+  );
+  // vscode.workspace.updateWorkspaceFolders(0, 0, {
+
+  //   uri: vscode.Uri.parse(
+  //     path.join(rootDir, ".vscode", "default.code-workspace")
+  //   ),
+  //   name: "Dendron",
+  // });
+}
+
 // === Main
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   console.log("activate");
+  const ctx = "activate";
 
   if (getStage() !== "test") {
-    const root = env("DENDRON_FS_ROOT");
+    //const root = env("DENDRON_FS_ROOT");
+    const config = vscode.workspace.getConfiguration("dendron");
+    // TODO
+    if (!config.get("rootDir")) {
+      L.info({ ctx, status: "no rootDir" });
+      setupWorkspace("~/Documents/Dendron", config);
+      // const platform = getPlatform();
+      // let rootDirDefault = "";
+      // if (platform === "darwin") {
+      //   rootDirDefault = "~/Documents/Dendron";
+      // }
+      // console.log({ platform });
+      // // ~/Documents/Dendron
+      // vscode.window
+      //   .showInputBox({
+      //     value: rootDirDefault,
+      //     prompt: "Select your default folder for dendron",
+      //     ignoreFocusOut: true,
+      //   })
+      //   .then(async (resp) => {
+      //     if (!resp) {
+      //       // TODO
+      //       throw Error("must enter");
+      //     }
+      //     // TODO: setup workspace
+      //   });
+    }
+    L.info({ ctx, status: "rootDir exist" });
+
+    /*
     vscode.workspace.updateWorkspaceFolders(0, 0, {
       uri: vscode.Uri.parse(root),
       name: "Dendron",
     });
-    const engine = getOrCreateEngine({root, mode: "exact"});
+    const engine = getOrCreateEngine({ root, mode: "exact" });
     engine.init().then(() => {
       console.log("engine initialized");
     });
+    */
   }
 
   // The command has been defined in the package.json file
@@ -46,95 +131,6 @@ export function activate(context: vscode.ExtensionContext) {
       const controller = new LookupController();
       L.info({ ctx: ctx + ":LookupController:post" });
       controller.show();
-      // TODO: dispose
-
-      // // === PickerProvider
-      // // define picker
-      // const quickpick = vscode.window.createQuickPick();
-      // quickpick.title = "quickpick title";
-      // quickpick.placeholder = "quickpick placeholder";
-      // quickpick.ignoreFocusOut = true;
-
-      // // picker items
-      // const items = getQuickPickItems();
-
-      // const disposables = new DisposableStore();
-      // const picksDisposable = disposables.add(new MutableDisposable());
-      // const valuePick = createPickFromValue("");
-      // quickpick.items = items;
-
-      // const updatePickerItems = async () => {
-      //   //quickpick.busy = true;
-      //   const { value } = quickpick;
-      //   valuePick.label = value;
-
-      //   //
-      //   if (quickpick.activeItems.length === 0) {
-      //     quickpick.items = [...items, createPickFromValue("bond")];
-      //   }
-      //   // quickpick.activeItems = [
-      //   //   createPickFromValue(value),
-      //   //   ...quickpick.activeItems,
-      //   // ];
-      //   //quickpick.items = [...getQuickPickItems(), createPickFromValue(value)];
-      //   // quickpick.activeItems = [valuePick];
-      //   //quickpick.busy = false;
-      //   console.log("updatePickerItems");
-      // };
-      // const debouncedUpdate = _.debounce(updatePickerItems, 200);
-      // disposables.add(quickpick.onDidChangeValue(updatePickerItems));
-
-      // // quickpick.onDidChangeValue(async () => {
-      // //   const { activeItems, selectedItems, value } = quickpick;
-      // //   console.log({
-      // //     ctx: "onDidChangeValue",
-      // //     selectedItems: { selectedItems },
-      // //     activeItems: { activeItems },
-      // //     value: { value },
-      // //   });
-      // //   const itemCurrent: QuickPickItem = {
-      // //     label: value,
-      // //     description: "current selection",
-      // //   };
-      // //   activeItems[0].label = value;
-      // //   // quickpick.activeItems = [itemCurrent].concat(
-      // //   //   quickpick.activeItems as QuickPickItem[]
-      // //   // );
-      // //   // {
-      // //   //   label: 'Search for',
-      // //   //   description: quickpick.value,
-      // //   //   item: quickpick.value
-      // //   // }
-      // // }, quickpick);
-      // quickpick.onDidAccept(async () => {
-      //   let items = quickpick.selectedItems;
-      //   if (items.length === 0) {
-      //     vscode.window.showInformationMessage("no item selected");
-      //   }
-      //   if (items.length === 1) {
-      //     const item = items[0];
-      //     const ext = ".md";
-      //     vscode.window.showInformationMessage(JSON.stringify(item));
-      //     const wsFolder: Uri = getFirstWorkspaceFolder({ asUri: true }) as Uri;
-      //     // TODO: check if not set
-      //     const selectedFile = vscode.Uri.joinPath(wsFolder, item.label + ext);
-      //     console.log({ selectedFile });
-      //     const document = await vscode.workspace.openTextDocument(
-      //       selectedFile
-      //     );
-      //     vscode.window.showTextDocument(document);
-      //   }
-      // });
-      // quickpick.show();
-      // quickpick.buttons = this.getButtons(step, commandsStep.command);
-
-      // const selection = await vscode.window.showQuickPick(items, {
-      //   placeHolder: "placeholder",
-      //   ignoreFocusOut: false,
-      //   matchOnDescription: true,
-      //   matchOnDetail: true,
-      // });
-      // vscode.window.showInformationMessage(JSON.stringify(selection));
     }
   );
 

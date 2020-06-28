@@ -1,0 +1,12 @@
+{
+  "folders": [
+    {
+      "path": "../notes"
+    }
+  ],
+  "settings": {
+    "spellright.language": ["en"],
+    "spellright.documentTypes": ["markdown", "latex", "plaintext"],
+    "editor.minimap.enabled": false
+  }
+}

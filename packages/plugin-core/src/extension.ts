@@ -76,18 +76,14 @@ async function setupWorkspace(rootDirRaw: string) {
     "/Users/kevinlin/projects/dendronv2/dendron/packages/plugin-core/assets/.vscode";
   fs.copySync(dotVscodeDefault, path.join(rootDir, ".vscode"));
   fs.copySync(path.join(assetsDir, "notes"), rootDir);
-  writeWSFile(path.join(rootDir, ".vscode", "dendron.code-workspace"), {
+  writeWSFile(path.join(rootDir, "dendron.code-workspace"), {
     rootDir,
   });
   vscode.commands
     .executeCommand(
       "vscode.openFolder",
-      vscode.Uri.parse(path.join(rootDir, ".vscode", "dendron.code-workspace"))
-    )
-    .then(async () => {
-      await getAndInitializeEngine(rootDir);
-      L.info({ ctx: ctx + ":exit" });
-    });
+      vscode.Uri.parse(path.join(rootDir, "dendron.code-workspace"))
+    );
 }
 
 async function getAndInitializeEngine(rootDir: string) {
@@ -128,7 +124,6 @@ export function activate(context: vscode.ExtensionContext) {
         // TODO
         throw Error("must enter");
       }
-      // TODO: setup workspace
       setupWorkspace(resp);
     })
   );

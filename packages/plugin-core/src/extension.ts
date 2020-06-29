@@ -2,6 +2,7 @@ import { getAndInitializeEngine } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
 import { DendronWorkspace } from "./workspace";
 import { Logger, TraceLevel } from "./logger";
+import { VSCodeUtils } from "./utils";
 
 // === Main
 // this method is called when your extension is activated
@@ -15,8 +16,13 @@ export function activate(context: vscode.ExtensionContext) {
   console.log("active", logPath, extensionPath);
   if (DendronWorkspace.isActive()) {
     ws.L.info({ ctx, msg: "isActive" });
-    const rootDir = ws.config.get("rootDir") as string;
-    getAndInitializeEngine(rootDir);
+    const wsFolders = vscode.workspace.workspaceFolders;
+    Logger.debug({ ctx, wsFolders });
+    const mainVault = wsFolders![0].uri.fsPath;
+    getAndInitializeEngine(mainVault);
+    if (VSCodeUtils.isDebuggingExtension()) {
+      Logger.output?.show(true);
+    }
   }
 }
 

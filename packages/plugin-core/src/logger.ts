@@ -1,5 +1,6 @@
 import { OutputChannel, ExtensionContext, window } from "vscode";
 import { DENDRON_CHANNEL_NAME } from "./constants";
+import { VSCodeUtils } from "./utils";
 
 export enum TraceLevel {
     Silent = 'silent',
@@ -11,7 +12,7 @@ export enum TraceLevel {
 export class Logger {
     static output: OutputChannel | undefined;
     static customLoggableFn: ((o: object) => string | undefined) | undefined;
-    static configure(context: ExtensionContext, level: TraceLevel, loggableFn?: (o: any) => string | undefined) {
+    static configure(_context: ExtensionContext, level: TraceLevel, loggableFn?: (o: any) => string | undefined) {
         this.customLoggableFn = loggableFn;
         this.level = level;
     }
@@ -39,9 +40,7 @@ export class Logger {
     private static _isDebugging: boolean | undefined;
     static get isDebugging() {
         if (this._isDebugging === undefined) {
-            const env = process.env;
-            this._isDebugging =
-                env && env.VSCODE_DEBUGGING_EXTENSION ? true : false
+            this._isDebugging = VSCodeUtils.isDebuggingExtension();
         }
 
         return this._isDebugging;

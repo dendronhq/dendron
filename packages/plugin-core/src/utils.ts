@@ -26,4 +26,7 @@ export class VSCodeUtils {
         vscode.Uri.parse(wsFile)
       );
   }
+  static isDebuggingExtension(): boolean {
+    return process.env.VSCODE_DEBUGGING_EXTENSION ? true : false;
+  }
 }

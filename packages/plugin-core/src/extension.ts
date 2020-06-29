@@ -5,7 +5,7 @@ import { getPlatform, resolveTilde } from "./utils";
 import { LookupController } from "./components/lookup/LookupController";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
-import { getStage } from "@dendronhq/common-all";
+import { getOrCreateEngine } from "@dendronhq/engine-server";
 //import { getOrCreateEngine } from "@dendronhq/engine-server";
 import path from "path";
 
@@ -17,7 +17,7 @@ function writeWSFile(fpath: string, opts: { rootDir: string }) {
   const jsonBody = {
     folders: [
       {
-        path: "notes",
+        path: opts.rootDir,
       },
     ],
     settings: {
@@ -36,21 +36,31 @@ async function setupWorkspace(rootDirRaw: string) {
   const rootDir = resolveTilde(rootDirRaw);
   // TODO: prompt for confirmation
   fs.removeSync(rootDir);
-  const notesDir: string = path.join(rootDir, "notes");
-  [rootDir, notesDir].forEach((dirPath: string) => {
+  [rootDir].forEach((dirPath: string) => {
     fs.ensureDirSync(dirPath);
   });
   // TODO: hardcoded
+  const assetsDir =
+    "/Users/kevinlin/projects/dendronv2/dendron/packages/plugin-core/assets";
   const dotVscodeDefault =
     "/Users/kevinlin/projects/dendronv2/dendron/packages/plugin-core/assets/.vscode";
   fs.copySync(dotVscodeDefault, path.join(rootDir, ".vscode"));
-  writeWSFile(path.join(rootDir, "dendron.code-workspace"), { rootDir });
-  vscode.commands.executeCommand(
-    "vscode.openFolder",
-    vscode.Uri.parse(path.join(rootDir, "dendron.code-workspace"))
-  );
-  vscode.window.showInformationMessage("Dendron initialized");
-  L.info({ ctx: ctx + ":exit" });
+  fs.copySync(path.join(assetsDir, "notes"), rootDir);
+  writeWSFile(path.join(rootDir, ".vscode", "dendron.code-workspace"), {
+    rootDir,
+  });
+  vscode.commands
+    .executeCommand(
+      "vscode.openFolder",
+      vscode.Uri.parse(path.join(rootDir, ".vscode", "dendron.code-workspace"))
+    )
+    .then(async () => {
+      const engine = getOrCreateEngine({ root: rootDir, forceNew: true });
+      // TODO: error check
+      await engine.init();
+      vscode.window.showInformationMessage("Dendron initialized");
+      L.info({ ctx: ctx + ":exit" });
+    });
 }
 
 // === Main

@@ -33,11 +33,15 @@
     "commands": [
       {
         "command": "dendron.lookup",
-        "title": "Lookup"
+        "title": "Dendron: Lookup"
       },
       {
-        "command": "dendron.init",
-        "title": "Initialize Dendron Workspace"
+        "command": "dendron.initWS",
+        "title": "Dendron: Initialize Workspace"
+      },
+      {
+        "command": "dendron.changeWS",
+        "title": "Dendron: Change Workspace"
       }
     ],
     "keybindings": [

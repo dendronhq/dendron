@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { getPlatform, resolveTilde } from "./utils";
+import { getPlatform, resolveTilde, VSCodeUtils } from "./utils";
 
 import { LookupController } from "./components/lookup/LookupController";
 import { createLogger } from "@dendronhq/common-server";
@@ -8,38 +8,10 @@ import fs from "fs-extra";
 import { getOrCreateEngine } from "@dendronhq/engine-server";
 //import { getOrCreateEngine } from "@dendronhq/engine-server";
 import path from "path";
+import { DENDRON_WS_NAME } from "./constants";
+import { DendronWorkspace } from "./workspace";
 
-const L = createLogger("extension");
-
-let _DendronWorkspace: DendronWorkspace | null;
-
-class DendronWorkspace {
-
-  static instance(): DendronWorkspace {
-    if (!_DendronWorkspace) {
-      throw Error("Dendronworkspace not initialized");
-    }
-    return _DendronWorkspace;
-  }
-
-  static isActive(): boolean {
-    const conf = vscode.workspace.getConfiguration("dendron").get("rootDir");
-    if (conf) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  public context: vscode.ExtensionContext;
-  public config: vscode.WorkspaceConfiguration;
-
-  constructor(context: vscode.ExtensionContext) {
-    this.context = context;
-    this.config = vscode.workspace.getConfiguration("dendron");
-    _DendronWorkspace = this;
-  }
-}
+let L: any;
 
 // --- VSCode
 
@@ -76,14 +48,24 @@ async function setupWorkspace(rootDirRaw: string) {
     "/Users/kevinlin/projects/dendronv2/dendron/packages/plugin-core/assets/.vscode";
   fs.copySync(dotVscodeDefault, path.join(rootDir, ".vscode"));
   fs.copySync(path.join(assetsDir, "notes"), rootDir);
-  writeWSFile(path.join(rootDir, "dendron.code-workspace"), {
+  writeWSFile(path.join(rootDir, DENDRON_WS_NAME), {
     rootDir,
   });
-  vscode.commands
-    .executeCommand(
-      "vscode.openFolder",
-      vscode.Uri.parse(path.join(rootDir, "dendron.code-workspace"))
-    );
+  VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
+}
+
+
+async function changeWorkspace(rootDirRaw: string) {
+  const ctx = "changeWorkspace";
+  L.info({ ctx, rootDirRaw });
+  const rootDir = resolveTilde(rootDirRaw);
+  if (!fs.existsSync(rootDir)) {
+    throw Error(`${rootDir} does not exist`);
+  }
+  if (!fs.existsSync(path.join(rootDir, DENDRON_WS_NAME))) {
+    throw Error(`workspace file does not exist`);
+  }
+  VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
 }
 
 async function getAndInitializeEngine(rootDir: string) {
@@ -98,8 +80,10 @@ async function getAndInitializeEngine(rootDir: string) {
 export function activate(context: vscode.ExtensionContext) {
   const ctx = "activate";
   const { logPath, extensionPath, extensionUri, storagePath, globalStoragePath } = context;
-  L.info({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
   const ws = new DendronWorkspace(context);
+  L = createLogger("extension");
+  L.info({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
+  console.log("active", logPath);
   if (DendronWorkspace.isActive()) {
     L.info({ ctx, msg: "isActive" });
     const rootDir = ws.config.get("rootDir") as string;
@@ -107,7 +91,7 @@ export function activate(context: vscode.ExtensionContext) {
   }
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("dendron.init", async () => {
+    vscode.commands.registerCommand("dendron.initWS", async () => {
       let rootDirDefault = "";
       const platform = getPlatform();
       if (platform === "darwin") {
@@ -125,6 +109,22 @@ export function activate(context: vscode.ExtensionContext) {
         throw Error("must enter");
       }
       setupWorkspace(resp);
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("dendron.changeWS", async () => {
+      // // ~/Documents/Dendron
+      const resp = await vscode.window.showInputBox({
+        prompt: "Select your folder for dendron",
+        ignoreFocusOut: true,
+      });
+      if (!resp) {
+        L.error({ ctx, msg: "no input" });
+        // TODO
+        throw Error("must enter");
+      }
+      changeWorkspace(resp);
     })
   );
 

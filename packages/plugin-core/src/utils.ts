@@ -1,5 +1,7 @@
 import os from "os";
+import * as vscode from "vscode";
 
+// === File FUtils
 export function resolveTilde(filePath: string) {
   if (!filePath || typeof filePath !== "string") {
     return "";
@@ -13,4 +15,15 @@ export function resolveTilde(filePath: string) {
 
 export function getPlatform() {
   return process.platform;
+}
+
+
+export class VSCodeUtils {
+  static async openWS(wsFile: string) {
+    vscode.commands
+      .executeCommand(
+        "vscode.openFolder",
+        vscode.Uri.parse(wsFile)
+      );
+  }
 }

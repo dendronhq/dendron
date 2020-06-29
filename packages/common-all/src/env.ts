@@ -34,6 +34,10 @@ export function getOrThrow<T = any>(
   return maybeValue;
 }
 
+export function setEnv(name: ConfigKey, value: any): void {
+  process.env[name] = value;
+}
+
 export function env(name: ConfigKey, opts?: { shouldThrow?: boolean }): any {
   const stage = getStage();
   // @ts-ignore: multiple configs

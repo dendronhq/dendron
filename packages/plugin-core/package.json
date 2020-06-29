@@ -43,7 +43,7 @@
     "keybindings": [
       {
         "command": "dendron.lookup",
-        "mac": "cmd+p"
+        "mac": "ctrl+p"
       }
     ]
   },

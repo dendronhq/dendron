@@ -19,7 +19,6 @@ import _ from "lodash";
 import path from "path";
 import YAML from "yamljs";
 
-
 // @ts-ignore
 const logger = createLogger("FileParser");
 

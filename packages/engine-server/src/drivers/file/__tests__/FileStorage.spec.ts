@@ -5,7 +5,6 @@ import {
   Schema
 } from "@dendronhq/common-all";
 import {
-  FileUtils,
   createFileStorage,
   expectSnapshot,
   readMdFile,
@@ -15,6 +14,7 @@ import {
 import FileStorage from "../store";
 import _ from "lodash";
 import fs from "fs-extra";
+import { FileTestUtils } from "packages/common-server";
 
 describe("main", () => {
   let root: string;
@@ -84,7 +84,7 @@ describe("main", () => {
      */
     describe("query", () => {
       test("with missing", async () => {
-        FileUtils.writeMDFile(
+        FileTestUtils.writeMDFile(
           root,
           "bar.one.alpha.md",
           {},
@@ -154,7 +154,7 @@ describe("main", () => {
     describe("write", () => {
       test("writeRoot", async () => {
         await store.write(Schema.createRoot());
-        const data = FileUtils.readYMLFile(root, "root.schema.yml");
+        const data = FileTestUtils.readYMLFile(root, "root.schema.yml");
         expect(data).toMatchSnapshot("data snapshot");
       });
     });

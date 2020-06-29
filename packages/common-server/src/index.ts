@@ -1,3 +1,3 @@
 export * from "./files";
 export * from "./logger";
-export { testUtils } from "./testUtils";
+export { testUtils, FileTestUtils } from "./testUtils";

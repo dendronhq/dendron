@@ -1,16 +1,15 @@
 import {
   DNode,
   DNodeData,
-  SchemaRawProps,
   genUUID
 } from "@dendronhq/common-all";
 
 import FileStorage from "./drivers/file/store";
 import YAML from "yamljs";
-import _ from "lodash";
 import fs from "fs-extra";
 import matter from "gray-matter";
 import path from "path";
+import _ from "lodash";
 
 // const FIXTURES_DIR =
 //     "/Users/kevinlin/projects/dendronv2/dendron/packages/electron-client/fixtures/store"
@@ -39,16 +38,11 @@ export const FOO_SCHEMA = {
 
 export const SCHEMA_FOO_PARENT_ID = "root.schema";
 export const TMP_DATA_DIR = "/tmp/dendron-tmp";
-const CACHE_DIR = "/tmp/dendron-test-cache";
 
-export class FileUtils {
-  static readYMLFile = (root: string, fname: string) => {
-    return YAML.load(path.join(root, fname));
+export class FixtureUtils {
+  static fixtureFiles = (): string[] => {
+    return fs.readdirSync(FIXTURES_DIR);
   }
-  static writeMDFile = (root: string, fname: string, fm: any, body: string) => {
-    const fmAndBody = matter.stringify(body, fm);
-    return fs.writeFileSync(path.join(root, fname), fmAndBody);
-  };
 }
 
 export function createFileStorage(root: string) {
@@ -62,27 +56,8 @@ export function readMdFile(root: string, fname: string) {
   return matter.read(path.join(root, fname));
 }
 
-export function readYAMLFile(root: string, fname: string): SchemaRawProps[] {
-  const out = fs.readFileSync(path.join(root, `${fname}.yml`), "utf8");
-  return YAML.parse(out) as SchemaRawProps[];
-}
-
-export function readFileForTest(root: string, fname: string, ext: string) {
-  return fs.readFileSync(path.join(root, `${fname}.${ext}`), "utf8");
-}
-
 export function appendUUID(fname: string) {
   return `${fname}-${genUUID()}`;
-}
-function createTmpDir(dirPath: string) {
-  const tmpDirPath = appendUUID(dirPath);
-  fs.ensureDirSync(tmpDirPath);
-  fs.emptyDirSync(tmpDirPath);
-  return tmpDirPath;
-}
-
-export function setupTmpCacheDir(): string {
-  return createTmpDir(CACHE_DIR);
 }
 
 export function setupTmpDendronDir(): string {

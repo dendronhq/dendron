@@ -2,7 +2,8 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { getOrCreateEngine } from "../engine";
-import { expectSnapshot, setupTmpDendronDir } from "../testUtils";
+import { expectSnapshot, setupTmpDendronDir, FixtureUtils } from "../testUtils";
+import { FileTestUtils } from "@dendronhq/common-server/src";
 
 describe("engine", () => {
     let root: string;
@@ -23,6 +24,8 @@ describe("engine", () => {
             expectSnapshot(expect, "main", _.values(engine.notes));
             const resp = engine.query("foo", queryMode);
             expect((await resp).data[0].title).toEqual("foo");
+            const files = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles());
+            expect(files[0]).toEqual(files[1]);
         });
     });
 
@@ -38,6 +41,17 @@ describe("engine", () => {
         });
 
         test("no md file, schema exist", async () => {
+            fs.unlink(path.join(root, "root.md"));
+            const engine = getOrCreateEngine({ root, forceNew: true });
+            await engine.init();
+            expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
+            expectSnapshot(expect, "main", _.values(engine.notes));
+            const resp = engine.query("root", "note");
+            expect((await resp).data[0].fname).toEqual("root");
+        });
+
+        test("no md file, no schema ", async () => {
+            fs.unlink(path.join(root, "foo.schema.yml"));
             fs.unlink(path.join(root, "root.md"));
             const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();

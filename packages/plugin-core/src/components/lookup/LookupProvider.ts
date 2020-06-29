@@ -74,7 +74,6 @@ export class LookupProvider {
       let items = picker.items.map((ent) => ent.label);
       L.info({ ctx: ctx + ":enter", querystring, activeItems, items });
       const resp = await engine().query(
-        { username: "dummy" },
         slashToDot(querystring),
         "note"
       );
@@ -122,7 +121,6 @@ export class LookupProvider {
         const fname = value;
         let nodeNew = new Note({ title: value, fname });
         await engine().write(
-          { username: "DUMMY" },
           nodeNew,
           {
             newNode: true,

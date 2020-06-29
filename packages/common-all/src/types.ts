@@ -107,10 +107,6 @@ export type EngineQueryResp<T = DNodeData> = Resp<IDNode<T>[]>;
 export type StoreGetResp<T = DNodeData> = Resp<DNodeRawProps<T>>;
 export type StoreQueryResp<T = DNodeData> = Resp<DNodeRawProps<T>[]>;
 
-export interface Scope {
-  username: string;
-}
-
 export interface NodeWriteOpts {
   /**
    * If newNode, will add it to the parent
@@ -166,15 +162,13 @@ export interface DEngineStore<T = DNodeData, O = any> {
   opts: O;
   // fetchInitial: () => DNodeDict;
   delete: (id: string) => Promise<void>;
-  get: (scope: Scope, id: string, opts?: QueryOpts) => Promise<StoreGetResp<T>>;
+  get: (id: string, opts?: QueryOpts) => Promise<StoreGetResp<T>>;
   query: (
-    scope: Scope,
     queryString: string,
     mode: QueryMode,
     opts?: QueryOpts
   ) => Promise<EngineQueryResp<T>>;
   write: <T>(
-    scope: Scope,
     node: IDNode<T>,
     opts?: DEngineStoreWriteOpts
   ) => Promise<void>;
@@ -207,7 +201,6 @@ export interface DEngine {
    * get(id: ...)
    */
   get: (
-    scope: Scope,
     id: string,
     mode: QueryMode,
     opts?: QueryOpts
@@ -222,14 +215,12 @@ export interface DEngine {
    * - [Node(id: ..., title: project, children: [])]
    */
   query: (
-    scope: Scope,
     queryString: string,
     mode: QueryMode,
     opts?: QueryOpts
   ) => Promise<EngineQueryResp<DNodeData>>;
 
   write: (
-    scope: Scope,
     node: IDNode<DNodeData>,
     opts?: NodeWriteOpts
   ) => Promise<void>;

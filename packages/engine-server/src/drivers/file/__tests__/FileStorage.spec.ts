@@ -7,7 +7,6 @@ import {
 import {
   FileUtils,
   createFileStorage,
-  createScope,
   expectSnapshot,
   readMdFile,
   setupTmpDendronDir
@@ -39,13 +38,13 @@ describe("main", () => {
 
     describe("delete", () => {
       test("delete foo.one", async () => {
-        const resp = await store.query(createScope(), "**/*", queryMode, {});
+        const resp = await store.query("**/*", queryMode, {});
         const nodeOrig = _.find(
           resp.data,
           n => n.title === "foo.one"
         ) as IDNode;
         await store.delete(nodeOrig.id);
-        await expect(store.get(createScope(), nodeOrig.id, {})).rejects.toThrow(
+        await expect(store.get(nodeOrig.id, {})).rejects.toThrow(
           AssertionError
         );
         expect(() => {
@@ -56,21 +55,21 @@ describe("main", () => {
 
     describe("get", () => {
       test("get root", async () => {
-        const resp = await store.query(createScope(), "**/*", queryMode, {});
+        const resp = await store.query("**/*", queryMode, {});
         const nodeOrig = _.find(resp.data, n => n.title === "root") as IDNode;
-        const respGet = await store.get(createScope(), nodeOrig.id, {});
+        const respGet = await store.get(nodeOrig.id, {});
         const node = respGet.data;
         expect(node).not.toBeUndefined();
         expect(node.fname).toEqual("root");
       });
 
       test("get foo.one", async () => {
-        const resp = await store.query(createScope(), "**/*", queryMode, {});
+        const resp = await store.query("**/*", queryMode, {});
         const nodeOrig = _.find(
           resp.data,
           n => n.title === "foo.one"
         ) as IDNode;
-        const respGet = await store.get(createScope(), nodeOrig.id, {});
+        const respGet = await store.get(nodeOrig.id, {});
         const node = respGet.data;
         expect(node).not.toBeUndefined();
         expect(node.fname).toEqual("foo.one");
@@ -92,7 +91,7 @@ describe("main", () => {
           "bar alpha content"
         );
         store = createFileStorage(root);
-        const resp = await store.query(createScope(), "**/*", queryMode, {});
+        const resp = await store.query("**/*", queryMode, {});
         const bar = _.find(resp.data, { fname: "bar" });
         const barOne = _.find(resp.data, { fname: "bar.one" });
         expect(bar).not.toBeNull();
@@ -103,7 +102,7 @@ describe("main", () => {
       });
 
       test("all", async () => {
-        const resp = await store.query(createScope(), "**/*", queryMode, {});
+        const resp = await store.query("**/*", queryMode, {});
         const rootNode = _.find(resp.data, n => n.title === "root") as Schema;
         const foo = _.find(resp.data, n => n.title === "foo") as Schema;
         const fooChild = _.find(
@@ -121,11 +120,10 @@ describe("main", () => {
 
     describe("write", () => {
       test("writeQuery", async () => {
-        const scope = createScope();
-        const resp = await store.query(scope, "**/*", queryMode, {});
+        const resp = await store.query("**/*", queryMode, {});
         const node = _.find(resp.data, n => n.title === "foo.one") as IDNode;
         node.body = "bond";
-        await store.write(scope, node);
+        await store.write(node);
         const { data, content } = readMdFile(root, "foo.one.md");
         expect(data.title).toEqual("foo.one");
         expect(content).toEqual("bond\n");
@@ -143,7 +141,7 @@ describe("main", () => {
 
     describe("query", () => {
       test("all", async () => {
-        const resp = await store.query(createScope(), "**/*", queryMode, {});
+        const resp = await store.query("**/*", queryMode, {});
         const rootNode = _.find(resp.data, n => n.title === "root") as IDNode;
         const foo = _.find(resp.data, n => n.title === "foo") as IDNode;
         const node = _.find(resp.data, n => n.title === "one") as IDNode;

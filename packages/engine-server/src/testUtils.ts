@@ -55,10 +55,6 @@ export function createFileStorage(root: string) {
   });
 }
 
-export function createScope() {
-  return { username: "kevin" };
-}
-
 export function readMdFile(root: string, fname: string) {
   return matter.read(path.join(root, fname));
 }

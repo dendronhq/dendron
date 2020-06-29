@@ -13,7 +13,6 @@ import {
   QueryOpts,
   Schema,
   SchemaRawProps,
-  Scope,
   StoreGetResp,
   assert,
   makeResponse
@@ -76,7 +75,6 @@ export abstract class FileStorageBase {
   }
 
   async get(
-    _scope: Scope,
     id: string,
     _opts?: QueryOpts
   ): Promise<StoreGetResp> {
@@ -161,7 +159,6 @@ class FileStorage extends FileStorageBase implements DEngineStore {
   }
 
   async query(
-    _scope: Scope,
     queryString: string,
     mode: QueryMode,
     _opts?: QueryOpts
@@ -211,7 +208,7 @@ class FileStorage extends FileStorageBase implements DEngineStore {
     });
   }
 
-  async write(_scope: Scope, node: IDNode, opts?: DEngineStoreWriteOpts) {
+  async write(node: IDNode, opts?: DEngineStoreWriteOpts) {
     opts = _.defaults(opts, { stub: false });
     if (!opts.stub) {
       await this._writeFile(node);

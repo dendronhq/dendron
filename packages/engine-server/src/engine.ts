@@ -18,7 +18,6 @@ import {
   Schema,
   SchemaDict,
   SchemaRawProps,
-  Scope,
   assert,
   assertExists,
   getStage,
@@ -157,11 +156,11 @@ export class ProtoEngine implements DEngine {
   }
 
   async init() {
-    await this.query({ username: "DUMMY" }, "**/*", "schema", {
+    await this.query("**/*", "schema", {
       fullNode: false,
       initialQuery: true,
     });
-    await this.query({ username: "DUMMY" }, "**/*", "note", {
+    await this.query("**/*", "note", {
       fullNode: false,
       initialQuery: true,
     });
@@ -268,7 +267,7 @@ export class ProtoEngine implements DEngine {
    * @param opts
    *  - fullNode: {default:true}
    */
-  async get(_scope: Scope, id: string, mode: QueryMode, opts?: QueryOpts) {
+  async get(id: string, mode: QueryMode, opts?: QueryOpts) {
     opts = _.defaults(opts || {}, { fullNode: true, createIfNew: true });
     let nodeDict;
     logger.debug({ ctx: "get", id, opts });
@@ -285,7 +284,7 @@ export class ProtoEngine implements DEngine {
     // a full node has a body and is fully resolved
     if (opts?.fullNode && !this.fullNodes.has(id)) {
       logger.debug({ ctx: "get:fetchFromStore:pre", id });
-      const fnResp = await this.store.get(_scope, id, {
+      const fnResp = await this.store.get(id, {
         ...opts,
         webClient: true
       });
@@ -300,7 +299,6 @@ export class ProtoEngine implements DEngine {
   }
 
   async query(
-    scope: Scope,
     queryString: string,
     mode: QueryMode,
     opts?: QueryOpts
@@ -316,7 +314,7 @@ export class ProtoEngine implements DEngine {
     // handle all query case
     if (isAllQuery(queryString)) {
       logger.debug({ ctx: "query:queryAll:pre", mode });
-      data = await this.store.query(scope, "**/*", mode, opts);
+      data = await this.store.query("**/*", mode, opts);
       if (opts.initialQuery) {
         this.refreshNodes(data.data);
       }
@@ -365,11 +363,11 @@ export class ProtoEngine implements DEngine {
             item: items[0]
           });
           const nodeBlank = new Note({ fname: queryString, stub: opts.stub });
-          await this.write(scope, nodeBlank, {
+          await this.write(nodeBlank, {
             newNode: true,
             stub: opts.stub
           });
-          const { data: nodeFull } = await this.get(scope, nodeBlank.id, mode);
+          const { data: nodeFull } = await this.get(nodeBlank.id, mode);
           this.refreshNodes([nodeFull], { fullNode: true });
           return makeResponse<EngineQueryResp>({
             data: [nodeFull],
@@ -388,7 +386,7 @@ export class ProtoEngine implements DEngine {
                 status: "fetch full node from store"
               });
               // FIXME: ratelimit
-              const fn = await this.get(scope, ent.id, mode);
+              const fn = await this.get(ent.id, mode);
               return fn.data;
             }
             logger.debug({
@@ -415,7 +413,7 @@ export class ProtoEngine implements DEngine {
     }
   }
 
-  async write(scope: Scope, node: IDNode, opts?: NodeWriteOpts): Promise<void> {
+  async write(node: IDNode, opts?: NodeWriteOpts): Promise<void> {
     opts = _.defaults(opts, { newNode: false, body: "", stub: false, parentsAsStubs: false });
     const refreshList: DNode[] = [node];
     if (node.type === "schema") {
@@ -436,7 +434,7 @@ export class ProtoEngine implements DEngine {
       node = schemaNew;
       // reset body
       node.body = "";
-      await this.store.write(scope, node, { stub: opts.stub });
+      await this.store.write(node, { stub: opts.stub });
       if (opts.newNode) {
         const parentPath = "root";
         const parentNode = _.find(this.schemas, n => n.title === parentPath);
@@ -447,7 +445,7 @@ export class ProtoEngine implements DEngine {
       }
     } else {
       const note = node as Note;
-      await this.store.write(scope, note, { stub: opts.stub });
+      await this.store.write(note, { stub: opts.stub });
       if (opts.newNode) {
         let parentPath = DNodeUtils.dirName(note.fname);
         if (_.isEmpty(parentPath)) {

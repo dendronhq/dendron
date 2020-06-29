@@ -1,13 +1,11 @@
-import FileStorage from "../drivers/file/store";
-import { setupTmpDendronDir, createFileStorage, expectSnapshot } from "../testUtils";
-import _ from "lodash";
-import { getOrCreateEngine } from "../engine";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
+import { getOrCreateEngine } from "../engine";
+import { expectSnapshot, setupTmpDendronDir } from "../testUtils";
 
 describe("engine", () => {
     let root: string;
-    let store: FileStorage;
 
     beforeEach(() => {
         root = setupTmpDendronDir();
@@ -20,7 +18,6 @@ describe("engine", () => {
     });
 
     describe("edge", () => {
-
         test("md exist, no schema file", async () => {
             fs.unlink(path.join(root, "foo.schema.yml"));
             const engine = getOrCreateEngine({ root });

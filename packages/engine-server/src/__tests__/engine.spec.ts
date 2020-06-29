@@ -36,5 +36,15 @@ describe("engine", () => {
             const resp = engine.query("root", "schema");
             expect((await resp).data[0].fname).toEqual("root.schema");
         });
+
+        test("no md file, schema exist", async () => {
+            fs.unlink(path.join(root, "root.md"));
+            const engine = getOrCreateEngine({ root, forceNew: true });
+            await engine.init();
+            expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
+            expectSnapshot(expect, "main", _.values(engine.notes));
+            const resp = engine.query("root", "note");
+            expect((await resp).data[0].fname).toEqual("root");
+        });
     });
 });

@@ -432,7 +432,7 @@ function getRoot(nodes: NoteRawProps[]) {
     ent => ent.title === "root" || _.isNull(ent.parent)
   );
   if (!rootNode) {
-    throw Error("no root node found");
+    throw new DendronError("no root node found");
   }
   const node = new Note({ ...rootNode, parent: null, children: [] });
   return { node, childrenIds: rootNode.children };

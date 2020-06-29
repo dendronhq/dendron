@@ -7,19 +7,18 @@ import {
   NoteUtils,
   SchemaNodeRaw,
   SchemaRawOpts,
-  SchemaRawProps,
-  assert
+  SchemaRawProps
 } from "@dendronhq/common-all";
 import {
   createLogger,
   globMatch,
   mdFile2NodeProps
 } from "@dendronhq/common-server";
-
-import YAML from "yamljs";
-import _ from "lodash";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
+import YAML from "yamljs";
+
 
 // @ts-ignore
 const logger = createLogger("FileParser");
@@ -172,7 +171,9 @@ export class FileParser {
     const fileMetaDict: FileMetaDict = getFileMeta(data);
     // logger.debug({ ctx: "parse:getFileMeta:post", fileMetaDict })
     const root = fileMetaDict[1].find(n => n.fpath === "root.md") as FileMeta;
-    assert(!_.isUndefined(root), "no root found");
+    if (!root) {
+      return [];
+    }
     const { node: rootNode } = this.toNode(root, [], store, {
       isRoot: true,
       errorOnBadParse: this.opts.errorOnBadParse
@@ -185,13 +186,13 @@ export class FileParser {
       // don't count root node, handle separately
       .filter(n => n.fpath !== "root.md")
       .map(ent =>
-        // first layer, no parent, expected
-        {
-          const { node } = this.toNode(ent, [], store, {
-            isRoot: true
-          });
-          return node;
-        }
+      // first layer, no parent, expected
+      {
+        const { node } = this.toNode(ent, [], store, {
+          isRoot: true
+        });
+        return node;
+      }
       ) as Note[];
     prevNodes.forEach(n => {
       rootNode.addChild(n);

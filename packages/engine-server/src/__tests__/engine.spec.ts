@@ -36,7 +36,7 @@ describe("engine", () => {
 
     describe("edge", () => {
         test("md exist, no schema file", async () => {
-            fs.unlink(path.join(root, "foo.schema.yml"));
+            fs.unlinkSync(path.join(root, "foo.schema.yml"));
             const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();
             expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
@@ -50,7 +50,7 @@ describe("engine", () => {
         });
 
         test("no md file, schema exist", async () => {
-            fs.unlink(path.join(root, "root.md"));
+            fs.unlinkSync(path.join(root, "root.md"));
             const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();
             expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
@@ -63,8 +63,8 @@ describe("engine", () => {
         });
 
         test("no md file, no schema ", async () => {
-            fs.unlink(path.join(root, "foo.schema.yml"));
-            fs.unlink(path.join(root, "root.md"));
+            fs.unlinkSync(path.join(root, "foo.schema.yml"));
+            fs.unlinkSync(path.join(root, "root.md"));
             const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();
             expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
@@ -74,6 +74,30 @@ describe("engine", () => {
             ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
                 add: ["root.schema.yml"],
                 remove: ["foo.schema.yml"]
+            }));
+        });
+
+        test("note without id", async () => {
+            fs.unlinkSync(path.join(root, "foo.md"));
+            FileTestUtils.writeMDFile(root, "foo.md", {}, "this is foo");
+            const engine = getOrCreateEngine({ root, forceNew: true });
+            await engine.init();
+            ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
+            }));
+            const fooNote = (await engine.query("foo", "note")).data[0];
+            expect(fooNote.fname).toEqual("foo");
+            expectSnapshot(expect, "fooNote", fooNote);
+        });
+
+        test("note without fm", async () => {
+            fs.unlinkSync(path.join(root, "foo.md"));
+            fs.writeFileSync(path.join(root, "foo.md"), "this is foo");
+            const engine = getOrCreateEngine({ root, forceNew: true });
+            await engine.init();
+            const fooNote = (await engine.query("foo", "note")).data[0];
+            expect(fooNote.fname).toEqual("foo");
+            expectSnapshot(expect, "fooNote", fooNote);
+            ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
             }));
         });
     });

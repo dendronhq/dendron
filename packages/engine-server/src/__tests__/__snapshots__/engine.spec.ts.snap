@@ -245,6 +245,45 @@ Array [
 ]
 `;
 
+exports[`engine edge note without fm: fooNote 1`] = `
+Object {
+  "body": "this is foo",
+  "children": Array [
+    "foo.one",
+    "foo.two",
+  ],
+  "created": "TODO",
+  "data": Object {},
+  "desc": "",
+  "fname": "foo",
+  "parent": "root",
+  "stub": false,
+  "title": "foo",
+  "type": "note",
+  "updated": "TODO",
+}
+`;
+
+exports[`engine edge note without id: fooNote 1`] = `
+Object {
+  "body": "this is foo
+",
+  "children": Array [
+    "foo.one",
+    "foo.two",
+  ],
+  "created": "TODO",
+  "data": Object {},
+  "desc": "",
+  "fname": "foo",
+  "parent": "root",
+  "stub": false,
+  "title": "foo",
+  "type": "note",
+  "updated": "TODO",
+}
+`;
+
 exports[`engine main sanity: main 1`] = `
 Array [
   Object {

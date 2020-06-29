@@ -32,7 +32,7 @@ export class FileTestUtils {
     return [
       dirEnts.sort(),
       expected.concat(cleanOpts.add).filter(ent => {
-        return !_.includes(opts?.remove, ent);
+        return !_.includes(cleanOpts?.remove, ent);
       }).sort()
     ];
   }

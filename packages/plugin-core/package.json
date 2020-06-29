@@ -3,7 +3,7 @@
   "displayName": "dendron",
   "description": "schema based note taking",
   "publisher": "dendron",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/dendronhq/dendron.git",

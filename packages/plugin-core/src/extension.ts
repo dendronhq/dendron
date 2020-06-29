@@ -9,7 +9,7 @@ export function activate(context: vscode.ExtensionContext) {
   const { logPath, extensionPath, extensionUri, storagePath, globalStoragePath } = context;
   const ws = new DendronWorkspace(context);
   ws.L.info({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
-  console.log("active", logPath);
+  console.log("active", logPath, extensionPath);
   if (DendronWorkspace.isActive()) {
     ws.L.info({ ctx, msg: "isActive" });
     const rootDir = ws.config.get("rootDir") as string;

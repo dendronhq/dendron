@@ -52,7 +52,8 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run build || true",
+    "vscode:prepublish": "npm run build || true && npm run copy-assets",
+    "copy-assets": "cp -R ./assets ./out",
     "lint": "eslint src --ext ts",
     "watch": "npm run compile -- --watch",
     "build": "npm run compile",

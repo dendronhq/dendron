@@ -25,13 +25,15 @@ export class FileTestUtils {
   static cmpFiles = (
     root: string,
     expected: string[],
-    opts?: { additions?: string[] }
+    opts?: { add?: string[], remove?: string[] }
   ) => {
-    const cleanOpts = _.defaults(opts, { additions: [] });
+    const cleanOpts = _.defaults(opts, { add: [], remove: [] });
     const dirEnts = fs.readdirSync(root);
     return [
       dirEnts.sort(),
-      expected.concat(_.map(cleanOpts.additions, (ent) => `${ent}.md`)).sort()
+      expected.concat(cleanOpts.add).filter(ent => {
+        return !_.includes(opts?.remove, ent);
+      }).sort()
     ];
   }
 

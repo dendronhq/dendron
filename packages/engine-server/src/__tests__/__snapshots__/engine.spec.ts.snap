@@ -149,6 +149,27 @@ Array [
 ]
 `;
 
+exports[`engine edge no md file, schema exist: fooNote 1`] = `
+Object {
+  "body": "",
+  "children": Array [
+    "foo.one",
+    "foo.two",
+  ],
+  "created": "TODO",
+  "data": Object {
+    "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
+  },
+  "desc": "",
+  "fname": "foo",
+  "parent": "root",
+  "stub": false,
+  "title": "foo",
+  "type": "note",
+  "updated": "TODO",
+}
+`;
+
 exports[`engine edge no md file, schema exist: listDir 1`] = `
 Array [
   "foo.md",

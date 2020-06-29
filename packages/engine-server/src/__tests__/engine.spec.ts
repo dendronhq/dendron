@@ -5,15 +5,21 @@ import { getOrCreateEngine } from "../engine";
 import { expectSnapshot, setupTmpDendronDir, FixtureUtils } from "../testUtils";
 import { FileTestUtils } from "@dendronhq/common-server/src";
 
+// function checkNodeCreated(expect: jest.Expect) {
+// }
+
 describe("engine", () => {
     let root: string;
     const queryMode = "note";
+    let actualFiles: string[];
+    let expectedFiles: string[];
 
     beforeEach(() => {
         root = setupTmpDendronDir();
     });
 
     afterEach(() => {
+        expect(actualFiles).toEqual(expectedFiles);
         fs.removeSync(root);
     });
 
@@ -24,8 +30,7 @@ describe("engine", () => {
             expectSnapshot(expect, "main", _.values(engine.notes));
             const resp = engine.query("foo", queryMode);
             expect((await resp).data[0].title).toEqual("foo");
-            const files = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles());
-            expect(files[0]).toEqual(files[1]);
+            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles()));
         });
     });
 
@@ -38,6 +43,10 @@ describe("engine", () => {
             expectSnapshot(expect, "main", _.values(engine.notes));
             const resp = engine.query("root", "schema");
             expect((await resp).data[0].fname).toEqual("root.schema");
+            ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
+                add: ["root.schema.yml"],
+                remove: ["foo.schema.yml"]
+            }));
         });
 
         test("no md file, schema exist", async () => {
@@ -46,8 +55,11 @@ describe("engine", () => {
             await engine.init();
             expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
             expectSnapshot(expect, "main", _.values(engine.notes));
-            const resp = engine.query("root", "note");
-            expect((await resp).data[0].fname).toEqual("root");
+            const fooNote = (await engine.query("foo", "note")).data[0];
+            expect(fooNote.fname).toEqual("foo");
+            expectSnapshot(expect, "fooNote", fooNote);
+            ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
+            }));
         });
 
         test("no md file, no schema ", async () => {
@@ -59,6 +71,10 @@ describe("engine", () => {
             expectSnapshot(expect, "main", _.values(engine.notes));
             const resp = engine.query("root", "note");
             expect((await resp).data[0].fname).toEqual("root");
+            ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
+                add: ["root.schema.yml"],
+                remove: ["foo.schema.yml"]
+            }));
         });
     });
 });

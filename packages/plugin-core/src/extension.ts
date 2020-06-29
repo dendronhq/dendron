@@ -1,6 +1,7 @@
 import { getAndInitializeEngine } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
 import { DendronWorkspace } from "./workspace";
+import { Logger, TraceLevel } from "./logger";
 
 // === Main
 // this method is called when your extension is activated
@@ -8,6 +9,8 @@ export function activate(context: vscode.ExtensionContext) {
   const ctx = "activate";
   const { logPath, extensionPath, extensionUri, storagePath, globalStoragePath } = context;
   const ws = new DendronWorkspace(context);
+  Logger.configure(context, TraceLevel.Debug);
+  Logger.debug({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
   ws.L.info({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
   console.log("active", logPath, extensionPath);
   if (DendronWorkspace.isActive()) {

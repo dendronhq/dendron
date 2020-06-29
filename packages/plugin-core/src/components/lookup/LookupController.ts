@@ -1,10 +1,10 @@
-import * as vscode from "vscode";
-
-import { LookupProvider } from "./LookupProvider";
-import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
-import { engine } from "@dendronhq/engine-server";
+import { getOrCreateEngine } from "@dendronhq/engine-server";
+import _ from "lodash";
 import path from "path";
+import * as vscode from "vscode";
+import { LookupProvider } from "./LookupProvider";
+
 
 let LOOKUP_PROVIDER: null | LookupProvider = null;
 const L = createLogger("LookupController");
@@ -22,7 +22,7 @@ export class LookupController {
     quickpick.title = "Lookup";
     quickpick.placeholder = "quickpick placeholder";
     quickpick.ignoreFocusOut = true;
-    quickpick.items = _.values(engine().notes);
+    quickpick.items = _.values(getOrCreateEngine().notes);
     quickpick.matchOnDetail = true;
     let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
     if (editorPath) {

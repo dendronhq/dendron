@@ -5,7 +5,7 @@ import { CREATE_NEW_LABEL } from "./constants";
 import { Note } from "@dendronhq/common-all";
 import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
-import { engine } from "@dendronhq/engine-server";
+import { getOrCreateEngine } from "@dendronhq/engine-server";
 
 const L = createLogger("LookupProvider");
 
@@ -73,7 +73,7 @@ export class LookupProvider {
       let activeItems = picker.activeItems.map((ent) => ent.label);
       let items = picker.items.map((ent) => ent.label);
       L.info({ ctx: ctx + ":enter", querystring, activeItems, items });
-      const resp = await engine().query(
+      const resp = await getOrCreateEngine().query(
         slashToDot(querystring),
         "note"
       );
@@ -84,7 +84,7 @@ export class LookupProvider {
       if (querystring === "") {
         L.info({ ctx, status: "no qs" });
         //picker.items = [engine().notes["root"]];
-        picker.items = _.values(engine().notes);
+        picker.items = _.values(getOrCreateEngine().notes);
         return;
       }
       // check if single item query
@@ -120,7 +120,7 @@ export class LookupProvider {
       if (isCreateNewPick(selectedItem)) {
         const fname = value;
         let nodeNew = new Note({ title: value, fname });
-        await engine().write(
+        await getOrCreateEngine().write(
           nodeNew,
           {
             newNode: true,

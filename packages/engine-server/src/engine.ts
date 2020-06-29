@@ -475,11 +475,6 @@ export class ProtoEngine implements DEngine {
   }
 }
 
-// TODO: DEPRECATE
-export function engine(opts?: ProtoEngineGetOpts) {
-  return ProtoEngine.getEngine(opts);
-}
-
 export function getOrCreateEngine(opts?: ProtoEngineGetOpts) {
   return ProtoEngine.getEngine(opts);
 }

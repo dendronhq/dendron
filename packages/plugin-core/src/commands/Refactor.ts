@@ -4,6 +4,7 @@ import { createLogger, getAllFiles } from "@dendronhq/common-server";
 import { Dirent } from "fs-extra";
 import fs from "fs-extra";
 import path from "path";
+import { genUUID } from "@dendronhq/common-all";
 
 const L = createLogger("dendron");
 
@@ -17,11 +18,13 @@ type RefactorCommandOpts = {
     limit?: number
     root: string
     rules: string[]
+
 };
 
 type RefactorRule = {
     name: string
     matcher: RegExp
+    fmOnly?: boolean
     replacer: (
         match: RegExpMatchArray | null,
         txt: string
@@ -33,6 +36,8 @@ type RefactorRule = {
 
 export const RULES = {
     ADD_FM_BLOCK: "ADD_FM_BLOCK",
+    ADD_FM_ID: "ADD_FM_ID",
+    REMOVE_FM_BRACKETS: "REMOVE_FM_BRACKETS"
 };
 
 export class RefactorCommand extends BaseCommand<RefactorCommandOpts> {
@@ -57,11 +62,58 @@ export class RefactorCommand extends BaseCommand<RefactorCommandOpts> {
                 opts: {
                     matchIfNull: true,
                 },
-            }
+            },
+            {
+                name: RULES.ADD_FM_ID,
+                matcher: /^---\n(?!.*id:.*)(?<fm>.*)^---\n(?<body>.*)/ms,
+                replacer: (match: RegExpMatchArray | null, _txt: string) => {
+                    const fmOrig: string | undefined = (match?.groups ?? {}).fm;
+                    const body: string | undefined = (match?.groups ?? {}).body;
+                    const output = [
+                        "---",
+                        `id: ${genUUID()}\n${fmOrig}`,
+                        "---",
+                        body,
+                    ];
+                    return { txtClean: output.join("\n"), diff: {} };
+                },
+            },
+            {
+                name: RULES.REMOVE_FM_BRACKETS,
+                fmOnly: true,
+                matcher: /^(?=.*\s*-\s*\[.*)/ms,
+                replacer: (match: RegExpMatchArray | null, _txt: string) => {
+                    const fmOrig: string | undefined = (match?.groups ?? {}).fm;
+                    const body: string | undefined = (match?.groups ?? {}).body;
+                    const fmClean = fmOrig
+                        .replace(/\[|/g, "")
+                        .replace(/\]/g, ": ");
+                    const output = ["---", fmClean, "---", body];
+                    return {
+                        txtClean: output.join("\n"),
+                        fmOrig,
+                        fmClean,
+                        diff: {},
+                    };
+                },
+            },
         ];
         rules.forEach(r => {
             this.rules[r.name] = r;
         });
+    }
+
+    applyMatch(txt: string, rule: RefactorRule) {
+        const { matcher, replacer, opts } = rule;
+        const match = txt.match(matcher);
+        const ruleOpts = _.defaults(opts, { matchIfNull: false });
+        if (
+            (!_.isNull(match) && !ruleOpts.matchIfNull) ||
+            (_.isNull(match) && ruleOpts.matchIfNull)
+        ) {
+            return replacer(match, txt);
+        }
+        return null;
     }
 
     async execute(opts: RefactorCommandOpts) {
@@ -89,19 +141,23 @@ export class RefactorCommand extends BaseCommand<RefactorCommandOpts> {
             }
 
             const txt = fs.readFileSync(path.join(root, fname), "utf8");
+            let matchTxt: string = "";
+            let restTxt: string = "";
             L.debug({ ctx: "execute:process", fname });
             rules.forEach(_r => {
                 const r = this.rules[_r];
-                const { matcher, replacer } = r;
-                const match = txt.match(matcher);
-                const ruleOpts = _.defaults(r.opts, { matchIfNull: false });
-                L.debug({ ctx: "execute:process:match", r, match, fname });
-                if (
-                    (!_.isNull(match) && !ruleOpts.matchIfNull) ||
-                    (_.isNull(match) && ruleOpts.matchIfNull)
-                ) {
+                if (r.fmOnly) {
+                    const startIndex = txt.indexOf('---') + 3;
+                    const endIndex = txt.indexOf("---", startIndex);
+                    matchTxt = _.trim(txt.slice(startIndex, endIndex - 3));
+                    restTxt = txt.slice(endIndex + 3);
+                } else {
+                    matchTxt = txt;
+                }
+                const matched = this.applyMatch(matchTxt, r);
+                if (matched) {
                     stats.numChanged += 1;
-                    const { txtClean, diff } = replacer(match, txt);
+                    const { txtClean, diff } = matched;
                     const dstPath = path.join(root, fname);
                     L.debug({
                         ctx: "writeFileSync:pre",
@@ -110,7 +166,7 @@ export class RefactorCommand extends BaseCommand<RefactorCommandOpts> {
                         txtClean,
                     });
                     if (!dryRun) {
-                        fs.writeFileSync(dstPath, txtClean);
+                        fs.writeFileSync(dstPath, txtClean + restTxt);
                     }
                 }
             });
@@ -123,9 +179,9 @@ async function main() {
     const root = process.argv[2];
     await new RefactorCommand().execute({
         root,
-        rules: [RULES.ADD_FM_BLOCK],
+        rules: [RULES.REMOVE_FM_BRACKETS],
         // include: ['cli.pbcopy.md'],
-        dryRun: true,
+        dryRun: false,
         // dryRun: true,
         limit: 10,
     });

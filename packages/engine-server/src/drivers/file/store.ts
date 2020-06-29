@@ -87,7 +87,7 @@ export abstract class FileStorageBase {
   }
 }
 
-class FileStorage extends FileStorageBase implements DEngineStore {
+export class FileStorage extends FileStorageBase implements DEngineStore {
   doGetFile(id: string): DNodeRawProps<DNodeData> {
     const { root } = this.opts;
     const fpath = this.idToPath[id];

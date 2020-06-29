@@ -130,11 +130,8 @@ export class DendronWorkspace {
         [rootDir].forEach((dirPath: string) => {
             fs.ensureDirSync(dirPath);
         });
-        // TODO: hardcoded
-        const assetsDir =
-            "/Users/kevinlin/projects/dendronv2/dendron/packages/plugin-core/assets";
-        const dotVscodeDefault =
-            "/Users/kevinlin/projects/dendronv2/dendron/packages/plugin-core/assets/.vscode";
+        const assetsDir = path.join(this.context.extensionPath, "assets");
+        const dotVscodeDefault = path.join(assetsDir, ".vscode");
         fs.copySync(dotVscodeDefault, path.join(rootDir, ".vscode"));
         fs.copySync(path.join(assetsDir, "notes"), rootDir);
         writeWSFile(path.join(rootDir, DENDRON_WS_NAME), {

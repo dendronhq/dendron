@@ -1,15 +1,24 @@
 import { getAndInitializeEngine } from "@dendronhq/engine-server";
 import * as vscode from "vscode";
-import { DendronWorkspace } from "./workspace";
+
 import { Logger, TraceLevel } from "./logger";
 import { VSCodeUtils } from "./utils";
+import fs from "fs-extra";
+import path from "path";
+import { setEnv } from "@dendronhq/common-all";
 
 // === Main
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   const ctx = "activate";
   const { logPath, extensionPath, extensionUri, storagePath, globalStoragePath } = context;
+  fs.ensureDirSync(context.logPath);
+  setEnv("LOG_DST", path.join(context.logPath, "dendron.log"));
+
+  const { DendronWorkspace } = require("./workspace");
   const ws = new DendronWorkspace(context);
+
+  // init logs
   Logger.configure(context, TraceLevel.Debug);
   Logger.debug({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
   ws.L.info({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
@@ -19,9 +28,13 @@ export function activate(context: vscode.ExtensionContext) {
     const wsFolders = vscode.workspace.workspaceFolders;
     Logger.debug({ ctx, wsFolders });
     const mainVault = wsFolders![0].uri.fsPath;
-    getAndInitializeEngine(mainVault);
+    getAndInitializeEngine(mainVault).then(() => {
+      Logger.debug({ ctx, msg: "engine Initialized" });
+    }, (err) => {
+      vscode.window.showErrorMessage(JSON.stringify(err));
+    });
     if (VSCodeUtils.isDebuggingExtension()) {
-      Logger.output?.show(true);
+      Logger.output?.show(false);
     }
   }
 }
@@ -29,5 +42,6 @@ export function activate(context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() {
   const ctx = "deactivate";
+  const { DendronWorkspace } = require("./workspace");
   DendronWorkspace.instance().L.info({ ctx });
 }

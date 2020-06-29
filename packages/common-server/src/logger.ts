@@ -29,9 +29,14 @@ export class Logger {
 function createLogger(name?: string) {
   const level = env("LOG_LEVEL", { shouldThrow: false }) || "debug";
   const nameClean = name || env("LOG_NAME");
+
   const logDst =
     env("LOG_DST", { shouldThrow: false }) || "/tmp/dendron-dev.log";
-  return pino(pino.destination(logDst)).child({ name: nameClean, level });
+  if (logDst === "stdout") {
+    return pino({ name: nameClean, level });
+  } else {
+    return pino(pino.destination(logDst)).child({ name: nameClean, level });
+  }
 }
 
 export { createLogger };

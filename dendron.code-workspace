@@ -16,9 +16,6 @@
       "path": "packages/web-server"
     },
     {
-      "path": "packages/infra"
-    },
-    {
       "path": "/Users/kevinlin/projects/vscode-extension/ref/vscode"
     }
   ],
@@ -33,7 +30,13 @@
         "mode": "auto"
       }
     ],
-    "spellright.language": ["en"],
-    "spellright.documentTypes": ["markdown", "latex", "plaintext"]
+    "spellright.language": [
+      "en"
+    ],
+    "spellright.documentTypes": [
+      "markdown",
+      "latex",
+      "plaintext"
+    ]
   }
 }

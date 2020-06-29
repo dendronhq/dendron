@@ -1,13 +1,13 @@
-import { createLogger } from "@dendronhq/common-server";
 import { getOrCreateEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { LookupProvider } from "./LookupProvider";
+import { createLogger } from "@dendronhq/common-server";
 
 
 let LOOKUP_PROVIDER: null | LookupProvider = null;
-const L = createLogger("LookupController");
+const L = createLogger("dendron");
 
 export class LookupController {
   show(_value = "") {

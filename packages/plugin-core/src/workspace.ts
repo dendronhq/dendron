@@ -1,4 +1,3 @@
-import { setEnv } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";
@@ -53,8 +52,6 @@ export class DendronWorkspace {
         this.context = context;
         this.config = vscode.workspace.getConfiguration("dendron");
         _DendronWorkspace = this;
-        fs.ensureDirSync(context.logPath);
-        setEnv("LOG_DST", path.join(context.logPath, "dendron.log"));
         this.L = createLogger("dendron");
         this._setupCommands();
     }

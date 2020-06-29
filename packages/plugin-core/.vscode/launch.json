@@ -10,10 +10,15 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
-      "outFiles": ["${workspaceFolder}/out/**/*.js"],
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/out/**/*.js"
+      ],
       "env": {
-        "STAGE": "dev"
+        "STAGE": "dev",
+        "LOG_DST": "/tmp/dendron-dev-fromlaunch.log"
       }
       //"preLaunchTask": "npm: watch"
     },
@@ -29,7 +34,9 @@
       "env": {
         "STAGE": "test"
       },
-      "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
+      "outFiles": [
+        "${workspaceFolder}/out/test/**/*.js"
+      ]
       // "preLaunchTask": "${defaultBuildTask}"
     }
   ]

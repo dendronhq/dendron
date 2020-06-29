@@ -11,6 +11,17 @@ import path from "path";
 
 const L = createLogger("extension");
 
+class DendronWorkspace {
+  static isActive(): boolean {
+    const conf = vscode.workspace.getConfiguration("dendron").get("rootDir");
+    if (conf) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
+
 // --- VSCode
 
 function writeWSFile(fpath: string, opts: { rootDir: string }) {
@@ -67,7 +78,11 @@ async function setupWorkspace(rootDirRaw: string) {
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   const ctx = "activate";
-  L.info({ ctx });
+  const { logPath, extensionPath, extensionUri, storagePath, globalStoragePath } = context;
+  L.info({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
+  if (DendronWorkspace.isActive()) {
+    L.info({ ctx, msg: "isActive" });
+  }
 
   context.subscriptions.push(
     vscode.commands.registerCommand("dendron.init", async () => {

@@ -17,6 +17,7 @@ import path from "path";
 // TODO
 //const FIXTURES_DIR = '/Users/kevinlin/Dropbox/Apps/Noah/notesv2';
 // eslint-disable-next-line operator-linebreak
+// TODO: don't hardcode
 const FIXTURES_DIR =
   "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/fixtures/store";
 export const ROOT_ID = "root";

@@ -1,0 +1,138 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`engine edge md exist, no schema file: listDir 1`] = `
+Array [
+  "foo.md",
+  "foo.one.md",
+  "foo.two.md",
+  "root.md",
+]
+`;
+
+exports[`engine edge md exist, no schema file: main 1`] = `
+Array [
+  Object {
+    "body": "",
+    "children": Array [
+      "foo",
+    ],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "parent": "root",
+    "stub": false,
+    "title": "root",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.one",
+      "foo.two",
+    ],
+    "created": "TODO",
+    "data": Object {
+      "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
+    },
+    "desc": "",
+    "fname": "foo",
+    "parent": "root",
+    "stub": false,
+    "title": "foo",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.one",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.one",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.two",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.two",
+    "type": "note",
+    "updated": "TODO",
+  },
+]
+`;
+
+exports[`engine sanity: main 1`] = `
+Array [
+  Object {
+    "body": "",
+    "children": Array [
+      "foo",
+    ],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "parent": "root",
+    "stub": false,
+    "title": "root",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.one",
+      "foo.two",
+    ],
+    "created": "TODO",
+    "data": Object {
+      "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
+    },
+    "desc": "",
+    "fname": "foo",
+    "parent": "root",
+    "stub": false,
+    "title": "foo",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.one",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.one",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.two",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.two",
+    "type": "note",
+    "updated": "TODO",
+  },
+]
+`;

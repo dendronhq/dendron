@@ -455,19 +455,19 @@ export class ProtoEngine implements DEngine {
         }
         let parentNode = _.find(this.notes, n => n.path === parentPath);
         if (!parentNode) {
-         if (opts.parentsAsStubs) {
-          const closestParent = DNodeUtils.findClosestParent(note.logicalPath, this.notes);
-          const stubNodes = NoteUtils.createStubNotes(
-            closestParent as Note,
-            node as Note
-          );
-          stubNodes.forEach(ent2 => {
-            refreshList.push(ent2);
-          });
-          parentNode = stubNodes.slice(-1)[0];
-        } else {
-          throw Error("no parent found");
-        }
+          if (opts.parentsAsStubs) {
+            const closestParent = DNodeUtils.findClosestParent(note.logicalPath, this.notes);
+            const stubNodes = NoteUtils.createStubNotes(
+              closestParent as Note,
+              node as Note
+            );
+            stubNodes.forEach(ent2 => {
+              refreshList.push(ent2);
+            });
+            parentNode = stubNodes.slice(-1)[0];
+          } else {
+            throw Error("no parent found");
+          }
         }
         parentNode.addChild(note);
       }
@@ -477,10 +477,18 @@ export class ProtoEngine implements DEngine {
   }
 }
 
+// TODO: DEPRECATE
 export function engine(opts?: ProtoEngineGetOpts) {
   return ProtoEngine.getEngine(opts);
 }
 
 export function getOrCreateEngine(opts?: ProtoEngineGetOpts) {
   return ProtoEngine.getEngine(opts);
+}
+
+export async function getAndInitializeEngine(rootDir: string) {
+  const _engine = getOrCreateEngine({ root: rootDir, forceNew: true });
+  // TODO: error check
+  await _engine.init();
+  return _engine;
 }

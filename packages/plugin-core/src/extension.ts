@@ -11,7 +11,17 @@ import path from "path";
 
 const L = createLogger("extension");
 
+let _DendronWorkspace: DendronWorkspace | null;
+
 class DendronWorkspace {
+
+  static instance(): DendronWorkspace {
+    if (!_DendronWorkspace) {
+      throw Error("Dendronworkspace not initialized");
+    }
+    return _DendronWorkspace;
+  }
+
   static isActive(): boolean {
     const conf = vscode.workspace.getConfiguration("dendron").get("rootDir");
     if (conf) {
@@ -19,6 +29,15 @@ class DendronWorkspace {
     } else {
       return false;
     }
+  }
+
+  public context: vscode.ExtensionContext;
+  public config: vscode.WorkspaceConfiguration;
+
+  constructor(context: vscode.ExtensionContext) {
+    this.context = context;
+    this.config = vscode.workspace.getConfiguration("dendron");
+    _DendronWorkspace = this;
   }
 }
 
@@ -66,12 +85,16 @@ async function setupWorkspace(rootDirRaw: string) {
       vscode.Uri.parse(path.join(rootDir, ".vscode", "dendron.code-workspace"))
     )
     .then(async () => {
-      const engine = getOrCreateEngine({ root: rootDir, forceNew: true });
-      // TODO: error check
-      await engine.init();
-      vscode.window.showInformationMessage("Dendron initialized");
+      await getAndInitializeEngine(rootDir);
       L.info({ ctx: ctx + ":exit" });
     });
+}
+
+async function getAndInitializeEngine(rootDir: string) {
+  const engine = getOrCreateEngine({ root: rootDir, forceNew: true });
+  // TODO: error check
+  await engine.init();
+  vscode.window.showInformationMessage("Dendron initialized");
 }
 
 // === Main
@@ -80,8 +103,11 @@ export function activate(context: vscode.ExtensionContext) {
   const ctx = "activate";
   const { logPath, extensionPath, extensionUri, storagePath, globalStoragePath } = context;
   L.info({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
+  const ws = new DendronWorkspace(context);
   if (DendronWorkspace.isActive()) {
     L.info({ ctx, msg: "isActive" });
+    const rootDir = ws.config.get("rootDir") as string;
+    getAndInitializeEngine(rootDir);
   }
 
   context.subscriptions.push(

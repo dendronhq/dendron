@@ -6,6 +6,7 @@ Array [
   "foo.one.md",
   "foo.two.md",
   "root.md",
+  "root.schema.yml",
 ]
 `;
 
@@ -73,7 +74,7 @@ Array [
 ]
 `;
 
-exports[`engine sanity: main 1`] = `
+exports[`engine main sanity: main 1`] = `
 Array [
   Object {
     "body": "",

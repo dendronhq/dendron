@@ -27,15 +27,10 @@ import {
 } from "@dendronhq/common-server";
 
 import { FileParser } from "./parser";
-// import NodeCache from 'node-cache';
 import _ from "lodash";
 import path from "path";
 
-// import { useAdapter } from '@type-cacheable/node-cache-adapter';
-
 const logger = createLogger("FileStore");
-// const cacheClient = new NodeCache();
-// useAdapter(cacheClient);
 
 interface FileStorageOpts {
   root: string;
@@ -101,13 +96,6 @@ class FileStorage extends FileStorageBase implements DEngineStore {
     return mdFile2NodeProps(uri);
   }
 
-  // @Cacheable({
-  //     cacheKey: CACHE_KEYS.QUERY_ALL,
-  //     hashKey: "query",
-  //     // @ts-ignore
-  //     client: cacheClient,
-  //     ttlSeconds: 86400,
-  // })
   async _getNoteAll(): Promise<NoteRawProps[]> {
     const allFiles = getAllFiles({
       root: this.opts.root,

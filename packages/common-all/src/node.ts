@@ -21,6 +21,7 @@ import YAML from "yamljs";
 /* eslint-disable no-loop-func */
 import _ from "lodash";
 import { genUUID } from "./uuid";
+import { DendronError } from "./error";
 
 export class DNodeUtils {
   static dirName(nodePath: string) {
@@ -330,6 +331,10 @@ export class Note extends DNode<NoteData> implements INote {
     return new Note({ stub: true, fname });
   }
 
+  static createRoot(): Note {
+    return new Note({ fname: "root", id: "root", title: "root" });
+  }
+
   constructor(props: INoteOpts) {
     super({
       type: "note",
@@ -365,7 +370,7 @@ export class Note extends DNode<NoteData> implements INote {
 
 export class Schema extends DNode<SchemaData> implements ISchema {
   static createRoot() {
-    const props = SchemaNodeRaw.createProps({ id: "root", fname: "root" });
+    const props = SchemaNodeRaw.createProps({ id: "root", fname: "root.schema" });
     return new Schema({ ...props, parent: null, children: [] });
   }
 
@@ -440,7 +445,7 @@ export class NodeBuilder {
     // nodes: {nodes}
     const rootNodes = _.filter(nodes, ent => ent.parent === "root");
     if (_.isEmpty(rootNodes)) {
-      throw Error("no root node found");
+      throw new DendronError("no root node found");
     }
     return rootNodes;
   }

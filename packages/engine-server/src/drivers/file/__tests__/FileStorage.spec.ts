@@ -150,5 +150,13 @@ describe("main", () => {
         expect(node.parent?.id).toEqual(foo.id);
       });
     });
+
+    describe("write", () => {
+      test("writeRoot", async () => {
+        await store.write(Schema.createRoot());
+        const data = FileUtils.readYMLFile(root, "root.schema.yml");
+        expect(data).toMatchSnapshot("data snapshot");
+      });
+    });
   });
 });

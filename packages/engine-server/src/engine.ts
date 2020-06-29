@@ -23,7 +23,8 @@ import {
   getStage,
   makeResponse,
   NoteUtils,
-  DNode
+  DNode,
+  DendronError,
 } from "@dendronhq/common-all";
 
 import { BodyParser } from "./drivers/raw/BodyParser";
@@ -153,6 +154,16 @@ export class ProtoEngine implements DEngine {
         throw Error(`${fpath} doesn't exist`);
       }
     });
+  }
+
+  _createRoot(mode: QueryMode): IDNode {
+    if (mode === "schema") {
+      const schema = Schema.createRoot();
+      return schema;
+    } else {
+      const note = Note.createRoot();
+      return note;
+    }
   }
 
   async init() {
@@ -302,19 +313,32 @@ export class ProtoEngine implements DEngine {
     queryString: string,
     mode: QueryMode,
     opts?: QueryOpts
-  ) {
+  ): Promise<EngineQueryResp<DNodeData>> {
     opts = _.defaults(opts || {}, {
       fullNode: false,
       createIfNew: false,
       initialQuery: false,
       stub: false
     });
+    const ctx = "query";
     let data: EngineQueryResp;
 
     // handle all query case
     if (isAllQuery(queryString)) {
       logger.debug({ ctx: "query:queryAll:pre", mode });
-      data = await this.store.query("**/*", mode, opts);
+      try {
+        data = await this.store.query("**/*", mode, opts);
+      } catch (err) {
+        if (err instanceof DendronError) {
+          logger.info({ ctx, msg: "no root found", mode });
+          const root = this._createRoot(mode);
+          await this.store.write(root);
+          logger.info({ ctx, msg: "post:store.write", mode });
+          return this.query(queryString, mode, opts);
+        } else {
+          throw err;
+        }
+      }
       if (opts.initialQuery) {
         this.refreshNodes(data.data);
       }

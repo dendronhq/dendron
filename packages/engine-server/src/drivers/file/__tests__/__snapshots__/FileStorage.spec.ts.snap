@@ -129,3 +129,22 @@ exports[`main notes write writeQuery: data snapshot 1`] = `
 "bond
 "
 `;
+
+exports[`main schema write writeRoot: data snapshot 1`] = `
+Array [
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "root.schema",
+    "id": "root",
+    "parent": "root",
+    "stub": false,
+    "title": "root",
+    "type": "schema",
+    "updated": "TODO",
+  },
+]
+`;

@@ -1,3 +1,8 @@
+/* eslint-disable no-loop-func */
+import _ from "lodash";
+import YAML from "yamljs";
+import { assertExists } from "./assert";
+import { DendronError } from "./error";
 import {
   DNodeData,
   DNodeDict,
@@ -13,16 +18,13 @@ import {
   NoteData,
   NoteRawProps,
   SchemaData,
-  SchemaRawOpts,
-  SchemaRawProps,
-  SchemaDict
-} from "./types";
 
-import YAML from "yamljs";
-/* eslint-disable no-loop-func */
-import _ from "lodash";
+  SchemaDict, SchemaRawOpts,
+  SchemaRawProps
+} from "./types";
 import { genUUID } from "./uuid";
-import { DendronError } from "./error";
+
+const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
 export class DNodeUtils {
   static dirName(nodePath: string) {
@@ -374,8 +376,14 @@ export class Note extends DNode<NoteData> implements INote {
       const prefixParts = ["$(repo)", this.schema.domain.title];
       // check if non-domain schema
       if (this.schema.domain.id !== this.schema.id) {
-        prefixParts.push("$(breadcrumb-separator)");
-        prefixParts.push(this.schema.title);
+        // eslint-disable-next-line no-use-before-define
+        if (SchemaUtils.isUnkown(this.schema)) {
+          prefixParts.push("$(breadcrumb-separator)");
+          prefixParts.push("$(squirrel) unknown");
+        } else {
+          prefixParts.push("$(breadcrumb-separator)");
+          prefixParts.push(this.schema.title);
+        }
       }
       schemaPrefix = prefixParts.join(" ");
     }
@@ -391,6 +399,15 @@ export class Schema extends DNode<SchemaData> implements ISchema {
   static createRoot() {
     const props = SchemaNodeRaw.createProps({ id: "root", fname: "root.schema" });
     return new Schema({ ...props, parent: null, children: [] });
+  }
+
+  /**
+   * This is attached to notes that are part of a domain with schema but
+   * don't match any schema in it
+   */
+  static createUnkownSchema(domain: Schema) {
+    const props = SchemaNodeRaw.createProps({ id: UNKNOWN_SCHEMA_ID, fname: UNKNOWN_SCHEMA_ID, stub: true });
+    return new Schema({ ...props, parent: domain, children: [] });
   }
 
   constructor(props: ISchemaOpts) {
@@ -482,6 +499,11 @@ export class NodeBuilder {
     if (node.schemaId) {
       node.schema = opts.schemas[node.schemaId];
     }
+    // eslint-disable-next-line no-use-before-define
+    if (node.schemaId === UNKNOWN_SCHEMA_ID) {
+      const domainSchema = assertExists<Schema>((node.domain as Note).domain as Schema, "note domain does not have schema");
+      node.schema = Schema.createUnkownSchema(domainSchema);
+    }
     const { parent: parentId, children } = item;
     const parent: Note = _.find(parents, { id: parentId }) as Note;
     parent.addChild(node);
@@ -567,5 +589,11 @@ export class NoteUtils {
     });
     parent.addChild(to);
     return stubNodes;
+  }
+}
+
+export class SchemaUtils {
+  static isUnkown(schema: Schema) {
+    return schema.id === UNKNOWN_SCHEMA_ID;
   }
 }

@@ -2,7 +2,7 @@ import { createLogger } from "@dendronhq/common-server";
 import { BaseCommand } from "./base";
 import { getOrCreateEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { Note, Schema, SchemaNodeRaw } from "@dendronhq/common-all";
+import { Note, Schema } from "@dendronhq/common-all";
 
 const L = createLogger("SchemaCommand");
 
@@ -13,21 +13,16 @@ type SchemaCommandOpts = {
 
 function applySchema(note: Note, schema: Schema) {
     note.data.schemaId = schema.id;
-    // schema.children.forEach(schema=> {
-    //     schema as Schema
-    // });
     note.children.map(noteChild => {
-        // @ts-ignore
-        const mschema: [Note, Schema][] = _.map(schema.children, schemaChild => {
-            if ((schemaChild as Schema).match(noteChild as Note)) {
-                return [noteChild, schemaChild];
-            } else {
-                return false;
-            }
-        }).filter(Boolean);
-        mschema.forEach(match => {
-            return applySchema(...match);
+        //const mschema: ([Note, Schema] | false)[] = 
+        const schemaMatch: Schema | undefined = _.find(schema.children as Schema[], schemaChild => {
+            return (schemaChild as Schema).match(noteChild as Note);
         });
+        if (schemaMatch) {
+            return applySchema(noteChild as Note, schemaMatch);
+        } else {
+            return applySchema(noteChild as Note, Schema.createUnkownSchema(schema.domain as Schema));
+        }
     });
 
 }

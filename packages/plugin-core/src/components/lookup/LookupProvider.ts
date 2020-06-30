@@ -80,9 +80,7 @@ export class LookupProvider {
       const querystring = picker.value;
 
       // DEBUG:BLOCK
-      let activeItems = picker.activeItems.map((ent) => ent.label);
-      let items = picker.items.map((ent) => ent.label);
-      L.info({ ctx: ctx + ":enter", querystring, activeItems, items });
+      L.info({ ctx: ctx + ":enter", querystring });
 
       const resp = await getOrCreateEngine().query(
         slashToDot(querystring),
@@ -111,6 +109,7 @@ export class LookupProvider {
       if (updatedItems.length === 0) {
         // check if empty
         L.info({ ctx, status: "no active items" });
+        this.noActiveItem.label = querystring;
         picker.items = [this.noActiveItem];
         return;
       }
@@ -124,17 +123,12 @@ export class LookupProvider {
       // check if active item is a perfect match
       if (picker.activeItems.length !== 0 && picker.activeItems[0].fname !== querystring) {
         L.debug({ ctx, msg: "active != qs" });
-        //this.noActiveItem.alwaysShow = true;
         picker.items = [this.noActiveItem].concat(updatedItems);
-        // picker.items = [createNoActiveItem({ label: querystring })].concat(updatedItems);
-        //picker.activeItems = [createNoActiveItem({ label: querystring })].concat(picker.activeItems);
-        //   // picker.items = picker.items.concat([createNoActiveItem()]);
-        //   picker.activeItems = [createNoActiveItem()].concat(picker.selectedItems);
       }
       // DEBUG
-      activeItems = picker.activeItems.map((ent) => ent.label);
-      items = picker.items.map((ent) => ent.label);
-      L.info({ ctx: ctx + ":exit", querystring, activeItems, items });
+      // activeItems = picker.activeItems.map((ent) => ent.label);
+      // items = picker.items.map((ent) => ent.label);
+      L.info({ ctx: ctx + ":exit", querystring });
       return;
     };
 
@@ -182,7 +176,7 @@ export class LookupProvider {
       const ctx = "onDidChangeSelection";
       L.info({ ctx, inputs });
     });
-    picker.onDidChangeValue(() => updatePickerItems());
+    picker.onDidChangeValue(updatePickerItems);
     updatePickerItems();
   }
 }

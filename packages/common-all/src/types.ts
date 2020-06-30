@@ -191,6 +191,7 @@ export interface DEngine {
   notes: NoteDict;
   schemas: SchemaDict;
   opts: Required<DEngineOpts>;
+  initialized: boolean;
 
   /**
    * Load all nodes

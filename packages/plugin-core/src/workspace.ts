@@ -5,6 +5,8 @@ import * as vscode from "vscode";
 import { LookupController } from "./components/lookup/LookupController";
 import { DENDRON_COMMANDS, DENDRON_WS_NAME } from "./constants";
 import { getPlatform, resolveTilde, VSCodeUtils } from "./utils";
+import { NodeService } from "./services/nodeService/NodeService";
+import { getVSCodeDownloadUrl } from "vscode-test/out/util";
 
 
 function writeWSFile(fpath: string, opts: { rootDir: string }) {
@@ -101,6 +103,17 @@ export class DendronWorkspace {
                 const controller = new LookupController();
                 this.L.info({ ctx: ctx + ":LookupController:post" });
                 controller.show();
+            })
+        );
+
+        this.context.subscriptions.push(
+            vscode.commands.registerCommand(DENDRON_COMMANDS.DELETE_NODE, async () => {
+                const ctx = DENDRON_COMMANDS.DELETE_NODE;
+                this.L.info({ ctx });
+                const ns = new NodeService();
+                const fsPath = VSCodeUtils.getFsPathFromTextEditor(VSCodeUtils.getActiveTextEditor() as vscode.TextEditor);
+                await ns.deleteByPath(fsPath, "note");
+                vscode.window.showInformationMessage(`${fsPath} deleted`);
             })
         );
     }

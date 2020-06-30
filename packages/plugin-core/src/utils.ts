@@ -19,6 +19,15 @@ export function getPlatform() {
 
 
 export class VSCodeUtils {
+
+  static getActiveTextEditor() {
+    return vscode.window.activeTextEditor;
+  }
+
+  static getFsPathFromTextEditor(editor: vscode.TextEditor) {
+    return editor.document.uri.fsPath;
+  }
+
   static async openWS(wsFile: string) {
     vscode.commands
       .executeCommand(

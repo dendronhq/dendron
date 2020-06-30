@@ -42,6 +42,10 @@
       {
         "command": "dendron.changeWS",
         "title": "Dendron: Change Workspace"
+      },
+      {
+        "command": "dendron.deleteNode",
+        "title": "Dendron: Delete Node"
       }
     ],
     "keybindings": [

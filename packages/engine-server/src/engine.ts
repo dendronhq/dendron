@@ -97,6 +97,8 @@ export class DendronEngine implements DEngine {
 
   public fullNodes: Set<string>;
 
+  public initialized: boolean;
+
   public opts: DendronEngineProps;
 
   public queries: Set<string>;
@@ -130,6 +132,7 @@ export class DendronEngine implements DEngine {
     // eslint-disable-next-line spaced-comment
     //this.nodes = store.fetchInitial();
     this.notes = {};
+    this.initialized = false;
     this.opts = _.defaults(opts, {
       cacheDir: "/tmp/dendronCache",
       root: "/Users/kevinlin/Dropbox/Apps/Dendron",
@@ -177,6 +180,7 @@ export class DendronEngine implements DEngine {
       fullNode: false,
       initialQuery: true,
     });
+    this.initialized = true;
     return;
   }
 

@@ -344,7 +344,7 @@ export class DendronEngine implements DEngine {
     if (isAllQuery(queryString)) {
       logger.debug({ ctx: "query:queryAll:pre", mode });
       try {
-        data = await this.store.query("**/*", mode, opts);
+        data = await this.store.query("**/*", mode, { ...opts, schemas: this.schemas });
       } catch (err) {
         if (err instanceof DendronError) {
           logger.info({ ctx, msg: "no root found", mode });
@@ -460,7 +460,7 @@ export class DendronEngine implements DEngine {
   }
 
   async write(node: IDNode, opts?: NodeWriteOpts): Promise<void> {
-    opts = _.defaults(opts, { newNode: false, body: "", stub: false, parentsAsStubs: false });
+    opts = _.defaults(opts, { newNode: false, body: "", stub: false, parentsAsStubs: false, recursive: false });
     const refreshList: DNode[] = [node];
     if (node.type === "schema") {
       assertExists(opts.body, "body must exist");
@@ -491,7 +491,7 @@ export class DendronEngine implements DEngine {
       }
     } else {
       const note = node as Note;
-      await this.store.write(note, { stub: opts.stub });
+      await this.store.write(note, { stub: opts.stub, recursive: opts.recursive });
       if (opts.newNode) {
         let parentPath = DNodeUtils.dirName(note.fname);
         if (_.isEmpty(parentPath)) {

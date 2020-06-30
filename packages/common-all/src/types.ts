@@ -122,6 +122,11 @@ export interface NodeWriteOpts {
    * If parents don't exist, create stubs
    */
   parentsAsStubs?: boolean;
+  /**
+   * Write all children?
+   * default: false
+   */
+  recursive?: boolean;
 }
 
 export interface QueryOpts {
@@ -159,6 +164,10 @@ export type DEngineStoreWriteOpts = {
    * If set, don't write to file
    */
   stub?: boolean;
+  /**
+   * See DEngineStoreWriteOpts.recursive
+   */
+  recursive?: boolean;
 };
 
 export interface DEngineStore<T = DNodeData, O = any> {
@@ -169,7 +178,7 @@ export interface DEngineStore<T = DNodeData, O = any> {
   query: (
     queryString: string,
     mode: QueryMode,
-    opts?: QueryOpts
+    opts?: StoreQueryOpts
   ) => Promise<EngineQueryResp<T>>;
   write: <T>(
     node: IDNode<T>,

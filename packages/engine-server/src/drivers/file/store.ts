@@ -15,7 +15,8 @@ import {
   SchemaRawProps,
   StoreGetResp,
   assert,
-  makeResponse
+  makeResponse,
+  StoreQueryOpts
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -149,7 +150,7 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
   async query(
     queryString: string,
     mode: QueryMode,
-    _opts?: QueryOpts
+    _opts?: StoreQueryOpts
   ): Promise<EngineQueryResp> {
     if (mode === "schema") {
       if (this.isQueryAll(queryString)) {
@@ -164,8 +165,9 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
     }
     // mode === note
     if (this.isQueryAll(queryString)) {
+      const schemas = _opts?.schemas || {};
       const noteProps = await this._getNoteAll();
-      const data = new NodeBuilder().buildNoteFromProps(noteProps);
+      const data = new NodeBuilder().buildNoteFromProps(noteProps, { schemas });
       // const data = new RawParser().parse(nodesAll)
       this.refreshIdToPath(data);
 
@@ -197,9 +199,12 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
   }
 
   async write(node: IDNode, opts?: DEngineStoreWriteOpts) {
-    opts = _.defaults(opts, { stub: false });
+    opts = _.defaults(opts, { stub: false, recursive: false });
     if (!opts.stub) {
       await this._writeFile(node);
+      if (opts.recursive) {
+        await Promise.all(node.children.map(c => this.write(c, opts)));
+      }
     }
     // FIXME:OPT: only do for new nodes
     this.refreshIdToPath([node]);

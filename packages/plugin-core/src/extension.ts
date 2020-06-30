@@ -36,11 +36,12 @@ export function activate(context: vscode.ExtensionContext) {
     });
     if (VSCodeUtils.isDebuggingExtension() || getStage() === "test") {
       Logger.output?.show(false);
-      const fullLogPath = FileUtils.escape(path.join(logPath, 'dendron.log'));
+      // TODO: check for cmd
+      // const fullLogPath = FileUtils.escape(path.join(logPath, 'dendron.log'));
       // TODO
-      const cmd = `/usr/local/bin/code-insiders ${fullLogPath}`;
-      execa.command(cmd);
-      vscode.window.showInformationMessage(`logs at ${fullLogPath}`);
+      // const cmd = `/usr/local/bin/code-insiders ${fullLogPath}`;
+      // execa.command(cmd);
+      // vscode.window.showInformationMessage(`logs at ${fullLogPath}`);
     }
   }
 }

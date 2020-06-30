@@ -127,7 +127,8 @@ export function node2MdFile(node: IDNode, opts: { root: string }) {
     "updated",
     "created",
     "url",
-    "path"
+    "path",
+    "data"
   ]);
   // only save parent id if parent is not a stub
   const parent = (node.parent && !node.parent.stub ? node.parent.id : null);

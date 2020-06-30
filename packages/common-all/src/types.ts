@@ -12,6 +12,7 @@ export type NoteData = {
 };
 export type SchemaData = {
   namespace?: boolean;
+  pattern?: string;
 };
 export type DNodeData = SchemaData | NoteData;
 export type IDNodeType = "note" | "schema";
@@ -59,7 +60,9 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   // how to display path in lookup
   // used to special case `root` node to be empty string
   queryPath: string;
-  // the root of domain
+  /**
+   * Child of the root (this.parent == root)
+   */
   domain: IDNode<T>;
   // absolute url to node id
   url: string;
@@ -85,7 +88,7 @@ export type DNodeDict<T = DNodeData> = { [id: string]: IDNode<T> };
 export type NoteRawProps = DNodeRawProps<NoteData>;
 export type INoteOpts = Omit<IDNodeOpts<NoteData>, "type">;
 export type INoteProps = Required<INoteOpts>;
-export type INote = INoteProps;
+export type INote = INoteProps & { domain: INote };
 export type NoteDict = { [id: string]: Note };
 
 // --- Schema
@@ -152,6 +155,10 @@ export interface QueryOpts {
 }
 
 export type QueryOneOpts = Omit<QueryOpts, "queryOne">
+
+export type StoreQueryOpts = QueryOpts & {
+  schemas?: SchemaDict
+}
 
 export interface DEngineParser<TOpts = any> {
   // parse: <T>(content: any, mode: QueryMode, opts: TOpts) => DNodeRawProps<T>[];

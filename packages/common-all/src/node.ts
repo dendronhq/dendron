@@ -14,7 +14,8 @@ import {
   NoteRawProps,
   SchemaData,
   SchemaRawOpts,
-  SchemaRawProps
+  SchemaRawProps,
+  SchemaDict
 } from "./types";
 
 import YAML from "yamljs";
@@ -333,6 +334,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
 
 export class Note extends DNode<NoteData> implements INote {
   public schemaId: string;
+  public schema?: Schema;
 
   static createStub(fname: string, opts?: Partial<INoteOpts>): Note {
     return new Note({ stub: true, fname, ...opts });
@@ -366,8 +368,18 @@ export class Note extends DNode<NoteData> implements INote {
     }
   }
 
-  get description(): string {
-    return "description";
+  get description(): string | undefined {
+    let schemaPrefix: string | undefined;
+    if (this.schema) {
+      const prefixParts = ["$(repo)", this.schema.domain.title];
+      // check if non-domain schema
+      if (this.schema.domain.id !== this.schema.id) {
+        prefixParts.push("$(breadcrumb-separator)");
+        prefixParts.push(this.schema.title);
+      }
+      schemaPrefix = prefixParts.join(" ");
+    }
+    return schemaPrefix;
   }
 
   get url(): string {
@@ -402,6 +414,11 @@ export class Schema extends DNode<SchemaData> implements ISchema {
 
   get url(): string {
     return `/schema/${this.id}`;
+  }
+
+  match(note: Note): boolean {
+    // TODO: simple version
+    return this.title === note.basename;
   }
 
   renderBody() {
@@ -460,8 +477,11 @@ export class NodeBuilder {
     return rootNodes;
   }
 
-  toNote(item: NoteRawProps, parents: Note[]) {
+  toNote(item: NoteRawProps, parents: Note[], opts: { schemas: SchemaDict }) {
     const node = new Note({ ...item, parent: null, children: [] });
+    if (node.schemaId) {
+      node.schema = opts.schemas[node.schemaId];
+    }
     const { parent: parentId, children } = item;
     const parent: Note = _.find(parents, { id: parentId }) as Note;
     parent.addChild(node);
@@ -479,7 +499,7 @@ export class NodeBuilder {
     return node;
   }
 
-  buildNoteFromProps(props: NoteRawProps[]): Note[] {
+  buildNoteFromProps(props: NoteRawProps[], opts: { schemas: SchemaDict }): Note[] {
     const { node: rootNode, childrenIds } = getRoot(props);
     const out = [];
     out.push([rootNode]);
@@ -493,7 +513,7 @@ export class NodeBuilder {
       nodeIds = nodeIds
         .map((id: string) => {
           const nodeProps = props.find(ent => ent.id === id) as NoteRawProps;
-          const { node, children } = this.toNote(nodeProps, parentNodes);
+          const { node, children } = this.toNote(nodeProps, parentNodes, opts);
           currentNodes.push(node);
           return children;
         })

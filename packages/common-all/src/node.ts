@@ -350,6 +350,13 @@ export class Note extends DNode<NoteData> implements INote {
     return new Note({ fname: "root", id: "root", title: "root" });
   }
 
+  static fromSchema(dirpath: string, schema: Schema): Note {
+    const fname = [dirpath, schema.title].join(".");
+    const note = new Note({ fname, stub: true, data: { schemaId: schema.id } });
+    note.schema = schema;
+    return note;
+  }
+
   constructor(props: INoteOpts) {
     super({
       type: "note",
@@ -378,6 +385,10 @@ export class Note extends DNode<NoteData> implements INote {
     let schemaPrefix: string | undefined;
     if (this.schema) {
       const prefixParts = ["$(repo)", this.schema.domain.title];
+      if (this.stub) {
+        prefixParts.unshift("(stub)");
+      }
+
       // check if non-domain schema
       if (this.schema.domain.id !== this.schema.id) {
         // eslint-disable-next-line no-use-before-define
@@ -392,6 +403,10 @@ export class Note extends DNode<NoteData> implements INote {
       schemaPrefix = prefixParts.join(" ");
     }
     return schemaPrefix;
+  }
+
+  get domain(): Note {
+    return super.domain as Note;
   }
 
   get url(): string {
@@ -505,7 +520,7 @@ export class NodeBuilder {
     }
     // eslint-disable-next-line no-use-before-define
     if (node.schemaId === UNKNOWN_SCHEMA_ID) {
-      const domainSchema = assertExists<Schema>((node.domain as Note).domain as Schema, "note domain does not have schema");
+      const domainSchema = assertExists<Schema>(node.domain.schema as Schema, "note domain does not have schema");
       node.schema = Schema.createUnkownSchema(domainSchema);
     }
     const { parent: parentId, children } = item;

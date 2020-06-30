@@ -198,6 +198,10 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     return this.logicalPath.split(".").slice(-1)[0];
   }
 
+  get detail(): string {
+    return "";
+  }
+
   /**
    * Self and all children
    */

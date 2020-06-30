@@ -4,12 +4,16 @@ import path from "path";
 import * as vscode from "vscode";
 import { LookupProvider } from "./LookupProvider";
 import { createLogger } from "@dendronhq/common-server";
+import { DNode } from "@dendronhq/common-all/src";
 
 
 let LOOKUP_PROVIDER: null | LookupProvider = null;
 const L = createLogger("dendron");
 
 export class LookupController {
+
+  public quickPick: vscode.QuickPick<DNode> | undefined;
+
   show(_value = "") {
     const ctx = "show";
     L.info({ ctx });
@@ -23,7 +27,7 @@ export class LookupController {
     quickpick.placeholder = "quickpick placeholder";
     quickpick.ignoreFocusOut = true;
     quickpick.items = _.values(getOrCreateEngine().notes);
-    quickpick.matchOnDetail = true;
+    // quickpick.matchOnDetail = true;
     let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
     if (editorPath) {
       quickpick.value = path.basename(editorPath, ".md");

@@ -22,7 +22,8 @@ export class NodeService {
             if (!node) {
                 throw Error(`no node found for ${fpath}`);
             }
-            this.engine.delete(node.id);
+            await this.engine.delete(node.id);
+            return;
         }
 
     }

@@ -64,6 +64,7 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   // absolute url to node id
   url: string;
   label: string;
+  detail: string;
 
   equal(node: IDNode<T>): boolean;
   // match(identifier: string): boolean;

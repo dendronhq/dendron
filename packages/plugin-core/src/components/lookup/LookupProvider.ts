@@ -3,21 +3,26 @@ import { node2Uri } from "./utils";
 
 import { CREATE_NEW_LABEL } from "./constants";
 import { Note, DNode } from "@dendronhq/common-all";
-import _ from "lodash";
+import _, { update } from "lodash";
 import { createLogger } from "@dendronhq/common-server";
 import { getOrCreateEngine } from "@dendronhq/engine-server";
 
 const L = createLogger("LookupProvider");
 
-function createNoActiveItem(): QuickPickItem {
+function createNoActiveItem(opts?: { label?: string }): QuickPickItem {
+  const cleanOpts = _.defaults(opts, { label: "" });
   return {
-    label: CREATE_NEW_LABEL,
+    label: cleanOpts.label,
+    detail: CREATE_NEW_LABEL,
     alwaysShow: true,
   };
 }
 
-function isCreateNewPick(node: DNode): boolean {
-  return node.label === CREATE_NEW_LABEL || node.stub;
+function isCreateNewPick(node: DNode | undefined): boolean {
+  if (!node) {
+    return true;
+  }
+  return node.detail === CREATE_NEW_LABEL || node.stub;
 }
 
 function slashToDot(ent: string) {
@@ -55,11 +60,13 @@ type LookupProviderState = {
 
 export class LookupProvider {
   public state: LookupProviderState;
+  public noActiveItem: QuickPickItem;
 
   constructor() {
     this.state = {
       lastLookupItem: null,
     };
+    this.noActiveItem = createNoActiveItem({ label: "Create New" });
   }
 
   provide(picker: QuickPick<any>) {
@@ -71,17 +78,21 @@ export class LookupProvider {
     const updatePickerItems = async () => {
       const ctx = "updatePickerItems";
       const querystring = picker.value;
+
+      // DEBUG:BLOCK
       let activeItems = picker.activeItems.map((ent) => ent.label);
       let items = picker.items.map((ent) => ent.label);
       L.info({ ctx: ctx + ":enter", querystring, activeItems, items });
+
       const resp = await getOrCreateEngine().query(
         slashToDot(querystring),
         "note"
       );
       L.info({ ctx: ctx + ":engine:query:post" });
-      picker.items = resp.data;
+      let updatedItems = resp.data;
 
-      // check if root query
+
+      // check if root query, if so, return everything
       if (querystring === "") {
         L.info({ ctx, status: "no qs" });
         //picker.items = [engine().notes["root"]];
@@ -90,19 +101,37 @@ export class LookupProvider {
       }
       // check if single item query
       if (picker.activeItems.length === 0 && querystring.length === 1) {
-        // doesn't make active if single letter match
+        // doesn't make active if single letter match, return everything;
+        picker.items = updatedItems;
         picker.activeItems = picker.items;
         return;
       }
 
       // new item
-      if (picker.items.length === 0) {
+      if (updatedItems.length === 0) {
         // check if empty
         L.info({ ctx, status: "no active items" });
-        picker.items = [createNoActiveItem()];
+        picker.items = [this.noActiveItem];
+        return;
+      }
+
+      // check if perfect match
+      if (picker.activeItems.length !== 0 && picker.activeItems[0].fname === querystring) {
+        L.debug({ ctx, msg: "active = qs" });
+        picker.items = updatedItems;
+      }
+
+      // check if active item is a perfect match
+      if (picker.activeItems.length !== 0 && picker.activeItems[0].fname !== querystring) {
+        L.debug({ ctx, msg: "active != qs" });
+        //this.noActiveItem.alwaysShow = true;
+        picker.items = [this.noActiveItem].concat(updatedItems);
+        // picker.items = [createNoActiveItem({ label: querystring })].concat(updatedItems);
+        //picker.activeItems = [createNoActiveItem({ label: querystring })].concat(picker.activeItems);
+        //   // picker.items = picker.items.concat([createNoActiveItem()]);
+        //   picker.activeItems = [createNoActiveItem()].concat(picker.selectedItems);
       }
       // DEBUG
-
       activeItems = picker.activeItems.map((ent) => ent.label);
       items = picker.items.map((ent) => ent.label);
       L.info({ ctx: ctx + ":exit", querystring, activeItems, items });
@@ -120,7 +149,7 @@ export class LookupProvider {
       let uri: Uri;
       if (isCreateNewPick(selectedItem)) {
         const fname = value;
-        let nodeNew: Note
+        let nodeNew: Note;
         if (selectedItem.stub) {
           nodeNew = (await getOrCreateEngine().queryOne(fname, "note")).data as Note;
         } else {

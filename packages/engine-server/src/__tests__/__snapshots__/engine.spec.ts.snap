@@ -284,6 +284,77 @@ Object {
 }
 `;
 
+exports[`engine main delete node with children: listDi2 1`] = `
+Array [
+  "foo.one.md",
+  "foo.schema.yml",
+  "foo.two.md",
+  "root.md",
+]
+`;
+
+exports[`engine main delete node with children: main 1`] = `
+Array [
+  Object {
+    "body": "",
+    "children": Array [
+      "foo",
+    ],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "parent": "root",
+    "stub": false,
+    "title": "root",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.one",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.one",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.two",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.two",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.one",
+      "foo.two",
+    ],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "parent": "root",
+    "stub": true,
+    "title": "foo",
+    "type": "note",
+    "updated": "TODO",
+  },
+]
+`;
+
 exports[`engine main open stub node: listDir 1`] = `
 Array [
   "bar.two.md",

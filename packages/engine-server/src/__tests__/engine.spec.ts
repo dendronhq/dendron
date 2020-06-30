@@ -1,12 +1,18 @@
+import { INoteOpts, Note } from "@dendronhq/common-all";
+import { FileTestUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { getOrCreateEngine } from "../engine";
-import { expectSnapshot, setupTmpDendronDir, FixtureUtils } from "../testUtils";
-import { FileTestUtils } from "@dendronhq/common-server/src";
+import { expectSnapshot, FixtureUtils, setupTmpDendronDir } from "../testUtils";
 
 // function checkNodeCreated(expect: jest.Expect) {
 // }
+
+function expectNoteProps(expect: jest.Expect, note: Note, expectedProps: INoteOpts) {
+    const propsToCheck = ["fname"].concat(_.keys(expectedProps));
+    expect(_.pick(note, propsToCheck)).toEqual(expectedProps);
+}
 
 describe("engine", () => {
     let root: string;
@@ -51,9 +57,19 @@ describe("engine", () => {
             }));
         });
 
-        test("delete node", async () => {
+        test("delete node with children", async () => {
             const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();
+            const fooNode = await engine.queryOne("foo", "note");
+            await engine.delete(fooNode.data.id);
+            expect(fs.readdirSync(root)).toMatchSnapshot("listDi2");
+            expectSnapshot(expect, "main", _.values(engine.notes));
+            const deletedNode = engine.notes[fooNode.data.id];
+            expectNoteProps(expect, deletedNode, { fname: "foo", stub: true });
+            // foo file should be deleted
+            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
+                remove: ["foo.md"]
+            }));
         });
     });
 

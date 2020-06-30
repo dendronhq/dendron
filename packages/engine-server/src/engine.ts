@@ -269,8 +269,14 @@ export class DendronEngine implements DEngine {
   }
 
   async delete(id: string): Promise<void> {
+    // TODO: take care of schema
+    const noteToDelete = this.notes[id];
     await this.store.delete(id);
     this.deleteFromNodes(id);
+    if (!_.isEmpty(noteToDelete.children)) {
+      const noteAsStub = Note.createStub(noteToDelete.fname, { id, children: noteToDelete.children });
+      this.refreshNodes([noteAsStub], { stub: true });
+    }
     return;
   }
 

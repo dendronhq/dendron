@@ -327,8 +327,8 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
 export class Note extends DNode<NoteData> implements INote {
   public schemaId: string;
 
-  static createStub(fname: string): Note {
-    return new Note({ stub: true, fname });
+  static createStub(fname: string, opts?: Partial<INoteOpts>): Note {
+    return new Note({ stub: true, fname, ...opts });
   }
 
   static createRoot(): Note {

@@ -46,12 +46,16 @@ suite("Extension Test Suite", () => {
         console.log(storeDir);
         fs.copySync(storeDir, root);
         console.log(root);
-        VSCodeUtils.openWS(path.join(root, DENDRON_WS_NAME));
+        // VSCodeUtils.openWS(path.join(root, DENDRON_WS_NAME));
     });
 
     describe("Lookup", () => {
         test("sanity", async () => {
             assert.ok(true);
+        });
+
+        test("sanity2", async () => {
+            assert.ok(false);
         });
     });
 

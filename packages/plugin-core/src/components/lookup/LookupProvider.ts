@@ -120,7 +120,12 @@ export class LookupProvider {
       let uri: Uri;
       if (isCreateNewPick(selectedItem)) {
         const fname = value;
-        let nodeNew = new Note({ title: value, fname });
+        let nodeNew: Note
+        if (selectedItem.stub) {
+          nodeNew = (await getOrCreateEngine().queryOne(fname, "note")).data as Note;
+        } else {
+          nodeNew = new Note({ title: value, fname });
+        }
         await getOrCreateEngine().write(
           nodeNew,
           {

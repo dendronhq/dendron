@@ -6,7 +6,7 @@ import { Logger, TraceLevel } from "./logger";
 import { VSCodeUtils, FileUtils } from "./utils";
 import fs from "fs-extra";
 import path from "path";
-import { setEnv } from "@dendronhq/common-all";
+import { setEnv, getStage } from "@dendronhq/common-all";
 
 // === Main
 // this method is called when your extension is activated
@@ -34,7 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
     }, (err) => {
       vscode.window.showErrorMessage(JSON.stringify(err));
     });
-    if (VSCodeUtils.isDebuggingExtension()) {
+    if (VSCodeUtils.isDebuggingExtension() || getStage() === "test") {
       Logger.output?.show(false);
       const fullLogPath = FileUtils.escape(path.join(logPath, 'dendron.log'));
       // TODO

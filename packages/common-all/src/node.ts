@@ -239,8 +239,11 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
   abstract get url(): string;
 
   addChild(node: IDNode<T>) {
-    this.children.push(node);
-    node.parent = this;
+    // only add if new
+    if (!this.children.some(ent => ent.id === node.id)) {
+      this.children.push(node);
+      node.parent = this;
+    }
   }
 
   equal(node: IDNode<T>) {

@@ -50,6 +50,11 @@ describe("engine", () => {
                 add: ["bar.two.md"]
             }));
         });
+
+        test("delete node", async () => {
+            const engine = getOrCreateEngine({ root, forceNew: true });
+            await engine.init();
+        });
     });
 
     describe("edge", () => {

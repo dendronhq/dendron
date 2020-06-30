@@ -25,6 +25,8 @@ import {
   NoteUtils,
   DNode,
   DendronError,
+  QueryOneOpts,
+  EngineGetResp,
 } from "@dendronhq/common-all";
 
 import { BodyParser } from "./drivers/raw/BodyParser";
@@ -34,7 +36,7 @@ import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 
-let PROTO_ENGINE: ProtoEngine;
+let DENDRON_ENGINE: DendronEngine;
 const logger = createLogger("DEngine");
 
 function isAllQuery(qs: string): boolean {
@@ -74,7 +76,7 @@ function createFuse<T>(initList: T[], opts: FuseOptions) {
   return fuse;
 }
 
-type ProtoEngineOpts = {
+type DendronEngineOpts = {
   root?: string;
   cacheDir?: string;
   forceNew?: boolean;
@@ -82,11 +84,11 @@ type ProtoEngineOpts = {
   mode?: DEngineMode;
 };
 
-type ProtoEngineGetOpts = Partial<ProtoEngineOpts>;
+type DendronEngineGetOpts = Partial<DendronEngineOpts>;
 
-type ProtoEngineProps = Required<ProtoEngineOpts>;
+type DendronEngineProps = Required<DendronEngineOpts>;
 
-export class ProtoEngine implements DEngine {
+export class DendronEngine implements DEngine {
   public fuse: Fuse<Note, any>;
   public schemaFuse: Fuse<Schema, any>;
 
@@ -95,36 +97,36 @@ export class ProtoEngine implements DEngine {
 
   public fullNodes: Set<string>;
 
-  public opts: ProtoEngineProps;
+  public opts: DendronEngineProps;
 
   public queries: Set<string>;
 
   public store: DEngineStore;
 
-  static getEngine(opts?: ProtoEngineGetOpts): DEngine {
+  static getEngine(opts?: DendronEngineGetOpts): DEngine {
     // TODO
     const root = opts?.root || "/Users/kevinlin/Dropbox/Apps/Noah/notesv2";
-    const optsClean: ProtoEngineOpts = _.defaults(opts || {}, {
+    const optsClean: DendronEngineOpts = _.defaults(opts || {}, {
       forceNew: false,
       store: new FileStorage({ root }),
       root,
       // TODO
       cacheDir: "/tmp/dendronCache"
     });
-    if (!PROTO_ENGINE || optsClean.forceNew) {
+    if (!DENDRON_ENGINE || optsClean.forceNew) {
       const stage = getStage();
       if (_.isUndefined(optsClean.root)) {
         throw Error(`root must be defined`);
       }
       // TODO
-      PROTO_ENGINE = new ProtoEngine(optsClean.store, optsClean);
+      DENDRON_ENGINE = new DendronEngine(optsClean.store, optsClean);
       logger.info({ ctx: "getEngine:exit", optsClean, stage });
-      return PROTO_ENGINE;
+      return DENDRON_ENGINE;
     }
-    return PROTO_ENGINE;
+    return DENDRON_ENGINE;
   }
 
-  constructor(store: DEngineStore, opts: ProtoEngineOpts) {
+  constructor(store: DEngineStore, opts: DendronEngineOpts) {
     // eslint-disable-next-line spaced-comment
     //this.nodes = store.fetchInitial();
     this.notes = {};
@@ -437,6 +439,11 @@ export class ProtoEngine implements DEngine {
     }
   }
 
+  async queryOne(queryString: string, mode: QueryMode, opts?: QueryOneOpts): Promise<EngineGetResp<DNodeData>> {
+    const resp = await this.query(queryString, mode, { ...opts, queryOne: true });
+    return makeResponse<EngineGetResp>({ data: resp.data[0], error: null });
+  }
+
   async write(node: IDNode, opts?: NodeWriteOpts): Promise<void> {
     opts = _.defaults(opts, { newNode: false, body: "", stub: false, parentsAsStubs: false });
     const refreshList: DNode[] = [node];
@@ -500,8 +507,8 @@ export class ProtoEngine implements DEngine {
   }
 }
 
-export function getOrCreateEngine(opts?: ProtoEngineGetOpts) {
-  return ProtoEngine.getEngine(opts);
+export function getOrCreateEngine(opts?: DendronEngineGetOpts) {
+  return DendronEngine.getEngine(opts);
 }
 
 export async function getAndInitializeEngine(rootDir: string) {

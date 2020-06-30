@@ -145,6 +145,8 @@ export interface QueryOpts {
   mode?: QueryMode;
 }
 
+export type QueryOneOpts = Omit<QueryOpts, "queryOne">
+
 export interface DEngineParser<TOpts = any> {
   // parse: <T>(content: any, mode: QueryMode, opts: TOpts) => DNodeRawProps<T>[];
   parseSchema(data: any, opts: TOpts): SchemaRawProps[];
@@ -219,6 +221,11 @@ export interface DEngine {
     mode: QueryMode,
     opts?: QueryOpts
   ) => Promise<EngineQueryResp<DNodeData>>;
+
+  /**
+   * Shortcut Function
+   */
+  queryOne: (queryString: string, mode: QueryMode, opts?: QueryOneOpts) => Promise<EngineGetResp<DNodeData>>
 
   write: (
     node: IDNode<DNodeData>,

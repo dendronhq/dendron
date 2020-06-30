@@ -22,7 +22,6 @@ export function setupTmpDendronDir(opts: {
 }
 
 export class FileTestUtils {
-
   static cmpFiles = (
     root: string,
     expected: string[],

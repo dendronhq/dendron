@@ -185,6 +185,11 @@ export class DendronEngine implements DEngine {
   }
 
   deleteFromNodes(id: string) {
+    this.fuse.remove((doc: DNode, idx: number) => {
+      // FIXME: can be undefined, dunno why
+      if (!doc) { return false; }
+      return doc.id === id;
+    });
     delete this.notes[id];
     this.fullNodes.delete(id);
   }

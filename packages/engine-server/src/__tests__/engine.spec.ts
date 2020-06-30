@@ -57,6 +57,24 @@ describe("engine", () => {
             }));
         });
 
+        test("delete node with no children", async () => {
+            const engine = getOrCreateEngine({ root, forceNew: true });
+            await engine.init();
+            const numNodesPre = _.values(engine.notes).length;
+            const fooNode = await engine.queryOne("foo.one", "note");
+            const deletedNode = engine.notes[fooNode.data.id];
+            await engine.delete(fooNode.data.id);
+            // should be less nodes
+            expect(numNodesPre - 1).toEqual(_.values(engine.notes).length);
+            const resp = await engine.query("foo", "note");
+            // start of with three foo nodes, end up with two
+            expect(resp.data.length).toEqual(2);
+            // file should not be there
+            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
+                remove: ["foo.one.md"]
+            }));
+        });
+
         test("delete node with children", async () => {
             const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();

@@ -62,7 +62,6 @@ describe("engine", () => {
             await engine.init();
             const numNodesPre = _.values(engine.notes).length;
             const fooNode = await engine.queryOne("foo.one", "note");
-            const deletedNode = engine.notes[fooNode.data.id];
             await engine.delete(fooNode.data.id);
             // should be less nodes
             expect(numNodesPre - 1).toEqual(_.values(engine.notes).length);

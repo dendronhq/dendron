@@ -3,13 +3,11 @@ import {
   DNodeData,
   genUUID
 } from "@dendronhq/common-all";
-
-import FileStorage from "./drivers/file/store";
-import YAML from "yamljs";
 import fs from "fs-extra";
 import matter from "gray-matter";
-import path from "path";
 import _ from "lodash";
+import path from "path";
+import FileStorage from "./drivers/file/store";
 
 // const FIXTURES_DIR =
 //     "/Users/kevinlin/projects/dendronv2/dendron/packages/electron-client/fixtures/store"

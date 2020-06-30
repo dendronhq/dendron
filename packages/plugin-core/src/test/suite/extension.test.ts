@@ -13,8 +13,6 @@ import path from "path";
 import { testUtils, FileTestUtils } from "@dendronhq/common-server";
 import { DendronWorkspace } from "../../workspace";
 import fs from "fs-extra";
-import { VSCodeUtils } from "../../utils";
-import { DENDRON_WS_NAME } from "../../constants";
 // import { testUtils } from "@dendronhq/common-server";
 
 class LernaTestUtils {

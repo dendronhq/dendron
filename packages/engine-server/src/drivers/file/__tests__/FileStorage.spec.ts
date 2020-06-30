@@ -14,7 +14,7 @@ import {
 import FileStorage from "../store";
 import _ from "lodash";
 import fs from "fs-extra";
-import { FileTestUtils } from "packages/common-server";
+import { FileTestUtils } from "@dendronhq/common-server";
 
 describe("main", () => {
   let root: string;

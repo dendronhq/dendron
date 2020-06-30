@@ -3,7 +3,7 @@ import { node2Uri } from "./utils";
 
 import { CREATE_NEW_LABEL } from "./constants";
 import { Note, DNode } from "@dendronhq/common-all";
-import _, { update } from "lodash";
+import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
 import { getOrCreateEngine } from "@dendronhq/engine-server";
 

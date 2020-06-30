@@ -86,7 +86,7 @@ export type DNodeDict<T = DNodeData> = { [id: string]: IDNode<T> };
 
 // --- Notes
 export type NoteRawProps = DNodeRawProps<NoteData>;
-export type INoteOpts = Omit<IDNodeOpts<NoteData>, "type">;
+export type INoteOpts = Omit<IDNodeOpts<NoteData>, "type"> & { schemaStub?: boolean };
 export type INoteProps = Required<INoteOpts>;
 export type INote = INoteProps & { domain: INote };
 export type NoteDict = { [id: string]: Note };

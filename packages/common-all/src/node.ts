@@ -386,7 +386,7 @@ export class Note extends DNode<NoteData> implements INote {
     if (this.schema) {
       const prefixParts = ["$(repo)", this.schema.domain.title];
       if (this.stub) {
-        prefixParts.unshift("(stub)");
+        prefixParts.unshift("(create from schema)");
       }
 
       // check if non-domain schema

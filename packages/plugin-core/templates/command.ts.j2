@@ -1,0 +1,24 @@
+import { createLogger } from "@dendronhq/common-server";
+import { BaseCommand } from "./base";
+
+const L = createLogger("SchemaCommand");
+
+type SchemaCommandOpts = {
+    root: string
+};
+
+export class SchemaCommand extends BaseCommand<SchemaCommandOpts> {
+    async execute(opts: SchemaCommandOpts) {
+        const ctx = "execute";
+        L.info({ ctx, opts });
+    }
+}
+
+async function main() {
+    const root = process.argv[2];
+    await new SchemaCommand().execute({
+        root,
+    });
+}
+
+main();

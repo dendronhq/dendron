@@ -160,6 +160,10 @@ export class FileParser {
     return data.map(fpath => this._parseSchema(fpath)).flat();
   }
 
+  /**
+   * Returns list of notes withou parent/child information
+   * @param data 
+   */
   parse(data: string[]): Note[] {
     if (_.isEmpty(data)) {
       return [];

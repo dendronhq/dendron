@@ -445,6 +445,9 @@ function getRoot(nodes: NoteRawProps[]) {
   return { node, childrenIds: rootNode.children };
 }
 
+/**
+ * From nodes, return a connected note tree
+ */
 export class NodeBuilder {
   getDomainsRoot<T extends DNodeData>(
     nodes: DNodeRawProps<T>[]
@@ -479,10 +482,6 @@ export class NodeBuilder {
   buildNoteFromProps(props: NoteRawProps[]): Note[] {
     const { node: rootNode, childrenIds } = getRoot(props);
     const out = [];
-    // const { node: rootNode, children: rootChildrenIds } = this.toNote(
-    //   rootRaw,
-    //   []
-    // );
     out.push([rootNode]);
 
     let parentNodes = [rootNode];

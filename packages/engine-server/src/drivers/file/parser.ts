@@ -104,15 +104,15 @@ export class FileParser {
     }
     // OPT
     //logger.debug({ ctx: "toNode:mdFile2NodeProps:post", noteProps })
-    let parent: Note | null;
+    // let parent: Note | null;
     let parentPath: string | null = null;
     let missing: null | string = null;
-    if (_.isNull(noteProps.parent)) {
-      parentPath = DNodeUtils.dirName(ent.prefix);
-      parent = _.find(parents, p => p.path === parentPath) || null;
-    } else {
-      parent = _.find(parents, p => p.id === noteProps.parent) || null;
-    }
+    // if (_.isNull(noteProps.parent)) {
+    parentPath = DNodeUtils.dirName(ent.prefix);
+    const parent = _.find(parents, p => p.path === parentPath) || null;
+    // } else {
+    //   parent = _.find(parents, p => p.id === noteProps.parent) || null;
+    // }
     // error checking
     if (!parent && !opts.isRoot) {
       const errorMsg = {
@@ -122,9 +122,9 @@ export class FileParser {
       };
       this.errors.push(errorMsg);
       // should not be the case
-      if (!parentPath) {
-        throw Error(`no parent path found for ${JSON.stringify(errorMsg)}`);
-      }
+      // if (!parentPath) {
+      //   throw Error(`no parent path found for ${JSON.stringify(errorMsg)}`);
+      // }
       missing = parentPath;
       if (opts.errorOnEmpty) {
         throw new Error(JSON.stringify(errorMsg));
@@ -162,7 +162,7 @@ export class FileParser {
 
   /**
    * Returns list of notes withou parent/child information
-   * @param data 
+   * @param data
    */
   parse(data: string[]): Note[] {
     if (_.isEmpty(data)) {

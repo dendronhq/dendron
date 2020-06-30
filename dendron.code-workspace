@@ -15,9 +15,10 @@
     {
       "path": "packages/web-server"
     },
-    {
-      "path": "/Users/kevinlin/projects/vscode-extension/ref/vscode"
-    }
+    // {
+    //   "name": "vscode",
+    //   "path": "/Users/kevinlin/projects/vscode-extension/ref/vscode"
+    // }
   ],
   "settings": {
     "files.exclude": {

@@ -27,6 +27,10 @@ import { genUUID } from "./uuid";
 const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
 export class DNodeUtils {
+  static basename(nodePath: string) {
+    return nodePath.split(".").slice(-1)[0];
+  }
+
   static dirName(nodePath: string) {
     return nodePath
       .split(".")
@@ -198,7 +202,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
   }
 
   get basename(): string {
-    return this.logicalPath.split(".").slice(-1)[0];
+    return DNodeUtils.basename(this.logicalPath);
   }
 
   get detail(): string {

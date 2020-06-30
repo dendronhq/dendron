@@ -35,7 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
       vscode.window.showErrorMessage(JSON.stringify(err));
     });
     if (VSCodeUtils.isDebuggingExtension() || getStage() === "test") {
-      Logger.output?.show(false);
+      Logger.output?.show(true);
       // TODO: check for cmd
       // const fullLogPath = FileUtils.escape(path.join(logPath, 'dendron.log'));
       // TODO

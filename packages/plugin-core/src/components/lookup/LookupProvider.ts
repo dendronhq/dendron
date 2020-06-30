@@ -2,12 +2,19 @@ import { QuickPick, QuickPickItem, Uri, window } from "vscode";
 import { node2Uri } from "./utils";
 
 import { CREATE_NEW_LABEL } from "./constants";
-import { Note, DNode } from "@dendronhq/common-all";
+import { Note, DNode, Schema, DNodeUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
 import { getOrCreateEngine } from "@dendronhq/engine-server";
 
 const L = createLogger("LookupProvider");
+
+class QueryStringUtils {
+  static getSchema(qs: string, engineResp: Note[]): Schema[] {
+    const maybeSchema = engineResp[0]?.schema;
+    return maybeSchema?.parent?.children as Schema[] || [];
+  }
+}
 
 function createNoActiveItem(opts?: { label?: string }): QuickPickItem {
   const cleanOpts = _.defaults(opts, { label: "" });
@@ -114,6 +121,15 @@ export class LookupProvider {
         return;
       }
 
+      // check if we need to add schema results
+      // TODO: check for note
+      const schemas = QueryStringUtils.getSchema(querystring, updatedItems as Note[]);
+      updatedItems = _.uniqBy(updatedItems.concat(schemas.map(schema => {
+        return Note.fromSchema(DNodeUtils.dirName(querystring), schema);
+      })), (ent) => {
+        return ent.fname;
+      });
+
       // check if perfect match
       if (picker.activeItems.length !== 0 && picker.activeItems[0].fname === querystring) {
         L.debug({ ctx, msg: "active = qs" });
@@ -135,7 +151,6 @@ export class LookupProvider {
     picker.onDidAccept(async () => {
       const ctx = "onDidAccept";
       L.info({ ctx });
-      // const selectedItem = picker.selectedItems[0];
       const value = PickerUtils.getValue(picker);
       const selectedItem = PickerUtils.getSelection<Note>(picker);
       L.info({ ctx: "onDidAccept", selectedItem, value });
@@ -144,6 +159,8 @@ export class LookupProvider {
       if (isCreateNewPick(selectedItem)) {
         const fname = value;
         let nodeNew: Note;
+        // reuse node if a stub
+        // otherwise, children will not be right
         if (selectedItem.stub) {
           nodeNew = (await getOrCreateEngine().queryOne(fname, "note")).data as Note;
         } else {
@@ -158,14 +175,6 @@ export class LookupProvider {
         );
         L.info({ ctx: `${ctx}:write:done`, value });
         uri = node2Uri(nodeNew);
-        // const uri = await fnameToUri(fname, { checkIfDirectoryFile: false });
-        // await (await DendronFileSystemProvider.getOrCreate()).writeFile(
-        //   uri,
-        //   Buffer.from("new file"),
-        //   { create: true, overwrite: true }
-        // );
-        // throw Error("not implemented");
-        //return showDocAndHidePicker(uri, picker);
       } else {
         uri = node2Uri(selectedItem);
       }

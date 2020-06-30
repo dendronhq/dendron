@@ -22,6 +22,7 @@ export function setupTmpDendronDir(opts: {
 }
 
 export class FileTestUtils {
+
   static cmpFiles = (
     root: string,
     expected: string[],
@@ -35,6 +36,27 @@ export class FileTestUtils {
         return !_.includes(cleanOpts?.remove, ent);
       }).sort()
     ];
+  }
+
+  static getPkgRoot(base: string): string {
+    let acc = 5;
+    const lvls = [];
+    while (acc > 0) {
+      const tryPath = path.join(base, ...lvls, "package.json");
+      if (fs.existsSync(tryPath)) {
+        return path.dirname(tryPath);
+      }
+      acc -= 1;
+      lvls.push("..");
+    }
+    throw Error(`no root found from ${base}`);
+  }
+
+  static tmpDir(base: string) {
+    const dirPath = appendUUID(base);
+    fs.ensureDirSync(dirPath);
+    fs.emptyDirSync(dirPath);
+    return dirPath;
   }
 
   static readYMLFile = (root: string, fname: string) => {

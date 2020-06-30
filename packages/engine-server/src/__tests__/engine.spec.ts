@@ -63,9 +63,13 @@ describe("engine", () => {
             const fooNode = await engine.queryOne("foo", "note");
             await engine.delete(fooNode.data.id);
             expect(fs.readdirSync(root)).toMatchSnapshot("listDi2");
+            const numNodesPre = _.values(engine.notes).length;
             expectSnapshot(expect, "main", _.values(engine.notes));
             const deletedNode = engine.notes[fooNode.data.id];
             expectNoteProps(expect, deletedNode, { fname: "foo", stub: true });
+            // size should be the same
+            expect(numNodesPre).toEqual(_.values(engine.notes).length);
+            expectSnapshot(expect, "main2", _.values(engine.notes));
             // foo file should be deleted
             ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
                 remove: ["foo.md"]

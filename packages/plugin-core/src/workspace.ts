@@ -6,7 +6,7 @@ import { LookupController } from "./components/lookup/LookupController";
 import { DENDRON_COMMANDS, DENDRON_WS_NAME } from "./constants";
 import { getPlatform, resolveTilde, VSCodeUtils } from "./utils";
 import { NodeService } from "./services/nodeService/NodeService";
-import { getVSCodeDownloadUrl } from "vscode-test/out/util";
+import _ from "lodash";
 
 
 function writeWSFile(fpath: string, opts: { rootDir: string }) {
@@ -50,12 +50,15 @@ export class DendronWorkspace {
     public config: vscode.WorkspaceConfiguration;
     public L: ReturnType<typeof createLogger>;
 
-    constructor(context: vscode.ExtensionContext) {
+    constructor(context: vscode.ExtensionContext, opts?: { skipSetup?: boolean }) {
+        opts = _.defaults(opts, { skipSetup: false });
         this.context = context;
         this.config = vscode.workspace.getConfiguration("dendron");
         _DendronWorkspace = this;
         this.L = createLogger("dendron");
-        this._setupCommands();
+        if (!opts.skipSetup) {
+            this._setupCommands();
+        }
     }
 
     _setupCommands() {
@@ -131,7 +134,8 @@ export class DendronWorkspace {
         VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
     }
 
-    async setupWorkspace(rootDirRaw: string) {
+    async setupWorkspace(rootDirRaw: string, opts?: { skipOpenWS?: boolean }) {
+        opts = _.defaults(opts, { skipOpenWS: false });
         const ctx = "setupWorkspace";
         this.L.info({ ctx, rootDirRaw });
         const rootDir = resolveTilde(rootDirRaw);
@@ -147,6 +151,8 @@ export class DendronWorkspace {
         writeWSFile(path.join(rootDir, DENDRON_WS_NAME), {
             rootDir,
         });
-        VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
+        if (!opts.skipOpenWS) {
+            VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
+        }
     }
 }

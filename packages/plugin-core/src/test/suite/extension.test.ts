@@ -9,85 +9,54 @@ import { afterEach, before, beforeEach, describe } from "mocha";
 // import _ from "lodash";
 // import { fnameToUri } from "../../components/lookup/utils";
 // import fs from "fs-extra";
-// import path from "path";
+import path from "path";
+import { testUtils, FileTestUtils } from "@dendronhq/common-server";
+import { DendronWorkspace } from "../../workspace";
+import fs from "fs-extra";
+import { VSCodeUtils } from "../../utils";
+import { DENDRON_WS_NAME } from "../../constants";
 // import { testUtils } from "@dendronhq/common-server";
 
-// class DevWorkspaceUtils {
-//   static getRootDir() {
-//     // TODO: go up until you find lerna.json
-//     return path.join(__dirname, "../../../../../");
-//   }
-//   static getFixturesDir() {
-//     return path.join(this.getRootDir(), "fixtures");
-//   }
-// }
+class LernaTestUtils {
+    static getRootDir() {
+        // TODO: go up until you find lerna.json
+        return path.join(__dirname, "../../../../../");
+    }
+    static getFixturesDir() {
+        return path.join(this.getRootDir(), "fixtures");
+    }
+}
 
-// async function setup() {
-//   const fixtures = DevWorkspaceUtils.getFixturesDir();
-//   const storeDir = path.join(fixtures, "store");
-//   const testRoot = testUtils.setupTmpDendronDir({
-//     fixturesDir: storeDir,
-//     tmpDir: "/tmp/dendron/plugin-core",
-//   });
-//   const fsp = await DendronFileSystemProvider.getOrCreate();
-//   await fsp.initialize({ root: testRoot });
-//   vscode.workspace.updateWorkspaceFolders(0, 0, {
-//     uri: vscode.Uri.parse("denfs:/"),
-//     name: "Dendron",
-//   });
-//   console.log({ testRoot });
-//   return { fsp, testRoot };
-// }
-
-// function genExpectedFiles(): string[] {
-//   return ["foo.md", "foo.one.md", "foo.schema.yml", "foo.two.md", "root.md"];
-// }
-
-// async function checkSingleAddition(
-//   _assert: typeof assert,
-//   fsp: DendronFileSystemProvider,
-//   testRoot: string,
-//   fname: string
-// ) {
-//   const uri = await fnameToUri(fname, { checkIfDirectoryFile: false });
-//   await fsp.writeFile(uri, Buffer.from(`${fname}.body`), {
-//     create: true,
-//     overwrite: true,
-//     writeToEngine: true,
-//   });
-//   checkFiles(assert, testRoot, { additions: [fname] });
-// }
-
-// function checkFiles(
-//   _assert: typeof assert,
-//   testRoot: string,
-//   opts: { additions?: string[] }
-// ) {
-//   const cleanOpts = _.defaults(opts, { additions: [] });
-//   const dirEnts = fs.readdirSync(testRoot);
-//   _assert.deepEqual(
-//     dirEnts.sort(),
-//     genExpectedFiles()
-//       .concat(_.map(cleanOpts.additions, (ent) => `${ent}.md`))
-//       .sort()
-//   );
-// }
+function createMockContext(): vscode.ExtensionContext {
+    const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
+    return { subscriptions: [], extensionPath: pkgRoot } as any;
+};
 
 suite("Extension Test Suite", () => {
     vscode.window.showInformationMessage("Start all tests.");
+    let root: string;
 
-    //   before(async () => {
-    //     const fsp = await DendronFileSystemProvider.getOrCreate({
-    //       initializeEngine: false,
-    //     });
-    //     vscode.workspace.registerFileSystemProvider("denfs", fsp, {
-    //       isCaseSensitive: true,
-    //     });
-    //   });
+    before(async () => {
+        const ctx = createMockContext();
+        const ws = new DendronWorkspace(ctx, { skipSetup: true });
+        root = FileTestUtils.tmpDir("/tmp/dendron");
+        await ws.setupWorkspace(root, { skipOpenWS: true });
+        const fixtures = LernaTestUtils.getFixturesDir();
+        const storeDir = path.join(fixtures, "store");
+        console.log(storeDir);
+        fs.copySync(storeDir, root);
+        console.log(root);
+        VSCodeUtils.openWS(path.join(root, DENDRON_WS_NAME));
+    });
+
+    describe("Lookup", () => {
+        test("sanity", async () => {
+            assert.ok(true);
+        });
+    });
+
 
     //   describe("DendronFileSystemProvider", () => {
-    //     let fsp: DendronFileSystemProvider;
-    //     let testRoot: string;
     //     beforeEach(async () => {
     //       ({ fsp, testRoot } = await setup());
     //     });

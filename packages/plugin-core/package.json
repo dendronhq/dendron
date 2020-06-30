@@ -66,6 +66,7 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
+    "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
     "@types/glob": "^7.1.1",
     "@types/lodash": "^4.14.155",
@@ -86,6 +87,7 @@
     "@dendronhq/common-all": "^0.2.6",
     "@dendronhq/common-server": "^0.2.6",
     "@dendronhq/engine-server": "^0.2.6",
+    "execa": "^4.0.2",
     "lodash": "^4.17.15"
   },
   "gitHead": "74f4be7ed8b97d566cd905a1409a347668a3aa8a"

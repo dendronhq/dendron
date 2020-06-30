@@ -18,6 +18,12 @@ export function getPlatform() {
 }
 
 
+export class FileUtils {
+  static escape(fpath: string) {
+    return fpath.replace(/(\s+)/g, '\\$1');
+  }
+}
+
 export class VSCodeUtils {
 
   static getActiveTextEditor() {

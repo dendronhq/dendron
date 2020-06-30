@@ -1,8 +1,9 @@
 import { getAndInitializeEngine } from "@dendronhq/engine-server";
+import execa from 'execa';
 import * as vscode from "vscode";
 
 import { Logger, TraceLevel } from "./logger";
-import { VSCodeUtils } from "./utils";
+import { VSCodeUtils, FileUtils } from "./utils";
 import fs from "fs-extra";
 import path from "path";
 import { setEnv } from "@dendronhq/common-all";
@@ -35,6 +36,11 @@ export function activate(context: vscode.ExtensionContext) {
     });
     if (VSCodeUtils.isDebuggingExtension()) {
       Logger.output?.show(false);
+      const fullLogPath = FileUtils.escape(path.join(logPath, 'dendron.log'));
+      // TODO
+      const cmd = `/usr/local/bin/code-insiders ${fullLogPath}`;
+      execa.command(cmd);
+      vscode.window.showInformationMessage(`logs at ${fullLogPath}`);
     }
   }
 }

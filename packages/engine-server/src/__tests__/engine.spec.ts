@@ -32,6 +32,24 @@ describe("engine", () => {
             expect((await resp).data[0].title).toEqual("foo");
             ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles()));
         });
+
+        test("open stub node", async () => {
+            FileTestUtils.writeMDFile(root, "bar.two.md", {}, "bar.two.body");
+            const engine = getOrCreateEngine({ root, forceNew: true });
+            await engine.init();
+            expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
+            expectSnapshot(expect, "main", _.values(engine.notes));
+            const resp = engine.query("bar.two", queryMode);
+            expect((await resp).data[0].fname).toEqual("bar.two");
+
+            const resp2 = engine.query("bar", queryMode);
+            expect((await resp2).data[0].fname).toEqual("bar");
+            expect(fs.readdirSync(root)).toMatchSnapshot("listDir2");
+
+            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
+                add: ["bar.two.md"]
+            }));
+        });
     });
 
     describe("edge", () => {

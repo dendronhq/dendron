@@ -284,6 +284,122 @@ Object {
 }
 `;
 
+exports[`engine main open stub node: listDir 1`] = `
+Array [
+  "bar.two.md",
+  "foo.md",
+  "foo.one.md",
+  "foo.schema.yml",
+  "foo.two.md",
+  "root.md",
+]
+`;
+
+exports[`engine main open stub node: listDir2 1`] = `
+Array [
+  "bar.two.md",
+  "foo.md",
+  "foo.one.md",
+  "foo.schema.yml",
+  "foo.two.md",
+  "root.md",
+]
+`;
+
+exports[`engine main open stub node: main 1`] = `
+Array [
+  Object {
+    "body": "",
+    "children": Array [
+      "foo",
+      "bar",
+    ],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "parent": "root",
+    "stub": false,
+    "title": "root",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.one",
+      "foo.two",
+    ],
+    "created": "TODO",
+    "data": Object {
+      "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
+    },
+    "desc": "",
+    "fname": "foo",
+    "parent": "root",
+    "stub": false,
+    "title": "foo",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "bar.two",
+    ],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "parent": "root",
+    "stub": true,
+    "title": "bar",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.one",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.one",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.two",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.two",
+    "type": "note",
+    "updated": "TODO",
+  },
+  Object {
+    "body": "bar.two.body
+",
+    "children": Array [],
+    "created": "TODO",
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.two",
+    "parent": "bar",
+    "stub": false,
+    "title": "bar.two",
+    "type": "note",
+    "updated": "TODO",
+  },
+]
+`;
+
 exports[`engine main sanity: main 1`] = `
 Array [
   Object {

@@ -486,6 +486,7 @@ export class ProtoEngine implements DEngine {
             stubNodes.forEach(ent2 => {
               refreshList.push(ent2);
             });
+            // last element is parent
             parentNode = stubNodes.slice(-1)[0];
           } else {
             throw Error("no parent found");

@@ -2,7 +2,7 @@ import { QuickPick, QuickPickItem, Uri, window } from "vscode";
 import { node2Uri } from "./utils";
 
 import { CREATE_NEW_LABEL } from "./constants";
-import { Note } from "@dendronhq/common-all";
+import { Note, DNode } from "@dendronhq/common-all";
 import _ from "lodash";
 import { createLogger } from "@dendronhq/common-server";
 import { getOrCreateEngine } from "@dendronhq/engine-server";
@@ -16,9 +16,10 @@ function createNoActiveItem(): QuickPickItem {
   };
 }
 
-function isCreateNewPick(item: QuickPickItem): boolean {
-  return item.label === CREATE_NEW_LABEL;
+function isCreateNewPick(node: DNode): boolean {
+  return node.label === CREATE_NEW_LABEL || node.stub;
 }
+
 function slashToDot(ent: string) {
   return ent.replace(/\//g, ".");
 }

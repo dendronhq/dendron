@@ -4,6 +4,7 @@ export const DENDRON_COMMANDS = {
     LOOKUP: "dendron.lookup",
     INIT_WS: "dendron.initWS",
     CHANGE_WS: "dendron.changeWS",
-    DELETE_NODE: "dendron.deleteNode"
+    DELETE_NODE: "dendron.deleteNode",
+    RELOAD_WS: "dendron.reloadWS"
 };
 export const DENDRON_CHANNEL_NAME = "Dendron";

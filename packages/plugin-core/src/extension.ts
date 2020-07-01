@@ -1,13 +1,10 @@
-import { getAndInitializeEngine } from "@dendronhq/engine-server";
-import execa from 'execa';
-import * as vscode from "vscode";
-
-import { Logger, TraceLevel } from "./logger";
-import { VSCodeUtils, FileUtils } from "./utils";
+import { getStage, setEnv } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import path from "path";
-import { setEnv, getStage } from "@dendronhq/common-all";
-import { SchemaCommand } from "./commands/Schema";
+import * as vscode from "vscode";
+import { Logger, TraceLevel } from "./logger";
+import { VSCodeUtils } from "./utils";
+
 
 // === Main
 // this method is called when your extension is activated
@@ -27,24 +24,18 @@ export function activate(context: vscode.ExtensionContext) {
   console.log("active", logPath, extensionPath);
   if (DendronWorkspace.isActive()) {
     ws.L.info({ ctx, msg: "isActive" });
-    const wsFolders = vscode.workspace.workspaceFolders;
-    Logger.debug({ ctx, wsFolders });
-    const mainVault = wsFolders![0].uri.fsPath;
-    getAndInitializeEngine(mainVault).then(async engine => {
-      await new SchemaCommand().hack(engine);
+    ws.reloadWorkspace().then(() => {
       Logger.debug({ ctx, msg: "engine Initialized" });
-    }, (err) => {
-      vscode.window.showErrorMessage(JSON.stringify(err));
     });
-    if (VSCodeUtils.isDebuggingExtension() || getStage() === "test") {
-      Logger.output?.show(true);
-      // TODO: check for cmd
-      // const fullLogPath = FileUtils.escape(path.join(logPath, 'dendron.log'));
-      // TODO
-      // const cmd = `/usr/local/bin/code-insiders ${fullLogPath}`;
-      // execa.command(cmd);
-      // vscode.window.showInformationMessage(`logs at ${fullLogPath}`);
-    }
+  }
+  if (VSCodeUtils.isDebuggingExtension() || getStage() === "test") {
+    Logger.output?.show(true);
+    // TODO: check for cmd
+    // const fullLogPath = FileUtils.escape(path.join(logPath, 'dendron.log'));
+    // TODO
+    // const cmd = `/usr/local/bin/code-insiders ${fullLogPath}`;
+    // execa.command(cmd);
+    // vscode.window.showInformationMessage(`logs at ${fullLogPath}`);
   }
 }
 

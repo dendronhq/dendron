@@ -7,6 +7,8 @@ import { DENDRON_COMMANDS, DENDRON_WS_NAME } from "./constants";
 import { getPlatform, resolveTilde, VSCodeUtils } from "./utils";
 import { NodeService } from "./services/nodeService/NodeService";
 import _ from "lodash";
+import { getAndInitializeEngine } from "@dendronhq/engine-server";
+import { SchemaCommand } from "./commands/Schema";
 
 
 function writeWSFile(fpath: string, opts: { rootDir: string }) {
@@ -100,6 +102,13 @@ export class DendronWorkspace {
         );
 
         this.context.subscriptions.push(
+            vscode.commands.registerCommand(DENDRON_COMMANDS.RELOAD_WS, async () => {
+                await this.reloadWorkspace();
+                vscode.window.showInformationMessage(`ws reloaded`);
+            })
+        );
+
+        this.context.subscriptions.push(
             vscode.commands.registerCommand(DENDRON_COMMANDS.LOOKUP, async () => {
                 const ctx = DENDRON_COMMANDS.LOOKUP;
                 this.L.info({ ctx: ctx + ":LookupController:pre" });
@@ -132,6 +141,14 @@ export class DendronWorkspace {
             throw Error(`workspace file does not exist`);
         }
         VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
+    }
+
+    async reloadWorkspace() {
+        const wsFolders = vscode.workspace.workspaceFolders;
+        const mainVault = wsFolders![0].uri.fsPath;
+        const engine = await getAndInitializeEngine(mainVault);
+        await new SchemaCommand().hack(engine);
+        return;
     }
 
     async setupWorkspace(rootDirRaw: string, opts?: { skipOpenWS?: boolean }) {

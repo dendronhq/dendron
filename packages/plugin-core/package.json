@@ -46,6 +46,10 @@
       {
         "command": "dendron.deleteNode",
         "title": "Dendron: Delete Node"
+      },
+      {
+        "command": "dendron.reloadWS",
+        "title": "Dendron: Reload Workspace"
       }
     ],
     "keybindings": [

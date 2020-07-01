@@ -184,10 +184,18 @@ export class DendronWorkspace {
         const welcomeUri = vscode.Uri.parse(path.join(this.rootDir, "vault.main", "dendron.md"));
         try {
             await vscode.window.showTextDocument(welcomeUri);
-            vscode.window.showInformationMessage("Dendron initialized");
+            await MarkdownUtils.openPreview();
         } catch (err) {
             vscode.window.showErrorMessage(JSON.stringify(err));
         }
 
+    }
+}
+
+class MarkdownUtils {
+    static async openPreview() {
+        let previewEnhanced = vscode.extensions.getExtension('shd101wyy.markdown-preview-enhanced');
+        const openMarkdownCmd = previewEnhanced ? "markdown-preview-enhanced.openPreviewToTheSide" : "markdown.showPreviewToSide";
+        return vscode.commands.executeCommand(openMarkdownCmd);
     }
 }

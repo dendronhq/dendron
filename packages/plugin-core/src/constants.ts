@@ -8,3 +8,8 @@ export const DENDRON_COMMANDS = {
     RELOAD_WS: "dendron.reloadWS"
 };
 export const DENDRON_CHANNEL_NAME = "Dendron";
+export const GLOBAL_STATE = {
+};
+export const CONFIG = {
+    ROOT_DIR: "rootDir"
+}

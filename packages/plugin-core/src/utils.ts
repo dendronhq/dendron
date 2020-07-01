@@ -35,7 +35,7 @@ export class VSCodeUtils {
   }
 
   static async openWS(wsFile: string) {
-    vscode.commands
+    return vscode.commands
       .executeCommand(
         "vscode.openFolder",
         vscode.Uri.parse(wsFile)

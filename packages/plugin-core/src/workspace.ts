@@ -3,7 +3,7 @@ import fs from "fs-extra";
 import path from "path";
 import * as vscode from "vscode";
 import { LookupController } from "./components/lookup/LookupController";
-import { DENDRON_COMMANDS, DENDRON_WS_NAME } from "./constants";
+import { DENDRON_COMMANDS, DENDRON_WS_NAME, CONFIG } from "./constants";
 import { getPlatform, resolveTilde, VSCodeUtils } from "./utils";
 import { NodeService } from "./services/nodeService/NodeService";
 import _ from "lodash";
@@ -61,6 +61,14 @@ export class DendronWorkspace {
         if (!opts.skipSetup) {
             this._setupCommands();
         }
+    }
+
+    get rootDir(): string {
+        const rootDir = this.config.get<string>(CONFIG.ROOT_DIR);
+        if (!rootDir) {
+            throw Error("rootDir not initialized");
+        }
+        return rootDir;
     }
 
     _setupCommands() {
@@ -167,7 +175,18 @@ export class DendronWorkspace {
             rootDir,
         });
         if (!opts.skipOpenWS) {
-            VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
+            return VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME))
         }
+    }
+
+    async showWelcome() {
+        const welcomeUri = vscode.Uri.parse(path.join(this.rootDir, "vault.main", "dendron.md"));
+        try {
+            await vscode.window.showTextDocument(welcomeUri);
+            vscode.window.showInformationMessage("Dendron initialized");
+        } catch (err) {
+            vscode.window.showErrorMessage(JSON.stringify(err));
+        }
+
     }
 }

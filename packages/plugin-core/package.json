@@ -23,9 +23,7 @@
     "schema"
   ],
   "preview": true,
-  "extensionDependencies": [
-    "yzhang.markdown-all-in-one"
-  ],
+  "extensionDependencies": [],
   "activationEvents": [
     "*"
   ],

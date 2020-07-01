@@ -24,7 +24,7 @@ export class LookupController {
     L.info({ ctx: ctx + ":createQuickPick:post" });
 
     quickpick.title = "Lookup";
-    quickpick.placeholder = "quickpick placeholder";
+    quickpick.placeholder = "eg. hello.world";
     quickpick.ignoreFocusOut = true;
     quickpick.items = _.values(getOrCreateEngine().notes);
     // quickpick.matchOnDetail = true;

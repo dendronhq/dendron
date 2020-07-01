@@ -1,8 +1,8 @@
 import { createLogger } from "@dendronhq/common-server";
 import { BaseCommand } from "./base";
-import { getOrCreateEngine } from "@dendronhq/engine-server";
+import { getOrCreateEngine, DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { Note, Schema } from "@dendronhq/common-all";
+import { Note, Schema, DEngine } from "@dendronhq/common-all";
 
 const L = createLogger("SchemaCommand");
 
@@ -28,11 +28,9 @@ function applySchema(note: Note, schema: Schema) {
 }
 
 export class SchemaCommand extends BaseCommand<SchemaCommandOpts> {
-    async execute(opts: SchemaCommandOpts) {
+
+    async hack(engine: DEngine) {
         const ctx = "execute";
-        L.info({ ctx, opts });
-        const engine = await getOrCreateEngine({ forceNew: true, mode: "exact", root: opts.root });
-        await engine.init();
         const schemas = _.values(engine.schemas.root.children);
         const notes = _.values(engine.notes);
         const domains = _.uniq(notes.map(ent => ent.domain));
@@ -51,13 +49,19 @@ export class SchemaCommand extends BaseCommand<SchemaCommandOpts> {
             }));
         }));
     }
+
+    async execute(opts: SchemaCommandOpts) {
+        const ctx = "execute";
+        L.info({ ctx, opts });
+        const engine = await getOrCreateEngine({ forceNew: true, mode: "exact", root: opts.root });
+        await engine.init();
+        await this.hack(engine);
+    }
 }
 
-async function main() {
-    const root = process.argv[2];
-    await new SchemaCommand().execute({
-        root,
-    });
-}
-
-main();
+// async function main() {
+//     const root = process.argv[2];
+//     await new SchemaCommand().execute({
+//         root,
+//     });
+// }

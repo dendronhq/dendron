@@ -7,6 +7,7 @@ import { VSCodeUtils, FileUtils } from "./utils";
 import fs from "fs-extra";
 import path from "path";
 import { setEnv, getStage } from "@dendronhq/common-all";
+import { SchemaCommand } from "./commands/Schema";
 
 // === Main
 // this method is called when your extension is activated
@@ -29,7 +30,8 @@ export function activate(context: vscode.ExtensionContext) {
     const wsFolders = vscode.workspace.workspaceFolders;
     Logger.debug({ ctx, wsFolders });
     const mainVault = wsFolders![0].uri.fsPath;
-    getAndInitializeEngine(mainVault).then(() => {
+    getAndInitializeEngine(mainVault).then(async engine => {
+      await new SchemaCommand().hack(engine);
       Logger.debug({ ctx, msg: "engine Initialized" });
     }, (err) => {
       vscode.window.showErrorMessage(JSON.stringify(err));

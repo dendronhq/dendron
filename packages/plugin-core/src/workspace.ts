@@ -9,6 +9,7 @@ import { NodeService } from "./services/nodeService/NodeService";
 import _ from "lodash";
 import { getAndInitializeEngine } from "@dendronhq/engine-server";
 import { SchemaCommand } from "./commands/Schema";
+import { Logger } from "./logger";
 
 
 function writeWSFile(fpath: string, opts: { rootDir: string }) {
@@ -50,14 +51,14 @@ export class DendronWorkspace {
 
     public context: vscode.ExtensionContext;
     public config: vscode.WorkspaceConfiguration;
-    public L: ReturnType<typeof createLogger>;
+    public L: typeof Logger;
 
     constructor(context: vscode.ExtensionContext, opts?: { skipSetup?: boolean }) {
         opts = _.defaults(opts, { skipSetup: false });
         this.context = context;
         this.config = vscode.workspace.getConfiguration("dendron");
         _DendronWorkspace = this;
-        this.L = createLogger("dendron");
+        this.L = Logger;
         if (!opts.skipSetup) {
             this._setupCommands();
         }

@@ -1,11 +1,9 @@
-import { getStage, setEnv } from "@dendronhq/common-all";
-import fs from "fs-extra";
-import path from "path";
+import { getStage } from "@dendronhq/common-all";
 import * as vscode from "vscode";
-import { Logger, TraceLevel } from "./logger";
+import { CONFIG } from "./constants";
+import { Logger } from "./logger";
 import { VSCodeUtils } from "./utils";
 import { DendronWorkspace } from "./workspace";
-import { CONFIG } from "./constants";
 
 
 // === Main
@@ -14,19 +12,14 @@ export function activate(context: vscode.ExtensionContext) {
   const ctx = "activate";
   const { logPath, extensionPath, extensionUri, storagePath, globalStoragePath } = context;
   // setup logging
-  fs.ensureDirSync(context.logPath);
-  setEnv("LOG_DST", path.join(context.logPath, "dendron.log"));
 
-
-
-  const ws = new DendronWorkspace(context);
-
-  // init logs
-  Logger.configure(context, TraceLevel.Debug);
+  Logger.configure(context, "debug");
   Logger.debug({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
-  ws.L.info({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
   console.log("active", logPath, extensionPath);
+
   if (DendronWorkspace.isActive()) {
+    const ws = new DendronWorkspace(context);
+    ws.L.info({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
     ws.L.info({ ctx, msg: "isActive" });
     ws.reloadWorkspace().then(() => {
       Logger.debug({ ctx, msg: "engine Initialized" });

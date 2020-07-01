@@ -1,9 +1,12 @@
 import { getStage } from "@dendronhq/common-all";
 import * as vscode from "vscode";
-import { CONFIG } from "./constants";
+import { CONFIG, GLOBAL_STATE } from "./constants";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./utils";
 import { DendronWorkspace } from "./workspace";
+import _ from "lodash";
+import path from "path";
+import { Uri } from "vscode";
 
 
 // === Main
@@ -13,25 +16,27 @@ export function activate(context: vscode.ExtensionContext) {
   const { logPath, extensionPath, extensionUri, storagePath, globalStoragePath } = context;
   // setup logging
 
+  const previousVersion = context.globalState.get<string | undefined>(GLOBAL_STATE.VERSION);
   Logger.configure(context, "debug");
-  Logger.debug({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
-  console.log("active", logPath, extensionPath);
+  Logger.info({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
+  // needs to be initialized to setup commands
+  const ws = new DendronWorkspace(context);
 
   if (DendronWorkspace.isActive()) {
-    const ws = new DendronWorkspace(context);
-    ws.L.info({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
-    ws.L.info({ ctx, msg: "isActive" });
+    Logger.info({ ctx: "dendron active" });
     ws.reloadWorkspace().then(() => {
-      Logger.debug({ ctx, msg: "engine Initialized" });
+      Logger.info({ ctx, msg: "engine Initialized" });
       const wsState = context.globalState.get(`wsInit:${ws.config.get(CONFIG.ROOT_DIR)}`);
       if (!wsState) {
         ws.showWelcome();
         context.globalState.update(`wsInit:${ws.config.get(CONFIG.ROOT_DIR)}`, true);
       }
     });
+  } else {
+    Logger.info({ ctx: "dendron not active" });
   }
   if (VSCodeUtils.isDebuggingExtension() || getStage() === "test") {
-    Logger.output?.show(true);
+    Logger.output?.show(false);
     // TODO: check for cmd
     // const fullLogPath = FileUtils.escape(path.join(logPath, 'dendron.log'));
     // TODO
@@ -39,6 +44,10 @@ export function activate(context: vscode.ExtensionContext) {
     // execa.command(cmd);
     // vscode.window.showInformationMessage(`logs at ${fullLogPath}`);
   }
+  // TODO: don't hardcode version
+  showWelcomeOrWhatsNew("0.0.1", previousVersion);
+
+
 }
 
 // this method is called when your extension is deactivated
@@ -46,4 +55,18 @@ export function deactivate() {
   const ctx = "deactivate";
   const { DendronWorkspace } = require("./workspace");
   DendronWorkspace.instance().L.info({ ctx });
+}
+
+
+async function showWelcomeOrWhatsNew(version: string, previousVersion: string | undefined) {
+  const ctx = "showWelcomeOrWhatsNew";
+  if (_.isUndefined(previousVersion)) {
+    Logger.info({ ctx, msg: "first time install" });
+    const ws = DendronWorkspace.instance();
+    const uri = Uri.parse(path.join(ws.extensionAssetsDir, "notes", "vault.main", "dendron.md"));
+    await ws.showWelcome(uri);
+    await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
+  } else {
+    Logger.info({ ctx, msg: "not first time install" });
+  }
 }

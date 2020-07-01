@@ -49,6 +49,7 @@ To read more about the ideas that inspired Dendron, you can read [this blog post
 - [workspace/file/line history](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens#current-line-blame-)
 
 # Quickstart
+
 Creating a note is as simple as looking it up - if it doesn't exist, Dendron will create it. To perform a lookup, use the `CTRL-P` shortcut or the `> Dendron: Lookup` command.
 
 ![Open or create note](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/dendron-open-create.gif)

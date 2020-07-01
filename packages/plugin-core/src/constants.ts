@@ -9,6 +9,7 @@ export const DENDRON_COMMANDS = {
 };
 export const DENDRON_CHANNEL_NAME = "Dendron";
 export const GLOBAL_STATE = {
+    VERSION: "dendron.version"
 };
 export const CONFIG = {
     ROOT_DIR: "rootDir"

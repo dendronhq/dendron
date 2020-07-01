@@ -72,6 +72,11 @@ export class DendronWorkspace {
         return rootDir;
     }
 
+    get extensionAssetsDir(): string {
+        const assetsDir = path.join(this.context.extensionPath, "assets");
+        return assetsDir;
+    }
+
     _setupCommands() {
         this.context.subscriptions.push(
             vscode.commands.registerCommand(DENDRON_COMMANDS.INIT_WS, async () => {
@@ -170,8 +175,7 @@ export class DendronWorkspace {
         [rootDir].forEach((dirPath: string) => {
             fs.ensureDirSync(dirPath);
         });
-        const assetsDir = path.join(this.context.extensionPath, "assets");
-        fs.copySync(path.join(assetsDir, "notes"), rootDir);
+        fs.copySync(path.join(this.extensionAssetsDir, "notes"), rootDir);
         writeWSFile(path.join(rootDir, DENDRON_WS_NAME), {
             rootDir,
         });
@@ -180,8 +184,8 @@ export class DendronWorkspace {
         }
     }
 
-    async showWelcome() {
-        const welcomeUri = vscode.Uri.parse(path.join(this.rootDir, "vault.main", "dendron.md"));
+    async showWelcome(welcomeUri?: vscode.Uri) {
+        welcomeUri = welcomeUri || vscode.Uri.parse(path.join(this.rootDir, "vault.main", "dendron.md"));
         try {
             await vscode.window.showTextDocument(welcomeUri);
             await MarkdownUtils.openPreview();

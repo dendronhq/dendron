@@ -25,11 +25,11 @@ function createNoActiveItem(opts?: { label?: string }): QuickPickItem {
   };
 }
 
-function isCreateNewPick(node: DNode | undefined): boolean {
+function isCreateNewPick(node: Note | undefined): boolean {
   if (!node) {
     return true;
   }
-  return node.detail === CREATE_NEW_LABEL || node.stub;
+  return node.detail === CREATE_NEW_LABEL || node.stub || node.schemaStub;
 }
 
 function slashToDot(ent: string) {

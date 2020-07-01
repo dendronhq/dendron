@@ -341,6 +341,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
 export class Note extends DNode<NoteData> implements INote {
   public schemaId: string;
   public schema?: Schema;
+  public schemaStub: boolean;
 
   static createStub(fname: string, opts?: Partial<INoteOpts>): Note {
     return new Note({ stub: true, fname, ...opts });
@@ -352,20 +353,23 @@ export class Note extends DNode<NoteData> implements INote {
 
   static fromSchema(dirpath: string, schema: Schema): Note {
     const fname = [dirpath, schema.title].join(".");
-    const note = new Note({ fname, stub: true, data: { schemaId: schema.id } });
+    const note = new Note({ fname, schemaStub: true, data: { schemaId: schema.id } });
     note.schema = schema;
     return note;
   }
 
   constructor(props: INoteOpts) {
+    const cleanProps = _.defaults(props, {
+      parent: null,
+      children: [],
+      schemaStub: false,
+    });
     super({
       type: "note",
-      ..._.defaults(props, {
-        parent: null,
-        children: []
-      })
+      ...cleanProps
     });
     this.schemaId = props?.data?.schemaId || "-1";
+    this.schemaStub = cleanProps.schemaStub;
   }
 
   // vscode detail pane
@@ -394,15 +398,16 @@ export class Note extends DNode<NoteData> implements INote {
 
       // case: recognized schema
       prefixParts = ["$(repo)", this.schema.domain.title];
-      if (this.stub) {
-        prefixParts.unshift("(stub)");
-      }
-
       // check if non-domain schema
       if (this.schema.domain.id !== this.schema.id) {
         prefixParts.push("$(breadcrumb-separator)");
         prefixParts.push(this.schema.title);
       }
+
+      if (this.schemaStub) {
+        prefixParts.push("(create from schema)");
+      }
+
       schemaPrefix = prefixParts.join(" ");
     }
     return schemaPrefix;

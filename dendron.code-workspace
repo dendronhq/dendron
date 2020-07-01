@@ -1,6 +1,9 @@
 {
   "folders": [
     {
+      "path": "packages/plugin-core/assets/notes/",
+    },
+    {
       "path": "packages/common-all"
     },
     {
@@ -31,6 +34,8 @@
         "mode": "auto"
       }
     ],
+    // TODO: make relative
+    "dendron.rootDir": "/Users/kevinlin/projects/dendronv2/dendron/dendron.code-workspace",
     "spellright.language": [
       "en"
     ],

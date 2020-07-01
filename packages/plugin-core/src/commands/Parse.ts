@@ -25,6 +25,7 @@ export class ParseCommand extends BaseCommand<ParseCommandOpts> {
             errorOnEmpty: false,
             errorOnBadParse: opts.bailOnError,
         });
+        // const dotVscodeDefault = path.join(assetsDir, ".vscode");
         // @ts-ignore
         const _data = fp.parse(allFiles);
         const report = fp.report();

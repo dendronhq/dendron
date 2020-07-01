@@ -21,7 +21,7 @@
         "STAGE": "dev",
         "VSCODE_DEBUGGING_EXTENSION": "dendron"
       }
-      //"preLaunchTask": "npm: watch"
+      //"preLaunchTask": "npm: watch no
     },
     {
       "name": "Extension Tests",

@@ -15,7 +15,7 @@ function writeWSFile(fpath: string, opts: { rootDir: string }) {
     const jsonBody = {
         folders: [
             {
-                path: opts.rootDir,
+                path: path.join(opts.rootDir, "vault.main"),
             },
         ],
         settings: {
@@ -162,8 +162,6 @@ export class DendronWorkspace {
             fs.ensureDirSync(dirPath);
         });
         const assetsDir = path.join(this.context.extensionPath, "assets");
-        const dotVscodeDefault = path.join(assetsDir, ".vscode");
-        fs.copySync(dotVscodeDefault, path.join(rootDir, ".vscode"));
         fs.copySync(path.join(assetsDir, "notes"), rootDir);
         writeWSFile(path.join(rootDir, DENDRON_WS_NAME), {
             rootDir,

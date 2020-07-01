@@ -40,13 +40,14 @@ To read more about the ideas that inspired Dendron, you can read [this blog post
 - schemas: optional type system for your notes
 - modeless operation: no difference between searching for a file and creating one
 
-## Bundled (enabled with bundled extensions)
+## Bundled (enabled with recommended extensions)
 
-- [live markdown preview](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one)
-- [github flavored markdown](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one#github-flavored-markdown)
-- [math](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one#math)
-- [keyboard shortcuts](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one#keyboard-shortcuts)
-- [table of contents](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one#table-of-contents)
+- [live markdown preview](https://marketplace.visualstudio.com/items?itemName=shd101wyy.markdown-preview-enhanced)
+- [math](https://shd101wyy.github.io/markdown-preview-enhanced/#/math) (KaTeX or MathJax)
+- [sequence diagrams](https://shd101wyy.github.io/markdown-preview-enhanced/#/diagrams?id=mermaid) (mermaid)
+- [pandoc support](https://shd101wyy.github.io/markdown-preview-enhanced/#/pandoc)
+- [code chunks](https://shd101wyy.github.io/markdown-preview-enhanced/#/code-chunk)
+- [presentations](https://rawgit.com/shd101wyy/markdown-preview-enhanced/master/docs/presentation-intro.html)
 - [wiki links](https://marketplace.visualstudio.com/items?itemName=kortina.vscode-markdown-notes)
 - [tags](https://marketplace.visualstudio.com/items?itemName=kortina.vscode-markdown-notes)
 - [backlinks](https://marketplace.visualstudio.com/items?itemName=kortina.vscode-markdown-notes)

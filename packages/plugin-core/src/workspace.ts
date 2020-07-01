@@ -1,15 +1,14 @@
-import { createLogger } from "@dendronhq/common-server";
+import { getAndInitializeEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
-import { LookupController } from "./components/lookup/LookupController";
-import { DENDRON_COMMANDS, DENDRON_WS_NAME, CONFIG } from "./constants";
-import { getPlatform, resolveTilde, VSCodeUtils } from "./utils";
-import { NodeService } from "./services/nodeService/NodeService";
-import _ from "lodash";
-import { getAndInitializeEngine } from "@dendronhq/engine-server";
 import { SchemaCommand } from "./commands/Schema";
+import { LookupController } from "./components/lookup/LookupController";
+import { CONFIG, DENDRON_COMMANDS, DENDRON_WS_NAME } from "./constants";
 import { Logger } from "./logger";
+import { NodeService } from "./services/nodeService/NodeService";
+import { getPlatform, resolveTilde, VSCodeUtils } from "./utils";
 
 
 function writeWSFile(fpath: string, opts: { rootDir: string }) {

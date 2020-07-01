@@ -1,12 +1,12 @@
 import { getStage } from "@dendronhq/common-all";
+import _ from "lodash";
+import path from "path";
 import * as vscode from "vscode";
-import { CONFIG, GLOBAL_STATE } from "./constants";
+import { Uri } from "vscode";
+import { GLOBAL_STATE } from "./constants";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./utils";
 import { DendronWorkspace } from "./workspace";
-import _ from "lodash";
-import path from "path";
-import { Uri } from "vscode";
 
 
 // === Main
@@ -26,10 +26,10 @@ export function activate(context: vscode.ExtensionContext) {
     Logger.info({ ctx: "dendron active" });
     ws.reloadWorkspace().then(() => {
       Logger.info({ ctx, msg: "engine Initialized" });
-      const wsState = context.globalState.get(`wsInit:${ws.config.get(CONFIG.ROOT_DIR)}`);
-      if (!wsState) {
+      if (_.isUndefined(context.globalState.get<string | undefined>(GLOBAL_STATE.DENDRON_FIRST_WS))) {
+        Logger.info({ ctx, msg: "show welcome" });
         ws.showWelcome();
-        context.globalState.update(`wsInit:${ws.config.get(CONFIG.ROOT_DIR)}`, true);
+        context.globalState.update(GLOBAL_STATE.DENDRON_FIRST_WS, "initialized");
       }
     });
   } else {
@@ -46,8 +46,6 @@ export function activate(context: vscode.ExtensionContext) {
   }
   // TODO: don't hardcode version
   showWelcomeOrWhatsNew("0.0.1", previousVersion);
-
-
 }
 
 // this method is called when your extension is deactivated

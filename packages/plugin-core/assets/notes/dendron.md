@@ -17,7 +17,7 @@ id: ef43aff2-d8ba-4551-b311-d85cc171f0e4
 
 # Dendron
 
-![](assets/2020-06-30-21-30-51.png#right)
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/2020-06-30-21-30-51.png#right)
 
 Dendron is a **hierarchal** note taking tool that **grows** as you do. 
 
@@ -55,7 +55,7 @@ To read more about the ideas that inspired Dendron, you can read [this blog post
 # Quickstart
 Creating a note is as simple as looking it up - if it doesn't exist, Dendron will create it. To perform a lookup, use the `CTRL-P` shortcut or the `> Dendron: Lookup` command.
 
-![Open or create note](assets/dendron-open-create.gif)
+![Open or create note](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/dendron-open-create.gif)
 
 Notes are stored and indexed hierarchically. Hierarchies can be as deep or shallow as you need them to be. 
 
@@ -68,7 +68,7 @@ Below is a simple two level hierarchy of CLI commands.
 - cli.curl
 - cli.zip
 ```
-![Lookup Notes Simple](assets/dendron-lookup-simple.gif)
+![Lookup Notes Simple](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/dendron-lookup-simple.gif)
 
 Here is a more involve hierarchy involving programming languages (don't mind the `l.` prefix, that will be explained later).
 
@@ -84,7 +84,7 @@ Here is a more involve hierarchy involving programming languages (don't mind the
   - l.python.oo
 ```
 
-![Lookup Notes Advanced](assets/dendron-lookup-advanced.gif)
+![Lookup Notes Advanced](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/dendron-lookup-advanced.gif)
 
 ## Schemas 
 As you end up creating more notes, it can be hard to keep track of it all. This is why Dendron has **schemas** to help you manage your notes at scale. Think of schemas as an **optional type system** for your notes. They describe the hierarchy of your data and are themselves, represented as a hierarchy.

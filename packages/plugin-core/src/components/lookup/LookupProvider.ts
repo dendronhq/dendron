@@ -25,7 +25,7 @@ function createNoActiveItem(opts?: { label?: string }): QuickPickItem {
   };
 }
 
-function isCreateNewPick(node: Note | undefined): boolean {
+function isCreateNewNotePick(node: Note | undefined): boolean {
   if (!node) {
     return true;
   }
@@ -156,7 +156,7 @@ export class LookupProvider {
       L.info({ ctx: "onDidAccept", selectedItem, value });
 
       let uri: Uri;
-      if (isCreateNewPick(selectedItem)) {
+      if (isCreateNewNotePick(selectedItem)) {
         const fname = value;
         let nodeNew: Note;
         // reuse node if a stub

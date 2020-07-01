@@ -383,22 +383,25 @@ export class Note extends DNode<NoteData> implements INote {
 
   get description(): string | undefined {
     let schemaPrefix: string | undefined;
+    let prefixParts = [];
     if (this.schema) {
-      const prefixParts = ["$(repo)", this.schema.domain.title];
+      // case: unknown schema
+      // eslint-disable-next-line no-use-before-define
+      if (SchemaUtils.isUnkown(this.schema)) {
+        prefixParts.push("$(squirrel) unknown");
+        return prefixParts.join(" ");
+      }
+
+      // case: recognized schema
+      prefixParts = ["$(repo)", this.schema.domain.title];
       if (this.stub) {
         prefixParts.unshift("(stub)");
       }
 
       // check if non-domain schema
       if (this.schema.domain.id !== this.schema.id) {
-        // eslint-disable-next-line no-use-before-define
-        if (SchemaUtils.isUnkown(this.schema)) {
-          prefixParts.push("$(breadcrumb-separator)");
-          prefixParts.push("$(squirrel) unknown");
-        } else {
-          prefixParts.push("$(breadcrumb-separator)");
-          prefixParts.push(this.schema.title);
-        }
+        prefixParts.push("$(breadcrumb-separator)");
+        prefixParts.push(this.schema.title);
       }
       schemaPrefix = prefixParts.join(" ");
     }
@@ -424,9 +427,9 @@ export class Schema extends DNode<SchemaData> implements ISchema {
    * This is attached to notes that are part of a domain with schema but
    * don't match any schema in it
    */
-  static createUnkownSchema(domain: Schema) {
+  static createUnkownSchema() {
     const props = SchemaNodeRaw.createProps({ id: UNKNOWN_SCHEMA_ID, fname: UNKNOWN_SCHEMA_ID, stub: true });
-    return new Schema({ ...props, parent: domain, children: [] });
+    return new Schema({ ...props, parent: null, children: [] });
   }
 
   constructor(props: ISchemaOpts) {
@@ -518,14 +521,17 @@ export class NodeBuilder {
     if (node.schemaId) {
       node.schema = opts.schemas[node.schemaId];
     }
-    // eslint-disable-next-line no-use-before-define
-    if (node.schemaId === UNKNOWN_SCHEMA_ID) {
-      const domainSchema = assertExists<Schema>(node.domain.schema as Schema, "note domain does not have schema");
-      node.schema = Schema.createUnkownSchema(domainSchema);
-    }
     const { parent: parentId, children } = item;
     const parent: Note = _.find(parents, { id: parentId }) as Note;
+    // NOTE: parents don't get resolved until this is called
     parent.addChild(node);
+    // eslint-disable-next-line no-use-before-define
+    if (node.schemaId === UNKNOWN_SCHEMA_ID) {
+      // TODO: FRAGILE, might not work with root stubs
+      // const domainSchema = assertExists<Schema>(node.domain.children[0].schema as Schema, "note domain does not have schema");
+      //const domainSchema = assertExists<Schema>(node.domain.schema as Schema, "note domain does not have schema");
+      node.schema = Schema.createUnkownSchema();
+    }
     return { node, parent, children };
   }
 

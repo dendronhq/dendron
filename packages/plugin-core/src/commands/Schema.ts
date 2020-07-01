@@ -21,7 +21,7 @@ function applySchema(note: Note, schema: Schema) {
         if (schemaMatch) {
             return applySchema(noteChild as Note, schemaMatch);
         } else {
-            return applySchema(noteChild as Note, Schema.createUnkownSchema(schema.domain as Schema));
+            return applySchema(noteChild as Note, Schema.createUnkownSchema());
         }
     });
 

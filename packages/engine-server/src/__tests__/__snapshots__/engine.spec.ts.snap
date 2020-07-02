@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`engine edge md exist, no schema file: listDir 1`] = `
+exports[`engine:exact edge md exist, no schema file: listDir 1`] = `
 Array [
   "foo.md",
   "foo.one.md",
@@ -10,7 +10,7 @@ Array [
 ]
 `;
 
-exports[`engine edge md exist, no schema file: main 1`] = `
+exports[`engine:exact edge md exist, no schema file: main 1`] = `
 Array [
   Object {
     "body": "",
@@ -66,7 +66,7 @@ Array [
 ]
 `;
 
-exports[`engine edge no md file, no schema : listDir 1`] = `
+exports[`engine:exact edge no md file, no schema : listDir 1`] = `
 Array [
   "foo.md",
   "foo.one.md",
@@ -76,7 +76,7 @@ Array [
 ]
 `;
 
-exports[`engine edge no md file, no schema : main 1`] = `
+exports[`engine:exact edge no md file, no schema : main 1`] = `
 Array [
   Object {
     "body": "
@@ -133,7 +133,7 @@ Array [
 ]
 `;
 
-exports[`engine edge no md file, schema exist: fooNote 1`] = `
+exports[`engine:exact edge no md file, schema exist: fooNote 1`] = `
 Object {
   "body": "",
   "children": Array [
@@ -152,7 +152,7 @@ Object {
 }
 `;
 
-exports[`engine edge no md file, schema exist: listDir 1`] = `
+exports[`engine:exact edge no md file, schema exist: listDir 1`] = `
 Array [
   "foo.md",
   "foo.one.md",
@@ -162,7 +162,7 @@ Array [
 ]
 `;
 
-exports[`engine edge no md file, schema exist: main 1`] = `
+exports[`engine:exact edge no md file, schema exist: main 1`] = `
 Array [
   Object {
     "body": "
@@ -219,7 +219,7 @@ Array [
 ]
 `;
 
-exports[`engine edge note without fm: fooNote 1`] = `
+exports[`engine:exact edge note without fm: fooNote 1`] = `
 Object {
   "body": "this is foo",
   "children": Array [
@@ -236,7 +236,7 @@ Object {
 }
 `;
 
-exports[`engine edge note without id: fooNote 1`] = `
+exports[`engine:exact edge note without id: fooNote 1`] = `
 Object {
   "body": "this is foo
 ",
@@ -254,7 +254,7 @@ Object {
 }
 `;
 
-exports[`engine main create node: bazNote 1`] = `
+exports[`engine:exact main create node: bazNote 1`] = `
 Object {
   "body": "",
   "data": Object {},
@@ -266,7 +266,7 @@ Object {
 }
 `;
 
-exports[`engine main delete node with children: listDi2 1`] = `
+exports[`engine:exact main delete node with children: listDi2 1`] = `
 Array [
   "foo.one.md",
   "foo.schema.yml",
@@ -275,7 +275,7 @@ Array [
 ]
 `;
 
-exports[`engine main delete node with children: main 1`] = `
+exports[`engine:exact main delete node with children: main 1`] = `
 Array [
   Object {
     "body": "",
@@ -329,7 +329,7 @@ Array [
 ]
 `;
 
-exports[`engine main delete node with children: main2 1`] = `
+exports[`engine:exact main delete node with children: main2 1`] = `
 Array [
   Object {
     "body": "",
@@ -383,7 +383,7 @@ Array [
 ]
 `;
 
-exports[`engine main fetch node 1`] = `
+exports[`engine:exact main fetch node 1`] = `
 Object {
   "body": "",
   "children": Array [
@@ -405,7 +405,7 @@ Object {
 }
 `;
 
-exports[`engine main fetch node: main 1`] = `
+exports[`engine:exact main fetch node: main 1`] = `
 Array [
   Object {
     "body": "",
@@ -461,7 +461,7 @@ Array [
 ]
 `;
 
-exports[`engine main open stub node: listDir 1`] = `
+exports[`engine:exact main open stub node: listDir 1`] = `
 Array [
   "bar.two.md",
   "foo.md",
@@ -472,7 +472,7 @@ Array [
 ]
 `;
 
-exports[`engine main open stub node: listDir2 1`] = `
+exports[`engine:exact main open stub node: listDir2 1`] = `
 Array [
   "bar.two.md",
   "foo.md",
@@ -483,7 +483,7 @@ Array [
 ]
 `;
 
-exports[`engine main open stub node: main 1`] = `
+exports[`engine:exact main open stub node: main 1`] = `
 Array [
   Object {
     "body": "",

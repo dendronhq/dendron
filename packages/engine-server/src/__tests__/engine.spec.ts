@@ -1,4 +1,4 @@
-import { INoteOpts, Note, testUtils } from "@dendronhq/common-all";
+import { INoteOpts, Note, testUtils, DEngine } from "@dendronhq/common-all";
 import { FileTestUtils, LernaTestUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -11,14 +11,16 @@ function expectNoteProps(expect: jest.Expect, note: Note, expectedProps: INoteOp
     expect(_.pick(note, propsToCheck)).toEqual(expectedProps);
 }
 
-describe("engine", () => {
+describe("engine:exact", () => {
     let root: string;
     const queryMode = "note";
     let actualFiles: string[];
     let expectedFiles: string[];
+    let engine: DEngine;
 
     beforeEach(() => {
         root = setupTmpDendronDir();
+        engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
     });
 
     afterEach(() => {
@@ -28,7 +30,6 @@ describe("engine", () => {
 
     describe("main", () => {
         test("create node", async () => {
-            const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();
             const bazNote = new Note({ fname: "baz" });
             await engine.write(bazNote, { newNode: true, body: "baz.body" });
@@ -41,7 +42,6 @@ describe("engine", () => {
         });
 
         test("fetch node", async () => {
-            const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();
             testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
             // foo should be fully specified
@@ -54,10 +54,9 @@ describe("engine", () => {
         });
 
         test("node has same attributes when re-initializing engine", async () => {
-            const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();
             const root1: Note = engine.notes.foo;
-            const engine2 = getOrCreateEngine({ root, forceNew: true });
+            const engine2 = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
             await engine2.init();
             const root2: Note = engine2.notes.foo;
             expect(root1.toRawProps()).toEqual(root2.toRawProps());
@@ -69,7 +68,7 @@ describe("engine", () => {
 
         test("open stub node", async () => {
             FileTestUtils.writeMDFile(root, "bar.two.md", {}, "bar.two.body");
-            const engine = getOrCreateEngine({ root, forceNew: true });
+            engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
             await engine.init();
             expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
             testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
@@ -86,7 +85,6 @@ describe("engine", () => {
         });
 
         test("delete node with no children", async () => {
-            const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();
             const numNodesPre = _.values(engine.notes).length;
             const fooNode = await engine.queryOne("foo.one", "note");
@@ -103,7 +101,6 @@ describe("engine", () => {
         });
 
         test("delete node with children", async () => {
-            const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();
             const fooNode = await engine.queryOne("foo", "note");
             await engine.delete(fooNode.data.id);
@@ -125,7 +122,7 @@ describe("engine", () => {
     describe("edge", () => {
         test("md exist, no schema file", async () => {
             fs.unlinkSync(path.join(root, "foo.schema.yml"));
-            const engine = getOrCreateEngine({ root, forceNew: true });
+            engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
             await engine.init();
             expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
             testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
@@ -139,7 +136,7 @@ describe("engine", () => {
 
         test("no md file, schema exist", async () => {
             fs.unlinkSync(path.join(root, "root.md"));
-            const engine = getOrCreateEngine({ root, forceNew: true });
+            engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
             await engine.init();
             expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
             testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
@@ -153,7 +150,7 @@ describe("engine", () => {
         test("no md file, no schema ", async () => {
             fs.unlinkSync(path.join(root, "foo.schema.yml"));
             fs.unlinkSync(path.join(root, "root.md"));
-            const engine = getOrCreateEngine({ root, forceNew: true });
+            engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
             await engine.init();
             expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
             testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
@@ -168,7 +165,7 @@ describe("engine", () => {
         test("note without id", async () => {
             fs.unlinkSync(path.join(root, "foo.md"));
             FileTestUtils.writeMDFile(root, "foo.md", {}, "this is foo");
-            const engine = getOrCreateEngine({ root, forceNew: true });
+            engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
             await engine.init();
             ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore(), {
             }));
@@ -180,7 +177,7 @@ describe("engine", () => {
         test("note without fm", async () => {
             fs.unlinkSync(path.join(root, "foo.md"));
             fs.writeFileSync(path.join(root, "foo.md"), "this is foo");
-            const engine = getOrCreateEngine({ root, forceNew: true });
+            engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
             await engine.init();
             const fooNote = (await engine.query("foo", "note")).data[0];
             expect(fooNote.fname).toEqual("foo");

@@ -122,7 +122,7 @@ export class DendronEngine implements DEngine {
       cacheDir: "/tmp/dendronCache",
       root: "/Users/kevinlin/Dropbox/Apps/Dendron",
       forceNew: false,
-      mode: "exact",
+      mode: "fuzzy",
     });
     this.store = store;
     this.fuse = createFuse<Note>([], {

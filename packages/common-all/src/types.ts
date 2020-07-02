@@ -196,6 +196,9 @@ export interface DEngineStore<T = DNodeData, O = any> {
 export type DEngineMode = "exact" | "fuzzy";
 
 export type DEngineOpts = {
+  /**
+   * TODO: this is currently not supported
+   */
   root: string;
   mode?: DEngineMode;
 };
@@ -250,6 +253,11 @@ export interface DEngine {
     opts?: NodeWriteOpts
   ) => Promise<void>;
 
+  /**
+   * Update engine properties
+   * @param opts 
+   */
+  updateProps(opts: Partial<DEngineOpts>): void
 
   // /**
   //  * Write list of nodes

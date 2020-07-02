@@ -27,6 +27,7 @@ import {
   DendronError,
   QueryOneOpts,
   EngineGetResp,
+  DEngineOpts,
 } from "@dendronhq/common-all";
 
 import { BodyParser } from "./drivers/raw/BodyParser";
@@ -43,22 +44,7 @@ function isAllQuery(qs: string): boolean {
   return qs === "**/*";
 }
 
-export interface FuseOptions {
-  exactMatch?: boolean;
-  preset: QueryMode;
-  // isCaseSensitive?: boolean
-  // distance?: number
-  // findAllMatches?: boolean
-  // includeMatches?: boolean
-  // includeScore?: boolean
-  // location?: number
-  // minMatchCharLength?: number
-  // shouldSort?: boolean
-  // threshold?: number
-  // useExtendedSearch?: boolean
-}
-
-function createFuse<T>(initList: T[], opts: FuseOptions) {
+function createFuse<T>(initList: T[], opts: Fuse.IFuseOptions<any> & { exactMatch: boolean, preset: "schema" | "note" }) {
   const options = {
     shouldSort: true,
     threshold: opts.exactMatch ? 0.0 : 0.6,
@@ -66,12 +52,11 @@ function createFuse<T>(initList: T[], opts: FuseOptions) {
     distance: 100,
     maxPatternLength: 32,
     minMatchCharLength: 1,
-    keys: ["title", "logicalPath", "basename"]
+    keys: ["title", "logicalPath", "basename"],
   };
   if (opts.preset === "schema") {
     options.keys = ["title", "id"];
   }
-  // initList = _.map(initList, (n) => ({ ...n, treePath: n.path }));
   const fuse = new Fuse(initList, options);
   return fuse;
 }
@@ -519,6 +504,14 @@ export class DendronEngine implements DEngine {
     }
     // TODO
     return this.refreshNodes(refreshList, { fullNode: opts.newNode });
+  }
+
+  updateProps(opts: DEngineOpts) {
+    if (opts.mode) {
+      this.props.mode = opts.mode
+      // @ts-ignore
+      const config = Fuse.config;
+    }
   }
 }
 

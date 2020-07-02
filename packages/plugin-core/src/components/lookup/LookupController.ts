@@ -98,7 +98,7 @@ export class LookupController {
           const btn = this.state.buttons.fuzzyMatch;
           btn.pressed = !btn.pressed;
           this.updateButton(btn);
-          // getOrCreateEngine().
+          getOrCreateEngine().updateProps({ mode: btn.pressed ? "fuzzy" : "exact" });
           vscode.window.showInformationMessage("fuzzy search");
           break;
         default:

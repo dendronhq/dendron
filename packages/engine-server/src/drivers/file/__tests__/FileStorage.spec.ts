@@ -7,7 +7,6 @@ import {
 } from "@dendronhq/common-all";
 import {
   createFileStorage,
-  readMdFile,
   setupTmpDendronDir
 } from "../../../testUtils";
 
@@ -48,7 +47,7 @@ describe("main", () => {
           AssertionError
         );
         expect(() => {
-          readMdFile(root, "foo.one.md");
+          FileTestUtils.readMDFile(root, "foo.one.md");
         }).toThrow(/ENOENT/);
       });
     });
@@ -124,7 +123,7 @@ describe("main", () => {
         const node = _.find(resp.data, n => n.title === "foo.one") as IDNode;
         node.body = "bond";
         await store.write(node);
-        const { data, content } = readMdFile(root, "foo.one.md");
+        const { data, content } = FileTestUtils.readMDFile(root, "foo.one.md");
         expect(data.title).toEqual("foo.one");
         expect(content).toEqual("bond\n");
         expect(content).toMatchSnapshot("data snapshot");

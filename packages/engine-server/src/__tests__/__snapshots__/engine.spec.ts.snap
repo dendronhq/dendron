@@ -254,6 +254,18 @@ Object {
 }
 `;
 
+exports[`engine main create node: bazNote 1`] = `
+Object {
+  "body": "",
+  "data": Object {},
+  "desc": "",
+  "fname": "baz",
+  "stub": false,
+  "title": "baz",
+  "type": "note",
+}
+`;
+
 exports[`engine main delete node with children: listDi2 1`] = `
 Array [
   "foo.one.md",
@@ -369,6 +381,28 @@ Array [
     "type": "note",
   },
 ]
+`;
+
+exports[`engine main fetch node 1`] = `
+Object {
+  "body": "",
+  "children": Array [
+    "foo.one",
+    "foo.two",
+  ],
+  "created": 123,
+  "data": Object {
+    "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
+  },
+  "desc": "",
+  "fname": "foo",
+  "id": "foo",
+  "parent": "root",
+  "stub": false,
+  "title": "foo",
+  "type": "note",
+  "updated": 456,
+}
 `;
 
 exports[`engine main fetch node: main 1`] = `

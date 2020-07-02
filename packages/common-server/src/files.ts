@@ -126,7 +126,6 @@ export function node2MdFile(node: IDNode, opts: { root: string }) {
     "desc",
     "updated",
     "created",
-    "url",
     "path",
     "data"
   ]);

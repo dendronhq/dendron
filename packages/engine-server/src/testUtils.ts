@@ -37,10 +37,6 @@ export function createFileStorage(root: string) {
   });
 }
 
-export function readMdFile(root: string, fname: string) {
-  return matter.read(path.join(root, fname));
-}
-
 export function setupTmpDendronDir(): string {
   return EngineTestUtils.setupStoreDir(LernaTestUtils.getFixturesDir("store"), TMP_DATA_DIR);
 }

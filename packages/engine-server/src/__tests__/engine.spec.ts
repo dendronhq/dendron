@@ -27,14 +27,29 @@ describe("engine", () => {
     });
 
     describe("main", () => {
+        test("create node", async () => {
+            const engine = getOrCreateEngine({ root, forceNew: true });
+            await engine.init();
+            const bazNote = new Note({ fname: "baz" });
+            await engine.write(bazNote, { newNode: true, body: "baz.body" });
+            const baz = await engine.queryOne("baz", "note");
+            // FIXME: the ids change, need a better way to test
+            // const bazMd = FileTestUtils.readMDFile(root, "baz.md");
+            // expect(bazMd).toMatchSnapshot("bazMd");
+            expect(testUtils.omitEntropicProps(baz.data.toRawProps())).toMatchSnapshot("bazNote");
+            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore(), { add: ["baz.md"] }));
+        });
+
         test("fetch node", async () => {
             const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();
             testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
+            // foo should be fully specified
             const resp = await engine.query("foo", queryMode);
             expect(resp.data[0].title).toEqual("foo");
             expect(resp.data[0].created).toEqual(123);
             expect(resp.data[0].updated).toEqual(456);
+            expect(resp.data[0].toRawProps()).toMatchSnapshot();
             ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore()));
         });
 

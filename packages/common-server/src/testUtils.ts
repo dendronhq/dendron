@@ -58,6 +58,10 @@ export class FileTestUtils {
     return dirPath;
   }
 
+  static readMDFile = (root: string, fname: string) => {
+    return matter.read(path.join(root, fname));
+  }
+
   static readYMLFile = (root: string, fname: string) => {
     return YAML.load(path.join(root, fname));
   }

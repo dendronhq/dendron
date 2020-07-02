@@ -31,21 +31,21 @@ describe("engine", () => {
             const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();
             testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
-            const resp = engine.query("foo", queryMode);
-            expect((await resp).data[0].title).toEqual("foo");
+            const resp = await engine.query("foo", queryMode);
+            expect(resp.data[0].title).toEqual("foo");
+            expect(resp.data[0].created).toEqual(123);
+            expect(resp.data[0].updated).toEqual(456);
             ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore()));
         });
 
         test("node has same attributes when re-initializing engine", async () => {
             const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();
-            //const noteValues = _.values(engine.notes);
-            const root1: Note = engine.notes.root;
+            const root1: Note = engine.notes.foo;
             const engine2 = getOrCreateEngine({ root, forceNew: true });
             await engine2.init();
-            //const noteValues2 = _.values(engine.notes);
-            const root2: Note = engine2.notes.root;
-            expect(root1.toRawPropsRecursive()).toEqual(root2.toRawPropsRecursive());
+            const root2: Note = engine2.notes.foo;
+            expect(root1.toRawProps()).toEqual(root2.toRawProps());
             ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore()));
         });
     });

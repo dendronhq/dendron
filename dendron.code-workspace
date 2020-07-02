@@ -18,6 +18,9 @@
     {
       "path": "packages/web-server"
     },
+    {
+      "path": "."
+    },
     // {
     //   "name": "vscode",
     //   "path": "/Users/kevinlin/projects/vscode-extension/ref/vscode"

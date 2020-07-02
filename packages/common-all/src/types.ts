@@ -207,7 +207,7 @@ export type DEngineOpts = {
 export interface DEngine {
   notes: NoteDict;
   schemas: SchemaDict;
-  opts: Required<DEngineOpts>;
+  props: Required<DEngineOpts>;
   initialized: boolean;
 
   /**
@@ -249,10 +249,7 @@ export interface DEngine {
     node: IDNode<DNodeData>,
     opts?: NodeWriteOpts
   ) => Promise<void>;
-  // /**
-  //  * Write node to db
-  //  */
-  // write: (scope: Scope, node: IDNode) => Promise<void>;
+
 
   // /**
   //  * Write list of nodes

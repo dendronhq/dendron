@@ -99,7 +99,7 @@ export class DendronEngine implements DEngine {
 
   public initialized: boolean;
 
-  public opts: DendronEngineProps;
+  public props: DendronEngineProps;
 
   public queries: Set<string>;
 
@@ -133,7 +133,7 @@ export class DendronEngine implements DEngine {
     //this.nodes = store.fetchInitial();
     this.notes = {};
     this.initialized = false;
-    this.opts = _.defaults(opts, {
+    this.props = _.defaults(opts, {
       cacheDir: "/tmp/dendronCache",
       root: "/Users/kevinlin/Dropbox/Apps/Dendron",
       forceNew: false,
@@ -141,7 +141,7 @@ export class DendronEngine implements DEngine {
     });
     this.store = store;
     this.fuse = createFuse<Note>([], {
-      exactMatch: this.opts.mode === "exact",
+      exactMatch: this.props.mode === "exact",
       preset: "note"
     });
     this.fullNodes = new Set();
@@ -150,7 +150,7 @@ export class DendronEngine implements DEngine {
     // setup schemas
     this.schemas = {};
     this.schemaFuse = createFuse<Schema>([], {
-      exactMatch: this.opts.mode === "exact",
+      exactMatch: this.props.mode === "exact",
       preset: "schema"
     });
 

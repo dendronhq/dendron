@@ -9,6 +9,8 @@
         "shd101wyy.markdown-preview-enhanced",
         // Spellcheck
         "ban.spellright",
+        // images
+        "mushan.vscode-paste-image",
         // wikilinks, backlinks, and additional goodies
         "kortina.vscode-markdown-notes"
     ]

@@ -24,6 +24,21 @@ function writeWSFile(fpath: string, opts: { rootDir: string }) {
             "editor.minimap.enabled": false,
             "dendron.rootDir": opts.rootDir,
         },
+        "extensions": {
+            "recommendations": [
+                "dendron.dendron",
+                // git version history
+                "eamodio.gitlens",
+                // markdown extensions
+                "shd101wyy.markdown-preview-enhanced",
+                // Spellcheck
+                "ban.spellright",
+                // images
+                "mushan.vscode-paste-image",
+                // wikilinks, backlinks, and additional goodies
+                "kortina.vscode-markdown-notes"
+            ]
+        }
     };
     fs.writeJsonSync(fpath, jsonBody);
 }

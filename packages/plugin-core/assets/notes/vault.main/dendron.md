@@ -17,6 +17,8 @@ id: ef43aff2-d8ba-4551-b311-d85cc171f0e4
 
 # Dendron
 
+
+
 ![](assets/2020-06-30-21-30-51.png#right)
 
 Dendron is a **hierarchal** note taking tool that **grows** as you do. 

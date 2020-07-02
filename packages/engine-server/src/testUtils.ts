@@ -8,16 +8,8 @@ import matter from "gray-matter";
 import _ from "lodash";
 import path from "path";
 import FileStorage from "./drivers/file/store";
-import { EngineTestUtils } from "@dendronhq/common-server";
+import { EngineTestUtils, LernaTestUtils } from "@dendronhq/common-server";
 
-// const FIXTURES_DIR =
-//     "/Users/kevinlin/projects/dendronv2/dendron/packages/electron-client/fixtures/store"
-// TODO
-//const FIXTURES_DIR = '/Users/kevinlin/Dropbox/Apps/Noah/notesv2';
-// eslint-disable-next-line operator-linebreak
-// TODO: don't hardcode
-const FIXTURES_DIR =
-  "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/fixtures/store";
 export const ROOT_ID = "root";
 export const NOTE_FOO_PATH = "foo";
 export const NOTE_FOO_CHILD_ONE_ID = "foo.one";
@@ -38,12 +30,6 @@ export const FOO_SCHEMA = {
 export const SCHEMA_FOO_PARENT_ID = "root.schema";
 export const TMP_DATA_DIR = "/tmp/dendron-tmp";
 
-export class FixtureUtils {
-  static fixtureFiles = (): string[] => {
-    return fs.readdirSync(FIXTURES_DIR);
-  }
-}
-
 export function createFileStorage(root: string) {
   // TODO: update
   return new FileStorage({
@@ -56,7 +42,7 @@ export function readMdFile(root: string, fname: string) {
 }
 
 export function setupTmpDendronDir(): string {
-  return EngineTestUtils.setupStoreDir(FIXTURES_DIR, TMP_DATA_DIR);
+  return EngineTestUtils.setupStoreDir(LernaTestUtils.getFixturesDir("store"), TMP_DATA_DIR);
 }
 
 export function rmTmpDendronDir(root: string) {

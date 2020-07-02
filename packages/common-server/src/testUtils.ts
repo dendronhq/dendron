@@ -72,7 +72,11 @@ export class LernaTestUtils {
   static getRootDir() {
     return FileTestUtils.getPkgRoot(__dirname, "lerna.json");
   }
-  static getFixturesDir() {
-    return path.join(this.getRootDir(), "fixtures");
+  static getFixturesDir(type?: "store") {
+    let pathSoFar = path.join(this.getRootDir(), "fixtures");
+    return type ? path.join(pathSoFar, type) : pathSoFar;
+  }
+  static fixtureFilesForStore() {
+    return fs.readdirSync(path.join(LernaTestUtils.getFixturesDir(), "store"));
   }
 }

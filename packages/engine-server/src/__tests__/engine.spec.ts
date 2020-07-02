@@ -1,13 +1,10 @@
 import { INoteOpts, Note, testUtils } from "@dendronhq/common-all";
-import { FileTestUtils } from "@dendronhq/common-server";
+import { FileTestUtils, LernaTestUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { getOrCreateEngine } from "../engine";
-import { FixtureUtils, setupTmpDendronDir } from "../testUtils";
-
-// function checkNodeCreated(expect: jest.Expect) {
-// }
+import { setupTmpDendronDir } from "../testUtils";
 
 function expectNoteProps(expect: jest.Expect, note: Note, expectedProps: INoteOpts) {
     const propsToCheck = ["fname"].concat(_.keys(expectedProps));
@@ -36,10 +33,10 @@ describe("engine", () => {
             testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
             const resp = engine.query("foo", queryMode);
             expect((await resp).data[0].title).toEqual("foo");
-            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles()));
+            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore()));
         });
 
-        test.skip("node has same attributes when re-initializing engine", async () => {
+        test("node has same attributes when re-initializing engine", async () => {
             const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();
             //const noteValues = _.values(engine.notes);
@@ -49,7 +46,7 @@ describe("engine", () => {
             //const noteValues2 = _.values(engine.notes);
             const root2: Note = engine2.notes.root;
             expect(root1.toRawPropsRecursive()).toEqual(root2.toRawPropsRecursive());
-            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles()));
+            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore()));
         });
     });
 
@@ -68,7 +65,7 @@ describe("engine", () => {
             expect((await resp2).data[0].fname).toEqual("bar");
             expect(fs.readdirSync(root)).toMatchSnapshot("listDir2");
 
-            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
+            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore(), {
                 add: ["bar.two.md"]
             }));
         });
@@ -85,7 +82,7 @@ describe("engine", () => {
             // start of with three foo nodes, end up with two
             expect(resp.data.length).toEqual(2);
             // file should not be there
-            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
+            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore(), {
                 remove: ["foo.one.md"]
             }));
         });
@@ -104,7 +101,7 @@ describe("engine", () => {
             expect(numNodesPre).toEqual(_.values(engine.notes).length);
             testUtils.expectSnapshot(expect, "main2", _.values(engine.notes));
             // foo file should be deleted
-            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
+            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore(), {
                 remove: ["foo.md"]
             }));
         });
@@ -119,7 +116,7 @@ describe("engine", () => {
             testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
             const resp = engine.query("root", "schema");
             expect((await resp).data[0].fname).toEqual("root.schema");
-            ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
+            ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore(), {
                 add: ["root.schema.yml"],
                 remove: ["foo.schema.yml"]
             }));
@@ -134,7 +131,7 @@ describe("engine", () => {
             const fooNote = (await engine.query("foo", "note")).data[0];
             expect(fooNote.fname).toEqual("foo");
             testUtils.expectSnapshot(expect, "fooNote", fooNote);
-            ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
+            ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore(), {
             }));
         });
 
@@ -147,7 +144,7 @@ describe("engine", () => {
             testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
             const resp = engine.query("root", "note");
             expect((await resp).data[0].fname).toEqual("root");
-            ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
+            ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore(), {
                 add: ["root.schema.yml"],
                 remove: ["foo.schema.yml"]
             }));
@@ -158,7 +155,7 @@ describe("engine", () => {
             FileTestUtils.writeMDFile(root, "foo.md", {}, "this is foo");
             const engine = getOrCreateEngine({ root, forceNew: true });
             await engine.init();
-            ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
+            ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore(), {
             }));
             const fooNote = (await engine.query("foo", "note")).data[0];
             expect(fooNote.fname).toEqual("foo");
@@ -173,7 +170,7 @@ describe("engine", () => {
             const fooNote = (await engine.query("foo", "note")).data[0];
             expect(fooNote.fname).toEqual("foo");
             testUtils.expectSnapshot(expect, "fooNote", fooNote);
-            ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, FixtureUtils.fixtureFiles(), {
+            ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore(), {
             }));
         });
     });

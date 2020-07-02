@@ -4,7 +4,7 @@ exports[`DNodeUtils findClosestParent, parent grandchild -> domain root: main 1`
 Object {
   "body": "",
   "children": Array [],
-  "created": "TODO",
+  "created": 1593699109603,
   "data": Object {},
   "desc": "",
   "fname": "baz",
@@ -12,7 +12,7 @@ Object {
   "stub": false,
   "title": "baz",
   "type": "note",
-  "updated": "TODO",
+  "updated": 1593699109603,
 }
 `;
 
@@ -20,7 +20,7 @@ exports[`DNodeUtils findClosestParent, parent grandchild -> parent: main 1`] = `
 Object {
   "body": "",
   "children": Array [],
-  "created": "TODO",
+  "created": 1593699109598,
   "data": Object {},
   "desc": "",
   "fname": "foo.one",
@@ -28,7 +28,7 @@ Object {
   "stub": false,
   "title": "foo.one",
   "type": "note",
-  "updated": "TODO",
+  "updated": 1593699109598,
 }
 `;
 
@@ -38,7 +38,7 @@ Object {
   "children": Array [
     "foo",
   ],
-  "created": "TODO",
+  "created": 1593699109604,
   "data": Object {},
   "desc": "",
   "fname": "root",
@@ -46,7 +46,7 @@ Object {
   "stub": false,
   "title": "root",
   "type": "note",
-  "updated": "TODO",
+  "updated": 1593699109604,
 }
 `;
 
@@ -55,7 +55,7 @@ Array [
   Object {
     "body": "",
     "children": Array [],
-    "created": "TODO",
+    "created": 1593699109605,
     "data": Object {},
     "desc": "",
     "fname": "bar.one",
@@ -63,7 +63,7 @@ Array [
     "stub": false,
     "title": "bar.one",
     "type": "note",
-    "updated": "TODO",
+    "updated": 1593699109605,
   },
 ]
 `;

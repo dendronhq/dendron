@@ -1,7 +1,6 @@
 /* eslint-disable no-loop-func */
 import _ from "lodash";
 import YAML from "yamljs";
-import { assertExists } from "./assert";
 import { DendronError } from "./error";
 import {
   DNodeData,
@@ -23,6 +22,7 @@ import {
   SchemaRawProps
 } from "./types";
 import { genUUID } from "./uuid";
+import moment from "moment";
 
 const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
@@ -74,8 +74,8 @@ export class DNodeRaw {
       body,
       data
     } = _.defaults(opts, {
-      updated: "TODO",
-      created: "TODO",
+      updated: moment.now(),
+      created: moment.now(),
       id: genUUID(),
       desc: "",
       children: [],

@@ -154,8 +154,8 @@ describe("main", () => {
     describe("write", () => {
       test("writeRoot", async () => {
         await store.write(Schema.createRoot());
-        const data = FileTestUtils.readYMLFile(root, "root.schema.yml");
-        expect(data).toMatchSnapshot("data snapshot");
+        const rootYml = FileTestUtils.readYMLFile(root, "root.schema.yml");
+        expect(testUtils.omitEntropicProps(rootYml[0])).toMatchSnapshot("root");
       });
     });
   });

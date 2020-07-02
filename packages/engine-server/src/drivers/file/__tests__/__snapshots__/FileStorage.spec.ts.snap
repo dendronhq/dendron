@@ -114,21 +114,14 @@ exports[`main notes write writeQuery: data snapshot 1`] = `
 "
 `;
 
-exports[`main schema write writeRoot: data snapshot 1`] = `
-Array [
-  Object {
-    "body": "",
-    "children": Array [],
-    "created": 1593701045255,
-    "data": Object {},
-    "desc": "",
-    "fname": "root.schema",
-    "id": "root",
-    "parent": "root",
-    "stub": false,
-    "title": "root",
-    "type": "schema",
-    "updated": 1593701045255,
-  },
-]
+exports[`main schema write writeRoot: root 1`] = `
+Object {
+  "body": "",
+  "data": Object {},
+  "desc": "",
+  "fname": "root.schema",
+  "stub": false,
+  "title": "root",
+  "type": "schema",
+}
 `;

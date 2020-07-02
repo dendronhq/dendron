@@ -1,16 +1,21 @@
 import { DNode } from "./node";
 import { DNodeData } from "./types";
 import _ from "lodash";
+import { DNodeRawProps } from "../lib";
 
 /**
  * Remove properties that change
  * @param n1 
  */
 export function toSnapshotProps(n1: DNode) {
-  const out = _.omit(n1.toRawProps(), "id", "parent", "children", "updated", "created");
+  const out = omitEntropicProps(n1.toRawProps());
   const parent = n1.parent?.title || "root";
   const children = n1.children.map(c => c.title);
   return { ...out, parent, children };
+}
+
+function omitEntropicProps(obj: DNodeRawProps) {
+  return _.omit(obj, "id", "parent", "children", "updated", "created");
 }
 
 export function expectSnapshot(
@@ -38,5 +43,6 @@ export function expectNodeEqual(
 export const testUtils = {
   expectNodeEqual,
   expectSnapshot,
-  toSnapshotProps
+  toSnapshotProps,
+  omitEntropicProps,
 };

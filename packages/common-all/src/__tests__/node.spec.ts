@@ -46,7 +46,7 @@ function setup() {
   return { foo, fooChild, fooGrandChild };
 }
 
-describe(DNodeUtils, () => {
+describe("DNoteUtils", () => {
   let notes: ReturnType<typeof setupNotes>;
   describe("findClosestParent, parent", () => {
     beforeEach(() => {

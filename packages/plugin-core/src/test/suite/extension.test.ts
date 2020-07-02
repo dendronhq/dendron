@@ -10,20 +10,11 @@ import { afterEach, before, beforeEach, describe } from "mocha";
 // import { fnameToUri } from "../../components/lookup/utils";
 // import fs from "fs-extra";
 import path from "path";
-import { testUtils, FileTestUtils } from "@dendronhq/common-server";
+import { FileTestUtils } from "@dendronhq/common-server";
 import { DendronWorkspace } from "../../workspace";
 import fs from "fs-extra";
-// import { testUtils } from "@dendronhq/common-server";
+import { LernaTestUtils } from "@dendronhq/common-server";
 
-class LernaTestUtils {
-    static getRootDir() {
-        // TODO: go up until you find lerna.json
-        return path.join(__dirname, "../../../../../");
-    }
-    static getFixturesDir() {
-        return path.join(this.getRootDir(), "fixtures");
-    }
-}
 
 function createMockContext(): vscode.ExtensionContext {
     const pkgRoot = FileTestUtils.getPkgRoot(__dirname);

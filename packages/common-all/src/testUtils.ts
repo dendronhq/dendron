@@ -2,8 +2,12 @@ import { DNode } from "./node";
 import { DNodeData } from "./types";
 import _ from "lodash";
 
+/**
+ * Remove properties that change
+ * @param n1 
+ */
 export function toSnapshotProps(n1: DNode) {
-  const out = _.omit(n1.toRawProps(), "id", "parent", "children");
+  const out = _.omit(n1.toRawProps(), "id", "parent", "children", "updated", "created");
   const parent = n1.parent?.title || "root";
   const children = n1.children.map(c => c.title);
   return { ...out, parent, children };

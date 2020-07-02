@@ -2,11 +2,11 @@ import {
   AssertionError,
   IDNode,
   QueryMode,
-  Schema
+  Schema,
+  testUtils
 } from "@dendronhq/common-all";
 import {
   createFileStorage,
-  expectSnapshot,
   readMdFile,
   setupTmpDendronDir
 } from "../../../testUtils";
@@ -98,7 +98,7 @@ describe("main", () => {
         expect(bar?.stub).toBeTruthy();
         expect(barOne).not.toBeNull();
         expect(barOne?.stub).toBeTruthy();
-        expectSnapshot(expect, "missing snapshots", resp.data);
+        testUtils.expectSnapshot(expect, "missing snapshots", resp.data);
       });
 
       test("all", async () => {
@@ -114,7 +114,7 @@ describe("main", () => {
         // expect parent
         expect(fooChild.domain.title).toEqual("foo");
         expect(fooChild.parent?.id).toEqual(foo.id);
-        expectSnapshot(expect, "raw-props", fooChild);
+        testUtils.expectSnapshot(expect, "raw-props", fooChild);
       });
     });
 

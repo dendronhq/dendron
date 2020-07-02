@@ -9,16 +9,15 @@ export function appendUUID(fname: string) {
   return `${fname}-${genUUID()}`;
 }
 
-export function setupTmpDendronDir(opts: {
-  fixturesDir: string;
-  tmpDir: string;
-}): string {
-  const dirPath = appendUUID(opts.tmpDir);
-  // eslint-disable-next-line no-undef
-  fs.ensureDirSync(dirPath);
-  fs.emptyDirSync(dirPath);
-  fs.copySync(opts.fixturesDir, dirPath);
-  return dirPath;
+export class EngineTestUtils {
+  static setupStoreDir(fixturesDir: string, storeDir: string) {
+    const dirPath = appendUUID(storeDir);
+    // eslint-disable-next-line no-undef
+    fs.ensureDirSync(dirPath);
+    fs.emptyDirSync(dirPath);
+    fs.copySync(fixturesDir, dirPath);
+    return dirPath;
+  }
 }
 
 export class FileTestUtils {
@@ -37,11 +36,12 @@ export class FileTestUtils {
     ];
   }
 
-  static getPkgRoot(base: string): string {
+  static getPkgRoot(base: string, fname?: string): string {
+    fname = fname || "package.json";
     let acc = 5;
     const lvls = [];
     while (acc > 0) {
-      const tryPath = path.join(base, ...lvls, "package.json");
+      const tryPath = path.join(base, ...lvls, fname);
       if (fs.existsSync(tryPath)) {
         return path.dirname(tryPath);
       }
@@ -68,6 +68,11 @@ export class FileTestUtils {
   };
 }
 
-export const testUtils = {
-  setupTmpDendronDir,
-};
+export class LernaTestUtils {
+  static getRootDir() {
+    return FileTestUtils.getPkgRoot(__dirname, "lerna.json");
+  }
+  static getFixturesDir() {
+    return path.join(this.getRootDir(), "fixtures");
+  }
+}

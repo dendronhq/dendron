@@ -4,7 +4,6 @@ exports[`main notes query all: raw-props 1`] = `
 Object {
   "body": "",
   "children": Array [],
-  "created": 1593699110461,
   "data": Object {},
   "desc": "",
   "fname": "foo.one",
@@ -12,7 +11,6 @@ Object {
   "stub": false,
   "title": "foo.one",
   "type": "note",
-  "updated": 1593699110461,
 }
 `;
 
@@ -24,7 +22,6 @@ Array [
       "foo",
       "bar",
     ],
-    "created": 1593699110447,
     "data": Object {},
     "desc": "",
     "fname": "root",
@@ -32,7 +29,6 @@ Array [
     "stub": false,
     "title": "root",
     "type": "note",
-    "updated": 1593699110447,
   },
   Object {
     "body": "",
@@ -40,7 +36,6 @@ Array [
       "foo.one",
       "foo.two",
     ],
-    "created": 1593699110447,
     "data": Object {
       "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
     },
@@ -50,14 +45,12 @@ Array [
     "stub": false,
     "title": "foo",
     "type": "note",
-    "updated": 1593699110447,
   },
   Object {
     "body": "",
     "children": Array [
       "bar.one",
     ],
-    "created": 1593699110449,
     "data": Object {},
     "desc": "",
     "fname": "bar",
@@ -65,12 +58,10 @@ Array [
     "stub": true,
     "title": "bar",
     "type": "note",
-    "updated": 1593699110449,
   },
   Object {
     "body": "",
     "children": Array [],
-    "created": 1593699110448,
     "data": Object {},
     "desc": "",
     "fname": "foo.one",
@@ -78,12 +69,10 @@ Array [
     "stub": false,
     "title": "foo.one",
     "type": "note",
-    "updated": 1593699110448,
   },
   Object {
     "body": "",
     "children": Array [],
-    "created": 1593699110448,
     "data": Object {},
     "desc": "",
     "fname": "foo.two",
@@ -91,14 +80,12 @@ Array [
     "stub": false,
     "title": "foo.two",
     "type": "note",
-    "updated": 1593699110448,
   },
   Object {
     "body": "",
     "children": Array [
       "bar.one.alpha",
     ],
-    "created": 1593699110449,
     "data": Object {},
     "desc": "",
     "fname": "bar.one",
@@ -106,13 +93,11 @@ Array [
     "stub": true,
     "title": "bar.one",
     "type": "note",
-    "updated": 1593699110449,
   },
   Object {
     "body": "bar alpha content
 ",
     "children": Array [],
-    "created": 1593699110449,
     "data": Object {},
     "desc": "",
     "fname": "bar.one.alpha",
@@ -120,7 +105,6 @@ Array [
     "stub": false,
     "title": "bar.one.alpha",
     "type": "note",
-    "updated": 1593699110449,
   },
 ]
 `;
@@ -135,7 +119,7 @@ Array [
   Object {
     "body": "",
     "children": Array [],
-    "created": 1593699110491,
+    "created": 1593701045255,
     "data": Object {},
     "desc": "",
     "fname": "root.schema",
@@ -144,7 +128,7 @@ Array [
     "stub": false,
     "title": "root",
     "type": "schema",
-    "updated": 1593699110491,
+    "updated": 1593701045255,
   },
 ]
 `;

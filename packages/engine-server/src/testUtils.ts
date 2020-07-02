@@ -8,6 +8,7 @@ import matter from "gray-matter";
 import _ from "lodash";
 import path from "path";
 import FileStorage from "./drivers/file/store";
+import { EngineTestUtils } from "@dendronhq/common-server";
 
 // const FIXTURES_DIR =
 //     "/Users/kevinlin/projects/dendronv2/dendron/packages/electron-client/fixtures/store"
@@ -54,47 +55,11 @@ export function readMdFile(root: string, fname: string) {
   return matter.read(path.join(root, fname));
 }
 
-export function appendUUID(fname: string) {
-  return `${fname}-${genUUID()}`;
-}
-
 export function setupTmpDendronDir(): string {
-  const dirPath = appendUUID(TMP_DATA_DIR);
-  fs.ensureDirSync(dirPath);
-  fs.emptyDirSync(dirPath);
-  fs.copySync(FIXTURES_DIR, dirPath);
-  return dirPath;
+  return EngineTestUtils.setupStoreDir(FIXTURES_DIR, TMP_DATA_DIR);
 }
 
 export function rmTmpDendronDir(root: string) {
   return fs.removeSync(root);
 }
 
-export function toSnapshotProps(n1: DNode) {
-  const out = _.omit(n1.toRawProps(), "id", "parent", "children");
-  const parent = n1.parent?.title || "root";
-  const children = n1.children.map(c => c.title);
-  return { ...out, parent, children };
-}
-
-export function expectSnapshot(
-  expect: jest.Expect,
-  name: string,
-  n1: DNode<DNodeData> | DNode<DNodeData>[]
-) {
-  let snap;
-  if (_.isArrayLike(n1)) {
-    snap = n1.map(n => toSnapshotProps(n));
-  } else {
-    snap = toSnapshotProps(n1);
-  }
-  expect(snap).toMatchSnapshot(name);
-}
-
-export function expectNodeEqual(
-  expect: jest.Expect,
-  n1: DNode<DNodeData>,
-  n2: DNode<DNodeData>
-) {
-  expect(n1.id).toEqual(n2.id);
-}

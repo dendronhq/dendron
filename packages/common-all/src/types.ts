@@ -30,7 +30,7 @@ export type DNodeRawOpts<T extends DNodeData> = {
   /**
    * Same as uri
    */
-  fname?: string;
+  fname: string;
   parent?: string | null | "root";
   children?: string[];
   body?: string;

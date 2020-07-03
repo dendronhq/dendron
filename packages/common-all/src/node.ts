@@ -388,6 +388,9 @@ export class Note extends DNode<NoteData> implements INote {
   get description(): string | undefined {
     let schemaPrefix: string | undefined;
     let prefixParts = [];
+    if (this.stub) {
+      prefixParts.push("(stub)")
+    }
     if (this.schema) {
       // case: unknown schema
       // eslint-disable-next-line no-use-before-define
@@ -407,9 +410,8 @@ export class Note extends DNode<NoteData> implements INote {
       if (this.schemaStub) {
         prefixParts.push("(create from schema)");
       }
-
-      schemaPrefix = prefixParts.join(" ");
     }
+    schemaPrefix = prefixParts.join(" ");
     return schemaPrefix;
   }
 

@@ -1,4 +1,4 @@
-import { INoteOpts, Note, testUtils, DEngine } from "@dendronhq/common-all";
+import { INoteOpts, Note, testUtils, DEngine, DNodeRawProps, SchemaNodeRaw, SchemaRawProps } from "@dendronhq/common-all";
 import { FileTestUtils, LernaTestUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -29,6 +29,22 @@ describe("engine:exact", () => {
     });
 
     describe("basic", () => {
+        test("create when empty", async () => {
+            fs.removeSync(root);
+            root = setupTmpDendronDir({copyFixtures: false});
+            engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
+            await engine.init();
+            testUtils.expectSnapshot(expect, "notes", _.values(engine.notes));
+            testUtils.expectSnapshot(expect, "schemas", _.values(engine.schemas));
+            const {content, data} = FileTestUtils.readMDFile(root, "root.md")
+            expect(content).toMatchSnapshot("notes-root-content");
+            expect(testUtils.omitEntropicProps(data as DNodeRawProps)).toMatchSnapshot("notes-root-data");
+            expect(
+                FileTestUtils.readYMLFile(root, "root.schema.yml").map((schemaProps: SchemaRawProps) => testUtils.omitEntropicProps(schemaProps))
+            ).toMatchSnapshot("schema-root");
+            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, ["root.md", "root.schema.yml"], {}));
+        });
+
         test("create node", async () => {
             await engine.init();
             const bazNote = new Note({ fname: "baz" });

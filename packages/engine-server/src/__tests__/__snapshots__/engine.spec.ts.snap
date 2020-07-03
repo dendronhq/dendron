@@ -12,6 +12,67 @@ Object {
 }
 `;
 
+exports[`engine:exact basic create when empty: notes 1`] = `
+Array [
+  Object {
+    "body": "
+",
+    "children": Array [],
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "parent": "root",
+    "stub": false,
+    "title": "root",
+    "type": "note",
+  },
+]
+`;
+
+exports[`engine:exact basic create when empty: notes-root-content 1`] = `
+"
+"
+`;
+
+exports[`engine:exact basic create when empty: notes-root-data 1`] = `
+Object {
+  "data": Object {},
+  "desc": "",
+  "path": "root",
+  "title": "root",
+}
+`;
+
+exports[`engine:exact basic create when empty: schema-root 1`] = `
+Array [
+  Object {
+    "body": "",
+    "data": Object {},
+    "desc": "",
+    "fname": "root.schema",
+    "stub": false,
+    "title": "root",
+    "type": "schema",
+  },
+]
+`;
+
+exports[`engine:exact basic create when empty: schemas 1`] = `
+Array [
+  Object {
+    "body": "",
+    "children": Array [],
+    "data": Object {},
+    "desc": "",
+    "fname": "root.schema",
+    "parent": "root",
+    "stub": false,
+    "title": "root",
+    "type": "schema",
+  },
+]
+`;
+
 exports[`engine:exact basic fetch node 1`] = `
 Object {
   "body": "",

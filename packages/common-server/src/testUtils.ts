@@ -10,12 +10,15 @@ export function appendUUID(fname: string) {
 }
 
 export class EngineTestUtils {
-  static setupStoreDir(fixturesDir: string, storeDir: string) {
+  static setupStoreDir(fixturesDir: string, storeDir: string, opts?: {copyFixtures?: boolean}) {
+    const cleanOpts = _.defaults(opts, {copyFixtures: true});
     const dirPath = appendUUID(storeDir);
     // eslint-disable-next-line no-undef
     fs.ensureDirSync(dirPath);
     fs.emptyDirSync(dirPath);
-    fs.copySync(fixturesDir, dirPath);
+    if (cleanOpts.copyFixtures) {
+      fs.copySync(fixturesDir, dirPath);
+    }
     return dirPath;
   }
 }

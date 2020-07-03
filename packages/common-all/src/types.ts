@@ -201,6 +201,7 @@ export interface DEngineStore<T = DNodeData, O = any> {
     node: IDNode<T>,
     opts?: DEngineStoreWriteOpts
   ) => Promise<void>;
+  updateNodes(nodes: IDNode[]): Promise<void>;
 }
 
 export type DEngineMode = "exact" | "fuzzy";
@@ -222,6 +223,7 @@ export interface DEngine {
   schemas: SchemaDict;
   props: Required<DEngineOpts>;
   initialized: boolean;
+  store: DEngineStore;
 
   /**
    * Load all nodes

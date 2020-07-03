@@ -27,7 +27,11 @@ import moment from "moment";
 const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
 export class DNodeUtils {
-  static basename(nodePath: string) {
+  static basename(nodePath: string, extension?: boolean) {
+    if (extension) {
+      const idx = nodePath.lastIndexOf(".md");
+      nodePath = nodePath.slice(0, idx);
+    }
     return nodePath.split(".").slice(-1)[0];
   }
 

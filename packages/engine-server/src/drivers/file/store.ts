@@ -89,6 +89,13 @@ export abstract class FileStorageBase {
 }
 
 export class FileStorage extends FileStorageBase implements DEngineStore {
+
+  files2Notes(fpaths: string[]): NoteRawProps[] {
+    const fp = new FileParser(this, { errorOnEmpty: false });
+    const data = fp.parse(fpaths);
+    return data.map(n => n.toRawProps());
+  }
+
   doGetFile(id: string): DNodeRawProps<DNodeData> {
     const { root } = this.opts;
     const fpath = this.idToPath[id];
@@ -102,11 +109,7 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
       root: this.opts.root,
       include: ["*.md"]
     }) as string[];
-    const fp = new FileParser(this, { errorOnEmpty: false });
-    const data = fp.parse(allFiles);
-    const report = fp.report();
-    logger.debug({ ctx: "_getQueryAll:exit", report });
-    return data.map(n => n.toRawProps());
+    return this.files2Notes(allFiles);
   }
 
   async _getSchemaAll(): Promise<SchemaRawProps[]> {
@@ -168,7 +171,6 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
       const schemas = _opts?.schemas || {};
       const noteProps = await this._getNoteAll();
       const data = new NodeBuilder().buildNoteFromProps(noteProps, { schemas });
-      // const data = new RawParser().parse(nodesAll)
       this.refreshIdToPath(data);
 
       logger.debug({ ctx: "query:exit:pre" });
@@ -207,8 +209,16 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
       }
     }
     // FIXME:OPT: only do for new nodes
-    this.refreshIdToPath([node]);
+    this.updateNodes([node])
     return;
+  }
+
+  /**
+   * Add to storage cache
+   * @param nodes 
+   */
+  async updateNodes(nodes: IDNode[]) {
+    this.refreshIdToPath(nodes)
   }
 }
 

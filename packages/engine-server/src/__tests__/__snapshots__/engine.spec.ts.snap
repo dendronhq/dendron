@@ -1,5 +1,163 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`engine:exact basic create node: bazNote 1`] = `
+Object {
+  "body": "",
+  "data": Object {},
+  "desc": "",
+  "fname": "baz",
+  "stub": false,
+  "title": "baz",
+  "type": "note",
+}
+`;
+
+exports[`engine:exact basic fetch node 1`] = `
+Object {
+  "body": "",
+  "children": Array [
+    "foo.one",
+    "foo.two",
+  ],
+  "created": 123,
+  "data": Object {
+    "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
+  },
+  "desc": "",
+  "fname": "foo",
+  "id": "foo",
+  "parent": "root",
+  "stub": false,
+  "title": "foo",
+  "type": "note",
+  "updated": 456,
+}
+`;
+
+exports[`engine:exact basic fetch node: main 1`] = `
+Array [
+  Object {
+    "body": "",
+    "children": Array [
+      "foo",
+    ],
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "parent": "root",
+    "stub": false,
+    "title": "root",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.one",
+      "foo.two",
+    ],
+    "data": Object {
+      "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
+    },
+    "desc": "",
+    "fname": "foo",
+    "parent": "root",
+    "stub": false,
+    "title": "foo",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.one",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.one",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.two",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.two",
+    "type": "note",
+  },
+]
+`;
+
+exports[`engine:exact basic updateNode: bazNote 1`] = `
+Object {
+  "body": "",
+  "data": Object {},
+  "desc": "",
+  "fname": "baz",
+  "stub": false,
+  "title": "baz",
+  "type": "note",
+}
+`;
+
+exports[`engine:exact basic updateNode: main 1`] = `
+Array [
+  Object {
+    "body": "",
+    "children": Array [
+      "foo",
+    ],
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "parent": "root",
+    "stub": false,
+    "title": "root",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.one",
+      "foo.two",
+    ],
+    "data": Object {
+      "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
+    },
+    "desc": "",
+    "fname": "foo",
+    "parent": "root",
+    "stub": false,
+    "title": "foo",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.one",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.one",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.two",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.two",
+    "type": "note",
+  },
+]
+`;
+
 exports[`engine:exact edge md exist, no schema file: listDir 1`] = `
 Array [
   "foo.md",
@@ -254,18 +412,6 @@ Object {
 }
 `;
 
-exports[`engine:exact main create node: bazNote 1`] = `
-Object {
-  "body": "",
-  "data": Object {},
-  "desc": "",
-  "fname": "baz",
-  "stub": false,
-  "title": "baz",
-  "type": "note",
-}
-`;
-
 exports[`engine:exact main delete node with children: listDi2 1`] = `
 Array [
   "foo.one.md",
@@ -378,84 +524,6 @@ Array [
     "parent": "root",
     "stub": true,
     "title": "foo",
-    "type": "note",
-  },
-]
-`;
-
-exports[`engine:exact main fetch node 1`] = `
-Object {
-  "body": "",
-  "children": Array [
-    "foo.one",
-    "foo.two",
-  ],
-  "created": 123,
-  "data": Object {
-    "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
-  },
-  "desc": "",
-  "fname": "foo",
-  "id": "foo",
-  "parent": "root",
-  "stub": false,
-  "title": "foo",
-  "type": "note",
-  "updated": 456,
-}
-`;
-
-exports[`engine:exact main fetch node: main 1`] = `
-Array [
-  Object {
-    "body": "",
-    "children": Array [
-      "foo",
-    ],
-    "data": Object {},
-    "desc": "",
-    "fname": "root",
-    "parent": "root",
-    "stub": false,
-    "title": "root",
-    "type": "note",
-  },
-  Object {
-    "body": "",
-    "children": Array [
-      "foo.one",
-      "foo.two",
-    ],
-    "data": Object {
-      "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
-    },
-    "desc": "",
-    "fname": "foo",
-    "parent": "root",
-    "stub": false,
-    "title": "foo",
-    "type": "note",
-  },
-  Object {
-    "body": "",
-    "children": Array [],
-    "data": Object {},
-    "desc": "",
-    "fname": "foo.one",
-    "parent": "foo",
-    "stub": false,
-    "title": "foo.one",
-    "type": "note",
-  },
-  Object {
-    "body": "",
-    "children": Array [],
-    "data": Object {},
-    "desc": "",
-    "fname": "foo.two",
-    "parent": "foo",
-    "stub": false,
-    "title": "foo.two",
     "type": "note",
   },
 ]

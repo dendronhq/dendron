@@ -28,6 +28,7 @@ import {
   QueryOneOpts,
   EngineGetResp,
   DEngineOpts,
+  UpdateNodesOpts,
 } from "@dendronhq/common-all";
 
 import { BodyParser } from "./drivers/raw/BodyParser";
@@ -445,19 +446,19 @@ export class DendronEngine implements DEngine {
   }
 
   async write(node: IDNode, opts?: NodeWriteOpts): Promise<void> {
-    opts = _.defaults(opts, { newNode: false, body: "", stub: false, parentsAsStubs: false, recursive: false });
-    const refreshList: DNode[] = [node];
+    const props = _.defaults(opts, { newNode: false, body: "", stub: false, parentsAsStubs: false, recursive: false });
     if (node.type === "schema") {
-      assertExists(opts.body, "body must exist");
+      const refreshList: DNode[] = [node];
+      assertExists(opts?.body, "body must exist");
       // convert body
-      const props: SchemaRawProps[] = new BodyParser().parseSchema(
-        opts.body as string,
+      const schemaRawProps: SchemaRawProps[] = new BodyParser().parseSchema(
+        props.body,
         {
           node,
           fname: node.fname
         }
       );
-      const schemas = new NodeBuilder().buildSchemaFromProps(props);
+      const schemas = new NodeBuilder().buildSchemaFromProps(schemaRawProps);
       const schemaNew = _.find(schemas, { id: node.id });
       if (_.isUndefined(schemaNew)) {
         throw Error(`no schema found for ${node} on write`);
@@ -465,8 +466,8 @@ export class DendronEngine implements DEngine {
       node = schemaNew;
       // reset body
       node.body = "";
-      await this.store.write(node, { stub: opts.stub });
-      if (opts.newNode) {
+      await this.store.write(node, { stub: props.stub });
+      if (props.newNode) {
         const parentPath = "root";
         const parentNode = _.find(this.schemas, n => n.title === parentPath);
         if (!parentNode) {
@@ -474,36 +475,12 @@ export class DendronEngine implements DEngine {
         }
         (parentNode as Schema).addChild(node as Schema);
       }
+      return this.refreshNodes(refreshList, { fullNode: props.newNode });
     } else {
       const note = node as Note;
-      await this.store.write(note, { stub: opts.stub, recursive: opts.recursive });
-      if (opts.newNode) {
-        let parentPath = DNodeUtils.dirName(note.fname);
-        if (_.isEmpty(parentPath)) {
-          parentPath = "root";
-        }
-        let parentNode = _.find(this.notes, n => n.path === parentPath);
-        if (!parentNode) {
-          if (opts.parentsAsStubs) {
-            const closestParent = DNodeUtils.findClosestParent(note.logicalPath, this.notes);
-            const stubNodes = NoteUtils.createStubNotes(
-              closestParent as Note,
-              node as Note
-            );
-            stubNodes.forEach(ent2 => {
-              refreshList.push(ent2);
-            });
-            // last element is parent
-            parentNode = stubNodes.slice(-1)[0];
-          } else {
-            throw Error("no parent found");
-          }
-        }
-        parentNode.addChild(note);
-      }
+      await this.store.write(note, { stub: props.stub, recursive: props.recursive });
+      return this.updateNodes([note], _.pick(props, ["parentsAsStubs", "newNode"]));
     }
-    // TODO
-    return this.refreshNodes(refreshList, { fullNode: opts.newNode });
   }
 
   updateProps(opts: DEngineOpts) {
@@ -512,6 +489,46 @@ export class DendronEngine implements DEngine {
       // @ts-ignore
       const config = Fuse.config;
     }
+  }
+
+  async updateNodes(nodes: IDNode[], opts: UpdateNodesOpts): Promise<void> {
+    const ntype = nodes[0].type
+    if (ntype === "schema") {
+      throw Error("not supported");
+    } else {
+      _.each(nodes, (node) => {
+        return this._updateNote(node as Note, opts);
+      });
+    }
+    return;
+  }
+
+  // OPTIMIZE: do in bulk
+  async _updateNote(note: Note, opts: { parentsAsStubs: boolean, newNode: boolean }) {
+    const refreshList: Note[] = [note];
+    let parentPath = DNodeUtils.dirName(note.fname);
+    if (_.isEmpty(parentPath)) {
+      parentPath = "root";
+    }
+    let parentNode = _.find(this.notes, n => n.path === parentPath);
+    if (!parentNode) {
+      if (opts.parentsAsStubs) {
+        const closestParent = DNodeUtils.findClosestParent(note.logicalPath, this.notes);
+        const stubNodes = NoteUtils.createStubNotes(
+          closestParent as Note,
+          note
+        );
+        stubNodes.forEach(ent2 => {
+          refreshList.push(ent2);
+        });
+        // last element is parent
+        parentNode = stubNodes.slice(-1)[0];
+      } else {
+        throw Error("no parent found");
+      }
+    }
+    parentNode.addChild(note);
+    return this.refreshNodes(refreshList, { fullNode: opts.newNode });
   }
 }
 

@@ -116,6 +116,9 @@ export interface NodeWriteOpts {
    * If newNode, will add it to the parent
    */
   newNode?: boolean;
+  /**
+   * Body of the node
+   */
   body?: string;
   /**
    * See QueryOpts.stub
@@ -123,6 +126,7 @@ export interface NodeWriteOpts {
   stub?: boolean;
   /**
    * If parents don't exist, create stubs
+   * default: false
    */
   parentsAsStubs?: boolean;
   /**
@@ -140,7 +144,8 @@ export interface QueryOpts {
   queryOne?: boolean;
   /**
    * Use with `createIfNew`
-   * If true, create a stub node
+   * If true, create a stub node.
+   * A stub node is not written to disk
    */
   stub?: boolean;
   /**
@@ -155,6 +160,11 @@ export interface QueryOpts {
 }
 
 export type QueryOneOpts = Omit<QueryOpts, "queryOne">
+
+export type UpdateNodesOpts = {
+  parentsAsStubs: boolean
+  newNode: boolean
+}
 
 export type StoreQueryOpts = QueryOpts & {
   schemas?: SchemaDict
@@ -219,6 +229,7 @@ export interface DEngine {
   init: () => Promise<void>;
 
   delete: (id: string) => Promise<void>;
+
   /**
    * Get node based on id
    * get(id: ...)
@@ -258,6 +269,13 @@ export interface DEngine {
    * @param opts 
    */
   updateProps(opts: Partial<DEngineOpts>): void
+
+
+  /**
+   * Update node metadata
+   * @param node 
+   */
+  updateNodes(nodes: IDNode[], opts: UpdateNodesOpts): Promise<void>
 
   // /**
   //  * Write list of nodes

@@ -28,7 +28,7 @@ describe("engine:exact", () => {
         fs.removeSync(root);
     });
 
-    describe("main", () => {
+    describe("basic", () => {
         test("create node", async () => {
             await engine.init();
             const bazNote = new Note({ fname: "baz" });
@@ -60,6 +60,17 @@ describe("engine:exact", () => {
             await engine2.init();
             const root2: Note = engine2.notes.foo;
             expect(root1.toRawProps()).toEqual(root2.toRawProps());
+            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore()));
+        });
+
+        test("updateNode", async () => {
+            await engine.init();
+            testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
+            const bazNote = new Note({ fname: "baz" });
+            // foo should be fully specified
+            await engine.updateNodes([bazNote], { newNode: true, parentsAsStubs: true })
+            const baz = await engine.queryOne("baz", "note");
+            expect(testUtils.omitEntropicProps(baz.data.toRawProps())).toMatchSnapshot("bazNote");
             ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore()));
         });
     });

@@ -24,10 +24,10 @@ export class FileTestUtils {
   static cmpFiles = (
     root: string,
     expected: string[],
-    opts?: { add?: string[], remove?: string[] }
+    opts?: { add?: string[], remove?: string[], ignore?: string[] }
   ) => {
-    const cleanOpts = _.defaults(opts, { add: [], remove: [] });
-    const dirEnts = fs.readdirSync(root);
+    const cleanOpts = _.defaults(opts, { add: [], remove: [], ignore: [] });
+    const dirEnts = fs.readdirSync(root).filter(ent => !_.includes(cleanOpts.ignore, ent));
     return [
       dirEnts.sort(),
       expected.concat(cleanOpts.add).filter(ent => {

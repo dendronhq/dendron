@@ -184,7 +184,13 @@ export class DendronWorkspace {
         const wsFolders = vscode.workspace.workspaceFolders;
         const mainVault = wsFolders![0].uri.fsPath;
         const engine = await getAndInitializeEngine(mainVault);
+        // refresh schemas
         await new SchemaCommand().hack(engine);
+        // hook into file create
+        vscode.workspace.onDidCreateFiles((e) => {
+            const files = e.files;
+            vscode.window.showInformationMessage("file created");
+        });
         return;
     }
 

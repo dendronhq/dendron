@@ -1,3 +1,4 @@
+import { DEngine } from "@dendronhq/common-all";
 import { getAndInitializeEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -192,13 +193,39 @@ export class DendronWorkspace {
         const wsFolders = vscode.workspace.workspaceFolders;
         const mainVault = wsFolders![0].uri.fsPath;
         const engine = await getAndInitializeEngine(mainVault);
+        this._engine = engine;
         // refresh schemas
         await new SchemaCommand().hack(engine);
+        /*
         // hook into file create
-        vscode.workspace.onDidCreateFiles((e) => {
-            const files = e.files;
-            vscode.window.showInformationMessage("file created");
+        vscode.workspace.onDidCreateFiles(async (e) => {
+            const ents: FileMeta[] = e.files.map(uri => ({
+                prefix: DNodeUtils.basename(uri.fsPath, true),
+                fpath: uri.fsPath,
+            }));
+            const nodes2Update: Note[] = []
+            const fp = new FileParser(this.engine.store, {errorOnEmpty: false});
+            ents.map(ent => {
+                const {node} = fp.toNode(ent, [], this.engine.store)
+                const note = assertExists<Note>(node as Note, "node exists")
+                nodes2Update.push(note);
+                const closetParent = DNodeUtils.findClosestParent(
+                    note.logicalPath,
+                    this.engine.notes
+                  );
+                  const stubNodes = NoteUtils.createStubNotes(
+                    closetParent as Note,
+                    note
+                  );
+                  stubNodes.forEach(sn => {
+                      nodes2Update.push(sn);
+                  });
+            });
+
+            // await this.engine.updateNodes(_.values(notes), {newNode: true, parentsAsStubs: true});
+            vscode.window.showInformationMessage("file added to engine");
         });
+        */
         return;
     }
 

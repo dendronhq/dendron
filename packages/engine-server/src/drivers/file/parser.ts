@@ -22,7 +22,7 @@ import YAML from "yamljs";
 // @ts-ignore
 const logger = createLogger("FileParser");
 
-type FileMeta = {
+export type FileMeta = {
   // file name: eg. foo.md, name = foo
   prefix: string;
   // fpath: full path, eg: foo.md, fpath: foo.md

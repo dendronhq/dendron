@@ -66,6 +66,7 @@ export class DendronWorkspace {
     public context: vscode.ExtensionContext;
     public config: vscode.WorkspaceConfiguration;
     public L: typeof Logger;
+    private _engine?: DEngine
 
     constructor(context: vscode.ExtensionContext, opts?: { skipSetup?: boolean }) {
         opts = _.defaults(opts, { skipSetup: false });
@@ -76,6 +77,13 @@ export class DendronWorkspace {
         if (!opts.skipSetup) {
             this._setupCommands();
         }
+    }
+
+    get engine(): DEngine {
+        if (!this._engine) {
+            throw Error("engine not initialized");
+        }
+        return this._engine;
     }
 
     get rootDir(): string {

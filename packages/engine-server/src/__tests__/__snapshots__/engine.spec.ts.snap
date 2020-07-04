@@ -2,7 +2,7 @@
 
 exports[`engine:exact basic create node: bazNote 1`] = `
 Object {
-  "body": "",
+  "body": "baz.body",
   "custom": Object {},
   "data": Object {},
   "desc": "",
@@ -285,6 +285,80 @@ Array [
     "stub": false,
     "title": "foo.three.alpha",
     "type": "note",
+  },
+]
+`;
+
+exports[`engine:exact basic: schema init: main 1`] = `
+Array [
+  Object {
+    "body": "",
+    "children": Array [
+      "foo",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root.schema",
+    "parent": "root",
+    "stub": false,
+    "title": "root",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.one",
+      "foo.three",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.schema",
+    "parent": "root",
+    "stub": false,
+    "title": "foo",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.alpha",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.schema",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.one",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.schema",
+    "parent": "foo.three",
+    "stub": false,
+    "title": "foo.alpha",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.alpha",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.schema",
+    "parent": "foo",
+    "stub": false,
+    "title": "foo.three",
+    "type": "schema",
   },
 ]
 `;

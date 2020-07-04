@@ -4,7 +4,8 @@ import {
   INoteOpts,
   Note,
   SchemaRawProps,
-  testUtils
+  testUtils,
+  SchemaUtils
 } from "@dendronhq/common-all";
 import { FileTestUtils, LernaTestUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -43,6 +44,19 @@ describe("engine:exact", () => {
     fs.removeSync(root);
   });
 
+
+  describe("basic: schema", () => {
+    test("init", async() => {
+      await engine.init();
+      testUtils.expectSnapshot(expect, "main", _.values(engine.schemas));
+      const note = engine.notes["foo"]
+      const schema = engine.schemas["foo"];
+      const schemaMatch = SchemaUtils.matchNote(note, engine.schemas)
+      expect(schemaMatch).toEqual(schema);
+    });
+  });
+
+
   describe("basic", () => {
     test("create when empty", async () => {
       fs.removeSync(root);
@@ -78,7 +92,8 @@ describe("engine:exact", () => {
     test("create node", async () => {
       await engine.init();
       const bazNote = new Note({ fname: "baz" });
-      await engine.write(bazNote, { newNode: true, body: "baz.body" });
+      bazNote.body = "baz.body";
+      await engine.write(bazNote, { newNode: true });
       const baz = await engine.queryOne("baz", "note");
       // FIXME: the ids change, need a better way to test
       // const bazMd = FileTestUtils.readMDFile(root, "baz.md");

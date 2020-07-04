@@ -1,15 +1,10 @@
 - id: foo
   parent: root
-  data:
-    pattern: foo
   children:
-    - foo.one
-    - foo.three
-- id: foo.one
+    - one
+    - three
+- id: one
   children:
-    - foo.alpha
-- id: foo.three
-  children:
-    - foo.alpha
-- id: foo.alpha
-  title: foo.alpha
+    - alpha
+- id: three
+- id: alpha

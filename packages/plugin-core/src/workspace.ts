@@ -208,7 +208,7 @@ export class DendronWorkspace {
         await engine.init()
         this._engine = engine;
         // refresh schemas
-        await new SchemaCommand().hack(engine);
+        // await new SchemaCommand().hack(engine);
         /*
         // hook into file create
         vscode.workspace.onDidCreateFiles(async (e) => {

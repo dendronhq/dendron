@@ -1,4 +1,4 @@
-import { DNodeUtils, Note, Schema } from "@dendronhq/common-all";
+import { DNodeUtils, Note, Schema, SchemaUtils } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import { DendronEngine  } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -70,6 +70,7 @@ export class LookupProvider {
   }
 
   provide(picker: QuickPick<any>) {
+    const engine = DendronEngine.getOrCreateEngine();
 
     const updatePickerItems = async () => {
       const ctx = "updatePickerItems";
@@ -83,14 +84,20 @@ export class LookupProvider {
         "note"
       );
       L.info({ ctx: ctx + ":engine:query:post" });
-      let updatedItems = resp.data;
+      let updatedItems = resp.data.map((note => {
+        const schema = SchemaUtils.matchNote(note as Note, engine.schemas);
+        if (schema) {
+          (note as Note).schema = schema;
+        }
+        return note;
+      }));
 
 
       // check if root query, if so, return everything
       if (querystring === "") {
         L.info({ ctx, status: "no qs" });
         //picker.items = [engine().notes["root"]];
-        picker.items = _.values(DendronEngine.getOrCreateEngine().notes);
+        picker.items = _.values(engine.notes);
         return;
       }
       // check if single item query
@@ -114,12 +121,12 @@ export class LookupProvider {
 
 
       // apply schemas to the results
-      const schemas = QueryStringUtils.getSchema(querystring, updatedItems as Note[]);
-      updatedItems = _.uniqBy(updatedItems.concat(schemas.map(schema => {
-        return Note.fromSchema(DNodeUtils.dirName(querystring), schema);
-      })), (ent) => {
-        return ent.fname;
-      });
+      // const schemas = QueryStringUtils.getSchema(querystring, updatedItems as Note[]);
+      // updatedItems = _.uniqBy(updatedItems.concat(schemas.map(schema => {
+      //   return Note.fromSchema(DNodeUtils.dirName(querystring), schema);
+      // })), (ent) => {
+      //   return ent.fname;
+      // });
 
 
       // check if perfect match, remove @noActiveItem result if that's the case

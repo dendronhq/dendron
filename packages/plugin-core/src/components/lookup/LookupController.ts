@@ -1,11 +1,11 @@
+import { DNode } from "@dendronhq/common-all/src";
+import { createLogger } from "@dendronhq/common-server";
 import { getOrCreateEngine } from "@dendronhq/engine-server";
-import _, { update } from "lodash";
+import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
+import { QuickInputButton, ThemeIcon } from "vscode";
 import { LookupProvider } from "./LookupProvider";
-import { createLogger } from "@dendronhq/common-server";
-import { DNode } from "@dendronhq/common-all/src";
-import { Uri, QuickInputButton, ThemeIcon } from "vscode";
 
 
 let LOOKUP_PROVIDER: null | LookupProvider = null;

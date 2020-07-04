@@ -1,4 +1,4 @@
-import { DEngine } from "@dendronhq/common-all";
+import { DEngine, Note, DNodeUtils } from "@dendronhq/common-all";
 import { getAndInitializeEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -10,6 +10,7 @@ import { CONFIG, DENDRON_COMMANDS, DENDRON_WS_NAME } from "./constants";
 import { Logger } from "./logger";
 import { NodeService } from "./services/nodeService/NodeService";
 import { getPlatform, resolveTilde, VSCodeUtils } from "./utils";
+import { node2Uri } from "./components/lookup/utils";
 
 
 function writeWSFile(fpath: string, opts: { rootDir: string }) {
@@ -161,7 +162,14 @@ export class DendronWorkspace {
                 this.L.info({ ctx });
                 const ns = new NodeService();
                 const fsPath = VSCodeUtils.getFsPathFromTextEditor(VSCodeUtils.getActiveTextEditor() as vscode.TextEditor);
-                await ns.deleteByPath(fsPath, "note");
+                const note: Note = (await ns.deleteByPath(fsPath, "note") as Note);
+                const closetParent = DNodeUtils.findClosestParent(note.logicalPath, this.engine.notes, {noStubs: true});
+                const uri = node2Uri(closetParent);
+                try {
+                    await vscode.window.showTextDocument(uri)
+                } catch (err) {
+                    this.L.error({ctx, msg: `can't open uri: ${uri}`});
+                }
                 vscode.window.showInformationMessage(`${fsPath} deleted`);
             })
         );

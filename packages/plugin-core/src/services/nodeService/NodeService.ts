@@ -1,3 +1,4 @@
+import { IDNode } from "@dendronhq/common-all";
 import { DEngine, QueryMode } from "@dendronhq/common-all/src";
 import { getOrCreateEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -13,7 +14,7 @@ export class NodeService {
         }
     }
 
-    async deleteByPath(fpath: string, mode: QueryMode) {
+    async deleteByPath(fpath: string, mode: QueryMode): Promise<IDNode> {
         if (mode === "schema") {
             throw Error("delete by schema not supported");
         } else {
@@ -23,7 +24,7 @@ export class NodeService {
                 throw Error(`no node found for ${fpath}`);
             }
             await this.engine.delete(node.id);
-            return;
+            return node;
         }
 
     }

@@ -23,8 +23,6 @@ import {
   SchemaRawProps
 } from "./types";
 import { genUUID } from "./uuid";
-import { URI } from 'vscode-uri'
-import path from "path";
 
 
 const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
@@ -49,13 +47,14 @@ export class DNodeUtils {
     return nodePath.split("."[0]);
   }
 
-  static findClosestParent(fpath: string, nodes: DNodeDict): IDNode {
+  static findClosestParent(fpath: string, nodes: DNodeDict, opts?: {noStubs: boolean}): IDNode {
+    const cleanOpts = _.defaults(opts, {noStubs: false});
     const dirname = DNodeUtils.dirName(fpath);
     if (dirname === "") {
       return nodes["root"];
     }
     const maybeNode = _.find(nodes, { fname: dirname });
-    if (maybeNode) {
+    if (maybeNode && !(maybeNode?.stub && cleanOpts.noStubs)) {
       return maybeNode;
     } else {
       return DNodeUtils.findClosestParent(dirname, nodes);
@@ -64,12 +63,6 @@ export class DNodeUtils {
 
   static isRoot(node: DNode): boolean {
     return node.id === "root";
-  }
-
-  static node2Uri(node: DNode, root: string): URI {
-    const nodePath = node.fname + ".md";
-    const uri = URI.parse(path.join(root, nodePath));
-    return uri;
   }
 
 }

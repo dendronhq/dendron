@@ -173,15 +173,6 @@ export class DendronWorkspace {
                 vscode.window.showInformationMessage(`${fsPath} deleted`);
             })
         );
-
-        // === DEBUG Commands
-        this.context.subscriptions.push(
-            vscode.commands.registerCommand("dendron:debugWS", async () => {
-                const ctx = "dendron:debugWS"
-                this.L.info({ ctx })
-                await this.changeWorkspace("/Users/kevinlin/Dropbox/Apps/Noah");
-            })
-        );
     }
 
     async changeWorkspace(rootDirRaw: string) {

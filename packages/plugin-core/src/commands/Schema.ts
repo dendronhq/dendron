@@ -44,7 +44,7 @@ export class SchemaCommand extends BaseCommand<SchemaCommandOpts> {
                 m.children.map(note => {
                     applySchema(note as Note, s as Schema);
                     // c.data.schemaId = s.id;
-                    return engine.write(note, { recursive: true });
+                    return engine.write(note, { recursive: true, parentsAsStubs: true });
                 });
             }));
         }));

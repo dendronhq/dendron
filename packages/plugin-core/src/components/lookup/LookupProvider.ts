@@ -1,6 +1,6 @@
 import { DNodeUtils, Note, Schema } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
-import { getOrCreateEngine } from "@dendronhq/engine-server";
+import { DendronEngine  } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { QuickPick, QuickPickItem, Uri, window } from "vscode";
 import { CREATE_NEW_LABEL } from "./constants";
@@ -78,7 +78,7 @@ export class LookupProvider {
       // DEBUG:BLOCK
       L.info({ ctx: ctx + ":enter", querystring });
 
-      const resp = await getOrCreateEngine().query(
+      const resp = await DendronEngine.getOrCreateEngine().query(
         slashToDot(querystring),
         "note"
       );
@@ -90,7 +90,7 @@ export class LookupProvider {
       if (querystring === "") {
         L.info({ ctx, status: "no qs" });
         //picker.items = [engine().notes["root"]];
-        picker.items = _.values(getOrCreateEngine().notes);
+        picker.items = _.values(DendronEngine.getOrCreateEngine().notes);
         return;
       }
       // check if single item query
@@ -153,11 +153,11 @@ export class LookupProvider {
         // reuse node if a stub
         // otherwise, children will not be right
         if (selectedItem.stub) {
-          nodeNew = (await getOrCreateEngine().queryOne(fname, "note")).data as Note;
+          nodeNew = (await DendronEngine.getOrCreateEngine().queryOne(fname, "note")).data as Note;
         } else {
           nodeNew = new Note({ title: value, fname });
         }
-        await getOrCreateEngine().write(
+        await DendronEngine.getOrCreateEngine().write(
           nodeNew,
           {
             newNode: true,

@@ -1,11 +1,11 @@
 import { DNode } from "@dendronhq/common-all/src";
 import { createLogger } from "@dendronhq/common-server";
-import { getOrCreateEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
 import { LookupProvider } from "./LookupProvider";
+import { DendronEngine } from "@dendronhq/engine-server";
 
 
 let LOOKUP_PROVIDER: null | LookupProvider = null;
@@ -83,7 +83,7 @@ export class LookupController {
     quickpick.placeholder = "eg. hello.world";
     quickpick.ignoreFocusOut = true;
     quickpick.buttons = [this.state.buttons.fuzzyMatch];
-    quickpick.items = _.values(getOrCreateEngine().notes);
+    quickpick.items = _.values(DendronEngine.getOrCreateEngine().notes);
 
     // set editor path
     let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
@@ -99,7 +99,7 @@ export class LookupController {
           const btn = this.state.buttons.fuzzyMatch;
           btn.pressed = !btn.pressed;
           this.updateButton(btn);
-          getOrCreateEngine().updateProps({ mode: btn.pressed ? "fuzzy" : "exact" });
+          DendronEngine.getOrCreateEngine().updateProps({ mode: btn.pressed ? "fuzzy" : "exact" });
           vscode.window.showInformationMessage("fuzzy search");
           break;
         default:

@@ -1,5 +1,5 @@
 import { DEngine, Note, DNodeUtils } from "@dendronhq/common-all";
-import { getAndInitializeEngine } from "@dendronhq/engine-server";
+import { DendronEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -200,7 +200,8 @@ export class DendronWorkspace {
     async reloadWorkspace() {
         const wsFolders = vscode.workspace.workspaceFolders;
         const mainVault = wsFolders![0].uri.fsPath;
-        const engine = await getAndInitializeEngine(mainVault);
+        const engine = DendronEngine.getOrCreateEngine({root: mainVault});
+        await engine.init()
         this._engine = engine;
         // refresh schemas
         await new SchemaCommand().hack(engine);

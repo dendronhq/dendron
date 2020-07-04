@@ -1,44 +1,149 @@
 import {
-  DEngine,
+  assert,
+  assertExists,
+
+
+
+
+  DendronError, DEngine,
   DEngineMode,
-  DEngineStore,
-  DNodeData,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  DEngineOpts, DEngineStore,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  DNode, DNodeData,
   DNodeDict,
   DNodeRawProps,
   DNodeUtils,
-  EngineQueryResp,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  EngineGetResp, EngineQueryResp,
   IDNode,
   INoteOpts,
-  NodeBuilder,
+
+
+
+
+
+
+
+
+
+
+
+
+  makeResponse, NodeBuilder,
   NodeWriteOpts,
   Note,
   NoteDict,
-  QueryMode,
-  QueryOpts,
+
+
+
+
+
+
+
+
+
+  NoteUtils, QueryMode,
+
+
+
+
+
+
+
+
+
+
+
+  QueryOneOpts, QueryOpts,
   Schema,
   SchemaDict,
   SchemaRawProps,
-  assert,
-  assertExists,
-  getStage,
-  makeResponse,
-  NoteUtils,
-  DNode,
-  DendronError,
-  QueryOneOpts,
-  EngineGetResp,
-  DEngineOpts,
-  UpdateNodesOpts,
-} from "@dendronhq/common-all";
 
-import { BodyParser } from "./drivers/raw/BodyParser";
-import FileStorage from "./drivers/file/store";
-import Fuse from "fuse.js";
-import _ from "lodash";
+
+
+
+
+
+
+
+
+
+  UpdateNodesOpts
+} from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
+import Fuse from "fuse.js";
+import _ from "lodash";
+import FileStorage from "./drivers/file/store";
+import { BodyParser } from "./drivers/raw/BodyParser";
 
-let DENDRON_ENGINE: DendronEngine;
+
+let _DENDRON_ENGINE: DendronEngine;
 const logger = createLogger("DEngine");
 
 function isAllQuery(qs: string): boolean {
@@ -63,14 +168,12 @@ function createFuse<T>(initList: T[], opts: Fuse.IFuseOptions<any> & { exactMatc
 }
 
 type DendronEngineOpts = {
-  root?: string;
+  root: string;
   cacheDir?: string;
   forceNew?: boolean;
-  store: DEngineStore;
+  store?: DEngineStore;
   mode?: DEngineMode;
 };
-
-type DendronEngineGetOpts = Partial<DendronEngineOpts>;
 
 type DendronEngineProps = Required<DendronEngineOpts>;
 
@@ -91,40 +194,37 @@ export class DendronEngine implements DEngine {
 
   public store: DEngineStore;
 
-  static getEngine(opts?: DendronEngineGetOpts): DEngine {
-    // TODO
-    const root = opts?.root || "/Users/kevinlin/Dropbox/Apps/Noah/notesv2";
-    const optsClean: DendronEngineOpts = _.defaults(opts || {}, {
-      forceNew: false,
-      store: new FileStorage({ root }),
-      root,
-      // TODO
-      cacheDir: "/tmp/dendronCache"
-    });
-    if (!DENDRON_ENGINE || optsClean.forceNew) {
-      const stage = getStage();
-      if (_.isUndefined(optsClean.root)) {
-        throw Error(`root must be defined`);
+  static getOrCreateEngine(opts?: DendronEngineOpts): DEngine {
+    if (opts) {
+      const root = opts.root;
+      const optsClean: DendronEngineProps = _.defaults(opts || {}, {
+        forceNew: false,
+        store: new FileStorage({ root }),
+        root,
+        // TODO: remove
+        cacheDir: "/tmp/dendronCache",
+        mode: "fuzzy"
+      });
+      if (!_DENDRON_ENGINE || optsClean.forceNew) {
+        if (_.isUndefined(optsClean.root)) {
+          throw Error(`root must be defined`);
+        }
+        // TODO
+        _DENDRON_ENGINE = new DendronEngine(optsClean.store, optsClean);
       }
-      // TODO
-      DENDRON_ENGINE = new DendronEngine(optsClean.store, optsClean);
-      logger.info({ ctx: "getEngine:exit", optsClean, stage });
-      return DENDRON_ENGINE;
     }
-    return DENDRON_ENGINE;
+    if (!_DENDRON_ENGINE) {
+      throw Error("dendron engine not initialized");
+    }
+    return _DENDRON_ENGINE;
   }
 
-  constructor(store: DEngineStore, opts: DendronEngineOpts) {
+  constructor(store: DEngineStore, props: DendronEngineProps) {
     // eslint-disable-next-line spaced-comment
     //this.nodes = store.fetchInitial();
     this.notes = {};
     this.initialized = false;
-    this.props = _.defaults(opts, {
-      cacheDir: "/tmp/dendronCache",
-      root: "/Users/kevinlin/Dropbox/Apps/Dendron",
-      forceNew: false,
-      mode: "fuzzy",
-    });
+    this.props = props;
     this.store = store;
     this.fuse = createFuse<Note>([], {
       exactMatch: this.props.mode === "exact",
@@ -140,7 +240,7 @@ export class DendronEngine implements DEngine {
       preset: "schema"
     });
 
-    [opts.root].forEach(fpath => {
+    [props.root].forEach(fpath => {
       if (!fs.existsSync(fpath as string)) {
         throw Error(`${fpath} doesn't exist`);
       }
@@ -530,15 +630,4 @@ export class DendronEngine implements DEngine {
     parentNode.addChild(note);
     return this.refreshNodes(refreshList, { fullNode: opts.newNode });
   }
-}
-
-export function getOrCreateEngine(opts?: DendronEngineGetOpts) {
-  return DendronEngine.getEngine(opts);
-}
-
-export async function getAndInitializeEngine(rootDir: string) {
-  const _engine = getOrCreateEngine({ root: rootDir, forceNew: true });
-  // TODO: error check
-  await _engine.init();
-  return _engine;
 }

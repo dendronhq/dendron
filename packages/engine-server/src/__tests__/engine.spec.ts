@@ -1,9 +1,9 @@
-import { INoteOpts, Note, testUtils, DEngine, DNodeRawProps, SchemaNodeRaw, SchemaRawProps } from "@dendronhq/common-all";
+import { DEngine, DNodeRawProps, INoteOpts, Note, SchemaRawProps, testUtils } from "@dendronhq/common-all";
 import { FileTestUtils, LernaTestUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { getOrCreateEngine } from "../engine";
+import { DendronEngine } from "../engine";
 import { setupTmpDendronDir } from "../testUtils";
 
 function expectNoteProps(expect: jest.Expect, note: Note, expectedProps: INoteOpts) {
@@ -20,7 +20,7 @@ describe("engine:exact", () => {
 
     beforeEach(() => {
         root = setupTmpDendronDir();
-        engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
+        engine = DendronEngine.getOrCreateEngine({ root, forceNew: true, mode: "exact" });
     });
 
     afterEach(() => {
@@ -32,7 +32,7 @@ describe("engine:exact", () => {
         test("create when empty", async () => {
             fs.removeSync(root);
             root = setupTmpDendronDir({copyFixtures: false});
-            engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
+            engine = DendronEngine.getOrCreateEngine({ root, forceNew: true, mode: "exact" });
             await engine.init();
             testUtils.expectSnapshot(expect, "notes", _.values(engine.notes));
             testUtils.expectSnapshot(expect, "schemas", _.values(engine.schemas));
@@ -72,7 +72,7 @@ describe("engine:exact", () => {
         test("node has same attributes when re-initializing engine", async () => {
             await engine.init();
             const root1: Note = engine.notes.foo;
-            const engine2 = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
+            const engine2 = DendronEngine.getOrCreateEngine({ root, forceNew: true, mode: "exact" });
             await engine2.init();
             const root2: Note = engine2.notes.foo;
             expect(root1.toRawProps()).toEqual(root2.toRawProps());
@@ -95,7 +95,7 @@ describe("engine:exact", () => {
 
         test("open stub node", async () => {
             FileTestUtils.writeMDFile(root, "bar.two.md", {}, "bar.two.body");
-            engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
+            engine = DendronEngine.getOrCreateEngine({ root, forceNew: true, mode: "exact" });
             await engine.init();
             expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
             testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
@@ -149,7 +149,7 @@ describe("engine:exact", () => {
     describe("edge", () => {
         test("md exist, no schema file", async () => {
             fs.unlinkSync(path.join(root, "foo.schema.yml"));
-            engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
+            engine = DendronEngine.getOrCreateEngine({ root, forceNew: true, mode: "exact" });
             await engine.init();
             expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
             testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
@@ -163,7 +163,7 @@ describe("engine:exact", () => {
 
         test("no md file, schema exist", async () => {
             fs.unlinkSync(path.join(root, "root.md"));
-            engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
+            engine = DendronEngine.getOrCreateEngine({ root, forceNew: true, mode: "exact" });
             await engine.init();
             expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
             testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
@@ -177,7 +177,7 @@ describe("engine:exact", () => {
         test("no md file, no schema ", async () => {
             fs.unlinkSync(path.join(root, "foo.schema.yml"));
             fs.unlinkSync(path.join(root, "root.md"));
-            engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
+            engine = DendronEngine.getOrCreateEngine({ root, forceNew: true, mode: "exact" });
             await engine.init();
             expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
             testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
@@ -192,7 +192,7 @@ describe("engine:exact", () => {
         test("note without id", async () => {
             fs.unlinkSync(path.join(root, "foo.md"));
             FileTestUtils.writeMDFile(root, "foo.md", {}, "this is foo");
-            engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
+            engine = DendronEngine.getOrCreateEngine({ root, forceNew: true, mode: "exact" });
             await engine.init();
             ([actualFiles, expectedFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore(), {
             }));
@@ -204,7 +204,7 @@ describe("engine:exact", () => {
         test("note without fm", async () => {
             fs.unlinkSync(path.join(root, "foo.md"));
             fs.writeFileSync(path.join(root, "foo.md"), "this is foo");
-            engine = getOrCreateEngine({ root, forceNew: true, mode: "exact" });
+            engine = DendronEngine.getOrCreateEngine({ root, forceNew: true, mode: "exact" });
             await engine.init();
             const fooNote = (await engine.query("foo", "note")).data[0];
             expect(fooNote.fname).toEqual("foo");

@@ -1,6 +1,6 @@
 import { IDNode } from "@dendronhq/common-all";
 import { DEngine, QueryMode } from "@dendronhq/common-all/src";
-import { getOrCreateEngine } from "@dendronhq/engine-server";
+import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 
@@ -8,7 +8,7 @@ export class NodeService {
     public engine: DEngine;
 
     constructor() {
-        this.engine = getOrCreateEngine();
+        this.engine = DendronEngine.getOrCreateEngine();
         if (!this.engine.initialized) {
             throw Error("engine not intiialized");
         }

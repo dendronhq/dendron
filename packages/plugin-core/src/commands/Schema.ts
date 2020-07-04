@@ -1,8 +1,8 @@
+import { DEngine, Note, Schema } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
-import { BaseCommand } from "./base";
-import { getOrCreateEngine, DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { Note, Schema, DEngine } from "@dendronhq/common-all";
+import { BaseCommand } from "./base";
+import { DendronEngine } from "@dendronhq/engine-server";
 
 const L = createLogger("SchemaCommand");
 
@@ -53,7 +53,7 @@ export class SchemaCommand extends BaseCommand<SchemaCommandOpts> {
     async execute(opts: SchemaCommandOpts) {
         const ctx = "execute";
         L.info({ ctx, opts });
-        const engine = await getOrCreateEngine({ forceNew: true, mode: "exact", root: opts.root });
+        const engine = await DendronEngine.getOrCreateEngine({ forceNew: true, mode: "exact", root: opts.root });
         await engine.init();
         await this.hack(engine);
     }

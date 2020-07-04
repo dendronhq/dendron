@@ -4,7 +4,11 @@
     pattern: foo
   children:
     - foo.one
+    - foo.three
 - id: foo.one
+  children:
+    - foo.alpha
+- id: foo.three
   children:
     - foo.alpha
 - id: foo.alpha

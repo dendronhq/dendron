@@ -79,29 +79,6 @@ Array [
 ]
 `;
 
-exports[`engine:exact basic fetch node 1`] = `
-Object {
-  "body": "",
-  "children": Array [
-    "foo.one",
-    "foo.two",
-  ],
-  "created": 123,
-  "custom": Object {},
-  "data": Object {
-    "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
-  },
-  "desc": "",
-  "fname": "foo",
-  "id": "foo",
-  "parent": "root",
-  "stub": false,
-  "title": "foo",
-  "type": "note",
-  "updated": 456,
-}
-`;
-
 exports[`engine:exact basic fetch node with custom att 1`] = `
 Object {
   "body": "",
@@ -143,6 +120,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
+      "foo.three",
     ],
     "custom": Object {},
     "data": Object {
@@ -179,6 +157,32 @@ Array [
     "parent": "foo",
     "stub": false,
     "title": "foo.two",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.three.alpha",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three",
+    "parent": "foo",
+    "stub": true,
+    "title": "foo.three",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three.alpha",
+    "parent": "foo.three",
+    "stub": false,
+    "title": "foo.three.alpha",
     "type": "note",
   },
 ]
@@ -218,6 +222,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
+      "foo.three",
     ],
     "custom": Object {},
     "data": Object {
@@ -256,6 +261,32 @@ Array [
     "title": "foo.two",
     "type": "note",
   },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.three.alpha",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three",
+    "parent": "foo",
+    "stub": true,
+    "title": "foo.three",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three.alpha",
+    "parent": "foo.three",
+    "stub": false,
+    "title": "foo.three.alpha",
+    "type": "note",
+  },
 ]
 `;
 
@@ -263,6 +294,7 @@ exports[`engine:exact edge md exist, no schema file: listDir 1`] = `
 Array [
   "foo.md",
   "foo.one.md",
+  "foo.three.alpha.md",
   "foo.two.md",
   "root.md",
   "root.schema.yml",
@@ -290,6 +322,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
+      "foo.three",
     ],
     "custom": Object {},
     "data": Object {
@@ -328,6 +361,32 @@ Array [
     "title": "foo.two",
     "type": "note",
   },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.three.alpha",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three",
+    "parent": "foo",
+    "stub": true,
+    "title": "foo.three",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three.alpha",
+    "parent": "foo.three",
+    "stub": false,
+    "title": "foo.three.alpha",
+    "type": "note",
+  },
 ]
 `;
 
@@ -335,6 +394,7 @@ exports[`engine:exact edge no md file, no schema : listDir 1`] = `
 Array [
   "foo.md",
   "foo.one.md",
+  "foo.three.alpha.md",
   "foo.two.md",
   "root.md",
   "root.schema.yml",
@@ -363,6 +423,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
+      "foo.three",
     ],
     "custom": Object {},
     "data": Object {
@@ -401,6 +462,32 @@ Array [
     "title": "foo.two",
     "type": "note",
   },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.three.alpha",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three",
+    "parent": "foo",
+    "stub": true,
+    "title": "foo.three",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three.alpha",
+    "parent": "foo.three",
+    "stub": false,
+    "title": "foo.three.alpha",
+    "type": "note",
+  },
 ]
 `;
 
@@ -410,6 +497,7 @@ Object {
   "children": Array [
     "foo.one",
     "foo.two",
+    "foo.three",
   ],
   "custom": Object {},
   "data": Object {
@@ -429,6 +517,7 @@ Array [
   "foo.md",
   "foo.one.md",
   "foo.schema.yml",
+  "foo.three.alpha.md",
   "foo.two.md",
   "root.md",
 ]
@@ -456,6 +545,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
+      "foo.three",
     ],
     "custom": Object {},
     "data": Object {
@@ -494,6 +584,32 @@ Array [
     "title": "foo.two",
     "type": "note",
   },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.three.alpha",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three",
+    "parent": "foo",
+    "stub": true,
+    "title": "foo.three",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three.alpha",
+    "parent": "foo.three",
+    "stub": false,
+    "title": "foo.three.alpha",
+    "type": "note",
+  },
 ]
 `;
 
@@ -503,6 +619,7 @@ Object {
   "children": Array [
     "foo.one",
     "foo.two",
+    "foo.three",
   ],
   "custom": Object {},
   "data": Object {},
@@ -522,6 +639,7 @@ Object {
   "children": Array [
     "foo.one",
     "foo.two",
+    "foo.three",
   ],
   "custom": Object {},
   "data": Object {},
@@ -538,6 +656,7 @@ exports[`engine:exact main delete node with children: listDi2 1`] = `
 Array [
   "foo.one.md",
   "foo.schema.yml",
+  "foo.three.alpha.md",
   "foo.two.md",
   "root.md",
 ]
@@ -588,8 +707,35 @@ Array [
   Object {
     "body": "",
     "children": Array [
+      "foo.three.alpha",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three",
+    "parent": "foo",
+    "stub": true,
+    "title": "foo.three",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three.alpha",
+    "parent": "foo.three",
+    "stub": false,
+    "title": "foo.three.alpha",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
       "foo.one",
       "foo.two",
+      "foo.three",
     ],
     "custom": Object {},
     "data": Object {},
@@ -648,8 +794,35 @@ Array [
   Object {
     "body": "",
     "children": Array [
+      "foo.three.alpha",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three",
+    "parent": "foo",
+    "stub": true,
+    "title": "foo.three",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three.alpha",
+    "parent": "foo.three",
+    "stub": false,
+    "title": "foo.three.alpha",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
       "foo.one",
       "foo.two",
+      "foo.three",
     ],
     "custom": Object {},
     "data": Object {},
@@ -669,6 +842,7 @@ Array [
   "foo.md",
   "foo.one.md",
   "foo.schema.yml",
+  "foo.three.alpha.md",
   "foo.two.md",
   "root.md",
 ]
@@ -680,6 +854,7 @@ Array [
   "foo.md",
   "foo.one.md",
   "foo.schema.yml",
+  "foo.three.alpha.md",
   "foo.two.md",
   "root.md",
 ]
@@ -707,6 +882,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
+      "foo.three",
     ],
     "custom": Object {},
     "data": Object {
@@ -760,6 +936,20 @@ Array [
     "type": "note",
   },
   Object {
+    "body": "",
+    "children": Array [
+      "foo.three.alpha",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three",
+    "parent": "foo",
+    "stub": true,
+    "title": "foo.three",
+    "type": "note",
+  },
+  Object {
     "body": "bar.two.body
 ",
     "children": Array [],
@@ -770,6 +960,18 @@ Array [
     "parent": "bar",
     "stub": false,
     "title": "bar.two",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three.alpha",
+    "parent": "foo.three",
+    "stub": false,
+    "title": "foo.three.alpha",
     "type": "note",
   },
 ]

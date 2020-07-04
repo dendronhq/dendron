@@ -96,6 +96,11 @@ suite("Extension Test Suite", () => {
         path: "foo.one",
         title: "foo.one",
       });
+      // stub node should not be written to disk
+      [expectedFiles, actualFiles] = VSFileUtils.cmpFiles(
+        root,
+        LernaTestUtils.fixtureFilesForStore()
+      );
     });
   });
 });

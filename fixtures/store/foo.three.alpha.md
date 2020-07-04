@@ -1,0 +1,3 @@
+---
+id: foo.three.alpha
+---

@@ -39,6 +39,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
+      "foo.three",
     ],
     "custom": Object {},
     "data": Object {
@@ -94,6 +95,20 @@ Array [
   Object {
     "body": "",
     "children": Array [
+      "foo.three.alpha",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three",
+    "parent": "foo",
+    "stub": true,
+    "title": "foo.three",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
       "bar.one.alpha",
     ],
     "custom": Object {},
@@ -103,6 +118,18 @@ Array [
     "parent": "bar",
     "stub": true,
     "title": "bar.one",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.three.alpha",
+    "parent": "foo.three",
+    "stub": false,
+    "title": "foo.three.alpha",
     "type": "note",
   },
   Object {

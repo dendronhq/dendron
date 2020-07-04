@@ -15,6 +15,8 @@ import { DendronWorkspace } from "../../workspace";
 import fs from "fs-extra";
 import { LernaTestUtils } from "@dendronhq/common-server";
 import _ from "lodash";
+import { WSAEACCES } from "constants";
+import { testUtils } from "@dendronhq/common-all";
 
 function createMockContext(): vscode.ExtensionContext {
   const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
@@ -44,10 +46,11 @@ suite("Extension Test Suite", () => {
   let root: string;
   let actualFiles: string[];
   let expectedFiles: string[];
+  let ws: DendronWorkspace;
 
   beforeEach(async () => {
     const ctx = createMockContext();
-    const ws = new DendronWorkspace(ctx, { skipSetup: true });
+    ws = new DendronWorkspace(ctx, { skipSetup: true });
     root = FileTestUtils.tmpDir("/tmp/dendron");
     await ws.setupWorkspace(root, { skipOpenWS: true });
     const fixtures = LernaTestUtils.getFixturesDir();
@@ -75,6 +78,13 @@ suite("Extension Test Suite", () => {
         root,
         LernaTestUtils.fixtureFilesForStore()
       );
+    });
+  });
+
+  describe("workspace", () => {
+    test("reload", async () => {
+      await ws.reloadWorkspace(root);
+      assert.equal(ws.engine.notes["root"].children.length, 1);
     });
   });
 

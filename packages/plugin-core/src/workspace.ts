@@ -197,9 +197,11 @@ export class DendronWorkspace {
         VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
     }
 
-    async reloadWorkspace() {
-        const wsFolders = vscode.workspace.workspaceFolders;
-        const mainVault = wsFolders![0].uri.fsPath;
+    async reloadWorkspace(mainVault?: string) {
+        if (!mainVault)  {
+            const wsFolders = vscode.workspace.workspaceFolders;
+            mainVault = wsFolders![0].uri.fsPath;
+        }
         const engine = DendronEngine.getOrCreateEngine({root: mainVault});
         await engine.init()
         this._engine = engine;
@@ -238,6 +240,11 @@ export class DendronWorkspace {
         return;
     }
 
+    /**
+     * Initialize a new directory with dendron files
+     * @param rootDirRaw
+     * @param opts 
+     */
     async setupWorkspace(rootDirRaw: string, opts?: { skipOpenWS?: boolean }) {
         opts = _.defaults(opts, { skipOpenWS: false });
         const ctx = "setupWorkspace";

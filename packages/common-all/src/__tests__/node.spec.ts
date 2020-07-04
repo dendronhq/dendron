@@ -1,6 +1,7 @@
-import { DNodeUtils, Note, NoteUtils, Schema } from "../node";
+import { DNodeUtils, Note, NoteUtils, Schema, SchemaUtils } from "../node";
 
 import { expectSnapshot } from "../testUtils";
+import _ from "lodash";
 
 function setupNotes() {
   const baz = new Note({
@@ -12,38 +13,53 @@ function setupNotes() {
   const fooChild = new Note({
     fname: "foo.one"
   });
+  const fooGrandChild = new Note({
+    fname: "foo.one.alpha"
+  });
   const fooTwoBeta = new Note({
     fname: "foo.two.beta"
   });
+  const bar= new Note({ fname: "bar" });
   const barChild = new Note({ fname: "bar.one" });
   const root = new Note({ id: "root", fname: "root" });
+  fooChild.addChild(fooGrandChild);
   foo.addChild(fooChild);
   root.addChild(foo);
-  return { foo, fooChild, barChild, root, fooTwoBeta, baz };
+  bar.addChild(barChild);
+  return { foo, fooChild, fooGrandChild, bar, barChild, root, fooTwoBeta, baz };
 }
 
-function setup() {
+function setupSchema() {
+  const bar= new Schema({
+    id: "bar",
+    fname: "bar.schema.yml",
+    parent: null
+  });
+  const barChildNamespace = new Schema({
+    id: "bar",
+    fname: "bar.schema.yml",
+    parent: null,
+    data: {namespace: true}
+  });
   const foo = new Schema({
-    id: "foo.root",
-    title: "foo.root",
-    fname: "foo.root",
+    id: "foo",
+    fname: "foo.schema.yml",
     parent: null
   });
   const fooChild = new Schema({
-    id: "foo.child",
-    title: "foo.child",
-    fname: "foo.child",
+    id: "one",
+    fname: "foo.schema.yml",
     parent: null
   });
   const fooGrandChild = new Schema({
-    id: "foo.grandchild",
-    title: "foo.grandchild",
-    fname: "foo.grandchild",
+    id: "alpha",
+    fname: "foo.schema.yml",
     parent: null
   });
   foo.addChild(fooChild);
   fooChild.addChild(fooGrandChild);
-  return { foo, fooChild, fooGrandChild };
+  bar.addChild(barChildNamespace);
+  return { foo, fooChild, fooGrandChild, bar, barChildNamespace };
 }
 
 describe("DNoteUtils", () => {
@@ -71,6 +87,47 @@ describe("DNoteUtils", () => {
       expectSnapshot(expect, "main", resp);
     });
   });
+});
+
+describe("SchemaUtils", () => {
+  let notes: ReturnType<typeof setupNotes>;
+  let schemas: ReturnType<typeof setupSchema>;
+
+  beforeEach(()=> {
+    notes = setupNotes();
+    schemas = setupSchema();
+  });
+
+  test("matchDomain", () => {
+    const fooNote = notes.foo
+    const fooSchema =SchemaUtils.matchNote(fooNote, schemas);
+    expectSnapshot(expect, "schemas", _.values(schemas));
+    expect(fooSchema).toEqual(schemas.foo);
+  });
+
+  test("matchChild", () => {
+    const note = notes.fooChild
+    const schema =SchemaUtils.matchNote(note, schemas);
+    expect(schema).toEqual(schemas.fooChild);
+  });
+
+  test("matchChildNamespace", () => {
+    const note = notes.barChild
+    const schema = SchemaUtils.matchNote(note, schemas);
+    expect(schema).toEqual(schemas.barChildNamespace);
+  });
+
+
+  test("matchGrandChild", () => {
+    const note = notes.fooGrandChild;
+    const schema =SchemaUtils.matchNote(note, schemas);
+    expect(schema).toEqual(schemas.fooGrandChild);
+    const note2 = notes.fooTwoBeta;
+    const schema2 =SchemaUtils.matchNote(note2, schemas);
+    expect(schema2).toBeUndefined();
+  });
+
+
 });
 
 describe("NoteUtils", () => {
@@ -105,28 +162,36 @@ describe("NoteUtils", () => {
   });
 });
 
-describe("schema", () => {
-  let schemas: ReturnType<typeof setup>;
+describe("Schema", () => {
+  let schemas: ReturnType<typeof setupSchema>;
 
   beforeEach(() => {
-    schemas = setup();
+    schemas = setupSchema();
   });
 
   describe("domainRoot", () => {
     test("at root", () => {
       const { foo } = schemas;
       expect(foo.domain.id).toEqual(foo.id);
+      expect(foo.logicalPath).toEqual("foo");
       expect(foo.renderBody()).toMatchSnapshot("foo_body");
     });
 
     test("at child", () => {
       const { fooChild, foo } = schemas;
       expect(fooChild.domain.id).toEqual(foo.id);
+      expect(fooChild.logicalPath).toEqual("foo.one");
       expect(fooChild.renderBody()).toMatchSnapshot("fooChild_body");
+    });
+
+    test("at child namespace", () => {
+      const {barChildNamespace: schema} = schemas;
+      expect(schema.logicalPath).toEqual("bar.*");
     });
 
     test("at grand child", () => {
       const { fooGrandChild, foo } = schemas;
+      expect(fooGrandChild.logicalPath).toEqual("foo.one.alpha");
       expect(fooGrandChild.domain.id).toEqual(foo.id);
     });
   });

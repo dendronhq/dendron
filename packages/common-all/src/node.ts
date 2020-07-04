@@ -1,6 +1,7 @@
 /* eslint-disable no-loop-func */
 import _ from "lodash";
 import moment from "moment";
+import minimatch  from "minimatch" ;
 import YAML from "yamljs";
 import { DendronError } from "./error";
 import {
@@ -243,8 +244,9 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
 
   /**
    * dot delimited path
-   *    - for root node, its ""
-   *    - for everything else, its the dot delimited name
+   *  - for root node, its ""
+   *  - for everything else, its the dot delimited name
+   *  - used when showing query
    */
   get logicalPath(): string {
     if (this.fname === "root") {
@@ -254,7 +256,6 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     }
   }
 
-  // used in parsing
   get path(): string {
     return this.fname;
   }
@@ -463,12 +464,18 @@ export class Schema extends DNode<SchemaData> implements ISchema {
     });
   }
 
-  get queryPath(): string {
-    return this.id;
-  }
-
   get namespace(): boolean {
     return this.data?.namespace || false;
+  }
+
+  get logicalPath(): string {
+    const part = this.namespace ? "*" : this.id;
+    if (this.parent && this.parent.id !== "root") {
+      const prefix = this.parent.logicalPath;
+      return [prefix, part].join(".")
+    } else {
+      return part;
+    }
   }
 
   get url(): string {
@@ -640,5 +647,10 @@ export class NoteUtils {
 export class SchemaUtils {
   static isUnkown(schema: Schema) {
     return schema.id === UNKNOWN_SCHEMA_ID;
+  }
+  static matchNote(note: Note, schemas: SchemaDict): Schema|undefined{
+    return _.find(_.values(schemas), schema => {
+       return minimatch(note.path, schema.logicalPath);
+     });
   }
 }

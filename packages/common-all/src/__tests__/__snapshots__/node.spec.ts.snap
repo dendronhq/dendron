@@ -18,7 +18,9 @@ Object {
 exports[`DNoteUtils findClosestParent, parent grandchild -> parent: main 1`] = `
 Object {
   "body": "",
-  "children": Array [],
+  "children": Array [
+    "foo.one.alpha",
+  ],
   "custom": Object {},
   "data": Object {},
   "desc": "",
@@ -64,54 +66,127 @@ Array [
 ]
 `;
 
-exports[`schema domainRoot at child: fooChild_body 1`] = `
+exports[`Schema domainRoot at child: fooChild_body 1`] = `
 "\`\`\`
 -
-    id: foo.child
-    title: foo.child
+    id: one
+    title: foo.schema.yml
     desc: \\"\\"
-    children: [foo.grandchild]
-    parent: foo.root
+    children: [alpha]
+    parent: foo
     data: {}
-    fname: foo.child
+    fname: foo.schema.yml
 -
-    id: foo.grandchild
-    title: foo.grandchild
+    id: alpha
+    title: foo.schema.yml
     desc: \\"\\"
     children: []
-    parent: foo.child
+    parent: one
     data: {}
-    fname: foo.grandchild
+    fname: foo.schema.yml
 
 \`\`\`"
 `;
 
-exports[`schema domainRoot at root: foo_body 1`] = `
+exports[`Schema domainRoot at root: foo_body 1`] = `
 "\`\`\`
 -
-    id: foo.root
-    title: foo.root
+    id: foo
+    title: foo.schema.yml
     desc: \\"\\"
-    children: [foo.child]
+    children: [one]
     parent: root
     data: {}
-    fname: foo.root
+    fname: foo.schema.yml
 -
-    id: foo.child
-    title: foo.child
+    id: one
+    title: foo.schema.yml
     desc: \\"\\"
-    children: [foo.grandchild]
-    parent: foo.root
+    children: [alpha]
+    parent: foo
     data: {}
-    fname: foo.child
+    fname: foo.schema.yml
 -
-    id: foo.grandchild
-    title: foo.grandchild
+    id: alpha
+    title: foo.schema.yml
     desc: \\"\\"
     children: []
-    parent: foo.child
+    parent: one
     data: {}
-    fname: foo.grandchild
+    fname: foo.schema.yml
 
 \`\`\`"
+`;
+
+exports[`SchemaUtils matchDomain: schemas 1`] = `
+Array [
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.schema.yml",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.schema.yml",
+    "parent": "root",
+    "stub": false,
+    "title": "foo.schema.yml",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.schema.yml",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.schema.yml",
+    "parent": "foo.schema.yml",
+    "stub": false,
+    "title": "foo.schema.yml",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.schema.yml",
+    "parent": "foo.schema.yml",
+    "stub": false,
+    "title": "foo.schema.yml",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "bar.schema.yml",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.schema.yml",
+    "parent": "root",
+    "stub": false,
+    "title": "bar.schema.yml",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {
+      "namespace": true,
+    },
+    "desc": "",
+    "fname": "bar.schema.yml",
+    "parent": "bar.schema.yml",
+    "stub": false,
+    "title": "bar.schema.yml",
+    "type": "schema",
+  },
+]
 `;

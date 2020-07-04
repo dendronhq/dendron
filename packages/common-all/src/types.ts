@@ -57,9 +57,16 @@ export type IDNodeProps<T = DNodeData> = Required<IDNodeOpts<T>>;
 export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   // generated
   nodes: IDNode<T>[];
-  // NOTE: currently equal to `fname`
+  /**
+   * The raw path
+   */
   path: string;
   basename: string;
+  /**
+   * Path dependent on type of node
+   *   - for notes, this is same as `path` except for `root` node, in which case this is ""
+   *   - for schemas, this is minimatch pattern of schema ids
+   */
   logicalPath: string;
   /**
    * Child of the root (this.parent == root)

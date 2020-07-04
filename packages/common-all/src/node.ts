@@ -1,5 +1,6 @@
 /* eslint-disable no-loop-func */
 import _ from "lodash";
+import moment from "moment";
 import YAML from "yamljs";
 import { DendronError } from "./error";
 import {
@@ -22,7 +23,9 @@ import {
   SchemaRawProps
 } from "./types";
 import { genUUID } from "./uuid";
-import moment from "moment";
+import { URI } from 'vscode-uri'
+import path from "path";
+
 
 const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
@@ -62,6 +65,13 @@ export class DNodeUtils {
   static isRoot(node: DNode): boolean {
     return node.id === "root";
   }
+
+  static node2Uri(node: DNode, root: string): URI {
+    const nodePath = node.fname + ".md";
+    const uri = URI.parse(path.join(root, nodePath));
+    return uri;
+  }
+
 }
 
 export class DNodeRaw {

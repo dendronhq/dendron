@@ -44,6 +44,7 @@
     "moment": "^2.27.0",
     "pino": "^6.3.1",
     "uuid": "^8.1.0",
+    "vscode-uri": "^2.1.2",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {

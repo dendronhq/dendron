@@ -1,7 +1,3 @@
----
-id: ef43aff2-d8ba-4551-b311-d85cc171f0e4
----
-
 <style>
   img[src*="#center"] {
       display: block;
@@ -145,7 +141,7 @@ Schemas are matched to hierarchies via the `data.pattern` attribute in the root 
 
 > NOTE: The functionality in this section is under active development and will be released shortly. 
 
-- TODOk
+- TODO
 
 With schemas, you get to see if you are missing entries
 
@@ -168,3 +164,6 @@ The **audacious long term goal** is for Dendron to become the **best way to crea
 # Configuration
 
 TODO
+
+# Changelog
+- to see the latest updates, see the [changelog](https://github.com/dendronhq/dendron/blob/master/CHANGELOG.md)

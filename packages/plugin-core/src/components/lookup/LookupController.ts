@@ -6,6 +6,7 @@ import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
 import { LookupProvider } from "./LookupProvider";
 import { DendronEngine } from "@dendronhq/engine-server";
+import { DendronWorkspace } from "../../workspace";
 
 
 let LOOKUP_PROVIDER: null | LookupProvider = null;
@@ -49,13 +50,15 @@ export class LookupController {
 
   public quickPick: vscode.QuickPick<DNode> | undefined;
   public state: State
+  public workspace: DendronWorkspace
 
-  constructor() {
+  constructor(workspace: DendronWorkspace) {
     this.state = {
       mode: "exact", buttons: {
         fuzzyMatch: new FuzzyMatchButton()
       }
     };
+    this.workspace = workspace
   }
 
   updateButton(btn: DendronQuickInputButton) {
@@ -79,6 +82,7 @@ export class LookupController {
     if (this.state.mode === "fuzzy") {
       title.push("mode: fuzzy");
     }
+    title.push(`- version: ${this.workspace.version}`)
     quickpick.title = title.join(" ");
     quickpick.placeholder = "eg. hello.world";
     quickpick.ignoreFocusOut = true;

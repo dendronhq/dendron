@@ -14,8 +14,8 @@ import { DendronWorkspace } from "./workspace";
 export function activate(context: vscode.ExtensionContext) {
   const ctx = "activate";
   const { logPath, extensionPath, extensionUri, storagePath, globalStoragePath } = context;
-  // setup logging
 
+  // setup logging
   const previousVersion = context.globalState.get<string | undefined>(GLOBAL_STATE.VERSION);
   Logger.configure(context, "debug");
   Logger.info({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });

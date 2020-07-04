@@ -1,4 +1,4 @@
-import { DEngine, Note, DNodeUtils } from "@dendronhq/common-all";
+import { DEngine, Note, DNodeUtils, getStage } from "@dendronhq/common-all";
 import { DendronEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -6,11 +6,12 @@ import path from "path";
 import * as vscode from "vscode";
 import { SchemaCommand } from "./commands/Schema";
 import { LookupController } from "./components/lookup/LookupController";
-import { CONFIG, DENDRON_COMMANDS, DENDRON_WS_NAME } from "./constants";
+import { CONFIG, DENDRON_COMMANDS, DENDRON_WS_NAME, extensionQualifiedId } from "./constants";
 import { Logger } from "./logger";
 import { NodeService } from "./services/nodeService/NodeService";
 import { getPlatform, resolveTilde, VSCodeUtils } from "./utils";
 import { node2Uri } from "./components/lookup/utils";
+import { FileTestUtils } from "@dendronhq/common-server";
 
 
 function writeWSFile(fpath: string, opts: { rootDir: string }) {
@@ -69,6 +70,7 @@ export class DendronWorkspace {
     public config: vscode.WorkspaceConfiguration;
     public L: typeof Logger;
     private _engine?: DEngine
+    public version: string
 
     constructor(context: vscode.ExtensionContext, opts?: { skipSetup?: boolean }) {
         opts = _.defaults(opts, { skipSetup: false });
@@ -76,6 +78,14 @@ export class DendronWorkspace {
         this.config = vscode.workspace.getConfiguration("dendron");
         _DendronWorkspace = this;
         this.L = Logger;
+        if (VSCodeUtils.isDebuggingExtension() || getStage() === "test") {
+            const pkgJSON = fs.readJSONSync(path.join(FileTestUtils.getPkgRoot(__dirname), "package.json"));
+            this.version = pkgJSON.version
+        } else {
+            const dendronExtension= vscode.extensions.getExtension(extensionQualifiedId)!;
+            this.version = dendronExtension.packageJSON.version;
+        }
+        this.L.info({ctx: "cons", version: this.version})
         if (!opts.skipSetup) {
             this._setupCommands();
         }
@@ -150,7 +160,7 @@ export class DendronWorkspace {
             vscode.commands.registerCommand(DENDRON_COMMANDS.LOOKUP, async () => {
                 const ctx = DENDRON_COMMANDS.LOOKUP;
                 this.L.info({ ctx: ctx + ":LookupController:pre" });
-                const controller = new LookupController();
+                const controller = new LookupController(this);
                 this.L.info({ ctx: ctx + ":LookupController:post" });
                 controller.show();
             })

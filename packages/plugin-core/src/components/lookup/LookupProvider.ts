@@ -75,7 +75,6 @@ export class LookupProvider {
     const updatePickerItems = async () => {
       const ctx = "updatePickerItems";
       const querystring = picker.value;
-      this.noActiveItem.label = querystring;
 
       // DEBUG:BLOCK
       L.info({ ctx: ctx + ":enter", querystring });
@@ -115,7 +114,6 @@ export class LookupProvider {
       if (updatedItems.length === 0 || (picker.activeItems.length === 0 && !perfectMatch)) {
         // check if empty
         L.info({ ctx, status: "no matches" });
-        this.noActiveItem.label = querystring;
         picker.items = [this.noActiveItem];
         return;
       }

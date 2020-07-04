@@ -16,7 +16,8 @@ import {
   StoreGetResp,
   assert,
   makeResponse,
-  StoreQueryOpts
+  StoreQueryOpts,
+  Note
 } from "@dendronhq/common-all";
 import {
   createLogger,

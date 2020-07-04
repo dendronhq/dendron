@@ -67,8 +67,12 @@ export class DNodeUtils {
 
 }
 
+export type CreatePropsOpts = {
+  returnExtra: boolean
+}
+
 export class DNodeRaw {
-  static createProps<T>(opts: DNodeRawOpts<T>): DNodeRawProps<T> {
+  static createProps<T>(nodeOpts: DNodeRawOpts<T>, opts?: CreatePropsOpts): DNodeRawProps<T> & {extra?: any} {
     const {
       id,
       desc,
@@ -81,7 +85,7 @@ export class DNodeRaw {
       body,
       data,
       custom
-    } = _.defaults(opts, {
+    } = _.defaults(nodeOpts, {
       updated: moment.now(),
       created: moment.now(),
       id: genUUID(),
@@ -94,8 +98,8 @@ export class DNodeRaw {
       fname: null,
       custom: {}
     });
-    const title = opts.title || fname;
-    return {
+    const title = nodeOpts.title || fname;
+    const nodeProps: DNodeRawProps<T> & {extra?: any} = {
       id,
       title,
       desc,
@@ -107,8 +111,13 @@ export class DNodeRaw {
       stub,
       body,
       data,
-      custom
+      custom,
     };
+    if (opts?.returnExtra) {
+      const extra = _.omit(nodeOpts, _.keys(nodeProps));
+      nodeProps.extra = extra;
+    }
+    return nodeProps
   }
 }
 

@@ -121,10 +121,6 @@ export interface NodeWriteOpts {
    */
   newNode?: boolean;
   /**
-   * Body of the node
-   */
-  body?: string;
-  /**
    * See QueryOpts.stub
    */
   stub?: boolean;

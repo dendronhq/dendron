@@ -549,7 +549,7 @@ export class DendronEngine implements DEngine {
     const props = _.defaults(opts, { newNode: false, body: "", stub: false, parentsAsStubs: false, recursive: false });
     if (node.type === "schema") {
       const refreshList: DNode[] = [node];
-      assertExists(opts?.body, "body must exist");
+      assertExists(node?.body, "body must exist");
       // convert body
       const schemaRawProps: SchemaRawProps[] = new BodyParser().parseSchema(
         props.body,

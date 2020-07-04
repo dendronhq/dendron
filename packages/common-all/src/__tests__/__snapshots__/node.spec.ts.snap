@@ -4,6 +4,7 @@ exports[`DNoteUtils findClosestParent, parent grandchild -> domain root: main 1`
 Object {
   "body": "",
   "children": Array [],
+  "custom": Object {},
   "data": Object {},
   "desc": "",
   "fname": "baz",
@@ -18,6 +19,7 @@ exports[`DNoteUtils findClosestParent, parent grandchild -> parent: main 1`] = `
 Object {
   "body": "",
   "children": Array [],
+  "custom": Object {},
   "data": Object {},
   "desc": "",
   "fname": "foo.one",
@@ -34,6 +36,7 @@ Object {
   "children": Array [
     "foo",
   ],
+  "custom": Object {},
   "data": Object {},
   "desc": "",
   "fname": "root",
@@ -49,6 +52,7 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "bar.one",

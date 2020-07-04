@@ -16,7 +16,8 @@ import {
   StoreGetResp,
   assert,
   makeResponse,
-  StoreQueryOpts
+  StoreQueryOpts,
+  Note
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -126,7 +127,7 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
     if (node.type === "schema") {
       return schema2YMLFile(node as Schema, { root: this.opts.root });
     }
-    return node2MdFile(node, { root: this.opts.root });
+    return node2MdFile(node as Note, { root: this.opts.root });
   }
 
   isQueryAll(qs: string) {

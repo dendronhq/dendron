@@ -69,6 +69,26 @@ describe("engine:exact", () => {
             ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore()));
         });
 
+        test("fetch node with custom att", async () => {
+            await engine.init();
+            const resp = await engine.query("foo.one", queryMode);
+            expect(resp.data[0].title).toEqual("foo.one");
+            expect(resp.data[0].custom).toEqual({bond: 42});
+            expect(resp.data[0].toRawProps()).toMatchSnapshot();
+            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore()));
+        });
+
+        test("write node with custom att", async () => {
+            await engine.init();
+            const note: Note = (await engine.query("foo.one", queryMode)).data[0] as Note;
+            note.body = "foo.one.body";
+            await engine.write(note);
+            const noteUpdated: Note = (await engine.query("foo.one", queryMode)).data[0] as Note;
+            expect(_.omit(note.toRawProps(), 'body')).toEqual(_.omit(noteUpdated.toRawProps(), 'body'));
+            expect(_.trim(noteUpdated.body)).toEqual("foo.one.body");
+            ([expectedFiles, actualFiles] = FileTestUtils.cmpFiles(root, LernaTestUtils.fixtureFilesForStore()));
+        });
+
         test("node has same attributes when re-initializing engine", async () => {
             await engine.init();
             const root1: Note = engine.notes.foo;

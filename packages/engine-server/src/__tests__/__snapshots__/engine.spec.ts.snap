@@ -3,6 +3,7 @@
 exports[`engine:exact basic create node: bazNote 1`] = `
 Object {
   "body": "",
+  "custom": Object {},
   "data": Object {},
   "desc": "",
   "fname": "baz",
@@ -18,6 +19,7 @@ Array [
     "body": "
 ",
     "children": Array [],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "root",
@@ -36,8 +38,10 @@ exports[`engine:exact basic create when empty: notes-root-content 1`] = `
 
 exports[`engine:exact basic create when empty: notes-root-data 1`] = `
 Object {
+  "custom": Object {},
   "data": Object {},
   "desc": "",
+  "fname": "root",
   "path": "root",
   "title": "root",
 }
@@ -47,6 +51,7 @@ exports[`engine:exact basic create when empty: schema-root 1`] = `
 Array [
   Object {
     "body": "",
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "root.schema",
@@ -62,6 +67,7 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "root.schema",
@@ -81,6 +87,7 @@ Object {
     "foo.two",
   ],
   "created": 123,
+  "custom": Object {},
   "data": Object {
     "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
   },
@@ -95,6 +102,26 @@ Object {
 }
 `;
 
+exports[`engine:exact basic fetch node with custom att 1`] = `
+Object {
+  "body": "",
+  "children": Array [],
+  "created": 123,
+  "custom": Object {
+    "bond": 42,
+  },
+  "data": Object {},
+  "desc": "",
+  "fname": "foo.one",
+  "id": "foo.one",
+  "parent": "foo",
+  "stub": false,
+  "title": "foo.one",
+  "type": "note",
+  "updated": 456,
+}
+`;
+
 exports[`engine:exact basic fetch node: main 1`] = `
 Array [
   Object {
@@ -102,6 +129,7 @@ Array [
     "children": Array [
       "foo",
     ],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "root",
@@ -116,6 +144,7 @@ Array [
       "foo.one",
       "foo.two",
     ],
+    "custom": Object {},
     "data": Object {
       "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
     },
@@ -129,6 +158,9 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {
+      "bond": 42,
+    },
     "data": Object {},
     "desc": "",
     "fname": "foo.one",
@@ -140,6 +172,7 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.two",
@@ -154,6 +187,7 @@ Array [
 exports[`engine:exact basic updateNode: bazNote 1`] = `
 Object {
   "body": "",
+  "custom": Object {},
   "data": Object {},
   "desc": "",
   "fname": "baz",
@@ -170,6 +204,7 @@ Array [
     "children": Array [
       "foo",
     ],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "root",
@@ -184,6 +219,7 @@ Array [
       "foo.one",
       "foo.two",
     ],
+    "custom": Object {},
     "data": Object {
       "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
     },
@@ -197,6 +233,9 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {
+      "bond": 42,
+    },
     "data": Object {},
     "desc": "",
     "fname": "foo.one",
@@ -208,6 +247,7 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.two",
@@ -236,6 +276,7 @@ Array [
     "children": Array [
       "foo",
     ],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "root",
@@ -250,6 +291,7 @@ Array [
       "foo.one",
       "foo.two",
     ],
+    "custom": Object {},
     "data": Object {
       "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
     },
@@ -263,6 +305,9 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {
+      "bond": 42,
+    },
     "data": Object {},
     "desc": "",
     "fname": "foo.one",
@@ -274,6 +319,7 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.two",
@@ -303,6 +349,7 @@ Array [
     "children": Array [
       "foo",
     ],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "root",
@@ -317,6 +364,7 @@ Array [
       "foo.one",
       "foo.two",
     ],
+    "custom": Object {},
     "data": Object {
       "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
     },
@@ -330,6 +378,9 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {
+      "bond": 42,
+    },
     "data": Object {},
     "desc": "",
     "fname": "foo.one",
@@ -341,6 +392,7 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.two",
@@ -359,6 +411,7 @@ Object {
     "foo.one",
     "foo.two",
   ],
+  "custom": Object {},
   "data": Object {
     "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
   },
@@ -389,6 +442,7 @@ Array [
     "children": Array [
       "foo",
     ],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "root",
@@ -403,6 +457,7 @@ Array [
       "foo.one",
       "foo.two",
     ],
+    "custom": Object {},
     "data": Object {
       "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
     },
@@ -416,6 +471,9 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {
+      "bond": 42,
+    },
     "data": Object {},
     "desc": "",
     "fname": "foo.one",
@@ -427,6 +485,7 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.two",
@@ -445,6 +504,7 @@ Object {
     "foo.one",
     "foo.two",
   ],
+  "custom": Object {},
   "data": Object {},
   "desc": "",
   "fname": "foo",
@@ -463,6 +523,7 @@ Object {
     "foo.one",
     "foo.two",
   ],
+  "custom": Object {},
   "data": Object {},
   "desc": "",
   "fname": "foo",
@@ -489,6 +550,7 @@ Array [
     "children": Array [
       "foo",
     ],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "root",
@@ -500,6 +562,9 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {
+      "bond": 42,
+    },
     "data": Object {},
     "desc": "",
     "fname": "foo.one",
@@ -511,6 +576,7 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.two",
@@ -525,6 +591,7 @@ Array [
       "foo.one",
       "foo.two",
     ],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo",
@@ -543,6 +610,7 @@ Array [
     "children": Array [
       "foo",
     ],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "root",
@@ -554,6 +622,9 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {
+      "bond": 42,
+    },
     "data": Object {},
     "desc": "",
     "fname": "foo.one",
@@ -565,6 +636,7 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.two",
@@ -579,6 +651,7 @@ Array [
       "foo.one",
       "foo.two",
     ],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo",
@@ -620,6 +693,7 @@ Array [
       "foo",
       "bar",
     ],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "root",
@@ -634,6 +708,7 @@ Array [
       "foo.one",
       "foo.two",
     ],
+    "custom": Object {},
     "data": Object {
       "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
     },
@@ -649,6 +724,7 @@ Array [
     "children": Array [
       "bar.two",
     ],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "bar",
@@ -660,6 +736,9 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {
+      "bond": 42,
+    },
     "data": Object {},
     "desc": "",
     "fname": "foo.one",
@@ -671,6 +750,7 @@ Array [
   Object {
     "body": "",
     "children": Array [],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.two",
@@ -683,6 +763,7 @@ Array [
     "body": "bar.two.body
 ",
     "children": Array [],
+    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "bar.two",

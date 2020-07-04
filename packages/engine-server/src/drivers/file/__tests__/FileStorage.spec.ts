@@ -143,7 +143,7 @@ describe("main", () => {
         const resp = await store.query("**/*", queryMode, {});
         const rootNode = _.find(resp.data, n => n.title === "root") as IDNode;
         const foo = _.find(resp.data, n => n.title === "foo") as IDNode;
-        const node = _.find(resp.data, n => n.title === "one") as IDNode;
+        const node = _.find(resp.data, n => n.title === "foo.one") as IDNode;
         expect(rootNode).not.toBeUndefined();
         expect(node).not.toBeUndefined();
         expect(node.parent?.id).toEqual(foo.id);

@@ -35,6 +35,10 @@ export type DNodeRawOpts<T extends DNodeData> = {
   children?: string[];
   body?: string;
   data?: T;
+  /**
+   * Custom attributes
+   */
+  custom?: any
 };
 export type DNodeRawProps<T extends DNodeData = DNodeData> = Required<
   DNodeRawOpts<T>

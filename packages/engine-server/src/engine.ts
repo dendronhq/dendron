@@ -604,7 +604,7 @@ export class DendronEngine implements DEngine {
   }
 
   // OPTIMIZE: do in bulk
-  async _updateNote(note: Note, opts: { parentsAsStubs: boolean, newNode: boolean }) {
+async _updateNote(note: Note, opts: { parentsAsStubs: boolean, newNode: boolean }) {
     const refreshList: Note[] = [note];
     let parentPath = DNodeUtils.dirName(note.fname);
     if (_.isEmpty(parentPath)) {

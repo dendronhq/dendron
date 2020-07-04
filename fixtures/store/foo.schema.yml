@@ -1,11 +1,11 @@
-- id: b111db5b-bc52-4977-893b-307522f89ea3
-  title: "foo"
+- id: foo
   parent: root
+  data:
+    pattern: foo
   children:
-    - 5291f68b-e266-405a-bd56-ee5980aad10c
-- id: 5291f68b-e266-405a-bd56-ee5980aad10c
-  title: "one"
+    - foo.one
+- id: foo.one
   children:
-    - foo.two
-- id: foo.two
-  title: foo.two
+    - foo.alpha
+- id: foo.alpha
+  title: foo.alpha

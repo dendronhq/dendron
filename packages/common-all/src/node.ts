@@ -79,7 +79,8 @@ export class DNodeRaw {
       stub,
       children,
       body,
-      data
+      data,
+      custom
     } = _.defaults(opts, {
       updated: moment.now(),
       created: moment.now(),
@@ -90,7 +91,8 @@ export class DNodeRaw {
       parent: null,
       body: "",
       data: {},
-      fname: null
+      fname: null,
+      custom: {}
     });
     const title = opts.title || fname;
     return {
@@ -104,7 +106,8 @@ export class DNodeRaw {
       children,
       stub,
       body,
-      data
+      data,
+      custom
     };
   }
 }
@@ -167,6 +170,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
   public data: T;
   public label: string;
   public stub: boolean;
+  public custom: any;
 
   constructor(opts: IDNodeOpts<T>) {
     const {
@@ -180,7 +184,8 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
       stub,
       body,
       data,
-      children
+      children,
+      custom
     } = _.defaults(
       opts,
       DNodeRaw.createProps(_.defaults(opts, { parent: null, children: [] }))
@@ -199,6 +204,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     this.data = data;
     this.label = DNodeUtils.isRoot(this) ? "root" : this.logicalPath;
     this.stub = stub;
+    this.custom = custom;
   }
 
   get domain(): DNode<T> {
@@ -309,7 +315,8 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
       "body",
       "fname",
       "data",
-      "stub"
+      "stub",
+      "custom",
     ]);
     let parent;
     if (this.parent?.title === "root") {

@@ -1,22 +1,18 @@
+import { FileTestUtils, LernaTestUtils } from "@dendronhq/common-server";
 import * as assert from "assert";
-// // You can import and use all API from the 'vscode' module
-// // as well as import your extension to test it
-import * as vscode from "vscode";
-
-import { afterEach, before, beforeEach, describe } from "mocha";
-
+import fs from "fs-extra";
+import _ from "lodash";
+import { afterEach, beforeEach, describe } from "mocha";
 // import { DendronFileSystemProvider } from "../../components/fsProvider";
 // import _ from "lodash";
 // import { fnameToUri } from "../../components/lookup/utils";
 // import fs from "fs-extra";
 import path from "path";
-import { FileTestUtils } from "@dendronhq/common-server";
+// // You can import and use all API from the 'vscode' module
+// // as well as import your extension to test it
+import * as vscode from "vscode";
 import { DendronWorkspace } from "../../workspace";
-import fs from "fs-extra";
-import { LernaTestUtils } from "@dendronhq/common-server";
-import _ from "lodash";
-import { WSAEACCES } from "constants";
-import { testUtils } from "@dendronhq/common-all";
+import { testUtils, NoteRawProps } from "@dendronhq/common-all";
 
 function createMockContext(): vscode.ExtensionContext {
   const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
@@ -85,74 +81,21 @@ suite("Extension Test Suite", () => {
     test("reload", async () => {
       await ws.reloadWorkspace(root);
       assert.equal(ws.engine.notes["root"].children.length, 1);
+      console.log("bond", root);
+      const { content, data } = FileTestUtils.readMDFile(root, "foo.one.md");
+      assert.equal(_.trim(content), "");
+      assert.deepEqual(testUtils.omitEntropicProps(data as NoteRawProps), {
+        custom: {
+          bond: 42,
+        },
+        data: {
+          schemaId: "foo",
+        },
+        desc: "",
+        fname: "foo.one",
+        path: "foo.one",
+        title: "foo.one",
+      });
     });
   });
-
-  //   describe("DendronFileSystemProvider", () => {
-  //     beforeEach(async () => {
-  //       ({ fsp, testRoot } = await setup());
-  //     });
-  //     afterEach(() => {
-  //       fs.removeSync(testRoot);
-  //     });
-
-  //     describe("create new", () => {
-  //       describe("parent: root", () => {
-  //         test("child: root/domain", async () => {
-  //           const uri = await fnameToUri("baz", { checkIfDirectoryFile: false });
-  //           await fsp.writeFile(uri, Buffer.from("baz.body"), {
-  //             create: true,
-  //             overwrite: true,
-  //             writeToEngine: true,
-  //           });
-  //           const note = _.find(fsp.engine.notes, { fname: "baz" });
-  //           checkFiles(assert, testRoot, { additions: ["baz"] });
-  //           assert.ok(!_.isUndefined(note));
-  //         });
-
-  //         test("grandchild, node: root/domain/node", async () => {
-  //           const fname = "foo.three";
-  //           const uri = await fnameToUri(fname, { checkIfDirectoryFile: false });
-  //           await fsp.writeFile(uri, Buffer.from(`${fname}.body`), {
-  //             create: true,
-  //             overwrite: true,
-  //             writeToEngine: true,
-  //           });
-  //           checkFiles(assert, testRoot, { additions: [fname] });
-  //         });
-
-  //         test("grandchild, stub: root/stub/node", async () => {
-  //           const fname = "baz.one";
-  //           const uri = await fnameToUri(fname, { checkIfDirectoryFile: false });
-  //           await fsp.writeFile(uri, Buffer.from(`${fname}.body`), {
-  //             create: true,
-  //             overwrite: true,
-  //             writeToEngine: true,
-  //           });
-  //           checkFiles(assert, testRoot, { additions: [fname] });
-  //         });
-  //       });
-
-  //       describe("parent: domain", () => {
-  //         test("child: domain/node", async () => {
-  //           await checkSingleAddition(assert, fsp, testRoot, "foo.three");
-  //         });
-
-  //         test("grandchild, stub: domain/stub/node", async () => {
-  //           await checkSingleAddition(assert, fsp, testRoot, "foo.beta.one");
-  //         });
-
-  //         test("grandchild, node: domain/node/node", async () => {
-  //           await checkSingleAddition(assert, fsp, testRoot, "foo.alpha.three");
-  //         });
-  //       });
-
-  //       describe.only("edge", () => {
-  //         test("(grandchild,stub), (child, node)", async () => {
-  //           await checkSingleAddition(assert, fsp, testRoot, "foo.beta.one");
-  //           await checkSingleAddition(assert, fsp, testRoot, "foo.beta");
-  //         });
-  //       });
-  //     });
-  //   });
 });

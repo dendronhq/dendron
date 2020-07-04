@@ -1,12 +1,12 @@
 import {
   DNodeRaw,
   DNodeRawOpts,
-  IDNode,
   Note,
   NoteData,
   NoteRawProps,
   Schema,
-  genUUID
+  genUUID,
+  assert
 } from "@dendronhq/common-all";
 import fs, { Dirent } from "fs";
 
@@ -117,7 +117,7 @@ export function mdFile2NodeProps(fpath: string): NoteRawProps {
 //   return note;
 // }
 
-export function node2MdFile(node: IDNode, opts: { root: string }) {
+export function node2MdFile(node: Note, opts: { root: string }) {
   const { root } = opts;
   const { body, path: nodePath } = node;
   const meta = _.pick(node, [
@@ -127,15 +127,23 @@ export function node2MdFile(node: IDNode, opts: { root: string }) {
     "updated",
     "created",
     "path",
-    "data"
+    "data",
+    "custom",
+    "fname"
   ]);
   // only save parent id if parent is not a stub
   const parent = (node.parent && !node.parent.stub ? node.parent.id : null);
   const children = node.children.map(c => c.id);
   const filePath = path.join(root, `${nodePath}.md`);
+  const props: Omit<NoteRawProps, "stub"|"body"> = {
+    ...meta,
+    parent,
+    children
+  }
+  assert(!node.stub, `writing a stub node: ${node.toRawProps()}`)
   return fs.writeFileSync(
     filePath,
-    matter.stringify(body || "", { ...meta, parent, children })
+    matter.stringify(body || "", props)
   );
 }
 

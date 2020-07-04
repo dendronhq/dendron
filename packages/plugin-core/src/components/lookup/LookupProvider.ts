@@ -75,6 +75,7 @@ export class LookupProvider {
     const updatePickerItems = async () => {
       const ctx = "updatePickerItems";
       const querystring = picker.value;
+      this.noActiveItem.label = querystring;
 
       // DEBUG:BLOCK
       L.info({ ctx: ctx + ":enter", querystring });

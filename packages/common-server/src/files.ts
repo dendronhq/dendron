@@ -106,7 +106,6 @@ export function node2MdFile(node: Note, opts: { root: string }) {
     "desc",
     "updated",
     "created",
-    "path",
     "data",
     "custom",
     "fname",

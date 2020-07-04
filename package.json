@@ -13,9 +13,13 @@
     "eslint-plugin-react-hooks": "^2.5.1",
     "husky": "^4.2.5",
     "lerna": "^3.19.0",
+    "lodash": "^4.17.15",
     "prettier": "^2.0.4",
-    "typescript": "^3.9.5",
-    "lodash": "^4.17.15"
+    "standard-version": "^8.0.0",
+    "typescript": "^3.9.5"
+  },
+  "scripts": {
+    "release": "standard-version"
   },
   "packages": [
     "packages/*",

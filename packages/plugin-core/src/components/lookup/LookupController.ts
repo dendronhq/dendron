@@ -68,7 +68,8 @@ export class LookupController {
   show(_value = "") {
     const ctx = "show";
     L.info({ ctx });
-    const provider = this.getOrInstantiateProvider();
+    // const provider = this.getOrInstantiateProvider();
+    const provider = new LookupProvider();
     L.info({ ctx: ctx + ":getOrInstantiateProvider:post" });
     // create quick pick
     const quickpick = vscode.window.createQuickPick<DNode>();

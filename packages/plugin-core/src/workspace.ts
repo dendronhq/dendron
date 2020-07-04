@@ -26,6 +26,7 @@ function writeWSFile(fpath: string, opts: { rootDir: string }) {
             "spellright.documentTypes": ["markdown", "latex", "plaintext"],
             "editor.minimap.enabled": false,
             "dendron.rootDir": opts.rootDir,
+            "files.autoSave": "onFocusChange",
         },
         "extensions": {
             "recommendations": [

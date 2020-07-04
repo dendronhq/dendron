@@ -14,7 +14,6 @@ type SchemaCommandOpts = {
 function applySchema(note: Note, schema: Schema) {
     note.data.schemaId = schema.id;
     note.children.map(noteChild => {
-        //const mschema: ([Note, Schema] | false)[] = 
         const schemaMatch: Schema | undefined = _.find(schema.children as Schema[], schemaChild => {
             return (schemaChild as Schema).match(noteChild as Note);
         });
@@ -40,11 +39,11 @@ export class SchemaCommand extends BaseCommand<SchemaCommandOpts> {
                 return d.fname === s.data.pattern;
             });
             return Promise.all(matchedDomains.map(m => {
-                // TODO: check if stub
                 m.children.map(note => {
                     applySchema(note as Note, s as Schema);
-                    // c.data.schemaId = s.id;
-                    return engine.write(note, { recursive: true, parentsAsStubs: true });
+                    if (!note.stub) {
+                        return engine.write(note, { recursive: true, parentsAsStubs: true });
+                    }
                 });
             }));
         }));

@@ -16,8 +16,7 @@ import {
   StoreGetResp,
   assert,
   makeResponse,
-  StoreQueryOpts,
-  Note
+  StoreQueryOpts
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -203,11 +202,11 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
 
   async write(node: IDNode, opts?: DEngineStoreWriteOpts) {
     opts = _.defaults(opts, { stub: false, recursive: false });
-    if (!opts.stub) {
+    if (!opts.stub && !node.stub) {
       await this._writeFile(node);
-      if (opts.recursive) {
-        await Promise.all(node.children.map(c => this.write(c, opts)));
-      }
+    }
+    if (!opts.stub && opts.recursive) {
+      await Promise.all(node.children.map(c => this.write(c, opts)));
     }
     // FIXME:OPT: only do for new nodes
     this.updateNodes([node])

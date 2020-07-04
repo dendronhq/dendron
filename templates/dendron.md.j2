@@ -165,3 +165,7 @@ Dendron can be installed as a [vscode plugin](TODO) or as using the [standalone 
 Dendron is still early and maybe 1% of where it could be. That being said, it is actively being used by the author on a daily (hourly) basis to manage a knowledge base of over 20 thousand notes. 
 
 The **audacious long term goal** is for Dendron to become the **best way to create, understand, and share knowledge**. Please join me in this **journey** and, together, lets **make sense** of this world that we inhabit.
+
+# Configuration
+
+TODO

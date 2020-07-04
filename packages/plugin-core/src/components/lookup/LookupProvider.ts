@@ -10,7 +10,12 @@ import { node2Uri } from "./utils";
 const L = createLogger("LookupProvider");
 
 class QueryStringUtils {
-  static getSchema(_qs: string, engineResp: Note[]): Schema[] {
+  /**
+   * Get all schema matches for current query
+   * @param _qs 
+   * @param engineResp 
+   */
+  static getAllSchemaAtLevel(_qs: string, engineResp: Note[]): Schema[] {
     const maybeSchema = engineResp[0]?.schema;
     return maybeSchema?.parent?.children as Schema[] || [];
   }
@@ -119,13 +124,13 @@ export class LookupProvider {
       }
 
 
-      // apply schemas to the results
-      // const schemas = QueryStringUtils.getSchema(querystring, updatedItems as Note[]);
-      // updatedItems = _.uniqBy(updatedItems.concat(schemas.map(schema => {
-      //   return Note.fromSchema(DNodeUtils.dirName(querystring), schema);
-      // })), (ent) => {
-      //   return ent.fname;
-      // });
+      // show schema suggestions
+      const schemas = QueryStringUtils.getAllSchemaAtLevel(querystring, updatedItems as Note[]);
+      updatedItems = _.uniqBy(updatedItems.concat(schemas.map(schema => {
+        return Note.fromSchema(DNodeUtils.dirName(querystring), schema);
+      })), (ent) => {
+        return ent.fname;
+      });
 
 
       // check if perfect match, remove @noActiveItem result if that's the case

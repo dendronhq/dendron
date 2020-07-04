@@ -3,5 +3,12 @@
     "packages/*"
   ],
   "version": "0.2.16",
-  "npmClient": "npm"
+  "npmClient": "npm",
+  "command": {
+    "version": {
+       "message": "chore(release): publish",
+       "conventionalCommits": true,
+       "yes": true
+    }
+  }
 }

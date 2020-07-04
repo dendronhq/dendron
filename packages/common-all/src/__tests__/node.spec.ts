@@ -92,6 +92,17 @@ describe("NoteUtils", () => {
     expect(notes.root.children.length).toEqual(1);
     expect(notes.foo.children.length).toEqual(2);
   });
+
+  test("createStubNotes, bar (stub) -> bar.two.beta", () => {
+    notes = setupNotes();
+    const barStub = Note.createStub("bar")
+    notes.root.addChild(barStub);
+    NoteUtils.createStubNotes(barStub, new Note({fname: "bar.two.beta"}));
+    const barStubChild = barStub.children[0]
+    expect(barStubChild?.stub).toBe(true);
+    expect(barStubChild?.fname).toBe("bar.two");
+    expect(barStubChild?.children.length).toEqual(1);
+  });
 });
 
 describe("schema", () => {

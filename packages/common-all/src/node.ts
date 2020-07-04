@@ -599,20 +599,20 @@ export class NodeBuilder {
 
 export class NoteUtils {
   /**
-   * Last note in this list is parent
    * @param from
    * @param to
    */
   static createStubNotes(from: Note, to: Note): Note[] {
     const stubNodes: Note[] = [];
-    // ""
     const fromPath = from.logicalPath;
-    // ""
     const toPath = to.logicalPath;
-    const diffPath = _.difference(toPath.split("."), fromPath.split("."));
+    const index = toPath.indexOf(fromPath) + fromPath.length;
+    const diffPath = _.trimStart(toPath.slice(index), ".").split(".");
     let stubPath = fromPath;
     let parent = from;
+    // last element is node
     diffPath.slice(0, -1).forEach(part => {
+      // handle starting from root, path = ""
       if (_.isEmpty(stubPath)) {
         stubPath = part;
       } else {

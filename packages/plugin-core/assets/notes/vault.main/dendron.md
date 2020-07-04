@@ -145,16 +145,15 @@ Schemas are matched to hierarchies via the `data.pattern` attribute in the root 
 
 > NOTE: The functionality in this section is under active development and will be released shortly. 
 
-
-![TODO]()
+- TODOk
 
 With schemas, you get to see if you are missing entries
 
-![TODO]()
+- TODO
 
 You also get to see if you accidentally made new additions
 
-![TODO]()
+- TODO
 
 Note that schemas are entirely optional and usually something that you develop over time. To that end, Dendron has many capabilities to help you develop and evolve your schemas over time and the ability to automatically refactor your notes to match your schemas. 
 

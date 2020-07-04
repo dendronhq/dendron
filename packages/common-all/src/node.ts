@@ -254,19 +254,9 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     }
   }
 
-  // used in lookup
-  get queryPath(): string {
-    return this.path;
-  }
-
   // used in parsing
   get path(): string {
     return this.fname;
-    // if (this.parent && this.parent.title !== "root") {
-    //   return [this.parent.path, this.title].join(".");
-    // } else {
-    //   return this.title;
-    // }
   }
 
   abstract get url(): string;

@@ -61,14 +61,12 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   path: string;
   basename: string;
   logicalPath: string;
-  // how to display path in lookup
-  // used to special case `root` node to be empty string
-  queryPath: string;
   /**
    * Child of the root (this.parent == root)
    */
   domain: IDNode<T>;
   // absolute url to node id
+  // FIXM:E not used
   url: string;
   label: string;
   detail: string;

@@ -1,9 +1,6 @@
 {
   "folders": [
     {
-      "path": "packages/plugin-core/assets/notes/",
-    },
-    {
       "path": "packages/common-all"
     },
     {

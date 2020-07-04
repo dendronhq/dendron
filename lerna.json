@@ -2,13 +2,13 @@
   "packages": [
     "packages/*"
   ],
-  "version": "0.2.17",
+  "version": "0.2.18",
   "npmClient": "npm",
   "command": {
     "version": {
-       "message": "chore(release): publish",
-       "conventionalCommits": true,
-       "yes": true
+      "message": "chore(release): publish",
+      "conventionalCommits": true,
+      "yes": true
     }
   }
 }

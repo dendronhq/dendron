@@ -308,8 +308,8 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "foo.one",
-      "foo.three",
+      "one",
+      "three",
     ],
     "custom": Object {},
     "data": Object {},
@@ -323,7 +323,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "foo.alpha",
+      "alpha",
     ],
     "custom": Object {},
     "data": Object {},
@@ -331,7 +331,7 @@ Array [
     "fname": "foo.schema",
     "parent": "foo",
     "stub": false,
-    "title": "foo.one",
+    "title": "one",
     "type": "schema",
   },
   Object {
@@ -341,23 +341,21 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo.schema",
-    "parent": "foo.three",
+    "parent": "one",
     "stub": false,
-    "title": "foo.alpha",
+    "title": "alpha",
     "type": "schema",
   },
   Object {
     "body": "",
-    "children": Array [
-      "foo.alpha",
-    ],
+    "children": Array [],
     "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.schema",
     "parent": "foo",
     "stub": false,
-    "title": "foo.three",
+    "title": "three",
     "type": "schema",
   },
 ]

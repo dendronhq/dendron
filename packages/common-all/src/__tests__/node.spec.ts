@@ -124,7 +124,7 @@ describe("SchemaUtils", () => {
     expect(schema).toEqual(schemas.fooGrandChild);
     const note2 = notes.fooTwoBeta;
     const schema2 =SchemaUtils.matchNote(note2, schemas);
-    expect(schema2).toBeUndefined();
+    expect(schema2).toEqual(Schema.createUnkownSchema())
   });
 
 

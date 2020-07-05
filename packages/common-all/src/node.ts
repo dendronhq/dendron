@@ -444,13 +444,19 @@ export class Schema extends DNode<SchemaData> implements ISchema {
     return new Schema({ ...props, parent: null, children: [] });
   }
 
+  static _UNKNOWN_SCHEMA: undefined|Schema = undefined;
+
   /**
    * This is attached to notes that are part of a domain with schema but
    * don't match any schema in it
    */
-  static createUnkownSchema() {
-    const props = SchemaNodeRaw.createProps({ id: UNKNOWN_SCHEMA_ID, fname: UNKNOWN_SCHEMA_ID, stub: true });
-    return new Schema({ ...props, parent: null, children: [] });
+  static createUnkownSchema(): Schema {
+    if (Schema._UNKNOWN_SCHEMA) {
+      const props = SchemaNodeRaw.createProps({ id: UNKNOWN_SCHEMA_ID, fname: UNKNOWN_SCHEMA_ID, stub: true,
+      created: "-1", updated: "-1" });
+      Schema._UNKNOWN_SCHEMA = new Schema({ ...props, parent: null, children: [] });
+    }
+    return Schema._UNKNOWN_SCHEMA as Schema;
   }
 
   constructor(props: ISchemaOpts) {
@@ -648,9 +654,9 @@ export class SchemaUtils {
   static isUnkown(schema: Schema) {
     return schema.id === UNKNOWN_SCHEMA_ID;
   }
-  static matchNote(note: Note, schemas: SchemaDict): Schema|undefined{
+  static matchNote(note: Note, schemas: SchemaDict): Schema{
     return _.find(_.values(schemas), schema => {
        return minimatch(note.path, schema.logicalPath);
-     });
+     }) || Schema.createUnkownSchema();
   }
 }

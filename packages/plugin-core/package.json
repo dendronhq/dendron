@@ -3,7 +3,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.2.20",
+  "version": "0.3.0",
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/dendronhq/dendron.git",
@@ -97,9 +97,9 @@
     "vscode-test": "^1.3.0"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.2.15",
-    "@dendronhq/common-server": "^0.2.15",
-    "@dendronhq/engine-server": "^0.2.15",
+    "@dendronhq/common-all": "^0.3.0",
+    "@dendronhq/common-server": "^0.3.0",
+    "@dendronhq/engine-server": "^0.3.0",
     "execa": "^4.0.2",
     "lodash": "^4.17.15"
   },

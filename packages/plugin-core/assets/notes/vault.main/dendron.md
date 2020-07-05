@@ -1,19 +1,17 @@
 <style>
   img[src*="#center"] {
-      display: block;
-      margin: 0 auto;
+#  display: block;
+#  margin: 0 auto;
   }
   img[src*="#right"] {
-    float: right;
-    display: block;
+#float: right;
+#display: block;
 }
 </style>
 
 > "We are overwhelmed with information and we don't have the tools to properly index and filter through it. [The development of these tools, which] will give society access to and command over the inherited knowledge of the ages [should] be the first objective of our scientist" - Vannevar Bush, 1945
 
-# Dendron
-
-![](assets/2020-06-30-21-30-51.png#right)
+![](assets/logo-banner.png#center)
 
 Dendron is a **hierarchal** note taking tool that **grows** as you do. 
 
@@ -49,15 +47,95 @@ To read more about the ideas that inspired Dendron, you can read [this blog post
 - [backlinks](https://marketplace.visualstudio.com/items?itemName=kortina.vscode-markdown-notes)
 - [workspace/file/line history](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens#current-line-blame-)
 
+
+# Legend
+- 🚧 these features are still under development
+
+
 # Quickstart
 
 ## Create a new workspace
 
-You can use the `> Dendron: Initialize Workspace` command to get started
+Launch *Quick Open*:
+  - <img src="https://www.kernel.org/theme/images/logos/favicon.png" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-linux.pdf">Linux</a> `Ctrl+P`
+  - <img src="https://developer.apple.com/favicon.ico" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf">macOS</a> `⌘P`
+  - <img src="https://www.microsoft.com/favicon.ico" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf">Windows</a> `Ctrl+P`
+
+Paste the following command and press `Enter`:
+
+```sh
+> Dendron: Initialize Workspace
+```
 
 ![Initialize workspace](assets/dendron-init.gif)
 
-## Create your first note
+## Welcome
+
+Congratulations, you have just set up your first workspace! 🎉🎉🎉
+
+Before we continue, a little terminology. In Dendron, your **workspace** is a folder that contains all your notes. Depending on your operating system, Dendron has a different default location for the **workspace**.
+
+Your workspace is made up of **vaults**. You can think of a vault as a git repository. By default, Dendron creates the *vault.main* folder to store all yoru notes. Dividing your notes by vaults has some of the following benefits:
+- you can separate private notes that you want to keep local (`vault.secret`) from notes you want to sync
+- 🚧 you can import vaults from third parties
+- 🚧 you can publish and collaborate with just the notes in a specific vault
+
+Within a vault, your notes are stored **hierarchily** as `.` delimited markdown files. This is similar to how domain names are stored. 
+
+![](assets/2020-07-05-11-35-11.png)
+
+TODO: make a dendron example
+
+Your file system is hierarichal. The below is an example of how you might organize files for a project.
+
+```
+├── project1/
+├── project1/designs/
+├── project1/designs/promotion.png
+├── project1/paperwork/
+├── project1/paperwork/legal.md
+├── project1/tasks/
+├── project1/tasks/task1.md
+└── project1/tasks/task2.md
+```
+
+
+In Dendron, the above hiearchy would look like the following
+
+```
+├── project1.
+├── project1.designs.
+├── project1.designs.promotion
+├── project1.paperwork.
+├── project1.paperwork.legal
+├── project1.tasks.
+├── project1.tasks.task1
+└── project1.tasks.task2
+```
+
+## Hierarichal Search
+
+To work with notes, Dendron uses **hierarichal search**. This is best explained by example. 
+
+First, use `CTRl-P` to bring up the search search bar. You should see the current note (`dendron`) highlighted. 
+
+- TODO: pciture
+
+Dendron is the **root** of its hierarchy. We call dendron a **domain**.
+
+You can see other notes further down the hierarchy via the dropdown. 
+
+- TODO:dropdown image
+
+To navigate deeper into the hiearchy, enter the following query and hit `Enter`
+```
+dendron.hello
+```
+
+Follow the instructions in `dendron.hello` before continuing.
+
+
+## Lookup
 
 Creating a note is as simple as looking it up - if it doesn't exist, Dendron will create it. To perform a lookup, use the `CTRL-P` shortcut or the `> Dendron: Lookup` command.
 
@@ -120,17 +198,17 @@ Here is schema for the programming language hierarchy
   namespace: true
   data.pattern: "^l"
   children:
-    - data
-    - io
-    - flow
-    - oo
+#- data
+#- io
+#- flow
+#- oo
 - id: data
   alias: d
   desc: data structures
   children:
-    - bool
-    - array
-    - string
+#- bool
+#- array
+#- string
 - id: io
   desc: input/output
 - id: flow

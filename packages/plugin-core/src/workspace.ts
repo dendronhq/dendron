@@ -27,13 +27,15 @@ function writeWSFile(fpath: string, opts: { rootDir: string }) {
             "dendron.rootDir": opts.rootDir,
             "files.autoSave": "onFocusChange",
             "materialTheme.accent": "Red",
-            "workbench.colorTheme": "Material Theme High Contrast"
+            "workbench.colorTheme": "Material Theme High Contrast",
+            "pasteImage.path": "${currentFileDir}/assets",
         },
         "extensions": {
             "recommendations": [
                 "dendron.dendron",
                 // git version history
-                "eamodio.gitlens",
+                // non-developers don't have git, will leave as optional for now
+                // "eamodio.gitlens",
                 // markdown extensions
                 "shd101wyy.markdown-preview-enhanced",
                 // Spellcheck
@@ -43,7 +45,9 @@ function writeWSFile(fpath: string, opts: { rootDir: string }) {
                 // wikilinks, backlinks, and additional goodies
                 "kortina.vscode-markdown-notes",
                 // material theme
-                "equinusocio.vsc-material-theme"
+                "equinusocio.vsc-material-theme",
+                // tree generator
+                "aprilandjan.ascii-tree-generator"
             ]
         }
     };

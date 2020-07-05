@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.1](https://github.com/dendronhq/dendron/compare/v0.3.0...v0.3.1) (2020-07-05)
+
+
+### Features
+
+* add material theme ([c9f8082](https://github.com/dendronhq/dendron/commit/c9f808288470015070d585146e593b55a80c4f82))
+
+
+
+
+
 # [0.3.0](https://github.com/dendronhq/dendron/compare/v0.2.20...v0.3.0) (2020-07-05)
 
 

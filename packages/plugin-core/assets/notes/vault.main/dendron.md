@@ -30,9 +30,10 @@ At its core, Dendron is a tool to help you **store and find notes** within **hie
 To read more about the ideas that inspired Dendron, you can read [this blog post](https://kevinslin.com/organizing/its_not_you_its_your_knowledge_base/).
 
 ## Core
-- hierarchical search: find nodes by tree traversal
-- schemas: optional type system for your notes
-- modeless operation: no difference between searching for a file and creating one
+- [[hierarchical search | dendron.features.hsearch.md]]: find nodes by tree traversal
+- [[schemas | dendron.features.schemas.md]]: optional type system for your notes
+- TODO
+  - modeless operation: no difference between searching for a file and creating one
 
 ## Bundled (enabled with recommended extensions)
 
@@ -48,11 +49,15 @@ To read more about the ideas that inspired Dendron, you can read [this blog post
 - [workspace/file/line history](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens#current-line-blame-)
 
 
-# Legend
-- 🚧 these features are still under development
 
 
 # Quickstart
+
+To start using Dendron, please go to [[quickstart | dendron.quickstart]]
+
+
+# Legend
+- 🚧 these features are still under development
 
 ## Create a new workspace
 
@@ -119,20 +124,23 @@ To work with notes, Dendron uses **hierarichal search**. This is best explained 
 
 First, use `CTRl-P` to bring up the search search bar. You should see the current note (`dendron`) highlighted. 
 
-- TODO: pciture
+- TODO: screen shot of ctrl-p
 
-Dendron is the **root** of its hierarchy. We call dendron a **domain**.
+Dendron is the **domain** of its hierarchy.  Think of it as a [tld](TODO) for a domain name or a notebook in a traditional note taking app like OneNote
 
-You can see other notes further down the hierarchy via the dropdown. 
+You can see other notes in the *dendron* **domain** via the dropdown.
 
-- TODO:dropdown image
+- TODO: screenshot of drop down
 
-To navigate deeper into the hiearchy, enter the following query and hit `Enter`
+To navigate, type to filter results and `.` to go deeper. Try the following query and then hit `Enter`
+
 ```
 dendron.hello
 ```
 
-Follow the instructions in `dendron.hello` before continuing.
+- TODO: screenshot
+
+Follow the instructions in `dendron.hello` before continuing below.
 
 
 ## Lookup

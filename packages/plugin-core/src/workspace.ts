@@ -1,17 +1,16 @@
-import { DEngine, Note, DNodeUtils, getStage } from "@dendronhq/common-all";
+import { DEngine, DNodeUtils, getStage, Note } from "@dendronhq/common-all";
+import { FileTestUtils } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
-import { SchemaCommand } from "./commands/Schema";
 import { LookupController } from "./components/lookup/LookupController";
+import { node2Uri } from "./components/lookup/utils";
 import { CONFIG, DENDRON_COMMANDS, DENDRON_WS_NAME, extensionQualifiedId } from "./constants";
 import { Logger } from "./logger";
 import { NodeService } from "./services/nodeService/NodeService";
 import { getPlatform, resolveTilde, VSCodeUtils } from "./utils";
-import { node2Uri } from "./components/lookup/utils";
-import { FileTestUtils } from "@dendronhq/common-server";
 
 
 function writeWSFile(fpath: string, opts: { rootDir: string }) {
@@ -27,6 +26,8 @@ function writeWSFile(fpath: string, opts: { rootDir: string }) {
             "editor.minimap.enabled": false,
             "dendron.rootDir": opts.rootDir,
             "files.autoSave": "onFocusChange",
+            "materialTheme.accent": "Red",
+            "workbench.colorTheme": "Material Theme High Contrast"
         },
         "extensions": {
             "recommendations": [
@@ -40,11 +41,13 @@ function writeWSFile(fpath: string, opts: { rootDir: string }) {
                 // images
                 "mushan.vscode-paste-image",
                 // wikilinks, backlinks, and additional goodies
-                "kortina.vscode-markdown-notes"
+                "kortina.vscode-markdown-notes",
+                // material theme
+                "equinusocio.vsc-material-theme"
             ]
         }
     };
-    fs.writeJsonSync(fpath, jsonBody);
+    fs.writeJsonSync(fpath, jsonBody, {spaces: 4});
 }
 
 let _DendronWorkspace: DendronWorkspace | null;

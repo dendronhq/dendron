@@ -53,7 +53,9 @@ exports[`NoteUtils createStubNotes, root -> bar.one: barChild 1`] = `
 Array [
   Object {
     "body": "",
-    "children": Array [],
+    "children": Array [
+      "bar.one.alpha",
+    ],
     "custom": Object {},
     "data": Object {},
     "desc": "",
@@ -61,6 +63,18 @@ Array [
     "parent": "bar",
     "stub": false,
     "title": "bar.one",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one.alpha",
+    "parent": "bar.one",
+    "stub": false,
+    "title": "bar.one.alpha",
     "type": "note",
   },
 ]
@@ -162,20 +176,6 @@ Array [
   },
   Object {
     "body": "",
-    "children": Array [
-      "bar.schema.yml",
-    ],
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "bar.schema.yml",
-    "parent": "root",
-    "stub": false,
-    "title": "bar.schema.yml",
-    "type": "schema",
-  },
-  Object {
-    "body": "",
     "children": Array [],
     "custom": Object {},
     "data": Object {
@@ -183,7 +183,7 @@ Array [
     },
     "desc": "",
     "fname": "bar.schema.yml",
-    "parent": "bar.schema.yml",
+    "parent": "root",
     "stub": false,
     "title": "bar.schema.yml",
     "type": "schema",

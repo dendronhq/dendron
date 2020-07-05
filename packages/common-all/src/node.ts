@@ -475,10 +475,10 @@ export class Schema extends DNode<SchemaData> implements ISchema {
   }
 
   get logicalPath(): string {
-    const part = this.namespace ? "*" : this.id;
+    const part = this.namespace ? `${this.id}/*` : this.id;
     if (this.parent && this.parent.id !== "root") {
       const prefix = this.parent.logicalPath;
-      return [prefix, part].join(".")
+      return [prefix, part].join("/")
     } else {
       return part;
     }
@@ -656,7 +656,7 @@ export class SchemaUtils {
   }
   static matchNote(note: Note, schemas: SchemaDict): Schema{
     return _.find(_.values(schemas), schema => {
-       return minimatch(note.path, schema.logicalPath);
+       return minimatch(note.path.replace(/\./g, '/'), schema.logicalPath);
      }) || Schema.createUnkownSchema();
   }
 }

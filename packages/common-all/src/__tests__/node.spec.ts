@@ -21,21 +21,18 @@ function setupNotes() {
   });
   const bar= new Note({ fname: "bar" });
   const barChild = new Note({ fname: "bar.one" });
+  const barGrandChild = new Note({ fname: "bar.one.alpha" });
   const root = new Note({ id: "root", fname: "root" });
   fooChild.addChild(fooGrandChild);
   foo.addChild(fooChild);
   root.addChild(foo);
   bar.addChild(barChild);
-  return { foo, fooChild, fooGrandChild, bar, barChild, root, fooTwoBeta, baz };
+  barChild.addChild(barGrandChild);
+  return { foo, fooChild, fooGrandChild, bar, barChild, barGrandChild, root, fooTwoBeta, baz };
 }
 
 function setupSchema() {
   const bar= new Schema({
-    id: "bar",
-    fname: "bar.schema.yml",
-    parent: null
-  });
-  const barChildNamespace = new Schema({
     id: "bar",
     fname: "bar.schema.yml",
     parent: null,
@@ -58,8 +55,7 @@ function setupSchema() {
   });
   foo.addChild(fooChild);
   fooChild.addChild(fooGrandChild);
-  bar.addChild(barChildNamespace);
-  return { foo, fooChild, fooGrandChild, bar, barChildNamespace };
+  return { foo, fooChild, fooGrandChild, bar };
 }
 
 describe("DNoteUtils", () => {
@@ -114,7 +110,13 @@ describe("SchemaUtils", () => {
   test("matchChildNamespace", () => {
     const note = notes.barChild
     const schema = SchemaUtils.matchNote(note, schemas);
-    expect(schema).toEqual(schemas.barChildNamespace);
+    expect(schema).toEqual(schemas.bar);
+  });
+
+  test("namespace no match grandchild", () => {
+    const note = notes.barGrandChild;
+    const schema = SchemaUtils.matchNote(note, schemas);
+    expect(schema).toEqual(Schema.createUnkownSchema());
   });
 
 
@@ -180,41 +182,19 @@ describe("Schema", () => {
     test("at child", () => {
       const { fooChild, foo } = schemas;
       expect(fooChild.domain.id).toEqual(foo.id);
-      expect(fooChild.logicalPath).toEqual("foo.one");
+      expect(fooChild.logicalPath).toEqual("foo/one");
       expect(fooChild.renderBody()).toMatchSnapshot("fooChild_body");
     });
 
     test("at child namespace", () => {
-      const {barChildNamespace: schema} = schemas;
-      expect(schema.logicalPath).toEqual("bar.*");
+      const {bar: schema} = schemas;
+      expect(schema.logicalPath).toEqual("bar/*");
     });
 
     test("at grand child", () => {
       const { fooGrandChild, foo } = schemas;
-      expect(fooGrandChild.logicalPath).toEqual("foo.one.alpha");
+      expect(fooGrandChild.logicalPath).toEqual("foo/one/alpha");
       expect(fooGrandChild.domain.id).toEqual(foo.id);
     });
   });
 });
-
-// describe("NodeBuilder", () => {
-//   // let store: FileStorage;
-//   let root: string;
-//   beforeAll(() => {
-//     root = setupTmpDendronDir();
-//     // store = createFileStorage(root);
-//   });
-
-// test("convert from raw", async () => {
-//   const resp = await store.query(createScope(), "**/*", {});
-//   const rawProps = resp.data.map(n => n.toRawProps());
-//   const p = new NodeBuilder();
-//   const nodes = p.parse(rawProps);
-//   const nodesRaw = _.sortBy(rawProps, [ent => ent.title]);
-//   const nodesParsedRaw = _.sortBy(
-//     nodes.map(n => n.toRawProps()),
-//     [ent => ent.title]
-//   );
-//   expect(nodesParsedRaw).toEqual(nodesRaw);
-// });
-// });

@@ -1,5 +1,6 @@
 import os from "os";
 import * as vscode from "vscode";
+import { GLOBAL_STATE } from "./constants";
 
 // === File FUtils
 export function resolveTilde(filePath: string) {
@@ -43,14 +44,23 @@ export class VSCodeUtils {
     }
   }
 
-  static async openWS(wsFile: string) {
+  static async openWS(wsFile: string, context: vscode.ExtensionContext) {
+    if (VSCodeUtils.isDebuggingExtension(context)) {
+      await context.globalState.update(GLOBAL_STATE.VSCODE_DEBUGGING_EXTENSION, "true");
+    }
     return vscode.commands
       .executeCommand(
         "vscode.openFolder",
         vscode.Uri.parse(wsFile)
       );
   }
-  static isDebuggingExtension(): boolean {
-    return process.env.VSCODE_DEBUGGING_EXTENSION ? true : false;
+  static isDebuggingExtension(context: vscode.ExtensionContext): boolean {
+    // HACK: vscode does not save env variables btw workspaces
+    const isDebugging = context.globalState.get<boolean>(GLOBAL_STATE.VSCODE_DEBUGGING_EXTENSION);
+    if (isDebugging) {
+      process.env.VSCODE_DEBUGGING_EXTENSION = "true";
+      context.globalState.update(GLOBAL_STATE.VSCODE_DEBUGGING_EXTENSION, undefined);
+    }
+    return process.env.VSCODE_DEBUGGING_EXTENSION || isDebugging ? true : false;
   }
 }

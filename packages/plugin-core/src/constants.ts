@@ -12,7 +12,15 @@ export const DENDRON_COMMANDS = {
 export const DENDRON_CHANNEL_NAME = "Dendron";
 export const GLOBAL_STATE = {
     VERSION: "dendron.version",
-    DENDRON_FIRST_WS: "dendron.first_ws"
+    /**
+     * Set the first time a dendron workspace is activated
+     */
+    DENDRON_FIRST_WS: "dendron.first_ws",
+    DENDRON_FIRST_WS_TUTORIAL_STEP: "dendron.first_ws.tutorial_step",
+    /**
+     * Extension is being debugged
+     */
+    VSCODE_DEBUGGING_EXTENSION: "dendron.vscode_debugging_extension"
 };
 export const CONFIG = {
     ROOT_DIR: "rootDir",

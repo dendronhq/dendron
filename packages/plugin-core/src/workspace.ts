@@ -1,4 +1,4 @@
-import { DEngine, DNodeUtils, getStage, Note } from "@dendronhq/common-all";
+import { DEngine, DNodeUtils, Note } from "@dendronhq/common-all";
 import { FileTestUtils } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -11,6 +11,7 @@ import { CONFIG, DENDRON_COMMANDS, DENDRON_WS_NAME, extensionQualifiedId, GLOBAL
 import { Logger } from "./logger";
 import { NodeService } from "./services/nodeService/NodeService";
 import { getPlatform, resolveTilde, VSCodeUtils } from "./utils";
+import { WSAEACCES } from "constants";
 
 
 function writeWSFile(fpath: string, opts: { rootDir: string }) {
@@ -86,7 +87,7 @@ export class DendronWorkspace {
         this.config = vscode.workspace.getConfiguration("dendron");
         _DendronWorkspace = this;
         this.L = Logger;
-        if (VSCodeUtils.isDebuggingExtension() || getStage() === "test") {
+        if (VSCodeUtils.isDebuggingExtension(context)) {
             const pkgJSON = fs.readJSONSync(path.join(FileTestUtils.getPkgRoot(__dirname), "package.json"));
             this.version = pkgJSON.version
         } else {
@@ -105,6 +106,7 @@ export class DendronWorkspace {
         }
         return this._engine;
     }
+
 
     get rootDir(): string {
         const rootDir = this.config.get<string>(CONFIG.ROOT_DIR);
@@ -167,7 +169,7 @@ export class DendronWorkspace {
         this.context.subscriptions.push(
             vscode.commands.registerCommand(DENDRON_COMMANDS.RESET_CONFIG, async () => {
                 await Promise.all(_.keys(GLOBAL_STATE).map(k => {
-                    return this.context.globalState.update(GLOBAL_STATE.VERSION, undefined);
+                    this.updateGlobalState(k, undefined);
                 }));
                 vscode.window.showInformationMessage(`reset config`);
             })
@@ -204,6 +206,11 @@ export class DendronWorkspace {
 
     // === Utils
 
+    getGlobalState<T>(key: keyof typeof GLOBAL_STATE) {
+        const _key = GLOBAL_STATE[key];
+        return this.context.globalState.get<T>(_key)
+    }
+
     updateGlobalState(key: keyof typeof GLOBAL_STATE, value: any) {
         const _key = GLOBAL_STATE[key]
         return this.context.globalState.update(_key, value);
@@ -221,17 +228,19 @@ export class DendronWorkspace {
         if (!fs.existsSync(path.join(rootDir, DENDRON_WS_NAME))) {
             throw Error(`workspace file does not exist`);
         }
-        VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
+        VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME), this.context);
     }
 
     async reloadWorkspace(mainVault?: string) {
-        if (!mainVault)  {
-            const wsFolders = vscode.workspace.workspaceFolders;
-            mainVault = wsFolders![0].uri.fsPath;
-        }
-        const engine = DendronEngine.getOrCreateEngine({root: mainVault});
-        await engine.init()
-        this._engine = engine;
+        const rootDir = this.rootDir;
+        VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME), this.context);
+        // if (!mainVault)  {
+        //     const wsFolders = vscode.workspace.workspaceFolders;
+        //     mainVault = wsFolders![0].uri.fsPath;
+        // }
+        // const engine = DendronEngine.getOrCreateEngine({root: mainVault});
+        // await engine.init()
+        // this._engine = engine;
         // refresh schemas
         // await new SchemaCommand().hack(engine);
         /*
@@ -287,7 +296,7 @@ export class DendronWorkspace {
             rootDir,
         });
         if (!opts.skipOpenWS) {
-            return VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME))
+            return VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME), this.context);
         }
     }
 

@@ -21,6 +21,10 @@ Think of it as a **second brain** to help you make sense of all the information 
 
 At its core, Dendron is a tool to help you **store and find notes** within **hierarchies**.  Dendron stores notes as plain [markdown](TODO) files with [frontmatter](). 
 
+Dendron is still early and maybe 1% of where it could be. That being said, it is actively being used by the author on a daily (hourly) basis to manage a knowledge base of over 20 thousand notes. 
+
+The **audacious long term goal** is for Dendron to become the **best way to create, understand, and share knowledge**. Please join me in this **journey** and, together, lets **make sense** of this world that we inhabit.
+
 # Principles
 
 1. Keep it simple: Dendron should be a frictionless way to store, connect, and share knowledge.
@@ -49,7 +53,10 @@ To read more about the ideas that inspired Dendron, you can read [this blog post
 - [backlinks](https://marketplace.visualstudio.com/items?itemName=kortina.vscode-markdown-notes)
 - [workspace/file/line history](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens#current-line-blame-)
 
-# Quickstart
+# Setup 
+Dendron can be installed as a [vscode plugin](TODO) or as using the [standalone Dendron app](TODO) (coming soon). 
+
+## Plugin
 
 To get started with Dendron, create a new **workspace** by following the instructions below. A workspace is where all your notes live. 
 
@@ -69,3 +76,7 @@ To get started with Dendron, create a new **workspace** by following the instruc
 You will find further instructions when you open the workspace. 
 
 <!-- TODO: LINK TO QUICKSTART -->
+
+## Dendron Editor 
+
+COMING SOON

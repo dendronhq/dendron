@@ -1,12 +1,23 @@
-- id: b111db5b-bc52-4977-893b-307522f89ea3
-  title: "foo"
+- id: dendron
   parent: root
   children:
-    - 5291f68b-e266-405a-bd56-ee5980aad10c
-- id: 5291f68b-e266-405a-bd56-ee5980aad10c
-  title: "one"
+    - f
+- id: f
+  title: "features"
+  namespace: true
+- id: cli
+  parent: root
+  namespace: true
+- id: lang
+  title: language
+  parent: root
+  namespace: true
   children:
-    - foo.two
-- id: foo.two
-  title: foo.two
-
+    - d
+- id: d
+  title: data structures
+  children:
+    - boolean
+    - string
+- id: boolean
+- id: string

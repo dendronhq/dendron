@@ -67,14 +67,13 @@ The Quick Open bar is how you issue commands to to Dendron. You can bring it ope
 - <img src="https://www.microsoft.com/favicon.ico" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf">Windows</a> `Ctrl+SHIFT+P`
 
 
-- TODO: picture
-
 ### Lookup Bar
 
 The lookup bar is how you interact with notes inside of Dendron. Use it to create, find, and delete notes. To bring it up, use the `CTRL-P` shortcut or open the `Command Bar` and type `> Dendron: Lookup`
 
 ## Next
 
-Now that we've covered the major concepts inside Dendron, go to [[dendron.lookup]] to continue the tutorial. You can navigate there by either clicking the link or bringing up the lookup bar using `CTRL-P` and typing `dendron.lookup`
+Now that we've covered the major concepts inside Dendron, go to [[dendron.lookup]] to continue the tutorial. You can navigate there by either clicking the link or bringing up the lookup bar using `CTRL-P`, typing `dendron.lookup`, and the hitting `Enter`
 
+![](./assets/dendron-lookup.gif)
 

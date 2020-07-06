@@ -6,7 +6,7 @@ Hierarchal lookup is a better way of finding information when you have a lot of 
 
 ## Simple Example
 
-Below is an example of a simple two level hierarchy with notes on various [command line interface](TODO) commands.
+Below is an example of a simple two level hierarchy with notes on various [command line interface](https://en.wikipedia.org/wiki/Command-line_interface) commands.
 Try some of the following lookups to get a feel for it.  
 
 ```
@@ -22,7 +22,7 @@ While we call it the `Lookup Bar`, `Lookup` is actually a misnomer because you c
 
 Use `CTRl-P` to bring up the lookup bar. Type `dendron.lookup.hello` and hit `Enter`.
 
-![Create Note](assets/dendron-open-create.gif)
+![Create Note](assets/dendron-create.gif)
 
 Even though the note didn't exist, Dendron created it through the act of you looking it up. 
 
@@ -38,6 +38,8 @@ To delete a note, you can use the `CTRL-SHIFT-D` shortcut on the note that you w
 To delete [[dendron.lookup.hello]], open the note and then use `CTRL-SHIFT-D` to delete.
 
 ![Delete Note](assets/dendron-delete.gif)
+
+After a note has been deleted, we automatically surface the parent note (in this case, [[dendron.lookup]]). 
 
 
 ## Other Capabilities

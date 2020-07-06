@@ -6,7 +6,7 @@ Dendron is a **hierarchal** knowledge management tool that **grows** as you do.
 
 Think of it as a **second brain** to help you make sense of all the information you care about. 
 
-At its core, Dendron helps you **store and find notes**. Dendron does this through [[hierarchies]], [[schemas]], and [markdown](TODO) with [frontmatter](). To read more about the ideas that inspired Dendron, you can read [this blog post](https://kevinslin.com/organizing/its_not_you_its_your_knowledge_base/).
+At its core, Dendron helps you **store and find notes**. Dendron does this through [[hierarchies]], [[schemas]], and [markdown](https://daringfireball.net/projects/markdown/syntax) with [frontmatter](https://jekyllrb.com/docs/front-matter/). To read more about the ideas that inspired Dendron, you can read [this blog post](https://kevinslin.com/organizing/its_not_you_its_your_knowledge_base/).
 
 ## Dendron Concepts
 

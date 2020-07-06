@@ -47,7 +47,9 @@ function writeWSFile(fpath: string, opts: { rootDir: string }) {
                 // material theme
                 "equinusocio.vsc-material-theme",
                 // tree generator
-                "aprilandjan.ascii-tree-generator"
+                "aprilandjan.ascii-tree-generator",
+                // markdown shortcuts
+                "mdickin.markdown-shortcuts"
             ]
         }
     };

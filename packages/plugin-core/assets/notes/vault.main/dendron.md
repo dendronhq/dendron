@@ -17,11 +17,11 @@ At its core, Dendron helps you **store and find notes**. Dendron does this throu
 ### Workspace
 In Dendron, your **workspace** is a folder that contains all your notes. Depending on your operating system, Dendron has a different default location for the **workspace**.
 
-### Vaults
-Your workspace is made up of **vaults**. You can think of a vault as a git repository. By default, Dendron creates the *vault.main* folder to store all yoru notes. Dividing your notes by vaults has some of the following benefits:
+### Vaults 🚧
+Your workspace is made up of **vaults**. You can think of a vault as a git repository. By default, Dendron creates the *vault.main* folder to store all your notes. Dividing your notes by vaults has some of the following benefits:
 - you can separate private notes that you want to keep local (`vault.secret`) from notes you want to sync
-- 🚧 you can import vaults from third parties
-- 🚧 you can publish and collaborate with just the notes in a specific vault
+- you can import vaults from third parties
+- you can publish and collaborate with just the notes in a specific vault
 
 ### Hierarchies
 
@@ -54,51 +54,27 @@ In Dendron, the above hierarchy would look like the following
 └── project1.tasks.task2
 ```
 
-## Hierarchal Lookup
+### Schema 🚧 
 
-To work with notes, Dendron uses **hierarchal lookup**. This is best explained by example. 
+As you end up creating more notes, it can be hard to keep track of it all. This is why Dendron has **schemas** to help you manage your notes at scale. Think of schemas as an **optional type system** for your notes. They describe the hierarchy of your data and are themselves, represented as a hierarchy.
 
-First, use `CTRl-P` to bring up the lookup bar. You should see the current note (`dendron`) highlighted. 
+### Command Bar
 
-- TODO: screen shot of ctrl-p
+The Quick Open bar is how you issue commands to to Dendron. You can bring it open with the following shortcut which will vary depending on your operating system.
 
-Dendron is the **domain** of its hierarchy.  Think of it as a [tld](TODO) for a domain name or a notebook in a traditional note taking app like OneNote
-
-You can see other notes in the *dendron* **domain** via the dropdown.
-
-- TODO: screenshot of drop down
-
-To navigate, type to filter results and `.` to go deeper. Try the following query and then hit `Enter`
-
-```
-dendron.f.hello
-```
-
-- TODO: screenshot
-
-Follow the instructions in [[dendron.f.lookup]] before continuing below.
+- <img src="https://www.kernel.org/theme/images/logos/favicon.png" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-linux.pdf">Linux</a> `Ctrl+SHIFT+P`
+- <img src="https://developer.apple.com/favicon.ico" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf">macOS</a> `⌘+SHIFT+P`
+- <img src="https://www.microsoft.com/favicon.ico" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf">Windows</a> `Ctrl+SHIFT+P`
 
 
-## Lookup
+- TODO: picture
 
-Creating a note is as simple as looking it up - if it doesn't exist, Dendron will create it. To perform a lookup, use the `CTRL-P` shortcut or the `> Dendron: Lookup` command.
+### Lookup Bar
 
-![Open or create note](assets/dendron-open-create.gif)
+The lookup bar is how you interact with notes inside of Dendron. Use it to create, find, and delete notes. To bring it up, use the `CTRL-P` shortcut or open the `Command Bar` and type `> Dendron: Lookup`
 
-Notes are stored and indexed hierarchically. Hierarchies can be as deep or shallow as you need them to be. 
+## Next
+
+Now that we've covered the major concepts inside Dendron, go to [[dendron.lookup]] to continue the tutorial. You can navigate there by either clicking the link or bringing up the lookup bar using `CTRL-P` and typing `dendron.lookup`
 
 
-# Install
-
-Dendron can be installed as a [vscode plugin](TODO) or as using the [standalone Dendron app](TODO) (coming soon). 
-
-Dendron is still early and maybe 1% of where it could be. That being said, it is actively being used by the author on a daily (hourly) basis to manage a knowledge base of over 20 thousand notes. 
-
-The **audacious long term goal** is for Dendron to become the **best way to create, understand, and share knowledge**. Please join me in this **journey** and, together, lets **make sense** of this world that we inhabit.
-
-# Configuration
-
-TODO
-
-# Changelog
-- to see the latest updates, see the [changelog](https://github.com/dendronhq/dendron/blob/master/CHANGELOG.md)

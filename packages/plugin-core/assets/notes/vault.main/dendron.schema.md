@@ -23,7 +23,6 @@ Here is schema for the programming language hierarchy
   alias: l
   parent: root
   namespace: true
-  data.pattern: "^l"
   children:
 - id: data
   alias: d
@@ -42,3 +41,5 @@ Here is schema for the programming language hierarchy
 ```
 
 Note that schemas are entirely optional and usually something that you develop over time. To that end, Dendron has many capabilities to help you develop and evolve your schemas over time and the ability to automatically refactor your notes to match your schemas. 
+
+Next, we're going to discuss additional capabilities you can do in Dendron under [[dendron.capabilities]]

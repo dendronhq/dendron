@@ -108,7 +108,7 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
   async _getNoteAll(): Promise<NoteRawProps[]> {
     const allFiles = getAllFiles({
       root: this.opts.root,
-      include: ["*.md"]
+      include: ["*.md"],
     }) as string[];
     return this.files2Notes(allFiles);
   }

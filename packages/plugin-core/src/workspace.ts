@@ -241,7 +241,7 @@ export class DendronWorkspace {
         }
         const engine = DendronEngine.getOrCreateEngine({root: mainVault});
         await engine.init()
-        // this._engine = engine;
+        this._engine = engine;
         // refresh schemas
         // await new SchemaCommand().hack(engine);
         /*

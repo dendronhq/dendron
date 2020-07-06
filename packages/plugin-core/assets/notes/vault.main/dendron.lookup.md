@@ -22,7 +22,7 @@ While we call it the `Lookup Bar`, `Lookup` is actually a misnomer because you c
 
 Use `CTRl-P` to bring up the lookup bar. Type `dendron.lookup.hello` and hit `Enter`.
 
-TODO: picture
+![Create Note](assets/dendron-open-create.gif)
 
 Even though the note didn't exist, Dendron created it through the act of you looking it up. 
 
@@ -37,8 +37,8 @@ To delete a note, you can use the `CTRL-SHIFT-D` shortcut on the note that you w
 
 To delete [[dendron.lookup.hello]], open the note and then use `CTRL-SHIFT-D` to delete.
 
+![Delete Note](assets/dendron-delete.gif)
+
 
 ## Other Capabilities
 Now that you've seen some of the things you can lookup, its time to go through the other capabilities you have with Dendron. Continue the tutorial by clicking [[dendron.capabilities]] or typing `dendron.capabilities` inside the lookup.
-
-TODO: picture

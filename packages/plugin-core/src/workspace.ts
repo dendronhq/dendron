@@ -33,7 +33,6 @@ function writeWSFile(fpath: string, opts: { rootDir: string }) {
         },
         "extensions": {
             "recommendations": [
-                "dendron.dendron",
                 // git version history
                 // non-developers don't have git, will leave as optional for now
                 // "eamodio.gitlens",

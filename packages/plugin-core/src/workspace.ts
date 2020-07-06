@@ -7,7 +7,7 @@ import path from "path";
 import * as vscode from "vscode";
 import { LookupController } from "./components/lookup/LookupController";
 import { node2Uri } from "./components/lookup/utils";
-import { CONFIG, DENDRON_COMMANDS, DENDRON_WS_NAME, extensionQualifiedId } from "./constants";
+import { CONFIG, DENDRON_COMMANDS, DENDRON_WS_NAME, extensionQualifiedId, GLOBAL_STATE } from "./constants";
 import { Logger } from "./logger";
 import { NodeService } from "./services/nodeService/NodeService";
 import { getPlatform, resolveTilde, VSCodeUtils } from "./utils";
@@ -161,6 +161,15 @@ export class DendronWorkspace {
             vscode.commands.registerCommand(DENDRON_COMMANDS.RELOAD_WS, async () => {
                 await this.reloadWorkspace();
                 vscode.window.showInformationMessage(`ws reloaded`);
+            })
+        );
+
+        this.context.subscriptions.push(
+            vscode.commands.registerCommand(DENDRON_COMMANDS.RESET_CONFIG, async () => {
+                await Promise.all(_.keys(GLOBAL_STATE).map(k => {
+                    return this.context.globalState.update(GLOBAL_STATE.VERSION, undefined);
+                }));
+                vscode.window.showInformationMessage(`reset config`);
             })
         );
 

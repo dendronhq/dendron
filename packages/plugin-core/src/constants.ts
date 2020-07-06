@@ -6,7 +6,8 @@ export const DENDRON_COMMANDS = {
     INIT_WS: "dendron.initWS",
     CHANGE_WS: "dendron.changeWS",
     DELETE_NODE: "dendron.deleteNode",
-    RELOAD_WS: "dendron.reloadWS"
+    RELOAD_WS: "dendron.reloadWS",
+    RESET_CONFIG: "dendron.dev.resetConfig"
 };
 export const DENDRON_CHANNEL_NAME = "Dendron";
 export const GLOBAL_STATE = {

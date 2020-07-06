@@ -202,6 +202,15 @@ export class DendronWorkspace {
         );
     }
 
+    // === Utils
+
+    updateGlobalState(key: keyof typeof GLOBAL_STATE, value: any) {
+        const _key = GLOBAL_STATE[key]
+        return this.context.globalState.update(_key, value);
+    }
+
+    // === Workspace
+
     async changeWorkspace(rootDirRaw: string) {
         const ctx = "changeWorkspace";
         this.L.info({ ctx, rootDirRaw });

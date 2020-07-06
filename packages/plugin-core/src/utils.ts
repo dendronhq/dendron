@@ -34,6 +34,15 @@ export class VSCodeUtils {
     return editor.document.uri.fsPath;
   }
 
+  static getWorkspaceFolders(getRoot?: boolean): readonly vscode.WorkspaceFolder[] | vscode.WorkspaceFolder| undefined {
+    const wsFolders = vscode.workspace.workspaceFolders;
+    if (getRoot) {
+      return wsFolders![0];
+    } else {
+      return wsFolders;
+    }
+  }
+
   static async openWS(wsFile: string) {
     return vscode.commands
       .executeCommand(

@@ -5,6 +5,7 @@ import path from "path";
 import { ExtensionContext, OutputChannel, window } from "vscode";
 import { DENDRON_CHANNEL_NAME } from "./constants";
 import { VSCodeUtils } from "./utils";
+import _ from "lodash";
 
 export type TraceLevel = "debug" | "info" | "warn" | "error" | "fatal";
 const levels = ["debug", "info", "warn", "error", "fatal"];
@@ -23,6 +24,15 @@ export class Logger {
 
     static cmpLevel(lvl: TraceLevel): boolean {
         return levels.indexOf(lvl) >= levels.indexOf(Logger.level || "debug");
+    }
+
+    /**
+     * Is lvl1 >= lvl2
+     * @param lvl1 
+     * @param lvl2 
+     */
+    static cmpLevels(lvl1: TraceLevel, lvl2: TraceLevel): boolean {
+        return levels.indexOf(lvl1) >= levels.indexOf(lvl2);
     }
 
     static get level() {
@@ -52,13 +62,11 @@ export class Logger {
     // }
 
     static error(msg: any) {
-        Logger.logger?.error(msg);
-        this.output?.appendLine("error: " + JSON.stringify(msg));
+        Logger.log(msg, "error");
     }
 
-    static info(msg: any) {
-        Logger.logger?.info(msg);
-        this.output?.appendLine(JSON.stringify(msg));
+    static info(msg: any, show?: boolean) {
+        Logger.log(msg, "info", {show});
     }
 
     static debug(msg: any) {
@@ -66,10 +74,19 @@ export class Logger {
         this.output?.appendLine(JSON.stringify(msg));
     }
 
-    static log(msg: any, lvl: TraceLevel) {
+    static log(msg: any, lvl: TraceLevel, opts?: {show?: boolean}) {
+        const cleanOpts = _.defaults(opts, {show: false});
         if (Logger.cmpLevel(lvl)) {
             Logger.logger && Logger.logger[lvl](msg);
             this.output?.appendLine(lvl + ": " + JSON.stringify(msg));
+            if (cleanOpts.show || Logger.cmpLevels(lvl, "error")) {
+                const cleanMsg = JSON.stringify(msg);
+                if (Logger.cmpLevels(lvl, "error")) {
+                    window.showErrorMessage(cleanMsg);
+                } else if (Logger.cmpLevels(lvl, "info")) {
+                    window.showInformationMessage(cleanMsg);
+                }
+            }
         }
     }
 

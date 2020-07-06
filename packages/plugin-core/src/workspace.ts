@@ -169,7 +169,7 @@ export class DendronWorkspace {
         this.context.subscriptions.push(
             vscode.commands.registerCommand(DENDRON_COMMANDS.RESET_CONFIG, async () => {
                 await Promise.all(_.keys(GLOBAL_STATE).map(k => {
-                    this.updateGlobalState(k, undefined);
+                    this.updateGlobalState(k as keyof typeof GLOBAL_STATE, undefined);
                 }));
                 vscode.window.showInformationMessage(`reset config`);
             })
@@ -232,14 +232,14 @@ export class DendronWorkspace {
     }
 
     async reloadWorkspace(mainVault?: string) {
-        const rootDir = this.rootDir;
-        VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME), this.context);
-        // if (!mainVault)  {
-        //     const wsFolders = vscode.workspace.workspaceFolders;
-        //     mainVault = wsFolders![0].uri.fsPath;
-        // }
-        // const engine = DendronEngine.getOrCreateEngine({root: mainVault});
-        // await engine.init()
+        // const rootDir = this.rootDir;
+        //VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME), this.context);
+        if (!mainVault)  {
+            const wsFolders = vscode.workspace.workspaceFolders;
+            mainVault = wsFolders![0].uri.fsPath;
+        }
+        const engine = DendronEngine.getOrCreateEngine({root: mainVault});
+        await engine.init()
         // this._engine = engine;
         // refresh schemas
         // await new SchemaCommand().hack(engine);

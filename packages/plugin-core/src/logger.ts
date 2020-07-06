@@ -1,11 +1,10 @@
 import { setEnv } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 import { ExtensionContext, OutputChannel, window } from "vscode";
 import { DENDRON_CHANNEL_NAME } from "./constants";
-import { VSCodeUtils } from "./utils";
-import _ from "lodash";
 
 export type TraceLevel = "debug" | "info" | "warn" | "error" | "fatal";
 const levels = ["debug", "info", "warn", "error", "fatal"];
@@ -89,14 +88,4 @@ export class Logger {
             }
         }
     }
-
-    private static _isDebugging: boolean | undefined;
-    static get isDebugging() {
-        if (this._isDebugging === undefined) {
-            this._isDebugging = VSCodeUtils.isDebuggingExtension();
-        }
-
-        return this._isDebugging;
-    }
-
 }

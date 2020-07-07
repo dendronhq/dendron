@@ -36,28 +36,6 @@ There are several additional extensions that work well with Dendron but are not 
 - [Bookmarks](https://marketplace.visualstudio.com/items?itemName=alefragnani.Bookmarks)
     - Bookmark lines within Files
 
-## Caveats
-
-- 🚧 Extra files being created
-    - Dendron currently creates a `root.md` file and a `root.schema.yml` file where you initialize your vault. these files will be used in the future to automatically generate an index of everything in your vault. you may safely ignore them for now
-- Frontmatter 
-    - currently, you might see the following text added to the top of your note. This is additional metadata that Dendron uses to manage your files. 
-
-```yml
----
-id: 4407f75d-7334-47a5-9f19-18b458618136
-title: dendron.lookup.hello
-desc: ''
-updated: 1594078624566
-created: 1594078624566
-data: {}
-custom: {}
-fname: dendron.lookup.hello
-parent: null
-children: []
----
-```
-
 
 ## Themes
 
@@ -69,5 +47,7 @@ By default, Dendron uses [Material Theme High Contrast](https://marketplace.visu
 We've only scratched the surface of what you can do with Dendron. Because Dendron is built on top of [VSCode](https://code.visualstudio.com/), it comes with all the [extensions](https://code.visualstudio.com/docs/introvideos/extend) already built in to the platform. 
 
 If for some reason, there is functionality that is missing still, you can always build your own or submit an issue on the [Dendron Roadmap](https://github.com/dendronhq/dendron-roadmap/issues/new)
+
+Be sure to checkout the [[dendron.faq]] first to see if your issue is already mentioned.
 
 Meanwhile, if you have any feedback or want to talk about anything note taking or second brain related, you can do so by joining our [discord community](https://discord.gg/6j85zNX) (like slack but without the message limits) or emailing me directly at `kevin(at)thence.io`.

@@ -13,7 +13,7 @@
 
 # Dendron
 
-![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/2020-06-30-21-30-51.png#right)
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 Dendron is a **hierarchal** note taking tool that **grows** as you do. 
 

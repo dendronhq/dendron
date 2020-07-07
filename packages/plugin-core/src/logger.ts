@@ -1,4 +1,4 @@
-import { setEnv } from "@dendronhq/common-all";
+import { setEnv, getStage } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -78,7 +78,9 @@ export class Logger {
         if (Logger.cmpLevel(lvl)) {
             Logger.logger && Logger.logger[lvl](msg);
             this.output?.appendLine(lvl + ": " + JSON.stringify(msg));
-            if (cleanOpts.show || Logger.cmpLevels(lvl, "error")) {
+            // FIXME: disable for now
+            const shouldShow = false // getStage() === "dev" && cleanOpts.show;
+            if (shouldShow || Logger.cmpLevels(lvl, "error")) {
                 const cleanMsg = JSON.stringify(msg);
                 if (Logger.cmpLevels(lvl, "error")) {
                     window.showErrorMessage(cleanMsg);

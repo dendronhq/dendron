@@ -68,11 +68,15 @@
     "keybindings": [
       {
         "command": "dendron.lookup",
-        "key": "ctrl+p"
+        "linux": "meta+p",
+        "win": "win+p",
+        "mac": "ctrl+p"
       },
       {
         "command": "dendron.deleteNode",
-        "key": "ctrl+shift+d"
+        "linux": "meta+shift+d",
+        "win": "win+shift+d",
+        "mac": "ctrl+shift+d"
       }
     ]
   },

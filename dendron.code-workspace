@@ -1,6 +1,10 @@
 {
   "folders": [
     {
+      "name": "mono-root",
+      "path": "."
+    },
+    {
       "path": "packages/common-all"
     },
     {
@@ -14,9 +18,6 @@
     },
     {
       "path": "packages/web-server"
-    },
-    {
-      "path": "."
     },
     // {
     //   "name": "vscode",

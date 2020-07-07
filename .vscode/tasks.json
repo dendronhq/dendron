@@ -1,0 +1,32 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "NPM: Publish",
+      "type": "shell",
+      "command": "./publish.sh",
+      "options": {
+        "cwd": "./scripts"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Code: Package and Install",
+      "type": "shell",
+      "command": "scripts/pack_and_install.sh",
+      "options": {
+        "cwd": "build/dendron/packages/plugin-core/"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Code: Publish",
+      "type": "shell",
+      "command": "scripts/publish.sh",
+      "options": {
+        "cwd": "build/dendron/packages/plugin-core/"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

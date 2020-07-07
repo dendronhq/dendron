@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.6](https://github.com/dendronhq/dendron/compare/v0.3.5...v0.3.6) (2020-07-07)
+
+
+### Features
+
+* auto add nodes when deleted or created outside of dendron ([a7e1ac9](https://github.com/dendronhq/dendron/commit/a7e1ac9b8a4f7f0592ab1b9f86a7a40182693a73))
+
+
+
+
+
 # [0.3.0](https://github.com/dendronhq/dendron/compare/v0.2.20...v0.3.0) (2020-07-05)
 
 

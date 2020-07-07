@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.6](https://github.com/dendronhq/dendron/compare/v0.3.5...v0.3.6) (2020-07-07)
+
+
+### Features
+
+* auto add nodes when deleted or created outside of dendron ([a7e1ac9](https://github.com/dendronhq/dendron/commit/a7e1ac9b8a4f7f0592ab1b9f86a7a40182693a73))
+* os specific keybindings ([0b49cb9](https://github.com/dendronhq/dendron/commit/0b49cb99e27148e88747876e4cbebd8d0ac7bba6))
+* support automatic config updates ([82ea9a2](https://github.com/dendronhq/dendron/commit/82ea9a2abe03c7ec98990f596c05402b7cebb5af))
+
+
+
+
+
 ## [0.3.5](https://github.com/dendronhq/dendron/compare/v0.3.4...v0.3.5) (2020-07-07)
 
 

@@ -1,5 +1,4 @@
 import { DEngine, DNodeUtils, Note } from "@dendronhq/common-all";
-import { FileTestUtils } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -10,6 +9,7 @@ import { node2Uri } from "./components/lookup/utils";
 import { CONFIG, DENDRON_COMMANDS, DENDRON_WS_NAME, extensionQualifiedId, GLOBAL_STATE } from "./constants";
 import { Logger } from "./logger";
 import { NodeService } from "./services/nodeService/NodeService";
+import { Settings } from "./settings";
 import { getPlatform, resolveTilde, VSCodeUtils } from "./utils";
 
 
@@ -20,18 +20,7 @@ function writeWSFile(fpath: string, opts: { rootDir: string }) {
                 path: path.join(opts.rootDir, "vault.main"),
             },
         ],
-        settings: {
-            "spellright.language": ["en"],
-            "spellright.documentTypes": ["markdown", "latex", "plaintext"],
-            "editor.minimap.enabled": false,
-            "dendron.rootDir": opts.rootDir,
-            "files.autoSave": "onFocusChange",
-            "materialTheme.accent": "Red",
-            "workbench.colorTheme": "Material Theme High Contrast",
-            "pasteImage.path": "${currentFileDir}/assets",
-            // prevent markdown-notes from mangling file names
-            "vscodeMarkdownNotes.slugifyCharacter": "NONE"
-        },
+        settings: Settings.defaults(opts),
         "extensions": {
             "recommendations": [
                 // git version history

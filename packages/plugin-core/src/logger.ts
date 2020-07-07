@@ -1,4 +1,4 @@
-import { setEnv, getStage } from "@dendronhq/common-all";
+import { setEnv } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -73,8 +73,7 @@ export class Logger {
         this.output?.appendLine(JSON.stringify(msg));
     }
 
-    static log(msg: any, lvl: TraceLevel, opts?: {show?: boolean}) {
-        const cleanOpts = _.defaults(opts, {show: false});
+    static log(msg: any, lvl: TraceLevel, _opts?: {show?: boolean}) {
         if (Logger.cmpLevel(lvl)) {
             Logger.logger && Logger.logger[lvl](msg);
             this.output?.appendLine(lvl + ": " + JSON.stringify(msg));

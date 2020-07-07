@@ -13,6 +13,7 @@ import path from "path";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { DendronWorkspace } from "../../workspace";
+import { Settings } from "../../settings";
 
 function createMockContext(): vscode.ExtensionContext {
   const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
@@ -46,17 +47,16 @@ class VSFileUtils {
   };
 }
 
-suite("Extension Test Suite", function(){
+suite("Extension Test Suite", function () {
   vscode.window.showInformationMessage("Start all tests.");
   let root: string;
   let actualFiles: string[];
   let expectedFiles: string[];
   let ws: DendronWorkspace;
-  this.timeout(5000); 
-
+  this.timeout(5000);
 
   //(this: Context, done: Done)
-  beforeEach(async function(){
+  beforeEach(async function () {
     const ctx = createMockContext();
     ws = new DendronWorkspace(ctx, { skipSetup: true });
     root = FileTestUtils.tmpDir("/tmp/dendron", true);
@@ -66,12 +66,29 @@ suite("Extension Test Suite", function(){
     console.log(storeDir);
     fs.copySync(storeDir, root);
     console.log(root);
-    return
+    return;
   });
 
   afterEach(async () => {
     assert.deepEqual(actualFiles, expectedFiles);
     fs.removeSync(root);
+  });
+
+  describe("Settings", () => {
+    test("settings", () => {
+      assert.deepStrictEqual(Settings.defaults({ rootDir: "bond" }), {
+        "dendron.rootDir": "bond",
+        "editor.minimap.enabled": false,
+        "files.autoSave": "onFocusChange",
+        "markdown-preview-enhanced.enableWikiLinkSyntax": true,
+        "materialTheme.accent": "Red",
+        "pasteImage.path": "${currentFileDir}/assets",
+        "spellright.documentTypes": ["markdown", "latex", "plaintext"],
+        "spellright.language": ["en"],
+        "vscodeMarkdownNotes.slugifyCharacter": "NONE",
+        "workbench.colorTheme": "Material Theme High Contrast",
+      });
+    });
   });
 
   describe("file system", () => {
@@ -85,7 +102,6 @@ suite("Extension Test Suite", function(){
   });
 
   describe("workspace", () => {
-    
     test("reload", async () => {
       await ws.reloadWorkspace(root);
       assert.equal(ws.engine.notes["root"].children.length, 1);

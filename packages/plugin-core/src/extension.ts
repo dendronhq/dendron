@@ -27,8 +27,6 @@ export function activate(context: vscode.ExtensionContext) {
         Logger.info({ ctx, msg: "show welcome" });
         const step = ws.context.globalState.get<string|undefined>(GLOBAL_STATE.DENDRON_FIRST_WS_TUTORIAL_STEP);
         if (_.isUndefined(step)) {
-          // FIXME: initialize at end
-          // await ws.updateGlobalState('DENDRON_FIRST_WS', "initialized");
           await ws.showWelcome();
           Logger.info({ ctx, step: -1 }, true);
           await ws.updateGlobalState('DENDRON_FIRST_WS', 'initialized');
@@ -39,9 +37,11 @@ export function activate(context: vscode.ExtensionContext) {
               Logger.info({msg: "going to step", step}, true);
               break;
             default:
-              Logger.error({msg: "bad step", step});
+              Logger.info({msg: "", step});
           }
         }
+      } else {
+        Logger.info({ctx, msg: "user finished welcome"});
       }
     });
   } else {

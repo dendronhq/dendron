@@ -91,16 +91,14 @@ export class DendronWorkspace {
         _DendronWorkspace = this;
         this.L = Logger;
         if (VSCodeUtils.isDebuggingExtension(context)) {
-            const pkgJSON = fs.readJSONSync(path.join(FileTestUtils.getPkgRoot(__dirname), "package.json"));
-            this.version = pkgJSON.version
+            this.version = VSCodeUtils.getVersionFromPkg();
         } else {
             try {
             const dendronExtension= vscode.extensions.getExtension(extensionQualifiedId)!;
             this.version = dendronExtension.packageJSON.version;
             } catch (err) {
-                const pkgJSON = fs.readJSONSync(path.join(FileTestUtils.getPkgRoot(__dirname), "package.json"));
-                this.version = pkgJSON.version
                 this.L.info({ctx, msg: "fetching from file", dir: __dirname})
+                this.version = VSCodeUtils.getVersionFromPkg();
             }
         }
         this.L.info({ctx, version: this.version})

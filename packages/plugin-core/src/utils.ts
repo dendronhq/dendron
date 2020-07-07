@@ -1,6 +1,9 @@
 import os from "os";
 import * as vscode from "vscode";
 import { GLOBAL_STATE } from "./constants";
+import fs from "fs-extra";
+import path from "path";
+import { FileTestUtils } from "@dendronhq/common-server";
 
 // === File FUtils
 export function resolveTilde(filePath: string) {
@@ -35,6 +38,11 @@ export class VSCodeUtils {
     return editor.document.uri.fsPath;
   }
 
+  static getVersionFromPkg(): string {
+    const pkgJSON = fs.readJSONSync(path.join(FileTestUtils.getPkgRoot(__dirname), "package.json"));
+    return `${pkgJSON.version}-dev`
+  }
+
   static getWorkspaceFolders(getRoot?: boolean): readonly vscode.WorkspaceFolder[] | vscode.WorkspaceFolder| undefined {
     const wsFolders = vscode.workspace.workspaceFolders;
     if (getRoot) {
@@ -54,6 +62,7 @@ export class VSCodeUtils {
         vscode.Uri.parse(wsFile)
       );
   }
+
   static isDebuggingExtension(context: vscode.ExtensionContext): boolean {
     // HACK: vscode does not save env variables btw workspaces
     const isDebugging = context.globalState.get<boolean>(GLOBAL_STATE.VSCODE_DEBUGGING_EXTENSION);

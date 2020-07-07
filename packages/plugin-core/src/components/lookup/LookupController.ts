@@ -1,4 +1,4 @@
-import { DNode } from "@dendronhq/common-all/src";
+import { DNode } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";

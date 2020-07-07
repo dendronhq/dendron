@@ -1,5 +1,5 @@
 import { IDNode } from "@dendronhq/common-all";
-import { DEngine, QueryMode } from "@dendronhq/common-all/src";
+import { DEngine, QueryMode } from "@dendronhq/common-all";
 import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";

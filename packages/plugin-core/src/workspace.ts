@@ -1,4 +1,4 @@
-import { DEngine, DNodeUtils, Note } from "@dendronhq/common-all";
+import { DEngine, DNodeUtils, getStage, Note } from "@dendronhq/common-all";
 import { DendronEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -67,7 +67,8 @@ export class DendronWorkspace {
     }
 
     public context: vscode.ExtensionContext;
-    public config: vscode.WorkspaceConfiguration;
+    public configDendron: vscode.WorkspaceConfiguration;
+    public configWS?: vscode.WorkspaceConfiguration;
     public L: typeof Logger;
     private _engine?: DEngine
     public version: string
@@ -76,10 +77,17 @@ export class DendronWorkspace {
         const ctx = "constructor"
         opts = _.defaults(opts, { skipSetup: false });
         this.context = context;
-        this.config = vscode.workspace.getConfiguration("dendron");
+        this.configDendron = vscode.workspace.getConfiguration("dendron");
         _DendronWorkspace = this;
         this.L = Logger;
-        if (VSCodeUtils.isDebuggingExtension(context)) {
+
+        // get workspace 
+        if (getStage() !== "test") {
+            this.configWS = vscode.workspace.getConfiguration(undefined, VSCodeUtils.getWorkspaceFolders(true) as vscode.WorkspaceFolder);
+        }
+
+        // get version
+        if (VSCodeUtils.isDebuggingExtension()) {
             this.version = VSCodeUtils.getVersionFromPkg();
         } else {
             try {
@@ -105,7 +113,7 @@ export class DendronWorkspace {
 
 
     get rootDir(): string {
-        const rootDir = this.config.get<string>(CONFIG.ROOT_DIR);
+        const rootDir = this.configDendron.get<string>(CONFIG.ROOT_DIR);
         if (!rootDir) {
             throw Error("rootDir not initialized");
         }
@@ -224,7 +232,7 @@ export class DendronWorkspace {
         if (!fs.existsSync(path.join(rootDir, DENDRON_WS_NAME))) {
             throw Error(`workspace file does not exist`);
         }
-        VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME), this.context);
+        VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
     }
 
     async reloadWorkspace(mainVault?: string) {
@@ -319,7 +327,7 @@ export class DendronWorkspace {
         });
         if (!opts.skipOpenWS) {
             vscode.window.showInformationMessage("opening dendron workspace");
-            return VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME), this.context);
+            return VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
         }
     }
 

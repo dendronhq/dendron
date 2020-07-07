@@ -2,6 +2,7 @@ import _ from "lodash";
 import * as vscode from "vscode";
 import { GLOBAL_STATE } from "./constants";
 import { Logger } from "./logger";
+import { Settings } from "./settings";
 import { VSCodeUtils } from "./utils";
 import { DendronWorkspace } from "./workspace";
 
@@ -47,7 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
   } else {
     Logger.info({ ctx: "dendron not active" });
   }
-  if (VSCodeUtils.isDebuggingExtension(context)) {
+  if (VSCodeUtils.isDebuggingExtension()) {
     Logger.output?.show(false);
     // TODO: check for cmd
     // const fullLogPath = FileUtils.escape(path.join(logPath, 'dendron.log'));
@@ -57,7 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
     // vscode.window.showInformationMessage(`logs at ${fullLogPath}`);
   }
   // TODO: don't hardcode version
- showWelcomeOrWhatsNew("0.0.1", previousVersion);
+ showWelcomeOrWhatsNew(ws.version, previousVersion);
 }
 
 // this method is called when your extension is deactivated
@@ -71,14 +72,21 @@ export function deactivate() {
 
 async function showWelcomeOrWhatsNew(version: string, previousVersion: string | undefined) {
   const ctx = "showWelcomeOrWhatsNew";
+  Logger.info({ ctx, version, previousVersion });
+  const ws = DendronWorkspace.instance();
   if (_.isUndefined(previousVersion)) {
     Logger.info({ ctx, msg: "first time install" });
-    const ws = DendronWorkspace.instance();
     // NOTE: this needs to be from extension because no workspace might exist at this point
     const uri = vscode.Uri.joinPath(ws.context.extensionUri, "README.md");
-    await ws.showWelcome(uri);
     await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
+    await ws.showWelcome(uri);
   } else {
     Logger.info({ ctx, msg: "not first time install" });
+    if (version !== previousVersion) {
+      Logger.info({ ctx, msg: "new version", version, previousVersion });
+      const changed = await Settings.upgrade(ws.configWS as vscode.WorkspaceConfiguration, Settings.defaultsChangeSet());
+      Logger.info({ ctx, msg: "settings upgraded", changed });
+      await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
+    }
   }
 }

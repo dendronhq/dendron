@@ -1,6 +1,9 @@
 
 export const DENDRON_WS_NAME = "dendron.code-workspace";
 export const extensionQualifiedId = `dendron.dendron`;
+// export const DENDRON_ENV = {
+//     DENDRON_WORKSPACE_FOLDERS: "DENDRON_WORKSPACE_FOLDERS"
+// };
 export const DENDRON_COMMANDS = {
     LOOKUP: "dendron.lookup",
     INIT_WS: "dendron.initWS",

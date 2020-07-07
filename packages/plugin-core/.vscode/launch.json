@@ -33,7 +33,7 @@
         "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
       ],
       "env": {
-        "STAGE": "test"
+        "STAGE": "test",
       },
       "outFiles": [
         "${workspaceFolder}/out/test/**/*.js"

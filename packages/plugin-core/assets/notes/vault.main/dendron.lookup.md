@@ -6,8 +6,7 @@ Hierarchal lookup is a better way of finding information when you have a lot of 
 
 ## Simple Example
 
-Below is an example of a simple two level hierarchy with notes on various [command line interface](https://en.wikipedia.org/wiki/Command-line_interface) commands.
-Try some of the following lookups to get a feel for it.  
+Below is an example of a simple two level hierarchy with notes on various [command line interface](https://en.wikipedia.org/wiki/Command-line_interface) commands. Use `CMD+p` to bring up the lookup and try some of the following queries.
 
 ```
 - cli.tar

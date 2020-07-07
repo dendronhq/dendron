@@ -12,20 +12,34 @@ import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
-import { DendronWorkspace } from "../../workspace";
 import { Settings } from "../../settings";
+import { DendronWorkspace } from "../../workspace";
+import { VSCodeUtils } from "../../utils";
 
-function createMockContext(): vscode.ExtensionContext {
+function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
+  const _settings = settings;
+  return {
+    get: (_key: string) => {
+      return _settings[_key];
+    },
+    update: async (_key: string, _value: any) => {
+      _settings[_key] = _value;
+    },
+    has: (key: string) => {
+      return key in _settings;
+    },
+    inspect: (_section: string) => {
+      return _settings;
+    },
+  };
+}
+
+function createMockContext(root: string): vscode.ExtensionContext {
   const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
   return {
     subscriptions: [],
     extensionPath: pkgRoot,
-    globalState: {
-      get: (_key: string) => {
-        return undefined;
-      },
-      update: (_key: string, _value: any) => {},
-    },
+    globalState: createMockConfig(Settings.defaults({ rootDir: root })),
   } as any;
 }
 
@@ -57,10 +71,17 @@ suite("Extension Test Suite", function () {
 
   //(this: Context, done: Done)
   beforeEach(async function () {
-    const ctx = createMockContext();
-    ws = new DendronWorkspace(ctx, { skipSetup: true });
     root = FileTestUtils.tmpDir("/tmp/dendron", true);
+
+    const ctx = createMockContext(root);
+
+    ws = new DendronWorkspace(ctx, { skipSetup: true });
     await ws.setupWorkspace(root, { skipOpenWS: true });
+
+    // setup configWS
+    const wsFolder = VSCodeUtils.createWSFolder(path.join(root, "vault.main"));
+    ws.configWS = vscode.workspace.getConfiguration(undefined, wsFolder);
+
     const fixtures = LernaTestUtils.getFixturesDir();
     const storeDir = path.join(fixtures, "store");
     console.log(storeDir);
@@ -75,7 +96,7 @@ suite("Extension Test Suite", function () {
   });
 
   describe("Settings", () => {
-    test("settings", () => {
+    test("defaults", () => {
       assert.deepStrictEqual(Settings.defaults({ rootDir: "bond" }), {
         "dendron.rootDir": "bond",
         "editor.minimap.enabled": false,
@@ -88,6 +109,19 @@ suite("Extension Test Suite", function () {
         "vscodeMarkdownNotes.slugifyCharacter": "NONE",
         "workbench.colorTheme": "Material Theme High Contrast",
       });
+    });
+
+    test.skip("upgrade", async function () {
+      const bond = {
+        "bond.config": {
+          default: 42,
+        },
+      };
+      const changed = await Settings.upgrade(
+        ws.configWS as vscode.WorkspaceConfiguration,
+        bond
+      );
+      assert.deepStrictEqual(changed, { add: { "bond.config": 42 } });
     });
   });
 
@@ -102,6 +136,16 @@ suite("Extension Test Suite", function () {
   });
 
   describe("workspace", () => {
+    test("sanity", async () => {
+      const workspace = fs.readJsonSync(
+        path.join(root, "dendron.code-workspace")
+      );
+      assert.deepStrictEqual(
+        workspace["settings"],
+        Settings.defaults({ rootDir: root })
+      );
+    });
+
     test("reload", async () => {
       await ws.reloadWorkspace(root);
       assert.equal(ws.engine.notes["root"].children.length, 1);

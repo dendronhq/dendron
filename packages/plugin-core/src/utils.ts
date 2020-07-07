@@ -1,9 +1,8 @@
-import os from "os";
-import * as vscode from "vscode";
-import { GLOBAL_STATE } from "./constants";
-import fs from "fs-extra";
-import path from "path";
 import { FileTestUtils } from "@dendronhq/common-server";
+import fs from "fs-extra";
+import os from "os";
+import path from "path";
+import * as vscode from "vscode";
 
 // === File FUtils
 export function resolveTilde(filePath: string) {
@@ -44,7 +43,8 @@ export class VSCodeUtils {
   }
 
   static getWorkspaceFolders(getRoot?: boolean): readonly vscode.WorkspaceFolder[] | vscode.WorkspaceFolder| undefined {
-    const wsFolders = vscode.workspace.workspaceFolders;
+    let wsFolders;
+    wsFolders = vscode.workspace.workspaceFolders;
     if (getRoot) {
       return wsFolders![0];
     } else {
@@ -52,10 +52,16 @@ export class VSCodeUtils {
     }
   }
 
-  static async openWS(wsFile: string, context: vscode.ExtensionContext) {
-    if (VSCodeUtils.isDebuggingExtension(context)) {
-      await context.globalState.update(GLOBAL_STATE.VSCODE_DEBUGGING_EXTENSION, "true");
+  static createWSFolder(root: string): vscode.WorkspaceFolder {
+    const uri = vscode.Uri.parse(root);
+    return {
+      index: 0,
+      uri,
+      name: path.basename(root)
     }
+  }
+
+  static async openWS(wsFile: string) {
     return vscode.commands
       .executeCommand(
         "vscode.openFolder",
@@ -63,13 +69,8 @@ export class VSCodeUtils {
       );
   }
 
-  static isDebuggingExtension(context: vscode.ExtensionContext): boolean {
+  static isDebuggingExtension(): boolean {
     // HACK: vscode does not save env variables btw workspaces
-    const isDebugging = context.globalState.get<boolean>(GLOBAL_STATE.VSCODE_DEBUGGING_EXTENSION);
-    if (isDebugging) {
-      process.env.VSCODE_DEBUGGING_EXTENSION = "true";
-      context.globalState.update(GLOBAL_STATE.VSCODE_DEBUGGING_EXTENSION, undefined);
-    }
-    return process.env.VSCODE_DEBUGGING_EXTENSION || isDebugging ? true : false;
+    return process.env.VSCODE_DEBUGGING_EXTENSION ? true : false;
   }
 }

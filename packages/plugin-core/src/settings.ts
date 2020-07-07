@@ -1,6 +1,17 @@
 import _ from "lodash";
+import { WorkspaceConfiguration } from "vscode";
 
-const _SETTINGS = {
+type ConfigUpdateEntry = {
+  /**
+   * Config default
+   */
+  default: any
+}
+
+type ConfigUpdateChangeSet = {[k: string]: ConfigUpdateEntry}
+
+
+const _SETTINGS: ConfigUpdateChangeSet = {
   "spellright.language": {
     default: ["en"],
   },
@@ -29,7 +40,30 @@ export class Settings {
     });
   }
 
+
   static defaults(opts: { rootDir: string }) {
     return { ...Settings.getDefaults(), "dendron.rootDir": opts.rootDir };
+  }
+
+  static defaultsChangeSet() {
+    return _SETTINGS
+  }
+
+  /**
+   * Upgrade config
+   * @param config config to upgrade
+   * @param target: config set to upgrade to
+   */
+  static async upgrade(src: WorkspaceConfiguration, target: ConfigUpdateChangeSet) {
+    const add: any = {};
+    await Promise.all(_.map(target, async (entry, key) => {
+      if (_.isUndefined(src.inspect(key)?.workspaceValue)) {
+        const value = entry.default;
+        add[key] = value;
+        return src.update(key, value);
+      }
+      return;
+    }));
+    return {add}
   }
 }

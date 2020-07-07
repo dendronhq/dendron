@@ -1,11 +1,9 @@
-import { getStage } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { GLOBAL_STATE } from "./constants";
 import { Logger } from "./logger";
 import { VSCodeUtils } from "./utils";
 import { DendronWorkspace } from "./workspace";
-import path from "path";
 
 
 // === Main
@@ -76,7 +74,7 @@ async function showWelcomeOrWhatsNew(version: string, previousVersion: string | 
     Logger.info({ ctx, msg: "first time install" });
     const ws = DendronWorkspace.instance();
     // NOTE: this needs to be from extension because no workspace might exist at this point
-    const uri = vscode.Uri.parse(path.join(ws.context.extensionPath, "README.md"));
+    const uri = vscode.Uri.joinPath(ws.context.extensionUri, "README.md");
     await ws.showWelcome(uri);
     await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
   } else {

@@ -133,7 +133,8 @@ import {
 
 
 
-  UpdateNodesOpts
+  UpdateNodesOpts,
+  EngineDeleteOpts
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -363,10 +364,23 @@ export class DendronEngine implements DEngine {
     }
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(idOrFname: string, opts?: EngineDeleteOpts): Promise<void> {
+    let cleanOpts = _.defaults(opts, {metaOnly: false});
     // TODO: take care of schema
-    const noteToDelete = this.notes[id];
-    await this.store.delete(id);
+    let noteToDelete = this.notes[idOrFname];
+    if (_.isUndefined(noteToDelete)) {
+      const fname = DNodeUtils.basename(idOrFname, false );
+      // NOTE: get around ts issues
+      let tmp = _.find(this.notes, { fname });
+      if (_.isUndefined(tmp)) {
+        throw Error(`node ${idOrFname} not found`)
+      }
+      noteToDelete = tmp;
+    }
+    const {id} = noteToDelete;
+    if (!cleanOpts.metaOnly) {
+      await this.store.delete(id);
+    }
     this.deleteFromNodes(id);
     if (!_.isEmpty(noteToDelete.children)) {
       const noteAsStub = Note.createStub(noteToDelete.fname, { id, children: noteToDelete.children });

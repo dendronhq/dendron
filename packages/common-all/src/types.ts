@@ -141,6 +141,13 @@ export interface NodeWriteOpts {
   recursive?: boolean;
 }
 
+export type EngineDeleteOpts = {
+  /**
+   * Only delete from meta
+   */
+  metaOnly?: boolean
+}
+
 export interface QueryOpts {
   fullNode?: boolean;
   /**
@@ -235,7 +242,7 @@ export interface DEngine {
    */
   init: () => Promise<void>;
 
-  delete: (id: string) => Promise<void>;
+  delete: (id: string, opts?: EngineDeleteOpts) => Promise<void>;
 
   /**
    * Get node based on id

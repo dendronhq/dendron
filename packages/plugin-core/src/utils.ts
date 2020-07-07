@@ -4,6 +4,14 @@ import os from "os";
 import path from "path";
 import * as vscode from "vscode";
 
+export class DisposableStore  {
+  private _toDispose = new Set<vscode.Disposable>();
+
+  public add(dis: vscode.Disposable) {
+    this._toDispose.add(dis);
+  }
+}
+
 // === File FUtils
 export function resolveTilde(filePath: string) {
   if (!filePath || typeof filePath !== "string") {
@@ -42,7 +50,8 @@ export class VSCodeUtils {
     return `${pkgJSON.version}-dev`
   }
 
-  static getWorkspaceFolders(getRoot?: boolean): readonly vscode.WorkspaceFolder[] | vscode.WorkspaceFolder| undefined {
+  static getWorkspaceFolders(): readonly vscode.WorkspaceFolder[]; 
+  static getWorkspaceFolders(getRoot?: boolean): vscode.WorkspaceFolder| undefined| readonly vscode.WorkspaceFolder[] {
     let wsFolders;
     wsFolders = vscode.workspace.workspaceFolders;
     if (getRoot) {

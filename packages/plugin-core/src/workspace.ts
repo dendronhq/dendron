@@ -11,7 +11,6 @@ import { CONFIG, DENDRON_COMMANDS, DENDRON_WS_NAME, extensionQualifiedId, GLOBAL
 import { Logger } from "./logger";
 import { NodeService } from "./services/nodeService/NodeService";
 import { getPlatform, resolveTilde, VSCodeUtils } from "./utils";
-import { WSAEACCES } from "constants";
 
 
 function writeWSFile(fpath: string, opts: { rootDir: string }) {
@@ -30,6 +29,8 @@ function writeWSFile(fpath: string, opts: { rootDir: string }) {
             "materialTheme.accent": "Red",
             "workbench.colorTheme": "Material Theme High Contrast",
             "pasteImage.path": "${currentFileDir}/assets",
+            // prevent markdown-notes from mangling file names
+            "vscodeMarkdownNotes.slugifyCharacter": "NONE"
         },
         "extensions": {
             "recommendations": [

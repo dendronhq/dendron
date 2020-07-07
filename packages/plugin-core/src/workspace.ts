@@ -83,6 +83,7 @@ export class DendronWorkspace {
     public version: string
 
     constructor(context: vscode.ExtensionContext, opts?: { skipSetup?: boolean }) {
+        const ctx = "constructor"
         opts = _.defaults(opts, { skipSetup: false });
         this.context = context;
         this.config = vscode.workspace.getConfiguration("dendron");
@@ -92,10 +93,16 @@ export class DendronWorkspace {
             const pkgJSON = fs.readJSONSync(path.join(FileTestUtils.getPkgRoot(__dirname), "package.json"));
             this.version = pkgJSON.version
         } else {
+            try {
             const dendronExtension= vscode.extensions.getExtension(extensionQualifiedId)!;
             this.version = dendronExtension.packageJSON.version;
+            } catch (err) {
+                const pkgJSON = fs.readJSONSync(path.join(FileTestUtils.getPkgRoot(__dirname), "package.json"));
+                this.version = pkgJSON.version
+                this.L.info({ctx, msg: "fetching from file", dir: __dirname})
+            }
         }
-        this.L.info({ctx: "cons", version: this.version})
+        this.L.info({ctx, version: this.version})
         if (!opts.skipSetup) {
             this._setupCommands();
         }

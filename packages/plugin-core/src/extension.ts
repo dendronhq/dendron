@@ -64,7 +64,8 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
   const ctx = "deactivate";
   const { DendronWorkspace } = require("./workspace");
-  DendronWorkspace.instance().L.info({ ctx });
+  const ws = DendronWorkspace.instance()
+  ws.L.info({ ctx });
 }
 
 

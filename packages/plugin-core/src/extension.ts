@@ -32,8 +32,9 @@ export function activate(context: vscode.ExtensionContext) {
           // FIXME: initialize at end
           // await ws.updateGlobalState('DENDRON_FIRST_WS', "initialized");
           await ws.showWelcome();
-          //await ws.updateGlobalState('DENDRON_FIRST_WS_TUTORIAL_STEP', '0');
           Logger.info({ ctx, step: -1 }, true);
+          await ws.updateGlobalState('DENDRON_FIRST_WS', 'initialized');
+          await ws.updateGlobalState('DENDRON_FIRST_WS_TUTORIAL_STEP', '0');
         } else {
           switch (step) {
             case "0":

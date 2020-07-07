@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "out",
     "rootDir": "src",
-    "declaration": false
+    "declaration": false,
   },
-  "exclude": ["node_modules", "lib", "local", ".vscode-test", "out"]
+  "exclude": [
+    "node_modules",
+    "lib",
+    "local",
+    ".vscode-test",
+    "out",
+  ]
 }

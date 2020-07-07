@@ -14,7 +14,10 @@ export function toSnapshotProps(n1: DNode) {
   return { ...out, parent, children };
 }
 
-function omitEntropicProps(obj: DNodeRawProps) {
+function omitEntropicProps(obj: DNodeRawProps, tsOnly?: boolean) {
+  if (tsOnly) {
+    return _.omit(obj, "updated", "created");
+  }
   return _.omit(obj, "id", "parent", "children", "updated", "created");
 }
 

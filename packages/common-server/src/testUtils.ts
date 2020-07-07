@@ -54,10 +54,12 @@ export class FileTestUtils {
     throw Error(`no root found from ${base}`);
   }
 
-  static tmpDir(base: string) {
+  static tmpDir(base: string, skipCreate?: boolean) {
     const dirPath = appendUUID(base);
-    fs.ensureDirSync(dirPath);
-    fs.emptyDirSync(dirPath);
+    if (!skipCreate) {
+      fs.ensureDirSync(dirPath);
+      fs.emptyDirSync(dirPath);
+    }
     return dirPath;
   }
 

@@ -20,13 +20,18 @@
       "problemMatcher": []
     },
     {
-      "label": "Code: Publish",
+      "label": "Code: Release",
       "type": "shell",
       "command": "scripts/publish.sh",
       "options": {
         "cwd": "build/dendron/packages/plugin-core/"
       },
       "problemMatcher": []
-    }
+    },
+    {
+      "label": "Everything",
+      "dependsOn": ["NPM: Publish", "Code: Package and Install", "Code: Release"],
+      "dependsOrder": "sequence"
+    },
   ]
 }

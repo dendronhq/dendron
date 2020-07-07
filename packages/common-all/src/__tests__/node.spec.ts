@@ -19,8 +19,10 @@ function setupNotes() {
   const fooTwoBeta = new Note({
     fname: "foo.two.beta"
   });
-  const bar= new Note({ fname: "bar" });
+  const bar = new Note({ fname: "bar" });
   const barChild = new Note({ fname: "bar.one" });
+  const barChildNamespaceExact = new Note({ fname: "bar.one.alpha-namespace" });
+  const barChildNamespaceChild = new Note({ fname: "bar.one.alpha-namespace.alpha" });
   const barGrandChild = new Note({ fname: "bar.one.alpha" });
   const root = new Note({ id: "root", fname: "root" });
   fooChild.addChild(fooGrandChild);
@@ -28,15 +30,35 @@ function setupNotes() {
   root.addChild(foo);
   bar.addChild(barChild);
   barChild.addChild(barGrandChild);
-  return { foo, fooChild, fooGrandChild, bar, barChild, barGrandChild, root, fooTwoBeta, baz };
+  bar.addChild(barChildNamespaceExact);
+  barChildNamespaceExact.addChild(barChildNamespaceChild);
+  return {
+    foo,
+    fooChild,
+    fooGrandChild,
+    bar,
+    barChild,
+    barChildNamespaceExact,
+    barChildNamespaceChild,
+    barGrandChild,
+    root,
+    fooTwoBeta,
+    baz
+  };
 }
 
 function setupSchema() {
-  const bar= new Schema({
+  const bar = new Schema({
     id: "bar",
     fname: "bar.schema.yml",
     parent: null,
-    data: {namespace: true}
+    data: { namespace: true }
+  });
+  const barChildNamespace = new Schema({
+    id: "alpha-namespace",
+    fname: "bar.schema.yml",
+    parent: null,
+    data: { namespace: true }
   });
   const foo = new Schema({
     id: "foo",
@@ -55,7 +77,8 @@ function setupSchema() {
   });
   foo.addChild(fooChild);
   fooChild.addChild(fooGrandChild);
-  return { foo, fooChild, fooGrandChild, bar };
+  bar.addChild(barChildNamespace);
+  return { foo, fooChild, fooGrandChild, bar, barChildNamespace };
 }
 
 describe("DNoteUtils", () => {
@@ -89,28 +112,40 @@ describe("SchemaUtils", () => {
   let notes: ReturnType<typeof setupNotes>;
   let schemas: ReturnType<typeof setupSchema>;
 
-  beforeEach(()=> {
+  beforeEach(() => {
     notes = setupNotes();
     schemas = setupSchema();
   });
 
   test("matchDomain", () => {
-    const fooNote = notes.foo
-    const fooSchema =SchemaUtils.matchNote(fooNote, schemas);
+    const fooNote = notes.foo;
+    const fooSchema = SchemaUtils.matchNote(fooNote, schemas);
     expectSnapshot(expect, "schemas", _.values(schemas));
     expect(fooSchema).toEqual(schemas.foo);
   });
 
   test("matchChild", () => {
-    const note = notes.fooChild
-    const schema =SchemaUtils.matchNote(note, schemas);
+    const note = notes.fooChild;
+    const schema = SchemaUtils.matchNote(note, schemas);
     expect(schema).toEqual(schemas.fooChild);
   });
 
   test("matchChildNamespace", () => {
-    const note = notes.barChild
+    const note = notes.barChild;
     const schema = SchemaUtils.matchNote(note, schemas);
     expect(schema).toEqual(schemas.bar);
+  });
+
+  test("matchChildNamespace:childAlsoNamespace:exact", () => {
+    const note = notes.barChildNamespaceExact;
+    const schema = SchemaUtils.matchNote(note, schemas);
+    expect(schema.toRawProps()).toEqual(schemas.barChildNamespace.toRawProps());
+  });
+
+  test("matchChildNamespace:childAlsoNamespace:child", () => {
+    const note = notes.barChildNamespaceExact;
+    const schema = SchemaUtils.matchNote(note, schemas);
+    expect(schema.toRawProps()).toEqual(schemas.barChildNamespace.toRawProps());
   });
 
   test("namespace no match grandchild", () => {
@@ -119,17 +154,14 @@ describe("SchemaUtils", () => {
     expect(schema).toEqual(Schema.createUnkownSchema());
   });
 
-
   test("matchGrandChild", () => {
     const note = notes.fooGrandChild;
-    const schema =SchemaUtils.matchNote(note, schemas);
+    const schema = SchemaUtils.matchNote(note, schemas);
     expect(schema).toEqual(schemas.fooGrandChild);
     const note2 = notes.fooTwoBeta;
-    const schema2 =SchemaUtils.matchNote(note2, schemas);
-    expect(schema2).toEqual(Schema.createUnkownSchema())
+    const schema2 = SchemaUtils.matchNote(note2, schemas);
+    expect(schema2).toEqual(Schema.createUnkownSchema());
   });
-
-
 });
 
 describe("NoteUtils", () => {
@@ -154,10 +186,10 @@ describe("NoteUtils", () => {
 
   test("createStubNotes, bar (stub) -> bar.two.beta", () => {
     notes = setupNotes();
-    const barStub = Note.createStub("bar")
+    const barStub = Note.createStub("bar");
     notes.root.addChild(barStub);
-    NoteUtils.createStubNotes(barStub, new Note({fname: "bar.two.beta"}));
-    const barStubChild = barStub.children[0]
+    NoteUtils.createStubNotes(barStub, new Note({ fname: "bar.two.beta" }));
+    const barStubChild = barStub.children[0];
     expect(barStubChild?.stub).toBe(true);
     expect(barStubChild?.fname).toBe("bar.two");
     expect(barStubChild?.children.length).toEqual(1);
@@ -187,7 +219,7 @@ describe("Schema", () => {
     });
 
     test("at child namespace", () => {
-      const {bar: schema} = schemas;
+      const { bar: schema } = schemas;
       expect(schema.logicalPath).toEqual("bar/*");
     });
 

@@ -658,9 +658,31 @@ export class SchemaUtils {
   static isUnkown(schema: Schema) {
     return schema.id === UNKNOWN_SCHEMA_ID;
   }
+
   static matchNote(note: Note, schemas: SchemaDict): Schema{
     return _.find(_.values(schemas), schema => {
-       return minimatch(note.path.replace(/\./g, '/'), schema.logicalPath);
+      const logicalPath = schema.logicalPath;
+      const notePath = note.path.replace(/\./g, '/');
+      if (schema.namespace) {
+        if (minimatch(notePath, _.trimEnd(logicalPath, "/*"))) {
+          return true;
+        }
+      }
+      return minimatch(notePath, logicalPath);
      }) || Schema.createUnkownSchema();
   }
+
+  // static matchNote(note: Note, schemas: SchemaDict): Schema{
+  //   const matches = _.filter(_.values(schemas), schema => {
+  //      return minimatch(note.path.replace(/\./g, '/'), schema.logicalPath);
+  //    }); 
+  //    if (_.isEmpty(matches)) {
+  //     return Schema.createUnkownSchema();
+  //    } else if (matches.length > 1) {
+  //      console.log("BOND");
+  //      // TODO
+  //    } else {
+  //      return matches;
+  //    }
+  // }V
 }

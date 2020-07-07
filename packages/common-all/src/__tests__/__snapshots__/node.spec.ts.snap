@@ -176,7 +176,9 @@ Array [
   },
   Object {
     "body": "",
-    "children": Array [],
+    "children": Array [
+      "bar.schema.yml",
+    ],
     "custom": Object {},
     "data": Object {
       "namespace": true,
@@ -184,6 +186,20 @@ Array [
     "desc": "",
     "fname": "bar.schema.yml",
     "parent": "root",
+    "stub": false,
+    "title": "bar.schema.yml",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {
+      "namespace": true,
+    },
+    "desc": "",
+    "fname": "bar.schema.yml",
+    "parent": "bar.schema.yml",
     "stub": false,
     "title": "bar.schema.yml",
     "type": "schema",

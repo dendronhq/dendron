@@ -287,8 +287,34 @@ export class DendronWorkspace {
         const ctx = "setupWorkspace";
         this.L.info({ ctx, rootDirRaw });
         const rootDir = resolveTilde(rootDirRaw);
-        // TODO: prompt for confirmation
-        fs.removeSync(rootDir);
+        if (fs.existsSync(rootDir)) {
+            const options = {
+                "delete": {msg: "delete existing folder", alias: "d"},
+                "abort": {msg: "abort current operation", alias: "a"},
+                "continue": {msg: "initialize workspace into current folder", alias: "c"}
+            }
+            const resp = await vscode.window.showInputBox({
+                prompt: `${rootDir} exists. Please specify the next action. Your options: ${_.map(options, (v, k)=> {
+                    return `(${k}: ${v.msg})`
+                }).join(", ")}`,
+                ignoreFocusOut: true,
+                value: 'continue',
+                validateInput: async (value: string) => {
+                    if (!_.includes(_.keys(options), value.toLowerCase())) {
+                        return `not valid input. valid inputs: ${_.keys(options).join(", ")}`
+                    }
+                    return null;
+                }
+            });
+            if (resp === "abort") {
+                vscode.window.showInformationMessage("did not initialize dendron workspace");
+                return;
+            } else 
+            if (resp === "delete") {
+                fs.removeSync(rootDir);
+                vscode.window.showInformationMessage("removing existing folder");
+            } 
+        };
         [rootDir].forEach((dirPath: string) => {
             fs.ensureDirSync(dirPath);
         });
@@ -297,6 +323,7 @@ export class DendronWorkspace {
             rootDir,
         });
         if (!opts.skipOpenWS) {
+            vscode.window.showInformationMessage("opening dendron workspace");
             return VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME), this.context);
         }
     }

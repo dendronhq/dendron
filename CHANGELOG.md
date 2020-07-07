@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.2](https://github.com/kevinslin/dendronv2/compare/v0.3.1...v0.3.2) (2020-07-07)
+
+
+### Features
+
+* add delete note shortcut ([0ba99a7](https://github.com/kevinslin/dendronv2/commit/0ba99a7d2d73fcddae3633703312fc0ad14e179d))
+* delete, abort or work inside existing folder when creating new workspace ([06d2dbe](https://github.com/kevinslin/dendronv2/commit/06d2dbe55ee99c5e2c8c60a152c6294d05fa5c91))
+* update first time onboarding ([d0958c0](https://github.com/kevinslin/dendronv2/commit/d0958c02d4f356f6eacc7e37d2f24c485a9af8fc))
+
+
+
+
+
 ## [0.3.1](https://github.com/kevinslin/dendronv2/compare/v0.3.0...v0.3.1) (2020-07-05)
 
 

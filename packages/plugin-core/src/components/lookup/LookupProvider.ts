@@ -19,6 +19,10 @@ class QueryStringUtils {
     const maybeSchema = engineResp[0]?.schema;
     return maybeSchema?.parent?.children as Schema[] || [];
   }
+
+  static isDomainQuery(qs: string): boolean {
+    return _.isEmpty(DNodeUtils.dirName(qs));
+  }
 }
 
 function createNoActiveItem(opts?: { label?: string }): QuickPickItem {
@@ -122,14 +126,16 @@ export class LookupProvider {
       }
 
 
-      // show schema suggestions
-      const schemas = QueryStringUtils.getAllSchemaAtLevel(querystring, updatedItems as Note[]);
-      updatedItems = _.uniqBy(updatedItems.concat(schemas.map(schema => {
-        return Note.fromSchema(DNodeUtils.dirName(querystring), schema);
-      })), (ent) => {
-        return ent.fname;
-      });
-
+      // don't do this for domain queries, results in `.{name}` right now
+      if (!QueryStringUtils.isDomainQuery(querystring)) {
+        // show schema suggestions
+        const schemas = QueryStringUtils.getAllSchemaAtLevel(querystring, updatedItems as Note[]);
+        updatedItems = _.uniqBy(updatedItems.concat(schemas.map(schema => {
+          return Note.fromSchema(DNodeUtils.dirName(querystring), schema);
+        })), (ent) => {
+          return ent.fname;
+        });
+      }
 
       // check if perfect match, remove @noActiveItem result if that's the case
       if (perfectMatch) {

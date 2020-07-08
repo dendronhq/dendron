@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.7](https://github.com/dendronhq/dendron/compare/v0.3.6...v0.3.7) (2020-07-08)
+
+
+### Features
+
+* better schema suggestions ([ad74bc0](https://github.com/dendronhq/dendron/commit/ad74bc009e1544319a49689394ab8d6b684f6578))
+* limit initial query to just domains ([7ca010b](https://github.com/dendronhq/dendron/commit/7ca010bcfb1217b8ef3facbb47d69315207aff3a))
+* show schema recommendations when no suggestions are available ([98aa467](https://github.com/dendronhq/dendron/commit/98aa4672297a754b695a3c965d8af9603e8a3724))
+* show schema suggestion at same level as query ([14e73fd](https://github.com/dendronhq/dendron/commit/14e73fd8c35a0ec01818ab5f8e20835351716dc2))
+
+
+
+
+
 ## [0.3.6](https://github.com/dendronhq/dendron/compare/v0.3.5...v0.3.6) (2020-07-07)
 
 

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.7](https://github.com/dendronhq/dendron/compare/v0.3.6...v0.3.7) (2020-07-08)
+
+
+### Features
+
+* better schema suggestions ([ad74bc0](https://github.com/dendronhq/dendron/commit/ad74bc009e1544319a49689394ab8d6b684f6578))
+* show node descriptions ([e08fce9](https://github.com/dendronhq/dendron/commit/e08fce994153e28fe504b85e6d9bc1f5fdd93e20))
+
+
+
+
+
 ## [0.3.6](https://github.com/dendronhq/dendron/compare/v0.3.5...v0.3.6) (2020-07-07)
 
 

@@ -1,0 +1,13 @@
+- id: dendron
+  parent: root
+  children:
+    - lookup
+    - schema
+    - faq
+    - capabilities
+    - tips
+- id: lookup
+- id: schema
+- id: faq
+- id: capabilities
+- id: tips

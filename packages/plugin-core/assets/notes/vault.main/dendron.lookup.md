@@ -1,8 +1,6 @@
 # Lookup
 
-To work with notes, Dendron uses what we call **lookups**. Lookups help you navigate a hierarchal corpus of notes.
-
-Hierarchal lookup is a better way of finding information when you have a lot of notes. It makes use of the hierarchical nature of your notes to quickly filter down to the specific note that you need.
+To work with notes, Dendron uses  **lookups**. Lookups help you navigate a hierarchal corpus of notes.
 
 ## Simple Example
 
@@ -17,9 +15,9 @@ Below is an example of a simple two level hierarchy with notes on various [comma
 
 ## Creating Notes
 
-While we call it the `Lookup Bar`, `Lookup` is actually a misnomer because you can also use it to create notes. Whenever you're looking for a note that doesn't exist, Dendron will create it.
+While we call it the `Lookup Bar`, you can also use it to create notes that don't exist. When you lookup for a note that hasn't been created, Dendron will create it for you. 
 
-Use `CTRl-P` to bring up the lookup bar. Type `dendron.lookup.hello` and hit `Enter`.
+To try it yourself, bring up the lookup bar. Type `dendron.lookup.hello` and hit `Enter`.
 
 ![Create Note](assets/dendron-create.gif)
 
@@ -42,4 +40,6 @@ After a note has been deleted, we automatically surface the parent note (in this
 
 
 ## Other Capabilities
-Now that you've seen some of the things you can lookup, its time to go through the other capabilities you have with Dendron. Continue the tutorial by clicking [[dendron.capabilities]] or typing `dendron.capabilities` inside the lookup.
+Now that you've seen some of the things you can lookup, its time we talk about [[schemas | dendron.schema]]. Click the link or type `dendron.schema` to continue.
+
+go through the other capabilities you have with Dendron. Continue the tutorial by clicking [[dendron.capabilities]] or typing `dendron.capabilities` inside the lookup.

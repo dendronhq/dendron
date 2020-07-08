@@ -1,28 +1,43 @@
 # Schemas
 
-> NOTE: The functionality in this section is under active development and will be released shortly.
 
 As you end up creating more notes, it can be hard to keep track of it all. This is why Dendron has **schemas** to help you manage your notes at scale. Think of schemas as an **optional type system** for your notes. They describe the hierarchy of your data and are themselves, represented as a hierarchy.
 
 ```yml
-  # an id identifies a particular node in the schema
-- id: cli 
+# an id identifies a particular node in the schema
+- id: cli
   # human readable description of hierarchy
-  desc: reference to cli programs
-  # the root of the hiearchy has a parent of root
+  desc: command line interface reference
   parent: root
-  # when a schema is a namespace, it can have arbitrary children
-  namespace: true
+  data: 
+    # when a schema is a namespace, it can have arbitary children. equivalent to cli.* glob pattern
+    namespace: true 
+  children:
+    # specifies 
+    - cmd
+    - env
+# will match cli.*.env
+- id: env
+  desc: cli specific env variables
+# will match cli.*.cmd.*
+- id: cmd
+  desc: subcommands 
+  data: 
+    namespace: true
 ```
 
+# Stub
+
+![](assets/2020-07-07-20-36-12.png)
+
+# Advanced Schema
 Here is schema for the programming language hierarchy
 
 ```yml
-- id: programming_language
-  # an alias is the shorthand representation of a hiearchy
-  alias: l
+- id: l
   parent: root
-  namespace: true
+  data:
+    namespace: true
   children:
 - id: data
   alias: d

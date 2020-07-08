@@ -118,6 +118,7 @@ export class LookupProvider {
         "note"
       );
       L.info({ ctx: ctx + ":engine:query:post" });
+      // enrich notes with schemas
       let updatedItems = resp.data.map((note => {
         const schema = SchemaUtils.matchNote(note as Note, engine.schemas);
         (note as Note).schema = schema;

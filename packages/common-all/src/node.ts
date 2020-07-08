@@ -450,7 +450,7 @@ export class Schema extends DNode<SchemaData> implements ISchema {
    * don't match any schema in it
    */
   static createUnkownSchema(): Schema {
-    if (Schema._UNKNOWN_SCHEMA) {
+    if (_.isUndefined(Schema._UNKNOWN_SCHEMA)) {
       const props = SchemaNodeRaw.createProps({ id: UNKNOWN_SCHEMA_ID, fname: UNKNOWN_SCHEMA_ID, stub: true,
       created: "-1", updated: "-1" });
       Schema._UNKNOWN_SCHEMA = new Schema({ ...props, parent: null, children: [] });
@@ -655,7 +655,7 @@ export class SchemaUtils {
   }
 
   static matchNote(note: Note, schemas: SchemaDict): Schema{
-    return _.find(_.values(schemas), schema => {
+    const out = _.find(_.values(schemas), schema => {
       const logicalPath = schema.logicalPath;
       const notePath = note.path.replace(/\./g, '/');
       if (schema.namespace) {
@@ -664,7 +664,11 @@ export class SchemaUtils {
         }
       }
       return minimatch(notePath, logicalPath);
-     }) || Schema.createUnkownSchema();
+     }); 
+     if (_.isUndefined(out)) {
+      return Schema.createUnkownSchema();
+     }
+     return out;
   }
 
   // static matchNote(note: Note, schemas: SchemaDict): Schema{

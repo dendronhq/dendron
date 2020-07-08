@@ -86,7 +86,8 @@ export class LookupController {
     quickpick.title = title.join(" ");
     quickpick.placeholder = "eg. hello.world";
     quickpick.ignoreFocusOut = true;
-    quickpick.buttons = [this.state.buttons.fuzzyMatch];
+    // FIXME: no button for now
+    // quickpick.buttons = [this.state.buttons.fuzzyMatch];
     quickpick.items = _.values(DendronEngine.getOrCreateEngine().notes);
 
     // set editor path

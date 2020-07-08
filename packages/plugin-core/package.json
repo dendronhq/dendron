@@ -74,9 +74,7 @@
       },
       {
         "command": "dendron.deleteNode",
-        "linux": "meta+shift+d",
-        "win": "win+shift+d",
-        "mac": "ctrl+shift+d"
+        "key": "ctrl+shift+d"
       }
     ]
   },

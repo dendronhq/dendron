@@ -53,6 +53,8 @@ describe("engine:exact", () => {
       const schema = engine.schemas["foo"];
       const schemaMatch = SchemaUtils.matchNote(note, engine.schemas)
       expect(schemaMatch).toEqual(schema);
+      const schemaNamespace = engine.schemas["bar"];
+      expect(schemaNamespace.namespace).toBeTruthy();
     });
   });
 

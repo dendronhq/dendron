@@ -309,7 +309,7 @@ export class DendronWorkspace {
         try {
             await this.engine.delete(fname, {metaOnly: true})
         } catch (err) {
-          this.L.error({ ctx, err });
+          this.L.error({ ctx, err: JSON.stringify(err) });
         }
       }, this)
     );

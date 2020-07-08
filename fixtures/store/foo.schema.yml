@@ -8,3 +8,10 @@
     - alpha
 - id: three
 - id: alpha
+- id: bar
+  parent: root
+  data:
+    namespace: true
+  children:
+    - one
+    - three

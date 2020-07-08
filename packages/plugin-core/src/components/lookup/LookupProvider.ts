@@ -5,6 +5,7 @@ import _ from "lodash";
 import { QuickPick, QuickPickItem, Uri, window } from "vscode";
 import { CREATE_NEW_LABEL } from "./constants";
 import { node2Uri } from "./utils";
+import { HistoryService } from "../../services/HistoryService";
 
 
 const L = createLogger("LookupProvider");
@@ -209,6 +210,12 @@ export class LookupProvider {
         } else {
           nodeNew = new Note({ title: value, fname });
         }
+
+        // FIXME: this should be done after the node is created
+        uri = node2Uri(nodeNew);
+        const historyService = HistoryService.instance();
+        historyService.add({source: "engine", action: "create", uri});
+
         await DendronEngine.getOrCreateEngine().write(
           nodeNew,
           {
@@ -217,7 +224,6 @@ export class LookupProvider {
           }
         );
         L.info({ ctx: `${ctx}:write:done`, value });
-        uri = node2Uri(nodeNew);
       } else {
         uri = node2Uri(selectedItem);
       }

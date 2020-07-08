@@ -1,140 +1,34 @@
 import {
   assert,
   assertExists,
-
-
-
-
-  DendronError, DEngine,
+  DendronError,
+  DEngine,
   DEngineMode,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  DEngineOpts, DEngineStore,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  DNode, DNodeData,
+  DEngineOpts,
+  DEngineStore,
+  DNode,
+  DNodeData,
   DNodeDict,
   DNodeRawProps,
   DNodeUtils,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  EngineGetResp, EngineQueryResp,
+  EngineDeleteOpts,
+  EngineGetResp,
+  EngineQueryResp,
   IDNode,
   INoteOpts,
-
-
-
-
-
-
-
-
-
-
-
-
-  makeResponse, NodeBuilder,
+  makeResponse,
+  NodeBuilder,
   NodeWriteOpts,
   Note,
   NoteDict,
-
-
-
-
-
-
-
-
-
-  NoteUtils, QueryMode,
-
-
-
-
-
-
-
-
-
-
-
-  QueryOneOpts, QueryOpts,
+  NoteUtils,
+  QueryMode,
+  QueryOneOpts,
+  QueryOpts,
   Schema,
   SchemaDict,
   SchemaRawProps,
-
-
-
-
-
-
-
-
-
-
-  UpdateNodesOpts,
-  EngineDeleteOpts
+  UpdateNodesOpts
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -143,7 +37,6 @@ import _ from "lodash";
 import FileStorage from "./drivers/file/store";
 import { BodyParser } from "./drivers/raw/BodyParser";
 
-
 let _DENDRON_ENGINE: DendronEngine;
 const logger = createLogger("DEngine");
 
@@ -151,7 +44,13 @@ function isAllQuery(qs: string): boolean {
   return qs === "**/*";
 }
 
-function createFuse<T>(initList: T[], opts: Fuse.IFuseOptions<any> & { exactMatch: boolean, preset: "schema" | "note" }) {
+function createFuse<T>(
+  initList: T[],
+  opts: Fuse.IFuseOptions<any> & {
+    exactMatch: boolean;
+    preset: "schema" | "note";
+  }
+) {
   const options = {
     shouldSort: true,
     threshold: opts.exactMatch ? 0.0 : 0.6,
@@ -159,7 +58,7 @@ function createFuse<T>(initList: T[], opts: Fuse.IFuseOptions<any> & { exactMatc
     distance: 100,
     maxPatternLength: 32,
     minMatchCharLength: 1,
-    keys: ["title", "logicalPath", "basename"],
+    keys: ["title", "logicalPath", "basename"]
   };
   if (opts.preset === "schema") {
     options.keys = ["title", "id"];
@@ -261,11 +160,11 @@ export class DendronEngine implements DEngine {
   async init() {
     await this.query("**/*", "schema", {
       fullNode: false,
-      initialQuery: true,
+      initialQuery: true
     });
     await this.query("**/*", "note", {
       fullNode: false,
-      initialQuery: true,
+      initialQuery: true
     });
     this.initialized = true;
     return;
@@ -274,7 +173,9 @@ export class DendronEngine implements DEngine {
   deleteFromNodes(id: string) {
     this.fuse.remove((doc: DNode) => {
       // FIXME: can be undefined, dunno why
-      if (!doc) { return false; }
+      if (!doc) {
+        return false;
+      }
       return doc.id === id;
     });
     delete this.notes[id];
@@ -365,25 +266,31 @@ export class DendronEngine implements DEngine {
   }
 
   async delete(idOrFname: string, opts?: EngineDeleteOpts): Promise<void> {
-    let cleanOpts = _.defaults(opts, {metaOnly: false});
+    const ctx = "delete";
+    let cleanOpts = _.defaults(opts, { metaOnly: false });
     // TODO: take care of schema
     let noteToDelete = this.notes[idOrFname];
     if (_.isUndefined(noteToDelete)) {
-      const fname = DNodeUtils.basename(idOrFname, false );
+      const fname = DNodeUtils.basename(idOrFname, false);
       // NOTE: get around ts issues
       let tmp = _.find(this.notes, { fname });
       if (_.isUndefined(tmp)) {
-        throw Error(`node ${idOrFname} not found`)
+        const msg = `node ${idOrFname} not found`
+        logger.error({ctx, msg})
+        throw Error(msg);
       }
       noteToDelete = tmp;
     }
-    const {id} = noteToDelete;
+    const { id } = noteToDelete;
     if (!cleanOpts.metaOnly) {
       await this.store.delete(id);
     }
     this.deleteFromNodes(id);
     if (!_.isEmpty(noteToDelete.children)) {
-      const noteAsStub = Note.createStub(noteToDelete.fname, { id, children: noteToDelete.children });
+      const noteAsStub = Note.createStub(noteToDelete.fname, {
+        id,
+        children: noteToDelete.children
+      });
       this.refreshNodes([noteAsStub], { stub: true });
     }
     return;
@@ -444,7 +351,10 @@ export class DendronEngine implements DEngine {
     if (isAllQuery(queryString)) {
       logger.debug({ ctx: "query:queryAll:pre", mode });
       try {
-        data = await this.store.query("**/*", mode, { ...opts, schemas: this.schemas });
+        data = await this.store.query("**/*", mode, {
+          ...opts,
+          schemas: this.schemas
+        });
       } catch (err) {
         if (err instanceof DendronError) {
           logger.info({ ctx, msg: "no root found", mode });
@@ -554,13 +464,26 @@ export class DendronEngine implements DEngine {
     }
   }
 
-  async queryOne(queryString: string, mode: QueryMode, opts?: QueryOneOpts): Promise<EngineGetResp<DNodeData>> {
-    const resp = await this.query(queryString, mode, { ...opts, queryOne: true });
+  async queryOne(
+    queryString: string,
+    mode: QueryMode,
+    opts?: QueryOneOpts
+  ): Promise<EngineGetResp<DNodeData>> {
+    const resp = await this.query(queryString, mode, {
+      ...opts,
+      queryOne: true
+    });
     return makeResponse<EngineGetResp>({ data: resp.data[0], error: null });
   }
 
   async write(node: IDNode, opts?: NodeWriteOpts): Promise<void> {
-    const props = _.defaults(opts, { newNode: false, body: "", stub: false, parentsAsStubs: false, recursive: false });
+    const props = _.defaults(opts, {
+      newNode: false,
+      body: "",
+      stub: false,
+      parentsAsStubs: false,
+      recursive: false
+    });
     if (node.type === "schema") {
       const refreshList: DNode[] = [node];
       assertExists(node?.body, "body must exist");
@@ -592,25 +515,31 @@ export class DendronEngine implements DEngine {
       return this.refreshNodes(refreshList, { fullNode: props.newNode });
     } else {
       const note = node as Note;
-      await this.store.write(note, { stub: props.stub, recursive: props.recursive });
-      return this.updateNodes([note], _.pick(props, ["parentsAsStubs", "newNode"]));
+      await this.store.write(note, {
+        stub: props.stub,
+        recursive: props.recursive
+      });
+      return this.updateNodes(
+        [note],
+        _.pick(props, ["parentsAsStubs", "newNode"])
+      );
     }
   }
 
   updateProps(opts: DEngineOpts) {
     if (opts.mode) {
-      this.props.mode = opts.mode
+      this.props.mode = opts.mode;
       // @ts-ignore
       const config = Fuse.config;
     }
   }
 
   async updateNodes(nodes: IDNode[], opts: UpdateNodesOpts): Promise<void> {
-    const ntype = nodes[0].type
+    const ntype = nodes[0].type;
     if (ntype === "schema") {
       throw Error("not supported");
     } else {
-      _.each(nodes, (node) => {
+      _.each(nodes, node => {
         return this._updateNote(node as Note, opts);
       });
     }
@@ -618,7 +547,10 @@ export class DendronEngine implements DEngine {
   }
 
   // OPTIMIZE: do in bulk
-async _updateNote(note: Note, opts: { parentsAsStubs: boolean, newNode: boolean }) {
+  async _updateNote(
+    note: Note,
+    opts: { parentsAsStubs: boolean; newNode: boolean }
+  ) {
     const refreshList: Note[] = [note];
     let parentPath = DNodeUtils.dirName(note.fname);
     if (_.isEmpty(parentPath)) {
@@ -627,7 +559,10 @@ async _updateNote(note: Note, opts: { parentsAsStubs: boolean, newNode: boolean 
     let parentNode = _.find(this.notes, n => n.path === parentPath);
     if (!parentNode) {
       if (opts.parentsAsStubs) {
-        const closestParent = DNodeUtils.findClosestParent(note.logicalPath, this.notes);
+        const closestParent = DNodeUtils.findClosestParent(
+          note.logicalPath,
+          this.notes
+        );
         const stubNodes = NoteUtils.createStubNotes(
           closestParent as Note,
           note

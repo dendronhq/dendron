@@ -6,7 +6,6 @@
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "declaration": true,
     "strict": true,
     // --- checks
     "noUnusedLocals": true,

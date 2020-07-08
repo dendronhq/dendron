@@ -23,6 +23,7 @@ import {
   DisposableStore,
 } from "./utils";
 import { posix } from "path";
+import { HistoryService } from "./services/HistoryService";
 
 function writeWSFile(fpath: string, opts: { rootDir: string }) {
   const jsonBody = {
@@ -85,6 +86,7 @@ export class DendronWorkspace {
   public version: string;
   private disposableStore: DisposableStore;
   private readonly workspaceFolders: readonly vscode.WorkspaceFolder[];
+  private history: HistoryService;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -97,6 +99,7 @@ export class DendronWorkspace {
     _DendronWorkspace = this;
     this.L = Logger;
     this.disposableStore = new DisposableStore();
+    this.history = HistoryService.instance();
 
     // get workspace
     if (getStage() === "test") {
@@ -243,6 +246,12 @@ export class DendronWorkspace {
           const fsPath = VSCodeUtils.getFsPathFromTextEditor(
             VSCodeUtils.getActiveTextEditor() as vscode.TextEditor
           );
+
+          this.history.add({
+            source: "engine",
+            action: "delete",
+            uri: vscode.Uri.parse(fsPath),
+          });
           const note: Note = (await ns.deleteByPath(fsPath, "note")) as Note;
           const closetParent = DNodeUtils.findClosestParent(
             note.logicalPath,
@@ -285,12 +294,24 @@ export class DendronWorkspace {
       true,
       false
     );
+
     this.disposableStore.add(
       this.fsWatcher.onDidCreate(async (uri: vscode.Uri) => {
         const ctx = "fsWatcher.onDidCreate";
         this.L.info({ ctx, uri });
         const fname = posix.basename(uri.fsPath, ".md");
         const note = new Note({ fname });
+
+        // check if ignore
+        const recentEvents = HistoryService.instance().lookBack();
+        this.L.debug({ ctx, recentEvents, fname});
+        if (_.find(recentEvents, (event => {
+          return _.every([event.uri.fsPath === uri.fsPath, event.source === "engine", event.action === "create"]);
+        }))) {
+          this.L.debug({ ctx, uri, msg: "create by engine, ignoring" });
+          return;
+        }
+
         try {
           this.engine.updateNodes([note], {
             newNode: true,
@@ -306,8 +327,19 @@ export class DendronWorkspace {
         const ctx = "fsWatcher.onDidDelete";
         this.L.info({ ctx, uri });
         const fname = posix.basename(uri.fsPath, ".md");
+
+        // check if we should ignore
+        const recentEvents = HistoryService.instance().lookBack();
+        this.L.debug({ ctx, recentEvents, fname});
+        if (_.find(recentEvents, (event => {
+          return _.every([event.uri.fsPath === uri.fsPath, event.source === "engine", event.action === "delete"]);
+        }))) {
+          this.L.debug({ ctx, uri, msg: "recent action by engine, ignoring" });
+          return;
+        }
+
         try {
-            await this.engine.delete(fname, {metaOnly: true})
+          await this.engine.delete(fname, { metaOnly: true });
         } catch (err) {
           this.L.error({ ctx, err: JSON.stringify(err) });
         }
@@ -338,38 +370,6 @@ export class DendronWorkspace {
     const engine = DendronEngine.getOrCreateEngine({ root: mainVault });
     await engine.init();
     this._engine = engine;
-    // refresh schemas
-    // await new SchemaCommand().hack(engine);
-    /*
-        // hook into file create
-        vscode.workspace.onDidCreateFiles(async (e) => {
-            const ents: FileMeta[] = e.files.map(uri => ({
-                prefix: DNodeUtils.basename(uri.fsPath, true),
-                fpath: uri.fsPath,
-            }));
-            const nodes2Update: Note[] = []
-            const fp = new FileParser(this.engine.store, {errorOnEmpty: false});
-            ents.map(ent => {
-                const {node} = fp.toNode(ent, [], this.engine.store)
-                const note = assertExists<Note>(node as Note, "node exists")
-                nodes2Update.push(note);
-                const closetParent = DNodeUtils.findClosestParent(
-                    note.logicalPath,
-                    this.engine.notes
-                  );
-                  const stubNodes = NoteUtils.createStubNotes(
-                    closetParent as Note,
-                    note
-                  );
-                  stubNodes.forEach(sn => {
-                      nodes2Update.push(sn);
-                  });
-            });
-
-            // await this.engine.updateNodes(_.values(notes), {newNode: true, parentsAsStubs: true});
-            vscode.window.showInformationMessage("file added to engine");
-        });
-        */
     return;
   }
 

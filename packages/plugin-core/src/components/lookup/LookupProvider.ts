@@ -103,7 +103,7 @@ export class LookupProvider {
     this.noActiveItem = createNoActiveItem({ label: "Create New" });
   }
 
-  provide(picker: QuickPick<any>) {
+  provide(picker: QuickPick<DNode>) {
     const engine = DendronEngine.getOrCreateEngine();
 
     const updatePickerItems = async () => {
@@ -132,24 +132,16 @@ export class LookupProvider {
         picker.items = _.values(engine.notes);
         return;
       }
-      // check if single item query
+      // check if single item query, vscode doesn't surface single letter queries 
       if (picker.activeItems.length === 0 && querystring.length === 1) {
-        // doesn't make active if single letter match, return everything;
         picker.items = updatedItems;
         picker.activeItems = picker.items;
         return;
       }
 
       const perfectMatch = _.find(updatedItems, {fname: querystring});
-
-      // new item
-      if (updatedItems.length === 0 || (picker.activeItems.length === 0 && !perfectMatch)) {
-        // check if empty
-        L.info({ ctx, status: "no matches" });
-        picker.items = [this.noActiveItem];
-        return;
-      }
-
+      // NOTE: we modify this later so need to track this here
+      const noUpdatedItems = updatedItems.length === 0;
 
       // don't do this for domain queries, results in `.{name}` right now
       if (!QueryStringUtils.isDomainQuery(querystring)) {
@@ -163,6 +155,14 @@ export class LookupProvider {
       }
       updatedItems = PickerUtils.filterStubs(updatedItems);
 
+      // check if new item
+      if (noUpdatedItems || (picker.activeItems.length === 0 && !perfectMatch)) {
+        L.info({ ctx, status: "no matches" });
+        // @ts-ignore
+        picker.items = updatedItems.concat([this.noActiveItem]);
+        return;
+      }
+
       // check if perfect match, remove @noActiveItem result if that's the case
       if (perfectMatch) {
         L.debug({ ctx, msg: "active = qs" });
@@ -170,6 +170,7 @@ export class LookupProvider {
         picker.items = updatedItems;
       } else {
         L.debug({ ctx, msg: "active != qs" });
+        // @ts-ignore
         picker.items = [this.noActiveItem].concat(updatedItems);
       }
 
@@ -184,6 +185,7 @@ export class LookupProvider {
       const ctx = "onDidAccept";
       L.info({ ctx });
       const value = PickerUtils.getValue(picker);
+      // @ts-ignore
       const selectedItem = PickerUtils.getSelection<Note>(picker);
       L.info({ ctx: "onDidAccept", selectedItem, value });
 

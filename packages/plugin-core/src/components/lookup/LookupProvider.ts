@@ -136,7 +136,7 @@ export class LookupProvider {
       if (querystring === "") {
         L.info({ ctx, status: "no qs" });
         //picker.items = [engine().notes["root"]];
-        picker.items = _.values(engine.notes);
+        picker.items = _.uniq(_.map(_.values(engine.notes), ent => ent.domain));
         return;
       }
       // check if single item query, vscode doesn't surface single letter queries 

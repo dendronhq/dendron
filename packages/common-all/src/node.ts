@@ -370,7 +370,7 @@ export class Note extends DNode<NoteData> implements INote {
   }
 
   static fromSchema(dirpath: string, schema: Schema): Note {
-    const fname = [dirpath, schema.title].join(".");
+    const fname = [dirpath, schema.id].join(".");
     const note = new Note({ fname, schemaStub: true, data: { schemaId: schema.id } });
     note.schema = schema;
     return note;
@@ -654,12 +654,13 @@ export class SchemaUtils {
     return schema.id === UNKNOWN_SCHEMA_ID;
   }
 
-  static matchNote(noteOrPath: Note|string, schemas: SchemaDict): Schema{
+  static matchNote(noteOrPath: Note|string, schemas: SchemaDict, opts?: {matchNamespace?: boolean}): Schema{
+    const cleanOpts = _.defaults(opts, {matchNamespace: true})
     const notePath = (_.isString(noteOrPath)) ? noteOrPath : noteOrPath.path
     const notePathClean  = notePath.replace(/\./g, '/');
     const out = _.find(_.values(schemas), schema => {
       const logicalPath = schema.logicalPath;
-      if (schema.namespace) {
+      if (schema.namespace && cleanOpts.matchNamespace) {
         if (minimatch(notePathClean, _.trimEnd(logicalPath, "/*"))) {
           return true;
         }

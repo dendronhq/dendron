@@ -152,7 +152,7 @@ export class LookupProvider {
 
       if (querystring.endsWith(".")) {
         // show schema suggestions
-        const schemas = SchemaUtils.matchNote(querystring, engine.schemas).children as Schema[];
+        const schemas = SchemaUtils.matchNote(querystring, engine.schemas, {matchNamespace: false}).children as Schema[];
         //const schemas = QueryStringUtils.getAllSchemaAtLevel(querystring, updatedItems as Note[]);
         updatedItems = _.uniqBy(updatedItems.concat(schemas.map(schema => {
           return Note.fromSchema(DNodeUtils.dirName(querystring), schema);

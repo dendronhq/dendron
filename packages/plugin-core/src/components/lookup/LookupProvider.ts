@@ -197,6 +197,8 @@ export class LookupProvider {
         // otherwise, children will not be right
         if (selectedItem.stub) {
           nodeNew = (await DendronEngine.getOrCreateEngine().queryOne(fname, "note")).data as Note;
+        } else if (selectedItem.schemaStub) {
+          nodeNew = new Note({ title: selectedItem.fname, fname: selectedItem.fname });
         } else {
           nodeNew = new Note({ title: value, fname });
         }

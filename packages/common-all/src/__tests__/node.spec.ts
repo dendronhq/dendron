@@ -117,6 +117,24 @@ describe("SchemaUtils", () => {
     schemas = setupSchema();
   });
 
+  test("matchString", () => {
+    const fooSchema = SchemaUtils.matchNote("foo", schemas);
+    expectSnapshot(expect, "schemas", _.values(schemas));
+    expect(fooSchema).toEqual(schemas.foo);
+  });
+
+  test("matchString, end with dot", () => {
+    const fooSchema = SchemaUtils.matchNote("foo.", schemas);
+    expectSnapshot(expect, "schemas", _.values(schemas));
+    expect(fooSchema).toEqual(schemas.foo);
+  });
+
+  test("matchString end with dot, namespace schema", () => {
+    const barSchema = SchemaUtils.matchNote("bar.", schemas);
+    expectSnapshot(expect, "schemas", _.values(schemas));
+    expect(barSchema).toEqual(schemas.bar);
+  });
+
   test("matchDomain", () => {
     const fooNote = notes.foo;
     const fooSchema = SchemaUtils.matchNote(fooNote, schemas);

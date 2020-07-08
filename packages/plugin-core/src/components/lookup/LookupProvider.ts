@@ -35,7 +35,12 @@ class QueryStringUtils {
    */
   static getAllSchemaAtLevel(_qs: string, engineResp: Note[]): Schema[] {
     const maybeSchema = engineResp[0]?.schema;
-    return maybeSchema?.children as Schema[] || [];
+    let out: Schema[][] = [];
+    // if (!this.isDomainQuery(_qs)) {
+    //   out.push(maybeSchema?.parent?.children as Schema[])
+    // }
+    out.push(maybeSchema?.children as Schema[])
+    return _.flatten(_.filter(out, ent => !_.isUndefined(ent)));
   }
 
   static isDomainQuery(qs: string): boolean {
@@ -144,10 +149,10 @@ export class LookupProvider {
       // NOTE: we modify this later so need to track this here
       const noUpdatedItems = updatedItems.length === 0;
 
-      // don't do this for domain queries, results in `.{name}` right now
-      if (!QueryStringUtils.isDomainQuery(querystring)) {
+      if (querystring.endsWith(".")) {
         // show schema suggestions
-        const schemas = QueryStringUtils.getAllSchemaAtLevel(querystring, updatedItems as Note[]);
+        const schemas = SchemaUtils.matchNote(querystring, engine.schemas).children as Schema[];
+        //const schemas = QueryStringUtils.getAllSchemaAtLevel(querystring, updatedItems as Note[]);
         updatedItems = _.uniqBy(updatedItems.concat(schemas.map(schema => {
           return Note.fromSchema(DNodeUtils.dirName(querystring), schema);
         })), (ent) => {
@@ -170,6 +175,7 @@ export class LookupProvider {
         picker.activeItems = [perfectMatch];
         picker.items = updatedItems;
       } else {
+        // regular result
         L.debug({ ctx, msg: "active != qs" });
         // @ts-ignore
         picker.items = [this.noActiveItem].concat(updatedItems);

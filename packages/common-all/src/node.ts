@@ -654,16 +654,17 @@ export class SchemaUtils {
     return schema.id === UNKNOWN_SCHEMA_ID;
   }
 
-  static matchNote(note: Note, schemas: SchemaDict): Schema{
+  static matchNote(noteOrPath: Note|string, schemas: SchemaDict): Schema{
+    const notePath = (_.isString(noteOrPath)) ? noteOrPath : noteOrPath.path
+    const notePathClean  = notePath.replace(/\./g, '/');
     const out = _.find(_.values(schemas), schema => {
       const logicalPath = schema.logicalPath;
-      const notePath = note.path.replace(/\./g, '/');
       if (schema.namespace) {
-        if (minimatch(notePath, _.trimEnd(logicalPath, "/*"))) {
+        if (minimatch(notePathClean, _.trimEnd(logicalPath, "/*"))) {
           return true;
         }
       }
-      return minimatch(notePath, logicalPath);
+      return minimatch(notePathClean, logicalPath);
      }); 
      if (_.isUndefined(out)) {
       return Schema.createUnkownSchema();

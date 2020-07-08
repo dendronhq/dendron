@@ -1,4 +1,4 @@
-import { DNodeUtils, Note, Schema, SchemaUtils } from "@dendronhq/common-all";
+import { DNodeUtils, Note, Schema, SchemaUtils, DNode } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import { DendronEngine  } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -12,12 +12,30 @@ const L = createLogger("LookupProvider");
 class QueryStringUtils {
   /**
    * Get all schema matches for current query
+   * 
+   * # eg. Query with Root
+   * 
+   * schema: 
+   * - bar
+   *  - alpha
+   *  - beta
+   * - foo
+   *   - one
+   *   - two
+   * qs: foo
+   * 
+   * return: [one, two]
+   * 
+   * # eg. Query not at root
+   * qs: foo.one
+   * 
+   * 
    * @param _qs 
    * @param engineResp 
    */
   static getAllSchemaAtLevel(_qs: string, engineResp: Note[]): Schema[] {
     const maybeSchema = engineResp[0]?.schema;
-    return maybeSchema?.parent?.children as Schema[] || [];
+    return maybeSchema?.children as Schema[] || [];
   }
 
   static isDomainQuery(qs: string): boolean {
@@ -63,10 +81,17 @@ class PickerUtils {
   ) {
     return picker.value;
   }
+
   static getSelection<T extends QuickPickItem = QuickPickItem>(
     picker: QuickPick<T>
   ): T {
     return picker.selectedItems[0];
+  }
+
+  static filterStubs(items: DNode[]): DNode[] {
+    return _.filter(items, ent => {
+      return !ent.stub
+    });
   }
 }
 
@@ -136,6 +161,7 @@ export class LookupProvider {
           return ent.fname;
         });
       }
+      updatedItems = PickerUtils.filterStubs(updatedItems);
 
       // check if perfect match, remove @noActiveItem result if that's the case
       if (perfectMatch) {

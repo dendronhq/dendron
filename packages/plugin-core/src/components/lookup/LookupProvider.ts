@@ -175,6 +175,9 @@ export class LookupProvider {
         L.debug({ ctx, msg: "active = qs" });
         picker.activeItems = [perfectMatch];
         picker.items = updatedItems;
+      } else if (querystring.endsWith(".")) {
+        L.debug({ ctx, msg: "active != qs, end with ." });
+        picker.items = updatedItems;
       } else {
         // regular result
         L.debug({ ctx, msg: "active != qs" });

@@ -392,15 +392,10 @@ export class Note extends DNode<NoteData> implements INote {
 
   // vscode detail pane
   get detail(): string {
-    const cleanPath = this.logicalPath
-      .split(".")
-      .slice(0, -1)
-      .join(".");
-    if (_.isEmpty(cleanPath)) {
-      return this.logicalPath;
-    } else {
-      return cleanPath + ".";
-    }
+    if (this.schema && this.schemaStub) {
+      return this.schema.desc;
+    } 
+    return this.desc;
   }
 
   get description(): string | undefined {

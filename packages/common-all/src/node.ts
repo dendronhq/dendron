@@ -418,7 +418,7 @@ export class Note extends DNode<NoteData> implements INote {
       }
 
       // case: recognized schema
-      prefixParts = ["$(repo)", this.schema.domain.title];
+      prefixParts.push(`$(repo) ${this.schema.domain.title}`);
       // check if non-domain schema
       if (this.schema.domain.id !== this.schema.id) {
         prefixParts.push("$(breadcrumb-separator)");

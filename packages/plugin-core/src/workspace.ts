@@ -247,7 +247,7 @@ export class DendronWorkspace {
           } catch (err) {
             this.L.error({ ctx, msg: `can't open uri: ${uri}` });
           }
-          vscode.window.showInformationMessage(`${fsPath} deleted`);
+          vscode.window.showInformationMessage(`${posix.basename(fsPath)} deleted`);
         }
       )
     );

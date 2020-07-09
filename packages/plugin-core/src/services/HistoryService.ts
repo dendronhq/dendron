@@ -1,26 +1,29 @@
-import { Uri } from "vscode"
 import _ from "lodash";
+import { Uri } from "vscode";
 
-export type Event = {
-    source: DendronEvent
-    uri: Uri
-    action: DendronAction
+export type HistoryEvent = {
+    action: HistoryEventAction
+    source: HistoryEventSource
+    uri?: Uri
 }
 
-type DendronEvent = "engine"|"src"
-type DendronAction = "delete"|"create"
+type HistoryEventSource = "engine"|"src"|"extension"
+type HistoryEventAction = "delete"|"create"|"activate"
+
+type HistoryEventListenerFunc = (event: HistoryEvent) => void;
 
 interface IHistoryService {
-    readonly events: Event[];
+    readonly events: HistoryEvent[];
     //instance: () =>IHistoryService;
-    add(event: Event): void;
-    lookBack(num?: number): Event[];
+    add(event: HistoryEvent): void;
+    lookBack(num?: number): HistoryEvent[];
 }
 
 let _HISTORY_SERVICE: undefined|HistoryService = undefined;
 
 export class HistoryService implements IHistoryService {
-    public readonly events: Event[];
+    public readonly events: HistoryEvent[];
+    private subscribers: {[k in HistoryEventSource]: HistoryEventListenerFunc[]};
 
     static instance(): HistoryService {
         if (_.isUndefined(_HISTORY_SERVICE)) {
@@ -31,13 +34,23 @@ export class HistoryService implements IHistoryService {
 
     constructor() {
         this.events = [];
+        this.subscribers = {
+            engine: [],
+            src: [],
+            extension: []
+        };
     }
 
-    add(event: Event) {
+    add(event: HistoryEvent) {
         this.events.unshift(event);
+        this.subscribers[event.source].forEach(f => f(event));
     }
 
-    lookBack(num: number = 3): Event[] {
+    lookBack(num: number = 3): HistoryEvent[] {
         return this.events.slice(0, num);
+    }
+
+    subscribe(source: HistoryEventSource, func: HistoryEventListenerFunc) {
+        this.subscribers[source].push(func);
     }
 }

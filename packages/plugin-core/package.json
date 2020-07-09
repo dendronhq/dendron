@@ -99,7 +99,6 @@
     "@typescript-eslint/eslint-plugin": "^2.30.0",
     "@typescript-eslint/parser": "^2.30.0",
     "eslint": "^6.8.0",
-    "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
     "mocha": "^7.1.2",
     "ts-node": "^8.10.2",
@@ -111,7 +110,8 @@
     "@dendronhq/common-server": "^0.3.8",
     "@dendronhq/engine-server": "^0.3.8",
     "execa": "^4.0.2",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.15",
+    "fs-extra": "^9.0.1"
   },
   "gitHead": "74f4be7ed8b97d566cd905a1409a347668a3aa8a"
 }

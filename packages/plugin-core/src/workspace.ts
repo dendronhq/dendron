@@ -324,7 +324,7 @@ export class DendronWorkspace {
         const recentEvents = HistoryService.instance().lookBack();
         this.L.debug({ ctx, recentEvents, fname});
         if (_.find(recentEvents, (event => {
-          return _.every([event.uri.fsPath === uri.fsPath, event.source === "engine", event.action === "create"]);
+          return _.every([event?.uri?.fsPath === uri.fsPath, event.source === "engine", event.action === "create"]);
         }))) {
           this.L.debug({ ctx, uri, msg: "create by engine, ignoring" });
           return;
@@ -350,7 +350,7 @@ export class DendronWorkspace {
         const recentEvents = HistoryService.instance().lookBack();
         this.L.debug({ ctx, recentEvents, fname});
         if (_.find(recentEvents, (event => {
-          return _.every([event.uri.fsPath === uri.fsPath, event.source === "engine", event.action === "delete"]);
+          return _.every([event?.uri?.fsPath === uri.fsPath, event.source === "engine", event.action === "delete"]);
         }))) {
           this.L.debug({ ctx, uri, msg: "recent action by engine, ignoring" });
           return;

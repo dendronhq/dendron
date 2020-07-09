@@ -6,6 +6,7 @@ import { Settings } from "./settings";
 import { VSCodeUtils } from "./utils";
 import { DendronWorkspace } from "./workspace";
 import { getStage } from "@dendronhq/common-all";
+import { HistoryService } from "./services/HistoryService";
 
 
 // === Main
@@ -62,7 +63,9 @@ export function activate(context: vscode.ExtensionContext) {
     // vscode.window.showInformationMessage(`logs at ${fullLogPath}`);
   }
   // TODO: don't hardcode version
- showWelcomeOrWhatsNew(ws.version, previousVersion);
+ showWelcomeOrWhatsNew(ws.version, previousVersion).then(()=> {
+   HistoryService.instance().add({source: "extension", action: "activate"})
+ });
 }
 
 // this method is called when your extension is deactivated

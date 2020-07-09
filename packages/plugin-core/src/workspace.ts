@@ -277,7 +277,7 @@ export class DendronWorkspace {
     if (getStage() === "test") {
       // stubbed for test
       workspaceFolders = [];
-      this.configWS = vscode.workspace.getConfiguration();
+      this.configWS = VSCodeUtils.createMockState({});
     } else {
       const wsFolders = VSCodeUtils.getWorkspaceFolders();
       if (_.isUndefined(wsFolders) || _.isEmpty(wsFolders)) {
@@ -289,6 +289,9 @@ export class DendronWorkspace {
         throw Error("no folders set for workspace");
       }
       workspaceFolders = wsFolders;
+      this.configWS = vscode.workspace.getConfiguration(
+        undefined,
+      )
       this.configWS = vscode.workspace.getConfiguration(
         undefined,
         workspaceFolders[0]

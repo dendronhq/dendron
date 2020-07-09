@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
   // setup logging
   const previousVersion = context.globalState.get<string | undefined>(GLOBAL_STATE.VERSION);
   Logger.configure(context, "debug");
-  Logger.info({ ctx, stage, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
+  Logger.info({ ctx, stage, logPath, extensionPath, extensionUri, storagePath, globalStoragePath, previousVersion });
   // needs to be initialized to setup commands
   const ws = new DendronWorkspace(context);
 
@@ -91,9 +91,11 @@ async function showWelcomeOrWhatsNew(version: string, previousVersion: string | 
     Logger.info({ ctx, msg: "not first time install" });
     if (version !== previousVersion) {
       Logger.info({ ctx, msg: "new version", version, previousVersion });
-      const changed = await Settings.upgrade(ws.configWS as vscode.WorkspaceConfiguration, Settings.defaultsChangeSet());
+      const config = vscode.workspace.getConfiguration()
+      const changed = await Settings.upgrade(config, Settings.defaultsChangeSet());
       Logger.info({ ctx, msg: "settings upgraded", changed });
       await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
+      vscode.window.showInformationMessage(`Dendron has been upgraded to ${version} from ${previousVersion}`);
     }
   }
 }

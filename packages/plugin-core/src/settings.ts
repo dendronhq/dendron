@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { WorkspaceConfiguration } from "vscode";
+import { WorkspaceConfiguration, ConfigurationTarget } from "vscode";
 
 type ConfigUpdateEntry = {
   /**
@@ -56,14 +56,20 @@ export class Settings {
    */
   static async upgrade(src: WorkspaceConfiguration, target: ConfigUpdateChangeSet) {
     const add: any = {};
+    const errors: any = {};
     await Promise.all(_.map(target, async (entry, key) => {
       if (_.isUndefined(src.inspect(key)?.workspaceValue)) {
         const value = entry.default;
-        add[key] = value;
-        return src.update(key, value);
+        try {
+          src.update(key, value, ConfigurationTarget.Global);
+          add[key] = value;
+          return
+        } catch(err) {
+          errors[key] = err;
+        }
       }
       return;
     }));
-    return {add}
+    return {add, errors}
   }
 }

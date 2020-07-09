@@ -15,7 +15,7 @@ import * as vscode from "vscode";
 import { Settings } from "../../settings";
 import { DendronWorkspace } from "../../workspace";
 import { VSCodeUtils } from "../../utils";
-import { DENDRON_QA, DENDRON_COMMANDS, CONFIG } from "../../constants";
+import { DENDRON_COMMANDS, CONFIG, GLOBAL_STATE } from "../../constants";
 import { HistoryService, HistoryEvent } from "../../services/HistoryService";
 
 function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
@@ -64,30 +64,47 @@ class VSFileUtils {
   };
 }
 
-suite("new install", function () {
+suite("startup", function () {
   const timeout = 60 * 1000;
   let root: string;
   let ws: DendronWorkspace;
 
-  beforeEach(async function () {
+  before(function() {
+    console.log("set version")
+    VSCodeUtils.getOrCreateMockContext().globalState.update(GLOBAL_STATE.VERSION, "0.0.1");
+  });
+
+  beforeEach(function () {
     console.log("before")
     root = FileTestUtils.tmpDir("/tmp/dendron", true);
   });
 
-  afterEach(async () => {
+  afterEach(function(){
     console.log("after")
     HistoryService.instance().clearSubscriptions();
     fs.removeSync(root);
-    //await vscode.commands.executeCommand("workbench.action.reloadWindow");
-    return 
   });
 
   describe("sanity", function () {
     vscode.window.showInformationMessage("Start sanity test.");
     this.timeout(timeout);
 
-    test("new install", function (done) {
-      vscode.window.showInformationMessage("waiting for new");
+    // test("new install", function (done) {
+    //   vscode.window.showInformationMessage("waiting for new");
+    //   HistoryService.instance().subscribe("extension", async (event: HistoryEvent) => {
+    //     vscode.window.showInformationMessage(`got activate`);
+    //     ws = DendronWorkspace.instance();
+    //     await ws.setupWorkspace(root, {skipOpenWS: true});
+    //     await ws.reloadWorkspace(root);
+    //     vscode.window.showInformationMessage(`setup ws`);
+    //     assert.ok("done");
+    //     done();
+    //   });
+    // });
+
+    test("upgrade from existing", function (done) {
+      vscode.window.showInformationMessage("waiting for existing");
+      ws = DendronWorkspace.instance();
       HistoryService.instance().subscribe("extension", async (event: HistoryEvent) => {
         vscode.window.showInformationMessage(`got activate`);
         ws = DendronWorkspace.instance();
@@ -98,31 +115,6 @@ suite("new install", function () {
         done();
       });
     });
-
-    test("one", ()=> {
-      console.log("subscribers");
-      const historyService = HistoryService.instance();
-      console.log(HistoryService.instance().subscribers);
-      assert.ok(true);
-    });
-
-    test("two", ()=> {
-      assert.ok(true);
-    });
-
-    // test("existing install", function (done) {
-    //   vscode.window.showInformationMessage("waiting for existing");
-    //   HistoryService.instance().subscribe("extension", async (event: HistoryEvent) => {
-    //     vscode.window.showInformationMessage(`got activate`);
-    //     ws = DendronWorkspace.instance();
-    //     await ws.setupWorkspace(root, {skipOpenWS: true});
-    //     await ws.reloadWorkspace(root);
-    //     vscode.window.showInformationMessage(`setup ws`);
-    //     assert.ok("done");
-    //     done();
-    //   });
-    //   vscode.commands.executeCommand("workbench.action.reloadWindow");
-    // });
 
   });
 });

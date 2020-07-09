@@ -451,13 +451,13 @@ export class DendronWorkspace {
     }
   }
 
-  async showWelcome(welcomeUri?: vscode.Uri) {
+  async showWelcome(welcomeUri?: vscode.Uri, opts?: {reuseWindow?: boolean}) {
     welcomeUri =
       welcomeUri ||
       vscode.Uri.parse(path.join(this.rootDir, "vault.main", "dendron.md"));
     try {
       await vscode.window.showTextDocument(welcomeUri);
-      await MarkdownUtils.openPreview();
+      await MarkdownUtils.openPreview(opts);
     } catch (err) {
       vscode.window.showErrorMessage(JSON.stringify(err));
     }
@@ -465,13 +465,24 @@ export class DendronWorkspace {
 }
 
 class MarkdownUtils {
-  static async openPreview() {
+
+  static async openPreview(opts?: {reuseWindow?: boolean}) {
+    const cleanOpts = _.defaults(opts, {reuseWindow: false});
     let previewEnhanced = vscode.extensions.getExtension(
       "shd101wyy.markdown-preview-enhanced"
     );
-    const openMarkdownCmd = previewEnhanced
-      ? "markdown-preview-enhanced.openPreviewToTheSide"
-      : "markdown.showPreviewToSide";
-    return vscode.commands.executeCommand(openMarkdownCmd);
+    const cmds = {
+      builtin: {
+        open: "markdown.showPreview",
+        openSide: "markdown.showPreviewToSide",
+      },
+      enhanced: {
+        open: "markdown-preview-enhanced.openPreview",
+        openSide: "markdown-preview-enhanced.openPreviewToTheSide"
+      }
+    };
+    const mdClient = cmds[previewEnhanced ? "enhanced" : "builtin"];
+    const openCmd = mdClient[cleanOpts.reuseWindow ? "open" : "openSide"];
+    return vscode.commands.executeCommand(openCmd);
   }
 }

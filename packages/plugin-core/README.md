@@ -71,7 +71,3 @@ To get started with Dendron, create a new **workspace** by following the instruc
 You will find further instructions when you open the workspace. 
 
 <!-- TODO: LINK TO QUICKSTART -->
-
-## Dendron Editor 
-
-COMING SOON

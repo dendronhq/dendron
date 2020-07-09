@@ -53,7 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
     Logger.info({ ctx: "dendron not active" });
   }
   if (VSCodeUtils.isDebuggingExtension()) {
-    Logger.output?.show(false);
+    // Logger.output?.show(false);
     // TODO: check for cmd
     // const fullLogPath = FileUtils.escape(path.join(logPath, 'dendron.log'));
     // TODO
@@ -83,7 +83,7 @@ async function showWelcomeOrWhatsNew(version: string, previousVersion: string | 
     // NOTE: this needs to be from extension because no workspace might exist at this point
     const uri = vscode.Uri.joinPath(ws.context.extensionUri, "README.md");
     await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
-    await ws.showWelcome(uri);
+    await ws.showWelcome(uri, {reuseWindow: true});
   } else {
     Logger.info({ ctx, msg: "not first time install" });
     if (version !== previousVersion) {

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.9](https://github.com/dendronhq/dendron/compare/v0.3.8...v0.3.9) (2020-07-09)
+
+
+### Features
+
+* updated icons for schemas ([b7a2d8a](https://github.com/dendronhq/dendron/commit/b7a2d8aa517cf88d7a93d07cd2ef19305e48d069))
+
+
+
+
+
 ## [0.3.7](https://github.com/dendronhq/dendron/compare/v0.3.6...v0.3.7) (2020-07-08)
 
 

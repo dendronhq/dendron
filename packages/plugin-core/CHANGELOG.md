@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.9](https://github.com/dendronhq/dendron/compare/v0.3.8...v0.3.9) (2020-07-09)
+
+
+### Features
+
+* better initial welcome page ([59b8a31](https://github.com/dendronhq/dendron/commit/59b8a3140b1f207aad81ab17fcc4e89570961845))
+* set default folder for all platforms ([b16def5](https://github.com/dendronhq/dendron/commit/b16def56e78da165e4b3af8f27b288add98ace3f))
+* show basename of node after deletion ([fe43708](https://github.com/dendronhq/dendron/commit/fe4370828d775a6b418a92dfb9c724828d856664))
+
+
+
+
+
 ## [0.3.8](https://github.com/dendronhq/dendron/compare/v0.3.7...v0.3.8) (2020-07-09)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

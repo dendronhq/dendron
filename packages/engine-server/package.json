@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/engine-server",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "dendron-engine",
   "license": "MIT",
   "repository": {
@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.3.7",
-    "@dendronhq/common-server": "^0.3.7",
+    "@dendronhq/common-server": "^0.3.8",
     "fs-extra": "^9.0.1",
     "fuse.js": "^6.3.0",
     "gray-matter": "^4.0.2",

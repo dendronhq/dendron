@@ -4,7 +4,7 @@ import os from "os";
 import path from "path";
 import * as vscode from "vscode";
 
-export class DisposableStore  {
+export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
 
   public add(dis: vscode.Disposable) {
@@ -12,8 +12,7 @@ export class DisposableStore  {
   }
 
   // TODO
-  public dispose() {
-  }
+  public dispose() {}
 }
 
 // === File FUtils
@@ -32,15 +31,16 @@ export function getPlatform() {
   return process.platform;
 }
 
-
 export class FileUtils {
   static escape(fpath: string) {
-    return fpath.replace(/(\s+)/g, '\\$1');
+    return fpath.replace(/(\s+)/g, "\\$1");
   }
 }
 
-export class VSCodeUtils {
+// NOTE: used for tests
+let _MOCK_CONTEXT: undefined | vscode.ExtensionContext = undefined;
 
+export class VSCodeUtils {
   static getActiveTextEditor() {
     return vscode.window.activeTextEditor;
   }
@@ -50,12 +50,16 @@ export class VSCodeUtils {
   }
 
   static getVersionFromPkg(): string {
-    const pkgJSON = fs.readJSONSync(path.join(FileTestUtils.getPkgRoot(__dirname), "package.json"));
-    return `${pkgJSON.version}-dev`
+    const pkgJSON = fs.readJSONSync(
+      path.join(FileTestUtils.getPkgRoot(__dirname), "package.json")
+    );
+    return `${pkgJSON.version}-dev`;
   }
 
-  static getWorkspaceFolders(): readonly vscode.WorkspaceFolder[]; 
-  static getWorkspaceFolders(getRoot?: boolean): vscode.WorkspaceFolder| undefined| readonly vscode.WorkspaceFolder[] {
+  static getWorkspaceFolders(): readonly vscode.WorkspaceFolder[];
+  static getWorkspaceFolders(
+    getRoot?: boolean
+  ): vscode.WorkspaceFolder | undefined | readonly vscode.WorkspaceFolder[] {
     let wsFolders;
     wsFolders = vscode.workspace.workspaceFolders;
     if (getRoot) {
@@ -65,22 +69,24 @@ export class VSCodeUtils {
     }
   }
 
-  static createMockContext(): vscode.ExtensionContext {
-    const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
-    return {
-      logPath: "/tmp/dendron-integ/",
-      subscriptions: [],
-      extensionPath: pkgRoot,
-      globalState: VSCodeUtils.createMockState({}),
-      workspaceState: VSCodeUtils.createMockState({}),
-      extensionUri: vscode.Uri.parse(pkgRoot),
-      environmentVariableCollection: {} as any,
-      storagePath: "/tmp/dendron-integ-storage/",
-      globalStoragePath: "/tmp/dendron-integ-storage-global/",
-      asAbsolutePath: {} as any //vscode.Uri.parse(wsPath)
-    } as vscode.ExtensionContext;
+  static getOrCreateMockContext(): vscode.ExtensionContext {
+    if (!_MOCK_CONTEXT) {
+      const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
+      _MOCK_CONTEXT = {
+        logPath: "/tmp/dendron-integ/",
+        subscriptions: [],
+        extensionPath: pkgRoot,
+        globalState: VSCodeUtils.createMockState({}),
+        workspaceState: VSCodeUtils.createMockState({}),
+        extensionUri: vscode.Uri.parse(pkgRoot),
+        environmentVariableCollection: {} as any,
+        storagePath: "/tmp/dendron-integ-storage/",
+        globalStoragePath: "/tmp/dendron-integ-storage-global/",
+        asAbsolutePath: {} as any, //vscode.Uri.parse(wsPath)
+      } as vscode.ExtensionContext;
+    }
+    return _MOCK_CONTEXT;
   }
-
 
   static createMockState(settings: any): vscode.WorkspaceConfiguration {
     const _settings = settings;
@@ -105,16 +111,15 @@ export class VSCodeUtils {
     return {
       index: 0,
       uri,
-      name: path.basename(root)
-    }
+      name: path.basename(root),
+    };
   }
 
   static async openWS(wsFile: string) {
-    return vscode.commands
-      .executeCommand(
-        "vscode.openFolder",
-        vscode.Uri.parse(wsFile)
-      );
+    return vscode.commands.executeCommand(
+      "vscode.openFolder",
+      vscode.Uri.parse(wsFile)
+    );
   }
 
   static isDebuggingExtension(): boolean {

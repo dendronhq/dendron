@@ -27,4 +27,5 @@ export const GLOBAL_STATE = {
 };
 export const CONFIG = {
     ROOT_DIR: "rootDir",
+    SKIP_PROMPT: "skipPrompt"
 }

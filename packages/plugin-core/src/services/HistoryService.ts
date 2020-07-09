@@ -23,7 +23,7 @@ let _HISTORY_SERVICE: undefined|HistoryService = undefined;
 
 export class HistoryService implements IHistoryService {
     public readonly events: HistoryEvent[];
-    private subscribers: {[k in HistoryEventSource]: HistoryEventListenerFunc[]};
+    public subscribers: {[k in HistoryEventSource]: HistoryEventListenerFunc[]};
 
     static instance(): HistoryService {
         if (_.isUndefined(_HISTORY_SERVICE)) {
@@ -44,6 +44,14 @@ export class HistoryService implements IHistoryService {
     add(event: HistoryEvent) {
         this.events.unshift(event);
         this.subscribers[event.source].forEach(f => f(event));
+    }
+
+    clearSubscriptions() {
+        this.subscribers = {
+            engine: [],
+            src: [],
+            extension: []
+        };
     }
 
     lookBack(num: number = 3): HistoryEvent[] {

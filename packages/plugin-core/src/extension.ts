@@ -16,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
   const stage = getStage();
   const { logPath, extensionPath, extensionUri, storagePath, globalStoragePath } = context;
   if (stage === "test") {
-    context = VSCodeUtils.createMockContext()
+    context = VSCodeUtils.getOrCreateMockContext()
   }
   // setup logging
   const previousVersion = context.globalState.get<string | undefined>(GLOBAL_STATE.VERSION);
@@ -60,7 +60,7 @@ export function activate(context: vscode.ExtensionContext) {
     // TODO
     // const cmd = `/usr/local/bin/code-insiders ${fullLogPath}`;
     // execa.command(cmd);
-    // vscode.window.showInformationMessage(`logs at ${fullLogPath}`);
+    vscode.window.showInformationMessage('activate');
   }
   // TODO: don't hardcode version
  showWelcomeOrWhatsNew(ws.version, previousVersion).then(()=> {

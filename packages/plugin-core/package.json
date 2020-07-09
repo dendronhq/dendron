@@ -30,12 +30,17 @@
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
-      "title": "Root Dir",
+      "title": "Dendron",
       "properties": {
         "dendron.rootDir": {
           "type": "string",
           "default": false,
-          "description": "Where dendron will store notes"
+          "description": "Where your dendron workspace is located"
+        },
+        "dendron.skipPrompt": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether dendron prompts for confirmation before certain actions"
         }
       }
     },

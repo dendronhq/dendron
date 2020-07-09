@@ -15,28 +15,23 @@
 
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
-Dendron is a **hierarchal** note taking tool that **grows** as you do. 
+
+Dendron is a **hierarchal** knowledge management tool that **grows** as you do. 
 
 Think of it as a **second brain** to help you make sense of all the information you care about. 
 
-At its core, Dendron is a tool to help you **store and find notes** within **hierarchies**.  Dendron stores notes as plain [markdown](TODO) files with [frontmatter](). 
-
-Dendron is still early and maybe 1% of where it could be. That being said, it is actively being used by the author on a daily (hourly) basis to manage a knowledge base of over 20 thousand notes. 
-
-The **audacious long term goal** is for Dendron to become the **best way to create, understand, and share knowledge**. Please join me in this **journey** and, together, lets **make sense** of this world that we inhabit.
+Dendron does this by helping you **store and find notes** via **flexible hierarchies**. Notes are stored as plain [markdown](https://daringfireball.net/projects/markdown/syntax) files with [frontmatter](https://jekyllrb.com/docs/front-matter/). To read more about the ideas that inspired Dendron, you can read [this blog post](https://kevinslin.com/organizing/its_not_you_its_your_knowledge_base/).
 
 # Principles
 
-1. Keep it simple: Dendron should be a frictionless way to store, connect, and share knowledge.
-2. Keep it fast: Dendron should be the fastest way to work with information.
-3. Keep it extensible: Dendron should be built with interoperability at its core. 
+1. Simple: Dendron should be a frictionless way to store, connect, and share knowledge.
+2. Fast: Dendron should be the fastest way to work with the information you care about.
+3. Extensible: Dendron should 
 
 # Features
 
-To read more about the ideas that inspired Dendron, you can read [this blog post](https://kevinslin.com/organizing/its_not_you_its_your_knowledge_base/).
-
 ## Core
-- hierarchical search: find nodes by tree traversal
+- hierarchical lookup: find nodes by travelling hierarchies
 - schemas: optional type system for your notes
 - modeless operation: no difference between searching for a file and creating one
 

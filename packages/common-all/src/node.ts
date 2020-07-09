@@ -401,14 +401,14 @@ export class Note extends DNode<NoteData> implements INote {
   get description(): string | undefined {
     let schemaPrefix: string | undefined;
     let prefixParts = [];
-    if (this.stub) {
-      prefixParts.push("(stub)")
+    if (this.stub || this.schemaStub) {
+      prefixParts.push("$(gist-new)")
     }
     if (this.schema) {
       // case: unknown schema
       // eslint-disable-next-line no-use-before-define
       if (SchemaUtils.isUnkown(this.schema)) {
-        prefixParts.push("$(squirrel) unknown");
+        prefixParts.push("$(squirrel)");
         return prefixParts.join(" ");
       }
 
@@ -418,10 +418,6 @@ export class Note extends DNode<NoteData> implements INote {
       if (this.schema.domain.id !== this.schema.id) {
         prefixParts.push("$(breadcrumb-separator)");
         prefixParts.push(this.schema.title);
-      }
-
-      if (this.schemaStub) {
-        prefixParts.push("(create from schema)");
       }
     }
     schemaPrefix = prefixParts.join(" ");

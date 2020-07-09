@@ -26,16 +26,18 @@ Dendron does this by helping you **store and find notes** via **flexible hierarc
 
 1. Simple: Dendron should be a frictionless way to store, connect, and share knowledge.
 2. Fast: Dendron should be the fastest way to work with the information you care about.
-3. Extensible: Dendron should 
+3. Extensible: Dendron should have a small core but limitless functionality through easy integration into existing vscode extensions and dendron specific plugins (coming soon).
 
 # Features
 
 ## Core
-- hierarchical lookup: find nodes by travelling hierarchies
-- schemas: optional type system for your notes
-- modeless operation: no difference between searching for a file and creating one
+- hierarchical lookup: find, create and explore notes stored in a hierarchy
+- schemas: a (optional) hierarchical type systems to help organize your notes
+- vaults: grow, share, and collaborate on an ever expanding store of knowledge (coming soon)
 
-## Bundled (enabled with recommended extensions)
+## Additional 
+
+These features are enabled through third party extensions that are installed alongside Dendron when you first use it. 
 
 - [live markdown preview](https://marketplace.visualstudio.com/items?itemName=shd101wyy.markdown-preview-enhanced)
 - [math](https://shd101wyy.github.io/markdown-preview-enhanced/#/math) (KaTeX or MathJax)
@@ -46,19 +48,16 @@ Dendron does this by helping you **store and find notes** via **flexible hierarc
 - [wiki links](https://marketplace.visualstudio.com/items?itemName=kortina.vscode-markdown-notes)
 - [tags](https://marketplace.visualstudio.com/items?itemName=kortina.vscode-markdown-notes)
 - [backlinks](https://marketplace.visualstudio.com/items?itemName=kortina.vscode-markdown-notes)
-- [workspace/file/line history](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens#current-line-blame-)
 
 # Setup 
-Dendron can be installed as a [vscode plugin](TODO) or as using the [standalone Dendron app](TODO) (coming soon). 
+Dendron can be installed as a [vscode plugin](https://marketplace.visualstudio.com/items?itemName=dendron.dendron). If you don't already have vscode, you can download it [here](https://code.visualstudio.com/).
 
-## Plugin
+After you have downloaded the plugin, following the instructions to create your first **workspace**. 
 
-To get started with Dendron, create a new **workspace** by following the instructions below. A workspace is where all your notes live. 
-
-1. Launch *Quick Open*:
-  - <img src="https://www.kernel.org/theme/images/logos/favicon.png" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-linux.pdf">Linux</a> `Ctrl+P`
-  - <img src="https://developer.apple.com/favicon.ico" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf">macOS</a> `⌘P`
-  - <img src="https://www.microsoft.com/favicon.ico" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf">Windows</a> `Ctrl+P`
+1. Launch the *command bar*:
+  - <img src="https://www.kernel.org/theme/images/logos/favicon.png" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-linux.pdf">Linux</a> `Ctrl+SHIFT+P`
+  - <img src="https://developer.apple.com/favicon.ico" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf">macOS</a> `CMD+SHIFT+P`
+  - <img src="https://www.microsoft.com/favicon.ico" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf">Windows</a> `Ctrl+SHIFT+P`
 
 2. Paste the following command and press `Enter`:
 
@@ -68,6 +67,6 @@ To get started with Dendron, create a new **workspace** by following the instruc
 
 ![Initialize workspace](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/dendron-init.gif)
 
-You will find further instructions when you open the workspace. 
+When the workspace opens, it will show a dialogue to install the recommended extensions. Though not required, these extensions add all the **non-core** features of Dendron like wiki links and tagging support.
 
 <!-- TODO: LINK TO QUICKSTART -->

@@ -4,7 +4,7 @@ To work with notes, Dendron uses  **lookups**. Lookups help you navigate a hiera
 
 ## Simple Example
 
-Below is an example of a simple two level hierarchy with notes on various [command line interface](https://en.wikipedia.org/wiki/Command-line_interface) commands. Use `CMD+p` to bring up the lookup and try some of the following queries.
+Below is an example of a simple two level hierarchy with notes on various [command line interface](https://en.wikipedia.org/wiki/Command-line_interface) commands. Use `CMD+L` (we are going to use mac keybindings for this tutorial) to bring up the lookup and try some of the following queries.
 
 ```
 - cli.tar
@@ -30,9 +30,7 @@ After you've created the note, you can click the 'x' next to the tab to come bac
 
 ## Deleting Notes
 
-To delete a note, you can use the `CTRL-SHIFT-D` shortcut on the note that you want to delete. Alternatively, you can also launch the `Command Bar` and type `Dendron: Delete Node` 
-
-To delete [[dendron.lookup.hello]], open the note and then use `CTRL-SHIFT-D` to delete.
+To delete [[dendron.lookup.hello]], use the `CMD-SHIFT-D` shortcut on the note that you want to delete. Alternatively, you can also launch the `Command Bar` and type `Dendron: Delete Node` 
 
 ![Delete Note](assets/dendron-delete.gif)
 

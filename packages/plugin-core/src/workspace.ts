@@ -158,11 +158,7 @@ export class DendronWorkspace {
     this.context.subscriptions.push(
       vscode.commands.registerCommand(DENDRON_COMMANDS.INIT_WS, async () => {
         const ctx = DENDRON_COMMANDS.INIT_WS;
-        let rootDirDefault = "";
-        const platform = getPlatform();
-        if (platform === "darwin") {
-          rootDirDefault = "~/Documents/Dendron";
-        }
+        const rootDirDefault = posix.join("~", "Dendron");
         const resp = await vscode.window.showInputBox({
           value: rootDirDefault,
           prompt: "Select your default folder for dendron",
@@ -298,7 +294,9 @@ export class DendronWorkspace {
         workspaceFolders[0]
       );
     }
-    this.createWorkspaceWatcher(workspaceFolders);
+    if (getStage() !== "test") {
+      this.createWorkspaceWatcher(workspaceFolders);
+    }
   }
 
   async createWorkspaceWatcher(workspaceFolders: readonly vscode.WorkspaceFolder[]) {

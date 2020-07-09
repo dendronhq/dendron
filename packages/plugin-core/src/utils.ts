@@ -10,6 +10,10 @@ export class DisposableStore  {
   public add(dis: vscode.Disposable) {
     this._toDispose.add(dis);
   }
+
+  // TODO
+  public dispose() {
+  }
 }
 
 // === File FUtils
@@ -59,6 +63,41 @@ export class VSCodeUtils {
     } else {
       return wsFolders;
     }
+  }
+
+  static createMockContext(): vscode.ExtensionContext {
+    const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
+    return {
+      logPath: "/tmp/dendron-integ/",
+      subscriptions: [],
+      extensionPath: pkgRoot,
+      globalState: VSCodeUtils.createMockState({}),
+      workspaceState: VSCodeUtils.createMockState({}),
+      extensionUri: vscode.Uri.parse(pkgRoot),
+      environmentVariableCollection: {} as any,
+      storagePath: "/tmp/dendron-integ-storage/",
+      globalStoragePath: "/tmp/dendron-integ-storage-global/",
+      asAbsolutePath: {} as any //vscode.Uri.parse(wsPath)
+    } as vscode.ExtensionContext;
+  }
+
+
+  static createMockState(settings: any): vscode.WorkspaceConfiguration {
+    const _settings = settings;
+    return {
+      get: (_key: string) => {
+        return _settings[_key];
+      },
+      update: async (_key: string, _value: any) => {
+        _settings[_key] = _value;
+      },
+      has: (key: string) => {
+        return key in _settings;
+      },
+      inspect: (_section: string) => {
+        return _settings;
+      },
+    };
   }
 
   static createWSFolder(root: string): vscode.WorkspaceFolder {

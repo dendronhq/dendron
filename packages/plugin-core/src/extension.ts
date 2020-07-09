@@ -5,18 +5,22 @@ import { Logger } from "./logger";
 import { Settings } from "./settings";
 import { VSCodeUtils } from "./utils";
 import { DendronWorkspace } from "./workspace";
+import { getStage } from "@dendronhq/common-all";
 
 
 // === Main
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   const ctx = "activate";
+  const stage = getStage();
   const { logPath, extensionPath, extensionUri, storagePath, globalStoragePath } = context;
-
+  if (stage === "test") {
+    context = VSCodeUtils.createMockContext()
+  }
   // setup logging
   const previousVersion = context.globalState.get<string | undefined>(GLOBAL_STATE.VERSION);
   Logger.configure(context, "debug");
-  Logger.info({ ctx, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
+  Logger.info({ ctx, stage, logPath, extensionPath, extensionUri, storagePath, globalStoragePath });
   // needs to be initialized to setup commands
   const ws = new DendronWorkspace(context);
 

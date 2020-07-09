@@ -77,15 +77,23 @@ export class DendronWorkspace {
     }
   }
 
+  static async resetConfig(globalState: vscode.Memento) {
+    return await Promise.all(
+      _.keys(GLOBAL_STATE).map((k) => {
+        const _key = GLOBAL_STATE[k as keyof typeof GLOBAL_STATE];
+        return globalState.update(_key, undefined);
+      })
+    );
+  }
+
   public context: vscode.ExtensionContext;
   public configDendron: vscode.WorkspaceConfiguration;
-  public configWS: vscode.WorkspaceConfiguration;
+  public configWS?: vscode.WorkspaceConfiguration;
   public fsWatcher?: vscode.FileSystemWatcher;
   public L: typeof Logger;
   private _engine?: DEngine;
   public version: string;
   private disposableStore: DisposableStore;
-  private readonly workspaceFolders: readonly vscode.WorkspaceFolder[];
   private history: HistoryService;
 
   constructor(
@@ -100,48 +108,7 @@ export class DendronWorkspace {
     this.L = Logger;
     this.disposableStore = new DisposableStore();
     this.history = HistoryService.instance();
-
-    // get workspace
-    if (getStage() === "test") {
-      // stubbed for test
-      this.workspaceFolders = [];
-      this.configWS = vscode.workspace.getConfiguration();
-    } else {
-      const wsFolders = VSCodeUtils.getWorkspaceFolders();
-      if (_.isUndefined(wsFolders) || _.isEmpty(wsFolders)) {
-        this.L.error({
-          ctx,
-          msg: "no folders set for workspace",
-          action: "Please set folder",
-        });
-        throw Error("no folders set for workspace");
-      }
-      this.workspaceFolders = wsFolders;
-      this.configWS = vscode.workspace.getConfiguration(
-        undefined,
-        this.workspaceFolders[0]
-      );
-    }
-
-    // get version
-    if (VSCodeUtils.isDebuggingExtension()) {
-      this.version = VSCodeUtils.getVersionFromPkg();
-    } else {
-      try {
-        const dendronExtension = vscode.extensions.getExtension(
-          extensionQualifiedId
-        )!;
-        this.version = dendronExtension.packageJSON.version;
-      } catch (err) {
-        this.L.info({ ctx, msg: "fetching from file", dir: __dirname });
-        this.version = VSCodeUtils.getVersionFromPkg();
-      }
-    }
-    this.L.info({ ctx, version: this.version });
-
-    // setup file watcher
-    this.createWorkspaceWatcher();
-
+    this.version = this._getVersion();
     if (!opts.skipSetup) {
       this._setupCommands();
     }
@@ -165,6 +132,26 @@ export class DendronWorkspace {
   get extensionAssetsDir(): string {
     const assetsDir = path.join(this.context.extensionPath, "assets");
     return assetsDir;
+  }
+
+  private _getVersion(): string  {
+    const ctx = "_getVersion";
+    let version: string;
+    if (VSCodeUtils.isDebuggingExtension()) {
+      version = VSCodeUtils.getVersionFromPkg();
+    } else {
+      try {
+        const dendronExtension = vscode.extensions.getExtension(
+          extensionQualifiedId
+        )!;
+        version = dendronExtension.packageJSON.version;
+      } catch (err) {
+        this.L.info({ ctx, msg: "fetching from file", dir: __dirname });
+        version = VSCodeUtils.getVersionFromPkg();
+      }
+    }
+    this.L.info({ ctx, version: this.version });
+    return version
   }
 
   _setupCommands() {
@@ -283,10 +270,41 @@ export class DendronWorkspace {
   }
 
   // === Workspace
-  async createWorkspaceWatcher() {
+  /**
+   * - get workspace config and workspace folder
+   * - activate workspacespace watchers
+   */
+  async activateWorkspace() {
+    const ctx = "activateWorkspace";
+    let workspaceFolders: readonly vscode.WorkspaceFolder[] = [];
+
+    if (getStage() === "test") {
+      // stubbed for test
+      workspaceFolders = [];
+      this.configWS = vscode.workspace.getConfiguration();
+    } else {
+      const wsFolders = VSCodeUtils.getWorkspaceFolders();
+      if (_.isUndefined(wsFolders) || _.isEmpty(wsFolders)) {
+        this.L.error({
+          ctx,
+          msg: "no folders set for workspace",
+          action: "Please set folder",
+        });
+        throw Error("no folders set for workspace");
+      }
+      workspaceFolders = wsFolders;
+      this.configWS = vscode.workspace.getConfiguration(
+        undefined,
+        workspaceFolders[0]
+      );
+    }
+    this.createWorkspaceWatcher(workspaceFolders);
+  }
+
+  async createWorkspaceWatcher(workspaceFolders: readonly vscode.WorkspaceFolder[]) {
     const ctx = "createWorkspaceWatcher";
     this.L.info({ ctx });
-    const rootFolder = this.workspaceFolders[0];
+    const rootFolder = workspaceFolders[0];
     let pattern = new vscode.RelativePattern(rootFolder, "*.md");
     this.fsWatcher = vscode.workspace.createFileSystemWatcher(
       pattern,
@@ -361,8 +379,8 @@ export class DendronWorkspace {
   }
 
   async reloadWorkspace(mainVault?: string) {
-    // const rootDir = this.rootDir;
-    //VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME), this.context);
+    // TODO: dispose of existing workspace
+    await this.activateWorkspace();
     if (!mainVault) {
       const wsFolders = vscode.workspace.workspaceFolders;
       mainVault = wsFolders![0].uri.fsPath;

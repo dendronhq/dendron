@@ -37,6 +37,24 @@
         "STAGE": "test",
       },
       "outFiles": [
+        "${workspaceFolder}/out/test/suite/*.js"
+      ]
+      // "preLaunchTask": "${defaultBuildTask}"
+    },
+    {
+      "name": "Extension Integ Tests",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionTestsPath=${workspaceFolder}/out/test/suite/index",
+      ],
+      "env": {
+        "STAGE": "test",
+      },
+      "outFiles": [
         "${workspaceFolder}/out/test/**/*.js"
       ]
       // "preLaunchTask": "${defaultBuildTask}"

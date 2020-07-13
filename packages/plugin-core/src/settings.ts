@@ -31,6 +31,7 @@ const _SETTINGS: ConfigUpdateChangeSet = {
   // prevent markdown-notes from mangling file names
   "vscodeMarkdownNotes.slugifyCharacter": { default: "NONE" },
   "markdown-preview-enhanced.enableWikiLinkSyntax": { default: true },
+  "markdown-preview-enhanced.wikiLinkFileExtension": { default: ".md"}
 };
 
 export class Settings {

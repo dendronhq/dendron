@@ -32,5 +32,5 @@ After a note has been deleted, we automatically surface the parent note (in this
 
 
 ##  Next
-Now that you've seen some of the things you can lookup, its time we talk about [[schemas | dendron.schema]]. Click the link or type `dendron.schema` to continue.
+Now that you've seen some of the things you can lookup, its time we talk about [[dendron.schema]]. Click the link or type `dendron.schema` to continue.
 

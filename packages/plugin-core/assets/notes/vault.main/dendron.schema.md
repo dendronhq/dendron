@@ -53,4 +53,4 @@ Dendron doesn't force you to use schemas if you don't want to. This is why you c
 
 
 ##  Next
-Next, we're going to discuss additional capabilities you can do in Dendron under [[capabilities | dendron.capabilities]]
+Next, we're going to discuss additional capabilities you can do in Dendron under [[dendron.capabilities]]

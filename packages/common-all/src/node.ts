@@ -408,7 +408,7 @@ export class Note extends DNode<NoteData> implements INote {
       // case: unknown schema
       // eslint-disable-next-line no-use-before-define
       if (SchemaUtils.isUnkown(this.schema)) {
-        prefixParts.push("$(squirrel)");
+        prefixParts.push("$(question)");
         return prefixParts.join(" ");
       }
 

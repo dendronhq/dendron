@@ -62,6 +62,9 @@
     "tslint-config-prettier": "^1.15.0",
     "typescript": "^3.1.1"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=10.0.0"
   },

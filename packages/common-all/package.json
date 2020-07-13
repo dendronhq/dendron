@@ -23,8 +23,8 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "clean": "rimraf lib && rimraf coverage",
-    "format": "",
-    "lint": "",
+    "format": "echo stub",
+    "lint": "echo stub",
     "prepublishOnly": "npm run build",
     "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
     "build": "npm run compile",

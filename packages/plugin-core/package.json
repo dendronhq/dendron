@@ -90,7 +90,7 @@
     "watch": "npm run compile -- --watch",
     "build": "npm run compile",
     "compile": "tsc -p tsconfig.build.json",
-    "pretest": "",
+    "pretest": "echo stub",
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {

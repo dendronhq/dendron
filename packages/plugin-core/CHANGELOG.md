@@ -3,6 +3,43 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.10](https://github.com/dendronhq/dendron/compare/v0.1.6...v0.3.10) (2020-07-13)
+
+
+### Bug Fixes
+
+* add bond ([6e57f0c](https://github.com/dendronhq/dendron/commit/6e57f0cc03683106fef26ebebdad4408bb469342))
+* issue with create new note not updating ([480d294](https://github.com/dendronhq/dendron/commit/480d29451e7db5370c6e693144d37039199396c7))
+* no flickering when surfacing "create new" suggestion ([102b997](https://github.com/dendronhq/dendron/commit/102b997a3064db646743d5a1256f48614fe92964))
+* remove test file ([734803f](https://github.com/dendronhq/dendron/commit/734803ffc8fcfe84433a50c0f411ea87ba8aa695))
+
+
+### Features
+
+* add delete note shortcut ([8b5a58b](https://github.com/dendronhq/dendron/commit/8b5a58bb41cceb5cdc59e826150aa3d3508cffb9))
+* add material theme ([3973fbf](https://github.com/dendronhq/dendron/commit/3973fbf70ee776c9bb527cc218d801bca4ea2f99))
+* auto add nodes when deleted or created outside of dendron ([8c311bd](https://github.com/dendronhq/dendron/commit/8c311bda948a1d54088c49fd70eb65d24af5d68f))
+* better initial welcome page ([f8767c6](https://github.com/dendronhq/dendron/commit/f8767c694bd5a5516a1a052f66bce0dff74fc7db))
+* better schema suggestions ([03656bc](https://github.com/dendronhq/dendron/commit/03656bc007810457cb6846f0d6adacab4a7fbd3a))
+* delete, abort or work inside existing folder when creating new workspace ([1da29ec](https://github.com/dendronhq/dendron/commit/1da29ec158ec416b9ee3002faf5bb2c4b84e12ed))
+* initialize workspace with autosave ([cd63346](https://github.com/dendronhq/dendron/commit/cd633462ea9ee050ad27de3de1633fa49a9ff453))
+* limit initial query to just domains ([1b611e5](https://github.com/dendronhq/dendron/commit/1b611e5e55dd8e81123895a40814aa2c8f4f7eaa))
+* os specific keybindings ([6a016ee](https://github.com/dendronhq/dendron/commit/6a016ee34bc6e2213f46ea9aa738068b14313899))
+* set default folder for all platforms ([64649d8](https://github.com/dendronhq/dendron/commit/64649d82bce35bae5db09cc83af1f398b760008a))
+* show basename of node after deletion ([4c8b72e](https://github.com/dendronhq/dendron/commit/4c8b72ee8a321eb17b68b2571cddf37e57249ca7))
+* show schema recommendations when no suggestions are available ([00e8b7c](https://github.com/dendronhq/dendron/commit/00e8b7c88f572487fd59fe64854a352e6c549563))
+* show schema suggestion at same level as query ([830c50d](https://github.com/dendronhq/dendron/commit/830c50da3a5cddfceeec48e8c0ec2ae68af51e77))
+* show schema suggestions ([1313e79](https://github.com/dendronhq/dendron/commit/1313e799874c5f706eb32342bbe86429e6ba0998))
+* show schema with results ([188fdeb](https://github.com/dendronhq/dendron/commit/188fdeb760010cd6767fb47e46cdfa757371a70b))
+* support automatic config updates ([637682c](https://github.com/dendronhq/dendron/commit/637682cd2c639102c0ea72a390bc781ffe6ac307))
+* surface unknown schemas ([d014965](https://github.com/dendronhq/dendron/commit/d0149652c985c69a4b2607984d578902820077f1))
+* update first time onboarding ([1edadf2](https://github.com/dendronhq/dendron/commit/1edadf2ff05ffb5b5fae1ca7e20513d327983043))
+* update logo ([920251d](https://github.com/dendronhq/dendron/commit/920251d1c85fa5ec5094b2d0b0aa400f39f8808b))
+
+
+
+
+
 ## [0.3.9](https://github.com/dendronhq/dendron/compare/v0.3.8...v0.3.9) (2020-07-09)
 
 

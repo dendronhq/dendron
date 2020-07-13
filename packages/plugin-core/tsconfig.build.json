@@ -12,5 +12,7 @@
     "local",
     ".vscode-test",
     "out",
+    "src/test/suite-integ/extension.test.ts",
+    "src/test/suite/extension.test.ts"
   ]
 }

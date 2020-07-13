@@ -2,7 +2,7 @@
   "name": "@dendronhq/common-server",
   "version": "0.3.9",
   "description": "common-server",
-  "license": "MIT",
+  "license": "GPLv3",
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/dendronhq/dendron.git",

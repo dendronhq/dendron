@@ -1,10 +1,8 @@
-import { createLogger, mdFile2NodeProps, node2MdFile, node2PropsMdFile } from "@dendronhq/common-server";
-import { RefactorCommandOpts, RefactorBaseCommand } from "./Refactor";
 import { NoteRawProps } from "@dendronhq/common-all";
-import { FileUtils } from "../utils";
+import { mdFile2NodeProps, node2PropsMdFile } from "@dendronhq/common-server";
 import _ from "lodash";
+import { RefactorBaseCommand, RefactorCommandOpts } from "./Refactor";
 
-const L = createLogger("RefactorYamlCommand");
 
 type File = NoteRawProps & {extra?: any}
 export class RefactorYamlCommand extends RefactorBaseCommand<File, any> {

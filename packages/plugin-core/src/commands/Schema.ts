@@ -39,6 +39,7 @@ export class SchemaCommand extends BaseCommand<SchemaCommandOpts> {
                 return d.fname === s.data.pattern;
             });
             return Promise.all(matchedDomains.map(m => {
+                // @ts-ignore
                 m.children.map(note => {
                     applySchema(note as Note, s as Schema);
                     if (!note.stub) {

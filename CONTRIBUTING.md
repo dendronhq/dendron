@@ -18,16 +18,22 @@ git clone https://github.com/dendronhq/dendron.git
 cd dendron
 npm install
 ```
+## Build Code Plugin
 
-
-### Build Code Plugin
-- order matters
-
+- bootstrap dependencies
 ```sh
-lerna run build --scope @dendronhq/common-all
-lerna run build --parallel  --scope @dendronhq/common-server 
---scope @dendronhq/plugin-core
-lerna run build --parallel  --scope @dendronhq/common-client --scope @dendronhq/common-server --scope @dendronhq/plugin-core
+npx lerna bootstrap --scope @dendronhq/common-all  --scope @dendronhq/common-server --scope @dendronhq/engine-server --scope @dendronhq/plugin-core
+
+```
+
+- build dependencies
+```sh
+npx lerna run build --scope @dendronhq/common-all
+npx lerna run build --scope @dendronhq/common-server 
+lerna run build --scope @dendronhq/engine-server 
+lerna run build --scope @dendronhq/plugin-core
+
+npx lerna run build --parallel  --scope @dendronhq/common-client --scope @dendronhq/common-server --scope @dendronhq/plugin-core
 ```
 
 # Issues

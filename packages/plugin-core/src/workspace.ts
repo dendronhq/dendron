@@ -17,7 +17,6 @@ import { Logger } from "./logger";
 import { NodeService } from "./services/nodeService/NodeService";
 import { Settings } from "./settings";
 import {
-  getPlatform,
   resolveTilde,
   VSCodeUtils,
   DisposableStore,
@@ -100,7 +99,6 @@ export class DendronWorkspace {
     context: vscode.ExtensionContext,
     opts?: { skipSetup?: boolean }
   ) {
-    const ctx = "constructor";
     opts = _.defaults(opts, { skipSetup: false });
     this.context = context;
     this.configDendron = vscode.workspace.getConfiguration("dendron");

@@ -10,6 +10,7 @@ import { HistoryService } from "../../services/HistoryService";
 
 const L = createLogger("LookupProvider");
 
+// @ts-ignore
 class QueryStringUtils {
   /**
    * Get all schema matches for current query

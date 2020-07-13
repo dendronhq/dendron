@@ -1,7 +1,6 @@
 import { DNode } from "./node";
-import { DNodeData } from "./types";
+import { DNodeData, DNodeRawProps } from "./types";
 import _ from "lodash";
-import { DNodeRawProps } from "../lib";
 
 /**
  * Remove properties that change

@@ -19,31 +19,11 @@
     {
       "path": "packages/web-server"
     },
-    // {
-    //   "name": "vscode",
-    //   "path": "/Users/kevinlin/projects/vscode-extension/ref/vscode"
-    // }
   ],
   "settings": {
     "files.exclude": {
       "*.d.ts": true,
       "packages": true
     },
-    "eslint.workingDirectories": [
-      {
-        "pattern": "./packages/*",
-        "mode": "auto"
-      }
-    ],
-    // TODO: make relative
-    "dendron.rootDir": "/Users/kevinlin/projects/dendronv2/dendron/dendron.code-workspace",
-    "spellright.language": [
-      "en"
-    ],
-    "spellright.documentTypes": [
-      "markdown",
-      "latex",
-      "plaintext"
-    ]
   }
 }

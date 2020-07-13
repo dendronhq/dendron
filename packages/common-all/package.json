@@ -11,8 +11,7 @@
   "author": {
     "name": "Kevin Lin",
     "email": "kevin@thence.io",
-    "url": "https://kevinslin.com",
-    "organization": true
+    "url": "https://kevinslin.com"
   },
   "keywords": [
     "common"
@@ -73,5 +72,5 @@
   "jest": {
     "preset": "ts-jest"
   },
-  "gitHead": "74f4be7ed8b97d566cd905a1409a347668a3aa8a"
+  "gitHead": "55454affb913aa09f205191c692102a53a3ee179"
 }

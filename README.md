@@ -87,4 +87,5 @@ We welcome community contributions and pull requests. See [[CONTRIBUTING]] for i
 
 Dendron is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3.
 
-See LICENSE and NOTICE for more information.
+See [[LICENSE]] and [[NOTICE]] for more information.
+

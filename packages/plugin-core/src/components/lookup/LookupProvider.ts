@@ -95,9 +95,12 @@ class PickerUtils {
     return picker.selectedItems[0];
   }
 
-  static filterStubs(items: DNode[]): DNode[] {
+  static filterStubs(items: Note[]): Note[] {
     return _.filter(items, ent => {
-      return !ent.stub
+      if (ent.schemaStub) {
+        return true
+      }
+      return !ent.stub  
     });
   }
 }
@@ -150,33 +153,34 @@ export class LookupProvider {
       const perfectMatch = _.find(updatedItems, {fname: querystring});
       // NOTE: we modify this later so need to track this here
       const noUpdatedItems = updatedItems.length === 0;
+      const queryEndsWithDot = querystring.endsWith(".");
 
-      if (querystring.endsWith(".")) {
+      // check if we just enetered a new level
+      if (queryEndsWithDot) {
         // show schema suggestions
         const schemas = SchemaUtils.matchNote(querystring, engine.schemas, {matchNamespace: false}).children as Schema[];
-        //const schemas = QueryStringUtils.getAllSchemaAtLevel(querystring, updatedItems as Note[]);
         updatedItems = _.uniqBy(updatedItems.concat(schemas.map(schema => {
           return Note.fromSchema(DNodeUtils.dirName(querystring), schema);
         })), (ent) => {
           return ent.fname;
         });
       }
-      updatedItems = PickerUtils.filterStubs(updatedItems);
+      updatedItems = PickerUtils.filterStubs(updatedItems as Note[]);
 
-      // check if new item
-      if (noUpdatedItems || (picker.activeItems.length === 0 && !perfectMatch)) {
-        L.info({ ctx, status: "no matches" });
-        // @ts-ignore
-        picker.items = updatedItems.concat([this.noActiveItem]);
-        return;
-      }
+      // check if new item, return if that's the case
+      // if (noUpdatedItems || (picker.activeItems.length === 0 && !perfectMatch)) {
+      //   L.info({ ctx, status: "no matches" });
+      //   // @ts-ignore
+      //   picker.items = updatedItems.concat([this.noActiveItem]);
+      //   return;
+      // }
 
       // check if perfect match, remove @noActiveItem result if that's the case
       if (perfectMatch) {
         L.debug({ ctx, msg: "active = qs" });
         picker.activeItems = [perfectMatch];
         picker.items = updatedItems;
-      } else if (querystring.endsWith(".")) {
+      } else if (queryEndsWithDot) {
         L.debug({ ctx, msg: "active != qs, end with ." });
         picker.items = updatedItems;
       } else {

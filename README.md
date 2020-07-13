@@ -6,11 +6,9 @@
 
 
 
-# Dendron 
-
 A knowledge management tool that **grows** as you do.
 
-Dendron is a local-first, markdown based, hierarchical note taking application built on top of [vscode](TODO) and [friends](TODO).
+Dendron is a local-first, markdown based, hierarchical note taking application built on top of [vscode](https://code.visualstudio.com/) and [friends](./ACKNOWLEDGEMENTS.md).
 
 Think of it as a **second brain** to help you **make sense** of all the information you care about. 
 
@@ -46,7 +44,7 @@ Grow, share, and collaborate on an ever expanding store of knowledge (coming soo
 
 # More Features
 
-These features are enabled through third party extensions that are installed alongside Dendron when you first use it. 
+These features are enabled through third party extensions that are installed alongside Dendron.
 
 - [live markdown preview](https://marketplace.visualstudio.com/items?itemName=shd101wyy.markdown-preview-enhanced)
 - [wiki links](https://marketplace.visualstudio.com/items?itemName=kortina.vscode-markdown-notes)

@@ -4,7 +4,7 @@ git reset --hard
 git clean -f
 git pull
 sed  -ibak 's/@dendronhq.plugin-core/dendron/' package.json
-./scripts/syncAssets.sh
+# ./scripts/syncAssets.sh
 npm install
-rm *.vsix
+rm "*.vsix"
 vsce package

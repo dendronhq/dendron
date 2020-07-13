@@ -82,7 +82,7 @@
       }
     ]
   },
-  "icon": "assets/notes/vault.main/assets/logo.png",
+  "icon": "assets/images/logo.png",
   "scripts": {
     "vscode:prepublish": "npm run build || true",
     "lint": "eslint src --ext ts",

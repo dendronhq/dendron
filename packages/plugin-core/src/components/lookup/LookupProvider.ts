@@ -165,15 +165,15 @@ export class LookupProvider {
           return ent.fname;
         });
       }
-      updatedItems = PickerUtils.filterStubs(updatedItems as Note[]);
+      // updatedItems = PickerUtils.filterStubs(updatedItems as Note[]);
 
       // check if new item, return if that's the case
-      // if (noUpdatedItems || (picker.activeItems.length === 0 && !perfectMatch)) {
-      //   L.info({ ctx, status: "no matches" });
-      //   // @ts-ignore
-      //   picker.items = updatedItems.concat([this.noActiveItem]);
-      //   return;
-      // }
+      if (noUpdatedItems || (picker.activeItems.length === 0 && !perfectMatch)) {
+        L.info({ ctx, status: "no matches" });
+        // @ts-ignore
+        picker.items = updatedItems.concat([this.noActiveItem]);
+        return;
+      }
 
       // check if perfect match, remove @noActiveItem result if that's the case
       if (perfectMatch) {
@@ -213,6 +213,7 @@ export class LookupProvider {
         // otherwise, children will not be right
         if (selectedItem.stub) {
           nodeNew = (await DendronEngine.getOrCreateEngine().queryOne(fname, "note")).data as Note;
+          nodeNew.stub = false;
         } else if (selectedItem.schemaStub) {
           nodeNew = new Note({ title: selectedItem.fname, fname: selectedItem.fname });
         } else {

@@ -5,7 +5,6 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 
-
 A personal knowledge management tool that **grows** as you do.
 
 Dendron is a local-first, markdown based, hierarchical note-taking application built on top of [VSCode](https://code.visualstudio.com/) and [friends](./ACKNOWLEDGEMENTS.md).
@@ -169,9 +168,10 @@ Dendron can be installed as a [vscode plugin](https://marketplace.visualstudio.c
 After you have downloaded the plugin, following the instructions to create your first **workspace**. 
 
 1. Launch the *command bar*:
-  - <img src="https://www.kernel.org/theme/images/logos/favicon.png" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-linux.pdf">Linux</a> `Ctrl+SHIFT+P`
-  - <img src="https://developer.apple.com/favicon.ico" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf">macOS</a> `CMD+SHIFT+P`
-  - <img src="https://www.microsoft.com/favicon.ico" width=16 height=16/> <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf">Windows</a> `Ctrl+SHIFT+P`
+
+  - <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-linux.pdf">Linux</a> `Ctrl+SHIFT+P`
+  - <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf">macOS</a> `CMD+SHIFT+P`
+  - <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf">Windows</a> `Ctrl+SHIFT+P`
 
 2. Paste the following command and press `Enter`:
 

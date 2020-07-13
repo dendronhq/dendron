@@ -1,33 +1,39 @@
 # Welcome to Dendron
 
-![](assets/logo-256.png#center)
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
-Dendron is a **hierarchal** knowledge management tool that **grows** as you do. 
+If you haven't already, you can get a general sense of what dendron is with this video.
 
-Think of it as a **second brain** to help you make sense of all the information you care about. 
+- TODO
 
-Dendron does this by helping you **store and find notes** via **flexible hierarchies**. Notes are stored as plain [markdown](https://daringfireball.net/projects/markdown/syntax) files with [frontmatter](https://jekyllrb.com/docs/front-matter/). To read more about the ideas that inspired Dendron, you can read [this blog post](https://kevinslin.com/organizing/its_not_you_its_your_knowledge_base/).
 
 ## Dendron Concepts
 
-### Legend
-
-- 🚧 these features are still under development
+Below are some concepts that make up the core of Dendron. Note that features with 🚧 are still under active development and might not be fully implemented.
 
 ### Workspace
-In Dendron, your **workspace** is a folder that contains all your notes. 
+In Dendron, your **workspace** is the root of where all your files are located. It's definde by the `dendron.rootDir` property and created when you first run `Dendron: Initialize Workspace`
 
 ### Vaults 🚧
-Your workspace is made up of **vaults**. You can think of a vault like you would a git repository. By default, Dendron creates a *vault.main* folder when you first initialize a **workspace**. Dividing your notes by vaults has some of the following benefits:
-- you can separate private notes that you want to keep local (`vault.secret`) from notes you want to sync
-- you can import vaults from third parties
-- you can publish and collaborate with just the notes in a specific vault
+Your workspace is made up of **vaults**. You can think of a vault like  a git repository. By default, Dendron creates a *vault.main* folder when you first initialize a **workspace**. All your notes are stored on a per vault basis.
+
+```
+.
+└── workspace
+    ├── vault.main
+    │   ├── foo.md
+    │   ├── foo.one.md
+    │   └── foo.two.md
+    └── vault.secret (hypothetical)
+        ├── secret.one.md
+        └── secret.two.md
+```
+
+By default, when you look for notes in dendron, it will search over all vaults.
 
 ### Hierarchies
 
-Within a vault, your notes are stored **hierarchically** as `.` delimited markdown files. 
-
-Below is an example of a hierarchal organization scheme within a file system. 
+Within a vault, your notes are stored **hierarchically** as `.` delimited markdown files. This is similar to a file tree (see picture below).
 
 ```
 .
@@ -56,6 +62,8 @@ In Dendron, the above hierarchy would look like the following
 └── project1.tasks.task2.md
 ```
 
+The advantage of representing hierarchies in this format is that unlike a folder, a dendron note can represent both a `File` (something that **has data**) and a `Folder` (something that **contains other files**) **simultaneously**. 
+
 ### Schema 🚧 
 
 As you end up creating more notes, it can be hard to keep track of it all. This is why Dendron has **schemas** to help you manage your notes at scale. Think of schemas as an **optional type system** for your notes. They describe the hierarchy of your data and are themselves, represented as a hierarchy. 
@@ -81,7 +89,6 @@ The lookup bar is how you interact with notes inside of Dendron. Use it to creat
 
 ## Next
 
-Now that we've covered the major concepts inside Dendron, go to [[dendron.lookup]] to continue the tutorial. You can navigate there by either clicking the link or bringing up the lookup bar using `CTRL-P`, typing `dendron.lookup`, and the hitting `Enter`
+Now that we've covered the major concepts inside Dendron, go to [[dendron.lookup]] to continue the tutorial. You can navigate there by either clicking the link in the `preview pane` or putting your cursor over `[[dendron.lookup]]` and using the `Go To Definition` command.
 
-![](./assets/dendron-lookup.gif)
 

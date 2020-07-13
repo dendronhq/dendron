@@ -30,10 +30,17 @@ npx lerna bootstrap --scope @dendronhq/common-all  --scope @dendronhq/common-ser
 ```sh
 npx lerna run build --scope @dendronhq/common-all
 npx lerna run build --scope @dendronhq/common-server 
-lerna run build --scope @dendronhq/engine-server 
-lerna run build --scope @dendronhq/plugin-core
+npx lerna run build --scope @dendronhq/engine-server 
+npx lerna run build --scope @dendronhq/plugin-core
 
 npx lerna run build --parallel  --scope @dendronhq/common-client --scope @dendronhq/common-server --scope @dendronhq/plugin-core
+```
+
+## Developing
+
+- to continuously compile all dependencies
+```sh
+npx lerna run watch --parallel --scope @dendronhq/common-all --scope @dendronhq/common-server --scope @dendronhq/engine-server --scope @dendronhq/plugin-core
 ```
 
 ## Debugging 

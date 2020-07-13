@@ -1,5 +1,6 @@
 {
   "name": "@dendronhq/plugin-core",
+  "private": true,
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",

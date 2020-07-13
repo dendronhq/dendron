@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.11](https://github.com/dendronhq/dendron/compare/v0.3.10...v0.3.11) (2020-07-13)
+
+
+### Bug Fixes
+
+* issue creating stubs ([5647a33](https://github.com/dendronhq/dendron/commit/5647a3307d4b1e42be49842db8de0a1da3d2127f))
+
+
+
+
+
 ## [0.3.10](https://github.com/dendronhq/dendron/compare/v0.1.6...v0.3.10) (2020-07-13)
 
 

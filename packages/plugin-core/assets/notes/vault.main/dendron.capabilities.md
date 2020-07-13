@@ -1,15 +1,14 @@
 
-# Capabilities
+# Additional Capabilities
 
-Dendron has lots of useful features that come with the extensions that Dendron is bundled with. A highlight of some of the core features below, grouped by the extension that provides said feature.
+Since Dendron runs on top of VSCode, it means that you also have access to thousands of extensions to customize Dendron exactly how you like it. 
 
-## Essential Features
+By default, Dendron will initialize your first workspace with the following extensions and features.
 
 - [Markdown Notes](https://marketplace.visualstudio.com/items?itemName=kortina.vscode-markdown-notes)
     - [wiki links](https://marketplace.visualstudio.com/items?itemName=kortina.vscode-markdown-notes)
     - [tags](https://marketplace.visualstudio.com/items?itemName=kortina.vscode-markdown-notes)
-    - [backlinks](https://marketplace.visualstudio.com/items?itemName=kortina.vscode-markdown-notes)
-    - [workspace/file/line history](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens#current-line-blame-)
+    - [backlinks](https://marketplace.visualstudio.com/items?itemName=kortina.vscode-markdown-notes) (think Roam)
 - [Markdown Shortcuts](https://marketplace.visualstudio.com/items?itemName=mdickin.markdown-shortcuts)
     - Quickly toggle bullet points
     - Easily generate URLs
@@ -21,13 +20,16 @@ Dendron has lots of useful features that come with the extensions that Dendron i
     - [pandoc support](https://shd101wyy.github.io/markdown-preview-enhanced/#/pandoc)
     - [code chunks](https://shd101wyy.github.io/markdown-preview-enhanced/#/code-chunk)
     - [presentations](https://rawgit.com/shd101wyy/markdown-preview-enhanced/master/docs/presentation-intro.html)
-    - [image pasting](https://marketplace.visualstudio.com/items?itemName=mushan.vscode-paste-image)
+- [Material Theme](https://marketplace.visualstudio.com/items?itemName=equinusocio.vsc-material-theme) 
+  - beautiful colors built using the [Material design system](https://material.io/) 
+- [Paste Image](https://marketplace.visualstudio.com/items?itemName=mushan.vscode-paste-image)
+  - easily add images from your clipboard to your markdown files
 - [Spell Right](https://marketplace.visualstudio.com/items?itemName=ban.spellright)
     - Spell Check
 
 ## Additional Features
 
-There are several additional extensions that work well with Dendron but are not bundled by default. You can download them separately to unlock additional functionality.
+The following extensions also work well with Dendron but are not bundled by default. You can download them separately to unlock additional functionality.
 
 - [Gitlens](https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens) 🔍
     - Repository/File/Line history and annotations of all your files
@@ -41,12 +43,13 @@ There are several additional extensions that work well with Dendron but are not 
 
 By default, Dendron uses [Material Theme High Contrast](https://marketplace.visualstudio.com/items?itemName=Equinusocio.vsc-material-theme). You can change this by typing `>Preferences: Color Theme` inside the *Quick Open Bar*.
 
+## Et cetera
 
-## Fin
+Hopefully, this has been enough to give you a sense of what you can do with Dendron. This project is about 1% complete, both in the sense that it is in **preview** but also that there's so much more to build. The north star of this project is to achieve *Vannevar Bush's* original vision - to build a tool of thought that can give humanity *"**access to** and **command over** the inherited **knowledge of the ages**"*. 
 
-We've only scratched the surface of what you can do with Dendron. Because Dendron is built on top of [VSCode](https://code.visualstudio.com/), it comes with all the [extensions](https://code.visualstudio.com/docs/introvideos/extend) already built in to the platform. 
+If you are reading this, you too, are now part of the journey. Let's take back control of our information and use it to build something better, together!
 
-If for some reason, there is functionality that is missing still, you can always build your own or submit an issue on the [Dendron Roadmap](https://github.com/dendronhq/dendron-roadmap/issues/new)
+If for some reason, there is functionality that is missing still, you can always build your own or submit an [issue](https://github.com/dendronhq/dendron/issues).
 
 Be sure to checkout the [[dendron.faq]] first to see if your issue is already mentioned.
 

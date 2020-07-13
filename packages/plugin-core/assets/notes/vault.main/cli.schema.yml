@@ -1,3 +1,6 @@
+# This schema describes the `cli` hiearchy
+# It is represented as a YAML list and is meant to represent a collection of nodes
+# Every node at minimum has to contain an `id`. Everything else is optional
 - id: cli
   desc: command line interface reference
   parent: root

@@ -63,10 +63,6 @@
         "title": "Dendron: Delete Node"
       },
       {
-        "command": "dendron.reloadWS",
-        "title": "Dendron: Reload Workspace"
-      },
-      {
         "command": "dendron.dev.resetConfig",
         "title": "Dev:Dendron: ResetConfig"
       }

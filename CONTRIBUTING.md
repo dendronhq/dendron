@@ -8,7 +8,7 @@ This document describes how to set up a development environment and submit your 
 
 Before you begin, you need to make sure to have the following SDKs and tools:
 
-- [Node.js >= 10.13.0](https://nodejs.org/download/release/latest-v10.x/)
+- [Node.js >= 12.0.0](https://nodejs.org/download/release/latest-v10.x/)
   - We recommend using a version in [Active LTS](https://nodejs.org/en/about/releases/)
 
 The basic commands to get the repository cloned and built locally follow:
@@ -36,8 +36,32 @@ lerna run build --scope @dendronhq/plugin-core
 npx lerna run build --parallel  --scope @dendronhq/common-client --scope @dendronhq/common-server --scope @dendronhq/plugin-core
 ```
 
-# Issues
+## Debugging 
 
-### Build issues
-- [] delete lock files
-- [] missing global dep (eg. `rimraf`)
+- run extension
+  - launch the `Run Extnesion` build task (copied below for reference)
+```json
+    {
+      "name": "Run Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        // "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/out/**/*.js"
+      ],
+      "env": {
+        "STAGE": "dev",
+        "VSCODE_DEBUGGING_EXTENSION": "dendron"
+      }
+      //"preLaunchTask": "npm: watch no
+    },
+```
+
+## Testing
+
+- in the root of the monorepo, run `./scripts/testAll.sh`
+

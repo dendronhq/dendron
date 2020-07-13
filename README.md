@@ -19,7 +19,7 @@ Every knowledge management tool today suffers from the problem of **information 
 
 The burning need for a tool that would not only overcome this problem but actually work better in the presence of more information was the basis of this project.
 
-# (Hiearichal) Solution
+# (Hierarchical) Solution
 
 ## Hierarchies 
 

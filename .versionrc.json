@@ -1,5 +1,15 @@
 {
-    "skip": { "tag": true },
-    "packageFiles": [ {  "filename": "lerna.json",  "type": "json" } ],
-    "bumpFiles": [ { "filename": "lerna.json", "type": "json" }  ]
-  }
+  "skip": { "tag": true },
+  "packageFiles": [{ "filename": "lerna.json", "type": "json" }],
+  "bumpFiles": [{ "filename": "lerna.json", "type": "json" }],
+  "types": [
+    { "type": "feat", "section": "Features" },
+    { "type": "fix", "section": "Bug Fixes" },
+    { "type": "chore", "hidden": true },
+    { "type": "docs", "hidden": false},
+    { "type": "style", "hidden": true },
+    { "type": "refactor", "hidden": true },
+    { "type": "perf", "hidden": true },
+    { "type": "test", "hidden": true }
+  ]
+}

@@ -19,6 +19,7 @@ import { Settings } from "./settings";
 import { resolveTilde, VSCodeUtils, DisposableStore } from "./utils";
 import { posix } from "path";
 import { HistoryService } from "./services/HistoryService";
+import moment from "moment";
 
 function writeWSFile(
   fpath: string,
@@ -170,6 +171,35 @@ export class DendronWorkspace {
         this.setupWorkspace(resp);
       })
     );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.CREATE_SCRATCH_NOTE,
+        async () => {
+          const ctx = DENDRON_COMMANDS.CREATE_SCRATCH_NOTE;
+          const defaultNameConfig = "Y-MM-DD-HHmmss";
+          const scratchDomain = "scratch";
+          const noteName = moment().format(defaultNameConfig);
+          const fname = `${scratchDomain}.${noteName}`;
+          const title = await vscode.window.showInputBox({
+            prompt: "Title",
+            ignoreFocusOut: true,
+            placeHolder: "scratch",
+          });
+          const node = new Note({ fname, title });
+          const uri = node2Uri(node);
+          const historyService = HistoryService.instance();
+          historyService.add({ source: "engine", action: "create", uri });
+          await DendronEngine.getOrCreateEngine().write(node, {
+            newNode: true,
+            parentsAsStubs: true,
+          });
+          this.L.info({ ctx: `${ctx}:write:done`, uri });
+          await vscode.window.showTextDocument(uri);
+        }
+      )
+    );
+
     this.context.subscriptions.push(
       vscode.commands.registerCommand(DENDRON_COMMANDS.CHANGE_WS, async () => {
         const ctx = DENDRON_COMMANDS.CHANGE_WS;

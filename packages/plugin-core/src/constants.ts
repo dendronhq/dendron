@@ -10,6 +10,7 @@ export const DENDRON_COMMANDS = {
   DELETE_NODE: "dendron.deleteNode",
   RELOAD_WS: "dendron.reloadWS",
   RESET_CONFIG: "dendron.dev.resetConfig",
+  CREATE_SCRATCH_NOTE: "dendron.createScratchNote",
 };
 export const DENDRON_CHANNEL_NAME = "Dendron";
 export const GLOBAL_STATE = {

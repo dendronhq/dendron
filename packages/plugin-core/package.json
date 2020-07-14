@@ -51,6 +51,10 @@
         "title": "Dendron: Lookup"
       },
       {
+        "command": "dendron.createScratchNote",
+        "title": "Dendron: Create Scratch Note"
+      },
+      {
         "command": "dendron.initWS",
         "title": "Dendron: Initialize Workspace"
       },
@@ -98,6 +102,7 @@
     "@types/glob": "^7.1.1",
     "@types/lodash": "^4.14.155",
     "@types/mocha": "^7.0.2",
+    "@types/moment": "^2.13.0",
     "@types/node": "^13.11.0",
     "@types/vscode": "^1.46.0",
     "@typescript-eslint/eslint-plugin": "^2.30.0",
@@ -119,6 +124,7 @@
     "@dendronhq/engine-server": "^0.3.11",
     "execa": "^4.0.2",
     "fs-extra": "^9.0.1",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.15",
+    "moment": "^2.27.0"
   }
 }

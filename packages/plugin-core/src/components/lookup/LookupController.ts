@@ -8,14 +8,13 @@ import { LookupProvider } from "./LookupProvider";
 import { DendronEngine } from "@dendronhq/engine-server";
 import { DendronWorkspace } from "../../workspace";
 
-
 let LOOKUP_PROVIDER: null | LookupProvider = null;
 const L = createLogger("dendron");
 
-type ButtonType = "fuzzy_match"
+type ButtonType = "fuzzy_match";
 
 type DendronQuickInputButton = QuickInputButton & {
-  type: ButtonType
+  type: ButtonType;
 };
 
 class FuzzyMatchButton implements DendronQuickInputButton {
@@ -38,27 +37,26 @@ class FuzzyMatchButton implements DendronQuickInputButton {
   }
 }
 
-
 type State = {
-  mode: "fuzzy" | "exact"
+  mode: "fuzzy" | "exact";
   buttons: {
-    fuzzyMatch: FuzzyMatchButton
-  }
+    fuzzyMatch: FuzzyMatchButton;
+  };
 };
 
 export class LookupController {
-
   public quickPick: vscode.QuickPick<DNode> | undefined;
-  public state: State
-  public workspace: DendronWorkspace
+  public state: State;
+  public workspace: DendronWorkspace;
 
   constructor(workspace: DendronWorkspace) {
     this.state = {
-      mode: "exact", buttons: {
-        fuzzyMatch: new FuzzyMatchButton()
-      }
+      mode: "exact",
+      buttons: {
+        fuzzyMatch: new FuzzyMatchButton(),
+      },
     };
-    this.workspace = workspace
+    this.workspace = workspace;
   }
 
   updateButton(btn: DendronQuickInputButton) {
@@ -82,7 +80,7 @@ export class LookupController {
     if (this.state.mode === "fuzzy") {
       title.push("mode: fuzzy");
     }
-    title.push(`- version: ${this.workspace.version}`)
+    title.push(`- version: ${this.workspace.version}`);
     quickpick.title = title.join(" ");
     quickpick.placeholder = "eg. hello.world";
     quickpick.ignoreFocusOut = true;
@@ -104,13 +102,15 @@ export class LookupController {
           const btn = this.state.buttons.fuzzyMatch;
           btn.pressed = !btn.pressed;
           this.updateButton(btn);
-          DendronEngine.getOrCreateEngine().updateProps({ mode: btn.pressed ? "fuzzy" : "exact" });
+          DendronEngine.getOrCreateEngine().updateProps({
+            mode: btn.pressed ? "fuzzy" : "exact",
+          });
           vscode.window.showInformationMessage("fuzzy search");
           break;
         default:
-          vscode.window.showErrorMessage(`bad buttton type: ${btnType}`)
+          vscode.window.showErrorMessage(`bad buttton type: ${btnType}`);
       }
-    })
+    });
 
     // cleanup quickpick
     quickpick.onDidHide(() => {

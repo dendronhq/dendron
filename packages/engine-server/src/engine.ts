@@ -28,7 +28,7 @@ import {
   Schema,
   SchemaDict,
   SchemaRawProps,
-  UpdateNodesOpts
+  UpdateNodesOpts,
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -58,7 +58,7 @@ function createFuse<T>(
     distance: 100,
     maxPatternLength: 32,
     minMatchCharLength: 1,
-    keys: ["title", "logicalPath", "basename"]
+    keys: ["title", "logicalPath", "basename"],
   };
   if (opts.preset === "schema") {
     options.keys = ["title", "id"];
@@ -103,7 +103,7 @@ export class DendronEngine implements DEngine {
         root,
         // TODO: remove
         cacheDir: "/tmp/dendronCache",
-        mode: "fuzzy"
+        mode: "fuzzy",
       });
       if (!_DENDRON_ENGINE || optsClean.forceNew) {
         if (_.isUndefined(optsClean.root)) {
@@ -128,7 +128,7 @@ export class DendronEngine implements DEngine {
     this.store = store;
     this.fuse = createFuse<Note>([], {
       exactMatch: this.props.mode === "exact",
-      preset: "note"
+      preset: "note",
     });
     this.fullNodes = new Set();
     this.queries = new Set();
@@ -137,10 +137,10 @@ export class DendronEngine implements DEngine {
     this.schemas = {};
     this.schemaFuse = createFuse<Schema>([], {
       exactMatch: this.props.mode === "exact",
-      preset: "schema"
+      preset: "schema",
     });
 
-    [props.root].forEach(fpath => {
+    [props.root].forEach((fpath) => {
       if (!fs.existsSync(fpath as string)) {
         throw Error(`${fpath} doesn't exist`);
       }
@@ -160,11 +160,11 @@ export class DendronEngine implements DEngine {
   async init() {
     await this.query("**/*", "schema", {
       fullNode: false,
-      initialQuery: true
+      initialQuery: true,
     });
     await this.query("**/*", "note", {
       fullNode: false,
-      initialQuery: true
+      initialQuery: true,
     });
     this.initialized = true;
     return;
@@ -216,7 +216,7 @@ export class DendronEngine implements DEngine {
           // exists, merge it
           logger.debug({
             ctx: "refreshNodes:existingNode",
-            node: node.toRawProps()
+            node: node.toRawProps(),
           });
           _.merge(this.notes[id], node);
         }
@@ -226,15 +226,15 @@ export class DendronEngine implements DEngine {
         }
       });
       // FIXME: debug
-      const newNodes = _.map(nodes, n => ({ title: n.title, id: n.id }));
-      const allNodes = _.map(this.notes, n => ({
+      const newNodes = _.map(nodes, (n) => ({ title: n.title, id: n.id }));
+      const allNodes = _.map(this.notes, (n) => ({
         title: n.title,
-        id: n.id
+        id: n.id,
       }));
       logger.debug({
         ctx: "refreshNodes",
         newNodes,
-        allNodes
+        allNodes,
       });
       this.updateLocalCollection(_.values(this.notes), "note");
       return;
@@ -275,8 +275,8 @@ export class DendronEngine implements DEngine {
       // NOTE: get around ts issues
       let tmp = _.find(this.notes, { fname });
       if (_.isUndefined(tmp)) {
-        const msg = `node ${idOrFname} not found`
-        logger.error({ctx, msg})
+        const msg = `node ${idOrFname} not found`;
+        logger.error({ ctx, msg });
         throw Error(msg);
       }
       noteToDelete = tmp;
@@ -289,7 +289,7 @@ export class DendronEngine implements DEngine {
     if (!_.isEmpty(noteToDelete.children)) {
       const noteAsStub = Note.createStub(noteToDelete.fname, {
         id,
-        children: noteToDelete.children
+        children: noteToDelete.children,
       });
       this.refreshNodes([noteAsStub], { stub: true });
     }
@@ -321,7 +321,7 @@ export class DendronEngine implements DEngine {
       logger.debug({ ctx: "get:fetchFromStore:pre", id });
       const fnResp = await this.store.get(id, {
         ...opts,
-        webClient: true
+        webClient: true,
       });
       logger.debug({ ctx: "get:fetchFromStore:post", id, opts, fnResp });
       const fullNode = await this.resolveIds(fnResp.data, this.notes);
@@ -342,7 +342,7 @@ export class DendronEngine implements DEngine {
       fullNode: false,
       createIfNew: false,
       initialQuery: false,
-      stub: false
+      stub: false,
     });
     const ctx = "query";
     let data: EngineQueryResp;
@@ -353,7 +353,7 @@ export class DendronEngine implements DEngine {
       try {
         data = await this.store.query("**/*", mode, {
           ...opts,
-          schemas: this.schemas
+          schemas: this.schemas,
         });
       } catch (err) {
         if (err instanceof DendronError) {
@@ -381,12 +381,12 @@ export class DendronEngine implements DEngine {
       if (opts.queryOne) {
         items = [results[0]?.item];
       } else {
-        items = _.map(results, resp => resp.item);
+        items = _.map(results, (resp) => resp.item);
       }
       logger.debug({ ctx: "query:exit:schema", items });
       return makeResponse<EngineQueryResp>({
-        data: _.map(items, item => nodes[item.id]),
-        error: null
+        data: _.map(items, (item) => nodes[item.id]),
+        error: null,
       });
     } else {
       let items: IDNode[];
@@ -399,7 +399,7 @@ export class DendronEngine implements DEngine {
         if (opts.queryOne) {
           items = [results[0]?.item];
         } else {
-          items = _.map(results, resp => resp.item);
+          items = _.map(results, (resp) => resp.item);
         }
 
         // found a result but it doesn't match
@@ -411,18 +411,18 @@ export class DendronEngine implements DEngine {
           logger.debug({
             ctx: "query:write:pre",
             queryString,
-            item: items[0]
+            item: items[0],
           });
           const nodeBlank = new Note({ fname: queryString, stub: opts.stub });
           await this.write(nodeBlank, {
             newNode: true,
-            stub: opts.stub
+            stub: opts.stub,
           });
           const { data: nodeFull } = await this.get(nodeBlank.id, mode);
           this.refreshNodes([nodeFull], { fullNode: true });
           return makeResponse<EngineQueryResp>({
             data: [nodeFull],
-            error: null
+            error: null,
           });
         }
       }
@@ -430,11 +430,11 @@ export class DendronEngine implements DEngine {
       // found result but want full node
       if (opts.fullNode) {
         const fetchedFullNodes = await Promise.all(
-          _.map<IDNode, Promise<IDNode | null>>(items, async ent => {
+          _.map<IDNode, Promise<IDNode | null>>(items, async (ent) => {
             if (!this.fullNodes.has(ent.id)) {
               logger.debug({
                 ctx: "query:fuse.search:post",
-                status: "fetch full node from store"
+                status: "fetch full node from store",
               });
               // FIXME: ratelimit
               const fn = await this.get(ent.id, mode);
@@ -442,24 +442,24 @@ export class DendronEngine implements DEngine {
             }
             logger.debug({
               ctx: "query:fuse.search:post",
-              status: "fetch full node from cache"
+              status: "fetch full node from cache",
             });
             return null;
           })
         );
         this.refreshNodes(
-          _.filter(fetchedFullNodes, ent => !_.isNull(ent)) as IDNode[],
+          _.filter(fetchedFullNodes, (ent) => !_.isNull(ent)) as IDNode[],
           { fullNode: true }
         );
         logger.debug({
           ctx: "query:fetchedFullNodes:exit",
-          fetchedFullNodes
+          fetchedFullNodes,
         });
       }
       logger.debug({ ctx: "query:exit:note", items });
       return makeResponse<EngineQueryResp>({
-        data: _.map(items, item => this.notes[item.id]),
-        error: null
+        data: _.map(items, (item) => this.notes[item.id]),
+        error: null,
       });
     }
   }
@@ -471,7 +471,7 @@ export class DendronEngine implements DEngine {
   ): Promise<EngineGetResp<DNodeData>> {
     const resp = await this.query(queryString, mode, {
       ...opts,
-      queryOne: true
+      queryOne: true,
     });
     return makeResponse<EngineGetResp>({ data: resp.data[0], error: null });
   }
@@ -482,7 +482,7 @@ export class DendronEngine implements DEngine {
       body: "",
       stub: false,
       parentsAsStubs: false,
-      recursive: false
+      recursive: false,
     });
     if (node.type === "schema") {
       const refreshList: DNode[] = [node];
@@ -492,7 +492,7 @@ export class DendronEngine implements DEngine {
         props.body,
         {
           node,
-          fname: node.fname
+          fname: node.fname,
         }
       );
       const schemas = new NodeBuilder().buildSchemaFromProps(schemaRawProps);
@@ -506,7 +506,7 @@ export class DendronEngine implements DEngine {
       await this.store.write(node, { stub: props.stub });
       if (props.newNode) {
         const parentPath = "root";
-        const parentNode = _.find(this.schemas, n => n.title === parentPath);
+        const parentNode = _.find(this.schemas, (n) => n.title === parentPath);
         if (!parentNode) {
           throw Error("no parent found");
         }
@@ -517,7 +517,7 @@ export class DendronEngine implements DEngine {
       const note = node as Note;
       await this.store.write(note, {
         stub: props.stub,
-        recursive: props.recursive
+        recursive: props.recursive,
       });
       return this.updateNodes(
         [note],
@@ -539,7 +539,7 @@ export class DendronEngine implements DEngine {
     if (ntype === "schema") {
       throw Error("not supported");
     } else {
-      _.each(nodes, node => {
+      _.each(nodes, (node) => {
         return this._updateNote(node as Note, opts);
       });
     }
@@ -556,7 +556,7 @@ export class DendronEngine implements DEngine {
     if (_.isEmpty(parentPath)) {
       parentPath = "root";
     }
-    let parentNode = _.find(this.notes, n => n.path === parentPath);
+    let parentNode = _.find(this.notes, (n) => n.path === parentPath);
     if (!parentNode) {
       if (opts.parentsAsStubs) {
         const closestParent = DNodeUtils.findClosestParent(
@@ -567,7 +567,7 @@ export class DendronEngine implements DEngine {
           closestParent as Note,
           note
         );
-        stubNodes.forEach(ent2 => {
+        stubNodes.forEach((ent2) => {
           refreshList.push(ent2);
         });
         // last element is parent

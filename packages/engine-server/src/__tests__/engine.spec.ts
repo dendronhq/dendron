@@ -5,7 +5,7 @@ import {
   Note,
   SchemaRawProps,
   testUtils,
-  SchemaUtils
+  SchemaUtils,
 } from "@dendronhq/common-all";
 import { FileTestUtils, LernaTestUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -35,7 +35,7 @@ describe("engine:exact", () => {
     engine = DendronEngine.getOrCreateEngine({
       root,
       forceNew: true,
-      mode: "exact"
+      mode: "exact",
     });
   });
 
@@ -44,20 +44,18 @@ describe("engine:exact", () => {
     fs.removeSync(root);
   });
 
-
   describe("basic: schema", () => {
-    test("init", async() => {
+    test("init", async () => {
       await engine.init();
       testUtils.expectSnapshot(expect, "main", _.values(engine.schemas));
-      const note = engine.notes["foo"]
+      const note = engine.notes["foo"];
       const schema = engine.schemas["foo"];
-      const schemaMatch = SchemaUtils.matchNote(note, engine.schemas)
+      const schemaMatch = SchemaUtils.matchNote(note, engine.schemas);
       expect(schemaMatch).toEqual(schema);
       const schemaNamespace = engine.schemas["bar"];
       expect(schemaNamespace.namespace).toBeTruthy();
     });
   });
-
 
   describe("basic", () => {
     test("create when empty", async () => {
@@ -66,7 +64,7 @@ describe("engine:exact", () => {
       engine = DendronEngine.getOrCreateEngine({
         root,
         forceNew: true,
-        mode: "exact"
+        mode: "exact",
       });
       await engine.init();
       testUtils.expectSnapshot(expect, "notes", _.values(engine.notes));
@@ -160,14 +158,14 @@ describe("engine:exact", () => {
       const engine2 = DendronEngine.getOrCreateEngine({
         root,
         forceNew: true,
-        mode: "exact"
+        mode: "exact",
       });
       await engine2.init();
       const root2: Note = engine2.notes.foo;
       // TODO: don't omit when we fix stub nodes
       const [root1Raw, root2Raw] = _.map(
         [root1.toRawProps(), root2.toRawProps()],
-        ent => _.omit(ent, "children")
+        (ent) => _.omit(ent, "children")
       );
       expect(root1Raw).toEqual(root2Raw);
       [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
@@ -183,7 +181,7 @@ describe("engine:exact", () => {
       // foo should be fully specified
       await engine.updateNodes([bazNote], {
         newNode: true,
-        parentsAsStubs: true
+        parentsAsStubs: true,
       });
       const baz = await engine.queryOne("baz", "note");
       expect(
@@ -202,7 +200,7 @@ describe("engine:exact", () => {
       engine = DendronEngine.getOrCreateEngine({
         root,
         forceNew: true,
-        mode: "exact"
+        mode: "exact",
       });
       await engine.init();
       expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
@@ -218,7 +216,7 @@ describe("engine:exact", () => {
         root,
         LernaTestUtils.fixtureFilesForStore(),
         {
-          add: ["bar.two.md"]
+          add: ["bar.two.md"],
         }
       );
     });
@@ -238,7 +236,7 @@ describe("engine:exact", () => {
         root,
         LernaTestUtils.fixtureFilesForStore(),
         {
-          remove: ["foo.one.md"]
+          remove: ["foo.one.md"],
         }
       );
     });
@@ -260,7 +258,7 @@ describe("engine:exact", () => {
         root,
         LernaTestUtils.fixtureFilesForStore(),
         {
-          remove: ["foo.md"]
+          remove: ["foo.md"],
         }
       );
     });
@@ -272,7 +270,7 @@ describe("engine:exact", () => {
       engine = DendronEngine.getOrCreateEngine({
         root,
         forceNew: true,
-        mode: "exact"
+        mode: "exact",
       });
       await engine.init();
       expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
@@ -284,7 +282,7 @@ describe("engine:exact", () => {
         LernaTestUtils.fixtureFilesForStore(),
         {
           add: ["root.schema.yml"],
-          remove: ["foo.schema.yml"]
+          remove: ["foo.schema.yml"],
         }
       );
     });
@@ -294,7 +292,7 @@ describe("engine:exact", () => {
       engine = DendronEngine.getOrCreateEngine({
         root,
         forceNew: true,
-        mode: "exact"
+        mode: "exact",
       });
       await engine.init();
       expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
@@ -315,7 +313,7 @@ describe("engine:exact", () => {
       engine = DendronEngine.getOrCreateEngine({
         root,
         forceNew: true,
-        mode: "exact"
+        mode: "exact",
       });
       await engine.init();
       expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
@@ -327,7 +325,7 @@ describe("engine:exact", () => {
         LernaTestUtils.fixtureFilesForStore(),
         {
           add: ["root.schema.yml"],
-          remove: ["foo.schema.yml"]
+          remove: ["foo.schema.yml"],
         }
       );
     });
@@ -338,7 +336,7 @@ describe("engine:exact", () => {
       engine = DendronEngine.getOrCreateEngine({
         root,
         forceNew: true,
-        mode: "exact"
+        mode: "exact",
       });
       await engine.init();
       [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
@@ -357,7 +355,7 @@ describe("engine:exact", () => {
       engine = DendronEngine.getOrCreateEngine({
         root,
         forceNew: true,
-        mode: "exact"
+        mode: "exact",
       });
       await engine.init();
       const fooNote = (await engine.query("foo", "note")).data[0];

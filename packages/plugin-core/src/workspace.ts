@@ -16,20 +16,21 @@ import {
 import { Logger } from "./logger";
 import { NodeService } from "./services/nodeService/NodeService";
 import { Settings } from "./settings";
-import {
-  resolveTilde,
-  VSCodeUtils,
-  DisposableStore,
-} from "./utils";
+import { resolveTilde, VSCodeUtils, DisposableStore } from "./utils";
 import { posix } from "path";
 import { HistoryService } from "./services/HistoryService";
 
-function writeWSFile(fpath: string, opts: { rootDir: string, pathOverride?: string }) {
-  const cleanOpts = _.defaults(opts, {pathOverride: path.join(opts.rootDir, "vault.main") })
+function writeWSFile(
+  fpath: string,
+  opts: { rootDir: string; pathOverride?: string }
+) {
+  const cleanOpts = _.defaults(opts, {
+    pathOverride: path.join(opts.rootDir, "vault.main"),
+  });
   const jsonBody = {
     folders: [
       {
-        path: cleanOpts.pathOverride
+        path: cleanOpts.pathOverride,
       },
     ],
     settings: Settings.defaults(cleanOpts),
@@ -131,7 +132,7 @@ export class DendronWorkspace {
     return assetsDir;
   }
 
-  private _getVersion(): string  {
+  private _getVersion(): string {
     const ctx = "_getVersion";
     let version: string;
     if (VSCodeUtils.isDebuggingExtension()) {
@@ -148,7 +149,7 @@ export class DendronWorkspace {
       }
     }
     this.L.info({ ctx, version: this.version });
-    return version
+    return version;
   }
 
   _setupCommands() {
@@ -244,7 +245,9 @@ export class DendronWorkspace {
           } catch (err) {
             this.L.error({ ctx, msg: `can't open uri: ${uri}` });
           }
-          vscode.window.showInformationMessage(`${posix.basename(fsPath)} deleted`);
+          vscode.window.showInformationMessage(
+            `${posix.basename(fsPath)} deleted`
+          );
         }
       )
     );
@@ -286,9 +289,7 @@ export class DendronWorkspace {
         throw Error("no folders set for workspace");
       }
       workspaceFolders = wsFolders;
-      this.configWS = vscode.workspace.getConfiguration(
-        undefined,
-      )
+      this.configWS = vscode.workspace.getConfiguration(undefined);
       this.configWS = vscode.workspace.getConfiguration(
         undefined,
         workspaceFolders[0]
@@ -299,7 +300,9 @@ export class DendronWorkspace {
     }
   }
 
-  async createWorkspaceWatcher(workspaceFolders: readonly vscode.WorkspaceFolder[]) {
+  async createWorkspaceWatcher(
+    workspaceFolders: readonly vscode.WorkspaceFolder[]
+  ) {
     const ctx = "createWorkspaceWatcher";
     this.L.info({ ctx });
     const rootFolder = workspaceFolders[0];
@@ -320,10 +323,16 @@ export class DendronWorkspace {
 
         // check if ignore
         const recentEvents = HistoryService.instance().lookBack();
-        this.L.debug({ ctx, recentEvents, fname});
-        if (_.find(recentEvents, (event => {
-          return _.every([event?.uri?.fsPath === uri.fsPath, event.source === "engine", event.action === "create"]);
-        }))) {
+        this.L.debug({ ctx, recentEvents, fname });
+        if (
+          _.find(recentEvents, (event) => {
+            return _.every([
+              event?.uri?.fsPath === uri.fsPath,
+              event.source === "engine",
+              event.action === "create",
+            ]);
+          })
+        ) {
           this.L.debug({ ctx, uri, msg: "create by engine, ignoring" });
           return;
         }
@@ -346,10 +355,16 @@ export class DendronWorkspace {
 
         // check if we should ignore
         const recentEvents = HistoryService.instance().lookBack();
-        this.L.debug({ ctx, recentEvents, fname});
-        if (_.find(recentEvents, (event => {
-          return _.every([event?.uri?.fsPath === uri.fsPath, event.source === "engine", event.action === "delete"]);
-        }))) {
+        this.L.debug({ ctx, recentEvents, fname });
+        if (
+          _.find(recentEvents, (event) => {
+            return _.every([
+              event?.uri?.fsPath === uri.fsPath,
+              event.source === "engine",
+              event.action === "delete",
+            ]);
+          })
+        ) {
           this.L.debug({ ctx, uri, msg: "recent action by engine, ignoring" });
           return;
         }
@@ -371,10 +386,10 @@ export class DendronWorkspace {
       throw Error(`${rootDir} does not exist`);
     }
     if (!fs.existsSync(path.join(rootDir, DENDRON_WS_NAME))) {
-    writeWSFile(path.join(rootDir, DENDRON_WS_NAME), {
-      rootDir,
-      pathOverride: rootDir
-    });
+      writeWSFile(path.join(rootDir, DENDRON_WS_NAME), {
+        rootDir,
+        pathOverride: rootDir,
+      });
     }
     VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
   }
@@ -452,7 +467,7 @@ export class DendronWorkspace {
     }
   }
 
-  async showWelcome(welcomeUri?: vscode.Uri, opts?: {reuseWindow?: boolean}) {
+  async showWelcome(welcomeUri?: vscode.Uri, opts?: { reuseWindow?: boolean }) {
     welcomeUri =
       welcomeUri ||
       vscode.Uri.parse(path.join(this.rootDir, "vault.main", "dendron.md"));
@@ -466,9 +481,8 @@ export class DendronWorkspace {
 }
 
 class MarkdownUtils {
-
-  static async openPreview(opts?: {reuseWindow?: boolean}) {
-    const cleanOpts = _.defaults(opts, {reuseWindow: false});
+  static async openPreview(opts?: { reuseWindow?: boolean }) {
+    const cleanOpts = _.defaults(opts, { reuseWindow: false });
     let previewEnhanced = vscode.extensions.getExtension(
       "shd101wyy.markdown-preview-enhanced"
     );
@@ -479,8 +493,8 @@ class MarkdownUtils {
       },
       enhanced: {
         open: "markdown-preview-enhanced.openPreview",
-        openSide: "markdown-preview-enhanced.openPreviewToTheSide"
-      }
+        openSide: "markdown-preview-enhanced.openPreviewToTheSide",
+      },
     };
     const mdClient = cmds[previewEnhanced ? "enhanced" : "builtin"];
     const openCmd = mdClient[cleanOpts.reuseWindow ? "open" : "openSide"];

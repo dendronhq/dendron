@@ -13,18 +13,28 @@
     "eslint-plugin-react-hooks": "^2.5.1",
     "husky": "^4.2.5",
     "lerna": "^3.19.0",
+    "lint-staged": ">=10",
     "lodash": "^4.17.15",
     "prettier": "^2.0.4",
     "standard-version": "^8.0.0",
     "typescript": "^3.9.5"
   },
   "scripts": {
-    "release": "standard-version"
+    "release": "standard-version",
+    "format": "prettier --ignore-path='.prettierignore' --write 'packages/**/*'"
   },
   "packages": [
     "packages/*",
     "vendor/*"
   ],
   "npmClient": "yarn",
-  "useWorkspaces": false
+  "useWorkspaces": false,
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,css,md}": "prettier --write"
+  }
 }

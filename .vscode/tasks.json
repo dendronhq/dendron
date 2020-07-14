@@ -39,8 +39,12 @@
     },
     {
       "label": "Everything",
-      "dependsOn": ["NPM: Publish", "Code: Package and Install", "Code: Release"],
+      "dependsOn": [
+        "NPM: Publish",
+        "Code: Package and Install",
+        "Code: Release"
+      ],
       "dependsOrder": "sequence"
-    },
+    }
   ]
 }

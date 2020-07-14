@@ -4,7 +4,7 @@ import {
   NoteRawProps,
   SchemaNodeRaw,
   SchemaRawOpts,
-  SchemaRawProps
+  SchemaRawProps,
 } from "@dendronhq/common-all";
 
 import YAML from "yamljs";
@@ -20,7 +20,7 @@ export class BodyParser implements DEngineParser<BodyParserOpts> {
     const { fname, node } = opts;
     data = _.trim(data, "` \\\n");
     const schemaOpts: SchemaRawOpts[] = YAML.parse(data);
-    const schemaProps = schemaOpts.map(o => {
+    const schemaProps = schemaOpts.map((o) => {
       const nodes = node.toRawPropsRecursive();
       const nodeOrig = _.find(nodes, { id: o.id });
       if (nodeOrig) {

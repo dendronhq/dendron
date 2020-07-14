@@ -24,7 +24,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "clean": "rimraf lib && rimraf coverage",
-    "format": "echo stub",
+    "format": "prettier --ignore-path='../../.prettierignore' --write .",
     "lint": "echo stub",
     "prepublishOnly": "npm run build",
     "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
@@ -56,7 +56,7 @@
     "coveralls": "^3.0.2",
     "cross-env": "^7.0.2",
     "jest": "^23.6.0",
-    "prettier": "^1.14.3",
+    "prettier": "2.0.5",
     "rimraf": "^2.6.2",
     "ts-jest": "^23.10.3",
     "ts-node": "^8.10.2",

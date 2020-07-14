@@ -17,7 +17,7 @@ import {
   assert,
   makeResponse,
   StoreQueryOpts,
-  Note
+  Note,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -25,7 +25,7 @@ import {
   getAllFiles,
   mdFile2NodeProps,
   node2MdFile,
-  schema2YMLFile
+  schema2YMLFile,
 } from "@dendronhq/common-server";
 
 import { FileParser } from "./parser";
@@ -45,7 +45,7 @@ export function fileNameToTitle(name: string): string {
 
 // @ts-ignore
 const CACHE_KEYS = {
-  QUERY_ALL: "QUERY_ALL"
+  QUERY_ALL: "QUERY_ALL",
 };
 
 export abstract class FileStorageBase {
@@ -71,10 +71,7 @@ export abstract class FileStorageBase {
     return this.doGetFile(this.rootId);
   }
 
-  async get(
-    id: string,
-    _opts?: QueryOpts
-  ): Promise<StoreGetResp> {
+  async get(id: string, _opts?: QueryOpts): Promise<StoreGetResp> {
     let resp: DNodeRawProps<DNodeData>;
     logger.debug({ ctx: "get:presGetFile", id });
     if (this.isRoot(id)) {
@@ -84,17 +81,16 @@ export abstract class FileStorageBase {
     }
     logger.debug({ ctx: "get:postGetFile", resp });
     return {
-      data: resp
+      data: resp,
     };
   }
 }
 
 export class FileStorage extends FileStorageBase implements DEngineStore {
-
   files2Notes(fpaths: string[]): NoteRawProps[] {
     const fp = new FileParser(this, { errorOnEmpty: false });
     const data = fp.parse(fpaths);
-    return data.map(n => n.toRawProps());
+    return data.map((n) => n.toRawProps());
   }
 
   doGetFile(id: string): DNodeRawProps<DNodeData> {
@@ -116,7 +112,7 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
   async _getSchemaAll(): Promise<SchemaRawProps[]> {
     const allFiles = getAllFiles({
       root: this.opts.root,
-      include: ["*.schema.yml"]
+      include: ["*.schema.yml"],
     }) as string[];
     const fp = new FileParser(this, { errorOnEmpty: false });
     const data = fp.parseSchema(allFiles);
@@ -187,13 +183,13 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
   refreshIdToPath(nodes: IDNode[]) {
     logger.debug({
       ctx: "refreshIdToPaths",
-      nodes: nodes.map(n => n.toRawProps())
+      nodes: nodes.map((n) => n.toRawProps()),
     });
     if (nodes[0].type === "schema") {
       // null-op
       return;
     }
-    nodes.forEach(n => {
+    nodes.forEach((n) => {
       this.idToPath[n.id] = n.path;
       if (n.title === "root") {
         this.rootId = n.id;
@@ -207,19 +203,19 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
       await this._writeFile(node);
     }
     if (!opts.stub && opts.recursive) {
-      await Promise.all(node.children.map(c => this.write(c, opts)));
+      await Promise.all(node.children.map((c) => this.write(c, opts)));
     }
     // FIXME:OPT: only do for new nodes
-    this.updateNodes([node])
+    this.updateNodes([node]);
     return;
   }
 
   /**
    * Add to storage cache
-   * @param nodes 
+   * @param nodes
    */
   async updateNodes(nodes: IDNode[]) {
-    this.refreshIdToPath(nodes)
+    this.refreshIdToPath(nodes);
   }
 }
 

@@ -3,12 +3,9 @@ import {
   IDNode,
   QueryMode,
   Schema,
-  testUtils
+  testUtils,
 } from "@dendronhq/common-all";
-import {
-  createFileStorage,
-  setupTmpDendronDir
-} from "../../../testUtils";
+import { createFileStorage, setupTmpDendronDir } from "../../../testUtils";
 
 import FileStorage from "../store";
 import _ from "lodash";
@@ -40,7 +37,7 @@ describe("main", () => {
         const resp = await store.query("**/*", queryMode, {});
         const nodeOrig = _.find(
           resp.data,
-          n => n.title === "foo.one"
+          (n) => n.title === "foo.one"
         ) as IDNode;
         await store.delete(nodeOrig.id);
         await expect(store.get(nodeOrig.id, {})).rejects.toThrow(
@@ -55,7 +52,7 @@ describe("main", () => {
     describe("get", () => {
       test("get root", async () => {
         const resp = await store.query("**/*", queryMode, {});
-        const nodeOrig = _.find(resp.data, n => n.title === "root") as IDNode;
+        const nodeOrig = _.find(resp.data, (n) => n.title === "root") as IDNode;
         const respGet = await store.get(nodeOrig.id, {});
         const node = respGet.data;
         expect(node).not.toBeUndefined();
@@ -66,7 +63,7 @@ describe("main", () => {
         const resp = await store.query("**/*", queryMode, {});
         const nodeOrig = _.find(
           resp.data,
-          n => n.title === "foo.one"
+          (n) => n.title === "foo.one"
         ) as IDNode;
         const respGet = await store.get(nodeOrig.id, {});
         const node = respGet.data;
@@ -102,11 +99,11 @@ describe("main", () => {
 
       test("all", async () => {
         const resp = await store.query("**/*", queryMode, {});
-        const rootNode = _.find(resp.data, n => n.title === "root") as Schema;
-        const foo = _.find(resp.data, n => n.title === "foo") as Schema;
+        const rootNode = _.find(resp.data, (n) => n.title === "root") as Schema;
+        const foo = _.find(resp.data, (n) => n.title === "foo") as Schema;
         const fooChild = _.find(
           resp.data,
-          n => n.title === "foo.one"
+          (n) => n.title === "foo.one"
         ) as Schema;
         expect(rootNode).not.toBeUndefined();
         expect(fooChild).not.toBeUndefined();
@@ -120,7 +117,7 @@ describe("main", () => {
     describe("write", () => {
       test("writeQuery", async () => {
         const resp = await store.query("**/*", queryMode, {});
-        const node = _.find(resp.data, n => n.title === "foo.one") as IDNode;
+        const node = _.find(resp.data, (n) => n.title === "foo.one") as IDNode;
         node.body = "bond";
         await store.write(node);
         const { data, content } = FileTestUtils.readMDFile(root, "foo.one.md");
@@ -141,9 +138,9 @@ describe("main", () => {
     describe("query", () => {
       test("all", async () => {
         const resp = await store.query("**/*", queryMode, {});
-        const rootNode = _.find(resp.data, n => n.title === "root") as IDNode;
-        const foo = _.find(resp.data, n => n.title === "foo") as IDNode;
-        const node = _.find(resp.data, n => n.title === "one") as IDNode;
+        const rootNode = _.find(resp.data, (n) => n.title === "root") as IDNode;
+        const foo = _.find(resp.data, (n) => n.title === "foo") as IDNode;
+        const node = _.find(resp.data, (n) => n.title === "one") as IDNode;
         expect(rootNode).not.toBeUndefined();
         expect(node).not.toBeUndefined();
         expect(node.parent?.id).toEqual(foo.id);

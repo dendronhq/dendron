@@ -1,1 +1,18 @@
 vendor/**/*
+lib
+node_modules
+out
+dist
+assets
+*.lock
+.*
+__snapshots__
+LICENSE
+*.sh
+*.j2
+# build
+# docs
+# fixtures
+# packages
+# playbooks
+# templates

@@ -89,7 +89,8 @@
     "build": "npm run compile",
     "compile": "tsc -p tsconfig.build.json",
     "pretest": "echo stub",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "format": "prettier --write src '*.json' '*.js'"
   },
   "devDependencies": {
     "@types/execa": "^2.0.0",
@@ -104,6 +105,7 @@
     "eslint": "^6.8.0",
     "glob": "^7.1.6",
     "mocha": "^7.1.2",
+    "prettier": "2.0.5",
     "ts-loader": "^8.0.0",
     "ts-node": "^8.10.2",
     "typescript": "^3.8.3",

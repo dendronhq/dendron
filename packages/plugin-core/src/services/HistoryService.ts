@@ -2,63 +2,63 @@ import _ from "lodash";
 import { Uri } from "vscode";
 
 export type HistoryEvent = {
-    action: HistoryEventAction
-    source: HistoryEventSource
-    uri?: Uri
-}
+  action: HistoryEventAction;
+  source: HistoryEventSource;
+  uri?: Uri;
+};
 
-type HistoryEventSource = "engine"|"src"|"extension"
-type HistoryEventAction = "delete"|"create"|"activate"
+type HistoryEventSource = "engine" | "src" | "extension";
+type HistoryEventAction = "delete" | "create" | "activate";
 
 type HistoryEventListenerFunc = (event: HistoryEvent) => void;
 
 interface IHistoryService {
-    readonly events: HistoryEvent[];
-    //instance: () =>IHistoryService;
-    add(event: HistoryEvent): void;
-    lookBack(num?: number): HistoryEvent[];
+  readonly events: HistoryEvent[];
+  //instance: () =>IHistoryService;
+  add(event: HistoryEvent): void;
+  lookBack(num?: number): HistoryEvent[];
 }
 
-let _HISTORY_SERVICE: undefined|HistoryService = undefined;
+let _HISTORY_SERVICE: undefined | HistoryService = undefined;
 
 export class HistoryService implements IHistoryService {
-    public readonly events: HistoryEvent[];
-    public subscribers: {[k in HistoryEventSource]: HistoryEventListenerFunc[]};
+  public readonly events: HistoryEvent[];
+  public subscribers: { [k in HistoryEventSource]: HistoryEventListenerFunc[] };
 
-    static instance(): HistoryService {
-        if (_.isUndefined(_HISTORY_SERVICE)) {
-            _HISTORY_SERVICE = new HistoryService();
-        }
-        return _HISTORY_SERVICE;
+  static instance(): HistoryService {
+    if (_.isUndefined(_HISTORY_SERVICE)) {
+      _HISTORY_SERVICE = new HistoryService();
     }
+    return _HISTORY_SERVICE;
+  }
 
-    constructor() {
-        this.events = [];
-        this.subscribers = {
-            engine: [],
-            src: [],
-            extension: []
-        };
-    }
+  constructor() {
+    this.events = [];
+    this.subscribers = {
+      engine: [],
+      src: [],
+      extension: [],
+    };
+  }
 
-    add(event: HistoryEvent) {
-        this.events.unshift(event);
-        this.subscribers[event.source].forEach(f => f(event));
-    }
+  add(event: HistoryEvent) {
+    this.events.unshift(event);
+    this.subscribers[event.source].forEach((f) => f(event));
+  }
 
-    clearSubscriptions() {
-        this.subscribers = {
-            engine: [],
-            src: [],
-            extension: []
-        };
-    }
+  clearSubscriptions() {
+    this.subscribers = {
+      engine: [],
+      src: [],
+      extension: [],
+    };
+  }
 
-    lookBack(num: number = 3): HistoryEvent[] {
-        return this.events.slice(0, num);
-    }
+  lookBack(num: number = 3): HistoryEvent[] {
+    return this.events.slice(0, num);
+  }
 
-    subscribe(source: HistoryEventSource, func: HistoryEventListenerFunc) {
-        this.subscribers[source].push(func);
-    }
+  subscribe(source: HistoryEventSource, func: HistoryEventListenerFunc) {
+    this.subscribers[source].push(func);
+  }
 }

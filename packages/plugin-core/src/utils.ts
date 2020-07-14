@@ -77,7 +77,9 @@ export class VSCodeUtils {
         logPath: "/tmp/dendron-integ/",
         subscriptions: [],
         extensionPath: pkgRoot,
-        globalState: VSCodeUtils.createMockState({[GLOBAL_STATE.VERSION]: "0.0.1"}),
+        globalState: VSCodeUtils.createMockState({
+          [GLOBAL_STATE.VERSION]: "0.0.1",
+        }),
         workspaceState: VSCodeUtils.createMockState({}),
         extensionUri: vscode.Uri.parse(pkgRoot),
         environmentVariableCollection: {} as any,
@@ -97,7 +99,7 @@ export class VSCodeUtils {
       },
       update: async (_key: string, _value: any) => {
         _settings[_key] = _value;
-        return
+        return;
       },
       has: (key: string) => {
         return key in _settings;

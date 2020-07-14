@@ -38,7 +38,7 @@ export type DNodeRawOpts<T extends DNodeData> = {
   /**
    * Custom attributes
    */
-  custom?: any
+  custom?: any;
 };
 export type DNodeRawProps<T extends DNodeData = DNodeData> = Required<
   DNodeRawOpts<T>
@@ -95,7 +95,9 @@ export type DNodeDict<T = DNodeData> = { [id: string]: IDNode<T> };
 
 // --- Notes
 export type NoteRawProps = DNodeRawProps<NoteData>;
-export type INoteOpts = Omit<IDNodeOpts<NoteData>, "type"> & { schemaStub?: boolean };
+export type INoteOpts = Omit<IDNodeOpts<NoteData>, "type"> & {
+  schemaStub?: boolean;
+};
 export type INoteProps = Required<INoteOpts>;
 export type INote = INoteProps & { domain: INote };
 export type NoteDict = { [id: string]: Note };
@@ -145,8 +147,8 @@ export type EngineDeleteOpts = {
   /**
    * Only delete from meta
    */
-  metaOnly?: boolean
-}
+  metaOnly?: boolean;
+};
 
 export interface QueryOpts {
   fullNode?: boolean;
@@ -171,16 +173,16 @@ export interface QueryOpts {
   mode?: QueryMode;
 }
 
-export type QueryOneOpts = Omit<QueryOpts, "queryOne">
+export type QueryOneOpts = Omit<QueryOpts, "queryOne">;
 
 export type UpdateNodesOpts = {
-  parentsAsStubs: boolean
-  newNode: boolean
-}
+  parentsAsStubs: boolean;
+  newNode: boolean;
+};
 
 export type StoreQueryOpts = QueryOpts & {
-  schemas?: SchemaDict
-}
+  schemas?: SchemaDict;
+};
 
 export interface DEngineParser<TOpts = any> {
   // parse: <T>(content: any, mode: QueryMode, opts: TOpts) => DNodeRawProps<T>[];
@@ -209,10 +211,7 @@ export interface DEngineStore<T = DNodeData, O = any> {
     mode: QueryMode,
     opts?: StoreQueryOpts
   ) => Promise<EngineQueryResp<T>>;
-  write: <T>(
-    node: IDNode<T>,
-    opts?: DEngineStoreWriteOpts
-  ) => Promise<void>;
+  write: <T>(node: IDNode<T>, opts?: DEngineStoreWriteOpts) => Promise<void>;
   updateNodes(nodes: IDNode[]): Promise<void>;
 }
 
@@ -271,25 +270,25 @@ export interface DEngine {
   /**
    * Shortcut Function
    */
-  queryOne: (queryString: string, mode: QueryMode, opts?: QueryOneOpts) => Promise<EngineGetResp<DNodeData>>
+  queryOne: (
+    queryString: string,
+    mode: QueryMode,
+    opts?: QueryOneOpts
+  ) => Promise<EngineGetResp<DNodeData>>;
 
-  write: (
-    node: IDNode<DNodeData>,
-    opts?: NodeWriteOpts
-  ) => Promise<void>;
+  write: (node: IDNode<DNodeData>, opts?: NodeWriteOpts) => Promise<void>;
 
   /**
    * Update engine properties
-   * @param opts 
+   * @param opts
    */
-  updateProps(opts: Partial<DEngineOpts>): void
-
+  updateProps(opts: Partial<DEngineOpts>): void;
 
   /**
    * Update node metadata
-   * @param node 
+   * @param node
    */
-  updateNodes(nodes: IDNode[], opts: UpdateNodesOpts): Promise<void>
+  updateNodes(nodes: IDNode[], opts: UpdateNodesOpts): Promise<void>;
 
   // /**
   //  * Write list of nodes

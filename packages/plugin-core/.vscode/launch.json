@@ -14,9 +14,7 @@
         // "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}"
       ],
-      "outFiles": [
-        "${workspaceFolder}/out/**/*.js"
-      ],
+      "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "env": {
         "STAGE": "dev",
         "VSCODE_DEBUGGING_EXTENSION": "dendron"
@@ -31,14 +29,12 @@
       "args": [
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/test/suite/index",
+        "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
       ],
       "env": {
-        "STAGE": "test",
+        "STAGE": "test"
       },
-      "outFiles": [
-        "${workspaceFolder}/out/test/suite/*.js"
-      ]
+      "outFiles": ["${workspaceFolder}/out/test/suite/*.js"]
       // "preLaunchTask": "${defaultBuildTask}"
     },
     {
@@ -49,14 +45,12 @@
       "args": [
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/test/suite/index",
+        "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
       ],
       "env": {
-        "STAGE": "test",
+        "STAGE": "test"
       },
-      "outFiles": [
-        "${workspaceFolder}/out/test/**/*.js"
-      ]
+      "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
       // "preLaunchTask": "${defaultBuildTask}"
     }
   ]

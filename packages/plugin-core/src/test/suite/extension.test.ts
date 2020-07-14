@@ -45,7 +45,6 @@ function createMockContext(root: string): vscode.ExtensionContext {
   } as any;
 }
 
-
 class VSFileUtils {
   static cmpFiles = (
     root: string,
@@ -69,18 +68,21 @@ suite("startup", function () {
   let root: string;
   let ws: DendronWorkspace;
 
-  before(function() {
-    console.log("set version")
-    VSCodeUtils.getOrCreateMockContext().globalState.update(GLOBAL_STATE.VERSION, "0.0.1");
+  before(function () {
+    console.log("set version");
+    VSCodeUtils.getOrCreateMockContext().globalState.update(
+      GLOBAL_STATE.VERSION,
+      "0.0.1"
+    );
   });
 
   beforeEach(function () {
-    console.log("before")
+    console.log("before");
     root = FileTestUtils.tmpDir("/tmp/dendron", true);
   });
 
-  afterEach(function(){
-    console.log("after")
+  afterEach(function () {
+    console.log("after");
     HistoryService.instance().clearSubscriptions();
     fs.removeSync(root);
   });
@@ -105,17 +107,19 @@ suite("startup", function () {
     test("upgrade from existing", function (done) {
       vscode.window.showInformationMessage("waiting for existing");
       ws = DendronWorkspace.instance();
-      HistoryService.instance().subscribe("extension", async (event: HistoryEvent) => {
-        vscode.window.showInformationMessage(`got activate`);
-        ws = DendronWorkspace.instance();
-        await ws.setupWorkspace(root, {skipOpenWS: true});
-        await ws.reloadWorkspace(root);
-        vscode.window.showInformationMessage(`setup ws`);
-        assert.ok("done");
-        done();
-      });
+      HistoryService.instance().subscribe(
+        "extension",
+        async (event: HistoryEvent) => {
+          vscode.window.showInformationMessage(`got activate`);
+          ws = DendronWorkspace.instance();
+          await ws.setupWorkspace(root, { skipOpenWS: true });
+          await ws.reloadWorkspace(root);
+          vscode.window.showInformationMessage(`setup ws`);
+          assert.ok("done");
+          done();
+        }
+      );
     });
-
   });
 });
 

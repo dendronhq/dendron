@@ -4,12 +4,12 @@ import _ from "lodash";
 
 /**
  * Remove properties that change
- * @param n1 
+ * @param n1
  */
 export function toSnapshotProps(n1: DNode) {
   const out = omitEntropicProps(n1.toRawProps());
   const parent = n1.parent?.title || "root";
-  const children = n1.children.map(c => c.title);
+  const children = n1.children.map((c) => c.title);
   return { ...out, parent, children };
 }
 
@@ -27,7 +27,7 @@ export function expectSnapshot(
 ) {
   let snap;
   if (_.isArrayLike(n1)) {
-    snap = n1.map(n => toSnapshotProps(n));
+    snap = n1.map((n) => toSnapshotProps(n));
   } else {
     snap = toSnapshotProps(n1);
   }

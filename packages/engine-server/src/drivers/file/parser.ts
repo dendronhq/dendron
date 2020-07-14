@@ -7,12 +7,12 @@ import {
   NoteUtils,
   SchemaNodeRaw,
   SchemaRawOpts,
-  SchemaRawProps
+  SchemaRawProps,
 } from "@dendronhq/common-all";
 import {
   createLogger,
   globMatch,
-  mdFile2NodeProps
+  mdFile2NodeProps,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -32,7 +32,7 @@ type FileMetaDict = { [key: string]: FileMeta[] };
 
 function getFileMeta(fpaths: string[]): FileMetaDict {
   const metaDict: FileMetaDict = {};
-  _.forEach(fpaths, fpath => {
+  _.forEach(fpaths, (fpath) => {
     const { name } = path.parse(fpath);
     const lvl = name.split(".").length;
     if (!_.has(metaDict, lvl)) {
@@ -63,7 +63,7 @@ export class FileParser {
     this.missing = new Set<string>();
     this.opts = _.defaults(opts, {
       errorOnEmpty: true,
-      errorOnBadParse: true
+      errorOnBadParse: true,
     });
     this.store = store;
   }
@@ -81,7 +81,7 @@ export class FileParser {
     opts = _.defaults(opts, {
       errorOnEmpty: true,
       isRoot: false,
-      errorOnBadParse: true
+      errorOnBadParse: true,
     });
     // DEBUG: noteProps: {noteProps}
     // TODO: handle errors
@@ -96,7 +96,7 @@ export class FileParser {
         const errorMsg = {
           status: "BAD_PARSE",
           ent,
-          err
+          err,
         };
         this.errors.push(errorMsg);
         return { node: null, missing: null };
@@ -109,7 +109,7 @@ export class FileParser {
     let missing: null | string = null;
     // if (_.isNull(noteProps.parent)) {
     parentPath = DNodeUtils.dirName(ent.prefix);
-    const parent = _.find(parents, p => p.path === parentPath) || null;
+    const parent = _.find(parents, (p) => p.path === parentPath) || null;
     // } else {
     //   parent = _.find(parents, p => p.id === noteProps.parent) || null;
     // }
@@ -118,7 +118,7 @@ export class FileParser {
       const errorMsg = {
         status: "NO_PARENT_PATH",
         ent,
-        parentPath
+        parentPath,
       };
       this.errors.push(errorMsg);
       // should not be the case
@@ -147,7 +147,7 @@ export class FileParser {
     const schemaOpts: SchemaRawOpts[] = YAML.parse(
       fs.readFileSync(path.join(root, fpath), "utf8")
     );
-    const schemaProps = schemaOpts.map(o =>
+    const schemaProps = schemaOpts.map((o) =>
       SchemaNodeRaw.createProps({ ...o, fname })
     );
     return schemaProps;
@@ -157,7 +157,7 @@ export class FileParser {
     if (_.isEmpty(data)) {
       return [];
     }
-    return data.map(fpath => this._parseSchema(fpath)).flat();
+    return data.map((fpath) => this._parseSchema(fpath)).flat();
   }
 
   /**
@@ -173,13 +173,13 @@ export class FileParser {
     const store = this.store;
     const fileMetaDict: FileMetaDict = getFileMeta(data);
     // logger.debug({ ctx: "parse:getFileMeta:post", fileMetaDict })
-    const root = fileMetaDict[1].find(n => n.fpath === "root.md") as FileMeta;
+    const root = fileMetaDict[1].find((n) => n.fpath === "root.md") as FileMeta;
     if (!root) {
       return [];
     }
     const { node: rootNode } = this.toNode(root, [], store, {
       isRoot: true,
-      errorOnBadParse: this.opts.errorOnBadParse
+      errorOnBadParse: this.opts.errorOnBadParse,
     }) as { node: Note };
     nodesStoreByFname["root"] = rootNode;
 
@@ -187,17 +187,17 @@ export class FileParser {
     let lvl = 2;
     let prevNodes: Note[] = fileMetaDict[1]
       // don't count root node, handle separately
-      .filter(n => n.fpath !== "root.md")
-      .map(ent =>
-      // first layer, no parent, expected
-      {
-        const { node } = this.toNode(ent, [], store, {
-          isRoot: true
-        });
-        return node;
-      }
+      .filter((n) => n.fpath !== "root.md")
+      .map((ent) =>
+        // first layer, no parent, expected
+        {
+          const { node } = this.toNode(ent, [], store, {
+            isRoot: true,
+          });
+          return node;
+        }
       ) as Note[];
-    prevNodes.forEach(n => {
+    prevNodes.forEach((n) => {
       rootNode.addChild(n);
       nodesStoreByFname[n.fname] = n;
     });
@@ -211,14 +211,14 @@ export class FileParser {
       // })
       const currNodes = fileMetaDict[lvl]
         // eslint-disable-next-line no-loop-func
-        .map(ent => {
+        .map((ent) => {
           // ignore root.schema and other such files
           if (globMatch(["root.*"], ent.fpath)) {
             return null;
           }
           const { node, missing } = this.toNode(ent, prevNodes, store, {
             errorOnEmpty: this.opts.errorOnEmpty,
-            errorOnBadParse: this.opts.errorOnBadParse
+            errorOnBadParse: this.opts.errorOnBadParse,
           });
           if (missing) {
             const closetParent = DNodeUtils.findClosestParent(
@@ -229,7 +229,7 @@ export class FileParser {
               closetParent as Note,
               node as Note
             );
-            stubNodes.forEach(ent2 => {
+            stubNodes.forEach((ent2) => {
               nodesStoreByFname[ent2.fname] = ent2;
             });
             // TODO: add stub nodes to dict and return dict
@@ -239,7 +239,7 @@ export class FileParser {
         })
         .filter(Boolean) as Note[];
       lvl += 1;
-      currNodes.forEach(n => {
+      currNodes.forEach((n) => {
         nodesStoreByFname[n.fname] = n;
       });
       // TODO: remove
@@ -253,7 +253,7 @@ export class FileParser {
     return {
       numErrors: errors.length,
       errors,
-      missing: Array.from(missing)
+      missing: Array.from(missing),
     };
   }
 }

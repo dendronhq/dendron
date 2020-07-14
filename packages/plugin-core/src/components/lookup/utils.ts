@@ -2,7 +2,6 @@ import { DNode } from "@dendronhq/common-all";
 import path from "path";
 import { Uri, workspace } from "vscode";
 
-
 export function node2Uri(node: DNode): Uri {
   const nodePath = node.fname + ".md";
   if (!workspace.workspaceFolders) {

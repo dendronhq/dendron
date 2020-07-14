@@ -21,7 +21,7 @@ import {
   SchemaData,
   SchemaDict,
   SchemaRawOpts,
-  SchemaRawProps
+  SchemaRawProps,
 } from "./types";
 import { genUUID } from "./uuid";
 
@@ -41,10 +41,7 @@ export class DNodeUtils {
   }
 
   static dirName(nodePath: string) {
-    return nodePath
-      .split(".")
-      .slice(0, -1)
-      .join(".");
+    return nodePath.split(".").slice(0, -1).join(".");
   }
 
   static domainName(nodePath: string) {
@@ -94,7 +91,7 @@ export class DNodeRaw {
       children,
       body,
       data,
-      custom
+      custom,
     } = _.defaults(nodeOpts, {
       updated: moment.now(),
       created: moment.now(),
@@ -106,7 +103,7 @@ export class DNodeRaw {
       body: "",
       data: {},
       fname: null,
-      custom: {}
+      custom: {},
     });
     const title = nodeOpts.title || fname;
     const nodeProps: DNodeRawProps<T> & { extra?: any } = {
@@ -121,7 +118,7 @@ export class DNodeRaw {
       stub,
       body,
       data,
-      custom
+      custom,
     };
     if (opts?.returnExtra) {
       const extra = _.omit(nodeOpts, _.keys(nodeProps));
@@ -204,7 +201,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
       body,
       data,
       children,
-      custom
+      custom,
     } = _.defaults(
       opts,
       DNodeRaw.createProps(_.defaults(opts, { parent: null, children: [] }))
@@ -246,7 +243,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
    */
   get nodes(): DNode<T>[] {
     const out: DNode<T>[] = [this as DNode<T>].concat(
-      this.children.map(c => c.nodes).flat()
+      this.children.map((c) => c.nodes).flat()
     );
     return out;
   }
@@ -273,7 +270,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
 
   addChild(node: IDNode<T>) {
     // only add if new
-    if (!this.children.some(ent => ent.id === node.id)) {
+    if (!this.children.some((ent) => ent.id === node.id)) {
       this.children.push(node);
       node.parent = this;
     }
@@ -284,7 +281,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     const props2 = node.toRawProps();
     return _.every([
       _.isEqual(_.omit(props1, "body"), _.omit(props2, "body")),
-      _.trim(props1.body) === _.trim(props2.body)
+      _.trim(props1.body) === _.trim(props2.body),
     ]);
   }
 
@@ -304,12 +301,12 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
             nodes: [
               {
                 object: "text",
-                text: this.renderBody()
-              }
-            ]
-          }
-        ]
-      }
+                text: this.renderBody(),
+              },
+            ],
+          },
+        ],
+      },
     };
   }
 
@@ -325,7 +322,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
       "fname",
       "data",
       "stub",
-      "custom"
+      "custom",
     ]);
     let parent;
     if (this.parent?.title === "root") {
@@ -334,7 +331,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
       // TODO: this should never happen
       parent = this.parent?.id ?? "root";
     }
-    const children = this.children.map(c => c.id);
+    const children = this.children.map((c) => c.id);
     return { ...props, parent, children };
   }
 
@@ -379,7 +376,7 @@ export class Note extends DNode<NoteData> implements INote {
     const note = new Note({
       fname,
       schemaStub: true,
-      data: { schemaId: schema.id }
+      data: { schemaId: schema.id },
     });
     note.schema = schema;
     return note;
@@ -389,11 +386,11 @@ export class Note extends DNode<NoteData> implements INote {
     const cleanProps = _.defaults(props, {
       parent: null,
       children: [],
-      schemaStub: false
+      schemaStub: false,
     });
     super({
       type: "note",
-      ...cleanProps
+      ...cleanProps,
     });
     this.schemaId = props?.data?.schemaId || "-1";
     this.schemaStub = cleanProps.schemaStub;
@@ -446,7 +443,7 @@ export class Schema extends DNode<SchemaData> implements ISchema {
   static createRoot() {
     const props = SchemaNodeRaw.createProps({
       id: "root",
-      fname: "root.schema"
+      fname: "root.schema",
     });
     return new Schema({ ...props, parent: null, children: [] });
   }
@@ -464,12 +461,12 @@ export class Schema extends DNode<SchemaData> implements ISchema {
         fname: UNKNOWN_SCHEMA_ID,
         stub: true,
         created: "-1",
-        updated: "-1"
+        updated: "-1",
       });
       Schema._UNKNOWN_SCHEMA = new Schema({
         ...props,
         parent: null,
-        children: []
+        children: [],
       });
     }
     return Schema._UNKNOWN_SCHEMA as Schema;
@@ -481,8 +478,8 @@ export class Schema extends DNode<SchemaData> implements ISchema {
       ..._.defaults(props, {
         parent: null,
         children: [],
-        data: {}
-      })
+        data: {},
+      }),
     });
   }
 
@@ -510,7 +507,7 @@ export class Schema extends DNode<SchemaData> implements ISchema {
   }
 
   renderBody() {
-    const out = _.map(this.toRawPropsRecursive(), props => {
+    const out = _.map(this.toRawPropsRecursive(), (props) => {
       return _.pick(props, [
         "id",
         "title",
@@ -518,7 +515,7 @@ export class Schema extends DNode<SchemaData> implements ISchema {
         "children",
         "parent",
         "data",
-        "fname"
+        "fname",
       ]);
     });
     return ["```", YAML.stringify(out, undefined, 4), "```"].join("\n");
@@ -529,7 +526,7 @@ const matchSchemaPropsToId = (
   id: string,
   props: SchemaRawProps[]
 ): SchemaRawProps => {
-  const out = _.find(props, p => _.some([p.id === id]));
+  const out = _.find(props, (p) => _.some([p.id === id]));
   if (_.isUndefined(out)) {
     throw Error(`no match found for ${id}, props: ${props}`);
   }
@@ -541,7 +538,7 @@ function getRoot(nodes: NoteRawProps[]) {
   // nodes: {nodes}
   const rootNode = _.find(
     nodes,
-    ent => ent.title === "root" || _.isNull(ent.parent)
+    (ent) => ent.title === "root" || _.isNull(ent.parent)
   );
   if (!rootNode) {
     throw new DendronError("no root node found");
@@ -558,7 +555,7 @@ export class NodeBuilder {
     nodes: DNodeRawProps<T>[]
   ): DNodeRawProps<T>[] {
     // nodes: {nodes}
-    const rootNodes = _.filter(nodes, ent => ent.parent === "root");
+    const rootNodes = _.filter(nodes, (ent) => ent.parent === "root");
     if (_.isEmpty(rootNodes)) {
       throw new DendronError("no root node found");
     }
@@ -587,7 +584,7 @@ export class NodeBuilder {
   toSchema(item: SchemaRawProps, parent: Schema, props: SchemaRawProps[]) {
     // DEBUG: item: {item}, parents: {parents}
     const node = new Schema({ ...item, parent, children: [] });
-    item.children.forEach(chId => {
+    item.children.forEach((chId) => {
       const match = matchSchemaPropsToId(chId, props);
       return this.toSchema(match, node, props);
     });
@@ -611,7 +608,7 @@ export class NodeBuilder {
 
       nodeIds = nodeIds
         .map((id: string) => {
-          const nodeProps = props.find(ent => ent.id === id) as NoteRawProps;
+          const nodeProps = props.find((ent) => ent.id === id) as NoteRawProps;
           const { node, children } = this.toNote(nodeProps, parentNodes, opts);
           currentNodes.push(node);
           return children;
@@ -629,7 +626,7 @@ export class NodeBuilder {
       props
     );
     let out = [root];
-    rootDomains.forEach(rootRaw => {
+    rootDomains.forEach((rootRaw) => {
       const domain = this.toSchema(rootRaw, root, props);
       out = out.concat(domain.nodes as Schema[]);
     });
@@ -652,7 +649,7 @@ export class NoteUtils {
     let stubPath = fromPath;
     let parent = from;
     // last element is node
-    diffPath.slice(0, -1).forEach(part => {
+    diffPath.slice(0, -1).forEach((part) => {
       // handle starting from root, path = ""
       if (_.isEmpty(stubPath)) {
         stubPath = part;
@@ -689,11 +686,11 @@ export class SchemaUtils {
   ): Schema {
     const cleanOpts = _.defaults(opts, {
       matchNamespace: true,
-      matchPrefix: false
+      matchPrefix: false,
     });
     const notePath = _.isString(noteOrPath) ? noteOrPath : noteOrPath.path;
     const notePathClean = notePath.replace(/\./g, "/");
-    const out = _.find(_.values(schemas), schema => {
+    const out = _.find(_.values(schemas), (schema) => {
       const logicalPath = schema.logicalPath;
       if (schema.namespace && cleanOpts.matchNamespace) {
         if (minimatch(notePathClean, _.trimEnd(logicalPath, "/*"))) {

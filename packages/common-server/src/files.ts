@@ -7,7 +7,7 @@ import {
   Schema,
   genUUID,
   assert,
-  CreatePropsOpts
+  CreatePropsOpts,
 } from "@dendronhq/common-all";
 import fs, { Dirent } from "fs";
 
@@ -37,10 +37,10 @@ export function fileMeta2Node(body: string, meta: FileMeta): Note {
     title,
     desc: "TODO",
     data: {
-      schemaId: "-1"
+      schemaId: "-1",
     },
     body,
-    fname: meta.name
+    fname: meta.name,
   });
   return note;
 }
@@ -53,17 +53,17 @@ export function globMatch(patterns: string[] | string, fname: string): boolean {
   if (_.isString(patterns)) {
     return minimatch(fname, patterns);
   }
-  return _.some(patterns, pattern => minimatch(fname, pattern));
+  return _.some(patterns, (pattern) => minimatch(fname, pattern));
 }
 
 export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
   const { root, withFileTypes } = _.defaults(opts, {
     exclude: [".git", "Icon\r", ".*"],
-    withFileTypes: false
+    withFileTypes: false,
   });
   const allFiles = fs.readdirSync(root, { withFileTypes: true });
   return _.reject(
-    allFiles.map(dirent => {
+    allFiles.map((dirent) => {
       const { name: fname } = dirent;
       // match exclusions
       if (
@@ -85,7 +85,10 @@ export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
   ) as Dirent[] | string[];
 }
 
-export function mdFile2NodeProps(fpath: string, opts?: CreatePropsOpts): NoteRawProps {
+export function mdFile2NodeProps(
+  fpath: string,
+  opts?: CreatePropsOpts
+): NoteRawProps {
   // NOTE: gray matter cache old date, need to pass empty options
   // to bypass
   // see https://github.com/jonschlinkert/gray-matter/issues/43
@@ -110,18 +113,18 @@ export function node2MdFile(node: Note, opts: { root: string }) {
     "custom",
     "fname",
     "stub",
-    "body"
+    "body",
   ]);
   // only save parent id if parent is not a stub
-  const parent = (node.parent && !node.parent.stub ? node.parent.id : null);
-  const children = node.children.map(c => c.id);
+  const parent = node.parent && !node.parent.stub ? node.parent.id : null;
+  const children = node.children.map((c) => c.id);
   const props: NoteRawProps = {
     ...meta,
     parent,
-    children
-  }
-  assert(!node.stub, `writing a stub node: ${node.toRawProps()}`)
-  return node2PropsMdFile({...props}, opts);
+    children,
+  };
+  assert(!node.stub, `writing a stub node: ${node.toRawProps()}`);
+  return node2PropsMdFile({ ...props }, opts);
 }
 
 export function node2PropsMdFile(props: NoteRawProps, opts: { root: string }) {

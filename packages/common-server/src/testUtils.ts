@@ -10,8 +10,12 @@ export function appendUUID(fname: string) {
 }
 
 export class EngineTestUtils {
-  static setupStoreDir(fixturesDir: string, storeDir: string, opts?: {copyFixtures?: boolean}) {
-    const cleanOpts = _.defaults(opts, {copyFixtures: true});
+  static setupStoreDir(
+    fixturesDir: string,
+    storeDir: string,
+    opts?: { copyFixtures?: boolean }
+  ) {
+    const cleanOpts = _.defaults(opts, { copyFixtures: true });
     const dirPath = appendUUID(storeDir);
     // eslint-disable-next-line no-undef
     fs.ensureDirSync(dirPath);
@@ -27,17 +31,22 @@ export class FileTestUtils {
   static cmpFiles = (
     root: string,
     expected: string[],
-    opts?: { add?: string[], remove?: string[], ignore?: string[] }
+    opts?: { add?: string[]; remove?: string[]; ignore?: string[] }
   ) => {
     const cleanOpts = _.defaults(opts, { add: [], remove: [], ignore: [] });
-    const dirEnts = fs.readdirSync(root).filter(ent => !_.includes(cleanOpts.ignore, ent));
+    const dirEnts = fs
+      .readdirSync(root)
+      .filter((ent) => !_.includes(cleanOpts.ignore, ent));
     return [
       dirEnts.sort(),
-      expected.concat(cleanOpts.add).filter(ent => {
-        return !_.includes(cleanOpts?.remove, ent);
-      }).sort()
+      expected
+        .concat(cleanOpts.add)
+        .filter((ent) => {
+          return !_.includes(cleanOpts?.remove, ent);
+        })
+        .sort(),
     ];
-  }
+  };
 
   static getPkgRoot(base: string, fname?: string): string {
     fname = fname || "package.json";
@@ -65,11 +74,11 @@ export class FileTestUtils {
 
   static readMDFile = (root: string, fname: string) => {
     return matter.read(path.join(root, fname));
-  }
+  };
 
   static readYMLFile = (root: string, fname: string) => {
     return YAML.load(path.join(root, fname));
-  }
+  };
 
   static writeMDFile = (root: string, fname: string, fm: any, body: string) => {
     const fmAndBody = matter.stringify(body, fm);

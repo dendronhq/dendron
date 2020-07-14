@@ -82,24 +82,24 @@ export abstract class RefactorBaseCommand<
     const { limit, root } = this.props;
     const allFiles = this.getFiles({ ...this.props });
     // return Promise.all(
-      return allFiles.map((dirent) => {
-        const { name: fname } = dirent;
-        if (stats.numChanged > limit) {
-          L.info(`reached limit of ${limit} changes`);
-          return;
+    return allFiles.map((dirent) => {
+      const { name: fname } = dirent;
+      if (stats.numChanged > limit) {
+        L.info(`reached limit of ${limit} changes`);
+        return;
+      }
+      const fpath = path.join(root, fname);
+      const out = this.readFile(fpath);
+      const { isMatch, matchData } = this.matchFile(out);
+      if (isMatch) {
+        this.L.info({ ctx, msg: "matchFile", fname, matchData });
+        if (!this.props.dryRun) {
+          const cleanFile = this.refactorFile(out, matchData);
+          this.writeFile(fpath, cleanFile);
         }
-        const fpath = path.join(root, fname);
-        const out = this.readFile(fpath);
-        const { isMatch, matchData } = this.matchFile(out);
-        if (isMatch) {
-          this.L.info({ ctx, msg: "matchFile", fname, matchData });
-          if (!this.props.dryRun) {
-            const cleanFile = this.refactorFile(out, matchData);
-            this.writeFile(fpath, cleanFile);
-          }
-          stats.numChanged += 1;
-        }
-      })
+        stats.numChanged += 1;
+      }
+    });
     //);
   }
 }

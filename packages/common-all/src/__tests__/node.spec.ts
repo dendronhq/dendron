@@ -5,25 +5,25 @@ import _ from "lodash";
 
 function setupNotes() {
   const baz = new Note({
-    fname: "baz"
+    fname: "baz",
   });
   const foo = new Note({
-    fname: "foo"
+    fname: "foo",
   });
   const fooChild = new Note({
-    fname: "foo.one"
+    fname: "foo.one",
   });
   const fooGrandChild = new Note({
-    fname: "foo.one.alpha"
+    fname: "foo.one.alpha",
   });
   const fooTwoBeta = new Note({
-    fname: "foo.two.beta"
+    fname: "foo.two.beta",
   });
   const bar = new Note({ fname: "bar" });
   const barChild = new Note({ fname: "bar.one" });
   const barChildNamespaceExact = new Note({ fname: "bar.one.alpha-namespace" });
   const barChildNamespaceChild = new Note({
-    fname: "bar.one.alpha-namespace.alpha"
+    fname: "bar.one.alpha-namespace.alpha",
   });
   const barGrandChild = new Note({ fname: "bar.one.alpha" });
   const root = new Note({ id: "root", fname: "root" });
@@ -45,7 +45,7 @@ function setupNotes() {
     barGrandChild,
     root,
     fooTwoBeta,
-    baz
+    baz,
   };
 }
 
@@ -54,28 +54,28 @@ function setupSchema() {
     id: "bar",
     fname: "bar.schema.yml",
     parent: null,
-    data: { namespace: true }
+    data: { namespace: true },
   });
   const barChildNamespace = new Schema({
     id: "alpha-namespace",
     fname: "bar.schema.yml",
     parent: null,
-    data: { namespace: true }
+    data: { namespace: true },
   });
   const foo = new Schema({
     id: "foo",
     fname: "foo.schema.yml",
-    parent: null
+    parent: null,
   });
   const fooChild = new Schema({
     id: "one",
     fname: "foo.schema.yml",
-    parent: null
+    parent: null,
   });
   const fooGrandChild = new Schema({
     id: "alpha",
     fname: "foo.schema.yml",
-    parent: null
+    parent: null,
   });
   foo.addChild(fooChild);
   fooChild.addChild(fooGrandChild);

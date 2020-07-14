@@ -15,15 +15,13 @@
     },
     {
       "path": "packages/engine-server"
-    },
-    {
-      "path": "packages/web-server"
-    },
+    }
   ],
   "settings": {
     "files.exclude": {
       "*.d.ts": true,
       "packages": true
     },
+    "editor.formatOnSave": true
   }
 }

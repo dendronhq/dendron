@@ -1,3 +1,5 @@
+
+
 # Dendron
 
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
@@ -17,7 +19,7 @@ Every knowledge management tool today suffers from the problem of **information 
 
 The burning need for a tool that would not only overcome this problem but actually work better in the presence of more information was the basis of this project.
 
-# (Hiearichal) Solution
+# (Hierarchical) Solution
 
 ## Hierarchies 
 
@@ -166,6 +168,7 @@ Dendron can be installed as a [vscode plugin](https://marketplace.visualstudio.c
 After you have downloaded the plugin, following the instructions to create your first **workspace**. 
 
 1. Launch the *command bar*:
+
   - <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-linux.pdf">Linux</a> `Ctrl+SHIFT+P`
   - <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-macos.pdf">macOS</a> `CMD+SHIFT+P`
   - <a href="https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf">Windows</a> `Ctrl+SHIFT+P`
@@ -180,6 +183,10 @@ After you have downloaded the plugin, following the instructions to create your 
 
 When the workspace opens, it will show dialogue to install the recommended extensions. Though not required, these extensions add all the **non-core** features of Dendron like wiki links and tagging support.
 
+# FAQ
+
+See [[FAQ]] to answers for common questions.
+
 
 # Contributing
 
@@ -190,3 +197,4 @@ We welcome community contributions and pull requests. See [[CONTRIBUTING]] for i
 Dendron is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3.
 
 See [[LICENSE]] and [[NOTICE]] for more information.
+

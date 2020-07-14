@@ -40,3 +40,8 @@ children: []
 ### Why are there two `book` icons that do markdown preview?
 
 We use an extension to do markdown preview. VSCode comes with its default markdown preview extension and its not currently possible to hide the button. You can re-open and upvote the issue [here](https://github.com/microsoft/vscode/issues/86994) if you want to fix this.
+
+
+### How are hierarchies created?
+
+Hierarchies today are created automatically when dendron crawls your folder for `.` delimited file names and custom schema.yml files.

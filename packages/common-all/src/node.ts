@@ -407,6 +407,9 @@ export class Note extends DNode<NoteData> implements INote {
   get description(): string | undefined {
     let schemaPrefix: string | undefined;
     let prefixParts = [];
+    if (this.title !== this.fname) {
+      prefixParts.push(this.title);
+    }
     if (this.stub || this.schemaStub) {
       prefixParts.push("$(gist-new)");
     }

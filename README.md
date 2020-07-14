@@ -183,6 +183,10 @@ After you have downloaded the plugin, following the instructions to create your 
 
 When the workspace opens, it will show dialogue to install the recommended extensions. Though not required, these extensions add all the **non-core** features of Dendron like wiki links and tagging support.
 
+# FAQ
+
+See [[FAQ]] to answers for common questions.
+
 
 # Contributing
 

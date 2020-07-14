@@ -24,14 +24,15 @@ import {
 import { posix } from "path";
 import { HistoryService } from "./services/HistoryService";
 
-function writeWSFile(fpath: string, opts: { rootDir: string }) {
+function writeWSFile(fpath: string, opts: { rootDir: string, pathOverride?: string }) {
+  const cleanOpts = _.defaults(opts, {pathOverride: path.join(opts.rootDir, "vault.main") })
   const jsonBody = {
     folders: [
       {
-        path: path.join(opts.rootDir, "vault.main"),
+        path: cleanOpts.pathOverride
       },
     ],
-    settings: Settings.defaults(opts),
+    settings: Settings.defaults(cleanOpts),
     extensions: {
       recommendations: [
         // git version history
@@ -370,7 +371,10 @@ export class DendronWorkspace {
       throw Error(`${rootDir} does not exist`);
     }
     if (!fs.existsSync(path.join(rootDir, DENDRON_WS_NAME))) {
-      throw Error(`workspace file does not exist`);
+    writeWSFile(path.join(rootDir, DENDRON_WS_NAME), {
+      rootDir,
+      pathOverride: rootDir
+    });
     }
     VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
   }

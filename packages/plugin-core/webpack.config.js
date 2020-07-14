@@ -41,7 +41,8 @@ const config = {
                     6192,
                     // cannot find namespace jest
                     2503
-                ]
+                ],
+                transpileOnly: true
             }
           }
         ]

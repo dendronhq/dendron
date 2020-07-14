@@ -2,6 +2,15 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Test",
+      "type": "shell",
+      "command": "./testAll.sh",
+      "options": {
+        "cwd": "./scripts"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "NPM: Publish",
       "type": "shell",
       "command": "./publish.sh",

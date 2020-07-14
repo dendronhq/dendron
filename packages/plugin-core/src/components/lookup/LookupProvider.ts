@@ -201,8 +201,8 @@ export class LookupProvider {
       if (querystring === "") {
         L.info({ ctx, status: "no qs" });
         //picker.items = [engine().notes["root"]];
-        picker.items = _.uniq(
-          _.map(_.values(engine.notes), (ent) => ent.domain)
+        picker.items = _.uniqBy(
+          _.map(_.values(engine.notes), (ent) => ent.domain), 'domain'
         );
         return;
       }

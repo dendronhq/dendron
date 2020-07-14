@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.13](https://github.com/dendronhq/dendron/compare/v0.3.12...v0.3.13) (2020-07-14)
+
+
+### Features
+
+* ability to re-use existing workspace ([7de80b1](https://github.com/dendronhq/dendron/commit/7de80b17cac4123336afb3d0dc902f22f1a0e488))
+
+
+
+
+
 ## [0.3.12](https://github.com/dendronhq/dendron/compare/v0.3.11...v0.3.12) (2020-07-13)
 
 **Note:** Version bump only for package root

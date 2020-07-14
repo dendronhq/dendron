@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.14](https://github.com/dendronhq/dendron/compare/v0.3.13...v0.3.14) (2020-07-14)
+
+
+### Performance Improvements
+
+* add webpack to optimize bundle ([6c8326a](https://github.com/dendronhq/dendron/commit/6c8326a7f5db7d3c928f04d7742b4f758370a107))
+
+
+
+
+
 ## [0.3.13](https://github.com/dendronhq/dendron/compare/v0.3.12...v0.3.13) (2020-07-14)
 
 

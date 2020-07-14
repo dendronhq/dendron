@@ -9,8 +9,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Performance Improvements
 
 * add webpack to optimize bundle ([4502e49](https://github.com/dendronhq/dendron/commit/4502e49f79d490bb639d2daaf93f841e5b18449d))
-* add webpack to optimize bundle ([6c8326a](https://github.com/dendronhq/dendron/commit/6c8326a7f5db7d3c928f04d7742b4f758370a107))
-
 
 
 

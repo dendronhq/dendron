@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.15](https://github.com/dendronhq/dendron/compare/v0.3.14...v0.3.15) (2020-07-14)
+
+### Bug Fixes
+
+- don't show duplicates when surfacing schema suggestions ([d1716cc](https://github.com/dendronhq/dendron/commit/d1716ccfc3e03ffaddc8e52a3be301af926be029))
+- schema suggestions not always showing ([658c9e3](https://github.com/dendronhq/dendron/commit/658c9e3215cccf1875138928a3c9a8486052b63a))
+
+### Features
+
+- scratch note command ([71d8433](https://github.com/dendronhq/dendron/commit/71d8433fbd10651ec7fcd13a5f7ee41199a43632))
+
 ## [0.3.14](https://github.com/dendronhq/dendron/compare/v0.3.13...v0.3.14) (2020-07-14)
 
 ### Performance Improvements

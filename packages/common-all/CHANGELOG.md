@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.15](https://github.com/dendronhq/dendron/compare/v0.3.14...v0.3.15) (2020-07-14)
+
+### Bug Fixes
+
+- schema suggestions not always showing ([658c9e3](https://github.com/dendronhq/dendron/commit/658c9e3215cccf1875138928a3c9a8486052b63a))
+
+### Features
+
+- show note title if differ from file name ([c0e428d](https://github.com/dendronhq/dendron/commit/c0e428d259ef116d66cbe1107d7760cbb84f8d20))
+
 ## [0.3.11](https://github.com/dendronhq/dendron/compare/v0.3.10...v0.3.11) (2020-07-13)
 
 **Note:** Version bump only for package @dendronhq/common-all

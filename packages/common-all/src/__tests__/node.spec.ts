@@ -22,7 +22,9 @@ function setupNotes() {
   const bar = new Note({ fname: "bar" });
   const barChild = new Note({ fname: "bar.one" });
   const barChildNamespaceExact = new Note({ fname: "bar.one.alpha-namespace" });
-  const barChildNamespaceChild = new Note({ fname: "bar.one.alpha-namespace.alpha" });
+  const barChildNamespaceChild = new Note({
+    fname: "bar.one.alpha-namespace.alpha"
+  });
   const barGrandChild = new Note({ fname: "bar.one.alpha" });
   const root = new Note({ id: "root", fname: "root" });
   fooChild.addChild(fooGrandChild);
@@ -117,68 +119,84 @@ describe("SchemaUtils", () => {
     schemas = setupSchema();
   });
 
-  test("matchString", () => {
-    const fooSchema = SchemaUtils.matchNote("foo", schemas);
-    expectSnapshot(expect, "schemas", _.values(schemas));
-    expect(fooSchema).toEqual(schemas.foo);
+  describe("string", () => {
+    test("node: domain", () => {
+      const fooSchema = SchemaUtils.matchNote("foo", schemas);
+      expectSnapshot(expect, "schemas", _.values(schemas));
+      expect(fooSchema).toEqual(schemas.foo);
+    });
+
+    test("end with dot", () => {
+      const fooSchema = SchemaUtils.matchNote("foo.", schemas);
+      expect(fooSchema).toEqual(schemas.foo);
+    });
+
+    test("end full-name, normal schema", () => {
+      const fooChildSchema = SchemaUtils.matchNote("foo.one", schemas);
+      expect(fooChildSchema).toEqual(schemas.fooChild);
+    });
+
+    test("end with dot, namespace schema", () => {
+      const barSchema = SchemaUtils.matchNote("bar.", schemas);
+      expect(barSchema).toEqual(schemas.bar);
+    });
+
+    test("end mid-name, namespace schema", () => {
+      const barSchema = SchemaUtils.matchNote("bar.foo", schemas);
+      expect(barSchema).toEqual(schemas.bar);
+    });
   });
 
-  test("matchString, end with dot", () => {
-    const fooSchema = SchemaUtils.matchNote("foo.", schemas);
-    expectSnapshot(expect, "schemas", _.values(schemas));
-    expect(fooSchema).toEqual(schemas.foo);
-  });
+  describe("note", () => {
+    test("matchDomain", () => {
+      const fooNote = notes.foo;
+      const fooSchema = SchemaUtils.matchNote(fooNote, schemas);
+      expectSnapshot(expect, "schemas", _.values(schemas));
+      expect(fooSchema).toEqual(schemas.foo);
+    });
 
-  test("matchString end with dot, namespace schema", () => {
-    const barSchema = SchemaUtils.matchNote("bar.", schemas);
-    expectSnapshot(expect, "schemas", _.values(schemas));
-    expect(barSchema).toEqual(schemas.bar);
-  });
+    test("matchChild", () => {
+      const note = notes.fooChild;
+      const schema = SchemaUtils.matchNote(note, schemas);
+      expect(schema).toEqual(schemas.fooChild);
+    });
 
-  test("matchDomain", () => {
-    const fooNote = notes.foo;
-    const fooSchema = SchemaUtils.matchNote(fooNote, schemas);
-    expectSnapshot(expect, "schemas", _.values(schemas));
-    expect(fooSchema).toEqual(schemas.foo);
-  });
+    test("matchChildNamespace", () => {
+      const note = notes.barChild;
+      const schema = SchemaUtils.matchNote(note, schemas);
+      expect(schema).toEqual(schemas.bar);
+    });
 
-  test("matchChild", () => {
-    const note = notes.fooChild;
-    const schema = SchemaUtils.matchNote(note, schemas);
-    expect(schema).toEqual(schemas.fooChild);
-  });
+    test("matchChildNamespace:childAlsoNamespace:exact", () => {
+      const note = notes.barChildNamespaceExact;
+      const schema = SchemaUtils.matchNote(note, schemas);
+      expect(schema.toRawProps()).toEqual(
+        schemas.barChildNamespace.toRawProps()
+      );
+    });
 
-  test("matchChildNamespace", () => {
-    const note = notes.barChild;
-    const schema = SchemaUtils.matchNote(note, schemas);
-    expect(schema).toEqual(schemas.bar);
-  });
+    test("matchChildNamespace:childAlsoNamespace:child", () => {
+      const note = notes.barChildNamespaceExact;
+      const schema = SchemaUtils.matchNote(note, schemas);
+      expect(schema.toRawProps()).toEqual(
+        schemas.barChildNamespace.toRawProps()
+      );
+    });
 
-  test("matchChildNamespace:childAlsoNamespace:exact", () => {
-    const note = notes.barChildNamespaceExact;
-    const schema = SchemaUtils.matchNote(note, schemas);
-    expect(schema.toRawProps()).toEqual(schemas.barChildNamespace.toRawProps());
-  });
+    test("namespace no match grandchild", () => {
+      const note = notes.barGrandChild;
+      const schema = SchemaUtils.matchNote(note, schemas);
+      expect(schema).toEqual(Schema.createUnkownSchema());
+    });
 
-  test("matchChildNamespace:childAlsoNamespace:child", () => {
-    const note = notes.barChildNamespaceExact;
-    const schema = SchemaUtils.matchNote(note, schemas);
-    expect(schema.toRawProps()).toEqual(schemas.barChildNamespace.toRawProps());
-  });
-
-  test("namespace no match grandchild", () => {
-    const note = notes.barGrandChild;
-    const schema = SchemaUtils.matchNote(note, schemas);
-    expect(schema).toEqual(Schema.createUnkownSchema());
-  });
-
-  test("matchGrandChild", () => {
-    const note = notes.fooGrandChild;
-    const schema = SchemaUtils.matchNote(note, schemas);
-    expect(schema).toEqual(schemas.fooGrandChild);
-    const note2 = notes.fooTwoBeta;
-    const schema2 = SchemaUtils.matchNote(note2, schemas);
-    expect(schema2).toEqual(Schema.createUnkownSchema());
+    test("matchGrandChild", () => {
+      const note = notes.fooGrandChild;
+      const schema = SchemaUtils.matchNote(note, schemas);
+      expect(schema).toEqual(schemas.fooGrandChild);
+      const note2 = notes.fooTwoBeta;
+      const schema2 = SchemaUtils.matchNote(note2, schemas);
+      expect(schema2).toEqual(Schema.createUnkownSchema());
+    });
   });
 });
 

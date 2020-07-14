@@ -1,7 +1,7 @@
 /* eslint-disable no-loop-func */
 import _ from "lodash";
 import moment from "moment";
-import minimatch  from "minimatch" ;
+import minimatch from "minimatch";
 import YAML from "yamljs";
 import { DendronError } from "./error";
 import {
@@ -19,19 +19,18 @@ import {
   NoteData,
   NoteRawProps,
   SchemaData,
-
-  SchemaDict, SchemaRawOpts,
+  SchemaDict,
+  SchemaRawOpts,
   SchemaRawProps
 } from "./types";
 import { genUUID } from "./uuid";
-
 
 const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
 export class DNodeUtils {
   /**
-   * @param nodePath 
-   * @param rmExtension 
+   * @param nodePath
+   * @param rmExtension
    */
   static basename(nodePath: string, rmExtension?: boolean) {
     if (rmExtension) {
@@ -52,8 +51,12 @@ export class DNodeUtils {
     return nodePath.split("."[0]);
   }
 
-  static findClosestParent(fpath: string, nodes: DNodeDict, opts?: {noStubs: boolean}): IDNode {
-    const cleanOpts = _.defaults(opts, {noStubs: false});
+  static findClosestParent(
+    fpath: string,
+    nodes: DNodeDict,
+    opts?: { noStubs: boolean }
+  ): IDNode {
+    const cleanOpts = _.defaults(opts, { noStubs: false });
     const dirname = DNodeUtils.dirName(fpath);
     if (dirname === "") {
       return nodes["root"];
@@ -69,15 +72,17 @@ export class DNodeUtils {
   static isRoot(node: DNode): boolean {
     return node.id === "root";
   }
-
 }
 
 export type CreatePropsOpts = {
-  returnExtra: boolean
-}
+  returnExtra: boolean;
+};
 
 export class DNodeRaw {
-  static createProps<T>(nodeOpts: DNodeRawOpts<T>, opts?: CreatePropsOpts): DNodeRawProps<T> & {extra?: any} {
+  static createProps<T>(
+    nodeOpts: DNodeRawOpts<T>,
+    opts?: CreatePropsOpts
+  ): DNodeRawProps<T> & { extra?: any } {
     const {
       id,
       desc,
@@ -104,7 +109,7 @@ export class DNodeRaw {
       custom: {}
     });
     const title = nodeOpts.title || fname;
-    const nodeProps: DNodeRawProps<T> & {extra?: any} = {
+    const nodeProps: DNodeRawProps<T> & { extra?: any } = {
       id,
       title,
       desc,
@@ -116,13 +121,13 @@ export class DNodeRaw {
       stub,
       body,
       data,
-      custom,
+      custom
     };
     if (opts?.returnExtra) {
       const extra = _.omit(nodeOpts, _.keys(nodeProps));
       nodeProps.extra = extra;
     }
-    return nodeProps
+    return nodeProps;
   }
 }
 
@@ -320,7 +325,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
       "fname",
       "data",
       "stub",
-      "custom",
+      "custom"
     ]);
     let parent;
     if (this.parent?.title === "root") {
@@ -371,7 +376,11 @@ export class Note extends DNode<NoteData> implements INote {
 
   static fromSchema(dirpath: string, schema: Schema): Note {
     const fname = [dirpath, schema.id].join(".");
-    const note = new Note({ fname, schemaStub: true, data: { schemaId: schema.id } });
+    const note = new Note({
+      fname,
+      schemaStub: true,
+      data: { schemaId: schema.id }
+    });
     note.schema = schema;
     return note;
   }
@@ -380,7 +389,7 @@ export class Note extends DNode<NoteData> implements INote {
     const cleanProps = _.defaults(props, {
       parent: null,
       children: [],
-      schemaStub: false,
+      schemaStub: false
     });
     super({
       type: "note",
@@ -394,7 +403,7 @@ export class Note extends DNode<NoteData> implements INote {
   get detail(): string {
     if (this.schema && this.schemaStub) {
       return this.schema.desc;
-    } 
+    }
     return this.desc;
   }
 
@@ -402,7 +411,7 @@ export class Note extends DNode<NoteData> implements INote {
     let schemaPrefix: string | undefined;
     let prefixParts = [];
     if (this.stub || this.schemaStub) {
-      prefixParts.push("$(gist-new)")
+      prefixParts.push("$(gist-new)");
     }
     if (this.schema) {
       // case: unknown schema
@@ -435,11 +444,14 @@ export class Note extends DNode<NoteData> implements INote {
 
 export class Schema extends DNode<SchemaData> implements ISchema {
   static createRoot() {
-    const props = SchemaNodeRaw.createProps({ id: "root", fname: "root.schema" });
+    const props = SchemaNodeRaw.createProps({
+      id: "root",
+      fname: "root.schema"
+    });
     return new Schema({ ...props, parent: null, children: [] });
   }
 
-  static _UNKNOWN_SCHEMA: undefined|Schema = undefined;
+  static _UNKNOWN_SCHEMA: undefined | Schema = undefined;
 
   /**
    * This is attached to notes that are part of a domain with schema but
@@ -447,9 +459,18 @@ export class Schema extends DNode<SchemaData> implements ISchema {
    */
   static createUnkownSchema(): Schema {
     if (_.isUndefined(Schema._UNKNOWN_SCHEMA)) {
-      const props = SchemaNodeRaw.createProps({ id: UNKNOWN_SCHEMA_ID, fname: UNKNOWN_SCHEMA_ID, stub: true,
-      created: "-1", updated: "-1" });
-      Schema._UNKNOWN_SCHEMA = new Schema({ ...props, parent: null, children: [] });
+      const props = SchemaNodeRaw.createProps({
+        id: UNKNOWN_SCHEMA_ID,
+        fname: UNKNOWN_SCHEMA_ID,
+        stub: true,
+        created: "-1",
+        updated: "-1"
+      });
+      Schema._UNKNOWN_SCHEMA = new Schema({
+        ...props,
+        parent: null,
+        children: []
+      });
     }
     return Schema._UNKNOWN_SCHEMA as Schema;
   }
@@ -473,7 +494,7 @@ export class Schema extends DNode<SchemaData> implements ISchema {
     const part = this.namespace ? `${this.id}/*` : this.id;
     if (this.parent && this.parent.id !== "root") {
       const prefix = this.parent.logicalPath;
-      return [prefix, part].join("/")
+      return [prefix, part].join("/");
     } else {
       return part;
     }
@@ -574,7 +595,10 @@ export class NodeBuilder {
     return node;
   }
 
-  buildNoteFromProps(props: NoteRawProps[], opts: { schemas: SchemaDict }): Note[] {
+  buildNoteFromProps(
+    props: NoteRawProps[],
+    opts: { schemas: SchemaDict }
+  ): Note[] {
     const { node: rootNode, childrenIds } = getRoot(props);
     const out = [];
     out.push([rootNode]);
@@ -650,10 +674,25 @@ export class SchemaUtils {
     return schema.id === UNKNOWN_SCHEMA_ID;
   }
 
-  static matchNote(noteOrPath: Note|string, schemas: SchemaDict, opts?: {matchNamespace?: boolean}): Schema{
-    const cleanOpts = _.defaults(opts, {matchNamespace: true})
-    const notePath = (_.isString(noteOrPath)) ? noteOrPath : noteOrPath.path
-    const notePathClean  = notePath.replace(/\./g, '/');
+  /**
+   *
+   * @param noteOrPath
+   * @param schemas
+   * @param opts
+   *   - matchNamespace: should match exact namespace note (in addition to wildcard), default: false
+   *   - matchPrefix: allow prefix match, default: false
+   */
+  static matchNote(
+    noteOrPath: Note | string,
+    schemas: SchemaDict,
+    opts?: { matchNamespace?: boolean; matchPrefix?: boolean }
+  ): Schema {
+    const cleanOpts = _.defaults(opts, {
+      matchNamespace: true,
+      matchPrefix: false
+    });
+    const notePath = _.isString(noteOrPath) ? noteOrPath : noteOrPath.path;
+    const notePathClean = notePath.replace(/\./g, "/");
     const out = _.find(_.values(schemas), schema => {
       const logicalPath = schema.logicalPath;
       if (schema.namespace && cleanOpts.matchNamespace) {
@@ -662,17 +701,17 @@ export class SchemaUtils {
         }
       }
       return minimatch(notePathClean, logicalPath);
-     }); 
-     if (_.isUndefined(out)) {
+    });
+    if (_.isUndefined(out)) {
       return Schema.createUnkownSchema();
-     }
-     return out;
+    }
+    return out;
   }
 
   // static matchNote(note: Note, schemas: SchemaDict): Schema{
   //   const matches = _.filter(_.values(schemas), schema => {
   //      return minimatch(note.path.replace(/\./g, '/'), schema.logicalPath);
-  //    }); 
+  //    });
   //    if (_.isEmpty(matches)) {
   //     return Schema.createUnkownSchema();
   //    } else if (matches.length > 1) {

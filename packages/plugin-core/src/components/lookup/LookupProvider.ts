@@ -1,12 +1,18 @@
-import { DNodeUtils, Note, Schema, SchemaUtils, DNode } from "@dendronhq/common-all";
+import {
+  DNodeUtils,
+  Note,
+  Schema,
+  SchemaUtils,
+  DNode,
+  DEngine,
+} from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
-import { DendronEngine  } from "@dendronhq/engine-server";
+import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { QuickPick, QuickPickItem, Uri, window } from "vscode";
 import { CREATE_NEW_LABEL } from "./constants";
 import { node2Uri } from "./utils";
 import { HistoryService } from "../../services/HistoryService";
-
 
 const L = createLogger("LookupProvider");
 
@@ -14,10 +20,10 @@ const L = createLogger("LookupProvider");
 class QueryStringUtils {
   /**
    * Get all schema matches for current query
-   * 
+   *
    * # eg. Query with Root
-   * 
-   * schema: 
+   *
+   * schema:
    * - bar
    *  - alpha
    *  - beta
@@ -25,15 +31,15 @@ class QueryStringUtils {
    *   - one
    *   - two
    * qs: foo
-   * 
+   *
    * return: [one, two]
-   * 
+   *
    * # eg. Query not at root
    * qs: foo.one
-   * 
-   * 
-   * @param _qs 
-   * @param engineResp 
+   *
+   *
+   * @param _qs
+   * @param engineResp
    */
   static getAllSchemaAtLevel(_qs: string, engineResp: Note[]): Schema[] {
     const maybeSchema = engineResp[0]?.schema;
@@ -41,8 +47,16 @@ class QueryStringUtils {
     // if (!this.isDomainQuery(_qs)) {
     //   out.push(maybeSchema?.parent?.children as Schema[])
     // }
-    out.push(maybeSchema?.children as Schema[])
-    return _.flatten(_.filter(out, ent => !_.isUndefined(ent)));
+    out.push(maybeSchema?.children as Schema[]);
+    return _.flatten(_.filter(out, (ent) => !_.isUndefined(ent)));
+  }
+
+  /**
+   *  Go up one level for the hiearchy
+   * @param qs
+   */
+  static goUp(qs: string) {
+    return qs.split(".").slice(0, -1).join(".");
   }
 
   static isDomainQuery(qs: string): boolean {
@@ -95,16 +109,64 @@ class PickerUtils {
     return picker.selectedItems[0];
   }
 
+  static genSchemaSuggestions({
+    items,
+    qs,
+    engine,
+  }: {
+    items: Note[];
+    qs: string;
+    engine: DEngine;
+  }): Note[] {
+    const queryEndsWithDot = qs.endsWith(".");
+
+    // handle schemas that are child of current
+    if (queryEndsWithDot) {
+      const schemas = SchemaUtils.matchNote(qs, engine.schemas, {
+        matchNamespace: false,
+      }).children as Schema[];
+      items = _.uniqBy(
+        items.concat(
+          schemas.map((schema) => {
+            return Note.fromSchema(DNodeUtils.dirName(qs), schema);
+          })
+        ),
+        (ent) => {
+          return ent.fname;
+        }
+      );
+    } else {
+      // handle schemas that are at current level
+      const schemas = SchemaUtils.matchNote(
+        QueryStringUtils.goUp(qs),
+        engine.schemas,
+        {
+          matchNamespace: false,
+        }
+      ).children as Schema[];
+      items = _.uniqBy(
+        items.concat(
+          schemas.map((schema) => {
+            return Note.fromSchema(DNodeUtils.dirName(qs), schema);
+          })
+        ),
+        (ent) => {
+          return ent.fname;
+        }
+      );
+    }
+    return items;
+  }
+
   static filterStubs(items: Note[]): Note[] {
-    return _.filter(items, ent => {
+    return _.filter(items, (ent) => {
       if (ent.schemaStub) {
-        return true
+        return true;
       }
-      return !ent.stub  
+      return !ent.stub;
     });
   }
 }
-
 
 export class LookupProvider {
   public noActiveItem: QuickPickItem;
@@ -129,46 +191,46 @@ export class LookupProvider {
       );
       L.info({ ctx: ctx + ":engine:query:post" });
       // enrich notes with schemas
-      let updatedItems = resp.data.map((note => {
+      let updatedItems = resp.data.map((note) => {
         const schema = SchemaUtils.matchNote(note as Note, engine.schemas);
         (note as Note).schema = schema;
         return note;
-      }));
-
+      });
 
       // check if root query, if so, return everything
       if (querystring === "") {
         L.info({ ctx, status: "no qs" });
         //picker.items = [engine().notes["root"]];
-        picker.items = _.uniq(_.map(_.values(engine.notes), ent => ent.domain));
+        picker.items = _.uniq(
+          _.map(_.values(engine.notes), (ent) => ent.domain)
+        );
         return;
       }
-      // check if single item query, vscode doesn't surface single letter queries 
+      // check if single item query, vscode doesn't surface single letter queries
       if (picker.activeItems.length === 0 && querystring.length === 1) {
         picker.items = updatedItems;
         picker.activeItems = picker.items;
         return;
       }
 
-      const perfectMatch = _.find(updatedItems, {fname: querystring});
+      const perfectMatch = _.find(updatedItems, { fname: querystring });
       // NOTE: we modify this later so need to track this here
       const noUpdatedItems = updatedItems.length === 0;
       const queryEndsWithDot = querystring.endsWith(".");
 
-      // check if we just enetered a new level
-      if (queryEndsWithDot) {
-        // show schema suggestions
-        const schemas = SchemaUtils.matchNote(querystring, engine.schemas, {matchNamespace: false}).children as Schema[];
-        updatedItems = _.uniqBy(updatedItems.concat(schemas.map(schema => {
-          return Note.fromSchema(DNodeUtils.dirName(querystring), schema);
-        })), (ent) => {
-          return ent.fname;
-        });
-      }
+      // check if we just entered a new level, only want to match children schema
+      updatedItems = PickerUtils.genSchemaSuggestions({
+        items: updatedItems as Note[],
+        qs: querystring,
+        engine: engine,
+      });
       // updatedItems = PickerUtils.filterStubs(updatedItems as Note[]);
 
       // check if new item, return if that's the case
-      if (noUpdatedItems || (picker.activeItems.length === 0 && !perfectMatch)) {
+      if (
+        noUpdatedItems ||
+        (picker.activeItems.length === 0 && !perfectMatch)
+      ) {
         L.info({ ctx, status: "no matches" });
         // @ts-ignore
         picker.items = updatedItems.concat([this.noActiveItem]);
@@ -181,6 +243,7 @@ export class LookupProvider {
         picker.activeItems = [perfectMatch];
         picker.items = updatedItems;
       } else if (queryEndsWithDot) {
+        // don't show noActiveItem for dot queries
         L.debug({ ctx, msg: "active != qs, end with ." });
         picker.items = updatedItems;
       } else {
@@ -212,10 +275,15 @@ export class LookupProvider {
         // reuse node if a stub
         // otherwise, children will not be right
         if (selectedItem.stub) {
-          nodeNew = (await DendronEngine.getOrCreateEngine().queryOne(fname, "note")).data as Note;
+          nodeNew = (
+            await DendronEngine.getOrCreateEngine().queryOne(fname, "note")
+          ).data as Note;
           nodeNew.stub = false;
         } else if (selectedItem.schemaStub) {
-          nodeNew = new Note({ title: selectedItem.fname, fname: selectedItem.fname });
+          nodeNew = new Note({
+            title: selectedItem.fname,
+            fname: selectedItem.fname,
+          });
         } else {
           nodeNew = new Note({ title: value, fname });
         }
@@ -223,15 +291,12 @@ export class LookupProvider {
         // FIXME: this should be done after the node is created
         uri = node2Uri(nodeNew);
         const historyService = HistoryService.instance();
-        historyService.add({source: "engine", action: "create", uri});
+        historyService.add({ source: "engine", action: "create", uri });
 
-        await DendronEngine.getOrCreateEngine().write(
-          nodeNew,
-          {
-            newNode: true,
-            parentsAsStubs: true,
-          }
-        );
+        await DendronEngine.getOrCreateEngine().write(nodeNew, {
+          newNode: true,
+          parentsAsStubs: true,
+        });
         L.info({ ctx: `${ctx}:write:done`, value });
       } else {
         uri = node2Uri(selectedItem);

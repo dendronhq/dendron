@@ -187,6 +187,10 @@ When the workspace opens, it will show dialogue to install the recommended exten
 
 See [[FAQ]] to answers for common questions.
 
+# Roadmap
+
+Check out our [public roadmap](https://github.com/orgs/dendronhq/projects/1) to see the features we're working on and to vote for what you want to see next. 
+
 
 # Contributing
 

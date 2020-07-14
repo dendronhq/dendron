@@ -32,8 +32,6 @@ npx lerna run build --scope @dendronhq/common-all
 npx lerna run build --scope @dendronhq/common-server 
 npx lerna run build --scope @dendronhq/engine-server 
 npx lerna run build --scope @dendronhq/plugin-core
-
-npx lerna run build --parallel  --scope @dendronhq/common-client --scope @dendronhq/common-server --scope @dendronhq/plugin-core
 ```
 
 ## Developing

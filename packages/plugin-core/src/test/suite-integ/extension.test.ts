@@ -109,7 +109,7 @@ suite("startup", function () {
       ws = DendronWorkspace.instance();
       HistoryService.instance().subscribe(
         "extension",
-        async (event: HistoryEvent) => {
+        async (_event: HistoryEvent) => {
           vscode.window.showInformationMessage(`got activate`);
           ws = DendronWorkspace.instance();
           await ws.setupWorkspace(root, { skipOpenWS: true });

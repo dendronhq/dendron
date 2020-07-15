@@ -125,8 +125,13 @@ async function showWelcomeOrWhatsNew(
       Logger.info({ ctx, msg: "settings upgraded", changed });
       await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
       vscode.window.showInformationMessage(
-        `Dendron has been upgraded to ${version} from ${previousVersion}`
-      );
+        `Dendron has been upgraded to ${version} from ${previousVersion}`,
+        "See what changed"
+      ).then(resp => {
+        if (resp === "See what changed") {
+          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('https://github.com/dendronhq/dendron/blob/master/CHANGELOG.md#change-log'));
+        }
+      });
     }
   }
 }

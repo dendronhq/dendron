@@ -16,7 +16,7 @@ import {
 import { Logger } from "./logger";
 import { NodeService } from "./services/nodeService/NodeService";
 import { Settings } from "./settings";
-import { resolveTilde, VSCodeUtils, DisposableStore } from "./utils";
+import { resolvePath, VSCodeUtils, DisposableStore } from "./utils";
 import { posix } from "path";
 import { HistoryService } from "./services/HistoryService";
 import moment from "moment";
@@ -125,12 +125,19 @@ export class DendronWorkspace {
     if (!rootDir) {
       throw Error("rootDir not initialized");
     }
-    return rootDir;
+    return resolvePath(rootDir, this.workspaceFile.fsPath);
   }
 
   get extensionAssetsDir(): string {
     const assetsDir = path.join(this.context.extensionPath, "assets");
     return assetsDir;
+  }
+
+  get workspaceFile(): vscode.Uri {
+    if (!vscode.workspace.workspaceFile) {
+      throw Error("no workspace file");
+    }
+    return vscode.workspace.workspaceFile;
   }
 
   private _getVersion(): string {
@@ -281,6 +288,17 @@ export class DendronWorkspace {
         }
       )
     );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.COMPILE_VAULTS,
+        async () => {
+          const ctx = DENDRON_COMMANDS.COMPILE_VAULTS;
+          this.L.info({ ctx });
+          vscode.window.showInformationMessage("compiling");
+        }
+      )
+    );
   }
 
   // === Utils
@@ -411,7 +429,7 @@ export class DendronWorkspace {
   async changeWorkspace(rootDirRaw: string) {
     const ctx = "changeWorkspace";
     this.L.info({ ctx, rootDirRaw });
-    const rootDir = resolveTilde(rootDirRaw);
+    const rootDir = resolvePath(rootDirRaw, vscode.workspace?.workspaceFile?.fsPath);
     if (!fs.existsSync(rootDir)) {
       throw Error(`${rootDir} does not exist`);
     }
@@ -446,7 +464,7 @@ export class DendronWorkspace {
     opts = _.defaults(opts, { skipOpenWS: false });
     const ctx = "setupWorkspace";
     this.L.info({ ctx, rootDirRaw });
-    const rootDir = resolveTilde(rootDirRaw);
+    const rootDir = resolvePath(rootDirRaw, vscode.workspace?.workspaceFile?.fsPath);
     if (fs.existsSync(rootDir)) {
       const options = {
         delete: { msg: "delete existing folder", alias: "d" },

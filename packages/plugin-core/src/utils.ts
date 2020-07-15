@@ -1,7 +1,7 @@
 import { FileTestUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import os from "os";
-import path from "path";
+import path, { posix } from "path";
 import * as vscode from "vscode";
 import { GLOBAL_STATE } from "./constants";
 
@@ -17,6 +17,19 @@ export class DisposableStore {
 }
 
 // === File FUtils
+export function resolvePath(filePath: string, wsRoot?: string): string {
+  if (filePath[0] === "~") {
+    return resolveTilde(filePath);
+  } else if (posix.isAbsolute(filePath)) {
+    return filePath;
+  } else {
+    if (!wsRoot) {
+      throw Error("can't use rel path without a workspace root set");
+    }
+    return posix.join(wsRoot, filePath);
+  }
+}
+
 export function resolveTilde(filePath: string) {
   if (!filePath || typeof filePath !== "string") {
     return "";

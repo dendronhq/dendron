@@ -6,7 +6,11 @@ A personal knowledge management tool that **grows** as you do.
 
 Dendron is a local-first, markdown based, hierarchical note-taking application built on top of [VSCode](https://code.visualstudio.com/) and [friends](./ACKNOWLEDGEMENTS.md).
 
+
+Whether you organize your notes with [PARA](https://fortelabs.co/blog/para/) or [Zettelkasten](https://zettelkasten.de/), link notes together like in [roam](https://roamresearch.com/) and [obsidian](https://obsidian.md/), or simply create notes in an ad-hoc manner, Dendron can help.
+
 Think of it as a [second brain](https://www.buildingasecondbrain.com/) to help you **make sense** of all the information you care about.
+
 
 # Motivation
 

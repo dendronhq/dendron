@@ -1,14 +1,10 @@
 - hosts: localhost # use all for remote
-  vars:
-    S3_PREFIX: https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/
   tasks:
-    - name: gen readme
+    - name: copy header
       template:
-        src: ../templates/dendron.md.j2
-        dest: ../packages/plugin-core/README.md
-    - name: gen dendron
-      vars:
-        S3_PREFIX: ""
-      template:
-        src: ../templates/dendron.md.j2
-        dest: ../packages/plugin-core/assets/notes/vault.main/dendron.md
+        src: ../templates/_readme.header.j2
+        dest: ../docs/README.md
+    - name: append newline
+      shell: echo "\n" >> ../docs/README.md
+    - name: append readme
+      shell: cat ../README.md >> ../docs/README.md

@@ -122,26 +122,17 @@ export type EngineQueryResp<T = DNodeData> = Resp<IDNode<T>[]>;
 export type StoreGetResp<T = DNodeData> = Resp<DNodeRawProps<T>>;
 export type StoreQueryResp<T = DNodeData> = Resp<DNodeRawProps<T>[]>;
 
-export interface NodeWriteOpts {
-  /**
-   * If newNode, will add it to the parent
-   */
-  newNode?: boolean;
+export type NodeWriteOpts = {
   /**
    * See QueryOpts.stub
    */
   stub?: boolean;
   /**
-   * If parents don't exist, create stubs
-   * default: false
-   */
-  parentsAsStubs?: boolean;
-  /**
    * Write all children?
    * default: false
    */
   recursive?: boolean;
-}
+} & Partial<UpdateNodesOpts>;
 
 export type EngineDeleteOpts = {
   /**
@@ -151,6 +142,9 @@ export type EngineDeleteOpts = {
 };
 
 export interface QueryOpts {
+  /**
+   * Should add to full nodes
+   */
   fullNode?: boolean;
   /**
    * Just get one result
@@ -176,8 +170,18 @@ export interface QueryOpts {
 export type QueryOneOpts = Omit<QueryOpts, "queryOne">;
 
 export type UpdateNodesOpts = {
+  /**
+   * If parents don't exist, create them
+   */
   parentsAsStubs: boolean;
+  /**
+   * New Node, should add to `fullNode` cache
+   */
   newNode: boolean;
+  /**
+   * Should skip adding parents, default: false
+   */
+  noAddParent?: boolean
 };
 
 export type StoreQueryOpts = QueryOpts & {

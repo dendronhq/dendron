@@ -43,12 +43,15 @@
     "fs-extra": "^9.0.1",
     "fuse.js": "^6.3.0",
     "gray-matter": "^4.0.2",
+    "klaw": "^3.0.0",
     "lodash": "^4.17.15",
+    "vscode-uri": "^2.1.2",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.1",
     "@types/jest": "^23.3.3",
+    "@types/klaw": "^3.0.1",
     "@types/lodash": "^4.14.156",
     "@types/node": "13.11.0",
     "@types/pino": "^6.3.0",

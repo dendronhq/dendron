@@ -2,7 +2,7 @@ import fs from "fs-extra";
 import { genUUID } from "@dendronhq/common-all";
 import _ from "lodash";
 import YAML from "yamljs";
-import path from "path";
+import path, { posix } from "path";
 import matter from "gray-matter";
 
 export function appendUUID(fname: string) {
@@ -48,6 +48,11 @@ export class FileTestUtils {
     ];
   };
 
+  static getFixturesRoot(base: string) {
+    const pkgRoot = FileTestUtils.getPkgRoot(base);
+    return posix.join(pkgRoot, "fixtures");
+  };
+
   static getPkgRoot(base: string, fname?: string): string {
     fname = fname || "package.json";
     let acc = 5;
@@ -61,6 +66,10 @@ export class FileTestUtils {
       lvls.push("..");
     }
     throw Error(`no root found from ${base}`);
+  }
+
+  static setupDir(from: string, to: string) {
+    fs.copySync(from, to);
   }
 
   static tmpDir(base: string, skipCreate?: boolean) {

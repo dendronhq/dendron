@@ -76,6 +76,12 @@ export type CreatePropsOpts = {
 };
 
 export class DNodeRaw {
+  /**
+   * 
+   * @param nodeOpts 
+   * @param opts 
+   *   - returnExtra: if true, return extra properties, default: false
+   */
   static createProps<T>(
     nodeOpts: DNodeRawOpts<T>,
     opts?: CreatePropsOpts

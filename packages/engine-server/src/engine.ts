@@ -483,6 +483,7 @@ export class DendronEngine implements DEngine {
       stub: false,
       parentsAsStubs: false,
       recursive: false,
+      noAddParent: false,
     });
     if (node.type === "schema") {
       const refreshList: DNode[] = [node];
@@ -521,7 +522,7 @@ export class DendronEngine implements DEngine {
       });
       return this.updateNodes(
         [note],
-        _.pick(props, ["parentsAsStubs", "newNode"])
+        _.pick(props, ["parentsAsStubs", "newNode", "noAddParent"])
       );
     }
   }
@@ -547,36 +548,40 @@ export class DendronEngine implements DEngine {
   }
 
   // OPTIMIZE: do in bulk
-  async _updateNote(
-    note: Note,
-    opts: { parentsAsStubs: boolean; newNode: boolean }
-  ) {
+  /**
+   *
+   * @param note
+   * @param opts
+   */
+  async _updateNote(note: Note, opts: UpdateNodesOpts) {
     const refreshList: Note[] = [note];
-    let parentPath = DNodeUtils.dirName(note.fname);
-    if (_.isEmpty(parentPath)) {
-      parentPath = "root";
-    }
-    let parentNode = _.find(this.notes, (n) => n.path === parentPath);
-    if (!parentNode) {
-      if (opts.parentsAsStubs) {
-        const closestParent = DNodeUtils.findClosestParent(
-          note.logicalPath,
-          this.notes
-        );
-        const stubNodes = NoteUtils.createStubNotes(
-          closestParent as Note,
-          note
-        );
-        stubNodes.forEach((ent2) => {
-          refreshList.push(ent2);
-        });
-        // last element is parent
-        parentNode = stubNodes.slice(-1)[0];
-      } else {
-        throw Error("no parent found");
+    if (!opts.noAddParent) {
+      let parentPath = DNodeUtils.dirName(note.fname);
+      if (_.isEmpty(parentPath)) {
+        parentPath = "root";
       }
+      let parentNode = _.find(this.notes, (n) => n.path === parentPath);
+      if (!parentNode) {
+        if (opts.parentsAsStubs) {
+          const closestParent = DNodeUtils.findClosestParent(
+            note.logicalPath,
+            this.notes
+          );
+          const stubNodes = NoteUtils.createStubNotes(
+            closestParent as Note,
+            note
+          );
+          stubNodes.forEach((ent2) => {
+            refreshList.push(ent2);
+          });
+          // last element is parent
+          parentNode = stubNodes.slice(-1)[0];
+        } else {
+          throw Error("no parent found");
+        }
+      }
+      parentNode.addChild(note);
     }
-    parentNode.addChild(note);
     return this.refreshNodes(refreshList, { fullNode: opts.newNode });
   }
 }

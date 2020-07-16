@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.16](https://github.com/dendronhq/dendron/compare/v0.3.15...v0.3.16) (2020-07-16)
+
+### Features
+
+- implement journal notes. see details here: https://github.com/dendronhq/dendron-template/blob/master/vault/dendron.feature.journals.md ([5e1236f](https://github.com/dendronhq/dendron/commit/5e1236fddbf1e0fddf4c27d1a40e9841cc99974f))
+- set relative rootDir ([65bbd77](https://github.com/dendronhq/dendron/commit/65bbd77e1bc49f45776904232953dba6b4c2cca9))
+
 ## [0.3.15](https://github.com/dendronhq/dendron/compare/v0.3.14...v0.3.15) (2020-07-14)
 
 ### Bug Fixes

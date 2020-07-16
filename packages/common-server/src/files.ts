@@ -15,7 +15,7 @@ import YAML from "yamljs";
 import _ from "lodash";
 import matter from "gray-matter";
 import minimatch from "minimatch";
-import path from "path";
+import path, { posix } from "path";
 
 interface FileMeta {
   name: string;
@@ -27,6 +27,22 @@ export type getAllFilesOpts = {
   exclude?: string[];
   withFileTypes?: boolean;
 };
+
+/**
+ * Make name safe for dendron
+ * @param name 
+ * @param opts 
+ */
+export function cleanName(name: string, opts?: { isDir?: boolean }): string {
+  const cleanOpts = _.defaults(opts, { isDir: false });
+  // strip extension
+  name = name.replace(/\//g, ".").toLocaleLowerCase();
+  name = name.replace(/' '/g, "-");
+  if (!cleanOpts.isDir) {
+    return posix.parse(name).name;
+  }
+  return name;
+}
 
 export function fileMeta2Node(body: string, meta: FileMeta): Note {
   const title = meta.name;

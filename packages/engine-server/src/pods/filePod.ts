@@ -11,6 +11,7 @@ import _ from "lodash";
 import { posix } from "path";
 import { URI } from "vscode-uri";
 import { BasePod } from "./base";
+import { cleanName } from "@dendronhq/common-server";
 
 type DItem = Item & {
   data?: any;
@@ -22,17 +23,6 @@ type DItem = Item & {
  * Key is path, value is raw props
  */
 type HierarichalDict = { [k: string]: NoteRawProps[] };
-
-function cleanName(name: string, opts?: { isDir?: boolean }): string {
-  const cleanOpts = _.defaults(opts, { isDir: false });
-  // strip extension
-  name = name.replace(/\//g, ".").toLocaleLowerCase();
-  name = name.replace(/' '/g, "_");
-  if (!cleanOpts.isDir) {
-    return posix.parse(name).name;
-  }
-  return name;
-}
 
 export class FilePod extends BasePod {
   files2HierarichalDict(files: DItem[]): HierarichalDict {

@@ -1,4 +1,11 @@
-import { DEngine, DNodeUtils, getStage, Note } from "@dendronhq/common-all";
+import {
+  DEngine,
+  DNodeUtils,
+  getStage,
+  Note,
+  DNode,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import { DendronEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -20,6 +27,7 @@ import { resolvePath, VSCodeUtils, DisposableStore } from "./utils";
 import { posix } from "path";
 import { HistoryService } from "./services/HistoryService";
 import moment from "moment";
+import { cleanName, mdFile2NodeProps } from "@dendronhq/common-server";
 
 function writeWSFile(
   fpath: string,
@@ -208,6 +216,59 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.CREATE_JOURNAL_NOTE,
+        async () => {
+          const ctx = DENDRON_COMMANDS.CREATE_JOURNAL_NOTE;
+          const defaultNameConfig = "Y-MM-DD-HHmmss";
+          const journalNamespace = "journal";
+          const noteName = moment().format(defaultNameConfig);
+          const editorPath =
+            vscode.window.activeTextEditor?.document.uri.fsPath;
+          if (!editorPath) {
+            throw Error("not currently in a note");
+          }
+          const cNoteFname = posix.basename(editorPath, ".md");
+          const currentDomain = DNodeUtils.domainName(cNoteFname);
+          let fname = `${currentDomain}.${journalNamespace}.${noteName}`;
+          const title = await vscode.window.showInputBox({
+            prompt: "Title",
+            ignoreFocusOut: true,
+            placeHolder: "Press enter to leave blank",
+          });
+          if (title) {
+            fname += `-${cleanName(title)}`;
+          }
+          const node = new Note({ fname, title });
+          const uri = node2Uri(node);
+          const historyService = HistoryService.instance();
+          historyService.add({ source: "engine", action: "create", uri });
+          await DendronEngine.getOrCreateEngine().write(node, {
+            newNode: true,
+            parentsAsStubs: true,
+          });
+
+          const cNote = _.find(this.engine.notes, {fname: cNoteFname});
+          if (!cNote) {
+            throw Error("cNote undefined");
+          }
+          const cNoteNew = new Note({
+            ...mdFile2NodeProps(editorPath),
+            parent: cNote.parent,
+            children: cNote.children,
+            id: cNote.id,
+          });
+          NoteUtils.addBackLink(cNoteNew, node);
+          await this.engine.write(cNoteNew);
+
+          // done
+          this.L.info({ ctx: `${ctx}:write:done`, uri });
+          await vscode.window.showTextDocument(uri);
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
       vscode.commands.registerCommand(DENDRON_COMMANDS.CHANGE_WS, async () => {
         const ctx = DENDRON_COMMANDS.CHANGE_WS;
         const resp = await vscode.window.showInputBox({
@@ -285,17 +346,6 @@ export class DendronWorkspace {
           vscode.window.showInformationMessage(
             `${posix.basename(fsPath)} deleted`
           );
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.COMPILE_VAULTS,
-        async () => {
-          const ctx = DENDRON_COMMANDS.COMPILE_VAULTS;
-          this.L.info({ ctx });
-          vscode.window.showInformationMessage("compiling");
         }
       )
     );
@@ -429,7 +479,10 @@ export class DendronWorkspace {
   async changeWorkspace(rootDirRaw: string) {
     const ctx = "changeWorkspace";
     this.L.info({ ctx, rootDirRaw });
-    const rootDir = resolvePath(rootDirRaw, vscode.workspace?.workspaceFile?.fsPath);
+    const rootDir = resolvePath(
+      rootDirRaw,
+      vscode.workspace?.workspaceFile?.fsPath
+    );
     if (!fs.existsSync(rootDir)) {
       throw Error(`${rootDir} does not exist`);
     }
@@ -464,7 +517,10 @@ export class DendronWorkspace {
     opts = _.defaults(opts, { skipOpenWS: false });
     const ctx = "setupWorkspace";
     this.L.info({ ctx, rootDirRaw });
-    const rootDir = resolvePath(rootDirRaw, vscode.workspace?.workspaceFile?.fsPath);
+    const rootDir = resolvePath(
+      rootDirRaw,
+      vscode.workspace?.workspaceFile?.fsPath
+    );
     if (fs.existsSync(rootDir)) {
       const options = {
         delete: { msg: "delete existing folder", alias: "d" },

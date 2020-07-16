@@ -22,13 +22,22 @@ import {
   SchemaDict,
   SchemaRawOpts,
   SchemaRawProps,
+  NoteLink,
 } from "./types";
 import { genUUID } from "./uuid";
+import { format } from "path";
 
 const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
 export class DNodeUtils {
   /**
+   * Last element of path
+   * 
+   * // don't remove extension
+   * basename(foo.bar.md) // foo.bar
+   * 
+   * // remove extension
+   * basename(foo.bar.md, true) // foo
    * @param nodePath
    * @param rmExtension
    */
@@ -40,12 +49,21 @@ export class DNodeUtils {
     return nodePath.split(".").slice(-1)[0];
   }
 
+  /**
+   * Second last element
+   * @param nodePath 
+   */
   static dirName(nodePath: string) {
     return nodePath.split(".").slice(0, -1).join(".");
   }
 
+  /**
+   * First element
+   * eg. domainName(foo.bar.baz) // foo
+   * @param nodePath 
+   */
   static domainName(nodePath: string) {
-    return nodePath.split("."[0]);
+    return nodePath.split(".")[0];
   }
 
   static findClosestParent(
@@ -644,7 +662,23 @@ export class NodeBuilder {
   }
 }
 
+
+function createBackLink(note: Note): NoteLink {
+  return {
+    type: "note",
+    id: "[[" + note.fname + "]]"
+  }
+}
+
 export class NoteUtils {
+
+  static addBackLink(from: Note, to: Note): void {
+    if (_.isUndefined(from.data.links)) {
+      from.data.links = [];
+    }
+    from.data.links.push(createBackLink(to))
+  }
+
   /**
    * @param from
    * @param to

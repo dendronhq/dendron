@@ -53,7 +53,6 @@ describe("filePod", () => {
       "project.p1.n1",
       "project.p1.n2",
     ]);
-    console.log(root);
     [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
       root,
       LernaTestUtils.fixtureFilesForStore(),

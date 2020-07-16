@@ -7,8 +7,14 @@ export type Stage = "dev" | "prod" | "test";
 // === Node Types
 
 // --- Primitives
+export type NoteLink = {
+  type: "note",
+  id: string
+}
+
 export type NoteData = {
   schemaId?: string;
+  links?: NoteLink[]
 };
 export type SchemaData = {
   namespace?: boolean;

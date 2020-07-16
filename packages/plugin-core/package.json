@@ -51,8 +51,12 @@
         "title": "Dendron: Lookup"
       },
       {
+        "command": "dendron.createJournalNote",
+        "title": "Dendron: New Journal Note"
+      },
+      {
         "command": "dendron.createScratchNote",
-        "title": "Dendron: Create Scratch Note"
+        "title": "Dendron: New Scratch Note"
       },
       {
         "command": "dendron.initWS",

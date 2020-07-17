@@ -33,12 +33,16 @@ export type getAllFilesOpts = {
  * @param name 
  * @param opts 
  */
-export function cleanName(name: string, opts?: { isDir?: boolean }): string {
-  const cleanOpts = _.defaults(opts, { isDir: false });
-  // strip extension
+export function cleanName(name: string): string {
   name = name.replace(/\//g, ".").toLocaleLowerCase();
   name = name.replace(/' '/g, "-");
-  if (!cleanOpts.isDir) {
+  return name;
+}
+
+export function cleanFileName(name: string, opts?: { isDir?: boolean }): string {
+  const cleanOpts = _.defaults(opts, { isDir: false });
+  name = cleanName(name);
+  if (cleanOpts.isDir) {
     return posix.parse(name).name;
   }
   return name;

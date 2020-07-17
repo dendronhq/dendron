@@ -1,17 +1,18 @@
 import {
   DNodeRaw,
-  NoteData,
-  NoteRawProps,
+
+
   DNodeUtils,
-  Note,
+  Note, NoteData,
+  NoteRawProps
 } from "@dendronhq/common-all";
+import { cleanFileName } from "@dendronhq/common-server";
 import matter from "gray-matter";
 import klaw, { Item } from "klaw";
 import _ from "lodash";
 import { posix } from "path";
 import { URI } from "vscode-uri";
 import { BasePod } from "./base";
-import { cleanName } from "@dendronhq/common-server";
 
 type DItem = Item & {
   data?: any;
@@ -28,7 +29,7 @@ export class FilePod extends BasePod {
   files2HierarichalDict(files: DItem[]): HierarichalDict {
     const out: HierarichalDict = {};
     _.forEach(files, (item) => {
-      const fname = cleanName(item.path, { isDir: item.stats.isDirectory() });
+      const fname = cleanFileName(item.path, { isDir: item.stats.isDirectory() });
       const lvl = fname.split(".").length;
       if (!_.has(out, lvl)) {
         out[lvl] = [];

@@ -59,6 +59,10 @@
         "title": "Dendron: New Scratch Note"
       },
       {
+        "command": "dendron.createRecordNote",
+        "title": "Dendron: New Record Note"
+      },
+      {
         "command": "dendron.initWS",
         "title": "Dendron: Initialize Workspace"
       },

@@ -20,6 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
     storagePath,
     globalStoragePath,
   } = context;
+  const isDebug = VSCodeUtils.isDebuggingExtension();
   if (stage === "test") {
     context = VSCodeUtils.getOrCreateMockContext();
   }
@@ -31,6 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
   Logger.info({
     ctx,
     stage,
+    isDebug,
     logPath,
     extensionPath,
     extensionUri,
@@ -77,8 +79,8 @@ export function activate(context: vscode.ExtensionContext) {
   } else {
     Logger.info({ ctx: "dendron not active" });
   }
-  if (VSCodeUtils.isDebuggingExtension()) {
-    // Logger.output?.show(false);
+  if (isDebug) {
+    Logger.output?.show(false);
     // TODO: check for cmd
     // const fullLogPath = FileUtils.escape(path.join(logPath, 'dendron.log'));
     // TODO

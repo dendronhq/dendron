@@ -1,7 +1,7 @@
 /* eslint-disable no-loop-func */
 import _ from "lodash";
-import moment from "moment";
 import minimatch from "minimatch";
+import moment from "moment";
 import YAML from "yamljs";
 import { DendronError } from "./error";
 import {
@@ -17,25 +17,24 @@ import {
   ISchema,
   ISchemaOpts,
   NoteData,
+  NoteLink,
   NoteRawProps,
   SchemaData,
   SchemaDict,
   SchemaRawOpts,
   SchemaRawProps,
-  NoteLink,
 } from "./types";
 import { genUUID } from "./uuid";
-import { format } from "path";
 
 const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
 export class DNodeUtils {
   /**
    * Last element of path
-   * 
+   *
    * // don't remove extension
    * basename(foo.bar.md) // foo.bar
-   * 
+   *
    * // remove extension
    * basename(foo.bar.md, true) // foo
    * @param nodePath
@@ -51,7 +50,7 @@ export class DNodeUtils {
 
   /**
    * Second last element
-   * @param nodePath 
+   * @param nodePath
    */
   static dirName(nodePath: string) {
     return nodePath.split(".").slice(0, -1).join(".");
@@ -60,7 +59,7 @@ export class DNodeUtils {
   /**
    * First element
    * eg. domainName(foo.bar.baz) // foo
-   * @param nodePath 
+   * @param nodePath
    */
   static domainName(nodePath: string) {
     return nodePath.split(".")[0];
@@ -95,9 +94,9 @@ export type CreatePropsOpts = {
 
 export class DNodeRaw {
   /**
-   * 
-   * @param nodeOpts 
-   * @param opts 
+   *
+   * @param nodeOpts
+   * @param opts
    *   - returnExtra: if true, return extra properties, default: false
    */
   static createProps<T>(
@@ -662,21 +661,19 @@ export class NodeBuilder {
   }
 }
 
-
 function createBackLink(note: Note): NoteLink {
   return {
     type: "note",
-    id: "[[" + note.fname + "]]"
-  }
+    id: "[[" + note.fname + "]]",
+  };
 }
 
 export class NoteUtils {
-
   static addBackLink(from: Note, to: Note): void {
     if (_.isUndefined(from.data.links)) {
       from.data.links = [];
     }
-    from.data.links.push(createBackLink(to))
+    from.data.links.push(createBackLink(to));
   }
 
   /**

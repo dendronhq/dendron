@@ -28,6 +28,8 @@ import { posix } from "path";
 import { HistoryService } from "./services/HistoryService";
 import moment from "moment";
 import { cleanName, mdFile2NodeProps } from "@dendronhq/common-server";
+import { isAnythingSelected } from "./utils/editor";
+import open from "open";
 
 function writeWSFile(
   fpath: string,
@@ -134,6 +136,12 @@ export class DendronWorkspace {
       throw Error("rootDir not initialized");
     }
     return resolvePath(rootDir, this.workspaceFile.fsPath);
+  }
+
+  get rootWorkspace(): vscode.WorkspaceFolder {
+    const wsFolders = vscode.workspace
+      ?.workspaceFolders as vscode.WorkspaceFolder[];
+    return wsFolders[0] as vscode.WorkspaceFolder;
   }
 
   get extensionAssetsDir(): string {
@@ -348,6 +356,32 @@ export class DendronWorkspace {
           );
         }
       )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(DENDRON_COMMANDS.OPEN_LINK, async () => {
+        const ctx = DENDRON_COMMANDS.OPEN_LINK;
+        this.L.info({ ctx });
+        if (!isAnythingSelected()) {
+          return vscode.window.showErrorMessage("nothing selected");
+        }
+        const editor = vscode.window.activeTextEditor as vscode.TextEditor;
+        const selection = editor.selection as vscode.Selection;
+        const text = editor.document.getText(selection);
+        const assetPath = resolvePath(text, this.rootWorkspace.uri.fsPath);
+        if (!fs.existsSync(assetPath)) {
+          return vscode.window.showErrorMessage(`${assetPath} does not exist`);
+        }
+        open(assetPath)
+          .then(() => {
+            vscode.window.showInformationMessage("loaded");
+          })
+          .catch((err) => {
+            vscode.window.showInformationMessage(
+              "error: " + JSON.stringify(err)
+            );
+          });
+      })
     );
   }
 

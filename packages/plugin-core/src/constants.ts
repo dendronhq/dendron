@@ -12,6 +12,7 @@ export const DENDRON_COMMANDS = {
   RESET_CONFIG: "dendron.dev.resetConfig",
   CREATE_SCRATCH_NOTE: "dendron.createScratchNote",
   CREATE_JOURNAL_NOTE: "dendron.createJournalNote",
+  OPEN_LINK: "dendron.openLink",
 };
 export const DENDRON_CHANNEL_NAME = "Dendron";
 export const GLOBAL_STATE = {

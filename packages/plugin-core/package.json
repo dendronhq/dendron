@@ -73,6 +73,10 @@
       {
         "command": "dendron.dev.resetConfig",
         "title": "Dev:Dendron: ResetConfig"
+      },
+      {
+        "command": "dendron.openLink",
+        "title": "Dendron: Open Link"
       }
     ],
     "keybindings": [
@@ -108,6 +112,7 @@
     "@types/mocha": "^7.0.2",
     "@types/moment": "^2.13.0",
     "@types/node": "^13.11.0",
+    "@types/open": "^6.2.1",
     "@types/vscode": "^1.46.0",
     "@typescript-eslint/eslint-plugin": "^2.30.0",
     "@typescript-eslint/parser": "^2.30.0",
@@ -129,6 +134,7 @@
     "execa": "^4.0.2",
     "fs-extra": "^9.0.1",
     "lodash": "^4.17.15",
-    "moment": "^2.27.0"
+    "moment": "^2.27.0",
+    "open": "^7.0.4"
   }
 }

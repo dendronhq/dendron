@@ -576,6 +576,7 @@ export class DendronWorkspace {
     }
     VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
   }
+  
 
   async reloadWorkspace(mainVault?: string) {
     // TODO: dispose of existing workspace
@@ -585,9 +586,13 @@ export class DendronWorkspace {
       mainVault = wsFolders![0].uri.fsPath;
     }
     const engine = DendronEngine.getOrCreateEngine({ root: mainVault });
-    await engine.init();
-    this._engine = engine;
-    return;
+    try {
+      await engine.init();
+      this._engine = engine;
+      return;
+    } catch (err) {
+      vscode.window.showErrorMessage(`error initializing dendron: ${JSON.stringify(err)}`);
+    }
   }
 
   /**

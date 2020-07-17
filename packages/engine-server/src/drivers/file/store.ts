@@ -90,6 +90,11 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
   files2Notes(fpaths: string[]): NoteRawProps[] {
     const fp = new FileParser(this, { errorOnEmpty: false });
     const data = fp.parse(fpaths);
+    const errors = fp.errors;
+    const badParseErrors = errors.filter((e) => e.status === "BAD_PARSE");
+    if (!_.isEmpty(badParseErrors)) {
+      throw Error(`bad yaml: ${badParseErrors}`)
+    }
     return data.map((n) => n.toRawProps());
   }
 

@@ -8,6 +8,12 @@
 - [ ] add cmd to `package.json`
 - [ ] add cmd implementation to `src/workspace.ts`
 
+### Force Install an older version of dendron
+
+```sh
+code-insiders --install-extension "dendron-0.3.16.vsix" --force
+```
+
 # QA
 
 ### General

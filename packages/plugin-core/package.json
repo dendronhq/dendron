@@ -81,6 +81,10 @@
       {
         "command": "dendron.openLink",
         "title": "Dendron: Open Link"
+      },
+      {
+        "command": "dendron.importPod",
+        "title": "Dendron: Import Pod"
       }
     ],
     "keybindings": [

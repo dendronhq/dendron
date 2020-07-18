@@ -7,10 +7,12 @@ interface Pod {
 
 export abstract class BasePod implements Pod {
     protected engine: DEngine;
+    protected root: URI;
 
-    constructor(engine: DEngine) {
-        this.engine = engine;
+    constructor(opts: {engine: DEngine, root: URI}) {
+        this.engine = opts.engine;
+        this.root = opts.root;
     }
 
-    abstract async import (uri: URI): Promise<any>
+    abstract async import (): Promise<any>
 }

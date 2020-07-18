@@ -117,8 +117,9 @@ Array [
     "type": "note",
   },
   Object {
-    "body": "project/p1/n1.pdf
-project/p1/n3.pdf",
+    "body": "# Imported Assets
+- [n1.pdf](assets/n1-171b1080-df6a-4d5c-9c47-70feb03f2966.pdf)
+- [n3.pdf](assets/n3-00fc1579-8c0c-4d75-a1a0-284bd6c26f8d.pdf)",
     "children": Array [
       "project.p1.n1",
       "project.p1.n2",

@@ -31,10 +31,10 @@ describe("filePod", () => {
 
   test("sanity", async () => {
     const filesRoot = posix.join(fixtures, "pods", "filePod");
-    const fp = new FilePod(engine);
     const uri = URI.parse(filesRoot);
-    await fp.import(uri);
-    testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
+    const fp = new FilePod({engine, root: uri});
+    await fp.import();
+    // testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
 
     // domain note is stub
     let note = _.find(engine.notes, { fname: "project" }) as Note;
@@ -58,6 +58,7 @@ describe("filePod", () => {
       LernaTestUtils.fixtureFilesForStore(),
       {
         add: [
+          "assets",
           "project.p1.md",
           "project.p1.n1.md",
           "project.p1.n2.md",
@@ -66,8 +67,15 @@ describe("filePod", () => {
       }
     );
     expect(expectedFiles).toEqual(actualFiles);
-    //expectSnapshot(expect, "pNote", pNote);
-    //expect(uri).toEqual("")
-    // fp.import(uri.p)
+    // check that assets are copied over
+    const assetsDir = fs.readdirSync(posix.join(root, "assets"));
+    //expect(assetsDir).toMatchSnapshot("assetsDir");
+    expect(assetsDir.length).toEqual(2);
+
+    // check that assets are there
+    const fileBody = fs.readFileSync(posix.join(root, "project.p1.md"), {encoding: "utf8"});
+    expect(fileBody.match("n1.pdf")).toBeTruthy();
+    expect(fileBody.match("n3.pdf")).toBeTruthy();
+    // expect(fs.readFileSync(posix.join(root, "project.p1.md"), {encoding: "utf8"})).toMatchSnapshot("p1.md")
   });
 });

@@ -39,10 +39,17 @@ export function cleanName(name: string): string {
   return name;
 }
 
+/**
+ * 
+ * @param name 
+ * @param opts 
+ *   - isDir: dealing with directory
+ */
 export function cleanFileName(name: string, opts?: { isDir?: boolean }): string {
   const cleanOpts = _.defaults(opts, { isDir: false });
   name = cleanName(name);
-  if (cleanOpts.isDir) {
+  // if file, only get name (no extension)
+  if (!cleanOpts.isDir) {
     return posix.parse(name).name;
   }
   return name;

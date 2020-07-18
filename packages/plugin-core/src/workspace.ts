@@ -28,6 +28,7 @@ import { NodeService } from "./services/nodeService/NodeService";
 import { Settings } from "./settings";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
+import { ImportPodCommand } from "./commands/ImportPod";
 
 function writeWSFile(
   fpath: string,
@@ -429,6 +430,15 @@ export class DendronWorkspace {
               "error: " + JSON.stringify(err)
             );
           });
+      })
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(DENDRON_COMMANDS.IMPORT_POD, async () => {
+        const ctx = DENDRON_COMMANDS.IMPORT_POD;
+        const wsRoot = this.rootWorkspace.uri.fsPath;
+        await new ImportPodCommand().execute({wsRoot});
+        vscode.window.showInformationMessage(`pod import`);
       })
     );
   }

@@ -25,6 +25,7 @@ import {
   SchemaRawProps,
 } from "./types";
 import { genUUID } from "./uuid";
+import { URI } from "vscode-uri";
 
 const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
@@ -210,6 +211,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
   public label: string;
   public stub: boolean;
   public custom: any;
+  public uri: URI;
 
   constructor(opts: IDNodeOpts<T>) {
     const {
@@ -244,6 +246,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     this.label = DNodeUtils.isRoot(this) ? "root" : this.logicalPath;
     this.stub = stub;
     this.custom = custom;
+    this.uri = URI.parse(`dendron://${fname}.md`);
   }
 
   get domain(): DNode<T> {
@@ -288,8 +291,6 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
   get path(): string {
     return this.fname;
   }
-
-  abstract get url(): string;
 
   addChild(node: IDNode<T>) {
     // only add if new

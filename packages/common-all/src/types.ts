@@ -1,7 +1,7 @@
 // Global Types
 
 import { Note, Schema } from "./node";
-
+import { URI } from 'vscode-uri';
 export type Stage = "dev" | "prod" | "test";
 
 // === Node Types
@@ -68,6 +68,7 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
    */
   path: string;
   basename: string;
+  uri: URI;
   /**
    * Path dependent on type of node
    *   - for notes, this is same as `path` except for `root` node, in which case this is ""
@@ -78,9 +79,6 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
    * Child of the root (this.parent == root)
    */
   domain: IDNode<T>;
-  // absolute url to node id
-  // FIXM:E not used
-  url: string;
   label: string;
   detail: string;
 

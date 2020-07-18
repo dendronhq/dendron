@@ -1,15 +1,13 @@
 import { DNode } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-server";
+import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
-import { LookupProvider } from "./LookupProvider";
-import { DendronEngine } from "@dendronhq/engine-server";
 import { DendronWorkspace } from "../../workspace";
+import { LookupProvider } from "./LookupProvider";
 
 let LOOKUP_PROVIDER: null | LookupProvider = null;
-const L = createLogger("dendron");
 
 type ButtonType = "fuzzy_match";
 
@@ -47,7 +45,7 @@ type State = {
 export class LookupController {
   public quickPick: vscode.QuickPick<DNode> | undefined;
   public state: State;
-  public workspace: DendronWorkspace;
+  public ws: DendronWorkspace;
 
   constructor(workspace: DendronWorkspace) {
     this.state = {
@@ -56,7 +54,7 @@ export class LookupController {
         fuzzyMatch: new FuzzyMatchButton(),
       },
     };
-    this.workspace = workspace;
+    this.ws = workspace;
   }
 
   updateButton(btn: DendronQuickInputButton) {
@@ -68,19 +66,19 @@ export class LookupController {
 
   show(_value = "") {
     const ctx = "show";
-    L.info({ ctx });
+    this.ws.L.info({ ctx });
     // const provider = this.getOrInstantiateProvider();
     const provider = new LookupProvider();
-    L.info({ ctx: ctx + ":getOrInstantiateProvider:post" });
+    this.ws.L.info({ ctx: ctx + ":getOrInstantiateProvider:post" });
     // create quick pick
     const quickpick = vscode.window.createQuickPick<DNode>();
     this.quickPick = quickpick;
-    L.info({ ctx: ctx + ":createQuickPick:post" });
+    this.ws.L.info({ ctx: ctx + ":createQuickPick:post" });
     let title = ["Lookup"];
     if (this.state.mode === "fuzzy") {
       title.push("mode: fuzzy");
     }
-    title.push(`- version: ${this.workspace.version}`);
+    title.push(`- version: ${this.ws.version}`);
     quickpick.title = title.join(" ");
     quickpick.placeholder = "eg. hello.world";
     quickpick.ignoreFocusOut = true;
@@ -119,10 +117,10 @@ export class LookupController {
     });
 
     provider.provide(quickpick);
-    L.info({ ctx: ctx + ":provide:post" });
+    this.ws.L.info({ ctx: ctx + ":provide:post" });
     // show
     quickpick.show();
-    L.info({ ctx: ctx + ":show:post" });
+    this.ws.L.info({ ctx: ctx + ":show:post" });
   }
 
   getOrInstantiateProvider() {

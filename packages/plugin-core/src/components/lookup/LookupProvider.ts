@@ -1,21 +1,18 @@
 import {
-  DNodeUtils,
+  DEngine, DNode, DNodeUtils,
   Note,
   Schema,
-  SchemaUtils,
-  DNode,
-  DEngine,
+  SchemaUtils
 } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { QuickPick, QuickPickItem, Uri, window } from "vscode";
+import { HistoryService } from "../../services/HistoryService";
 import { CREATE_NEW_LABEL } from "./constants";
 import { node2Uri } from "./utils";
-import { HistoryService } from "../../services/HistoryService";
+import { Logger } from "../../logger";
 
-const L = createLogger("LookupProvider");
-
+const L = Logger
 // @ts-ignore
 class QueryStringUtils {
   /**
@@ -179,86 +176,92 @@ export class LookupProvider {
     const engine = DendronEngine.getOrCreateEngine();
 
     const updatePickerItems = async () => {
+      picker.busy = true;
       const ctx = "updatePickerItems";
       const querystring = picker.value;
+      try {
 
-      // DEBUG:BLOCK
-      L.info({ ctx: ctx + ":enter", querystring });
+        // DEBUG:BLOCK
+        L.info({ ctx: ctx + ":enter", querystring });
 
-      const resp = await DendronEngine.getOrCreateEngine().query(
-        slashToDot(querystring),
-        "note"
-      );
-      L.info({ ctx: ctx + ":engine:query:post" });
-      // enrich notes with schemas
-      let updatedItems = resp.data.map((note) => {
-        const schema = SchemaUtils.matchNote(note as Note, engine.schemas);
-        (note as Note).schema = schema;
-        return note;
-      });
-
-      // check if root query, if so, return everything
-      if (querystring === "") {
-        L.info({ ctx, status: "no qs" });
-        //picker.items = [engine().notes["root"]];
-        picker.items = _.uniqBy(
-          _.map(_.values(engine.notes), (ent) => ent.domain),
-          "domain"
+        const resp = await DendronEngine.getOrCreateEngine().query(
+          slashToDot(querystring),
+          "note"
         );
+        L.info({ ctx, msg: "engine:query:post" });
+        // enrich notes with schemas
+        let updatedItems = resp.data.map((note) => {
+          const schema = SchemaUtils.matchNote(note as Note, engine.schemas);
+          (note as Note).schema = schema;
+          return note;
+        });
+
+        // check if root query, if so, return everything
+        if (querystring === "") {
+          L.info({ ctx, status: "no qs" });
+          //picker.items = [engine().notes["root"]];
+          picker.items = _.uniqBy(
+            _.map(_.values(engine.notes), (ent) => ent.domain),
+            "domain"
+          );
+          return;
+        }
+        // check if single item query, vscode doesn't surface single letter queries
+        if (picker.activeItems.length === 0 && querystring.length === 1) {
+          picker.items = updatedItems;
+          picker.activeItems = picker.items;
+          return;
+        }
+
+        const perfectMatch = _.find(updatedItems, { fname: querystring });
+        // NOTE: we modify this later so need to track this here
+        const noUpdatedItems = updatedItems.length === 0;
+        const queryEndsWithDot = querystring.endsWith(".");
+
+        // check if we just entered a new level, only want to match children schema
+        updatedItems = PickerUtils.genSchemaSuggestions({
+          items: updatedItems as Note[],
+          qs: querystring,
+          engine: engine,
+        });
+        // updatedItems = PickerUtils.filterStubs(updatedItems as Note[]);
+
+        // check if new item, return if that's the case
+        if (
+          noUpdatedItems ||
+          (picker.activeItems.length === 0 && !perfectMatch)
+        ) {
+          L.info({ ctx, status: "no matches" });
+          // @ts-ignore
+          picker.items = updatedItems.concat([this.noActiveItem]);
+          return;
+        }
+
+        // check if perfect match, remove @noActiveItem result if that's the case
+        if (perfectMatch) {
+          L.debug({ ctx, msg: "active = qs" });
+          picker.activeItems = [perfectMatch];
+          picker.items = updatedItems;
+        } else if (queryEndsWithDot) {
+          // don't show noActiveItem for dot queries
+          L.debug({ ctx, msg: "active != qs, end with ." });
+          picker.items = updatedItems;
+        } else {
+          // regular result
+          L.debug({ ctx, msg: "active != qs" });
+          // @ts-ignore
+          picker.items = [this.noActiveItem].concat(updatedItems);
+        }
+
+        // DEBUG
+        // activeItems = picker.activeItems.map((ent) => ent.label);
+        // items = picker.items.map((ent) => ent.label);
+        L.info({ ctx: ctx + ":exit", querystring });
         return;
+      } finally {
+        L.info({ ctx, msg: "exit", querystring });
+        picker.busy = false;
       }
-      // check if single item query, vscode doesn't surface single letter queries
-      if (picker.activeItems.length === 0 && querystring.length === 1) {
-        picker.items = updatedItems;
-        picker.activeItems = picker.items;
-        return;
-      }
-
-      const perfectMatch = _.find(updatedItems, { fname: querystring });
-      // NOTE: we modify this later so need to track this here
-      const noUpdatedItems = updatedItems.length === 0;
-      const queryEndsWithDot = querystring.endsWith(".");
-
-      // check if we just entered a new level, only want to match children schema
-      updatedItems = PickerUtils.genSchemaSuggestions({
-        items: updatedItems as Note[],
-        qs: querystring,
-        engine: engine,
-      });
-      // updatedItems = PickerUtils.filterStubs(updatedItems as Note[]);
-
-      // check if new item, return if that's the case
-      if (
-        noUpdatedItems ||
-        (picker.activeItems.length === 0 && !perfectMatch)
-      ) {
-        L.info({ ctx, status: "no matches" });
-        // @ts-ignore
-        picker.items = updatedItems.concat([this.noActiveItem]);
-        return;
-      }
-
-      // check if perfect match, remove @noActiveItem result if that's the case
-      if (perfectMatch) {
-        L.debug({ ctx, msg: "active = qs" });
-        picker.activeItems = [perfectMatch];
-        picker.items = updatedItems;
-      } else if (queryEndsWithDot) {
-        // don't show noActiveItem for dot queries
-        L.debug({ ctx, msg: "active != qs, end with ." });
-        picker.items = updatedItems;
-      } else {
-        // regular result
-        L.debug({ ctx, msg: "active != qs" });
-        // @ts-ignore
-        picker.items = [this.noActiveItem].concat(updatedItems);
-      }
-
-      // DEBUG
-      // activeItems = picker.activeItems.map((ent) => ent.label);
-      // items = picker.items.map((ent) => ent.label);
-      L.info({ ctx: ctx + ":exit", querystring });
-      return;
     };
 
     picker.onDidAccept(async () => {
@@ -267,7 +270,6 @@ export class LookupProvider {
       const value = PickerUtils.getValue(picker);
       // @ts-ignore
       const selectedItem = PickerUtils.getSelection<Note>(picker);
-      L.info({ ctx: "onDidAccept", selectedItem, value });
 
       let uri: Uri;
       if (isCreateNewNotePick(selectedItem)) {
@@ -305,10 +307,9 @@ export class LookupProvider {
       L.info({ ctx: "onDidAccept:showTextDocument:pre", uri });
       return showDocAndHidePicker(uri, picker);
     });
-    picker.onDidChangeSelection((inputs: QuickPickItem[]) => {
-      const ctx = "onDidChangeSelection";
-      L.info({ ctx, inputs });
-    });
+    // picker.onDidChangeSelection((inputs: QuickPickItem[]) => {
+    //   const ctx = "onDidChangeSelection";
+    // });
     picker.onDidChangeValue(updatePickerItems);
     updatePickerItems();
   }

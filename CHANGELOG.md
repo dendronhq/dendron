@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.18](https://github.com/dendronhq/dendron/compare/v0.3.17...v0.3.18) (2020-07-18)
+
+### Bug Fixes
+
+- github banner occluding text on mobile devices ([972a51d](https://github.com/dendronhq/dendron/commit/972a51df165d10b87cc8770a5264201e7239ad82))
+- surface errors to user if bad frontmatter ([03107f4](https://github.com/dendronhq/dendron/commit/03107f413626362c8efde99328d9b0712e286441))
+
+### Features
+
+- ability to import notes from local file system [docs](https://github.com/dendronhq/dendron-template/blob/master/vault/dendron.topic.pod.md) ([e44fd11](https://github.com/dendronhq/dendron/commit/e44fd1133bec10f22831f059c8d98cf4076dcdcc))
+
 ## [0.3.17](https://github.com/dendronhq/dendron/compare/v0.3.16...v0.3.17) (2020-07-17)
 
 ### Features

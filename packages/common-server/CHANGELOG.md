@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.20](https://github.com/dendronhq/dendron/compare/v0.3.19...v0.3.20) (2020-07-18)
+
+### Bug Fixes
+
+- handle special characters in file names when importing using LocalFilePod ([03e42b1](https://github.com/dendronhq/dendron/commit/03e42b167ac9f073cd56f10c4e31b5cecf66dabf))
+
 ## [0.3.19](https://github.com/dendronhq/dendron/compare/v0.3.18...v0.3.19) (2020-07-18)
 
 **Note:** Version bump only for package @dendronhq/common-server

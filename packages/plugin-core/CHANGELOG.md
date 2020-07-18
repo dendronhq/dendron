@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.19](https://github.com/dendronhq/dendron/compare/v0.3.18...v0.3.19) (2020-07-18)
+
+### Features
+
+- show busy ui when engine is searching ([4fc7256](https://github.com/dendronhq/dendron/commit/4fc72565c139177bd725a5599c8954c2cceed8ab))
+
 ## [0.3.18](https://github.com/dendronhq/dendron/compare/v0.3.17...v0.3.18) (2020-07-18)
 
 ### Bug Fixes

@@ -30,28 +30,38 @@ export type getAllFilesOpts = {
 
 /**
  * Make name safe for dendron
- * @param name 
- * @param opts 
+ * @param name
+ * @param opts
  */
 export function cleanName(name: string): string {
   name = name.replace(/\//g, ".").toLocaleLowerCase();
-  name = name.replace(/' '/g, "-");
+  name = name.replace(/ /g, "-");
   return name;
 }
 
 /**
- * 
- * @param name 
- * @param opts 
+ *
+ * Normalize file name
+ * - strip off extension
+ * - replace [.\s] with -
+ * @param name
+ * @param opts
  *   - isDir: dealing with directory
  */
-export function cleanFileName(name: string, opts?: { isDir?: boolean }): string {
+export function cleanFileName(
+  name: string,
+  opts?: { isDir?: boolean }
+): string {
   const cleanOpts = _.defaults(opts, { isDir: false });
+  if (!cleanOpts.isDir) {
+    const { name: fname, dir } = posix.parse(name);
+    name = posix.join(dir, fname);
+    name = name.replace(/\./g, "-");
+  }
+  // replace all names already in file name
+  //name = name.replace(/\./g, "-");
   name = cleanName(name);
   // if file, only get name (no extension)
-  if (!cleanOpts.isDir) {
-    return posix.parse(name).name;
-  }
   return name;
 }
 
@@ -129,6 +139,16 @@ export function mdFile2NodeProps(
   return dataProps;
 }
 
+export function node2PropsMdFile(props: NoteRawProps, opts: { root: string }) {
+  const { root } = opts;
+  const { body, fname } = props;
+  const filePath = path.join(root, `${fname}.md`);
+  return fs.writeFileSync(
+    filePath,
+    matter.stringify(body || "", _.omit(props, ["body", "stub"]))
+  );
+}
+
 export function node2MdFile(node: Note, opts: { root: string }) {
   const meta = _.pick(node, [
     "id",
@@ -152,16 +172,6 @@ export function node2MdFile(node: Note, opts: { root: string }) {
   };
   assert(!node.stub, `writing a stub node: ${node.toRawProps()}`);
   return node2PropsMdFile({ ...props }, opts);
-}
-
-export function node2PropsMdFile(props: NoteRawProps, opts: { root: string }) {
-  const { root } = opts;
-  const { body, fname } = props;
-  const filePath = path.join(root, `${fname}.md`);
-  return fs.writeFileSync(
-    filePath,
-    matter.stringify(body || "", _.omit(props, ["body", "stub"]))
-  );
 }
 
 export function schema2YMLFile(schema: Schema, opts: { root: string }) {

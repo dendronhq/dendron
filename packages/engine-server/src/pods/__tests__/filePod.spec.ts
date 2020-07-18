@@ -32,7 +32,7 @@ describe("filePod", () => {
   test("sanity", async () => {
     const filesRoot = posix.join(fixtures, "pods", "filePod");
     const uri = URI.parse(filesRoot);
-    const fp = new FilePod({engine, root: uri});
+    const fp = new FilePod({ engine, root: uri });
     await fp.import();
     // testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
 
@@ -73,9 +73,19 @@ describe("filePod", () => {
     expect(assetsDir.length).toEqual(2);
 
     // check that assets are there
-    const fileBody = fs.readFileSync(posix.join(root, "project.p1.md"), {encoding: "utf8"});
+    const fileBody = fs.readFileSync(posix.join(root, "project.p1.md"), {
+      encoding: "utf8",
+    });
     expect(fileBody.match("n1.pdf")).toBeTruthy();
     expect(fileBody.match("n3.pdf")).toBeTruthy();
     // expect(fs.readFileSync(posix.join(root, "project.p1.md"), {encoding: "utf8"})).toMatchSnapshot("p1.md")
+  });
+
+  test("harness1", async () => {
+    const filesRoot = "/Users/kevinlin/tmp/kiran_test";
+    const uri = URI.parse(filesRoot);
+    const fp = new FilePod({ engine, root: uri });
+    await fp.import();
+    // testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
   });
 });

@@ -4,9 +4,9 @@ import {
   genUUID,
   Note,
   NoteData,
-  NoteRawProps
+  NoteRawProps,
 } from "@dendronhq/common-all";
-import { cleanFileName } from "@dendronhq/common-server";
+import { cleanFileName, cleanName } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import matter from "gray-matter";
 import klaw, { Item } from "klaw";
@@ -32,6 +32,10 @@ const toMarkdownLink = (assetPath: string, opts?: { name?: string }) => {
 };
 
 export class FilePod extends BasePod {
+  /**
+   * Return list of note props keyed by level of hierarchy
+   * @param files
+   */
   files2HierarichalDict(files: DItem[]): HierarichalDict {
     const out: HierarichalDict = {};
     _.forEach(files, (item) => {
@@ -63,15 +67,16 @@ export class FilePod extends BasePod {
         const assetDir = posix.join(this.engine.props.root, assetDirName);
         fs.ensureDirSync(assetDir);
         const mdLinks: string[] = [];
-        item.entries.map((item) => {
+        item.entries.map((_item) => {
           const uuid = genUUID();
-          const { ext, name } = posix.parse(item.path);
-          const assetBaseNew = `${name}-${uuid}${ext}`;
+          const { ext, name } = posix.parse(_item.path);
+          // const { ext, name } = posix.parse(cleanFileName(_item.path));
+          const assetBaseNew = `${cleanFileName(name)}-${uuid}${ext}`;
           const assetPathFull = posix.join(assetDir, assetBaseNew);
           const assetPathRel = posix.join(assetDirName, assetBaseNew);
           // TODO: make sure to append uuid
           fs.copyFileSync(
-            posix.join(this.root.fsPath, item.path),
+            posix.join(this.root.fsPath, _item.path),
             assetPathFull
           );
           mdLinks.push(toMarkdownLink(assetPathRel, { name: `${name}${ext}` }));
@@ -125,9 +130,11 @@ export class FilePod extends BasePod {
     const root = uri.fsPath;
     const mask = uri.fsPath.endsWith("/") ? root.length : root.length + 1;
 
-    const excludeFilter = through2.obj(function (item: Item, enc, next) {
-      const basename = posix.basename(item.path);
-      if (!basename.startsWith(".")) this.push(item);
+    const excludeFilter = through2.obj(function (item: Item, _enc, next) {
+      // check if hidden file
+      if (!_.some(item.path.split("/"), (ent) => ent.startsWith("."))) {
+        this.push(item);
+      }
       next();
     });
     // collect all files
@@ -135,8 +142,9 @@ export class FilePod extends BasePod {
     await new Promise((resolve, reject) => {
       klaw(root)
         .pipe(excludeFilter)
+        // eslint-disable-next-line prefer-arrow-callback
         .on("data", function (item: Item) {
-          let out: DItem = { ...item, entries: [] };
+          const out: DItem = { ...item, entries: [] };
           if (item.path.endsWith(".md")) {
             const { data, content } = matter.read(item.path, {});
             out.data = data;
@@ -170,6 +178,7 @@ export class FilePod extends BasePod {
 
     // convert to dot files
     const hDict = this.files2HierarichalDict(_.values(engineFileDict));
+
     const notes = this.hDict2Notes(hDict);
     // OPTIMIZE: parallilize
     //await this.engine.updateNodes(notes, {parentsAsStubs: false, newNode: true})

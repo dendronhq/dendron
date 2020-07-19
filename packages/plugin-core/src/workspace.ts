@@ -61,6 +61,8 @@ function writeWSFile(
         "equinusocio.vsc-material-theme",
         // markdown shortcuts
         "mdickin.markdown-shortcuts",
+        // markdown links
+        "dendron.dendron-markdown-links",
       ],
     },
   };
@@ -241,7 +243,7 @@ export class DendronWorkspace {
           const title = await vscode.window.showInputBox({
             prompt: "Title",
             ignoreFocusOut: true,
-            value: fname
+            value: fname,
           });
           if (title) {
             fname = `${cleanName(title)}`;
@@ -294,7 +296,7 @@ export class DendronWorkspace {
           const title = await vscode.window.showInputBox({
             prompt: "Title",
             ignoreFocusOut: true,
-            value: fname
+            value: fname,
           });
           if (title) {
             fname = `${cleanName(title)}`;
@@ -424,12 +426,9 @@ export class DendronWorkspace {
         if (!fs.existsSync(assetPath)) {
           return vscode.window.showErrorMessage(`${assetPath} does not exist`);
         }
-        open(assetPath)
-          .catch((err) => {
-            vscode.window.showInformationMessage(
-              "error: " + JSON.stringify(err)
-            );
-          });
+        open(assetPath).catch((err) => {
+          vscode.window.showInformationMessage("error: " + JSON.stringify(err));
+        });
       })
     );
 
@@ -437,7 +436,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(DENDRON_COMMANDS.IMPORT_POD, async () => {
         const ctx = DENDRON_COMMANDS.IMPORT_POD;
         const wsRoot = this.rootWorkspace.uri.fsPath;
-        await new ImportPodCommand().execute({wsRoot});
+        await new ImportPodCommand().execute({ wsRoot });
         vscode.window.showInformationMessage(`pod import`);
       })
     );
@@ -586,7 +585,6 @@ export class DendronWorkspace {
     }
     VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
   }
-  
 
   async reloadWorkspace(mainVault?: string) {
     // TODO: dispose of existing workspace
@@ -601,7 +599,9 @@ export class DendronWorkspace {
       this._engine = engine;
       return;
     } catch (err) {
-      vscode.window.showErrorMessage(`error initializing dendron: ${JSON.stringify(err)}`);
+      vscode.window.showErrorMessage(
+        `error initializing dendron: ${JSON.stringify(err)}`
+      );
     }
   }
 

@@ -7,7 +7,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Features
 
-- add graph view [docs](https://github.com/dendronhq/dendron-template/blob/master/vault/dendron.topic.graph-view.md) ([129bf4e](https://github.com/dendronhq/dendron/commit/129bf4e4e480dfbff66530725c6db8d2321adc28))
+- add graph view [docs](https://github.com/dendronhq/dendron-template/blob/master/vault/pro.dendron.topic.graph-view.md) ([129bf4e](https://github.com/dendronhq/dendron/commit/129bf4e4e480dfbff66530725c6db8d2321adc28))
 
 ## [0.3.20](https://github.com/dendronhq/dendron/compare/v0.3.19...v0.3.20) (2020-07-18)
 
@@ -29,20 +29,20 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Features
 
-- ability to import notes from local file system [docs](https://github.com/dendronhq/dendron-template/blob/master/vault/dendron.topic.pod.md) ([e44fd11](https://github.com/dendronhq/dendron/commit/e44fd1133bec10f22831f059c8d98cf4076dcdcc))
+- ability to import notes from local file system [docs](https://github.com/dendronhq/dendron-template/blob/master/vault/pro.dendron.topic.pod.md) ([e44fd11](https://github.com/dendronhq/dendron/commit/e44fd1133bec10f22831f059c8d98cf4076dcdcc))
 
 ## [0.3.17](https://github.com/dendronhq/dendron/compare/v0.3.16...v0.3.17) (2020-07-17)
 
 ### Features
 
-- more flexible file names for [journal notes](https://github.com/dendronhq/dendron-template/blob/master/vault/dendron.special-notes.md) ([9d9f10b](https://github.com/dendronhq/dendron/commit/9d9f10bd0873c201361c4625fc49c9f62ee82991))
-- open non-markdown files using native apps. [docs](https://github.com/dendronhq/dendron-template/blob/master/vault/dendron.feature.links.md) ([7f630d1](https://github.com/dendronhq/dendron/commit/7f630d1fb95d5c0d28fc5a83f4cee27bc17d452c))
+- more flexible file names for [journal notes](https://github.com/dendronhq/dendron-template/blob/master/vault/pro.dendron.topic.special-notes.md) ([9d9f10b](https://github.com/dendronhq/dendron/commit/9d9f10bd0873c201361c4625fc49c9f62ee82991))
+- open non-markdown files using native apps. [docs](https://github.com/dendronhq/dendron-template/blob/master/vault/pro.dendron.topic.links.md) ([7f630d1](https://github.com/dendronhq/dendron/commit/7f630d1fb95d5c0d28fc5a83f4cee27bc17d452c))
 
 ## [0.3.16](https://github.com/dendronhq/dendron/compare/v0.3.15...v0.3.16) (2020-07-16)
 
 ### Features
 
-- implement journal notes. see details here: https://github.com/dendronhq/dendron-template/blob/master/vault/dendron.feature.journals.md ([5e1236f](https://github.com/dendronhq/dendron/commit/5e1236fddbf1e0fddf4c27d1a40e9841cc99974f))
+- implement journal notes. [docs](https://github.com/dendronhq/dendron-template/blob/master/vault/pro.dendron.topic.special-notes.md) ([5e1236f](https://github.com/dendronhq/dendron/commit/5e1236fddbf1e0fddf4c27d1a40e9841cc99974f))
 - set relative rootDir ([65bbd77](https://github.com/dendronhq/dendron/commit/65bbd77e1bc49f45776904232953dba6b4c2cca9))
 
 ## [0.3.15](https://github.com/dendronhq/dendron/compare/v0.3.14...v0.3.15) (2020-07-14)

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.21](https://github.com/dendronhq/dendron/compare/v0.3.20...v0.3.21) (2020-07-19)
+
+### Features
+
+- add graph view [docs](https://github.com/dendronhq/dendron-template/blob/master/vault/dendron.topic.graph-view.md) ([129bf4e](https://github.com/dendronhq/dendron/commit/129bf4e4e480dfbff66530725c6db8d2321adc28))
+
 ## [0.3.20](https://github.com/dendronhq/dendron/compare/v0.3.19...v0.3.20) (2020-07-18)
 
 ### Bug Fixes

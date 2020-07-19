@@ -39,7 +39,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
-      "foo.three",
+      "three",
     ],
     "custom": Object {},
     "data": Object {
@@ -55,7 +55,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "bar.one",
+      "one",
     ],
     "custom": Object {},
     "data": Object {},
@@ -95,7 +95,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "foo.three.alpha",
+      "alpha",
     ],
     "custom": Object {},
     "data": Object {},
@@ -103,13 +103,13 @@ Array [
     "fname": "foo.three",
     "parent": "foo",
     "stub": true,
-    "title": "foo.three",
+    "title": "three",
     "type": "note",
   },
   Object {
     "body": "",
     "children": Array [
-      "bar.one.alpha",
+      "alpha",
     ],
     "custom": Object {},
     "data": Object {},
@@ -117,7 +117,7 @@ Array [
     "fname": "bar.one",
     "parent": "bar",
     "stub": true,
-    "title": "bar.one",
+    "title": "one",
     "type": "note",
   },
   Object {
@@ -127,9 +127,9 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo.three.alpha",
-    "parent": "foo.three",
+    "parent": "three",
     "stub": false,
-    "title": "foo.three.alpha",
+    "title": "alpha",
     "type": "note",
   },
   Object {
@@ -140,9 +140,9 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "bar.one.alpha",
-    "parent": "bar.one",
+    "parent": "one",
     "stub": false,
-    "title": "bar.one.alpha",
+    "title": "alpha",
     "type": "note",
   },
 ]

@@ -129,7 +129,7 @@ export class DNodeRaw {
       fname: null,
       custom: {},
     });
-    const title = nodeOpts.title || fname;
+    const title = nodeOpts.title || DNodeUtils.basename(fname);
     const nodeProps: DNodeRawProps<T> & { extra?: any } = {
       id,
       title,

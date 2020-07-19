@@ -119,7 +119,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
-      "foo.three",
+      "three",
     ],
     "custom": Object {},
     "data": Object {
@@ -161,7 +161,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "foo.three.alpha",
+      "alpha",
     ],
     "custom": Object {},
     "data": Object {},
@@ -169,7 +169,7 @@ Array [
     "fname": "foo.three",
     "parent": "foo",
     "stub": true,
-    "title": "foo.three",
+    "title": "three",
     "type": "note",
   },
   Object {
@@ -179,9 +179,9 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo.three.alpha",
-    "parent": "foo.three",
+    "parent": "three",
     "stub": false,
-    "title": "foo.three.alpha",
+    "title": "alpha",
     "type": "note",
   },
 ]
@@ -221,7 +221,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
-      "foo.three",
+      "three",
     ],
     "custom": Object {},
     "data": Object {
@@ -263,7 +263,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "foo.three.alpha",
+      "alpha",
     ],
     "custom": Object {},
     "data": Object {},
@@ -271,7 +271,7 @@ Array [
     "fname": "foo.three",
     "parent": "foo",
     "stub": true,
-    "title": "foo.three",
+    "title": "three",
     "type": "note",
   },
   Object {
@@ -281,9 +281,9 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo.three.alpha",
-    "parent": "foo.three",
+    "parent": "three",
     "stub": false,
-    "title": "foo.three.alpha",
+    "title": "alpha",
     "type": "note",
   },
 ]
@@ -411,7 +411,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
-      "foo.three",
+      "three",
     ],
     "custom": Object {},
     "data": Object {
@@ -453,7 +453,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "foo.three.alpha",
+      "alpha",
     ],
     "custom": Object {},
     "data": Object {},
@@ -461,7 +461,7 @@ Array [
     "fname": "foo.three",
     "parent": "foo",
     "stub": true,
-    "title": "foo.three",
+    "title": "three",
     "type": "note",
   },
   Object {
@@ -471,9 +471,9 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo.three.alpha",
-    "parent": "foo.three",
+    "parent": "three",
     "stub": false,
-    "title": "foo.three.alpha",
+    "title": "alpha",
     "type": "note",
   },
 ]
@@ -512,7 +512,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
-      "foo.three",
+      "three",
     ],
     "custom": Object {},
     "data": Object {
@@ -554,7 +554,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "foo.three.alpha",
+      "alpha",
     ],
     "custom": Object {},
     "data": Object {},
@@ -562,7 +562,7 @@ Array [
     "fname": "foo.three",
     "parent": "foo",
     "stub": true,
-    "title": "foo.three",
+    "title": "three",
     "type": "note",
   },
   Object {
@@ -572,9 +572,9 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo.three.alpha",
-    "parent": "foo.three",
+    "parent": "three",
     "stub": false,
-    "title": "foo.three.alpha",
+    "title": "alpha",
     "type": "note",
   },
 ]
@@ -586,7 +586,7 @@ Object {
   "children": Array [
     "foo.one",
     "foo.two",
-    "foo.three",
+    "three",
   ],
   "custom": Object {},
   "data": Object {
@@ -634,7 +634,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
-      "foo.three",
+      "three",
     ],
     "custom": Object {},
     "data": Object {
@@ -676,7 +676,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "foo.three.alpha",
+      "alpha",
     ],
     "custom": Object {},
     "data": Object {},
@@ -684,7 +684,7 @@ Array [
     "fname": "foo.three",
     "parent": "foo",
     "stub": true,
-    "title": "foo.three",
+    "title": "three",
     "type": "note",
   },
   Object {
@@ -694,9 +694,9 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo.three.alpha",
-    "parent": "foo.three",
+    "parent": "three",
     "stub": false,
-    "title": "foo.three.alpha",
+    "title": "alpha",
     "type": "note",
   },
 ]
@@ -708,7 +708,7 @@ Object {
   "children": Array [
     "foo.one",
     "foo.two",
-    "foo.three",
+    "three",
   ],
   "custom": Object {},
   "data": Object {},
@@ -728,7 +728,7 @@ Object {
   "children": Array [
     "foo.one",
     "foo.two",
-    "foo.three",
+    "three",
   ],
   "custom": Object {},
   "data": Object {},
@@ -796,7 +796,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "foo.three.alpha",
+      "alpha",
     ],
     "custom": Object {},
     "data": Object {},
@@ -804,7 +804,7 @@ Array [
     "fname": "foo.three",
     "parent": "foo",
     "stub": true,
-    "title": "foo.three",
+    "title": "three",
     "type": "note",
   },
   Object {
@@ -814,9 +814,9 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo.three.alpha",
-    "parent": "foo.three",
+    "parent": "three",
     "stub": false,
-    "title": "foo.three.alpha",
+    "title": "alpha",
     "type": "note",
   },
   Object {
@@ -824,7 +824,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
-      "foo.three",
+      "three",
     ],
     "custom": Object {},
     "data": Object {},
@@ -883,7 +883,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "foo.three.alpha",
+      "alpha",
     ],
     "custom": Object {},
     "data": Object {},
@@ -891,7 +891,7 @@ Array [
     "fname": "foo.three",
     "parent": "foo",
     "stub": true,
-    "title": "foo.three",
+    "title": "three",
     "type": "note",
   },
   Object {
@@ -901,9 +901,9 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo.three.alpha",
-    "parent": "foo.three",
+    "parent": "three",
     "stub": false,
-    "title": "foo.three.alpha",
+    "title": "alpha",
     "type": "note",
   },
   Object {
@@ -911,7 +911,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
-      "foo.three",
+      "three",
     ],
     "custom": Object {},
     "data": Object {},
@@ -971,7 +971,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
-      "foo.three",
+      "three",
     ],
     "custom": Object {},
     "data": Object {
@@ -987,7 +987,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "bar.two",
+      "two",
     ],
     "custom": Object {},
     "data": Object {},
@@ -1027,7 +1027,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "foo.three.alpha",
+      "alpha",
     ],
     "custom": Object {},
     "data": Object {},
@@ -1035,7 +1035,7 @@ Array [
     "fname": "foo.three",
     "parent": "foo",
     "stub": true,
-    "title": "foo.three",
+    "title": "three",
     "type": "note",
   },
   Object {
@@ -1048,7 +1048,7 @@ Array [
     "fname": "bar.two",
     "parent": "bar",
     "stub": false,
-    "title": "bar.two",
+    "title": "two",
     "type": "note",
   },
   Object {
@@ -1058,9 +1058,9 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo.three.alpha",
-    "parent": "foo.three",
+    "parent": "three",
     "stub": false,
-    "title": "foo.three.alpha",
+    "title": "alpha",
     "type": "note",
   },
 ]

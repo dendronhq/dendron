@@ -284,11 +284,11 @@ export class LookupProvider {
           nodeNew.stub = false;
         } else if (selectedItem.schemaStub) {
           nodeNew = new Note({
-            title: selectedItem.fname,
+            title: DNodeUtils.basename(selectedItem.fname),
             fname: selectedItem.fname,
           });
         } else {
-          nodeNew = new Note({ title: value, fname });
+          nodeNew = new Note({ title: DNodeUtils.basename(value), fname });
         }
 
         // FIXME: this should be done after the node is created

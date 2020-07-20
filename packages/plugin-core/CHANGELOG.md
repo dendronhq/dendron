@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.23](https://github.com/dendronhq/dendron/compare/v0.3.22...v0.3.23) (2020-07-20)
+
+### Bug Fixes
+
+- markdown preview will now open local links ([10a3418](https://github.com/dendronhq/dendron/commit/10a3418f7a633fa9b5294794e1a912cb4ea6c066))
+
+### Features
+
+- basic windows support ([a789ec5](https://github.com/dendronhq/dendron/commit/a789ec5792301103d302739f00b595509128d367))
+
 ## [0.3.22](https://github.com/dendronhq/dendron/compare/v0.3.21...v0.3.22) (2020-07-20)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

@@ -50,7 +50,7 @@ function writeWSFile(
         // non-developers don't have git, will leave as optional for now
         // "eamodio.gitlens",
         // markdown extensions
-        "shd101wyy.markdown-preview-enhanced",
+        "dendron.markdown-preview-enhanced",
         // Spellcheck
         "ban.spellright",
         // images

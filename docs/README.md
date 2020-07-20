@@ -180,6 +180,8 @@ Hopefully, this has been enough to give you a sense of what you can do with Dend
 
 If you are reading this, you too, are now part of the journey. Let's take back control of our information and use it to build something better, together!
 
+To stay up to date on the project, you can follow me at [@kevins8](https://twitter.com/kevins8)
+
 # Getting Started
 
 Dendron can be installed as a [vscode plugin](https://marketplace.visualstudio.com/items?itemName=dendron.dendron). If you don't already have VSCode, you can download it [here](https://code.visualstudio.com/).

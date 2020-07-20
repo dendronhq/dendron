@@ -1,8 +1,7 @@
 import { setEnv } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
-import _ from "lodash";
-import path from "path";
+import { posix } from "path";
 import { ExtensionContext, OutputChannel, window } from "vscode";
 import { DENDRON_CHANNEL_NAME } from "./constants";
 
@@ -15,8 +14,7 @@ export class Logger {
 
   static configure(context: ExtensionContext, level: TraceLevel) {
     fs.ensureDirSync(context.logPath);
-    // setEnv("LOG_DST", path.join(context.logPath, "dendron.log"));
-    setEnv("LOG_DST", path.join('/tmp', "dendron.log"));
+    setEnv("LOG_DST", posix.join(context.logPath, "dendron.log"));
     this.logger = createLogger("dendron");
     this.level = level;
   }

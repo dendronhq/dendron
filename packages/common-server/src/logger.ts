@@ -31,9 +31,7 @@ function createLogger(name?: string) {
   const level = env("LOG_LEVEL", { shouldThrow: false }) || "debug";
   const nameClean = name || env("LOG_NAME");
 
-  const logDst =
-    env("LOG_DST", { shouldThrow: false }) ||
-    path.join("/tmp", "dendron-dev.log");
+  const logDst = env("LOG_DST", { shouldThrow: false }) || "stdout";
   if (logDst === "stdout") {
     return pino({ name: nameClean, level });
   } else {

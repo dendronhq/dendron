@@ -79,8 +79,12 @@ export class DendronWorkspace {
     return _DendronWorkspace;
   }
 
+  static configuration(): vscode.WorkspaceConfiguration {
+    return vscode.workspace.getConfiguration("dendron");
+  }
+
   static isActive(): boolean {
-    const conf = vscode.workspace.getConfiguration("dendron").get("rootDir");
+    const conf = DendronWorkspace.configuration().get("rootDir");
     if (conf) {
       return true;
     } else {
@@ -426,7 +430,7 @@ export class DendronWorkspace {
         if (!fs.existsSync(assetPath)) {
           return vscode.window.showErrorMessage(`${assetPath} does not exist`);
         }
-        open(assetPath).catch((err) => {
+        return open(assetPath).catch((err) => {
           vscode.window.showInformationMessage("error: " + JSON.stringify(err));
         });
       })
@@ -434,7 +438,6 @@ export class DendronWorkspace {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(DENDRON_COMMANDS.IMPORT_POD, async () => {
-        const ctx = DENDRON_COMMANDS.IMPORT_POD;
         const wsRoot = this.rootWorkspace.uri.fsPath;
         await new ImportPodCommand().execute({ wsRoot });
         vscode.window.showInformationMessage(`pod import`);
@@ -586,6 +589,10 @@ export class DendronWorkspace {
     VSCodeUtils.openWS(posix.join(rootDir, DENDRON_WS_NAME));
   }
 
+  /**
+   *  Calls activate workspace
+   * @param mainVault 
+   */
   async reloadWorkspace(mainVault?: string) {
     // TODO: dispose of existing workspace
     await this.activateWorkspace();
@@ -618,7 +625,7 @@ export class DendronWorkspace {
       rootDirRaw,
       vscode.workspace?.workspaceFile?.fsPath
     );
-     (fs.existsSync(rootDir)) {
+     if (fs.existsSync(rootDir)) {
       const options = {
         delete: { msg: "delete existing folder", alias: "d" },
         abort: { msg: "abort current operation", alias: "a" },

@@ -17,6 +17,7 @@ import { DendronWorkspace } from "../../workspace";
 import { VSCodeUtils } from "../../utils";
 import { DENDRON_COMMANDS, CONFIG, GLOBAL_STATE } from "../../constants";
 import { HistoryService, HistoryEvent } from "../../services/HistoryService";
+import { _activate } from "../../extension";
 
 function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
   const _settings = settings;
@@ -66,19 +67,23 @@ class VSFileUtils {
 suite("startup", function () {
   const timeout = 60 * 1000;
   let root: string;
-  let ws: DendronWorkspace;
+  let ctx: vscode.ExtensionContext;
 
-  before(function () {
+  before(async function () {
     console.log("set version");
-    VSCodeUtils.getOrCreateMockContext().globalState.update(
-      GLOBAL_STATE.VERSION,
-      "0.0.1"
-    );
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    // setup commands
+    new DendronWorkspace(ctx);
+    // .globalState.update(
+    //   GLOBAL_STATE.VERSION,
+    //   "0.0.1"
+    // );
   });
 
   beforeEach(function () {
     console.log("before");
     root = FileTestUtils.tmpDir("/tmp/dendron", true);
+    ctx = VSCodeUtils.getOrCreateMockContext();
   });
 
   afterEach(function () {
@@ -91,35 +96,57 @@ suite("startup", function () {
     vscode.window.showInformationMessage("Start sanity test.");
     this.timeout(timeout);
 
-    // test("new install", function (done) {
-    //   vscode.window.showInformationMessage("waiting for new");
-    //   HistoryService.instance().subscribe("extension", async (event: HistoryEvent) => {
-    //     vscode.window.showInformationMessage(`got activate`);
-    //     ws = DendronWorkspace.instance();
-    //     await ws.setupWorkspace(root, {skipOpenWS: true});
-    //     await ws.reloadWorkspace(root);
-    //     vscode.window.showInformationMessage(`setup ws`);
-    //     assert.ok("done");
-    //     done();
-    //   });
-    // });
-
-    test("upgrade from existing", function (done) {
-      vscode.window.showInformationMessage("waiting for existing");
-      ws = DendronWorkspace.instance();
-      HistoryService.instance().subscribe(
-        "extension",
-        async (_event: HistoryEvent) => {
-          vscode.window.showInformationMessage(`got activate`);
-          ws = DendronWorkspace.instance();
-          await ws.setupWorkspace(root, { skipOpenWS: true });
-          await ws.reloadWorkspace(root);
-          vscode.window.showInformationMessage(`setup ws`);
-          assert.ok("done");
-          done();
-        }
-      );
+    test.skip("workspace not activated", function (done) {
+      _activate(ctx);
+      // const ws = DendronWorkspace.instance();
+      // ws.reloadWorkspace(root)
+      HistoryService.instance().subscribe("extension", async (event: HistoryEvent) => {
+        assert.equal(DendronWorkspace.isActive(), false);
+        // ws = DendronWorkspace.instance();
+        // await ws.setupWorkspace(root, {skipOpenWS: true});
+        // await ws.reloadWorkspace(root);
+        // vscode.window.showInformationMessage(`setup ws`);
+        done();
+      });
     });
+
+    test("workspace active, first time install", async function (done) {
+      DendronWorkspace.configuration = () => {
+        return createMockConfig({
+          rootDir: root;
+        });
+      };
+      await DendronWorkspace.instance().setupWorkspace(root, {skipOpenWS: true});
+      // await ws.reloadWorkspace(root);
+      _activate(ctx);
+      // await conf.update("rootDir", root);
+      // const bond = conf.get("rootDir");
+      // console.log({bond})
+      HistoryService.instance().subscribe("extension", async (event: HistoryEvent) => {
+        assert.equal(DendronWorkspace.isActive(), true);
+        // await ws.setupWorkspace(root, {skipOpenWS: true});
+        // await ws.reloadWorkspace(root);
+        // vscode.window.showInformationMessage(`setup ws`);
+        done();
+      });
+    });
+
+    // test("upgrade from existing", function (done) {
+    //   vscode.window.showInformationMessage("waiting for existing");
+    //   ws = DendronWorkspace.instance();
+    //   HistoryService.instance().subscribe(
+    //     "extension",
+    //     async (_event: HistoryEvent) => {
+    //       vscode.window.showInformationMessage(`got activate`);
+    //       ws = DendronWorkspace.instance();
+    //       await ws.setupWorkspace(root, { skipOpenWS: true });
+    //       await ws.reloadWorkspace(root);
+    //       vscode.window.showInformationMessage(`setup ws`);
+    //       assert.ok("done");
+    //       done();
+    //     }
+    //   );
+    // });
   });
 });
 

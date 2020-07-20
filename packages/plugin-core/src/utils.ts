@@ -4,6 +4,7 @@ import os from "os";
 import path, { posix } from "path";
 import * as vscode from "vscode";
 import { GLOBAL_STATE } from "./constants";
+import _ from "lodash";
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
@@ -20,10 +21,13 @@ export class DisposableStore {
 export function resolvePath(filePath: string, wsRoot?: string): string {
   const platform = os.platform();
 
-  const isWin = (platform === "win32") ? true: false;
+  const isWin = platform === "win32" ? true : false;
   if (filePath[0] === "~") {
     return resolveTilde(filePath);
-  } else if (path.isAbsolute(filePath) || (isWin && filePath.startsWith('\\'))) {
+  } else if (
+    path.isAbsolute(filePath) ||
+    (isWin && filePath.startsWith("\\"))
+  ) {
     return filePath;
   } else {
     if (!wsRoot) {

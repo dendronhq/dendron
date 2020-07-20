@@ -11,6 +11,16 @@ import { HistoryService } from "./services/HistoryService";
 // === Main
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
+  const stage = getStage();
+  if (stage === "test") {
+    return;
+  } else {
+    _activate(context);
+  }
+}
+
+export function _activate(context: vscode.ExtensionContext) {
+  const isDebug = VSCodeUtils.isDebuggingExtension();
   const ctx = "activate";
   const stage = getStage();
   const {
@@ -20,11 +30,6 @@ export function activate(context: vscode.ExtensionContext) {
     storagePath,
     globalStoragePath,
   } = context;
-  const isDebug = VSCodeUtils.isDebuggingExtension();
-  if (stage === "test") {
-    context = VSCodeUtils.getOrCreateMockContext();
-  }
-  // setup logging
   const previousVersion = context.globalState.get<string | undefined>(
     GLOBAL_STATE.VERSION
   );
@@ -41,7 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
     previousVersion,
   });
   // needs to be initialized to setup commands
-  const ws = new DendronWorkspace(context);
+  const ws = new DendronWorkspace(context, {skipSetup: stage === "test"});
 
   if (DendronWorkspace.isActive()) {
     Logger.info({ msg: "reloadWorkspace:pre" });
@@ -97,7 +102,6 @@ export function activate(context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() {
   const ctx = "deactivate";
-  const { DendronWorkspace } = require("./workspace");
   const ws = DendronWorkspace.instance();
   ws.L.info({ ctx });
 }

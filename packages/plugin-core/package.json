@@ -90,7 +90,8 @@
     "keybindings": [
       {
         "command": "dendron.lookup",
-        "mac": "cmd+l"
+        "mac": "cmd+l",
+        "key": "ctrl+l"
       },
       {
         "command": "dendron.deleteNode",

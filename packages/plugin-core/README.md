@@ -6,9 +6,19 @@ A personal knowledge management tool that **grows** as you do.
 
 Dendron is a local-first, markdown based, hierarchical note-taking application built on top of [VSCode](https://code.visualstudio.com/) and [friends](./ACKNOWLEDGEMENTS.md).
 
-Whether you organize your notes with [PARA](https://fortelabs.co/blog/para/) or [Zettelkasten](https://zettelkasten.de/), link notes together like in [roam](https://roamresearch.com/) and [obsidian](https://obsidian.md/), or simply create notes in an ad-hoc manner, Dendron can help.
+Whether you organize your notes with [PARA](https://fortelabs.co/blog/para/) or [Zettelkasten](https://zettelkasten.de/), link notes together like [roam](https://roamresearch.com/), or simply create notes in an ad-hoc manner, Dendron can help.
 
 Think of it as a [second brain](https://www.buildingasecondbrain.com/) to help you **make sense** of all the information you care about.
+
+Some popular use cases include:
+
+- project management
+- personal knowledge base of things you've learned
+- CRM to keep track of clients, friends and enemies
+- recipe book
+- keeping track of things you care about
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/graph-intro.gif)
 
 # Motivation
 
@@ -161,6 +171,8 @@ Hopefully, this has been enough to give you a sense of what you can do with Dend
 
 If you are reading this, you too, are now part of the journey. Let's take back control of our information and use it to build something better, together!
 
+To stay up to date on the project, you can follow me at [@kevins8](https://twitter.com/kevins8)
+
 # Getting Started
 
 Dendron can be installed as a [vscode plugin](https://marketplace.visualstudio.com/items?itemName=dendron.dendron). If you don't already have VSCode, you can download it [here](https://code.visualstudio.com/).
@@ -185,14 +197,14 @@ When the workspace opens, it will show dialogue to install the recommended exten
 
 # FAQ
 
-See [[FAQ]] to answers for common questions.
+See [FAQ](https://github.com/dendronhq/dendron-template/blob/master/vault/pro.dendron.faq.md) to answers for common questions.
 
 # Contributing
 
-We welcome community contributions and pull requests. See [[CONTRIBUTING]] for information on how to set up a development environment and submit code.
+We welcome community contributions and pull requests. See [CONTRIBUTING](https://github.com/dendronhq/dendron/blob/master/CONTRIBUTING.md) for information on how to set up a development environment and submit code.
 
 # License
 
 Dendron is distributed under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3.
 
-See [[LICENSE]] and [[NOTICE]] for more information.
+See [LICENSE](https://github.com/dendronhq/dendron/blob/master/LICENSE.md) and [NOTICE](https://github.com/dendronhq/dendron/blob/master/NOTICE.md) for more information.

@@ -702,6 +702,9 @@ class MarkdownUtils {
     let previewEnhanced = vscode.extensions.getExtension(
       "shd101wyy.markdown-preview-enhanced"
     );
+    let previewEnhanced2 = vscode.extensions.getExtension(
+      "dendron.dendron-markdown-preview-enhanced"
+    );
     const cmds = {
       builtin: {
         open: "markdown.showPreview",
@@ -712,7 +715,7 @@ class MarkdownUtils {
         openSide: "markdown-preview-enhanced.openPreviewToTheSide",
       },
     };
-    const mdClient = cmds[previewEnhanced ? "enhanced" : "builtin"];
+    const mdClient = cmds[(previewEnhanced || previewEnhanced2) ? "enhanced" : "builtin"];
     const openCmd = mdClient[cleanOpts.reuseWindow ? "open" : "openSide"];
     return vscode.commands.executeCommand(openCmd);
   }

@@ -23,6 +23,7 @@
       "packages": true
     },
     "editor.formatOnSave": false,
+    "workbench.editor.showTabs": true,
     "workbench.colorCustomizations": {
       "activityBar.activeBackground": "#3399ff",
       "activityBar.activeBorder": "#bf0060",

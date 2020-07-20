@@ -10,5 +10,5 @@ export function node2Uri(node: DNode): Uri {
   }
   const rootWs = workspace.workspaceFolders[0];
   const rootPath = rootWs.uri.path;
-  return Uri.parse(path.join(rootPath, nodePath));
+  return Uri.file(path.join(rootPath, nodePath));
 }

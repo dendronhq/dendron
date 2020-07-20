@@ -18,9 +18,12 @@ export class DisposableStore {
 
 // === File FUtils
 export function resolvePath(filePath: string, wsRoot?: string): string {
+  const platform = os.platform();
+
+  const isWin = (platform === "win32") ? true: false;
   if (filePath[0] === "~") {
     return resolveTilde(filePath);
-  } else if (posix.isAbsolute(filePath)) {
+  } else if (path.isAbsolute(filePath) || (isWin && filePath.startsWith('\\'))) {
     return filePath;
   } else {
     if (!wsRoot) {
@@ -94,11 +97,11 @@ export class VSCodeUtils {
           [GLOBAL_STATE.VERSION]: "0.0.1",
         }),
         workspaceState: VSCodeUtils.createMockState({}),
-        extensionUri: vscode.Uri.parse(pkgRoot),
+        extensionUri: vscode.Uri.file(pkgRoot),
         environmentVariableCollection: {} as any,
         storagePath: "/tmp/dendron-integ-storage/",
         globalStoragePath: "/tmp/dendron-integ-storage-global/",
-        asAbsolutePath: {} as any, //vscode.Uri.parse(wsPath)
+        asAbsolutePath: {} as any, //vscode.Uri.file(wsPath)
       } as vscode.ExtensionContext;
     }
     return _MOCK_CONTEXT;
@@ -124,7 +127,7 @@ export class VSCodeUtils {
   }
 
   static createWSFolder(root: string): vscode.WorkspaceFolder {
-    const uri = vscode.Uri.parse(root);
+    const uri = vscode.Uri.file(root);
     return {
       index: 0,
       uri,
@@ -135,7 +138,7 @@ export class VSCodeUtils {
   static async openWS(wsFile: string) {
     return vscode.commands.executeCommand(
       "vscode.openFolder",
-      vscode.Uri.parse(wsFile)
+      vscode.Uri.file(wsFile)
     );
   }
 

@@ -1,6 +1,7 @@
 // import pino from "pino";
 
 import { env } from "@dendronhq/common-all";
+import path from "path";
 import pino from "pino";
 
 export class Logger {
@@ -31,7 +32,8 @@ function createLogger(name?: string) {
   const nameClean = name || env("LOG_NAME");
 
   const logDst =
-    env("LOG_DST", { shouldThrow: false }) || "/tmp/dendron-dev.log";
+    env("LOG_DST", { shouldThrow: false }) ||
+    path.join("/tmp", "dendron-dev.log");
   if (logDst === "stdout") {
     return pino({ name: nameClean, level });
   } else {

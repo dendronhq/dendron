@@ -33,7 +33,9 @@ function createLogger(name?: string) {
 
   const logDst = env("LOG_DST", { shouldThrow: false }) || "stdout";
   if (logDst === "stdout") {
-    return pino({ name: nameClean, level });
+    // TODO: tmp disable pino logging on stdout
+    const out = pino({ name: nameClean });
+    return out;
   } else {
     return pino(pino.destination(logDst)).child({ name: nameClean, level });
   }

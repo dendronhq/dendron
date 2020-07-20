@@ -26,7 +26,12 @@ import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { NodeService } from "./services/nodeService/NodeService";
 import { Settings } from "./settings";
-import { DisposableStore, resolvePath, VSCodeUtils, resolveTilde } from "./utils";
+import {
+  DisposableStore,
+  resolvePath,
+  VSCodeUtils,
+  resolveTilde,
+} from "./utils";
 import { isAnythingSelected } from "./utils/editor";
 import { ImportPodCommand } from "./commands/ImportPod";
 
@@ -35,7 +40,8 @@ function writeWSFile(
   opts: { rootDir: string; pathOverride?: string }
 ) {
   const cleanOpts = _.defaults(opts, {
-    pathOverride: vscode.Uri.file(posix.join(opts.rootDir, "vault.main")).fsPath,
+    pathOverride: vscode.Uri.file(posix.join(opts.rootDir, "vault.main"))
+      .fsPath,
   });
   const jsonBody = {
     folders: [
@@ -50,7 +56,7 @@ function writeWSFile(
         // non-developers don't have git, will leave as optional for now
         // "eamodio.gitlens",
         // markdown extensions
-        "dendron.markdown-preview-enhanced",
+        "dendron.dendron-markdown-preview-enhanced",
         // Spellcheck
         "ban.spellright",
         // images
@@ -150,7 +156,9 @@ export class DendronWorkspace {
   }
 
   get extensionAssetsDir(): vscode.Uri {
-    const assetsDir = vscode.Uri.file(path.join(this.context.extensionPath, "assets"));
+    const assetsDir = vscode.Uri.file(
+      path.join(this.context.extensionPath, "assets")
+    );
     return assetsDir;
   }
 
@@ -591,7 +599,7 @@ export class DendronWorkspace {
 
   /**
    *  Calls activate workspace
-   * @param mainVault 
+   * @param mainVault
    */
   async reloadWorkspace(mainVault?: string) {
     // TODO: dispose of existing workspace
@@ -625,7 +633,7 @@ export class DendronWorkspace {
       rootDirRaw,
       vscode.workspace?.workspaceFile?.fsPath
     );
-     if (fs.existsSync(rootDir)) {
+    if (fs.existsSync(rootDir)) {
       const options = {
         delete: { msg: "delete existing folder", alias: "d" },
         abort: { msg: "abort current operation", alias: "a" },
@@ -659,10 +667,12 @@ export class DendronWorkspace {
         return;
       } else if (resp === "delete") {
         try {
-        fs.removeSync(rootDir);
-        } catch(err) {
+          fs.removeSync(rootDir);
+        } catch (err) {
           Logger.error(JSON.stringify(err));
-          vscode.window.showErrorMessage(`error removing ${rootDir}. please check that it's not currently open`);
+          vscode.window.showErrorMessage(
+            `error removing ${rootDir}. please check that it's not currently open`
+          );
           return;
         }
         vscode.window.showInformationMessage(`removed ${rootDir}`);
@@ -679,7 +689,9 @@ export class DendronWorkspace {
     });
     if (!opts.skipOpenWS) {
       vscode.window.showInformationMessage("opening dendron workspace");
-      return VSCodeUtils.openWS(vscode.Uri.file(posix.join(rootDir, DENDRON_WS_NAME)).fsPath);
+      return VSCodeUtils.openWS(
+        vscode.Uri.file(posix.join(rootDir, DENDRON_WS_NAME)).fsPath
+      );
     }
   }
 
@@ -715,7 +727,8 @@ class MarkdownUtils {
         openSide: "markdown-preview-enhanced.openPreviewToTheSide",
       },
     };
-    const mdClient = cmds[(previewEnhanced || previewEnhanced2) ? "enhanced" : "builtin"];
+    const mdClient =
+      cmds[previewEnhanced || previewEnhanced2 ? "enhanced" : "builtin"];
     const openCmd = mdClient[cleanOpts.reuseWindow ? "open" : "openSide"];
     return vscode.commands.executeCommand(openCmd);
   }

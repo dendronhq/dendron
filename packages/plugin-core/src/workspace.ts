@@ -66,7 +66,7 @@ function writeWSFile(
         // material theme
         "equinusocio.vsc-material-theme",
         // markdown shortcuts
-        "mdickin.markdown-shortcuts",
+        "dendron.dendron-markdown-shortcuts",
         // markdown links
         "dendron.dendron-markdown-links",
       ],

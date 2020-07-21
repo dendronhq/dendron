@@ -90,7 +90,7 @@
     "keybindings": [
       {
         "command": "dendron.lookup",
-        "mac": "cmd+l",
+        "mac": "cmd+L",
         "key": "ctrl+l"
       },
       {

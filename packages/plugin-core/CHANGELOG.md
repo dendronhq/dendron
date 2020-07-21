@@ -7,26 +7,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 **Note:** Version bump only for package @dendronhq/plugin-core
 
-## [0.3.28](https://github.com/dendronhq/dendron/compare/v0.3.27...v0.3.28) (2020-07-20)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.3.27](https://github.com/dendronhq/dendron/compare/v0.3.26...v0.3.27) (2020-07-20)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.3.26](https://github.com/dendronhq/dendron/compare/v0.3.25...v0.3.26) (2020-07-20)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.3.25](https://github.com/dendronhq/dendron/compare/v0.3.24...v0.3.25) (2020-07-20)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.3.24](https://github.com/dendronhq/dendron/compare/v0.3.23...v0.3.24) (2020-07-20)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
 ## [0.3.23](https://github.com/dendronhq/dendron/compare/v0.3.22...v0.3.23) (2020-07-20)
 
 ### Bug Fixes
@@ -37,9 +17,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - basic windows support ([a789ec5](https://github.com/dendronhq/dendron/commit/a789ec5792301103d302739f00b595509128d367))
 
-## [0.3.22](https://github.com/dendronhq/dendron/compare/v0.3.21...v0.3.22) (2020-07-20)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
 
 ## [0.3.21](https://github.com/dendronhq/dendron/compare/v0.3.20...v0.3.21) (2020-07-19)
 

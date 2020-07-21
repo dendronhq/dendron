@@ -40,8 +40,7 @@ function writeWSFile(
   opts: { rootDir: string; pathOverride?: string }
 ) {
   const cleanOpts = _.defaults(opts, {
-    pathOverride: vscode.Uri.file(posix.join(opts.rootDir, "vault.main"))
-      .fsPath,
+    pathOverride: "vault.main"
   });
   const jsonBody = {
     folders: [
@@ -49,7 +48,7 @@ function writeWSFile(
         path: cleanOpts.pathOverride,
       },
     ],
-    settings: Settings.defaults(cleanOpts),
+    settings: Settings.defaults(),
     extensions: {
       recommendations: [
         // git version history

@@ -267,13 +267,13 @@ export class DendronEngine implements DEngine {
 
   async delete(idOrFname: string, opts?: EngineDeleteOpts): Promise<void> {
     const ctx = "delete";
-    let cleanOpts = _.defaults(opts, { metaOnly: false });
+    const cleanOpts = _.defaults(opts, { metaOnly: false });
     // TODO: take care of schema
     let noteToDelete = this.notes[idOrFname];
     if (_.isUndefined(noteToDelete)) {
       const fname = DNodeUtils.basename(idOrFname, false);
       // NOTE: get around ts issues
-      let tmp = _.find(this.notes, { fname });
+      const tmp = _.find(this.notes, { fname });
       if (_.isUndefined(tmp)) {
         const msg = `node ${idOrFname} not found`;
         logger.error({ ctx, msg });

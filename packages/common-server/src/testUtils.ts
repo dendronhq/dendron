@@ -51,7 +51,7 @@ export class FileTestUtils {
   static getFixturesRoot(base: string) {
     const pkgRoot = FileTestUtils.getPkgRoot(base);
     return posix.join(pkgRoot, "fixtures");
-  };
+  }
 
   static getPkgRoot(base: string, fname?: string): string {
     fname = fname || "package.json";
@@ -100,7 +100,7 @@ export class LernaTestUtils {
     return FileTestUtils.getPkgRoot(__dirname, "lerna.json");
   }
   static getFixturesDir(type?: "store") {
-    let pathSoFar = path.join(this.getRootDir(), "fixtures");
+    const pathSoFar = path.join(this.getRootDir(), "fixtures");
     return type ? path.join(pathSoFar, type) : pathSoFar;
   }
   static fixtureFilesForStore() {

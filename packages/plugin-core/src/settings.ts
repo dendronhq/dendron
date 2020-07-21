@@ -11,11 +11,8 @@ type ConfigUpdateEntry = {
 type ConfigUpdateChangeSet = { [k: string]: ConfigUpdateEntry };
 
 const _SETTINGS: ConfigUpdateChangeSet = {
-  "spellright.language": {
-    default: ["en"],
-  },
-  "spellright.documentTypes": {
-    default: ["markdown", "latex", "plaintext"],
+  "dendron.rootDir": {
+    default: "."
   },
   "editor.minimap.enabled": {
     default: false,
@@ -40,8 +37,8 @@ export class Settings {
     });
   }
 
-  static defaults(opts: { rootDir: string }) {
-    return { ...Settings.getDefaults(), "dendron.rootDir": opts.rootDir };
+  static defaults() {
+    return { ...Settings.getDefaults() };
   }
 
   static defaultsChangeSet() {

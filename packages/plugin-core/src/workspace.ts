@@ -34,6 +34,7 @@ import {
 } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
 import { ImportPodCommand } from "./commands/ImportPod";
+import { ReloadIndexCommand } from "./commands/ReloadIndex";
 
 function writeWSFile(
   fpath: string,
@@ -448,6 +449,14 @@ export class DendronWorkspace {
         const wsRoot = this.rootWorkspace.uri.fsPath;
         await new ImportPodCommand().execute({ wsRoot });
         vscode.window.showInformationMessage(`pod import`);
+      })
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(DENDRON_COMMANDS.RELOAD_INDEX, async () => {
+        const root = this.rootWorkspace.uri.fsPath;
+        await new ReloadIndexCommand().execute({ root });
+        vscode.window.showInformationMessage(`finish reload`);
       })
     );
   }

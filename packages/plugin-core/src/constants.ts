@@ -8,6 +8,7 @@ export const DENDRON_COMMANDS = {
   INIT_WS: "dendron.initWS",
   CHANGE_WS: "dendron.changeWS",
   DELETE_NODE: "dendron.deleteNode",
+  RELOAD_INDEX: "dendron.reloadIndex",
   RELOAD_WS: "dendron.reloadWS",
   RESET_CONFIG: "dendron.dev.resetConfig",
   CREATE_SCRATCH_NOTE: "dendron.createScratchNote",

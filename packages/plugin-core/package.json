@@ -75,6 +75,10 @@
         "title": "Dendron: Delete Node"
       },
       {
+        "command": "dendron.reloadIndex",
+        "title": "Dendron: Reload Index"
+      },
+      {
         "command": "dendron.dev.resetConfig",
         "title": "Dev:Dendron: ResetConfig"
       },

@@ -45,6 +45,15 @@
         "Code: Release"
       ],
       "dependsOrder": "sequence"
+    },
+    {
+      "label": "Pub:Local",
+      "dependsOn": [
+        "NPM: Publish",
+        "Code: Package and Install"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
     }
   ]
 }

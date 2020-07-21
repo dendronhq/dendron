@@ -23,6 +23,10 @@ function expectNoteProps(
   expect(_.pick(note, propsToCheck)).toEqual(expectedProps);
 }
 
+function stripEntropicData(ent: any) {
+  return _.omit(ent,["created", "updated"])
+}
+
 describe("engine:exact", () => {
   let root: string;
   const queryMode = "note";
@@ -91,16 +95,19 @@ describe("engine:exact", () => {
 
     test("create node", async () => {
       await engine.init();
-      const bazNote = new Note({ fname: "baz" });
+      const bazNote = new Note({ id: "baz", fname: "baz" });
       bazNote.body = "baz.body";
       await engine.write(bazNote, { newNode: true });
       const baz = await engine.queryOne("baz", "note");
       // FIXME: the ids change, need a better way to test
-      // const bazMd = FileTestUtils.readMDFile(root, "baz.md");
-      // expect(bazMd).toMatchSnapshot("bazMd");
-      expect(
-        testUtils.omitEntropicProps(baz.data.toRawProps())
-      ).toMatchSnapshot("bazNote");
+      let bazMd = FileTestUtils.readMDFile(root, "baz.md");
+
+      bazMd.data = stripEntropicData(bazMd.data);
+      // @ts-ignore
+      bazMd = _.omit(bazMd, ["path"]);
+      expect(bazMd).toMatchSnapshot("bazMd");
+      expect(stripEntropicData(baz.data.toRawProps())).toMatchSnapshot("bazNode");
+
       [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
         root,
         LernaTestUtils.fixtureFilesForStore(),

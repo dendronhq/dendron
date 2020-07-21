@@ -143,9 +143,10 @@ export function node2PropsMdFile(props: NoteRawProps, opts: { root: string }) {
   const { root } = opts;
   const { body, fname } = props;
   const filePath = path.join(root, `${fname}.md`);
+  const blacklist = ["body", "stub", "data", "custom", "fname", "parent", "children"];
   return fs.writeFileSync(
     filePath,
-    matter.stringify(body || "", _.omit(props, ["body", "stub"]))
+    matter.stringify(body || "", _.omit(props, blacklist))
   );
 }
 

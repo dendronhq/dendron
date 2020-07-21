@@ -1,12 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`engine:exact basic create node: bazNote 1`] = `
+exports[`engine:exact basic create node: bazMd 1`] = `
+Object {
+  "content": "baz.body
+",
+  "data": Object {
+    "desc": "",
+    "id": "baz",
+    "title": "baz",
+  },
+  "excerpt": "",
+  "isEmpty": false,
+}
+`;
+
+exports[`engine:exact basic create node: bazNode 1`] = `
 Object {
   "body": "baz.body",
+  "children": Array [],
   "custom": Object {},
   "data": Object {},
   "desc": "",
   "fname": "baz",
+  "id": "baz",
+  "parent": "root",
   "stub": false,
   "title": "baz",
   "type": "note",
@@ -38,10 +55,7 @@ exports[`engine:exact basic create when empty: notes-root-content 1`] = `
 
 exports[`engine:exact basic create when empty: notes-root-data 1`] = `
 Object {
-  "custom": Object {},
-  "data": Object {},
   "desc": "",
-  "fname": "root",
   "title": "root",
 }
 `;
@@ -122,9 +136,7 @@ Array [
       "three",
     ],
     "custom": Object {},
-    "data": Object {
-      "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
-    },
+    "data": Object {},
     "desc": "",
     "fname": "foo",
     "parent": "root",
@@ -224,9 +236,7 @@ Array [
       "three",
     ],
     "custom": Object {},
-    "data": Object {
-      "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
-    },
+    "data": Object {},
     "desc": "",
     "fname": "foo",
     "parent": "root",
@@ -414,9 +424,7 @@ Array [
       "three",
     ],
     "custom": Object {},
-    "data": Object {
-      "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
-    },
+    "data": Object {},
     "desc": "",
     "fname": "foo",
     "parent": "root",
@@ -515,9 +523,7 @@ Array [
       "three",
     ],
     "custom": Object {},
-    "data": Object {
-      "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
-    },
+    "data": Object {},
     "desc": "",
     "fname": "foo",
     "parent": "root",
@@ -589,9 +595,7 @@ Object {
     "three",
   ],
   "custom": Object {},
-  "data": Object {
-    "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
-  },
+  "data": Object {},
   "desc": "",
   "fname": "foo",
   "parent": "root",
@@ -637,9 +641,7 @@ Array [
       "three",
     ],
     "custom": Object {},
-    "data": Object {
-      "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
-    },
+    "data": Object {},
     "desc": "",
     "fname": "foo",
     "parent": "root",
@@ -974,9 +976,7 @@ Array [
       "three",
     ],
     "custom": Object {},
-    "data": Object {
-      "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
-    },
+    "data": Object {},
     "desc": "",
     "fname": "foo",
     "parent": "root",

@@ -7,21 +7,20 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug file",
-      "program": "${workspaceRoot}/lib/${fileBasenameNoExtension}.js",
-      "cwd": "${workspaceRoot}",
+      "name": "engine-server:Debug file",
+      "program": "${workspaceFolder:engine-server}/lib/${fileBasenameNoExtension}.js",
+      "cwd": "${workspaceFolder:engine-server}",
       "sourceMaps": true,
       "smartStep": true,
       "preLaunchTask": "build",
-      "outFiles": ["${workspaceRoot}/lib/*.js"]
+      "outFiles": ["${workspaceFolder:engine-server}/lib/*.js"]
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug test",
-      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "args": ["--findRelatedTests", "${relativeFile}"],
-      "cwd": "${workspaceRoot}"
+      "name": "engine-server:Debug test",
+      "program": "${workspaceFolder:engine-server}/node_modules/jest/bin/jest.js",
+      "cwd": "${workspaceFolder:engine-server}"
     }
   ]
 }

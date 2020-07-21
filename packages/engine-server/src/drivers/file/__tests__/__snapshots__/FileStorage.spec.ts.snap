@@ -42,9 +42,7 @@ Array [
       "three",
     ],
     "custom": Object {},
-    "data": Object {
-      "schemaId": "b111db5b-bc52-4977-893b-307522f89ea3",
-    },
+    "data": Object {},
     "desc": "",
     "fname": "foo",
     "parent": "root",

@@ -25,7 +25,7 @@ import {
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { NodeService } from "./services/nodeService/NodeService";
-import { Settings } from "./settings";
+import { Settings, Extensions } from "./settings";
 import {
   DisposableStore,
   resolvePath,
@@ -35,13 +35,24 @@ import {
 import { isAnythingSelected } from "./utils/editor";
 import { ImportPodCommand } from "./commands/ImportPod";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
+import { UpgradeSettingsCommand } from "./commands/UpgradeSettings";
+
+/**
+ * Write out .vscode folder
+ * @param root 
+ */
+function writeWSFolder(root: string) {
+  const wsFolder = path.join(root, ".vscode");
+  fs.ensureDirSync(wsFolder);
+  return Extensions.write(wsFolder);
+}
 
 function writeWSFile(
   fpath: string,
   opts: { rootDir: string; pathOverride?: string }
 ) {
   const cleanOpts = _.defaults(opts, {
-    pathOverride: "vault.main"
+    pathOverride: "vault.main",
   });
   const jsonBody = {
     folders: [
@@ -50,27 +61,6 @@ function writeWSFile(
       },
     ],
     settings: Settings.defaults(),
-    extensions: {
-      recommendations: [
-        // git version history
-        // non-developers don't have git, will leave as optional for now
-        // "eamodio.gitlens",
-        // markdown extensions
-        "dendron.dendron-markdown-preview-enhanced",
-        // Spellcheck
-        "ban.spellright",
-        // images
-        "mushan.vscode-paste-image",
-        // wikilinks, backlinks, and additional goodies
-        "kortina.vscode-markdown-notes",
-        // material theme
-        "equinusocio.vsc-material-theme",
-        // markdown shortcuts
-        "dendron.dendron-markdown-shortcuts",
-        // markdown links
-        "dendron.dendron-markdown-links",
-      ],
-    },
   };
   fs.writeJsonSync(fpath, jsonBody, { spaces: 4 });
 }
@@ -453,11 +443,26 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.RELOAD_INDEX, async () => {
-        const root = this.rootWorkspace.uri.fsPath;
-        await new ReloadIndexCommand().execute({ root });
-        vscode.window.showInformationMessage(`finish reload`);
-      })
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.RELOAD_INDEX,
+        async () => {
+          const root = this.rootWorkspace.uri.fsPath;
+          await new ReloadIndexCommand().execute({ root });
+          vscode.window.showInformationMessage(`finish reload`);
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.UPGRADE_SETTINGS,
+        async () => {
+          await new UpgradeSettingsCommand().execute({
+            ws: this,
+            settingOpts: { force: true },
+          });
+        }
+      )
     );
   }
 
@@ -602,6 +607,7 @@ export class DendronWorkspace {
         pathOverride: rootDir,
       });
     }
+    Extensions.update(rootDir);
     VSCodeUtils.openWS(posix.join(rootDir, DENDRON_WS_NAME));
   }
 
@@ -695,6 +701,8 @@ export class DendronWorkspace {
     writeWSFile(vscode.Uri.file(posix.join(rootDir, DENDRON_WS_NAME)).fsPath, {
       rootDir,
     });
+    Extensions.update(rootDir);
+
     if (!opts.skipOpenWS) {
       vscode.window.showInformationMessage("opening dendron workspace");
       return VSCodeUtils.openWS(

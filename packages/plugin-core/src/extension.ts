@@ -1,11 +1,11 @@
 import _ from "lodash";
 import * as vscode from "vscode";
-import { GLOBAL_STATE } from "./constants";
+import { GLOBAL_STATE, DENDRON_COMMANDS } from "./constants";
 import { Logger } from "./logger";
 import { Settings } from "./settings";
 import { VSCodeUtils } from "./utils";
 import { DendronWorkspace } from "./workspace";
-import { getStage } from "@dendronhq/common-all";
+import { getStage, CONSTANTS } from "@dendronhq/common-all";
 import { HistoryService } from "./services/HistoryService";
 
 // === Main
@@ -123,12 +123,12 @@ async function showWelcomeOrWhatsNew(
     Logger.info({ ctx, msg: "not first time install" });
     if (version !== previousVersion) {
       Logger.info({ ctx, msg: "new version", version, previousVersion });
-      const config = vscode.workspace.getConfiguration();
-      const changed = await Settings.upgrade(
-        config,
-        Settings.defaultsChangeSet()
-      );
-      Logger.info({ ctx, msg: "settings upgraded", changed });
+      await vscode.commands.executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS);
+      // const changed = await Settings.upgrade(
+      //   config,
+      //   Settings.defaultsChangeSet()
+      // );
+      // Logger.info({ ctx, msg: "settings upgraded", changed });
       await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
       vscode.window.showInformationMessage(
         `Dendron has been upgraded to ${version} from ${previousVersion}`,

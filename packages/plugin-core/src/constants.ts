@@ -16,6 +16,7 @@ export const DENDRON_COMMANDS = {
   CREATE_RECORD_NOTE: "dendron.createRecordNote",
   OPEN_LINK: "dendron.openLink",
   IMPORT_POD: "dendron.importPod",
+  UPGRADE_SETTINGS: "dendron.upgradeSettings",
 };
 export const DENDRON_CHANNEL_NAME = "Dendron";
 export const GLOBAL_STATE = {

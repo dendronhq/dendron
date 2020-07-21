@@ -89,6 +89,10 @@
       {
         "command": "dendron.importPod",
         "title": "Dendron: Import Pod"
+      },
+      {
+        "command": "dendron.upgradeSettings",
+        "title": "Dendron: Upgrade Settings"
       }
     ],
     "keybindings": [

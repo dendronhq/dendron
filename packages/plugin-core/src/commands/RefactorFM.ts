@@ -10,7 +10,7 @@ export class RefactorYamlCommand extends RefactorBaseCommand<File, any> {
   }
 
   readFile(fpath: string) {
-    return mdFile2NodeProps(fpath, { returnExtra: true });
+    return mdFile2NodeProps(fpath);
   }
 
   writeFile(_fpath: string, data: File) {

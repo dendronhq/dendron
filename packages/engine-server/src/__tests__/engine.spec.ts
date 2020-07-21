@@ -3,7 +3,6 @@ import {
   DNodeRawProps,
   INoteOpts,
   Note,
-  SchemaRawProps,
   testUtils,
   SchemaUtils,
 } from "@dendronhq/common-all";
@@ -24,7 +23,7 @@ function expectNoteProps(
 }
 
 function stripEntropicData(ent: any) {
-  return _.omit(ent,["created", "updated"])
+  return _.omit(ent, ["created", "updated"]);
 }
 
 describe("engine:exact", () => {
@@ -78,17 +77,9 @@ describe("engine:exact", () => {
       expect(
         testUtils.omitEntropicProps(data as DNodeRawProps)
       ).toMatchSnapshot("notes-root-data");
-      expect(
-        FileTestUtils.readYMLFile(
-          root,
-          "root.schema.yml"
-        ).map((schemaProps: SchemaRawProps) =>
-          testUtils.omitEntropicProps(schemaProps)
-        )
-      ).toMatchSnapshot("schema-root");
       [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
         root,
-        ["root.md", "root.schema.yml"],
+        ["root.md"],
         {}
       );
     });
@@ -106,7 +97,9 @@ describe("engine:exact", () => {
       // @ts-ignore
       bazMd = _.omit(bazMd, ["path"]);
       expect(bazMd).toMatchSnapshot("bazMd");
-      expect(stripEntropicData(baz.data.toRawProps())).toMatchSnapshot("bazNode");
+      expect(stripEntropicData(baz.data.toRawProps())).toMatchSnapshot(
+        "bazNode"
+      );
 
       [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
         root,
@@ -147,12 +140,54 @@ describe("engine:exact", () => {
         .data[0] as Note;
       note.body = "foo.one.body";
       await engine.write(note);
+
+      // check written note is still equal
       const noteUpdated: Note = (await engine.query("foo.one", queryMode))
         .data[0] as Note;
       expect(_.omit(note.toRawProps(), "body")).toEqual(
         _.omit(noteUpdated.toRawProps(), "body")
       );
       expect(_.trim(noteUpdated.body)).toEqual("foo.one.body");
+
+      // check custom att is in file
+      const { data } = FileTestUtils.readMDFile(root, "foo.one.md");
+      expect(stripEntropicData(data)).toEqual({
+        bond: 42,
+        desc: "",
+        id: "foo.one",
+        title: "foo.one",
+      });
+
+      [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
+        root,
+        LernaTestUtils.fixtureFilesForStore()
+      );
+    });
+
+    test("add custom att to node", async () => {
+      await engine.init();
+      const note: Note = (await engine.query("foo", queryMode)).data[0] as Note;
+      // add custom att
+      note.custom.bond = true;
+      await engine.write(note);
+      const noteUpdated: Note = (await engine.query("foo", queryMode))
+        .data[0] as Note;
+
+      // check note is equal
+      expect(_.omit(note.toRawProps(), "body")).toEqual(
+        _.omit(noteUpdated.toRawProps(), "body")
+      );
+      expect(_.trim(noteUpdated.body)).toEqual("");
+      // check custom att in file
+      const { content, data } = FileTestUtils.readMDFile(root, "foo.md");
+      expect(_.trim(content)).toEqual("");
+      expect(stripEntropicData(data)).toEqual({
+        bond: true,
+        desc: "",
+        id: "foo",
+        title: "foo",
+      });
+
       [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
         root,
         LernaTestUtils.fixtureFilesForStore()
@@ -288,7 +323,7 @@ describe("engine:exact", () => {
         root,
         LernaTestUtils.fixtureFilesForStore(),
         {
-          add: ["root.schema.yml"],
+          add: [],
           remove: ["foo.schema.yml"],
         }
       );
@@ -331,7 +366,7 @@ describe("engine:exact", () => {
         root,
         LernaTestUtils.fixtureFilesForStore(),
         {
-          add: ["root.schema.yml"],
+          add: [],
           remove: ["foo.schema.yml"],
         }
       );

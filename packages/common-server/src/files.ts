@@ -7,7 +7,6 @@ import {
   Schema,
   genUUID,
   assert,
-  CreatePropsOpts,
 } from "@dendronhq/common-all";
 import fs, { Dirent } from "fs";
 
@@ -124,7 +123,6 @@ export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
 
 export function mdFile2NodeProps(
   fpath: string,
-  opts?: CreatePropsOpts
 ): NoteRawProps {
   // NOTE: gray matter cache old date, need to pass empty options
   // to bypass
@@ -134,22 +132,38 @@ export function mdFile2NodeProps(
     content: string;
   };
   const { name: fname } = path.parse(fpath);
-  const dataProps = DNodeRaw.createProps({ ...data, fname, body }, opts);
+  const dataProps = DNodeRaw.createProps({ ...data, fname, body });
   // DEBUG: data: {data}, fpath: {fpath}, dataProps: {dataProps}
   return dataProps;
 }
 
 export function node2PropsMdFile(props: NoteRawProps, opts: { root: string }) {
   const { root } = opts;
-  const { body, fname } = props;
+  const { body, fname, custom } = props;
   const filePath = path.join(root, `${fname}.md`);
-  const blacklist = ["body", "stub", "data", "custom", "fname", "parent", "children"];
+  const blacklist = [
+    "body",
+    "stub",
+    "data",
+    "custom",
+    "fname",
+    "parent",
+    "children",
+  ];
   return fs.writeFileSync(
     filePath,
-    matter.stringify(body || "", _.omit(props, blacklist))
+    matter.stringify(body || "", { ..._.omit(props, blacklist), ...custom })
   );
 }
 
+/**
+ * Convert a node to a MD File. Any custom attributes will be
+ * added to the end
+ *
+ * @param node: node to convert
+ * @param opts
+ *   - root: root folder where files should be written to
+ */
 export function node2MdFile(node: Note, opts: { root: string }) {
   const meta = _.pick(node, [
     "id",

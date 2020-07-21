@@ -20,7 +20,10 @@
       "request": "launch",
       "name": "engine-server:Debug test",
       "program": "${workspaceFolder:engine-server}/node_modules/jest/bin/jest.js",
-      "cwd": "${workspaceFolder:engine-server}"
+      "cwd": "${workspaceFolder:engine-server}",
+      "args": [
+        "--runInBand"
+      ]
     }
   ]
 }

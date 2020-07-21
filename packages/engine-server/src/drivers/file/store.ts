@@ -93,7 +93,7 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
     const errors = fp.errors;
     const badParseErrors = errors.filter((e) => e.status === "BAD_PARSE");
     if (!_.isEmpty(badParseErrors)) {
-      throw Error(`bad yaml: ${badParseErrors}`)
+      throw Error(`bad yaml: ${badParseErrors}`);
     }
     return data.map((n) => n.toRawProps());
   }

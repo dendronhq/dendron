@@ -60,21 +60,6 @@ Object {
 }
 `;
 
-exports[`engine:exact basic create when empty: schema-root 1`] = `
-Array [
-  Object {
-    "body": "",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "root.schema",
-    "stub": false,
-    "title": "root",
-    "type": "schema",
-  },
-]
-`;
-
 exports[`engine:exact basic create when empty: schemas 1`] = `
 Array [
   Object {
@@ -396,7 +381,6 @@ Array [
   "foo.three.alpha.md",
   "foo.two.md",
   "root.md",
-  "root.schema.yml",
 ]
 `;
 
@@ -494,7 +478,6 @@ Array [
   "foo.three.alpha.md",
   "foo.two.md",
   "root.md",
-  "root.schema.yml",
 ]
 `;
 

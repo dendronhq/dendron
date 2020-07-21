@@ -101,8 +101,7 @@ export class DNodeRaw {
    *   - returnExtra: if true, return extra properties, default: false
    */
   static createProps<T>(
-    nodeOpts: DNodeRawOpts<T>,
-    opts?: CreatePropsOpts
+    nodeOpts: DNodeRawOpts<T>
   ): DNodeRawProps<T> & { extra?: any } {
     const {
       id,
@@ -115,7 +114,6 @@ export class DNodeRaw {
       children,
       body,
       data,
-      custom,
     } = _.defaults(nodeOpts, {
       updated: moment.now(),
       created: moment.now(),
@@ -127,10 +125,9 @@ export class DNodeRaw {
       body: "",
       data: {},
       fname: null,
-      custom: {},
     });
     const title = nodeOpts.title || DNodeUtils.basename(fname);
-    const nodeProps: DNodeRawProps<T> & { extra?: any } = {
+    const nodePropsItems = {
       id,
       title,
       desc,
@@ -142,12 +139,13 @@ export class DNodeRaw {
       stub,
       body,
       data,
+    };
+    const denylist = ["schemaStub", "type"];
+    const custom = _.omit(nodeOpts, _.keys(nodePropsItems).concat(denylist));
+    const nodeProps: DNodeRawProps<T> & { extra?: any } = {
+      ...nodePropsItems,
       custom,
     };
-    if (opts?.returnExtra) {
-      const extra = _.omit(nodeOpts, _.keys(nodeProps));
-      nodeProps.extra = extra;
-    }
     return nodeProps;
   }
 }
@@ -429,8 +427,7 @@ export class Note extends DNode<NoteData> implements INote {
   }
 
   get description(): string | undefined {
-    let schemaPrefix: string | undefined;
-    let prefixParts = [];
+    const prefixParts = [];
     if (this.title !== this.fname) {
       prefixParts.push(this.title);
     }
@@ -453,8 +450,7 @@ export class Note extends DNode<NoteData> implements INote {
         prefixParts.push(this.schema.title);
       }
     }
-    schemaPrefix = prefixParts.join(" ");
-    return schemaPrefix;
+    return prefixParts.join(" ");
   }
 
   get domain(): Note {
@@ -468,11 +464,7 @@ export class Note extends DNode<NoteData> implements INote {
 
 export class Schema extends DNode<SchemaData> implements ISchema {
   static createRoot() {
-    const props = SchemaNodeRaw.createProps({
-      id: "root",
-      fname: "root.schema",
-    });
-    return new Schema({ ...props, parent: null, children: [] });
+    return new Schema({ id: "root", title: "root", fname: "root.schema", parent: null, children: [] });
   }
 
   static _UNKNOWN_SCHEMA: undefined | Schema = undefined;
@@ -581,12 +573,7 @@ export class NodeBuilder {
   getDomainsRoot<T extends DNodeData>(
     nodes: DNodeRawProps<T>[]
   ): DNodeRawProps<T>[] {
-    // nodes: {nodes}
-    const rootNodes = _.filter(nodes, (ent) => ent.parent === "root");
-    if (_.isEmpty(rootNodes)) {
-      throw new DendronError("no root node found");
-    }
-    return rootNodes;
+    return _.filter(nodes, (ent) => ent.parent === "root");
   }
 
   toNote(item: NoteRawProps, parents: Note[], opts: { schemas: SchemaDict }) {

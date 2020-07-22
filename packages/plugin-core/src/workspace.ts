@@ -239,12 +239,13 @@ export class DendronWorkspace {
           const uri = node2Uri(node);
           const historyService = HistoryService.instance();
           historyService.add({ source: "engine", action: "create", uri });
-          await DendronEngine.getOrCreateEngine().write(node, {
+          const engine = await DendronEngine.getOrCreateEngine();
+          engine.write(node, {
             newNode: true,
             parentsAsStubs: true,
           });
 
-          const cNote = _.find(this.engine.notes, { fname: cNoteFname });
+          const cNote = _.find(engine.notes, { fname: cNoteFname });
           if (!cNote) {
             throw Error("cNote undefined");
           }
@@ -255,7 +256,7 @@ export class DendronWorkspace {
             id: cNote.id,
           });
           NoteUtils.addBackLink(cNoteNew, node);
-          await this.engine.write(cNoteNew);
+          await engine.write(cNoteNew);
 
           // done
           this.L.info({ ctx: `${ctx}:write:done`, uri });

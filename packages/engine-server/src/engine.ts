@@ -547,11 +547,11 @@ export class DendronEngine implements DEngine {
     if (ntype === "schema") {
       throw Error("not supported");
     } else {
-      _.each(nodes, (node) => {
+      await Promise.all(_.map(nodes, (node) => {
         return this._updateNote(node as Note, opts);
-      });
+      }));
+      return;
     }
-    return;
   }
 
   // OPTIMIZE: do in bulk

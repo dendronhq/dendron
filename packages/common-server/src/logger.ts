@@ -1,7 +1,6 @@
 // import pino from "pino";
 
 import { env } from "@dendronhq/common-all";
-import path from "path";
 import pino from "pino";
 
 export class Logger {
@@ -19,6 +18,9 @@ export class Logger {
     // eslint-disable-next-line no-console
     console.log(this.name, ctx, msg);
   }
+  debug = (msg: any) => {
+    this._log(msg);
+  };
   info = (msg: any) => {
     this._log(msg);
   };
@@ -27,7 +29,7 @@ export class Logger {
   };
 }
 
-function createLogger(name?: string) {
+function createLogger(name?: string): pino.Logger {
   const level = env("LOG_LEVEL", { shouldThrow: false }) || "debug";
   const nameClean = name || env("LOG_NAME");
 
@@ -41,7 +43,14 @@ function createLogger(name?: string) {
   }
 }
 
-export { createLogger };
+export type DLogger = {
+  debug: (msg: any) => void;
+  info: (msg: any) => void;
+  error: (msg: any) => void;
+  //fatal: (msg: any) => void;
+}
+
+export { createLogger, pino };
 
 export function logAndThrow(logger: Logger, msg: any): never {
   logger.error(msg);

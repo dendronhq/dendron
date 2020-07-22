@@ -28,7 +28,6 @@ export function _activate(context: vscode.ExtensionContext) {
     extensionPath,
     extensionUri,
     storagePath,
-    globalStoragePath,
   } = context;
 
   Logger.configure(context, "debug");

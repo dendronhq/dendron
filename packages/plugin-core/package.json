@@ -83,6 +83,10 @@
         "title": "Dev:Dendron: ResetConfig"
       },
       {
+        "command": "dendron.dev.openLogs",
+        "title": "Dev:Dendron: Open Logs"
+      },
+      {
         "command": "dendron.openLink",
         "title": "Dendron: Open Link"
       },

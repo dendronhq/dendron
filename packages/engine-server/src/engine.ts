@@ -30,7 +30,7 @@ import {
   SchemaRawProps,
   UpdateNodesOpts,
 } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-server";
+import { createLogger, DLogger, Logger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import Fuse from "fuse.js";
 import _ from "lodash";
@@ -38,7 +38,6 @@ import FileStorage from "./drivers/file/store";
 import { BodyParser } from "./drivers/raw/BodyParser";
 
 let _DENDRON_ENGINE: DendronEngine;
-const logger = createLogger("DEngine");
 
 function isAllQuery(qs: string): boolean {
   return qs === "**/*";
@@ -73,6 +72,7 @@ type DendronEngineOpts = {
   forceNew?: boolean;
   store?: DEngineStore;
   mode?: DEngineMode;
+  logger?: DLogger;
 };
 
 type DendronEngineProps = Required<DendronEngineOpts>;
@@ -94,21 +94,26 @@ export class DendronEngine implements DEngine {
 
   public store: DEngineStore;
 
+  public logger: Logger;
+
   static getOrCreateEngine(opts?: DendronEngineOpts): DEngine {
+    const ctx = "getOrCreateEngine";
     if (opts) {
       const root = opts.root;
       const optsClean: DendronEngineProps = _.defaults(opts || {}, {
         forceNew: false,
-        store: new FileStorage({ root }),
+        store: new FileStorage({ root, logger: opts?.logger }),
         root,
         // TODO: remove
         cacheDir: "/tmp/dendronCache",
         mode: "fuzzy",
+        logger: createLogger("DEngine"),
       });
       if (!_DENDRON_ENGINE || optsClean.forceNew) {
         if (_.isUndefined(optsClean.root)) {
           throw Error(`root must be defined`);
         }
+        optsClean.logger.info({ ctx, msg: "create new engine" });
         // TODO
         _DENDRON_ENGINE = new DendronEngine(optsClean.store, optsClean);
       }
@@ -132,6 +137,8 @@ export class DendronEngine implements DEngine {
     });
     this.fullNodes = new Set();
     this.queries = new Set();
+    // @ts-ignore
+    this.logger = props.logger;
 
     // setup schemas
     this.schemas = {};
@@ -214,7 +221,7 @@ export class DendronEngine implements DEngine {
           this.notes[id] = node;
         } else {
           // exists, merge it
-          logger.debug({
+          this.logger.debug({
             ctx: "refreshNodes:existingNode",
             node: node.toRawProps(),
           });
@@ -231,7 +238,7 @@ export class DendronEngine implements DEngine {
         title: n.title,
         id: n.id,
       }));
-      logger.debug({
+      this.logger.debug({
         ctx: "refreshNodes",
         newNodes,
         allNodes,
@@ -276,7 +283,7 @@ export class DendronEngine implements DEngine {
       const tmp = _.find(this.notes, { fname });
       if (_.isUndefined(tmp)) {
         const msg = `node ${idOrFname} not found`;
-        logger.error({ ctx, msg });
+        this.logger.error({ ctx, msg });
         throw Error(msg);
       }
       noteToDelete = tmp;
@@ -305,7 +312,7 @@ export class DendronEngine implements DEngine {
   async get(id: string, mode: QueryMode, opts?: QueryOpts) {
     opts = _.defaults(opts || {}, { fullNode: true, createIfNew: true });
     let nodeDict;
-    logger.debug({ ctx: "get", id, opts });
+    this.logger.debug({ ctx: "get", id, opts });
 
     if (mode === "schema") {
       nodeDict = this.schemas;
@@ -318,14 +325,14 @@ export class DendronEngine implements DEngine {
 
     // a full node has a body and is fully resolved
     if (opts?.fullNode && !this.fullNodes.has(id)) {
-      logger.debug({ ctx: "get:fetchFromStore:pre", id });
+      this.logger.debug({ ctx: "get:fetchFromStore:pre", id });
       const fnResp = await this.store.get(id, {
         ...opts,
         webClient: true,
       });
-      logger.debug({ ctx: "get:fetchFromStore:post", id, opts, fnResp });
+      this.logger.debug({ ctx: "get:fetchFromStore:post", id, opts, fnResp });
       const fullNode = await this.resolveIds(fnResp.data, this.notes);
-      logger.debug({ ctx: "get:resolve:post", fnResp });
+      this.logger.debug({ ctx: "get:resolve:post", fnResp });
       // TODO:
       this.refreshNodes([fullNode], opts);
       return { data: fullNode };
@@ -349,7 +356,7 @@ export class DendronEngine implements DEngine {
 
     // handle all query case
     if (isAllQuery(queryString)) {
-      logger.debug({ ctx: "query:queryAll:pre", mode });
+      this.logger.debug({ ctx: "query:queryAll:pre", mode });
       try {
         data = await this.store.query("**/*", mode, {
           ...opts,
@@ -357,10 +364,10 @@ export class DendronEngine implements DEngine {
         });
       } catch (err) {
         if (err instanceof DendronError) {
-          logger.info({ ctx, msg: "no root found", mode });
+          this.logger.info({ ctx, msg: "no root found", mode });
           const root = this._createRoot(mode);
           await this.store.write(root);
-          logger.info({ ctx, msg: "post:store.write", mode });
+          this.logger.info({ ctx, msg: "post:store.write", mode });
           return this.query(queryString, mode, opts);
         } else {
           throw err;
@@ -383,7 +390,7 @@ export class DendronEngine implements DEngine {
       } else {
         items = _.map(results, (resp) => resp.item);
       }
-      logger.debug({ ctx: "query:exit:schema", items });
+      this.logger.debug({ ctx: "query:exit:schema", items });
       return makeResponse<EngineQueryResp>({
         data: _.map(items, (item) => nodes[item.id]),
         error: null,
@@ -408,7 +415,7 @@ export class DendronEngine implements DEngine {
           items[0]?.path !== queryString &&
           opts.createIfNew
         ) {
-          logger.debug({
+          this.logger.debug({
             ctx: "query:write:pre",
             queryString,
             item: items[0],
@@ -432,7 +439,7 @@ export class DendronEngine implements DEngine {
         const fetchedFullNodes = await Promise.all(
           _.map<IDNode, Promise<IDNode | null>>(items, async (ent) => {
             if (!this.fullNodes.has(ent.id)) {
-              logger.debug({
+              this.logger.debug({
                 ctx: "query:fuse.search:post",
                 status: "fetch full node from store",
               });
@@ -440,7 +447,7 @@ export class DendronEngine implements DEngine {
               const fn = await this.get(ent.id, mode);
               return fn.data;
             }
-            logger.debug({
+            this.logger.debug({
               ctx: "query:fuse.search:post",
               status: "fetch full node from cache",
             });
@@ -451,12 +458,12 @@ export class DendronEngine implements DEngine {
           _.filter(fetchedFullNodes, (ent) => !_.isNull(ent)) as IDNode[],
           { fullNode: true }
         );
-        logger.debug({
+        this.logger.debug({
           ctx: "query:fetchedFullNodes:exit",
           fetchedFullNodes,
         });
       }
-      logger.debug({ ctx: "query:exit:note", items });
+      this.logger.debug({ ctx: "query:exit:note", items });
       return makeResponse<EngineQueryResp>({
         data: _.map(items, (item) => this.notes[item.id]),
         error: null,

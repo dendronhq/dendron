@@ -13,14 +13,13 @@ import {
   createLogger,
   globMatch,
   mdFile2NodeProps,
+  pino,
+  DLogger,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import YAML from "yamljs";
-
-// @ts-ignore
-const logger = createLogger("FileParser");
 
 export type FileMeta = {
   // file name: eg. foo.md, name = foo
@@ -46,6 +45,7 @@ function getFileMeta(fpaths: string[]): FileMetaDict {
 type FileParserOpts = {
   errorOnEmpty?: boolean;
   errorOnBadParse?: boolean;
+  logger?: pino.Logger;
 };
 type FileParserProps = Required<FileParserOpts>;
 
@@ -58,13 +58,17 @@ export class FileParser {
 
   public store: DEngineStore;
 
+  public logger: DLogger;
+
   constructor(store: DEngineStore, opts?: FileParserOpts) {
     this.errors = [];
     this.missing = new Set<string>();
     this.opts = _.defaults(opts, {
       errorOnEmpty: true,
       errorOnBadParse: true,
+      logger: createLogger("FileParser"),
     });
+    this.logger = this.opts.logger;
     this.store = store;
   }
 
@@ -89,7 +93,7 @@ export class FileParser {
     try {
       noteProps = mdFile2NodeProps(path.join(store.opts.root, ent.fpath));
     } catch (err) {
-      logger.error({ ctx: "toNode", ent, opts, err });
+      this.logger.error({ ctx: "toNode", ent, opts, err });
       if (opts.errorOnBadParse) {
         throw err;
       } else {

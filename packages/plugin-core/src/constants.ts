@@ -10,13 +10,15 @@ export const DENDRON_COMMANDS = {
   DELETE_NODE: "dendron.deleteNode",
   RELOAD_INDEX: "dendron.reloadIndex",
   RELOAD_WS: "dendron.reloadWS",
-  RESET_CONFIG: "dendron.dev.resetConfig",
   CREATE_SCRATCH_NOTE: "dendron.createScratchNote",
   CREATE_JOURNAL_NOTE: "dendron.createJournalNote",
   CREATE_RECORD_NOTE: "dendron.createRecordNote",
   OPEN_LINK: "dendron.openLink",
   IMPORT_POD: "dendron.importPod",
   UPGRADE_SETTINGS: "dendron.upgradeSettings",
+  // DEV commands
+  RESET_CONFIG: "dendron.dev.resetConfig",
+  OPEN_LOGS: "dendron.dev.openLogs",
 };
 
 export const DENDRON_CHANNEL_NAME = "Dendron";

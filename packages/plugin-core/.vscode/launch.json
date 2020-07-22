@@ -14,12 +14,11 @@
         // "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}"
       ],
-      "outFiles": ["${workspaceFolder}/out/**/*.js"],
+      "outFiles": ["${workspaceFolder:plugin-core}/out/**/*.js"],
       "env": {
         "STAGE": "dev",
         "VSCODE_DEBUGGING_EXTENSION": "dendron"
       }
-      //"preLaunchTask": "npm: watch no
     },
     {
       "name": "Extension Tests",

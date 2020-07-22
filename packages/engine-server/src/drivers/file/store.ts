@@ -26,16 +26,16 @@ import {
   mdFile2NodeProps,
   node2MdFile,
   schema2YMLFile,
+  DLogger,
 } from "@dendronhq/common-server";
 
 import { FileParser } from "./parser";
 import _ from "lodash";
 import path from "path";
 
-const logger = createLogger("FileStore");
-
 interface FileStorageOpts {
   root: string;
+  logger?: DLogger;
 }
 
 export function fileNameToTitle(name: string): string {
@@ -54,10 +54,13 @@ export abstract class FileStorageBase {
 
   public rootId: string;
 
+  public logger: DLogger;
+
   constructor(opts: FileStorageOpts) {
     this.opts = opts;
     this.idToPath = {};
     this.rootId = "";
+    this.logger = opts.logger || createLogger("FileStore");
   }
 
   abstract doGetFile(id: string): DNodeRawProps<DNodeData>;
@@ -67,19 +70,19 @@ export abstract class FileStorageBase {
   }
 
   async getRoot() {
-    logger.debug({ ctx: "getRoot", rootId: this.rootId });
+    this.logger.debug({ ctx: "getRoot", rootId: this.rootId });
     return this.doGetFile(this.rootId);
   }
 
   async get(id: string, _opts?: QueryOpts): Promise<StoreGetResp> {
     let resp: DNodeRawProps<DNodeData>;
-    logger.debug({ ctx: "get:presGetFile", id });
+    this.logger.debug({ ctx: "get:presGetFile", id });
     if (this.isRoot(id)) {
       resp = await this.getRoot();
     } else {
       resp = this.doGetFile(id);
     }
-    logger.debug({ ctx: "get:postGetFile", resp });
+    this.logger.debug({ ctx: "get:postGetFile", resp });
     return {
       data: resp,
     };
@@ -163,7 +166,7 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
         const data = new NodeBuilder().buildSchemaFromProps(schemaProps);
         // TODO
         // this.refreshIdToPath(data)
-        logger.debug({ ctx: "query:exit:pre" });
+        this.logger.debug({ ctx: "query:exit:pre" });
         return makeResponse<EngineQueryResp>({ data, error: null });
       }
       throw Error(`unsupported ${queryString}`);
@@ -175,7 +178,7 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
       const data = new NodeBuilder().buildNoteFromProps(noteProps, { schemas });
       this.refreshIdToPath(data);
 
-      logger.debug({ ctx: "query:exit:pre" });
+      this.logger.debug({ ctx: "query:exit:pre" });
       return makeResponse<EngineQueryResp>({ data, error: null });
     }
     throw Error(`unsupported ${queryString}`);
@@ -186,7 +189,7 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
   }
 
   refreshIdToPath(nodes: IDNode[]) {
-    logger.debug({
+    this.logger.debug({
       ctx: "refreshIdToPaths",
       nodes: nodes.map((n) => n.toRawProps()),
     });

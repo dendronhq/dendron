@@ -36,6 +36,7 @@ import {
   VSCodeUtils
 } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
+import { OpenLogsCommand } from "./commands/OpenLogs";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -440,6 +441,19 @@ export class DendronWorkspace {
           await new ReloadIndexCommand().execute({ root });
           if (!silent) {
             vscode.window.showInformationMessage(`finish reload`);
+          }
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.OPEN_LOGS,
+        async () => {
+          try {
+            await new OpenLogsCommand().execute({});
+          } catch(err) {
+            Logger.error(JSON.stringify(err));
           }
         }
       )

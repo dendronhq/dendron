@@ -1,7 +1,7 @@
 import { setEnv } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
-import { posix } from "path";
+import path from "path";
 import { ExtensionContext, OutputChannel, window } from "vscode";
 import { DENDRON_CHANNEL_NAME } from "./constants";
 
@@ -11,10 +11,13 @@ const levels = ["debug", "info", "warn", "error", "fatal"];
 export class Logger {
   static output: OutputChannel | undefined;
   static logger: ReturnType<typeof createLogger> | undefined;
+  static logPath?: string
 
   static configure(context: ExtensionContext, level: TraceLevel) {
     fs.ensureDirSync(context.logPath);
-    setEnv("LOG_DST", posix.join(context.logPath, "dendron.log"));
+    const logPath = path.join(context.logPath, "dendron.log");
+    setEnv("LOG_DST", logPath);
+    Logger.logPath = logPath;
     this.logger = createLogger("dendron");
     this.level = level;
   }
@@ -73,10 +76,10 @@ export class Logger {
     this.output?.appendLine(JSON.stringify(msg));
   }
 
-  static log(msg: any, lvl: TraceLevel, _opts?: { show?: boolean }) {
+  static log = (msg: any, lvl: TraceLevel, _opts?: { show?: boolean }) => {
     if (Logger.cmpLevel(lvl)) {
       Logger.logger && Logger.logger[lvl](msg);
-      this.output?.appendLine(lvl + ": " + JSON.stringify(msg));
+      Logger.output?.appendLine(lvl + ": " + JSON.stringify(msg));
       // FIXME: disable for now
       const shouldShow = false; // getStage() === "dev" && cleanOpts.show;
       if (shouldShow || Logger.cmpLevels(lvl, "error")) {

@@ -28,7 +28,7 @@ import {
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { NodeService } from "./services/nodeService/NodeService";
-import { Extensions, WorkspaceConfig } from "./settings";
+import { WorkspaceConfig } from "./settings";
 import {
   DisposableStore,
   resolvePath,
@@ -591,7 +591,6 @@ export class DendronWorkspace {
     if (!fs.existsSync(posix.join(rootDir, DENDRON_WS_NAME))) {
       WorkspaceConfig.write(rootDir, { rootVault: "." });
     }
-    Extensions.update(rootDir);
     if (!opts.skipOpenWS) {
       VSCodeUtils.openWS(posix.join(rootDir, DENDRON_WS_NAME));
     }

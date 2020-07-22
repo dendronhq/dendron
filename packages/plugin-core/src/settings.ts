@@ -4,6 +4,19 @@ import path from "path";
 import { ConfigurationTarget, WorkspaceConfiguration } from "vscode";
 import { DendronWorkspace } from "./workspace";
 
+type CodeConfig = {
+  settings?: CodeSettingsConfig
+  extensions?: CodeExtensionsConfig
+}
+type CodeExtensionsConfig = {
+  recommendations?: string[];
+  unwantedRecommendations?: string[];
+}
+
+type CodeSettingsConfig = {
+  [p: string]: any
+}
+
 export type ConfigChanges = {
   add: [];
   errors: [];
@@ -80,41 +93,23 @@ export class WorkspaceConfig {
     );
   }
 
-  static update(wsRoot: string, opts: { rootVault?: string }) {
-    const cleanOpts = _.defaults(opts, {
-      rootVault: "vault.main",
-    });
-    const jsonBody = {
-      folders: [
-        {
-          path: cleanOpts.rootVault,
-        },
-      ],
-      settings: Settings.defaults(),
-      extensions: {
-        ...Extensions.defaults(),
-      },
-    };
+  static update(wsRoot: string) {
+    const config: CodeConfig= fs.readJSONSync(path.join(wsRoot, DendronWorkspace.DENDRON_WORKSPACE_FILE));
+    config.extensions = Extensions.update(config.extensions || {});
+    config.settings = Settings.update(config.settings || {});
+
     return fs.writeJSONSync(
       path.join(wsRoot, DendronWorkspace.DENDRON_WORKSPACE_FILE),
-      jsonBody,
+      config,
       { spaces: 4 }
     );
   }
 }
 
-// interface WorkspaceSection {
-//   getDefaults()
-
-// }
-
 export class Extensions {
   static EXTENSION_FILE_NAME = "extensions.json";
 
-  static defaults(): {
-    recommendations: string[];
-    unwantedRecommendations: string[];
-  } {
+  static defaults(): CodeExtensionsConfig {
     const recommendations = Extensions.configEntries()
       .filter((ent) => {
         return _.isUndefined(ent.action) || ent?.action !== "REMOVE";
@@ -135,65 +130,23 @@ export class Extensions {
     return _EXTENSIONS;
   }
 
-  /**
-   * Initialize empty extension object or read from file
-   * @param wsRoot
-   */
-  static _getExtensions(wsRoot: string): string[] {
-    const extensionsPath = path.join(
-      wsRoot,
-      ".vscode",
-      Extensions.EXTENSION_FILE_NAME
-    );
-    const out = fs.existsSync(extensionsPath)
-      ? fs.readJSONSync(extensionsPath)["recommendations"] || []
-      : [];
-    return out;
-  }
-
-  static _writeExtensions(wsRoot: string, extensions: string[]) {
-    const extensionsFolder = path.join(wsRoot, ".vscode");
-    fs.ensureDirSync(extensionsFolder);
-    return fs.writeJSONSync(
-      path.join(extensionsFolder, Extensions.EXTENSION_FILE_NAME),
-      {
-        recommendations: extensions,
-      },
-      { spaces: 4 }
-    );
-  }
-
-  static update(wsRoot: string) {
-    const extensions = Extensions._getExtensions(wsRoot);
-    const recommendations: Set<string> = new Set(extensions);
-    const defaults = Extensions.configEntries();
-    defaults.forEach((ent) => {
+  static update(extensions: CodeExtensionsConfig): CodeExtensionsConfig {
+    const recommendations: Set<string> = new Set(extensions.recommendations);
+    const unwantedRecommendations: Set<string> = new Set(extensions.unwantedRecommendations);
+    const configEntries = Extensions.configEntries();
+    configEntries.forEach((ent) => {
       if (ent?.action === "REMOVE") {
         recommendations.delete(ent.default);
+        unwantedRecommendations.add(ent.default);
       } else {
         recommendations.add(ent.default);
+        unwantedRecommendations.delete(ent.default);
       }
     });
-    Extensions._writeExtensions(wsRoot, Array.from(recommendations));
-  }
-
-  static write(vscodeFolderPath: string) {
-    const out: {
-      recommendations: string[];
-    } = {
-      recommendations: [],
-    };
-    const defaults = Extensions.configEntries();
-    defaults.forEach((ent) => {
-      if (!ent.action || ent.action != "REMOVE") {
-        out.recommendations.push(ent.default);
-      }
-    });
-    return fs.writeJSONSync(
-      path.join(vscodeFolderPath, Extensions.EXTENSION_FILE_NAME),
-      out,
-      { spaces: 4 }
-    );
+    return {
+      recommendations: Array.from(recommendations),
+      unwantedRecommendations: Array.from(unwantedRecommendations)
+    }
   }
 }
 
@@ -204,12 +157,32 @@ export class Settings {
     });
   }
 
+  static configEntries(): ConfigUpdateChangeSet {
+    return _SETTINGS;
+  }
+
   static defaults() {
     return { ...Settings.getDefaults() };
   }
 
   static defaultsChangeSet() {
     return _SETTINGS;
+  }
+
+  static update(settings: CodeSettingsConfig): CodeSettingsConfig {
+    const configEntries = Settings.configEntries();
+    _.forEach(configEntries, (changeSet, key) => {
+      const cleanChangeSet = _.defaults(changeSet, {action: "ADD"});
+      if (cleanChangeSet.action === "ADD") {
+        if (!_.has(settings, key)) {
+          settings[key] = changeSet.default;
+        }
+      }
+      if (cleanChangeSet.action === "REMOVE") {
+        // TODO: right now, not removing
+      }
+    })
+    return settings;
   }
 
   /**

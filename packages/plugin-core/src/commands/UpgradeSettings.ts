@@ -1,7 +1,6 @@
 import { createLogger } from "@dendronhq/common-server";
 import path from "path";
-import { window } from "vscode";
-import { Extensions, Settings, SettingsUpgradeOpts, ConfigChanges } from "../settings";
+import { SettingsUpgradeOpts, WorkspaceConfig } from "../settings";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 
@@ -11,7 +10,7 @@ type UpgradeSettingsCommandOpts = {
   settingOpts: SettingsUpgradeOpts
 };
 
-export class UpgradeSettingsCommand extends BaseCommand<UpgradeSettingsCommandOpts, ConfigChanges> {
+export class UpgradeSettingsCommand extends BaseCommand<UpgradeSettingsCommandOpts, any> {
   async execute(opts: UpgradeSettingsCommandOpts) {
     const ctx = "execute";
     L.info({ ctx, opts });
@@ -19,13 +18,10 @@ export class UpgradeSettingsCommand extends BaseCommand<UpgradeSettingsCommandOp
     if (!config) {
         throw Error("no ws config found");
     }
-    const changed = await Settings.upgrade(
-        config,
-        Settings.defaultsChangeSet(),
-        opts.settingOpts
-    );
-    this.L.info({ctx, changed})
-    Extensions.update(path.dirname(DendronWorkspace.workspaceFile().fsPath));
-    return changed;
+
+    WorkspaceConfig.update(path.dirname(DendronWorkspace.workspaceFile().fsPath));
+    //this.L.info({ctx, changed})
+    // Extensions.update(path.dirname(DendronWorkspace.workspaceFile().fsPath));
+    //return changed;
   }
 }

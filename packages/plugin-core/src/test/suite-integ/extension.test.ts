@@ -13,7 +13,7 @@ import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 
-const expectedSettings = (opts?: {folders: any}) => {
+const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
     folders: [
       {
@@ -45,12 +45,13 @@ const expectedSettings = (opts?: {folders: any}) => {
         "kortina.vscode-markdown-notes",
       ],
     },
-  }
-  if (opts?.folders) {
-    settings.folders = opts.folders
-  }
-  return settings
-}
+  };
+  _.keys(opts).forEach((key) => {
+    // @ts-ignore
+    settings[key] = opts[key];
+  });
+  return settings;
+};
 
 function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
   const _settings = settings;
@@ -152,7 +153,7 @@ suite("startup", function () {
       );
     });
 
-    test("workspace active, prior workspace version", function (done) {
+    test("workspace active, prior lower workspace version, setting with extra prop, upgrade", function (done) {
       DendronWorkspace.configuration = () => {
         return createMockConfig({
           dendron: { rootDir: root },
@@ -171,17 +172,30 @@ suite("startup", function () {
           DendronWorkspace.instance()
             .setupWorkspace(root, { skipOpenWS: true })
             .then(() => {
+              const initSettings = expectedSettings({ settings: { bond: 42 } });
+              fs.writeJSONSync(
+                path.join(root, DendronWorkspace.DENDRON_WORKSPACE_FILE),
+                initSettings
+              );
               _activate(ctx);
             });
         });
+
       HistoryService.instance().subscribe(
         "extension",
         async (_event: HistoryEvent) => {
           assert.equal(DendronWorkspace.isActive(), true);
+          // updated to latest version
           assert.equal(
             ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
             VSCodeUtils.getVersionFromPkg()
           );
+          const config = fs.readJSONSync(
+            path.join(root, DendronWorkspace.DENDRON_WORKSPACE_FILE)
+          );
+          const settings = expectedSettings();
+          settings.settings.bond = 42;
+          assert.deepEqual(config, settings);
           done();
         }
       );
@@ -195,11 +209,13 @@ suite("startup", function () {
       };
       _activate(ctx);
       fs.ensureDirSync(root);
-      await DendronWorkspace.instance().changeWorkspace(root, {skipOpenWS: true})
+      await DendronWorkspace.instance().changeWorkspace(root, {
+        skipOpenWS: true,
+      });
       const config = fs.readJSONSync(
         path.join(root, DendronWorkspace.DENDRON_WORKSPACE_FILE)
       );
-      assert.deepEqual(config, expectedSettings({folders: [{path: "."}]}))
+      assert.deepEqual(config, expectedSettings({ folders: [{ path: "." }] }));
       HistoryService.instance().subscribe(
         "extension",
         async (_event: HistoryEvent) => {
@@ -207,7 +223,6 @@ suite("startup", function () {
         }
       );
     });
-
   });
 });
 

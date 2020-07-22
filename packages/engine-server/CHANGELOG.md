@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.36](https://github.com/dendronhq/dendron/compare/v0.3.35...v0.3.36) (2020-07-22)
+
+### Bug Fixes
+
+- issue with new journal notes not initializing ([63e3e63](https://github.com/dendronhq/dendron/commit/63e3e63bd246ae7fd1587e6ea95c66ebf943bc36))
+
 ## [0.3.35](https://github.com/dendronhq/dendron/compare/v0.3.33...v0.3.35) (2020-07-22)
 
 ### Features

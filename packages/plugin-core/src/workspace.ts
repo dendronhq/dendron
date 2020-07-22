@@ -28,36 +28,19 @@ import {
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { NodeService } from "./services/nodeService/NodeService";
-import { Extensions, Settings } from "./settings";
+import { Extensions, WorkspaceConfig } from "./settings";
 import {
   DisposableStore,
   resolvePath,
-
-  resolveTilde, VSCodeUtils
+  resolveTilde,
+  VSCodeUtils
 } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
-
-function writeWSFile(
-  fpath: string,
-  opts: { rootDir: string; pathOverride?: string }
-) {
-  const cleanOpts = _.defaults(opts, {
-    pathOverride: "vault.main",
-  });
-  const jsonBody = {
-    folders: [
-      {
-        path: cleanOpts.pathOverride,
-      },
-    ],
-    settings: Settings.defaults(),
-  };
-  fs.writeJsonSync(fpath, jsonBody, { spaces: 4 });
-}
 
 let _DendronWorkspace: DendronWorkspace | null;
 
 export class DendronWorkspace {
+  static DENDRON_WORKSPACE_FILE: string = "dendron.code-workspace";
 
   static instance(): DendronWorkspace {
     if (!_DendronWorkspace) {
@@ -141,7 +124,7 @@ export class DendronWorkspace {
     if (!rootDir) {
       throw Error("rootDir not initialized");
     }
-    
+
     return resolvePath(rootDir, DendronWorkspace.workspaceFile().fsPath);
   }
 
@@ -339,6 +322,12 @@ export class DendronWorkspace {
         const resp = await vscode.window.showInputBox({
           prompt: "Select your folder for dendron",
           ignoreFocusOut: true,
+          validateInput: (input: string) => {
+            if (!path.isAbsolute(input)) {
+              return "must enter absolute path";
+            }
+            return undefined;
+          },
         });
         if (!resp) {
           this.L.error({ ctx, msg: "no input" });
@@ -582,24 +571,23 @@ export class DendronWorkspace {
     );
   }
 
-  async changeWorkspace(rootDirRaw: string) {
+  async changeWorkspace(rootDirRaw: string, opts?: { skipOpenWS?: boolean }) {
+    opts = _.defaults(opts, { skipOpenWS: false });
     const ctx = "changeWorkspace";
     this.L.info({ ctx, rootDirRaw });
     const rootDir = resolvePath(
-      rootDirRaw,
-      DendronWorkspace.workspaceFile().fsPath
+      rootDirRaw
     );
     if (!fs.existsSync(rootDir)) {
       throw Error(`${rootDir} does not exist`);
     }
     if (!fs.existsSync(posix.join(rootDir, DENDRON_WS_NAME))) {
-      writeWSFile(posix.join(rootDir, DENDRON_WS_NAME), {
-        rootDir,
-        pathOverride: rootDir,
-      });
+      WorkspaceConfig.write(rootDir, { rootVault: "." });
     }
     Extensions.update(rootDir);
-    VSCodeUtils.openWS(posix.join(rootDir, DENDRON_WS_NAME));
+    if (!opts.skipOpenWS) {
+      VSCodeUtils.openWS(posix.join(rootDir, DENDRON_WS_NAME));
+    }
   }
 
   /**
@@ -616,7 +604,10 @@ export class DendronWorkspace {
       mainVault = wsFolders![0].uri.fsPath;
     }
     try {
-      this._engine = await vscode.commands.executeCommand(DENDRON_COMMANDS.RELOAD_INDEX, true);
+      this._engine = await vscode.commands.executeCommand(
+        DENDRON_COMMANDS.RELOAD_INDEX,
+        true
+      );
       return;
     } catch (err) {
       vscode.window.showErrorMessage(
@@ -689,10 +680,12 @@ export class DendronWorkspace {
     const src = vscode.Uri.joinPath(this.extensionAssetsDir, "notes");
 
     fs.copySync(src.fsPath, rootDir);
-    writeWSFile(vscode.Uri.file(posix.join(rootDir, DENDRON_WS_NAME)).fsPath, {
-      rootDir,
-    });
-    Extensions.update(rootDir);
+    WorkspaceConfig.write(rootDir);
+
+    // writeWSFile(vscode.Uri.file(posix.join(rootDir, DENDRON_WS_NAME)).fsPath, {
+    //   rootDir,
+    // });
+    // Extensions.update(rootDir);
 
     if (!opts.skipOpenWS) {
       vscode.window.showInformationMessage("opening dendron workspace");

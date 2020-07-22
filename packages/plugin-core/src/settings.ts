@@ -2,11 +2,12 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { ConfigurationTarget, WorkspaceConfiguration } from "vscode";
+import { DendronWorkspace } from "./workspace";
 
 export type ConfigChanges = {
-  add: [],
-  errors: []
-}
+  add: [];
+  errors: [];
+};
 
 type ConfigUpdateEntry = {
   /**
@@ -48,10 +49,59 @@ const _EXTENSIONS: ConfigUpdateEntry[] = [
   { default: "dendron.dendron-markdown-shortcuts" },
   { default: "dendron.dendron-markdown-preview-enhanced" },
   { default: "dendron.dendron-markdown-links" },
-  { default: "dendron.dendron-vscode-markdown-notes"},
+  { default: "dendron.dendron-vscode-markdown-notes" },
   { default: "shd101wyy.markdown-preview-enhanced", action: "REMOVE" },
   { default: "kortina.vscode-markdown-notes", action: "REMOVE" },
 ];
+
+export type WriteConfigOpts = {
+  rootVault?: string;
+};
+
+export class WorkspaceConfig {
+
+  static write(wsRoot: string, opts?: WriteConfigOpts) {
+    const cleanOpts = _.defaults(opts, {
+      rootVault: "vault.main",
+    });
+    const jsonBody = {
+      folders: [
+        {
+          path: cleanOpts.rootVault,
+        },
+      ],
+      settings: Settings.defaults(),
+      extensions: Extensions.defaults(),
+    };
+    return fs.writeJSONSync(
+      path.join(wsRoot, DendronWorkspace.DENDRON_WORKSPACE_FILE),
+      jsonBody,
+      { spaces: 4 }
+    );
+  }
+
+  static update(wsRoot: string, opts: { rootVault?: string }) {
+    const cleanOpts = _.defaults(opts, {
+      rootVault: "vault.main",
+    });
+    const jsonBody = {
+      folders: [
+        {
+          path: cleanOpts.rootVault,
+        },
+      ],
+      settings: Settings.defaults(),
+      extensions: {
+        ...Extensions.defaults(),
+      },
+    };
+    return fs.writeJSONSync(
+      path.join(wsRoot, DendronWorkspace.DENDRON_WORKSPACE_FILE),
+      jsonBody,
+      { spaces: 4 }
+    );
+  }
+}
 
 // interface WorkspaceSection {
 //   getDefaults()
@@ -61,7 +111,27 @@ const _EXTENSIONS: ConfigUpdateEntry[] = [
 export class Extensions {
   static EXTENSION_FILE_NAME = "extensions.json";
 
-  static defaults(): ConfigUpdateEntry[] {
+  static defaults(): {
+    recommendations: string[];
+    unwantedRecommendations: string[];
+  } {
+    const recommendations = Extensions.configEntries()
+      .filter((ent) => {
+        return _.isUndefined(ent.action) || ent?.action !== "REMOVE";
+      })
+      .map((ent) => ent.default);
+    const unwantedRecommendations = Extensions.configEntries()
+      .filter((ent) => {
+        return ent?.action === "REMOVE";
+      })
+      .map((ent) => ent.default);
+    return {
+      recommendations,
+      unwantedRecommendations,
+    };
+  }
+
+  static configEntries(): ConfigUpdateEntry[] {
     return _EXTENSIONS;
   }
 
@@ -69,9 +139,7 @@ export class Extensions {
    * Initialize empty extension object or read from file
    * @param wsRoot
    */
-  static _getExtensions(
-    wsRoot: string
-  ): string[] {
+  static _getExtensions(wsRoot: string): string[] {
     const extensionsPath = path.join(
       wsRoot,
       ".vscode",
@@ -79,7 +147,7 @@ export class Extensions {
     );
     const out = fs.existsSync(extensionsPath)
       ? fs.readJSONSync(extensionsPath)["recommendations"] || []
-      : []
+      : [];
     return out;
   }
 
@@ -98,7 +166,7 @@ export class Extensions {
   static update(wsRoot: string) {
     const extensions = Extensions._getExtensions(wsRoot);
     const recommendations: Set<string> = new Set(extensions);
-    const defaults = Extensions.defaults();
+    const defaults = Extensions.configEntries();
     defaults.forEach((ent) => {
       if (ent?.action === "REMOVE") {
         recommendations.delete(ent.default);
@@ -115,7 +183,7 @@ export class Extensions {
     } = {
       recommendations: [],
     };
-    const defaults = Extensions.defaults();
+    const defaults = Extensions.configEntries();
     defaults.forEach((ent) => {
       if (!ent.action || ent.action != "REMOVE") {
         out.recommendations.push(ent.default);

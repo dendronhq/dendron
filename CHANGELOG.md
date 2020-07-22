@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.33](https://github.com/dendronhq/dendron/compare/v0.3.32...v0.3.33) (2020-07-22)
+
+### Bug Fixes
+
+- bad extension identifier ([a234b23](https://github.com/dendronhq/dendron/commit/a234b23b27b6e72ec5683b4c90db29149bb3a167))
+- dispose of file watchers on extension deactivate ([3ef52e1](https://github.com/dendronhq/dendron/commit/3ef52e18ec26bd5b50e24f7ada69c05e0b569383))
+
 ## [0.3.32](https://github.com/dendronhq/dendron/compare/v0.3.31...v0.3.32) (2020-07-22)
 
 **Note:** Version bump only for package root

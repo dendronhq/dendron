@@ -6,7 +6,7 @@ import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { VSCodeUtils } from "./utils";
 import { DendronWorkspace } from "./workspace";
-import semver  from 'semver' ;
+import semver from "semver";
 
 // === Main
 // this method is called when your extension is activated
@@ -30,9 +30,7 @@ export function _activate(context: vscode.ExtensionContext) {
     storagePath,
     globalStoragePath,
   } = context;
-  const previousVersion = context.globalState.get<string | undefined>(
-    GLOBAL_STATE.VERSION
-  );
+
   Logger.configure(context, "debug");
   Logger.info({
     ctx,
@@ -42,11 +40,27 @@ export function _activate(context: vscode.ExtensionContext) {
     extensionPath,
     extensionUri,
     storagePath,
-    globalStoragePath,
-    previousVersion,
   });
   // needs to be initialized to setup commands
-  const ws = new DendronWorkspace(context, {skipSetup: stage === "test"});
+  const ws = new DendronWorkspace(context, { skipSetup: stage === "test" });
+
+  const installedGlobalVersion = ws.version;
+  const migratedGlobalVersion = context.globalState.get<string | undefined>(
+    GLOBAL_STATE.VERSION
+  );
+  const previousGlobalVersion = ws.context.globalState.get<string>(
+    GLOBAL_STATE.VERSION_PREV
+  );
+  const previousWsVersion = context.workspaceState.get<string>(
+    WORKSPACE_STATE.WS_VERSION
+  );
+  Logger.info({
+    ctx,
+    installedGlobalVersion,
+    migratedGlobalVersion,
+    previousGlobalVersion,
+    previousWsVersion,
+  });
 
   if (DendronWorkspace.isActive()) {
     Logger.info({ msg: "reloadWorkspace:pre", rootDir: ws.rootDir });
@@ -83,26 +97,33 @@ export function _activate(context: vscode.ExtensionContext) {
       }
     });
 
-    // check if we need to upgrade settings
-    const prevWsVersion = context.workspaceState.get<string>(WORKSPACE_STATE.WS_VERSION);
-    const prevGlobalVersion = ws.context.globalState.get<string>(GLOBAL_STATE.VERSION_PREV);
-    if (_.isUndefined(prevGlobalVersion) || semver.lt(prevGlobalVersion, "0.30.0")) {
-      Logger.info({ ctx, msg: "pre 0.30.0 version, upgrade" });
-      vscode.commands.executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS).then(changes => {
-        Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
-      });
+    
+    // first time install
+    if (
+      _.isUndefined(previousGlobalVersion) 
+    ) {
+      Logger.info({ ctx, msg: "no previous global version" });
+      vscode.commands
+        .executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS)
+        .then((changes) => {
+          Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
+        });
       context.workspaceState.update(WORKSPACE_STATE.WS_VERSION, ws.version);
-    }
-    if (_.isUndefined(prevWsVersion)) {
+    } else if (_.isUndefined(previousWsVersion)) {
       Logger.info({ ctx, msg: "first init workspace, do nothing" });
       context.workspaceState.update(WORKSPACE_STATE.WS_VERSION, ws.version);
     } else {
-      if (semver.lt(prevWsVersion, ws.version)) {
+      if (semver.lt(previousWsVersion, ws.version)) {
         Logger.info({ ctx, msg: "preUpgrade: new wsVersion" });
-        vscode.commands.executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS).then(changes => {
-          Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
-          context.workspaceState.update(WORKSPACE_STATE.WS_VERSION, ws.version);
-        });
+        vscode.commands
+          .executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS)
+          .then((changes) => {
+            Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
+            context.workspaceState.update(
+              WORKSPACE_STATE.WS_VERSION,
+              ws.version
+            );
+          });
       } else {
         Logger.info({ ctx, msg: "same wsVersion" });
       }
@@ -119,7 +140,7 @@ export function _activate(context: vscode.ExtensionContext) {
     // execa.command(cmd);
     vscode.window.showInformationMessage("activate");
   }
-  showWelcomeOrWhatsNew(ws.version, previousVersion).then(() => {
+  showWelcomeOrWhatsNew(ws.version, migratedGlobalVersion).then(() => {
     HistoryService.instance().add({ source: "extension", action: "activate" });
   });
 }
@@ -151,15 +172,25 @@ async function showWelcomeOrWhatsNew(
     if (version !== previousVersion) {
       Logger.info({ ctx, msg: "new version", version, previousVersion });
       await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
-      await ws.context.globalState.update(GLOBAL_STATE.VERSION_PREV, previousVersion);
-      vscode.window.showInformationMessage(
-        `Dendron has been upgraded to ${version} from ${previousVersion}`,
-        "See what changed"
-      ).then(resp => {
-        if (resp === "See what changed") {
-          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('https://github.com/dendronhq/dendron/blob/master/CHANGELOG.md#change-log'));
-        }
-      });
+      await ws.context.globalState.update(
+        GLOBAL_STATE.VERSION_PREV,
+        previousVersion
+      );
+      vscode.window
+        .showInformationMessage(
+          `Dendron has been upgraded to ${version} from ${previousVersion}`,
+          "See what changed"
+        )
+        .then((resp) => {
+          if (resp === "See what changed") {
+            vscode.commands.executeCommand(
+              "vscode.open",
+              vscode.Uri.parse(
+                "https://github.com/dendronhq/dendron/blob/master/CHANGELOG.md#change-log"
+              )
+            );
+          }
+        });
     }
   }
 }

@@ -93,16 +93,20 @@ export class WorkspaceConfig {
     );
   }
 
-  static update(wsRoot: string) {
+  static update(wsRoot: string): Required<CodeConfig> {
     const config: CodeConfig= fs.readJSONSync(path.join(wsRoot, DendronWorkspace.DENDRON_WORKSPACE_FILE));
     config.extensions = Extensions.update(config.extensions || {});
     config.settings = Settings.update(config.settings || {});
 
-    return fs.writeJSONSync(
+    fs.writeJSONSync(
       path.join(wsRoot, DendronWorkspace.DENDRON_WORKSPACE_FILE),
       config,
       { spaces: 4 }
     );
+    return {
+      extensions: config.extensions,
+      settings: config.settings
+    }
   }
 }
 

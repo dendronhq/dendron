@@ -74,7 +74,7 @@ export class VSCodeUtils {
     const pkgJSON = fs.readJSONSync(
       path.join(FileTestUtils.getPkgRoot(__dirname), "package.json")
     );
-    return `${pkgJSON.version}-dev`;
+    return `${pkgJSON.version}`;
   }
 
   static getOrCreateMockContext(): vscode.ExtensionContext {

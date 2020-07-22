@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.34](https://github.com/dendronhq/dendron/compare/v0.3.33...v0.3.34) (2020-07-22)
+
+### Features
+
+- add a openLogs command to help debug issues ([4f223fc](https://github.com/dendronhq/dendron/commit/4f223fc318fe033471252611c8f41d505dca1055))
+
 ## [0.3.33](https://github.com/dendronhq/dendron/compare/v0.3.32...v0.3.33) (2020-07-22)
 
 ### Bug Fixes

@@ -10,11 +10,28 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - bad extension identifier ([a234b23](https://github.com/dendronhq/dendron/commit/a234b23b27b6e72ec5683b4c90db29149bb3a167))
 - dispose of file watchers on extension deactivate ([3ef52e1](https://github.com/dendronhq/dendron/commit/3ef52e18ec26bd5b50e24f7ada69c05e0b569383))
 
-## [0.3.32](https://github.com/dendronhq/dendron/compare/v0.3.31...v0.3.32) (2020-07-22)
-
-**Note:** Version bump only for package root
-
 ## [0.3.31](https://github.com/dendronhq/dendron/compare/v0.3.30...v0.3.31) (2020-07-22)
+
+### Manual Changes
+
+🚨NOTE: if you are upgrading from version 0.3.30 or lower, manual action is needed!🚨
+
+We've forked a bunch of the core vscode extensions to make them work better with Dendron. You will need to uninstall the previous extension and install the Dendron version of these extensions.
+
+Changes you will need to make
+
+Remove the following extensions and replace them with their `Dendron *` counterparts. VSCode should automatically recommend that you install them but if not, you can find the extensions by adding `Dendron` in front of the extension name (eg. Markdown Links -> Dendron Markdown Links)
+
+- Markdown Links:
+  - why: support showing graphs based on dendron's hierarchy
+- Markdown Preview Enhanced:
+  - why: Fix some link bugs and upcoming integration with how Dendron handles frontmatter
+- Markdown Shortcuts:
+  - why: Remove some default keybindings that were interferring with Dendron bindings on Linux and Windows
+- Markdown Notes:
+  - why: required for integrating new note creation via link with Dendron and other upcoming features
+
+After you've made the above changes, you can run `Developer: Reload Window` for the changes to take effect.
 
 ### Features
 
@@ -29,30 +46,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - custom front matter support [docs](https://github.com/dendronhq/dendron-template/blob/master/vault/pro.dendron.topic.frontmatter.md) ([dadd3fd](https://github.com/dendronhq/dendron/commit/dadd3fd16e2814e378b7af3c097b556c92981de3))
 - remove un-used frontmatter ([e059346](https://github.com/dendronhq/dendron/commit/e0593467fca94a4d29dc9463721a99e67881cfb3))
 
-## [0.3.29](https://github.com/dendronhq/dendron/compare/v0.3.28...v0.3.29) (2020-07-21)
-
-**Note:** Version bump only for package root
-
-## [0.3.28](https://github.com/dendronhq/dendron/compare/v0.3.27...v0.3.28) (2020-07-20)
-
-**Note:** Version bump only for package root
-
-## [0.3.27](https://github.com/dendronhq/dendron/compare/v0.3.26...v0.3.27) (2020-07-20)
-
-**Note:** Version bump only for package root
-
-## [0.3.26](https://github.com/dendronhq/dendron/compare/v0.3.25...v0.3.26) (2020-07-20)
-
-**Note:** Version bump only for package root
-
-## [0.3.25](https://github.com/dendronhq/dendron/compare/v0.3.24...v0.3.25) (2020-07-20)
-
-**Note:** Version bump only for package root
-
-## [0.3.24](https://github.com/dendronhq/dendron/compare/v0.3.23...v0.3.24) (2020-07-20)
-
-**Note:** Version bump only for package root
-
 ## [0.3.23](https://github.com/dendronhq/dendron/compare/v0.3.22...v0.3.23) (2020-07-20)
 
 ### Bug Fixes
@@ -62,10 +55,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Features
 
 - basic windows support ([a789ec5](https://github.com/dendronhq/dendron/commit/a789ec5792301103d302739f00b595509128d367))
-
-## [0.3.22](https://github.com/dendronhq/dendron/compare/v0.3.21...v0.3.22) (2020-07-20)
-
-**Note:** Version bump only for package root
 
 ## [0.3.21](https://github.com/dendronhq/dendron/compare/v0.3.20...v0.3.21) (2020-07-19)
 
@@ -134,10 +123,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - ability to re-use existing workspace ([7de80b1](https://github.com/dendronhq/dendron/commit/7de80b17cac4123336afb3d0dc902f22f1a0e488))
 
-## [0.3.12](https://github.com/dendronhq/dendron/compare/v0.3.11...v0.3.12) (2020-07-13)
-
-**Note:** Version bump only for package root
-
 ## [0.3.11](https://github.com/dendronhq/dendron/compare/v0.3.10...v0.3.11) (2020-07-13)
 
 ### Bug Fixes
@@ -188,10 +173,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - show basename of node after deletion ([fe43708](https://github.com/kevinslin/dendronv2/commit/fe4370828d775a6b418a92dfb9c724828d856664))
 - updated icons for schemas ([b7a2d8a](https://github.com/kevinslin/dendronv2/commit/b7a2d8aa517cf88d7a93d07cd2ef19305e48d069))
 
-## [0.3.8](https://github.com/kevinslin/dendronv2/compare/v0.3.7...v0.3.8) (2020-07-09)
-
-**Note:** Version bump only for package root
-
 ## [0.3.7](https://github.com/kevinslin/dendronv2/compare/v0.3.6...v0.3.7) (2020-07-08)
 
 ### Features
@@ -215,14 +196,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Features
 
 - update logo ([8eeb6a3](https://github.com/kevinslin/dendronv2/commit/8eeb6a3b6f5a54d558ee8ebaa635139fbbbc3631))
-
-## [0.3.4](https://github.com/kevinslin/dendronv2/compare/v0.3.3...v0.3.4) (2020-07-07)
-
-**Note:** Version bump only for package root
-
-## [0.3.3](https://github.com/kevinslin/dendronv2/compare/v0.3.2...v0.3.3) (2020-07-07)
-
-**Note:** Version bump only for package root
 
 ## [0.3.2](https://github.com/kevinslin/dendronv2/compare/v0.3.1...v0.3.2) (2020-07-07)
 

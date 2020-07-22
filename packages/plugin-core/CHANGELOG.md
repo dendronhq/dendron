@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.32](https://github.com/dendronhq/dendron/compare/v0.3.31...v0.3.32) (2020-07-22)
+
+**Note:** Version bump only for package @dendronhq/plugin-core
+
 ## [0.3.31](https://github.com/dendronhq/dendron/compare/v0.3.30...v0.3.31) (2020-07-22)
 
 ### Manual Changes
@@ -10,26 +14,27 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 🚨NOTE: if you are upgrading from version 0.3.30 or lower, manual action is needed!🚨
 
 We've changed the way we recommend and upgrade related extensions
+
 1. We now write recommended extensions to `.vscode/extensions.json` instead of the `dendron.code-workspace` file. This allows us to more easily modify this list in the future without affecting your existing workspace settings
-2. We've forked a bunch of the core vscode extensions to make them work better with Dendron. You will need to uninstall the previous extension and install the Dendron version of these extensions. 
+2. We've forked a bunch of the core vscode extensions to make them work better with Dendron. You will need to uninstall the previous extension and install the Dendron version of these extensions.
 
 Changes you will need to make
+
 1. Remove the `extensions` section of `dendron.code-workspace` - this is no longer used and might conflict with `extensions.json` in the future
 
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/upgrade-0.3.31.jpg)
 
 2. Remove the following extensions and replace them with their `Dendron *` counterparts. VSCode should automatically recommend that you install them but if not, you can find the extensions by adding `Dendron` in front of the extension name (eg. Markdown Links -> Dendron Markdown Links)
-    - Markdown Links: 
-        - why: support showing graphs based on dendron's hierarchy
-    - Markdown Preview Enhanced: 
-        - why: Fix some link bugs and upcoming integration with how Dendron handles frontmatter
-    - Markdown Shortcuts: 
-        - why: Remove some default keybindings that were interferring with Dendron bindings on Linux and Windows
-    - Markdown Notes:
-        - why: required for integrating new note creation via link with Dendron and other upcoming features
+   - Markdown Links:
+     - why: support showing graphs based on dendron's hierarchy
+   - Markdown Preview Enhanced:
+     - why: Fix some link bugs and upcoming integration with how Dendron handles frontmatter
+   - Markdown Shortcuts:
+     - why: Remove some default keybindings that were interferring with Dendron bindings on Linux and Windows
+   - Markdown Notes:
+     - why: required for integrating new note creation via link with Dendron and other upcoming features
 
 After you've made the above changes, you can run `Developer: Reload Window` for the changes to take effect.
-
 
 ### Features
 

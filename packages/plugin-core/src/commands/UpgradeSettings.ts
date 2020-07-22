@@ -24,8 +24,7 @@ export class UpgradeSettingsCommand extends BaseCommand<UpgradeSettingsCommandOp
         Settings.defaultsChangeSet(),
         opts.settingOpts
     );
-    const msg = `${JSON.stringify(changed)} settings have been updated`;
-    window.showInformationMessage(msg);
+    this.L.info({ctx, changed})
     Extensions.update(path.dirname(DendronWorkspace.workspaceFile().fsPath));
     return changed;
   }

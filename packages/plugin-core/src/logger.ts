@@ -72,18 +72,18 @@ export class Logger {
   }
 
   static debug(msg: any) {
-    Logger.logger?.debug(msg);
-    this.output?.appendLine(JSON.stringify(msg));
+    Logger.log(msg, "debug");
   }
 
   static log = (msg: any, lvl: TraceLevel, _opts?: { show?: boolean }) => {
     if (Logger.cmpLevel(lvl)) {
+      const stringMsg = customStringify(msg);
       Logger.logger && Logger.logger[lvl](msg);
-      Logger.output?.appendLine(lvl + ": " + JSON.stringify(msg));
+      Logger.output?.appendLine(lvl + ": " + stringMsg);
       // FIXME: disable for now
       const shouldShow = false; // getStage() === "dev" && cleanOpts.show;
       if (shouldShow || Logger.cmpLevels(lvl, "error")) {
-        const cleanMsg = JSON.stringify(msg);
+        const cleanMsg = stringMsg;
         if (Logger.cmpLevels(lvl, "error")) {
           window.showErrorMessage(cleanMsg);
         } else if (Logger.cmpLevels(lvl, "info")) {
@@ -93,3 +93,26 @@ export class Logger {
     }
   }
 }
+
+
+const customStringify = function (v: any) {
+  const cache = new Set();
+  return JSON.stringify(v, function (_key, value) {
+    if (typeof value === 'object' && value !== null) {
+      if (cache.has(value)) {
+        // Circular reference found
+        try {
+          // If this value does not reference a parent it can be deduped
+         return JSON.parse(JSON.stringify(value));
+        }
+        catch (err) {
+          // discard key if value cannot be deduped
+         return;
+        }
+      }
+      // Store value in our set
+      cache.add(value);
+    }
+    return value;
+  });
+};

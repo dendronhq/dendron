@@ -7,7 +7,7 @@ import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
-import { WORKSPACE_STATE } from "../../constants";
+import { WORKSPACE_STATE, DENDRON_COMMANDS } from "../../constants";
 import { _activate } from "../../extension";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
@@ -38,7 +38,7 @@ const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
         "dendron.dendron-markdown-shortcuts",
         "dendron.dendron-markdown-preview-enhanced",
         "dendron.dendron-markdown-links",
-        "dendron.dendron-vscode-markdown-notes",
+        "dendron.dendron-markdown-notes",
       ],
       unwantedRecommendations: [
         "shd101wyy.markdown-preview-enhanced",
@@ -79,12 +79,8 @@ suite("startup", function () {
   before(async function () {
     console.log("before");
     ctx = VSCodeUtils.getOrCreateMockContext();
-    // setup commands
     new DendronWorkspace(ctx);
-    // .globalState.update(
-    //   GLOBAL_STATE.VERSION,
-    //   "0.0.1"
-    // );
+    await vscode.commands.executeCommand(DENDRON_COMMANDS.RESET_CONFIG);
   });
 
   beforeEach(function () {

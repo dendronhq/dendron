@@ -44,12 +44,13 @@ const _SETTINGS: ConfigUpdateChangeSet = {
 
 const _EXTENSIONS: ConfigUpdateEntry[] = [
   { default: "mushan.vscode-paste-image" },
-  { default: "kortina.vscode-markdown-notes" },
   { default: "equinusocio.vsc-material-theme" },
   { default: "dendron.dendron-markdown-shortcuts" },
   { default: "dendron.dendron-markdown-preview-enhanced" },
   { default: "dendron.dendron-markdown-links" },
+  { default: "dendron.dendron-vscode-markdown-notes"},
   { default: "shd101wyy.markdown-preview-enhanced", action: "REMOVE" },
+  { default: "kortina.vscode-markdown-notes", action: "REMOVE" },
 ];
 
 // interface WorkspaceSection {

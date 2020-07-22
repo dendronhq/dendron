@@ -493,6 +493,13 @@ export class DendronWorkspace {
     }
   }
 
+  async deactivate() {
+    const ctx = "deactivateWorkspace";
+    this.L.info({ctx})
+    this.fsWatcher?.dispose();
+    this.disposableStore.dispose();
+  }
+
   async createWorkspaceWatcher(
     workspaceFolders: readonly vscode.WorkspaceFolder[]
   ) {

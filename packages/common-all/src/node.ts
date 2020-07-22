@@ -464,7 +464,13 @@ export class Note extends DNode<NoteData> implements INote {
 
 export class Schema extends DNode<SchemaData> implements ISchema {
   static createRoot() {
-    return new Schema({ id: "root", title: "root", fname: "root.schema", parent: null, children: [] });
+    return new Schema({
+      id: "root",
+      title: "root",
+      fname: "root.schema",
+      parent: null,
+      children: [],
+    });
   }
 
   static _UNKNOWN_SCHEMA: undefined | Schema = undefined;

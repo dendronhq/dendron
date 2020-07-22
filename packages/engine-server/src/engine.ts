@@ -370,6 +370,8 @@ export class DendronEngine implements DEngine {
           this.logger.info({ ctx, msg: "post:store.write", mode });
           return this.query(queryString, mode, opts);
         } else {
+          const { message, stack } = err;
+          this.logger.error({ ctx, err: JSON.stringify({ message, stack }) });
           throw err;
         }
       }
@@ -547,9 +549,11 @@ export class DendronEngine implements DEngine {
     if (ntype === "schema") {
       throw Error("not supported");
     } else {
-      await Promise.all(_.map(nodes, (node) => {
-        return this._updateNote(node as Note, opts);
-      }));
+      await Promise.all(
+        _.map(nodes, (node) => {
+          return this._updateNote(node as Note, opts);
+        })
+      );
       return;
     }
   }

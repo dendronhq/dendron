@@ -1,20 +1,20 @@
 // Global Types
 
 import { Note, Schema } from "./node";
-import { URI } from 'vscode-uri';
+import { URI } from "vscode-uri";
 export type Stage = "dev" | "prod" | "test";
 
 // === Node Types
 
 // --- Primitives
 export type NoteLink = {
-  type: "note",
-  id: string
-}
+  type: "note";
+  id: string;
+};
 
 export type NoteData = {
   schemaId?: string;
-  links?: NoteLink[]
+  links?: NoteLink[];
 };
 export type SchemaData = {
   namespace?: boolean;
@@ -185,7 +185,7 @@ export type UpdateNodesOpts = {
   /**
    * Should skip adding parents, default: false
    */
-  noAddParent?: boolean
+  noAddParent?: boolean;
 };
 
 export type StoreQueryOpts = QueryOpts & {

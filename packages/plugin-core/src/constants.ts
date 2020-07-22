@@ -27,6 +27,7 @@ export const WORKSPACE_STATE = {
 
 export const GLOBAL_STATE = {
   VERSION: "dendron.version",
+  VERSION_PREV: "dendron.versionPrev",
   /**
    * Set the first time a dendron workspace is activated
    */

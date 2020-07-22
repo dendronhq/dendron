@@ -32,33 +32,6 @@ function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
   };
 }
 
-function createMockContext(root: string): vscode.ExtensionContext {
-  const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
-  return {
-    subscriptions: [],
-    extensionPath: pkgRoot,
-    globalState: createMockConfig(Settings.defaults()),
-  } as any;
-}
-
-class VSFileUtils {
-  static cmpFiles = (
-    root: string,
-    expected: string[],
-    opts?: { add?: string[]; remove?: string[] }
-  ) => {
-    const cleanOpts: Required<{
-      add?: string[];
-      remove?: string[];
-    }> = _.defaults(opts || {}, {
-      add: [],
-      remove: [],
-      ignore: [".DS_Store", ".vscode", "dendron.code-workspace", "vault.main"],
-    });
-    return FileTestUtils.cmpFiles(root, expected, cleanOpts);
-  };
-}
-
 suite("startup", function () {
   const timeout = 60 * 1000;
   let root: string;
@@ -83,8 +56,8 @@ suite("startup", function () {
 
   afterEach(function () {
     console.log("after");
-    // HistoryService.instance().clearSubscriptions();
-    // fs.removeSync(root);
+    HistoryService.instance().clearSubscriptions();
+    fs.removeSync(root);
   });
 
   describe("sanity", function () {
@@ -148,7 +121,7 @@ suite("startup", function () {
       });
       HistoryService.instance().subscribe("extension", async (event: HistoryEvent) => {
         assert.equal(DendronWorkspace.isActive(), true);
-        // TODO: do tests
+        assert.equal(ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION), VSCodeUtils.getVersionFromPkg());
         done();
       });
     });

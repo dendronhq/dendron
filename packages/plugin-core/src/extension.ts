@@ -85,6 +85,14 @@ export function _activate(context: vscode.ExtensionContext) {
 
     // check if we need to upgrade settings
     const prevWsVersion = context.workspaceState.get<string>(WORKSPACE_STATE.WS_VERSION);
+    const prevGlobalVersion = ws.context.globalState.get<string>(GLOBAL_STATE.VERSION_PREV);
+    if (_.isUndefined(prevGlobalVersion) || semver.lt(prevGlobalVersion, "0.30.0")) {
+      Logger.info({ ctx, msg: "pre 0.30.0 version, upgrade" });
+      vscode.commands.executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS).then(changes => {
+        Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
+      });
+      context.workspaceState.update(WORKSPACE_STATE.WS_VERSION, ws.version);
+    }
     if (_.isUndefined(prevWsVersion)) {
       Logger.info({ ctx, msg: "first init workspace, do nothing" });
       context.workspaceState.update(WORKSPACE_STATE.WS_VERSION, ws.version);
@@ -93,6 +101,7 @@ export function _activate(context: vscode.ExtensionContext) {
         Logger.info({ ctx, msg: "preUpgrade: new wsVersion" });
         vscode.commands.executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS).then(changes => {
           Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
+          context.workspaceState.update(WORKSPACE_STATE.WS_VERSION, ws.version);
         });
       } else {
         Logger.info({ ctx, msg: "same wsVersion" });
@@ -134,12 +143,14 @@ async function showWelcomeOrWhatsNew(
     // NOTE: this needs to be from extension because no workspace might exist at this point
     const uri = vscode.Uri.joinPath(ws.context.extensionUri, "README.md");
     await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
+    await ws.context.globalState.update(GLOBAL_STATE.VERSION_PREV, "0.0.0");
     await ws.showWelcome(uri, { reuseWindow: true });
   } else {
     Logger.info({ ctx, msg: "not first time install" });
     if (version !== previousVersion) {
       Logger.info({ ctx, msg: "new version", version, previousVersion });
       await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
+      await ws.context.globalState.update(GLOBAL_STATE.VERSION_PREV, previousVersion);
       vscode.window.showInformationMessage(
         `Dendron has been upgraded to ${version} from ${previousVersion}`,
         "See what changed"

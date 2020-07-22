@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.31](https://github.com/dendronhq/dendron/compare/v0.3.30...v0.3.31) (2020-07-22)
+
+### Features
+
+- add reload index command ([236b2ac](https://github.com/dendronhq/dendron/commit/236b2ac70812c4df525ff27479802b6e49e0587f))
+- initialize default workspace with relative paths so that its portable btw devices ([790ef50](https://github.com/dendronhq/dendron/commit/790ef503225e5b18a78e3e62e847ba8b2adfd8d0))
+- upgrade settings command ([c043090](https://github.com/dendronhq/dendron/commit/c0430905d314c6ee870f9bdd45434f53e93a7098))
+
 ## [0.3.30](https://github.com/dendronhq/dendron/compare/v0.3.29...v0.3.30) (2020-07-21)
 
 ### Features

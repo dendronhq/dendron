@@ -1,9 +1,10 @@
-import { createLogger, Logger } from "@dendronhq/common-server";
+import { createLogger } from "@dendronhq/common-server";
+import _ from "lodash";
 import path from "path";
+import { Extension, extensions, window } from "vscode";
 import { SettingsUpgradeOpts, WorkspaceConfig } from "../settings";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
-import { extensions } from "vscode";
 
 const L = createLogger("UpgradeSettingsCommand");
 
@@ -21,11 +22,17 @@ export class UpgradeSettingsCommand extends BaseCommand<UpgradeSettingsCommandOp
     }
 
     const newConfig = WorkspaceConfig.update(path.dirname(DendronWorkspace.workspaceFile().fsPath));
-    const badExtensions = newConfig.extensions.unwantedRecommendations?.map(ext => {
+    const badExtensions: Extension<any>[] = newConfig.extensions.unwantedRecommendations?.map(ext => {
       return extensions.getExtension(ext)
-    }).filter(Boolean);
+    }).filter(Boolean) as Extension<any>[]|| [];
     this.L.info({ctx, badExtensions});
-    // Extensions.update(path.dirname(DendronWorkspace.workspaceFile().fsPath));
-    //return changed;
+    if (!_.isEmpty(badExtensions)) {
+      const msg = [
+        "Manual action needed!",
+        "The following extensions have been replaced with Dendron specific alternatives. Please uninstall and reload the window:",
+      ].concat([badExtensions.map(ext => ext.packageJSON.displayName).join(", ")])
+      console.log(msg);
+      window.showWarningMessage(msg.join(" "));
+    }
   }
 }

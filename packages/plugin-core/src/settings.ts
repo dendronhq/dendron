@@ -3,6 +3,11 @@ import _ from "lodash";
 import path from "path";
 import { ConfigurationTarget, WorkspaceConfiguration } from "vscode";
 
+export type ConfigChanges = {
+  add: [],
+  errors: []
+}
+
 type ConfigUpdateEntry = {
   /**
    * Config default
@@ -147,7 +152,7 @@ export class Settings {
     src: WorkspaceConfiguration,
     target: ConfigUpdateChangeSet,
     opts?: SettingsUpgradeOpts
-  ) {
+  ): Promise<ConfigChanges> {
     const cleanOpts = _.defaults(opts, { force: false });
     const add: any = {};
     const errors: any = {};

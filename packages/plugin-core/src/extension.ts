@@ -1,12 +1,12 @@
+import { getStage } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
-import { GLOBAL_STATE, DENDRON_COMMANDS } from "./constants";
+import { GLOBAL_STATE, WORKSPACE_STATE, DENDRON_COMMANDS } from "./constants";
 import { Logger } from "./logger";
-import { Settings } from "./settings";
+import { HistoryService } from "./services/HistoryService";
 import { VSCodeUtils } from "./utils";
 import { DendronWorkspace } from "./workspace";
-import { getStage, CONSTANTS } from "@dendronhq/common-all";
-import { HistoryService } from "./services/HistoryService";
+import semver  from 'semver' ;
 
 // === Main
 // this method is called when your extension is activated
@@ -49,9 +49,10 @@ export function _activate(context: vscode.ExtensionContext) {
   const ws = new DendronWorkspace(context, {skipSetup: stage === "test"});
 
   if (DendronWorkspace.isActive()) {
-    Logger.info({ msg: "reloadWorkspace:pre" });
+    Logger.info({ msg: "reloadWorkspace:pre", rootDir: ws.rootDir });
     ws.reloadWorkspace().then(async () => {
       Logger.info({ ctx, msg: "dendron ready" }, true);
+      // check if first time install workspace, if so, show tutorial
       if (
         _.isUndefined(
           context.globalState.get<string | undefined>(
@@ -59,7 +60,7 @@ export function _activate(context: vscode.ExtensionContext) {
           )
         )
       ) {
-        Logger.info({ ctx, msg: "show welcome" });
+        Logger.info({ ctx, msg: "first dendron ws, show welcome" });
         const step = ws.context.globalState.get<string | undefined>(
           GLOBAL_STATE.DENDRON_FIRST_WS_TUTORIAL_STEP
         );
@@ -81,10 +82,26 @@ export function _activate(context: vscode.ExtensionContext) {
         Logger.info({ ctx, msg: "user finished welcome" });
       }
     });
+
+    // check if we need to upgrade settings
+    const prevWsVersion = context.workspaceState.get<string>(WORKSPACE_STATE.WS_VERSION);
+    if (_.isUndefined(prevWsVersion)) {
+      Logger.info({ ctx, msg: "first init workspace, do nothing" });
+      context.workspaceState.update(WORKSPACE_STATE.WS_VERSION, ws.version);
+    } else {
+      if (semver.lt(prevWsVersion, ws.version)) {
+        Logger.info({ ctx, msg: "preUpgrade: new wsVersion" });
+        vscode.commands.executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS).then(changes => {
+          Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
+        });
+      } else {
+        Logger.info({ ctx, msg: "same wsVersion" });
+      }
+    }
   } else {
     Logger.info({ ctx: "dendron not active" });
   }
-  if (isDebug) {
+  if (isDebug || stage === "test") {
     Logger.output?.show(false);
     // TODO: check for cmd
     // const fullLogPath = FileUtils.escape(path.join(logPath, 'dendron.log'));
@@ -93,7 +110,6 @@ export function _activate(context: vscode.ExtensionContext) {
     // execa.command(cmd);
     vscode.window.showInformationMessage("activate");
   }
-  // TODO: don't hardcode version
   showWelcomeOrWhatsNew(ws.version, previousVersion).then(() => {
     HistoryService.instance().add({ source: "extension", action: "activate" });
   });
@@ -123,12 +139,6 @@ async function showWelcomeOrWhatsNew(
     Logger.info({ ctx, msg: "not first time install" });
     if (version !== previousVersion) {
       Logger.info({ ctx, msg: "new version", version, previousVersion });
-      await vscode.commands.executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS);
-      // const changed = await Settings.upgrade(
-      //   config,
-      //   Settings.defaultsChangeSet()
-      // );
-      // Logger.info({ ctx, msg: "settings upgraded", changed });
       await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
       vscode.window.showInformationMessage(
         `Dendron has been upgraded to ${version} from ${previousVersion}`,

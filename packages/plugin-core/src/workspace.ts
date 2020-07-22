@@ -3,7 +3,7 @@ import {
   DNodeUtils,
   getStage,
   Note,
-  NoteUtils,
+  NoteUtils
 } from "@dendronhq/common-all";
 import { cleanName, mdFile2NodeProps } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
@@ -13,6 +13,9 @@ import moment from "moment";
 import open from "open";
 import path, { posix } from "path";
 import * as vscode from "vscode";
+import { ImportPodCommand } from "./commands/ImportPod";
+import { ReloadIndexCommand } from "./commands/ReloadIndex";
+import { UpgradeSettingsCommand } from "./commands/UpgradeSettings";
 import { LookupController } from "./components/lookup/LookupController";
 import { node2Uri } from "./components/lookup/utils";
 import {
@@ -20,32 +23,19 @@ import {
   DENDRON_COMMANDS,
   DENDRON_WS_NAME,
   extensionQualifiedId,
-  GLOBAL_STATE,
+  GLOBAL_STATE
 } from "./constants";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { NodeService } from "./services/nodeService/NodeService";
-import { Settings, Extensions } from "./settings";
+import { Extensions, Settings } from "./settings";
 import {
   DisposableStore,
   resolvePath,
-  VSCodeUtils,
-  resolveTilde,
+
+  resolveTilde, VSCodeUtils
 } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
-import { ImportPodCommand } from "./commands/ImportPod";
-import { ReloadIndexCommand } from "./commands/ReloadIndex";
-import { UpgradeSettingsCommand } from "./commands/UpgradeSettings";
-
-/**
- * Write out .vscode folder
- * @param root 
- */
-function writeWSFolder(root: string) {
-  const wsFolder = path.join(root, ".vscode");
-  fs.ensureDirSync(wsFolder);
-  return Extensions.write(wsFolder);
-}
 
 function writeWSFile(
   fpath: string,
@@ -68,6 +58,7 @@ function writeWSFile(
 let _DendronWorkspace: DendronWorkspace | null;
 
 export class DendronWorkspace {
+
   static instance(): DendronWorkspace {
     if (!_DendronWorkspace) {
       throw Error("Dendronworkspace not initialized");
@@ -75,12 +66,27 @@ export class DendronWorkspace {
     return _DendronWorkspace;
   }
 
+  /**
+   * Workspace configuration
+   */
   static configuration(): vscode.WorkspaceConfiguration {
-    return vscode.workspace.getConfiguration("dendron");
+    // the reason this is static is so we can stub it for tests
+    return vscode.workspace.getConfiguration();
+  }
+
+  static workspaceFile(): vscode.Uri {
+    if (!vscode.workspace.workspaceFile) {
+      throw Error("no workspace file");
+    }
+    return vscode.workspace.workspaceFile;
+  }
+
+  static workspaceFolders(): readonly vscode.WorkspaceFolder[] | undefined {
+    return vscode.workspace.workspaceFolders;
   }
 
   static isActive(): boolean {
-    const conf = DendronWorkspace.configuration().get("rootDir");
+    const conf = DendronWorkspace.configuration().get("dendron.rootDir");
     if (conf) {
       return true;
     } else {
@@ -98,8 +104,6 @@ export class DendronWorkspace {
   }
 
   public context: vscode.ExtensionContext;
-  public configDendron: vscode.WorkspaceConfiguration;
-  public configWS?: vscode.WorkspaceConfiguration;
   public fsWatcher?: vscode.FileSystemWatcher;
   public L: typeof Logger;
   private _engine?: DEngine;
@@ -113,7 +117,6 @@ export class DendronWorkspace {
   ) {
     opts = _.defaults(opts, { skipSetup: false });
     this.context = context;
-    this.configDendron = vscode.workspace.getConfiguration("dendron");
     _DendronWorkspace = this;
     this.L = Logger;
     this.disposableStore = new DisposableStore();
@@ -132,16 +135,21 @@ export class DendronWorkspace {
   }
 
   get rootDir(): string {
-    const rootDir = this.configDendron.get<string>(CONFIG.ROOT_DIR);
+    const rootDir = DendronWorkspace.configuration().get<string>(
+      `dendron.${CONFIG.ROOT_DIR}`
+    );
     if (!rootDir) {
       throw Error("rootDir not initialized");
     }
-    return resolvePath(rootDir, this.workspaceFile.fsPath);
+    
+    return resolvePath(rootDir, DendronWorkspace.workspaceFile().fsPath);
   }
 
   get rootWorkspace(): vscode.WorkspaceFolder {
-    const wsFolders = vscode.workspace
-      ?.workspaceFolders as vscode.WorkspaceFolder[];
+    const wsFolders = DendronWorkspace.workspaceFolders();
+    if (_.isEmpty(wsFolders) || _.isUndefined(wsFolders)) {
+      throw Error("no ws folders");
+    }
     return wsFolders[0] as vscode.WorkspaceFolder;
   }
 
@@ -150,13 +158,6 @@ export class DendronWorkspace {
       path.join(this.context.extensionPath, "assets")
     );
     return assetsDir;
-  }
-
-  get workspaceFile(): vscode.Uri {
-    if (!vscode.workspace.workspaceFile) {
-      throw Error("no workspace file");
-    }
-    return vscode.workspace.workspaceFile;
   }
 
   private _getVersion(): string {
@@ -445,10 +446,12 @@ export class DendronWorkspace {
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RELOAD_INDEX,
-        async () => {
+        async (silent?: boolean) => {
           const root = this.rootWorkspace.uri.fsPath;
           await new ReloadIndexCommand().execute({ root });
-          vscode.window.showInformationMessage(`finish reload`);
+          if (!silent) {
+            vscode.window.showInformationMessage(`finish reload`);
+          }
         }
       )
     );
@@ -458,7 +461,6 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.UPGRADE_SETTINGS,
         async () => {
           await new UpgradeSettingsCommand().execute({
-            ws: this,
             settingOpts: { force: true },
           });
         }
@@ -487,27 +489,16 @@ export class DendronWorkspace {
     const ctx = "activateWorkspace";
     let workspaceFolders: readonly vscode.WorkspaceFolder[] = [];
 
-    if (getStage() === "test") {
-      // stubbed for test
-      workspaceFolders = [];
-      this.configWS = VSCodeUtils.createMockState({});
-    } else {
-      const wsFolders = VSCodeUtils.getWorkspaceFolders();
-      if (_.isUndefined(wsFolders) || _.isEmpty(wsFolders)) {
-        this.L.error({
-          ctx,
-          msg: "no folders set for workspace",
-          action: "Please set folder",
-        });
-        throw Error("no folders set for workspace");
-      }
-      workspaceFolders = wsFolders;
-      this.configWS = vscode.workspace.getConfiguration(undefined);
-      this.configWS = vscode.workspace.getConfiguration(
-        undefined,
-        workspaceFolders[0]
-      );
+    const wsFolders = DendronWorkspace.workspaceFolders();
+    if (_.isUndefined(wsFolders) || _.isEmpty(wsFolders)) {
+      this.L.error({
+        ctx,
+        msg: "no folders set for workspace",
+        action: "Please set folder",
+      });
+      throw Error("no folders set for workspace");
     }
+    workspaceFolders = wsFolders;
     if (getStage() !== "test") {
       this.createWorkspaceWatcher(workspaceFolders);
     }
@@ -596,7 +587,7 @@ export class DendronWorkspace {
     this.L.info({ ctx, rootDirRaw });
     const rootDir = resolvePath(
       rootDirRaw,
-      vscode.workspace?.workspaceFile?.fsPath
+      DendronWorkspace.workspaceFile().fsPath
     );
     if (!fs.existsSync(rootDir)) {
       throw Error(`${rootDir} does not exist`);
@@ -612,20 +603,20 @@ export class DendronWorkspace {
   }
 
   /**
+   * Performs a series of step to initialize the workspace
    *  Calls activate workspace
+   * - initializes DendronEngine
    * @param mainVault
    */
   async reloadWorkspace(mainVault?: string) {
     // TODO: dispose of existing workspace
     await this.activateWorkspace();
     if (!mainVault) {
-      const wsFolders = vscode.workspace.workspaceFolders;
+      const wsFolders = DendronWorkspace.workspaceFolders();
       mainVault = wsFolders![0].uri.fsPath;
     }
-    const engine = DendronEngine.getOrCreateEngine({ root: mainVault });
     try {
-      await engine.init();
-      this._engine = engine;
+      this._engine = await vscode.commands.executeCommand(DENDRON_COMMANDS.RELOAD_INDEX, true);
       return;
     } catch (err) {
       vscode.window.showErrorMessage(
@@ -645,7 +636,7 @@ export class DendronWorkspace {
     this.L.info({ ctx, rootDirRaw });
     const rootDir = resolvePath(
       rootDirRaw,
-      vscode.workspace?.workspaceFile?.fsPath
+      DendronWorkspace.workspaceFile().fsPath
     );
     if (fs.existsSync(rootDir)) {
       const options = {

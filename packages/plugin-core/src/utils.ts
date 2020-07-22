@@ -77,19 +77,6 @@ export class VSCodeUtils {
     return `${pkgJSON.version}-dev`;
   }
 
-  static getWorkspaceFolders(): readonly vscode.WorkspaceFolder[];
-  static getWorkspaceFolders(
-    getRoot?: boolean
-  ): vscode.WorkspaceFolder | undefined | readonly vscode.WorkspaceFolder[] {
-    let wsFolders;
-    wsFolders = vscode.workspace.workspaceFolders;
-    if (getRoot) {
-      return wsFolders![0];
-    } else {
-      return wsFolders;
-    }
-  }
-
   static getOrCreateMockContext(): vscode.ExtensionContext {
     if (!_MOCK_CONTEXT) {
       const pkgRoot = FileTestUtils.getPkgRoot(__dirname);

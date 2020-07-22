@@ -18,7 +18,13 @@ export const DENDRON_COMMANDS = {
   IMPORT_POD: "dendron.importPod",
   UPGRADE_SETTINGS: "dendron.upgradeSettings",
 };
+
 export const DENDRON_CHANNEL_NAME = "Dendron";
+
+export const WORKSPACE_STATE = {
+  WS_VERSION: "dendron.wsVersion"
+};
+
 export const GLOBAL_STATE = {
   VERSION: "dendron.version",
   /**

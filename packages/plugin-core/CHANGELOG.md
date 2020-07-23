@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.43](https://github.com/dendronhq/dendron/compare/v0.3.42...v0.3.43) (2020-07-23)
+
+### Features
+
+- new getting started experience ([dd4f50e](https://github.com/dendronhq/dendron/commit/dd4f50eb169e7f9686c4e3fbabca3b2a6c1e1bb7))
+
 ## [0.3.42](https://github.com/dendronhq/dendron/compare/v0.3.41...v0.3.42) (2020-07-23)
 
 ### Features

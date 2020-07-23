@@ -589,6 +589,13 @@ export class NodeBuilder {
     }
     const { parent: parentId, children } = item;
     const parent: Note = _.find(parents, { id: parentId }) as Note;
+    if (_.isUndefined(parent)) {
+      const error = JSON.stringify({
+        msg: "no parent found",
+        parentId, parents: parents.map(p => p.toRawProps());
+      });
+      throw Error(error);
+    }
     // NOTE: parents don't get resolved until this is called
     parent.addChild(node);
     // eslint-disable-next-line no-use-before-define

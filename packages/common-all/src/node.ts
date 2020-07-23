@@ -638,7 +638,12 @@ export class NodeBuilder {
 
       nodeIds = nodeIds
         .map((id: string) => {
-          const nodeProps = props.find((ent) => ent.id === id) as NoteRawProps;
+          const nodePropsList = props.filter((ent) => ent.id === id) as NoteRawProps[];
+          if (nodePropsList.length > 1) {
+            const fnames = nodePropsList.map(ent => ent.fname).join(", ");
+            throw Error(`found multiple notes with the same id. please check the following notes: ${fnames}`);
+          }
+          const nodeProps = nodePropsList[0];
           const { node, children } = this.toNote(nodeProps, parentNodes, opts);
           currentNodes.push(node);
           return children;

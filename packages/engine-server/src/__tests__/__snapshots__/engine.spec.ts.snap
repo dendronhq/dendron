@@ -291,6 +291,7 @@ Array [
     "children": Array [
       "foo",
       "bar",
+      "test1",
     ],
     "custom": Object {},
     "data": Object {},
@@ -371,6 +372,59 @@ Array [
     "title": "bar",
     "type": "schema",
   },
+  Object {
+    "body": "",
+    "children": Array [
+      "test1-1",
+      "test1-2",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "test1.schema",
+    "parent": "root",
+    "stub": false,
+    "title": "test1",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "test1-1-1",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "test1.schema",
+    "parent": "test1",
+    "stub": false,
+    "title": "test1-1",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "test1.schema",
+    "parent": "test1-1",
+    "stub": false,
+    "title": "test1-1-1",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "test1.schema",
+    "parent": "test1",
+    "stub": false,
+    "title": "test1-2",
+    "type": "schema",
+  },
 ]
 `;
 
@@ -381,6 +435,7 @@ Array [
   "foo.three.alpha.md",
   "foo.two.md",
   "root.md",
+  "test1.schema.yml",
 ]
 `;
 
@@ -478,6 +533,7 @@ Array [
   "foo.three.alpha.md",
   "foo.two.md",
   "root.md",
+  "test1.schema.yml",
 ]
 `;
 
@@ -596,6 +652,7 @@ Array [
   "foo.three.alpha.md",
   "foo.two.md",
   "root.md",
+  "test1.schema.yml",
 ]
 `;
 
@@ -733,6 +790,7 @@ Array [
   "foo.three.alpha.md",
   "foo.two.md",
   "root.md",
+  "test1.schema.yml",
 ]
 `;
 
@@ -919,6 +977,7 @@ Array [
   "foo.three.alpha.md",
   "foo.two.md",
   "root.md",
+  "test1.schema.yml",
 ]
 `;
 
@@ -931,6 +990,7 @@ Array [
   "foo.three.alpha.md",
   "foo.two.md",
   "root.md",
+  "test1.schema.yml",
 ]
 `;
 

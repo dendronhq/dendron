@@ -248,7 +248,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
   }
 
   get domain(): DNode<T> {
-    if (this.parent?.title === "root" || _.isNull(this.parent)) {
+    if (this.parent?.id === "root" || _.isNull(this.parent)) {
       return this;
     }
     return this.parent.domain;
@@ -589,11 +589,13 @@ export class NodeBuilder {
     }
     const { parent: parentId, children } = item;
     const parent: Note = _.find(parents, { id: parentId }) as Note;
+    // const parent = undefined;
     if (_.isUndefined(parent)) {
       const error = JSON.stringify({
         msg: "no parent found",
         parentId,
-        parents: parents.map((p) => p.toRawProps()),
+        parents: parents.map((p) => _.omit(p.toRawProps(), "body")),
+        item: _.omit(item, "body")
       });
       throw Error(error);
     }

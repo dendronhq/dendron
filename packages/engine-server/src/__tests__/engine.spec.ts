@@ -52,11 +52,27 @@ describe("engine:exact", () => {
       await engine.init();
       testUtils.expectSnapshot(expect, "main", _.values(engine.schemas));
       const note = engine.notes["foo"];
-      const schema = engine.schemas["foo"];
+      let schema = engine.schemas["foo"];
       const schemaMatch = SchemaUtils.matchNote(note, engine.schemas);
       expect(schemaMatch).toEqual(schema);
       const schemaNamespace = engine.schemas["bar"];
       expect(schemaNamespace.namespace).toBeTruthy();
+
+      // case3
+      schema = engine.schemas["test1-1"];
+      expect(schema.children[0].id).toEqual("test1-1-1");
+    });
+
+    test("add node with schema", async () => {
+      await engine.init();
+      await engine.write(
+        new Note({ id: "bar.ns.one.alpha", fname: "bar.ns.one.alpha" }),
+        { newNode: true, parentsAsStubs: true }
+      );
+      const note = engine.notes["bar.ns.one.alpha"];
+      const schema = engine.schemas["alpha"];
+      const schemaMatch = SchemaUtils.matchNote(note, engine.schemas);
+      expect(schemaMatch).toEqual(schema);
     });
   });
 

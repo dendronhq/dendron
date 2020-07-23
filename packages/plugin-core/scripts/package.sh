@@ -3,10 +3,10 @@
 git reset --hard
 git clean -f
 git pull
-# conform to vscode naming 
+# conform to vscode naming  convention
 sed  -ibak 's/@dendronhq.plugin-core/dendron/' package.json
-# use webpack
 sed  -ibak 's/out\/extension/dist\/extension/' package.json
-# ./scripts/syncAssets.sh
+
+./scripts/sync_vault.sh
 npm install
 vsce package

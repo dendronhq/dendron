@@ -37,6 +37,13 @@ npx lerna run build --scope @dendronhq/engine-server
 npx lerna run build --scope @dendronhq/plugin-core
 ```
 
+- initialize template-repo
+
+```sh
+ cd packages/plugin-core/
+ ./scripts/sync_vault.sh
+```
+
 ## Developing
 
 - to continuously compile all dependencies

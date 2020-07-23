@@ -36,33 +36,6 @@ function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
   };
 }
 
-function createMockContext(root: string): vscode.ExtensionContext {
-  const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
-  return {
-    subscriptions: [],
-    extensionPath: pkgRoot,
-    globalState: createMockConfig(Settings.defaults({ rootDir: root })),
-  } as any;
-}
-
-class VSFileUtils {
-  static cmpFiles = (
-    root: string,
-    expected: string[],
-    opts?: { add?: string[]; remove?: string[] }
-  ) => {
-    const cleanOpts: Required<{
-      add?: string[];
-      remove?: string[];
-    }> = _.defaults(opts || {}, {
-      add: [],
-      remove: [],
-      ignore: [".DS_Store", ".vscode", "dendron.code-workspace", "vault.main"],
-    });
-    return FileTestUtils.cmpFiles(root, expected, cleanOpts);
-  };
-}
-
 suite("startup", function () {
   const timeout = 60 * 1000;
   let root: string;

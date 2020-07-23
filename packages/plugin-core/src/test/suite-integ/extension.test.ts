@@ -12,6 +12,7 @@ import { _activate } from "../../extension";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
+import { ChangeWorkspaceCommand } from "../../commands/ChangeWorkspace";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
@@ -72,22 +73,23 @@ function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
 }
 
 suite("startup", function () {
-  const timeout = 60 * 1000;
+  const timeout = 60 * 1000 * 5;
   let root: string;
   let ctx: vscode.ExtensionContext;
 
-  before(async function () {
+  before(function () {
     console.log("before");
     ctx = VSCodeUtils.getOrCreateMockContext();
     new DendronWorkspace(ctx);
-    await vscode.commands.executeCommand(DENDRON_COMMANDS.RESET_CONFIG);
   });
 
-  beforeEach(function () {
+  beforeEach(async function () {
     console.log("before");
+    await vscode.commands.executeCommand(DENDRON_COMMANDS.RESET_CONFIG);
     root = FileTestUtils.tmpDir("/tmp/dendron", true);
     ctx = VSCodeUtils.getOrCreateMockContext();
     console.log("before-done");
+    return;
   });
 
   afterEach(function () {
@@ -205,9 +207,7 @@ suite("startup", function () {
       };
       _activate(ctx);
       fs.ensureDirSync(root);
-      await DendronWorkspace.instance().changeWorkspace(root, {
-        skipOpenWS: true,
-      });
+      await new ChangeWorkspaceCommand().execute({rootDirRaw: root, skipOpenWS: true})
       const config = fs.readJSONSync(
         path.join(root, DendronWorkspace.DENDRON_WORKSPACE_FILE)
       );

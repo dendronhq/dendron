@@ -51,9 +51,10 @@ const _SETTINGS: ConfigUpdateChangeSet = {
   "workbench.colorTheme": { default: "Material Theme High Contrast" },
   "pasteImage.path": { default: "${currentFileDir}/assets" },
   // prevent markdown-notes from mangling file names
-  "vscodeMarkdownNotes.slugifyCharacter": { default: "NONE" },
   "markdown-preview-enhanced.enableWikiLinkSyntax": { default: true },
   "markdown-preview-enhanced.wikiLinkFileExtension": { default: ".md" },
+  "vscodeMarkdownNotes.noteCompletionConvention": { default: "noExtension" },
+  "vscodeMarkdownNotes.slugifyCharacter": { default: "NONE" },
 };
 
 const _EXTENSIONS: ConfigUpdateEntry[] = [

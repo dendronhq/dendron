@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.42](https://github.com/dendronhq/dendron/compare/v0.3.41...v0.3.42) (2020-07-23)
+
+### Features
+
+- change workspaces accepts '~' path ([d6c4f64](https://github.com/dendronhq/dendron/commit/d6c4f64cdfbb9e6b5c44a04320a84756fefcb924))
+
 ## [0.3.41](https://github.com/dendronhq/dendron/compare/v0.3.40...v0.3.41) (2020-07-23)
 
 ### Bug Fixes

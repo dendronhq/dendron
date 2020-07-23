@@ -133,6 +133,25 @@ export class VSCodeUtils {
     );
   }
 
+  static async gatherFolderPath(): Promise<string|undefined> {
+    const folderPath = await vscode.window.showInputBox({
+      prompt: "Select path to folder",
+      ignoreFocusOut: true,
+      validateInput: (input: string) => {
+        if (!path.isAbsolute(input)) {
+          if (input[0] !== "~") {
+            return "must enter absolute path";
+          }
+        }
+        return undefined;
+      },
+    });
+    if (_.isUndefined(folderPath)) {
+      return;
+    } 
+    return resolvePath(folderPath);
+  }
+
   static isDebuggingExtension(): boolean {
     // HACK: vscode does not save env variables btw workspaces
     return process.env.VSCODE_DEBUGGING_EXTENSION ? true : false;

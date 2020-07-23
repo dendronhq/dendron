@@ -1,14 +1,13 @@
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { window } from "vscode";
 import { DENDRON_WS_NAME } from "../constants";
 import { WorkspaceConfig } from "../settings";
-import { resolvePath, VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../utils";
 import { BaseCommand } from "./base";
 
 type ChangeWorkspaceCommandOpts = {
-  rootDirRaw: string;
+  rootDirRaw: string
   skipOpenWS?: boolean;
 };
 
@@ -21,38 +20,25 @@ export class ChangeWorkspaceCommand extends BaseCommand<
   any,
   CommandInput
 > {
-  async gatherInputs(): Promise<CommandInput> {
-    const ctx = "ChangeWorkspaceCommand";
-    const resp = await window.showInputBox({
-      prompt: "Select your folder for dendron",
-      ignoreFocusOut: true,
-      validateInput: (input: string) => {
-        if (!path.isAbsolute(input)) {
-          if (input[0] !== "~") {
-            return "must enter absolute path";
-          }
-        }
-        return undefined;
-      },
-    });
-    if (!resp) {
-      this.L.error({ ctx, msg: "no input" });
-      // TODO
-      throw Error("must enter");
-    }
-    return {rootDirRaw: resp};
+
+  async gatherInputs(): Promise<CommandInput|undefined> {
+    const rootDirRaw = await VSCodeUtils.gatherFolderPath();
+    if (_.isUndefined(rootDirRaw)) {
+        return;
+    } 
+    return {rootDirRaw};
   }
+
   async execute(opts: ChangeWorkspaceCommandOpts) {
     const { rootDirRaw, skipOpenWS } = _.defaults(opts, { skipOpenWS: false });
-    const rootDir = resolvePath(rootDirRaw);
-    if (!fs.existsSync(rootDir)) {
-      throw Error(`${rootDir} does not exist`);
+    if (!fs.existsSync(rootDirRaw)) {
+      throw Error(`${rootDirRaw} does not exist`);
     }
-    if (!fs.existsSync(path.join(rootDir, DENDRON_WS_NAME))) {
-      WorkspaceConfig.write(rootDir, { rootVault: "." });
+    if (!fs.existsSync(path.join(rootDirRaw, DENDRON_WS_NAME))) {
+      WorkspaceConfig.write(rootDirRaw, { rootVault: "." });
     }
     if (!skipOpenWS) {
-      VSCodeUtils.openWS(path.join(rootDir, DENDRON_WS_NAME));
+      VSCodeUtils.openWS(path.join(rootDirRaw, DENDRON_WS_NAME));
     }
   }
 }

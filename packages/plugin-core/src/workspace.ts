@@ -327,8 +327,10 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(DENDRON_COMMANDS.CHANGE_WS, async () => {
 
         const cmd = new ChangeWorkspaceCommand();
-        const {rootDirRaw} = await cmd.gatherInputs();
-        await cmd.execute({rootDirRaw});
+        const inputs = await cmd.gatherInputs();
+        if (!_.isUndefined(inputs)) {
+          await cmd.execute(inputs);
+        }
       })
     );
 

@@ -133,10 +133,11 @@ export class VSCodeUtils {
     );
   }
 
-  static async gatherFolderPath(): Promise<string|undefined> {
+  static async gatherFolderPath(opts?: {default: string}): Promise<string|undefined> {
     const folderPath = await vscode.window.showInputBox({
       prompt: "Select path to folder",
       ignoreFocusOut: true,
+      value: opts?.default,
       validateInput: (input: string) => {
         if (!path.isAbsolute(input)) {
           if (input[0] !== "~") {

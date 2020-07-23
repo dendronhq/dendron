@@ -13,12 +13,14 @@ import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { ChangeWorkspaceCommand } from "../../commands/ChangeWorkspace";
+import { SetupWorkspaceCommand } from "../../commands/SetupWorkspace";
+import { ResetConfigCommand } from "../../commands/ResetConfig";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
     folders: [
       {
-        path: "vault.main",
+        path: "vault",
       },
     ],
     settings: {
@@ -85,7 +87,7 @@ suite("startup", function () {
 
   beforeEach(async function () {
     console.log("before");
-    await vscode.commands.executeCommand(DENDRON_COMMANDS.RESET_CONFIG);
+    await new ResetConfigCommand().execute({scope: "all"})
     root = FileTestUtils.tmpDir("/tmp/dendron", true);
     ctx = VSCodeUtils.getOrCreateMockContext();
     console.log("before-done");
@@ -130,11 +132,11 @@ suite("startup", function () {
         return vscode.Uri.file(path.join(root, "dendron.code-workspace"));
       };
       DendronWorkspace.workspaceFolders = () => {
-        const uri = vscode.Uri.file(path.join(root, "vault.main"));
-        return [{ uri, name: "vault.main", index: 0 }];
+        const uri = vscode.Uri.file(path.join(root, "vault"));
+        return [{ uri, name: "vault", index: 0 }];
       };
-      DendronWorkspace.instance()
-        .setupWorkspace(root, { skipOpenWS: true })
+      new SetupWorkspaceCommand()
+        .execute({ rootDirRaw: root, skipOpenWs: true })
         .then(() => {
           _activate(ctx);
         });
@@ -161,14 +163,14 @@ suite("startup", function () {
         return vscode.Uri.file(path.join(root, "dendron.code-workspace"));
       };
       DendronWorkspace.workspaceFolders = () => {
-        const uri = vscode.Uri.file(path.join(root, "vault.main"));
-        return [{ uri, name: "vault.main", index: 0 }];
+        const uri = vscode.Uri.file(path.join(root, "vault"));
+        return [{ uri, name: "vault", index: 0 }];
       };
       ctx.workspaceState
         .update(WORKSPACE_STATE.WS_VERSION, "0.0.1")
         .then(() => {
-          DendronWorkspace.instance()
-            .setupWorkspace(root, { skipOpenWS: true })
+          new SetupWorkspaceCommand()
+            .execute({ rootDirRaw: root, skipOpenWs: true })
             .then(() => {
               const initSettings = expectedSettings({ settings: { bond: 42 } });
               fs.writeJSONSync(
@@ -207,7 +209,10 @@ suite("startup", function () {
       };
       _activate(ctx);
       fs.ensureDirSync(root);
-      await new ChangeWorkspaceCommand().execute({rootDirRaw: root, skipOpenWS: true})
+      await new ChangeWorkspaceCommand().execute({
+        rootDirRaw: root,
+        skipOpenWS: true,
+      });
       const config = fs.readJSONSync(
         path.join(root, DendronWorkspace.DENDRON_WORKSPACE_FILE)
       );
@@ -269,7 +274,7 @@ suite("startup", function () {
 //     await ws.setupWorkspace(root, { skipOpenWS: true });
 
 //     // setup configWS
-//     const wsFolder = VSCodeUtils.createWSFolder(path.join(root, "vault.main"));
+//     const wsFolder = VSCodeUtils.createWSFolder(path.join(root, "vault"));
 //     ws.configWS = vscode.workspace.getConfiguration(undefined, wsFolder);
 
 //     const fixtures = LernaTestUtils.getFixturesDir();

@@ -4,7 +4,7 @@ import path from "path";
 import vscode from "vscode";
 import { DENDRON_WS_NAME } from "../constants";
 import { WorkspaceConfig } from "../settings";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils, resolveTilde } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 
@@ -14,7 +14,7 @@ type CommandOpts = {
 };
 
 type CommandInput = {
-    rootDirRaw: string
+  rootDirRaw: string;
 };
 
 type CommandOutput = any;
@@ -24,9 +24,10 @@ export class SetupWorkspaceCommand extends BaseCommand<
   CommandOutput,
   CommandInput
 > {
-
-  async gatherInputs(): Promise<CommandInput|undefined> {
-    const rootDirRaw = await VSCodeUtils.gatherFolderPath();
+  async gatherInputs(): Promise<CommandInput | undefined> {
+    const rootDirRaw = await VSCodeUtils.gatherFolderPath({
+      default: path.join(resolveTilde("~"), "Dendron"),
+    });
     if (_.isUndefined(rootDirRaw)) {
       return;
     }
@@ -94,10 +95,10 @@ export class SetupWorkspaceCommand extends BaseCommand<
     fs.copySync(src.fsPath, rootDir);
     WorkspaceConfig.write(rootDir);
     if (!opts.skipOpenWs) {
-    vscode.window.showInformationMessage("opening dendron workspace");
-    return VSCodeUtils.openWS(
+      vscode.window.showInformationMessage("opening dendron workspace");
+      return VSCodeUtils.openWS(
         vscode.Uri.file(path.join(rootDir, DENDRON_WS_NAME)).fsPath
-    );
+      );
     }
     return;
   }

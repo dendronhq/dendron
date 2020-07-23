@@ -13,32 +13,31 @@ import moment from "moment";
 import open from "open";
 import path, { posix } from "path";
 import * as vscode from "vscode";
+import { ChangeWorkspaceCommand } from "./commands/ChangeWorkspace";
 import { ImportPodCommand } from "./commands/ImportPod";
+import { OpenLogsCommand } from "./commands/OpenLogs";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
+import { ResetConfigCommand } from "./commands/ResetConfig";
+import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import { UpgradeSettingsCommand } from "./commands/UpgradeSettings";
 import { LookupController } from "./components/lookup/LookupController";
 import { node2Uri } from "./components/lookup/utils";
 import {
-  CONFIG,
   DENDRON_COMMANDS,
-  DENDRON_WS_NAME,
+
   extensionQualifiedId,
   GLOBAL_STATE
 } from "./constants";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { NodeService } from "./services/nodeService/NodeService";
-import { WorkspaceConfig } from "./settings";
 import {
   DisposableStore,
   resolvePath,
-  resolveTilde,
+
   VSCodeUtils
 } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
-import { OpenLogsCommand } from "./commands/OpenLogs";
-import { ChangeWorkspaceCommand } from "./commands/ChangeWorkspace";
-import { ResetConfigCommand } from "./commands/ResetConfig";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -120,17 +119,6 @@ export class DendronWorkspace {
     return this._engine;
   }
 
-  get rootDir(): string {
-    const rootDir = DendronWorkspace.configuration().get<string>(
-      `dendron.${CONFIG.ROOT_DIR}`
-    );
-    if (!rootDir) {
-      throw Error("rootDir not initialized");
-    }
-
-    return resolvePath(rootDir, DendronWorkspace.workspaceFile().fsPath);
-  }
-
   get rootWorkspace(): vscode.WorkspaceFolder {
     const wsFolders = DendronWorkspace.workspaceFolders();
     if (_.isEmpty(wsFolders) || _.isUndefined(wsFolders)) {
@@ -169,19 +157,11 @@ export class DendronWorkspace {
   _setupCommands() {
     this.context.subscriptions.push(
       vscode.commands.registerCommand(DENDRON_COMMANDS.INIT_WS, async () => {
-        const ctx = DENDRON_COMMANDS.INIT_WS;
-        const rootDirDefault = path.join(resolveTilde("~"), "Dendron");
-        const resp = await vscode.window.showInputBox({
-          value: rootDirDefault,
-          prompt: "Select your default folder for dendron",
-          ignoreFocusOut: true,
-        });
-        if (!resp) {
-          this.L.error({ ctx, msg: "no input" });
-          // TODO
-          throw Error("must enter");
+        const cmd = new SetupWorkspaceCommand();
+        const inputs = await cmd.gatherInputs();
+        if (!_.isUndefined(inputs)) {
+          await cmd.execute(inputs);
         }
-        this.setupWorkspace(resp);
       })
     );
 
@@ -346,7 +326,11 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.RESET_CONFIG,
         async () => {
           const cmd = new ResetConfigCommand();
-          await cmd.execute({});
+          const inputs = await cmd.gatherInputs();
+          if (_.isUndefined(inputs)) {
+            return;
+          }
+          await cmd.execute(inputs);
         }
       )
     );
@@ -609,89 +593,10 @@ export class DendronWorkspace {
     }
   }
 
-  /**
-   * Initialize a new directory with dendron files
-   * @param rootDirRaw
-   * @param opts
-   */
-  async setupWorkspace(rootDirRaw: string, opts?: { skipOpenWS?: boolean }) {
-    opts = _.defaults(opts, { skipOpenWS: false });
-    const ctx = "setupWorkspace";
-    this.L.info({ ctx, rootDirRaw });
-    const rootDir = resolvePath(
-      rootDirRaw,
-      DendronWorkspace.workspaceFile().fsPath
-    );
-    if (fs.existsSync(rootDir)) {
-      const options = {
-        delete: { msg: "delete existing folder", alias: "d" },
-        abort: { msg: "abort current operation", alias: "a" },
-        continue: {
-          msg: "initialize workspace into current folder",
-          alias: "c",
-        },
-      };
-      const resp = await vscode.window.showInputBox({
-        prompt: `${rootDir} exists. Please specify the next action. Your options: ${_.map(
-          options,
-          (v, k) => {
-            return `(${k}: ${v.msg})`;
-          }
-        ).join(", ")}`,
-        ignoreFocusOut: true,
-        value: "continue",
-        validateInput: async (value: string) => {
-          if (!_.includes(_.keys(options), value.toLowerCase())) {
-            return `not valid input. valid inputs: ${_.keys(options).join(
-              ", "
-            )}`;
-          }
-          return null;
-        },
-      });
-      if (resp === "abort") {
-        vscode.window.showInformationMessage(
-          "did not initialize dendron workspace"
-        );
-        return;
-      } else if (resp === "delete") {
-        try {
-          fs.removeSync(rootDir);
-        } catch (err) {
-          Logger.error(JSON.stringify(err));
-          vscode.window.showErrorMessage(
-            `error removing ${rootDir}. please check that it's not currently open`
-          );
-          return;
-        }
-        vscode.window.showInformationMessage(`removed ${rootDir}`);
-      }
-    }
-    [rootDir].forEach((dirPath: string) => {
-      fs.ensureDirSync(dirPath);
-    });
-    const src = vscode.Uri.joinPath(this.extensionAssetsDir, "notes");
-
-    fs.copySync(src.fsPath, rootDir);
-    WorkspaceConfig.write(rootDir);
-
-    // writeWSFile(vscode.Uri.file(posix.join(rootDir, DENDRON_WS_NAME)).fsPath, {
-    //   rootDir,
-    // });
-    // Extensions.update(rootDir);
-
-    if (!opts.skipOpenWS) {
-      vscode.window.showInformationMessage("opening dendron workspace");
-      return VSCodeUtils.openWS(
-        vscode.Uri.file(posix.join(rootDir, DENDRON_WS_NAME)).fsPath
-      );
-    }
-  }
-
   async showWelcome(welcomeUri?: vscode.Uri, opts?: { reuseWindow?: boolean }) {
     welcomeUri =
       welcomeUri ||
-      vscode.Uri.file(posix.join(this.rootDir, "vault.main", "dendron.md"));
+      vscode.Uri.joinPath(this.rootWorkspace.uri, "pro.dendron.quickstart.md");
     try {
       await vscode.window.showTextDocument(welcomeUri);
       await MarkdownUtils.openPreview(opts);

@@ -75,7 +75,7 @@ export class WorkspaceConfig {
 
   static write(wsRoot: string, opts?: WriteConfigOpts) {
     const cleanOpts = _.defaults(opts, {
-      rootVault: "vault.main",
+      rootVault: "vault",
     });
     const jsonBody = {
       folders: [

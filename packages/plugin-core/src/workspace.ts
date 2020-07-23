@@ -442,7 +442,7 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.RELOAD_INDEX,
         async (silent?: boolean) => {
           const root = this.rootWorkspace.uri.fsPath;
-          await new ReloadIndexCommand().execute({ root });
+          this._engine = await new ReloadIndexCommand().execute({ root });
           if (!silent) {
             vscode.window.showInformationMessage(`finish reload`);
           }
@@ -628,7 +628,7 @@ export class DendronWorkspace {
       mainVault = wsFolders![0].uri.fsPath;
     }
     try {
-      this._engine = await vscode.commands.executeCommand(
+      await vscode.commands.executeCommand(
         DENDRON_COMMANDS.RELOAD_INDEX,
         true
       );

@@ -1,7 +1,6 @@
 /* eslint-disable no-loop-func */
 import _ from "lodash";
 import minimatch from "minimatch";
-import moment from "moment";
 import YAML from "yamljs";
 import { DendronError } from "./error";
 import {
@@ -26,6 +25,7 @@ import {
 } from "./types";
 import { genUUID } from "./uuid";
 import { URI } from "vscode-uri";
+import moment from "moment";
 
 const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
@@ -592,7 +592,8 @@ export class NodeBuilder {
     if (_.isUndefined(parent)) {
       const error = JSON.stringify({
         msg: "no parent found",
-        parentId, parents: parents.map(p => p.toRawProps());
+        parentId,
+        parents: parents.map((p) => p.toRawProps()),
       });
       throw Error(error);
     }

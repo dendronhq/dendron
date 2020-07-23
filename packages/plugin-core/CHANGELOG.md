@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.41](https://github.com/dendronhq/dendron/compare/v0.3.40...v0.3.41) (2020-07-23)
+
+### Bug Fixes
+
+- dendron complain about engine not being initialized ([d461109](https://github.com/dendronhq/dendron/commit/d461109019609cb272fa24c6dca1fd65f82528c9))
+- don't create journal entry if user cancels ([e763178](https://github.com/dendronhq/dendron/commit/e763178cae6f0c763bc432617a0e8b15f2dff532))
+
 ## [0.3.40](https://github.com/dendronhq/dendron/compare/v0.3.39...v0.3.40) (2020-07-23)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

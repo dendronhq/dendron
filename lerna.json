@@ -2,7 +2,7 @@
   "packages": [
     "packages/*"
   ],
-  "version": "0.3.40",
+  "version": "0.3.41",
   "npmClient": "npm",
   "command": {
     "version": {

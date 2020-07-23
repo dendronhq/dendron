@@ -232,6 +232,9 @@ export class DendronWorkspace {
             ignoreFocusOut: true,
             value: fname,
           });
+          if (_.isUndefined(title)) {
+            return;
+          }
           if (title) {
             fname = `${cleanName(title)}`;
           }

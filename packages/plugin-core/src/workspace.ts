@@ -38,6 +38,7 @@ import {
 import { isAnythingSelected } from "./utils/editor";
 import { OpenLogsCommand } from "./commands/OpenLogs";
 import { ChangeWorkspaceCommand } from "./commands/ChangeWorkspace";
+import { ResetConfigCommand } from "./commands/ResetConfig";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -326,7 +327,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(DENDRON_COMMANDS.CHANGE_WS, async () => {
 
         const cmd = new ChangeWorkspaceCommand();
-        const {rootDirRaw} = await cmd.gatherInput();
+        const {rootDirRaw} = await cmd.gatherInputs();
         await cmd.execute({rootDirRaw});
       })
     );
@@ -342,12 +343,8 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RESET_CONFIG,
         async () => {
-          await Promise.all(
-            _.keys(GLOBAL_STATE).map((k) => {
-              this.updateGlobalState(k as keyof typeof GLOBAL_STATE, undefined);
-            })
-          );
-          vscode.window.showInformationMessage(`reset config`);
+          const cmd = new ResetConfigCommand();
+          await cmd.execute({});
         }
       )
     );

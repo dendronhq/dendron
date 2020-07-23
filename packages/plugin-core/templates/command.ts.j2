@@ -1,24 +1,45 @@
-import { createLogger } from "@dendronhq/common-server";
+import fs from "fs-extra";
+import _ from "lodash";
+import path from "path";
+import { window } from "vscode";
+import { DENDRON_WS_NAME } from "../constants";
+import { WorkspaceConfig } from "../settings";
+import { resolvePath, VSCodeUtils } from "../utils";
 import { BaseCommand } from "./base";
 
-const L = createLogger("SchemaCommand");
-
-type SchemaCommandOpts = {
-    root: string
+type CommandOpts = {
 };
 
-export class SchemaCommand extends BaseCommand<SchemaCommandOpts> {
-    async execute(opts: SchemaCommandOpts) {
-        const ctx = "execute";
-        L.info({ ctx, opts });
-    }
+type CommandInput = {
 }
 
-async function main() {
-    const root = process.argv[2];
-    await new SchemaCommand().execute({
-        root,
+type CommandOutput = {
+}
+
+export class {{ COMMAND }}Command extends BaseCommand<
+  CommandOpts,
+  CommandOutput,
+  CommandInput
+> {
+  async gatherInputs(): Promise<CommandInput|undefined> {
+    const resp = await window.showInputBox({
+      prompt: "Select your folder for dendron",
+      ignoreFocusOut: true,
+      validateInput: (input: string) => {
+        if (!path.isAbsolute(input)) {
+          if (input[0] !== "~") {
+            return "must enter absolute path";
+          }
+        }
+        return undefined;
+      },
     });
+    if (_.isUndefined(resp)) {
+        return
+    }
+    return;
+  }
+  async execute(opts: CommandOpts) {
+    const {} = _.defaults(opts, {});
+  }
 }
-
-main();

@@ -1,11 +1,11 @@
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { window } from "vscode";
 import { DENDRON_WS_NAME } from "../constants";
 import { WorkspaceConfig } from "../settings";
 import { resolvePath, VSCodeUtils } from "../utils";
 import { BaseCommand } from "./base";
-import { window } from "vscode";
 
 type ChangeWorkspaceCommandOpts = {
   rootDirRaw: string;
@@ -18,9 +18,10 @@ type CommandInput = {
 
 export class ChangeWorkspaceCommand extends BaseCommand<
   ChangeWorkspaceCommandOpts,
-  any
+  any,
+  CommandInput
 > {
-  async gatherInput(): Promise<CommandInput> {
+  async gatherInputs(): Promise<CommandInput> {
     const ctx = "ChangeWorkspaceCommand";
     const resp = await window.showInputBox({
       prompt: "Select your folder for dendron",

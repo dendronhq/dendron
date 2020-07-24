@@ -109,6 +109,17 @@
         "command": "dendron.deleteNode",
         "key": "ctrl+shift+d",
         "mac": "cmd+shift+d"
+      },
+      {
+        "command": "dendron.createScratchNote",
+        "key": "ctrl+shift+s",
+        "mac": "cmd+shift+s"
+      },
+      {
+        "command": "dendron.createJournalNote",
+        "key": "ctrl+shift+j",
+        "mac": "cmd+shift+j",
+        "when": "editorFocus"
       }
     ]
   },

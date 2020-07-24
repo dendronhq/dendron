@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.45](https://github.com/dendronhq/dendron/compare/v0.3.44...v0.3.45) (2020-07-24)
+
+### Features
+
+- better scratch notes, [docs](https://github.com/dendronhq/dendron-template/blob/master/vault/pro.dendron.topic.special-notes.md#scratch-note) ([f1d0f94](https://github.com/dendronhq/dendron/commit/f1d0f94e871984428d442c8b54d130fff53b2b91))
+- creating journals copies path to clipboard ([a34fc81](https://github.com/dendronhq/dendron/commit/a34fc815454e0e86112d5a507dd0013ec37a0edb))
+
 ## [0.3.44](https://github.com/dendronhq/dendron/compare/v0.3.43...v0.3.44) (2020-07-24)
 
 **Note:** Version bump only for package root

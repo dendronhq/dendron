@@ -11,8 +11,8 @@ else
     git clone git@github.com:dendronhq/dendron-template.git
     cd dendron-template
 fi
-export TAG=$(git describe --tags)
-echo "copying template $TAG..."
+export LAST_COMMIT=$(git rev-parse HEAD)
+echo "copying template $LAST_COMMIT..."
 rm -R ../../assets/notes/vault 
 cp -R vault ../../assets/notes/vault 
-touch ../../assets/notes/$TAG
+echo $LAST_COMMIT > ../../assets/notes/LAST_COMMIT

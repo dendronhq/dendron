@@ -13,5 +13,6 @@ else
 fi
 export TAG=$(git describe --tags)
 echo "copying template $TAG..."
+rm -R ../../assets/notes/vault 
 cp -R vault ../../assets/notes/vault 
 touch ../../assets/notes/$TAG

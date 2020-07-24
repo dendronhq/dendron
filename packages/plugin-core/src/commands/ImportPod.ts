@@ -64,12 +64,12 @@ class MultiStepInput {
   private current?: QuickInput;
   private steps: InputStep[] = [];
 
-  static async run<T>(start: InputStep) {
+  static async run(start: InputStep) {
     const input = new MultiStepInput();
     return input.stepThrough(start);
   }
 
-  private async stepThrough<T>(start: InputStep) {
+  private async stepThrough(start: InputStep) {
     let step: InputStep | void = start;
     while (step) {
       this.steps.push(step);

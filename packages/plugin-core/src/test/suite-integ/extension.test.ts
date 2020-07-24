@@ -7,14 +7,14 @@ import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
-import { WORKSPACE_STATE, DENDRON_COMMANDS } from "../../constants";
+import { ChangeWorkspaceCommand } from "../../commands/ChangeWorkspace";
+import { ResetConfigCommand } from "../../commands/ResetConfig";
+import { SetupWorkspaceCommand } from "../../commands/SetupWorkspace";
+import { WORKSPACE_STATE } from "../../constants";
 import { _activate } from "../../extension";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { ChangeWorkspaceCommand } from "../../commands/ChangeWorkspace";
-import { SetupWorkspaceCommand } from "../../commands/SetupWorkspace";
-import { ResetConfigCommand } from "../../commands/ResetConfig";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {

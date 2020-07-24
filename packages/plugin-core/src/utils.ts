@@ -70,6 +70,13 @@ export class VSCodeUtils {
     return editor.document.uri.fsPath;
   }
 
+  static getSelection() {
+    const editor = vscode.window.activeTextEditor as vscode.TextEditor;
+    const selection = editor.selection as vscode.Selection;
+    const text = editor.document.getText(selection);
+    return {text, selection};
+  }
+
   static getVersionFromPkg(): string {
     const pkgJSON = fs.readJSONSync(
       path.join(FileTestUtils.getPkgRoot(__dirname), "package.json")

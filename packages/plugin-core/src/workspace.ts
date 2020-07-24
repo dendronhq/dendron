@@ -175,11 +175,24 @@ export class DendronWorkspace {
           const scratchDomain = "scratch";
           const noteName = moment().format(defaultNameConfig);
           const fname = `${scratchDomain}.${noteName}`;
-          const title = await vscode.window.showInputBox({
-            prompt: "Title",
-            ignoreFocusOut: true,
-            placeHolder: "scratch",
-          });
+
+          // get title
+          let title: string
+          const {text, selection} = VSCodeUtils.getSelection();
+          const editor = VSCodeUtils.getActiveTextEditor();
+          if (!_.isEmpty(text)) {
+            title = text;
+          } else {
+            const resp = await vscode.window.showInputBox({
+              prompt: "Title",
+              ignoreFocusOut: true,
+              placeHolder: "scratch",
+            });
+            if (_.isUndefined(resp)) {
+              return;
+            }
+            title = resp;
+          }
           const node = new Note({ fname, title });
           const uri = node2Uri(node);
           const historyService = HistoryService.instance();
@@ -187,6 +200,10 @@ export class DendronWorkspace {
           await DendronEngine.getOrCreateEngine().write(node, {
             newNode: true,
             parentsAsStubs: true,
+          });
+          await editor?.edit(builder => {
+            const link = _.isEmpty(title) ? `${fname}` : `${title} | ${fname}`;
+            builder.replace(selection, `[[${link}]]`);
           });
           this.L.info({ ctx: `${ctx}:write:done`, uri });
           await vscode.window.showTextDocument(uri);
@@ -394,9 +411,7 @@ export class DendronWorkspace {
         if (!isAnythingSelected()) {
           return vscode.window.showErrorMessage("nothing selected");
         }
-        const editor = vscode.window.activeTextEditor as vscode.TextEditor;
-        const selection = editor.selection as vscode.Selection;
-        const text = editor.document.getText(selection);
+        const {text} = VSCodeUtils.getSelection();
         const assetPath = resolvePath(text, this.rootWorkspace.uri.fsPath);
         if (!fs.existsSync(assetPath)) {
           return vscode.window.showErrorMessage(`${assetPath} does not exist`);

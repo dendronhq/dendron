@@ -126,6 +126,7 @@
     "format": "prettier --write src '*.json' '*.js'"
   },
   "devDependencies": {
+    "@types/clipboardy": "^2.0.1",
     "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
     "@types/glob": "^7.1.1",
@@ -153,6 +154,7 @@
     "@dendronhq/common-all": "^0.3.42",
     "@dendronhq/common-server": "^0.3.42",
     "@dendronhq/engine-server": "^0.3.42",
+    "clipboardy": "^2.3.0",
     "execa": "^4.0.2",
     "fs-extra": "^9.0.1",
     "lodash": "^4.17.15",

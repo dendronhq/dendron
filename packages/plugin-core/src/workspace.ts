@@ -38,6 +38,7 @@ import {
   VSCodeUtils
 } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
+import { CreateJournalCommand } from "./commands/CreateJournal";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -198,7 +199,7 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.CREATE_JOURNAL_NOTE,
         async () => {
           const ctx = DENDRON_COMMANDS.CREATE_JOURNAL_NOTE;
-          const defaultNameConfig = "Y-MM-DD-HHmmss";
+          const defaultNameConfig = "Y-MM-DD";
           const journalNamespace = "journal";
           const noteName = moment().format(defaultNameConfig);
           const editorPath =
@@ -220,6 +221,8 @@ export class DendronWorkspace {
           if (title) {
             fname = `${cleanName(title)}`;
           }
+
+          // create new note
           const node = new Note({ fname, title });
           const uri = node2Uri(node);
           const historyService = HistoryService.instance();
@@ -229,23 +232,27 @@ export class DendronWorkspace {
             newNode: true,
             parentsAsStubs: true,
           });
+          const cmd = new CreateJournalCommand();
+          await cmd.execute({fname});
 
-          const cNote = _.find(engine.notes, { fname: cNoteFname });
-          if (!cNote) {
-            throw Error("cNote undefined");
-          }
-          const cNoteNew = new Note({
-            ...mdFile2NodeProps(editorPath),
-            parent: cNote.parent,
-            children: cNote.children,
-            id: cNote.id,
-          });
-          NoteUtils.addBackLink(cNoteNew, node);
-          await engine.write(cNoteNew);
+          // get note to link to
+          // const cNote = _.find(engine.notes, { fname: cNoteFname });
+          // if (!cNote) {
+          //   throw Error("cNote undefined");
+          // }
+          // const cNoteNew = new Note({
+          //   ...mdFile2NodeProps(editorPath),
+          //   parent: cNote.parent,
+          //   children: cNote.children,
+          //   id: cNote.id,
+          // });
+          // NoteUtils.addBackLink(cNoteNew, node);
+          // await engine.write(cNoteNew);
 
           // done
           this.L.info({ ctx: `${ctx}:write:done`, uri });
           await vscode.window.showTextDocument(uri);
+          vscode.window.showInformationMessage(`${fname} copied to clipboard`)
         }
       )
     );

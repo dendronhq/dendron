@@ -7,6 +7,10 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 **Note:** Version bump only for package @dendronhq/plugin-core
 
+### Announcements
+
+- Dendron has a new getting started experience. Content for getting started is now in a [separate repository](https://github.com/dendronhq/dendron-template/tree/v0.3.43/vault). If you are an existing Dendron user, you can get the latest content by running `Dendron: Initialize Workspace` and either re-initializing your current workspace or creating a new workspace. 
+
 ## [0.3.43](https://github.com/dendronhq/dendron/compare/v0.3.42...v0.3.43) (2020-07-23)
 
 ### Features

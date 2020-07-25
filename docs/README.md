@@ -5,7 +5,7 @@
 <meta name="twitter:image" content="https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png" />
 
 
-<a href="https://github.com/dendronhq/dendron"><img width="149" height="149" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_darkblue_121621.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1" style="position: fixed; top: 0; right: 0; border: 0;"></a>
+<a href="https://github.com/dendronhq/dendron"><img width="149" height="149" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_darkblue_121621.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1" style="position: fixed; top: 0; right: 0; border: 0; background-color: inherit;"></a>
 
 # Dendron
 
@@ -28,6 +28,11 @@ Some popular use cases include:
 - keeping track of things you care about
 
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/graph-intro.gif)
+
+
+# Join Us
+
+To stay up to date on Dendron developments and all things knowledge management, you can follow us at [@dendronhq](https://twitter.com/dendronhq) or join us on [discord](https://discord.gg/6j85zNX) (or even do both)!
 
 # Motivation
 
@@ -179,8 +184,6 @@ The following extensions also work well with Dendron but are not bundled by defa
 Hopefully, this has been enough to give you a sense of what you can do with Dendron. This project is about 1% complete, both in the sense that it is in **preview** but also that there's so much more to build. The north star of this project is to achieve _Vannevar Bush's_ original vision - to build a tool of thought that can give humanity _"**access to** and **command over** the inherited **knowledge of the ages**"_.
 
 If you are reading this, you too, are now part of the journey. Let's take back control of our information and use it to build something better, together!
-
-To stay up to date on the project, you can follow me at [@kevins8](https://twitter.com/kevins8)
 
 # Getting Started
 

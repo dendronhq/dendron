@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.46](https://github.com/dendronhq/dendron/compare/v0.3.45...v0.3.46) (2020-07-25)
+
+### Features
+
+- keyboard shortcuts for scratch and journal notes ([076fa18](https://github.com/dendronhq/dendron/commit/076fa18ceb0836736e123d7439af31da00cc2ec2))
+
 ## [0.3.45](https://github.com/dendronhq/dendron/compare/v0.3.44...v0.3.45) (2020-07-24)
 
 ### Features

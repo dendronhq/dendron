@@ -1,12 +1,12 @@
 import { getStage } from "@dendronhq/common-all";
 import _ from "lodash";
+import semver from "semver";
 import * as vscode from "vscode";
-import { GLOBAL_STATE, WORKSPACE_STATE, DENDRON_COMMANDS } from "./constants";
+import { DENDRON_COMMANDS, GLOBAL_STATE, WORKSPACE_STATE } from "./constants";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { VSCodeUtils } from "./utils";
 import { DendronWorkspace } from "./workspace";
-import semver from "semver";
 
 // === Main
 // this method is called when your extension is activated
@@ -23,12 +23,7 @@ export function _activate(context: vscode.ExtensionContext) {
   const isDebug = VSCodeUtils.isDebuggingExtension();
   const ctx = "activate";
   const stage = getStage();
-  const {
-    logPath,
-    extensionPath,
-    extensionUri,
-    storagePath,
-  } = context;
+  const { logPath, extensionPath, extensionUri, storagePath } = context;
 
   Logger.configure(context, "debug");
   Logger.info({
@@ -98,11 +93,8 @@ export function _activate(context: vscode.ExtensionContext) {
       }
     });
 
-    
     // first time install
-    if (
-      _.isUndefined(previousGlobalVersion) 
-    ) {
+    if (_.isUndefined(previousGlobalVersion)) {
       Logger.info({ ctx, msg: "no previous global version" });
       vscode.commands
         .executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS)

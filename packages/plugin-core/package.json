@@ -97,6 +97,10 @@
       {
         "command": "dendron.upgradeSettings",
         "title": "Dendron: Upgrade Settings"
+      },
+      {
+        "command": "dendron.refactorHierarchy",
+        "title": "Dendron: Refactor Hierarchy (experimental)"
       }
     ],
     "keybindings": [

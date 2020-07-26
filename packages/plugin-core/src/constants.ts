@@ -16,6 +16,8 @@ export const DENDRON_COMMANDS = {
   OPEN_LINK: "dendron.openLink",
   IMPORT_POD: "dendron.importPod",
   UPGRADE_SETTINGS: "dendron.upgradeSettings",
+  // Experimental
+  REFACTOR_HIERARCHY: "dendron.refactorHierarchy",
   // DEV commands
   RESET_CONFIG: "dendron.dev.resetConfig",
   OPEN_LOGS: "dendron.dev.openLogs",
@@ -24,7 +26,7 @@ export const DENDRON_COMMANDS = {
 export const DENDRON_CHANNEL_NAME = "Dendron";
 
 export const WORKSPACE_STATE = {
-  WS_VERSION: "dendron.wsVersion"
+  WS_VERSION: "dendron.wsVersion",
 };
 
 export const GLOBAL_STATE = {

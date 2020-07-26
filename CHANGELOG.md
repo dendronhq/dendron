@@ -5,7 +5,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## 0.4.0 (2020-07-26)
 
-- release: 0.4 release notes ([cb029cf](https://github.com/dendronhq/dendron/commit/cb029cf))
+### Release Notes
+
+<a href="https://marketplace.visualstudio.com/items?itemName=dendron.dendron">Version 0.4.0</a> is out 🎉 Read about the new features and fixes in our <a href="https://www.dendron.so/release.2020-07-25">release notes</a></div>
 
 ## [0.3.47](https://github.com/dendronhq/dendron/compare/v0.3.46...v0.3.47) (2020-07-26)
 

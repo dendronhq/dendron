@@ -7,6 +7,15 @@
 
 <a href="https://github.com/dendronhq/dendron"><img width="149" height="149" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_darkblue_121621.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1" style="position: fixed; top: 0; right: 0; border: 0; background-color: inherit;"></a>
 
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+<div class="alert alert-success" role="alert">
+<a href="https://marketplace.visualstudio.com/items?itemName=dendron.dendron">Version 0.4.0</a> is out 🎉 Read about the new features and fixes in our <a href="./release.2020-07-25">release notes</a>
+</div>
+
 # Dendron
 
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
@@ -209,7 +218,7 @@ When the workspace opens, it will show dialogue to install the recommended exten
 
 # FAQ
 
-See [FAQ](https://github.com/dendronhq/dendron-template/blob/master/vault/pro.dendron.faq.md) to answers for common questions.
+See [FAQ](https://github.com/dendronhq/dendron-template/blob/master/vault/dendron.faq.md) to answers for common questions.
 
 # Contributing
 

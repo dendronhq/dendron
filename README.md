@@ -200,7 +200,7 @@ When the workspace opens, it will show dialogue to install the recommended exten
 
 # FAQ
 
-See [FAQ](https://github.com/dendronhq/dendron-template/blob/master/vault/pro.dendron.faq.md) to answers for common questions.
+See [FAQ](https://github.com/dendronhq/dendron-template/blob/master/vault/dendron.faq.md) to answers for common questions.
 
 # Contributing
 

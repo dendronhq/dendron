@@ -11,15 +11,15 @@ Whether you organize your notes with [PARA](https://fortelabs.co/blog/para/) or 
 
 Think of it as a [second brain](https://www.buildingasecondbrain.com/) to help you **make sense** of all the information you care about.
 
-Some popular use cases include:
-- project management
+Some potential use cases include:
+- project management 
 - personal knowledge base of things you've learned
 - CRM to keep track of clients, friends and enemies
 - recipe book 
-- keeping track of things you care about
 
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/graph-intro.gif)
 
+Click [here](https://youtu.be/6rwWUalr9Ac) to see an example of Dendron in action. 
 
 # Join Us
 

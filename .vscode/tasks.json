@@ -38,6 +38,15 @@
       "problemMatcher": []
     },
     {
+      "label": "Plugin: Pack, Install, Release",
+      "dependsOn": [
+        "Code: Package and Install",
+        "Code: Release"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
       "label": "Everything",
       "dependsOn": [
         "NPM: Publish",

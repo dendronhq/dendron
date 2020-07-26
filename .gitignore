@@ -10,3 +10,4 @@ vendor
 dendron.code-workspace
 .jekyll-cache
 _site
+shell.code-snippets

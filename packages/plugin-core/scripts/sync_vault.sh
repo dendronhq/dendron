@@ -17,3 +17,7 @@ rm -R ../../assets/notes || true
 mkdir  ../../assets/notes
 cp -R vault ../../assets/notes/vault 
 echo $LAST_COMMIT > ../../assets/notes/LAST_COMMIT
+cd ../../assets/notes/vault
+git init 
+git add .
+git commit -m "initial commit"

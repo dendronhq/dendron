@@ -95,6 +95,10 @@ By not hardcoding the workspace path, it makes it easy to use Dendron between di
 
 Dendron will now initialize a git repository when you run `Initialize Workspace`
 
+### Example Video
+
+Dendron now has an example video. You can watch it [here](https://youtu.be/6rwWUalr9Ac).
+
 ## Next
 
 Some notable items we are working on for the next release. You can see the full roadmap [here](https://github.com/orgs/dendronhq/projects/1). You can join the discussion on upcoming roadmap items in our [#roadmap discord channel](https://discord.gg/HzkFcs).

@@ -5,6 +5,7 @@
   "types": [
     { "type": "feat", "section": "Features" },
     { "type": "fix", "section": "Bug Fixes" },
+    { "type": "release", "section": "Release" },
     { "type": "chore", "hidden": true },
     { "type": "docs", "hidden": false },
     { "type": "style", "hidden": true },

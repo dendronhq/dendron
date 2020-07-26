@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.47](https://github.com/dendronhq/dendron/compare/v0.3.46...v0.3.47) (2020-07-26)
+
+### Features
+
+- initialize new vault with git ([7278b6f](https://github.com/dendronhq/dendron/commit/7278b6fbbf4e175815a0a069c449ad7ef479a77e))
+
 ## [0.3.46](https://github.com/dendronhq/dendron/compare/v0.3.45...v0.3.46) (2020-07-25)
 
 ### Features

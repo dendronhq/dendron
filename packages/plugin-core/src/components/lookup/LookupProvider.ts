@@ -7,10 +7,11 @@ import {
 import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { QuickPick, QuickPickItem, Uri, window } from "vscode";
+import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
+import { getDurationMilliseconds, profile } from "../../utils/system";
 import { CREATE_NEW_LABEL } from "./constants";
 import { node2Uri } from "./utils";
-import { Logger } from "../../logger";
 
 const L = Logger
 // @ts-ignore
@@ -81,13 +82,21 @@ function slashToDot(ent: string) {
   return ent.replace(/\//g, ".");
 }
 
-function showDocAndHidePicker(uri: Uri, picker: QuickPick<any>) {
-  window.showTextDocument(uri).then(
+
+function showDocAndHidePicker(uri: Uri, picker: QuickPick<any>): any {
+  const start = process.hrtime();
+  const ctx = {ctx: uri, value: picker.value}
+  return window.showTextDocument(uri).then(
     () => {
+      let profile = getDurationMilliseconds(start);
+      Logger.info({ ...ctx, msg: "showTextDocument", profile});
       picker.hide();
+      profile = getDurationMilliseconds(start);
+      Logger.info({ ...ctx, msg: "picker.hide", profile});
+      return;
     },
     (err) => {
-      L.error({ err });
+      Logger.error({ ...ctx, err, msg: "exit", profile});
       throw err;
     }
   );
@@ -176,29 +185,35 @@ export class LookupProvider {
     const engine = DendronEngine.getOrCreateEngine();
 
     const updatePickerItems = async () => {
+      const start = process.hrtime();
       picker.busy = true;
       const ctx = "updatePickerItems";
       const querystring = picker.value;
+      let profile: number;
+      const ctx2 = {
+        ctx,
+        querystring
+      }
       try {
-
-        // DEBUG:BLOCK
-        L.info({ ctx: ctx + ":enter", querystring });
-
+        L.info({ ...ctx2, msg: "enter"});
         const resp = await DendronEngine.getOrCreateEngine().query(
           slashToDot(querystring),
           "note"
         );
-        L.info({ ctx, msg: "engine:query:post" });
+        profile = getDurationMilliseconds(start);
+        L.info({ ...ctx2, msg: "engine.query", profile });
         // enrich notes with schemas
         let updatedItems = resp.data.map((note) => {
           const schema = SchemaUtils.matchNote(note as Note, engine.schemas);
           (note as Note).schema = schema;
           return note;
         });
+        profile = getDurationMilliseconds(start);
+        L.info({ ...ctx2, msg: "matchSchema", profile });
 
         // check if root query, if so, return everything
         if (querystring === "") {
-          L.info({ ctx, status: "no qs" });
+          L.info({ ...ctx2, msg: "no qs" });
           //picker.items = [engine().notes["root"]];
           picker.items = _.uniqBy(
             _.map(_.values(engine.notes), (ent) => ent.domain),
@@ -224,6 +239,8 @@ export class LookupProvider {
           qs: querystring,
           engine: engine,
         });
+        profile = getDurationMilliseconds(start);
+        L.info({ ...ctx2, msg: "genSchemaSuggestions", profile });
         // updatedItems = PickerUtils.filterStubs(updatedItems as Note[]);
 
         // check if new item, return if that's the case
@@ -231,7 +248,7 @@ export class LookupProvider {
           noUpdatedItems ||
           (picker.activeItems.length === 0 && !perfectMatch)
         ) {
-          L.info({ ctx, status: "no matches" });
+          L.info({ ...ctx2, msg: "no matches" });
           // @ts-ignore
           picker.items = updatedItems.concat([this.noActiveItem]);
           return;
@@ -239,16 +256,16 @@ export class LookupProvider {
 
         // check if perfect match, remove @noActiveItem result if that's the case
         if (perfectMatch) {
-          L.debug({ ctx, msg: "active = qs" });
+          L.debug({ ...ctx2, msg: "active = qs" });
           picker.activeItems = [perfectMatch];
           picker.items = updatedItems;
         } else if (queryEndsWithDot) {
           // don't show noActiveItem for dot queries
-          L.debug({ ctx, msg: "active != qs, end with ." });
+          L.debug({ ...ctx2, msg: "active != qs, end with ." });
           picker.items = updatedItems;
         } else {
           // regular result
-          L.debug({ ctx, msg: "active != qs" });
+          L.debug({ ...ctx2, msg: "active != qs" });
           // @ts-ignore
           picker.items = [this.noActiveItem].concat(updatedItems);
         }
@@ -256,37 +273,50 @@ export class LookupProvider {
         // DEBUG
         // activeItems = picker.activeItems.map((ent) => ent.label);
         // items = picker.items.map((ent) => ent.label);
-        L.info({ ctx: ctx + ":exit", querystring });
+        L.info({...ctx2, msg: "exit"});
         return;
       } finally {
-        L.info({ ctx, msg: "exit", querystring });
+        profile = getDurationMilliseconds(start);
+        L.info({ ...ctx2, msg: "exit", querystring, profile });
         picker.busy = false;
       }
     };
 
     picker.onDidAccept(async () => {
-      const ctx = "onDidAccept";
-      L.info({ ctx });
+      const start = process.hrtime();
       const value = PickerUtils.getValue(picker);
+      let profile
+      const ctx2 = {
+        ctx: "onDidAccept",
+        value 
+      }
+      L.info({...ctx2, msg: "enter"});
       // @ts-ignore
       const selectedItem = PickerUtils.getSelection<Note>(picker);
 
       let uri: Uri;
       if (isCreateNewNotePick(selectedItem)) {
+        L.info({...ctx2, msg: "createNewPick"});
         const fname = value;
         let nodeNew: Note;
         // reuse node if a stub
         // otherwise, children will not be right
         if (selectedItem.stub) {
+          L.info({...ctx2, msg: "createNewPick:stub"});
           nodeNew = (
             await DendronEngine.getOrCreateEngine().queryOne(fname, "note")
           ).data as Note;
           nodeNew.stub = false;
+          profile = getDurationMilliseconds(start);
+          L.info({...ctx2, msg: "createNewPick:stub", func: "engine.queryOne", profile});
         } else if (selectedItem.schemaStub) {
+          L.info({...ctx2, msg: "createNewPick:schemaStub"});
           nodeNew = new Note({
             title: DNodeUtils.basename(selectedItem.fname),
             fname: selectedItem.fname,
           });
+          profile = getDurationMilliseconds(start);
+          L.info({...ctx2, msg: "createNewPick:schemaStub", func: "Note.new", profile});
         } else {
           nodeNew = new Note({ title: DNodeUtils.basename(value), fname });
         }
@@ -295,16 +325,20 @@ export class LookupProvider {
         uri = node2Uri(nodeNew);
         const historyService = HistoryService.instance();
         historyService.add({ source: "engine", action: "create", uri });
+        profile = getDurationMilliseconds(start);
+        L.info({...ctx2, msg: "historyService.add", profile});
 
         await DendronEngine.getOrCreateEngine().write(nodeNew, {
           newNode: true,
           parentsAsStubs: true,
         });
-        L.info({ ctx: `${ctx}:write:done`, value });
+        profile = getDurationMilliseconds(start);
+        L.info({...ctx2, msg: "engine.write", profile});
       } else {
         uri = node2Uri(selectedItem);
       }
-      L.info({ ctx: "onDidAccept:showTextDocument:pre", uri });
+      profile = getDurationMilliseconds(start);
+      L.info({...ctx2, msg: "exit", profile});
       return showDocAndHidePicker(uri, picker);
     });
     // picker.onDidChangeSelection((inputs: QuickPickItem[]) => {

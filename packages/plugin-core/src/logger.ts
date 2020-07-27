@@ -16,6 +16,8 @@ export class Logger {
   static configure(context: ExtensionContext, level: TraceLevel) {
     fs.ensureDirSync(context.logPath);
     const logPath = path.join(context.logPath, "dendron.log");
+    fs.ensureFileSync(logPath);
+    fs.truncateSync(logPath);
     setEnv("LOG_DST", logPath);
     Logger.logPath = logPath;
     this.logger = createLogger("dendron");

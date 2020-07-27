@@ -2,6 +2,7 @@
 
 import { Note, Schema } from "./node";
 import { URI } from "vscode-uri";
+
 export type Stage = "dev" | "prod" | "test";
 
 // === Node Types
@@ -90,7 +91,7 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
    */
   renderBody(): string;
   toDocument(): any;
-  toRawProps(): DNodeRawProps<T>;
+  toRawProps(hideBody?: boolean): DNodeRawProps<T>;
   toRawPropsRecursive(): DNodeRawProps<T>[];
   validate(): boolean;
 };

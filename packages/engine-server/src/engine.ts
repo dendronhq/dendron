@@ -223,7 +223,7 @@ export class DendronEngine implements DEngine {
           // exists, merge it
           this.logger.debug({
             ctx: "refreshNodes:existingNode",
-            node: node.toRawProps(),
+            node: node.toRawProps(true),
           });
           _.merge(this.notes[id], node);
         }
@@ -233,16 +233,16 @@ export class DendronEngine implements DEngine {
         }
       });
       // FIXME: debug
-      const newNodes = _.map(nodes, (n) => ({ title: n.title, id: n.id }));
-      const allNodes = _.map(this.notes, (n) => ({
-        title: n.title,
-        id: n.id,
-      }));
-      this.logger.debug({
-        ctx: "refreshNodes",
-        newNodes,
-        allNodes,
-      });
+      // const newNodes = _.map(nodes, (n) => ({ title: n.title, id: n.id }));
+      // const allNodes = _.map(this.notes, (n) => ({
+      //   title: n.title,
+      //   id: n.id,
+      // }));
+      // this.logger.debug({
+      //   ctx: "refreshNodes",
+      //   newNodes,
+      //   allNodes,
+      // });
       this.updateLocalCollection(_.values(this.notes), "note");
       return;
     }
@@ -330,9 +330,7 @@ export class DendronEngine implements DEngine {
         ...opts,
         webClient: true,
       });
-      this.logger.debug({ ctx: "get:fetchFromStore:post", id, opts, fnResp });
       const fullNode = await this.resolveIds(fnResp.data, this.notes);
-      this.logger.debug({ ctx: "get:resolve:post", fnResp });
       // TODO:
       this.refreshNodes([fullNode], opts);
       return { data: fullNode };
@@ -420,7 +418,6 @@ export class DendronEngine implements DEngine {
           this.logger.debug({
             ctx: "query:write:pre",
             queryString,
-            item: items[0],
           });
           const nodeBlank = new Note({ fname: queryString, stub: opts.stub });
           await this.write(nodeBlank, {
@@ -462,10 +459,9 @@ export class DendronEngine implements DEngine {
         );
         this.logger.debug({
           ctx: "query:fetchedFullNodes:exit",
-          fetchedFullNodes,
         });
       }
-      this.logger.debug({ ctx: "query:exit:note", items });
+      this.logger.debug({ ctx: "query:exit:note" });
       return makeResponse<EngineQueryResp>({
         data: _.map(items, (item) => this.notes[item.id]),
         error: null,

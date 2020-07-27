@@ -332,7 +332,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     };
   }
 
-  toRawProps(): DNodeRawProps<T> {
+  toRawProps(hideBody?: boolean): DNodeRawProps<T> {
     const props = _.pick(this, [
       "id",
       "title",
@@ -347,6 +347,9 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
       "custom",
     ]);
     let parent;
+    if (hideBody) {
+      delete props.body;
+    }
     if (this.parent?.title === "root") {
       parent = "root";
     } else {
@@ -371,6 +374,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     const out = [parent].concat(children);
     return out.flat();
   }
+
   //othrow Error("to implement");
   //   return [];
   // }

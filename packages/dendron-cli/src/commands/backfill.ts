@@ -1,6 +1,6 @@
 import { BaseCommand } from "./base";
 import _ from "lodash";
-import { DEngine } from "@dendronhq/common-all/src";
+import { DEngine } from "@dendronhq/common-all";
 
 type CommandOpts = { engine: DEngine };
 

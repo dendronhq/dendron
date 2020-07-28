@@ -1,20 +1,18 @@
 import {
   DNodeRaw,
   DNodeRawOpts,
-  Note,
+  genUUID, Note,
   NoteData,
   NoteRawProps,
-  Schema,
-  genUUID,
-  assert,
+  Schema
 } from "@dendronhq/common-all";
 import fs, { Dirent } from "fs";
-
-import YAML from "yamljs";
-import _ from "lodash";
 import matter from "gray-matter";
+import _ from "lodash";
 import minimatch from "minimatch";
 import path, { posix } from "path";
+import YAML from "yamljs";
+
 
 interface FileMeta {
   name: string;

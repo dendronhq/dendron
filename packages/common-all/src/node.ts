@@ -84,6 +84,22 @@ export class DNodeUtils {
     }
   }
 
+  static getMeta(note: Note) {
+    const meta = _.pick(note, [
+      "id",
+      "title",
+      "desc",
+      "updated",
+      "created",
+      "data",
+      "custom",
+      "fname",
+      "stub",
+    ]);
+    const family = _.pick(note.toRawProps(), ["parent", "children"]);
+    return { ...meta, ...family };
+  }
+
   static isRoot(node: DNode): boolean {
     return node.id === "root";
   }
@@ -599,7 +615,7 @@ export class NodeBuilder {
         msg: "no parent found",
         parentId,
         parents: parents.map((p) => _.omit(p.toRawProps(), "body")),
-        item: _.omit(item, "body")
+        item: _.omit(item, "body"),
       });
       throw Error(error);
     }
@@ -642,10 +658,14 @@ export class NodeBuilder {
 
       nodeIds = nodeIds
         .map((id: string) => {
-          const nodePropsList = props.filter((ent) => ent.id === id) as NoteRawProps[];
+          const nodePropsList = props.filter(
+            (ent) => ent.id === id
+          ) as NoteRawProps[];
           if (nodePropsList.length > 1) {
-            const fnames = nodePropsList.map(ent => ent.fname).join(", ");
-            throw Error(`found multiple notes with the same id. please check the following notes: ${fnames}`);
+            const fnames = nodePropsList.map((ent) => ent.fname).join(", ");
+            throw Error(
+              `found multiple notes with the same id. please check the following notes: ${fnames}`
+            );
           }
           const nodeProps = nodePropsList[0];
           const { node, children } = this.toNote(nodeProps, parentNodes, opts);

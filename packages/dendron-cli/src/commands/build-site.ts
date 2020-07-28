@@ -42,7 +42,7 @@ function note2JekyllMdFile(
   if (note.parent?.fname === opts.root) {
     delete meta["parent"];
   }
-  const filePath = path.join(opts.notesDir, meta.fname + ".md");
+  const filePath = path.join(opts.notesDir, meta.id + ".md");
   return fs.writeFile(
     filePath,
     matter.stringify(note.body || "", { ...meta, ...jekyllProps })
@@ -52,7 +52,7 @@ function note2JekyllMdFile(
 export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const { engine, siteRoot } = _.defaults(opts, {});
-    const notesDir = "docs";
+    const notesDir = "notes";
     const notesDirPath = path.join(siteRoot, notesDir);
     fs.ensureDirSync(notesDirPath);
     // TODO: ask for confirmation

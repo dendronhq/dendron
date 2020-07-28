@@ -27,9 +27,39 @@ type DendronJekyllProps = {
   permalink?: string;
 };
 
+function wikiLinkToMd(note: Note, engine: DEngine) {
+  let matches;
+  let doc = note.body;
+  do {
+    matches = doc.match(/(?<raw>\[\[(?<link>[^\]]+)\]\])/);
+    if (matches) {
+      // @ts-ignore
+      const { raw, link } = matches.groups;
+      const [first, rest] = link.split("|");
+      let title: string;
+      let mdLink: string;
+      // we have a piped title
+      if (rest) {
+        title = _.trim(first);
+        mdLink = _.trim(rest);
+      } else {
+        title = _.trim(note.title);
+        mdLink = _.trim(first);
+      }
+      const noteFromLink  = _.find(engine.notes, { fname: mdLink });
+      if (!noteFromLink) {
+        throw Error(`${mdLink} not found. file: ${note.fname}`);
+      }
+      const newLink = `[${title}](${noteFromLink.id})`;
+      doc = doc.replace(raw, newLink);
+    }
+  } while (matches);
+  return doc;
+}
+
 function note2JekyllMdFile(
   note: Note,
-  opts: { notesDir: string } & DendronSiteConfig
+  opts: { notesDir: string; engine: DEngine } & DendronSiteConfig
 ) {
   const meta = DNodeUtils.getMeta(note, { pullCustomUp: true });
   const jekyllProps: DendronJekyllProps = {
@@ -42,6 +72,7 @@ function note2JekyllMdFile(
   if (note.parent?.fname === opts.root) {
     delete meta["parent"];
   }
+  note.body = wikiLinkToMd(note, opts.engine);
   const filePath = path.join(opts.notesDir, meta.id + ".md");
   return fs.writeFile(
     filePath,
@@ -68,7 +99,9 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     const out = [];
     while (!_.isEmpty(nodes)) {
       const node = nodes.pop() as Note;
-      out.push(note2JekyllMdFile(node, { notesDir: notesDirPath, ...config }));
+      out.push(
+        note2JekyllMdFile(node, { notesDir: notesDirPath, engine, ...config })
+      );
       node.children.forEach(n => nodes.push(n as Note));
     }
     await Promise.all(nodes);

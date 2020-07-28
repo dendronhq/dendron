@@ -185,7 +185,6 @@ export function node2MdFile(node: Note, opts: { root: string }) {
     parent,
     children,
   };
-  assert(!node.stub, `writing a stub node: ${node.toRawProps()}`);
   return node2PropsMdFile({ ...props }, opts);
 }
 

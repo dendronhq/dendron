@@ -489,6 +489,7 @@ export class DendronEngine implements DEngine {
       parentsAsStubs: false,
       recursive: false,
       noAddParent: false,
+      writeStub: false,
     });
     if (node.type === "schema") {
       const refreshList: DNode[] = [node];
@@ -509,7 +510,7 @@ export class DendronEngine implements DEngine {
       node = schemaNew;
       // reset body
       node.body = "";
-      await this.store.write(node, { stub: props.stub });
+      await this.store.write(node, { stub: props.stub, writeStub: props.writeStub });
       if (props.newNode) {
         const parentPath = "root";
         const parentNode = _.find(this.schemas, (n) => n.title === parentPath);

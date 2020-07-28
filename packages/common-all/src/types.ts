@@ -137,6 +137,11 @@ export type NodeWriteOpts = {
    * default: false
    */
   recursive?: boolean;
+  /**
+   * Write stubs
+   * default: false
+   */
+  writeStub?: boolean
 } & Partial<UpdateNodesOpts>;
 
 export type EngineDeleteOpts = {
@@ -208,6 +213,10 @@ export type DEngineStoreWriteOpts = {
    * See DEngineStoreWriteOpts.recursive
    */
   recursive?: boolean;
+  /**
+   * See DEngineStoreWriteOpts.writeStub
+   */
+  writeStub?: boolean
 };
 
 export interface DEngineStore<T = DNodeData, O = any> {

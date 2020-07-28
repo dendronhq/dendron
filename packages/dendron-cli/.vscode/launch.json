@@ -7,6 +7,19 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Debug Bin",
+      "program": "${workspaceRoot}/lib/bin/dendron-cli.js",
+      "args": ["backfill", "--vault", "/Users/kevinlin/projects/dendronv2/dendron-template/vault"],
+      "cwd": "${workspaceRoot}",
+      "sourceMaps": true,
+      "smartStep": true,
+      "outFiles": [
+        "${workspaceRoot}/lib/*.js"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Debug file",
       "program": "${workspaceRoot}/lib/${fileBasenameNoExtension}.js",
       "cwd": "${workspaceRoot}",

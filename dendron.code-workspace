@@ -1,10 +1,6 @@
 {
   "folders": [
     {
-      "name": "mono-root",
-      "path": "."
-    },
-    {
       "path": "packages/common-all"
     },
     {

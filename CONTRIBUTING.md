@@ -24,7 +24,7 @@ npm install
 - bootstrap dependencies
 
 ```sh
-npx lerna bootstrap --scope @dendronhq/common-all  --scope @dendronhq/common-server --scope @dendronhq/engine-server --scope @dendronhq/plugin-core
+npx lerna bootstrap --scope @dendronhq/common-all  --scope @dendronhq/common-server --scope @dendronhq/engine-server --scope @dendronhq/plugin-core --scope @dendronhq/dendron-cli
 
 ```
 
@@ -34,6 +34,7 @@ npx lerna bootstrap --scope @dendronhq/common-all  --scope @dendronhq/common-ser
 npx lerna run build --scope @dendronhq/common-all
 npx lerna run build --scope @dendronhq/common-server
 npx lerna run build --scope @dendronhq/engine-server
+npx lerna run build --scope @dendronhq/dendron-cli
 npx lerna run build --scope @dendronhq/plugin-core
 ```
 
@@ -49,7 +50,7 @@ npx lerna run build --scope @dendronhq/plugin-core
 - to continuously compile all dependencies
 
 ```sh
-npx lerna run watch --parallel --scope @dendronhq/common-all --scope @dendronhq/common-server --scope @dendronhq/engine-server --scope @dendronhq/plugin-core
+npx lerna run watch --parallel --scope @dendronhq/common-all --scope @dendronhq/common-server --scope @dendronhq/engine-server --scope @dendronhq/plugin-core --scope @dendronhq/dendron-cli
 ```
 
 ## Debugging

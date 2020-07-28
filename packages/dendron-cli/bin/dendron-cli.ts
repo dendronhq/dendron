@@ -12,13 +12,18 @@ yargs
       args.option("vault", {
         describe: "location of vault"
       });
+      args.option("overwriteFields", {
+        describe: "location of site dir",
+        array: true,
+        default: []
+      });
     },
     async args => {
-      const { vault } = args;
+      const { vault, overwriteFields } = args;
       const cmd = new BackfillCommand();
       const engine = DendronEngine.getOrCreateEngine({ root: vault });
       await engine.init();
-      await cmd.execute({ engine });
+      await cmd.execute({ engine, overwriteFields });
     }
   )
   .command<BuildSiteCliOpts>(

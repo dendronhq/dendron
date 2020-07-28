@@ -44,9 +44,12 @@ export class DNodeUtils {
   static basename(nodePath: string, rmExtension?: boolean) {
     if (rmExtension) {
       const idx = nodePath.lastIndexOf(".md");
-      nodePath = nodePath.slice(0, idx);
+      if (idx > 0) {
+        nodePath = nodePath.slice(0, idx);
+      }
     }
-    return nodePath.split(".").slice(-1)[0];
+    const [first, ...rest] = nodePath.split(".");
+    return _.isEmpty(rest) ? first : rest.slice(-1)[0];
   }
 
   /**
@@ -84,18 +87,30 @@ export class DNodeUtils {
     }
   }
 
-  static getMeta(note: Note) {
-    const meta = _.pick(note, [
+  /**
+   *
+   * @param note
+   * - pullCustomUp: roll custom attributes to top level, default: false
+   * @param opts
+   */
+  static getMeta(note: Note, opts?: { pullCustomUp?: boolean }) {
+    const { pullCustomUp } = _.defaults(opts || {}, { pullCustomUp: false });
+    let seed = {};
+    let fields = [
       "id",
       "title",
       "desc",
       "updated",
       "created",
       "data",
-      "custom",
       "fname",
       "stub",
-    ]);
+    ];
+    if (pullCustomUp) {
+      seed = note.custom;
+      fields = _.reject(fields, ent => ent === "custom");
+    }
+    const meta = { ...seed, ..._.pick(note, [...fields]) };
     const family = _.pick(note.toRawProps(), ["parent", "children"]);
     return { ...meta, ...family };
   }
@@ -226,6 +241,10 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
   public stub: boolean;
   public custom: any;
   public uri: URI;
+
+  static defaultTitle(fname: string) {
+    return _.capitalize(DNodeUtils.basename(fname, true));
+  }
 
   constructor(opts: IDNodeOpts<T>) {
     const {

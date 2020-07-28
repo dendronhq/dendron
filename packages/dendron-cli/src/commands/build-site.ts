@@ -23,24 +23,24 @@ type DendronSiteConfig = {
 };
 
 type DendronJekyllProps = {
-    hpath: string
-    permalink?: string
-}
+  hpath: string;
+  permalink?: string;
+};
 
 function note2JekyllMdFile(
   note: Note,
   opts: { notesDir: string } & DendronSiteConfig
 ) {
-  const meta = DNodeUtils.getMeta(note);
+  const meta = DNodeUtils.getMeta(note, { pullCustomUp: true });
   const jekyllProps: DendronJekyllProps = {
     hpath: note.path
   };
   if (opts.root === meta.fname) {
-    jekyllProps['permalink'] = '/';
+    jekyllProps["permalink"] = "/";
   }
   // pull children of root to the top
   if (note.parent?.fname === opts.root) {
-      delete meta['parent'];
+    delete meta["parent"];
   }
   const filePath = path.join(opts.notesDir, meta.fname + ".md");
   return fs.writeFile(
@@ -67,9 +67,9 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     const nodes: Note[] = [root];
     const out = [];
     while (!_.isEmpty(nodes)) {
-        const node = nodes.pop() as Note;
-        out.push(note2JekyllMdFile(node, { notesDir: notesDirPath, ...config }));
-        node.children.forEach(n => nodes.push(n as Note));
+      const node = nodes.pop() as Note;
+      out.push(note2JekyllMdFile(node, { notesDir: notesDirPath, ...config }));
+      node.children.forEach(n => nodes.push(n as Note));
     }
     await Promise.all(nodes);
     //   _.values(engine.notes).map(n => {

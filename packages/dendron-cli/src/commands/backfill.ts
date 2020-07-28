@@ -1,21 +1,30 @@
 import { BaseCommand } from "./base";
 import _ from "lodash";
-import { DEngine } from "@dendronhq/common-all";
+import { DEngine, DNode } from "@dendronhq/common-all";
 
-type CommandOpts = { engine: DEngine };
+type CommandOpts = { engine: DEngine } & CommonOpts;
 
+type CommonOpts = {
+  overwriteFields?: string[];
+};
 
 type CommandOutput = void;
 
-export class BackfillCommand extends BaseCommand<
-  CommandOpts,
-  CommandOutput
-> {
+export class BackfillCommand extends BaseCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
-    const { engine } = _.defaults(opts, {});
+    const { engine, overwriteFields } = _.defaults(opts, {
+      overwriteFields: []
+    });
     await Promise.all(
       _.values(engine.notes).map(n => {
-        return engine.write(n);
+        overwriteFields.forEach(f => {
+          if (f === "title") {
+            n.title = DNode.defaultTitle(n.fname);
+          } else {
+            throw Error(`unknown overwrite field: ${f}`);
+          }
+          return engine.write(n);
+        });
       })
     );
     return;
@@ -24,4 +33,4 @@ export class BackfillCommand extends BaseCommand<
 
 export type BackfillCliOpts = {
   vault: string;
-};
+} & CommonOpts;

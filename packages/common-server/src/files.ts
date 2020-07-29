@@ -1,10 +1,11 @@
 import {
   DNodeRaw,
   DNodeRawOpts,
-  genUUID, Note,
+  genUUID,
+  Note,
   NoteData,
   NoteRawProps,
-  Schema
+  Schema,
 } from "@dendronhq/common-all";
 import fs, { Dirent } from "fs";
 import matter from "gray-matter";
@@ -12,7 +13,7 @@ import _ from "lodash";
 import minimatch from "minimatch";
 import path, { posix } from "path";
 import YAML from "yamljs";
-
+import os from "os";
 
 interface FileMeta {
   name: string;
@@ -119,9 +120,7 @@ export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
   ) as Dirent[] | string[];
 }
 
-export function mdFile2NodeProps(
-  fpath: string,
-): NoteRawProps {
+export function mdFile2NodeProps(fpath: string): NoteRawProps {
   // NOTE: gray matter cache old date, need to pass empty options
   // to bypass
   // see https://github.com/jonschlinkert/gray-matter/issues/43
@@ -192,4 +191,38 @@ export function schema2YMLFile(schema: Schema, opts: { root: string }) {
   const filePath = path.join(root, `${fname}.yml`);
   const out = YAML.stringify(schema.toRawPropsRecursive(), undefined, 4);
   return fs.writeFileSync(filePath, out);
+}
+
+export function resolveTilde(filePath: string) {
+  if (!filePath || typeof filePath !== "string") {
+    return "";
+  }
+  // '~/folder/path' or '~'
+  if (filePath[0] === "~" && (filePath[1] === "/" || filePath.length === 1)) {
+    return filePath.replace("~", os.homedir());
+  }
+  return filePath;
+}
+
+/**
+ * Resolve file path and resolve relative paths relative to `root`
+ * @param filePath
+ * @param root
+ */
+export function resolvePath(filePath: string, root?: string): string {
+  const platform = os.platform();
+  const isWin = platform === "win32";
+  if (filePath[0] === "~") {
+    return resolveTilde(filePath);
+  } else if (
+    path.isAbsolute(filePath) ||
+    (isWin && filePath.startsWith("\\"))
+  ) {
+    return filePath;
+  } else {
+    if (!root) {
+      throw Error("can't use rel path without a workspace root set");
+    }
+    return posix.join(root, filePath);
+  }
 }

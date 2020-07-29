@@ -1,4 +1,4 @@
-import { FileTestUtils } from "@dendronhq/common-server";
+import { FileTestUtils, resolveTilde } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import os from "os";
 import path, { posix } from "path";
@@ -18,6 +18,7 @@ export class DisposableStore {
 }
 
 // === File FUtils
+// @DEPRECATE, use src/files.ts#resolvePath
 export function resolvePath(filePath: string, wsRoot?: string): string {
   const platform = os.platform();
 
@@ -35,17 +36,6 @@ export function resolvePath(filePath: string, wsRoot?: string): string {
     }
     return posix.join(wsRoot, filePath);
   }
-}
-
-export function resolveTilde(filePath: string) {
-  if (!filePath || typeof filePath !== "string") {
-    return "";
-  }
-  // '~/folder/path' or '~'
-  if (filePath[0] === "~" && (filePath[1] === "/" || filePath.length === 1)) {
-    return filePath.replace("~", os.homedir());
-  }
-  return filePath;
 }
 
 export function getPlatform() {
@@ -74,7 +64,7 @@ export class VSCodeUtils {
     const editor = vscode.window.activeTextEditor as vscode.TextEditor;
     const selection = editor.selection as vscode.Selection;
     const text = editor.document.getText(selection);
-    return {text, selection};
+    return { text, selection };
   }
 
   static getVersionFromPkg(): string {
@@ -140,7 +130,9 @@ export class VSCodeUtils {
     );
   }
 
-  static async gatherFolderPath(opts?: {default: string}): Promise<string|undefined> {
+  static async gatherFolderPath(opts?: {
+    default: string;
+  }): Promise<string | undefined> {
     const folderPath = await vscode.window.showInputBox({
       prompt: "Select path to folder",
       ignoreFocusOut: true,
@@ -156,7 +148,7 @@ export class VSCodeUtils {
     });
     if (_.isUndefined(folderPath)) {
       return;
-    } 
+    }
     return resolvePath(folderPath);
   }
 

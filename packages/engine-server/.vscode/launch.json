@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "engine-server:Debug file",
+      "name": "engine-server:debug file",
       "program": "${workspaceFolder:engine-server}/lib/${fileBasenameNoExtension}.js",
       "cwd": "${workspaceFolder:engine-server}",
       "sourceMaps": true,
@@ -18,11 +18,22 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "engine-server:Debug test",
+      "name": "engine-server:debug test",
       "program": "${workspaceFolder:engine-server}/node_modules/jest/bin/jest.js",
       "cwd": "${workspaceFolder:engine-server}",
       "args": [
         "--runInBand"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "engine-server:debug test file",
+      "program": "${workspaceFolder:engine-server}/node_modules/jest/bin/jest.js",
+      "cwd": "${workspaceFolder:engine-server}",
+      "args": [
+        "--runInBand",
+        "${relativeFile}"
       ]
     }
   ]

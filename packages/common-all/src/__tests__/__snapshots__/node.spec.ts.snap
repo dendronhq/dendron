@@ -37,6 +37,7 @@ Object {
   "body": "",
   "children": Array [
     "foo",
+    "baz",
   ],
   "custom": Object {},
   "data": Object {},

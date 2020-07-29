@@ -1,4 +1,5 @@
 import { DEngine, DNodeUtils, Note } from "@dendronhq/common-all";
+import { resolvePath } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import matter from "gray-matter";
 import _ from "lodash";
@@ -7,19 +8,18 @@ import { BaseCommand } from "./base";
 
 type CommandOpts = {
   engine: DEngine;
+  config: DendronSiteConfig;
 } & CommandCommonOpts;
 
 type CommandCommonOpts = {
-  /**
-   * Where is site
-   */
-  siteRoot: string;
+  dendronRoot: string;
 };
 
 type CommandOutput = void;
 
-type DendronSiteConfig = {
-  root: string;
+export type DendronSiteConfig = {
+  noteRoot: string;
+  siteRoot: string;
 };
 
 type DendronJekyllProps = {
@@ -63,15 +63,16 @@ function note2JekyllMdFile(
 ) {
   const meta = DNodeUtils.getMeta(note, { pullCustomUp: true });
   const jekyllProps: DendronJekyllProps = {
-    hpath: note.path,
+    hpath: note.path
   };
-  if (opts.root === meta.fname) {
+  if (opts.noteRoot === meta.fname) {
     jekyllProps["permalink"] = "/";
   }
   // pull children of root to the top
-  if (note.parent?.fname === opts.root) {
+  if (note.parent?.fname === opts.noteRoot) {
     delete meta["parent"];
   }
+  // delete parent from root
   note.body = wikiLinkToMd(note, opts.engine);
   const filePath = path.join(opts.notesDir, meta.id + ".md");
   return fs.writeFile(
@@ -82,28 +83,33 @@ function note2JekyllMdFile(
 
 export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
-    const { engine, siteRoot } = _.defaults(opts, {});
-    const notesDir = "notes";
-    const notesDirPath = path.join(siteRoot, notesDir);
-    const L = this.L.child({ ctx: "BuildSiteComman", siteRoot });
-    fs.ensureDirSync(notesDirPath);
-    // TODO: ask for confirmation
-    fs.emptyDirSync(notesDirPath);
-    const config: DendronSiteConfig = {
-      root: "dendron",
-    };
-    const root: Note = _.find(engine.notes, { fname: config.root }) as Note;
+    const { engine, config, dendronRoot } = _.defaults(opts, {});
+    const { siteRoot, noteRoot } = config;
+
+    const siteNotesDir = "notes";
+    const siteNotesDirPath = path.join(resolvePath(siteRoot, dendronRoot), siteNotesDir);
+    const L = this.L.child({ ctx: "BuildSiteComman", siteRoot, dendronRoot, noteRoot });
+    L.info({ msg: "enter", siteNotesDirPath });
+    fs.ensureDirSync(siteNotesDirPath);
+    fs.emptyDirSync(siteNotesDirPath);
+
+    const root: Note = _.find(engine.notes, { fname: noteRoot }) as Note;
     if (_.isUndefined(root)) {
       throw Error(`root ${root} not found`);
     }
     const nodes: Note[] = [root];
     const out = [];
+
+    // delete parent from the root
+    delete root['parent'];
+    root.custom.nav_order = 0;
+
     while (!_.isEmpty(nodes)) {
       const node = nodes.pop() as Note;
       out.push(
-        note2JekyllMdFile(node, { notesDir: notesDirPath, engine, ...config })
+        note2JekyllMdFile(node, { notesDir: siteNotesDirPath, engine, ...config })
       );
-      node.children.forEach((n) => nodes.push(n as Note));
+      node.children.forEach(n => nodes.push(n as Note));
     }
     // TODO: need to rewrite links before this is ready
     // const assetsDir = "assets";

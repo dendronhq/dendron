@@ -30,6 +30,7 @@ function setupNotes() {
   fooChild.addChild(fooGrandChild);
   foo.addChild(fooChild);
   root.addChild(foo);
+  root.addChild(baz);
   bar.addChild(barChild);
   barChild.addChild(barGrandChild);
   bar.addChild(barChildNamespaceExact);
@@ -77,6 +78,9 @@ function setupSchema() {
     fname: "foo.schema.yml",
     parent: null,
   });
+  const root = Schema.createRoot();
+  root.addChild(foo);
+  root.addChild(bar);
   foo.addChild(fooChild);
   fooChild.addChild(fooGrandChild);
   bar.addChild(barChildNamespace);
@@ -207,7 +211,7 @@ describe("NoteUtils", () => {
     NoteUtils.createStubNotes(notes.root, notes.barChild);
     expect(notes.barChild.parent).not.toBeNull();
     expect(notes.barChild.parent?.stub).toBe(true);
-    expect(notes.root.children.length).toEqual(2);
+    expect(notes.root.children.length).toEqual(3);
     expectSnapshot(expect, "barChild", notes.barChild.nodes);
   });
 
@@ -216,7 +220,7 @@ describe("NoteUtils", () => {
     NoteUtils.createStubNotes(notes.foo, notes.fooTwoBeta);
     expect(notes.fooTwoBeta.parent).not.toBeNull();
     expect(notes.fooTwoBeta.parent?.stub).toBe(true);
-    expect(notes.root.children.length).toEqual(1);
+    expect(notes.root.children.length).toEqual(2);
     expect(notes.foo.children.length).toEqual(2);
   });
 

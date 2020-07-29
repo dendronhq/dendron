@@ -81,11 +81,11 @@ describe("filePod", () => {
     // expect(fs.readFileSync(posix.join(root, "project.p1.md"), {encoding: "utf8"})).toMatchSnapshot("p1.md")
   });
 
-  test("harness1", async () => {
-    const filesRoot = "/Users/kevinlin/tmp/kiran_test";
-    const uri = URI.parse(filesRoot);
-    const fp = new FilePod({ engine, root: uri });
-    await fp.import();
-    // testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
-  });
+  // test("harness1", async () => {
+  //   const filesRoot = "/Users/kevinlin/tmp/kiran_test";
+  //   const uri = URI.parse(filesRoot);
+  //   const fp = new FilePod({ engine, root: uri });
+  //   await fp.import();
+  //   // testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
+  // });
 });

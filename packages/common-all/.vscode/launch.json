@@ -22,6 +22,18 @@
       "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
       "args": ["--findRelatedTests", "${relativeFile}"],
       "cwd": "${workspaceRoot}"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug test file",
+      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+      "args": [
+        "--runInBand",
+        "${relativeFile}",
+        "-u"
+      ],
+      "cwd": "${workspaceRoot}"
     }
   ]
 }

@@ -2,7 +2,7 @@
 import { DendronEngine } from "@dendronhq/engine-server";
 import yargs from "yargs";
 import { BackfillCliOpts, BackfillCommand } from "../src/commands/backfill";
-import { BuildSiteCliOpts, BuildSiteCommand } from "../src/commands/build-site";
+import { BuildSiteCliOpts, BuildSiteCommand, DendronSiteConfig } from "../src/commands/build-site";
 
 yargs
   .command<BackfillCliOpts>(
@@ -33,16 +33,20 @@ yargs
       args.option("vault", {
         describe: "location of vault"
       });
-      args.option("siteRoot", {
-        describe: "location of site dir"
+      args.option("dendronRoot", {
+        describe: "location to dendronRoot"
       });
     },
     async args => {
-      const { vault, siteRoot } = args;
+      const { vault, dendronRoot } = args;
+      const config: DendronSiteConfig = {
+        noteRoot: "root",
+        siteRoot: "./docs-dev"
+      };
       const cmd = new BuildSiteCommand();
       const engine = DendronEngine.getOrCreateEngine({ root: vault });
       await engine.init();
-      await cmd.execute({ engine, siteRoot });
+      await cmd.execute({ engine, config, dendronRoot });
     }
   )
   .demandCommand(1)

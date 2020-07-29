@@ -4,9 +4,10 @@ import path from "path";
 import vscode from "vscode";
 import { DENDRON_WS_NAME } from "../constants";
 import { WorkspaceConfig } from "../settings";
-import { VSCodeUtils, resolveTilde } from "../utils";
+import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
+import { resolveTilde } from "@dendronhq/common-server";
 
 type CommandOpts = {
   rootDirRaw: string;

@@ -46,7 +46,7 @@ function wikiLinkToMd(note: Note, engine: DEngine) {
         title = _.trim(note.title);
         mdLink = _.trim(first);
       }
-      const noteFromLink  = _.find(engine.notes, { fname: mdLink });
+      const noteFromLink = _.find(engine.notes, { fname: mdLink });
       if (!noteFromLink) {
         throw Error(`${mdLink} not found. file: ${note.fname}`);
       }
@@ -63,7 +63,7 @@ function note2JekyllMdFile(
 ) {
   const meta = DNodeUtils.getMeta(note, { pullCustomUp: true });
   const jekyllProps: DendronJekyllProps = {
-    hpath: note.path
+    hpath: note.path,
   };
   if (opts.root === meta.fname) {
     jekyllProps["permalink"] = "/";
@@ -85,11 +85,12 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     const { engine, siteRoot } = _.defaults(opts, {});
     const notesDir = "notes";
     const notesDirPath = path.join(siteRoot, notesDir);
+    const L = this.L.child({ ctx: "BuildSiteComman", siteRoot });
     fs.ensureDirSync(notesDirPath);
     // TODO: ask for confirmation
     fs.emptyDirSync(notesDirPath);
     const config: DendronSiteConfig = {
-      root: "dendron"
+      root: "dendron",
     };
     const root: Note = _.find(engine.notes, { fname: config.root }) as Note;
     if (_.isUndefined(root)) {
@@ -102,13 +103,28 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
       out.push(
         note2JekyllMdFile(node, { notesDir: notesDirPath, engine, ...config })
       );
-      node.children.forEach(n => nodes.push(n as Note));
+      node.children.forEach((n) => nodes.push(n as Note));
     }
+    // TODO: need to rewrite links before this is ready
+    // const assetsDir = "assets";
+    // const noteAssetsDir = path.join(notesDirPath, assetsDir);
+    // const siteAssetsDir = path.join(siteRoot, assetsDir);
+    // const vaultAssetsDir = path.join(engine.props.root, assetsDir);
+
+    // const copyP = new Promise((resolve, reject) => {
+    //   fs.copy(
+    //     path.join(vaultAssetsDir, "images"),
+    //     path.join(siteAssetsDir, "images"),
+    //     err => {
+    //       if (err) reject(err);
+    //       L.info({ msg: "finish copying" });
+    //       resolve();
+    //     }
+    //   );
+    // });
     await Promise.all(nodes);
-    //   _.values(engine.notes).map(n => {
-    //     return note2JekyllMdFile(n, { notesDir: notesDirPath });
-    //   })
-    // );
+    // await copyP;
+    L.info({ msg: "exit" });
     return;
   }
 }

@@ -13,18 +13,18 @@ type CommandOutput = void;
 export class BackfillCommand extends BaseCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const { engine, overwriteFields } = _.defaults(opts, {
-      overwriteFields: []
+      overwriteFields: [],
     });
     await Promise.all(
-      _.values(engine.notes).map(n => {
-        overwriteFields.forEach(f => {
+      _.values(engine.notes).map((n) => {
+        overwriteFields.forEach((f) => {
           if (f === "title") {
             n.title = DNode.defaultTitle(n.fname);
           } else {
             throw Error(`unknown overwrite field: ${f}`);
           }
-          return engine.write(n);
         });
+        return engine.write(n);
       })
     );
     return;

@@ -5,17 +5,17 @@ import { ConfigurationTarget, WorkspaceConfiguration } from "vscode";
 import { DendronWorkspace } from "./workspace";
 
 type CodeConfig = {
-  settings?: CodeSettingsConfig
-  extensions?: CodeExtensionsConfig
-}
+  settings?: CodeSettingsConfig;
+  extensions?: CodeExtensionsConfig;
+};
 type CodeExtensionsConfig = {
   recommendations?: string[];
   unwantedRecommendations?: string[];
-}
+};
 
 type CodeSettingsConfig = {
-  [p: string]: any
-}
+  [p: string]: any;
+};
 
 export type ConfigChanges = {
   add: [];
@@ -49,7 +49,7 @@ const _SETTINGS: ConfigUpdateChangeSet = {
   },
   "materialTheme.accent": { default: "Red" },
   "workbench.colorTheme": { default: "Material Theme High Contrast" },
-  "pasteImage.path": { default: "${currentFileDir}/assets" },
+  "pasteImage.path": { default: "${currentFileDir}/assets/images" },
   // prevent markdown-notes from mangling file names
   "markdown-preview-enhanced.enableWikiLinkSyntax": { default: true },
   "markdown-preview-enhanced.wikiLinkFileExtension": { default: ".md" },
@@ -73,7 +73,6 @@ export type WriteConfigOpts = {
 };
 
 export class WorkspaceConfig {
-
   static write(wsRoot: string, opts?: WriteConfigOpts) {
     const cleanOpts = _.defaults(opts, {
       rootVault: "vault",
@@ -95,7 +94,9 @@ export class WorkspaceConfig {
   }
 
   static update(wsRoot: string): Required<CodeConfig> {
-    const config: CodeConfig= fs.readJSONSync(path.join(wsRoot, DendronWorkspace.DENDRON_WORKSPACE_FILE));
+    const config: CodeConfig = fs.readJSONSync(
+      path.join(wsRoot, DendronWorkspace.DENDRON_WORKSPACE_FILE)
+    );
     config.extensions = Extensions.update(config.extensions || {});
     config.settings = Settings.update(config.settings || {});
 
@@ -106,8 +107,8 @@ export class WorkspaceConfig {
     );
     return {
       extensions: config.extensions,
-      settings: config.settings
-    }
+      settings: config.settings,
+    };
   }
 }
 
@@ -137,7 +138,9 @@ export class Extensions {
 
   static update(extensions: CodeExtensionsConfig): CodeExtensionsConfig {
     const recommendations: Set<string> = new Set(extensions.recommendations);
-    const unwantedRecommendations: Set<string> = new Set(extensions.unwantedRecommendations);
+    const unwantedRecommendations: Set<string> = new Set(
+      extensions.unwantedRecommendations
+    );
     const configEntries = Extensions.configEntries();
     configEntries.forEach((ent) => {
       if (ent?.action === "REMOVE") {
@@ -150,8 +153,8 @@ export class Extensions {
     });
     return {
       recommendations: Array.from(recommendations),
-      unwantedRecommendations: Array.from(unwantedRecommendations)
-    }
+      unwantedRecommendations: Array.from(unwantedRecommendations),
+    };
   }
 }
 
@@ -177,7 +180,7 @@ export class Settings {
   static update(settings: CodeSettingsConfig): CodeSettingsConfig {
     const configEntries = Settings.configEntries();
     _.forEach(configEntries, (changeSet, key) => {
-      const cleanChangeSet = _.defaults(changeSet, {action: "ADD"});
+      const cleanChangeSet = _.defaults(changeSet, { action: "ADD" });
       if (cleanChangeSet.action === "ADD") {
         if (!_.has(settings, key)) {
           settings[key] = changeSet.default;
@@ -186,7 +189,7 @@ export class Settings {
       if (cleanChangeSet.action === "REMOVE") {
         // TODO: right now, not removing
       }
-    })
+    });
     return settings;
   }
 

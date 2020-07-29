@@ -4,6 +4,7 @@
   "bumpFiles": [{ "filename": "lerna.json", "type": "json" }],
   "types": [
     { "type": "feat", "section": "Features" },
+    { "type": "enh", "section": "Enhancements" },
     { "type": "fix", "section": "Bug Fixes" },
     { "type": "release", "section": "Release" },
     { "type": "chore", "hidden": true },

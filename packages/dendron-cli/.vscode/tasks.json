@@ -54,6 +54,12 @@
       "problemMatcher": [
         "$eslint-stylish"
       ]
+    },
+    {
+      "label": "watch-vault-dev",
+      "type": "shell",
+      "command": "nodemon --watch '/Users/kevinlin/projects/dendronv2/dendron-template/vault' --watch '${workspaceFolder}/**/*'  --ext md,ts lib/bin/dendron-cli.js build-site --vault /Users/kevinlin/projects/dendronv2/dendron-template/vault --dendronRoot /Users/kevinlin/projects/dendronv2/dendron-template",
+      "problemMatcher": []
     }
   ]
 }

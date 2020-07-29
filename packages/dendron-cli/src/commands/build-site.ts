@@ -103,6 +103,7 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     // delete parent from the root
     delete root['parent'];
     root.custom.nav_order = 0;
+    root.title = _.capitalize(root.title);
 
     while (!_.isEmpty(nodes)) {
       const node = nodes.pop() as Note;

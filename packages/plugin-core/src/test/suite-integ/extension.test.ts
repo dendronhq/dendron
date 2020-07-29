@@ -29,7 +29,7 @@ const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
       "files.autoSave": "onFocusChange",
       "materialTheme.accent": "Red",
       "workbench.colorTheme": "Material Theme High Contrast",
-      "pasteImage.path": "${currentFileDir}/assets",
+      "pasteImage.path": "${currentFileDir}/assets/images",
       "markdown-preview-enhanced.enableWikiLinkSyntax": true,
       "markdown-preview-enhanced.wikiLinkFileExtension": ".md",
       "vscodeMarkdownNotes.noteCompletionConvention": "noExtension",

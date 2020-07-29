@@ -108,7 +108,7 @@ export class DNodeUtils {
     ];
     if (pullCustomUp) {
       seed = note.custom;
-      fields = _.reject(fields, ent => ent === "custom");
+      fields = _.reject(fields, (ent) => ent === "custom");
     }
     const meta = { ...seed, ..._.pick(note, [...fields]) };
     const family = _.pick(note.toRawProps(), ["parent", "children"]);
@@ -387,9 +387,13 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     }
     if (this.parent?.title === "root") {
       parent = "root";
+    } else if (this.id === "root") {
+      parent = null;
     } else {
-      // TODO: this should never happen
-      parent = this.parent?.id ?? "root";
+      if (_.isNull(this.parent)) {
+        throw Error(`${props.fname} has no parent node`);
+      }
+      parent = this.parent.id;
     }
     const children = this.children.map((c) => c.id);
     return { ...props, parent, children };

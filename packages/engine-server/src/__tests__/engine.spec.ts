@@ -189,7 +189,7 @@ describe("engine:exact", () => {
       const noteUpdated: Note = (await engine.query("foo", queryMode))
         .data[0] as Note;
 
-      // check note is equal
+      // check note has custom att
       expect(_.omit(note.toRawProps(), "body")).toEqual(
         _.omit(noteUpdated.toRawProps(), "body")
       );
@@ -302,12 +302,17 @@ describe("engine:exact", () => {
     test("delete node with children", async () => {
       await engine.init();
       const fooNode = await engine.queryOne("foo", "note");
+
+      // delete foo
       await engine.delete(fooNode.data.id);
       expect(fs.readdirSync(root)).toMatchSnapshot("listDi2");
       const numNodesPre = _.values(engine.notes).length;
       testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
+
+      // because foo has children, exepect it to still exist as a stub
       const deletedNode = engine.notes[fooNode.data.id];
       expectNoteProps(expect, deletedNode, { fname: "foo", stub: true });
+
       // size should be the same
       expect(numNodesPre).toEqual(_.values(engine.notes).length);
       testUtils.expectSnapshot(expect, "main2", _.values(engine.notes));

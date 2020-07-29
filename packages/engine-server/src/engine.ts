@@ -296,6 +296,7 @@ export class DendronEngine implements DEngine {
     if (!_.isEmpty(noteToDelete.children)) {
       const noteAsStub = Note.createStub(noteToDelete.fname, {
         id,
+        parent: noteToDelete.parent,
         children: noteToDelete.children,
       });
       this.refreshNodes([noteAsStub], { stub: true });

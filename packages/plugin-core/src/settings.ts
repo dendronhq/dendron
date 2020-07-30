@@ -50,6 +50,8 @@ const _SETTINGS: ConfigUpdateChangeSet = {
   "materialTheme.accent": { default: "Red" },
   "workbench.colorTheme": { default: "Material Theme High Contrast" },
   "pasteImage.path": { default: "${currentFileDir}/assets/images" },
+  // required for jekyll image build
+  "pasteImage.prefix": { default: "/" },
   // prevent markdown-notes from mangling file names
   "markdown-preview-enhanced.enableWikiLinkSyntax": { default: true },
   "markdown-preview-enhanced.wikiLinkFileExtension": { default: ".md" },

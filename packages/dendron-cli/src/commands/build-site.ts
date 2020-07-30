@@ -1,4 +1,8 @@
-import { DEngine, DNodeUtils, Note, DendronSiteConfig } from "@dendronhq/common-all";
+import {
+  DendronSiteConfig, DEngine,
+  DNodeUtils,
+  Note
+} from "@dendronhq/common-all";
 import { resolvePath } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import matter from "gray-matter";
@@ -52,11 +56,30 @@ function wikiLinkToMd(note: Note, engine: DEngine) {
   return doc;
 }
 
+// @ts-ignore
+function imageLinkConverter(note: Note) {
+  let matches;
+  let doc = note.body;
+  do {
+    matches = doc.match(/(\(?<link>assets\/images[^)]+\))/);
+    if (matches) {
+      // @ts-ignore
+      const { link } = matches.groups;
+      const linkReplace = link.replace("(assets", "(/assets");
+      doc = doc.replace(link, linkReplace);
+    }
+  } while (matches);
+  return doc;
+}
+
 function note2JekyllMdFile(
   note: Note,
   opts: { notesDir: string; engine: DEngine } & DendronSiteConfig
 ) {
-  const meta = DNodeUtils.getMeta(note, { pullCustomUp: true, ignoreNullParent: true });
+  const meta = DNodeUtils.getMeta(note, {
+    pullCustomUp: true,
+    ignoreNullParent: true
+  });
   const jekyllProps: DendronJekyllProps = {
     hpath: note.path
   };
@@ -79,11 +102,20 @@ function note2JekyllMdFile(
 export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const { engine, config, dendronRoot } = _.defaults(opts, {});
-    const { siteRoot, noteRoot } = config;
+    const { siteRoot: siteRootRaw, noteRoot } = config;
 
+    const siteRoot = resolvePath(siteRootRaw, dendronRoot);
     const siteNotesDir = "notes";
-    const siteNotesDirPath = path.join(resolvePath(siteRoot, dendronRoot), siteNotesDir);
-    const L = this.L.child({ ctx: "BuildSiteComman", siteRoot, dendronRoot, noteRoot });
+    const siteNotesDirPath = path.join(
+      siteRoot,
+      siteNotesDir
+    );
+    const L = this.L.child({
+      ctx: "BuildSiteComman",
+      siteRoot,
+      dendronRoot,
+      noteRoot
+    });
     L.info({ msg: "enter", siteNotesDirPath });
     fs.ensureDirSync(siteNotesDirPath);
     fs.emptyDirSync(siteNotesDirPath);
@@ -96,37 +128,47 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     const out = [];
 
     // delete parent from the root
-    root['parent'] = null;
+    root["parent"] = null;
     root.custom.nav_order = 0;
     root.title = _.capitalize(root.title);
 
     while (!_.isEmpty(nodes)) {
       const node = nodes.pop() as Note;
       out.push(
-        note2JekyllMdFile(node, { notesDir: siteNotesDirPath, engine, ...config })
+        note2JekyllMdFile(node, {
+          notesDir: siteNotesDirPath,
+          engine,
+          ...config
+        })
       );
       node.children.forEach(n => nodes.push(n as Note));
     }
 
     // TODO: need to rewrite links before this is ready
-    // const assetsDir = "assets";
-    // const noteAssetsDir = path.join(notesDirPath, assetsDir);
-    // const siteAssetsDir = path.join(siteRoot, assetsDir);
-    // const vaultAssetsDir = path.join(engine.props.root, assetsDir);
+    const assetsDir = "assets";
+    // notes/assets
+    //const noteAssetsDir = path.join(siteNotesDirPath, assetsDir);
+    const vaultAssetsDir = path.join(engine.props.root, assetsDir);
+    // docs/assets
+    const siteAssetsDir = path.join(siteRoot, assetsDir);
 
-    // const copyP = new Promise((resolve, reject) => {
-    //   fs.copy(
-    //     path.join(vaultAssetsDir, "images"),
-    //     path.join(siteAssetsDir, "images"),
-    //     err => {
-    //       if (err) reject(err);
-    //       L.info({ msg: "finish copying" });
-    //       resolve();
-    //     }
-    //   );
-    // });
+
+    const copyP = new Promise((resolve, reject) => {
+      fs.copy(
+        path.join(vaultAssetsDir, "images"),
+        path.join(siteAssetsDir, "images"),
+        err => {
+          if (err) {
+            err.message += JSON.stringify({ vaultAssetsDir, siteAssetsDir });
+            reject(err);
+          }
+          L.info({ msg: "finish copying" });
+          resolve();
+        }
+      );
+    });
     await Promise.all(nodes);
-    // await copyP;
+    await copyP;
     L.info({ msg: "exit" });
     return;
   }

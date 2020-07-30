@@ -30,6 +30,7 @@ const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
       "materialTheme.accent": "Red",
       "workbench.colorTheme": "Material Theme High Contrast",
       "pasteImage.path": "${currentFileDir}/assets/images",
+      "pasteImage.prefix": "/",
       "markdown-preview-enhanced.enableWikiLinkSyntax": true,
       "markdown-preview-enhanced.wikiLinkFileExtension": ".md",
       "vscodeMarkdownNotes.noteCompletionConvention": "noExtension",

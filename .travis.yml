@@ -1,7 +1,6 @@
 matrix:
   include:
   - os: linux
-    sudo: required
     env: BUILDARCH=x64
     dist: trusty
   - os: osx

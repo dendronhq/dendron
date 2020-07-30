@@ -494,12 +494,10 @@ export class DendronWorkspace {
         async () => {
           const findings = await new DoctorCommand().execute({
           });
-          if (_.isEmpty(findings)) {
-            vscode.window.showInformationMessage(`no issues found`);
-          }
           findings.data.forEach(f => {
             vscode.window.showInformationMessage(`issue: ${f.issue}. fix: ${f.fix}`);
           });
+          vscode.window.showInformationMessage(`doctor finished checkup`);
         }
       )
     );

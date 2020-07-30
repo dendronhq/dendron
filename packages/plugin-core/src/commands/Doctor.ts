@@ -4,6 +4,7 @@ import path from "path";
 import { Uri, window } from "vscode";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
+import { BackfillCommand } from "@dendronhq/dendron-cli";
 
 type Finding = {
   issue: string;
@@ -50,6 +51,8 @@ export class DoctorCommand extends BaseCommand<
       throw Error("rootDir undefined");
     }
     const siteRoot = path.join(rootDir, ws.config.site.siteRoot);
+    const engine = ws.engine;
+    await new BackfillCommand().execute({engine})
     if (!fs.existsSync(siteRoot)) {
     const f: Finding = { issue: "no siteRoot found" };
       const dendronWSTemplate = Uri.joinPath(ws.extensionAssetsDir, "dendronWS").fsPath;

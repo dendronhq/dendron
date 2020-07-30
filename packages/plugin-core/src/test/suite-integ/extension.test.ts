@@ -1,4 +1,4 @@
-import { FileTestUtils } from "@dendronhq/common-server";
+import { FileTestUtils, DirResult } from "@dendronhq/common-server";
 import * as assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -77,7 +77,7 @@ function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
 
 suite("startup", function () {
   const timeout = 60 * 1000 * 5;
-  let root: string;
+  let root: DirResult;
   let ctx: vscode.ExtensionContext;
 
   before(function () {
@@ -89,7 +89,8 @@ suite("startup", function () {
   beforeEach(async function () {
     console.log("before");
     await new ResetConfigCommand().execute({scope: "all"})
-    root = FileTestUtils.tmpDir("/tmp/dendron", true);
+    root = FileTestUtils.tmpDir();
+    fs.removeSync(root.name);
     ctx = VSCodeUtils.getOrCreateMockContext();
     console.log("before-done");
     return;
@@ -98,7 +99,8 @@ suite("startup", function () {
   afterEach(function () {
     console.log("after");
     HistoryService.instance().clearSubscriptions();
-    fs.removeSync(root);
+    //root.removeCallback();
+    // fs.removeSync(root.name);
   });
 
   describe("sanity", function () {
@@ -126,18 +128,18 @@ suite("startup", function () {
     test("workspace active, no prior workspace version", function (done) {
       DendronWorkspace.configuration = () => {
         return createMockConfig({
-          dendron: { rootDir: root },
+          dendron: { rootDir: root.name },
         });
       };
       DendronWorkspace.workspaceFile = () => {
-        return vscode.Uri.file(path.join(root, "dendron.code-workspace"));
+        return vscode.Uri.file(path.join(root.name, "dendron.code-workspace"));
       };
       DendronWorkspace.workspaceFolders = () => {
-        const uri = vscode.Uri.file(path.join(root, "vault"));
+        const uri = vscode.Uri.file(path.join(root.name, "vault"));
         return [{ uri, name: "vault", index: 0 }];
       };
       new SetupWorkspaceCommand()
-        .execute({ rootDirRaw: root, skipOpenWs: true })
+        .execute({ rootDirRaw: root.name, skipOpenWs: true })
         .then(() => {
           _activate(ctx);
         });
@@ -146,7 +148,7 @@ suite("startup", function () {
         async (_event: HistoryEvent) => {
           assert.equal(DendronWorkspace.isActive(), true);
           const config = fs.readJSONSync(
-            path.join(root, DendronWorkspace.DENDRON_WORKSPACE_FILE)
+            path.join(root.name, DendronWorkspace.DENDRON_WORKSPACE_FILE)
           );
           assert.deepEqual(config, expectedSettings());
           done();
@@ -157,25 +159,25 @@ suite("startup", function () {
     test("workspace active, prior lower workspace version, setting with extra prop, upgrade", function (done) {
       DendronWorkspace.configuration = () => {
         return createMockConfig({
-          dendron: { rootDir: root },
+          dendron: { rootDir: root.name },
         });
       };
       DendronWorkspace.workspaceFile = () => {
-        return vscode.Uri.file(path.join(root, "dendron.code-workspace"));
+        return vscode.Uri.file(path.join(root.name, "dendron.code-workspace"));
       };
       DendronWorkspace.workspaceFolders = () => {
-        const uri = vscode.Uri.file(path.join(root, "vault"));
+        const uri = vscode.Uri.file(path.join(root.name, "vault"));
         return [{ uri, name: "vault", index: 0 }];
       };
       ctx.workspaceState
         .update(WORKSPACE_STATE.WS_VERSION, "0.0.1")
         .then(() => {
           new SetupWorkspaceCommand()
-            .execute({ rootDirRaw: root, skipOpenWs: true })
+            .execute({ rootDirRaw: root.name, skipOpenWs: true })
             .then(() => {
               const initSettings = expectedSettings({ settings: { bond: 42 } });
               fs.writeJSONSync(
-                path.join(root, DendronWorkspace.DENDRON_WORKSPACE_FILE),
+                path.join(root.name, DendronWorkspace.DENDRON_WORKSPACE_FILE),
                 initSettings
               );
               _activate(ctx);
@@ -192,7 +194,7 @@ suite("startup", function () {
             VSCodeUtils.getVersionFromPkg()
           );
           const config = fs.readJSONSync(
-            path.join(root, DendronWorkspace.DENDRON_WORKSPACE_FILE)
+            path.join(root.name, DendronWorkspace.DENDRON_WORKSPACE_FILE)
           );
           const settings = expectedSettings();
           settings.settings.bond = 42;
@@ -209,13 +211,13 @@ suite("startup", function () {
         });
       };
       _activate(ctx);
-      fs.ensureDirSync(root);
+      fs.ensureDirSync(root.name);
       await new ChangeWorkspaceCommand().execute({
-        rootDirRaw: root,
+        rootDirRaw: root.name,
         skipOpenWS: true,
       });
       const config = fs.readJSONSync(
-        path.join(root, DendronWorkspace.DENDRON_WORKSPACE_FILE)
+        path.join(root.name, DendronWorkspace.DENDRON_WORKSPACE_FILE)
       );
       assert.deepEqual(config, expectedSettings({ folders: [{ path: "." }] }));
       HistoryService.instance().subscribe(
@@ -228,37 +230,6 @@ suite("startup", function () {
   });
 });
 
-// suite("existing install", function () {
-//   const timeout = 60 * 1000;
-//   let root: string;
-//   let ws: DendronWorkspace;
-
-//   beforeEach(async function () {
-//     root = FileTestUtils.tmpDir("/tmp/dendron", true);
-//   });
-
-//   afterEach(async () => {
-//     fs.removeSync(root);
-//   });
-
-//   describe("sanity", function () {
-//     vscode.window.showInformationMessage("Start sanity test on new.");
-//     this.timeout(timeout);
-
-//     test("new install", function (done) {
-//       vscode.window.showInformationMessage("waiting");
-//       HistoryService.instance().subscribe("extension", async (event: HistoryEvent) => {
-//         vscode.window.showInformationMessage(`got activate`);
-//         ws = DendronWorkspace.instance();
-//         await ws.setupWorkspace(root, {skipOpenWS: true});
-//         await ws.reloadWorkspace(root);
-//         vscode.window.showInformationMessage(`setup ws`);
-//         assert.ok("done");
-//         done();
-//       });
-//     });
-//   });
-// });
 
 // suite("Extension Test Suite", function () {
 //   let root: string;
@@ -267,7 +238,6 @@ suite("startup", function () {
 //   let ws: DendronWorkspace;
 
 //   beforeEach(async function () {
-//     root = FileTestUtils.tmpDir("/tmp/dendron", true);
 
 //     const ctx = createMockContext(root);
 

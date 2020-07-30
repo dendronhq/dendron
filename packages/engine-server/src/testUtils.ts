@@ -1,4 +1,4 @@
-import { EngineTestUtils, LernaTestUtils } from "@dendronhq/common-server";
+import { EngineTestUtils, LernaTestUtils, FileTestUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import FileStorage from "./drivers/file/store";
 
@@ -20,7 +20,6 @@ export const FOO_SCHEMA = {
 };
 
 export const SCHEMA_FOO_PARENT_ID = "root.schema";
-export const TMP_DATA_DIR = "/tmp/dendron-tmp";
 
 export function createFileStorage(root: string) {
   // TODO: update
@@ -32,7 +31,7 @@ export function createFileStorage(root: string) {
 export function setupTmpDendronDir(opts?: { copyFixtures?: boolean }): string {
   return EngineTestUtils.setupStoreDir(
     LernaTestUtils.getFixturesDir("store"),
-    TMP_DATA_DIR,
+    FileTestUtils.tmpDir().name,
     opts
   );
 }

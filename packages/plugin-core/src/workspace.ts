@@ -80,6 +80,9 @@ export class DendronWorkspace {
     return vscode.workspace.workspaceFolders;
   }
 
+  /**
+   * Currently, this is a check to see if rootDir is defined in settings
+   */
   static isActive(): boolean {
     return !_.isUndefined(DendronWorkspace.rootDir());
   }
@@ -100,7 +103,7 @@ export class DendronWorkspace {
   public version: string;
   private disposableStore: DisposableStore;
   private history: HistoryService;
-  public config: DendronConfig;
+  public config?: DendronConfig;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -113,11 +116,6 @@ export class DendronWorkspace {
     this.disposableStore = new DisposableStore();
     this.history = HistoryService.instance();
     this.version = this._getVersion();
-    const rootDir = DendronWorkspace.rootDir();
-    if (!rootDir) {
-      throw `rootDir not set`
-    }
-    this.config = DConfig.getOrCreate(rootDir);
     if (!opts.skipSetup) {
       this._setupCommands();
     }
@@ -469,6 +467,11 @@ export class DendronWorkspace {
   async activateWorkspace() {
     const ctx = "activateWorkspace";
     let workspaceFolders: readonly vscode.WorkspaceFolder[] = [];
+    const rootDir = DendronWorkspace.rootDir();
+    if (!rootDir) {
+      throw `rootDir not set`
+    }
+    this.config = DConfig.getOrCreate(rootDir);
 
     const wsFolders = DendronWorkspace.workspaceFolders();
     if (_.isUndefined(wsFolders) || _.isEmpty(wsFolders)) {

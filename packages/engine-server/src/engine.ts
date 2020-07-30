@@ -68,7 +68,6 @@ function createFuse<T>(
 
 type DendronEngineOpts = {
   root: string;
-  cacheDir?: string;
   forceNew?: boolean;
   store?: DEngineStore;
   mode?: DEngineMode;
@@ -104,8 +103,6 @@ export class DendronEngine implements DEngine {
         forceNew: false,
         store: new FileStorage({ root, logger: opts?.logger }),
         root,
-        // TODO: remove
-        cacheDir: "/tmp/dendronCache",
         mode: "fuzzy",
         logger: createLogger("DEngine"),
       });

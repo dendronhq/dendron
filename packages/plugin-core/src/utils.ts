@@ -78,7 +78,7 @@ export class VSCodeUtils {
     if (!_MOCK_CONTEXT) {
       const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
       _MOCK_CONTEXT = {
-        logPath: "/tmp/dendron-integ/",
+        logPath: FileTestUtils.tmpDir().name,
         subscriptions: [],
         extensionPath: pkgRoot,
         globalState: VSCodeUtils.createMockState({
@@ -87,8 +87,8 @@ export class VSCodeUtils {
         workspaceState: VSCodeUtils.createMockState({}),
         extensionUri: vscode.Uri.file(pkgRoot),
         environmentVariableCollection: {} as any,
-        storagePath: "/tmp/dendron-integ-storage/",
-        globalStoragePath: "/tmp/dendron-integ-storage-global/",
+        storagePath: FileTestUtils.tmpDir().name,
+        globalStoragePath: FileTestUtils.tmpDir().name,
         asAbsolutePath: {} as any, //vscode.Uri.file(wsPath)
       } as vscode.ExtensionContext;
     }

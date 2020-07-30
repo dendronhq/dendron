@@ -4,10 +4,15 @@ import matter from "gray-matter";
 import _ from "lodash";
 import path from "path";
 import YAML from "yamljs";
+import tmp, { DirResult } from "tmp";
 
 export function appendUUID(fname: string) {
   return `${fname}-${genUUID()}`;
 }
+export { DirResult };
+// eslint-disable-next-line no-undef
+
+tmp.setGracefulCleanup();
 
 export class EngineTestUtils {
   static setupStoreDir(
@@ -72,12 +77,8 @@ export class FileTestUtils {
     fs.copySync(from, to);
   }
 
-  static tmpDir(base: string, skipCreate?: boolean) {
-    const dirPath = appendUUID(base);
-    if (!skipCreate) {
-      fs.ensureDirSync(dirPath);
-      fs.emptyDirSync(dirPath);
-    }
+  static tmpDir(): DirResult {
+    const dirPath = tmp.dirSync();
     return dirPath;
   }
 

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 if [[ -d ./build ]]; then
     echo "pulling template..."
     cd build/dendron-template
@@ -12,12 +13,28 @@ else
     cd dendron-template
 fi
 export LAST_COMMIT=$(git rev-parse HEAD)
-echo "copying template $LAST_COMMIT..."
-rm -Rf ../../assets/notes || true
-mkdir  ../../assets/notes
-cp -R vault ../../assets/notes/vault 
-echo $LAST_COMMIT > ../../assets/notes/LAST_COMMIT
-cd ../../assets/notes/vault
+echo "sync $LAST_COMMIT..."
+
+rm -rf ../../assets/dendronWS || true
+mkdir  ../../assets/dendronWS
+# TODO: figure out why --delete option doesn't work
+rsync -av * ../../assets/dendronWS/ --exclude .git --exclude package.json --exclude CNAME --exclude scripts --exclude LICENSE  --exclude dendron.code-workspace --exclude docs/notes
+
+echo $LAST_COMMIT > ../../assets/LAST_COMMIT
+cd ../../assets/dendronWS
 git init 
 git add .
 git commit -m "initial commit"
+
+
+# echo "copy notes..."
+# mkdir  ../../assets/dendronWS/notes
+# cp -R vault ../../assets/dendronWS/notes/vault 
+
+# echo "copy docs..."
+# rm -Rf ../../assets/docs || true
+# mkdir  ../../assets/docs
+# cp -R docs/Gemfile ../../assets/docs
+# cp -R docs/Gemfile.lock ../../assets/docs
+# cp -R docs/_config.yml ../../assets/docs
+# cp -R docs/assets ../../assets/docs

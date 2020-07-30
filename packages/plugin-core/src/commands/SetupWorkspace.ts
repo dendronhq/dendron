@@ -92,8 +92,10 @@ export class SetupWorkspaceCommand extends BaseCommand<
 
     // make sure root dir exists
     fs.ensureDirSync(rootDir);
-    const src = vscode.Uri.joinPath(ws.extensionAssetsDir, "notes");
-    fs.copySync(src.fsPath, rootDir);
+    const dendronWSTemplate = vscode.Uri.joinPath(ws.extensionAssetsDir, "dendronWS");
+    //const notesSrc = vscode.Uri.joinPath(ws.extensionAssetsDir, "notes");
+
+    fs.copySync(dendronWSTemplate.fsPath, rootDir);
     WorkspaceConfig.write(rootDir);
     if (!opts.skipOpenWs) {
       vscode.window.showInformationMessage("opening dendron workspace");

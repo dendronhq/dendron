@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.2](https://github.com/dendronhq/dendron/compare/v0.4.1...v0.4.2) (2020-07-30)
+
+### Features
+
+- add doctor command ([d4fa71c](https://github.com/dendronhq/dendron/commit/d4fa71cd839782587d47a3ba1b0f7e89742e7ffe))
+- backfill command ([91b2193](https://github.com/dendronhq/dendron/commit/91b21932aec72b111e1e9d458a8c7c3817c68bbe))
+- backfill ids when running doctor ([3705234](https://github.com/dendronhq/dendron/commit/37052342de88107f928b16595587492e601c9831))
+- build pod command with github pages support ([e063732](https://github.com/dendronhq/dendron/commit/e063732d1ff082dd8520a479926e7ceb1b0893ab))
+- setup initial workspace to be ready for publishing ([e1242b4](https://github.com/dendronhq/dendron/commit/e1242b494cc91b3284053b54dccecc4e4686ab7d))
+
+### Performance Improvements
+
+- add timing data ([ffef382](https://github.com/dendronhq/dendron/commit/ffef38294cd04fac6d6784865c43c7fa8af62abd))
+
 ## [0.4.1](https://github.com/dendronhq/dendron/compare/v0.4.0...v0.4.1) (2020-07-26)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

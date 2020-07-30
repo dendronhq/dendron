@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.2](https://github.com/dendronhq/dendron/compare/v0.4.1...v0.4.2) (2020-07-30)
+
+### Bug Fixes
+
+- stub nodes should keep parents when deleted ([f32f291](https://github.com/dendronhq/dendron/commit/f32f291bc7a1ddd6c542483730e2db74b400dafa))
+
+### Features
+
+- build pod command with github pages support ([e063732](https://github.com/dendronhq/dendron/commit/e063732d1ff082dd8520a479926e7ceb1b0893ab))
+
 ## 0.4.0 (2020-07-26)
 
 **Note:** Version bump only for package @dendronhq/engine-server

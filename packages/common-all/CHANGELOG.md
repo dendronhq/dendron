@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.2](https://github.com/dendronhq/dendron/compare/v0.4.1...v0.4.2) (2020-07-30)
+
+### Bug Fixes
+
+- root should have no parent ([bab72fd](https://github.com/dendronhq/dendron/commit/bab72fd438c541673c128caf96174d43b8eaa43a))
+
+### Features
+
+- build pod command with github pages support ([e063732](https://github.com/dendronhq/dendron/commit/e063732d1ff082dd8520a479926e7ceb1b0893ab))
+- build-site command ([8e5ca80](https://github.com/dendronhq/dendron/commit/8e5ca801237686d70f5955c461049010480837be))
+- overwrite fields in backfill ([af504f4](https://github.com/dendronhq/dendron/commit/af504f44d73910e8687367bc203b613d774a039c))
+
 ## 0.4.0 (2020-07-26)
 
 **Note:** Version bump only for package @dendronhq/common-all

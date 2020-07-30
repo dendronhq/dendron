@@ -1,4 +1,3 @@
-import { genUUID } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import matter from "gray-matter";
 import _ from "lodash";
@@ -6,9 +5,6 @@ import path from "path";
 import YAML from "yamljs";
 import tmp, { DirResult } from "tmp";
 
-export function appendUUID(fname: string) {
-  return `${fname}-${genUUID()}`;
-}
 export { DirResult };
 // eslint-disable-next-line no-undef
 
@@ -17,14 +13,10 @@ tmp.setGracefulCleanup();
 export class EngineTestUtils {
   static setupStoreDir(
     fixturesDir: string,
-    storeDir: string,
+    dirPath: string,
     opts?: { copyFixtures?: boolean }
   ) {
     const cleanOpts = _.defaults(opts, { copyFixtures: true });
-    const dirPath = appendUUID(storeDir);
-    // eslint-disable-next-line no-undef
-    fs.ensureDirSync(dirPath);
-    fs.emptyDirSync(dirPath);
     if (cleanOpts.copyFixtures) {
       fs.copySync(fixturesDir, dirPath);
     }

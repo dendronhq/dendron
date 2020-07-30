@@ -63,6 +63,15 @@ export function cleanFileName(
   return name;
 }
 
+export function readYAML(fpath: string): any {
+   return YAML.load(fpath);
+}
+
+export function writeYAML(fpath: string, data: any) {
+  const out = YAML.stringify(data, undefined, 4);
+  return fs.writeFileSync(fpath, out);
+}
+
 export function fileMeta2Node(body: string, meta: FileMeta): Note {
   const title = meta.name;
   // read id from file or generate one based on thte tile

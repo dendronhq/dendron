@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-expressions */
-import { DendronEngine } from "@dendronhq/engine-server";
+import { DConfig, DendronEngine } from "@dendronhq/engine-server";
 import yargs from "yargs";
 import { BackfillCliOpts, BackfillCommand } from "../src/commands/backfill";
-import { BuildSiteCliOpts, BuildSiteCommand, DendronSiteConfig } from "../src/commands/build-site";
+import { BuildSiteCliOpts, BuildSiteCommand } from "../src/commands/build-site";
 
 yargs
   .command<BackfillCliOpts>(
@@ -39,10 +39,7 @@ yargs
     },
     async args => {
       const { vault, dendronRoot } = args;
-      const config: DendronSiteConfig = {
-        noteRoot: "root",
-        siteRoot: "./docs-dev"
-      };
+      const config = DConfig.getOrCreate(dendronRoot).site;
       const cmd = new BuildSiteCommand();
       const engine = DendronEngine.getOrCreateEngine({ root: vault });
       await engine.init();

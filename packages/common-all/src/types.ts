@@ -141,7 +141,7 @@ export type NodeWriteOpts = {
    * Write stubs
    * default: false
    */
-  writeStub?: boolean
+  writeStub?: boolean;
 } & Partial<UpdateNodesOpts>;
 
 export type EngineDeleteOpts = {
@@ -216,7 +216,7 @@ export type DEngineStoreWriteOpts = {
   /**
    * See DEngineStoreWriteOpts.writeStub
    */
-  writeStub?: boolean
+  writeStub?: boolean;
 };
 
 export interface DEngineStore<T = DNodeData, O = any> {
@@ -313,3 +313,12 @@ export interface DEngine {
   //  */
   // writeBatch: (scope: Scope, nodes: DNodeDict) => Promise<void>;
 }
+
+export type DendronConfig = {
+  site: DendronSiteConfig;
+};
+
+export type DendronSiteConfig = {
+  noteRoot: string;
+  siteRoot: string;
+};

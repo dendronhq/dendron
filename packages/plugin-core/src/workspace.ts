@@ -1,12 +1,12 @@
 import {
-  DEngine,
+  DendronConfig, DEngine,
   DNodeUtils,
   getStage,
   Note,
   NoteUtils
 } from "@dendronhq/common-all";
 import { cleanName, mdFile2NodeProps } from "@dendronhq/common-server";
-import { DendronEngine } from "@dendronhq/engine-server";
+import { DConfig, DendronEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import moment from "moment";
@@ -14,6 +14,7 @@ import open from "open";
 import path, { posix } from "path";
 import * as vscode from "vscode";
 import { ChangeWorkspaceCommand } from "./commands/ChangeWorkspace";
+import { CreateJournalCommand } from "./commands/CreateJournal";
 import { ImportPodCommand } from "./commands/ImportPod";
 import { OpenLogsCommand } from "./commands/OpenLogs";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
@@ -38,7 +39,7 @@ import {
   VSCodeUtils
 } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
-import { CreateJournalCommand } from "./commands/CreateJournal";
+import { BuildPodCommand } from "./commands/BuildPod";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -60,6 +61,14 @@ export class DendronWorkspace {
     return vscode.workspace.getConfiguration();
   }
 
+  static rootDir(): string|undefined {
+    const rootDir = DendronWorkspace.configuration().get<string>("dendron.rootDir");
+    if (rootDir) {
+      return resolvePath(rootDir, path.dirname(DendronWorkspace.workspaceFile().fsPath));
+    }
+    return rootDir;
+  }
+
   static workspaceFile(): vscode.Uri {
     if (!vscode.workspace.workspaceFile) {
       throw Error("no workspace file");
@@ -72,12 +81,7 @@ export class DendronWorkspace {
   }
 
   static isActive(): boolean {
-    const conf = DendronWorkspace.configuration().get("dendron.rootDir");
-    if (conf) {
-      return true;
-    } else {
-      return false;
-    }
+    return !_.isUndefined(DendronWorkspace.rootDir());
   }
 
   static async resetConfig(globalState: vscode.Memento) {
@@ -96,6 +100,7 @@ export class DendronWorkspace {
   public version: string;
   private disposableStore: DisposableStore;
   private history: HistoryService;
+  public config: DendronConfig;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -108,6 +113,11 @@ export class DendronWorkspace {
     this.disposableStore = new DisposableStore();
     this.history = HistoryService.instance();
     this.version = this._getVersion();
+    const rootDir = DendronWorkspace.rootDir();
+    if (!rootDir) {
+      throw `rootDir not set`
+    }
+    this.config = DConfig.getOrCreate(rootDir);
     if (!opts.skipSetup) {
       this._setupCommands();
     }
@@ -462,6 +472,16 @@ export class DendronWorkspace {
         async () => {
           await new UpgradeSettingsCommand().execute({
             settingOpts: { force: true },
+          });
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.BUILD_POD,
+        async () => {
+          await new BuildPodCommand().execute({
           });
         }
       )

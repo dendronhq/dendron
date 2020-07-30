@@ -1,6 +1,8 @@
 /* eslint-disable no-loop-func */
 import _ from "lodash";
 import minimatch from "minimatch";
+import moment from "moment";
+import { URI } from "vscode-uri";
 import YAML from "yamljs";
 import { DendronError } from "./error";
 import {
@@ -24,8 +26,6 @@ import {
   SchemaRawProps,
 } from "./types";
 import { genUUID } from "./uuid";
-import { URI } from "vscode-uri";
-import moment from "moment";
 
 const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
@@ -93,8 +93,14 @@ export class DNodeUtils {
    * - pullCustomUp: roll custom attributes to top level, default: false
    * @param opts
    */
-  static getMeta(note: Note, opts?: { pullCustomUp?: boolean }) {
-    const { pullCustomUp } = _.defaults(opts || {}, { pullCustomUp: false });
+  static getMeta(
+    note: Note,
+    opts?: { pullCustomUp?: boolean; ignoreNullParent?: boolean }
+  ) {
+    const { pullCustomUp, ignoreNullParent } = _.defaults(opts || {}, {
+      pullCustomUp: false,
+      ignoreNullParent: false,
+    });
     let seed = {};
     let fields = [
       "id",
@@ -111,7 +117,10 @@ export class DNodeUtils {
       fields = _.reject(fields, (ent) => ent === "custom");
     }
     const meta = { ...seed, ..._.pick(note, [...fields]) };
-    const family = _.pick(note.toRawProps(), ["parent", "children"]);
+    const family = _.pick(note.toRawProps(true, { ignoreNullParent }), [
+      "parent",
+      "children",
+    ]);
     return { ...meta, ...family };
   }
 
@@ -367,7 +376,11 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     };
   }
 
-  toRawProps(hideBody?: boolean): DNodeRawProps<T> {
+  toRawProps(
+    hideBody?: boolean,
+    opts?: { ignoreNullParent: boolean }
+  ): DNodeRawProps<T> {
+    const { ignoreNullParent } = _.defaults(opts, { ignoreNullParent: false });
     const props = _.pick(this, [
       "id",
       "title",
@@ -390,10 +403,17 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     } else if (this.id === "root") {
       parent = null;
     } else {
+      // eslint-disable-next-line no-lonely-if
       if (_.isNull(this.parent)) {
-        throw Error(`${props.fname} has no parent node`);
+        // parent deleted when publishing site
+        if (ignoreNullParent) {
+          parent = null;
+        } else {
+          throw Error(`${props.fname} has no parent node`);
+        }
+      } else {
+        parent = this.parent.id;
       }
-      parent = this.parent.id;
     }
     const children = this.children.map((c) => c.id);
     return { ...props, parent, children };

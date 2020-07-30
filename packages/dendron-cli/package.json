@@ -15,8 +15,8 @@
   "files": [
     "lib"
   ],
-  "main": "lib/index",
-  "types": "lib/index",
+  "main": "lib/src/index",
+  "types": "lib/src/index",
   "scripts": {
     "clean": "rimraf lib && rimraf coverage",
     "format": "prettier --ignore-path='../../.prettierignore' --write .",

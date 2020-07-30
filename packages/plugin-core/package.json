@@ -99,8 +99,8 @@
         "title": "Dendron: Upgrade Settings"
       },
       {
-        "command": "dendron.refactorHierarchy",
-        "title": "Dendron: Refactor Hierarchy (experimental)"
+        "command": "dendron.buildPod",
+        "title": "Dendron: Build Pod"
       }
     ],
     "keybindings": [
@@ -168,6 +168,7 @@
   "dependencies": {
     "@dendronhq/common-all": "^0.4.0",
     "@dendronhq/common-server": "^0.4.0",
+    "@dendronhq/dendron-cli": "^0.0.0",
     "@dendronhq/engine-server": "^0.4.0",
     "clipboardy": "^2.3.0",
     "execa": "^4.0.2",

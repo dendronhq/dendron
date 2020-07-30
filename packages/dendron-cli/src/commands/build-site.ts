@@ -1,4 +1,4 @@
-import { DEngine, DNodeUtils, Note } from "@dendronhq/common-all";
+import { DEngine, DNodeUtils, Note, DendronSiteConfig } from "@dendronhq/common-all";
 import { resolvePath } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import matter from "gray-matter";
@@ -16,11 +16,6 @@ type CommandCommonOpts = {
 };
 
 type CommandOutput = void;
-
-export type DendronSiteConfig = {
-  noteRoot: string;
-  siteRoot: string;
-};
 
 type DendronJekyllProps = {
   hpath: string;
@@ -61,7 +56,7 @@ function note2JekyllMdFile(
   note: Note,
   opts: { notesDir: string; engine: DEngine } & DendronSiteConfig
 ) {
-  const meta = DNodeUtils.getMeta(note, { pullCustomUp: true });
+  const meta = DNodeUtils.getMeta(note, { pullCustomUp: true, ignoreNullParent: true });
   const jekyllProps: DendronJekyllProps = {
     hpath: note.path
   };
@@ -101,7 +96,7 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     const out = [];
 
     // delete parent from the root
-    delete root['parent'];
+    root['parent'] = null;
     root.custom.nav_order = 0;
     root.title = _.capitalize(root.title);
 
@@ -112,6 +107,7 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
       );
       node.children.forEach(n => nodes.push(n as Note));
     }
+
     // TODO: need to rewrite links before this is ready
     // const assetsDir = "assets";
     // const noteAssetsDir = path.join(notesDirPath, assetsDir);

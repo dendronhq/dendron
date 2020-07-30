@@ -21,6 +21,8 @@ export const DENDRON_COMMANDS = {
   // DEV commands
   RESET_CONFIG: "dendron.dev.resetConfig",
   OPEN_LOGS: "dendron.dev.openLogs",
+  // publish
+  BUILD_POD: "dendron.buildPod",
 };
 
 export const DENDRON_CHANNEL_NAME = "Dendron";

@@ -24,7 +24,7 @@
   "types": "lib/src/index",
   "scripts": {
     "clean": "rimraf lib && rimraf coverage",
-    "format": "prettier --ignore-path='../../.prettierignore' --write .",
+    "format": "echo foo",
     "lint": "echo stub",
     "prepublishOnly": "npm run build",
     "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
@@ -50,7 +50,7 @@
     "@types/fs-extra": "^9.0.1",
     "@types/jest": "^23.3.3",
     "@types/lodash": "^4.14.158",
-    "@types/node": "^10.11.4",
+    "@types/node": "13.11.0",
     "@types/yargs": "^15.0.5",
     "coveralls": "^3.0.2",
     "jest": "^23.6.0",

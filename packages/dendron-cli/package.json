@@ -3,11 +3,16 @@
   "version": "0.4.2",
   "description": "dendron-cli",
   "license": "GPLv3",
-  "repository": "",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/dendronhq/dendron.git",
+    "directory": "packages/common-server"
+  },
   "author": {
-    "name": "",
-    "email": "",
-    "url": ""
+    "name": "Kevin Lin",
+    "email": "kevin@thence.io",
+    "url": "https://kevinslin.com",
+    "organization": true
   },
   "keywords": [
     ""

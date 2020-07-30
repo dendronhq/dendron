@@ -13,11 +13,10 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Features
 
-- add doctor command ([d4fa71c](https://github.com/dendronhq/dendron/commit/d4fa71cd839782587d47a3ba1b0f7e89742e7ffe))
-- backfill command ([91b2193](https://github.com/dendronhq/dendron/commit/91b21932aec72b111e1e9d458a8c7c3817c68bbe))
-- backfill ids when running doctor ([3705234](https://github.com/dendronhq/dendron/commit/37052342de88107f928b16595587492e601c9831))
-- build pod command with github pages support ([e063732](https://github.com/dendronhq/dendron/commit/e063732d1ff082dd8520a479926e7ceb1b0893ab))
-- build-site command ([8e5ca80](https://github.com/dendronhq/dendron/commit/8e5ca801237686d70f5955c461049010480837be))
+- add doctor command ([d4fa71c](https://github.com/dendronhq/dendron/commit/d4fa71cd839782587d47a3ba1b0f7e89742e7ffe)) ([docs](https://www.dendron.so/notes/eea2b078-1acc-4071-a14e-18299fc28f47.html#doctor))
+- backfill command ([91b2193](https://github.com/dendronhq/dendron/commit/91b21932aec72b111e1e9d458a8c7c3817c68bbe))  
+- backfill ids when running doctor ([3705234](https://github.com/dendronhq/dendron/commit/37052342de88107f928b16595587492e601c9831)) 
+- publishing vaults to github ([e063732](https://github.com/dendronhq/dendron/commit/e063732d1ff082dd8520a479926e7ceb1b0893ab)) ([docs](https://www.dendron.so/notes/73d395c9-5041-4d0d-9db7-080d9586136e.html))
 - convert wiki-links to markdown links while building site ([f451be4](https://github.com/dendronhq/dendron/commit/f451be4db437a9cd6c290019fd5d24fe4fd9e907))
 - overwrite fields in backfill ([af504f4](https://github.com/dendronhq/dendron/commit/af504f44d73910e8687367bc203b613d774a039c))
 - setup initial workspace to be ready for publishing ([e1242b4](https://github.com/dendronhq/dendron/commit/e1242b494cc91b3284053b54dccecc4e4686ab7d))

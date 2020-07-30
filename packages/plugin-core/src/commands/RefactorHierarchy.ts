@@ -54,8 +54,10 @@ export class RefactorHierarchyCommand extends BaseCommand<
       let [
         src,
         prefix,
+        // @ts-ignore
         _replace,
         suffix,
+        // @ts-ignore
         ..._rest
       ] = matchObj as RegExpExecArray;
       const dst = [prefix, replacer, suffix]

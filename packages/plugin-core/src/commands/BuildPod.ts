@@ -41,8 +41,13 @@ export class BuildPodCommand extends BaseCommand<
     const {} = _.defaults(opts, {});
     const ws = DendronWorkspace.instance();
     // TODO: HACK, need to actually track changes
-    const engine = await new ReloadIndexCommand().execute({root: ws.engine.props.root});
-    const config = ws.config.site;
+    const engine = await new ReloadIndexCommand().execute({
+      root: ws.engine.props.root,
+    });
+    const config = ws.config?.site;
+    if (_.isUndefined(config)) {
+      throw Error("no config found");
+    }
     const cmd = new BuildSiteCommand();
     cmd.L = this.L;
     const dendronRoot = DendronWorkspace.rootDir();

@@ -15,7 +15,7 @@ type CommandOpts = {};
 type CommandInput = {};
 
 type CommandOutput = {
-    data: Finding[]
+  data: Finding[];
 };
 
 export class DoctorCommand extends BaseCommand<
@@ -50,18 +50,24 @@ export class DoctorCommand extends BaseCommand<
     if (_.isUndefined(rootDir)) {
       throw Error("rootDir undefined");
     }
-    const siteRoot = path.join(rootDir, ws.config.site.siteRoot);
+
+    const config = ws?.config;
+    if (_.isUndefined(config)) {
+      throw Error("no config found");
+    }
+    const siteRoot = path.join(rootDir, config.site.siteRoot);
     const engine = ws.engine;
-    await new BackfillCommand().execute({engine})
+    await new BackfillCommand().execute({ engine });
     if (!fs.existsSync(siteRoot)) {
-    const f: Finding = { issue: "no siteRoot found" };
-      const dendronWSTemplate = Uri.joinPath(ws.extensionAssetsDir, "dendronWS").fsPath;
+      const f: Finding = { issue: "no siteRoot found" };
+      const dendronWSTemplate = Uri.joinPath(ws.extensionAssetsDir, "dendronWS")
+        .fsPath;
       const dendronSiteRoot = path.join(dendronWSTemplate, "docs");
       fs.copySync(dendronSiteRoot, siteRoot);
-      f.fix = `created siteRoot at ${siteRoot}`
+      f.fix = `created siteRoot at ${siteRoot}`;
       findings.push(f);
     }
-    return {data: findings}
+    return { data: findings };
     // check for docs folrder
   }
 }

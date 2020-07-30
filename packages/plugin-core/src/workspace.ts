@@ -286,59 +286,6 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.CREATE_RECORD_NOTE,
-        async () => {
-          const ctx = DENDRON_COMMANDS.CREATE_RECORD_NOTE;
-          const defaultNameConfig = "Y-MM-DD-HHmmss";
-          const journalNamespace = "record";
-          const noteName = moment().format(defaultNameConfig);
-          const editorPath =
-            vscode.window.activeTextEditor?.document.uri.fsPath;
-          if (!editorPath) {
-            throw Error("not currently in a note");
-          }
-          const cNoteFname = posix.basename(editorPath, ".md");
-          const currentDomain = DNodeUtils.domainName(cNoteFname);
-          let fname = `${currentDomain}.${journalNamespace}.${noteName}`;
-          const title = await vscode.window.showInputBox({
-            prompt: "Title",
-            ignoreFocusOut: true,
-            value: fname,
-          });
-          if (title) {
-            fname = `${cleanName(title)}`;
-          }
-          const node = new Note({ fname, title });
-          const uri = node2Uri(node);
-          const historyService = HistoryService.instance();
-          historyService.add({ source: "engine", action: "create", uri });
-          await DendronEngine.getOrCreateEngine().write(node, {
-            newNode: true,
-            parentsAsStubs: true,
-          });
-
-          const cNote = _.find(this.engine.notes, { fname: cNoteFname });
-          if (!cNote) {
-            throw Error("cNote undefined");
-          }
-          const cNoteNew = new Note({
-            ...mdFile2NodeProps(editorPath),
-            parent: cNote.parent,
-            children: cNote.children,
-            id: cNote.id,
-          });
-          NoteUtils.addBackLink(cNoteNew, node);
-          await this.engine.write(cNoteNew);
-
-          // done
-          this.L.info({ ctx: `${ctx}:write:done`, uri });
-          await vscode.window.showTextDocument(uri);
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
       vscode.commands.registerCommand(DENDRON_COMMANDS.CHANGE_WS, async () => {
 
         const cmd = new ChangeWorkspaceCommand();

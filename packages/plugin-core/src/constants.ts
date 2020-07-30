@@ -12,7 +12,7 @@ export const DENDRON_COMMANDS = {
   RELOAD_WS: "dendron.reloadWS",
   CREATE_SCRATCH_NOTE: "dendron.createScratchNote",
   CREATE_JOURNAL_NOTE: "dendron.createJournalNote",
-  CREATE_RECORD_NOTE: "dendron.createRecordNote",
+  // CREATE_RECORD_NOTE: "dendron.createRecordNote",
   OPEN_LINK: "dendron.openLink",
   IMPORT_POD: "dendron.importPod",
   UPGRADE_SETTINGS: "dendron.upgradeSettings",

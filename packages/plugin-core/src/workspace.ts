@@ -40,6 +40,7 @@ import {
 } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
 import { BuildPodCommand } from "./commands/BuildPod";
+import { DoctorCommand } from "./commands/Doctor";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -482,6 +483,22 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.BUILD_POD,
         async () => {
           await new BuildPodCommand().execute({
+          });
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.DOCTOR,
+        async () => {
+          const findings = await new DoctorCommand().execute({
+          });
+          if (_.isEmpty(findings)) {
+            vscode.window.showInformationMessage(`no issues found`);
+          }
+          findings.data.forEach(f => {
+            vscode.window.showInformationMessage(`issue: ${f.issue}. fix: ${f.fix}`);
           });
         }
       )

@@ -79,6 +79,10 @@
         "title": "Dendron: Reload Index"
       },
       {
+        "command": "dendron.dev.doctor",
+        "title": "Dev:Dendron: Doctor"
+      },
+      {
         "command": "dendron.dev.resetConfig",
         "title": "Dev:Dendron: ResetConfig"
       },

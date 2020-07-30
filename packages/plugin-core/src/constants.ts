@@ -21,6 +21,7 @@ export const DENDRON_COMMANDS = {
   // DEV commands
   RESET_CONFIG: "dendron.dev.resetConfig",
   OPEN_LOGS: "dendron.dev.openLogs",
+  DOCTOR: "dendron.dev.doctor",
   // publish
   BUILD_POD: "dendron.buildPod",
 };

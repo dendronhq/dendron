@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.3](https://github.com/dendronhq/dendron/compare/v0.4.2...v0.4.3) (2020-07-30)
+
+### Bug Fixes
+
+- issue with journal names on windows ([d0bfe7f](https://github.com/dendronhq/dendron/commit/d0bfe7fb0288e8610fc4b177ee85697a8ebc3efe))
+
+### Features
+
+- publish local images when publishing site ([f60360d](https://github.com/dendronhq/dendron/commit/f60360d94b8149404032fc77cfa7556801768105))
+
 ## [0.4.2](https://github.com/dendronhq/dendron/compare/v0.4.1...v0.4.2) (2020-07-30)
 
 ### Features

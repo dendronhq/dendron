@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.3](https://github.com/dendronhq/dendron/compare/v0.4.2...v0.4.3) (2020-07-30)
+
+### Bug Fixes
+
+- logging bad nodes ([c013e00](https://github.com/dendronhq/dendron/commit/c013e00faff9d7a9cce7743020cb97507f826943))
+
 ## [0.4.2](https://github.com/dendronhq/dendron/compare/v0.4.1...v0.4.2) (2020-07-30)
 
 ### Bug Fixes

@@ -1,9 +1,9 @@
-import fs from "fs-extra";
 import { genUUID } from "@dendronhq/common-all";
-import _ from "lodash";
-import YAML from "yamljs";
-import path, { posix } from "path";
+import fs from "fs-extra";
 import matter from "gray-matter";
+import _ from "lodash";
+import path from "path";
+import YAML from "yamljs";
 
 export function appendUUID(fname: string) {
   return `${fname}-${genUUID()}`;
@@ -50,7 +50,7 @@ export class FileTestUtils {
 
   static getFixturesRoot(base: string) {
     const pkgRoot = FileTestUtils.getPkgRoot(base);
-    return posix.join(pkgRoot, "fixtures");
+    return path.join(pkgRoot, "fixtures");
   }
 
   static getPkgRoot(base: string, fname?: string): string {

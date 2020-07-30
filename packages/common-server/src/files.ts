@@ -11,7 +11,7 @@ import fs, { Dirent } from "fs";
 import matter from "gray-matter";
 import _ from "lodash";
 import minimatch from "minimatch";
-import path, { posix } from "path";
+import path from "path";
 import YAML from "yamljs";
 import os from "os";
 
@@ -52,8 +52,8 @@ export function cleanFileName(
 ): string {
   const cleanOpts = _.defaults(opts, { isDir: false });
   if (!cleanOpts.isDir) {
-    const { name: fname, dir } = posix.parse(name);
-    name = posix.join(dir, fname);
+    const { name: fname, dir } = path.parse(name);
+    name = path.join(dir, fname);
     name = name.replace(/\./g, "-");
   }
   // replace all names already in file name
@@ -232,6 +232,6 @@ export function resolvePath(filePath: string, root?: string): string {
     if (!root) {
       throw Error("can't use rel path without a workspace root set");
     }
-    return posix.join(root, filePath);
+    return path.join(root, filePath);
   }
 }

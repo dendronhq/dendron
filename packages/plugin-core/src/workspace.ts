@@ -2,19 +2,20 @@ import {
   DendronConfig, DEngine,
   DNodeUtils,
   getStage,
-  Note,
-  NoteUtils
+  Note
 } from "@dendronhq/common-all";
-import { cleanName, mdFile2NodeProps } from "@dendronhq/common-server";
+import { cleanName } from "@dendronhq/common-server";
 import { DConfig, DendronEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import moment from "moment";
 import open from "open";
-import path, { posix } from "path";
+import path from "path";
 import * as vscode from "vscode";
+import { BuildPodCommand } from "./commands/BuildPod";
 import { ChangeWorkspaceCommand } from "./commands/ChangeWorkspace";
 import { CreateJournalCommand } from "./commands/CreateJournal";
+import { DoctorCommand } from "./commands/Doctor";
 import { ImportPodCommand } from "./commands/ImportPod";
 import { OpenLogsCommand } from "./commands/OpenLogs";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
@@ -39,8 +40,6 @@ import {
   VSCodeUtils
 } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
-import { BuildPodCommand } from "./commands/BuildPod";
-import { DoctorCommand } from "./commands/Doctor";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -356,7 +355,7 @@ export class DendronWorkspace {
             this.L.error({ ctx, msg: `can't open uri: ${uri}` });
           }
           vscode.window.showInformationMessage(
-            `${posix.basename(fsPath)} deleted`
+            `${path.basename(fsPath)} deleted`
           );
         }
       )
@@ -511,7 +510,7 @@ export class DendronWorkspace {
       this.fsWatcher.onDidCreate(async (uri: vscode.Uri) => {
         const ctx = "fsWatcher.onDidCreate";
         this.L.info({ ctx, uri });
-        const fname = posix.basename(uri.fsPath, ".md");
+        const fname = path.basename(uri.fsPath, ".md");
         const note = new Note({ fname });
 
         // check if ignore
@@ -544,7 +543,7 @@ export class DendronWorkspace {
       this.fsWatcher.onDidDelete(async (uri: vscode.Uri) => {
         const ctx = "fsWatcher.onDidDelete";
         this.L.info({ ctx, uri });
-        const fname = posix.basename(uri.fsPath, ".md");
+        const fname = path.basename(uri.fsPath, ".md");
 
         // check if we should ignore
         const recentEvents = HistoryService.instance().lookBack();

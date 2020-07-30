@@ -1,17 +1,18 @@
+/* eslint-disable func-names */
 import {
   DNodeRaw,
   DNodeUtils,
   genUUID,
   Note,
   NoteData,
-  NoteRawProps,
+  NoteRawProps
 } from "@dendronhq/common-all";
-import { cleanFileName, cleanName } from "@dendronhq/common-server";
+import { cleanFileName } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import matter from "gray-matter";
 import klaw, { Item } from "klaw";
 import _ from "lodash";
-import { posix } from "path";
+import path from "path";
 import through2 from "through2";
 import { BasePod } from "./base";
 
@@ -27,7 +28,7 @@ type DItem = Item & {
 type HierarichalDict = { [k: string]: NoteRawProps[] };
 
 const toMarkdownLink = (assetPath: string, opts?: { name?: string }) => {
-  const name = opts?.name ? opts.name : posix.parse(assetPath).name;
+  const name = opts?.name ? opts.name : path.parse(assetPath).name;
   return `- [${name}](${assetPath})`;
 };
 
@@ -51,8 +52,7 @@ export class FilePod extends BasePod {
         {
           fname,
           stub,
-        },
-        { returnExtra: true }
+        }
       );
       if (item?.body) {
         noteProps.body = item.body;
@@ -64,19 +64,19 @@ export class FilePod extends BasePod {
         // move entries over
         // TODO: don't hardcode assets
         const assetDirName = "assets";
-        const assetDir = posix.join(this.engine.props.root, assetDirName);
+        const assetDir = path.join(this.engine.props.root, assetDirName);
         fs.ensureDirSync(assetDir);
         const mdLinks: string[] = [];
         item.entries.map((_item) => {
           const uuid = genUUID();
-          const { ext, name } = posix.parse(_item.path);
-          // const { ext, name } = posix.parse(cleanFileName(_item.path));
+          const { ext, name } = path.parse(_item.path);
+          // const { ext, name } = path.parse(cleanFileName(_item.path));
           const assetBaseNew = `${cleanFileName(name)}-${uuid}${ext}`;
-          const assetPathFull = posix.join(assetDir, assetBaseNew);
-          const assetPathRel = posix.join(assetDirName, assetBaseNew);
+          const assetPathFull = path.join(assetDir, assetBaseNew);
+          const assetPathRel = path.join(assetDirName, assetBaseNew);
           // TODO: make sure to append uuid
           fs.copyFileSync(
-            posix.join(this.root.fsPath, _item.path),
+            path.join(this.root.fsPath, _item.path),
             assetPathFull
           );
           mdLinks.push(toMarkdownLink(assetPathRel, { name: `${name}${ext}` }));
@@ -139,7 +139,7 @@ export class FilePod extends BasePod {
     });
     // collect all files
     // TODO: catch errors
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve, _reject) => {
       klaw(root)
         .pipe(excludeFilter)
         // eslint-disable-next-line prefer-arrow-callback
@@ -172,7 +172,7 @@ export class FilePod extends BasePod {
 
     // add assets
     _.values(assetFileDict).forEach((ent) => {
-      const dirname = posix.dirname(ent.path);
+      const dirname = path.dirname(ent.path);
       engineFileDict[dirname].entries.push(ent);
     });
 

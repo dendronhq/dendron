@@ -1,10 +1,10 @@
 import { FileTestUtils, resolveTilde } from "@dendronhq/common-server";
 import fs from "fs-extra";
+import _ from "lodash";
 import os from "os";
-import path, { posix } from "path";
+import path from "path";
 import * as vscode from "vscode";
 import { GLOBAL_STATE } from "./constants";
-import _ from "lodash";
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
@@ -34,7 +34,7 @@ export function resolvePath(filePath: string, wsRoot?: string): string {
     if (!wsRoot) {
       throw Error("can't use rel path without a workspace root set");
     }
-    return posix.join(wsRoot, filePath);
+    return path.join(wsRoot, filePath);
   }
 }
 

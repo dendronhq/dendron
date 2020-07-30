@@ -21,10 +21,10 @@ mkdir  ../../assets/dendronWS
 rsync -av * ../../assets/dendronWS/ --exclude .git --exclude package.json --exclude CNAME --exclude scripts --exclude LICENSE.md  --exclude dendron.code-workspace --exclude docs/notes
 
 echo $LAST_COMMIT > ../../assets/LAST_COMMIT
-cd ../../assets/dendronWS
-git init 
-git add .
-git commit -m "initial commit"
+# cd ../../assets/dendronWS
+# git init 
+# git add .
+# git commit -m "initial commit"
 
 
 # echo "copy notes..."

@@ -12,4 +12,10 @@ fi
 # eval $cmd
 # use below to update snapshots
 npx lerna run test --parallel --ignore @dendronhq/plugin-core -- -- -u 2>&1 
-travis_terminate 0 || true
+
+travis_terminate() {
+  set +e
+  pkill -9 -P $$ &> /dev/null || true
+  exit $1
+}
+travis_terminate 0 

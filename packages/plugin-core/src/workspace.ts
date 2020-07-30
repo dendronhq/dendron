@@ -235,7 +235,7 @@ export class DendronWorkspace {
           if (!editorPath) {
             throw Error("not currently in a note");
           }
-          const cNoteFname = posix.basename(editorPath, ".md");
+          const cNoteFname = path.basename(editorPath, ".md");
           const currentDomain = DNodeUtils.domainName(cNoteFname);
           let fname = `${currentDomain}.${journalNamespace}.${noteName}`;
           const title = await vscode.window.showInputBox({

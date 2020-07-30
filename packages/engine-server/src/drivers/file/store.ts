@@ -189,10 +189,6 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
   }
 
   refreshIdToPath(nodes: IDNode[]) {
-    this.logger.debug({
-      ctx: "refreshIdToPaths",
-      nodes: nodes.map((n) => n.toRawProps(true)),
-    });
     if (nodes[0].type === "schema") {
       // null-op
       return;

@@ -9,7 +9,7 @@ else
     echo "cloning template..."
     mkdir build
     cd build 
-    git clone git@github.com:dendronhq/dendron-template.git
+    git clone https://github.com/dendronhq/dendron-template.git
     cd dendron-template
 fi
 export LAST_COMMIT=$(git rev-parse HEAD)

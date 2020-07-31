@@ -226,7 +226,7 @@ export class LookupProvider {
     if (isCreateNewNotePick(selectedItem)) {
       L.info({ ...ctx2, msg: "createNewPick" });
       const fname = value;
-      let nodeNew: Note;
+      let nodeNew: DNode;
       // reuse node if a stub
       // otherwise, children will not be right
       if (selectedItem.stub) {
@@ -255,7 +255,7 @@ export class LookupProvider {
           profile,
         });
       } else {
-        nodeNew = new Note({ fname });
+        nodeNew = opts.flavor === "note" ? new Note({fname}) : new Schema({fname})
       }
 
       // FIXME: this should be done after the node is created

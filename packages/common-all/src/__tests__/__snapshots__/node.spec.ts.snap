@@ -8,9 +8,9 @@ Object {
   "data": Object {},
   "desc": "",
   "fname": "baz",
-  "parent": "root",
+  "parent": "Root",
   "stub": false,
-  "title": "baz",
+  "title": "Baz",
   "type": "note",
 }
 `;
@@ -19,15 +19,15 @@ exports[`DNoteUtils findClosestParent, parent grandchild -> parent: main 1`] = `
 Object {
   "body": "",
   "children": Array [
-    "alpha",
+    "Alpha",
   ],
   "custom": Object {},
   "data": Object {},
   "desc": "",
   "fname": "foo.one",
-  "parent": "foo",
+  "parent": "Foo",
   "stub": false,
-  "title": "one",
+  "title": "One",
   "type": "note",
 }
 `;
@@ -36,8 +36,8 @@ exports[`DNoteUtils findClosestParent, parent grandchild -> root: main 1`] = `
 Object {
   "body": "",
   "children": Array [
-    "foo",
-    "baz",
+    "Foo",
+    "Baz",
   ],
   "custom": Object {},
   "data": Object {},
@@ -45,7 +45,7 @@ Object {
   "fname": "root",
   "parent": "root",
   "stub": false,
-  "title": "root",
+  "title": "Root",
   "type": "note",
 }
 `;
@@ -55,15 +55,15 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "alpha",
+      "Alpha",
     ],
     "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "bar.one",
-    "parent": "bar",
+    "parent": "Bar",
     "stub": false,
-    "title": "one",
+    "title": "One",
     "type": "note",
   },
   Object {
@@ -73,9 +73,9 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "bar.one.alpha",
-    "parent": "one",
+    "parent": "One",
     "stub": false,
-    "title": "alpha",
+    "title": "Alpha",
     "type": "note",
   },
 ]
@@ -85,7 +85,7 @@ exports[`Schema domainRoot at child: fooChild_body 1`] = `
 "\`\`\`
 -
     id: one
-    title: yml
+    title: Yml
     desc: \\"\\"
     children: [alpha]
     parent: foo
@@ -93,7 +93,7 @@ exports[`Schema domainRoot at child: fooChild_body 1`] = `
     fname: foo.schema.yml
 -
     id: alpha
-    title: yml
+    title: Yml
     desc: \\"\\"
     children: []
     parent: one
@@ -107,7 +107,7 @@ exports[`Schema domainRoot at root: foo_body 1`] = `
 "\`\`\`
 -
     id: foo
-    title: yml
+    title: Yml
     desc: \\"\\"
     children: [one]
     parent: root
@@ -115,7 +115,7 @@ exports[`Schema domainRoot at root: foo_body 1`] = `
     fname: foo.schema.yml
 -
     id: one
-    title: yml
+    title: Yml
     desc: \\"\\"
     children: [alpha]
     parent: foo
@@ -123,7 +123,7 @@ exports[`Schema domainRoot at root: foo_body 1`] = `
     fname: foo.schema.yml
 -
     id: alpha
-    title: yml
+    title: Yml
     desc: \\"\\"
     children: []
     parent: one
@@ -138,7 +138,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "yml",
+      "Yml",
     ],
     "custom": Object {},
     "data": Object {},
@@ -146,21 +146,21 @@ Array [
     "fname": "foo.schema.yml",
     "parent": "root",
     "stub": false,
-    "title": "yml",
+    "title": "Yml",
     "type": "schema",
   },
   Object {
     "body": "",
     "children": Array [
-      "yml",
+      "Yml",
     ],
     "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.schema.yml",
-    "parent": "yml",
+    "parent": "Yml",
     "stub": false,
-    "title": "yml",
+    "title": "Yml",
     "type": "schema",
   },
   Object {
@@ -170,15 +170,15 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo.schema.yml",
-    "parent": "yml",
+    "parent": "Yml",
     "stub": false,
-    "title": "yml",
+    "title": "Yml",
     "type": "schema",
   },
   Object {
     "body": "",
     "children": Array [
-      "yml",
+      "Yml",
     ],
     "custom": Object {},
     "data": Object {
@@ -188,7 +188,7 @@ Array [
     "fname": "bar.schema.yml",
     "parent": "root",
     "stub": false,
-    "title": "yml",
+    "title": "Yml",
     "type": "schema",
   },
   Object {
@@ -200,9 +200,9 @@ Array [
     },
     "desc": "",
     "fname": "bar.schema.yml",
-    "parent": "yml",
+    "parent": "Yml",
     "stub": false,
-    "title": "yml",
+    "title": "Yml",
     "type": "schema",
   },
 ]
@@ -213,7 +213,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "yml",
+      "Yml",
     ],
     "custom": Object {},
     "data": Object {},
@@ -221,21 +221,21 @@ Array [
     "fname": "foo.schema.yml",
     "parent": "root",
     "stub": false,
-    "title": "yml",
+    "title": "Yml",
     "type": "schema",
   },
   Object {
     "body": "",
     "children": Array [
-      "yml",
+      "Yml",
     ],
     "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.schema.yml",
-    "parent": "yml",
+    "parent": "Yml",
     "stub": false,
-    "title": "yml",
+    "title": "Yml",
     "type": "schema",
   },
   Object {
@@ -245,15 +245,15 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo.schema.yml",
-    "parent": "yml",
+    "parent": "Yml",
     "stub": false,
-    "title": "yml",
+    "title": "Yml",
     "type": "schema",
   },
   Object {
     "body": "",
     "children": Array [
-      "yml",
+      "Yml",
     ],
     "custom": Object {},
     "data": Object {
@@ -263,7 +263,7 @@ Array [
     "fname": "bar.schema.yml",
     "parent": "root",
     "stub": false,
-    "title": "yml",
+    "title": "Yml",
     "type": "schema",
   },
   Object {
@@ -275,9 +275,9 @@ Array [
     },
     "desc": "",
     "fname": "bar.schema.yml",
-    "parent": "yml",
+    "parent": "Yml",
     "stub": false,
-    "title": "yml",
+    "title": "Yml",
     "type": "schema",
   },
 ]

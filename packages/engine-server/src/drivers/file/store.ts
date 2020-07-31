@@ -120,7 +120,7 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
   async _getSchemaAll(): Promise<SchemaRawProps[]> {
     const allFiles = getAllFiles({
       root: this.opts.root,
-      include: ["*.schema.yml"],
+      include: ["*.yml"],
     }) as string[];
     const fp = new FileParser(this, { errorOnEmpty: false });
     const data = fp.parseSchema(allFiles);

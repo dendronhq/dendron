@@ -23,7 +23,7 @@ Array [
     "body": "",
     "children": Array [
       "foo",
-      "bar",
+      "Bar",
     ],
     "custom": Object {},
     "data": Object {},
@@ -39,7 +39,7 @@ Array [
     "children": Array [
       "foo.one",
       "foo.two",
-      "three",
+      "Three",
     ],
     "custom": Object {},
     "data": Object {},
@@ -53,7 +53,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "one",
+      "One",
     ],
     "custom": Object {},
     "data": Object {},
@@ -61,7 +61,7 @@ Array [
     "fname": "bar",
     "parent": "root",
     "stub": true,
-    "title": "bar",
+    "title": "Bar",
     "type": "note",
   },
   Object {
@@ -93,7 +93,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "alpha",
+      "Alpha",
     ],
     "custom": Object {},
     "data": Object {},
@@ -101,21 +101,21 @@ Array [
     "fname": "foo.three",
     "parent": "foo",
     "stub": true,
-    "title": "three",
+    "title": "Three",
     "type": "note",
   },
   Object {
     "body": "",
     "children": Array [
-      "alpha",
+      "Alpha",
     ],
     "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "bar.one",
-    "parent": "bar",
+    "parent": "Bar",
     "stub": true,
-    "title": "one",
+    "title": "One",
     "type": "note",
   },
   Object {
@@ -125,9 +125,9 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo.three.alpha",
-    "parent": "three",
+    "parent": "Three",
     "stub": false,
-    "title": "alpha",
+    "title": "Alpha",
     "type": "note",
   },
   Object {
@@ -138,9 +138,9 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "bar.one.alpha",
-    "parent": "one",
+    "parent": "One",
     "stub": false,
-    "title": "alpha",
+    "title": "Alpha",
     "type": "note",
   },
 ]

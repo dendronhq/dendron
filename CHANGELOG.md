@@ -13,7 +13,10 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Features
 
 - CI/CD testing ([d6ce68c](https://github.com/dendronhq/dendron/commit/d6ce68c720d7e8c96d7f4bb6ab390c1bd52c5218))
-- publish local images when publishing site ([f60360d](https://github.com/dendronhq/dendron/commit/f60360d94b8149404032fc77cfa7556801768105))
+  - Dendron now has continuous integration tests for all pushes. ![](https://travis-ci.com/dendronhq/dendron.svg?branch=master)
+  - Tests run on mac, linux and windows which means moving forward, there should be fewer OS related issues
+- Publish local images when publishing site ([f60360d](https://github.com/dendronhq/dendron/commit/f60360d94b8149404032fc77cfa7556801768105))
+  - any images you have added using [paste images](https://www.dendron.so/notes/a91fd8da-6895-49fe-8164-a17acd8d9a17.html) will now automatically be included when you run `Build Pod`
 
 ## [0.4.2](https://github.com/dendronhq/dendron/compare/v0.4.1...v0.4.2) (2020-07-30)
 

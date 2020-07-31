@@ -175,6 +175,33 @@ class PickerUtils {
   }
 }
 
+type EngineFlavor = "note"|"schema"
+type EngineOpts = {
+  flavor: EngineFlavor
+}
+
+function addSchemaResults(notes: Note[], engine: DEngine) {
+  return notes.map((note) => {
+    const schema = SchemaUtils.matchNote(note as Note, engine.schemas);
+    (note as Note).schema = schema;
+    return note;
+  });
+}
+
+function showRootResults(flavor: EngineFlavor, engine: DEngine) {
+  if (flavor === "note") {
+    return _.uniqBy(
+      _.map(_.values(engine.notes), (ent) => ent.domain),
+      "domain"
+    );
+  } else {
+    return _.uniqBy(
+      _.map(_.values(engine.schemas), (ent) => ent.domain),
+      "domain"
+    );
+  }
+}
+
 export class LookupProvider {
   public noActiveItem: QuickPickItem;
 
@@ -251,42 +278,39 @@ export class LookupProvider {
     return showDocAndHidePicker(uri, picker);
   }
 
-  async onUpdatePickerItem(picker: QuickPick<DNode>) {
+  async onUpdatePickerItem(picker: QuickPick<DNode>, opts: EngineOpts) {
     const start = process.hrtime();
     picker.busy = true;
-    const ctx = "updatePickerItems";
     const querystring = picker.value;
     let profile: number;
     const ctx2 = {
-      ctx,
+      ctx: "updatePickerItems",
       querystring,
+      opts,
     };
     const engine = DendronEngine.getOrCreateEngine();
     try {
       L.info({ ...ctx2, msg: "enter" });
       const resp = await engine.query(
         slashToDot(querystring),
-        "note"
+        opts.flavor
       );
       profile = getDurationMilliseconds(start);
       L.info({ ...ctx2, msg: "engine.query", profile });
+      // let nodes = opts.flavor === "note" ? engine.notes : engine.schemas;
+
+      let updatedItems = resp.data;
       // enrich notes with schemas
-      let updatedItems = resp.data.map((note) => {
-        const schema = SchemaUtils.matchNote(note as Note, engine.schemas);
-        (note as Note).schema = schema;
-        return note;
-      });
-      profile = getDurationMilliseconds(start);
-      L.info({ ...ctx2, msg: "matchSchema", profile });
+      if (opts.flavor === "note") {
+        updatedItems = addSchemaResults(updatedItems as Note[], engine);
+        profile = getDurationMilliseconds(start);
+        L.info({ ...ctx2, msg: "matchSchema", profile });
+      }
 
       // check if root query, if so, return everything
       if (querystring === "") {
         L.info({ ...ctx2, msg: "no qs" });
-        //picker.items = [engine().notes["root"]];
-        picker.items = _.uniqBy(
-          _.map(_.values(engine.notes), (ent) => ent.domain),
-          "domain"
-        );
+        picker.items = showRootResults(opts.flavor, engine);
         return;
       }
       // check if single item query, vscode doesn't surface single letter queries
@@ -302,6 +326,7 @@ export class LookupProvider {
       const queryEndsWithDot = querystring.endsWith(".");
 
       // check if we just entered a new level, only want to match children schema
+      if (opts.flavor === "note") {
       updatedItems = PickerUtils.genSchemaSuggestions({
         items: updatedItems as Note[],
         qs: querystring,
@@ -309,6 +334,7 @@ export class LookupProvider {
       });
       profile = getDurationMilliseconds(start);
       L.info({ ...ctx2, msg: "genSchemaSuggestions", profile });
+    }
       // updatedItems = PickerUtils.filterStubs(updatedItems as Note[]);
 
       // check if new item, return if that's the case
@@ -352,6 +378,10 @@ export class LookupProvider {
 
   provide(picker: QuickPick<DNode>) {
 
+    const opts = {
+      flavor: "schema" as const
+    }
+
     picker.onDidAccept(async () => {
       this.onDidAccept(picker);
     });
@@ -359,8 +389,8 @@ export class LookupProvider {
     //   const ctx = "onDidChangeSelection";
     // });
     picker.onDidChangeValue(() => {
-      this.onUpdatePickerItem(picker);
+      this.onUpdatePickerItem(picker, opts);
     });
-    this.onUpdatePickerItem(picker);
+    this.onUpdatePickerItem(picker, opts);
   }
 }

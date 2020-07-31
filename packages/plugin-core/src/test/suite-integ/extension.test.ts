@@ -76,6 +76,35 @@ function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
   };
 }
 
+function setupDendronWorkspace(rootDir: string, ctx: vscode.ExtensionContext) {
+  DendronWorkspace.configuration = () => {
+    return createMockConfig({
+      dendron: { rootDir },
+    });
+  };
+  DendronWorkspace.workspaceFile = () => {
+    return vscode.Uri.file(path.join(rootDir, "dendron.code-workspace"));
+  };
+  DendronWorkspace.workspaceFolders = () => {
+    const uri = vscode.Uri.file(path.join(rootDir, "vault"));
+    return [{ uri, name: "vault", index: 0 }];
+  };
+  return new SetupWorkspaceCommand()
+    .execute({ rootDirRaw: rootDir, skipOpenWs: true })
+    .then(async () => {
+      return _activate(ctx);
+    });
+}
+
+function onWSActive(cb: Function) {
+  HistoryService.instance().subscribe(
+    "extension",
+    async (_event: HistoryEvent) => {
+      await cb();
+    }
+  );
+}
+
 suite("startup", function () {
   const timeout = 60 * 1000 * 5;
   let root: DirResult;
@@ -89,7 +118,7 @@ suite("startup", function () {
 
   beforeEach(async function () {
     console.log("before");
-    await new ResetConfigCommand().execute({scope: "all"})
+    await new ResetConfigCommand().execute({ scope: "all" });
     root = FileTestUtils.tmpDir();
     fs.removeSync(root.name);
     ctx = VSCodeUtils.getOrCreateMockContext();
@@ -229,108 +258,17 @@ suite("startup", function () {
       );
     });
   });
+
+  describe.only("lookup", function () {
+    vscode.window.showInformationMessage("Start lookup test");
+    test("lookup new node", function (done) {
+      setupDendronWorkspace(root.name, ctx).then(() => {
+        onWSActive(async () => {
+          assert.equal(DendronWorkspace.isActive(), true);
+          // TODO: get new quickpick
+          done();
+        });
+      });
+    });
+  });
 });
-
-
-// suite("Extension Test Suite", function () {
-//   let root: string;
-//   let actualFiles: string[];
-//   let expectedFiles: string[];
-//   let ws: DendronWorkspace;
-
-//   beforeEach(async function () {
-
-//     const ctx = createMockContext(root);
-
-//     ws = new DendronWorkspace(ctx, { skipSetup: true });
-//     await ws.setupWorkspace(root, { skipOpenWS: true });
-
-//     // setup configWS
-//     const wsFolder = VSCodeUtils.createWSFolder(path.join(root, "vault"));
-//     ws.configWS = vscode.workspace.getConfiguration(undefined, wsFolder);
-
-//     const fixtures = LernaTestUtils.getFixturesDir();
-//     const storeDir = path.join(fixtures, "store");
-//     console.log(storeDir);
-//     fs.copySync(storeDir, root);
-//     console.log(root);
-//     return;
-//   });
-
-//   afterEach(async () => {
-//     assert.deepEqual(actualFiles, expectedFiles);
-//     fs.removeSync(root);
-//   });
-
-//   describe("settings", () => {
-//     test("defaults", () => {
-//       assert.deepStrictEqual(Settings.defaults({ rootDir: "bond" }), {
-//         "dendron.rootDir": "bond",
-//         "editor.minimap.enabled": false,
-//         "files.autoSave": "onFocusChange",
-//         "markdown-preview-enhanced.enableWikiLinkSyntax": true,
-//         "materialTheme.accent": "Red",
-//         "pasteImage.path": "${currentFileDir}/assets",
-//         "spellright.documentTypes": ["markdown", "latex", "plaintext"],
-//         "spellright.language": ["en"],
-//         "vscodeMarkdownNotes.slugifyCharacter": "NONE",
-//         "workbench.colorTheme": "Material Theme High Contrast",
-//       });
-//     });
-
-//     test.skip("upgrade", async function () {
-//       const bond = {
-//         "bond.config": {
-//           default: 42,
-//         },
-//       };
-//       const changed = await Settings.upgrade(
-//         ws.configWS as vscode.WorkspaceConfiguration,
-//         bond
-//       );
-//       assert.deepStrictEqual(changed, { add: { "bond.config": 42 } });
-//     });
-//   });
-
-//   describe("file system", () => {
-//     test("new file", () => {
-//       assert.ok(true);
-//       [expectedFiles, actualFiles] = VSFileUtils.cmpFiles(
-//         root,
-//         LernaTestUtils.fixtureFilesForStore()
-//       );
-//     });
-//   });
-
-//   describe("workspace", () => {
-//     test("sanity", async () => {
-//       const workspace = fs.readJsonSync(
-//         path.join(root, "dendron.code-workspace")
-//       );
-//       assert.deepStrictEqual(
-//         workspace["settings"],
-//         Settings.defaults({ rootDir: root })
-//       );
-//     });
-
-//     test("reload", async () => {
-//       await ws.reloadWorkspace(root);
-//       assert.equal(ws.engine.notes["root"].children.length, 1);
-//       const { content, data } = FileTestUtils.readMDFile(root, "foo.one.md");
-//       assert.equal(_.trim(content), "");
-//       const actual = testUtils.omitEntropicProps(data as NoteRawProps, true);
-//       assert.deepEqual(actual, {
-//         custom: {
-//           bond: 42,
-//         },
-//         id: "foo.one",
-//         title: "foo.one",
-//       });
-//       // stub node should not be written to disk
-//       [expectedFiles, actualFiles] = VSFileUtils.cmpFiles(
-//         root,
-//         LernaTestUtils.fixtureFilesForStore()
-//       );
-//     });
-//   });
-// });

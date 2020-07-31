@@ -1,8 +1,10 @@
 import {
-  DEngine, DNode, DNodeUtils,
+  DEngine,
+  DNode,
+  DNodeUtils,
   Note,
   Schema,
-  SchemaUtils
+  SchemaUtils,
 } from "@dendronhq/common-all";
 import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -13,7 +15,7 @@ import { getDurationMilliseconds, profile } from "../../utils/system";
 import { CREATE_NEW_LABEL } from "./constants";
 import { node2Uri } from "./utils";
 
-const L = Logger
+const L = Logger;
 // @ts-ignore
 class QueryStringUtils {
   /**
@@ -82,21 +84,20 @@ function slashToDot(ent: string) {
   return ent.replace(/\//g, ".");
 }
 
-
 function showDocAndHidePicker(uri: Uri, picker: QuickPick<any>): any {
   const start = process.hrtime();
-  const ctx = {ctx: uri, value: picker.value}
+  const ctx = { ctx: uri, value: picker.value };
   return window.showTextDocument(uri).then(
     () => {
       let profile = getDurationMilliseconds(start);
-      Logger.info({ ...ctx, msg: "showTextDocument", profile});
+      Logger.info({ ...ctx, msg: "showTextDocument", profile });
       picker.hide();
       profile = getDurationMilliseconds(start);
-      Logger.info({ ...ctx, msg: "picker.hide", profile});
+      Logger.info({ ...ctx, msg: "picker.hide", profile });
       return;
     },
     (err) => {
-      Logger.error({ ...ctx, err, msg: "exit", profile});
+      Logger.error({ ...ctx, err, msg: "exit", profile });
       throw err;
     }
   );
@@ -181,6 +182,75 @@ export class LookupProvider {
     this.noActiveItem = createNoActiveItem({ label: "Create New" });
   }
 
+  async onDidAccept(picker: QuickPick<DNode>) {
+    const start = process.hrtime();
+    const value = PickerUtils.getValue(picker);
+    let profile;
+    const ctx2 = {
+      ctx: "onDidAccept",
+      value,
+    };
+    L.info({ ...ctx2, msg: "enter" });
+    // @ts-ignore
+    const selectedItem = PickerUtils.getSelection<Note>(picker);
+
+    let uri: Uri;
+    if (isCreateNewNotePick(selectedItem)) {
+      L.info({ ...ctx2, msg: "createNewPick" });
+      const fname = value;
+      let nodeNew: Note;
+      // reuse node if a stub
+      // otherwise, children will not be right
+      if (selectedItem.stub) {
+        L.info({ ...ctx2, msg: "createNewPick:stub" });
+        nodeNew = (
+          await DendronEngine.getOrCreateEngine().queryOne(fname, "note")
+        ).data as Note;
+        nodeNew.stub = false;
+        profile = getDurationMilliseconds(start);
+        L.info({
+          ...ctx2,
+          msg: "createNewPick:stub",
+          func: "engine.queryOne",
+          profile,
+        });
+      } else if (selectedItem.schemaStub) {
+        L.info({ ...ctx2, msg: "createNewPick:schemaStub" });
+        nodeNew = new Note({
+          fname: selectedItem.fname,
+        });
+        profile = getDurationMilliseconds(start);
+        L.info({
+          ...ctx2,
+          msg: "createNewPick:schemaStub",
+          func: "Note.new",
+          profile,
+        });
+      } else {
+        nodeNew = new Note({ fname });
+      }
+
+      // FIXME: this should be done after the node is created
+      uri = node2Uri(nodeNew);
+      const historyService = HistoryService.instance();
+      historyService.add({ source: "engine", action: "create", uri });
+      profile = getDurationMilliseconds(start);
+      L.info({ ...ctx2, msg: "historyService.add", profile });
+
+      await DendronEngine.getOrCreateEngine().write(nodeNew, {
+        newNode: true,
+        parentsAsStubs: true,
+      });
+      profile = getDurationMilliseconds(start);
+      L.info({ ...ctx2, msg: "engine.write", profile });
+    } else {
+      uri = node2Uri(selectedItem);
+    }
+    profile = getDurationMilliseconds(start);
+    L.info({ ...ctx2, msg: "exit", profile });
+    return showDocAndHidePicker(uri, picker);
+  }
+
   provide(picker: QuickPick<DNode>) {
     const engine = DendronEngine.getOrCreateEngine();
 
@@ -192,10 +262,10 @@ export class LookupProvider {
       let profile: number;
       const ctx2 = {
         ctx,
-        querystring
-      }
+        querystring,
+      };
       try {
-        L.info({ ...ctx2, msg: "enter"});
+        L.info({ ...ctx2, msg: "enter" });
         const resp = await DendronEngine.getOrCreateEngine().query(
           slashToDot(querystring),
           "note"
@@ -273,7 +343,7 @@ export class LookupProvider {
         // DEBUG
         // activeItems = picker.activeItems.map((ent) => ent.label);
         // items = picker.items.map((ent) => ent.label);
-        L.info({...ctx2, msg: "exit"});
+        L.info({ ...ctx2, msg: "exit" });
         return;
       } finally {
         profile = getDurationMilliseconds(start);
@@ -283,63 +353,7 @@ export class LookupProvider {
     };
 
     picker.onDidAccept(async () => {
-      const start = process.hrtime();
-      const value = PickerUtils.getValue(picker);
-      let profile
-      const ctx2 = {
-        ctx: "onDidAccept",
-        value 
-      }
-      L.info({...ctx2, msg: "enter"});
-      // @ts-ignore
-      const selectedItem = PickerUtils.getSelection<Note>(picker);
-
-      let uri: Uri;
-      if (isCreateNewNotePick(selectedItem)) {
-        L.info({...ctx2, msg: "createNewPick"});
-        const fname = value;
-        let nodeNew: Note;
-        // reuse node if a stub
-        // otherwise, children will not be right
-        if (selectedItem.stub) {
-          L.info({...ctx2, msg: "createNewPick:stub"});
-          nodeNew = (
-            await DendronEngine.getOrCreateEngine().queryOne(fname, "note")
-          ).data as Note;
-          nodeNew.stub = false;
-          profile = getDurationMilliseconds(start);
-          L.info({...ctx2, msg: "createNewPick:stub", func: "engine.queryOne", profile});
-        } else if (selectedItem.schemaStub) {
-          L.info({...ctx2, msg: "createNewPick:schemaStub"});
-          nodeNew = new Note({
-            title: DNodeUtils.basename(selectedItem.fname),
-            fname: selectedItem.fname,
-          });
-          profile = getDurationMilliseconds(start);
-          L.info({...ctx2, msg: "createNewPick:schemaStub", func: "Note.new", profile});
-        } else {
-          nodeNew = new Note({ title: DNodeUtils.basename(value), fname });
-        }
-
-        // FIXME: this should be done after the node is created
-        uri = node2Uri(nodeNew);
-        const historyService = HistoryService.instance();
-        historyService.add({ source: "engine", action: "create", uri });
-        profile = getDurationMilliseconds(start);
-        L.info({...ctx2, msg: "historyService.add", profile});
-
-        await DendronEngine.getOrCreateEngine().write(nodeNew, {
-          newNode: true,
-          parentsAsStubs: true,
-        });
-        profile = getDurationMilliseconds(start);
-        L.info({...ctx2, msg: "engine.write", profile});
-      } else {
-        uri = node2Uri(selectedItem);
-      }
-      profile = getDurationMilliseconds(start);
-      L.info({...ctx2, msg: "exit", profile});
-      return showDocAndHidePicker(uri, picker);
+      this.onDidAccept(picker);
     });
     // picker.onDidChangeSelection((inputs: QuickPickItem[]) => {
     //   const ctx = "onDidChangeSelection";

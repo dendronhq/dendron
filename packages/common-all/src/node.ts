@@ -166,7 +166,8 @@ export class DNodeRaw {
       data: {},
       fname: null,
     });
-    const title = nodeOpts.title || DNodeUtils.basename(fname);
+    // eslint-disable-next-line no-use-before-define
+    const title = nodeOpts.title || DNode.defaultTitle(fname);
     const nodePropsItems = {
       id,
       title,
@@ -275,7 +276,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     );
 
     this.id = id;
-    this.title = title || fname.split(".").slice(-1)[0];
+    this.title = title;
     this.desc = desc;
     this.fname = fname;
     this.type = type;

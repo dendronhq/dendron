@@ -209,13 +209,14 @@ export class LookupProvider {
     this.noActiveItem = createNoActiveItem({ label: "Create New" });
   }
 
-  async onDidAccept(picker: QuickPick<DNode>) {
+  async onDidAccept(picker: QuickPick<DNode>, opts: EngineOpts) {
     const start = process.hrtime();
     const value = PickerUtils.getValue(picker);
     let profile;
     const ctx2 = {
       ctx: "onDidAccept",
       value,
+      opts
     };
     L.info({ ...ctx2, msg: "enter" });
     // @ts-ignore
@@ -383,7 +384,7 @@ export class LookupProvider {
     }
 
     picker.onDidAccept(async () => {
-      this.onDidAccept(picker);
+      this.onDidAccept(picker, opts);
     });
     // picker.onDidChangeSelection((inputs: QuickPickItem[]) => {
     //   const ctx = "onDidChangeSelection";

@@ -3,7 +3,8 @@ import path from "path";
 import { Uri, workspace } from "vscode";
 
 export function node2Uri(node: DNode): Uri {
-  const nodePath = node.fname + ".md";
+  const ext = node.type === "note" ? ".md" : ".yml";
+  const nodePath = node.fname + ext;
   if (!workspace.workspaceFolders) {
     // TODO: handle
     throw Error("ws not initialized");

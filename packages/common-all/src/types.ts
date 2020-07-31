@@ -25,6 +25,9 @@ export type DNodeData = SchemaData | NoteData;
 export type IDNodeType = "note" | "schema";
 
 export type QueryMode = IDNodeType;
+export type RawPropsOpts = {
+  ignoreNullParent?: boolean
+}
 
 // --- Nodes
 export type DNodeRawOpts<T extends DNodeData> = {
@@ -91,8 +94,8 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
    */
   renderBody(): string;
   toDocument(): any;
-  toRawProps(hideBody?: boolean): DNodeRawProps<T>;
-  toRawPropsRecursive(): DNodeRawProps<T>[];
+  toRawProps(hideBody?: boolean, opts?: RawPropsOpts): DNodeRawProps<T>;
+  toRawPropsRecursive(opts?: RawPropsOpts): DNodeRawProps<T>[];
   validate(): boolean;
 };
 export type DNodeRawDict<T = DNodeData> = { [id: string]: DNodeRawProps<T> };

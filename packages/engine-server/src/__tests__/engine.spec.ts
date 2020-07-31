@@ -5,6 +5,7 @@ import {
   Note,
   testUtils,
   SchemaUtils,
+  Schema,
 } from "@dendronhq/common-all";
 import { FileTestUtils, LernaTestUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -74,6 +75,32 @@ describe("engine:exact", () => {
         const schema = engine.schemas["alpha"];
         const schemaMatch = SchemaUtils.matchNote(note, engine.schemas);
         expect(schemaMatch).toEqual(schema);
+      });
+
+      test("write schema", async () => {
+        await engine.init();
+        const schema = new Schema({ fname: "bond" });
+        await engine.write(schema, {
+          newNode: true,
+          parentsAsStubs: true,
+        });
+        const schemaInEngine = engine.schemas["bond"];
+        testUtils.expectSnapshot(expect, "schema", schemaInEngine);
+        expect(
+          _.pick(schemaInEngine.toRawProps(), [
+            "id",
+            "title",
+            "fname",
+            "parent",
+            "children",
+          ])
+        ).toEqual({
+          id: "bond",
+          title: "bond",
+          fname: "bond.schema",
+          parent: "root",
+          children: [],
+        });
       });
     });
   });

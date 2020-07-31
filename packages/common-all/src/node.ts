@@ -24,6 +24,7 @@ import {
   SchemaDict,
   SchemaRawOpts,
   SchemaRawProps,
+  RawPropsOpts,
 } from "./types";
 import { genUUID } from "./uuid";
 
@@ -377,10 +378,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     };
   }
 
-  toRawProps(
-    hideBody?: boolean,
-    opts?: { ignoreNullParent: boolean }
-  ): DNodeRawProps<T> {
+  toRawProps(hideBody?: boolean, opts?: RawPropsOpts): DNodeRawProps<T> {
     const { ignoreNullParent } = _.defaults(opts, { ignoreNullParent: false });
     const props = _.pick(this, [
       "id",
@@ -420,13 +418,13 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     return { ...props, parent, children };
   }
 
-  toRawPropsRecursive(): DNodeRawProps<T>[] {
-    const parent: DNodeRawProps<T> = this.toRawProps();
+  toRawPropsRecursive(opts?: RawPropsOpts): DNodeRawProps<T>[] {
+    const parent: DNodeRawProps<T> = this.toRawProps(false, opts);
     const children: DNodeRawProps<T>[] = this.children
       .map(
         (ch: DNode<T>) =>
           // @ts-ignore
-          ch.toRawPropsRecursive()
+          ch.toRawPropsRecursive(opts)
         // eslint-disable-next-line function-paren-newline
       )
       .flat();
@@ -561,10 +559,19 @@ export class Schema extends DNode<SchemaData> implements ISchema {
     return Schema._UNKNOWN_SCHEMA as Schema;
   }
 
+  static defaultTitle(fname: string) {
+    return fname.replace(".schema", "");
+  }
+
   constructor(props: ISchemaOpts) {
+    if (props.fname.indexOf(".schema") < 0) {
+      props.fname += ".schema";
+    }
     super({
       type: "schema",
       ..._.defaults(props, {
+        id: Schema.defaultTitle(props.fname),
+        title: Schema.defaultTitle(props.fname),
         parent: null,
         children: [],
         data: {},
@@ -596,18 +603,13 @@ export class Schema extends DNode<SchemaData> implements ISchema {
   }
 
   renderBody() {
-    const out = _.map(this.toRawPropsRecursive(), (props) => {
-      return _.pick(props, [
-        "id",
-        "title",
-        "desc",
-        "children",
-        "parent",
-        "data",
-        "fname",
-      ]);
-    });
-    return ["```", YAML.stringify(out, undefined, 4), "```"].join("\n");
+    const out = _.map(
+      this.toRawPropsRecursive({ ignoreNullParent: true }),
+      (props) => {
+        return _.pick(props, ["id", "title", "desc", "children", "data"]);
+      }
+    );
+    return YAML.stringify(out, undefined, 4);
   }
 }
 

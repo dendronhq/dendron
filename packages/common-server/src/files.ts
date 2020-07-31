@@ -64,7 +64,7 @@ export function cleanFileName(
 }
 
 export function readYAML(fpath: string): any {
-   return YAML.load(fpath);
+  return YAML.load(fpath);
 }
 
 export function writeYAML(fpath: string, data: any) {
@@ -198,7 +198,7 @@ export function schema2YMLFile(schema: Schema, opts: { root: string }) {
   const { root } = opts;
   const { fname } = schema;
   const filePath = path.join(root, `${fname}.yml`);
-  const out = YAML.stringify(schema.toRawPropsRecursive(), undefined, 4);
+  const out = schema.renderBody();
   return fs.writeFileSync(filePath, out);
 }
 

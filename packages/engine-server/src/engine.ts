@@ -1,6 +1,5 @@
 import {
   assert,
-  assertExists,
   DendronError,
   DEngine,
   DEngineMode,
@@ -17,7 +16,6 @@ import {
   IDNode,
   INoteOpts,
   makeResponse,
-  NodeBuilder,
   NodeWriteOpts,
   Note,
   NoteDict,
@@ -27,7 +25,6 @@ import {
   QueryOpts,
   Schema,
   SchemaDict,
-  SchemaRawProps,
   UpdateNodesOpts,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, Logger } from "@dendronhq/common-server";
@@ -35,7 +32,6 @@ import fs from "fs-extra";
 import Fuse from "fuse.js";
 import _ from "lodash";
 import FileStorage from "./drivers/file/store";
-import { BodyParser } from "./drivers/raw/BodyParser";
 
 let _DENDRON_ENGINE: DendronEngine;
 
@@ -489,46 +485,14 @@ export class DendronEngine implements DEngine {
       noAddParent: false,
       writeStub: false,
     });
-    if (node.type === "schema") {
-      const refreshList: DNode[] = [node];
-      assertExists(node?.body, "body must exist");
-      // convert body
-      const schemaRawProps: SchemaRawProps[] = new BodyParser().parseSchema(
-        props.body,
-        {
-          node,
-          fname: node.fname,
-        }
-      );
-      const schemas = new NodeBuilder().buildSchemaFromProps(schemaRawProps);
-      const schemaNew = _.find(schemas, { id: node.id });
-      if (_.isUndefined(schemaNew)) {
-        throw Error(`no schema found for ${node} on write`);
-      }
-      node = schemaNew;
-      // reset body
-      node.body = "";
-      await this.store.write(node, { stub: props.stub, writeStub: props.writeStub });
-      if (props.newNode) {
-        const parentPath = "root";
-        const parentNode = _.find(this.schemas, (n) => n.title === parentPath);
-        if (!parentNode) {
-          throw Error("no parent found");
-        }
-        (parentNode as Schema).addChild(node as Schema);
-      }
-      return this.refreshNodes(refreshList, { fullNode: props.newNode });
-    } else {
-      const note = node as Note;
-      await this.store.write(note, {
-        stub: props.stub,
-        recursive: props.recursive,
-      });
-      return this.updateNodes(
-        [note],
-        _.pick(props, ["parentsAsStubs", "newNode", "noAddParent"])
-      );
-    }
+    await this.store.write(node, {
+      stub: props.stub,
+      recursive: props.recursive,
+    });
+    return this.updateNodes(
+      [node],
+      _.pick(props, ["parentsAsStubs", "newNode", "noAddParent"])
+    );
   }
 
   updateProps(opts: DEngineOpts) {
@@ -542,7 +506,11 @@ export class DendronEngine implements DEngine {
   async updateNodes(nodes: IDNode[], opts: UpdateNodesOpts): Promise<void> {
     const ntype = nodes[0].type;
     if (ntype === "schema") {
-      throw Error("not supported");
+      await Promise.all(
+        _.map(nodes, (node) => {
+          return this._updateSchema(node as Schema);
+        })
+      );
     } else {
       await Promise.all(
         _.map(nodes, (node) => {
@@ -551,6 +519,11 @@ export class DendronEngine implements DEngine {
       );
       return;
     }
+  }
+  async _updateSchema(node: Schema) {
+    const root = this.schemas.root;
+    root.addChild(node);
+    return this.refreshNodes([node]);
   }
 
   // OPTIMIZE: do in bulk

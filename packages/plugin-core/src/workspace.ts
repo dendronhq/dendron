@@ -318,8 +318,15 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(DENDRON_COMMANDS.LOOKUP, async () => {
         const ctx = DENDRON_COMMANDS.LOOKUP;
         this.L.info({ ctx: ctx + ":LookupController:pre" });
-        const controller = new LookupController(this);
+        const controller = new LookupController(this, {flavor: "note"});
         this.L.info({ ctx: ctx + ":LookupController:post" });
+        controller.show();
+      })
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(DENDRON_COMMANDS.LOOKUP_SCHEMA, async () => {
+        const controller = new LookupController(this, {flavor: "schema"});
         controller.show();
       })
     );

@@ -51,6 +51,10 @@
         "title": "Dendron: Lookup"
       },
       {
+        "command": "dendron.lookupSchema",
+        "title": "Dendron: Lookup Schema"
+      },
+      {
         "command": "dendron.createJournalNote",
         "title": "Dendron: New Journal Note"
       },
@@ -104,6 +108,12 @@
       }
     ],
     "keybindings": [
+      {
+        "command": "dendron.lookupSchema",
+        "mac": "cmd+shift+L",
+        "key": "ctrl+shift+l",
+        "when": "editorFocus"
+      },
       {
         "command": "dendron.lookup",
         "mac": "cmd+L",

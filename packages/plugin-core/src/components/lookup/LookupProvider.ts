@@ -4,7 +4,7 @@ import {
   DNodeUtils,
   Note,
   Schema,
-  SchemaUtils
+  SchemaUtils,
 } from "@dendronhq/common-all";
 import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -175,10 +175,10 @@ class PickerUtils {
   }
 }
 
-type EngineFlavor = "note"|"schema"
-type EngineOpts = {
-  flavor: EngineFlavor
-}
+type EngineFlavor = "note" | "schema";
+export type EngineOpts = {
+  flavor: EngineFlavor;
+};
 
 function addSchemaResults(notes: Note[], engine: DEngine) {
   return notes.map((note) => {
@@ -204,9 +204,20 @@ function showRootResults(flavor: EngineFlavor, engine: DEngine) {
 
 export class LookupProvider {
   public noActiveItem: QuickPickItem;
+  protected opts: EngineOpts;
 
-  constructor() {
+  constructor(opts: EngineOpts) {
     this.noActiveItem = createNoActiveItem({ label: "Create New" });
+    this.opts = opts;
+  }
+
+  validate(value: string, flavor: EngineFlavor): string|undefined {
+    if (flavor === "schema") {
+      if (value.split(".").length > 1) {
+        return "schemas can only be one level deep"
+      }
+    }
+    return;
   }
 
   async onDidAccept(picker: QuickPick<DNode>, opts: EngineOpts) {
@@ -216,11 +227,17 @@ export class LookupProvider {
     const ctx2 = {
       ctx: "onDidAccept",
       value,
-      opts
+      opts,
     };
     L.info({ ...ctx2, msg: "enter" });
     // @ts-ignore
     const selectedItem = PickerUtils.getSelection<Note>(picker);
+
+    const resp = this.validate(picker.value, opts.flavor);
+    if (resp) {
+      window.showErrorMessage(resp);
+      return;
+    }
 
     let uri: Uri;
     if (isCreateNewNotePick(selectedItem)) {
@@ -255,7 +272,8 @@ export class LookupProvider {
           profile,
         });
       } else {
-        nodeNew = opts.flavor === "note" ? new Note({fname}) : new Schema({fname})
+        nodeNew =
+          opts.flavor === "note" ? new Note({ fname }) : new Schema({ fname });
       }
 
       // FIXME: this should be done after the node is created
@@ -282,7 +300,7 @@ export class LookupProvider {
   async onUpdatePickerItem(picker: QuickPick<DNode>, opts: EngineOpts) {
     const start = process.hrtime();
     picker.busy = true;
-    const querystring = picker.value;
+    const querystring = slashToDot(picker.value);
     let profile: number;
     const ctx2 = {
       ctx: "updatePickerItems",
@@ -292,13 +310,9 @@ export class LookupProvider {
     const engine = DendronEngine.getOrCreateEngine();
     try {
       L.info({ ...ctx2, msg: "enter" });
-      const resp = await engine.query(
-        slashToDot(querystring),
-        opts.flavor
-      );
+      const resp = await engine.query(querystring, opts.flavor);
       profile = getDurationMilliseconds(start);
       L.info({ ...ctx2, msg: "engine.query", profile });
-      // let nodes = opts.flavor === "note" ? engine.notes : engine.schemas;
 
       let updatedItems = resp.data;
       // enrich notes with schemas
@@ -328,14 +342,14 @@ export class LookupProvider {
 
       // check if we just entered a new level, only want to match children schema
       if (opts.flavor === "note") {
-      updatedItems = PickerUtils.genSchemaSuggestions({
-        items: updatedItems as Note[],
-        qs: querystring,
-        engine: engine,
-      });
-      profile = getDurationMilliseconds(start);
-      L.info({ ...ctx2, msg: "genSchemaSuggestions", profile });
-    }
+        updatedItems = PickerUtils.genSchemaSuggestions({
+          items: updatedItems as Note[],
+          qs: querystring,
+          engine: engine,
+        });
+        profile = getDurationMilliseconds(start);
+        L.info({ ...ctx2, msg: "genSchemaSuggestions", profile });
+      }
       // updatedItems = PickerUtils.filterStubs(updatedItems as Note[]);
 
       // check if new item, return if that's the case
@@ -378,11 +392,7 @@ export class LookupProvider {
   }
 
   provide(picker: QuickPick<DNode>) {
-
-    const opts = {
-      flavor: "schema" as const
-    }
-
+    const { opts } = this;
     picker.onDidAccept(async () => {
       this.onDidAccept(picker, opts);
     });

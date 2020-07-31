@@ -5,9 +5,8 @@ import path from "path";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
 import { DendronWorkspace } from "../../workspace";
-import { LookupProvider } from "./LookupProvider";
+import { EngineOpts, LookupProvider } from "./LookupProvider";
 
-let LOOKUP_PROVIDER: null | LookupProvider = null;
 
 type ButtonType = "fuzzy_match";
 
@@ -46,8 +45,9 @@ export class LookupController {
   public quickPick: vscode.QuickPick<DNode> | undefined;
   public state: State;
   public ws: DendronWorkspace;
+  protected opts: EngineOpts;
 
-  constructor(workspace: DendronWorkspace) {
+  constructor(workspace: DendronWorkspace, opts: EngineOpts) {
     this.state = {
       mode: "exact",
       buttons: {
@@ -55,6 +55,7 @@ export class LookupController {
       },
     };
     this.ws = workspace;
+    this.opts = opts;
   }
 
   updateButton(btn: DendronQuickInputButton) {
@@ -68,7 +69,6 @@ export class LookupController {
     const ctx = "show";
     this.ws.L.info({ ctx });
     // const provider = this.getOrInstantiateProvider();
-    const provider = new LookupProvider();
     this.ws.L.info({ ctx: ctx + ":getOrInstantiateProvider:post" });
     // create quick pick
     const quickpick = vscode.window.createQuickPick<DNode>();
@@ -84,7 +84,7 @@ export class LookupController {
     quickpick.ignoreFocusOut = true;
     // FIXME: no button for now
     // quickpick.buttons = [this.state.buttons.fuzzyMatch];
-    quickpick.items = _.values(DendronEngine.getOrCreateEngine().notes);
+    // quickpick.items = _.values(DendronEngine.getOrCreateEngine().notes);
 
     // set editor path
     let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
@@ -116,6 +116,7 @@ export class LookupController {
       this.quickPick = undefined;
     });
 
+    const provider = new LookupProvider(this.opts);
     provider.provide(quickpick);
     this.ws.L.info({ ctx: ctx + ":provide:post" });
     // show
@@ -123,10 +124,4 @@ export class LookupController {
     this.ws.L.info({ ctx: ctx + ":show:post" });
   }
 
-  getOrInstantiateProvider() {
-    if (_.isNull(LOOKUP_PROVIDER)) {
-      LOOKUP_PROVIDER = new LookupProvider();
-    }
-    return LOOKUP_PROVIDER;
-  }
 }

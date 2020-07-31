@@ -605,8 +605,12 @@ export class Schema extends DNode<SchemaData> implements ISchema {
   renderBody() {
     const out = _.map(
       this.toRawPropsRecursive({ ignoreNullParent: true }),
+      // TODO: don't hardcode, this only applies to new schemas
       (props) => {
-        return _.pick(props, ["id", "title", "desc", "children", "data"]);
+        return {
+          ..._.pick(props, ["id", "title", "desc", "children", "data"]),
+          parent: "root",
+        };
       }
     );
     return YAML.stringify(out, undefined, 4);

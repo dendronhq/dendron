@@ -5,6 +5,7 @@ export const extensionQualifiedId = `dendron.dendron`;
 // };
 export const DENDRON_COMMANDS = {
   LOOKUP: "dendron.lookup",
+  LOOKUP_SCHEMA: "dendron.lookupSchema",
   INIT_WS: "dendron.initWS",
   CHANGE_WS: "dendron.changeWS",
   DELETE_NODE: "dendron.deleteNode",

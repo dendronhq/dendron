@@ -102,6 +102,22 @@ describe("engine:exact", () => {
           children: [],
         });
       });
+
+      test("delete schema", async () => {
+        await engine.init();
+        const numNodesPre = _.values(engine.schemas).length;
+        const fooNode = await engine.queryOne("foo", "schema");
+        await engine.delete(fooNode.data.id, "schema");
+        expect(_.values(engine.schemas).length).toEqual(numNodesPre - 1);
+        // TODO: check for files
+        [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
+          root,
+          LernaTestUtils.fixtureFilesForStore(),
+          {
+            remove: ["foo.schema.yml"],
+          }
+        );
+      });
     });
   });
   describe("note", () => {
@@ -313,7 +329,7 @@ describe("engine:exact", () => {
         await engine.init();
         const numNodesPre = _.values(engine.notes).length;
         const fooNode = await engine.queryOne("foo.one", "note");
-        await engine.delete(fooNode.data.id);
+        await engine.delete(fooNode.data.id, "note");
         // should be less nodes
         expect(numNodesPre - 1).toEqual(_.values(engine.notes).length);
         const resp = await engine.query("foo", "note");
@@ -334,7 +350,7 @@ describe("engine:exact", () => {
         const fooNode = await engine.queryOne("foo", "note");
 
         // delete foo
-        await engine.delete(fooNode.data.id);
+        await engine.delete(fooNode.data.id, "note");
         expect(fs.readdirSync(root)).toMatchSnapshot("listDi2");
         const numNodesPre = _.values(engine.notes).length;
         testUtils.expectSnapshot(expect, "main", _.values(engine.notes));

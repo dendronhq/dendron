@@ -82,55 +82,46 @@ Array [
 `;
 
 exports[`Schema domainRoot at child: fooChild_body 1`] = `
-"\`\`\`
--
+"-
     id: one
-    title: Yml
+    title: foo.yml
     desc: \\"\\"
     children: [alpha]
-    parent: foo
     data: {}
-    fname: foo.schema.yml
+    parent: root
 -
     id: alpha
-    title: Yml
+    title: foo.yml
     desc: \\"\\"
     children: []
-    parent: one
     data: {}
-    fname: foo.schema.yml
-
-\`\`\`"
+    parent: root
+"
 `;
 
 exports[`Schema domainRoot at root: foo_body 1`] = `
-"\`\`\`
--
+"-
     id: foo
-    title: Yml
+    title: foo.yml
     desc: \\"\\"
     children: [one]
-    parent: root
     data: {}
-    fname: foo.schema.yml
+    parent: root
 -
     id: one
-    title: Yml
+    title: foo.yml
     desc: \\"\\"
     children: [alpha]
-    parent: foo
     data: {}
-    fname: foo.schema.yml
+    parent: root
 -
     id: alpha
-    title: Yml
+    title: foo.yml
     desc: \\"\\"
     children: []
-    parent: one
     data: {}
-    fname: foo.schema.yml
-
-\`\`\`"
+    parent: root
+"
 `;
 
 exports[`SchemaUtils note matchDomain: schemas 1`] = `
@@ -138,7 +129,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "Yml",
+      "foo.yml",
     ],
     "custom": Object {},
     "data": Object {},
@@ -146,21 +137,21 @@ Array [
     "fname": "foo.schema.yml",
     "parent": "root",
     "stub": false,
-    "title": "Yml",
+    "title": "foo.yml",
     "type": "schema",
   },
   Object {
     "body": "",
     "children": Array [
-      "Yml",
+      "foo.yml",
     ],
     "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.schema.yml",
-    "parent": "Yml",
+    "parent": "foo.yml",
     "stub": false,
-    "title": "Yml",
+    "title": "foo.yml",
     "type": "schema",
   },
   Object {
@@ -170,15 +161,15 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo.schema.yml",
-    "parent": "Yml",
+    "parent": "foo.yml",
     "stub": false,
-    "title": "Yml",
+    "title": "foo.yml",
     "type": "schema",
   },
   Object {
     "body": "",
     "children": Array [
-      "Yml",
+      "bar.yml",
     ],
     "custom": Object {},
     "data": Object {
@@ -188,7 +179,7 @@ Array [
     "fname": "bar.schema.yml",
     "parent": "root",
     "stub": false,
-    "title": "Yml",
+    "title": "bar.yml",
     "type": "schema",
   },
   Object {
@@ -200,9 +191,9 @@ Array [
     },
     "desc": "",
     "fname": "bar.schema.yml",
-    "parent": "Yml",
+    "parent": "bar.yml",
     "stub": false,
-    "title": "Yml",
+    "title": "bar.yml",
     "type": "schema",
   },
 ]
@@ -213,7 +204,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "Yml",
+      "foo.yml",
     ],
     "custom": Object {},
     "data": Object {},
@@ -221,21 +212,21 @@ Array [
     "fname": "foo.schema.yml",
     "parent": "root",
     "stub": false,
-    "title": "Yml",
+    "title": "foo.yml",
     "type": "schema",
   },
   Object {
     "body": "",
     "children": Array [
-      "Yml",
+      "foo.yml",
     ],
     "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.schema.yml",
-    "parent": "Yml",
+    "parent": "foo.yml",
     "stub": false,
-    "title": "Yml",
+    "title": "foo.yml",
     "type": "schema",
   },
   Object {
@@ -245,15 +236,15 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo.schema.yml",
-    "parent": "Yml",
+    "parent": "foo.yml",
     "stub": false,
-    "title": "Yml",
+    "title": "foo.yml",
     "type": "schema",
   },
   Object {
     "body": "",
     "children": Array [
-      "Yml",
+      "bar.yml",
     ],
     "custom": Object {},
     "data": Object {
@@ -263,7 +254,7 @@ Array [
     "fname": "bar.schema.yml",
     "parent": "root",
     "stub": false,
-    "title": "Yml",
+    "title": "bar.yml",
     "type": "schema",
   },
   Object {
@@ -275,9 +266,9 @@ Array [
     },
     "desc": "",
     "fname": "bar.schema.yml",
-    "parent": "Yml",
+    "parent": "bar.yml",
     "stub": false,
-    "title": "Yml",
+    "title": "bar.yml",
     "type": "schema",
   },
 ]

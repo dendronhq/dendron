@@ -153,13 +153,8 @@ exports[`main notes write writeQuery: data snapshot 1`] = `
 
 exports[`main schema write writeRoot: root 1`] = `
 Object {
-  "body": "",
-  "custom": Object {},
   "data": Object {},
   "desc": "",
-  "fname": "root.schema",
-  "stub": false,
   "title": "root",
-  "type": "schema",
 }
 `;

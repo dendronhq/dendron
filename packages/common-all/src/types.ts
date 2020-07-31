@@ -26,8 +26,8 @@ export type IDNodeType = "note" | "schema";
 
 export type QueryMode = IDNodeType;
 export type RawPropsOpts = {
-  ignoreNullParent?: boolean
-}
+  ignoreNullParent?: boolean;
+};
 
 // --- Nodes
 export type DNodeRawOpts<T extends DNodeData> = {
@@ -200,6 +200,9 @@ export type UpdateNodesOpts = {
 export type StoreQueryOpts = QueryOpts & {
   schemas?: SchemaDict;
 };
+export type StoreDeleteOpts = {
+  fpath?: string;
+};
 
 export interface DEngineParser<TOpts = any> {
   // parse: <T>(content: any, mode: QueryMode, opts: TOpts) => DNodeRawProps<T>[];
@@ -225,7 +228,7 @@ export type DEngineStoreWriteOpts = {
 export interface DEngineStore<T = DNodeData, O = any> {
   opts: O;
   // fetchInitial: () => DNodeDict;
-  delete: (id: string) => Promise<void>;
+  delete: (id: string, opts?: StoreDeleteOpts) => Promise<void>;
   get: (id: string, opts?: QueryOpts) => Promise<StoreGetResp<T>>;
   query: (
     queryString: string,
@@ -262,7 +265,7 @@ export interface DEngine {
    */
   init: () => Promise<void>;
 
-  delete: (id: string, opts?: EngineDeleteOpts) => Promise<void>;
+  delete: (id: string, mode: QueryMode, opts?: EngineDeleteOpts) => Promise<void>;
 
   /**
    * Get node based on id

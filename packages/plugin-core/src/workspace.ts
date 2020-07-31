@@ -572,7 +572,7 @@ export class DendronWorkspace {
         }
 
         try {
-          await this.engine.delete(fname, { metaOnly: true });
+          await this.engine.delete(fname, "note", { metaOnly: true });
         } catch (err) {
           this.L.error({ ctx, err: JSON.stringify(err) });
         }

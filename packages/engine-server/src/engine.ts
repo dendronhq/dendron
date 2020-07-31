@@ -170,16 +170,28 @@ export class DendronEngine implements DEngine {
     return;
   }
 
-  deleteFromNodes(id: string) {
-    this.fuse.remove((doc: DNode) => {
-      // FIXME: can be undefined, dunno why
-      if (!doc) {
-        return false;
-      }
-      return doc.id === id;
-    });
-    delete this.notes[id];
-    this.fullNodes.delete(id);
+  deleteFromNodes(id: string, mode: QueryMode) {
+    if (mode === "note") {
+      this.fuse.remove((doc: DNode) => {
+        // FIXME: can be undefined, dunno why
+        if (!doc) {
+          return false;
+        }
+        return doc.id === id;
+      });
+      delete this.notes[id];
+      this.fullNodes.delete(id);
+    } else {
+      this.schemaFuse.remove((doc: DNode) => {
+        if (!doc) {
+          return false;
+        }
+        // FIXME: should be deleting all children as well
+        return doc.id === id;
+      });
+      // FIXME: should be deleting all children as well
+      delete this.schemas[id];
+    }
   }
 
   /**
@@ -265,34 +277,49 @@ export class DendronEngine implements DEngine {
     }
   }
 
-  async delete(idOrFname: string, opts?: EngineDeleteOpts): Promise<void> {
+  async delete(
+    idOrFname: string,
+    mode: QueryMode,
+    opts?: EngineDeleteOpts
+  ): Promise<void> {
     const ctx = "delete";
     const cleanOpts = _.defaults(opts, { metaOnly: false });
-    // TODO: take care of schema
-    let noteToDelete = this.notes[idOrFname];
-    if (_.isUndefined(noteToDelete)) {
-      const fname = DNodeUtils.basename(idOrFname, false);
-      // NOTE: get around ts issues
-      const tmp = _.find(this.notes, { fname });
-      if (_.isUndefined(tmp)) {
-        const msg = `node ${idOrFname} not found`;
-        this.logger.error({ ctx, msg });
-        throw Error(msg);
+    let noteToDelete: DNode;
+
+    if (mode === "note") {
+      noteToDelete = this.notes[idOrFname];
+      if (_.isUndefined(noteToDelete)) {
+        const fname = DNodeUtils.basename(idOrFname, false);
+        // NOTE: get around ts issues
+        const tmp = _.find(this.notes, { fname });
+        if (_.isUndefined(tmp)) {
+          const msg = `node ${idOrFname} not found`;
+          this.logger.error({ ctx, msg });
+          throw Error(msg);
+        }
+        noteToDelete = tmp;
       }
-      noteToDelete = tmp;
+    } else {
+      // TODO: only support fname
+      noteToDelete = this.schemas[idOrFname];
     }
     const { id } = noteToDelete;
+
     if (!cleanOpts.metaOnly) {
-      await this.store.delete(id);
+      const storeOpts =
+        mode === "schema" ? { fpath: noteToDelete.fname + ".yml" } : {};
+      await this.store.delete(id, storeOpts);
     }
-    this.deleteFromNodes(id);
-    if (!_.isEmpty(noteToDelete.children)) {
-      const noteAsStub = Note.createStub(noteToDelete.fname, {
-        id,
-        parent: noteToDelete.parent,
-        children: noteToDelete.children,
-      });
-      this.refreshNodes([noteAsStub], { stub: true });
+    this.deleteFromNodes(id, mode);
+    if (mode === "note") {
+      if (!_.isEmpty(noteToDelete.children)) {
+        const noteAsStub = Note.createStub(noteToDelete.fname, {
+          id,
+          parent: (noteToDelete as Note).parent,
+          children: (noteToDelete as Note).children,
+        });
+        this.refreshNodes([noteAsStub], { stub: true });
+      }
     }
     return;
   }

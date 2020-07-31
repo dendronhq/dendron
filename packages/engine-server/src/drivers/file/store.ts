@@ -18,6 +18,7 @@ import {
   makeResponse,
   StoreQueryOpts,
   Note,
+  StoreDeleteOpts,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -144,12 +145,12 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
    * @param id
    */
   // @CacheClear({ cacheKey: CACHE_KEYS.QUERY_ALL })
-  async delete(id: string): Promise<void> {
+  async delete(id: string, opts?: StoreDeleteOpts): Promise<void> {
     if (id === this.rootId) {
       throw new IllegalOperationError("can't delete root");
     }
-    const fpath = this.idToPath[id];
-    const uri = path.join(this.opts.root, `${fpath}.md`);
+    const fpath = opts?.fpath ? opts.fpath : this.idToPath[id] + ".md";
+    const uri = path.join(this.opts.root, fpath);
     deleteFile(uri);
     this.deleteFromIdToPath(id);
     return;

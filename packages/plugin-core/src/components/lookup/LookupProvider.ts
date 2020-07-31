@@ -4,7 +4,7 @@ import {
   DNodeUtils,
   Note,
   Schema,
-  SchemaUtils,
+  SchemaUtils
 } from "@dendronhq/common-all";
 import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -251,106 +251,106 @@ export class LookupProvider {
     return showDocAndHidePicker(uri, picker);
   }
 
-  provide(picker: QuickPick<DNode>) {
-    const engine = DendronEngine.getOrCreateEngine();
-
-    const updatePickerItems = async () => {
-      const start = process.hrtime();
-      picker.busy = true;
-      const ctx = "updatePickerItems";
-      const querystring = picker.value;
-      let profile: number;
-      const ctx2 = {
-        ctx,
-        querystring,
-      };
-      try {
-        L.info({ ...ctx2, msg: "enter" });
-        const resp = await DendronEngine.getOrCreateEngine().query(
-          slashToDot(querystring),
-          "note"
-        );
-        profile = getDurationMilliseconds(start);
-        L.info({ ...ctx2, msg: "engine.query", profile });
-        // enrich notes with schemas
-        let updatedItems = resp.data.map((note) => {
-          const schema = SchemaUtils.matchNote(note as Note, engine.schemas);
-          (note as Note).schema = schema;
-          return note;
-        });
-        profile = getDurationMilliseconds(start);
-        L.info({ ...ctx2, msg: "matchSchema", profile });
-
-        // check if root query, if so, return everything
-        if (querystring === "") {
-          L.info({ ...ctx2, msg: "no qs" });
-          //picker.items = [engine().notes["root"]];
-          picker.items = _.uniqBy(
-            _.map(_.values(engine.notes), (ent) => ent.domain),
-            "domain"
-          );
-          return;
-        }
-        // check if single item query, vscode doesn't surface single letter queries
-        if (picker.activeItems.length === 0 && querystring.length === 1) {
-          picker.items = updatedItems;
-          picker.activeItems = picker.items;
-          return;
-        }
-
-        const perfectMatch = _.find(updatedItems, { fname: querystring });
-        // NOTE: we modify this later so need to track this here
-        const noUpdatedItems = updatedItems.length === 0;
-        const queryEndsWithDot = querystring.endsWith(".");
-
-        // check if we just entered a new level, only want to match children schema
-        updatedItems = PickerUtils.genSchemaSuggestions({
-          items: updatedItems as Note[],
-          qs: querystring,
-          engine: engine,
-        });
-        profile = getDurationMilliseconds(start);
-        L.info({ ...ctx2, msg: "genSchemaSuggestions", profile });
-        // updatedItems = PickerUtils.filterStubs(updatedItems as Note[]);
-
-        // check if new item, return if that's the case
-        if (
-          noUpdatedItems ||
-          (picker.activeItems.length === 0 && !perfectMatch)
-        ) {
-          L.info({ ...ctx2, msg: "no matches" });
-          // @ts-ignore
-          picker.items = updatedItems.concat([this.noActiveItem]);
-          return;
-        }
-
-        // check if perfect match, remove @noActiveItem result if that's the case
-        if (perfectMatch) {
-          L.debug({ ...ctx2, msg: "active = qs" });
-          picker.activeItems = [perfectMatch];
-          picker.items = updatedItems;
-        } else if (queryEndsWithDot) {
-          // don't show noActiveItem for dot queries
-          L.debug({ ...ctx2, msg: "active != qs, end with ." });
-          picker.items = updatedItems;
-        } else {
-          // regular result
-          L.debug({ ...ctx2, msg: "active != qs" });
-          // @ts-ignore
-          picker.items = [this.noActiveItem].concat(updatedItems);
-        }
-
-        // DEBUG
-        // activeItems = picker.activeItems.map((ent) => ent.label);
-        // items = picker.items.map((ent) => ent.label);
-        L.info({ ...ctx2, msg: "exit" });
-        return;
-      } finally {
-        profile = getDurationMilliseconds(start);
-        L.info({ ...ctx2, msg: "exit", querystring, profile });
-        picker.busy = false;
-      }
+  async onUpdatePickerItem(picker: QuickPick<DNode>) {
+    const start = process.hrtime();
+    picker.busy = true;
+    const ctx = "updatePickerItems";
+    const querystring = picker.value;
+    let profile: number;
+    const ctx2 = {
+      ctx,
+      querystring,
     };
+    const engine = DendronEngine.getOrCreateEngine();
+    try {
+      L.info({ ...ctx2, msg: "enter" });
+      const resp = await engine.query(
+        slashToDot(querystring),
+        "note"
+      );
+      profile = getDurationMilliseconds(start);
+      L.info({ ...ctx2, msg: "engine.query", profile });
+      // enrich notes with schemas
+      let updatedItems = resp.data.map((note) => {
+        const schema = SchemaUtils.matchNote(note as Note, engine.schemas);
+        (note as Note).schema = schema;
+        return note;
+      });
+      profile = getDurationMilliseconds(start);
+      L.info({ ...ctx2, msg: "matchSchema", profile });
+
+      // check if root query, if so, return everything
+      if (querystring === "") {
+        L.info({ ...ctx2, msg: "no qs" });
+        //picker.items = [engine().notes["root"]];
+        picker.items = _.uniqBy(
+          _.map(_.values(engine.notes), (ent) => ent.domain),
+          "domain"
+        );
+        return;
+      }
+      // check if single item query, vscode doesn't surface single letter queries
+      if (picker.activeItems.length === 0 && querystring.length === 1) {
+        picker.items = updatedItems;
+        picker.activeItems = picker.items;
+        return;
+      }
+
+      const perfectMatch = _.find(updatedItems, { fname: querystring });
+      // NOTE: we modify this later so need to track this here
+      const noUpdatedItems = updatedItems.length === 0;
+      const queryEndsWithDot = querystring.endsWith(".");
+
+      // check if we just entered a new level, only want to match children schema
+      updatedItems = PickerUtils.genSchemaSuggestions({
+        items: updatedItems as Note[],
+        qs: querystring,
+        engine: engine,
+      });
+      profile = getDurationMilliseconds(start);
+      L.info({ ...ctx2, msg: "genSchemaSuggestions", profile });
+      // updatedItems = PickerUtils.filterStubs(updatedItems as Note[]);
+
+      // check if new item, return if that's the case
+      if (
+        noUpdatedItems ||
+        (picker.activeItems.length === 0 && !perfectMatch)
+      ) {
+        L.info({ ...ctx2, msg: "no matches" });
+        // @ts-ignore
+        picker.items = updatedItems.concat([this.noActiveItem]);
+        return;
+      }
+
+      // check if perfect match, remove @noActiveItem result if that's the case
+      if (perfectMatch) {
+        L.debug({ ...ctx2, msg: "active = qs" });
+        picker.activeItems = [perfectMatch];
+        picker.items = updatedItems;
+      } else if (queryEndsWithDot) {
+        // don't show noActiveItem for dot queries
+        L.debug({ ...ctx2, msg: "active != qs, end with ." });
+        picker.items = updatedItems;
+      } else {
+        // regular result
+        L.debug({ ...ctx2, msg: "active != qs" });
+        // @ts-ignore
+        picker.items = [this.noActiveItem].concat(updatedItems);
+      }
+
+      // DEBUG
+      // activeItems = picker.activeItems.map((ent) => ent.label);
+      // items = picker.items.map((ent) => ent.label);
+      L.info({ ...ctx2, msg: "exit" });
+      return;
+    } finally {
+      profile = getDurationMilliseconds(start);
+      L.info({ ...ctx2, msg: "exit", querystring, profile });
+      picker.busy = false;
+    }
+  }
+
+  provide(picker: QuickPick<DNode>) {
 
     picker.onDidAccept(async () => {
       this.onDidAccept(picker);
@@ -358,7 +358,9 @@ export class LookupProvider {
     // picker.onDidChangeSelection((inputs: QuickPickItem[]) => {
     //   const ctx = "onDidChangeSelection";
     // });
-    picker.onDidChangeValue(updatePickerItems);
-    updatePickerItems();
+    picker.onDidChangeValue(() => {
+      this.onUpdatePickerItem(picker);
+    });
+    this.onUpdatePickerItem(picker);
   }
 }

@@ -286,6 +286,7 @@ Array [
 
 exports[`engine:exact note edge md exist, no schema file: listDir 1`] = `
 Array [
+  "bar.schema.yml",
   "foo.md",
   "foo.one.md",
   "foo.three.alpha.md",
@@ -384,6 +385,7 @@ Array [
 
 exports[`engine:exact note edge no md file, no schema : listDir 1`] = `
 Array [
+  "bar.schema.yml",
   "foo.md",
   "foo.one.md",
   "foo.three.alpha.md",
@@ -502,6 +504,7 @@ Object {
 
 exports[`engine:exact note edge no md file, schema exist: listDir 1`] = `
 Array [
+  "bar.schema.yml",
   "foo.md",
   "foo.one.md",
   "foo.schema.yml",
@@ -641,6 +644,7 @@ Object {
 
 exports[`engine:exact note main delete node with children: listDi2 1`] = `
 Array [
+  "bar.schema.yml",
   "foo.one.md",
   "foo.schema.yml",
   "foo.three.alpha.md",
@@ -826,6 +830,7 @@ Array [
 
 exports[`engine:exact note main open stub node: listDir 1`] = `
 Array [
+  "bar.schema.yml",
   "bar.two.md",
   "foo.md",
   "foo.one.md",
@@ -839,6 +844,7 @@ Array [
 
 exports[`engine:exact note main open stub node: listDir2 1`] = `
 Array [
+  "bar.schema.yml",
   "bar.two.md",
   "foo.md",
   "foo.one.md",
@@ -970,8 +976,8 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "foo",
       "bar",
+      "foo",
       "test1",
     ],
     "custom": Object {},
@@ -981,6 +987,23 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "root",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "one",
+      "three",
+    ],
+    "custom": Object {},
+    "data": Object {
+      "namespace": true,
+    },
+    "desc": "",
+    "fname": "bar.schema",
+    "parent": "root",
+    "stub": false,
+    "title": "bar",
     "type": "schema",
   },
   Object {
@@ -1001,61 +1024,6 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "alpha",
-    ],
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "foo.schema",
-    "parent": "bar",
-    "stub": false,
-    "title": "one",
-    "type": "schema",
-  },
-  Object {
-    "body": "",
-    "children": Array [],
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "foo.schema",
-    "parent": "one",
-    "stub": false,
-    "title": "alpha",
-    "type": "schema",
-  },
-  Object {
-    "body": "",
-    "children": Array [],
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "foo.schema",
-    "parent": "bar",
-    "stub": false,
-    "title": "three",
-    "type": "schema",
-  },
-  Object {
-    "body": "",
-    "children": Array [
-      "one",
-      "three",
-    ],
-    "custom": Object {},
-    "data": Object {
-      "namespace": true,
-    },
-    "desc": "",
-    "fname": "foo.schema",
-    "parent": "root",
-    "stub": false,
-    "title": "bar",
-    "type": "schema",
-  },
-  Object {
-    "body": "",
-    "children": Array [
       "test1-1",
       "test1-2",
     ],
@@ -1066,44 +1034,6 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "test1",
-    "type": "schema",
-  },
-  Object {
-    "body": "",
-    "children": Array [
-      "test1-1-1",
-    ],
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "test1.schema",
-    "parent": "test1",
-    "stub": false,
-    "title": "test1-1",
-    "type": "schema",
-  },
-  Object {
-    "body": "",
-    "children": Array [],
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "test1.schema",
-    "parent": "test1-1",
-    "stub": false,
-    "title": "test1-1-1",
-    "type": "schema",
-  },
-  Object {
-    "body": "",
-    "children": Array [],
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "test1.schema",
-    "parent": "test1",
-    "stub": false,
-    "title": "test1-2",
     "type": "schema",
   },
 ]

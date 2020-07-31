@@ -26,14 +26,20 @@ export class NodeService {
 
   async deleteByPath(fpath: string, mode: QueryMode): Promise<IDNode> {
     if (mode === "schema") {
-      throw Error("delete by schema not supported");
+      const fpathClean = path.basename(fpath, ".yml");
+      const node = _.find(this.engine["schemas"], { fname: fpathClean });
+      if (!node) {
+        throw Error(`no node found for ${fpath}`);
+      }
+      await this.engine.delete(node.id, mode);
+      return node;
     } else {
       const fpathClean = path.basename(fpath, ".md");
       const node = _.find(this.engine["notes"], { fname: fpathClean });
       if (!node) {
         throw Error(`no node found for ${fpath}`);
       }
-      await this.engine.delete(node.id);
+      await this.engine.delete(node.id, mode);
       return node;
     }
   }

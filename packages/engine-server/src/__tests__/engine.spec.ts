@@ -50,19 +50,22 @@ describe("engine:exact", () => {
 
   describe("schema", () => {
     describe("basic", () => {
+
       test("init", async () => {
         await engine.init();
-        testUtils.expectSnapshot(expect, "main", _.values(engine.schemas));
+        const schemas = _.values(engine.schemas);
+        testUtils.expectSnapshot(expect, "main", schemas);
+        expect(schemas.length).toEqual(4);
         const note = engine.notes["foo"];
-        let schema = engine.schemas["foo"];
+        const schema = engine.schemas["foo"];
         const schemaMatch = SchemaUtils.matchNote(note, engine.schemas);
-        expect(schemaMatch).toEqual(schema);
+        expect(schemaMatch.toRawProps()).toEqual(schema.toRawProps());
         const schemaNamespace = engine.schemas["bar"];
         expect(schemaNamespace.namespace).toBeTruthy();
 
-        // case3
-        schema = engine.schemas["test1-1"];
-        expect(schema.children[0].id).toEqual("test1-1-1");
+        // // case3
+        // schema = engine.schemas["test1"];
+        // expect(schema.children[0].id).toEqual("test1-1-1");
       });
 
       test("add node with schema", async () => {
@@ -72,7 +75,8 @@ describe("engine:exact", () => {
           { newNode: true, parentsAsStubs: true }
         );
         const note = engine.notes["bar.ns.one.alpha"];
-        const schema = engine.schemas["alpha"];
+        const schemaDomain = engine.schemas["bar"];
+        const schema = _.find(schemaDomain.nodes, { id: "alpha" }) as Schema;
         const schemaMatch = SchemaUtils.matchNote(note, engine.schemas);
         expect(schemaMatch).toEqual(schema);
       });

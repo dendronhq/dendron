@@ -1,10 +1,12 @@
-- id: foo
+- id: bar
   parent: root
+  data:
+    namespace: true
   children:
     - one
     - three
 - id: one
   children:
     - alpha
-- id: three
 - id: alpha
+- id: three

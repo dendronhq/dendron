@@ -347,18 +347,20 @@ export class DendronWorkspace {
             action: "delete",
             uri: vscode.Uri.file(fsPath),
           });
-          const note: Note = (await ns.deleteByPath(fsPath, "note")) as Note;
-          const closetParent = DNodeUtils.findClosestParent(
-            note.logicalPath,
-            this.engine.notes,
-            { noStubs: true }
-          );
-          const uri = node2Uri(closetParent);
-          try {
-            await vscode.window.showTextDocument(uri);
-          } catch (err) {
-            this.L.error({ ctx, msg: `can't open uri: ${uri}` });
-          }
+          const mode = fsPath.endsWith(".md") ? "note" : "schema";
+          await ns.deleteByPath(fsPath, mode);
+
+          // const closetParent = DNodeUtils.findClosestParent(
+          //   note.logicalPath,
+          //   this.engine.notes,
+          //   { noStubs: true }
+          // );
+          // const uri = node2Uri(closetParent);
+          // try {
+          //   await vscode.window.showTextDocument(uri);
+          // } catch (err) {
+          //   this.L.error({ ctx, msg: `can't open uri: ${uri}` });
+          // }
           vscode.window.showInformationMessage(
             `${path.basename(fsPath)} deleted`
           );

@@ -4,6 +4,7 @@ import {
   QueryMode,
   Schema,
   testUtils,
+  SchemaUtils,
 } from "@dendronhq/common-all";
 import { createFileStorage, setupTmpDendronDir } from "../../../testUtils";
 
@@ -140,7 +141,8 @@ describe("main", () => {
         const resp = await store.query("**/*", queryMode, {});
         const rootNode = _.find(resp.data, (n) => n.title === "root") as IDNode;
         const foo = _.find(resp.data, (n) => n.title === "foo") as IDNode;
-        const node = _.find(resp.data, (n) => n.title === "one") as IDNode;
+        const node = SchemaUtils.matchNote("foo.one", resp.data as Schema[]);
+        //const node = _.find(resp.data, (n) => n.title === "one") as IDNode;
         expect(rootNode).not.toBeUndefined();
         expect(node).not.toBeUndefined();
         expect(node.parent?.id).toEqual(foo.id);

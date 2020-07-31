@@ -734,10 +734,11 @@ export class NodeBuilder {
     const rootDomains: SchemaRawProps[] = this.getDomainsRoot<SchemaData>(
       props
     );
-    let out = [root];
+    const out = [root];
     rootDomains.forEach((rootRaw) => {
       const domain = this.toSchema(rootRaw, root, props);
-      out = out.concat(domain.nodes as Schema[]);
+      out.push(domain);
+      //out = out.concat(domain.nodes as Schema[]);
     });
     // DEBUG ctx: "parseSchema", out:
     return out;
@@ -804,28 +805,38 @@ export class SchemaUtils {
    */
   static matchNote(
     noteOrPath: Note | string,
-    schemas: SchemaDict,
+    schemas: SchemaDict|Schema[],
     opts?: { matchNamespace?: boolean; matchPrefix?: boolean }
   ): Schema {
     const cleanOpts = _.defaults(opts, {
       matchNamespace: true,
       matchPrefix: false,
     });
+    const schemaList = _.isArray(schemas) ? schemas : _.values(schemas);
     const notePath = _.isString(noteOrPath) ? noteOrPath : noteOrPath.path;
     const notePathClean = notePath.replace(/\./g, "/");
-    const out = _.find(_.values(schemas), (schema) => {
-      const logicalPath = schema.logicalPath;
-      if (schema.namespace && cleanOpts.matchNamespace) {
-        if (minimatch(notePathClean, _.trimEnd(logicalPath, "/*"))) {
-          return true;
+    let match: Schema | undefined;
+    _.find(schemaList, (schemaDomain) => {
+      return _.some(schemaDomain.nodes, (schema) => {
+        const logicalPath = schema.logicalPath;
+        if ((schema as Schema).namespace && cleanOpts.matchNamespace) {
+          if (minimatch(notePathClean, _.trimEnd(logicalPath, "/*"))) {
+            match = schema as Schema;
+            return true;
+          }
         }
-      }
-      return minimatch(notePathClean, logicalPath);
+        if (minimatch(notePathClean, logicalPath)) {
+          match = schema as Schema;
+          return true;
+        } else {
+          return false;
+        }
+      });
     });
-    if (_.isUndefined(out)) {
+    if (_.isUndefined(match)) {
       return Schema.createUnkownSchema();
     }
-    return out;
+    return match;
   }
 
   // static matchNote(note: Note, schemas: SchemaDict): Schema{

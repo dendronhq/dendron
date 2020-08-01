@@ -259,7 +259,7 @@ suite("startup", function () {
     });
   });
 
-  describe.only("lookup", function () {
+  describe("lookup", function () {
     vscode.window.showInformationMessage("Start lookup test");
     test("lookup new node", function (done) {
       setupDendronWorkspace(root.name, ctx).then(() => {

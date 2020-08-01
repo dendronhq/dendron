@@ -2,9 +2,9 @@ import {
   DEngineParser,
   IDNode,
   NoteRawProps,
-  SchemaNodeRaw,
   SchemaRawOpts,
   SchemaRawProps,
+  Schema,
 } from "@dendronhq/common-all";
 
 import YAML from "yamljs";
@@ -29,7 +29,7 @@ export class BodyParser implements DEngineParser<BodyParserOpts> {
         // new node
         o = _.merge(o, { parent: "root" });
       }
-      return SchemaNodeRaw.createProps({ ...o, fname });
+      return Schema.createRawProps({ ...o, fname });
     });
     return schemaProps;
   }

@@ -29,7 +29,7 @@ import {
 } from "./types";
 import { genUUID } from "./uuid";
 
-const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
+export const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
 export class DNodeUtils {
   /**
@@ -190,22 +190,6 @@ export class DNodeRaw {
       custom,
     };
     return nodeProps;
-  }
-}
-
-/*
-Create Schema based on Minimal Props
-- id: b111db5b-bc52-4977-893b-307522f89ea3
-  title: "foo",
-  parent: null
-  children:
-    - one
-*/
-// TODO: deprecate
-export class SchemaNodeRaw {
-  static createProps(opts: SchemaRawOpts): SchemaRawProps {
-    opts.title = opts.title || opts.id;
-    return DNodeRaw.createProps<SchemaData>(opts);
   }
 }
 
@@ -409,7 +393,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
       // eslint-disable-next-line no-lonely-if
       if (_.isNull(this.parent)) {
         // parent deleted when publishing site
-        if (ignoreNullParent) {
+        if (ignoreNullParent || this.id === UNKNOWN_SCHEMA_ID) {
           parent = null;
         } else {
           throw Error(`${props.fname} has no parent node`);
@@ -565,7 +549,7 @@ export class Schema extends DNode<SchemaData> implements ISchema {
    */
   static createUnkownSchema(): Schema {
     if (_.isUndefined(Schema._UNKNOWN_SCHEMA)) {
-      const props = SchemaNodeRaw.createProps({
+      const props = Schema.createRawProps({
         id: UNKNOWN_SCHEMA_ID,
         fname: UNKNOWN_SCHEMA_ID,
         stub: true,

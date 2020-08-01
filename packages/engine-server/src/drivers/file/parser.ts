@@ -5,17 +5,16 @@ import {
   NoteDict,
   NoteRawProps,
   NoteUtils,
-  SchemaNodeRaw,
+  Schema,
   SchemaRawOpts,
   SchemaRawProps,
-  Schema,
 } from "@dendronhq/common-all";
 import {
   createLogger,
+  DLogger,
   globMatch,
   mdFile2NodeProps,
   pino,
-  DLogger,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";

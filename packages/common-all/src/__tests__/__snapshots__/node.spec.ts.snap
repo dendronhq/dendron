@@ -81,6 +81,21 @@ Array [
 ]
 `;
 
+exports[`Schema basic unknown schema: unknown 1`] = `
+Object {
+  "body": "",
+  "children": Array [],
+  "custom": Object {},
+  "data": Object {},
+  "desc": "",
+  "fname": "_UNKNOWN_SCHEMA.schema",
+  "parent": "root",
+  "stub": true,
+  "title": "_UNKNOWN_SCHEMA",
+  "type": "schema",
+}
+`;
+
 exports[`Schema domainRoot at child: fooChild_body 1`] = `
 "-
     id: one

@@ -1,6 +1,13 @@
-import { DNodeUtils, Note, NoteUtils, Schema, SchemaUtils } from "../node";
+import {
+  DNodeUtils,
+  Note,
+  NoteUtils,
+  Schema,
+  SchemaUtils,
+  UNKNOWN_SCHEMA_ID,
+} from "../node";
 
-import { expectSnapshot } from "../testUtils";
+import { expectSnapshot, testUtils } from "../testUtils";
 import _ from "lodash";
 
 function setupNotes() {
@@ -241,6 +248,15 @@ describe("Schema", () => {
 
   beforeEach(() => {
     schemas = setupSchema();
+  });
+
+  describe("basic", () => {
+    test("unknown schema", () => {
+      const schema = Schema.createUnkownSchema();
+      expect(schema.id).toEqual(UNKNOWN_SCHEMA_ID);
+      expect(schema.stub).toBe(true);
+      testUtils.expectSnapshot(expect, "unknown", schema);
+    });
   });
 
   describe("domainRoot", () => {

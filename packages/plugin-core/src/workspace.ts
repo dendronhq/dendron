@@ -202,7 +202,8 @@ export class DendronWorkspace {
             title = resp;
           }
           const node = new Note({ fname, title });
-          const uri = node2Uri(node);
+          const wsFolders = DendronWorkspace.workspaceFolders() as vscode.WorkspaceFolder[];
+          const uri = node2Uri(node, wsFolders);
           const historyService = HistoryService.instance();
           historyService.add({ source: "engine", action: "create", uri });
           await DendronEngine.getOrCreateEngine().write(node, {
@@ -249,7 +250,8 @@ export class DendronWorkspace {
 
           // create new note
           const node = new Note({ fname, title });
-          const uri = node2Uri(node);
+          const wsFolders = DendronWorkspace.workspaceFolders() as vscode.WorkspaceFolder[];
+          const uri = node2Uri(node, wsFolders);
           const historyService = HistoryService.instance();
           historyService.add({ source: "engine", action: "create", uri });
           const engine = await DendronEngine.getOrCreateEngine();

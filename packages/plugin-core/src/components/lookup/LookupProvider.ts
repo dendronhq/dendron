@@ -8,12 +8,13 @@ import {
 } from "@dendronhq/common-all";
 import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { QuickPick, QuickPickItem, Uri, window } from "vscode";
+import { QuickPick, QuickPickItem, Uri, window, WorkspaceFolder } from "vscode";
 import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
 import { getDurationMilliseconds, profile } from "../../utils/system";
 import { CREATE_NEW_LABEL } from "./constants";
 import { node2Uri } from "./utils";
+import { DendronWorkspace } from "../../workspace";
 
 const L = Logger;
 // @ts-ignore
@@ -64,7 +65,7 @@ class QueryStringUtils {
   }
 }
 
-function createNoActiveItem(opts?: { label?: string }): QuickPickItem {
+export function createNoActiveItem(opts?: { label?: string }): QuickPickItem {
   const cleanOpts = _.defaults(opts, { label: "" });
   return {
     label: cleanOpts.label,
@@ -240,6 +241,8 @@ export class LookupProvider {
     }
 
     let uri: Uri;
+    const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
+
     if (isCreateNewNotePick(selectedItem)) {
       L.info({ ...ctx2, msg: "createNewPick" });
       const fname = value;
@@ -272,12 +275,13 @@ export class LookupProvider {
           profile,
         });
       } else {
+        L.info({...ctx2, msg: "create from label"});
         nodeNew =
           opts.flavor === "note" ? new Note({ fname }) : new Schema({ fname });
       }
 
       // FIXME: this should be done after the node is created
-      uri = node2Uri(nodeNew);
+      uri = node2Uri(nodeNew, wsFolders);
       const historyService = HistoryService.instance();
       historyService.add({ source: "engine", action: "create", uri });
       profile = getDurationMilliseconds(start);
@@ -290,7 +294,7 @@ export class LookupProvider {
       profile = getDurationMilliseconds(start);
       L.info({ ...ctx2, msg: "engine.write", profile });
     } else {
-      uri = node2Uri(selectedItem);
+      uri = node2Uri(selectedItem, wsFolders);
     }
     profile = getDurationMilliseconds(start);
     L.info({ ...ctx2, msg: "exit", profile });

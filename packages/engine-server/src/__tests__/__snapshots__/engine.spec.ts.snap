@@ -103,6 +103,7 @@ Array [
     "body": "",
     "children": Array [
       "foo",
+      "Bar",
     ],
     "custom": Object {},
     "data": Object {},
@@ -127,6 +128,20 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "foo",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "parent": "root",
+    "stub": true,
+    "title": "Bar",
     "type": "note",
   },
   Object {
@@ -171,6 +186,20 @@ Array [
   },
   Object {
     "body": "",
+    "children": Array [
+      "Temp",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one",
+    "parent": "Bar",
+    "stub": true,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
+    "body": "",
     "children": Array [],
     "custom": Object {},
     "data": Object {},
@@ -179,6 +208,18 @@ Array [
     "parent": "Three",
     "stub": false,
     "title": "Alpha",
+    "type": "note",
+  },
+  Object {
+    "body": "Template text",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one.temp",
+    "parent": "One",
+    "stub": false,
+    "title": "Temp",
     "type": "note",
   },
 ]
@@ -203,6 +244,7 @@ Array [
     "body": "",
     "children": Array [
       "foo",
+      "Bar",
     ],
     "custom": Object {},
     "data": Object {},
@@ -227,6 +269,20 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "foo",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "parent": "root",
+    "stub": true,
+    "title": "Bar",
     "type": "note",
   },
   Object {
@@ -271,6 +327,20 @@ Array [
   },
   Object {
     "body": "",
+    "children": Array [
+      "Temp",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one",
+    "parent": "Bar",
+    "stub": true,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
+    "body": "",
     "children": Array [],
     "custom": Object {},
     "data": Object {},
@@ -281,11 +351,24 @@ Array [
     "title": "Alpha",
     "type": "note",
   },
+  Object {
+    "body": "Template text",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one.temp",
+    "parent": "One",
+    "stub": false,
+    "title": "Temp",
+    "type": "note",
+  },
 ]
 `;
 
 exports[`engine:exact note edge md exist, no schema file: listDir 1`] = `
 Array [
+  "bar.one.temp.md",
   "bar.schema.yml",
   "foo.md",
   "foo.one.md",
@@ -302,6 +385,7 @@ Array [
     "body": "",
     "children": Array [
       "foo",
+      "Bar",
     ],
     "custom": Object {},
     "data": Object {},
@@ -326,6 +410,20 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "foo",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "parent": "root",
+    "stub": true,
+    "title": "Bar",
     "type": "note",
   },
   Object {
@@ -370,6 +468,20 @@ Array [
   },
   Object {
     "body": "",
+    "children": Array [
+      "Temp",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one",
+    "parent": "Bar",
+    "stub": true,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
+    "body": "",
     "children": Array [],
     "custom": Object {},
     "data": Object {},
@@ -380,11 +492,24 @@ Array [
     "title": "Alpha",
     "type": "note",
   },
+  Object {
+    "body": "Template text",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one.temp",
+    "parent": "One",
+    "stub": false,
+    "title": "Temp",
+    "type": "note",
+  },
 ]
 `;
 
 exports[`engine:exact note edge no md file, no schema : listDir 1`] = `
 Array [
+  "bar.one.temp.md",
   "bar.schema.yml",
   "foo.md",
   "foo.one.md",
@@ -402,6 +527,7 @@ Array [
 ",
     "children": Array [
       "foo",
+      "Bar",
     ],
     "custom": Object {},
     "data": Object {},
@@ -426,6 +552,20 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "foo",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "parent": "root",
+    "stub": true,
+    "title": "Bar",
     "type": "note",
   },
   Object {
@@ -470,6 +610,20 @@ Array [
   },
   Object {
     "body": "",
+    "children": Array [
+      "Temp",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one",
+    "parent": "Bar",
+    "stub": true,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
+    "body": "",
     "children": Array [],
     "custom": Object {},
     "data": Object {},
@@ -478,6 +632,18 @@ Array [
     "parent": "Three",
     "stub": false,
     "title": "Alpha",
+    "type": "note",
+  },
+  Object {
+    "body": "Template text",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one.temp",
+    "parent": "One",
+    "stub": false,
+    "title": "Temp",
     "type": "note",
   },
 ]
@@ -504,6 +670,7 @@ Object {
 
 exports[`engine:exact note edge no md file, schema exist: listDir 1`] = `
 Array [
+  "bar.one.temp.md",
   "bar.schema.yml",
   "foo.md",
   "foo.one.md",
@@ -522,6 +689,7 @@ Array [
 ",
     "children": Array [
       "foo",
+      "Bar",
     ],
     "custom": Object {},
     "data": Object {},
@@ -546,6 +714,20 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "foo",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "parent": "root",
+    "stub": true,
+    "title": "Bar",
     "type": "note",
   },
   Object {
@@ -590,6 +772,20 @@ Array [
   },
   Object {
     "body": "",
+    "children": Array [
+      "Temp",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one",
+    "parent": "Bar",
+    "stub": true,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
+    "body": "",
     "children": Array [],
     "custom": Object {},
     "data": Object {},
@@ -598,6 +794,18 @@ Array [
     "parent": "Three",
     "stub": false,
     "title": "Alpha",
+    "type": "note",
+  },
+  Object {
+    "body": "Template text",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one.temp",
+    "parent": "One",
+    "stub": false,
+    "title": "Temp",
     "type": "note",
   },
 ]
@@ -644,6 +852,7 @@ Object {
 
 exports[`engine:exact note main delete node with children: listDi2 1`] = `
 Array [
+  "bar.one.temp.md",
   "bar.schema.yml",
   "foo.one.md",
   "foo.schema.yml",
@@ -660,6 +869,7 @@ Array [
     "body": "",
     "children": Array [
       "foo",
+      "Bar",
     ],
     "custom": Object {},
     "data": Object {},
@@ -668,6 +878,20 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "root",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "parent": "root",
+    "stub": true,
+    "title": "Bar",
     "type": "note",
   },
   Object {
@@ -712,6 +936,20 @@ Array [
   },
   Object {
     "body": "",
+    "children": Array [
+      "Temp",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one",
+    "parent": "Bar",
+    "stub": true,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
+    "body": "",
     "children": Array [],
     "custom": Object {},
     "data": Object {},
@@ -720,6 +958,18 @@ Array [
     "parent": "Three",
     "stub": false,
     "title": "Alpha",
+    "type": "note",
+  },
+  Object {
+    "body": "Template text",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one.temp",
+    "parent": "One",
+    "stub": false,
+    "title": "Temp",
     "type": "note",
   },
   Object {
@@ -747,6 +997,7 @@ Array [
     "body": "",
     "children": Array [
       "foo",
+      "Bar",
     ],
     "custom": Object {},
     "data": Object {},
@@ -755,6 +1006,20 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "root",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "parent": "root",
+    "stub": true,
+    "title": "Bar",
     "type": "note",
   },
   Object {
@@ -799,6 +1064,20 @@ Array [
   },
   Object {
     "body": "",
+    "children": Array [
+      "Temp",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one",
+    "parent": "Bar",
+    "stub": true,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
+    "body": "",
     "children": Array [],
     "custom": Object {},
     "data": Object {},
@@ -807,6 +1086,18 @@ Array [
     "parent": "Three",
     "stub": false,
     "title": "Alpha",
+    "type": "note",
+  },
+  Object {
+    "body": "Template text",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one.temp",
+    "parent": "One",
+    "stub": false,
+    "title": "Temp",
     "type": "note",
   },
   Object {
@@ -830,6 +1121,7 @@ Array [
 
 exports[`engine:exact note main open stub node: listDir 1`] = `
 Array [
+  "bar.one.temp.md",
   "bar.schema.yml",
   "bar.two.md",
   "foo.md",
@@ -844,6 +1136,7 @@ Array [
 
 exports[`engine:exact note main open stub node: listDir2 1`] = `
 Array [
+  "bar.one.temp.md",
   "bar.schema.yml",
   "bar.two.md",
   "foo.md",
@@ -893,6 +1186,7 @@ Array [
     "body": "",
     "children": Array [
       "Two",
+      "One",
     ],
     "custom": Object {},
     "data": Object {},
@@ -958,6 +1252,20 @@ Array [
   },
   Object {
     "body": "",
+    "children": Array [
+      "Temp",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one",
+    "parent": "Bar",
+    "stub": true,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
+    "body": "",
     "children": Array [],
     "custom": Object {},
     "data": Object {},
@@ -966,6 +1274,18 @@ Array [
     "parent": "Three",
     "stub": false,
     "title": "Alpha",
+    "type": "note",
+  },
+  Object {
+    "body": "Template text",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one.temp",
+    "parent": "One",
+    "stub": false,
+    "title": "Temp",
     "type": "note",
   },
 ]

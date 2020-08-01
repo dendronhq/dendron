@@ -5,6 +5,9 @@
     - one
     - three
 - id: one
+  template:
+    id: bar.one.temp
+    type: note
   children:
     - alpha
 - id: alpha

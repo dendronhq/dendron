@@ -22,7 +22,6 @@ import {
   NoteRawProps,
   SchemaData,
   SchemaDict,
-  SchemaRawOpts,
   SchemaRawProps,
   RawPropsOpts,
   SchemaRawOptsFlat,

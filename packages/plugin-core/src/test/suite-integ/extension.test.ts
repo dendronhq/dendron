@@ -1,4 +1,4 @@
-import { FileTestUtils, DirResult } from "@dendronhq/common-server";
+import { FileTestUtils, DirResult, mdFile2NodeProps } from "@dendronhq/common-server";
 import * as assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -15,6 +15,8 @@ import { _activate } from "../../extension";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
+import { LookupProvider, EngineOpts, createNoActiveItem } from "../../components/lookup/LookupProvider";
+import { DNode, Note } from "@dendronhq/common-all";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
@@ -272,18 +274,55 @@ suite("startup", function () {
     });
   });
 
-  describe.only("lookup", function () {
+  describe("lookup", function () {
     vscode.window.showInformationMessage("Start lookup test");
     this.timeout(timeout);
+
     test("lookup new node", function (done) {
       setupDendronWorkspace(root.name, ctx).then(() => {
         onWSActive(async () => {
           assert.equal(DendronWorkspace.isActive(), true);
-          await createMockQuickPick({value: "bond"});
-          // TODO: get new quickpick
-          // done();
+          const qp = await createMockQuickPick<DNode>({value: "bond"});
+          const bondNote = createNoActiveItem({label: "bond"});
+          // @ts-ignore
+          qp.items = [bondNote];
+          // @ts-ignore
+          qp.activeItems = [bondNote];
+          // @ts-ignore
+          qp.selectedItems = [bondNote];
+          const engOpts: EngineOpts = {flavor: "note"};
+          const lp = new LookupProvider(engOpts);
+          await lp.onDidAccept(qp, engOpts);
+          const txtPath = vscode.window.activeTextEditor?.document.uri.fsPath as string;
+          const node = mdFile2NodeProps(txtPath);
+          assert.equal(node.title, "Bond");
+          done();
         });
       });
     });
+
+    test("lookup new node with schema template", function (done) {
+      setupDendronWorkspace(root.name, ctx).then(() => {
+        onWSActive(async () => {
+          assert.equal(DendronWorkspace.isActive(), true);
+          const qp = await createMockQuickPick<DNode>({value: "bar.one"});
+          const bondNote = createNoActiveItem({label: "bond.one"});
+          // @ts-ignore
+          qp.items = [bondNote];
+          // @ts-ignore
+          qp.activeItems = [bondNote];
+          // @ts-ignore
+          qp.selectedItems = [bondNote];
+          const engOpts: EngineOpts = {flavor: "note"};
+          const lp = new LookupProvider(engOpts);
+          await lp.onDidAccept(qp, engOpts);
+          const txtPath = vscode.window.activeTextEditor?.document.uri.fsPath as string;
+          const node = mdFile2NodeProps(txtPath);
+          assert.equal(node.body, _.trim("Template Text"));
+          done();
+        });
+      });
+    });
+
   });
 });

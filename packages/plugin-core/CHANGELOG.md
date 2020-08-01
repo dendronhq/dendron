@@ -5,11 +5,27 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.4.6](https://github.com/dendronhq/dendron/compare/v0.4.5...v0.4.6) (2020-08-01)
 
+### Summary
+
+Schemas now support templates. That means you can add the name of another note that you want to serve as a template to a schema. Every time a note that matches the schema is created, it will have the template applied automatically.
+
+We are launching with support for creating templates from other notes. We will also be launching the ability to create templates from snippets in the coming week.
+
+<img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/481b7ab051394c1caa383383bd265755-with-play.gif">
+
 ### Features
 
-- support schema templates ([0205d66](https://github.com/dendronhq/dendron/commit/0205d66fc4538361322ffeabb3e532f0d541b775))
+- support schema templates ([0205d66](https://github.com/dendronhq/dendron/commit/0205d66fc4538361322ffeabb3e532f0d541b775)) ([docs](https://www.dendron.so/notes/c5e5adde-5459-409b-b34d-a0d75cbb1052.html#schema-templates))
 
 ## [0.4.5](https://github.com/dendronhq/dendron/compare/v0.4.4...v0.4.5) (2020-08-01)
+
+### Summary
+
+Schema syntax has been simplified. Before we had an extra `data` field to namespace the `namespace` field. We flattened all schema attributes to make the syntax more elegant. Note that the old styled `data` syntax is still supported but we recommend moving to the new syntax as `data` will be deprecated in a few releases.
+
+### Enhancements
+
+- simpler schema syntax ([d53ddb](https://github.com/dendronhq/dendron/commit/d53ddb73bfacc3f769db88cfd4f482a706dcb6dd))
 
 ### Bug Fixes
 

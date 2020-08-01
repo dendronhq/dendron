@@ -76,6 +76,19 @@ function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
   };
 }
 
+
+type QuickPickOpts = Partial<{
+  value: string
+}>
+
+function createMockQuickPick<T extends vscode.QuickPickItem>(opts: QuickPickOpts): vscode.QuickPick<T> {
+    const qp = vscode.window.createQuickPick<T>()
+    if (opts.value) {
+      qp.value = opts.value;
+    }
+    return qp;
+}
+
 function setupDendronWorkspace(rootDir: string, ctx: vscode.ExtensionContext) {
   DendronWorkspace.configuration = () => {
     return createMockConfig({
@@ -259,14 +272,16 @@ suite("startup", function () {
     });
   });
 
-  describe("lookup", function () {
+  describe.only("lookup", function () {
     vscode.window.showInformationMessage("Start lookup test");
+    this.timeout(timeout);
     test("lookup new node", function (done) {
       setupDendronWorkspace(root.name, ctx).then(() => {
         onWSActive(async () => {
           assert.equal(DendronWorkspace.isActive(), true);
+          await createMockQuickPick({value: "bond"});
           // TODO: get new quickpick
-          done();
+          // done();
         });
       });
     });

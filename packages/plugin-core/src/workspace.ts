@@ -611,7 +611,7 @@ export class DendronWorkspace {
   async showWelcome(welcomeUri?: vscode.Uri, opts?: { reuseWindow?: boolean }) {
     welcomeUri =
       welcomeUri ||
-      vscode.Uri.joinPath(this.rootWorkspace.uri, "pro.dendron.quickstart.md");
+      vscode.Uri.joinPath(this.rootWorkspace.uri, "dendron.quickstart.md");
     try {
       await vscode.window.showTextDocument(welcomeUri);
       await MarkdownUtils.openPreview(opts);

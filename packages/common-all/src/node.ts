@@ -27,6 +27,7 @@ import {
   SchemaRawOptsFlat,
 } from "./types";
 import { genUUID } from "./uuid";
+import { SchemaTemplate, DEngine } from "../lib";
 
 export const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
@@ -516,8 +517,15 @@ export class Schema extends DNode<SchemaData> implements ISchema {
     if (opts.fname.indexOf(".schema") < 0) {
       opts.fname += ".schema";
     }
-    const schemaDataOpts: (keyof SchemaData)[] = ["namespace", "pattern"];
-    const optsWithoutData = _.omit<SchemaRawOptsFlat, keyof SchemaData>(opts, schemaDataOpts);
+    const schemaDataOpts: (keyof SchemaData)[] = [
+      "namespace",
+      "pattern",
+      "template",
+    ];
+    const optsWithoutData = _.omit<SchemaRawOptsFlat, keyof SchemaData>(
+      opts,
+      schemaDataOpts
+    );
     const optsData = _.pick(opts, schemaDataOpts);
     return DNodeRaw.createProps({
       ..._.defaults(optsWithoutData, {
@@ -802,6 +810,41 @@ export class NoteUtils {
 export class SchemaUtils {
   static isUnkown(schema: Schema) {
     return schema.id === UNKNOWN_SCHEMA_ID;
+  }
+
+  static applyTemplate(opts: {
+    template: SchemaTemplate;
+    note: Note;
+    engine: DEngine;
+  }) {
+    const { template, note, engine } = opts;
+    if (template.type === "note") {
+      const tempNote = _.find(_.values(engine.notes), { fname: template.id });
+      if (_.isUndefined(tempNote)) {
+        throw Error(`no template found for ${template}`);
+      }
+      note.body = tempNote.body;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Return true if template was applied, false otherwise
+   * @param opts
+   */
+  static matchAndApplyTemplate(opts: { note: Note; engine: DEngine }): boolean {
+    const { note, engine } = opts;
+    const schemas = SchemaUtils.matchNote(note, engine.schemas);
+    if (schemas.data.template) {
+      return SchemaUtils.applyTemplate({
+        template: schemas.data.template,
+        note,
+        engine,
+      });
+    } else {
+      return false;
+    }
   }
 
   /**

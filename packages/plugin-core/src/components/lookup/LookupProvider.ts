@@ -212,10 +212,10 @@ export class LookupProvider {
     this.opts = opts;
   }
 
-  validate(value: string, flavor: EngineFlavor): string|undefined {
+  validate(value: string, flavor: EngineFlavor): string | undefined {
     if (flavor === "schema") {
       if (value.split(".").length > 1) {
-        return "schemas can only be one level deep"
+        return "schemas can only be one level deep";
       }
     }
     return;
@@ -242,6 +242,7 @@ export class LookupProvider {
 
     let uri: Uri;
     const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
+    const engine = DendronEngine.getOrCreateEngine();
 
     if (isCreateNewNotePick(selectedItem)) {
       L.info({ ...ctx2, msg: "createNewPick" });
@@ -251,9 +252,7 @@ export class LookupProvider {
       // otherwise, children will not be right
       if (selectedItem.stub) {
         L.info({ ...ctx2, msg: "createNewPick:stub" });
-        nodeNew = (
-          await DendronEngine.getOrCreateEngine().queryOne(fname, "note")
-        ).data as Note;
+        nodeNew = (await engine.queryOne(fname, "note")).data as Note;
         nodeNew.stub = false;
         profile = getDurationMilliseconds(start);
         L.info({
@@ -275,9 +274,14 @@ export class LookupProvider {
           profile,
         });
       } else {
-        L.info({...ctx2, msg: "create from label"});
+        L.info({ ...ctx2, msg: "create from label" });
         nodeNew =
           opts.flavor === "note" ? new Note({ fname }) : new Schema({ fname });
+      }
+
+      // apply schema template
+      if (opts.flavor === "note") {
+        SchemaUtils.matchAndApplyTemplate({ note: nodeNew as Note, engine });
       }
 
       // FIXME: this should be done after the node is created

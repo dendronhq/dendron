@@ -17,9 +17,14 @@ export type NoteData = {
   schemaId?: string;
   links?: NoteLink[];
 };
+export type SchemaTemplate = {
+  id: string
+  type: "snippet"|"note"
+}
 export type SchemaData = {
   namespace?: boolean;
   pattern?: string;
+  template?: SchemaTemplate;
 };
 export type DNodeData = SchemaData | NoteData;
 export type IDNodeType = "note" | "schema";

@@ -2,7 +2,8 @@ import {
   DendronConfig, DEngine,
   DNodeUtils,
   getStage,
-  Note
+  Note,
+  SchemaUtils
 } from "@dendronhq/common-all";
 import { cleanName } from "@dendronhq/common-server";
 import { DConfig, DendronEngine } from "@dendronhq/engine-server";
@@ -182,6 +183,7 @@ export class DendronWorkspace {
           const defaultNameConfig = "Y-MM-DD-HHmmss";
           const scratchDomain = "scratch";
           const noteName = moment().format(defaultNameConfig);
+          const engine = await DendronEngine.getOrCreateEngine();
           const fname = `${scratchDomain}.${noteName}`;
 
           // get title
@@ -202,11 +204,12 @@ export class DendronWorkspace {
             title = resp;
           }
           const node = new Note({ fname, title });
+          SchemaUtils.matchAndApplyTemplate({ note: node, engine });
           const wsFolders = DendronWorkspace.workspaceFolders() as vscode.WorkspaceFolder[];
           const uri = node2Uri(node, wsFolders);
           const historyService = HistoryService.instance();
           historyService.add({ source: "engine", action: "create", uri });
-          await DendronEngine.getOrCreateEngine().write(node, {
+          engine.write(node, {
             newNode: true,
             parentsAsStubs: true,
           });
@@ -255,6 +258,7 @@ export class DendronWorkspace {
           const historyService = HistoryService.instance();
           historyService.add({ source: "engine", action: "create", uri });
           const engine = await DendronEngine.getOrCreateEngine();
+          SchemaUtils.matchAndApplyTemplate({ note: node, engine });
           engine.write(node, {
             newNode: true,
             parentsAsStubs: true,

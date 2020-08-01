@@ -248,7 +248,6 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
   public children: IDNode<T>[];
   public body: string;
   public data: T;
-  public label: string;
   public stub: boolean;
   public custom: any;
   public uri: URI;
@@ -287,7 +286,6 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     this.children = children;
     this.body = body;
     this.data = data;
-    this.label = DNodeUtils.isRoot(this) ? "root" : this.logicalPath;
     this.stub = stub;
     this.custom = custom;
     this.uri = URI.parse(`dendron://${fname}.md`);
@@ -306,6 +304,10 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
 
   get detail(): string {
     return "";
+  }
+
+  get label(): string {
+    return DNodeUtils.isRoot(this) ? "root" : this.logicalPath;
   }
 
   /**
@@ -581,6 +583,10 @@ export class Schema extends DNode<SchemaData> implements ISchema {
 
   get namespace(): boolean {
     return this.data?.namespace || false;
+  }
+
+  get label(): string {
+    return this.id;
   }
 
   get logicalPath(): string {

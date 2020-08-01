@@ -88,7 +88,7 @@ export class LookupController {
 
     // set editor path
     let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
-    if (editorPath) {
+    if (editorPath && this.opts.flavor !== "schema") {
       quickpick.value = path.basename(editorPath, ".md");
     }
 

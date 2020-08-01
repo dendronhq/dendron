@@ -50,7 +50,6 @@ describe("engine:exact", () => {
 
   describe("schema", () => {
     describe("basic", () => {
-
       test("init", async () => {
         await engine.init();
         const schemas = _.values(engine.schemas);
@@ -90,6 +89,9 @@ describe("engine:exact", () => {
         });
         const schemaInEngine = engine.schemas["bond"];
         testUtils.expectSnapshot(expect, "schema", schemaInEngine);
+        expect(
+          fs.readFileSync(path.join(root, "bond.schema.yml"), "utf8")
+        ).toMatchSnapshot("bond.schema");
         expect(
           _.pick(schemaInEngine.toRawProps(), [
             "id",

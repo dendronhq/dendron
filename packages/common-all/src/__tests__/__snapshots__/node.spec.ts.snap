@@ -86,14 +86,12 @@ exports[`Schema domainRoot at child: fooChild_body 1`] = `
     id: one
     title: foo.yml
     desc: \\"\\"
-    children: [alpha]
     data: {}
     parent: root
 -
     id: alpha
     title: foo.yml
     desc: \\"\\"
-    children: []
     data: {}
     parent: root
 "
@@ -104,21 +102,18 @@ exports[`Schema domainRoot at root: foo_body 1`] = `
     id: foo
     title: foo.yml
     desc: \\"\\"
-    children: [one]
     data: {}
     parent: root
 -
     id: one
     title: foo.yml
     desc: \\"\\"
-    children: [alpha]
     data: {}
     parent: root
 -
     id: alpha
     title: foo.yml
     desc: \\"\\"
-    children: []
     data: {}
     parent: root
 "

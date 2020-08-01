@@ -1039,6 +1039,16 @@ Array [
 ]
 `;
 
+exports[`engine:exact schema basic write schema: bond.schema 1`] = `
+"-
+    id: bond
+    title: bond
+    desc: \\"\\"
+    data: {}
+    parent: root
+"
+`;
+
 exports[`engine:exact schema basic write schema: schema 1`] = `
 Object {
   "body": "",

@@ -608,7 +608,7 @@ export class Schema extends DNode<SchemaData> implements ISchema {
       // TODO: don't hardcode, this only applies to new schemas
       (props) => {
         return {
-          ..._.pick(props, ["id", "title", "desc", "children", "data"]),
+          ..._.pick(props, ["id", "title", "desc", "data"]),
           parent: "root",
         };
       }

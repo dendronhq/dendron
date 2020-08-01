@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.4](https://github.com/dendronhq/dendron/compare/v0.4.3...v0.4.4) (2020-08-01)
+
+### Features
+
+- support deleting schemas ([450f00d](https://github.com/dendronhq/dendron/commit/450f00d6661d1d45dbfed7392bde179a0ab0020c))
+- support deleting schemas ([7e6730a](https://github.com/dendronhq/dendron/commit/7e6730a9c3f804d7c039cf74495493839c910fed))
+
 ## [0.4.3](https://github.com/dendronhq/dendron/compare/v0.4.2...v0.4.3) (2020-07-30)
 
 ### Bug Fixes

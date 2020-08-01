@@ -5,11 +5,16 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.4.4](https://github.com/dendronhq/dendron/compare/v0.4.3...v0.4.4) (2020-08-01)
 
+### Summary
+
+You can now work with schemas as easily as you do with regular notes. Have no fear, lookup for schemas is here!
+
 ### Features
 
-- support deleting schemas ([450f00d](https://github.com/dendronhq/dendron/commit/450f00d6661d1d45dbfed7392bde179a0ab0020c))
-- support deleting schemas ([7e6730a](https://github.com/dendronhq/dendron/commit/7e6730a9c3f804d7c039cf74495493839c910fed))
-- use lookups to view and create schemas ([19b4677](https://github.com/dendronhq/dendron/commit/19b46770fe6a842831692563de96ff4a823df871))
+- use lookups to view and create schemas ([19b4677](https://github.com/dendronhq/dendron/commit/19b46770fe6a842831692563de96ff4a823df871)) ([docs](https://www.dendron.so/notes/a7c3a810-28c8-4b47-96a6-8156b1524af3.html#schemas))
+  - it's now possible to perform lookup on schemas in addition to notes
+- support deleting schemas ([7e6730a](https://github.com/dendronhq/dendron/commit/7e6730a9c3f804d7c039cf74495493839c910fed)) ([docs](https://www.dendron.so/notes/a7c3a810-28c8-4b47-96a6-8156b1524af3.html#schemas))
+  - what you create you can also take away
 
 ## [0.4.3](https://github.com/dendronhq/dendron/compare/v0.4.2...v0.4.3) (2020-07-30)
 

@@ -111,6 +111,7 @@ export type INote = INoteProps & { domain: INote };
 export type NoteDict = { [id: string]: Note };
 
 // --- Schema
+export type SchemaRawOptsFlat = Omit<DNodeRawOpts<any>, "data"> & SchemaData & {id: string, fname: string}
 export type SchemaRawOpts = DNodeRawOpts<SchemaData> &
   Required<Pick<DNodeRawOpts<SchemaData>, "id" | "fname">>;
 export type SchemaRawProps = DNodeRawProps<SchemaData>;

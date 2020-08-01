@@ -8,6 +8,7 @@ import {
   SchemaNodeRaw,
   SchemaRawOpts,
   SchemaRawProps,
+  Schema,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -152,7 +153,7 @@ export class FileParser {
       fs.readFileSync(path.join(root, fpath), "utf8")
     );
     const schemaProps = schemaOpts.map((o) =>
-      SchemaNodeRaw.createProps({ ...o, fname })
+      Schema.createRawProps({ ...o, fname })
     );
     return schemaProps;
   }

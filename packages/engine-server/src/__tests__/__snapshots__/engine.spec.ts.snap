@@ -992,8 +992,8 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "one",
-      "three",
+      "bar",
+      "bar",
     ],
     "custom": Object {},
     "data": Object {
@@ -1009,8 +1009,8 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "one",
-      "three",
+      "bar",
+      "bar",
     ],
     "custom": Object {},
     "data": Object {},
@@ -1024,8 +1024,8 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "test1-1",
-      "test1-2",
+      "test1",
+      "test1",
     ],
     "custom": Object {},
     "data": Object {},

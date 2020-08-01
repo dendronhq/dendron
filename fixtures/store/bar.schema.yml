@@ -1,7 +1,6 @@
 - id: bar
   parent: root
-  data:
-    namespace: true
+  namespace: true
   children:
     - one
     - three

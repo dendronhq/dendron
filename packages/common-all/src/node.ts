@@ -25,6 +25,7 @@ import {
   SchemaRawOpts,
   SchemaRawProps,
   RawPropsOpts,
+  SchemaRawOptsFlat,
 } from "./types";
 import { genUUID } from "./uuid";
 
@@ -200,6 +201,7 @@ Create Schema based on Minimal Props
   children:
     - one
 */
+// TODO: deprecate
 export class SchemaNodeRaw {
   static createProps(opts: SchemaRawOpts): SchemaRawProps {
     opts.title = opts.title || opts.id;
@@ -527,6 +529,24 @@ export class Note extends DNode<NoteData> implements INote {
 }
 
 export class Schema extends DNode<SchemaData> implements ISchema {
+  static createRawProps(opts: SchemaRawOptsFlat): SchemaRawProps {
+    if (opts.fname.indexOf(".schema") < 0) {
+      opts.fname += ".schema";
+    }
+    const schemaDataOpts: (keyof SchemaData)[] = ["namespace", "pattern"];
+    const optsWithoutData = _.omit<SchemaRawOptsFlat, keyof SchemaData>(opts, schemaDataOpts);
+    const optsData = _.pick(opts, schemaDataOpts);
+    return DNodeRaw.createProps({
+      ..._.defaults(optsWithoutData, {
+        id: Schema.defaultTitle(opts.fname),
+        title: Schema.defaultTitle(opts.fname),
+        parent: null,
+        children: [],
+        data: optsData,
+      }),
+    });
+  }
+
   static createRoot() {
     return new Schema({
       id: "root",
@@ -811,7 +831,7 @@ export class SchemaUtils {
    */
   static matchNote(
     noteOrPath: Note | string,
-    schemas: SchemaDict|Schema[],
+    schemas: SchemaDict | Schema[],
     opts?: { matchNamespace?: boolean; matchPrefix?: boolean }
   ): Schema {
     const cleanOpts = _.defaults(opts, {

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.6](https://github.com/dendronhq/dendron/compare/v0.4.5...v0.4.6) (2020-08-01)
+
+### Features
+
+- support schema templates ([0205d66](https://github.com/dendronhq/dendron/commit/0205d66fc4538361322ffeabb3e532f0d541b775))
+
 ## [0.4.5](https://github.com/dendronhq/dendron/compare/v0.4.4...v0.4.5) (2020-08-01)
 
 ### Bug Fixes

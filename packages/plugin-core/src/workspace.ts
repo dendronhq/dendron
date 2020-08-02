@@ -41,6 +41,7 @@ import {
   VSCodeUtils
 } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
+import { ShowHelpCommand } from "./commands/ShowHelp";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -409,6 +410,15 @@ export class DendronWorkspace {
           if (!silent) {
             vscode.window.showInformationMessage(`finish reload`);
           }
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.SHOW_HELP,
+        async () => {
+          await new ShowHelpCommand().execute();
         }
       )
     );

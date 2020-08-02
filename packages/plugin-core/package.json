@@ -105,6 +105,10 @@
       {
         "command": "dendron.buildPod",
         "title": "Dendron: Build Pod"
+      },
+      {
+        "command": "dendron.showHelp",
+        "title": "Dendron: Show Help"
       }
     ],
     "keybindings": [

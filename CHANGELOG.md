@@ -5,6 +5,10 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.4.7](https://github.com/dendronhq/dendron/compare/v0.4.6...v0.4.7) (2020-08-01)
 
+## Summary
+
+We overhauled the [home page](https://www.dendron.so) to be less preachy and more user friendly. Also fixed a bunch of link issues - most notably, an issue with linking from the home page of a generated site when using wiki-links.
+
 ### Bug Fixes
 
 - issue with urls in published site ([0ac8e75](https://github.com/dendronhq/dendron/commit/0ac8e75c95a9c4760e12bb301fc5b66b011ef0fb))

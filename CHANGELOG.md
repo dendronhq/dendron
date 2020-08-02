@@ -5,7 +5,10 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [0.5.0](https://github.com/dendronhq/dendron/compare/v0.4.8...v0.5.0) (2020-08-02)
 
-**Note:** Version bump only for package root
+### Release Notes
+
+<a href="https://marketplace.visualstudio.com/items?itemName=dendron.dendron">Version 0.5.0</a> has planted 🌱
+Read about the new features and fixes in our <a href="https://www.dendron.so/notes/e32aa1e2-9780-4183-927e-2f46372050aa.html">release notes</a></div>
 
 ## [0.4.8](https://github.com/dendronhq/dendron/compare/v0.4.7...v0.4.8) (2020-08-02)
 
@@ -106,7 +109,7 @@ You can now work with schemas as easily as you do with regular notes. Have no fe
 
 **Note:** Version bump only for package root
 
-## 0.4.0 (2020-07-26)
+# 0.4.0 (2020-07-26)
 
 ### Release Notes
 

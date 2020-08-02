@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.8](https://github.com/dendronhq/dendron/compare/v0.4.7...v0.4.8) (2020-08-02)
+
+### Features
+
+- add ShowHelp command ([ecf3c68](https://github.com/dendronhq/dendron/commit/ecf3c6822848834d9a00e373d1c59b6628e7f4df))
+
 ## [0.4.7](https://github.com/dendronhq/dendron/compare/v0.4.6...v0.4.7) (2020-08-01)
 
 ## Summary

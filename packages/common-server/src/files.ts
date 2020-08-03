@@ -171,27 +171,14 @@ export function node2PropsMdFile(props: NoteRawProps, opts: { root: string }) {
  *   - root: root folder where files should be written to
  */
 export function node2MdFile(node: Note, opts: { root: string }) {
-  const meta = _.pick(node, [
-    "id",
-    "title",
-    "desc",
-    "updated",
-    "created",
-    "data",
-    "custom",
-    "fname",
-    "stub",
-    "body",
-  ]);
-  // only save parent id if parent is not a stub
-  const parent = node.parent && !node.parent.stub ? node.parent.id : null;
-  const children = node.children.map((c) => c.id);
-  const props: NoteRawProps = {
-    ...meta,
-    parent,
-    children,
-  };
-  return node2PropsMdFile({ ...props }, opts);
+  const { meta, body } = node.toNoteProps();
+  const { root } = opts;
+  const { fname } = node;
+  const filePath = path.join(root, `${fname}.md`);
+  return fs.writeFileSync(
+    filePath,
+    matter.stringify(body || "", meta)
+  );
 }
 
 export function schema2YMLFile(schema: Schema, opts: { root: string }) {

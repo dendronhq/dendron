@@ -27,6 +27,7 @@ import {
   SchemaRawOptsFlat,
   SchemaTemplate,
   DEngine,
+  NoteProps,
 } from "./types";
 import { genUUID } from "./uuid";
 
@@ -364,6 +365,18 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
           },
         ],
       },
+    };
+  }
+
+  toNoteProps(): NoteProps {
+    const node = this;
+    const body = this.body;
+    const props = _.pick(node, ["id", "title", "desc", "updated", "created"]);
+    const { custom } = node;
+    const meta = { ...props, ...custom };
+    return {
+      meta,
+      body,
     };
   }
 

@@ -59,6 +59,11 @@ export type DNodeRawProps<T extends DNodeData = DNodeData> = Required<
   DNodeRawOpts<T>
 >;
 
+export type NoteProps = {
+  body: string;
+  meta: any;
+};
+
 export type IDNodeOpts<T = DNodeData> = Omit<
   DNodeRawOpts<T>,
   "parent" | "children"
@@ -90,6 +95,7 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   domain: IDNode<T>;
   label: string;
   detail: string;
+  bar?: string;
 
   equal(node: IDNode<T>): boolean;
   // match(identifier: string): boolean;
@@ -99,6 +105,8 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
    */
   renderBody(): string;
   toDocument(): any;
+  toNoteProps(): NoteProps;
+
   toRawProps(hideBody?: boolean, opts?: RawPropsOpts): DNodeRawProps<T>;
   toRawPropsRecursive(opts?: RawPropsOpts): DNodeRawProps<T>[];
   validate(): boolean;

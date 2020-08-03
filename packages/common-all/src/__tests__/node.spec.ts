@@ -96,6 +96,19 @@ function setupSchema() {
 
 describe("DNoteUtils", () => {
   let notes: ReturnType<typeof setupNotes>;
+
+  describe("basename", () => {
+    test("simple", () => {
+      expect(DNodeUtils.basename("foo.bar.md")).toEqual("md");
+    });
+    test("simple, rm extension", () => {
+      expect(DNodeUtils.basename("foo.bar.md", true)).toEqual("bar");
+    });
+    test("simple, rm extension, no extension", () => {
+      expect(DNodeUtils.basename("foo.bar", true)).toEqual("bar");
+    });
+  });
+
   describe("findClosestParent, parent", () => {
     beforeEach(() => {
       notes = setupNotes();

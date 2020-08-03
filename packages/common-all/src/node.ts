@@ -41,8 +41,6 @@ export class DNodeUtils {
    * // don't remove extension
    * basename(foo.bar.md) // foo.bar
    *
-   * // remove extension
-   * basename(foo.bar.md, true) // foo
    * @param nodePath
    * @param rmExtension
    */

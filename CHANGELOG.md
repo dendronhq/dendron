@@ -7,6 +7,10 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 **Note:** Version bump only for package root
 
+### Dendron Markdown Notes (0.0.16)
+
+- Creating a new markdown note by going to a wiki-link will create a note with the same frontmatter as regular lookup
+
 ## [0.5.2](https://github.com/dendronhq/dendron/compare/v0.5.1...v0.5.2) (2020-08-03)
 
 **Note:** Version bump only for package root

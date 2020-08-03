@@ -20,7 +20,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Code: Package and Install",
+      "label": "Plugin: Package and Install",
       "type": "shell",
       "command": "scripts/pack_and_install.sh",
       "options": {
@@ -29,7 +29,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Code: Release",
+      "label": "Plugin: Release",
       "type": "shell",
       "command": "scripts/publish.sh",
       "options": {
@@ -40,8 +40,8 @@
     {
       "label": "Plugin: Pack, Install, Release",
       "dependsOn": [
-        "Code: Package and Install",
-        "Code: Release"
+        "Plugin: Package and Install",
+        "Plugin: Release"
       ],
       "dependsOrder": "sequence",
       "problemMatcher": []
@@ -50,8 +50,8 @@
       "label": "Everything",
       "dependsOn": [
         "NPM: Publish",
-        "Code: Package and Install",
-        "Code: Release"
+        "Plugin: Package and Install",
+        "Plugin: Release"
       ],
       "dependsOrder": "sequence",
       "problemMatcher": []
@@ -60,7 +60,7 @@
       "label": "Pub:Local",
       "dependsOn": [
         "NPM: Publish",
-        "Code: Package and Install"
+        "Plugin: Package and Install"
       ],
       "dependsOrder": "sequence",
       "problemMatcher": []

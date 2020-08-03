@@ -435,10 +435,6 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     return out.flat();
   }
 
-  //othrow Error("to implement");
-  //   return [];
-  // }
-
   validate(): boolean {
     return true;
   }

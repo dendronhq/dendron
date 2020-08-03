@@ -171,13 +171,12 @@ export function node2PropsMdFile(props: NoteRawProps, opts: { root: string }) {
  *   - root: root folder where files should be written to
  */
 export function node2MdFile(node: Note, opts: { root: string }) {
-  const { meta, body } = node.toNoteProps();
   const { root } = opts;
   const { fname } = node;
   const filePath = path.join(root, `${fname}.md`);
   return fs.writeFileSync(
     filePath,
-    matter.stringify(body || "", meta)
+    node.render()
   );
 }
 

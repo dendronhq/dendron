@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "dropbox": "^4.0.30",
+    "gray-matter": "^4.0.2",
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.15",
     "minimatch": "^3.0.4",

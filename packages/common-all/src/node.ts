@@ -29,6 +29,7 @@ import {
   DEngine,
   NoteProps,
 } from "./types";
+import matter from "gray-matter";
 import { genUUID } from "./uuid";
 
 export const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
@@ -343,7 +344,10 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     ]);
   }
 
-  // abstract match(identifier: any): boolean;
+  render(): string {
+    const { body, meta } = this.toNoteProps();
+    return matter.stringify(body || "", meta);
+  }
 
   renderBody(): string {
     return this.body;

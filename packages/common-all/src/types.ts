@@ -100,6 +100,7 @@ export type IDNode<T = DNodeData> = IDNodeProps<T> & {
   equal(node: IDNode<T>): boolean;
   // match(identifier: string): boolean;
   addChild(node: IDNode<T>): void;
+  render(): string;
   /**
    * Render body for rich-markdown-editor
    */

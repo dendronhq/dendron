@@ -10,6 +10,10 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 <a href="https://marketplace.visualstudio.com/items?itemName=dendron.dendron">Version 0.5.0</a> has planted 🌱
 Read about the new features and fixes in our <a href="https://www.dendron.so/notes/e32aa1e2-9780-4183-927e-2f46372050aa.html">release notes</a></div>
 
+With this release, we are also conducting our first dendron user survey. It's a short survey that should take no more than 3 minutes to fill out and will help inform me on the future growth of Dendron. Your participation is immensely appreciated 🙏
+
+https://forms.gle/PPqe2axvwEmpXj4v5
+
 ## [0.4.8](https://github.com/dendronhq/dendron/compare/v0.4.7...v0.4.8) (2020-08-02)
 
 ### Features

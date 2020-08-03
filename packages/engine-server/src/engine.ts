@@ -203,7 +203,7 @@ export class DendronEngine implements DEngine {
    * @param nodes
    * @param opts
    */
-  refreshNodes(nodes: IDNode[], opts?: QueryOpts) {
+  async refreshNodes(nodes: IDNode[], opts?: QueryOpts) {
     if (_.isEmpty(nodes)) {
       return;
     }
@@ -237,18 +237,8 @@ export class DendronEngine implements DEngine {
           this.fullNodes.add(id);
         }
       });
-      // FIXME: debug
-      // const newNodes = _.map(nodes, (n) => ({ title: n.title, id: n.id }));
-      // const allNodes = _.map(this.notes, (n) => ({
-      //   title: n.title,
-      //   id: n.id,
-      // }));
-      // this.logger.debug({
-      //   ctx: "refreshNodes",
-      //   newNodes,
-      //   allNodes,
-      // });
       this.updateLocalCollection(_.values(this.notes), "note");
+      await this.store.updateNodes(nodes);
       return;
     }
   }

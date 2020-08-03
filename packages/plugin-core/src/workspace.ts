@@ -5,7 +5,7 @@ import {
   Note,
   SchemaUtils
 } from "@dendronhq/common-all";
-import { cleanName } from "@dendronhq/common-server";
+import { cleanName, mdFile2NodeProps } from "@dendronhq/common-server";
 import { DConfig, DendronEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -539,7 +539,8 @@ export class DendronWorkspace {
         const ctx = "fsWatcher.onDidCreate";
         this.L.info({ ctx, uri });
         const fname = path.basename(uri.fsPath, ".md");
-        const note = new Note({ fname });
+        const noteRaw = mdFile2NodeProps(uri.fsPath);
+        const note = new Note({ ...noteRaw, parent: null, children: [] });
 
         // check if ignore
         const recentEvents = HistoryService.instance().lookBack();
@@ -558,6 +559,7 @@ export class DendronWorkspace {
         }
 
         try {
+          this.L.debug({ ctx, uri, msg: "adding to engine" });
           this.engine.updateNodes([note], {
             newNode: true,
             parentsAsStubs: true,

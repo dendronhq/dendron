@@ -25,9 +25,10 @@ import {
   SchemaRawProps,
   RawPropsOpts,
   SchemaRawOptsFlat,
+  SchemaTemplate,
+  DEngine,
 } from "./types";
 import { genUUID } from "./uuid";
-import { SchemaTemplate, DEngine } from "../lib";
 
 export const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 

@@ -18,9 +18,9 @@ export type NoteData = {
   links?: NoteLink[];
 };
 export type SchemaTemplate = {
-  id: string
-  type: "snippet"|"note"
-}
+  id: string;
+  type: "snippet" | "note";
+};
 export type SchemaData = {
   namespace?: boolean;
   pattern?: string;
@@ -116,7 +116,8 @@ export type INote = INoteProps & { domain: INote };
 export type NoteDict = { [id: string]: Note };
 
 // --- Schema
-export type SchemaRawOptsFlat = Omit<DNodeRawOpts<any>, "data"> & SchemaData & {id: string, fname: string}
+export type SchemaRawOptsFlat = Omit<DNodeRawOpts<any>, "data"> &
+  SchemaData & { id: string; fname: string };
 export type SchemaRawOpts = DNodeRawOpts<SchemaData> &
   Required<Pick<DNodeRawOpts<SchemaData>, "id" | "fname">>;
 export type SchemaRawProps = DNodeRawProps<SchemaData>;
@@ -271,7 +272,11 @@ export interface DEngine {
    */
   init: () => Promise<void>;
 
-  delete: (id: string, mode: QueryMode, opts?: EngineDeleteOpts) => Promise<void>;
+  delete: (
+    id: string,
+    mode: QueryMode,
+    opts?: EngineDeleteOpts
+  ) => Promise<void>;
 
   /**
    * Get node based on id

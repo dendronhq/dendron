@@ -30,6 +30,7 @@ import {
   DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
+  CONFIG,
 } from "./constants";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
@@ -181,7 +182,7 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.CREATE_SCRATCH_NOTE,
         async () => {
           const ctx = DENDRON_COMMANDS.CREATE_SCRATCH_NOTE;
-          const defaultNameConfig = "Y-MM-DD-HHmmss";
+          const defaultNameConfig = DendronWorkspace.configuration().get<string>(CONFIG.DEFAULT_SCRATCH_DATE_FORMAT);
           const scratchDomain = "scratch";
           const noteName = moment().format(defaultNameConfig);
           const engine = await DendronEngine.getOrCreateEngine();
@@ -229,7 +230,7 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.CREATE_JOURNAL_NOTE,
         async () => {
           const ctx = DENDRON_COMMANDS.CREATE_JOURNAL_NOTE;
-          const defaultNameConfig = "Y-MM-DD";
+          const defaultNameConfig = DendronWorkspace.configuration().get<string>(CONFIG.DEFAULT_JOURNAL_DATE_FORMAT);
           const journalNamespace = "journal";
           const noteName = moment().format(defaultNameConfig);
           const editorPath =

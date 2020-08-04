@@ -48,6 +48,8 @@ export const GLOBAL_STATE = {
   VSCODE_DEBUGGING_EXTENSION: "dendron.vscode_debugging_extension",
 };
 export const CONFIG = {
-  ROOT_DIR: "rootDir",
-  SKIP_PROMPT: "skipPrompt",
+  DEFAULT_JOURNAL_DATE_FORMAT: "dendron.defaultJournalDateFormat",
+  DEFAULT_SCRATCH_DATE_FORMAT: "dendron.defaultScratchDateFormat",
+  ROOT_DIR: "dendron.rootDir",
+  SKIP_PROMPT: "dendron.skipPrompt",
 };

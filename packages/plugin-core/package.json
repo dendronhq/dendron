@@ -33,6 +33,16 @@
           "default": false,
           "description": "Where your dendron workspace is located"
         },
+        "dendron.defaultJournalDateFormat": {
+          "type": "string",
+          "default": "Y-MM-DD",
+          "description": "Date used in journal notes"
+        },
+        "dendron.defaultScratchDateFormat": {
+          "type": "string",
+          "default": "Y-MM-DD-HHmmss",
+          "description": "Date used in scratch notes"
+        },
         "dendron.skipPrompt": {
           "type": "boolean",
           "default": false,

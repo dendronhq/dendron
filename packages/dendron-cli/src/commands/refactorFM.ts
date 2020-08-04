@@ -1,9 +1,8 @@
-import { DEngine, NoteRawProps } from "@dendronhq/common-all";
+import { NoteRawProps } from "@dendronhq/common-all";
 import { mdFile2NodeProps, node2PropsMdFile } from "@dendronhq/common-server";
 import path from "path";
 import { RefactorBaseCommand, RefactorRule } from "./refactorBase";
 
-type CommandOpts = { engine: DEngine } & CommonOpts;
 
 type RuleData = {
   from: { key: string };
@@ -14,8 +13,6 @@ type CommonOpts = {
   overwriteFields?: string[];
 };
 
-type CommandOutput = void;
-
 type TFile = NoteRawProps;
 
 export class RefactorFMCommand extends RefactorBaseCommand<TFile, any> {
@@ -23,7 +20,7 @@ export class RefactorFMCommand extends RefactorBaseCommand<TFile, any> {
     super("RefactorFM");
   }
 
-  matchFile(file: TFile) {
+  matchFile(_file: TFile) {
     return {
       isMatch: true
     };

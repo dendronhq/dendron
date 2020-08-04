@@ -49,7 +49,7 @@ const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
     },
     extensions: {
       recommendations: [
-        "mushan.vscode-paste-image",
+        "dendron.dendron-paste-image",
         "equinusocio.vsc-material-theme",
         "dendron.dendron-markdown-shortcuts",
         "dendron.dendron-markdown-preview-enhanced",
@@ -59,6 +59,7 @@ const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
       unwantedRecommendations: [
         "shd101wyy.markdown-preview-enhanced",
         "kortina.vscode-markdown-notes",
+        "mushan.vscode-paste-image",
       ],
     },
   };
@@ -259,7 +260,7 @@ suite("startup", function () {
       );
     });
 
-    test("workspace active, change into workspace", async function () {
+    test("workspace active, change into workspace", function (done) {
       DendronWorkspace.configuration = () => {
         return createMockConfig({
           dendron: {},
@@ -267,48 +268,31 @@ suite("startup", function () {
       };
       _activate(ctx);
       fs.ensureDirSync(root.name);
-      await new ChangeWorkspaceCommand().execute({
-        rootDirRaw: root.name,
-        skipOpenWS: true,
-      });
-      const config = fs.readJSONSync(
-        path.join(root.name, DendronWorkspace.DENDRON_WORKSPACE_FILE)
-      );
-      assert.deepEqual(config, expectedSettings({ folders: [{ path: "." }] }));
-      HistoryService.instance().subscribe(
-        "extension",
-        async (_event: HistoryEvent) => {
-          assert.equal(DendronWorkspace.isActive(), false);
-        }
-      );
+      new ChangeWorkspaceCommand()
+        .execute({
+          rootDirRaw: root.name,
+          skipOpenWS: true,
+        })
+        .then(() => {
+          const config = fs.readJSONSync(
+            path.join(root.name, DendronWorkspace.DENDRON_WORKSPACE_FILE)
+          );
+          assert.deepEqual(
+            config,
+            expectedSettings({ folders: [{ path: "." }] })
+          );
+          HistoryService.instance().subscribe(
+            "extension",
+            async (_event: HistoryEvent) => {
+              assert.equal(DendronWorkspace.isActive(), false);
+              done();
+            }
+          );
+        });
     });
-  });
-});
-
-suite("started", function () {
-  const timeout = 60 * 1000 * 5;
-  let root: DirResult;
-  let ctx: vscode.ExtensionContext;
-
-  beforeEach(async function () {
-    console.log("before");
-    await new ResetConfigCommand().execute({ scope: "all" });
-    root = FileTestUtils.tmpDir();
-    fs.removeSync(root.name);
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    console.log("before-done");
-    return;
-  });
-
-  afterEach(function () {
-    console.log("after");
-    HistoryService.instance().clearSubscriptions();
-    //root.removeCallback();
-    // fs.removeSync(root.name);
   });
 
   describe("lookup", function () {
-    vscode.window.showInformationMessage("Start lookup test");
     this.timeout(timeout);
 
     test("lookup new node", function (done) {

@@ -482,6 +482,30 @@ describe("engine:exact", () => {
           {}
         );
       });
+
+      test("one note without domain", async () => {
+        root = setupTmpDendronDir({ copyFixtures: false });
+        engine = DendronEngine.getOrCreateEngine({
+          root,
+          forceNew: true,
+          mode: "exact",
+        });
+        FileTestUtils.writeMDFile(root, "root.md", { id: "root" }, "root");
+        const fname = "backlog.journal.2020";
+        FileTestUtils.writeMDFile(
+          root,
+          fname + ".md",
+          { id: "backlog" },
+          "backlog"
+        );
+        await engine.init();
+        const note = new Note({ id: "backlog", fname });
+        const [t1, t2] = _.map([engine.notes["backlog"], note], (n) => {
+          return testUtils.omitEntropicProps(n.toRawProps(true, {ignoreNullParent: true}));
+        });
+
+        expect(t1).toEqual(t2);
+      });
     });
   });
 });

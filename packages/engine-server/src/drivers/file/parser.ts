@@ -17,7 +17,7 @@ import {
   pino,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
-import _ from "lodash";
+import _, { toInteger } from "lodash";
 import path from "path";
 import YAML from "yamljs";
 
@@ -176,7 +176,7 @@ export class FileParser {
     const nodesStoreByFname: NoteDict = {};
     const store = this.store;
     const fileMetaDict: FileMetaDict = getFileMeta(data);
-    // logger.debug({ ctx: "parse:getFileMeta:post", fileMetaDict })
+    const maxLvl = _.max(_.keys(fileMetaDict).map((e) => toInteger(e))) || 2;
     const root = fileMetaDict[1].find((n) => n.fpath === "root.md") as FileMeta;
     if (!root) {
       return [];
@@ -207,13 +207,8 @@ export class FileParser {
     });
 
     // domain root children
-    while (_.has(fileMetaDict, lvl)) {
-      // OPT: slow
-      // logger.debug({
-      //     ctx: "parse:while",
-      //     prevNodes: prevNodes.map(n => n.toRawProps()),
-      // })
-      const currNodes = fileMetaDict[lvl]
+    while (lvl <= maxLvl) {
+      const currNodes = (fileMetaDict[lvl] || [])
         // eslint-disable-next-line no-loop-func
         .map((ent) => {
           // ignore root.schema and other such files

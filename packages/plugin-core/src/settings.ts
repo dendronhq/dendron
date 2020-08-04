@@ -60,7 +60,8 @@ const _SETTINGS: ConfigUpdateChangeSet = {
 };
 
 const _EXTENSIONS: ConfigUpdateEntry[] = [
-  { default: "mushan.vscode-paste-image" },
+  //{ default: "mushan.vscode-paste-image" },
+  { default: "dendron.denron-paste-image" },
   { default: "equinusocio.vsc-material-theme" },
   { default: "dendron.dendron-markdown-shortcuts" },
   { default: "dendron.dendron-markdown-preview-enhanced" },
@@ -68,6 +69,7 @@ const _EXTENSIONS: ConfigUpdateEntry[] = [
   { default: "dendron.dendron-markdown-notes" },
   { default: "shd101wyy.markdown-preview-enhanced", action: "REMOVE" },
   { default: "kortina.vscode-markdown-notes", action: "REMOVE" },
+  { default: "mushan.vscode-paste-image", action: "REMOVE" },
 ];
 
 export type WriteConfigOpts = {

@@ -29,8 +29,10 @@ export class UpgradeSettingsCommand extends BaseCommand<UpgradeSettingsCommandOp
     if (!_.isEmpty(badExtensions)) {
       const msg = [
         "Manual action needed!",
-        "The following extensions have been replaced with Dendron specific alternatives. Please uninstall and reload the window:",
-      ].concat([badExtensions.map(ext => ext.packageJSON.displayName).join(", ")])
+        "The following extensions need to be uninstalled: ",
+      ].concat([badExtensions.map(ext => ext.packageJSON.displayName).join(", ")]).concat([
+        "Reload the window afterwards and Dendron will offer to install the Dendron version of the extension"
+      ]);
       console.log(msg);
       window.showWarningMessage(msg.join(" "));
     }

@@ -61,7 +61,7 @@ const _SETTINGS: ConfigUpdateChangeSet = {
 
 const _EXTENSIONS: ConfigUpdateEntry[] = [
   //{ default: "mushan.vscode-paste-image" },
-  { default: "dendron.denron-paste-image" },
+  { default: "dendron.dendron-paste-image" },
   { default: "equinusocio.vsc-material-theme" },
   { default: "dendron.dendron-markdown-shortcuts" },
   { default: "dendron.dendron-markdown-preview-enhanced" },

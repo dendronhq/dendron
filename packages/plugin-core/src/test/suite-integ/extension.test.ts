@@ -206,6 +206,14 @@ suite("startup", function () {
           const config = fs.readJSONSync(
             path.join(root.name, DendronWorkspace.DENDRON_WORKSPACE_FILE)
           );
+          const wsFolders = DendronWorkspace.workspaceFolders() as vscode.WorkspaceFolder[];
+          const wsRoot = wsFolders[0].uri.fsPath;
+          const snippetsPath = path.join(
+            wsRoot,
+            ".vscode",
+            "dendron.code-snippets"
+          );
+          assert.ok(fs.existsSync(snippetsPath));
           assert.deepEqual(config, expectedSettings());
           done();
         }

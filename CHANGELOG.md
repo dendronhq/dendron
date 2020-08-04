@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.7](https://github.com/dendronhq/dendron/compare/v0.5.6...v0.5.7) (2020-08-04)
+
+### Bug Fixes
+
+- not all notes indexed in sparse vaults ([383b6e3](https://github.com/dendronhq/dendron/commit/383b6e3f54e46616e1becf28eccd903b372897e5))
+
 ## [0.5.6](https://github.com/dendronhq/dendron/compare/v0.5.5...v0.5.6) (2020-08-04)
 
 ### Features

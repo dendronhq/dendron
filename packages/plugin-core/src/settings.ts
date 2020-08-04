@@ -57,6 +57,11 @@ const _SETTINGS: ConfigUpdateChangeSet = {
   "markdown-preview-enhanced.wikiLinkFileExtension": { default: ".md" },
   "vscodeMarkdownNotes.noteCompletionConvention": { default: "noExtension" },
   "vscodeMarkdownNotes.slugifyCharacter": { default: "NONE" },
+  // add snippet completion
+  "editor.snippetSuggestions": { default: "inline" },
+  "editor.suggest.snippetsPreventQuickSuggestions": { default: false },
+  "editor.suggest.showSnippets": { default: true },
+  "editor.tabCompletion": { default: "on" },
 };
 
 const _EXTENSIONS: ConfigUpdateEntry[] = [

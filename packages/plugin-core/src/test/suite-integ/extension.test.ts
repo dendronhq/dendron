@@ -46,6 +46,10 @@ const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
       "markdown-preview-enhanced.wikiLinkFileExtension": ".md",
       "vscodeMarkdownNotes.noteCompletionConvention": "noExtension",
       "vscodeMarkdownNotes.slugifyCharacter": "NONE",
+      "editor.snippetSuggestions": "inline",
+      "editor.suggest.snippetsPreventQuickSuggestions": false,
+      "editor.suggest.showSnippets": true,
+      "editor.tabCompletion": "on"
     },
     extensions: {
       recommendations: [

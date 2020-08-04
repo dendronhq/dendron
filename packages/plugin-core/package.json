@@ -5,11 +5,6 @@
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
   "version": "0.5.3",
-  "repository": {
-    "type": "git",
-    "url": "ssh://git@github.com/dendronhq/dendron.git",
-    "directory": "packages/plugin-core"
-  },
   "engines": {
     "vscode": "^1.46.0"
   },

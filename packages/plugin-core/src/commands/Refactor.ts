@@ -36,6 +36,7 @@ export const RULES = {
   ADD_FM_BLOCK: "ADD_FM_BLOCK",
   ADD_FM_ID: "ADD_FM_ID",
   REMOVE_FM_BRACKETS: "REMOVE_FM_BRACKETS",
+  ADD_LAYOUT: "ADD_LAYOUT"
 };
 
 export abstract class RefactorBaseCommand<
@@ -164,6 +165,23 @@ export class RefactorCommand extends BaseCommand<RefactorCommandOpts> {
           };
         },
       },
+      {
+        name: RULES.ADD_LAYOUT,
+        fmOnly: true,
+        matcher: /^(?=.*\s*-\s*\[.*)/ms,
+        replacer: (match: RegExpMatchArray | null, _txt: string) => {
+          const fmOrig: string | undefined = (match?.groups ?? {}).fm;
+          const body: string | undefined = (match?.groups ?? {}).body;
+          const fmClean = fmOrig.replace(/\[|/g, "").replace(/\]/g, ": ");
+          const output = ["---", fmClean, "---", body];
+          return {
+            txtClean: output.join("\n"),
+            fmOrig,
+            fmClean,
+            diff: {},
+          };
+        },
+      },
     ];
     rules.forEach((r) => {
       this.rules[r.name] = r;
@@ -184,6 +202,7 @@ export class RefactorCommand extends BaseCommand<RefactorCommandOpts> {
   }
 
   async execute(opts: RefactorCommandOpts) {
+    const logger = L.child({ctx: "execute", opts})
     const { root, dryRun, exclude, include, limit, rules } = _.defaults(opts, {
       include: ["*.md"],
       exclude: [],
@@ -193,6 +212,7 @@ export class RefactorCommand extends BaseCommand<RefactorCommandOpts> {
     const stats = {
       numChanged: 0,
     };
+    logger.info({msg: "enter"})
     const allFiles = this.getFiles({ root, exclude, include });
     allFiles.forEach((dirent) => {
       const { name: fname } = dirent;
@@ -237,7 +257,7 @@ export class RefactorCommand extends BaseCommand<RefactorCommandOpts> {
   }
 }
 
-async function main() {
+export async function main() {
   const root = process.argv[2];
   await new RefactorCommand().execute({
     root,
@@ -253,5 +273,5 @@ async function main() {
   //   console.log({ resp });
 }
 
-console.log("start");
-main();
+// console.log("start");
+// main();

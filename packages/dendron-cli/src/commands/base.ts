@@ -7,5 +7,5 @@ export abstract class BaseCommand<TOpts, TOut = any> {
     this.L = createLogger(name || "Command");
   }
 
-  abstract async execute(opts: TOpts): Promise<TOut>;
+  abstract async execute(opts?: TOpts): Promise<TOut>;
 }

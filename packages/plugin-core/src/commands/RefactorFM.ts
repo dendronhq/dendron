@@ -31,11 +31,13 @@ export class RefactorYamlCommand extends RefactorBaseCommand<File, any> {
 }
 
 async function main() {
-  const root = process.argv[2];
+  // const root = process.argv[2];
+  const root = "/Users/kevinlin/projects/dendronv2/dendron-kevinslin/vault"
   const opts = {
     root,
     rules: [],
-    dryRun: false,
+    dryRun: true,
+    include: ["blog.aws.2*.md"]
   };
   await new RefactorYamlCommand(opts).execute();
 }

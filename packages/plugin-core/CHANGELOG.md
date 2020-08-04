@@ -5,13 +5,17 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.5.5](https://github.com/dendronhq/dendron/compare/v0.5.4...v0.5.5) (2020-08-04)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
+
+### open-vsx
+
+- Dendron and all of its extensions are now published on the [open-vsx](https://open-vsx.org/) registry. This means that you can now use Dendron inside any VS Code Compatible Editor (eg. [Theia](https://github.com/eclipse-theia/theia) and [VSCodium](https://vscodium.com/))
 
 ## [0.5.4](https://github.com/dendronhq/dendron/compare/v0.5.3...v0.5.4) (2020-08-04)
 
 ### Bug Fixes
 
-- notes created via link not being indexed properly ([5c1b495](https://github.com/dendronhq/dendron/commit/5c1b4950026bf83580a095532a48320ad66f256f))
+- notes created via wiki-links not being indexed properly ([5c1b495](https://github.com/dendronhq/dendron/commit/5c1b4950026bf83580a095532a48320ad66f256f))
 
 ### Features
 
@@ -19,8 +23,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - update index when notes are deleted outside of dendron ([93ad260](https://github.com/dendronhq/dendron/commit/93ad26059009f55e4ff1c9a75cfe39c7cff0b376))
 
 ## [0.5.3](https://github.com/dendronhq/dendron/compare/v0.5.2...v0.5.3) (2020-08-03)
-
-**Note:** Version bump only for package root
 
 ### Dendron Markdown Notes (0.0.16)
 

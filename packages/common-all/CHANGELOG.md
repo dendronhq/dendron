@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.8](https://github.com/dendronhq/dendron/compare/v0.5.7...v0.5.8) (2020-08-05)
+
+### Features
+
+- apply schema description to new notes ([c4b9f15](https://github.com/dendronhq/dendron/commit/c4b9f158daeab5d159e5f4e690ad0c4ad1e3f549))
+
 ## [0.5.4](https://github.com/dendronhq/dendron/compare/v0.5.3...v0.5.4) (2020-08-04)
 
 ### Features

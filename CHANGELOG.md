@@ -20,7 +20,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Features
 
 - add built in snippets ([b639998](https://github.com/dendronhq/dendron/commit/b639998a8e955a88bec350d687c0f84c497f79fc))
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/tab-autocomplete.gif)
+
 - make journal timestamp format configurable ([228384a](https://github.com/dendronhq/dendron/commit/228384a86720f56f2fce752d4c0cc8904326e651))
+
+<a href="https://www.loom.com/share/27b9efa48cbe4fcb9535be9b60840d57"> 
+<img style="" src="https://cdn.loom.com/sessions/thumbnails/27b9efa48cbe4fcb9535be9b60840d57-with-play.gif"> 
+</a>
 
 ## [0.5.5](https://github.com/dendronhq/dendron/compare/v0.5.4...v0.5.5) (2020-08-04)
 

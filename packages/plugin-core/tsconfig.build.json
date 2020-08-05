@@ -11,7 +11,6 @@
     "lib",
     "local",
     ".vscode-test",
-    "out",
-    "src/test/suite/extension.test.ts"
+    "out"
   ]
 }

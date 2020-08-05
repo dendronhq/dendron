@@ -33,7 +33,7 @@
       "env": {
         "STAGE": "test"
       },
-      "outFiles": ["${workspaceFolder}/out/test/suite/*.js"]
+      "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
       // "preLaunchTask": "${defaultBuildTask}"
     },
     {

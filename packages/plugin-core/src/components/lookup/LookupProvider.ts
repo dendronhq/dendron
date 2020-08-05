@@ -263,9 +263,7 @@ export class LookupProvider {
         });
       } else if (selectedItem.schemaStub) {
         L.info({ ...ctx2, msg: "createNewPick:schemaStub" });
-        nodeNew = new Note({
-          fname: selectedItem.fname,
-        });
+        nodeNew = selectedItem;
         profile = getDurationMilliseconds(start);
         L.info({
           ...ctx2,

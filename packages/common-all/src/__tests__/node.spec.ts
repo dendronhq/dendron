@@ -266,15 +266,14 @@ describe("Note", () => {
     schemas = setupSchema();
   });
 
-  describe("create", ()=> {
+  describe("create", () => {
     test("fromSchema", () => {
-      let dirPath = "root";
+      const dirPath = "root";
       const note = Note.fromSchema(dirPath, schemas.foo);
       expect(note.desc).toEqual(schemas.foo.desc);
       testUtils.expectSnapshot(expect, "noteFromSchema", note);
     });
   });
-
 });
 
 describe("Schema", () => {

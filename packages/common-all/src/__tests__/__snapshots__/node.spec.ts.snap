@@ -50,6 +50,23 @@ Object {
 }
 `;
 
+exports[`Note create fromSchema: noteFromSchema 1`] = `
+Object {
+  "body": "",
+  "children": Array [],
+  "custom": Object {},
+  "data": Object {
+    "schemaId": "foo",
+  },
+  "desc": "foo desc",
+  "fname": "root.foo",
+  "parent": "root",
+  "stub": false,
+  "title": "Foo",
+  "type": "note",
+}
+`;
+
 exports[`NoteUtils createStubNotes, root -> bar.one: barChild 1`] = `
 Array [
   Object {
@@ -116,7 +133,7 @@ exports[`Schema domainRoot at root: foo_body 1`] = `
 "-
     id: foo
     title: foo.yml
-    desc: \\"\\"
+    desc: 'foo desc'
     data: {}
     parent: root
 -
@@ -143,7 +160,7 @@ Array [
     ],
     "custom": Object {},
     "data": Object {},
-    "desc": "",
+    "desc": "foo desc",
     "fname": "foo.schema.yml",
     "parent": "root",
     "stub": false,
@@ -218,7 +235,7 @@ Array [
     ],
     "custom": Object {},
     "data": Object {},
-    "desc": "",
+    "desc": "foo desc",
     "fname": "foo.schema.yml",
     "parent": "root",
     "stub": false,

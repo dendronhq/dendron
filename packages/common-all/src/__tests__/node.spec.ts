@@ -72,6 +72,7 @@ function setupSchema() {
   });
   const foo = new Schema({
     id: "foo",
+    desc: "foo desc",
     fname: "foo.schema.yml",
     parent: null,
   });
@@ -254,6 +255,26 @@ describe("NoteUtils", () => {
     expect(barStubChild?.fname).toBe("bar.two");
     expect(barStubChild?.children.length).toEqual(1);
   });
+});
+
+describe("Note", () => {
+  let notes: ReturnType<typeof setupNotes>;
+  let schemas: ReturnType<typeof setupSchema>;
+
+  beforeEach(() => {
+    notes = setupNotes();
+    schemas = setupSchema();
+  });
+
+  describe("create", ()=> {
+    test("fromSchema", () => {
+      let dirPath = "root";
+      const note = Note.fromSchema(dirPath, schemas.foo);
+      expect(note.desc).toEqual(schemas.foo.desc);
+      testUtils.expectSnapshot(expect, "noteFromSchema", note);
+    });
+  });
+
 });
 
 describe("Schema", () => {

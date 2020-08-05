@@ -10,20 +10,6 @@ export { DirResult };
 
 tmp.setGracefulCleanup();
 
-export class EngineTestUtils {
-  static setupStoreDir(
-    fixturesDir: string,
-    dirPath: string,
-    opts?: { copyFixtures?: boolean }
-  ) {
-    const cleanOpts = _.defaults(opts, { copyFixtures: true });
-    if (cleanOpts.copyFixtures) {
-      fs.copySync(fixturesDir, dirPath);
-    }
-    return dirPath;
-  }
-}
-
 export class FileTestUtils {
   static cmpFiles = (
     root: string,
@@ -98,5 +84,27 @@ export class LernaTestUtils {
   }
   static fixtureFilesForStore() {
     return fs.readdirSync(path.join(LernaTestUtils.getFixturesDir(), "store"));
+  }
+}
+
+export class EngineTestUtils {
+  static setupDendronVault(opts?: { copyFixtures?: boolean }) {
+    return EngineTestUtils.setupStoreDir(
+      LernaTestUtils.getFixturesDir("store"),
+      FileTestUtils.tmpDir().name,
+      opts
+    );
+  }
+
+  static setupStoreDir(
+    fixturesDir: string,
+    dirPath: string,
+    opts?: { copyFixtures?: boolean }
+  ) {
+    const cleanOpts = _.defaults(opts, { copyFixtures: true });
+    if (cleanOpts.copyFixtures) {
+      fs.copySync(fixturesDir, dirPath);
+    }
+    return dirPath;
   }
 }

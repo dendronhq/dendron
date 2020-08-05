@@ -104,7 +104,7 @@ function showDocAndHidePicker(uri: Uri, picker: QuickPick<any>): any {
   );
 }
 
-class PickerUtils {
+export class PickerUtils {
   static getValue<T extends QuickPickItem = QuickPickItem>(
     picker: QuickPick<T>
   ) {

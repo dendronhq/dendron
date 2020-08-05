@@ -15,6 +15,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - apply schema description to new notes ([c4b9f15](https://github.com/dendronhq/dendron/commit/c4b9f158daeab5d159e5f4e690ad0c4ad1e3f549))
 
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/schema-desc.gif)
+
 ## [0.5.7](https://github.com/dendronhq/dendron/compare/v0.5.6...v0.5.7) (2020-08-04)
 
 ### Bug Fixes

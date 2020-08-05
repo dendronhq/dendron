@@ -11,18 +11,31 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.5.8](https://github.com/dendronhq/dendron/compare/v0.5.7...v0.5.8) (2020-08-05)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Features
+
+- apply schema description to new notes ([c4b9f15](https://github.com/dendronhq/dendron/commit/c4b9f158daeab5d159e5f4e690ad0c4ad1e3f549))
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/schema-desc.gif)
 
 ## [0.5.7](https://github.com/dendronhq/dendron/compare/v0.5.6...v0.5.7) (2020-08-04)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- not all notes indexed in sparse vaults ([383b6e3](https://github.com/dendronhq/dendron/commit/383b6e3f54e46616e1becf28eccd903b372897e5))
 
 ## [0.5.6](https://github.com/dendronhq/dendron/compare/v0.5.5...v0.5.6) (2020-08-04)
 
 ### Features
 
 - add built in snippets ([b639998](https://github.com/dendronhq/dendron/commit/b639998a8e955a88bec350d687c0f84c497f79fc))
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/tab-autocomplete.gif)
+
 - make journal timestamp format configurable ([228384a](https://github.com/dendronhq/dendron/commit/228384a86720f56f2fce752d4c0cc8904326e651))
+
+<a href="https://www.loom.com/share/27b9efa48cbe4fcb9535be9b60840d57"> 
+<img style="" src="https://cdn.loom.com/sessions/thumbnails/27b9efa48cbe4fcb9535be9b60840d57-with-play.gif"> 
+</a>
 
 ## [0.5.5](https://github.com/dendronhq/dendron/compare/v0.5.4...v0.5.5) (2020-08-04)
 

@@ -98,6 +98,15 @@ Array [
 ]
 `;
 
+exports[`Schema basic render: schema.render 1`] = `
+"-
+    id: foo
+    title: foo
+    desc: \\"\\"
+    parent: root
+"
+`;
+
 exports[`Schema basic unknown schema: unknown 1`] = `
 Object {
   "body": "",

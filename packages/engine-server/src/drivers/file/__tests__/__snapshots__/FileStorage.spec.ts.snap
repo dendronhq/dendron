@@ -166,7 +166,6 @@ exports[`main notes write writeQuery: data snapshot 1`] = `
 
 exports[`main schema write writeRoot: root 1`] = `
 Object {
-  "data": Object {},
   "desc": "",
   "title": "root",
 }

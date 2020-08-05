@@ -184,7 +184,7 @@ export function schema2YMLFile(schema: Schema, opts: { root: string }) {
   const { root } = opts;
   const { fname } = schema;
   const filePath = path.join(root, `${fname}.yml`);
-  const out = schema.renderBody();
+  const out = schema.render();
   return fs.writeFileSync(filePath, out);
 }
 

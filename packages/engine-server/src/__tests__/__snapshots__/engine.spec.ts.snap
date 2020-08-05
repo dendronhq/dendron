@@ -1364,7 +1364,6 @@ exports[`engine:exact schema basic write schema: bond.schema 1`] = `
     id: bond
     title: bond
     desc: \\"\\"
-    data: {}
     parent: root
 "
 `;

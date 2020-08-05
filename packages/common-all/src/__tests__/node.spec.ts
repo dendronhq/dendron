@@ -290,6 +290,12 @@ describe("Schema", () => {
       expect(schema.stub).toBe(true);
       testUtils.expectSnapshot(expect, "unknown", schema);
     });
+
+    test("render", () => {
+      const schema = new Schema({ fname: "foo" });
+      const body = schema.render();
+      expect(body).toMatchSnapshot("schema.render");
+    });
   });
 
   describe("domainRoot", () => {

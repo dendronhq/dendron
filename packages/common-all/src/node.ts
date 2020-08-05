@@ -645,6 +645,22 @@ export class Schema extends DNode<SchemaData> implements ISchema {
     );
     return YAML.stringify(out, undefined, 4);
   }
+
+  render() {
+    const out = _.map(
+      this.toRawPropsRecursive({ ignoreNullParent: true }),
+      // TODO: don't hardcode, this only applies to new schemas
+      (props) => {
+        const data = props.data;
+        return {
+          ..._.pick(props, ["id", "title", "desc"]),
+          ...data,
+          parent: "root",
+        };
+      }
+    );
+    return YAML.stringify(out, undefined, 4);
+  }
 }
 
 const matchSchemaPropsToId = (

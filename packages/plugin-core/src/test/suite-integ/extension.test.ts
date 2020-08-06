@@ -25,6 +25,7 @@ import { _activate } from "../../extension";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
+import { CreateScratchCommand } from "../../commands/CreateScratch";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
@@ -393,7 +394,7 @@ suite("startup", function () {
   });
 });
 
-suite("commands", function () {
+suite.only("commands", function () {
   this.timeout(TIMEOUT);
 
   before(function () {
@@ -414,7 +415,7 @@ suite("commands", function () {
 
   // --- Notes
 
-  describe("new journal command", function () {
+  describe("CreateJournalCommand", function () {
     test("lookup new node", function (done) {
       onWSInit(async () => {
         const uri = vscode.Uri.file(
@@ -432,13 +433,31 @@ suite("commands", function () {
     });
   });
 
+  describe("CreateScratchCommand", function () {
+    test("basic", function (done) {
+      onWSInit(async () => {
+        const uri = vscode.Uri.file(
+          path.join(root.name, "vault", "dendron.md")
+        );
+        await vscode.window.showTextDocument(uri);
+        VSCodeUtils.showInputBox = async (opts: vscode.InputBoxOptions|undefined) => {
+          return "scratch";
+        }
+        const resp = await new CreateScratchCommand().run() as vscode.Uri;
+        assert.ok(fs.existsSync(resp.fsPath));
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx);
+    });
+  });
+
   // --- Dev
   describe("DoctorCommand", function () {
     test("basic", function (done) {
       onWSInit(async () => {
         const testFile = path.join(root.name, "vault", "bond2.md");
         fs.writeFileSync(testFile, "bond", {encoding: "utf8"});
-        const engine = await new ReloadIndexCommand().run();
+        await new ReloadIndexCommand().run();
         await new DoctorCommand().run();
         const nodeProps = mdFile2NodeProps(testFile);
         assert.equal(_.trim(nodeProps.title), "Bond2")

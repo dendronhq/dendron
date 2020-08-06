@@ -1,3 +1,4 @@
+import { resolveTilde } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -6,8 +7,7 @@ import { DENDRON_WS_NAME } from "../constants";
 import { WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
-import { BaseCommand } from "./base";
-import { resolveTilde } from "@dendronhq/common-server";
+import { BasicCommand } from "./base";
 
 type CommandOpts = {
   rootDirRaw: string;
@@ -20,10 +20,9 @@ type CommandInput = {
 
 type CommandOutput = any;
 
-export class SetupWorkspaceCommand extends BaseCommand<
+export class SetupWorkspaceCommand extends BasicCommand<
   CommandOpts,
-  CommandOutput,
-  CommandInput
+  CommandOutput
 > {
   async gatherInputs(): Promise<CommandInput | undefined> {
     const rootDirRaw = await VSCodeUtils.gatherFolderPath({

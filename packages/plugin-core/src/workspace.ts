@@ -182,7 +182,7 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.CREATE_SCRATCH_NOTE,
         async () => {
           const ctx = DENDRON_COMMANDS.CREATE_SCRATCH_NOTE;
-          const defaultNameConfig = DendronWorkspace.configuration().get<string>(CONFIG.DEFAULT_SCRATCH_DATE_FORMAT);
+          const defaultNameConfig = DendronWorkspace.configuration().get<string>(CONFIG.DEFAULT_SCRATCH_DATE_FORMAT.key);
           const scratchDomain = "scratch";
           const noteName = moment().format(defaultNameConfig);
           const engine = await DendronEngine.getOrCreateEngine();
@@ -229,74 +229,14 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.CREATE_JOURNAL_NOTE,
         async () => {
-          const ctx = DENDRON_COMMANDS.CREATE_JOURNAL_NOTE;
-          const defaultNameConfig = DendronWorkspace.configuration().get<string>(CONFIG.DEFAULT_JOURNAL_DATE_FORMAT);
-          const journalNamespace = "journal";
-          const noteName = moment().format(defaultNameConfig);
-          const editorPath =
-            vscode.window.activeTextEditor?.document.uri.fsPath;
-          if (!editorPath) {
-            throw Error("not currently in a note");
-          }
-          const cNoteFname = path.basename(editorPath, ".md");
-          const currentDomain = DNodeUtils.domainName(cNoteFname);
-          let fname = `${currentDomain}.${journalNamespace}.${noteName}`;
-          const title = await vscode.window.showInputBox({
-            prompt: "Title",
-            ignoreFocusOut: true,
-            value: fname,
-          });
-          if (_.isUndefined(title)) {
-            return;
-          }
-          if (title) {
-            fname = `${cleanName(title)}`;
-          }
-
-          // create new note
-          const node = new Note({ fname, title });
-          const wsFolders = DendronWorkspace.workspaceFolders() as vscode.WorkspaceFolder[];
-          const uri = node2Uri(node, wsFolders);
-          const historyService = HistoryService.instance();
-          historyService.add({ source: "engine", action: "create", uri });
-          const engine = await DendronEngine.getOrCreateEngine();
-          SchemaUtils.matchAndApplyTemplate({ note: node, engine });
-          engine.write(node, {
-            newNode: true,
-            parentsAsStubs: true,
-          });
-          const cmd = new CreateJournalCommand();
-          await cmd.execute({ fname });
-
-          // get note to link to
-          // const cNote = _.find(engine.notes, { fname: cNoteFname });
-          // if (!cNote) {
-          //   throw Error("cNote undefined");
-          // }
-          // const cNoteNew = new Note({
-          //   ...mdFile2NodeProps(editorPath),
-          //   parent: cNote.parent,
-          //   children: cNote.children,
-          //   id: cNote.id,
-          // });
-          // NoteUtils.addBackLink(cNoteNew, node);
-          // await engine.write(cNoteNew);
-
-          // done
-          this.L.info({ ctx: `${ctx}:write:done`, uri });
-          await vscode.window.showTextDocument(uri);
-          vscode.window.showInformationMessage(`${fname} copied to clipboard`);
+          await new CreateJournalCommand().run();
         }
       )
     );
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(DENDRON_COMMANDS.CHANGE_WS, async () => {
-        const cmd = new ChangeWorkspaceCommand();
-        const inputs = await cmd.gatherInputs();
-        if (!_.isUndefined(inputs)) {
-          await cmd.execute(inputs);
-        }
+        await new ChangeWorkspaceCommand().run();
       })
     );
 

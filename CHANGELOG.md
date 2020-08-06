@@ -8,7 +8,11 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Features
 
 - better scratch note command ([277d240](https://github.com/dendronhq/dendron/commit/277d2405b1d055e13beb555def2a53c7e9e2937e))
-- flexible configuration for journal notes and scratch notes ([f26fb61](https://github.com/dendronhq/dendron/commit/f26fb61a8774482dde7a129a1efa459a59086763))
+- flexible configuration for journal notes and scratch notes ([f26fb61](https://github.com/dendronhq/dendron/commit/f26fb61a8774482dde7a129a1efa459a59086763))([docs](https://dendron.so/notes/5c213aa6-e4ba-49e8-85c5-1bdcb33ce202.html#configuration))
+
+### Docs
+
+- over the last few weeks, we've been getting lots of great questions about dendron, why its different from everything else and how to best use it. we've compiled our answers in an updated FAQ which you can find [here](https://www.dendron.so/notes/683740e3-70ce-4a47-a1f4-1f140e80b558.html.
 
 ## [0.5.10](https://github.com/dendronhq/dendron/compare/v0.5.9...v0.5.10) (2020-08-06)
 

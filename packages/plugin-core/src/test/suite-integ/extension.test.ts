@@ -14,7 +14,7 @@ import * as vscode from "vscode";
 import { ChangeWorkspaceCommand } from "../../commands/ChangeWorkspace";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import { SetupWorkspaceCommand } from "../../commands/SetupWorkspace";
-import { WORKSPACE_STATE } from "../../constants";
+import { WORKSPACE_STATE, CONFIG } from "../../constants";
 import { _activate } from "../../extension";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
@@ -108,9 +108,17 @@ function createMockQuickPick<T extends vscode.QuickPickItem>(
 
 function setupDendronWorkspace(rootDir: string, ctx: vscode.ExtensionContext) {
   DendronWorkspace.configuration = () => {
-    return createMockConfig({
-      dendron: { rootDir },
+    const config: any = {
+      dendron: { 
+        rootDir,
+       },
+    }
+    _.forEach(CONFIG, ent => {
+      if (ent.default) {
+        _.set(config, ent.key, ent.default);
+      }
     });
+    return createMockConfig(config);
   };
   DendronWorkspace.workspaceFile = () => {
     return vscode.Uri.file(path.join(rootDir, "dendron.code-workspace"));

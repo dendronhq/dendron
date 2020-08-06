@@ -1,22 +1,15 @@
-import {
-  DendronConfig,
-  DEngine,
-
-  getStage,
-  Note,
-  SchemaUtils
-} from "@dendronhq/common-all";
+import { DendronConfig, DEngine, getStage, Note } from "@dendronhq/common-all";
 import { mdFile2NodeProps } from "@dendronhq/common-server";
-import { DConfig, DendronEngine } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import moment from "moment";
 import open from "open";
 import path from "path";
 import * as vscode from "vscode";
 import { BuildPodCommand } from "./commands/BuildPod";
 import { ChangeWorkspaceCommand } from "./commands/ChangeWorkspace";
 import { CreateJournalCommand } from "./commands/CreateJournal";
+import { CreateScratchCommand } from "./commands/CreateScratch";
 import { DoctorCommand } from "./commands/Doctor";
 import { ImportPodCommand } from "./commands/ImportPod";
 import { OpenLogsCommand } from "./commands/OpenLogs";
@@ -26,18 +19,16 @@ import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import { ShowHelpCommand } from "./commands/ShowHelp";
 import { UpgradeSettingsCommand } from "./commands/UpgradeSettings";
 import { LookupController } from "./components/lookup/LookupController";
-import { node2Uri } from "./components/lookup/utils";
 import {
-  CONFIG, DENDRON_COMMANDS,
+  DENDRON_COMMANDS,
   extensionQualifiedId,
-  GLOBAL_STATE
+  GLOBAL_STATE,
 } from "./constants";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { NodeService } from "./services/nodeService/NodeService";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
-import { CreateScratchCommand } from "./commands/CreateScratch";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -113,7 +104,7 @@ export class DendronWorkspace {
     opts?: { skipSetup?: boolean }
   ) {
     if (!_DendronWorkspace) {
-      _DendronWorkspace = new DendronWorkspace(context, opts)
+      _DendronWorkspace = new DendronWorkspace(context, opts);
     }
     return _DendronWorkspace;
   }
@@ -188,47 +179,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.CREATE_SCRATCH_NOTE,
         async () => {
-          await new CreateScratchCommand().run()
-          // const ctx = DENDRON_COMMANDS.CREATE_SCRATCH_NOTE;
-          // const defaultNameConfig = DendronWorkspace.configuration().get<string>(CONFIG.DEFAULT_SCRATCH_DATE_FORMAT.key);
-          // const scratchDomain = "scratch";
-          // const noteName = moment().format(defaultNameConfig);
-          // const engine = await DendronEngine.getOrCreateEngine();
-          // const fname = `${scratchDomain}.${noteName}`;
-
-          // // get title
-          // let title: string;
-          // const { text, selection } = VSCodeUtils.getSelection();
-          // const editor = VSCodeUtils.getActiveTextEditor();
-          // if (!_.isEmpty(text)) {
-          //   title = text;
-          // } else {
-          //   const resp = await vscode.window.showInputBox({
-          //     prompt: "Title",
-          //     ignoreFocusOut: true,
-          //     placeHolder: "scratch",
-          //   });
-          //   if (_.isUndefined(resp)) {
-          //     return;
-          //   }
-          //   title = resp;
-          // }
-          // const node = new Note({ fname, title });
-          // SchemaUtils.matchAndApplyTemplate({ note: node, engine });
-          // const wsFolders = DendronWorkspace.workspaceFolders() as vscode.WorkspaceFolder[];
-          // const uri = node2Uri(node, wsFolders);
-          // const historyService = HistoryService.instance();
-          // historyService.add({ source: "engine", action: "create", uri });
-          // engine.write(node, {
-          //   newNode: true,
-          //   parentsAsStubs: true,
-          // });
-          // await editor?.edit((builder) => {
-          //   const link = _.isEmpty(title) ? `${fname}` : `${title} | ${fname}`;
-          //   builder.replace(selection, `[[${link}]]`);
-          // });
-          // this.L.info({ ctx: `${ctx}:write:done`, uri });
-          // await vscode.window.showTextDocument(uri);
+          await new CreateScratchCommand().run();
         }
       )
     );
@@ -259,12 +210,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RESET_CONFIG,
         async () => {
-          const cmd = new ResetConfigCommand();
-          const inputs = await cmd.gatherInputs();
-          if (_.isUndefined(inputs)) {
-            return;
-          }
-          await cmd.execute(inputs);
+          await new ResetConfigCommand().run();
         }
       )
     );
@@ -307,18 +253,6 @@ export class DendronWorkspace {
           });
           const mode = fsPath.endsWith(".md") ? "note" : "schema";
           await ns.deleteByPath(fsPath, mode);
-
-          // const closetParent = DNodeUtils.findClosestParent(
-          //   note.logicalPath,
-          //   this.engine.notes,
-          //   { noStubs: true }
-          // );
-          // const uri = node2Uri(closetParent);
-          // try {
-          //   await vscode.window.showTextDocument(uri);
-          // } catch (err) {
-          //   this.L.error({ ctx, msg: `can't open uri: ${uri}` });
-          // }
           vscode.window.showInformationMessage(
             `${path.basename(fsPath)} deleted`
           );

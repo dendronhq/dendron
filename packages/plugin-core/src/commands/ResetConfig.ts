@@ -2,7 +2,7 @@ import _ from "lodash";
 import { window } from "vscode";
 import { GLOBAL_STATE, WORKSPACE_STATE } from "../constants";
 import { DendronWorkspace } from "../workspace";
-import { BaseCommand } from "./base";
+import { BasicCommand } from "./base";
 
 type ConfigScope = "local" | "global" | "all";
 type CommandOpts = {
@@ -17,7 +17,7 @@ type CommandInput = {
 
 const valid = ["local", "global", "all"];
 
-export class ResetConfigCommand extends BaseCommand<
+export class ResetConfigCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {

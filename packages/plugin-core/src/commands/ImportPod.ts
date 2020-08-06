@@ -1,17 +1,17 @@
 import { createLogger } from "@dendronhq/common-server";
-import { BaseCommand } from "./base";
+import { DendronEngine, FilePod } from "@dendronhq/engine-server";
+import fs from "fs-extra";
 import {
-  QuickPickItem,
+  Disposable,
   QuickInput,
   QuickInputButton,
-  Disposable,
-  window,
   QuickInputButtons,
+  QuickPickItem,
   Uri,
+  window,
 } from "vscode";
-import fs from "fs-extra";
 import { resolvePath } from "../utils";
-import { DendronEngine, FilePod } from "@dendronhq/engine-server";
+import { BasicCommand } from "./base";
 
 const L = createLogger("ImportPodCommand");
 
@@ -290,7 +290,7 @@ async function multiStepInput(opts: ImportPodCommandOpts) {
   return await fp.import();
 }
 
-export class ImportPodCommand extends BaseCommand<ImportPodCommandOpts> {
+export class ImportPodCommand extends BasicCommand<ImportPodCommandOpts> {
   async execute(opts: ImportPodCommandOpts) {
     const ctx = "execute";
     L.info({ ctx, opts });

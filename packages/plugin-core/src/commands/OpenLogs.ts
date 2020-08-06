@@ -1,12 +1,12 @@
-import { Uri, workspace, window } from "vscode";
+import { Uri, window, workspace } from "vscode";
 import { Logger } from "../logger";
-import { BaseCommand } from "./base";
+import { BasicCommand } from "./base";
 const L = Logger;
 
 type OpenLogsCommandOpts = {
 };
 
-export class OpenLogsCommand extends BaseCommand<OpenLogsCommandOpts, void> {
+export class OpenLogsCommand extends BasicCommand<OpenLogsCommandOpts, void> {
   async execute(opts: OpenLogsCommandOpts) {
     const ctx = "execute";
     L.info({ ctx, opts });

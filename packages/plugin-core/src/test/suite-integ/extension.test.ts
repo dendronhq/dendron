@@ -394,7 +394,7 @@ suite("startup", function () {
   });
 });
 
-suite.only("commands", function () {
+suite("commands", function () {
   this.timeout(TIMEOUT);
 
   before(function () {

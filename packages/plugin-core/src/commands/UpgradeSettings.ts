@@ -4,7 +4,7 @@ import path from "path";
 import { Extension, extensions, window } from "vscode";
 import { SettingsUpgradeOpts, WorkspaceConfig } from "../settings";
 import { DendronWorkspace } from "../workspace";
-import { BaseCommand } from "./base";
+import { BasicCommand } from "./base";
 
 const L = createLogger("UpgradeSettingsCommand");
 
@@ -12,7 +12,7 @@ type UpgradeSettingsCommandOpts = {
   settingOpts: SettingsUpgradeOpts;
 };
 
-export class UpgradeSettingsCommand extends BaseCommand<
+export class UpgradeSettingsCommand extends BasicCommand<
   UpgradeSettingsCommandOpts,
   any
 > {

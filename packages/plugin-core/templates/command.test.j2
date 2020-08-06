@@ -1,0 +1,17 @@
+  describe("{{ command }}", function () {
+    test("basic", function (done) {
+      onWSActive(async () => {
+        const uri = vscode.Uri.file(
+          path.join(root.name, "vault", "dendron.md")
+        );
+        await vscode.window.showTextDocument(uri);
+        VSCodeUtils.showInputBox = async (opts: vscode.InputBoxOptions|undefined) => {
+          return opts?.value;
+        }
+        const resp = await new {{ command }}().run() as vscode.Uri;
+        // assert.ok({{TODO}});
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx);
+    });
+  });

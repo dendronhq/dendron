@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/engine-server",
-  "version": "0.5.9",
+  "version": "0.5.10",
   "description": "dendron-engine",
   "license": "GPLv3",
   "repository": {
@@ -38,8 +38,8 @@
     "test:unit:debug": "NODE_ENV=test  node --inspect node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.5.9",
-    "@dendronhq/common-server": "^0.5.9",
+    "@dendronhq/common-all": "^0.5.10",
+    "@dendronhq/common-server": "^0.5.10",
     "fs-extra": "^9.0.1",
     "fuse.js": "^6.3.0",
     "gray-matter": "^4.0.2",

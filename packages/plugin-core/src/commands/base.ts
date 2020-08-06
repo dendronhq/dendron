@@ -1,12 +1,13 @@
-import { createLogger } from "@dendronhq/common-server";
+import { DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import { window } from "vscode";
+import { Logger } from "../logger";
 
 export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
-  public L: ReturnType<typeof createLogger>;
+  public L: DLogger;
 
-  constructor(name?: string) {
-    this.L = createLogger(name || "Command");
+  constructor(_name?: string) {
+    this.L = Logger;
   }
 
   static showInput = window.showInputBox;

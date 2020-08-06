@@ -4,7 +4,7 @@
   "displayName": "dendron",
   "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
   "publisher": "dendron",
-  "version": "0.5.10",
+  "version": "0.5.11",
   "engines": {
     "vscode": "^1.46.0"
   },
@@ -46,13 +46,21 @@
         "dendron.defaultJournalAddBehavior": {
           "type": "string",
           "default": "childOfDomain",
-          "enum": ["childOfDomain", "childOfCurrent", "asOwnDomain"],
+          "enum": [
+            "childOfDomain",
+            "childOfCurrent",
+            "asOwnDomain"
+          ],
           "description": "How are new notes added"
         },
         "dendron.defaultScratchAddBehavior": {
           "type": "string",
           "default": "asOwnDomain",
-          "enum": ["childOfDomain", "childOfCurrent", "asOwnDomain"],
+          "enum": [
+            "childOfDomain",
+            "childOfCurrent",
+            "asOwnDomain"
+          ],
           "description": "How are new new notes added"
         },
         "dendron.defaultJournalName": {

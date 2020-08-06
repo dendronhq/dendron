@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.11](https://github.com/dendronhq/dendron/compare/v0.5.10...v0.5.11) (2020-08-06)
+
+### Features
+
+- better scratch note command ([277d240](https://github.com/dendronhq/dendron/commit/277d2405b1d055e13beb555def2a53c7e9e2937e))
+- flexible configuration for journal notes and scratch notes ([f26fb61](https://github.com/dendronhq/dendron/commit/f26fb61a8774482dde7a129a1efa459a59086763))
+
 ## [0.5.10](https://github.com/dendronhq/dendron/compare/v0.5.9...v0.5.10) (2020-08-06)
 
 ### Features

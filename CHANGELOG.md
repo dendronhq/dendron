@@ -12,7 +12,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Docs
 
-- over the last few weeks, we've been getting lots of great questions about dendron, why its different from everything else and how to best use it. we've compiled our answers in an updated FAQ which you can find [here](https://www.dendron.so/notes/683740e3-70ce-4a47-a1f4-1f140e80b558.html.
+- over the last few weeks, we've been getting lots of great questions about dendron, why its different from everything else and how to best use it. we've compiled our answers in an updated FAQ which you can find [here](https://www.dendron.so/notes/683740e3-70ce-4a47-a1f4-1f140e80b558.html)
 
 ## [0.5.10](https://github.com/dendronhq/dendron/compare/v0.5.9...v0.5.10) (2020-08-06)
 

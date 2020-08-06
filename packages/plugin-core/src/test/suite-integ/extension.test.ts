@@ -1,8 +1,8 @@
 import { DNode, Note } from "@dendronhq/common-all";
 import {
-  DirResult, FileTestUtils,
-
-  mdFile2NodeProps
+  DirResult,
+  FileTestUtils,
+  mdFile2NodeProps,
 } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
 import * as assert from "assert";
@@ -15,17 +15,21 @@ import path from "path";
 import * as vscode from "vscode";
 import { ChangeWorkspaceCommand } from "../../commands/ChangeWorkspace";
 import { CreateJournalCommand } from "../../commands/CreateJournal";
+import { CreateScratchCommand } from "../../commands/CreateScratch";
 import { DoctorCommand } from "../../commands/Doctor";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import { SetupWorkspaceCommand } from "../../commands/SetupWorkspace";
-import { createNoActiveItem, EngineOpts, LookupProvider } from "../../components/lookup/LookupProvider";
-import { CONFIG, WORKSPACE_STATE } from "../../constants";
+import {
+  createNoActiveItem,
+  EngineOpts,
+  LookupProvider,
+} from "../../components/lookup/LookupProvider";
+import { CONFIG, WORKSPACE_STATE, ConfigKey } from "../../constants";
 import { _activate } from "../../extension";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { CreateScratchCommand } from "../../commands/CreateScratch";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
@@ -106,7 +110,12 @@ function createMockQuickPick<T extends vscode.QuickPickItem>(
   return qp;
 }
 
-function setupDendronWorkspace(rootDir: string, ctx: vscode.ExtensionContext) {
+function setupDendronWorkspace(
+  rootDir: string,
+  ctx: vscode.ExtensionContext,
+  opts?: { configOverride: any }
+) {
+  const optsClean = _.defaults(opts, { configOverride: {} });
   DendronWorkspace.configuration = () => {
     const config: any = {
       dendron: {
@@ -114,9 +123,14 @@ function setupDendronWorkspace(rootDir: string, ctx: vscode.ExtensionContext) {
       },
     };
     _.forEach(CONFIG, (ent) => {
+      // @ts-ignore
       if (ent.default) {
+        // @ts-ignore
         _.set(config, ent.key, ent.default);
       }
+    });
+    _.forEach(optsClean.configOverride, (v, k) => {
+      _.set(config, k, v);
     });
     return createMockConfig(config);
   };
@@ -193,8 +207,6 @@ suite("startup", function () {
         });
       };
       _activate(ctx);
-      // const ws = DendronWorkspace.instance();
-      // ws.reloadWorkspace(root)
       onWSActive(async (_event: HistoryEvent) => {
         assert.equal(DendronWorkspace.isActive(), false);
         done();
@@ -416,39 +428,143 @@ suite("commands", function () {
   // --- Notes
 
   describe("CreateJournalCommand", function () {
-    test("lookup new node", function (done) {
+    test("basic", function (done) {
       onWSInit(async () => {
         const uri = vscode.Uri.file(
-          path.join(root.name, "vault", "dendron.md")
+          path.join(root.name, "vault", "dendron.faq.md")
         );
         await vscode.window.showTextDocument(uri);
-        VSCodeUtils.showInputBox = async (opts: vscode.InputBoxOptions|undefined) => {
+        VSCodeUtils.showInputBox = async (
+          opts: vscode.InputBoxOptions | undefined
+        ) => {
           return opts?.value;
-        }
-        const resp = await new CreateJournalCommand().run() as vscode.Uri;
+        };
+        const resp = (await new CreateJournalCommand().run()) as vscode.Uri;
         assert.ok(resp.fsPath.indexOf("dendron.journal") > 0);
         done();
       });
       setupDendronWorkspace(root.name, ctx);
     });
+
+    test("add: childOfCurrent", function (done) {
+      setupDendronWorkspace(root.name, ctx, {
+        configOverride: {
+          [CONFIG.DEFAULT_JOURNAL_ADD_BEHAVIOR.key]: "childOfCurrent",
+        },
+      });
+      onWSInit(async () => {
+        const uri = vscode.Uri.file(
+          path.join(root.name, "vault", "dendron.faq.md")
+        );
+        await vscode.window.showTextDocument(uri);
+        VSCodeUtils.showInputBox = async (
+          opts: vscode.InputBoxOptions | undefined
+        ) => {
+          return opts?.value;
+        };
+        const resp = (await new CreateJournalCommand().run()) as vscode.Uri;
+        assert.ok(resp.fsPath.indexOf("dendron.faq.journal") > 0);
+        done();
+      });
+    });
+
+    test("add: diff name", function (done) {
+      setupDendronWorkspace(root.name, ctx, {
+        configOverride: {
+          [CONFIG.DEFAULT_JOURNAL_NAME.key]: "foo",
+        },
+      });
+      onWSInit(async () => {
+        const uri = vscode.Uri.file(
+          path.join(root.name, "vault", "dendron.faq.md")
+        );
+        await vscode.window.showTextDocument(uri);
+        VSCodeUtils.showInputBox = async (
+          opts: vscode.InputBoxOptions | undefined
+        ) => {
+          return opts?.value;
+        };
+        const resp = (await new CreateJournalCommand().run()) as vscode.Uri;
+        assert.ok(resp.fsPath.indexOf("dendron.foo") > 0);
+        done();
+      });
+    });
+
+    test("add: asOwnDomain", function (done) {
+      setupDendronWorkspace(root.name, ctx, {
+        configOverride: {
+          [CONFIG.DEFAULT_JOURNAL_ADD_BEHAVIOR.key]: "asOwnDomain",
+        },
+      });
+      onWSInit(async () => {
+        const uri = vscode.Uri.file(
+          path.join(root.name, "vault", "dendron.faq.md")
+        );
+        await vscode.window.showTextDocument(uri);
+        VSCodeUtils.showInputBox = async (
+          opts: vscode.InputBoxOptions | undefined
+        ) => {
+          return opts?.value;
+        };
+        const resp = (await new CreateJournalCommand().run()) as vscode.Uri;
+        assert.ok(path.basename(resp.fsPath).startsWith("journal"));
+        done();
+      });
+    });
   });
 
   describe("CreateScratchCommand", function () {
+    let noteType = "SCRATCH";
+    let uri: vscode.Uri;
+
+    beforeEach(()=> {
+        VSCodeUtils.showInputBox = async (
+        ) => {
+          return "scratch";
+        };
+        uri = vscode.Uri.file(
+          path.join(root.name, "vault", "dendron.faq.md")
+        );
+    });
+
     test("basic", function (done) {
       onWSInit(async () => {
-        const uri = vscode.Uri.file(
-          path.join(root.name, "vault", "dendron.md")
-        );
         await vscode.window.showTextDocument(uri);
-        VSCodeUtils.showInputBox = async (opts: vscode.InputBoxOptions|undefined) => {
-          return "scratch";
-        }
-        const resp = await new CreateScratchCommand().run() as vscode.Uri;
-        assert.ok(fs.existsSync(resp.fsPath));
+        const resp = (await new CreateScratchCommand().run()) as vscode.Uri;
+        assert.ok(path.basename(resp.fsPath).startsWith("scratch"));
         done();
       });
       setupDendronWorkspace(root.name, ctx);
     });
+
+    test("add: childOfCurrent", function (done) {
+      setupDendronWorkspace(root.name, ctx, {
+        configOverride: {
+          [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]: "childOfCurrent",
+        },
+      });
+      onWSInit(async () => {
+        await vscode.window.showTextDocument(uri);
+        const resp = await new CreateScratchCommand().run()
+        assert.ok((resp as vscode.Uri).fsPath.indexOf("dendron.faq.scratch") > 0);
+        done();
+      });
+    });
+
+    test("add: childOfDomain", function (done) {
+      setupDendronWorkspace(root.name, ctx, {
+        configOverride: {
+          [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]: "childOfDomain",
+        },
+      });
+      onWSInit(async () => {
+        await vscode.window.showTextDocument(uri);
+        const resp = await new CreateScratchCommand().run()
+        assert.ok((resp as vscode.Uri).fsPath.indexOf("dendron.scratch") > 0);
+        done();
+      });
+    });
+
   });
 
   // --- Dev
@@ -456,16 +572,15 @@ suite("commands", function () {
     test("basic", function (done) {
       onWSInit(async () => {
         const testFile = path.join(root.name, "vault", "bond2.md");
-        fs.writeFileSync(testFile, "bond", {encoding: "utf8"});
+        fs.writeFileSync(testFile, "bond", { encoding: "utf8" });
         await new ReloadIndexCommand().run();
         await new DoctorCommand().run();
         const nodeProps = mdFile2NodeProps(testFile);
-        assert.equal(_.trim(nodeProps.title), "Bond2")
+        assert.equal(_.trim(nodeProps.title), "Bond2");
         assert.ok(nodeProps.id);
         done();
       });
       setupDendronWorkspace(root.name, ctx);
     });
   });
-
 });

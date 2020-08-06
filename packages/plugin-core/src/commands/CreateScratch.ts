@@ -1,10 +1,7 @@
 import clipboardy from "clipboardy";
 import _ from "lodash";
-import moment from "moment";
 import * as vscode from "vscode";
-import { CONFIG } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
 import { CreateNoteCommand } from "./CreateNote";
 
 type CommandOpts = {
@@ -40,12 +37,7 @@ export class CreateScratchCommand extends CreateNoteCommand {
   }
 
   async enrichInputs(inputs: CommandInput) {
-    const defaultNameConfig = DendronWorkspace.configuration().get<string>(
-      CONFIG.DEFAULT_SCRATCH_DATE_FORMAT.key
-    );
-    const scratchDomain = "scratch";
-    const noteName = moment().format(defaultNameConfig);
-    const fname = `${scratchDomain}.${noteName}`;
+    const fname = this.genFname("SCRATCH");
     return {
       ...inputs,
       fname,

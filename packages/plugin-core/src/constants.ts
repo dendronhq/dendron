@@ -48,21 +48,41 @@ export const GLOBAL_STATE = {
   VSCODE_DEBUGGING_EXTENSION: "dendron.vscode_debugging_extension",
 };
 
-type ConfigEntry = {
-  key: string;
-  default?: any;
-};
-type ConfigDict = { [k: string]: ConfigEntry};
+// type ConfigEntry = {
+//   key: string;
+//   default?: any;
+// };
+// type ConfigDict = { [k: keyof typeof CONFIG]: ConfigEntry};
 
-export const CONFIG: ConfigDict = {
+export type ConfigKey = keyof typeof CONFIG;
+
+export const CONFIG = {
+  DEFAULT_JOURNAL_NAME: {
+    key: "dendron.defaultJournalName",
+    default: "journal",
+  },
   DEFAULT_JOURNAL_DATE_FORMAT: {
     key: "dendron.defaultJournalDateFormat",
     default: "Y-MM-DD",
+  },
+  DEFAULT_JOURNAL_ADD_BEHAVIOR: {
+    key: "dendron.defaultJournalAddBehavior",
+    default: "childOfDomain"
+  },
+  DEFAULT_SCRATCH_NAME: {
+    key: "dendron.defaultScratchName",
+    default: "scratch",
   },
   DEFAULT_SCRATCH_DATE_FORMAT: {
     key: "dendron.defaultScratchDateFormat",
     default: "Y-MM-DD-HHmmss",
   },
-  ROOT_DIR: { key: "dendron.rootDir" },
+  DEFAULT_SCRATCH_ADD_BEHAVIOR: {
+    key: "dendron.defaultScratchAddBehavior",
+    default: "asOwnDomain"
+  },
+  ROOT_DIR: { 
+    key: "dendron.rootDir" 
+  },
   SKIP_PROMPT: { key: "dendron.skipPrompt" },
 };

@@ -75,6 +75,10 @@ export function _activate(context: vscode.ExtensionContext) {
         Logger.info({ ctx, msg: "user finished welcome" });
       }
       HistoryService.instance().add({ source: "extension", action: "initialized" });
+      if (isDebug || stage === "test") {
+        Logger.output?.show(false);
+        vscode.window.showInformationMessage("activate");
+      }
     });
 
     // first time install
@@ -108,15 +112,7 @@ export function _activate(context: vscode.ExtensionContext) {
   } else {
     Logger.info({ ctx: "dendron not active" });
   }
-  if (isDebug || stage === "test") {
-    Logger.output?.show(false);
-    // TODO: check for cmd
-    // const fullLogPath = FileUtils.escape(path.join(logPath, 'dendron.log'));
-    // TODO
-    // const cmd = `/usr/local/bin/code-insiders ${fullLogPath}`;
-    // execa.command(cmd);
-    vscode.window.showInformationMessage("activate");
-  }
+
   showWelcomeOrWhatsNew(ws.version, migratedGlobalVersion).then(() => {
     HistoryService.instance().add({ source: "extension", action: "activate" });
   });

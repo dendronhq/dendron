@@ -1,12 +1,12 @@
 import {
   DendronConfig,
   DEngine,
-  DNodeUtils,
+
   getStage,
   Note,
-  SchemaUtils,
+  SchemaUtils
 } from "@dendronhq/common-all";
-import { cleanName, mdFile2NodeProps } from "@dendronhq/common-server";
+import { mdFile2NodeProps } from "@dendronhq/common-server";
 import { DConfig, DendronEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -23,21 +23,20 @@ import { OpenLogsCommand } from "./commands/OpenLogs";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import { ResetConfigCommand } from "./commands/ResetConfig";
 import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
+import { ShowHelpCommand } from "./commands/ShowHelp";
 import { UpgradeSettingsCommand } from "./commands/UpgradeSettings";
 import { LookupController } from "./components/lookup/LookupController";
 import { node2Uri } from "./components/lookup/utils";
 import {
-  DENDRON_COMMANDS,
+  CONFIG, DENDRON_COMMANDS,
   extensionQualifiedId,
-  GLOBAL_STATE,
-  CONFIG,
+  GLOBAL_STATE
 } from "./constants";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { NodeService } from "./services/nodeService/NodeService";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
-import { ShowHelpCommand } from "./commands/ShowHelp";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -102,11 +101,21 @@ export class DendronWorkspace {
   public context: vscode.ExtensionContext;
   public fsWatcher?: vscode.FileSystemWatcher;
   public L: typeof Logger;
-  private _engine?: DEngine;
+  public _engine?: DEngine;
   public version: string;
   private disposableStore: DisposableStore;
   private history: HistoryService;
   public config?: DendronConfig;
+
+  static getOrCreate(
+    context: vscode.ExtensionContext,
+    opts?: { skipSetup?: boolean }
+  ) {
+    if (!_DendronWorkspace) {
+      _DendronWorkspace = new DendronWorkspace(context, opts)
+    }
+    return _DendronWorkspace;
+  }
 
   constructor(
     context: vscode.ExtensionContext,
@@ -167,6 +176,7 @@ export class DendronWorkspace {
   }
 
   _setupCommands() {
+    let that = this;
     this.context.subscriptions.push(
       vscode.commands.registerCommand(DENDRON_COMMANDS.INIT_WS, async () => {
         const cmd = new SetupWorkspaceCommand();
@@ -349,7 +359,7 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.RELOAD_INDEX,
         async (silent?: boolean) => {
           const root = this.rootWorkspace.uri.fsPath;
-          this._engine = await new ReloadIndexCommand().execute({ root });
+          that._engine = await new ReloadIndexCommand().execute({ root });
           if (!silent) {
             vscode.window.showInformationMessage(`finish reload`);
           }
@@ -386,19 +396,13 @@ export class DendronWorkspace {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(DENDRON_COMMANDS.BUILD_POD, async () => {
-        await new BuildPodCommand().execute({});
+        await new BuildPodCommand().run();
       })
     );
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(DENDRON_COMMANDS.DOCTOR, async () => {
-        const findings = await new DoctorCommand().execute({});
-        findings.data.forEach((f) => {
-          vscode.window.showInformationMessage(
-            `issue: ${f.issue}. fix: ${f.fix}`
-          );
-        });
-        vscode.window.showInformationMessage(`doctor finished checkup`);
+        await new DoctorCommand().run();
       })
     );
   }

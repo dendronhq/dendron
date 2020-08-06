@@ -1,10 +1,10 @@
+import { BackfillCommand } from "@dendronhq/dendron-cli";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";
 import { DendronWorkspace } from "../workspace";
-import { BaseCommand } from "./base";
-import { BackfillCommand } from "@dendronhq/dendron-cli";
+import { BasicCommand } from "./base";
 
 type Finding = {
   issue: string;
@@ -12,36 +12,11 @@ type Finding = {
 };
 type CommandOpts = {};
 
-type CommandInput = {};
-
 type CommandOutput = {
   data: Finding[];
 };
 
-export class DoctorCommand extends BaseCommand<
-  CommandOpts,
-  CommandOutput,
-  CommandInput
-> {
-  async gatherInputs(): Promise<CommandInput | undefined> {
-    const resp = await window.showInputBox({
-      prompt: "Select your folder for dendron",
-      ignoreFocusOut: true,
-      validateInput: (input: string) => {
-        if (!path.isAbsolute(input)) {
-          if (input[0] !== "~") {
-            return "must enter absolute path";
-          }
-        }
-        return undefined;
-      },
-    });
-    if (_.isUndefined(resp)) {
-      return;
-    }
-    return;
-  }
-
+export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const {} = _.defaults(opts, {});
     const ws = DendronWorkspace.instance();
@@ -58,6 +33,8 @@ export class DoctorCommand extends BaseCommand<
     const siteRoot = path.join(rootDir, config.site.siteRoot);
     const engine = ws.engine;
     await new BackfillCommand().execute({ engine });
+
+    // create site root, used for publication
     if (!fs.existsSync(siteRoot)) {
       const f: Finding = { issue: "no siteRoot found" };
       const dendronWSTemplate = Uri.joinPath(ws.extensionAssetsDir, "dendronWS")
@@ -69,5 +46,11 @@ export class DoctorCommand extends BaseCommand<
     }
     return { data: findings };
     // check for docs folrder
+  }
+  async showResponse(findings: CommandOutput) {
+    findings.data.forEach((f) => {
+      window.showInformationMessage(`issue: ${f.issue}. fix: ${f.fix}`);
+    });
+    window.showInformationMessage(`doctor finished checkup`);
   }
 }

@@ -36,7 +36,7 @@ export function _activate(context: vscode.ExtensionContext) {
     storagePath,
   });
   // needs to be initialized to setup commands
-  const ws = new DendronWorkspace(context, { skipSetup: stage === "test" });
+  const ws = DendronWorkspace.getOrCreate(context, { skipSetup: stage === "test" });
 
   const installedGlobalVersion = ws.version;
   const migratedGlobalVersion = context.globalState.get<string | undefined>(
@@ -71,26 +71,10 @@ export function _activate(context: vscode.ExtensionContext) {
         Logger.info({ ctx, msg: "first dendron ws, show welcome" });
         await ws.showWelcome();
         await ws.updateGlobalState("DENDRON_FIRST_WS", "initialized");
-        // const step = ws.context.globalState.get<string | undefined>(
-        //   GLOBAL_STATE.DENDRON_FIRST_WS_TUTORIAL_STEP
-        // );
-        // if (_.isUndefined(step)) {
-        //   await ws.showWelcome();
-        //   Logger.info({ ctx, step: -1 }, true);
-        //   await ws.updateGlobalState("DENDRON_FIRST_WS", "initialized");
-        //   await ws.updateGlobalState("DENDRON_FIRST_WS_TUTORIAL_STEP", "0");
-        // } else {
-        //   switch (step) {
-        //     case "0":
-        //       Logger.info({ msg: "going to step", step }, true);
-        //       break;
-        //     default:
-        //       Logger.info({ msg: "", step });
-        //   }
-        // }
       } else {
         Logger.info({ ctx, msg: "user finished welcome" });
       }
+      HistoryService.instance().add({ source: "extension", action: "initialized" });
     });
 
     // first time install

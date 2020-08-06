@@ -8,7 +8,7 @@ export type HistoryEvent = {
 };
 
 type HistoryEventSource = "engine" | "src" | "extension";
-type HistoryEventAction = "delete" | "create" | "activate";
+type HistoryEventAction = "delete" | "create" | "activate" | "initialized";
 
 type HistoryEventListenerFunc = (event: HistoryEvent) => void;
 

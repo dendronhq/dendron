@@ -156,4 +156,6 @@ export class VSCodeUtils {
     // HACK: vscode does not save env variables btw workspaces
     return process.env.VSCODE_DEBUGGING_EXTENSION ? true : false;
   }
+
+  static showInputBox = vscode.window.showInputBox;
 }

@@ -4,7 +4,7 @@ import path from "path";
 import { DENDRON_WS_NAME } from "../constants";
 import { WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
-import { BaseCommand } from "./base";
+import { BasicCommand } from "./base";
 
 type ChangeWorkspaceCommandOpts = {
   rootDirRaw: string
@@ -15,10 +15,9 @@ type CommandInput = {
     rootDirRaw: string
 }
 
-export class ChangeWorkspaceCommand extends BaseCommand<
+export class ChangeWorkspaceCommand extends BasicCommand<
   ChangeWorkspaceCommandOpts,
-  any,
-  CommandInput
+  any
 > {
 
   async gatherInputs(): Promise<CommandInput|undefined> {

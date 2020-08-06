@@ -5,7 +5,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.5.10](https://github.com/dendronhq/dendron/compare/v0.5.9...v0.5.10) (2020-08-06)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Features
+
+- [dendron-jekyll](https://github.com/dendronhq/dendron-jekyll): custom jekyll theme for dendron
+  - dendron-jekyll is now published as a gem - this means you can publish dendron sites on any platform that supports static hosting
+  - dendron-jekyll exposes a subset of [helper utilities](https://mmistakes.github.io/minimal-mistakes/docs/helpers/#figure) that are compatible with github's remote-theme builds
+  - dendron-jekyll now has a custom [blogging layout](https://www.dendron.so/notes/4c0ef322-3006-405c-9a66-3134dd9649a5.html#blogging)
+    ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/jekyll-kevinslin.gif)
 
 ## [0.5.9](https://github.com/dendronhq/dendron/compare/v0.5.8...v0.5.9) (2020-08-05)
 

@@ -5,6 +5,7 @@ import path from "path";
 import { Uri, window } from "vscode";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
+import { ReloadIndexCommand } from "./ReloadIndex";
 
 type Finding = {
   issue: string;
@@ -31,7 +32,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       throw Error("no config found");
     }
     const siteRoot = path.join(rootDir, config.site.siteRoot);
-    const engine = ws.engine;
+    const engine = await new ReloadIndexCommand().execute();
     await new BackfillCommand().execute({ engine });
 
     // create site root, used for publication

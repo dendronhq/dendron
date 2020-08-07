@@ -11,9 +11,13 @@ type ReloadIndexCommandOpts = {
 
 export class ReloadIndexCommand extends BasicCommand<ReloadIndexCommandOpts, DEngine> {
 
-  async execute(opts: ReloadIndexCommandOpts) {
+  /**
+   * Update index
+   * @param opts 
+   */
+  async execute() {
     const ctx = "execute";
-    L.info({ ctx, opts });
+    L.info({ ctx });
     const ws = DendronWorkspace.instance();
     const root = ws.rootWorkspace.uri.fsPath;
     const engine = DendronEngine.getOrCreateEngine({

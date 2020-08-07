@@ -168,7 +168,6 @@ export class DendronWorkspace {
   }
 
   _setupCommands() {
-    let that = this;
     this.context.subscriptions.push(
       vscode.commands.registerCommand(DENDRON_COMMANDS.INIT_WS, async () => {
         await new SetupWorkspaceCommand().run();
@@ -290,8 +289,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RELOAD_INDEX,
         async (silent?: boolean) => {
-          const root = this.rootWorkspace.uri.fsPath;
-          that._engine = await new ReloadIndexCommand().execute({ root });
+          await new ReloadIndexCommand().execute();
           if (!silent) {
             vscode.window.showInformationMessage(`finish reload`);
           }

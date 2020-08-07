@@ -1,230 +1,232 @@
 {
-  "name": "@dendronhq/plugin-core",
-  "private": true,
-  "displayName": "dendron",
-  "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
-  "publisher": "dendron",
-  "version": "0.5.12",
-  "engines": {
-    "vscode": "^1.46.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "keywords": [
-    "second brain",
-    "markdown",
-    "roam",
-    "notes",
-    "schema"
-  ],
-  "preview": true,
-  "extensionDependencies": [],
-  "activationEvents": [
-    "*"
-  ],
-  "main": "./out/extension.js",
-  "contributes": {
-    "configuration": {
-      "title": "Dendron",
-      "properties": {
-        "dendron.rootDir": {
-          "type": "string",
-          "default": false,
-          "description": "Where your dendron workspace is located"
-        },
-        "dendron.defaultJournalDateFormat": {
-          "type": "string",
-          "default": "Y-MM-DD",
-          "description": "Date used in journal notes"
-        },
-        "dendron.defaultScratchDateFormat": {
-          "type": "string",
-          "default": "Y-MM-DD-HHmmss",
-          "description": "Date used in scratch notes"
-        },
-        "dendron.defaultJournalAddBehavior": {
-          "type": "string",
-          "default": "childOfDomain",
-          "enum": [
-            "childOfDomain",
-            "childOfCurrent",
-            "asOwnDomain"
-          ],
-          "description": "How are new notes added"
-        },
-        "dendron.defaultScratchAddBehavior": {
-          "type": "string",
-          "default": "asOwnDomain",
-          "enum": [
-            "childOfDomain",
-            "childOfCurrent",
-            "asOwnDomain"
-          ],
-          "description": "How are new new notes added"
-        },
-        "dendron.defaultJournalName": {
-          "type": "string",
-          "default": "journal",
-          "description": "name used for notes"
-        },
-        "dendron.defaultScratchName": {
-          "type": "string",
-          "default": "scratch",
-          "description": "name used for notes"
-        },
-        "dendron.skipPrompt": {
-          "type": "boolean",
-          "default": false,
-          "description": "Whether dendron prompts for confirmation before certain actions"
-        }
-      }
+    "name": "@dendronhq/plugin-core",
+    "private": true,
+    "displayName": "dendron",
+    "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
+    "publisher": "dendron",
+    "version": "0.5.12",
+    "engines": {
+        "vscode": "^1.46.0"
     },
-    "commands": [
-      {
-        "command": "dendron.lookup",
-        "title": "Dendron: Lookup"
-      },
-      {
-        "command": "dendron.lookupSchema",
-        "title": "Dendron: Lookup Schema"
-      },
-      {
-        "command": "dendron.createJournalNote",
-        "title": "Dendron: New Journal Note"
-      },
-      {
-        "command": "dendron.createScratchNote",
-        "title": "Dendron: New Scratch Note"
-      },
-      {
-        "command": "dendron.initWS",
-        "title": "Dendron: Initialize Workspace"
-      },
-      {
-        "command": "dendron.changeWS",
-        "title": "Dendron: Change Workspace"
-      },
-      {
-        "command": "dendron.deleteNode",
-        "title": "Dendron: Delete Node"
-      },
-      {
-        "command": "dendron.reloadIndex",
-        "title": "Dendron: Reload Index"
-      },
-      {
-        "command": "dendron.dev.doctor",
-        "title": "Dev:Dendron: Doctor"
-      },
-      {
-        "command": "dendron.dev.resetConfig",
-        "title": "Dev:Dendron: ResetConfig"
-      },
-      {
-        "command": "dendron.dev.openLogs",
-        "title": "Dev:Dendron: Open Logs"
-      },
-      {
-        "command": "dendron.openLink",
-        "title": "Dendron: Open Link"
-      },
-      {
-        "command": "dendron.importPod",
-        "title": "Dendron: Import Pod"
-      },
-      {
-        "command": "dendron.upgradeSettings",
-        "title": "Dendron: Upgrade Settings"
-      },
-      {
-        "command": "dendron.buildPod",
-        "title": "Dendron: Build Pod"
-      },
-      {
-        "command": "dendron.showHelp",
-        "title": "Dendron: Show Help"
-      }
+    "categories": [
+        "Other"
     ],
-    "keybindings": [
-      {
-        "command": "dendron.lookupSchema",
-        "mac": "cmd+shift+L",
-        "key": "ctrl+shift+l",
-        "when": "editorFocus"
-      },
-      {
-        "command": "dendron.lookup",
-        "mac": "cmd+L",
-        "key": "ctrl+l"
-      },
-      {
-        "command": "dendron.deleteNode",
-        "key": "ctrl+shift+d",
-        "mac": "cmd+shift+d"
-      },
-      {
-        "command": "dendron.createScratchNote",
-        "key": "ctrl+shift+s",
-        "mac": "cmd+shift+s"
-      },
-      {
-        "command": "dendron.createJournalNote",
-        "key": "ctrl+shift+j",
-        "mac": "cmd+shift+j",
-        "when": "editorFocus"
-      }
-    ]
-  },
-  "icon": "assets/images/logo.png",
-  "scripts": {
-    "vscode:prepublish": "webpack --mode production",
-    "webpack": "webpack --mode development",
-    "webpack-dev": "webpack --mode development --watch",
-    "lint": "eslint src --ext ts",
-    "watch": "npm run compile -- --watch",
-    "build": "npm run compile",
-    "compile": "tsc -p tsconfig.build.json",
-    "pretest": "echo stub",
-    "test": "node ./out/test/runTest.js",
-    "format": "prettier --write src '*.json' '*.js'"
-  },
-  "devDependencies": {
-    "@types/clipboardy": "^2.0.1",
-    "@types/execa": "^2.0.0",
-    "@types/fs-extra": "^9.0.1",
-    "@types/glob": "^7.1.1",
-    "@types/lodash": "^4.14.155",
-    "@types/mocha": "^7.0.2",
-    "@types/moment": "^2.13.0",
-    "@types/node": "^13.11.0",
-    "@types/open": "^6.2.1",
-    "@types/semver": "^7.3.1",
-    "@types/vscode": "^1.46.0",
-    "@typescript-eslint/eslint-plugin": "^2.30.0",
-    "@typescript-eslint/parser": "^2.30.0",
-    "eslint": "^6.8.0",
-    "glob": "^7.1.6",
-    "mocha": "^7.1.2",
-    "prettier": "2.0.5",
-    "ts-loader": "^8.0.0",
-    "ts-node": "^8.10.2",
-    "typescript": "^3.8.3",
-    "vscode-test": "^1.3.0",
-    "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.12"
-  },
-  "dependencies": {
-    "@dendronhq/common-all": "^0.5.10",
-    "@dendronhq/common-server": "^0.5.10",
-    "@dendronhq/dendron-cli": "^0.5.10",
-    "@dendronhq/engine-server": "^0.5.10",
-    "clipboardy": "^2.3.0",
-    "execa": "^4.0.2",
-    "fs-extra": "^9.0.1",
-    "lodash": "^4.17.15",
-    "moment": "^2.27.0",
-    "open": "^7.0.4",
-    "semver": "^7.3.2"
-  }
+    "keywords": [
+        "second brain",
+        "markdown",
+        "roam",
+        "notes",
+        "schema"
+    ],
+    "preview": true,
+    "extensionDependencies": [],
+    "activationEvents": [
+        "*"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "configuration": {
+            "title": "Dendron",
+            "properties": {
+                "dendron.defaultJournalName": {
+                    "type": "string",
+                    "default": "journal",
+                    "description": "named used for journal notes"
+                },
+                "dendron.defaultJournalDateFormat": {
+                    "type": "string",
+                    "default": "Y-MM-DD",
+                    "description": "date format used for journal notes"
+                },
+                "dendron.defaultJournalAddBehavior": {
+                    "default": "childOfDomain",
+                    "description": "strategy for adding new journal notes",
+                    "enum": [
+                        "childOfDomain",
+                        "childOfCurrent",
+                        "asOwnDomain"
+                    ]
+                },
+                "dendron.defaultScratchName": {
+                    "type": "string",
+                    "default": "scratch",
+                    "description": "named used for scratch notes"
+                },
+                "dendron.defaultScratchDateFormat": {
+                    "type": "string",
+                    "default": "Y-MM-DD-HHmmss",
+                    "description": "date format used for scratch notes"
+                },
+                "dendron.defaultScratchAddBehavior": {
+                    "default": "asOwnDomain",
+                    "description": "strategy for adding new scratch notes",
+                    "enum": [
+                        "childOfDomain",
+                        "childOfCurrent",
+                        "asOwnDomain"
+                    ]
+                },
+                "dendron.rootDir": {
+                    "type": "string",
+                    "default": false,
+                    "description": "location of dendron workspace"
+                },
+                "dendron.notesDirPath": {
+                    "type": "string",
+                    "desc": "Path to notesdir executable"
+                },
+                "dendron.skipPrompt": {
+                    "type": "boolean",
+                    "default": false,
+                    "descriptionip": "whether dendron prompts for confirmation for certain actions"
+                }
+            }
+        },
+        "commands": [
+            {
+                "command": "dendron.lookup",
+                "title": "Dendron: Lookup"
+            },
+            {
+                "command": "dendron.lookupSchema",
+                "title": "Dendron: Lookup Schema"
+            },
+            {
+                "command": "dendron.createJournalNote",
+                "title": "Dendron: New Journal Note"
+            },
+            {
+                "command": "dendron.createScratchNote",
+                "title": "Dendron: New Scratch Note"
+            },
+            {
+                "command": "dendron.initWS",
+                "title": "Dendron: Initialize Workspace"
+            },
+            {
+                "command": "dendron.changeWS",
+                "title": "Dendron: Change Workspace"
+            },
+            {
+                "command": "dendron.deleteNode",
+                "title": "Dendron: Delete Node"
+            },
+            {
+                "command": "dendron.reloadIndex",
+                "title": "Dendron: Reload Index"
+            },
+            {
+                "command": "dendron.dev.doctor",
+                "title": "Dev:Dendron: Doctor"
+            },
+            {
+                "command": "dendron.dev.resetConfig",
+                "title": "Dev:Dendron: ResetConfig"
+            },
+            {
+                "command": "dendron.dev.openLogs",
+                "title": "Dev:Dendron: Open Logs"
+            },
+            {
+                "command": "dendron.openLink",
+                "title": "Dendron: Open Link"
+            },
+            {
+                "command": "dendron.importPod",
+                "title": "Dendron: Import Pod"
+            },
+            {
+                "command": "dendron.upgradeSettings",
+                "title": "Dendron: Upgrade Settings"
+            },
+            {
+                "command": "dendron.buildPod",
+                "title": "Dendron: Build Pod"
+            },
+            {
+                "command": "dendron.showHelp",
+                "title": "Dendron: Show Help"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "dendron.lookupSchema",
+                "mac": "cmd+shift+L",
+                "key": "ctrl+shift+l",
+                "when": "editorFocus"
+            },
+            {
+                "command": "dendron.lookup",
+                "mac": "cmd+L",
+                "key": "ctrl+l"
+            },
+            {
+                "command": "dendron.deleteNode",
+                "key": "ctrl+shift+d",
+                "mac": "cmd+shift+d"
+            },
+            {
+                "command": "dendron.createScratchNote",
+                "key": "ctrl+shift+s",
+                "mac": "cmd+shift+s"
+            },
+            {
+                "command": "dendron.createJournalNote",
+                "key": "ctrl+shift+j",
+                "mac": "cmd+shift+j",
+                "when": "editorFocus"
+            }
+        ]
+    },
+    "icon": "assets/images/logo.png",
+    "scripts": {
+        "vscode:prepublish": "webpack --mode production",
+        "webpack": "webpack --mode development",
+        "webpack-dev": "webpack --mode development --watch",
+        "lint": "eslint src --ext ts",
+        "watch": "npm run compile -- --watch",
+        "build": "npm run compile",
+        "compile": "tsc -p tsconfig.build.json",
+        "pretest": "echo stub",
+        "test": "node ./out/test/runTest.js",
+        "format": "prettier --write src '*.json' '*.js'"
+    },
+    "devDependencies": {
+        "@types/clipboardy": "^2.0.1",
+        "@types/execa": "^2.0.0",
+        "@types/fs-extra": "^9.0.1",
+        "@types/glob": "^7.1.1",
+        "@types/lodash": "^4.14.155",
+        "@types/mocha": "^7.0.2",
+        "@types/moment": "^2.13.0",
+        "@types/node": "^13.11.0",
+        "@types/open": "^6.2.1",
+        "@types/semver": "^7.3.1",
+        "@types/vscode": "^1.46.0",
+        "@typescript-eslint/eslint-plugin": "^2.30.0",
+        "@typescript-eslint/parser": "^2.30.0",
+        "eslint": "^6.8.0",
+        "glob": "^7.1.6",
+        "mocha": "^7.1.2",
+        "prettier": "2.0.5",
+        "ts-loader": "^8.0.0",
+        "ts-node": "^8.10.2",
+        "typescript": "^3.8.3",
+        "vscode-test": "^1.3.0",
+        "webpack": "^4.43.0",
+        "webpack-cli": "^3.3.12"
+    },
+    "dependencies": {
+        "@dendronhq/common-all": "^0.5.10",
+        "@dendronhq/common-server": "^0.5.10",
+        "@dendronhq/dendron-cli": "^0.5.10",
+        "@dendronhq/engine-server": "^0.5.10",
+        "clipboardy": "^2.3.0",
+        "execa": "^4.0.2",
+        "fs-extra": "^9.0.1",
+        "lodash": "^4.17.15",
+        "moment": "^2.27.0",
+        "open": "^7.0.4",
+        "semver": "^7.3.2"
+    }
 }

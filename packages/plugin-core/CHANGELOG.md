@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.12](https://github.com/dendronhq/dendron/compare/v0.5.11...v0.5.12) (2020-08-07)
+
+### Bug Fixes
+
+- doctor reload index before doing backfill ([1b261ab](https://github.com/dendronhq/dendron/commit/1b261ab6bbc08b6ac9869e1c54ba7095a0b13573))
+
 ## [0.5.11](https://github.com/dendronhq/dendron/compare/v0.5.10...v0.5.11) (2020-08-06)
 
 ### Features

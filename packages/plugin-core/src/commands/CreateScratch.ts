@@ -16,6 +16,7 @@ type CommandInput = {
 };
 
 export class CreateScratchCommand extends CreateNoteCommand {
+
   async gatherInputs(): Promise<CommandInput | undefined> {
     let title: string;
     const { text, selection } = VSCodeUtils.getSelection();
@@ -46,7 +47,7 @@ export class CreateScratchCommand extends CreateNoteCommand {
 
   async execute(opts: CommandOpts) {
     const { fname, selection, title } = opts;
-    const uri = await super.execute({ ...opts, title: fname });
+    const uri = await super.execute({ ...opts, title });
 
     const editor = VSCodeUtils.getActiveTextEditor();
     await editor?.edit((builder) => {

@@ -5,7 +5,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.5.14](https://github.com/dendronhq/dendron/compare/v0.5.13...v0.5.14) (2020-08-08)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- issue with buildpod ([239c63c](https://github.com/dendronhq/dendron/commit/239c63cfae0ee0d65629a2085b7a8ba3a40f7fae))
 
 ## [0.5.13](https://github.com/dendronhq/dendron/compare/v0.5.12...v0.5.13) (2020-08-08)
 
@@ -15,7 +17,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Features
 
-- basic implementation of move command ([4a869cf](https://github.com/dendronhq/dendron/commit/4a869cfc521aeaba5ec61275e4f55e0dfcf87d6d))
+- initial implementation of `Dendron: Rename` command ([4a869cf](https://github.com/dendronhq/dendron/commit/4a869cfc521aeaba5ec61275e4f55e0dfcf87d6d)) ([docs](http://localhost:4000/notes/eea2b078-1acc-4071-a14e-18299fc28f47.html#renamenote-))
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/command-rename.gif)
 
 ## [0.5.12](https://github.com/dendronhq/dendron/compare/v0.5.11...v0.5.12) (2020-08-07)
 

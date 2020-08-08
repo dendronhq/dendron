@@ -85,7 +85,7 @@ export function _activate(context: vscode.ExtensionContext) {
     if (_.isUndefined(previousGlobalVersion)) {
       Logger.info({ ctx, msg: "no previous global version" });
       vscode.commands
-        .executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS)
+        .executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS.key)
         .then((changes) => {
           Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
         });
@@ -97,7 +97,7 @@ export function _activate(context: vscode.ExtensionContext) {
       if (semver.lt(previousWsVersion, ws.version)) {
         Logger.info({ ctx, msg: "preUpgrade: new wsVersion" });
         vscode.commands
-          .executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS)
+          .executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS.key)
           .then((changes) => {
             Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
             context.workspaceState.update(

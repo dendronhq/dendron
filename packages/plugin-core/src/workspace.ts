@@ -178,14 +178,14 @@ export class DendronWorkspace {
 
   _setupCommands() {
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.INIT_WS, async () => {
+      vscode.commands.registerCommand(DENDRON_COMMANDS.INIT_WS.key, async () => {
         await new SetupWorkspaceCommand().run();
       })
     );
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        DENDRON_COMMANDS.CREATE_SCRATCH_NOTE,
+        DENDRON_COMMANDS.CREATE_SCRATCH_NOTE.key,
         async () => {
           await new CreateScratchCommand().run();
         }
@@ -194,7 +194,7 @@ export class DendronWorkspace {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        DENDRON_COMMANDS.CREATE_JOURNAL_NOTE,
+        DENDRON_COMMANDS.CREATE_JOURNAL_NOTE.key,
         async () => {
           await new CreateJournalCommand().run();
         }
@@ -202,13 +202,13 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.CHANGE_WS, async () => {
+      vscode.commands.registerCommand(DENDRON_COMMANDS.CHANGE_WS.key, async () => {
         await new ChangeWorkspaceCommand().run();
       })
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.RELOAD_WS, async () => {
+      vscode.commands.registerCommand(DENDRON_COMMANDS.RELOAD_WS.key, async () => {
         await this.reloadWorkspace();
         vscode.window.showInformationMessage(`ws reloaded`);
       })
@@ -216,7 +216,7 @@ export class DendronWorkspace {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        DENDRON_COMMANDS.RESET_CONFIG,
+        DENDRON_COMMANDS.RESET_CONFIG.key,
         async () => {
           await new ResetConfigCommand().run();
         }
@@ -224,7 +224,7 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.LOOKUP, async () => {
+      vscode.commands.registerCommand(DENDRON_COMMANDS.LOOKUP.key, async () => {
         const ctx = DENDRON_COMMANDS.LOOKUP;
         this.L.info({ ctx: ctx + ":LookupController:pre" });
         const controller = new LookupController(this, { flavor: "note" });
@@ -235,7 +235,7 @@ export class DendronWorkspace {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        DENDRON_COMMANDS.LOOKUP_SCHEMA,
+        DENDRON_COMMANDS.LOOKUP_SCHEMA.key,
         async () => {
           const controller = new LookupController(this, { flavor: "schema" });
           controller.show();
@@ -245,7 +245,7 @@ export class DendronWorkspace {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        DENDRON_COMMANDS.DELETE_NODE,
+        DENDRON_COMMANDS.DELETE_NODE.key,
         async () => {
           const ctx = DENDRON_COMMANDS.DELETE_NODE;
           this.L.info({ ctx });
@@ -269,7 +269,7 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.OPEN_LINK, async () => {
+      vscode.commands.registerCommand(DENDRON_COMMANDS.OPEN_LINK.key, async () => {
         const ctx = DENDRON_COMMANDS.OPEN_LINK;
         this.L.info({ ctx });
         if (!isAnythingSelected()) {
@@ -287,7 +287,7 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.IMPORT_POD, async () => {
+      vscode.commands.registerCommand(DENDRON_COMMANDS.IMPORT_POD.key, async () => {
         const wsRoot = this.rootWorkspace.uri.fsPath;
         await new ImportPodCommand().execute({ wsRoot });
         vscode.window.showInformationMessage(`pod import`);
@@ -296,7 +296,7 @@ export class DendronWorkspace {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        DENDRON_COMMANDS.RELOAD_INDEX,
+        DENDRON_COMMANDS.RELOAD_INDEX.key,
         async (silent?: boolean) => {
           await new ReloadIndexCommand().execute();
           if (!silent) {
@@ -307,13 +307,13 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.SHOW_HELP, async () => {
+      vscode.commands.registerCommand(DENDRON_COMMANDS.SHOW_HELP.key, async () => {
         await new ShowHelpCommand().execute();
       })
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.OPEN_LOGS, async () => {
+      vscode.commands.registerCommand(DENDRON_COMMANDS.OPEN_LOGS.key, async () => {
         try {
           await new OpenLogsCommand().execute({});
         } catch (err) {
@@ -324,7 +324,7 @@ export class DendronWorkspace {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        DENDRON_COMMANDS.UPGRADE_SETTINGS,
+        DENDRON_COMMANDS.UPGRADE_SETTINGS.key,
         async () => {
           await new UpgradeSettingsCommand().execute({
             settingOpts: { force: true },
@@ -334,19 +334,19 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.BUILD_POD, async () => {
+      vscode.commands.registerCommand(DENDRON_COMMANDS.BUILD_POD.key, async () => {
         await new BuildPodCommand().run();
       })
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.DOCTOR, async () => {
+      vscode.commands.registerCommand(DENDRON_COMMANDS.DOCTOR.key, async () => {
         await new DoctorCommand().run();
       })
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.RENAME_NOTE, async () => {
+      vscode.commands.registerCommand(DENDRON_COMMANDS.RENAME_NOTE.key, async () => {
         await new RenameNoteCommand().run();
       })
     );
@@ -500,7 +500,7 @@ export class DendronWorkspace {
       mainVault = wsFolders![0].uri.fsPath;
     }
     try {
-      await vscode.commands.executeCommand(DENDRON_COMMANDS.RELOAD_INDEX, true);
+      await vscode.commands.executeCommand(DENDRON_COMMANDS.RELOAD_INDEX.key, true);
       return;
     } catch (err) {
       vscode.window.showErrorMessage(

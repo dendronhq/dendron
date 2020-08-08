@@ -93,11 +93,11 @@
             },
             {
                 "command": "dendron.createJournalNote",
-                "title": "Dendron: New Journal Note"
+                "title": "Dendron: Create Journal Note"
             },
             {
                 "command": "dendron.createScratchNote",
-                "title": "Dendron: New Scratch Note"
+                "title": "Dendron: Create Scratch Note"
             },
             {
                 "command": "dendron.initWS",
@@ -114,18 +114,6 @@
             {
                 "command": "dendron.reloadIndex",
                 "title": "Dendron: Reload Index"
-            },
-            {
-                "command": "dendron.dev.doctor",
-                "title": "Dev:Dendron: Doctor"
-            },
-            {
-                "command": "dendron.dev.resetConfig",
-                "title": "Dev:Dendron: ResetConfig"
-            },
-            {
-                "command": "dendron.dev.openLogs",
-                "title": "Dev:Dendron: Open Logs"
             },
             {
                 "command": "dendron.openLink",
@@ -150,6 +138,18 @@
             {
                 "command": "dendron.renameNote",
                 "title": "Dendron: 🚧 Rename Note 🚧"
+            },
+            {
+                "command": "dendron.dev.doctor",
+                "title": "Dendron:Dev: Doctor"
+            },
+            {
+                "command": "dendron.dev.resetConfig",
+                "title": "Dendron:Dev: Reset Config"
+            },
+            {
+                "command": "dendron.dev.openLogs",
+                "title": "Dendron:Dev: Open Logs"
             }
         ],
         "keybindings": [

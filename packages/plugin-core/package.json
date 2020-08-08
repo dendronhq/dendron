@@ -149,7 +149,7 @@
             },
             {
                 "command": "dendron.renameNote",
-                "title": "Dendron: Rename Note"
+                "title": "Dendron: 🚧 Rename Note 🚧"
             }
         ],
         "keybindings": [

@@ -15,6 +15,10 @@ export const DENDRON_COMMANDS = {
     key: "dendron.createScratchNote",
     title: `${CMD_PREFIX} Create Scratch Note`,
   },
+  COPY_NOTE_LINK: {
+    key: "dendron.copyNoteLink",
+    title: `${CMD_PREFIX} Copy Note Link`
+  },
   DELETE_NODE: {
     key: "dendron.deleteNode",
     title: `${CMD_PREFIX} Delete Node`,

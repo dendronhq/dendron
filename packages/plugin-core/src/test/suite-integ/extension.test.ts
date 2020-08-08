@@ -30,6 +30,7 @@ import { _activate } from "../../extension";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
+import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
@@ -565,6 +566,21 @@ suite("commands", function () {
       });
     });
 
+  });
+
+  describe("CopyNoteLink", function () {
+    test("basic", function (done) {
+      onWSInit(async () => {
+        const uri = vscode.Uri.file(
+          path.join(root.name, "vault", "dendron.faq.md")
+        );
+        await vscode.window.showTextDocument(uri);
+        const link = await new CopyNoteLinkCommand().run();
+        assert.equal(link, "[[ Faq | dendron.faq ]]");
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx);
+    });
   });
 
   // --- Dev

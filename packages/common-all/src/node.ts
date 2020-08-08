@@ -31,6 +31,7 @@ import {
 } from "./types";
 import matter from "gray-matter";
 import { genUUID } from "./uuid";
+import path from "path";
 
 export const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
@@ -129,6 +130,10 @@ export class DNodeUtils {
 
   static isRoot(node: DNode): boolean {
     return node.id === "root";
+  }
+
+  static uri2Fname(uri: URI) {
+    return path.basename(uri.fsPath, ".md");
   }
 }
 

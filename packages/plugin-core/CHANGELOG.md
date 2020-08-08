@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.13](https://github.com/dendronhq/dendron/compare/v0.5.12...v0.5.13) (2020-08-08)
+
+### Bug Fixes
+
+- scratch note title set to fname ([416a515](https://github.com/dendronhq/dendron/commit/416a51573406d2a87f8b2d3d90e9fea143f6d4a2))
+
+### Features
+
+- basic implementation of move command ([4a869cf](https://github.com/dendronhq/dendron/commit/4a869cfc521aeaba5ec61275e4f55e0dfcf87d6d))
+
 ## [0.5.12](https://github.com/dendronhq/dendron/compare/v0.5.11...v0.5.12) (2020-08-07)
 
 ### Bug Fixes

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.14](https://github.com/dendronhq/dendron/compare/v0.5.13...v0.5.14) (2020-08-08)
+
+### Bug Fixes
+
+- issue with buildpod ([239c63c](https://github.com/dendronhq/dendron/commit/239c63cfae0ee0d65629a2085b7a8ba3a40f7fae))
+
 ## [0.5.13](https://github.com/dendronhq/dendron/compare/v0.5.12...v0.5.13) (2020-08-08)
 
 ### Bug Fixes

@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.14](https://github.com/dendronhq/dendron/compare/v0.5.13...v0.5.14) (2020-08-08)
+
+**Note:** Version bump only for package @dendronhq/plugin-core
+
 ## [0.5.13](https://github.com/dendronhq/dendron/compare/v0.5.12...v0.5.13) (2020-08-08)
 
 ### Bug Fixes

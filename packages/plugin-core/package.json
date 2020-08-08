@@ -226,6 +226,7 @@
         "@dendronhq/dendron-cli": "^0.5.14",
         "@dendronhq/engine-server": "^0.5.10",
         "clipboardy": "^2.3.0",
+        "cross-path-sort": "^1.0.0",
         "execa": "^4.0.2",
         "fs-extra": "^9.0.1",
         "lodash": "^4.17.15",

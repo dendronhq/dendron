@@ -30,6 +30,8 @@ import { NodeService } from "./services/nodeService/NodeService";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
 import { RenameNoteCommand } from "./commands/RenameNote";
+import { cacheWorkspace } from "./external/memo/utils/utils";
+import { RenameNoteV2Command } from "./commands/RenameNoteV2";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -340,7 +342,7 @@ export class DendronWorkspace {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(DENDRON_COMMANDS.RENAME_NOTE.key, async () => {
-        await new RenameNoteCommand().run();
+        await new RenameNoteV2Command().run();
       })
     );
   }
@@ -494,6 +496,7 @@ export class DendronWorkspace {
     }
     try {
       await vscode.commands.executeCommand(DENDRON_COMMANDS.RELOAD_INDEX.key, true);
+      await cacheWorkspace();
       return;
     } catch (err) {
       vscode.window.showErrorMessage(

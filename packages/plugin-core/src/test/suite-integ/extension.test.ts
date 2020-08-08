@@ -2,7 +2,7 @@ import { DNode, Note } from "@dendronhq/common-all";
 import {
   DirResult,
   FileTestUtils,
-  mdFile2NodeProps,
+  mdFile2NodeProps
 } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
 import * as assert from "assert";
@@ -13,24 +13,27 @@ import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
+import { workspace } from "vscode";
 import { ChangeWorkspaceCommand } from "../../commands/ChangeWorkspace";
+import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
 import { CreateJournalCommand } from "../../commands/CreateJournal";
 import { CreateScratchCommand } from "../../commands/CreateScratch";
 import { DoctorCommand } from "../../commands/Doctor";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
+import { RenameNoteV2Command } from "../../commands/RenameNoteV2";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import { SetupWorkspaceCommand } from "../../commands/SetupWorkspace";
 import {
   createNoActiveItem,
   EngineOpts,
-  LookupProvider,
+  LookupProvider
 } from "../../components/lookup/LookupProvider";
-import { CONFIG, WORKSPACE_STATE, ConfigKey } from "../../constants";
+import { CONFIG, ConfigKey, WORKSPACE_STATE } from "../../constants";
 import { _activate } from "../../extension";
+import { replaceRefs } from "../../external/memo/utils/utils";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
@@ -598,5 +601,158 @@ suite("commands", function () {
       });
       setupDendronWorkspace(root.name, ctx);
     });
+  });
+});
+
+suite("memo", function () {
+  this.timeout(TIMEOUT);
+
+  before(function () {
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    DendronWorkspace.getOrCreate(ctx);
+  });
+
+  beforeEach(async function () {
+    root = FileTestUtils.tmpDir();
+    fs.removeSync(root.name);
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    return;
+  });
+
+  afterEach(function () {
+    HistoryService.instance().clearSubscriptions();
+  });
+
+  describe("basic", ()=> {
+    test("basic", function(done) {
+      onWSInit(async () => {
+        const uri = vscode.Uri.file(
+          path.join(root.name, "vault", "dendron.faq.md")
+        );
+        VSCodeUtils.showInputBox = async (
+          ) => {
+            return "dendron.bond";
+          };
+        await vscode.window.showTextDocument(uri);
+        await new RenameNoteV2Command().run();
+        const editor = await vscode.window.showTextDocument(vscode.Uri.file(
+          path.join(root.name, "vault", "dendron.md")
+        ));
+        assert.ok(editor.document.getText().indexOf("[[FAQ |dendron.bond]]") > 0);
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx);
+    })
+  });
+});
+
+
+const it = test;
+const expect = assert.deepEqual;
+
+suite("utils", function () {
+  describe('replaceRefs()', () => {
+    before(function () {
+      ctx = VSCodeUtils.getOrCreateMockContext();
+      DendronWorkspace.getOrCreate(ctx);
+    });
+  
+    beforeEach(async function () {
+      root = FileTestUtils.tmpDir();
+      fs.removeSync(root.name);
+      ctx = VSCodeUtils.getOrCreateMockContext();
+      return;
+    });
+  
+    afterEach(function () {
+      HistoryService.instance().clearSubscriptions();
+    });
+  
+    it('should return null if nothing to replace', async () => {
+      assert.deepEqual(
+        replaceRefs({
+          refs: [{ old: 'test-ref', new: 'new-test-ref' }],
+          document: await workspace.openTextDocument({
+            language: 'markdown',
+            content: '[[test-ref]]',
+          }),
+        }),
+      '[[new-test-ref]]');
+    });
+
+    it('should replace short ref with short ref', async () => {
+      assert.deepEqual(
+        replaceRefs({
+          refs: [{ old: 'test-ref', new: 'new-test-ref' }],
+          document: await workspace.openTextDocument({
+            language: 'markdown',
+            content: '[[test-ref]]',
+          }),
+        }),'[[new-test-ref]]');
+    });
+
+    it('should replace short ref with label with short ref with label', async () => {
+      const replace = replaceRefs({
+        refs: [{ old: 'test-ref', new: 'new-test-ref' }],
+        document: await workspace.openTextDocument({
+          language: 'markdown',
+          content: '[[Test Label|test-ref]]',
+        }),
+      })
+      expect(
+        replace
+        ,
+      '[[Test Label|new-test-ref]]');
+    });
+
+    // custom
+    it('should replace short ref with label with short ref with label and space ', async () => {
+      expect(
+        replaceRefs({
+          refs: [{ old: 'dendron.faq', new: 'dendron.bond' }],
+          document: await workspace.openTextDocument({
+            language: 'markdown',
+            content: '[[ FAQ|dendron.faq]]',
+          }),
+        }),
+      '[[FAQ|dendron.bond]]');
+    });
+
+    it('should replace short ref with label with short ref with label and space 2 ', async () => {
+      expect(
+        replaceRefs({
+          refs: [{ old: 'dendron.faq', new: 'dendron.bond' }],
+          document: await workspace.openTextDocument({
+            language: 'markdown',
+            content: '[[FAQ |dendron.faq]]',
+          }),
+        }),
+      '[[FAQ |dendron.bond]]');
+    });
+
+    it('should replace short ref with label with short ref with label and space 3 ', async () => {
+      expect(
+        replaceRefs({
+          refs: [{ old: 'dendron.faq', new: 'dendron.bond' }],
+          document: await workspace.openTextDocument({
+            language: 'markdown',
+            content: '[[FAQ| dendron.faq]]',
+          }),
+        }),
+      '[[FAQ|dendron.bond]]');
+    });
+
+    it('should replace short ref with label with short ref with label and space 4 ', async () => {
+      expect(
+        replaceRefs({
+          refs: [{ old: 'dendron.faq', new: 'dendron.bond' }],
+          document: await workspace.openTextDocument({
+            language: 'markdown',
+            content: '[[FAQ|dendron.faq ]]',
+          }),
+        }),
+      '[[FAQ|dendron.bond]]');
+    });
+
   });
 });

@@ -134,12 +134,13 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     const siteRoot = resolvePath(siteRootRaw, dendronRoot);
     const siteNotesDir = "notes";
     const siteNotesDirPath = path.join(siteRoot, siteNotesDir);
-    const L = this.L.child({
-      ctx: "BuildSiteComman",
-      siteRoot,
-      dendronRoot,
-      noteRoot
-    });
+    const L = this.L;
+    // ({
+    //   ctx: "BuildSiteComman",
+    //   siteRoot,
+    //   dendronRoot,
+    //   noteRoot
+    // });
     L.info({ msg: "enter", siteNotesDirPath });
     fs.ensureDirSync(siteNotesDirPath);
     fs.emptyDirSync(siteNotesDirPath);

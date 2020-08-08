@@ -208,13 +208,6 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.RELOAD_WS.key, async () => {
-        await this.reloadWorkspace();
-        vscode.window.showInformationMessage(`ws reloaded`);
-      })
-    );
-
-    this.context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RESET_CONFIG.key,
         async () => {

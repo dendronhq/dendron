@@ -6,14 +6,7 @@ export const extensionQualifiedId = `dendron.dendron`;
 
 const CMD_PREFIX = "Dendron:";
 export const DENDRON_COMMANDS = {
-  LOOKUP: {
-    key: "dendron.lookup",
-    title: `${CMD_PREFIX} Lookup`,
-  },
-  LOOKUP_SCHEMA: {
-    key: "dendron.lookupSchema",
-    title: `${CMD_PREFIX} Lookup Schema`,
-  },
+  // --- Notes
   CREATE_JOURNAL_NOTE: {
     key: "dendron.createJournalNote",
     title: `${CMD_PREFIX} Create Journal Note`,
@@ -22,6 +15,23 @@ export const DENDRON_COMMANDS = {
     key: "dendron.createScratchNote",
     title: `${CMD_PREFIX} Create Scratch Note`,
   },
+  DELETE_NODE: {
+    key: "dendron.deleteNode",
+    title: `${CMD_PREFIX} Delete Node`,
+  },
+  LOOKUP: {
+    key: "dendron.lookup",
+    title: `${CMD_PREFIX} Lookup`,
+  },
+  LOOKUP_SCHEMA: {
+    key: "dendron.lookupSchema",
+    title: `${CMD_PREFIX} Lookup Schema`,
+  },
+  RENAME_NOTE: {
+    key: "dendron.renameNote",
+    title: `${CMD_PREFIX} 🚧 Rename Note 🚧`,
+  },
+  // --- Workspace
   INIT_WS: {
     key: "dendron.initWS",
     title: `${CMD_PREFIX} Initialize Workspace`,
@@ -30,30 +40,25 @@ export const DENDRON_COMMANDS = {
     key: "dendron.changeWS",
     title: `${CMD_PREFIX} Change Workspace`,
   },
-  DELETE_NODE: {
-    key: "dendron.deleteNode",
-    title: `${CMD_PREFIX} Delete Node`,
-  },
   RELOAD_INDEX: {
     key: "dendron.reloadIndex",
     title: `${CMD_PREFIX} Reload Index`,
   },
-  OPEN_LINK: { key: "dendron.openLink", title: `${CMD_PREFIX} Open Link` },
+  // --- Pods
+  BUILD_POD: { key: "dendron.buildPod", title: `${CMD_PREFIX} Build Pod` },
   IMPORT_POD: { key: "dendron.importPod", title: `${CMD_PREFIX} Import Pod` },
+  // --- Misc
+  OPEN_LINK: { key: "dendron.openLink", title: `${CMD_PREFIX} Open Link` },
   UPGRADE_SETTINGS: {
     key: "dendron.upgradeSettings",
     title: `${CMD_PREFIX} Upgrade Settings`,
   },
-  BUILD_POD: { key: "dendron.buildPod", title: `${CMD_PREFIX} Build Pod` },
   SHOW_HELP: { key: "dendron.showHelp", title: `${CMD_PREFIX} Show Help` },
-  RENAME_NOTE: {
-    key: "dendron.renameNote",
-    title: `${CMD_PREFIX} 🚧 Rename Note 🚧`,
-  },
   // REFACTOR_HIERARCHY: {
   //   key: "dendron.refactorHierarchy",
   //   title: `${CMD_PREFIX} Refactor Hierarchy`,
   // },
+  // --- Dev
   DOCTOR: { key: "dendron.dev.doctor", title: `${CMD_PREFIX}Dev: Doctor` },
   RESET_CONFIG: {
     key: "dendron.dev.resetConfig",

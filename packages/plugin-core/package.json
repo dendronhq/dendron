@@ -84,6 +84,18 @@
         },
         "commands": [
             {
+                "command": "dendron.createJournalNote",
+                "title": "Dendron: Create Journal Note"
+            },
+            {
+                "command": "dendron.createScratchNote",
+                "title": "Dendron: Create Scratch Note"
+            },
+            {
+                "command": "dendron.deleteNode",
+                "title": "Dendron: Delete Node"
+            },
+            {
                 "command": "dendron.lookup",
                 "title": "Dendron: Lookup"
             },
@@ -92,12 +104,8 @@
                 "title": "Dendron: Lookup Schema"
             },
             {
-                "command": "dendron.createJournalNote",
-                "title": "Dendron: Create Journal Note"
-            },
-            {
-                "command": "dendron.createScratchNote",
-                "title": "Dendron: Create Scratch Note"
+                "command": "dendron.renameNote",
+                "title": "Dendron: 🚧 Rename Note 🚧"
             },
             {
                 "command": "dendron.initWS",
@@ -108,36 +116,28 @@
                 "title": "Dendron: Change Workspace"
             },
             {
-                "command": "dendron.deleteNode",
-                "title": "Dendron: Delete Node"
-            },
-            {
                 "command": "dendron.reloadIndex",
                 "title": "Dendron: Reload Index"
-            },
-            {
-                "command": "dendron.openLink",
-                "title": "Dendron: Open Link"
-            },
-            {
-                "command": "dendron.importPod",
-                "title": "Dendron: Import Pod"
-            },
-            {
-                "command": "dendron.upgradeSettings",
-                "title": "Dendron: Upgrade Settings"
             },
             {
                 "command": "dendron.buildPod",
                 "title": "Dendron: Build Pod"
             },
             {
-                "command": "dendron.showHelp",
-                "title": "Dendron: Show Help"
+                "command": "dendron.importPod",
+                "title": "Dendron: Import Pod"
             },
             {
-                "command": "dendron.renameNote",
-                "title": "Dendron: 🚧 Rename Note 🚧"
+                "command": "dendron.openLink",
+                "title": "Dendron: Open Link"
+            },
+            {
+                "command": "dendron.upgradeSettings",
+                "title": "Dendron: Upgrade Settings"
+            },
+            {
+                "command": "dendron.showHelp",
+                "title": "Dendron: Show Help"
             },
             {
                 "command": "dendron.dev.doctor",

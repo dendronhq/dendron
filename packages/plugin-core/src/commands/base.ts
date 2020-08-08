@@ -24,7 +24,17 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
     return;
   }
 
+  async sanityCheck(): Promise<undefined|string> {
+    return;
+  }
+
   async run(): Promise<TOut|undefined> {
+    const out = await this.sanityCheck();
+    if (!_.isUndefined(out)) {
+      window.showErrorMessage(out);
+      return;
+    }
+    
     const inputs = await this.gatherInputs();
     if (!_.isUndefined(inputs)) {
       const opts: TOpts = await this.enrichInputs(inputs);
@@ -36,7 +46,7 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
   }
 }
 
-export abstract class BasicCommand<TOpts, TOut = any> extends BaseCommand<TOpts, TOut, TOpts> {
+export abstract class BasicCommand<TOpts, TOut = any> extends BaseCommand<TOpts, TOut, TOpts|undefined> {
   async enrichInputs(inputs: TOpts): Promise<TOpts> {
     return inputs;
   }

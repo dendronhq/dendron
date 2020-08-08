@@ -146,6 +146,10 @@
             {
                 "command": "dendron.showHelp",
                 "title": "Dendron: Show Help"
+            },
+            {
+                "command": "dendron.renameNote",
+                "title": "Dendron: Rename Note"
             }
         ],
         "keybindings": [

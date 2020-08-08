@@ -11,6 +11,7 @@ export const DENDRON_COMMANDS = {
   DELETE_NODE: "dendron.deleteNode",
   RELOAD_INDEX: "dendron.reloadIndex",
   RELOAD_WS: "dendron.reloadWS",
+  RENAME_NOTE: "dendron.renameNote",
   SHOW_HELP: "dendron.showHelp",
   CREATE_SCRATCH_NOTE: "dendron.createScratchNote",
   CREATE_JOURNAL_NOTE: "dendron.createJournalNote",
@@ -80,7 +81,7 @@ export const CONFIG = {
   DEFAULT_JOURNAL_ADD_BEHAVIOR: {
     key: "dendron.defaultJournalAddBehavior",
     default: "childOfDomain",
-    description: _noteAddBehaviorDesc("journal");
+    description: _noteAddBehaviorDesc("journal"),
     enum: _noteAddBehaviorEnum,
   },
   DEFAULT_SCRATCH_NAME: {

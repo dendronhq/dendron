@@ -29,6 +29,7 @@ import { HistoryService } from "./services/HistoryService";
 import { NodeService } from "./services/nodeService/NodeService";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
+import { RenameNoteCommand } from "./commands/RenameNote";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -72,6 +73,14 @@ export class DendronWorkspace {
 
   static workspaceFolders(): readonly vscode.WorkspaceFolder[] | undefined {
     return vscode.workspace.workspaceFolders;
+  }
+
+  static rootWorkspaceFolder(): vscode.WorkspaceFolder | undefined {
+    const wsFolders = DendronWorkspace.workspaceFolders();
+    if(wsFolders) {
+      return wsFolders[0];
+    }
+    return;
   }
 
   /**
@@ -335,6 +344,12 @@ export class DendronWorkspace {
         await new DoctorCommand().run();
       })
     );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(DENDRON_COMMANDS.RENAME_NOTE, async () => {
+        await new RenameNoteCommand().run();
+      })
+    );
   }
 
   // === Utils
@@ -434,6 +449,7 @@ export class DendronWorkspace {
         }
       }, this)
     );
+
     this.disposableStore.add(
       this.fsWatcher.onDidDelete(async (uri: vscode.Uri) => {
         const ctx = "fsWatcher.onDidDelete";
@@ -441,14 +457,14 @@ export class DendronWorkspace {
         const fname = path.basename(uri.fsPath, ".md");
 
         // check if we should ignore
-        const recentEvents = HistoryService.instance().lookBack();
+        const recentEvents = HistoryService.instance().lookBack(5);
         this.L.debug({ ctx, recentEvents, fname });
         if (
           _.find(recentEvents, (event) => {
             return _.every([
               event?.uri?.fsPath === uri.fsPath,
               event.source === "engine",
-              event.action === "delete",
+              _.includes(["delete", "rename"], event.action)
             ]);
           })
         ) {
@@ -457,6 +473,7 @@ export class DendronWorkspace {
         }
 
         try {
+          this.L.debug({ ctx, uri, msg: "preparing to delete" });
           const nodeToDelete = _.find(this.engine.notes, { fname });
           if (_.isUndefined(nodeToDelete)) {
             throw `${fname} not found`;

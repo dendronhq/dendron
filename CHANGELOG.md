@@ -5,7 +5,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [0.6.0](https://github.com/dendronhq/dendron/compare/v0.5.15...v0.6.0) (2020-08-09)
 
-**Note:** Version bump only for package root
+Dendron 0.6 has sprouted :seedling:
+
+The much asked for Rename Note command is here, as well as a bunch of enhancements to notes and schemas. Read the full release notes [here](https://www.dendron.so/notes/075e9806-0367-40a2-8154-2e84d5a020e2.html)
 
 ## [0.5.15](https://github.com/dendronhq/dendron/compare/v0.5.14...v0.5.15) (2020-08-09)
 

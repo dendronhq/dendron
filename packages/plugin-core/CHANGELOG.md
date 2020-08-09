@@ -11,8 +11,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Features
 
-- add copy note link command ([5ca2434](https://github.com/dendronhq/dendron/commit/5ca2434de3f19eaa94ef7bc876ad9b8067cdf90a))
-- standalone rename note command ([72809a4](https://github.com/dendronhq/dendron/commit/72809a487d8ac57c96046395ea872d78e8efc1ad))
+- add copy note link command ([5ca2434](https://github.com/dendronhq/dendron/commit/5ca2434de3f19eaa94ef7bc876ad9b8067cdf90a)) ([docs](https://www.dendron.so/notes/eea2b078-1acc-4071-a14e-18299fc28f47.html#copy-link))
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/command.copy-link.gif)
+
+- standalone rename note command ([72809a4](https://github.com/dendronhq/dendron/commit/72809a487d8ac57c96046395ea872d78e8efc1ad)) ([docs](https://www.dendron.so/notes/eea2b078-1acc-4071-a14e-18299fc28f47.html#rename-note))
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/command-rename.gif)
 
 ## [0.5.14](https://github.com/dendronhq/dendron/compare/v0.5.13...v0.5.14) (2020-08-08)
 

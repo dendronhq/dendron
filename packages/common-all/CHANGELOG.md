@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.15](https://github.com/dendronhq/dendron/compare/v0.5.14...v0.5.15) (2020-08-09)
+
+### Bug Fixes
+
+- index notes created through rename ([40f8fb6](https://github.com/dendronhq/dendron/commit/40f8fb6dd6c810a5ead9de2dedaffd4b55c321e9))
+
+### Features
+
+- add copy note link command ([5ca2434](https://github.com/dendronhq/dendron/commit/5ca2434de3f19eaa94ef7bc876ad9b8067cdf90a))
+
 ## [0.5.10](https://github.com/dendronhq/dendron/compare/v0.5.9...v0.5.10) (2020-08-06)
 
 **Note:** Version bump only for package @dendronhq/common-all

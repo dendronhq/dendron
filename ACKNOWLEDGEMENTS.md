@@ -7,3 +7,7 @@ Dendron is made possible with the help of the following third party extensions.
 - [Material Theme](https://marketplace.visualstudio.com/items?itemName=equinusocio.vsc-material-theme)
 - [Paste Image](https://marketplace.visualstudio.com/items?itemName=mushan.vscode-paste-image)
 - [Spell Right](https://marketplace.visualstudio.com/items?itemName=ban.spellright)
+
+Dendron borrows code from some of the following projects:
+
+- [vscode-memo](https://github.com/svsool/vscode-memo) ([MIT License](https://github.com/svsool/vscode-memo/blob/master/LICENSE))

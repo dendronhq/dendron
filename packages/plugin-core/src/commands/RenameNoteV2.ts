@@ -77,13 +77,12 @@ export class RenameNoteV2Command extends BasicCommand<
       path.join(ws.rootWorkspace.uri.fsPath, opts.dest + ".md")
     );
 
-    
     const noteOld = DNodeUtils.getNoteByFname(
-        DNodeUtils.uri2Fname(oldUri),
-        ws.engine,
-        {throwIfEmpty: true}
+      DNodeUtils.uri2Fname(oldUri),
+      ws.engine,
+      { throwIfEmpty: true }
     ) as Note;
-    await ws.engine.delete(noteOld.id, "note", {metaOnly: true});
+    await ws.engine.delete(noteOld.id, "note", { metaOnly: true });
     fs.moveSync(oldUri.fsPath, newUri.fsPath);
 
     const files = [{ oldUri, newUri }];
@@ -200,7 +199,7 @@ export class RenameNoteV2Command extends BasicCommand<
     );
     if (pathsUpdated.length > 0) {
       window.showInformationMessage(
-        `Updated ${refsUpdated} link${
+        `Dendron updated ${refsUpdated} link${
           refsUpdated === 0 || refsUpdated === 1 ? "" : "s"
         } in ${pathsUpdated.length} file${
           pathsUpdated.length === 0 || pathsUpdated.length === 1 ? "" : "s"

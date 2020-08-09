@@ -109,7 +109,7 @@
             },
             {
                 "command": "dendron.renameNote",
-                "title": "Dendron: 🚧 Rename Note 🚧"
+                "title": "Dendron: Rename Note"
             },
             {
                 "command": "dendron.initWS",

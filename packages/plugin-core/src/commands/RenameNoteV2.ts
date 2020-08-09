@@ -124,7 +124,7 @@ export class RenameNoteV2Command extends BasicCommand<
     const addToPathsUpdated = (path: string) =>
       (pathsUpdated = [...new Set([...pathsUpdated, path])]);
 
-    Promise.all(
+    await Promise.all(
       files.map(async ({ oldUri, newUri }) => {
         const preserveOldExtension = !containsMarkdownExt(oldUri.fsPath);
         const preserveNewExtension = !containsMarkdownExt(newUri.fsPath);

@@ -17,7 +17,7 @@ export const DENDRON_COMMANDS = {
   },
   COPY_NOTE_LINK: {
     key: "dendron.copyNoteLink",
-    title: `${CMD_PREFIX} Copy Note Link`
+    title: `${CMD_PREFIX} Copy Note Link`,
   },
   DELETE_NODE: {
     key: "dendron.deleteNode",
@@ -33,7 +33,7 @@ export const DENDRON_COMMANDS = {
   },
   RENAME_NOTE: {
     key: "dendron.renameNote",
-    title: `${CMD_PREFIX} 🚧 Rename Note 🚧`,
+    title: `${CMD_PREFIX} Rename Note`,
   },
   // --- Workspace
   INIT_WS: {

@@ -475,7 +475,8 @@ export class DendronWorkspace {
           }
           await this.engine.delete(nodeToDelete.id, "note", { metaOnly: true });
         } catch (err) {
-          this.L.error({ ctx, err: JSON.stringify(err) });
+          // NOTE: ignore, many legitimate reasons why this might happen
+          // this.L.error({ ctx, err: JSON.stringify(err) });
         }
       }, this)
     );

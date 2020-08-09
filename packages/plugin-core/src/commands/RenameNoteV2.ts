@@ -1,4 +1,4 @@
-import { Note } from "@dendronhq/common-all";
+import { Note, DNodeUtils } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _, { groupBy } from "lodash";
 import path from "path";
@@ -76,6 +76,14 @@ export class RenameNoteV2Command extends BasicCommand<
     const newUri = Uri.file(
       path.join(ws.rootWorkspace.uri.fsPath, opts.dest + ".md")
     );
+
+    
+    const noteOld = DNodeUtils.getNoteByFname(
+        DNodeUtils.uri2Fname(oldUri),
+        ws.engine,
+        {throwIfEmpty: true}
+    ) as Note;
+    await ws.engine.delete(noteOld.id, "note", {metaOnly: true});
     fs.moveSync(oldUri.fsPath, newUri.fsPath);
 
     const files = [{ oldUri, newUri }];

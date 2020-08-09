@@ -32,6 +32,7 @@ import { isAnythingSelected } from "./utils/editor";
 import { RenameNoteCommand } from "./commands/RenameNote";
 import { cacheWorkspace } from "./external/memo/utils/utils";
 import { RenameNoteV2Command } from "./commands/RenameNoteV2";
+import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -79,7 +80,7 @@ export class DendronWorkspace {
 
   static rootWorkspaceFolder(): vscode.WorkspaceFolder | undefined {
     const wsFolders = DendronWorkspace.workspaceFolders();
-    if(wsFolders) {
+    if (wsFolders) {
       return wsFolders[0];
     }
     return;
@@ -180,9 +181,12 @@ export class DendronWorkspace {
 
   _setupCommands() {
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.INIT_WS.key, async () => {
-        await new SetupWorkspaceCommand().run();
-      })
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.INIT_WS.key,
+        async () => {
+          await new SetupWorkspaceCommand().run();
+        }
+      )
     );
 
     this.context.subscriptions.push(
@@ -204,9 +208,12 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.CHANGE_WS.key, async () => {
-        await new ChangeWorkspaceCommand().run();
-      })
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.CHANGE_WS.key,
+        async () => {
+          await new ChangeWorkspaceCommand().run();
+        }
+      )
     );
 
     this.context.subscriptions.push(
@@ -264,29 +271,39 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.OPEN_LINK.key, async () => {
-        const ctx = DENDRON_COMMANDS.OPEN_LINK;
-        this.L.info({ ctx });
-        if (!isAnythingSelected()) {
-          return vscode.window.showErrorMessage("nothing selected");
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.OPEN_LINK.key,
+        async () => {
+          const ctx = DENDRON_COMMANDS.OPEN_LINK;
+          this.L.info({ ctx });
+          if (!isAnythingSelected()) {
+            return vscode.window.showErrorMessage("nothing selected");
+          }
+          const { text } = VSCodeUtils.getSelection();
+          const assetPath = resolvePath(text, this.rootWorkspace.uri.fsPath);
+          if (!fs.existsSync(assetPath)) {
+            return vscode.window.showErrorMessage(
+              `${assetPath} does not exist`
+            );
+          }
+          return open(assetPath).catch((err) => {
+            vscode.window.showInformationMessage(
+              "error: " + JSON.stringify(err)
+            );
+          });
         }
-        const { text } = VSCodeUtils.getSelection();
-        const assetPath = resolvePath(text, this.rootWorkspace.uri.fsPath);
-        if (!fs.existsSync(assetPath)) {
-          return vscode.window.showErrorMessage(`${assetPath} does not exist`);
-        }
-        return open(assetPath).catch((err) => {
-          vscode.window.showInformationMessage("error: " + JSON.stringify(err));
-        });
-      })
+      )
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.IMPORT_POD.key, async () => {
-        const wsRoot = this.rootWorkspace.uri.fsPath;
-        await new ImportPodCommand().execute({ wsRoot });
-        vscode.window.showInformationMessage(`pod import`);
-      })
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.IMPORT_POD.key,
+        async () => {
+          const wsRoot = this.rootWorkspace.uri.fsPath;
+          await new ImportPodCommand().execute({ wsRoot });
+          vscode.window.showInformationMessage(`pod import`);
+        }
+      )
     );
 
     this.context.subscriptions.push(
@@ -302,19 +319,25 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.SHOW_HELP.key, async () => {
-        await new ShowHelpCommand().execute();
-      })
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.SHOW_HELP.key,
+        async () => {
+          await new ShowHelpCommand().execute();
+        }
+      )
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.OPEN_LOGS.key, async () => {
-        try {
-          await new OpenLogsCommand().execute({});
-        } catch (err) {
-          Logger.error(JSON.stringify(err));
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.OPEN_LOGS.key,
+        async () => {
+          try {
+            await new OpenLogsCommand().execute({});
+          } catch (err) {
+            Logger.error(JSON.stringify(err));
+          }
         }
-      })
+      )
     );
 
     this.context.subscriptions.push(
@@ -329,9 +352,12 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.BUILD_POD.key, async () => {
-        await new BuildPodCommand().run();
-      })
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.BUILD_POD.key,
+        async () => {
+          await new BuildPodCommand().run();
+        }
+      )
     );
 
     this.context.subscriptions.push(
@@ -341,9 +367,21 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.RENAME_NOTE.key, async () => {
-        await new RenameNoteV2Command().run();
-      })
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.RENAME_NOTE.key,
+        async () => {
+          await new RenameNoteV2Command().run();
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.COPY_NOTE_LINK.key,
+        async () => {
+          await new CopyNoteLinkCommand().run();
+        }
+      )
     );
   }
 
@@ -459,7 +497,7 @@ export class DendronWorkspace {
             return _.every([
               event?.uri?.fsPath === uri.fsPath,
               event.source === "engine",
-              _.includes(["delete", "rename"], event.action)
+              _.includes(["delete", "rename"], event.action),
             ]);
           })
         ) {
@@ -496,7 +534,10 @@ export class DendronWorkspace {
       mainVault = wsFolders![0].uri.fsPath;
     }
     try {
-      await vscode.commands.executeCommand(DENDRON_COMMANDS.RELOAD_INDEX.key, true);
+      await vscode.commands.executeCommand(
+        DENDRON_COMMANDS.RELOAD_INDEX.key,
+        true
+      );
       await cacheWorkspace();
       return;
     } catch (err) {

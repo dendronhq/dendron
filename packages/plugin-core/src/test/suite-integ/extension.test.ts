@@ -39,6 +39,7 @@ import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { RefactorHierarchyCommand } from "../../commands/RefactorHierarchy";
+import { ArchiveHierarchyCommand } from "../../commands/ArchiveHierarchy";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
@@ -633,6 +634,33 @@ suite("commands", function () {
   });
 
   // --- Hierarchy
+  describe("Archive Hierarchy", function () {
+    test.only("basic", function (done) {
+      // setup mocks
+      VSCodeUtils.showInputBox = async () => {
+        return "refactor";
+      };
+      // @ts-ignore
+      VSCodeUtils.showQuickPick = async () => {
+        return "proceed";
+      };
+
+      onWSInit(async () => {
+        const resp = await new ArchiveHierarchyCommand().run();
+        assert.equal(resp.refsUpdated, 2);
+        assert.deepEqual(
+          resp.pathsUpdated.map((p: string) => path.basename(p)),
+          ["foo.md", "archive.refactor.one.md"]
+        );
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        setupWsOverride: { emptyWs: true },
+        useFixtures: true,
+      });
+    });
+  });
+
   describe("Refactor Hierarchy", function () {
     test("basic", function (done) {
       // setup mocks

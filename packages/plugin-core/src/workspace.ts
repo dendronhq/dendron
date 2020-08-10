@@ -33,6 +33,7 @@ import { cacheWorkspace } from "./external/memo/utils/utils";
 import { RenameNoteV2Command } from "./commands/RenameNoteV2";
 import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
 import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";
+import { ArchiveHierarchyCommand } from "./commands/ArchiveHierarchy";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -389,6 +390,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.REFACTOR_HIERARCHY.key,
         async () => {
           await new RefactorHierarchyCommand().run();
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.ARCHIVE_HIERARCHY.key,
+        async () => {
+          await new ArchiveHierarchyCommand().run();
         }
       )
     );

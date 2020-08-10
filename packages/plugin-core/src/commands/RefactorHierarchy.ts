@@ -6,6 +6,7 @@ import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { RenameNoteOutput, RenameNoteV2Command } from "./RenameNoteV2";
+import { DNodeUtils } from "@dendronhq/common-all";
 
 const md = _md();
 
@@ -28,7 +29,15 @@ export class RefactorHierarchyCommand extends BasicCommand<
   async gatherInputs(): Promise<CommandOpts | undefined> {
     let match: string | undefined;
     let replace: string | undefined;
-    match = await VSCodeUtils.showInputBox({ prompt: "Enter match text" });
+    let value: string = "";
+    const editor = VSCodeUtils.getActiveTextEditor();
+    if (editor) {
+      value = DNodeUtils.uri2Fname(editor.document.uri);
+    }
+    match = await VSCodeUtils.showInputBox({
+      prompt: "Enter match text",
+      value,
+    });
     if (match) {
       replace = await VSCodeUtils.showInputBox({
         prompt: "Enter replace prefix",

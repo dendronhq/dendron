@@ -36,6 +36,10 @@ export const DENDRON_COMMANDS = {
     title: `${CMD_PREFIX} Rename Note`,
   },
   // --- Hierarchies
+  ARCHIVE_HIERARCHY: {
+    key: "dendron.archiveHierarchy",
+    title: `${CMD_PREFIX} Archive Hierarchy`,
+  },
   REFACTOR_HIERARCHY: {
     key: "dendron.refactorHierarchy",
     title: `${CMD_PREFIX} Refactor Hierarchy`,

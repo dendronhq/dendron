@@ -114,6 +114,10 @@
                 "title": "Dendron: Rename Note"
             },
             {
+                "command": "dendron.archiveHierarchy",
+                "title": "Dendron: Archive Hierarchy"
+            },
+            {
                 "command": "dendron.refactorHierarchy",
                 "title": "Dendron: Refactor Hierarchy"
             },

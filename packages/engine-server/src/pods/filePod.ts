@@ -5,7 +5,7 @@ import {
   genUUID,
   Note,
   NoteData,
-  NoteRawProps
+  NoteRawProps,
 } from "@dendronhq/common-all";
 import { cleanFileName } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -48,12 +48,10 @@ export class FilePod extends BasePod {
         out[lvl] = [];
       }
       const stub = item.stats.isDirectory() && _.isEmpty(item.entries);
-      const noteProps = DNodeRaw.createProps<NoteData>(
-        {
-          fname,
-          stub,
-        }
-      );
+      const noteProps = DNodeRaw.createProps<NoteData>({
+        fname,
+        stub,
+      });
       if (item?.body) {
         noteProps.body = item.body;
       }

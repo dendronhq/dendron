@@ -2,7 +2,8 @@ import { DNode, Note } from "@dendronhq/common-all";
 import {
   DirResult,
   FileTestUtils,
-  mdFile2NodeProps
+  mdFile2NodeProps,
+  EngineTestUtils,
 } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
 import * as assert from "assert";
@@ -22,11 +23,14 @@ import { DoctorCommand } from "../../commands/Doctor";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import { RenameNoteV2Command } from "../../commands/RenameNoteV2";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
-import { SetupWorkspaceCommand } from "../../commands/SetupWorkspace";
+import {
+  SetupWorkspaceCommand,
+  SetupWorkspaceOpts,
+} from "../../commands/SetupWorkspace";
 import {
   createNoActiveItem,
   EngineOpts,
-  LookupProvider
+  LookupProvider,
 } from "../../components/lookup/LookupProvider";
 import { CONFIG, ConfigKey, WORKSPACE_STATE } from "../../constants";
 import { _activate } from "../../extension";
@@ -34,6 +38,7 @@ import { replaceRefs } from "../../external/memo/utils/utils";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
+import { RefactorHierarchyCommand } from "../../commands/RefactorHierarchy";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
@@ -117,7 +122,11 @@ function createMockQuickPick<T extends vscode.QuickPickItem>(
 function setupDendronWorkspace(
   rootDir: string,
   ctx: vscode.ExtensionContext,
-  opts?: { configOverride: any }
+  opts?: {
+    configOverride?: any;
+    setupWsOverride?: Partial<SetupWorkspaceOpts>;
+    useFixtures?: boolean;
+  }
 ) {
   const optsClean = _.defaults(opts, { configOverride: {} });
   DendronWorkspace.configuration = () => {
@@ -146,8 +155,18 @@ function setupDendronWorkspace(
     return [{ uri, name: "vault", index: 0 }];
   };
   return new SetupWorkspaceCommand()
-    .execute({ rootDirRaw: rootDir, skipOpenWs: true })
+    .execute({
+      rootDirRaw: rootDir,
+      skipOpenWs: true,
+      ...opts?.setupWsOverride,
+    })
     .then(async () => {
+      if (opts?.useFixtures) {
+        await EngineTestUtils.setupDendronVault({
+          copyFixtures: true,
+          root: path.join(rootDir, "vault"),
+        });
+      }
       return _activate(ctx);
     });
 }
@@ -330,81 +349,79 @@ suite("startup", function () {
     this.timeout(timeout);
 
     test("lookup new node", function (done) {
-      setupDendronWorkspace(root.name, ctx).then(() => {
-        onWSActive(async () => {
-          assert.equal(DendronWorkspace.isActive(), true);
-          const qp = await createMockQuickPick<DNode>({ value: "bond" });
-          const bondNote = createNoActiveItem({ label: "bond" });
-          // @ts-ignore
-          qp.items = [bondNote];
-          // @ts-ignore
-          qp.activeItems = [bondNote];
-          // @ts-ignore
-          qp.selectedItems = [bondNote];
-          const engOpts: EngineOpts = { flavor: "note" };
-          const lp = new LookupProvider(engOpts);
-          await lp.onDidAccept(qp, engOpts);
-          const txtPath = vscode.window.activeTextEditor?.document.uri
-            .fsPath as string;
-          const node = mdFile2NodeProps(txtPath);
-          assert.equal(node.title, "Bond");
-          done();
-        });
+      setupDendronWorkspace(root.name, ctx);
+      onWSInit(async () => {
+        console.log("lookup");
+        assert.equal(DendronWorkspace.isActive(), true);
+        const qp = await createMockQuickPick<DNode>({ value: "bond" });
+        const bondNote = createNoActiveItem({ label: "bond" });
+        // @ts-ignore
+        qp.items = [bondNote];
+        // @ts-ignore
+        qp.activeItems = [bondNote];
+        // @ts-ignore
+        qp.selectedItems = [bondNote];
+        const engOpts: EngineOpts = { flavor: "note" };
+        const lp = new LookupProvider(engOpts);
+        await lp.onDidAccept(qp, engOpts);
+        const txtPath = vscode.window.activeTextEditor?.document.uri
+          .fsPath as string;
+        const node = mdFile2NodeProps(txtPath);
+        assert.equal(node.title, "Bond");
+        done();
       });
     });
 
     test("lookup new node with schema template", function (done) {
-      setupDendronWorkspace(root.name, ctx).then(() => {
-        onWSActive(async () => {
-          assert.equal(DendronWorkspace.isActive(), true);
-          const lbl = "dendron.demo.template";
-          const qp = await createMockQuickPick<DNode>({ value: lbl });
-          const bondNote = createNoActiveItem({ label: lbl });
-          // @ts-ignore
-          qp.items = [bondNote];
-          // @ts-ignore
-          qp.activeItems = [bondNote];
-          // @ts-ignore
-          qp.selectedItems = [bondNote];
-          const engOpts: EngineOpts = { flavor: "note" };
-          const lp = new LookupProvider(engOpts);
-          await lp.onDidAccept(qp, engOpts);
-          const txtPath = vscode.window.activeTextEditor?.document.uri
-            .fsPath as string;
-          const node = mdFile2NodeProps(txtPath);
-          assert.equal(_.trim(node.body), "I am text from a template.");
-          done();
-        });
+      setupDendronWorkspace(root.name, ctx);
+      onWSInit(async () => {
+        assert.equal(DendronWorkspace.isActive(), true);
+        const lbl = "dendron.demo.template";
+        const qp = await createMockQuickPick<DNode>({ value: lbl });
+        const bondNote = createNoActiveItem({ label: lbl });
+        // @ts-ignore
+        qp.items = [bondNote];
+        // @ts-ignore
+        qp.activeItems = [bondNote];
+        // @ts-ignore
+        qp.selectedItems = [bondNote];
+        const engOpts: EngineOpts = { flavor: "note" };
+        const lp = new LookupProvider(engOpts);
+        await lp.onDidAccept(qp, engOpts);
+        const txtPath = vscode.window.activeTextEditor?.document.uri
+          .fsPath as string;
+        const node = mdFile2NodeProps(txtPath);
+        assert.equal(_.trim(node.body), "I am text from a template.");
+        done();
       });
     });
 
     test("lookup new node with schema template for namespace", function (done) {
-      setupDendronWorkspace(root.name, ctx).then(() => {
-        onWSActive(async () => {
-          assert.equal(DendronWorkspace.isActive(), true);
-          const lbl = "journal.daily.2020-08-10";
-          const qp = await createMockQuickPick<DNode>({ value: lbl });
-          const bondNote = createNoActiveItem({ label: lbl });
-          // @ts-ignore
-          qp.items = [bondNote];
-          // @ts-ignore
-          qp.activeItems = [bondNote];
-          // @ts-ignore
-          qp.selectedItems = [bondNote];
-          const engOpts: EngineOpts = { flavor: "note" };
-          const lp = new LookupProvider(engOpts);
-          await lp.onDidAccept(qp, engOpts);
-          const txtPath = vscode.window.activeTextEditor?.document.uri
-            .fsPath as string;
-          const node = mdFile2NodeProps(txtPath);
+      setupDendronWorkspace(root.name, ctx);
+      onWSInit(async () => {
+        assert.equal(DendronWorkspace.isActive(), true);
+        const lbl = "journal.daily.2020-08-10";
+        const qp = await createMockQuickPick<DNode>({ value: lbl });
+        const bondNote = createNoActiveItem({ label: lbl });
+        // @ts-ignore
+        qp.items = [bondNote];
+        // @ts-ignore
+        qp.activeItems = [bondNote];
+        // @ts-ignore
+        qp.selectedItems = [bondNote];
+        const engOpts: EngineOpts = { flavor: "note" };
+        const lp = new LookupProvider(engOpts);
+        await lp.onDidAccept(qp, engOpts);
+        const txtPath = vscode.window.activeTextEditor?.document.uri
+          .fsPath as string;
+        const node = mdFile2NodeProps(txtPath);
 
-          const engine = DendronEngine.getOrCreateEngine();
-          const template = _.find(_.values(engine.notes), {
-            fname: "journal.template.daily",
-          }) as Note;
-          assert.equal(_.trim(node.body), _.trim(template.body));
-          done();
-        });
+        const engine = DendronEngine.getOrCreateEngine();
+        const template = _.find(_.values(engine.notes), {
+          fname: "journal.template.daily",
+        }) as Note;
+        assert.equal(_.trim(node.body), _.trim(template.body));
+        done();
       });
     });
   });
@@ -521,14 +538,11 @@ suite("commands", function () {
     let noteType = "SCRATCH";
     let uri: vscode.Uri;
 
-    beforeEach(()=> {
-        VSCodeUtils.showInputBox = async (
-        ) => {
-          return "scratch";
-        };
-        uri = vscode.Uri.file(
-          path.join(root.name, "vault", "dendron.faq.md")
-        );
+    beforeEach(() => {
+      VSCodeUtils.showInputBox = async () => {
+        return "scratch";
+      };
+      uri = vscode.Uri.file(path.join(root.name, "vault", "dendron.faq.md"));
     });
 
     test("basic", function (done) {
@@ -544,13 +558,16 @@ suite("commands", function () {
     test("add: childOfCurrent", function (done) {
       setupDendronWorkspace(root.name, ctx, {
         configOverride: {
-          [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]: "childOfCurrent",
+          [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
+            "childOfCurrent",
         },
       });
       onWSInit(async () => {
         await vscode.window.showTextDocument(uri);
-        const resp = await new CreateScratchCommand().run()
-        assert.ok((resp as vscode.Uri).fsPath.indexOf("dendron.faq.scratch") > 0);
+        const resp = await new CreateScratchCommand().run();
+        assert.ok(
+          (resp as vscode.Uri).fsPath.indexOf("dendron.faq.scratch") > 0
+        );
         done();
       });
     });
@@ -558,17 +575,17 @@ suite("commands", function () {
     test("add: childOfDomain", function (done) {
       setupDendronWorkspace(root.name, ctx, {
         configOverride: {
-          [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]: "childOfDomain",
+          [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
+            "childOfDomain",
         },
       });
       onWSInit(async () => {
         await vscode.window.showTextDocument(uri);
-        const resp = await new CreateScratchCommand().run()
+        const resp = await new CreateScratchCommand().run();
         assert.ok((resp as vscode.Uri).fsPath.indexOf("dendron.scratch") > 0);
         done();
       });
     });
-
   });
 
   describe("CopyNoteLink", function () {
@@ -583,6 +600,40 @@ suite("commands", function () {
         done();
       });
       setupDendronWorkspace(root.name, ctx);
+    });
+  });
+
+  // --- Hierarchy
+  describe("Refactor Hierarchy", function () {
+    test("basic", function (done) {
+      // setup mocks
+      let acc = 0;
+      VSCodeUtils.showInputBox = async () => {
+        if (acc == 0) {
+          acc += 1;
+          return "refactor";
+        } else {
+          return "bond";
+        }
+      };
+      // @ts-ignore
+      VSCodeUtils.showQuickPick = async () => {
+        return "proceed";
+      };
+
+      onWSInit(async () => {
+        const resp = await new RefactorHierarchyCommand().run();
+        assert.equal(resp.refsUpdated, 2);
+        assert.deepEqual(
+          resp.pathsUpdated.map((p: string) => path.basename(p)),
+          ["foo.md", "bond.one.md"]
+        );
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        setupWsOverride: { emptyWs: true },
+        useFixtures: true,
+      });
     });
   });
 
@@ -623,136 +674,141 @@ suite("memo", function () {
     HistoryService.instance().clearSubscriptions();
   });
 
-  describe("basic", ()=> {
-    test("basic", function(done) {
+  describe("basic", () => {
+    test("basic", function (done) {
       onWSInit(async () => {
         const uri = vscode.Uri.file(
           path.join(root.name, "vault", "dendron.faq.md")
         );
-        VSCodeUtils.showInputBox = async (
-          ) => {
-            return "dendron.bond";
-          };
+        VSCodeUtils.showInputBox = async () => {
+          return "dendron.bond";
+        };
         await vscode.window.showTextDocument(uri);
         await new RenameNoteV2Command().run();
-        const editor = await vscode.window.showTextDocument(vscode.Uri.file(
-          path.join(root.name, "vault", "dendron.md")
-        ));
-        assert.ok(editor.document.getText().indexOf("[[FAQ |dendron.bond]]") > 0);
+        const text = fs.readFileSync(
+          path.join(root.name, "vault", "dendron.md"),
+          { encoding: "utf8" }
+        );
+        // const editor = await vscode.window.showTextDocument(
+        //   vscode.Uri.file(),
+        // );
+        assert.ok(text.indexOf("[[FAQ |dendron.bond]]") > 0);
         done();
       });
       setupDendronWorkspace(root.name, ctx);
-    })
+    });
   });
 });
-
 
 const it = test;
 const expect = assert.deepEqual;
 
 suite("utils", function () {
-  describe('replaceRefs()', () => {
+  describe("replaceRefs()", () => {
     before(function () {
       ctx = VSCodeUtils.getOrCreateMockContext();
       DendronWorkspace.getOrCreate(ctx);
     });
-  
+
     beforeEach(async function () {
       root = FileTestUtils.tmpDir();
       fs.removeSync(root.name);
       ctx = VSCodeUtils.getOrCreateMockContext();
       return;
     });
-  
+
     afterEach(function () {
       HistoryService.instance().clearSubscriptions();
     });
-  
-    it('should return null if nothing to replace', async () => {
+
+    it("should return null if nothing to replace", async () => {
       assert.deepEqual(
         replaceRefs({
-          refs: [{ old: 'test-ref', new: 'new-test-ref' }],
+          refs: [{ old: "test-ref", new: "new-test-ref" }],
           document: await workspace.openTextDocument({
-            language: 'markdown',
-            content: '[[test-ref]]',
+            language: "markdown",
+            content: "[[test-ref]]",
           }),
         }),
-      '[[new-test-ref]]');
+        "[[new-test-ref]]"
+      );
     });
 
-    it('should replace short ref with short ref', async () => {
+    it("should replace short ref with short ref", async () => {
       assert.deepEqual(
         replaceRefs({
-          refs: [{ old: 'test-ref', new: 'new-test-ref' }],
+          refs: [{ old: "test-ref", new: "new-test-ref" }],
           document: await workspace.openTextDocument({
-            language: 'markdown',
-            content: '[[test-ref]]',
+            language: "markdown",
+            content: "[[test-ref]]",
           }),
-        }),'[[new-test-ref]]');
+        }),
+        "[[new-test-ref]]"
+      );
     });
 
-    it('should replace short ref with label with short ref with label', async () => {
+    it("should replace short ref with label with short ref with label", async () => {
       const replace = replaceRefs({
-        refs: [{ old: 'test-ref', new: 'new-test-ref' }],
+        refs: [{ old: "test-ref", new: "new-test-ref" }],
         document: await workspace.openTextDocument({
-          language: 'markdown',
-          content: '[[Test Label|test-ref]]',
+          language: "markdown",
+          content: "[[Test Label|test-ref]]",
         }),
-      })
-      expect(
-        replace
-        ,
-      '[[Test Label|new-test-ref]]');
+      });
+      expect(replace, "[[Test Label|new-test-ref]]");
     });
 
     // custom
-    it('should replace short ref with label with short ref with label and space ', async () => {
+    it("should replace short ref with label with short ref with label and space ", async () => {
       expect(
         replaceRefs({
-          refs: [{ old: 'dendron.faq', new: 'dendron.bond' }],
+          refs: [{ old: "dendron.faq", new: "dendron.bond" }],
           document: await workspace.openTextDocument({
-            language: 'markdown',
-            content: '[[ FAQ|dendron.faq]]',
+            language: "markdown",
+            content: "[[ FAQ|dendron.faq]]",
           }),
         }),
-      '[[FAQ|dendron.bond]]');
+        "[[FAQ|dendron.bond]]"
+      );
     });
 
-    it('should replace short ref with label with short ref with label and space 2 ', async () => {
+    it("should replace short ref with label with short ref with label and space 2 ", async () => {
       expect(
         replaceRefs({
-          refs: [{ old: 'dendron.faq', new: 'dendron.bond' }],
+          refs: [{ old: "dendron.faq", new: "dendron.bond" }],
           document: await workspace.openTextDocument({
-            language: 'markdown',
-            content: '[[FAQ |dendron.faq]]',
+            language: "markdown",
+            content: "[[FAQ |dendron.faq]]",
           }),
         }),
-      '[[FAQ |dendron.bond]]');
+        "[[FAQ |dendron.bond]]"
+      );
     });
 
-    it('should replace short ref with label with short ref with label and space 3 ', async () => {
+    it("should replace short ref with label with short ref with label and space 3 ", async () => {
       expect(
         replaceRefs({
-          refs: [{ old: 'dendron.faq', new: 'dendron.bond' }],
+          refs: [{ old: "dendron.faq", new: "dendron.bond" }],
           document: await workspace.openTextDocument({
-            language: 'markdown',
-            content: '[[FAQ| dendron.faq]]',
+            language: "markdown",
+            content: "[[FAQ| dendron.faq]]",
           }),
         }),
-      '[[FAQ|dendron.bond]]');
+        "[[FAQ|dendron.bond]]"
+      );
     });
 
-    it('should replace short ref with label with short ref with label and space 4 ', async () => {
+    it("should replace short ref with label with short ref with label and space 4 ", async () => {
       expect(
         replaceRefs({
-          refs: [{ old: 'dendron.faq', new: 'dendron.bond' }],
+          refs: [{ old: "dendron.faq", new: "dendron.bond" }],
           document: await workspace.openTextDocument({
-            language: 'markdown',
-            content: '[[FAQ|dendron.faq ]]',
+            language: "markdown",
+            content: "[[FAQ|dendron.faq ]]",
           }),
         }),
-      '[[FAQ|dendron.bond]]');
+        "[[FAQ|dendron.bond]]"
+      );
     });
-
   });
 });

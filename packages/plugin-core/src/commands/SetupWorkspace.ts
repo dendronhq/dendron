@@ -12,6 +12,7 @@ import { BasicCommand } from "./base";
 type CommandOpts = {
   rootDirRaw: string;
   skipOpenWs?: boolean;
+  emptyWs?: boolean;
 };
 
 type CommandInput = {
@@ -19,6 +20,8 @@ type CommandInput = {
 };
 
 type CommandOutput = any;
+
+export { CommandOpts as SetupWorkspaceOpts };
 
 export class SetupWorkspaceCommand extends BasicCommand<
   CommandOpts,
@@ -91,10 +94,24 @@ export class SetupWorkspaceCommand extends BasicCommand<
 
     // make sure root dir exists
     fs.ensureDirSync(rootDir);
-    const dendronWSTemplate = vscode.Uri.joinPath(ws.extensionAssetsDir, "dendronWS");
+    const dendronWSTemplate = vscode.Uri.joinPath(
+      ws.extensionAssetsDir,
+      "dendronWS"
+    );
     //const notesSrc = vscode.Uri.joinPath(ws.extensionAssetsDir, "notes");
-
-    fs.copySync(dendronWSTemplate.fsPath, rootDir);
+    if (opts.emptyWs) {
+      fs.copySync(
+        path.join(dendronWSTemplate.fsPath, "dendron.yml"),
+        path.join(rootDir, "dendron.yml")
+      );
+      fs.copySync(
+        path.join(dendronWSTemplate.fsPath, "docs"),
+        path.join(rootDir, "docs")
+      );
+      fs.ensureDirSync(path.join(rootDir, "vault"));
+    } else {
+      fs.copySync(dendronWSTemplate.fsPath, rootDir);
+    }
     WorkspaceConfig.write(rootDir);
     if (!opts.skipOpenWs) {
       vscode.window.showInformationMessage("opening dendron workspace");

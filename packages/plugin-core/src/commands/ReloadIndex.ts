@@ -1,4 +1,4 @@
-import { DEngine } from "@dendronhq/common-all/src";
+import { DEngine } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
 import { DendronWorkspace } from "../workspace";
@@ -6,14 +6,15 @@ import { BasicCommand } from "./base";
 
 const L = createLogger("ReloadIndexCommand");
 
-type ReloadIndexCommandOpts = {
-};
+type ReloadIndexCommandOpts = {};
 
-export class ReloadIndexCommand extends BasicCommand<ReloadIndexCommandOpts, DEngine> {
-
+export class ReloadIndexCommand extends BasicCommand<
+  ReloadIndexCommandOpts,
+  DEngine
+> {
   /**
    * Update index
-   * @param opts 
+   * @param opts
    */
   async execute() {
     const ctx = "execute";
@@ -21,9 +22,9 @@ export class ReloadIndexCommand extends BasicCommand<ReloadIndexCommandOpts, DEn
     const ws = DendronWorkspace.instance();
     const root = ws.rootWorkspace.uri.fsPath;
     const engine = DendronEngine.getOrCreateEngine({
-      root, 
+      root,
       forceNew: true,
-      logger: ws.L
+      logger: ws.L,
     });
     await engine.init();
     ws._engine = engine;

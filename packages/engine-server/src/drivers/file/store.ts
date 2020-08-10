@@ -203,7 +203,11 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
   }
 
   async write(node: IDNode, opts?: DEngineStoreWriteOpts) {
-    opts = _.defaults(opts, { stub: false, recursive: false, writeStub: false });
+    opts = _.defaults(opts, {
+      stub: false,
+      recursive: false,
+      writeStub: false,
+    });
     if (opts.writeStub || (!opts.stub && !node.stub)) {
       await this._writeFile(node);
     }

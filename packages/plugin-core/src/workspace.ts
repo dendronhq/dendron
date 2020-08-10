@@ -29,10 +29,10 @@ import { HistoryService } from "./services/HistoryService";
 import { NodeService } from "./services/nodeService/NodeService";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
-import { RenameNoteCommand } from "./commands/RenameNote";
 import { cacheWorkspace } from "./external/memo/utils/utils";
 import { RenameNoteV2Command } from "./commands/RenameNoteV2";
 import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
+import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -383,6 +383,15 @@ export class DendronWorkspace {
         }
       )
     );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.REFACTOR_HIERARCHY.key,
+        async () => {
+          await new RefactorHierarchyCommand().run();
+        }
+      )
+    );
   }
 
   // === Utils
@@ -552,8 +561,10 @@ export class DendronWorkspace {
       welcomeUri ||
       vscode.Uri.joinPath(this.rootWorkspace.uri, "dendron.quickstart.md");
     try {
-      await vscode.window.showTextDocument(welcomeUri);
-      await MarkdownUtils.openPreview(opts);
+      if (getStage() !== "test") {
+        await vscode.window.showTextDocument(welcomeUri);
+        await MarkdownUtils.openPreview(opts);
+      }
     } catch (err) {
       vscode.window.showErrorMessage(JSON.stringify(err));
     }

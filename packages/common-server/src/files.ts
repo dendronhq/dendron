@@ -174,10 +174,7 @@ export function node2MdFile(node: Note, opts: { root: string }) {
   const { root } = opts;
   const { fname } = node;
   const filePath = path.join(root, `${fname}.md`);
-  return fs.writeFileSync(
-    filePath,
-    node.render()
-  );
+  return fs.writeFileSync(filePath, node.render());
 }
 
 export function schema2YMLFile(schema: Schema, opts: { root: string }) {

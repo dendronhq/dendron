@@ -193,12 +193,12 @@ function showRootResults(flavor: EngineFlavor, engine: DEngine) {
   if (flavor === "note") {
     return _.uniqBy(
       _.map(_.values(engine.notes), (ent) => ent.domain),
-      "domain"
+      "domain.id"
     );
   } else {
     return _.uniqBy(
       _.map(_.values(engine.schemas), (ent) => ent.domain),
-      "domain"
+      "domain.id"
     );
   }
 }

@@ -22,7 +22,7 @@ export class DConfig {
       config = DConfig.genDefaultConfig();
       writeYAML(configPath, config);
     } else {
-        config = readYAML(configPath) as DendronConfig;
+      config = readYAML(configPath) as DendronConfig;
     }
     return config;
   }

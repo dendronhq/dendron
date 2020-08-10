@@ -245,10 +245,10 @@ describe("engine:exact", () => {
         expect(_.omit(note.toRawProps(), "body")).toEqual(
           _.omit(noteUpdated.toRawProps(), "body")
         );
-        expect(_.trim(noteUpdated.body)).toEqual("");
+        expect(_.trim(noteUpdated.body)).toEqual("- [[refactor.one]]");
         // check custom att in file
         const { content, data } = FileTestUtils.readMDFile(root, "foo.md");
-        expect(_.trim(content)).toEqual("");
+        expect(_.trim(content)).toEqual("- [[refactor.one]]");
         expect(stripEntropicData(data)).toEqual({
           bond: true,
           desc: "",
@@ -501,7 +501,9 @@ describe("engine:exact", () => {
         await engine.init();
         const note = new Note({ id: "backlog", fname });
         const [t1, t2] = _.map([engine.notes["backlog"], note], (n) => {
-          return testUtils.omitEntropicProps(n.toRawProps(true, {ignoreNullParent: true}));
+          return testUtils.omitEntropicProps(
+            n.toRawProps(true, { ignoreNullParent: true })
+          );
         });
 
         expect(t1).toEqual(t2);

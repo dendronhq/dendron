@@ -14,14 +14,19 @@ import {
 } from "../external/memo/utils/utils";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
-import { BasicCommand } from "./base";
+import { BaseCommand } from "./base";
+import { HistoryService } from "../services/HistoryService";
 
 type CommandInput = {
   dest: string;
-  preview: boolean;
 };
-type CommandOpts = {};
-type CommandOutput = void;
+type CommandOpts = { files: { oldUri: Uri; newUri: Uri }[]; silent: boolean };
+type CommandOutput = {
+  refsUpdated: number;
+  pathsUpdated: string[];
+};
+
+export { CommandOutput as RenameNoteOutput };
 
 // Short ref allowed when non-unique filename comes first in the list of sorted uris.
 // /a.md - <-- can be referenced via short ref as [[a]], since it comes first according to paths sorting
@@ -32,10 +37,12 @@ const isFirstUriInGroup = (pathParam: string, urisGroup: Uri[] = []) =>
 const getBasename = (pathParam: string) =>
   path.basename(pathParam).toLowerCase();
 
-export class RenameNoteV2Command extends BasicCommand<
+export class RenameNoteV2Command extends BaseCommand<
   CommandOpts,
   CommandOutput
 > {
+  public silent?: boolean;
+
   async gatherInputs(): Promise<CommandInput | undefined> {
     const resp = await VSCodeUtils.showInputBox({
       prompt: "Rename file",
@@ -50,8 +57,25 @@ export class RenameNoteV2Command extends BasicCommand<
     }
     return {
       dest: resp as string,
-      preview: false,
     };
+  }
+
+  async enrichInputs(inputs: CommandInput): Promise<CommandOpts> {
+    const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
+    const oldUri: Uri = editor.document.uri;
+    const ws = DendronWorkspace.instance();
+
+    // error checking
+    let newNote = _.find(_.values(ws.engine.notes), { fname: inputs.dest });
+    if (newNote) {
+      throw Error(`${inputs.dest} already exists`);
+    }
+
+    newNote = new Note({ fname: inputs.dest });
+    const newUri = Uri.file(
+      path.join(ws.rootWorkspace.uri.fsPath, inputs.dest + ".md")
+    );
+    return { files: [{ oldUri, newUri }], silent: false };
   }
 
   async sanityCheck() {
@@ -61,32 +85,49 @@ export class RenameNoteV2Command extends BasicCommand<
     return;
   }
 
-  async execute(opts: CommandInput) {
-    await cacheUris();
-    const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
+  async moveNote(oldUri: Uri, newUri: Uri) {
     const ws = DendronWorkspace.instance();
-    let newNote = _.find(_.values(ws.engine.notes), { fname: opts.dest });
-    if (newNote) {
-      throw Error(`${opts.dest} already exists`);
-      return;
-    }
-    const oldUri: Uri = editor.document.uri;
-
-    newNote = new Note({ fname: opts.dest });
-    const newUri = Uri.file(
-      path.join(ws.rootWorkspace.uri.fsPath, opts.dest + ".md")
-    );
-
     const noteOld = DNodeUtils.getNoteByFname(
       DNodeUtils.uri2Fname(oldUri),
       ws.engine,
       { throwIfEmpty: true }
     ) as Note;
-    await ws.engine.delete(noteOld.id, "note", { metaOnly: true });
-    fs.moveSync(oldUri.fsPath, newUri.fsPath);
+    // fs.moveSync(oldUri.fsPath, newUri.fsPath);
+    await ws.engine.delete(noteOld.id, "note");
 
-    const files = [{ oldUri, newUri }];
-    const oldFsPaths = files.map(({ oldUri }) => oldUri.fsPath);
+    noteOld.fname = DNodeUtils.uri2Fname(newUri);
+    const historyService = HistoryService.instance();
+    historyService.add({ source: "engine", action: "create", uri: newUri });
+    ws.engine.write(noteOld, { newNode: true, parentsAsStubs: true });
+    await ws.engine.updateNodes([noteOld], {
+      newNode: true,
+      parentsAsStubs: true,
+    });
+  }
+
+  async showResponse(res: CommandOutput) {
+    const { pathsUpdated, refsUpdated } = res;
+    if (pathsUpdated.length > 0 && !this.silent) {
+      window.showInformationMessage(
+        `Dendron updated ${refsUpdated} link${
+          refsUpdated === 0 || refsUpdated === 1 ? "" : "s"
+        } in ${pathsUpdated.length} file${
+          pathsUpdated.length === 0 || pathsUpdated.length === 1 ? "" : "s"
+        }`
+      );
+    }
+  }
+
+  async execute(opts: CommandOpts) {
+    await cacheUris();
+    this.silent = opts.silent;
+
+    const { files } = opts;
+    const oldFsPaths = await Promise.all(
+      files.map(async ({ oldUri }) => {
+        return oldUri.fsPath;
+      })
+    );
     const oldUrisGroupedByBasename = groupBy(
       sortPaths(
         [
@@ -102,11 +143,17 @@ export class RenameNoteV2Command extends BasicCommand<
       ),
       ({ fsPath }) => path.basename(fsPath).toLowerCase()
     );
+
+    // get new paths
     const newFsPaths = files.map(({ newUri }) => newUri.fsPath);
+
+    // get all paths
     const allUris = [
+      // old uris that don't include new uris
       ...getWorkspaceCache().allUris.filter(
         (uri) => !newFsPaths.includes(uri.fsPath)
       ),
+      // new uris
       ...files.map(({ newUri }) => newUri),
     ];
     const newUris = sortPaths([...allUris], {
@@ -124,8 +171,12 @@ export class RenameNoteV2Command extends BasicCommand<
     const addToPathsUpdated = (path: string) =>
       (pathsUpdated = [...new Set([...pathsUpdated, path])]);
 
+    // re-link
     await Promise.all(
       files.map(async ({ oldUri, newUri }) => {
+        // move note
+        await this.moveNote(oldUri, newUri);
+        // check if there's link to replace
         const preserveOldExtension = !containsMarkdownExt(oldUri.fsPath);
         const preserveNewExtension = !containsMarkdownExt(newUri.fsPath);
         const workspaceFolder = getWorkspaceFolder()!;
@@ -160,12 +211,18 @@ export class RenameNoteV2Command extends BasicCommand<
           return;
         }
 
+        // therefound link to replace
         await Promise.all(
           newUris.map(async ({ fsPath }) => {
-            if (!containsMarkdownExt(fsPath)) {
+            if (!containsMarkdownExt(fsPath) || fsPath === oldUri.fsPath) {
               return;
             }
-            const doc = await workspace.openTextDocument(Uri.file(fsPath));
+            let doc;
+            try {
+              doc = await workspace.openTextDocument(Uri.file(fsPath));
+            } catch (err) {
+              throw err;
+            }
             let refs: { old: string; new: string }[] = [];
             if (!oldUriIsShortRef && !newUriIsShortRef) {
               // replace long ref with long ref
@@ -195,17 +252,12 @@ export class RenameNoteV2Command extends BasicCommand<
             }
           })
         );
+        // finished renaming
       })
     );
-    if (pathsUpdated.length > 0) {
-      window.showInformationMessage(
-        `Dendron updated ${refsUpdated} link${
-          refsUpdated === 0 || refsUpdated === 1 ? "" : "s"
-        } in ${pathsUpdated.length} file${
-          pathsUpdated.length === 0 || pathsUpdated.length === 1 ? "" : "s"
-        }`
-      );
-    }
-    return;
+    return {
+      refsUpdated,
+      pathsUpdated,
+    };
   }
 }

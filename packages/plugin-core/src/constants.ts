@@ -35,6 +35,11 @@ export const DENDRON_COMMANDS = {
     key: "dendron.renameNote",
     title: `${CMD_PREFIX} Rename Note`,
   },
+  // --- Hierarchies
+  REFACTOR_HIERARCHY: {
+    key: "dendron.refactorHierarchy",
+    title: `${CMD_PREFIX} Refactor Hierarchy`,
+  },
   // --- Workspace
   INIT_WS: {
     key: "dendron.initWS",
@@ -58,10 +63,6 @@ export const DENDRON_COMMANDS = {
     title: `${CMD_PREFIX} Upgrade Settings`,
   },
   SHOW_HELP: { key: "dendron.showHelp", title: `${CMD_PREFIX} Show Help` },
-  // REFACTOR_HIERARCHY: {
-  //   key: "dendron.refactorHierarchy",
-  //   title: `${CMD_PREFIX} Refactor Hierarchy`,
-  // },
   // --- Dev
   DOCTOR: { key: "dendron.dev.doctor", title: `${CMD_PREFIX}Dev: Doctor` },
   RESET_CONFIG: {

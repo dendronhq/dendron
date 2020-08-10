@@ -158,4 +158,5 @@ export class VSCodeUtils {
   }
 
   static showInputBox = vscode.window.showInputBox;
+  static showQuickPick = vscode.window.showQuickPick;
 }

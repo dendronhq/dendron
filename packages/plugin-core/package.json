@@ -112,6 +112,10 @@
                 "title": "Dendron: Rename Note"
             },
             {
+                "command": "dendron.refactorHierarchy",
+                "title": "Dendron: Refactor Hierarchy"
+            },
+            {
                 "command": "dendron.initWS",
                 "title": "Dendron: Initialize Workspace"
             },
@@ -211,6 +215,7 @@
         "@types/fs-extra": "^9.0.1",
         "@types/glob": "^7.1.1",
         "@types/lodash": "^4.14.155",
+        "@types/markdown-it": "^10.0.2",
         "@types/mocha": "^7.0.2",
         "@types/moment": "^2.13.0",
         "@types/node": "^13.11.0",
@@ -240,6 +245,7 @@
         "execa": "^4.0.2",
         "fs-extra": "^9.0.1",
         "lodash": "^4.17.15",
+        "markdown-it": "^11.0.0",
         "moment": "^2.27.0",
         "open": "^7.0.4",
         "semver": "^7.3.2"

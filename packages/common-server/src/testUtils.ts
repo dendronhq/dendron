@@ -88,10 +88,10 @@ export class LernaTestUtils {
 }
 
 export class EngineTestUtils {
-  static setupDendronVault(opts?: { copyFixtures?: boolean }) {
+  static setupDendronVault(opts?: { copyFixtures?: boolean; root?: string }) {
     return EngineTestUtils.setupStoreDir(
       LernaTestUtils.getFixturesDir("store"),
-      FileTestUtils.tmpDir().name,
+      opts?.root || FileTestUtils.tmpDir().name,
       opts
     );
   }

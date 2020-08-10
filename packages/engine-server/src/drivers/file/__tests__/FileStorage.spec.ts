@@ -139,7 +139,7 @@ describe("main", () => {
     describe("query", () => {
       test("sanity", async () => {
         const resp = await store.query("**/*", queryMode, {});
-        const bar = _.find(resp.data, n => n.id === "bar") as Schema;
+        const bar = _.find(resp.data, (n) => n.id === "bar") as Schema;
         expect(bar.namespace).toBe(true);
       });
 

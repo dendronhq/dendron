@@ -1,48 +1,77 @@
 import _ from "lodash";
+import _md from "markdown-it";
 import path from "path";
-import { window } from "vscode";
+import { Uri, ViewColumn, window } from "vscode";
+import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
-import { BaseCommand } from "./base";
-import execa from "execa";
+import { BasicCommand } from "./base";
+import { RenameNoteOutput, RenameNoteV2Command } from "./RenameNoteV2";
+
+const md = _md();
 
 type CommandOpts = {
-  preview: boolean;
+  match: string;
+  replace: string;
 };
 
-type CommandInput = {};
+type CommandOutput = any;
 
-type CommandOutput = void;
+type RenameOperation = {
+  oldUri: Uri;
+  newUri: Uri;
+};
 
-export class RefactorHierarchyCommand extends BaseCommand<
+export class RefactorHierarchyCommand extends BasicCommand<
   CommandOpts,
-  CommandOutput,
-  CommandInput
+  CommandOutput
 > {
-  async gatherInputs(): Promise<CommandInput | undefined> {
-    const resp = await window.showInputBox({
-      prompt: "Select your folder for dendron",
-      ignoreFocusOut: true,
-      validateInput: (input: string) => {
-        if (!path.isAbsolute(input)) {
-          if (input[0] !== "~") {
-            return "must enter absolute path";
-          }
-        }
-        return undefined;
-      },
-    });
-    if (_.isUndefined(resp)) {
+  async gatherInputs(): Promise<CommandOpts | undefined> {
+    let match: string | undefined;
+    let replace: string | undefined;
+    match = await VSCodeUtils.showInputBox({ prompt: "Enter match text" });
+    if (match) {
+      replace = await VSCodeUtils.showInputBox({
+        prompt: "Enter replace prefix",
+      });
+    }
+    if (!replace || !match) {
       return;
     }
-    return;
+    return {
+      match,
+      replace,
+    };
   }
-  async execute(opts: CommandOpts) {
-    const { preview } = _.defaults(opts, { preview: false });
+
+  async showPreview(operations: RenameOperation[]) {
+    const content = [
+      "# Refactor Preview",
+      "",
+      "### The following files will be renamed",
+    ]
+      .concat(
+        operations.map(({ oldUri, newUri }) => {
+          return `- ${path.basename(oldUri.fsPath)} --> ${path.basename(
+            newUri.fsPath
+          )}`;
+        })
+      )
+      .join("\n");
+    const panel = window.createWebviewPanel(
+      "refactorPreview", // Identifies the type of the webview. Used internally
+      "Refactor Preview", // Title of the panel displayed to the user
+      ViewColumn.One, // Editor column to show the new webview panel in.
+      {} // Webview options. More on these later.
+    );
+    panel.webview.html = md.render(content);
+  }
+
+  async execute(opts: CommandOpts): Promise<any> {
+    const { match, replace } = _.defaults(opts);
+    this.L.info(opts);
     const ws = DendronWorkspace.instance();
     const notes = ws.engine.notes;
-    const pattern = "^pro.";
-    const replacer = "";
-    const re = new RegExp(`(.*)(${pattern})(.*)`);
+    const re = new RegExp(`(.*)(${match})(.*)`);
     const candidates = _.map(notes, (n) => {
       if (n.stub) {
         return false;
@@ -60,29 +89,55 @@ export class RefactorHierarchyCommand extends BaseCommand<
         // @ts-ignore
         ..._rest
       ] = matchObj as RegExpExecArray;
-      const dst = [prefix, replacer, suffix]
+      const dst = [prefix, replace, suffix]
         .filter((ent) => !_.isEmpty(ent))
         .join("");
-      return { src, dst };
+
+      const rootUri = ws.rootWorkspace.uri;
+      const oldUri = Uri.joinPath(rootUri, src + ".md");
+      const newUri = Uri.joinPath(rootUri, dst + ".md");
+      return { oldUri, newUri };
     });
-    _.reduce(
+    await this.showPreview(operations);
+    const options = ["proceed", "cancel"];
+    const shouldProceed = await VSCodeUtils.showQuickPick(options, {
+      placeHolder: "proceed",
+      ignoreFocusOut: true,
+    });
+    if (shouldProceed !== "proceed") {
+      window.showInformationMessage("cancelled");
+      return;
+    }
+    window.showInformationMessage("refactoring...");
+    const renameCmd = new RenameNoteV2Command();
+    return await _.reduce<typeof operations[0], Promise<RenameNoteOutput>>(
       operations,
-      async (prev, { src, dst }) => {
-        await prev;
-        const notesdir = "/Users/kevinlin/.pyenv/versions/3.7.5/bin/notesdir";
-        let cmd = `${notesdir} mv ${src}.md ${dst}.md`;
-        if (preview) {
-          cmd += " -p";
-        }
-        console.log(cmd);
-        const out = await execa.command(cmd, {
-          cwd: ws.rootWorkspace.uri.fsPath,
-        });
-        console.log(out);
-        return;
+      async (resp, op) => {
+        const acc = await resp;
+        this.L.info({ orig: op.oldUri.fsPath, replace: op.newUri.fsPath });
+        const resp2 = await renameCmd.execute({ files: [op], silent: true });
+        acc.refsUpdated += resp2.refsUpdated;
+        acc.pathsUpdated = acc.pathsUpdated.concat(resp2.pathsUpdated);
+        return acc;
       },
-      Promise.resolve()
+      Promise.resolve({
+        refsUpdated: 0,
+        pathsUpdated: [],
+      })
     );
-    return;
+  }
+
+  async showResponse(res: CommandOutput) {
+    const { pathsUpdated, refsUpdated } = res;
+    window.showInformationMessage("done refactoring");
+    if (pathsUpdated.length > 0) {
+      window.showInformationMessage(
+        `Dendron updated ${refsUpdated} link${
+          refsUpdated === 0 || refsUpdated === 1 ? "" : "s"
+        } in ${pathsUpdated.length} file${
+          pathsUpdated.length === 0 || pathsUpdated.length === 1 ? "" : "s"
+        }`
+      );
+    }
   }
 }

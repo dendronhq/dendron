@@ -48,7 +48,7 @@ export type DLogger = {
   info: (msg: any) => void;
   error: (msg: any) => void;
   //fatal: (msg: any) => void;
-}
+};
 
 export { createLogger, pino };
 

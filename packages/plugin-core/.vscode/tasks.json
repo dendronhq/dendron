@@ -17,6 +17,12 @@
       },
       "label": "npm: watch",
       "detail": "tsc -watch -p ./"
+    },
+    {
+      "label": "gen:config",
+      "type": "shell",
+      "command": "node scripts/genConfig.js",
+      "problemMatcher": []
     }
   ]
 }

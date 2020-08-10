@@ -43,6 +43,7 @@
                     "description": "strategy for adding new journal notes",
                     "enum": [
                         "childOfDomain",
+                        "childOfDomainNamespace",
                         "childOfCurrent",
                         "asOwnDomain"
                     ]
@@ -62,6 +63,7 @@
                     "description": "strategy for adding new scratch notes",
                     "enum": [
                         "childOfDomain",
+                        "childOfDomainNamespace",
                         "childOfCurrent",
                         "asOwnDomain"
                     ]

@@ -109,7 +109,12 @@ const _noteNameDesc = (type: "journal" | "scratch") =>
   `named used for ${type} notes`;
 const _noteAddBehaviorDesc = (type: "journal" | "scratch") =>
   `strategy for adding new ${type} notes`;
-const _noteAddBehaviorEnum = ["childOfDomain", "childOfCurrent", "asOwnDomain"];
+export const _noteAddBehaviorEnum = [
+  "childOfDomain",
+  "childOfDomainNamespace",
+  "childOfCurrent",
+  "asOwnDomain",
+];
 
 export const CONFIG = {
   // --- journals

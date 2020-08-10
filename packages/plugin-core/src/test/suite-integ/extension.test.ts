@@ -128,7 +128,13 @@ function setupDendronWorkspace(
     useFixtures?: boolean;
   }
 ) {
-  const optsClean = _.defaults(opts, { configOverride: {} });
+  const optsClean = _.defaults(opts, {
+    configOverride: {},
+    setupWsOverride: {},
+  });
+  if (opts?.useFixtures) {
+    optsClean.setupWsOverride = { emptyWs: true };
+  }
   DendronWorkspace.configuration = () => {
     const config: any = {
       dendron: {
@@ -158,7 +164,7 @@ function setupDendronWorkspace(
     .execute({
       rootDirRaw: rootDir,
       skipOpenWs: true,
-      ...opts?.setupWsOverride,
+      ...optsClean.setupWsOverride,
     })
     .then(async () => {
       if (opts?.useFixtures) {
@@ -465,6 +471,29 @@ suite("commands", function () {
         done();
       });
       setupDendronWorkspace(root.name, ctx);
+    });
+
+    test("add: childOfDomainNamespace", function (done) {
+      setupDendronWorkspace(root.name, ctx, {
+        configOverride: {
+          [CONFIG.DEFAULT_JOURNAL_ADD_BEHAVIOR.key]: "childOfDomainNamespace",
+        },
+        useFixtures: true,
+      });
+      onWSInit(async () => {
+        const uri = vscode.Uri.file(
+          path.join(root.name, "vault", "bar.one.temp.md")
+        );
+        await vscode.window.showTextDocument(uri);
+        VSCodeUtils.showInputBox = async (
+          opts: vscode.InputBoxOptions | undefined
+        ) => {
+          return opts?.value;
+        };
+        const resp = (await new CreateJournalCommand().run()) as vscode.Uri;
+        assert.ok(resp.fsPath.indexOf("bar.one.journal") > 0);
+        done();
+      });
     });
 
     test("add: childOfCurrent", function (done) {

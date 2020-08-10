@@ -140,6 +140,10 @@ export class DNodeUtils {
     return out;
   }
 
+  static getPathUpTo(hpath: string, numCompoenents: number) {
+    return hpath.split(".").slice(0, numCompoenents).join(".");
+  }
+
   static isRoot(node: DNode): boolean {
     return node.id === "root";
   }

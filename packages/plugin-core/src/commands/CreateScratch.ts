@@ -1,4 +1,3 @@
-import clipboardy from "clipboardy";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { VSCodeUtils } from "../utils";
@@ -16,7 +15,6 @@ type CommandInput = {
 };
 
 export class CreateScratchCommand extends CreateNoteCommand {
-
   async gatherInputs(): Promise<CommandInput | undefined> {
     let title: string;
     const { text, selection } = VSCodeUtils.getSelection();
@@ -57,11 +55,6 @@ export class CreateScratchCommand extends CreateNoteCommand {
       }
     });
 
-    if (_.isEmpty(title)) {
-      clipboardy.writeSync(`[[${opts.fname}]]`);
-    } else {
-      clipboardy.writeSync(`[[${title} | ${opts.fname}]]`);
-    }
     await vscode.window.showTextDocument(uri);
     vscode.window.showInformationMessage(`${fname} copied to clipboard`);
     return uri;

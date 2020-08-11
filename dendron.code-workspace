@@ -14,9 +14,6 @@
     },
     {
       "path": "packages/dendron-cli"
-    },
-    {
-      "path": "."
     }
   ],
   "settings": {
@@ -35,12 +32,10 @@
       "activityBarBadge.background": "#bf0060",
       "activityBarBadge.foreground": "#e7e7e7",
       "statusBar.background": "#007fff",
-      "statusBar.border": "#007fff",
       "statusBar.foreground": "#e7e7e7",
       "statusBarItem.hoverBackground": "#3399ff",
       "titleBar.activeBackground": "#007fff",
       "titleBar.activeForeground": "#e7e7e7",
-      "titleBar.border": "#007fff",
       "titleBar.inactiveBackground": "#007fff99",
       "titleBar.inactiveForeground": "#e7e7e799"
     },

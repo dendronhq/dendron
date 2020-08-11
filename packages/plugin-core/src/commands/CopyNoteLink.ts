@@ -36,7 +36,12 @@ export class CopyNoteLinkCommand extends BasicCommand<
     }
     const { title } = note;
     const link = `[[ ${title} | ${fname} ]]`;
-    clipboardy.writeSync(link);
+    try {
+      clipboardy.writeSync(link);
+    } catch (err) {
+      this.L.error({ err, link });
+      throw err;
+    }
     this.showFeedback(link);
     return link;
   }

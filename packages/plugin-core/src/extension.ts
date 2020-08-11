@@ -7,6 +7,7 @@ import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { VSCodeUtils } from "./utils";
 import { DendronWorkspace } from "./workspace";
+import fs from "fs-extra";
 
 // === Main
 // this method is called when your extension is activated
@@ -36,7 +37,9 @@ export function _activate(context: vscode.ExtensionContext) {
     storagePath,
   });
   // needs to be initialized to setup commands
-  const ws = DendronWorkspace.getOrCreate(context, { skipSetup: stage === "test" });
+  const ws = DendronWorkspace.getOrCreate(context, {
+    skipSetup: stage === "test",
+  });
 
   const installedGlobalVersion = ws.version;
   const migratedGlobalVersion = context.globalState.get<string | undefined>(
@@ -60,6 +63,10 @@ export function _activate(context: vscode.ExtensionContext) {
     Logger.info({ msg: "reloadWorkspace:pre" });
     ws.reloadWorkspace().then(async () => {
       Logger.info({ ctx, msg: "dendron ready" }, true);
+      // help with debug
+      fs.readJSON(DendronWorkspace.workspaceFile().fsPath).then((config) => {
+        Logger.info({ ctx, msg: "gotConfig", config });
+      });
       // check if first time install workspace, if so, show tutorial
       if (
         _.isUndefined(
@@ -74,7 +81,10 @@ export function _activate(context: vscode.ExtensionContext) {
       } else {
         Logger.info({ ctx, msg: "user finished welcome" });
       }
-      HistoryService.instance().add({ source: "extension", action: "initialized" });
+      HistoryService.instance().add({
+        source: "extension",
+        action: "initialized",
+      });
       if (isDebug || stage === "test") {
         Logger.output?.show(false);
         vscode.window.showInformationMessage("activate");

@@ -78,6 +78,7 @@ export class VSCodeUtils {
     if (!_MOCK_CONTEXT) {
       const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
       _MOCK_CONTEXT = {
+        extensionMode: vscode.ExtensionMode.Development,
         logPath: FileTestUtils.tmpDir().name,
         subscriptions: [],
         extensionPath: pkgRoot,

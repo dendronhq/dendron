@@ -1,22 +1,16 @@
 import _ from "lodash";
 import path from "path";
 import { env, Uri, window } from "vscode";
-import { BaseCommand } from "./base";
+import { BasicCommand } from "./base";
 
-type CommandOpts = {
-};
+type CommandOpts = {};
 
-type CommandInput = {
-}
+type CommandInput = {};
 
 type CommandOutput = void;
 
-export class ShowHelpCommand extends BaseCommand<
-  CommandOpts,
-  CommandOutput,
-  CommandInput
-> {
-  async gatherInputs(): Promise<CommandInput|undefined> {
+export class ShowHelpCommand extends BasicCommand<CommandOpts, CommandOutput> {
+  async gatherInputs(): Promise<CommandInput | undefined> {
     const resp = await window.showInputBox({
       prompt: "Select your folder for dendron",
       ignoreFocusOut: true,
@@ -30,12 +24,15 @@ export class ShowHelpCommand extends BaseCommand<
       },
     });
     if (_.isUndefined(resp)) {
-        return
+      return;
     }
     return;
   }
   async execute() {
-    env.openExternal(Uri.parse("https://www.dendron.so/notes/e86ac3ab-dbe1-47a1-bcd7-9df0d0490b40.html"));
+    env.openExternal(
+      Uri.parse(
+        "https://www.dendron.so/notes/e86ac3ab-dbe1-47a1-bcd7-9df0d0490b40.html"
+      )
+    );
   }
 }
-

@@ -635,7 +635,7 @@ suite("commands", function () {
 
   // --- Hierarchy
   describe("Archive Hierarchy", function () {
-    test.only("basic", function (done) {
+    test("basic", function (done) {
       // setup mocks
       VSCodeUtils.showInputBox = async () => {
         return "refactor";

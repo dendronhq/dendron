@@ -1,8 +1,8 @@
 import { DEngine, Note, Schema } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
-import _ from "lodash";
-import { BaseCommand } from "./base";
 import { DendronEngine } from "@dendronhq/engine-server";
+import _ from "lodash";
+import { BasicCommand } from "./base";
 
 const L = createLogger("SchemaCommand");
 
@@ -27,7 +27,7 @@ function applySchema(note: Note, schema: Schema) {
   });
 }
 
-export class SchemaCommand extends BaseCommand<SchemaCommandOpts> {
+export class SchemaCommand extends BasicCommand<SchemaCommandOpts> {
   async hack(engine: DEngine) {
     const ctx = "execute";
     const schemas = _.values(engine.schemas.root.children);

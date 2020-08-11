@@ -3,7 +3,7 @@ import { createLogger, getAllFiles } from "@dendronhq/common-server";
 import fs, { Dirent } from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { BaseCommand } from "./base";
+import { BasicCommand } from "./base";
 
 const L = createLogger("dendron");
 
@@ -36,13 +36,13 @@ export const RULES = {
   ADD_FM_BLOCK: "ADD_FM_BLOCK",
   ADD_FM_ID: "ADD_FM_ID",
   REMOVE_FM_BRACKETS: "REMOVE_FM_BRACKETS",
-  ADD_LAYOUT: "ADD_LAYOUT"
+  ADD_LAYOUT: "ADD_LAYOUT",
 };
 
 export abstract class RefactorBaseCommand<
   TFile,
   TMatchData
-> extends BaseCommand<RefactorCommandOpts> {
+> extends BasicCommand<RefactorCommandOpts> {
   public props: Required<RefactorCommandOpts>;
 
   constructor(name: string, opts: RefactorCommandOpts) {
@@ -105,7 +105,7 @@ export abstract class RefactorBaseCommand<
   }
 }
 
-export class RefactorCommand extends BaseCommand<RefactorCommandOpts> {
+export class RefactorCommand extends BasicCommand<RefactorCommandOpts> {
   public rules: { [key: string]: RefactorRule };
 
   constructor() {
@@ -202,7 +202,7 @@ export class RefactorCommand extends BaseCommand<RefactorCommandOpts> {
   }
 
   async execute(opts: RefactorCommandOpts) {
-    const logger = L.child({ctx: "execute", opts})
+    const logger = L.child({ ctx: "execute", opts });
     const { root, dryRun, exclude, include, limit, rules } = _.defaults(opts, {
       include: ["*.md"],
       exclude: [],
@@ -212,7 +212,7 @@ export class RefactorCommand extends BaseCommand<RefactorCommandOpts> {
     const stats = {
       numChanged: 0,
     };
-    logger.info({msg: "enter"})
+    logger.info({ msg: "enter" });
     const allFiles = this.getFiles({ root, exclude, include });
     allFiles.forEach((dirent) => {
       const { name: fname } = dirent;

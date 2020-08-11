@@ -1,7 +1,7 @@
 import { createLogger, getAllFiles } from "@dendronhq/common-server";
 import { FileParser, FileStorage } from "@dendronhq/engine-server";
-import { BaseCommand } from "./base";
 import _ from "lodash";
+import { BasicCommand } from "./base";
 
 const L = createLogger("ParseCommand");
 
@@ -15,7 +15,7 @@ type ParseCommandOpts = {
   fixMissing?: boolean;
 };
 
-export class ParseCommand extends BaseCommand<ParseCommandOpts> {
+export class ParseCommand extends BasicCommand<ParseCommandOpts> {
   async execute(opts: ParseCommandOpts) {
     opts = _.defaults(opts, { bailOnError: false });
     L.info({ ctx: "execute:enter", opts });

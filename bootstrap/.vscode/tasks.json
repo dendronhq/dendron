@@ -6,7 +6,7 @@
       "type": "shell",
       "command": "./testAll.sh",
       "options": {
-        "cwd": "./scripts"
+        "cwd": "./../scripts"
       },
       "problemMatcher": []
     },

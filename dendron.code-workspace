@@ -15,6 +15,9 @@
     {
       "path": "packages/dendron-cli"
     }
+    {
+      "path": "bootstrap"
+    }
   ],
   "settings": {
     "files.exclude": {

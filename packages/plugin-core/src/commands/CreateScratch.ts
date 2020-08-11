@@ -56,7 +56,6 @@ export class CreateScratchCommand extends CreateNoteCommand {
     });
 
     await vscode.window.showTextDocument(uri);
-    vscode.window.showInformationMessage(`${fname} copied to clipboard`);
     return uri;
   }
 }

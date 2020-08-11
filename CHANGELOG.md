@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.2](https://github.com/dendronhq/dendron/compare/v0.6.1...v0.6.2) (2020-08-11)
+
+### Bug Fixes
+
+- issue with rename notes ([e16e0e9](https://github.com/dendronhq/dendron/commit/e16e0e971234c054ccc81ad7091400ccaad09b48))
+- remove obsolete info messages ([564e4c1](https://github.com/dendronhq/dendron/commit/564e4c16d4966f5cd36019b84f44ba6570bb3614))
+
 ## [0.6.1](https://github.com/dendronhq/dendron/compare/v0.6.0...v0.6.1) (2020-08-11)
 
 ### Features

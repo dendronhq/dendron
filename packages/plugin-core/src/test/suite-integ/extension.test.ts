@@ -379,6 +379,27 @@ suite("startup", function () {
       });
     });
 
+    test("lookup existing node", function (done) {
+      setupDendronWorkspace(root.name, ctx, { useFixtures: true });
+      onWSInit(async () => {
+        console.log("lookup");
+        assert.equal(DendronWorkspace.isActive(), true);
+        const qp = await createMockQuickPick<DNode>({ value: "foo" });
+        const ws = DendronWorkspace.instance();
+        const fooNote = (await ws.engine.queryOne("foo", "note")).data;
+        qp.items = [fooNote];
+        qp.activeItems = [fooNote];
+        qp.selectedItems = [fooNote];
+        const engOpts: EngineOpts = { flavor: "note" };
+        const lp = new LookupProvider(engOpts);
+        await lp.onDidAccept(qp, engOpts);
+        const txtPath = vscode.window.activeTextEditor?.document.uri
+          .fsPath as string;
+        const node = mdFile2NodeProps(txtPath);
+        assert.equal(node.title, "foo");
+        done();
+      });
+    });
     test("lookup new node with schema template", function (done) {
       setupDendronWorkspace(root.name, ctx);
       onWSInit(async () => {

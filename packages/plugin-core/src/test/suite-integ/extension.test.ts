@@ -741,15 +741,21 @@ suite("memo", function () {
           return "dendron.bond";
         };
         await vscode.window.showTextDocument(uri);
+        fs.appendFileSync(uri.fsPath, "shaken");
         await new RenameNoteV2Command().run();
         const text = fs.readFileSync(
           path.join(root.name, "vault", "dendron.md"),
+          { encoding: "utf8" }
+        );
+        const textOfNew = fs.readFileSync(
+          path.join(root.name, "vault", "dendron.bond.md"),
           { encoding: "utf8" }
         );
         // const editor = await vscode.window.showTextDocument(
         //   vscode.Uri.file(),
         // );
         assert.ok(text.indexOf("[[FAQ |dendron.bond]]") > 0);
+        assert.ok(textOfNew.indexOf("shaken") > 0);
         done();
       });
       setupDendronWorkspace(root.name, ctx);

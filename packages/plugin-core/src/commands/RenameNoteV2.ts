@@ -1,4 +1,4 @@
-import { Note, DNodeUtils } from "@dendronhq/common-all";
+import { Note, DNodeUtils, DNodeRaw } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _, { groupBy } from "lodash";
 import path from "path";
@@ -16,6 +16,7 @@ import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 import { HistoryService } from "../services/HistoryService";
+import { mdFile2NodeProps } from "@dendronhq/common-server";
 
 type CommandInput = {
   dest: string;
@@ -86,19 +87,30 @@ export class RenameNoteV2Command extends BaseCommand<
   }
 
   async moveNote(oldUri: Uri, newUri: Uri) {
+    // create new note
     const ws = DendronWorkspace.instance();
     const noteOld = DNodeUtils.getNoteByFname(
       DNodeUtils.uri2Fname(oldUri),
       ws.engine,
       { throwIfEmpty: true }
     ) as Note;
-    // fs.moveSync(oldUri.fsPath, newUri.fsPath);
-    await ws.engine.delete(noteOld.id, "note");
+    const props = mdFile2NodeProps(oldUri.fsPath);
+    const newFname = DNodeUtils.uri2Fname(newUri);
+    const noteNew = new Note({
+      ...props,
+      parent: noteOld.parent,
+      children: noteOld.children,
+      id: noteOld.id,
+      fname: newFname,
+    });
 
-    noteOld.fname = DNodeUtils.uri2Fname(newUri);
+    // delete old note
+    await ws.engine.delete(noteOld.id, "note");
     const historyService = HistoryService.instance();
     historyService.add({ source: "engine", action: "create", uri: newUri });
-    ws.engine.write(noteOld, { newNode: true, parentsAsStubs: true });
+
+    // write new note
+    ws.engine.write(noteNew, { newNode: true, parentsAsStubs: true });
     await ws.engine.updateNodes([noteOld], {
       newNode: true,
       parentsAsStubs: true,

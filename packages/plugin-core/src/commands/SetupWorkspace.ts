@@ -43,10 +43,10 @@ export class SetupWorkspaceCommand extends BasicCommand<
       placeHolder: "initialize with dendron tutorial notes",
       ignoreFocusOut: true,
     });
-    const emptyWs = initializeEmpty === options[1];
-    if (!emptyWs) {
+    if (!initializeEmpty) {
       return;
     }
+    const emptyWs = initializeEmpty === options[1];
     return { rootDirRaw, emptyWs };
   }
 

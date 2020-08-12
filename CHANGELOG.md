@@ -3,9 +3,11 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## [0.6.3](https://github.com/dendronhq/dendron/compare/v0.6.2...v0.6.3) (2020-08-12)
+### [0.6.3](https://github.com/dendronhq/dendron/compare/v0.6.2...v0.6.3) (2020-08-12)
 
-**Note:** Version bump only for package root
+### Enhancements
+
+- **workspace:** initialize empty workspace ([5406f52](https://github.com/dendronhq/dendron/commit/5406f52f5c1994fe81f3f9b33db039dd29b989ae))
 
 ## [0.6.2](https://github.com/dendronhq/dendron/compare/v0.6.1...v0.6.2) (2020-08-11)
 

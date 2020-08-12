@@ -43,7 +43,7 @@ export class RefactorHierarchyCommand extends BasicCommand<
         prompt: "Enter replace prefix",
       });
     }
-    if (!replace || !match) {
+    if (_.isUndefined(replace) || !match) {
       return;
     }
     return {

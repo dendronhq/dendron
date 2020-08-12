@@ -252,13 +252,15 @@ export class LookupProvider {
       // otherwise, children will not be right
       if (selectedItem.stub) {
         L.info({ ...ctx2, msg: "createNewPick:stub" });
-        nodeNew = (await engine.queryOne(fname, "note")).data as Note;
+        // get note
+        nodeNew = engine.notes[selectedItem.id];
         nodeNew.stub = false;
+        await engine.write(nodeNew, { newNode: true, stub: false });
+        // write note
         profile = getDurationMilliseconds(start);
         L.info({
           ...ctx2,
           msg: "createNewPick:stub",
-          func: "engine.queryOne",
           profile,
         });
       } else if (selectedItem.schemaStub) {

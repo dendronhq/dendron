@@ -7,6 +7,7 @@ import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { RenameNoteOutput, RenameNoteV2Command } from "./RenameNoteV2";
 import { DNodeUtils } from "@dendronhq/common-all";
+import fs from "fs-extra";
 
 const md = _md();
 
@@ -75,6 +76,29 @@ export class RefactorHierarchyCommand extends BasicCommand<
     panel.webview.html = md.render(content);
   }
 
+  async showError(operations: RenameOperation[]) {
+    const content = [
+      "# Error - Refactoring would overwrite files",
+      "",
+      "### The following files woudl be overwritten",
+    ]
+      .concat(
+        operations.map(({ oldUri, newUri }) => {
+          return `- ${path.basename(oldUri.fsPath)} --> ${path.basename(
+            newUri.fsPath
+          )}`;
+        })
+      )
+      .join("\n");
+    const panel = window.createWebviewPanel(
+      "refactorPreview", // Identifies the type of the webview. Used internally
+      "Refactor Preview", // Title of the panel displayed to the user
+      ViewColumn.One, // Editor column to show the new webview panel in.
+      {} // Webview options. More on these later.
+    );
+    panel.webview.html = md.render(content);
+  }
+
   async execute(opts: CommandOpts): Promise<any> {
     const { match, replace } = _.defaults(opts);
     this.L.info(opts);
@@ -107,6 +131,17 @@ export class RefactorHierarchyCommand extends BasicCommand<
       const newUri = Uri.joinPath(rootUri, dst + ".md");
       return { oldUri, newUri };
     });
+    // NOTE: async version doesn't work, not sure why
+    const filesThatExist: RenameOperation[] = _.filter(operations, (op) => {
+      return fs.pathExistsSync(op.newUri.fsPath);
+    });
+    if (!_.isEmpty(filesThatExist)) {
+      await this.showError(filesThatExist);
+      window.showErrorMessage(
+        "refactored files would overwrite existing files"
+      );
+      return;
+    }
     await this.showPreview(operations);
     const options = ["proceed", "cancel"];
     const shouldProceed = await VSCodeUtils.showQuickPick(options, {

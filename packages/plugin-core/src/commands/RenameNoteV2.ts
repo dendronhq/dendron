@@ -1,8 +1,9 @@
-import { Note, DNodeUtils, DNodeRaw } from "@dendronhq/common-all";
+import { DNodeUtils, Note } from "@dendronhq/common-all";
+import { mdFile2NodeProps } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _, { groupBy } from "lodash";
 import path from "path";
-import { TextEditor, Uri, window, workspace } from "vscode";
+import { TextEditor, Uri, window } from "vscode";
 import {
   cacheUris,
   containsMarkdownExt,
@@ -12,11 +13,10 @@ import {
   replaceRefs,
   sortPaths,
 } from "../external/memo/utils/utils";
+import { HistoryService } from "../services/HistoryService";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
-import { HistoryService } from "../services/HistoryService";
-import { mdFile2NodeProps } from "@dendronhq/common-server";
 
 type CommandInput = {
   dest: string;

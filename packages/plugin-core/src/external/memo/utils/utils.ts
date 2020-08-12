@@ -75,6 +75,9 @@ export const findUriByRef = (
   });
 };
 
+export const getFileUrlForMarkdownPreview = (filePath: string): string =>
+  vscode.Uri.file(filePath).toString().replace("file://", "");
+
 export const trimLeadingSlash = (value: string) =>
   value.replace(/^\/+|^\\+/g, "");
 export const normalizeSlashes = (value: string) => value.replace(/\\/gi, "/");
@@ -107,14 +110,17 @@ export const getWorkspaceFolder = (): string | undefined =>
 
 export const parseRef = (rawRef: string): RefT => {
   const dividerPosition = rawRef.indexOf("|");
-
-  return {
-    ref: dividerPosition !== -1 ? rawRef.slice(0, dividerPosition) : rawRef,
-    label:
-      dividerPosition !== -1
-        ? rawRef.slice(dividerPosition + 1, rawRef.length)
-        : "",
-  };
+  if (dividerPosition < 0) {
+    return {
+      ref: _.trim(rawRef),
+      label: _.trim(rawRef),
+    };
+  } else {
+    return {
+      ref: _.trim(rawRef.slice(dividerPosition + 1, rawRef.length)),
+      label: _.trim(rawRef.slice(0, dividerPosition)),
+    };
+  }
 };
 
 // === Cache

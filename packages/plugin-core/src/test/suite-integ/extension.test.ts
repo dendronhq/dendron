@@ -35,7 +35,7 @@ import {
 } from "../../components/lookup/LookupProvider";
 import { CONFIG, ConfigKey, WORKSPACE_STATE } from "../../constants";
 import { _activate } from "../../extension";
-import { replaceRefs } from "../../external/memo/utils/utils";
+import { replaceRefs, parseRef } from "../../external/memo/utils/utils";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
@@ -800,6 +800,28 @@ const it = test;
 const expect = assert.deepEqual;
 
 suite("utils", function () {
+  describe("parseRef()", () => {
+    // it('should fail on providing wrong parameter type', () => {
+    //   expect(() => parseRef((undefined as unknown) as string)).toThrow();
+    // });
+
+    it("should return empty ref and label", () => {
+      assert.deepEqual(parseRef(""), { ref: "", label: "" });
+      //expect(parseRef('')();
+    });
+
+    it("should parse raw ref and return ref and label", () => {
+      assert.deepEqual(parseRef("Label|link"), { ref: "link", label: "Label" });
+    });
+
+    // TODO: hadnle this case
+    it.skip("should favour only first divider", () => {
+      assert.deepEqual(parseRef("Label|||link"), {
+        ref: "link",
+        label: "||Label",
+      });
+    });
+  });
   describe("replaceRefs()", () => {
     before(function () {
       ctx = VSCodeUtils.getOrCreateMockContext();

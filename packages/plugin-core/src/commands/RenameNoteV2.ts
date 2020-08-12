@@ -229,9 +229,10 @@ export class RenameNoteV2Command extends BaseCommand<
             if (!containsMarkdownExt(fsPath) || fsPath === oldUri.fsPath) {
               return;
             }
-            let doc;
+            let content: string;
             try {
-              doc = await workspace.openTextDocument(Uri.file(fsPath));
+              content = fs.readFileSync(fsPath, { encoding: "utf8" });
+              // doc = await workspace.openTextDocument();
             } catch (err) {
               throw err;
             }
@@ -254,7 +255,7 @@ export class RenameNoteV2Command extends BaseCommand<
 
             const nextContent = replaceRefs({
               refs,
-              document: doc,
+              content,
               onMatch: () => addToPathsUpdated(fsPath),
               onReplace: incrementRefsCounter,
             });
@@ -269,7 +270,7 @@ export class RenameNoteV2Command extends BaseCommand<
     );
     return {
       refsUpdated,
-      pathsUpdated,
+      pathsUpdated: _.uniq(pathsUpdated),
     };
   }
 }

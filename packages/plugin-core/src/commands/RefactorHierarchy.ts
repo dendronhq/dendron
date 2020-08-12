@@ -119,7 +119,7 @@ export class RefactorHierarchyCommand extends BasicCommand<
     }
     window.showInformationMessage("refactoring...");
     const renameCmd = new RenameNoteV2Command();
-    return await _.reduce<typeof operations[0], Promise<RenameNoteOutput>>(
+    const out = await _.reduce<typeof operations[0], Promise<RenameNoteOutput>>(
       operations,
       async (resp, op) => {
         const acc = await resp;
@@ -134,6 +134,10 @@ export class RefactorHierarchyCommand extends BasicCommand<
         pathsUpdated: [],
       })
     );
+    return {
+      refsUpdated: out.refsUpdated,
+      pathsUpdated: _.sortedUniq(_.sortBy(out.pathsUpdated)),
+    };
   }
 
   async showResponse(res: CommandOutput) {

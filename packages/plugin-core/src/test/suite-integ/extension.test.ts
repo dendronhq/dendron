@@ -1,9 +1,9 @@
 import { DNode, Note } from "@dendronhq/common-all";
 import {
   DirResult,
+  EngineTestUtils,
   FileTestUtils,
   mdFile2NodeProps,
-  EngineTestUtils,
 } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
 import * as assert from "assert";
@@ -14,12 +14,13 @@ import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
-import { workspace } from "vscode";
+import { ArchiveHierarchyCommand } from "../../commands/ArchiveHierarchy";
 import { ChangeWorkspaceCommand } from "../../commands/ChangeWorkspace";
 import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
 import { CreateJournalCommand } from "../../commands/CreateJournal";
 import { CreateScratchCommand } from "../../commands/CreateScratch";
 import { DoctorCommand } from "../../commands/Doctor";
+import { RefactorHierarchyCommand } from "../../commands/RefactorHierarchy";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import { RenameNoteV2Command } from "../../commands/RenameNoteV2";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
@@ -38,8 +39,6 @@ import { replaceRefs } from "../../external/memo/utils/utils";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { RefactorHierarchyCommand } from "../../commands/RefactorHierarchy";
-import { ArchiveHierarchyCommand } from "../../commands/ArchiveHierarchy";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
@@ -654,6 +653,69 @@ suite("commands", function () {
     });
   });
 
+  describe("RenameNote", function () {
+    test("basic", function (done) {
+      onWSInit(async () => {
+        const uri = vscode.Uri.file(
+          path.join(root.name, "vault", "dendron.faq.md")
+        );
+        VSCodeUtils.showInputBox = async () => {
+          return "dendron.bond";
+        };
+        await vscode.window.showTextDocument(uri);
+        fs.appendFileSync(uri.fsPath, "shaken");
+        await new RenameNoteV2Command().run();
+        const text = fs.readFileSync(
+          path.join(root.name, "vault", "dendron.md"),
+          { encoding: "utf8" }
+        );
+        const textOfNew = fs.readFileSync(
+          path.join(root.name, "vault", "dendron.bond.md"),
+          { encoding: "utf8" }
+        );
+        assert.ok(text.indexOf("[[FAQ |dendron.bond]]") > 0);
+        assert.ok(textOfNew.indexOf("shaken") > 0);
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx);
+    });
+
+    test("mult links", function (done) {
+      onWSInit(async () => {
+        let uri = vscode.Uri.file(
+          path.join(root.name, "vault", "refactor.one.md")
+        );
+        VSCodeUtils.showInputBox = async () => {
+          return "bond.one";
+        };
+        await vscode.window.showTextDocument(uri);
+        await new RenameNoteV2Command().run();
+        let text = fs.readFileSync(
+          path.join(root.name, "vault", "refactor.md"),
+          { encoding: "utf8" }
+        );
+        assert.ok(text.indexOf("bond.one") > 0);
+
+        uri = vscode.Uri.file(path.join(root.name, "vault", "refactor.two.md"));
+        VSCodeUtils.showInputBox = async () => {
+          return "bond.two";
+        };
+        await vscode.window.showTextDocument(uri);
+        await new RenameNoteV2Command().run();
+        text = fs.readFileSync(path.join(root.name, "vault", "refactor.md"), {
+          encoding: "utf8",
+        });
+        assert.ok(text.indexOf("bond.one") > 0);
+        assert.ok(text.indexOf("bond.two") > 0);
+        console.log(text);
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        useFixtures: true,
+      });
+    });
+  });
+
   // --- Hierarchy
   describe("Archive Hierarchy", function () {
     test("basic", function (done) {
@@ -668,10 +730,10 @@ suite("commands", function () {
 
       onWSInit(async () => {
         const resp = await new ArchiveHierarchyCommand().run();
-        assert.equal(resp.refsUpdated, 2);
+        assert.equal(resp.refsUpdated, 4);
         assert.deepEqual(
           resp.pathsUpdated.map((p: string) => path.basename(p)),
-          ["foo.md", "archive.refactor.one.md"]
+          ["archive.refactor.md", "archive.refactor.one.md", "foo.md"]
         );
         done();
       });
@@ -701,15 +763,16 @@ suite("commands", function () {
 
       onWSInit(async () => {
         const resp = await new RefactorHierarchyCommand().run();
-        assert.equal(resp.refsUpdated, 2);
+        let rootName = root.name;
+        console.log(rootName);
+        assert.equal(resp.refsUpdated, 4);
         assert.deepEqual(
           resp.pathsUpdated.map((p: string) => path.basename(p)),
-          ["foo.md", "bond.one.md"]
+          ["bond.md", "bond.one.md", "foo.md"]
         );
         done();
       });
       setupDendronWorkspace(root.name, ctx, {
-        setupWsOverride: { emptyWs: true },
         useFixtures: true,
       });
     });
@@ -726,57 +789,6 @@ suite("commands", function () {
         const nodeProps = mdFile2NodeProps(testFile);
         assert.equal(_.trim(nodeProps.title), "Bond2");
         assert.ok(nodeProps.id);
-        done();
-      });
-      setupDendronWorkspace(root.name, ctx);
-    });
-  });
-});
-
-suite("memo", function () {
-  this.timeout(TIMEOUT);
-
-  before(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  beforeEach(async function () {
-    root = FileTestUtils.tmpDir();
-    fs.removeSync(root.name);
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    return;
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
-  });
-
-  describe("basic", () => {
-    test("basic", function (done) {
-      onWSInit(async () => {
-        const uri = vscode.Uri.file(
-          path.join(root.name, "vault", "dendron.faq.md")
-        );
-        VSCodeUtils.showInputBox = async () => {
-          return "dendron.bond";
-        };
-        await vscode.window.showTextDocument(uri);
-        fs.appendFileSync(uri.fsPath, "shaken");
-        await new RenameNoteV2Command().run();
-        const text = fs.readFileSync(
-          path.join(root.name, "vault", "dendron.md"),
-          { encoding: "utf8" }
-        );
-        const textOfNew = fs.readFileSync(
-          path.join(root.name, "vault", "dendron.bond.md"),
-          { encoding: "utf8" }
-        );
-        // const editor = await vscode.window.showTextDocument(
-        //   vscode.Uri.file(),
-        // );
-        assert.ok(text.indexOf("[[FAQ |dendron.bond]]") > 0);
-        assert.ok(textOfNew.indexOf("shaken") > 0);
         done();
       });
       setupDendronWorkspace(root.name, ctx);
@@ -809,10 +821,7 @@ suite("utils", function () {
       assert.deepEqual(
         replaceRefs({
           refs: [{ old: "test-ref", new: "new-test-ref" }],
-          document: await workspace.openTextDocument({
-            language: "markdown",
-            content: "[[test-ref]]",
-          }),
+          content: "[[test-ref]]",
         }),
         "[[new-test-ref]]"
       );
@@ -822,10 +831,7 @@ suite("utils", function () {
       assert.deepEqual(
         replaceRefs({
           refs: [{ old: "test-ref", new: "new-test-ref" }],
-          document: await workspace.openTextDocument({
-            language: "markdown",
-            content: "[[test-ref]]",
-          }),
+          content: "[[test-ref]]",
         }),
         "[[new-test-ref]]"
       );
@@ -834,10 +840,7 @@ suite("utils", function () {
     it("should replace short ref with label with short ref with label", async () => {
       const replace = replaceRefs({
         refs: [{ old: "test-ref", new: "new-test-ref" }],
-        document: await workspace.openTextDocument({
-          language: "markdown",
-          content: "[[Test Label|test-ref]]",
-        }),
+        content: "[[Test Label|test-ref]]",
       });
       expect(replace, "[[Test Label|new-test-ref]]");
     });
@@ -847,10 +850,7 @@ suite("utils", function () {
       expect(
         replaceRefs({
           refs: [{ old: "dendron.faq", new: "dendron.bond" }],
-          document: await workspace.openTextDocument({
-            language: "markdown",
-            content: "[[ FAQ|dendron.faq]]",
-          }),
+          content: "[[ FAQ|dendron.faq]]",
         }),
         "[[FAQ|dendron.bond]]"
       );
@@ -860,10 +860,7 @@ suite("utils", function () {
       expect(
         replaceRefs({
           refs: [{ old: "dendron.faq", new: "dendron.bond" }],
-          document: await workspace.openTextDocument({
-            language: "markdown",
-            content: "[[FAQ |dendron.faq]]",
-          }),
+          content: "[[FAQ |dendron.faq]]",
         }),
         "[[FAQ |dendron.bond]]"
       );
@@ -873,10 +870,7 @@ suite("utils", function () {
       expect(
         replaceRefs({
           refs: [{ old: "dendron.faq", new: "dendron.bond" }],
-          document: await workspace.openTextDocument({
-            language: "markdown",
-            content: "[[FAQ| dendron.faq]]",
-          }),
+          content: "[[FAQ| dendron.faq]]",
         }),
         "[[FAQ|dendron.bond]]"
       );
@@ -886,10 +880,7 @@ suite("utils", function () {
       expect(
         replaceRefs({
           refs: [{ old: "dendron.faq", new: "dendron.bond" }],
-          document: await workspace.openTextDocument({
-            language: "markdown",
-            content: "[[FAQ|dendron.faq ]]",
-          }),
+          content: "[[FAQ|dendron.faq ]]",
         }),
         "[[FAQ|dendron.bond]]"
       );

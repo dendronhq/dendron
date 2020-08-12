@@ -54,7 +54,8 @@ Array [
     "type": "note",
   },
   Object {
-    "body": "",
+    "body": "- [[refactor.one]]
+- [[refactor.two]]",
     "children": Array [
       "One",
       "Two",

@@ -14,9 +14,12 @@
     },
     {
       "path": "packages/dendron-cli"
-    }
+    },
     {
       "path": "bootstrap"
+    },
+    {
+      "path": "fixtures"
     }
   ],
   "settings": {

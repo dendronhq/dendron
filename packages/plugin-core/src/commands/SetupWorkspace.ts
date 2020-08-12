@@ -17,6 +17,7 @@ type CommandOpts = {
 
 type CommandInput = {
   rootDirRaw: string;
+  emptyWs: boolean;
 };
 
 type CommandOutput = any;
@@ -34,7 +35,19 @@ export class SetupWorkspaceCommand extends BasicCommand<
     if (_.isUndefined(rootDirRaw)) {
       return;
     }
-    return { rootDirRaw };
+    const options = [
+      "initialize with dendron tutorial notes",
+      "initialize empty repository",
+    ];
+    const initializeEmpty = await VSCodeUtils.showQuickPick(options, {
+      placeHolder: "initialize with dendron tutorial notes",
+      ignoreFocusOut: true,
+    });
+    const emptyWs = initializeEmpty === options[1];
+    if (!emptyWs) {
+      return;
+    }
+    return { rootDirRaw, emptyWs };
   }
 
   async execute(opts: CommandOpts) {

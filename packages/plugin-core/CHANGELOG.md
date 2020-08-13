@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.4](https://github.com/dendronhq/dendron/compare/v0.6.3...v0.6.4) (2020-08-13)
+
+### Bug Fixes
+
+- **commands:** allow empty replacements ([6d101aa](https://github.com/dendronhq/dendron/commit/6d101aa7df72c7639051e59e9b734399e068c9cc))
+- **commands:** issue where refactor would miss some links ([1734778](https://github.com/dendronhq/dendron/commit/173477849f6dd21f9f52a1d8c6733faf472fcea3))
+- **plugin:** issue where new note won't be created if stub ([e5604a9](https://github.com/dendronhq/dendron/commit/e5604a9be02455a75084b4cf20f749ce7c4c6866))
+- quickinput exit early on certain inputs ([b1e47bd](https://github.com/dendronhq/dendron/commit/b1e47bd5b4c81a1d69ae76b82869c04739557ab8))
+
 ### [0.6.3](https://github.com/dendronhq/dendron/compare/v0.6.2...v0.6.3) (2020-08-12)
 
 ### Enhancements

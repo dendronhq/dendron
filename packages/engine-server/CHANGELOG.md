@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.4](https://github.com/dendronhq/dendron/compare/v0.6.3...v0.6.4) (2020-08-13)
+
+### Bug Fixes
+
+- **commands:** issue where refactor would miss some links ([1734778](https://github.com/dendronhq/dendron/commit/173477849f6dd21f9f52a1d8c6733faf472fcea3))
+
 ## [0.6.1](https://github.com/dendronhq/dendron/compare/v0.6.0...v0.6.1) (2020-08-11)
 
 ### Features

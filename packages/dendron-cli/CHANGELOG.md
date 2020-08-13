@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.4](https://github.com/dendronhq/dendron/compare/v0.6.3...v0.6.4) (2020-08-13)
+
+**Note:** Version bump only for package @dendronhq/dendron-cli
+
 ## [0.6.1](https://github.com/dendronhq/dendron/compare/v0.6.0...v0.6.1) (2020-08-11)
 
 ### Features

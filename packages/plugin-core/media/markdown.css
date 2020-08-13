@@ -1,0 +1,57 @@
+.memo-markdown-embed {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 5px 20px 15px 20px;
+  margin: 0 20px;
+  position: relative;
+}
+
+.memo-markdown-embed-title {
+  height: 36px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 26px;
+  line-height: 42px;
+  top: 5px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  text-align: center;
+  font-weight: 900;
+}
+
+.memo-markdown-embed-link {
+  position: absolute;
+  top: 6px;
+  right: 12px;
+  cursor: pointer;
+}
+
+.memo-markdown-embed-link i {
+  font-size: 18px;
+  color: #535353;
+}
+
+.memo-markdown-embed-link:hover i {
+  color: #000000;
+}
+
+.vscode-dark .memo-markdown-embed-link:hover i {
+  color: #ffffff;
+}
+
+.memo-markdown-embed-content {
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.memo-invalid-link {
+  color: #cc0013 !important;
+  cursor: not-allowed;
+}
+
+.memo-cyclic-link-warning {
+  text-align: center;
+}

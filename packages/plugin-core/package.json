@@ -201,6 +201,10 @@
                 "mac": "cmd+shift+c",
                 "when": "editorFocus"
             }
+        ],
+        "markdown.previewStyles": [
+            "./media/fontello/css/fontello.css",
+            "./media/markdown.css"
         ]
     },
     "icon": "assets/images/logo.png",

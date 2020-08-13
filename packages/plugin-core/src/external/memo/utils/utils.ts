@@ -5,6 +5,7 @@ import { WorkspaceCache, RefT } from "../types";
 import vscode, { workspace, Uri } from "vscode";
 import fs from "fs-extra";
 import path from "path";
+import { stringify } from "querystring";
 export { sortPaths };
 
 const workspaceCache: WorkspaceCache = {
@@ -215,6 +216,19 @@ export const extractDanglingRefs = (content: string) => {
   });
 
   return Array.from(new Set(refs));
+};
+
+export const extractEmbedRefs = (content: string) => {
+  const matches = matchAll(
+    new RegExp(`!\\[\\[(([^\\[\\]]+?)(\\|.*)?)\\]\\]`, "gi"),
+    content
+  );
+
+  return matches.map((match) => {
+    const [, $1] = match;
+
+    return $1;
+  });
 };
 
 export const getWorkspaceCache = (): WorkspaceCache => workspaceCache;

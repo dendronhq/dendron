@@ -48,10 +48,9 @@ const extendMarkdownIt = (md: MarkdownIt) => {
         const cyclicLinkDetected = false;
         const refs = extractEmbedRefs(block).map((ref) => ref.toLowerCase());
         const html = `<div class="memo-markdown-embed">
-        <div class="memo-markdown-embed-title">${name}</div>
         <div class="memo-markdown-embed-link">
           <a title="${fsPath}" href="${fsPath}">
-            <i class="icon-link"></i>
+            <i class="icon-link"></i> ${name}
           </a>
         </div>
         <div class="memo-markdown-embed-content">

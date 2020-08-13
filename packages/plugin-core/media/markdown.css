@@ -1,8 +1,9 @@
 .memo-markdown-embed {
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 5px 20px 15px 20px;
-  margin: 0 20px;
+  /* border: 1px solid #ddd; */
+  /* border-radius: 6px; */
+  /* padding: 5px 20px 15px 20px;
+  margin: 0 20px; */
+  border-bottom: dashed thin;
   position: relative;
 }
 
@@ -22,10 +23,12 @@
 }
 
 .memo-markdown-embed-link {
-  position: absolute;
+  border-bottom: dashed thin;
+  /* position: absolute;
   top: 6px;
-  right: 12px;
-  cursor: pointer;
+  right: 12px; */
+  /* /cursor: pointer; */
+  /* //float: right; */
 }
 
 .memo-markdown-embed-link i {
@@ -42,9 +45,9 @@
 }
 
 .memo-markdown-embed-content {
-  max-height: 500px;
-  overflow-y: auto;
-  padding-right: 10px;
+  /* max-height: 500px; */
+  /* overflow-y: auto;
+  padding-right: 10px; */
 }
 
 .memo-invalid-link {

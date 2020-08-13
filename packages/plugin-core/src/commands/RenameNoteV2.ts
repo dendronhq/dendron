@@ -17,11 +17,17 @@ import { HistoryService } from "../services/HistoryService";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
+import { FileItem } from "../external/fileutils/FileItem";
 
 type CommandInput = {
   dest: string;
 };
-type CommandOpts = { files: { oldUri: Uri; newUri: Uri }[]; silent: boolean };
+type CommandOpts = {
+  files: { oldUri: Uri; newUri: Uri }[];
+  silent: boolean;
+  closeCurrentFile: boolean;
+  openNewFile: boolean;
+};
 type CommandOutput = {
   refsUpdated: number;
   pathsUpdated: string[];
@@ -76,7 +82,12 @@ export class RenameNoteV2Command extends BaseCommand<
     const newUri = Uri.file(
       path.join(ws.rootWorkspace.uri.fsPath, inputs.dest + ".md")
     );
-    return { files: [{ oldUri, newUri }], silent: false };
+    return {
+      files: [{ oldUri, newUri }],
+      silent: false,
+      closeCurrentFile: true,
+      openNewFile: true,
+    };
   }
 
   async sanityCheck() {
@@ -135,6 +146,7 @@ export class RenameNoteV2Command extends BaseCommand<
     this.silent = opts.silent;
 
     const { files } = opts;
+    const oneFile = files.length === 1;
     const oldFsPaths = await Promise.all(
       files.map(async ({ oldUri }) => {
         return oldUri.fsPath;
@@ -268,6 +280,13 @@ export class RenameNoteV2Command extends BaseCommand<
         // finished renaming
       })
     );
+    if (oneFile) {
+      if (opts.closeCurrentFile) {
+        await VSCodeUtils.closeCurrentFileEditor();
+      }
+      opts.openNewFile &&
+        (await VSCodeUtils.openFileInEditor(new FileItem(files[0].newUri)));
+    }
     return {
       refsUpdated,
       pathsUpdated: _.uniq(pathsUpdated),

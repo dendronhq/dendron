@@ -5,6 +5,7 @@ import os from "os";
 import path from "path";
 import * as vscode from "vscode";
 import { GLOBAL_STATE } from "./constants";
+import { FileItem } from "./external/fileutils/FileItem";
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
@@ -52,6 +53,10 @@ export class FileUtils {
 let _MOCK_CONTEXT: undefined | vscode.ExtensionContext = undefined;
 
 export class VSCodeUtils {
+  static closeCurrentFileEditor() {
+    return vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+  }
+
   static getActiveTextEditor() {
     return vscode.window.activeTextEditor;
   }
@@ -122,6 +127,29 @@ export class VSCodeUtils {
       uri,
       name: path.basename(root),
     };
+  }
+
+  static async openFileInEditor(
+    fileItem: FileItem
+  ): Promise<vscode.TextEditor | undefined> {
+    if (fileItem.isDir) {
+      return;
+    }
+
+    const textDocument = await vscode.workspace.openTextDocument(fileItem.path);
+    if (!textDocument) {
+      throw new Error("Could not open file!");
+    }
+
+    const editor = await vscode.window.showTextDocument(
+      textDocument,
+      vscode.ViewColumn.Active
+    );
+    if (!editor) {
+      throw new Error("Could not show document!");
+    }
+
+    return editor;
   }
 
   static async openWS(wsFile: string) {

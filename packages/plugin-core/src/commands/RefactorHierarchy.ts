@@ -159,7 +159,12 @@ export class RefactorHierarchyCommand extends BasicCommand<
       async (resp, op) => {
         const acc = await resp;
         this.L.info({ orig: op.oldUri.fsPath, replace: op.newUri.fsPath });
-        const resp2 = await renameCmd.execute({ files: [op], silent: true });
+        const resp2 = await renameCmd.execute({
+          files: [op],
+          silent: true,
+          closeCurrentFile: true,
+          openNewFile: true,
+        });
         acc.refsUpdated += resp2.refsUpdated;
         acc.pathsUpdated = acc.pathsUpdated.concat(resp2.pathsUpdated);
         return acc;

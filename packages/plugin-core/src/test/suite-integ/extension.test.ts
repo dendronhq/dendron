@@ -675,6 +675,11 @@ suite("commands", function () {
         );
         assert.ok(text.indexOf("[[FAQ |dendron.bond]]") > 0);
         assert.ok(textOfNew.indexOf("shaken") > 0);
+        const activeUri = vscode.window.activeTextEditor?.document.uri;
+        assert.equal(
+          activeUri?.fsPath,
+          path.join(root.name, "vault", "dendron.bond.md")
+        );
         done();
       });
       setupDendronWorkspace(root.name, ctx);
@@ -763,8 +768,14 @@ suite("commands", function () {
 
       onWSInit(async () => {
         const resp = await new RefactorHierarchyCommand().run();
-        let rootName = root.name;
-        console.log(rootName);
+
+        // assert.equal(
+        //   VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath,
+        //   vscode.Uri.joinPath(
+        //     DendronWorkspace.instance().rootWorkspace.uri,
+        //     "bond.md"
+        //   ).fsPath
+        // );
         assert.equal(resp.refsUpdated, 4);
         assert.deepEqual(
           resp.pathsUpdated.map((p: string) => path.basename(p)),
@@ -815,7 +826,7 @@ suite("utils", function () {
     });
 
     // TODO: hadnle this case
-    it.skip("should favour only first divider", () => {
+    it.skip("should favour first divider", () => {
       assert.deepEqual(parseRef("Label|||link"), {
         ref: "link",
         label: "||Label",

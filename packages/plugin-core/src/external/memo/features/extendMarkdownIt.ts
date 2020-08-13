@@ -5,7 +5,6 @@ import {
   getFileUrlForMarkdownPreview,
   getWorkspaceCache,
   parseRef,
-  extractEmbedRefs,
 } from "../utils/utils";
 import fs from "fs-extra";
 import path from "path";
@@ -26,7 +25,7 @@ const extendMarkdownIt = (md: MarkdownIt) => {
       regex: /\(\(([^)]+)\)\)/,
       replace: (rawRef: string) => {
         // const { ref, label } = parseRef(rawRef);
-        const { direction, link } = parseDendronRef(rawRef);
+        const { link } = parseDendronRef(rawRef);
         let ref: string;
         let label: string;
         // open file
@@ -46,7 +45,7 @@ const extendMarkdownIt = (md: MarkdownIt) => {
         const block = extractBlock(content, link);
 
         const cyclicLinkDetected = false;
-        const refs = extractEmbedRefs(block).map((ref) => ref.toLowerCase());
+        // const refs = extractEmbedRefs(block).map((ref) => ref.toLowerCase());
         const html = `<div class="memo-markdown-embed">
         <div class="memo-markdown-embed-link">
           <a title="${fsPath}" href="${fsPath}">

@@ -3,7 +3,9 @@ import {
   parseFileLink,
   DendronRefLink,
   matchEmbedMarker,
+  extractBlock,
 } from "../utils";
+import _ from "lodash";
 
 function createFileLink(opts?: Partial<DendronRefLink>): DendronRefLink {
   return {
@@ -20,30 +22,6 @@ describe("matchEmbedMarker", () => {
       "[[class.mba.chapters.2]]"
     );
   });
-});
-
-describe("parseIdLink", () => {
-  // it("just id", () => {
-  //   expect(parseFileLink("aa0b5d00-9b71-403e-bca3-ffe78fa6844d")).toEqual({
-  //     name: "foo",
-  //     type: "file",
-  //   });
-  // });
-  // it("one anchor", () => {
-  //   expect(parseFileLink("[[foo]]#head1")).toEqual({
-  //     name: "foo",
-  //     anchorStart: "head1",
-  //     type: "file",
-  //   });
-  // });
-  // it("all parts", () => {
-  //   expect(parseFileLink("[[foo]]#head1:#head2")).toEqual({
-  //     anchorEnd: "head2",
-  //     anchorStart: "head1",
-  //     name: "foo",
-  //     type: "file",
-  //   });
-  // });
 });
 
 describe("parseFileLink", () => {
@@ -93,14 +71,74 @@ describe("parseRef", () => {
       link: createFileLink({ anchorStart: "head1" }),
     });
   });
-  //   it("testFileRef", () => {
-  //     const ref = "ref: [[foo.md]]";
-  //     expect(parseDendronRef(ref)).toEqual({
-  //       linkType: "file",
-  //       linkDirection: "to",
-  //       start: {
-  //         name: "foo",
-  //       },
-  //     });
-  //   });
+});
+
+const FILE_TEXT = `
+# Head 1
+
+Head 1 Text
+
+## Head 2.1
+
+Head 2.1 Text
+
+### Head 2.1.1
+
+Head 2.1.1 Text
+
+## Head 2.2
+
+Head 2.2 Text`;
+
+describe("extractBlock", () => {
+  it("no anchor", () => {
+    expect(extractBlock(FILE_TEXT, createFileLink())).toEqual(
+      _.trim(FILE_TEXT)
+    );
+  });
+
+  it("anchor start", () => {
+    expect(
+      extractBlock(
+        FILE_TEXT,
+        createFileLink({
+          anchorStart: "Head 2.1",
+        })
+      )
+    ).toEqual(
+      _.trim(`
+## Head 2.1
+
+Head 2.1 Text
+
+### Head 2.1.1
+
+Head 2.1.1 Text
+
+## Head 2.2
+
+Head 2.2 Text`)
+    );
+  });
+
+  it("anchor stard and end", () => {
+    expect(
+      extractBlock(
+        FILE_TEXT,
+        createFileLink({
+          anchorStart: "Head 2.1",
+          anchorEnd: "Head 2.2",
+        })
+      )
+    ).toEqual(
+      _.trim(`
+## Head 2.1
+
+Head 2.1 Text
+
+### Head 2.1.1
+
+Head 2.1.1 Text`)
+    );
+  });
 });

@@ -45,6 +45,8 @@
     "gray-matter": "^4.0.2",
     "klaw": "^3.0.0",
     "lodash": "^4.17.15",
+    "markdown-it": "^11.0.0",
+    "markdown-it-ast": "^0.0.1",
     "through2": "^4.0.2",
     "vscode-uri": "^2.1.2",
     "yamljs": "^0.3.0"
@@ -54,6 +56,7 @@
     "@types/jest": "^23.3.3",
     "@types/klaw": "^3.0.1",
     "@types/lodash": "^4.14.156",
+    "@types/markdown-it": "^10.0.2",
     "@types/node": "13.11.0",
     "@types/pino": "^6.3.0",
     "@types/through2": "^2.0.36",

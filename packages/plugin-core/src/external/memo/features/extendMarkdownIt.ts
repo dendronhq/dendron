@@ -9,8 +9,9 @@ import {
 } from "../utils/utils";
 import fs from "fs-extra";
 import path from "path";
-import { parseDendronRef } from "@dendronhq/engine-server";
+import { parseDendronRef, extractBlock } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { readMD } from "@dendronhq/common-server";
 
 const getInvalidRefAnchor = (text: string) =>
   `<a class="memo-invalid-link" title="Link does not exist yet. Please use cmd / ctrl + click in text editor to create a new one." href="javascript:void(0)">${text}</a>`;
@@ -29,8 +30,7 @@ const extendMarkdownIt = (md: MarkdownIt) => {
         let ref: string;
         let label: string;
         // open file
-        console.log("markdown parser");
-        if (link?.name && _.isUndefined(link?.anchorStart)) {
+        if (link?.name && link.type === "file") {
           ref = link.name;
           label = ref;
         } else {
@@ -42,9 +42,11 @@ const extendMarkdownIt = (md: MarkdownIt) => {
           return getInvalidRefAnchor(label || ref);
         }
         const name = path.parse(fsPath).name;
-        const content = fs.readFileSync(fsPath).toString();
+        const { content } = readMD(fsPath);
+        const block = extractBlock(content, link);
+
         const cyclicLinkDetected = false;
-        const refs = extractEmbedRefs(content).map((ref) => ref.toLowerCase());
+        const refs = extractEmbedRefs(block).map((ref) => ref.toLowerCase());
         const html = `<div class="memo-markdown-embed">
         <div class="memo-markdown-embed-title">${name}</div>
         <div class="memo-markdown-embed-link">
@@ -55,7 +57,7 @@ const extendMarkdownIt = (md: MarkdownIt) => {
         <div class="memo-markdown-embed-content">
           ${
             !cyclicLinkDetected
-              ? (mdExtended as any).render(content, undefined, true)
+              ? (mdExtended as any).render(block, undefined, true)
               : '<div class="memo-cyclic-link-warning">Cyclic linking detected 💥.</div>'
           }
         </div>

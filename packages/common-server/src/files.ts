@@ -63,6 +63,10 @@ export function cleanFileName(
   return name;
 }
 
+export function readMD(fpath: string): { data: any; content: string } {
+  return matter.read(fpath, {});
+}
+
 export function readYAML(fpath: string): any {
   return YAML.load(fpath);
 }

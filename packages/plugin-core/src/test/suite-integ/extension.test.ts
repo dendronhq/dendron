@@ -35,7 +35,13 @@ import {
 } from "../../components/lookup/LookupProvider";
 import { CONFIG, ConfigKey, WORKSPACE_STATE } from "../../constants";
 import { _activate } from "../../extension";
-import { replaceRefs, parseRef } from "../../external/memo/utils/utils";
+import {
+  replaceRefs,
+  parseRef,
+  findDanglingRefsByFsPath,
+  getWorkspaceCache,
+  cacheRefs,
+} from "../../external/memo/utils/utils";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
@@ -810,7 +816,127 @@ suite("commands", function () {
 const it = test;
 const expect = assert.deepEqual;
 
-suite("utils", function () {
+export const rndName = (): string => {
+  const name = Math.random()
+    .toString(36)
+    .replace(/[^a-z]+/g, "")
+    .substr(0, 5);
+
+  return name.length !== 5 ? rndName() : name;
+};
+
+export const createFile = async (
+  filename: string,
+  content: string = "",
+  _syncCache: boolean = true
+): Promise<vscode.Uri | undefined> => {
+  const workspaceFolder = DendronWorkspace.instance().rootWorkspace.uri.fsPath;
+  if (!workspaceFolder) {
+    return;
+  }
+  const filepath = path.join(workspaceFolder, ...filename.split("/"));
+  // const dirname = path.dirname(filepath);
+  // utils.ensureDirectoryExists(filepath);
+
+  // if (!fs.existsSync(dirname)) {
+  //   throw new Error(`Directory ${dirname} does not exist`);
+  // }
+
+  fs.writeFileSync(filepath, content);
+
+  // if (syncCache) {
+  //   await cacheWorkspace();
+  // }
+
+  return vscode.Uri.file(path.join(workspaceFolder, ...filename.split("/")));
+};
+
+suite.skip("utils", function () {
+  describe("findDanglingRefsByFsPath()", function () {
+    this.timeout(TIMEOUT);
+
+    before(function () {
+      ctx = VSCodeUtils.getOrCreateMockContext();
+      DendronWorkspace.getOrCreate(ctx);
+    });
+
+    beforeEach(async function () {
+      root = FileTestUtils.tmpDir();
+      fs.removeSync(root.name);
+      ctx = VSCodeUtils.getOrCreateMockContext();
+      return;
+    });
+
+    afterEach(function () {
+      HistoryService.instance().clearSubscriptions();
+    });
+
+    it("should find dangling refs by fs path", async () => {
+      setupDendronWorkspace(root.name, ctx, {
+        useFixtures: true,
+      });
+      onWSInit(async () => {});
+      const name0 = rndName();
+      const name1 = rndName();
+      await createFile(
+        `${name0}.md`,
+        `
+      [[dangling-ref]]
+      [[dangling-ref]]
+      [[dangling-ref2|Test Label]]
+      [[folder1/long-dangling-ref]]
+      ![[dangling-ref3]]
+      \`[[dangling-ref-within-code-span]]\`
+      \`\`\`
+      Preceding text
+      [[dangling-ref-within-fenced-code-block]]
+      Following text
+      \`\`\`
+      [[${name1}]]
+      `
+      );
+      await createFile(`${name1}.md`);
+      await cacheRefs();
+      const refsByFsPath = await findDanglingRefsByFsPath(
+        getWorkspaceCache().markdownUris
+      );
+
+      assert.equal(Object.keys(refsByFsPath).length, 1);
+      assert.equal(Object.values(refsByFsPath)[0], [
+        "dangling-ref",
+        "dangling-ref2",
+        "folder1/long-dangling-ref",
+        "dangling-ref3",
+      ]);
+    });
+
+    // it('should find dangling refs from the just edited document', async () => {
+    //   const name0 = rndName();
+
+    //   await createFile(`${name0}.md`, '[[dangling-ref]]');
+
+    //   const doc = await openTextDocument(`${name0}.md`);
+
+    //   const editor = await window.showTextDocument(doc);
+
+    //   const refsByFsPath = await findDanglingRefsByFsPath(getWorkspaceCache().markdownUris);
+
+    //   expect(Object.keys(refsByFsPath)).toHaveLength(1);
+    //   expect(Object.values(refsByFsPath)[0]).toEqual(['dangling-ref']);
+
+    //   await editor.edit((edit) => edit.insert(new Position(1, 0), '[[dangling-ref2]]'));
+
+    //   const refsByFsPath2 = await findDanglingRefsByFsPath(getWorkspaceCache().markdownUris);
+
+    //   expect(Object.keys(refsByFsPath2)).toHaveLength(1);
+    //   expect(Object.values(refsByFsPath2)[0]).toEqual(['dangling-ref', 'dangling-ref2']);
+
+    //   await editor.edit((edit) => edit.delete(new Range(new Position(0, 0), new Position(2, 0))));
+
+    //   expect(await findDanglingRefsByFsPath(getWorkspaceCache().markdownUris)).toEqual({});
+    // });
+  });
+
   describe("parseRef()", () => {
     // it('should fail on providing wrong parameter type', () => {
     //   expect(() => parseRef((undefined as unknown) as string)).toThrow();

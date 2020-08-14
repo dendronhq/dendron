@@ -136,16 +136,6 @@ function parseLink(ref: string): DendronRefLink | undefined {
   } else {
     throw Error("not implemented");
   }
-  // let wikiLinkRegex = /(?<name>[^\]:]+)/;
-  // console.log(ref);
-  // //const reLink = new RegExp(/(\[\[(?<name>[^\]]+)\]\])?#?((?<id>[\w\d-]+)?)/);
-  // const reLink = new RegExp(/(\[\[(?<name>[^\]]+)\]\])?#?((?<id>[\w\d-]+)?)/);
-  // console.log(reLink);
-  // const groups = reLink.exec(ref)?.groups;
-  // console.log(groups);
-  // if (!groups) { return; }
-  // const link = createDendronRefLink({...groups});
-  // return link;
 }
 
 // function testLineRef() {
@@ -179,8 +169,6 @@ function parseLink(ref: string): DendronRefLink | undefined {
 //     // console.log(testFileWithLineRef());
 //     // console.log(testBlockRef());
 // }
-
-// runTests();
 
 export const matchEmbedMarker = (txt: string) => {
   return txt.match(/<!--\(\(([^)]+)\)\)-->/);

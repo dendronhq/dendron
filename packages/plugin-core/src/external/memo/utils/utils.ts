@@ -2,10 +2,9 @@ import { DendronWorkspace } from "../../../workspace";
 import _ from "lodash";
 import { sort as sortPaths } from "cross-path-sort";
 import { WorkspaceCache, RefT } from "../types";
-import vscode, { workspace, Uri } from "vscode";
+import vscode, { workspace, Uri, TextDocument } from "vscode";
 import fs from "fs-extra";
 import path from "path";
-import { stringify } from "querystring";
 export { sortPaths };
 
 const workspaceCache: WorkspaceCache = {
@@ -18,25 +17,12 @@ const workspaceCache: WorkspaceCache = {
 };
 
 const markdownExtRegex = /\.md$/i;
+export const REGEX_FENCED_CODE_BLOCK = /^( {0,3}|\t)```[^`\r\n]*$[\w\W]+?^( {0,3}|\t)``` *$/gm;
 
 export const containsMarkdownExt = (pathParam: string): boolean =>
   !!markdownExtRegex.exec(path.parse(pathParam).ext);
 
 export const refPattern = "(\\[\\[)([^\\[\\]]+?)(\\]\\])";
-
-// export const isInFencedCodeBlock = (
-//   documentOrContent: TextDocument | string,
-//   lineNum: number,
-// ): boolean => {
-//   const content =
-//     typeof documentOrContent === 'string' ? documentOrContent : documentOrContent.getText();
-//   const textBefore = content
-//     .slice(0, positionToOffset(content, { line: lineNum, column: 0 }))
-//     .replace(REGEX_FENCED_CODE_BLOCK, '')
-//     .replace(/<!--[\W\w]+?-->/g, '');
-//   // So far `textBefore` should contain no valid fenced code block or comment
-//   return /^( {0,3}|\t)```[^`\r\n]*$[\w\W]*$/gm.test(textBefore);
-// };
 
 // === Utils
 
@@ -76,8 +62,60 @@ export const findUriByRef = (
   });
 };
 
+export const lineBreakOffsetsByLineIndex = (value: string): number[] => {
+  const result = [];
+  let index = value.indexOf("\n");
+
+  while (index !== -1) {
+    result.push(index + 1);
+    index = value.indexOf("\n", index + 1);
+  }
+
+  result.push(value.length + 1);
+
+  return result;
+};
+
+export const positionToOffset = (
+  content: string,
+  position: { line: number; column: number }
+) => {
+  if (position.line < 0) {
+    throw new Error("Illegal argument: line must be non-negative");
+  }
+
+  if (position.column < 0) {
+    throw new Error("Illegal argument: column must be non-negative");
+  }
+
+  const lineBreakOffsetsByIndex = lineBreakOffsetsByLineIndex(content);
+  if (lineBreakOffsetsByIndex[position.line] !== undefined) {
+    return (
+      (lineBreakOffsetsByIndex[position.line - 1] || 0) + position.column || 0
+    );
+  }
+
+  return 0;
+};
+
 export const getFileUrlForMarkdownPreview = (filePath: string): string =>
   vscode.Uri.file(filePath).toString().replace("file://", "");
+
+export const isInFencedCodeBlock = (
+  documentOrContent: TextDocument | string,
+  lineNum: number
+): boolean => {
+  const content =
+    typeof documentOrContent === "string"
+      ? documentOrContent
+      : documentOrContent.getText();
+  const textBefore = content
+    .slice(0, positionToOffset(content, { line: lineNum, column: 0 }))
+    .replace(REGEX_FENCED_CODE_BLOCK, "")
+    .replace(/<!--[\W\w]+?-->/g, "");
+  // So far `textBefore` should contain no valid fenced code block or comment
+  return /^( {0,3}|\t)```[^`\r\n]*$[\w\W]*$/gm.test(textBefore);
+};
 
 export const trimLeadingSlash = (value: string) =>
   value.replace(/^\/+|^\\+/g, "");
@@ -218,19 +256,6 @@ export const extractDanglingRefs = (content: string) => {
   return Array.from(new Set(refs));
 };
 
-export const extractEmbedRefs = (content: string) => {
-  const matches = matchAll(
-    new RegExp(`!\\[\\[(([^\\[\\]]+?)(\\|.*)?)\\]\\]`, "gi"),
-    content
-  );
-
-  return matches.map((match) => {
-    const [, $1] = match;
-
-    return $1;
-  });
-};
-
 export const getWorkspaceCache = (): WorkspaceCache => workspaceCache;
 
 export const matchAll = (
@@ -272,6 +297,7 @@ export const replaceRefs = ({
         // @ts-ignore
         const nextContent = content.replace(
           new RegExp(pattern, "gi"),
+          // @ts-ignore
           ($0, $1, offset) => {
             // const pos = document.positionAt(offset);
 

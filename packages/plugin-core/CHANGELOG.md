@@ -8,13 +8,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Features
 
 - **commands:** add copy ref command ([5bbbbf6](https://github.com/dendronhq/dendron/commit/5bbbbf69c88c851aafca16003689e03745527390))
-- **markdown:** embed anchors with markdown ([57d5c6a](https://github.com/dendronhq/dendron/commit/57d5c6a08f5b8c6c25edb49ea3136e46f11aa664))
+- **markdown:** embed note refs into other notes ([57d5c6a](https://github.com/dendronhq/dendron/commit/57d5c6a08f5b8c6c25edb49ea3136e46f11aa664))([docs](http://localhost:4000/notes/f1af56bb-db27-47ae-8406-61a98de6c78c.html#note-reference))
+  - NOTE: this only works with the regular markdown link, and not `Dendron Markdown Preview Enhanced`.
 
-> root@ release /Users/kevinlin/projects/dendronv2/dendron
-> standard-version "--dry-run"
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/ref-note.gif)
 
-✔ bumping version in lerna.json from 0.6.3 to 0.6.4
-✔ outputting changes to CHANGELOG.md
+### Enhancements
+
+- **commands:** rename note will open new note and close moved note ([98e5b36](https://github.com/dendronhq/dendron/commit/98e5b36f6c02b44e24aa4969b9913156f2947a24))
+- **markdown:** update markdown css for note refs ([7976392](https://github.com/dendronhq/dendron/commit/79763924b8454687fe2c4fa668de7ff8f0eb2353))
 
 ---
 

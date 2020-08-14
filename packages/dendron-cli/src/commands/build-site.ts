@@ -2,7 +2,7 @@ import {
   DendronSiteConfig,
   DEngine,
   DNodeUtils,
-  Note
+  Note,
 } from "@dendronhq/common-all";
 import { resolvePath } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -102,10 +102,10 @@ function note2JekyllMdFile(
 ) {
   const meta = DNodeUtils.getMeta(note, {
     pullCustomUp: true,
-    ignoreNullParent: true
+    ignoreNullParent: true,
   });
   const jekyllProps: DendronJekyllProps = {
-    hpath: note.path
+    hpath: note.path,
   };
   let linkPrefix = "";
   if (opts.noteRoot === meta.fname) {
@@ -118,7 +118,10 @@ function note2JekyllMdFile(
   }
   // delete parent from root
   note.body = stripSiteOnlyTags(note);
-  note.body = wikiLinkToMd(note, opts.engine, { linkPrefix });
+  // TODO: HACK
+  if (note.id !== "f1af56bb-db27-47ae-8406-61a98de6c78c") {
+    note.body = wikiLinkToMd(note, opts.engine, { linkPrefix });
+  }
   const filePath = path.join(opts.notesDir, meta.id + ".md");
   return fs.writeFile(
     filePath,
@@ -163,10 +166,10 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
         note2JekyllMdFile(node, {
           notesDir: siteNotesDirPath,
           engine,
-          ...config
+          ...config,
         })
       );
-      node.children.forEach(n => nodes.push(n as Note));
+      node.children.forEach((n) => nodes.push(n as Note));
     }
 
     // TODO: need to rewrite links before this is ready
@@ -181,7 +184,7 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
       fs.copy(
         path.join(vaultAssetsDir, "images"),
         path.join(siteAssetsDir, "images"),
-        err => {
+        (err) => {
           if (err) {
             err.message += JSON.stringify({ vaultAssetsDir, siteAssetsDir });
             reject(err);

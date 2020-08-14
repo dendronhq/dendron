@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.5](https://github.com/dendronhq/dendron/compare/v0.6.4...v0.6.5) (2020-08-14)
+
+### Features
+
+- **markdown:** embed anchors with markdown ([57d5c6a](https://github.com/dendronhq/dendron/commit/57d5c6a08f5b8c6c25edb49ea3136e46f11aa664))
+
 ## [0.6.4](https://github.com/dendronhq/dendron/compare/v0.6.3...v0.6.4) (2020-08-13)
 
 ### Bug Fixes

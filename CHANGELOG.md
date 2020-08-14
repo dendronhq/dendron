@@ -8,7 +8,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Features
 
 - **commands:** add copy ref command ([5bbbbf6](https://github.com/dendronhq/dendron/commit/5bbbbf69c88c851aafca16003689e03745527390))
-- **markdown:** embed note refs into other notes ([57d5c6a](https://github.com/dendronhq/dendron/commit/57d5c6a08f5b8c6c25edb49ea3136e46f11aa664))([docs](http://localhost:4000/notes/f1af56bb-db27-47ae-8406-61a98de6c78c.html#note-reference))
+- **markdown:** embed note refs into other notes ([57d5c6a](https://github.com/dendronhq/dendron/commit/57d5c6a08f5b8c6c25edb49ea3136e46f11aa664))
   - NOTE: this only works with the regular markdown link, and not `Dendron Markdown Preview Enhanced`.
 
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/ref-note.gif)

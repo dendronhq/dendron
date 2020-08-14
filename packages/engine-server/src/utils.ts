@@ -4,6 +4,7 @@ import _markdownIt from "markdown-it";
 // @ts-ignore
 import markdownItAST from "markdown-it-ast";
 import Token from "markdown-it/lib/token";
+import { readMD } from "@dendronhq/common-server";
 
 const markdownIt = _markdownIt();
 
@@ -35,14 +36,22 @@ function genAST(txt: string): ASTEnt[] {
   return markdownItAST.makeAST(tokens);
 }
 
-export function extractBlock(txt: string, link: DendronRefLink) {
+export function extractBlock(
+  txt: string,
+  link: DendronRefLink
+  //opts?: { linesOnly?: boolean }
+): {
+  block: string;
+  lines?: { start: number | undefined; end: number | undefined };
+} {
+  // const copts = _.defaults(opts, { linesOnly: false });
   const { anchorStart, anchorEnd } = link;
   if (link.type === "id") {
     throw Error(`id link not supported`);
   } else {
     txt = _.trim(txt);
     if (!anchorStart) {
-      return txt;
+      return { block: txt };
     }
     const ast = genAST(txt);
     const clean = {
@@ -65,14 +74,14 @@ export function extractBlock(txt: string, link: DendronRefLink) {
     });
     const txtAsLines = _.trim(txt).split("\n");
     if (_.isNull(out.anchorStart)) {
-      return "invalid link";
+      return { block: "invalid link" };
     }
     const start = out.anchorStart[0] - 1;
     const end = _.isNull(out["anchorEnd"])
       ? txtAsLines.length
       : out["anchorEnd"][0];
     const block = _.trim(txtAsLines.slice(start, end).join("\n"));
-    return block;
+    return { block, lines: { start, end } };
   }
 }
 
@@ -170,6 +179,35 @@ function parseLink(ref: string): DendronRefLink | undefined {
 //     // console.log(testBlockRef());
 // }
 
-export const matchEmbedMarker = (txt: string) => {
-  return txt.match(/<!--\(\(([^)]+)\)\)-->/);
+export const matchRefMarker = (txt: string) => {
+  return txt.match(/\(\((?<ref>[^)]+)\)\)/);
+};
+
+export const replaceRefWithMPEImport = (
+  line: string,
+  opts: { root: string }
+): string => {
+  const match = matchRefMarker(line);
+  let prefix = `@import`;
+  if (!match || !match.groups) {
+    return line;
+  }
+  const ref = match.groups["ref"];
+  if (!ref) {
+    return line;
+  }
+  const { link } = parseDendronRef(ref);
+  // unsupported
+  if (!link || !link.name) {
+    return line;
+  }
+  const fsPath = path.join(opts.root, link.name + ".md");
+  prefix += ` "${link.name + ".md"}"`;
+  if (!link.anchorStart) {
+    return prefix;
+  }
+  //TODO: will be more sophisticated when multi-vault
+  const { content } = readMD(fsPath);
+  const { lines } = extractBlock(content, link);
+  return line;
 };

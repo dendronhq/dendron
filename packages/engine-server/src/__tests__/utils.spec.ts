@@ -2,10 +2,12 @@ import {
   parseDendronRef,
   parseFileLink,
   DendronRefLink,
-  matchEmbedMarker,
+  matchRefMarker,
   extractBlock,
+  replaceRefWithMPEImport,
 } from "../utils";
 import _ from "lodash";
+import { setupTmpDendronDir } from "../testUtils";
 
 function createFileLink(opts?: Partial<DendronRefLink>): DendronRefLink {
   return {
@@ -18,7 +20,7 @@ function createFileLink(opts?: Partial<DendronRefLink>): DendronRefLink {
 describe("matchEmbedMarker", () => {
   test("basic", () => {
     // @ts-ignore
-    expect(matchEmbedMarker("<!--(([[class.mba.chapters.2]]))-->")[1]).toEqual(
+    expect(matchRefMarker("<!--(([[class.mba.chapters.2]]))-->")[1]).toEqual(
       "[[class.mba.chapters.2]]"
     );
   });
@@ -92,7 +94,7 @@ Head 2.2 Text`;
 
 describe("extractBlock", () => {
   it("no anchor", () => {
-    expect(extractBlock(FILE_TEXT, createFileLink())).toEqual(
+    expect(extractBlock(FILE_TEXT, createFileLink()).block).toEqual(
       _.trim(FILE_TEXT)
     );
   });
@@ -104,7 +106,7 @@ describe("extractBlock", () => {
         createFileLink({
           anchorStart: "Head 2.1",
         })
-      )
+      ).block
     ).toEqual(
       _.trim(`
 ## Head 2.1
@@ -129,7 +131,7 @@ Head 2.2 Text`)
           anchorStart: "Head 2.1",
           anchorEnd: "Head 2.2",
         })
-      )
+      ).block
     ).toEqual(
       _.trim(`
 ## Head 2.1
@@ -140,5 +142,20 @@ Head 2.1 Text
 
 Head 2.1.1 Text`)
     );
+  });
+});
+
+describe("replaceRefWithMPEImport", () => {
+  let root: string;
+  beforeEach(async () => {
+    root = await setupTmpDendronDir({ copyFixtures: true });
+  });
+
+  it("basic", () => {
+    expect(
+      replaceRefWithMPEImport("((ref:[[foo]]))", {
+        root,
+      })
+    ).toEqual('@import "foo.md"');
   });
 });

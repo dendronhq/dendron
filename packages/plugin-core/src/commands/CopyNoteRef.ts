@@ -9,7 +9,7 @@ import { BasicCommand } from "./base";
 type CommandOpts = {};
 type CommandOutput = string;
 
-export class CopyNoteLinkCommand extends BasicCommand<
+export class CopyNoteRefCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
@@ -31,8 +31,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
     if (!note) {
       throw Error(`${fname} not found in engine`);
     }
-    const { title } = note;
-    const link = `[[${title}|${fname}]]`;
+    const link = `((ref:[[${fname}]]))`;
     try {
       clipboardy.writeSync(link);
     } catch (err) {

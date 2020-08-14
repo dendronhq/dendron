@@ -34,6 +34,7 @@ import { RenameNoteV2Command } from "./commands/RenameNoteV2";
 import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
 import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";
 import { ArchiveHierarchyCommand } from "./commands/ArchiveHierarchy";
+import { CopyNoteRefCommand } from "./commands/CopyNoteRef";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -381,6 +382,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.COPY_NOTE_LINK.key,
         async () => {
           await new CopyNoteLinkCommand().run();
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.COPY_NOTE_REF.key,
+        async () => {
+          await new CopyNoteRefCommand().run();
         }
       )
     );

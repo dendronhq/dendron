@@ -99,6 +99,10 @@
                 "title": "Dendron: Copy Note Link"
             },
             {
+                "command": "dendron.copyNoteRef",
+                "title": "Dendron: Copy Note Ref"
+            },
+            {
                 "command": "dendron.deleteNode",
                 "title": "Dendron: Delete Node"
             },
@@ -199,6 +203,12 @@
                 "command": "dendron.copyNoteLink",
                 "key": "ctrl+shift+c",
                 "mac": "cmd+shift+c",
+                "when": "editorFocus"
+            },
+            {
+                "command": "dendron.copyNoteRef",
+                "key": "ctrl+shift+r",
+                "mac": "cmd+shift+r",
                 "when": "editorFocus"
             }
         ],

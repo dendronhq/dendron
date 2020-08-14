@@ -19,6 +19,10 @@ export const DENDRON_COMMANDS = {
     key: "dendron.copyNoteLink",
     title: `${CMD_PREFIX} Copy Note Link`,
   },
+  COPY_NOTE_REF: {
+    key: "dendron.copyNoteRef",
+    title: `${CMD_PREFIX} Copy Note Ref`,
+  },
   DELETE_NODE: {
     key: "dendron.deleteNode",
     title: `${CMD_PREFIX} Delete Node`,

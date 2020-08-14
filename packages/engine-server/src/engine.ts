@@ -73,8 +73,8 @@ type DendronEngineOpts = {
 type DendronEngineProps = Required<DendronEngineOpts>;
 
 export class DendronEngine implements DEngine {
-  public fuse: Fuse<Note, any>;
-  public schemaFuse: Fuse<Schema, any>;
+  public fuse: Fuse<Note>;
+  public schemaFuse: Fuse<Schema>;
 
   public notes: NoteDict;
   public schemas: SchemaDict;

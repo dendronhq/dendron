@@ -208,6 +208,7 @@ export const replaceRefWithMPEImport = (
   }
   //TODO: will be more sophisticated when multi-vault
   const { content } = readMD(fsPath);
+  // @ts-ignore
   const { lines } = extractBlock(content, link);
   return line;
 };

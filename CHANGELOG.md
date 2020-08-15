@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.8](https://github.com/dendronhq/dendron/compare/v0.6.5...v0.6.8) (2020-08-15)
+
+### Features
+
+- **commands:** add show preview command ([f62dcf8](https://github.com/dendronhq/dendron/commit/f62dcf8ad97f95a2784397606233aaf20f8df4cc))
+- do block ref ([8fdc331](https://github.com/dendronhq/dendron/commit/8fdc33198eb1ada6e0f1a8511065315cbba75530))
+- replaceRefWithMPEImport ([eb3f627](https://github.com/dendronhq/dendron/commit/eb3f627a435f62a788899adb34f1d3de256232f7))
+
 ## [0.6.5](https://github.com/dendronhq/dendron/compare/v0.6.4...v0.6.5) (2020-08-14)
 
 ### Features

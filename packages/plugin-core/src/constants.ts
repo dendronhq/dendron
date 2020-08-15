@@ -71,6 +71,10 @@ export const DENDRON_COMMANDS = {
     title: `${CMD_PREFIX} Upgrade Settings`,
   },
   SHOW_HELP: { key: "dendron.showHelp", title: `${CMD_PREFIX} Show Help` },
+  SHOW_PREVIEW: {
+    key: "dendron.showPreview",
+    title: `${CMD_PREFIX} Show Preview`,
+  },
   // --- Dev
   DOCTOR: { key: "dendron.dev.doctor", title: `${CMD_PREFIX}Dev: Doctor` },
   RESET_CONFIG: {

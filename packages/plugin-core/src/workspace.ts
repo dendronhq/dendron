@@ -35,6 +35,7 @@ import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
 import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";
 import { ArchiveHierarchyCommand } from "./commands/ArchiveHierarchy";
 import { CopyNoteRefCommand } from "./commands/CopyNoteRef";
+import { MarkdownUtils } from "./utils/md";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -588,31 +589,5 @@ export class DendronWorkspace {
     } catch (err) {
       vscode.window.showErrorMessage(JSON.stringify(err));
     }
-  }
-}
-
-class MarkdownUtils {
-  static async openPreview(opts?: { reuseWindow?: boolean }) {
-    const cleanOpts = _.defaults(opts, { reuseWindow: false });
-    let previewEnhanced = vscode.extensions.getExtension(
-      "shd101wyy.markdown-preview-enhanced"
-    );
-    let previewEnhanced2 = vscode.extensions.getExtension(
-      "dendron.dendron-markdown-preview-enhanced"
-    );
-    const cmds = {
-      builtin: {
-        open: "markdown.showPreview",
-        openSide: "markdown.showPreviewToSide",
-      },
-      enhanced: {
-        open: "markdown-preview-enhanced.openPreview",
-        openSide: "markdown-preview-enhanced.openPreviewToTheSide",
-      },
-    };
-    const mdClient =
-      cmds[previewEnhanced || previewEnhanced2 ? "enhanced" : "builtin"];
-    const openCmd = mdClient[cleanOpts.reuseWindow ? "open" : "openSide"];
-    return vscode.commands.executeCommand(openCmd);
   }
 }

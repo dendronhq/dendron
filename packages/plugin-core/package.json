@@ -159,6 +159,10 @@
                 "title": "Dendron: Show Help"
             },
             {
+                "command": "dendron.showPreview",
+                "title": "Dendron: Show Preview"
+            },
+            {
                 "command": "dendron.dev.doctor",
                 "title": "Dendron:Dev: Doctor"
             },
@@ -210,6 +214,11 @@
                 "key": "ctrl+shift+r",
                 "mac": "cmd+shift+r",
                 "when": "editorFocus"
+            },
+            {
+                "command": "dendron.showPreview",
+                "key": "ctrl+ctrl+p",
+                "mac": "cmd+ctrl+p"
             }
         ],
         "markdown.previewStyles": [

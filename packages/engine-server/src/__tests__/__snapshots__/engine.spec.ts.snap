@@ -103,6 +103,7 @@ Array [
     "body": "",
     "children": Array [
       "foo",
+      "ref",
       "Refactor",
       "Bar",
     ],
@@ -134,8 +135,37 @@ Array [
     "type": "note",
   },
   Object {
+    "body": "
+# head1
+
+Header 1 text
+
+## head2.1
+
+Header 2 text
+
+## head2.2
+
+head 2.2 text
+
+## head2.3
+
+head w.3 text
+",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "ref test",
+    "fname": "ref",
+    "parent": "root",
+    "stub": false,
+    "title": "ref",
+    "type": "note",
+  },
+  Object {
     "body": "- [[refactor.one]]
-- [[refactor.two]]",
+- [[refactor.two]]
+",
     "children": Array [
       "One",
       "Two",
@@ -288,6 +318,7 @@ Array [
     "body": "",
     "children": Array [
       "foo",
+      "ref",
       "Refactor",
       "Bar",
     ],
@@ -319,8 +350,37 @@ Array [
     "type": "note",
   },
   Object {
+    "body": "
+# head1
+
+Header 1 text
+
+## head2.1
+
+Header 2 text
+
+## head2.2
+
+head 2.2 text
+
+## head2.3
+
+head w.3 text
+",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "ref test",
+    "fname": "ref",
+    "parent": "root",
+    "stub": false,
+    "title": "ref",
+    "type": "note",
+  },
+  Object {
     "body": "- [[refactor.one]]
-- [[refactor.two]]",
+- [[refactor.two]]
+",
     "children": Array [
       "One",
       "Two",
@@ -462,6 +522,7 @@ Array [
   "foo.one.md",
   "foo.three.alpha.md",
   "foo.two.md",
+  "ref.md",
   "refactor.md",
   "refactor.one.md",
   "refactor.two.md",
@@ -476,6 +537,7 @@ Array [
     "body": "",
     "children": Array [
       "foo",
+      "ref",
       "Refactor",
       "Bar",
     ],
@@ -507,8 +569,37 @@ Array [
     "type": "note",
   },
   Object {
+    "body": "
+# head1
+
+Header 1 text
+
+## head2.1
+
+Header 2 text
+
+## head2.2
+
+head 2.2 text
+
+## head2.3
+
+head w.3 text
+",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "ref test",
+    "fname": "ref",
+    "parent": "root",
+    "stub": false,
+    "title": "ref",
+    "type": "note",
+  },
+  Object {
     "body": "- [[refactor.one]]
-- [[refactor.two]]",
+- [[refactor.two]]
+",
     "children": Array [
       "One",
       "Two",
@@ -650,6 +741,7 @@ Array [
   "foo.one.md",
   "foo.three.alpha.md",
   "foo.two.md",
+  "ref.md",
   "refactor.md",
   "refactor.one.md",
   "refactor.two.md",
@@ -665,6 +757,7 @@ Array [
 ",
     "children": Array [
       "foo",
+      "ref",
       "Refactor",
       "Bar",
     ],
@@ -696,8 +789,37 @@ Array [
     "type": "note",
   },
   Object {
+    "body": "
+# head1
+
+Header 1 text
+
+## head2.1
+
+Header 2 text
+
+## head2.2
+
+head 2.2 text
+
+## head2.3
+
+head w.3 text
+",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "ref test",
+    "fname": "ref",
+    "parent": "root",
+    "stub": false,
+    "title": "ref",
+    "type": "note",
+  },
+  Object {
     "body": "- [[refactor.one]]
-- [[refactor.two]]",
+- [[refactor.two]]
+",
     "children": Array [
       "One",
       "Two",
@@ -861,6 +983,7 @@ Array [
   "foo.schema.yml",
   "foo.three.alpha.md",
   "foo.two.md",
+  "ref.md",
   "refactor.md",
   "refactor.one.md",
   "refactor.two.md",
@@ -876,6 +999,7 @@ Array [
 ",
     "children": Array [
       "foo",
+      "ref",
       "Refactor",
       "Bar",
     ],
@@ -907,8 +1031,37 @@ Array [
     "type": "note",
   },
   Object {
+    "body": "
+# head1
+
+Header 1 text
+
+## head2.1
+
+Header 2 text
+
+## head2.2
+
+head 2.2 text
+
+## head2.3
+
+head w.3 text
+",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "ref test",
+    "fname": "ref",
+    "parent": "root",
+    "stub": false,
+    "title": "ref",
+    "type": "note",
+  },
+  Object {
     "body": "- [[refactor.one]]
-- [[refactor.two]]",
+- [[refactor.two]]
+",
     "children": Array [
       "One",
       "Two",
@@ -1089,6 +1242,7 @@ Array [
   "foo.schema.yml",
   "foo.three.alpha.md",
   "foo.two.md",
+  "ref.md",
   "refactor.md",
   "refactor.one.md",
   "refactor.two.md",
@@ -1103,6 +1257,7 @@ Array [
     "body": "",
     "children": Array [
       "foo",
+      "ref",
       "Refactor",
       "Bar",
     ],
@@ -1116,8 +1271,37 @@ Array [
     "type": "note",
   },
   Object {
+    "body": "
+# head1
+
+Header 1 text
+
+## head2.1
+
+Header 2 text
+
+## head2.2
+
+head 2.2 text
+
+## head2.3
+
+head w.3 text
+",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "ref test",
+    "fname": "ref",
+    "parent": "root",
+    "stub": false,
+    "title": "ref",
+    "type": "note",
+  },
+  Object {
     "body": "- [[refactor.one]]
-- [[refactor.two]]",
+- [[refactor.two]]
+",
     "children": Array [
       "One",
       "Two",
@@ -1273,6 +1457,7 @@ Array [
     "body": "",
     "children": Array [
       "foo",
+      "ref",
       "Refactor",
       "Bar",
     ],
@@ -1286,8 +1471,37 @@ Array [
     "type": "note",
   },
   Object {
+    "body": "
+# head1
+
+Header 1 text
+
+## head2.1
+
+Header 2 text
+
+## head2.2
+
+head 2.2 text
+
+## head2.3
+
+head w.3 text
+",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "ref test",
+    "fname": "ref",
+    "parent": "root",
+    "stub": false,
+    "title": "ref",
+    "type": "note",
+  },
+  Object {
     "body": "- [[refactor.one]]
-- [[refactor.two]]",
+- [[refactor.two]]
+",
     "children": Array [
       "One",
       "Two",
@@ -1447,6 +1661,7 @@ Array [
   "foo.schema.yml",
   "foo.three.alpha.md",
   "foo.two.md",
+  "ref.md",
   "refactor.md",
   "refactor.one.md",
   "refactor.two.md",
@@ -1465,6 +1680,7 @@ Array [
   "foo.schema.yml",
   "foo.three.alpha.md",
   "foo.two.md",
+  "ref.md",
   "refactor.md",
   "refactor.one.md",
   "refactor.two.md",
@@ -1479,6 +1695,7 @@ Array [
     "body": "",
     "children": Array [
       "foo",
+      "ref",
       "Refactor",
       "Bar",
     ],
@@ -1510,8 +1727,37 @@ Array [
     "type": "note",
   },
   Object {
+    "body": "
+# head1
+
+Header 1 text
+
+## head2.1
+
+Header 2 text
+
+## head2.2
+
+head 2.2 text
+
+## head2.3
+
+head w.3 text
+",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "ref test",
+    "fname": "ref",
+    "parent": "root",
+    "stub": false,
+    "title": "ref",
+    "type": "note",
+  },
+  Object {
     "body": "- [[refactor.one]]
-- [[refactor.two]]",
+- [[refactor.two]]
+",
     "children": Array [
       "One",
       "Two",
@@ -1655,6 +1901,74 @@ Array [
     "stub": false,
     "title": "Temp",
     "type": "note",
+  },
+]
+`;
+
+exports[`engine:exact schema basic init, mult domain with children with same ids: main 1`] = `
+Array [
+  Object {
+    "body": "",
+    "children": Array [
+      "bar",
+      "foo",
+      "test1",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root.schema",
+    "parent": "root",
+    "stub": false,
+    "title": "root",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "bar",
+      "bar",
+    ],
+    "custom": Object {},
+    "data": Object {
+      "namespace": true,
+    },
+    "desc": "",
+    "fname": "bar.schema",
+    "parent": "root",
+    "stub": false,
+    "title": "bar",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "bar",
+      "bar",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.schema",
+    "parent": "root",
+    "stub": false,
+    "title": "foo",
+    "type": "schema",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "test1",
+      "test1",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "test1.schema",
+    "parent": "root",
+    "stub": false,
+    "title": "test1",
+    "type": "schema",
   },
 ]
 `;

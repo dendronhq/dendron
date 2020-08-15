@@ -55,19 +55,21 @@ function wikiLinkToMd(
       // @ts-ignore
       const { raw, link } = matches.groups;
       const [first, rest] = link.split("|");
-      let title: string;
+      let title: string | undefined;
       let mdLink: string;
       // we have a piped title
       if (rest) {
         title = _.trim(first);
         mdLink = _.trim(rest);
       } else {
-        title = _.trim(note.title);
         mdLink = _.trim(first);
       }
       const noteFromLink = _.find(engine.notes, { fname: mdLink });
       if (!noteFromLink) {
         throw Error(`${mdLink} not found. file: ${note.fname}`);
+      }
+      if (!title) {
+        title = _.trim(noteFromLink.title);
       }
       let noteLink = noteFromLink.id;
       if (opts?.linkPrefix) {

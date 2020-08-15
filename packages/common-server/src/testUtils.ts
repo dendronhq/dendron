@@ -96,6 +96,12 @@ export class EngineTestUtils {
     );
   }
 
+  /**
+   * setupStoreDir
+   * @param fixturesDir
+   * @param dirPath
+   * @param opts : copyFixtures, true by default
+   */
   static setupStoreDir(
     fixturesDir: string,
     dirPath: string,

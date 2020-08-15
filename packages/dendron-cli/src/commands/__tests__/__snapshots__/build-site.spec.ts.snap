@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`build-site basic: bond-foo 1`] = `
+"
+- [refactor-one](refactor.one)
+"
+`;

@@ -162,7 +162,7 @@ describe("replaceRefWithMPEImport", () => {
       replaceRefWithMPEImport("((ref:[[ref]]#head2.1))", {
         root,
       })
-    ).toEqual('@import "ref.md" {line_begin=11}');
+    ).toEqual('@import "ref.md" {line_begin=10}');
   });
 
   it("anchor start", () => {
@@ -170,6 +170,6 @@ describe("replaceRefWithMPEImport", () => {
       replaceRefWithMPEImport("((ref:[[ref]]#head2.1:#head2.3))", {
         root,
       })
-    ).toEqual('@import "ref.md" {line_begin=11 line_end=19}');
+    ).toEqual('@import "ref.md" {line_begin=10 line_end=18}');
   });
 });

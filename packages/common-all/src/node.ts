@@ -684,11 +684,14 @@ export class Schema extends DNode<SchemaData> implements ISchema {
   }
 }
 
-const matchSchemaPropsToId = (
+const matchSchemaProps = (
   id: string,
+  item: SchemaRawProps,
   props: SchemaRawProps[]
 ): SchemaRawProps => {
-  const out = _.find(props, (p) => _.some([p.id === id]));
+  const out = _.find(props, (p) =>
+    _.every([p.id === id, item.fname === p.fname])
+  );
   if (_.isUndefined(out)) {
     throw Error(`no match found for ${id}, props: ${props}`);
   }
@@ -752,7 +755,7 @@ export class NodeBuilder {
     // DEBUG: item: {item}, parents: {parents}
     const node = new Schema({ ...item, parent, children: [] });
     item.children.forEach((chId) => {
-      const match = matchSchemaPropsToId(chId, props);
+      const match = matchSchemaProps(chId, item, props);
       return this.toSchema(match, node, props);
     });
     parent.addChild(node);

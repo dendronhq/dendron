@@ -1905,72 +1905,22 @@ head w.3 text
 ]
 `;
 
-exports[`engine:exact schema basic init, mult domain with children with same ids: main 1`] = `
-Array [
-  Object {
-    "body": "",
-    "children": Array [
-      "bar",
-      "foo",
-      "test1",
-    ],
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "root.schema",
-    "parent": "root",
-    "stub": false,
-    "title": "root",
-    "type": "schema",
-  },
-  Object {
-    "body": "",
-    "children": Array [
-      "bar",
-      "bar",
-    ],
-    "custom": Object {},
-    "data": Object {
-      "namespace": true,
-    },
-    "desc": "",
-    "fname": "bar.schema",
-    "parent": "root",
-    "stub": false,
-    "title": "bar",
-    "type": "schema",
-  },
-  Object {
-    "body": "",
-    "children": Array [
-      "bar",
-      "bar",
-    ],
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "foo.schema",
-    "parent": "root",
-    "stub": false,
-    "title": "foo",
-    "type": "schema",
-  },
-  Object {
-    "body": "",
-    "children": Array [
-      "test1",
-      "test1",
-    ],
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "test1.schema",
-    "parent": "root",
-    "stub": false,
-    "title": "test1",
-    "type": "schema",
-  },
-]
+exports[`engine:exact schema basic init: bond 1`] = `
+Object {
+  "body": "",
+  "children": Array [
+    "alpha",
+  ],
+  "custom": Object {},
+  "data": Object {},
+  "desc": "",
+  "fname": "foo.schema",
+  "id": "one",
+  "parent": "foo",
+  "stub": false,
+  "title": "foo",
+  "type": "schema",
+}
 `;
 
 exports[`engine:exact schema basic init: main 1`] = `
@@ -2011,8 +1961,8 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "bar",
-      "bar",
+      "foo",
+      "foo",
     ],
     "custom": Object {},
     "data": Object {},

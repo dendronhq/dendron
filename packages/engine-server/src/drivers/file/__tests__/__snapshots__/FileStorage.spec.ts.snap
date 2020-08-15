@@ -23,6 +23,7 @@ Array [
     "body": "",
     "children": Array [
       "foo",
+      "ref",
       "Refactor",
       "Bar",
     ],
@@ -54,8 +55,37 @@ Array [
     "type": "note",
   },
   Object {
+    "body": "
+# head1
+
+Header 1 text
+
+## head2.1
+
+Header 2 text
+
+## head2.2
+
+head 2.2 text
+
+## head2.3
+
+head w.3 text
+",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "ref test",
+    "fname": "ref",
+    "parent": "root",
+    "stub": false,
+    "title": "ref",
+    "type": "note",
+  },
+  Object {
     "body": "- [[refactor.one]]
-- [[refactor.two]]",
+- [[refactor.two]]
+",
     "children": Array [
       "One",
       "Two",

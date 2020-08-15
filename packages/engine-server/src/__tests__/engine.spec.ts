@@ -57,10 +57,20 @@ describe("engine:exact", () => {
         expect(schemas.length).toEqual(4);
         const note = engine.notes["foo"];
         const schema = engine.schemas["foo"];
+        const barSchema = engine.schemas["bar"];
         const schemaMatch = SchemaUtils.matchNote(note, engine.schemas);
         expect(schemaMatch.toRawProps()).toEqual(schema.toRawProps());
         const schemaNamespace = engine.schemas["bar"];
         expect(schemaNamespace.namespace).toBeTruthy();
+
+        // check that children with same id are still unique
+        const fooOneChild = _.find(schema.children, { id: "one" }) as Schema;
+        expect(fooOneChild.fname).toEqual("foo.schema");
+        const barOneChild = _.find(barSchema.children, { id: "one" }) as Schema;
+        expect(barOneChild.fname).toEqual("bar.schema");
+        expect(
+          testUtils.omitEntropicProps(fooOneChild.toRawProps(), true)
+        ).toMatchSnapshot("bond");
 
         // // case3
         // schema = engine.schemas["test1"];

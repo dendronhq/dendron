@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.7](https://github.com/dendronhq/dendron/compare/v0.6.5...v0.6.7) (2020-08-15)
+
+### Features
+
+- **commands:** add show preview command ([f62dcf8](https://github.com/dendronhq/dendron/commit/f62dcf8ad97f95a2784397606233aaf20f8df4cc))
+
 ## [0.6.5](https://github.com/dendronhq/dendron/compare/v0.6.4...v0.6.5) (2020-08-14)
 
 ### Features

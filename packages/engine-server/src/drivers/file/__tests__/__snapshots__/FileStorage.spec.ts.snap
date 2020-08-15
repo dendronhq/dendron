@@ -39,7 +39,8 @@ Array [
   Object {
     "body": "
 - [[refactor.one]]
-",
+
+- SECRETS <!--LOCAL_ONLY_LINE-->",
     "children": Array [
       "foo.one",
       "foo.two",
@@ -87,7 +88,7 @@ head w.3 text
 - [[refactor.two]]
 ",
     "children": Array [
-      "One",
+      "refactor-one",
       "Two",
     ],
     "custom": Object {},
@@ -154,7 +155,8 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "- [[refactor.two]]
+    "body": "
+- [[refactor.two]]
 ",
     "children": Array [],
     "custom": Object {},
@@ -163,7 +165,7 @@ head w.3 text
     "fname": "refactor.one",
     "parent": "Refactor",
     "stub": false,
-    "title": "One",
+    "title": "refactor-one",
     "type": "note",
   },
   Object {

@@ -11,7 +11,7 @@
     },
     {
       "label": "npm:test:watch",
-      "command": "npm run test:watch -- ${relativeFile}",
+      "command": "npm run test:watch -- ${relativeFile} -u",
       "type": "shell",
       "problemMatcher": []
     },

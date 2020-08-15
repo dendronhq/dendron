@@ -255,10 +255,8 @@ describe("engine:exact", () => {
         expect(_.omit(note.toRawProps(), "body")).toEqual(
           _.omit(noteUpdated.toRawProps(), "body")
         );
-        expect(_.trim(noteUpdated.body)).toEqual("- [[refactor.one]]");
         // check custom att in file
-        const { content, data } = FileTestUtils.readMDFile(root, "foo.md");
-        expect(_.trim(content)).toEqual("- [[refactor.one]]");
+        const { data } = FileTestUtils.readMDFile(root, "foo.md");
         expect(stripEntropicData(data)).toEqual({
           bond: true,
           desc: "",

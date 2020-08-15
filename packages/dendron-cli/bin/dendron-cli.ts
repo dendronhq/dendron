@@ -5,7 +5,7 @@ import { BackfillCliOpts, BackfillCommand } from "../src/commands/backfill";
 import { BuildSiteCliOpts, BuildSiteCommand } from "../src/commands/build-site";
 import {
   RefactorFMCliOpts,
-  RefactorFMCommand
+  RefactorFMCommand,
 } from "../src/commands/refactorFM";
 import { RefactorRule } from "../src/commands/refactorBase";
 
@@ -14,29 +14,29 @@ export const addLayout: RefactorRule = {
   operation: "add",
   data: {
     from: { key: "layout" },
-    to: { value: "single" }
-  }
+    to: { value: "single" },
+  },
 };
 export const updateTime: RefactorRule = {
   operation: "title2time",
-  data: {}
-}
+  data: {},
+};
 
 yargs
   .command<BackfillCliOpts>(
     "backfill",
     "backfill frontmatter",
-    args => {
+    (args) => {
       args.option("vault", {
-        describe: "location of vault"
+        describe: "location of vault",
       });
       args.option("overwriteFields", {
         describe: "location of site dir",
         array: true,
-        default: []
+        default: [],
       });
     },
-    async args => {
+    async (args) => {
       const { vault, overwriteFields } = args;
       const cmd = new BackfillCommand();
       const engine = DendronEngine.getOrCreateEngine({ root: vault });
@@ -47,15 +47,15 @@ yargs
   .command<BuildSiteCliOpts>(
     "build-site",
     "build static site",
-    args => {
+    (args) => {
       args.option("vault", {
-        describe: "location of vault"
+        describe: "location of vault",
       });
       args.option("dendronRoot", {
-        describe: "location to dendronRoot"
+        describe: "location to dendronRoot",
       });
     },
-    async args => {
+    async (args) => {
       const { vault, dendronRoot } = args;
       const config = DConfig.getOrCreate(dendronRoot).site;
       const cmd = new BuildSiteCommand();
@@ -67,18 +67,18 @@ yargs
   .command<RefactorFMCliOpts>(
     "refactorFM",
     "refactor frontmatter",
-    args => {
+    (args) => {
       args.option("vault", {
-        describe: "location of vault"
+        describe: "location of vault",
       });
     },
-    async args => {
+    async (args) => {
       const { vault } = args;
       const cmd = new RefactorFMCommand();
       await cmd.execute({
         root: vault,
         include: ["blog.thoughts.*"],
-        rule: updateTime
+        rule: updateTime,
       });
     }
   )

@@ -10,6 +10,7 @@ import matter from "gray-matter";
 import _ from "lodash";
 import path from "path";
 import { BaseCommand } from "./base";
+import { stripLocalOnlyTags } from "@dendronhq/engine-server";
 
 type CommandOpts = {
   engine: DEngine;
@@ -101,7 +102,7 @@ function imageLinkConverter(note: Note) {
 function note2JekyllMdFile(
   note: Note,
   opts: { notesDir: string; engine: DEngine } & DendronSiteConfig
-) {
+): Promise<void> {
   const meta = DNodeUtils.getMeta(note, {
     pullCustomUp: true,
     ignoreNullParent: true,
@@ -120,6 +121,8 @@ function note2JekyllMdFile(
   }
   // delete parent from root
   note.body = stripSiteOnlyTags(note);
+  note.body = stripLocalOnlyTags(note.body);
+  // note.body = stripLocalOnlyTags(note.body);
   // TODO: HACK
   if (note.id !== "f1af56bb-db27-47ae-8406-61a98de6c78c") {
     note.body = wikiLinkToMd(note, opts.engine, { linkPrefix });
@@ -132,6 +135,27 @@ function note2JekyllMdFile(
 }
 
 export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
+  async copyAssets(opts: { vaultAssetsDir: string; siteAssetsDir: string }) {
+    const { vaultAssetsDir, siteAssetsDir } = opts;
+    if (!fs.existsSync(vaultAssetsDir)) {
+      return;
+    }
+    return new Promise((resolve, reject) => {
+      fs.copy(
+        path.join(vaultAssetsDir, "images"),
+        path.join(siteAssetsDir, "images"),
+        (err) => {
+          if (err) {
+            err.message += JSON.stringify({ vaultAssetsDir, siteAssetsDir });
+            reject(err);
+          }
+          this.L.info({ msg: "finish copying" });
+          resolve();
+        }
+      );
+    });
+  }
+
   async execute(opts: CommandOpts) {
     const { engine, config, dendronRoot } = _.defaults(opts, {});
     const { siteRoot: siteRootRaw, noteRoot } = config;
@@ -181,23 +205,9 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     const vaultAssetsDir = path.join(engine.props.root, assetsDir);
     // docs/assets
     const siteAssetsDir = path.join(siteRoot, assetsDir);
+    await this.copyAssets({ vaultAssetsDir, siteAssetsDir });
 
-    const copyP = new Promise((resolve, reject) => {
-      fs.copy(
-        path.join(vaultAssetsDir, "images"),
-        path.join(siteAssetsDir, "images"),
-        (err) => {
-          if (err) {
-            err.message += JSON.stringify({ vaultAssetsDir, siteAssetsDir });
-            reject(err);
-          }
-          L.info({ msg: "finish copying" });
-          resolve();
-        }
-      );
-    });
-    await Promise.all(nodes);
-    await copyP;
+    const resp = await Promise.all(out);
     L.info({ msg: "exit" });
     return;
   }

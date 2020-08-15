@@ -3,5 +3,6 @@
 exports[`build-site basic: bond-foo 1`] = `
 "
 - [refactor-one](refactor.one)
+
 "
 `;

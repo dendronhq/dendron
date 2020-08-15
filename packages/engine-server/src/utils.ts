@@ -1,11 +1,10 @@
+import { createLogger, readMD } from "@dendronhq/common-server";
 import _ from "lodash";
-import path from "path";
 import _markdownIt from "markdown-it";
 // @ts-ignore
 import markdownItAST from "markdown-it-ast";
 import Token from "markdown-it/lib/token";
-import { readMD, createLogger } from "@dendronhq/common-server";
-import fs from "fs-extra";
+import path from "path";
 
 process.env["LOG_DST"] = "/tmp/bond.log";
 const L = createLogger("bond");
@@ -196,7 +195,6 @@ export const replaceRefWithMPEImport = (
 ): string => {
   const ctx = "replaceRefWithMPEImport";
   L.info({ ctx, line });
-  fs.appendFileSync("/tmp/bond2.log", JSON.stringify({ctx, line}));
   const match = matchRefMarker(line);
   let prefix = `@import`;
   if (!match || !match.groups) {
@@ -241,3 +239,17 @@ export const replaceRefWithMPEImport = (
   prefix += ` {${offset.join(" ")}}`;
   return prefix;
 };
+
+export function stripLocalOnlyTags(doc: string) {
+  const re = new RegExp(/(?<raw>.+<!--LOCAL_ONLY_LINE-->)/);
+  let matches;
+  do {
+    matches = doc.match(re);
+    if (matches) {
+      // @ts-ignore
+      const { raw, body } = matches.groups;
+      doc = doc.replace(raw, "");
+    }
+  } while (matches);
+  return doc;
+}

@@ -5,6 +5,7 @@ import {
   matchRefMarker,
   extractBlock,
   replaceRefWithMPEImport,
+  stripLocalOnlyTags,
 } from "../utils";
 import _ from "lodash";
 import { setupTmpDendronDir } from "../testUtils";
@@ -171,5 +172,15 @@ describe("replaceRefWithMPEImport", () => {
         root,
       })
     ).toEqual('@import "ref.md" {line_begin=10 line_end=18}');
+  });
+});
+
+describe("stripLocalOnlyTags", () => {
+  it("basic", () => {
+    const txt = `
+- this is a bullet
+    - this is a secret <!--LOCAL_ONLY_LINE-->
+`;
+    expect(_.trim(stripLocalOnlyTags(txt))).toEqual("- this is a bullet");
   });
 });

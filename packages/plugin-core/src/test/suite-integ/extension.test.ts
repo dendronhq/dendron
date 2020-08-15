@@ -652,7 +652,7 @@ suite("commands", function () {
         );
         await vscode.window.showTextDocument(uri);
         const link = await new CopyNoteLinkCommand().run();
-        assert.equal(link, "[[ Faq | dendron.faq ]]");
+        assert.equal(link, "[[Faq|dendron.faq]]");
         done();
       });
       setupDendronWorkspace(root.name, ctx);

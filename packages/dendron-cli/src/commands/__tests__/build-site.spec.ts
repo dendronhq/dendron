@@ -1,5 +1,4 @@
 import { DEngine } from "@dendronhq/common-all";
-import fs from "fs-extra";
 import {
   LernaTestUtils,
   EngineTestUtils,
@@ -50,6 +49,6 @@ describe("build-site", () => {
     expect(content).toMatchSnapshot("bond-foo");
     expect(data.id).toEqual("foo");
     expect(content.indexOf("- [refactor-one](refactor.one)") >= 0).toBe(true);
-    expect(1).toEqual(1);
+    expect(content.indexOf("SECRETS") < 0).toBe(true);
   });
 });

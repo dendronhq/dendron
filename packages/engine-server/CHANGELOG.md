@@ -3,6 +3,189 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.6.8 (2020-08-15)
+
+### Features
+
+- do block ref ([8fdc331](https://github.com/dendronhq/dendron/commit/8fdc33198eb1ada6e0f1a8511065315cbba75530))
+- replaceRefWithMPEImport ([eb3f627](https://github.com/dendronhq/dendron/commit/eb3f627a435f62a788899adb34f1d3de256232f7))
+
+## 0.6.5 (2020-08-14)
+
+### Features
+
+- **markdown:** embed anchors with markdown ([57d5c6a](https://github.com/dendronhq/dendron/commit/57d5c6a08f5b8c6c25edb49ea3136e46f11aa664))
+
+## 0.6.4 (2020-08-13)
+
+### Bug Fixes
+
+- **commands:** issue where refactor would miss some links ([1734778](https://github.com/dendronhq/dendron/commit/173477849f6dd21f9f52a1d8c6733faf472fcea3))
+
+## 0.6.1 (2020-08-11)
+
+### Features
+
+- **commands:** Add Refactor Hierarchy Command ([4fcaf40](https://github.com/dendronhq/dendron/commit/4fcaf40a7fd7b98b658703e726dd8ccf6c14e4c4))
+
+# 0.6.0 (2020-08-09)
+
+## 0.5.15 (2020-08-09)
+
+## 0.5.10 (2020-08-06)
+
+## 0.5.9 (2020-08-05)
+
+## 0.5.8 (2020-08-05)
+
+## 0.5.7 (2020-08-04)
+
+### Bug Fixes
+
+- not all notes indexed in sparse vaults ([383b6e3](https://github.com/dendronhq/dendron/commit/383b6e3f54e46616e1becf28eccd903b372897e5))
+
+## 0.5.6 (2020-08-04)
+
+## 0.5.4 (2020-08-04)
+
+### Bug Fixes
+
+- notes created via link not being indexed properly ([5c1b495](https://github.com/dendronhq/dendron/commit/5c1b4950026bf83580a095532a48320ad66f256f))
+
+## 0.5.3 (2020-08-03)
+
+## 0.5.2 (2020-08-03)
+
+## 0.5.1 (2020-08-03)
+
+# 0.5.0 (2020-08-02)
+
+## 0.4.6 (2020-08-01)
+
+## 0.4.5 (2020-08-01)
+
+## 0.4.4 (2020-08-01)
+
+### Bug Fixes
+
+- logging bad nodes ([c013e00](https://github.com/dendronhq/dendron/commit/c013e00faff9d7a9cce7743020cb97507f826943))
+
+### Features
+
+- support deleting schemas ([450f00d](https://github.com/dendronhq/dendron/commit/450f00d6661d1d45dbfed7392bde179a0ab0020c))
+- support deleting schemas ([7e6730a](https://github.com/dendronhq/dendron/commit/7e6730a9c3f804d7c039cf74495493839c910fed))
+
+## 0.4.2 (2020-07-30)
+
+### Bug Fixes
+
+- stub nodes should keep parents when deleted ([f32f291](https://github.com/dendronhq/dendron/commit/f32f291bc7a1ddd6c542483730e2db74b400dafa))
+
+### Features
+
+- build pod command with github pages support ([e063732](https://github.com/dendronhq/dendron/commit/e063732d1ff082dd8520a479926e7ceb1b0893ab))
+
+# 0.4.0 (2020-07-26)
+
+## 0.3.42 (2020-07-23)
+
+## 0.3.40 (2020-07-23)
+
+## 0.3.39 (2020-07-23)
+
+## 0.3.38 (2020-07-23)
+
+## 0.3.37 (2020-07-22)
+
+## 0.3.36 (2020-07-22)
+
+### Bug Fixes
+
+- issue with new journal notes not initializing ([63e3e63](https://github.com/dendronhq/dendron/commit/63e3e63bd246ae7fd1587e6ea95c66ebf943bc36))
+
+## 0.3.35 (2020-07-22)
+
+### Features
+
+- add a openLogs command to help debug issues ([4f223fc](https://github.com/dendronhq/dendron/commit/4f223fc318fe033471252611c8f41d505dca1055))
+
+## 0.3.31 (2020-07-22)
+
+### Features
+
+- initialize default workspace with relative paths so that its portable btw devices ([790ef50](https://github.com/dendronhq/dendron/commit/790ef503225e5b18a78e3e62e847ba8b2adfd8d0))
+
+## 0.3.30 (2020-07-21)
+
+### Features
+
+- custom front matter support [docs](https://github.com/dendronhq/dendron-template/blob/master/vault/pro.dendron.topic.frontmatter.md) ([dadd3fd](https://github.com/dendronhq/dendron/commit/dadd3fd16e2814e378b7af3c097b556c92981de3))
+- remove un-used frontmatter ([e059346](https://github.com/dendronhq/dendron/commit/e0593467fca94a4d29dc9463721a99e67881cfb3))
+
+## 0.3.26 (2020-07-20)
+
+## 0.3.25 (2020-07-20)
+
+## 0.3.24 (2020-07-20)
+
+## 0.3.21 (2020-07-19)
+
+## 0.3.20 (2020-07-18)
+
+### Bug Fixes
+
+- handle special characters in file names when importing using LocalFilePod ([03e42b1](https://github.com/dendronhq/dendron/commit/03e42b167ac9f073cd56f10c4e31b5cecf66dabf))
+
+## 0.3.19 (2020-07-18)
+
+## 0.3.18 (2020-07-18)
+
+### Bug Fixes
+
+- surface errors to user if bad frontmatter ([03107f4](https://github.com/dendronhq/dendron/commit/03107f413626362c8efde99328d9b0712e286441))
+
+### Features
+
+- ability to import notes from local file system [docs](https://github.com/dendronhq/dendron-template/blob/master/vault/dendron.topic.pod.md) ([e44fd11](https://github.com/dendronhq/dendron/commit/e44fd1133bec10f22831f059c8d98cf4076dcdcc))
+
+## 0.3.17 (2020-07-17)
+
+### Features
+
+- more flexible file names for [journal notes](https://github.com/dendronhq/dendron-template/blob/master/vault/dendron.special-notes.md) ([9d9f10b](https://github.com/dendronhq/dendron/commit/9d9f10bd0873c201361c4625fc49c9f62ee82991))
+
+## 0.3.16 (2020-07-16)
+
+### Features
+
+- implement journal notes. see details here: https://github.com/dendronhq/dendron-template/blob/master/vault/dendron.feature.journals.md ([5e1236f](https://github.com/dendronhq/dendron/commit/5e1236fddbf1e0fddf4c27d1a40e9841cc99974f))
+
+## 0.3.15 (2020-07-14)
+
+## 0.3.11 (2020-07-13)
+
+## 0.3.10 (2020-07-13)
+
+### Features
+
+- auto add nodes when deleted or created outside of dendron ([8c311bd](https://github.com/dendronhq/dendron/commit/8c311bda948a1d54088c49fd70eb65d24af5d68f))
+- show schema with results ([188fdeb](https://github.com/dendronhq/dendron/commit/188fdeb760010cd6767fb47e46cdfa757371a70b))
+- surface unknown schemas ([d014965](https://github.com/dendronhq/dendron/commit/d0149652c985c69a4b2607984d578902820077f1))
+
+## 0.1.6 (2020-06-24)
+
+## 0.1.5 (2020-06-24)
+
+## 0.1.4 (2020-06-24)
+
+## 0.1.3 (2020-06-24)
+
+## 0.1.2 (2020-06-24)
+
+## 0.1.1 (2020-06-24)
+
+# 0.1.0 (2020-06-24)
+
 ## [0.6.5](https://github.com/dendronhq/dendron/compare/v0.6.4...v0.6.5) (2020-08-14)
 
 ### Features

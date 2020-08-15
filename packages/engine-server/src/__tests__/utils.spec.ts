@@ -94,9 +94,7 @@ Head 2.2 Text`;
 
 describe("extractBlock", () => {
   it("no anchor", () => {
-    expect(extractBlock(FILE_TEXT, createFileLink()).block).toEqual(
-      _.trim(FILE_TEXT)
-    );
+    expect(extractBlock(FILE_TEXT, createFileLink()).block).toEqual(FILE_TEXT);
   });
 
   it("anchor start", () => {
@@ -157,5 +155,21 @@ describe("replaceRefWithMPEImport", () => {
         root,
       })
     ).toEqual('@import "foo.md"');
+  });
+
+  it("anchor start", () => {
+    expect(
+      replaceRefWithMPEImport("((ref:[[ref]]#head2.1))", {
+        root,
+      })
+    ).toEqual('@import "ref.md" {line_begin=11}');
+  });
+
+  it("anchor start", () => {
+    expect(
+      replaceRefWithMPEImport("((ref:[[ref]]#head2.1:#head2.3))", {
+        root,
+      })
+    ).toEqual('@import "ref.md" {line_begin=11 line_end=19}');
   });
 });

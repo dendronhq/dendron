@@ -4,9 +4,14 @@ import _markdownIt from "markdown-it";
 // @ts-ignore
 import markdownItAST from "markdown-it-ast";
 import Token from "markdown-it/lib/token";
-import { readMD } from "@dendronhq/common-server";
+import { readMD, createLogger } from "@dendronhq/common-server";
+import fs from "fs-extra";
+
+process.env["LOG_DST"] = "/tmp/bond.log";
+const L = createLogger("bond");
 
 const markdownIt = _markdownIt();
+export const VERSION = "BOND";
 
 // const testString = "<!--(([[class.mba.chapters.2]]))-->";
 
@@ -44,12 +49,14 @@ export function extractBlock(
   block: string;
   lines?: { start: number | undefined; end: number | undefined };
 } {
+  const ctx = "extractBlock";
+  L.info({ ctx, txt, link });
   // const copts = _.defaults(opts, { linesOnly: false });
   const { anchorStart, anchorEnd } = link;
   if (link.type === "id") {
     throw Error(`id link not supported`);
   } else {
-    txt = _.trim(txt);
+    //txt = _.trim(txt);
     if (!anchorStart) {
       return { block: txt };
     }
@@ -72,7 +79,7 @@ export function extractBlock(
         }
       }
     });
-    const txtAsLines = _.trim(txt).split("\n");
+    const txtAsLines = txt.split("\n");
     if (_.isNull(out.anchorStart)) {
       return { block: "invalid link" };
     }
@@ -187,6 +194,9 @@ export const replaceRefWithMPEImport = (
   line: string,
   opts: { root: string }
 ): string => {
+  const ctx = "replaceRefWithMPEImport";
+  L.info({ ctx, line });
+  fs.appendFileSync("/tmp/bond2.log", JSON.stringify({ctx, line}));
   const match = matchRefMarker(line);
   let prefix = `@import`;
   if (!match || !match.groups) {
@@ -206,9 +216,28 @@ export const replaceRefWithMPEImport = (
   if (!link.anchorStart) {
     return prefix;
   }
+  // {line_begin=2 line_end=10}
+  const offset = [];
   //TODO: will be more sophisticated when multi-vault
-  const { content } = readMD(fsPath);
+  // @ts-ignore
+  const { content, matter } = readMD(fsPath);
+  // the last --- isn't counted, shoud be +1
+  // but since mpe is 0 delimited, it cancels each other out
+  const fmOffset = matter.split("\n").length;
   // @ts-ignore
   const { lines } = extractBlock(content, link);
-  return line;
+  // TODO: throw error
+  if (!lines?.start) {
+    return line;
+  }
+  // +1 because extract block does -1 for 0-indexing file
+  // +1 because header block gets parsed form line before
+  const pad = 2 + fmOffset;
+  offset.push(`line_begin=${lines.start + pad}`);
+  if (link.anchorEnd) {
+    // everything up to header is counted here
+    offset.push(`line_end=${lines.end + pad - 1}`);
+  }
+  prefix += ` {${offset.join(" ")}}`;
+  return prefix;
 };

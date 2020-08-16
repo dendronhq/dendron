@@ -69,7 +69,9 @@ describe("build-site", () => {
     expect(_.includes(dir, "refactor.one.md")).toBeFalsy();
     let { data } = readMD(path.join(buildDir, "foo.md"));
     expect(data.nav_order).toEqual(0);
+    expect(data.parent).toBe(null);
     ({ data } = readMD(path.join(buildDir, "build-site.md")));
     expect(data.nav_order).toEqual(1);
+    expect(data.parent).toBe(null);
   });
 });

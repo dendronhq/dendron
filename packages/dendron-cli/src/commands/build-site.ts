@@ -185,16 +185,13 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
             throwIfEmpty: true,
           }) as Note;
           note.custom.nav_order = navOrder;
+          note.parent = null;
+          note.title = _.capitalize(note.title);
           navOrder += 1;
           return note;
         })
       : [root];
     const out = [];
-
-    // delete parent from the root
-    root["parent"] = null;
-    nodes[0]["parent"] = null;
-    nodes[0]["title"] = _.capitalize(root.title);
 
     while (!_.isEmpty(nodes)) {
       const node = nodes.pop() as Note;

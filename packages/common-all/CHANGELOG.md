@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.9](https://github.com/dendronhq/dendron/compare/v0.6.8...v0.6.9) (2020-08-16)
+
+### Bug Fixes
+
+- issue with schemas that have same ids ([3f93b31](https://github.com/dendronhq/dendron/commit/3f93b31bffdaa6092a7c03c48db46edf0d89f65a))
+
 ## [0.6.1](https://github.com/dendronhq/dendron/compare/v0.6.0...v0.6.1) (2020-08-11)
 
 ### Features

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.9](https://github.com/dendronhq/dendron/compare/v0.6.8...v0.6.9) (2020-08-16)
+
+### Bug Fixes
+
+- **pods:** bad title for naked wiki links ([64c04ff](https://github.com/dendronhq/dendron/commit/64c04ff3adbcc44aa7b540cbb7a9c34d6c4c19ae))
+- **pods:** building sites without assets directory throws error ([5f711c9](https://github.com/dendronhq/dendron/commit/5f711c973a629a52b5ca66d647f9bbebd3f867fa))
+
+### Features
+
+- **pods:** ability to not publish select lines ([e90514b](https://github.com/dendronhq/dendron/commit/e90514bc85179598ad9de9612ee6684e8195a7aa))
+
 ## 0.6.6 (2020-08-15)
 
 ## 0.6.5 (2020-08-14)

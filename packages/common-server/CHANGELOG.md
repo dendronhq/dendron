@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.9](https://github.com/dendronhq/dendron/compare/v0.6.8...v0.6.9) (2020-08-16)
+
+### Bug Fixes
+
+- **pods:** bad title for naked wiki links ([64c04ff](https://github.com/dendronhq/dendron/commit/64c04ff3adbcc44aa7b540cbb7a9c34d6c4c19ae))
+
 ## [0.6.5](https://github.com/dendronhq/dendron/compare/v0.6.4...v0.6.5) (2020-08-14)
 
 ### Features

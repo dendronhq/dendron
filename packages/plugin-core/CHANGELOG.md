@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.9](https://github.com/dendronhq/dendron/compare/v0.6.8...v0.6.9) (2020-08-16)
+
+### Features
+
+- **pods:** ability to not publish select lines ([e90514b](https://github.com/dendronhq/dendron/commit/e90514bc85179598ad9de9612ee6684e8195a7aa))
+
 ## [0.6.8](https://github.com/dendronhq/dendron/compare/v0.6.5...v0.6.8) (2020-08-15)
 
 ### Features

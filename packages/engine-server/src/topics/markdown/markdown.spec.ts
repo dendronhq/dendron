@@ -6,7 +6,7 @@ const mdSimple = `
 Content
 `;
 
-describe("Tokens2Md", () => {
+describe.skip("Tokens2Md", () => {
   test("identity", () => {
     const ast = md2MDNodes(mdSimple);
     // expect(mdNodes2MD(ast)).toEqual(mdSimple);

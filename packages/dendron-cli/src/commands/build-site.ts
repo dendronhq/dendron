@@ -137,7 +137,7 @@ function note2JekyllMdFile(
 export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
   async copyAssets(opts: { vaultAssetsDir: string; siteAssetsDir: string }) {
     const { vaultAssetsDir, siteAssetsDir } = opts;
-    if (!fs.existsSync(vaultAssetsDir)) {
+    if (!fs.existsSync(path.join(vaultAssetsDir, "images"))) {
       return;
     }
     return new Promise((resolve, reject) => {

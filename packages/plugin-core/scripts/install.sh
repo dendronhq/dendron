@@ -1,6 +1,6 @@
 #!/bin/bash
-version=`cat package.json | jq ".version" -r`
-code-insiders --install-extension "dendron-$version.vsix"
 
-# NOTE: if you want to install in code instead, use the following line
-# code --install-extension "dendron-$version.vsix"
+version=`cat package.json | jq ".version" -r`
+name=`cat package.json | jq ".name" -r`
+code-insiders --install-extension "$name-$version.vsix" --force
+codium --install-extension "$name-$version.vsix" --force

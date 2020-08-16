@@ -2,10 +2,10 @@
 
 exports[`build-site multiple roots: bond-dir 1`] = `
 Array [
-  "4fa3e6a1-a28c-4bc0-860a-93e3cb766e16.md",
-  "a5499aa8-920b-46b0-a3b6-abbca4e303bc.md",
+  "448822f6-2fdd-471b-a133-29f83d4326b2.md",
+  "7f30fb93-6533-45dd-b893-48e50ef22089.md",
+  "97c28f71-a022-48cb-a284-b37ba01ae4b4.md",
   "bar.one.temp.md",
-  "ffd084f5-792b-4a1b-85dd-6927b695e2d0.md",
   "foo.md",
   "foo.one.md",
   "foo.three.alpha.md",

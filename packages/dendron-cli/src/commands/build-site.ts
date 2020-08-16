@@ -178,7 +178,11 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     if (_.isUndefined(root)) {
       throw Error(`root ${root} not found`);
     }
-    const nodes: Note[] = [root];
+    const nodes = config.noteRoots
+      ? config.noteRoots.map((fname) =>
+          DNodeUtils.getNoteByFname(fname, engine, { throwIfEmpty: true })
+        )
+      : [root];
     const out = [];
 
     // delete parent from the root
@@ -207,7 +211,7 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     const siteAssetsDir = path.join(siteRoot, assetsDir);
     await this.copyAssets({ vaultAssetsDir, siteAssetsDir });
 
-    const resp = await Promise.all(out);
+    await Promise.all(out);
     L.info({ msg: "exit" });
     return;
   }

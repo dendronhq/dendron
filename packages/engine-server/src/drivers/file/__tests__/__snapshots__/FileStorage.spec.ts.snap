@@ -40,7 +40,8 @@ Array [
     "body": "
 - [[refactor.one]]
 
-- SECRETS <!--LOCAL_ONLY_LINE-->",
+- SECRETS <!--LOCAL_ONLY_LINE-->
+",
     "children": Array [
       "foo.one",
       "foo.two",

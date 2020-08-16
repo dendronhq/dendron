@@ -349,5 +349,6 @@ export type DendronConfig = {
 
 export type DendronSiteConfig = {
   noteRoot: string;
+  noteRoots?: string[];
   siteRoot: string;
 };

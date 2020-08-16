@@ -1,8 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`build-site basic: bond-foo 1`] = `
-"
-- [refactor-one](refactor.one)
-
-"
+exports[`build-site multiple roots: bond-dir 1`] = `
+Array [
+  "4fa3e6a1-a28c-4bc0-860a-93e3cb766e16.md",
+  "a5499aa8-920b-46b0-a3b6-abbca4e303bc.md",
+  "bar.one.temp.md",
+  "ffd084f5-792b-4a1b-85dd-6927b695e2d0.md",
+  "foo.md",
+  "foo.one.md",
+  "foo.three.alpha.md",
+  "foo.two.md",
+]
 `;

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.10](https://github.com/dendronhq/dendron/compare/v0.6.9...v0.6.10) (2020-08-16)
+
+### Features
+
+- **pods:** publish multiple roots ([827b2f5](https://github.com/dendronhq/dendron/commit/827b2f52c35fa650b109dc5d929554a3d5db0cf5))
+
 ## [0.6.9](https://github.com/dendronhq/dendron/compare/v0.6.8...v0.6.9) (2020-08-16)
 
 ### Bug Fixes

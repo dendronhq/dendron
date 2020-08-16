@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.12](https://github.com/dendronhq/dendron/compare/v0.6.11...v0.6.12) (2020-08-16)
+
+### Bug Fixes
+
+- **pods:** properly set path of multi-domain site ([18dda68](https://github.com/dendronhq/dendron/commit/18dda68d90ef727399e0336e034f875972a5bdc8))
+
 ## [0.6.11](https://github.com/dendronhq/dendron/compare/v0.6.10...v0.6.11) (2020-08-16)
 
 ### Bug Fixes

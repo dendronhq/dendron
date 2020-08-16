@@ -3,8 +3,11 @@ import _ from "lodash";
 import _markdownIt from "markdown-it";
 // @ts-ignore
 import markdownItAST from "markdown-it-ast";
+import markdownItRegex from "markdown-it-regex";
 import Token from "markdown-it/lib/token";
 import path from "path";
+import { parseRef, findUriByRef } from "./external/memo/utils/utils";
+import { URI } from "vscode-uri";
 
 process.env["LOG_DST"] = "/tmp/bond.log";
 const L = createLogger("bond");
@@ -28,17 +31,18 @@ type DendronRef = {
   link: DendronRefLink;
 };
 
-type ASTEnt = {
+export type ASTEnt = {
   nodeType: "heading" | "other";
   openNode: Token;
   closeNode: Token;
   children: Token[];
 };
 
-function genAST(txt: string): ASTEnt[] {
-  const tokens: Token[] = markdownIt.parse(txt, {});
-  return markdownItAST.makeAST(tokens);
-}
+const getRefAnchor = (href: string, text: string) =>
+  `<a title="${href}" href="${href}">${text}</a>`;
+
+export const getFileUrlForMarkdownPreview = (filePath: string): string =>
+  URI.file(filePath).toString().replace("file://", "");
 
 export function extractBlock(
   txt: string,

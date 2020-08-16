@@ -22,6 +22,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
+      "Build-site",
       "foo",
       "ref",
       "Refactor",
@@ -34,6 +35,18 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "root",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "build-site",
+    "parent": "root",
+    "stub": false,
+    "title": "Build-site",
     "type": "note",
   },
   Object {
@@ -222,7 +235,9 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "Template text",
+    "body": "
+Template text
+",
     "children": Array [],
     "custom": Object {},
     "data": Object {},

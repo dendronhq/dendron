@@ -102,6 +102,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
+      "Build-site",
       "foo",
       "ref",
       "Refactor",
@@ -114,6 +115,18 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "root",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "build-site",
+    "parent": "root",
+    "stub": false,
+    "title": "Build-site",
     "type": "note",
   },
   Object {
@@ -288,7 +301,9 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "Template text",
+    "body": "
+Template text
+",
     "children": Array [],
     "custom": Object {},
     "data": Object {},
@@ -320,6 +335,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
+      "Build-site",
       "foo",
       "ref",
       "Refactor",
@@ -332,6 +348,18 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "root",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "build-site",
+    "parent": "root",
+    "stub": false,
+    "title": "Build-site",
     "type": "note",
   },
   Object {
@@ -506,7 +534,9 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "Template text",
+    "body": "
+Template text
+",
     "children": Array [],
     "custom": Object {},
     "data": Object {},
@@ -524,6 +554,7 @@ exports[`engine:exact note edge md exist, no schema file: listDir 1`] = `
 Array [
   "bar.one.temp.md",
   "bar.schema.yml",
+  "build-site.md",
   "foo.md",
   "foo.one.md",
   "foo.three.alpha.md",
@@ -542,6 +573,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
+      "Build-site",
       "foo",
       "ref",
       "Refactor",
@@ -554,6 +586,18 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "root",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "build-site",
+    "parent": "root",
+    "stub": false,
+    "title": "Build-site",
     "type": "note",
   },
   Object {
@@ -728,7 +772,9 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "Template text",
+    "body": "
+Template text
+",
     "children": Array [],
     "custom": Object {},
     "data": Object {},
@@ -746,6 +792,7 @@ exports[`engine:exact note edge no md file, no schema : listDir 1`] = `
 Array [
   "bar.one.temp.md",
   "bar.schema.yml",
+  "build-site.md",
   "foo.md",
   "foo.one.md",
   "foo.three.alpha.md",
@@ -765,6 +812,7 @@ Array [
     "body": "
 ",
     "children": Array [
+      "Build-site",
       "foo",
       "ref",
       "Refactor",
@@ -777,6 +825,18 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "root",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "build-site",
+    "parent": "root",
+    "stub": false,
+    "title": "Build-site",
     "type": "note",
   },
   Object {
@@ -951,7 +1011,9 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "Template text",
+    "body": "
+Template text
+",
     "children": Array [],
     "custom": Object {},
     "data": Object {},
@@ -992,6 +1054,7 @@ exports[`engine:exact note edge no md file, schema exist: listDir 1`] = `
 Array [
   "bar.one.temp.md",
   "bar.schema.yml",
+  "build-site.md",
   "foo.md",
   "foo.one.md",
   "foo.schema.yml",
@@ -1012,6 +1075,7 @@ Array [
     "body": "
 ",
     "children": Array [
+      "Build-site",
       "foo",
       "ref",
       "Refactor",
@@ -1024,6 +1088,18 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "root",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "build-site",
+    "parent": "root",
+    "stub": false,
+    "title": "Build-site",
     "type": "note",
   },
   Object {
@@ -1198,7 +1274,9 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "Template text",
+    "body": "
+Template text
+",
     "children": Array [],
     "custom": Object {},
     "data": Object {},
@@ -1255,6 +1333,7 @@ exports[`engine:exact note main delete node with children: listDi2 1`] = `
 Array [
   "bar.one.temp.md",
   "bar.schema.yml",
+  "build-site.md",
   "foo.one.md",
   "foo.schema.yml",
   "foo.three.alpha.md",
@@ -1273,6 +1352,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
+      "Build-site",
       "foo",
       "ref",
       "Refactor",
@@ -1285,6 +1365,18 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "root",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "build-site",
+    "parent": "root",
+    "stub": false,
+    "title": "Build-site",
     "type": "note",
   },
   Object {
@@ -1439,7 +1531,9 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "Template text",
+    "body": "
+Template text
+",
     "children": Array [],
     "custom": Object {},
     "data": Object {},
@@ -1474,6 +1568,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
+      "Build-site",
       "foo",
       "ref",
       "Refactor",
@@ -1486,6 +1581,18 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "root",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "build-site",
+    "parent": "root",
+    "stub": false,
+    "title": "Build-site",
     "type": "note",
   },
   Object {
@@ -1640,7 +1747,9 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "Template text",
+    "body": "
+Template text
+",
     "children": Array [],
     "custom": Object {},
     "data": Object {},
@@ -1675,6 +1784,7 @@ Array [
   "bar.one.temp.md",
   "bar.schema.yml",
   "bar.two.md",
+  "build-site.md",
   "foo.md",
   "foo.one.md",
   "foo.schema.yml",
@@ -1694,6 +1804,7 @@ Array [
   "bar.one.temp.md",
   "bar.schema.yml",
   "bar.two.md",
+  "build-site.md",
   "foo.md",
   "foo.one.md",
   "foo.schema.yml",
@@ -1713,6 +1824,7 @@ Array [
   Object {
     "body": "",
     "children": Array [
+      "Build-site",
       "foo",
       "ref",
       "Refactor",
@@ -1725,6 +1837,18 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "root",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "build-site",
+    "parent": "root",
+    "stub": false,
+    "title": "Build-site",
     "type": "note",
   },
   Object {
@@ -1913,7 +2037,9 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "Template text",
+    "body": "
+Template text
+",
     "children": Array [],
     "custom": Object {},
     "data": Object {},

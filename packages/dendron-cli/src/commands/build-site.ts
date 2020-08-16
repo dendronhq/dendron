@@ -178,17 +178,23 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     if (_.isUndefined(root)) {
       throw Error(`root ${root} not found`);
     }
-    const nodes = config.noteRoots
-      ? config.noteRoots.map((fname) =>
-          DNodeUtils.getNoteByFname(fname, engine, { throwIfEmpty: true })
-        )
+    let navOrder = 0;
+    const nodes: Note[] = config.noteRoots
+      ? config.noteRoots.map((fname) => {
+          const note = DNodeUtils.getNoteByFname(fname, engine, {
+            throwIfEmpty: true,
+          }) as Note;
+          note.custom.nav_order = navOrder;
+          navOrder += 1;
+          return note;
+        })
       : [root];
     const out = [];
 
     // delete parent from the root
     root["parent"] = null;
-    root.custom.nav_order = 0;
-    root.title = _.capitalize(root.title);
+    nodes[0]["parent"] = null;
+    nodes[0]["title"] = _.capitalize(root.title);
 
     while (!_.isEmpty(nodes)) {
       const node = nodes.pop() as Note;

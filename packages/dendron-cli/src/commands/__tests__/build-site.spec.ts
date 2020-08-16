@@ -57,7 +57,7 @@ describe("build-site", () => {
     await engine.init();
     const config = {
       noteRoot: "root",
-      noteRoots: ["foo", "bar"],
+      noteRoots: ["foo", "build-site"],
       siteRoot: siteRoot.name,
     };
     const dendronRoot = root;
@@ -65,8 +65,11 @@ describe("build-site", () => {
     const buildDir = path.join(siteRoot.name, "notes");
     const dir = fs.readdirSync(buildDir);
     expect(_.includes(dir, "foo.md")).toBeTruthy();
-    expect(_.includes(dir, "bar.one.temp.md")).toBeTruthy();
+    expect(_.includes(dir, "build-site.md")).toBeTruthy();
     expect(_.includes(dir, "refactor.one.md")).toBeFalsy();
-    expect(dir).toMatchSnapshot("bond-dir");
+    let { data } = readMD(path.join(buildDir, "foo.md"));
+    expect(data.nav_order).toEqual(0);
+    ({ data } = readMD(path.join(buildDir, "build-site.md")));
+    expect(data.nav_order).toEqual(1);
   });
 });

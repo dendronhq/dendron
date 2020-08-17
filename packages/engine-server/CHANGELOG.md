@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.2](https://github.com/dendronhq/dendron/compare/v0.7.1...v0.7.2) (2020-08-17)
+
+### Bug Fixes
+
+- posix path break windows ([5e25db0](https://github.com/dendronhq/dendron/commit/5e25db034fed1db7b65fa85ab30f15ca85344aaf))
+
 # [0.7.0](https://github.com/dendronhq/dendron/compare/v0.6.12...v0.7.0) (2020-08-17)
 
 **Note:** Version bump only for package @dendronhq/engine-server

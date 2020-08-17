@@ -185,7 +185,7 @@ export class MDRenderer {
   renderToken(
     tokens: Token[],
     idx: number,
-    options: MarkdownIt.Options
+    _options: MarkdownIt.Options
   ): string {
     let nextToken;
     let result = "";
@@ -209,15 +209,20 @@ export class MDRenderer {
     }
 
     // Add token name, e.g. `<img`
-    result += (token.nesting === -1 ? "</" : "<") + token.tag;
+    // result += (token.nesting === -1 ? "</" : "<") + token.tag;
+    if (token.nesting === 1) {
+      if (token.block) {
+        // result += token.markup + " ";
+      }
+    }
 
     // Encode attributes, e.g. `<img src="foo"`
-    result += this.renderAttrs(token);
+    // result += this.renderAttrs(token);
 
     // Add a slash for self-closing tags, e.g. `<img src="foo" /`
-    if (token.nesting === 0 && options.xhtmlOut) {
-      result += " /";
-    }
+    // if (token.nesting === 0 && options.xhtmlOut) {
+    //   result += " /";
+    // }
 
     // Check if we need to add a newline after this tag
     if (token.block) {
@@ -240,7 +245,7 @@ export class MDRenderer {
       }
     }
 
-    result += needLf ? ">\n" : ">";
+    result += needLf ? "\n" : "";
 
     return result;
   }

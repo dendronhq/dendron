@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Tokens2Md identity: bond 1`] = `
+"
+
+
+
+
+
+
+
+
+
+
+
+
+
+"
+`;
+
+exports[`Tokens2Md identity: normal 1`] = `
+"<h2>Header</h2>
+<p>Content</p>
+<ul>
+<li>bullet</li>
+</ul>
+<ol>
+<li>number</li>
+</ol>
+"
+`;

@@ -235,8 +235,8 @@
         "watch": "npm run compile -- --watch",
         "build": "npm run compile",
         "compile": "tsc -p tsconfig.build.json",
-        "pretest": "echo stub",
-        "test": "node ./out/test/runTest.js",
+        "pretest": "npm run compile",
+        "test": "node ./out/test/runTestInteg.js",
         "format": "prettier --write src '*.json' '*.js'"
     },
     "devDependencies": {

@@ -1,11 +1,9 @@
+import { readMD } from "@dendronhq/common-server";
+import _ from "lodash";
 import _markdownIt from "markdown-it";
-// @ts-ignore
-import markdownItAST from "markdown-it-ast";
-import markdownItRegex from "markdown-it-regex";
 import Token from "markdown-it/lib/token";
 import path from "path";
-import _ from "lodash";
-import { readMD } from "@dendronhq/common-server";
+import { URI } from "vscode-uri";
 
 const markdownIt = _markdownIt();
 
@@ -32,60 +30,56 @@ export type ASTEnt = {
   children: Token[];
 };
 
-const getRefAnchor = (href: string, text: string) =>
-  `<a title="${href}" href="${href}">${text}</a>`;
+export const cacheRefs = async (uris: URI[]) => {};
 
-export const getFileUrlForMarkdownPreview = (filePath: string): string =>
-  URI.file(filePath).toString().replace("file://", "");
-
-export function extractBlock(
-  txt: string,
-  link: DendronRefLink
-  //opts?: { linesOnly?: boolean }
-): {
-  block: string;
-  lines?: { start: number | undefined; end: number | undefined };
-} {
-  // const copts = _.defaults(opts, { linesOnly: false });
-  const { anchorStart, anchorEnd } = link;
-  if (link.type === "id") {
-    throw Error(`id link not supported`);
-  } else {
-    //txt = _.trim(txt);
-    if (!anchorStart) {
-      return { block: txt };
-    }
-    const ast = genAST(txt);
-    const clean = {
-      anchorStart: _.trim(anchorStart),
-      anchorEnd: _.trim(anchorEnd),
-    };
-    const out: any = {
-      anchorStart: null,
-      anchorEnd: null,
-    };
-    ast.forEach((ent) => {
-      if (ent.nodeType === "heading") {
-        const matchKey: keyof typeof clean = _.isNull(out["anchorStart"])
-          ? "anchorStart"
-          : "anchorEnd";
-        if (_.trim(ent.children[0].content) === clean[matchKey]) {
-          out[matchKey] = ent.openNode.map;
-        }
-      }
-    });
-    const txtAsLines = txt.split("\n");
-    if (_.isNull(out.anchorStart)) {
-      return { block: "invalid link" };
-    }
-    const start = out.anchorStart[0] - 1;
-    const end = _.isNull(out["anchorEnd"])
-      ? txtAsLines.length
-      : out["anchorEnd"][0];
-    const block = _.trim(txtAsLines.slice(start, end).join("\n"));
-    return { block, lines: { start, end } };
-  }
-}
+// export function extractBlock(
+//   txt: string,
+//   link: DendronRefLink
+//   //opts?: { linesOnly?: boolean }
+// ): {
+//   block: string;
+//   lines?: { start: number | undefined; end: number | undefined };
+// } {
+//   // const copts = _.defaults(opts, { linesOnly: false });
+//   const { anchorStart, anchorEnd } = link;
+//   if (link.type === "id") {
+//     throw Error(`id link not supported`);
+//   } else {
+//     //txt = _.trim(txt);
+//     if (!anchorStart) {
+//       return { block: txt };
+//     }
+//     const ast = genAST(txt);
+//     const clean = {
+//       anchorStart: _.trim(anchorStart),
+//       anchorEnd: _.trim(anchorEnd),
+//     };
+//     const out: any = {
+//       anchorStart: null,
+//       anchorEnd: null,
+//     };
+//     ast.forEach((ent) => {
+//       if (ent.nodeType === "heading") {
+//         const matchKey: keyof typeof clean = _.isNull(out["anchorStart"])
+//           ? "anchorStart"
+//           : "anchorEnd";
+//         if (_.trim(ent.children[0].content) === clean[matchKey]) {
+//           out[matchKey] = ent.openNode.map;
+//         }
+//       }
+//     });
+//     const txtAsLines = txt.split("\n");
+//     if (_.isNull(out.anchorStart)) {
+//       return { block: "invalid link" };
+//     }
+//     const start = out.anchorStart[0] - 1;
+//     const end = _.isNull(out["anchorEnd"])
+//       ? txtAsLines.length
+//       : out["anchorEnd"][0];
+//     const block = _.trim(txtAsLines.slice(start, end).join("\n"));
+//     return { block, lines: { start, end } };
+//   }
+// }
 
 export function parseDendronRef(ref: string) {
   const [idOrRef, ...rest] = _.trim(ref).split(":");

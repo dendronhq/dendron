@@ -3,7 +3,6 @@ import {
   parseFileLink,
   DendronRefLink,
   matchRefMarker,
-  extractBlock,
   replaceRefWithMPEImport,
   stripLocalOnlyTags,
 } from "../utils";

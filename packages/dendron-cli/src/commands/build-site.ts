@@ -10,7 +10,11 @@ import matter from "gray-matter";
 import _ from "lodash";
 import path from "path";
 import { BaseCommand } from "./base";
-import { stripLocalOnlyTags } from "@dendronhq/engine-server";
+import {
+  stripLocalOnlyTags,
+  getProcessor,
+  replaceRefs,
+} from "@dendronhq/engine-server";
 
 type CommandOpts = {
   engine: DEngine;
@@ -83,22 +87,6 @@ function wikiLinkToMd(
   return doc;
 }
 
-// @ts-ignore
-function imageLinkConverter(note: Note) {
-  let matches;
-  let doc = note.body;
-  do {
-    matches = doc.match(/(\(?<link>assets\/images[^)]+\))/);
-    if (matches) {
-      // @ts-ignore
-      const { link } = matches.groups;
-      const linkReplace = link.replace("(assets", "(/assets");
-      doc = doc.replace(link, linkReplace);
-    }
-  } while (matches);
-  return doc;
-}
-
 function note2JekyllMdFile(
   note: Note,
   opts: { notesDir: string; engine: DEngine } & DendronSiteConfig
@@ -124,9 +112,13 @@ function note2JekyllMdFile(
   note.body = stripLocalOnlyTags(note.body);
   // note.body = stripLocalOnlyTags(note.body);
   // TODO: HACK
-  if (note.id !== "f1af56bb-db27-47ae-8406-61a98de6c78c") {
-    note.body = wikiLinkToMd(note, opts.engine, { linkPrefix });
-  }
+  // if (note.id !== "f1af56bb-db27-47ae-8406-61a98de6c78c") {
+  //   //note.body = wikiLinkToMd(note, opts.engine, { linkPrefix });
+  note.body = getProcessor()
+    .use(replaceRefs, { wikiLink2Md: true, wikiLinkPrefix: linkPrefix })
+    .processSync(note.body)
+    .toString();
+  // }
   const filePath = path.join(opts.notesDir, meta.id + ".md");
   return fs.writeFile(
     filePath,

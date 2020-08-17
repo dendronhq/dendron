@@ -2,12 +2,38 @@
 
 import { Note, Schema } from "./node";
 import { URI } from "vscode-uri";
+import { Position } from "unist";
 
 export type Stage = "dev" | "prod" | "test";
 
 // === Node Types
 
 // --- Primitives
+
+export enum LinkType {
+  WIKI_LINK = "WIKI_LINK",
+  IMAGE_LINK = "IMAGE_LINK",
+}
+
+export interface Link {
+  type: LinkType;
+  url: string;
+  position: Position;
+  label?: string;
+}
+
+export interface WikiLink extends Link {
+  type: LinkType.WIKI_LINK;
+}
+
+export interface ImageLink extends Link {
+  type: LinkType.IMAGE_LINK;
+  alt?: string;
+}
+
+export type ProtoLink = WikiLink | ImageLink;
+
+// TODO: depreacte
 export type NoteLink = {
   type: "note";
   id: string;

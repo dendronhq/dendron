@@ -48,7 +48,8 @@ describe("build-site", () => {
     const buildDir = path.join(siteRoot.name, "notes");
     const { data, content } = readMD(path.join(buildDir, "foo.md"));
     expect(data.id).toEqual("foo");
-    expect(content.indexOf("- [refactor-one](refactor.one)") >= 0).toBe(true);
+    expect(content).toMatchSnapshot("bond");
+    expect(content.indexOf("- [lbl](refactor.one)") >= 0).toBe(true);
     expect(content.indexOf("SECRETS") < 0).toBe(true);
   });
 

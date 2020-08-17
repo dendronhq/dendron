@@ -7,11 +7,8 @@
     {
       "type": "node",
       "command": "npm run test:watch",
-      "args": [
-        "--",
-        "${relativeFile}",
-      ]
-    }
+      "args": ["--", "${relativeFile}"]
+    },
     {
       "type": "node",
       "request": "launch",
@@ -29,9 +26,7 @@
       "name": "engine-server:debug test",
       "program": "${workspaceFolder:engine-server}/node_modules/jest/bin/jest.js",
       "cwd": "${workspaceFolder:engine-server}",
-      "args": [
-        "--runInBand"
-      ]
+      "args": ["--runInBand"]
     },
     {
       "type": "node",
@@ -39,10 +34,7 @@
       "name": "engine-server:debug test file",
       "program": "${workspaceFolder:engine-server}/node_modules/jest/bin/jest.js",
       "cwd": "${workspaceFolder:engine-server}",
-      "args": [
-        "--runInBand",
-        "${relativeFile}"
-      ]
+      "args": ["--runInBand", "${relativeFile}"]
     }
   ]
 }

@@ -1,16 +1,12 @@
-import { createLogger, readMD } from "@dendronhq/common-server";
-import _ from "lodash";
 import _markdownIt from "markdown-it";
 // @ts-ignore
 import markdownItAST from "markdown-it-ast";
 import Token from "markdown-it/lib/token";
 import path from "path";
-
-process.env["LOG_DST"] = "/tmp/bond.log";
-const L = createLogger("bond");
+import _ from "lodash";
+import { readMD } from "@dendronhq/common-server";
 
 const markdownIt = _markdownIt();
-export const VERSION = "BOND";
 
 // const testString = "<!--(([[class.mba.chapters.2]]))-->";
 
@@ -48,8 +44,6 @@ export function extractBlock(
   block: string;
   lines?: { start: number | undefined; end: number | undefined };
 } {
-  const ctx = "extractBlock";
-  L.info({ ctx, txt, link });
   // const copts = _.defaults(opts, { linesOnly: false });
   const { anchorStart, anchorEnd } = link;
   if (link.type === "id") {
@@ -193,8 +187,6 @@ export const replaceRefWithMPEImport = (
   line: string,
   opts: { root: string }
 ): string => {
-  const ctx = "replaceRefWithMPEImport";
-  L.info({ ctx, line });
   const match = matchRefMarker(line);
   let prefix = `@import`;
   if (!match || !match.groups) {

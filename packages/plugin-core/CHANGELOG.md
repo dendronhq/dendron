@@ -5,21 +5,33 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [0.7.0](https://github.com/dendronhq/dendron/compare/v0.6.12...v0.7.0) (2020-08-17)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.6.12](https://github.com/dendronhq/dendron/compare/v0.6.11...v0.6.12) (2020-08-16)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- **pods:** properly set path of multi-domain site ([18dda68](https://github.com/dendronhq/dendron/commit/18dda68d90ef727399e0336e034f875972a5bdc8))
 
 ## [0.6.11](https://github.com/dendronhq/dendron/compare/v0.6.10...v0.6.11) (2020-08-16)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- add nav_order to multi-root publication ([04c06f1](https://github.com/dendronhq/dendron/commit/04c06f13fc323931c7959461df8cfdf307caa7c7))
 
 ## [0.6.10](https://github.com/dendronhq/dendron/compare/v0.6.9...v0.6.10) (2020-08-16)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Features
+
+- **pods:** publish multiple roots ([827b2f5](https://github.com/dendronhq/dendron/commit/827b2f52c35fa650b109dc5d929554a3d5db0cf5))
 
 ## [0.6.9](https://github.com/dendronhq/dendron/compare/v0.6.8...v0.6.9) (2020-08-16)
+
+### Bug Fixes
+
+- **pods:** bad title for naked wiki links ([64c04ff](https://github.com/dendronhq/dendron/commit/64c04ff3adbcc44aa7b540cbb7a9c34d6c4c19ae))
+- **pods:** building sites without assets directory throws error ([5f711c9](https://github.com/dendronhq/dendron/commit/5f711c973a629a52b5ca66d647f9bbebd3f867fa))
+- issue with schemas that have same ids ([3f93b31](https://github.com/dendronhq/dendron/commit/3f93b31bffdaa6092a7c03c48db46edf0d89f65a))
 
 ### Features
 
@@ -30,6 +42,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Features
 
 - **commands:** add show preview command ([f62dcf8](https://github.com/dendronhq/dendron/commit/f62dcf8ad97f95a2784397606233aaf20f8df4cc))
+- do block ref ([8fdc331](https://github.com/dendronhq/dendron/commit/8fdc33198eb1ada6e0f1a8511065315cbba75530))
+- replaceRefWithMPEImport ([eb3f627](https://github.com/dendronhq/dendron/commit/eb3f627a435f62a788899adb34f1d3de256232f7))
 
 ## [0.6.5](https://github.com/dendronhq/dendron/compare/v0.6.4...v0.6.5) (2020-08-14)
 

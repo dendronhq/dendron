@@ -78,6 +78,7 @@ async function note2JekyllMdFile(
   if (note.parent?.fname === opts.noteRoot) {
     delete meta["parent"];
   }
+  // TEST
   // delete parent from root
   note.body = stripSiteOnlyTags(note);
   note.body = stripLocalOnlyTags(note.body);

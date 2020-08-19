@@ -1,29 +1,23 @@
 /* eslint-disable camelcase */
-import {
-  DNodeUtils,
-  LinkType,
-  Note,
-  NoteUtils,
-  ProtoLink,
-} from "@dendronhq/common-all";
+import { DNodeUtils, LinkType, Note, ProtoLink } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import _markdownit from "markdown-it";
 import markdownItRegex from "markdown-it-regex";
 import Token from "markdown-it/lib/token";
 import os from "os";
+import remark from "remark";
 import frontmatterPlugin from "remark-frontmatter";
 import markdownParse from "remark-parse";
+import { PassThrough } from "stream";
 // import wikiLinkPlugin from "remark-wiki-link";
 import unified, { Processor } from "unified";
+import engine from "unified-engine";
 import { Node, Parent, Point, Position } from "unist";
 import visit, { CONTINUE, EXIT } from "unist-util-visit";
 import { parse as parseYAML } from "yaml";
-import { MDRenderer } from "./renderer";
-import { PassThrough } from "stream";
-import engine from "unified-engine";
-import remark from "remark";
 import { dendronLinksPlugin } from "./plugins/dendronLinksPlugin";
+import { MDRenderer } from "./renderer";
 
 enum NodeType {
   code_inline = "code_inline",

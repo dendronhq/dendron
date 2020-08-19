@@ -1,13 +1,11 @@
 /* eslint-disable no-cond-assign */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-use-before-define */
-import _ from "lodash";
 import { sort as sortPaths } from "cross-path-sort";
-import { WorkspaceCache, RefT } from "../types";
+import _ from "lodash";
 import path from "path";
-import fs from "fs-extra";
 import { URI } from "vscode-uri";
-import { genAST, ASTEnt } from "../../../utils";
+import { RefT, WorkspaceCache } from "../types";
 
 export { sortPaths };
 
@@ -269,73 +267,4 @@ export const matchAll = (
   }
 
   return out;
-};
-
-function findTokens(type: string, ast: ASTEnt[]): ASTEnt[] {}
-
-export const replaceRefs = ({
-  refs,
-  content,
-  onMatch,
-  onReplace,
-}: {
-  refs: { old: string; new: string }[];
-  content: string;
-  onMatch?: () => void;
-  onReplace?: () => void;
-}): string | null => {
-  const ast = genAST(content);
-  const links = findTokens("ref-document", ast);
-  const { updatedOnce, nextContent } = refs.reduce(
-    // eslint-disable-next-line no-shadow
-    ({ updatedOnce, nextContent }, ref) => {
-      //const pattern = `\\[\\[${escapeForRegExp(ref.old)}(\\|.*)?\\]\\]`;
-      const oldRef = escapeForRegExp(ref.old);
-      const pattern = `\\[\\[\\s*?(.*\\|)?\\s*${oldRef}\\s*\\]\\]`;
-
-      if (new RegExp(pattern, "i").exec(content)) {
-        let replacedOnce = false;
-
-        const _nextContent = content.replace(
-          new RegExp(pattern, "gi"),
-          // @ts-ignore
-          ($0, $1, offset) => {
-            // const pos = document.positionAt(offset);
-
-            // if (
-            //   isInFencedCodeBlock(document, pos.line) ||
-            //   isInCodeSpan(document, pos.line, pos.character)
-            // ) {
-            //   return $0;
-            // }
-
-            if (!replacedOnce) {
-              // eslint-disable-next-line no-unused-expressions
-              onMatch && onMatch();
-            }
-
-            // eslint-disable-next-line no-unused-expressions
-            onReplace && onReplace();
-
-            replacedOnce = true;
-
-            return `[[${_.trim($1) || ""}${ref.new}]]`;
-          }
-        );
-
-        return {
-          updatedOnce: true,
-          nextContent: _nextContent,
-        };
-      }
-
-      return {
-        updatedOnce,
-        nextContent,
-      };
-    },
-    { updatedOnce: false, nextContent: content }
-  );
-
-  return updatedOnce ? nextContent : null;
 };

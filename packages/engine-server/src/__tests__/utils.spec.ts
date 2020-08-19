@@ -5,6 +5,7 @@ import {
   matchRefMarker,
   replaceRefWithMPEImport,
   stripLocalOnlyTags,
+  extractBlock,
 } from "../utils";
 import _ from "lodash";
 import { setupTmpDendronDir } from "../testUtils";

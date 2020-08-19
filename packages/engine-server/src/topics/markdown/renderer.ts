@@ -5,6 +5,9 @@
 /**
  * class Renderer
  **/
+/**
+ * DEPRECATE
+ */
 
 import * as _Renderer from "markdown-it/lib/renderer";
 import { escapeHtml, unescapeAll } from "markdown-it/lib/common/utils";

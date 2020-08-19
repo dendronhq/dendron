@@ -824,6 +824,7 @@ function createBackLink(note: Note): NoteLink {
   };
 }
 
+// DEPRECATE: not using
 export type ProtoNoteSource = {
   uri: URI;
   text: string;

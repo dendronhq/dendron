@@ -72,7 +72,7 @@ async function note2JekyllMdFile(
   let linkPrefix = "";
   if (opts.noteRoot === meta.fname) {
     jekyllProps["permalink"] = "/";
-    linkPrefix = path.basename(opts.notesDir);
+    linkPrefix = path.basename(opts.notesDir) + "/";
   }
   // pull children of root to the top
   if (note.parent?.fname === opts.noteRoot) {

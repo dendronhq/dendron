@@ -65,7 +65,7 @@ async function note2JekyllMdFile(
     publishByDefault: true,
   });
 
-  if (!hConfig.publishByDefault && !note.custom.publish) {
+  if (!hConfig.publishByDefault && !note.custom.published) {
     return;
   }
 
@@ -78,7 +78,6 @@ async function note2JekyllMdFile(
   if (note.parent?.fname === opts.noteRoot) {
     delete meta["parent"];
   }
-  // TEST
   // delete parent from root
   note.body = stripSiteOnlyTags(note);
   note.body = stripLocalOnlyTags(note.body);

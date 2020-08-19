@@ -1,6 +1,6 @@
 ---
 id: build-site
-publish: true
+published: true
 ---
 
 Build site home

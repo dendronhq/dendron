@@ -40,12 +40,13 @@ Array [
   },
   Object {
     "body": "
-Build site home",
+Build site home
+",
     "children": Array [
       "One",
     ],
     "custom": Object {
-      "publish": true,
+      "published": true,
     },
     "data": Object {},
     "desc": "",
@@ -150,7 +151,8 @@ head w.3 text
   },
   Object {
     "body": "
-Published note set",
+Published note set
+",
     "children": Array [],
     "custom": Object {},
     "data": Object {},

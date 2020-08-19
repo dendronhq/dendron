@@ -74,6 +74,8 @@ describe("build-site", () => {
     expect(data.nav_order).toEqual(1);
     expect(data.parent).toBe(null);
     expect(content).toMatchSnapshot("build-site.md");
+    const siteRootDir = fs.readdirSync(siteRoot);
+    expect(_.includes(siteRootDir, "assets")).toBeTruthy();
   });
 
   test("image prefix", async () => {
@@ -92,5 +94,23 @@ describe("build-site", () => {
 
     expect(_.includes(dir, "assets")).toBeFalsy();
     expect(_.trim(content)).toEqual("![link-alt](fake-s3.com/link-path.jpg)");
+  });
+
+  test("delete unused asset", async () => {
+    const config = {
+      noteRoot: "root",
+      noteRoots: ["sample"],
+      siteRoot,
+    };
+    await new BuildSiteCommand().execute({ engine, config, dendronRoot });
+    const img = path.join(siteRoot, "assets", "images", "foo.jpg");
+    expect(fs.existsSync(img)).toBeTruthy();
+
+    // delete image, should be gone
+    const imgSrc = path.join(root, "assets", "images", "foo.jpg");
+    fs.unlinkSync(imgSrc);
+
+    await new BuildSiteCommand().execute({ engine, config, dendronRoot });
+    expect(fs.existsSync(img)).toBeFalsy();
   });
 });

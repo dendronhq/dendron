@@ -15,6 +15,7 @@ import {
   getProcessor,
   replaceRefs,
 } from "@dendronhq/engine-server";
+import Rsync from "rsync";
 
 type CommandOpts = {
   engine: DEngine;
@@ -88,22 +89,28 @@ function note2JekyllMdFile(
 export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
   async copyAssets(opts: { vaultAssetsDir: string; siteAssetsDir: string }) {
     const { vaultAssetsDir, siteAssetsDir } = opts;
+
     if (!fs.existsSync(path.join(vaultAssetsDir, "images"))) {
       return;
     }
+    const src = path.join(vaultAssetsDir, "images");
+    const dst = path.join(siteAssetsDir);
+    const rsync = new Rsync().flags("az").delete().source(src).destination(dst);
+
     return new Promise((resolve, reject) => {
-      fs.copy(
-        path.join(vaultAssetsDir, "images"),
-        path.join(siteAssetsDir, "images"),
-        (err) => {
-          if (err) {
-            err.message += JSON.stringify({ vaultAssetsDir, siteAssetsDir });
-            reject(err);
-          }
-          this.L.info({ msg: "finish copying" });
-          resolve();
+      rsync.execute((err, code, cmd) => {
+        if (err) {
+          err.message += JSON.stringify({
+            code,
+            cmd,
+            vaultAssetsDir,
+            siteAssetsDir,
+          });
+          reject(err);
         }
-      );
+        this.L.info({ msg: "finish copying" });
+        resolve();
+      });
     });
   }
 

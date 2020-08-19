@@ -44,6 +44,7 @@
     "fs-extra": "^9.0.1",
     "gray-matter": "^4.0.2",
     "lodash": "^4.17.19",
+    "rsync": "^0.6.1",
     "yargs": "^15.4.1"
   },
   "devDependencies": {
@@ -51,6 +52,7 @@
     "@types/jest": "^23.3.3",
     "@types/lodash": "^4.14.158",
     "@types/node": "13.11.0",
+    "@types/rsync": "^0.4.30",
     "@types/yargs": "^15.0.5",
     "coveralls": "^3.0.2",
     "jest": "^23.6.0",

@@ -20,6 +20,15 @@
       "problemMatcher": []
     },
     {
+      "label": "NPM: Publish:Pre-Patch",
+      "type": "shell",
+      "command": "./bootstrap/scripts/publish-pre-patch.sh",
+      "options": {
+        "cwd": "./.."
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Plugin: Package and Install",
       "type": "shell",
       "command": "scripts/pack_and_install.sh",
@@ -60,6 +69,15 @@
       "label": "Pub:Local",
       "dependsOn": [
         "NPM: Publish",
+        "Plugin: Package and Install"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "Pub:Local:Pre:Patch",
+      "dependsOn": [
+        "NPM: Publish:Pre-Patch",
         "Plugin: Package and Install"
       ],
       "dependsOrder": "sequence",

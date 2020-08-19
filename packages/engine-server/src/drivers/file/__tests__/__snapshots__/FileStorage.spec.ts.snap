@@ -125,7 +125,7 @@ head w.3 text
     "desc": "",
     "fname": "sample",
     "parent": "root",
-    "stub": true,
+    "stub": false,
     "title": "Sample",
     "type": "note",
   },
@@ -210,7 +210,8 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "![link-alt](link-path.jpg)
+    "body": "
+![link-alt](link-path.jpg)
 ",
     "children": Array [],
     "custom": Object {},

@@ -21,31 +21,33 @@ function setupTmpDendronDir() {
 describe("build-site", () => {
   let root: string;
   let engine: DEngine;
+  let siteRoot: string;
+  let dendronRoot: string;
+  let buildDir: string;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     root = setupTmpDendronDir();
     engine = DendronEngine.getOrCreateEngine({
       root,
       forceNew: true,
       mode: "exact",
     });
+    siteRoot = FileTestUtils.tmpDir().name;
+    dendronRoot = root;
+    buildDir = path.join(siteRoot, "notes");
+    await engine.init();
   });
 
   afterEach(() => {
-    // expect(actualFiles).toEqual(expectedFiles);
     fs.removeSync(root);
   });
 
   test("basic", async () => {
-    const siteRoot = FileTestUtils.tmpDir();
-    await engine.init();
     const config = {
       noteRoot: "root",
-      siteRoot: siteRoot.name,
+      siteRoot,
     };
-    const dendronRoot = root;
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
-    const buildDir = path.join(siteRoot.name, "notes");
     const { data, content } = readMD(path.join(buildDir, "foo.md"));
     expect(data.id).toEqual("foo");
     expect(content).toMatchSnapshot("bond");
@@ -54,25 +56,41 @@ describe("build-site", () => {
   });
 
   test("multiple roots", async () => {
-    const siteRoot = FileTestUtils.tmpDir();
-    await engine.init();
     const config = {
       noteRoot: "root",
       noteRoots: ["foo", "build-site"],
-      siteRoot: siteRoot.name,
+      siteRoot,
     };
-    const dendronRoot = root;
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
-    const buildDir = path.join(siteRoot.name, "notes");
     const dir = fs.readdirSync(buildDir);
     expect(_.includes(dir, "foo.md")).toBeTruthy();
     expect(_.includes(dir, "build-site.md")).toBeTruthy();
     expect(_.includes(dir, "refactor.one.md")).toBeFalsy();
-    let { data } = readMD(path.join(buildDir, "foo.md"));
+    let { data, content } = readMD(path.join(buildDir, "foo.md"));
     expect(data.nav_order).toEqual(0);
     expect(data.parent).toBe(null);
-    ({ data } = readMD(path.join(buildDir, "build-site.md")));
+    expect(content).toMatchSnapshot("foo.md");
+    ({ data, content } = readMD(path.join(buildDir, "build-site.md")));
     expect(data.nav_order).toEqual(1);
     expect(data.parent).toBe(null);
+    expect(content).toMatchSnapshot("build-site.md");
+  });
+
+  test("image prefix", async () => {
+    const config = {
+      noteRoot: "root",
+      noteRoots: ["sample"],
+      siteRoot,
+      assetsPrefix: "fake-s3.com/",
+    };
+    await new BuildSiteCommand().execute({ engine, config, dendronRoot });
+
+    const { content } = readMD(path.join(buildDir, "sample.image-link.md"));
+    const dir = fs.readdirSync(siteRoot);
+
+    expect(content).toMatchSnapshot("sample.image-link.md");
+
+    expect(_.includes(dir, "assets")).toBeFalsy();
+    expect(_.trim(content)).toEqual("![link-alt](fake-s3.com/link-path.jpg)");
   });
 });

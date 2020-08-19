@@ -377,4 +377,8 @@ export type DendronSiteConfig = {
   noteRoot: string;
   noteRoots?: string[];
   siteRoot: string;
+  /**
+   * If set, instead of copying assets, load assets from the assigned prefix
+   */
+  assetsPrefix?: string;
 };

@@ -4,3 +4,18 @@ exports[`build-site basic: bond 1`] = `
 "- [lbl](refactor.one)
 "
 `;
+
+exports[`build-site image prefix: sample.image-link.md 1`] = `
+"![link-alt](fake-s3.com/link-path.jpg)
+"
+`;
+
+exports[`build-site multiple roots: build-site.md 1`] = `
+"
+"
+`;
+
+exports[`build-site multiple roots: foo.md 1`] = `
+"- [lbl](refactor.one)
+"
+`;

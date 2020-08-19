@@ -47,46 +47,6 @@ function stripSiteOnlyTags(note: Note) {
   return doc;
 }
 
-function wikiLinkToMd(
-  note: Note,
-  engine: DEngine,
-  opts?: { linkPrefix: string }
-) {
-  let matches;
-  let doc = note.body;
-  do {
-    matches = doc.match(/(?<raw>\[\[(?<link>[^\]]+)\]\])/);
-    if (matches) {
-      // @ts-ignore
-      const { raw, link } = matches.groups;
-      const [first, rest] = link.split("|");
-      let title: string | undefined;
-      let mdLink: string;
-      // we have a piped title
-      if (rest) {
-        title = _.trim(first);
-        mdLink = _.trim(rest);
-      } else {
-        mdLink = _.trim(first);
-      }
-      const noteFromLink = _.find(engine.notes, { fname: mdLink });
-      if (!noteFromLink) {
-        throw Error(`${mdLink} not found. file: ${note.fname}`);
-      }
-      if (!title) {
-        title = _.trim(noteFromLink.title);
-      }
-      let noteLink = noteFromLink.id;
-      if (opts?.linkPrefix) {
-        noteLink = `${opts.linkPrefix}/${noteLink}`;
-      }
-      const newLink = `[${title}](${noteLink})`;
-      doc = doc.replace(raw, newLink);
-    }
-  } while (matches);
-  return doc;
-}
-
 function note2JekyllMdFile(
   note: Note,
   opts: { notesDir: string; engine: DEngine } & DendronSiteConfig
@@ -110,15 +70,14 @@ function note2JekyllMdFile(
   // delete parent from root
   note.body = stripSiteOnlyTags(note);
   note.body = stripLocalOnlyTags(note.body);
-  // note.body = stripLocalOnlyTags(note.body);
-  // TODO: HACK
-  // if (note.id !== "f1af56bb-db27-47ae-8406-61a98de6c78c") {
-  //   //note.body = wikiLinkToMd(note, opts.engine, { linkPrefix });
   note.body = getProcessor()
-    .use(replaceRefs, { wikiLink2Md: true, wikiLinkPrefix: linkPrefix })
+    .use(replaceRefs, {
+      wikiLink2Md: true,
+      wikiLinkPrefix: linkPrefix,
+      imageRefPrefix: opts.assetsPrefix,
+    })
     .processSync(note.body)
     .toString();
-  // }
   const filePath = path.join(opts.notesDir, meta.id + ".md");
   return fs.writeFile(
     filePath,
@@ -204,7 +163,9 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     const vaultAssetsDir = path.join(engine.props.root, assetsDir);
     // docs/assets
     const siteAssetsDir = path.join(siteRoot, assetsDir);
-    await this.copyAssets({ vaultAssetsDir, siteAssetsDir });
+    if (!config.assetsPrefix) {
+      await this.copyAssets({ vaultAssetsDir, siteAssetsDir });
+    }
 
     await Promise.all(out);
     L.info({ msg: "exit" });

@@ -205,7 +205,7 @@ head w.3 text
     "desc": "",
     "fname": "sample",
     "parent": "root",
-    "stub": true,
+    "stub": false,
     "title": "Sample",
     "type": "note",
   },
@@ -290,7 +290,8 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "![link-alt](link-path.jpg)
+    "body": "
+![link-alt](link-path.jpg)
 ",
     "children": Array [],
     "custom": Object {},
@@ -466,7 +467,7 @@ head w.3 text
     "desc": "",
     "fname": "sample",
     "parent": "root",
-    "stub": true,
+    "stub": false,
     "title": "Sample",
     "type": "note",
   },
@@ -551,7 +552,8 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "![link-alt](link-path.jpg)
+    "body": "
+![link-alt](link-path.jpg)
 ",
     "children": Array [],
     "custom": Object {},
@@ -608,6 +610,7 @@ Template text
 
 exports[`engine:exact note edge md exist, no schema file: listDir 1`] = `
 Array [
+  "assets",
   "bar.one.temp.md",
   "bar.schema.yml",
   "build-site.md",
@@ -621,6 +624,7 @@ Array [
   "refactor.two.md",
   "root.md",
   "sample.image-link.md",
+  "sample.md",
   "test1.schema.yml",
 ]
 `;
@@ -733,7 +737,7 @@ head w.3 text
     "desc": "",
     "fname": "sample",
     "parent": "root",
-    "stub": true,
+    "stub": false,
     "title": "Sample",
     "type": "note",
   },
@@ -818,7 +822,8 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "![link-alt](link-path.jpg)
+    "body": "
+![link-alt](link-path.jpg)
 ",
     "children": Array [],
     "custom": Object {},
@@ -875,6 +880,7 @@ Template text
 
 exports[`engine:exact note edge no md file, no schema : listDir 1`] = `
 Array [
+  "assets",
   "bar.one.temp.md",
   "bar.schema.yml",
   "build-site.md",
@@ -888,6 +894,7 @@ Array [
   "refactor.two.md",
   "root.md",
   "sample.image-link.md",
+  "sample.md",
   "test1.schema.yml",
 ]
 `;
@@ -1001,7 +1008,7 @@ head w.3 text
     "desc": "",
     "fname": "sample",
     "parent": "root",
-    "stub": true,
+    "stub": false,
     "title": "Sample",
     "type": "note",
   },
@@ -1086,7 +1093,8 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "![link-alt](link-path.jpg)
+    "body": "
+![link-alt](link-path.jpg)
 ",
     "children": Array [],
     "custom": Object {},
@@ -1166,6 +1174,7 @@ Object {
 
 exports[`engine:exact note edge no md file, schema exist: listDir 1`] = `
 Array [
+  "assets",
   "bar.one.temp.md",
   "bar.schema.yml",
   "build-site.md",
@@ -1180,6 +1189,7 @@ Array [
   "refactor.two.md",
   "root.md",
   "sample.image-link.md",
+  "sample.md",
   "test1.schema.yml",
 ]
 `;
@@ -1293,7 +1303,7 @@ head w.3 text
     "desc": "",
     "fname": "sample",
     "parent": "root",
-    "stub": true,
+    "stub": false,
     "title": "Sample",
     "type": "note",
   },
@@ -1378,7 +1388,8 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "![link-alt](link-path.jpg)
+    "body": "
+![link-alt](link-path.jpg)
 ",
     "children": Array [],
     "custom": Object {},
@@ -1474,6 +1485,7 @@ Object {
 
 exports[`engine:exact note main delete node with children: listDi2 1`] = `
 Array [
+  "assets",
   "bar.one.temp.md",
   "bar.schema.yml",
   "build-site.md",
@@ -1487,6 +1499,7 @@ Array [
   "refactor.two.md",
   "root.md",
   "sample.image-link.md",
+  "sample.md",
   "test1.schema.yml",
 ]
 `;
@@ -1579,7 +1592,7 @@ head w.3 text
     "desc": "",
     "fname": "sample",
     "parent": "root",
-    "stub": true,
+    "stub": false,
     "title": "Sample",
     "type": "note",
   },
@@ -1664,7 +1677,8 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "![link-alt](link-path.jpg)
+    "body": "
+![link-alt](link-path.jpg)
 ",
     "children": Array [],
     "custom": Object {},
@@ -1823,7 +1837,7 @@ head w.3 text
     "desc": "",
     "fname": "sample",
     "parent": "root",
-    "stub": true,
+    "stub": false,
     "title": "Sample",
     "type": "note",
   },
@@ -1908,7 +1922,8 @@ head w.3 text
     "type": "note",
   },
   Object {
-    "body": "![link-alt](link-path.jpg)
+    "body": "
+![link-alt](link-path.jpg)
 ",
     "children": Array [],
     "custom": Object {},
@@ -1981,6 +1996,7 @@ Template text
 
 exports[`engine:exact note main open stub node: listDir 1`] = `
 Array [
+  "assets",
   "bar.one.temp.md",
   "bar.schema.yml",
   "bar.two.md",
@@ -1996,12 +2012,14 @@ Array [
   "refactor.two.md",
   "root.md",
   "sample.image-link.md",
+  "sample.md",
   "test1.schema.yml",
 ]
 `;
 
 exports[`engine:exact note main open stub node: listDir2 1`] = `
 Array [
+  "assets",
   "bar.one.temp.md",
   "bar.schema.yml",
   "bar.two.md",
@@ -2017,6 +2035,7 @@ Array [
   "refactor.two.md",
   "root.md",
   "sample.image-link.md",
+  "sample.md",
   "test1.schema.yml",
 ]
 `;
@@ -2030,8 +2049,8 @@ Array [
       "foo",
       "ref",
       "Refactor",
-      "Bar",
       "Sample",
+      "Bar",
     ],
     "custom": Object {},
     "data": Object {},
@@ -2122,6 +2141,20 @@ head w.3 text
   Object {
     "body": "",
     "children": Array [
+      "Image-link",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "sample",
+    "parent": "root",
+    "stub": false,
+    "title": "Sample",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
       "Two",
       "One",
     ],
@@ -2132,20 +2165,6 @@ head w.3 text
     "parent": "root",
     "stub": true,
     "title": "Bar",
-    "type": "note",
-  },
-  Object {
-    "body": "",
-    "children": Array [
-      "Image-link",
-    ],
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "sample",
-    "parent": "root",
-    "stub": true,
-    "title": "Sample",
     "type": "note",
   },
   Object {
@@ -2215,6 +2234,20 @@ head w.3 text
     "type": "note",
   },
   Object {
+    "body": "
+![link-alt](link-path.jpg)
+",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "sample.image-link",
+    "parent": "Sample",
+    "stub": false,
+    "title": "Image-link",
+    "type": "note",
+  },
+  Object {
     "body": "bar.two.body
 ",
     "children": Array [],
@@ -2239,19 +2272,6 @@ head w.3 text
     "parent": "Bar",
     "stub": true,
     "title": "One",
-    "type": "note",
-  },
-  Object {
-    "body": "![link-alt](link-path.jpg)
-",
-    "children": Array [],
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "sample.image-link",
-    "parent": "Sample",
-    "stub": false,
-    "title": "Image-link",
     "type": "note",
   },
   Object {

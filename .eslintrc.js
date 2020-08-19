@@ -4,7 +4,7 @@ module.exports = {
     es6: true,
     jest: true,
   },
-  extends: ["plugin:react/recommended", "airbnb"],
+  extends: ["plugin:react/recommended", "airbnb", "prettier"],
   globals: {
     Atomics: "readonly",
     SharedArrayBuffer: "readonly",
@@ -37,6 +37,7 @@ module.exports = {
     // prettier
     indent: "off",
     quotes: "off",
+    "newline-per-chained-call": "off",
     "function-paren-newline": "off",
     "brace-style": "off",
     // runs into max-len issue

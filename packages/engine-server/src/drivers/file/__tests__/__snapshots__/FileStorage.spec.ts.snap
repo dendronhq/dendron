@@ -43,7 +43,8 @@ Array [
     "body": "
 Build site home
 
-- [[build-site.one]]",
+- [[build-site.one]]
+",
     "children": Array [
       "One",
     ],
@@ -266,7 +267,8 @@ Replace-refs Text
 - [[engine-server.replace-refs.one]]
 - [[lbl|engine-server.replace-refs.one]]
 - [[engine-server.replace-refs.one.md]]
-- [[lbl|engine-server.replace-refs.one.md]]",
+- [[lbl|engine-server.replace-refs.one.md]]
+",
     "children": Array [
       "One",
     ],
@@ -311,7 +313,8 @@ Replace-refs Text
 store/engine-server.replace-refs.one text
 
 - [[engine-server.replace-refs]]
-- [[engine-server.replace-refs.md]]",
+- [[engine-server.replace-refs.md]]
+",
     "children": Array [],
     "custom": Object {},
     "data": Object {},

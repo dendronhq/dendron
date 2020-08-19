@@ -35,7 +35,7 @@ interface PluginOpts {
 export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
   const permalinks = opts.permalinks || [];
   const defaultPageResolver = (name: string) => [
-    name.replace(/ /g, "_").toLowerCase(),
+    name.replace(/ /g, "").toLowerCase(),
   ];
   const pageResolver = opts.pageResolver || defaultPageResolver;
   const newClassName = opts.newClassName || "new";

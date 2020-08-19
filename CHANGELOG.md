@@ -9,23 +9,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - links not being converted to ids ([7106681](https://github.com/dendronhq/dendron/commit/7106681734804ec39990abfdfe9643ba9c006aa5))
 
-## [0.7.6-alpha.2](https://github.com/dendronhq/dendron/compare/v0.7.6-alpha.1...v0.7.6-alpha.2) (2020-08-19)
-
-**Note:** Version bump only for package root
-
-## [0.7.6-alpha.1](https://github.com/dendronhq/dendron/compare/v0.7.6-alpha.0...v0.7.6-alpha.1) (2020-08-19)
-
-**Note:** Version bump only for package root
-
-## [0.7.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.7.5-alpha.0...v0.7.6-alpha.0) (2020-08-19)
-
 ### Features
 
 - **pods:** support per hierarchy configuration when publishing ([e68edfa](https://github.com/dendronhq/dendron/commit/e68edfa4cac21230ff77a24b65efa2031eb292dc))
-
-## [0.7.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.7.4...v0.7.5-alpha.0) (2020-08-19)
-
-### Features
 
 - **pods:** enable image prefix when building site ([ab86573](https://github.com/dendronhq/dendron/commit/ab865730b0c2da461e2b9fe6851b8784f690be8a))
 

@@ -3,6 +3,7 @@ import {
   DEngine,
   DNodeUtils,
   Note,
+  HierarchyConfig,
 } from "@dendronhq/common-all";
 import { resolvePath } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -48,7 +49,7 @@ function stripSiteOnlyTags(note: Note) {
   return doc;
 }
 
-function note2JekyllMdFile(
+async function note2JekyllMdFile(
   note: Note,
   opts: { notesDir: string; engine: DEngine } & DendronSiteConfig
 ): Promise<void> {
@@ -59,6 +60,15 @@ function note2JekyllMdFile(
   const jekyllProps: DendronJekyllProps = {
     hpath: note.path,
   };
+  const config = opts.config || {};
+  let hConfig: HierarchyConfig = _.get(config, note.domain.fname, {
+    publishByDefault: true,
+  });
+
+  if (!hConfig.publishByDefault && !note.custom.publish) {
+    return;
+  }
+
   let linkPrefix = "";
   if (opts.noteRoot === meta.fname) {
     jekyllProps["permalink"] = "/";
@@ -122,12 +132,6 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     const siteNotesDir = "notes";
     const siteNotesDirPath = path.join(siteRoot, siteNotesDir);
     const L = this.L;
-    // ({
-    //   ctx: "BuildSiteComman",
-    //   siteRoot,
-    //   dendronRoot,
-    //   noteRoot
-    // });
     L.info({ msg: "enter", siteNotesDirPath });
     fs.ensureDirSync(siteNotesDirPath);
     fs.emptyDirSync(siteNotesDirPath);

@@ -11,7 +11,7 @@ exports[`build-site image prefix: sample.image-link.md 1`] = `
 `;
 
 exports[`build-site multiple roots: build-site.md 1`] = `
-"
+"Build site home
 "
 `;
 

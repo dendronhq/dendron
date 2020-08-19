@@ -1,4 +1,4 @@
-import { DEngine } from "@dendronhq/common-all";
+import { DEngine, DendronSiteConfig } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import {
   LernaTestUtils,
@@ -23,7 +23,7 @@ describe("build-site", () => {
   let engine: DEngine;
   let siteRoot: string;
   let dendronRoot: string;
-  let buildDir: string;
+  let notesDir: string;
 
   beforeEach(async () => {
     root = setupTmpDendronDir();
@@ -34,7 +34,7 @@ describe("build-site", () => {
     });
     siteRoot = FileTestUtils.tmpDir().name;
     dendronRoot = root;
-    buildDir = path.join(siteRoot, "notes");
+    notesDir = path.join(siteRoot, "notes");
     await engine.init();
   });
 
@@ -48,7 +48,7 @@ describe("build-site", () => {
       siteRoot,
     };
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
-    const { data, content } = readMD(path.join(buildDir, "foo.md"));
+    const { data, content } = readMD(path.join(notesDir, "foo.md"));
     expect(data.id).toEqual("foo");
     expect(content).toMatchSnapshot("bond");
     expect(content.indexOf("- [lbl](refactor.one)") >= 0).toBe(true);
@@ -62,15 +62,15 @@ describe("build-site", () => {
       siteRoot,
     };
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
-    const dir = fs.readdirSync(buildDir);
+    const dir = fs.readdirSync(notesDir);
     expect(_.includes(dir, "foo.md")).toBeTruthy();
     expect(_.includes(dir, "build-site.md")).toBeTruthy();
     expect(_.includes(dir, "refactor.one.md")).toBeFalsy();
-    let { data, content } = readMD(path.join(buildDir, "foo.md"));
+    let { data, content } = readMD(path.join(notesDir, "foo.md"));
     expect(data.nav_order).toEqual(0);
     expect(data.parent).toBe(null);
     expect(content).toMatchSnapshot("foo.md");
-    ({ data, content } = readMD(path.join(buildDir, "build-site.md")));
+    ({ data, content } = readMD(path.join(notesDir, "build-site.md")));
     expect(data.nav_order).toEqual(1);
     expect(data.parent).toBe(null);
     expect(content).toMatchSnapshot("build-site.md");
@@ -87,7 +87,7 @@ describe("build-site", () => {
     };
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
 
-    const { content } = readMD(path.join(buildDir, "sample.image-link.md"));
+    const { content } = readMD(path.join(notesDir, "sample.image-link.md"));
     const dir = fs.readdirSync(siteRoot);
 
     expect(content).toMatchSnapshot("sample.image-link.md");
@@ -112,5 +112,27 @@ describe("build-site", () => {
 
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
     expect(fs.existsSync(img)).toBeFalsy();
+  });
+
+  test("no publsih by default", async () => {
+    const config: DendronSiteConfig = {
+      noteRoot: "root",
+      noteRoots: ["build-site"],
+      siteRoot,
+      config: {
+        "build-site": {
+          publishByDefault: false,
+        },
+      },
+    };
+    await new BuildSiteCommand().execute({ engine, config, dendronRoot });
+    const dir = fs.readdirSync(notesDir);
+    // root should exist
+    let notePath = path.join(notesDir, "build-site.md");
+    expect(fs.existsSync(notePath)).toBeTruthy();
+    // non-root should not exist
+    notePath = path.join(notesDir, "build-site.one.md");
+    expect(fs.existsSync(notePath)).toBeFalsy();
+    expect(dir.length).toEqual(1);
   });
 });

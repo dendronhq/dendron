@@ -39,9 +39,14 @@ Array [
     "type": "note",
   },
   Object {
-    "body": "",
-    "children": Array [],
-    "custom": Object {},
+    "body": "
+Build site home",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {
+      "publish": true,
+    },
     "data": Object {},
     "desc": "",
     "fname": "build-site",
@@ -141,6 +146,19 @@ head w.3 text
     "parent": "root",
     "stub": true,
     "title": "Bar",
+    "type": "note",
+  },
+  Object {
+    "body": "
+Published note set",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "build-site.one",
+    "parent": "Build-site",
+    "stub": false,
+    "title": "One",
     "type": "note",
   },
   Object {

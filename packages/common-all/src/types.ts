@@ -373,12 +373,30 @@ export type DendronConfig = {
   site: DendronSiteConfig;
 };
 
+export type HierarchyConfig = {
+  publishByDefault: boolean;
+};
+
 export type DendronSiteConfig = {
+  // TODO: rename `siteHomePage`
   noteRoot: string;
+
+  // TODO: rename `siteHierarchies`
   noteRoots?: string[];
+
+  /**
+   * // TODO: rename `siteRootDir`
+   * Where is site going to be published
+   */
   siteRoot: string;
+
   /**
    * If set, instead of copying assets, load assets from the assigned prefix
    */
   assetsPrefix?: string;
+
+  /**
+   * Control publication on a per hierarchy basis
+   */
+  config?: { [key: string]: HierarchyConfig };
 };

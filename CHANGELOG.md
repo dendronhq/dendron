@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.4](https://github.com/dendronhq/dendron/compare/v0.7.3...v0.7.4) (2020-08-19)
+
+**Note:** Version bump only for package root
+
 ## [0.7.3](https://github.com/dendronhq/dendron/compare/v0.7.2...v0.7.3) (2020-08-17)
 
 **Note:** Version bump only for package root

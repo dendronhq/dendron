@@ -1,5 +1,5 @@
 ---
-id: build-site.one
+id: id.build-site.one
 ---
 
 Published note set

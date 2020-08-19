@@ -135,4 +135,19 @@ describe("build-site", () => {
     expect(fs.existsSync(notePath)).toBeFalsy();
     expect(dir.length).toEqual(1);
   });
+
+  test("ids are converted", async () => {
+    const config: DendronSiteConfig = {
+      noteRoot: "root",
+      noteRoots: ["build-site"],
+      siteRoot,
+    };
+    await new BuildSiteCommand().execute({ engine, config, dendronRoot });
+    let notePath = path.join(notesDir, "build-site.md");
+    const { content } = readMD(notePath);
+    expect(content).toMatchSnapshot("converted");
+    expect(
+      content.indexOf("[build-site.one](id.build-site.one)") >= 0
+    ).toBeTruthy();
+  });
 });

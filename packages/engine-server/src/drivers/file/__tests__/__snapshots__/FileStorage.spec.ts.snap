@@ -27,6 +27,7 @@ Array [
       "ref",
       "Refactor",
       "Sample",
+      "Engine-server",
       "Bar",
     ],
     "custom": Object {},
@@ -41,7 +42,8 @@ Array [
   Object {
     "body": "
 Build site home
-",
+
+- [[build-site.one]]",
     "children": Array [
       "One",
     ],
@@ -133,6 +135,20 @@ head w.3 text
     "parent": "root",
     "stub": false,
     "title": "Sample",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "replace-refs",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server",
+    "parent": "root",
+    "stub": true,
+    "title": "Engine-server",
     "type": "note",
   },
   Object {
@@ -244,6 +260,26 @@ Published note set
     "type": "note",
   },
   Object {
+    "body": "
+Replace-refs Text
+
+- [[engine-server.replace-refs.one]]
+- [[lbl|engine-server.replace-refs.one]]
+- [[engine-server.replace-refs.one.md]]
+- [[lbl|engine-server.replace-refs.one.md]]",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs",
+    "parent": "Engine-server",
+    "stub": false,
+    "title": "replace-refs",
+    "type": "note",
+  },
+  Object {
     "body": "",
     "children": Array [
       "Alpha",
@@ -268,6 +304,22 @@ Published note set
     "parent": "Three",
     "stub": false,
     "title": "Alpha",
+    "type": "note",
+  },
+  Object {
+    "body": "
+store/engine-server.replace-refs.one text
+
+- [[engine-server.replace-refs]]
+- [[engine-server.replace-refs.md]]",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs.one",
+    "parent": "replace-refs",
+    "stub": false,
+    "title": "One",
     "type": "note",
   },
   Object {

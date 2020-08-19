@@ -5,6 +5,13 @@ exports[`build-site basic: bond 1`] = `
 "
 `;
 
+exports[`build-site ids are converted: converted 1`] = `
+"Build site home
+
+- [build-site.one](id.build-site.one)
+"
+`;
+
 exports[`build-site image prefix: sample.image-link.md 1`] = `
 "![link-alt](fake-s3.com/link-path.jpg)
 "
@@ -12,6 +19,8 @@ exports[`build-site image prefix: sample.image-link.md 1`] = `
 
 exports[`build-site multiple roots: build-site.md 1`] = `
 "Build site home
+
+- [build-site.one](id.build-site.one)
 "
 `;
 

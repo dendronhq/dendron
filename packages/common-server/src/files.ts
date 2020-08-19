@@ -222,3 +222,11 @@ export function resolvePath(filePath: string, root?: string): string {
     return path.join(root, filePath);
   }
 }
+
+export function removeMDExtension(nodePath: string) {
+  const idx = nodePath.lastIndexOf(".md");
+  if (idx > 0) {
+    nodePath = nodePath.slice(0, idx);
+  }
+  return nodePath;
+}

@@ -1,6 +1,8 @@
 import RemarkParser, { Eat } from "remark-parse";
 import { Processor } from "unified";
 import { Node } from "unist";
+import { Note } from "@dendronhq/common-all";
+import { removeMDExtension } from "@dendronhq/common-server";
 
 const LINK_REGEX = /^\[\[(.+?)\]\]/;
 
@@ -13,6 +15,8 @@ export type WikiLinkData = {
   hChildren: any[];
   toMd?: boolean;
   prefix?: string;
+  useId: boolean;
+  note?: Note;
 };
 
 function locator(value: string, fromIndex: number) {
@@ -78,6 +82,10 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
       if (!exists) {
         classNames += " " + newClassName;
       }
+      // normalize
+      if (permalink) {
+        permalink = removeMDExtension(permalink);
+      }
 
       return eat(match[0])({
         type: "wikiLink",
@@ -127,6 +135,12 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
         const data = node.data as WikiLinkData;
         if (!node || !node.data || !node.data.alias) {
           throw Error("no alias found");
+        }
+        if (data.useId) {
+          if (!data.note) {
+            throw Error("no note");
+          }
+          node.value = data.note.id;
         }
         if (data.toMd) {
           return `[${data.alias}](${data.prefix || ""}${node.value})`;

@@ -1,6 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`replaceRefs md2wiki: parsed 1`] = `
+exports[`replaceRefs wiki2Md and swap id: raw 1`] = `
+"Replace-refs Text
+
+- [engine-server.replace-refs.one](234)
+- [lbl](234)
+- [engine-server.replace-refs.one.md](234)
+- [lbl](234)
+"
+`;
+
+exports[`replaceRefs wiki2Md: parsed 1`] = `
 Object {
   "children": Array [
     Object {
@@ -337,7 +347,7 @@ Object {
 }
 `;
 
-exports[`replaceRefs md2wiki: raw 1`] = `
+exports[`replaceRefs wiki2Md: raw 1`] = `
 "[link](normal-link)
 
 - [foo-wiki-link](foo-wiki-link)

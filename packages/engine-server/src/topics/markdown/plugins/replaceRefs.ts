@@ -1,4 +1,4 @@
-import { ProtoLink } from "@dendronhq/common-all/src";
+import { ProtoLink, DEngine, DNodeUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Node } from "unist";
 import visit from "unist-util-visit";
@@ -10,14 +10,17 @@ type ReplaceRefOptions = {
   imageRefPrefix?: string;
   wikiLink2Md?: boolean;
   wikiLinkPrefix?: string;
+  wikiLinkUseId?: boolean;
+  engine?: DEngine;
 };
 
 export function replaceRefs(options: ReplaceRefOptions) {
   const {
-    refReplacements,
     imageRefPrefix,
     wikiLink2Md,
     wikiLinkPrefix,
+    wikiLinkUseId,
+    engine,
   } = _.defaults(options, {
     refReplacements: {},
     wikiLinkPrefix: false,
@@ -40,6 +43,15 @@ export function replaceRefs(options: ReplaceRefOptions) {
         }
         if (wikiLinkPrefix) {
           data.prefix = wikiLinkPrefix;
+        }
+        if (wikiLinkUseId) {
+          data.useId = true;
+          if (!engine) {
+            throw Error(`need engine when wikiLinkUseId is set`);
+          }
+          data.note = DNodeUtils.getNoteByFname(data.permalink, engine, {
+            throwIfEmpty: true,
+          });
         }
       }
     });

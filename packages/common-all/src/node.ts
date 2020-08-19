@@ -135,7 +135,7 @@ export class DNodeUtils {
     engine: DEngine,
     opts?: { throwIfEmpty: boolean }
   ): Note | undefined {
-    const out = _.find(_.values(engine.notes), { fname });
+    const out = _.find(_.values(engine.notes), { fname: fname.toLowerCase() });
     if (opts?.throwIfEmpty && _.isUndefined(out)) {
       throw Error(`${fname} not found`);
     }

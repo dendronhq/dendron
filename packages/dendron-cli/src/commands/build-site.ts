@@ -86,6 +86,8 @@ async function note2JekyllMdFile(
       wikiLink2Md: true,
       wikiLinkPrefix: linkPrefix,
       imageRefPrefix: opts.assetsPrefix,
+      wikiLinkUseId: true,
+      engine: opts.engine,
     })
     .processSync(note.body)
     .toString();

@@ -100,6 +100,42 @@ Object {
 exports[`engine:exact note basic fetch node: main 1`] = `
 Array [
   Object {
+    "body": "
+Replace-refs Text
+
+- [[engine-server.replace-refs.one]]
+- [[lbl|engine-server.replace-refs.one]]
+- [[engine-server.replace-refs.one.md]]
+- [[lbl|engine-server.replace-refs.one.md]]",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs",
+    "parent": "Engine-server",
+    "stub": false,
+    "title": "replace-refs",
+    "type": "note",
+  },
+  Object {
+    "body": "
+store/engine-server.replace-refs.one text
+
+- [[engine-server.replace-refs]]
+- [[engine-server.replace-refs.md]]",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs.one",
+    "parent": "replace-refs",
+    "stub": false,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
     "body": "",
     "children": Array [
       "Build-site",
@@ -107,6 +143,7 @@ Array [
       "ref",
       "Refactor",
       "Sample",
+      "Engine-server",
       "Bar",
     ],
     "custom": Object {},
@@ -121,7 +158,8 @@ Array [
   Object {
     "body": "
 Build site home
-",
+
+- [[build-site.one]]",
     "children": Array [
       "One",
     ],
@@ -213,6 +251,20 @@ head w.3 text
     "parent": "root",
     "stub": false,
     "title": "Sample",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "replace-refs",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server",
+    "parent": "root",
+    "stub": true,
+    "title": "Engine-server",
     "type": "note",
   },
   Object {
@@ -382,6 +434,42 @@ Object {
 exports[`engine:exact note basic updateNode: main 1`] = `
 Array [
   Object {
+    "body": "
+Replace-refs Text
+
+- [[engine-server.replace-refs.one]]
+- [[lbl|engine-server.replace-refs.one]]
+- [[engine-server.replace-refs.one.md]]
+- [[lbl|engine-server.replace-refs.one.md]]",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs",
+    "parent": "Engine-server",
+    "stub": false,
+    "title": "replace-refs",
+    "type": "note",
+  },
+  Object {
+    "body": "
+store/engine-server.replace-refs.one text
+
+- [[engine-server.replace-refs]]
+- [[engine-server.replace-refs.md]]",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs.one",
+    "parent": "replace-refs",
+    "stub": false,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
     "body": "",
     "children": Array [
       "Build-site",
@@ -389,6 +477,7 @@ Array [
       "ref",
       "Refactor",
       "Sample",
+      "Engine-server",
       "Bar",
     ],
     "custom": Object {},
@@ -403,7 +492,8 @@ Array [
   Object {
     "body": "
 Build site home
-",
+
+- [[build-site.one]]",
     "children": Array [
       "One",
     ],
@@ -495,6 +585,20 @@ head w.3 text
     "parent": "root",
     "stub": false,
     "title": "Sample",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "replace-refs",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server",
+    "parent": "root",
+    "stub": true,
+    "title": "Engine-server",
     "type": "note",
   },
   Object {
@@ -655,6 +759,8 @@ Array [
   "bar.schema.yml",
   "build-site.md",
   "build-site.one.md",
+  "engine-server.replace-refs.md",
+  "engine-server.replace-refs.one.md",
   "foo.md",
   "foo.one.md",
   "foo.three.alpha.md",
@@ -673,6 +779,42 @@ Array [
 exports[`engine:exact note edge md exist, no schema file: main 1`] = `
 Array [
   Object {
+    "body": "
+Replace-refs Text
+
+- [[engine-server.replace-refs.one]]
+- [[lbl|engine-server.replace-refs.one]]
+- [[engine-server.replace-refs.one.md]]
+- [[lbl|engine-server.replace-refs.one.md]]",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs",
+    "parent": "Engine-server",
+    "stub": false,
+    "title": "replace-refs",
+    "type": "note",
+  },
+  Object {
+    "body": "
+store/engine-server.replace-refs.one text
+
+- [[engine-server.replace-refs]]
+- [[engine-server.replace-refs.md]]",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs.one",
+    "parent": "replace-refs",
+    "stub": false,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
     "body": "",
     "children": Array [
       "Build-site",
@@ -680,6 +822,7 @@ Array [
       "ref",
       "Refactor",
       "Sample",
+      "Engine-server",
       "Bar",
     ],
     "custom": Object {},
@@ -694,7 +837,8 @@ Array [
   Object {
     "body": "
 Build site home
-",
+
+- [[build-site.one]]",
     "children": Array [
       "One",
     ],
@@ -786,6 +930,20 @@ head w.3 text
     "parent": "root",
     "stub": false,
     "title": "Sample",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "replace-refs",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server",
+    "parent": "root",
+    "stub": true,
+    "title": "Engine-server",
     "type": "note",
   },
   Object {
@@ -946,6 +1104,8 @@ Array [
   "bar.schema.yml",
   "build-site.md",
   "build-site.one.md",
+  "engine-server.replace-refs.md",
+  "engine-server.replace-refs.one.md",
   "foo.md",
   "foo.one.md",
   "foo.three.alpha.md",
@@ -965,6 +1125,42 @@ exports[`engine:exact note edge no md file, no schema : main 1`] = `
 Array [
   Object {
     "body": "
+Replace-refs Text
+
+- [[engine-server.replace-refs.one]]
+- [[lbl|engine-server.replace-refs.one]]
+- [[engine-server.replace-refs.one.md]]
+- [[lbl|engine-server.replace-refs.one.md]]",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs",
+    "parent": "Engine-server",
+    "stub": false,
+    "title": "replace-refs",
+    "type": "note",
+  },
+  Object {
+    "body": "
+store/engine-server.replace-refs.one text
+
+- [[engine-server.replace-refs]]
+- [[engine-server.replace-refs.md]]",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs.one",
+    "parent": "replace-refs",
+    "stub": false,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
+    "body": "
 ",
     "children": Array [
       "Build-site",
@@ -972,6 +1168,7 @@ Array [
       "ref",
       "Refactor",
       "Sample",
+      "Engine-server",
       "Bar",
     ],
     "custom": Object {},
@@ -986,7 +1183,8 @@ Array [
   Object {
     "body": "
 Build site home
-",
+
+- [[build-site.one]]",
     "children": Array [
       "One",
     ],
@@ -1078,6 +1276,20 @@ head w.3 text
     "parent": "root",
     "stub": false,
     "title": "Sample",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "replace-refs",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server",
+    "parent": "root",
+    "stub": true,
+    "title": "Engine-server",
     "type": "note",
   },
   Object {
@@ -1261,6 +1473,8 @@ Array [
   "bar.schema.yml",
   "build-site.md",
   "build-site.one.md",
+  "engine-server.replace-refs.md",
+  "engine-server.replace-refs.one.md",
   "foo.md",
   "foo.one.md",
   "foo.schema.yml",
@@ -1281,6 +1495,42 @@ exports[`engine:exact note edge no md file, schema exist: main 1`] = `
 Array [
   Object {
     "body": "
+Replace-refs Text
+
+- [[engine-server.replace-refs.one]]
+- [[lbl|engine-server.replace-refs.one]]
+- [[engine-server.replace-refs.one.md]]
+- [[lbl|engine-server.replace-refs.one.md]]",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs",
+    "parent": "Engine-server",
+    "stub": false,
+    "title": "replace-refs",
+    "type": "note",
+  },
+  Object {
+    "body": "
+store/engine-server.replace-refs.one text
+
+- [[engine-server.replace-refs]]
+- [[engine-server.replace-refs.md]]",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs.one",
+    "parent": "replace-refs",
+    "stub": false,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
+    "body": "
 ",
     "children": Array [
       "Build-site",
@@ -1288,6 +1538,7 @@ Array [
       "ref",
       "Refactor",
       "Sample",
+      "Engine-server",
       "Bar",
     ],
     "custom": Object {},
@@ -1302,7 +1553,8 @@ Array [
   Object {
     "body": "
 Build site home
-",
+
+- [[build-site.one]]",
     "children": Array [
       "One",
     ],
@@ -1394,6 +1646,20 @@ head w.3 text
     "parent": "root",
     "stub": false,
     "title": "Sample",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "replace-refs",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server",
+    "parent": "root",
+    "stub": true,
+    "title": "Engine-server",
     "type": "note",
   },
   Object {
@@ -1593,6 +1859,8 @@ Array [
   "bar.schema.yml",
   "build-site.md",
   "build-site.one.md",
+  "engine-server.replace-refs.md",
+  "engine-server.replace-refs.one.md",
   "foo.one.md",
   "foo.schema.yml",
   "foo.three.alpha.md",
@@ -1611,6 +1879,42 @@ Array [
 exports[`engine:exact note main delete node with children: main 1`] = `
 Array [
   Object {
+    "body": "
+Replace-refs Text
+
+- [[engine-server.replace-refs.one]]
+- [[lbl|engine-server.replace-refs.one]]
+- [[engine-server.replace-refs.one.md]]
+- [[lbl|engine-server.replace-refs.one.md]]",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs",
+    "parent": "Engine-server",
+    "stub": false,
+    "title": "replace-refs",
+    "type": "note",
+  },
+  Object {
+    "body": "
+store/engine-server.replace-refs.one text
+
+- [[engine-server.replace-refs]]
+- [[engine-server.replace-refs.md]]",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs.one",
+    "parent": "replace-refs",
+    "stub": false,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
     "body": "",
     "children": Array [
       "Build-site",
@@ -1618,6 +1922,7 @@ Array [
       "ref",
       "Refactor",
       "Sample",
+      "Engine-server",
       "Bar",
     ],
     "custom": Object {},
@@ -1632,7 +1937,8 @@ Array [
   Object {
     "body": "
 Build site home
-",
+
+- [[build-site.one]]",
     "children": Array [
       "One",
     ],
@@ -1704,6 +2010,20 @@ head w.3 text
     "parent": "root",
     "stub": false,
     "title": "Sample",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "replace-refs",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server",
+    "parent": "root",
+    "stub": true,
+    "title": "Engine-server",
     "type": "note",
   },
   Object {
@@ -1876,6 +2196,42 @@ Template text
 exports[`engine:exact note main delete node with children: main2 1`] = `
 Array [
   Object {
+    "body": "
+Replace-refs Text
+
+- [[engine-server.replace-refs.one]]
+- [[lbl|engine-server.replace-refs.one]]
+- [[engine-server.replace-refs.one.md]]
+- [[lbl|engine-server.replace-refs.one.md]]",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs",
+    "parent": "Engine-server",
+    "stub": false,
+    "title": "replace-refs",
+    "type": "note",
+  },
+  Object {
+    "body": "
+store/engine-server.replace-refs.one text
+
+- [[engine-server.replace-refs]]
+- [[engine-server.replace-refs.md]]",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs.one",
+    "parent": "replace-refs",
+    "stub": false,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
     "body": "",
     "children": Array [
       "Build-site",
@@ -1883,6 +2239,7 @@ Array [
       "ref",
       "Refactor",
       "Sample",
+      "Engine-server",
       "Bar",
     ],
     "custom": Object {},
@@ -1897,7 +2254,8 @@ Array [
   Object {
     "body": "
 Build site home
-",
+
+- [[build-site.one]]",
     "children": Array [
       "One",
     ],
@@ -1969,6 +2327,20 @@ head w.3 text
     "parent": "root",
     "stub": false,
     "title": "Sample",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "replace-refs",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server",
+    "parent": "root",
+    "stub": true,
+    "title": "Engine-server",
     "type": "note",
   },
   Object {
@@ -2146,6 +2518,8 @@ Array [
   "bar.two.md",
   "build-site.md",
   "build-site.one.md",
+  "engine-server.replace-refs.md",
+  "engine-server.replace-refs.one.md",
   "foo.md",
   "foo.one.md",
   "foo.schema.yml",
@@ -2170,6 +2544,8 @@ Array [
   "bar.two.md",
   "build-site.md",
   "build-site.one.md",
+  "engine-server.replace-refs.md",
+  "engine-server.replace-refs.one.md",
   "foo.md",
   "foo.one.md",
   "foo.schema.yml",
@@ -2189,6 +2565,42 @@ Array [
 exports[`engine:exact note main open stub node: main 1`] = `
 Array [
   Object {
+    "body": "
+Replace-refs Text
+
+- [[engine-server.replace-refs.one]]
+- [[lbl|engine-server.replace-refs.one]]
+- [[engine-server.replace-refs.one.md]]
+- [[lbl|engine-server.replace-refs.one.md]]",
+    "children": Array [
+      "One",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs",
+    "parent": "Engine-server",
+    "stub": false,
+    "title": "replace-refs",
+    "type": "note",
+  },
+  Object {
+    "body": "
+store/engine-server.replace-refs.one text
+
+- [[engine-server.replace-refs]]
+- [[engine-server.replace-refs.md]]",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server.replace-refs.one",
+    "parent": "replace-refs",
+    "stub": false,
+    "title": "One",
+    "type": "note",
+  },
+  Object {
     "body": "",
     "children": Array [
       "Build-site",
@@ -2197,6 +2609,7 @@ Array [
       "Refactor",
       "Sample",
       "Bar",
+      "Engine-server",
     ],
     "custom": Object {},
     "data": Object {},
@@ -2210,7 +2623,8 @@ Array [
   Object {
     "body": "
 Build site home
-",
+
+- [[build-site.one]]",
     "children": Array [
       "One",
     ],
@@ -2317,6 +2731,20 @@ head w.3 text
     "parent": "root",
     "stub": true,
     "title": "Bar",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "replace-refs",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "engine-server",
+    "parent": "root",
+    "stub": true,
+    "title": "Engine-server",
     "type": "note",
   },
   Object {

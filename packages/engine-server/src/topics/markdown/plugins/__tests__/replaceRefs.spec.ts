@@ -1,0 +1,3 @@
+describe("basic", () => {
+  test("init", () => {});
+});

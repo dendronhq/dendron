@@ -1,8 +1,9 @@
 import { EngineTestUtils } from "@dendronhq/common-server";
 import _ from "lodash";
-import path from "path";
 import { replaceRefs } from "./plugins/replaceRefs";
-import { createNoteFromMarkdown, getProcessor } from "./utils";
+import { getProcessor } from "./utils";
+import { DendronEngine } from "../../engine";
+import { DNodeUtils, Note } from "@dendronhq/common-all";
 
 // @ts-ignore
 const mdSimple = `
@@ -39,29 +40,6 @@ code fence
 - [[label|foo-wiki-link]]#foobar
 `;
 
-// describe("Tokens2Md", () => {
-//   test("identity", () => {
-//     const tokens = md2Tokens(mdSimple);
-//     // expect(new MDRenderer().renderInline(tokens, {}, {})).toMatchSnapshot("inline");
-
-//     expect(mdSimple).toMatchSnapshot("orig");
-//     expect(parse(mdSimple)).toMatchSnapshot("new");
-//     const out = getProcessor()
-//       .use(replaceRefs, {
-//         refType: LinkType.IMAGE_LINK,
-//         imageRefPrefix: "bond",
-//       })
-//       .processSync(mdSimple);
-//     expect(out).toMatchSnapshot("processed");
-//     //expect(md().render(mdSimple)).toMatchSnapshot("normal");
-//     // expect(new MDRenderer().render(tokens, {}, {})).toMatchSnapshot(
-//     //   "md-render"
-//     // );
-//     //expect(tokens2MD(ast)).toEqual(mdSimple);
-//     // expect(mdNodes2MD(mdSimple)).toEqual(mdSimple);
-//   });
-// });
-
 describe("replaceRefs", () => {
   // @ts-ignore
   let root: string;
@@ -82,7 +60,7 @@ describe("replaceRefs", () => {
     expect(_.trim(out.toString())).toEqual("![alt-text](bond/image-url.jpg)");
   });
 
-  test("md2wiki", () => {
+  test("wiki2Md", () => {
     const links = `
 [link](normal-link)
 
@@ -96,5 +74,24 @@ describe("replaceRefs", () => {
 
     expect(out.toString()).toMatchSnapshot("raw");
     expect(tokens).toMatchSnapshot("parsed");
+  });
+
+  test("wiki2Md and swap id", async () => {
+    const engine = DendronEngine.getOrCreateEngine({ root });
+    await engine.init();
+    const proc = getProcessor().use(replaceRefs, {
+      wikiLink2Md: true,
+      wikiLinkUseId: true,
+      engine,
+    });
+
+    const note = DNodeUtils.getNoteByFname(
+      "engine-server.replace-refs",
+      engine,
+      { throwIfEmpty: true }
+    ) as Note;
+    const out = proc.processSync(note.body);
+
+    expect(out.toString()).toMatchSnapshot("raw");
   });
 });

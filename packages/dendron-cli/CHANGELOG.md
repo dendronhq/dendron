@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.7.4...v0.7.5-alpha.0) (2020-08-19)
+
+### Features
+
+- **pods:** enable image prefix when building site ([ab86573](https://github.com/dendronhq/dendron/commit/ab865730b0c2da461e2b9fe6851b8784f690be8a))
+
 ## [0.7.4](https://github.com/dendronhq/dendron/compare/v0.7.3...v0.7.4) (2020-08-19)
 
 **Note:** Version bump only for package @dendronhq/dendron-cli

@@ -5,7 +5,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.7.4](https://github.com/dendronhq/dendron/compare/v0.7.3...v0.7.4) (2020-08-19)
 
-**Note:** Version bump only for package root
+### Enhancements
+
+- better markdown parsing ([cc712f0](https://github.com/dendronhq/dendron/commit/cc712f07b88d6e274b49f38cdedb4bd8981cd9c2))
 
 ## [0.7.3](https://github.com/dendronhq/dendron/compare/v0.7.2...v0.7.3) (2020-08-17)
 

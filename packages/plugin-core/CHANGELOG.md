@@ -5,19 +5,23 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.7.4](https://github.com/dendronhq/dendron/compare/v0.7.3...v0.7.4) (2020-08-19)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Enhancements
+
+- better markdown parsing ([cc712f0](https://github.com/dendronhq/dendron/commit/cc712f07b88d6e274b49f38cdedb4bd8981cd9c2))
 
 ## [0.7.3](https://github.com/dendronhq/dendron/compare/v0.7.2...v0.7.3) (2020-08-17)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.7.2](https://github.com/dendronhq/dendron/compare/v0.7.1...v0.7.2) (2020-08-17)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- posix path break windows ([5e25db0](https://github.com/dendronhq/dendron/commit/5e25db034fed1db7b65fa85ab30f15ca85344aaf))
 
 ## [0.7.1](https://github.com/dendronhq/dendron/compare/v0.7.0...v0.7.1) (2020-08-17)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 # [0.7.0](https://github.com/dendronhq/dendron/compare/v0.6.12...v0.7.0) (2020-08-17)
 

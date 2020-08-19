@@ -4,18 +4,18 @@
     {
       "label": "Test",
       "type": "shell",
-      "command": "./testAll.sh",
+      "command": "./bootstrap/scripts/testAll.sh",
       "options": {
-        "cwd": "./../scripts"
+        "cwd": "./.."
       },
       "problemMatcher": []
     },
     {
       "label": "NPM: Publish",
       "type": "shell",
-      "command": "./publish.sh",
+      "command": "./bootstrap/scripts/publish.sh",
       "options": {
-        "cwd": "./../scripts"
+        "cwd": "./.."
       },
       "problemMatcher": []
     },

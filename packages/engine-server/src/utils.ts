@@ -1,14 +1,19 @@
+import { readMD } from "@dendronhq/common-server";
+import _ from "lodash";
 import _markdownIt from "markdown-it";
-// @ts-ignore
-import markdownItAST from "markdown-it-ast";
 import Token from "markdown-it/lib/token";
 import path from "path";
-import _ from "lodash";
-import { readMD } from "@dendronhq/common-server";
+import { URI } from "vscode-uri";
+// @ts-ignoreig
+import markdownItAST from "markdown-it-ast";
 
 const markdownIt = _markdownIt();
 
 // const testString = "<!--(([[class.mba.chapters.2]]))-->";
+function genAST(txt: string): ASTEnt[] {
+  const tokens: Token[] = markdownIt.parse(txt, {});
+  return markdownItAST.makeAST(tokens);
+}
 
 export type DendronRefLink = {
   label?: string;
@@ -24,17 +29,14 @@ type DendronRef = {
   link: DendronRefLink;
 };
 
-type ASTEnt = {
+export type ASTEnt = {
   nodeType: "heading" | "other";
   openNode: Token;
   closeNode: Token;
   children: Token[];
 };
 
-function genAST(txt: string): ASTEnt[] {
-  const tokens: Token[] = markdownIt.parse(txt, {});
-  return markdownItAST.makeAST(tokens);
-}
+export const cacheRefs = async (uris: URI[]) => {};
 
 export function extractBlock(
   txt: string,

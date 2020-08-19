@@ -25,7 +25,6 @@
     ],
     "main": "./out/extension.js",
     "contributes": {
-        "markdown.markdownItPlugins": true,
         "configuration": {
             "title": "Dendron",
             "properties": {

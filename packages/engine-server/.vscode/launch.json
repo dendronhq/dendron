@@ -34,7 +34,7 @@
       "name": "engine-server:debug test file",
       "program": "${workspaceFolder:engine-server}/node_modules/jest/bin/jest.js",
       "cwd": "${workspaceFolder:engine-server}",
-      "args": ["--runInBand", "${relativeFile}"]
+      "args": ["--runInBand", "${relativeFile}", "-u"]
     }
   ]
 }

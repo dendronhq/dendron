@@ -8,7 +8,6 @@ import { HistoryService } from "./services/HistoryService";
 import { VSCodeUtils } from "./utils";
 import { DendronWorkspace } from "./workspace";
 import fs from "fs-extra";
-import { extendMarkdownIt } from "./external/memo/features";
 
 // === Main
 // this method is called when your extension is activated
@@ -17,9 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
   if (stage !== "test") {
     _activate(context);
   }
-  return {
-    extendMarkdownIt,
-  };
+  return;
 }
 
 export function _activate(context: vscode.ExtensionContext) {

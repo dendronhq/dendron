@@ -55,6 +55,7 @@
     "@types/moment": "^2.13.0",
     "@types/node": "13.11.0",
     "@types/pino": "^6.0.1",
+    "@types/unist": "^2.0.3",
     "@types/uuid": "^8.0.0",
     "@types/yamljs": "^0.2.31",
     "coveralls": "^3.0.2",

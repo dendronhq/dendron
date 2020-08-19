@@ -235,7 +235,7 @@ export class RenameNoteV2Command extends BaseCommand<
           return;
         }
 
-        // therefound link to replace
+        // found link to replace
         await Promise.all(
           newUris.map(async ({ fsPath }) => {
             if (!containsMarkdownExt(fsPath) || fsPath === oldUri.fsPath) {

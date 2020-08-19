@@ -1,15 +1,19 @@
+/* eslint-disable func-names */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable camelcase */
 /**
  * class Renderer
  **/
+/**
+ * DEPRECATE
+ */
 
-import { assign } from "lodash";
 import * as _Renderer from "markdown-it/lib/renderer";
 import { escapeHtml, unescapeAll } from "markdown-it/lib/common/utils";
 import Token from "markdown-it/lib/token";
 import MarkdownIt from "markdown-it";
+import _, { assign } from "lodash";
 
 type RenderRuleRecord = _Renderer.RenderRuleRecord;
 // var assign          = require('./common/utils').assign;
@@ -18,19 +22,11 @@ type RenderRuleRecord = _Renderer.RenderRuleRecord;
 
 const default_rules: RenderRuleRecord = {};
 
-default_rules.code_inline = function (tokens, idx, options, env, slf) {
-  const token = tokens[idx];
-
-  return (
-    "<code" +
-    slf.renderAttrs(token) +
-    ">" +
-    escapeHtml(tokens[idx].content) +
-    "</code>"
-  );
+default_rules.code_inline = function (tokens, idx, _options, _env, slf) {
+  return "`" + escapeHtml(tokens[idx].content) + "`";
 };
 
-default_rules.code_block = function (tokens, idx, options, env, slf) {
+default_rules.code_block = function (tokens, idx, _options, _env, slf) {
   const token = tokens[idx];
 
   return (
@@ -42,7 +38,7 @@ default_rules.code_block = function (tokens, idx, options, env, slf) {
   );
 };
 
-default_rules.fence = function (tokens, idx, options, env, slf) {
+default_rules.fence = function (tokens, idx, options, _env, slf) {
   const token = tokens[idx];
   const info = token.info ? unescapeAll(token.info).trim() : "";
   let langName = "";
@@ -93,13 +89,7 @@ default_rules.fence = function (tokens, idx, options, env, slf) {
     );
   }
 
-  return (
-    "<pre><code" +
-    slf.renderAttrs(token) +
-    ">" +
-    highlighted +
-    "</code></pre>\n"
-  );
+  return "```\n" + highlighted + "```\n";
 };
 
 default_rules.image = function (tokens, idx, options, env, slf) {
@@ -120,10 +110,10 @@ default_rules.image = function (tokens, idx, options, env, slf) {
   return slf.renderToken(tokens, idx, options);
 };
 
-default_rules.hardbreak = function (tokens, idx, options /*, env */) {
+default_rules.hardbreak = function (_tokens, _idx, options /*, env */) {
   return options.xhtmlOut ? "<br />\n" : "<br>\n";
 };
-default_rules.softbreak = function (tokens, idx, options /*, env */) {
+default_rules.softbreak = function (_tokens, _idx, options /*, env */) {
   return options.breaks ? (options.xhtmlOut ? "<br />\n" : "<br>\n") : "\n";
 };
 
@@ -185,7 +175,7 @@ export class MDRenderer {
   renderToken(
     tokens: Token[],
     idx: number,
-    options: MarkdownIt.Options
+    _options: MarkdownIt.Options
   ): string {
     let nextToken;
     let result = "";
@@ -205,24 +195,50 @@ export class MDRenderer {
     //    >
     //
     if (token.block && token.nesting !== -1 && idx && tokens[idx - 1].hidden) {
+      result += ` (debug-0: newline at beg)`;
       result += "\n";
     }
 
     // Add token name, e.g. `<img`
-    result += (token.nesting === -1 ? "</" : "<") + token.tag;
+    // result += (token.nesting === -1 ? "</" : "<") + token.tag;
+    const typesShowMarkup = ["list_item_open", "heading_open"];
+    if (token.nesting === 1) {
+      if (token.block && _.includes(typesShowMarkup, token.type)) {
+        let markup = token.markup;
+        // ordered list
+        if (markup === ".") {
+          markup = "1.";
+        }
+        result += markup + " ";
+      }
+    }
 
     // Encode attributes, e.g. `<img src="foo"`
-    result += this.renderAttrs(token);
+    // result += this.renderAttrs(token);
 
     // Add a slash for self-closing tags, e.g. `<img src="foo" /`
-    if (token.nesting === 0 && options.xhtmlOut) {
-      result += " /";
+    // if (token.nesting === 0 && options.xhtmlOut) {
+    //   result += " /";
+    // }
+
+    const blocks_that_need_lf = [
+      "paragraph_open",
+      "paragraph_close",
+      "heading_close",
+    ];
+    const blocksWithoutLF = ["bullet_list_close"];
+    const matchNoLF = _.includes(blocksWithoutLF, token.type);
+    const matchNeedLF = _.includes(blocks_that_need_lf, token.type);
+    if (matchNeedLF) {
+      needLf = true;
     }
 
     // Check if we need to add a newline after this tag
-    if (token.block) {
+    if (token.block && !matchNeedLF) {
       needLf = true;
-
+      if (matchNoLF) {
+        needLf = false;
+      }
       if (token.nesting === 1) {
         if (idx + 1 < tokens.length) {
           nextToken = tokens[idx + 1];
@@ -240,8 +256,8 @@ export class MDRenderer {
       }
     }
 
-    result += needLf ? ">\n" : ">";
-
+    // result += ` (debug: needLf: ${needLf}, type:${token.type})`;
+    result += needLf ? `\n` : "";
     return result;
   }
 
@@ -322,7 +338,8 @@ export class MDRenderer {
 
       if (type === "inline") {
         // @ts-ignore
-        result += this.renderInline(tokens[i].children, options, env);
+        //result += this.renderInline(tokens[i].children, options, env);
+        result += tokens[i].content;
       } else if (typeof rules[type] !== "undefined") {
         // @ts-ignore
         result += rules[tokens[i].type](tokens, i, options, env, this);

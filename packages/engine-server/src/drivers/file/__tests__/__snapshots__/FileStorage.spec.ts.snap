@@ -26,6 +26,7 @@ Array [
       "foo",
       "ref",
       "Refactor",
+      "Sample",
       "Bar",
     ],
     "custom": Object {},
@@ -51,7 +52,7 @@ Array [
   },
   Object {
     "body": "
-- [[refactor.one]]
+- [[lbl|refactor.one]]
 
 - SECRETS <!--LOCAL_ONLY_LINE-->
 ",
@@ -112,6 +113,20 @@ head w.3 text
     "parent": "root",
     "stub": false,
     "title": "Refactor",
+    "type": "note",
+  },
+  Object {
+    "body": "",
+    "children": Array [
+      "Image-link",
+    ],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "sample",
+    "parent": "root",
+    "stub": true,
+    "title": "Sample",
     "type": "note",
   },
   Object {
@@ -192,6 +207,19 @@ head w.3 text
     "parent": "Refactor",
     "stub": false,
     "title": "Two",
+    "type": "note",
+  },
+  Object {
+    "body": "![link-alt](link-path.jpg)
+",
+    "children": Array [],
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "sample.image-link",
+    "parent": "Sample",
+    "stub": false,
+    "title": "Image-link",
     "type": "note",
   },
   Object {

@@ -103,11 +103,17 @@ export class EngineTestUtils {
    * @param opts : copyFixtures, true by default
    */
   static setupStoreDir(
-    fixturesDir: string,
-    dirPath: string,
+    fixturesDir?: string,
+    dirPath?: string,
     opts?: { copyFixtures?: boolean }
   ) {
     const cleanOpts = _.defaults(opts, { copyFixtures: true });
+    if (!fixturesDir) {
+      fixturesDir = LernaTestUtils.getFixturesDir("store");
+    }
+    if (!dirPath) {
+      dirPath = FileTestUtils.tmpDir().name;
+    }
     if (cleanOpts.copyFixtures) {
       fs.copySync(fixturesDir, dirPath);
     }

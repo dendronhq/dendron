@@ -1,0 +1,348 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`replaceRefs md2wiki: parsed 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "children": Array [
+            Object {
+              "position": Position {
+                "end": Object {
+                  "column": 6,
+                  "line": 2,
+                  "offset": 6,
+                },
+                "indent": Array [],
+                "start": Object {
+                  "column": 2,
+                  "line": 2,
+                  "offset": 2,
+                },
+              },
+              "type": "text",
+              "value": "link",
+            },
+          ],
+          "position": Position {
+            "end": Object {
+              "column": 20,
+              "line": 2,
+              "offset": 20,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 2,
+              "offset": 1,
+            },
+          },
+          "title": null,
+          "type": "link",
+          "url": "normal-link",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 20,
+          "line": 2,
+          "offset": 20,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 2,
+          "offset": 1,
+        },
+      },
+      "type": "paragraph",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "checked": null,
+          "children": Array [
+            Object {
+              "children": Array [
+                Object {
+                  "data": Object {
+                    "alias": "foo-wiki-link",
+                    "exists": false,
+                    "hChildren": Array [
+                      Object {
+                        "type": "text",
+                        "value": "foo-wiki-link",
+                      },
+                    ],
+                    "hName": "a",
+                    "hProperties": Object {
+                      "className": "internal new",
+                      "href": "#/page/foo-wiki-link",
+                    },
+                    "permalink": "foo-wiki-link",
+                  },
+                  "position": Position {
+                    "end": Object {
+                      "column": 20,
+                      "line": 4,
+                      "offset": 41,
+                    },
+                    "indent": Array [],
+                    "start": Object {
+                      "column": 3,
+                      "line": 4,
+                      "offset": 24,
+                    },
+                  },
+                  "type": "wikiLink",
+                  "value": "foo-wiki-link",
+                },
+              ],
+              "position": Position {
+                "end": Object {
+                  "column": 20,
+                  "line": 4,
+                  "offset": 41,
+                },
+                "indent": Array [],
+                "start": Object {
+                  "column": 3,
+                  "line": 4,
+                  "offset": 24,
+                },
+              },
+              "type": "paragraph",
+            },
+          ],
+          "position": Position {
+            "end": Object {
+              "column": 20,
+              "line": 4,
+              "offset": 41,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 4,
+              "offset": 22,
+            },
+          },
+          "spread": false,
+          "type": "listItem",
+        },
+        Object {
+          "checked": null,
+          "children": Array [
+            Object {
+              "children": Array [
+                Object {
+                  "data": Object {
+                    "alias": "label",
+                    "exists": false,
+                    "hChildren": Array [
+                      Object {
+                        "type": "text",
+                        "value": "label",
+                      },
+                    ],
+                    "hName": "a",
+                    "hProperties": Object {
+                      "className": "internal new",
+                      "href": "#/page/foo-wiki-link",
+                    },
+                    "permalink": "foo-wiki-link",
+                  },
+                  "position": Position {
+                    "end": Object {
+                      "column": 26,
+                      "line": 5,
+                      "offset": 67,
+                    },
+                    "indent": Array [],
+                    "start": Object {
+                      "column": 3,
+                      "line": 5,
+                      "offset": 44,
+                    },
+                  },
+                  "type": "wikiLink",
+                  "value": "foo-wiki-link",
+                },
+              ],
+              "position": Position {
+                "end": Object {
+                  "column": 26,
+                  "line": 5,
+                  "offset": 67,
+                },
+                "indent": Array [],
+                "start": Object {
+                  "column": 3,
+                  "line": 5,
+                  "offset": 44,
+                },
+              },
+              "type": "paragraph",
+            },
+          ],
+          "position": Position {
+            "end": Object {
+              "column": 26,
+              "line": 5,
+              "offset": 67,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 5,
+              "offset": 42,
+            },
+          },
+          "spread": false,
+          "type": "listItem",
+        },
+        Object {
+          "checked": null,
+          "children": Array [
+            Object {
+              "children": Array [
+                Object {
+                  "data": Object {
+                    "alias": "label",
+                    "exists": false,
+                    "hChildren": Array [
+                      Object {
+                        "type": "text",
+                        "value": "label",
+                      },
+                    ],
+                    "hName": "a",
+                    "hProperties": Object {
+                      "className": "internal new",
+                      "href": "#/page/foo-wiki-link",
+                    },
+                    "permalink": "foo-wiki-link",
+                  },
+                  "position": Position {
+                    "end": Object {
+                      "column": 26,
+                      "line": 6,
+                      "offset": 93,
+                    },
+                    "indent": Array [],
+                    "start": Object {
+                      "column": 3,
+                      "line": 6,
+                      "offset": 70,
+                    },
+                  },
+                  "type": "wikiLink",
+                  "value": "foo-wiki-link",
+                },
+                Object {
+                  "position": Position {
+                    "end": Object {
+                      "column": 5,
+                      "line": 7,
+                      "offset": 105,
+                    },
+                    "indent": Array [
+                      3,
+                    ],
+                    "start": Object {
+                      "column": 26,
+                      "line": 6,
+                      "offset": 93,
+                    },
+                  },
+                  "type": "text",
+                  "value": "#foobar
+  ",
+                },
+              ],
+              "position": Position {
+                "end": Object {
+                  "column": 5,
+                  "line": 7,
+                  "offset": 105,
+                },
+                "indent": Array [
+                  3,
+                ],
+                "start": Object {
+                  "column": 3,
+                  "line": 6,
+                  "offset": 70,
+                },
+              },
+              "type": "paragraph",
+            },
+          ],
+          "position": Position {
+            "end": Object {
+              "column": 5,
+              "line": 7,
+              "offset": 105,
+            },
+            "indent": Array [
+              1,
+            ],
+            "start": Object {
+              "column": 1,
+              "line": 6,
+              "offset": 68,
+            },
+          },
+          "spread": false,
+          "type": "listItem",
+        },
+      ],
+      "ordered": false,
+      "position": Position {
+        "end": Object {
+          "column": 5,
+          "line": 7,
+          "offset": 105,
+        },
+        "indent": Array [
+          1,
+          1,
+          1,
+        ],
+        "start": Object {
+          "column": 1,
+          "line": 4,
+          "offset": 22,
+        },
+      },
+      "spread": false,
+      "start": null,
+      "type": "list",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 5,
+      "line": 7,
+      "offset": 105,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`replaceRefs md2wiki: raw 1`] = `
+"[link](normal-link)
+
+- [foo-wiki-link](foo-wiki-link)
+- [label](foo-wiki-link)
+- [label](foo-wiki-link)#foobar
+    
+"
+`;

@@ -5,6 +5,6 @@ updated: 456
 created: 123
 ---
 
-- [[refactor.one]]
+- [[lbl|refactor.one]]
 
 - SECRETS <!--LOCAL_ONLY_LINE-->

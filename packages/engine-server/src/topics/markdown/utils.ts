@@ -15,7 +15,7 @@ import unified, { Processor } from "unified";
 import engine from "unified-engine";
 import { Node, Parent, Point, Position } from "unist";
 import visit, { CONTINUE, EXIT } from "unist-util-visit";
-import { parse as parseYAML } from "yaml";
+import YAML from "yaml";
 import { dendronLinksPlugin } from "./plugins/dendronLinksPlugin";
 import { MDRenderer } from "./renderer";
 
@@ -222,7 +222,7 @@ export function createNoteFromMarkdown(uri: string, eol?: string): Note {
 
   visit(tree, (node) => {
     if (node.type === "yaml") {
-      frontmatter = parseYAML(node.value as string) ?? {}; // parseYAML returns null if the frontmatter is empty
+      frontmatter = YAML.parse(node.value as string) ?? {}; // parseYAML returns null if the frontmatter is empty
       if (frontmatter.tite) {
         title = frontmatter.title;
       }

@@ -15,7 +15,7 @@ import unified, { Processor } from "unified";
 import engine from "unified-engine";
 import { Node, Parent, Point, Position } from "unist";
 import visit, { CONTINUE, EXIT } from "unist-util-visit";
-import YAML from "yaml";
+import YAML from "yamljs";
 import { dendronLinksPlugin } from "./plugins/dendronLinksPlugin";
 import { MDRenderer } from "./renderer";
 

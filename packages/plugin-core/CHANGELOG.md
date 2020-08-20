@@ -5,23 +5,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.7.9](https://github.com/dendronhq/dendron/compare/v0.7.9-alpha.1...v0.7.9) (2020-08-20)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Enhancements
 
-## [0.7.9-alpha.1](https://github.com/dendronhq/dendron/compare/v0.7.9-alpha.0...v0.7.9-alpha.1) (2020-08-20)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.7.9-alpha.0](https://github.com/dendronhq/dendron/compare/v0.7.8...v0.7.9-alpha.0) (2020-08-20)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.7.8](https://github.com/dendronhq/dendron/compare/v0.7.7...v0.7.8) (2020-08-19)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.7.7](https://github.com/dendronhq/dendron/compare/v0.7.6...v0.7.7) (2020-08-19)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
+- **pods:** new website config syntax ([fd11f48](https://github.com/dendronhq/dendron/commit/fd11f483de62ddba91fd67abb298b2a49b4becba))([docs](https://www.dendron.so/notes/73d395c9-5041-4d0d-9db7-080d9586136e.html#properties))
 
 ## [0.7.6](https://github.com/dendronhq/dendron/compare/v0.7.6-alpha.2...v0.7.6) (2020-08-19)
 
@@ -31,7 +17,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Features
 
-- **pods:** support per hierarchy configuration when publishing ([e68edfa](https://github.com/dendronhq/dendron/commit/e68edfa4cac21230ff77a24b65efa2031eb292dc))
+- **pods:** support per hierarchy configuration when publishing ([e68edfa](https://github.com/dendronhq/dendron/commit/e68edfa4cac21230ff77a24b65efa2031eb292dc))([docs](https://www.dendron.so/notes/73d395c9-5041-4d0d-9db7-080d9586136e.html#config))
+
+### Work in Progress
 
 - **pods:** enable image prefix when building site ([ab86573](https://github.com/dendronhq/dendron/commit/ab865730b0c2da461e2b9fe6851b8784f690be8a))
 

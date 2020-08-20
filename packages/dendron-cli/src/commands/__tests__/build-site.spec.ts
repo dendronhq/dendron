@@ -277,7 +277,7 @@ describe("build-site-new", () => {
     const { content } = readMD(notePath);
     expect(content).toMatchSnapshot("converted");
     expect(
-      content.indexOf("[build-site.one](id.build-site.one)") >= 0
+      content.indexOf("[build-site.one](notes/id.build-site.one)") >= 0
     ).toBeTruthy();
   });
 });

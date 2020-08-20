@@ -70,7 +70,7 @@ async function note2JekyllMdFile(
   }
 
   let linkPrefix = "";
-  if (opts.noteRoot === meta.fname) {
+  if (opts.siteIndex === meta.fname) {
     jekyllProps["permalink"] = "/";
     linkPrefix = path.basename(opts.notesDir) + "/";
   }
@@ -134,6 +134,7 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
       siteRootDir,
       siteHierarchies,
       noteRoots,
+      siteIndex,
     } = config;
     siteRootDir = siteRootDir || siteRoot;
     if (!siteRootDir) {
@@ -143,8 +144,8 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     if (siteHierarchies.length < 1) {
       throw `siteHiearchies must have at least one hiearchy`;
     }
-
-    const homeFname = siteHierarchies[0];
+    // update site index
+    config.siteIndex = siteIndex || noteRoot || siteHierarchies[0];
 
     // setup path to site
     const siteRootPath = resolvePath(siteRootDir, dendronRoot);
@@ -153,12 +154,6 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     this.L.info({ msg: "enter", siteNotesDirPath });
     fs.ensureDirSync(siteNotesDirPath);
     fs.emptyDirSync(siteNotesDirPath);
-
-    // get root note
-    const root: Note = _.find(engine.notes, { fname: homeFname }) as Note;
-    if (_.isUndefined(root)) {
-      throw Error(`root ${root} not found`);
-    }
 
     // get hieararchy domains
     let navOrder = 0;

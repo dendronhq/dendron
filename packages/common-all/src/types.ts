@@ -386,8 +386,6 @@ export type DendronSiteConfig = {
   // DEPRECATED
   noteRoots?: string[];
 
-  siteHierarchies?: string[];
-
   /**
    * // TODO: rename `siteRootDir`
    * Where is site going to be published
@@ -395,12 +393,24 @@ export type DendronSiteConfig = {
   // DEPRECATED
   siteRoot?: string;
 
-  siteRootDir?: string;
-
   /**
    * If set, instead of copying assets, load assets from the assigned prefix
    */
   assetsPrefix?: string;
+
+  /**
+   * By default, the domain of your siteHiearchies page
+   */
+  siteIndex?: string;
+  /**
+   * Hiearchies to publish
+   */
+  siteHierarchies?: string[];
+  /**
+   * Where your site will be published.
+   * Relative to Dendron workspace
+   */
+  siteRootDir?: string;
 
   /**
    * Control publication on a per hierarchy basis

@@ -132,19 +132,19 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
       siteRoot,
       noteRoot,
       siteRootDir,
-      siteHieararchies,
+      siteHierarchies,
       noteRoots,
     } = config;
     siteRootDir = siteRootDir || siteRoot;
     if (!siteRootDir) {
       throw `siteRootDir is undefined`;
     }
-    siteHieararchies = siteHieararchies || noteRoots || [noteRoot];
-    if (siteHieararchies.length < 1) {
+    siteHierarchies = (siteHierarchies || noteRoots || [noteRoot]) as string[];
+    if (siteHierarchies.length < 1) {
       throw `siteHiearchies must have at least one hiearchy`;
     }
 
-    const homeFname = siteHieararchies[0];
+    const homeFname = siteHierarchies[0];
 
     // setup path to site
     const siteRootPath = resolvePath(siteRootDir, dendronRoot);
@@ -162,7 +162,7 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
 
     // get hieararchy domains
     let navOrder = 0;
-    const nodes: Note[] = siteHieararchies.map((fname) => {
+    const nodes: Note[] = siteHierarchies.map((fname) => {
       const note = DNodeUtils.getNoteByFname(fname, engine, {
         throwIfEmpty: true,
       }) as Note;

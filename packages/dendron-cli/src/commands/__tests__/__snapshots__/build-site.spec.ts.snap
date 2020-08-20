@@ -28,3 +28,32 @@ exports[`build-site multiple roots: foo.md 1`] = `
 "- [lbl](refactor.one)
 "
 `;
+
+exports[`build-site-new basic: bond 1`] = `
+"- [lbl](refactor.one)
+"
+`;
+
+exports[`build-site-new ids are converted: converted 1`] = `
+"Build site home
+
+- [build-site.one](id.build-site.one)
+"
+`;
+
+exports[`build-site-new image prefix: sample.image-link.md 1`] = `
+"![link-alt](fake-s3.com/link-path.jpg)
+"
+`;
+
+exports[`build-site-new multiple roots: build-site.md 1`] = `
+"Build site home
+
+- [build-site.one](id.build-site.one)
+"
+`;
+
+exports[`build-site-new multiple roots: foo.md 1`] = `
+"- [lbl](refactor.one)
+"
+`;

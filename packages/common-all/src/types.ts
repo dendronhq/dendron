@@ -380,13 +380,13 @@ export type HierarchyConfig = {
 export type DendronSiteConfig = {
   // TODO: rename `siteHomePage`
   // DEPRECATED
-  noteRoot: string;
+  noteRoot?: string;
 
   // TODO: rename `siteHierarchies`
   // DEPRECATED
   noteRoots?: string[];
 
-  siteHieararchies?: string[];
+  siteHierarchies?: string[];
 
   /**
    * // TODO: rename `siteRootDir`

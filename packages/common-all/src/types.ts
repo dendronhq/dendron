@@ -379,16 +379,23 @@ export type HierarchyConfig = {
 
 export type DendronSiteConfig = {
   // TODO: rename `siteHomePage`
+  // DEPRECATED
   noteRoot: string;
 
   // TODO: rename `siteHierarchies`
+  // DEPRECATED
   noteRoots?: string[];
+
+  siteHieararchies?: string[];
 
   /**
    * // TODO: rename `siteRootDir`
    * Where is site going to be published
    */
-  siteRoot: string;
+  // DEPRECATED
+  siteRoot?: string;
+
+  siteRootDir?: string;
 
   /**
    * If set, instead of copying assets, load assets from the assigned prefix

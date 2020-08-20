@@ -128,35 +128,53 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
 
   async execute(opts: CommandOpts) {
     const { engine, config, dendronRoot } = _.defaults(opts, {});
-    const { siteRoot: siteRootRaw, noteRoot } = config;
+    let {
+      siteRoot,
+      noteRoot,
+      siteRootDir,
+      siteHieararchies,
+      noteRoots,
+    } = config;
+    siteRootDir = siteRootDir || siteRoot;
+    if (!siteRootDir) {
+      throw `siteRootDir is undefined`;
+    }
+    siteHieararchies = siteHieararchies || noteRoots || [noteRoot];
+    if (siteHieararchies.length < 1) {
+      throw `siteHiearchies must have at least one hiearchy`;
+    }
 
-    const siteRoot = resolvePath(siteRootRaw, dendronRoot);
+    const homeFname = siteHieararchies[0];
+
+    // setup path to site
+    const siteRootPath = resolvePath(siteRootDir, dendronRoot);
     const siteNotesDir = "notes";
-    const siteNotesDirPath = path.join(siteRoot, siteNotesDir);
-    const L = this.L;
-    L.info({ msg: "enter", siteNotesDirPath });
+    const siteNotesDirPath = path.join(siteRootPath, siteNotesDir);
+    this.L.info({ msg: "enter", siteNotesDirPath });
     fs.ensureDirSync(siteNotesDirPath);
     fs.emptyDirSync(siteNotesDirPath);
 
-    const root: Note = _.find(engine.notes, { fname: noteRoot }) as Note;
+    // get root note
+    const root: Note = _.find(engine.notes, { fname: homeFname }) as Note;
     if (_.isUndefined(root)) {
       throw Error(`root ${root} not found`);
     }
+
+    // get hieararchy domains
     let navOrder = 0;
-    const nodes: Note[] = config.noteRoots
-      ? config.noteRoots.map((fname) => {
-          const note = DNodeUtils.getNoteByFname(fname, engine, {
-            throwIfEmpty: true,
-          }) as Note;
-          note.custom.nav_order = navOrder;
-          note.parent = null;
-          note.title = _.capitalize(note.title);
-          navOrder += 1;
-          return note;
-        })
-      : [root];
+    const nodes: Note[] = siteHieararchies.map((fname) => {
+      const note = DNodeUtils.getNoteByFname(fname, engine, {
+        throwIfEmpty: true,
+      }) as Note;
+      note.custom.nav_order = navOrder;
+      note.parent = null;
+      note.title = _.capitalize(note.title);
+      navOrder += 1;
+      return note;
+    });
     const out = [];
 
+    // get rest of hieararchy
     while (!_.isEmpty(nodes)) {
       const node = nodes.pop() as Note;
       out.push(
@@ -169,19 +187,16 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
       node.children.forEach((n) => nodes.push(n as Note));
     }
 
-    // TODO: need to rewrite links before this is ready
+    // move assets
     const assetsDir = "assets";
-    // notes/assets
-    //const noteAssetsDir = path.join(siteNotesDirPath, assetsDir);
     const vaultAssetsDir = path.join(engine.props.root, assetsDir);
-    // docs/assets
-    const siteAssetsDir = path.join(siteRoot, assetsDir);
+    const siteAssetsDir = path.join(siteRootPath, assetsDir);
     if (!config.assetsPrefix) {
       await this.copyAssets({ vaultAssetsDir, siteAssetsDir });
     }
 
     await Promise.all(out);
-    L.info({ msg: "exit" });
+    this.L.info({ msg: "exit" });
     return;
   }
 }

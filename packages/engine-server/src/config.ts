@@ -1,9 +1,38 @@
-import { DendronConfig } from "@dendronhq/common-all";
+import {
+  DendronConfig,
+  LegacyDendronSiteConfig,
+  DendronSiteConfig,
+} from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";
+import _ from "lodash";
 
 const DENDRON_CONFIG_FILE = "dendron.yml";
+
+function isLegacySiteConfig(site: any): boolean {
+  return !_.isEmpty(
+    _.intersection(_.keys(site), ["noteRoot", "noteRoots", "siteRoot"])
+  );
+}
+
+function rewriteSiteConfig(site: LegacyDendronSiteConfig): DendronSiteConfig {
+  const remap = {
+    noteRoot: "siteIndex",
+    noteRoots: "siteHierarchies",
+    siteRoot: "siteRootDir",
+  };
+  _.each(remap, (v, k) => {
+    if (_.has(site, k)) {
+      // @ts-ignore
+      site[v] = site[k];
+      // @ts-ignore
+      delete site[k];
+    }
+  });
+
+  return site as DendronSiteConfig;
+}
 
 export class DConfig {
   static configPath(wsRoot: string): string {
@@ -27,6 +56,10 @@ export class DConfig {
       writeYAML(configPath, config);
     } else {
       config = readYAML(configPath) as DendronConfig;
+      if (isLegacySiteConfig(config.site)) {
+        config.site = rewriteSiteConfig(config.site as LegacyDendronSiteConfig);
+        writeYAML(DConfig.configPath(dendronRoot), config);
+      }
     }
     return config;
   }

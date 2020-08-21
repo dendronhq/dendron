@@ -816,6 +816,7 @@ suite("commands", function () {
       setupDendronWorkspace(root.name, ctx);
     });
 
+    // TODO: Deprecate, this is done in DConfig
     test("update site config", function (done) {
       onWSInit(async () => {
         const ws = DendronWorkspace.instance();

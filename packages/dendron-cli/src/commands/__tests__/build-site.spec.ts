@@ -280,4 +280,25 @@ describe("build-site-new", () => {
       content.indexOf("[build-site.one](notes/id.build-site.one)") >= 0
     ).toBeTruthy();
   });
+
+  test("use fallback copy", async () => {
+    const config: DendronSiteConfig = {
+      siteHierarchies: ["sample"],
+      siteRootDir: siteRoot,
+    };
+    const cmd = new BuildSiteCommand();
+    cmd.copyAssets = () => {
+      throw Error("bad rsync");
+    };
+    await cmd.execute({ engine, config, dendronRoot });
+    const img = path.join(siteRoot, "assets", "images", "foo.jpg");
+    expect(fs.existsSync(img)).toBeTruthy();
+
+    // delete image, should be gone
+    // const imgSrc = path.join(root, "assets", "images", "foo.jpg");
+    // fs.unlinkSync(imgSrc);
+
+    // await new BuildSiteCommand().execute({ engine, config, dendronRoot });
+    // expect(fs.existsSync(img)).toBeFalsy();
+  });
 });

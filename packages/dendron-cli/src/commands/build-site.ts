@@ -99,6 +99,30 @@ async function note2JekyllMdFile(
 }
 
 export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
+  async copyAssetsFallback(opts: {
+    vaultAssetsDir: string;
+    siteAssetsDir: string;
+  }) {
+    const { vaultAssetsDir, siteAssetsDir } = opts;
+    if (!fs.existsSync(path.join(vaultAssetsDir, "images"))) {
+      return;
+    }
+    return new Promise((resolve, reject) => {
+      fs.copy(
+        path.join(vaultAssetsDir, "images"),
+        path.join(siteAssetsDir, "images"),
+        (err) => {
+          if (err) {
+            err.message += JSON.stringify({ vaultAssetsDir, siteAssetsDir });
+            reject(err);
+          }
+          this.L.info({ msg: "finish copying" });
+          resolve();
+        }
+      );
+    });
+  }
+
   async copyAssets(opts: { vaultAssetsDir: string; siteAssetsDir: string }) {
     const { vaultAssetsDir, siteAssetsDir } = opts;
 
@@ -119,9 +143,10 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
             siteAssetsDir,
           });
           reject(err);
+        } else {
+          this.L.info({ msg: "finish copying" });
+          resolve();
         }
-        this.L.info({ msg: "finish copying" });
-        resolve();
       });
     });
   }
@@ -190,7 +215,13 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     const vaultAssetsDir = path.join(engine.props.root, assetsDir);
     const siteAssetsDir = path.join(siteRootPath, assetsDir);
     if (!config.assetsPrefix) {
-      await this.copyAssets({ vaultAssetsDir, siteAssetsDir });
+      try {
+        await this.copyAssets({ vaultAssetsDir, siteAssetsDir });
+      } catch (err) {
+        this.L.error({ err, msg: "error copying assets" });
+        await this.copyAssetsFallback({ vaultAssetsDir, siteAssetsDir });
+        this.L.info({ msg: "use copy fallback" });
+      }
     }
 
     await Promise.all(out);

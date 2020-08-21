@@ -5,15 +5,30 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.7.10](https://github.com/dendronhq/dendron/compare/v0.7.10-alpha.1...v0.7.10) (2020-08-21)
 
-**Note:** Version bump only for package root
+### Enhancements
 
-## [0.7.10-alpha.1](https://github.com/dendronhq/dendron/compare/v0.7.10-alpha.0...v0.7.10-alpha.1) (2020-08-20)
+- **pods:** always read config when publishing ([7d1d93a](https://github.com/dendronhq/dendron/commit/7d1d93ad06c4174b227b7669b6074e0df207fdba))
 
-**Note:** Version bump only for package root
+### Dendron Markdown Links Updates (0.6.7)
 
-## [0.7.10-alpha.0](https://github.com/dendronhq/dendron/compare/v0.7.9...v0.7.10-alpha.0) (2020-08-20)
+#### Features
 
-**Note:** Version bump only for package root
+- Add `Dendron:ShowSchema` Command ([docs](http://dendron.so/notes/587e6d62-3c5b-49b0-aedc-02f62f0448e6.html#dendron-show-schema-graph))
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/graphs.show-schema.gif)
+
+#### Enhancements
+
+- `Dendron: Reload Graphs` will now reload all open `Schema` and `Note` Graphs
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/graphs.reload.gif)
+
+- Nicer visuals
+
+#### Breaking
+
+- Renamed `Markdown Links: Show Graph` to `Dendron: Show Note Graph`
+- Renamed `Markdown Links: Reload Graph` to `Dendron: Reload Graphs`
 
 ## [0.7.9](https://github.com/dendronhq/dendron/compare/v0.7.9-alpha.1...v0.7.9) (2020-08-20)
 

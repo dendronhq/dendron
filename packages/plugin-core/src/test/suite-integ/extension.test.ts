@@ -1,9 +1,16 @@
-import { DNode, Note } from "@dendronhq/common-all";
+import {
+  DNode,
+  Note,
+  LegacyDendronSiteConfig,
+  DendronSiteConfig,
+} from "@dendronhq/common-all";
 import {
   DirResult,
   EngineTestUtils,
   FileTestUtils,
   mdFile2NodeProps,
+  writeYAML,
+  readYAML,
 } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
 import * as assert from "assert";
@@ -647,15 +654,13 @@ suite("commands", function () {
   describe("CopyNoteLink", function () {
     test("basic", function (done) {
       onWSInit(async () => {
-        const uri = vscode.Uri.file(
-          path.join(root.name, "vault", "dendron.faq.md")
-        );
+        const uri = vscode.Uri.file(path.join(root.name, "vault", "foo.md"));
         await vscode.window.showTextDocument(uri);
         const link = await new CopyNoteLinkCommand().run();
-        assert.equal(link, "[[Faq|dendron.faq]]");
+        assert.equal(link, "[[foo|foo]]");
         done();
       });
-      setupDendronWorkspace(root.name, ctx);
+      setupDendronWorkspace(root.name, ctx, { useFixtures: true });
     });
   });
 
@@ -809,6 +814,39 @@ suite("commands", function () {
         done();
       });
       setupDendronWorkspace(root.name, ctx);
+    });
+
+    test("update site config", function (done) {
+      onWSInit(async () => {
+        const ws = DendronWorkspace.instance();
+        const dendronConfigPath = path.join(root.name, "dendron.yml");
+        const legacySiteConfig: LegacyDendronSiteConfig = {
+          noteRoots: ["root"],
+          noteRoot: "home",
+          siteRoot: "doc",
+        };
+        writeYAML(dendronConfigPath, { site: legacySiteConfig });
+
+        await new ReloadIndexCommand().run();
+        await new DoctorCommand().run();
+        assert.deepEqual(ws.config.site, {
+          siteHierarchies: ["root"],
+          siteIndex: "home",
+          siteRootDir: "doc",
+        } as DendronSiteConfig);
+        const newSiteConfig = readYAML(dendronConfigPath);
+        assert.deepEqual(newSiteConfig.site, {
+          siteHierarchies: ["root"],
+          siteIndex: "home",
+          siteRootDir: "doc",
+        } as DendronSiteConfig);
+
+        // const nodeProps = mdFile2NodeProps(testFile);
+        // assert.equal(_.trim(nodeProps.title), "Bond2");
+        // assert.ok(nodeProps.id);
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, { useFixtures: true });
     });
   });
 });

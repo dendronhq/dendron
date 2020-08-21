@@ -6,6 +6,10 @@ import path from "path";
 const DENDRON_CONFIG_FILE = "dendron.yml";
 
 export class DConfig {
+  static configPath(wsRoot: string): string {
+    return path.join(wsRoot, DENDRON_CONFIG_FILE);
+  }
+
   static genDefaultConfig(): DendronConfig {
     return {
       site: {
@@ -16,7 +20,7 @@ export class DConfig {
   }
 
   static getOrCreate(dendronRoot: string): DendronConfig {
-    const configPath = path.join(dendronRoot, DENDRON_CONFIG_FILE);
+    const configPath = DConfig.configPath(dendronRoot);
     let config: DendronConfig;
     if (!fs.existsSync(configPath)) {
       config = DConfig.genDefaultConfig();

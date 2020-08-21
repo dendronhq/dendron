@@ -377,7 +377,7 @@ export type HierarchyConfig = {
   publishByDefault: boolean;
 };
 
-export type DendronSiteConfig = {
+export type LegacyDendronSiteConfig = {
   // TODO: rename `siteHomePage`
   // DEPRECATED
   noteRoot?: string;
@@ -392,7 +392,9 @@ export type DendronSiteConfig = {
    */
   // DEPRECATED
   siteRoot?: string;
+};
 
+export type DendronSiteConfig = {
   /**
    * If set, instead of copying assets, load assets from the assigned prefix
    */
@@ -405,12 +407,13 @@ export type DendronSiteConfig = {
   /**
    * Hiearchies to publish
    */
-  siteHierarchies?: string[];
+  siteHierarchies: string[];
+
   /**
    * Where your site will be published.
    * Relative to Dendron workspace
    */
-  siteRootDir?: string;
+  siteRootDir: string;
 
   /**
    * Control publication on a per hierarchy basis

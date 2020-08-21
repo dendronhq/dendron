@@ -5,15 +5,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.7.10](https://github.com/dendronhq/dendron/compare/v0.7.10-alpha.1...v0.7.10) (2020-08-21)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.7.10-alpha.1](https://github.com/dendronhq/dendron/compare/v0.7.10-alpha.0...v0.7.10-alpha.1) (2020-08-20)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.7.10-alpha.0](https://github.com/dendronhq/dendron/compare/v0.7.9...v0.7.10-alpha.0) (2020-08-20)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.7.9](https://github.com/dendronhq/dendron/compare/v0.7.9-alpha.1...v0.7.9) (2020-08-20)
 

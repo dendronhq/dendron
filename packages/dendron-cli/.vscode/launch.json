@@ -25,11 +25,10 @@
       "type": "node",
       "request": "launch",
       "name": "Debug file",
-      "program": "${workspaceRoot}/lib/${fileBasenameNoExtension}.js",
-      "cwd": "${workspaceRoot}",
+      "program": "${workspaceRoot}/lib/src/${fileBasenameNoExtension}.js",
+      "cwd": "${workspaceRoot:}",
       "sourceMaps": true,
       "smartStep": true,
-      "preLaunchTask": "build",
       "outFiles": [
         "${workspaceRoot}/lib/*.js"
       ]

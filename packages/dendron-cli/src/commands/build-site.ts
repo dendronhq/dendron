@@ -128,6 +128,7 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
 
   async execute(opts: CommandOpts) {
     const { engine, config, dendronRoot } = _.defaults(opts, {});
+    const ctx = "BuildSiteCommand";
     let {
       siteRoot,
       noteRoot,
@@ -146,6 +147,7 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     }
     // update site index
     config.siteIndex = siteIndex || noteRoot || siteHierarchies[0];
+    this.L.info({ ctx, siteHierarchies, config });
 
     // setup path to site
     const siteRootPath = resolvePath(siteRootDir, dendronRoot);
@@ -157,6 +159,7 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
 
     // get hieararchy domains
     let navOrder = 0;
+
     const nodes: Note[] = siteHierarchies.map((fname) => {
       const note = DNodeUtils.getNoteByFname(fname, engine, {
         throwIfEmpty: true,

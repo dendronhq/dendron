@@ -112,7 +112,6 @@ export class DendronWorkspace {
   public version: string;
   private disposableStore: DisposableStore;
   private history: HistoryService;
-  public config?: DendronConfig;
 
   static getOrCreate(
     context: vscode.ExtensionContext,
@@ -138,6 +137,14 @@ export class DendronWorkspace {
     if (!opts.skipSetup) {
       this._setupCommands();
     }
+  }
+
+  get config(): DendronConfig {
+    const rootDir = DendronWorkspace.rootDir();
+    if (!rootDir) {
+      throw `rootDir not set`;
+    }
+    return DConfig.getOrCreate(rootDir);
   }
 
   get engine(): DEngine {
@@ -439,7 +446,6 @@ export class DendronWorkspace {
     if (!rootDir) {
       throw `rootDir not set`;
     }
-    this.config = DConfig.getOrCreate(rootDir);
 
     const wsFolders = DendronWorkspace.workspaceFolders();
     if (_.isUndefined(wsFolders) || _.isEmpty(wsFolders)) {

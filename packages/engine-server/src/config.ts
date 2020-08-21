@@ -9,8 +9,8 @@ export class DConfig {
   static genDefaultConfig(): DendronConfig {
     return {
       site: {
-        noteRoot: "root",
-        siteRoot: "docs",
+        siteHierarchies: ["root"],
+        siteRootDir: "docs",
       },
     };
   }

@@ -8,7 +8,7 @@ import {
   extractBlock,
 } from "../utils";
 import _ from "lodash";
-import { setupTmpDendronDir } from "../testUtils";
+import { EngineTestUtils } from "@dendronhq/common-server/src";
 
 function createFileLink(opts?: Partial<DendronRefLink>): DendronRefLink {
   return {
@@ -147,7 +147,7 @@ Head 2.1.1 Text`)
 describe("replaceRefWithMPEImport", () => {
   let root: string;
   beforeEach(async () => {
-    root = await setupTmpDendronDir({ copyFixtures: true });
+    root = await EngineTestUtils.setupStoreDir({ copyFixtures: true });
   });
 
   it("basic", () => {

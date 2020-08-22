@@ -3,16 +3,19 @@ import {
   DNodeRawProps,
   INoteOpts,
   Note,
-  testUtils,
-  SchemaUtils,
   Schema,
+  SchemaUtils,
+  testUtils as testUtilsCommonAll,
 } from "@dendronhq/common-all";
-import { FileTestUtils, LernaTestUtils } from "@dendronhq/common-server";
+import {
+  EngineTestUtils,
+  FileTestUtils,
+  LernaTestUtils,
+} from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DendronEngine } from "../engine";
-import { setupTmpDendronDir } from "../testUtils";
 
 function expectNoteProps(
   expect: jest.Expect,
@@ -35,7 +38,7 @@ describe("engine:exact", () => {
   let engine: DEngine;
 
   beforeEach(() => {
-    root = setupTmpDendronDir();
+    root = EngineTestUtils.setupStoreDir();
     engine = DendronEngine.getOrCreateEngine({
       root,
       forceNew: true,
@@ -53,7 +56,7 @@ describe("engine:exact", () => {
       test("init", async () => {
         await engine.init();
         const schemas = _.values(engine.schemas);
-        testUtils.expectSnapshot(expect, "main", schemas);
+        testUtilsCommonAll.expectSnapshot(expect, "main", schemas);
         expect(schemas.length).toEqual(4);
         const note = engine.notes["foo"];
         const schema = engine.schemas["foo"];
@@ -69,7 +72,7 @@ describe("engine:exact", () => {
         const barOneChild = _.find(barSchema.children, { id: "one" }) as Schema;
         expect(barOneChild.fname).toEqual("bar.schema");
         expect(
-          testUtils.omitEntropicProps(fooOneChild.toRawProps(), true)
+          testUtilsCommonAll.omitEntropicProps(fooOneChild.toRawProps(), true)
         ).toMatchSnapshot("bond");
 
         // // case3
@@ -98,7 +101,7 @@ describe("engine:exact", () => {
           parentsAsStubs: true,
         });
         const schemaInEngine = engine.schemas["bond"];
-        testUtils.expectSnapshot(expect, "schema", schemaInEngine);
+        testUtilsCommonAll.expectSnapshot(expect, "schema", schemaInEngine);
         expect(
           fs.readFileSync(path.join(root, "bond.schema.yml"), "utf8")
         ).toMatchSnapshot("bond.schema");
@@ -140,19 +143,27 @@ describe("engine:exact", () => {
     describe("basic", () => {
       test("create when empty", async () => {
         fs.removeSync(root);
-        root = setupTmpDendronDir({ copyFixtures: false });
+        root = EngineTestUtils.setupStoreDir({ copyFixtures: false });
         engine = DendronEngine.getOrCreateEngine({
           root,
           forceNew: true,
           mode: "exact",
         });
         await engine.init();
-        testUtils.expectSnapshot(expect, "notes", _.values(engine.notes));
-        testUtils.expectSnapshot(expect, "schemas", _.values(engine.schemas));
+        testUtilsCommonAll.expectSnapshot(
+          expect,
+          "notes",
+          _.values(engine.notes)
+        );
+        testUtilsCommonAll.expectSnapshot(
+          expect,
+          "schemas",
+          _.values(engine.schemas)
+        );
         const { content, data } = FileTestUtils.readMDFile(root, "root.md");
         expect(content).toMatchSnapshot("notes-root-content");
         expect(
-          testUtils.omitEntropicProps(data as DNodeRawProps)
+          testUtilsCommonAll.omitEntropicProps(data as DNodeRawProps)
         ).toMatchSnapshot("notes-root-data");
         [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
           root,
@@ -187,7 +198,11 @@ describe("engine:exact", () => {
 
       test("fetch node", async () => {
         await engine.init();
-        testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
+        testUtilsCommonAll.expectSnapshot(
+          expect,
+          "main",
+          _.values(engine.notes)
+        );
         // foo should be fully specified
         const resp = await engine.query("foo", queryMode);
         expect(resp.data[0].title).toEqual("foo");
@@ -294,7 +309,11 @@ describe("engine:exact", () => {
 
       test("updateNode", async () => {
         await engine.init();
-        testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
+        testUtilsCommonAll.expectSnapshot(
+          expect,
+          "main",
+          _.values(engine.notes)
+        );
         const bazNote = new Note({ fname: "baz" });
         // foo should be fully specified
         await engine.updateNodes([bazNote], {
@@ -303,7 +322,7 @@ describe("engine:exact", () => {
         });
         const baz = await engine.queryOne("baz", "note");
         expect(
-          testUtils.omitEntropicProps(baz.data.toRawProps())
+          testUtilsCommonAll.omitEntropicProps(baz.data.toRawProps())
         ).toMatchSnapshot("bazNote");
         [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
           root,
@@ -322,7 +341,11 @@ describe("engine:exact", () => {
         });
         await engine.init();
         expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
-        testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
+        testUtilsCommonAll.expectSnapshot(
+          expect,
+          "main",
+          _.values(engine.notes)
+        );
         const resp = engine.query("bar.two", queryMode);
         expect((await resp).data[0].fname).toEqual("bar.two");
 
@@ -367,7 +390,11 @@ describe("engine:exact", () => {
         await engine.delete(fooNode.data.id, "note");
         expect(fs.readdirSync(root)).toMatchSnapshot("listDi2");
         const numNodesPre = _.values(engine.notes).length;
-        testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
+        testUtilsCommonAll.expectSnapshot(
+          expect,
+          "main",
+          _.values(engine.notes)
+        );
 
         // because foo has children, exepect it to still exist as a stub
         const deletedNode = engine.notes[fooNode.data.id];
@@ -375,7 +402,11 @@ describe("engine:exact", () => {
 
         // size should be the same
         expect(numNodesPre).toEqual(_.values(engine.notes).length);
-        testUtils.expectSnapshot(expect, "main2", _.values(engine.notes));
+        testUtilsCommonAll.expectSnapshot(
+          expect,
+          "main2",
+          _.values(engine.notes)
+        );
         // foo file should be deleted
         [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
           root,
@@ -397,7 +428,11 @@ describe("engine:exact", () => {
         });
         await engine.init();
         expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
-        testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
+        testUtilsCommonAll.expectSnapshot(
+          expect,
+          "main",
+          _.values(engine.notes)
+        );
         const resp = engine.query("root", "schema");
         expect((await resp).data[0].fname).toEqual("root.schema");
         [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
@@ -419,10 +454,14 @@ describe("engine:exact", () => {
         });
         await engine.init();
         expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
-        testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
+        testUtilsCommonAll.expectSnapshot(
+          expect,
+          "main",
+          _.values(engine.notes)
+        );
         const fooNote = (await engine.query("foo", "note")).data[0];
         expect(fooNote.fname).toEqual("foo");
-        testUtils.expectSnapshot(expect, "fooNote", fooNote);
+        testUtilsCommonAll.expectSnapshot(expect, "fooNote", fooNote);
         [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
           root,
           LernaTestUtils.fixtureFilesForStore(),
@@ -440,7 +479,11 @@ describe("engine:exact", () => {
         });
         await engine.init();
         expect(fs.readdirSync(root)).toMatchSnapshot("listDir");
-        testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
+        testUtilsCommonAll.expectSnapshot(
+          expect,
+          "main",
+          _.values(engine.notes)
+        );
         const resp = engine.query("root", "note");
         expect((await resp).data[0].fname).toEqual("root");
         [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
@@ -469,7 +512,7 @@ describe("engine:exact", () => {
         );
         const fooNote = (await engine.query("foo", "note")).data[0];
         expect(fooNote.fname).toEqual("foo");
-        testUtils.expectSnapshot(expect, "fooNote", fooNote);
+        testUtilsCommonAll.expectSnapshot(expect, "fooNote", fooNote);
       });
 
       test("note without fm", async () => {
@@ -483,7 +526,7 @@ describe("engine:exact", () => {
         await engine.init();
         const fooNote = (await engine.query("foo", "note")).data[0];
         expect(fooNote.fname).toEqual("foo");
-        testUtils.expectSnapshot(expect, "fooNote", fooNote);
+        testUtilsCommonAll.expectSnapshot(expect, "fooNote", fooNote);
         [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
           root,
           LernaTestUtils.fixtureFilesForStore(),
@@ -492,7 +535,7 @@ describe("engine:exact", () => {
       });
 
       test("one note without domain", async () => {
-        root = setupTmpDendronDir({ copyFixtures: false });
+        root = EngineTestUtils.setupStoreDir({ copyFixtures: false });
         engine = DendronEngine.getOrCreateEngine({
           root,
           forceNew: true,
@@ -509,7 +552,7 @@ describe("engine:exact", () => {
         await engine.init();
         const note = new Note({ id: "backlog", fname });
         const [t1, t2] = _.map([engine.notes["backlog"], note], (n) => {
-          return testUtils.omitEntropicProps(
+          return testUtilsCommonAll.omitEntropicProps(
             n.toRawProps(true, { ignoreNullParent: true })
           );
         });

@@ -1,40 +1,32 @@
-import { DEngine, DendronSiteConfig } from "@dendronhq/common-all";
-import fs from "fs-extra";
+import { DendronSiteConfig, DEngine } from "@dendronhq/common-all";
 import {
-  LernaTestUtils,
   EngineTestUtils,
   FileTestUtils,
   readMD,
 } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
-import { BuildSiteCommand } from "../build-site";
-import path from "path";
+import fs from "fs-extra";
 import _ from "lodash";
-
-function setupTmpDendronDir() {
-  return EngineTestUtils.setupStoreDir(
-    LernaTestUtils.getFixturesDir("store"),
-    FileTestUtils.tmpDir().name
-  );
-}
+import path from "path";
+import { BuildSiteCommand } from "../build-site";
 
 describe("build-site", () => {
   let root: string;
   let engine: DEngine;
-  let siteRoot: string;
+  let siteRootDir: string;
   let dendronRoot: string;
   let notesDir: string;
 
   beforeEach(async () => {
-    root = setupTmpDendronDir();
+    root = EngineTestUtils.setupStoreDir();
     engine = DendronEngine.getOrCreateEngine({
       root,
       forceNew: true,
       mode: "exact",
     });
-    siteRoot = FileTestUtils.tmpDir().name;
+    siteRootDir = FileTestUtils.tmpDir().name;
     dendronRoot = root;
-    notesDir = path.join(siteRoot, "notes");
+    notesDir = path.join(siteRootDir, "notes");
     await engine.init();
   });
 
@@ -43,9 +35,10 @@ describe("build-site", () => {
   });
 
   test("basic", async () => {
-    const config = {
-      noteRoot: "root",
-      siteRoot,
+    const config: DendronSiteConfig = {
+      siteIndex: "root",
+      siteRootDir: siteRootDir,
+      siteHierarchies: ["root"],
     };
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
     const { data, content } = readMD(path.join(notesDir, "foo.md"));
@@ -57,9 +50,9 @@ describe("build-site", () => {
 
   test("multiple roots", async () => {
     const config = {
-      noteRoot: "root",
-      noteRoots: ["foo", "build-site"],
-      siteRoot,
+      siteIndex: "root",
+      siteHierarchies: ["foo", "build-site"],
+      siteRootDir,
     };
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
     const dir = fs.readdirSync(notesDir);
@@ -68,27 +61,27 @@ describe("build-site", () => {
     expect(_.includes(dir, "refactor.one.md")).toBeFalsy();
     let { data, content } = readMD(path.join(notesDir, "foo.md"));
     expect(data.nav_order).toEqual(0);
-    expect(data.parent).toBe(null);
+    expect(data.parent).toBe(undefined);
     expect(content).toMatchSnapshot("foo.md");
     ({ data, content } = readMD(path.join(notesDir, "build-site.md")));
     expect(data.nav_order).toEqual(1);
-    expect(data.parent).toBe(null);
+    expect(data.parent).toBe(undefined);
     expect(content).toMatchSnapshot("build-site.md");
-    const siteRootDir = fs.readdirSync(siteRoot);
-    expect(_.includes(siteRootDir, "assets")).toBeTruthy();
+    const siteRootDirContents = fs.readdirSync(siteRootDir);
+    expect(_.includes(siteRootDirContents, "assets")).toBeTruthy();
   });
 
   test("image prefix", async () => {
     const config = {
-      noteRoot: "root",
-      noteRoots: ["sample"],
-      siteRoot,
+      siteIndex: "root",
+      siteHierarchies: ["sample"],
+      siteRootDir: siteRootDir,
       assetsPrefix: "fake-s3.com/",
     };
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
 
     const { content } = readMD(path.join(notesDir, "sample.image-link.md"));
-    const dir = fs.readdirSync(siteRoot);
+    const dir = fs.readdirSync(siteRootDir);
 
     expect(content).toMatchSnapshot("sample.image-link.md");
 
@@ -98,12 +91,12 @@ describe("build-site", () => {
 
   test("delete unused asset", async () => {
     const config = {
-      noteRoot: "root",
-      noteRoots: ["sample"],
-      siteRoot,
+      siteIndex: "root",
+      siteHierarchies: ["sample"],
+      siteRootDir: siteRootDir,
     };
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
-    const img = path.join(siteRoot, "assets", "images", "foo.jpg");
+    const img = path.join(siteRootDir, "assets", "images", "foo.jpg");
     expect(fs.existsSync(img)).toBeTruthy();
 
     // delete image, should be gone
@@ -116,9 +109,9 @@ describe("build-site", () => {
 
   test("no publsih by default", async () => {
     const config: DendronSiteConfig = {
-      noteRoot: "root",
-      noteRoots: ["build-site"],
-      siteRoot,
+      siteIndex: "root",
+      siteHierarchies: ["build-site"],
+      siteRootDir: siteRootDir,
       config: {
         "build-site": {
           publishByDefault: false,
@@ -138,9 +131,9 @@ describe("build-site", () => {
 
   test("ids are converted", async () => {
     const config: DendronSiteConfig = {
-      noteRoot: "root",
-      noteRoots: ["build-site"],
-      siteRoot,
+      siteIndex: "root",
+      siteHierarchies: ["build-site"],
+      siteRootDir: siteRootDir,
     };
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
     let notePath = path.join(notesDir, "build-site.md");
@@ -155,20 +148,20 @@ describe("build-site", () => {
 describe("build-site-new", () => {
   let root: string;
   let engine: DEngine;
-  let siteRoot: string;
+  let siteRootDir: string;
   let dendronRoot: string;
   let notesDir: string;
 
   beforeEach(async () => {
-    root = setupTmpDendronDir();
+    root = EngineTestUtils.setupStoreDir();
     engine = DendronEngine.getOrCreateEngine({
       root,
       forceNew: true,
       mode: "exact",
     });
-    siteRoot = FileTestUtils.tmpDir().name;
+    siteRootDir = FileTestUtils.tmpDir().name;
     dendronRoot = root;
-    notesDir = path.join(siteRoot, "notes");
+    notesDir = path.join(siteRootDir, "notes");
     await engine.init();
   });
 
@@ -179,7 +172,7 @@ describe("build-site-new", () => {
   test("basic", async () => {
     const config: DendronSiteConfig = {
       siteHierarchies: ["root"],
-      siteRootDir: siteRoot,
+      siteRootDir,
     };
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
     const { data, content } = readMD(path.join(notesDir, "foo.md"));
@@ -192,7 +185,7 @@ describe("build-site-new", () => {
   test("multiple roots", async () => {
     const config: DendronSiteConfig = {
       siteHierarchies: ["foo", "build-site"],
-      siteRootDir: siteRoot,
+      siteRootDir,
     };
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
     const dir = fs.readdirSync(notesDir);
@@ -207,21 +200,21 @@ describe("build-site-new", () => {
     expect(data.nav_order).toEqual(1);
     expect(data.parent).toBe(undefined);
     expect(content).toMatchSnapshot("build-site.md");
-    const siteRootDir = fs.readdirSync(siteRoot);
-    expect(_.includes(siteRootDir, "assets")).toBeTruthy();
+    const siteRootDirContents = fs.readdirSync(siteRootDir);
+    expect(_.includes(siteRootDirContents, "assets")).toBeTruthy();
   });
 
   test("image prefix", async () => {
     const config: DendronSiteConfig = {
       siteHierarchies: ["sample"],
-      siteRootDir: siteRoot,
+      siteRootDir,
       assetsPrefix: "fake-s3.com/",
     };
 
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
 
     const { content } = readMD(path.join(notesDir, "sample.image-link.md"));
-    const dir = fs.readdirSync(siteRoot);
+    const dir = fs.readdirSync(siteRootDir);
 
     expect(content).toMatchSnapshot("sample.image-link.md");
 
@@ -232,10 +225,10 @@ describe("build-site-new", () => {
   test("delete unused asset", async () => {
     const config: DendronSiteConfig = {
       siteHierarchies: ["sample"],
-      siteRootDir: siteRoot,
+      siteRootDir,
     };
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
-    const img = path.join(siteRoot, "assets", "images", "foo.jpg");
+    const img = path.join(siteRootDir, "assets", "images", "foo.jpg");
     expect(fs.existsSync(img)).toBeTruthy();
 
     // delete image, should be gone
@@ -249,7 +242,7 @@ describe("build-site-new", () => {
   test("no publsih by default", async () => {
     const config: DendronSiteConfig = {
       siteHierarchies: ["build-site"],
-      siteRootDir: siteRoot,
+      siteRootDir,
       config: {
         "build-site": {
           publishByDefault: false,
@@ -270,7 +263,7 @@ describe("build-site-new", () => {
   test("ids are converted", async () => {
     const config: DendronSiteConfig = {
       siteHierarchies: ["build-site"],
-      siteRootDir: siteRoot,
+      siteRootDir,
     };
     await new BuildSiteCommand().execute({ engine, config, dendronRoot });
     let notePath = path.join(notesDir, "build-site.md");
@@ -284,14 +277,14 @@ describe("build-site-new", () => {
   test("use fallback copy", async () => {
     const config: DendronSiteConfig = {
       siteHierarchies: ["sample"],
-      siteRootDir: siteRoot,
+      siteRootDir,
     };
     const cmd = new BuildSiteCommand();
     cmd.copyAssets = () => {
       throw Error("bad rsync");
     };
     await cmd.execute({ engine, config, dendronRoot });
-    const img = path.join(siteRoot, "assets", "images", "foo.jpg");
+    const img = path.join(siteRootDir, "assets", "images", "foo.jpg");
     expect(fs.existsSync(img)).toBeTruthy();
 
     // delete image, should be gone

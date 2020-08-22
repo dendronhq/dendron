@@ -3,22 +3,21 @@ import {
   IDNode,
   QueryMode,
   Schema,
-  testUtils,
   SchemaUtils,
+  testUtils,
 } from "@dendronhq/common-all";
-import { createFileStorage, setupTmpDendronDir } from "../../../testUtils";
-
-import FileStorage from "../store";
-import _ from "lodash";
+import { EngineTestUtils, FileTestUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
-import { FileTestUtils } from "@dendronhq/common-server";
+import _ from "lodash";
+import { createFileStorage } from "../../../testUtils";
+import FileStorage from "../store";
 
 describe("main", () => {
   let root: string;
   let store: FileStorage;
 
   beforeEach(() => {
-    root = setupTmpDendronDir();
+    root = EngineTestUtils.setupStoreDir();
     store = createFileStorage(root);
   });
 

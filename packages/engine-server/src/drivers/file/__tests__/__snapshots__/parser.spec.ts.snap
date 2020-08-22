@@ -7,7 +7,7 @@ Array [
     "children": Array [
       "bar",
     ],
-    "created": 1598122667070,
+    "created": 1598123040495,
     "custom": Object {},
     "data": Object {},
     "desc": "",
@@ -16,7 +16,7 @@ Array [
     "parent": "root",
     "stub": false,
     "title": "foo",
-    "updated": 1598122667070,
+    "updated": 1598123040495,
   },
 ]
 `;

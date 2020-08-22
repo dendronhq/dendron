@@ -1,10 +1,13 @@
 import { DEngine, Note } from "@dendronhq/common-all";
-import { FileTestUtils, LernaTestUtils } from "@dendronhq/common-server";
+import {
+  FileTestUtils,
+  LernaTestUtils,
+  EngineTestUtils,
+} from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DendronEngine } from "../../engine";
-import { setupTmpDendronDir } from "../../testUtils";
 import { FilePod } from "../filePod";
 
 // not working on windows, need to investigate
@@ -16,7 +19,7 @@ describe("filePod", () => {
   let expectedFiles: string[];
 
   beforeEach(async () => {
-    root = setupTmpDendronDir();
+    root = EngineTestUtils.setupStoreDir();
     fixtures = FileTestUtils.getFixturesRoot(__dirname);
     engine = DendronEngine.getOrCreateEngine({
       root,

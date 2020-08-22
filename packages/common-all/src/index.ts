@@ -7,4 +7,4 @@ export * from "./assert";
 export * from "./uuid";
 export * from "./constants";
 export * from "./error";
-export { testUtils } from "./testUtils";
+export { testUtilsCommonAll as testUtils } from "./testUtils";

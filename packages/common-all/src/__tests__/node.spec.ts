@@ -7,7 +7,7 @@ import {
   UNKNOWN_SCHEMA_ID,
 } from "../node";
 
-import { expectSnapshot, testUtils } from "../testUtils";
+import { expectSnapshot, testUtilsCommonAll } from "../testUtils";
 import _ from "lodash";
 
 function setupNotes() {
@@ -271,7 +271,7 @@ describe("Note", () => {
       const dirPath = "root";
       const note = Note.fromSchema(dirPath, schemas.foo);
       expect(note.desc).toEqual(schemas.foo.desc);
-      testUtils.expectSnapshot(expect, "noteFromSchema", note);
+      testUtilsCommonAll.expectSnapshot(expect, "noteFromSchema", note);
     });
   });
 });
@@ -288,7 +288,7 @@ describe("Schema", () => {
       const schema = Schema.createUnkownSchema();
       expect(schema.id).toEqual(UNKNOWN_SCHEMA_ID);
       expect(schema.stub).toBe(true);
-      testUtils.expectSnapshot(expect, "unknown", schema);
+      testUtilsCommonAll.expectSnapshot(expect, "unknown", schema);
     });
 
     test("render", () => {

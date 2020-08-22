@@ -1,10 +1,8 @@
 import { EngineTestUtils } from "@dendronhq/common-server";
 import { FileParserUtils } from "../parser";
-import path from "path";
 
 describe("schema parser ", () => {
   let root: string;
-  let bond;
 
   beforeEach(async () => {
     root = await EngineTestUtils.setupStoreDir({

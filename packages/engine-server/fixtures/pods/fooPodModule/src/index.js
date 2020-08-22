@@ -1,8 +1,8 @@
-const { say } = require('cowsay');
+const { say } = require("cowsay");
 
 class TestPod {
   execute() {
-    console.log(say({ text: 'grazing in the browser' }));
+    console.log(say({ text: "grazing in the browser" }));
   }
 }
 

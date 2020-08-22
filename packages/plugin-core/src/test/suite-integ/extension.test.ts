@@ -183,10 +183,10 @@ function setupDendronWorkspace(
     })
     .then(async () => {
       if (opts?.useFixtures) {
-        await EngineTestUtils.setupDendronVault({
+        await EngineTestUtils.setupStoreDir({
           copyFixtures: true,
-          root: path.join(rootDir, "vault"),
-          fixtureDir: optsClean.fixtureDir,
+          storeDstPath: path.join(rootDir, "vault"),
+          storeDirSrc: optsClean.fixtureDir,
         });
       }
       return _activate(ctx);

@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`schema parser  basic: schemas 1`] = `
+Array [
+  Object {
+    "body": "",
+    "children": Array [
+      "bar",
+    ],
+    "created": 1598122667070,
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.schema",
+    "id": "foo",
+    "parent": "root",
+    "stub": false,
+    "title": "foo",
+    "updated": 1598122667070,
+  },
+]
+`;

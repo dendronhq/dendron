@@ -154,6 +154,16 @@ export type INote = INoteProps & { domain: INote };
 export type NoteDict = { [id: string]: Note };
 
 // --- Schema
+// V1 {
+export type SchemaRawV1 = {
+  version: string;
+  imports?: SchemaRawImport;
+  schemas: SchemaRawOpts[];
+};
+export type SchemaRawImport = string[];
+export type SchemaRawEntry = SchemaRawOptsFlat | SchemaRawImport;
+// } END V1
+
 export type SchemaRawOptsFlat = Omit<DNodeRawOpts<any>, "data"> &
   SchemaData & { id: string; fname: string };
 export type SchemaRawOpts = DNodeRawOpts<SchemaData> &

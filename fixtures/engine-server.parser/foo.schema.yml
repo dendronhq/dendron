@@ -1,0 +1,8 @@
+version: 1
+import:
+- bar
+schemas:
+- id: foo
+  parent: root
+  children:
+    - bar

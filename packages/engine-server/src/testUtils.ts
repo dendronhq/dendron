@@ -1,8 +1,4 @@
-import {
-  EngineTestUtils,
-  LernaTestUtils,
-  FileTestUtils,
-} from "@dendronhq/common-server";
+import { EngineTestUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import FileStorage from "./drivers/file/store";
 
@@ -34,11 +30,9 @@ export function createFileStorage(root: string) {
 
 // TODO: replace with setupDendronVault
 export function setupTmpDendronDir(opts?: { copyFixtures?: boolean }): string {
-  return EngineTestUtils.setupStoreDir(
-    LernaTestUtils.getFixturesDir("store"),
-    FileTestUtils.tmpDir().name,
-    opts
-  );
+  return EngineTestUtils.setupStoreDir({
+    ...opts,
+  });
 }
 
 export function rmTmpDendronDir(root: string) {

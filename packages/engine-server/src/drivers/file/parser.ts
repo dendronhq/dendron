@@ -8,6 +8,7 @@ import {
   Schema,
   SchemaRawOpts,
   SchemaRawProps,
+  SchemaRawV1,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -48,6 +49,51 @@ type FileParserOpts = {
   logger?: pino.Logger;
 };
 type FileParserProps = Required<FileParserOpts>;
+
+export class FileParserUtils {
+  static parseSchemaVersion1(
+    schema: SchemaRawV1,
+    opts: { fname: string; root: string }
+  ): SchemaRawProps[] {
+    const { imports, schemas } = schema;
+    const { fname, root } = opts;
+    // const rawProps = [];
+    const schemasFromImport = _.flatMap(imports, (ent) => {
+      return FileParserUtils.parseSchemaFile(
+        path.join(root, `${ent}.schema.yml`),
+        { root }
+      );
+    });
+    const schemasFromFile = schemas.map((o) =>
+      Schema.createRawProps({ ...o, fname })
+    );
+    return schemasFromImport.concat(schemasFromFile);
+  }
+
+  static parseSchemaFile(
+    fpath: string,
+    opts: { root: string }
+  ): SchemaRawProps[] {
+    const { root } = opts;
+    const fname = path.parse(fpath).name;
+    const schemaOpts: SchemaRawOpts[] = YAML.parse(
+      fs.readFileSync(path.join(root, fpath), "utf8")
+    );
+
+    const version = _.isArray(schemaOpts) ? 0 : 1;
+    if (version === 1) {
+      return FileParserUtils.parseSchemaVersion1(
+        (schemaOpts as unknown) as SchemaRawV1,
+        { fname, root }
+      );
+    }
+
+    const schemaProps = schemaOpts.map((o) =>
+      Schema.createRawProps({ ...o, fname })
+    );
+    return schemaProps;
+  }
+}
 
 export class FileParser {
   public errors: any[];
@@ -144,24 +190,15 @@ export class FileParser {
     return { node: note, missing };
   }
 
-  _parseSchema(fpath: string): SchemaRawProps[] {
-    const fname = path.parse(fpath).name;
-    const root = this.store.opts.root;
-
-    const schemaOpts: SchemaRawOpts[] = YAML.parse(
-      fs.readFileSync(path.join(root, fpath), "utf8")
-    );
-    const schemaProps = schemaOpts.map((o) =>
-      Schema.createRawProps({ ...o, fname })
-    );
-    return schemaProps;
-  }
-
   parseSchema(data: string[]): SchemaRawProps[] {
     if (_.isEmpty(data)) {
       return [];
     }
-    return data.map((fpath) => this._parseSchema(fpath)).flat();
+    return data
+      .map((fpath) =>
+        FileParserUtils.parseSchemaFile(fpath, { root: this.store.opts.root })
+      )
+      .flat();
   }
 
   /**

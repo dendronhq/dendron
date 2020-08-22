@@ -103,36 +103,26 @@ export type DendronVaultOpts = {
 };
 
 export class EngineTestUtils {
-  static setupDendronVault(opts?: DendronVaultOpts) {
-    const cleanOpts = _.defaults(opts, { fixtureDir: "store" });
-    return EngineTestUtils.setupStoreDir(
-      LernaTestUtils.getFixturesDir(cleanOpts.fixtureDir),
-      opts?.root || FileTestUtils.tmpDir().name,
-      opts
-    );
-  }
-
   /**
    * setupStoreDir
-   * @param fixturesDir
-   * @param dirPath
-   * @param opts : copyFixtures, true by default
    */
-  static setupStoreDir(
-    fixturesDir?: string,
-    dirPath?: string,
-    opts?: { copyFixtures?: boolean }
-  ) {
-    const cleanOpts = _.defaults(opts, { copyFixtures: true });
-    if (!fixturesDir) {
-      fixturesDir = LernaTestUtils.getFixturesDir("store");
+  static setupStoreDir(opts?: {
+    storeDirSrc?: string;
+    storeDstPath?: string;
+    copyFixtures?: boolean;
+  }) {
+    const cleanOpts = _.defaults(opts, {
+      storeDirSrc: "store",
+      copyFixtures: true,
+    });
+    let { storeDirSrc, storeDstPath, copyFixtures } = cleanOpts;
+    const fixturesSrcPath = LernaTestUtils.getFixturesDir(storeDirSrc);
+    if (_.isUndefined(storeDstPath)) {
+      storeDstPath = FileTestUtils.tmpDir().name;
     }
-    if (!dirPath) {
-      dirPath = FileTestUtils.tmpDir().name;
+    if (copyFixtures) {
+      fs.copySync(fixturesSrcPath, storeDstPath);
     }
-    if (cleanOpts.copyFixtures) {
-      fs.copySync(fixturesDir, dirPath);
-    }
-    return dirPath;
+    return storeDstPath;
   }
 }

@@ -1,0 +1,6 @@
+version: 1
+schemas:
+- id: bar
+  children: 
+    - one
+- id: one

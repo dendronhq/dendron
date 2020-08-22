@@ -12,7 +12,7 @@ suite("startup", function () {
     let engine: DEngine;
 
     beforeEach(async () => {
-      root = EngineTestUtils.setupDendronVault();
+      root = EngineTestUtils.setupStoreDir();
       engine = DendronEngine.getOrCreateEngine({
         root,
         forceNew: true,

@@ -646,6 +646,21 @@ export class Schema extends DNode<SchemaData> implements ISchema {
     }
   }
 
+  get patternMatch(): string {
+    const part = this.namespace ? `${this.pattern}/*` : this.pattern;
+    const parent: undefined | Schema = this.parent as Schema;
+    if (parent && parent.pattern !== "root") {
+      const prefix = parent.patternMatch;
+      return [prefix, part].join("/");
+    } else {
+      return part;
+    }
+  }
+
+  get pattern(): string {
+    return this.data.pattern || this.id;
+  }
+
   get url(): string {
     return `/schema/${this.id}`;
   }
@@ -950,15 +965,15 @@ export class SchemaUtils {
     const notePathClean = notePath.replace(/\./g, "/");
     let match: Schema | undefined;
     _.find(schemaList, (schemaDomain) => {
-      return _.some(schemaDomain.nodes, (schema) => {
-        const logicalPath = schema.logicalPath;
+      return _.some(schemaDomain.nodes as Schema[], (schema) => {
+        const patternMatch = schema.patternMatch;
         if ((schema as Schema).namespace && cleanOpts.matchNamespace) {
-          if (minimatch(notePathClean, _.trimEnd(logicalPath, "/*"))) {
+          if (minimatch(notePathClean, _.trimEnd(patternMatch, "/*"))) {
             match = schema as Schema;
             return true;
           }
         }
-        if (minimatch(notePathClean, logicalPath)) {
+        if (minimatch(notePathClean, patternMatch)) {
           match = schema as Schema;
           return true;
         } else {

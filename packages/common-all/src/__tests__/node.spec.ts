@@ -86,13 +86,22 @@ function setupSchema() {
     fname: "foo.schema.yml",
     parent: null,
   });
+  const baz = new Schema({
+    id: "baz",
+    fname: "baz.schema.yml",
+    parent: null,
+    data: {
+      pattern: "baaaz",
+    },
+  });
   const root = Schema.createRoot();
   root.addChild(foo);
   root.addChild(bar);
+  root.addChild(baz);
   foo.addChild(fooChild);
   fooChild.addChild(fooGrandChild);
   bar.addChild(barChildNamespace);
-  return { foo, fooChild, fooGrandChild, bar, barChildNamespace };
+  return { foo, fooChild, fooGrandChild, bar, barChildNamespace, baz };
 }
 
 describe("DNoteUtils", () => {
@@ -169,6 +178,11 @@ describe("SchemaUtils", () => {
     test("end mid-name, namespace schema", () => {
       const barSchema = SchemaUtils.matchNote("bar.foo", schemas);
       expect(barSchema).toEqual(schemas.bar);
+    });
+
+    test.only("match pattern", () => {
+      const match = SchemaUtils.matchNote("baaaz", schemas);
+      expect(match).toEqual(schemas.baz);
     });
   });
 

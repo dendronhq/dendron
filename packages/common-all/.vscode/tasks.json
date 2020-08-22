@@ -10,6 +10,12 @@
       "problemMatcher": []
     },
     {
+      "label": "npm:test:watch",
+      "command": "npm run test:watch -- ${relativeFile} -u",
+      "type": "shell",
+      "problemMatcher": []
+    },
+    {
       "type": "npm",
       "label": "clean",
       "script": "clean",

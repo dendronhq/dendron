@@ -1,8 +1,10 @@
 version: 1
-import:
+imports:
 - bar
+- baz
 schemas:
 - id: foo
   parent: root
   children:
-    - bar
+    - bar.bar
+    - baz.baz

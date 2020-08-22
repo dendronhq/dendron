@@ -658,7 +658,7 @@ export class Schema extends DNode<SchemaData> implements ISchema {
   }
 
   get pattern(): string {
-    return this.data.pattern || this.id;
+    return this.data.pattern?.replace(".", "/") || this.id;
   }
 
   get url(): string {
@@ -908,6 +908,16 @@ export class NoteUtils {
 }
 
 export class SchemaUtils {
+  static fname(nodePath: string, rmExtension?: boolean) {
+    if (rmExtension) {
+      const idx = nodePath.lastIndexOf(".yml");
+      if (idx > 0) {
+        nodePath = nodePath.slice(0, idx);
+      }
+    }
+    // remove trailing dot
+    return nodePath.slice(0, nodePath.lastIndexOf("schema") - 1);
+  }
   static isUnkown(schema: Schema) {
     return schema.id === UNKNOWN_SCHEMA_ID;
   }

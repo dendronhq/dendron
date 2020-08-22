@@ -37,22 +37,22 @@ describe("engine:exact", () => {
   let expectedFiles: string[];
   let engine: DEngine;
 
-  beforeEach(() => {
-    root = EngineTestUtils.setupStoreDir();
-    engine = DendronEngine.getOrCreateEngine({
-      root,
-      forceNew: true,
-      mode: "exact",
-    });
-  });
-
-  afterEach(() => {
-    expect(actualFiles).toEqual(expectedFiles);
-    fs.removeSync(root);
-  });
-
   describe("schema", () => {
     describe("basic", () => {
+      beforeEach(() => {
+        root = EngineTestUtils.setupStoreDir();
+        engine = DendronEngine.getOrCreateEngine({
+          root,
+          forceNew: true,
+          mode: "exact",
+        });
+      });
+
+      afterEach(() => {
+        expect(actualFiles).toEqual(expectedFiles);
+        fs.removeSync(root);
+      });
+
       test("init", async () => {
         await engine.init();
         const schemas = _.values(engine.schemas);
@@ -88,6 +88,7 @@ describe("engine:exact", () => {
         );
         const note = engine.notes["bar.ns.one.alpha"];
         const schemaDomain = engine.schemas["bar"];
+
         const schema = _.find(schemaDomain.nodes, { id: "alpha" }) as Schema;
         const schemaMatch = SchemaUtils.matchNote(note, engine.schemas);
         expect(schemaMatch).toEqual(schema);
@@ -138,8 +139,70 @@ describe("engine:exact", () => {
         );
       });
     });
+
+    describe("import", () => {
+      beforeEach(() => {
+        root = EngineTestUtils.setupStoreDir({
+          storeDirSrc: "engine-server.parser",
+        });
+        engine = DendronEngine.getOrCreateEngine({
+          root,
+          forceNew: true,
+          mode: "exact",
+        });
+      });
+
+      afterEach(() => {
+        expect(actualFiles).toEqual(expectedFiles);
+        fs.removeSync(root);
+      });
+
+      test("basic", async () => {
+        await engine.init();
+        await engine.write(new Note({ id: "foo.bar.id", fname: "foo.bar" }), {
+          newNode: true,
+          parentsAsStubs: true,
+        });
+        // expect(_.map(engine.schemas, s => s.toRawPropsRecursive())).toMatchSnapshot("bond");
+        const note = engine.notes["foo.bar.id"];
+        const schemaDomain = engine.schemas["foo"];
+        const schemaMatch = SchemaUtils.matchNote(note, engine.schemas);
+        const schema = _.find(schemaDomain.nodes, { id: "bar.bar" }) as Schema;
+        expect(schemaMatch).toEqual(schema);
+      });
+
+      test("double import", async () => {
+        await engine.init();
+        await engine.write(
+          new Note({ id: "foo.baz.bar.id", fname: "foo.baz.bar" }),
+          { newNode: true, parentsAsStubs: true }
+        );
+        const note = engine.notes["foo.baz.bar.id"];
+        const schemaDomain = engine.schemas["foo"];
+        const schemaMatch = SchemaUtils.matchNote(note, engine.schemas);
+        const schema = _.find(schemaDomain.nodes, {
+          id: "baz.bar.bar",
+        }) as Schema;
+        expect(schemaMatch).toEqual(schema);
+      });
+    });
   });
+
   describe("note", () => {
+    beforeEach(() => {
+      root = EngineTestUtils.setupStoreDir();
+      engine = DendronEngine.getOrCreateEngine({
+        root,
+        forceNew: true,
+        mode: "exact",
+      });
+    });
+
+    afterEach(() => {
+      expect(actualFiles).toEqual(expectedFiles);
+      fs.removeSync(root);
+    });
+
     describe("basic", () => {
       test("create when empty", async () => {
         fs.removeSync(root);

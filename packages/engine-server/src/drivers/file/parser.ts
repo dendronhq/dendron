@@ -9,6 +9,7 @@ import {
   SchemaRawOpts,
   SchemaRawProps,
   SchemaRawV1,
+  SchemaUtils,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -58,11 +59,18 @@ export class FileParserUtils {
     const { imports, schemas } = schema;
     const { fname, root } = opts;
     // const rawProps = [];
-    const schemasFromImport = _.flatMap(imports, (ent) => {
-      return FileParserUtils.parseSchemaFile(
-        path.join(root, `${ent}.schema.yml`),
-        { root }
-      );
+    let schemasFromImport = _.flatMap(imports, (ent) => {
+      return FileParserUtils.parseSchemaFile(`${ent}.schema.yml`, { root });
+    });
+    schemasFromImport = schemasFromImport.map((ent) => {
+      const domain = SchemaUtils.fname(ent.fname);
+      // set pattern to old pattern or id
+      ent.data.pattern = ent.data.pattern || ent.id;
+      ent.id = `${domain}.${ent.id}`;
+      ent.fname = fname;
+      ent.parent = null;
+      ent.children = ent.children.map((ent) => `${domain}.${ent}`);
+      return ent;
     });
     const schemasFromFile = schemas.map((o) =>
       Schema.createRawProps({ ...o, fname })

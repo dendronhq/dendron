@@ -180,9 +180,49 @@ describe("SchemaUtils", () => {
       expect(barSchema).toEqual(schemas.bar);
     });
 
-    test.only("match pattern", () => {
+    test("match pattern", () => {
       const match = SchemaUtils.matchNote("baaaz", schemas);
       expect(match).toEqual(schemas.baz);
+    });
+
+    test("match complex pattern", () => {
+      const fname = "journal.schema.yml";
+      const journalSchema = new Schema({
+        id: "journal",
+        fname,
+        parent: null,
+        data: { pattern: "journal" },
+      });
+      const year = new Schema({
+        id: "year",
+        fname,
+        data: { pattern: "[0-2][0-9][0-9][0-9]" },
+      });
+      const month = new Schema({
+        id: "month",
+        fname,
+        data: { pattern: "[0-9][0-9]" },
+      });
+      const day = new Schema({
+        id: "day",
+        fname,
+        data: { pattern: "[0-9][0-9]", namespace: true },
+      });
+      journalSchema.addChild(year);
+      year.addChild(month);
+      month.addChild(day);
+
+      const match = SchemaUtils.matchNote("journal.2020", [journalSchema]);
+      expect(match).toEqual(year);
+      expect(SchemaUtils.matchNote("journal.2020.12", [journalSchema])).toEqual(
+        month
+      );
+      expect(
+        SchemaUtils.matchNote("journal.2020.12.12", [journalSchema])
+      ).toEqual(day);
+      expect(
+        SchemaUtils.matchNote("journal.2020.12.12.foo", [journalSchema])
+      ).toEqual(day);
     });
   });
 

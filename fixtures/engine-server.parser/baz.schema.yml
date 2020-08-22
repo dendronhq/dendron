@@ -1,7 +1,8 @@
 version: 1
+imports:
+- bar
 schemas:
-- id: bar
+- id: baz
   parent: root
   children: 
-    - one
-- id: one
+    - bar.bar

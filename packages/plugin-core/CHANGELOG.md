@@ -5,11 +5,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.7.11](https://github.com/dendronhq/dendron/compare/v0.7.11-alpha.0...v0.7.11) (2020-08-22)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.7.11-alpha.0](https://github.com/dendronhq/dendron/compare/v0.7.10...v0.7.11-alpha.0) (2020-08-22)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- **pods:** use regular copy if rsync not installed ([ba4a98a](https://github.com/dendronhq/dendron/commit/ba4a98ab36b9c6b55a26bfd5ec9db2dd80de1644))
 
 ## [0.7.10](https://github.com/dendronhq/dendron/compare/v0.7.10-alpha.1...v0.7.10) (2020-08-21)
 

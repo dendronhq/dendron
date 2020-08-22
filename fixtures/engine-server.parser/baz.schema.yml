@@ -6,3 +6,6 @@ schemas:
   parent: root
   children: 
     - bar.bar
+    - ns
+- id: ns
+  namespace: true

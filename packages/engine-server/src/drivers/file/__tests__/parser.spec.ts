@@ -23,6 +23,7 @@ describe("schema parser ", () => {
         "baz.bar.bar",
         "baz.baz",
         "baz.bar.one",
+        "baz.ns",
       ].sort()
     );
     // @ts-ignore

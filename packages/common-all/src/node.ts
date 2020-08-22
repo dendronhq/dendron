@@ -479,7 +479,7 @@ export class Note extends DNode<NoteData> implements INote {
   }
 
   static fromSchema(dirpath: string, schema: Schema): Note {
-    const fname = [dirpath, schema.id].join(".");
+    const fname = [dirpath, schema.pattern].join(".");
     const note = new Note({
       fname,
       desc: schema.desc,

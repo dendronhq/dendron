@@ -185,6 +185,21 @@ describe("engine:exact", () => {
         }) as Schema;
         expect(schemaMatch).toEqual(schema);
       });
+
+      test("import and namespace", async () => {
+        await engine.init();
+        await engine.write(
+          new Note({ id: "foo.baz.ns.one.id", fname: "foo.baz.ns.one" }),
+          { newNode: true, parentsAsStubs: true }
+        );
+        const note = engine.notes["foo.baz.ns.one.id"];
+        const schemaDomain = engine.schemas["foo"];
+        const schemaMatch = SchemaUtils.matchNote(note, engine.schemas);
+        const schema = _.find(schemaDomain.nodes, {
+          id: "baz.ns",
+        }) as Schema;
+        expect(schemaMatch.toRawProps()).toEqual(schema.toRawProps());
+      });
     });
   });
 

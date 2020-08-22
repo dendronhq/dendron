@@ -139,11 +139,13 @@ function setupDendronWorkspace(
     configOverride?: any;
     setupWsOverride?: Partial<SetupWorkspaceOpts>;
     useFixtures?: boolean;
+    fixtureDir?: string;
   }
 ) {
   const optsClean = _.defaults(opts, {
     configOverride: {},
     setupWsOverride: {},
+    fixtureDir: "store",
   });
   if (opts?.useFixtures) {
     optsClean.setupWsOverride = { emptyWs: true };
@@ -184,6 +186,7 @@ function setupDendronWorkspace(
         await EngineTestUtils.setupDendronVault({
           copyFixtures: true,
           root: path.join(rootDir, "vault"),
+          fixtureDir: optsClean.fixtureDir,
         });
       }
       return _activate(ctx);
@@ -412,11 +415,15 @@ suite("startup", function () {
         done();
       });
     });
+
     test("lookup new node with schema template", function (done) {
-      setupDendronWorkspace(root.name, ctx);
+      setupDendronWorkspace(root.name, ctx, {
+        useFixtures: true,
+        fixtureDir: "vault-template",
+      });
       onWSInit(async () => {
         assert.equal(DendronWorkspace.isActive(), true);
-        const lbl = "dendron.demo.template";
+        const lbl = "bar.ns1.three";
         const qp = await createMockQuickPick<DNode>({ value: lbl });
         const bondNote = createNoActiveItem({ label: lbl });
         // @ts-ignore
@@ -431,7 +438,7 @@ suite("startup", function () {
         const txtPath = vscode.window.activeTextEditor?.document.uri
           .fsPath as string;
         const node = mdFile2NodeProps(txtPath);
-        assert.equal(_.trim(node.body), "I am text from a template.");
+        assert.equal(_.trim(node.body), "text from alpha template");
         done();
       });
     });

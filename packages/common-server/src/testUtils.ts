@@ -78,7 +78,7 @@ export class LernaTestUtils {
   static getRootDir() {
     return FileTestUtils.getPkgRoot(__dirname, "lerna.json");
   }
-  static getFixturesDir(type?: "store") {
+  static getFixturesDir(type?: string) {
     const pathSoFar = path.join(this.getRootDir(), "fixtures");
     return type ? path.join(pathSoFar, type) : pathSoFar;
   }
@@ -87,10 +87,26 @@ export class LernaTestUtils {
   }
 }
 
+export type DendronVaultOpts = {
+  /**
+   * Destination. Default: create a tmp directory
+   */
+  root?: string;
+  /**
+   * Fixture to copy from. Default: 'store'
+   */
+  fixtureDir?: string;
+  /**
+   * Copy fixtures. Default: true
+   */
+  copyFixtures?: boolean;
+};
+
 export class EngineTestUtils {
-  static setupDendronVault(opts?: { copyFixtures?: boolean; root?: string }) {
+  static setupDendronVault(opts?: DendronVaultOpts) {
+    const cleanOpts = _.defaults(opts, { fixtureDir: "store" });
     return EngineTestUtils.setupStoreDir(
-      LernaTestUtils.getFixturesDir("store"),
+      LernaTestUtils.getFixturesDir(cleanOpts.fixtureDir),
       opts?.root || FileTestUtils.tmpDir().name,
       opts
     );

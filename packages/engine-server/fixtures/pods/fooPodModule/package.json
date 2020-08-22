@@ -1,0 +1,9 @@
+{
+  "name": "fooPodModule",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "license": "MIT",
+  "dependencies": {
+    "cowsay": "^1.4.0"
+  }
+}

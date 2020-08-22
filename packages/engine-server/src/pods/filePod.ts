@@ -48,6 +48,8 @@ export class FilePod extends BasePod<ImportOpts> {
     },
   ];
 
+  async fetch() {}
+
   /**
    * Return list of note props keyed by level of hierarchy
    * @param files

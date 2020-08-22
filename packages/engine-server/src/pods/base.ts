@@ -11,6 +11,13 @@ export type PodOptEntry = {
 export type PodOpts = PodOptEntry[];
 
 export interface Pod<TImportOpts = any> {
+  /**
+   * Fetch pod from remote
+   */
+  fetch: () => Promise<void>;
+  /**
+   * Convert to dendron
+   */
   import: (opts: TImportOpts) => Promise<any>;
 }
 
@@ -38,6 +45,8 @@ export abstract class BasePod<TImportOpts = any> implements Pod<TImportOpts> {
     this.L = createLogger("PodCommand");
     this.engine = opts.engine;
   }
+
+  abstract async fetch(): Promise<void>;
 
   abstract async handleImport(opts: TImportOpts): Promise<any>;
 

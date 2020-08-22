@@ -664,6 +664,20 @@ suite("commands", function () {
     });
   });
 
+  // describe("ImportPod", function() {
+  //   test("basic", function (done) {
+  //     onWSInit(async () => {
+  //       const uri = vscode.Uri.file(path.join(root.name, "vault", "foo.md"));
+  //       await vscode.window.showTextDocument(uri);
+  //       const link = await new CopyNoteLinkCommand().run();
+  //       assert.equal(link, "[[foo|foo]]");
+  //       done();
+  //     });
+  //     setupDendronWorkspace(root.name, ctx, { useFixtures: true });
+  //   });
+
+  // });
+
   describe("RenameNote", function () {
     test("basic", function (done) {
       onWSInit(async () => {

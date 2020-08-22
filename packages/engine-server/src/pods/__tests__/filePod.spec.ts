@@ -3,13 +3,12 @@ import { FileTestUtils, LernaTestUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { URI } from "vscode-uri";
 import { DendronEngine } from "../../engine";
 import { setupTmpDendronDir } from "../../testUtils";
 import { FilePod } from "../filePod";
 
 // not working on windows, need to investigate
-describe.skip("filePod", () => {
+describe("filePod", () => {
   let root: string;
   let fixtures: string;
   let engine: DEngine;
@@ -32,10 +31,9 @@ describe.skip("filePod", () => {
 
   test("sanity", async () => {
     const filesRoot = path.join(fixtures, "pods", "filePod");
-    const uri = URI.parse(filesRoot);
-    const fp = new FilePod({ engine, root: uri });
-    await fp.import();
-    // testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
+    // const uri = URI.parse(filesRoot);
+    const fp = new FilePod({ engine });
+    await fp.import({ root: filesRoot });
 
     // domain note is stub
     let note = _.find(engine.notes, { fname: "project" }) as Note;
@@ -59,7 +57,6 @@ describe.skip("filePod", () => {
       LernaTestUtils.fixtureFilesForStore(),
       {
         add: [
-          "assets",
           "project.p1.md",
           "project.p1.n1.md",
           "project.p1.n2.md",
@@ -70,8 +67,7 @@ describe.skip("filePod", () => {
     expect(expectedFiles).toEqual(actualFiles);
     // check that assets are copied over
     const assetsDir = fs.readdirSync(path.join(root, "assets"));
-    //expect(assetsDir).toMatchSnapshot("assetsDir");
-    expect(assetsDir.length).toEqual(2);
+    expect(assetsDir.length).toEqual(3);
 
     // check that assets are there
     const fileBody = fs.readFileSync(path.join(root, "project.p1.md"), {
@@ -79,14 +75,5 @@ describe.skip("filePod", () => {
     });
     expect(fileBody.match("n1.pdf")).toBeTruthy();
     expect(fileBody.match("n3.pdf")).toBeTruthy();
-    // expect(fs.readFileSync(path.join(root, "project.p1.md"), {encoding: "utf8"})).toMatchSnapshot("p1.md")
   });
-
-  // test("harness1", async () => {
-  //   const filesRoot = "/Users/kevinlin/tmp/kiran_test";
-  //   const uri = URI.parse(filesRoot);
-  //   const fp = new FilePod({ engine, root: uri });
-  //   await fp.import();
-  //   // testUtils.expectSnapshot(expect, "main", _.values(engine.notes));
-  // });
 });

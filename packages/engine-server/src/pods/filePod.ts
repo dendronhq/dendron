@@ -14,7 +14,7 @@ import klaw, { Item } from "klaw";
 import _ from "lodash";
 import path from "path";
 import through2 from "through2";
-import { BasePod } from "./base";
+import { BasePod, PodOpts } from "./base";
 
 type DItem = Item & {
   data?: any;
@@ -32,12 +32,27 @@ const toMarkdownLink = (assetPath: string, opts?: { name?: string }) => {
   return `- [${name}](${assetPath})`;
 };
 
-export class FilePod extends BasePod {
+type ImportOpts = {
+  root: string;
+};
+
+export class FilePod extends BasePod<ImportOpts> {
+  static id = "FilePod";
+  static description: "Import from your local file system";
+  static importOpts: PodOpts = [
+    {
+      name: "root",
+      required: true,
+      description: "Path to directory of holding notes",
+      type: "string",
+    },
+  ];
+
   /**
    * Return list of note props keyed by level of hierarchy
    * @param files
    */
-  files2HierarichalDict(files: DItem[]): HierarichalDict {
+  files2HierarichalDict(files: DItem[], root: string): HierarichalDict {
     const out: HierarichalDict = {};
     _.forEach(files, (item) => {
       const fname = cleanFileName(item.path, {
@@ -73,10 +88,7 @@ export class FilePod extends BasePod {
           const assetPathFull = path.join(assetDir, assetBaseNew);
           const assetPathRel = path.join(assetDirName, assetBaseNew);
           // TODO: make sure to append uuid
-          fs.copyFileSync(
-            path.join(this.root.fsPath, _item.path),
-            assetPathFull
-          );
+          fs.copyFileSync(path.join(root, _item.path), assetPathFull);
           mdLinks.push(toMarkdownLink(assetPathRel, { name: `${name}${ext}` }));
         });
 
@@ -122,11 +134,12 @@ export class FilePod extends BasePod {
     return _.values(noteDict);
   }
 
-  async import() {
+  async handleImport(opts: ImportOpts) {
+    const ctx = "FilePod.handleImport";
+    const { root } = opts;
     const items: DItem[] = []; // files, directories, symlinks, etc
-    const uri = this.root;
-    const root = uri.fsPath;
-    const mask = uri.fsPath.endsWith("/") ? root.length : root.length + 1;
+    const mask = root.endsWith("/") ? root.length : root.length + 1;
+    this.L.info({ ctx, opts });
 
     const excludeFilter = through2.obj(function (item: Item, _enc, next) {
       // check if hidden file
@@ -175,7 +188,7 @@ export class FilePod extends BasePod {
     });
 
     // convert to dot files
-    const hDict = this.files2HierarichalDict(_.values(engineFileDict));
+    const hDict = this.files2HierarichalDict(_.values(engineFileDict), root);
 
     const notes = this.hDict2Notes(hDict);
     // OPTIMIZE: parallilize

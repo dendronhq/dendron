@@ -1,4 +1,10 @@
-import { DendronConfig, DEngine, getStage, Note } from "@dendronhq/common-all";
+import {
+  DendronConfig,
+  DEngine,
+  getStage,
+  Note,
+  DNodeUtils,
+} from "@dendronhq/common-all";
 import { mdFile2NodeProps } from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -11,7 +17,6 @@ import { ChangeWorkspaceCommand } from "./commands/ChangeWorkspace";
 import { CreateJournalCommand } from "./commands/CreateJournal";
 import { CreateScratchCommand } from "./commands/CreateScratch";
 import { DoctorCommand } from "./commands/Doctor";
-import { ImportPodCommand } from "./commands/ImportPod";
 import { OpenLogsCommand } from "./commands/OpenLogs";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import { ResetConfigCommand } from "./commands/ResetConfig";
@@ -36,6 +41,7 @@ import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";
 import { ArchiveHierarchyCommand } from "./commands/ArchiveHierarchy";
 import { CopyNoteRefCommand } from "./commands/CopyNoteRef";
 import { MarkdownUtils } from "./utils/md";
+import { ImportPodV2Command } from "./commands/ImportPodV2";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -309,9 +315,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.IMPORT_POD.key,
         async () => {
-          const wsRoot = this.rootWorkspace.uri.fsPath;
-          await new ImportPodCommand().execute({ wsRoot });
-          vscode.window.showInformationMessage(`pod import`);
+          await new ImportPodV2Command().run();
         }
       )
     );
@@ -490,6 +494,12 @@ export class DendronWorkspace {
         const fname = path.basename(uri.fsPath, ".md");
         const noteRaw = mdFile2NodeProps(uri.fsPath);
         const note = new Note({ ...noteRaw, parent: null, children: [] });
+
+        // ignore notes already in engine
+        const maybeNote = DNodeUtils.getNoteByFname(fname, this.engine);
+        if (maybeNote) {
+          return;
+        }
 
         // check if ignore
         const recentEvents = HistoryService.instance().lookBack();

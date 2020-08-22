@@ -8,7 +8,12 @@ export type HistoryEvent = {
 };
 
 type HistoryEventSource = "engine" | "src" | "extension";
-type HistoryEventAction = "delete" | "create" | "activate" | "initialized" | "rename";
+type HistoryEventAction =
+  | "delete"
+  | "create"
+  | "activate"
+  | "initialized"
+  | "rename";
 
 type HistoryEventListenerFunc = (event: HistoryEvent) => void;
 
@@ -24,6 +29,7 @@ let _HISTORY_SERVICE: undefined | HistoryService = undefined;
 export class HistoryService implements IHistoryService {
   public readonly events: HistoryEvent[];
   public subscribers: { [k in HistoryEventSource]: HistoryEventListenerFunc[] };
+  public pause: boolean;
 
   static instance(): HistoryService {
     if (_.isUndefined(_HISTORY_SERVICE)) {
@@ -39,11 +45,14 @@ export class HistoryService implements IHistoryService {
       src: [],
       extension: [],
     };
+    this.pause = false;
   }
 
   add(event: HistoryEvent) {
-    this.events.unshift(event);
-    this.subscribers[event.source].forEach((f) => f(event));
+    if (!this.pause) {
+      this.events.unshift(event);
+      this.subscribers[event.source].forEach((f) => f(event));
+    }
   }
 
   clearSubscriptions() {

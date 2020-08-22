@@ -1,3 +1,9 @@
 const { say } = require('cowsay');
 
-console.log(say({ text: 'grazing in the browser' }));
+class TestPod {
+  execute() {
+    console.log(say({ text: 'grazing in the browser' }));
+  }
+}
+
+module.exports = TestPod;

@@ -54,7 +54,7 @@ export abstract class BasePod<TImportOpts = any> implements Pod<TImportOpts> {
     return;
   }
 
-  async import(opts: TImportOpts): Promise<{ error: any[] }> {
+  async import(opts: TImportOpts): Promise<{ error: any }> {
     const out = await this.sanityCheck();
     if (!_.isUndefined(out)) {
       return {

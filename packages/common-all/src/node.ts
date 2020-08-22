@@ -710,7 +710,11 @@ const matchSchemaProps = (
     _.every([p.id === id, item.fname === p.fname])
   );
   if (_.isUndefined(out)) {
-    throw Error(`no match found for ${id}, props: ${props}`);
+    throw Error(
+      `bad schema file. no match found for schema with id ${id}. schema file contents: ${JSON.stringify(
+        props
+      )}`
+    );
   }
   return out;
 };

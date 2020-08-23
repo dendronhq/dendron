@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.12](https://github.com/dendronhq/dendron/compare/v0.7.11...v0.7.12) (2020-08-23)
+
+### Bug Fixes
+
+- **schema:** autocomplete with imported schemas ([5b6a347](https://github.com/dendronhq/dendron/commit/5b6a3472d2ee895bd64ac365d6ab6f49cb768a4f))
+
+### Features
+
+- **schemas:** support schema import ([7a38f1c](https://github.com/dendronhq/dendron/commit/7a38f1c869f5a20bf81c77682877995dd7bfce87))
+
 ## [0.7.11](https://github.com/dendronhq/dendron/compare/v0.7.11-alpha.0...v0.7.11) (2020-08-22)
 
 **Note:** Version bump only for package @dendronhq/engine-server

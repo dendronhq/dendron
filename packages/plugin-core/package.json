@@ -176,31 +176,15 @@
         ],
         "keybindings": [
             {
-                "command": "dendron.lookupSchema",
-                "mac": "cmd+shift+L",
-                "key": "ctrl+shift+l",
+                "command": "dendron.createJournalNote",
+                "key": "ctrl+shift+j",
+                "mac": "cmd+shift+j",
                 "when": "editorFocus"
-            },
-            {
-                "command": "dendron.lookup",
-                "mac": "cmd+L",
-                "key": "ctrl+l"
-            },
-            {
-                "command": "dendron.deleteNode",
-                "key": "ctrl+shift+d",
-                "mac": "cmd+shift+d"
             },
             {
                 "command": "dendron.createScratchNote",
                 "key": "ctrl+shift+s",
                 "mac": "cmd+shift+s"
-            },
-            {
-                "command": "dendron.createJournalNote",
-                "key": "ctrl+shift+j",
-                "mac": "cmd+shift+j",
-                "when": "editorFocus"
             },
             {
                 "command": "dendron.copyNoteLink",
@@ -212,6 +196,23 @@
                 "command": "dendron.copyNoteRef",
                 "key": "ctrl+shift+r",
                 "mac": "cmd+shift+r",
+                "when": "editorFocus"
+            },
+            {
+                "command": "dendron.deleteNode",
+                "key": "ctrl+shift+d",
+                "mac": "cmd+shift+d"
+            },
+            {
+                "command": "dendron.lookup",
+                "mac": "cmd+L",
+                "key": "ctrl+l",
+                "when": "editorFocus"
+            },
+            {
+                "command": "dendron.lookupSchema",
+                "mac": "cmd+shift+L",
+                "key": "ctrl+shift+l",
                 "when": "editorFocus"
             },
             {

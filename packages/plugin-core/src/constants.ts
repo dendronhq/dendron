@@ -10,30 +10,63 @@ export const DENDRON_COMMANDS = {
   CREATE_JOURNAL_NOTE: {
     key: "dendron.createJournalNote",
     title: `${CMD_PREFIX} Create Journal Note`,
+    keybindings: {
+      key: "ctrl+shift+j",
+      mac: "cmd+shift+j",
+      when: "editorFocus",
+    },
   },
   CREATE_SCRATCH_NOTE: {
     key: "dendron.createScratchNote",
     title: `${CMD_PREFIX} Create Scratch Note`,
+    keybindings: {
+      key: "ctrl+shift+s",
+      mac: "cmd+shift+s",
+    },
   },
   COPY_NOTE_LINK: {
     key: "dendron.copyNoteLink",
     title: `${CMD_PREFIX} Copy Note Link`,
+    keybindings: {
+      key: "ctrl+shift+c",
+      mac: "cmd+shift+c",
+      when: "editorFocus",
+    },
   },
   COPY_NOTE_REF: {
     key: "dendron.copyNoteRef",
     title: `${CMD_PREFIX} Copy Note Ref`,
+    keybindings: {
+      key: "ctrl+shift+r",
+      mac: "cmd+shift+r",
+      when: "editorFocus",
+    },
   },
   DELETE_NODE: {
     key: "dendron.deleteNode",
     title: `${CMD_PREFIX} Delete Node`,
+    keybindings: {
+      key: "ctrl+shift+d",
+      mac: "cmd+shift+d",
+    },
   },
   LOOKUP: {
     key: "dendron.lookup",
     title: `${CMD_PREFIX} Lookup`,
+    keybindings: {
+      mac: "cmd+L",
+      key: "ctrl+l",
+      when: "editorFocus",
+    },
   },
   LOOKUP_SCHEMA: {
     key: "dendron.lookupSchema",
     title: `${CMD_PREFIX} Lookup Schema`,
+    keybindings: {
+      mac: "cmd+shift+L",
+      key: "ctrl+shift+l",
+      when: "editorFocus",
+    },
   },
   RENAME_NOTE: {
     key: "dendron.renameNote",
@@ -74,6 +107,11 @@ export const DENDRON_COMMANDS = {
   SHOW_PREVIEW: {
     key: "dendron.showPreview",
     title: `${CMD_PREFIX} Show Preview`,
+    keybindings: {
+      command: "dendron.showPreview",
+      key: "ctrl+ctrl+p",
+      mac: "cmd+ctrl+p",
+    },
   },
   // --- Dev
   DOCTOR: { key: "dendron.dev.doctor", title: `${CMD_PREFIX}Dev: Doctor` },

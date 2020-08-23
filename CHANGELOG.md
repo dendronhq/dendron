@@ -9,10 +9,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - **schema:** autocomplete with imported schemas ([5b6a347](https://github.com/dendronhq/dendron/commit/5b6a3472d2ee895bd64ac365d6ab6f49cb768a4f))
 
+### Enhancements
+
+- **schema:** better error message on bad schema ([a86b35d](https://github.com/dendronhq/dendron/commit/a86b35d606da9cdce16dbbafb944bc460f6d7ff4))
+
 ### Features
 
 - **schemas:** support match by pattern ([ba4f687](https://github.com/dendronhq/dendron/commit/ba4f687f5f837ce244e7f58f2746f06372d85a99))
-- **schemas:** support schema import ([7a38f1c](https://github.com/dendronhq/dendron/commit/7a38f1c869f5a20bf81c77682877995dd7bfce87))
+- **schemas:** support schema import ([7a38f1c](https://github.com/dendronhq/dendron/commit/7a38f1c869f5a20bf81c77682877995dd7bfce87))([docs](http://dendron.so/notes/c5e5adde-5459-409b-b34d-a0d75cbb1052.html#imports-optional-str))([docs](http://dendron.so/notes/c5e5adde-5459-409b-b34d-a0d75cbb1052.html#pattern))
 
 ## [0.7.11](https://github.com/dendronhq/dendron/compare/v0.7.11-alpha.0...v0.7.11) (2020-08-22)
 
@@ -301,8 +305,8 @@ The much asked for Rename Note command is here, as well as a bunch of enhancemen
 
 - make journal timestamp format configurable ([228384a](https://github.com/dendronhq/dendron/commit/228384a86720f56f2fce752d4c0cc8904326e651))
 
-<a href="https://www.loom.com/share/27b9efa48cbe4fcb9535be9b60840d57"> 
-<img style="" src="https://cdn.loom.com/sessions/thumbnails/27b9efa48cbe4fcb9535be9b60840d57-with-play.gif"> 
+<a href="https://www.loom.com/share/27b9efa48cbe4fcb9535be9b60840d57">
+<img style="" src="https://cdn.loom.com/sessions/thumbnails/27b9efa48cbe4fcb9535be9b60840d57-with-play.gif">
 </a>
 
 ## [0.5.5](https://github.com/dendronhq/dendron/compare/v0.5.4...v0.5.5) (2020-08-04)

@@ -65,12 +65,20 @@ function genPrefix(
   return out;
 }
 
+type CreateFnameOverrides = {
+  domain?: string;
+};
+
+type CreateFnameOpts = {
+  overrides?: CreateFnameOverrides;
+};
+
 export abstract class CreateNoteCommand extends BaseCommand<
   CommandOpts,
   CommandOutput,
   CommandInput
 > {
-  genFname(type: "JOURNAL" | "SCRATCH"): string {
+  genFname(type: "JOURNAL" | "SCRATCH", opts?: CreateFnameOpts): string {
     // gather inputs
     const dateFormatKey: ConfigKey = `DEFAULT_${type}_DATE_FORMAT` as ConfigKey;
     const dateFormat = DendronWorkspace.configuration().get<string>(
@@ -98,7 +106,8 @@ export abstract class CreateNoteCommand extends BaseCommand<
 
     const engine = DendronWorkspace.instance().engine;
     // put together
-    const cNoteFname = path.basename(editorPath, ".md");
+    const cNoteFname =
+      opts?.overrides?.domain || path.basename(editorPath, ".md");
     const prefix = genPrefix(cNoteFname, addBehavior as AddBehavior, {
       engine,
     });

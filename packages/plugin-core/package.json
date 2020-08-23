@@ -28,6 +28,11 @@
         "configuration": {
             "title": "Dendron",
             "properties": {
+                "dendron.dailyJournalDomain": {
+                    "type": "string",
+                    "default": "daily",
+                    "description": "domain where daily journals are kept"
+                },
                 "dendron.defaultJournalName": {
                     "type": "string",
                     "default": "journal",
@@ -85,6 +90,10 @@
             }
         },
         "commands": [
+            {
+                "command": "dendron.createDailyJournalNote",
+                "title": "Dendron: Create Daily Journal Note"
+            },
             {
                 "command": "dendron.createJournalNote",
                 "title": "Dendron: Create Journal Note"
@@ -175,6 +184,12 @@
             }
         ],
         "keybindings": [
+            {
+                "command": "dendron.createDailyJournalNote",
+                "key": "ctrl+shift+i",
+                "mac": "cmd+shift+i",
+                "when": "editorFocus"
+            },
             {
                 "command": "dendron.createJournalNote",
                 "key": "ctrl+shift+j",

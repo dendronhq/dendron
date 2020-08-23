@@ -7,6 +7,15 @@ export const extensionQualifiedId = `dendron.dendron`;
 const CMD_PREFIX = "Dendron:";
 export const DENDRON_COMMANDS = {
   // --- Notes
+  CREATE_DAILY_JOURNAL_NOTE: {
+    key: "dendron.createDailyJournalNote",
+    title: `${CMD_PREFIX} Create Daily Journal Note`,
+    keybindings: {
+      key: "ctrl+shift+i",
+      mac: "cmd+shift+i",
+      when: "editorFocus",
+    },
+  },
   CREATE_JOURNAL_NOTE: {
     key: "dendron.createJournalNote",
     title: `${CMD_PREFIX} Create Journal Note`,
@@ -168,6 +177,12 @@ export const _noteAddBehaviorEnum = [
 
 export const CONFIG = {
   // --- journals
+  DAILY_JOURNAL_DOMAIN: {
+    key: "dendron.dailyJournalDomain",
+    type: "string",
+    default: "daily",
+    description: "domain where daily journals are kept",
+  },
   DEFAULT_JOURNAL_NAME: {
     key: "dendron.defaultJournalName",
     type: "string",

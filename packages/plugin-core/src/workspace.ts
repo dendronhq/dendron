@@ -42,6 +42,7 @@ import { ArchiveHierarchyCommand } from "./commands/ArchiveHierarchy";
 import { CopyNoteRefCommand } from "./commands/CopyNoteRef";
 import { MarkdownUtils } from "./utils/md";
 import { ImportPodV2Command } from "./commands/ImportPodV2";
+import { CreateDailyJournalCommand } from "./commands/CreateDailyJournal";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -421,6 +422,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.ARCHIVE_HIERARCHY.key,
         async () => {
           await new ArchiveHierarchyCommand().run();
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key,
+        async () => {
+          await new CreateDailyJournalCommand().run();
         }
       )
     );

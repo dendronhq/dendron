@@ -2934,7 +2934,7 @@ Object {
   "id": "one",
   "parent": "foo",
   "stub": false,
-  "title": "foo",
+  "title": "one",
   "type": "schema",
 }
 `;
@@ -2960,8 +2960,8 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "bar",
-      "bar",
+      "one",
+      "three",
     ],
     "custom": Object {},
     "data": Object {
@@ -2977,8 +2977,8 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "foo",
-      "foo",
+      "one",
+      "three",
     ],
     "custom": Object {},
     "data": Object {},
@@ -2992,8 +2992,8 @@ Array [
   Object {
     "body": "",
     "children": Array [
-      "test1",
-      "test1",
+      "test1-1",
+      "test1-2",
     ],
     "custom": Object {},
     "data": Object {},

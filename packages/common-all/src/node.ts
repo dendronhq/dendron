@@ -565,8 +565,7 @@ export class Schema extends DNode<SchemaData> implements ISchema {
     const optsData = _.pick(opts, schemaDataOpts);
     return DNodeRaw.createProps({
       ..._.defaults(optsWithoutData, {
-        id: Schema.defaultTitle(opts.fname),
-        title: Schema.defaultTitle(opts.fname),
+        title: optsWithoutData.id,
         parent: null,
         children: [],
         data: optsData,

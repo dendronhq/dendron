@@ -2,31 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [0.7.13](https://github.com/dendronhq/dendron/compare/v0.7.12...v0.7.13) (2020-08-24)
-
-
-### Features
-
-* **notes:** create daily journal note command ([532cc16](https://github.com/dendronhq/dendron/commit/532cc1662445efb840d5e3a1211ea1e312e2bd9c))
-
-
-### Enhancements
-
-* **schema:** default title to id ([080f6bb](https://github.com/dendronhq/dendron/commit/080f6bbda51774f23dd248bbd38f8b894ee24842))
-
-### [0.7.13-alpha.2](https://github.com/dendronhq/dendron/compare/v0.7.13-alpha.1...v0.7.13-alpha.2) (2020-08-23)
-
-
-### Enhancements
-
-* **schema:** default title to id ([4ede100](https://github.com/dendronhq/dendron/commit/4ede100d4d299342308759168c5c023278fa7f3a))
-
-### [0.7.13-alpha.0](https://github.com/dendronhq/dendron/compare/v0.7.12...v0.7.13-alpha.0) (2020-08-23)
-
+## [0.7.13](https://github.com/dendronhq/dendron/compare/v0.7.12...v0.7.13) (2020-08-24)
 
 ### Features
 
-* **notes:** create daily journal note command ([532cc16](https://github.com/dendronhq/dendron/commit/532cc1662445efb840d5e3a1211ea1e312e2bd9c))
+- **notes:** create daily journal note command ([532cc16](https://github.com/dendronhq/dendron/commit/532cc1662445efb840d5e3a1211ea1e312e2bd9c))
+
+### Enhancements
+
+- **schema:** default title to id ([080f6bb](https://github.com/dendronhq/dendron/commit/080f6bbda51774f23dd248bbd38f8b894ee24842))
 
 ## [0.7.12](https://github.com/dendronhq/dendron/compare/v0.7.11...v0.7.12) (2020-08-23)
 

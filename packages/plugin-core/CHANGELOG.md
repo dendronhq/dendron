@@ -1,13 +1,31 @@
-# Change Log
+# Changelog
 
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [0.7.13](https://github.com/dendronhq/dendron/compare/v0.7.12...v0.7.13) (2020-08-24)
+
+### Features
+
+- **notes:** create daily journal note command ([532cc16](https://github.com/dendronhq/dendron/commit/532cc1662445efb840d5e3a1211ea1e312e2bd9c))
+
+### Enhancements
+
+- **schema:** default title to id ([080f6bb](https://github.com/dendronhq/dendron/commit/080f6bbda51774f23dd248bbd38f8b894ee24842))
 
 ## [0.7.12](https://github.com/dendronhq/dendron/compare/v0.7.11...v0.7.12) (2020-08-23)
 
 ### Bug Fixes
 
 - **schema:** autocomplete with imported schemas ([5b6a347](https://github.com/dendronhq/dendron/commit/5b6a3472d2ee895bd64ac365d6ab6f49cb768a4f))
+
+### Enhancements
+
+- **schema:** better error message on bad schema ([a86b35d](https://github.com/dendronhq/dendron/commit/a86b35d606da9cdce16dbbafb944bc460f6d7ff4))
+
+### Features
+
+- **schemas:** support match by pattern ([ba4f687](https://github.com/dendronhq/dendron/commit/ba4f687f5f837ce244e7f58f2746f06372d85a99))
+- **schemas:** support schema import ([7a38f1c](https://github.com/dendronhq/dendron/commit/7a38f1c869f5a20bf81c77682877995dd7bfce87))([docs](http://dendron.so/notes/c5e5adde-5459-409b-b34d-a0d75cbb1052.html#imports-optional-str))([docs](http://dendron.so/notes/c5e5adde-5459-409b-b34d-a0d75cbb1052.html#pattern))
 
 ## [0.7.11](https://github.com/dendronhq/dendron/compare/v0.7.11-alpha.0...v0.7.11) (2020-08-22)
 
@@ -296,8 +314,8 @@ The much asked for Rename Note command is here, as well as a bunch of enhancemen
 
 - make journal timestamp format configurable ([228384a](https://github.com/dendronhq/dendron/commit/228384a86720f56f2fce752d4c0cc8904326e651))
 
-<a href="https://www.loom.com/share/27b9efa48cbe4fcb9535be9b60840d57"> 
-<img style="" src="https://cdn.loom.com/sessions/thumbnails/27b9efa48cbe4fcb9535be9b60840d57-with-play.gif"> 
+<a href="https://www.loom.com/share/27b9efa48cbe4fcb9535be9b60840d57">
+<img style="" src="https://cdn.loom.com/sessions/thumbnails/27b9efa48cbe4fcb9535be9b60840d57-with-play.gif">
 </a>
 
 ## [0.5.5](https://github.com/dendronhq/dendron/compare/v0.5.4...v0.5.5) (2020-08-04)

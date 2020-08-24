@@ -81,16 +81,20 @@ async function note2JekyllMdFile(
   // delete parent from root
   note.body = stripSiteOnlyTags(note);
   note.body = stripLocalOnlyTags(note.body);
-  note.body = getProcessor()
-    .use(replaceRefs, {
-      wikiLink2Md: true,
-      wikiLinkPrefix: linkPrefix,
-      imageRefPrefix: opts.assetsPrefix,
-      wikiLinkUseId: true,
-      engine: opts.engine,
-    })
-    .processSync(note.body)
-    .toString();
+  try {
+    note.body = getProcessor()
+      .use(replaceRefs, {
+        wikiLink2Md: true,
+        wikiLinkPrefix: linkPrefix,
+        imageRefPrefix: opts.assetsPrefix,
+        wikiLinkUseId: true,
+        engine: opts.engine,
+      })
+      .processSync(note.body)
+      .toString();
+  } catch (err) {
+    throw err;
+  }
   const filePath = path.join(opts.notesDir, meta.id + ".md");
   return fs.writeFile(
     filePath,

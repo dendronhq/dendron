@@ -30,51 +30,27 @@ Object {
 }
 `;
 
-exports[`engine:exact note basic create when empty: notes 1`] = `
-Array [
-  Object {
-    "body": "
-",
-    "children": Array [],
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "root",
-    "parent": "root",
-    "stub": false,
-    "title": "root",
-    "type": "note",
-  },
-]
-`;
-
-exports[`engine:exact note basic create when empty: notes-root-content 1`] = `
-"
-"
-`;
-
-exports[`engine:exact note basic create when empty: notes-root-data 1`] = `
+exports[`engine:exact note basic create when empty: foo 1`] = `
 Object {
-  "desc": "",
-  "title": "root",
-}
-`;
+  "body": "
+- [[lbl|refactor.one]]
 
-exports[`engine:exact note basic create when empty: schemas 1`] = `
-Array [
-  Object {
-    "body": "",
-    "children": Array [],
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "root.schema",
-    "parent": "root",
-    "stub": false,
-    "title": "root",
-    "type": "schema",
-  },
-]
+- SECRETS <!--LOCAL_ONLY_LINE-->
+",
+  "children": Array [
+    "foo.one",
+    "foo.two",
+    "Three",
+  ],
+  "custom": Object {},
+  "data": Object {},
+  "desc": "",
+  "fname": "foo",
+  "parent": "root",
+  "stub": false,
+  "title": "foo",
+  "type": "note",
+}
 `;
 
 exports[`engine:exact note basic fetch node with custom att 1`] = `

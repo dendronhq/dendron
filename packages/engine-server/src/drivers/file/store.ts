@@ -176,7 +176,9 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
     if (this.isQueryAll(queryString)) {
       const schemas = _opts?.schemas || {};
       const noteProps = await this._getNoteAll();
-      const data = new NodeBuilder().buildNoteFromProps(noteProps, { schemas });
+      const data = new NodeBuilder().buildNoteFromProps(noteProps, {
+        schemas: _.values(schemas),
+      });
       this.refreshIdToPath(data);
 
       this.logger.debug({ ctx: "query:exit:pre" });

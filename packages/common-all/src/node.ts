@@ -751,11 +751,13 @@ export class NodeBuilder {
     return _.filter(nodes, (ent) => ent.parent === "root");
   }
 
-  toNote(item: NoteRawProps, parents: Note[], opts: { schemas: SchemaDict }) {
+  toNote(item: NoteRawProps, parents: Note[], opts: { schemas: Schema[] }) {
+    // _.map(schemas, (v, k) => {
+    // });
     const node = new Note({ ...item, parent: null, children: [] });
-    if (node.schemaId) {
-      node.schema = opts.schemas[node.schemaId];
-    }
+    // if (node.schemaId) {
+    //   node.schema = opts.schemas[node.schemaId];
+    // }
     const { parent: parentId, children } = item;
     const parent: Note = _.find(parents, { id: parentId }) as Note;
     // const parent = undefined;
@@ -770,14 +772,15 @@ export class NodeBuilder {
     }
     // NOTE: parents don't get resolved until this is called
     parent.addChild(node);
-    // eslint-disable-next-line no-use-before-define
-    if (node.schemaId === UNKNOWN_SCHEMA_ID) {
-      // TODO: FRAGILE, might not work with root stubs
-      // const domainSchema = assertExists<Schema>(node.domain.children[0].schema as Schema, "note domain does not have schema");
-      //const domainSchema = assertExists<Schema>(node.domain.schema as Schema, "note domain does not have schema");
+    let filteredSchemas = opts.schemas;
+    const maybeSchema = SchemaUtils.matchNote(node, opts.schemas);
+    if (maybeSchema) {
+      node.schema = maybeSchema;
+    } else {
       node.schema = Schema.createUnkownSchema();
+      filteredSchemas = [];
     }
-    return { node, parent, children };
+    return { node, parent, children, schemas: filteredSchemas };
   }
 
   toSchema(item: SchemaRawProps, parent: Schema, props: SchemaRawProps[]) {
@@ -793,33 +796,57 @@ export class NodeBuilder {
 
   buildNoteFromProps(
     props: NoteRawProps[],
-    opts: { schemas: SchemaDict }
+    opts: { schemas: Schema[] }
   ): Note[] {
     const { node: rootNode, childrenIds } = getRoot(props);
     const out = [];
     out.push([rootNode]);
 
-    let parentNodes = [rootNode];
-    let nodeIds = childrenIds;
+    const getNoteFromId = (id: string, props: NoteRawProps[]): NoteRawProps => {
+      const nodePropsList = props.filter(
+        (ent) => ent.id === id
+      ) as NoteRawProps[];
+      if (nodePropsList.length > 1) {
+        const fnames = nodePropsList.map((ent) => ent.fname).join(", ");
+        throw Error(
+          `found multiple notes with the same id. please check the following notes: ${fnames}`
+        );
+      }
+      const nodeProps = nodePropsList[0];
+      return nodeProps;
+    };
 
-    while (!_.isEmpty(nodeIds)) {
+    let parentNodes = [rootNode];
+    let noteProps: {
+      nodeProps: NoteRawProps;
+      schemas: Schema[];
+    }[] = childrenIds.map((id) => {
+      return {
+        nodeProps: getNoteFromId(id, props),
+        schemas: opts.schemas,
+      };
+    });
+
+    while (!_.isEmpty(noteProps)) {
       const currentNodes: Note[] = [];
 
-      nodeIds = nodeIds
-        .map((id: string) => {
-          const nodePropsList = props.filter(
-            (ent) => ent.id === id
-          ) as NoteRawProps[];
-          if (nodePropsList.length > 1) {
-            const fnames = nodePropsList.map((ent) => ent.fname).join(", ");
-            throw Error(
-              `found multiple notes with the same id. please check the following notes: ${fnames}`
-            );
-          }
-          const nodeProps = nodePropsList[0];
-          const { node, children } = this.toNote(nodeProps, parentNodes, opts);
+      noteProps = noteProps
+        .map(({ nodeProps, schemas }) => {
+          // convert note props to note
+          const { node, children, schemas: filteredSchemas } = this.toNote(
+            nodeProps,
+            parentNodes,
+            {
+              schemas,
+            }
+          );
           currentNodes.push(node);
-          return children;
+          return children.map((id) => {
+            return {
+              nodeProps: getNoteFromId(id, props),
+              schemas: filteredSchemas,
+            };
+          });
         })
         .flat();
       out.push(currentNodes);

@@ -5,7 +5,6 @@ import * as assert from "assert";
 import _ from "lodash";
 import { beforeEach, describe } from "mocha";
 import { PickerUtils } from "../../components/lookup/LookupProvider";
-import { fsPathToRef } from "../../external/memo/utils/utils";
 
 suite("startup", function () {
   describe("PickerUtils", function () {

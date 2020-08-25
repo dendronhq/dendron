@@ -12,9 +12,9 @@ import { QuickPick, QuickPickItem, Uri, window, WorkspaceFolder } from "vscode";
 import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
 import { getDurationMilliseconds, profile } from "../../utils/system";
+import { DendronWorkspace } from "../../workspace";
 import { CREATE_NEW_LABEL } from "./constants";
 import { node2Uri } from "./utils";
-import { DendronWorkspace } from "../../workspace";
 
 const L = Logger;
 // @ts-ignore
@@ -143,25 +143,6 @@ export class PickerUtils {
           return ent.fname;
         }
       );
-    } else {
-      // handle schemas that are at current level
-      const schemas = SchemaUtils.matchNote(
-        QueryStringUtils.goUp(qs),
-        engine.schemas,
-        {
-          matchNamespace: false,
-        }
-      ).children as Schema[];
-      items = _.uniqBy(
-        items.concat(
-          schemas.map((schema) => {
-            return Note.fromSchema(DNodeUtils.dirName(qs), schema);
-          })
-        ),
-        (ent) => {
-          return ent.fname;
-        }
-      );
     }
     return items;
   }
@@ -180,14 +161,6 @@ type EngineFlavor = "note" | "schema";
 export type EngineOpts = {
   flavor: EngineFlavor;
 };
-
-function addSchemaResults(notes: Note[], engine: DEngine) {
-  return notes.map((note) => {
-    const schema = SchemaUtils.matchNote(note as Note, engine.schemas);
-    (note as Note).schema = schema;
-    return note;
-  });
-}
 
 function showRootResults(flavor: EngineFlavor, engine: DEngine) {
   if (flavor === "note") {
@@ -245,12 +218,16 @@ export class LookupProvider {
     const engine = DendronEngine.getOrCreateEngine();
 
     if (isCreateNewNotePick(selectedItem)) {
-      L.info({ ...ctx2, msg: "createNewPick" });
+      L.info({ ...ctx2, msg: "createNewPick", selectedItem });
       const fname = value;
       let nodeNew: DNode;
       // reuse node if a stub
       // otherwise, children will not be right
-      if (selectedItem.stub) {
+      if (_.isUndefined(selectedItem)) {
+        L.info({ ...ctx2, msg: "create new note" });
+        nodeNew =
+          opts.flavor === "note" ? new Note({ fname }) : new Schema({ fname });
+      } else if (selectedItem.stub) {
         L.info({ ...ctx2, msg: "createNewPick:stub" });
         // get note
         nodeNew = engine.notes[selectedItem.id];
@@ -316,26 +293,24 @@ export class LookupProvider {
       opts,
     };
     const engine = DendronEngine.getOrCreateEngine();
+    const queryEndsWithDot = querystring.endsWith(".");
     try {
+      let updatedItems = picker.items;
       L.info({ ...ctx2, msg: "enter" });
-      const resp = await engine.query(querystring, opts.flavor);
-      profile = getDurationMilliseconds(start);
-      L.info({ ...ctx2, msg: "engine.query", profile });
-
-      let updatedItems = resp.data;
-      // enrich notes with schemas
-      if (opts.flavor === "note") {
-        updatedItems = addSchemaResults(updatedItems as Note[], engine);
+      if (queryEndsWithDot) {
+        const resp = await engine.query(querystring, opts.flavor);
+        updatedItems = resp.data;
         profile = getDurationMilliseconds(start);
-        L.info({ ...ctx2, msg: "matchSchema", profile });
+        L.info({ ...ctx2, msg: "engine.query", profile });
       }
 
-      // check if root query, if so, return everything
+      // check if root query, special case, return everything
       if (querystring === "") {
         L.info({ ...ctx2, msg: "no qs" });
         picker.items = showRootResults(opts.flavor, engine);
         return;
       }
+
       // check if single item query, vscode doesn't surface single letter queries
       if (picker.activeItems.length === 0 && querystring.length === 1) {
         picker.items = updatedItems;
@@ -346,7 +321,6 @@ export class LookupProvider {
       const perfectMatch = _.find(updatedItems, { fname: querystring });
       // NOTE: we modify this later so need to track this here
       const noUpdatedItems = updatedItems.length === 0;
-      const queryEndsWithDot = querystring.endsWith(".");
 
       // check if we just entered a new level, only want to match children schema
       if (opts.flavor === "note") {
@@ -366,8 +340,9 @@ export class LookupProvider {
         (picker.activeItems.length === 0 && !perfectMatch)
       ) {
         L.info({ ...ctx2, msg: "no matches" });
+        // BOND
         // @ts-ignore
-        picker.items = updatedItems.concat([this.noActiveItem]);
+        picker.items = updatedItems; //.concat([this.noActiveItem]);
         return;
       }
 
@@ -384,7 +359,7 @@ export class LookupProvider {
         // regular result
         L.debug({ ...ctx2, msg: "active != qs" });
         // @ts-ignore
-        picker.items = [this.noActiveItem].concat(updatedItems);
+        picker.items = updatedItems;
       }
 
       // DEBUG

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.8.1](https://github.com/dendronhq/dendron/compare/v0.8.0...v0.8.1) (2020-08-25)
+
+### Features
+
+- **hierarchies:** Add Go Up Hierarchy command ([7b225b9](https://github.com/dendronhq/dendron/commit/7b225b94d2e2ac1d13e0d21f7b8b5bc6604508a9))
+
+### Enhancements
+
+- **pods:** throw error on badly formed links ([c0a383d](https://github.com/dendronhq/dendron/commit/c0a383d31eb3ef85eb19d7919c95411cc440040a))
+
+* update contributing docs ([6097c8d](https://github.com/dendronhq/dendron/commit/6097c8daaebafcf264f15fbfe5d02cac3d0a9529))
+
+# [0.8.0](https://github.com/dendronhq/dendron/compare/v0.7.13...v0.8.0) (2020-08-24)
+
 ## [0.7.13](https://github.com/dendronhq/dendron/compare/v0.7.12...v0.7.13) (2020-08-24)
 
 ### Features

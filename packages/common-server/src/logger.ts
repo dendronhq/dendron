@@ -33,13 +33,15 @@ function createLogger(name?: string): pino.Logger {
   const level = env("LOG_LEVEL", { shouldThrow: false }) || "debug";
   const nameClean = name || env("LOG_NAME");
 
-  const logDst = env("LOG_DST", { shouldThrow: false }) || "stdout";
+  //const logDst = env("LOG_DST", { shouldThrow: false }) || "stdout";
   // if (logDst === "stdout") {
   //   // TODO: tmp disable pino logging on stdout
   //   const out = pino({ name: nameClean, level });
   //   return out;
   // } else {
-  return pino(pino.destination(logDst)).child({ name: nameClean, level });
+  const out = pino({ name: nameClean, level });
+  return out;
+  //return pino(pino.destination(logDst)).child({ name: nameClean, level });
   // }
 }
 

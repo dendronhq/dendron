@@ -236,13 +236,13 @@
             },
             {
                 "command": "dendron.goUpHierarchy",
-                "mac": "cmd+u",
-                "key": "ctrl+u",
+                "mac": "cmd+shift+up",
+                "key": "ctrl+shift+up",
                 "when": "editorFocus"
             },
             {
                 "command": "dendron.showPreview",
-                "key": "ctrl+ctrl+p",
+                "windows": "windows+ctrl+p",
                 "mac": "cmd+ctrl+p"
             }
         ],

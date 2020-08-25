@@ -127,7 +127,7 @@ export const DENDRON_COMMANDS = {
     title: `${CMD_PREFIX} Show Preview`,
     keybindings: {
       command: "dendron.showPreview",
-      key: "ctrl+ctrl+p",
+      windows: "windows+ctrl+p",
       mac: "cmd+ctrl+p",
     },
   },

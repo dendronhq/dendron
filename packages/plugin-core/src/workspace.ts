@@ -44,6 +44,7 @@ import { MarkdownUtils } from "./utils/md";
 import { ImportPodV2Command } from "./commands/ImportPodV2";
 import { CreateDailyJournalCommand } from "./commands/CreateDailyJournal";
 import { GoUpCommand } from "./commands/GoUpCommand";
+import { ShowPreviewCommand } from "./commands/ShowPreview";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -212,6 +213,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.CREATE_SCRATCH_NOTE.key,
         async () => {
           await new CreateScratchCommand().run();
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.SHOW_PREVIEW.key,
+        async () => {
+          await new ShowPreviewCommand().run();
         }
       )
     );

@@ -53,8 +53,9 @@ export class SetupWorkspaceCommand extends BasicCommand<
   async execute(opts: CommandOpts) {
     const ctx = "SetupWorkspaceCommand extends BaseCommand";
     const ws = DendronWorkspace.instance();
-    const { rootDirRaw: rootDir, skipOpenWs } = _.defaults(opts, {
+    const { rootDirRaw: rootDir, skipOpenWs, emptyWs } = _.defaults(opts, {
       skipOpenWs: false,
+      emptyWs: false,
     });
     ws.L.info({ ctx, rootDir, skipOpenWs });
 
@@ -111,19 +112,18 @@ export class SetupWorkspaceCommand extends BasicCommand<
       ws.extensionAssetsDir,
       "dendronWS"
     );
-    //const notesSrc = vscode.Uri.joinPath(ws.extensionAssetsDir, "notes");
-    if (opts.emptyWs) {
+    const dendronJekyll = vscode.Uri.joinPath(ws.extensionAssetsDir, "jekyll");
+    fs.copySync(path.join(dendronJekyll.fsPath), path.join(rootDir, "docs"));
+    fs.ensureDirSync(path.join(rootDir, "vault"));
+    fs.copySync(
+      path.join(dendronWSTemplate.fsPath, "vault", ".vscode"),
+      path.join(rootDir, "vault", ".vscode")
+    );
+    if (!emptyWs) {
       fs.copySync(
-        path.join(dendronWSTemplate.fsPath, "dendron.yml"),
-        path.join(rootDir, "dendron.yml")
+        path.join(dendronWSTemplate.fsPath, "vault"),
+        path.join(rootDir, "vault")
       );
-      fs.copySync(
-        path.join(dendronWSTemplate.fsPath, "docs"),
-        path.join(rootDir, "docs")
-      );
-      fs.ensureDirSync(path.join(rootDir, "vault"));
-    } else {
-      fs.copySync(dendronWSTemplate.fsPath, rootDir);
     }
     WorkspaceConfig.write(rootDir);
     if (!opts.skipOpenWs) {

@@ -16,6 +16,10 @@ export function activate(context: vscode.ExtensionContext) {
   if (stage !== "test") {
     _activate(context);
   }
+  HistoryService.instance().add({
+    source: "extension",
+    action: "activate-test",
+  });
   return;
 }
 

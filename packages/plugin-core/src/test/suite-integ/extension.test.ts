@@ -204,6 +204,7 @@ function onWSActive(cb: Function) {
     }
   );
 }
+
 function onWSInit(cb: Function) {
   HistoryService.instance().subscribe(
     "extension",
@@ -445,7 +446,9 @@ suite("startup", function () {
     });
 
     test("lookup new node with schema template for namespace", function (done) {
-      setupDendronWorkspace(root.name, ctx);
+      setupDendronWorkspace(root.name, ctx, {
+        setupWsOverride: { emptyWs: false },
+      });
       onWSInit(async () => {
         assert.equal(DendronWorkspace.isActive(), true);
         const lbl = "journal.daily.2020-08-10";
@@ -887,6 +890,29 @@ suite("commands", function () {
         done();
       });
       setupDendronWorkspace(root.name, ctx, { useFixtures: true });
+    });
+  });
+
+  describe.only("SetupWorkspaceCommand", function () {
+    this.timeout(TIMEOUT);
+    test("basic", async function (done) {
+      onWSActive(async () => {
+        VSCodeUtils.gatherFolderPath = async () => {
+          return root.name;
+        };
+        // @ts-ignore
+        VSCodeUtils.showQuickPick = async () => {
+          return "initialize with dendron tutorial notes";
+        };
+        await new SetupWorkspaceCommand().run();
+        assert.equal(fs.readdirSync(root.name).sort(), [
+          "dendron.code-workspace",
+          "docs",
+          "vault",
+        ]);
+        done();
+      });
+      _activate(ctx);
     });
   });
 });

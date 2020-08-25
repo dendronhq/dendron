@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.8.3](https://github.com/dendronhq/dendron/compare/v0.8.2...v0.8.3) (2020-08-25)
+
+
+### Bug Fixes
+
+* **markdown:** preview command disabled ([0c7effb](https://github.com/dendronhq/dendron/commit/0c7effbfa7f67310cf3ca613bb15357af91ede79))
+
 ## [0.8.1](https://github.com/dendronhq/dendron/compare/v0.8.0...v0.8.1) (2020-08-25)
 
 ### Features

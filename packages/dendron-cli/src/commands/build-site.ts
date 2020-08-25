@@ -75,7 +75,7 @@ async function note2JekyllMdFile(
     linkPrefix = path.basename(opts.notesDir) + "/";
   }
   // pull children of root to the top
-  if (note.parent?.fname === opts.noteRoot) {
+  if (note.parent?.fname === opts.siteIndex) {
     delete meta["parent"];
   }
   // delete parent from root
@@ -158,24 +158,15 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const { engine, config, dendronRoot } = _.defaults(opts, {});
     const ctx = "BuildSiteCommand";
-    let {
-      siteRoot,
-      noteRoot,
-      siteRootDir,
-      siteHierarchies,
-      noteRoots,
-      siteIndex,
-    } = config;
-    siteRootDir = siteRootDir || siteRoot;
+    let { siteRootDir, siteHierarchies, siteIndex } = config;
     if (!siteRootDir) {
       throw `siteRootDir is undefined`;
     }
-    siteHierarchies = (siteHierarchies || noteRoots || [noteRoot]) as string[];
     if (siteHierarchies.length < 1) {
       throw `siteHiearchies must have at least one hiearchy`;
     }
     // update site index
-    config.siteIndex = siteIndex || noteRoot || siteHierarchies[0];
+    config.siteIndex = siteIndex || siteHierarchies[0];
     this.L.info({ ctx, siteHierarchies, config });
 
     // setup path to site

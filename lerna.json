@@ -8,6 +8,7 @@
     "version": {
       "conventionalCommits": true,
       "message": "chore(release): publish",
+      "changelogPreset": "@dendronhq/conventional-changelog-dendron",
       "yes": true
     }
   }

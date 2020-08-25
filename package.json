@@ -38,5 +38,7 @@
   "lint-staged": {
     "*.{ts,css,md}": "prettier --write"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@dendronhq/conventional-changelog-dendron": "^5.0.11"
+  }
 }

@@ -124,22 +124,89 @@ describe("DNoteUtils", () => {
       notes = setupNotes();
     });
 
-    test("grandchild -> parent", () => {
-      const resp = DNodeUtils.findClosestParent("foo.one.alpha", notes);
-      resp.fname = "foo.one";
-      expectSnapshot(expect, "main", resp);
+    const createNotesWithStub = () => {
+      const root = new Note({ id: "root", fname: "root" });
+      const foo = new Note({
+        fname: "foo",
+      });
+      const fooChild = new Note({
+        fname: "foo.one",
+        stub: true,
+      });
+      const fooGrandChild = new Note({
+        fname: "foo.one.alpha",
+      });
+      fooChild.addChild(fooGrandChild);
+      foo.addChild(fooChild);
+      root.addChild(foo);
+      return { root, foo, fooChild, fooGrandChild };
+    };
+
+    describe("noStub = false", () => {
+      test("grandchild -> parent", () => {
+        const resp = DNodeUtils.findClosestParent("foo.one.alpha", notes);
+        resp.fname = "foo.one";
+        expectSnapshot(expect, "main", resp);
+      });
+
+      test("grandchild -> domain root", () => {
+        const resp = DNodeUtils.findClosestParent("baz.one.alpha", notes);
+        resp.fname = "baz";
+        expectSnapshot(expect, "main", resp);
+      });
+
+      test("grandchild -> root", () => {
+        const resp = DNodeUtils.findClosestParent("bond.one.alpha", notes);
+        resp.fname = "root";
+        expectSnapshot(expect, "main", resp);
+      });
     });
 
-    test("grandchild -> domain root", () => {
-      const resp = DNodeUtils.findClosestParent("baz.one.alpha", notes);
-      resp.fname = "baz";
-      expectSnapshot(expect, "main", resp);
-    });
+    describe("noStub = true", () => {
+      const noStubs = true;
 
-    test("grandchild -> root", () => {
-      const resp = DNodeUtils.findClosestParent("bond.one.alpha", notes);
-      resp.fname = "root";
-      expectSnapshot(expect, "main", resp);
+      test("grandchild -> parent", () => {
+        const resp = DNodeUtils.findClosestParent("foo.one.alpha", notes, {
+          noStubs,
+        });
+        resp.fname = "foo.one";
+        expectSnapshot(expect, "main", resp);
+      });
+
+      test("grandchild -> domain root", () => {
+        const resp = DNodeUtils.findClosestParent("baz.one.alpha", notes, {
+          noStubs,
+        });
+        resp.fname = "baz";
+        expectSnapshot(expect, "main", resp);
+      });
+
+      test("grandchild -> root", () => {
+        const resp = DNodeUtils.findClosestParent("bond.one.alpha", notes, {
+          noStubs,
+        });
+        resp.fname = "root";
+        expectSnapshot(expect, "main", resp);
+      });
+
+      test("parent is stub", () => {
+        const notes = createNotesWithStub();
+        expect(
+          DNodeUtils.findClosestParent("foo.one.alpha", notes, {
+            noStubs,
+          }).fname
+        ).toEqual("foo");
+      });
+
+      test("grandparent is stub", () => {
+        const notes = createNotesWithStub();
+        notes.foo.stub = true;
+        expect(
+          DNodeUtils.findClosestParent("foo.one.alpha", notes, {
+            noStubs,
+          }).fname
+        ).toEqual("root");
+      });
     });
   });
 });

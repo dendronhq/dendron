@@ -130,13 +130,21 @@ export class VSCodeUtils {
   }
 
   static async openFileInEditor(
-    fileItem: FileItem
+    fileItemOrURI: FileItem | vscode.Uri
   ): Promise<vscode.TextEditor | undefined> {
-    if (fileItem.isDir) {
-      return;
+    let textDocument;
+    if (fileItemOrURI instanceof FileItem) {
+      if (fileItemOrURI.isDir) {
+        return;
+      }
+
+      textDocument = await vscode.workspace.openTextDocument(
+        fileItemOrURI.path
+      );
+    } else {
+      textDocument = await vscode.workspace.openTextDocument(fileItemOrURI);
     }
 
-    const textDocument = await vscode.workspace.openTextDocument(fileItem.path);
     if (!textDocument) {
       throw new Error("Could not open file!");
     }

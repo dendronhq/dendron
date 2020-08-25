@@ -52,6 +52,7 @@ import {
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
+import { GoUpCommand } from "../../commands/GoUpCommand";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
@@ -665,6 +666,23 @@ suite("commands", function () {
         await vscode.window.showTextDocument(uri);
         const link = await new CopyNoteLinkCommand().run();
         assert.equal(link, "[[foo|foo]]");
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, { useFixtures: true });
+    });
+  });
+
+  describe("GoUp", function () {
+    test("basic", function (done) {
+      onWSInit(async () => {
+        const uri = vscode.Uri.file(path.join(root.name, "vault", "foo.md"));
+        await vscode.window.showTextDocument(uri);
+        await new GoUpCommand().run();
+        assert.ok(
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+            "root.md"
+          )
+        );
         done();
       });
       setupDendronWorkspace(root.name, ctx, { useFixtures: true });

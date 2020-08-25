@@ -135,6 +135,10 @@
                 "title": "Dendron: Refactor Hierarchy"
             },
             {
+                "command": "dendron.goUpHierarchy",
+                "title": "Dendron: Go Up"
+            },
+            {
                 "command": "dendron.initWS",
                 "title": "Dendron: Initialize Workspace"
             },
@@ -228,6 +232,12 @@
                 "command": "dendron.lookupSchema",
                 "mac": "cmd+shift+L",
                 "key": "ctrl+shift+l",
+                "when": "editorFocus"
+            },
+            {
+                "command": "dendron.goUpHierarchy",
+                "mac": "cmd+u",
+                "key": "ctrl+u",
                 "when": "editorFocus"
             },
             {

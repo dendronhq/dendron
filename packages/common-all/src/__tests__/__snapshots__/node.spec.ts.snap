@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DNoteUtils findClosestParent, parent grandchild -> domain root: main 1`] = `
+exports[`DNoteUtils findClosestParent, parent noStub = false grandchild -> domain root: main 1`] = `
 Object {
   "body": "",
   "children": Array [],
@@ -15,7 +15,7 @@ Object {
 }
 `;
 
-exports[`DNoteUtils findClosestParent, parent grandchild -> parent: main 1`] = `
+exports[`DNoteUtils findClosestParent, parent noStub = false grandchild -> parent: main 1`] = `
 Object {
   "body": "",
   "children": Array [
@@ -32,7 +32,57 @@ Object {
 }
 `;
 
-exports[`DNoteUtils findClosestParent, parent grandchild -> root: main 1`] = `
+exports[`DNoteUtils findClosestParent, parent noStub = false grandchild -> root: main 1`] = `
+Object {
+  "body": "",
+  "children": Array [
+    "Foo",
+    "Baz",
+  ],
+  "custom": Object {},
+  "data": Object {},
+  "desc": "",
+  "fname": "root",
+  "parent": "root",
+  "stub": false,
+  "title": "Root",
+  "type": "note",
+}
+`;
+
+exports[`DNoteUtils findClosestParent, parent noStub = true grandchild -> domain root: main 1`] = `
+Object {
+  "body": "",
+  "children": Array [],
+  "custom": Object {},
+  "data": Object {},
+  "desc": "",
+  "fname": "baz",
+  "parent": "Root",
+  "stub": false,
+  "title": "Baz",
+  "type": "note",
+}
+`;
+
+exports[`DNoteUtils findClosestParent, parent noStub = true grandchild -> parent: main 1`] = `
+Object {
+  "body": "",
+  "children": Array [
+    "Alpha",
+  ],
+  "custom": Object {},
+  "data": Object {},
+  "desc": "",
+  "fname": "foo.one",
+  "parent": "Foo",
+  "stub": false,
+  "title": "One",
+  "type": "note",
+}
+`;
+
+exports[`DNoteUtils findClosestParent, parent noStub = true grandchild -> root: main 1`] = `
 Object {
   "body": "",
   "children": Array [

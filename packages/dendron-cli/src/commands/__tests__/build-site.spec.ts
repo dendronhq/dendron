@@ -61,11 +61,11 @@ describe("build-site", () => {
     expect(_.includes(dir, "refactor.one.md")).toBeFalsy();
     let { data, content } = readMD(path.join(notesDir, "foo.md"));
     expect(data.nav_order).toEqual(0);
-    expect(data.parent).toBe(undefined);
+    expect(data.parent).toBe(null);
     expect(content).toMatchSnapshot("foo.md");
     ({ data, content } = readMD(path.join(notesDir, "build-site.md")));
     expect(data.nav_order).toEqual(1);
-    expect(data.parent).toBe(undefined);
+    expect(data.parent).toBe(null);
     expect(content).toMatchSnapshot("build-site.md");
     const siteRootDirContents = fs.readdirSync(siteRootDir);
     expect(_.includes(siteRootDirContents, "assets")).toBeTruthy();
@@ -194,11 +194,11 @@ describe("build-site-new", () => {
     expect(_.includes(dir, "refactor.one.md")).toBeFalsy();
     let { data, content } = readMD(path.join(notesDir, "foo.md"));
     expect(data.nav_order).toEqual(0);
-    expect(data.parent).toBe(undefined);
+    expect(data.parent).toBe(null);
     expect(content).toMatchSnapshot("foo.md");
     ({ data, content } = readMD(path.join(notesDir, "build-site.md")));
     expect(data.nav_order).toEqual(1);
-    expect(data.parent).toBe(undefined);
+    expect(data.parent).toBe(null);
     expect(content).toMatchSnapshot("build-site.md");
     const siteRootDirContents = fs.readdirSync(siteRootDir);
     expect(_.includes(siteRootDirContents, "assets")).toBeTruthy();

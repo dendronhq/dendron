@@ -43,6 +43,7 @@ import { CopyNoteRefCommand } from "./commands/CopyNoteRef";
 import { MarkdownUtils } from "./utils/md";
 import { ImportPodV2Command } from "./commands/ImportPodV2";
 import { CreateDailyJournalCommand } from "./commands/CreateDailyJournal";
+import { GoUpCommand } from "./commands/GoUpCommand";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -431,6 +432,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key,
         async () => {
           await new CreateDailyJournalCommand().run();
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.GO_UP_HIERARCHY.key,
+        async () => {
+          await new GoUpCommand().run();
         }
       )
     );

@@ -86,11 +86,16 @@ export class DNodeUtils {
       return nodes["root"];
     }
     const maybeNode = _.find(nodes, { fname: dirname });
-    if (maybeNode && !(maybeNode?.stub && cleanOpts.noStubs)) {
+    if (
+      (maybeNode && cleanOpts.noStubs && !maybeNode?.stub) ||
+      (maybeNode && !cleanOpts.noStubs)
+    ) {
+      if (maybeNode.fname === "project") {
+        debugger;
+      }
       return maybeNode;
-    } else {
-      return DNodeUtils.findClosestParent(dirname, nodes);
     }
+    return DNodeUtils.findClosestParent(dirname, nodes, cleanOpts);
   }
 
   /**
@@ -152,6 +157,10 @@ export class DNodeUtils {
 
   static uri2Fname(uri: URI) {
     return path.basename(uri.fsPath, ".md");
+  }
+
+  static node2Uri(node: Note, engine: DEngine): URI {
+    return URI.file(path.join(engine.props.root, node.fname + ".md"));
   }
 }
 

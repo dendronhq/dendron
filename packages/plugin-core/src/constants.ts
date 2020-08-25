@@ -90,6 +90,15 @@ export const DENDRON_COMMANDS = {
     key: "dendron.refactorHierarchy",
     title: `${CMD_PREFIX} Refactor Hierarchy`,
   },
+  GO_UP_HIERARCHY: {
+    key: "dendron.goUpHierarchy",
+    title: `${CMD_PREFIX} Go Up`,
+    keybindings: {
+      mac: "cmd+shift+up",
+      key: "ctrl+shift+up",
+      when: "editorFocus",
+    },
+  },
   // --- Workspace
   INIT_WS: {
     key: "dendron.initWS",

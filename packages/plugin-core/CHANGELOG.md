@@ -5,15 +5,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.8.5](https://github.com/dendronhq/dendron/compare/v0.8.5-alpha.1...v0.8.5) (2020-08-25)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
 
-## [0.8.5-alpha.1](https://github.com/dendronhq/dendron/compare/v0.8.5-alpha.0...v0.8.5-alpha.1) (2020-08-25)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.8.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.4...v0.8.5-alpha.0) (2020-08-25)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
+- **windows:** commands not working
 
 ## [0.8.4](https://github.com/dendronhq/dendron/compare/v0.8.2...v0.8.4) (2020-08-25)
 
@@ -24,6 +18,12 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 # Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### [0.8.3](https://github.com/dendronhq/dendron/compare/v0.8.2...v0.8.3) (2020-08-25)
+
+### Bug Fixes
+
+- **markdown:** preview command disabled ([0c7effb](https://github.com/dendronhq/dendron/commit/0c7effbfa7f67310cf3ca613bb15357af91ede79))
 
 ## [0.8.1](https://github.com/dendronhq/dendron/compare/v0.8.0...v0.8.1) (2020-08-25)
 

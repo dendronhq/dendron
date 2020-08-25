@@ -5,15 +5,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.8.5](https://github.com/dendronhq/dendron/compare/v0.8.5-alpha.1...v0.8.5) (2020-08-25)
 
-**Note:** Version bump only for package root
+### Bug Fixes
 
-## [0.8.5-alpha.1](https://github.com/dendronhq/dendron/compare/v0.8.5-alpha.0...v0.8.5-alpha.1) (2020-08-25)
-
-**Note:** Version bump only for package root
-
-## [0.8.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.4...v0.8.5-alpha.0) (2020-08-25)
-
-**Note:** Version bump only for package root
+- **windows:** commands not working
 
 ## [0.8.4](https://github.com/dendronhq/dendron/compare/v0.8.2...v0.8.4) (2020-08-25)
 

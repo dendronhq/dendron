@@ -100,15 +100,18 @@ All packages in the repo use a standard base configuration found at [.eslintrc.j
 ### Add a new node package
 
 - initialize repo
+
 ```sh
 cd {workspace_dir}
 cp -R /path/to/dendron-yeoman/node-ts packages/{new-package}
 ```
 
 - update `package.json`
+
   - change project name
 
 - publish the repo (needs to be done initially before running lerna publish)
+
 ```
 npm publish --access public
 ```

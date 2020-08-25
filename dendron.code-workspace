@@ -22,6 +22,9 @@
       "path": "fixtures"
     },
     {
+      "path": "docs"
+    },
+    {
       "path": "../dendron-playbooks"
     }
   ],

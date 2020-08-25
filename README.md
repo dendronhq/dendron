@@ -6,20 +6,20 @@ A personal knowledge management tool that **grows** as you do.
 
 Dendron is a local-first, markdown based, hierarchical note-taking application built on top of [VSCode](https://code.visualstudio.com/) and [friends](./ACKNOWLEDGEMENTS.md).
 
-
 Whether you organize your notes with [PARA](https://fortelabs.co/blog/para/) or [Zettelkasten](https://zettelkasten.de/), link notes together like [roam](https://roamresearch.com/), or simply create notes in an ad-hoc manner, Dendron can help.
 
 Think of it as a [second brain](https://www.buildingasecondbrain.com/) to help you **make sense** of all the information you care about.
 
 Some potential use cases include:
-- project management 
+
+- project management
 - personal knowledge base of things you've learned
 - CRM to keep track of clients, friends and enemies
-- recipe book 
+- recipe book
 
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/graph-intro.gif)
 
-Click [here](https://youtu.be/6rwWUalr9Ac) to see an example of Dendron in action. 
+Click [here](https://youtu.be/6rwWUalr9Ac) to see an example of Dendron in action.
 
 # Join Us
 
@@ -204,7 +204,7 @@ See [FAQ](https://github.com/dendronhq/dendron-template/blob/master/vault/dendro
 
 # Contributing
 
-We welcome community contributions and pull requests. See [CONTRIBUTING](https://github.com/dendronhq/dendron/blob/master/CONTRIBUTING.md) for information on how to set up a development environment and submit code.
+We welcome community contributions and pull requests. See [CONTRIBUTING](https://github.com/dendronhq/dendron/blob/master/docs/CONTRIBUTING.md) for information on how to set up a development environment and submit code.
 
 # License
 

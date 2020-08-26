@@ -7,24 +7,10 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Enhancements
 
-- **workspace:** show create new option in schema ([4d61d85](https://github.com/dendronhq/dendron/commit/4d61d8562db4f72105818c70cbde83bedecacd83))
-
-## [0.8.8-alpha.2](https://github.com/dendronhq/dendron/compare/v0.8.8-alpha.1...v0.8.8-alpha.2) (2020-08-26)
-
-### Enhancements
-
+- **workspace:** show create new option in schema lookup ([4d61d85](https://github.com/dendronhq/dendron/commit/4d61d8562db4f72105818c70cbde83bedecacd83))
 - **workspace:** better first workspace experience ([6d2413c](https://github.com/dendronhq/dendron/commit/6d2413c75587c755305a0e13fb4a64cf7a118d6f))
-
-## [0.8.8-alpha.1](https://github.com/dendronhq/dendron/compare/v0.8.8-alpha.0...v0.8.8-alpha.1) (2020-08-26)
-
-**Note:** Version bump only for package root
-
-## [0.8.8-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.7...v0.8.8-alpha.0) (2020-08-26)
-
-### Enhancements
-
-- **workspace:** bundle md preview in extension pack ([5395301](https://github.com/dendronhq/dendron/commit/53953018e27903174708e08b70aea07638f399d7))
-- **workspace:** new welcome screen on first init ([929c256](https://github.com/dendronhq/dendron/commit/929c2564b592a0094bc18fcae996cfea6c303236))
+- **workspace:** bundle md preview with dendron ([5395301](https://github.com/dendronhq/dendron/commit/53953018e27903174708e08b70aea07638f399d7))
+- **workspace:** new welcome screen on initial startup ([929c256](https://github.com/dendronhq/dendron/commit/929c2564b592a0094bc18fcae996cfea6c303236))
 
 ## [0.8.7](https://github.com/dendronhq/dendron/compare/v0.8.7-alpha.0...v0.8.7) (2020-08-26)
 

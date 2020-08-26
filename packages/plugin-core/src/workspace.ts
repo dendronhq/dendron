@@ -627,7 +627,6 @@ export class DendronWorkspace {
       vscode.Uri.joinPath(this.rootWorkspace.uri, "dendron.quickstart.md");
     try {
       const { content } = readMD(welcomeUri.fsPath);
-      VSCodeUtils.showWebView({ title: "Welcome", content });
       if (getStage() !== "test") {
         VSCodeUtils.showWebView({ title: "Welcome", content });
         //   await vscode.window.showTextDocument(welcomeUri);

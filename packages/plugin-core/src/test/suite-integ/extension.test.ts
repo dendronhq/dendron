@@ -259,7 +259,7 @@ suite("startup", function () {
       });
     });
 
-    test.only("workspace active, no prior workspace version", function (done) {
+    test("workspace active, no prior workspace version", function (done) {
       DendronWorkspace.configuration = () => {
         return createMockConfig({
           dendron: { rootDir: root.name },
@@ -295,7 +295,7 @@ suite("startup", function () {
         assert.ok(fs.existsSync(snippetsPath));
         assert.deepEqual(config, expectedSettings());
         DendronWorkspace.version = priorVersion;
-        //done();
+        done();
       });
     });
 

@@ -8,6 +8,7 @@ import { HistoryService } from "./services/HistoryService";
 import { VSCodeUtils } from "./utils";
 import { DendronWorkspace } from "./workspace";
 import fs from "fs-extra";
+import { MarkdownUtils } from "./utils/md";
 
 // === Main
 // this method is called when your extension is activated
@@ -75,9 +76,14 @@ export function _activate(context: vscode.ExtensionContext) {
         )
       ) {
         Logger.info({ ctx, msg: "first dendron ws, show welcome" });
-        await ws.showWelcome(
-          vscode.Uri.joinPath(ws.rootWorkspace.uri, "dendron.quickstart.md")
+        const welcomeUri = vscode.Uri.joinPath(
+          ws.rootWorkspace.uri,
+          "dendron.quickstart.md"
         );
+        if (getStage() !== "test" && fs.pathExistsSync(welcomeUri.fsPath)) {
+          await vscode.window.showTextDocument(welcomeUri);
+          await MarkdownUtils.openPreview({ reuseWindow: false });
+        }
         await ws.updateGlobalState("DENDRON_FIRST_WS", "initialized");
       } else {
         Logger.info({ ctx, msg: "user finished welcome" });

@@ -77,7 +77,7 @@ export class LookupController {
     if (this.state.mode === "fuzzy") {
       title.push("mode: fuzzy");
     }
-    title.push(`- version: ${this.ws.version}`);
+    title.push(`- version: ${DendronWorkspace.version()}`);
     quickpick.title = title.join(" ");
     quickpick.placeholder = "eg. hello.world";
     quickpick.ignoreFocusOut = true;

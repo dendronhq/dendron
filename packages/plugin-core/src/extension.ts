@@ -40,7 +40,7 @@ export function _activate(context: vscode.ExtensionContext) {
     skipSetup: stage === "test",
   });
 
-  const installedGlobalVersion = ws.version;
+  const installedGlobalVersion = DendronWorkspace.version();
   const migratedGlobalVersion = context.globalState.get<string | undefined>(
     GLOBAL_STATE.VERSION
   );
@@ -75,7 +75,9 @@ export function _activate(context: vscode.ExtensionContext) {
         )
       ) {
         Logger.info({ ctx, msg: "first dendron ws, show welcome" });
-        await ws.showWelcome();
+        await ws.showWelcome(
+          vscode.Uri.joinPath(ws.rootWorkspace.uri, "dendron.quickstart.md")
+        );
         await ws.updateGlobalState("DENDRON_FIRST_WS", "initialized");
       } else {
         Logger.info({ ctx, msg: "user finished welcome" });
@@ -91,19 +93,26 @@ export function _activate(context: vscode.ExtensionContext) {
     });
 
     // first time install
-    if (_.isUndefined(previousGlobalVersion)) {
+    if (previousGlobalVersion === "0.0.0") {
       Logger.info({ ctx, msg: "no previous global version" });
       vscode.commands
         .executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS.key)
         .then((changes) => {
           Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
         });
-      context.workspaceState.update(WORKSPACE_STATE.WS_VERSION, ws.version);
+      context.workspaceState.update(
+        WORKSPACE_STATE.WS_VERSION,
+        DendronWorkspace.version()
+      );
     } else if (_.isUndefined(previousWsVersion)) {
+      // USED To do something here, no longer do
       Logger.info({ ctx, msg: "first init workspace, do nothing" });
-      context.workspaceState.update(WORKSPACE_STATE.WS_VERSION, ws.version);
+      context.workspaceState.update(
+        WORKSPACE_STATE.WS_VERSION,
+        DendronWorkspace.version()
+      );
     } else {
-      if (semver.lt(previousWsVersion, ws.version)) {
+      if (semver.lt(previousWsVersion, DendronWorkspace.version())) {
         Logger.info({ ctx, msg: "preUpgrade: new wsVersion" });
         vscode.commands
           .executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS.key)
@@ -111,7 +120,7 @@ export function _activate(context: vscode.ExtensionContext) {
             Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
             context.workspaceState.update(
               WORKSPACE_STATE.WS_VERSION,
-              ws.version
+              DendronWorkspace.version()
             );
           });
       } else {
@@ -122,9 +131,14 @@ export function _activate(context: vscode.ExtensionContext) {
     Logger.info({ ctx: "dendron not active" });
   }
 
-  showWelcomeOrWhatsNew(ws.version, migratedGlobalVersion).then(() => {
-    HistoryService.instance().add({ source: "extension", action: "activate" });
-  });
+  showWelcomeOrWhatsNew(DendronWorkspace.version(), migratedGlobalVersion).then(
+    () => {
+      HistoryService.instance().add({
+        source: "extension",
+        action: "activate",
+      });
+    }
+  );
 }
 
 // this method is called when your extension is deactivated
@@ -145,7 +159,13 @@ async function showWelcomeOrWhatsNew(
   if (_.isUndefined(previousVersion)) {
     Logger.info({ ctx, msg: "first time install" });
     // NOTE: this needs to be from extension because no workspace might exist at this point
-    const uri = vscode.Uri.joinPath(ws.context.extensionUri, "README.md");
+    const uri = vscode.Uri.joinPath(
+      ws.context.extensionUri,
+      "assets",
+      "dendronWS",
+      "vault",
+      "dendron.welcome.md"
+    );
     await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
     await ws.context.globalState.update(GLOBAL_STATE.VERSION_PREV, "0.0.0");
     await ws.showWelcome(uri, { reuseWindow: true });

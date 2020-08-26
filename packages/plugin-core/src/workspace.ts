@@ -5,7 +5,7 @@ import {
   Note,
   DNodeUtils,
 } from "@dendronhq/common-all";
-import { mdFile2NodeProps } from "@dendronhq/common-server";
+import { mdFile2NodeProps, readMD } from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -105,6 +105,26 @@ export class DendronWorkspace {
     return !_.isUndefined(DendronWorkspace.rootDir());
   }
 
+  static version(): string {
+    let version: string | undefined;
+    if (VSCodeUtils.isDebuggingExtension()) {
+      version = VSCodeUtils.getVersionFromPkg();
+    } else {
+      try {
+        const dendronExtension = vscode.extensions.getExtension(
+          extensionQualifiedId
+        )!;
+        version = dendronExtension.packageJSON.version;
+      } catch (err) {
+        version = VSCodeUtils.getVersionFromPkg();
+      }
+    }
+    if (_.isUndefined(version)) {
+      version = "0.0.0";
+    }
+    return version;
+  }
+
   static async resetConfig(globalState: vscode.Memento) {
     return await Promise.all(
       _.keys(GLOBAL_STATE).map((k) => {
@@ -118,7 +138,6 @@ export class DendronWorkspace {
   public fsWatcher?: vscode.FileSystemWatcher;
   public L: typeof Logger;
   public _engine?: DEngine;
-  public version: string;
   private disposableStore: DisposableStore;
   private history: HistoryService;
 
@@ -142,7 +161,6 @@ export class DendronWorkspace {
     this.L = Logger;
     this.disposableStore = new DisposableStore();
     this.history = HistoryService.instance();
-    this.version = this._getVersion();
     if (!opts.skipSetup) {
       this._setupCommands();
     }
@@ -176,26 +194,6 @@ export class DendronWorkspace {
       path.join(this.context.extensionPath, "assets")
     );
     return assetsDir;
-  }
-
-  private _getVersion(): string {
-    const ctx = "_getVersion";
-    let version: string;
-    if (VSCodeUtils.isDebuggingExtension()) {
-      version = VSCodeUtils.getVersionFromPkg();
-    } else {
-      try {
-        const dendronExtension = vscode.extensions.getExtension(
-          extensionQualifiedId
-        )!;
-        version = dendronExtension.packageJSON.version;
-      } catch (err) {
-        this.L.info({ ctx, msg: "fetching from file", dir: __dirname });
-        version = VSCodeUtils.getVersionFromPkg();
-      }
-    }
-    this.L.info({ ctx, version: this.version });
-    return version;
   }
 
   _setupCommands() {
@@ -628,9 +626,11 @@ export class DendronWorkspace {
       welcomeUri ||
       vscode.Uri.joinPath(this.rootWorkspace.uri, "dendron.quickstart.md");
     try {
+      const { content } = readMD(welcomeUri.fsPath);
       if (getStage() !== "test") {
-        await vscode.window.showTextDocument(welcomeUri);
-        await MarkdownUtils.openPreview(opts);
+        VSCodeUtils.showWebView({ title: "Welcome", content });
+        //   await vscode.window.showTextDocument(welcomeUri);
+        //   await MarkdownUtils.openPreview(opts);
       }
     } catch (err) {
       vscode.window.showErrorMessage(JSON.stringify(err));

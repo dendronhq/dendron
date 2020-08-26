@@ -235,7 +235,6 @@ suite("startup", function () {
     root = FileTestUtils.tmpDir();
     fs.removeSync(root.name);
     ctx = VSCodeUtils.getOrCreateMockContext();
-    console.log("before-done");
     return;
   });
 

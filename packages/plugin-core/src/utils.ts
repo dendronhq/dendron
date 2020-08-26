@@ -6,6 +6,7 @@ import path from "path";
 import * as vscode from "vscode";
 import { GLOBAL_STATE } from "./constants";
 import { FileItem } from "./external/fileutils/FileItem";
+import _md from "markdown-it";
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
@@ -196,4 +197,14 @@ export class VSCodeUtils {
 
   static showInputBox = vscode.window.showInputBox;
   static showQuickPick = vscode.window.showQuickPick;
+  static showWebView = (opts: { title: string; content: string }) => {
+    const { title, content } = opts;
+    const panel = vscode.window.createWebviewPanel(
+      _.kebabCase(title),
+      title, // Title of the panel displayed to the user
+      vscode.ViewColumn.One, // Editor column to show the new webview panel in.
+      {} // Webview options. More on these later.
+    );
+    panel.webview.html = _md().render(content);
+  };
 }

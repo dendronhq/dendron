@@ -3,7 +3,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import vscode from "vscode";
-import { DENDRON_WS_NAME } from "../constants";
+import { DENDRON_WS_NAME, GLOBAL_STATE } from "../constants";
 import { WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
@@ -35,10 +35,21 @@ export class SetupWorkspaceCommand extends BasicCommand<
     if (_.isUndefined(rootDirRaw)) {
       return;
     }
+    const isFirstWS = _.isUndefined(
+      DendronWorkspace.instance().context.globalState.get<string | undefined>(
+        GLOBAL_STATE.DENDRON_FIRST_WS
+      )
+    );
     const options = [
       "initialize with dendron tutorial notes",
       "initialize empty repository",
     ];
+
+    // don't prompt for option if first ws
+    if (isFirstWS) {
+      return { rootDirRaw, emptyWs: false };
+    }
+
     const initializeEmpty = await VSCodeUtils.showQuickPick(options, {
       placeHolder: "initialize with dendron tutorial notes",
       ignoreFocusOut: true,

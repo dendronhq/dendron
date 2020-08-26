@@ -181,7 +181,6 @@ export class LookupProvider {
   }
 
   showRootResults(flavor: EngineFlavor, engine: DEngine) {
-    let out;
     if (flavor === "note") {
       return _.uniqBy(
         _.map(_.values(engine.notes), (ent) => ent.domain),

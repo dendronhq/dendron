@@ -85,8 +85,6 @@ export function _activate(context: vscode.ExtensionContext) {
           await MarkdownUtils.openPreview({ reuseWindow: false });
         }
         await ws.updateGlobalState("DENDRON_FIRST_WS", "initialized");
-      } else {
-        Logger.info({ ctx, msg: "user finished welcome" });
       }
       HistoryService.instance().add({
         source: "extension",
@@ -96,6 +94,7 @@ export function _activate(context: vscode.ExtensionContext) {
         Logger.output?.show(false);
         vscode.window.showInformationMessage("activate");
       }
+      Logger.info({ ctx, msg: "finish reloadWorkspace" });
     });
 
     // first time install
@@ -133,6 +132,7 @@ export function _activate(context: vscode.ExtensionContext) {
         Logger.info({ ctx, msg: "same wsVersion" });
       }
     }
+    Logger.info({ ctx, msg: "exit" });
   } else {
     Logger.info({ ctx: "dendron not active" });
   }

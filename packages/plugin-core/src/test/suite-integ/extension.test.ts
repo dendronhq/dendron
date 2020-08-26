@@ -40,7 +40,12 @@ import {
   EngineOpts,
   LookupProvider,
 } from "../../components/lookup/LookupProvider";
-import { CONFIG, ConfigKey, WORKSPACE_STATE } from "../../constants";
+import {
+  CONFIG,
+  ConfigKey,
+  WORKSPACE_STATE,
+  GLOBAL_STATE,
+} from "../../constants";
 import { _activate } from "../../extension";
 import {
   replaceRefs,
@@ -220,17 +225,77 @@ let ctx: vscode.ExtensionContext;
 
 const TIMEOUT = 60 * 1000 * 5;
 
-suite("startup", function () {
-  const timeout = 60 * 1000 * 5;
+function setupWorkspace(root: string) {
+  DendronWorkspace.configuration = () => {
+    return createMockConfig({
+      dendron: {},
+    });
+  };
+  DendronWorkspace.workspaceFile = () => {
+    return vscode.Uri.file(path.join(root, "dendron.code-workspace"));
+  };
+  DendronWorkspace.workspaceFolders = () => {
+    const uri = vscode.Uri.file(path.join(root, "vault"));
+    return [{ uri, name: "vault", index: 0 }];
+  };
+}
 
+suite("manual", function () {
   before(function () {
-    console.log("before");
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });
 
   beforeEach(async function () {
-    console.log("before");
+    await new ResetConfigCommand().execute({ scope: "all" });
+    root = FileTestUtils.tmpDir();
+    //fs.removeSync(root.name);
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    return;
+  });
+
+  describe("SetupWorkspaceCommand", function () {
+    this.timeout(TIMEOUT);
+
+    test("first time setup", function (done) {
+      setupWorkspace(root.name);
+      VSCodeUtils.gatherFolderPath = () => Promise.resolve(root.name);
+      // @ts-ignore
+      VSCodeUtils.showQuickPick = () =>
+        Promise.resolve("initialize empty repository");
+      const cmd = new SetupWorkspaceCommand();
+      cmd.gatherInputs().then((resp) => {
+        assert.deepEqual(resp, { rootDirRaw: root.name, emptyWs: false });
+        done();
+      });
+    });
+
+    test("not first time setup", function (done) {
+      setupWorkspace(root.name);
+      VSCodeUtils.gatherFolderPath = () => Promise.resolve(root.name);
+      // @ts-ignore
+      VSCodeUtils.showQuickPick = () =>
+        Promise.resolve("initialize empty repository");
+      const cmd = new SetupWorkspaceCommand();
+      ctx.globalState.update(GLOBAL_STATE.DENDRON_FIRST_WS, "init").then(() => {
+        cmd.gatherInputs().then((resp) => {
+          assert.deepEqual(resp, { rootDirRaw: root.name, emptyWs: true });
+          done();
+        });
+      });
+    });
+  });
+});
+
+suite("startup", function () {
+  const timeout = 60 * 1000 * 5;
+
+  before(function () {
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    DendronWorkspace.getOrCreate(ctx);
+  });
+
+  beforeEach(async function () {
     await new ResetConfigCommand().execute({ scope: "all" });
     root = FileTestUtils.tmpDir();
     fs.removeSync(root.name);

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.9-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.8...v0.8.9-alpha.0) (2020-08-26)
+
+### Enhancements
+
+- **workspace:** init first workspace with walkthrough ([3821e02](https://github.com/dendronhq/dendron/commit/3821e02f4818c3ab330763f8ca9f0b404e60c16d))
+
 ## [0.8.8](https://github.com/dendronhq/dendron/compare/v0.8.8-alpha.2...v0.8.8) (2020-08-26)
 
 ### Enhancements

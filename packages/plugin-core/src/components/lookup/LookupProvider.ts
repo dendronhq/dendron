@@ -162,20 +162,6 @@ export type EngineOpts = {
   flavor: EngineFlavor;
 };
 
-function showRootResults(flavor: EngineFlavor, engine: DEngine) {
-  if (flavor === "note") {
-    return _.uniqBy(
-      _.map(_.values(engine.notes), (ent) => ent.domain),
-      "domain.id"
-    );
-  } else {
-    return _.uniqBy(
-      _.map(_.values(engine.schemas), (ent) => ent.domain),
-      "domain.id"
-    );
-  }
-}
-
 export class LookupProvider {
   public noActiveItem: QuickPickItem;
   protected opts: EngineOpts;
@@ -192,6 +178,21 @@ export class LookupProvider {
       }
     }
     return;
+  }
+
+  showRootResults(flavor: EngineFlavor, engine: DEngine) {
+    let out;
+    if (flavor === "note") {
+      return _.uniqBy(
+        _.map(_.values(engine.notes), (ent) => ent.domain),
+        "domain.id"
+      );
+    } else {
+      return _.uniqBy(
+        _.map(_.values(engine.schemas), (ent) => ent.domain),
+        "domain.id"
+      );
+    }
   }
 
   async onDidAccept(picker: QuickPick<DNode>, opts: EngineOpts) {
@@ -315,18 +316,19 @@ export class LookupProvider {
       // check if root query, special case, return everything
       if (querystring === "") {
         L.info({ ...ctx2, msg: "no qs" });
-        picker.items = showRootResults(opts.flavor, engine);
+        picker.items = this.showRootResults(opts.flavor, engine);
         return;
       }
 
       const items: DNode[] = [...picker.items];
       let updatedItems = filterNoActiveItem(items);
-      updatedItems.push(this.noActiveItem as DNode);
+      updatedItems = [this.noActiveItem as DNode].concat(updatedItems);
       L.info({ ...ctx2, msg: "enter" });
 
+      // first query still
       if (queryEndsWithDot || querystring.split(".").length < 2) {
         const resp = await engine.query(querystring, opts.flavor);
-        updatedItems = resp.data;
+        updatedItems = [this.noActiveItem as DNode].concat(resp.data);
         profile = getDurationMilliseconds(start);
         L.info({ ...ctx2, msg: "engine.query", profile });
       }

@@ -29,7 +29,7 @@ export class Logger {
   };
 }
 
-function createLogger(name?: string): pino.Logger {
+function createLogger(name?: string, dest?: string): pino.Logger {
   const level = env("LOG_LEVEL", { shouldThrow: false }) || "debug";
   const nameClean = name || env("LOG_NAME");
 
@@ -39,10 +39,11 @@ function createLogger(name?: string): pino.Logger {
   //   const out = pino({ name: nameClean, level });
   //   return out;
   // } else {
-  const out = pino({ name: nameClean, level });
-  return out;
-  //return pino(pino.destination(logDst)).child({ name: nameClean, level });
-  // }
+  if (dest) {
+    return pino(pino.destination(dest)).child({ name: nameClean, level });
+  } else {
+    return pino({ name: nameClean, level });
+  }
 }
 
 export type DLogger = {

@@ -11,7 +11,7 @@ const levels = ["debug", "info", "warn", "error", "fatal"];
 export class Logger {
   static output: OutputChannel | undefined;
   static logger: ReturnType<typeof createLogger> | undefined;
-  static logPath?: string
+  static logPath?: string;
 
   static configure(context: ExtensionContext, level: TraceLevel) {
     fs.ensureDirSync(context.logPath);
@@ -20,7 +20,7 @@ export class Logger {
     fs.truncateSync(logPath);
     setEnv("LOG_DST", logPath);
     Logger.logPath = logPath;
-    this.logger = createLogger("dendron");
+    this.logger = createLogger("dendron", logPath);
     this.level = level;
   }
   private static _level: TraceLevel = "debug";
@@ -93,23 +93,21 @@ export class Logger {
         }
       }
     }
-  }
+  };
 }
-
 
 const customStringify = function (v: any) {
   const cache = new Set();
   return JSON.stringify(v, function (_key, value) {
-    if (typeof value === 'object' && value !== null) {
+    if (typeof value === "object" && value !== null) {
       if (cache.has(value)) {
         // Circular reference found
         try {
           // If this value does not reference a parent it can be deduped
-         return JSON.parse(JSON.stringify(value));
-        }
-        catch (err) {
+          return JSON.parse(JSON.stringify(value));
+        } catch (err) {
           // discard key if value cannot be deduped
-         return;
+          return;
         }
       }
       // Store value in our set

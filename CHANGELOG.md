@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.8-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.7...v0.8.8-alpha.0) (2020-08-26)
+
+### Enhancements
+
+- **workspace:** bundle md preview in extension pack ([5395301](https://github.com/dendronhq/dendron/commit/53953018e27903174708e08b70aea07638f399d7))
+- **workspace:** new welcome screen on first init ([929c256](https://github.com/dendronhq/dendron/commit/929c2564b592a0094bc18fcae996cfea6c303236))
+
 ## [0.8.7](https://github.com/dendronhq/dendron/compare/v0.8.7-alpha.0...v0.8.7) (2020-08-26)
 
 ### Enhancements

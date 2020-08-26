@@ -312,23 +312,23 @@ export class LookupProvider {
     const engine = DendronEngine.getOrCreateEngine();
     const queryEndsWithDot = querystring.endsWith(".");
     try {
-      const items: DNode[] = [...picker.items];
-      let updatedItems = filterNoActiveItem(items);
-      updatedItems.push(this.noActiveItem as DNode);
-      L.info({ ...ctx2, msg: "enter" });
-
-      if (queryEndsWithDot) {
-        const resp = await engine.query(querystring, opts.flavor);
-        updatedItems = resp.data;
-        profile = getDurationMilliseconds(start);
-        L.info({ ...ctx2, msg: "engine.query", profile });
-      }
-
       // check if root query, special case, return everything
       if (querystring === "") {
         L.info({ ...ctx2, msg: "no qs" });
         picker.items = showRootResults(opts.flavor, engine);
         return;
+      }
+
+      const items: DNode[] = [...picker.items];
+      let updatedItems = filterNoActiveItem(items);
+      updatedItems.push(this.noActiveItem as DNode);
+      L.info({ ...ctx2, msg: "enter" });
+
+      if (queryEndsWithDot || querystring.split(".").length < 2) {
+        const resp = await engine.query(querystring, opts.flavor);
+        updatedItems = resp.data;
+        profile = getDurationMilliseconds(start);
+        L.info({ ...ctx2, msg: "engine.query", profile });
       }
 
       // check if single item query, vscode doesn't surface single letter queries

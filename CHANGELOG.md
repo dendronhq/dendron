@@ -13,7 +13,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Features
 
-- **workspace:** lookup is MUCH FASTER!!! ([38a3661](https://github.com/dendronhq/dendron/commit/38a366146ef7ce1b47fe06a4be46f7c0e5b41144))
+- **workspace:** lookup is MUCH FASTER!!! 🚀🚀🚀 ([38a3661](https://github.com/dendronhq/dendron/commit/38a366146ef7ce1b47fe06a4be46f7c0e5b41144))
 
 ## [0.8.5](https://github.com/dendronhq/dendron/compare/v0.8.5-alpha.1...v0.8.5) (2020-08-25)
 
@@ -26,10 +26,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Bug Fixes
 
 - **markdown:** preview command disabled ([0c7effb](https://github.com/dendronhq/dendron/commit/0c7effbfa7f67310cf3ca613bb15357af91ede79))
-
-# Changelog
-
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 ### [0.8.3](https://github.com/dendronhq/dendron/compare/v0.8.2...v0.8.3) (2020-08-25)
 

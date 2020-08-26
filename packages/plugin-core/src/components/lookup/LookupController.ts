@@ -7,7 +7,6 @@ import { QuickInputButton, ThemeIcon } from "vscode";
 import { DendronWorkspace } from "../../workspace";
 import { EngineOpts, LookupProvider } from "./LookupProvider";
 
-
 type ButtonType = "fuzzy_match";
 
 type DendronQuickInputButton = QuickInputButton & {
@@ -82,6 +81,8 @@ export class LookupController {
     quickpick.title = title.join(" ");
     quickpick.placeholder = "eg. hello.world";
     quickpick.ignoreFocusOut = true;
+    // @ts-ignore
+    quickpick.justActivated = true;
     // FIXME: no button for now
     // quickpick.buttons = [this.state.buttons.fuzzyMatch];
     // quickpick.items = _.values(DendronEngine.getOrCreateEngine().notes);
@@ -123,5 +124,4 @@ export class LookupController {
     quickpick.show();
     this.ws.L.info({ ctx: ctx + ":show:post" });
   }
-
 }

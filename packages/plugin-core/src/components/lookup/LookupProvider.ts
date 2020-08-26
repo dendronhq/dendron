@@ -285,7 +285,24 @@ export class LookupProvider {
   async onUpdatePickerItem(picker: QuickPick<DNode>, opts: EngineOpts) {
     const start = process.hrtime();
     picker.busy = true;
-    const querystring = slashToDot(picker.value);
+
+    const filterNoActiveItem = (items: DNode[]): DNode[] => {
+      return _.reject(items, { label: this.noActiveItem.label });
+    };
+
+    let pickerValue = picker.value;
+    // @ts-ignore
+    if (picker.justActivated) {
+      const lastDotIndex = pickerValue.lastIndexOf(".");
+      if (lastDotIndex < 0) {
+        pickerValue = "";
+      } else {
+        pickerValue = pickerValue.slice(0, lastDotIndex + 1);
+      }
+      // @ts-ignore
+      picker.justActivated = false;
+    }
+    const querystring = slashToDot(pickerValue);
     let profile: number;
     const ctx2 = {
       ctx: "updatePickerItems",
@@ -295,8 +312,11 @@ export class LookupProvider {
     const engine = DendronEngine.getOrCreateEngine();
     const queryEndsWithDot = querystring.endsWith(".");
     try {
-      let updatedItems = picker.items;
+      const items: DNode[] = [...picker.items];
+      let updatedItems = filterNoActiveItem(items);
+      updatedItems.push(this.noActiveItem as DNode);
       L.info({ ...ctx2, msg: "enter" });
+
       if (queryEndsWithDot) {
         const resp = await engine.query(querystring, opts.flavor);
         updatedItems = resp.data;
@@ -332,7 +352,6 @@ export class LookupProvider {
         profile = getDurationMilliseconds(start);
         L.info({ ...ctx2, msg: "genSchemaSuggestions", profile });
       }
-      // updatedItems = PickerUtils.filterStubs(updatedItems as Note[]);
 
       // check if new item, return if that's the case
       if (
@@ -350,11 +369,11 @@ export class LookupProvider {
       if (perfectMatch) {
         L.debug({ ...ctx2, msg: "active = qs" });
         picker.activeItems = [perfectMatch];
-        picker.items = updatedItems;
+        picker.items = filterNoActiveItem(updatedItems);
       } else if (queryEndsWithDot) {
         // don't show noActiveItem for dot queries
         L.debug({ ...ctx2, msg: "active != qs, end with ." });
-        picker.items = updatedItems;
+        picker.items = filterNoActiveItem(updatedItems);
       } else {
         // regular result
         L.debug({ ...ctx2, msg: "active != qs" });

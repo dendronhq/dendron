@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.7](https://github.com/dendronhq/dendron/compare/v0.8.7-alpha.0...v0.8.7) (2020-08-26)
+
+### Enhancements
+
+- **workspace:** better lookup when at root ([b65ae46](https://github.com/dendronhq/dendron/commit/b65ae46fdb8299ddafd6ef9ebf5f96c0d7b04d77))
+
 ## [0.8.7-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.6...v0.8.7-alpha.0) (2020-08-26)
 
 ### Enhancements

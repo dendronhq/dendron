@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.7-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.6...v0.8.7-alpha.0) (2020-08-26)
+
+### Enhancements
+
+- **workspace:** add no active item picks ([a24f1f6](https://github.com/dendronhq/dendron/commit/a24f1f6858de69bf21f1c77d2911c9a549249c3b))
+
 ## [0.8.6](https://github.com/dendronhq/dendron/compare/v0.8.5...v0.8.6) (2020-08-26)
 
 ### Features

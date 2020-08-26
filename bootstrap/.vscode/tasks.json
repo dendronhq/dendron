@@ -11,6 +11,15 @@
       "problemMatcher": []
     },
     {
+      "label": "changelog",
+      "type": "shell",
+      "command": "./bootstrap/scripts/changelog.sh",
+      "options": {
+        "cwd": "./.."
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "NPM: Publish",
       "type": "shell",
       "command": "./bootstrap/scripts/publish.sh",

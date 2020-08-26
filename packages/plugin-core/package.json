@@ -24,10 +24,10 @@
         "*"
     ],
     "main": "./out/extension.js",
+    "extensionPack": [
+        "dendron.dendron-markdown-preview-enhanced"
+    ],
     "contributes": {
-        "extensionPack": [
-            "dendron.dendron-markdown-preview-enhanced"
-        ],
         "configuration": {
             "title": "Dendron",
             "properties": {

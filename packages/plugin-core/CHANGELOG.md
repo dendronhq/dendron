@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.8](https://github.com/dendronhq/dendron/compare/v0.8.8-alpha.2...v0.8.8) (2020-08-26)
+
+### Enhancements
+
+- **workspace:** show create new option in schema ([4d61d85](https://github.com/dendronhq/dendron/commit/4d61d8562db4f72105818c70cbde83bedecacd83))
+
 ## [0.8.8-alpha.2](https://github.com/dendronhq/dendron/compare/v0.8.8-alpha.1...v0.8.8-alpha.2) (2020-08-26)
 
 ### Enhancements

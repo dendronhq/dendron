@@ -25,6 +25,9 @@
     ],
     "main": "./out/extension.js",
     "contributes": {
+        "extensionPack": [
+            "dendron.dendron-markdown-preview-enhanced"
+        ],
         "configuration": {
             "title": "Dendron",
             "properties": {

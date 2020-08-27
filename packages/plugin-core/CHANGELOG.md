@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.11-alpha.1](https://github.com/dendronhq/dendron/compare/v0.8.11-alpha.0...v0.8.11-alpha.1) (2020-08-27)
+
+### Enhancements
+
+- **workspace:** keyboard shortcuts don't require editor focus ([df5d7b4](https://github.com/dendronhq/dendron/commit/df5d7b43ee33f3a6e86d59a368faaedb026c2710))
+
 ## [0.8.11-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.10...v0.8.11-alpha.0) (2020-08-27)
 
 ### Features

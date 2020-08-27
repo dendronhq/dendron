@@ -240,14 +240,12 @@
             {
                 "command": "dendron.lookup",
                 "mac": "cmd+L",
-                "key": "ctrl+l",
-                "when": "editorFocus"
+                "key": "ctrl+l"
             },
             {
                 "command": "dendron.lookupSchema",
                 "mac": "cmd+shift+L",
-                "key": "ctrl+shift+l",
-                "when": "editorFocus"
+                "key": "ctrl+shift+l"
             },
             {
                 "command": "dendron.goUpHierarchy",

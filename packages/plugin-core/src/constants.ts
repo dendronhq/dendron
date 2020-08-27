@@ -74,7 +74,6 @@ export const DENDRON_COMMANDS = {
     keybindings: {
       mac: "cmd+L",
       key: "ctrl+l",
-      when: "editorFocus",
     },
   },
   LOOKUP_SCHEMA: {
@@ -83,7 +82,6 @@ export const DENDRON_COMMANDS = {
     keybindings: {
       mac: "cmd+shift+L",
       key: "ctrl+shift+l",
-      when: "editorFocus",
     },
   },
   RENAME_NOTE: {

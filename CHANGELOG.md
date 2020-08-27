@@ -5,10 +5,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.8.9](https://github.com/dendronhq/dendron/compare/v0.8.9-alpha.3...v0.8.9) (2020-08-27)
 
-**Note:** Version bump only for package root
-
-## [0.8.9-alpha.3](https://github.com/dendronhq/dendron/compare/v0.8.9-alpha.2...v0.8.9-alpha.3) (2020-08-27)
-
 ### Enhancements
 
 - **workspace:** update default theme ([0197495](https://github.com/dendronhq/dendron/commit/0197495a53cdf35c89a40711a2f131c08dbe902b))

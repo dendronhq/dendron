@@ -1,4 +1,4 @@
-import { DEngine, DNodeUtils, Note, SchemaUtils } from "@dendronhq/common-all";
+import { DNodeUtils, Note, SchemaUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import vscode, {
@@ -73,7 +73,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<TreeNote> {
   readonly onDidChangeTreeData: vscode.Event<TreeNote | undefined | void> = this
     ._onDidChangeTreeData.event;
 
-  constructor(public engine: DEngine) {}
+  constructor() {}
 
   refresh(): void {
     this._onDidChangeTreeData.fire();
@@ -83,18 +83,25 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<TreeNote> {
     return element;
   }
 
+  sort(notes: TreeNote[]) {
+    return _.sortBy(notes, "label");
+  }
+
   async getChildren(element?: TreeNote): Promise<TreeNote[]> {
-    if (!this.engine.notes["root"]) {
+    const engine = DendronWorkspace.instance().engine;
+    if (!engine.notes["root"]) {
       vscode.window.showInformationMessage("No notes found");
       return Promise.resolve([]);
     }
 
     if (element) {
-      return Promise.resolve(element.children);
+      return Promise.resolve(this.sort(element.children));
     } else {
-      return this.engine.notes["root"].children.map((note) => {
-        return createTreeNote(note as Note);
-      });
+      return this.sort(
+        engine.notes["root"].children.map((note) => {
+          return createTreeNote(note as Note);
+        })
+      );
     }
   }
 }
@@ -106,8 +113,7 @@ export class DendronTreeView {
       async (_event: HistoryEvent) => {
         if (_event.action === "initialized") {
           const ws = DendronWorkspace.instance();
-          const engine = ws.engine;
-          const treeDataProvider = new EngineNoteProvider(engine);
+          const treeDataProvider = new EngineNoteProvider();
           const treeView = window.createTreeView("dendronTreeView", {
             treeDataProvider,
           });

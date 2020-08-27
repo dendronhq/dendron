@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.11-alpha.3](https://github.com/dendronhq/dendron/compare/v0.8.11-alpha.2...v0.8.11-alpha.3) (2020-08-27)
+
+### Enhancements
+
+- **workspace:** refresh tree view on note deletion ([d3919f0](https://github.com/dendronhq/dendron/commit/d3919f0d53455d4a2a6a45d2390c5c63f8829bf8))
+- **workspace:** treeview tooltip reflect note title ([ec1d43d](https://github.com/dendronhq/dendron/commit/ec1d43dda87f0017cb7f9f5ba57e3bc108f9fadd))
+
 ## [0.8.11-alpha.2](https://github.com/dendronhq/dendron/compare/v0.8.11-alpha.1...v0.8.11-alpha.2) (2020-08-27)
 
 ### Enhancements

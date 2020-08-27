@@ -9,9 +9,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - **workspace:** update default theme ([0197495](https://github.com/dendronhq/dendron/commit/0197495a53cdf35c89a40711a2f131c08dbe902b))
 
-## [0.8.9-alpha.2](https://github.com/dendronhq/dendron/compare/v0.8.9-alpha.1...v0.8.9-alpha.2) (2020-08-27)
+We now use `Github Light Theme` by default
 
-### Enhancements
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/graph-intro.gif)
 
 - **workspace:** loading indicator when workspace is first starting ([0330dbe](https://github.com/dendronhq/dendron/commit/0330dbe35bcbb708ead1890351d971621ac9dc38))
 

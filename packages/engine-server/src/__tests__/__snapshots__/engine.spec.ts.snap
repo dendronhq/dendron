@@ -2169,7 +2169,11 @@ Template text
     "type": "note",
   },
   Object {
-    "body": "",
+    "body": "
+- [[lbl|refactor.one]]
+
+- SECRETS <!--LOCAL_ONLY_LINE-->
+",
     "children": Array [
       "foo.one",
       "foo.two",
@@ -2181,7 +2185,7 @@ Template text
     "fname": "foo",
     "parent": "root",
     "stub": true,
-    "title": "Foo",
+    "title": "foo",
     "type": "note",
   },
 ]
@@ -2489,7 +2493,11 @@ Template text
     "type": "note",
   },
   Object {
-    "body": "",
+    "body": "
+- [[lbl|refactor.one]]
+
+- SECRETS <!--LOCAL_ONLY_LINE-->
+",
     "children": Array [
       "foo.one",
       "foo.two",
@@ -2501,7 +2509,7 @@ Template text
     "fname": "foo",
     "parent": "root",
     "stub": true,
-    "title": "Foo",
+    "title": "foo",
     "type": "note",
   },
 ]

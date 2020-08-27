@@ -203,7 +203,7 @@ export class DendronEngine implements DEngine {
    * @param nodes
    * @param opts
    */
-  async refreshNodes(nodes: IDNode[], opts?: QueryOpts) {
+  async refreshNodes(nodes: IDNode[], opts?: { fullNode?: boolean }) {
     if (_.isEmpty(nodes)) {
       return;
     }
@@ -302,13 +302,18 @@ export class DendronEngine implements DEngine {
     }
     this.deleteFromNodes(id, mode);
     if (mode === "note") {
+      // if have children, keep this note as a stub
       if (!_.isEmpty(noteToDelete.children)) {
-        const noteAsStub = Note.createStub(noteToDelete.fname, {
-          id,
-          parent: (noteToDelete as Note).parent,
-          children: (noteToDelete as Note).children,
-        });
-        this.refreshNodes([noteAsStub], { stub: true });
+        noteToDelete.stub = true;
+        this.refreshNodes([noteToDelete]);
+      } else {
+        // no more children, delete from parent
+        if (noteToDelete.parent) {
+          noteToDelete.parent.children = _.reject(
+            noteToDelete.parent.children,
+            { id: noteToDelete.id }
+          );
+        }
       }
     }
     return;

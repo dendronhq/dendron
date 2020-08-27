@@ -563,6 +563,7 @@ export class DendronWorkspace {
             newNode: true,
             parentsAsStubs: true,
           });
+          this.dendronTreeView?.treeProvider.refresh();
         } catch (err) {
           this.L.error({ ctx, err });
         }
@@ -588,6 +589,7 @@ export class DendronWorkspace {
           })
         ) {
           this.L.debug({ ctx, uri, msg: "recent action by engine, ignoring" });
+          this.dendronTreeView?.treeProvider.refresh();
           return;
         }
 
@@ -598,6 +600,7 @@ export class DendronWorkspace {
             throw `${fname} not found`;
           }
           await this.engine.delete(nodeToDelete.id, "note", { metaOnly: true });
+          this.dendronTreeView?.treeProvider.refresh();
         } catch (err) {
           // NOTE: ignore, many legitimate reasons why this might happen
           // this.L.error({ ctx, err: JSON.stringify(err) });

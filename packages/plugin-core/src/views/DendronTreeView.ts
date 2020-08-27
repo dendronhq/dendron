@@ -56,14 +56,6 @@ export class TreeNote extends vscode.TreeItem {
       return createTreeNote(note as Note);
     });
   }
-
-  // get tooltip(): string {
-  //   return `${this.note.desc}`;
-  // }
-
-  // get description(): string {
-  //   // return this.note.desc || "";
-  // }
 }
 
 export class EngineNoteProvider implements vscode.TreeDataProvider<TreeNote> {

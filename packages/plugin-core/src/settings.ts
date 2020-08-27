@@ -51,8 +51,7 @@ const _SETTINGS: ConfigUpdateChangeSet = {
   "files.autoSave": {
     default: "onFocusChange",
   },
-  "materialTheme.accent": { default: "Red" },
-  "workbench.colorTheme": { default: "Material Theme High Contrast" },
+  "workbench.colorTheme": { default: "GitHub Light" },
   // --- images
   "pasteImage.path": { default: "${currentFileDir}/assets/images" },
   // required for jekyll image build
@@ -78,6 +77,7 @@ const _EXTENSIONS: ConfigUpdateEntry[] = [
   { default: "dendron.dendron-markdown-preview-enhanced" },
   { default: "dendron.dendron-markdown-links" },
   { default: "dendron.dendron-markdown-notes" },
+  { default: "github.github-vscode-theme" },
   { default: "shd101wyy.markdown-preview-enhanced", action: "REMOVE" },
   { default: "kortina.vscode-markdown-notes", action: "REMOVE" },
   { default: "mushan.vscode-paste-image", action: "REMOVE" },

@@ -5,23 +5,11 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.8.9-alpha.2](https://github.com/dendronhq/dendron/compare/v0.8.9-alpha.1...v0.8.9-alpha.2) (2020-08-27)
 
-**Note:** Version bump only for package root
-
-## [0.8.9-alpha.1](https://github.com/dendronhq/dendron/compare/v0.8.9-alpha.0...v0.8.9-alpha.1) (2020-08-26)
-
 ### Enhancements
 
 - **workspace:** loading indicator when workspace is first starting ([0330dbe](https://github.com/dendronhq/dendron/commit/0330dbe35bcbb708ead1890351d971621ac9dc38))
 
-## [0.8.9-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.8...v0.8.9-alpha.0) (2020-08-26)
-
-### Enhancements
-
 - **workspace:** init first workspace with walkthrough ([3821e02](https://github.com/dendronhq/dendron/commit/3821e02f4818c3ab330763f8ca9f0b404e60c16d))
-
-## [0.8.8](https://github.com/dendronhq/dendron/compare/v0.8.8-alpha.2...v0.8.8) (2020-08-26)
-
-### Enhancements
 
 - **workspace:** show create new option in schema lookup ([4d61d85](https://github.com/dendronhq/dendron/commit/4d61d8562db4f72105818c70cbde83bedecacd83))
 - **workspace:** better first workspace experience ([6d2413c](https://github.com/dendronhq/dendron/commit/6d2413c75587c755305a0e13fb4a64cf7a118d6f))

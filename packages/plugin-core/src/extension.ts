@@ -105,6 +105,7 @@ export function _activate(context: vscode.ExtensionContext) {
         source: "extension",
         action: "initialized",
       });
+      vscode.window.showInformationMessage("Dendron is active");
       if (isDebug || stage === "test") {
         Logger.output?.show(false);
         vscode.window.showInformationMessage("activate");

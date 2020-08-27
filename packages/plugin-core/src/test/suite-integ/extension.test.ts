@@ -70,8 +70,7 @@ const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
       "dendron.rootDir": ".",
       "editor.minimap.enabled": false,
       "files.autoSave": "onFocusChange",
-      "materialTheme.accent": "Red",
-      "workbench.colorTheme": "Material Theme High Contrast",
+      "workbench.colorTheme": "GitHub Light",
       "pasteImage.path": "${currentFileDir}/assets/images",
       "pasteImage.prefix": "/",
       "markdown-preview-enhanced.enableWikiLinkSyntax": true,
@@ -91,6 +90,7 @@ const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
         "dendron.dendron-markdown-preview-enhanced",
         "dendron.dendron-markdown-links",
         "dendron.dendron-markdown-notes",
+        "github.github-vscode-theme",
       ],
       unwantedRecommendations: [
         "shd101wyy.markdown-preview-enhanced",

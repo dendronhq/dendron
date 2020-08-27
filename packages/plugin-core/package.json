@@ -4,7 +4,7 @@
     "displayName": "dendron",
     "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
     "publisher": "dendron",
-    "version": "0.8.9-alpha.2",
+    "version": "0.8.9-alpha.3",
     "engines": {
         "vscode": "^1.46.0"
     },

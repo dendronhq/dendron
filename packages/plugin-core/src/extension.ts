@@ -9,6 +9,8 @@ import { VSCodeUtils } from "./utils";
 import { DendronWorkspace } from "./workspace";
 import fs from "fs-extra";
 import { MarkdownUtils } from "./utils/md";
+import { getOS } from "./utils/system";
+import { Extensions } from "./settings";
 
 // === Main
 // this method is called when your extension is activated
@@ -51,12 +53,25 @@ export async function _activate(context: vscode.ExtensionContext) {
   const previousWsVersion = context.workspaceState.get<string>(
     WORKSPACE_STATE.WS_VERSION
   );
+  // stats
+  const platform = getOS();
+  const extensions = Extensions.getVSCodeExtnsion().map(
+    ({ id, extension: ext }) => {
+      return {
+        id,
+        version: ext?.packageJSON?.version,
+        active: ext?.isActive,
+      };
+    }
+  );
   Logger.info({
     ctx,
     installedGlobalVersion,
     migratedGlobalVersion,
     previousGlobalVersion,
     previousWsVersion,
+    platform,
+    extensions,
   });
 
   if (DendronWorkspace.isActive()) {

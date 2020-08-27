@@ -1,9 +1,9 @@
 import {
   DendronConfig,
   DEngine,
+  DNodeUtils,
   getStage,
   Note,
-  DNodeUtils,
 } from "@dendronhq/common-all";
 import { mdFile2NodeProps, readMD } from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
@@ -12,16 +12,25 @@ import _ from "lodash";
 import open from "open";
 import path from "path";
 import * as vscode from "vscode";
+import { ArchiveHierarchyCommand } from "./commands/ArchiveHierarchy";
 import { BuildPodCommand } from "./commands/BuildPod";
 import { ChangeWorkspaceCommand } from "./commands/ChangeWorkspace";
+import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
+import { CopyNoteRefCommand } from "./commands/CopyNoteRef";
+import { CreateDailyJournalCommand } from "./commands/CreateDailyJournal";
 import { CreateJournalCommand } from "./commands/CreateJournal";
 import { CreateScratchCommand } from "./commands/CreateScratch";
 import { DoctorCommand } from "./commands/Doctor";
+import { GoUpCommand } from "./commands/GoUpCommand";
+import { ImportPodV2Command } from "./commands/ImportPodV2";
 import { OpenLogsCommand } from "./commands/OpenLogs";
+import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
+import { RenameNoteV2Command } from "./commands/RenameNoteV2";
 import { ResetConfigCommand } from "./commands/ResetConfig";
 import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import { ShowHelpCommand } from "./commands/ShowHelp";
+import { ShowPreviewCommand } from "./commands/ShowPreview";
 import { UpgradeSettingsCommand } from "./commands/UpgradeSettings";
 import { LookupController } from "./components/lookup/LookupController";
 import {
@@ -29,22 +38,12 @@ import {
   extensionQualifiedId,
   GLOBAL_STATE,
 } from "./constants";
+import { cacheWorkspace } from "./external/memo/utils/utils";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { NodeService } from "./services/nodeService/NodeService";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
-import { cacheWorkspace } from "./external/memo/utils/utils";
-import { RenameNoteV2Command } from "./commands/RenameNoteV2";
-import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
-import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";
-import { ArchiveHierarchyCommand } from "./commands/ArchiveHierarchy";
-import { CopyNoteRefCommand } from "./commands/CopyNoteRef";
-import { MarkdownUtils } from "./utils/md";
-import { ImportPodV2Command } from "./commands/ImportPodV2";
-import { CreateDailyJournalCommand } from "./commands/CreateDailyJournal";
-import { GoUpCommand } from "./commands/GoUpCommand";
-import { ShowPreviewCommand } from "./commands/ShowPreview";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -621,7 +620,10 @@ export class DendronWorkspace {
     }
   }
 
-  async showWelcome(welcomeUri?: vscode.Uri, opts?: { reuseWindow?: boolean }) {
+  async showWelcome(
+    welcomeUri?: vscode.Uri,
+    _opts?: { reuseWindow?: boolean }
+  ) {
     welcomeUri =
       welcomeUri ||
       vscode.Uri.joinPath(this.rootWorkspace.uri, "dendron.quickstart.md");

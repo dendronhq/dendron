@@ -1,7 +1,11 @@
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { ConfigurationTarget, WorkspaceConfiguration } from "vscode";
+import {
+  ConfigurationTarget,
+  WorkspaceConfiguration,
+  extensions,
+} from "vscode";
 import { DendronWorkspace } from "./workspace";
 
 type CodeConfig = {
@@ -49,14 +53,17 @@ const _SETTINGS: ConfigUpdateChangeSet = {
   },
   "materialTheme.accent": { default: "Red" },
   "workbench.colorTheme": { default: "Material Theme High Contrast" },
+  // --- images
   "pasteImage.path": { default: "${currentFileDir}/assets/images" },
   // required for jekyll image build
   "pasteImage.prefix": { default: "/" },
+  // -- md notes
   // prevent markdown-notes from mangling file names
   "markdown-preview-enhanced.enableWikiLinkSyntax": { default: true },
   "markdown-preview-enhanced.wikiLinkFileExtension": { default: ".md" },
   "vscodeMarkdownNotes.noteCompletionConvention": { default: "noExtension" },
   "vscodeMarkdownNotes.slugifyCharacter": { default: "NONE" },
+  // --- snippets
   // add snippet completion
   "editor.snippetSuggestions": { default: "inline" },
   "editor.suggest.snippetsPreventQuickSuggestions": { default: false },
@@ -65,7 +72,6 @@ const _SETTINGS: ConfigUpdateChangeSet = {
 };
 
 const _EXTENSIONS: ConfigUpdateEntry[] = [
-  //{ default: "mushan.vscode-paste-image" },
   { default: "dendron.dendron-paste-image" },
   { default: "equinusocio.vsc-material-theme" },
   { default: "dendron.dendron-markdown-shortcuts" },
@@ -139,6 +145,17 @@ export class Extensions {
       recommendations,
       unwantedRecommendations,
     };
+  }
+
+  static getVSCodeExtnsion() {
+    return _.filter(Extensions.configEntries(), (ent) => {
+      return _.isUndefined(ent.action);
+    }).map((ent) => {
+      return {
+        id: ent.default,
+        extension: extensions.getExtension(ent.default),
+      };
+    });
   }
 
   static configEntries(): ConfigUpdateEntry[] {

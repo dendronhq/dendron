@@ -286,8 +286,8 @@ async function multiStepInput(opts: ImportPodCommandOpts) {
   // const state = {podSrc: "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/fixtures/pods/filePod"};
   const engine = DendronEngine.getOrCreateEngine();
   const uri = Uri.parse(state.podSrc);
-  const fp = new FilePod({ engine, root: uri });
-  return await fp.import();
+  const fp = new FilePod({ engine });
+  return await fp.import({ root: uri.fsPath });
 }
 
 export class ImportPodCommand extends BasicCommand<ImportPodCommandOpts> {

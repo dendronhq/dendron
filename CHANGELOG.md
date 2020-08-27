@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.11-alpha.2](https://github.com/dendronhq/dendron/compare/v0.8.11-alpha.1...v0.8.11-alpha.2) (2020-08-27)
+
+### Enhancements
+
+- **workspace:** add sort to tree view ([945976b](https://github.com/dendronhq/dendron/commit/945976ba1f00c2978a2a644cd5d9206bd55bae84))
+
 ## [0.8.11-alpha.1](https://github.com/dendronhq/dendron/compare/v0.8.11-alpha.0...v0.8.11-alpha.1) (2020-08-27)
 
 ### Enhancements

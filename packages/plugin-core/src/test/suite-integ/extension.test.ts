@@ -391,7 +391,6 @@ suite("startup", function () {
               _activate(ctx);
             });
         });
-
       onWSActive(async (_event: HistoryEvent) => {
         assert.equal(DendronWorkspace.isActive(), true);
         // updated to latest version

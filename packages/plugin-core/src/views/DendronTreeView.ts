@@ -51,6 +51,10 @@ export class TreeNote extends vscode.TreeItem {
     };
   }
 
+  get tooltip(): string {
+    return this.note.title;
+  }
+
   get children(): TreeNote[] {
     return this.note.children.map((note) => {
       return createTreeNote(note as Note);

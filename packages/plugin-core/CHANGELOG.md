@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.10](https://github.com/dendronhq/dendron/compare/v0.8.9...v0.8.10) (2020-08-27)
+
+### Bug Fixes
+
+- **workspace:** misleading loading message ([485f7a8](https://github.com/dendronhq/dendron/commit/485f7a8a573bdfed1b782d58b2208f50bb3d1d82))
+
+### Reverts
+
+- Revert "enhance(workspace): loading indicator when workspace is first starting" ([d174cf4](https://github.com/dendronhq/dendron/commit/d174cf44872c6128eef42073ad37bb74c0b5d566))
+
 ## [0.8.9](https://github.com/dendronhq/dendron/compare/v0.8.9-alpha.3...v0.8.9) (2020-08-27)
 
 ### Enhancements

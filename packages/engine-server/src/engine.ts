@@ -420,17 +420,24 @@ export class DendronEngine implements DEngine {
           items = _.map(results, (resp) => resp.item);
         }
 
-        // found a result but it doesn't match
+        // check if we need to create a new node
         if (
           opts.queryOne &&
-          items[0]?.path !== queryString &&
-          opts.createIfNew
+          opts.createIfNew &&
+          // did not find a good match or found a match but it was a stub
+          (items[0]?.path !== queryString || items[0]?.stub)
         ) {
           this.logger.debug({
             ctx: "query:write:pre",
             queryString,
           });
-          const nodeBlank = new Note({ fname: queryString, stub: opts.stub });
+          let nodeBlank: Note;
+          if (items[0]?.path === queryString && items[0]?.stub) {
+            nodeBlank = items[0] as Note;
+            nodeBlank.stub = false;
+          } else {
+            nodeBlank = new Note({ fname: queryString, stub: opts.stub });
+          }
           await this.write(nodeBlank, {
             newNode: true,
             stub: opts.stub,

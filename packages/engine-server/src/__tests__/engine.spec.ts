@@ -1,5 +1,6 @@
 import {
   DEngine,
+  DNodeUtils,
   INoteOpts,
   Note,
   Schema,
@@ -10,6 +11,7 @@ import {
   EngineTestUtils,
   FileTestUtils,
   LernaTestUtils,
+  node2MdFile,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -648,6 +650,28 @@ describe("engine:exact", () => {
         });
 
         expect(t1).toEqual(t2);
+      });
+
+      test("queryOne on existing stub node", async () => {
+        root = EngineTestUtils.setupStoreDir({ copyFixtures: false });
+        node2MdFile(new Note({ fname: "foo" }), { root });
+        node2MdFile(new Note({ fname: "foo.one.alpha" }), { root });
+        engine = DendronEngine.getOrCreateEngine({
+          root,
+          forceNew: true,
+          mode: "exact",
+        });
+        await engine.init();
+        const stubNode = DNodeUtils.getNoteByFname("foo.one", engine) as Note;
+        expect(stubNode.stub).toBeTruthy();
+        const resp = await engine.queryOne("foo.one", "note", {
+          createIfNew: true,
+        });
+        const createdNode = resp.data;
+        // expect(stubNode.toRawProps()).toMatchSnapshot("stub");
+        // expect(createdNode.toRawProps()).toMatchSnapshot("created");
+        expect(stubNode.id).toEqual(createdNode.id);
+        expect(createdNode.stub).toBeFalsy();
       });
     });
   });

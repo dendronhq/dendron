@@ -1035,18 +1035,4 @@ export class SchemaUtils {
     }
     return match;
   }
-
-  // static matchNote(note: Note, schemas: SchemaDict): Schema{
-  //   const matches = _.filter(_.values(schemas), schema => {
-  //      return minimatch(note.path.replace(/\./g, '/'), schema.logicalPath);
-  //    });
-  //    if (_.isEmpty(matches)) {
-  //     return Schema.createUnkownSchema();
-  //    } else if (matches.length > 1) {
-  //      console.log("BOND");
-  //      // TODO
-  //    } else {
-  //      return matches;
-  //    }
-  // }V
 }

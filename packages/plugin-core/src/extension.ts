@@ -11,18 +11,20 @@ import fs from "fs-extra";
 import { MarkdownUtils } from "./utils/md";
 import { getOS } from "./utils/system";
 import { Extensions } from "./settings";
+import { DendronTreeView } from "./views/DendronTreeView";
 
 // === Main
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   const stage = getStage();
+  DendronTreeView.register(context);
   if (stage !== "test") {
     _activate(context);
   }
   return;
 }
 
-export function _activate(context: vscode.ExtensionContext) {
+export async function _activate(context: vscode.ExtensionContext) {
   const isDebug = VSCodeUtils.isDebuggingExtension();
   const ctx = "activate";
   const stage = getStage();

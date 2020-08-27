@@ -44,11 +44,14 @@ import { HistoryService } from "./services/HistoryService";
 import { NodeService } from "./services/nodeService/NodeService";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
+import { GotoNoteCommand, GotoNoteCommandOpts } from "./commands/GotoNote";
+import { DendronTreeView } from "./views/DendronTreeView";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
 export class DendronWorkspace {
   static DENDRON_WORKSPACE_FILE: string = "dendron.code-workspace";
+  public dendronTreeView: DendronTreeView | undefined;
 
   static instance(): DendronWorkspace {
     if (!_DendronWorkspace) {
@@ -228,6 +231,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.CREATE_JOURNAL_NOTE.key,
         async () => {
           await new CreateJournalCommand().run();
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.GOTO_NOTE.key,
+        async (opts: GotoNoteCommandOpts) => {
+          new GotoNoteCommand().execute(opts);
         }
       )
     );
@@ -525,6 +537,7 @@ export class DendronWorkspace {
         // ignore notes already in engine
         const maybeNote = DNodeUtils.getNoteByFname(fname, this.engine);
         if (maybeNote) {
+          this.dendronTreeView?.treeProvider.refresh();
           return;
         }
 

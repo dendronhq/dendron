@@ -28,6 +28,14 @@
         "dendron.dendron-markdown-preview-enhanced"
     ],
     "contributes": {
+        "views": {
+            "explorer": [
+                {
+                    "id": "dendronTreeView",
+                    "name": "Dendron Tree View"
+                }
+            ]
+        },
         "configuration": {
             "title": "Dendron",
             "properties": {
@@ -93,6 +101,10 @@
             }
         },
         "commands": [
+            {
+                "command": "dendron.gotoNote",
+                "title": "Goto Note"
+            },
             {
                 "command": "dendron.createDailyJournalNote",
                 "title": "Dendron: Create Daily Journal Note"

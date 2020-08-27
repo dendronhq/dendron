@@ -5,8 +5,17 @@ export const extensionQualifiedId = `dendron.dendron`;
 // };
 
 const CMD_PREFIX = "Dendron:";
+export const ICONS = {
+  STUB: "gist-new",
+  SCHEMA: "repo",
+};
 export const DENDRON_COMMANDS = {
   // --- Notes
+  GOTO_NOTE: {
+    key: "dendron.gotoNote",
+    // no prefix, we don't want to show this command
+    title: `Goto Note`,
+  },
   CREATE_DAILY_JOURNAL_NOTE: {
     key: "dendron.createDailyJournalNote",
     title: `${CMD_PREFIX} Create Daily Journal Note`,

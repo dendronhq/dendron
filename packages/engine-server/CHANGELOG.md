@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.12](https://github.com/dendronhq/dendron/compare/v0.8.11...v0.8.12) (2020-08-28)
+
+### Bug Fixes
+
+- **engine:** issue 137 ([6a7f0bb](https://github.com/dendronhq/dendron/commit/6a7f0bb22630cb364797d75bf4e1d7f2d8d08368))
+
 ## [0.8.11](https://github.com/dendronhq/dendron/compare/v0.8.11-alpha.3...v0.8.11) (2020-08-28)
 
 **Note:** Version bump only for package @dendronhq/engine-server

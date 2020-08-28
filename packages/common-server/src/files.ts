@@ -1,19 +1,17 @@
 import {
   DNodeRaw,
-  DNodeRawOpts,
   genUUID,
   Note,
-  NoteData,
   NoteRawProps,
   Schema,
 } from "@dendronhq/common-all";
 import fs, { Dirent } from "fs";
 import matter from "gray-matter";
+import YAML from "js-yaml";
 import _ from "lodash";
 import minimatch from "minimatch";
-import path from "path";
-import YAML from "yamljs";
 import os from "os";
+import path from "path";
 
 interface FileMeta {
   name: string;
@@ -68,11 +66,13 @@ export function readMD(fpath: string): { data: any; content: string } {
 }
 
 export function readYAML(fpath: string): any {
-  return YAML.load(fpath);
+  return YAML.safeLoad(fs.readFileSync(fpath, { encoding: "utf8" }), {
+    schema: YAML.JSON_SCHEMA,
+  });
 }
 
 export function writeYAML(fpath: string, data: any) {
-  const out = YAML.stringify(data, undefined, 4);
+  const out = YAML.safeDump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
   return fs.writeFileSync(fpath, out);
 }
 
@@ -134,17 +134,21 @@ export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
 }
 
 export function mdFile2NodeProps(fpath: string): NoteRawProps {
-  // NOTE: gray matter cache old date, need to pass empty options
-  // to bypass
-  // see https://github.com/jonschlinkert/gray-matter/issues/43
-  const { data, content: body } = (matter.read(fpath, {}) as unknown) as {
-    data: DNodeRawOpts<NoteData>;
-    content: string;
-  };
+  const { data, content: body } = matter(
+    fs.readFileSync(fpath, { encoding: "utf8" }),
+    {
+      engines: {
+        yaml: {
+          // @ts-ignore
+          parse: (s) => YAML.safeLoad(s, { schema: YAML.JSON_SCHEMA }),
+          stringify: (s) => YAML.safeDump(s, { schema: YAML.JSON_SCHEMA }),
+        },
+      },
+    }
+  );
   const { name: fname } = path.parse(fpath);
   const dataProps = DNodeRaw.createProps({ ...data, fname, body });
-  // DEBUG: data: {data}, fpath: {fpath}, dataProps: {dataProps}
-  return dataProps;
+  return dataProps as NoteRawProps;
 }
 
 export function node2PropsMdFile(props: NoteRawProps, opts: { root: string }) {

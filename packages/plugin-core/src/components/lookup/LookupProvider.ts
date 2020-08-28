@@ -360,7 +360,6 @@ export class LookupProvider {
         (picker.activeItems.length === 0 && !perfectMatch)
       ) {
         L.info({ ...ctx2, msg: "no matches" });
-        // BOND
         // @ts-ignore
         picker.items = updatedItems; //.concat([this.noActiveItem]);
         return;

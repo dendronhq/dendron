@@ -2,8 +2,8 @@ import fs from "fs-extra";
 import matter from "gray-matter";
 import _ from "lodash";
 import path from "path";
-import YAML from "yamljs";
 import tmp, { DirResult } from "tmp";
+import { readYAML } from "./files";
 
 export { DirResult };
 // eslint-disable-next-line no-undef
@@ -65,7 +65,7 @@ export class FileTestUtils {
   };
 
   static readYMLFile = (root: string, fname: string) => {
-    return YAML.load(path.join(root, fname));
+    return readYAML(path.join(root, fname));
   };
 
   static writeMDFile = (root: string, fname: string, fm: any, body: string) => {

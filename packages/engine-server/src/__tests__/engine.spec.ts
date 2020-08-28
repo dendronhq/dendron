@@ -673,6 +673,28 @@ describe("engine:exact", () => {
         expect(stubNode.id).toEqual(createdNode.id);
         expect(createdNode.stub).toBeFalsy();
       });
+
+      test("note with time stamp as title", async () => {
+        root = EngineTestUtils.setupStoreDir({ copyFixtures: false });
+        fs.writeFileSync(
+          path.join(root, "root.md"),
+          "---\nid: root\ntitle: root\n---",
+          { encoding: "utf8" }
+        );
+        fs.writeFileSync(
+          path.join(root, "foo.md"),
+          "---\ntitle: 2020-08-01\n---",
+          { encoding: "utf8" }
+        );
+        engine = DendronEngine.getOrCreateEngine({
+          root,
+          forceNew: true,
+          mode: "exact",
+        });
+        await engine.init();
+        const node = DNodeUtils.getNoteByFname("foo", engine) as Note;
+        expect(node.title).toEqual("2020-08-01");
+      });
     });
   });
 });

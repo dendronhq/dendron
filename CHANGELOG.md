@@ -7,7 +7,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Bug Fixes
 
-- **engine:** issue 137 ([6a7f0bb](https://github.com/dendronhq/dendron/commit/6a7f0bb22630cb364797d75bf4e1d7f2d8d08368))
+- **engine:** [error when setting unquoted date in frontmatter](https://github.com/dendronhq/dendron/issues/137) ([6a7f0bb](https://github.com/dendronhq/dendron/commit/6a7f0bb22630cb364797d75bf4e1d7f2d8d08368))
 
 ## [0.8.11](https://github.com/dendronhq/dendron/compare/v0.8.11-alpha.3...v0.8.11) (2020-08-28)
 

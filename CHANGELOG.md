@@ -9,20 +9,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - **workspace:** refresh tree view on note deletion ([d3919f0](https://github.com/dendronhq/dendron/commit/d3919f0d53455d4a2a6a45d2390c5c63f8829bf8))
 - **workspace:** treeview tooltip reflect note title ([ec1d43d](https://github.com/dendronhq/dendron/commit/ec1d43dda87f0017cb7f9f5ba57e3bc108f9fadd))
-
-## [0.8.11-alpha.2](https://github.com/dendronhq/dendron/compare/v0.8.11-alpha.1...v0.8.11-alpha.2) (2020-08-27)
-
-### Enhancements
-
 - **workspace:** add sort to tree view ([945976b](https://github.com/dendronhq/dendron/commit/945976ba1f00c2978a2a644cd5d9206bd55bae84))
-
-## [0.8.11-alpha.1](https://github.com/dendronhq/dendron/compare/v0.8.11-alpha.0...v0.8.11-alpha.1) (2020-08-27)
-
-### Enhancements
-
 - **workspace:** keyboard shortcuts don't require editor focus ([df5d7b4](https://github.com/dendronhq/dendron/commit/df5d7b43ee33f3a6e86d59a368faaedb026c2710))
-
-## [0.8.11-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.10...v0.8.11-alpha.0) (2020-08-27)
 
 ### Features
 

@@ -232,8 +232,6 @@ export class LookupProvider {
         // get note
         nodeNew = engine.notes[selectedItem.id];
         nodeNew.stub = false;
-        await engine.write(nodeNew, { newNode: true, stub: false });
-        // write note
         profile = getDurationMilliseconds(start);
         L.info({
           ...ctx2,
@@ -267,8 +265,15 @@ export class LookupProvider {
       historyService.add({ source: "engine", action: "create", uri });
       profile = getDurationMilliseconds(start);
       L.info({ ...ctx2, msg: "historyService.add", profile });
-
-      await DendronEngine.getOrCreateEngine().write(nodeNew, {
+      // sanity check
+      if (
+        (!nodeNew.stub || !selectedItem.schemaStub) &&
+        DNodeUtils.getNoteByFname(nodeNew.fname, engine)
+      ) {
+        L.error({ ...ctx2, msg: "action will overwrite existing note" });
+        return;
+      }
+      await engine.write(nodeNew, {
         newNode: true,
         parentsAsStubs: true,
       });

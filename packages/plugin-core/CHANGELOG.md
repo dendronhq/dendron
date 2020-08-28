@@ -5,61 +5,59 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.8.11](https://github.com/dendronhq/dendron/compare/v0.8.11-alpha.3...v0.8.11) (2020-08-28)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Features
 
-## [0.8.11-alpha.3](https://github.com/dendronhq/dendron/compare/v0.8.11-alpha.2...v0.8.11-alpha.3) (2020-08-27)
+- **workbench:** add dendron tree view ([73b0b82](https://github.com/dendronhq/dendron/commit/73b0b825586eca81360d92dd5e7f00239149b41e))([docs](http://dendron.so/notes/f7ebd4aa-8ba7-4bc5-bd00-a1efc5315f07.html#dendron-tree-view))
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.treeview.gif)
 
 ### Enhancements
 
-- **workspace:** refresh tree view on note deletion ([d3919f0](https://github.com/dendronhq/dendron/commit/d3919f0d53455d4a2a6a45d2390c5c63f8829bf8))
-- **workspace:** treeview tooltip reflect note title ([ec1d43d](https://github.com/dendronhq/dendron/commit/ec1d43dda87f0017cb7f9f5ba57e3bc108f9fadd))
-- **workspace:** add sort to tree view ([945976b](https://github.com/dendronhq/dendron/commit/945976ba1f00c2978a2a644cd5d9206bd55bae84))
-- **workspace:** keyboard shortcuts don't require editor focus ([df5d7b4](https://github.com/dendronhq/dendron/commit/df5d7b43ee33f3a6e86d59a368faaedb026c2710))
-
-### Features
-
-- **workspace:** add dendron tree view ([73b0b82](https://github.com/dendronhq/dendron/commit/73b0b825586eca81360d92dd5e7f00239149b41e))
+- **workbench:** refresh tree view on note deletion ([d3919f0](https://github.com/dendronhq/dendron/commit/d3919f0d53455d4a2a6a45d2390c5c63f8829bf8))
+- **workbench:** treeview tooltip reflect note title ([ec1d43d](https://github.com/dendronhq/dendron/commit/ec1d43dda87f0017cb7f9f5ba57e3bc108f9fadd))
+- **workbench:** add sort to tree view ([945976b](https://github.com/dendronhq/dendron/commit/945976ba1f00c2978a2a644cd5d9206bd55bae84))
+- **workbench:** keyboard shortcuts don't require editor focus ([df5d7b4](https://github.com/dendronhq/dendron/commit/df5d7b43ee33f3a6e86d59a368faaedb026c2710))
 
 ## [0.8.10](https://github.com/dendronhq/dendron/compare/v0.8.9...v0.8.10) (2020-08-27)
 
 ### Bug Fixes
 
-- **workspace:** misleading loading message ([485f7a8](https://github.com/dendronhq/dendron/commit/485f7a8a573bdfed1b782d58b2208f50bb3d1d82))
+- **workbench:** misleading loading message ([485f7a8](https://github.com/dendronhq/dendron/commit/485f7a8a573bdfed1b782d58b2208f50bb3d1d82))
 
 ### Reverts
 
-- Revert "enhance(workspace): loading indicator when workspace is first starting" ([d174cf4](https://github.com/dendronhq/dendron/commit/d174cf44872c6128eef42073ad37bb74c0b5d566))
+- Revert "enhance(workbench): loading indicator when workbench is first starting" ([d174cf4](https://github.com/dendronhq/dendron/commit/d174cf44872c6128eef42073ad37bb74c0b5d566))
 
 ## [0.8.9](https://github.com/dendronhq/dendron/compare/v0.8.9-alpha.3...v0.8.9) (2020-08-27)
 
 ### Enhancements
 
-- **workspace:** update default theme ([0197495](https://github.com/dendronhq/dendron/commit/0197495a53cdf35c89a40711a2f131c08dbe902b))
+- **workbench:** update default theme ([0197495](https://github.com/dendronhq/dendron/commit/0197495a53cdf35c89a40711a2f131c08dbe902b))
 
 We now use `Github Light Theme` by default
 
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/graph-intro.gif)
 
-- **workspace:** loading indicator when workspace is first starting ([0330dbe](https://github.com/dendronhq/dendron/commit/0330dbe35bcbb708ead1890351d971621ac9dc38))
+- **workbench:** loading indicator when workbench is first starting ([0330dbe](https://github.com/dendronhq/dendron/commit/0330dbe35bcbb708ead1890351d971621ac9dc38))
 
-- **workspace:** init first workspace with walkthrough ([3821e02](https://github.com/dendronhq/dendron/commit/3821e02f4818c3ab330763f8ca9f0b404e60c16d))
+- **workbench:** init first workbench with walkthrough ([3821e02](https://github.com/dendronhq/dendron/commit/3821e02f4818c3ab330763f8ca9f0b404e60c16d))
 
-- **workspace:** show create new option in schema lookup ([4d61d85](https://github.com/dendronhq/dendron/commit/4d61d8562db4f72105818c70cbde83bedecacd83))
-- **workspace:** better first workspace experience ([6d2413c](https://github.com/dendronhq/dendron/commit/6d2413c75587c755305a0e13fb4a64cf7a118d6f))
-- **workspace:** bundle md preview with dendron ([5395301](https://github.com/dendronhq/dendron/commit/53953018e27903174708e08b70aea07638f399d7))
-- **workspace:** new welcome screen on initial startup ([929c256](https://github.com/dendronhq/dendron/commit/929c2564b592a0094bc18fcae996cfea6c303236))
+- **workbench:** show create new option in schema lookup ([4d61d85](https://github.com/dendronhq/dendron/commit/4d61d8562db4f72105818c70cbde83bedecacd83))
+- **workbench:** better first workbench experience ([6d2413c](https://github.com/dendronhq/dendron/commit/6d2413c75587c755305a0e13fb4a64cf7a118d6f))
+- **workbench:** bundle md preview with dendron ([5395301](https://github.com/dendronhq/dendron/commit/53953018e27903174708e08b70aea07638f399d7))
+- **workbench:** new welcome screen on initial startup ([929c256](https://github.com/dendronhq/dendron/commit/929c2564b592a0094bc18fcae996cfea6c303236))
 
 ## [0.8.7](https://github.com/dendronhq/dendron/compare/v0.8.7-alpha.0...v0.8.7) (2020-08-26)
 
 ### Enhancements
 
-- **workspace:** better lookup when at root ([b65ae46](https://github.com/dendronhq/dendron/commit/b65ae46fdb8299ddafd6ef9ebf5f96c0d7b04d77))
+- **workbench:** better lookup when at root ([b65ae46](https://github.com/dendronhq/dendron/commit/b65ae46fdb8299ddafd6ef9ebf5f96c0d7b04d77))
 
 ## [0.8.6](https://github.com/dendronhq/dendron/compare/v0.8.5...v0.8.6) (2020-08-26)
 
 ### Features
 
-- **workspace:** lookup is MUCH FASTER!!! 🚀🚀🚀 ([38a3661](https://github.com/dendronhq/dendron/commit/38a366146ef7ce1b47fe06a4be46f7c0e5b41144))
+- **workbench:** lookup is MUCH FASTER!!! 🚀🚀🚀 ([38a3661](https://github.com/dendronhq/dendron/commit/38a366146ef7ce1b47fe06a4be46f7c0e5b41144))
 
 ## [0.8.5](https://github.com/dendronhq/dendron/compare/v0.8.5-alpha.1...v0.8.5) (2020-08-25)
 
@@ -292,7 +290,7 @@ We now use `Github Light Theme` by default
 
 ### Enhancements
 
-- **workspace:** initialize empty workspace ([5406f52](https://github.com/dendronhq/dendron/commit/5406f52f5c1994fe81f3f9b33db039dd29b989ae))
+- **workbench:** initialize empty workbench ([5406f52](https://github.com/dendronhq/dendron/commit/5406f52f5c1994fe81f3f9b33db039dd29b989ae))
 
 ## [0.6.2](https://github.com/dendronhq/dendron/compare/v0.6.1...v0.6.2) (2020-08-11)
 
@@ -541,7 +539,7 @@ You can now work with schemas as easily as you do with regular notes. Have no fe
 - publishing vaults to github ([e063732](https://github.com/dendronhq/dendron/commit/e063732d1ff082dd8520a479926e7ceb1b0893ab)) ([docs](https://www.dendron.so/notes/73d395c9-5041-4d0d-9db7-080d9586136e.html))
 - convert wiki-links to markdown links while building site ([f451be4](https://github.com/dendronhq/dendron/commit/f451be4db437a9cd6c290019fd5d24fe4fd9e907))
 - overwrite fields in backfill ([af504f4](https://github.com/dendronhq/dendron/commit/af504f44d73910e8687367bc203b613d774a039c))
-- setup initial workspace to be ready for publishing ([e1242b4](https://github.com/dendronhq/dendron/commit/e1242b494cc91b3284053b54dccecc4e4686ab7d))
+- setup initial workbench to be ready for publishing ([e1242b4](https://github.com/dendronhq/dendron/commit/e1242b494cc91b3284053b54dccecc4e4686ab7d))
 - support custom root when publishing a site ([41e3d72](https://github.com/dendronhq/dendron/commit/41e3d7283bf5719a62f8f7f6f612dc9ad07370f7))
 
 ### Performance Improvements
@@ -591,7 +589,7 @@ You can now work with schemas as easily as you do with regular notes. Have no fe
 
 ### Features
 
-- change workspaces accepts '~' path ([d6c4f64](https://github.com/dendronhq/dendron/commit/d6c4f64cdfbb9e6b5c44a04320a84756fefcb924))
+- change workbenchs accepts '~' path ([d6c4f64](https://github.com/dendronhq/dendron/commit/d6c4f64cdfbb9e6b5c44a04320a84756fefcb924))
 
 ## [0.3.41](https://github.com/dendronhq/dendron/compare/v0.3.40...v0.3.41) (2020-07-23)
 
@@ -667,7 +665,7 @@ After you've made the above changes, you can run `Developer: Reload Window` for 
 ### Features
 
 - add reload index command ([236b2ac](https://github.com/dendronhq/dendron/commit/236b2ac70812c4df525ff27479802b6e49e0587f))
-- initialize default workspace with relative paths so that its portable btw devices ([790ef50](https://github.com/dendronhq/dendron/commit/790ef503225e5b18a78e3e62e847ba8b2adfd8d0))
+- initialize default workbench with relative paths so that its portable btw devices ([790ef50](https://github.com/dendronhq/dendron/commit/790ef503225e5b18a78e3e62e847ba8b2adfd8d0))
 - upgrade settings command ([c043090](https://github.com/dendronhq/dendron/commit/c0430905d314c6ee870f9bdd45434f53e93a7098))
 
 ## [0.3.30](https://github.com/dendronhq/dendron/compare/v0.3.29...v0.3.30) (2020-07-21)
@@ -752,7 +750,7 @@ After you've made the above changes, you can run `Developer: Reload Window` for 
 
 ### Features
 
-- ability to re-use existing workspace ([7de80b1](https://github.com/dendronhq/dendron/commit/7de80b17cac4123336afb3d0dc902f22f1a0e488))
+- ability to re-use existing workbench ([7de80b1](https://github.com/dendronhq/dendron/commit/7de80b17cac4123336afb3d0dc902f22f1a0e488))
 
 ## [0.3.11](https://github.com/dendronhq/dendron/compare/v0.3.10...v0.3.11) (2020-07-13)
 
@@ -777,8 +775,8 @@ After you've made the above changes, you can run `Developer: Reload Window` for 
 - auto add nodes when deleted or created outside of dendron ([8c311bd](https://github.com/dendronhq/dendron/commit/8c311bda948a1d54088c49fd70eb65d24af5d68f))
 - better initial welcome page ([f8767c6](https://github.com/dendronhq/dendron/commit/f8767c694bd5a5516a1a052f66bce0dff74fc7db))
 - better schema suggestions ([03656bc](https://github.com/dendronhq/dendron/commit/03656bc007810457cb6846f0d6adacab4a7fbd3a))
-- delete, abort or work inside existing folder when creating new workspace ([1da29ec](https://github.com/dendronhq/dendron/commit/1da29ec158ec416b9ee3002faf5bb2c4b84e12ed))
-- initialize workspace with autosave ([cd63346](https://github.com/dendronhq/dendron/commit/cd633462ea9ee050ad27de3de1633fa49a9ff453))
+- delete, abort or work inside existing folder when creating new workbench ([1da29ec](https://github.com/dendronhq/dendron/commit/1da29ec158ec416b9ee3002faf5bb2c4b84e12ed))
+- initialize workbench with autosave ([cd63346](https://github.com/dendronhq/dendron/commit/cd633462ea9ee050ad27de3de1633fa49a9ff453))
 - limit initial query to just domains ([1b611e5](https://github.com/dendronhq/dendron/commit/1b611e5e55dd8e81123895a40814aa2c8f4f7eaa))
 - match namespace schemas ([7a67b8b](https://github.com/dendronhq/dendron/commit/7a67b8b2fb7caa1b97ee6d492d2801782abecdf6))
 - os specific keybindings ([6a016ee](https://github.com/dendronhq/dendron/commit/6a016ee34bc6e2213f46ea9aa738068b14313899))
@@ -833,7 +831,7 @@ After you've made the above changes, you can run `Developer: Reload Window` for 
 ### Features
 
 - add delete note shortcut ([0ba99a7](https://github.com/kevinslin/dendronv2/commit/0ba99a7d2d73fcddae3633703312fc0ad14e179d))
-- delete, abort or work inside existing folder when creating new workspace ([06d2dbe](https://github.com/kevinslin/dendronv2/commit/06d2dbe55ee99c5e2c8c60a152c6294d05fa5c91))
+- delete, abort or work inside existing folder when creating new workbench ([06d2dbe](https://github.com/kevinslin/dendronv2/commit/06d2dbe55ee99c5e2c8c60a152c6294d05fa5c91))
 - update first time onboarding ([d0958c0](https://github.com/kevinslin/dendronv2/commit/d0958c02d4f356f6eacc7e37d2f24c485a9af8fc))
 
 ## [0.3.1](https://github.com/kevinslin/dendronv2/compare/v0.3.0...v0.3.1) (2020-07-05)
@@ -851,7 +849,7 @@ After you've made the above changes, you can run `Developer: Reload Window` for 
 
 ### Features
 
-- initialize workspace with autosave ([34eb272](https://github.com/kevinslin/dendronv2/commit/34eb2723d8f32adba2daf1fee7c687df7bfdd592))
+- initialize workbench with autosave ([34eb272](https://github.com/kevinslin/dendronv2/commit/34eb2723d8f32adba2daf1fee7c687df7bfdd592))
 - match namespace schemas ([1a960bf](https://github.com/kevinslin/dendronv2/commit/1a960bf26f8984e541b3eb118f60bdc09d8250fe))
 - show schema suggestions ([5680a74](https://github.com/kevinslin/dendronv2/commit/5680a7426f35b0c43680d8b3b0011dfc0eb0d6f1))
 - show schema with results ([5d7294d](https://github.com/kevinslin/dendronv2/commit/5d7294dfab1b5e4c177dd1c95d504ffcaafd09d0))

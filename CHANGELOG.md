@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.13-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.12...v0.8.13-alpha.0) (2020-08-28)
+
+### Bug Fixes
+
+- **engine:** bad create-new prompt ([0ce026d](https://github.com/dendronhq/dendron/commit/0ce026d882aa42d8884d7c4856912511c74a8bfb))
+
 ## [0.8.12](https://github.com/dendronhq/dendron/compare/v0.8.11...v0.8.12) (2020-08-28)
 
 ### Bug Fixes

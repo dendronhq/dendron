@@ -303,6 +303,7 @@ export class LookupProvider {
       picker.justActivated = false;
     }
     const querystring = slashToDot(pickerValue);
+    const queryOrig = slashToDot(picker.value);
     let profile: number;
     const ctx2 = {
       ctx: "updatePickerItems",
@@ -310,7 +311,7 @@ export class LookupProvider {
       opts,
     };
     const engine = DendronEngine.getOrCreateEngine();
-    const queryEndsWithDot = querystring.endsWith(".");
+    const queryEndsWithDot = queryOrig.endsWith(".");
     try {
       // check if root query, special case, return everything
       if (querystring === "") {
@@ -325,7 +326,7 @@ export class LookupProvider {
       L.info({ ...ctx2, msg: "enter" });
 
       // first query still
-      if (queryEndsWithDot || querystring.split(".").length < 2) {
+      if (queryEndsWithDot || queryOrig.split(".").length < 2) {
         const resp = await engine.query(querystring, opts.flavor);
         updatedItems = [this.noActiveItem as DNode].concat(resp.data);
         profile = getDurationMilliseconds(start);
@@ -339,7 +340,8 @@ export class LookupProvider {
         return;
       }
 
-      const perfectMatch = _.find(updatedItems, { fname: querystring });
+      // don't use query string since this can change
+      const perfectMatch = _.find(updatedItems, { fname: queryOrig });
       // NOTE: we modify this later so need to track this here
       const noUpdatedItems = updatedItems.length === 0;
 
@@ -357,7 +359,7 @@ export class LookupProvider {
       // check if new item, return if that's the case
       if (
         noUpdatedItems ||
-        (picker.activeItems.length === 0 && !perfectMatch)
+        (picker.activeItems.length === 0 && !perfectMatch && !queryEndsWithDot)
       ) {
         L.info({ ...ctx2, msg: "no matches" });
         // @ts-ignore

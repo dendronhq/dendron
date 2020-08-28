@@ -13,10 +13,6 @@ export type MDNode = {
   children: Token[];
 };
 
-export function mdNodes2MD(nodes: MDNode[]): string {
-  return "";
-}
-
 export function md2MDNodes(txt: string): MDNode[] {
   const tokens: Token[] = markdownIt
     .use(markdownItRegex, {

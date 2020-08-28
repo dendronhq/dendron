@@ -1,7 +1,7 @@
 import { DNode, IDNodeType } from "@dendronhq/common-all";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
-import { window, Uri } from "vscode";
+import { Uri } from "vscode";
 import { VSCodeUtils } from "../utils";
 import path from "path";
 

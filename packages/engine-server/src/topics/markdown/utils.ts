@@ -9,10 +9,8 @@ import os from "os";
 import remark from "remark";
 import frontmatterPlugin from "remark-frontmatter";
 import markdownParse from "remark-parse";
-import { PassThrough } from "stream";
 // import wikiLinkPlugin from "remark-wiki-link";
 import unified, { Processor } from "unified";
-import engine from "unified-engine";
 import { Node, Parent, Point, Position } from "unist";
 import visit, { CONTINUE, EXIT } from "unist-util-visit";
 import YAML from "yamljs";
@@ -67,11 +65,6 @@ export function md2Tokens(txt: string): Token[] {
     .parse(txt, {});
   return tokens;
 }
-
-type TRef = {
-  old: string;
-  new: string;
-};
 
 // export function replaceMDRefs(opts: ReplaceMDRefsOpts): Token[] {
 //   const { tokens, imageLinkPrefix } = opts;
@@ -142,56 +135,33 @@ export function parse(markdown: string): Node {
       .use(markdownParse, { gfm: true })
       .use(frontmatterPlugin, ["yaml"])
       .use(dendronLinksPlugin);
-  //.use(wikiLinkPlugin);
   return processor.parse(markdown);
 }
 
-export async function process(node: Node) {
-  const streamIn = new PassThrough();
-  streamIn.write("# foo bar");
+// export async function process(node: Node) {
+//   const streamIn = new PassThrough();
+//   streamIn.write("# foo bar");
 
-  return new Promise((resolve) => {
-    engine(
-      {
-        processor: remark(),
-        streamIn,
-        pluginPrefix: "remark",
-        rcName: ".remarkrc",
-        packageField: "remarkConfig",
-        ignoreName: ".remarkignore",
-        color: true,
-      },
-      // eslint-disable-next-line no-use-before-define
-      done
-    );
+//   return new Promise((resolve) => {
+//     engine(
+//       {
+//         processor: remark(),
+//         streamIn,
+//         pluginPrefix: "remark",
+//         rcName: ".remarkrc",
+//         packageField: "remarkConfig",
+//         ignoreName: ".remarkignore",
+//         color: true,
+//       },
+//       // eslint-disable-next-line no-use-before-define
+//       done
+//     );
 
-    function done(error: any) {
-      if (error) throw error;
-      resolve();
-    }
-  });
-}
-//   var engine = require('unified-engine')
-// var remark = require('remark')
-
-// engine(
-//   {
-//     processor: remark,
-//     files: ['.'],
-//     extensions: ['md', 'markdown', 'mkd', 'mkdn', 'mkdown'],
-//     pluginPrefix: 'remark',
-//     rcName: '.remarkrc',
-//     packageField: 'remarkConfig',
-//     ignoreName: '.remarkignore',
-//     color: true
-//   },
-//   done
-// )
-
-// function done(error) {
-//   if (error) throw error
-// }
-
+//     function done(error: any) {
+//       if (error) throw error;
+//       resolve();
+//     }
+//   });
 // }
 
 // TODO: stub
@@ -293,16 +263,6 @@ export function createNoteFromMarkdown(uri: string, eol?: string): Note {
   note.custom.props = props;
   return note;
 }
-
-type ReplaceRefsOpts = {
-  /**
-   * Refs to replace
-   */
-  refs?: TRef[];
-  wikiLink2MDLink?: boolean;
-  urlLinkPrefix?: string;
-  imageLinkPrefix?: string;
-};
 
 // === Text Edits
 

@@ -1,11 +1,10 @@
 import { readMD } from "@dendronhq/common-server";
 import _ from "lodash";
 import _markdownIt from "markdown-it";
-import Token from "markdown-it/lib/token";
-import path from "path";
-import { URI } from "vscode-uri";
 // @ts-ignoreig
 import markdownItAST from "markdown-it-ast";
+import Token from "markdown-it/lib/token";
+import path from "path";
 
 const markdownIt = _markdownIt();
 
@@ -35,8 +34,6 @@ export type ASTEnt = {
   closeNode: Token;
   children: Token[];
 };
-
-export const cacheRefs = async (uris: URI[]) => {};
 
 export function extractBlock(
   txt: string,

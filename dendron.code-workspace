@@ -25,10 +25,7 @@
       "path": "docs"
     },
     {
-      "path": "../dendron-playbooks"
-    },
-    {
-      "path": "../dendron-conventional-changelog"
+      "path": "."
     }
   ],
   "settings": {

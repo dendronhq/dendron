@@ -379,6 +379,8 @@ describe("NoteUtils", () => {
 });
 
 describe("Note", () => {
+  // TODO: for some reason, npm run build says notes is unused
+  // @ts-ignore
   let notes: ReturnType<typeof setupNotes>;
   let schemas: ReturnType<typeof setupSchema>;
 

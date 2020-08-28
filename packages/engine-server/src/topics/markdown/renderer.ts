@@ -22,7 +22,7 @@ type RenderRuleRecord = _Renderer.RenderRuleRecord;
 
 const default_rules: RenderRuleRecord = {};
 
-default_rules.code_inline = function (tokens, idx, _options, _env, slf) {
+default_rules.code_inline = function (tokens, idx, _options, _env, _slf) {
   return "`" + escapeHtml(tokens[idx].content) + "`";
 };
 

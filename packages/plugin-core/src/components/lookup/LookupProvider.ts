@@ -304,8 +304,6 @@ export class LookupProvider {
       } else {
         pickerValue = pickerValue.slice(0, lastDotIndex + 1);
       }
-      // @ts-ignore
-      picker.justActivated = false;
     }
     const querystring = slashToDot(pickerValue);
     const queryOrig = slashToDot(picker.value);
@@ -331,7 +329,12 @@ export class LookupProvider {
       L.info({ ...ctx2, msg: "enter" });
 
       // first query still
-      if (queryEndsWithDot || queryOrig.split(".").length < 2) {
+      if (
+        queryEndsWithDot ||
+        queryOrig.split(".").length < 2 ||
+        // @ts-ignore
+        picker.justActivated
+      ) {
         const resp = await engine.query(querystring, opts.flavor);
         updatedItems = [this.noActiveItem as DNode].concat(resp.data);
         profile = getDurationMilliseconds(start);
@@ -397,6 +400,8 @@ export class LookupProvider {
       profile = getDurationMilliseconds(start);
       L.info({ ...ctx2, msg: "exit", querystring, profile });
       picker.busy = false;
+      // @ts-ignore
+      picker.justActivated = false;
     }
   }
 

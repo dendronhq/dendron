@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.14-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.13...v0.8.14-alpha.0) (2020-08-29)
+
+### Enhancements
+
+- **plugin:** don't ignore focus out ([c87af7b](https://github.com/dendronhq/dendron/commit/c87af7bb828a8fe532f37d00acddbba0ed3e1e08))
+
+### Features
+
+- **workbench:** tree view focus on active editor ([2e3a81d](https://github.com/dendronhq/dendron/commit/2e3a81dd24c3c3322aa8dc8aaa3fbdc4d58c103d))
+
 ## [0.8.13](https://github.com/dendronhq/dendron/compare/v0.8.13-alpha.4...v0.8.13) (2020-08-29)
 
 ### Bug Fixes

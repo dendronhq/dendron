@@ -8,34 +8,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Bug Fixes
 
 - **plugin:** remove stub icons after creating note ([43eab44](https://github.com/dendronhq/dendron/commit/43eab44917b44aceaad04467234b3dc4738c5097))
-
-## [0.8.13-alpha.3](https://github.com/dendronhq/dendron/compare/v0.8.13-alpha.2...v0.8.13-alpha.3) (2020-08-29)
-
-### Bug Fixes
-
-- **engine:** lookup edge case ([b5680dd](https://github.com/dendronhq/dendron/commit/b5680dd448a756a3b45ca457464d1fce704f1807))
-
-## [0.8.13-alpha.2](https://github.com/dendronhq/dendron/compare/v0.8.13-alpha.1...v0.8.13-alpha.2) (2020-08-28)
-
-### Bug Fixes
-
+- **engine:** more lookup edge case ([b5680dd](https://github.com/dendronhq/dendron/commit/b5680dd448a756a3b45ca457464d1fce704f1807))
 - **engine:** edge case in lookup ([7d47119](https://github.com/dendronhq/dendron/commit/7d47119d7a66df69cfa0d925078d95af20e6ddd8))
-
-## [0.8.13-alpha.1](https://github.com/dendronhq/dendron/compare/v0.8.13-alpha.0...v0.8.13-alpha.1) (2020-08-28)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.8.13-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.12...v0.8.13-alpha.0) (2020-08-28)
-
-### Bug Fixes
-
-- **engine:** bad create-new prompt ([0ce026d](https://github.com/dendronhq/dendron/commit/0ce026d882aa42d8884d7c4856912511c74a8bfb))
+- **engine:** invalid create new prompt ([0ce026d](https://github.com/dendronhq/dendron/commit/0ce026d882aa42d8884d7c4856912511c74a8bfb))
 
 ## [0.8.12](https://github.com/dendronhq/dendron/compare/v0.8.11...v0.8.12) (2020-08-28)
 
 ### Bug Fixes
 
-- **engine:** issue 137 ([6a7f0bb](https://github.com/dendronhq/dendron/commit/6a7f0bb22630cb364797d75bf4e1d7f2d8d08368))
+- **engine:** [error when setting unquoted date in frontmatter](https://github.com/dendronhq/dendron/issues/137) ([6a7f0bb](https://github.com/dendronhq/dendron/commit/6a7f0bb22630cb364797d75bf4e1d7f2d8d08368))
 
 ## [0.8.11](https://github.com/dendronhq/dendron/compare/v0.8.11-alpha.3...v0.8.11) (2020-08-28)
 

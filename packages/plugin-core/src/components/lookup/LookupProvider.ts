@@ -221,6 +221,7 @@ export class LookupProvider {
       L.info({ ...ctx2, msg: "createNewPick", selectedItem });
       const fname = value;
       let nodeNew: DNode;
+      let foundStub = false;
       // reuse node if a stub
       // otherwise, children will not be right
       if (_.isUndefined(selectedItem)) {
@@ -232,6 +233,7 @@ export class LookupProvider {
         // get note
         nodeNew = engine.notes[selectedItem.id];
         nodeNew.stub = false;
+        foundStub = true;
         profile = getDurationMilliseconds(start);
         L.info({
           ...ctx2,
@@ -265,11 +267,9 @@ export class LookupProvider {
       historyService.add({ source: "engine", action: "create", uri });
       profile = getDurationMilliseconds(start);
       L.info({ ...ctx2, msg: "historyService.add", profile });
+      const noteExists = DNodeUtils.getNoteByFname(nodeNew.fname, engine);
       // sanity check
-      if (
-        (!nodeNew.stub || !selectedItem.schemaStub) &&
-        DNodeUtils.getNoteByFname(nodeNew.fname, engine)
-      ) {
+      if (noteExists && !foundStub && !selectedItem.schemaStub) {
         L.error({ ...ctx2, msg: "action will overwrite existing note" });
         return;
       }

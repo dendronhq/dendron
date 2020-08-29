@@ -131,6 +131,7 @@ export class DendronTreeView {
           const treeDataProvider = new EngineNoteProvider();
           const treeView = window.createTreeView("dendronTreeView", {
             treeDataProvider,
+            showCollapseAll: true,
           });
           const _class = new DendronTreeView(treeView, treeDataProvider);
           ws.dendronTreeView = _class;

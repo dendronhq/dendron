@@ -1,17 +1,17 @@
 import {
-  DNode,
-  Note,
-  LegacyDendronSiteConfig,
   DendronSiteConfig,
+  DNode,
+  LegacyDendronSiteConfig,
+  Note,
 } from "@dendronhq/common-all";
 import {
   DirResult,
   EngineTestUtils,
   FileTestUtils,
   mdFile2NodeProps,
-  writeYAML,
-  readYAML,
   node2MdFile,
+  readYAML,
+  writeYAML,
 } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
 import * as assert from "assert";
@@ -28,6 +28,7 @@ import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
 import { CreateJournalCommand } from "../../commands/CreateJournal";
 import { CreateScratchCommand } from "../../commands/CreateScratch";
 import { DoctorCommand } from "../../commands/Doctor";
+import { GoUpCommand } from "../../commands/GoUpCommand";
 import { RefactorHierarchyCommand } from "../../commands/RefactorHierarchy";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import { RenameNoteV2Command } from "../../commands/RenameNoteV2";
@@ -36,6 +37,7 @@ import {
   SetupWorkspaceCommand,
   SetupWorkspaceOpts,
 } from "../../commands/SetupWorkspace";
+import { LookupController } from "../../components/lookup/LookupController";
 import {
   createNoActiveItem,
   EngineOpts,
@@ -44,22 +46,20 @@ import {
 import {
   CONFIG,
   ConfigKey,
-  WORKSPACE_STATE,
   GLOBAL_STATE,
+  WORKSPACE_STATE,
 } from "../../constants";
 import { _activate } from "../../extension";
 import {
-  replaceRefs,
-  parseRef,
+  cacheRefs,
   findDanglingRefsByFsPath,
   getWorkspaceCache,
-  cacheRefs,
+  parseRef,
+  replaceRefs,
 } from "../../external/memo/utils/utils";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { GoUpCommand } from "../../commands/GoUpCommand";
-import { LookupController } from "../../components/lookup/LookupController";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
@@ -149,15 +149,20 @@ function setupDendronWorkspace(
     useFixtures?: boolean;
     fixtureDir?: string;
     useCb?: (vaultPath: string) => Promise<void>;
+    activateWorkspace?: boolean;
   }
 ) {
   const optsClean = _.defaults(opts, {
     configOverride: {},
     setupWsOverride: {},
     fixtureDir: "store",
+    activateWorkspace: false,
   });
   if (opts?.useFixtures || opts?.useCb) {
     optsClean.setupWsOverride = { emptyWs: true };
+  }
+  if (optsClean.activateWorkspace) {
+    DendronWorkspace.isActive = () => true;
   }
   DendronWorkspace.configuration = () => {
     const config: any = {
@@ -449,13 +454,7 @@ suite("startup", function () {
 
     describe("updateItems", function () {
       // TODO: need to clear existing open folders
-      test.skip("init", function (done) {
-        setupDendronWorkspace(root.name, ctx, {
-          useCb: async (vaultPath: string) => {
-            node2MdFile(new Note({ fname: "foo" }), { root: vaultPath });
-            node2MdFile(new Note({ fname: "bar" }), { root: vaultPath });
-          },
-        });
+      test("init", function (done) {
         onWSInit(async () => {
           const ws = DendronWorkspace.instance();
           const engOpts: EngineOpts = { flavor: "note" };
@@ -467,6 +466,16 @@ suite("startup", function () {
           // two notes and root
           assert.equal(lc.quickPick?.items.length, 3);
           done();
+        });
+        setupDendronWorkspace(root.name, ctx, {
+          useCb: async (vaultPath: string) => {
+            node2MdFile(
+              new Note({ fname: "root", id: "root", title: "root" }),
+              { root: vaultPath }
+            );
+            node2MdFile(new Note({ fname: "foo" }), { root: vaultPath });
+            node2MdFile(new Note({ fname: "bar" }), { root: vaultPath });
+          },
         });
       });
 
@@ -491,6 +500,42 @@ suite("startup", function () {
           assert.equal(lc.quickPick?.activeItems.length, 1);
           assert.equal(lc.quickPick?.activeItems[0].fname, "foo");
           done();
+        });
+      });
+
+      test("remove stub status after creation", function (done) {
+        onWSInit(async () => {
+          const ws = DendronWorkspace.instance();
+          const engOpts: EngineOpts = { flavor: "note" };
+          const lc = new LookupController(ws, engOpts);
+          const lp = new LookupProvider(engOpts);
+
+          let quickpick = lc.show();
+          let note = _.find(quickpick.items, { fname: "foo" }) as Note;
+          assert.ok(note.stub);
+          quickpick.selectedItems = [note];
+          await lp.onDidAccept(quickpick, engOpts);
+          assert.equal(
+            path.basename(
+              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+            ),
+            "foo.md"
+          );
+
+          quickpick = lc.show();
+          note = _.find(quickpick.items, { fname: "foo" }) as Note;
+          assert.ok(!note.stub);
+          done();
+        });
+        setupDendronWorkspace(root.name, ctx, {
+          activateWorkspace: true,
+          useCb: async (vaultPath: string) => {
+            node2MdFile(
+              new Note({ fname: "root", id: "root", title: "root" }),
+              { root: vaultPath }
+            );
+            node2MdFile(new Note({ fname: "foo.bar" }), { root: vaultPath });
+          },
         });
       });
     });

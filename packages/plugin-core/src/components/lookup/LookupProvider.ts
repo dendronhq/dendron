@@ -259,7 +259,10 @@ export class LookupProvider {
       // apply schema template
       if (opts.flavor === "note") {
         SchemaUtils.matchAndApplyTemplate({ note: nodeNew as Note, engine });
-        const maybeSchema = SchemaUtils.matchNote(nodeNew, engine.schemas);
+        const maybeSchema = SchemaUtils.matchNote(
+          nodeNew as Note,
+          engine.schemas
+        );
         if (maybeSchema) {
           (nodeNew as Note).schema = maybeSchema;
         }

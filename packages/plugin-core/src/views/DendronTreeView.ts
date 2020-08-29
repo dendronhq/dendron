@@ -3,10 +3,13 @@ import _ from "lodash";
 import path from "path";
 import vscode, {
   ExtensionContext,
+  TextDocument,
   ThemeIcon,
   TreeView,
   Uri,
   window,
+  workspace,
+  TextEditor,
 } from "vscode";
 import { DENDRON_COMMANDS, ICONS } from "../constants";
 import { HistoryEvent, HistoryService } from "../services/HistoryService";
@@ -16,7 +19,10 @@ function createTreeNote(note: Note) {
   const collapsibleState = _.isEmpty(note.children)
     ? vscode.TreeItemCollapsibleState.None
     : vscode.TreeItemCollapsibleState.Collapsed;
-  const tn = new TreeNote({ note: note as Note, collapsibleState });
+  const tn = new TreeNote({
+    note: note as Note,
+    collapsibleState,
+  });
   if (note.stub) {
     tn.iconPath = new ThemeIcon(ICONS.STUB);
   } else if (note.schema && !SchemaUtils.isUnkown(note.schema)) {
@@ -28,6 +34,7 @@ function createTreeNote(note: Note) {
 export class TreeNote extends vscode.TreeItem {
   public note: Note;
   public uri: Uri;
+  public children: string[] = [];
 
   constructor({
     note,
@@ -51,23 +58,23 @@ export class TreeNote extends vscode.TreeItem {
     };
   }
 
+  get id(): string {
+    return this.note.id;
+  }
+
   get tooltip(): string {
     return this.note.title;
   }
-
-  get children(): TreeNote[] {
-    return this.note.children.map((note) => {
-      return createTreeNote(note as Note);
-    });
-  }
 }
 
-export class EngineNoteProvider implements vscode.TreeDataProvider<TreeNote> {
+export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
   private _onDidChangeTreeData: vscode.EventEmitter<
-    TreeNote | undefined | void
-  > = new vscode.EventEmitter<TreeNote | undefined | void>();
-  readonly onDidChangeTreeData: vscode.Event<TreeNote | undefined | void> = this
+    string | undefined | void
+  > = new vscode.EventEmitter<string | undefined | void>();
+  readonly onDidChangeTreeData: vscode.Event<string | undefined | void> = this
     ._onDidChangeTreeData.event;
+  public tree: { [key: string]: TreeNote } = {};
+  public active: string | undefined;
 
   constructor() {}
 
@@ -75,30 +82,42 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<TreeNote> {
     this._onDidChangeTreeData.fire();
   }
 
-  getTreeItem(element: TreeNote): vscode.TreeItem {
-    return element;
-  }
-
-  sort(notes: TreeNote[]) {
+  sort(notes: TreeNote[]): TreeNote[] {
     return _.sortBy(notes, "label");
   }
 
-  async getChildren(element?: TreeNote): Promise<TreeNote[]> {
+  getTreeItem(id: string): vscode.TreeItem {
+    return this.tree[id];
+  }
+
+  getChildren(id?: string): Thenable<string[]> {
     const engine = DendronWorkspace.instance().engine;
     if (!engine.notes["root"]) {
       vscode.window.showInformationMessage("No notes found");
       return Promise.resolve([]);
     }
 
-    if (element) {
-      return Promise.resolve(this.sort(element.children));
+    if (id) {
+      return Promise.resolve(this.tree[id].children);
     } else {
-      return this.sort(
-        engine.notes["root"].children.map((note) => {
-          return createTreeNote(note as Note);
-        })
-      );
+      const root = engine.notes["root"];
+      return Promise.resolve(this.parseTree(root).children);
     }
+  }
+
+  async getParent(id: string) {
+    const parentId = this.tree[id].note.parent?.id;
+    return parentId ? parentId : null;
+  }
+
+  parseTree(note: Note): TreeNote {
+    const tn = createTreeNote(note);
+    this.tree[note.id] = tn;
+    const children = note.children.map((c) => {
+      return this.parseTree(c as Note);
+    });
+    tn.children = this.sort(children).map((c) => c.id);
+    return tn;
   }
 }
 
@@ -121,7 +140,30 @@ export class DendronTreeView {
   }
 
   constructor(
-    public treeView: TreeView<TreeNote>,
+    public treeView: TreeView<string>,
     public treeProvider: EngineNoteProvider
-  ) {}
+  ) {
+    //workspace.onDidOpenTextDocument(this.onOpenTextDocument, this)
+    DendronWorkspace.instance().addDisposable(
+      window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
+    );
+  }
+
+  async onOpenTextDocument(editor: TextEditor | undefined) {
+    if (_.isUndefined(editor)) {
+      return;
+    }
+    const uri = editor.document.uri;
+    const basename = path.basename(uri.fsPath);
+    if (basename.endsWith(".md")) {
+      const fname = DNodeUtils.uri2Fname(uri);
+      const note = DNodeUtils.getNoteByFname(
+        fname,
+        DendronWorkspace.instance().engine
+      );
+      if (note) {
+        this.treeView.reveal(note.id);
+      }
+    }
+  }
 }

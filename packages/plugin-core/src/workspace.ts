@@ -465,6 +465,11 @@ export class DendronWorkspace {
     );
   }
 
+  addDisposable(_disposable: vscode.Disposable) {
+    // TODO
+    // handle all disposables
+  }
+
   // === Utils
 
   getGlobalState<T>(key: keyof typeof GLOBAL_STATE) {

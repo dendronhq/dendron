@@ -32,7 +32,8 @@
             "explorer": [
                 {
                     "id": "dendronTreeView",
-                    "name": "Dendron Tree View"
+                    "name": "Dendron Tree View",
+                    "visibility": "visible"
                 }
             ]
         },

@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.14-alpha.1](https://github.com/dendronhq/dendron/compare/v0.8.14-alpha.0...v0.8.14-alpha.1) (2020-08-29)
+
+### Enhancements
+
+- **workbench:** show collapse all in tree view ([5a2469b](https://github.com/dendronhq/dendron/commit/5a2469bf6d4261fd0ff898a28b1683bf6aa1f9c8))
+
+### Features
+
+- **workspace:** Show cheatsheet of all commands ([e434a9d](https://github.com/dendronhq/dendron/commit/e434a9d7755880cd5a1de81045c4409b2e8e83b3))
+
 ## [0.8.14-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.13...v0.8.14-alpha.0) (2020-08-29)
 
 ### Enhancements

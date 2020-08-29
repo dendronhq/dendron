@@ -259,6 +259,13 @@ export class LookupProvider {
       // apply schema template
       if (opts.flavor === "note") {
         SchemaUtils.matchAndApplyTemplate({ note: nodeNew as Note, engine });
+        const maybeSchema = SchemaUtils.matchNote(nodeNew, engine.schemas);
+        if (maybeSchema) {
+          (nodeNew as Note).schema = maybeSchema;
+        }
+        // schema stub counts as stub
+        nodeNew.stub = false;
+        (nodeNew as Note).schemaStub = false;
       }
 
       // FIXME: this should be done after the node is created
@@ -273,6 +280,8 @@ export class LookupProvider {
         L.error({ ...ctx2, msg: "action will overwrite existing note" });
         return;
       }
+
+      // need to apply schema to new notes
       await engine.write(nodeNew, {
         newNode: true,
         parentsAsStubs: true,

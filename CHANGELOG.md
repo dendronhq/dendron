@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.13-alpha.3](https://github.com/dendronhq/dendron/compare/v0.8.13-alpha.2...v0.8.13-alpha.3) (2020-08-29)
+
+### Bug Fixes
+
+- **engine:** lookup edge case ([b5680dd](https://github.com/dendronhq/dendron/commit/b5680dd448a756a3b45ca457464d1fce704f1807))
+
 ## [0.8.13-alpha.2](https://github.com/dendronhq/dendron/compare/v0.8.13-alpha.1...v0.8.13-alpha.2) (2020-08-28)
 
 ### Bug Fixes

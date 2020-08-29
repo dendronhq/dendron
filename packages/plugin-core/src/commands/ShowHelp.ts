@@ -29,6 +29,10 @@ export class ShowHelpCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return;
   }
   async execute() {
-    env.openExternal(Uri.parse("https://www.dendron.so/notes/cheatsheet.html"));
+    env.openExternal(
+      Uri.parse(
+        "https://www.dendron.so/notes/f9540bb6-7a5a-46db-ae7c-e1a606f28c73.html"
+      )
+    );
   }
 }

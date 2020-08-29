@@ -5,10 +5,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.8.13](https://github.com/dendronhq/dendron/compare/v0.8.13-alpha.4...v0.8.13) (2020-08-29)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.8.13-alpha.4](https://github.com/dendronhq/dendron/compare/v0.8.13-alpha.3...v0.8.13-alpha.4) (2020-08-29)
-
 ### Bug Fixes
 
 - **plugin:** remove stub icons after creating note ([43eab44](https://github.com/dendronhq/dendron/commit/43eab44917b44aceaad04467234b3dc4738c5097))

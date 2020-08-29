@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.13-alpha.4](https://github.com/dendronhq/dendron/compare/v0.8.13-alpha.3...v0.8.13-alpha.4) (2020-08-29)
+
+### Bug Fixes
+
+- **plugin:** remove stub icons after creating note ([43eab44](https://github.com/dendronhq/dendron/commit/43eab44917b44aceaad04467234b3dc4738c5097))
+
 ## [0.8.13-alpha.3](https://github.com/dendronhq/dendron/compare/v0.8.13-alpha.2...v0.8.13-alpha.3) (2020-08-29)
 
 ### Bug Fixes

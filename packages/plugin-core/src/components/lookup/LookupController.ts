@@ -80,7 +80,7 @@ export class LookupController {
     title.push(`- version: ${DendronWorkspace.version()}`);
     quickpick.title = title.join(" ");
     quickpick.placeholder = "eg. hello.world";
-    quickpick.ignoreFocusOut = true;
+    quickpick.ignoreFocusOut = false;
     // @ts-ignore
     quickpick.justActivated = true;
     // FIXME: no button for now
@@ -123,5 +123,6 @@ export class LookupController {
     // show
     quickpick.show();
     this.ws.L.info({ ctx: ctx + ":show:post" });
+    return quickpick;
   }
 }

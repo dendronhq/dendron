@@ -3,6 +3,7 @@ import {
   DNode,
   LegacyDendronSiteConfig,
   Note,
+  Schema,
 } from "@dendronhq/common-all";
 import {
   DirResult,
@@ -12,6 +13,7 @@ import {
   node2MdFile,
   readYAML,
   writeYAML,
+  schema2YMLFile,
 } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
 import * as assert from "assert";
@@ -525,8 +527,11 @@ suite("startup", function () {
           quickpick = lc.show();
           note = _.find(quickpick.items, { fname: "foo" }) as Note;
           assert.ok(!note.stub);
+          // no schema file
+          assert.ok(note.schema?.id, Schema.createUnkownSchema().id);
           done();
         });
+
         setupDendronWorkspace(root.name, ctx, {
           activateWorkspace: true,
           useCb: async (vaultPath: string) => {
@@ -535,6 +540,55 @@ suite("startup", function () {
               { root: vaultPath }
             );
             node2MdFile(new Note({ fname: "foo.bar" }), { root: vaultPath });
+          },
+        });
+      });
+
+      test("attach schema after creation", function (done) {
+        onWSInit(async () => {
+          const ws = DendronWorkspace.instance();
+          const engOpts: EngineOpts = { flavor: "note" };
+          const lc = new LookupController(ws, engOpts);
+          const lp = new LookupProvider(engOpts);
+
+          let quickpick = lc.show();
+          let note = _.find(quickpick.items, { fname: "foo" }) as Note;
+          assert.ok(note.stub);
+          quickpick.selectedItems = [note];
+          await lp.onDidAccept(quickpick, engOpts);
+          assert.equal(
+            path.basename(
+              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+            ),
+            "foo.md"
+          );
+
+          quickpick = lc.show();
+          note = _.find(quickpick.items, { fname: "foo" }) as Note;
+          assert.ok(!note.stub);
+          // no schema file
+          assert.ok(note.schema?.id, "foo");
+          done();
+        });
+
+        setupDendronWorkspace(root.name, ctx, {
+          activateWorkspace: true,
+          useCb: async (vaultPath: string) => {
+            node2MdFile(
+              new Note({ fname: "root", id: "root", title: "root" }),
+              { root: vaultPath }
+            );
+            node2MdFile(new Note({ fname: "foo.bar" }), { root: vaultPath });
+            const schemaPath = path.join(vaultPath, "foo.schema.yml");
+            writeYAML(schemaPath, {
+              version: 1,
+              schemas: [
+                {
+                  id: "foo",
+                  parent: "root",
+                },
+              ],
+            });
           },
         });
       });
@@ -643,6 +697,44 @@ suite("startup", function () {
           done();
         });
       });
+
+      // test("lookup new node with unknown schema", function(done) {
+      //   onWSInit(async () => {
+      //     const ws = DendronWorkspace.instance();
+      //     const engOpts: EngineOpts = { flavor: "note" };
+      //     const lc = new LookupController(ws, engOpts);
+      //     const lp = new LookupProvider(engOpts);
+
+      //     let quickpick = lc.show();
+      //     let note = _.find(quickpick.items, { fname: "foo" }) as Note;
+      //     assert.ok(note.stub);
+      //     quickpick.selectedItems = [note];
+      //     await lp.onDidAccept(quickpick, engOpts);
+      //     assert.equal(
+      //       path.basename(
+      //         VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+      //       ),
+      //       "foo.md"
+      //     );
+
+      //     quickpick = lc.show();
+      //     note = _.find(quickpick.items, { fname: "foo" }) as Note;
+      //     assert.ok(!note.stub);
+      //     done();
+      //   });
+
+      //   setupDendronWorkspace(root.name, ctx, {
+      //     activateWorkspace: true,
+      //     useCb: async (vaultPath: string) => {
+      //       node2MdFile(
+      //         new Note({ fname: "root", id: "root", title: "root" }),
+      //         { root: vaultPath }
+      //       );
+      //       node2MdFile(new Note({ fname: "foo" }), { root: vaultPath });
+      //     },
+      //   });
+
+      // });
     });
   });
 });

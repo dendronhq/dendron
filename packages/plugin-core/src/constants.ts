@@ -258,7 +258,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "workspace",
     desc: "Show this help page",
     docLink: "dendron.topic.commands.md",
-    docPreview: `<a href="https://www.loom.com/share/b81ce02f30b84d79b92584f339184a00"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/b81ce02f30b84d79b92584f339184a00-with-play.gif"> </a>`,
+    docPreview: `![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.help.gif)`,
   },
   SHOW_PREVIEW: {
     key: "dendron.showPreview",

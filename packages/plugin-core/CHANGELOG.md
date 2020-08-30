@@ -5,23 +5,20 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.8.14-alpha.1](https://github.com/dendronhq/dendron/compare/v0.8.14-alpha.0...v0.8.14-alpha.1) (2020-08-29)
 
-### Enhancements
-
-- **workbench:** show collapse all in tree view ([5a2469b](https://github.com/dendronhq/dendron/commit/5a2469bf6d4261fd0ff898a28b1683bf6aa1f9c8))
-
 ### Features
 
 - **workspace:** Show cheatsheet of all commands ([e434a9d](https://github.com/dendronhq/dendron/commit/e434a9d7755880cd5a1de81045c4409b2e8e83b3))
 
-## [0.8.14-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.13...v0.8.14-alpha.0) (2020-08-29)
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.help.gif)
+
+- **workbench:** tree view focus on active editor ([2e3a81d](https://github.com/dendronhq/dendron/commit/2e3a81dd24c3c3322aa8dc8aaa3fbdc4d58c103d))
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.treeview-active-doc.gif)
 
 ### Enhancements
 
+- **workbench:** show collapse all in tree view ([5a2469b](https://github.com/dendronhq/dendron/commit/5a2469bf6d4261fd0ff898a28b1683bf6aa1f9c8))
 - **plugin:** don't ignore focus out ([c87af7b](https://github.com/dendronhq/dendron/commit/c87af7bb828a8fe532f37d00acddbba0ed3e1e08))
-
-### Features
-
-- **workbench:** tree view focus on active editor ([2e3a81d](https://github.com/dendronhq/dendron/commit/2e3a81dd24c3c3322aa8dc8aaa3fbdc4d58c103d))
 
 ## [0.8.13](https://github.com/dendronhq/dendron/compare/v0.8.13-alpha.4...v0.8.13) (2020-08-29)
 

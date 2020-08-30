@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.15-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.14...v0.8.15-alpha.0) (2020-08-30)
+
+### Bug Fixes
+
+- **workbench:** copy note link could sometimes fail ([9618488](https://github.com/dendronhq/dendron/commit/96184889092415f31e7ceea864ca4c9a68cc3877))
+
 ## [0.8.14](https://github.com/dendronhq/dendron/compare/v0.8.14-alpha.1...v0.8.14) (2020-08-30)
 
 ### Features

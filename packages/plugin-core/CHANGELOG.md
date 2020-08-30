@@ -5,18 +5,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [0.9.0](https://github.com/dendronhq/dendron/compare/v0.8.15-alpha.1...v0.9.0) (2020-08-30)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+Read the [release notes](https://www.dendron.so/notes/1a79e2a1-c906-4ed4-a528-15bd34c4e649.html) for a sumary of all notable changes.
 
-## [0.8.15-alpha.1](https://github.com/dendronhq/dendron/compare/v0.8.15-alpha.0...v0.8.15-alpha.1) (2020-08-30)
+## 0.8.15 (2020-08-30)
 
 ### Bug Fixes
 
 - **workbench:** clipboard fallback on windows ([de35c03](https://github.com/dendronhq/dendron/commit/de35c032cfa0ea66e37c2907cd819fdccc8f37ca))
-
-## [0.8.15-alpha.0](https://github.com/dendronhq/dendron/compare/v0.8.14...v0.8.15-alpha.0) (2020-08-30)
-
-### Bug Fixes
-
 - **workbench:** copy note link could sometimes fail ([9618488](https://github.com/dendronhq/dendron/commit/96184889092415f31e7ceea864ca4c9a68cc3877))
 
 ## [0.8.14](https://github.com/dendronhq/dendron/compare/v0.8.14-alpha.1...v0.8.14) (2020-08-30)

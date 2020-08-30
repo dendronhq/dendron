@@ -3,13 +3,11 @@ import _ from "lodash";
 import path from "path";
 import vscode, {
   ExtensionContext,
-  TextDocument,
+  TextEditor,
   ThemeIcon,
   TreeView,
   Uri,
   window,
-  workspace,
-  TextEditor,
 } from "vscode";
 import { DENDRON_COMMANDS, ICONS } from "../constants";
 import { HistoryEvent, HistoryService } from "../services/HistoryService";

@@ -17,6 +17,9 @@ const config = {
     libraryTarget: "commonjs2",
     devtoolModuleFilenameTemplate: "../[resource-path]",
   },
+  node: {
+    __dirname: false
+  },
   devtool: "source-map",
   externals: {
     vscode: "commonjs vscode", // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
@@ -26,13 +29,13 @@ const config = {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
     extensions: [".ts", ".js"],
   },
-  plugins: [
-    new CopyPlugin({
-      patterns: [
-        { from: path.join("node_modules", "clipboardy", "fallbacks"), to: 'fallbacks' },
-      ],
-    }),
-  ],
+  // plugins: [
+  //   new CopyPlugin({
+  //     patterns: [
+  //       { from: path.join("node_modules", "clipboardy", "fallbacks"), to: 'fallbacks' },
+  //     ],
+  //   }),
+  // ],
   module: {
     rules: [
       {

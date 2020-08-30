@@ -23,7 +23,7 @@
     "activationEvents": [
         "*"
     ],
-    "main": "./out/extension.js",
+    "main": "./dist/extension.js",
     "extensionPack": [
         "dendron.dendron-markdown-preview-enhanced"
     ],
@@ -375,11 +375,11 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
+        "@dendronhq/clipboardy": "^2.3.0",
         "@dendronhq/common-all": "^0.8.13",
         "@dendronhq/common-server": "^0.8.13",
         "@dendronhq/dendron-cli": "^0.8.13",
         "@dendronhq/engine-server": "^0.8.13",
-        "clipboardy": "^2.3.0",
         "cross-path-sort": "^1.0.0",
         "execa": "^4.0.2",
         "fs-extra": "^9.0.1",

@@ -1,5 +1,5 @@
 import { DNodeUtils } from "@dendronhq/common-all";
-import clipboardy from "clipboardy";
+import clipboardy from "@dendronhq/clipboardy";
 import _ from "lodash";
 import { TextEditor, window } from "vscode";
 import { VSCodeUtils } from "../utils";

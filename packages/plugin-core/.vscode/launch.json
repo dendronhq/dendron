@@ -21,6 +21,21 @@
       }
     },
     {
+      "name": "Run Extension - Webpack",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}"
+      ],
+      "outFiles": ["${workspaceFolder:plugin-core}/dist/**/*.js"],
+      "env": {
+        "STAGE": "dev",
+        "VSCODE_DEBUGGING_EXTENSION": "dendron"
+      }
+    },
+    {
       "name": "Extension Tests",
       "type": "extensionHost",
       "request": "launch",

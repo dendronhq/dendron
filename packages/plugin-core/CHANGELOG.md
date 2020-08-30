@@ -5,10 +5,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.8.14](https://github.com/dendronhq/dendron/compare/v0.8.14-alpha.1...v0.8.14) (2020-08-30)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.8.14-alpha.1](https://github.com/dendronhq/dendron/compare/v0.8.14-alpha.0...v0.8.14-alpha.1) (2020-08-29)
-
 ### Features
 
 - **workspace:** Show cheatsheet of all commands ([e434a9d](https://github.com/dendronhq/dendron/commit/e434a9d7755880cd5a1de81045c4409b2e8e83b3))

@@ -1,4 +1,4 @@
-import { URI } from "vscode-URI";
+import { URI } from "vscode-uri";
 
 export type WorkspaceCache = {
   imageUris: URI[];

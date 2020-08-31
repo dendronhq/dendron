@@ -557,7 +557,10 @@ export class DendronEngine implements DEngine {
 
   // OPTIMIZE: do in bulk
   /**
-   *
+   * Indexes note into engine. This does a few things:
+   *   - Add parent-child relationship to note.
+   *   - If parent's don't exist, create parents as stubs.
+   *   - Calls `refreshNodes` on notes
    * @param note
    * @param opts
    */

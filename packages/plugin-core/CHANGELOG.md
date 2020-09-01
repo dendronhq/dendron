@@ -5,7 +5,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.9.1](https://github.com/dendronhq/dendron/compare/v0.9.1-alpha.0...v0.9.1) (2020-09-01)
 
-### [Dendron Jekyll](http://localhost:4000/notes/4c0ef322-3006-405c-9a66-3134dd9649a5.html)
+### [Dendron Jekyll](http://dendron.so/notes/4c0ef322-3006-405c-9a66-3134dd9649a5.html)
 
 #### Nav Based Hierarchy Hints
 

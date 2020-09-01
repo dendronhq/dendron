@@ -361,8 +361,9 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     // only add if new
     if (!this.children.some((ent) => ent.id === node.id)) {
       this.children.push(node);
-      node.parent = this;
     }
+    // during rename, id will stay the same but parent is set to `null`
+    node.parent = this;
   }
 
   equal(node: IDNode<T>) {

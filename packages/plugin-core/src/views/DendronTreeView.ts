@@ -10,6 +10,7 @@ import vscode, {
   window,
 } from "vscode";
 import { DENDRON_COMMANDS, ICONS } from "../constants";
+import { Logger } from "../logger";
 import { HistoryEvent, HistoryService } from "../services/HistoryService";
 import { DendronWorkspace } from "../workspace";
 
@@ -33,6 +34,7 @@ export class TreeNote extends vscode.TreeItem {
   public note: Note;
   public uri: Uri;
   public children: string[] = [];
+  public L: typeof Logger;
 
   constructor({
     note,
@@ -54,6 +56,7 @@ export class TreeNote extends vscode.TreeItem {
       title: "",
       arguments: [{ qs: this.note.fname, mode: "note" }],
     };
+    this.L = DendronWorkspace.instance().L;
   }
 
   get id(): string {
@@ -89,6 +92,8 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
   }
 
   getChildren(id?: string): Thenable<string[]> {
+    const ctx = "TreeView:getChildren";
+    Logger.debug({ ctx, id });
     const engine = DendronWorkspace.instance().engine;
     if (!engine.notes["root"]) {
       vscode.window.showInformationMessage("No notes found");
@@ -98,6 +103,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
     if (id) {
       return Promise.resolve(this.tree[id].children);
     } else {
+      Logger.info({ ctx, msg: "reconstructing tree" });
       const root = engine.notes["root"];
       return Promise.resolve(this.parseTree(root).children);
     }
@@ -127,6 +133,7 @@ export class DendronTreeView {
         if (_event.action === "initialized") {
           const ws = DendronWorkspace.instance();
           const treeDataProvider = new EngineNoteProvider();
+          await treeDataProvider.getChildren();
           const treeView = window.createTreeView("dendronTreeView", {
             treeDataProvider,
             showCollapseAll: true,
@@ -142,7 +149,6 @@ export class DendronTreeView {
     public treeView: TreeView<string>,
     public treeProvider: EngineNoteProvider
   ) {
-    //workspace.onDidOpenTextDocument(this.onOpenTextDocument, this)
     DendronWorkspace.instance().addDisposable(
       window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
     );

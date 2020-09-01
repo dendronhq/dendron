@@ -170,6 +170,14 @@ export class DendronEngine implements DEngine {
     return;
   }
 
+  /**
+   * Does the following
+   *  - remove from search index
+   *  - remove from `notes` dict
+   *  - remove from `fullNodes` dict
+   * @param id
+   * @param mode
+   */
   deleteFromNodes(id: string, mode: QueryMode) {
     if (mode === "note") {
       this.fuse.remove((doc: DNode) => {
@@ -275,6 +283,7 @@ export class DendronEngine implements DEngine {
     const ctx = "delete";
     const cleanOpts = _.defaults(opts, { metaOnly: false });
     let noteToDelete: DNode;
+    this.logger.info({ ctx, idOrFname });
 
     if (mode === "note") {
       noteToDelete = this.notes[idOrFname];
@@ -300,13 +309,16 @@ export class DendronEngine implements DEngine {
         mode === "schema" ? { fpath: noteToDelete.fname + ".yml" } : {};
       await this.store.delete(id, storeOpts);
     }
+
     this.deleteFromNodes(id, mode);
     if (mode === "note") {
       // if have children, keep this note as a stub
       if (!_.isEmpty(noteToDelete.children)) {
+        this.logger.info({ ctx, idOrFname, msg: "keep as stub" });
         noteToDelete.stub = true;
         this.refreshNodes([noteToDelete]);
       } else {
+        this.logger.info({ ctx, idOrFname, msg: "delete from parent" });
         // no more children, delete from parent
         if (noteToDelete.parent) {
           noteToDelete.parent.children = _.reject(
@@ -316,6 +328,7 @@ export class DendronEngine implements DEngine {
         }
       }
     }
+    this.logger.info({ ctx, idOrFname, msg: "exit" });
     return;
   }
 
@@ -565,8 +578,7 @@ export class DendronEngine implements DEngine {
    * @param opts
    */
   async _updateNote(note: Note, opts: UpdateNodesOpts) {
-    const refreshList: Note[] = [note];
-    if (!opts.noAddParent) {
+    const addParent = (note: Note, opts: UpdateNodesOpts) => {
       let parentPath = DNodeUtils.dirName(note.fname);
       if (_.isEmpty(parentPath)) {
         parentPath = "root";
@@ -592,6 +604,11 @@ export class DendronEngine implements DEngine {
         }
       }
       parentNode.addChild(note);
+    };
+
+    const refreshList: Note[] = [note];
+    if (!opts.noAddParent) {
+      addParent(note, opts);
     }
     return this.refreshNodes(refreshList, { fullNode: opts.newNode });
   }

@@ -109,8 +109,8 @@ export class RenameNoteV2Command extends BaseCommand<
     const newFname = DNodeUtils.uri2Fname(newUri);
     const noteNew = new Note({
       ...props,
-      parent: noteOld.parent,
-      children: noteOld.children,
+      parent: null,
+      children: [],
       id: noteOld.id,
       fname: newFname,
     });
@@ -121,11 +121,7 @@ export class RenameNoteV2Command extends BaseCommand<
     historyService.add({ source: "engine", action: "create", uri: newUri });
 
     // write new note
-    ws.engine.write(noteNew, { newNode: true, parentsAsStubs: true });
-    await ws.engine.updateNodes([noteOld], {
-      newNode: true,
-      parentsAsStubs: true,
-    });
+    await ws.engine.write(noteNew, { newNode: true, parentsAsStubs: true });
   }
 
   async showResponse(res: CommandOutput) {
@@ -142,8 +138,10 @@ export class RenameNoteV2Command extends BaseCommand<
   }
 
   async execute(opts: CommandOpts) {
+    const ctx = "RenameNoteV2";
     await cacheUris();
     this.silent = opts.silent;
+    this.L.info({ ctx, msg: "enter", opts });
 
     const { files } = opts;
     const oneFile = files.length === 1;
@@ -287,6 +285,7 @@ export class RenameNoteV2Command extends BaseCommand<
       opts.openNewFile &&
         (await VSCodeUtils.openFileInEditor(new FileItem(files[0].newUri)));
     }
+    this.L.info({ ctx, msg: "exit" });
     return {
       refsUpdated,
       pathsUpdated: _.uniq(pathsUpdated),

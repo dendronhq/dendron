@@ -23,7 +23,7 @@
     "activationEvents": [
         "*"
     ],
-    "main": "./dist/extension.js",
+    "main": "./out/extension.js",
     "extensionPack": [
         "dendron.dendron-markdown-preview-enhanced"
     ],

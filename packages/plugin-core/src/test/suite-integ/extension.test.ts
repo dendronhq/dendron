@@ -1028,6 +1028,7 @@ suite("commands", function () {
         console.log(text);
         done();
       });
+
       setupDendronWorkspace(root.name, ctx, {
         useFixtures: true,
       });

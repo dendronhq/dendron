@@ -1,10 +1,4 @@
-import {
-  DendronConfig,
-  DEngine,
-  DNodeUtils,
-  getStage,
-  Note,
-} from "@dendronhq/common-all";
+import { DendronConfig, DEngine, getStage, Note } from "@dendronhq/common-all";
 import { mdFile2NodeProps, readMD } from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -531,84 +525,94 @@ export class DendronWorkspace {
       false
     );
 
+    const refreshTree = _.debounce(() => {
+      const ctx = "refreshTree";
+      Logger.info({ ctx });
+      this.dendronTreeView?.treeProvider.refresh();
+    }, 100);
+
     this.disposableStore.add(
       this.fsWatcher.onDidCreate(async (uri: vscode.Uri) => {
-        const ctx = "fsWatcher.onDidCreate";
-        this.L.info({ ctx, uri });
-        const fname = path.basename(uri.fsPath, ".md");
-        const noteRaw = mdFile2NodeProps(uri.fsPath);
-        const note = new Note({ ...noteRaw, parent: null, children: [] });
-
-        // ignore notes already in engine
-        const maybeNote = DNodeUtils.getNoteByFname(fname, this.engine);
-        if (maybeNote) {
-          this.dendronTreeView?.treeProvider.refresh();
-          return;
-        }
-
-        // check if ignore
-        const recentEvents = HistoryService.instance().lookBack();
-        this.L.debug({ ctx, recentEvents, fname });
-        if (
-          _.find(recentEvents, (event) => {
-            return _.every([
-              event?.uri?.fsPath === uri.fsPath,
-              event.source === "engine",
-              event.action === "create",
-            ]);
-          })
-        ) {
-          this.L.debug({ ctx, uri, msg: "create by engine, ignoring" });
-          return;
-        }
-
         try {
-          this.L.debug({ ctx, uri, msg: "adding to engine" });
-          this.engine.updateNodes([note], {
-            newNode: true,
-            parentsAsStubs: true,
-          });
-          this.dendronTreeView?.treeProvider.refresh();
-        } catch (err) {
-          this.L.error({ ctx, err });
+          const ctx = "fsWatcher.onDidCreate";
+          this.L.info({ ctx, uri });
+          const fname = path.basename(uri.fsPath, ".md");
+          const noteRaw = mdFile2NodeProps(uri.fsPath);
+          const note = new Note({ ...noteRaw, parent: null, children: [] });
+
+          // check if ignore
+          const recentEvents = HistoryService.instance().lookBack();
+          this.L.debug({ ctx, recentEvents, fname });
+          if (
+            _.find(recentEvents, (event) => {
+              return _.every([
+                event?.uri?.fsPath === uri.fsPath,
+                event.source === "engine",
+                event.action === "create",
+              ]);
+            })
+          ) {
+            this.L.debug({ ctx, uri, msg: "create by engine, ignoring" });
+            return;
+          }
+
+          try {
+            this.L.debug({ ctx, uri, msg: "adding to engine" });
+            this.engine.updateNodes([note], {
+              newNode: true,
+              parentsAsStubs: true,
+            });
+          } catch (err) {
+            this.L.error({ ctx, err });
+          }
+        } finally {
+          refreshTree();
         }
       }, this)
     );
 
     this.disposableStore.add(
       this.fsWatcher.onDidDelete(async (uri: vscode.Uri) => {
-        const ctx = "fsWatcher.onDidDelete";
-        this.L.info({ ctx, uri });
-        const fname = path.basename(uri.fsPath, ".md");
-
-        // check if we should ignore
-        const recentEvents = HistoryService.instance().lookBack(5);
-        this.L.debug({ ctx, recentEvents, fname });
-        if (
-          _.find(recentEvents, (event) => {
-            return _.every([
-              event?.uri?.fsPath === uri.fsPath,
-              event.source === "engine",
-              _.includes(["delete", "rename"], event.action),
-            ]);
-          })
-        ) {
-          this.L.debug({ ctx, uri, msg: "recent action by engine, ignoring" });
-          this.dendronTreeView?.treeProvider.refresh();
-          return;
-        }
-
         try {
-          this.L.debug({ ctx, uri, msg: "preparing to delete" });
-          const nodeToDelete = _.find(this.engine.notes, { fname });
-          if (_.isUndefined(nodeToDelete)) {
-            throw `${fname} not found`;
+          const ctx = "fsWatcher.onDidDelete";
+          this.L.info({ ctx, uri });
+          const fname = path.basename(uri.fsPath, ".md");
+
+          // check if we should ignore
+          const recentEvents = HistoryService.instance().lookBack(5);
+          this.L.debug({ ctx, recentEvents, fname });
+          if (
+            _.find(recentEvents, (event) => {
+              return _.every([
+                event?.uri?.fsPath === uri.fsPath,
+                event.source === "engine",
+                _.includes(["delete", "rename"], event.action),
+              ]);
+            })
+          ) {
+            this.L.debug({
+              ctx,
+              uri,
+              msg: "recent action by engine, ignoring",
+            });
+            return;
           }
-          await this.engine.delete(nodeToDelete.id, "note", { metaOnly: true });
-          this.dendronTreeView?.treeProvider.refresh();
-        } catch (err) {
-          // NOTE: ignore, many legitimate reasons why this might happen
-          // this.L.error({ ctx, err: JSON.stringify(err) });
+
+          try {
+            this.L.debug({ ctx, uri, msg: "preparing to delete" });
+            const nodeToDelete = _.find(this.engine.notes, { fname });
+            if (_.isUndefined(nodeToDelete)) {
+              throw `${fname} not found`;
+            }
+            await this.engine.delete(nodeToDelete.id, "note", {
+              metaOnly: true,
+            });
+          } catch (err) {
+            // NOTE: ignore, many legitimate reasons why this might happen
+            // this.L.error({ ctx, err: JSON.stringify(err) });
+          }
+        } finally {
+          refreshTree();
         }
       }, this)
     );

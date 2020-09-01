@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.9.0...v0.9.1-alpha.0) (2020-09-01)
+
+### Bug Fixes
+
+- **workbench:** rename note will update tree view correctly ([c98de12](https://github.com/dendronhq/dendron/commit/c98de121406590015bbb395eaa05fbbc83c50ff9))
+- bad case in import statement ([c6ab92a](https://github.com/dendronhq/dendron/commit/c6ab92af9b27fa1535d98043af411172d105b728))
+
 # [0.9.0](https://github.com/dendronhq/dendron/compare/v0.8.15-alpha.1...v0.9.0) (2020-08-30)
 
 **Note:** Version bump only for package @dendronhq/engine-server

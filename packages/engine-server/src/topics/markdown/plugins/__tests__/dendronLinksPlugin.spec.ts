@@ -3,10 +3,7 @@ import { dendronLinksPlugin } from "../dendronLinksPlugin";
 import markdownParse from "remark-parse";
 
 function getProcessor() {
-  let processor: unified.Processor | null = null;
-  return (processor = unified()
-    .use(markdownParse, { gfm: true })
-    .use(dendronLinksPlugin));
+  return unified().use(markdownParse, { gfm: true }).use(dendronLinksPlugin);
 }
 
 describe("basic", () => {

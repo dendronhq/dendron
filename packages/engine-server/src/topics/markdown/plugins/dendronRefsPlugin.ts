@@ -185,6 +185,7 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
           anchorStartIndex,
           anchorEndIndex
         );
+
         return getProcessor().stringify(bodyAST);
         // targetAst.children.splice.apply(targetAst.children, [
         //     head + 1, // start splice

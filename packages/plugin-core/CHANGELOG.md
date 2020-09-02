@@ -5,7 +5,16 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.9.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.9.1...v0.9.2-alpha.0) (2020-09-02)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Dendron Markdown Preview (0.9.2)
+
+### Enhancements
+
+- note refs will not resolve when inside an inline code span or a fenced code block
+- switch to use new markdown parser for resolving note refs
+
+### Bug Fixes
+
+- edge case with note refs not resolving ([8e26da1](https://github.com/dendronhq/dendron/commit/8e26da119e48fc6dc5eccf724fc3cdff3d876fee))
 
 ## [0.9.1](https://github.com/dendronhq/dendron/compare/v0.9.1-alpha.0...v0.9.1) (2020-09-01)
 

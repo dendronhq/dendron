@@ -161,7 +161,7 @@ describe("basic", () => {
       expect(out.indexOf("task2") >= 0).toBeTruthy();
     });
 
-    test("basic block with header, start and end ", async () => {
+    test.only("basic block with header, start and end ", async () => {
       const txt = [
         "---",
         "id: foo",
@@ -171,6 +171,9 @@ describe("basic", () => {
         "task1",
         "## Header2",
         "task2",
+        "<div class='bar'>",
+        "BOND",
+        "</div>",
       ];
       root = await EngineTestUtils.setupStoreDir({
         initDirCb: (dirPath: string) => {

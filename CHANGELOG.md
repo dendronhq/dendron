@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.2](https://github.com/dendronhq/dendron/compare/v0.9.2-alpha.0...v0.9.2) (2020-09-02)
+
+### Enhancements
+
+- **workbench:** stub notes get created when clicked on tree view ([6c0ea7d](https://github.com/dendronhq/dendron/commit/6c0ea7d889530ff385aa5b249e12235b635c85cd))
+
 ## [0.9.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.9.1...v0.9.2-alpha.0) (2020-09-02)
 
 ### Dendron Markdown Preview (0.9.2)

@@ -66,6 +66,7 @@ export async function _activate(context: vscode.ExtensionContext) {
       };
     }
   );
+  const workspace = ws.rootWorkspace.uri.fsPath;
   Logger.info({
     ctx,
     installedGlobalVersion,
@@ -74,6 +75,7 @@ export async function _activate(context: vscode.ExtensionContext) {
     previousWsVersion,
     platform,
     extensions,
+    workspace,
   });
 
   if (DendronWorkspace.isActive()) {

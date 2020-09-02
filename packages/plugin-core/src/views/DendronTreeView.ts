@@ -158,6 +158,9 @@ export class DendronTreeView {
     if (_.isUndefined(editor)) {
       return;
     }
+    if (!this.treeView.visible) {
+      return;
+    }
     const uri = editor.document.uri;
     const basename = path.basename(uri.fsPath);
     if (basename.endsWith(".md")) {

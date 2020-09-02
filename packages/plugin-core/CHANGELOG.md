@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.9.2...v0.9.3-alpha.0) (2020-09-02)
+
+### Bug Fixes
+
+- **workbench:** upgrade settings sometimes override existing settings ([8cf9f24](https://github.com/dendronhq/dendron/commit/8cf9f2435a24f5e90ef8a0a259acc811f2e341b1))
+
+### Enhancements
+
+- **workbench:** don't focus tree view if not visible ([2628dd9](https://github.com/dendronhq/dendron/commit/2628dd9f0c667cc367a0545b393e08e31ad52025))
+
 ## [0.9.2](https://github.com/dendronhq/dendron/compare/v0.9.2-alpha.0...v0.9.2) (2020-09-02)
 
 ### Enhancements

@@ -7,6 +7,7 @@ import * as vscode from "vscode";
 import { GLOBAL_STATE } from "./constants";
 import { FileItem } from "./external/fileutils/FileItem";
 import _md from "markdown-it";
+import { DendronWorkspace } from "./workspace";
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
@@ -78,6 +79,25 @@ export class VSCodeUtils {
       path.join(FileTestUtils.getPkgRoot(__dirname), "package.json")
     );
     return `${pkgJSON.version}`;
+  }
+
+  static createWSContext(): vscode.ExtensionContext {
+    const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
+    const globalState = DendronWorkspace.configuration();
+    const workspaceState = DendronWorkspace.configuration("dendron");
+    return {
+      extensionMode: vscode.ExtensionMode.Development,
+      logPath: FileTestUtils.tmpDir().name,
+      subscriptions: [],
+      extensionPath: pkgRoot,
+      globalState,
+      workspaceState,
+      extensionUri: vscode.Uri.file(pkgRoot),
+      environmentVariableCollection: {} as any,
+      storagePath: FileTestUtils.tmpDir().name,
+      globalStoragePath: FileTestUtils.tmpDir().name,
+      asAbsolutePath: {} as any, //vscode.Uri.file(wsPath)
+    } as vscode.ExtensionContext;
   }
 
   static getOrCreateMockContext(): vscode.ExtensionContext {

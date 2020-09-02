@@ -44,12 +44,7 @@ import {
   EngineOpts,
   LookupProvider,
 } from "../../components/lookup/LookupProvider";
-import {
-  CONFIG,
-  ConfigKey,
-  GLOBAL_STATE,
-  WORKSPACE_STATE,
-} from "../../constants";
+import { CONFIG, ConfigKey, GLOBAL_STATE } from "../../constants";
 import { _activate } from "../../extension";
 import {
   cacheRefs,
@@ -223,6 +218,17 @@ function onWSActive(cb: Function) {
   );
 }
 
+function onWSUpgraded(cb: Function) {
+  HistoryService.instance().subscribe(
+    "extension",
+    async (_event: HistoryEvent) => {
+      if (_event.action === "upgraded") {
+        await cb();
+      }
+    }
+  );
+}
+
 function onWSInit(cb: Function) {
   HistoryService.instance().subscribe(
     "extension",
@@ -300,20 +306,14 @@ suite("manual", function () {
   });
 });
 
-suite("startup", function () {
+suite.skip("startup", function () {
   const timeout = 60 * 1000 * 5;
 
-  before(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
   beforeEach(async function () {
-    await new ResetConfigCommand().execute({ scope: "all" });
+    const ctx = VSCodeUtils.createWSContext();
+    DendronWorkspace.getOrCreate(ctx);
     root = FileTestUtils.tmpDir();
-    fs.removeSync(root.name);
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    return;
+    await new ResetConfigCommand().execute({ scope: "all" });
   });
 
   afterEach(function () {
@@ -325,11 +325,6 @@ suite("startup", function () {
     this.timeout(timeout);
 
     test("workspace not activated", function (done) {
-      DendronWorkspace.configuration = () => {
-        return createMockConfig({
-          dendron: {},
-        });
-      };
       _activate(ctx);
       onWSActive(async (_event: HistoryEvent) => {
         assert.equal(DendronWorkspace.isActive(), false);
@@ -337,15 +332,8 @@ suite("startup", function () {
       });
     });
 
-    test("workspace active, no prior workspace version", function (done) {
-      DendronWorkspace.configuration = () => {
-        return createMockConfig({
-          dendron: { rootDir: root.name },
-        });
-      };
-      DendronWorkspace.workspaceFile = () => {
-        return vscode.Uri.file(path.join(root.name, "dendron.code-workspace"));
-      };
+    test("workspace active, no prior workspace version", async function (done) {
+      await DendronWorkspace.configuration().update("dendron.rootDir", ".");
       DendronWorkspace.workspaceFolders = () => {
         const uri = vscode.Uri.file(path.join(root.name, "vault"));
         return [{ uri, name: "vault", index: 0 }];
@@ -390,25 +378,23 @@ suite("startup", function () {
         const uri = vscode.Uri.file(path.join(root.name, "vault"));
         return [{ uri, name: "vault", index: 0 }];
       };
-      ctx.workspaceState
-        .update(WORKSPACE_STATE.WS_VERSION, "0.0.1")
-        .then(() => {
-          new SetupWorkspaceCommand()
-            .execute({ rootDirRaw: root.name, skipOpenWs: true })
-            .then(() => {
-              const initSettings = expectedSettings({ settings: { bond: 42 } });
-              fs.writeJSONSync(
-                path.join(root.name, DendronWorkspace.DENDRON_WORKSPACE_FILE),
-                initSettings
-              );
-              _activate(ctx);
-            });
-        });
+      ctx.globalState.update(GLOBAL_STATE.WS_VERSION, "0.0.1").then(() => {
+        new SetupWorkspaceCommand()
+          .execute({ rootDirRaw: root.name, skipOpenWs: true })
+          .then(() => {
+            const initSettings = expectedSettings({ settings: { bond: 42 } });
+            fs.writeJSONSync(
+              path.join(root.name, DendronWorkspace.DENDRON_WORKSPACE_FILE),
+              initSettings
+            );
+            _activate(ctx);
+          });
+      });
       onWSActive(async (_event: HistoryEvent) => {
         assert.equal(DendronWorkspace.isActive(), true);
         // updated to latest version
         assert.equal(
-          ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
+          ctx.globalState.get(GLOBAL_STATE.WS_VERSION),
           VSCodeUtils.getVersionFromPkg()
         );
         const config = fs.readJSONSync(
@@ -418,6 +404,51 @@ suite("startup", function () {
         settings.settings.bond = 42;
         assert.deepEqual(config, settings);
         done();
+      });
+    });
+
+    test("workspace active, prior lower workspace version, don't override current setting, upgrade", function (done) {
+      DendronWorkspace.configuration = () => {
+        return createMockConfig({
+          dendron: { rootDir: root.name },
+        });
+      };
+      DendronWorkspace.workspaceFile = () => {
+        return vscode.Uri.file(path.join(root.name, "dendron.code-workspace"));
+      };
+      DendronWorkspace.workspaceFolders = () => {
+        const uri = vscode.Uri.file(path.join(root.name, "vault"));
+        return [{ uri, name: "vault", index: 0 }];
+      };
+      ctx.globalState.update(GLOBAL_STATE.WS_VERSION, "0.0.1").then(() => {
+        new SetupWorkspaceCommand()
+          .execute({ rootDirRaw: root.name, skipOpenWs: true })
+          .then(() => {
+            const initSettings = expectedSettings({
+              settings: { "workbench.colorTheme": "dark theme" },
+            });
+            fs.writeJSONSync(
+              path.join(root.name, DendronWorkspace.DENDRON_WORKSPACE_FILE),
+              initSettings
+            );
+            _activate(ctx);
+          });
+      });
+
+      onWSUpgraded(async (_event: HistoryEvent) => {
+        assert.equal(DendronWorkspace.isActive(), true);
+        // updated to latest version
+        assert.equal(
+          ctx.globalState.get(GLOBAL_STATE.WS_VERSION),
+          VSCodeUtils.getVersionFromPkg()
+        );
+        const config = fs.readJSONSync(
+          path.join(root.name, DendronWorkspace.DENDRON_WORKSPACE_FILE)
+        );
+        const settings = expectedSettings();
+        settings.settings["workbench.colorTheme"] = "dark theme";
+        assert.deepEqual(config, settings);
+        // done();
       });
     });
 

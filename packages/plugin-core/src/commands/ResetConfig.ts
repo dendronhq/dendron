@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { window } from "vscode";
-import { GLOBAL_STATE, WORKSPACE_STATE } from "../constants";
+import { GLOBAL_STATE } from "../constants";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -40,14 +40,7 @@ export class ResetConfigCommand extends BasicCommand<
   }
 
   async resetWorkspaceState() {
-    return Promise.all(
-        _.keys(WORKSPACE_STATE).map((k) => {
-          return DendronWorkspace.instance().context.workspaceState.update(
-            k, 
-            undefined
-          );
-        })
-      );
+    // TODO
   }
 
   async resetGlobalState() {
@@ -64,14 +57,14 @@ export class ResetConfigCommand extends BasicCommand<
   async execute(opts: CommandOpts) {
     const scope = opts.scope;
     if (scope === "all") {
-        await this.resetGlobalState();
-        await this.resetWorkspaceState();
+      await this.resetGlobalState();
+      await this.resetWorkspaceState();
     } else if (scope === "global") {
-        await this.resetGlobalState();
+      await this.resetGlobalState();
     } else if (scope === "local") {
-        await this.resetWorkspaceState();
+      await this.resetWorkspaceState();
     } else {
-        throw Error(`wrong scope: ${opts}`)
+      throw Error(`wrong scope: ${opts}`);
     }
     window.showInformationMessage(`reset config`);
     return;

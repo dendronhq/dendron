@@ -1,4 +1,4 @@
-const { CONFIG, DENDRON_COMMANDS } = require("../out/constants");
+const { CONFIG, GLOBAL_STATE_V2, DENDRON_COMMANDS } = require("../out/constants");
 const _ = require("lodash");
 const fs = require("fs-extra");
 const path = require("path");
@@ -15,7 +15,7 @@ function genEntry(entryDict) {
 
 function updateConfig(configuration) {
   console.log("update config...");
-  configuration["properties"] = genEntry(CONFIG);
+  configuration["properties"] = {...genEntry(CONFIG), ...genEntry(GLOBAL_STATE_V2)};
 }
 
 function updateCommands(contributes) {

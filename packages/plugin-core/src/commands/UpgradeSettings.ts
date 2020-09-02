@@ -17,16 +17,17 @@ export class UpgradeSettingsCommand extends BasicCommand<
   any
 > {
   async execute(opts: UpgradeSettingsCommandOpts) {
-    const ctx = "execute";
+    const ctx = "Upgrade:execute";
     L.info({ ctx, opts });
     const config = DendronWorkspace.configuration();
     if (!config) {
       throw Error("no ws config found");
     }
 
-    const newConfig = WorkspaceConfig.update(
+    const newConfig = await WorkspaceConfig.update(
       path.dirname(DendronWorkspace.workspaceFile().fsPath)
     );
+    this.L.info({ ctx, newConfig });
     const badExtensions: Extension<any>[] =
       (newConfig.extensions.unwantedRecommendations
         ?.map((ext) => {
@@ -45,7 +46,6 @@ export class UpgradeSettingsCommand extends BasicCommand<
         .concat([
           "- Reload the window afterwards and Dendron will offer to install the Dendron version of the extension",
         ]);
-      console.log(msg);
       window.showWarningMessage(msg.join(" "));
     }
   }

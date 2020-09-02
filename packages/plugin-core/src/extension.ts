@@ -2,7 +2,7 @@ import { getStage } from "@dendronhq/common-all";
 import _ from "lodash";
 import semver from "semver";
 import * as vscode from "vscode";
-import { DENDRON_COMMANDS, GLOBAL_STATE, WORKSPACE_STATE } from "./constants";
+import { DENDRON_COMMANDS, GLOBAL_STATE } from "./constants";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { VSCodeUtils } from "./utils";
@@ -53,7 +53,7 @@ export async function _activate(context: vscode.ExtensionContext) {
     GLOBAL_STATE.VERSION_PREV
   );
   const previousWsVersion = context.workspaceState.get<string>(
-    WORKSPACE_STATE.WS_VERSION
+    GLOBAL_STATE.WS_VERSION
   );
   // stats
   const platform = getOS();
@@ -79,7 +79,7 @@ export async function _activate(context: vscode.ExtensionContext) {
   });
 
   if (DendronWorkspace.isActive()) {
-    Logger.info({ msg: "reloadWorkspace:pre" });
+    Logger.info({ ctx, msg: "isActive:reloadWorkspace:pre" });
     ws.reloadWorkspace().then(async () => {
       Logger.info({ ctx, msg: "dendron ready" }, true);
       // help with debug
@@ -126,27 +126,38 @@ export async function _activate(context: vscode.ExtensionContext) {
           Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
         });
       context.workspaceState.update(
-        WORKSPACE_STATE.WS_VERSION,
+        GLOBAL_STATE.WS_VERSION,
         DendronWorkspace.version()
       );
     } else if (_.isUndefined(previousWsVersion)) {
       // USED To do something here, no longer do
       Logger.info({ ctx, msg: "first init workspace, do nothing" });
       context.workspaceState.update(
-        WORKSPACE_STATE.WS_VERSION,
+        GLOBAL_STATE.WS_VERSION,
         DendronWorkspace.version()
       );
     } else {
-      if (semver.lt(previousWsVersion, DendronWorkspace.version())) {
+      const newVersion = DendronWorkspace.version();
+      if (semver.lt(previousWsVersion, newVersion)) {
         Logger.info({ ctx, msg: "preUpgrade: new wsVersion" });
         vscode.commands
           .executeCommand(DENDRON_COMMANDS.UPGRADE_SETTINGS.key)
-          .then((changes) => {
-            Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
-            context.workspaceState.update(
-              WORKSPACE_STATE.WS_VERSION,
-              DendronWorkspace.version()
+          .then(async (changes) => {
+            Logger.info({
+              ctx,
+              msg: "postUpgrade: new wsVersion",
+              changes,
+              previousWsVersion,
+              newVersion,
+            });
+            await context.workspaceState.update(
+              GLOBAL_STATE.WS_VERSION,
+              newVersion
             );
+            HistoryService.instance().add({
+              source: "extension",
+              action: "upgraded",
+            });
           });
       } else {
         Logger.info({ ctx, msg: "same wsVersion" });

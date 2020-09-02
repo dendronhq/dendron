@@ -299,10 +299,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
 
 export const DENDRON_CHANNEL_NAME = "Dendron";
 
-export const WORKSPACE_STATE = {
-  WS_VERSION: "dendron.wsVersion",
-};
-
 export const GLOBAL_STATE = {
   VERSION: "dendron.version",
   VERSION_PREV: "dendron.versionPrev",
@@ -310,11 +306,44 @@ export const GLOBAL_STATE = {
    * Set the first time a dendron workspace is activated
    */
   DENDRON_FIRST_WS: "dendron.first_ws",
-  DENDRON_FIRST_WS_TUTORIAL_STEP: "dendron.first_ws.tutorial_step",
   /**
    * Extension is being debugged
    */
   VSCODE_DEBUGGING_EXTENSION: "dendron.vscode_debugging_extension",
+  WS_VERSION: "dendron.wsVersion",
+};
+
+export const GLOBAL_STATE_V2 = {
+  VERSION: {
+    key: "dendron.version",
+    type: "string",
+    default: undefined,
+    description: "dendron current version",
+  },
+  VERSION_PREV: {
+    key: "dendron.versionPrev",
+    type: "string",
+    default: undefined,
+    description: "previous dendron version",
+  },
+  WS_VERSION: {
+    key: "dendron.wsVersion",
+    type: "string",
+    default: undefined,
+    description: "dendron workspace version",
+  },
+  DENDRON_FIRST_WS: {
+    key: "dendron.first_ws",
+    type: "boolean",
+    default: true,
+    description: "indicate whether this is the first time dendron is opened",
+  },
+  VSCODE_DEBUGGING_EXTENSION: {
+    key: "dendron.vscode_debugging_extension",
+    type: "boolean",
+    default: false,
+    description: "indicate whether we are running inside debugger",
+  },
 };
 
 // type ConfigEntry = {
@@ -386,7 +415,7 @@ export const CONFIG = {
   ROOT_DIR: {
     key: "dendron.rootDir",
     type: "string",
-    default: false,
+    default: "",
     description: "location of dendron workspace",
   },
   // --- other

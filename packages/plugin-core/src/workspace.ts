@@ -55,11 +55,13 @@ export class DendronWorkspace {
   }
 
   /**
-   * Workspace configuration
+   * Global Workspace configuration
    */
-  static configuration(): vscode.WorkspaceConfiguration {
+  static configuration(
+    section?: string | undefined
+  ): vscode.WorkspaceConfiguration {
     // the reason this is static is so we can stub it for tests
-    return vscode.workspace.getConfiguration();
+    return vscode.workspace.getConfiguration(section);
   }
 
   static rootDir(): string | undefined {
@@ -98,7 +100,8 @@ export class DendronWorkspace {
    * Currently, this is a check to see if rootDir is defined in settings
    */
   static isActive(): boolean {
-    return !_.isUndefined(DendronWorkspace.rootDir());
+    const rootDir = DendronWorkspace.rootDir();
+    return !_.isUndefined(rootDir) && !_.isEmpty(rootDir);
   }
 
   static version(): string {

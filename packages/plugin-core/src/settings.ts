@@ -7,18 +7,15 @@ import {
   extensions,
 } from "vscode";
 import { DendronWorkspace } from "./workspace";
+import { Logger } from "@dendronhq/common-server/src";
 
 type CodeConfig = {
-  settings?: CodeSettingsConfig;
+  settings?: ConfigChanges;
   extensions?: CodeExtensionsConfig;
 };
 type CodeExtensionsConfig = {
   recommendations?: string[];
   unwantedRecommendations?: string[];
-};
-
-type CodeSettingsConfig = {
-  [p: string]: any;
 };
 
 export type ConfigChanges = {
@@ -108,21 +105,24 @@ export class WorkspaceConfig {
     );
   }
 
-  static update(wsRoot: string): Required<CodeConfig> {
+  static async update(wsRoot: string): Promise<Required<CodeConfig>> {
     const config: CodeConfig = fs.readJSONSync(
       path.join(wsRoot, DendronWorkspace.DENDRON_WORKSPACE_FILE)
     );
     config.extensions = Extensions.update(config.extensions || {});
-    config.settings = Settings.update(config.settings || {});
+    // config.settings = Settings.update(config.settings || {});
 
     fs.writeJSONSync(
       path.join(wsRoot, DendronWorkspace.DENDRON_WORKSPACE_FILE),
       config,
       { spaces: 4 }
     );
+    const src = DendronWorkspace.configuration();
+    const changes = await Settings.upgrade(src, _SETTINGS);
+
     return {
       extensions: config.extensions,
-      settings: config.settings,
+      settings: changes,
     };
   }
 }
@@ -203,21 +203,21 @@ export class Settings {
     return _SETTINGS;
   }
 
-  static update(settings: CodeSettingsConfig): CodeSettingsConfig {
-    const configEntries = Settings.configEntries();
-    _.forEach(configEntries, (changeSet, key) => {
-      const cleanChangeSet = _.defaults(changeSet, { action: "ADD" });
-      if (cleanChangeSet.action === "ADD") {
-        if (!_.has(settings, key)) {
-          settings[key] = changeSet.default;
-        }
-      }
-      if (cleanChangeSet.action === "REMOVE") {
-        // TODO: right now, not removing
-      }
-    });
-    return settings;
-  }
+  // static update(settings: CodeSettingsConfig): CodeSettingsConfig {
+  //   const configEntries = Settings.configEntries();
+  //   _.forEach(configEntries, (changeSet, key) => {
+  //     const cleanChangeSet = _.defaults(changeSet, { action: "ADD" });
+  //     if (cleanChangeSet.action === "ADD") {
+  //       if (!_.has(settings, key)) {
+  //         settings[key] = changeSet.default;
+  //       }
+  //     }
+  //     if (cleanChangeSet.action === "REMOVE") {
+  //       // TODO: right now, not removing
+  //     }
+  //   });
+  //   return settings;
+  // }
 
   /**
    * Upgrade config

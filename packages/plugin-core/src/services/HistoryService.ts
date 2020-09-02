@@ -13,7 +13,8 @@ type HistoryEventAction =
   | "create"
   | "activate"
   | "initialized"
-  | "rename";
+  | "rename"
+  | "upgraded";
 
 type HistoryEventListenerFunc = (event: HistoryEvent) => void;
 

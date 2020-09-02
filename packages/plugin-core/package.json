@@ -98,6 +98,28 @@
                     "type": "boolean",
                     "default": false,
                     "descriptionip": "whether dendron prompts for confirmation for certain actions"
+                },
+                "dendron.version": {
+                    "type": "string",
+                    "description": "dendron current version"
+                },
+                "dendron.versionPrev": {
+                    "type": "string",
+                    "description": "previous dendron version"
+                },
+                "dendron.wsVersion": {
+                    "type": "string",
+                    "description": "dendron workspace version"
+                },
+                "dendron.first_ws": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "indicate whether this is the first time dendron is opened"
+                },
+                "dendron.vscode_debugging_extension": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "indicate whether we are running inside debugger"
                 }
             }
         },

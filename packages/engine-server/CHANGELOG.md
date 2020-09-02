@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.9.1...v0.9.2-alpha.0) (2020-09-02)
+
+### Bug Fixes
+
+- **workbench:** edge case with note refs ([8e26da1](https://github.com/dendronhq/dendron/commit/8e26da119e48fc6dc5eccf724fc3cdff3d876fee))
+
 ## [0.9.1](https://github.com/dendronhq/dendron/compare/v0.9.1-alpha.0...v0.9.1) (2020-09-01)
 
 **Note:** Version bump only for package @dendronhq/engine-server

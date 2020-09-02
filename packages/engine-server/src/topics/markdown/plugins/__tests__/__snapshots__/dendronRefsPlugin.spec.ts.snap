@@ -1,0 +1,355 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`basic parse init 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "ref:[[foo.md]]",
+            "exists": false,
+            "hChildren": Array [
+              Object {
+                "type": "text",
+                "value": "ref:[[foo.md]]",
+              },
+            ],
+            "hName": "a",
+            "hProperties": Object {
+              "className": "internal new",
+              "href": "#/page/ref:[[foo",
+            },
+            "link": Object {
+              "anchorEnd": undefined,
+              "anchorStart": undefined,
+              "name": "foo",
+              "type": "file",
+            },
+            "permalink": "ref:[[foo",
+          },
+          "position": Position {
+            "end": Object {
+              "column": 19,
+              "line": 1,
+              "offset": 18,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "type": "refLink",
+          "value": "ref:[[foo.md]]",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 19,
+          "line": 1,
+          "offset": 18,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 19,
+      "line": 1,
+      "offset": 18,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`basic parse with start anchor 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "ref:[[foo]]#h1",
+            "exists": false,
+            "hChildren": Array [
+              Object {
+                "type": "text",
+                "value": "ref:[[foo]]#h1",
+              },
+            ],
+            "hName": "a",
+            "hProperties": Object {
+              "className": "internal new",
+              "href": "#/page/ref:[[foo]]#h1",
+            },
+            "link": Object {
+              "anchorEnd": undefined,
+              "anchorStart": "h1",
+              "name": "foo",
+              "type": "file",
+            },
+            "permalink": "ref:[[foo]]#h1",
+          },
+          "position": Position {
+            "end": Object {
+              "column": 19,
+              "line": 1,
+              "offset": 18,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "type": "refLink",
+          "value": "ref:[[foo]]#h1",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 19,
+          "line": 1,
+          "offset": 18,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 19,
+      "line": 1,
+      "offset": 18,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`basic parse with start and end 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "ref:[[foo]]#h1:#h2",
+            "exists": false,
+            "hChildren": Array [
+              Object {
+                "type": "text",
+                "value": "ref:[[foo]]#h1:#h2",
+              },
+            ],
+            "hName": "a",
+            "hProperties": Object {
+              "className": "internal new",
+              "href": "#/page/ref:[[foo]]#h1:#h2",
+            },
+            "link": Object {
+              "anchorEnd": "h2",
+              "anchorStart": "h1",
+              "name": "foo",
+              "type": "file",
+            },
+            "permalink": "ref:[[foo]]#h1:#h2",
+          },
+          "position": Position {
+            "end": Object {
+              "column": 23,
+              "line": 1,
+              "offset": 22,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "type": "refLink",
+          "value": "ref:[[foo]]#h1:#h2",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 23,
+          "line": 1,
+          "offset": 22,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 23,
+      "line": 1,
+      "offset": 22,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`basic parse without suffix 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "ref:[[foo]]",
+            "exists": false,
+            "hChildren": Array [
+              Object {
+                "type": "text",
+                "value": "ref:[[foo]]",
+              },
+            ],
+            "hName": "a",
+            "hProperties": Object {
+              "className": "internal new",
+              "href": "#/page/ref:[[foo]]",
+            },
+            "link": Object {
+              "anchorEnd": undefined,
+              "anchorStart": undefined,
+              "name": "foo",
+              "type": "file",
+            },
+            "permalink": "ref:[[foo]]",
+          },
+          "position": Position {
+            "end": Object {
+              "column": 16,
+              "line": 1,
+              "offset": 15,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "type": "refLink",
+          "value": "ref:[[foo]]",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 16,
+          "line": 1,
+          "offset": 15,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 16,
+      "line": 1,
+      "offset": 15,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`basic stingify basic 1`] = `
+"# Tasks
+
+task1
+task2
+"
+`;
+
+exports[`basic stingify basic block 1`] = `
+"# Foo Bar
+
+# Tasks
+
+task1
+task2
+"
+`;
+
+exports[`basic stingify basic block with fm 1`] = `
+"# Foo Bar
+
+# Tasks
+
+task1
+task2
+"
+`;
+
+exports[`basic stingify basic block with header and start  1`] = `
+"# Foo Bar
+
+## Header2
+
+task2
+"
+`;
+
+exports[`basic stingify basic block with header, start and end  1`] = `
+"# Foo Bar
+
+## Header1
+
+task1
+"
+`;

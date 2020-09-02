@@ -13,3 +13,4 @@ Dendron borrows code from some of the following projects:
 - [vscode-memo](https://github.com/svsool/vscode-memo) ([MIT License](https://github.com/svsool/vscode-memo/blob/master/LICENSE))
 - [vscode-fileutils](https://tweetdeck.twitter.com/) (MIT License)
 - [foam](https://github.com/foambubble/foam) (MIT License)
+- [mdast-util-inject](https://github.com/anandthakker/mdast-util-inject) (MIT License)

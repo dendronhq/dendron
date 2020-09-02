@@ -110,6 +110,7 @@ export class EngineTestUtils {
     storeDirSrc?: string;
     storeDstPath?: string;
     copyFixtures?: boolean;
+    initDirCb?: (dirPath: string) => void;
   }) {
     const cleanOpts = _.defaults(opts, {
       storeDirSrc: "store",
@@ -122,6 +123,9 @@ export class EngineTestUtils {
     }
     if (copyFixtures) {
       fs.copySync(fixturesSrcPath, storeDstPath);
+    }
+    if (opts?.initDirCb) {
+      opts.initDirCb(storeDstPath);
     }
     return storeDstPath;
   }

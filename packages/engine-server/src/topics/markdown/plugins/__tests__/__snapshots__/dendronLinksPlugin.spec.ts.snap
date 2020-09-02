@@ -1,0 +1,127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`basic doesn't parse inline code block: bond 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 13,
+              "line": 1,
+              "offset": 12,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "type": "inlineCode",
+          "value": "[[foo.md]]",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 13,
+          "line": 1,
+          "offset": 12,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 13,
+      "line": 1,
+      "offset": 12,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`basic init 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "\\"foo.md\\"",
+            "exists": false,
+            "hChildren": Array [
+              Object {
+                "type": "text",
+                "value": "\\"foo.md\\"",
+              },
+            ],
+            "hName": "a",
+            "hProperties": Object {
+              "className": "internal new",
+              "href": "#/page/\\"foo",
+            },
+            "permalink": "\\"foo",
+          },
+          "position": Position {
+            "end": Object {
+              "column": 13,
+              "line": 1,
+              "offset": 12,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "type": "wikiLink",
+          "value": "\\"foo.md\\"",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 13,
+          "line": 1,
+          "offset": 12,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 13,
+      "line": 1,
+      "offset": 12,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;

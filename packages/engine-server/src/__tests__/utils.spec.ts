@@ -9,6 +9,8 @@ import {
 } from "../utils";
 import _ from "lodash";
 import { EngineTestUtils } from "@dendronhq/common-server/src";
+import fs from "fs-extra";
+import path from "path";
 
 function createFileLink(opts?: Partial<DendronRefLink>): DendronRefLink {
   return {
@@ -122,6 +124,18 @@ Head 2.2 Text`)
     );
   });
 
+  it("anchor start alt", () => {
+    const txt = ["", `# Tasks`, "task1", "task2"];
+    expect(
+      extractBlock(
+        txt.join("\n"),
+        createFileLink({
+          anchorStart: "Tasks",
+        })
+      ).block
+    ).toEqual(_.trim(txt.join("\n")));
+  });
+
   it("anchor stard and end", () => {
     expect(
       extractBlock(
@@ -166,7 +180,23 @@ describe("replaceRefWithMPEImport", () => {
     ).toEqual('@import "ref.md" {line_begin=10}');
   });
 
-  it("anchor start", () => {
+  it.skip("anchor start alt", async () => {
+    const txt = ["", `# Tasks`, "task1", "task2"];
+    root = EngineTestUtils.setupStoreDir({
+      initDirCb: (dirPath: string) => {
+        fs.writeFileSync(path.join(dirPath, "daily.tasks.md"), txt.join("\n"), {
+          encoding: "utf8",
+        });
+      },
+    });
+    expect(
+      replaceRefWithMPEImport("((ref:[[daily.tasks]]#Tasks))", {
+        root,
+      })
+    ).toEqual('@import "daily.task.md" {line_begin=1}');
+  });
+
+  it("anchor start and end", () => {
     expect(
       replaceRefWithMPEImport("((ref:[[ref]]#head2.1:#head2.3))", {
         root,

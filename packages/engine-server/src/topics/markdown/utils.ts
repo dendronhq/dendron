@@ -15,6 +15,7 @@ import { Node, Parent, Point, Position } from "unist";
 import visit, { CONTINUE, EXIT } from "unist-util-visit";
 import YAML from "yamljs";
 import { dendronLinksPlugin } from "./plugins/dendronLinksPlugin";
+import { dendronRefsPlugin } from "./plugins/dendronRefsPlugin";
 import { MDRenderer } from "./renderer";
 
 enum NodeType {
@@ -94,39 +95,6 @@ export function md2Tokens(txt: string): Token[] {
 //   });
 //   return tokens;
 // }
-
-// === Foam
-
-// enum LinkType {
-//   WIKI_LINK = "WIKI_LINK",
-//   IMAGE_LINK = "IMAGE_LINK",
-// }
-
-// export interface Link {
-//   type: LinkType;
-//   url: string;
-//   position: Position;
-//   label?: string;
-// }
-
-// export interface WikiLink extends Link {
-//   type: LinkType.WIKI_LINK;
-// }
-
-// export interface ImageLink extends Link {
-//   type: LinkType.IMAGE_LINK;
-//   alt?: string;
-// }
-
-// export interface NoteLinkDefinition {
-//   label: string;
-//   url: string;
-//   title?: string;
-//   position?: Position;
-// }
-
-// at the moment we only model wikilink
-// export type NoteLink = WikiLink | ImageLink;
 
 export function parse(markdown: string): Node {
   processor =
@@ -349,10 +317,12 @@ export const applyTextEdit = (text: string, textEdit: TextEdit): string => {
   return characters.join("");
 };
 
-export function getProcessor(): Processor {
+export function getProcessor(opts?: { root?: string }): Processor {
+  const root = opts?.root;
   return remark()
     .use(markdownParse, { gfm: true })
     .use(frontmatterPlugin, ["yaml"])
     .use(dendronLinksPlugin)
+    .use(dendronRefsPlugin, { root })
     .use({ settings: { listItemIndent: "1", fences: true } });
 }

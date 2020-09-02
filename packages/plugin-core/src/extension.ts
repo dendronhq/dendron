@@ -2,7 +2,7 @@ import { getStage } from "@dendronhq/common-all";
 import _ from "lodash";
 import semver from "semver";
 import * as vscode from "vscode";
-import { DENDRON_COMMANDS, GLOBAL_STATE } from "./constants";
+import { DENDRON_COMMANDS, GLOBAL_STATE, WORKSPACE_STATE } from "./constants";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { VSCodeUtils } from "./utils";
@@ -52,9 +52,8 @@ export async function _activate(context: vscode.ExtensionContext) {
   const previousGlobalVersion = ws.context.globalState.get<string>(
     GLOBAL_STATE.VERSION_PREV
   );
-  const previousWsVersion = context.workspaceState.get<string>(
-    GLOBAL_STATE.WS_VERSION
-  );
+  const previousWsVersion =
+    context.workspaceState.get<string>(WORKSPACE_STATE.WS_VERSION) || "0.0.0";
   // stats
   const platform = getOS();
   const extensions = Extensions.getVSCodeExtnsion().map(
@@ -126,14 +125,7 @@ export async function _activate(context: vscode.ExtensionContext) {
           Logger.info({ ctx, msg: "postUpgrade: new wsVersion", changes });
         });
       context.workspaceState.update(
-        GLOBAL_STATE.WS_VERSION,
-        DendronWorkspace.version()
-      );
-    } else if (_.isUndefined(previousWsVersion)) {
-      // USED To do something here, no longer do
-      Logger.info({ ctx, msg: "first init workspace, do nothing" });
-      context.workspaceState.update(
-        GLOBAL_STATE.WS_VERSION,
+        WORKSPACE_STATE.WS_VERSION,
         DendronWorkspace.version()
       );
     } else {
@@ -151,7 +143,7 @@ export async function _activate(context: vscode.ExtensionContext) {
               newVersion,
             });
             await context.workspaceState.update(
-              GLOBAL_STATE.WS_VERSION,
+              WORKSPACE_STATE.WS_VERSION,
               newVersion
             );
             HistoryService.instance().add({

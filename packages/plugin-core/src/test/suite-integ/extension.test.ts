@@ -44,7 +44,12 @@ import {
   EngineOpts,
   LookupProvider,
 } from "../../components/lookup/LookupProvider";
-import { CONFIG, ConfigKey, GLOBAL_STATE } from "../../constants";
+import {
+  CONFIG,
+  ConfigKey,
+  GLOBAL_STATE,
+  WORKSPACE_STATE,
+} from "../../constants";
 import { _activate } from "../../extension";
 import {
   cacheRefs,
@@ -378,7 +383,7 @@ suite.skip("startup", function () {
         const uri = vscode.Uri.file(path.join(root.name, "vault"));
         return [{ uri, name: "vault", index: 0 }];
       };
-      ctx.globalState.update(GLOBAL_STATE.WS_VERSION, "0.0.1").then(() => {
+      ctx.globalState.update(WORKSPACE_STATE.WS_VERSION, "0.0.1").then(() => {
         new SetupWorkspaceCommand()
           .execute({ rootDirRaw: root.name, skipOpenWs: true })
           .then(() => {
@@ -394,7 +399,7 @@ suite.skip("startup", function () {
         assert.equal(DendronWorkspace.isActive(), true);
         // updated to latest version
         assert.equal(
-          ctx.globalState.get(GLOBAL_STATE.WS_VERSION),
+          ctx.globalState.get(WORKSPACE_STATE.WS_VERSION),
           VSCodeUtils.getVersionFromPkg()
         );
         const config = fs.readJSONSync(
@@ -420,7 +425,7 @@ suite.skip("startup", function () {
         const uri = vscode.Uri.file(path.join(root.name, "vault"));
         return [{ uri, name: "vault", index: 0 }];
       };
-      ctx.globalState.update(GLOBAL_STATE.WS_VERSION, "0.0.1").then(() => {
+      ctx.globalState.update(WORKSPACE_STATE.WS_VERSION, "0.0.1").then(() => {
         new SetupWorkspaceCommand()
           .execute({ rootDirRaw: root.name, skipOpenWs: true })
           .then(() => {
@@ -439,7 +444,7 @@ suite.skip("startup", function () {
         assert.equal(DendronWorkspace.isActive(), true);
         // updated to latest version
         assert.equal(
-          ctx.globalState.get(GLOBAL_STATE.WS_VERSION),
+          ctx.globalState.get(WORKSPACE_STATE.WS_VERSION),
           VSCodeUtils.getVersionFromPkg()
         );
         const config = fs.readJSONSync(
@@ -448,7 +453,7 @@ suite.skip("startup", function () {
         const settings = expectedSettings();
         settings.settings["workbench.colorTheme"] = "dark theme";
         assert.deepEqual(config, settings);
-        // done();
+        done();
       });
     });
 

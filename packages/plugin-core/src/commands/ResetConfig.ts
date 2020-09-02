@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { window } from "vscode";
-import { GLOBAL_STATE } from "../constants";
+import { GLOBAL_STATE, WORKSPACE_STATE } from "../constants";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -40,7 +40,15 @@ export class ResetConfigCommand extends BasicCommand<
   }
 
   async resetWorkspaceState() {
-    // TODO
+    return Promise.all(
+      _.keys(WORKSPACE_STATE).map((k) => {
+        return DendronWorkspace.instance().context.workspaceState.update(
+          // @ts-ignore
+          WORKSPACE_STATE[k],
+          undefined
+        );
+      })
+    );
   }
 
   async resetGlobalState() {

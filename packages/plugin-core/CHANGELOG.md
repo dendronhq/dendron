@@ -7,18 +7,18 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Enhancements
 
-- **workbench:** stub notes get created when clicked on tree view ([6c0ea7d](https://github.com/dendronhq/dendron/commit/6c0ea7d889530ff385aa5b249e12235b635c85cd))
+- **workbench:** create note from tree view if not exist ([6c0ea7d](https://github.com/dendronhq/dendron/commit/6c0ea7d889530ff385aa5b249e12235b635c85cd))
 
-## [0.9.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.9.1...v0.9.2-alpha.0) (2020-09-02)
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.treeview.stub.gif)
 
-### Dendron Markdown Preview (0.9.2)
+### Dendron Markdown Preview
 
-### Enhancements
+#### Enhancements
 
 - note refs will not resolve when inside an inline code span or a fenced code block
 - switch to use new markdown parser for resolving note refs
 
-### Bug Fixes
+#### Bug Fixes
 
 - edge case with note refs not resolving ([8e26da1](https://github.com/dendronhq/dendron/commit/8e26da119e48fc6dc5eccf724fc3cdff3d876fee))
 

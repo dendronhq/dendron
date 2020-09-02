@@ -44,17 +44,14 @@ export async function _activate(context: vscode.ExtensionContext) {
   const ws = DendronWorkspace.getOrCreate(context, {
     skipSetup: stage === "test",
   });
-  Logger.info("check1");
 
   const installedGlobalVersion = DendronWorkspace.version();
-  Logger.info("check2");
   const migratedGlobalVersion = context.globalState.get<string | undefined>(
     GLOBAL_STATE.VERSION
   );
   const previousGlobalVersion = ws.context.globalState.get<string | undefined>(
     GLOBAL_STATE.VERSION_PREV
   );
-  Logger.info("check3");
   const previousWsVersion =
     context.workspaceState.get<string>(WORKSPACE_STATE.WS_VERSION) || "0.0.0";
   // stats
@@ -68,7 +65,6 @@ export async function _activate(context: vscode.ExtensionContext) {
       };
     }
   );
-  Logger.info("check4");
   const workspace = ws.rootWorkspace.uri.fsPath;
   Logger.info({
     ctx,

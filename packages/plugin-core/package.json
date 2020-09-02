@@ -24,9 +24,7 @@
     ],
     "main": "./out/extension.js",
     "extensionPack": [
-        "dendron.dendron-markdown-preview-enhanced"
-    ],
-    "extensionDependencies": [
+        "dendron.dendron-markdown-preview-enhanced",
         "github.github-vscode-theme"
     ],
     "contributes": {

@@ -163,6 +163,8 @@ export class DendronWorkspace {
     if (!opts.skipSetup) {
       this._setupCommands();
     }
+    const ctx = "DendronWorkspace";
+    this.L.info({ ctx, msg: "initialized" });
   }
 
   get config(): DendronConfig {

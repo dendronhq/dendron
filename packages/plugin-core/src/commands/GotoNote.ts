@@ -17,7 +17,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const { qs, mode } = opts;
     const engine = DendronWorkspace.instance().engine;
-    const resp = engine.queryOne(qs, mode);
+    const resp = engine.queryOne(qs, mode, { createIfNew: true });
     const node = (await resp).data;
     const uri = Uri.file(path.join(engine.props.root, node.fname + ".md"));
     await VSCodeUtils.openFileInEditor(uri);

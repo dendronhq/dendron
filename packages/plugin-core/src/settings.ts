@@ -234,8 +234,16 @@ export class Settings {
     const errors: any = {};
     await Promise.all(
       _.map(target, async (entry, key) => {
+        const item = src.inspect(key);
         if (
-          _.isUndefined(src.inspect(key)?.workspaceValue) ||
+          _.every(
+            [
+              item?.globalValue,
+              item?.workspaceFolderValue,
+              item?.workspaceValue,
+            ],
+            _.isUndefined
+          ) ||
           cleanOpts.force
         ) {
           const value = entry.default;

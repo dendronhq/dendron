@@ -8,6 +8,8 @@ import { DENDRON_CHANNEL_NAME } from "./constants";
 export type TraceLevel = "debug" | "info" | "warn" | "error" | "fatal";
 const levels = ["debug", "info", "warn", "error", "fatal"];
 
+export const UNKNOWN_ERROR_MSG = `You found a bug! We didn't think this could happen but you proved us wrong. Please file the bug here -->  https://github.com/dendronhq/dendron/issues/new?assignees=&labels=&template=bug_report.md&title= We will put our best bug exterminators on this right away!`;
+
 export class Logger {
   static output: OutputChannel | undefined;
   static logger: ReturnType<typeof createLogger> | undefined;

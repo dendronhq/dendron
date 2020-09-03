@@ -12,11 +12,11 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
 
   static showInput = window.showInputBox;
 
-  async gatherInputs(): Promise<TInput|undefined> {
+  async gatherInputs(): Promise<TInput | undefined> {
     return {} as any;
   }
 
-  async abstract enrichInputs(inputs: TInput): Promise<TOpts>;
+  abstract async enrichInputs(inputs: TInput): Promise<TOpts>;
 
   abstract async execute(opts: TOpts): Promise<TOut>;
 
@@ -24,29 +24,37 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
     return;
   }
 
-  async sanityCheck(): Promise<undefined|string> {
+  async sanityCheck(): Promise<undefined | string> {
     return;
   }
 
-  async run(): Promise<TOut|undefined> {
-    const out = await this.sanityCheck();
-    if (!_.isUndefined(out)) {
-      window.showErrorMessage(out);
+  async run(): Promise<TOut | undefined> {
+    try {
+      const out = await this.sanityCheck();
+      if (!_.isUndefined(out)) {
+        window.showErrorMessage(out);
+        return;
+      }
+
+      const inputs = await this.gatherInputs();
+      if (!_.isUndefined(inputs)) {
+        const opts: TOpts = await this.enrichInputs(inputs);
+        const resp = await this.execute(opts);
+        this.showResponse(resp);
+        return resp;
+      }
       return;
+    } catch (err) {
+      Logger.error(err.message);
     }
-    
-    const inputs = await this.gatherInputs();
-    if (!_.isUndefined(inputs)) {
-      const opts: TOpts = await this.enrichInputs(inputs);
-      const resp = await this.execute(opts);
-      this.showResponse(resp);
-      return resp;
-    }
-    return;
   }
 }
 
-export abstract class BasicCommand<TOpts, TOut = any> extends BaseCommand<TOpts, TOut, TOpts|undefined> {
+export abstract class BasicCommand<TOpts, TOut = any> extends BaseCommand<
+  TOpts,
+  TOut,
+  TOpts | undefined
+> {
   async enrichInputs(inputs: TOpts): Promise<TOpts> {
     return inputs;
   }

@@ -87,8 +87,9 @@ export class LookupController {
     // quickpick.buttons = [this.state.buttons.fuzzyMatch];
     // quickpick.items = _.values(DendronEngine.getOrCreateEngine().notes);
 
-    if (opts?.value) {
-      quickpick.value = opts.value;
+    let { value } = cleanOpts;
+    if (!_.isUndefined(value)) {
+      quickpick.value = value;
     } else {
       // set editor path
       let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;

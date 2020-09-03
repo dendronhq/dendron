@@ -9,8 +9,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - **pods:** use new ref parser when building site ([79b0a59](https://github.com/dendronhq/dendron/commit/79b0a597bed24f5f95d11977c1337ac25eae174f))
 
-### Features
-
 ## [0.9.3](https://github.com/dendronhq/dendron/compare/v0.9.3-alpha.3...v0.9.3) (2020-09-03)
 
 ### Features

@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.4](https://github.com/dendronhq/dendron/compare/v0.9.4-alpha.0...v0.9.4) (2020-09-03)
+
+**Note:** Version bump only for package root
+
 ### Bug Fixes
 
 - **pods:** use new ref parser when building site ([79b0a59](https://github.com/dendronhq/dendron/commit/79b0a597bed24f5f95d11977c1337ac25eae174f))

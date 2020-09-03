@@ -16,6 +16,9 @@
       "path": "packages/dendron-cli"
     },
     {
+      "path": "packages/pods-core"
+    },
+    {
       "path": "bootstrap"
     },
     {

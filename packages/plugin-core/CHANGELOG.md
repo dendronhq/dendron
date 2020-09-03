@@ -3,11 +3,11 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## [0.9.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.9.3-alpha.3...v0.9.4-alpha.0) (2020-09-03)
+### Bug Fixes
+
+- **pods:** use new ref parser when building site ([79b0a59](https://github.com/dendronhq/dendron/commit/79b0a597bed24f5f95d11977c1337ac25eae174f))
 
 ### Features
-
-- **workbench:** add GoDown command ([bddc344](https://github.com/dendronhq/dendron/commit/bddc3442043918519d5dfb72b5ea4571b22568bf))
 
 ## [0.9.3](https://github.com/dendronhq/dendron/compare/v0.9.3-alpha.3...v0.9.3) (2020-09-03)
 

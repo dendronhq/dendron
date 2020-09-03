@@ -40,6 +40,7 @@ import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
 import { GotoNoteCommand, GotoNoteCommandOpts } from "./commands/GotoNote";
 import { DendronTreeView } from "./views/DendronTreeView";
+import { GoDownCommand } from "./commands/GoDownCommand";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -459,6 +460,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.GO_UP_HIERARCHY.key,
         async () => {
           await new GoUpCommand().run();
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.GO_DOWN_HIERARCHY.key,
+        async () => {
+          await new GoDownCommand().run();
         }
       )
     );

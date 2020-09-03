@@ -64,14 +64,14 @@ export class LookupController {
     }
   }
 
-  show(_value = "") {
+  show(opts?: { value?: string; ignoreFocusOut?: boolean }) {
     const ctx = "show";
+    const cleanOpts = _.defaults(opts, { ignoreFocusOut: false });
     this.ws.L.info({ ctx });
     // const provider = this.getOrInstantiateProvider();
     this.ws.L.info({ ctx: ctx + ":getOrInstantiateProvider:post" });
     // create quick pick
     const quickpick = vscode.window.createQuickPick<DNode>();
-    this.quickPick = quickpick;
     this.ws.L.info({ ctx: ctx + ":createQuickPick:post" });
     let title = ["Lookup"];
     if (this.state.mode === "fuzzy") {
@@ -80,17 +80,21 @@ export class LookupController {
     title.push(`- version: ${DendronWorkspace.version()}`);
     quickpick.title = title.join(" ");
     quickpick.placeholder = "eg. hello.world";
-    quickpick.ignoreFocusOut = false;
+    quickpick.ignoreFocusOut = cleanOpts.ignoreFocusOut;
     // @ts-ignore
     quickpick.justActivated = true;
     // FIXME: no button for now
     // quickpick.buttons = [this.state.buttons.fuzzyMatch];
     // quickpick.items = _.values(DendronEngine.getOrCreateEngine().notes);
 
-    // set editor path
-    let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
-    if (editorPath && this.opts.flavor !== "schema") {
-      quickpick.value = path.basename(editorPath, ".md");
+    if (opts?.value) {
+      quickpick.value = opts.value;
+    } else {
+      // set editor path
+      let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
+      if (editorPath && this.opts.flavor !== "schema") {
+        quickpick.value = path.basename(editorPath, ".md");
+      }
     }
 
     quickpick.onDidTriggerButton((btn: QuickInputButton) => {

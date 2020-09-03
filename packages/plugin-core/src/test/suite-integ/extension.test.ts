@@ -61,6 +61,7 @@ import {
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
+import { GoDownCommand } from "../../commands/GoDownCommand";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
@@ -982,6 +983,20 @@ suite("commands", function () {
             "root.md"
           )
         );
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, { useFixtures: true });
+    });
+  });
+
+  // figure better way of testing this
+  describe.skip("GoDown", function () {
+    test("basic", function (done) {
+      onWSInit(async () => {
+        const uri = vscode.Uri.file(path.join(root.name, "vault", "foo.md"));
+        await vscode.window.showTextDocument(uri);
+        const lookup = await new GoDownCommand().run();
+        assert.equal(lookup?.quickPick?.value, "foo.");
         done();
       });
       setupDendronWorkspace(root.name, ctx, { useFixtures: true });

@@ -87,7 +87,7 @@
                 },
                 "dendron.rootDir": {
                     "type": "string",
-                    "default": false,
+                    "default": "",
                     "description": "location of dendron workspace"
                 },
                 "dendron.notesDirPath": {
@@ -196,6 +196,13 @@
                 "desc": "Go to closet non-stub parent",
                 "docLink": "dendron.topic.commands.md",
                 "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-up.gif)"
+            },
+            {
+                "command": "dendron.goDownHierarchy",
+                "title": "Dendron: Go Down",
+                "desc": "Go down the hierarchy",
+                "docLink": "dendron.topic.commands.md",
+                "docPreview": ""
             },
             {
                 "command": "dendron.initWS",
@@ -321,6 +328,12 @@
                 "command": "dendron.goUpHierarchy",
                 "mac": "cmd+shift+up",
                 "key": "ctrl+shift+up",
+                "when": "editorFocus"
+            },
+            {
+                "command": "dendron.goDownHierarchy",
+                "mac": "cmd+shift+down",
+                "key": "ctrl+shift+down",
                 "when": "editorFocus"
             },
             {

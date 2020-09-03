@@ -196,6 +196,19 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-up.gif)",
   },
+  GO_DOWN_HIERARCHY: {
+    key: "dendron.goDownHierarchy",
+    title: `${CMD_PREFIX} Go Down`,
+    group: "hierarchies",
+    keybindings: {
+      mac: "cmd+shift+down",
+      key: "ctrl+shift+down",
+      when: "editorFocus",
+    },
+    desc: "Go down the hierarchy",
+    docLink: "dendron.topic.commands.md",
+    docPreview: "",
+  },
   // --- Workspace
   INIT_WS: {
     key: "dendron.initWS",

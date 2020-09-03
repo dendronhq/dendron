@@ -59,6 +59,10 @@ export class VSCodeUtils {
     return vscode.commands.executeCommand("workbench.action.closeActiveEditor");
   }
 
+  static closeAllEditors() {
+    return vscode.commands.executeCommand("workbench.action.closeAllEditors");
+  }
+
   static getActiveTextEditor() {
     return vscode.window.activeTextEditor;
   }

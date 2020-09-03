@@ -196,6 +196,34 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-up.gif)",
   },
+  GO_NEXT_HIERARCHY: {
+    key: "dendron.goNextHierarchy",
+    title: `${CMD_PREFIX} Go Next Sibling`,
+    group: "hierarchies",
+    keybindings: {
+      mac: "cmd+shift+right",
+      key: "ctrl+shift+right",
+      when: "editorFocus",
+    },
+    desc: "Go to the next sibling",
+    docLink: "dendron.topic.commands.md",
+    docPreview:
+      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-sibling.gif)",
+  },
+  GO_PREV_HIERARCHY: {
+    key: "dendron.goPrevHierarchy",
+    title: `${CMD_PREFIX} Go Previous Sibling`,
+    group: "hierarchies",
+    keybindings: {
+      mac: "cmd+shift+left",
+      key: "ctrl+shift+left",
+      when: "editorFocus",
+    },
+    desc: "Go to the previous sibling",
+    docLink: "dendron.topic.commands.md",
+    docPreview:
+      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-sibling.gif)",
+  },
   GO_DOWN_HIERARCHY: {
     key: "dendron.goDownHierarchy",
     title: `${CMD_PREFIX} Go Down`,
@@ -207,7 +235,8 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
     desc: "Go down the hierarchy",
     docLink: "dendron.topic.commands.md",
-    docPreview: "",
+    docPreview:
+      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-down.gif)",
   },
   // --- Workspace
   INIT_WS: {

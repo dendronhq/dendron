@@ -11,7 +11,7 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "--disable-extensions",
+        // "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}"
       ],
       "outFiles": ["${workspaceFolder:plugin-core}/out/**/*.js"],
@@ -66,23 +66,23 @@
         "STAGE": "test"
       },
       "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
-    },
-    {
-      "name": "Extension Integ Tests with WS Root",
-      "type": "extensionHost",
-      "request": "launch",
-      "runtimeExecutable": "${execPath}",
-      "args": [
-        "${workspaceFolder}/fixtures/fake-workspace",
-        "--disable-extensions",
-        "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/test/suite-integ/index"
-      ],
-      "env": {
-        "STAGE": "test"
-      },
-      "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
-      // "preLaunchTask": "${defaultBuildTask}"
     }
+    // {
+    //   "name": "Extension Integ Tests with WS Root",
+    //   "type": "extensionHost",
+    //   "request": "launch",
+    //   "runtimeExecutable": "${execPath}",
+    //   "args": [
+    //     "${workspaceFolder}/fixtures/fake-workspace",
+    //     "--disable-extensions",
+    //     "--extensionDevelopmentPath=${workspaceFolder}",
+    //     "--extensionTestsPath=${workspaceFolder}/out/test/suite-integ/index"
+    //   ],
+    //   "env": {
+    //     "STAGE": "test"
+    //   },
+    //   "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
+    //   // "preLaunchTask": "${defaultBuildTask}"
+    // }
   ]
 }

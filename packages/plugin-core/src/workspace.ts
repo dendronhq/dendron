@@ -41,6 +41,7 @@ import { isAnythingSelected } from "./utils/editor";
 import { GotoNoteCommand, GotoNoteCommandOpts } from "./commands/GotoNote";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { GoDownCommand } from "./commands/GoDownCommand";
+import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -78,6 +79,9 @@ export class DendronWorkspace {
     return rootDir;
   }
 
+  /**
+   * Workspace settings file
+   */
   static workspaceFile(): vscode.Uri {
     if (!vscode.workspace.workspaceFile) {
       throw Error("no workspace file");
@@ -460,6 +464,24 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.GO_UP_HIERARCHY.key,
         async () => {
           await new GoUpCommand().run();
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.GO_NEXT_HIERARCHY.key,
+        async () => {
+          await new GoToSiblingCommand().execute({ direction: "next" });
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
+        async () => {
+          await new GoToSiblingCommand().execute({ direction: "prev" });
         }
       )
     );

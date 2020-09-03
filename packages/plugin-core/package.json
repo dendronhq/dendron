@@ -198,11 +198,25 @@
                 "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-up.gif)"
             },
             {
+                "command": "dendron.goNextHierarchy",
+                "title": "Dendron: Go Next Sibling",
+                "desc": "Go to the next sibling",
+                "docLink": "dendron.topic.commands.md",
+                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-sibling.gif)"
+            },
+            {
+                "command": "dendron.goPrevHierarchy",
+                "title": "Dendron: Go Previous Sibling",
+                "desc": "Go to the previous sibling",
+                "docLink": "dendron.topic.commands.md",
+                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-sibling.gif)"
+            },
+            {
                 "command": "dendron.goDownHierarchy",
                 "title": "Dendron: Go Down",
                 "desc": "Go down the hierarchy",
                 "docLink": "dendron.topic.commands.md",
-                "docPreview": ""
+                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-down.gif)"
             },
             {
                 "command": "dendron.initWS",
@@ -328,6 +342,18 @@
                 "command": "dendron.goUpHierarchy",
                 "mac": "cmd+shift+up",
                 "key": "ctrl+shift+up",
+                "when": "editorFocus"
+            },
+            {
+                "command": "dendron.goNextHierarchy",
+                "mac": "cmd+shift+right",
+                "key": "ctrl+shift+right",
+                "when": "editorFocus"
+            },
+            {
+                "command": "dendron.goPrevHierarchy",
+                "mac": "cmd+shift+left",
+                "key": "ctrl+shift+left",
                 "when": "editorFocus"
             },
             {

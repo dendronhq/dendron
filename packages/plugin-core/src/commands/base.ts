@@ -46,6 +46,7 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
       return;
     } catch (err) {
       Logger.error(err.message);
+      return;
     }
   }
 }

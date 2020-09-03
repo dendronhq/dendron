@@ -4,6 +4,7 @@ import {
   LegacyDendronSiteConfig,
   Note,
   Schema,
+  DNodeUtils,
 } from "@dendronhq/common-all";
 import {
   DirResult,
@@ -62,6 +63,10 @@ import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { GoDownCommand } from "../../commands/GoDownCommand";
+import {
+  GoToSiblingCommand,
+  GoToSiblingCommandOpts,
+} from "../../commands/GoToSiblingCommand";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
@@ -156,12 +161,12 @@ function setupDendronWorkspace(
 ) {
   const optsClean = _.defaults(opts, {
     configOverride: {},
-    setupWsOverride: {},
+    setupWsOverride: { skipConfirmation: true },
     fixtureDir: "store",
     activateWorkspace: false,
   });
   if (opts?.useFixtures || opts?.useCb) {
-    optsClean.setupWsOverride = { emptyWs: true };
+    optsClean.setupWsOverride.emptyWs = true;
   }
   if (optsClean.activateWorkspace) {
     DendronWorkspace.isActive = () => true;
@@ -1460,6 +1465,168 @@ suite.skip("utils", function () {
         }),
         "[[FAQ|dendron.bond]]"
       );
+    });
+  });
+});
+
+// === Commands
+suite("GoToSibling", function () {
+  before(function () {
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    DendronWorkspace.getOrCreate(ctx);
+  });
+
+  describe("GoToSibling: next", function () {
+    this.timeout(TIMEOUT);
+    let direction: GoToSiblingCommandOpts["direction"];
+    let uri: vscode.Uri;
+    direction = "next";
+
+    const createNotes = (vaultPath: string) => {
+      node2MdFile(new Note({ fname: "root", id: "root", title: "root" }), {
+        root: vaultPath,
+      });
+      node2MdFile(new Note({ fname: "foo.journal.2020.08.29" }), {
+        root: vaultPath,
+      });
+      node2MdFile(new Note({ fname: "foo.journal.2020.08.30" }), {
+        root: vaultPath,
+      });
+      node2MdFile(new Note({ fname: "foo.journal.2020.08.31" }), {
+        root: vaultPath,
+      });
+    };
+
+    beforeEach(async function () {
+      root = FileTestUtils.tmpDir();
+      ctx = VSCodeUtils.getOrCreateMockContext();
+      await new ResetConfigCommand().execute({ scope: "all" });
+    });
+
+    afterEach(function () {
+      HistoryService.instance().clearSubscriptions();
+    });
+
+    test("basic", function (done) {
+      uri = vscode.Uri.file(
+        path.join(root.name, "vault", "foo.journal.2020.08.30.md")
+      );
+      onWSInit(async () => {
+        await vscode.window.showTextDocument(uri);
+        const resp = await new GoToSiblingCommand().execute({ direction });
+        assert.deepEqual(resp, { msg: "ok" });
+        assert.equal(
+          DNodeUtils.uri2Fname(
+            VSCodeUtils.getActiveTextEditor()?.document.uri as vscode.Uri
+          ),
+          "foo.journal.2020.08.31"
+        );
+        done();
+      });
+
+      setupDendronWorkspace(root.name, ctx, {
+        useCb: async (vaultPath: string) => {
+          return createNotes(vaultPath);
+        },
+      });
+    });
+
+    test("go over index", function (done) {
+      onWSInit(async () => {
+        uri = vscode.Uri.file(
+          path.join(root.name, "vault", "foo.journal.2020.08.31.md")
+        );
+        await vscode.window.showTextDocument(uri);
+        const resp = await new GoToSiblingCommand().execute({ direction });
+        assert.deepEqual(resp, { msg: "ok" });
+        assert.equal(
+          DNodeUtils.uri2Fname(
+            VSCodeUtils.getActiveTextEditor()?.document.uri as vscode.Uri
+          ),
+          "foo.journal.2020.08.29"
+        );
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        useCb: async (vaultPath: string) => {
+          return createNotes(vaultPath);
+        },
+      });
+    });
+
+    test("one note", function (done) {
+      onWSInit(async () => {
+        uri = vscode.Uri.file(
+          path.join(root.name, "vault", "foo.journal.2020.08.29.md")
+        );
+        await vscode.window.showTextDocument(uri);
+        const resp = await new GoToSiblingCommand().execute({ direction });
+        assert.deepEqual(resp, { msg: "no_siblings" });
+        assert.equal(
+          DNodeUtils.uri2Fname(
+            VSCodeUtils.getActiveTextEditor()?.document.uri as vscode.Uri
+          ),
+          "foo.journal.2020.08.29"
+        );
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        useCb: async (vaultPath: string) => {
+          // fs.emptyDirSync(root.name);
+          node2MdFile(new Note({ fname: "root", id: "root", title: "root" }), {
+            root: vaultPath,
+          });
+          node2MdFile(new Note({ fname: "foo.journal.2020.08.29" }), {
+            root: vaultPath,
+          });
+          return;
+        },
+      });
+    });
+
+    test("no open editor", function (done) {
+      onWSInit(async () => {
+        await VSCodeUtils.closeAllEditors();
+        const resp = await new GoToSiblingCommand().execute({ direction });
+        assert.deepEqual(resp, { msg: "no_editor" });
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        useCb: async (vaultPath: string) => {
+          node2MdFile(new Note({ fname: "root", id: "root", title: "root" }), {
+            root: vaultPath,
+          });
+        },
+      });
+    });
+
+    test("nav in root", function (done) {
+      onWSInit(async () => {
+        uri = vscode.Uri.file(path.join(root.name, "vault", "root.md"));
+        await vscode.window.showTextDocument(uri);
+        const resp = await new GoToSiblingCommand().execute({ direction });
+        assert.deepEqual(resp, { msg: "ok" });
+        assert.equal(
+          DNodeUtils.uri2Fname(
+            VSCodeUtils.getActiveTextEditor()?.document.uri as vscode.Uri
+          ),
+          "foo"
+        );
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        useCb: async (vaultPath: string) => {
+          node2MdFile(new Note({ fname: "root", id: "root", title: "root" }), {
+            root: vaultPath,
+          });
+          node2MdFile(new Note({ fname: "foo" }), {
+            root: vaultPath,
+          });
+          node2MdFile(new Note({ fname: "gamma" }), {
+            root: vaultPath,
+          });
+        },
+      });
     });
   });
 });

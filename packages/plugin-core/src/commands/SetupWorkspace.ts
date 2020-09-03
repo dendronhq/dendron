@@ -13,6 +13,10 @@ type CommandOpts = {
   rootDirRaw: string;
   skipOpenWs?: boolean;
   emptyWs?: boolean;
+  /**
+   * override prompts
+   */
+  skipConfirmation?: boolean;
 };
 
 type CommandInput = {
@@ -71,7 +75,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
     ws.L.info({ ctx, rootDir, skipOpenWs });
 
     // handle existing
-    if (fs.existsSync(rootDir)) {
+    if (fs.existsSync(rootDir) && !opts.skipConfirmation) {
       const options = {
         delete: { msg: "delete existing folder", alias: "d" },
         abort: { msg: "abort current operation", alias: "a" },

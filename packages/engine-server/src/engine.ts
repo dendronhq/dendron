@@ -54,6 +54,7 @@ function createFuse<T>(
     maxPatternLength: 32,
     minMatchCharLength: 1,
     keys: ["title", "logicalPath", "basename"],
+    useExtendedSearch: true,
   };
   if (opts.preset === "schema") {
     options.keys = ["title", "id"];

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.9.4...v0.9.5-alpha.0) (2020-09-03)
+
+### Bug Fixes
+
+- **engine:** trouble with mixed case file names ([02bcde2](https://github.com/dendronhq/dendron/commit/02bcde2d7f8e9c6bef9753e18fffd9e15c763976))
+
 ## [0.9.1](https://github.com/dendronhq/dendron/compare/v0.9.1-alpha.0...v0.9.1) (2020-09-01)
 
 **Note:** Version bump only for package @dendronhq/common-all

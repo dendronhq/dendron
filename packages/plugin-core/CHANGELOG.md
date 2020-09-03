@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.9.4...v0.9.5-alpha.0) (2020-09-03)
+
+### Features
+
+- **workbench:** go to sibling command ([261fc0c](https://github.com/dendronhq/dendron/commit/261fc0cf85202651fde286ba79b81f09b6580a42))
+
 ## [0.9.4](https://github.com/dendronhq/dendron/compare/v0.9.4-alpha.0...v0.9.4) (2020-09-0
 
 ### Bug Fixes

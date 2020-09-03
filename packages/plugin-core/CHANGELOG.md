@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.3](https://github.com/dendronhq/dendron/compare/v0.9.3-alpha.3...v0.9.3) (2020-09-03)
+
+### Features
+
+- **workbench:** add GoDown command ([bddc344](https://github.com/dendronhq/dendron/commit/bddc3442043918519d5dfb72b5ea4571b22568bf))
+
 ## [0.9.3-alpha.4](https://github.com/dendronhq/dendron/compare/v0.9.3-alpha.3...v0.9.3-alpha.4) (2020-09-03)
 
 ### Features

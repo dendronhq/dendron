@@ -11,15 +11,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.9.3-alpha.3](https://github.com/dendronhq/dendron/compare/v0.9.3-alpha.2...v0.9.3-alpha.3) (2020-09-02)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
-
 ## [0.9.3-alpha.2](https://github.com/dendronhq/dendron/compare/v0.9.3-alpha.1...v0.9.3-alpha.2) (2020-09-02)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.9.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.9.3-alpha.0...v0.9.3-alpha.1) (2020-09-02)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.9.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.9.2...v0.9.3-alpha.0) (2020-09-02)
 

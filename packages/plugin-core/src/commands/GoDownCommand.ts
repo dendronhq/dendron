@@ -19,6 +19,9 @@ export class GoDownCommand extends BasicCommand<CommandOpts, CommandOutput> {
     let value = "";
     if (maybeTextEditor) {
       value = path.basename(maybeTextEditor.document.uri.fsPath, ".md") + ".";
+      if (value === "root") {
+        value = "";
+      }
     }
     controller.show({ value });
     return controller;

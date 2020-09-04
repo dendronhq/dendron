@@ -5,18 +5,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.9.5](https://github.com/dendronhq/dendron/compare/v0.9.5-alpha.0...v0.9.5) (2020-09-04)
 
-**Note:** Version bump only for package root
+### Features
 
-## [0.9.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.9.4...v0.9.5-alpha.0) (2020-09-03)
+- **workbench:** go to sibling command ([261fc0c](https://github.com/dendronhq/dendron/commit/261fc0cf85202651fde286ba79b81f09b6580a42))
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-sibling.gif)
 
 ### Bug Fixes
 
 - **engine:** trouble with mixed case file names ([02bcde2](https://github.com/dendronhq/dendron/commit/02bcde2d7f8e9c6bef9753e18fffd9e15c763976))
-
-### Features
-
-- **engine:** use extended search ([c8cac6b](https://github.com/dendronhq/dendron/commit/c8cac6b3c5f2376eb802b0c5bdd984d05e92d10b))
-- **workbench:** go to sibling command ([261fc0c](https://github.com/dendronhq/dendron/commit/261fc0cf85202651fde286ba79b81f09b6580a42))
 
 ## [0.9.4](https://github.com/dendronhq/dendron/compare/v0.9.4-alpha.0...v0.9.4) (2020-09-0
 

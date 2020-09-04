@@ -1,5 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`basic bond simple 1`] = `
+"$$
+f(x) = \\\\\\\\sin(x)
+$$
+"
+`;
+
 exports[`basic parse init 1`] = `
 Object {
   "children": Array [

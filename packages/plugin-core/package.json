@@ -137,8 +137,9 @@
             {
                 "command": "dendron.copyNoteRef",
                 "title": "Dendron: Copy Note Ref",
-                "desc": "Copy reference to note",
+                "desc": "Copies a reference to the current open document",
                 "docLink": "dendron.topic.commands.md",
+                "docs": "See [[references | dendron.topic.refs]] for more details",
                 "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/ref-note.gif)"
             },
             {
@@ -180,6 +181,7 @@
                 "command": "dendron.archiveHierarchy",
                 "title": "Dendron: Archive Hierarchy",
                 "desc": "Move current note and all children under the `archive` hierarchy",
+                "docs": "This is a convenience method around `Refactor Hierarchy` for the case of archiving hierarchies you are no longer using. For example, if you were currently at `pro.foo`, running `Archive Hierarchy` would be equivalent to running `Refactor Hierarchy` with the following arguments:\n- matcher: `pro.foo`\n- replacement:  `archive.pro.foo`",
                 "docLink": "dendron.topic.commands.md",
                 "docPreview": "<a href=\"https://www.loom.com/share/9698d5a4451b49d8b107f3ff67d97877\">  <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/9698d5a4451b49d8b107f3ff67d97877-with-play.gif\"> </a>"
             },
@@ -187,13 +189,14 @@
                 "command": "dendron.refactorHierarchy",
                 "title": "Dendron: Refactor Hierarchy",
                 "desc": "Update hierarchy using regex",
+                "docs": "Like `Rename Note` but works on an entire hierarchy of notes. This command takes two arguments: \n- matcher: regex that matches text you want to capture for replacement\n- replacer: regex that represents text you want to use as replacement\n\nAfter running the command, you will be taken to a preview that shows all files that will be affected. You will be given an option in a dropdown to either proceed with the refactor or cancel the operation. \n\n- NOTE: Dendron will warn you if refactoring will overwrite existing files. You will need to either change your `replacer` or move the affected files before Dendron will perform a refactor",
                 "docLink": "dendron.topic.commands.md",
                 "docPreview": "<a href=\"https://www.loom.com/share/11d90a86fd1348a5a504406b52d79f85\"> <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/11d90a86fd1348a5a504406b52d79f85-with-play.gif\"> </a>"
             },
             {
                 "command": "dendron.goUpHierarchy",
                 "title": "Dendron: Go Up",
-                "desc": "Go to closet non-stub parent",
+                "desc": "Go to closet non-stub parent of the currently open note",
                 "docLink": "dendron.topic.commands.md",
                 "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-up.gif)"
             },
@@ -229,6 +232,7 @@
                 "command": "dendron.changeWS",
                 "title": "Dendron: Change Workspace",
                 "desc": "Change into existing workspace",
+                "docs": "Dendron will create a `dendron.code-workspace` file in specified directory and then open the workspace (if a workspace file already exists, it will use that). It will also create a `root.md` file in that directory if it doesn't exist (currently this is part of the internal working of dendron).\n\nDendron **does not** delete or overwrite any files during the **Change Workspace** operation.",
                 "docLink": "dendron.topic.commands.md",
                 "docPreview": ""
             },
@@ -263,7 +267,7 @@
             {
                 "command": "dendron.showHelp",
                 "title": "Dendron: Show Help",
-                "desc": "Show this help page",
+                "desc": "Dendron will open your current browser to the [[cheatsheet|dendron.cheatsheet]] page. ",
                 "docLink": "dendron.topic.commands.md",
                 "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.help.gif)"
             },
@@ -278,6 +282,7 @@
                 "command": "dendron.dev.doctor",
                 "title": "Dendron: Doctor",
                 "desc": "Auto fix issues with frontmatter",
+                "docs": "This makes sure your workspace is up to date. It will execute the following actions:\n- add ids and titles to the frontmatter of all notes that are missing it\n- setup a `docs` folder if it doesn't exist. Required if you want to [[publish | dendron.topic.publishing]] your notes",
                 "docLink": "dendron.topic.commands.md",
                 "docPreview": "<a href=\"https://www.loom.com/share/bd045f708f8e474193de8e3de0dc820f\"> <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/bd045f708f8e474193de8e3de0dc820f-with-play.gif\"> </a>"
             },

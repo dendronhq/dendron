@@ -21,6 +21,7 @@ type CommandEntry = {
    */
   skipDocs?: boolean;
   desc?: string;
+  docs?: string;
   docLink?: string;
   docAnchor?: string;
   docPreview?: string;
@@ -98,8 +99,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.copyNoteRef",
     title: `${CMD_PREFIX} Copy Note Ref`,
     group: "notes",
-    desc: "Copy reference to note",
+    desc: "Copies a reference to the current open document",
     docLink: "dendron.topic.commands.md",
+    docs: "See [[references | dendron.topic.refs]] for more details",
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/ref-note.gif)",
     keybindings: {
@@ -171,6 +173,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Archive Hierarchy`,
     group: "hierarchies",
     desc: "Move current note and all children under the `archive` hierarchy",
+    docs: [
+      "This is a convenience method around `Refactor Hierarchy` for the case of archiving hierarchies you are no longer using. For example, if you were currently at `pro.foo`, running `Archive Hierarchy` would be equivalent to running `Refactor Hierarchy` with the following arguments:",
+      "- matcher: `pro.foo`",
+      "- replacement:  `archive.pro.foo`",
+    ].join("\n"),
     docLink: "dendron.topic.commands.md",
     docPreview: `<a href="https://www.loom.com/share/9698d5a4451b49d8b107f3ff67d97877">  <img style="" src="https://cdn.loom.com/sessions/thumbnails/9698d5a4451b49d8b107f3ff67d97877-with-play.gif"> </a>`,
   },
@@ -179,6 +186,15 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Refactor Hierarchy`,
     group: "hierarchies",
     desc: "Update hierarchy using regex",
+    docs: [
+      "Like `Rename Note` but works on an entire hierarchy of notes. This command takes two arguments: ",
+      "- matcher: regex that matches text you want to capture for replacement",
+      "- replacer: regex that represents text you want to use as replacement",
+      "",
+      "After running the command, you will be taken to a preview that shows all files that will be affected. You will be given an option in a dropdown to either proceed with the refactor or cancel the operation. ",
+      "",
+      "- NOTE: Dendron will warn you if refactoring will overwrite existing files. You will need to either change your `replacer` or move the affected files before Dendron will perform a refactor",
+    ].join("\n"),
     docLink: "dendron.topic.commands.md",
     docPreview: `<a href="https://www.loom.com/share/11d90a86fd1348a5a504406b52d79f85"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/11d90a86fd1348a5a504406b52d79f85-with-play.gif"> </a>`,
   },
@@ -191,7 +207,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       key: "ctrl+shift+up",
       when: "editorFocus",
     },
-    desc: "Go to closet non-stub parent",
+    desc: "Go to closet non-stub parent of the currently open note",
     docLink: "dendron.topic.commands.md",
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-up.gif)",
@@ -253,6 +269,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Change Workspace`,
     group: "workspace",
     desc: "Change into existing workspace",
+    docs: [
+      "Dendron will create a `dendron.code-workspace` file in specified directory and then open the workspace (if a workspace file already exists, it will use that). It will also create a `root.md` file in that directory if it doesn't exist (currently this is part of the internal working of dendron).",
+      "",
+      "Dendron **does not** delete or overwrite any files during the **Change Workspace** operation.",
+    ].join("\n"),
     docLink: "dendron.topic.commands.md",
     docPreview: "",
   },
@@ -298,7 +319,8 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.showHelp",
     title: `${CMD_PREFIX} Show Help`,
     group: "workspace",
-    desc: "Show this help page",
+    desc:
+      "Dendron will open your current browser to the [[cheatsheet|dendron.cheatsheet]] page. ",
     docLink: "dendron.topic.commands.md",
     docPreview: `![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.help.gif)`,
   },
@@ -320,6 +342,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Doctor`,
     group: "dev",
     desc: "Auto fix issues with frontmatter",
+    docs: [
+      "This makes sure your workspace is up to date. It will execute the following actions:",
+      "- add ids and titles to the frontmatter of all notes that are missing it",
+      "- setup a `docs` folder if it doesn't exist. Required if you want to [[publish | dendron.topic.publishing]] your notes",
+    ].join("\n"),
     docLink: "dendron.topic.commands.md",
     docPreview: `<a href="https://www.loom.com/share/bd045f708f8e474193de8e3de0dc820f"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/bd045f708f8e474193de8e3de0dc820f-with-play.gif"> </a>`,
   },

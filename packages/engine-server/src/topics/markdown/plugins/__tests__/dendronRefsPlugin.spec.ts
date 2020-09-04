@@ -4,6 +4,16 @@ import path from "path";
 import { getProcessor } from "../../../markdown/utils";
 
 describe("basic", () => {
+  describe.skip("bond", () => {
+    test.only("simple", () => {
+      const resp = getProcessor();
+      const txt = `
+$$
+f(x) = \\sin(x)
+$$`;
+      expect(resp.processSync(txt).toString()).toMatchSnapshot();
+    });
+  });
   describe("parse", () => {
     test("init", () => {
       const resp = getProcessor().parse(`((ref:[[foo.md]]))`);
@@ -66,7 +76,7 @@ describe("basic", () => {
     test.skip("doesn't parse code block", () => {});
   });
 
-  describe.only("stingify", () => {
+  describe("stingify", () => {
     let root: string;
 
     test("basic", async () => {
@@ -161,7 +171,7 @@ describe("basic", () => {
       expect(out.indexOf("task2") >= 0).toBeTruthy();
     });
 
-    test.only("basic block with header, start and end ", async () => {
+    test("basic block with header, start and end ", async () => {
       const txt = [
         "---",
         "id: foo",

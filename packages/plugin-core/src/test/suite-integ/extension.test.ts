@@ -1562,6 +1562,36 @@ suite("GoToSibling", function () {
       });
     });
 
+    test("traversal from parent", function (done) {
+      uri = vscode.Uri.file(
+        path.join(root.name, "vault", "foo.journal.2020.08.md")
+      );
+      onWSInit(async () => {
+        await vscode.window.showTextDocument(uri);
+        const resp = await new GoToSiblingCommand().execute({ direction });
+        assert.deepEqual(resp, { msg: "ok" });
+        assert.equal(
+          DNodeUtils.uri2Fname(
+            VSCodeUtils.getActiveTextEditor()?.document.uri as vscode.Uri
+          ),
+          "foo.journal.2020.09"
+        );
+        done();
+      });
+
+      setupDendronWorkspace(root.name, ctx, {
+        useCb: async (vaultPath: string) => {
+          createNotes(vaultPath);
+          node2MdFile(new Note({ fname: "foo.journal.2020.08" }), {
+            root: vaultPath,
+          });
+          node2MdFile(new Note({ fname: "foo.journal.2020.09" }), {
+            root: vaultPath,
+          });
+        },
+      });
+    });
+
     test("go over index", function (done) {
       onWSInit(async () => {
         uri = vscode.Uri.file(

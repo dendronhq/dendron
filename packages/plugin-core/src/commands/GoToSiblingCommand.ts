@@ -1,4 +1,4 @@
-import { DNodeUtils, Note } from "@dendronhq/common-all";
+import { DNodeUtils, Note, DNode } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";
@@ -40,9 +40,11 @@ export class GoToSiblingCommand extends BasicCommand<
         "domain.id"
       );
     } else {
-      const nodeParent = DNodeUtils.dirName(value);
-      let qs = `^` + nodeParent + ".";
-      respNodes = (await ws.engine.query(qs, "note")).data as Note[];
+      const node = DNodeUtils.getNoteByFname(value, ws.engine);
+      respNodes = node?.parent?.children as Note[];
+      // const nodeParent = DNodeUtils.dirName(value);
+      // let qs = `^` + nodeParent + ".";
+      // respNodes = (await ws.engine.query(qs, "note")).data as Note[];
     }
 
     if (respNodes.length <= 1) {

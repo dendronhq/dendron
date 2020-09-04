@@ -106,16 +106,6 @@ export class WorkspaceConfig {
   }
 
   static async update(_wsRoot: string): Promise<Required<CodeConfig>> {
-    // const config: CodeConfig = fs.readJSONSync(
-    //   path.join(wsRoot, DendronWorkspace.DENDRON_WORKSPACE_FILE)
-    // );
-    // config.extensions = Extensions.update(config.extensions || {});
-    // config.settings = Settings.update(config.settings || {});
-    // fs.writeJSONSync(
-    //   path.join(wsRoot, DendronWorkspace.DENDRON_WORKSPACE_FILE),
-    //   config,
-    //   { spaces: 4 }
-    // );
     const src = DendronWorkspace.configuration();
     const changes = await Settings.upgrade(src, _SETTINGS);
 
@@ -232,7 +222,7 @@ export class Settings {
     const add: any = {};
     const errors: any = {};
     await Promise.all(
-      _.map(target, async (entry, key) => {
+      _.map(_.omit(target, "workbench.colorTheme"), async (entry, key) => {
         const item = src.inspect(key);
         if (
           _.every(

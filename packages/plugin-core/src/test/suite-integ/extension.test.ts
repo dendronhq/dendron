@@ -168,9 +168,12 @@ function setupDendronWorkspace(
   if (opts?.useFixtures || opts?.useCb) {
     optsClean.setupWsOverride.emptyWs = true;
   }
+
+  // pretend workspace is active
   if (optsClean.activateWorkspace) {
     DendronWorkspace.isActive = () => true;
   }
+  // override configuration
   DendronWorkspace.configuration = () => {
     const config: any = {
       dendron: {
@@ -189,6 +192,7 @@ function setupDendronWorkspace(
     });
     return createMockConfig(config);
   };
+
   const vaultPath = path.join(rootDir, "vault");
   DendronWorkspace.workspaceFile = () => {
     return vscode.Uri.file(path.join(rootDir, "dendron.code-workspace"));
@@ -250,6 +254,15 @@ function onWSInit(cb: Function) {
     }
   );
 }
+
+function resetWorkspaceFile() {
+  const fpath = DendronWorkspace.workspaceFile().fsPath;
+  return fs.writeJSONSync(fpath, {
+    folders: [],
+    settings: {},
+  });
+}
+
 let root: DirResult;
 let ctx: vscode.ExtensionContext;
 
@@ -318,22 +331,30 @@ suite("manual", function () {
 });
 
 suite.skip("startup", function () {
-  const timeout = 60 * 1000 * 5;
+  this.timeout(TIMEOUT);
+  let ctx: vscode.ExtensionContext;
 
   beforeEach(async function () {
-    const ctx = VSCodeUtils.createWSContext();
+    console.log("before each");
+    ctx = VSCodeUtils.createWSContext();
     DendronWorkspace.getOrCreate(ctx);
     root = FileTestUtils.tmpDir();
     await new ResetConfigCommand().execute({ scope: "all" });
+    console.log("before each end");
   });
 
   afterEach(function () {
+    console.log("after each");
     HistoryService.instance().clearSubscriptions();
   });
 
   describe("sanity", function () {
     vscode.window.showInformationMessage("Start sanity test.");
-    this.timeout(timeout);
+    this.timeout(TIMEOUT);
+
+    afterEach(function () {
+      resetWorkspaceFile();
+    });
 
     test("workspace not activated", function (done) {
       _activate(ctx);
@@ -343,21 +364,29 @@ suite.skip("startup", function () {
       });
     });
 
-    test("workspace active, no prior workspace version", async function (done) {
-      await DendronWorkspace.configuration().update("dendron.rootDir", ".");
-      DendronWorkspace.workspaceFolders = () => {
-        const uri = vscode.Uri.file(path.join(root.name, "vault"));
-        return [{ uri, name: "vault", index: 0 }];
-      };
+    test("workspace active, no prior workspace version", function (done) {
       const priorVersion = DendronWorkspace.version;
-      DendronWorkspace.version = () => "0.0.1";
-
-      new SetupWorkspaceCommand()
-        .execute({ rootDirRaw: root.name, skipOpenWs: true })
+      DendronWorkspace.configuration()
+        .update("dendron.rootDir", ".")
         .then(() => {
-          _activate(ctx);
+          DendronWorkspace.workspaceFolders = () => {
+            const uri = vscode.Uri.file(path.join(root.name, "vault"));
+            return [{ uri, name: "vault", index: 0 }];
+          };
+          DendronWorkspace.version = () => "0.0.1";
+
+          new SetupWorkspaceCommand()
+            .execute({
+              rootDirRaw: root.name,
+              skipOpenWs: true,
+              skipConfirmation: true,
+            })
+            .then(() => {
+              _activate(ctx);
+            });
         });
-      onWSActive(async (_event: HistoryEvent) => {
+
+      onWSActive((_event: HistoryEvent) => {
         assert.equal(DendronWorkspace.isActive(), true);
         const config = fs.readJSONSync(
           path.join(root.name, DendronWorkspace.DENDRON_WORKSPACE_FILE)
@@ -389,18 +418,7 @@ suite.skip("startup", function () {
         const uri = vscode.Uri.file(path.join(root.name, "vault"));
         return [{ uri, name: "vault", index: 0 }];
       };
-      ctx.globalState.update(WORKSPACE_STATE.WS_VERSION, "0.0.1").then(() => {
-        new SetupWorkspaceCommand()
-          .execute({ rootDirRaw: root.name, skipOpenWs: true })
-          .then(() => {
-            const initSettings = expectedSettings({ settings: { bond: 42 } });
-            fs.writeJSONSync(
-              path.join(root.name, DendronWorkspace.DENDRON_WORKSPACE_FILE),
-              initSettings
-            );
-            _activate(ctx);
-          });
-      });
+
       onWSActive(async (_event: HistoryEvent) => {
         assert.equal(DendronWorkspace.isActive(), true);
         // updated to latest version
@@ -415,6 +433,19 @@ suite.skip("startup", function () {
         settings.settings.bond = 42;
         assert.deepEqual(config, settings);
         done();
+      });
+
+      ctx.globalState.update(WORKSPACE_STATE.WS_VERSION, "0.0.1").then(() => {
+        new SetupWorkspaceCommand()
+          .execute({ rootDirRaw: root.name, skipOpenWs: true })
+          .then(() => {
+            const initSettings = expectedSettings({ settings: { bond: 42 } });
+            fs.writeJSONSync(
+              path.join(root.name, DendronWorkspace.DENDRON_WORKSPACE_FILE),
+              initSettings
+            );
+            _activate(ctx);
+          });
       });
     });
 
@@ -493,7 +524,7 @@ suite.skip("startup", function () {
   });
 
   describe("lookup", function () {
-    this.timeout(timeout);
+    this.timeout(TIMEOUT);
 
     describe("updateItems", function () {
       // TODO: need to clear existing open folders

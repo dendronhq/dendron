@@ -57,7 +57,7 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "${workspaceFolder}/fixtures/fake-workspace",
+        "${workspaceFolder}/fixtures/fake-workspace/dendron.code-workspace",
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
         "--extensionTestsPath=${workspaceFolder}/out/test/suite-integ/index"

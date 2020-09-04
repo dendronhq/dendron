@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/pods-core",
-  "version": "0.9.5-alpha.0",
+  "version": "0.9.5",
   "description": "pods-core",
   "license": "GPLv3",
   "repository": {

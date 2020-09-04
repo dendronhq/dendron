@@ -6,11 +6,6 @@
   "configurations": [
     {
       "type": "node",
-      "command": "npm run test:watch",
-      "args": ["--", "${relativeFile}"]
-    },
-    {
-      "type": "node",
       "request": "launch",
       "name": "engine-server:test file",
       "program": "${workspaceFolder:engine-server}/lib/${fileBasenameNoExtension}.js",

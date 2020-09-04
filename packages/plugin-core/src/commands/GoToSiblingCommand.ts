@@ -1,4 +1,4 @@
-import { DNodeUtils, Note, DNode } from "@dendronhq/common-all";
+import { DNodeUtils, Note } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";

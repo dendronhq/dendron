@@ -1,0 +1,107 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExportPod basic 1`] = `
+Array [
+  Object {
+    "body": "
+",
+    "children": Array [
+      "482b1cd8-a775-4bee-958f-f9bd8068e8c4",
+      "ed92c531-a08a-4cd6-a0f8-f0dfd57507dd",
+    ],
+    "created": 1599261638527,
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "stub": false,
+    "title": "root",
+    "type": "note",
+    "updated": 1599261638527,
+  },
+  Object {
+    "body": "bar body
+",
+    "children": Array [],
+    "created": 1599261638531,
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "id": "482b1cd8-a775-4bee-958f-f9bd8068e8c4",
+    "parent": "root",
+    "stub": false,
+    "title": "Bar",
+    "type": "note",
+    "updated": 1599261638531,
+  },
+  Object {
+    "body": "foo body
+",
+    "children": Array [],
+    "created": 1599261638530,
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "ed92c531-a08a-4cd6-a0f8-f0dfd57507dd",
+    "parent": "root",
+    "stub": false,
+    "title": "Foo",
+    "type": "note",
+    "updated": 1599261638530,
+  },
+]
+`;
+
+exports[`ExportPod basic no body 1`] = `
+Array [
+  Object {
+    "children": Array [
+      "482b1cd8-a775-4bee-958f-f9bd8068e8c4",
+      "ed92c531-a08a-4cd6-a0f8-f0dfd57507dd",
+    ],
+    "created": 1599261638527,
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "stub": false,
+    "title": "root",
+    "type": "note",
+    "updated": 1599261638527,
+  },
+  Object {
+    "children": Array [],
+    "created": 1599261638531,
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "id": "482b1cd8-a775-4bee-958f-f9bd8068e8c4",
+    "parent": "root",
+    "stub": false,
+    "title": "Bar",
+    "type": "note",
+    "updated": 1599261638531,
+  },
+  Object {
+    "children": Array [],
+    "created": 1599261638530,
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "ed92c531-a08a-4cd6-a0f8-f0dfd57507dd",
+    "parent": "root",
+    "stub": false,
+    "title": "Foo",
+    "type": "note",
+    "updated": 1599261638530,
+  },
+]
+`;

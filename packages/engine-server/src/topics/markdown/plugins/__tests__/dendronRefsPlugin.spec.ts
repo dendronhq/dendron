@@ -5,7 +5,7 @@ import { getProcessor } from "../../../markdown/utils";
 
 describe("basic", () => {
   describe.skip("bond", () => {
-    test.only("simple", () => {
+    test("simple", () => {
       const resp = getProcessor();
       const txt = `
 $$

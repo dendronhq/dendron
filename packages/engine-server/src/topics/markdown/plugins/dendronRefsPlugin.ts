@@ -43,6 +43,26 @@ interface PluginOpts {
   root: string | undefined;
 }
 
+const aliasDivider = "|";
+function isAlias(pageTitle: string) {
+  return pageTitle.indexOf(aliasDivider) !== -1;
+}
+
+function parseAliasLink(pageTitle: string) {
+  const [displayName, name] = pageTitle.split(aliasDivider);
+  return { name, displayName };
+}
+
+export function parsePageTitle(pageTitle: string) {
+  if (isAlias(pageTitle)) {
+    return parseAliasLink(pageTitle);
+  }
+  return {
+    name: pageTitle,
+    displayName: pageTitle,
+  };
+}
+
 export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
   const permalinks = opts.permalinks || [];
   const defaultPageResolver = (name: string) => [
@@ -53,27 +73,7 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
   const wikiLinkClassName = opts.wikiLinkClassName || "internal";
   const defaultHrefTemplate = (permalink: string) => `#/page/${permalink}`;
   const hrefTemplate = opts.hrefTemplate || defaultHrefTemplate;
-  const aliasDivider = opts.aliasDivider || "|";
   const root: string | undefined = opts.root;
-
-  function isAlias(pageTitle: string) {
-    return pageTitle.indexOf(aliasDivider) !== -1;
-  }
-
-  function parseAliasLink(pageTitle: string) {
-    const [displayName, name] = pageTitle.split(aliasDivider);
-    return { name, displayName };
-  }
-
-  function parsePageTitle(pageTitle: string) {
-    if (isAlias(pageTitle)) {
-      return parseAliasLink(pageTitle);
-    }
-    return {
-      name: pageTitle,
-      displayName: pageTitle,
-    };
-  }
 
   function inlineTokenizer(eat: Eat, value: string) {
     const match = LINK_REGEX.exec(value);

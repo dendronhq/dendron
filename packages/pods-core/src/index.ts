@@ -1,8 +1,7 @@
 import { readYAML } from "@dendronhq/common-server";
 import fs, { writeFileSync, ensureDirSync } from "fs-extra";
 import path from "path";
-import { Pod } from "../lib/base";
-import { PodOptsV2 } from "./base";
+import { PodOptsV2, Pod } from "./base";
 import { JSONExportPod, PodConfigEntry } from "./builtin";
 import _ from "lodash";
 

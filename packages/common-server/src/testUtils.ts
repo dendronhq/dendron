@@ -3,7 +3,8 @@ import matter from "gray-matter";
 import _ from "lodash";
 import path from "path";
 import tmp, { DirResult } from "tmp";
-import { readYAML } from "./files";
+import { readYAML, node2MdFile } from "./files";
+import { NoteRawProps, Note, DNodeRawProps } from "@dendronhq/common-all";
 
 export { DirResult };
 // eslint-disable-next-line no-undef
@@ -71,6 +72,47 @@ export class FileTestUtils {
   static writeMDFile = (root: string, fname: string, fm: any, body: string) => {
     const fmAndBody = matter.stringify(body, fm);
     return fs.writeFileSync(path.join(root, fname), fmAndBody);
+  };
+}
+
+export class NodeTestUtils {
+  static createNotes = (vaultPath: string, notes: Partial<NoteRawProps>[]) => {
+    node2MdFile(new Note({ fname: "root", id: "root", title: "root" }), {
+      root: vaultPath,
+    });
+    notes.map((n) => {
+      // @ts-ignore
+      node2MdFile(new Note(n), {
+        root: vaultPath,
+      });
+    });
+  };
+
+  static cleanNodeMeta = (opts: {
+    payload: DNodeRawProps[];
+    fields: string[];
+  }) => {
+    const { payload, fields } = opts;
+    return _.sortBy(_.map(payload, (ent) => _.pick(ent, fields)));
+  };
+
+  static assertNodeBody = (opts: {
+    expect: jest.Expect;
+    payload: DNodeRawProps[];
+    expected: { fname: string; body: string }[];
+  }) => {
+    const { expect, payload, expected } = opts;
+    expect(
+      _.sortBy(
+        _.map(payload, (ent) => {
+          const { body, fname } = _.pick(ent, ["body", "fname"]);
+          return {
+            fname,
+            body: _.trim(body),
+          };
+        })
+      )
+    ).toEqual(expected);
   };
 }
 

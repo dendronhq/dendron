@@ -306,6 +306,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.pod.md",
     docPreview: "",
   },
+  EXPORT_POD: {
+    key: "dendron.exportPod",
+    title: `${CMD_PREFIX} Export Pod`,
+    group: "pods",
+    desc: "Export notes to an external data source",
+    docLink: "dendron.topic.pod.md",
+    docPreview: "",
+  },
   // --- Misc
   OPEN_LINK: {
     key: "dendron.openLink",

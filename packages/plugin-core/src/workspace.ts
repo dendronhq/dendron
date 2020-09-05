@@ -42,6 +42,7 @@ import { GotoNoteCommand, GotoNoteCommandOpts } from "./commands/GotoNote";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { GoDownCommand } from "./commands/GoDownCommand";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
+import { ExportPodCommand } from "./commands/ExportPod";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -185,6 +186,16 @@ export class DendronWorkspace {
       throw Error("engine not initialized");
     }
     return this._engine;
+  }
+
+  get podsDir(): string {
+    const rootDir = DendronWorkspace.rootDir();
+    if (!rootDir) {
+      throw `rootdir not set`;
+    }
+    const podsPath = path.join(rootDir, "pods");
+    fs.ensureDirSync(podsPath);
+    return podsPath;
   }
 
   get rootWorkspace(): vscode.WorkspaceFolder {
@@ -464,6 +475,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.GO_UP_HIERARCHY.key,
         async () => {
           await new GoUpCommand().run();
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.EXPORT_POD.key,
+        async () => {
+          await new ExportPodCommand().run();
         }
       )
     );

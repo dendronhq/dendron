@@ -1,18 +1,18 @@
-import { URI } from "vscode-uri";
 import { DEngine } from "@dendronhq/common-all";
 import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
 
-type PodOpts = {
+export type PodOptsV2 = {
   roots: string[];
+  podsDir: string;
   engine?: DEngine;
 };
 
-export abstract class PodBase<TExportPodOpts extends ExportConfig = any> {
-  public opts: PodOpts;
+export abstract class PodBaseV2<TExportPodOpts extends ExportConfig = any> {
+  public opts: PodOptsV2;
   private _engine: DEngine;
 
-  constructor(opts: PodOpts) {
+  constructor(opts: PodOptsV2) {
     this.opts = opts;
     if (!_.isUndefined(this.opts.engine)) {
       this._engine = this.opts.engine;
@@ -43,7 +43,7 @@ export abstract class PodBase<TExportPodOpts extends ExportConfig = any> {
 }
 
 export type ExportConfig = {
-  dest: URI;
+  dest: string;
 };
 
 export type ExportPodOpts<TConfig extends ExportConfig> = {
@@ -58,9 +58,11 @@ export type ExportPodOpts<TConfig extends ExportConfig> = {
   config: TConfig;
 };
 
-export interface ExportPod<TConfig extends ExportConfig> {
+export interface ExportPod<TConfig extends ExportConfig = any> {
   plant: (opts: ExportPodOpts<TConfig>) => Promise<void>;
 }
+
+export type Pod = ExportPod;
 
 // interface ImportPod {
 // }

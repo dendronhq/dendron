@@ -7,8 +7,8 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { URI } from "vscode-uri";
-import { ExportPod } from "../JSONPod";
+import { genPodConfig, getPodConfigPath } from "../..";
+import { JSONExportPod } from "../JSONPod";
 
 const createNotes = (vaultPath: string, notes: Partial<NoteRawProps>[]) => {
   node2MdFile(new Note({ fname: "root", id: "root", title: "root" }), {
@@ -54,33 +54,38 @@ const assertNodeBody = (opts: {
 };
 
 function setup(opts: { notes: Partial<NoteRawProps>[] }) {
-  return EngineTestUtils.setupStoreDir({
+  const podsDir = FileTestUtils.tmpDir().name;
+  const storeDir = EngineTestUtils.setupStoreDir({
     copyFixtures: false,
     initDirCb: (dirPath: string) => {
       createNotes(dirPath, opts.notes);
     },
   });
+  return { podsDir, storeDir };
 }
 
-describe("ExportPod", () => {
-  let root: string;
+describe("JSONExportPod", () => {
+  let storeDir: string;
+  let podsDir: string;
 
   const createNotes = (): Partial<NoteRawProps>[] => [
     { fname: "foo", body: "foo body" },
     { fname: "bar", body: "bar body" },
   ];
 
+  beforeEach(async () => {
+    ({ storeDir, podsDir } = await setup({ notes: createNotes() }));
+  });
+
   test("basic", async () => {
-    root = await setup({ notes: createNotes() });
-    const pod = new ExportPod({ roots: [root] });
+    const pod = new JSONExportPod({ roots: [storeDir], podsDir });
     const mode = "notes";
     const metaOnly = false;
     const destDir = FileTestUtils.tmpDir().name;
     const destPath = path.join(destDir, "export.json");
-    const config = { dest: URI.file(destPath) };
+    const config = { dest: destPath };
     await pod.plant({ mode, metaOnly, config });
     const payload = fs.readJSONSync(destPath) as NoteRawProps[];
-    expect(payload).toMatchSnapshot();
     assertNodeMeta({
       expect,
       payload,
@@ -108,16 +113,14 @@ describe("ExportPod", () => {
   });
 
   test("basic no body", async () => {
-    root = await setup({ notes: createNotes() });
-    const pod = new ExportPod({ roots: [root] });
+    const pod = new JSONExportPod({ roots: [storeDir], podsDir });
     const mode = "notes";
     const metaOnly = true;
     const destDir = FileTestUtils.tmpDir().name;
     const destPath = path.join(destDir, "export.json");
-    const config = { dest: URI.file(destPath) };
+    const config = { dest: destPath };
     await pod.plant({ mode, metaOnly, config });
     const payload = fs.readJSONSync(destPath) as NoteRawProps[];
-    expect(payload).toMatchSnapshot();
     assertNodeMeta({
       expect,
       payload,
@@ -142,5 +145,12 @@ describe("ExportPod", () => {
         { fname: "foo", body: "" },
       ],
     });
+  });
+
+  test("write config", () => {
+    genPodConfig(podsDir, JSONExportPod);
+    const configPath = getPodConfigPath(podsDir, JSONExportPod);
+    genPodConfig(podsDir, JSONExportPod);
+    expect(fs.readFileSync(configPath, { encoding: "utf8" })).toMatchSnapshot();
   });
 });

@@ -258,6 +258,13 @@
                 "docPreview": ""
             },
             {
+                "command": "dendron.exportPod",
+                "title": "Dendron: Export Pod",
+                "desc": "Export notes to an external data source",
+                "docLink": "dendron.topic.pod.md",
+                "docPreview": ""
+            },
+            {
                 "command": "dendron.openLink",
                 "title": "Dendron: Open Link",
                 "desc": "Open link to external file (eg. pdf, .mov, etc) use system default",
@@ -424,6 +431,7 @@
         "@dendronhq/common-server": "^0.9.5",
         "@dendronhq/dendron-cli": "^0.9.5",
         "@dendronhq/engine-server": "^0.9.5",
+        "@dendronhq/pods-core": "^0.9.5",
         "cross-path-sort": "^1.0.0",
         "execa": "^4.0.2",
         "fs-extra": "^9.0.1",

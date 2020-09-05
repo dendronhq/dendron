@@ -16,7 +16,7 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
     return {} as any;
   }
 
-  abstract async enrichInputs(inputs: TInput): Promise<TOpts>;
+  abstract async enrichInputs(inputs: TInput): Promise<TOpts | undefined>;
 
   abstract async execute(opts: TOpts): Promise<TOut>;
 
@@ -38,7 +38,10 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
 
       const inputs = await this.gatherInputs();
       if (!_.isUndefined(inputs)) {
-        const opts: TOpts = await this.enrichInputs(inputs);
+        const opts: TOpts | undefined = await this.enrichInputs(inputs);
+        if (_.isUndefined(opts)) {
+          return;
+        }
         const resp = await this.execute(opts);
         this.showResponse(resp);
         return resp;

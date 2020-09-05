@@ -1,34 +1,56 @@
 import fs from "fs-extra";
 import { URI } from "vscode-uri";
-import { ExportPod, ExportPodOpts, PodBase } from "../base";
+import { ExportPod, ExportPodOpts, PodBaseV2, PodOptsV2 } from "../base";
 
-type PodOpts = {
-  roots: string[];
-};
+class JSONPod extends PodBaseV2 {
+  public opts: PodOptsV2;
 
-class JSONPod extends PodBase {
-  public opts: PodOpts;
-
-  constructor(opts: PodOpts) {
+  constructor(opts: PodOptsV2) {
     super(opts);
     this.opts = opts;
   }
 }
 
 type ExportConfig = {
-  dest: URI;
+  dest: string;
 };
 
-class JSONExportPod extends JSONPod implements ExportPod<ExportConfig> {
+export type PodConfigEntry = {
+  key: string;
+  description: string;
+  type: "string" | "number";
+  default?: any;
+};
+
+export class JSONExportPod extends JSONPod implements ExportPod<ExportConfig> {
+  static id: string = "dendron.json";
+  static description: string = "export to json";
+
+  static config = (): PodConfigEntry[] => {
+    return [
+      {
+        key: "dest",
+        description: "where will output be stored",
+        type: "string",
+      },
+    ];
+  };
+
+  cleanConfig(config: ExportConfig) {
+    return {
+      ...config,
+      dest: URI.file(config.dest),
+    };
+  }
+
   async plant(opts: ExportPodOpts<ExportConfig>): Promise<void> {
     return new Promise(async (resolve) => {
       await this.initEngine();
+      const cleanConfig = this.cleanConfig(opts.config);
       const payload = this.prepareForExport(opts);
-      const destPath = opts.config.dest.fsPath;
+      const destPath = cleanConfig.dest.fsPath;
       fs.writeJSONSync(destPath, payload, { encoding: "utf8" });
       resolve();
     });
   }
 }
-
-export { JSONExportPod as ExportPod };

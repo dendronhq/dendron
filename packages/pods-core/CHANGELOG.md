@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.6](https://github.com/dendronhq/dendron/compare/v0.9.6-alpha.0...v0.9.6) (2020-09-05)
+
+**Note:** Version bump only for package @dendronhq/pods-core
+
 ## [0.9.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.9.5...v0.9.6-alpha.0) (2020-09-05)
 
 ### Features

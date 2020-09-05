@@ -5,14 +5,18 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.9.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.9.5...v0.9.6-alpha.0) (2020-09-05)
 
+### Features
+
+- **pods:** Pod Exports ([ba22bbe](https://github.com/dendronhq/dendron/commitkkk/ba22bbe85d76f6665eeaf1e5deebb11f96132794))
+
+Export notes to an external data source. Currently only JSON is supported.
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.help.gif)
+
 ### Bug Fixes
 
 - **engine:** bad sibling traversal in some cases ([17a1a13](https://github.com/dendronhq/dendron/commit/17a1a13874df1fd763954bce622ebfda346c02a9))
 - **workbench:** don't update color theme on upgrade ([266e46e](https://github.com/dendronhq/dendron/commit/266e46ec08fafa87df62dfb8ff4a3b8aa7bbd5b4))
-
-### Features
-
-- **pods:** JSON export pod ([ba22bbe](https://github.com/dendronhq/dendron/commit/ba22bbe85d76f6665eeaf1e5deebb11f96132794))
 
 ## [0.9.5](https://github.com/dendronhq/dendron/compare/v0.9.5-alpha.0...v0.9.5) (2020-09-04)
 

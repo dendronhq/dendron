@@ -4,7 +4,6 @@ import path from "path";
 import { Pod } from "../lib/base";
 import { PodOptsV2 } from "./base";
 import { JSONExportPod, PodConfigEntry } from "./builtin";
-import { entries } from "lodash";
 import _ from "lodash";
 
 export interface PodClassEntryV2 {

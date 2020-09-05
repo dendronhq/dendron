@@ -310,9 +310,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.exportPod",
     title: `${CMD_PREFIX} Export Pod`,
     group: "pods",
-    desc: "Export notes to an external data source",
+    desc:
+      "Export notes to an external data source. Currently only JSON is supported. ",
     docLink: "dendron.topic.pod.md",
-    docPreview: "",
+    docPreview: `<a href="https://www.loom.com/share/d49e5f4155af485cadc9cd810b6cab28"> <img src="https://cdn.loom.com/sessions/thumbnails/d49e5f4155af485cadc9cd810b6cab28-with-play.gif"> </a>`,
   },
   // --- Misc
   OPEN_LINK: {

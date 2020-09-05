@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.7-alpha.1](https://github.com/dendronhq/dendron/compare/v0.9.7-alpha.0...v0.9.7-alpha.1) (2020-09-05)
+
+### Features
+
+- **pods:** support note references when publishing notes ([dbd50d6](https://github.com/dendronhq/dendron/commit/dbd50d699703d64402918cc40f1a8d7f89e0a789))
+
 ## [0.9.7-alpha.0](https://github.com/dendronhq/dendron/compare/v0.9.6...v0.9.7-alpha.0) (2020-09-05)
 
 **Note:** Version bump only for package @dendronhq/pods-core

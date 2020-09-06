@@ -76,6 +76,24 @@ describe("parseRef", () => {
       link: createFileLink({ anchorStart: "head1" }),
     });
   });
+
+  it("describe file ref with anchor start and end", () => {
+    expect(parseDendronRef("ref: [[foo.md]]#head1:#head2")).toEqual({
+      direction: "to",
+      link: createFileLink({ anchorStart: "head1", anchorEnd: "head2" }),
+    });
+  });
+
+  it("describe file ref with anchor start and end, start offset", () => {
+    expect(parseDendronRef("ref: [[foo.md]]#head1,1:#head2")).toEqual({
+      direction: "to",
+      link: createFileLink({
+        anchorStart: "head1",
+        anchorEnd: "head2",
+        anchorStartOffset: 1,
+      }),
+    });
+  });
 });
 
 const FILE_TEXT = `

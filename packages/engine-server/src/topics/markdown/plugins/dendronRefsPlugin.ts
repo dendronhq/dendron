@@ -164,7 +164,7 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
         });
         const bodyAST: Parent = getProcessor().parse(body) as Parent;
         // bumpHeadings(bodyAST, 2);
-        const { anchorStart, anchorEnd } = data.link;
+        const { anchorStart, anchorEnd, anchorStartOffset } = data.link;
         let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
         let anchorEndIndex = bodyAST.children.length;
         if (anchorStart) {
@@ -186,31 +186,11 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
           anchorEndIndex
         );
 
-        return getProcessor().stringify(bodyAST);
-        // targetAst.children.splice.apply(targetAst.children, [
-        //     head + 1, // start splice
-        //     (nextHead >= 0 ? nextHead - head : targetAst.children.length - head) - 1 // items to delete
-        //   ].concat(toInjectAst.children))
-
-        // inject('Section1', target, newStuff)
-        // return `ref link: ${root}`;
-        // if (!node || !node.data || !node.data.alias) {
-        //   throw Error("no alias found");
-        // }
-        // if (data.useId) {
-        //   if (!data.note) {
-        //     throw Error("no note");
-        //   }
-        //   node.value = data.note.id;
-        // }
-        // if (data.toMd) {
-        //   return `[${data.alias}](${data.prefix || ""}${node.value})`;
-        // }
-
-        // if (node.data.alias !== node.value) {
-        //   return `[[${node.data.alias}${aliasDivider}${node.value}]]`;
-        // }
-        // return `[[${node.value}]]`;
+        let out = getProcessor().stringify(bodyAST);
+        if (anchorStartOffset) {
+          out = out.split("\n").slice(anchorStartOffset).join("\n");
+        }
+        return out;
       };
     }
   }

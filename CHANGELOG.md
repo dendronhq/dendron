@@ -9,9 +9,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - **pods:** support note references when publishing notes ([dbd50d6](https://github.com/dendronhq/dendron/commit/dbd50d699703d64402918cc40f1a8d7f89e0a789))
 
-## [0.9.7-alpha.0](https://github.com/dendronhq/dendron/compare/v0.9.6...v0.9.7-alpha.0) (2020-09-05)
+## Dendron Markdown Preview
 
-**Note:** Version bump only for package root
+<a href="https://www.loom.com/share/8eb01f6c3196415c8aadc4992805a176"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/8eb01f6c3196415c8aadc4992805a176-with-play.gif"> </a>
+
+### Bug Fixes
+
+- fix issue with preview checkbox not updating markdown
+- fix issue with `\` causing in certain markdown blocks
 
 ## [0.9.6](https://github.com/dendronhq/dendron/compare/v0.9.6-alpha.0...v0.9.6) (2020-09-05)
 

@@ -171,6 +171,38 @@ $$`;
       expect(out.indexOf("task2") >= 0).toBeTruthy();
     });
 
+    test("basic block with header and start, offset ", async () => {
+      const txt = [
+        "---",
+        "id: foo",
+        "---",
+        `# Tasks`,
+        "## Header1",
+        "task1",
+        "## Header2",
+        "task2",
+      ];
+      root = await EngineTestUtils.setupStoreDir({
+        initDirCb: (dirPath: string) => {
+          fs.writeFileSync(
+            path.join(dirPath, "daily.tasks.md"),
+            txt.join("\n"),
+            { encoding: "utf8" }
+          );
+        },
+      });
+      const out = getProcessor({ root })
+        .processSync(
+          `# Foo Bar
+((ref:[[daily.tasks]]#Header2,1))`
+        )
+        .toString();
+      expect(out).toMatchSnapshot();
+      expect(out.indexOf("Header2") >= 0).toBeFalsy();
+      expect(out.indexOf("task1") >= 0).toBeFalsy();
+      expect(out.indexOf("task2") >= 0).toBeTruthy();
+    });
+
     test("basic block with header, start and end ", async () => {
       const txt = [
         "---",
@@ -201,6 +233,42 @@ $$`;
         )
         .toString();
       expect(out).toMatchSnapshot();
+      expect(out.indexOf("Header1") >= 0).toBeTruthy();
+      expect(out.indexOf("task1") >= 0).toBeTruthy();
+      expect(out.indexOf("task2") >= 0).toBeFalsy();
+    });
+
+    test("basic block with header, start and end, offset ", async () => {
+      const txt = [
+        "---",
+        "id: foo",
+        "---",
+        `# Tasks`,
+        "## Header1",
+        "task1",
+        "## Header2",
+        "task2",
+        "<div class='bar'>",
+        "BOND",
+        "</div>",
+      ];
+      root = await EngineTestUtils.setupStoreDir({
+        initDirCb: (dirPath: string) => {
+          fs.writeFileSync(
+            path.join(dirPath, "daily.tasks.md"),
+            txt.join("\n"),
+            { encoding: "utf8" }
+          );
+        },
+      });
+      const out = getProcessor({ root })
+        .processSync(
+          `# Foo Bar
+((ref:[[daily.tasks]]#Header1,1:#Header2))`
+        )
+        .toString();
+      expect(out).toMatchSnapshot();
+      expect(out.indexOf("Header1") >= 0).toBeFalsy();
       expect(out.indexOf("task1") >= 0).toBeTruthy();
       expect(out.indexOf("task2") >= 0).toBeFalsy();
     });

@@ -20,6 +20,7 @@ export type DendronRefLink = {
   name?: string;
   anchorStart?: string;
   anchorEnd?: string;
+  anchorStartOffset?: number;
   type: "file" | "id";
 };
 
@@ -131,6 +132,11 @@ export function parseFileLink(ref: string): DendronRefLink {
       clean[k] = v;
     }
   });
+  if (clean.anchorStart && clean.anchorStart.indexOf(",") >= 0) {
+    const [anchorStart, offset] = clean.anchorStart.split(",");
+    clean.anchorStart = anchorStart;
+    clean.anchorStartOffset = parseInt(offset);
+  }
   return clean;
 }
 

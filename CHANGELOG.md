@@ -5,21 +5,25 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.9.7](https://github.com/dendronhq/dendron/compare/v0.9.7-alpha.2...v0.9.7) (2020-09-06)
 
-**Note:** Version bump only for package root
-
-## [0.9.7-alpha.2](https://github.com/dendronhq/dendron/compare/v0.9.7-alpha.1...v0.9.7-alpha.2) (2020-09-06)
-
-**Note:** Version bump only for package root
-
-## [0.9.7-alpha.1](https://github.com/dendronhq/dendron/compare/v0.9.7-alpha.0...v0.9.7-alpha.1) (2020-09-05)
-
 ### Features
 
 - **pods:** support note references when publishing notes ([dbd50d6](https://github.com/dendronhq/dendron/commit/dbd50d699703d64402918cc40f1a8d7f89e0a789))
 
-## Dendron Markdown Preview
-
 <a href="https://www.loom.com/share/8eb01f6c3196415c8aadc4992805a176"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/8eb01f6c3196415c8aadc4992805a176-with-play.gif"> </a>
+
+- **markdown:** support note reference offsets ([645e90f](https://github.com/dendronhq/dendron/commit/645e90f))
+
+A note reference offset is a way to skip a number of lines when using a note reference. The syntax is `,{number}`. Below is an example of using a note reference offset to offset an initial heading, skipping the actual header when doing the embeding.
+
+- NOTE: currently, note reference offsets are limited to the first anchor inside a block reference. They must also be a positive value
+
+```
+((ref:[[demo.embed.block]]#head1,1))
+```
+
+<a href="https://www.loom.com/share/31cb62916586453f8475f94ba68b74a1"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/31cb62916586453f8475f94ba68b74a1-with-play.gif"> </a>
+
+## Dendron Markdown Preview
 
 ### Bug Fixes
 

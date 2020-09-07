@@ -51,9 +51,10 @@ export function cleanFileName(
   const cleanOpts = _.defaults(opts, { isDir: false });
   if (!cleanOpts.isDir) {
     const { name: fname, dir } = path.parse(name);
+    // strip off extension
     name = path.join(dir, fname);
-    name = name.replace(/\./g, "-");
   }
+  name = name.replace(/\./g, "-");
   // replace all names already in file name
   //name = name.replace(/\./g, "-");
   name = cleanName(name);

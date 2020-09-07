@@ -75,6 +75,8 @@ export class FilePod extends BasePod<ImportOpts> {
       if (item?.data) {
         noteProps.data = item.data;
       }
+
+      // deal with non-md files
       if (!_.isEmpty(item.entries)) {
         // move entries over
         // TODO: don't hardcode assets

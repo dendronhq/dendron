@@ -43,6 +43,7 @@ describe("filePod", () => {
     expect(note.stub).toBeTruthy();
     expect(note.parent?.fname).toEqual("root");
     expect(note.children.map((n) => n.fname)).toEqual([
+      "project.p-3",
       "project.p1",
       "project.p2",
     ]);
@@ -64,6 +65,7 @@ describe("filePod", () => {
           "project.p1.n1.md",
           "project.p1.n2.md",
           "project.p2.n1.md",
+          "project.p-3.n1.md",
         ],
       }
     );

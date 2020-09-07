@@ -5,7 +5,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [0.10.0](https://github.com/dendronhq/dendron/compare/v0.9.7...v0.10.0) (2020-09-07)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+See our release notes [here](https://www.dendron.so/notes/08b2e6ea-bd3e-4f4b-b2b9-676a7b743a65.html)
 
 ## [0.9.7](https://github.com/dendronhq/dendron/compare/v0.9.7-alpha.2...v0.9.7) (2020-09-06)
 
@@ -61,7 +61,7 @@ Export notes to an external data source. Currently only JSON is supported.
 
 - **engine:** trouble with mixed case file names ([02bcde2](https://github.com/dendronhq/dendron/commit/02bcde2d7f8e9c6bef9753e18fffd9e15c763976))
 
-## [0.9.4](https://github.com/dendronhq/dendron/compare/v0.9.4-alpha.0...v0.9.4) (2020-09-0
+## [0.9.4](https://github.com/dendronhq/dendron/compare/v0.9.4-alpha.0...v0.9.4) (2020-09-0-4)
 
 ### Bug Fixes
 

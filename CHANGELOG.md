@@ -5,7 +5,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [0.10.0](https://github.com/dendronhq/dendron/compare/v0.9.7...v0.10.0) (2020-09-07)
 
-**Note:** Version bump only for package root
+See our release notes [here](https://www.dendron.so/notes/08b2e6ea-bd3e-4f4b-b2b9-676a7b743a65.html)
 
 ## [0.9.7](https://github.com/dendronhq/dendron/compare/v0.9.7-alpha.2...v0.9.7) (2020-09-06)
 

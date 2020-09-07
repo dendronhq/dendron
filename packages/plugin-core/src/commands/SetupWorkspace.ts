@@ -135,9 +135,14 @@ export class SetupWorkspaceCommand extends BasicCommand<
       path.join(rootDir, "vault", ".vscode")
     );
     if (!emptyWs) {
+      const filterFunc = (src: string, _dest: string) => {
+        const basename = path.basename(src, ".md");
+        return !basename.startsWith("project");
+      };
       fs.copySync(
         path.join(dendronWSTemplate.fsPath, "vault"),
-        path.join(rootDir, "vault")
+        path.join(rootDir, "vault"),
+        { filter: filterFunc }
       );
     }
     WorkspaceConfig.write(rootDir);

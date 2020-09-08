@@ -9,6 +9,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - **notes:** new note from selection cmd ([d2a917a](https://github.com/dendronhq/dendron/commit/d2a917a31c135b6222c3c3083ba1413298bb095d))
 
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.new-from-select.gif)
+
 ## [0.10.1](https://github.com/dendronhq/dendron/compare/v0.10.0...v0.10.1) (2020-09-07)
 
 ### Bug Fixes

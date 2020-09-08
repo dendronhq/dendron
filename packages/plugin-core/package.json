@@ -152,9 +152,9 @@
             {
                 "command": "dendron.newNoteFromSelection",
                 "title": "Dendron: New Note From Selection",
-                "desc": "Create new note based on a selection",
+                "desc": "Create new note based on a selection. Remove selection from original note.",
                 "docLink": "dendron.topic.commands.md",
-                "docPreview": ""
+                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.new-from-select.gif)"
             },
             {
                 "command": "dendron.renameNote",

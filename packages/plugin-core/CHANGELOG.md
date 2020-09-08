@@ -9,9 +9,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - **notes:** new note from selection cmd ([d2a917a](https://github.com/dendronhq/dendron/commit/d2a917a31c135b6222c3c3083ba1413298bb095d))
 
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.new-from-select.gif)
+
 ## [0.10.1](https://github.com/dendronhq/dendron/compare/v0.10.0...v0.10.1) (2020-09-07)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- **pods:** deal with dots when importing directories ([5e45e1d](https://github.com/dendronhq/dendron/commit/5e45e1df132a1cfc234d1ce149ddfedcdee25d44))
 
 # [0.10.0](https://github.com/dendronhq/dendron/compare/v0.9.7...v0.10.0) (2020-09-07)
 

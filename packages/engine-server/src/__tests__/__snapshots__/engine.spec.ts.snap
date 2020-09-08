@@ -7,6 +7,7 @@ Object {
   "data": Object {
     "desc": "",
     "id": "baz",
+    "stub": false,
     "title": "Baz",
   },
   "excerpt": "",

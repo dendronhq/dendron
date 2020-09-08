@@ -62,7 +62,7 @@ export class ExportPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
       roots: [root],
       podsDir: ws.podsDir,
     });
-    await pod.plant({ mode: "notes", metaOnly: true, config: opts.config });
+    await pod.plant({ mode: "notes", config: opts.config });
     const dest = opts.config.dest;
     window.showInformationMessage(`done exporting. destination: ${dest}`);
   }

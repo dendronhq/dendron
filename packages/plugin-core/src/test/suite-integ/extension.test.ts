@@ -75,6 +75,7 @@ import {
   getPodPath,
 } from "@dendronhq/pods-core";
 import { podClassEntryToPodItem } from "../../utils/pods";
+import { ExportConfig } from "packages/pods-core/src/base";
 
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
@@ -1740,7 +1741,7 @@ suite("ExportPod", function () {
     });
   });
 
-  test("config present", function (done) {
+  test("config present, default", function (done) {
     onWSInit(async () => {
       podsDir = DendronWorkspace.instance().podsDir;
       const pods = getAllExportPods();
@@ -1752,14 +1753,98 @@ suite("ExportPod", function () {
         "export.json"
       );
       ensureDirSync(path.dirname(configPath));
-      writeYAML(configPath, { dest: exportDest });
+      writeYAML(configPath, { dest: exportDest } as ExportConfig);
       cmd.gatherInputs = async () => ({
         podChoice: podClassEntryToPodItem(podClassEntry),
       });
       await cmd.run();
       const payload = fs.readJSONSync(exportDest);
       assert.deepEqual(
-        NodeTestUtils.cleanNodeMeta({ payload, fields: ["fname"] }),
+        NodeTestUtils.cleanNodeMeta({ payload, fields: ["fname", "body"] }),
+        [
+          { fname: "root", body: "\n" },
+          { fname: "bar", body: "bar body\n" },
+        ]
+      );
+      done();
+    });
+
+    setupDendronWorkspace(root.name, ctx, {
+      useCb: async () => {
+        NodeTestUtils.createNotes(path.join(root.name, "vault"), [
+          { fname: "foo", stub: true },
+          { fname: "bar" },
+        ]);
+      },
+    });
+  });
+
+  test("config present, default, include stubs", function (done) {
+    onWSInit(async () => {
+      podsDir = DendronWorkspace.instance().podsDir;
+      const pods = getAllExportPods();
+      const podClassEntry = pods[0];
+      const cmd = new ExportPodCommand();
+      const configPath = getPodConfigPath(podsDir, podClassEntry);
+      const exportDest = path.join(
+        getPodPath(podsDir, podClassEntry),
+        "export.json"
+      );
+      ensureDirSync(path.dirname(configPath));
+      writeYAML(configPath, {
+        dest: exportDest,
+        includeStubs: true,
+      } as ExportConfig);
+      cmd.gatherInputs = async () => ({
+        podChoice: podClassEntryToPodItem(podClassEntry),
+      });
+      await cmd.run();
+      const payload = fs.readJSONSync(exportDest);
+      assert.deepEqual(
+        NodeTestUtils.cleanNodeMeta({ payload, fields: ["fname", "body"] }),
+        [
+          { fname: "root", body: "\n" },
+          { fname: "bar", body: "bar body\n" },
+          { fname: "foo", body: "foo body\n" },
+        ]
+      );
+      done();
+    });
+
+    setupDendronWorkspace(root.name, ctx, {
+      useCb: async () => {
+        NodeTestUtils.createNotes(path.join(root.name, "vault"), [
+          { fname: "foo", stub: true },
+          { fname: "bar" },
+        ]);
+      },
+    });
+  });
+
+  test("config present, default, include stubs, no body", function (done) {
+    onWSInit(async () => {
+      podsDir = DendronWorkspace.instance().podsDir;
+      const pods = getAllExportPods();
+      const podClassEntry = pods[0];
+      const cmd = new ExportPodCommand();
+      const configPath = getPodConfigPath(podsDir, podClassEntry);
+      const exportDest = path.join(
+        getPodPath(podsDir, podClassEntry),
+        "export.json"
+      );
+      ensureDirSync(path.dirname(configPath));
+      writeYAML(configPath, {
+        dest: exportDest,
+        includeStubs: true,
+        includeBody: false,
+      } as ExportConfig);
+      cmd.gatherInputs = async () => ({
+        podChoice: podClassEntryToPodItem(podClassEntry),
+      });
+      await cmd.run();
+      const payload = fs.readJSONSync(exportDest);
+      assert.deepEqual(
+        NodeTestUtils.cleanNodeMeta({ payload, fields: ["fname", "body"] }),
         [{ fname: "root" }, { fname: "bar" }, { fname: "foo" }]
       );
       done();
@@ -1768,7 +1853,7 @@ suite("ExportPod", function () {
     setupDendronWorkspace(root.name, ctx, {
       useCb: async () => {
         NodeTestUtils.createNotes(path.join(root.name, "vault"), [
-          { fname: "foo" },
+          { fname: "foo", stub: true },
           { fname: "bar" },
         ]);
       },

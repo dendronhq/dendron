@@ -1,8 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`note refs note refs 1`] = `
-"# Foo Content
-
-# Bar Content # I am bar
+"foo body
 "
 `;

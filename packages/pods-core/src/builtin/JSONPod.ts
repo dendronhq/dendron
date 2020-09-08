@@ -1,6 +1,13 @@
 import fs from "fs-extra";
 import { URI } from "vscode-uri";
-import { ExportPod, ExportPodOpts, PodBaseV2, PodOptsV2 } from "../base";
+import {
+  ExportPod,
+  ExportPodOpts,
+  PodBaseV2,
+  PodOptsV2,
+  ExportConfig,
+} from "../base";
+import _ from "lodash";
 
 class JSONPod extends PodBaseV2 {
   public opts: PodOptsV2;
@@ -10,10 +17,6 @@ class JSONPod extends PodBaseV2 {
     this.opts = opts;
   }
 }
-
-type ExportConfig = {
-  dest: string;
-};
 
 export type PodConfigEntry = {
   key: string;
@@ -35,13 +38,6 @@ export class JSONExportPod extends JSONPod implements ExportPod<ExportConfig> {
       },
     ];
   };
-
-  cleanConfig(config: ExportConfig) {
-    return {
-      ...config,
-      dest: URI.file(config.dest),
-    };
-  }
 
   async plant(opts: ExportPodOpts<ExportConfig>): Promise<void> {
     return new Promise(async (resolve) => {

@@ -76,13 +76,19 @@ export class FileTestUtils {
 }
 
 export class NodeTestUtils {
-  static createNotes = (vaultPath: string, notes: Partial<NoteRawProps>[]) => {
+  static createNotes = (
+    vaultPath: string,
+    notes: Partial<NoteRawProps>[],
+    opts?: { withBody: boolean }
+  ) => {
+    const cleanOpts = _.defaults(opts, { withBody: true });
     node2MdFile(new Note({ fname: "root", id: "root", title: "root" }), {
       root: vaultPath,
     });
     notes.map((n) => {
+      const body = cleanOpts.withBody ? n.fname + " body" : "";
       // @ts-ignore
-      node2MdFile(new Note(n), {
+      node2MdFile(new Note({ ...n, body }), {
         root: vaultPath,
       });
     });

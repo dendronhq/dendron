@@ -9,6 +9,7 @@ import _ from "lodash";
 import path from "path";
 import { genPodConfig, getPodConfigPath } from "../..";
 import { JSONExportPod } from "../JSONPod";
+import { ExportConfig } from "packages/pods-core/lib/base";
 
 const createNotes = (vaultPath: string, notes: Partial<NoteRawProps>[]) => {
   node2MdFile(new Note({ fname: "root", id: "root", title: "root" }), {
@@ -115,11 +116,10 @@ describe("JSONExportPod", () => {
   test("basic no body", async () => {
     const pod = new JSONExportPod({ roots: [storeDir], podsDir });
     const mode = "notes";
-    const metaOnly = true;
     const destDir = FileTestUtils.tmpDir().name;
     const destPath = path.join(destDir, "export.json");
-    const config = { dest: destPath };
-    await pod.plant({ mode, metaOnly, config });
+    const config: ExportConfig = { dest: destPath, includeBody: false };
+    await pod.plant({ mode, config });
     const payload = fs.readJSONSync(destPath) as NoteRawProps[];
     assertNodeMeta({
       expect,

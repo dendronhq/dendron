@@ -340,6 +340,7 @@ describe("engine:exact", () => {
           desc: "",
           id: "foo.one",
           title: "foo.one",
+          stub: false,
         });
 
         [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
@@ -369,6 +370,7 @@ describe("engine:exact", () => {
           desc: "",
           id: "foo",
           title: "foo",
+          stub: false,
         });
 
         [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(

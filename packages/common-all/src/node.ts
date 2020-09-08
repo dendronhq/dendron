@@ -406,7 +406,14 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
   toNoteProps(): NoteProps {
     const node = this;
     const body = this.body;
-    const props = _.pick(node, ["id", "title", "desc", "updated", "created"]);
+    const props = _.pick(node, [
+      "id",
+      "title",
+      "desc",
+      "updated",
+      "created",
+      "stub",
+    ]);
     const { custom } = node;
     const meta = { ...props, ...custom };
     return {

@@ -1,6 +1,7 @@
 import { DEngine } from "@dendronhq/common-all";
 import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { URI } from "vscode-uri";
 
 export type PodOptsV2 = {
   roots: string[];
@@ -31,10 +32,20 @@ export abstract class PodBaseV2<TExportPodOpts extends ExportConfig = any> {
     await this.engine.init();
   }
 
+  cleanConfig(config: ExportConfig) {
+    return {
+      ..._.defaults(config, { includeStubs: false, includeBody: true }),
+      dest: URI.file(config.dest),
+    };
+  }
+
   prepareForExport(opts: ExportPodOpts<TExportPodOpts>) {
     this.initEngine();
-    const nodes = this.engine[opts.mode];
-    const hideBody = opts.metaOnly ? true : false;
+    let nodes = _.values(this.engine[opts.mode]);
+    const hideBody = opts.config.includeBody ? false : true;
+    if (!opts.config.includeStubs) {
+      nodes = _.reject(nodes, { stub: true });
+    }
     const payload: any = _.map(nodes, (ent) => {
       return ent.toRawProps(hideBody);
     });
@@ -44,6 +55,14 @@ export abstract class PodBaseV2<TExportPodOpts extends ExportConfig = any> {
 
 export type ExportConfig = {
   dest: string;
+  /**
+   * Default: false
+   */
+  includeStubs?: boolean;
+  /**
+   * Default: true
+   */
+  includeBody?: boolean;
 };
 
 export type ExportPodOpts<TConfig extends ExportConfig> = {
@@ -54,7 +73,6 @@ export type ExportPodOpts<TConfig extends ExportConfig> = {
   /**
    * Only export metadata?
    */
-  metaOnly: boolean;
   config: TConfig;
 };
 

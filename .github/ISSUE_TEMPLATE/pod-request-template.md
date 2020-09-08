@@ -1,3 +1,12 @@
+---
+name: Pod Request Template
+about: 'When requesting a Pod (import/export method for Dendron), use this template. '
+title: "[Pod Request] placeholder"
+labels: ''
+assignees: kpathakota
+
+---
+
 # <template> Pod Proposal
 
 ## Import
@@ -28,4 +37,4 @@ destinations:
 
 
 ## Example Use Cases
-<e.g. Sync notes from meetings with an airtable tracking meetings across days and people> 
+<e.g. Sync notes from meetings with an airtable tracking meetings across days and people>

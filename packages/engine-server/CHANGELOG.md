@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.3-alpha.2](https://github.com/dendronhq/dendron/compare/v0.10.3-alpha.1...v0.10.3-alpha.2) (2020-09-08)
+
+### Enhancements
+
+- **pods:** additional options on export ([500a908](https://github.com/dendronhq/dendron/commit/500a90853121874dcff64a6300eb317efb58e8a4))
+
 ## [0.10.1](https://github.com/dendronhq/dendron/compare/v0.10.0...v0.10.1) (2020-09-07)
 
 ### Bug Fixes

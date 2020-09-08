@@ -14,6 +14,7 @@ import { BaseCommand } from "./base";
 type CommandOpts = {
   fname: string;
   title: string;
+  body?: string;
 };
 
 type CommandInput = {};
@@ -118,6 +119,9 @@ export abstract class CreateNoteCommand extends BaseCommand<
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const { fname, title } = _.defaults(opts, {});
     const node = new Note({ fname, title });
+    if (opts.body) {
+      node.body = opts.body;
+    }
     const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
     const uri = node2Uri(node, wsFolders);
     const historyService = HistoryService.instance();

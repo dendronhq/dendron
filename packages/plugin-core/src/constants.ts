@@ -122,6 +122,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.lookup.md",
     docPreview: "",
   },
+  NEW_NOTE_FROM_SELECTION: {
+    key: "dendron.newNoteFromSelection",
+    title: `${CMD_PREFIX} New Note From Selection`,
+    group: "notes",
+    desc: "Create new note based on a selection",
+    docLink: "dendron.topic.commands.md",
+    docPreview: "",
+  },
   RENAME_NOTE: {
     key: "dendron.renameNote",
     title: `${CMD_PREFIX} Rename Note`,

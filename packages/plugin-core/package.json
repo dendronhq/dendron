@@ -150,6 +150,13 @@
                 "docPreview": ""
             },
             {
+                "command": "dendron.newNoteFromSelection",
+                "title": "Dendron: New Note From Selection",
+                "desc": "Create new note based on a selection",
+                "docLink": "dendron.topic.commands.md",
+                "docPreview": ""
+            },
+            {
                 "command": "dendron.renameNote",
                 "title": "Dendron: Rename Note",
                 "desc": "Rename a note and all backlinks",

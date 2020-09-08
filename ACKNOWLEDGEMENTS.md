@@ -11,6 +11,7 @@ Dendron is made possible with the help of the following third party extensions.
 Dendron borrows code from some of the following projects:
 
 - [vscode-memo](https://github.com/svsool/vscode-memo) ([MIT License](https://github.com/svsool/vscode-memo/blob/master/LICENSE))
+- [markdown-kit](https://github.com/svsool/vscode-markdown-kit) (MIT License)
 - [vscode-fileutils](https://tweetdeck.twitter.com/) (MIT License)
 - [foam](https://github.com/foambubble/foam) (MIT License)
 - [mdast-util-inject](https://github.com/anandthakker/mdast-util-inject) (MIT License)

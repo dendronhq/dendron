@@ -43,6 +43,7 @@ import { DendronTreeView } from "./views/DendronTreeView";
 import { GoDownCommand } from "./commands/GoDownCommand";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { ExportPodCommand } from "./commands/ExportPod";
+import { NewNoteFromSelectionCommand } from "./commands/NewNoteFromSelectionCommand";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -421,6 +422,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.RENAME_NOTE.key,
         async () => {
           await new RenameNoteV2Command().run();
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.NEW_NOTE_FROM_SELECTION.key,
+        async () => {
+          await new NewNoteFromSelectionCommand().run();
         }
       )
     );

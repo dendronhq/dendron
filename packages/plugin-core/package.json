@@ -196,7 +196,7 @@
                 "command": "dendron.refactorHierarchy",
                 "title": "Dendron: Refactor Hierarchy",
                 "desc": "Update hierarchy using regex",
-                "docs": "Like `Rename Note` but works on an entire hierarchy of notes. This command takes two arguments: \n- matcher: regex that matches text you want to capture for replacement\n- replacer: regex that represents text you want to use as replacement\n\nAfter running the command, you will be taken to a preview that shows all files that will be affected. You will be given an option in a dropdown to either proceed with the refactor or cancel the operation. \n\n- NOTE: Dendron will warn you if refactoring will overwrite existing files. You will need to either change your `replacer` or move the affected files before Dendron will perform a refactor",
+                "docs": "Like `Rename Note` but works on an entire hierarchy of notes. This command takes two arguments: \n- matcher: regex that matches text you want to capture for replacement\n- replacer: regex that represents text you want to use as replacement\n\nAfter running the command, you will be taken to a preview that shows all files that will be affected. You will be given an option in a dropdown to either proceed with the refactor or cancel the operation. \n\n- NOTE: Dendron will warn you if refactoring will overwrite existing files. You will need to either change your `replacer` or move the affected files before Dendron will perform a refactor\n\nRefactor Hierarchy is \nhttps://discordapp.com/channels/717965437182410783/743194856788328497/743195382795993291",
                 "docLink": "dendron.topic.commands.md",
                 "docPreview": "<a href=\"https://www.loom.com/share/11d90a86fd1348a5a504406b52d79f85\"> <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/11d90a86fd1348a5a504406b52d79f85-with-play.gif\"> </a>"
             },
@@ -254,6 +254,13 @@
                 "command": "dendron.buildPod",
                 "title": "Dendron: Build Pod",
                 "desc": "Build your notes for export. Currently, only export to github pages is supported.",
+                "docLink": "dendron.topic.pod.md",
+                "docPreview": ""
+            },
+            {
+                "command": "dendron.configurePod",
+                "title": "Dendron: Configure Pod",
+                "desc": "Update your pod configuration",
                 "docLink": "dendron.topic.pod.md",
                 "docPreview": ""
             },

@@ -310,6 +310,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.pod.md",
     docPreview: "",
   },
+  CONFIGURE_POD: {
+    key: "dendron.configurePod",
+    title: `${CMD_PREFIX} Configure Pod`,
+    group: "pods",
+    desc: "Update your pod configuration",
+    docLink: "dendron.topic.pod.md",
+    docPreview: "",
+  },
   IMPORT_POD: {
     key: "dendron.importPod",
     title: `${CMD_PREFIX} Import Pod`,

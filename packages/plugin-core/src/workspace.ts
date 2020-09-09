@@ -44,6 +44,7 @@ import { GoDownCommand } from "./commands/GoDownCommand";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { ExportPodCommand } from "./commands/ExportPod";
 import { NewNoteFromSelectionCommand } from "./commands/NewNoteFromSelectionCommand";
+import { ConfigurePodCommand } from "./commands/ConfigurePodCommand";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -494,6 +495,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.EXPORT_POD.key,
         async () => {
           await new ExportPodCommand().run();
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.CONFIGURE_POD.key,
+        async () => {
+          await new ConfigurePodCommand().run();
         }
       )
     );

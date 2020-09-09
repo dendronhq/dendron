@@ -1,13 +1,11 @@
 import fs from "fs-extra";
-import { URI } from "vscode-uri";
 import {
+  ExportConfig,
   ExportPod,
   ExportPodOpts,
   PodBaseV2,
   PodOptsV2,
-  ExportConfig,
 } from "../base";
-import _ from "lodash";
 
 class JSONPod extends PodBaseV2 {
   public opts: PodOptsV2;

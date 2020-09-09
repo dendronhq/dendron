@@ -55,6 +55,8 @@ export function genPodConfig(podsDir: string, podClass: PodClassEntryV2) {
       ].join("\n");
     })
     .join("\n");
-  writeFileSync(podConfigPath, config);
+  if (!fs.existsSync(podConfigPath)) {
+    writeFileSync(podConfigPath, config);
+  }
   return podConfigPath;
 }

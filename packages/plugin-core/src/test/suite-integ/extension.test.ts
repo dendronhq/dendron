@@ -75,8 +75,9 @@ import {
   getPodPath,
 } from "@dendronhq/pods-core";
 import { podClassEntryToPodItem } from "../../utils/pods";
-import { ExportConfig } from "packages/pods-core/src/base";
+import { ConfigurePodCommand } from "../../commands/ConfigurePodCommand";
 
+type ExportConfig = any;
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
   const settings = {
     folders: [
@@ -1697,6 +1698,77 @@ suite("GoToSibling", function () {
           });
         },
       });
+    });
+  });
+});
+
+suite("ConfigurePod", function () {
+  let root: DirResult;
+  let ctx: vscode.ExtensionContext;
+  let podsDir: string;
+  this.timeout(TIMEOUT);
+
+  beforeEach(function () {
+    root = FileTestUtils.tmpDir();
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    DendronWorkspace.getOrCreate(ctx);
+  });
+
+  afterEach(function () {
+    HistoryService.instance().clearSubscriptions();
+  });
+
+  test("no config", function (done) {
+    onWSInit(async () => {
+      // await vscode.window.showTextDocument(uri);
+      podsDir = DendronWorkspace.instance().podsDir;
+      const pods = getAllExportPods();
+      const podClassEntry = pods[0];
+      const cmd = new ConfigurePodCommand();
+      cmd.gatherInputs = async () => ({
+        podClass: podClassEntry,
+      });
+      await cmd.run();
+      const configPath = getPodConfigPath(podsDir, podClassEntry);
+      assert.deepEqual(
+        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath,
+        configPath
+      );
+      done();
+    });
+
+    setupDendronWorkspace(root.name, ctx, {
+      useCb: async () => {},
+    });
+  });
+
+  test("config present ", function (done) {
+    onWSInit(async () => {
+      podsDir = DendronWorkspace.instance().podsDir;
+      const pods = getAllExportPods();
+      const podClassEntry = pods[0];
+      const cmd = new ConfigurePodCommand();
+      const configPath = getPodConfigPath(podsDir, podClassEntry);
+      const exportDest = path.join(
+        getPodPath(podsDir, podClassEntry),
+        "export.json"
+      );
+      ensureDirSync(path.dirname(configPath));
+      writeYAML(configPath, { dest: exportDest } as ExportConfig);
+
+      cmd.gatherInputs = async () => ({
+        podClass: podClassEntry,
+      });
+      await cmd.run();
+      assert.deepEqual(
+        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath,
+        configPath
+      );
+      done();
+    });
+
+    setupDendronWorkspace(root.name, ctx, {
+      useCb: async () => {},
     });
   });
 });

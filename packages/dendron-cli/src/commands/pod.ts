@@ -51,7 +51,10 @@ export abstract class PodCLICommand extends BaseCommand<
     pods: PodClassEntryV2[]
   ): Promise<CommandOpts> {
     const { vault, podId, podsDir } = args;
-    const engine = DendronEngine.getOrCreateEngine({ root: vault });
+    const engine = DendronEngine.getOrCreateEngine({
+      root: vault,
+      forceNew: true,
+    });
     const podClass = _.find(pods, {
       id: podId,
     }) as PodClassEntryV2;

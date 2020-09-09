@@ -9,7 +9,7 @@ import {
 
 export class JSONExportPod extends ExportPodBaseV2
   implements ExportPod<ExportConfig> {
-  static id: string = "dendron.json.pod";
+  static id: string = "dendron.pod.json";
   static description: string = "export to json";
 
   static config = (): PodConfigEntry[] => {

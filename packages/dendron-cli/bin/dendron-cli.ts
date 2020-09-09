@@ -9,6 +9,7 @@ import {
   RefactorFMCliOpts,
   RefactorFMCommand,
 } from "../src/commands/refactorFM";
+import { ImportPodCLICommand } from "../src/commands/importPod";
 
 export const addLayout: RefactorRule = {
   name: "add fm",
@@ -71,6 +72,14 @@ yargs
     ExportPodCLICommand.buildArgs,
     async (args: any) => {
       return ExportPodCLICommand.run(args);
+    }
+  )
+  .command<any>(
+    "importPod",
+    "import a pod",
+    ImportPodCLICommand.buildArgs,
+    async (args: any) => {
+      return ImportPodCLICommand.run(args);
     }
   )
   .command<RefactorFMCliOpts>(

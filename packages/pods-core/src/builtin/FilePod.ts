@@ -34,7 +34,7 @@ const toMarkdownLink = (assetPath: string, opts?: { name?: string }) => {
 };
 
 export class FileImportPod extends ImportPodBaseV2 {
-  static id: string = "dendron.file.pod";
+  static id: string = "dendron.pod.file";
   static description: string = "import to file";
 
   static config = (): PodConfigEntry[] => {

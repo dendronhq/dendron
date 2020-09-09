@@ -21,7 +21,7 @@ export function getPodConfigPath(
   podsDir: string,
   podClass: PodClassEntryV2
 ): string {
-  return path.join(podsDir, podClass.id, `$config.${podClass.kind}.yml`);
+  return path.join(podsDir, podClass.id, `config.${podClass.kind}.yml`);
 }
 
 export function getPodPath(podsDir: string, podClass: PodClassEntryV2): string {

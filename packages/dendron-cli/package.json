@@ -30,7 +30,7 @@
     "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
     "build": "npm run compile",
     "compile": "tsc -p tsconfig.build.json",
-    "test": "env LOG_DST=/tmp/dendron-engine-server.log jest",
+    "test": "env LOG_DST=/tmp/dendron-cli.txt jest",
     "test:unit:all": "cross-env LOG_LEVEL=error yarn test",
     "coverage": "jest --coverage",
     "watch": "npm run compile -- --watch",

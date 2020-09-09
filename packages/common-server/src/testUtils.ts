@@ -12,6 +12,12 @@ export { DirResult };
 tmp.setGracefulCleanup();
 
 export class FileTestUtils {
+  /**
+   * Compare files in root with expected
+   * @param root
+   * @param expected
+   * @param opts
+   */
   static cmpFiles = (
     root: string,
     expected: string[],

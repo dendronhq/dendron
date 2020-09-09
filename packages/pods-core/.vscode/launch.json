@@ -29,7 +29,8 @@
         "name": "pods-core:debug test file",
         "program": "${workspaceFolder:pods-core}/node_modules/jest/bin/jest.js",
         "cwd": "${workspaceFolder:pods-core}",
-        "args": ["--runInBand", "${relativeFile}", "-u"]
+        "args": ["--runInBand", "${relativeFile}", "-u"],
+        "env": {"LOG_DST": "/tmp/pods-core.txt"}
       }
     ]
   }

@@ -1,9 +1,9 @@
-import { PodConfigEntry } from "./builtin";
-import { PodOptsV2, Pod } from "./base";
+import { PodOptsV2, Pod, PodConfigEntry } from "./base";
 
 export interface PodClassEntryV2 {
   id: string;
   description: string;
+  kind: PodKind;
   config: () => PodConfigEntry[];
   new (opts: PodOptsV2): Pod;
 }
@@ -13,3 +13,5 @@ export type PodItem = {
   description: string;
   podClass: PodClassEntryV2;
 };
+
+export type PodKind = "import" | "export";

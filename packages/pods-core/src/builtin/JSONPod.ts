@@ -2,29 +2,14 @@ import fs from "fs-extra";
 import {
   ExportConfig,
   ExportPod,
+  ExportPodBaseV2,
   ExportPodOpts,
-  PodBaseV2,
-  PodOptsV2,
+  PodConfigEntry,
 } from "../base";
 
-class JSONPod extends PodBaseV2 {
-  public opts: PodOptsV2;
-
-  constructor(opts: PodOptsV2) {
-    super(opts);
-    this.opts = opts;
-  }
-}
-
-export type PodConfigEntry = {
-  key: string;
-  description: string;
-  type: "string" | "number";
-  default?: any;
-};
-
-export class JSONExportPod extends JSONPod implements ExportPod<ExportConfig> {
-  static id: string = "dendron.json";
+export class JSONExportPod extends ExportPodBaseV2
+  implements ExportPod<ExportConfig> {
+  static id: string = "dendron.json.pod";
   static description: string = "export to json";
 
   static config = (): PodConfigEntry[] => {

@@ -10,7 +10,8 @@ export class Logger {
     this.name = opts.name;
     this.level = opts.level;
   }
-  _log(msg: any) {
+
+  private _log(msg: any) {
     let ctx = "";
     if (msg.ctx) {
       ctx = msg.ctx;
@@ -33,7 +34,6 @@ function createLogger(name?: string, dest?: string): pino.Logger {
   const level = env("LOG_LEVEL", { shouldThrow: false }) || "debug";
   const nameClean = name || env("LOG_NAME");
 
-  //const logDst = env("LOG_DST", { shouldThrow: false }) || "stdout";
   // if (logDst === "stdout") {
   //   // TODO: tmp disable pino logging on stdout
   //   const out = pino({ name: nameClean, level });
@@ -42,6 +42,10 @@ function createLogger(name?: string, dest?: string): pino.Logger {
   if (dest) {
     return pino(pino.destination(dest)).child({ name: nameClean, level });
   } else {
+    // const logDst = env("LOG_DST", { shouldThrow: false })
+    // if (logDst) {
+    //   return pino(pino.destination(logDst)).child({ name: nameClean, level });
+    // }
     return pino({ name: nameClean, level });
   }
 }

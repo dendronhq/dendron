@@ -2,7 +2,7 @@ import { readYAML } from "@dendronhq/common-server";
 import fs, { ensureDirSync, writeFileSync } from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { JSONExportPod } from "./builtin";
+import { JSONExportPod, FileImportPod } from "./builtin";
 import { PodClassEntryV2 } from "./types";
 export * from "./types";
 export * from "./utils";
@@ -11,6 +11,9 @@ export * from "./builtin";
 export function getAllExportPods(): PodClassEntryV2[] {
   return [JSONExportPod];
 }
+export function getAllImportPods(): PodClassEntryV2[] {
+  return [FileImportPod];
+}
 
 // === utils
 
@@ -18,7 +21,7 @@ export function getPodConfigPath(
   podsDir: string,
   podClass: PodClassEntryV2
 ): string {
-  return path.join(podsDir, podClass.id, "config.yml");
+  return path.join(podsDir, podClass.id, `$config.${podClass.kind}.yml`);
 }
 
 export function getPodPath(podsDir: string, podClass: PodClassEntryV2): string {

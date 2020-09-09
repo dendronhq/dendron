@@ -42,7 +42,7 @@
         "--findRelatedTests",
         "${relativeFile}"
       ],
-      "cwd": "${workspaceRoot}"
+      "cwd": "${workspaceRoot}","env": {"LOG_DST": "/tmp/dendron-cli.txt"}
     }
   ]
 }

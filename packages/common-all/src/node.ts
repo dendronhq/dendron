@@ -90,9 +90,6 @@ export class DNodeUtils {
       (maybeNode && cleanOpts.noStubs && !maybeNode?.stub) ||
       (maybeNode && !cleanOpts.noStubs)
     ) {
-      if (maybeNode.fname === "project") {
-        debugger;
-      }
       return maybeNode;
     }
     return DNodeUtils.findClosestParent(dirname, nodes, cleanOpts);

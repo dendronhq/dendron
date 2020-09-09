@@ -137,7 +137,8 @@ export class SetupWorkspaceCommand extends BasicCommand<
     if (!emptyWs) {
       const filterFunc = (src: string, _dest: string) => {
         const basename = path.basename(src, ".md");
-        return !basename.startsWith("project");
+        const blacklist = ["project", "meet"];
+        return !_.some(blacklist, (ent) => basename.startsWith(ent));
       };
       fs.copySync(
         path.join(dendronWSTemplate.fsPath, "vault"),

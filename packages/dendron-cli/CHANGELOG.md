@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.3](https://github.com/dendronhq/dendron/compare/v0.10.3-alpha.2...v0.10.3) (2020-09-09)
+
+**Note:** Version bump only for package @dendronhq/dendron-cli
+
 ## [0.10.3-alpha.2](https://github.com/dendronhq/dendron/compare/v0.10.3-alpha.1...v0.10.3-alpha.2) (2020-09-08)
 
 ### Enhancements

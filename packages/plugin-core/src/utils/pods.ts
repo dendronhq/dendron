@@ -23,11 +23,3 @@ export const showPodQuickPickItems = (podItem: PodItem[]) => {
     canPickMany: false,
   });
 };
-
-export const podClassEntryToPodItem = (p: PodClassEntryV2): PodItem => {
-  return {
-    id: p.id,
-    description: p.description,
-    podClass: p,
-  };
-};

@@ -2,14 +2,11 @@ import {
   genPodConfig,
   getAllExportPods,
   PodClassEntryV2,
+  podClassEntryToPodItem,
 } from "@dendronhq/pods-core";
 import { Uri } from "vscode";
 import { VSCodeUtils } from "../utils";
-import {
-  podClassEntryToPodItem,
-  PodItem,
-  showPodQuickPickItems,
-} from "../utils/pods";
+import { PodItem, showPodQuickPickItems } from "../utils/pods";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 

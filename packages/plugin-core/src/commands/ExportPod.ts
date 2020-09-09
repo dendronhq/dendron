@@ -3,14 +3,11 @@ import {
   getAllExportPods,
   getPodConfig,
   PodClassEntryV2,
+  podClassEntryToPodItem,
 } from "@dendronhq/pods-core";
 import { Uri, window } from "vscode";
 import { VSCodeUtils } from "../utils";
-import {
-  podClassEntryToPodItem,
-  PodItem,
-  showPodQuickPickItems,
-} from "../utils/pods";
+import { PodItem, showPodQuickPickItems } from "../utils/pods";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 
@@ -56,11 +53,9 @@ export class ExportPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const ctx = { ctx: "ExportPod" };
     this.L.info({ ctx, opts });
-    const ws = DendronWorkspace.instance();
     const root = DendronWorkspace.rootWorkspaceFolder()?.uri.fsPath as string;
     const pod = new opts.podChoice.podClass({
       roots: [root],
-      podsDir: ws.podsDir,
     });
     await pod.plant({ mode: "notes", config: opts.config });
     const dest = opts.config.dest;

@@ -73,8 +73,8 @@ import {
   getAllExportPods,
   getPodConfigPath,
   getPodPath,
+  podClassEntryToPodItem,
 } from "@dendronhq/pods-core";
-import { podClassEntryToPodItem } from "../../utils/pods";
 import { ConfigurePodCommand } from "../../commands/ConfigurePodCommand";
 
 type ExportConfig = any;

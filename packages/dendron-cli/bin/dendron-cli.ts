@@ -3,11 +3,12 @@ import { DConfig, DendronEngine } from "@dendronhq/engine-server";
 import yargs from "yargs";
 import { BackfillCliOpts, BackfillCommand } from "../src/commands/backfill";
 import { BuildSiteCliOpts, BuildSiteCommand } from "../src/commands/build-site";
+import { ExportPodCLICommand } from "../src/commands/exportPod";
+import { RefactorRule } from "../src/commands/refactorBase";
 import {
   RefactorFMCliOpts,
   RefactorFMCommand,
 } from "../src/commands/refactorFM";
-import { RefactorRule } from "../src/commands/refactorBase";
 
 export const addLayout: RefactorRule = {
   name: "add fm",
@@ -44,10 +45,10 @@ yargs
       await cmd.execute({ engine, overwriteFields });
     }
   )
-  .command<BuildSiteCliOpts>(
+  .command<any>(
     "build-site",
     "build static site",
-    (args) => {
+    (args: yargs.Argv<BuildSiteCliOpts>) => {
       args.option("vault", {
         describe: "location of vault",
       });
@@ -55,13 +56,21 @@ yargs
         describe: "location to dendronRoot",
       });
     },
-    async (args) => {
+    async (args: any) => {
       const { vault, dendronRoot } = args;
       const config = DConfig.getOrCreate(dendronRoot).site;
       const cmd = new BuildSiteCommand();
       const engine = DendronEngine.getOrCreateEngine({ root: vault });
       await engine.init();
       await cmd.execute({ engine, config, dendronRoot });
+    }
+  )
+  .command<any>(
+    "exportPod",
+    "export a pod",
+    ExportPodCLICommand.buildArgs,
+    async (args: any) => {
+      return ExportPodCLICommand.run(args);
     }
   )
   .command<RefactorFMCliOpts>(

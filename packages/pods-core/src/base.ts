@@ -5,7 +5,6 @@ import { URI } from "vscode-uri";
 
 export type PodOptsV2 = {
   roots: string[];
-  podsDir: string;
   engine?: DEngine;
 };
 

@@ -41,6 +41,7 @@
     "@dendronhq/common-all": "^0.10.3",
     "@dendronhq/common-server": "^0.10.3",
     "@dendronhq/engine-server": "^0.10.3",
+    "@dendronhq/pods-core": "^0.10.3",
     "fs-extra": "^9.0.1",
     "gray-matter": "^4.0.2",
     "lodash": "^4.17.19",

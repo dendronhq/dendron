@@ -316,7 +316,8 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "pods",
     desc: "Update your pod configuration",
     docLink: "dendron.topic.pod.md",
-    docPreview: "",
+    docPreview:
+      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)",
   },
   IMPORT_POD: {
     key: "dendron.importPod",

@@ -9,19 +9,12 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - **pods:** Add configure pod command ([254ae08](https://github.com/dendronhq/dendron/commit/254ae08aceef4e1fecc80688c5f92c9bb03d3502))
 
-## [0.10.3-alpha.2](https://github.com/dendronhq/dendron/compare/v0.10.3-alpha.1...v0.10.3-alpha.2) (2020-09-08)
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)
 
 ### Enhancements
 
 - **pods:** additional options on export ([500a908](https://github.com/dendronhq/dendron/commit/500a90853121874dcff64a6300eb317efb58e8a4))
-
-## [0.10.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.10.3-alpha.0...v0.10.3-alpha.1) (2020-09-08)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.10.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.10.2...v0.10.3-alpha.0) (2020-09-08)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
+- **workbench:** add [code server support](https://github.com/cdr/code-server) ([e50fe3](https://github.com/dendronhq/dendron/commit/e50fe351c1486acdf5f36ef89db0209e19008120))
 
 ## [0.10.2](https://github.com/dendronhq/dendron/compare/v0.10.1...v0.10.2) (2020-09-08)
 

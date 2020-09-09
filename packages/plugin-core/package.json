@@ -262,7 +262,7 @@
                 "title": "Dendron: Configure Pod",
                 "desc": "Update your pod configuration",
                 "docLink": "dendron.topic.pod.md",
-                "docPreview": ""
+                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/pods.configure.gif)"
             },
             {
                 "command": "dendron.importPod",

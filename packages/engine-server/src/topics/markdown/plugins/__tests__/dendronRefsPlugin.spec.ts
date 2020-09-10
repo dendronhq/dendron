@@ -4,16 +4,6 @@ import path from "path";
 import { getProcessor } from "../../../markdown/utils";
 
 describe("basic", () => {
-  describe.skip("bond", () => {
-    test("simple", () => {
-      const resp = getProcessor();
-      const txt = `
-$$
-f(x) = \\sin(x)
-$$`;
-      expect(resp.processSync(txt).toString()).toMatchSnapshot();
-    });
-  });
   describe("parse", () => {
     test("init", () => {
       const resp = getProcessor().parse(`((ref:[[foo.md]]))`);
@@ -265,6 +255,76 @@ $$`;
         .processSync(
           `# Foo Bar
 ((ref:[[daily.tasks]]#Header1,1:#Header2))`
+        )
+        .toString();
+      expect(out).toMatchSnapshot();
+      expect(out.indexOf("Header1") >= 0).toBeFalsy();
+      expect(out.indexOf("task1") >= 0).toBeTruthy();
+      expect(out.indexOf("task2") >= 0).toBeFalsy();
+    });
+
+    test("basic block with wildcard as 1st elem ", async () => {
+      const txt = [
+        "---",
+        "id: foo",
+        "---",
+        `# Tasks`,
+        "## Header1",
+        "task1",
+        "## Header2",
+        "task2",
+        "<div class='bar'>",
+        "BOND",
+        "</div>",
+      ];
+      root = await EngineTestUtils.setupStoreDir({
+        initDirCb: (dirPath: string) => {
+          fs.writeFileSync(
+            path.join(dirPath, "daily.tasks.md"),
+            txt.join("\n"),
+            { encoding: "utf8" }
+          );
+        },
+      });
+      const out = getProcessor({ root })
+        .processSync(
+          `# Foo Bar
+((ref:[[daily.tasks]]#*,1:#header2))`
+        )
+        .toString();
+      expect(out).toMatchSnapshot();
+      expect(out.indexOf("Header1") >= 0).toBeTruthy();
+      expect(out.indexOf("task1") >= 0).toBeTruthy();
+      expect(out.indexOf("task2") >= 0).toBeFalsy();
+    });
+
+    test("basic block with wildcard as 2nd elem ", async () => {
+      const txt = [
+        "---",
+        "id: foo",
+        "---",
+        `# Tasks`,
+        "## Header1",
+        "task1",
+        "## Header2",
+        "task2",
+        "<div class='bar'>",
+        "BOND",
+        "</div>",
+      ];
+      root = await EngineTestUtils.setupStoreDir({
+        initDirCb: (dirPath: string) => {
+          fs.writeFileSync(
+            path.join(dirPath, "daily.tasks.md"),
+            txt.join("\n"),
+            { encoding: "utf8" }
+          );
+        },
+      });
+      const out = getProcessor({ root })
+        .processSync(
+          `# Foo Bar
+((ref:[[daily.tasks]]#Header1,1:#*))`
         )
         .toString();
       expect(out).toMatchSnapshot();

@@ -175,11 +175,16 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
           });
         }
         if (anchorEnd) {
-          anchorEndIndex = findIndex(bodyAST.children as any[], function (
-            node: Node
-          ) {
-            return isHeading(node, anchorEnd);
-          });
+          anchorEndIndex = findIndex(
+            bodyAST.children.slice(anchorStartIndex + 1) as any[],
+            function (node: Node) {
+              return isHeading(node, anchorEnd);
+            }
+          );
+          if (anchorEndIndex < 0) {
+            // TODO: raise error
+          }
+          anchorEndIndex += anchorStartIndex + 1;
         }
         bodyAST.children = bodyAST.children.slice(
           anchorStartIndex,

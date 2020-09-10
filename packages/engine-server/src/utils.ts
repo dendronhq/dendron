@@ -9,21 +9,24 @@ import path from "path";
 const markdownIt = _markdownIt();
 
 function normalize(text: string) {
-  return _.toLower(_.trim(text, ' #'));
+  return _.toLower(_.trim(text, " #"));
 }
 
-export function refLink2String(link: DendronRefLink, opts?: {includeParen: boolean}): string {
-  const cleanOpts = _.defaults(opts, {includeParen: false});
+export function refLink2String(
+  link: DendronRefLink,
+  opts?: { includeParen: boolean }
+): string {
+  const cleanOpts = _.defaults(opts, { includeParen: false });
   // [[foo]]#head1:#*"
-  const linkParts = [`[[${link.name}]]`]
+  const linkParts = [`[[${link.name}]]`];
   if (link.anchorStart) {
-    linkParts.push(`#${normalize(link.anchorStart)}`)
+    linkParts.push(`#${normalize(link.anchorStart)}`);
   }
   if (link.anchorStartOffset) {
-    linkParts.push(`,${link.anchorStartOffset}`)
+    linkParts.push(`,${link.anchorStartOffset}`);
   }
   if (link.anchorEnd) {
-    linkParts.push(`:#${normalize(link.anchorEnd)}`)
+    linkParts.push(`:#${normalize(link.anchorEnd)}`);
   }
   if (cleanOpts.includeParen) {
     linkParts.splice(0, 0, "((");

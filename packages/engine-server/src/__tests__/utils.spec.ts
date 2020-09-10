@@ -67,39 +67,46 @@ describe("parseFileLink", () => {
 
 describe("link2String", () => {
   test("file", () => {
-    expect(refLink2String({
-    name: "foo",
-    type: "file",
-    })).toEqual("[[foo]]")
+    expect(
+      refLink2String({
+        name: "foo",
+        type: "file",
+      })
+    ).toEqual("[[foo]]");
   });
 
   it("one anchor", () => {
-    expect(refLink2String({
-      name: "foo",
-      anchorStart: "head1",
-      type: "file",
-    })).toEqual("[[foo]]#head1");
+    expect(
+      refLink2String({
+        name: "foo",
+        anchorStart: "head1",
+        type: "file",
+      })
+    ).toEqual("[[foo]]#head1");
   });
 
   it("all parts", () => {
-    expect(refLink2String({
-      anchorEnd: "head2",
-      anchorStart: "head1",
-      name: "foo",
-      type: "file",
-    })).toEqual("[[foo]]#head1:#head2");
+    expect(
+      refLink2String({
+        anchorEnd: "head2",
+        anchorStart: "head1",
+        name: "foo",
+        type: "file",
+      })
+    ).toEqual("[[foo]]#head1:#head2");
   });
 
   it("next anchor", () => {
-    expect(refLink2String({
-      anchorEnd: "*",
-      anchorStart: "head1",
-      name: "foo",
-      type: "file",
-    })).toEqual("[[foo]]#head1:#*");
+    expect(
+      refLink2String({
+        anchorEnd: "*",
+        anchorStart: "head1",
+        name: "foo",
+        type: "file",
+      })
+    ).toEqual("[[foo]]#head1:#*");
   });
-
-})
+});
 
 describe("parseRef", () => {
   it("describe file ref without extension", () => {

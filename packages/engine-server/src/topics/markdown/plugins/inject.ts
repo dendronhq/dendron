@@ -87,9 +87,12 @@ export function isHeading(node: Node, text: string, depth?: number) {
     return false;
   }
 
+  // wildcard is always true
+  if (text === "*") {
+    return true;
+  }
   if (text) {
     var headingText = toString(node);
-    // TODO: more flexible match?
     return text.trim().toLowerCase() === headingText.trim().toLowerCase();
   }
 

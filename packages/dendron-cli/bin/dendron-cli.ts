@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /* eslint-disable no-unused-expressions */
 import { DConfig, DendronEngine } from "@dendronhq/engine-server";
 import yargs from "yargs";

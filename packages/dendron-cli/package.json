@@ -8,6 +8,9 @@
     "url": "ssh://git@github.com/dendronhq/dendron.git",
     "directory": "packages/common-server"
   },
+  "bin": {
+    "dendron-cli": "./lib/bin/dendron-cli.js"
+  },
   "author": {
     "name": "Kevin Lin",
     "email": "kevin@thence.io",

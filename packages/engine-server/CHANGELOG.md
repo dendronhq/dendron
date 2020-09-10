@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.10.4...v0.10.5-alpha.0) (2020-09-10)
+
+### Enhancements
+
+- **refs:** more intelligent ref copying ([6f1906f](https://github.com/dendronhq/dendron/commit/6f1906f410e84bc9782af415c5fcefc6a18ddf7c))
+- **refs:** support wildcard refs ([7161363](https://github.com/dendronhq/dendron/commit/7161363897b069b11981caa51af914b7529d13e4))
+
 ## [0.10.4](https://github.com/dendronhq/dendron/compare/v0.10.4-alpha.1...v0.10.4) (2020-09-10)
 
 **Note:** Version bump only for package @dendronhq/engine-server

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.10.4...v0.10.5-alpha.0) (2020-09-10)
+
+### Enhancements
+
+- **pods:** use consistent interface for import/export ([6a824dd](https://github.com/dendronhq/dendron/commit/6a824dd3bcf0d202107d3044f9406949258507c7))
+
 ## [0.10.4](https://github.com/dendronhq/dendron/compare/v0.10.4-alpha.1...v0.10.4) (2020-09-10)
 
 **Note:** Version bump only for package @dendronhq/dendron-cli

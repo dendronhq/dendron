@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/engine-server",
-  "version": "0.10.4-alpha.0",
+  "version": "0.10.4-alpha.1",
   "description": "dendron-engine",
   "license": "GPLv3",
   "repository": {
@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.10.4-alpha.0",
-    "@dendronhq/common-server": "^0.10.4-alpha.0",
+    "@dendronhq/common-server": "^0.10.4-alpha.1",
     "cross-path-sort": "^1.0.0",
     "fs-extra": "^9.0.1",
     "fuse.js": "^6.3.0",

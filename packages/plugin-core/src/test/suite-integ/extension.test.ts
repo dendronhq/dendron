@@ -78,6 +78,7 @@ import {
 } from "@dendronhq/pods-core";
 import { ConfigurePodCommand } from "../../commands/ConfigurePodCommand";
 import { ImportPodCommand } from "../../commands/ImportPod";
+import { CopyNoteRefCommand } from "../../commands/CopyNoteRef";
 
 type ExportConfig = any;
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
@@ -1017,6 +1018,35 @@ suite("commands", function () {
         done();
       });
       setupDendronWorkspace(root.name, ctx, { useFixtures: true });
+    });
+  });
+
+  describe.only("CopyNoteRefCommand", function () {
+    test("basic", function (done) {
+      onWSInit(async () => {
+        const uri = vscode.Uri.file(path.join(root.name, "vault", "foo.md"));
+        await vscode.window.showTextDocument(uri);
+        const link = await new CopyNoteRefCommand().run();
+        assert.equal(link, "((ref: [[foo]]))");
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, { useFixtures: true });
+    });
+
+    test("with selection", function (done) {
+      onWSInit(async () => {
+        const uri = vscode.Uri.file(path.join(root.name, "vault", "bar.md"));
+        const editor = await vscode.window.showTextDocument(uri);
+        editor.selection = new vscode.Selection(8, 0, 8, 12);
+        const link = await new CopyNoteRefCommand().run();
+        assert.equal(link, "((ref: [[bar]]#foo,1:#*))");
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, { useFixtures: false, useCb: async (vault) => {
+        NodeTestUtils.createNotes(vault, [
+          { fname: "bar", body: "## Foo\nfoo text\n## Header\n Header text" },
+        ]);
+      }});
     });
   });
 

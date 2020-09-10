@@ -107,7 +107,7 @@ export class NodeTestUtils {
     notes.map((n) => {
       const body = cleanOpts.withBody ? n.fname + " body" : "";
       // @ts-ignore
-      node2MdFile(new Note({ ...n, body }), {
+      node2MdFile(new Note({ body, ...n }), {
         root: vaultPath,
       });
     });

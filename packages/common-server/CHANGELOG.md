@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.10.3...v0.10.4-alpha.0) (2020-09-10)
+
+### Enhancements
+
+- **pods:** use cli to export pod ([dd21f31](https://github.com/dendronhq/dendron/commit/dd21f31a7270b4449995caf28f5a5aa40a56e160))
+
 ## [0.10.3](https://github.com/dendronhq/dendron/compare/v0.10.3-alpha.2...v0.10.3) (2020-09-09)
 
 **Note:** Version bump only for package @dendronhq/common-server

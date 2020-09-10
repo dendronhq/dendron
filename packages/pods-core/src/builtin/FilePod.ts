@@ -40,8 +40,8 @@ export class FileImportPod extends ImportPodBaseV2 {
   static config = (): PodConfigEntry[] => {
     return [
       {
-        key: "dest",
-        description: "where will output be stored",
+        key: "src",
+        description: "where will notes be imported from",
         type: "string",
       },
     ];

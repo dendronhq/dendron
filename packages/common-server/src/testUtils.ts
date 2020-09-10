@@ -11,6 +11,10 @@ export { DirResult };
 
 tmp.setGracefulCleanup();
 
+export type FileItem = {
+  path: string;
+};
+
 export class FileTestUtils {
   /**
    * Compare files in root with expected
@@ -38,6 +42,15 @@ export class FileTestUtils {
     ];
   };
 
+  static async createFiles(root: string, files: FileItem[]) {
+    return Promise.all(
+      _.map(files, async (ent) => {
+        const fpath = path.join(root, ent.path);
+        return await fs.ensureFile(fpath);
+      })
+    );
+  }
+
   static getFixturesRoot(base: string) {
     const pkgRoot = FileTestUtils.getPkgRoot(base);
     return path.join(pkgRoot, "fixtures");
@@ -45,7 +58,7 @@ export class FileTestUtils {
 
   static getPkgRoot(base: string, fname?: string): string {
     fname = fname || "package.json";
-    let acc = 5;
+    let acc = 10;
     const lvls = [];
     while (acc > 0) {
       const tryPath = path.join(base, ...lvls, fname);

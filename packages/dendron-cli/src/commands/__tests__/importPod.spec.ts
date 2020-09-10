@@ -5,22 +5,10 @@ import {
 } from "@dendronhq/common-server";
 import { FileImportPod, getPodConfigPath } from "@dendronhq/pods-core";
 import fs, { ensureDirSync } from "fs-extra";
-import _ from "lodash";
 import path from "path";
 import { ImportPodCLICommand } from "../importPod";
 
-type FileItem = {
-  path: string;
-};
-
-async function createFiles(root: string, files: FileItem[]) {
-  return Promise.all(
-    _.map(files, async (ent) => {
-      const fpath = path.join(root, ent.path);
-      return await fs.ensureFile(fpath);
-    })
-  );
-}
+const { createFiles } = FileTestUtils;
 
 describe("importPod", async () => {
   let importSrc: string;

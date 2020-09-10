@@ -74,8 +74,10 @@ import {
   getPodConfigPath,
   getPodPath,
   podClassEntryToPodItem,
+  getAllImportPods,
 } from "@dendronhq/pods-core";
 import { ConfigurePodCommand } from "../../commands/ConfigurePodCommand";
+import { ImportPodCommand } from "../../commands/ImportPod";
 
 type ExportConfig = any;
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
@@ -1764,6 +1766,93 @@ suite("ConfigurePod", function () {
         VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath,
         configPath
       );
+      done();
+    });
+
+    setupDendronWorkspace(root.name, ctx, {
+      useCb: async () => {},
+    });
+  });
+});
+
+suite("ImportPod", function () {
+  let root: DirResult;
+  let ctx: vscode.ExtensionContext;
+  let podsDir: string;
+  let importSrc: string;
+  let vault: string;
+  this.timeout(TIMEOUT);
+
+  beforeEach(async function () {
+    root = FileTestUtils.tmpDir();
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    importSrc = FileTestUtils.tmpDir().name;
+    vault = path.join(root.name, "vault");
+    DendronWorkspace.getOrCreate(ctx);
+    await FileTestUtils.createFiles(importSrc, [
+      { path: "project/p2/n1.md" },
+      { path: "project/p1/n1.md" },
+      { path: "project/p1/n2.md" },
+      { path: "project/p1/.DS_STORE_TEST" },
+      { path: "project/p1/n3.pdf" },
+      { path: "project/p1/n1.pdf" },
+      { path: "project/p1/n1.pdf" },
+      { path: "project/p.3/n1.md" },
+    ]);
+  });
+
+  afterEach(function () {
+    HistoryService.instance().clearSubscriptions();
+  });
+
+  test("no config", function (done) {
+    onWSInit(async () => {
+      // await vscode.window.showTextDocument(uri);
+      podsDir = DendronWorkspace.instance().podsDir;
+      const pods = getAllImportPods();
+      const podClassEntry = pods[0];
+      const cmd = new ImportPodCommand();
+      cmd.gatherInputs = async () => ({
+        podChoice: podClassEntryToPodItem(podClassEntry),
+      });
+      await cmd.run();
+      const configPath = getPodConfigPath(podsDir, podClassEntry);
+      assert.deepEqual(
+        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath,
+        configPath
+      );
+      done();
+    });
+
+    setupDendronWorkspace(root.name, ctx, {
+      useCb: async () => {},
+    });
+  });
+
+  test("config present, default", function (done) {
+    onWSInit(async () => {
+      podsDir = DendronWorkspace.instance().podsDir;
+      const pods = getAllImportPods();
+      const podClassEntry = pods[0];
+      const cmd = new ImportPodCommand();
+      const configPath = getPodConfigPath(podsDir, podClassEntry);
+      ensureDirSync(path.dirname(configPath));
+      writeYAML(configPath, { src: importSrc });
+      cmd.gatherInputs = async () => ({
+        podChoice: podClassEntryToPodItem(podClassEntry),
+      });
+      await cmd.run();
+      let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(vault, [
+        ".vscode",
+        "assets",
+        "project.p1.md",
+        "project.p1.n1.md",
+        "project.p1.n2.md",
+        "project.p2.n1.md",
+        "project.p-3.n1.md",
+        "root.md",
+      ]);
+      expect(expectedFiles, actualFiles);
       done();
     });
 

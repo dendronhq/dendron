@@ -45,6 +45,7 @@ import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { ExportPodCommand } from "./commands/ExportPod";
 import { NewNoteFromSelectionCommand } from "./commands/NewNoteFromSelectionCommand";
 import { ConfigurePodCommand } from "./commands/ConfigurePodCommand";
+import { ImportPodCommand } from "./commands/ImportPod";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -353,7 +354,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.IMPORT_POD.key,
         async () => {
-          await new ImportPodV2Command().run();
+          await new ImportPodCommand().run();
         }
       )
     );

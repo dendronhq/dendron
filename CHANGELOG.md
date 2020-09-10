@@ -5,10 +5,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.10.4](https://github.com/dendronhq/dendron/compare/v0.10.4-alpha.1...v0.10.4) (2020-09-10)
 
-**Note:** Version bump only for package root
-
-## [0.10.4-alpha.1](https://github.com/dendronhq/dendron/compare/v0.10.4-alpha.0...v0.10.4-alpha.1) (2020-09-10)
-
 ### Features
 
 - **workbench:** add create snippet functionality ([e9b7fec](https://github.com/dendronhq/dendron/commit/e9b7fec0fd3b2c46b7f3c39f3613f61b3882aff1))

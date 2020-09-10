@@ -16,7 +16,6 @@ import { CreateJournalCommand } from "./commands/CreateJournal";
 import { CreateScratchCommand } from "./commands/CreateScratch";
 import { DoctorCommand } from "./commands/Doctor";
 import { GoUpCommand } from "./commands/GoUpCommand";
-import { ImportPodV2Command } from "./commands/ImportPodV2";
 import { OpenLogsCommand } from "./commands/OpenLogs";
 import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";

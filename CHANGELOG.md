@@ -5,28 +5,29 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.10.4-alpha.1](https://github.com/dendronhq/dendron/compare/v0.10.4-alpha.0...v0.10.4-alpha.1) (2020-09-10)
 
-### Enhancements
-
-- **cli:** make cli executable ([1ff6e64](https://github.com/dendronhq/dendron/commit/1ff6e646d8b459b68ee7dafe8922df4706712553))
-
 ### Features
 
-- **workbench:** add snippet functionality ([e9b7fec](https://github.com/dendronhq/dendron/commit/e9b7fec0fd3b2c46b7f3c39f3613f61b3882aff1))
+- **workbench:** add create snippet functionality ([e9b7fec](https://github.com/dendronhq/dendron/commit/e9b7fec0fd3b2c46b7f3c39f3613f61b3882aff1))
 
-## [0.10.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.10.3...v0.10.4-alpha.0) (2020-09-10)
+Create snippets from the highlighted selection
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/snippet.create.gif)
+
+- **workbench:** add goto snippet functionality ([e9b7fec](https://github.com/dendronhq/dendron/commit/e9b7fec0fd3b2c46b7f3c39f3613f61b3882aff1))
+
+Goto existing snippet
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/snippet.goto.gif)
 
 ### Bug Fixes
 
-- **pods:** initialize pods on import using cli ([28c5fc4](https://github.com/dendronhq/dendron/commit/28c5fc4adff092bde108af9b9315ade91508fa09))
+- **cli:** initialize pods on import using cli ([28c5fc4](https://github.com/dendronhq/dendron/commit/28c5fc4adff092bde108af9b9315ade91508fa09))
 
 ### Enhancements
 
-- **pods:** import pod from cli ([bcfd9cc](https://github.com/dendronhq/dendron/commit/bcfd9cc0680324b6e98ca621c38380ba451b4860))
-- **pods:** use cli to export pod ([dd21f31](https://github.com/dendronhq/dendron/commit/dd21f31a7270b4449995caf28f5a5aa40a56e160))
-
-### Features
-
-- **cli:** add export pod to cli ([3fbf011](https://github.com/dendronhq/dendron/commit/3fbf01139bfd4f9078906efe9e2e3c6e3f298f08))
+- **cli:** make cli executable ([1ff6e64](https://github.com/dendronhq/dendron/commit/1ff6e646d8b459b68ee7dafe8922df4706712553))
+- **cli:** import pod from cli ([bcfd9cc](https://github.com/dendronhq/dendron/commit/bcfd9cc0680324b6e98ca621c38380ba451b4860))
+- **cli:** export pod from cli ([dd21f31](https://github.com/dendronhq/dendron/commit/dd21f31a7270b4449995caf28f5a5aa40a56e160))
 
 ## [0.10.3](https://github.com/dendronhq/dendron/compare/v0.10.3-alpha.2...v0.10.3) (2020-09-09)
 

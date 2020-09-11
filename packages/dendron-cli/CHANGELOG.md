@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.6-alpha.1](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.0...v0.10.6-alpha.1) (2020-09-11)
+
+### Features
+
+- **publish:** published sites use pretty refs ([5913df0](https://github.com/dendronhq/dendron/commit/5913df05aafbd905beb7cd6ee88883c3314795e6))
+
 ## [0.10.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.10.5...v0.10.6-alpha.0) (2020-09-11)
 
 **Note:** Version bump only for package @dendronhq/dendron-cli

@@ -41,6 +41,7 @@ interface PluginOpts {
   hrefTemplate: (permalink: string) => string;
   aliasDivider: string;
   root: string | undefined;
+  renderWithOutline?: boolean;
 }
 
 const aliasDivider = "|";
@@ -70,6 +71,7 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
   ];
   const pageResolver = opts.pageResolver || defaultPageResolver;
   const newClassName = opts.newClassName || "new";
+  const renderWithOutline = opts.renderWithOutline || false;
   const wikiLinkClassName = opts.wikiLinkClassName || "internal";
   const defaultHrefTemplate = (permalink: string) => `#/page/${permalink}`;
   const hrefTemplate = opts.hrefTemplate || defaultHrefTemplate;
@@ -195,8 +197,39 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
         if (anchorStartOffset) {
           out = out.split("\n").slice(anchorStartOffset).join("\n");
         }
+        if (renderWithOutline) {
+          return doRenderWithOutline({
+            content: out,
+            title: data.link.label || data.link.name || "no title",
+            link: data.link.name + ".md",
+          });
+        }
         return out;
       };
     }
   }
+}
+
+function doRenderWithOutline(opts: {
+  content: string;
+  title: string;
+  link: string;
+}) {
+  const { content, title, link } = opts;
+  return `
+<div class="portal-container">
+<div class="portal-head">
+    <div class="portal-backlink" >
+        <div class="portal-title">From <span class="portal-text-title">${title}</span></div>
+        <a href="${link}" class="portal-arrow">Go to text <span class="right-arrow">→</span></a>
+    </div>
+</div>
+<div id="portal-parent-{{include.anchor}}" class="portal-parent">
+    <div class="portal-parent-fader-top"></div>
+    <div class="portal-parent-fader-bottom"></div>        
+
+${content}
+</div>    
+</div>
+`;
 }

@@ -317,12 +317,15 @@ export const applyTextEdit = (text: string, textEdit: TextEdit): string => {
   return characters.join("");
 };
 
-export function getProcessor(opts?: { root?: string }): Processor {
-  const root = opts?.root;
+export function getProcessor(opts?: {
+  root?: string;
+  renderWithOutline?: boolean;
+}): Processor {
+  const { root, renderWithOutline } = opts || {};
   return remark()
     .use(markdownParse, { gfm: true })
     .use(frontmatterPlugin, ["yaml"])
     .use(dendronLinksPlugin)
-    .use(dendronRefsPlugin, { root })
+    .use(dendronRefsPlugin, { root, renderWithOutline })
     .use({ settings: { listItemIndent: "1", fences: true } });
 }

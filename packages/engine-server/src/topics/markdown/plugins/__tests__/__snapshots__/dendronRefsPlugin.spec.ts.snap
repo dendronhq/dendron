@@ -442,3 +442,27 @@ exports[`basic stingify basic block with wildcard as 2nd elem  1`] = `
 task1
 "
 `;
+
+exports[`basic stingify renderWithOutline 1`] = `
+"# Foo Bar
+
+
+<div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+    <div class=\\"portal-backlink\\" >
+        <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">daily.tasks</span></div>
+        <a href=\\"daily.tasks.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+    </div>
+</div>
+<div id=\\"portal-parent-{{include.anchor}}\\" class=\\"portal-parent\\">
+    <div class=\\"portal-parent-fader-top\\"></div>
+    <div class=\\"portal-parent-fader-bottom\\"></div>        
+
+## Header1
+
+task1
+
+</div>    
+</div>
+"
+`;

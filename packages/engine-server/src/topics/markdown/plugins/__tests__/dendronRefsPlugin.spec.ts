@@ -332,5 +332,40 @@ describe("basic", () => {
       expect(out.indexOf("task1") >= 0).toBeTruthy();
       expect(out.indexOf("task2") >= 0).toBeFalsy();
     });
+
+    test("renderWithOutline", async () => {
+      const txt = [
+        "---",
+        "id: foo",
+        "---",
+        `# Tasks`,
+        "## Header1",
+        "task1",
+        "## Header2",
+        "task2",
+        "<div class='bar'>",
+        "BOND",
+        "</div>",
+      ];
+      root = await EngineTestUtils.setupStoreDir({
+        initDirCb: (dirPath: string) => {
+          fs.writeFileSync(
+            path.join(dirPath, "daily.tasks.md"),
+            txt.join("\n"),
+            { encoding: "utf8" }
+          );
+        },
+      });
+      const out = getProcessor({ root, renderWithOutline: true })
+        .processSync(
+          `# Foo Bar
+((ref:[[daily.tasks]]#Header1:#Header2))`
+        )
+        .toString();
+      expect(out).toMatchSnapshot();
+      expect(out.indexOf("Header1") >= 0).toBeTruthy();
+      expect(out.indexOf("task1") >= 0).toBeTruthy();
+      expect(out.indexOf("task2") >= 0).toBeFalsy();
+    });
   });
 });

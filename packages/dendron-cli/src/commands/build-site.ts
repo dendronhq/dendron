@@ -88,7 +88,10 @@ async function note2JekyllMdFile(
   note.body = stripSiteOnlyTags(note);
   note.body = stripLocalOnlyTags(note.body);
   try {
-    note.body = getProcessor({ root: opts.engine.props.root })
+    note.body = getProcessor({
+      root: opts.engine.props.root,
+      renderWithOutline: true,
+    })
       .use(replaceRefs, {
         wikiLink2Md: true,
         wikiLinkPrefix: linkPrefix,

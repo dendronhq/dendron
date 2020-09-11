@@ -44,6 +44,7 @@ describe("build-site-new", () => {
     const { data, content } = readMD(path.join(notesDir, "foo.md"));
     expect(data.id).toEqual("foo");
     expect(content).toMatchSnapshot("bond");
+    expect(data.noindex).toBeUndefined();
     expect(content.indexOf("- [lbl](refactor.one)") >= 0).toBe(true);
     expect(content.indexOf("SECRETS") < 0).toBe(true);
   });
@@ -112,6 +113,7 @@ describe("build-site-new", () => {
       config: {
         "build-site": {
           publishByDefault: false,
+          noindexByDefault: false,
         },
       },
     };
@@ -124,6 +126,32 @@ describe("build-site-new", () => {
     notePath = path.join(notesDir, "build-site.one.md");
     expect(fs.existsSync(notePath)).toBeFalsy();
     expect(dir.length).toEqual(1);
+  });
+
+  test("noindex by default", async () => {
+    const config: DendronSiteConfig = {
+      siteHierarchies: ["build-site"],
+      siteRootDir,
+      config: {
+        "build-site": {
+          publishByDefault: true,
+          noindexByDefault: true,
+        },
+      },
+    };
+    await new BuildSiteCommand().execute({ engine, config, dendronRoot });
+    const dir = fs.readdirSync(notesDir);
+    // root should exist
+    let notePath = path.join(notesDir, "build-site.md");
+    let data: any;
+    ({ data } = readMD(notePath));
+    expect(data.noindex).toBeTruthy();
+
+    notePath = path.join(notesDir, "id.build-site.one.md");
+    ({ data } = readMD(notePath));
+    expect(data.noindex).toBeTruthy();
+
+    expect(dir.length).toEqual(2);
   });
 
   test("ids are converted", async () => {
@@ -155,7 +183,7 @@ describe("build-site-new", () => {
   });
 });
 
-describe.only("note refs", () => {
+describe("note refs", () => {
   let root: string;
   let engine: DEngine;
   let siteRootDir: string;

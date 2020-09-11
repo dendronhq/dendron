@@ -63,6 +63,7 @@ async function note2JekyllMdFile(
   const config = opts.config || {};
   let hConfig: HierarchyConfig = _.get(config, note.domain.fname, {
     publishByDefault: true,
+    noindexByDefault: false,
   });
 
   if (!hConfig.publishByDefault && !note.custom.published) {
@@ -76,8 +77,13 @@ async function note2JekyllMdFile(
   }
   // pull children of root to the top
   if (note.parent?.fname === opts.siteIndex) {
+    // @ts-ignore
     delete meta["parent"];
   }
+  if (hConfig.noindexByDefault && _.isUndefined(note.custom.noindex)) {
+    meta.noindex = true;
+  }
+
   // delete parent from root
   note.body = stripSiteOnlyTags(note);
   note.body = stripLocalOnlyTags(note.body);
@@ -228,8 +234,3 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
 export type BuildSiteCliOpts = {
   vault: string;
 } & CommandCommonOpts;
-
-// rm -r site-builder/docs 2>/dev/null || true
-// mkdir site-builder/docs
-// echo "copying files..."
-// cp vault/* site-builder/docs

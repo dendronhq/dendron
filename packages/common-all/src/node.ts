@@ -104,7 +104,7 @@ export class DNodeUtils {
   static getMeta(
     note: Note,
     opts?: { pullCustomUp?: boolean; ignoreNullParent?: boolean }
-  ) {
+  ): any {
     const { pullCustomUp, ignoreNullParent } = _.defaults(opts || {}, {
       pullCustomUp: false,
       ignoreNullParent: false,
@@ -436,6 +436,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
     ]);
     let parent;
     if (hideBody) {
+      // @ts-ignore
       delete props.body;
     }
     if (this.parent?.title === "root") {
@@ -740,7 +741,7 @@ function getRoot(nodes: NoteRawProps[]) {
     (ent) => ent.title === "root" || _.isNull(ent.parent)
   );
   if (!rootNode) {
-    throw new DendronError("no root node found");
+    throw new DendronError({ msg: "no root node found" });
   }
   const node = new Note({ ...rootNode, parent: null, children: [] });
   return { node, childrenIds: rootNode.children };

@@ -385,6 +385,7 @@ export type DendronConfig = {
 
 export type HierarchyConfig = {
   publishByDefault: boolean;
+  noindexByDefault: boolean;
 };
 
 export type LegacyDendronSiteConfig = {

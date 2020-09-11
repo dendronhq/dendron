@@ -219,16 +219,17 @@ function doRenderWithOutline(opts: {
   return `
 <div class="portal-container">
 <div class="portal-head">
-    <div class="portal-backlink" markdown="1">
-        <div class="portal-title">From <span class="portal-text-title">${title}</span></div>
-        <a href="${link}" class="portal-arrow">Go to text <span class="right-arrow">→</span></a>
-    </div>
+<div class="portal-backlink" markdown="1">
+<div class="portal-title">From <span class="portal-text-title">${title}</span></div>
+<a href="${link}" class="portal-arrow">Go to text <span class="right-arrow">→</span></a>
+</div>
 </div>
 <div id="portal-parent-{{include.anchor}}" class="portal-parent">
-    <div class="portal-parent-fader-top"></div>
-    <div class="portal-parent-fader-bottom"></div>        
+<div class="portal-parent-fader-top"></div>
+<div class="portal-parent-fader-bottom"></div>        
 
 ${content}
+
 </div>    
 </div>
 `;

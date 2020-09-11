@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.6-alpha.2](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.1...v0.10.6-alpha.2) (2020-09-11)
+
+### Bug Fixes
+
+- display markdown inside jekyll html ([b1a0947](https://github.com/dendronhq/dendron/commit/b1a094749d7ca34bb2a7500399b7ed93e6191536))
+
 ## [0.10.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.10.5...v0.10.6-alpha.0) (2020-09-11)
 
 **Note:** Version bump only for package @dendronhq/engine-server

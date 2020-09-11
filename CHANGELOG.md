@@ -5,13 +5,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.10.5](https://github.com/dendronhq/dendron/compare/v0.10.5-alpha.1...v0.10.5) (2020-09-11)
 
-**Note:** Version bump only for package root
-
-## [0.10.5-alpha.1](https://github.com/dendronhq/dendron/compare/v0.10.5-alpha.0...v0.10.5-alpha.1) (2020-09-11)
-
 ### Enhancements
 
-- **pods:** use consistent interface for import/export ([6a824dd](https://github.com/dendronhq/dendron/commit/6a824dd3bcf0d202107d3044f9406949258507c7))
 - **refs:** support wildcard refs ([7161363](https://github.com/dendronhq/dendron/commit/7161363897b069b11981caa51af914b7529d13e4))
 
 When you're referencing a header by reference, sometimes you don't care what the next header is, just that the reference covers all text up to the next header. You can now specify this using the `*` symbol in a header reference.
@@ -25,6 +20,11 @@ For example, the following would reference the content from header1 to the next 
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/refs.wildcard.gif)
 
 - **refs:** more intelligent ref copying ([6f1906f](https://github.com/dendronhq/dendron/commit/6f1906f410e84bc9782af415c5fcefc6a18ddf7c))
+
+If you have a header selected while running this command, it will copy the note ref with the selected header to the next note ref
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/refs.copy-selection.gif)
+
+- **pods:** use consistent interface for import/export ([6a824dd](https://github.com/dendronhq/dendron/commit/6a824dd3bcf0d202107d3044f9406949258507c7))
 
 ## [0.10.4](https://github.com/dendronhq/dendron/compare/v0.10.4-alpha.1...v0.10.4) (2020-09-10)
 

@@ -108,8 +108,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       "If you have a header selected while running this command, it will copy the note ref with the selected header to the next note ref",
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/refs.copy-selection.gif)",
     ].join("\n"),
-    docPreview:
-      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/ref-note.gif)",
+    docPreview: "",
     keybindings: {
       key: "ctrl+shift+r",
       mac: "cmd+shift+r",

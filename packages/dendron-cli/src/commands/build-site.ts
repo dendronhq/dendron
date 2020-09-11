@@ -213,7 +213,7 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
       try {
         await this.copyAssets({ vaultAssetsDir, siteAssetsDir });
       } catch (err) {
-        this.L.error({ err, msg: "error copying assets" });
+        // this.L.error({ err, msg: "error copying assets" });
         await this.copyAssetsFallback({ vaultAssetsDir, siteAssetsDir });
         this.L.info({ msg: "use copy fallback" });
       }

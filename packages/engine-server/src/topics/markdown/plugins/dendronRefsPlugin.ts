@@ -219,7 +219,7 @@ function doRenderWithOutline(opts: {
   return `
 <div class="portal-container">
 <div class="portal-head">
-    <div class="portal-backlink" >
+    <div class="portal-backlink" markdown="1">
         <div class="portal-title">From <span class="portal-text-title">${title}</span></div>
         <a href="${link}" class="portal-arrow">Go to text <span class="right-arrow">→</span></a>
     </div>

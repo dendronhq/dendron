@@ -9,21 +9,25 @@ export type ReplaceRefOptions = {
   refReplacements?: { [key: string]: ProtoLink };
   imageRefPrefix?: string;
   wikiLink2Md?: boolean;
+  wikiLink2Html?: boolean;
   wikiLinkPrefix?: string;
   wikiLinkUseId?: boolean;
   engine?: DEngine;
+  toHTML?: boolean;
 };
 
 export function replaceRefs(options: ReplaceRefOptions) {
   const {
     imageRefPrefix,
     wikiLink2Md,
+    wikiLink2Html,
     wikiLinkPrefix,
     wikiLinkUseId,
     engine,
   } = _.defaults(options, {
     refReplacements: {},
     wikiLinkPrefix: false,
+    wikiLink2Html: false,
   });
   function transformer(tree: Node, _file: VFile) {
     visit(tree, (node) => {
@@ -40,6 +44,9 @@ export function replaceRefs(options: ReplaceRefOptions) {
         const data = node.data as WikiLinkData;
         if (wikiLink2Md) {
           data.toMd = true;
+        }
+        if (wikiLink2Html) {
+          data.toHTML = true;
         }
         if (wikiLinkPrefix) {
           data.prefix = wikiLinkPrefix;

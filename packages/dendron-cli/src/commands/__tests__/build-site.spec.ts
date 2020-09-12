@@ -200,7 +200,7 @@ describe("note refs", () => {
             fname: "foo",
             body: "# Foo Content\n # Bar Content ((ref:[[bar]]))",
           },
-          { fname: "bar", body: "# I am bar\n [[foo]]" },
+          { id: "id.bar", fname: "bar", body: "# I am bar\n [[foo]]" },
         ]);
       },
     });

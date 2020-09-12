@@ -14,6 +14,7 @@ export type WikiLinkData = {
   hProperties: any;
   hChildren: any[];
   toMd?: boolean;
+  toHTML?: boolean;
   prefix?: string;
   useId: boolean;
   note?: Note;
@@ -144,6 +145,9 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
         }
         if (data.toMd) {
           return `[${data.alias}](${data.prefix || ""}${node.value})`;
+        }
+        if (data.toHTML) {
+          return `/${data.prefix || ""}${node.value}.html`;
         }
 
         if (node.data.alias !== node.value) {

@@ -38,7 +38,7 @@ exports[`note refs note refs 1`] = `
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">bar</span></div>
-<a href=\\"bar.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"/notes/id.bar.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">

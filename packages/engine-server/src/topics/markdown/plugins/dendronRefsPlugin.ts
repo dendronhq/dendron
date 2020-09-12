@@ -1,5 +1,6 @@
 import { Note } from "@dendronhq/common-all";
 import { removeMDExtension } from "@dendronhq/common-server";
+import { S_IFSOCK } from "constants";
 import fs from "fs-extra";
 import _ from "lodash";
 import { Parent } from "mdast";
@@ -205,10 +206,24 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
           out = out.split("\n").slice(anchorStartOffset).join("\n");
         }
         if (renderWithOutline) {
+          let link = data.link.name;
+          if (!_.isUndefined(opts.replaceRefs)) {
+            link = _.trim(
+              getProcessor()
+                .use(replaceRefs, {
+                  ..._.omit(opts.replaceRefs, "wikiLink2Md"),
+                  wikiLink2Html: true,
+                })
+                .processSync(`[[${link}]]`)
+                .toString()
+            );
+          } else {
+            link += ".md";
+          }
           return doRenderWithOutline({
             content: out,
             title: data.link.label || data.link.name || "no title",
-            link: data.link.name + ".md",
+            link,
           });
         }
         return out;

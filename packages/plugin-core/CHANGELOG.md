@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.6](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.8...v0.10.6) (2020-09-12)
+
+### Enhancements
+
+- **workbench:** friendlier default settings ([5719d88](https://github.com/dendronhq/dendron/commit/5719d8878c9904be8cbddf6082c15c6533ddde4f))
+
 ## [0.10.6-alpha.8](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.7...v0.10.6-alpha.8) (2020-09-12)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

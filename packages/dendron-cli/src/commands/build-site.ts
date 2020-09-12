@@ -70,6 +70,7 @@ async function note2JekyllMdFile(
     return;
   }
 
+  // root page should have '/ permalinik
   let linkPrefix = "";
   if (opts.siteIndex === meta.fname) {
     jekyllProps["permalink"] = "/";
@@ -90,14 +91,14 @@ async function note2JekyllMdFile(
   try {
     note.body = getProcessor({
       root: opts.engine.props.root,
-      renderWithOutline: false,
-      // replaceRefs: {
-      //   wikiLink2Md: true,
-      //   wikiLinkPrefix: linkPrefix,
-      //   imageRefPrefix: opts.assetsPrefix,
-      //   wikiLinkUseId: true,
-      //   engine: opts.engine,
-      // },
+      renderWithOutline: true,
+      replaceRefs: {
+        wikiLink2Md: true,
+        wikiLinkPrefix: linkPrefix,
+        imageRefPrefix: opts.assetsPrefix,
+        wikiLinkUseId: true,
+        engine: opts.engine,
+      },
     })
       .use(replaceRefs, {
         wikiLink2Md: true,

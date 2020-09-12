@@ -201,6 +201,7 @@ describe("note refs", () => {
             body: "# Foo Content\n # Bar Content ((ref:[[bar]]))",
           },
           { id: "id.bar", fname: "bar", body: "# I am bar\n [[foo]]" },
+          { id: "id.c", fname: "c" },
         ]);
       },
     });
@@ -229,6 +230,6 @@ describe("note refs", () => {
     let fooPath = path.join(notesDir, "id.foo.md");
     const { content } = readMD(fooPath);
     expect(content).toMatchSnapshot();
-    //expect(content.indexOf("[foo](notes/id.foo)") >= 0).toBeTruthy();
+    expect(content.indexOf("[foo](notes/id.foo)") >= 0).toBeTruthy();
   });
 });

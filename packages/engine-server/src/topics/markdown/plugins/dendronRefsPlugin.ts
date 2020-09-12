@@ -197,6 +197,7 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
           anchorEndIndex
         );
 
+        // convert content inside block
         let outProc = getProcessor();
         if (!_.isUndefined(opts.replaceRefs)) {
           outProc = outProc.use(replaceRefs, opts.replaceRefs);
@@ -207,6 +208,7 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
         }
         if (renderWithOutline) {
           let link = data.link.name;
+          // convert link
           if (!_.isUndefined(opts.replaceRefs)) {
             link = _.trim(
               getProcessor()

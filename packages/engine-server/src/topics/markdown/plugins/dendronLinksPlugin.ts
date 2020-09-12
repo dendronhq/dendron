@@ -147,7 +147,7 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
           return `[${data.alias}](${data.prefix || ""}${node.value})`;
         }
         if (data.toHTML) {
-          return `/${data.prefix || ""}${node.value}.html`;
+          return `${data.prefix || ""}${node.value}.html`;
         }
 
         if (node.data.alias !== node.value) {

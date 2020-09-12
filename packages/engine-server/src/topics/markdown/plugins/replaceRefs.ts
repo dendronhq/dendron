@@ -5,7 +5,7 @@ import visit from "unist-util-visit";
 import { VFile } from "vfile";
 import { WikiLinkData } from "./dendronLinksPlugin";
 
-type ReplaceRefOptions = {
+export type ReplaceRefOptions = {
   refReplacements?: { [key: string]: ProtoLink };
   imageRefPrefix?: string;
   wikiLink2Md?: boolean;

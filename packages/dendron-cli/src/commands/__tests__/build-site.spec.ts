@@ -196,11 +196,11 @@ describe("note refs", () => {
       initDirCb: (dirPath: string) => {
         NodeTestUtils.createNotes(dirPath, [
           {
-            id: "foo",
+            id: "id.foo",
             fname: "foo",
             body: "# Foo Content\n # Bar Content ((ref:[[bar]]))",
           },
-          { fname: "bar", body: "# I am bar" },
+          { fname: "bar", body: "# I am bar\n [[foo]]" },
         ]);
       },
     });
@@ -226,8 +226,9 @@ describe("note refs", () => {
     };
     const cmd = new BuildSiteCommand();
     await cmd.execute({ engine, config, dendronRoot });
-    let fooPath = path.join(notesDir, "foo.md");
+    let fooPath = path.join(notesDir, "id.foo.md");
     const { content } = readMD(fooPath);
     expect(content).toMatchSnapshot();
+    expect(content.indexOf("[foo](notes/id.foo)") >= 0).toBeTruthy();
   });
 });

@@ -10,6 +10,7 @@ import { Node } from "unist";
 import { DendronRefLink, parseDendronRef } from "../../../utils";
 import { getProcessor } from "../utils";
 import { findIndex, isHeading } from "./inject";
+import { ReplaceRefOptions, replaceRefs } from "./replaceRefs";
 
 // const LINK_REGEX = /^\[\[(.+?)\]\]/;
 const LINK_REGEX = /^\(\((?<ref>[^)]+)\)\)/;
@@ -42,6 +43,7 @@ interface PluginOpts {
   aliasDivider: string;
   root: string | undefined;
   renderWithOutline?: boolean;
+  replaceRefs?: ReplaceRefOptions;
 }
 
 const aliasDivider = "|";
@@ -164,7 +166,8 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
         const body = fs.readFileSync(path.join(root, data.link.name + ".md"), {
           encoding: "utf8",
         });
-        const bodyAST: Parent = getProcessor().parse(body) as Parent;
+        let proc = getProcessor();
+        const bodyAST: Parent = proc.parse(body) as Parent;
         // bumpHeadings(bodyAST, 2);
         const { anchorStart, anchorEnd, anchorStartOffset } = data.link;
         let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
@@ -193,7 +196,11 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
           anchorEndIndex
         );
 
-        let out = getProcessor().stringify(bodyAST);
+        let outProc = getProcessor();
+        if (!_.isUndefined(opts.replaceRefs)) {
+          outProc = outProc.use(replaceRefs, opts.replaceRefs);
+        }
+        let out = outProc.processSync(outProc.stringify(bodyAST)).toString();
         if (anchorStartOffset) {
           out = out.split("\n").slice(anchorStartOffset).join("\n");
         }

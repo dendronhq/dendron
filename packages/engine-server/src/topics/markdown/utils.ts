@@ -16,6 +16,7 @@ import visit, { CONTINUE, EXIT } from "unist-util-visit";
 import YAML from "yamljs";
 import { dendronLinksPlugin } from "./plugins/dendronLinksPlugin";
 import { dendronRefsPlugin } from "./plugins/dendronRefsPlugin";
+import { ReplaceRefOptions } from "./plugins/replaceRefs";
 import { MDRenderer } from "./renderer";
 
 enum NodeType {
@@ -320,12 +321,13 @@ export const applyTextEdit = (text: string, textEdit: TextEdit): string => {
 export function getProcessor(opts?: {
   root?: string;
   renderWithOutline?: boolean;
+  replaceRefs?: ReplaceRefOptions;
 }): Processor {
-  const { root, renderWithOutline } = opts || {};
+  const { root, renderWithOutline, replaceRefs } = opts || {};
   return remark()
     .use(markdownParse, { gfm: true })
     .use(frontmatterPlugin, ["yaml"])
     .use(dendronLinksPlugin)
-    .use(dendronRefsPlugin, { root, renderWithOutline })
+    .use(dendronRefsPlugin, { root, renderWithOutline, replaceRefs })
     .use({ settings: { listItemIndent: "1", fences: true } });
 }

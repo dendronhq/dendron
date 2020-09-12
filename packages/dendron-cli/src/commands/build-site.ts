@@ -91,7 +91,7 @@ async function note2JekyllMdFile(
   try {
     note.body = getProcessor({
       root: opts.engine.props.root,
-      renderWithOutline: true,
+      renderWithOutline: opts.usePrettyRefs,
       replaceRefs: {
         wikiLink2Md: true,
         wikiLinkPrefix: linkPrefix,
@@ -175,7 +175,9 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const { engine, config, dendronRoot } = _.defaults(opts, {});
     const ctx = "BuildSiteCommand";
-    let { siteRootDir, siteHierarchies, siteIndex } = config;
+    let { siteRootDir, siteHierarchies, siteIndex } = _.defaults(config, {
+      usePrettyRefs: true,
+    });
     if (!siteRootDir) {
       throw `siteRootDir is undefined`;
     }

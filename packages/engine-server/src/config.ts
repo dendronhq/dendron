@@ -44,6 +44,7 @@ export class DConfig {
       site: {
         siteHierarchies: ["root"],
         siteRootDir: "docs",
+        usePrettyRefs: true,
       },
     };
   }

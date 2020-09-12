@@ -426,6 +426,8 @@ export type DendronSiteConfig = {
    */
   siteRootDir: string;
 
+  usePrettyRefs?: boolean;
+
   /**
    * Control publication on a per hierarchy basis
    */

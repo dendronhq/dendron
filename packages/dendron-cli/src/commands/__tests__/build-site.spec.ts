@@ -231,5 +231,20 @@ describe("note refs", () => {
     const { content } = readMD(fooPath);
     expect(content).toMatchSnapshot();
     expect(content.indexOf("[foo](notes/id.foo)") >= 0).toBeTruthy();
+    expect(content.indexOf("portal-container") >= 0).toBeTruthy();
+  });
+
+  test("note refs, disable pretty", async () => {
+    const config: DendronSiteConfig = {
+      siteHierarchies: ["foo"],
+      siteRootDir,
+      usePrettyRefs: false,
+    };
+    const cmd = new BuildSiteCommand();
+    await cmd.execute({ engine, config, dendronRoot });
+    let fooPath = path.join(notesDir, "id.foo.md");
+    const { content } = readMD(fooPath);
+    expect(content).toMatchSnapshot();
+    expect(content.indexOf("portal-container") >= 0).toBeFalsy();
   });
 });

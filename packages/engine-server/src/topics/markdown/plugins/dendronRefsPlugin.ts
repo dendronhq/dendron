@@ -1,6 +1,5 @@
 import { Note } from "@dendronhq/common-all";
 import { removeMDExtension } from "@dendronhq/common-server";
-import { S_IFSOCK } from "constants";
 import fs from "fs-extra";
 import _ from "lodash";
 import { Parent } from "mdast";

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.6-alpha.7](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.6...v0.10.6-alpha.7) (2020-09-12)
+
+### Bug Fixes
+
+- **publishing:** update links ([f4422c3](https://github.com/dendronhq/dendron/commit/f4422c31f1ad13b70273b26e6ed6ae956d3dd2ea))
+
 ## [0.10.6-alpha.6](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.5...v0.10.6-alpha.6) (2020-09-12)
 
 ### Bug Fixes

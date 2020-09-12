@@ -5,49 +5,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.10.6-alpha.8](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.7...v0.10.6-alpha.8) (2020-09-12)
 
-**Note:** Version bump only for package root
-
-## [0.10.6-alpha.7](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.6...v0.10.6-alpha.7) (2020-09-12)
-
-### Bug Fixes
-
-- **publishing:** update links ([f4422c3](https://github.com/dendronhq/dendron/commit/f4422c31f1ad13b70273b26e6ed6ae956d3dd2ea))
-
-## [0.10.6-alpha.6](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.5...v0.10.6-alpha.6) (2020-09-12)
-
-### Bug Fixes
-
-- replace refs in note refs ([f5d32a7](https://github.com/dendronhq/dendron/commit/f5d32a76502b055626c12f22e2fa6fe0f4c874fe))
-
-## [0.10.6-alpha.5](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.4...v0.10.6-alpha.5) (2020-09-11)
-
-**Note:** Version bump only for package root
-
-## [0.10.6-alpha.4](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.3...v0.10.6-alpha.4) (2020-09-11)
-
-**Note:** Version bump only for package root
-
-## [0.10.6-alpha.3](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.2...v0.10.6-alpha.3) (2020-09-11)
-
-**Note:** Version bump only for package root
-
-## [0.10.6-alpha.2](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.1...v0.10.6-alpha.2) (2020-09-11)
-
-### Bug Fixes
-
-- display markdown inside jekyll html ([b1a0947](https://github.com/dendronhq/dendron/commit/b1a094749d7ca34bb2a7500399b7ed93e6191536))
-
-## [0.10.6-alpha.1](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.0...v0.10.6-alpha.1) (2020-09-11)
-
 ### Features
 
-- **publish:** published sites use pretty refs ([5913df0](https://github.com/dendronhq/dendron/commit/5913df05aafbd905beb7cd6ee88883c3314795e6))
+- **publishing:** support noindex option (d582580)
 
-## [0.10.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.10.5...v0.10.6-alpha.0) (2020-09-11)
+### Enhancements
 
-**Note:** Version bump only for package root
-
-## [0.10.5](https://github.com/dendronhq/dendron/compare/v0.10.5-alpha.1...v0.10.5) (2020-09-11)
+## 0.10.5 (2020-09-11)
 
 ### Enhancements
 

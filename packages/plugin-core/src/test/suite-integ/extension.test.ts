@@ -1021,7 +1021,7 @@ suite("commands", function () {
     });
   });
 
-  describe.only("CopyNoteRefCommand", function () {
+  describe("CopyNoteRefCommand", function () {
     test("basic", function (done) {
       onWSInit(async () => {
         const uri = vscode.Uri.file(path.join(root.name, "vault", "foo.md"));
@@ -1042,11 +1042,14 @@ suite("commands", function () {
         assert.equal(link, "((ref: [[bar]]#foo,1:#*))");
         done();
       });
-      setupDendronWorkspace(root.name, ctx, { useFixtures: false, useCb: async (vault) => {
-        NodeTestUtils.createNotes(vault, [
-          { fname: "bar", body: "## Foo\nfoo text\n## Header\n Header text" },
-        ]);
-      }});
+      setupDendronWorkspace(root.name, ctx, {
+        useFixtures: false,
+        useCb: async (vault) => {
+          NodeTestUtils.createNotes(vault, [
+            { fname: "bar", body: "## Foo\nfoo text\n## Header\n Header text" },
+          ]);
+        },
+      });
     });
   });
 

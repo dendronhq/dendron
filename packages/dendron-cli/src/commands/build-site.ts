@@ -90,14 +90,14 @@ async function note2JekyllMdFile(
   try {
     note.body = getProcessor({
       root: opts.engine.props.root,
-      renderWithOutline: true,
-      replaceRefs: {
-        wikiLink2Md: true,
-        wikiLinkPrefix: linkPrefix,
-        imageRefPrefix: opts.assetsPrefix,
-        wikiLinkUseId: true,
-        engine: opts.engine,
-      },
+      renderWithOutline: false,
+      // replaceRefs: {
+      //   wikiLink2Md: true,
+      //   wikiLinkPrefix: linkPrefix,
+      //   imageRefPrefix: opts.assetsPrefix,
+      //   wikiLinkUseId: true,
+      //   engine: opts.engine,
+      // },
     })
       .use(replaceRefs, {
         wikiLink2Md: true,

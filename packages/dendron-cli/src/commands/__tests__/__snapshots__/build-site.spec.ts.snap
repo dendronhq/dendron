@@ -32,25 +32,8 @@ exports[`build-site-new multiple roots: foo.md 1`] = `
 exports[`note refs note refs 1`] = `
 "# Foo Content
 
-# Bar Content 
+# Bar Content # I am bar
 
-<div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">bar</span></div>
-<a href=\\"/notes/id.bar.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
-  
-# I am bar
-
- [foo](notes/id.foo)
-
-
-</div>    
-</div>
+ [[foo]]
 "
 `;

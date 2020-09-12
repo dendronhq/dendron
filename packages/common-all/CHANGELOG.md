@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.7-alpha.0](https://github.com/dendronhq/dendron/compare/v0.10.6...v0.10.7-alpha.0) (2020-09-12)
+
+### Enhancements
+
+- **publishing:** add config to specify pretty refs ([4418316](https://github.com/dendronhq/dendron/commit/4418316f606c0e5b563d44da494f81d125d201b6))
+
 ## [0.10.6](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.8...v0.10.6) (2020-09-12)
 
 **Note:** Version bump only for package @dendronhq/common-all

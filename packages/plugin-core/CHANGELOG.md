@@ -5,47 +5,37 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.10.6](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.8...v0.10.6) (2020-09-12)
 
+### Features
+
+- **note refs:** support pretty refs with outline
+
+Note references are now outlined and have links going to the referred document. If you prefer to be sneaky, you can get the old stye refs back by setting the following option to false.
+
+```
+"markdown-preview-enhanced.renderRefWithOutline": true
+```
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/refs.block.gif)
+
+- **publishing:** support noindex option (per page) (d582580)
+
+To tell google to not index a page, you can set `noindex: true` to the frontmatter. You can also have this as a default for a given hierarchy by setting `noIndexByDefault: true` in the site config.
+
+Setting `noindex: true` will add the following meta tag to your site.
+
+```html
+<meta name="robots" content="noindex, nofollow”>
+```
+
 ### Enhancements
 
 - **workbench:** friendlier default settings ([5719d88](https://github.com/dendronhq/dendron/commit/5719d8878c9904be8cbddf6082c15c6533ddde4f))
 
-## [0.10.6-alpha.8](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.7...v0.10.6-alpha.8) (2020-09-12)
+New workspaces will be initialized to autocomplete links automatically without any triggers. Special thanks to Ed for the contribution :)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.suggest.gif)
 
-## [0.10.6-alpha.7](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.6...v0.10.6-alpha.7) (2020-09-12)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.10.6-alpha.6](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.5...v0.10.6-alpha.6) (2020-09-12)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.10.6-alpha.5](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.4...v0.10.6-alpha.5) (2020-09-11)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.10.6-alpha.4](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.3...v0.10.6-alpha.4) (2020-09-11)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.10.6-alpha.3](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.2...v0.10.6-alpha.3) (2020-09-11)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.10.6-alpha.2](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.1...v0.10.6-alpha.2) (2020-09-11)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.10.6-alpha.1](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.0...v0.10.6-alpha.1) (2020-09-11)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.10.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.10.5...v0.10.6-alpha.0) (2020-09-11)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.10.5](https://github.com/dendronhq/dendron/compare/v0.10.5-alpha.1...v0.10.5) (2020-09-11)
+## 0.10.5 (2020-09-11)
 
 ### Enhancements
 

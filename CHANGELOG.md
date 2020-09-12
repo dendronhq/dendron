@@ -5,17 +5,35 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.10.6](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.8...v0.10.6) (2020-09-12)
 
+### Features
+
+- **note refs:** support pretty refs with outline
+
+Note references are now outlined and have links going to the referred document. If you prefer to be sneaky, you can get the old stye refs back by setting the following option to false.
+
+```
+"markdown-preview-enhanced.renderRefWithOutline": true
+```
+
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/refs.block.gif)
+
+- **publishing:** support noindex option (per page) (d582580)
+
+To tell google to not index a page, you can set `noindex: true` to the frontmatter. You can also have this as a default for a given hierarchy by setting `noIndexByDefault: true` in the site config.
+
+Setting `noindex: true` will add the following meta tag to your site.
+
+```html
+<meta name="robots" content="noindex, nofollow”>
+```
+
 ### Enhancements
 
 - **workbench:** friendlier default settings ([5719d88](https://github.com/dendronhq/dendron/commit/5719d8878c9904be8cbddf6082c15c6533ddde4f))
 
-## [0.10.6-alpha.8](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.7...v0.10.6-alpha.8) (2020-09-12)
+New workspaces will be initialized to autocomplete links automatically without any triggers. Special thanks to Ed for the contribution :)
 
-### Features
-
-- **publishing:** support noindex option (d582580)
-
-### Enhancements
+![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.suggest.gif)
 
 ## 0.10.5 (2020-09-11)
 

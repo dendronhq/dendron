@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.6-alpha.6](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.5...v0.10.6-alpha.6) (2020-09-12)
+
+### Bug Fixes
+
+- replace refs in note refs ([f5d32a7](https://github.com/dendronhq/dendron/commit/f5d32a76502b055626c12f22e2fa6fe0f4c874fe))
+
 ## [0.10.6-alpha.5](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.4...v0.10.6-alpha.5) (2020-09-11)
 
 **Note:** Version bump only for package root

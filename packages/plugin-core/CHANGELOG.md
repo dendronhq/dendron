@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.8](https://github.com/dendronhq/dendron/compare/v0.10.7...v0.10.8) (2020-09-13)
+
+### Enhancements
+
+- **publish:** keyboard shortcuts for copy note url cmd ([a579d7f](https://github.com/dendronhq/dendron/commit/a579d7f339b2eb1713178f4ad93beec822a0eba1))
+
+### Features
+
+- add copy note url command ([1e4142e](https://github.com/dendronhq/dendron/commit/1e4142e5ecbe41f8a542a454ea1b8db10e93fb7c))
+
 ## [0.10.7](https://github.com/dendronhq/dendron/compare/v0.10.7-alpha.0...v0.10.7) (2020-09-13)
 
 ### Features

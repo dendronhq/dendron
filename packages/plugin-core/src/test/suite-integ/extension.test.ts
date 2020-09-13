@@ -79,6 +79,7 @@ import {
 import { ConfigurePodCommand } from "../../commands/ConfigurePodCommand";
 import { ImportPodCommand } from "../../commands/ImportPod";
 import { CopyNoteRefCommand } from "../../commands/CopyNoteRef";
+import { CopyNoteURLCommand } from "../../commands/CopyNoteURL";
 
 type ExportConfig = any;
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
@@ -1546,6 +1547,78 @@ suite.skip("utils", function () {
 });
 
 // === Commands
+suite("Copy Note URL", function () {
+  let root: DirResult;
+  this.timeout(TIMEOUT);
+  let rootUrl = "dendron.so";
+
+  before(function () {
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    DendronWorkspace.getOrCreate(ctx);
+  });
+
+  beforeEach(function () {
+    root = FileTestUtils.tmpDir();
+  });
+
+  afterEach(function () {
+    HistoryService.instance().clearSubscriptions();
+  });
+
+  test("with override", function (done) {
+    onWSInit(async () => {
+      const uri = vscode.Uri.file(path.join(root.name, "vault", "bar.md"));
+      await vscode.window.showTextDocument(uri);
+      const link = await new CopyNoteURLCommand().run();
+      const url = path.join(rootUrl, "notes", "id-bar.html");
+      assert.equal(link, url);
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      configOverride: {
+        [CONFIG.COPY_NOTE_URL_ROOT.key]: "dendron.so",
+      },
+      useFixtures: false,
+      useCb: async (vault) => {
+        NodeTestUtils.createNotes(vault, [
+          {
+            id: "id-bar",
+            fname: "bar",
+            body: "## Foo\nfoo text\n## Header\n Header text",
+          },
+        ]);
+      },
+    });
+  });
+
+  test("with selection and override", function (done) {
+    onWSInit(async () => {
+      const uri = vscode.Uri.file(path.join(root.name, "vault", "bar.md"));
+      const editor = await vscode.window.showTextDocument(uri);
+      editor.selection = new vscode.Selection(8, 0, 8, 12);
+      const link = await new CopyNoteURLCommand().run();
+      const url = path.join(rootUrl, "notes", "id-bar.html#foo");
+      assert.equal(link, url);
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      configOverride: {
+        [CONFIG.COPY_NOTE_URL_ROOT.key]: "dendron.so",
+      },
+      useFixtures: false,
+      useCb: async (vault) => {
+        NodeTestUtils.createNotes(vault, [
+          {
+            id: "id-bar",
+            fname: "bar",
+            body: "## Foo\nfoo text\n## Header\n Header text",
+          },
+        ]);
+      },
+    });
+  });
+});
+
 suite("GoToSibling", function () {
   before(function () {
     ctx = VSCodeUtils.getOrCreateMockContext();

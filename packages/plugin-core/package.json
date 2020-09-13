@@ -86,6 +86,10 @@
                         "asOwnDomain"
                     ]
                 },
+                "dendron.copyNoteUrlRoot": {
+                    "type": "string",
+                    "description": "Override root url when getting note url"
+                },
                 "dendron.rootDir": {
                     "type": "string",
                     "default": "",
@@ -278,6 +282,13 @@
                 "desc": "Export notes to an external data source. Currently only JSON is supported. ",
                 "docLink": "dendron.topic.pod.md",
                 "docPreview": "<a href=\"https://www.loom.com/share/d49e5f4155af485cadc9cd810b6cab28\"> <img src=\"https://cdn.loom.com/sessions/thumbnails/d49e5f4155af485cadc9cd810b6cab28-with-play.gif\"> </a>"
+            },
+            {
+                "command": "dendron.copyNoteURL",
+                "title": "Dendron: Copy Note URL",
+                "desc": "Get URL of current note from published site",
+                "docLink": "",
+                "docPreview": ""
             },
             {
                 "command": "dendron.openLink",

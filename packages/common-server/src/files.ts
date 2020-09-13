@@ -62,6 +62,20 @@ export function cleanFileName(
   return name;
 }
 
+export function findInParent(base: string, fname: string): string | undefined {
+  let acc = 10;
+  const lvls = [];
+  while (acc > 0) {
+    const tryPath = path.join(base, ...lvls, fname);
+    if (fs.existsSync(tryPath)) {
+      return path.dirname(tryPath);
+    }
+    acc -= 1;
+    lvls.push("..");
+  }
+  return;
+}
+
 export function readMD(fpath: string): { data: any; content: string } {
   return matter.read(fpath, {});
 }

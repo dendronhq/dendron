@@ -45,6 +45,7 @@ import { ExportPodCommand } from "./commands/ExportPod";
 import { NewNoteFromSelectionCommand } from "./commands/NewNoteFromSelectionCommand";
 import { ConfigurePodCommand } from "./commands/ConfigurePodCommand";
 import { ImportPodCommand } from "./commands/ImportPod";
+import { CopyNoteURLCommand } from "./commands/CopyNoteURL";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -504,6 +505,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.CONFIGURE_POD.key,
         async () => {
           await new ConfigurePodCommand().run();
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.COPY_NOTE_URL.key,
+        async () => {
+          await new CopyNoteURLCommand().run();
         }
       )
     );

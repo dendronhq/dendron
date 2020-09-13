@@ -1131,6 +1131,51 @@ suite("commands", function () {
       setupDendronWorkspace(root.name, ctx);
     });
 
+    test("stub exists", function (done) {
+      onWSInit(async () => {
+        const uri = vscode.Uri.file(
+          path.join(root.name, "vault", "bar.one.md")
+        );
+        VSCodeUtils.showInputBox = async () => {
+          return "bar";
+        };
+        await vscode.window.showTextDocument(uri);
+        fs.appendFileSync(uri.fsPath, "shaken");
+        await new RenameNoteV2Command().run();
+
+        const text = fs.readFileSync(
+          path.join(root.name, "vault", "dendron.md"),
+          { encoding: "utf8" }
+        );
+        const textOfNew = fs.readFileSync(
+          path.join(root.name, "vault", "bar.md"),
+          { encoding: "utf8" }
+        );
+        assert.ok(text.indexOf("[[bar]]") > 0);
+        assert.ok(textOfNew.indexOf("shaken") > 0);
+        const activeUri = vscode.window.activeTextEditor?.document.uri;
+        assert.equal(
+          activeUri?.fsPath,
+          path.join(root.name, "vault", "bar.md")
+        );
+        done();
+      });
+
+      setupDendronWorkspace(root.name, ctx, {
+        useFixtures: false,
+        useCb: async (vault) => {
+          NodeTestUtils.createNotes(vault, [
+            {
+              id: "id-bar.one",
+              fname: "bar.one",
+              body: "## Foo\nfoo text\n## Header\n Header text",
+            },
+            { id: "id-dendron", fname: "dendron", body: "[[bar.one]]" },
+          ]);
+        },
+      });
+    });
+
     test("mult links", function (done) {
       onWSInit(async () => {
         let uri = vscode.Uri.file(

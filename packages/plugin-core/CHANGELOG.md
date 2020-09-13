@@ -5,17 +5,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.10.7](https://github.com/dendronhq/dendron/compare/v0.10.7-alpha.0...v0.10.7) (2020-09-13)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Features
 
-## [0.10.7-alpha.0](https://github.com/dendronhq/dendron/compare/v0.10.6...v0.10.7-alpha.0) (2020-09-12)
+- **publishing:** use pretty refs when publishing ([72ea20c](https://github.com/dendronhq/dendron/commit/72ea20cae7209076e5f76d7bd5d0f0db88f7b112))
 
 ### Enhancements
 
 - **publishing:** add config to toggle pretty refs when publishing ([4418316](https://github.com/dendronhq/dendron/commit/4418316f606c0e5b563d44da494f81d125d201b6))
-
-### Features
-
-- **publishing:** use pretty note refs when publishing ([72ea20c](https://github.com/dendronhq/dendron/commit/72ea20cae7209076e5f76d7bd5d0f0db88f7b112))
 
 ## [0.10.6](https://github.com/dendronhq/dendron/compare/v0.10.6-alpha.8...v0.10.6) (2020-09-12)
 

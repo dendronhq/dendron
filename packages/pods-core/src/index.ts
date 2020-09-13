@@ -7,6 +7,7 @@ import { PodClassEntryV2 } from "./types";
 export * from "./types";
 export * from "./utils";
 export * from "./builtin";
+export * from "./base";
 
 export function getAllExportPods(): PodClassEntryV2[] {
   return [JSONExportPod];

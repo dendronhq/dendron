@@ -73,9 +73,9 @@ export abstract class ExportPodBaseV2<
   abstract plant(opts: ExportPodOpts<TConfig>): Promise<void>;
 }
 
-export abstract class ImportPodBaseV2<
-  TConfig extends ImportConfig = ImportConfig
-> extends PodBaseV2 implements ImportPod<TConfig> {
+export abstract class ImportPodBaseV2<TConfig extends ImportConfig = any>
+  extends PodBaseV2
+  implements ImportPod<TConfig> {
   static kind = "import" as PodKind;
 
   cleanConfig(config: ImportConfig) {

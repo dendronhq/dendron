@@ -97,7 +97,7 @@ export class JSONImportPod extends ImportPodBaseV2<ImportPodConfig> {
 export class JSONExportPod extends ExportPodBaseV2
   implements ExportPod<ExportConfig> {
   static id: string = ID;
-  static description: string = "export to json";
+  static description: string = "import from json";
 
   static config = (): PodConfigEntry[] => {
     return [

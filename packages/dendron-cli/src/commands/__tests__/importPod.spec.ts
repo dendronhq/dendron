@@ -3,14 +3,18 @@ import {
   NodeTestUtils,
   writeYAML,
 } from "@dendronhq/common-server";
-import { FileImportPod, getPodConfigPath } from "@dendronhq/pods-core";
+import {
+  FileImportPod,
+  getPodConfigPath,
+  JSONImportPod,
+} from "@dendronhq/pods-core";
 import fs, { ensureDirSync } from "fs-extra";
 import path from "path";
 import { ImportPodCLICommand } from "../importPod";
 
 const { createFiles } = FileTestUtils;
 
-describe("importPod", async () => {
+describe("import file pod", async () => {
   let importSrc: string;
   let podsDir: string;
   let vault: string;
@@ -74,5 +78,5 @@ describe("importPod", async () => {
     });
     expect(fileBody.match("n1.pdf")).toBeTruthy();
     expect(fileBody.match("n3.pdf")).toBeTruthy();
-  }, 5000000);
+  });
 });

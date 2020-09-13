@@ -13,7 +13,7 @@ export type PodOptsV2 = {
 export type PodConfigEntry = {
   key: string;
   description: string;
-  type: "string" | "number";
+  type: "string" | "number" | "boolean";
   default?: any;
 };
 
@@ -32,6 +32,7 @@ export abstract class PodBaseV2 {
     } else {
       this._engine = DendronEngine.getOrCreateEngine({
         root: this.opts.roots[0],
+        forceNew: true,
       });
     }
   }

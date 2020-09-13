@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.9-alpha.0](https://github.com/dendronhq/dendron/compare/v0.10.8...v0.10.9-alpha.0) (2020-09-13)
+
+### Bug Fixes
+
+- **hiearchies:** rename when stub is present ([abd8ca5](https://github.com/dendronhq/dendron/commit/abd8ca586f3db50b1f482d8064a656787580ea4b))
+
 ## [0.10.8](https://github.com/dendronhq/dendron/compare/v0.10.7...v0.10.8) (2020-09-13)
 
 ### Enhancements

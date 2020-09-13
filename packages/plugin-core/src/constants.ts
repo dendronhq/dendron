@@ -349,6 +349,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Get URL of current note from published site",
     docLink: "",
     docPreview: ``,
+    keybindings: {
+      mac: "cmd+shift+u",
+      windows: "ctrl+shift+u",
+    },
   },
   // --- Misc
   OPEN_LINK: {

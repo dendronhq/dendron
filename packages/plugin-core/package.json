@@ -401,6 +401,11 @@
                 "when": "editorFocus"
             },
             {
+                "command": "dendron.copyNoteURL",
+                "mac": "cmd+shift+u",
+                "windows": "ctrl+shift+u"
+            },
+            {
                 "command": "dendron.showPreview",
                 "windows": "windows+ctrl+p",
                 "mac": "cmd+ctrl+p"

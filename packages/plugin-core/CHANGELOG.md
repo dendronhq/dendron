@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.11.1-alpha.1...v0.11.1-alpha.2) (2020-09-14)
+
+### Enhancements
+
+- **pods:** work with relative file paths ([21ee4c5](https://github.com/dendronhq/dendron/commit/21ee4c585ab100d2f80436d01ef80afab67d3b09))
+
 ## [0.11.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.11.1-alpha.0...v0.11.1-alpha.1) (2020-09-14)
 
 ### Enhancements

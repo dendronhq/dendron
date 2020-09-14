@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.11.1-alpha.0...v0.11.1-alpha.1) (2020-09-14)
+
+### Enhancements
+
+- **pods:** configure import and export pods ([363285f](https://github.com/dendronhq/dendron/commit/363285f4777a6c1525a4880d3e3bd7384da9d42f))
+
 ## [0.11.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.11.0...v0.11.1-alpha.0) (2020-09-14)
 
 ### Features

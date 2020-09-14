@@ -1,4 +1,10 @@
-import { DNodeRawProps, Note, NoteRawProps } from "@dendronhq/common-all";
+import {
+  DNode,
+  DNodeRawProps,
+  DNodeUtils,
+  Note,
+  NoteRawProps,
+} from "@dendronhq/common-all";
 import {
   EngineTestUtils,
   FileTestUtils,
@@ -118,6 +124,33 @@ describe("JSONImportPod", () => {
       add: ["root.md", "foo.md", "bar.md"],
     });
     expect(expectedFiles).toEqual(actualFiles);
+    const importedNote = fs.readFileSync(path.join(storeDir, "foo.md"), {
+      encoding: "utf8",
+    });
+    expect(
+      _.every(["foo body"], (ent) => importedNote.match(ent))
+    ).toBeTruthy();
+  });
+
+  test("basic w/stubs", async () => {
+    ({ storeDir, importSrc } = await setupImport({
+      jsonEntries: createJSON().concat([
+        { fname: "baz.one", body: "baz body" },
+      ]),
+    }));
+    wsRoot = path.dirname(importSrc).split("/").slice(0, -1).join("/");
+    const pod = new JSONImportPod({ roots: [storeDir], wsRoot });
+    const config: JSONImportPodConfig = {
+      src: importSrc,
+      concatenate: false,
+    };
+    await pod.plant({ mode, config });
+    let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(storeDir, [], {
+      add: ["root.md", "foo.md", "bar.md", "baz.one.md"],
+    });
+    expect(expectedFiles).toEqual(actualFiles);
+    const stubNote = DNodeUtils.getNoteByFname("baz", pod.engine) as Note;
+    expect(stubNote.stub).toBeTruthy();
     const importedNote = fs.readFileSync(path.join(storeDir, "foo.md"), {
       encoding: "utf8",
     });

@@ -60,7 +60,9 @@ export class JSONImportPod extends ImportPodBaseV2<ImportPodConfig> {
     const entries = fs.readJSONSync(src.fsPath);
     const notes = await this._entries2Notes(entries, { destName, concatenate });
     return Promise.all(
-      _.map(notes, (n) => this.engine.write(n, { newNode: true }))
+      _.map(notes, (n) =>
+        this.engine.write(n, { newNode: true, parentsAsStubs: true })
+      )
     );
   }
 

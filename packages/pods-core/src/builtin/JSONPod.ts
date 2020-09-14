@@ -83,7 +83,7 @@ export class JSONImportPod extends ImportPodBaseV2<ImportPodConfig> {
       }
       const acc: string[] = [""];
       _.forEach(notes, (n) => {
-        acc.push(`# ${n.fname}`);
+        acc.push(`# [[${n.fname}]]`);
         acc.push(n.renderBody());
         acc.push("---");
       });

@@ -141,7 +141,9 @@ describe("JSONImportPod", () => {
     });
     expect(importedNote).toMatchSnapshot();
     expect(
-      _.every(["bar body", "foo body"], (ent) => importedNote.match(ent))
+      _.every(["[[bar]]", "bar body", "foo body"], (ent) =>
+        importedNote.match(ent)
+      )
     ).toBeTruthy();
   });
 

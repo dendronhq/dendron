@@ -5,10 +5,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.11.1](https://github.com/dendronhq/dendron/compare/v0.11.1-alpha.3...v0.11.1) (2020-09-14)
 
-**Note:** Version bump only for package root
-
-## [0.11.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.11.1-alpha.2...v0.11.1-alpha.3) (2020-09-14)
-
 ### Features
 
 - **pods:** json import pod ([5b1fd8d](https://github.com/dendronhq/dendron/commit/5b1fd8db5de4f25987ba6f388b3f557038377d76))

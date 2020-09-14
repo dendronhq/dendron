@@ -5,39 +5,32 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.11.1](https://github.com/dendronhq/dendron/compare/v0.11.1-alpha.3...v0.11.1) (2020-09-14)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.11.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.11.1-alpha.2...v0.11.1-alpha.3) (2020-09-14)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.11.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.11.1-alpha.1...v0.11.1-alpha.2) (2020-09-14)
-
-### Enhancements
-
-- **pods:** work with relative file paths ([21ee4c5](https://github.com/dendronhq/dendron/commit/21ee4c585ab100d2f80436d01ef80afab67d3b09))
-
-## [0.11.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.11.1-alpha.0...v0.11.1-alpha.1) (2020-09-14)
-
-### Enhancements
-
-- **pods:** configure import and export pods ([363285f](https://github.com/dendronhq/dendron/commit/363285f4777a6c1525a4880d3e3bd7384da9d42f))
-
-## [0.11.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.11.0...v0.11.1-alpha.0) (2020-09-14)
-
 ### Features
 
 - **pods:** json import pod ([5b1fd8d](https://github.com/dendronhq/dendron/commit/5b1fd8db5de4f25987ba6f388b3f557038377d76))
 
+  Imports a JSON file as Dendron notes
+  <a href="https://www.loom.com/share/375b64a6597346ec8e6be5ca35049194"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/375b64a6597346ec8e6be5ca35049194-with-play.gif"> </a>
+
 - **notes:** add copy note url command ([1e4142e](https://github.com/dendronhq/dendron/commit/1e4142e5ecbe41f8a542a454ea1b8db10e93fb7c))
+
+  Get URL of current note from published site
+
+  If you highlight a header, will copy the url with the header set as the anchor
+
+  ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.copy-url.gif)
 
 ### Enhancements
 
 - **publish:** keyboard shortcuts for copy note url cmd ([a579d7f](https://github.com/dendronhq/dendron/commit/a579d7f339b2eb1713178f4ad93beec822a0eba1))
+- **pods:** work with relative file paths ([21ee4c5](https://github.com/dendronhq/dendron/commit/21ee4c585ab100d2f80436d01ef80afab67d3b09))
+- **pods:** configure import and export pods ([363285f](https://github.com/dendronhq/dendron/commit/363285f4777a6c1525a4880d3e3bd7384da9d42f))
+- **pods:** json pod import fnames as links ([8113594](https://github.com/dendronhq/dendron/commit/8113594c4def9f21f801439c435fe30e79b2b457))
 
 ### Bug Fixes
 
 - **hiearchies:** rename when stub is present ([abd8ca5](https://github.com/dendronhq/dendron/commit/abd8ca586f3db50b1f482d8064a656787580ea4b))
+- **pods:** handle stub notes correctly on import ([df22b59](https://github.com/dendronhq/dendron/commit/df22b595088a2e08be23ee0ad2e462317f0e9642))
 
 # [0.11.0](https://github.com/dendronhq/dendron/compare/v0.10.7...v0.11.0) (2020-09-13)
 

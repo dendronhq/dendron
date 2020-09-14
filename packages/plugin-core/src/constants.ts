@@ -347,8 +347,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Copy Note URL`,
     group: "pods",
     desc: "Get URL of current note from published site",
+    docs:
+      "If you highlight a header, will copy the url with the header set as the anchor",
     docLink: "",
-    docPreview: ``,
+    docPreview: `![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.copy-url.gif)`,
     keybindings: {
       mac: "cmd+shift+u",
       windows: "ctrl+shift+u",

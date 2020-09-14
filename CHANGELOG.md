@@ -5,27 +5,19 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.11.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.11.0...v0.11.1-alpha.0) (2020-09-14)
 
-## [0.10.9-alpha.1](https://github.com/dendronhq/dendron/compare/v0.10.9-alpha.0...v0.10.9-alpha.1) (2020-09-13)
-
 ### Features
 
 - **pods:** json import pod ([5b1fd8d](https://github.com/dendronhq/dendron/commit/5b1fd8db5de4f25987ba6f388b3f557038377d76))
 
-## [0.10.9-alpha.0](https://github.com/dendronhq/dendron/compare/v0.10.8...v0.10.9-alpha.0) (2020-09-13)
-
-### Bug Fixes
-
-- **hiearchies:** rename when stub is present ([abd8ca5](https://github.com/dendronhq/dendron/commit/abd8ca586f3db50b1f482d8064a656787580ea4b))
-
-## [0.10.8](https://github.com/dendronhq/dendron/compare/v0.10.7...v0.10.8) (2020-09-13)
+- **notes:** add copy note url command ([1e4142e](https://github.com/dendronhq/dendron/commit/1e4142e5ecbe41f8a542a454ea1b8db10e93fb7c))
 
 ### Enhancements
 
 - **publish:** keyboard shortcuts for copy note url cmd ([a579d7f](https://github.com/dendronhq/dendron/commit/a579d7f339b2eb1713178f4ad93beec822a0eba1))
 
-### Features
+### Bug Fixes
 
-- add copy note url command ([1e4142e](https://github.com/dendronhq/dendron/commit/1e4142e5ecbe41f8a542a454ea1b8db10e93fb7c))
+- **hiearchies:** rename when stub is present ([abd8ca5](https://github.com/dendronhq/dendron/commit/abd8ca586f3db50b1f482d8064a656787580ea4b))
 
 # [0.11.0](https://github.com/dendronhq/dendron/compare/v0.10.7...v0.11.0) (2020-09-13)
 

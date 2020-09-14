@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.11.1-alpha.2...v0.11.1-alpha.3) (2020-09-14)
+
+### Bug Fixes
+
+- **pods:** handle stub notes correctly on import ([df22b59](https://github.com/dendronhq/dendron/commit/df22b595088a2e08be23ee0ad2e462317f0e9642))
+
 ## [0.11.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.11.1-alpha.1...v0.11.1-alpha.2) (2020-09-14)
 
 ### Enhancements

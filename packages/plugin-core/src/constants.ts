@@ -342,6 +342,18 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.pod.md",
     docPreview: `<a href="https://www.loom.com/share/d49e5f4155af485cadc9cd810b6cab28"> <img src="https://cdn.loom.com/sessions/thumbnails/d49e5f4155af485cadc9cd810b6cab28-with-play.gif"> </a>`,
   },
+  COPY_NOTE_URL: {
+    key: "dendron.copyNoteURL",
+    title: `${CMD_PREFIX} Copy Note URL`,
+    group: "pods",
+    desc: "Get URL of current note from published site",
+    docLink: "",
+    docPreview: ``,
+    keybindings: {
+      mac: "cmd+shift+u",
+      windows: "ctrl+shift+u",
+    },
+  },
   // --- Misc
   OPEN_LINK: {
     key: "dendron.openLink",
@@ -486,6 +498,11 @@ export const CONFIG = {
     default: "asOwnDomain",
     description: _noteAddBehaviorDesc("scratch"),
     enum: _noteAddBehaviorEnum,
+  },
+  COPY_NOTE_URL_ROOT: {
+    key: "dendron.copyNoteUrlRoot",
+    type: "string",
+    description: "Override root url when getting note url",
   },
   // --- root dir
   ROOT_DIR: {

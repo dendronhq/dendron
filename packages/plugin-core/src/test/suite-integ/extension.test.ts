@@ -79,6 +79,7 @@ import {
 import { ConfigurePodCommand } from "../../commands/ConfigurePodCommand";
 import { ImportPodCommand } from "../../commands/ImportPod";
 import { CopyNoteRefCommand } from "../../commands/CopyNoteRef";
+import { CopyNoteURLCommand } from "../../commands/CopyNoteURL";
 
 type ExportConfig = any;
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
@@ -1130,6 +1131,51 @@ suite("commands", function () {
       setupDendronWorkspace(root.name, ctx);
     });
 
+    test("stub exists", function (done) {
+      onWSInit(async () => {
+        const uri = vscode.Uri.file(
+          path.join(root.name, "vault", "bar.one.md")
+        );
+        VSCodeUtils.showInputBox = async () => {
+          return "bar";
+        };
+        await vscode.window.showTextDocument(uri);
+        fs.appendFileSync(uri.fsPath, "shaken");
+        await new RenameNoteV2Command().run();
+
+        const text = fs.readFileSync(
+          path.join(root.name, "vault", "dendron.md"),
+          { encoding: "utf8" }
+        );
+        const textOfNew = fs.readFileSync(
+          path.join(root.name, "vault", "bar.md"),
+          { encoding: "utf8" }
+        );
+        assert.ok(text.indexOf("[[bar]]") > 0);
+        assert.ok(textOfNew.indexOf("shaken") > 0);
+        const activeUri = vscode.window.activeTextEditor?.document.uri;
+        assert.equal(
+          activeUri?.fsPath,
+          path.join(root.name, "vault", "bar.md")
+        );
+        done();
+      });
+
+      setupDendronWorkspace(root.name, ctx, {
+        useFixtures: false,
+        useCb: async (vault) => {
+          NodeTestUtils.createNotes(vault, [
+            {
+              id: "id-bar.one",
+              fname: "bar.one",
+              body: "## Foo\nfoo text\n## Header\n Header text",
+            },
+            { id: "id-dendron", fname: "dendron", body: "[[bar.one]]" },
+          ]);
+        },
+      });
+    });
+
     test("mult links", function (done) {
       onWSInit(async () => {
         let uri = vscode.Uri.file(
@@ -1546,6 +1592,78 @@ suite.skip("utils", function () {
 });
 
 // === Commands
+suite("Copy Note URL", function () {
+  let root: DirResult;
+  this.timeout(TIMEOUT);
+  let rootUrl = "dendron.so";
+
+  before(function () {
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    DendronWorkspace.getOrCreate(ctx);
+  });
+
+  beforeEach(function () {
+    root = FileTestUtils.tmpDir();
+  });
+
+  afterEach(function () {
+    HistoryService.instance().clearSubscriptions();
+  });
+
+  test("with override", function (done) {
+    onWSInit(async () => {
+      const uri = vscode.Uri.file(path.join(root.name, "vault", "bar.md"));
+      await vscode.window.showTextDocument(uri);
+      const link = await new CopyNoteURLCommand().run();
+      const url = path.join(rootUrl, "notes", "id-bar.html");
+      assert.equal(link, url);
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      configOverride: {
+        [CONFIG.COPY_NOTE_URL_ROOT.key]: "dendron.so",
+      },
+      useFixtures: false,
+      useCb: async (vault) => {
+        NodeTestUtils.createNotes(vault, [
+          {
+            id: "id-bar",
+            fname: "bar",
+            body: "## Foo\nfoo text\n## Header\n Header text",
+          },
+        ]);
+      },
+    });
+  });
+
+  test("with selection and override", function (done) {
+    onWSInit(async () => {
+      const uri = vscode.Uri.file(path.join(root.name, "vault", "bar.md"));
+      const editor = await vscode.window.showTextDocument(uri);
+      editor.selection = new vscode.Selection(8, 0, 8, 12);
+      const link = await new CopyNoteURLCommand().run();
+      const url = path.join(rootUrl, "notes", "id-bar.html#foo");
+      assert.equal(link, url);
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      configOverride: {
+        [CONFIG.COPY_NOTE_URL_ROOT.key]: "dendron.so",
+      },
+      useFixtures: false,
+      useCb: async (vault) => {
+        NodeTestUtils.createNotes(vault, [
+          {
+            id: "id-bar",
+            fname: "bar",
+            body: "## Foo\nfoo text\n## Header\n Header text",
+          },
+        ]);
+      },
+    });
+  });
+});
+
 suite("GoToSibling", function () {
   before(function () {
     ctx = VSCodeUtils.getOrCreateMockContext();

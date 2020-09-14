@@ -74,11 +74,11 @@ export class RenameNoteV2Command extends BaseCommand<
 
     // error checking
     let newNote = _.find(_.values(ws.engine.notes), { fname: inputs.dest });
-    if (newNote) {
+    let isStub = newNote?.stub;
+    if (newNote && !isStub) {
       throw Error(`${inputs.dest} already exists`);
     }
-
-    newNote = new Note({ fname: inputs.dest });
+    newNote = new Note({ fname: inputs.dest, id: newNote?.id });
     const newUri = Uri.file(
       path.join(ws.rootWorkspace.uri.fsPath, inputs.dest + ".md")
     );

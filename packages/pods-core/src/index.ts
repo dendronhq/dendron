@@ -2,7 +2,7 @@ import { readYAML } from "@dendronhq/common-server";
 import fs, { ensureDirSync, writeFileSync } from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { JSONExportPod, FileImportPod } from "./builtin";
+import { JSONExportPod, FileImportPod, JSONImportPod } from "./builtin";
 import { PodClassEntryV2 } from "./types";
 export * from "./types";
 export * from "./utils";
@@ -13,7 +13,7 @@ export function getAllExportPods(): PodClassEntryV2[] {
   return [JSONExportPod];
 }
 export function getAllImportPods(): PodClassEntryV2[] {
-  return [FileImportPod];
+  return [FileImportPod, JSONImportPod];
 }
 
 // === utils

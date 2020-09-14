@@ -3,11 +3,7 @@ import {
   NodeTestUtils,
   writeYAML,
 } from "@dendronhq/common-server";
-import {
-  FileImportPod,
-  getPodConfigPath,
-  JSONImportPod,
-} from "@dendronhq/pods-core";
+import { FileImportPod, getPodConfigPath } from "@dendronhq/pods-core";
 import fs, { ensureDirSync } from "fs-extra";
 import path from "path";
 import { ImportPodCLICommand } from "../importPod";
@@ -16,12 +12,12 @@ const { createFiles } = FileTestUtils;
 
 describe("import file pod", async () => {
   let importSrc: string;
-  let podsDir: string;
+  let wsRoot: string;
   let vault: string;
 
   beforeEach(async function () {
     importSrc = FileTestUtils.tmpDir().name;
-    podsDir = FileTestUtils.tmpDir().name;
+    wsRoot = FileTestUtils.tmpDir().name;
     vault = FileTestUtils.tmpDir().name;
     await NodeTestUtils.createNotes(vault, []);
 
@@ -41,7 +37,7 @@ describe("import file pod", async () => {
     try {
       await ImportPodCLICommand.run({
         podId: FileImportPod.id,
-        podsDir,
+        wsRoot,
         vault,
       });
     } catch (err) {
@@ -50,13 +46,16 @@ describe("import file pod", async () => {
   });
 
   test("config present, default", async () => {
-    const configPath = getPodConfigPath(podsDir, FileImportPod);
+    const configPath = getPodConfigPath(
+      path.join(wsRoot, "pods"),
+      FileImportPod
+    );
     ensureDirSync(path.dirname(configPath));
     writeYAML(configPath, { src: importSrc });
 
     const cmd = await ImportPodCLICommand.run({
       podId: FileImportPod.id,
-      podsDir,
+      wsRoot,
       vault,
     });
     cmd.L.info({ msg: "in test file" });

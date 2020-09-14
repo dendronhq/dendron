@@ -16,6 +16,7 @@ import path from "path";
 describe("exportPod", () => {
   let vault: string;
   let podsDir: string;
+  let wsRoot: string;
 
   beforeEach(function () {
     vault = EngineTestUtils.setupStoreDir({
@@ -27,14 +28,15 @@ describe("exportPod", () => {
         ]);
       },
     });
-    podsDir = FileTestUtils.tmpDir().name;
+    wsRoot = FileTestUtils.tmpDir().name;
+    podsDir = path.join(wsRoot, "pods");
   });
 
   test("json export, no config", async () => {
     try {
       await ExportPodCLICommand.run({
         podId: JSONExportPod.id,
-        podsDir,
+        wsRoot,
         vault,
       });
     } catch (err) {
@@ -52,7 +54,7 @@ describe("exportPod", () => {
     writeYAML(configPath, { dest: exportDest });
     await ExportPodCLICommand.run({
       podId: JSONExportPod.id,
-      podsDir,
+      wsRoot,
       vault,
     });
     const payload = fs.readJSONSync(exportDest);

@@ -54,8 +54,13 @@ export class ExportPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
     const ctx = { ctx: "ExportPod" };
     this.L.info({ ctx, opts });
     const root = DendronWorkspace.rootWorkspaceFolder()?.uri.fsPath as string;
+    const wsRoot = DendronWorkspace.rootDir();
+    if (!wsRoot) {
+      throw Error("ws root not defined");
+    }
     const pod = new opts.podChoice.podClass({
       roots: [root],
+      wsRoot,
     });
     await pod.plant({ mode: "notes", config: opts.config });
     const dest = opts.config.dest;

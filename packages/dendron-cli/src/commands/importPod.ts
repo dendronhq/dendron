@@ -4,15 +4,7 @@ import {
   PodItem,
 } from "@dendronhq/pods-core";
 import yargs from "yargs";
-import { PodCLICommand } from "./pod";
-
-type CommandCLIOpts = {
-  podId: string;
-  podsDir: string;
-  vault: string;
-};
-
-export { CommandCLIOpts as ImportPodCLIOpts };
+import { CommandCLIOpts, PodCLICommand } from "./pod";
 
 export class ImportPodCLICommand extends PodCLICommand {
   static getPods() {

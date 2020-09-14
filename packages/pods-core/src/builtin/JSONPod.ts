@@ -110,13 +110,10 @@ export class JSONExportPod extends ExportPodBaseV2
   };
 
   async plant(opts: ExportPodOpts<ExportConfig>): Promise<void> {
-    return new Promise(async (resolve) => {
-      await this.initEngine();
-      const cleanConfig = this.cleanConfig(opts.config);
-      const payload = this.prepareForExport(opts);
-      const destPath = cleanConfig.dest.fsPath;
-      fs.writeJSONSync(destPath, payload, { encoding: "utf8" });
-      resolve();
-    });
+    await this.initEngine();
+    const cleanConfig = this.cleanConfig(opts.config);
+    const payload = this.prepareForExport(opts);
+    const destPath = cleanConfig.dest.fsPath;
+    fs.writeJSONSync(destPath, payload, { encoding: "utf8" });
   }
 }

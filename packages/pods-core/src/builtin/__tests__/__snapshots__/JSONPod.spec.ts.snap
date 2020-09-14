@@ -5,22 +5,3 @@ exports[`JSONExportPod write config 1`] = `
 # type: string
 dest: TODO"
 `;
-
-exports[`JSONImportPod concatenate 1`] = `
-"---
-id: ad9f3347-7adf-49b0-97e8-acede4b93c5a
-title: Results
-desc: ''
-updated: 1600110905047
-created: 1600110905047
-stub: false
----
-
-# [[foo]]
-foo body
----
-# [[bar]]
-bar body
----
-"
-`;

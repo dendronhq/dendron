@@ -6,12 +6,8 @@ import yargs from "yargs";
 import { BackfillCliOpts, BackfillCommand } from "../src/commands/backfill";
 import { BuildSiteCliOpts, BuildSiteCommand } from "../src/commands/build-site";
 import { ExportPodCLICommand } from "../src/commands/exportPod";
-import { RefactorRule } from "../src/commands/refactorBase";
-import {
-  RefactorFMCliOpts,
-  RefactorFMCommand,
-} from "../src/commands/refactorFM";
 import { ImportPodCLICommand } from "../src/commands/importPod";
+import { RefactorRule } from "../src/commands/refactorBase";
 
 export const addLayout: RefactorRule = {
   name: "add fm",
@@ -84,23 +80,23 @@ yargs
       return ImportPodCLICommand.run(args);
     }
   )
-  .command<RefactorFMCliOpts>(
-    "refactorFM",
-    "refactor frontmatter",
-    (args) => {
-      args.option("vault", {
-        describe: "location of vault",
-      });
-    },
-    async (args) => {
-      const { vault } = args;
-      const cmd = new RefactorFMCommand();
-      await cmd.execute({
-        root: vault,
-        include: ["blog.thoughts.*"],
-        rule: updateTime,
-      });
-    }
-  )
+  // .command<RefactorFMCliOpts>(
+  //   "refactorFM",
+  //   "refactor frontmatter",
+  //   (args) => {
+  //     args.option("vault", {
+  //       describe: "location of vault",
+  //     });
+  //   },
+  //   async (args) => {
+  //     const { vault } = args;
+  //     const cmd = new RefactorFMCommand();
+  //     await cmd.execute({
+  //       root: vault,
+  //       include: ["blog.thoughts.*"],
+  //       rule: updateTime,
+  //     });
+  //   }
+  // )
   .demandCommand(1)
   .help().argv;

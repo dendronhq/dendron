@@ -7,6 +7,7 @@ import {
   getPodConfigPath,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
+import path from "path";
 import yargs from "yargs";
 import { BaseCommand } from "./base";
 
@@ -14,17 +15,17 @@ type CommandOpts = {
   engine: DEngine;
   podClass: PodClassEntryV2;
   config: any;
+  wsRoot: string;
 };
 
 type CommandOutput = void;
 
-type CommandCLIOpts = {
+export type CommandCLIOpts = {
   podId: string;
-  podsDir: string;
+  wsRoot: string;
+  //podsDir: string;
   vault: string;
 };
-
-export { CommandCLIOpts as ImportPodCLIOpts };
 
 export abstract class PodCLICommand extends BaseCommand<
   CommandOpts,
@@ -41,8 +42,8 @@ export abstract class PodCLICommand extends BaseCommand<
     args.option("vault", {
       describe: "location of vault",
     });
-    args.option("podsDir", {
-      describe: "location of pods dir",
+    args.option("wsRoot", {
+      describe: "location of workspace",
     });
   }
 
@@ -50,7 +51,8 @@ export abstract class PodCLICommand extends BaseCommand<
     args: CommandCLIOpts,
     pods: PodClassEntryV2[]
   ): Promise<CommandOpts> {
-    const { vault, podId, podsDir } = args;
+    const { vault, podId, wsRoot } = args;
+    const podsDir = path.join(wsRoot, "pods");
     const engine = DendronEngine.getOrCreateEngine({
       root: vault,
       forceNew: true,
@@ -70,14 +72,16 @@ export abstract class PodCLICommand extends BaseCommand<
       engine,
       podClass,
       config: maybeConfig,
+      wsRoot,
     };
   }
 
   async execute(opts: CommandOpts) {
-    const { podClass, engine, config } = opts;
+    const { podClass, engine, config, wsRoot } = opts;
     const root = engine.props.root;
     const pod = new podClass({
       roots: [root],
+      wsRoot,
     });
     await pod.plant({ mode: "notes", config: config });
   }

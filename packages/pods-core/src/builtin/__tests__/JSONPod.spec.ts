@@ -79,12 +79,13 @@ function setupImport(opts: { jsonEntries: Partial<NoteRawProps>[] }) {
       createNotes(dirPath, []);
     },
   });
-  return { podsDir, storeDir, importSrc };
+  return { podsDir, storeDir, importSrc, importDir };
 }
 
 describe("JSONImportPod", () => {
   let storeDir: string;
   let importSrc: string;
+  let wsRoot: string;
   const mode = "notes";
   const createJSON = () => {
     return [
@@ -103,10 +104,11 @@ describe("JSONImportPod", () => {
     ({ storeDir, importSrc } = await setupImport({
       jsonEntries: createJSON(),
     }));
+    wsRoot = path.dirname(importSrc).split("/").slice(0, -1).join("/");
   });
 
   test("basic", async () => {
-    const pod = new JSONImportPod({ roots: [storeDir] });
+    const pod = new JSONImportPod({ roots: [storeDir], wsRoot });
     const config: JSONImportPodConfig = {
       src: importSrc,
       concatenate: false,
@@ -124,8 +126,29 @@ describe("JSONImportPod", () => {
     ).toBeTruthy();
   });
 
+  test("basic w/rel path", async () => {
+    const pod = new JSONImportPod({ roots: [storeDir], wsRoot });
+    const dirname = path.dirname(importSrc).split("/").slice(-1)[0];
+    const basename = path.basename(importSrc);
+    const config: JSONImportPodConfig = {
+      src: `./${path.join(dirname, basename)}`,
+      concatenate: false,
+    };
+    await pod.plant({ mode, config });
+    let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(storeDir, [], {
+      add: ["root.md", "foo.md", "bar.md"],
+    });
+    expect(expectedFiles).toEqual(actualFiles);
+    const importedNote = fs.readFileSync(path.join(storeDir, "foo.md"), {
+      encoding: "utf8",
+    });
+    expect(
+      _.every(["foo body"], (ent) => importedNote.match(ent))
+    ).toBeTruthy();
+  });
+
   test("concatenate", async () => {
-    const pod = new JSONImportPod({ roots: [storeDir] });
+    const pod = new JSONImportPod({ roots: [storeDir], wsRoot });
     const config: JSONImportPodConfig = {
       src: importSrc,
       concatenate: true,
@@ -139,7 +162,6 @@ describe("JSONImportPod", () => {
     const importedNote = fs.readFileSync(path.join(storeDir, "results.md"), {
       encoding: "utf8",
     });
-    expect(importedNote).toMatchSnapshot();
     expect(
       _.every(["[[bar]]", "bar body", "foo body"], (ent) =>
         importedNote.match(ent)
@@ -148,7 +170,7 @@ describe("JSONImportPod", () => {
   });
 
   test("concatenate without dest set", async () => {
-    const pod = new JSONImportPod({ roots: [storeDir] });
+    const pod = new JSONImportPod({ roots: [storeDir], wsRoot });
     const config: JSONImportPodConfig = {
       src: importSrc,
       concatenate: true,
@@ -164,6 +186,7 @@ describe("JSONImportPod", () => {
 describe("JSONExportPod", () => {
   let storeDir: string;
   let podsDir: string;
+  let wsRoot: string;
 
   const createNotes = (): Partial<NoteRawProps>[] => [
     { fname: "foo", body: "foo body" },
@@ -172,10 +195,11 @@ describe("JSONExportPod", () => {
 
   beforeEach(async () => {
     ({ storeDir, podsDir } = await setup({ notes: createNotes() }));
+    wsRoot = path.dirname(podsDir).split("/").slice(0, -1).join("/");
   });
 
   test("basic", async () => {
-    const pod = new JSONExportPod({ roots: [storeDir] });
+    const pod = new JSONExportPod({ roots: [storeDir], wsRoot });
     const mode = "notes";
     const destDir = FileTestUtils.tmpDir().name;
     const destPath = path.join(destDir, "export.json");
@@ -208,8 +232,42 @@ describe("JSONExportPod", () => {
     });
   });
 
+  test("basic w/rel path", async () => {
+    const pod = new JSONExportPod({ roots: [storeDir], wsRoot });
+    const mode = "notes";
+
+    const fname = "export.json";
+    const config = { dest: `./${fname}` };
+    await pod.plant({ mode, config });
+    const payload = fs.readJSONSync(path.join(wsRoot, fname)) as NoteRawProps[];
+    assertNodeMeta({
+      expect,
+      payload,
+      fields: ["fname"],
+      expected: [
+        {
+          fname: "root",
+        },
+        { fname: "bar" },
+        { fname: "foo" },
+      ],
+    });
+    assertNodeBody({
+      expect,
+      payload,
+      expected: [
+        {
+          fname: "root",
+          body: "",
+        },
+        { fname: "bar", body: "bar body" },
+        { fname: "foo", body: "foo body" },
+      ],
+    });
+  });
+
   test("basic no body", async () => {
-    const pod = new JSONExportPod({ roots: [storeDir] });
+    const pod = new JSONExportPod({ roots: [storeDir], wsRoot });
     const mode = "notes";
     const destDir = FileTestUtils.tmpDir().name;
     const destPath = path.join(destDir, "export.json");

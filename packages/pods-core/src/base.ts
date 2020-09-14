@@ -3,10 +3,11 @@ import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { URI } from "vscode-uri";
 import { PodKind } from "./types";
-import { Logger, createLogger } from "@dendronhq/common-server";
+import { Logger, createLogger, resolvePath } from "@dendronhq/common-server";
 
 export type PodOptsV2 = {
   roots: string[];
+  wsRoot: string;
   engine?: DEngine;
 };
 
@@ -54,7 +55,7 @@ export abstract class ExportPodBaseV2<
   cleanConfig(config: ExportConfig) {
     return {
       ..._.defaults(config, { includeStubs: false, includeBody: true }),
-      dest: URI.file(config.dest),
+      dest: URI.file(resolvePath(config.dest, this.opts.wsRoot)),
     };
   }
 
@@ -82,7 +83,7 @@ export abstract class ImportPodBaseV2<TConfig extends ImportConfig = any>
   cleanConfig(config: ImportConfig) {
     return {
       ..._.defaults(config),
-      src: URI.file(config.src),
+      src: URI.file(resolvePath(config.src, this.opts.wsRoot)),
     };
   }
 

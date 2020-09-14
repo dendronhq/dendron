@@ -70,6 +70,9 @@ export class DendronWorkspace {
     return vscode.workspace.getConfiguration(section);
   }
 
+  /**
+   * Full path to workspace root
+   */
   static rootDir(): string | undefined {
     const rootDir = DendronWorkspace.configuration().get<string>(
       "dendron.rootDir"

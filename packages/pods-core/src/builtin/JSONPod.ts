@@ -22,7 +22,7 @@ export type ImportPodConfig = ImportConfig & {
 
 export class JSONImportPod extends ImportPodBaseV2<ImportPodConfig> {
   static id: string = ID;
-  static description: string = "import to json";
+  static description: string = "import json";
 
   static config = (): PodConfigEntry[] => {
     return [
@@ -97,7 +97,7 @@ export class JSONImportPod extends ImportPodBaseV2<ImportPodConfig> {
 export class JSONExportPod extends ExportPodBaseV2
   implements ExportPod<ExportConfig> {
   static id: string = ID;
-  static description: string = "import from json";
+  static description: string = "export json";
 
   static config = (): PodConfigEntry[] => {
     return [

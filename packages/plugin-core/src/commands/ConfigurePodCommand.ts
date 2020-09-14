@@ -3,6 +3,7 @@ import {
   getAllExportPods,
   PodClassEntryV2,
   podClassEntryToPodItem,
+  getAllImportPods,
 } from "@dendronhq/pods-core";
 import { Uri } from "vscode";
 import { VSCodeUtils } from "../utils";
@@ -28,8 +29,11 @@ export class ConfigurePodCommand extends BasicCommand<
   }
 
   async gatherInputs(): Promise<CommandInput | undefined> {
-    const pods = getAllExportPods();
-    const podItems: PodItem[] = pods.map((p) => podClassEntryToPodItem(p));
+    const podsImport = getAllImportPods();
+    const podsExport = getAllExportPods();
+    const podItems: PodItem[] = podsExport
+      .map((p) => podClassEntryToPodItem(p))
+      .concat(podsImport.map((p) => podClassEntryToPodItem(p)));
     const userPick = await showPodQuickPickItems(podItems);
     if (!userPick) {
       return;

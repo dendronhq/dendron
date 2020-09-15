@@ -23,7 +23,7 @@ export class ImportPodCLICommand extends PodCLICommand {
     const cmd = new ImportPodCLICommand();
     cmd.L.info({ ctx, msg: "enter", args });
     const pods = await ImportPodCLICommand.getPods();
-    const opts = await cmd.enrichArgs(args, pods);
+    const opts = await cmd.enrichArgs(args, pods, "import");
     cmd.L.info({ ctx, msg: "enrichArgs:post", args });
     await cmd.execute(opts);
     cmd.L.info({ ctx, msg: "exit", args });

@@ -23,7 +23,7 @@ export class ExportPodCLICommand extends PodCLICommand {
   static async run(args: CommandCLIOpts) {
     const cmd = new ExportPodCLICommand();
     const pods = await ExportPodCLICommand.getPods();
-    const opts = await cmd.enrichArgs(args, pods);
+    const opts = await cmd.enrichArgs(args, pods, "export");
     return cmd.execute(opts);
   }
 }

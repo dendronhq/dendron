@@ -1,5 +1,4 @@
 import {
-  DNode,
   DNodeRawProps,
   DNodeUtils,
   Note,

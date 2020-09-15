@@ -20,11 +20,39 @@ type CommandOpts = {
 
 type CommandOutput = void;
 
+function fetchPodClass(
+  podId: string,
+  opts: {
+    podSource: CommandCLIOpts["podSource"];
+    pods?: PodClassEntryV2[];
+    podType: "import" | "export";
+  }
+) {
+  const { podSource, pods } = opts;
+  if (podSource === "builtin") {
+    if (!pods) {
+      throw Error("pods needs to be defined");
+    }
+    const podClass = _.find(pods, {
+      id: podId,
+    }) as PodClassEntryV2;
+    return podClass;
+  } else {
+    const podEntry = require(podId);
+    const key = opts.podType === "import" ? "importPod" : "exportPod";
+    const podClass = podEntry[key];
+    if (!podClass) {
+      throw Error("no podClass found");
+    }
+    return podClass;
+  }
+}
+
 export type CommandCLIOpts = {
   podId: string;
   wsRoot: string;
-  //podsDir: string;
   vault: string;
+  podSource?: "remote" | "builtin";
 };
 
 export abstract class PodCLICommand extends BaseCommand<
@@ -33,11 +61,11 @@ export abstract class PodCLICommand extends BaseCommand<
 > {
   static async buildArgsCore(
     args: yargs.Argv<CommandCLIOpts>,
-    podItems: PodItem[]
+    _podItems: PodItem[]
   ) {
     args.option("podId", {
       describe: "pod to use",
-      choices: podItems.map((ent) => ent.id),
+      //choices: podItems.map(ent => ent.id)
     });
     args.option("vault", {
       describe: "location of vault",
@@ -45,21 +73,27 @@ export abstract class PodCLICommand extends BaseCommand<
     args.option("wsRoot", {
       describe: "location of workspace",
     });
+    // args.option("podSource", {
+    //   describe: "what kind of pod are you using",
+    //   choices: ["remote", "builtin"],
+    //   default: "builtin"
+    // });
   }
 
   async enrichArgs(
     args: CommandCLIOpts,
-    pods: PodClassEntryV2[]
+    pods: PodClassEntryV2[],
+    podType: "import" | "export"
   ): Promise<CommandOpts> {
-    const { vault, podId, wsRoot } = args;
+    const { vault, podId, wsRoot, podSource } = _.defaults(args, {
+      podSource: "builtin",
+    });
     const podsDir = path.join(wsRoot, "pods");
     const engine = DendronEngine.getOrCreateEngine({
       root: vault,
       forceNew: true,
     });
-    const podClass = _.find(pods, {
-      id: podId,
-    }) as PodClassEntryV2;
+    const podClass = fetchPodClass(podId, { podSource, pods, podType });
     const maybeConfig = getPodConfig(podsDir, podClass);
     if (!maybeConfig) {
       const podConfigPath = getPodConfigPath(podsDir, podClass);

@@ -49,8 +49,12 @@ export class PublishNotesCommand extends BaseCommand<
     return resp;
   }
 
+  async sanity(_opts: CommandOpts) {
+    return true;
+  }
+
   async execute(opts: CommandOpts) {
-    const { wsRoot, vault } = opts;
+    const { wsRoot, vault, noPush } = opts;
     const engine = DendronEngine.getOrCreateEngine({
       root: vault,
       forceNew: true,
@@ -59,6 +63,14 @@ export class PublishNotesCommand extends BaseCommand<
     await engine.init();
     const config = DConfig.getOrCreate(wsRoot);
     const siteConfig = config.site;
+
+    if (!noPush) {
+      const sane = await this.sanity(opts);
+      if (!sane) {
+        // TODO: report issues
+      }
+    }
+
     const { buildNotesRoot } = await new BuildSiteCommand().execute({
       engine,
       config: siteConfig,

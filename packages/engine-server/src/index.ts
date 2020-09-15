@@ -5,3 +5,4 @@ export * from "./drivers/file/parser";
 export * from "./pods";
 export * from "./utils";
 export * from "./topics/markdown";
+export * from "./topics/git";

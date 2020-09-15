@@ -147,7 +147,7 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
   // @CacheClear({ cacheKey: CACHE_KEYS.QUERY_ALL })
   async delete(id: string, opts?: StoreDeleteOpts): Promise<void> {
     if (id === this.rootId) {
-      throw new IllegalOperationError("can't delete root");
+      throw new IllegalOperationError({ msg: "can't delete root" });
     }
     const fpath = opts?.fpath ? opts.fpath : this.idToPath[id] + ".md";
     const uri = path.join(this.opts.root, fpath);

@@ -10,6 +10,7 @@ import { PublishNotesCommand } from "../publishNotes";
 describe("publishNotes", async () => {
   let wsRoot: string;
   let vault: string;
+  // @ts-ignore
   let siteRootDir: string;
 
   beforeEach(async () => {
@@ -28,13 +29,19 @@ describe("publishNotes", async () => {
   });
 
   test("publish", async () => {
-    // const config = setupDendronPubConfig({siteRootDir});
-    // const configPath = path.join(wsRoot, "dendron.yml")
-    // writeYAML(configPath, config);
     const { buildNotesRoot } = await PublishNotesCommand.run({
       wsRoot,
       vault,
       noPush: true,
+    });
+    const notesDir = path.join(buildNotesRoot, "notes");
+    FileTestUtils.cmpFiles(notesDir, ["id-bar.md", "id-foo.md", "root.md"]);
+  });
+
+  test("publish but no git", async () => {
+    const { buildNotesRoot } = await PublishNotesCommand.run({
+      wsRoot,
+      vault,
     });
     const notesDir = path.join(buildNotesRoot, "notes");
     FileTestUtils.cmpFiles(notesDir, ["id-bar.md", "id-foo.md", "root.md"]);

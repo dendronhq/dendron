@@ -9,5 +9,9 @@ export function findRepo() {
     throw Error("no repo found");
   }
   const pathToRepo = path.join(resp, ".git");
-  Git.Repository.open(pathToRepo);
+  return Git.Repository.open(pathToRepo);
+}
+
+export async function isRepo(fpath: string) {
+  return Git.Repository.open(fpath);
 }

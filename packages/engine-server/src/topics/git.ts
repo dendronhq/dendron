@@ -1,14 +1,9 @@
 import { findInParent } from "@dendronhq/common-server";
-import { pathExists } from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import Git from "nodegit";
 
-var Git = require("nodegit");
-
-console.log(Git);
-console.log("done");
-
-function findRepo() {
+export function findRepo() {
   const resp = findInParent(".", ".git");
   if (_.isUndefined(resp)) {
     throw Error("no repo found");

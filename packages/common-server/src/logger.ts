@@ -1,6 +1,7 @@
 // import pino from "pino";
 
 import { env } from "@dendronhq/common-all";
+import _ from "lodash";
 import pino from "pino";
 
 export class Logger {
@@ -42,7 +43,12 @@ function createLogger(name?: string, dest?: string): pino.Logger {
   if (dest) {
     return pino(pino.destination(dest)).child({ name: nameClean, level });
   } else {
-    // const logDst = env("LOG_DST", { shouldThrow: false })
+    const logDst = env("LOG_DST", { shouldThrow: false });
+    if (!logDst || _.isEmpty(logDst) || logDst === "stdout") {
+      // TODO: tmp disable pino logging on stdout
+      const out = pino({ name: nameClean, level });
+      return out;
+    }
     // if (logDst) {
     //   return pino(pino.destination(logDst)).child({ name: nameClean, level });
     // }

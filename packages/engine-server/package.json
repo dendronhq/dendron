@@ -72,6 +72,7 @@
     "@types/markdown-it": "^10.0.2",
     "@types/mdast": "^3.0.3",
     "@types/node": "13.11.0",
+    "@types/nodegit": "^0.26.8",
     "@types/pino": "^6.3.0",
     "@types/through2": "^2.0.36",
     "@types/unist": "^2.0.3",

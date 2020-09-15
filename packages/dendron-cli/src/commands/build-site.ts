@@ -27,7 +27,9 @@ type CommandCommonOpts = {
   dendronRoot: string;
 };
 
-type CommandOutput = void;
+type CommandOutput = {
+  buildNotesRoot: string;
+};
 
 type DendronJekyllProps = {
   hpath: string;
@@ -240,7 +242,9 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
 
     await Promise.all(out);
     this.L.info({ msg: "exit" });
-    return;
+    return {
+      buildNotesRoot: siteRootPath,
+    };
   }
 }
 

@@ -16,6 +16,11 @@ import { DendronWorkspace } from "../../workspace";
 import { CREATE_NEW_LABEL } from "./constants";
 import { node2Uri } from "./utils";
 
+export type DendronQuickPicker = QuickPick<DNode> & {
+  justActivated?: boolean;
+  onCreate?: (note: Note) => Promise<void>;
+};
+
 const L = Logger;
 // @ts-ignore
 class QueryStringUtils {
@@ -194,7 +199,7 @@ export class LookupProvider {
     }
   }
 
-  async onDidAccept(picker: QuickPick<DNode>, opts: EngineOpts) {
+  async onDidAccept(picker: DendronQuickPicker, opts: EngineOpts) {
     const start = process.hrtime();
     const value = PickerUtils.getValue(picker);
     let profile;
@@ -283,6 +288,11 @@ export class LookupProvider {
         L.error({ ...ctx2, msg: "action will overwrite existing note" });
         return;
       }
+      if (opts.flavor === "note") {
+        if (picker.onCreate) {
+          await picker.onCreate(nodeNew as Note);
+        }
+      }
 
       // need to apply schema to new notes
       await engine.write(nodeNew, {
@@ -299,7 +309,7 @@ export class LookupProvider {
     return showDocAndHidePicker(uri, picker);
   }
 
-  async onUpdatePickerItem(picker: QuickPick<DNode>, opts: EngineOpts) {
+  async onUpdatePickerItem(picker: DendronQuickPicker, opts: EngineOpts) {
     const start = process.hrtime();
     picker.busy = true;
 
@@ -417,7 +427,7 @@ export class LookupProvider {
     }
   }
 
-  provide(picker: QuickPick<DNode>) {
+  provide(picker: DendronQuickPicker) {
     const { opts } = this;
     picker.onDidAccept(async () => {
       this.onDidAccept(picker, opts);

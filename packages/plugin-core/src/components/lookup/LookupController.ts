@@ -5,7 +5,11 @@ import path from "path";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
 import { DendronWorkspace } from "../../workspace";
-import { EngineOpts, LookupProvider } from "./LookupProvider";
+import {
+  DendronQuickPicker,
+  EngineOpts,
+  LookupProvider,
+} from "./LookupProvider";
 
 type ButtonType = "fuzzy_match";
 
@@ -64,14 +68,25 @@ export class LookupController {
     }
   }
 
-  show(opts?: { value?: string; ignoreFocusOut?: boolean }) {
+  show(opts?: {
+    value?: string;
+    ignoreFocusOut?: boolean;
+    onCreate?: DendronQuickPicker["onCreate"];
+  }) {
     const ctx = "show";
-    const cleanOpts = _.defaults(opts, { ignoreFocusOut: false });
+    const cleanOpts = _.defaults(opts, {
+      ignoreFocusOut: false,
+      onCreate: async () => {
+        return;
+      },
+    });
     this.ws.L.info({ ctx });
     // const provider = this.getOrInstantiateProvider();
     this.ws.L.info({ ctx: ctx + ":getOrInstantiateProvider:post" });
     // create quick pick
-    const quickpick = vscode.window.createQuickPick<DNode>();
+    const quickpick = vscode.window.createQuickPick<
+      DNode
+    >() as DendronQuickPicker;
     this.ws.L.info({ ctx: ctx + ":createQuickPick:post" });
     let title = ["Lookup"];
     if (this.state.mode === "fuzzy") {
@@ -81,8 +96,8 @@ export class LookupController {
     quickpick.title = title.join(" ");
     quickpick.placeholder = "eg. hello.world";
     quickpick.ignoreFocusOut = cleanOpts.ignoreFocusOut;
-    // @ts-ignore
     quickpick.justActivated = true;
+    quickpick.onCreate = cleanOpts.onCreate;
     // FIXME: no button for now
     // quickpick.buttons = [this.state.buttons.fuzzyMatch];
     // quickpick.items = _.values(DendronEngine.getOrCreateEngine().notes);

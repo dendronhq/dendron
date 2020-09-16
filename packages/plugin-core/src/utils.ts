@@ -62,6 +62,36 @@ export class VSCodeUtils {
     return vscode.commands.executeCommand("workbench.action.closeAllEditors");
   }
 
+  static extractRangeFromActiveEditor = async (
+    documentParam?: vscode.TextDocument,
+    rangeParam?: vscode.Range
+  ) => {
+    const document = documentParam
+      ? documentParam
+      : vscode.window.activeTextEditor?.document;
+
+    if (!document || (document && document.languageId !== "markdown")) {
+      return;
+    }
+
+    const range = rangeParam
+      ? rangeParam
+      : vscode.window.activeTextEditor?.selection;
+
+    if (!range || (range && range.isEmpty)) {
+      return;
+    }
+    return { document, range };
+  };
+
+  static deleteRange = async (
+    document: vscode.TextDocument,
+    range: vscode.Range
+  ) => {
+    const editor = await vscode.window.showTextDocument(document);
+    await editor.edit((edit) => edit.delete(range));
+  };
+
   static getActiveTextEditor() {
     return vscode.window.activeTextEditor;
   }

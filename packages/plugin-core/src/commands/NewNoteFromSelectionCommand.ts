@@ -74,8 +74,6 @@ const extractRangeToNewNote = async (
     return;
   }
   return { document, range };
-
-  //   await showFile(targetUri);
 };
 
 export default extractRangeToNewNote;

@@ -1,10 +1,10 @@
 import {
   DendronSiteConfig,
   DNode,
+  DNodeUtils,
   LegacyDendronSiteConfig,
   Note,
   Schema,
-  DNodeUtils,
 } from "@dendronhq/common-all";
 import {
   DirResult,
@@ -12,11 +12,18 @@ import {
   FileTestUtils,
   mdFile2NodeProps,
   node2MdFile,
+  NodeTestUtils,
   readYAML,
   writeYAML,
-  NodeTestUtils,
 } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
+import {
+  getAllExportPods,
+  getAllImportPods,
+  getPodConfigPath,
+  getPodPath,
+  podClassEntryToPodItem,
+} from "@dendronhq/pods-core";
 import * as assert from "assert";
 import fs, { ensureDirSync } from "fs-extra";
 import _ from "lodash";
@@ -27,11 +34,21 @@ import path from "path";
 import * as vscode from "vscode";
 import { ArchiveHierarchyCommand } from "../../commands/ArchiveHierarchy";
 import { ChangeWorkspaceCommand } from "../../commands/ChangeWorkspace";
+import { ConfigurePodCommand } from "../../commands/ConfigurePodCommand";
 import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
+import { CopyNoteRefCommand } from "../../commands/CopyNoteRef";
+import { CopyNoteURLCommand } from "../../commands/CopyNoteURL";
 import { CreateJournalCommand } from "../../commands/CreateJournal";
 import { CreateScratchCommand } from "../../commands/CreateScratch";
 import { DoctorCommand } from "../../commands/Doctor";
+import { ExportPodCommand } from "../../commands/ExportPod";
+import { GoDownCommand } from "../../commands/GoDownCommand";
+import {
+  GoToSiblingCommand,
+  GoToSiblingCommandOpts,
+} from "../../commands/GoToSiblingCommand";
 import { GoUpCommand } from "../../commands/GoUpCommand";
+import { ImportPodCommand } from "../../commands/ImportPod";
 import { RefactorHierarchyCommand } from "../../commands/RefactorHierarchy";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import { RenameNoteV2Command } from "../../commands/RenameNoteV2";
@@ -63,23 +80,6 @@ import {
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { GoDownCommand } from "../../commands/GoDownCommand";
-import {
-  GoToSiblingCommand,
-  GoToSiblingCommandOpts,
-} from "../../commands/GoToSiblingCommand";
-import { ExportPodCommand } from "../../commands/ExportPod";
-import {
-  getAllExportPods,
-  getPodConfigPath,
-  getPodPath,
-  podClassEntryToPodItem,
-  getAllImportPods,
-} from "@dendronhq/pods-core";
-import { ConfigurePodCommand } from "../../commands/ConfigurePodCommand";
-import { ImportPodCommand } from "../../commands/ImportPod";
-import { CopyNoteRefCommand } from "../../commands/CopyNoteRef";
-import { CopyNoteURLCommand } from "../../commands/CopyNoteURL";
 
 type ExportConfig = any;
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
@@ -783,6 +783,33 @@ suite.skip("startup", function () {
           done();
         });
       });
+
+      // test("lookup new node with body", function (done) {
+      //   onWSInit(async () => {
+      //     const uri = vscode.Uri.file(path.join(root.name, "vault", "bar.md"));
+      //     const editor = await vscode.window.showTextDocument(uri);
+      //     editor.selection = new vscode.Selection(8, 0, 8, 12);
+      //     // @ts-ignore
+      //     const {document, range} = await VSCodeUtils.extractRangeFromActiveEditor();
+      //     const body = "\n" + document.getText(range).trim();
+      //     const lbl = "bond";
+      //     const qp = await createMockQuickPick<DNode>({ value: lbl }) as DendronQuickPicker;
+      //     const engOpts: EngineOpts = { flavor: "note" };
+      //     const lp = new LookupProvider(engOpts);
+      //     await lp.onDidAccept(qp, engOpts);
+      //     const activeEditor = VSCodeUtils.getActiveTextEditor();
+      //     expect(path.basename(activeEditor?.document.uri.fsPath as string), "bar.md");
+      //     done();
+      //   });
+      //   setupDendronWorkspace(root.name, ctx, {
+      //     useCb: async () => {
+      //       NodeTestUtils.createNotes(path.join(root.name, "vault"), [
+      //         { fname: "foo", stub: true },
+      //         { fname: "bar" },
+      //       ]);
+      //     },
+      //   });
+      // });
 
       // test("lookup new node with unknown schema", function(done) {
       //   onWSInit(async () => {

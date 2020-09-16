@@ -285,11 +285,18 @@ export class DendronWorkspace {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(DENDRON_COMMANDS.LOOKUP.key, async () => {
-        const ctx = DENDRON_COMMANDS.LOOKUP;
-        this.L.info({ ctx: ctx + ":LookupController:pre" });
         const controller = new LookupController(this, { flavor: "note" });
-        this.L.info({ ctx: ctx + ":LookupController:post" });
-        controller.show();
+        const resp = await VSCodeUtils.extractRangeFromActiveEditor();
+        let onCreate;
+        if (!_.isUndefined(resp)) {
+          const { document, range } = resp;
+          const body = "\n" + document.getText(range).trim();
+          onCreate = async (note: Note) => {
+            note.body = body;
+            await VSCodeUtils.deleteRange(document, range);
+          };
+        }
+        controller.show({ onCreate });
       })
     );
 

@@ -3,11 +3,11 @@ import {
   FileTestUtils,
   NodeTestUtils,
 } from "@dendronhq/common-server";
-import { DConfig, Git } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/engine-server";
 import path from "path";
 import { PublishNotesCommand } from "../publishNotes";
 
-describe("publishNotes", async () => {
+describe.skip("publishNotes", async () => {
   let wsRoot: string;
   let vault: string;
   // @ts-ignore
@@ -49,15 +49,15 @@ describe("publishNotes", async () => {
     }
   });
 
-  test("publish, ok", async () => {
-    await Git.createRepoWithCommit(wsRoot);
-    await Git.create(wsRoot);
-    const { buildNotesRoot } = await PublishNotesCommand.run({
-      wsRoot,
-      vault,
-      noPush: true,
-    });
-    const notesDir = path.join(buildNotesRoot, "notes");
-    FileTestUtils.cmpFiles(notesDir, ["id-bar.md", "id-foo.md", "root.md"]);
-  });
+  // test("publish, ok", async () => {
+  //   await Git.createRepoWithCommit(wsRoot);
+  //   await Git.create(wsRoot);
+  //   const { buildNotesRoot } = await PublishNotesCommand.run({
+  //     wsRoot,
+  //     vault,
+  //     noPush: true,
+  //   });
+  //   const notesDir = path.join(buildNotesRoot, "notes");
+  //   FileTestUtils.cmpFiles(notesDir, ["id-bar.md", "id-foo.md", "root.md"]);
+  // });
 });

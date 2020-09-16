@@ -1,4 +1,5 @@
-import { DConfig, DendronEngine } from "@dendronhq/engine-server";
+import { DendronError } from "@dendronhq/common-all/src";
+import { DConfig, DendronEngine, Git } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
 import { BaseCommand } from "./base";
@@ -49,7 +50,12 @@ export class PublishNotesCommand extends BaseCommand<
     return resp;
   }
 
-  async sanity(_opts: CommandOpts) {
+  async sanity(opts: CommandOpts) {
+    const { wsRoot } = opts;
+    const repo = await Git.isRepo(wsRoot);
+    if (!repo) {
+      throw new DendronError({ msg: "no repo found" });
+    }
     return true;
   }
 
@@ -65,10 +71,7 @@ export class PublishNotesCommand extends BaseCommand<
     const siteConfig = config.site;
 
     if (!noPush) {
-      const sane = await this.sanity(opts);
-      if (!sane) {
-        // TODO: report issues
-      }
+      await this.sanity(opts);
     }
 
     const { buildNotesRoot } = await new BuildSiteCommand().execute({

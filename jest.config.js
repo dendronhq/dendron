@@ -17,11 +17,12 @@ module.exports = {
       diagnostics: false,
     },
   },
-  moduleFileExtensions: ["ts", "tsx", "js"],
+  moduleFileExtensions: ["ts", "tsx", "js", "json"],
   modulePathIgnorePatterns: ["lib"],
   notify: true,
   notifyMode: "always",
   testEnvironment: "node",
+  testPathIgnorePatterns: ["utils.ts"],
   //roots: ["<rootDir>/packages"],
   transform: {
     "^.+\\.tsx?$": "ts-jest",

@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-server",
-  "version": "0.11.2-alpha.0",
+  "version": "0.11.2",
   "description": "common-server",
   "license": "GPLv3",
   "repository": {

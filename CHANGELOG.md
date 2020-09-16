@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.2](https://github.com/dendronhq/dendron/compare/v0.11.2-alpha.0...v0.11.2) (2020-09-16)
+
+### Enhancements
+
+- **workbench:** lookup can extract highlighted text ([87effa2](https://github.com/dendronhq/dendron/commit/87effa26f134e1c7cd129e4d5b4f244977141fc5))
+
 ## [0.11.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.11.1...v0.11.2-alpha.0) (2020-09-15)
 
 **Note:** Version bump only for package root

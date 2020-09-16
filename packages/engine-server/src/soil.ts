@@ -1,5 +1,5 @@
 import { createLogger, DEngine } from "@dendronhq/common-all";
-import { Logger } from "@dendronhq/common-server/src";
+import { Logger } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import { DendronEngine } from "./engine";

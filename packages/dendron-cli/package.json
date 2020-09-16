@@ -33,7 +33,7 @@
     "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
     "build": "npm run compile",
     "compile": "tsc -p tsconfig.build.json",
-    "test": "jest",
+    "test": "npx jest",
     "test:unit:all": "cross-env LOG_LEVEL=error yarn test",
     "coverage": "jest --coverage",
     "watch": "npm run compile -- --watch",

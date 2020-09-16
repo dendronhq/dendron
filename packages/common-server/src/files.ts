@@ -149,17 +149,18 @@ export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
 }
 
 export function mdFile2NodeProps(fpath: string): NoteRawProps {
+  const options: any = {
+    engines: {
+      yaml: {
+        parse: (s: string) => YAML.safeLoad(s, { schema: YAML.JSON_SCHEMA }),
+        stringify: (s: string) =>
+          YAML.safeDump(s, { schema: YAML.JSON_SCHEMA }),
+      },
+    },
+  };
   const { data, content: body } = matter(
     fs.readFileSync(fpath, { encoding: "utf8" }),
-    {
-      engines: {
-        yaml: {
-          // @ts-ignore
-          parse: (s) => YAML.safeLoad(s, { schema: YAML.JSON_SCHEMA }),
-          stringify: (s) => YAML.safeDump(s, { schema: YAML.JSON_SCHEMA }),
-        },
-      },
-    }
+    options
   );
   const { name: fname } = path.parse(fpath);
   const dataProps = DNodeRaw.createProps({ ...data, fname, body });

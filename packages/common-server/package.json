@@ -44,9 +44,6 @@
     "minimatch": "^3.0.4",
     "pino": "^6.3.2",
     "tmp": "^0.2.1",
-    "vscode-uri": "^2.1.2"
-  },
-  "devDependencies": {
     "@types/fs-extra": "^9.0.1",
     "@types/jest": "^23.3.3",
     "@types/js-yaml": "^3.12.5",
@@ -55,6 +52,9 @@
     "@types/node": "13.11.0",
     "@types/pino": "^6.3.0",
     "@types/tmp": "^0.2.0",
+    "vscode-uri": "^2.1.2"
+  },
+  "devDependencies": {
     "coveralls": "^3.0.2",
     "jest": "^23.6.0",
     "prettier": "2.0.5",

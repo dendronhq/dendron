@@ -9,7 +9,7 @@ import {
   refLink2String,
 } from "../utils";
 import _ from "lodash";
-import { EngineTestUtils } from "@dendronhq/common-server/src";
+import { EngineTestUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";
 

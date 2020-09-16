@@ -1,11 +1,14 @@
 /* eslint-disable no-loop-func */
+import matter from "gray-matter";
 import _ from "lodash";
 import minimatch from "minimatch";
 import moment from "moment";
+import path from "path";
 import { URI } from "vscode-uri";
 import YAML from "yamljs";
 import { DendronError } from "./error";
 import {
+  DEngine,
   DNodeData,
   DNodeDict,
   DNodeRawOpts,
@@ -19,21 +22,16 @@ import {
   ISchemaOpts,
   NoteData,
   NoteLink,
+  NoteProps,
   NoteRawProps,
+  RawPropsOpts,
   SchemaData,
   SchemaDict,
-  SchemaRawProps,
-  RawPropsOpts,
   SchemaRawOptsFlat,
+  SchemaRawProps,
   SchemaTemplate,
-  DEngine,
-  NoteProps,
-  ProtoLink,
 } from "./types";
-import matter from "gray-matter";
 import { genUUID } from "./uuid";
-import path from "path";
-import { Point, Node } from "unist";
 
 export const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
@@ -884,16 +882,6 @@ function createBackLink(note: Note): NoteLink {
   };
 }
 
-// DEPRECATE: not using
-export type ProtoNoteSource = {
-  uri: URI;
-  text: string;
-  contentStart: Point;
-  end: Point;
-  eol: string;
-  tree: Node;
-};
-
 export class NoteUtils {
   static addBackLink(from: Note, to: Note): void {
     if (_.isUndefined(from.data.links)) {
@@ -929,22 +917,6 @@ export class NoteUtils {
     });
     parent.addChild(to);
     return stubNodes;
-  }
-
-  static protoGetLinks(note: Note, opts: { filter?: string }): ProtoLink[] {
-    const cleanOpts = _.defaults(opts, { filter: undefined });
-    const props = note.custom.props;
-    let links = props.links as ProtoLink[];
-    if (cleanOpts.filter) {
-      links = links.filter((l) => l.type === cleanOpts.filter);
-    }
-    return links;
-  }
-
-  static protoGetSource(note: Note): ProtoNoteSource {
-    const props = note.custom.props;
-    const source = props.source as ProtoNoteSource;
-    return source;
   }
 }
 

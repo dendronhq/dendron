@@ -29,6 +29,15 @@
       "problemMatcher": []
     },
     {
+      "label": "Sleep",
+      "type": "shell",
+      "command": "./bootstrap/scripts/sleep.sh",
+      "options": {
+        "cwd": "./.."
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "NPM: Publish:Pre-Patch",
       "type": "shell",
       "command": "./bootstrap/scripts/publish-pre-patch.sh",
@@ -78,6 +87,7 @@
       "label": "Pub:Local",
       "dependsOn": [
         "NPM: Publish",
+        "Sleep",
         "Plugin: Package and Install"
       ],
       "dependsOrder": "sequence",
@@ -87,6 +97,7 @@
       "label": "Pub:Local:Pre:Patch",
       "dependsOn": [
         "NPM: Publish:Pre-Patch",
+        "Sleep",
         "Plugin: Package and Install"
       ],
       "dependsOrder": "sequence",

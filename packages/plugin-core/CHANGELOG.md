@@ -9,9 +9,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - **workbench:** lookup can extract highlighted text ([87effa2](https://github.com/dendronhq/dendron/commit/87effa26f134e1c7cd129e4d5b4f244977141fc5))
 
-## [0.11.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.11.1...v0.11.2-alpha.0) (2020-09-15)
+If you have text highlighted while creating a new note with a lookup, the new note will be created with the text from the old note. The highlighted text will also be removed from the original note.
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+<a href="https://www.loom.com/share/33b6ad44479c4902834b01db0feeee43"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/33b6ad44479c4902834b01db0feeee43-with-play.gif"> </a>
 
 ## [0.11.1](https://github.com/dendronhq/dendron/compare/v0.11.1-alpha.3...v0.11.1) (2020-09-14)
 

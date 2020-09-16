@@ -172,8 +172,9 @@
                 "command": "dendron.lookup",
                 "title": "Dendron: Lookup",
                 "desc": "Initiate note lookup",
+                "docs": "((ref: [[dendron.topic.lookup]]#notes,1:#schemas))",
                 "docLink": "dendron.topic.lookup.md",
-                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/lookup-cli.gif)"
+                "docPreview": ""
             },
             {
                 "command": "dendron.lookupSchema",

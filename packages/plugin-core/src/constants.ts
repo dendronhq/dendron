@@ -156,9 +156,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       key: "ctrl+l",
     },
     desc: "Initiate note lookup",
+    docs: ["((ref: [[dendron.topic.lookup]]#notes,1:#schemas))"].join("\n"),
     docLink: "dendron.topic.lookup.md",
-    docPreview:
-      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/lookup-cli.gif)",
+    docPreview: "",
   },
   LOOKUP_SCHEMA: {
     key: "dendron.lookupSchema",

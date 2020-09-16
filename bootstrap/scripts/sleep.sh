@@ -1,3 +1,5 @@
 #!/bin/bash
 
-sleep 10
+echo "start sleeping"
+sleep 20
+echo "done sleeping"

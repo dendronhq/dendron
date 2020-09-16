@@ -1,4 +1,4 @@
-import { DendronError } from "@dendronhq/common-all/src";
+import { DendronError } from "@dendronhq/common-all";
 import { DConfig, DendronEngine, Git } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";

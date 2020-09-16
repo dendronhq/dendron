@@ -51,7 +51,7 @@ describe("publishNotes", async () => {
 
   test("publish, ok", async () => {
     await Git.createRepoWithCommit(wsRoot);
-    const git = await Git.create(wsRoot);
+    await Git.create(wsRoot);
     const { buildNotesRoot } = await PublishNotesCommand.run({
       wsRoot,
       vault,

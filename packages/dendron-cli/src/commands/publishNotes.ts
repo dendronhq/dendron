@@ -52,7 +52,7 @@ export class PublishNotesCommand extends BaseCommand<
 
   async sanity(opts: CommandOpts) {
     const { wsRoot } = opts;
-    const repo = await Git.isRepo(wsRoot);
+    const repo = await Git.getRepo(wsRoot);
     if (!repo) {
       throw new DendronError({ msg: "no repo found" });
     }

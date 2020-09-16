@@ -53,6 +53,7 @@
     "@types/unist": "^2.0.3",
     "@types/yamljs": "^0.2.31",
     "cross-path-sort": "^1.0.0",
+    "execa": "^4.0.3",
     "fs-extra": "^9.0.1",
     "fuse.js": "^6.3.0",
     "gray-matter": "^4.0.2",
@@ -78,6 +79,7 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "@types/execa": "^2.0.0",
     "coveralls": "^3.0.2",
     "cross-env": "^7.0.2",
     "jest": "^23.6.0",

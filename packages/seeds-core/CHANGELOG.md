@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.11.3...v0.11.4-alpha.0) (2020-09-17)
+
+### Enhancements
+
+- **seeds:** better planting options ([c0a1dd4](https://github.com/dendronhq/dendron/commit/c0a1dd4b81418950091a8557583d322cf87a095f))
+
 ## [0.11.3](https://github.com/dendronhq/dendron/compare/v0.11.3-alpha.5...v0.11.3) (2020-09-17)
 
 **Note:** Version bump only for package @dendronhq/seeds-core

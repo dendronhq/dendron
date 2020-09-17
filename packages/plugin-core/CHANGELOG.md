@@ -5,31 +5,21 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.11.3](https://github.com/dendronhq/dendron/compare/v0.11.3-alpha.5...v0.11.3) (2020-09-17)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Dendron-CLI
 
-## [0.11.3-alpha.5](https://github.com/dendronhq/dendron/compare/v0.11.3-alpha.4...v0.11.3-alpha.5) (2020-09-16)
+#### Features
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+- support for seeds ([docs](https:/dendron.so/notes/4fdf54ac-599e-42e7-90a5-38964913a9a7.html))
 
-## [0.11.3-alpha.4](https://github.com/dendronhq/dendron/compare/v0.11.3-alpha.3...v0.11.3-alpha.4) (2020-09-16)
+> Note: Seeds are highly experimental and under active development. Content here is subject to change.
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+Seeds represent existing knowledge out in the world. A seed could be a wikipedia article, a github repo, or an arbitrary website.
 
-## [0.11.3-alpha.3](https://github.com/dendronhq/dendron/compare/v0.11.3-alpha.2...v0.11.3-alpha.3) (2020-09-16)
+You can use a **Dendron Seed** to ingest data from existing sources and import them into your vault. Data ingestion is also refereed to as **planting**.
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+Note that seeds differ from [[pods|dendron.topic.pod]] in that they help you ingest content from external sources from content that you might have no control over. Pods help you import/export your content between various platforms.
 
-## [0.11.3-alpha.2](https://github.com/dendronhq/dendron/compare/v0.11.3-alpha.1...v0.11.3-alpha.2) (2020-09-16)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.11.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.11.3-alpha.0...v0.11.3-alpha.1) (2020-09-16)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.11.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.11.2...v0.11.3-alpha.0) (2020-09-16)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
+You can see an example of a published seeded vault [here](https://aws.dendron.so/).
 
 ## [0.11.2](https://github.com/dendronhq/dendron/compare/v0.11.2-alpha.0...v0.11.2) (2020-09-16)
 

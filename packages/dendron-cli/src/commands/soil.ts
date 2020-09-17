@@ -1,4 +1,5 @@
 import { DEngine } from "@dendronhq/common-all";
+import { resolvePath } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
@@ -36,11 +37,15 @@ export abstract class SoilCommand<
   }
 
   enrichArgs(args: TCLIOpts): CommandOpts {
-    const { vault, wsRoot } = args;
+    let { vault, wsRoot } = args;
     const engine = DendronEngine.getOrCreateEngine({
       root: vault,
       forceNew: true,
     });
+
+    const cwd = process.cwd();
+    wsRoot = resolvePath(wsRoot, cwd);
+    vault = resolvePath(vault, cwd);
     return {
       ...args,
       engine,

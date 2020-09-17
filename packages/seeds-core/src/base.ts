@@ -1,5 +1,6 @@
 import { DendronSoil, Git } from "@dendronhq/engine-server";
 import { Note } from "@dendronhq/common-all";
+import path from "path";
 
 type FetchResp = {
   root: string;
@@ -22,14 +23,20 @@ export abstract class DendronSeed<
   abstract config(): TConfig;
 
   async handleGit(config: TConfig) {
+    const ctx = "handleGit";
+    this.L.info({ ctx, config });
     const remoteUrl = config.src.url;
     const localUrl = this.buildDirPath(this.opts.name);
-    // TODO: pull if exist
+    const repoPath = path.join(localUrl, "repo");
+
     const git = new Git({ localUrl, remoteUrl });
-    if (!(await git.isRepo())) {
-      await git.clone();
+    const isRepo = await Git.getRepo(repoPath);
+    if (!isRepo) {
+      this.L.info({ ctx, msg: "cloning" });
+      await git.clone("repo");
     }
-    return { root: localUrl };
+    this.L.info({ ctx, localUrl, remoteUrl, msg: "exit" });
+    return { root: repoPath };
   }
 
   async fetch(config: TConfig): Promise<FetchResp> {

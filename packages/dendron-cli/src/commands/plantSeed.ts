@@ -1,3 +1,4 @@
+import path from "path";
 import yargs from "yargs";
 import { SoilCommand, SoilCommandCLIOpts, SoilCommandOpts } from "./soil";
 
@@ -7,6 +8,7 @@ type CLIOpts = SoilCommandCLIOpts & {
 
 type CommandOpts = SoilCommandOpts & {
   id: string;
+  roots: string[];
 };
 
 export class PlantSeedCommand extends SoilCommand<CLIOpts, CommandOpts> {
@@ -20,7 +22,7 @@ export class PlantSeedCommand extends SoilCommand<CLIOpts, CommandOpts> {
 
   enrichArgs(args: CLIOpts) {
     const opts = super.enrichArgs(args);
-    return { ...opts, id: args.id };
+    return { ...opts, roots: [args.vault], id: args.id };
   }
 
   eval = (args: CLIOpts) => {
@@ -39,7 +41,11 @@ export class PlantSeedCommand extends SoilCommand<CLIOpts, CommandOpts> {
   }
 
   async execute(opts: CommandOpts) {
-    const SeedClass = require(opts.id);
-    console.log(SeedClass);
+    const { roots, wsRoot } = opts;
+    const node_modules = path.join(opts.wsRoot, "node_modules");
+    const SeedClass = require(path.join(node_modules, opts.id)).default;
+    const seed = new SeedClass({ name: SeedClass.name, roots, wsRoot });
+    await seed.plant();
+    return;
   }
 }

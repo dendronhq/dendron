@@ -6,23 +6,26 @@
 // import os from "os";
 // import path from "path";
 import execa from "execa";
+import fs from "fs-extra";
+import path from "path";
 
 export class Git {
   static async getRepo(fpath: string): Promise<any | false> {
-    try {
-      const out = await execa.command(`git status`, {
-        shell: true,
-        cwd: fpath,
-      });
-      return out;
-      // return await nodegit.Repository.open(fpath);
-    } catch (err) {
-      const { stderr } = err as { stderr: string };
-      if (stderr.match(/not a git repository/)) {
-        return false;
-      }
-      throw err;
-    }
+    return fs.existsSync(path.join(fpath, ".git"));
+    // try {
+    //   const out = await execa.command(`git status`, {
+    //     shell: true,
+    //     cwd: fpath,
+    //   });
+    //   return out;
+    //   // return await nodegit.Repository.open(fpath);
+    // } catch (err) {
+    //   const { stderr } = err as { stderr: string };
+    //   if (stderr.match(/not a git repository/)) {
+    //     return false;
+    //   }
+    //   throw err;
+    // }
   }
 
   constructor(public opts: { localUrl: string; remoteUrl: string }) {}
@@ -31,9 +34,13 @@ export class Git {
     return Git.getRepo(this.opts.localUrl);
   }
 
-  async clone() {
+  async clone(destOverride?: string) {
     const { localUrl, remoteUrl } = this.opts;
-    await execa.command(`git clone ${remoteUrl}`, {
+    const cmdParts = ["git clone", remoteUrl];
+    if (destOverride) {
+      cmdParts.push(destOverride);
+    }
+    await execa.command(cmdParts.join(" "), {
       shell: true,
       cwd: localUrl,
     });

@@ -450,6 +450,7 @@ const _noteNameDesc = (type: "journal" | "scratch") =>
   `named used for ${type} notes`;
 const _noteAddBehaviorDesc = (type: "journal" | "scratch") =>
   `strategy for adding new ${type} notes`;
+
 export const _noteAddBehaviorEnum = [
   "childOfDomain",
   "childOfDomainNamespace",
@@ -505,6 +506,13 @@ export const CONFIG = {
     key: "dendron.copyNoteUrlRoot",
     type: "string",
     description: "Override root url when getting note url",
+  },
+  DEFAULT_LOOKUP_CREATE_BEHAVIOR: {
+    key: "dendron.defaultLookupCreateBehavior",
+    default: "selectionExtract",
+    description:
+      "when creating a new note with selected text, define behavior for selected text",
+    enum: ["selection2link", "selectionExtract"],
   },
   // --- root dir
   ROOT_DIR: {

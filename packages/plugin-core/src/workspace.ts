@@ -287,16 +287,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(DENDRON_COMMANDS.LOOKUP.key, async () => {
         const controller = new LookupController(this, { flavor: "note" });
         const resp = await VSCodeUtils.extractRangeFromActiveEditor();
-        let onCreate;
-        if (!_.isUndefined(resp)) {
-          const { document, range } = resp;
-          const body = "\n" + document.getText(range).trim();
-          onCreate = async (note: Note) => {
-            note.body = body;
-            await VSCodeUtils.deleteRange(document, range);
-          };
-        }
-        controller.show({ onCreate });
+        controller.show(resp);
       })
     );
 

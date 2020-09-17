@@ -90,6 +90,14 @@
                     "type": "string",
                     "description": "Override root url when getting note url"
                 },
+                "dendron.defaultLookupCreateBehavior": {
+                    "default": "selectionExtract",
+                    "description": "when creating a new note with selected text, define behavior for selected text",
+                    "enum": [
+                        "selection2link",
+                        "selectionExtract"
+                    ]
+                },
                 "dendron.rootDir": {
                     "type": "string",
                     "default": "",

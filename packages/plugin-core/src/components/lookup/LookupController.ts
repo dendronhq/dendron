@@ -1,47 +1,26 @@
-import { DNode } from "@dendronhq/common-all";
-import { DendronEngine } from "@dendronhq/engine-server";
+import { CONSTANTS, DNode, Note } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
-import { QuickInputButton, ThemeIcon } from "vscode";
+import { QuickInputButton } from "vscode";
+import { CONFIG } from "../../constants";
+import { Logger } from "../../logger";
+import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
+import {
+  ButtonType,
+  createAllButtons,
+  IDendronQuickInputButton,
+  refreshButtons,
+} from "./buttons";
 import {
   DendronQuickPicker,
   EngineOpts,
   LookupProvider,
 } from "./LookupProvider";
 
-type ButtonType = "fuzzy_match";
-
-type DendronQuickInputButton = QuickInputButton & {
-  type: ButtonType;
-};
-
-class FuzzyMatchButton implements DendronQuickInputButton {
-  public iconPathNormal: ThemeIcon;
-  public iconPathPressed: ThemeIcon;
-  public tooltip: string;
-  public type: ButtonType;
-  public pressed: boolean;
-
-  constructor(pressed?: boolean) {
-    this.pressed = pressed || false;
-    this.iconPathNormal = new vscode.ThemeIcon("symbol-constant");
-    this.iconPathPressed = new vscode.ThemeIcon("squirrel");
-    this.tooltip = "fuzzy search";
-    this.type = "fuzzy_match";
-  }
-
-  get iconPath() {
-    return !this.pressed ? this.iconPathNormal : this.iconPathPressed;
-  }
-}
-
 type State = {
-  mode: "fuzzy" | "exact";
-  buttons: {
-    fuzzyMatch: FuzzyMatchButton;
-  };
+  buttons: IDendronQuickInputButton[];
 };
 
 export class LookupController {
@@ -51,98 +30,130 @@ export class LookupController {
   protected opts: EngineOpts;
 
   constructor(workspace: DendronWorkspace, opts: EngineOpts) {
+    const btnType = DendronWorkspace.configuration().get<string>(
+      CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key
+    ) as ButtonType;
     this.state = {
-      mode: "exact",
-      buttons: {
-        fuzzyMatch: new FuzzyMatchButton(),
-      },
+      buttons: createAllButtons(btnType),
     };
     this.ws = workspace;
     this.opts = opts;
   }
 
-  updateButton(btn: DendronQuickInputButton) {
-    // FIXME: if mult buttons, this won't work
-    if (this.quickPick) {
-      this.quickPick.buttons = [btn];
+  onCreate(opts: {
+    quickPick: DendronQuickPicker;
+    document?: vscode.TextDocument;
+    range?: vscode.Range;
+  }) {
+    const { document, range, quickPick } = opts;
+    const buttons = this.state.buttons;
+    const resp = _.find(buttons, { pressed: true });
+    if (!resp) {
+      quickPick.onCreate = async () => {};
+      return;
     }
+    quickPick.onCreate = async (note: Note) => {
+      const ctx = "onCreate";
+      switch (resp.type) {
+        case "selectionExtract": {
+          Logger.info({ ctx, msg: "selection extract" });
+          if (!_.isUndefined(document)) {
+            const body = "\n" + document.getText(range).trim();
+            note.body = body;
+            await VSCodeUtils.deleteRange(document, range as vscode.Range);
+          }
+          break;
+        }
+        case "selection2link": {
+          Logger.info({ ctx, msg: "selection 2 link" });
+          if (!_.isUndefined(document)) {
+            const editor = VSCodeUtils.getActiveTextEditor();
+            const { selection, text } = VSCodeUtils.getSelection();
+            await editor?.edit((builder) => {
+              const link = note.fname;
+              if (!selection.isEmpty) {
+                builder.replace(selection, `[[${text}|${link}]]`);
+              }
+            });
+          }
+          break;
+        }
+        default: {
+          vscode.window.showInformationMessage("no action");
+        }
+      }
+    };
   }
 
   show(opts?: {
     value?: string;
     ignoreFocusOut?: boolean;
-    onCreate?: DendronQuickPicker["onCreate"];
+    document?: vscode.TextDocument;
+    range?: vscode.Range;
   }) {
     const ctx = "show";
     const cleanOpts = _.defaults(opts, {
-      ignoreFocusOut: false,
-      onCreate: async () => {
-        return;
-      },
+      ignoreFocusOut: true,
     });
+    const { document, range } = cleanOpts;
     this.ws.L.info({ ctx });
     // const provider = this.getOrInstantiateProvider();
     this.ws.L.info({ ctx: ctx + ":getOrInstantiateProvider:post" });
     // create quick pick
-    const quickpick = vscode.window.createQuickPick<
+    const quickPick = vscode.window.createQuickPick<
       DNode
     >() as DendronQuickPicker;
     this.ws.L.info({ ctx: ctx + ":createQuickPick:post" });
     let title = ["Lookup"];
-    if (this.state.mode === "fuzzy") {
-      title.push("mode: fuzzy");
-    }
     title.push(`- version: ${DendronWorkspace.version()}`);
-    quickpick.title = title.join(" ");
-    quickpick.placeholder = "eg. hello.world";
-    quickpick.ignoreFocusOut = cleanOpts.ignoreFocusOut;
-    quickpick.justActivated = true;
-    quickpick.onCreate = cleanOpts.onCreate;
+    quickPick.title = title.join(" ");
+    quickPick.placeholder = "eg. hello.world";
+    quickPick.ignoreFocusOut = cleanOpts.ignoreFocusOut;
+    quickPick.justActivated = true;
+
+    this.onCreate({ quickPick, document, range });
     // FIXME: no button for now
-    // quickpick.buttons = [this.state.buttons.fuzzyMatch];
+    refreshButtons(quickPick, this.state.buttons);
     // quickpick.items = _.values(DendronEngine.getOrCreateEngine().notes);
 
     let { value } = cleanOpts;
     if (!_.isUndefined(value)) {
-      quickpick.value = value;
+      quickPick.value = value;
     } else {
       // set editor path
       let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
       if (editorPath && this.opts.flavor !== "schema") {
-        quickpick.value = path.basename(editorPath, ".md");
+        quickPick.value = path.basename(editorPath, ".md");
       }
     }
 
-    quickpick.onDidTriggerButton((btn: QuickInputButton) => {
-      const btnType = (btn as DendronQuickInputButton).type;
+    quickPick.onDidTriggerButton((btn: QuickInputButton) => {
+      const btnType = (btn as IDendronQuickInputButton).type;
 
-      switch (btnType) {
-        case "fuzzy_match":
-          const btn = this.state.buttons.fuzzyMatch;
-          btn.pressed = !btn.pressed;
-          this.updateButton(btn);
-          DendronEngine.getOrCreateEngine().updateProps({
-            mode: btn.pressed ? "fuzzy" : "exact",
-          });
-          vscode.window.showInformationMessage("fuzzy search");
-          break;
-        default:
-          vscode.window.showErrorMessage(`bad buttton type: ${btnType}`);
+      const btnTriggered = _.find(this.state.buttons, { type: btnType });
+      if (!btnTriggered) {
+        throw Error("bad button type");
       }
+      btnTriggered.pressed = !btnTriggered.pressed;
+      _.filter(this.state.buttons, (ent) => ent.type !== btnTriggered.type).map(
+        (ent) => (ent.pressed = false)
+      );
+      refreshButtons(quickPick, this.state.buttons);
+      this.onCreate({ quickPick, document, range });
     });
 
     // cleanup quickpick
-    quickpick.onDidHide(() => {
-      quickpick.dispose();
+    quickPick.onDidHide(() => {
+      quickPick.dispose();
       this.quickPick = undefined;
     });
 
     const provider = new LookupProvider(this.opts);
-    provider.provide(quickpick);
+    provider.provide(quickPick);
     this.ws.L.info({ ctx: ctx + ":provide:post" });
     // show
-    quickpick.show();
+    quickPick.show();
     this.ws.L.info({ ctx: ctx + ":show:post" });
-    return quickpick;
+    return quickPick;
   }
 }

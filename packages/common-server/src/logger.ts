@@ -31,8 +31,13 @@ export class Logger {
   };
 }
 
-function createLogger(name?: string, dest?: string): pino.Logger {
-  const level = env("LOG_LEVEL", { shouldThrow: false }) || "error";
+function createLogger(
+  name?: string,
+  dest?: string,
+  opts?: { lvl?: "debug" }
+): pino.Logger {
+  const level =
+    opts?.lvl || env("LOG_LEVEL", { shouldThrow: false }) || "error";
   const nameClean = name || env("LOG_NAME");
 
   // if (logDst === "stdout") {

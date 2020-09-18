@@ -366,3 +366,60 @@ Object {
   "title": "root",
 }
 `;
+
+exports[`use cache notes query  1`] = `
+Array [
+  Object {
+    "body": "
+",
+    "children": Array [
+      "id-bar",
+    ],
+    "created": 1600458227749,
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "stub": false,
+    "title": "root",
+    "type": "note",
+    "updated": 1600458227749,
+  },
+  Object {
+    "body": "bar body
+",
+    "children": Array [
+      "id-bar.one",
+    ],
+    "created": 1600458227750,
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "id": "id-bar",
+    "parent": "root",
+    "stub": false,
+    "title": "Bar",
+    "type": "note",
+    "updated": 1600458227750,
+  },
+  Object {
+    "body": "bar.one body
+",
+    "children": Array [],
+    "created": 1600458227750,
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.one",
+    "id": "id-bar.one",
+    "parent": "id-bar",
+    "stub": false,
+    "title": "One",
+    "type": "note",
+    "updated": 1600458227750,
+  },
+]
+`;

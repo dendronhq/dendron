@@ -286,8 +286,8 @@ export type DEngineStoreOpts = {
 };
 
 export type DEngineCache = {
-  get(key: string): Promise<DNodeRawProps>;
-  set(key: string, value: DNodeRawProps): Promise<void>;
+  get(key: string): Promise<DNodeRawProps | null>;
+  //set(key: string, value: DNodeRawProps): Promise<void>;
   getAll(type: IDNodeType, checkpoint: any): Promise<DNodeRawProps[]>;
   setAll(
     type: IDNodeType,

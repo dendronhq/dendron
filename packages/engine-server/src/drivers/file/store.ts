@@ -63,6 +63,7 @@ export abstract class FileStorageBase {
     this.idToPath = {};
     this.rootId = "";
     this.logger = opts.logger || createLogger("FileStore");
+    this.logger.info("initialized");
   }
 
   abstract doGetFile(id: string): DNodeRawProps<DNodeData>;
@@ -193,7 +194,7 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
     let noteProps: NoteRawProps[] = [];
 
     if (this.isQueryAll(queryString)) {
-      if (this.opts.cache && this.getLastCheckpoint() !== null) {
+      if (this.opts.cache && (await this.getLastCheckpoint()) !== null) {
         const checkpoint = await this.getLastSavedCheckpoint();
         noteProps = (await this.opts.cache.getAll(
           "note",

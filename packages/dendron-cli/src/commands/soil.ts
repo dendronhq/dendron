@@ -35,6 +35,15 @@ export abstract class SoilCommand<
     });
   }
 
+  abstract enrichArgs(args: TCLIOpts): TCommandOpts;
+
+  eval = (args: TCLIOpts) => {
+    const opts = this.enrichArgs(args);
+    return opts.engine.init().then(() => {
+      this.execute(opts);
+    });
+  };
+
   _enrichArgs(args: TCLIOpts): CommandOpts {
     let { vault, wsRoot } = args;
     const engine = DendronEngine.getOrCreateEngine({

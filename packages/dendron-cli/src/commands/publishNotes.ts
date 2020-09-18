@@ -1,5 +1,5 @@
 import { DendronError } from "@dendronhq/common-all";
-import { DConfig, DendronEngine, Git } from "@dendronhq/engine-server";
+import { DConfig, Git } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
 import { BuildSiteCommand } from "./build-site";
@@ -36,11 +36,6 @@ export class PublishNotesCommand extends SoilCommand<
     );
   }
 
-  eval = (args: CommandCLIOpts) => {
-    const opts = this.enrichArgs(args);
-    this.execute(opts);
-  };
-
   static buildCmd(yargs: yargs.Argv): yargs.Argv {
     const _cmd = new PublishNotesCommand();
     return yargs.command(
@@ -72,13 +67,8 @@ export class PublishNotesCommand extends SoilCommand<
   }
 
   async execute(opts: CommandOpts) {
-    const { wsRoot, vault, noPush } = opts;
-    const engine = DendronEngine.getOrCreateEngine({
-      root: vault,
-      forceNew: true,
-      mode: "exact",
-    });
-    await engine.init();
+    const { wsRoot, noPush } = opts;
+    const engine = opts.engine;
     const config = DConfig.getOrCreate(wsRoot);
     const siteConfig = config.site;
     const git = new Git({ localUrl: wsRoot });
@@ -90,7 +80,7 @@ export class PublishNotesCommand extends SoilCommand<
     const { buildNotesRoot } = await new BuildSiteCommand().execute({
       engine,
       config: siteConfig,
-      dendronRoot: wsRoot,
+      wsRoot: wsRoot,
     });
 
     if (!noPush) {

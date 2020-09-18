@@ -10,21 +10,18 @@ import fs from "fs-extra";
 import matter from "gray-matter";
 import _ from "lodash";
 import path from "path";
-import { BaseCommand } from "./base";
 import {
   stripLocalOnlyTags,
   getProcessor,
   replaceRefs,
+  DConfig,
 } from "@dendronhq/engine-server";
 import Rsync from "rsync";
+import { SoilCommand, SoilCommandCLIOpts, SoilCommandOpts } from "./soil";
+import yargs from "yargs";
 
-type CommandOpts = {
-  engine: DEngine;
+type CommandOpts = SoilCommandOpts & {
   config: DendronSiteConfig;
-} & CommandCommonOpts;
-
-type CommandCommonOpts = {
-  dendronRoot: string;
 };
 
 type CommandOutput = {
@@ -121,7 +118,27 @@ async function note2JekyllMdFile(
   );
 }
 
-export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
+export class BuildSiteCommand extends SoilCommand<
+  SoilCommandCLIOpts,
+  CommandOpts,
+  CommandOutput
+> {
+  enrichArgs(args: SoilCommandCLIOpts) {
+    const args1 = super._enrichArgs(args);
+    const config = DConfig.getOrCreate(args.wsRoot).site;
+    return { ...args1, config };
+  }
+
+  static buildCmd(yargs: yargs.Argv): yargs.Argv {
+    const _cmd = new BuildSiteCommand();
+    return yargs.command(
+      "buildSite",
+      "build notes for publication",
+      _cmd.buildArgs,
+      _cmd.eval
+    );
+  }
+
   async copyAssetsFallback(opts: {
     vaultAssetsDir: string;
     siteAssetsDir: string;
@@ -175,7 +192,7 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
   }
 
   async execute(opts: CommandOpts) {
-    const { engine, config, dendronRoot } = _.defaults(opts, {});
+    const { engine, config, wsRoot } = _.defaults(opts, {});
     const ctx = "BuildSiteCommand";
     let { siteRootDir, siteHierarchies, siteIndex } = _.defaults(config, {
       usePrettyRefs: true,
@@ -191,7 +208,7 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     this.L.info({ ctx, siteHierarchies, config });
 
     // setup path to site
-    const siteRootPath = resolvePath(siteRootDir, dendronRoot);
+    const siteRootPath = resolvePath(siteRootDir, wsRoot);
     const siteNotesDir = "notes";
     const siteNotesDirPath = path.join(siteRootPath, siteNotesDir);
     this.L.info({ msg: "enter", siteNotesDirPath });
@@ -247,7 +264,3 @@ export class BuildSiteCommand extends BaseCommand<CommandOpts, CommandOutput> {
     };
   }
 }
-
-export type BuildSiteCliOpts = {
-  vault: string;
-} & CommandCommonOpts;

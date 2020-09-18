@@ -40,7 +40,11 @@ describe("build-site-new", () => {
       siteHierarchies: ["root"],
       siteRootDir,
     };
-    await new BuildSiteCommand().execute({ engine, config, dendronRoot });
+    await new BuildSiteCommand().execute({
+      engine,
+      config,
+      wsRoot: dendronRoot,
+    });
     const { data, content } = readMD(path.join(notesDir, "foo.md"));
     expect(data.id).toEqual("foo");
     expect(content).toMatchSnapshot("bond");
@@ -54,7 +58,11 @@ describe("build-site-new", () => {
       siteHierarchies: ["foo", "build-site"],
       siteRootDir,
     };
-    await new BuildSiteCommand().execute({ engine, config, dendronRoot });
+    await new BuildSiteCommand().execute({
+      engine,
+      config,
+      wsRoot: dendronRoot,
+    });
     const dir = fs.readdirSync(notesDir);
     expect(_.includes(dir, "foo.md")).toBeTruthy();
     expect(_.includes(dir, "build-site.md")).toBeTruthy();
@@ -78,7 +86,11 @@ describe("build-site-new", () => {
       assetsPrefix: "fake-s3.com/",
     };
 
-    await new BuildSiteCommand().execute({ engine, config, dendronRoot });
+    await new BuildSiteCommand().execute({
+      engine,
+      config,
+      wsRoot: dendronRoot,
+    });
 
     const { content } = readMD(path.join(notesDir, "sample.image-link.md"));
     const dir = fs.readdirSync(siteRootDir);
@@ -94,7 +106,11 @@ describe("build-site-new", () => {
       siteHierarchies: ["sample"],
       siteRootDir,
     };
-    await new BuildSiteCommand().execute({ engine, config, dendronRoot });
+    await new BuildSiteCommand().execute({
+      engine,
+      config,
+      wsRoot: dendronRoot,
+    });
     const img = path.join(siteRootDir, "assets", "images", "foo.jpg");
     expect(fs.existsSync(img)).toBeTruthy();
 
@@ -102,7 +118,11 @@ describe("build-site-new", () => {
     const imgSrc = path.join(root, "assets", "images", "foo.jpg");
     fs.unlinkSync(imgSrc);
 
-    await new BuildSiteCommand().execute({ engine, config, dendronRoot });
+    await new BuildSiteCommand().execute({
+      engine,
+      config,
+      wsRoot: dendronRoot,
+    });
     expect(fs.existsSync(img)).toBeFalsy();
   });
 
@@ -117,7 +137,11 @@ describe("build-site-new", () => {
         },
       },
     };
-    await new BuildSiteCommand().execute({ engine, config, dendronRoot });
+    await new BuildSiteCommand().execute({
+      engine,
+      config,
+      wsRoot: dendronRoot,
+    });
     const dir = fs.readdirSync(notesDir);
     // root should exist
     let notePath = path.join(notesDir, "build-site.md");
@@ -139,7 +163,11 @@ describe("build-site-new", () => {
         },
       },
     };
-    await new BuildSiteCommand().execute({ engine, config, dendronRoot });
+    await new BuildSiteCommand().execute({
+      engine,
+      config,
+      wsRoot: dendronRoot,
+    });
     const dir = fs.readdirSync(notesDir);
     // root should exist
     let notePath = path.join(notesDir, "build-site.md");
@@ -159,7 +187,11 @@ describe("build-site-new", () => {
       siteHierarchies: ["build-site"],
       siteRootDir,
     };
-    await new BuildSiteCommand().execute({ engine, config, dendronRoot });
+    await new BuildSiteCommand().execute({
+      engine,
+      config,
+      wsRoot: dendronRoot,
+    });
     let notePath = path.join(notesDir, "build-site.md");
     const { content } = readMD(notePath);
     expect(content).toMatchSnapshot("converted");
@@ -177,7 +209,7 @@ describe("build-site-new", () => {
     cmd.copyAssets = () => {
       throw Error("bad rsync");
     };
-    await cmd.execute({ engine, config, dendronRoot });
+    await cmd.execute({ engine, config, wsRoot: dendronRoot });
     const img = path.join(siteRootDir, "assets", "images", "foo.jpg");
     expect(fs.existsSync(img)).toBeTruthy();
   });
@@ -226,7 +258,7 @@ describe("note refs", () => {
       siteRootDir,
     };
     const cmd = new BuildSiteCommand();
-    await cmd.execute({ engine, config, dendronRoot });
+    await cmd.execute({ engine, config, wsRoot: dendronRoot });
     let fooPath = path.join(notesDir, "id.foo.md");
     const { content } = readMD(fooPath);
     expect(content).toMatchSnapshot();
@@ -241,7 +273,7 @@ describe("note refs", () => {
       usePrettyRefs: false,
     };
     const cmd = new BuildSiteCommand();
-    await cmd.execute({ engine, config, dendronRoot });
+    await cmd.execute({ engine, config, wsRoot: dendronRoot });
     let fooPath = path.join(notesDir, "id.foo.md");
     const { content } = readMD(fooPath);
     expect(content).toMatchSnapshot();

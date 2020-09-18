@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 /* eslint-disable no-unused-expressions */
-import { DConfig, DendronEngine } from "@dendronhq/engine-server";
+import { DendronEngine } from "@dendronhq/engine-server";
 import yargs from "yargs";
+import { BuildSiteCommand } from "../src";
 import { BackfillCliOpts, BackfillCommand } from "../src/commands/backfill";
-import { BuildSiteCliOpts, BuildSiteCommand } from "../src/commands/build-site";
 import { ExportPodCLICommand } from "../src/commands/exportPod";
 import { ImportPodCLICommand } from "../src/commands/importPod";
 import { PlantSeedCommand } from "../src/commands/plantSeed";
@@ -47,26 +47,6 @@ let buildYargs = yargs
     }
   )
   .command<any>(
-    "build-site",
-    "build static site",
-    (args: yargs.Argv<BuildSiteCliOpts>) => {
-      args.option("vault", {
-        describe: "location of vault",
-      });
-      args.option("dendronRoot", {
-        describe: "location to dendronRoot",
-      });
-    },
-    async (args: any) => {
-      const { vault, dendronRoot } = args;
-      const config = DConfig.getOrCreate(dendronRoot).site;
-      const cmd = new BuildSiteCommand();
-      const engine = DendronEngine.getOrCreateEngine({ root: vault });
-      await engine.init();
-      await cmd.execute({ engine, config, dendronRoot });
-    }
-  )
-  .command<any>(
     "exportPod",
     "export a pod",
     ExportPodCLICommand.buildArgs,
@@ -84,6 +64,7 @@ let buildYargs = yargs
   );
 
 PlantSeedCommand.buildCmd(buildYargs);
+BuildSiteCommand.buildCmd(buildYargs);
 PublishNotesCommand.buildCmd(buildYargs);
 //.command(...PlantSeedCommand.cmd())
 // .command<RefactorFMCliOpts>(

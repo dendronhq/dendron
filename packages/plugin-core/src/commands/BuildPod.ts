@@ -9,11 +9,7 @@ type CommandOpts = {};
 
 type CommandOutput = void;
 
-export class BuildPodCommand extends BasicCommand<
-  CommandOpts,
-  CommandOutput
-> {
-
+export class BuildPodCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const ctx = { ctx: "PlantNotesCommand" };
     const {} = _.defaults(opts, {});
@@ -32,7 +28,7 @@ export class BuildPodCommand extends BasicCommand<
       throw Error("dendronRoot note set");
     }
     this.L.info({ ...ctx, config });
-    await cmd.execute({ engine, config, dendronRoot });
+    await cmd.execute({ engine, config, wsRoot: dendronRoot });
     window.showInformationMessage("finished");
   }
 }

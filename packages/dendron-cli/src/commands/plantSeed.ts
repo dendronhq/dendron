@@ -25,11 +25,6 @@ export class PlantSeedCommand extends SoilCommand<CLIOpts, CommandOpts> {
     return { ...opts, roots: [args.vault], id: args.id };
   }
 
-  eval = (args: CLIOpts) => {
-    const opts = this.enrichArgs(args);
-    this.execute(opts);
-  };
-
   static buildCmd(yargs: yargs.Argv): yargs.Argv {
     const _cmd = new PlantSeedCommand();
     return yargs.command(

@@ -5,11 +5,24 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.11.4-alpha.1](https://github.com/dendronhq/dendron/compare/v0.11.4-alpha.0...v0.11.4-alpha.1) (2020-09-17)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Features
 
-## [0.11.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.11.3...v0.11.4-alpha.0) (2020-09-17)
+- **lookup:** enhanced lookups
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+If you have text highlighted while creating a new note with a lookup, the new note will be created using the text selected. How the text will be used depends on the `dendron.defaultLookupCreateBehavior` setting.
+
+- values:
+  - selectionExtract (default): create new note with text from the old note. remove text from the old note
+  - selection2link: create new empty note and turn selection into a link referencing the old note
+
+<a href="https://www.loom.com/share/61d754c1dca84b99b2786b2f89473566">
+<img style="" src="https://cdn.loom.com/sessions/thumbnails/61d754c1dca84b99b2786b2f89473566-with-play.gif"> </a>
+
+### Enhancements
+
+- **seeds:** better planting options ([c0a1dd4](https://github.com/dendronhq/dendron/commit/c0a1dd4b81418950091a8557583d322cf87a095f))
+
+You know have more options when creating seeds from existing content. You will be able to read the soon to be coming API docs [here](https:/dendron.so/notes/08a917a9-31f1-434d-bc7f-71dce2b63a27.html)
 
 ## [0.11.3](https://github.com/dendronhq/dendron/compare/v0.11.3-alpha.5...v0.11.3) (2020-09-17)
 

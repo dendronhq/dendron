@@ -40,7 +40,7 @@ export abstract class SoilCommand<
   eval = (args: TCLIOpts) => {
     const opts = this.enrichArgs(args);
     return opts.engine.init().then(() => {
-      this.execute(opts);
+      return this.execute(opts);
     });
   };
 

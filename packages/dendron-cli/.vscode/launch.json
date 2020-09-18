@@ -37,12 +37,13 @@
       "type": "node",
       "request": "launch",
       "name": "Debug test file",
-      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+      "program": "${workspaceRoot:dendron-cli}/node_modules/jest/bin/jest.js",
       "args": [
         "--findRelatedTests",
-        "${relativeFile}"
+        "${relativeFile}",
+        "--runInBand"
       ],
-      "cwd": "${workspaceRoot}","env": {"LOG_DST": "/tmp/dendron-cli.txt"}
+      "cwd": "${workspaceRoot:dendron-cli}","env": {"LOG_DST": "/tmp/dendron-cli.txt"}
     }
   ]
 }

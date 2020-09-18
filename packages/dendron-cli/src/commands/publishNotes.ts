@@ -47,14 +47,8 @@ export class PublishNotesCommand extends SoilCommand<
   }
 
   static async run(args: CommandCLIOpts) {
-    const ctx = "PublishNotes:run";
     const cmd = new PublishNotesCommand();
-    cmd.L.info({ ctx, msg: "enter", args });
-    const opts = await cmd.enrichArgs(args);
-    cmd.L.info({ ctx, msg: "enrichArgs:post", args });
-    const resp = await cmd.execute(opts);
-    cmd.L.info({ ctx, msg: "exit", args });
-    return resp;
+    return cmd.eval(args);
   }
 
   async sanity(opts: CommandOpts) {

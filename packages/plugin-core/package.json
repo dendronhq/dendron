@@ -301,6 +301,14 @@
                 "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.copy-url.gif)"
             },
             {
+                "command": "dendron.publish",
+                "title": "Dendron: Publish",
+                "desc": "Build, commit and publish your notes",
+                "docs": "Single command to publish your notes",
+                "docLink": "",
+                "docPreview": ""
+            },
+            {
                 "command": "dendron.openLink",
                 "title": "Dendron: Open Link",
                 "desc": "Open link to external file (eg. pdf, .mov, etc) use system default",

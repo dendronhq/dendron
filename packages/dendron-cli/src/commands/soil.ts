@@ -10,8 +10,6 @@ type CommandOpts = {
   wsRoot: string;
 };
 
-type CommandOutput = void;
-
 type CommandCLIOpts = {
   wsRoot: string;
   vault: string;
@@ -23,8 +21,9 @@ export { CommandOpts as SoilCommandOpts };
 // @ts-ignore
 export abstract class SoilCommand<
   TCLIOpts extends CommandCLIOpts = CommandCLIOpts,
-  TCommandOpts = CommandOpts
-> extends BaseCommand<TCommandOpts, CommandOutput> {
+  TCommandOpts extends CommandOpts = CommandOpts,
+  TCommandOutput = void
+> extends BaseCommand<TCommandOpts, TCommandOutput> {
   buildArgs(args: yargs.Argv) {
     args.option("wsRoot", {
       describe: "location of workspace",
@@ -36,7 +35,7 @@ export abstract class SoilCommand<
     });
   }
 
-  enrichArgs(args: TCLIOpts): CommandOpts {
+  _enrichArgs(args: TCLIOpts): CommandOpts {
     let { vault, wsRoot } = args;
     const engine = DendronEngine.getOrCreateEngine({
       root: vault,

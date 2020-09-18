@@ -21,7 +21,7 @@ export class PlantSeedCommand extends SoilCommand<CLIOpts, CommandOpts> {
   }
 
   enrichArgs(args: CLIOpts) {
-    const opts = super.enrichArgs(args);
+    const opts = super._enrichArgs(args);
     return { ...opts, roots: [args.vault], id: args.id };
   }
 

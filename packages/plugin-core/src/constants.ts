@@ -15,7 +15,14 @@ type CommandEntry = {
   key: string;
   title: string;
   keybindings?: KeyBinding;
-  group: "notes" | "workspace" | "pods" | "dev" | "hierarchies" | "navigation";
+  group:
+    | "notes"
+    | "workspace"
+    | "pods"
+    | "dev"
+    | "hierarchies"
+    | "navigation"
+    | "publishing";
   /**
    * Skip doc generation
    */
@@ -355,6 +362,16 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       mac: "cmd+shift+u",
       windows: "ctrl+shift+u",
     },
+  },
+  // --- Publishing
+  PUBLISH: {
+    key: "dendron.publish",
+    title: `${CMD_PREFIX} Publish`,
+    group: "publishing",
+    desc: "Build, commit and publish your notes",
+    docs: "",
+    docLink: "",
+    docPreview: ``,
   },
   // --- Misc
   OPEN_LINK: {

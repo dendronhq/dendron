@@ -1,4 +1,4 @@
-import { CONSTANTS, DNode, Note } from "@dendronhq/common-all";
+import { DNode, Note } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";

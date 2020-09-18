@@ -5,10 +5,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.11.4](https://github.com/dendronhq/dendron/compare/v0.11.4-alpha.1...v0.11.4) (2020-09-18)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.11.4-alpha.1](https://github.com/dendronhq/dendron/compare/v0.11.4-alpha.0...v0.11.4-alpha.1) (2020-09-17)
-
 ### Features
 
 - **lookup:** enhanced lookups

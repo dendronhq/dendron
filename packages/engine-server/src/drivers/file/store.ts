@@ -1,40 +1,41 @@
 // @ts-ignore
 import {
+  assert,
+  Checkpoint,
   DEngineStore,
+  DEngineStoreOpts,
   DEngineStoreWriteOpts,
   DNodeData,
   DNodeRawProps,
   EngineQueryResp,
   IDNode,
   IllegalOperationError,
+  makeResponse,
   NodeBuilder,
+  Note,
   NoteRawProps,
   QueryMode,
   QueryOpts,
   Schema,
   SchemaRawProps,
-  StoreGetResp,
-  assert,
-  makeResponse,
-  StoreQueryOpts,
-  Note,
   StoreDeleteOpts,
+  StoreGetResp,
+  StoreQueryOpts,
 } from "@dendronhq/common-all";
 import {
   createLogger,
   deleteFile,
+  DLogger,
   getAllFiles,
   mdFile2NodeProps,
   node2MdFile,
   schema2YMLFile,
-  DLogger,
 } from "@dendronhq/common-server";
-
-import { FileParser } from "./parser";
 import _ from "lodash";
 import path from "path";
+import { FileParser } from "./parser";
 
-interface FileStorageOpts {
+interface FileStorageOpts extends DEngineStoreOpts {
   root: string;
   logger?: DLogger;
 }
@@ -156,6 +157,20 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
     return;
   }
 
+  async getChangedSinceCheckpoint(
+    _checkpoint: Checkpoint
+  ): Promise<DNodeRawProps[]> {
+    return [];
+  }
+
+  async getLastSavedCheckpoint(): Promise<Checkpoint> {
+    return null;
+  }
+
+  async getLastCheckpoint(): Promise<Checkpoint> {
+    return null;
+  }
+
   async query(
     queryString: string,
     mode: QueryMode,
@@ -173,10 +188,28 @@ export class FileStorage extends FileStorageBase implements DEngineStore {
       throw Error(`unsupported ${queryString}`);
     }
     // mode === note
+    let data: Note[];
+    const schemas = _opts?.schemas || {};
+    let noteProps: NoteRawProps[] = [];
+
     if (this.isQueryAll(queryString)) {
-      const schemas = _opts?.schemas || {};
-      const noteProps = await this._getNoteAll();
-      const data = new NodeBuilder().buildNoteFromProps(noteProps, {
+      if (this.opts.cache && this.getLastCheckpoint() !== null) {
+        const checkpoint = await this.getLastSavedCheckpoint();
+        noteProps = (await this.opts.cache.getAll(
+          "note",
+          checkpoint
+        )) as NoteRawProps[];
+        const lastCheck = await this.getLastCheckpoint();
+        if (lastCheck !== checkpoint) {
+          const entriesChanged = (await this.getChangedSinceCheckpoint(
+            lastCheck
+          )) as NoteRawProps[];
+          noteProps = entriesChanged.concat(noteProps);
+        }
+      } else {
+        noteProps = await this._getNoteAll();
+      }
+      data = new NodeBuilder().buildNoteFromProps(noteProps, {
         schemas: _.values(schemas),
       });
       this.refreshIdToPath(data);

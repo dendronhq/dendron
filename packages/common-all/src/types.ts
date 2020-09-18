@@ -280,7 +280,23 @@ export type DEngineStoreWriteOpts = {
   writeStub?: boolean;
 };
 
-export interface DEngineStore<T = DNodeData, O = any> {
+export type Checkpoint = string | null;
+export type DEngineStoreOpts = {
+  cache?: DEngineCache;
+};
+
+export type DEngineCache = {
+  get(key: string): Promise<DNodeRawProps>;
+  set(key: string, value: DNodeRawProps): Promise<void>;
+  getAll(type: IDNodeType, checkpoint: any): Promise<DNodeRawProps[]>;
+  setAll(
+    type: IDNodeType,
+    entries: DNodeRawProps[],
+    checkpoint: any
+  ): Promise<void>;
+};
+
+export interface DEngineStore<T = DNodeData, O extends DEngineStoreOpts = any> {
   opts: O;
   // fetchInitial: () => DNodeDict;
   delete: (id: string, opts?: StoreDeleteOpts) => Promise<void>;

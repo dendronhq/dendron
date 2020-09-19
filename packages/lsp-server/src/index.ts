@@ -1,3 +1,4 @@
+import _ from "lodash";
 /* --------------------------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License. See License.txt in the project root for license information.
@@ -18,6 +19,7 @@ import {
 } from "vscode-languageserver";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
+export { DendronEngine } from "./engine";
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -30,7 +32,7 @@ let hasConfigurationCapability: boolean = false;
 let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
 
-connection.onInitialize((params: InitializeParams) => {
+connection.onInitialize(async (params: InitializeParams) => {
   connection.console.log("initialized");
   let capabilities = params.capabilities;
 
@@ -64,6 +66,14 @@ connection.onInitialize((params: InitializeParams) => {
       },
     };
   }
+
+  // const wsFolders = await connection.workspace.getWorkspaceFolders();
+  // if (!_.isNull(wsFolders)) {
+  //   connection.console.log(`init engine server: ${JSON.stringify(wsFolders)}`);
+  //   const server = DendronEngineServer.getOrCreate({roots: wsFolders})
+  //   await server.init();
+  //   connection.console.log("finish init engine server");
+  // }
   return result;
 });
 

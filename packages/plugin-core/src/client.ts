@@ -1,5 +1,5 @@
 import * as path from "path";
-import { workspace, ExtensionContext } from "vscode";
+import { workspace, ExtensionContext, WorkspaceFolder } from "vscode";
 
 import {
   LanguageClient,
@@ -9,6 +9,7 @@ import {
 } from "vscode-languageclient";
 import { Logger } from "./logger";
 import fs from "fs-extra";
+import { DendronWorkspace } from "./workspace";
 
 let client: LanguageClient;
 
@@ -63,6 +64,8 @@ export function startClient(context: ExtensionContext) {
     synchronize: {
       fileEvents: workspace.createFileSystemWatcher("**/.clientrc"),
     },
+    // @ts-ignore
+    workspaceFolder: DendronWorkspace.workspaceFolders()[0] as WorkspaceFolder,
   };
 
   // Create the language client and start the client.

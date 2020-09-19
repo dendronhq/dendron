@@ -11,7 +11,6 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        // "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}"
       ],
       "outFiles": ["${workspaceFolder:plugin-core}/out/**/*.js"],
@@ -21,19 +20,13 @@
       }
     },
     {
-      "name": "Run Extension - Webpack",
-      "type": "extensionHost",
-      "request": "launch",
-      "runtimeExecutable": "${execPath}",
-      "args": [
-        "--disable-extensions",
-        "--extensionDevelopmentPath=${workspaceFolder}"
-      ],
-      "outFiles": ["${workspaceFolder:plugin-core}/dist/**/*.js"],
-      "env": {
-        "STAGE": "dev",
-        "VSCODE_DEBUGGING_EXTENSION": "dendron"
-      }
+      "type": "node",
+      "request": "attach",
+      "name": "Attach to Server",
+      "restart": true,
+      "port": 6009,
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder:lsp-server}/out/**/*.js"]
     },
     {
       "name": "Extension Tests",
@@ -84,5 +77,11 @@
     //   "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
     //   // "preLaunchTask": "${defaultBuildTask}"
     // }
+  ],
+  "compounds": [
+    {
+      "name": "Client + Server",
+      "configurations": ["Run Extension", "Attach to Server"]
+    }
   ]
 }

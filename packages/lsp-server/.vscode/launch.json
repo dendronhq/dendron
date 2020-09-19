@@ -7,30 +7,41 @@
       {
         "type": "node",
         "request": "launch",
-        "name": "pods-core:test file",
-        "program": "${workspaceFolder:pods-core}/lib/${fileBasenameNoExtension}.js",
-        "cwd": "${workspaceFolder:pods-core}",
+        "name": "lsp-server:test file",
+        "program": "${workspaceFolder:lsp-server}/lib/${fileBasenameNoExtension}.js",
+        "cwd": "${workspaceFolder:lsp-server}",
         "sourceMaps": true,
         "smartStep": true,
         "preLaunchTask": "build",
-        "outFiles": ["${workspaceFolder:pods-core}/lib/*.js"]
+        "outFiles": ["${workspaceFolder:lsp-server}/lib/*.js"]
       },
       {
         "type": "node",
         "request": "launch",
-        "name": "pods-core:debug test",
-        "program": "${workspaceFolder:pods-core}/node_modules/jest/bin/jest.js",
-        "cwd": "${workspaceFolder:pods-core}",
+        "name": "lsp-server:debug test",
+        "program": "${workspaceFolder:lsp-server}/node_modules/jest/bin/jest.js",
+        "cwd": "${workspaceFolder:lsp-server}",
         "args": ["--runInBand"]
       },
       {
         "type": "node",
+        "request": "attach",
+        "name": "Attach to Server 6009",
+        "address": "localhost",
+        "protocol": "inspector",
+        "restart": true,
+        "port": 6009,
+        "sourceMaps": true,
+        "outFiles": ["${workspaceFolder:lsp-server}/out/**/*.js"],
+      },
+      {
+        "type": "node",
         "request": "launch",
-        "name": "pods-core:debug test file",
-        "program": "${workspaceFolder:pods-core}/node_modules/jest/bin/jest.js",
-        "cwd": "${workspaceFolder:pods-core}",
+        "name": "lsp-server:debug test file",
+        "program": "${workspaceFolder:lsp-server}/node_modules/jest/bin/jest.js",
+        "cwd": "${workspaceFolder:lsp-server}",
         "args": ["--runInBand", "${relativeFile}", "-u"],
-        "env": {"LOG_DST": "/tmp/pods-core.txt"}
+        "env": {"LOG_DST": "/tmp/lsp-server.txt"}
       }
     ]
   }

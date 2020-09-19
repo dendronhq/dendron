@@ -17,13 +17,14 @@
   "files": [
     "lib"
   ],
-  "main": "lib/index.js",
+  "main": "dist/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
     "clean": "rimraf lib && rimraf coverage",
     "format": "prettier --ignore-path='../../.prettierignore' --write .",
     "lint": "echo stub",
-    "prepublishOnly": "npm run build && npx webpack --mode production",
+    "prepublishOnly": "npm run build",
+    "prepack": "npx webpack --mode production",
     "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
     "build": "npm run compile",
     "compile": "tsc -p tsconfig.json",

@@ -30,11 +30,6 @@ const config = {
     extensions: [".ts", ".js"],
   },
   plugins: [
-    // new CopyPlugin({
-    //   patterns: [
-    //     { from: path.join("node_modules", "@dendronhq", "lsp-server"), to: 'lsp-server'},
-    //   ],
-    // }),
   ],
   module: {
     rules: [

@@ -1,3 +1,4 @@
+import { fstat } from "fs";
 /* --------------------------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License. See License.txt in the project root for license information.
@@ -13,13 +14,26 @@ import {
   TransportKind,
 } from "vscode-languageclient";
 import { Logger } from "./logger";
+import fs from "fs-extra";
 
 let client: LanguageClient;
 
 export function startClient(context: ExtensionContext) {
-  let serverModule = context.asAbsolutePath(
+  const isDev = fs.existsSync(
     path.join("node_modules", "@dendronhq", "lsp-server", "lib", "index.js")
   );
+  let serverModule: string;
+
+  if (isDev) {
+    serverModule = context.asAbsolutePath(
+      path.join("node_modules", "@dendronhq", "lsp-server", "lib", "index.js")
+    );
+  } else {
+    serverModule = context.asAbsolutePath(
+      path.join("dist", "lsp-server", "lib", "index.js")
+    );
+  }
+
   Logger.info({ serverModule, msg: "starting client" });
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging

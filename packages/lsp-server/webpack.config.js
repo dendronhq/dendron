@@ -3,17 +3,17 @@
 "use strict";
 
 const path = require("path");
-const CopyPlugin = require('copy-webpack-plugin');
+// const CopyPlugin = require('copy-webpack-plugin');
 
 /**@type {import('webpack').Configuration}*/
 const config = {
   target: "node", // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
 
-  entry: "./src/extension.ts", // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
+  entry: "./src/index.ts", // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
   output: {
     // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
     path: path.resolve(__dirname, "dist"),
-    filename: "extension.js",
+    filename: "index.js",
     libraryTarget: "commonjs2",
     devtoolModuleFilenameTemplate: "../[resource-path]",
   },
@@ -30,11 +30,11 @@ const config = {
     extensions: [".ts", ".js"],
   },
   plugins: [
-    new CopyPlugin({
-      patterns: [
-        { from: path.join("node_modules", "@dendronhq", "lsp-server"), to: 'lsp-server'},
-      ],
-    }),
+    // new CopyPlugin({
+    //   patterns: [
+    //     { from: path.join("node_modules", "@dendronhq", "lsp-server"), to: 'lsp-server'},
+    //   ],
+    // }),
   ],
   module: {
     rules: [

@@ -23,7 +23,7 @@
     "clean": "rimraf lib && rimraf coverage",
     "format": "prettier --ignore-path='../../.prettierignore' --write .",
     "lint": "echo stub",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run build && npx webpack --mode production",
     "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
     "build": "npm run compile",
     "compile": "tsc -p tsconfig.json",
@@ -43,8 +43,11 @@
     "prettier": "2.0.5",
     "rimraf": "^2.6.2",
     "ts-jest": "^23.10.3",
+    "ts-loader": "^8.0.3",
     "ts-node": "^8.10.2",
-    "typescript": "^3.1.1"
+    "typescript": "^3.1.1",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12"
   },
   "engines": {
     "node": ">=12.0.0"

@@ -13,13 +13,22 @@ import fs from "fs-extra";
 let client: LanguageClient;
 
 export function startClient(context: ExtensionContext) {
+  //   const pathToDev = path.join(
+  //     __dirname,
+  //     "..",
+  //     "node_modules",
+  //     "@dendronhq",
+  //     "lsp-server",
+  //     "lib",
+  //     "index.js"
+  //   );
   const pathToDev = path.join(
     __dirname,
     "..",
     "node_modules",
     "@dendronhq",
     "lsp-server",
-    "lib",
+    "dist",
     "index.js"
   );
   const isDev = fs.existsSync(pathToDev);

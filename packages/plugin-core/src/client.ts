@@ -40,7 +40,7 @@ export function startClient(context: ExtensionContext) {
     serverModule = pathToDev;
   } else {
     serverModule = context.asAbsolutePath(
-      path.join("dist", "lsp-server", "dist", "index.js")
+      path.join("dist", "lsp-server", "lib", "index.js")
     );
   }
 

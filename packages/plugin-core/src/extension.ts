@@ -12,7 +12,7 @@ import { MarkdownUtils } from "./utils/md";
 import { getOS } from "./utils/system";
 import { Extensions } from "./settings";
 import { DendronTreeView } from "./views/DendronTreeView";
-import { startClient } from "./client";
+// import { startClient } from "./client";
 
 // === Main
 // this method is called when your extension is activated
@@ -41,7 +41,7 @@ export async function _activate(context: vscode.ExtensionContext) {
     extensionUri,
     storagePath,
   });
-  startClient(context);
+  // startClient(context);
   // needs to be initialized to setup commands
   const ws = DendronWorkspace.getOrCreate(context, {
     skipSetup: stage === "test",

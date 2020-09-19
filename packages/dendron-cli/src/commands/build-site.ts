@@ -5,7 +5,7 @@ import {
   Note,
   HierarchyConfig,
 } from "@dendronhq/common-all";
-import { resolvePath } from "@dendronhq/common-server";
+import { resolvePath, tmpDir } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import matter from "gray-matter";
 import _ from "lodash";
@@ -20,18 +20,54 @@ import Rsync from "rsync";
 import { SoilCommand, SoilCommandCLIOpts, SoilCommandOpts } from "./soil";
 import yargs from "yargs";
 
-type CommandOpts = SoilCommandOpts & {
-  config: DendronSiteConfig;
-};
-
 type CommandOutput = {
   buildNotesRoot: string;
+};
+
+type CLIOpts = SoilCommandCLIOpts & {
+  writeStubs: boolean;
+  incremental?: boolean;
+  dryRun?: boolean;
+};
+
+type CommandOpts = SoilCommandOpts & {
+  config: DendronSiteConfig;
+  writeStubs: boolean;
+  incremental?: boolean;
+  dryRun?: boolean;
 };
 
 type DendronJekyllProps = {
   hpath: string;
   permalink?: string;
 };
+
+function rsyncCopy(src: string, dst: string) {
+  // rsync -a --no-times --size-only /tmp/notes/* docs/notes
+  return new Promise((resolve, reject) => {
+    const rsync = new Rsync()
+      .flags("a")
+      .set("no-times")
+      .set("size-only")
+      .delete()
+      .source(src)
+      .destination(dst);
+    console.log(rsync.command());
+    rsync.execute((err, code, cmd) => {
+      if (err) {
+        err.message += JSON.stringify({
+          code,
+          cmd,
+          src,
+          dst,
+        });
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
 
 function stripSiteOnlyTags(note: Note) {
   const re = new RegExp(/(?<raw><!--SITE_ONLY(?<body>.*)-->)/, "ms");
@@ -109,7 +145,7 @@ async function note2JekyllMdFile(
       .processSync(note.body)
       .toString();
   } catch (err) {
-    throw err;
+    console.log(err);
   }
   const filePath = path.join(opts.notesDir, meta.id + ".md");
   return fs.writeFile(
@@ -119,14 +155,32 @@ async function note2JekyllMdFile(
 }
 
 export class BuildSiteCommand extends SoilCommand<
-  SoilCommandCLIOpts,
+  CLIOpts,
   CommandOpts,
   CommandOutput
 > {
-  enrichArgs(args: SoilCommandCLIOpts) {
+  buildArgs(args: yargs.Argv) {
+    super.buildArgs(args);
+    args.option("writeStubs", {
+      describe: "writeStubs",
+      default: true,
+    });
+    args.option("incremental", {
+      describe: "use rsync to only copy files that changed",
+      default: false,
+      type: "boolean",
+    });
+    args.option("dryRun", {
+      describe: "don't actually build",
+      default: false,
+      type: "boolean",
+    });
+  }
+
+  enrichArgs(args: CLIOpts) {
     const args1 = super._enrichArgs(args);
     const config = DConfig.getOrCreate(args.wsRoot).site;
-    return { ...args1, config };
+    return { ...args1, config, writeStubs: args.writeStubs };
   }
 
   static buildCmd(yargs: yargs.Argv): yargs.Argv {
@@ -191,33 +245,16 @@ export class BuildSiteCommand extends SoilCommand<
     });
   }
 
-  async execute(opts: CommandOpts) {
-    const { engine, config, wsRoot } = _.defaults(opts, {});
-    const ctx = "BuildSiteCommand";
-    let { siteRootDir, siteHierarchies, siteIndex } = _.defaults(config, {
-      usePrettyRefs: true,
-    });
-    if (!siteRootDir) {
-      throw `siteRootDir is undefined`;
-    }
-    if (siteHierarchies.length < 1) {
-      throw `siteHiearchies must have at least one hiearchy`;
-    }
-    // update site index
-    config.siteIndex = siteIndex || siteHierarchies[0];
-    this.L.info({ ctx, siteHierarchies, config });
+  async doBuild(opts: {
+    engine: DEngine;
+    config: DendronSiteConfig;
+    writeStubs: boolean;
+    notesDir: string;
+  }) {
+    const { engine, config, writeStubs, notesDir } = opts;
+    const { siteHierarchies } = config;
 
-    // setup path to site
-    const siteRootPath = resolvePath(siteRootDir, wsRoot);
-    const siteNotesDir = "notes";
-    const siteNotesDirPath = path.join(siteRootPath, siteNotesDir);
-    this.L.info({ msg: "enter", siteNotesDirPath });
-    fs.ensureDirSync(siteNotesDirPath);
-    fs.emptyDirSync(siteNotesDirPath);
-
-    // get hieararchy domains
     let navOrder = 0;
-
     const nodes: Note[] = siteHierarchies.map((fname) => {
       const note = DNodeUtils.getNoteByFname(fname, engine, {
         throwIfEmpty: true,
@@ -229,21 +266,73 @@ export class BuildSiteCommand extends SoilCommand<
       return note;
     });
     const out = [];
+    let writeStubsQ = [];
 
     // get rest of hieararchy
     while (!_.isEmpty(nodes)) {
       const node = nodes.pop() as Note;
       out.push(
         note2JekyllMdFile(node, {
-          notesDir: siteNotesDirPath,
+          notesDir,
           engine,
           ...config,
         })
       );
       node.children.forEach((n) => nodes.push(n as Note));
+      if (writeStubs && node.stub) {
+        node.stub = false;
+        writeStubsQ.push(engine.write(node, { stub: false }));
+      }
+    }
+    await Promise.all(writeStubsQ.concat(out));
+  }
+
+  async execute(opts: CommandOpts) {
+    let { engine, config, wsRoot, writeStubs, incremental } = _.defaults(opts, {
+      incremental: false,
+    });
+    const ctx = "BuildSiteCommand";
+    config = DConfig.cleanSiteConfig(config);
+    this.L.info({ ctx, config, incremental });
+
+    // setup path to site
+    const siteRootPath = resolvePath(config.siteRootDir, wsRoot);
+    const siteNotesDir = "notes";
+    const siteNotesDirPath = path.join(siteRootPath, siteNotesDir);
+    this.L.info({ msg: "enter", siteNotesDirPath });
+    fs.ensureDirSync(siteNotesDirPath);
+
+    if (incremental) {
+      const staging = tmpDir();
+      await this.doBuild({
+        engine,
+        config,
+        writeStubs,
+        notesDir: staging.name,
+      });
+      this.L.info({
+        ctx,
+        msg: "rsync",
+        src: staging.name,
+        dest: siteNotesDirPath,
+      });
+      if (!opts.dryRun) {
+        await rsyncCopy(`${staging.name}/*`, siteNotesDirPath);
+        // fs.emptyDirSync(staging.name);
+        // staging.removeCallback();
+      }
+    } else {
+      fs.emptyDirSync(siteNotesDirPath);
+      await this.doBuild({
+        engine,
+        config,
+        writeStubs,
+        notesDir: siteNotesDirPath,
+      });
     }
 
     // move assets
+    this.L.info({ ctx, msg: "copy assets..." });
     const assetsDir = "assets";
     const vaultAssetsDir = path.join(engine.props.root, assetsDir);
     const siteAssetsDir = path.join(siteRootPath, assetsDir);
@@ -257,7 +346,6 @@ export class BuildSiteCommand extends SoilCommand<
       }
     }
 
-    await Promise.all(out);
     this.L.info({ msg: "exit" });
     return {
       buildNotesRoot: siteRootPath,

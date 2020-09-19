@@ -1,32 +1,65 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`build-site-new basic: bond 1`] = `
+exports[`buildSite basic: bond 1`] = `
 "- [lbl](refactor.one)
 "
 `;
 
-exports[`build-site-new ids are converted: converted 1`] = `
+exports[`buildSite ids are converted: converted 1`] = `
 "Build site home
 
 - [build-site.one](notes/id.build-site.one)
 "
 `;
 
-exports[`build-site-new image prefix: sample.image-link.md 1`] = `
+exports[`buildSite image prefix: sample.image-link.md 1`] = `
 "![link-alt](fake-s3.com/link-path.jpg)
 "
 `;
 
-exports[`build-site-new multiple roots: build-site.md 1`] = `
+exports[`buildSite multiple roots: build-site.md 1`] = `
 "Build site home
 
 - [build-site.one](id.build-site.one)
 "
 `;
 
-exports[`build-site-new multiple roots: foo.md 1`] = `
+exports[`buildSite multiple roots: foo.md 1`] = `
 "- [lbl](notes/refactor.one)
 "
+`;
+
+exports[`buildSite v2 incremental basic 1`] = `
+Array [
+  "bar.one.md",
+  "foo.md",
+  "root.md",
+]
+`;
+
+exports[`buildSite v2 incremental basic: build notes 1`] = `
+Array [
+  "a300e3c0-ec49-4004-af80-c2bd48314420.md",
+  "id.bar.one.md",
+  "id.foo.md",
+]
+`;
+
+exports[`buildSite v2 write stubs no write stub 1`] = `
+Array [
+  "bar.one.md",
+  "foo.md",
+  "root.md",
+]
+`;
+
+exports[`buildSite v2 write stubs write stub 1`] = `
+Array [
+  "bar.md",
+  "bar.one.md",
+  "foo.md",
+  "root.md",
+]
 `;
 
 exports[`note refs note refs 1`] = `

@@ -11,12 +11,13 @@ import _ from "lodash";
 import path from "path";
 import { BuildSiteCommand } from "../build-site";
 
-describe("build-site-new", () => {
+describe("buildSite", () => {
   let root: string;
   let engine: DEngine;
   let siteRootDir: string;
   let dendronRoot: string;
   let notesDir: string;
+  let writeStubs: boolean;
 
   beforeEach(async () => {
     root = EngineTestUtils.setupStoreDir();
@@ -28,6 +29,7 @@ describe("build-site-new", () => {
     siteRootDir = FileTestUtils.tmpDir().name;
     dendronRoot = root;
     notesDir = path.join(siteRootDir, "notes");
+    writeStubs = false;
     await engine.init();
   });
 
@@ -44,6 +46,7 @@ describe("build-site-new", () => {
       engine,
       config,
       wsRoot: dendronRoot,
+      writeStubs,
     });
     const { data, content } = readMD(path.join(notesDir, "foo.md"));
     expect(data.id).toEqual("foo");
@@ -62,6 +65,7 @@ describe("build-site-new", () => {
       engine,
       config,
       wsRoot: dendronRoot,
+      writeStubs,
     });
     const dir = fs.readdirSync(notesDir);
     expect(_.includes(dir, "foo.md")).toBeTruthy();
@@ -90,6 +94,7 @@ describe("build-site-new", () => {
       engine,
       config,
       wsRoot: dendronRoot,
+      writeStubs,
     });
 
     const { content } = readMD(path.join(notesDir, "sample.image-link.md"));
@@ -110,6 +115,7 @@ describe("build-site-new", () => {
       engine,
       config,
       wsRoot: dendronRoot,
+      writeStubs,
     });
     const img = path.join(siteRootDir, "assets", "images", "foo.jpg");
     expect(fs.existsSync(img)).toBeTruthy();
@@ -122,6 +128,7 @@ describe("build-site-new", () => {
       engine,
       config,
       wsRoot: dendronRoot,
+      writeStubs,
     });
     expect(fs.existsSync(img)).toBeFalsy();
   });
@@ -141,6 +148,7 @@ describe("build-site-new", () => {
       engine,
       config,
       wsRoot: dendronRoot,
+      writeStubs,
     });
     const dir = fs.readdirSync(notesDir);
     // root should exist
@@ -167,6 +175,7 @@ describe("build-site-new", () => {
       engine,
       config,
       wsRoot: dendronRoot,
+      writeStubs,
     });
     const dir = fs.readdirSync(notesDir);
     // root should exist
@@ -191,6 +200,7 @@ describe("build-site-new", () => {
       engine,
       config,
       wsRoot: dendronRoot,
+      writeStubs,
     });
     let notePath = path.join(notesDir, "build-site.md");
     const { content } = readMD(notePath);
@@ -209,9 +219,148 @@ describe("build-site-new", () => {
     cmd.copyAssets = () => {
       throw Error("bad rsync");
     };
-    await cmd.execute({ engine, config, wsRoot: dendronRoot });
+    await cmd.execute({ engine, config, wsRoot: dendronRoot, writeStubs });
     const img = path.join(siteRootDir, "assets", "images", "foo.jpg");
     expect(fs.existsSync(img)).toBeTruthy();
+  });
+});
+
+describe("buildSite v2", () => {
+  let wsRoot: string;
+  let vault: string;
+  let engine: DEngine;
+  let siteRootDir: string;
+  let notesDir: string;
+
+  describe("incremental", () => {
+    beforeEach(async () => {
+      wsRoot = FileTestUtils.tmpDir().name;
+      vault = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vault);
+      EngineTestUtils.setupStoreDir({
+        copyFixtures: false,
+        storeDstPath: vault,
+        initDirCb: (dirPath: string) => {
+          NodeTestUtils.createNotes(dirPath, [
+            {
+              id: "id.foo",
+              fname: "foo",
+            },
+            {
+              id: "id.bar.one",
+              fname: "bar.one",
+            },
+          ]);
+        },
+      });
+      engine = DendronEngine.getOrCreateEngine({
+        root: vault,
+        forceNew: true,
+        mode: "exact",
+      });
+      siteRootDir = path.join(wsRoot, "docs");
+      fs.ensureDir(siteRootDir);
+      notesDir = path.join(siteRootDir, "notes");
+      await engine.init();
+    });
+
+    afterEach(() => {
+      fs.removeSync(wsRoot);
+    });
+
+    test("basic", async () => {
+      const config: DendronSiteConfig = {
+        siteHierarchies: ["foo", "bar"],
+        siteRootDir,
+      };
+      const cmd = new BuildSiteCommand();
+      await cmd.execute({
+        engine,
+        config,
+        wsRoot,
+        writeStubs: false,
+        incremental: true,
+      });
+
+      // check storage notes no change
+      const notes = fs.readdirSync(vault);
+      expect(notes).toMatchSnapshot();
+      expect(notes.length).toEqual(3);
+
+      // chekc site notes
+      const sitePath = path.join(siteRootDir, "notes");
+      const entries = fs.readdirSync(sitePath);
+      expect(entries).toMatchSnapshot("build notes");
+    });
+  });
+
+  describe("write stubs", () => {
+    beforeEach(async () => {
+      wsRoot = EngineTestUtils.setupStoreDir({
+        copyFixtures: false,
+        initDirCb: (dirPath: string) => {
+          NodeTestUtils.createNotes(dirPath, [
+            {
+              id: "id.foo",
+              fname: "foo",
+            },
+            {
+              id: "id.bar.one",
+              fname: "bar.one",
+            },
+          ]);
+        },
+      });
+      engine = DendronEngine.getOrCreateEngine({
+        root: wsRoot,
+        forceNew: true,
+        mode: "exact",
+      });
+      siteRootDir = FileTestUtils.tmpDir().name;
+      dendronRoot = wsRoot;
+      notesDir = path.join(siteRootDir, "notes");
+      await engine.init();
+    });
+
+    afterEach(() => {
+      fs.removeSync(wsRoot);
+    });
+
+    test("no write stub", async () => {
+      const config: DendronSiteConfig = {
+        siteHierarchies: ["foo", "bar"],
+        siteRootDir,
+      };
+      const cmd = new BuildSiteCommand();
+      await cmd.execute({
+        engine,
+        config,
+        wsRoot: dendronRoot,
+        writeStubs: false,
+      });
+      const notesDir = wsRoot;
+      const notes = fs.readdirSync(notesDir);
+      expect(notes).toMatchSnapshot();
+      expect(notes.length).toEqual(3);
+    });
+
+    test("write stub", async () => {
+      const config: DendronSiteConfig = {
+        siteHierarchies: ["foo", "bar"],
+        siteRootDir,
+      };
+      const cmd = new BuildSiteCommand();
+      await cmd.execute({
+        engine,
+        config,
+        wsRoot: dendronRoot,
+        writeStubs: true,
+      });
+      const notesDir = wsRoot;
+      const notes = fs.readdirSync(notesDir);
+      expect(notes).toMatchSnapshot();
+      expect(notes.length).toEqual(4);
+    });
   });
 });
 
@@ -221,6 +370,7 @@ describe("note refs", () => {
   let siteRootDir: string;
   let dendronRoot: string;
   let notesDir: string;
+  let writeStubs = false;
 
   beforeEach(async () => {
     root = EngineTestUtils.setupStoreDir({
@@ -258,7 +408,7 @@ describe("note refs", () => {
       siteRootDir,
     };
     const cmd = new BuildSiteCommand();
-    await cmd.execute({ engine, config, wsRoot: dendronRoot });
+    await cmd.execute({ engine, config, wsRoot: dendronRoot, writeStubs });
     let fooPath = path.join(notesDir, "id.foo.md");
     const { content } = readMD(fooPath);
     expect(content).toMatchSnapshot();
@@ -273,7 +423,7 @@ describe("note refs", () => {
       usePrettyRefs: false,
     };
     const cmd = new BuildSiteCommand();
-    await cmd.execute({ engine, config, wsRoot: dendronRoot });
+    await cmd.execute({ engine, config, wsRoot: dendronRoot, writeStubs });
     let fooPath = path.join(notesDir, "id.foo.md");
     const { content } = readMD(fooPath);
     expect(content).toMatchSnapshot();

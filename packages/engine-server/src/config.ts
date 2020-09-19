@@ -64,4 +64,19 @@ export class DConfig {
     }
     return config;
   }
+
+  static cleanSiteConfig(config: DendronSiteConfig): DendronSiteConfig {
+    let out = _.defaults(config, {
+      usePrettyRefs: true,
+    });
+    let { siteRootDir, siteHierarchies, siteIndex } = out;
+    if (!siteRootDir) {
+      throw `siteRootDir is undefined`;
+    }
+    if (siteHierarchies.length < 1) {
+      throw `siteHiearchies must have at least one hiearchy`;
+    }
+    out.siteIndex = siteIndex || siteHierarchies[0];
+    return out;
+  }
 }

@@ -75,6 +75,7 @@ export class PublishNotesCommand extends SoilCommand<
       engine,
       config: siteConfig,
       wsRoot: wsRoot,
+      writeStubs: false,
     });
 
     if (!noPush) {

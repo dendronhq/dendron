@@ -2,5 +2,5 @@
 
 echo "upgrading..."
 lerna version prerelease
-lerna publish from-package --ignore-scripts -y
+lerna publish from-package -y
 git push

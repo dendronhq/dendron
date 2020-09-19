@@ -481,6 +481,7 @@
         "@dendronhq/common-server": "^0.11.3",
         "@dendronhq/dendron-cli": "^0.11.5-alpha.0",
         "@dendronhq/engine-server": "^0.11.5-alpha.0",
+        "@dendronhq/lsp-server": "^0.11.5-alpha.0",
         "@dendronhq/pods-core": "^0.11.5-alpha.0",
         "cross-path-sort": "^1.0.0",
         "execa": "^4.0.2",
@@ -490,6 +491,7 @@
         "markdown-it-regex": "^0.2.0",
         "moment": "^2.27.0",
         "open": "^7.0.4",
-        "semver": "^7.3.2"
+        "semver": "^7.3.2",
+        "vscode-languageclient": "^6.1.3"
     }
 }

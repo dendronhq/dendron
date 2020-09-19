@@ -22,6 +22,9 @@
       "path": "packages/seeds-core"
     },
     {
+      "path": "packages/lsp-server"
+    },
+    {
       "path": "packages/dendron-snippet-maker"
     },
     {

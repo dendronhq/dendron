@@ -3,7 +3,7 @@
 "use strict";
 
 const path = require("path");
-// const CopyPlugin = require('copy-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -30,11 +30,11 @@ const config = {
     extensions: [".ts", ".js"],
   },
   plugins: [
-    // new CopyPlugin({
-    //   patterns: [
-    //     { from: path.join("node_modules", "@dendronhq", "lsp-server"), to: 'lsp-server'},
-    //   ],
-    // }),
+    new CopyPlugin({
+      patterns: [
+        { from: path.join("node_modules", "@dendronhq", "lsp-server"), to: 'lsp-server'},
+      ],
+    }),
   ],
   module: {
     rules: [

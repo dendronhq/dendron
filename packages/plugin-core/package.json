@@ -481,6 +481,7 @@
         "@dendronhq/common-server": "^0.11.5",
         "@dendronhq/dendron-cli": "^0.11.5",
         "@dendronhq/engine-server": "^0.11.5",
+        "@dendronhq/lsp-server": "^0.11.5",
         "@dendronhq/pods-core": "^0.11.5",
         "cross-path-sort": "^1.0.0",
         "execa": "^4.0.2",

@@ -3,7 +3,7 @@
 "use strict";
 
 const path = require("path");
-// const CopyPlugin = require('copy-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -29,7 +29,13 @@ const config = {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
     extensions: [".ts", ".js"],
   },
-  plugins: [],
+  plugins: [
+    new CopyPlugin({
+      patterns: [
+        { from: path.join("node_modules", "vscode-languageserver"), to: 'vscode-languageserver'},
+      ],
+    })
+  ],
   module: {
     rules: [
       {

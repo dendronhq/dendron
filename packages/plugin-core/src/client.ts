@@ -9,6 +9,7 @@ import {
 } from "vscode-languageclient";
 import { Logger } from "./logger";
 import fs from "fs-extra";
+const lspServer = require("@dendronhq/lsp-server");
 
 let client: LanguageClient;
 
@@ -28,6 +29,7 @@ export function startClient(context: ExtensionContext) {
     "node_modules",
     "@dendronhq",
     "lsp-server",
+    "lib",
     "dist",
     "index.js"
   );
@@ -38,7 +40,7 @@ export function startClient(context: ExtensionContext) {
     serverModule = pathToDev;
   } else {
     serverModule = context.asAbsolutePath(
-      path.join("dist", "lsp-server", "lib", "index.js")
+      path.join("dist", "lsp-server", "dist", "index.js")
     );
   }
 

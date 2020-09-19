@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/lsp-server",
-  "version": "0.11.5-alpha.3",
+  "version": "0.11.5-alpha.4",
   "description": "dendron lsp",
   "license": "GPLv3",
   "repository": {

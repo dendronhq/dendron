@@ -368,10 +368,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.publish",
     title: `${CMD_PREFIX} Publish`,
     group: "publishing",
-    desc: "Build, commit and publish your notes",
+    desc: "Build, commit and publish your notes with a single command",
     docs: "",
     docLink: "",
-    docPreview: ``,
+    docPreview: `<a href="https://www.loom.com/share/c58edf543e234a8fa164095237579ccc"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/c58edf543e234a8fa164095237579ccc-with-play.gif"> </a>`,
   },
   // --- Misc
   OPEN_LINK: {

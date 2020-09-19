@@ -303,10 +303,10 @@
             {
                 "command": "dendron.publish",
                 "title": "Dendron: Publish",
-                "desc": "Build, commit and publish your notes",
-                "docs": "Single command to publish your notes",
+                "desc": "Build, commit and publish your notes with a single command",
+                "docs": "",
                 "docLink": "",
-                "docPreview": ""
+                "docPreview": "<a href=\"https://www.loom.com/share/c58edf543e234a8fa164095237579ccc\"> <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/c58edf543e234a8fa164095237579ccc-with-play.gif\"> </a>"
             },
             {
                 "command": "dendron.openLink",

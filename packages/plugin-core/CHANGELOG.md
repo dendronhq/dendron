@@ -5,18 +5,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.11.5](https://github.com/dendronhq/dendron/compare/v0.11.5-alpha.8...v0.11.5) (2020-09-19)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.11.5-alpha.8](https://github.com/dendronhq/dendron/compare/v0.11.5-alpha.7...v0.11.5-alpha.8) (2020-09-19)
-
-**Note:** Version bump only for package root
-
-## [0.11.5-alpha.6](https://github.com/dendronhq/dendron/compare/v0.11.5-alpha.5...v0.11.5-alpha.6) (2020-09-19)
-
-**Note:** Version bump only for package root
-
-## [0.11.5-alpha.5](https://github.com/dendronhq/dendron/compare/v0.11.5-alpha.4...v0.11.5-alpha.5) (2020-09-19)
-
 ### Features
 
 - **publish:** publish command ([bef8a53](https://github.com/dendronhq/dendron/commit/bef8a53b1c32223ad1fc8dfbc2932fe7e523fb9d))

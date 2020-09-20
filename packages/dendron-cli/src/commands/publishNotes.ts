@@ -1,4 +1,5 @@
 import { DendronError } from "@dendronhq/common-all";
+import { resolvePath } from "@dendronhq/common-server";
 import { DConfig, Git } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
@@ -32,8 +33,7 @@ export class PublishNotesCommand extends SoilCommand<
 
   enrichArgs(args: CommandCLIOpts) {
     const cleanArgs = super._enrichArgs(args);
-    //return _.defaults({...args, ...cleanArgs}, {});
-    return _.defaults(
+    let out = _.defaults(
       { ...args, ...cleanArgs },
       {
         buildPod: true,
@@ -44,6 +44,8 @@ export class PublishNotesCommand extends SoilCommand<
         publishRepoDir: cleanArgs.wsRoot,
       }
     );
+    out.publishRepoDir = resolvePath(out.publishRepoDir, out.wsRoot);
+    return out;
   }
 
   static buildCmd(yargs: yargs.Argv): yargs.Argv {

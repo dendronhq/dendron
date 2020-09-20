@@ -9,10 +9,12 @@ type CommandOutput = { buildNotesRoot: string };
 
 type CommandOpts = SoilCommandOpts & Required<CommandCLIOpts>;
 
+export { CommandOpts as PublishNotesCommandOpts };
 export type CommandCLIOpts = BuildSiteCommandCLIOpts & {
   buildPod?: boolean;
   noPush?: boolean;
   incremental?: boolean;
+  publishRepoDir?: string;
 };
 
 export class PublishNotesCommand extends SoilCommand<
@@ -39,6 +41,7 @@ export class PublishNotesCommand extends SoilCommand<
         incremental: false,
         writeStubs: false,
         dryRun: false,
+        publishRepoDir: cleanArgs.wsRoot,
       }
     );
   }
@@ -59,8 +62,8 @@ export class PublishNotesCommand extends SoilCommand<
   }
 
   async sanity(opts: CommandOpts) {
-    const { wsRoot } = opts;
-    const repo = await Git.getRepo(wsRoot);
+    const { publishRepoDir } = opts;
+    const repo = await Git.getRepo(publishRepoDir);
     if (!repo) {
       throw new DendronError({ msg: "no repo found" });
     }
@@ -68,11 +71,11 @@ export class PublishNotesCommand extends SoilCommand<
   }
 
   async execute(opts: CommandOpts) {
-    const { wsRoot, noPush, incremental, writeStubs } = opts;
+    const { wsRoot, noPush, incremental, writeStubs, publishRepoDir } = opts;
     const engine = opts.engine;
     const config = DConfig.getOrCreate(wsRoot);
     const siteConfig = config.site;
-    const git = new Git({ localUrl: wsRoot });
+    const git = new Git({ localUrl: publishRepoDir });
 
     if (!noPush) {
       await this.sanity(opts);

@@ -1,11 +1,14 @@
-import { PublishNotesCommand } from "@dendronhq/dendron-cli";
+import {
+  PublishNotesCommand,
+  PublishNotesCommandOpts,
+} from "@dendronhq/dendron-cli";
 import _ from "lodash";
 import { window } from "vscode";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
-type CommandOpts = {};
+type CommandOpts = Partial<PublishNotesCommandOpts>;
 
 type CommandOutput = void;
 
@@ -13,7 +16,7 @@ export class PublishCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async gatherInputs(): Promise<any> {
     return {};
   }
-  async execute() {
+  async execute(opts?: CommandOpts) {
     const maybeTextEditor = VSCodeUtils.getActiveTextEditor();
     if (_.isUndefined(maybeTextEditor)) {
       window.showErrorMessage("no active document found");
@@ -23,7 +26,7 @@ export class PublishCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const wsRoot = DendronWorkspace.rootDir() as string;
     const ws = DendronWorkspace.instance();
     const vault = ws.engine.props.root;
-    await cmd.eval({ wsRoot, vault });
+    await cmd.eval({ wsRoot, vault, ...opts });
     this.showResponse();
   }
 

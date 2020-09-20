@@ -24,11 +24,13 @@ type CommandOutput = {
   buildNotesRoot: string;
 };
 
-type CLIOpts = SoilCommandCLIOpts & {
-  writeStubs: boolean;
+type CommandCLIOpts = SoilCommandCLIOpts & {
+  writeStubs?: boolean;
   incremental?: boolean;
   dryRun?: boolean;
 };
+
+export { CommandCLIOpts as BuildSiteCommandCLIOpts };
 
 type CommandOpts = SoilCommandOpts & {
   config: DendronSiteConfig;
@@ -155,7 +157,7 @@ async function note2JekyllMdFile(
 }
 
 export class BuildSiteCommand extends SoilCommand<
-  CLIOpts,
+  CommandCLIOpts,
   CommandOpts,
   CommandOutput
 > {
@@ -177,10 +179,10 @@ export class BuildSiteCommand extends SoilCommand<
     });
   }
 
-  enrichArgs(args: CLIOpts) {
+  enrichArgs(args: CommandCLIOpts) {
     const args1 = super._enrichArgs(args);
     const config = DConfig.getOrCreate(args.wsRoot).site;
-    return { ...args1, config, writeStubs: args.writeStubs };
+    return { ...args1, config, writeStubs: args.writeStubs || false };
   }
 
   static buildCmd(yargs: yargs.Argv): yargs.Argv {

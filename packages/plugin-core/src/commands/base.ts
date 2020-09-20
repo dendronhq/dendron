@@ -28,7 +28,7 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
     return;
   }
 
-  async run(): Promise<TOut | undefined> {
+  async run(args?: any): Promise<TOut | undefined> {
     try {
       const out = await this.sanityCheck();
       if (!_.isUndefined(out)) {
@@ -42,7 +42,7 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
         if (_.isUndefined(opts)) {
           return;
         }
-        const resp = await this.execute(opts);
+        const resp = await this.execute({ ...opts, ...args });
         this.showResponse(resp);
         return resp;
       }

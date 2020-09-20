@@ -287,8 +287,8 @@ export class DendronWorkspace {
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.PUBLISH.key,
-        async () => {
-          await new PublishCommand().run();
+        async (args: any) => {
+          await new PublishCommand().run(args);
         }
       )
     );
@@ -418,8 +418,8 @@ export class DendronWorkspace {
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.BUILD_POD.key,
-        async () => {
-          await new BuildPodCommand().run();
+        async (args: any) => {
+          await new BuildPodCommand().run(args);
         }
       )
     );

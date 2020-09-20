@@ -2,16 +2,17 @@ import { DendronError } from "@dendronhq/common-all";
 import { DConfig, Git } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
-import { BuildSiteCommand } from "./build-site";
-import { SoilCommand, SoilCommandCLIOpts, SoilCommandOpts } from "./soil";
+import { BuildSiteCommand, BuildSiteCommandCLIOpts } from "./build-site";
+import { SoilCommand, SoilCommandOpts } from "./soil";
 
 type CommandOutput = { buildNotesRoot: string };
 
 type CommandOpts = SoilCommandOpts & Required<CommandCLIOpts>;
 
-export type CommandCLIOpts = SoilCommandCLIOpts & {
+export type CommandCLIOpts = BuildSiteCommandCLIOpts & {
   buildPod?: boolean;
   noPush?: boolean;
+  incremental?: boolean;
 };
 
 export class PublishNotesCommand extends SoilCommand<
@@ -32,7 +33,13 @@ export class PublishNotesCommand extends SoilCommand<
     //return _.defaults({...args, ...cleanArgs}, {});
     return _.defaults(
       { ...args, ...cleanArgs },
-      { buildPod: true, noPush: false }
+      {
+        buildPod: true,
+        noPush: false,
+        incremental: false,
+        writeStubs: false,
+        dryRun: false,
+      }
     );
   }
 
@@ -61,7 +68,7 @@ export class PublishNotesCommand extends SoilCommand<
   }
 
   async execute(opts: CommandOpts) {
-    const { wsRoot, noPush } = opts;
+    const { wsRoot, noPush, incremental, writeStubs } = opts;
     const engine = opts.engine;
     const config = DConfig.getOrCreate(wsRoot);
     const siteConfig = config.site;
@@ -75,7 +82,8 @@ export class PublishNotesCommand extends SoilCommand<
       engine,
       config: siteConfig,
       wsRoot: wsRoot,
-      writeStubs: false,
+      incremental,
+      writeStubs,
     });
 
     if (!noPush) {

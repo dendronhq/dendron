@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/engine-server",
-  "version": "0.11.5",
+  "version": "0.11.9-alpha.4",
   "description": "dendron-engine",
   "license": "GPLv3",
   "repository": {
@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.11.5",
-    "@dendronhq/common-server": "^0.11.5",
+    "@dendronhq/common-server": "^0.11.9-alpha.4",
     "@types/fs-extra": "^9.0.1",
     "@types/jest": "^23.3.3",
     "@types/klaw": "^3.0.1",

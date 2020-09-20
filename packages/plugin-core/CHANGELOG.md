@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.9-alpha.4](https://github.com/dendronhq/dendron/compare/v0.11.9-alpha.3...v0.11.9-alpha.4) (2020-09-20)
+
+### Enhancements
+
+- **publish:** specify publish repo ([7b3c1f0](https://github.com/dendronhq/dendron/commit/7b3c1f0076ca13e35ebaafcbbe6623c45b88d08c))
+- **publishing:** be able to pass in custom args to commands ([3a97d9a](https://github.com/dendronhq/dendron/commit/3a97d9a23d7616d62146e6e8c74c5d479cfdede4))
+
 ## [0.11.9-alpha.3](https://github.com/dendronhq/dendron/compare/v0.11.9-alpha.2...v0.11.9-alpha.3) (2020-09-19)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

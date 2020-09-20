@@ -317,7 +317,6 @@ describe("buildSite v2", () => {
         mode: "exact",
       });
       siteRootDir = FileTestUtils.tmpDir().name;
-      dendronRoot = wsRoot;
       notesDir = path.join(siteRootDir, "notes");
       await engine.init();
     });
@@ -335,7 +334,7 @@ describe("buildSite v2", () => {
       await cmd.execute({
         engine,
         config,
-        wsRoot: dendronRoot,
+        wsRoot,
         writeStubs: false,
       });
       const notesDir = wsRoot;
@@ -353,7 +352,7 @@ describe("buildSite v2", () => {
       await cmd.execute({
         engine,
         config,
-        wsRoot: dendronRoot,
+        wsRoot,
         writeStubs: true,
       });
       const notesDir = wsRoot;

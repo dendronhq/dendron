@@ -5,10 +5,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.11.9](https://github.com/dendronhq/dendron/compare/v0.11.9-alpha.4...v0.11.9) (2020-09-20)
 
-**Note:** Version bump only for package root
-
-## [0.11.9-alpha.4](https://github.com/dendronhq/dendron/compare/v0.11.9-alpha.3...v0.11.9-alpha.4) (2020-09-20)
-
 ### Features
 
 - **publishing:** support incremental page building ([3189590](https://github.com/dendronhq/dendron/commit/31895904e55953776f5e048c32e7dfbc9b579f1c)) ([docs](https:/dendron.so/notes/8b03ed06-4f46-46e0-8652-c6abf2266a79.html#buildsite))

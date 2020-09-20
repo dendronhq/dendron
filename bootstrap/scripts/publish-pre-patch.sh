@@ -2,5 +2,5 @@
 
 echo "upgrading..."
 lerna version prerelease
-lerna publish 
+lerna publish from-package
 git push

@@ -230,6 +230,7 @@ describe("buildSite v2", () => {
   let vault: string;
   let engine: DEngine;
   let siteRootDir: string;
+  //@ts-ignore
   let notesDir: string;
 
   describe("incremental", () => {

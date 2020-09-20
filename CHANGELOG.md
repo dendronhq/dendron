@@ -7,13 +7,19 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Features
 
-- **publishing:** support incremental page building ([3189590](https://github.com/dendronhq/dendron/commit/31895904e55953776f5e048c32e7dfbc9b579f1c))
+- **publishing:** support incremental page building ([3189590](https://github.com/dendronhq/dendron/commit/31895904e55953776f5e048c32e7dfbc9b579f1c)) ([docs](https:/dendron.so/notes/8b03ed06-4f46-46e0-8652-c6abf2266a79.html#buildsite))
+
+* **publishing:** support automatic attributions of page via frontmatter ([docs](https:/dendron.so/notes/f9c646b1-34ab-4b18-8ec1-cabb8b2c7066.html#sources-source))
 
 ### Enhancements
 
-- **publishing:** specify publish repo ([7b3c1f0](https://github.com/dendronhq/dendron/commit/7b3c1f0076ca13e35ebaafcbbe6623c45b88d08c))
-- **publishing:** support rel path with repoDir ([af1c1b6](https://github.com/dendronhq/dendron/commit/af1c1b6f90aaeb3d967e10031be0fdab62d6ac89))
-- **publishing:** be able to pass in custom args to commands ([3a97d9a](https://github.com/dendronhq/dendron/commit/3a97d9a23d7616d62146e6e8c74c5d479cfdede4))
+- **publishing:** specify publish repo ([7b3c1f0](https://github.com/dendronhq/dendron/commit/7b3c1f0076ca13e35ebaafcbbe6623c45b88d08c)) ([docs](https:/dendron.so/notes/8b03ed06-4f46-46e0-8652-c6abf2266a79.html#publishnotes))
+- **publishing:** support relative path when specifying publishing targets ([af1c1b6](https://github.com/dendronhq/dendron/commit/af1c1b6f90aaeb3d967e10031be0fdab62d6ac89))
+- **publishing:** be able to pass in custom args to publishing commands ([3a97d9a](https://github.com/dendronhq/dendron/commit/3a97d9a23d7616d62146e6e8c74c5d479cfdede4))
+
+### Bug Fixes
+
+- **publishing:** issue where citations without a name results in a blank url
 
 ## [0.11.5](https://github.com/dendronhq/dendron/compare/v0.11.5-alpha.8...v0.11.5) (2020-09-19)
 

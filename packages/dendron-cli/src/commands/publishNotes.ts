@@ -24,22 +24,25 @@ export class PublishNotesCommand extends SoilCommand<
   CommandOutput
 > {
   buildArgs(args: yargs.Argv) {
-    super.buildArgs(args);
+    new BuildSiteCommand().buildArgs(args);
     args.option("noPush", {
       describe: "don't push the result",
       type: "boolean",
     });
+    args.option("publishRepoDir", {
+      describe: "repo to publish from. default is same as `wsRoot`",
+    });
   }
 
   enrichArgs(args: CommandCLIOpts) {
-    const cleanArgs = super._enrichArgs(args);
+    //const cleanArgs = super._enrichArgs(args);
+    const cleanArgs = new BuildSiteCommand().enrichArgs(args);
     let out = _.defaults(
       { ...args, ...cleanArgs },
       {
         buildPod: true,
         noPush: false,
         incremental: false,
-        writeStubs: false,
         dryRun: false,
         publishRepoDir: cleanArgs.wsRoot,
       }

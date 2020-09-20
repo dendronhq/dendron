@@ -129,6 +129,7 @@ async function note2JekyllMdFile(
     note.body = getProcessor({
       root: opts.engine.props.root,
       renderWithOutline: opts.usePrettyRefs,
+      // necessary when when finding refs
       replaceRefs: {
         wikiLink2Md: true,
         wikiLinkPrefix: linkPrefix,

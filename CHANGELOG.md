@@ -9,7 +9,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - **publishing:** support incremental page building ([3189590](https://github.com/dendronhq/dendron/commit/31895904e55953776f5e048c32e7dfbc9b579f1c)) ([docs](https:/dendron.so/notes/8b03ed06-4f46-46e0-8652-c6abf2266a79.html#buildsite))
 
-* **publishing:** support automatic attributions of page via frontmatter ([docs](https:/dendron.so/notes/f9c646b1-34ab-4b18-8ec1-cabb8b2c7066.html#sources-source))
+* **publishing:** support automatic attribution$$s of page via frontmatter ([docs](https:/dendron.so/notes/f9c646b1-34ab-4b18-8ec1-cabb8b2c7066.html#sources-sourc$$e))
 
 ### Enhancements
 

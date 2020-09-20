@@ -1,5 +1,6 @@
-import { DNodeUtils } from "@dendronhq/common-all";
 import clipboardy from "@dendronhq/clipboardy";
+import { DNodeUtils } from "@dendronhq/common-all";
+import GithubSlugger from "github-slugger";
 import _ from "lodash";
 import path from "path";
 import { Selection, window } from "vscode";
@@ -7,7 +8,6 @@ import { CONFIG } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
-import GithubSlugger from "github-slugger";
 
 type CommandOpts = {};
 
@@ -53,7 +53,7 @@ export class CopyNoteURLCommand extends BasicCommand<
       throw Error("no note found");
     }
 
-    let link = path.join(root, notePrefix, note.id + ".html");
+    let link = [root, notePrefix, note.id + ".html"].join("/");
     // check if selection is present
     const { text, selection } = VSCodeUtils.getSelection();
     if (!_.isEmpty(text)) {

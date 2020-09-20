@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.12.0](https://github.com/dendronhq/dendron/compare/v0.11.9...v0.12.0) (2020-09-20)
+
+**Note:** Version bump only for package @dendronhq/lsp-server
+
 ## [0.11.9](https://github.com/dendronhq/dendron/compare/v0.11.9-alpha.4...v0.11.9) (2020-09-20)
 
 **Note:** Version bump only for package @dendronhq/lsp-server

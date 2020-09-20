@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.12.0](https://github.com/dendronhq/dendron/compare/v0.11.9...v0.12.0) (2020-09-20)
+
+### Bug Fixes
+
+- **notes:** truncating url prefix ([3adf80c](https://github.com/dendronhq/dendron/commit/3adf80c6d94099db94f0a53ca9f993a1bc0301bc))
+
 ## [0.11.9](https://github.com/dendronhq/dendron/compare/v0.11.9-alpha.4...v0.11.9) (2020-09-20)
 
 ### Features

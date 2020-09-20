@@ -319,9 +319,9 @@ export class BuildSiteCommand extends SoilCommand<
         dest: siteNotesDirPath,
       });
       if (!opts.dryRun) {
-        await rsyncCopy(`${staging.name}/*`, siteNotesDirPath);
-        // fs.emptyDirSync(staging.name);
-        // staging.removeCallback();
+        await rsyncCopy(`${path.join(staging.name, "*")}`, siteNotesDirPath);
+        fs.emptyDirSync(staging.name);
+        staging.removeCallback();
       }
     } else {
       fs.emptyDirSync(siteNotesDirPath);

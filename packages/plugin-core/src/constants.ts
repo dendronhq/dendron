@@ -136,10 +136,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   },
   NEW_NOTE_FROM_SELECTION: {
     key: "dendron.newNoteFromSelection",
-    title: `${CMD_PREFIX} New Note From Selection`,
+    title: `${CMD_PREFIX} New Note From Selection (Removed)`,
     group: "notes",
     desc:
-      "Create new note based on a selection. Remove selection from original note.",
+      "This command is now deprecated. You can now use lookup with highlighted text to achieve the same functionality",
     docLink: "dendron.topic.commands.md",
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.new-from-select.gif)",

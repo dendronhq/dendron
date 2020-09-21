@@ -164,8 +164,8 @@
             },
             {
                 "command": "dendron.newNoteFromSelection",
-                "title": "Dendron: New Note From Selection",
-                "desc": "Create new note based on a selection. Remove selection from original note.",
+                "title": "Dendron: New Note From Selection (Removed)",
+                "desc": "This command is now deprecated. You can now use lookup with highlighted text to achieve the same functionality",
                 "docLink": "dendron.topic.commands.md",
                 "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.new-from-select.gif)"
             },

@@ -105,12 +105,16 @@
                 },
                 "dendron.notesDirPath": {
                     "type": "string",
-                    "desc": "Path to notesdir executable"
+                    "description": "Path to notesdir executable"
                 },
                 "dendron.skipPrompt": {
                     "type": "boolean",
                     "default": false,
-                    "descriptionip": "whether dendron prompts for confirmation for certain actions"
+                    "description": "whether dendron prompts for confirmation for certain actions"
+                },
+                "dendron.publishRepoDir": {
+                    "type": "string",
+                    "description": "Path of git repo when running `Dendron: Publish`"
                 }
             }
         },

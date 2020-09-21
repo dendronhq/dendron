@@ -11,6 +11,15 @@ type KeyBinding = {
   when?: string;
 };
 
+type ConfigEntry = {
+  key: string;
+  description: string;
+  type?: "string" | "boolean";
+  default?: any;
+  enum?: string[];
+  scope?: CommandEntry;
+};
+
 type CommandEntry = {
   key: string;
   title: string;
@@ -475,7 +484,7 @@ export const _noteAddBehaviorEnum = [
   "asOwnDomain",
 ];
 
-export const CONFIG = {
+export const CONFIG: { [key: string]: ConfigEntry } = {
   // --- journals
   DAILY_JOURNAL_DOMAIN: {
     key: "dendron.dailyJournalDomain",
@@ -542,13 +551,19 @@ export const CONFIG = {
   NOTESDIR_PATH: {
     key: "dendron.notesDirPath",
     type: "string",
-    desc: "Path to notesdir executable",
+    description: "Path to notesdir executable",
   },
   SKIP_PROMPT: {
     key: "dendron.skipPrompt",
     type: "boolean",
     default: false,
-    descriptionip:
-      "whether dendron prompts for confirmation for certain actions",
+    description: "whether dendron prompts for confirmation for certain actions",
+  },
+  // --- publishing
+  PUBLISH_REPO_DIR: {
+    key: "dendron.publishRepoDir",
+    type: "string",
+    description: "Path of git repo when running `Dendron: Publish`",
+    scope: DENDRON_COMMANDS.PUBLISH,
   },
 };

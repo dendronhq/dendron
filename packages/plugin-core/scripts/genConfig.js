@@ -6,7 +6,7 @@ const path = require("path");
 function genEntry(entryDict) {
   const configGenerated = {};
   _.forEach(entryDict, (ent) => {
-    const configProps = _.omit(ent, "key");
+    const configProps = _.omit(ent, ["key", "scope"]);
     const configKey = ent["key"];
     configGenerated[configKey] = configProps;
   });

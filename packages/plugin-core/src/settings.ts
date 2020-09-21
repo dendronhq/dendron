@@ -65,31 +65,7 @@ const _SETTINGS: ConfigUpdateChangeSet = {
   "editor.suggest.snippetsPreventQuickSuggestions": { default: false },
   "editor.suggest.showSnippets": { default: true },
   "editor.tabCompletion": { default: "on" },
-  "[markdown]": {
-    default: {
-      "editor.quickSuggestions": true,
-      "editor.wordBasedSuggestions": false,
-      "editor.tabSize": 2,
-      "editor.suggest.showSnippets": false,
-    },
-  },
 };
-
-// {
-//   // quickSuggestions true will provide suggestions as you type.
-//   // If you turn this on and DO NOT want suggestions
-//   // for non-wiki-link, non-tag words,
-//   "editor.quickSuggestions": true,
-//   // This is poorly documented, but seems to offer suggestions
-//   // from any word in open document when turned on, which
-//   // can be a little distracting in markdown docs:
-//   "editor.wordBasedSuggestions": false,
-//   "editor.tabSize": 2,
-//   // Set this to false if you turn on quickSuggestions
-//   // but don't want suggestions for markdown related snippets
-//   // as you type:
-//   "editor.suggest.showSnippets": false,
-// },
 
 const _EXTENSIONS: ConfigUpdateEntry[] = [
   { default: "dendron.dendron-paste-image" },

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.0...v0.12.1-alpha.0) (2020-09-21)
+
+### Enhancements
+
+- **publish:** configure repoDir via config ([fa838e4](https://github.com/dendronhq/dendron/commit/fa838e48bc5e33b8aa00d5aa954283c55af4d917))
+
 # [0.12.0](https://github.com/dendronhq/dendron/compare/v0.11.9...v0.12.0) (2020-09-20)
 
 ### Bug Fixes

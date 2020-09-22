@@ -1,6 +1,37 @@
 {
   "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "pkg",
+      "description": "pkg",
+      "type": "promptString"
+    },
+    {
+      "id": "scope",
+      "description": "scope",
+      "type": "pickString",
+      "options": [
+        "@dendronhq/common-all",
+        "@dendronhq/common-server",
+        "@dendronhq/engine-server",
+        "@dendronhq/dendron-cli",
+        "@dendronhq/pods-core",
+        "@dendronhq/seeds-core",
+        "@dendronhq/lsp-server",
+        "@dendronhq/plugin-core"
+      ]
+    }
+  ],
   "tasks": [
+    {
+      "label": "Lerna:Install",
+      "type": "shell",
+      "command": "./bootstrap/scripts/install.sh ${input:pkg} ${input:scope}",
+      "options": {
+        "cwd": "./.."
+      },
+      "problemMatcher": []
+    },
     {
       "label": "Test",
       "type": "shell",
@@ -66,10 +97,7 @@
     },
     {
       "label": "Plugin: Pack, Install, Release",
-      "dependsOn": [
-        "Plugin: Package and Install",
-        "Plugin: Release"
-      ],
+      "dependsOn": ["Plugin: Package and Install", "Plugin: Release"],
       "dependsOrder": "sequence",
       "problemMatcher": []
     },
@@ -85,11 +113,7 @@
     },
     {
       "label": "Pub:Local",
-      "dependsOn": [
-        "NPM: Publish",
-        "Sleep",
-        "Plugin: Package and Install"
-      ],
+      "dependsOn": ["NPM: Publish", "Sleep", "Plugin: Package and Install"],
       "dependsOrder": "sequence",
       "problemMatcher": []
     },

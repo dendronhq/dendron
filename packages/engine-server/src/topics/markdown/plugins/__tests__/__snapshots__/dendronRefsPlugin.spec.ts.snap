@@ -408,12 +408,30 @@ task2
 "
 `;
 
+exports[`basic stingify basic block with header and start, start invalid  1`] = `
+"# Foo Bar
+
+### Note Ref Error
+
+start anchor badheader not found  
+"
+`;
+
 exports[`basic stingify basic block with header, start and end  1`] = `
 "# Foo Bar
 
 ## Header1
 
 task1
+"
+`;
+
+exports[`basic stingify basic block with header, start and end, end invalid  1`] = `
+"# Foo Bar
+
+### Note Ref Error
+
+end anchor badheader not found  
 "
 `;
 

@@ -161,6 +161,71 @@ describe("basic", () => {
       expect(out.indexOf("task2") >= 0).toBeTruthy();
     });
 
+    test("basic block with header and start, start invalid ", async () => {
+      const txt = [
+        "---",
+        "id: foo",
+        "---",
+        `# Tasks`,
+        "## Header1",
+        "task1",
+        "## Header2",
+        "task2",
+      ];
+      root = await EngineTestUtils.setupStoreDir({
+        initDirCb: (dirPath: string) => {
+          fs.writeFileSync(
+            path.join(dirPath, "daily.tasks.md"),
+            txt.join("\n"),
+            { encoding: "utf8" }
+          );
+        },
+      });
+      const out = getProcessor({ root })
+        .processSync(
+          `# Foo Bar
+((ref:[[daily.tasks]]#badheader))`
+        )
+        .toString();
+      expect(out).toMatchSnapshot();
+      expect(out.indexOf("Note Ref Error") >= 0).toBeTruthy();
+      expect(out.indexOf("badheader not found") >= 0).toBeTruthy();
+    });
+
+    test("basic block with header, start and end, end invalid ", async () => {
+      const txt = [
+        "---",
+        "id: foo",
+        "---",
+        `# Tasks`,
+        "## Header1",
+        "task1",
+        "## Header2",
+        "task2",
+        "<div class='bar'>",
+        "BOND",
+        "</div>",
+      ];
+      root = await EngineTestUtils.setupStoreDir({
+        initDirCb: (dirPath: string) => {
+          fs.writeFileSync(
+            path.join(dirPath, "daily.tasks.md"),
+            txt.join("\n"),
+            { encoding: "utf8" }
+          );
+        },
+      });
+      const out = getProcessor({ root })
+        .processSync(
+          `# Foo Bar
+((ref:[[daily.tasks]]#Header1:#badheader))`
+        )
+        .toString();
+      expect(out).toMatchSnapshot();
+      expect(out.indexOf("Note Ref Error") >= 0).toBeTruthy();
+      expect(out.indexOf("badheader not found") >= 0).toBeTruthy();
+    });
+
     test("basic block with header and start, offset ", async () => {
       const txt = [
         "---",

@@ -11,6 +11,13 @@ import { DendronRefLink, parseDendronRef } from "../../../utils";
 import { getProcessor } from "../utils";
 import { findIndex, isHeading } from "./inject";
 import { ReplaceRefOptions, replaceRefs } from "./replaceRefs";
+import {
+  root as mdastRoot,
+  paragraph,
+  text,
+  heading,
+  brk,
+} from "mdast-builder";
 
 // const LINK_REGEX = /^\[\[(.+?)\]\]/;
 const LINK_REGEX = /^\(\((?<ref>[^)]+)\)\)/;
@@ -49,6 +56,71 @@ interface PluginOpts {
 const aliasDivider = "|";
 function isAlias(pageTitle: string) {
   return pageTitle.indexOf(aliasDivider) !== -1;
+}
+
+function findNoteRef(opts: {
+  body: string;
+  link: DendronRefLink;
+  replaceRefs?: ReplaceRefOptions;
+}) {
+  const { body, link } = opts;
+  let proc = getProcessor();
+  const bodyAST: Parent = proc.parse(body) as Parent;
+  // bumpHeadings(bodyAST, 2);
+  const { anchorStart, anchorEnd, anchorStartOffset } = link;
+  let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
+  let anchorEndIndex = bodyAST.children.length;
+  if (anchorStart) {
+    anchorStartIndex = findIndex(bodyAST.children as any[], function (
+      node: Node
+    ) {
+      return isHeading(node, anchorStart);
+    });
+    if (anchorStartIndex < 0) {
+      return proc.stringify(
+        genMDError({
+          msg: `start anchor ${anchorStart} not found`,
+          title: "Note Ref Error",
+        })
+      );
+    }
+  }
+  if (anchorEnd) {
+    anchorEndIndex = findIndex(
+      bodyAST.children.slice(anchorStartIndex + 1) as any[],
+      function (node: Node) {
+        return isHeading(node, anchorEnd);
+      }
+    );
+    if (anchorEndIndex < 0) {
+      const mdError = genMDError({
+        msg: `end anchor ${anchorEnd} not found`,
+        title: "Note Ref Error",
+      });
+      return proc.stringify(mdError);
+    }
+    anchorEndIndex += anchorStartIndex + 1;
+  }
+  bodyAST.children = bodyAST.children.slice(anchorStartIndex, anchorEndIndex);
+
+  // convert content inside block
+  let outProc = getProcessor();
+  if (!_.isUndefined(opts.replaceRefs)) {
+    outProc = outProc.use(replaceRefs, opts.replaceRefs);
+  }
+  let out = outProc.processSync(outProc.stringify(bodyAST)).toString();
+  if (anchorStartOffset) {
+    out = out.split("\n").slice(anchorStartOffset).join("\n");
+  }
+  return out;
+}
+
+function genMDError(opts: { msg: string; title: string }) {
+  const { msg, title } = opts;
+  return mdastRoot([
+    heading(3, text(title)),
+    paragraph([paragraph(text(msg)), brk]),
+  ]);
 }
 
 function parseAliasLink(pageTitle: string) {
@@ -166,45 +238,11 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
         const body = fs.readFileSync(path.join(root, data.link.name + ".md"), {
           encoding: "utf8",
         });
-        let proc = getProcessor();
-        const bodyAST: Parent = proc.parse(body) as Parent;
-        // bumpHeadings(bodyAST, 2);
-        const { anchorStart, anchorEnd, anchorStartOffset } = data.link;
-        let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
-        let anchorEndIndex = bodyAST.children.length;
-        if (anchorStart) {
-          anchorStartIndex = findIndex(bodyAST.children as any[], function (
-            node: Node
-          ) {
-            return isHeading(node, anchorStart);
-          });
-        }
-        if (anchorEnd) {
-          anchorEndIndex = findIndex(
-            bodyAST.children.slice(anchorStartIndex + 1) as any[],
-            function (node: Node) {
-              return isHeading(node, anchorEnd);
-            }
-          );
-          if (anchorEndIndex < 0) {
-            // TODO: raise error
-          }
-          anchorEndIndex += anchorStartIndex + 1;
-        }
-        bodyAST.children = bodyAST.children.slice(
-          anchorStartIndex,
-          anchorEndIndex
-        );
-
-        // convert content inside block
-        let outProc = getProcessor();
-        if (!_.isUndefined(opts.replaceRefs)) {
-          outProc = outProc.use(replaceRefs, opts.replaceRefs);
-        }
-        let out = outProc.processSync(outProc.stringify(bodyAST)).toString();
-        if (anchorStartOffset) {
-          out = out.split("\n").slice(anchorStartOffset).join("\n");
-        }
+        const out = findNoteRef({
+          body,
+          link: data.link,
+          replaceRefs: opts.replaceRefs,
+        });
         if (renderWithOutline) {
           let link = data.link.name;
           // convert link

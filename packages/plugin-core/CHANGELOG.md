@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.1-alpha.0...v0.12.1-alpha.1) (2020-09-22)
+
+### Enhancements
+
+- **refs:** better header selection ([ba9a4d9](https://github.com/dendronhq/dendron/commit/ba9a4d975b115e4cf8bc211f5e00f0557f26693b))
+
+### Features
+
+- **lookup:** create scratch or journal notes via lookup ([591c55f](https://github.com/dendronhq/dendron/commit/591c55f792ad8121d27af3a1c645ff9a2458f19c))
+
 ## [0.12.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.0...v0.12.1-alpha.0) (2020-09-21)
 
 ### Enhancements

@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/engine-server",
-  "version": "0.12.0",
+  "version": "0.12.1-alpha.1",
   "description": "dendron-engine",
   "license": "GPLv3",
   "repository": {

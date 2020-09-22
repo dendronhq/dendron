@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.1-alpha.0...v0.12.1-alpha.1) (2020-09-22)
+
+### Enhancements
+
+- **refs:** emit error when header not found ([5deb2d1](https://github.com/dendronhq/dendron/commit/5deb2d18160974bd035b3703715acc16d0dcb012))
+
 # [0.12.0](https://github.com/dendronhq/dendron/compare/v0.11.9...v0.12.0) (2020-09-20)
 
 **Note:** Version bump only for package @dendronhq/engine-server

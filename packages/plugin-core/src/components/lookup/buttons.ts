@@ -3,7 +3,11 @@ import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
 import { DendronQuickPicker } from "./LookupProvider";
 
-export type ButtonType = "selection2link" | "selectionExtract";
+export type ButtonType =
+  | "selection2link"
+  | "selectionExtract"
+  | "journal"
+  | "scratch";
 
 export type IDendronQuickInputButton = QuickInputButton & {
   type: ButtonType;
@@ -53,7 +57,7 @@ class Selection2LinkBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new DendronBtn({
       title: "Selection to Link",
-      iconOff: "link-external",
+      iconOff: "link",
       iconOn: "menu-selection",
       type: "selection2link",
       pressed,
@@ -73,6 +77,30 @@ class SlectionExtractBtn extends DendronBtn {
   }
 }
 
+class JournalBtn extends DendronBtn {
+  static create(pressed?: boolean) {
+    return new DendronBtn({
+      title: "Create Journal Note",
+      iconOff: "calendar",
+      iconOn: "menu-selection",
+      type: "journal",
+      pressed,
+    });
+  }
+}
+
+class ScratchBtn extends DendronBtn {
+  static create(pressed?: boolean) {
+    return new DendronBtn({
+      title: "Create Scratch Note",
+      iconOff: "new-file",
+      iconOn: "menu-selection",
+      type: "scratch",
+      pressed,
+    });
+  }
+}
+
 export function refreshButtons(
   quickpick: DendronQuickPicker,
   buttons: IDendronQuickInputButton[]
@@ -81,7 +109,12 @@ export function refreshButtons(
 }
 
 export function createAllButtons(typeToTurnOn?: ButtonType): DendronBtn[] {
-  const buttons = [SlectionExtractBtn.create(), Selection2LinkBtn.create()];
+  const buttons = [
+    SlectionExtractBtn.create(),
+    Selection2LinkBtn.create(),
+    JournalBtn.create(),
+    ScratchBtn.create(),
+  ];
   if (typeToTurnOn) {
     const btn = _.find(buttons, { type: typeToTurnOn }) as DendronBtn;
     btn.pressed = true;

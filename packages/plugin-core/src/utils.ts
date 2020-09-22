@@ -4,9 +4,17 @@ import _ from "lodash";
 import os from "os";
 import path from "path";
 import * as vscode from "vscode";
-import { GLOBAL_STATE } from "./constants";
+import {
+  CONFIG,
+  ConfigKey,
+  GLOBAL_STATE,
+  _noteAddBehaviorEnum,
+} from "./constants";
 import { FileItem } from "./external/fileutils/FileItem";
 import _md from "markdown-it";
+import { DendronWorkspace } from "./workspace";
+import { DEngine, DNodeUtils, SchemaUtils } from "@dendronhq/common-all";
+import moment from "moment";
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
@@ -53,6 +61,20 @@ export class FileUtils {
 // NOTE: used for tests
 let _MOCK_CONTEXT: undefined | vscode.ExtensionContext = undefined;
 
+type CreateFnameOverrides = {
+  domain?: string;
+};
+
+type CreateFnameOpts = {
+  overrides?: CreateFnameOverrides;
+};
+
+type AddBehavior =
+  | "childOfDomain"
+  | "childOfCurrent"
+  | "asOwnDomain"
+  | "childOfDomainNamespace";
+
 export class VSCodeUtils {
   static closeCurrentFileEditor() {
     return vscode.commands.executeCommand("workbench.action.closeActiveEditor");
@@ -98,6 +120,86 @@ export class VSCodeUtils {
 
   static getFsPathFromTextEditor(editor: vscode.TextEditor) {
     return editor.document.uri.fsPath;
+  }
+  static genNotePrefix(
+    fname: string,
+    addBehavior: AddBehavior,
+    opts: { engine: DEngine }
+  ) {
+    let out: string;
+    switch (addBehavior) {
+      case "childOfDomain": {
+        out = DNodeUtils.domainName(fname);
+        break;
+      }
+      case "childOfDomainNamespace": {
+        out = DNodeUtils.domainName(fname);
+        const domain = DNodeUtils.getNoteByFname(out, opts.engine);
+        if (domain) {
+          const schema = SchemaUtils.matchNote(domain, opts.engine.schemas);
+          if (schema && schema.namespace) {
+            out = DNodeUtils.getPathUpTo(fname, 2);
+          }
+        }
+        break;
+      }
+      case "childOfCurrent": {
+        out = fname;
+        break;
+      }
+      case "asOwnDomain": {
+        out = "";
+        break;
+      }
+      default: {
+        throw Error(`unknown add Behavior: ${addBehavior}`);
+      }
+    }
+    return out;
+  }
+
+  static genNoteName(
+    type: "JOURNAL" | "SCRATCH",
+    opts?: CreateFnameOpts
+  ): string {
+    // gather inputs
+    const dateFormatKey: ConfigKey = `DEFAULT_${type}_DATE_FORMAT` as ConfigKey;
+    const dateFormat = DendronWorkspace.configuration().get<string>(
+      CONFIG[dateFormatKey].key
+    );
+    const addKey = `DEFAULT_${type}_ADD_BEHAVIOR` as ConfigKey;
+    const addBehavior = DendronWorkspace.configuration().get<string>(
+      CONFIG[addKey].key
+    );
+    const nameKey: ConfigKey = `DEFAULT_${type}_NAME` as ConfigKey;
+    const name = DendronWorkspace.configuration().get<string>(
+      CONFIG[nameKey].key
+    );
+    if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
+      throw Error(
+        `${
+          CONFIG[addKey].key
+        } must be one of following ${_noteAddBehaviorEnum.join(", ")}`
+      );
+    }
+    const editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
+    if (!editorPath) {
+      throw Error("not currently in a note");
+    }
+
+    const engine = DendronWorkspace.instance().engine;
+    // put together
+    const cNoteFname =
+      opts?.overrides?.domain || path.basename(editorPath, ".md");
+    const prefix = VSCodeUtils.genNotePrefix(
+      cNoteFname,
+      addBehavior as AddBehavior,
+      {
+        engine,
+      }
+    );
+    const noteDate = moment().format(dateFormat);
+    return [prefix, name, noteDate].filter((ent) => !_.isEmpty(ent)).join(".");
   }
 
   static getSelection() {

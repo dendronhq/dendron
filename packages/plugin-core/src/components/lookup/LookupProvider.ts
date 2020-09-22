@@ -18,6 +18,7 @@ import { node2Uri } from "./utils";
 
 export type DendronQuickPicker = QuickPick<DNode> & {
   justActivated?: boolean;
+  prev?: { activeItems: any; items: any };
   onCreate?: (note: Note) => Promise<void>;
 };
 
@@ -169,7 +170,7 @@ export type EngineOpts = {
 
 export class LookupProvider {
   public noActiveItem: QuickPickItem;
-  protected opts: EngineOpts;
+  public opts: EngineOpts;
 
   constructor(opts: EngineOpts) {
     this.noActiveItem = createNoActiveItem({ label: "Create New" });
@@ -432,12 +433,10 @@ export class LookupProvider {
     picker.onDidAccept(async () => {
       this.onDidAccept(picker, opts);
     });
-    // picker.onDidChangeSelection((inputs: QuickPickItem[]) => {
-    //   const ctx = "onDidChangeSelection";
-    // });
     picker.onDidChangeValue(() => {
       this.onUpdatePickerItem(picker, opts);
     });
+    // OPTIMIZE: might not be needed anymore
     this.onUpdatePickerItem(picker, opts);
   }
 }

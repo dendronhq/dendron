@@ -40,23 +40,50 @@ export class LookupController {
     this.opts = opts;
   }
 
-  onCreate(opts: {
+  updatePickerBehavior(opts: {
     quickPick: DendronQuickPicker;
     document?: vscode.TextDocument;
     range?: vscode.Range;
+    quickPickValue?: string;
+    provider: LookupProvider;
   }) {
-    const { document, range, quickPick } = opts;
+    const { document, range, quickPick, quickPickValue, provider } = opts;
     const buttons = this.state.buttons;
     const resp = _.find(buttons, { pressed: true });
     if (!resp) {
       quickPick.onCreate = async () => {};
       return;
     }
+    // determine value
+    switch (resp.type) {
+      case "journal": {
+        const value = VSCodeUtils.genNoteName("JOURNAL");
+        quickPick.value = value;
+        provider.onUpdatePickerItem(quickPick, provider.opts);
+        break;
+      }
+      case "scratch": {
+        const value = VSCodeUtils.genNoteName("SCRATCH");
+        quickPick.value = value;
+        provider.onUpdatePickerItem(quickPick, provider.opts);
+        break;
+      }
+      default:
+        if (quickPickValue) {
+          quickPick.value = quickPickValue;
+        } else {
+          let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
+          if (editorPath && this.opts.flavor !== "schema") {
+            quickPick.value = path.basename(editorPath, ".md");
+          }
+        }
+        provider.onUpdatePickerItem(quickPick, provider.opts);
+    }
     quickPick.onCreate = async (note: Note) => {
       const ctx = "onCreate";
+      Logger.info({ ctx, btnType: resp.type });
       switch (resp.type) {
         case "selectionExtract": {
-          Logger.info({ ctx, msg: "selection extract" });
           if (!_.isUndefined(document)) {
             const body = "\n" + document.getText(range).trim();
             note.body = body;
@@ -65,7 +92,6 @@ export class LookupController {
           break;
         }
         case "selection2link": {
-          Logger.info({ ctx, msg: "selection 2 link" });
           if (!_.isUndefined(document)) {
             const editor = VSCodeUtils.getActiveTextEditor();
             const { selection, text } = VSCodeUtils.getSelection();
@@ -110,22 +136,16 @@ export class LookupController {
     quickPick.placeholder = "eg. hello.world";
     quickPick.ignoreFocusOut = cleanOpts.ignoreFocusOut;
     quickPick.justActivated = true;
+    const provider = new LookupProvider(this.opts);
 
-    this.onCreate({ quickPick, document, range });
-    // FIXME: no button for now
+    this.updatePickerBehavior({
+      quickPick,
+      document,
+      range,
+      quickPickValue: cleanOpts.value,
+      provider,
+    });
     refreshButtons(quickPick, this.state.buttons);
-    // quickpick.items = _.values(DendronEngine.getOrCreateEngine().notes);
-
-    let { value } = cleanOpts;
-    if (!_.isUndefined(value)) {
-      quickPick.value = value;
-    } else {
-      // set editor path
-      let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
-      if (editorPath && this.opts.flavor !== "schema") {
-        quickPick.value = path.basename(editorPath, ".md");
-      }
-    }
 
     quickPick.onDidTriggerButton((btn: QuickInputButton) => {
       const btnType = (btn as IDendronQuickInputButton).type;
@@ -139,7 +159,7 @@ export class LookupController {
         (ent) => (ent.pressed = false)
       );
       refreshButtons(quickPick, this.state.buttons);
-      this.onCreate({ quickPick, document, range });
+      this.updatePickerBehavior({ quickPick, document, range, provider });
     });
 
     // cleanup quickpick
@@ -148,7 +168,6 @@ export class LookupController {
       this.quickPick = undefined;
     });
 
-    const provider = new LookupProvider(this.opts);
     provider.provide(quickPick);
     this.ws.L.info({ ctx: ctx + ":provide:post" });
     // show

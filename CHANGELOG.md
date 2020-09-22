@@ -14,17 +14,16 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Enhancements
 
 - **refs:** better header selection ([ba9a4d9](https://github.com/dendronhq/dendron/commit/ba9a4d975b115e4cf8bc211f5e00f0557f26693b))
+
+When selecting the last header of a page, don't create a wildcard ref to the next header.
+
 - **refs:** emit error when header not found ([5deb2d1](https://github.com/dendronhq/dendron/commit/5deb2d18160974bd035b3703715acc16d0dcb012))
+
+- **publish:** configure repoDir via config ([fa838e4](https://github.com/dendronhq/dendron/commit/fa838e48bc5e33b8aa00d5aa954283c55af4d917))
 
 ### Features
 
 - **lookup:** create scratch or journal notes via lookup ([591c55f](https://github.com/dendronhq/dendron/commit/591c55f792ad8121d27af3a1c645ff9a2458f19c))
-
-## [0.12.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.0...v0.12.1-alpha.0) (2020-09-21)
-
-### Enhancements
-
-- **publish:** configure repoDir via config ([fa838e4](https://github.com/dendronhq/dendron/commit/fa838e48bc5e33b8aa00d5aa954283c55af4d917))
 
 # [0.12.0](https://github.com/dendronhq/dendron/compare/v0.11.9...v0.12.0) (2020-09-20)
 

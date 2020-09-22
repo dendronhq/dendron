@@ -9,6 +9,16 @@ export type ButtonType =
   | "journal"
   | "scratch";
 
+export type ButtonCategory = "selection" | "note";
+
+export function getButtonCategory(button: DendronBtn): ButtonCategory {
+  return isSelectionBtn(button) ? "selection" : "note";
+}
+
+function isSelectionBtn(button: DendronBtn) {
+  return _.includes(["selection2link", "selectionExtract"], button.type);
+}
+
 export type IDendronQuickInputButton = QuickInputButton & {
   type: ButtonType;
   pressed: boolean;

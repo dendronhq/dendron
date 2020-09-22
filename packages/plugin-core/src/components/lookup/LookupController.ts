@@ -10,6 +10,8 @@ import { DendronWorkspace } from "../../workspace";
 import {
   ButtonType,
   createAllButtons,
+  DendronBtn,
+  getButtonCategory,
   IDendronQuickInputButton,
   refreshButtons,
 } from "./buttons";
@@ -20,7 +22,7 @@ import {
 } from "./LookupProvider";
 
 type State = {
-  buttons: IDendronQuickInputButton[];
+  buttons: DendronBtn[];
 };
 
 export class LookupController {
@@ -47,15 +49,19 @@ export class LookupController {
     quickPickValue?: string;
     provider: LookupProvider;
   }) {
+    const ctx = "updatePickerBehavior";
     const { document, range, quickPick, quickPickValue, provider } = opts;
     const buttons = this.state.buttons;
-    const resp = _.find(buttons, { pressed: true });
-    if (!resp) {
-      quickPick.onCreate = async () => {};
-      return;
-    }
+    const resp = _.filter(buttons, { pressed: true });
+    Logger.info({ ctx, resp });
+    const selectionResp = _.find(
+      resp,
+      (ent) => getButtonCategory(ent) === "selection"
+    );
+    const noteResp = _.find(resp, (ent) => getButtonCategory(ent) === "note");
+
     // determine value
-    switch (resp.type) {
+    switch (noteResp?.type) {
       case "journal": {
         const value = VSCodeUtils.genNoteName("JOURNAL");
         quickPick.value = value;
@@ -80,9 +86,7 @@ export class LookupController {
         provider.onUpdatePickerItem(quickPick, provider.opts);
     }
     quickPick.onCreate = async (note: Note) => {
-      const ctx = "onCreate";
-      Logger.info({ ctx, btnType: resp.type });
-      switch (resp.type) {
+      switch (selectionResp?.type) {
         case "selectionExtract": {
           if (!_.isUndefined(document)) {
             const body = "\n" + document.getText(range).trim();
@@ -105,7 +109,7 @@ export class LookupController {
           break;
         }
         default: {
-          vscode.window.showInformationMessage("no action");
+          quickPick.onCreate = async () => {};
         }
       }
     };
@@ -150,13 +154,20 @@ export class LookupController {
     quickPick.onDidTriggerButton((btn: QuickInputButton) => {
       const btnType = (btn as IDendronQuickInputButton).type;
 
-      const btnTriggered = _.find(this.state.buttons, { type: btnType });
+      const btnTriggered = _.find(this.state.buttons, {
+        type: btnType,
+      }) as DendronBtn;
       if (!btnTriggered) {
         throw Error("bad button type");
       }
       btnTriggered.pressed = !btnTriggered.pressed;
+      const btnCategory = getButtonCategory(btnTriggered);
       _.filter(this.state.buttons, (ent) => ent.type !== btnTriggered.type).map(
-        (ent) => (ent.pressed = false)
+        (ent) => {
+          if (getButtonCategory(ent) === btnCategory) {
+            ent.pressed = false;
+          }
+        }
       );
       refreshButtons(quickPick, this.state.buttons);
       this.updatePickerBehavior({ quickPick, document, range, provider });

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.1-alpha.1...v0.12.1-alpha.2) (2020-09-22)
+
+### Enhancements
+
+- **lookup:** support selection and note toggles ([70cf9eb](https://github.com/dendronhq/dendron/commit/70cf9ebc7a02cc5f256c2a1ffeec62f1bf1642b8))
+
 ## [0.12.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.1-alpha.0...v0.12.1-alpha.1) (2020-09-22)
 
 ### Enhancements

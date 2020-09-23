@@ -442,6 +442,11 @@ export type DendronSiteConfig = {
    */
   siteRootDir: string;
 
+  /**
+   * Folder where your notes will be kept. By default, "notes"
+   */
+  siteNotesDir?: string;
+
   usePrettyRefs?: boolean;
 
   /**

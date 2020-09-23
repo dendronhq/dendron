@@ -68,6 +68,7 @@ export class DConfig {
   static cleanSiteConfig(config: DendronSiteConfig): DendronSiteConfig {
     let out = _.defaults(config, {
       usePrettyRefs: true,
+      siteNotesDir: "notes",
     });
     let { siteRootDir, siteHierarchies, siteIndex } = out;
     if (!siteRootDir) {

@@ -97,11 +97,12 @@ async function note2JekyllMdFile(
   const jekyllProps: DendronJekyllProps = {
     hpath: note.path,
   };
-  const config = opts.config || {};
+  const config: Partial<DendronSiteConfig> = opts.config || {};
   let hConfig: HierarchyConfig = _.get(config, note.domain.fname, {
     publishByDefault: true,
     noindexByDefault: false,
   });
+  const siteNotesDir = config.siteNotesDir || "notes";
 
   if (!hConfig.publishByDefault && !note.custom.published) {
     return;
@@ -111,7 +112,7 @@ async function note2JekyllMdFile(
   let linkPrefix = "";
   if (opts.siteIndex === meta.fname) {
     jekyllProps["permalink"] = "/";
-    linkPrefix = path.basename(opts.notesDir) + "/";
+    linkPrefix = path.basename(siteNotesDir) + "/";
   }
   // pull children of root to the top
   if (note.parent?.fname === opts.siteIndex) {

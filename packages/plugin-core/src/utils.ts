@@ -206,7 +206,7 @@ export class VSCodeUtils {
     const editor = vscode.window.activeTextEditor as vscode.TextEditor;
     const selection = editor.selection as vscode.Selection;
     const text = editor.document.getText(selection);
-    return { text, selection };
+    return { text, selection, editor };
   }
 
   static getVersionFromPkg(): string {

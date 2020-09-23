@@ -1080,6 +1080,28 @@ suite("commands", function () {
       });
     });
 
+    test("with partial selection", function (done) {
+      onWSInit(async () => {
+        const uri = vscode.Uri.file(path.join(root.name, "vault", "bar.md"));
+        const editor = await vscode.window.showTextDocument(uri);
+        editor.selection = new vscode.Selection(8, 0, 8, 4);
+        const link = await new CopyNoteRefCommand().run();
+        assert.equal(link, "((ref: [[bar]]#foo bar,1:#*))");
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        useFixtures: false,
+        useCb: async (vault) => {
+          NodeTestUtils.createNotes(vault, [
+            {
+              fname: "bar",
+              body: "## Foo bar\nfoo text\n## Header\n Header text",
+            },
+          ]);
+        },
+      });
+    });
+
     test("with selection and no next header", function (done) {
       onWSInit(async () => {
         const uri = vscode.Uri.file(path.join(root.name, "vault", "bar.md"));

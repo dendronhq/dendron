@@ -25,8 +25,25 @@ export class CopyNoteRefCommand extends BasicCommand<
     window.showInformationMessage(`${link} copied`);
   }
 
-  isHeader(text: string, selection: Selection) {
-    return text.startsWith("#") && selection.start.line === selection.end.line;
+  isHeader(
+    text: string,
+    selection: Selection,
+    editor: TextEditor
+  ): false | string {
+    // multi-line
+    if (selection.start.line !== selection.end.line) {
+      return false;
+    }
+    const lineRange = new Range(
+      new Position(selection.start.line, 0),
+      new Position(selection.start.line + 1, 0)
+    );
+    const headerText = _.trim(editor.document.getText(lineRange).slice(0, -1));
+    if (text.startsWith("#")) {
+      return headerText;
+    } else {
+      return false;
+    }
   }
 
   hasNextHeader(opts: { selection: Selection }) {
@@ -49,12 +66,12 @@ export class CopyNoteRefCommand extends BasicCommand<
       type: "file",
       name: fname,
     };
-    const { text, selection } = VSCodeUtils.getSelection();
+    const { text, selection, editor } = VSCodeUtils.getSelection();
     let refLinkString: string = refLink2String(link);
     if (!_.isEmpty(text)) {
-      if (this.isHeader(text, selection)) {
-        const headerText = _.trim(text);
-        link.anchorStart = headerText;
+      const maybeHeaderText = this.isHeader(text, selection, editor);
+      if (maybeHeaderText) {
+        link.anchorStart = maybeHeaderText;
         if (this.hasNextHeader({ selection })) {
           link.anchorEnd = "*";
         }

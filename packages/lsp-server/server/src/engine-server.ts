@@ -1,13 +1,12 @@
 import { WorkspaceFolder } from "vscode-languageserver";
-import { DEngine } from "../../common-server/node_modules/@dendronhq/common-all/lib";
-import { DendronEngine } from "./engine";
+import { DendronEngine } from "@dendronhq/engine-server";
 
 type DendronEngineServerOpts = {
   roots: WorkspaceFolder[];
 };
 
 export class DendronEngineServer {
-  protected _engine?: DEngine;
+  protected _engine?: DendronEngine;
 
   constructor(public opts: DendronEngineServerOpts) {}
 
@@ -28,7 +27,7 @@ export class DendronEngineServer {
     const engine = DendronEngine.getOrCreateEngine({
       root: root.uri,
       forceNew: true,
-    });
+    }) as DendronEngine;
     this._engine = engine;
     this._engine.init();
   }

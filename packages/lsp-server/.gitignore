@@ -7,3 +7,5 @@ yarn-error.log*
 lib
 lib_test
 dist
+old
+out

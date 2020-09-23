@@ -1,48 +1,46 @@
+// A launch configuration that compiles the extension and then opens it inside a new window
 {
-    // Use IntelliSense to learn about possible Node.js debug attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "type": "node",
-        "request": "launch",
-        "name": "lsp-server:test file",
-        "program": "${workspaceFolder:lsp-server}/lib/${fileBasenameNoExtension}.js",
-        "cwd": "${workspaceFolder:lsp-server}",
-        "sourceMaps": true,
-        "smartStep": true,
-        "preLaunchTask": "build",
-        "outFiles": ["${workspaceFolder:lsp-server}/lib/*.js"]
-      },
-      {
-        "type": "node",
-        "request": "launch",
-        "name": "lsp-server:debug test",
-        "program": "${workspaceFolder:lsp-server}/node_modules/jest/bin/jest.js",
-        "cwd": "${workspaceFolder:lsp-server}",
-        "args": ["--runInBand"]
-      },
-      {
-        "type": "node",
-        "request": "attach",
-        "name": "Attach to Server 6009",
-        "address": "localhost",
-        "protocol": "inspector",
-        "restart": true,
-        "port": 6009,
-        "sourceMaps": true,
-        "outFiles": ["${workspaceFolder:lsp-server}/out/**/*.js"],
-      },
-      {
-        "type": "node",
-        "request": "launch",
-        "name": "lsp-server:debug test file",
-        "program": "${workspaceFolder:lsp-server}/node_modules/jest/bin/jest.js",
-        "cwd": "${workspaceFolder:lsp-server}",
-        "args": ["--runInBand", "${relativeFile}", "-u"],
-        "env": {"LOG_DST": "/tmp/lsp-server.txt"}
-      }
-    ]
-  }
-  
+	"version": "0.2.0",
+	"configurations": [
+    {
+      "name": "debug vars",
+      "request": "launch",
+      "type": "node",
+      "preLaunchTask": "bond"
+    },
+		{
+			"type": "extensionHost",
+			"request": "launch",
+			"name": "Launch Client",
+			"runtimeExecutable": "${execPath}",
+			"args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+			"outFiles": ["${workspaceFolder}/client/out/**/*.js"],
+		},
+		{
+			"type": "node",
+			"request": "attach",
+			"name": "Attach to Server",
+			"port": 6009,
+			"restart": true,
+			"outFiles": ["${workspaceRoot:lsp-server}/server/out/**/*.js"]
+		},
+		{
+			"name": "Language Server E2E Test",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceRoot:lsp-server}",
+				"--extensionTestsPath=${workspaceRoot:lsp-server}/client/out/test/index",
+				"${workspaceRoot:lsp-server}/client/testFixture"
+			],
+			"outFiles": ["${workspaceRoot:lsp-server}/client/out/test/**/*.js"]
+		}
+	],
+	"compounds": [
+		{
+			"name": "Client + Server",
+			"configurations": ["Launch Client", "Attach to Server"]
+		}
+	]
+}

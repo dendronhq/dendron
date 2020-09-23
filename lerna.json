@@ -1,6 +1,7 @@
 {
   "packages": [
-    "packages/*"
+    "packages/*",
+    "packages/lsp-server/server"
   ],
   "version": "0.12.1",
   "npmClient": "npm",

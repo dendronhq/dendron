@@ -1,4 +1,4 @@
-import _ from "lodash";
+import { DendronEngine } from "@dendronhq/engine-server";
 /* --------------------------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License. See License.txt in the project root for license information.
@@ -19,11 +19,13 @@ import {
 } from "vscode-languageserver";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
-export { DendronEngine } from "./engine";
+import { URI } from "vscode-uri";
+import { LSPUtils } from "./utils";
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 let connection = createConnection(ProposedFeatures.all);
+LSPUtils.instance(connection);
 
 // Create a simple text document manager.
 let documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
@@ -32,8 +34,8 @@ let hasConfigurationCapability: boolean = false;
 let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
 
-connection.onInitialize(async (params: InitializeParams) => {
-  connection.console.log("initialized");
+connection.onInitialize((params: InitializeParams) => {
+  connection.console.log("conneciton initializing");
   let capabilities = params.capabilities;
 
   // Does the client support the `workspace/configuration` request?
@@ -67,17 +69,10 @@ connection.onInitialize(async (params: InitializeParams) => {
     };
   }
 
-  // const wsFolders = await connection.workspace.getWorkspaceFolders();
-  // if (!_.isNull(wsFolders)) {
-  //   connection.console.log(`init engine server: ${JSON.stringify(wsFolders)}`);
-  //   const server = DendronEngineServer.getOrCreate({roots: wsFolders})
-  //   await server.init();
-  //   connection.console.log("finish init engine server");
-  // }
   return result;
 });
 
-connection.onInitialized(() => {
+connection.onInitialized(async () => {
   if (hasConfigurationCapability) {
     // Register for all configuration changes.
     connection.client.register(
@@ -89,6 +84,12 @@ connection.onInitialized(() => {
     connection.workspace.onDidChangeWorkspaceFolders((_event) => {
       connection.console.log("Workspace folder change event received.");
     });
+  }
+  const wsFolders = await LSPUtils.wsFolders();
+  if (wsFolders && wsFolders[0]) {
+    const uri = URI.parse(wsFolders[0].uri);
+    DendronEngine.getOrCreateEngine({ root: uri.fsPath, forceNew: true });
+    connection.console.log("engine initialized");
   }
 });
 
@@ -120,19 +121,19 @@ connection.onDidChangeConfiguration((change) => {
   documents.all().forEach(validateTextDocument);
 });
 
-function getDocumentSettings(_resource: string): Thenable<ExampleSettings> {
-  // if (!hasConfigurationCapability) {
-  return Promise.resolve(globalSettings);
-  // }
-  // let result = documentSettings.get(resource);
-  // if (!result) {
-  // 	result = connection.workspace.getConfiguration({
-  // 		scopeUri: resource,
-  // 		section: 'languageServerExample'
-  // 	});
-  // 	documentSettings.set(resource, result);
-  // }
-  // return result;
+function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
+  if (!hasConfigurationCapability) {
+    return Promise.resolve(globalSettings);
+  }
+  let result = documentSettings.get(resource);
+  if (!result) {
+    result = connection.workspace.getConfiguration({
+      scopeUri: resource,
+      section: "languageServerExample",
+    });
+    documentSettings.set(resource, result);
+  }
+  return result;
 }
 
 // Only keep settings for open documents
@@ -147,7 +148,7 @@ documents.onDidChangeContent((change) => {
 });
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
-  connection.console.log("validate text document");
+  connection.console.info("v2");
   // In this simple example we get the settings for every validate run.
   let settings = await getDocumentSettings(textDocument.uri);
 
@@ -202,17 +203,18 @@ connection.onDidChangeWatchedFiles((_change) => {
 // This handler provides the initial list of the completion items.
 connection.onCompletion(
   (_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
+    connection.console.error("BOND!");
     // The pass parameter contains the position of the text document in
     // which code complete got requested. For the example we ignore this
     // info and always provide the same completion items.
     return [
       {
-        label: "TypeScript",
+        label: "TypeScript!!",
         kind: CompletionItemKind.Text,
         data: 1,
       },
       {
-        label: "JavaScript",
+        label: "JavaScript!!",
         kind: CompletionItemKind.Text,
         data: 2,
       },
@@ -225,10 +227,10 @@ connection.onCompletion(
 connection.onCompletionResolve(
   (item: CompletionItem): CompletionItem => {
     if (item.data === 1) {
-      item.detail = "TypeScript details";
+      item.detail = "TypeScript details!!";
       item.documentation = "TypeScript documentation";
     } else if (item.data === 2) {
-      item.detail = "JavaScript details";
+      item.detail = "JavaScript details!!";
       item.documentation = "JavaScript documentation";
     }
     return item;

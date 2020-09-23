@@ -5,29 +5,30 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.12.1](https://github.com/dendronhq/dendron/compare/v0.12.1-alpha.2...v0.12.1) (2020-09-22)
 
-**Note:** Version bump only for package root
+### Features
 
-## [0.12.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.1-alpha.1...v0.12.1-alpha.2) (2020-09-22)
+- **lookup:** create scratch or journal notes via lookup ([591c55f](https://github.com/dendronhq/dendron/commit/591c55f792ad8121d27af3a1c645ff9a2458f19c))
+
+A journal note is a self contained note that is meant to track something over time. Examples of journals include recording **workout sessions**, making **meeting notes**, and keeping a **mood journal**.
+
+To create a journal note, trigger a lookup and then click on the calendar icon.
+
+<a href="https://www.loom.com/share/3c3ddc1dc63547cea8bf186bec31f71b"> 
+<img style="" src="https://cdn.loom.com/sessions/thumbnails/3c3ddc1dc63547cea8bf186bec31f71b-with-play.gif"> </a>
+
+A scratch note is a self contained note that is meant to be used as scratchpad. Use it for thoughts or when you want to expand on a bullet point. Scratch notes are created in the `scratch` domain and have the following format: `{domain}.journal.{Y-MM-DD-HHHHmmss}`.
+
+<a href="https://www.loom.com/share/2fd3042119124df8bb4592d8ffe6d708"> 
+<img style="" src="https://cdn.loom.com/sessions/thumbnails/2fd3042119124df8bb4592d8ffe6d708-with-play.gif"> </a>
+
+- **lookup:** support selection modifiers when creating special notes ([591c55f](https://github.com/dendronhq/dendron/commit/591c55f792ad8121d27af3a1c645ff9a2458f19c))
 
 ### Enhancements
 
 - **lookup:** support selection and note toggles ([70cf9eb](https://github.com/dendronhq/dendron/commit/70cf9ebc7a02cc5f256c2a1ffeec62f1bf1642b8))
-
-## [0.12.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.1-alpha.0...v0.12.1-alpha.1) (2020-09-22)
-
-### Enhancements
-
 - **refs:** better header selection ([ba9a4d9](https://github.com/dendronhq/dendron/commit/ba9a4d975b115e4cf8bc211f5e00f0557f26693b))
-
-When selecting the last header of a page, don't create a wildcard ref to the next header.
-
 - **refs:** emit error when header not found ([5deb2d1](https://github.com/dendronhq/dendron/commit/5deb2d18160974bd035b3703715acc16d0dcb012))
-
 - **publish:** configure repoDir via config ([fa838e4](https://github.com/dendronhq/dendron/commit/fa838e48bc5e33b8aa00d5aa954283c55af4d917))
-
-### Features
-
-- **lookup:** create scratch or journal notes via lookup ([591c55f](https://github.com/dendronhq/dendron/commit/591c55f792ad8121d27af3a1c645ff9a2458f19c))
 
 # [0.12.0](https://github.com/dendronhq/dendron/compare/v0.11.9...v0.12.0) (2020-09-20)
 
@@ -209,7 +210,7 @@ New workspaces will be initialized to autocomplete links automatically without a
 
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.suggest.gif)
 
-## 0.10.5 (2020-09-11)
+## 0.10.5 (2020-09-11)VV
 
 ### Enhancements
 

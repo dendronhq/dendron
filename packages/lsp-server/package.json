@@ -24,7 +24,8 @@
 		"vscode-uri": "^2.1.2"
 	},
 	"scripts": {
-		"watch": "tsc --watch"
+		"watch": "tsc --watch",
+		"prepublishOnly": "npx webpack --production"
 	},
 	"gitHead": "b747a42e317e52137dd2aa740805d44e33b77ee8",
 	"devDependencies": {

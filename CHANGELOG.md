@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.2...v0.12.3-alpha.0) (2020-09-24)
+
+### Enhancements
+
+- reduce extension bundle size ([22cfff8](https://github.com/dendronhq/dendron/commit/22cfff8398611f54f7a88d7e110aa9f9f602ad4e))
+
 ## [0.12.2](https://github.com/dendronhq/dendron/compare/v0.12.2-alpha.0...v0.12.2) (2020-09-24)
 
 **Note:** Version bump only for package root

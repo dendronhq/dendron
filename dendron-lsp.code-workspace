@@ -4,6 +4,12 @@
         "path": "packages/lsp-server"
       },
       {
+        "path": "packages/engine-server"
+      },
+      {
+        "path": "packages/common-all"
+      },
+      {
         "path": "packages/lsp-client"
       },
       {

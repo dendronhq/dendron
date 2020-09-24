@@ -1,5 +1,7 @@
 import process from "process";
 
 import { app } from "./index";
-console.log(app);
-app.listen(3000);
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`start on port ${port}`);
+});

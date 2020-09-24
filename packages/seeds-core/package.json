@@ -61,5 +61,6 @@
     "fs-extra": "^9.0.1",
     "klaw": "^3.0.0",
     "lodash": "^4.17.20"
-  }
+  },
+  "gitHead": "8357ccf9ef080020dcefba191b8f916913d3179d"
 }

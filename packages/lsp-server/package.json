@@ -61,5 +61,6 @@
 	},
 	"dependencies": {
 		"@dendronhq/engine-server": "^0.12.2-alpha.0"
-	}
+	},
+	"gitHead": "8357ccf9ef080020dcefba191b8f916913d3179d"
 }

@@ -117,6 +117,15 @@
                     "default": false,
                     "description": "launch dendron with lsp support"
                 },
+                "dendron.trace.server": {
+                    "enum": [
+                        "off",
+                        "messages",
+                        "verbose"
+                    ],
+                    "default": "messages",
+                    "description": "LSP log level"
+                },
                 "dendron.publishRepoDir": {
                     "type": "string",
                     "description": "Path of git repo when running `Dendron: Publish`"

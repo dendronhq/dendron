@@ -565,6 +565,12 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     default: false,
     description: "launch dendron with lsp support",
   },
+  LSP_LOG_LVL: {
+    key: "dendron.trace.server",
+    enum: ["off", "messages", "verbose"],
+    default: "messages",
+    description: "LSP log level",
+  },
   // --- publishing
   PUBLISH_REPO_DIR: {
     key: "dendron.publishRepoDir",

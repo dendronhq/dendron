@@ -69,9 +69,6 @@ connection.onInitialize((params: InitializeParams) => {
       },
     };
   }
-  // app.listen(3000, () => {
-  //   console.log("express server started");
-  // });
   return result;
 });
 
@@ -96,7 +93,7 @@ connection.onInitialized(async () => {
 
     // initialize express
     app.listen(6030, () => {
-      console.log("express started");
+      connection.console.log("express started");
     });
   }
 });
@@ -168,7 +165,6 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
   let problems = 0;
   let diagnostics: Diagnostic[] = [];
-  debugger;
   while ((m = pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
     problems++;
     let diagnostic: Diagnostic = {

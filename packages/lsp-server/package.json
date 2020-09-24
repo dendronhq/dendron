@@ -26,7 +26,7 @@
 	},
 	"scripts": {
 		"watch": "tsc --watch",
-		"prepare": "npx webpack --production"
+		"prepublishOnly": "npx webpack --production"
 	},
 	"gitHead": "b747a42e317e52137dd2aa740805d44e33b77ee8",
 	"devDependencies": {

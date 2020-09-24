@@ -1,7 +1,9 @@
 {
   "packages": [
     "packages/*",
-    "packages/lsp-server/server"
+    "packages/lsp-server/client",
+    "packages/lsp-server/server",
+    "packages/lsp-server/express-server"
   ],
   "version": "0.12.3-alpha.0",
   "npmClient": "npm",

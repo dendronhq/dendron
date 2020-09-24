@@ -1,5 +1,5 @@
 {
-	"name": "lsp-sample-client",
+	"name": "@dendronhq/lsp-client",
 	"description": "VSCode part of a language server",
 	"author": "Microsoft Corporation",
 	"license": "MIT",

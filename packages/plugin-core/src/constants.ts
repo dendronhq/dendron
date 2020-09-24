@@ -559,6 +559,12 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     default: false,
     description: "whether dendron prompts for confirmation for certain actions",
   },
+  USE_EXPERIMENTAL_LSP_SUPPORT: {
+    key: "dendron.useExperimentalLSPSupport",
+    type: "boolean",
+    default: false,
+    description: "launch dendron with lsp support",
+  },
   // --- publishing
   PUBLISH_REPO_DIR: {
     key: "dendron.publishRepoDir",

@@ -112,6 +112,11 @@
                     "default": false,
                     "description": "whether dendron prompts for confirmation for certain actions"
                 },
+                "dendron.useExperimentalLSPSupport": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "launch dendron with lsp support"
+                },
                 "dendron.publishRepoDir": {
                     "type": "string",
                     "description": "Path of git repo when running `Dendron: Publish`"
@@ -485,6 +490,7 @@
         "@dendronhq/common-server": "^0.12.3-alpha.0",
         "@dendronhq/dendron-cli": "^0.12.3-alpha.0",
         "@dendronhq/engine-server": "^0.12.3-alpha.0",
+        "@dendronhq/lsp-client": "^0.0.1",
         "@dendronhq/lsp-server": "^0.12.3-alpha.0",
         "@dendronhq/pods-core": "^0.12.3-alpha.0",
         "cross-path-sort": "^1.0.0",

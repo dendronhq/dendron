@@ -16,22 +16,22 @@
       "workbench.editor.showTabs": true,
       "workbench.colorTheme": "Default Dark+",
       "workbench.colorCustomizations": {
-        "activityBar.activeBackground": "#3399ff",
-        "activityBar.activeBorder": "#bf0060",
-        "activityBar.background": "#3399ff",
+        "activityBar.activeBackground": "#93e6fc",
+        "activityBar.activeBorder": "#fa45d4",
+        "activityBar.background": "#93e6fc",
         "activityBar.foreground": "#15202b",
         "activityBar.inactiveForeground": "#15202b99",
-        "activityBarBadge.background": "#bf0060",
-        "activityBarBadge.foreground": "#e7e7e7",
-        "statusBar.background": "#007fff",
-        "statusBar.foreground": "#e7e7e7",
-        "statusBarItem.hoverBackground": "#3399ff",
-        "titleBar.activeBackground": "#007fff",
-        "titleBar.activeForeground": "#e7e7e7",
-        "titleBar.inactiveBackground": "#007fff99",
-        "titleBar.inactiveForeground": "#e7e7e799"
+        "activityBarBadge.background": "#fa45d4",
+        "activityBarBadge.foreground": "#15202b",
+        "statusBar.background": "#61dafb",
+        "statusBar.foreground": "#15202b",
+        "statusBarItem.hoverBackground": "#2fcefa",
+        "titleBar.activeBackground": "#61dafb",
+        "titleBar.activeForeground": "#15202b",
+        "titleBar.inactiveBackground": "#61dafb99",
+        "titleBar.inactiveForeground": "#15202b99"
       },
-      "peacock.color": "#007fff",
+      "peacock.color": "#61dafb",
       "vim.statusBarColorControl": false
     }
   }

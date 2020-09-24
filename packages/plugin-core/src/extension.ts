@@ -1,8 +1,13 @@
-import { getStage } from "@dendronhq/common-all";
+import { CONSTANTS, getStage } from "@dendronhq/common-all";
 import _ from "lodash";
 import semver from "semver";
 import * as vscode from "vscode";
-import { DENDRON_COMMANDS, GLOBAL_STATE, WORKSPACE_STATE } from "./constants";
+import {
+  CONFIG,
+  DENDRON_COMMANDS,
+  GLOBAL_STATE,
+  WORKSPACE_STATE,
+} from "./constants";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { VSCodeUtils } from "./utils";
@@ -12,6 +17,7 @@ import { MarkdownUtils } from "./utils/md";
 import { getOS } from "./utils/system";
 import { Extensions } from "./settings";
 import { DendronTreeView } from "./views/DendronTreeView";
+import { startClient } from "./lsp";
 
 // === Main
 // this method is called when your extension is activated
@@ -79,45 +85,54 @@ export async function _activate(context: vscode.ExtensionContext) {
   });
 
   if (DendronWorkspace.isActive()) {
-    Logger.info({ ctx, msg: "isActive:reloadWorkspace:pre" });
-    // startClient(context);
-    ws.reloadWorkspace().then(async () => {
-      Logger.info({ ctx, msg: "dendron ready" }, true);
-      // help with debug
-      fs.readJSON(DendronWorkspace.workspaceFile().fsPath).then((config) => {
-        Logger.info({ ctx, msg: "gotConfig", config });
-      });
-      // check if first time install workspace, if so, show tutorial
-      if (
-        _.isUndefined(
-          context.globalState.get<string | undefined>(
-            GLOBAL_STATE.DENDRON_FIRST_WS
-          )
-        )
-      ) {
-        Logger.info({ ctx, msg: "first dendron ws, show welcome" });
-        const welcomeUri = vscode.Uri.joinPath(
-          ws.rootWorkspace.uri,
-          "dendron.quickstart.md"
-        );
-        if (getStage() !== "test" && fs.pathExistsSync(welcomeUri.fsPath)) {
-          await vscode.window.showTextDocument(welcomeUri);
-          await MarkdownUtils.openPreview({ reuseWindow: false });
-        }
-        await ws.updateGlobalState("DENDRON_FIRST_WS", "initialized");
-      }
-      HistoryService.instance().add({
-        source: "extension",
-        action: "initialized",
-      });
-      vscode.window.showInformationMessage("Dendron is active");
-      if (isDebug || stage === "test") {
-        Logger.output?.show(false);
-        vscode.window.showInformationMessage("activate");
-      }
-      Logger.info({ ctx, msg: "finish reloadWorkspace" });
-    });
+    const lspSupport = DendronWorkspace.configuration().get(
+      CONFIG.USE_EXPERIMENTAL_LSP_SUPPORT.key
+    );
+    Logger.info({ ctx, msg: "wsActive", lspSupport });
 
+    if (lspSupport) {
+      Logger.info({ ctx, msg: "start with lsp support" });
+      startClient(context);
+      return;
+    } else {
+      // startClient(context);
+      ws.reloadWorkspace().then(async () => {
+        Logger.info({ ctx, msg: "dendron ready" }, true);
+        // help with debug
+        fs.readJSON(DendronWorkspace.workspaceFile().fsPath).then((config) => {
+          Logger.info({ ctx, msg: "gotConfig", config });
+        });
+        // check if first time install workspace, if so, show tutorial
+        if (
+          _.isUndefined(
+            context.globalState.get<string | undefined>(
+              GLOBAL_STATE.DENDRON_FIRST_WS
+            )
+          )
+        ) {
+          Logger.info({ ctx, msg: "first dendron ws, show welcome" });
+          const welcomeUri = vscode.Uri.joinPath(
+            ws.rootWorkspace.uri,
+            "dendron.quickstart.md"
+          );
+          if (getStage() !== "test" && fs.pathExistsSync(welcomeUri.fsPath)) {
+            await vscode.window.showTextDocument(welcomeUri);
+            await MarkdownUtils.openPreview({ reuseWindow: false });
+          }
+          await ws.updateGlobalState("DENDRON_FIRST_WS", "initialized");
+        }
+        HistoryService.instance().add({
+          source: "extension",
+          action: "initialized",
+        });
+        vscode.window.showInformationMessage("Dendron is active");
+        if (isDebug || stage === "test") {
+          Logger.output?.show(false);
+          vscode.window.showInformationMessage("activate");
+        }
+        Logger.info({ ctx, msg: "finish reloadWorkspace" });
+      });
+    }
     // first time install
     if (previousGlobalVersion === "0.0.0") {
       Logger.info({ ctx, msg: "no previous global version" });
@@ -157,8 +172,11 @@ export async function _activate(context: vscode.ExtensionContext) {
         Logger.info({ ctx, msg: "same wsVersion" });
       }
     }
+
+    // exit
     Logger.info({ ctx, msg: "exit" });
   } else {
+    // ws not active
     Logger.info({ ctx: "dendron not active" });
   }
 

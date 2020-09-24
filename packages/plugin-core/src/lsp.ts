@@ -7,6 +7,7 @@ import {
   ServerOptions,
   TransportKind,
 } from "vscode-languageclient";
+import { Logger } from "./logger";
 
 export function startClient(context: ExtensionContext) {
   // The server is implemented in node
@@ -29,9 +30,8 @@ export function startClient(context: ExtensionContext) {
       path.join("dist", "lsp-server", "dist", "index.js")
     );
   }
-  //   let serverModule = context.asAbsolutePath(
-  //     path.join("server", "out", "server.js")
-  //   );
+  const ctx = "startLSPClient";
+  Logger.info({ ctx, serverModule, isDev, msg: "starting client" });
 
   // TODO: don't hradcode
   // let expressModule = context.asAbsolutePath(

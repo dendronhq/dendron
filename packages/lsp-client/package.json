@@ -1,6 +1,7 @@
 {
-	"name": "@dendronhq/lsp-client-server",
+	"name": "@dendronhq/lsp-client-uber",
 	"description": "",
+	"private": true,
 	"author": "Kevin",
 	"license": "GPLv3",
 	"version": "0.12.3-alpha.2",
@@ -48,7 +49,6 @@
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -b",
 		"watch": "tsc -b -w",
-		"postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
 		"test": "sh ./scripts/e2e.sh"
 	},
 	"devDependencies": {

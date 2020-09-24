@@ -69,7 +69,8 @@ export function startClient(context: ExtensionContext) {
     "dendron.lsp",
     "Dendron LSP",
     serverOptions,
-    clientOptions
+    clientOptions,
+    true
   );
 
   // Start the client. This will also launch the server

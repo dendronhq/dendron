@@ -4,6 +4,9 @@
         "path": "packages/lsp-server"
       },
       {
+        "path": "packages/lsp-client"
+      },
+      {
         "path": "packages/express-server"
       },
       {

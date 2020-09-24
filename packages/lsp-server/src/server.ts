@@ -168,6 +168,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
   let problems = 0;
   let diagnostics: Diagnostic[] = [];
+  debugger;
   while ((m = pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
     problems++;
     let diagnostic: Diagnostic = {

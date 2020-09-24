@@ -90,6 +90,8 @@ connection.onInitialized(async () => {
     const uri = URI.parse(wsFolders[0].uri);
     DendronEngine.getOrCreateEngine({ root: uri.fsPath, forceNew: true });
     connection.console.log("engine initialized");
+
+    // initialize express
   }
 });
 

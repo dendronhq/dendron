@@ -18,6 +18,6 @@ echo "sync $LAST_COMMIT..."
 rm -rf ../../assets/dendronWS || true
 mkdir  ../../assets/dendronWS
 # TODO: figure out why --delete option doesn't work
-rsync -av * ../../assets/dendronWS/ --exclude .git --exclude package.json --exclude CNAME --exclude scripts --exclude LICENSE.md  --exclude dendron.code-workspace --exclude docs/notes --delete
+rsync -avq * ../../assets/dendronWS/ --exclude .git --exclude package.json --exclude CNAME --exclude scripts --exclude LICENSE.md  --exclude dendron.code-workspace --exclude docs/notes --delete
 
 echo $LAST_COMMIT > ../../assets/LAST_COMMIT

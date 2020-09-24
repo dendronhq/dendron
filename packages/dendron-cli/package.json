@@ -74,5 +74,5 @@
   "jest": {
     "preset": "ts-jest"
   },
-  "gitHead": "8357ccf9ef080020dcefba191b8f916913d3179d"
+  "gitHead": "47c197f18329be43e02389fb4bd63267dfc07874"
 }

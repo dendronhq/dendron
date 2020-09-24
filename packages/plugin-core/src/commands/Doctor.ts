@@ -39,15 +39,13 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // create site root, used for publication
     if (!fs.existsSync(siteRoot)) {
       const f: Finding = { issue: "no siteRoot found" };
-      const dendronWSTemplate = Uri.joinPath(ws.extensionAssetsDir, "dendronWS")
-        .fsPath;
-      const dendronSiteRoot = path.join(dendronWSTemplate, "docs");
-      fs.copySync(dendronSiteRoot, siteRoot);
+      const dendronJekyll = Uri.joinPath(ws.extensionAssetsDir, "jekyll");
+      fs.copySync(path.join(dendronJekyll.fsPath), path.join(siteRoot, "docs"));
+      fs.copySync(dendronJekyll.fsPath, siteRoot);
       f.fix = `created siteRoot at ${siteRoot}`;
       findings.push(f);
     }
     return { data: findings };
-    // check for docs folrder
   }
   async showResponse(findings: CommandOutput) {
     findings.data.forEach((f) => {

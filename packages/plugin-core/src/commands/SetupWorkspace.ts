@@ -127,13 +127,18 @@ export class SetupWorkspaceCommand extends BasicCommand<
       ws.extensionAssetsDir,
       "dendronWS"
     );
+    // copy over jekyll config
     const dendronJekyll = vscode.Uri.joinPath(ws.extensionAssetsDir, "jekyll");
     fs.copySync(path.join(dendronJekyll.fsPath), path.join(rootDir, "docs"));
-    fs.ensureDirSync(path.join(rootDir, "vault"));
-    fs.copySync(
-      path.join(dendronWSTemplate.fsPath, "vault", ".vscode"),
-      path.join(rootDir, "vault", ".vscode")
-    );
+
+    // copy over vscode settings
+    // fs.ensureDirSync(path.join(rootDir, "vault"));
+    // fs.copySync(
+    //   path.join(dendronWSTemplate.fsPath, "vault", ".vscode"),
+    //   path.join(rootDir, "vault", ".vscode")
+    // );
+
+    // copy over notes
     if (!emptyWs) {
       const filterFunc = (src: string, _dest: string) => {
         const basename = path.basename(src, ".md");
@@ -148,6 +153,8 @@ export class SetupWorkspaceCommand extends BasicCommand<
         { filter: filterFunc }
       );
     }
+
+    // write workspace defaults
     WorkspaceConfig.write(rootDir);
     if (!opts.skipOpenWs) {
       vscode.window.showInformationMessage("opening dendron workspace");

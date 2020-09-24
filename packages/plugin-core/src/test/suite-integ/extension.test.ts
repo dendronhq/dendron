@@ -1,11 +1,4 @@
-import {
-  DendronSiteConfig,
-  DNode,
-  DNodeUtils,
-  LegacyDendronSiteConfig,
-  Note,
-  Schema,
-} from "@dendronhq/common-all";
+import { DNode, DNodeUtils, Note, Schema } from "@dendronhq/common-all";
 import {
   DirResult,
   EngineTestUtils,
@@ -13,7 +6,6 @@ import {
   mdFile2NodeProps,
   node2MdFile,
   NodeTestUtils,
-  readYAML,
   writeYAML,
 } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
@@ -1365,38 +1357,26 @@ suite("commands", function () {
       setupDendronWorkspace(root.name, ctx);
     });
 
-    // TODO: Deprecate, this is done in DConfig
-    test("update site config", function (done) {
+    test("missing doc folder", function (done) {
       onWSInit(async () => {
-        const ws = DendronWorkspace.instance();
-        const dendronConfigPath = path.join(root.name, "dendron.yml");
-        const legacySiteConfig: LegacyDendronSiteConfig = {
-          noteRoots: ["root"],
-          noteRoot: "home",
-          siteRoot: "doc",
-        };
-        writeYAML(dendronConfigPath, { site: legacySiteConfig });
-
+        const testFile = path.join(root.name, "vault", "bond2.md");
+        fs.writeFileSync(testFile, "bond", { encoding: "utf8" });
+        fs.removeSync(path.join(root.name, "docs"));
         await new ReloadIndexCommand().run();
-        await new DoctorCommand().run();
-        assert.deepEqual(ws.config.site, {
-          siteHierarchies: ["root"],
-          siteIndex: "home",
-          siteRootDir: "doc",
-        } as DendronSiteConfig);
-        const newSiteConfig = readYAML(dendronConfigPath);
-        assert.deepEqual(newSiteConfig.site, {
-          siteHierarchies: ["root"],
-          siteIndex: "home",
-          siteRootDir: "doc",
-        } as DendronSiteConfig);
-
-        // const nodeProps = mdFile2NodeProps(testFile);
-        // assert.equal(_.trim(nodeProps.title), "Bond2");
-        // assert.ok(nodeProps.id);
+        const findings = await new DoctorCommand().run();
+        assert.ok(_.find(findings?.data, { issue: "no siteRoot found" }));
+        const docsDir = path.join(root.name, "docs");
+        assert.ok(fs.existsSync(docsDir));
+        expect(fs.readdirSync(docsDir), [
+          "Gemfile",
+          "_config.yml",
+          "assets",
+          "docs",
+          "favicon.ico",
+        ]);
         done();
       });
-      setupDendronWorkspace(root.name, ctx, { useFixtures: true });
+      setupDendronWorkspace(root.name, ctx);
     });
   });
 

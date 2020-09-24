@@ -1,13 +1,13 @@
 {
   "name": "@dendronhq/express-server",
-  "version": "0.12.3-alpha.2",
+  "version": "0.12.3-alpha.3",
   "scripts": {
     "build": "node build.js && tsc --build tsconfig.prod.json",
     "lint": "tslint --project \"tsconfig.json\"",
     "start": "node -r module-alias/register ./dist --env=production",
     "start:dev": "nodemon",
     "test": "nodemon --config ./spec/nodemon.json",
-		"watch": "tsc --watch"
+    "watch": "tsc --watch"
   },
   "files": [
     "dist/src"

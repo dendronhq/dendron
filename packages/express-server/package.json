@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/express-server",
-  "version": "0.12.3-alpha.1",
+  "version": "0.12.3-alpha.2",
   "scripts": {
     "build": "node build.js && tsc --build tsconfig.prod.json",
     "lint": "tslint --project \"tsconfig.json\"",

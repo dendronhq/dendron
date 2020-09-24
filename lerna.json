@@ -4,7 +4,7 @@
     "packages/lsp-server/client",
     "packages/lsp-server/server"
   ],
-  "version": "0.12.3-alpha.1",
+  "version": "0.12.3-alpha.2",
   "npmClient": "npm",
   "command": {
     "version": {

@@ -9,3 +9,4 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 node_modules
+build

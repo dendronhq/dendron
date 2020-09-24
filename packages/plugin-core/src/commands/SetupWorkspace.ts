@@ -131,8 +131,10 @@ export class SetupWorkspaceCommand extends BasicCommand<
     const dendronJekyll = vscode.Uri.joinPath(ws.extensionAssetsDir, "jekyll");
     fs.copySync(path.join(dendronJekyll.fsPath), path.join(rootDir, "docs"));
 
+    // create vault
+    fs.ensureDirSync(path.join(rootDir, "vault"));
+
     // copy over vscode settings
-    // fs.ensureDirSync(path.join(rootDir, "vault"));
     // fs.copySync(
     //   path.join(dendronWSTemplate.fsPath, "vault", ".vscode"),
     //   path.join(rootDir, "vault", ".vscode")

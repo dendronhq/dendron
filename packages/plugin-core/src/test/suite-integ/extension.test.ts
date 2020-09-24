@@ -2043,7 +2043,6 @@ suite("ImportPod", function () {
       });
       await cmd.run();
       let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(vault, [
-        ".vscode",
         "assets",
         "project.p1.md",
         "project.p1.n1.md",

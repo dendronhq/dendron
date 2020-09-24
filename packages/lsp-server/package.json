@@ -3,7 +3,7 @@
 	"description": "",
 	"author": "Kevin",
 	"license": "GPLv3",
-	"version": "0.12.3-alpha.0",
+	"version": "0.12.3-alpha.1",
 	"repository": {
 		"type": "git",
 		"url": "ssh://git@github.com/dendronhq/dendron.git",

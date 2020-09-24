@@ -1,6 +1,7 @@
 {
 	"name": "@dendronhq/lsp-client",
 	"description": "VSCode part of a language server",
+	"private": true,
 	"author": "Microsoft Corporation",
 	"license": "MIT",
 	"version": "0.12.3-alpha.1",
@@ -18,5 +19,6 @@
 	"devDependencies": {
 		"@types/vscode": "1.43.0",
 		"vscode-test": "^1.3.0"
-	}
+	},
+	"gitHead": "b747a42e317e52137dd2aa740805d44e33b77ee8"
 }

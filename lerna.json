@@ -2,7 +2,6 @@
   "packages": [
     "packages/*",
     "packages/lsp-server/client",
-    "packages/lsp-server/express-server",
     "packages/lsp-server/server"
   ],
   "version": "0.12.3-alpha.1",

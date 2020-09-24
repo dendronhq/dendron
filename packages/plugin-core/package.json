@@ -490,7 +490,6 @@
         "@dendronhq/common-server": "^0.12.3-alpha.0",
         "@dendronhq/dendron-cli": "^0.12.3-alpha.0",
         "@dendronhq/engine-server": "^0.12.3-alpha.0",
-        "@dendronhq/lsp-client": "^0.12.3-alpha.1",
         "@dendronhq/lsp-server": "^0.12.3-alpha.1",
         "@dendronhq/pods-core": "^0.12.3-alpha.0",
         "cross-path-sort": "^1.0.0",

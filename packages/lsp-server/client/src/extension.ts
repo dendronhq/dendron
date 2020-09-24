@@ -25,7 +25,7 @@ export function activate(context: ExtensionContext) {
   let expressModule = context.asAbsolutePath(
     path.join("express-server", "dist", "src", "index.js")
   );
-  const { app: server } = require(expressModule);
+  // const { app: server } = require(expressModule);
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
   let debugOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
@@ -62,9 +62,9 @@ export function activate(context: ExtensionContext) {
   // Start the client. This will also launch the server
   client.start();
   const port = 3000;
-  server.listen(3000, () => {
-    console.log("express server started");
-  });
+  // server.listen(3000, () => {
+  //   console.log("express server started");
+  // });
 }
 
 export function deactivate(): Thenable<void> | undefined {

@@ -17,6 +17,7 @@ import {
   TextDocumentSyncKind,
   InitializeResult,
 } from "vscode-languageserver";
+// import {app} from "@dendronhq/express-server";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
@@ -68,7 +69,9 @@ connection.onInitialize((params: InitializeParams) => {
       },
     };
   }
-
+  // app.listen(3000, () => {
+  //   console.log("express server started");
+  // });
   return result;
 });
 

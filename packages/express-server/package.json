@@ -8,6 +8,11 @@
     "start:dev": "nodemon",
     "test": "nodemon --config ./spec/nodemon.json"
   },
+  "files": [
+    "dist/src"
+  ],
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "nodemonConfig": {
     "watch": [
       "src"

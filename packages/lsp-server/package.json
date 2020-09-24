@@ -26,5 +26,11 @@
 	"scripts": {
 		"watch": "tsc --watch"
 	},
-	"gitHead": "b747a42e317e52137dd2aa740805d44e33b77ee8"
+	"gitHead": "b747a42e317e52137dd2aa740805d44e33b77ee8",
+	"devDependencies": {
+		"copy-webpack-plugin": "^6.1.1",
+		"ts-loader": "^8.0.4",
+		"webpack": "^4.44.2",
+		"webpack-cli": "^3.3.12"
+	}
 }

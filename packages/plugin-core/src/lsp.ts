@@ -27,7 +27,7 @@ export function startClient(context: ExtensionContext) {
     serverModule = pathToDev;
   } else {
     serverModule = context.asAbsolutePath(
-      path.join("dist", "lsp-server", "out", "server.js")
+      path.join("dist", "lsp-server", "dist", "server.js")
     );
   }
   const ctx = "startLSPClient";

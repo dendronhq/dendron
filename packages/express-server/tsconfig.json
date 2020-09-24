@@ -2,6 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "emitDecoratorMetadata": true,
+    "declaration": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "importHelpers": true,

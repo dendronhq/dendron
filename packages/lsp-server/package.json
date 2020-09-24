@@ -12,7 +12,8 @@
 		"url": "https://github.com/Microsoft/vscode-extension-samples"
 	},
 	"files": [
-		"out"
+		"out",
+		"dist"
 	],
 	"main": "out/server.js",
 	"types": "out/server.d.js",

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.3-alpha.10](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.9...v0.12.3-alpha.10) (2020-09-25)
+
+### Enhancements
+
+- **publishing:** spiff up 404 page ([e74c4a2](https://github.com/dendronhq/dendron/commit/e74c4a2c97197f5d43132be6ac9436ac91d9db8a))
+
 ## [0.12.3-alpha.9](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.8...v0.12.3-alpha.9) (2020-09-24)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

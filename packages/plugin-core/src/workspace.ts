@@ -9,14 +9,22 @@ import * as vscode from "vscode";
 import { ArchiveHierarchyCommand } from "./commands/ArchiveHierarchy";
 import { BuildPodCommand } from "./commands/BuildPod";
 import { ChangeWorkspaceCommand } from "./commands/ChangeWorkspace";
+import { ConfigurePodCommand } from "./commands/ConfigurePodCommand";
 import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
 import { CopyNoteRefCommand } from "./commands/CopyNoteRef";
+import { CopyNoteURLCommand } from "./commands/CopyNoteURL";
 import { CreateDailyJournalCommand } from "./commands/CreateDailyJournal";
 import { CreateJournalCommand } from "./commands/CreateJournal";
 import { CreateScratchCommand } from "./commands/CreateScratch";
 import { DoctorCommand } from "./commands/Doctor";
+import { ExportPodCommand } from "./commands/ExportPod";
+import { GoDownCommand } from "./commands/GoDownCommand";
+import { GotoNoteCommand, GotoNoteCommandOpts } from "./commands/GotoNote";
+import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { GoUpCommand } from "./commands/GoUpCommand";
+import { ImportPodCommand } from "./commands/ImportPod";
 import { OpenLogsCommand } from "./commands/OpenLogs";
+import { PublishCommand } from "./commands/Publish";
 import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import { RenameNoteV2Command } from "./commands/RenameNoteV2";
@@ -37,16 +45,7 @@ import { HistoryService } from "./services/HistoryService";
 import { NodeService } from "./services/nodeService/NodeService";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
-import { GotoNoteCommand, GotoNoteCommandOpts } from "./commands/GotoNote";
 import { DendronTreeView } from "./views/DendronTreeView";
-import { GoDownCommand } from "./commands/GoDownCommand";
-import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
-import { ExportPodCommand } from "./commands/ExportPod";
-import { NewNoteFromSelectionCommand } from "./commands/NewNoteFromSelectionCommand";
-import { ConfigurePodCommand } from "./commands/ConfigurePodCommand";
-import { ImportPodCommand } from "./commands/ImportPod";
-import { CopyNoteURLCommand } from "./commands/CopyNoteURL";
-import { PublishCommand } from "./commands/Publish";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -435,15 +434,6 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.RENAME_NOTE.key,
         async () => {
           await new RenameNoteV2Command().run();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.NEW_NOTE_FROM_SELECTION.key,
-        async () => {
-          await new NewNoteFromSelectionCommand().run();
         }
       )
     );

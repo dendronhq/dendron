@@ -143,16 +143,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.lookup.md",
     docPreview: "",
   },
-  NEW_NOTE_FROM_SELECTION: {
-    key: "dendron.newNoteFromSelection",
-    title: `${CMD_PREFIX} New Note From Selection (Removed)`,
-    group: "notes",
-    desc:
-      "This command is now deprecated. You can now use lookup with highlighted text to achieve the same functionality",
-    docLink: "dendron.topic.commands.md",
-    docPreview:
-      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.new-from-select.gif)",
-  },
   RENAME_NOTE: {
     key: "dendron.renameNote",
     title: `${CMD_PREFIX} Rename Note`,

@@ -1,1 +1,2 @@
-export * from "./base";
+const foo = {};
+export { foo };

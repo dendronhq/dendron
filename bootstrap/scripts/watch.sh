@@ -12,4 +12,3 @@ npx lerna run watch --parallel
     \ --scope @dendronhq/lsp-server 
     \ --scope @dendronhq/express-server
     \ --scope @dendronhq/common-test-utils
-# npx lerna exec "npm run webpack" --scope @dendronhq/lsp-server

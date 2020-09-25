@@ -53,6 +53,7 @@
     "minimatch": "^3.0.4",
     "moment": "^2.27.0",
     "pino": "^6.3.1",
+    "request": "^2.88.2",
     "request-promise": "^4.2.6",
     "uuid": "^8.1.0",
     "vscode-uri": "^2.1.2",

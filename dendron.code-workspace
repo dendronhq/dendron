@@ -25,6 +25,9 @@
       "path": "packages/lsp-server"
     },
     {
+      "path": "packages/express-server"
+    },
+    {
       "path": "packages/dendron-snippet-maker"
     },
     {

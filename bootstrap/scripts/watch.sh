@@ -1,5 +1,6 @@
 #!/bin/bash
 
+echo "watching..."
 npx lerna run watch --parallel 
     \ --scope @dendronhq/common-all 
     \ --scope @dendronhq/common-server 
@@ -10,4 +11,5 @@ npx lerna run watch --parallel
     \ --scope @dendronhq/seeds-core 
     \ --scope @dendronhq/lsp-server 
     \ --scope @dendronhq/express-server
+    \ --scope @dendronhq/common-test-utils
 # npx lerna exec "npm run webpack" --scope @dendronhq/lsp-server

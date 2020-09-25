@@ -11,10 +11,10 @@
     "start:integ": "env PORT=3005 nodemon"
   },
   "files": [
-    "dist/src"
+    "src"
   ],
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
   "nodemonConfig": {
     "watch": [
       "src"
@@ -64,5 +64,5 @@
     "tslint": "^6.1.3",
     "typescript": "^4.0.3"
   },
-  "gitHead": "b747a42e317e52137dd2aa740805d44e33b77ee8"
+  "gitHead": "3c8fb7d88198badb6f46705eb3d26adaf50ff916"
 }

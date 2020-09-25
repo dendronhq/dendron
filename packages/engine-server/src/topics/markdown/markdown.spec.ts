@@ -55,7 +55,7 @@ describe("replaceRefs", () => {
     //   "rawprops"
     // );
     const out = getProcessor()
-      .use(replaceRefs, { imageRefPrefix: "bond/" })
+      .use(replaceRefs, { imageRefPrefix: "bond/", scratch: "" })
       .processSync(`![alt-text](image-url.jpg)`);
     expect(_.trim(out.toString())).toEqual("![alt-text](bond/image-url.jpg)");
   });
@@ -68,7 +68,10 @@ describe("replaceRefs", () => {
 - [[label|foo-wiki-link]]
 - [[label|foo-wiki-link]]#foobar
     `;
-    const proc = getProcessor().use(replaceRefs, { wikiLink2Md: true });
+    const proc = getProcessor().use(replaceRefs, {
+      wikiLink2Md: true,
+      scratch: "",
+    });
     const out = proc.processSync(links);
     const tokens = proc.parse(links);
 
@@ -83,6 +86,7 @@ describe("replaceRefs", () => {
       wikiLink2Md: true,
       wikiLinkUseId: true,
       engine,
+      scratch: "",
     });
 
     const note = DNodeUtils.getNoteByFname(

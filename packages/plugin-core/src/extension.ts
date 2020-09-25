@@ -1,4 +1,5 @@
-import { CONSTANTS, getStage } from "@dendronhq/common-all";
+import { getStage } from "@dendronhq/common-all";
+import fs from "fs-extra";
 import _ from "lodash";
 import semver from "semver";
 import * as vscode from "vscode";
@@ -9,15 +10,14 @@ import {
   WORKSPACE_STATE,
 } from "./constants";
 import { Logger } from "./logger";
+import { startClient } from "./lsp";
 import { HistoryService } from "./services/HistoryService";
+import { Extensions } from "./settings";
 import { VSCodeUtils } from "./utils";
-import { DendronWorkspace } from "./workspace";
-import fs from "fs-extra";
 import { MarkdownUtils } from "./utils/md";
 import { getOS } from "./utils/system";
-import { Extensions } from "./settings";
 import { DendronTreeView } from "./views/DendronTreeView";
-import { startClient } from "./lsp";
+import { DendronWorkspace } from "./workspace";
 
 // === Main
 // this method is called when your extension is activated

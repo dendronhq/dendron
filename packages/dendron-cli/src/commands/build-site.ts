@@ -86,10 +86,15 @@ function stripSiteOnlyTags(note: Note) {
   return doc;
 }
 
+type Jekyll2MdFileErrors = {
+  source: string;
+  links: string[];
+};
+
 async function note2JekyllMdFile(
   note: Note,
   opts: { notesDir: string; engine: DEngine } & DendronSiteConfig
-): Promise<void> {
+): Promise<Jekyll2MdFileErrors[]> {
   const meta = DNodeUtils.getMeta(note, {
     pullCustomUp: true,
     ignoreNullParent: true,
@@ -105,7 +110,7 @@ async function note2JekyllMdFile(
   const siteNotesDir = config.siteNotesDir || "notes";
 
   if (!hConfig.publishByDefault && !note.custom.published) {
-    return;
+    return [];
   }
 
   // root page should have '/ permalinik
@@ -125,8 +130,14 @@ async function note2JekyllMdFile(
 
   // delete parent from root
   note.body = stripSiteOnlyTags(note);
+  // delete content that is not meant to be published
   note.body = stripLocalOnlyTags(note.body);
+  const scratchPad1Dir = tmpDir();
+  const scratchPad2Dir = tmpDir();
+  const scratchPad1 = path.join(scratchPad1Dir.name, "scratch.txt");
+  const scratchPad2 = path.join(scratchPad2Dir.name, "scratch.txt");
   try {
+    // convert links in the page
     note.body = getProcessor({
       root: opts.engine.props.root,
       renderWithOutline: opts.usePrettyRefs,
@@ -137,6 +148,7 @@ async function note2JekyllMdFile(
         imageRefPrefix: opts.assetsPrefix,
         wikiLinkUseId: true,
         engine: opts.engine,
+        scratch: scratchPad1,
       },
     })
       .use(replaceRefs, {
@@ -145,6 +157,7 @@ async function note2JekyllMdFile(
         imageRefPrefix: opts.assetsPrefix,
         wikiLinkUseId: true,
         engine: opts.engine,
+        scratch: scratchPad2,
       })
       .processSync(note.body)
       .toString();
@@ -152,10 +165,26 @@ async function note2JekyllMdFile(
     console.log(err);
   }
   const filePath = path.join(opts.notesDir, meta.id + ".md");
-  return fs.writeFile(
+  await fs.writeFile(
     filePath,
     matter.stringify(note.body || "", { ...meta, ...jekyllProps })
   );
+  const errors: Jekyll2MdFileErrors[] = [];
+  await Promise.all(
+    [scratchPad1Dir, scratchPad2Dir].map(async (ent) => {
+      const scratchFile = path.join(ent.name, "scratch.txt");
+      if (fs.existsSync(scratchFile)) {
+        const sc = fs.readFileSync(scratchFile, { encoding: "utf8" });
+        errors.push({
+          source: note.fname,
+          links: _.reject(sc.split("\n"), _.isEmpty),
+        });
+        await fs.emptyDir(ent.name);
+      }
+      ent.removeCallback();
+    })
+  );
+  return errors;
 }
 
 export class BuildSiteCommand extends SoilCommand<
@@ -254,7 +283,7 @@ export class BuildSiteCommand extends SoilCommand<
     config: DendronSiteConfig;
     writeStubs: boolean;
     notesDir: string;
-  }) {
+  }): Promise<Jekyll2MdFileErrors[]> {
     const { engine, config, writeStubs, notesDir } = opts;
     const { siteHierarchies } = config;
 
@@ -270,7 +299,7 @@ export class BuildSiteCommand extends SoilCommand<
       return note;
     });
     const out = [];
-    let writeStubsQ = [];
+    let writeStubsQ: any = [];
 
     // get rest of hieararchy
     while (!_.isEmpty(nodes)) {
@@ -288,7 +317,9 @@ export class BuildSiteCommand extends SoilCommand<
         writeStubsQ.push(engine.write(node, { stub: false }));
       }
     }
-    await Promise.all(writeStubsQ.concat(out));
+    await Promise.all(writeStubsQ);
+    const errors = await Promise.all(out);
+    return _.flatten(errors);
   }
 
   async execute(opts: CommandOpts) {
@@ -305,10 +336,11 @@ export class BuildSiteCommand extends SoilCommand<
     const siteNotesDirPath = path.join(siteRootPath, siteNotesDir);
     this.L.info({ msg: "enter", siteNotesDirPath });
     fs.ensureDirSync(siteNotesDirPath);
+    let errors: Jekyll2MdFileErrors[];
 
     if (incremental) {
       const staging = tmpDir();
-      await this.doBuild({
+      errors = await this.doBuild({
         engine,
         config,
         writeStubs,
@@ -327,7 +359,7 @@ export class BuildSiteCommand extends SoilCommand<
       }
     } else {
       fs.emptyDirSync(siteNotesDirPath);
-      await this.doBuild({
+      errors = await this.doBuild({
         engine,
         config,
         writeStubs,
@@ -353,6 +385,7 @@ export class BuildSiteCommand extends SoilCommand<
     this.L.info({ msg: "exit" });
     return {
       buildNotesRoot: siteRootPath,
+      errors,
     };
   }
 }

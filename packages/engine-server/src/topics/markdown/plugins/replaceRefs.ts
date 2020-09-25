@@ -4,6 +4,7 @@ import { Node } from "unist";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
 import { WikiLinkData } from "./dendronLinksPlugin";
+import fs from "fs-extra";
 
 export type ReplaceRefOptions = {
   refReplacements?: { [key: string]: ProtoLink };
@@ -14,6 +15,11 @@ export type ReplaceRefOptions = {
   wikiLinkUseId?: boolean;
   engine?: DEngine;
   toHTML?: boolean;
+  missingLinkBehavior?: "raiseError" | "404";
+  /**
+   * Write errors that have occured
+   */
+  scratch: string;
 };
 
 export function replaceRefs(options: ReplaceRefOptions) {
@@ -24,10 +30,13 @@ export function replaceRefs(options: ReplaceRefOptions) {
     wikiLinkPrefix,
     wikiLinkUseId,
     engine,
+    missingLinkBehavior,
+    scratch,
   } = _.defaults(options, {
     refReplacements: {},
     wikiLinkPrefix: false,
     wikiLink2Html: false,
+    missingLinkBehavior: "404",
   });
   function transformer(tree: Node, _file: VFile) {
     visit(tree, (node) => {
@@ -51,14 +60,24 @@ export function replaceRefs(options: ReplaceRefOptions) {
         if (wikiLinkPrefix) {
           data.prefix = wikiLinkPrefix;
         }
+        // use id-based link
         if (wikiLinkUseId) {
           data.useId = true;
           if (!engine) {
             throw Error(`need engine when wikiLinkUseId is set`);
           }
+          const throwIfEmpty = missingLinkBehavior === "raiseIfError";
           data.note = DNodeUtils.getNoteByFname(data.permalink, engine, {
-            throwIfEmpty: true,
+            throwIfEmpty,
           });
+          if (_.isUndefined(data.note) && missingLinkBehavior === "404") {
+            // @ts-ignore
+            data.note = { id: "/404.html" };
+            delete data["prefix"];
+            fs.appendFileSync(scratch, data.permalink + "\n", {
+              encoding: "utf8",
+            });
+          }
         }
       }
     });

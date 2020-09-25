@@ -2,8 +2,8 @@ import { DendronSiteConfig, DEngine } from "@dendronhq/common-all";
 import {
   EngineTestUtils,
   FileTestUtils,
-  readMD,
   NodeTestUtils,
+  readMD,
 } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -361,6 +361,106 @@ describe("buildSite v2", () => {
       expect(notes).toMatchSnapshot();
       expect(notes.length).toEqual(4);
     });
+  });
+});
+
+describe("wiki link", () => {
+  let root: string;
+  let engine: DEngine;
+  let siteRootDir: string;
+  let notesDir: string;
+  let writeStubs = false;
+
+  beforeEach(async () => {
+    siteRootDir = FileTestUtils.tmpDir().name;
+    notesDir = path.join(siteRootDir, "notes");
+  });
+
+  afterEach(() => {
+    fs.removeSync(root);
+  });
+
+  test("missing link", async () => {
+    root = EngineTestUtils.setupStoreDir({
+      copyFixtures: false,
+      initDirCb: (dirPath: string) => {
+        NodeTestUtils.createNotes(dirPath, [
+          {
+            id: "id.foo",
+            fname: "foo",
+            body: "# Foo Content\n # Bar Content [[missing-link]]",
+          },
+        ]);
+      },
+    });
+    engine = DendronEngine.getOrCreateEngine({
+      root,
+      forceNew: true,
+      mode: "exact",
+    });
+    await engine.init();
+
+    const config: DendronSiteConfig = {
+      siteHierarchies: ["foo"],
+      siteRootDir,
+    };
+    const cmd = new BuildSiteCommand();
+    const { errors } = await cmd.execute({
+      engine,
+      config,
+      wsRoot: root,
+      writeStubs,
+    });
+    let fooPath = path.join(notesDir, "id.foo.md");
+    const { content } = readMD(fooPath);
+    expect(content).toMatchSnapshot();
+    expect(content.indexOf("[missing-link](/404.html)") >= 0).toBeTruthy();
+    expect(errors).toMatchSnapshot();
+    expect(errors).toEqual([{ links: ["missing-link"], source: "foo" }]);
+  });
+
+  test("case sensitive link", async () => {
+    const config: DendronSiteConfig = {
+      siteHierarchies: ["foo"],
+      siteRootDir,
+    };
+    root = EngineTestUtils.setupStoreDir({
+      copyFixtures: false,
+      initDirCb: (dirPath: string) => {
+        NodeTestUtils.createNotes(dirPath, [
+          {
+            fname: "foo.Mixed_case",
+            id: "id.foo.mixed-case",
+          },
+          {
+            fname: "foo.one",
+            id: "id.foo.one",
+            body: "[[foo.Mixed_case]]",
+          },
+        ]);
+      },
+    });
+    engine = DendronEngine.getOrCreateEngine({
+      root,
+      forceNew: true,
+      mode: "exact",
+    });
+    await engine.init();
+
+    const cmd = new BuildSiteCommand();
+    const { errors } = await cmd.execute({
+      engine,
+      config,
+      wsRoot: root,
+      writeStubs,
+    });
+    let fooPath = path.join(notesDir, "id.foo.one.md");
+    const { content } = readMD(fooPath);
+    expect(content).toMatchSnapshot();
+    expect(
+      content.indexOf("[foo.Mixed_case](id.foo.mixed-case)") >= 0
+    ).toBeTruthy();
+    expect(errors).toEqual([]);
   });
 });
 

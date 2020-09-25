@@ -375,7 +375,7 @@ Array [
     "children": Array [
       "id-bar",
     ],
-    "created": 1600561757749,
+    "created": 1601056312322,
     "custom": Object {},
     "data": Object {},
     "desc": "",
@@ -385,7 +385,7 @@ Array [
     "stub": false,
     "title": "root",
     "type": "note",
-    "updated": 1600561757749,
+    "updated": 1601056312322,
   },
   Object {
     "body": "bar body
@@ -393,7 +393,7 @@ Array [
     "children": Array [
       "id-bar.one",
     ],
-    "created": 1600561757750,
+    "created": 1601056312361,
     "custom": Object {},
     "data": Object {},
     "desc": "",
@@ -403,13 +403,13 @@ Array [
     "stub": false,
     "title": "Bar",
     "type": "note",
-    "updated": 1600561757750,
+    "updated": 1601056312361,
   },
   Object {
     "body": "bar.one body
 ",
     "children": Array [],
-    "created": 1600561757751,
+    "created": 1601056312362,
     "custom": Object {},
     "data": Object {},
     "desc": "",
@@ -419,7 +419,7 @@ Array [
     "stub": false,
     "title": "One",
     "type": "note",
-    "updated": 1600561757751,
+    "updated": 1601056312362,
   },
 ]
 `;

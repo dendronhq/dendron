@@ -39,7 +39,7 @@ Array [
 
 exports[`buildSite v2 incremental basic: build notes 1`] = `
 Array [
-  "ebd46326-e213-48f6-ad5f-706733cf8e61.md",
+  "8b7cf140-4e2b-4d2c-8151-f62830fa3fe4.md",
   "id.bar.one.md",
   "id.foo.md",
 ]
@@ -95,4 +95,27 @@ exports[`note refs note refs, disable pretty 1`] = `
 
  [foo](notes/id.foo)
 "
+`;
+
+exports[`wiki link case sensitive link 1`] = `
+"[foo.Mixed_case](id.foo.mixed-case)
+"
+`;
+
+exports[`wiki link missing link 1`] = `
+"# Foo Content
+
+# Bar Content [missing-link](/404.html)
+"
+`;
+
+exports[`wiki link missing link 2`] = `
+Array [
+  Object {
+    "links": Array [
+      "missing-link",
+    ],
+    "source": "foo",
+  },
+]
 `;

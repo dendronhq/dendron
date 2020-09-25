@@ -1,6 +1,7 @@
 import { BuildSiteCommand } from "@dendronhq/dendron-cli";
 import _ from "lodash";
 import { window } from "vscode";
+import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
@@ -31,13 +32,22 @@ export class BuildPodCommand extends BasicCommand<CommandOpts, CommandOutput> {
       throw Error("dendronRoot note set");
     }
     this.L.info({ ...ctx, config });
-    await cmd.execute({
+    const { errors } = await cmd.execute({
       engine,
       config,
       wsRoot: dendronRoot,
       writeStubs,
       incremental,
     });
+    if (!_.isEmpty(errors)) {
+      return VSCodeUtils.showWebView({
+        title: "Errors while publishing",
+        content: [
+          "The following files had links that did not resolve.",
+          ...errors.map((ent) => JSON.stringify(ent)),
+        ].join("\n"),
+      });
+    }
     window.showInformationMessage("finished");
   }
 }

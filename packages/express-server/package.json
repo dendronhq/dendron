@@ -11,10 +11,10 @@
     "start:integ": "env PORT=3005 nodemon"
   },
   "files": [
-    "src"
+    "dist"
   ],
-  "main": "src/index.js",
-  "types": "src/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "nodemonConfig": {
     "watch": [
       "src"

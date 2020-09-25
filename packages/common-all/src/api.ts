@@ -1,6 +1,5 @@
 import _ from "lodash";
 import request from "request-promise";
-import { DendronError } from "../lib";
 import { createLogger } from "./logger";
 // import { nonEmptyGet, unwrapGet, unwrapSearch } from "./es";
 // import { L } from "./logger";

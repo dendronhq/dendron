@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/express-server",
-  "version": "0.12.3-alpha.10",
+  "version": "0.12.3-alpha.11",
   "scripts": {
     "build": "node build.js && tsc --build tsconfig.prod.json",
     "lint": "tslint --project \"tsconfig.json\"",
@@ -26,7 +26,7 @@
     "exec": "ts-node ./src/start.ts"
   },
   "dependencies": {
-    "@dendronhq/engine-server": "^0.12.3-alpha.10",
+    "@dendronhq/engine-server": "^0.12.3-alpha.11",
     "command-line-args": "^5.1.1",
     "cookie-parser": "^1.4.5",
     "dotenv": "^8.2.0",

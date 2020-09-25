@@ -49,7 +49,7 @@
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -b",
 		"watch": "tsc -b -w",
-		"test": "sh ./scripts/e2e.sh"
+		"test-alt": "sh ./scripts/e2e.sh"
 	},
 	"devDependencies": {
 		"@types/mocha": "^8.0.3",

@@ -10,3 +10,4 @@ dist
 old
 out
 server
+.vscode-test

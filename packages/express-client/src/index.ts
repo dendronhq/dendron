@@ -1,2 +1,4 @@
-import { appendFile } from "fs";
+// import { appendFile } from "fs";
 import API from "@dendronhq/common-all";
+
+export { API };

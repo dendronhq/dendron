@@ -1,13 +1,13 @@
 import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
+import {
+  LookupNoteType,
+  LookupSelectionType,
+} from "../../commands/LookupCommand";
 import { DendronQuickPicker } from "./LookupProvider";
 
-export type ButtonType =
-  | "selection2link"
-  | "selectionExtract"
-  | "journal"
-  | "scratch";
+export type ButtonType = LookupNoteType | LookupSelectionType;
 
 export type ButtonCategory = "selection" | "note";
 
@@ -118,16 +118,17 @@ export function refreshButtons(
   quickpick.buttons = buttons;
 }
 
-export function createAllButtons(typeToTurnOn?: ButtonType): DendronBtn[] {
+export function createAllButtons(
+  typesToTurnOn: ButtonType[] = []
+): DendronBtn[] {
   const buttons = [
     SlectionExtractBtn.create(),
     Selection2LinkBtn.create(),
     JournalBtn.create(),
     ScratchBtn.create(),
   ];
-  if (typeToTurnOn) {
-    const btn = _.find(buttons, { type: typeToTurnOn }) as DendronBtn;
-    btn.pressed = true;
-  }
+  typesToTurnOn.map((btnType) => {
+    (_.find(buttons, { type: btnType }) as DendronBtn).pressed = true;
+  });
   return buttons;
 }

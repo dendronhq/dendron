@@ -3,6 +3,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { QuickInputButton } from "vscode";
+import { LookupCommandOpts } from "../../commands/LookupCommand";
 import { CONFIG } from "../../constants";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
@@ -31,12 +32,23 @@ export class LookupController {
   public ws: DendronWorkspace;
   protected opts: EngineOpts;
 
-  constructor(workspace: DendronWorkspace, opts: EngineOpts) {
-    const btnType = DendronWorkspace.configuration().get<string>(
-      CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key
-    ) as ButtonType;
+  constructor(
+    workspace: DendronWorkspace,
+    opts: EngineOpts,
+    lookupOpts?: LookupCommandOpts
+  ) {
+    let lookupSelectionType =
+      lookupOpts?.selectionType ||
+      (DendronWorkspace.configuration().get<string>(
+        CONFIG.DEFAULT_LOOKUP_CREATE_BEHAVIOR.key
+      ) as ButtonType);
+    let noteSelectioType = lookupOpts?.noteType;
+    let initialTypes = [lookupSelectionType];
+    if (noteSelectioType) {
+      initialTypes.push(noteSelectioType);
+    }
     this.state = {
-      buttons: createAllButtons(btnType),
+      buttons: createAllButtons(initialTypes),
     };
     this.ws = workspace;
     this.opts = opts;
@@ -127,13 +139,10 @@ export class LookupController {
     });
     const { document, range } = cleanOpts;
     this.ws.L.info({ ctx });
-    // const provider = this.getOrInstantiateProvider();
-    this.ws.L.info({ ctx: ctx + ":getOrInstantiateProvider:post" });
     // create quick pick
     const quickPick = vscode.window.createQuickPick<
       DNode
     >() as DendronQuickPicker;
-    this.ws.L.info({ ctx: ctx + ":createQuickPick:post" });
     let title = ["Lookup"];
     title.push(`- version: ${DendronWorkspace.version()}`);
     quickPick.title = title.join(" ");

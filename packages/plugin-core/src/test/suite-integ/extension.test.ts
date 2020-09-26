@@ -42,6 +42,7 @@ import {
 } from "../../commands/GoToSiblingCommand";
 import { GoUpCommand } from "../../commands/GoUpCommand";
 import { ImportPodCommand } from "../../commands/ImportPod";
+import { LookupCommand } from "../../commands/LookupCommand";
 import { RefactorHierarchyCommand } from "../../commands/RefactorHierarchy";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import { RenameNoteV2Command } from "../../commands/RenameNoteV2";
@@ -2224,6 +2225,105 @@ suite("ExportPod", function () {
   });
 });
 
+// --- Lookup
+// not sure how to have user accept yet
+suite("Lookup", function () {
+  let root: DirResult;
+  let ctx: vscode.ExtensionContext;
+  this.timeout(TIMEOUT);
+
+  beforeEach(function () {
+    root = FileTestUtils.tmpDir();
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    DendronWorkspace.getOrCreate(ctx);
+  });
+
+  afterEach(function () {
+    HistoryService.instance().clearSubscriptions();
+  });
+
+  test("Lookup scratch note", function (done) {
+    onWSInit(async () => {
+      // const editor = VSCodeUtils.getActiveTextEditor();
+      const uri = vscode.Uri.file(path.join(root.name, "vault", "foo.md"));
+      const editor = (await VSCodeUtils.openFileInEditor(
+        uri
+      )) as vscode.TextEditor;
+      editor.selection = new vscode.Selection(9, 0, 9, 12);
+      await new LookupCommand().execute({
+        selectionType: "selection2link",
+        noteType: "journal",
+      });
+      done();
+    });
+
+    setupDendronWorkspace(root.name, ctx, {
+      useCb: async () => {
+        NodeTestUtils.createNotes(path.join(root.name, "vault"), [
+          {
+            id: "id.foo",
+            fname: "foo",
+            body: "# Foo Content\nFoo line",
+          },
+        ]);
+      },
+    });
+  });
+
+  test("Lookup scratch note", function (done) {
+    onWSInit(async () => {
+      // const editor = VSCodeUtils.getActiveTextEditor();
+      const uri = vscode.Uri.file(path.join(root.name, "vault", "foo.md"));
+      const editor = (await VSCodeUtils.openFileInEditor(
+        uri
+      )) as vscode.TextEditor;
+      editor.selection = new vscode.Selection(9, 0, 9, 12);
+      await new LookupCommand().execute({
+        selectionType: "selection2link",
+        noteType: "scratch",
+      });
+      done();
+    });
+
+    setupDendronWorkspace(root.name, ctx, {
+      useCb: async () => {
+        NodeTestUtils.createNotes(path.join(root.name, "vault"), [
+          {
+            id: "id.foo",
+            fname: "foo",
+            body: "# Foo Content\nFoo line",
+          },
+        ]);
+      },
+    });
+  });
+
+  test("Lookup selection2link", function (done) {
+    onWSInit(async () => {
+      // const editor = VSCodeUtils.getActiveTextEditor();
+      const uri = vscode.Uri.file(path.join(root.name, "vault", "foo.md"));
+      const editor = (await VSCodeUtils.openFileInEditor(
+        uri
+      )) as vscode.TextEditor;
+      editor.selection = new vscode.Selection(9, 0, 9, 12);
+      await new LookupCommand().execute({ selectionType: "selection2link" });
+      done();
+    });
+
+    setupDendronWorkspace(root.name, ctx, {
+      useCb: async () => {
+        NodeTestUtils.createNotes(path.join(root.name, "vault"), [
+          {
+            id: "id.foo",
+            fname: "foo",
+            body: "# Foo Content\nFoo line",
+          },
+        ]);
+      },
+    });
+  });
+});
+
 // --- Publishing
 
 suite("Build Site", function () {
@@ -2241,7 +2341,7 @@ suite("Build Site", function () {
     HistoryService.instance().clearSubscriptions();
   });
 
-  test.only("missing link", function (done) {
+  test("missing link", function (done) {
     onWSInit(async () => {
       await new BuildPodCommand().execute({});
       const editor = VSCodeUtils.getActiveTextEditor();

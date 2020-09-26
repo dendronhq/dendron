@@ -23,6 +23,7 @@ import { GotoNoteCommand, GotoNoteCommandOpts } from "./commands/GotoNote";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { GoUpCommand } from "./commands/GoUpCommand";
 import { ImportPodCommand } from "./commands/ImportPod";
+import { LookupCommand } from "./commands/LookupCommand";
 import { OpenLogsCommand } from "./commands/OpenLogs";
 import { PublishCommand } from "./commands/Publish";
 import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";
@@ -293,11 +294,12 @@ export class DendronWorkspace {
     );
 
     this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.LOOKUP.key, async () => {
-        const controller = new LookupController(this, { flavor: "note" });
-        const resp = await VSCodeUtils.extractRangeFromActiveEditor();
-        controller.show(resp);
-      })
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.LOOKUP.key,
+        async (args: any) => {
+          new LookupCommand().run(args);
+        }
+      )
     );
 
     this.context.subscriptions.push(

@@ -5,79 +5,30 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.12.3](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.16...v0.12.3) (2020-09-26)
 
+### Feature
+
+- **publishing:** generate bad links report ([2097d39](https://github.com/dendronhq/dendron/commit/2097d39))
+
+When building your site by running `Dendron: Build Pod`, Dendron will generate a bad links report of all wiki-links that did not resolve. It will also update the links to point to a 404 page instead.
+
+<a href="https://www.loom.com/share/91c4d7b023754b76b4d02519946603e0"> 
+<img style="" src="https://cdn.loom.com/sessions/thumbnails/91c4d7b023754b76b4d02519946603e0-with-play.gif"> </a>
+
 ### Enhancements
 
 - **lookup:** lookup command accept args ([3e1fe8a](https://github.com/dendronhq/dendron/commit/3e1fe8a33344c3e79c1fb5bd758eaeab23b7fb9f))
+- **publishing:** better 404 page ([e74c4a2](https://github.com/dendronhq/dendron/commit/e74c4a2c97197f5d43132be6ac9436ac91d9db8a))
+- **plugin:** dramatically reduce extension bundle size ([22cfff8](https://github.com/dendronhq/dendron/commit/22cfff8398611f54f7a88d7e110aa9f9f602ad4e))
 
-## [0.12.3-alpha.16](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.15...v0.12.3-alpha.16) (2020-09-25)
+### Work in Progress
 
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.3-alpha.15](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.14...v0.12.3-alpha.15) (2020-09-25)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.3-alpha.14](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.13...v0.12.3-alpha.14) (2020-09-25)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.3-alpha.11](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.10...v0.12.3-alpha.11) (2020-09-25)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.3-alpha.10](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.9...v0.12.3-alpha.10) (2020-09-25)
-
-### Enhancements
-
-- **publishing:** spiff up 404 page ([e74c4a2](https://github.com/dendronhq/dendron/commit/e74c4a2c97197f5d43132be6ac9436ac91d9db8a))
-
-## [0.12.3-alpha.9](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.8...v0.12.3-alpha.9) (2020-09-24)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.3-alpha.8](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.7...v0.12.3-alpha.8) (2020-09-24)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.3-alpha.7](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.6...v0.12.3-alpha.7) (2020-09-24)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.3-alpha.6](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.5...v0.12.3-alpha.6) (2020-09-24)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.3-alpha.5](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.4...v0.12.3-alpha.5) (2020-09-24)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.3-alpha.4](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.3...v0.12.3-alpha.4) (2020-09-24)
-
-### Enhancements
-
-- **lsp:** add log lvl config ([b93b8fa](https://github.com/dendronhq/dendron/commit/b93b8fa32c65a91ad87bc6116f57b5a4c4f9a22c))
-
-## [0.12.3-alpha.3](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.2...v0.12.3-alpha.3) (2020-09-24)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.3-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.1...v0.12.3-alpha.2) (2020-09-24)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.0...v0.12.3-alpha.1) (2020-09-24)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.2...v0.12.3-alpha.0) (2020-09-24)
-
-### Enhancements
-
-- reduce extension bundle size ([22cfff8](https://github.com/dendronhq/dendron/commit/22cfff8398611f54f7a88d7e110aa9f9f602ad4e))
+- **lsp:** add log lvl config when using lsp ([b93b8fa](https://github.com/dendronhq/dendron/commit/b93b8fa32c65a91ad87bc6116f57b5a4c4f9a22c))
+- **lsp:** enable experimental lsp mode
+- **lsp:** setup lsp scaffolding
 
 ## [0.12.2](https://github.com/dendronhq/dendron/compare/v0.12.2-alpha.0...v0.12.2) (2020-09-24)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.12.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.1...v0.12.2-alpha.0) (2020-09-24)
 

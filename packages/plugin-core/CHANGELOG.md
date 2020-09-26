@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.3](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.16...v0.12.3) (2020-09-26)
+
+### Enhancements
+
+- **lookup:** lookup command accept args ([3e1fe8a](https://github.com/dendronhq/dendron/commit/3e1fe8a33344c3e79c1fb5bd758eaeab23b7fb9f))
+
 ## [0.12.3-alpha.16](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.15...v0.12.3-alpha.16) (2020-09-25)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

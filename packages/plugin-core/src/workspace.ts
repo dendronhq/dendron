@@ -14,7 +14,6 @@ import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
 import { CopyNoteRefCommand } from "./commands/CopyNoteRef";
 import { CopyNoteURLCommand } from "./commands/CopyNoteURL";
 import { CreateDailyJournalCommand } from "./commands/CreateDailyJournal";
-import { CreateJournalCommand } from "./commands/CreateJournal";
 import { CreateScratchCommand } from "./commands/CreateScratch";
 import { DoctorCommand } from "./commands/Doctor";
 import { ExportPodCommand } from "./commands/ExportPod";
@@ -23,7 +22,7 @@ import { GotoNoteCommand, GotoNoteCommandOpts } from "./commands/GotoNote";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { GoUpCommand } from "./commands/GoUpCommand";
 import { ImportPodCommand } from "./commands/ImportPod";
-import { LookupCommand } from "./commands/LookupCommand";
+import { LookupCommand, LookupCommandOpts } from "./commands/LookupCommand";
 import { OpenLogsCommand } from "./commands/OpenLogs";
 import { PublishCommand } from "./commands/Publish";
 import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";
@@ -252,7 +251,9 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.CREATE_JOURNAL_NOTE.key,
         async () => {
-          await new CreateJournalCommand().run();
+          await new LookupCommand().run({
+            noteType: "journal",
+          } as LookupCommandOpts);
         }
       )
     );

@@ -9,6 +9,7 @@ type KeyBinding = {
   mac?: string;
   windows?: string;
   when?: string;
+  args?: any;
 };
 
 type ConfigEntry = {
@@ -24,6 +25,7 @@ type CommandEntry = {
   key: string;
   title: string;
   keybindings?: KeyBinding;
+  shortcut?: boolean;
   group:
     | "notes"
     | "workspace"
@@ -76,11 +78,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.createJournalNote",
     title: `${CMD_PREFIX} Create Journal Note`,
     group: "notes",
-    keybindings: {
-      key: "ctrl+shift+j",
-      mac: "cmd+shift+j",
-      when: "editorFocus",
-    },
     desc: "Create a hierarchy specific journal note",
     docLink: "dendron.topic.special-notes.md",
     docPreview: `<a href="https://www.loom.com/share/da562a166af9427e908a76be8bc38355"><img src="https://cdn.loom.com/sessions/thumbnails/da562a166af9427e908a76be8bc38355-with-play.gif"></a>`,
@@ -89,10 +86,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.createScratchNote",
     title: `${CMD_PREFIX} Create Scratch Note`,
     group: "notes",
-    keybindings: {
-      key: "ctrl+shift+s",
-      mac: "cmd+shift+s",
-    },
     desc: "Create a hierarchy specific scratch note",
     docLink: "dendron.topic.special-notes.md",
     docPreview: `<a href="https://www.loom.com/share/104a3e0bb10f4012a831194d02483e4a"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/104a3e0bb10f4012a831194d02483e4a-with-play.gif"> </a>`,
@@ -162,6 +155,41 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       key: "ctrl+l",
     },
     desc: "Initiate note lookup",
+    docs: ["((ref: [[dendron.topic.lookup]]#notes,1:#schemas))"].join("\n"),
+    docLink: "dendron.topic.lookup.md",
+    docPreview: "",
+  },
+  LOOKUP_JOURNAL: {
+    key: "dendron.lookup",
+    shortcut: true,
+    title: `${CMD_PREFIX} Lookup (Journal Note)`,
+    group: "navigation",
+    keybindings: {
+      key: "ctrl+shift+j",
+      mac: "cmd+shift+j",
+      args: {
+        noteType: "journal",
+      },
+    },
+    desc: "Initiate note lookup with journal note pre-selected",
+    docs: ["((ref: [[dendron.topic.lookup]]#notes,1:#schemas))"].join("\n"),
+    docLink: "dendron.topic.lookup.md",
+    docPreview: "",
+  },
+  LOOKUP_SCRATCH: {
+    key: "dendron.lookup",
+    shortcut: true,
+    title: `${CMD_PREFIX} Lookup (Scratch Note)`,
+    group: "navigation",
+    keybindings: {
+      key: "ctrl+shift+s",
+      mac: "cmd+shift+s",
+      args: {
+        noteType: "scratch",
+        selectionType: "selection2link",
+      },
+    },
+    desc: "Initiate note lookup with scratch note pre-selected",
     docs: ["((ref: [[dendron.topic.lookup]]#notes,1:#schemas))"].join("\n"),
     docLink: "dendron.topic.lookup.md",
     docPreview: "",
@@ -431,6 +459,17 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docPreview: "",
   },
 };
+
+// DENDRON_COMMANDS["LOOKUP_JOURNAL"] = {
+//   ...DENDRON_COMMANDS["LOOKUP"],
+//   keybindings: {
+//     key: "ctrl+shift+j",
+//     mac: "cmd+shift+j",
+//     args: {
+//       noteType: "journal",
+//     },
+//   },
+// };
 
 export const DENDRON_CHANNEL_NAME = "Dendron";
 

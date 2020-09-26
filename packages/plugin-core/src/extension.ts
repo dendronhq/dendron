@@ -126,10 +126,6 @@ export async function _activate(context: vscode.ExtensionContext) {
           action: "initialized",
         });
         vscode.window.showInformationMessage("Dendron is active");
-        if (isDebug || stage === "test") {
-          Logger.output?.show(false);
-          vscode.window.showInformationMessage("activate");
-        }
         Logger.info({ ctx, msg: "finish reloadWorkspace" });
       });
     }

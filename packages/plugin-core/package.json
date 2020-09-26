@@ -368,17 +368,6 @@
                 "when": "editorFocus"
             },
             {
-                "command": "dendron.createJournalNote",
-                "key": "ctrl+shift+j",
-                "mac": "cmd+shift+j",
-                "when": "editorFocus"
-            },
-            {
-                "command": "dendron.createScratchNote",
-                "key": "ctrl+shift+s",
-                "mac": "cmd+shift+s"
-            },
-            {
                 "command": "dendron.copyNoteLink",
                 "key": "ctrl+shift+c",
                 "mac": "cmd+shift+c",
@@ -399,6 +388,23 @@
                 "command": "dendron.lookup",
                 "mac": "cmd+L",
                 "key": "ctrl+l"
+            },
+            {
+                "command": "dendron.lookup",
+                "key": "ctrl+shift+j",
+                "mac": "cmd+shift+j",
+                "args": {
+                    "noteType": "journal"
+                }
+            },
+            {
+                "command": "dendron.lookup",
+                "key": "ctrl+shift+s",
+                "mac": "cmd+shift+s",
+                "args": {
+                    "noteType": "scratch",
+                    "selectionType": "selection2link"
+                }
             },
             {
                 "command": "dendron.lookupSchema",

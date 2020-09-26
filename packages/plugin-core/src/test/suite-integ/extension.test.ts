@@ -42,7 +42,7 @@ import {
 } from "../../commands/GoToSiblingCommand";
 import { GoUpCommand } from "../../commands/GoUpCommand";
 import { ImportPodCommand } from "../../commands/ImportPod";
-import { LookupCommand } from "../../commands/LookupCommand";
+import { LookupCommand, LookupCommandOpts } from "../../commands/LookupCommand";
 import { RefactorHierarchyCommand } from "../../commands/RefactorHierarchy";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import { RenameNoteV2Command } from "../../commands/RenameNoteV2";
@@ -879,8 +879,13 @@ suite("commands", function () {
         ) => {
           return opts?.value;
         };
-        const resp = (await new CreateJournalCommand().run()) as vscode.Uri;
-        assert.ok(resp.fsPath.indexOf("dendron.journal") > 0);
+        const resp = (
+          await new LookupCommand().run({
+            noteType: "journal",
+          } as LookupCommandOpts)
+        )?.value as string;
+        const found = resp.indexOf("dendron.journal") >= 0;
+        assert.ok(found);
         done();
       });
       setupDendronWorkspace(root.name, ctx);
@@ -903,8 +908,12 @@ suite("commands", function () {
         ) => {
           return opts?.value;
         };
-        const resp = (await new CreateJournalCommand().run()) as vscode.Uri;
-        assert.ok(resp.fsPath.indexOf("bar.one.journal") > 0);
+        const resp = (
+          await new LookupCommand().run({
+            noteType: "journal",
+          } as LookupCommandOpts)
+        )?.value as string;
+        assert.ok(resp.indexOf("bar.one.journal") >= 0);
         done();
       });
     });
@@ -925,8 +934,12 @@ suite("commands", function () {
         ) => {
           return opts?.value;
         };
-        const resp = (await new CreateJournalCommand().run()) as vscode.Uri;
-        assert.ok(resp.fsPath.indexOf("dendron.faq.journal") > 0);
+        const resp = (
+          await new LookupCommand().run({
+            noteType: "journal",
+          } as LookupCommandOpts)
+        )?.value as string;
+        assert.ok(resp.indexOf("dendron.faq.journal") >= 0);
         done();
       });
     });
@@ -947,8 +960,12 @@ suite("commands", function () {
         ) => {
           return opts?.value;
         };
-        const resp = (await new CreateJournalCommand().run()) as vscode.Uri;
-        assert.ok(resp.fsPath.indexOf("dendron.foo") > 0);
+        const resp = (
+          await new LookupCommand().run({
+            noteType: "journal",
+          } as LookupCommandOpts)
+        )?.value as string;
+        assert.ok(resp.indexOf("dendron.foo") >= 0);
         done();
       });
     });
@@ -969,8 +986,12 @@ suite("commands", function () {
         ) => {
           return opts?.value;
         };
-        const resp = (await new CreateJournalCommand().run()) as vscode.Uri;
-        assert.ok(path.basename(resp.fsPath).startsWith("journal"));
+        const resp = (
+          await new LookupCommand().run({
+            noteType: "journal",
+          } as LookupCommandOpts)
+        )?.value as string;
+        assert.ok(resp.startsWith("journal"));
         done();
       });
     });

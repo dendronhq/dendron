@@ -20,7 +20,7 @@ function updateConfig(configuration) {
 
 function updateCommands(contributes) {
   console.log("update commands...");
-  const commands = _.map(DENDRON_COMMANDS, (ent) => {
+  const commands = _.map(_.filter(DENDRON_COMMANDS, ent => _.isUndefined(ent.shortcut)), (ent) => {
     const configProps = _.omit(ent, [
       "key",
       "keybindings",

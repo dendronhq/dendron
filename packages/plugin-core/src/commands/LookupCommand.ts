@@ -1,4 +1,5 @@
 import { LookupController } from "../components/lookup/LookupController";
+import { DendronQuickPicker } from "../components/lookup/LookupProvider";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -11,7 +12,7 @@ type CommandOpts = {
   noteType?: LookupNoteType;
 };
 
-type CommandOutput = void;
+type CommandOutput = DendronQuickPicker;
 
 export { CommandOpts as LookupCommandOpts };
 
@@ -26,6 +27,6 @@ export class LookupCommand extends BasicCommand<CommandOpts, CommandOutput> {
       opts
     );
     const resp = await VSCodeUtils.extractRangeFromActiveEditor();
-    controller.show({ ...resp });
+    return controller.show({ ...resp });
   }
 }

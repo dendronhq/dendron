@@ -25,11 +25,7 @@ export class CopyNoteRefCommand extends BasicCommand<
     window.showInformationMessage(`${link} copied`);
   }
 
-  isHeader(
-    text: string,
-    selection: Selection,
-    editor: TextEditor
-  ): false | string {
+  isHeader(selection: Selection, editor: TextEditor): false | string {
     // multi-line
     if (selection.start.line !== selection.end.line) {
       return false;
@@ -39,7 +35,7 @@ export class CopyNoteRefCommand extends BasicCommand<
       new Position(selection.start.line + 1, 0)
     );
     const headerText = _.trim(editor.document.getText(lineRange).slice(0, -1));
-    if (text.startsWith("#")) {
+    if (headerText.startsWith("#")) {
       return headerText;
     } else {
       return false;
@@ -69,7 +65,7 @@ export class CopyNoteRefCommand extends BasicCommand<
     const { text, selection, editor } = VSCodeUtils.getSelection();
     let refLinkString: string = refLink2String(link);
     if (!_.isEmpty(text)) {
-      const maybeHeaderText = this.isHeader(text, selection, editor);
+      const maybeHeaderText = this.isHeader(selection, editor);
       if (maybeHeaderText) {
         link.anchorStart = maybeHeaderText;
         if (this.hasNextHeader({ selection })) {

@@ -18,8 +18,11 @@
 	"main": "out/server.js",
 	"types": "out/server.d.js",
 	"dependencies": {
+		"@dendronhq/api-server": "^0.12.3",
+		"@dendronhq/common-all": "^0.12.3",
 		"@dendronhq/engine-server": "^0.12.3",
-		"@dendronhq/express-server": "^0.12.3",
+		"fs-extra": "^9.0.1",
+		"lodash": "^4.17.20",
 		"vscode-languageserver": "^6.1.1",
 		"vscode-languageserver-textdocument": "^1.0.1",
 		"vscode-uri": "^2.1.2"
@@ -30,6 +33,8 @@
 	},
 	"gitHead": "b747a42e317e52137dd2aa740805d44e33b77ee8",
 	"devDependencies": {
+		"@types/fs-extra": "^9.0.1",
+		"@types/lodash": "^4.14.161",
 		"copy-webpack-plugin": "^6.1.1",
 		"ts-loader": "^8.0.4",
 		"webpack": "^4.44.2",

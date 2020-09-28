@@ -89,10 +89,11 @@ export async function _activate(context: vscode.ExtensionContext) {
       CONFIG.USE_EXPERIMENTAL_LSP_SUPPORT.key
     );
     Logger.info({ ctx, msg: "wsActive", lspSupport });
-
     if (lspSupport) {
       Logger.info({ ctx, msg: "start with lsp support" });
+      await DendronWorkspace.instance().activateWorkspace();
       startClient(context);
+      Logger.info({ ctx, msg: "exit" });
       return;
     } else {
       // startClient(context);

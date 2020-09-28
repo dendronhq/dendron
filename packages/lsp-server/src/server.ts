@@ -1,4 +1,4 @@
-import { DendronEngine } from "@dendronhq/engine-server";
+import { DendronEngine, FileStorage } from "@dendronhq/engine-server";
 /* --------------------------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License. See License.txt in the project root for license information.
@@ -17,11 +17,17 @@ import {
   TextDocumentSyncKind,
   InitializeResult,
 } from "vscode-languageserver";
-import { app } from "@dendronhq/express-server";
+import { app } from "@dendronhq/api-server";
+import fs from "fs-extra";
+import path from "path";
+import { CONSTANTS } from "@dendronhq/common-all";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
 import { LSPUtils } from "./utils";
+import { DendronInitializationOptions } from "./types";
+import { getSettings, updateSettings } from "./settings";
+import _ from "lodash";
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -38,6 +44,12 @@ let hasDiagnosticRelatedInformationCapability: boolean = false;
 connection.onInitialize((params: InitializeParams) => {
   connection.console.log("conneciton initializing");
   let capabilities = params.capabilities;
+  const dendronOptions = params.initializationOptions as DendronInitializationOptions;
+  if (!dendronOptions) {
+    connection.console.error("no dendron options found");
+    throw Error("no dendron options found");
+  }
+  updateSettings(dendronOptions);
 
   // Does the client support the `workspace/configuration` request?
   // If not, we fall back using global settings.
@@ -90,10 +102,17 @@ connection.onInitialized(async () => {
     const uri = URI.parse(wsFolders[0].uri);
     DendronEngine.getOrCreateEngine({ root: uri.fsPath, forceNew: true });
     connection.console.log("engine initialized");
-
+    const settings = getSettings();
+    connection.console.log(`settings: ${JSON.stringify(settings)}`);
     // initialize express
-    app.listen(6030, () => {
-      connection.console.log("express started");
+    const server = app.listen(0, () => {
+      const port = (server.address() as any).port;
+      connection.console.log(`express started on ${port}`);
+      fs.writeFileSync(
+        path.join(path.dirname(settings.wsRoot), CONSTANTS.DENDRON_SERVER_PORT),
+        port,
+        { encoding: "utf-8" }
+      );
     });
   }
 });

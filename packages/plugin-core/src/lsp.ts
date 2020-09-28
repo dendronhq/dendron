@@ -8,6 +8,7 @@ import {
   TransportKind,
 } from "vscode-languageclient";
 import { Logger } from "./logger";
+import { DendronWorkspace } from "./workspace";
 
 export function startClient(context: ExtensionContext) {
   // The server is implemented in node
@@ -60,7 +61,10 @@ export function startClient(context: ExtensionContext) {
     documentSelector: [{ scheme: "file", language: "markdown" }],
     synchronize: {
       // Notify the server about file changes to '.clientrc files contained in the workspace
-      fileEvents: workspace.createFileSystemWatcher("**/.clientrc"),
+      fileEvents: workspace.createFileSystemWatcher("dendron.yml"),
+    },
+    initializationOptions: {
+      wsRoot: DendronWorkspace.workspaceFile().fsPath,
     },
   };
 

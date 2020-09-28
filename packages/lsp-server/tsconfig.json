@@ -4,6 +4,7 @@
 		"lib": ["ES2019"],
 		"module": "commonjs",
 		"moduleResolution": "node",
+		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,

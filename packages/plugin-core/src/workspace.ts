@@ -1,4 +1,10 @@
-import { DendronConfig, DEngine, getStage, Note } from "@dendronhq/common-all";
+import {
+  CONSTANTS,
+  DendronConfig,
+  DEngine,
+  getStage,
+  Note,
+} from "@dendronhq/common-all";
 import { mdFile2NodeProps, readMD } from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -49,8 +55,13 @@ import { DendronTreeView } from "./views/DendronTreeView";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
+export type ServerConfiguration = {
+  serverPort: string;
+};
+
 export class DendronWorkspace {
   static DENDRON_WORKSPACE_FILE: string = "dendron.code-workspace";
+  static _SERVER_CONFIGURATION: Partial<ServerConfiguration>;
   public dendronTreeView: DendronTreeView | undefined;
 
   static instance(): DendronWorkspace {
@@ -58,6 +69,13 @@ export class DendronWorkspace {
       throw Error("Dendronworkspace not initialized");
     }
     return _DendronWorkspace;
+  }
+
+  static serverConfiguration() {
+    if (!DendronWorkspace._SERVER_CONFIGURATION) {
+      DendronWorkspace._SERVER_CONFIGURATION = {};
+    }
+    return DendronWorkspace._SERVER_CONFIGURATION as ServerConfiguration;
   }
 
   /**
@@ -147,6 +165,7 @@ export class DendronWorkspace {
 
   public context: vscode.ExtensionContext;
   public fsWatcher?: vscode.FileSystemWatcher;
+  public serverWatcher?: vscode.FileSystemWatcher;
   public L: typeof Logger;
   public _engine?: DEngine;
   private disposableStore: DisposableStore;
@@ -574,6 +593,8 @@ export class DendronWorkspace {
    */
   async activateWorkspace() {
     const ctx = "activateWorkspace";
+    const stage = getStage();
+    this.L.info({ ctx, stage, msg: "enter" });
     let workspaceFolders: readonly vscode.WorkspaceFolder[] = [];
     const rootDir = DendronWorkspace.rootDir();
     if (!rootDir) {
@@ -590,8 +611,9 @@ export class DendronWorkspace {
       throw Error("no folders set for workspace");
     }
     workspaceFolders = wsFolders;
-    if (getStage() !== "test") {
+    if (stage !== "test") {
       this.createWorkspaceWatcher(workspaceFolders);
+      this.createServerWatcher();
     }
   }
 
@@ -600,6 +622,43 @@ export class DendronWorkspace {
     this.L.info({ ctx });
     this.fsWatcher?.dispose();
     this.disposableStore.dispose();
+  }
+
+  async createServerWatcher() {
+    const ctx = "createServerWatcher";
+    this.L.info({ ctx });
+    const portFile = path.join(
+      path.dirname(DendronWorkspace.workspaceFile().fsPath),
+      CONSTANTS.DENDRON_SERVER_PORT
+    );
+    this.serverWatcher = vscode.workspace.createFileSystemWatcher(
+      portFile,
+      false,
+      false,
+      false
+    );
+    const updateServerConfig = (uri: vscode.Uri) => {
+      const port = _.trim(fs.readFileSync(uri.fsPath, { encoding: "utf-8" }));
+      DendronWorkspace.serverConfiguration()["serverPort"] = port;
+      const ctx = "updateServerConfig";
+      this.L.info({ ctx, msg: "update serverConfig", port });
+    };
+
+    this.disposableStore.add(
+      this.serverWatcher.onDidCreate(async (uri: vscode.Uri) => {
+        const ctx = "createServerWatcher.onDidCreate";
+        this.L.info({ ctx, uri });
+        updateServerConfig(uri);
+      }, this)
+    );
+
+    this.disposableStore.add(
+      this.serverWatcher.onDidChange(async (uri: vscode.Uri) => {
+        const ctx = "createServerWatcher.onDidChange";
+        this.L.info({ ctx, uri });
+        updateServerConfig(uri);
+      }, this)
+    );
   }
 
   async createWorkspaceWatcher(

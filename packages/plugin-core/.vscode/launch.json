@@ -58,6 +58,22 @@
         "STAGE": "test"
       },
       "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
+    },
+    {
+      "name": "Extension Integ Tests - File",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionTestsPath=${workspaceFolder}/out/test/suite-integ/index"
+      ],
+      "env": {
+        "STAGE": "test",
+        "TEST_TO_RUN": "${fileBasenameNoExtension}"
+      },
+      "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
     }
     // {
     //   "name": "Extension Integ Tests with WS Root",

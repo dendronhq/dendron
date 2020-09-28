@@ -12,7 +12,12 @@ export function run(): Promise<void> {
   const testsRoot = path.resolve(__dirname, ".");
 
   return new Promise((c, e) => {
-    glob("**/*.test.js", { cwd: testsRoot }, (err, files) => {
+    const fname = process.env.TEST_TO_RUN;
+    let pattern = "**/*.test.js";
+    if (fname) {
+      pattern = `**/${fname}.js`;
+    }
+    glob(pattern, { cwd: testsRoot }, (err, files) => {
       if (err) {
         return e(err);
       }

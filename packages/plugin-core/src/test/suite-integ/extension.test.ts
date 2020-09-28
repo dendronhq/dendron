@@ -31,7 +31,6 @@ import { ConfigurePodCommand } from "../../commands/ConfigurePodCommand";
 import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
 import { CopyNoteRefCommand } from "../../commands/CopyNoteRef";
 import { CopyNoteURLCommand } from "../../commands/CopyNoteURL";
-import { CreateJournalCommand } from "../../commands/CreateJournal";
 import { CreateScratchCommand } from "../../commands/CreateScratch";
 import { DoctorCommand } from "../../commands/Doctor";
 import { ExportPodCommand } from "../../commands/ExportPod";

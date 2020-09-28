@@ -54,6 +54,8 @@ suite("startup", function () {
         ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
         undefined
       );
+
+      // setup workspace
       new SetupWorkspaceCommand()
         .execute({
           rootDirRaw: root.name,
@@ -75,7 +77,7 @@ suite("startup", function () {
   });
 });
 
-suite.skip("startup with lsp", function () {
+suite.only("startup with lsp", function () {
   this.timeout(TIMEOUT);
   let ctx: ExtensionContext;
   let root: DirResult;

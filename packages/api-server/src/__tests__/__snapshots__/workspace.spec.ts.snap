@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`main one 1`] = `
+Object {
+  "data": Object {
+    "data": Object {
+      "workspaces": Array [
+        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64249-fLvqZ05ZwBKx",
+        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64291-BwBDHpE4HQ4h",
+        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64308-XZ85DCzNFKkz",
+        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64338-60jW5p7H4vMz",
+        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64358-x4y66CCpQ332",
+        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64573-t4pTIVfNe5og",
+        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64634-KmLHRSTtvYAr",
+        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64654-oFYKaUuWnVMn",
+        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64699-7Roxtb23eo0O",
+        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64727-La9xl7PSZwYo",
+      ],
+    },
+    "error": null,
+  },
+  "error": null,
+}
+`;

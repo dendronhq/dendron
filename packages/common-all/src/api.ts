@@ -1,6 +1,7 @@
 import _ from "lodash";
 import request from "request-promise";
 import { createLogger } from "./logger";
+import { DEngineQuery } from "./types";
 // import { nonEmptyGet, unwrapGet, unwrapSearch } from "./es";
 // import { L } from "./logger";
 // import { PlainNode } from "./nodev2";
@@ -116,6 +117,8 @@ type WorkspaceInitRequest = {
   config: any;
 };
 
+export type EngineQueryRequest = DEngineQuery & { ws: string };
+
 // === Base
 
 export abstract class API {
@@ -128,6 +131,9 @@ export abstract class API {
       statusHandlers: {},
       onAuth: async ({ headers }: IRequestArgs): Promise<any> => headers,
       onBuildHeaders: ({ headers }: IRequestArgs): Promise<any> => headers,
+      onError: (args: any) => {
+        console.log(args);
+      },
     });
 
     this.opts = opts as IAPIOpts;
@@ -232,7 +238,7 @@ export abstract class API {
 
 // === DendronAPI
 
-export abstract class DendronAPI extends API {
+export class DendronAPI extends API {
   static instance: DendronAPI;
 
   // TODO
@@ -258,13 +264,30 @@ export abstract class DendronAPI extends API {
   //   return payload;
   // }
 
-  async initialize(req: WorkspaceInitRequest): Promise<InitializePayload> {
-    const resp = this._makeRequest({
-      path: "schema/qp",
+  async workspaceInit(req: WorkspaceInitRequest): Promise<InitializePayload> {
+    const resp = await this._makeRequest({
+      path: "workspace/initialize",
       method: "post",
       body: {
         ...req,
       },
+    });
+    return this._createPayload(resp);
+  }
+
+  async workspaceList(): Promise<InitializePayload> {
+    const resp = await this._makeRequest({
+      path: "workspace/all",
+      method: "get",
+    });
+    return this._createPayload(resp);
+  }
+
+  async engineQuery(req: EngineQueryRequest): Promise<any> {
+    const resp = await this._makeRequest({
+      path: "engine/query",
+      method: "post",
+      body: req,
     });
     return this._createPayload(resp);
   }

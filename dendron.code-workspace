@@ -28,6 +28,9 @@
       "path": "packages/express-server"
     },
     {
+      "path": "packages/express-client"
+    },
+    {
       "path": "packages/dendron-snippet-maker"
     },
     {

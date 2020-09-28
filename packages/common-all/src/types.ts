@@ -320,6 +320,12 @@ export type DEngineOpts = {
   mode?: DEngineMode;
 };
 
+export type DEngineQuery = {
+  queryString: string;
+  mode: QueryMode;
+  opts?: QueryOpts;
+};
+
 /**
  * Query: path based
  * Get: id based

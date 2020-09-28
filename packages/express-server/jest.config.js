@@ -1,5 +1,9 @@
 const jestConfig = require("../../jest.config");
 
 module.exports = {
-  ...jestConfig,
+  preset: 'ts-jest',
+  testMatch: [
+    "**/__tests__/**/*.ts?(x)",
+    "**/?(*.)+(spec|test).ts?(x)"
+  ]
 };

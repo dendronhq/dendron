@@ -5,6 +5,7 @@ import path from "path";
 import tmp, { DirResult } from "tmp";
 import { readYAML, node2MdFile } from "./files";
 import { NoteRawProps, Note, DNodeRawProps } from "@dendronhq/common-all";
+import { tmpDir } from "../lib";
 
 export { DirResult };
 // eslint-disable-next-line no-undef
@@ -169,9 +170,23 @@ export type DendronVaultOpts = {
   copyFixtures?: boolean;
 };
 
+type SetupVaultOpts = {
+  vaultDir?: string;
+  initDirCb?: (vaultPath: string) => void;
+};
+
 export class EngineTestUtils {
+  static async setupVault(opts: SetupVaultOpts): Promise<string> {
+    let vaultDir = opts.vaultDir ? opts.vaultDir : tmpDir().name;
+    if (opts?.initDirCb) {
+      await opts.initDirCb(vaultDir);
+    }
+    return vaultDir;
+  }
+
   /**
    * setupStoreDir
+   * - storeDstPath: the vault directory
    */
   static setupStoreDir(opts?: {
     storeDirSrc?: string;

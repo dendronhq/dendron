@@ -10,7 +10,7 @@
         "path": "packages/common-all"
       },
       {
-        "path": "packages/express-client"
+        "path": "packages/api-server"
       },
       {
         "path": "packages/lsp-client"
@@ -18,9 +18,9 @@
       {
         "path": "packages/express-server"
       },
-      {
-        "path": "vendor/vscode-languageserver-node"
-      },
+      // {
+      //   "path": "vendor/vscode-languageserver-node"
+      // },
     ],
     "settings": {
       "files.exclude": {

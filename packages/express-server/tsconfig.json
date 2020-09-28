@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": "./",
     "emitDecoratorMetadata": true,
     "declaration": true,
     "esModuleInterop": true,
@@ -21,7 +20,7 @@
     ]
   },
   "include": [
-    "src/**/*.ts",
+    "src/**/*",
   ],
   "exclude": [
     "src/public/"

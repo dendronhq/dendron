@@ -1,0 +1,85 @@
+{
+  "name": "@dendronhq/api-server",
+  "version": "0.12.3",
+  "description": "",
+  "license": "GPLv3",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/dendronhq/dendron.git",
+    "directory": "packages/api-server"
+  },
+  "author": {
+    "name": "Kevin Lin",
+    "email": "kevin@thence.io",
+    "url": "https://kevinslin.com"
+  },
+  "keywords": [],
+  "files": [
+    "lib"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "clean": "rimraf lib && rimraf coverage",
+    "format": "prettier --ignore-path='../../.prettierignore' --write .",
+    "lint": "echo stub",
+    "prepublishOnly": "npm run build",
+    "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
+    "build": "npm run compile",
+    "compile": "tsc -p tsconfig.json",
+    "test": "npx jest",
+    "coverage": "jest --coverage",
+    "watch": "npm run compile -- --watch",
+    "test:unit": "jest ",
+    "test:unit:debug": "NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:watch": "LOG_DST=/tmp/pods-core.txt jest --watch",
+    "start:integ": "env PORT=3005 npx ts-node ./src/start.ts",
+    "start:integ:debug": "env PORT=3005 TS_NODE_LOG_ERROR=1 node --inspect -r ts-node/register ./src/start.ts",
+    "start:integ:watch": "env PORT=3005 npx nodemon"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.1",
+    "@types/jest": "^26.0.13",
+    "@types/lodash": "^4.14.161",
+    "@types/express": "^4.17.8",
+    "@types/node": "13.11.0",
+    "@types/morgan": "^1.9.1",
+    "jest": "^23.6.0",
+    "prettier": "2.0.5",
+    "rimraf": "^2.6.2",
+    "ts-jest": "^23.10.3",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.1.1"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "jest": {
+    "preset": "ts-jest"
+  },
+  "dependencies": {
+    "@dendronhq/common-all": "^0.12.3",
+    "@dendronhq/common-server": "^0.12.3",
+    "@dendronhq/engine-server": "^0.12.3",
+    "morgan": "^1.10.0",
+    "fs-extra": "^9.0.1",
+    "nodemon": "^2.0.4",
+    "http-status-codes": "^2.1.4",
+    "klaw": "^3.0.0",
+    "lodash": "^4.17.20",
+    "express": "^4.17.1"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src"
+    ],
+    "ext": "ts, html",
+    "ignore": [
+      "src/public"
+    ],
+    "exec": "ts-node --log-error ./src/start.ts"
+  }
+}

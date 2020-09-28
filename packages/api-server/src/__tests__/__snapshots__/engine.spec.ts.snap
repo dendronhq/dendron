@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`main one 1`] = `
+Object {
+  "data": Object {
+    "data": undefined,
+    "error": [StatusCodeError: 404 - "<!DOCTYPE html>\\n<html lang=\\"en\\">\\n<head>\\n<meta charset=\\"utf-8\\">\\n<title>Error</title>\\n</head>\\n<body>\\n<pre>Cannot POST /api/engine/query</pre>\\n</body>\\n</html>\\n"],
+  },
+  "error": null,
+}
+`;

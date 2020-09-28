@@ -64,7 +64,7 @@ export function startClient(context: ExtensionContext) {
       fileEvents: workspace.createFileSystemWatcher("dendron.yml"),
     },
     initializationOptions: {
-      wsRoot: DendronWorkspace.workspaceFile().fsPath,
+      wsRoot: path.dirname(DendronWorkspace.workspaceFile().fsPath),
     },
   };
 

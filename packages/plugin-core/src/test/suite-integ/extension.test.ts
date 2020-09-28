@@ -73,6 +73,7 @@ import {
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
+import { onWSActive, onWSInit, setupWorkspace } from "../testUtils";
 
 type ExportConfig = any;
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {
@@ -229,33 +230,11 @@ function setupDendronWorkspace(
     });
 }
 
-function onWSActive(cb: Function) {
-  HistoryService.instance().subscribe(
-    "extension",
-    async (_event: HistoryEvent) => {
-      if (_event.action === "activate") {
-        await cb();
-      }
-    }
-  );
-}
-
 function onWSUpgraded(cb: Function) {
   HistoryService.instance().subscribe(
     "extension",
     async (_event: HistoryEvent) => {
       if (_event.action === "upgraded") {
-        await cb();
-      }
-    }
-  );
-}
-
-function onWSInit(cb: Function) {
-  HistoryService.instance().subscribe(
-    "extension",
-    async (_event: HistoryEvent) => {
-      if (_event.action === "initialized") {
         await cb();
       }
     }
@@ -275,21 +254,6 @@ let ctx: vscode.ExtensionContext;
 
 const TIMEOUT = 60 * 1000 * 5;
 
-function setupWorkspace(root: string) {
-  DendronWorkspace.configuration = () => {
-    return createMockConfig({
-      dendron: {},
-    });
-  };
-  DendronWorkspace.workspaceFile = () => {
-    return vscode.Uri.file(path.join(root, "dendron.code-workspace"));
-  };
-  DendronWorkspace.workspaceFolders = () => {
-    const uri = vscode.Uri.file(path.join(root, "vault"));
-    return [{ uri, name: "vault", index: 0 }];
-  };
-}
-
 suite("manual", function () {
   before(function () {
     ctx = VSCodeUtils.getOrCreateMockContext();
@@ -306,19 +270,6 @@ suite("manual", function () {
 
   describe("SetupWorkspaceCommand", function () {
     this.timeout(TIMEOUT);
-
-    test("first time setup", function (done) {
-      setupWorkspace(root.name);
-      VSCodeUtils.gatherFolderPath = () => Promise.resolve(root.name);
-      // @ts-ignore
-      VSCodeUtils.showQuickPick = () =>
-        Promise.resolve("initialize empty repository");
-      const cmd = new SetupWorkspaceCommand();
-      cmd.gatherInputs().then((resp) => {
-        assert.deepEqual(resp, { rootDirRaw: root.name, emptyWs: false });
-        done();
-      });
-    });
 
     test("not first time setup", function (done) {
       setupWorkspace(root.name);
@@ -367,47 +318,6 @@ suite.skip("startup", function () {
       _activate(ctx);
       onWSActive(async (_event: HistoryEvent) => {
         assert.equal(DendronWorkspace.isActive(), false);
-        done();
-      });
-    });
-
-    test("workspace active, no prior workspace version", function (done) {
-      const priorVersion = DendronWorkspace.version;
-      DendronWorkspace.configuration()
-        .update("dendron.rootDir", ".")
-        .then(() => {
-          DendronWorkspace.workspaceFolders = () => {
-            const uri = vscode.Uri.file(path.join(root.name, "vault"));
-            return [{ uri, name: "vault", index: 0 }];
-          };
-          DendronWorkspace.version = () => "0.0.1";
-
-          new SetupWorkspaceCommand()
-            .execute({
-              rootDirRaw: root.name,
-              skipOpenWs: true,
-              skipConfirmation: true,
-            })
-            .then(() => {
-              _activate(ctx);
-            });
-        });
-
-      onWSActive((_event: HistoryEvent) => {
-        assert.equal(DendronWorkspace.isActive(), true);
-        const config = fs.readJSONSync(
-          path.join(root.name, DendronWorkspace.DENDRON_WORKSPACE_FILE)
-        );
-        const wsFolders = DendronWorkspace.workspaceFolders() as vscode.WorkspaceFolder[];
-        const wsRoot = wsFolders[0].uri.fsPath;
-        const snippetsPath = path.join(
-          wsRoot,
-          ".vscode",
-          "dendron.code-snippets"
-        );
-        assert.ok(fs.existsSync(snippetsPath));
-        assert.deepEqual(config, expectedSettings());
-        DendronWorkspace.version = priorVersion;
         done();
       });
     });

@@ -20,7 +20,7 @@ import {
 import { app } from "@dendronhq/api-server";
 import fs from "fs-extra";
 import path from "path";
-import { CONSTANTS } from "@dendronhq/common-all";
+import { CONSTANTS, getStage } from "@dendronhq/common-all";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
@@ -42,7 +42,8 @@ let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
 
 connection.onInitialize((params: InitializeParams) => {
-  connection.console.log("conneciton initializing");
+  const ctx = "connection:onInitialize";
+  LSPUtils.log({ ctx: "enter" });
   let capabilities = params.capabilities;
   const dendronOptions = params.initializationOptions as DendronInitializationOptions;
   if (!dendronOptions) {
@@ -81,10 +82,15 @@ connection.onInitialize((params: InitializeParams) => {
       },
     };
   }
+  LSPUtils.log({ ctx: "exit" });
   return result;
 });
 
 connection.onInitialized(async () => {
+  const ctx = "connection:onInitialized";
+  const stage = getStage();
+  LSPUtils.log({ ctx: "enter", stage });
+
   if (hasConfigurationCapability) {
     // Register for all configuration changes.
     connection.client.register(
@@ -92,6 +98,10 @@ connection.onInitialized(async () => {
       undefined
     );
   }
+  if (stage === "test") {
+    hasWorkspaceFolderCapability = true;
+  }
+
   if (hasWorkspaceFolderCapability) {
     connection.workspace.onDidChangeWorkspaceFolders((_event) => {
       connection.console.log("Workspace folder change event received.");
@@ -101,15 +111,14 @@ connection.onInitialized(async () => {
   if (wsFolders && wsFolders[0]) {
     const uri = URI.parse(wsFolders[0].uri);
     DendronEngine.getOrCreateEngine({ root: uri.fsPath, forceNew: true });
-    connection.console.log("engine initialized");
     const settings = getSettings();
-    connection.console.log(`settings: ${JSON.stringify(settings)}`);
+    LSPUtils.log({ ctx, msg: "post-engine-init", settings });
     // initialize express
     const server = app.listen(0, () => {
       const port = (server.address() as any).port;
-      connection.console.log(`express started on ${port}`);
+      LSPUtils.log({ ctx, msg: "post-express-init", port });
       fs.writeFileSync(
-        path.join(path.dirname(settings.wsRoot), CONSTANTS.DENDRON_SERVER_PORT),
+        path.join(settings.wsRoot, CONSTANTS.DENDRON_SERVER_PORT),
         port,
         { encoding: "utf-8" }
       );

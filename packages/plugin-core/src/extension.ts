@@ -1,4 +1,5 @@
 import { DendronAPI, getStage } from "@dendronhq/common-all";
+import { DendronEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import semver from "semver";
@@ -11,6 +12,7 @@ import {
 } from "./constants";
 import { Logger } from "./logger";
 import { startClient } from "./lsp";
+import { EngineAPIService } from "./services/EngineAPIService";
 import { HistoryEvent, HistoryService } from "./services/HistoryService";
 import { Extensions } from "./settings";
 import { VSCodeUtils } from "./utils";
@@ -18,8 +20,6 @@ import { MarkdownUtils } from "./utils/md";
 import { getOS } from "./utils/system";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronWorkspace } from "./workspace";
-import { EngineAPIService } from "./services/EngineAPIService";
-import { DendronEngine } from "@dendronhq/engine-server";
 
 // === Main
 // this method is called when your extension is activated
@@ -30,6 +30,17 @@ export function activate(context: vscode.ExtensionContext) {
     _activate(context);
   }
   return;
+}
+
+async function reloadWorkspace() {
+  const ctx = "reloadWorkspace";
+  const ws = DendronWorkspace.instance();
+  await ws.reloadWorkspace();
+  Logger.info({ ctx, msg: "post-reload-ws" });
+  // help with debug
+  fs.readJSON(DendronWorkspace.workspaceFile().fsPath).then((config) => {
+    Logger.info({ ctx, msg: "gotConfig", config });
+  });
 }
 
 export async function _activate(context: vscode.ExtensionContext) {
@@ -105,12 +116,12 @@ export async function _activate(context: vscode.ExtensionContext) {
             ws._engine = new EngineAPIService(api);
             await ws.engine.init();
             Logger.info({ ctx, msg: "fin init Engine" });
+            await reloadWorkspace();
           }
         }
       );
       startClient(context);
       Logger.info({ ctx, msg: "fin startClient" });
-      return;
     } else {
       ws._engine = DendronEngine.getOrCreateEngine({
         root: ws.rootWorkspace.uri.fsPath,

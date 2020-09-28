@@ -1,10 +1,133 @@
+import {
+  DirResult,
+  FileTestUtils,
+  NodeTestUtils,
+} from "@dendronhq/common-server";
 import * as assert from "assert";
-import { afterEach, before, beforeEach, describe, it } from "mocha";
+import _ from "lodash";
+import { afterEach, beforeEach, describe, it } from "mocha";
+import { ExtensionContext, WorkspaceFolder } from "vscode";
+import { ResetConfigCommand } from "../../commands/ResetConfig";
+import { SetupWorkspaceCommand } from "../../commands/SetupWorkspace";
+import { WORKSPACE_STATE } from "../../constants";
+import { _activate } from "../../extension";
+import { HistoryEvent, HistoryService } from "../../services/HistoryService";
+import { VSCodeUtils } from "../../utils";
+import { DendronWorkspace } from "../../workspace";
+import { onWSInit, setupWorkspace } from "../testUtils";
+
+const TIMEOUT = 60 * 1000 * 5;
 
 suite("startup", function () {
-  describe("foo", function () {
-    it("sanity", function () {
-      assert.strictEqual(1, 1);
+  this.timeout(TIMEOUT);
+  let ctx: ExtensionContext;
+  let root: DirResult;
+
+  describe("workspace", function () {
+    beforeEach(async function () {
+      ctx = VSCodeUtils.getOrCreateMockContext();
+      DendronWorkspace.getOrCreate(ctx);
+      await new ResetConfigCommand().execute({ scope: "all" });
+      root = FileTestUtils.tmpDir();
+    });
+
+    afterEach(function () {
+      HistoryService.instance().clearSubscriptions();
+    });
+
+    it("workspace active, no prior workspace version", function (done) {
+      setupWorkspace(root.name);
+      onWSInit((_event: HistoryEvent) => {
+        assert.strictEqual(DendronWorkspace.isActive(), true);
+        assert.strictEqual(
+          ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
+          "0.0.1"
+        );
+        const engine = DendronWorkspace.instance().engine;
+        assert.strictEqual(_.values(engine.notes).length, 2);
+        assert.strictEqual(engine.notes["id.foo"].fname, "foo");
+        done();
+      });
+
+      DendronWorkspace.version = () => "0.0.1";
+      assert.strictEqual(
+        ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
+        undefined
+      );
+      new SetupWorkspaceCommand()
+        .execute({
+          rootDirRaw: root.name,
+          skipOpenWs: true,
+          skipConfirmation: true,
+          emptyWs: true,
+        })
+        .then(async () => {
+          const wsFolder = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
+          NodeTestUtils.createNotes(wsFolder[0].uri.fsPath, [
+            {
+              id: "id.foo",
+              fname: "foo",
+            },
+          ]);
+          _activate(ctx);
+        });
+    });
+  });
+});
+
+suite.skip("startup with lsp", function () {
+  this.timeout(TIMEOUT);
+  let ctx: ExtensionContext;
+  let root: DirResult;
+
+  describe("workspace", function () {
+    beforeEach(async function () {
+      ctx = VSCodeUtils.getOrCreateMockContext();
+      DendronWorkspace.getOrCreate(ctx);
+      await new ResetConfigCommand().execute({ scope: "all" });
+      root = FileTestUtils.tmpDir();
+    });
+
+    afterEach(function () {
+      HistoryService.instance().clearSubscriptions();
+    });
+
+    it("workspace active, no prior workspace version", function (done) {
+      setupWorkspace(root.name, { lsp: true });
+      onWSInit((_event: HistoryEvent) => {
+        assert.strictEqual(DendronWorkspace.isActive(), true);
+        assert.strictEqual(
+          ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
+          "0.0.1"
+        );
+        const engine = DendronWorkspace.instance().engine;
+        assert.strictEqual(_.values(engine.notes).length, 2);
+        assert.strictEqual(engine.notes["id.foo"].fname, "foo");
+        done();
+      });
+
+      DendronWorkspace.version = () => "0.0.1";
+      assert.strictEqual(
+        ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
+        undefined
+      );
+      new SetupWorkspaceCommand()
+        .execute({
+          rootDirRaw: root.name,
+          skipOpenWs: true,
+          skipConfirmation: true,
+          emptyWs: true,
+        })
+        .then(async () => {
+          const wsFolder = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
+          NodeTestUtils.createNotes(wsFolder[0].uri.fsPath, [
+            {
+              id: "id.foo",
+              fname: "foo",
+            },
+          ]);
+          _activate(ctx);
+        });
     });
   });
 });

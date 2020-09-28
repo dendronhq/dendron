@@ -611,10 +611,10 @@ export class DendronWorkspace {
       throw Error("no folders set for workspace");
     }
     workspaceFolders = wsFolders;
-    if (stage !== "test") {
-      this.createWorkspaceWatcher(workspaceFolders);
-      this.createServerWatcher();
-    }
+    // if (stage !== "test") {
+    this.createWorkspaceWatcher(workspaceFolders);
+    this.createServerWatcher();
+    // }
   }
 
   async deactivate() {
@@ -647,6 +647,14 @@ export class DendronWorkspace {
         action: "changedPort",
       });
     };
+
+    // file watcher can't watch outside of workspace and our integ tests mock workspaces
+    if (getStage() === "test") {
+      fs.watchFile(portFile, () => {
+        fs.existsSync(portFile) &&
+          updateServerConfig(vscode.Uri.file(portFile));
+      });
+    }
 
     this.disposableStore.add(
       this.serverWatcher.onDidCreate(async (uri: vscode.Uri) => {

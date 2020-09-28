@@ -1,5 +1,4 @@
 import { DEngine } from "@dendronhq/common-all";
-import { DendronEngine } from "@dendronhq/engine-server";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -17,12 +16,7 @@ export class ReloadIndexCommand extends BasicCommand<
     const ctx = "ReloadIndex.execute";
     this.L.info({ ctx, msg: "enter" });
     const ws = DendronWorkspace.instance();
-    const root = ws.rootWorkspace.uri.fsPath;
-    const engine = DendronEngine.getOrCreateEngine({
-      root,
-      forceNew: true,
-      logger: ws.L,
-    });
+    const engine = ws.engine;
     await engine.init();
     ws._engine = engine;
     this.L.info({ ctx, msg: "exit" });

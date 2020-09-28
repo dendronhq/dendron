@@ -7,14 +7,22 @@ export type HistoryEvent = {
   uri?: Uri;
 };
 
-type HistoryEventSource = "engine" | "src" | "extension";
+type HistoryEventSource =
+  | "engine"
+  | "src"
+  | "extension"
+  | "lspServer"
+  | "apiServer";
 type HistoryEventAction =
   | "delete"
   | "create"
   | "activate"
   | "initialized"
   | "rename"
-  | "upgraded";
+  | "upgraded"
+  | APIServerEvent;
+
+export type APIServerEvent = "changedPort";
 
 type HistoryEventListenerFunc = (event: HistoryEvent) => void;
 
@@ -45,6 +53,8 @@ export class HistoryService implements IHistoryService {
       engine: [],
       src: [],
       extension: [],
+      lspServer: [],
+      apiServer: [],
     };
     this.pause = false;
   }
@@ -61,6 +71,8 @@ export class HistoryService implements IHistoryService {
       engine: [],
       src: [],
       extension: [],
+      lspServer: [],
+      apiServer: [],
     };
   }
 

@@ -114,7 +114,9 @@ const STATUS_HANDLERS = {
 
 type WorkspaceInitRequest = {
   uri: string;
-  config: any;
+  config: {
+    vaults: string[];
+  };
 };
 
 export type EngineQueryRequest = DEngineQuery & { ws: string };

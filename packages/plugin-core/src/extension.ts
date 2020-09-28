@@ -1,4 +1,4 @@
-import { getStage } from "@dendronhq/common-all";
+import { DendronAPI, getStage } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import semver from "semver";
@@ -11,13 +11,14 @@ import {
 } from "./constants";
 import { Logger } from "./logger";
 import { startClient } from "./lsp";
-import { HistoryService } from "./services/HistoryService";
+import { HistoryEvent, HistoryService } from "./services/HistoryService";
 import { Extensions } from "./settings";
 import { VSCodeUtils } from "./utils";
 import { MarkdownUtils } from "./utils/md";
 import { getOS } from "./utils/system";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronWorkspace } from "./workspace";
+import { EngineAPIService } from "./services/EngineAPIService";
 
 // === Main
 // this method is called when your extension is activated
@@ -92,8 +93,24 @@ export async function _activate(context: vscode.ExtensionContext) {
     if (lspSupport) {
       Logger.info({ ctx, msg: "start with lsp support" });
       await DendronWorkspace.instance().activateWorkspace();
+      HistoryService.instance().subscribe(
+        "apiServer",
+        async (event: HistoryEvent) => {
+          if (event.action === "changedPort") {
+            const port = DendronWorkspace.serverConfiguration().serverPort;
+            const api = new DendronAPI({
+              endpoint: `http://localhost:${port}`,
+              apiPath: "api",
+            });
+            const ws = DendronWorkspace.instance();
+            ws._engine = new EngineAPIService(api);
+            await ws.engine.init();
+            Logger.info({ ctx, msg: "fin init Engine" });
+          }
+        }
+      );
       startClient(context);
-      Logger.info({ ctx, msg: "exit" });
+      Logger.info({ ctx, msg: "fin startClient" });
       return;
     } else {
       // startClient(context);

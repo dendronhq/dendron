@@ -642,6 +642,10 @@ export class DendronWorkspace {
       DendronWorkspace.serverConfiguration()["serverPort"] = port;
       const ctx = "updateServerConfig";
       this.L.info({ ctx, msg: "update serverConfig", port });
+      HistoryService.instance().add({
+        source: "apiServer",
+        action: "changedPort",
+      });
     };
 
     this.disposableStore.add(

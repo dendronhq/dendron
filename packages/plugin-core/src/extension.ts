@@ -19,6 +19,7 @@ import { getOS } from "./utils/system";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronWorkspace } from "./workspace";
 import { EngineAPIService } from "./services/EngineAPIService";
+import { DendronEngine } from "@dendronhq/engine-server";
 
 // === Main
 // this method is called when your extension is activated
@@ -73,7 +74,6 @@ export async function _activate(context: vscode.ExtensionContext) {
     }
   );
 
-  const workspace = ws.rootWorkspace.uri.fsPath;
   Logger.info({
     ctx,
     installedGlobalVersion,
@@ -82,7 +82,7 @@ export async function _activate(context: vscode.ExtensionContext) {
     previousWsVersion,
     platform,
     extensions,
-    workspace,
+    workspace: ws.rootWorkspace.uri.fsPath,
   });
 
   if (DendronWorkspace.isActive()) {
@@ -92,7 +92,7 @@ export async function _activate(context: vscode.ExtensionContext) {
     Logger.info({ ctx, msg: "wsActive", lspSupport });
     if (lspSupport) {
       Logger.info({ ctx, msg: "start with lsp support" });
-      await DendronWorkspace.instance().activateWorkspace();
+      await ws.activateWorkspace();
       HistoryService.instance().subscribe(
         "apiServer",
         async (event: HistoryEvent) => {
@@ -102,7 +102,6 @@ export async function _activate(context: vscode.ExtensionContext) {
               endpoint: `http://localhost:${port}`,
               apiPath: "api",
             });
-            const ws = DendronWorkspace.instance();
             ws._engine = new EngineAPIService(api);
             await ws.engine.init();
             Logger.info({ ctx, msg: "fin init Engine" });
@@ -113,6 +112,11 @@ export async function _activate(context: vscode.ExtensionContext) {
       Logger.info({ ctx, msg: "fin startClient" });
       return;
     } else {
+      ws._engine = DendronEngine.getOrCreateEngine({
+        root: ws.rootWorkspace.uri.fsPath,
+        forceNew: true,
+        logger: ws.L,
+      });
       // startClient(context);
       ws.reloadWorkspace().then(async () => {
         Logger.info({ ctx, msg: "dendron ready" }, true);

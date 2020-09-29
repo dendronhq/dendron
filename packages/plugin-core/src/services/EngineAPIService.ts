@@ -26,6 +26,7 @@ export class EngineAPIService implements DEngine {
   public props: Required<DEngineOpts>;
   public initialized: boolean;
   public store: DEngineStore;
+  public ws: string;
 
   constructor(public api: DendronAPI) {
     this.notes = {};
@@ -33,6 +34,7 @@ export class EngineAPIService implements DEngine {
     this.props = {} as any;
     this.initialized = false;
     this.store = {} as any;
+    this.ws = path.dirname(DendronWorkspace.workspaceFile().fsPath);
   }
 
   /**
@@ -41,10 +43,12 @@ export class EngineAPIService implements DEngine {
   async init(): Promise<void> {
     const ctx = "EngineAPIService:init";
     Logger.info({ ctx, msg: "enter" });
-    const uri = path.dirname(DendronWorkspace.workspaceFile().fsPath);
     const vaults =
       DendronWorkspace.workspaceFolders()?.map((ent) => ent.uri.fsPath) || [];
-    const resp = await this.api.workspaceInit({ uri, config: { vaults } });
+    const resp = await this.api.workspaceInit({
+      uri: this.ws,
+      config: { vaults },
+    });
     Logger.info({ ctx, msg: "exit", resp });
     return;
   }
@@ -82,7 +86,15 @@ export class EngineAPIService implements DEngine {
     mode: QueryMode,
     opts?: QueryOpts
   ): Promise<EngineQueryResp<DNodeData>> {
-    return {} as any;
+    const ctx = "query";
+    const resp = await this.api.engineQuery({
+      mode,
+      queryString,
+      opts,
+      ws: this.ws,
+    });
+    Logger.info({ ctx, msg: "exit", resp });
+    return resp as any;
   }
 
   /**

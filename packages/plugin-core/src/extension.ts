@@ -205,6 +205,7 @@ export async function _activate(context: vscode.ExtensionContext) {
         forceNew: true,
         logger: ws.L,
       });
+      await ws.activateWorkspace();
       await reloadWorkspace();
     }
   } else {

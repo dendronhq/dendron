@@ -227,10 +227,14 @@ export abstract class API {
     args: IDoRequestArgs,
     paylaodData?: T["data"]
   ): Promise<T> {
-    const payload = this._createPayload(paylaodData) as T;
+    let payload = this._createPayload(paylaodData) as T;
     try {
       const resp = await this._doRequest(args);
-      payload.data = resp;
+      if (_.every(["data", "error"], (ent) => _.has(resp, ent))) {
+        payload = resp;
+      } else {
+        payload.data = resp;
+      }
     } catch (err) {
       payload.error = err;
     }
@@ -291,7 +295,8 @@ export class DendronAPI extends API {
       method: "post",
       body: req,
     });
-    return this._createPayload(resp);
+    return resp;
+    // return this._createPayload(resp);
   }
 
   //   async nodeGet(id: string): Promise<INodeGetPayload> {

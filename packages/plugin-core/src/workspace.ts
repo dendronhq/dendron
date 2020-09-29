@@ -787,8 +787,6 @@ export class DendronWorkspace {
    * @param mainVault
    */
   async reloadWorkspace(mainVault?: string) {
-    // TODO: dispose of existing workspace
-    await this.activateWorkspace();
     if (!mainVault) {
       const wsFolders = DendronWorkspace.workspaceFolders();
       mainVault = wsFolders![0].uri.fsPath;

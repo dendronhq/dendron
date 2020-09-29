@@ -25,7 +25,7 @@
       "path": "packages/lsp-server"
     },
     {
-      "path": "packages/express-server"
+      "path": "packages/api-server"
     },
     {
       "path": "packages/express-client"

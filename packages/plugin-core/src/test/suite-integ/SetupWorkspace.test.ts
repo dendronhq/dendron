@@ -77,7 +77,7 @@ suite("startup", function () {
   });
 });
 
-suite.only("startup with lsp", function () {
+suite("startup with lsp", function () {
   this.timeout(TIMEOUT);
   let ctx: ExtensionContext;
   let root: DirResult;
@@ -96,15 +96,18 @@ suite.only("startup with lsp", function () {
 
     it("workspace active, no prior workspace version", function (done) {
       setupWorkspace(root.name, { lsp: true });
-      onWSInit((_event: HistoryEvent) => {
+      onWSInit(async (_event: HistoryEvent) => {
         assert.strictEqual(DendronWorkspace.isActive(), true);
         assert.strictEqual(
           ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
           "0.0.1"
         );
         const engine = DendronWorkspace.instance().engine;
-        assert.strictEqual(_.values(engine.notes).length, 2);
-        assert.strictEqual(engine.notes["id.foo"].fname, "foo");
+        const resp = await engine.query("", "note");
+        const notes = resp.data;
+        assert.strictEqual(notes.length, 1);
+        assert.deepStrictEqual(notes[0].children, ["id.foo"]);
+        // assert.strictEqual(engine.notes["id.foo"].fname, "foo");
         done();
       });
 

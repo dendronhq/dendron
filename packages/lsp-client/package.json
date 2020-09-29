@@ -61,7 +61,7 @@
 	},
 	"dependencies": {
 		"@dendronhq/engine-server": "^0.12.4-alpha.0",
-		"@dendronhq/express-server": "^0.12.4-alpha.0"
+		"@dendronhq/api-server": "^0.12.4-alpha.0"
 	},
 	"gitHead": "b747a42e317e52137dd2aa740805d44e33b77ee8"
 }

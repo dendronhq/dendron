@@ -311,6 +311,7 @@ describe("engine:exact", () => {
         const resp = await engine.query("foo.one", queryMode);
         expect(resp.data[0].title).toEqual("foo.one");
         expect(resp.data[0].custom).toEqual({ bond: 42 });
+        // @ts-ignore
         expect(resp.data[0].toRawProps()).toMatchSnapshot();
         [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
           root,
@@ -555,6 +556,7 @@ describe("engine:exact", () => {
         );
         const fooNote = (await engine.query("foo", "note")).data[0];
         expect(fooNote.fname).toEqual("foo");
+        // @ts-ignore
         testUtilsCommonAll.expectSnapshot(expect, "fooNote", fooNote);
         [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
           root,
@@ -606,6 +608,7 @@ describe("engine:exact", () => {
         );
         const fooNote = (await engine.query("foo", "note")).data[0];
         expect(fooNote.fname).toEqual("foo");
+        // @ts-ignore
         testUtilsCommonAll.expectSnapshot(expect, "fooNote", fooNote);
       });
 
@@ -620,6 +623,7 @@ describe("engine:exact", () => {
         await engine.init();
         const fooNote = (await engine.query("foo", "note")).data[0];
         expect(fooNote.fname).toEqual("foo");
+        // @ts-ignore
         testUtilsCommonAll.expectSnapshot(expect, "fooNote", fooNote);
         [actualFiles, expectedFiles] = FileTestUtils.cmpFiles(
           root,

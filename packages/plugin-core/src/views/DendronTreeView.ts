@@ -45,11 +45,11 @@ export class TreeNote extends vscode.TreeItem {
   }) {
     super(DNodeUtils.basename(note.fname, true), collapsibleState);
     this.note = note;
+    this.id = this.note.id;
+    this.tooltip = this.note.title;
+    const mainVault = (DendronWorkspace.workspaceFolders() as vscode.WorkspaceFolder[])[0];
     this.uri = Uri.file(
-      path.join(
-        DendronWorkspace.instance().engine.props.root,
-        this.note.fname + ".md"
-      )
+      path.join(mainVault.uri.fsPath, this.note.fname + ".md")
     );
     this.command = {
       command: DENDRON_COMMANDS.GOTO_NOTE.key,
@@ -57,14 +57,6 @@ export class TreeNote extends vscode.TreeItem {
       arguments: [{ qs: this.note.fname, mode: "note" }],
     };
     this.L = DendronWorkspace.instance().L;
-  }
-
-  get id(): string {
-    return this.note.id;
-  }
-
-  get tooltip(): string {
-    return this.note.title;
   }
 }
 
@@ -117,9 +109,10 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
   parseTree(note: Note): TreeNote {
     const tn = createTreeNote(note);
     this.tree[note.id] = tn;
-    const children = note.children.map((c) => {
+    let children = note.children.map((c) => {
       return this.parseTree(c as Note);
     });
+    // @ts-ignore
     tn.children = this.sort(children).map((c) => c.id);
     return tn;
   }
@@ -130,17 +123,17 @@ export class DendronTreeView {
     HistoryService.instance().subscribe(
       "extension",
       async (_event: HistoryEvent) => {
-        if (_event.action === "initialized") {
-          const ws = DendronWorkspace.instance();
-          const treeDataProvider = new EngineNoteProvider();
-          await treeDataProvider.getChildren();
-          const treeView = window.createTreeView("dendronTreeView", {
-            treeDataProvider,
-            showCollapseAll: true,
-          });
-          const _class = new DendronTreeView(treeView, treeDataProvider);
-          ws.dendronTreeView = _class;
-        }
+        // if (_event.action === "initialized") {
+        //   const ws = DendronWorkspace.instance();
+        //   const treeDataProvider = new EngineNoteProvider();
+        //   await treeDataProvider.getChildren();
+        //   const treeView = window.createTreeView("dendronTreeView", {
+        //     treeDataProvider,
+        //     showCollapseAll: true,
+        //   });
+        //   const _class = new DendronTreeView(treeView, treeDataProvider);
+        //   ws.dendronTreeView = _class;
+        // }
       }
     );
   }

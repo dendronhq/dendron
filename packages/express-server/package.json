@@ -7,10 +7,10 @@
     "start": "node -r module-alias/register ./dist --env=production",
     "start:dev": "nodemon",
     "watch": "tsc --watch",
-    "test": "NODE_OPTIONS='--unhandled-rejections=strict' npx jest",
+    "test": "echo stub",
     "start:integ": "env PORT=3005 ts-node ./src/start.ts",
     "start:integ:debug": "env PORT=3005 node --inspect -r ts-node/register ./src/start.ts",
-    "test:watch": "npm run test -- --watch"
+    "test:watch": "echo stub"
   },
   "files": [
     "dist"

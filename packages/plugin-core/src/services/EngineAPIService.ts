@@ -11,6 +11,7 @@ import {
   IDNode,
   IDNodeType,
   NodeWriteOpts,
+  Note,
   NoteDict,
   QueryMode,
   QueryOneOpts,
@@ -54,15 +55,17 @@ export class EngineAPIService implements DEngine {
       uri: this.ws,
       config: { vaults },
     });
+    // TODO: initialize root nodes
+    // TODO: initialize everything else
     await this.refreshNodes(resp.data.notes, "note");
     Logger.info({ ctx, msg: "exit", resp });
     return;
   }
 
   async delete(
-    id: string,
-    mode: QueryMode,
-    opts?: EngineDeleteOpts
+    _id: string,
+    _mode: QueryMode,
+    _opts?: EngineDeleteOpts
   ): Promise<void> {
     return;
   }
@@ -72,9 +75,9 @@ export class EngineAPIService implements DEngine {
    * get(id: ...)
    */
   async get(
-    id: string,
-    mode: QueryMode,
-    opts?: QueryOpts
+    _id: string,
+    _mode: QueryMode,
+    _opts?: QueryOpts
   ): Promise<EngineGetResp<DNodeData>> {
     return {} as any;
   }
@@ -108,12 +111,15 @@ export class EngineAPIService implements DEngine {
    * Shortcut Function
    */
   async queryOne(
-    queryString: string,
-    mode: QueryMode,
-    opts?: QueryOneOpts
+    _queryString: string,
+    _mode: QueryMode,
+    _opts?: QueryOneOpts
   ): Promise<EngineGetResp<DNodeData>> {
     return {} as any;
   }
+
+  async buildNotes() {}
+
   async refreshNodes(
     nodes: DNodeRawProps[],
     mode: IDNodeType,
@@ -128,13 +134,11 @@ export class EngineAPIService implements DEngine {
       nodes.forEach((node: DNodeRawProps) => {
         const { id } = node;
         if (!_.has(this.notes, id)) {
-          // add if not exist
-          // TODO: nodes has both raw and full nodes
-          // @ts-ignore
-          this.notes[id] = node;
+          // TODO
+          // this.notes[id] = new Note(node);
         } else {
           // exists, merge it
-          _.merge(this.notes[id], node);
+          new Note(_.merge(this.notes[id], node));
         }
         if (opts?.fullNode) {
           this.fullNodes.add(id);
@@ -143,7 +147,7 @@ export class EngineAPIService implements DEngine {
     }
   }
 
-  async write(node: IDNode<DNodeData>, opts?: NodeWriteOpts): Promise<void> {
+  async write(_node: IDNode<DNodeData>, _opts?: NodeWriteOpts): Promise<void> {
     return {} as any;
   }
 
@@ -151,7 +155,7 @@ export class EngineAPIService implements DEngine {
    * Update engine properties
    * @param opts
    */
-  async updateProps(opts: Partial<DEngineOpts>): Promise<void> {
+  async updateProps(_opts: Partial<DEngineOpts>): Promise<void> {
     return;
   }
 
@@ -159,7 +163,7 @@ export class EngineAPIService implements DEngine {
    * Update node metadata
    * @param node
    */
-  async updateNodes(nodes: IDNode[], opts: UpdateNodesOpts): Promise<void> {
+  async updateNodes(_nodes: IDNode[], _opts: UpdateNodesOpts): Promise<void> {
     return;
   }
 }

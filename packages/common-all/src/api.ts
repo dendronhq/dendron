@@ -290,7 +290,7 @@ export class DendronAPI extends API {
         ...req,
       },
     });
-    return this._createPayload(resp);
+    return resp;
   }
 
   async workspaceList(): Promise<InitializePayload> {

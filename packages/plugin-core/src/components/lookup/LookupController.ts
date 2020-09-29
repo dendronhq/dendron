@@ -27,7 +27,7 @@ type State = {
 };
 
 export class LookupController {
-  public quickPick: vscode.QuickPick<DNode> | undefined;
+  public quickPick: DendronQuickPicker | undefined;
   public state: State;
   public ws: DendronWorkspace;
   protected opts: EngineOpts;
@@ -189,10 +189,8 @@ export class LookupController {
     });
 
     provider.provide(quickPick);
-    this.ws.L.info({ ctx: ctx + ":provide:post" });
-    // show
     quickPick.show();
-    this.ws.L.info({ ctx: ctx + ":show:post" });
+    this.quickPick = quickPick;
     return quickPick;
   }
 }

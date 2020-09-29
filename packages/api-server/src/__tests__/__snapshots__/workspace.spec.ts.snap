@@ -3,18 +3,72 @@
 exports[`main one 1`] = `
 Object {
   "data": Object {
+    "notes": Array [
+      Object {
+        "body": "
+",
+        "children": Array [
+          "id.foo",
+        ],
+        "created": 1601400963862,
+        "custom": Object {},
+        "data": Object {},
+        "desc": "",
+        "fname": "root",
+        "id": "root",
+        "parent": null,
+        "stub": false,
+        "title": "root",
+        "type": "note",
+        "updated": 1601400963862,
+      },
+      Object {
+        "body": "foo body
+",
+        "children": Array [],
+        "created": 1601400963868,
+        "custom": Object {},
+        "data": Object {},
+        "desc": "",
+        "fname": "foo",
+        "id": "id.foo",
+        "parent": "root",
+        "stub": false,
+        "title": "Foo",
+        "type": "note",
+        "updated": 1601400963868,
+      },
+    ],
+    "schemas": Array [
+      Object {
+        "body": "",
+        "children": Array [],
+        "created": 1601400963897,
+        "custom": Object {},
+        "data": Object {},
+        "desc": "",
+        "fname": "root.schema",
+        "id": "root",
+        "parent": null,
+        "stub": false,
+        "title": "root",
+        "type": "schema",
+        "updated": 1601400963897,
+      },
+    ],
+  },
+  "error": null,
+}
+`;
+
+exports[`main one 2`] = `
+Object {
+  "data": Object {
     "data": Object {
       "workspaces": Array [
-        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64249-fLvqZ05ZwBKx",
-        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64291-BwBDHpE4HQ4h",
-        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64308-XZ85DCzNFKkz",
-        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64338-60jW5p7H4vMz",
-        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64358-x4y66CCpQ332",
-        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64573-t4pTIVfNe5og",
-        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64634-KmLHRSTtvYAr",
-        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64654-oFYKaUuWnVMn",
-        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64699-7Roxtb23eo0O",
-        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64727-La9xl7PSZwYo",
+        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-26122-m67o1Aki0lIG",
+        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-27091-7nRusabb1Enc",
+        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-27536-M6FOp1Plp2D7",
       ],
     },
     "error": null,

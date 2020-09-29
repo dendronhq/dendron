@@ -39,8 +39,9 @@ describe("main", () => {
       endpoint: "http://localhost:3005",
       apiPath: "api",
     });
-    await api.workspaceInit(payload);
-    const resp = await api.workspaceList();
+    let resp = await api.workspaceInit(payload);
+    expect(resp).toMatchSnapshot();
+    resp = await api.workspaceList();
     expect(resp).toMatchSnapshot();
   });
 });

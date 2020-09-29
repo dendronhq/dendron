@@ -21,6 +21,7 @@ import {
   ISchema,
   ISchemaOpts,
   NoteData,
+  NoteDict,
   NoteLink,
   NoteProps,
   NoteRawProps,
@@ -73,6 +74,18 @@ export class DNodeUtils {
     return nodePath.split(".")[0];
   }
 
+  static findParent(opts: {
+    hpath: string;
+    nodes: DNodeDict;
+  }): DNode | undefined {
+    const { hpath, nodes } = opts;
+    const dirname = DNodeUtils.dirName(hpath);
+    if (dirname === "") {
+      return nodes["root"];
+    }
+    return _.find(nodes, { fname: dirname });
+  }
+
   static findClosestParent(
     fpath: string,
     nodes: DNodeDict,
@@ -84,6 +97,7 @@ export class DNodeUtils {
       return nodes["root"];
     }
     const maybeNode = _.find(nodes, { fname: dirname });
+    // return if not a stub
     if (
       (maybeNode && cleanOpts.noStubs && !maybeNode?.stub) ||
       (maybeNode && !cleanOpts.noStubs)
@@ -494,6 +508,38 @@ export class Note extends DNode<NoteData> implements INote {
 
   static createRoot(): Note {
     return new Note({ fname: "root", id: "root", title: "root" });
+  }
+
+  /**
+   * Create note using props and existing note dict
+   * Will merge properties of notes that already exist
+   * @param opts
+   */
+  static fromProps(opts: { props: NoteRawProps; noteDict: NoteDict }) {
+    let { props, noteDict } = opts;
+    const maybeExisting = noteDict[props.id];
+    if (maybeExisting) {
+      props = { ...props, ..._.omit(maybeExisting, ["parent", "children"]) };
+    }
+    if (props.id === "root") {
+      return new Note({
+        ...props,
+        parent: null,
+        children: maybeExisting?.children || [],
+      });
+    }
+    const maybeParent = DNodeUtils.findParent({
+      hpath: props.fname,
+      nodes: noteDict,
+    });
+    if (_.isUndefined(maybeParent)) {
+      throw Error("no parent found");
+    }
+    return new Note({
+      ...props,
+      parent: maybeParent as Note,
+      children: maybeExisting?.children || [],
+    });
   }
 
   static fromSchema(dirpath: string, schema: Schema): Note {

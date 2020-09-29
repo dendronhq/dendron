@@ -20,7 +20,7 @@ import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { onWSInit, setupDendronWorkspace, TIMEOUT } from "../testUtils";
 
-suite("Basics", function () {
+suite.skip("Basics", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
   this.timeout(TIMEOUT);

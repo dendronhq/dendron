@@ -77,7 +77,7 @@ suite("startup", function () {
   });
 });
 
-suite("startup with lsp", function () {
+suite.skip("startup with lsp", function () {
   this.timeout(TIMEOUT);
   let ctx: ExtensionContext;
   let root: DirResult;

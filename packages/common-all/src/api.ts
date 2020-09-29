@@ -1,7 +1,12 @@
 import _ from "lodash";
 import request from "request-promise";
 import { createLogger } from "./logger";
-import { DEngineQuery } from "./types";
+import {
+  DEngineQuery,
+  DNodeRawProps,
+  NoteRawProps,
+  SchemaRawProps,
+} from "./types";
 // import { nonEmptyGet, unwrapGet, unwrapSearch } from "./es";
 // import { L } from "./logger";
 // import { PlainNode } from "./nodev2";
@@ -78,18 +83,25 @@ type APIPayload<T = any> = {
   data: T;
 };
 
-type InitializePayload = APIPayload<any>;
+export type InitializePayload = APIPayload<{
+  notes: NoteRawProps[];
+  schemas: SchemaRawProps[];
+}>;
+
+export type EngineQueryPayload = APIPayload<DNodeRawProps[]>;
 
 // === Utilities
 
 export class APIError {
+  public name: string;
   public type: APIErrorType;
-  public message?: string;
+  public message: string;
   public code?: number;
 
   constructor({ type, message, code }: IAPIErrorArgs) {
     this.type = type;
     this.message = message || "";
+    this.name = "APIError";
     this.code = code || -1;
   }
 }
@@ -289,7 +301,7 @@ export class DendronAPI extends API {
     return this._createPayload(resp);
   }
 
-  async engineQuery(req: EngineQueryRequest): Promise<any> {
+  async engineQuery(req: EngineQueryRequest): Promise<EngineQueryPayload> {
     const resp = await this._makeRequest({
       path: "engine/query",
       method: "post",

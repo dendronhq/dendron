@@ -199,7 +199,6 @@ export class DNodeRaw {
       data: {},
       fname: null,
     });
-    // eslint-disable-next-line no-use-before-define
     const title = nodeOpts.title || DNode.defaultTitle(fname);
     const nodePropsItems = {
       id,
@@ -215,6 +214,9 @@ export class DNodeRaw {
       data,
     };
     const denylist = ["schemaStub", "type"];
+    /**
+     * Custom properties
+     */
     const custom = _.omit(nodeOpts, _.keys(nodePropsItems).concat(denylist));
     const nodeProps: DNodeRawProps<T> & { extra?: any } = {
       ...nodePropsItems,

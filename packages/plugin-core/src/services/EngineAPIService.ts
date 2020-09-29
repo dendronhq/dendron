@@ -4,10 +4,12 @@ import {
   DEngineOpts,
   DEngineStore,
   DNodeData,
+  DNodeRawProps,
   EngineDeleteOpts,
   EngineGetResp,
   EngineQueryResp,
   IDNode,
+  IDNodeType,
   NodeWriteOpts,
   NoteDict,
   QueryMode,
@@ -16,6 +18,7 @@ import {
   SchemaDict,
   UpdateNodesOpts,
 } from "@dendronhq/common-all";
+import _ from "lodash";
 import path from "path";
 import { Logger } from "../logger";
 import { DendronWorkspace } from "../workspace";
@@ -27,9 +30,11 @@ export class EngineAPIService implements DEngine {
   public initialized: boolean;
   public store: DEngineStore;
   public ws: string;
+  public fullNodes: Set<string>;
 
   constructor(public api: DendronAPI) {
     this.notes = {};
+    this.fullNodes = new Set();
     this.schemas = {};
     this.props = {} as any;
     this.initialized = false;
@@ -49,6 +54,7 @@ export class EngineAPIService implements DEngine {
       uri: this.ws,
       config: { vaults },
     });
+    await this.refreshNodes(resp.data.notes, "note");
     Logger.info({ ctx, msg: "exit", resp });
     return;
   }
@@ -85,7 +91,7 @@ export class EngineAPIService implements DEngine {
     queryString: string,
     mode: QueryMode,
     opts?: QueryOpts
-  ): Promise<EngineQueryResp<DNodeData>> {
+  ): Promise<EngineQueryResp> {
     const ctx = "query";
     const resp = await this.api.engineQuery({
       mode,
@@ -93,8 +99,9 @@ export class EngineAPIService implements DEngine {
       opts,
       ws: this.ws,
     });
+    await this.refreshNodes(resp.data as DNodeRawProps[], mode);
     Logger.info({ ctx, msg: "exit", resp });
-    return resp as any;
+    return resp;
   }
 
   /**
@@ -106,6 +113,34 @@ export class EngineAPIService implements DEngine {
     opts?: QueryOneOpts
   ): Promise<EngineGetResp<DNodeData>> {
     return {} as any;
+  }
+  async refreshNodes(
+    nodes: DNodeRawProps[],
+    mode: IDNodeType,
+    opts?: { fullNode?: boolean }
+  ) {
+    if (_.isEmpty(nodes)) {
+      return;
+    }
+    if (mode === "schema") {
+      throw Error("not implemented schema refresh");
+    } else {
+      nodes.forEach((node: DNodeRawProps) => {
+        const { id } = node;
+        if (!_.has(this.notes, id)) {
+          // add if not exist
+          // TODO: nodes has both raw and full nodes
+          // @ts-ignore
+          this.notes[id] = node;
+        } else {
+          // exists, merge it
+          _.merge(this.notes[id], node);
+        }
+        if (opts?.fullNode) {
+          this.fullNodes.add(id);
+        }
+      });
+    }
   }
 
   async write(node: IDNode<DNodeData>, opts?: NodeWriteOpts): Promise<void> {

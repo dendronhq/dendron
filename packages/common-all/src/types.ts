@@ -90,6 +90,9 @@ export type NoteProps = {
   meta: any;
 };
 
+/**
+ * Instead of full nodes, give pointers for parent and children
+ */
 export type IDNodeOpts<T = DNodeData> = Omit<
   DNodeRawOpts<T>,
   "parent" | "children"
@@ -181,7 +184,9 @@ export interface Resp<T> {
 }
 
 export type EngineGetResp<T = DNodeData> = Resp<IDNode<T>>;
-export type EngineQueryResp<T = DNodeData> = Resp<IDNode<T>[]>;
+export type EngineQueryResp<T = DNodeData> = Resp<
+  IDNode<T>[] | DNodeRawProps[]
+>;
 export type StoreGetResp<T = DNodeData> = Resp<DNodeRawProps<T>>;
 export type StoreQueryResp<T = DNodeData> = Resp<DNodeRawProps<T>[]>;
 

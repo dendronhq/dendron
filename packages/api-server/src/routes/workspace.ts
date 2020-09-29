@@ -1,3 +1,4 @@
+import { NoteRawProps, SchemaRawProps } from "@dendronhq/common-all";
 import { DendronEngine } from "@dendronhq/engine-server";
 import { Request, Response, Router } from "express";
 import { OK } from "http-status-codes";
@@ -14,6 +15,8 @@ const router = Router();
 router.post("/initialize", async (req: Request, res: Response) => {
   const { uri, config } = req.body as WorkspaceInitRequest;
   const val = await MemoryStore.instance().get(`ws:${uri}`);
+  let notes: NoteRawProps[] = [];
+  let schemas: SchemaRawProps[] = [];
   if (!val) {
     const { vaults } = config;
     const engine = DendronEngine.getOrCreateEngine({
@@ -21,9 +24,12 @@ router.post("/initialize", async (req: Request, res: Response) => {
       forceNew: true,
     });
     await engine.init();
+    notes = _.values(engine.notes).map((ent) => ent.toRawProps());
+    schemas = _.values(engine.schemas).map((ent) => ent.toRawProps());
     MemoryStore.instance().put(`ws:${uri}`, engine);
   }
-  return res.status(OK).end();
+  const payload = { notes, schemas };
+  return res.json(payload);
 });
 
 router.get("/all", async (_req: Request, res: Response) => {

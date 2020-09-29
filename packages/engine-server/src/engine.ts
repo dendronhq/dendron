@@ -404,7 +404,7 @@ export class DendronEngine implements DEngine {
         }
       }
       if (opts.initialQuery) {
-        this.refreshNodes(data.data);
+        this.refreshNodes(data.data as IDNode[]);
       }
       // @ts-ignore
       return data as EngineQueryResp;
@@ -515,7 +515,8 @@ export class DendronEngine implements DEngine {
       ...opts,
       queryOne: true,
     });
-    return makeResponse<EngineGetResp>({ data: resp.data[0], error: null });
+    const data = resp.data as IDNode[];
+    return makeResponse<EngineGetResp>({ data: data[0], error: null });
   }
 
   async write(node: IDNode, opts?: NodeWriteOpts): Promise<void> {

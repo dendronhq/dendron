@@ -15,9 +15,6 @@
       {
         "path": "packages/lsp-client"
       },
-      {
-        "path": "packages/express-server"
-      },
       // {
       //   "path": "vendor/vscode-languageserver-node"
       // },

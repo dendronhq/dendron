@@ -10,5 +10,5 @@ npx lerna bootstrap
     \ --scope @dendronhq/pods-core 
     \ --scope @dendronhq/seeds-core 
     \ --scope @dendronhq/lsp-server 
-    \ --scope @dendronhq/express-server
+    \ --scope @dendronhq/api-server
     \ --scope @dendronhq/common-test-utils

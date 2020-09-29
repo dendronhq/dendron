@@ -9,5 +9,5 @@ npx lerna run build --scope @dendronhq/pods-core
 npx lerna run build --scope @dendronhq/seeds-core
 npx lerna run build --scope @dendronhq/lsp-server
 npx lerna run build --scope @dendronhq/plugin-core
-npx lerna run build --scope @dendronhq/express-server
+npx lerna run build --scope @dendronhq/api-server
 npx lerna run build --scope @dendronhq/common-test-utils

@@ -3,9 +3,8 @@ import matter from "gray-matter";
 import _ from "lodash";
 import path from "path";
 import tmp, { DirResult } from "tmp";
-import { readYAML, node2MdFile } from "./files";
+import { readYAML, node2MdFile, tmpDir } from "./files";
 import { NoteRawProps, Note, DNodeRawProps } from "@dendronhq/common-all";
-import { tmpDir } from "../lib";
 
 export { DirResult };
 // eslint-disable-next-line no-undef

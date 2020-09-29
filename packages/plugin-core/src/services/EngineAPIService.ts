@@ -1,22 +1,21 @@
 import {
   DendronAPI,
-  DEngine,
   DEngineOpts,
-  DEngineStore,
+  DEngineV2,
   DNodeData,
+  DNodePropsV2,
   DNodeRawProps,
   EngineDeleteOpts,
   EngineGetResp,
-  EngineQueryResp,
   IDNode,
   IDNodeType,
   NodeWriteOpts,
-  Note,
-  NoteDict,
+  NotePropsDictV2,
   QueryMode,
   QueryOneOpts,
   QueryOpts,
-  SchemaDict,
+  Resp,
+  SchemaPropsDictV2,
   UpdateNodesOpts,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -24,22 +23,23 @@ import path from "path";
 import { Logger } from "../logger";
 import { DendronWorkspace } from "../workspace";
 
-export class EngineAPIService implements DEngine {
-  public notes: NoteDict;
-  public schemas: SchemaDict;
-  public props: Required<DEngineOpts>;
-  public initialized: boolean;
-  public store: DEngineStore;
+export class EngineAPIService implements DEngineV2 {
+  public notes: NotePropsDictV2;
+  public schemas: SchemaPropsDictV2;
+  // public schemas: SchemaDict;
+  // public props: Required<DEngineOpts>;
+  // public initialized: boolean;
+  // public store: DEngineStore;
   public ws: string;
-  public fullNodes: Set<string>;
+  // public fullNodes: Set<string>;
 
   constructor(public api: DendronAPI) {
     this.notes = {};
-    this.fullNodes = new Set();
     this.schemas = {};
-    this.props = {} as any;
-    this.initialized = false;
-    this.store = {} as any;
+    // this.fullNodes = new Set();
+    // this.props = {} as any;
+    // this.initialized = false;
+    // this.store = {} as any;
     this.ws = path.dirname(DendronWorkspace.workspaceFile().fsPath);
   }
 
@@ -94,7 +94,7 @@ export class EngineAPIService implements DEngine {
     queryString: string,
     mode: QueryMode,
     opts?: QueryOpts
-  ): Promise<EngineQueryResp> {
+  ): Promise<Resp<DNodePropsV2[]>> {
     const ctx = "query";
     const resp = await this.api.engineQuery({
       mode,
@@ -120,11 +120,7 @@ export class EngineAPIService implements DEngine {
 
   async buildNotes() {}
 
-  async refreshNodes(
-    nodes: DNodeRawProps[],
-    mode: IDNodeType,
-    opts?: { fullNode?: boolean }
-  ) {
+  async refreshNodes(nodes: DNodeRawProps[], mode: IDNodeType) {
     if (_.isEmpty(nodes)) {
       return;
     }
@@ -134,14 +130,9 @@ export class EngineAPIService implements DEngine {
       nodes.forEach((node: DNodeRawProps) => {
         const { id } = node;
         if (!_.has(this.notes, id)) {
-          // TODO
-          // this.notes[id] = new Note(node);
+          this.notes[id] = node;
         } else {
-          // exists, merge it
-          new Note(_.merge(this.notes[id], node));
-        }
-        if (opts?.fullNode) {
-          this.fullNodes.add(id);
+          _.merge(this.notes[id], node);
         }
       });
     }

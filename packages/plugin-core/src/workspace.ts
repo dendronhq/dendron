@@ -2,6 +2,7 @@ import {
   CONSTANTS,
   DendronConfig,
   DEngine,
+  DEngineV2,
   getStage,
   Note,
 } from "@dendronhq/common-all";
@@ -167,7 +168,7 @@ export class DendronWorkspace {
   public fsWatcher?: vscode.FileSystemWatcher;
   public serverWatcher?: vscode.FileSystemWatcher;
   public L: typeof Logger;
-  public _engine?: DEngine;
+  public _engine?: DEngine | DEngineV2;
   private disposableStore: DisposableStore;
   private history: HistoryService;
 
@@ -206,7 +207,7 @@ export class DendronWorkspace {
     return DConfig.getOrCreate(rootDir);
   }
 
-  get engine(): DEngine {
+  get engine(): DEngine | DEngineV2 {
     if (!this._engine) {
       throw Error("engine not initialized");
     }

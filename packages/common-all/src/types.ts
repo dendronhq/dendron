@@ -184,9 +184,7 @@ export interface Resp<T> {
 }
 
 export type EngineGetResp<T = DNodeData> = Resp<IDNode<T>>;
-export type EngineQueryResp<T = DNodeData> = Resp<
-  IDNode<T>[] | DNodeRawProps[]
->;
+export type EngineQueryResp<T = DNodeData> = Resp<IDNode<T>[]>;
 export type StoreGetResp<T = DNodeData> = Resp<DNodeRawProps<T>>;
 export type StoreQueryResp<T = DNodeData> = Resp<DNodeRawProps<T>[]>;
 
@@ -464,4 +462,60 @@ export type DendronSiteConfig = {
    * Control publication on a per hierarchy basis
    */
   config?: { [key: string]: HierarchyConfig };
+};
+
+// === V2
+
+export type DNodePropsV2 = {
+  id: string;
+  fname: string;
+  stub?: boolean;
+};
+
+export type NotePropsDictV2 = {
+  [key: string]: DNodePropsV2;
+};
+export type SchemaPropsDictV2 = {
+  [key: string]: DNodePropsV2;
+};
+
+export interface QueryOptsV2 {
+  /**
+   * Should add to full nodes
+   */
+  fullNode?: boolean;
+  /**
+   * Just get one result
+   */
+  queryOne?: boolean;
+  /**
+   * Use with `createIfNew`
+   * If true, create a stub node.
+   * A stub node is not written to disk
+   */
+  stub?: boolean;
+  /**
+   * If node does not exist, create it?
+   */
+  createIfNew?: boolean;
+}
+
+export type DEngineV2 = {
+  notes: NotePropsDictV2;
+  schemas: SchemaPropsDictV2;
+
+  init: () => Promise<void>;
+  updateNodes(nodes: DNodePropsV2[], opts: UpdateNodesOpts): Promise<void>;
+
+  delete: (
+    id: string,
+    mode: QueryMode,
+    opts?: EngineDeleteOpts
+  ) => Promise<void>;
+
+  query: (
+    queryString: string,
+    mode: QueryMode,
+    opts?: QueryOptsV2
+  ) => Promise<Resp<DNodePropsV2[]>>;
 };

@@ -42,10 +42,8 @@ describe("main", () => {
     describe("delete", () => {
       test("delete foo.one", async () => {
         const resp = await store.query("**/*", queryMode, {});
-        const nodeOrig = _.find(
-          resp.data,
-          (n) => n.title === "foo.one"
-        ) as IDNode;
+        const data = resp.data as IDNode[];
+        const nodeOrig = _.find(data, (n) => n.title === "foo.one") as IDNode;
         await store.delete(nodeOrig.id);
         await expect(store.get(nodeOrig.id, {})).rejects.toThrow(
           AssertionError

@@ -20,7 +20,7 @@ import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { onWSInit, setupDendronWorkspace, TIMEOUT } from "../testUtils";
 
-suite.skip("Basics", function () {
+suite("Basics", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
   this.timeout(TIMEOUT);
@@ -56,7 +56,7 @@ suite.skip("Basics", function () {
         done();
       });
       setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
+        lsp: false,
         useCb: async (vaultPath) => {
           vault = vaultPath;
           NodeTestUtils.createNotes(vaultPath, [

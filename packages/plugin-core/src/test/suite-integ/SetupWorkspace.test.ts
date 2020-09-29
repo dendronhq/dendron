@@ -77,7 +77,7 @@ suite("startup", function () {
   });
 });
 
-suite.skip("startup with lsp", function () {
+suite("startup with lsp", function () {
   this.timeout(TIMEOUT);
   let ctx: ExtensionContext;
   let root: DirResult;
@@ -105,12 +105,6 @@ suite.skip("startup with lsp", function () {
         const engine = DendronWorkspace.instance().engine;
         assert.strictEqual(_.values(engine.notes).length, 2);
         assert.strictEqual(engine.notes["id.foo"].fname, "foo");
-        // const engine = DendronWorkspace.instance().engine;
-        // const resp = await engine.query("", "note");
-        // const notes = resp.data;
-        // assert.strictEqual(notes.length, 1);
-        // assert.deepStrictEqual(notes[0].children, ["id.foo"]);
-        // assert.strictEqual(engine.notes["id.foo"].fname, "foo");
         done();
       });
 

@@ -1,6 +1,7 @@
 import {
   DEngine,
   DNode,
+  DNodePropsV2,
   DNodeRawProps,
   DNodeUtils,
   Note,
@@ -226,7 +227,7 @@ export class LookupProvider {
     if (isCreateNewNotePick(selectedItem)) {
       L.info({ ...ctx2, msg: "createNewPick", selectedItem });
       const fname = value;
-      let nodeNew: DNode;
+      let nodeNew: DNodePropsV2;
       let foundStub = false;
       // reuse node if a stub
       // otherwise, children will not be right
@@ -264,6 +265,7 @@ export class LookupProvider {
 
       // apply schema template
       if (opts.flavor === "note") {
+        // TODO
         SchemaUtils.matchAndApplyTemplate({ note: nodeNew as Note, engine });
         const maybeSchema = SchemaUtils.matchNote(
           nodeNew as Note,

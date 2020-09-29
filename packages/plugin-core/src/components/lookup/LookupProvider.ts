@@ -1,12 +1,12 @@
 import {
   DEngine,
   DNode,
+  DNodeRawProps,
   DNodeUtils,
   Note,
   Schema,
   SchemaUtils,
 } from "@dendronhq/common-all";
-import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { QuickPick, QuickPickItem, Uri, window, WorkspaceFolder } from "vscode";
 import { Logger } from "../../logger";
@@ -221,7 +221,7 @@ export class LookupProvider {
 
     let uri: Uri;
     const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
-    const engine = DendronEngine.getOrCreateEngine();
+    const engine = DendronWorkspace.instance().engine;
 
     if (isCreateNewNotePick(selectedItem)) {
       L.info({ ...ctx2, msg: "createNewPick", selectedItem });
@@ -330,14 +330,15 @@ export class LookupProvider {
     }
     const querystring = slashToDot(pickerValue);
     const queryOrig = slashToDot(picker.value);
+    const ws = DendronWorkspace.instance();
     let profile: number;
     const ctx2 = {
       ctx: "updatePickerItems",
       querystring,
       opts,
     };
-    const engine = DendronEngine.getOrCreateEngine();
     const queryEndsWithDot = queryOrig.endsWith(".");
+    const engine = ws.engine;
     try {
       // check if root query, special case, return everything
       if (querystring === "") {
@@ -359,7 +360,12 @@ export class LookupProvider {
         picker.justActivated
       ) {
         const resp = await engine.query(querystring, opts.flavor);
-        updatedItems = [this.noActiveItem as DNode].concat(resp.data);
+        const notes = resp.data as DNodeRawProps[];
+        // @ts-ignore
+        updatedItems = [this.noActiveItem as DNode].concat(
+          // @ts-ignore
+          notes.map((ent) => new Note(ent))
+        );
         profile = getDurationMilliseconds(start);
         L.info({ ...ctx2, msg: "engine.query", profile });
       }

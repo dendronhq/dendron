@@ -1,4 +1,4 @@
-import { DEngine } from "@dendronhq/common-all/src";
+import { DEngine } from "@dendronhq/common-all";
 import { BackfillCommand } from "@dendronhq/dendron-cli";
 import fs from "fs-extra";
 import _ from "lodash";

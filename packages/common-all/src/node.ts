@@ -9,7 +9,6 @@ import YAML from "yamljs";
 import { DendronError } from "./error";
 import {
   DEngine,
-  DEngineV2,
   DNodeData,
   DNodeDict,
   DNodeRawOpts,
@@ -1008,10 +1007,7 @@ export class SchemaUtils {
    * Return true if template was applied, false otherwise
    * @param opts
    */
-  static matchAndApplyTemplate(opts: {
-    note: Note;
-    engine: DEngine | DEngineV2;
-  }): boolean {
+  static matchAndApplyTemplate(opts: { note: Note; engine: DEngine }): boolean {
     const { note, engine } = opts;
     const schemas = SchemaUtils.matchNote(note, engine.schemas);
     if (schemas.data.template) {

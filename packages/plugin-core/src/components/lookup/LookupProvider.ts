@@ -1,8 +1,6 @@
 import {
   DEngine,
   DNode,
-  DNodePropsV2,
-  DNodeRawProps,
   DNodeUtils,
   Note,
   Schema,
@@ -222,12 +220,12 @@ export class LookupProvider {
 
     let uri: Uri;
     const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
-    const engine = DendronWorkspace.instance().engine;
+    const engine = DendronWorkspace.instance().engine as DEngine;
 
     if (isCreateNewNotePick(selectedItem)) {
       L.info({ ...ctx2, msg: "createNewPick", selectedItem });
       const fname = value;
-      let nodeNew: DNodePropsV2;
+      let nodeNew: DNode;
       let foundStub = false;
       // reuse node if a stub
       // otherwise, children will not be right
@@ -340,7 +338,7 @@ export class LookupProvider {
       opts,
     };
     const queryEndsWithDot = queryOrig.endsWith(".");
-    const engine = ws.engine;
+    const engine = ws.engine as DEngine;
     try {
       // check if root query, special case, return everything
       if (querystring === "") {
@@ -362,7 +360,7 @@ export class LookupProvider {
         picker.justActivated
       ) {
         const resp = await engine.query(querystring, opts.flavor);
-        const notes = resp.data as DNodeRawProps[];
+        const notes = resp.data;
         // @ts-ignore
         updatedItems = [this.noActiveItem as DNode].concat(
           // @ts-ignore

@@ -466,15 +466,26 @@ export type DendronSiteConfig = {
 
 // === V2
 
-export type DNodePropsV2 = {
+export type DNodePointerV2 = string;
+
+export type DNodePropsV2<T = any> = {
   id: string;
   fname: string;
   stub?: boolean;
+  children: DNodePointerV2[];
+  data: T;
+};
+export type SchemaPropsV2 = DNodePropsV2<SchemaData>;
+export type NotePropsV2 = DNodePropsV2<NoteDict>;
+
+export type DNodePropsDictV2 = {
+  [key: string]: DNodePropsV2;
 };
 
 export type NotePropsDictV2 = {
   [key: string]: DNodePropsV2;
 };
+
 export type SchemaPropsDictV2 = {
   [key: string]: DNodePropsV2;
 };

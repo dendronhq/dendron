@@ -1,12 +1,8 @@
 import {
   DEngine,
-  DEngineV2,
   DNode,
-  DNodePropsDictV2,
-  DNodePropsQuickInputV2,
   DNodePropsV2,
   DNodeUtils,
-  DNodeUtilsV2,
   Note,
   NotePropsV2,
   Schema,
@@ -186,21 +182,6 @@ export class LookupProvider {
     }
   }
 
-  showRootResultsV2(
-    flavor: EngineFlavor,
-    engine: DEngineV2
-  ): DNodePropsQuickInputV2[] {
-    let nodeDict: DNodePropsDictV2;
-    if (flavor === "note") {
-      nodeDict = engine.notes;
-    } else {
-      nodeDict = engine.schemas;
-    }
-    return DNodeUtilsV2.enhancePropsForQuickInput(
-      _.map(nodeDict["root"].children, (ent) => nodeDict[ent])
-    );
-  }
-
   async onDidAccept(picker: DendronQuickPicker, opts: EngineOpts) {
     const start = process.hrtime();
     const value = PickerUtils.getValue(picker);
@@ -345,14 +326,10 @@ export class LookupProvider {
       // check if root query, special case, return everything
       if (querystring === "") {
         L.info({ ...ctx2, msg: "no qs" });
-        if (!DendronWorkspace.lsp()) {
-          picker.items = this.showRootResults(
-            opts.flavor,
-            engine as DendronEngine
-          );
-        } else {
-          // picker.items = this.showRootResultsV2(opts.flavor, engine as DEngineV2);
-        }
+        picker.items = this.showRootResults(
+          opts.flavor,
+          engine as DendronEngine
+        );
         return;
       }
 

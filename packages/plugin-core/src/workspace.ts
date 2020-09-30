@@ -4,10 +4,11 @@ import {
   DEngine,
   DEngineV2,
   getStage,
+  NodeBuilder,
   Note,
 } from "@dendronhq/common-all";
 import { mdFile2NodeProps, readMD } from "@dendronhq/common-server";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig, FileParser } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import open from "open";
@@ -175,6 +176,7 @@ export class DendronWorkspace {
   public context: vscode.ExtensionContext;
   public fsWatcher?: vscode.FileSystemWatcher;
   public serverWatcher?: vscode.FileSystemWatcher;
+  public schemaWatcher?: vscode.FileSystemWatcher;
   public L: typeof Logger;
   public _engine?: DEngine;
   public _enginev2?: DEngineV2;
@@ -635,6 +637,7 @@ export class DendronWorkspace {
     // if (stage !== "test") {
     this.createWorkspaceWatcher(workspaceFolders);
     this.createServerWatcher();
+    this.createSchemaWatcher(workspaceFolders);
     // }
   }
 
@@ -693,6 +696,36 @@ export class DendronWorkspace {
       }, this)
     );
   }
+  async createSchemaWatcher(
+    workspaceFolders: readonly vscode.WorkspaceFolder[]
+  ) {
+    const ctx = "createSchemaWatcher";
+    this.L.info({ ctx, msg: "enter" });
+    const rootFolder = workspaceFolders[0];
+    let pattern = new vscode.RelativePattern(rootFolder, "*.schema.yml");
+    this.schemaWatcher = vscode.workspace.createFileSystemWatcher(
+      pattern,
+      true,
+      false,
+      true
+    );
+
+    this.disposableStore.add(
+      this.schemaWatcher.onDidChange(async (uri: vscode.Uri) => {
+        this.L.info({ ctx, uri });
+
+        const schema = path.basename(uri.fsPath);
+        const engine = DendronWorkspace.instance().engine;
+        const fp = new FileParser(engine.store, { errorOnEmpty: false });
+        const data = fp.parseSchema([schema]);
+        const nodes = new NodeBuilder().buildSchemaFromProps(data);
+        await this.engine.updateNodes(nodes, {
+          parentsAsStubs: false,
+          newNode: false,
+        });
+      }, this)
+    );
+  }
 
   async createWorkspaceWatcher(
     workspaceFolders: readonly vscode.WorkspaceFolder[]
@@ -707,7 +740,6 @@ export class DendronWorkspace {
       true,
       false
     );
-
     const refreshTree = _.debounce(() => {
       const ctx = "refreshTree";
       Logger.info({ ctx });

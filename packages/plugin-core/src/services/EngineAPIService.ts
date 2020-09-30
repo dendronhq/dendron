@@ -6,6 +6,7 @@ import {
   DNodePropsV2,
   EngineDeleteOpts,
   EngineGetResp,
+  EngineWriteOptsV2,
   IDNode,
   IDNodeType,
   NodeWriteOpts,
@@ -137,8 +138,16 @@ export class EngineAPIService implements DEngineV2 {
     }
   }
 
-  async write(_node: IDNode<DNodeData>, _opts?: NodeWriteOpts): Promise<void> {
-    return {} as any;
+  async write(node: DNodePropsV2, opts?: EngineWriteOptsV2): Promise<void> {
+    const ctx = "write";
+    const resp = await this.api.engineWrite({
+      node,
+      opts,
+      ws: this.ws,
+    });
+    await this.refreshNodes([node], node.type);
+    Logger.info({ ctx, msg: "exit", resp });
+    return;
   }
 
   /**

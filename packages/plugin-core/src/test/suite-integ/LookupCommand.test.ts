@@ -102,7 +102,7 @@ suite("Basics", function () {
       });
     });
 
-    test.only("remove stub status after creation", function (done) {
+    test("remove stub status after creation", function (done) {
       onWSInit(async () => {
         const engOpts: EngineOpts = { flavor: "note" };
         const lc = new LookupControllerV2(engOpts);

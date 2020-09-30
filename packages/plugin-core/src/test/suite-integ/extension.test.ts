@@ -52,10 +52,10 @@ import {
 } from "../../commands/SetupWorkspace";
 import { LookupController } from "../../components/lookup/LookupController";
 import {
-  createNoActiveItem,
   EngineOpts,
   LookupProvider,
 } from "../../components/lookup/LookupProvider";
+import { createNoActiveItem } from "../../components/lookup/utils";
 import {
   CONFIG,
   ConfigKey,

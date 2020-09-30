@@ -94,10 +94,10 @@ export class LookupProviderV2 {
       }
     }
     // TODO: write negine
-    //   await engine.write(nodeNew, {
-    //     newNode: true,
-    //     parentsAsStubs: true,
-    //   });
+    await engine.write(nodeNew, {
+      newNode: true,
+      parentsAsStubs: true,
+    });
     Logger.info({ ctx, msg: "engine.write", profile });
     return uri;
   }

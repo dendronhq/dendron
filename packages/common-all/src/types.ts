@@ -1,5 +1,3 @@
-// Global Types
-
 import { Note, Schema } from "./node";
 import { URI } from "vscode-uri";
 import { Position } from "unist";
@@ -468,13 +466,27 @@ export type DendronSiteConfig = {
 
 export type DNodePointerV2 = string;
 
+// export type DNodeRawPropsV2<T = any> = Omit<DNodePropsV2, "parent"> & {parent?: };
+
 export type DNodePropsV2<T = any> = {
   id: string;
+  title: string;
+  desc: string;
   fname: string;
+  updated: string;
+  created: string;
   stub?: boolean;
+  parent: DNodePointerV2 | null;
   children: DNodePointerV2[];
   data: T;
+  body: string;
+  custom?: any;
 };
+
+export type DNodePropsQuickInputV2<T = any> = DNodePropsV2<T> & {
+  label: string;
+};
+
 export type SchemaPropsV2 = DNodePropsV2<SchemaData>;
 export type NotePropsV2 = DNodePropsV2<NoteDict>;
 

@@ -1,11 +1,17 @@
 import {
   DEngine,
+  DEngineV2,
   DNode,
+  DNodePropsDictV2,
+  DNodePropsQuickInputV2,
+  DNodePropsV2,
   DNodeUtils,
+  DNodeUtilsV2,
   Note,
   Schema,
   SchemaUtils,
 } from "@dendronhq/common-all";
+import { DendronEngine } from "@dendronhq/engine-server/src";
 import _ from "lodash";
 import { QuickPick, QuickPickItem, Uri, window, WorkspaceFolder } from "vscode";
 import { Logger } from "../../logger";
@@ -15,7 +21,15 @@ import { DendronWorkspace } from "../../workspace";
 import { CREATE_NEW_LABEL } from "./constants";
 import { node2Uri } from "./utils";
 
-export type DendronQuickPicker = QuickPick<DNode> & {
+export type DendronQuickPicker = QuickPick<DNode & { label: string }> & {
+  justActivated?: boolean;
+  prev?: { activeItems: any; items: any };
+  onCreate?: (note: Note) => Promise<void>;
+};
+
+export type DendronQuickPickerV2 = QuickPick<
+  DNodePropsV2 & { label: string }
+> & {
   justActivated?: boolean;
   prev?: { activeItems: any; items: any };
   onCreate?: (note: Note) => Promise<void>;
@@ -199,6 +213,21 @@ export class LookupProvider {
     }
   }
 
+  showRootResultsV2(
+    flavor: EngineFlavor,
+    engine: DEngineV2
+  ): DNodePropsQuickInputV2[] {
+    let nodeDict: DNodePropsDictV2;
+    if (flavor === "note") {
+      nodeDict = engine.notes;
+    } else {
+      nodeDict = engine.schemas;
+    }
+    return DNodeUtilsV2.enhanceWithLabel(
+      _.map(nodeDict["root"].children, (ent) => nodeDict[ent])
+    );
+  }
+
   async onDidAccept(picker: DendronQuickPicker, opts: EngineOpts) {
     const start = process.hrtime();
     const value = PickerUtils.getValue(picker);
@@ -338,12 +367,19 @@ export class LookupProvider {
       opts,
     };
     const queryEndsWithDot = queryOrig.endsWith(".");
-    const engine = ws.engine as DEngine;
+    const engine = ws.engine;
     try {
       // check if root query, special case, return everything
       if (querystring === "") {
         L.info({ ...ctx2, msg: "no qs" });
-        picker.items = this.showRootResults(opts.flavor, engine);
+        if (!DendronWorkspace.lsp()) {
+          picker.items = this.showRootResults(
+            opts.flavor,
+            engine as DendronEngine
+          );
+        } else {
+          // picker.items = this.showRootResultsV2(opts.flavor, engine as DEngineV2);
+        }
         return;
       }
 
@@ -387,7 +423,7 @@ export class LookupProvider {
         updatedItems = PickerUtils.genSchemaSuggestions({
           items: updatedItems as Note[],
           qs: querystring,
-          engine: engine,
+          engine: engine as DEngine,
         });
         profile = getDurationMilliseconds(start);
         L.info({ ...ctx2, msg: "genSchemaSuggestions", profile });

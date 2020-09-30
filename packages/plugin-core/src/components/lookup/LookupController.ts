@@ -18,6 +18,7 @@ import {
 } from "./buttons";
 import {
   DendronQuickPicker,
+  DendronQuickPickerV2,
   EngineOpts,
   LookupProvider,
 } from "./LookupProvider";
@@ -27,7 +28,7 @@ type State = {
 };
 
 export class LookupController {
-  public quickPick: DendronQuickPicker | undefined;
+  public quickPick: DendronQuickPicker | DendronQuickPickerV2 | undefined;
   public state: State;
   public ws: DendronWorkspace;
   protected opts: EngineOpts;

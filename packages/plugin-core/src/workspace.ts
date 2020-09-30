@@ -2,7 +2,6 @@ import {
   CONSTANTS,
   DendronConfig,
   DEngine,
-  DEngineV2,
   getStage,
   Note,
 } from "@dendronhq/common-all";
@@ -42,6 +41,7 @@ import { ShowPreviewCommand } from "./commands/ShowPreview";
 import { UpgradeSettingsCommand } from "./commands/UpgradeSettings";
 import { LookupController } from "./components/lookup/LookupController";
 import {
+  CONFIG,
   DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
@@ -103,6 +103,13 @@ export class DendronWorkspace {
       );
     }
     return rootDir;
+  }
+
+  static lsp(): boolean {
+    const resp = DendronWorkspace.configuration().get<boolean>(
+      CONFIG.USE_EXPERIMENTAL_LSP_SUPPORT.key
+    );
+    return _.isUndefined(resp) ? false : resp;
   }
 
   /**
@@ -168,7 +175,7 @@ export class DendronWorkspace {
   public fsWatcher?: vscode.FileSystemWatcher;
   public serverWatcher?: vscode.FileSystemWatcher;
   public L: typeof Logger;
-  public _engine?: DEngine | DEngineV2;
+  public _engine?: DEngine;
   private disposableStore: DisposableStore;
   private history: HistoryService;
 
@@ -207,7 +214,7 @@ export class DendronWorkspace {
     return DConfig.getOrCreate(rootDir);
   }
 
-  get engine(): DEngine | DEngineV2 {
+  get engine(): DEngine {
     if (!this._engine) {
       throw Error("engine not initialized");
     }

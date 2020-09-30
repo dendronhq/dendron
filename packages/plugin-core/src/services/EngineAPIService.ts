@@ -154,7 +154,9 @@ export class EngineAPIService implements DEngineV2 {
    * Update node metadata
    * @param node
    */
+  // @ts-ignore
   async updateNodes(_nodes: IDNode[], _opts: UpdateNodesOpts): Promise<void> {
+    throw Error("not implemented");
     return;
   }
 }

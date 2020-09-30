@@ -12,7 +12,6 @@ import {
 } from "./constants";
 import { Logger } from "./logger";
 import { startClient } from "./lsp";
-import { EngineAPIService } from "./services/EngineAPIService";
 import { HistoryEvent, HistoryService } from "./services/HistoryService";
 import { Extensions } from "./settings";
 import { VSCodeUtils } from "./utils";
@@ -186,14 +185,15 @@ export async function _activate(context: vscode.ExtensionContext) {
         async (event: HistoryEvent) => {
           if (event.action === "changedPort") {
             const port = DendronWorkspace.serverConfiguration().serverPort;
+            // @ts-ignore
             const api = new DendronAPI({
               endpoint: `http://localhost:${port}`,
               apiPath: "api",
             });
-            ws._engine = new EngineAPIService(api);
-            await ws.engine.init();
-            Logger.info({ ctx, msg: "fin init Engine" });
-            await reloadWorkspace();
+            // ws._engine = new EngineAPIService(api);
+            // await ws.engine.init();
+            // Logger.info({ ctx, msg: "fin init Engine" });
+            // await reloadWorkspace();
           }
         }
       );

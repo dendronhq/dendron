@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.4-alpha.11](https://github.com/dendronhq/dendron/compare/v0.12.4-alpha.10...v0.12.4-alpha.11) (2020-09-30)
+
+### Enhancements
+
+- **lookup:** support lookup note in new split ([da825a9](https://github.com/dendronhq/dendron/commit/da825a9d2b1ec10a3f9d3eac20db06448fe5344b))
+
 ## [0.12.4-alpha.10](https://github.com/dendronhq/dendron/compare/v0.12.4-alpha.9...v0.12.4-alpha.10) (2020-09-30)
 
 **Note:** Version bump only for package root

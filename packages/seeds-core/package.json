@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/seeds-core",
-  "version": "0.12.4-alpha.0",
+  "version": "0.12.4-alpha.2",
   "description": "dendron seeds",
   "license": "GPLv3",
   "repository": {
@@ -56,8 +56,8 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.12.4-alpha.0",
-    "@dendronhq/engine-server": "^0.12.4-alpha.0",
+    "@dendronhq/common-all": "^0.12.4-alpha.2",
+    "@dendronhq/engine-server": "^0.12.4-alpha.2",
     "fs-extra": "^9.0.1",
     "klaw": "^3.0.0",
     "lodash": "^4.17.20"

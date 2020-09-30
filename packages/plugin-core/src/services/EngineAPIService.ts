@@ -7,9 +7,7 @@ import {
   EngineDeleteOpts,
   EngineGetResp,
   EngineWriteOptsV2,
-  IDNode,
   IDNodeType,
-  NodeWriteOpts,
   NotePropsDictV2,
   QueryMode,
   QueryOneOpts,
@@ -164,8 +162,8 @@ export class EngineAPIService implements DEngineV2 {
    */
   // @ts-ignore
   async updateNodes(
-    nodes: DNodePropsV2[],
-    opts: UpdateNodesOpts
+    _nodes: DNodePropsV2[],
+    _opts: UpdateNodesOpts
   ): Promise<void> {
     throw Error("not implemented");
   }

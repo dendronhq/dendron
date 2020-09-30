@@ -1,26 +1,18 @@
 import {
-  DEngine,
   DEngineV2,
-  DNode,
   DNodePropsDictV2,
   DNodePropsQuickInputV2,
   DNodePropsV2,
-  DNodeUtils,
   DNodeUtilsV2,
-  Note,
   NoteUtilsV2,
-  Schema,
-  SchemaUtils,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
-import { DendronEngine } from "@dendronhq/engine-server/src";
 import _ from "lodash";
-import { QuickPick, QuickPickItem, Uri, window, WorkspaceFolder } from "vscode";
+import { Uri, window, WorkspaceFolder } from "vscode";
 import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
 import { getDurationMilliseconds, profile } from "../../utils/system";
 import { DendronWorkspace } from "../../workspace";
-import { CREATE_NEW_DETAIL } from "./constants";
 import {
   DendronQuickPickerV2,
   EngineFlavor,

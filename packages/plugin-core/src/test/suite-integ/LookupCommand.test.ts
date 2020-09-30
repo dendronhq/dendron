@@ -1,4 +1,4 @@
-import { DNodePropsQuickInputV2, NotePropsV2 } from "@dendronhq/common-all";
+import { DNodePropsQuickInputV2 } from "@dendronhq/common-all";
 import {
   DirResult,
   FileTestUtils,

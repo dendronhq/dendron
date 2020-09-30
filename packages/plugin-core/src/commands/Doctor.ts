@@ -1,3 +1,4 @@
+import { DEngine } from "@dendronhq/common-all/src";
 import { BackfillCommand } from "@dendronhq/dendron-cli";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -33,7 +34,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
 
     const siteRoot = path.join(rootDir, config.site.siteRootDir);
-    const engine = await new ReloadIndexCommand().execute();
+    // TODO
+    const engine = (await new ReloadIndexCommand().execute()) as DEngine;
     await new BackfillCommand().execute({ engine });
 
     // create site root, used for publication

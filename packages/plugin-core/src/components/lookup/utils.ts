@@ -11,9 +11,7 @@ import { Logger } from "../../logger";
 import { CREATE_NEW_DETAIL, CREATE_NEW_LABEL } from "./constants";
 import { DendronQuickPickerV2 } from "./LookupProvider";
 
-export function createNoActiveItem(opts?: {
-  label?: string;
-}): DNodePropsQuickInputV2 {
+export function createNoActiveItem(): DNodePropsQuickInputV2 {
   const props = DNodeUtilsV2.create({ fname: CREATE_NEW_LABEL, type: "note" });
   return {
     ...props,

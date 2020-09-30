@@ -1,3 +1,4 @@
+import { DEngine } from "@dendronhq/common-all";
 import { BuildSiteCommand } from "@dendronhq/dendron-cli";
 import _ from "lodash";
 import { window } from "vscode";
@@ -19,7 +20,7 @@ export class BuildPodCommand extends BasicCommand<CommandOpts, CommandOutput> {
     });
     const ws = DendronWorkspace.instance();
     // TODO: HACK, need to actually track changes
-    const engine = await new ReloadIndexCommand().execute();
+    const engine = (await new ReloadIndexCommand().execute()) as DEngine;
     const config = ws.config?.site;
     if (_.isUndefined(config)) {
       throw Error("no config found");

@@ -123,17 +123,17 @@ export class DendronTreeView {
     HistoryService.instance().subscribe(
       "extension",
       async (_event: HistoryEvent) => {
-        // if (_event.action === "initialized") {
-        //   const ws = DendronWorkspace.instance();
-        //   const treeDataProvider = new EngineNoteProvider();
-        //   await treeDataProvider.getChildren();
-        //   const treeView = window.createTreeView("dendronTreeView", {
-        //     treeDataProvider,
-        //     showCollapseAll: true,
-        //   });
-        //   const _class = new DendronTreeView(treeView, treeDataProvider);
-        //   ws.dendronTreeView = _class;
-        // }
+        if (_event.action === "initialized") {
+          const ws = DendronWorkspace.instance();
+          const treeDataProvider = new EngineNoteProvider();
+          await treeDataProvider.getChildren();
+          const treeView = window.createTreeView("dendronTreeView", {
+            treeDataProvider,
+            showCollapseAll: true,
+          });
+          const _class = new DendronTreeView(treeView, treeDataProvider);
+          ws.dendronTreeView = _class;
+        }
       }
     );
   }

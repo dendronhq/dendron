@@ -589,7 +589,7 @@ suite.skip("startup", function () {
         onWSInit(async () => {
           assert.equal(DendronWorkspace.isActive(), true);
           const qp = await createMockQuickPick<DNode>({ value: "bond" });
-          const bondNote = createNoActiveItem({ label: "bond" });
+          const bondNote = createNoActiveItem();
           // @ts-ignore
           qp.items = [bondNote];
           // @ts-ignore
@@ -638,7 +638,7 @@ suite.skip("startup", function () {
           assert.equal(DendronWorkspace.isActive(), true);
           const lbl = "bar.ns1.three";
           const qp = await createMockQuickPick<DNode>({ value: lbl });
-          const bondNote = createNoActiveItem({ label: lbl });
+          const bondNote = createNoActiveItem();
           // @ts-ignore
           qp.items = [bondNote];
           // @ts-ignore
@@ -664,7 +664,7 @@ suite.skip("startup", function () {
           assert.equal(DendronWorkspace.isActive(), true);
           const lbl = "journal.daily.2020-08-10";
           const qp = await createMockQuickPick<DNode>({ value: lbl });
-          const bondNote = createNoActiveItem({ label: lbl });
+          const bondNote = createNoActiveItem();
           // @ts-ignore
           qp.items = [bondNote];
           // @ts-ignore

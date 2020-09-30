@@ -178,7 +178,7 @@ export class LookupProvider {
   public opts: EngineOpts;
 
   constructor(opts: EngineOpts) {
-    this.noActiveItem = createNoActiveItem({ label: "Create New" });
+    this.noActiveItem = createNoActiveItem();
     this.opts = opts;
   }
 

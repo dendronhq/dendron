@@ -1,7 +1,7 @@
 {
 	"name": "@dendronhq/lsp-server",
 	"description": "Example implementation of a language server in node.",
-	"version": "0.12.4-alpha.6",
+	"version": "0.12.4-alpha.8",
 	"author": "Dendron",
 	"license": "MIT",
 	"engines": {
@@ -18,7 +18,7 @@
 	"main": "out/server.js",
 	"types": "out/server.d.js",
 	"dependencies": {
-		"@dendronhq/api-server": "^0.12.4-alpha.6",
+		"@dendronhq/api-server": "^0.12.4-alpha.8",
 		"@dendronhq/common-all": "^0.12.4-alpha.5",
 		"@dendronhq/engine-server": "^0.12.4-alpha.6",
 		"fs-extra": "^9.0.1",

@@ -22,6 +22,7 @@ router.post("/initialize", async (req: Request, res: Response) => {
     const engine = DendronEngine.getOrCreateEngine({
       root: vaults[0],
       forceNew: true,
+      // @ts-ignore
       store: new StorageV2({ root: vaults[0] }),
     });
     await engine.init();

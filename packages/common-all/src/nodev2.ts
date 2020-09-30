@@ -1,21 +1,27 @@
-import _, { entries } from "lodash";
+import _ from "lodash";
 import minimatch from "minimatch";
 import moment from "moment";
 import { DNode } from "./node";
 import {
+  DEngineV2,
+  DNodeOptsV2,
   DNodePropsDictV2,
   DNodePropsQuickInputV2,
   DNodePropsV2,
-  SchemaData,
+  NoteOptsV2,
+  NotePropsV2,
+  SchemaDataV2,
+  SchemaOptsV2,
   SchemaPropsDictV2,
   SchemaPropsV2,
-} from "./types";
+} from "./typesv2";
 import { genUUID } from "./uuid";
 
 export class DNodeUtilsV2 {
-  static create(props: Partial<DNodePropsV2>): DNodePropsV2 {
+  static create(opts: DNodeOptsV2): DNodePropsV2 {
     const {
       id,
+      type,
       desc,
       fname,
       updated,
@@ -25,7 +31,7 @@ export class DNodeUtilsV2 {
       children,
       body,
       data,
-    } = _.defaults(props, {
+    } = _.defaults(opts, {
       updated: moment.now(),
       created: moment.now(),
       id: genUUID(),
@@ -36,10 +42,11 @@ export class DNodeUtilsV2 {
       data: {},
       fname: null,
     });
-    const title = props.title || DNode.defaultTitle(fname);
+    const title = opts.title || DNode.defaultTitle(fname);
     const cleanProps: DNodePropsV2 = {
       id,
       title,
+      type,
       desc,
       fname,
       updated,
@@ -53,15 +60,21 @@ export class DNodeUtilsV2 {
       cleanProps.stub = stub;
     }
     const denylist = ["schemaStub", "type"];
-    const custom = _.omit(props, _.keys(cleanProps).concat(denylist));
+    const custom = _.omit(opts, _.keys(cleanProps).concat(denylist));
     if (!_.isEmpty(custom)) {
       cleanProps.custom = custom;
     }
     return cleanProps;
   }
 
-  static enhanceWithLabel(props: DNodePropsV2[]): DNodePropsQuickInputV2[] {
-    return props.map((ent) => ({ ...ent, label: ent.title }));
+  static enhancePropForQuickInput(props: DNodePropsV2): DNodePropsQuickInputV2 {
+    return { ...props, label: props.title };
+  }
+
+  static enhancePropsForQuickInput(
+    props: DNodePropsV2[]
+  ): DNodePropsQuickInputV2[] {
+    return props.map(DNodeUtilsV2.enhancePropForQuickInput);
   }
 
   static getDomain(
@@ -117,22 +130,51 @@ export class DNodeUtilsV2 {
     }
     return children;
   }
+
+  static getNoteByFname(
+    fname: string,
+    engine: DEngineV2,
+    opts?: { throwIfEmpty: boolean }
+  ): NotePropsV2 | undefined {
+    const out = _.find(
+      _.values(engine.notes),
+      (ent) => ent.fname.toLowerCase() === fname
+    );
+    if (opts?.throwIfEmpty && _.isUndefined(out)) {
+      throw Error(`${fname} not found`);
+    }
+    return out;
+  }
+}
+
+export class NoteUtilsV2 {
+  static create(opts: NoteOptsV2): NotePropsV2 {
+    const cleanOpts = _.defaults(opts, {
+      schemaStub: false,
+    });
+    return DNodeUtilsV2.create({ ...cleanOpts, type: "note" });
+  }
 }
 
 export class SchemaUtilsV2 {
-  static create(opts: SchemaPropsV2) {
+  static create(opts: SchemaOptsV2): SchemaPropsV2 {
     if (opts.fname.indexOf(".schema") < 0) {
       opts.fname += ".schema";
     }
-    const schemaDataOpts: (keyof SchemaData)[] = [
+    const schemaDataOpts: (keyof SchemaDataV2)[] = [
       "namespace",
       "pattern",
       "template",
     ];
-    const optsWithoutData = _.omit(opts, schemaDataOpts);
+    const optsWithoutData = _.omit(opts, schemaDataOpts) as SchemaOptsV2;
     const optsData = _.pick(opts, schemaDataOpts);
-    // TODO
-    return { optsWithoutData, optsData };
+    return DNodeUtilsV2.create({
+      ..._.defaults(optsWithoutData, {
+        title: optsWithoutData.id,
+        data: optsData,
+      }),
+      type: "schema",
+    });
   }
 
   /**

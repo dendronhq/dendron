@@ -2,6 +2,7 @@ import {
   CONSTANTS,
   DendronConfig,
   DEngine,
+  DEngineV2,
   getStage,
   Note,
 } from "@dendronhq/common-all";
@@ -176,6 +177,7 @@ export class DendronWorkspace {
   public serverWatcher?: vscode.FileSystemWatcher;
   public L: typeof Logger;
   public _engine?: DEngine;
+  public _enginev2?: DEngineV2;
   private disposableStore: DisposableStore;
   private history: HistoryService;
 
@@ -244,6 +246,17 @@ export class DendronWorkspace {
       path.join(this.context.extensionPath, "assets")
     );
     return assetsDir;
+  }
+
+  getEngine(): DEngineV2 {
+    if (!this._enginev2) {
+      throw Error("engine not set");
+    }
+    return this._enginev2;
+  }
+
+  setEngine(engine: DEngineV2) {
+    this._enginev2 = engine;
   }
 
   _setupCommands() {
@@ -804,7 +817,9 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.RELOAD_INDEX.key,
         true
       );
-      await cacheWorkspace();
+      if (!DendronWorkspace.lsp()) {
+        await cacheWorkspace();
+      }
       return;
     } catch (err) {
       vscode.window.showErrorMessage(

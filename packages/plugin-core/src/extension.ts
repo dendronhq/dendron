@@ -12,6 +12,7 @@ import {
 } from "./constants";
 import { Logger } from "./logger";
 import { startClient } from "./lsp";
+import { EngineAPIService } from "./services/EngineAPIService";
 import { HistoryEvent, HistoryService } from "./services/HistoryService";
 import { Extensions } from "./settings";
 import { VSCodeUtils } from "./utils";
@@ -190,10 +191,10 @@ export async function _activate(context: vscode.ExtensionContext) {
               endpoint: `http://localhost:${port}`,
               apiPath: "api",
             });
-            // ws._engine = new EngineAPIService(api);
-            // await ws.engine.init();
-            // Logger.info({ ctx, msg: "fin init Engine" });
-            // await reloadWorkspace();
+            ws.setEngine(new EngineAPIService(api));
+            await ws.getEngine().init();
+            Logger.info({ ctx, msg: "fin init Engine" });
+            await reloadWorkspace();
           }
         }
       );

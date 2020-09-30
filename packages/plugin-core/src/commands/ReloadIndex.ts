@@ -16,9 +16,16 @@ export class ReloadIndexCommand extends BasicCommand<
     const ctx = "ReloadIndex.execute";
     this.L.info({ ctx, msg: "enter" });
     const ws = DendronWorkspace.instance();
-    const engine = ws.engine;
-    await engine.init();
-    this.L.info({ ctx, msg: "exit" });
-    return engine;
+    if (DendronWorkspace.lsp()) {
+      const engine = ws.getEngine();
+      await engine.init();
+      this.L.info({ ctx, msg: "exit" });
+      return engine;
+    } else {
+      const engine = ws.engine;
+      await engine.init();
+      this.L.info({ ctx, msg: "exit" });
+      return engine;
+    }
   }
 }

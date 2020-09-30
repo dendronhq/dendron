@@ -7,16 +7,19 @@ describe("DNodeUtilsV2", () => {
         fname: "root",
         id: "root",
         parent: null,
+        type: "note",
       });
       const bar = DNodeUtilsV2.create({
         fname: "bar",
         id: "bar",
         parent: root.id,
+        type: "note",
       });
       const barChild = DNodeUtilsV2.create({
         fname: "bar.ch1",
         id: "bar.ch1",
         parent: bar.id,
+        type: "note",
       });
       const nodeDict = { bar, barChild };
       expect(DNodeUtilsV2.getDomain(barChild, { nodeDict })).toEqual(bar);

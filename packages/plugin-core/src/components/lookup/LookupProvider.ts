@@ -8,18 +8,19 @@ import {
   DNodeUtils,
   DNodeUtilsV2,
   Note,
+  NotePropsV2,
   Schema,
   SchemaUtils,
 } from "@dendronhq/common-all";
-import { DendronEngine } from "@dendronhq/engine-server/src";
+import { DendronEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { QuickPick, QuickPickItem, Uri, window, WorkspaceFolder } from "vscode";
 import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
 import { getDurationMilliseconds, profile } from "../../utils/system";
 import { DendronWorkspace } from "../../workspace";
-import { CREATE_NEW_LABEL } from "./constants";
-import { node2Uri } from "./utils";
+import { CREATE_NEW_DETAIL } from "./constants";
+import { createNoActiveItem, node2Uri } from "./utils";
 
 export type DendronQuickPicker = QuickPick<DNode & { label: string }> & {
   justActivated?: boolean;
@@ -32,7 +33,7 @@ export type DendronQuickPickerV2 = QuickPick<
 > & {
   justActivated?: boolean;
   prev?: { activeItems: any; items: any };
-  onCreate?: (note: Note) => Promise<void>;
+  onCreate?: (note: NotePropsV2) => Promise<void>;
 };
 
 const L = Logger;
@@ -84,20 +85,11 @@ class QueryStringUtils {
   }
 }
 
-export function createNoActiveItem(opts?: { label?: string }): QuickPickItem {
-  const cleanOpts = _.defaults(opts, { label: "" });
-  return {
-    label: cleanOpts.label,
-    detail: CREATE_NEW_LABEL,
-    alwaysShow: true,
-  };
-}
-
 function isCreateNewNotePick(node: Note | undefined): boolean {
   if (!node) {
     return true;
   }
-  return node.detail === CREATE_NEW_LABEL || node.stub || node.schemaStub;
+  return node.detail === CREATE_NEW_DETAIL || node.stub || node.schemaStub;
 }
 
 function slashToDot(ent: string) {
@@ -176,7 +168,7 @@ export class PickerUtils {
   }
 }
 
-type EngineFlavor = "note" | "schema";
+export type EngineFlavor = "note" | "schema";
 export type EngineOpts = {
   flavor: EngineFlavor;
 };
@@ -223,7 +215,7 @@ export class LookupProvider {
     } else {
       nodeDict = engine.schemas;
     }
-    return DNodeUtilsV2.enhanceWithLabel(
+    return DNodeUtilsV2.enhancePropsForQuickInput(
       _.map(nodeDict["root"].children, (ent) => nodeDict[ent])
     );
   }

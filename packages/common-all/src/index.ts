@@ -1,4 +1,5 @@
 export * from "./types";
+export * from "./typesv2";
 export * from "./node";
 export * from "./nodev2";
 export * from "./helpers";

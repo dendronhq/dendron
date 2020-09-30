@@ -1,12 +1,8 @@
 import _ from "lodash";
 import request from "request-promise";
 import { createLogger } from "./logger";
-import {
-  DEngineQuery,
-  DNodeRawProps,
-  NoteRawProps,
-  SchemaRawProps,
-} from "./types";
+import { DEngineQuery } from "./types";
+import { DNodePropsV2, NotePropsV2, SchemaPropsV2 } from "./typesv2";
 // import { nonEmptyGet, unwrapGet, unwrapSearch } from "./es";
 // import { L } from "./logger";
 // import { PlainNode } from "./nodev2";
@@ -84,11 +80,11 @@ type APIPayload<T = any> = {
 };
 
 export type InitializePayload = APIPayload<{
-  notes: NoteRawProps[];
-  schemas: SchemaRawProps[];
+  notes: NotePropsV2[];
+  schemas: SchemaPropsV2[];
 }>;
 
-export type EngineQueryPayload = APIPayload<DNodeRawProps[]>;
+export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
 
 // === Utilities
 
@@ -259,29 +255,6 @@ export abstract class API {
 export class DendronAPI extends API {
   static instance: DendronAPI;
 
-  // TODO
-  // async nodeGetRoot(): Promise<INodeGetPayload> {
-  //   const payload = this._createPayload<INodeGetPayload>();
-  //   // TODO: actual implementation
-  //   payload.data = {
-  //     children: [
-  //       {
-  //         id: "aws",
-  //         tags: [],
-  //         title: "aws"
-  //       }
-  //     ],
-  //     id: "0",
-  //     meta: {},
-  //     parents: [],
-  //     tags: [],
-  //     title: "__root",
-  //     body: "",
-  //     attribution: []
-  //   };
-  //   return payload;
-  // }
-
   async workspaceInit(req: WorkspaceInitRequest): Promise<InitializePayload> {
     const resp = await this._makeRequest({
       path: "workspace/initialize",
@@ -308,7 +281,15 @@ export class DendronAPI extends API {
       body: req,
     });
     return resp;
-    // return this._createPayload(resp);
+  }
+
+  async engineWrite(req: EngineQueryRequest): Promise<EngineQueryPayload> {
+    const resp = await this._makeRequest({
+      path: "engine/query",
+      method: "post",
+      body: req,
+    });
+    return resp;
   }
 
   //   async nodeGet(id: string): Promise<INodeGetPayload> {

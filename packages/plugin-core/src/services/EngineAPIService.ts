@@ -4,7 +4,6 @@ import {
   DEngineV2,
   DNodeData,
   DNodePropsV2,
-  DNodeRawProps,
   EngineDeleteOpts,
   EngineGetResp,
   IDNode,
@@ -102,7 +101,7 @@ export class EngineAPIService implements DEngineV2 {
       opts,
       ws: this.ws,
     });
-    await this.refreshNodes(resp.data as DNodeRawProps[], mode);
+    await this.refreshNodes(resp.data, mode);
     Logger.info({ ctx, msg: "exit", resp });
     return resp;
   }
@@ -120,14 +119,14 @@ export class EngineAPIService implements DEngineV2 {
 
   async buildNotes() {}
 
-  async refreshNodes(nodes: DNodeRawProps[], mode: IDNodeType) {
+  async refreshNodes(nodes: DNodePropsV2[], mode: IDNodeType) {
     if (_.isEmpty(nodes)) {
       return;
     }
     if (mode === "schema") {
       throw Error("not implemented schema refresh");
     } else {
-      nodes.forEach((node: DNodeRawProps) => {
+      nodes.forEach((node: DNodePropsV2) => {
         const { id } = node;
         if (!_.has(this.notes, id)) {
           this.notes[id] = node;
@@ -155,8 +154,10 @@ export class EngineAPIService implements DEngineV2 {
    * @param node
    */
   // @ts-ignore
-  async updateNodes(_nodes: IDNode[], _opts: UpdateNodesOpts): Promise<void> {
+  async updateNodes(
+    nodes: DNodePropsV2[],
+    opts: UpdateNodesOpts
+  ): Promise<void> {
     throw Error("not implemented");
-    return;
   }
 }

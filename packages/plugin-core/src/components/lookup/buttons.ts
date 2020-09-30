@@ -5,7 +5,7 @@ import {
   LookupNoteType,
   LookupSelectionType,
 } from "../../commands/LookupCommand";
-import { DendronQuickPicker } from "./LookupProvider";
+import { DendronQuickPicker, DendronQuickPickerV2 } from "./LookupProvider";
 
 export type ButtonType = LookupNoteType | LookupSelectionType;
 
@@ -112,7 +112,7 @@ class ScratchBtn extends DendronBtn {
 }
 
 export function refreshButtons(
-  quickpick: DendronQuickPicker,
+  quickpick: DendronQuickPicker | DendronQuickPickerV2,
   buttons: IDendronQuickInputButton[]
 ) {
   quickpick.buttons = buttons;

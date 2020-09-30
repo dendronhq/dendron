@@ -1,9 +1,30 @@
-import { DNode } from "@dendronhq/common-all";
+import {
+  DNode,
+  DNodePropsQuickInputV2,
+  DNodePropsV2,
+  DNodeUtilsV2,
+} from "@dendronhq/common-all";
+import _ from "lodash";
 import path from "path";
-import { Uri, WorkspaceFolder } from "vscode";
+import { QuickPick, Uri, window, WorkspaceFolder } from "vscode";
+import { Logger } from "../../logger";
+import { CREATE_NEW_DETAIL, CREATE_NEW_LABEL } from "./constants";
+import { DendronQuickPickerV2 } from "./LookupProvider";
+
+export function createNoActiveItem(opts?: {
+  label?: string;
+}): DNodePropsQuickInputV2 {
+  const props = DNodeUtilsV2.create({ fname: CREATE_NEW_LABEL, type: "note" });
+  return {
+    ...props,
+    label: CREATE_NEW_LABEL,
+    detail: CREATE_NEW_DETAIL,
+    alwaysShow: true,
+  };
+}
 
 export function node2Uri(
-  node: DNode,
+  node: DNode | DNodePropsV2,
   workspaceFolders: WorkspaceFolder[]
 ): Uri {
   const ext = node.type === "note" ? ".md" : ".yml";
@@ -11,4 +32,45 @@ export function node2Uri(
   const rootWs = workspaceFolders[0];
   const rootPath = rootWs.uri.path;
   return Uri.file(path.join(rootPath, nodePath));
+}
+
+export function showDocAndHidePicker(uri: Uri, picker: QuickPick<any>): any {
+  const ctx = "showDocAndHidePicker";
+  return window.showTextDocument(uri).then(
+    () => {
+      Logger.info({ ctx, msg: "showTextDocument" });
+      picker.hide();
+      return;
+    },
+    (err) => {
+      Logger.error({ ctx, err, msg: "exit" });
+      throw err;
+    }
+  );
+}
+
+export class PickerUtilsV2 {
+  static getSelection(picker: DendronQuickPickerV2) {
+    return picker.selectedItems[0];
+  }
+
+  static filterCreateNewItem = (
+    items: DNodePropsQuickInputV2[]
+  ): DNodePropsQuickInputV2[] => {
+    return _.reject(items, { label: CREATE_NEW_LABEL });
+  };
+
+  static isCreateNewNotePick(node: DNodePropsQuickInputV2): boolean {
+    if (!node) {
+      return true;
+    }
+    if (node.detail === CREATE_NEW_DETAIL || node.stub || node.schemaStub) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  static slashToDot(ent: string) {
+    return ent.replace(/\//g, ".");
+  }
 }

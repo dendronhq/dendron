@@ -1,4 +1,4 @@
-import { DNode, Note } from "@dendronhq/common-all";
+import { DNodePropsQuickInputV2, NotePropsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
@@ -16,25 +16,17 @@ import {
   IDendronQuickInputButton,
   refreshButtons,
 } from "./buttons";
-import {
-  DendronQuickPicker,
-  DendronQuickPickerV2,
-  EngineOpts,
-  LookupProvider,
-} from "./LookupProvider";
+import { DendronQuickPickerV2, EngineOpts } from "./LookupProvider";
+import { LookupProviderV2 } from "./LookupProviderV2";
 import { LookupControllerState } from "./types";
 
-export class LookupController {
-  public quickPick: DendronQuickPicker | DendronQuickPickerV2 | undefined;
+export class LookupControllerV2 {
+  public quickPick?: DendronQuickPickerV2;
   public state: LookupControllerState;
-  public ws: DendronWorkspace;
   protected opts: EngineOpts;
 
-  constructor(
-    workspace: DendronWorkspace,
-    opts: EngineOpts,
-    lookupOpts?: LookupCommandOpts
-  ) {
+  constructor(opts: EngineOpts, lookupOpts?: LookupCommandOpts) {
+    // selection behaior
     let lookupSelectionType =
       lookupOpts?.selectionType ||
       (DendronWorkspace.configuration().get<string>(
@@ -45,84 +37,12 @@ export class LookupController {
     if (noteSelectioType) {
       initialTypes.push(noteSelectioType);
     }
+
+    // initialize rest
     this.state = {
       buttons: createAllButtons(initialTypes),
     };
-    this.ws = workspace;
     this.opts = opts;
-  }
-
-  updatePickerBehavior(opts: {
-    quickPick: DendronQuickPicker;
-    document?: vscode.TextDocument;
-    range?: vscode.Range;
-    quickPickValue?: string;
-    provider: LookupProvider;
-  }) {
-    const ctx = "updatePickerBehavior";
-    const { document, range, quickPick, quickPickValue, provider } = opts;
-    const buttons = this.state.buttons;
-    const resp = _.filter(buttons, { pressed: true });
-    Logger.info({ ctx, resp });
-    const selectionResp = _.find(
-      resp,
-      (ent) => getButtonCategory(ent) === "selection"
-    );
-    const noteResp = _.find(resp, (ent) => getButtonCategory(ent) === "note");
-
-    // determine value
-    switch (noteResp?.type) {
-      case "journal": {
-        const value = VSCodeUtils.genNoteName("JOURNAL");
-        quickPick.value = value;
-        provider.onUpdatePickerItem(quickPick, provider.opts);
-        break;
-      }
-      case "scratch": {
-        const value = VSCodeUtils.genNoteName("SCRATCH");
-        quickPick.value = value;
-        provider.onUpdatePickerItem(quickPick, provider.opts);
-        break;
-      }
-      default:
-        if (quickPickValue) {
-          quickPick.value = quickPickValue;
-        } else {
-          let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
-          if (editorPath && this.opts.flavor !== "schema") {
-            quickPick.value = path.basename(editorPath, ".md");
-          }
-        }
-        provider.onUpdatePickerItem(quickPick, provider.opts);
-    }
-    quickPick.onCreate = async (note: Note) => {
-      switch (selectionResp?.type) {
-        case "selectionExtract": {
-          if (!_.isUndefined(document)) {
-            const body = "\n" + document.getText(range).trim();
-            note.body = body;
-            await VSCodeUtils.deleteRange(document, range as vscode.Range);
-          }
-          break;
-        }
-        case "selection2link": {
-          if (!_.isUndefined(document)) {
-            const editor = VSCodeUtils.getActiveTextEditor();
-            const { selection, text } = VSCodeUtils.getSelection();
-            await editor?.edit((builder) => {
-              const link = note.fname;
-              if (!selection.isEmpty) {
-                builder.replace(selection, `[[${text}|${link}]]`);
-              }
-            });
-          }
-          break;
-        }
-        default: {
-          quickPick.onCreate = async () => {};
-        }
-      }
-    };
   }
 
   show(opts?: {
@@ -136,18 +56,18 @@ export class LookupController {
       ignoreFocusOut: true,
     });
     const { document, range } = cleanOpts;
-    this.ws.L.info({ ctx });
+    Logger.info({ ctx, msg: "enter" });
     // create quick pick
     const quickPick = vscode.window.createQuickPick<
-      DNode
-    >() as DendronQuickPicker;
+      DNodePropsQuickInputV2
+    >() as DendronQuickPickerV2;
     let title = ["Lookup"];
     title.push(`- version: ${DendronWorkspace.version()}`);
     quickPick.title = title.join(" ");
     quickPick.placeholder = "eg. hello.world";
     quickPick.ignoreFocusOut = cleanOpts.ignoreFocusOut;
     quickPick.justActivated = true;
-    const provider = new LookupProvider(this.opts);
+    const provider = new LookupProviderV2(this.opts);
 
     this.updatePickerBehavior({
       quickPick,
@@ -190,5 +110,90 @@ export class LookupController {
     quickPick.show();
     this.quickPick = quickPick;
     return quickPick;
+  }
+
+  updatePickerBehavior(opts: {
+    quickPick: DendronQuickPickerV2;
+    document?: vscode.TextDocument;
+    range?: vscode.Range;
+    quickPickValue?: string;
+    provider: LookupProviderV2;
+  }) {
+    const ctx = "updatePickerBehavior";
+    const { document, range, quickPick, quickPickValue, provider } = opts;
+    const buttons = this.state.buttons;
+    const resp = _.filter(buttons, { pressed: true });
+    Logger.info({ ctx, activeButtons: resp });
+    const selectionResp = _.find(
+      resp,
+      (ent) => getButtonCategory(ent) === "selection"
+    );
+    const noteResp = _.find(resp, (ent) => getButtonCategory(ent) === "note");
+
+    // determine value
+    switch (noteResp?.type) {
+      case "journal": {
+        const value = VSCodeUtils.genNoteName("JOURNAL");
+        quickPick.value = value;
+        provider.onUpdatePickerItem(
+          quickPick,
+          provider.opts,
+          "updatePickerBehavior:journal"
+        );
+        break;
+      }
+      case "scratch": {
+        const value = VSCodeUtils.genNoteName("SCRATCH");
+        quickPick.value = value;
+        provider.onUpdatePickerItem(
+          quickPick,
+          provider.opts,
+          "updatePickerBehavior:scratch"
+        );
+        break;
+      }
+      default:
+        if (quickPickValue) {
+          quickPick.value = quickPickValue;
+        } else {
+          let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
+          if (editorPath && this.opts.flavor !== "schema") {
+            quickPick.value = path.basename(editorPath, ".md");
+          }
+        }
+        provider.onUpdatePickerItem(
+          quickPick,
+          provider.opts,
+          "updatePickerBehavior:normal"
+        );
+    }
+    quickPick.onCreate = async (note: NotePropsV2) => {
+      switch (selectionResp?.type) {
+        case "selectionExtract": {
+          if (!_.isUndefined(document)) {
+            const body = "\n" + document.getText(range).trim();
+            note.body = body;
+            await VSCodeUtils.deleteRange(document, range as vscode.Range);
+          }
+          break;
+        }
+        case "selection2link": {
+          if (!_.isUndefined(document)) {
+            const editor = VSCodeUtils.getActiveTextEditor();
+            const { selection, text } = VSCodeUtils.getSelection();
+            await editor?.edit((builder) => {
+              const link = note.fname;
+              if (!selection.isEmpty) {
+                builder.replace(selection, `[[${text}|${link}]]`);
+              }
+            });
+          }
+          break;
+        }
+        default: {
+          quickPick.onCreate = async () => {};
+        }
+      }
+    };
   }
 }

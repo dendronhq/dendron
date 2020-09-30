@@ -1,5 +1,9 @@
 import { LookupController } from "../components/lookup/LookupController";
-import { DendronQuickPicker } from "../components/lookup/LookupProvider";
+import { LookupControllerV2 } from "../components/lookup/LookupControllerV2";
+import {
+  DendronQuickPicker,
+  DendronQuickPickerV2,
+} from "../components/lookup/LookupProvider";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -12,7 +16,7 @@ type CommandOpts = {
   noteType?: LookupNoteType;
 };
 
-type CommandOutput = DendronQuickPicker;
+type CommandOutput = DendronQuickPicker | DendronQuickPickerV2;
 
 export { CommandOpts as LookupCommandOpts };
 
@@ -21,12 +25,18 @@ export class LookupCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return {};
   }
   async execute(opts: CommandOpts) {
-    const controller = new LookupController(
-      DendronWorkspace.instance(),
-      { flavor: "note" },
-      opts
-    );
-    const resp = await VSCodeUtils.extractRangeFromActiveEditor();
-    return controller.show({ ...resp });
+    if (DendronWorkspace.lsp()) {
+      const controller = new LookupControllerV2({ flavor: "note" }, opts);
+      const resp = await VSCodeUtils.extractRangeFromActiveEditor();
+      return controller.show({ ...resp });
+    } else {
+      const controller = new LookupController(
+        DendronWorkspace.instance(),
+        { flavor: "note" },
+        opts
+      );
+      const resp = await VSCodeUtils.extractRangeFromActiveEditor();
+      return controller.show({ ...resp });
+    }
   }
 }

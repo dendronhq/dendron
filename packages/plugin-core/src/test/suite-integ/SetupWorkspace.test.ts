@@ -102,9 +102,10 @@ suite("startup with lsp", function () {
           ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
           "0.0.1"
         );
-        const engine = DendronWorkspace.instance().engine;
+        const engine = DendronWorkspace.instance().getEngine();
         assert.strictEqual(_.values(engine.notes).length, 2);
         assert.strictEqual(engine.notes["id.foo"].fname, "foo");
+        assert.strictEqual(engine.notes["root"].fname, "root");
         done();
       });
 

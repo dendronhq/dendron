@@ -1,6 +1,6 @@
 import { DNodePropsV2 } from "@dendronhq/common-all";
 import { note2File } from "@dendronhq/common-server";
-import { FileStorage } from "./store";
+const FileStorage = require("./store");
 
 export class StorageV2 extends FileStorage {
   // @ts-ignore

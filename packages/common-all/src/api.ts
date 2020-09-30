@@ -2,7 +2,12 @@ import _ from "lodash";
 import request from "request-promise";
 import { createLogger } from "./logger";
 import { DEngineQuery } from "./types";
-import { DNodePropsV2, NotePropsV2, SchemaPropsV2 } from "./typesv2";
+import {
+  DNodePropsV2,
+  EngineWriteOptsV2,
+  NotePropsV2,
+  SchemaPropsV2,
+} from "./typesv2";
 // import { nonEmptyGet, unwrapGet, unwrapSearch } from "./es";
 // import { L } from "./logger";
 // import { PlainNode } from "./nodev2";
@@ -85,6 +90,7 @@ export type InitializePayload = APIPayload<{
 }>;
 
 export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
+export type EngineWritePayload = APIPayload<void>;
 
 // === Utilities
 
@@ -128,6 +134,10 @@ type WorkspaceInitRequest = {
 };
 
 export type EngineQueryRequest = DEngineQuery & { ws: string };
+export type EngineWriteRequest = {
+  node: DNodePropsV2;
+  opts?: EngineWriteOptsV2;
+} & { ws: string };
 
 // === Base
 
@@ -283,9 +293,9 @@ export class DendronAPI extends API {
     return resp;
   }
 
-  async engineWrite(req: EngineQueryRequest): Promise<EngineQueryPayload> {
+  async engineWrite(req: EngineWriteRequest): Promise<EngineWritePayload> {
     const resp = await this._makeRequest({
-      path: "engine/query",
+      path: "engine/write",
       method: "post",
       body: req,
     });

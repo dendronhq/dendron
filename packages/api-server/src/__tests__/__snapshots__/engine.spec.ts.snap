@@ -1,11 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`main one 1`] = `
+exports[`main query 1`] = `
 Object {
-  "data": Object {
-    "data": undefined,
-    "error": [StatusCodeError: 404 - "<!DOCTYPE html>\\n<html lang=\\"en\\">\\n<head>\\n<meta charset=\\"utf-8\\">\\n<title>Error</title>\\n</head>\\n<body>\\n<pre>Cannot POST /api/engine/query</pre>\\n</body>\\n</html>\\n"],
-  },
+  "data": Array [
+    Object {
+      "body": "
+",
+      "children": Array [
+        "id.foo",
+      ],
+      "created": 1601492948365,
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "root",
+      "id": "root",
+      "parent": null,
+      "stub": false,
+      "title": "root",
+      "type": "note",
+      "updated": 1601492948365,
+    },
+  ],
+  "error": null,
+}
+`;
+
+exports[`main write 1`] = `
+Object {
+  "data": null,
   "error": null,
 }
 `;

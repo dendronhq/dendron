@@ -1,4 +1,4 @@
-import { DendronAPI } from "@dendronhq/common-all";
+import { DendronAPI, NoteUtilsV2 } from "@dendronhq/common-all";
 import {
   EngineTestUtils,
   NodeTestUtils,
@@ -28,7 +28,7 @@ describe("main", () => {
     });
   });
 
-  test("one", async () => {
+  test("query", async () => {
     const payload = {
       uri: wsRoot,
       config: {
@@ -42,9 +42,30 @@ describe("main", () => {
     await api.workspaceInit(payload);
     const resp = await api.engineQuery({
       ws: wsRoot,
-      queryString: "*",
+      queryString: "",
       mode: "note" as const,
     });
     expect(resp).toMatchSnapshot();
+  });
+
+  test("write", async () => {
+    const payload = {
+      uri: wsRoot,
+      config: {
+        vaults: [vault],
+      },
+    };
+    const api = new DendronAPI({
+      endpoint: "http://localhost:3005",
+      apiPath: "api",
+    });
+    await api.workspaceInit(payload);
+    const resp = await api.engineWrite({
+      ws: wsRoot,
+      node: NoteUtilsV2.create({ fname: "bond" }),
+    });
+    expect(resp).toMatchSnapshot();
+    const out = fs.readdirSync(vault);
+    expect(out).toEqual(["bond.md", "foo.md", "root.md"]);
   });
 });

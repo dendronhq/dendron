@@ -79,15 +79,34 @@ export interface QueryOptsV2 {
   createIfNew?: boolean;
 }
 
-type UpdateNodesOptsV2 = UpdateNodesOpts;
-type EngineDeleteOptsV2 = EngineDeleteOpts;
+export type EngineUpdateNodesOptsV2 = UpdateNodesOpts;
+export type EngineDeleteOptsV2 = EngineDeleteOpts;
+export type EngineWriteOptsV2 = {
+  /**
+   * See QueryOpts.stub
+   */
+  stub?: boolean;
+  /**
+   * Write all children?
+   * default: false
+   */
+  recursive?: boolean;
+  /**
+   * Write stubs
+   * default: false
+   */
+  writeStub?: boolean;
+} & Partial<EngineUpdateNodesOptsV2>;
 
 export type DEngineV2 = {
   notes: NotePropsDictV2;
   schemas: SchemaPropsDictV2;
 
   init: () => Promise<void>;
-  updateNodes(nodes: DNodePropsV2[], opts: UpdateNodesOptsV2): Promise<void>;
+  updateNodes(
+    nodes: DNodePropsV2[],
+    opts: EngineUpdateNodesOptsV2
+  ): Promise<void>;
 
   delete: (
     id: string,
@@ -100,4 +119,6 @@ export type DEngineV2 = {
     mode: DNodeTypeV2,
     opts?: QueryOptsV2
   ) => Promise<Resp<DNodePropsV2[]>>;
+
+  write: (node: DNodePropsV2, opts?: EngineWriteOptsV2) => Promise<void>;
 };

@@ -154,6 +154,24 @@ export class NoteUtilsV2 {
     });
     return DNodeUtilsV2.create({ ...cleanOpts, type: "note" });
   }
+
+  static serialize(props: NotePropsV2) {
+    const body = props.body;
+    const builtinProps = _.pick(props, [
+      "id",
+      "title",
+      "desc",
+      "updated",
+      "created",
+      "stub",
+    ]);
+    const { custom: customProps } = props;
+    const meta = { ...builtinProps, ...customProps };
+    return {
+      meta,
+      body,
+    };
+  }
 }
 
 export class SchemaUtilsV2 {

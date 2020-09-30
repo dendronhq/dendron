@@ -17,10 +17,10 @@ import _ from "lodash";
 import { QuickPick, QuickPickItem, Uri, window, WorkspaceFolder } from "vscode";
 import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
-import { getDurationMilliseconds, profile } from "../../utils/system";
+import { getDurationMilliseconds } from "../../utils/system";
 import { DendronWorkspace } from "../../workspace";
 import { CREATE_NEW_DETAIL } from "./constants";
-import { createNoActiveItem, node2Uri } from "./utils";
+import { createNoActiveItem, node2Uri, showDocAndHidePicker } from "./utils";
 
 export type DendronQuickPicker = QuickPick<DNode & { label: string }> & {
   justActivated?: boolean;
@@ -94,25 +94,6 @@ function isCreateNewNotePick(node: Note | undefined): boolean {
 
 function slashToDot(ent: string) {
   return ent.replace(/\//g, ".");
-}
-
-function showDocAndHidePicker(uri: Uri, picker: QuickPick<any>): any {
-  const start = process.hrtime();
-  const ctx = { ctx: uri, value: picker.value };
-  return window.showTextDocument(uri).then(
-    () => {
-      let profile = getDurationMilliseconds(start);
-      Logger.info({ ...ctx, msg: "showTextDocument", profile });
-      picker.hide();
-      profile = getDurationMilliseconds(start);
-      Logger.info({ ...ctx, msg: "picker.hide", profile });
-      return;
-    },
-    (err) => {
-      Logger.error({ ...ctx, err, msg: "exit", profile });
-      throw err;
-    }
-  );
 }
 
 export class PickerUtils {

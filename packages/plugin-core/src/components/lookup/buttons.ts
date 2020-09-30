@@ -4,19 +4,37 @@ import { QuickInputButton, ThemeIcon } from "vscode";
 import {
   LookupNoteType,
   LookupSelectionType,
+  LookupSplitType,
 } from "../../commands/LookupCommand";
 import { DendronQuickPicker, DendronQuickPickerV2 } from "./LookupProvider";
 
-export type ButtonType = LookupNoteType | LookupSelectionType;
+export type ButtonType = LookupNoteType | LookupSelectionType | LookupSplitType;
 
-export type ButtonCategory = "selection" | "note";
+export type ButtonCategory = "selection" | "note" | "split";
 
 export function getButtonCategory(button: DendronBtn): ButtonCategory {
-  return isSelectionBtn(button) ? "selection" : "note";
+  if (isSelectionBtn(button)) {
+    return "selection";
+  }
+  if (isNoteBtn(button)) {
+    return "note";
+  }
+  if (isSplitButton(button)) {
+    return "split";
+  }
+  throw Error(`unknown btn type ${button}`);
 }
 
 function isSelectionBtn(button: DendronBtn) {
   return _.includes(["selection2link", "selectionExtract"], button.type);
+}
+
+function isNoteBtn(button: DendronBtn) {
+  return _.includes(["journal", "scratch"], button.type);
+}
+
+function isSplitButton(button: DendronBtn) {
+  return _.includes(["horizontal", "vertical"], button.type);
 }
 
 export type IDendronQuickInputButton = QuickInputButton & {
@@ -110,6 +128,30 @@ class ScratchBtn extends DendronBtn {
     });
   }
 }
+class HorizontalSplitBtn extends DendronBtn {
+  static create(pressed?: boolean) {
+    return new DendronBtn({
+      title: "Split Horizontal",
+      iconOff: "split-horizontal",
+      iconOn: "menu-selection",
+      type: "horizontal",
+      pressed,
+    });
+  }
+}
+
+// @ts-ignore
+class VerticalSplitBtn extends DendronBtn {
+  static create(pressed?: boolean) {
+    return new DendronBtn({
+      title: "Split Vertical",
+      iconOff: "split-vertical",
+      iconOn: "menu-selection",
+      type: "vertical",
+      pressed,
+    });
+  }
+}
 
 export function refreshButtons(
   quickpick: DendronQuickPicker | DendronQuickPickerV2,
@@ -126,6 +168,8 @@ export function createAllButtons(
     Selection2LinkBtn.create(),
     JournalBtn.create(),
     ScratchBtn.create(),
+    HorizontalSplitBtn.create(),
+    // VerticalSplitBtn.create(),
   ];
   typesToTurnOn.map((btnType) => {
     (_.find(buttons, { type: btnType }) as DendronBtn).pressed = true;

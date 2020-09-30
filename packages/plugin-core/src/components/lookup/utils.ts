@@ -6,10 +6,11 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
-import { QuickPick, Uri, window, WorkspaceFolder } from "vscode";
+import { Uri, ViewColumn, window, WorkspaceFolder } from "vscode";
 import { Logger } from "../../logger";
+import { DendronBtn, getButtonCategory } from "./buttons";
 import { CREATE_NEW_DETAIL, CREATE_NEW_LABEL } from "./constants";
-import { DendronQuickPickerV2 } from "./LookupProvider";
+import { DendronQuickPicker, DendronQuickPickerV2 } from "./LookupProvider";
 
 export function createNoActiveItem(): DNodePropsQuickInputV2 {
   const props = DNodeUtilsV2.create({ fname: CREATE_NEW_LABEL, type: "note" });
@@ -32,9 +33,26 @@ export function node2Uri(
   return Uri.file(path.join(rootPath, nodePath));
 }
 
-export function showDocAndHidePicker(uri: Uri, picker: QuickPick<any>): any {
+export async function showDocAndHidePicker(
+  uri: Uri,
+  picker: DendronQuickPicker | DendronQuickPickerV2
+) {
   const ctx = "showDocAndHidePicker";
-  return window.showTextDocument(uri).then(
+  const maybeSplitSelection = _.find(picker.buttons, (ent: DendronBtn) => {
+    return getButtonCategory(ent) === "split" && ent.pressed;
+  });
+  let viewColumn = ViewColumn.Active;
+  if (maybeSplitSelection) {
+    const splitType = (maybeSplitSelection as DendronBtn).type;
+    if (splitType === "horizontal") {
+      viewColumn = ViewColumn.Beside;
+    } else {
+      // TODO: close current button
+      // await commands.executeCommand("workbench.action.splitEditorDown");
+    }
+  }
+
+  return window.showTextDocument(uri, { viewColumn }).then(
     () => {
       Logger.info({ ctx, msg: "showTextDocument" });
       picker.hide();

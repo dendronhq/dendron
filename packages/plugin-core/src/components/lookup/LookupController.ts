@@ -45,6 +45,9 @@ export class LookupController {
     if (noteSelectioType) {
       initialTypes.push(noteSelectioType);
     }
+    if (lookupOpts?.splitType) {
+      initialTypes.push(lookupOpts.splitType);
+    }
     this.state = {
       buttons: createAllButtons(initialTypes),
     };

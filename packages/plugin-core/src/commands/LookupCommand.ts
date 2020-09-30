@@ -10,10 +10,12 @@ import { BasicCommand } from "./base";
 
 export type LookupSelectionType = "selection2link" | "selectionExtract";
 export type LookupNoteType = "journal" | "scratch";
+export type LookupSplitType = "horizontal" | "vertical";
 
 type CommandOpts = {
   selectionType?: LookupSelectionType;
   noteType?: LookupNoteType;
+  splitType?: LookupSplitType;
 };
 
 type CommandOutput = DendronQuickPicker | DendronQuickPickerV2;

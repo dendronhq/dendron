@@ -1,6 +1,9 @@
 import _ from "lodash";
 import minimatch from "minimatch";
 import moment from "moment";
+import YAML from "yamljs";
+import { ENGINE_ERROR_CODES } from "./constants";
+import { DendronError } from "./error";
 import { DNode } from "./node";
 import {
   DEngineV2,
@@ -11,6 +14,7 @@ import {
   NoteOptsV2,
   NotePropsV2,
   SchemaDataV2,
+  SchemaModulePropsV2,
   SchemaOptsV2,
   SchemaPropsDictV2,
   SchemaPropsV2,
@@ -18,6 +22,11 @@ import {
 import { genUUID } from "./uuid";
 
 export class DNodeUtilsV2 {
+  static addChild(parent: DNodePropsV2, child: DNodePropsV2) {
+    parent.children = Array.from(new Set(parent.children).add(child.id));
+    child.parent = parent.id;
+  }
+
   static create(opts: DNodeOptsV2): DNodePropsV2 {
     const {
       id,
@@ -193,6 +202,58 @@ export class SchemaUtilsV2 {
       }),
       type: "schema",
     });
+  }
+
+  static createModule(opts: SchemaModulePropsV2): SchemaModulePropsV2 {
+    return opts;
+  }
+
+  static createRootModule(opts?: Partial<SchemaPropsV2>): SchemaModulePropsV2 {
+    const schema = SchemaUtilsV2.create({
+      id: "root",
+      title: "root",
+      fname: "root.schema",
+      parent: null,
+      children: [],
+      ...opts,
+    });
+    return {
+      version: 1,
+      imports: [],
+      schemas: [schema],
+    };
+  }
+
+  static getModuleFname(module: SchemaModulePropsV2): string {
+    return SchemaUtilsV2.getModuleRoot(module).fname;
+  }
+
+  static getModuleRoot(module: SchemaModulePropsV2): SchemaPropsV2 {
+    const maybeRoot = _.find(module.schemas, { parent: "root" });
+    if (!maybeRoot) {
+      const rootSchemaRoot = _.find(module.schemas, {
+        parent: null,
+        id: "root",
+      });
+      if (!rootSchemaRoot) {
+        throw new DendronError({
+          status: ENGINE_ERROR_CODES.NO_ROOT_SCHEMA_FOUND,
+        });
+      } else {
+        return rootSchemaRoot as SchemaPropsV2;
+      }
+    }
+    return maybeRoot as SchemaPropsV2;
+  }
+
+  static serializeModule(moduleProps: SchemaModulePropsV2) {
+    const { version, imports, schemas } = moduleProps;
+    const out = {
+      version,
+      imports,
+      schemas,
+    };
+    return YAML.stringify(out, undefined, 4);
   }
 
   /**

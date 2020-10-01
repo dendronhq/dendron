@@ -62,6 +62,7 @@ function createLogger(
 }
 
 export type DLogger = {
+  name?: string;
   debug: (msg: any) => void;
   info: (msg: any) => void;
   error: (msg: any) => void;

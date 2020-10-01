@@ -31,7 +31,7 @@ router.post("/write", async (req: Request, res: Response) => {
     throw "No Engine";
   }
   try {
-    await engine.write(node, opts);
+    await engine.writeNote(node, opts);
     res.json({ error: null, data: null });
   } catch (err) {
     res.json({ error: JSON.stringify(err), data: null });

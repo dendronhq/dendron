@@ -1,5 +1,5 @@
 import { NoteRawProps, SchemaRawProps } from "@dendronhq/common-all";
-import { DendronEngine, StorageV2 } from "@dendronhq/engine-server";
+import { DendronEngine, FileStorageV2 } from "@dendronhq/engine-server";
 import { Request, Response, Router } from "express";
 import { OK } from "http-status-codes";
 import _ from "lodash";
@@ -23,7 +23,7 @@ router.post("/initialize", async (req: Request, res: Response) => {
       root: vaults[0],
       forceNew: true,
       // @ts-ignore
-      store: new StorageV2({ root: vaults[0] }),
+      store: new FileStorageV2({ root: vaults[0] }),
     });
     await engine.init();
     notes = _.values(engine.notes).map((ent) => ent.toRawProps());

@@ -5,3 +5,8 @@ export const CONSTANTS = {
   ALL_QUERY: "**/*",
   DENDRON_SERVER_PORT: ".dendron.port",
 };
+
+export const ENGINE_ERROR_CODES = {
+  NO_SCHEMA_FOUND: "no_schema_found",
+  NO_ROOT_SCHEMA_FOUND: "no_root_schema_found",
+};

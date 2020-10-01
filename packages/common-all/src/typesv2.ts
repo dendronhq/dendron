@@ -1,7 +1,7 @@
+import { DendronError } from "./error";
 import {
   EngineDeleteOpts,
   NoteData,
-  Resp,
   SchemaData,
   UpdateNodesOpts,
 } from "./types";
@@ -49,14 +49,37 @@ export type DNodePropsDictV2 = {
 };
 
 export type NotePropsDictV2 = {
-  [key: string]: DNodePropsV2;
+  [key: string]: NotePropsV2;
 };
 
 export type SchemaPropsDictV2 = {
-  [key: string]: DNodePropsV2;
+  [key: string]: SchemaPropsV2;
+};
+
+export type SchemaModuleDictV2 = {
+  [key: string]: SchemaModuleV2;
+};
+
+// ---
+
+export type SchemaImportV2 = string[];
+export type SchemaModulePropsV2 = {
+  version: number;
+  imports?: SchemaImportV2;
+  schemas: SchemaOptsV2[];
+};
+export type SchemaModuleV2 = {
+  root: SchemaPropsV2;
+  schemas: SchemaPropsDictV2;
+  fname: string;
 };
 
 // === Engine
+
+export interface RespV2<T> {
+  data: T;
+  error?: DendronError | null;
+}
 
 export interface QueryOptsV2 {
   /**
@@ -98,16 +121,27 @@ export type EngineWriteOptsV2 = {
   writeStub?: boolean;
 } & Partial<EngineUpdateNodesOptsV2>;
 
-export type DEngineV2 = {
+export type DCommonProps = {
   notes: NotePropsDictV2;
-  schemas: SchemaPropsDictV2;
+  schemas: SchemaModuleDictV2;
+  vaults: string[];
 
-  init: () => Promise<void>;
-  updateNodes(
-    nodes: DNodePropsV2[],
-    opts: EngineUpdateNodesOptsV2
-  ): Promise<void>;
+  updateNote(note: NotePropsV2, opts?: EngineUpdateNodesOptsV2): Promise<void>;
+  updateSchema: (schema: SchemaModulePropsV2) => Promise<void>;
 
+  writeNote: (note: NotePropsV2, opts?: EngineWriteOptsV2) => Promise<void>;
+  writeSchema: (schema: SchemaModulePropsV2) => Promise<void>;
+};
+
+export type DEngineInitPayloadV2 = {
+  notes?: NotePropsDictV2;
+  schemas?: SchemaModuleDictV2;
+};
+
+export type DEngineV2 = DCommonProps & {
+  store: DStoreV2;
+
+  init: () => Promise<RespV2<DEngineInitPayloadV2>>;
   delete: (
     id: string,
     mode: DNodeTypeV2,
@@ -118,7 +152,9 @@ export type DEngineV2 = {
     queryString: string,
     mode: DNodeTypeV2,
     opts?: QueryOptsV2
-  ) => Promise<Resp<DNodePropsV2[]>>;
+  ) => Promise<RespV2<DNodePropsV2[]>>;
+};
 
-  write: (node: DNodePropsV2, opts?: EngineWriteOptsV2) => Promise<void>;
+export type DStoreV2 = DCommonProps & {
+  init: () => Promise<DEngineInitPayloadV2>;
 };

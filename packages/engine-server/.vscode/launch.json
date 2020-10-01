@@ -28,6 +28,8 @@
       "request": "launch",
       "name": "engine-server:debug test file",
       "program": "${workspaceFolder:engine-server}/node_modules/jest/bin/jest.js",
+      "sourceMaps": true,
+      "smartStep": true,
       "cwd": "${workspaceFolder:engine-server}",
       "args": ["--runInBand", "${relativeFile}", "-u"]
     }

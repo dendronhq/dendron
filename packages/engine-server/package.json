@@ -78,6 +78,7 @@
   },
   "devDependencies": {
     "@types/execa": "^2.0.0",
+    "@dendronhq/common-test-utils": "^0.12.3",
     "coveralls": "^3.0.2",
     "cross-env": "^7.0.2",
     "jest": "^23.6.0",

@@ -15,6 +15,9 @@
       {
         "path": "packages/lsp-client"
       },
+      {
+        "path": "packages/common-test-utils"
+      },
       // {
       //   "path": "vendor/vscode-languageserver-node"
       // },
@@ -44,7 +47,8 @@
         "titleBar.inactiveForeground": "#15202b99"
       },
       "peacock.color": "#61dafb",
-      "vim.statusBarColorControl": false
+      "vim.statusBarColorControl": false,
+      "debug.node.autoAttach": "on"
     }
   }
   

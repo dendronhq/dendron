@@ -3,17 +3,9 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## [0.12.4](https://github.com/dendronhq/dendron/compare/v0.12.4-alpha.11...v0.12.4) (2020-09-30)
+## 0.12.4 and Beyond
 
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.4-alpha.11](https://github.com/dendronhq/dendron/compare/v0.12.4-alpha.10...v0.12.4-alpha.11) (2020-09-30)
-
-### Enhancements
-
-- **lookup:** support lookup note in new split ([da825a9](https://github.com/dendronhq/dendron/commit/da825a9d2b1ec10a3f9d3eac20db06448fe5344b))
-- **server:** return version ([b3577c2](https://github.com/dendronhq/dendron/commit/b3577c27aaf0cfdcd85c3c8c0e86dd890a0ad496))
-- **refs:** easier header selection ([114ff87](https://github.com/dendronhq/dendron/commit/114ff87be04f8d746b0be28f7627ba0d1ec9b504))
+- All changelogs post 0.12.3 are now published on [Dendron](https://www.dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html)
 
 ## [0.12.3](https://github.com/dendronhq/dendron/compare/v0.12.3-alpha.16...v0.12.3) (2020-09-26)
 

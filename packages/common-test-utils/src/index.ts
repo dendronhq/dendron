@@ -32,9 +32,12 @@ export class NodeTestUtilsV2 {
       withBody: true,
       noteProps: [] as NoteOptsV2[],
     });
-    const rootNote = await NoteUtilsV2.createRoot({
+    const defaultOpts = {
       created: "1",
       updated: "1",
+    };
+    const rootNote = await NoteUtilsV2.createRoot({
+      ...defaultOpts,
     });
     const out: NotePropsDictV2 = {
       root: rootNote,
@@ -42,7 +45,7 @@ export class NodeTestUtilsV2 {
     await Promise.all(
       cleanOpts.noteProps.map(async (n) => {
         const body = cleanOpts.withBody ? n.fname + " body" : "";
-        const _n = NoteUtilsV2.create({ ...n, body });
+        const _n = NoteUtilsV2.create({ ...defaultOpts, ...n, body });
         DNodeUtilsV2.addChild(rootNote, _n);
         if (cleanOpts.vaultPath) {
           await note2File(_n, cleanOpts.vaultPath);

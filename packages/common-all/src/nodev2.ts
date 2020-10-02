@@ -41,6 +41,7 @@ export class DNodeUtilsV2 {
       parent,
       stub,
       children,
+      custom,
       body,
       data,
     } = _.defaults(opts, {
@@ -62,6 +63,7 @@ export class DNodeUtilsV2 {
       desc,
       fname,
       updated,
+      custom,
       created,
       parent,
       children,
@@ -70,11 +72,6 @@ export class DNodeUtilsV2 {
     };
     if (stub) {
       cleanProps.stub = stub;
-    }
-    const denylist = ["schemaStub", "type"];
-    const custom = _.omit(opts, _.keys(cleanProps).concat(denylist));
-    if (!_.isEmpty(custom)) {
-      cleanProps.custom = custom;
     }
     return cleanProps;
   }
@@ -104,6 +101,26 @@ export class DNodeUtilsV2 {
     } else {
       return DNodeUtilsV2.findClosestParent(dirname, nodes);
     }
+  }
+
+  static getCustomProps(props: any): any {
+    const blacklist = [
+      "id",
+      "title",
+      "type",
+      "desc",
+      "fname",
+      "updated",
+      "custom",
+      "created",
+      "parent",
+      "children",
+      "body",
+      "data",
+      "schemaStub",
+      "type",
+    ];
+    return _.omit(props, blacklist);
   }
 
   static getDomain(

@@ -85,6 +85,7 @@ export class DendronEngineV2 implements DEngineV2 {
   async init(): Promise<RespV2<DEngineInitPayloadV2>> {
     try {
       const { notes, schemas } = await this.store.init();
+      this.updateIndex("note");
       return {
         error: null,
         data: { notes, schemas },
@@ -128,6 +129,7 @@ export class DendronEngineV2 implements DEngineV2 {
       items = [this.notes.root];
     } else {
       const results = this.notesIndex.search(queryString);
+      items = _.map(results, (resp) => resp.item);
     }
     if (cleanOpts.createIfNew) {
       let noteNew: NotePropsV2;
@@ -156,12 +158,22 @@ export class DendronEngineV2 implements DEngineV2 {
     return this.store.updateNote(note, opts);
   }
 
+  async updateIndex(mode: DNodeTypeV2) {
+    if (mode === "schema") {
+      throw Error("not implemented");
+      // this.schemaIndex.setCollection(_.values(this.schemas));
+    } else {
+      this.notesIndex.setCollection(_.values(this.notes));
+    }
+  }
+
   async updateSchema(schemaModule: SchemaModuleOptsV2) {
     return this.store.updateSchema(schemaModule);
   }
 
   async writeNote(note: NotePropsV2, opts?: EngineWriteOptsV2): Promise<void> {
     await this.store.writeNote(note, opts);
+    await this.updateIndex("note");
   }
 
   async writeSchema(schema: SchemaModuleOptsV2) {

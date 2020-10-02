@@ -197,6 +197,88 @@ describe("engine, notes/", () => {
     });
   });
 
+  describe("basic test v0/", () => {
+    beforeEach(async () => {
+      vaultDir = await EngineTestUtilsV2.setupVault({
+        initDirCb: async (dirPath: string) => {
+          await NodeTestUtilsV2.createSchemas({ vaultPath: dirPath });
+          await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
+        },
+      });
+      engine = new DendronEngineV2({
+        vaults: [vaultDir],
+        forceNew: true,
+        store: new FileStorageV2({ vaults: [vaultDir], logger }),
+        mode: "fuzzy",
+        logger,
+      });
+    });
+
+    test("fetch node with custom att", async () => {
+      await NodeTestUtilsV2.createNotes({
+        vaultPath: vaultDir,
+        noteProps: [
+          {
+            id: "foo",
+            fname: "foo",
+            custom: {
+              bond: 42,
+            },
+          },
+        ],
+      });
+      await engine.init();
+      const resp = await engine.query("foo", "note");
+      expect(resp.data[0].title).toEqual("Foo");
+      expect(resp.data[0].custom).toEqual({ bond: 42 });
+    });
+
+    test("write node with custom att", async () => {
+      await NodeTestUtilsV2.createNotes({
+        vaultPath: vaultDir,
+        noteProps: [
+          {
+            id: "foo",
+            fname: "foo",
+            custom: {
+              bond: 42,
+            },
+          },
+        ],
+      });
+      await engine.init();
+      let resp = await engine.query("foo", "note");
+      const note = resp.data[0];
+      note.body = "custom body";
+      await engine.writeNote(note);
+
+      resp = await engine.query("foo", "note");
+      expect(resp.data[0].title).toEqual("Foo");
+      expect(resp.data[0].body).toEqual(note.body);
+      expect(resp.data[0].custom).toEqual({ bond: 42 });
+    });
+
+    test("add custom att to node", async () => {
+      await NodeTestUtilsV2.createNotes({
+        vaultPath: vaultDir,
+        noteProps: [
+          {
+            id: "foo",
+            fname: "foo",
+          },
+        ],
+      });
+      await engine.init();
+      let resp = await engine.query("foo", "note");
+      const note = resp.data[0];
+      note.custom = { bond: 43 };
+      await engine.writeNote(note);
+      resp = await engine.query("foo", "note");
+      expect(resp.data[0].title).toEqual("Foo");
+      expect(resp.data[0].custom).toEqual({ bond: 43 });
+    });
+  });
+
   describe("basics", () => {
     beforeEach(async () => {
       vaultDir = await EngineTestUtilsV2.setupVault({
@@ -232,12 +314,15 @@ describe("engine, notes/", () => {
       expect(error.status).toEqual(ENGINE_ERROR_CODES.BAD_PARSE_FOR_NOTE);
     });
 
-    test("no parent", async () => {
+    test("stub note", async () => {
       await note2File(NoteUtilsV2.create({ fname: "foo.ch1" }), vaultDir);
       await engine.init();
       expect(_.values(engine.notes).length).toEqual(3);
       const stubNote = NoteUtilsV2.getNoteByFname("foo", engine.notes);
       expect(_.pick(stubNote, ["stub"])).toEqual({ stub: true });
+      const vaultFiles = fs.readdirSync(vaultDir);
+      expect(vaultFiles).toMatchSnapshot();
+      expect(vaultFiles.length).toEqual(3);
     });
 
     test("root and two notes", async () => {
@@ -257,7 +342,9 @@ describe("engine, notes/", () => {
       });
       await engine.writeNote(barNote);
       expect(engine.notes).toMatchSnapshot();
+      const resp = await engine.query("bar", "note");
       expect(_.values(engine.notes).length).toEqual(2);
+      expect(resp.data).toEqual([engine.notes["bar"]]);
       expect(fs.readdirSync(vaultDir)).toEqual([
         "bar.md",
         "root.md",

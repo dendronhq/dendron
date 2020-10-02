@@ -25,7 +25,8 @@ export function file2Note(fpath: string): NotePropsV2 {
     options
   );
   const { name: fname } = path.parse(fpath);
-  return DNodeUtilsV2.create({ ...data, fname, body, type: "note" });
+  const custom = DNodeUtilsV2.getCustomProps(data);
+  return DNodeUtilsV2.create({ ...data, custom, fname, body, type: "note" });
 }
 
 export function note2File(note: NotePropsV2, vaultPath: string) {

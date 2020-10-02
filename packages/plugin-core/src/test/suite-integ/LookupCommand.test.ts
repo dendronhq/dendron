@@ -80,9 +80,11 @@ suite("Basics", function () {
         );
         const quickpick = lc.show();
         await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
-        assert.equal(lc.quickPick?.activeItems.length, 1);
-        assert.equal(lc.quickPick?.activeItems[0].fname, "foo");
-        done();
+        quickpick.onDidChangeActive(() => {
+          assert.equal(lc.quickPick?.activeItems.length, 1);
+          assert.equal(lc.quickPick?.activeItems[0].fname, "foo");
+          done();
+        });
       });
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,

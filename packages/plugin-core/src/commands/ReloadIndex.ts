@@ -1,4 +1,4 @@
-import { DEngine, DEngineV2 } from "@dendronhq/common-all";
+import { DEngine, DEngineClientV2 } from "@dendronhq/common-all";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -6,7 +6,7 @@ type ReloadIndexCommandOpts = {};
 
 export class ReloadIndexCommand extends BasicCommand<
   ReloadIndexCommandOpts,
-  DEngine | DEngineV2
+  DEngine | DEngineClientV2
 > {
   /**
    * Update index

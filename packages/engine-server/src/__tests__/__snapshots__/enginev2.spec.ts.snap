@@ -82,7 +82,7 @@ Object {
     "desc": "",
     "fname": "bar",
     "id": "bar",
-    "parent": null,
+    "parent": "root",
     "title": "Bar",
     "type": "note",
     "updated": "1",
@@ -90,7 +90,9 @@ Object {
   "root": Object {
     "body": "
 ",
-    "children": Array [],
+    "children": Array [
+      "bar",
+    ],
     "created": "1",
     "data": Object {},
     "desc": "",

@@ -82,7 +82,7 @@ export class DNodeUtilsV2 {
   }
 
   static enhancePropForQuickInput(props: DNodePropsV2): DNodePropsQuickInputV2 {
-    return { ...props, label: props.title };
+    return { ...props, label: props.title.toLowerCase() };
   }
 
   static enhancePropsForQuickInput(
@@ -91,13 +91,10 @@ export class DNodeUtilsV2 {
     return props.map(DNodeUtilsV2.enhancePropForQuickInput);
   }
 
-  static findClosestParent(
-    fpath: string,
-    nodes: DNodePropsDictV2
-  ): DNodePropsV2 {
+  static findClosestParent(fpath: string, nodes: DNodePropsV2[]): DNodePropsV2 {
     const dirname = DNodeUtilsV2.dirName(fpath);
     if (dirname === "") {
-      return nodes["root"] as DNodePropsV2;
+      return _.find(nodes, { id: "root" }) as DNodePropsV2;
     }
     const maybeNode = _.find(nodes, { fname: dirname });
     if (maybeNode) {
@@ -163,6 +160,38 @@ export class DNodeUtilsV2 {
 }
 
 export class NoteUtilsV2 {
+  static addParent(opts: {
+    note: NotePropsV2;
+    notesList: NotePropsV2[];
+    createStubs: boolean;
+  }): NotePropsV2[] {
+    const { note, notesList, createStubs } = opts;
+    const parentPath = DNodeUtilsV2.dirName(note.fname);
+    let parent = _.find(notesList, (p) => p.fname === parentPath) || null;
+    const stubs: NotePropsV2[] = [];
+    if (!parent && !createStubs) {
+      const err = {
+        status: ENGINE_ERROR_CODES.NO_PARENT_FOR_NOTE,
+        msg: JSON.stringify({
+          fname: note.fname,
+        }),
+      };
+      throw new DendronError(err);
+    }
+    if (!parent) {
+      parent = DNodeUtilsV2.findClosestParent(
+        note.fname,
+        notesList
+      ) as NotePropsV2;
+      const stubNodes = NoteUtilsV2.createStubs(parent, note);
+      stubNodes.forEach((ent2) => {
+        stubs.push(ent2);
+      });
+    }
+    DNodeUtilsV2.addChild(parent, note);
+    return stubs;
+  }
+
   static create(opts: NoteOptsV2): NotePropsV2 {
     const cleanOpts = _.defaults(opts, {
       schemaStub: false,

@@ -116,7 +116,9 @@ export type DCommonProps = {
   notes: NotePropsDictV2;
   schemas: SchemaModuleDictV2;
   vaults: string[];
+};
 
+export type DCommonMethods = {
   updateNote(note: NotePropsV2, opts?: EngineUpdateNodesOptsV2): Promise<void>;
   updateSchema: (schema: SchemaModulePropsV2) => Promise<void>;
 
@@ -129,23 +131,27 @@ export type DEngineInitPayloadV2 = {
   schemas?: SchemaModuleDictV2;
 };
 
-export type DEngineV2 = DCommonProps & {
-  store: DStoreV2;
+export type DEngineV2 = DCommonProps &
+  DCommonMethods & {
+    store: DStoreV2;
 
-  init: () => Promise<RespV2<DEngineInitPayloadV2>>;
-  delete: (
-    id: string,
-    mode: DNodeTypeV2,
-    opts?: EngineDeleteOptsV2
-  ) => Promise<void>;
+    init: () => Promise<RespV2<DEngineInitPayloadV2>>;
+    delete: (
+      id: string,
+      mode: DNodeTypeV2,
+      opts?: EngineDeleteOptsV2
+    ) => Promise<void>;
 
-  query: (
-    queryString: string,
-    mode: DNodeTypeV2,
-    opts?: QueryOptsV2
-  ) => Promise<RespV2<DNodePropsV2[]>>;
-};
+    query: (
+      queryString: string,
+      mode: DNodeTypeV2,
+      opts?: QueryOptsV2
+    ) => Promise<RespV2<DNodePropsV2[]>>;
+  };
 
-export type DStoreV2 = DCommonProps & {
-  init: () => Promise<DEngineInitPayloadV2>;
-};
+export type DEngineClientV2 = Omit<DEngineV2, "store" | "vaults">;
+
+export type DStoreV2 = DCommonProps &
+  DCommonMethods & {
+    init: () => Promise<DEngineInitPayloadV2>;
+  };

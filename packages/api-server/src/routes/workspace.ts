@@ -1,5 +1,10 @@
-import { NoteRawProps, SchemaRawProps } from "@dendronhq/common-all";
-import { DendronEngine, FileStorageV2 } from "@dendronhq/engine-server";
+import {
+  InitializePayload,
+  NotePropsDictV2,
+  SchemaModuleDictV2,
+} from "@dendronhq/common-all";
+import { createLogger } from "@dendronhq/common-server";
+import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
 import { Request, Response, Router } from "express";
 import { OK } from "http-status-codes";
 import _ from "lodash";
@@ -14,23 +19,26 @@ const router = Router();
 
 router.post("/initialize", async (req: Request, res: Response) => {
   const { uri, config } = req.body as WorkspaceInitRequest;
-  const val = await MemoryStore.instance().get(`ws:${uri}`);
-  let notes: NoteRawProps[] = [];
-  let schemas: SchemaRawProps[] = [];
-  if (!val) {
-    const { vaults } = config;
-    const engine = DendronEngine.getOrCreateEngine({
-      root: vaults[0],
-      forceNew: true,
-      // @ts-ignore
-      store: new FileStorageV2({ root: vaults[0] }),
-    });
-    await engine.init();
-    notes = _.values(engine.notes).map((ent) => ent.toRawProps());
-    schemas = _.values(engine.schemas).map((ent) => ent.toRawProps());
-    MemoryStore.instance().put(`ws:${uri}`, engine);
-  }
-  const payload = { notes, schemas };
+  // const val = await MemoryStore.instance().get(`ws:${uri}`);
+  let notes: NotePropsDictV2;
+  let schemas: SchemaModuleDictV2;
+  const logger = createLogger("api-server");
+  const { vaults } = config;
+  const engine = new DendronEngineV2({
+    vaults,
+    forceNew: true,
+    store: new FileStorageV2({ vaults, logger }),
+    mode: "fuzzy",
+    logger,
+  });
+  await engine.init();
+  notes = engine.notes;
+  schemas = engine.schemas;
+  MemoryStore.instance().put(`ws:${uri}`, engine);
+  const payload: InitializePayload = {
+    error: null,
+    data: { notes, schemas },
+  };
   return res.json(payload);
 });
 

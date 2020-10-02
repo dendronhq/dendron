@@ -1,4 +1,5 @@
 export * from "./engine";
+export * from "./enginev2";
 export * from "./config";
 export * from "./drivers/file/store";
 export * from "./drivers/file/storev2";

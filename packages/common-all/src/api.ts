@@ -7,6 +7,8 @@ import {
   EngineWriteOptsV2,
   NotePropsV2,
   SchemaPropsV2,
+  SchemaModuleDictV2,
+  NotePropsDictV2,
 } from "./typesv2";
 // import { nonEmptyGet, unwrapGet, unwrapSearch } from "./es";
 // import { L } from "./logger";
@@ -85,8 +87,8 @@ type APIPayload<T = any> = {
 };
 
 export type InitializePayload = APIPayload<{
-  notes: NotePropsV2[];
-  schemas: SchemaPropsV2[];
+  notes: NotePropsDictV2;
+  schemas: SchemaModuleDictV2;
 }>;
 
 export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
@@ -99,12 +101,14 @@ export class APIError {
   public type: APIErrorType;
   public message: string;
   public code?: number;
+  public status: string;
 
   constructor({ type, message, code }: IAPIErrorArgs) {
     this.type = type;
     this.message = message || "";
     this.name = "APIError";
     this.code = code || -1;
+    this.status = this.message;
   }
 }
 

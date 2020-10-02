@@ -86,18 +86,23 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
   getChildren(id?: string): Thenable<string[]> {
     const ctx = "TreeView:getChildren";
     Logger.debug({ ctx, id });
-    const engine = DendronWorkspace.instance().engine;
-    if (!engine.notes["root"]) {
-      vscode.window.showInformationMessage("No notes found");
+    if (DendronWorkspace.lsp()) {
+      // TODO
       return Promise.resolve([]);
-    }
-
-    if (id) {
-      return Promise.resolve(this.tree[id].children);
     } else {
-      Logger.info({ ctx, msg: "reconstructing tree" });
-      const root = engine.notes["root"];
-      return Promise.resolve(this.parseTree(root).children);
+      const engine = DendronWorkspace.instance().engine;
+      if (!engine.notes["root"]) {
+        vscode.window.showInformationMessage("No notes found");
+        return Promise.resolve([]);
+      }
+
+      if (id) {
+        return Promise.resolve(this.tree[id].children);
+      } else {
+        Logger.info({ ctx, msg: "reconstructing tree" });
+        const root = engine.notes["root"];
+        return Promise.resolve(this.parseTree(root).children);
+      }
     }
   }
 

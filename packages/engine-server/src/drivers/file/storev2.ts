@@ -70,9 +70,11 @@ export class NoteParserV2 extends ParserBaseV2 {
   }
 
   parseFile(fpath: string[]): NotePropsV2[] {
+    const ctx = "parseFile";
     const fileMetaDict: FileMetaDictV2 = getFileMetaV2(fpath);
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
     const notesByFname: NotePropsDictV2 = {};
+    this.logger.debug({ ctx, msg: "enter", fpath });
 
     // get root note
     if (_.isUndefined(fileMetaDict[1])) {
@@ -88,6 +90,7 @@ export class NoteParserV2 extends ParserBaseV2 {
       fileMeta: rootFile,
       addParent: false,
     })[0];
+    this.logger.debug({ ctx, rootNote, msg: "post-parse-rootNote" });
 
     notesByFname[rootNote.fname] = rootNote;
 
@@ -141,10 +144,12 @@ export class NoteParserV2 extends ParserBaseV2 {
       addParent: true,
       createStubs: true,
       notesByFname: {},
+      parents: [] as NotePropsV2[],
     });
-    const ctx = "parseNoteProps";
-    const root = this.opts.store.vaults[0];
     const { fileMeta, parents, notesByFname } = cleanOpts;
+    const ctx = "parseNoteProps";
+    this.logger.debug({ ctx, msg: "enter", fileMeta });
+    const root = this.opts.store.vaults[0];
     let out: NotePropsV2[] = [];
     let noteProps: NotePropsV2;
     try {
@@ -162,30 +167,12 @@ export class NoteParserV2 extends ParserBaseV2 {
     }
 
     if (cleanOpts.addParent) {
-      const parentPath = DNodeUtilsV2.dirName(fileMeta.prefix);
-      let parent = _.find(parents, (p) => p.fname === parentPath) || null;
-
-      if (!parent && !cleanOpts.createStubs) {
-        const err = {
-          status: ENGINE_ERROR_CODES.NO_PARENT_FOR_NOTE,
-          msg: JSON.stringify({
-            fname: fileMeta.fpath,
-          }),
-        };
-        this.logger.error({ ctx, fileMeta, err });
-        throw new DendronError(err);
-      }
-      if (!parent) {
-        parent = DNodeUtilsV2.findClosestParent(
-          noteProps.fname,
-          notesByFname
-        ) as NotePropsV2;
-        const stubNodes = NoteUtilsV2.createStubs(parent, noteProps);
-        stubNodes.forEach((ent2) => {
-          out.push(ent2);
-        });
-      }
-      DNodeUtilsV2.addChild(parent, noteProps);
+      const stubs = NoteUtilsV2.addParent({
+        note: noteProps,
+        notesList: _.values(notesByFname).concat(parents),
+        createStubs: cleanOpts.createStubs,
+      });
+      out = out.concat(stubs);
     }
     out.push(noteProps);
     return out;
@@ -264,6 +251,8 @@ export class SchemaParserV2 extends ParserBaseV2 {
   }
 
   parse(fpaths: string[], root: string): SchemaModuleV2[] {
+    const ctx = "parse";
+    this.logger.info({ ctx, msg: "enter", fpaths, root });
     return fpaths.flatMap((fpath) => {
       return SchemaParserV2.parseFile(fpath, root);
     });
@@ -361,7 +350,6 @@ export class FileStorageV2 implements DStoreV2 {
     _opts?: EngineUpdateNodesOptsV2
   ): Promise<void> {
     this.notes[note.id] = note;
-    return;
   }
 
   async updateSchema(schemaModule: SchemaModulePropsV2) {
@@ -375,11 +363,13 @@ export class FileStorageV2 implements DStoreV2 {
   }
 
   async writeNote(note: NotePropsV2, _opts?: EngineWriteOptsV2): Promise<void> {
-    if (note.stub) {
-      return;
-    }
     await note2File(note, this.vaults[0]);
-    await this.updateNote(note);
+    const stubs: NotePropsV2[] = NoteUtilsV2.addParent({
+      note,
+      notesList: _.values(this.notes),
+      createStubs: true,
+    });
+    await Promise.all([note].concat(stubs).map((ent) => this.updateNote(ent)));
   }
 
   async writeSchema(schemaModule: SchemaModulePropsV2) {

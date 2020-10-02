@@ -1,4 +1,9 @@
-import { resolveTilde } from "@dendronhq/common-server";
+import { NoteUtilsV2, SchemaUtilsV2 } from "@dendronhq/common-all";
+import {
+  note2File,
+  resolveTilde,
+  schemaModule2File,
+} from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -130,9 +135,9 @@ export class SetupWorkspaceCommand extends BasicCommand<
     // copy over jekyll config
     const dendronJekyll = vscode.Uri.joinPath(ws.extensionAssetsDir, "jekyll");
     fs.copySync(path.join(dendronJekyll.fsPath), path.join(rootDir, "docs"));
-
     // create vault
-    fs.ensureDirSync(path.join(rootDir, "vault"));
+    const vaultPath = path.join(rootDir, "vault");
+    fs.ensureDirSync(vaultPath);
 
     // copy over vscode settings
     // fs.copySync(
@@ -149,11 +154,15 @@ export class SetupWorkspaceCommand extends BasicCommand<
         const whitelist = ["dendron", "vault"];
         return _.some(whitelist, (ent) => basename.startsWith(ent));
       };
-      fs.copySync(
-        path.join(dendronWSTemplate.fsPath, "vault"),
-        path.join(rootDir, "vault"),
-        { filter: filterFunc }
-      );
+      fs.copySync(path.join(dendronWSTemplate.fsPath, "vault"), vaultPath, {
+        filter: filterFunc,
+      });
+    } else {
+      // make sure roto files exist
+      const note = NoteUtilsV2.createRoot({});
+      const schema = SchemaUtilsV2.createRootModule({});
+      await note2File(note, vaultPath);
+      await schemaModule2File(schema, vaultPath, "root");
     }
 
     // write workspace defaults

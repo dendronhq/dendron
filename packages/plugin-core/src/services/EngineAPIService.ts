@@ -1,29 +1,34 @@
 import {
   DendronAPI,
-  DEngineOpts,
-  DEngineV2,
+  DEngineClientV2,
+  DEngineInitPayloadV2,
   DNodeData,
   DNodePropsV2,
+  DNodeTypeV2,
   EngineDeleteOpts,
   EngineGetResp,
+  EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   IDNodeType,
   NotePropsDictV2,
+  NotePropsV2,
   QueryMode,
   QueryOneOpts,
   QueryOpts,
+  QueryOptsV2,
   Resp,
-  SchemaPropsDictV2,
-  UpdateNodesOpts,
+  RespV2,
+  SchemaModuleDictV2,
+  SchemaModulePropsV2,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Logger } from "../logger";
 import { DendronWorkspace } from "../workspace";
 
-export class EngineAPIService implements DEngineV2 {
+export class EngineAPIService implements DEngineClientV2 {
   public notes: NotePropsDictV2;
-  public schemas: SchemaPropsDictV2;
+  public schemas: SchemaModuleDictV2;
   // public schemas: SchemaDict;
   // public props: Required<DEngineOpts>;
   // public initialized: boolean;
@@ -44,7 +49,7 @@ export class EngineAPIService implements DEngineV2 {
   /**
    * Load all nodes
    */
-  async init(): Promise<void> {
+  async init(): Promise<RespV2<DEngineInitPayloadV2>> {
     const ctx = "EngineAPIService:init";
     Logger.info({ ctx, msg: "enter" });
     const vaults =
@@ -53,11 +58,12 @@ export class EngineAPIService implements DEngineV2 {
       uri: this.ws,
       config: { vaults },
     });
-    // TODO: initialize root nodes
-    // TODO: initialize everything else
-    await this.refreshNodes(resp.data.notes, "note");
+
+    const { notes, schemas } = resp.data;
+    this.notes = notes;
+    this.schemas = schemas;
     Logger.info({ ctx, msg: "exit", resp });
-    return;
+    return resp;
   }
 
   async delete(
@@ -65,7 +71,7 @@ export class EngineAPIService implements DEngineV2 {
     _mode: QueryMode,
     _opts?: EngineDeleteOpts
   ): Promise<void> {
-    return;
+    throw Error("not implemented");
   }
 
   /**
@@ -77,7 +83,7 @@ export class EngineAPIService implements DEngineV2 {
     _mode: QueryMode,
     _opts?: QueryOpts
   ): Promise<EngineGetResp<DNodeData>> {
-    return {} as any;
+    throw Error("not implemented");
   }
 
   // getBatch: (scope: Scope, ids: string[]) => Promise<NodeGetBatchResp>;
@@ -90,9 +96,10 @@ export class EngineAPIService implements DEngineV2 {
    */
   async query(
     queryString: string,
-    mode: QueryMode,
-    opts?: QueryOpts
-  ): Promise<Resp<DNodePropsV2[]>> {
+    mode: DNodeTypeV2,
+    opts?: QueryOptsV2
+  ): Promise<RespV2<DNodePropsV2[]>> {
+    // TODO: look at cache
     const ctx = "query";
     const resp = await this.api.engineQuery({
       mode,
@@ -136,35 +143,27 @@ export class EngineAPIService implements DEngineV2 {
     }
   }
 
-  async write(node: DNodePropsV2, opts?: EngineWriteOptsV2): Promise<void> {
+  async updateNote(
+    note: NotePropsV2,
+    opts?: EngineUpdateNodesOptsV2
+  ): Promise<void> {
+    throw Error("not implemented");
+  }
+  async updateSchema(schema: SchemaModulePropsV2): Promise<void> {
+    throw Error("not implemented");
+  }
+  async writeNote(note: NotePropsV2, opts?: EngineWriteOptsV2): Promise<void> {
     const ctx = "write";
     const resp = await this.api.engineWrite({
-      node,
+      node: note,
       opts,
       ws: this.ws,
     });
-    await this.refreshNodes([node], node.type);
+    await this.refreshNodes([note], note.type);
     Logger.info({ ctx, msg: "exit", resp });
     return;
   }
-
-  /**
-   * Update engine properties
-   * @param opts
-   */
-  async updateProps(_opts: Partial<DEngineOpts>): Promise<void> {
-    return;
-  }
-
-  /**
-   * Update node metadata
-   * @param node
-   */
-  // @ts-ignore
-  async updateNodes(
-    _nodes: DNodePropsV2[],
-    _opts: UpdateNodesOpts
-  ): Promise<void> {
+  async writeSchema(schema: SchemaModulePropsV2): Promise<void> {
     throw Error("not implemented");
   }
 }

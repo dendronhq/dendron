@@ -1,4 +1,5 @@
 import {
+  DEngineClientV2,
   DEngineV2,
   DNodePropsDictV2,
   DNodePropsQuickInputV2,
@@ -40,8 +41,8 @@ export class LookupProviderV2 {
     opts: EngineOpts
   ): Promise<Uri> {
     const ctx = "onAcceptNewNode";
-    Logger.info({ ctx, msg: "createNewPick" });
     const fname = PickerUtils.getValue(picker);
+    Logger.info({ ctx, msg: "createNewPick", value: fname });
     const selectedItem = PickerUtilsV2.getSelection(picker);
     let nodeNew: DNodePropsV2;
     let foundStub = false;
@@ -75,7 +76,7 @@ export class LookupProviderV2 {
     const uri = node2Uri(nodeNew, wsFolders);
     const historyService = HistoryService.instance();
     historyService.add({ source: "engine", action: "create", uri });
-    const noteExists = DNodeUtilsV2.getNoteByFname(nodeNew.fname, engine);
+    const noteExists = NoteUtilsV2.getNoteByFname(nodeNew.fname, engine.notes);
     if (noteExists && !foundStub && !selectedItem.schemaStub) {
       Logger.error({ ctx, msg: "action will overwrite existing note" });
       throw Error("action will overwrite existing note");
@@ -86,9 +87,8 @@ export class LookupProviderV2 {
       }
     }
     // TODO: write negine
-    await engine.write(nodeNew, {
+    await engine.writeNote(nodeNew, {
       newNode: true,
-      parentsAsStubs: true,
     });
     Logger.info({ ctx, msg: "engine.write", profile });
     return uri;
@@ -189,7 +189,7 @@ export class LookupProviderV2 {
       profile = getDurationMilliseconds(start);
       picker.busy = false;
       picker.justActivated = false;
-      Logger.info({ ctx, msg: "exit", queryOrig, source, profile });
+      Logger.info({ ctx, msg: "exit", queryOrig, source, profile, picker });
     }
   }
 
@@ -205,13 +205,13 @@ export class LookupProviderV2 {
 
   showRootResults(
     flavor: EngineFlavor,
-    engine: DEngineV2
+    engine: DEngineClientV2
   ): DNodePropsQuickInputV2[] {
     let nodeDict: DNodePropsDictV2;
     if (flavor === "note") {
       nodeDict = engine.notes;
     } else {
-      nodeDict = engine.schemas;
+      nodeDict = _.mapValues(engine.schemas, (ent) => ent.root);
     }
     return DNodeUtilsV2.enhancePropsForQuickInput(
       _.map(nodeDict["root"].children, (ent) => nodeDict[ent]).concat(

@@ -20,7 +20,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { FileStorageV2 } from "../drivers/file/storev2";
-import { DendronEngine } from "../enginev2";
+import { DendronEngineV2 } from "../enginev2";
 
 describe("engine, schema", () => {
   let vaultDir: string;
@@ -65,9 +65,10 @@ describe("engine, schema", () => {
       vaultDir = await EngineTestUtilsV2.setupVault({
         initDirCb: async (dirPath: string) => {
           await NodeTestUtilsV2.createSchemas(dirPath, []);
+          await NodeTestUtilsV2.createNotes(dirPath, []);
         },
       });
-      engine = new DendronEngine({
+      engine = new DendronEngineV2({
         vaults: [vaultDir],
         forceNew: true,
         store: new FileStorageV2({ vaults: [vaultDir], logger }),
@@ -132,7 +133,7 @@ describe("engine, schema", () => {
   });
 });
 
-describe.only("engine, notes", () => {
+describe("engine, notes", () => {
   let vaultDir: string;
   let engine: DEngineV2;
   let logger = createLogger("enginev2.spec");
@@ -164,7 +165,7 @@ describe.only("engine, notes", () => {
           await NodeTestUtilsV2.createNotes(dirPath, []);
         },
       });
-      engine = new DendronEngine({
+      engine = new DendronEngineV2({
         vaults: [vaultDir],
         forceNew: true,
         store: new FileStorageV2({ vaults: [vaultDir], logger }),

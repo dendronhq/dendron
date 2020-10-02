@@ -9,6 +9,7 @@ import {
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   NotePropsV2,
+  NoteUtilsV2,
   QueryOptsV2,
   RespV2,
   SchemaModulePropsV2,
@@ -51,11 +52,7 @@ function createFuse<T>(
   return fuse;
 }
 
-function isAllQuery(qs: string): boolean {
-  return qs === "**/*";
-}
-
-export class DendronEngine implements DEngineV2 {
+export class DendronEngineV2 implements DEngineV2 {
   public vaults: string[];
   public store: DStoreV2;
   protected notesIndex: Fuse<NotePropsV2>;
@@ -114,22 +111,42 @@ export class DendronEngine implements DEngineV2 {
     opts?: QueryOptsV2
   ): Promise<RespV2<DNodePropsV2[]>> {
     const ctx = "query";
-    let data: RespV2<DNodePropsV2[]>;
     const cleanOpts = _.defaults(opts || {}, {
       fullNode: false,
       createIfNew: false,
       initialQuery: false,
       stub: false,
     });
-
-    if (isAllQuery(queryString)) {
-      this.logger.info({ ctx, msg: "queryAll", mode });
-      try {
-      } catch (err) {
-        // TODO
-      }
+    this.logger.info({ ctx, msg: "enter" });
+    if (mode === "schema") {
+      throw Error("not implemented");
     }
-    return {} as any;
+
+    // --- note query
+    let items: DNodePropsV2[] = [];
+    if (queryString === "") {
+      items = [this.notes.root];
+    } else {
+      const results = this.notesIndex.search(queryString);
+    }
+    if (cleanOpts.createIfNew) {
+      let noteNew: NotePropsV2;
+      if (items[0]?.fname === queryString && items[0]?.stub) {
+        noteNew = items[0];
+        noteNew.stub = false;
+      } else {
+        noteNew = NoteUtilsV2.create({ fname: queryString });
+      }
+      await this.writeNote(noteNew, { newNode: true });
+    }
+    if (cleanOpts.fullNode) {
+      throw Error("not implemented");
+    }
+    this.logger.info({ ctx, msg: "exit" });
+    return {
+      error: null,
+      data: items,
+    };
   }
 
   async updateNote(

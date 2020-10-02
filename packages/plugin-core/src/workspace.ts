@@ -2,6 +2,7 @@ import {
   CONSTANTS,
   DendronConfig,
   DEngine,
+  DEngineClientV2,
   DEngineV2,
   getStage,
   NodeBuilder,
@@ -179,7 +180,7 @@ export class DendronWorkspace {
   public schemaWatcher?: vscode.FileSystemWatcher;
   public L: typeof Logger;
   public _engine?: DEngine;
-  public _enginev2?: DEngineV2;
+  public _enginev2?: DEngineClientV2;
   private disposableStore: DisposableStore;
   private history: HistoryService;
 
@@ -250,14 +251,14 @@ export class DendronWorkspace {
     return assetsDir;
   }
 
-  getEngine(): DEngineV2 {
+  getEngine(): DEngineClientV2 {
     if (!this._enginev2) {
       throw Error("engine not set");
     }
     return this._enginev2;
   }
 
-  setEngine(engine: DEngineV2) {
+  setEngine(engine: DEngineClientV2) {
     this._enginev2 = engine;
   }
 
@@ -650,11 +651,11 @@ export class DendronWorkspace {
 
   async createServerWatcher() {
     const ctx = "createServerWatcher";
-    this.L.info({ ctx });
     const portFile = path.join(
       path.dirname(DendronWorkspace.workspaceFile().fsPath),
       CONSTANTS.DENDRON_SERVER_PORT
     );
+    this.L.info({ ctx, portFile });
     this.serverWatcher = vscode.workspace.createFileSystemWatcher(
       portFile,
       false,

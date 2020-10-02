@@ -3,24 +3,7 @@
 exports[`main query 1`] = `
 Object {
   "data": Array [
-    Object {
-      "body": "
-",
-      "children": Array [
-        "id.foo",
-      ],
-      "created": 1601492948365,
-      "custom": Object {},
-      "data": Object {},
-      "desc": "",
-      "fname": "root",
-      "id": "root",
-      "parent": null,
-      "stub": false,
-      "title": "root",
-      "type": "note",
-      "updated": 1601492948365,
-    },
+    null,
   ],
   "error": null,
 }

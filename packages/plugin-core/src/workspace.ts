@@ -3,7 +3,6 @@ import {
   DendronConfig,
   DEngine,
   DEngineClientV2,
-  DEngineV2,
   getStage,
   NodeBuilder,
   Note,

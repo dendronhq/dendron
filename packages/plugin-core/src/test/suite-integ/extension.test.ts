@@ -62,7 +62,7 @@ import {
   GLOBAL_STATE,
   WORKSPACE_STATE,
 } from "../../constants";
-import { _activate } from "../../extension";
+import { _activate } from "../../_extension";
 import {
   cacheRefs,
   findDanglingRefsByFsPath,

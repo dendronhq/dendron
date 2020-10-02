@@ -10,7 +10,7 @@ import { ExtensionContext, WorkspaceFolder } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import { SetupWorkspaceCommand } from "../../commands/SetupWorkspace";
 import { WORKSPACE_STATE } from "../../constants";
-import { _activate } from "../../extension";
+import { _activate } from "../../_extension";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";

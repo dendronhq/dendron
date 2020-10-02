@@ -39,25 +39,13 @@ function createLogger(
   const level =
     opts?.lvl || env("LOG_LEVEL", { shouldThrow: false }) || "error";
   const nameClean = name || env("LOG_NAME");
-
-  // if (logDst === "stdout") {
-  //   // TODO: tmp disable pino logging on stdout
-  //   const out = pino({ name: nameClean, level });
-  //   return out;
-  // } else {
-  if (dest) {
-    return pino(pino.destination(dest)).child({ name: nameClean, level });
+  const logDst = dest || env("LOG_DST", { shouldThrow: false });
+  console.log({ ctx: "createLogger", level, logDst, nameClean });
+  if (!logDst || _.isEmpty(logDst) || logDst === "stdout") {
+    const out = pino({ name: nameClean, level });
+    return out;
   } else {
-    const logDst = env("LOG_DST", { shouldThrow: false });
-    if (!logDst || _.isEmpty(logDst) || logDst === "stdout") {
-      // TODO: tmp disable pino logging on stdout
-      const out = pino({ name: nameClean, level });
-      return out;
-    }
-    // if (logDst) {
-    //   return pino(pino.destination(logDst)).child({ name: nameClean, level });
-    // }
-    return pino({ name: nameClean, level });
+    return pino(pino.destination(logDst)).child({ name: nameClean, level });
   }
 }
 

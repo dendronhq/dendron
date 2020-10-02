@@ -21,6 +21,7 @@ export class Logger {
     fs.ensureFileSync(logPath);
     fs.truncateSync(logPath);
     setEnv("LOG_DST", logPath);
+    setEnv("LOG_LEVEL", "info");
     Logger.logPath = logPath;
     this.logger = createLogger("dendron", logPath);
     this.level = level;

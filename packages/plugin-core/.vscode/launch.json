@@ -16,7 +16,7 @@
       "outFiles": ["${workspaceFolder:plugin-core}/out/**/*.js"],
       "env": {
         "STAGE": "dev",
-        "VSCODE_DEBUGGING_EXTENSION": "dendron"
+        "VSCODE_DEBUGGING_EXTENSION": "dendron",
       }
     },
     {

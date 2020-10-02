@@ -10,8 +10,8 @@ import {
   NotePropsV2,
   NoteUtilsV2,
   SchemaModuleDictV2,
+  SchemaModuleOptsV2,
   SchemaModulePropsV2,
-  SchemaModuleV2,
   SchemaOptsV2,
   SchemaPropsDictV2,
   SchemaPropsV2,
@@ -69,11 +69,12 @@ export class NoteParserV2 extends ParserBaseV2 {
     this.cache = opts.cache;
   }
 
-  parseFile(fpath: string[]): NotePropsV2[] {
+  async parseFile(fpath: string[]): Promise<NotePropsV2[]> {
     const ctx = "parseFile";
     const fileMetaDict: FileMetaDictV2 = getFileMetaV2(fpath);
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
     const notesByFname: NotePropsDictV2 = {};
+    const notesById: NotePropsDictV2 = {};
     this.logger.debug({ ctx, msg: "enter", fpath });
 
     // get root note
@@ -93,6 +94,7 @@ export class NoteParserV2 extends ParserBaseV2 {
     this.logger.debug({ ctx, rootNote, msg: "post-parse-rootNote" });
 
     notesByFname[rootNote.fname] = rootNote;
+    notesById[rootNote.id] = rootNote;
 
     // get root of hiearchies
     let lvl = 2;
@@ -106,6 +108,7 @@ export class NoteParserV2 extends ParserBaseV2 {
     prevNodes.forEach((ent) => {
       DNodeUtilsV2.addChild(rootNote, ent);
       notesByFname[ent.fname] = ent;
+      notesById[ent.id] = ent;
     });
 
     // get everything else
@@ -126,11 +129,23 @@ export class NoteParserV2 extends ParserBaseV2 {
       lvl += 1;
       currNodes.forEach((ent) => {
         notesByFname[ent.fname] = ent;
+        notesById[ent.id] = ent;
       });
       prevNodes = currNodes;
     }
 
-    return _.values(notesByFname);
+    // add schemas
+    const out = _.values(notesByFname);
+    const domains = rootNote.children.map(
+      (ent) => notesById[ent]
+    ) as NotePropsV2[];
+    const schemas = this.opts.store.schemas;
+    await Promise.all(
+      domains.map(async (d) => {
+        return SchemaUtilsV2.matchDomain(d, notesById, schemas);
+      })
+    );
+    return out;
   }
 
   parseNoteProps(opts: {
@@ -152,6 +167,8 @@ export class NoteParserV2 extends ParserBaseV2 {
     const root = this.opts.store.vaults[0];
     let out: NotePropsV2[] = [];
     let noteProps: NotePropsV2;
+
+    // get note props
     try {
       noteProps = file2Note(path.join(root, fileMeta.fpath));
     } catch (_err) {
@@ -166,6 +183,7 @@ export class NoteParserV2 extends ParserBaseV2 {
       throw new DendronError(err);
     }
 
+    // add parent
     if (cleanOpts.addParent) {
       const stubs = NoteUtilsV2.addParent({
         note: noteProps,
@@ -178,13 +196,13 @@ export class NoteParserV2 extends ParserBaseV2 {
     return out;
   }
 
-  parse(fpaths: string[]): NotePropsV2[] {
+  async parse(fpaths: string[]): Promise<NotePropsV2[]> {
     return this.parseFile(fpaths);
   }
 }
 
 export class SchemaParserV2 extends ParserBaseV2 {
-  static parseFile(fpath: string, root: string): SchemaModuleV2 {
+  static parseFile(fpath: string, root: string): SchemaModulePropsV2 {
     const fname = path.parse(fpath).name;
     const schemaOpts: any = YAML.parse(
       fs.readFileSync(path.join(root, fpath), "utf8")
@@ -192,7 +210,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
     const version = _.isArray(schemaOpts) ? 0 : 1;
     if (version > 0) {
       return SchemaParserV2.parseSchemaModuleProps(
-        schemaOpts as SchemaModulePropsV2,
+        schemaOpts as SchemaModuleOptsV2,
         {
           fname,
           root,
@@ -206,6 +224,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
       });
       const maybeRoot = schemaDict["root"] as SchemaPropsV2;
       return {
+        version: 0,
         root: maybeRoot,
         schemas: schemaDict,
         fname: maybeRoot.fname,
@@ -214,10 +233,10 @@ export class SchemaParserV2 extends ParserBaseV2 {
   }
 
   static parseSchemaModuleProps(
-    schemaModuleProps: SchemaModulePropsV2,
+    schemaModuleProps: SchemaModuleOptsV2,
     opts: { fname: string; root: string }
-  ): SchemaModuleV2 {
-    const { imports, schemas } = schemaModuleProps;
+  ): SchemaModulePropsV2 {
+    const { imports, schemas, version } = schemaModuleProps;
     const { fname, root } = opts;
     let schemaModulesFromImport = _.flatMap(imports, (ent) => {
       return SchemaParserV2.parseFile(`${ent}.yml`, root);
@@ -244,18 +263,22 @@ export class SchemaParserV2 extends ParserBaseV2 {
     });
     const rootModule = SchemaUtilsV2.getModuleRoot(schemaModuleProps);
     return {
+      version,
+      imports,
       root: rootModule,
       schemas: schemasDict,
       fname: rootModule.fname,
     };
   }
 
-  parse(fpaths: string[], root: string): SchemaModuleV2[] {
+  async parse(fpaths: string[], root: string): Promise<SchemaModulePropsV2[]> {
     const ctx = "parse";
     this.logger.info({ ctx, msg: "enter", fpaths, root });
-    return fpaths.flatMap((fpath) => {
-      return SchemaParserV2.parseFile(fpath, root);
-    });
+    return Promise.all(
+      fpaths.flatMap((fpath) => {
+        return SchemaParserV2.parseFile(fpath, root);
+      })
+    );
   }
 }
 
@@ -295,10 +318,10 @@ export class FileStorageV2 implements DStoreV2 {
   async init(): Promise<DEngineInitPayloadV2> {
     try {
       const _schemas = await this.initSchema();
-      const _notes = await this.initNotes();
       _schemas.map((ent) => {
         this.schemas[ent.root.id] = ent;
       });
+      const _notes = await this.initNotes();
       _notes.map((ent) => {
         this.notes[ent.id] = ent;
       });
@@ -314,7 +337,7 @@ export class FileStorageV2 implements DStoreV2 {
     return {};
   }
 
-  async initSchema(): Promise<SchemaModuleV2[]> {
+  async initSchema(): Promise<SchemaModulePropsV2[]> {
     const ctx = "initSchema";
     this.logger.info({ ctx, msg: "enter" });
     const schemaFiles = getAllFiles({
@@ -352,7 +375,7 @@ export class FileStorageV2 implements DStoreV2 {
     this.notes[note.id] = note;
   }
 
-  async updateSchema(schemaModule: SchemaModulePropsV2) {
+  async updateSchema(schemaModule: SchemaModuleOptsV2) {
     const vault = this.vaults[0];
     const schemas = SchemaParserV2.parseSchemaModuleProps(schemaModule, {
       fname: schemaModule.schemas[0].fname,
@@ -372,7 +395,7 @@ export class FileStorageV2 implements DStoreV2 {
     await Promise.all([note].concat(stubs).map((ent) => this.updateNote(ent)));
   }
 
-  async writeSchema(schemaModule: SchemaModulePropsV2) {
+  async writeSchema(schemaModule: SchemaModuleOptsV2) {
     return this.updateSchema(schemaModule);
   }
 }

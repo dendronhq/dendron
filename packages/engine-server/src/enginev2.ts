@@ -12,7 +12,7 @@ import {
   NoteUtilsV2,
   QueryOptsV2,
   RespV2,
-  SchemaModulePropsV2,
+  SchemaModuleOptsV2,
   SchemaPropsV2,
 } from "@dendronhq/common-all";
 import { DLogger } from "@dendronhq/common-server";
@@ -156,7 +156,7 @@ export class DendronEngineV2 implements DEngineV2 {
     return this.store.updateNote(note, opts);
   }
 
-  async updateSchema(schemaModule: SchemaModulePropsV2) {
+  async updateSchema(schemaModule: SchemaModuleOptsV2) {
     return this.store.updateSchema(schemaModule);
   }
 
@@ -164,7 +164,7 @@ export class DendronEngineV2 implements DEngineV2 {
     await this.store.writeNote(note, opts);
   }
 
-  async writeSchema(schema: SchemaModulePropsV2) {
+  async writeSchema(schema: SchemaModuleOptsV2) {
     return this.store.writeSchema(schema);
   }
 }

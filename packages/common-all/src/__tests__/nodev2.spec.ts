@@ -27,3 +27,25 @@ describe("DNodeUtilsV2", () => {
     });
   });
 });
+
+describe("SchemaUtilsV2", () => {
+  describe("matchDomain", () => {
+    it("basic", async () => {
+      //   const schemaModules = await NodeTestUtilsV2.createSchemas({});
+      //   const notes = await NodeTestUtilsV2.createNotes({});
+      //   const noteDict: NotePropsDictV2 = {};
+      //   const schemaDict: SchemaModuleDictV2= {};
+      //   notes.forEach((n: NotePropsV2) => {
+      //     noteDict[n.id] = n
+      //   })
+      //   schemaModules.forEach(n => {
+      //     schemaDict[n.id] = n
+      //   })
+      //   const rootNote = _.find(notes, { id: "root" }) as NotePropsV2;
+      //   const domains = rootNote.children.map((ent) =>
+      //     _.find(notes, { id: ent })
+      //   ) as NotePropsV2[];
+      //   SchemaUtilsV2.matchDomain(domains[0]);
+    });
+  });
+});

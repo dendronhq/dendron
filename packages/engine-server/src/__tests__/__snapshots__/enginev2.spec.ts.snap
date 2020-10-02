@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`engine, notes basics bad parse  1`] = `"{\\"opts\\":{\\"status\\":\\"bad_parse_for_note\\",\\"msg\\":\\"{\\\\\\"fname\\\\\\":\\\\\\"foo.md\\\\\\",\\\\\\"error\\\\\\":\\\\\\"can not read a block mapping entry; a multiline key may not be an implicit key at line 5, column 1:\\\\\\\\n    \\\\\\\\n    ^\\\\\\"}\\"},\\"status\\":\\"bad_parse_for_note\\"}"`;
+exports[`engine, notes/ basics bad parse  1`] = `"{\\"opts\\":{\\"status\\":\\"bad_parse_for_note\\",\\"msg\\":\\"{\\\\\\"fname\\\\\\":\\\\\\"foo.md\\\\\\",\\\\\\"error\\\\\\":\\\\\\"can not read a block mapping entry; a multiline key may not be an implicit key at line 5, column 1:\\\\\\\\n    \\\\\\\\n    ^\\\\\\"}\\"},\\"status\\":\\"bad_parse_for_note\\"}"`;
 
-exports[`engine, notes basics only root 1`] = `
+exports[`engine, notes/ basics only root 1`] = `
 Object {
   "root": Object {
     "body": "
@@ -21,7 +21,7 @@ Object {
 }
 `;
 
-exports[`engine, notes basics root and two notes 1`] = `
+exports[`engine, notes/ basics root and two notes 1`] = `
 Object {
   "foo": Object {
     "body": "
@@ -72,7 +72,7 @@ Object {
 }
 `;
 
-exports[`engine, notes basics write note 1`] = `
+exports[`engine, notes/ basics write note 1`] = `
 Object {
   "bar": Object {
     "body": "",
@@ -106,46 +106,70 @@ Object {
 }
 `;
 
-exports[`engine, schema basics only root 1`] = `
+exports[`engine, notes/ schemas/ root and two notes 1`] = `
 Object {
+  "foo": Object {
+    "body": "
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "parent": "root",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+  },
+  "foo.ch1": Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "id": "foo.ch1",
+    "parent": "foo",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "ch1",
+    },
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+  },
   "root": Object {
-    "fname": "root.schema",
-    "root": Object {
-      "body": "",
-      "children": Array [],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "root.schema",
-      "id": "root",
-      "parent": null,
-      "title": "root",
-      "type": "schema",
-      "updated": "1",
-    },
-    "schemas": Object {
-      "root": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "root.schema",
-        "id": "root",
-        "parent": null,
-        "title": "root",
-        "type": "schema",
-        "updated": "1",
-      },
-    },
+    "body": "
+",
+    "children": Array [
+      "foo",
+    ],
+    "created": "1",
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
   },
 }
 `;
 
-exports[`engine, schema basics root and one schem 1`] = `
+exports[`engine, notes/ schemas/ root and two notes 2`] = `
 Object {
   "foo": Object {
     "fname": "foo.schema",
+    "imports": null,
     "root": Object {
       "body": "",
       "children": Array [
@@ -170,7 +194,7 @@ Object {
         "desc": "",
         "fname": "foo.schema",
         "id": "ch1",
-        "parent": null,
+        "parent": "foo",
         "title": "ch1",
         "type": "schema",
         "updated": "1",
@@ -191,9 +215,11 @@ Object {
         "updated": "1",
       },
     },
+    "version": 1,
   },
   "root": Object {
     "fname": "root.schema",
+    "imports": Array [],
     "root": Object {
       "body": "",
       "children": Array [],
@@ -222,14 +248,142 @@ Object {
         "updated": "1",
       },
     },
+    "version": 1,
   },
 }
 `;
 
-exports[`engine, schema basics write new module 1`] = `
+exports[`engine, schema/ basics/ only root 1`] = `
+Object {
+  "root": Object {
+    "fname": "root.schema",
+    "imports": Array [],
+    "root": Object {
+      "body": "",
+      "children": Array [],
+      "created": "1",
+      "data": Object {},
+      "desc": "",
+      "fname": "root.schema",
+      "id": "root",
+      "parent": null,
+      "title": "root",
+      "type": "schema",
+      "updated": "1",
+    },
+    "schemas": Object {
+      "root": Object {
+        "body": "",
+        "children": Array [],
+        "created": "1",
+        "data": Object {},
+        "desc": "",
+        "fname": "root.schema",
+        "id": "root",
+        "parent": null,
+        "title": "root",
+        "type": "schema",
+        "updated": "1",
+      },
+    },
+    "version": 1,
+  },
+}
+`;
+
+exports[`engine, schema/ basics/ root and one schem 1`] = `
+Object {
+  "foo": Object {
+    "fname": "foo.schema",
+    "imports": null,
+    "root": Object {
+      "body": "",
+      "children": Array [
+        "ch1",
+      ],
+      "created": "1",
+      "data": Object {},
+      "desc": "",
+      "fname": "foo.schema",
+      "id": "foo",
+      "parent": "root",
+      "title": "foo",
+      "type": "schema",
+      "updated": "1",
+    },
+    "schemas": Object {
+      "ch1": Object {
+        "body": "",
+        "children": Array [],
+        "created": "1",
+        "data": Object {},
+        "desc": "",
+        "fname": "foo.schema",
+        "id": "ch1",
+        "parent": "foo",
+        "title": "ch1",
+        "type": "schema",
+        "updated": "1",
+      },
+      "foo": Object {
+        "body": "",
+        "children": Array [
+          "ch1",
+        ],
+        "created": "1",
+        "data": Object {},
+        "desc": "",
+        "fname": "foo.schema",
+        "id": "foo",
+        "parent": "root",
+        "title": "foo",
+        "type": "schema",
+        "updated": "1",
+      },
+    },
+    "version": 1,
+  },
+  "root": Object {
+    "fname": "root.schema",
+    "imports": Array [],
+    "root": Object {
+      "body": "",
+      "children": Array [],
+      "created": "1",
+      "data": Object {},
+      "desc": "",
+      "fname": "root.schema",
+      "id": "root",
+      "parent": null,
+      "title": "root",
+      "type": "schema",
+      "updated": "1",
+    },
+    "schemas": Object {
+      "root": Object {
+        "body": "",
+        "children": Array [],
+        "created": "1",
+        "data": Object {},
+        "desc": "",
+        "fname": "root.schema",
+        "id": "root",
+        "parent": null,
+        "title": "root",
+        "type": "schema",
+        "updated": "1",
+      },
+    },
+    "version": 1,
+  },
+}
+`;
+
+exports[`engine, schema/ basics/ write new module 1`] = `
 Object {
   "bar": Object {
     "fname": "bar.schema",
+    "imports": undefined,
     "root": Object {
       "body": "",
       "children": Array [
@@ -269,15 +423,17 @@ Object {
         "desc": "",
         "fname": "bar.schema",
         "id": "ch1",
-        "parent": null,
+        "parent": "bar",
         "title": "ch1",
         "type": "schema",
         "updated": "1",
       },
     },
+    "version": 1,
   },
   "foo": Object {
     "fname": "foo.schema",
+    "imports": null,
     "root": Object {
       "body": "",
       "children": Array [
@@ -302,7 +458,7 @@ Object {
         "desc": "",
         "fname": "foo.schema",
         "id": "ch1",
-        "parent": null,
+        "parent": "foo",
         "title": "ch1",
         "type": "schema",
         "updated": "1",
@@ -323,9 +479,11 @@ Object {
         "updated": "1",
       },
     },
+    "version": 1,
   },
   "root": Object {
     "fname": "root.schema",
+    "imports": Array [],
     "root": Object {
       "body": "",
       "children": Array [],
@@ -354,14 +512,16 @@ Object {
         "updated": "1",
       },
     },
+    "version": 1,
   },
 }
 `;
 
-exports[`engine, schema basics write schema to existing module 1`] = `
+exports[`engine, schema/ basics/ write schema to existing module 1`] = `
 Object {
   "foo": Object {
     "fname": "foo.schema",
+    "imports": undefined,
     "root": Object {
       "body": "",
       "children": Array [
@@ -387,7 +547,7 @@ Object {
         "desc": "",
         "fname": "foo.schema",
         "id": "ch1",
-        "parent": null,
+        "parent": "foo",
         "title": "ch1",
         "type": "schema",
         "updated": "1",
@@ -422,9 +582,11 @@ Object {
         "updated": "1",
       },
     },
+    "version": 1,
   },
   "root": Object {
     "fname": "root.schema",
+    "imports": Array [],
     "root": Object {
       "body": "",
       "children": Array [],
@@ -453,6 +615,7 @@ Object {
         "updated": "1",
       },
     },
+    "version": 1,
   },
 }
 `;

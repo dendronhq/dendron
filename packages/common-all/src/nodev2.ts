@@ -1,6 +1,6 @@
 import matter from "gray-matter";
-import _ from "lodash";
 import minimatch from "minimatch";
+import _ from "lodash";
 import moment from "moment";
 import YAML from "yamljs";
 import { ENGINE_ERROR_CODES } from "./constants";
@@ -15,6 +15,8 @@ import {
   NotePropsDictV2,
   NotePropsV2,
   SchemaDataV2,
+  SchemaModuleDictV2,
+  SchemaModuleOptsV2,
   SchemaModulePropsV2,
   SchemaOptsV2,
   SchemaPropsDictV2,
@@ -192,6 +194,15 @@ export class NoteUtilsV2 {
     return stubs;
   }
 
+  static addSchema(opts: {
+    note: NotePropsV2;
+    schemaModule: SchemaModulePropsV2;
+    schema: SchemaPropsV2;
+  }) {
+    const { note, schema, schemaModule } = opts;
+    note.schema = { schemaId: schema.id, moduleId: schemaModule.root.id };
+  }
+
   static create(opts: NoteOptsV2): NotePropsV2 {
     const cleanOpts = _.defaults(opts, {
       schemaStub: false,
@@ -267,6 +278,12 @@ export class NoteUtilsV2 {
   }
 }
 
+type SchemaMatchResult = {
+  schema: SchemaPropsV2;
+  namespace: boolean;
+  note: NotePropsV2;
+};
+
 export class SchemaUtilsV2 {
   static create(opts: SchemaOptsV2): SchemaPropsV2 {
     if (opts.fname.indexOf(".schema") < 0) {
@@ -288,11 +305,11 @@ export class SchemaUtilsV2 {
     });
   }
 
-  static createModule(opts: SchemaModulePropsV2): SchemaModulePropsV2 {
+  static createModule(opts: SchemaModuleOptsV2): SchemaModuleOptsV2 {
     return opts;
   }
 
-  static createRootModule(opts?: Partial<SchemaPropsV2>): SchemaModulePropsV2 {
+  static createRootModule(opts?: Partial<SchemaPropsV2>): SchemaModuleOptsV2 {
     const schema = SchemaUtilsV2.create({
       id: "root",
       title: "root",
@@ -308,11 +325,11 @@ export class SchemaUtilsV2 {
     };
   }
 
-  static getModuleFname(module: SchemaModulePropsV2): string {
+  static getModuleFname(module: SchemaModuleOptsV2): string {
     return SchemaUtilsV2.getModuleRoot(module).fname;
   }
 
-  static getModuleRoot(module: SchemaModulePropsV2): SchemaPropsV2 {
+  static getModuleRoot(module: SchemaModuleOptsV2): SchemaPropsV2 {
     const maybeRoot = _.find(module.schemas, { parent: "root" });
     if (!maybeRoot) {
       const rootSchemaRoot = _.find(module.schemas, {
@@ -330,7 +347,113 @@ export class SchemaUtilsV2 {
     return maybeRoot as SchemaPropsV2;
   }
 
-  static serializeModule(moduleProps: SchemaModulePropsV2) {
+  static matchDomain(
+    domain: NotePropsV2,
+    notes: NotePropsDictV2,
+    schemas: SchemaModuleDictV2
+  ) {
+    const match = schemas[domain.fname];
+    if (!match) {
+      return;
+    } else {
+      const domainSchema = match.root;
+      return SchemaUtilsV2.matchDomainWithSchema({
+        noteCandidates: [domain],
+        notes,
+        schemaCandidates: [domainSchema],
+        schemaModule: match,
+      });
+    }
+  }
+
+  static matchDomainWithSchema(opts: {
+    noteCandidates: NotePropsV2[];
+    notes: NotePropsDictV2;
+    schemaCandidates: SchemaPropsV2[];
+    schemaModule: SchemaModulePropsV2;
+  }) {
+    const { noteCandidates, schemaCandidates, notes, schemaModule } = opts;
+    const matches = _.map(noteCandidates, (note) => {
+      return SchemaUtilsV2.matchPathWithSchema({
+        note,
+        schemas: schemaCandidates,
+        schemaDict: schemaModule.schemas,
+      });
+    }).filter((ent) => !_.isUndefined(ent)) as SchemaMatchResult[];
+
+    matches.map((m) => {
+      const { schema, note } = m;
+      NoteUtilsV2.addSchema({ note, schema, schemaModule });
+
+      // if namespace, create fake intermediary note
+      const nextSchemaCandidates = schema.data.namespace
+        ? [
+            SchemaUtilsV2.create({
+              data: { pattern: "*" },
+              fname: schemaModule.fname,
+              children: schema.children,
+              parent: schema.id,
+            }),
+          ]
+        : schema.children.map((id) => schemaModule.schemas[id]);
+      const nextNoteCandidates = note.children.map((id) => notes[id]);
+      return SchemaUtilsV2.matchDomainWithSchema({
+        noteCandidates: nextNoteCandidates,
+        schemaCandidates: nextSchemaCandidates,
+        notes,
+        schemaModule,
+      });
+    });
+  }
+
+  static matchPathWithSchema(opts: {
+    note: NotePropsV2;
+    schemas: SchemaPropsV2[];
+    schemaDict: SchemaPropsDictV2;
+    matchNamespace?: boolean;
+  }): SchemaMatchResult | undefined {
+    const getPattern = (
+      schema: SchemaPropsV2,
+      schemas: SchemaPropsDictV2
+    ): string => {
+      const pattern = schema.data.pattern || schema.id;
+      const part = schema.data.namespace ? `${pattern}/*` : pattern;
+      if (_.isNull(schema.parent)) {
+        return part;
+      }
+      const parent: SchemaPropsV2 = schemas[schema.parent];
+      if (parent && parent.data.pattern !== "root") {
+        const prefix = getPattern(parent, schemas);
+        return [prefix, part].join("/");
+      } else {
+        return part;
+      }
+    };
+
+    const { note, schemas, schemaDict, matchNamespace } = opts;
+    const notePath = note.fname;
+    const notePathClean = notePath.replace(/\./g, "/");
+    let namespace = false;
+    let match = _.find(schemas, (sc) => {
+      const pattern = getPattern(sc, schemaDict);
+      if (sc.data.namespace && matchNamespace) {
+        namespace = true;
+        return minimatch(notePathClean, _.trimEnd(pattern, "/*"));
+      } else {
+        return minimatch(notePathClean, pattern);
+      }
+    });
+    if (match) {
+      return {
+        schema: match,
+        namespace,
+        note,
+      };
+    }
+    return;
+  }
+
+  static serializeModule(moduleProps: SchemaModuleOptsV2) {
     const { version, imports, schemas } = moduleProps;
     const out = {
       version,
@@ -340,57 +463,50 @@ export class SchemaUtilsV2 {
     return YAML.stringify(out, undefined, 4);
   }
 
-  /**
-   *
-   * @param noteOrPath
-   * @param schemas
-   * @param opts
-   *   - matchNamespace: should match exact namespace note (in addition to wildcard), default: false
-   *   - matchPrefix: allow prefix match, default: false
-   */
-  static matchNote(
-    noteOrPath: DNodePropsV2 | string,
-    schemas: SchemaPropsDictV2,
-    opts?: { matchNamespace?: boolean; matchPrefix?: boolean }
-  ): DNodePropsV2 {
-    const cleanOpts = _.defaults(opts, {
-      matchNamespace: true,
-      matchPrefix: false,
-    });
-    const schemaList = _.isArray(schemas) ? schemas : _.values(schemas);
-    const notePath = _.isString(noteOrPath) ? noteOrPath : noteOrPath.fname;
-    const notePathClean = notePath.replace(/\./g, "/");
-    let match: DNodePropsV2 | undefined;
-    _.find(schemaList, (schemaDomain) => {
-      // @ts-ignore
-      const allMatches = [schemaDomain].concat(
-        DNodeUtilsV2.getChildren(schemaDomain, {
-          recursive: true,
-          nodeDict: schemas,
-        })
-      );
-      return _.some(schemaDomain.nodes, (schema) => {
-        const patternMatch = schema.patternMatch;
-        if (
-          (schema as SchemaPropsV2).data.namespace &&
-          cleanOpts.matchNamespace
-        ) {
-          if (minimatch(notePathClean, _.trimEnd(patternMatch, "/*"))) {
-            match = schema;
-            return true;
-          }
-        }
-        if (minimatch(notePathClean, patternMatch)) {
-          match = schema;
-          return true;
-        } else {
-          return false;
-        }
-      });
-    });
-    if (_.isUndefined(match)) {
-      throw Error("not implemented");
-    }
-    return match;
-  }
+  // /**
+  //  *
+  //  * @param noteOrPath
+  //  * @param schemas
+  //  * @param opts
+  //  *   - matchNamespace: should match exact namespace note (in addition to wildcard), default: false
+  //  *   - matchPrefix: allow prefix match, default: false
+  //  */
+  // static match(
+  //   noteOrPath: NotePropsV2| string,
+  //   schemas: SchemaModuleV2[],
+  //   opts?: { matchNamespace?: boolean; matchPrefix?: boolean }
+  // ): SchemaPropsV2 {
+  //   const cleanOpts = _.defaults(opts, {
+  //     matchNamespace: true,
+  //     matchPrefix: false,
+  //   });
+  //   const notePath = _.isString(noteOrPath) ? noteOrPath : noteOrPath.fname;
+  //   const notePathClean = notePath.replace(/\./g, "/");
+  //   let match: SchemaPropsV2| undefined;
+  //   _.find(schemas, (schemaMod) => {
+  //     let schemasToMatch = schemaMod.schemas;
+  //     return _.some(schemaDomain.nodes, (schema) => {
+  //       const patternMatch = schema.patternMatch;
+  //       if (
+  //         (schema as SchemaPropsV2).data.namespace &&
+  //         cleanOpts.matchNamespace
+  //       ) {
+  //         if (minimatch(notePathClean, _.trimEnd(patternMatch, "/*"))) {
+  //           match = schema;
+  //           return true;
+  //         }
+  //       }
+  //       if (minimatch(notePathClean, patternMatch)) {
+  //         match = schema;
+  //         return true;
+  //       } else {
+  //         return false;
+  //       }
+  //     });
+  //   });
+  //   if (_.isUndefined(match)) {
+  //     throw Error("not implemented");
+  //   }
+  //   return match;
+  // }
 }

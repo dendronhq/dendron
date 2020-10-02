@@ -2,7 +2,7 @@ import {
   DNodeUtilsV2,
   NotePropsV2,
   NoteUtilsV2,
-  SchemaModulePropsV2,
+  SchemaModuleOptsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
@@ -38,7 +38,7 @@ export function note2File(note: NotePropsV2, vaultPath: string) {
 }
 
 export function schemaModule2File(
-  schemaFile: SchemaModulePropsV2,
+  schemaFile: SchemaModuleOptsV2,
   vaultPath: string,
   fname: string
 ) {

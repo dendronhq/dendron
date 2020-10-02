@@ -25,6 +25,7 @@ export type DNodePropsV2<T = any> = {
   data: T;
   body: string;
   custom?: any;
+  schema?: { moduleId: string; schemaId: string };
 };
 
 /**
@@ -58,20 +59,23 @@ export type SchemaPropsDictV2 = {
 };
 
 export type SchemaModuleDictV2 = {
-  [key: string]: SchemaModuleV2;
+  [key: string]: SchemaModulePropsV2;
 };
 
 // ---
 
 export type SchemaImportV2 = string[];
-export type SchemaModulePropsV2 = {
+export type SchemaModuleOptsV2 = {
   version: number;
   imports?: SchemaImportV2;
   schemas: SchemaOptsV2[];
 };
-export type SchemaModuleV2 = {
-  root: SchemaPropsV2;
+
+export type SchemaModulePropsV2 = {
+  version: number;
+  imports?: SchemaImportV2;
   schemas: SchemaPropsDictV2;
+  root: SchemaPropsV2;
   fname: string;
 };
 
@@ -120,10 +124,10 @@ export type DCommonProps = {
 
 export type DCommonMethods = {
   updateNote(note: NotePropsV2, opts?: EngineUpdateNodesOptsV2): Promise<void>;
-  updateSchema: (schema: SchemaModulePropsV2) => Promise<void>;
+  updateSchema: (schema: SchemaModuleOptsV2) => Promise<void>;
 
   writeNote: (note: NotePropsV2, opts?: EngineWriteOptsV2) => Promise<void>;
-  writeSchema: (schema: SchemaModulePropsV2) => Promise<void>;
+  writeSchema: (schema: SchemaModuleOptsV2) => Promise<void>;
 };
 
 export type DEngineInitPayloadV2 = {

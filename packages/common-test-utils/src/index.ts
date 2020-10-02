@@ -1,8 +1,9 @@
 import {
   DNodeUtilsV2,
   NoteOptsV2,
+  NotePropsDictV2,
   NoteUtilsV2,
-  SchemaModulePropsV2,
+  SchemaModuleOptsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import { note2File, schemaModule2File, tmpDir } from "@dendronhq/common-server";
@@ -22,40 +23,61 @@ export class EngineTestUtilsV2 {
 }
 
 export class NodeTestUtilsV2 {
-  static createNotes = async (
-    vaultPath: string,
-    noteProps: NoteOptsV2[],
-    opts?: { withBody: boolean }
-  ) => {
-    const cleanOpts = _.defaults(opts, { withBody: true });
+  static createNotes = async (opts: {
+    withBody?: boolean;
+    vaultPath?: string;
+    noteProps?: NoteOptsV2[];
+  }): Promise<NotePropsDictV2> => {
+    const cleanOpts = _.defaults(opts, {
+      withBody: true,
+      noteProps: [] as NoteOptsV2[],
+    });
     const rootNote = await NoteUtilsV2.createRoot({
       created: "1",
       updated: "1",
     });
+    const out: NotePropsDictV2 = {
+      root: rootNote,
+    };
     await Promise.all(
-      noteProps.map((n) => {
+      cleanOpts.noteProps.map(async (n) => {
         const body = cleanOpts.withBody ? n.fname + " body" : "";
         const _n = NoteUtilsV2.create({ ...n, body });
         DNodeUtilsV2.addChild(rootNote, _n);
-        return note2File(_n, vaultPath);
+        if (cleanOpts.vaultPath) {
+          await note2File(_n, cleanOpts.vaultPath);
+        }
+        out[_n.id] = _n;
+        return;
       })
     );
-    await note2File(rootNote, vaultPath);
+    if (cleanOpts.vaultPath) {
+      await note2File(rootNote, cleanOpts.vaultPath);
+    }
+    return out;
   };
 
-  static createSchemas = async (
-    vaultPath: string,
-    schemaModuleProps: [SchemaModulePropsV2, string][]
-  ) => {
+  static createSchemas = async (opts: {
+    vaultPath?: string;
+    schemaModuleProps?: [SchemaModuleOptsV2, string][];
+  }) => {
+    const cleanOpts = _.defaults(opts, {
+      schemaModuleProps: [] as [SchemaModuleOptsV2, string][],
+    });
+    const { vaultPath, schemaModuleProps } = cleanOpts;
     const rootModule = SchemaUtilsV2.createRootModule({
       created: "1",
       updated: "1",
     });
-    await schemaModule2File(rootModule, vaultPath, "root");
+    if (vaultPath) {
+      await schemaModule2File(rootModule, vaultPath, "root");
+    }
     await Promise.all(
-      schemaModuleProps.map((ent) => {
+      schemaModuleProps.map(async (ent) => {
         const [module, fname] = ent;
-        return schemaModule2File(module, vaultPath, fname);
+        if (vaultPath) {
+          await schemaModule2File(module, vaultPath, fname);
+        }
       })
     );
   };

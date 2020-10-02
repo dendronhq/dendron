@@ -60,6 +60,7 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "@dendronhq/common-test-utils": "^0.12.3",
     "@types/request-promise": "^4.1.46",
     "coveralls": "^3.0.2",
     "jest": "^23.6.0",

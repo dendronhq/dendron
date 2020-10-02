@@ -1,10 +1,13 @@
+import matter from "gray-matter";
 import _ from "lodash";
 import minimatch from "minimatch";
 import moment from "moment";
 import YAML from "yamljs";
+import { NoteProps } from "../lib";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
 import { DNode } from "./node";
+import { DEngine } from "./types";
 import {
   DEngineV2,
   DNodeOptsV2,
@@ -12,6 +15,7 @@ import {
   DNodePropsQuickInputV2,
   DNodePropsV2,
   NoteOptsV2,
+  NotePropsDictV2,
   NotePropsV2,
   SchemaDataV2,
   SchemaModulePropsV2,
@@ -76,6 +80,10 @@ export class DNodeUtilsV2 {
     return cleanProps;
   }
 
+  static dirName(nodePath: string) {
+    return nodePath.split(".").slice(0, -1).join(".");
+  }
+
   static enhancePropForQuickInput(props: DNodePropsV2): DNodePropsQuickInputV2 {
     return { ...props, label: props.title };
   }
@@ -84,6 +92,22 @@ export class DNodeUtilsV2 {
     props: DNodePropsV2[]
   ): DNodePropsQuickInputV2[] {
     return props.map(DNodeUtilsV2.enhancePropForQuickInput);
+  }
+
+  static findClosestParent(
+    fpath: string,
+    nodes: DNodePropsDictV2
+  ): DNodePropsV2 {
+    const dirname = DNodeUtilsV2.dirName(fpath);
+    if (dirname === "") {
+      return nodes["root"] as DNodePropsV2;
+    }
+    const maybeNode = _.find(nodes, { fname: dirname });
+    if (maybeNode) {
+      return maybeNode;
+    } else {
+      return DNodeUtilsV2.findClosestParent(dirname, nodes);
+    }
   }
 
   static getDomain(
@@ -139,21 +163,6 @@ export class DNodeUtilsV2 {
     }
     return children;
   }
-
-  static getNoteByFname(
-    fname: string,
-    engine: DEngineV2,
-    opts?: { throwIfEmpty: boolean }
-  ): NotePropsV2 | undefined {
-    const out = _.find(
-      _.values(engine.notes),
-      (ent) => ent.fname.toLowerCase() === fname
-    );
-    if (opts?.throwIfEmpty && _.isUndefined(out)) {
-      throw Error(`${fname} not found`);
-    }
-    return out;
-  }
 }
 
 export class NoteUtilsV2 {
@@ -164,7 +173,59 @@ export class NoteUtilsV2 {
     return DNodeUtilsV2.create({ ...cleanOpts, type: "note" });
   }
 
-  static serialize(props: NotePropsV2) {
+  static createRoot(opts: Partial<NoteOptsV2>): NotePropsV2 {
+    return DNodeUtilsV2.create({
+      ...opts,
+      type: "note",
+      fname: "root",
+      id: "root",
+    });
+  }
+
+  static createStubs(from: NotePropsV2, to: NotePropsV2): NotePropsV2[] {
+    const stubNodes: NotePropsV2[] = [];
+    let fromPath = from.fname;
+    if (from.id === "root") {
+      fromPath = "";
+    }
+    const toPath = to.fname;
+    const index = toPath.indexOf(fromPath) + fromPath.length;
+    const diffPath = _.trimStart(toPath.slice(index), ".").split(".");
+    let stubPath = fromPath;
+    let parent = from;
+    // last element is node
+    diffPath.slice(0, -1).forEach((part) => {
+      // handle starting from root, path = ""
+      if (_.isEmpty(stubPath)) {
+        stubPath = part;
+      } else {
+        stubPath += `.${part}`;
+      }
+      const n = NoteUtilsV2.create({ fname: stubPath, stub: true });
+      stubNodes.push(n);
+      DNodeUtilsV2.addChild(parent, n);
+      parent = n;
+    });
+    DNodeUtilsV2.addChild(parent, to);
+    return stubNodes;
+  }
+
+  static getNoteByFname(
+    fname: string,
+    notes: NotePropsDictV2,
+    opts?: { throwIfEmpty: boolean }
+  ): NotePropsV2 | undefined {
+    const out = _.find(
+      _.values(notes),
+      (ent) => ent.fname.toLowerCase() === fname
+    );
+    if (opts?.throwIfEmpty && _.isUndefined(out)) {
+      throw Error(`${fname} not found`);
+    }
+    return out;
+  }
+
+  static serialize(props: NotePropsV2): string {
     const body = props.body;
     const builtinProps = _.pick(props, [
       "id",
@@ -176,10 +237,7 @@ export class NoteUtilsV2 {
     ]);
     const { custom: customProps } = props;
     const meta = { ...builtinProps, ...customProps };
-    return {
-      meta,
-      body,
-    };
+    return matter.stringify(body || "", meta);
   }
 }
 

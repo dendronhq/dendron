@@ -12,6 +12,9 @@ export type DNodeTypeV2 = "note" | "schema";
 export type SchemaDataV2 = SchemaData;
 export type NoteDataV2 = NoteData;
 
+/**
+ * Props are the official interface for a node
+ */
 export type DNodePropsV2<T = any> = {
   id: string;
   title: string;
@@ -29,8 +32,11 @@ export type DNodePropsV2<T = any> = {
   custom?: any;
 };
 
+/**
+ * Opts are arguments used when creating a node
+ */
 export type DNodeOptsV2<T = any> = Partial<
-  Omit<DNodePropsV2<T>, "fname|type">
+  Omit<DNodePropsV2<T>, "fname|type"> & { fname: string; type: DNodeTypeV2 }
 > & { fname: string; type: DNodeTypeV2 };
 export type SchemaOptsV2 = Omit<DNodeOptsV2<SchemaData>, "type">;
 export type NoteOptsV2 = Omit<DNodeOptsV2<NoteDataV2>, "type">;

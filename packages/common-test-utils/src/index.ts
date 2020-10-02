@@ -1,4 +1,5 @@
 import {
+  DNodeUtilsV2,
   NoteOptsV2,
   NoteUtilsV2,
   SchemaModulePropsV2,
@@ -27,16 +28,19 @@ export class NodeTestUtilsV2 {
     opts?: { withBody: boolean }
   ) => {
     const cleanOpts = _.defaults(opts, { withBody: true });
-    await note2File(
-      NoteUtilsV2.create({ fname: "root", id: "root", title: "root" }),
-      vaultPath
-    );
+    const rootNote = await NoteUtilsV2.createRoot({
+      created: "1",
+      updated: "1",
+    });
     await Promise.all(
       noteProps.map((n) => {
         const body = cleanOpts.withBody ? n.fname + " body" : "";
-        return note2File(NoteUtilsV2.create({ ...n, body }), vaultPath);
+        const _n = NoteUtilsV2.create({ ...n, body });
+        DNodeUtilsV2.addChild(rootNote, _n);
+        return note2File(_n, vaultPath);
       })
     );
+    await note2File(rootNote, vaultPath);
   };
 
   static createSchemas = async (

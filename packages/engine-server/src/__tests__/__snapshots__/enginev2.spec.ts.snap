@@ -72,6 +72,38 @@ Object {
 }
 `;
 
+exports[`engine, notes basics write note 1`] = `
+Object {
+  "bar": Object {
+    "body": "",
+    "children": Array [],
+    "created": "1",
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "id": "bar",
+    "parent": null,
+    "title": "Bar",
+    "type": "note",
+    "updated": "1",
+  },
+  "root": Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+  },
+}
+`;
+
 exports[`engine, schema basics only root 1`] = `
 Object {
   "root": Object {

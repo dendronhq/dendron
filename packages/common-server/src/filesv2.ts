@@ -1,6 +1,5 @@
 import {
   DNodeUtilsV2,
-  NoteOptsV2,
   NotePropsV2,
   NoteUtilsV2,
   SchemaModulePropsV2,

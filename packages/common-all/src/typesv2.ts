@@ -1,10 +1,5 @@
 import { DendronError } from "./error";
-import {
-  EngineDeleteOpts,
-  NoteData,
-  SchemaData,
-  UpdateNodesOpts,
-} from "./types";
+import { EngineDeleteOpts, NoteData, SchemaData } from "./types";
 
 export type DNodePointerV2 = string;
 export type DNodeTypeV2 = "note" | "schema";
@@ -97,34 +92,24 @@ export interface QueryOptsV2 {
    */
   queryOne?: boolean;
   /**
-   * Use with `createIfNew`
-   * If true, create a stub node.
-   * A stub node is not written to disk
-   */
-  stub?: boolean;
-  /**
    * If node does not exist, create it?
    */
   createIfNew?: boolean;
 }
 
-export type EngineUpdateNodesOptsV2 = UpdateNodesOpts;
+export type EngineUpdateNodesOptsV2 = {
+  /**
+   * New Node, should add to `fullNode` cache
+   */
+  newNode: boolean;
+};
 export type EngineDeleteOptsV2 = EngineDeleteOpts;
 export type EngineWriteOptsV2 = {
-  /**
-   * See QueryOpts.stub
-   */
-  stub?: boolean;
   /**
    * Write all children?
    * default: false
    */
   recursive?: boolean;
-  /**
-   * Write stubs
-   * default: false
-   */
-  writeStub?: boolean;
 } & Partial<EngineUpdateNodesOptsV2>;
 
 export type DCommonProps = {

@@ -3,13 +3,10 @@ import _ from "lodash";
 import minimatch from "minimatch";
 import moment from "moment";
 import YAML from "yamljs";
-import { NoteProps } from "../lib";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
 import { DNode } from "./node";
-import { DEngine } from "./types";
 import {
-  DEngineV2,
   DNodeOptsV2,
   DNodePropsDictV2,
   DNodePropsQuickInputV2,

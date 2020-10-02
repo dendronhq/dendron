@@ -1,13 +1,11 @@
 import {
   DendronError,
   DEngineInitPayloadV2,
-  DNodePropsV2,
   DNodeUtilsV2,
   DStoreV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   ENGINE_ERROR_CODES,
-  NoteOptsV2,
   NotePropsDictV2,
   NotePropsV2,
   NoteUtilsV2,
@@ -25,10 +23,10 @@ import {
   file2Note,
   getAllFiles,
   globMatch,
+  note2File,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import { FileMeta } from "packages/engine-server/lib";
 import path from "path";
 import YAML from "yamljs";
 
@@ -274,18 +272,18 @@ export class SchemaParserV2 extends ParserBaseV2 {
 
 type NotePropsCacheV2 = {};
 
-type NoteEntryV2 = {
-  mtime: number;
-  size: number;
-  hash: number;
-};
+// type NoteEntryV2 = {
+//   mtime: number;
+//   size: number;
+//   hash: number;
+// };
 
-type MetaEntryV2 = {
-  links: any[];
-  embeds: any[];
-  tags: any[];
-  headings: any[];
-};
+// type MetaEntryV2 = {
+//   links: any[];
+//   embeds: any[];
+//   tags: any[];
+//   headings: any[];
+// };
 
 export class FileStorageV2 implements DStoreV2 {
   public vaults: string[];
@@ -353,7 +351,6 @@ export class FileStorageV2 implements DStoreV2 {
       include: ["*.md"],
     }) as string[];
     const cache = this.loadNotesCache();
-    const root = this.vaults[0];
     return new NoteParserV2({ store: this, cache, logger: this.logger }).parse(
       noteFiles
     );
@@ -361,9 +358,9 @@ export class FileStorageV2 implements DStoreV2 {
 
   async updateNote(
     note: NotePropsV2,
-    opts?: EngineUpdateNodesOptsV2
+    _opts?: EngineUpdateNodesOptsV2
   ): Promise<void> {
-    throw Error("not implemented");
+    this.notes[note.id] = note;
     return;
   }
 
@@ -377,9 +374,12 @@ export class FileStorageV2 implements DStoreV2 {
     return;
   }
 
-  async writeNote(note: NotePropsV2, opts?: EngineWriteOptsV2): Promise<void> {
-    throw Error("to implement");
-    return;
+  async writeNote(note: NotePropsV2, _opts?: EngineWriteOptsV2): Promise<void> {
+    if (note.stub) {
+      return;
+    }
+    await note2File(note, this.vaults[0]);
+    await this.updateNote(note);
   }
 
   async writeSchema(schemaModule: SchemaModulePropsV2) {

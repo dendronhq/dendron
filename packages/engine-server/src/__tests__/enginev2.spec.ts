@@ -193,7 +193,7 @@ describe.only("engine, notes", () => {
 
     test("no parent", async () => {
       await note2File(NoteUtilsV2.create({ fname: "foo.ch1" }), vaultDir);
-      const { data } = await engine.init();
+      await engine.init();
       expect(_.values(engine.notes).length).toEqual(3);
       const stubNote = NoteUtilsV2.getNoteByFname("foo", engine.notes);
       expect(_.pick(stubNote, ["stub"])).toEqual({ stub: true });
@@ -206,39 +206,22 @@ describe.only("engine, notes", () => {
       expect(_.values(engine.notes).length).toEqual(3);
     });
 
-    // test("write schema to existing module", async () => {
-    //   const module = await createSchemaModule();
-    //   await engine.init();
-
-    //   // update schema
-    //   const moduleRoot = SchemaUtilsV2.getModuleRoot(module);
-    //   const ch2 = SchemaUtilsV2.create({
-    //     fname: "foo",
-    //     id: "ch2",
-    //     created: "1",
-    //     updated: "1",
-    //   });
-    //   DNodeUtilsV2.addChild(moduleRoot, ch2);
-    //   module.schemas.push(ch2);
-    //   await engine.updateSchema(module);
-
-    //   expect(engine.schemas).toMatchSnapshot();
-    //   expect(_.values(engine.schemas).length).toEqual(2);
-    //   expect(_.values(engine.schemas["foo"].schemas).length).toEqual(3);
-    // });
-
-    // test("write new module", async () => {
-    //   await createSchemaModule();
-    //   await engine.init();
-
-    //   // update schema
-    //   const moduleNew = await createSchemaModule("bar");
-    //   await engine.writeSchema(moduleNew);
-
-    //   expect(engine.schemas).toMatchSnapshot();
-    //   expect(_.values(engine.schemas).length).toEqual(3);
-    //   expect(_.values(engine.schemas["foo"].schemas).length).toEqual(2);
-    //   expect(_.values(engine.schemas["bar"].schemas).length).toEqual(2);
-    // });
+    test("write note", async () => {
+      await engine.init();
+      const barNote = NoteUtilsV2.create({
+        fname: "bar",
+        id: "bar",
+        created: "1",
+        updated: "1",
+      });
+      await engine.writeNote(barNote);
+      expect(engine.notes).toMatchSnapshot();
+      expect(_.values(engine.notes).length).toEqual(2);
+      expect(fs.readdirSync(vaultDir)).toEqual([
+        "bar.md",
+        "root.md",
+        "root.schema.yml",
+      ]);
+    });
   });
 });

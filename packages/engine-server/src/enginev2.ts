@@ -4,25 +4,19 @@ import {
   DEngineV2,
   DNodePropsV2,
   DNodeTypeV2,
-  DNodeUtilsV2,
   DStoreV2,
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
-  NotePropsDictV2,
   NotePropsV2,
   QueryOptsV2,
-  Resp,
   RespV2,
   SchemaModulePropsV2,
-  SchemaPropsDictV2,
   SchemaPropsV2,
-  SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import { DLogger } from "@dendronhq/common-server";
 import Fuse from "fuse.js";
 import _ from "lodash";
-import { SchemaParserV2 } from "../lib";
 
 type DendronEngineOptsV2 = {
   vaults: string[];
@@ -107,23 +101,12 @@ export class DendronEngine implements DEngineV2 {
   }
 
   async delete(
-    id: string,
-    mode: DNodeTypeV2,
-    opts?: EngineDeleteOptsV2
+    _id: string,
+    _mode: DNodeTypeV2,
+    _opts?: EngineDeleteOptsV2
   ): Promise<void> {
     throw Error("to implement");
-    return;
   }
-  //   updateNodes(
-  //     nodes: DNodePropsV2[],
-  //     opts: EngineUpdateNodesOptsV2
-  //   ): Promise<void>;
-
-  //   delete: (
-  //     id: string,
-  //     mode: DNodeTypeV2,
-  //     opts?: EngineDeleteOptsV2
-  //   ) => Promise<void>;
 
   async query(
     queryString: string,
@@ -139,7 +122,6 @@ export class DendronEngine implements DEngineV2 {
       stub: false,
     });
 
-    // get everything
     if (isAllQuery(queryString)) {
       this.logger.info({ ctx, msg: "queryAll", mode });
       try {
@@ -154,22 +136,18 @@ export class DendronEngine implements DEngineV2 {
     note: NotePropsV2,
     opts?: EngineUpdateNodesOptsV2
   ): Promise<void> {
-    throw Error("not implemented");
-    return;
+    return this.store.updateNote(note, opts);
   }
 
   async updateSchema(schemaModule: SchemaModulePropsV2) {
-    return await this.store.updateSchema(schemaModule);
+    return this.store.updateSchema(schemaModule);
   }
 
   async writeNote(note: NotePropsV2, opts?: EngineWriteOptsV2): Promise<void> {
-    throw Error("to implement");
-    return;
+    await this.store.writeNote(note, opts);
   }
 
   async writeSchema(schema: SchemaModulePropsV2) {
     return this.store.writeSchema(schema);
   }
-
-  //   write: (node: DNodePropsV2, opts?: EngineWriteOptsV2) => Promise<void>;
 }

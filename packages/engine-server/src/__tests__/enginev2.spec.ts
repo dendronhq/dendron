@@ -9,9 +9,10 @@ import {
 } from "@dendronhq/common-all";
 import {
   createLogger,
+  NodeTestUtils,
   note2File,
   readYAML,
-  schemaModule2File,
+  schemaModuleOpts2File,
 } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
@@ -19,7 +20,7 @@ import {
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import path from "path";
+import path, { resolve } from "path";
 import { FileStorageV2, SchemaParserV2 } from "../drivers/file/storev2";
 import { DendronEngineV2 } from "../enginev2";
 const createNotes = async (opts: { rootName: string; vaultDir: string }) => {
@@ -74,7 +75,7 @@ const createSchemaModule = async (opts: {
   await Promise.all(
     schemaModuleProps.map((ent) => {
       const [module, fname] = ent;
-      return schemaModule2File(module, vaultDir, fname);
+      return schemaModuleOpts2File(module, vaultDir, fname);
     })
   );
   return schemaModuleProps[0][0];
@@ -88,7 +89,7 @@ const beforePreset = async () => {
       await NodeTestUtilsV2.createSchemas({ vaultPath });
       await NodeTestUtilsV2.createNotes({ vaultPath });
       await NodeTestUtilsV2.createNoteProps({ vaultPath, rootName: "foo" });
-      await NodeTestUtilsV2.createSchemaModules({
+      await NodeTestUtilsV2.createSchemaModuleOpts({
         vaultDir: vaultPath,
         rootName: "foo",
       });
@@ -176,7 +177,7 @@ describe("engine, schema/", () => {
           await NodeTestUtilsV2.createSchemas({ vaultPath });
           await NodeTestUtilsV2.createNotes({ vaultPath });
           await NodeTestUtilsV2.createNoteProps({ vaultPath, rootName: "foo" });
-          await NodeTestUtilsV2.createSchemaModules({
+          await NodeTestUtilsV2.createSchemaModuleOpts({
             vaultDir: vaultPath,
             rootName: "foo",
           });
@@ -243,7 +244,36 @@ describe("engine, schema/", () => {
     test.skip("delete schema", async () => {});
   });
 
-  describe.skip("import", () => {});
+  describe.skip("import", () => {
+    let vaultDir: string;
+    let engine: DEngineV2;
+
+    describe("write/", () => {
+      beforeEach(async () => {
+        ({ vaultDir, engine } = await beforePreset());
+        const sMO = SchemaUtilsV2.createModule({
+          version: 1,
+          schemas: [
+            SchemaUtilsV2.create({
+              fname: "bar",
+              id: "bar",
+              children: ["foo.foo"],
+            }),
+          ],
+          imports: ["foo"],
+        });
+        await schemaModuleOpts2File(sMO, vaultDir, "bar");
+      });
+
+      test("basic", async () => {
+        await engine.init();
+        await engine.writeNote(NoteUtilsV2.create({ fname: "bar.foo" }));
+        const resp = await engine.query("bar.foo", "note");
+        const note = resp.data[0];
+        expect(note.schema).toEqual({ moduleId: "bar", schemaId: "foo.foo" });
+      });
+    });
+  });
 });
 
 describe("engine, notes/", () => {
@@ -333,6 +363,66 @@ describe("engine, notes/", () => {
     });
   });
 
+  describe.only("write/", () => {
+    let vaultDir: string;
+    let engine: DEngineV2;
+    beforeEach(async () => {
+      ({ vaultDir, engine } = await beforePreset());
+    });
+
+    test("write note, no schema", async () => {
+      await engine.init();
+      const barNote = NoteUtilsV2.create({
+        fname: "bar",
+        id: "bar",
+        created: "1",
+        updated: "1",
+      });
+      await engine.writeNote(barNote);
+      expect(engine.notes).toMatchSnapshot();
+      const resp = await engine.query("bar", "note");
+      const note = resp.data[0];
+      expect(_.values(engine.notes).length).toEqual(4);
+      expect(note).toEqual(engine.notes["bar"]);
+      expect(note.schema).toBeUndefined();
+      expect(fs.readdirSync(vaultDir)).toEqual([
+        "bar.md",
+        "foo.ch1.md",
+        "foo.md",
+        "foo.schema.yml",
+        "root.md",
+        "root.schema.yml",
+      ]);
+    });
+
+    test.only("write note, match schema", async () => {
+      fs.removeSync(path.join(vaultDir, "foo.ch1.md"));
+      await engine.init();
+      const noteNew = NoteUtilsV2.create({
+        fname: "foo.ch1",
+        id: "foo.ch1",
+        created: "1",
+        updated: "1",
+      });
+      await engine.writeNote(noteNew);
+      expect(engine.notes).toMatchSnapshot();
+      expect(engine.schemas).toMatchSnapshot();
+      // const resp = await engine.query("bar", "note");
+      // const note = resp.data[0];
+      // expect(_.values(engine.notes).length).toEqual(4);
+      // expect(note).toEqual(engine.notes["bar"]);
+      // expect(note.schema).toBeUndefined();
+      // expect(fs.readdirSync(vaultDir)).toEqual([
+      //   "bar.md",
+      //   "foo.ch1.md",
+      //   "foo.md",
+      //   "foo.schema.yml",
+      //   "root.md",
+      //   "root.schema.yml",
+      // ]);
+    });
+  });
+
   describe("basics", () => {
     beforeEach(async () => {
       vaultDir = await EngineTestUtilsV2.setupVault({
@@ -384,26 +474,6 @@ describe("engine, notes/", () => {
       await engine.init();
       expect(engine.notes).toMatchSnapshot();
       expect(_.values(engine.notes).length).toEqual(3);
-    });
-
-    test("write note", async () => {
-      await engine.init();
-      const barNote = NoteUtilsV2.create({
-        fname: "bar",
-        id: "bar",
-        created: "1",
-        updated: "1",
-      });
-      await engine.writeNote(barNote);
-      expect(engine.notes).toMatchSnapshot();
-      const resp = await engine.query("bar", "note");
-      expect(_.values(engine.notes).length).toEqual(2);
-      expect(resp.data).toEqual([engine.notes["bar"]]);
-      expect(fs.readdirSync(vaultDir)).toEqual([
-        "bar.md",
-        "root.md",
-        "root.schema.yml",
-      ]);
     });
   });
 });

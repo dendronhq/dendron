@@ -426,7 +426,7 @@ export class SchemaUtilsV2 {
   }) {
     const { noteCandidates, schemaCandidates, notes, schemaModule } = opts;
     const matches = _.map(noteCandidates, (note) => {
-      return SchemaUtilsV2.matchPathWithSchema({
+      return SchemaUtilsV2.matchNoteWithSchemaAtLevel({
         note,
         schemas: schemaCandidates,
         schemaDict: schemaModule.schemas,
@@ -458,7 +458,13 @@ export class SchemaUtilsV2 {
     });
   }
 
-  static matchPathWithSchema(opts: {
+  // static matchNoteWithSchema(opts: {
+  //   note: NotePropsV2;
+  //   schemaDict: SchemaPropsDictV2;
+  // }): SchemaMatchResult | undefined {
+  // }
+
+  static matchNoteWithSchemaAtLevel(opts: {
     note: NotePropsV2;
     schemas: SchemaPropsV2[];
     schemaDict: SchemaPropsDictV2;

@@ -6,7 +6,11 @@ import {
   SchemaModuleOptsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
-import { note2File, schemaModule2File, tmpDir } from "@dendronhq/common-server";
+import {
+  note2File,
+  schemaModuleOpts2File,
+  tmpDir,
+} from "@dendronhq/common-server";
 import _ from "lodash";
 export type SetupVaultOpts = {
   vaultDir?: string;
@@ -85,30 +89,30 @@ export class NodeTestUtilsV2 {
 
   static createSchemas = async (opts: {
     vaultPath?: string;
-    schemaModuleProps?: [SchemaModuleOptsV2, string][];
+    schemaMO?: [SchemaModuleOptsV2, string][];
   }) => {
     const cleanOpts = _.defaults(opts, {
-      schemaModuleProps: [] as [SchemaModuleOptsV2, string][],
+      schemaMO: [] as [SchemaModuleOptsV2, string][],
     });
-    const { vaultPath, schemaModuleProps } = cleanOpts;
+    const { vaultPath, schemaMO } = cleanOpts;
     const rootModule = SchemaUtilsV2.createRootModule({
       created: "1",
       updated: "1",
     });
     if (vaultPath) {
-      await schemaModule2File(rootModule, vaultPath, "root");
+      await schemaModuleOpts2File(rootModule, vaultPath, "root");
     }
     await Promise.all(
-      schemaModuleProps.map(async (ent) => {
+      schemaMO.map(async (ent) => {
         const [module, fname] = ent;
         if (vaultPath) {
-          await schemaModule2File(module, vaultPath, fname);
+          await schemaModuleOpts2File(module, vaultPath, fname);
         }
       })
     );
   };
 
-  static createSchemaModules = async (opts: {
+  static createSchemaModuleOpts = async (opts: {
     vaultDir: string;
     rootName: string;
   }) => {
@@ -140,7 +144,7 @@ export class NodeTestUtilsV2 {
     await Promise.all(
       schemaModuleProps.map((ent) => {
         const [module, fname] = ent;
-        return schemaModule2File(module, vaultDir, fname);
+        return schemaModuleOpts2File(module, vaultDir, fname);
       })
     );
     return schemaModuleProps[0][0];

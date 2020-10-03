@@ -18,7 +18,7 @@ describe("main", () => {
         await NodeTestUtilsV2.createNotes({ vaultPath });
         await NodeTestUtilsV2.createSchemas({ vaultPath });
         await NodeTestUtilsV2.createNoteProps({ vaultPath, rootName: "foo" });
-        await NodeTestUtilsV2.createSchemaModules({
+        await NodeTestUtilsV2.createSchemaModuleOpts({
           vaultDir: vaultPath,
           rootName: "foo",
         });

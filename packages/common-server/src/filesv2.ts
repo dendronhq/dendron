@@ -39,7 +39,7 @@ export function note2File(note: NotePropsV2, vaultPath: string) {
   );
 }
 
-export function schemaModule2File(
+export function schemaModuleOpts2File(
   schemaFile: SchemaModuleOptsV2,
   vaultPath: string,
   fname: string

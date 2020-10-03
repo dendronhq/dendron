@@ -24,7 +24,7 @@ import {
   getAllFiles,
   globMatch,
   note2File,
-  schemaModule2File,
+  schemaModuleOpts2File,
   schemaModuleProps2File,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";

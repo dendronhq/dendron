@@ -406,20 +406,10 @@ describe("engine, notes/", () => {
       });
       await engine.writeNote(noteNew);
       expect(engine.notes).toMatchSnapshot();
-      expect(engine.schemas).toMatchSnapshot();
-      // const resp = await engine.query("bar", "note");
-      // const note = resp.data[0];
-      // expect(_.values(engine.notes).length).toEqual(4);
-      // expect(note).toEqual(engine.notes["bar"]);
-      // expect(note.schema).toBeUndefined();
-      // expect(fs.readdirSync(vaultDir)).toEqual([
-      //   "bar.md",
-      //   "foo.ch1.md",
-      //   "foo.md",
-      //   "foo.schema.yml",
-      //   "root.md",
-      //   "root.schema.yml",
-      // ]);
+      expect(engine.notes["foo.ch1"].schema).toEqual({
+        moduleId: "foo",
+        schemaId: "ch1",
+      });
     });
   });
 

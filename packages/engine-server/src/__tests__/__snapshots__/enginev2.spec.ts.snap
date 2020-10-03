@@ -116,6 +116,10 @@ Object {
     "fname": "foo.ch1",
     "id": "foo.ch1",
     "parent": "foo",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "ch1",
+    },
     "title": "Ch1",
     "type": "note",
     "updated": "1",
@@ -136,94 +140,6 @@ Object {
     "title": "Root",
     "type": "note",
     "updated": "1",
-  },
-}
-`;
-
-exports[`engine, notes/ write/ write note, match schema 2`] = `
-Object {
-  "foo": Object {
-    "fname": "foo.schema",
-    "imports": null,
-    "root": Object {
-      "body": "",
-      "children": Array [
-        "ch1",
-      ],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "foo.schema",
-      "id": "foo",
-      "parent": "root",
-      "title": "foo",
-      "type": "schema",
-      "updated": "1",
-    },
-    "schemas": Object {
-      "ch1": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "foo.schema",
-        "id": "ch1",
-        "parent": "foo",
-        "title": "ch1",
-        "type": "schema",
-        "updated": "1",
-      },
-      "foo": Object {
-        "body": "",
-        "children": Array [
-          "ch1",
-        ],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "foo.schema",
-        "id": "foo",
-        "parent": "root",
-        "title": "foo",
-        "type": "schema",
-        "updated": "1",
-      },
-    },
-    "version": 1,
-  },
-  "root": Object {
-    "fname": "root.schema",
-    "imports": Array [],
-    "root": Object {
-      "body": "",
-      "children": Array [],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "root.schema",
-      "id": "root",
-      "parent": null,
-      "title": "root",
-      "type": "schema",
-      "updated": "1",
-    },
-    "schemas": Object {
-      "root": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "root.schema",
-        "id": "root",
-        "parent": null,
-        "title": "root",
-        "type": "schema",
-        "updated": "1",
-      },
-    },
-    "version": 1,
   },
 }
 `;

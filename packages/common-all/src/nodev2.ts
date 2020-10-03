@@ -23,6 +23,7 @@ import {
   SchemaPropsV2,
 } from "./typesv2";
 import { genUUID } from "./uuid";
+import { domain } from "process";
 
 export class DNodeUtilsV2 {
   static addChild(parent: DNodePropsV2, child: DNodePropsV2) {
@@ -335,6 +336,7 @@ export class NoteUtilsV2 {
 }
 
 type SchemaMatchResult = {
+  schemaModule: SchemaModulePropsV2;
   schema: SchemaPropsV2;
   namespace: boolean;
   notePath: string;
@@ -441,7 +443,7 @@ export class SchemaUtilsV2 {
       return SchemaUtilsV2.matchNotePathWithSchemaAtLevel({
         notePath: note.fname,
         schemas: schemaCandidates,
-        schemaDict: schemaModule.schemas,
+        schemaModule,
       });
     }).filter((ent) => !_.isUndefined(ent)) as SchemaMatchResult[];
 
@@ -482,11 +484,17 @@ export class SchemaUtilsV2 {
       return;
     } else {
       const domainSchema = match.root;
+      if (domainName.length === notePath.length) {
+        return {
+          schema: domainSchema,
+          notePath,
+          namespace: false,
+          schemaModule: match,
+        };
+      }
       return SchemaUtilsV2.matchPathWithSchema({
-        pathCandidate: {
-          matched: domainName,
-          notMatched: notePath.slice(domainName.length),
-        },
+        notePath,
+        matched: "",
         schemaCandidates: [domainSchema],
         schemaModule: match,
       });
@@ -494,27 +502,59 @@ export class SchemaUtilsV2 {
   }
 
   static matchPathWithSchema(opts: {
-    pathCandidate: {
-      matched: string;
-      notMatched: string;
-    };
+    notePath: string;
+    matched: string;
     schemaCandidates: SchemaPropsV2[];
     schemaModule: SchemaModulePropsV2;
   }): SchemaMatchResult | undefined {
-    // const { pathCandidate, schemaCandidates, schemaModule } = opts;
-    // const domainName = DNodeUtilsV2.domainName(notePath);
-    // const match = schemaModDict[domainName];
-    // if (!match) {
-    //   return;
-    // } else {
-    // }
+    const { notePath, matched, schemaCandidates, schemaModule } = opts;
+
+    const getChildOfPath = (notePath: string, matched: string) => {
+      const nextLvlIndex = _.indexOf(notePath, ".", matched.length + 1);
+      return nextLvlIndex > 0 ? notePath.slice(0, nextLvlIndex) : notePath;
+    };
+
+    const nextNotePath = getChildOfPath(notePath, matched);
+
+    const match = SchemaUtilsV2.matchNotePathWithSchemaAtLevel({
+      notePath: nextNotePath,
+      schemas: schemaCandidates,
+      schemaModule,
+    });
+    if (match) {
+      const { schema } = match;
+      if (notePath === nextNotePath) {
+        return {
+          schemaModule,
+          schema,
+          namespace: false,
+          notePath,
+        };
+      }
+      const nextSchemaCandidates = schema.data.namespace
+        ? [
+            SchemaUtilsV2.create({
+              data: { pattern: "*" },
+              fname: schemaModule.fname,
+              children: schema.children,
+              parent: schema.id,
+            }),
+          ]
+        : schema.children.map((id) => schemaModule.schemas[id]);
+      return SchemaUtilsV2.matchPathWithSchema({
+        notePath,
+        matched: nextNotePath,
+        schemaCandidates: nextSchemaCandidates,
+        schemaModule,
+      });
+    }
     return;
   }
 
   static matchNotePathWithSchemaAtLevel(opts: {
     notePath: string;
     schemas: SchemaPropsV2[];
-    schemaDict: SchemaPropsDictV2;
+    schemaModule: SchemaModulePropsV2;
     matchNamespace?: boolean;
   }): SchemaMatchResult | undefined {
     const getPattern = (
@@ -535,11 +575,11 @@ export class SchemaUtilsV2 {
       }
     };
 
-    const { notePath, schemas, schemaDict, matchNamespace } = opts;
+    const { notePath, schemas, schemaModule, matchNamespace } = opts;
     const notePathClean = notePath.replace(/\./g, "/");
     let namespace = false;
     let match = _.find(schemas, (sc) => {
-      const pattern = getPattern(sc, schemaDict);
+      const pattern = getPattern(sc, schemaModule.schemas);
       if (sc.data.namespace && matchNamespace) {
         namespace = true;
         return minimatch(notePathClean, _.trimEnd(pattern, "/*"));
@@ -552,6 +592,7 @@ export class SchemaUtilsV2 {
         schema: match,
         namespace,
         notePath,
+        schemaModule,
       };
     }
     return;

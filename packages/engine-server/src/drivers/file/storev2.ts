@@ -24,7 +24,6 @@ import {
   getAllFiles,
   globMatch,
   note2File,
-  schemaModuleOpts2File,
   schemaModuleProps2File,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -391,6 +390,14 @@ export class FileStorageV2 implements DStoreV2 {
       notesList: _.values(this.notes),
       createStubs: true,
     });
+    const match = SchemaUtilsV2.matchPath({
+      notePath: note.fname,
+      schemaModDict: this.schemas,
+    });
+    if (match) {
+      const { schema, schemaModule } = match;
+      NoteUtilsV2.addSchema({ note, schema, schemaModule });
+    }
     await Promise.all([note].concat(stubs).map((ent) => this.updateNote(ent)));
   }
 

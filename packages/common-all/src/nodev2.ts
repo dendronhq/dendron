@@ -82,6 +82,10 @@ export class DNodeUtilsV2 {
     return nodePath.split(".").slice(0, -1).join(".");
   }
 
+  static domainName(nodePath: string) {
+    return nodePath.split(".")[0];
+  }
+
   static enhancePropForQuickInput(
     props: DNodePropsV2,
     schemaModule?: SchemaModulePropsV2
@@ -333,7 +337,7 @@ export class NoteUtilsV2 {
 type SchemaMatchResult = {
   schema: SchemaPropsV2;
   namespace: boolean;
-  note: NotePropsV2;
+  notePath: string;
 };
 
 export class SchemaUtilsV2 {
@@ -399,6 +403,14 @@ export class SchemaUtilsV2 {
     return maybeRoot as SchemaPropsV2;
   }
 
+  /**
+   * Matcn and assign schemas to all nodes within
+   * a domain
+   *
+   * @param domain
+   * @param notes
+   * @param schemas
+   */
   static matchDomain(
     domain: NotePropsV2,
     notes: NotePropsDictV2,
@@ -426,15 +438,16 @@ export class SchemaUtilsV2 {
   }) {
     const { noteCandidates, schemaCandidates, notes, schemaModule } = opts;
     const matches = _.map(noteCandidates, (note) => {
-      return SchemaUtilsV2.matchNoteWithSchemaAtLevel({
-        note,
+      return SchemaUtilsV2.matchNotePathWithSchemaAtLevel({
+        notePath: note.fname,
         schemas: schemaCandidates,
         schemaDict: schemaModule.schemas,
       });
     }).filter((ent) => !_.isUndefined(ent)) as SchemaMatchResult[];
 
     matches.map((m) => {
-      const { schema, note } = m;
+      const { schema, notePath } = m;
+      const note = _.find(noteCandidates, { fname: notePath }) as NotePropsV2;
       NoteUtilsV2.addSchema({ note, schema, schemaModule });
 
       // if namespace, create fake intermediary note
@@ -458,14 +471,48 @@ export class SchemaUtilsV2 {
     });
   }
 
-  // static matchNoteWithSchema(opts: {
-  //   note: NotePropsV2;
-  //   schemaDict: SchemaPropsDictV2;
-  // }): SchemaMatchResult | undefined {
-  // }
+  static matchPath(opts: {
+    notePath: string;
+    schemaModDict: SchemaModuleDictV2;
+  }): SchemaMatchResult | undefined {
+    const { notePath, schemaModDict } = opts;
+    const domainName = DNodeUtilsV2.domainName(notePath);
+    const match = schemaModDict[domainName];
+    if (!match) {
+      return;
+    } else {
+      const domainSchema = match.root;
+      return SchemaUtilsV2.matchPathWithSchema({
+        pathCandidate: {
+          matched: domainName,
+          notMatched: notePath.slice(domainName.length),
+        },
+        schemaCandidates: [domainSchema],
+        schemaModule: match,
+      });
+    }
+  }
 
-  static matchNoteWithSchemaAtLevel(opts: {
-    note: NotePropsV2;
+  static matchPathWithSchema(opts: {
+    pathCandidate: {
+      matched: string;
+      notMatched: string;
+    };
+    schemaCandidates: SchemaPropsV2[];
+    schemaModule: SchemaModulePropsV2;
+  }): SchemaMatchResult | undefined {
+    // const { pathCandidate, schemaCandidates, schemaModule } = opts;
+    // const domainName = DNodeUtilsV2.domainName(notePath);
+    // const match = schemaModDict[domainName];
+    // if (!match) {
+    //   return;
+    // } else {
+    // }
+    return;
+  }
+
+  static matchNotePathWithSchemaAtLevel(opts: {
+    notePath: string;
     schemas: SchemaPropsV2[];
     schemaDict: SchemaPropsDictV2;
     matchNamespace?: boolean;
@@ -488,8 +535,7 @@ export class SchemaUtilsV2 {
       }
     };
 
-    const { note, schemas, schemaDict, matchNamespace } = opts;
-    const notePath = note.fname;
+    const { notePath, schemas, schemaDict, matchNamespace } = opts;
     const notePathClean = notePath.replace(/\./g, "/");
     let namespace = false;
     let match = _.find(schemas, (sc) => {
@@ -505,7 +551,7 @@ export class SchemaUtilsV2 {
       return {
         schema: match,
         namespace,
-        note,
+        notePath,
       };
     }
     return;

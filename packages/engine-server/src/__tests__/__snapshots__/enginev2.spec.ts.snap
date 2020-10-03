@@ -625,6 +625,56 @@ Object {
 }
 `;
 
+exports[`engine, schema/ write/ update schema, add new prop to module: new schema file 1`] = `
+Object {
+  "schemas": Array [
+    Object {
+      "body": "",
+      "children": Array [
+        "ch1",
+        "ch2",
+      ],
+      "created": "1",
+      "data": Object {},
+      "desc": "",
+      "fname": "foo.schema",
+      "id": "foo",
+      "parent": "root",
+      "title": "foo",
+      "type": "schema",
+      "updated": "1",
+    },
+    Object {
+      "body": "",
+      "children": Array [],
+      "created": "1",
+      "data": Object {},
+      "desc": "",
+      "fname": "foo.schema",
+      "id": "ch1",
+      "parent": "foo",
+      "title": "ch1",
+      "type": "schema",
+      "updated": "1",
+    },
+    Object {
+      "body": "",
+      "children": Array [],
+      "created": "1",
+      "data": Object {},
+      "desc": "",
+      "fname": "foo.schema",
+      "id": "ch2",
+      "parent": "foo",
+      "title": "ch2",
+      "type": "schema",
+      "updated": "1",
+    },
+  ],
+  "version": 1,
+}
+`;
+
 exports[`engine, schema/ write/ write new module 1`] = `
 Object {
   "bar": Object {

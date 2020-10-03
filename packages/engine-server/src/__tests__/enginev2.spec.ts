@@ -363,7 +363,7 @@ describe("engine, notes/", () => {
     });
   });
 
-  describe.only("write/", () => {
+  describe("write/", () => {
     let vaultDir: string;
     let engine: DEngineV2;
     beforeEach(async () => {
@@ -395,7 +395,7 @@ describe("engine, notes/", () => {
       ]);
     });
 
-    test.only("write note, match schema", async () => {
+    test("write note, match schema", async () => {
       fs.removeSync(path.join(vaultDir, "foo.ch1.md"));
       await engine.init();
       const noteNew = NoteUtilsV2.create({

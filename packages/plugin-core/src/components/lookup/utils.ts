@@ -3,9 +3,6 @@ import {
   DNodePropsQuickInputV2,
   DNodePropsV2,
   DNodeUtilsV2,
-  NotePropsV2,
-  SchemaModulePropsV2,
-  SchemaPropsDictV2,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";

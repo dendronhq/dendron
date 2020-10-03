@@ -12,7 +12,6 @@ import {
   NoteUtilsV2,
   QueryOptsV2,
   RespV2,
-  SchemaModuleOptsV2,
   SchemaModulePropsV2,
   SchemaPropsV2,
 } from "@dendronhq/common-all";

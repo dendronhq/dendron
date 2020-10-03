@@ -1,6 +1,6 @@
 import matter from "gray-matter";
-import minimatch from "minimatch";
 import _ from "lodash";
+import minimatch from "minimatch";
 import moment from "moment";
 import YAML from "yamljs";
 import { ENGINE_ERROR_CODES } from "./constants";
@@ -23,7 +23,6 @@ import {
   SchemaPropsV2,
 } from "./typesv2";
 import { genUUID } from "./uuid";
-import { domain } from "process";
 
 export class DNodeUtilsV2 {
   static addChild(parent: DNodePropsV2, child: DNodePropsV2) {
@@ -89,13 +88,16 @@ export class DNodeUtilsV2 {
 
   static enhancePropForQuickInput(
     props: DNodePropsV2,
-    schemaModule?: SchemaModulePropsV2
+    schemaModules: SchemaModuleDictV2
   ): DNodePropsQuickInputV2 {
     if (props.type === "note") {
       const label = props.id === "root" ? "root" : props.fname;
       const detail = props.desc;
-      // const description = NoteUtilsV2.genSchemaDesc(props, schemaModule)
-      const out = { ...props, label, detail };
+      const sm = props.schema
+        ? schemaModules[props.schema.moduleId]
+        : undefined;
+      const description = NoteUtilsV2.genSchemaDesc(props, sm);
+      const out = { ...props, label, detail, description };
       return out;
     } else {
       throw Error("not implemented");

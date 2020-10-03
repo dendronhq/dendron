@@ -176,10 +176,7 @@ export class LookupProviderV2 {
         const notes = resp.data;
         updatedItems = [this.noActiveItem].concat(
           notes.map((ent) =>
-            DNodeUtilsV2.enhancePropForQuickInput(
-              NoteUtilsV2.create(ent),
-              ent.schema ? engine.schemas[ent.schema.moduleId] : undefined
-            )
+            DNodeUtilsV2.enhancePropForQuickInput(ent, engine.schemas)
           )
         );
         profile = getDurationMilliseconds(start);
@@ -264,10 +261,7 @@ export class LookupProviderV2 {
     return _.map(nodeDict["root"].children, (ent) => nodeDict[ent])
       .concat(nodeDict["root"])
       .map((ent) => {
-        return DNodeUtilsV2.enhancePropForQuickInput(
-          NoteUtilsV2.create(ent),
-          ent.schema ? engine.schemas[ent.schema.moduleId] : undefined
-        );
+        return DNodeUtilsV2.enhancePropForQuickInput(ent, engine.schemas);
       });
   }
 

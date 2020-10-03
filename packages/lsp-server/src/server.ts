@@ -1,33 +1,30 @@
-import { DendronEngine, FileStorage } from "@dendronhq/engine-server";
+import { app } from "@dendronhq/api-server";
+import { CONSTANTS, getStage } from "@dendronhq/common-all";
+import fs from "fs-extra";
+import path from "path";
 /* --------------------------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import {
-  createConnection,
-  TextDocuments,
-  Diagnostic,
-  DiagnosticSeverity,
-  ProposedFeatures,
-  InitializeParams,
-  DidChangeConfigurationNotification,
   CompletionItem,
   CompletionItemKind,
-  TextDocumentPositionParams,
-  TextDocumentSyncKind,
+  createConnection,
+  Diagnostic,
+  DiagnosticSeverity,
+  DidChangeConfigurationNotification,
+  InitializeParams,
   InitializeResult,
+  ProposedFeatures,
+  TextDocumentPositionParams,
+  TextDocuments,
+  TextDocumentSyncKind,
 } from "vscode-languageserver";
-import { app } from "@dendronhq/api-server";
-import fs from "fs-extra";
-import path from "path";
-import { CONSTANTS, getStage } from "@dendronhq/common-all";
-
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
-import { LSPUtils } from "./utils";
-import { DendronInitializationOptions } from "./types";
 import { getSettings, updateSettings } from "./settings";
-import _ from "lodash";
+import { DendronInitializationOptions } from "./types";
+import { LSPUtils } from "./utils";
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -110,7 +107,6 @@ connection.onInitialized(async () => {
   const wsFolders = await LSPUtils.wsFolders();
   if (wsFolders && wsFolders[0]) {
     const uri = URI.parse(wsFolders[0].uri);
-    DendronEngine.getOrCreateEngine({ root: uri.fsPath, forceNew: true });
     const settings = getSettings();
     LSPUtils.log({ ctx, msg: "post-engine-init", settings });
     // initialize express

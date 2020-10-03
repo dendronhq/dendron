@@ -9,7 +9,6 @@ import {
 } from "@dendronhq/common-all";
 import {
   createLogger,
-  NodeTestUtils,
   note2File,
   readYAML,
   schemaModuleOpts2File,
@@ -20,7 +19,7 @@ import {
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import path, { resolve } from "path";
+import path from "path";
 import { FileStorageV2, SchemaParserV2 } from "../drivers/file/storev2";
 import { DendronEngineV2 } from "../enginev2";
 const createNotes = async (opts: { rootName: string; vaultDir: string }) => {
@@ -405,7 +404,8 @@ describe("engine, notes/", () => {
         updated: "1",
       });
       await engine.writeNote(noteNew);
-      expect(engine.notes).toMatchSnapshot();
+      expect(engine.notes).toMatchSnapshot("notes");
+      expect(engine.schemas).toMatchSnapshot("schemas");
       expect(engine.notes["foo.ch1"].schema).toEqual({
         moduleId: "foo",
         schemaId: "ch1",

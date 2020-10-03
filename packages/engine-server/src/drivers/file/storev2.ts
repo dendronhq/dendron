@@ -262,7 +262,22 @@ export class SchemaParserV2 extends ParserBaseV2 {
     schemasAll.forEach((ent) => {
       schemasDict[ent.id] = ent;
     });
+
     const rootModule = SchemaUtilsV2.getModuleRoot(schemaModuleProps);
+
+    const addConnections = (parent: SchemaPropsV2) => {
+      _.map(parent.children, (ch) => {
+        const child = schemasDict[ch];
+        if (!child) {
+          throw new DendronError({ status: ENGINE_ERROR_CODES.MISSING_SCHEMA });
+        }
+        DNodeUtilsV2.addChild(parent, child);
+        return addConnections(child);
+      });
+    };
+    // add parent relationship
+    addConnections(rootModule);
+
     return {
       version,
       imports,

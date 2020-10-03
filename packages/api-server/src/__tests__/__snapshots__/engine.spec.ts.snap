@@ -1,6 +1,123 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`main query 1`] = `
+exports[`main query child note with schema 1`] = `
+Object {
+  "data": Array [
+    Object {
+      "body": "
+",
+      "children": Array [],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "foo.ch1",
+      "id": "foo.ch1",
+      "parent": "foo",
+      "schema": Object {
+        "moduleId": "foo",
+        "schemaId": "ch1",
+      },
+      "title": "Ch1",
+      "type": "note",
+      "updated": "1",
+    },
+    Object {
+      "body": "
+",
+      "children": Array [
+        "foo.ch1",
+      ],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "foo",
+      "id": "foo",
+      "parent": "root",
+      "schema": Object {
+        "moduleId": "foo",
+        "schemaId": "foo",
+      },
+      "title": "Foo",
+      "type": "note",
+      "updated": "1",
+    },
+  ],
+  "error": null,
+}
+`;
+
+exports[`main query child note with schema 2`] = `"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64137-V42HV3FM6S73"`;
+
+exports[`main query root note with schema 1`] = `
+Object {
+  "data": Array [
+    Object {
+      "body": "
+",
+      "children": Array [
+        "foo.ch1",
+      ],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "foo",
+      "id": "foo",
+      "parent": "root",
+      "schema": Object {
+        "moduleId": "foo",
+        "schemaId": "foo",
+      },
+      "title": "Foo",
+      "type": "note",
+      "updated": "1",
+    },
+    Object {
+      "body": "
+",
+      "children": Array [],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "foo.ch1",
+      "id": "foo.ch1",
+      "parent": "foo",
+      "schema": Object {
+        "moduleId": "foo",
+        "schemaId": "ch1",
+      },
+      "title": "Ch1",
+      "type": "note",
+      "updated": "1",
+    },
+    Object {
+      "body": "
+",
+      "children": Array [
+        "foo",
+      ],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "root",
+      "id": "root",
+      "parent": null,
+      "title": "Root",
+      "type": "note",
+      "updated": "1",
+    },
+  ],
+  "error": null,
+}
+`;
+
+exports[`main query root note with schema 2`] = `"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-64137-sTHQZn6XSxG8"`;
+
+exports[`main query root: root note 1`] = `
 Object {
   "data": Array [
     Object {
@@ -25,7 +142,12 @@ Object {
 }
 `;
 
-exports[`main query 2`] = `"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-47741-R8SU6pvBBiXu"`;
+exports[`main query root: root schema  1`] = `
+Object {
+  "data": Array [],
+  "error": null,
+}
+`;
 
 exports[`main write 1`] = `
 Object {

@@ -12,7 +12,6 @@
       "cwd": "${workspaceFolder:engine-server}",
       "sourceMaps": true,
       "smartStep": true,
-      "preLaunchTask": "build",
       "outFiles": ["${workspaceFolder:engine-server}/lib/*.js"]
     },
     {

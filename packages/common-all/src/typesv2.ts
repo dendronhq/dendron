@@ -124,10 +124,10 @@ export type DCommonProps = {
 
 export type DCommonMethods = {
   updateNote(note: NotePropsV2, opts?: EngineUpdateNodesOptsV2): Promise<void>;
-  updateSchema: (schema: SchemaModuleOptsV2) => Promise<void>;
+  updateSchema: (schema: SchemaModulePropsV2) => Promise<void>;
 
   writeNote: (note: NotePropsV2, opts?: EngineWriteOptsV2) => Promise<void>;
-  writeSchema: (schema: SchemaModuleOptsV2) => Promise<void>;
+  writeSchema: (schema: SchemaModulePropsV2) => Promise<void>;
 };
 
 export type DEngineInitPayloadV2 = {

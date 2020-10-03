@@ -35,9 +35,10 @@
     "test:watch": "LOG_DST=/tmp/pods-core.txt jest --watch",
     "start:integ": "env PORT=3005 npx ts-node ./src/start.ts",
     "start:integ:debug": "env PORT=3005 TS_NODE_LOG_ERROR=1 node --inspect -r ts-node/register ./src/start.ts",
-    "start:integ:watch": "env PORT=3005 npx nodemon"
+    "start:integ:watch": "env PORT=3005 npx nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts'"
   },
   "devDependencies": {
+    "@dendronhq/common-test-utils": "^0.12.3",
     "@types/express": "^4.17.8",
     "@types/fs-extra": "^9.0.1",
     "@types/jest": "^26.0.13",

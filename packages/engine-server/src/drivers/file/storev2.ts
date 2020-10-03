@@ -24,6 +24,8 @@ import {
   getAllFiles,
   globMatch,
   note2File,
+  schemaModule2File,
+  schemaModuleProps2File,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -209,7 +211,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
     );
     const version = _.isArray(schemaOpts) ? 0 : 1;
     if (version > 0) {
-      return SchemaParserV2.parseSchemaModuleProps(
+      return SchemaParserV2.parseSchemaModuleOpts(
         schemaOpts as SchemaModuleOptsV2,
         {
           fname,
@@ -232,7 +234,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
     }
   }
 
-  static parseSchemaModuleProps(
+  static parseSchemaModuleOpts(
     schemaModuleProps: SchemaModuleOptsV2,
     opts: { fname: string; root: string }
   ): SchemaModulePropsV2 {
@@ -375,13 +377,10 @@ export class FileStorageV2 implements DStoreV2 {
     this.notes[note.id] = note;
   }
 
-  async updateSchema(schemaModule: SchemaModuleOptsV2) {
-    const vault = this.vaults[0];
-    const schemas = SchemaParserV2.parseSchemaModuleProps(schemaModule, {
-      fname: schemaModule.schemas[0].fname,
-      root: vault,
-    });
-    this.schemas[schemas.root.id] = schemas;
+  async updateSchema(schemaModule: SchemaModulePropsV2) {
+    this.schemas[schemaModule.root.id] = schemaModule;
+    const vaultDir = this.vaults[0];
+    await schemaModuleProps2File(schemaModule, vaultDir, schemaModule.fname);
     return;
   }
 
@@ -395,7 +394,8 @@ export class FileStorageV2 implements DStoreV2 {
     await Promise.all([note].concat(stubs).map((ent) => this.updateNote(ent)));
   }
 
-  async writeSchema(schemaModule: SchemaModuleOptsV2) {
+  async writeSchema(schemaModule: SchemaModulePropsV2) {
     return this.updateSchema(schemaModule);
+    throw Error("not implemetned: need to write");
   }
 }

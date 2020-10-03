@@ -3,11 +3,29 @@
 exports[`main query 1`] = `
 Object {
   "data": Array [
-    null,
+    Object {
+      "body": "
+",
+      "children": Array [
+        "foo",
+      ],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "root",
+      "id": "root",
+      "parent": null,
+      "title": "Root",
+      "type": "note",
+      "updated": "1",
+    },
   ],
   "error": null,
 }
 `;
+
+exports[`main query 2`] = `"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-47741-R8SU6pvBBiXu"`;
 
 exports[`main write 1`] = `
 Object {

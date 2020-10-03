@@ -13,6 +13,7 @@ import {
   QueryOptsV2,
   RespV2,
   SchemaModuleOptsV2,
+  SchemaModulePropsV2,
   SchemaPropsV2,
 } from "@dendronhq/common-all";
 import { DLogger } from "@dendronhq/common-server";
@@ -46,7 +47,7 @@ function createFuse<T>(
     useExtendedSearch: true,
   };
   if (opts.preset === "schema") {
-    options.keys = ["title", "id"];
+    options.keys = ["id", "title"];
   }
   const fuse = new Fuse(initList, options);
   return fuse;
@@ -86,6 +87,7 @@ export class DendronEngineV2 implements DEngineV2 {
     try {
       const { notes, schemas } = await this.store.init();
       this.updateIndex("note");
+      this.updateIndex("schema");
       return {
         error: null,
         data: { notes, schemas },
@@ -119,31 +121,42 @@ export class DendronEngineV2 implements DEngineV2 {
       stub: false,
     });
     this.logger.info({ ctx, msg: "enter" });
+    let items: DNodePropsV2[] = [];
+
+    // ~~~ schema query
     if (mode === "schema") {
-      throw Error("not implemented");
+      if (queryString === "") {
+        items = [this.schemas.root.root];
+      } else if (queryString === "*") {
+        items = _.values(this.schemas).map((ent) => ent.root);
+      } else {
+        const results = this.schemaIndex.search(queryString);
+        items = _.map(results, (resp) => resp.item);
+      }
+    } else {
+      // ~~~ note query
+      if (queryString === "") {
+        items = [this.notes.root];
+      } else {
+        const results = this.notesIndex.search(queryString);
+        items = _.map(results, (resp) => resp.item);
+      }
+      if (cleanOpts.createIfNew) {
+        let noteNew: NotePropsV2;
+        if (items[0]?.fname === queryString && items[0]?.stub) {
+          noteNew = items[0];
+          noteNew.stub = false;
+        } else {
+          noteNew = NoteUtilsV2.create({ fname: queryString });
+        }
+        await this.writeNote(noteNew, { newNode: true });
+      }
+      if (cleanOpts.fullNode) {
+        throw Error("not implemented");
+      }
     }
 
-    // --- note query
-    let items: DNodePropsV2[] = [];
-    if (queryString === "") {
-      items = [this.notes.root];
-    } else {
-      const results = this.notesIndex.search(queryString);
-      items = _.map(results, (resp) => resp.item);
-    }
-    if (cleanOpts.createIfNew) {
-      let noteNew: NotePropsV2;
-      if (items[0]?.fname === queryString && items[0]?.stub) {
-        noteNew = items[0];
-        noteNew.stub = false;
-      } else {
-        noteNew = NoteUtilsV2.create({ fname: queryString });
-      }
-      await this.writeNote(noteNew, { newNode: true });
-    }
-    if (cleanOpts.fullNode) {
-      throw Error("not implemented");
-    }
+    // ~~~ exit
     this.logger.info({ ctx, msg: "exit" });
     return {
       error: null,
@@ -160,14 +173,15 @@ export class DendronEngineV2 implements DEngineV2 {
 
   async updateIndex(mode: DNodeTypeV2) {
     if (mode === "schema") {
-      throw Error("not implemented");
-      // this.schemaIndex.setCollection(_.values(this.schemas));
+      this.schemaIndex.setCollection(
+        _.map(_.values(this.schemas), (ent) => ent.root)
+      );
     } else {
       this.notesIndex.setCollection(_.values(this.notes));
     }
   }
 
-  async updateSchema(schemaModule: SchemaModuleOptsV2) {
+  async updateSchema(schemaModule: SchemaModulePropsV2) {
     return this.store.updateSchema(schemaModule);
   }
 
@@ -176,7 +190,7 @@ export class DendronEngineV2 implements DEngineV2 {
     await this.updateIndex("note");
   }
 
-  async writeSchema(schema: SchemaModuleOptsV2) {
+  async writeSchema(schema: SchemaModulePropsV2) {
     return this.store.writeSchema(schema);
   }
 }

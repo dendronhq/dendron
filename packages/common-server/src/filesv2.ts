@@ -3,6 +3,7 @@ import {
   NotePropsV2,
   NoteUtilsV2,
   SchemaModuleOptsV2,
+  SchemaModulePropsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
@@ -46,6 +47,18 @@ export function schemaModule2File(
   const ext = ".schema.yml";
   return fs.writeFile(
     path.join(vaultPath, fname + ext),
-    SchemaUtilsV2.serializeModule(schemaFile)
+    SchemaUtilsV2.serializeModuleOpts(schemaFile)
+  );
+}
+
+export function schemaModuleProps2File(
+  schemaMProps: SchemaModulePropsV2,
+  vaultPath: string,
+  fname: string
+) {
+  const ext = ".yml";
+  return fs.writeFile(
+    path.join(vaultPath, fname + ext),
+    SchemaUtilsV2.serializeModuleProps(schemaMProps)
   );
 }

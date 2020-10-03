@@ -10,6 +10,7 @@ import {
 import {
   createLogger,
   note2File,
+  readYAML,
   schemaModule2File,
 } from "@dendronhq/common-server";
 import {
@@ -19,7 +20,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { FileStorageV2 } from "../drivers/file/storev2";
+import { FileStorageV2, SchemaParserV2 } from "../drivers/file/storev2";
 import { DendronEngineV2 } from "../enginev2";
 const createNotes = async (opts: { rootName: string; vaultDir: string }) => {
   const { rootName, vaultDir } = opts;
@@ -79,10 +80,129 @@ const createSchemaModule = async (opts: {
   return schemaModuleProps[0][0];
 };
 
+let LOGGER = createLogger("enginev2.spec");
+
+const beforePreset = async () => {
+  const vaultDir = await EngineTestUtilsV2.setupVault({
+    initDirCb: async (vaultPath: string) => {
+      await NodeTestUtilsV2.createSchemas({ vaultPath });
+      await NodeTestUtilsV2.createNotes({ vaultPath });
+      await NodeTestUtilsV2.createNoteProps({ vaultPath, rootName: "foo" });
+      await NodeTestUtilsV2.createSchemaModules({
+        vaultDir: vaultPath,
+        rootName: "foo",
+      });
+    },
+  });
+  const engine = new DendronEngineV2({
+    vaults: [vaultDir],
+    forceNew: true,
+    store: new FileStorageV2({ vaults: [vaultDir], logger: LOGGER }),
+    mode: "fuzzy",
+    logger: LOGGER,
+  });
+  return { vaultDir, engine };
+};
+
 describe("engine, schema/", () => {
   let vaultDir: string;
   let engine: DEngineV2;
-  let logger = createLogger("enginev2.spec");
+
+  describe("write/", () => {
+    beforeEach(async () => {
+      ({ vaultDir, engine } = await beforePreset());
+    });
+
+    test("update schema, add new prop to module", async () => {
+      await engine.init();
+
+      // update schema
+      const module = engine.schemas["foo"];
+      const moduleRoot = module.schemas[module.root.id];
+      const ch2 = SchemaUtilsV2.create({
+        fname: "foo",
+        id: "ch2",
+        created: "1",
+        updated: "1",
+      });
+      DNodeUtilsV2.addChild(moduleRoot, ch2);
+      module.schemas[ch2.id] = ch2;
+      await engine.updateSchema(module);
+
+      expect(engine.schemas).toMatchSnapshot();
+      expect(_.values(engine.schemas).length).toEqual(2);
+      expect(_.values(engine.schemas["foo"].schemas).length).toEqual(3);
+
+      // query should have same results
+      const resp = await engine.query("*", "schema");
+      expect(resp).toMatchSnapshot();
+      expect(resp.data.length).toEqual(2);
+
+      // should be written to file
+      const data = readYAML(path.join(vaultDir, "foo.schema.yml"));
+      expect(data).toMatchSnapshot("new schema file");
+      expect(data.schemas.length).toEqual(3);
+      // should have added new child
+      expect(_.find(data.schemas, { id: "foo" }).children.length).toEqual(2);
+    });
+
+    test("write new module", async () => {
+      await engine.init();
+
+      // update schema
+      const mOpts = await createSchemaModule({ vaultDir, rootName: "bar" });
+      const mProps = SchemaParserV2.parseSchemaModuleOpts(mOpts, {
+        fname: "bar",
+        root: vaultDir,
+      });
+      await engine.writeSchema(mProps);
+
+      expect(engine.schemas).toMatchSnapshot();
+      expect(_.values(engine.schemas).length).toEqual(3);
+      expect(_.values(engine.schemas["foo"].schemas).length).toEqual(2);
+      expect(_.values(engine.schemas["bar"].schemas).length).toEqual(2);
+
+      // should be written to file
+      const data = readYAML(path.join(vaultDir, "bar.schema.yml"));
+      expect(data.schemas.length).toEqual(2);
+      expect(data).toEqual(mOpts);
+    });
+  });
+
+  describe("query/", () => {
+    beforeEach(async () => {
+      vaultDir = await EngineTestUtilsV2.setupVault({
+        initDirCb: async (vaultPath: string) => {
+          await NodeTestUtilsV2.createSchemas({ vaultPath });
+          await NodeTestUtilsV2.createNotes({ vaultPath });
+          await NodeTestUtilsV2.createNoteProps({ vaultPath, rootName: "foo" });
+          await NodeTestUtilsV2.createSchemaModules({
+            vaultDir: vaultPath,
+            rootName: "foo",
+          });
+        },
+      });
+      engine = new DendronEngineV2({
+        vaults: [vaultDir],
+        forceNew: true,
+        store: new FileStorageV2({ vaults: [vaultDir], logger: LOGGER }),
+        mode: "fuzzy",
+        logger: LOGGER,
+      });
+    });
+
+    test("root", async () => {
+      await engine.init();
+      const resp = await engine.query("", "schema");
+      expect(resp).toMatchSnapshot();
+    });
+
+    test("non-root", async () => {
+      await engine.init();
+      const resp = await engine.query("foo", "schema");
+      expect(resp).toMatchSnapshot();
+    });
+  });
 
   describe("basics/", () => {
     beforeEach(async () => {
@@ -95,9 +215,9 @@ describe("engine, schema/", () => {
       engine = new DendronEngineV2({
         vaults: [vaultDir],
         forceNew: true,
-        store: new FileStorageV2({ vaults: [vaultDir], logger }),
+        store: new FileStorageV2({ vaults: [vaultDir], logger: LOGGER }),
         mode: "fuzzy",
-        logger,
+        logger: LOGGER,
       });
     });
 
@@ -120,82 +240,16 @@ describe("engine, schema/", () => {
       expect(_.values(engine.schemas["foo"].schemas).length).toEqual(2);
     });
 
-    test("write schema to existing module", async () => {
-      const module = await createSchemaModule({ vaultDir, rootName: "foo" });
-      await engine.init();
-
-      // update schema
-      const moduleRoot = SchemaUtilsV2.getModuleRoot(module);
-      const ch2 = SchemaUtilsV2.create({
-        fname: "foo",
-        id: "ch2",
-        created: "1",
-        updated: "1",
-      });
-      DNodeUtilsV2.addChild(moduleRoot, ch2);
-      module.schemas.push(ch2);
-      await engine.updateSchema(module);
-
-      expect(engine.schemas).toMatchSnapshot();
-      expect(_.values(engine.schemas).length).toEqual(2);
-      expect(_.values(engine.schemas["foo"].schemas).length).toEqual(3);
-    });
-
-    test("write new module", async () => {
-      await createSchemaModule({ vaultDir, rootName: "foo" });
-      await engine.init();
-
-      // update schema
-      const moduleNew = await createSchemaModule({ vaultDir, rootName: "bar" });
-      await engine.writeSchema(moduleNew);
-
-      expect(engine.schemas).toMatchSnapshot();
-      expect(_.values(engine.schemas).length).toEqual(3);
-      expect(_.values(engine.schemas["foo"].schemas).length).toEqual(2);
-      expect(_.values(engine.schemas["bar"].schemas).length).toEqual(2);
-    });
+    test.skip("delete schema", async () => {});
   });
+
+  describe.skip("import", () => {});
 });
 
 describe("engine, notes/", () => {
   let vaultDir: string;
   let engine: DEngineV2;
   let logger = createLogger("enginev2.spec");
-
-  describe("schemas/", () => {
-    beforeEach(async () => {
-      vaultDir = await EngineTestUtilsV2.setupVault({
-        initDirCb: async (dirPath: string) => {
-          await NodeTestUtilsV2.createSchemas({ vaultPath: dirPath });
-          await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
-        },
-      });
-      engine = new DendronEngineV2({
-        vaults: [vaultDir],
-        forceNew: true,
-        store: new FileStorageV2({ vaults: [vaultDir], logger }),
-        mode: "fuzzy",
-        logger,
-      });
-    });
-
-    test("root and two notes", async () => {
-      await createNotes({ rootName: "foo", vaultDir });
-      await createSchemaModule({ vaultDir, rootName: "foo" });
-      await engine.init();
-      expect(engine.notes).toMatchSnapshot();
-      expect(engine.schemas).toMatchSnapshot();
-      expect(_.values(engine.notes).length).toEqual(3);
-      expect(engine.notes["foo"].schema).toEqual({
-        schemaId: "foo",
-        moduleId: "foo",
-      });
-      expect(engine.notes["foo.ch1"].schema).toEqual({
-        schemaId: "ch1",
-        moduleId: "foo",
-      });
-    });
-  });
 
   describe("basic test v0/", () => {
     beforeEach(async () => {
@@ -350,6 +404,62 @@ describe("engine, notes/", () => {
         "root.md",
         "root.schema.yml",
       ]);
+    });
+  });
+});
+
+describe("note and schema", async () => {
+  let vaultDir: string;
+  let engine: DEngineV2;
+
+  beforeEach(async () => {
+    vaultDir = await EngineTestUtilsV2.setupVault({
+      initDirCb: async (dirPath: string) => {
+        await NodeTestUtilsV2.createSchemas({ vaultPath: dirPath });
+        await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
+      },
+    });
+    engine = new DendronEngineV2({
+      vaults: [vaultDir],
+      forceNew: true,
+      store: new FileStorageV2({ vaults: [vaultDir], logger: LOGGER }),
+      mode: "fuzzy",
+      logger: LOGGER,
+    });
+  });
+
+  describe("basics/", () => {
+    beforeEach(async () => {
+      vaultDir = await EngineTestUtilsV2.setupVault({
+        initDirCb: async (dirPath: string) => {
+          await NodeTestUtilsV2.createSchemas({ vaultPath: dirPath });
+          await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
+        },
+      });
+      engine = new DendronEngineV2({
+        vaults: [vaultDir],
+        forceNew: true,
+        store: new FileStorageV2({ vaults: [vaultDir], logger: LOGGER }),
+        mode: "fuzzy",
+        logger: LOGGER,
+      });
+    });
+
+    test("root and two notes", async () => {
+      await createNotes({ rootName: "foo", vaultDir });
+      await createSchemaModule({ vaultDir, rootName: "foo" });
+      await engine.init();
+      expect(engine.notes).toMatchSnapshot();
+      expect(engine.schemas).toMatchSnapshot();
+      expect(_.values(engine.notes).length).toEqual(3);
+      expect(engine.notes["foo"].schema).toEqual({
+        schemaId: "foo",
+        moduleId: "foo",
+      });
+      expect(engine.notes["foo.ch1"].schema).toEqual({
+        schemaId: "ch1",
+        moduleId: "foo",
+      });
     });
   });
 });

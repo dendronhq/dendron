@@ -1,6 +1,5 @@
 import {
   DEngineClientV2,
-  DEngineV2,
   DNodePropsDictV2,
   DNodePropsQuickInputV2,
   DNodePropsV2,
@@ -123,12 +122,11 @@ export class LookupProviderV2 {
       | "onValueChange"
       | "manual"
   ) {
+    // ~~~ setup variables
     const start = process.hrtime();
     const ctx = "updatePickerItems";
     picker.busy = true;
-
     let pickerValue = picker.value;
-
     // if we just started, show all results of current parent
     if (picker.justActivated) {
       const lastDotIndex = pickerValue.lastIndexOf(".");
@@ -145,6 +143,8 @@ export class LookupProviderV2 {
     const queryEndsWithDot = queryOrig.endsWith(".");
     const engine = ws.getEngine();
     Logger.info({ ctx, msg: "enter", queryOrig, source });
+
+    // ~~~ update results
     try {
       if (querystring === "") {
         Logger.info({ ctx, msg: "empty qs" });
@@ -176,13 +176,61 @@ export class LookupProviderV2 {
         const notes = resp.data;
         updatedItems = [this.noActiveItem].concat(
           notes.map((ent) =>
-            DNodeUtilsV2.enhancePropForQuickInput(NoteUtilsV2.create(ent))
+            DNodeUtilsV2.enhancePropForQuickInput(
+              NoteUtilsV2.create(ent),
+              ent.schema ? engine.schemas[ent.schema.moduleId] : undefined
+            )
           )
         );
         profile = getDurationMilliseconds(start);
         Logger.info({ ctx, msg: "engine.query", profile });
       }
-      return;
+
+      // check if single item query, vscode doesn't surface single letter queries
+      if (picker.activeItems.length === 0 && querystring.length === 1) {
+        picker.items = updatedItems;
+        picker.activeItems = picker.items;
+        return;
+      }
+
+      // don't use query string since this can change
+      const perfectMatch = _.find(updatedItems, { fname: queryOrig });
+      // NOTE: we modify this later so need to track this here
+      const noUpdatedItems = updatedItems.length === 0;
+
+      if (opts.flavor === "note") {
+        // TODO: gen schema suggestions
+        // updatedItems = PickerUtils.genSchemaSuggestions({
+        //   items: updatedItems as Note[],
+        //   qs: querystring,
+        //   engine: engine as DEngine,
+        // });
+        // profile = getDurationMilliseconds(start);
+        // L.info({ ...ctx2, msg: "genSchemaSuggestions", profile });
+      }
+      // check if new item, return if that's the case
+      if (
+        noUpdatedItems ||
+        (picker.activeItems.length === 0 && !perfectMatch && !queryEndsWithDot)
+      ) {
+        Logger.info({ ctx, msg: "no matches" });
+        picker.items = updatedItems;
+        return;
+      }
+
+      if (perfectMatch) {
+        Logger.debug({ ctx, msg: "active = qs" });
+        picker.activeItems = [perfectMatch];
+        picker.items = PickerUtilsV2.filterCreateNewItem(updatedItems);
+      } else if (queryEndsWithDot) {
+        // don't show noActiveItem for dot queries
+        Logger.debug({ ctx, msg: "active != qs, end with ." });
+        picker.items = PickerUtilsV2.filterCreateNewItem(updatedItems);
+      } else {
+        // regular result
+        Logger.debug({ ctx, msg: "active != qs" });
+        picker.items = updatedItems;
+      }
     } catch (err) {
       throw Error(err);
     } finally {
@@ -213,11 +261,14 @@ export class LookupProviderV2 {
     } else {
       nodeDict = _.mapValues(engine.schemas, (ent) => ent.root);
     }
-    return DNodeUtilsV2.enhancePropsForQuickInput(
-      _.map(nodeDict["root"].children, (ent) => nodeDict[ent]).concat(
-        nodeDict["root"]
-      )
-    );
+    return _.map(nodeDict["root"].children, (ent) => nodeDict[ent])
+      .concat(nodeDict["root"])
+      .map((ent) => {
+        return DNodeUtilsV2.enhancePropForQuickInput(
+          NoteUtilsV2.create(ent),
+          ent.schema ? engine.schemas[ent.schema.moduleId] : undefined
+        );
+      });
   }
 
   validate(value: string, flavor: EngineFlavor): string | undefined {

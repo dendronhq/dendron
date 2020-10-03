@@ -1,9 +1,6 @@
 import { DendronAPI, NoteUtilsV2 } from "@dendronhq/common-all";
-import {
-  EngineTestUtils,
-  NodeTestUtils,
-  tmpDir,
-} from "@dendronhq/common-server";
+import { NodeTestUtilsV2 } from "@dendronhq/common-test-utils";
+import { EngineTestUtils, tmpDir } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";
 
@@ -17,18 +14,19 @@ describe("main", () => {
     fs.ensureDirSync(vault);
     await EngineTestUtils.setupVault({
       vaultDir: vault,
-      initDirCb: (dirPath: string) => {
-        NodeTestUtils.createNotes(dirPath, [
-          {
-            id: "id.foo",
-            fname: "foo",
-          },
-        ]);
+      initDirCb: async (vaultPath: string) => {
+        await NodeTestUtilsV2.createNotes({ vaultPath });
+        await NodeTestUtilsV2.createSchemas({ vaultPath });
+        await NodeTestUtilsV2.createNoteProps({ vaultPath, rootName: "foo" });
+        await NodeTestUtilsV2.createSchemaModules({
+          vaultDir: vaultPath,
+          rootName: "foo",
+        });
       },
     });
   });
 
-  test("query", async () => {
+  test.only("query", async () => {
     const payload = {
       uri: wsRoot,
       config: {
@@ -46,6 +44,13 @@ describe("main", () => {
       mode: "note" as const,
     });
     expect(resp).toMatchSnapshot();
+    const schemas = await api.engineQuery({
+      ws: wsRoot,
+      queryString: "",
+      mode: "schema" as const,
+    });
+    expect(schemas).toMatchSnapshot("schemas");
+    expect(wsRoot).toMatchSnapshot();
   });
 
   test("write", async () => {

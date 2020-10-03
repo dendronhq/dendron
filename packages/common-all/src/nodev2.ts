@@ -39,9 +39,7 @@ export class DNodeUtilsV2 {
       updated,
       created,
       parent,
-      stub,
       children,
-      custom,
       body,
       data,
     } = _.defaults(opts, {
@@ -63,16 +61,20 @@ export class DNodeUtilsV2 {
       desc,
       fname,
       updated,
-      custom,
       created,
       parent,
       children,
       body,
       data,
     };
-    if (stub) {
-      cleanProps.stub = stub;
-    }
+
+    // don't include optional props
+    const optionalProps: (keyof DNodeOptsV2)[] = ["stub", "custom"];
+    _.forEach(optionalProps, (op) => {
+      if (opts[op]) {
+        cleanProps[op] = opts[op];
+      }
+    });
     return cleanProps;
   }
 
@@ -80,14 +82,19 @@ export class DNodeUtilsV2 {
     return nodePath.split(".").slice(0, -1).join(".");
   }
 
-  static enhancePropForQuickInput(props: DNodePropsV2): DNodePropsQuickInputV2 {
-    return { ...props, label: props.title.toLowerCase() };
-  }
-
-  static enhancePropsForQuickInput(
-    props: DNodePropsV2[]
-  ): DNodePropsQuickInputV2[] {
-    return props.map(DNodeUtilsV2.enhancePropForQuickInput);
+  static enhancePropForQuickInput(
+    props: DNodePropsV2,
+    schemaModule?: SchemaModulePropsV2
+  ): DNodePropsQuickInputV2 {
+    if (props.type === "note") {
+      const label = props.id === "root" ? "root" : props.fname;
+      const detail = props.desc;
+      // const description = NoteUtilsV2.genSchemaDesc(props, schemaModule)
+      const out = { ...props, label, detail };
+      return out;
+    } else {
+      throw Error("not implemented");
+    }
   }
 
   static findClosestParent(fpath: string, nodes: DNodePropsV2[]): DNodePropsV2 {
@@ -262,6 +269,34 @@ export class NoteUtilsV2 {
     });
     DNodeUtilsV2.addChild(parent, to);
     return stubNodes;
+  }
+
+  static genSchemaDesc(
+    note: NotePropsV2,
+    schemaMod?: SchemaModulePropsV2
+  ): string {
+    const prefixParts = [];
+    if (note.title !== note.fname) {
+      prefixParts.push(note.title);
+    }
+    if (note.stub || note.schemaStub) {
+      prefixParts.push("$(gist-new)");
+    }
+    if (note.schema) {
+      if (!schemaMod) {
+        throw Error("schema mod required");
+      }
+      const domain = schemaMod.root;
+      const schema = schemaMod.schemas[note.schema.schemaId];
+      // case: recognized schema
+      prefixParts.push(`$(repo) ${domain.title}`);
+      // check if non-domain schema
+      if (domain.id !== note.schema.schemaId) {
+        prefixParts.push("$(breadcrumb-separator)");
+        prefixParts.push(schema.title);
+      }
+    }
+    return prefixParts.join(" ");
   }
 
   static getNoteByFname(
@@ -470,8 +505,24 @@ export class SchemaUtilsV2 {
     return;
   }
 
-  static serializeModule(moduleProps: SchemaModuleOptsV2) {
+  static serializeSchemaProps(sp: SchemaPropsV2) {
+    return sp;
+  }
+
+  static serializeModuleProps(moduleProps: SchemaModulePropsV2) {
     const { version, imports, schemas } = moduleProps;
+    // TODO: filter out imported schemas
+    const out: SchemaModuleOptsV2 = {
+      version,
+      schemas: _.values(schemas),
+    };
+    if (imports) {
+      out.imports = imports;
+    }
+    return YAML.stringify(out, undefined, 4);
+  }
+  static serializeModuleOpts(moduleOpts: SchemaModuleOptsV2) {
+    const { version, imports, schemas } = moduleOpts;
     const out = {
       version,
       imports,

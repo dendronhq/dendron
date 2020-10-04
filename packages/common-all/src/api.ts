@@ -5,8 +5,6 @@ import { DEngineQuery } from "./types";
 import {
   DNodePropsV2,
   EngineWriteOptsV2,
-  NotePropsV2,
-  SchemaPropsV2,
   SchemaModuleDictV2,
   NotePropsDictV2,
 } from "./typesv2";

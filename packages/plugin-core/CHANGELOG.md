@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.4...v0.12.5-alpha.0) (2020-10-04)
+
+**Note:** Version bump only for package @dendronhq/plugin-core
+
 ## 0.12.4 and Beyond
 
 - All changelogs post 0.12.3 are now published on [Dendron](https://www.dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html)

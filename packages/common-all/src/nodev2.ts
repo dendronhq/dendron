@@ -370,7 +370,7 @@ export class SchemaUtilsV2 {
   static createModuleProps(opts: { fname: string }): SchemaModulePropsV2 {
     const { fname } = opts;
     const root = SchemaUtilsV2.create({
-      id: `root`,
+      id: `${fname}`,
       fname,
       parent: "root",
       created: "1",
@@ -409,7 +409,7 @@ export class SchemaUtilsV2 {
     const schema = SchemaUtilsV2.create({
       id: "root",
       title: "root",
-      fname: "root.schema",
+      fname: "root",
       parent: "root",
       children: [],
       ...opts,

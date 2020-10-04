@@ -204,7 +204,7 @@ export class NoteParserV2 extends ParserBaseV2 {
 
 export class SchemaParserV2 extends ParserBaseV2 {
   static parseFile(fpath: string, root: string): SchemaModulePropsV2 {
-    const fname = path.parse(fpath).name;
+    const fname = path.basename(fpath, ".schema.yml");
     const schemaOpts: any = YAML.parse(
       fs.readFileSync(path.join(root, fpath), "utf8")
     );
@@ -228,7 +228,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
         version: 0,
         root: maybeRoot,
         schemas: schemaDict,
-        fname: maybeRoot.fname,
+        fname,
       };
     }
   }

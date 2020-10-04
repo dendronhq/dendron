@@ -267,8 +267,6 @@ Object {
 }
 `;
 
-exports[`engine, schema/ write/ update schema, add new prop to module: error 1`] = `null`;
-
 exports[`engine, schema/ write/ update schema, add new prop to module: new schema file 1`] = `
 Object {
   "imports": Array [],

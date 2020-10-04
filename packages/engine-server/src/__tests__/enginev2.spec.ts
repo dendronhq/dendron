@@ -81,7 +81,7 @@ describe("engine, schema/", () => {
 
     test("update schema, add new prop to module", async () => {
       const { error } = await engine.init();
-      expect(error).toMatchSnapshot("error");
+      expect(error).toBeNull();
       // update schema
       const module = engine.schemas["foo"];
       const moduleRoot = module.schemas[module.root.id];

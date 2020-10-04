@@ -4,15 +4,14 @@ exports[`schemaModuleProps2File non-root 1`] = `
 "version: 1
 imports: []
 schemas:
-  - id: root
+  - id: bond
     children:
       - ch1
-    title: root
+    title: bond
     parent: root
   - id: ch1
     children: []
     title: ch1
-    parent: root
 "
 `;
 

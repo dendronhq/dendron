@@ -15,17 +15,17 @@ describe("schemaModuleProps2File", () => {
   });
 
   it("root", async () => {
-    const fname = "root.schema";
+    const fname = "root";
     const sm = _su.createRootModuleProps(fname);
     await schemaModuleProps2File(sm, root, fname);
-    const payload = fs.readFileSync(path.join(root, `${fname}.yml`), {
+    const payload = fs.readFileSync(path.join(root, `${fname}.schema.yml`), {
       encoding: "utf8",
     });
     expect(payload).toMatchSnapshot();
   });
 
   it("non-root", async () => {
-    const fname = "bond.schema";
+    const fname = "bond";
     const smp = _su.createModuleProps({ fname });
     const rootNote = smp.schemas["root"];
     const ch1 = _su.create({ id: "ch1", fname });
@@ -33,7 +33,7 @@ describe("schemaModuleProps2File", () => {
     _du.addChild(rootNote, ch1);
 
     await schemaModuleProps2File(smp, root, fname);
-    const payload = fs.readFileSync(path.join(root, `${fname}.yml`), {
+    const payload = fs.readFileSync(path.join(root, `${fname}.schema.yml`), {
       encoding: "utf8",
     });
     expect(payload).toMatchSnapshot();

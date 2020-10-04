@@ -56,7 +56,7 @@ export function schemaModuleProps2File(
   vaultPath: string,
   fname: string
 ) {
-  const ext = ".yml";
+  const ext = ".schema.yml";
   return fs.writeFile(
     path.join(vaultPath, fname + ext),
     SchemaUtilsV2.serializeModuleProps(schemaMProps)

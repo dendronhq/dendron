@@ -169,7 +169,7 @@ describe("main", () => {
   });
 });
 
-describe("use cache", () => {
+describe.skip("use cache", () => {
   let queryMode: QueryMode;
 
   describe("notes", () => {

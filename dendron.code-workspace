@@ -22,6 +22,9 @@
       "path": "packages/seeds-core"
     },
     {
+      "path": "packages/dendron-cli"
+    },
+    {
       "path": "packages/lsp-server"
     },
     {
@@ -31,7 +34,7 @@
       "path": "packages/express-client"
     },
     {
-      "path": "packages/dendron-snippet-maker"
+      "path": "packages/common-test-utils",
     },
     {
       "path": "bootstrap"

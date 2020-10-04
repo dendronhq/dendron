@@ -29,22 +29,6 @@ exports[`buildSite multiple roots: foo.md 1`] = `
 "
 `;
 
-exports[`buildSite v2 incremental basic 1`] = `
-Array [
-  "bar.one.md",
-  "foo.md",
-  "root.md",
-]
-`;
-
-exports[`buildSite v2 incremental basic: build notes 1`] = `
-Array [
-  "ea3b1fc3-7022-4439-88b4-822d114fd76e.md",
-  "id.bar.one.md",
-  "id.foo.md",
-]
-`;
-
 exports[`buildSite v2 write stubs no write stub 1`] = `
 Array [
   "bar.one.md",

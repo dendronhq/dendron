@@ -2,7 +2,7 @@ import matter from "gray-matter";
 import _ from "lodash";
 import minimatch from "minimatch";
 import moment from "moment";
-import YAML from "yamljs";
+import YAML, { JSON_SCHEMA } from "js-yaml";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
 import { DNode } from "./node";
@@ -21,6 +21,7 @@ import {
   SchemaOptsV2,
   SchemaPropsDictV2,
   SchemaPropsV2,
+  SchemaSerializedV2,
 } from "./typesv2";
 import { genUUID } from "./uuid";
 
@@ -346,9 +347,6 @@ type SchemaMatchResult = {
 
 export class SchemaUtilsV2 {
   static create(opts: SchemaOptsV2): SchemaPropsV2 {
-    if (opts.fname.indexOf(".schema") < 0) {
-      opts.fname += ".schema";
-    }
     const schemaDataOpts: (keyof SchemaDataV2)[] = [
       "namespace",
       "pattern",
@@ -369,12 +367,31 @@ export class SchemaUtilsV2 {
     return opts;
   }
 
+  static createModuleProps(opts: { fname: string }): SchemaModulePropsV2 {
+    const { fname } = opts;
+    const root = SchemaUtilsV2.create({
+      id: `root`,
+      fname,
+      parent: "root",
+      created: "1",
+      updated: "1",
+      children: [],
+    });
+    return {
+      version: 1,
+      fname,
+      root,
+      schemas: { root },
+      imports: [],
+    };
+  }
+
   static createRootModule(opts?: Partial<SchemaPropsV2>): SchemaModuleOptsV2 {
     const schema = SchemaUtilsV2.create({
       id: "root",
       title: "root",
       fname: "root.schema",
-      parent: null,
+      parent: "root",
       children: [],
       ...opts,
     });
@@ -385,8 +402,25 @@ export class SchemaUtilsV2 {
     };
   }
 
-  static getModuleFname(module: SchemaModuleOptsV2): string {
-    return SchemaUtilsV2.getModuleRoot(module).fname;
+  static createRootModuleProps(
+    fname: string,
+    opts?: Partial<SchemaPropsV2>
+  ): SchemaModulePropsV2 {
+    const schema = SchemaUtilsV2.create({
+      id: "root",
+      title: "root",
+      fname: "root.schema",
+      parent: "root",
+      children: [],
+      ...opts,
+    });
+    return {
+      version: 1,
+      imports: [],
+      schemas: { root: schema },
+      fname,
+      root: schema,
+    };
   }
 
   static getModuleRoot(module: SchemaModuleOptsV2): SchemaPropsV2 {
@@ -407,6 +441,24 @@ export class SchemaUtilsV2 {
     return maybeRoot as SchemaPropsV2;
   }
 
+  static getPattern = (
+    schema: SchemaPropsV2,
+    schemas: SchemaPropsDictV2
+  ): string => {
+    const pattern = schema?.data?.pattern || schema.id;
+    const part = schema?.data?.namespace ? `${pattern}/*` : pattern;
+    if (_.isNull(schema.parent)) {
+      return part;
+    }
+    const parent: SchemaPropsV2 = schemas[schema.parent];
+    if (parent && parent.id !== "root") {
+      const prefix = SchemaUtilsV2.getPattern(parent, schemas);
+      return [prefix, part].join("/");
+    } else {
+      return part;
+    }
+  };
+
   /**
    * Matcn and assign schemas to all nodes within
    * a domain
@@ -424,7 +476,7 @@ export class SchemaUtilsV2 {
     if (!match) {
       return;
     } else {
-      const domainSchema = match.root;
+      const domainSchema = match.schemas[match.root.id];
       return SchemaUtilsV2.matchDomainWithSchema({
         noteCandidates: [domain],
         notes,
@@ -461,6 +513,7 @@ export class SchemaUtilsV2 {
               data: { pattern: "*" },
               fname: schemaModule.fname,
               children: schema.children,
+              id: "_tmp_ns_node",
               parent: schema.id,
             }),
           ]
@@ -485,7 +538,7 @@ export class SchemaUtilsV2 {
     if (!match) {
       return;
     } else {
-      const domainSchema = match.root;
+      const domainSchema = match.schemas[match.root.id];
       if (domainName.length === notePath.length) {
         return {
           schema: domainSchema,
@@ -540,6 +593,7 @@ export class SchemaUtilsV2 {
               fname: schemaModule.fname,
               children: schema.children,
               parent: schema.id,
+              id: "_tmp_namespace_node",
             }),
           ]
         : schema.children.map((id) => schemaModule.schemas[id]);
@@ -559,30 +613,12 @@ export class SchemaUtilsV2 {
     schemaModule: SchemaModulePropsV2;
     matchNamespace?: boolean;
   }): SchemaMatchResult | undefined {
-    const getPattern = (
-      schema: SchemaPropsV2,
-      schemas: SchemaPropsDictV2
-    ): string => {
-      const pattern = schema.data.pattern || schema.id;
-      const part = schema.data.namespace ? `${pattern}/*` : pattern;
-      if (_.isNull(schema.parent)) {
-        return part;
-      }
-      const parent: SchemaPropsV2 = schemas[schema.parent];
-      if (parent && parent.data.pattern !== "root") {
-        const prefix = getPattern(parent, schemas);
-        return [prefix, part].join("/");
-      } else {
-        return part;
-      }
-    };
-
     const { notePath, schemas, schemaModule, matchNamespace } = opts;
     const notePathClean = notePath.replace(/\./g, "/");
     let namespace = false;
     let match = _.find(schemas, (sc) => {
-      const pattern = getPattern(sc, schemaModule.schemas);
-      if (sc.data.namespace && matchNamespace) {
+      const pattern = SchemaUtilsV2.getPattern(sc, schemaModule.schemas);
+      if (sc?.data?.namespace && matchNamespace) {
         namespace = true;
         return minimatch(notePathClean, _.trimEnd(pattern, "/*"));
       } else {
@@ -600,30 +636,50 @@ export class SchemaUtilsV2 {
     return;
   }
 
-  static serializeSchemaProps(sp: SchemaPropsV2) {
-    return sp;
+  static serializeSchemaProps(
+    props: SchemaPropsV2 | SchemaOptsV2
+  ): SchemaSerializedV2 {
+    const builtinProps: Omit<SchemaOptsV2, "fname"> = _.pick(props, [
+      "id",
+      "children",
+    ]);
+    const optional: (keyof Omit<SchemaOptsV2, "fname">)[] = ["title", "desc"];
+    _.forEach(optional, (opt) => {
+      if (props[opt]) {
+        builtinProps[opt] = props[opt];
+      }
+    });
+    const dataProps = props.data;
+    // special for root
+    if (props?.parent === "root") {
+      builtinProps.parent = "root";
+    }
+    return { ...builtinProps, ...dataProps };
   }
 
   static serializeModuleProps(moduleProps: SchemaModulePropsV2) {
     const { version, imports, schemas } = moduleProps;
     // TODO: filter out imported schemas
-    const out: SchemaModuleOptsV2 = {
+    const out: any = {
       version,
-      schemas: _.values(schemas),
+      imports: [],
+      schemas: _.values(schemas).map((ent) => this.serializeSchemaProps(ent)),
     };
     if (imports) {
       out.imports = imports;
     }
-    return YAML.stringify(out, undefined, 4);
+    return YAML.safeDump(out, { schema: JSON_SCHEMA });
   }
   static serializeModuleOpts(moduleOpts: SchemaModuleOptsV2) {
-    const { version, imports, schemas } = moduleOpts;
+    const { version, imports, schemas } = _.defaults(moduleOpts, {
+      imports: [],
+    });
     const out = {
       version,
       imports,
-      schemas,
+      schemas: _.values(schemas).map((ent) => this.serializeSchemaProps(ent)),
     };
-    return YAML.stringify(out, undefined, 4);
+    return YAML.safeDump(out, { schema: JSON_SCHEMA });
   }
 
   // /**

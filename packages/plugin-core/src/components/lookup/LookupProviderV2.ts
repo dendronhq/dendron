@@ -53,7 +53,7 @@ export class LookupProviderV2 {
       nodeNew =
         opts.flavor === "note"
           ? NoteUtilsV2.create({ fname })
-          : SchemaUtilsV2.create({ fname });
+          : SchemaUtilsV2.create({ id: fname, fname });
     } else if (selectedItem.stub) {
       Logger.info({ ctx, msg: "create stub" });
       nodeNew = engine.notes[selectedItem.id];
@@ -68,7 +68,7 @@ export class LookupProviderV2 {
       nodeNew =
         opts.flavor === "note"
           ? NoteUtilsV2.create({ fname })
-          : SchemaUtilsV2.create({ fname });
+          : SchemaUtilsV2.create({ id: fname, fname });
     }
 
     // TODO: apply schema

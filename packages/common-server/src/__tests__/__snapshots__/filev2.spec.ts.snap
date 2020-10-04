@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`schemaModuleProps2File non-root 1`] = `
+"version: 1
+imports: []
+schemas:
+  - id: root
+    children:
+      - ch1
+    title: root
+    parent: root
+  - id: ch1
+    children: []
+    title: ch1
+    parent: root
+"
+`;
+
+exports[`schemaModuleProps2File root 1`] = `
+"version: 1
+imports: []
+schemas:
+  - id: root
+    children: []
+    title: root
+    parent: root
+"
+`;

@@ -285,13 +285,12 @@ describe("buildSite v2", () => {
 
       // check storage notes no change
       const notes = fs.readdirSync(vault);
-      expect(notes).toMatchSnapshot();
       expect(notes.length).toEqual(3);
 
       // chekc site notes
       const sitePath = path.join(siteRootDir, "notes");
       const entries = fs.readdirSync(sitePath);
-      expect(entries).toMatchSnapshot("build notes");
+      expect(entries.length).toEqual(3);
     });
   });
 

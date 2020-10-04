@@ -144,94 +144,6 @@ Object {
 }
 `;
 
-exports[`engine, notes/ write/ write note, match schema: schemas 1`] = `
-Object {
-  "foo": Object {
-    "fname": "foo.schema",
-    "imports": null,
-    "root": Object {
-      "body": "",
-      "children": Array [
-        "ch1",
-      ],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "foo.schema",
-      "id": "foo",
-      "parent": "root",
-      "title": "foo",
-      "type": "schema",
-      "updated": "1",
-    },
-    "schemas": Object {
-      "ch1": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "foo.schema",
-        "id": "ch1",
-        "parent": "foo",
-        "title": "ch1",
-        "type": "schema",
-        "updated": "1",
-      },
-      "foo": Object {
-        "body": "",
-        "children": Array [
-          "ch1",
-        ],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "foo.schema",
-        "id": "foo",
-        "parent": "root",
-        "title": "foo",
-        "type": "schema",
-        "updated": "1",
-      },
-    },
-    "version": 1,
-  },
-  "root": Object {
-    "fname": "root.schema",
-    "imports": Array [],
-    "root": Object {
-      "body": "",
-      "children": Array [],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "root.schema",
-      "id": "root",
-      "parent": null,
-      "title": "root",
-      "type": "schema",
-      "updated": "1",
-    },
-    "schemas": Object {
-      "root": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "root.schema",
-        "id": "root",
-        "parent": null,
-        "title": "root",
-        "type": "schema",
-        "updated": "1",
-      },
-    },
-    "version": 1,
-  },
-}
-`;
-
 exports[`engine, notes/ write/ write note, no schema 1`] = `
 Object {
   "bar": Object {
@@ -309,161 +221,32 @@ Object {
 `;
 
 exports[`engine, schema/ basics/ only root 1`] = `
-Object {
-  "root": Object {
-    "fname": "root.schema",
-    "imports": Array [],
-    "root": Object {
-      "body": "",
-      "children": Array [],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "root.schema",
-      "id": "root",
-      "parent": null,
-      "title": "root",
-      "type": "schema",
-      "updated": "1",
-    },
-    "schemas": Object {
-      "root": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "root.schema",
-        "id": "root",
-        "parent": null,
-        "title": "root",
-        "type": "schema",
-        "updated": "1",
-      },
-    },
-    "version": 1,
-  },
-}
-`;
-
-exports[`engine, schema/ basics/ root and one schem 1`] = `
-Object {
-  "foo": Object {
-    "fname": "foo.schema",
-    "imports": null,
-    "root": Object {
-      "body": "",
-      "children": Array [
-        "ch1",
-      ],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "foo.schema",
-      "id": "foo",
-      "parent": "root",
-      "title": "foo",
-      "type": "schema",
-      "updated": "1",
-    },
-    "schemas": Object {
-      "ch1": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "foo.schema",
-        "id": "ch1",
-        "parent": "foo",
-        "title": "ch1",
-        "type": "schema",
-        "updated": "1",
-      },
-      "foo": Object {
-        "body": "",
-        "children": Array [
-          "ch1",
-        ],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "foo.schema",
-        "id": "foo",
-        "parent": "root",
-        "title": "foo",
-        "type": "schema",
-        "updated": "1",
-      },
-    },
-    "version": 1,
-  },
-  "root": Object {
-    "fname": "root.schema",
-    "imports": Array [],
-    "root": Object {
-      "body": "",
-      "children": Array [],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "root.schema",
-      "id": "root",
-      "parent": null,
-      "title": "root",
-      "type": "schema",
-      "updated": "1",
-    },
-    "schemas": Object {
-      "root": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "root.schema",
-        "id": "root",
-        "parent": null,
-        "title": "root",
-        "type": "schema",
-        "updated": "1",
-      },
-    },
-    "version": 1,
-  },
-}
+"version: 1
+imports: []
+schemas:
+  - id: root
+    children: []
+    title: root
+    parent: root
+"
 `;
 
 exports[`engine, schema/ query/ non-root 1`] = `
 Object {
   "data": Array [
     Object {
-      "body": "",
       "children": Array [
         "ch1",
       ],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "foo.schema",
       "id": "foo",
       "parent": "root",
       "title": "foo",
-      "type": "schema",
-      "updated": "1",
     },
     Object {
-      "body": "",
       "children": Array [],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "root.schema",
       "id": "root",
-      "parent": null,
+      "parent": "root",
       "title": "root",
-      "type": "schema",
-      "updated": "1",
     },
   ],
   "error": null,
@@ -474,346 +257,43 @@ exports[`engine, schema/ query/ root 1`] = `
 Object {
   "data": Array [
     Object {
-      "body": "",
       "children": Array [],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "root.schema",
       "id": "root",
-      "parent": null,
+      "parent": "root",
       "title": "root",
-      "type": "schema",
-      "updated": "1",
     },
   ],
   "error": null,
 }
 `;
 
-exports[`engine, schema/ write/ update schema, add new prop to module 1`] = `
-Object {
-  "foo": Object {
-    "fname": "foo.schema",
-    "imports": null,
-    "root": Object {
-      "body": "",
-      "children": Array [
-        "ch1",
-      ],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "foo.schema",
-      "id": "foo",
-      "parent": "root",
-      "title": "foo",
-      "type": "schema",
-      "updated": "1",
-    },
-    "schemas": Object {
-      "ch1": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "foo.schema",
-        "id": "ch1",
-        "parent": "foo",
-        "title": "ch1",
-        "type": "schema",
-        "updated": "1",
-      },
-      "ch2": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "foo.schema",
-        "id": "ch2",
-        "parent": "foo",
-        "title": "ch2",
-        "type": "schema",
-        "updated": "1",
-      },
-      "foo": Object {
-        "body": "",
-        "children": Array [
-          "ch1",
-          "ch2",
-        ],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "foo.schema",
-        "id": "foo",
-        "parent": "root",
-        "title": "foo",
-        "type": "schema",
-        "updated": "1",
-      },
-    },
-    "version": 1,
-  },
-  "root": Object {
-    "fname": "root.schema",
-    "imports": Array [],
-    "root": Object {
-      "body": "",
-      "children": Array [],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "root.schema",
-      "id": "root",
-      "parent": null,
-      "title": "root",
-      "type": "schema",
-      "updated": "1",
-    },
-    "schemas": Object {
-      "root": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "root.schema",
-        "id": "root",
-        "parent": null,
-        "title": "root",
-        "type": "schema",
-        "updated": "1",
-      },
-    },
-    "version": 1,
-  },
-}
-`;
-
-exports[`engine, schema/ write/ update schema, add new prop to module 2`] = `
-Object {
-  "data": Array [
-    Object {
-      "body": "",
-      "children": Array [
-        "ch1",
-      ],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "foo.schema",
-      "id": "foo",
-      "parent": "root",
-      "title": "foo",
-      "type": "schema",
-      "updated": "1",
-    },
-    Object {
-      "body": "",
-      "children": Array [],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "root.schema",
-      "id": "root",
-      "parent": null,
-      "title": "root",
-      "type": "schema",
-      "updated": "1",
-    },
-  ],
-  "error": null,
-}
-`;
+exports[`engine, schema/ write/ update schema, add new prop to module: error 1`] = `null`;
 
 exports[`engine, schema/ write/ update schema, add new prop to module: new schema file 1`] = `
 Object {
+  "imports": Array [],
   "schemas": Array [
     Object {
-      "body": "",
       "children": Array [
         "ch1",
         "ch2",
       ],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "foo.schema",
       "id": "foo",
       "parent": "root",
       "title": "foo",
-      "type": "schema",
-      "updated": "1",
     },
     Object {
-      "body": "",
       "children": Array [],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "foo.schema",
       "id": "ch1",
-      "parent": "foo",
       "title": "ch1",
-      "type": "schema",
-      "updated": "1",
     },
     Object {
-      "body": "",
       "children": Array [],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "foo.schema",
       "id": "ch2",
-      "parent": "foo",
       "title": "ch2",
-      "type": "schema",
-      "updated": "1",
     },
   ],
   "version": 1,
-}
-`;
-
-exports[`engine, schema/ write/ write new module 1`] = `
-Object {
-  "bar": Object {
-    "fname": "bar.schema",
-    "imports": undefined,
-    "root": Object {
-      "body": "",
-      "children": Array [
-        "ch1",
-      ],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "bar.schema",
-      "id": "bar",
-      "parent": "root",
-      "title": "bar",
-      "type": "schema",
-      "updated": "1",
-    },
-    "schemas": Object {
-      "bar": Object {
-        "body": "",
-        "children": Array [
-          "ch1",
-        ],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "bar.schema",
-        "id": "bar",
-        "parent": "root",
-        "title": "bar",
-        "type": "schema",
-        "updated": "1",
-      },
-      "ch1": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "bar.schema",
-        "id": "ch1",
-        "parent": "bar",
-        "title": "ch1",
-        "type": "schema",
-        "updated": "1",
-      },
-    },
-    "version": 1,
-  },
-  "foo": Object {
-    "fname": "foo.schema",
-    "imports": null,
-    "root": Object {
-      "body": "",
-      "children": Array [
-        "ch1",
-      ],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "foo.schema",
-      "id": "foo",
-      "parent": "root",
-      "title": "foo",
-      "type": "schema",
-      "updated": "1",
-    },
-    "schemas": Object {
-      "ch1": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "foo.schema",
-        "id": "ch1",
-        "parent": "foo",
-        "title": "ch1",
-        "type": "schema",
-        "updated": "1",
-      },
-      "foo": Object {
-        "body": "",
-        "children": Array [
-          "ch1",
-        ],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "foo.schema",
-        "id": "foo",
-        "parent": "root",
-        "title": "foo",
-        "type": "schema",
-        "updated": "1",
-      },
-    },
-    "version": 1,
-  },
-  "root": Object {
-    "fname": "root.schema",
-    "imports": Array [],
-    "root": Object {
-      "body": "",
-      "children": Array [],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "root.schema",
-      "id": "root",
-      "parent": null,
-      "title": "root",
-      "type": "schema",
-      "updated": "1",
-    },
-    "schemas": Object {
-      "root": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "root.schema",
-        "id": "root",
-        "parent": null,
-        "title": "root",
-        "type": "schema",
-        "updated": "1",
-      },
-    },
-    "version": 1,
-  },
 }
 `;
 
@@ -875,94 +355,6 @@ Object {
     "title": "Root",
     "type": "note",
     "updated": "1",
-  },
-}
-`;
-
-exports[`note and schema basics/ root and two notes 2`] = `
-Object {
-  "foo": Object {
-    "fname": "foo.schema",
-    "imports": null,
-    "root": Object {
-      "body": "",
-      "children": Array [
-        "ch1",
-      ],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "foo.schema",
-      "id": "foo",
-      "parent": "root",
-      "title": "foo",
-      "type": "schema",
-      "updated": "1",
-    },
-    "schemas": Object {
-      "ch1": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "foo.schema",
-        "id": "ch1",
-        "parent": "foo",
-        "title": "ch1",
-        "type": "schema",
-        "updated": "1",
-      },
-      "foo": Object {
-        "body": "",
-        "children": Array [
-          "ch1",
-        ],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "foo.schema",
-        "id": "foo",
-        "parent": "root",
-        "title": "foo",
-        "type": "schema",
-        "updated": "1",
-      },
-    },
-    "version": 1,
-  },
-  "root": Object {
-    "fname": "root.schema",
-    "imports": Array [],
-    "root": Object {
-      "body": "",
-      "children": Array [],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "root.schema",
-      "id": "root",
-      "parent": null,
-      "title": "root",
-      "type": "schema",
-      "updated": "1",
-    },
-    "schemas": Object {
-      "root": Object {
-        "body": "",
-        "children": Array [],
-        "created": "1",
-        "data": Object {},
-        "desc": "",
-        "fname": "root.schema",
-        "id": "root",
-        "parent": null,
-        "title": "root",
-        "type": "schema",
-        "updated": "1",
-      },
-    },
-    "version": 1,
   },
 }
 `;

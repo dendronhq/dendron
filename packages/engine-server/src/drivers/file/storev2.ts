@@ -283,7 +283,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
       imports,
       root: rootModule,
       schemas: schemasDict,
-      fname: rootModule.fname,
+      fname,
     };
   }
 

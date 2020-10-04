@@ -40,7 +40,6 @@ function createLogger(
     opts?.lvl || env("LOG_LEVEL", { shouldThrow: false }) || "error";
   const nameClean = name || env("LOG_NAME");
   const logDst = dest || env("LOG_DST", { shouldThrow: false });
-  console.log({ ctx: "createLogger", level, logDst, nameClean });
   if (!logDst || _.isEmpty(logDst) || logDst === "stdout") {
     const out = pino({ name: nameClean, level });
     return out;

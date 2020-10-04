@@ -82,6 +82,9 @@ export class DendronEngineV2 implements DEngineV2 {
     return this.store.schemas;
   }
 
+  /**
+   * Does not throw error but returns it
+   */
   async init(): Promise<RespV2<DEngineInitPayloadV2>> {
     try {
       const { notes, schemas } = await this.store.init();

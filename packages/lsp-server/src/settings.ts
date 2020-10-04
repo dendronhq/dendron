@@ -2,6 +2,7 @@ import _ from "lodash";
 
 type DendronSettings = {
   wsRoot: string;
+  port: number;
 };
 
 // let settings: Map<string, Thenable<DendronSettings>> = new Map();

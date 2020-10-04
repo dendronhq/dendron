@@ -15,7 +15,7 @@ type KeyBinding = {
 type ConfigEntry = {
   key: string;
   description: string;
-  type?: "string" | "boolean";
+  type?: "string" | "boolean" | "number";
   default?: any;
   enum?: string[];
   scope?: CommandEntry;
@@ -599,6 +599,11 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     enum: ["off", "messages", "verbose"],
     default: "messages",
     description: "LSP log level",
+  },
+  SERVER_PORT: {
+    key: "dendron.serverPort",
+    type: "number",
+    description: "port for server",
   },
   // --- publishing
   PUBLISH_REPO_DIR: {

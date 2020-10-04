@@ -13,8 +13,14 @@ import {
 import { FileItem } from "./external/fileutils/FileItem";
 import _md from "markdown-it";
 import { DendronWorkspace } from "./workspace";
-import { DEngine, DNodeUtils, SchemaUtils } from "@dendronhq/common-all";
+import {
+  DendronAPI,
+  DEngine,
+  DNodeUtils,
+  SchemaUtils,
+} from "@dendronhq/common-all";
 import moment from "moment";
+import { EngineAPIService } from "./services/EngineAPIService";
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
@@ -362,4 +368,16 @@ export class VSCodeUtils {
     );
     panel.webview.html = _md().render(content);
   };
+}
+
+export class WSUtils {
+  static updateEngineAPI(port: number | string) {
+    const api = new DendronAPI({
+      endpoint: `http://localhost:${port}`,
+      apiPath: "api",
+    });
+    const ws = DendronWorkspace.instance();
+    ws.setEngine(new EngineAPIService(api));
+    return ws.getEngine();
+  }
 }

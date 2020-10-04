@@ -110,15 +110,15 @@ connection.onInitialized(async () => {
     const settings = getSettings();
     LSPUtils.log({ ctx, msg: "post-engine-init", settings });
     // initialize express
-    const server = app.listen(0, () => {
-      const port = (server.address() as any).port;
-      LSPUtils.log({ ctx, msg: "post-express-init", port });
-      fs.writeFileSync(
-        path.join(settings.wsRoot, CONSTANTS.DENDRON_SERVER_PORT),
-        port,
-        { encoding: "utf-8" }
-      );
-    });
+    // const server = app.listen(0, () => {
+    //   const port = (server.address() as any).port;
+    //   LSPUtils.log({ ctx, msg: "post-express-init", port });
+    //   fs.writeFileSync(
+    //     path.join(settings.wsRoot, CONSTANTS.DENDRON_SERVER_PORT),
+    //     port,
+    //     { encoding: "utf-8" }
+    //   );
+    // });
   }
 });
 

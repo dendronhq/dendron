@@ -126,6 +126,10 @@
                     "default": "messages",
                     "description": "LSP log level"
                 },
+                "dendron.serverPort": {
+                    "type": "number",
+                    "description": "port for server"
+                },
                 "dendron.publishRepoDir": {
                     "type": "string",
                     "description": "Path of git repo when running `Dendron: Publish`"
@@ -493,6 +497,7 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
+        "@dendronhq/api-server": "^0.12.4",
         "@dendronhq/clipboardy": "^2.3.0",
         "@dendronhq/common-all": "^0.12.4",
         "@dendronhq/common-server": "^0.12.4",

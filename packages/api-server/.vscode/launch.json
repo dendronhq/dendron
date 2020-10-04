@@ -6,8 +6,8 @@
     "configurations": [
         {
           "type": "node",
+          "name": "api-server:test launch server",
           "request": "launch",
-          "name": "Integ Debug",
           "runtimeArgs": [
               "-r",
               "ts-node/register"

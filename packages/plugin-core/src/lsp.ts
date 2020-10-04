@@ -10,7 +10,8 @@ import {
 import { Logger } from "./logger";
 import { DendronWorkspace } from "./workspace";
 
-export function startClient(context: ExtensionContext) {
+export function startClient(opts: { context: ExtensionContext; port: number }) {
+  const { context, port } = opts;
   // The server is implemented in node
   const pathToDev = path.join(
     __dirname,
@@ -65,6 +66,7 @@ export function startClient(context: ExtensionContext) {
     },
     initializationOptions: {
       wsRoot: path.dirname(DendronWorkspace.workspaceFile().fsPath),
+      port,
     },
   };
 

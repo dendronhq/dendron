@@ -1,4 +1,5 @@
-import { DendronAPI, getStage } from "@dendronhq/common-all";
+import { launch } from "@dendronhq/api-server";
+import { getStage } from "@dendronhq/common-all";
 import { DendronEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -12,10 +13,9 @@ import {
 } from "./constants";
 import { Logger } from "./logger";
 import { startClient } from "./lsp";
-import { EngineAPIService } from "./services/EngineAPIService";
 import { HistoryEvent, HistoryService } from "./services/HistoryService";
 import { Extensions } from "./settings";
-import { VSCodeUtils } from "./utils";
+import { VSCodeUtils, WSUtils } from "./utils";
 import { MarkdownUtils } from "./utils/md";
 import { getOS } from "./utils/system";
 import { DendronTreeView } from "./views/DendronTreeView";
@@ -120,6 +120,33 @@ function isFirstInstall(context: vscode.ExtensionContext): boolean {
   );
 }
 
+async function startServer() {
+  const maybePort = DendronWorkspace.configuration().get<number | undefined>(
+    CONFIG.SERVER_PORT.key
+  );
+  if (!maybePort) {
+    return await launch({ port: maybePort });
+  }
+  return maybePort;
+}
+
+// @ts-ignore
+function subscribeToPortChange() {
+  const ctx = "subscribeToPortChange";
+  HistoryService.instance().subscribe(
+    "apiServer",
+    async (event: HistoryEvent) => {
+      if (event.action === "changedPort") {
+        const port = DendronWorkspace.serverConfiguration().serverPort;
+        const engine = WSUtils.updateEngineAPI(port);
+        await engine.init();
+        Logger.info({ ctx, msg: "fin init Engine" });
+        await reloadWorkspace();
+      }
+    }
+  );
+}
+
 export async function _activate(context: vscode.ExtensionContext) {
   const isDebug = VSCodeUtils.isDebuggingExtension();
   const ctx = "_activate";
@@ -178,24 +205,11 @@ export async function _activate(context: vscode.ExtensionContext) {
     if (lspSupport) {
       Logger.info({ ctx, msg: "start with lsp support" });
       await ws.activateWorkspace();
-      HistoryService.instance().subscribe(
-        "apiServer",
-        async (event: HistoryEvent) => {
-          if (event.action === "changedPort") {
-            const port = DendronWorkspace.serverConfiguration().serverPort;
-            // @ts-ignore
-            const api = new DendronAPI({
-              endpoint: `http://localhost:${port}`,
-              apiPath: "api",
-            });
-            ws.setEngine(new EngineAPIService(api));
-            await ws.getEngine().init();
-            Logger.info({ ctx, msg: "fin init Engine" });
-            await reloadWorkspace();
-          }
-        }
-      );
-      startClient(context);
+      const port: number = await startServer();
+      Logger.info({ ctx, msg: "post-start-server", port });
+      WSUtils.updateEngineAPI(port);
+      startClient({ context, port });
+      await reloadWorkspace();
       Logger.info({ ctx, msg: "fin startClient" });
     } else {
       ws._engine = DendronEngine.getOrCreateEngine({

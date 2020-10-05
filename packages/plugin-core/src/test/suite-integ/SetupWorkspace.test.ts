@@ -15,6 +15,9 @@ import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { onWSInit, setupWorkspace } from "../testUtils";
+import path from "path";
+import { Snippets } from "../../settings";
+import fs from "fs-extra";
 
 const TIMEOUT = 60 * 1000 * 5;
 
@@ -23,7 +26,7 @@ suite("startup", function () {
   let ctx: ExtensionContext;
   let root: DirResult;
 
-  describe("workspace", function () {
+  describe.only("workspace", function () {
     beforeEach(async function () {
       ctx = VSCodeUtils.getOrCreateMockContext();
       DendronWorkspace.getOrCreate(ctx);
@@ -46,6 +49,15 @@ suite("startup", function () {
         const engine = DendronWorkspace.instance().engine;
         assert.strictEqual(_.values(engine.notes).length, 2);
         assert.strictEqual(engine.notes["id.foo"].fname, "foo");
+        const pathToVault = DendronWorkspace.rootWorkspaceFolder()?.uri
+          .fsPath as string;
+        const snippetFile = path.join(
+          pathToVault,
+          ".vscode",
+          Snippets.filename
+        );
+        const payload = fs.readJSONSync(snippetFile);
+        assert.deepStrictEqual(payload, Snippets.defaults);
         done();
       });
 

@@ -173,6 +173,37 @@ export class Extensions {
   }
 }
 
+type Snippet = {
+  prefix: string;
+  scope: string;
+  body: string | string[];
+  description: string;
+};
+
+export class Snippets {
+  static filename = "dendron.code-snippets";
+  static defaults: { [key: string]: Snippet } = {
+    todo: {
+      prefix: "to",
+      scope: "markdown",
+      body: "- [ ]",
+      description: "render todo box",
+    },
+    tag: {
+      prefix: "#",
+      scope: "markdown,yaml",
+      body: "[[#${1:my-tag}|tag.${1}]]",
+      description: "tag",
+    },
+  };
+
+  static updateOrCreate = (dirPath: string) => {
+    fs.ensureDirSync(dirPath);
+    const snippetPath = path.join(dirPath, Snippets.filename);
+    return fs.writeJSONSync(snippetPath, Snippets.defaults, { spaces: 4 });
+  };
+}
+
 export class Settings {
   private static getDefaults() {
     return _.mapValues(_SETTINGS, (obj) => {
@@ -191,22 +222,6 @@ export class Settings {
   static defaultsChangeSet() {
     return _SETTINGS;
   }
-
-  // static update(settings: CodeSettingsConfig): CodeSettingsConfig {
-  //   const configEntries = Settings.configEntries();
-  //   _.forEach(configEntries, (changeSet, key) => {
-  //     const cleanChangeSet = _.defaults(changeSet, { action: "ADD" });
-  //     if (cleanChangeSet.action === "ADD") {
-  //       if (!_.has(settings, key)) {
-  //         settings[key] = changeSet.default;
-  //       }
-  //     }
-  //     if (cleanChangeSet.action === "REMOVE") {
-  //       // TODO: right now, not removing
-  //     }
-  //   });
-  //   return settings;
-  // }
 
   /**
    * Upgrade config

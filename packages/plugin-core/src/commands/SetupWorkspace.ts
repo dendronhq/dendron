@@ -9,7 +9,7 @@ import _ from "lodash";
 import path from "path";
 import vscode from "vscode";
 import { DENDRON_WS_NAME, GLOBAL_STATE } from "../constants";
-import { WorkspaceConfig } from "../settings";
+import { Snippets, WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -161,6 +161,11 @@ export class SetupWorkspaceCommand extends BasicCommand<
 
     // write workspace defaults
     WorkspaceConfig.write(rootDir);
+
+    // write snippets
+    const vscodeDir = path.join(vaultPath, ".vscode");
+    Snippets.updateOrCreate(vscodeDir);
+
     if (!opts.skipOpenWs) {
       vscode.window.showInformationMessage("opening dendron workspace");
       return VSCodeUtils.openWS(

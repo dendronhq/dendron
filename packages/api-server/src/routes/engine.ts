@@ -1,8 +1,8 @@
+import { DEngineV2 } from "@dendronhq/common-all";
 import {
-  DEngineV2,
   EngineQueryRequest,
   EngineWriteRequest,
-} from "@dendronhq/common-all";
+} from "@dendronhq/common-server";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
 import { Request, Response, Router } from "express";
 import { MemoryStore } from "../store/memoryStore";

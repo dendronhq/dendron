@@ -9,7 +9,21 @@ import {
 import fs from "fs-extra";
 import matter from "gray-matter";
 import YAML from "js-yaml";
+import _ from "lodash";
 import path from "path";
+import { SchemaParserV2 } from "./parser";
+
+export function file2Schema(fpath: string): SchemaModulePropsV2 {
+  const root = path.dirname(fpath);
+  const fname = path.basename(fpath, ".schema.yml");
+  const schemaOpts = YAML.safeLoad(
+    fs.readFileSync(fpath, { encoding: "utf8" }),
+    {
+      schema: YAML.JSON_SCHEMA,
+    }
+  ) as SchemaModuleOptsV2;
+  return SchemaParserV2.parseRaw(schemaOpts, { root, fname });
+}
 
 export function file2Note(fpath: string): NotePropsV2 {
   const options: any = {

@@ -3,9 +3,10 @@ import {
   SchemaUtilsV2 as _su,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 import { tmpDir } from "../files";
-import { schemaModuleProps2File } from "../filesv2";
+import { file2Schema, schemaModuleProps2File } from "../filesv2";
 
 describe("schemaModuleProps2File", () => {
   let root: string;
@@ -37,5 +38,50 @@ describe("schemaModuleProps2File", () => {
       encoding: "utf8",
     });
     expect(payload).toMatchSnapshot();
+  });
+});
+
+describe("file2Schema", () => {
+  let root: string;
+  beforeEach(() => {
+    root = tmpDir().name;
+  });
+
+  it("simple", async () => {
+    const fpath = path.join(root, "sample.schema.yml");
+    fs.writeFileSync(
+      fpath,
+      `
+version: 1
+schemas:
+- id: pro
+  desc: projects
+  parent: root
+  namespace: true
+  children:
+    - quickstart
+    - concepts
+    - tips
+    - faq
+    - upgrading
+    - topic
+    - install
+- id: quickstart
+  desc: getting started with a project
+- id: concepts
+  desc: basic concepts to do with the project
+- id: tips
+- id: faq
+- id: upgrading
+- id: install
+- id: topic
+  desc: important areas of a project
+  namespace: true
+`,
+      { encoding: "utf-8" }
+    );
+    const schema = file2Schema(fpath);
+    expect(schema).toMatchSnapshot();
+    expect(_.values(schema.schemas).length).toEqual(8);
   });
 });

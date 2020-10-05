@@ -1,12 +1,13 @@
-import _ from "lodash";
 import {
-  DEngineQuery,
   createLogger,
+  DEngineQuery,
   DNodePropsV2,
   EngineWriteOptsV2,
-  SchemaModuleDictV2,
   NotePropsDictV2,
+  SchemaModuleDictV2,
+  SchemaModulePropsV2,
 } from "@dendronhq/common-all";
+import _ from "lodash";
 // import { nonEmptyGet, unwrapGet, unwrapSearch } from "./es";
 // import { L } from "./logger";
 // import { PlainNode } from "./nodev2";
@@ -90,6 +91,8 @@ export type InitializePayload = APIPayload<{
 
 export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
 export type EngineWritePayload = APIPayload<void>;
+export type SchemaWritePayload = APIPayload<void>;
+export type SchemaUpdatePayload = APIPayload<void>;
 
 // === Utilities
 
@@ -134,11 +137,19 @@ type WorkspaceInitRequest = {
   };
 };
 
+type WorkspaceRequest = { ws: string };
+
 export type EngineQueryRequest = DEngineQuery & { ws: string };
 export type EngineWriteRequest = {
   node: DNodePropsV2;
   opts?: EngineWriteOptsV2;
 } & { ws: string };
+
+export type SchemaWriteRequest = {
+  schema: SchemaModulePropsV2;
+} & WorkspaceRequest;
+
+export type SchemaUpdateRequest = SchemaWriteRequest;
 
 // === Base
 
@@ -300,6 +311,24 @@ export class DendronAPI extends API {
   async engineWrite(req: EngineWriteRequest): Promise<EngineWritePayload> {
     const resp = await this._makeRequest({
       path: "engine/write",
+      method: "post",
+      body: req,
+    });
+    return resp;
+  }
+
+  async schemaWrite(req: SchemaWriteRequest): Promise<SchemaWritePayload> {
+    const resp = await this._makeRequest({
+      path: "schema/write",
+      method: "post",
+      body: req,
+    });
+    return resp;
+  }
+
+  async schemaUpdate(req: SchemaUpdateRequest): Promise<SchemaUpdatePayload> {
+    const resp = await this._makeRequest({
+      path: "schema/update",
       method: "post",
       body: req,
     });

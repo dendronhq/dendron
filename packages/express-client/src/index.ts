@@ -1,3 +1,2 @@
-import { API } from "@dendronhq/common-all";
-
-export { API };
+const dummy = {};
+export { dummy };

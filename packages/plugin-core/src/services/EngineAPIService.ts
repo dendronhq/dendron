@@ -1,5 +1,4 @@
 import {
-  DendronAPI,
   DEngineClientV2,
   DEngineInitPayloadV2,
   DNodeData,
@@ -20,6 +19,7 @@ import {
   SchemaModuleDictV2,
   SchemaModulePropsV2,
 } from "@dendronhq/common-all";
+import { DendronAPI } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import { Logger } from "../logger";

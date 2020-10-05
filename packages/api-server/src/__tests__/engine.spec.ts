@@ -1,6 +1,6 @@
-import { DendronAPI, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import { NodeTestUtilsV2 } from "@dendronhq/common-test-utils";
-import { EngineTestUtils, tmpDir } from "@dendronhq/common-server";
+import { DendronAPI, EngineTestUtils, tmpDir } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";
 

@@ -36,7 +36,9 @@ export type DNodeOptsV2<T = any> = Partial<
 > & { fname: string; type: DNodeTypeV2 };
 
 export type SchemaSerializedV2 = Pick<SchemaPropsV2, "id"> &
-  Partial<SchemaDataV2> & { title?: string; desc?: string };
+  Partial<SchemaDataV2> & { title?: string; desc?: string } & Partial<
+    Pick<DNodePropsV2, "children">
+  >;
 
 export type SchemaOptsV2 = Omit<DNodeOptsV2<SchemaData>, "type" | "id"> & {
   id: string;

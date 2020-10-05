@@ -1,13 +1,12 @@
 import _ from "lodash";
-import request from "request-promise";
-import { createLogger } from "./logger";
-import { DEngineQuery } from "./types";
 import {
+  DEngineQuery,
+  createLogger,
   DNodePropsV2,
   EngineWriteOptsV2,
   SchemaModuleDictV2,
   NotePropsDictV2,
-} from "./typesv2";
+} from "@dendronhq/common-all";
 // import { nonEmptyGet, unwrapGet, unwrapSearch } from "./es";
 // import { L } from "./logger";
 // import { PlainNode } from "./nodev2";
@@ -148,7 +147,7 @@ export abstract class API {
 
   constructor(opts: IAPIConstructor) {
     opts = _.defaults(opts, {
-      _request: request,
+      // _request: request,
       logger: L,
       statusHandlers: {},
       onAuth: async ({ headers }: IRequestArgs): Promise<any> => headers,
@@ -157,6 +156,9 @@ export abstract class API {
         console.log(args);
       },
     });
+    if (!opts._request) {
+      opts._request = require("request-promise");
+    }
 
     this.opts = opts as IAPIOpts;
   }
@@ -303,49 +305,4 @@ export class DendronAPI extends API {
     });
     return resp;
   }
-
-  //   async nodeGet(id: string): Promise<INodeGetPayload> {
-  //     const resp = await this._doRequest({ path: `node/${id}` });
-  //     const payload = this._createPayload<INodeGetPayload>();
-  //     if (nonEmptyGet(resp)) {
-  //       payload.data = PlainNode.fromESItem(unwrapGet(resp));
-  //     } else {
-  //       payload.error = new APIError({ type: "does_not_exist_error" });
-  //     }
-  //     return payload;
-  //   }
-
-  //   async nodeGetMulti(ids: string[]): Promise<INodeGetMultiPayload> {
-  //     const resp = await this._doRequest({ path: `node/multi/${ids.join(",")}` });
-  //     const payload = this._createPayload<INodeGetMultiPayload>();
-  //     payload.data = unwrapSearch(resp.body) as any;
-  //     return payload;
-  //   }
-
-  //   async schemaGet({ schemaDomain }: ISchemaGetAPI): Promise<ISchemaGetPayload> {
-  //     return this._makeRequest({
-  //       path: "schema/qp",
-  //       method: "post",
-  //       body: {
-  //         schemaDomain
-  //       }
-  //     });
-  //   }
-
-  //   async suggestGetQP({ qp }: IAPIGetNodeByQP): Promise<IAPIGetNodeByQPPayload> {
-  //     const payload: IAPIGetNodeByQPPayload = this._createPayload();
-  //     try {
-  //       const resp = await this._doRequest({
-  //         path: `suggestion/qp`,
-  //         method: "post",
-  //         body: {
-  //           qp
-  //         }
-  //       });
-  //       payload.data = resp;
-  //     } catch (err) {
-  //       payload.error = err;
-  //     }
-  //     return payload;
-  //   }
 }

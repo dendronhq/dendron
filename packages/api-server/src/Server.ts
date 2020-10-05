@@ -15,7 +15,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // app.use('/api/static', express.static('public'))
-app.get("/api/static", (req, res) => {
+app.get("/api/static", (_req, res) => {
   res.redirect("http://localhost:1568/");
 });
 

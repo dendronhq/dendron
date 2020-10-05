@@ -1,8 +1,8 @@
-import { DendronAPI } from "@dendronhq/common-all";
 import {
   EngineTestUtils,
   NodeTestUtils,
   tmpDir,
+  DendronAPI,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";

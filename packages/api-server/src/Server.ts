@@ -14,6 +14,11 @@ if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
 }
 
+// app.use('/api/static', express.static('public'))
+app.get("/api/static", (req, res) => {
+  res.redirect("http://localhost:1568/");
+});
+
 app.get("/health", async (_req: Request, res: Response) => {
   return res.json({ ok: 1 });
 });

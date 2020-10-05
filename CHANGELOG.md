@@ -5,10 +5,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.12.5-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.5-alpha.0...v0.12.5-alpha.1) (2020-10-04)
 
-**Note:** Version bump only for package root
-
-## [0.12.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.4...v0.12.5-alpha.0) (2020-10-04)
-
 ### Bug Fixes
 
 - **server:** schema names ([c457f96](https://github.com/dendronhq/dendron/commit/c457f96cc02accd2811a73e15025f68d6796256d))

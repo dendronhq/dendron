@@ -40,6 +40,7 @@ import { ResetConfigCommand } from "./commands/ResetConfig";
 import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import { ShowHelpCommand } from "./commands/ShowHelp";
 import { ShowPreviewCommand } from "./commands/ShowPreview";
+import { UpdateSchemaCommand } from "./commands/UpdateSchema";
 import { UpgradeSettingsCommand } from "./commands/UpgradeSettings";
 import { LookupController } from "./components/lookup/LookupController";
 import {
@@ -533,6 +534,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.GO_UP_HIERARCHY.key,
         async () => {
           await new GoUpCommand().run();
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.UPDATE_SCHEMA.key,
+        async () => {
+          await new UpdateSchemaCommand().run();
         }
       )
     );

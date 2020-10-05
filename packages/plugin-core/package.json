@@ -331,6 +331,10 @@
                 "docPreview": "<a href=\"https://www.loom.com/share/01250485e20a4cdca2a053dd6047ac68\"><img src=\"https://cdn.loom.com/sessions/thumbnails/01250485e20a4cdca2a053dd6047ac68-with-play.gif\"> </a>"
             },
             {
+                "command": "dendron.updateSchema",
+                "title": "Dendron: Update Schema"
+            },
+            {
                 "command": "dendron.showHelp",
                 "title": "Dendron: Show Help",
                 "desc": "Dendron will open your current browser to the [[cheatsheet|dendron.cheatsheet]] page. ",

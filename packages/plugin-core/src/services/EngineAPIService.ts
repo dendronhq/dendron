@@ -16,7 +16,6 @@ import {
   QueryOneOpts,
   QueryOpts,
   QueryOptsV2,
-  Resp,
   RespV2,
   SchemaModuleDictV2,
   SchemaModulePropsV2,

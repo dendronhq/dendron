@@ -28,6 +28,7 @@ type CommandEntry = {
   shortcut?: boolean;
   group:
     | "notes"
+    | "lookup"
     | "workspace"
     | "pods"
     | "dev"
@@ -408,6 +409,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Open link to external file (eg. pdf, .mov, etc) use system default",
     docLink: "dendron.topic.links.md",
     docPreview: `<a href="https://www.loom.com/share/01250485e20a4cdca2a053dd6047ac68"><img src="https://cdn.loom.com/sessions/thumbnails/01250485e20a4cdca2a053dd6047ac68-with-play.gif"> </a>`,
+  },
+  UPDATE_SCHEMA: {
+    key: "dendron.updateSchema",
+    title: `${CMD_PREFIX} Update Schema`,
+    group: "lookup",
   },
   SHOW_HELP: {
     key: "dendron.showHelp",

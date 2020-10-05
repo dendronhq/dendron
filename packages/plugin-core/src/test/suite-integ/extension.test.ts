@@ -1985,6 +1985,7 @@ suite("ImportPod", function () {
         "project.p2.n1.md",
         "project.p-3.n1.md",
         "root.md",
+        "root.schema.yml",
       ]);
       expect(expectedFiles, actualFiles);
       done();

@@ -8,7 +8,7 @@ import {
   SetupWorkspaceOpts,
 } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
-import { _activate } from "../extension";
+import { _activate } from "../_extension";
 import { HistoryEvent, HistoryService } from "../services/HistoryService";
 import { DendronWorkspace } from "../workspace";
 

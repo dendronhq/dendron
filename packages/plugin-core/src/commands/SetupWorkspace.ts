@@ -2,7 +2,7 @@ import { NoteUtilsV2, SchemaUtilsV2 } from "@dendronhq/common-all";
 import {
   note2File,
   resolveTilde,
-  schemaModule2File,
+  schemaModuleOpts2File,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -139,12 +139,6 @@ export class SetupWorkspaceCommand extends BasicCommand<
     const vaultPath = path.join(rootDir, "vault");
     fs.ensureDirSync(vaultPath);
 
-    // copy over vscode settings
-    // fs.copySync(
-    //   path.join(dendronWSTemplate.fsPath, "vault", ".vscode"),
-    //   path.join(rootDir, "vault", ".vscode")
-    // );
-
     // copy over notes
     if (!emptyWs) {
       const filterFunc = (src: string, _dest: string) => {
@@ -162,7 +156,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
       const note = NoteUtilsV2.createRoot({});
       const schema = SchemaUtilsV2.createRootModule({});
       await note2File(note, vaultPath);
-      await schemaModule2File(schema, vaultPath, "root");
+      await schemaModuleOpts2File(schema, vaultPath, "root");
     }
 
     // write workspace defaults

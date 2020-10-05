@@ -26,7 +26,7 @@ suite("startup", function () {
   let ctx: ExtensionContext;
   let root: DirResult;
 
-  describe.only("workspace", function () {
+  describe("workspace", function () {
     beforeEach(async function () {
       ctx = VSCodeUtils.getOrCreateMockContext();
       DendronWorkspace.getOrCreate(ctx);

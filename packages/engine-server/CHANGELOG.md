@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.5-alpha.5](https://github.com/dendronhq/dendron/compare/v0.12.5-alpha.4...v0.12.5-alpha.5) (2020-10-06)
+
+### Bug Fixes
+
+- **lookup:** schemas in lookup ([b4055fd](https://github.com/dendronhq/dendron/commit/b4055fd61d4918cf4c1a44591be31be69a71b93a))
+
 ## [0.12.5-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.5-alpha.1...v0.12.5-alpha.2) (2020-10-05)
 
 **Note:** Version bump only for package @dendronhq/engine-server

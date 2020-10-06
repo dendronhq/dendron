@@ -16,6 +16,12 @@
       "problemMatcher": []
     },
     {
+      "label": "npm:test:watch:integ",
+      "command": "npm run test:watch:integ -- ${relativeFile} -u",
+      "type": "shell",
+      "problemMatcher": []
+    },
+    {
       "type": "npm",
       "label": "clean",
       "script": "clean",

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { engineRouter } from "./engine";
+import { schemaRouter } from "./schema";
 import { workspaceRouter } from "./workspace";
 
 // Init router and path
@@ -8,6 +9,7 @@ const router = Router();
 // Add sub-routes
 router.use("/workspace", workspaceRouter);
 router.use("/engine", engineRouter);
+router.use("/schema", schemaRouter);
 
 // const engineRouter = Router();
 // engineRouter.get("health", async (_req: Request, res: Response) => {

@@ -12,6 +12,7 @@ import {
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";
+import _ from "lodash";
 
 describe("schema", () => {
   let wsRoot: string;
@@ -35,7 +36,7 @@ describe("schema", () => {
     });
   });
 
-  describe.skip("write", () => {
+  describe("write", () => {
     test("simple schema", async () => {
       const payload = {
         uri: wsRoot,
@@ -48,17 +49,18 @@ describe("schema", () => {
         apiPath: "api",
       });
       const schema = su.createModuleProps({ fname: "pro" });
-      const respWs = await api.workspaceInit(payload);
-      expect(respWs).toMatchSnapshot();
+      await api.workspaceInit(payload);
       let resp: any = await api.workspaceList();
-      expect(resp).toMatchSnapshot("wsList");
-
       resp = await api.schemaWrite({
         ws: wsRoot,
         schema,
       });
-      const schemaOut = file2Schema(path.join(vault, "pro.schema.yml"));
-      expect(schemaOut).toMatchSnapshot();
+      const schemaPath = path.join(vault, "pro.schema.yml");
+      const schemaOut = file2Schema(schemaPath);
+      expect(
+        fs.readFileSync(schemaPath, { encoding: "utf8" })
+      ).toMatchSnapshot();
+      expect(_.size(schemaOut.schemas)).toEqual(1);
     });
   });
 });

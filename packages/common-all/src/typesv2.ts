@@ -91,7 +91,7 @@ export type SchemaModulePropsV2 = {
 
 export interface RespV2<T> {
   data: T;
-  error?: DendronError | null;
+  error: DendronError | null;
 }
 
 export interface QueryOptsV2 {
@@ -124,6 +124,18 @@ export type EngineWriteOptsV2 = {
   recursive?: boolean;
 } & Partial<EngineUpdateNodesOptsV2>;
 
+export type DEngineInitPayloadV2 = {
+  notes?: NotePropsDictV2;
+  schemas?: SchemaModuleDictV2;
+};
+
+/**
+ * Returns list of notes that were changed
+ */
+export type WriteNoteResp = RespV2<NotePropsV2[]>;
+
+// === Engine and Store Main
+
 export type DCommonProps = {
   notes: NotePropsDictV2;
   schemas: SchemaModuleDictV2;
@@ -134,13 +146,11 @@ export type DCommonMethods = {
   updateNote(note: NotePropsV2, opts?: EngineUpdateNodesOptsV2): Promise<void>;
   updateSchema: (schema: SchemaModulePropsV2) => Promise<void>;
 
-  writeNote: (note: NotePropsV2, opts?: EngineWriteOptsV2) => Promise<void>;
+  writeNote: (
+    note: NotePropsV2,
+    opts?: EngineWriteOptsV2
+  ) => Promise<WriteNoteResp>;
   writeSchema: (schema: SchemaModulePropsV2) => Promise<void>;
-};
-
-export type DEngineInitPayloadV2 = {
-  notes?: NotePropsDictV2;
-  schemas?: SchemaModuleDictV2;
 };
 
 export type DEngineV2 = DCommonProps &

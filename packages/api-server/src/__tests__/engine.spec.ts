@@ -50,8 +50,8 @@ describe("schema", () => {
       });
       const schema = su.createModuleProps({ fname: "pro" });
       await api.workspaceInit(payload);
-      let resp: any = await api.workspaceList();
-      resp = await api.schemaWrite({
+      api.workspaceList();
+      await api.schemaWrite({
         ws: wsRoot,
         schema,
       });
@@ -65,129 +65,252 @@ describe("schema", () => {
   });
 });
 
-describe("main", () => {
+describe("notes", () => {
   let wsRoot: string;
   let vault: string;
 
-  beforeEach(async () => {
-    wsRoot = tmpDir().name;
-    vault = path.join(wsRoot, "vault");
-    fs.ensureDirSync(vault);
-    await EngineTestUtils.setupVault({
-      vaultDir: vault,
-      initDirCb: async (vaultPath: string) => {
-        await NodeTestUtilsV2.createNotes({ vaultPath });
-        await NodeTestUtilsV2.createSchemas({ vaultPath });
-        await NodeTestUtilsV2.createNoteProps({ vaultPath, rootName: "foo" });
-        await NodeTestUtilsV2.createSchemaModuleOpts({
-          vaultDir: vaultPath,
-          rootName: "foo",
-        });
-      },
+  describe("query", () => {
+    beforeEach(async () => {
+      wsRoot = tmpDir().name;
+      vault = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vault);
+      await EngineTestUtils.setupVault({
+        vaultDir: vault,
+        initDirCb: async (vaultPath: string) => {
+          await NodeTestUtilsV2.createNotes({ vaultPath });
+          await NodeTestUtilsV2.createSchemas({ vaultPath });
+          await NodeTestUtilsV2.createNoteProps({ vaultPath, rootName: "foo" });
+          await NodeTestUtilsV2.createSchemaModuleOpts({
+            vaultDir: vaultPath,
+            rootName: "foo",
+          });
+        },
+      });
+    });
+
+    test("query root", async () => {
+      const payload = {
+        uri: wsRoot,
+        config: {
+          vaults: [vault],
+        },
+      };
+      const api = new DendronAPI({
+        endpoint: "http://localhost:3005",
+        apiPath: "api",
+      });
+      await api.workspaceInit(payload);
+      const resp = await api.engineQuery({
+        ws: wsRoot,
+        queryString: "",
+        mode: "note" as const,
+      });
+      expect(resp).toMatchSnapshot("root note");
+      const schemas = await api.engineQuery({
+        ws: wsRoot,
+        queryString: "",
+        mode: "schema" as const,
+      });
+      expect(schemas).toMatchSnapshot("root schema ");
+    });
+
+    test("query root note with schema", async () => {
+      const payload = {
+        uri: wsRoot,
+        config: {
+          vaults: [vault],
+        },
+      };
+      const api = new DendronAPI({
+        endpoint: "http://localhost:3005",
+        apiPath: "api",
+      });
+      await api.workspaceInit(payload);
+      const resp = await api.engineQuery({
+        ws: wsRoot,
+        queryString: "foo",
+        mode: "note" as const,
+      });
+      const note = resp.data[0] as NotePropsV2;
+      expect(resp).toMatchSnapshot();
+      expect(note.schema).toEqual({
+        moduleId: "foo",
+        schemaId: "foo",
+      });
+    });
+
+    test("query child note with schema", async () => {
+      const payload = {
+        uri: wsRoot,
+        config: {
+          vaults: [vault],
+        },
+      };
+      const api = new DendronAPI({
+        endpoint: "http://localhost:3005",
+        apiPath: "api",
+      });
+      await api.workspaceInit(payload);
+      const resp = await api.engineQuery({
+        ws: wsRoot,
+        queryString: "foo.ch1",
+        mode: "note" as const,
+      });
+      const note = resp.data[0] as NotePropsV2;
+      expect(resp).toMatchSnapshot();
+      expect(note.schema).toEqual({
+        moduleId: "foo",
+        schemaId: "ch1",
+      });
     });
   });
 
-  test("query root", async () => {
-    const payload = {
-      uri: wsRoot,
-      config: {
-        vaults: [vault],
-      },
-    };
-    const api = new DendronAPI({
-      endpoint: "http://localhost:3005",
-      apiPath: "api",
+  describe("write", () => {
+    beforeEach(async () => {
+      wsRoot = tmpDir().name;
+      vault = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vault);
+      await EngineTestUtils.setupVault({
+        vaultDir: vault,
+        initDirCb: async (vaultPath: string) => {
+          await NodeTestUtilsV2.createNotes({ vaultPath });
+          await NodeTestUtilsV2.createSchemas({ vaultPath });
+          await NodeTestUtilsV2.createNoteProps({ vaultPath, rootName: "foo" });
+          await NodeTestUtilsV2.createSchemaModuleOpts({
+            vaultDir: vaultPath,
+            rootName: "foo",
+          });
+        },
+      });
     });
-    await api.workspaceInit(payload);
-    const resp = await api.engineQuery({
-      ws: wsRoot,
-      queryString: "",
-      mode: "note" as const,
+    test("new hierarchy", async () => {
+      const payload = {
+        uri: wsRoot,
+        config: {
+          vaults: [vault],
+        },
+      };
+      const api = new DendronAPI({
+        endpoint: "http://localhost:3005",
+        apiPath: "api",
+      });
+      await api.workspaceInit(payload);
+      const resp = await api.engineWrite({
+        ws: wsRoot,
+        node: NoteUtilsV2.create({ fname: "bond" }),
+      });
+      expect(resp.data.length).toEqual(2);
+      const out = fs.readdirSync(vault);
+      expect(out).toEqual([
+        "bond.md",
+        "foo.ch1.md",
+        "foo.md",
+        "foo.schema.yml",
+        "root.md",
+        "root.schema.yml",
+      ]);
     });
-    expect(resp).toMatchSnapshot("root note");
-    const schemas = await api.engineQuery({
-      ws: wsRoot,
-      queryString: "",
-      mode: "schema" as const,
-    });
-    expect(schemas).toMatchSnapshot("root schema ");
-  });
 
-  test("query root note with schema", async () => {
-    const payload = {
-      uri: wsRoot,
-      config: {
-        vaults: [vault],
-      },
-    };
-    const api = new DendronAPI({
-      endpoint: "http://localhost:3005",
-      apiPath: "api",
+    test("grandchild of root, child is stub", async () => {
+      const payload = {
+        uri: wsRoot,
+        config: {
+          vaults: [vault],
+        },
+      };
+      const api = new DendronAPI({
+        endpoint: "http://localhost:3005",
+        apiPath: "api",
+      });
+      await api.workspaceInit(payload);
+      const resp = await api.engineWrite({
+        ws: wsRoot,
+        node: NoteUtilsV2.create({ id: "bond.ch1", fname: "bond.ch1" }),
+      });
+      const expected = ["bond.ch1", "root"];
+      expect(resp.data.length).toEqual(3);
+      expect(
+        _.intersection(
+          resp.data.map((ent) => _.pick(ent, "id").id).sort(),
+          expected
+        ).sort()
+      ).toEqual(expected);
+      const out = fs.readdirSync(vault);
+      expect(out.sort()).toEqual([
+        "bond.ch1.md",
+        "foo.ch1.md",
+        "foo.md",
+        "foo.schema.yml",
+        "root.md",
+        "root.schema.yml",
+      ]);
     });
-    await api.workspaceInit(payload);
-    const resp = await api.engineQuery({
-      ws: wsRoot,
-      queryString: "foo",
-      mode: "note" as const,
-    });
-    const note = resp.data[0] as NotePropsV2;
-    expect(resp).toMatchSnapshot();
-    expect(note.schema).toEqual({
-      moduleId: "foo",
-      schemaId: "foo",
-    });
-  });
 
-  test("query child note with schema", async () => {
-    const payload = {
-      uri: wsRoot,
-      config: {
-        vaults: [vault],
-      },
-    };
-    const api = new DendronAPI({
-      endpoint: "http://localhost:3005",
-      apiPath: "api",
+    test("child of domain", async () => {
+      const payload = {
+        uri: wsRoot,
+        config: {
+          vaults: [vault],
+        },
+      };
+      const api = new DendronAPI({
+        endpoint: "http://localhost:3005",
+        apiPath: "api",
+      });
+      await api.workspaceInit(payload);
+      const resp = await api.engineWrite({
+        ws: wsRoot,
+        node: NoteUtilsV2.create({ id: "foo.ch2", fname: "foo.ch2" }),
+      });
+      expect(resp.data.length).toEqual(2);
+      expect(resp.data.map((ent) => _.pick(ent, "id").id).sort()).toEqual([
+        "foo",
+        "foo.ch2",
+      ]);
+      const out = fs.readdirSync(vault);
+      expect(out.sort()).toEqual([
+        "foo.ch1.md",
+        "foo.ch2.md",
+        "foo.md",
+        "foo.schema.yml",
+        "root.md",
+        "root.schema.yml",
+      ]);
     });
-    await api.workspaceInit(payload);
-    const resp = await api.engineQuery({
-      ws: wsRoot,
-      queryString: "foo.ch1",
-      mode: "note" as const,
-    });
-    const note = resp.data[0] as NotePropsV2;
-    expect(resp).toMatchSnapshot();
-    expect(note.schema).toEqual({
-      moduleId: "foo",
-      schemaId: "ch1",
-    });
-  });
 
-  test.skip("write", async () => {
-    const payload = {
-      uri: wsRoot,
-      config: {
-        vaults: [vault],
-      },
-    };
-    const api = new DendronAPI({
-      endpoint: "http://localhost:3005",
-      apiPath: "api",
+    test("grandchild of domain, child is stub", async () => {
+      const payload = {
+        uri: wsRoot,
+        config: {
+          vaults: [vault],
+        },
+      };
+      const api = new DendronAPI({
+        endpoint: "http://localhost:3005",
+        apiPath: "api",
+      });
+      await api.workspaceInit(payload);
+      const resp = await api.engineWrite({
+        ws: wsRoot,
+        node: NoteUtilsV2.create({ id: "foo.ch2.gch1", fname: "foo.ch2.gch1" }),
+      });
+      const expected = ["foo", "foo.ch2.gch1"];
+      expect(resp.data.length).toEqual(3);
+      expect(
+        _.intersection(
+          resp.data.map((ent) => _.pick(ent, "id").id).sort(),
+          expected
+        )
+      ).toEqual(expected);
+      const out = fs.readdirSync(vault);
+      expect(out.sort()).toEqual([
+        "foo.ch1.md",
+        "foo.ch2.gch1.md",
+        "foo.md",
+        "foo.schema.yml",
+        "root.md",
+        "root.schema.yml",
+      ]);
     });
-    await api.workspaceInit(payload);
-    const resp = await api.engineWrite({
-      ws: wsRoot,
-      node: NoteUtilsV2.create({ fname: "bond" }),
-    });
-    expect(resp).toMatchSnapshot();
-    const out = fs.readdirSync(vault);
-    expect(out).toEqual([
-      "bond.md",
-      "foo.ch1.md",
-      "foo.md",
-      "foo.schema.yml",
-      "root.md",
-      "root.schema.yml",
-    ]);
   });
 });

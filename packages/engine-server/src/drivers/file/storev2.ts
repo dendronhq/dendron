@@ -17,6 +17,7 @@ import {
   SchemaPropsV2,
   SchemaUtils,
   SchemaUtilsV2,
+  WriteNoteResp,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -398,9 +399,13 @@ export class FileStorageV2 implements DStoreV2 {
     return;
   }
 
-  async writeNote(note: NotePropsV2, _opts?: EngineWriteOptsV2): Promise<void> {
+  async writeNote(
+    note: NotePropsV2,
+    _opts?: EngineWriteOptsV2
+  ): Promise<WriteNoteResp> {
     await note2File(note, this.vaults[0]);
-    const stubs: NotePropsV2[] = NoteUtilsV2.addParent({
+    const out = [note];
+    const changed: NotePropsV2[] = NoteUtilsV2.addParent({
       note,
       notesList: _.values(this.notes),
       createStubs: true,
@@ -413,7 +418,13 @@ export class FileStorageV2 implements DStoreV2 {
       const { schema, schemaModule } = match;
       NoteUtilsV2.addSchema({ note, schema, schemaModule });
     }
-    await Promise.all([note].concat(stubs).map((ent) => this.updateNote(ent)));
+    await Promise.all(
+      [note].concat(changed).map((ent) => this.updateNote(ent))
+    );
+    return {
+      error: null,
+      data: out.concat(changed),
+    };
   }
 
   async writeSchema(schemaModule: SchemaModulePropsV2) {

@@ -1,4 +1,4 @@
-import { DEngineV2 } from "@dendronhq/common-all";
+import { DendronError, DEngineV2, WriteNoteResp } from "@dendronhq/common-all";
 import {
   EngineQueryRequest,
   EngineWriteRequest,
@@ -8,10 +8,6 @@ import { Request, Response, Router } from "express";
 import { MemoryStore } from "../store/memoryStore";
 
 const router = Router();
-
-router.get("/health", async (_req: Request, res: Response) => {
-  return res.json({ ok: 1 });
-});
 
 router.post("/query", async (req: Request, res: Response) => {
   const { ws, queryString, mode } = req.body as EngineQueryRequest;
@@ -23,17 +19,20 @@ router.post("/query", async (req: Request, res: Response) => {
   res.json({ error, data });
 });
 
-router.post("/write", async (req: Request, res: Response) => {
+router.post("/write", async (req: Request, res: Response<WriteNoteResp>) => {
   const { ws, node, opts } = req.body as EngineWriteRequest;
   const engine = await MemoryStore.instance().get<DEngineV2>(`ws:${ws}`);
   if (!engine) {
     throw "No Engine";
   }
   try {
-    await engine.writeNote(node, opts);
-    res.json({ error: null, data: null });
+    const out = await engine.writeNote(node, opts);
+    res.json(out);
   } catch (err) {
-    res.json({ error: JSON.stringify(err), data: null });
+    res.json({
+      error: new DendronError({ msg: JSON.stringify(err) }),
+      data: [],
+    });
   }
 });
 

@@ -14,6 +14,7 @@ import {
   RespV2,
   SchemaModulePropsV2,
   SchemaPropsV2,
+  WriteNoteResp,
 } from "@dendronhq/common-all";
 import { DLogger } from "@dendronhq/common-server";
 import Fuse from "fuse.js";
@@ -220,9 +221,13 @@ export class DendronEngineV2 implements DEngineV2 {
     return this.store.updateSchema(schemaModule);
   }
 
-  async writeNote(note: NotePropsV2, opts?: EngineWriteOptsV2): Promise<void> {
-    await this.store.writeNote(note, opts);
+  async writeNote(
+    note: NotePropsV2,
+    opts?: EngineWriteOptsV2
+  ): Promise<WriteNoteResp> {
+    const out = await this.store.writeNote(note, opts);
     await this.updateIndex("note");
+    return out;
   }
 
   async writeSchema(schema: SchemaModulePropsV2) {

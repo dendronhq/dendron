@@ -18,6 +18,7 @@ import {
   RespV2,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
+  WriteNoteResp,
 } from "@dendronhq/common-all";
 import { DendronAPI } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -151,17 +152,22 @@ export class EngineAPIService implements DEngineClientV2 {
   async updateSchema(schema: SchemaModulePropsV2): Promise<void> {
     throw Error("not implemented");
   }
-  async writeNote(note: NotePropsV2, opts?: EngineWriteOptsV2): Promise<void> {
+  async writeNote(
+    note: NotePropsV2,
+    opts?: EngineWriteOptsV2
+  ): Promise<WriteNoteResp> {
     const ctx = "write";
     const resp = await this.api.engineWrite({
       node: note,
       opts,
       ws: this.ws,
     });
-    await this.refreshNodes([note], note.type);
+    const changed = resp.data;
+    await this.refreshNodes(changed, note.type);
     Logger.info({ ctx, msg: "exit", resp });
-    return;
+    return resp;
   }
+
   async writeSchema(schema: SchemaModulePropsV2): Promise<void> {
     throw Error("not implemented");
   }

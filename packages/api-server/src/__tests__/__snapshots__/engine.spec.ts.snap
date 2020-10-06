@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`main query child note with schema 1`] = `
+exports[`notes query query child note with schema 1`] = `
 Object {
   "data": Array [
     Object {
@@ -48,7 +48,7 @@ Object {
 }
 `;
 
-exports[`main query root note with schema 1`] = `
+exports[`notes query query root note with schema 1`] = `
 Object {
   "data": Array [
     Object {
@@ -113,7 +113,7 @@ Object {
 }
 `;
 
-exports[`main query root: root note 1`] = `
+exports[`notes query query root: root note 1`] = `
 Object {
   "data": Array [
     Object {
@@ -138,7 +138,7 @@ Object {
 }
 `;
 
-exports[`main query root: root schema  1`] = `
+exports[`notes query query root: root schema  1`] = `
 Object {
   "data": Array [
     Object {
@@ -149,13 +149,6 @@ Object {
     },
   ],
   "error": null,
-}
-`;
-
-exports[`main write 1`] = `
-Object {
-  "data": undefined,
-  "error": [StatusCodeError: 500 - "Internal Server Error"],
 }
 `;
 

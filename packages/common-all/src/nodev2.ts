@@ -194,6 +194,12 @@ export class DNodeUtilsV2 {
 }
 
 export class NoteUtilsV2 {
+  /**
+   * Add node to parent
+   * Create stubs if no direct parent exists
+   * @param opts
+   * @returns All notes that were changed
+   */
   static addParent(opts: {
     note: NotePropsV2;
     notesList: NotePropsV2[];
@@ -202,7 +208,10 @@ export class NoteUtilsV2 {
     const { note, notesList, createStubs } = opts;
     const parentPath = DNodeUtilsV2.dirName(note.fname);
     let parent = _.find(notesList, (p) => p.fname === parentPath) || null;
-    const stubs: NotePropsV2[] = [];
+    const changed: NotePropsV2[] = [];
+    if (parent) {
+      changed.push(parent);
+    }
     if (!parent && !createStubs) {
       const err = {
         status: ENGINE_ERROR_CODES.NO_PARENT_FOR_NOTE,
@@ -217,13 +226,14 @@ export class NoteUtilsV2 {
         note.fname,
         notesList
       ) as NotePropsV2;
+      changed.push(parent);
       const stubNodes = NoteUtilsV2.createStubs(parent, note);
       stubNodes.forEach((ent2) => {
-        stubs.push(ent2);
+        changed.push(ent2);
       });
     }
     DNodeUtilsV2.addChild(parent, note);
-    return stubs;
+    return changed;
   }
 
   static addSchema(opts: {

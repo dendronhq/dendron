@@ -7,6 +7,7 @@ import {
   NotePropsDictV2,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
+  WriteNoteResp,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 // import { nonEmptyGet, unwrapGet, unwrapSearch } from "./es";
@@ -81,7 +82,7 @@ interface IStatusHandler {
 }
 
 type APIPayload<T = any> = {
-  error?: DendronError | null | "string";
+  error: DendronError | null;
   data: T;
 };
 
@@ -91,8 +92,6 @@ export type InitializePayload = APIPayload<{
 }>;
 
 export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
-export type EngineWritePayload = APIPayload<void>;
-
 export type SchemaReadPayload = APIPayload<SchemaModulePropsV2>;
 export type SchemaWritePayload = APIPayload<void>;
 export type SchemaUpdatePayload = APIPayload<void>;
@@ -300,7 +299,7 @@ export class DendronAPI extends API {
     return resp;
   }
 
-  async engineWrite(req: EngineWriteRequest): Promise<EngineWritePayload> {
+  async engineWrite(req: EngineWriteRequest): Promise<WriteNoteResp> {
     const resp = await this._makeRequest({
       path: "engine/write",
       method: "post",

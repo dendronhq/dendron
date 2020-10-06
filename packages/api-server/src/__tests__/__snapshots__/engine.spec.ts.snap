@@ -48,8 +48,6 @@ Object {
 }
 `;
 
-exports[`main query child note with schema 2`] = `"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-68269-TqLyK6SINA7U"`;
-
 exports[`main query root note with schema 1`] = `
 Object {
   "data": Array [
@@ -115,7 +113,44 @@ Object {
 }
 `;
 
-exports[`main query root note with schema 2`] = `"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-68269-7bujEWRZoZsf"`;
+exports[`main query root: root note 1`] = `
+Object {
+  "data": Array [
+    Object {
+      "body": "
+",
+      "children": Array [
+        "foo",
+      ],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "root",
+      "id": "root",
+      "parent": null,
+      "title": "Root",
+      "type": "note",
+      "updated": "1",
+    },
+  ],
+  "error": null,
+}
+`;
+
+exports[`main query root: root schema  1`] = `
+Object {
+  "data": Array [
+    Object {
+      "children": Array [],
+      "id": "root",
+      "parent": "root",
+      "title": "root",
+    },
+  ],
+  "error": null,
+}
+`;
 
 exports[`main write 1`] = `
 Object {
@@ -202,7 +237,7 @@ Object {
           "ch1": Object {
             "body": "",
             "children": Array [],
-            "created": 1601932944386,
+            "created": 1602005445421,
             "data": Object {},
             "desc": "",
             "fname": null,
@@ -210,14 +245,14 @@ Object {
             "parent": "foo",
             "title": "ch1",
             "type": "schema",
-            "updated": 1601932944386,
+            "updated": 1602005445421,
           },
           "foo": Object {
             "body": "",
             "children": Array [
               "ch1",
             ],
-            "created": 1601932944386,
+            "created": 1602005445421,
             "data": Object {},
             "desc": "",
             "fname": null,
@@ -225,7 +260,7 @@ Object {
             "parent": "root",
             "title": "foo",
             "type": "schema",
-            "updated": 1601932944386,
+            "updated": 1602005445421,
           },
         },
         "version": 1,
@@ -243,7 +278,7 @@ Object {
           "root": Object {
             "body": "",
             "children": Array [],
-            "created": 1601932944386,
+            "created": 1602005445421,
             "data": Object {},
             "desc": "",
             "fname": null,
@@ -251,7 +286,7 @@ Object {
             "parent": "root",
             "title": "root",
             "type": "schema",
-            "updated": 1601932944386,
+            "updated": 1602005445421,
           },
         },
         "version": 1,
@@ -262,16 +297,31 @@ Object {
 }
 `;
 
-exports[`schema write simple schema: wsList 1`] = `
+exports[`schema write simple schema 2`] = `
 Object {
-  "data": Object {
-    "data": Object {
-      "workspaces": Array [
-        "ws:/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-69412-LrI5M5haGMU8",
-      ],
-    },
-    "error": null,
+  "fname": "pro",
+  "imports": Array [],
+  "root": Object {
+    "children": Array [],
+    "id": "pro",
+    "parent": "root",
+    "title": "pro",
   },
-  "error": null,
+  "schemas": Object {
+    "pro": Object {
+      "body": "",
+      "children": Array [],
+      "created": 1601938011262,
+      "data": Object {},
+      "desc": "",
+      "fname": null,
+      "id": "pro",
+      "parent": "root",
+      "title": "pro",
+      "type": "schema",
+      "updated": 1601938011262,
+    },
+  },
+  "version": 1,
 }
 `;

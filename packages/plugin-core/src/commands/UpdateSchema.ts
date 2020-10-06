@@ -39,7 +39,7 @@ function getWebviewContent2() {
     </style>
   </head>
   <body>
-    <iframe width="100%" height="100%" src="http://localhost:1568/"></iframe>
+    <iframe width="100%" height="100%" src="http://localhost:3000/posts/proto2"></iframe>
   </body>
   </html>`;
 }

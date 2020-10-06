@@ -348,10 +348,7 @@ export class LookupProvider {
         const resp = await engine.query(querystring, opts.flavor);
         const notes = resp.data;
         // @ts-ignore
-        updatedItems = [this.noActiveItem as DNode].concat(
-          // @ts-ignore
-          notes.map((ent) => new Note(ent))
-        );
+        updatedItems = [this.noActiveItem as DNode].concat(notes);
         profile = getDurationMilliseconds(start);
         L.info({ ...ctx2, msg: "engine.query", profile });
       }

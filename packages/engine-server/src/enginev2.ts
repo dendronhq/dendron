@@ -110,6 +110,39 @@ export class DendronEngineV2 implements DEngineV2 {
     throw Error("to implement");
   }
 
+  async getSchema(id: string): Promise<RespV2<SchemaModulePropsV2>> {
+    const ctx = "getSchema";
+    const data = this.schemas[id];
+    this.logger.info({ ctx, msg: "exit" });
+    return {
+      data,
+      error: null,
+    };
+  }
+
+  async querySchema(
+    queryString: string
+  ): Promise<RespV2<SchemaModulePropsV2[]>> {
+    const ctx = "querySchema";
+
+    let items: SchemaModulePropsV2[] = [];
+    if (queryString === "") {
+      items = [this.schemas.root];
+    } else if (queryString === "*") {
+      items = _.values(this.schemas);
+    } else {
+      // const results = this.schemaIndex.search(queryString);
+      throw Error("not supported");
+      // TODO
+      // items = _.map(results, (resp) => resp.item);
+    }
+    this.logger.info({ ctx, msg: "exit" });
+    return {
+      error: null,
+      data: items,
+    };
+  }
+
   async query(
     queryString: string,
     mode: DNodeTypeV2,

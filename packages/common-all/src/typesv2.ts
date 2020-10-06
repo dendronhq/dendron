@@ -154,6 +154,9 @@ export type DEngineV2 = DCommonProps &
       opts?: EngineDeleteOptsV2
     ) => Promise<void>;
 
+    getSchema: (qs: string) => Promise<RespV2<SchemaModulePropsV2>>;
+
+    querySchema: (qs: string) => Promise<RespV2<SchemaModulePropsV2[]>>;
     query: (
       queryString: string,
       mode: DNodeTypeV2,

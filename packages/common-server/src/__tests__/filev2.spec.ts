@@ -81,7 +81,6 @@ schemas:
       { encoding: "utf-8" }
     );
     const schema = file2Schema(fpath);
-    expect(schema).toMatchSnapshot();
     expect(_.values(schema.schemas).length).toEqual(8);
   });
 });

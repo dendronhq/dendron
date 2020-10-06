@@ -1,8 +1,67 @@
-import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import {
+  NotePropsV2,
+  NoteUtilsV2,
+  SchemaUtilsV2 as su,
+} from "@dendronhq/common-all";
 import { NodeTestUtilsV2 } from "@dendronhq/common-test-utils";
-import { DendronAPI, EngineTestUtils, tmpDir } from "@dendronhq/common-server";
+import {
+  DendronAPI,
+  EngineTestUtils,
+  file2Schema,
+  tmpDir,
+} from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";
+
+describe("schema", () => {
+  let wsRoot: string;
+  let vault: string;
+
+  beforeEach(async () => {
+    wsRoot = tmpDir().name;
+    vault = path.join(wsRoot, "vault");
+    fs.ensureDirSync(vault);
+    await EngineTestUtils.setupVault({
+      vaultDir: vault,
+      initDirCb: async (vaultPath: string) => {
+        await NodeTestUtilsV2.createNotes({ vaultPath });
+        await NodeTestUtilsV2.createSchemas({ vaultPath });
+        await NodeTestUtilsV2.createNoteProps({ vaultPath, rootName: "foo" });
+        await NodeTestUtilsV2.createSchemaModuleOpts({
+          vaultDir: vaultPath,
+          rootName: "foo",
+        });
+      },
+    });
+  });
+
+  describe.skip("write", () => {
+    test("simple schema", async () => {
+      const payload = {
+        uri: wsRoot,
+        config: {
+          vaults: [vault],
+        },
+      };
+      const api = new DendronAPI({
+        endpoint: "http://localhost:3005",
+        apiPath: "api",
+      });
+      const schema = su.createModuleProps({ fname: "pro" });
+      const respWs = await api.workspaceInit(payload);
+      expect(respWs).toMatchSnapshot();
+      let resp: any = await api.workspaceList();
+      expect(resp).toMatchSnapshot("wsList");
+
+      resp = await api.schemaWrite({
+        ws: wsRoot,
+        schema,
+      });
+      const schemaOut = file2Schema(path.join(vault, "pro.schema.yml"));
+      expect(schemaOut).toMatchSnapshot();
+    });
+  });
+});
 
 describe("main", () => {
   let wsRoot: string;
@@ -75,7 +134,6 @@ describe("main", () => {
       moduleId: "foo",
       schemaId: "foo",
     });
-    expect(wsRoot).toMatchSnapshot();
   });
 
   test("query child note with schema", async () => {
@@ -101,10 +159,9 @@ describe("main", () => {
       moduleId: "foo",
       schemaId: "ch1",
     });
-    expect(wsRoot).toMatchSnapshot();
   });
 
-  test("write", async () => {
+  test.skip("write", async () => {
     const payload = {
       uri: wsRoot,
       config: {

@@ -1,5 +1,6 @@
 import {
   createLogger,
+  DendronError,
   DEngineQuery,
   DNodePropsV2,
   EngineWriteOptsV2,
@@ -39,7 +40,7 @@ interface IRequestArgs {
 
 interface IAPIPayload {
   data: null | any | any[];
-  error: null | APIError;
+  error: null | DendronError;
 }
 
 interface IAPIOpts {
@@ -51,7 +52,7 @@ interface IAPIOpts {
   onAuth: (opts: IRequestArgs) => Promise<any>;
   onBuildHeaders: ({}: IRequestArgs) => Promise<any>;
   onError: ({}: {
-    err: APIError;
+    err: DendronError;
     body: any;
     resp: any;
     headers: any;
@@ -80,7 +81,7 @@ interface IStatusHandler {
 }
 
 type APIPayload<T = any> = {
-  error: APIError | null;
+  error?: DendronError | null | "string";
   data: T;
 };
 
@@ -91,42 +92,30 @@ export type InitializePayload = APIPayload<{
 
 export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
 export type EngineWritePayload = APIPayload<void>;
+
+export type SchemaReadPayload = APIPayload<SchemaModulePropsV2>;
 export type SchemaWritePayload = APIPayload<void>;
 export type SchemaUpdatePayload = APIPayload<void>;
 
 // === Utilities
 
-export class APIError {
-  public name: string;
-  public type: APIErrorType;
-  public message: string;
-  public code?: number;
-  public status: string;
-
-  constructor({ type, message, code }: IAPIErrorArgs) {
-    this.type = type;
-    this.message = message || "";
-    this.name = "APIError";
-    this.code = code || -1;
-    this.status = this.message;
-  }
-}
+const APIError = DendronError;
 
 const STATUS_HANDLERS = {
   401: {
     isErr: true,
     handler: ({ resp }: IStatusHandler) =>
-      new APIError({ type: "not_authorized_error", code: resp.statusCode }),
+      new APIError({ status: "not_authorized_error", code: resp.statusCode }),
   },
   404: {
     isErr: true,
     handler: ({ resp }: IStatusHandler) =>
-      new APIError({ code: resp.statusCode, type: "does_not_exist_error" }),
+      new APIError({ code: resp.statusCode, status: "does_not_exist_error" }),
   },
   502: {
     isErr: true,
     handler: ({ resp }: IStatusHandler) =>
-      new APIError({ code: resp.statusCode, type: "unknown_error" }),
+      new APIError({ code: resp.statusCode, status: "unknown_error" }),
   },
 };
 
@@ -145,6 +134,9 @@ export type EngineWriteRequest = {
   opts?: EngineWriteOptsV2;
 } & { ws: string };
 
+export type SchemaReadRequest = {
+  id: string;
+} & Partial<WorkspaceRequest>;
 export type SchemaWriteRequest = {
   schema: SchemaModulePropsV2;
 } & WorkspaceRequest;
@@ -313,6 +305,15 @@ export class DendronAPI extends API {
       path: "engine/write",
       method: "post",
       body: req,
+    });
+    return resp;
+  }
+
+  async schemaRead(req: SchemaReadRequest): Promise<SchemaReadPayload> {
+    const resp = await this._makeRequest({
+      path: "schema/get",
+      method: "get",
+      qs: req,
     });
     return resp;
   }

@@ -13,6 +13,7 @@ import {
   note2File,
   readYAML,
   schemaModuleOpts2File,
+  SchemaParserV2 as cSchemaParserV2,
 } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
@@ -21,7 +22,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { FileStorageV2, SchemaParserV2 } from "../drivers/file/storev2";
+import { FileStorageV2 } from "../drivers/file/storev2";
 import { DendronEngineV2 } from "../enginev2";
 
 const _su = SchemaUtilsV2;
@@ -118,7 +119,7 @@ describe("engine, schema/", () => {
         vaultDir,
         rootName: "bar",
       });
-      const mProps = SchemaParserV2.parseSchemaModuleOpts(mOpts, {
+      const mProps = cSchemaParserV2.parseSchemaModuleOpts(mOpts, {
         fname: "bar",
         root: vaultDir,
       });

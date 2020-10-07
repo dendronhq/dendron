@@ -10,12 +10,7 @@ import {
   NotePropsV2,
   NoteUtilsV2,
   SchemaModuleDictV2,
-  SchemaModuleOptsV2,
   SchemaModulePropsV2,
-  SchemaOptsV2,
-  SchemaPropsDictV2,
-  SchemaPropsV2,
-  SchemaUtils,
   SchemaUtilsV2,
   WriteNoteResp,
 } from "@dendronhq/common-all";

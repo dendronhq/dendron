@@ -168,6 +168,15 @@ export class EngineAPIService implements DEngineClientV2 {
     return resp;
   }
 
+  // ~~~ schemas
+  async getSchema(qs: string): Promise<RespV2<SchemaModulePropsV2>> {
+    throw Error("not implemetned");
+  }
+
+  async querySchema(qs: string): Promise<RespV2<SchemaModulePropsV2[]>> {
+    throw Error("not implemetned");
+  }
+
   async writeSchema(schema: SchemaModulePropsV2): Promise<void> {
     throw Error("not implemented");
   }

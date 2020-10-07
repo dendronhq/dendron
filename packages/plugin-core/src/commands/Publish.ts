@@ -4,8 +4,6 @@ import {
 } from "@dendronhq/dendron-cli";
 import _ from "lodash";
 import { window } from "vscode";
-import { CONFIG } from "../constants";
-import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -22,9 +20,7 @@ export class PublishCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const wsRoot = DendronWorkspace.rootDir() as string;
     const ws = DendronWorkspace.instance();
     const vault = ws.engine.props.root;
-    const publishRepoDir = DendronWorkspace.configuration().get<
-      string | undefined
-    >(CONFIG.PUBLISH_REPO_DIR.key);
+    const publishRepoDir = ws.config.site.siteRepoDir;
     await cmd.eval({ wsRoot, vault, publishRepoDir, ...opts });
     this.showResponse();
   }

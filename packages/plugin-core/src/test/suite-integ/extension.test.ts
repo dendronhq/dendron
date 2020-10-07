@@ -25,7 +25,6 @@ import path from "path";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { ArchiveHierarchyCommand } from "../../commands/ArchiveHierarchy";
-import { BuildPodCommand } from "../../commands/BuildPod";
 import { ChangeWorkspaceCommand } from "../../commands/ChangeWorkspace";
 import { ConfigurePodCommand } from "../../commands/ConfigurePodCommand";
 import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
@@ -2249,47 +2248,6 @@ suite("Lookup", function () {
             id: "id.foo",
             fname: "foo",
             body: "# Foo Content\nFoo line",
-          },
-        ]);
-      },
-    });
-  });
-});
-
-// --- Publishing
-
-// get call.getFileName issue
-suite.skip("Build Site", function () {
-  let root: DirResult;
-  let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
-
-  beforeEach(function () {
-    root = FileTestUtils.tmpDir();
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
-  });
-
-  test("missing link", function (done) {
-    onWSInit(async () => {
-      await new BuildPodCommand().execute({});
-      const editor = VSCodeUtils.getActiveTextEditor();
-      // there's a webview present
-      assert.ok(_.isUndefined(editor));
-      done();
-    });
-
-    setupDendronWorkspace(root.name, ctx, {
-      useCb: async () => {
-        NodeTestUtils.createNotes(path.join(root.name, "vault"), [
-          {
-            id: "id.foo",
-            fname: "foo",
-            body: "# Foo Content\n # Bar Content [[missing-link]]",
           },
         ]);
       },

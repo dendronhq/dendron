@@ -80,4 +80,15 @@ export class DConfig {
     out.siteIndex = siteIndex || siteHierarchies[0];
     return out;
   }
+
+  static writeConfig({
+    wsRoot,
+    config,
+  }: {
+    wsRoot: string;
+    config: DendronConfig;
+  }) {
+    const configPath = DConfig.configPath(wsRoot);
+    return writeYAML(configPath, config);
+  }
 }

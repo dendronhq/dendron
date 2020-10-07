@@ -450,6 +450,12 @@ export type DendronSiteConfig = {
   siteRootDir: string;
 
   /**
+   * Location of the github repo where your site notes are located.
+   * By default, this is assumed to be your `workspaceRoot` if not set.
+   */
+  siteRepoDir?: string;
+
+  /**
    * Folder where your notes will be kept. By default, "notes"
    */
   siteNotesDir?: string;

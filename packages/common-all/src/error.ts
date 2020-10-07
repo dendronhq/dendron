@@ -4,6 +4,10 @@ export class DendronError extends Error {
     super(opts?.msg);
     this.status = opts?.status || "ok";
   }
+
+  get msg(): string {
+    return this.opts?.msg || "";
+  }
 }
 
 export class IllegalOperationError extends DendronError {}

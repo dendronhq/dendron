@@ -27,6 +27,25 @@ export class EngineTestUtilsV2 {
   }
 }
 
+export class NodeTestPresetsV2 {
+  static async createOneNoteoneSchemaPreset({
+    vaultDir,
+  }: {
+    vaultDir: string;
+  }) {
+    await NodeTestUtilsV2.createSchemas({ vaultPath: vaultDir });
+    await NodeTestUtilsV2.createNotes({ vaultPath: vaultDir });
+    await NodeTestUtilsV2.createNoteProps({
+      vaultPath: vaultDir,
+      rootName: "foo",
+    });
+    await NodeTestUtilsV2.createSchemaModuleOpts({
+      vaultDir: vaultDir,
+      rootName: "foo",
+    });
+  }
+}
+
 export class NodeTestUtilsV2 {
   static createNoteProps = async (opts: {
     rootName: string;

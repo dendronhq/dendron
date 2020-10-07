@@ -230,7 +230,7 @@ export class LookupProviderV2 {
             updatedItems,
             (ent) => ent.fname
           );
-          updatedItems.concat(
+          updatedItems = updatedItems.concat(
             candidatesToAdd.map((ent) => {
               return DNodeUtilsV2.enhancePropForQuickInput(ent, engine.schemas);
             })

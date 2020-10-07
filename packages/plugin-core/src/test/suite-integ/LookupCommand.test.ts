@@ -18,6 +18,11 @@ import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { onWSInit, setupDendronWorkspace, TIMEOUT } from "../testUtils";
+import {
+  NodeTestPresetsV2,
+  NodeTestUtilsV2,
+} from "@dendronhq/common-test-utils";
+import fs from "fs-extra";
 
 suite("schemas", function () {});
 
@@ -147,6 +152,39 @@ suite("notes", function () {
               fname: "foo.bar",
             },
           ]);
+        },
+      });
+    });
+
+    test("schema suggestion", function (done) {
+      onWSInit(async () => {
+        const engOpts: EngineOpts = { flavor: "note" };
+        const lc = new LookupControllerV2(engOpts);
+        const lp = new LookupProviderV2(engOpts);
+        let quickpick = lc.show();
+        quickpick.value = "foo.";
+        await lp.onUpdatePickerItem(quickpick, { flavor: "note" }, "manual");
+        assert.deepStrictEqual(quickpick.items.length, 3);
+        assert.deepStrictEqual(
+          _.pick(_.find(quickpick.items, { fname: "foo.ch1" }), [
+            "fname",
+            "schemaStub",
+          ]),
+          {
+            fname: "foo.ch1",
+            schemaStub: true,
+          }
+        );
+        done();
+      });
+
+      setupDendronWorkspace(root.name, ctx, {
+        lsp: true,
+        useCb: async (vaultPath) => {
+          await NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+            vaultDir: vaultPath,
+          });
+          fs.removeSync(path.join(vaultPath, "foo.ch1.md"));
         },
       });
     });

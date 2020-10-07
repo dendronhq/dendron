@@ -1,33 +1,15 @@
-import {
-  DendronError,
-  DEngineV2,
-  DNodeUtilsV2,
-  ENGINE_ERROR_CODES,
-  NoteUtilsV2,
-  SchemaModuleDictV2,
-  SchemaModulePropsV2,
-  SchemaUtils,
-  SchemaUtilsV2,
-} from "@dendronhq/common-all";
-import {
-  createLogger,
-  note2File,
-  readYAML,
-  schemaModuleOpts2File,
-} from "@dendronhq/common-server";
+import { DEngineV2, NoteUtilsV2, SchemaUtilsV2 } from "@dendronhq/common-all";
+import { createLogger, note2File } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
   NodeTestUtilsV2,
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
-import _ from "lodash";
 import path from "path";
-import { FileStorageV2, SchemaParserV2 } from "../drivers/file/storev2";
+import { FileStorageV2 } from "../drivers/file/storev2";
 import { DendronEngineV2 } from "../enginev2";
 
 let LOGGER = createLogger("enginev2.spec", "/tmp/engine-server.log");
-
-const _su = SchemaUtilsV2;
 
 const beforePreset = async () => {
   const vaultDir = await EngineTestUtilsV2.setupVault({
@@ -52,11 +34,10 @@ const beforePreset = async () => {
 };
 
 describe("matchPath", () => {
-  let vaultDir: string;
   let engine: DEngineV2;
 
   beforeEach(async () => {
-    ({ vaultDir, engine } = await beforePreset());
+    ({ engine } = await beforePreset());
   });
 
   it("match path on domain, reg", async () => {

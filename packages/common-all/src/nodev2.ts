@@ -70,7 +70,11 @@ export class DNodeUtilsV2 {
     };
 
     // don't include optional props
-    const optionalProps: (keyof DNodeOptsV2)[] = ["stub", "custom"];
+    const optionalProps: (keyof DNodeOptsV2)[] = [
+      "stub",
+      "schemaStub",
+      "custom",
+    ];
     _.forEach(optionalProps, (op) => {
       if (opts[op]) {
         cleanProps[op] = opts[op];

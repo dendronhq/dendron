@@ -474,6 +474,7 @@
         "format": "prettier --write src '*.json' '*.js'"
     },
     "devDependencies": {
+        "@dendronhq/common-test-utils": "^0.12.5-alpha.5",
         "@types/clipboardy": "^2.0.1",
         "@types/execa": "^2.0.0",
         "@types/fs-extra": "^9.0.1",

@@ -4,6 +4,7 @@ import {
   DNodePropsQuickInputV2,
   DNodePropsV2,
   DNodeUtilsV2,
+  NotePropsV2,
   NoteUtilsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
@@ -195,15 +196,46 @@ export class LookupProviderV2 {
       // NOTE: we modify this later so need to track this here
       const noUpdatedItems = updatedItems.length === 0;
 
-      if (opts.flavor === "note") {
-        // TODO: gen schema suggestions
-        // updatedItems = PickerUtils.genSchemaSuggestions({
-        //   items: updatedItems as Note[],
-        //   qs: querystring,
-        //   engine: engine as DEngine,
-        // });
-        // profile = getDurationMilliseconds(start);
-        // L.info({ ...ctx2, msg: "genSchemaSuggestions", profile });
+      // add schema suggestions
+      if (opts.flavor === "note" && queryEndsWithDot) {
+        const results = SchemaUtilsV2.matchPath({
+          notePath: _.trimEnd(queryOrig, "."),
+          schemaModDict: engine.schemas,
+        });
+        // since namespace matches everything, we don't do queries on that
+        if (results && !results.schema.data.namespace) {
+          const { schema, schemaModule } = results;
+          const dirName = DNodeUtilsV2.dirName(queryOrig);
+          const candidates = schema.children
+            .map((ent) => {
+              const mschema = schemaModule.schemas[ent];
+              if (SchemaUtilsV2.hasSimplePattern(mschema)) {
+                const pattern = SchemaUtilsV2.getPattern(mschema);
+                const fname = [dirName, pattern].join(".");
+                return NoteUtilsV2.create({
+                  fname,
+                  schemaStub: true,
+                  desc: mschema.desc,
+                  schema: {
+                    moduleId: schemaModule.root.id,
+                    schemaId: schema.id,
+                  },
+                });
+              }
+              return;
+            })
+            .filter(Boolean) as NotePropsV2[];
+          const candidatesToAdd = _.differenceBy(
+            candidates,
+            updatedItems,
+            (ent) => ent.fname
+          );
+          updatedItems.concat(
+            candidatesToAdd.map((ent) => {
+              return DNodeUtilsV2.enhancePropForQuickInput(ent, engine.schemas);
+            })
+          );
+        }
       }
       // check if new item, return if that's the case
       if (

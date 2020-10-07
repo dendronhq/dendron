@@ -4,6 +4,7 @@ import {
   NotePropsDictV2,
   NoteUtilsV2,
   SchemaModuleOptsV2,
+  SchemaPropsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import {
@@ -115,8 +116,9 @@ export class NodeTestUtilsV2 {
   static createSchemaModuleOpts = async (opts: {
     vaultDir: string;
     rootName: string;
+    rootOpts?: Partial<SchemaPropsV2>;
   }) => {
-    const { vaultDir, rootName } = opts;
+    const { vaultDir, rootName, rootOpts } = opts;
     const schema = SchemaUtilsV2.create({
       fname: `${rootName}`,
       id: `${rootName}`,
@@ -124,6 +126,7 @@ export class NodeTestUtilsV2 {
       created: "1",
       updated: "1",
       children: ["ch1"],
+      ...rootOpts,
     });
     const ch1 = SchemaUtilsV2.create({
       fname: `${rootName}`,

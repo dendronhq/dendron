@@ -21,7 +21,7 @@ import {
   SchemaOptsV2,
   SchemaPropsDictV2,
   SchemaPropsV2,
-  SchemaSerializedV2,
+  SchemaRawV2,
 } from "./typesv2";
 import { genUUID } from "./uuid";
 
@@ -356,18 +356,19 @@ type SchemaMatchResult = {
 };
 
 export class SchemaUtilsV2 {
-  static create(opts: SchemaOptsV2): SchemaPropsV2 {
+  static create(opts: SchemaOptsV2 | SchemaRawV2): SchemaPropsV2 {
     const schemaDataOpts: (keyof SchemaDataV2)[] = [
       "namespace",
       "pattern",
       "template",
     ];
-    const optsWithoutData = _.omit(opts, schemaDataOpts) as SchemaOptsV2;
+    const optsWithoutData = _.omit(opts, schemaDataOpts);
     const optsData = _.pick(opts, schemaDataOpts);
     return DNodeUtilsV2.create({
       ..._.defaults(optsWithoutData, {
         title: optsWithoutData.id,
         data: optsData,
+        fname: "__empty",
       }),
       type: "schema",
     });
@@ -391,7 +392,7 @@ export class SchemaUtilsV2 {
       version: 1,
       fname,
       root,
-      schemas: { root },
+      schemas: { [root.id]: root },
       imports: [],
     };
   }
@@ -432,7 +433,6 @@ export class SchemaUtilsV2 {
       root: schema,
     };
   }
-
   static getModuleRoot(module: SchemaModuleOptsV2): SchemaPropsV2 {
     const maybeRoot = _.find(module.schemas, { parent: "root" });
     if (!maybeRoot) {
@@ -451,22 +451,32 @@ export class SchemaUtilsV2 {
     return maybeRoot as SchemaPropsV2;
   }
 
-  static getPattern = (
+  static getPattern = (schema: SchemaPropsV2) => {
+    const pattern = schema?.data?.pattern || schema.id;
+    const part = schema?.data?.namespace ? `${pattern}/*` : pattern;
+    return part;
+  };
+
+  static getPatternRecursive = (
     schema: SchemaPropsV2,
     schemas: SchemaPropsDictV2
   ): string => {
-    const pattern = schema?.data?.pattern || schema.id;
-    const part = schema?.data?.namespace ? `${pattern}/*` : pattern;
+    const part = SchemaUtilsV2.getPattern(schema);
     if (_.isNull(schema.parent)) {
       return part;
     }
     const parent: SchemaPropsV2 = schemas[schema.parent];
     if (parent && parent.id !== "root") {
-      const prefix = SchemaUtilsV2.getPattern(parent, schemas);
+      const prefix = SchemaUtilsV2.getPatternRecursive(parent, schemas);
       return [prefix, part].join("/");
     } else {
       return part;
     }
+  };
+
+  static hasSimplePattern = (schema: SchemaPropsV2): boolean => {
+    const pattern: string = SchemaUtilsV2.getPattern(schema);
+    return !_.isNull(pattern.match(/^[a-zA-Z0-9_-]*$/));
   };
 
   /**
@@ -501,13 +511,21 @@ export class SchemaUtilsV2 {
     notes: NotePropsDictV2;
     schemaCandidates: SchemaPropsV2[];
     schemaModule: SchemaModulePropsV2;
+    matchNamespace?: boolean;
   }) {
-    const { noteCandidates, schemaCandidates, notes, schemaModule } = opts;
+    const {
+      noteCandidates,
+      schemaCandidates,
+      notes,
+      schemaModule,
+      matchNamespace,
+    } = _.defaults(opts, { matchNamespace: true });
     const matches = _.map(noteCandidates, (note) => {
       return SchemaUtilsV2.matchNotePathWithSchemaAtLevel({
         notePath: note.fname,
         schemas: schemaCandidates,
         schemaModule,
+        matchNamespace,
       });
     }).filter((ent) => !_.isUndefined(ent)) as SchemaMatchResult[];
 
@@ -516,24 +534,19 @@ export class SchemaUtilsV2 {
       const note = _.find(noteCandidates, { fname: notePath }) as NotePropsV2;
       NoteUtilsV2.addSchema({ note, schema, schemaModule });
 
-      // if namespace, create fake intermediary note
-      const nextSchemaCandidates = schema.data.namespace
-        ? [
-            SchemaUtilsV2.create({
-              data: { pattern: "*" },
-              fname: schemaModule.fname,
-              children: schema.children,
-              id: "_tmp_ns_node",
-              parent: schema.id,
-            }),
-          ]
-        : schema.children.map((id) => schemaModule.schemas[id]);
+      const matchNextNamespace =
+        schema.data.namespace && matchNamespace ? false : true;
+      const nextSchemaCandidates = matchNextNamespace
+        ? schema.children.map((id) => schemaModule.schemas[id])
+        : [schema];
+
       const nextNoteCandidates = note.children.map((id) => notes[id]);
       return SchemaUtilsV2.matchDomainWithSchema({
         noteCandidates: nextNoteCandidates,
         schemaCandidates: nextSchemaCandidates,
         notes,
         schemaModule,
+        matchNamespace: matchNextNamespace,
       });
     });
   }
@@ -566,14 +579,19 @@ export class SchemaUtilsV2 {
     }
   }
 
-  static matchPathWithSchema(opts: {
+  static matchPathWithSchema({
+    notePath,
+    matched,
+    schemaCandidates,
+    schemaModule,
+    matchNamespace = true,
+  }: {
     notePath: string;
     matched: string;
     schemaCandidates: SchemaPropsV2[];
     schemaModule: SchemaModulePropsV2;
+    matchNamespace?: boolean;
   }): SchemaMatchResult | undefined {
-    const { notePath, matched, schemaCandidates, schemaModule } = opts;
-
     const getChildOfPath = (notePath: string, matched: string) => {
       const nextLvlIndex = _.indexOf(notePath, ".", matched.length + 1);
       return nextLvlIndex > 0 ? notePath.slice(0, nextLvlIndex) : notePath;
@@ -585,6 +603,7 @@ export class SchemaUtilsV2 {
       notePath: nextNotePath,
       schemas: schemaCandidates,
       schemaModule,
+      matchNamespace,
     });
     if (match) {
       const { schema } = match;
@@ -596,38 +615,44 @@ export class SchemaUtilsV2 {
           notePath,
         };
       }
-      const nextSchemaCandidates = schema.data.namespace
-        ? [
-            SchemaUtilsV2.create({
-              data: { pattern: "*" },
-              fname: schemaModule.fname,
-              children: schema.children,
-              parent: schema.id,
-              id: "_tmp_namespace_node",
-            }),
-          ]
-        : schema.children.map((id) => schemaModule.schemas[id]);
+
+      // if current note is a namespace and we are currently matching namespaces, don't match on the next turn
+      const matchNextNamespace =
+        schema.data.namespace && matchNamespace ? false : true;
+
+      // if we are not matching the next namespace, then we go back to regular matching behavior
+      const nextSchemaCandidates = matchNextNamespace
+        ? schema.children.map((id) => schemaModule.schemas[id])
+        : [schema];
       return SchemaUtilsV2.matchPathWithSchema({
         notePath,
         matched: nextNotePath,
         schemaCandidates: nextSchemaCandidates,
         schemaModule,
+        matchNamespace: matchNextNamespace,
       });
     }
     return;
   }
 
-  static matchNotePathWithSchemaAtLevel(opts: {
+  static matchNotePathWithSchemaAtLevel({
+    notePath,
+    schemas,
+    schemaModule,
+    matchNamespace = true,
+  }: {
     notePath: string;
     schemas: SchemaPropsV2[];
     schemaModule: SchemaModulePropsV2;
     matchNamespace?: boolean;
   }): SchemaMatchResult | undefined {
-    const { notePath, schemas, schemaModule, matchNamespace } = opts;
     const notePathClean = notePath.replace(/\./g, "/");
     let namespace = false;
     let match = _.find(schemas, (sc) => {
-      const pattern = SchemaUtilsV2.getPattern(sc, schemaModule.schemas);
+      const pattern = SchemaUtilsV2.getPatternRecursive(
+        sc,
+        schemaModule.schemas
+      );
       if (sc?.data?.namespace && matchNamespace) {
         namespace = true;
         return minimatch(notePathClean, _.trimEnd(pattern, "/*"));
@@ -648,7 +673,7 @@ export class SchemaUtilsV2 {
 
   static serializeSchemaProps(
     props: SchemaPropsV2 | SchemaOptsV2
-  ): SchemaSerializedV2 {
+  ): SchemaRawV2 {
     const builtinProps: Omit<SchemaOptsV2, "fname"> = _.pick(props, [
       "id",
       "children",

@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matchDomain match path on domain as namespace 1`] = `
+Object {
+  "moduleId": "bond",
+  "schemaId": "bond",
+}
+`;
+
+exports[`matchDomain match path on domain as namespace 2`] = `
+Object {
+  "moduleId": "bond",
+  "schemaId": "bond",
+}
+`;
+
+exports[`matchDomain match path on domain, reg 1`] = `
+Object {
+  "moduleId": "foo",
+  "schemaId": "foo",
+}
+`;

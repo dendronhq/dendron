@@ -18,11 +18,6 @@ export class PublishCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return {};
   }
   async execute(opts?: CommandOpts) {
-    const maybeTextEditor = VSCodeUtils.getActiveTextEditor();
-    if (_.isUndefined(maybeTextEditor)) {
-      window.showErrorMessage("no active document found");
-      return;
-    }
     const cmd = new PublishNotesCommand();
     const wsRoot = DendronWorkspace.rootDir() as string;
     const ws = DendronWorkspace.instance();

@@ -5,51 +5,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.12.6](https://github.com/dendronhq/dendron/compare/v0.12.5...v0.12.6) (2020-10-07)
 
-**Note:** Version bump only for package root
-
-## [0.12.5](https://github.com/dendronhq/dendron/compare/v0.12.5-alpha.7...v0.12.5) (2020-10-07)
-
-**Note:** Version bump only for package root
-
-## [0.12.5-alpha.7](https://github.com/dendronhq/dendron/compare/v0.12.5-alpha.6...v0.12.5-alpha.7) (2020-10-07)
-
-### Bug Fixes
-
-- **publishing:** don't require active doc to publish ([01cfe21](https://github.com/dendronhq/dendron/commit/01cfe21894bca6acb75e1908eeeef0cc39a4a60e))
-
 ### Enhancements
 
 - **publishing:** custom repo dir when publishing ([e0f5c0a](https://github.com/dendronhq/dendron/commit/e0f5c0a0e6f543b975a278127fb9213d03b5306f))
 - **workbench:** upgrade dendron snippets ([26e7a90](https://github.com/dendronhq/dendron/commit/26e7a903de8d14e815caab515e7535f1873252c4))
-
-## [0.12.5-alpha.6](https://github.com/dendronhq/dendron/compare/v0.12.5-alpha.5...v0.12.5-alpha.6) (2020-10-07)
-
-**Note:** Version bump only for package root
-
-## [0.12.5-alpha.5](https://github.com/dendronhq/dendron/compare/v0.12.5-alpha.4...v0.12.5-alpha.5) (2020-10-06)
+- **workbench:** default snippets ([7e959a4](https://github.com/dendronhq/dendron/commit/7e959a432c03fcb953bfd8890369cd91f1242dcc))
 
 ### Bug Fixes
 
 - **lookup:** schemas in lookup ([b4055fd](https://github.com/dendronhq/dendron/commit/b4055fd61d4918cf4c1a44591be31be69a71b93a))
-
-## [0.12.5-alpha.4](https://github.com/dendronhq/dendron/compare/v0.12.5-alpha.3...v0.12.5-alpha.4) (2020-10-05)
-
-**Note:** Version bump only for package root
-
-## [0.12.5-alpha.3](https://github.com/dendronhq/dendron/compare/v0.12.5-alpha.2...v0.12.5-alpha.3) (2020-10-05)
-
-**Note:** Version bump only for package root
-
-## [0.12.5-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.5-alpha.1...v0.12.5-alpha.2) (2020-10-05)
-
-### Enhancements
-
-- **workbench:** default snippets ([7e959a4](https://github.com/dendronhq/dendron/commit/7e959a432c03fcb953bfd8890369cd91f1242dcc))
-
-## [0.12.5-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.5-alpha.0...v0.12.5-alpha.1) (2020-10-04)
-
-### Bug Fixes
-
 - **server:** schema names ([c457f96](https://github.com/dendronhq/dendron/commit/c457f96cc02accd2811a73e15025f68d6796256d))
 
 ## 0.12.4 and Beyond

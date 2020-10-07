@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.5-alpha.7](https://github.com/dendronhq/dendron/compare/v0.12.5-alpha.6...v0.12.5-alpha.7) (2020-10-07)
+
+### Bug Fixes
+
+- **publishing:** don't require active doc to publish ([01cfe21](https://github.com/dendronhq/dendron/commit/01cfe21894bca6acb75e1908eeeef0cc39a4a60e))
+
+### Enhancements
+
+- **publishing:** custom repo dir when publishing ([e0f5c0a](https://github.com/dendronhq/dendron/commit/e0f5c0a0e6f543b975a278127fb9213d03b5306f))
+- **workbench:** upgrade dendron snippets ([26e7a90](https://github.com/dendronhq/dendron/commit/26e7a903de8d14e815caab515e7535f1873252c4))
+
 ## [0.12.5-alpha.6](https://github.com/dendronhq/dendron/compare/v0.12.5-alpha.5...v0.12.5-alpha.6) (2020-10-07)
 
 **Note:** Version bump only for package root

@@ -4,7 +4,7 @@
     "displayName": "dendron",
     "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
     "publisher": "dendron",
-    "version": "0.12.5-alpha.7",
+    "version": "0.12.5",
     "engines": {
         "vscode": "^1.45.0"
     },
@@ -474,7 +474,7 @@
         "format": "prettier --write src '*.json' '*.js'"
     },
     "devDependencies": {
-        "@dendronhq/common-test-utils": "^0.12.5-alpha.7",
+        "@dendronhq/common-test-utils": "^0.12.5",
         "@types/clipboardy": "^2.0.1",
         "@types/execa": "^2.0.0",
         "@types/fs-extra": "^9.0.1",
@@ -503,14 +503,14 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
-        "@dendronhq/api-server": "^0.12.5-alpha.7",
+        "@dendronhq/api-server": "^0.12.5",
         "@dendronhq/clipboardy": "^2.3.0",
-        "@dendronhq/common-all": "^0.12.5-alpha.7",
-        "@dendronhq/common-server": "^0.12.5-alpha.7",
-        "@dendronhq/dendron-cli": "^0.12.5-alpha.7",
-        "@dendronhq/engine-server": "^0.12.5-alpha.7",
-        "@dendronhq/lsp-server": "^0.12.5-alpha.7",
-        "@dendronhq/pods-core": "^0.12.5-alpha.7",
+        "@dendronhq/common-all": "^0.12.5",
+        "@dendronhq/common-server": "^0.12.5",
+        "@dendronhq/dendron-cli": "^0.12.5",
+        "@dendronhq/engine-server": "^0.12.5",
+        "@dendronhq/lsp-server": "^0.12.5",
+        "@dendronhq/pods-core": "^0.12.5",
         "cross-path-sort": "^1.0.0",
         "execa": "^4.0.2",
         "fs-extra": "^9.0.1",

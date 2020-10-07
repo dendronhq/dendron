@@ -47,7 +47,7 @@ export class PublishNotesCommand extends SoilCommand<
         publishRepoDir: cleanArgs.wsRoot,
       }
     );
-    out.publishRepoDir = resolvePath(out.publishRepoDir, out.wsRoot);
+    chout.publishRepoDir = resolvePath(out.publishRepoDir, out.wsRoot);
     return out;
   }
 

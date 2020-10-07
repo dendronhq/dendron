@@ -38,6 +38,78 @@ suite("startup", function () {
       HistoryService.instance().clearSubscriptions();
     });
 
+    it("workspace active, prior workspace version", function (done) {
+      const pathToVault = path.join(root.name, "vault");
+      const snippetFile = path.join(pathToVault, ".vscode", Snippets.filename);
+      setupWorkspace(root.name);
+
+      onWSInit((_event: HistoryEvent) => {
+        assert.strictEqual(DendronWorkspace.isActive(), true);
+        assert.strictEqual(
+          ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
+          "0.0.1"
+        );
+        const payload = fs.readJSONSync(snippetFile);
+        assert.deepStrictEqual(payload, {
+          bond: {
+            prefix: "bond",
+            desc: "diff_prefix",
+          },
+          time: {
+            prefix: "snippet_with_same_id",
+          },
+          snippet_with_same_prefix: {
+            prefix: "date",
+          },
+          todo: {
+            prefix: "to",
+            scope: "markdown,yaml",
+            body: "- [ ]",
+            description: "render todo box",
+          },
+          tag: {
+            prefix: "#",
+            scope: "markdown,yaml",
+            body: "[[#${1:my-tag}|tag.${1}]]",
+            description: "tag",
+          },
+        });
+        done();
+      });
+
+      DendronWorkspace.version = () => "0.0.1";
+      assert.strictEqual(
+        ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
+        undefined
+      );
+      ctx.globalState.update(WORKSPACE_STATE.WS_VERSION, "0.0.1").then(() => {
+        // setup workspace
+        new SetupWorkspaceCommand()
+          .execute({
+            rootDirRaw: root.name,
+            skipOpenWs: true,
+            skipConfirmation: true,
+            emptyWs: true,
+          })
+          .then(async () => {
+            fs.ensureFileSync(snippetFile);
+            fs.writeJSONSync(snippetFile, {
+              bond: {
+                prefix: "bond",
+                desc: "diff_prefix",
+              },
+              time: {
+                prefix: "snippet_with_same_id",
+              },
+              snippet_with_same_prefix: {
+                prefix: "date",
+              },
+            });
+            _activate(ctx);
+          });
+      });
+    });
+
     it("workspace active, no prior workspace version", function (done) {
       setupWorkspace(root.name);
       onWSInit((_event: HistoryEvent) => {

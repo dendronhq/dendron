@@ -5,12 +5,15 @@ import {
   ConfigurationTarget,
   WorkspaceConfiguration,
   extensions,
+  WorkspaceFolder,
 } from "vscode";
+import { Logger } from "./logger";
 import { DendronWorkspace } from "./workspace";
 
 type CodeConfig = {
   settings?: ConfigChanges;
   extensions?: CodeExtensionsConfig;
+  snippetChanges?: any;
 };
 type CodeExtensionsConfig = {
   recommendations?: string[];
@@ -106,12 +109,17 @@ export class WorkspaceConfig {
   }
 
   static async update(_wsRoot: string): Promise<Required<CodeConfig>> {
+    const ctx = "WorkspaceConfig:update";
     const src = DendronWorkspace.configuration();
     const changes = await Settings.upgrade(src, _SETTINGS);
-
+    const vault = (DendronWorkspace.workspaceFolders() as WorkspaceFolder[])[0];
+    const vscodeDir = path.join(vault.uri.fsPath, ".vscode");
+    const snippetChanges = Snippets.upgradeOrCreate(vscodeDir);
+    Logger.info({ ctx, vscodeDir, snippetChanges });
     return {
       extensions: {},
       settings: changes,
+      snippetChanges,
     };
   }
 }
@@ -185,7 +193,7 @@ export class Snippets {
   static defaults: { [key: string]: Snippet } = {
     todo: {
       prefix: "to",
-      scope: "markdown",
+      scope: "markdown,yaml",
       body: "- [ ]",
       description: "render todo box",
     },
@@ -195,13 +203,58 @@ export class Snippets {
       body: "[[#${1:my-tag}|tag.${1}]]",
       description: "tag",
     },
+    date: {
+      prefix: "date",
+      scope: "markdown,yaml",
+      body: "$CURRENT_YEAR.$CURRENT_MONTH.$CURRENT_DATE",
+      description: "today's date",
+    },
+    time: {
+      prefix: "time",
+      scope: "markdown,yaml",
+      body:
+        "$CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE $CURRENT_HOUR:$CURRENT_MINUTE",
+      description: "time",
+    },
   };
 
-  static updateOrCreate = (dirPath: string) => {
+  static create = (dirPath: string) => {
     fs.ensureDirSync(dirPath);
     const snippetPath = path.join(dirPath, Snippets.filename);
     return fs.writeJSONSync(snippetPath, Snippets.defaults, { spaces: 4 });
   };
+
+  static read = (dirPath: string): false | { [key: string]: Snippet } => {
+    const snippetPath = path.join(dirPath, Snippets.filename);
+    if (!fs.existsSync(snippetPath)) {
+      return false;
+    } else {
+      return fs.readJSONSync(snippetPath);
+    }
+  };
+
+  static upgradeOrCreate(dirPath: string): { [key: string]: Snippet } {
+    const out = Snippets.read(dirPath);
+    if (!out) {
+      Snippets.create(dirPath);
+      return Snippets.defaults;
+    } else {
+      const changed: { [key: string]: Snippet } = {};
+      const prefixKey = _.mapKeys(out, (ent) => ent.prefix);
+      _.each(Snippets.defaults, (v: Snippet, k: string) => {
+        if (!_.has(out, k) && !_.has(prefixKey, v.prefix)) {
+          changed[k] = v;
+        }
+      });
+      Snippets.write(dirPath, { ...out, ...changed });
+      return changed;
+    }
+  }
+
+  static write(dirPath: string, snippets: { [key: string]: Snippet }) {
+    const snippetPath = path.join(dirPath, Snippets.filename);
+    return fs.writeJSONSync(snippetPath, snippets, { spaces: 4 });
+  }
 }
 
 export class Settings {

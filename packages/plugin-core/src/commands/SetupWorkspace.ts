@@ -164,7 +164,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
 
     // write snippets
     const vscodeDir = path.join(vaultPath, ".vscode");
-    Snippets.updateOrCreate(vscodeDir);
+    Snippets.create(vscodeDir);
 
     if (!opts.skipOpenWs) {
       vscode.window.showInformationMessage("opening dendron workspace");

@@ -73,7 +73,6 @@ export class LookupProviderV2 {
           : SchemaUtilsV2.create({ id: fname, fname });
     }
 
-    // TODO: apply schema
     const uri = node2Uri(nodeNew, wsFolders);
     const historyService = HistoryService.instance();
     historyService.add({ source: "engine", action: "create", uri });

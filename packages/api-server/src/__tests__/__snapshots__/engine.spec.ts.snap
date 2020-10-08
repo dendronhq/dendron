@@ -122,42 +122,10 @@ Object {
 }
 `;
 
-exports[`notes query query root: root note 1`] = `
+exports[`notes write grandchild of root, child is stub: root note 1`] = `
 Object {
-  "data": Array [
-    Object {
-      "body": "
-",
-      "children": Array [
-        "foo",
-      ],
-      "created": "1",
-      "custom": Object {},
-      "data": Object {},
-      "desc": "",
-      "fname": "root",
-      "id": "root",
-      "parent": null,
-      "title": "Root",
-      "type": "note",
-      "updated": "1",
-    },
-  ],
-  "error": null,
-}
-`;
-
-exports[`notes query query root: root schema  1`] = `
-Object {
-  "data": Array [
-    Object {
-      "children": Array [],
-      "id": "root",
-      "parent": "root",
-      "title": "root",
-    },
-  ],
-  "error": null,
+  "data": undefined,
+  "error": [RequestError: Error: connect ECONNREFUSED 127.0.0.1:3005],
 }
 `;
 

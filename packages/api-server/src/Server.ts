@@ -14,7 +14,6 @@ if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
 }
 
-// app.use('/api/static', express.static('public'))
 app.get("/api/static", (_req, res) => {
   res.redirect("http://localhost:1568/");
 });
@@ -40,4 +39,4 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
-export default app;
+export { app };

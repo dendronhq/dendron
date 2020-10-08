@@ -1,7 +1,6 @@
 import process from "process";
 
-import { app } from "./index";
+import { launch } from "./index";
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`start on port ${port}`);
-});
+const logPath = process.env.LOG_DST_DIR;
+launch({ port: port as number, logPath });

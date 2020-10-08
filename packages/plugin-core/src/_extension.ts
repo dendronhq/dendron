@@ -124,8 +124,9 @@ async function startServer() {
   const maybePort = DendronWorkspace.configuration().get<number | undefined>(
     CONFIG.SERVER_PORT.key
   );
+  const logPath = DendronWorkspace.instance().context.logPath;
   if (!maybePort) {
-    return await launch({ port: maybePort });
+    return await launch({ port: maybePort, logPath });
   }
   return maybePort;
 }

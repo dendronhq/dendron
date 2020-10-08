@@ -11,6 +11,8 @@ import { CONFIG } from "../constants";
 import { _activate } from "../_extension";
 import { HistoryEvent, HistoryService } from "../services/HistoryService";
 import { DendronWorkspace } from "../workspace";
+import { DendronQuickPickerV2 } from "../components/lookup/LookupProvider";
+import { DNodePropsQuickInputV2 } from "@dendronhq/common-all";
 
 function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
   const _settings = settings;
@@ -28,6 +30,20 @@ function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
       return _settings;
     },
   };
+}
+
+type QuickPickOpts = Partial<{
+  value: string;
+}>;
+
+export function createMockQuickPick(
+  opts: QuickPickOpts
+): vscode.QuickPick<DNodePropsQuickInputV2> {
+  const qp = vscode.window.createQuickPick<DNodePropsQuickInputV2>();
+  if (opts.value) {
+    qp.value = opts.value;
+  }
+  return qp as DendronQuickPickerV2;
 }
 
 export function setupWorkspace(

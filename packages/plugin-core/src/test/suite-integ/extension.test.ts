@@ -61,7 +61,6 @@ import {
   GLOBAL_STATE,
   WORKSPACE_STATE,
 } from "../../constants";
-import { _activate } from "../../_extension";
 import {
   cacheRefs,
   findDanglingRefsByFsPath,
@@ -72,6 +71,7 @@ import {
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
+import { _activate } from "../../_extension";
 import { onWSActive, onWSInit, setupWorkspace } from "../testUtils";
 
 type ExportConfig = any;
@@ -1977,6 +1977,7 @@ suite("ImportPod", function () {
       });
       await cmd.run();
       let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(vault, [
+        ".vscode",
         "assets",
         "project.p1.md",
         "project.p1.n1.md",
@@ -2184,6 +2185,7 @@ suite("Lookup", function () {
       await new LookupCommand().execute({
         selectionType: "selection2link",
         noteType: "journal",
+        flavor: "note",
       });
       done();
     });
@@ -2212,6 +2214,7 @@ suite("Lookup", function () {
       await new LookupCommand().execute({
         selectionType: "selection2link",
         noteType: "scratch",
+        flavor: "note",
       });
       done();
     });
@@ -2237,7 +2240,10 @@ suite("Lookup", function () {
         uri
       )) as vscode.TextEditor;
       editor.selection = new vscode.Selection(9, 0, 9, 12);
-      await new LookupCommand().execute({ selectionType: "selection2link" });
+      await new LookupCommand().execute({
+        selectionType: "selection2link",
+        flavor: "note",
+      });
       done();
     });
 

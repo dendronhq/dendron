@@ -1,10 +1,13 @@
-import { DNodePropsQuickInputV2 } from "@dendronhq/common-all";
+import { DEngineClientV2, DNodePropsQuickInputV2 } from "@dendronhq/common-all";
 import {
   DirResult,
   FileTestUtils,
   NodeTestUtils,
 } from "@dendronhq/common-server";
-import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
+import {
+  NodeTestPresetsV2,
+  SchemaTestPresetsV2,
+} from "@dendronhq/common-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -19,9 +22,187 @@ import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { onWSInit, setupDendronWorkspace, TIMEOUT } from "../testUtils";
+import {
+  createMockQuickPick,
+  onWSInit,
+  setupDendronWorkspace,
+  TIMEOUT,
+} from "../testUtils";
 
-suite("schemas", function () {});
+suite.only("schemas", function () {
+  let root: DirResult;
+  let ctx: vscode.ExtensionContext;
+  this.timeout(TIMEOUT);
+
+  beforeEach(function () {
+    root = FileTestUtils.tmpDir();
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    DendronWorkspace.getOrCreate(ctx);
+  });
+
+  afterEach(function () {
+    HistoryService.instance().clearSubscriptions();
+  });
+
+  describe("updateItems", function () {
+    const engOpts: EngineOpts = { flavor: "schema" };
+    let ws: DendronWorkspace;
+    let client: DEngineClientV2;
+
+    test("root", function (done) {
+      onWSInit(async () => {
+        ws = DendronWorkspace.instance();
+        client = ws.getEngine();
+        const lc = new LookupControllerV2(engOpts);
+        const lp = new LookupProviderV2(engOpts);
+        const quickpick = lc.show();
+        quickpick.value = "root";
+        await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
+        const schemaModules = _.map(
+          lc.quickPick?.items,
+          (ent) => client.schemas[ent.id]
+        );
+        _.map(
+          await SchemaTestPresetsV2.createQueryRootResults(schemaModules),
+          (ent) => {
+            const { actual, expected, msg } = ent;
+            assert.strictEqual(actual, expected, msg);
+          }
+        );
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        lsp: true,
+        useCb: async (vaultPath) => {
+          return NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+            vaultDir: vaultPath,
+          });
+        },
+      });
+    });
+
+    test("all", function (done) {
+      onWSInit(async () => {
+        ws = DendronWorkspace.instance();
+        client = ws.getEngine();
+        const lc = new LookupControllerV2(engOpts);
+        const lp = new LookupProviderV2(engOpts);
+        const quickpick = lc.show();
+        quickpick.value = "";
+        await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
+        const schemaModules = _.map(
+          lc.quickPick?.items,
+          (ent) => client.schemas[ent.id]
+        );
+        _.map(
+          await SchemaTestPresetsV2.createQueryAllResults(schemaModules),
+          (ent) => {
+            const { actual, expected, msg } = ent;
+            console.log(msg);
+            assert.strictEqual(actual, expected);
+          }
+        );
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        lsp: true,
+        useCb: async (vaultPath) => {
+          return NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+            vaultDir: vaultPath,
+          });
+        },
+      });
+    });
+
+    test("non-root", function (done) {
+      onWSInit(async () => {
+        ws = DendronWorkspace.instance();
+        client = ws.getEngine();
+        const lc = new LookupControllerV2(engOpts);
+        const lp = new LookupProviderV2(engOpts);
+        const quickpick = lc.show();
+        quickpick.value = "foo";
+        await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
+        const schemaModules = _.map(
+          lc.quickPick?.items,
+          (ent) => client.schemas[ent.id]
+        );
+        _.map(
+          await SchemaTestPresetsV2.createQueryNonRootResults(schemaModules),
+          (ent) => {
+            const { actual, expected, msg } = ent;
+            assert.strictEqual(actual, expected, msg);
+          }
+        );
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        lsp: true,
+        useCb: async (vaultPath) => {
+          return NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+            vaultDir: vaultPath,
+          });
+        },
+      });
+    });
+  });
+
+  describe("onAccept", function () {
+    const engOpts: EngineOpts = { flavor: "schema" };
+    let ws: DendronWorkspace;
+    let client: DEngineClientV2;
+
+    test.only("root", function (done) {
+      onWSInit(async () => {
+        ws = DendronWorkspace.instance();
+        client = ws.getEngine();
+        const quickpick = createMockQuickPick({ value: "root" });
+        const lp = new LookupProviderV2(engOpts);
+        await lp.onDidAccept(quickpick, engOpts);
+        assert.strictEqual(
+          path.basename(
+            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+          ),
+          "root.schema.yml"
+        );
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        lsp: true,
+        useCb: async (vaultPath) => {
+          return NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+            vaultDir: vaultPath,
+          });
+        },
+      });
+    });
+
+    test("non-root", function (done) {
+      onWSInit(async () => {
+        ws = DendronWorkspace.instance();
+        client = ws.getEngine();
+        const quickpick = createMockQuickPick({ value: "foo" });
+        const lp = new LookupProviderV2(engOpts);
+        await lp.onDidAccept(quickpick, engOpts);
+        assert.strictEqual(
+          path.basename(
+            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+          ),
+          "foo.schema.yml"
+        );
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        lsp: true,
+        useCb: async (vaultPath) => {
+          return NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+            vaultDir: vaultPath,
+          });
+        },
+      });
+      done();
+    });
+  });
+});
 
 suite("notes", function () {
   let root: DirResult;
@@ -56,11 +237,12 @@ suite("notes", function () {
         assert.equal(lc.quickPick?.items.length, 3);
         done();
       });
+
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
         useCb: async (vaultPath) => {
           vault = vaultPath;
-          NodeTestUtils.createNotes(vaultPath, [
+          await NodeTestUtils.createNotes(vaultPath, [
             {
               id: "id.foo",
               fname: "foo",

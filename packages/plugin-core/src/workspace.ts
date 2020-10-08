@@ -1,6 +1,7 @@
 import {
   CONSTANTS,
   DendronConfig,
+  DendronError,
   DEngine,
   DEngineClientV2,
   getStage,
@@ -297,6 +298,7 @@ export class DendronWorkspace {
         async () => {
           await new LookupCommand().run({
             noteType: "journal",
+            flavor: "note",
           } as LookupCommandOpts);
         }
       )
@@ -342,7 +344,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.LOOKUP.key,
         async (args: any) => {
-          new LookupCommand().run(args);
+          new LookupCommand().run({ ...args, flavor: "note" });
         }
       )
     );
@@ -351,8 +353,11 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.LOOKUP_SCHEMA.key,
         async () => {
+          if (DendronWorkspace.lsp()) {
+            return new LookupCommand().run({ flavor: "schema" });
+          }
           const controller = new LookupController(this, { flavor: "schema" });
-          controller.show();
+          return controller.show();
         }
       )
     );

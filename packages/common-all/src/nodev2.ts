@@ -105,7 +105,10 @@ export class DNodeUtilsV2 {
       const out = { ...props, label, detail, description };
       return out;
     } else {
-      throw Error("not implemented");
+      const label = props.id === "root" ? "root" : props.id;
+      const detail = props.desc;
+      const out = { ...props, label, detail };
+      return out;
     }
   }
 

@@ -211,7 +211,8 @@ export class EngineAPIService implements DEngineClientV2 {
   }
 
   async querySchema(qs: string): Promise<RespV2<SchemaModulePropsV2[]>> {
-    throw Error("not implemetned");
+    const out = await this.api.schemaQuery({ qs, ws: this.ws });
+    return _.defaults(out, { data: [] });
   }
 
   async updateSchema(schema: SchemaModulePropsV2): Promise<void> {

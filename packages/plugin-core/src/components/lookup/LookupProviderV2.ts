@@ -6,6 +6,7 @@ import {
   DNodeUtilsV2,
   NotePropsV2,
   NoteUtilsV2,
+  SchemaModulePropsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -173,10 +174,16 @@ export class LookupProviderV2 {
         picker.justActivated
       ) {
         Logger.info({ ctx, msg: "first query" });
-        const resp = await engine.query(querystring, opts.flavor);
-        const notes = resp.data;
+        let nodes: DNodePropsV2[];
+        if (opts.flavor === "note") {
+          const resp = await engine.query(querystring, opts.flavor);
+          nodes = resp.data;
+        } else {
+          const resp = await engine.querySchema(querystring);
+          nodes = resp.data.map((ent) => SchemaUtilsV2.getModuleRoot(ent));
+        }
         updatedItems = [this.noActiveItem].concat(
-          notes.map((ent) =>
+          nodes.map((ent) =>
             DNodeUtilsV2.enhancePropForQuickInput(ent, engine.schemas)
           )
         );
@@ -192,7 +199,10 @@ export class LookupProviderV2 {
       }
 
       // don't use query string since this can change
-      const perfectMatch = _.find(updatedItems, { fname: queryOrig });
+      const perfectMatch =
+        opts.flavor === "note"
+          ? _.find(updatedItems, { fname: queryOrig })
+          : _.find(updatedItems, { id: queryOrig });
       // NOTE: we modify this later so need to track this here
       const noUpdatedItems = updatedItems.length === 0;
 
@@ -285,16 +295,21 @@ export class LookupProviderV2 {
     engine: DEngineClientV2
   ): DNodePropsQuickInputV2[] {
     let nodeDict: DNodePropsDictV2;
+    let nodes: DNodePropsV2[];
     if (flavor === "note") {
       nodeDict = engine.notes;
+      nodes = _.map(nodeDict["root"].children, (ent) => nodeDict[ent]).concat(
+        nodeDict["root"]
+      );
     } else {
       nodeDict = _.mapValues(engine.schemas, (ent) => ent.root);
-    }
-    return _.map(nodeDict["root"].children, (ent) => nodeDict[ent])
-      .concat(nodeDict["root"])
-      .map((ent) => {
-        return DNodeUtilsV2.enhancePropForQuickInput(ent, engine.schemas);
+      nodes = _.map(_.values(engine.schemas), (ent: SchemaModulePropsV2) => {
+        return SchemaUtilsV2.getModuleRoot(ent);
       });
+    }
+    return nodes.map((ent) => {
+      return DNodeUtilsV2.enhancePropForQuickInput(ent, engine.schemas);
+    });
   }
 
   validate(value: string, flavor: EngineFlavor): string | undefined {

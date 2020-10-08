@@ -1,10 +1,12 @@
 import {
+  DendronError,
   DEngineClientV2,
   DEngineInitPayloadV2,
   DNodeData,
   DNodePropsV2,
   DNodeTypeV2,
   EngineDeleteOpts,
+  EngineDeleteOptsV2,
   EngineGetResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
@@ -58,12 +60,30 @@ export class EngineAPIService implements DEngineClientV2 {
       uri: this.ws,
       config: { vaults },
     });
+    if (!resp.data) {
+      throw new DendronError({ msg: "no data" });
+    }
 
     const { notes, schemas } = resp.data;
     this.notes = notes;
     this.schemas = schemas;
     Logger.info({ ctx, msg: "exit", resp });
-    return resp;
+    return {
+      error: null,
+      data: { notes, schemas },
+    };
+  }
+
+  async deleteNote(id: string, opts?: EngineDeleteOptsV2) {
+    const ws = this.ws;
+    const resp = await this.api.engineDelete({ id, opts, ws });
+    if (!resp.data) {
+      throw new DendronError({ msg: "no data" });
+    }
+    return {
+      error: null,
+      data: resp.data,
+    };
   }
 
   async delete(
@@ -107,9 +127,15 @@ export class EngineAPIService implements DEngineClientV2 {
       opts,
       ws: this.ws,
     });
+    if (!resp.data) {
+      throw new DendronError({ msg: "no data" });
+    }
     await this.refreshNodes(resp.data, mode);
     Logger.info({ ctx, msg: "exit", resp });
-    return resp;
+    return {
+      error: null,
+      data: resp.data,
+    };
   }
 
   /**

@@ -158,11 +158,15 @@ export type DEngineV2 = DCommonProps &
     store: DStoreV2;
 
     init: () => Promise<RespV2<DEngineInitPayloadV2>>;
-    delete: (
+    // delete: (
+    //   id: string,
+    //   mode: DNodeTypeV2,
+    //   opts?: EngineDeleteOptsV2
+    // ) => Promise<void>;
+    deleteNote: (
       id: string,
-      mode: DNodeTypeV2,
       opts?: EngineDeleteOptsV2
-    ) => Promise<void>;
+    ) => Promise<RespV2<StoreDeleteNoteResp>>;
 
     getSchema: (qs: string) => Promise<RespV2<SchemaModulePropsV2>>;
 
@@ -176,7 +180,13 @@ export type DEngineV2 = DCommonProps &
 
 export type DEngineClientV2 = Omit<DEngineV2, "store" | "vaults">;
 
+export type StoreDeleteNoteResp = "stub" | "removed";
+
 export type DStoreV2 = DCommonProps &
   DCommonMethods & {
     init: () => Promise<DEngineInitPayloadV2>;
+    deleteNote: (
+      id: string,
+      opts?: EngineDeleteOptsV2
+    ) => Promise<StoreDeleteNoteResp>;
   };

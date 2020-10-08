@@ -84,6 +84,128 @@ Array [
 ]
 `;
 
+exports[`engine, notes/ delete/ delete node w/ no children 1`] = `
+Object {
+  "foo": Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "parent": "root",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+  },
+  "root": Object {
+    "body": "
+",
+    "children": Array [
+      "foo",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+  },
+}
+`;
+
+exports[`engine, notes/ delete/ delete node w/ no children 2`] = `
+Array [
+  "foo.md",
+  "foo.schema.yml",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
+exports[`engine, notes/ delete/ delete node w/children 1`] = `
+Object {
+  "foo": Object {
+    "body": "
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "parent": "root",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "stub": true,
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+  },
+  "foo.ch1": Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "id": "foo.ch1",
+    "parent": "foo",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "ch1",
+    },
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+  },
+  "root": Object {
+    "body": "
+",
+    "children": Array [
+      "foo",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+  },
+}
+`;
+
+exports[`engine, notes/ delete/ delete node w/children 2`] = `
+Array [
+  "foo.ch1.md",
+  "foo.schema.yml",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
 exports[`engine, notes/ write/ write note, match schema: notes 1`] = `
 Object {
   "foo": Object {

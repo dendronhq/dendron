@@ -333,6 +333,50 @@ describe("engine, notes/", () => {
     });
   });
 
+  describe("delete/", () => {
+    let vaultDir: string;
+    let engine: DEngineV2;
+    beforeEach(async () => {
+      ({ vaultDir, engine } = await beforePreset());
+    });
+
+    test("delete node w/children", async () => {
+      await engine.init();
+      await engine.deleteNote("foo");
+      expect(engine.notes).toMatchSnapshot();
+
+      // note not removed but changed into stub in memory
+      expect(_.values(engine.notes).length).toEqual(3);
+      expect(engine.notes["foo"].stub).toBeTruthy();
+
+      // note removed from disk
+      expect(fs.readdirSync(vaultDir)).toMatchSnapshot();
+      expect(_.includes(fs.readdirSync(vaultDir), "foo.md")).toBeFalsy();
+
+      // note still in index
+      const index = (engine as DendronEngineV2).notesIndex;
+      expect((index.getIndex().toJSON() as any).records.length).toEqual(3);
+    });
+
+    test("delete node w/ no children", async () => {
+      await engine.init();
+      await engine.deleteNote("foo.ch1");
+      expect(engine.notes).toMatchSnapshot();
+
+      // note deleted in memory
+      expect(_.values(engine.notes).length).toEqual(2);
+
+      // note removed from parent
+      expect(engine.notes["foo"].children).toEqual([]);
+      expect(fs.readdirSync(vaultDir)).toMatchSnapshot();
+      expect(_.includes(fs.readdirSync(vaultDir), "foo.ch1.md")).toBeFalsy();
+
+      // note not in index
+      const index = (engine as DendronEngineV2).notesIndex;
+      expect((index.getIndex().toJSON() as any).records.length).toEqual(2);
+    });
+  });
+
   describe("write/", () => {
     let vaultDir: string;
     let engine: DEngineV2;

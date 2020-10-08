@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`notes delete node w/children delete 1`] = `
+Array [
+  "foo.ch1.md",
+  "foo.schema.yml",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
 exports[`notes query query child note with schema 1`] = `
 Object {
   "data": Array [

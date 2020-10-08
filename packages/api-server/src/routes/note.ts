@@ -1,5 +1,6 @@
 import { DendronError, DEngineV2, WriteNoteResp } from "@dendronhq/common-all";
 import {
+  EngineDeleteRequest,
   EngineQueryRequest,
   EngineWriteRequest,
 } from "@dendronhq/common-server";
@@ -8,6 +9,16 @@ import { Request, Response, Router } from "express";
 import { MemoryStore } from "../store/memoryStore";
 
 const router = Router();
+
+router.post("/delete", async (req: Request, res: Response) => {
+  const { ws, id, opts } = req.body as EngineDeleteRequest;
+  const engine = await MemoryStore.instance().get<DendronEngineV2>(`ws:${ws}`);
+  if (!engine) {
+    throw "No Engine";
+  }
+  const { error, data } = await engine.deleteNote(id, opts);
+  res.json({ error, data });
+});
 
 router.post("/query", async (req: Request, res: Response) => {
   const { ws, queryString, mode } = req.body as EngineQueryRequest;
@@ -36,4 +47,4 @@ router.post("/write", async (req: Request, res: Response<WriteNoteResp>) => {
   }
 });
 
-export { router as engineRouter };
+export { router as noteRouter };

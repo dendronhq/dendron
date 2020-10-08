@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { engineRouter } from "./engine";
+import { noteRouter } from "./note";
 import { schemaRouter } from "./schema";
 import { workspaceRouter } from "./workspace";
 
@@ -8,7 +8,7 @@ const router = Router();
 
 // Add sub-routes
 router.use("/workspace", workspaceRouter);
-router.use("/engine", engineRouter);
+router.use("/note", noteRouter);
 router.use("/schema", schemaRouter);
 
 // const engineRouter = Router();

@@ -3,10 +3,12 @@ import {
   DendronError,
   DEngineQuery,
   DNodePropsV2,
+  EngineDeleteOptsV2,
   EngineWriteOptsV2,
   NotePropsDictV2,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
+  StoreDeleteNoteResp,
   WriteNoteResp,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -83,7 +85,7 @@ interface IStatusHandler {
 
 type APIPayload<T = any> = {
   error: DendronError | null;
-  data: T;
+  data?: T;
 };
 
 export type InitializePayload = APIPayload<{
@@ -92,6 +94,8 @@ export type InitializePayload = APIPayload<{
 }>;
 
 export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
+export type EngineDeletePayload = APIPayload<StoreDeleteNoteResp>;
+
 export type SchemaReadPayload = APIPayload<SchemaModulePropsV2>;
 export type SchemaWritePayload = APIPayload<void>;
 export type SchemaUpdatePayload = APIPayload<void>;
@@ -132,6 +136,10 @@ export type EngineWriteRequest = {
   node: DNodePropsV2;
   opts?: EngineWriteOptsV2;
 } & { ws: string };
+export type EngineDeleteRequest = {
+  id: string;
+  opts?: EngineDeleteOptsV2;
+} & { ws: string };
 
 export type SchemaReadRequest = {
   id: string;
@@ -154,8 +162,8 @@ export abstract class API {
       statusHandlers: {},
       onAuth: async ({ headers }: IRequestArgs): Promise<any> => headers,
       onBuildHeaders: ({ headers }: IRequestArgs): Promise<any> => headers,
-      onError: (args: any) => {
-        console.log(args);
+      onError: (_args: any) => {
+        // console.log(args);
       },
     });
     if (!opts._request) {
@@ -290,9 +298,18 @@ export class DendronAPI extends API {
     return this._createPayload(resp);
   }
 
+  async engineDelete(req: EngineDeleteRequest): Promise<EngineDeletePayload> {
+    const resp = await this._makeRequest({
+      path: "note/delete",
+      method: "post",
+      body: req,
+    });
+    return resp;
+  }
+
   async engineQuery(req: EngineQueryRequest): Promise<EngineQueryPayload> {
     const resp = await this._makeRequest({
-      path: "engine/query",
+      path: "note/query",
       method: "post",
       body: req,
     });
@@ -301,7 +318,7 @@ export class DendronAPI extends API {
 
   async engineWrite(req: EngineWriteRequest): Promise<WriteNoteResp> {
     const resp = await this._makeRequest({
-      path: "engine/write",
+      path: "note/write",
       method: "post",
       body: req,
     });

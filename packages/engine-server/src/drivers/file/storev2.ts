@@ -3,6 +3,7 @@ import {
   DEngineInitPayloadV2,
   DNodeUtilsV2,
   DStoreV2,
+  EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   ENGINE_ERROR_CODES,
@@ -12,6 +13,7 @@ import {
   SchemaModuleDictV2,
   SchemaModulePropsV2,
   SchemaUtilsV2,
+  StoreDeleteNoteResp,
   WriteNoteResp,
 } from "@dendronhq/common-all";
 import {
@@ -321,6 +323,45 @@ export class FileStorageV2 implements DStoreV2 {
     } catch (err) {
       this.logger.error(err);
       throw err;
+    }
+  }
+
+  async deleteNote(
+    id: string,
+    opts?: EngineDeleteOptsV2
+  ): Promise<StoreDeleteNoteResp> {
+    const ctx = "deleteNote";
+    if (id === "root") {
+      throw new DendronError({ status: ENGINE_ERROR_CODES.CANT_DELETE_ROOT });
+    }
+    const noteToDelete = this.notes[id];
+    const ext = ".md";
+    const vault = this.vaults[0];
+    const fpath = path.join(vault, noteToDelete.fname + ext);
+
+    // remove from fs
+    if (!opts?.metaOnly) {
+      fs.unlinkSync(fpath);
+    }
+
+    // if have children, keep this node around as a stub
+    if (!_.isEmpty(noteToDelete.children)) {
+      this.logger.info({ ctx, noteToDelete, msg: "keep as stub" });
+      noteToDelete.stub = true;
+      this.updateNote(noteToDelete);
+      return "stub";
+    } else {
+      this.logger.info({ ctx, noteToDelete, msg: "delete from parent" });
+      // no more children, delete from parent
+      if (noteToDelete.parent) {
+        const parentNote = this.notes[noteToDelete.parent] as NotePropsV2;
+        parentNote.children = _.reject(
+          parentNote.children,
+          (ent) => ent === noteToDelete.id
+        );
+        delete this.notes[noteToDelete.id];
+      }
+      return "removed";
     }
   }
 

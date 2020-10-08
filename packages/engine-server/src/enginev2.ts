@@ -56,8 +56,8 @@ function createFuse<T>(
 export class DendronEngineV2 implements DEngineV2 {
   public vaults: string[];
   public store: DStoreV2;
-  protected notesIndex: Fuse<NotePropsV2>;
-  protected schemaIndex: Fuse<SchemaPropsV2>;
+  public notesIndex: Fuse<NotePropsV2>;
+  public schemaIndex: Fuse<SchemaPropsV2>;
   protected props: DendronEnginePropsV2;
   public logger: DLogger;
 
@@ -103,13 +103,28 @@ export class DendronEngineV2 implements DEngineV2 {
     }
   }
 
-  async delete(
-    _id: string,
-    _mode: DNodeTypeV2,
-    _opts?: EngineDeleteOptsV2
-  ): Promise<void> {
-    throw Error("to implement");
+  async deleteNote(id: string, opts?: EngineDeleteOptsV2) {
+    const note = this.notes[id];
+    const status = await this.store.deleteNote(id, opts);
+    if (status === "removed") {
+      await this.removeNoteFromIndex(note);
+    }
+    return {
+      data: status,
+      error: null,
+    };
   }
+
+  // async delete(
+  //   id: string,
+  //   mode: DNodeTypeV2,
+  //   opts?: EngineDeleteOptsV2
+  // ): Promise<void> {
+  //   if (mode === "note") {
+  //     return this.deleteNote(id, opts)
+  //   }
+  //   throw Error("to implement");
+  // }
 
   async getSchema(id: string): Promise<RespV2<SchemaModulePropsV2>> {
     const ctx = "getSchema";
@@ -198,6 +213,16 @@ export class DendronEngineV2 implements DEngineV2 {
       error: null,
       data: items,
     };
+  }
+
+  async removeNoteFromIndex(note: NotePropsV2) {
+    this.notesIndex.remove((doc: NotePropsV2) => {
+      // FIXME: can be undefined, dunno why
+      if (!doc) {
+        return false;
+      }
+      return doc.id === note.id;
+    });
   }
 
   async updateNote(

@@ -3,7 +3,10 @@ import {
   NoteUtilsV2,
   SchemaUtilsV2 as su,
 } from "@dendronhq/common-all";
-import { NodeTestUtilsV2 } from "@dendronhq/common-test-utils";
+import {
+  NodeTestPresetsV2,
+  NodeTestUtilsV2,
+} from "@dendronhq/common-test-utils";
 import {
   DendronAPI,
   EngineTestUtils,
@@ -13,6 +16,21 @@ import {
 import fs from "fs-extra";
 import path from "path";
 import _ from "lodash";
+
+async function setupWS({ wsRoot, vault }: { wsRoot: string; vault: string }) {
+  const payload = {
+    uri: wsRoot,
+    config: {
+      vaults: [vault],
+    },
+  };
+  const api = new DendronAPI({
+    endpoint: "http://localhost:3005",
+    apiPath: "api",
+  });
+  await api.workspaceInit(payload);
+  return api;
+}
 
 describe("schema", () => {
   let wsRoot: string;
@@ -68,6 +86,30 @@ describe("schema", () => {
 describe("notes", () => {
   let wsRoot: string;
   let vault: string;
+  let api: DendronAPI;
+
+  describe("delete node w/children", () => {
+    beforeEach(async () => {
+      wsRoot = tmpDir().name;
+      vault = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vault);
+      await EngineTestUtils.setupVault({
+        vaultDir: vault,
+        initDirCb: async (vaultPath: string) => {
+          await NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+            vaultDir: vaultPath,
+          });
+        },
+      });
+      api = await setupWS({ wsRoot, vault });
+    });
+
+    test("delete", async () => {
+      await api.engineDelete({ id: "foo", ws: wsRoot });
+      expect(fs.readdirSync(vault)).toMatchSnapshot();
+      expect(_.includes(fs.readdirSync(vault), "foo.md")).toBeFalsy();
+    });
+  });
 
   describe("query", () => {
     beforeEach(async () => {
@@ -131,7 +173,7 @@ describe("notes", () => {
         queryString: "foo",
         mode: "note" as const,
       });
-      const note = resp.data[0] as NotePropsV2;
+      const note = (resp.data as NotePropsV2[])[0] as NotePropsV2;
       expect(resp).toMatchSnapshot();
       expect(note.schema).toEqual({
         moduleId: "foo",
@@ -156,7 +198,7 @@ describe("notes", () => {
         queryString: "foo.ch1",
         mode: "note" as const,
       });
-      const note = resp.data[0] as NotePropsV2;
+      const note = (resp.data as any[])[0] as NotePropsV2;
       expect(resp).toMatchSnapshot();
       expect(note.schema).toEqual({
         moduleId: "foo",

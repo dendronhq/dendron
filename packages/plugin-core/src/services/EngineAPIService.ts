@@ -80,6 +80,8 @@ export class EngineAPIService implements DEngineClientV2 {
     if (!resp.data) {
       throw new DendronError({ msg: "no data" });
     }
+    delete this.notes[id];
+    await this.refreshNotes(resp.data);
     return {
       error: null,
       data: resp.data,
@@ -169,15 +171,24 @@ export class EngineAPIService implements DEngineClientV2 {
     }
   }
 
+  async refreshNotes(notes: NotePropsV2[]) {
+    notes.forEach((node: DNodePropsV2) => {
+      const { id } = node;
+      if (!_.has(this.notes, id)) {
+        this.notes[id] = node;
+      } else {
+        _.merge(this.notes[id], node);
+      }
+    });
+  }
+
   async updateNote(
     note: NotePropsV2,
     opts?: EngineUpdateNodesOptsV2
   ): Promise<void> {
     throw Error("not implemented");
   }
-  async updateSchema(schema: SchemaModulePropsV2): Promise<void> {
-    throw Error("not implemented");
-  }
+
   async writeNote(
     note: NotePropsV2,
     opts?: EngineWriteOptsV2
@@ -201,6 +212,10 @@ export class EngineAPIService implements DEngineClientV2 {
 
   async querySchema(qs: string): Promise<RespV2<SchemaModulePropsV2[]>> {
     throw Error("not implemetned");
+  }
+
+  async updateSchema(schema: SchemaModulePropsV2): Promise<void> {
+    throw Error("not implemented");
   }
 
   async writeSchema(schema: SchemaModulePropsV2): Promise<void> {

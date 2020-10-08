@@ -105,12 +105,16 @@ export class DendronEngineV2 implements DEngineV2 {
 
   async deleteNote(id: string, opts?: EngineDeleteOptsV2) {
     const note = this.notes[id];
+    const changed: NotePropsV2[] = [];
     const status = await this.store.deleteNote(id, opts);
     if (status === "removed") {
       await this.removeNoteFromIndex(note);
+      if (note.parent) {
+        changed.push(this.notes[note.parent]);
+      }
     }
     return {
-      data: status,
+      data: changed,
       error: null,
     };
   }

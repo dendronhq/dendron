@@ -342,8 +342,10 @@ describe("engine, notes/", () => {
 
     test("delete node w/children", async () => {
       await engine.init();
-      await engine.deleteNote("foo");
+      const changed = await engine.deleteNote("foo");
       expect(engine.notes).toMatchSnapshot();
+      // nothing changed since parent is stub
+      expect(changed.data).toEqual([]);
 
       // note not removed but changed into stub in memory
       expect(_.values(engine.notes).length).toEqual(3);
@@ -360,8 +362,10 @@ describe("engine, notes/", () => {
 
     test("delete node w/ no children", async () => {
       await engine.init();
-      await engine.deleteNote("foo.ch1");
+      const changed = await engine.deleteNote("foo.ch1");
       expect(engine.notes).toMatchSnapshot();
+      // parent changed, child is removed
+      expect(changed.data[0].id).toEqual("foo");
 
       // note deleted in memory
       expect(_.values(engine.notes).length).toEqual(2);

@@ -3,12 +3,12 @@ import {
   DendronError,
   DEngineQuery,
   DNodePropsV2,
+  EngineDeleteNotePayload,
   EngineDeleteOptsV2,
   EngineWriteOptsV2,
   NotePropsDictV2,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
-  StoreDeleteNoteResp,
   WriteNoteResp,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -94,7 +94,7 @@ export type InitializePayload = APIPayload<{
 }>;
 
 export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
-export type EngineDeletePayload = APIPayload<StoreDeleteNoteResp>;
+export type EngineDeletePayload = APIPayload<EngineDeleteNotePayload>;
 
 export type SchemaReadPayload = APIPayload<SchemaModulePropsV2>;
 export type SchemaWritePayload = APIPayload<void>;

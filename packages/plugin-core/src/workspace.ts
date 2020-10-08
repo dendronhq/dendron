@@ -23,6 +23,7 @@ import { CopyNoteRefCommand } from "./commands/CopyNoteRef";
 import { CopyNoteURLCommand } from "./commands/CopyNoteURL";
 import { CreateDailyJournalCommand } from "./commands/CreateDailyJournal";
 import { CreateScratchCommand } from "./commands/CreateScratch";
+import { DeleteNodeCommand } from "./commands/DeleteNodeCommand";
 import { DoctorCommand } from "./commands/Doctor";
 import { ExportPodCommand } from "./commands/ExportPod";
 import { GoDownCommand } from "./commands/GoDownCommand";
@@ -360,6 +361,9 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.DELETE_NODE.key,
         async () => {
+          if (DendronWorkspace.lsp()) {
+            return new DeleteNodeCommand().run();
+          }
           const ctx = DENDRON_COMMANDS.DELETE_NODE;
           this.L.info({ ctx });
           const ns = new NodeService();

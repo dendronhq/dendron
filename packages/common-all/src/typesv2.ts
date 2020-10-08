@@ -129,11 +129,6 @@ export type DEngineInitPayloadV2 = {
   schemas?: SchemaModuleDictV2;
 };
 
-/**
- * Returns list of notes that were changed
- */
-export type WriteNoteResp = RespV2<NotePropsV2[]>;
-
 // === Engine and Store Main
 
 export type DCommonProps = {
@@ -141,6 +136,12 @@ export type DCommonProps = {
   schemas: SchemaModuleDictV2;
   vaults: string[];
 };
+
+type NotesChanged = NotePropsV2[];
+/**
+ * Returns list of notes that were changed
+ */
+export type WriteNoteResp = RespV2<NotesChanged>;
 
 export type DCommonMethods = {
   updateNote(note: NotePropsV2, opts?: EngineUpdateNodesOptsV2): Promise<void>;
@@ -153,6 +154,7 @@ export type DCommonMethods = {
   writeSchema: (schema: SchemaModulePropsV2) => Promise<void>;
 };
 
+export type EngineDeleteNotePayload = NotesChanged;
 export type DEngineV2 = DCommonProps &
   DCommonMethods & {
     store: DStoreV2;
@@ -166,7 +168,7 @@ export type DEngineV2 = DCommonProps &
     deleteNote: (
       id: string,
       opts?: EngineDeleteOptsV2
-    ) => Promise<RespV2<StoreDeleteNoteResp>>;
+    ) => Promise<RespV2<EngineDeleteNotePayload>>;
 
     getSchema: (qs: string) => Promise<RespV2<SchemaModulePropsV2>>;
 

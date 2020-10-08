@@ -17,7 +17,13 @@ import {
 import { FileItem } from "./external/fileutils/FileItem";
 import _md from "markdown-it";
 import { DendronWorkspace } from "./workspace";
-import { DEngine, DNodeUtils, SchemaUtils } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DEngine,
+  DEngineClientV2,
+  DNodeUtils,
+  SchemaUtils,
+} from "@dendronhq/common-all";
 import moment from "moment";
 import { EngineAPIService } from "./services/EngineAPIService";
 
@@ -379,4 +385,20 @@ export class WSUtils {
     ws.setEngine(new EngineAPIService(api));
     return ws.getEngine();
   }
+}
+
+export class DendronClientUtilsV2 {
+  static getNoteByFname = async ({
+    fname,
+    client,
+  }: {
+    fname: string;
+    client: DEngineClientV2;
+  }) => {
+    const note = _.find(client.notes, { fname });
+    if (!note) {
+      throw new DendronError({ msg: "no note found" });
+    }
+    return note;
+  };
 }

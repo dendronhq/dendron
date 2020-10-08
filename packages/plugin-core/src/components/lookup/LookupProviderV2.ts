@@ -62,6 +62,7 @@ export class LookupProviderV2 {
       foundStub = true;
     } else if (selectedItem.schemaStub) {
       Logger.info({ ctx, msg: "create schema stub" });
+      selectedItem.schemaStub = false;
       nodeNew = selectedItem;
     } else {
       Logger.info({ ctx, msg: "create from label" });

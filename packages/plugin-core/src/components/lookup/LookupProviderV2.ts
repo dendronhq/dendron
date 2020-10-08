@@ -1,4 +1,5 @@
 import {
+  DendronError,
   DEngineClientV2,
   DNodePropsDictV2,
   DNodePropsQuickInputV2,
@@ -37,10 +38,7 @@ export class LookupProviderV2 {
     this.opts = opts;
   }
 
-  async onAcceptNewNode(
-    picker: DendronQuickPickerV2,
-    opts: EngineOpts
-  ): Promise<Uri> {
+  async _onAcceptNewNote(picker: DendronQuickPickerV2): Promise<Uri> {
     const ctx = "onAcceptNewNode";
     const fname = PickerUtils.getValue(picker);
     Logger.info({ ctx, msg: "createNewPick", value: fname });
@@ -52,10 +50,7 @@ export class LookupProviderV2 {
     const engine = ws.getEngine();
     if (_.isUndefined(selectedItem)) {
       Logger.info({ ctx, msg: "create normal node" });
-      nodeNew =
-        opts.flavor === "note"
-          ? NoteUtilsV2.create({ fname })
-          : SchemaUtilsV2.create({ id: fname, fname });
+      nodeNew = NoteUtilsV2.create({ fname });
     } else if (selectedItem.stub) {
       Logger.info({ ctx, msg: "create stub" });
       nodeNew = engine.notes[selectedItem.id];
@@ -68,31 +63,62 @@ export class LookupProviderV2 {
     } else {
       Logger.info({ ctx, msg: "create from label" });
       // TODO: isn't this the same as undefined?
-      nodeNew =
-        opts.flavor === "note"
-          ? NoteUtilsV2.create({ fname })
-          : SchemaUtilsV2.create({ id: fname, fname });
+      nodeNew = NoteUtilsV2.create({ fname });
     }
 
     const uri = node2Uri(nodeNew, wsFolders);
     const historyService = HistoryService.instance();
     historyService.add({ source: "engine", action: "create", uri });
-    const noteExists = NoteUtilsV2.getNoteByFname(nodeNew.fname, engine.notes);
-    if (noteExists && !foundStub && !selectedItem.schemaStub) {
+
+    // TODO: check for overwriting schema
+    let noteExists = NoteUtilsV2.getNoteByFname(nodeNew.fname, engine.notes);
+    if (noteExists && !foundStub && !selectedItem?.schemaStub) {
       Logger.error({ ctx, msg: "action will overwrite existing note" });
       throw Error("action will overwrite existing note");
     }
-    if (opts.flavor === "note") {
-      if (picker.onCreate) {
-        await picker.onCreate(nodeNew);
-      }
+    if (picker.onCreate) {
+      await picker.onCreate(nodeNew);
     }
-    // TODO: write negine
     await engine.writeNote(nodeNew, {
       newNode: true,
     });
     Logger.info({ ctx, msg: "engine.write", profile });
     return uri;
+  }
+
+  async _onAcceptNewSchema(picker: DendronQuickPickerV2) {
+    const ctx = "onAcceptNewSchema";
+    const fname = PickerUtils.getValue(picker);
+    Logger.info({ ctx, msg: "createNewPick", value: fname });
+    const selectedItem = PickerUtilsV2.getSelection(picker);
+    let smodNew: SchemaModulePropsV2;
+    const ws = DendronWorkspace.instance();
+    const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
+    const engine = ws.getEngine();
+    if (!_.isUndefined(selectedItem)) {
+      // should not happen
+      throw new DendronError({ msg: "selected item not undefined" });
+    }
+    Logger.info({ ctx, msg: "create normal node" });
+    smodNew = SchemaUtilsV2.createModuleProps({ fname });
+    const uri = Uri.file(
+      SchemaUtilsV2.getPath({ root: wsFolders[0].uri.fsPath, fname })
+    );
+    const historyService = HistoryService.instance();
+    historyService.add({ source: "engine", action: "create", uri });
+    await engine.writeSchema(smodNew);
+    Logger.info({ ctx, msg: "engine.write", profile });
+    return uri;
+  }
+  async onAcceptNewNode(
+    picker: DendronQuickPickerV2,
+    opts: EngineOpts
+  ): Promise<Uri> {
+    if (opts.flavor === "schema") {
+      return this._onAcceptNewSchema(picker);
+    } else {
+      return this._onAcceptNewNote(picker);
+    }
   }
 
   async onDidAccept(picker: DendronQuickPickerV2, opts: EngineOpts) {
@@ -110,6 +136,17 @@ export class LookupProviderV2 {
       uri = await this.onAcceptNewNode(picker, opts);
     } else {
       uri = node2Uri(selectedItem, wsFolders);
+      if (opts.flavor === "schema") {
+        const smod = DendronWorkspace.instance().getEngine().schemas[
+          selectedItem.id
+        ];
+        uri = Uri.file(
+          SchemaUtilsV2.getPath({
+            root: DendronWorkspace.rootWorkspaceFolder()?.uri.fsPath as string,
+            fname: smod.fname,
+          })
+        );
+      }
     }
     return showDocAndHidePicker(uri, picker);
   }
@@ -222,14 +259,10 @@ export class LookupProviderV2 {
               if (SchemaUtilsV2.hasSimplePattern(mschema)) {
                 const pattern = SchemaUtilsV2.getPattern(mschema);
                 const fname = [dirName, pattern].join(".");
-                return NoteUtilsV2.create({
+                return NoteUtilsV2.fromSchema({
+                  schemaModule,
+                  schemaId: ent,
                   fname,
-                  schemaStub: true,
-                  desc: mschema.desc,
-                  schema: {
-                    moduleId: schemaModule.root.id,
-                    schemaId: schema.id,
-                  },
                 });
               }
               return;

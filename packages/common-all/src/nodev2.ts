@@ -24,6 +24,9 @@ import {
   SchemaRawV2,
 } from "./typesv2";
 import { genUUID } from "./uuid";
+import { URI } from "vscode-uri";
+import { pathToFileURL } from "url";
+import path from "path";
 
 export class DNodeUtilsV2 {
   static addChild(parent: DNodePropsV2, child: DNodePropsV2) {
@@ -296,6 +299,27 @@ export class NoteUtilsV2 {
     return stubNodes;
   }
 
+  static fromSchema({
+    fname,
+    schemaModule,
+    schemaId,
+  }: {
+    fname: string;
+    schemaModule: SchemaModulePropsV2;
+    schemaId: string;
+  }) {
+    const mschema = schemaModule.schemas[schemaId];
+    return NoteUtilsV2.create({
+      fname,
+      schemaStub: true,
+      desc: mschema.desc,
+      schema: {
+        moduleId: schemaModule.root.id,
+        schemaId,
+      },
+    });
+  }
+
   static genSchemaDesc(
     note: NotePropsV2,
     schemaMod?: SchemaModulePropsV2
@@ -440,6 +464,7 @@ export class SchemaUtilsV2 {
       root: schema,
     };
   }
+
   static getModuleRoot(
     module: SchemaModuleOptsV2 | SchemaModulePropsV2
   ): SchemaPropsV2 {
@@ -482,6 +507,10 @@ export class SchemaUtilsV2 {
       return part;
     }
   };
+
+  static getPath({ root, fname }: { root: string; fname: string }): string {
+    return path.join(root, fname + ".schema.yml");
+  }
 
   static hasSimplePattern = (schema: SchemaPropsV2): boolean => {
     const pattern: string = SchemaUtilsV2.getPattern(schema);

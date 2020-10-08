@@ -34,15 +34,19 @@ function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
 
 type QuickPickOpts = Partial<{
   value: string;
+  selectedItems: DNodePropsQuickInputV2[];
 }>;
 
-export function createMockQuickPick(
-  opts: QuickPickOpts
-): vscode.QuickPick<DNodePropsQuickInputV2> {
+export function createMockQuickPick({
+  value,
+  selectedItems = [],
+}: QuickPickOpts): vscode.QuickPick<DNodePropsQuickInputV2> {
   const qp = vscode.window.createQuickPick<DNodePropsQuickInputV2>();
-  if (opts.value) {
-    qp.value = opts.value;
+  if (value) {
+    qp.value = value;
   }
+  qp.items = selectedItems;
+  qp.selectedItems = selectedItems;
   return qp as DendronQuickPickerV2;
 }
 

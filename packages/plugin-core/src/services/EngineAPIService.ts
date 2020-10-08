@@ -10,7 +10,6 @@ import {
   EngineGetResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
-  IDNodeType,
   NotePropsDictV2,
   NotePropsV2,
   QueryMode,
@@ -20,6 +19,7 @@ import {
   RespV2,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
+  SchemaUtilsV2,
   WriteNoteResp,
 } from "@dendronhq/common-all";
 import { DendronAPI } from "@dendronhq/common-server";
@@ -132,7 +132,11 @@ export class EngineAPIService implements DEngineClientV2 {
     if (!resp.data) {
       throw new DendronError({ msg: "no data" });
     }
-    await this.refreshNodes(resp.data, mode);
+    if (mode === "note") {
+      this.refreshNotes(resp.data);
+    } else {
+      // TODO
+    }
     Logger.info({ ctx, msg: "exit", resp });
     return {
       error: null,
@@ -153,24 +157,6 @@ export class EngineAPIService implements DEngineClientV2 {
 
   async buildNotes() {}
 
-  async refreshNodes(nodes: DNodePropsV2[], mode: IDNodeType) {
-    if (_.isEmpty(nodes)) {
-      return;
-    }
-    if (mode === "schema") {
-      throw Error("not implemented schema refresh");
-    } else {
-      nodes.forEach((node: DNodePropsV2) => {
-        const { id } = node;
-        if (!_.has(this.notes, id)) {
-          this.notes[id] = node;
-        } else {
-          _.merge(this.notes[id], node);
-        }
-      });
-    }
-  }
-
   async refreshNotes(notes: NotePropsV2[]) {
     notes.forEach((node: DNodePropsV2) => {
       const { id } = node;
@@ -179,6 +165,13 @@ export class EngineAPIService implements DEngineClientV2 {
       } else {
         _.merge(this.notes[id], node);
       }
+    });
+  }
+
+  async refreshSchemas(smods: SchemaModulePropsV2[]) {
+    smods.forEach((smod) => {
+      const id = SchemaUtilsV2.getModuleRoot(smod).id;
+      this.schemas[id] = smod;
     });
   }
 
@@ -200,7 +193,7 @@ export class EngineAPIService implements DEngineClientV2 {
       ws: this.ws,
     });
     const changed = resp.data;
-    await this.refreshNodes(changed, note.type);
+    await this.refreshNotes(changed);
     Logger.info({ ctx, msg: "exit", resp });
     return resp;
   }
@@ -220,6 +213,8 @@ export class EngineAPIService implements DEngineClientV2 {
   }
 
   async writeSchema(schema: SchemaModulePropsV2): Promise<void> {
-    throw Error("not implemented");
+    await this.api.schemaWrite({ schema, ws: this.ws });
+    await this.refreshSchemas([schema]);
+    return;
   }
 }

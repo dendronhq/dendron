@@ -1,4 +1,8 @@
-import { DEngineClientV2, DNodePropsQuickInputV2 } from "@dendronhq/common-all";
+import {
+  DEngineClientV2,
+  DNodePropsQuickInputV2,
+  DNodeUtilsV2,
+} from "@dendronhq/common-all";
 import {
   DirResult,
   FileTestUtils,
@@ -29,7 +33,7 @@ import {
   TIMEOUT,
 } from "../testUtils";
 
-suite.only("schemas", function () {
+suite("schemas", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
   this.timeout(TIMEOUT);
@@ -97,8 +101,7 @@ suite.only("schemas", function () {
         _.map(
           await SchemaTestPresetsV2.createQueryAllResults(schemaModules),
           (ent) => {
-            const { actual, expected, msg } = ent;
-            console.log(msg);
+            const { actual, expected } = ent;
             assert.strictEqual(actual, expected);
           }
         );
@@ -152,11 +155,20 @@ suite.only("schemas", function () {
     let ws: DendronWorkspace;
     let client: DEngineClientV2;
 
-    test.only("root", function (done) {
+    test("root", function (done) {
       onWSInit(async () => {
         ws = DendronWorkspace.instance();
         client = ws.getEngine();
-        const quickpick = createMockQuickPick({ value: "root" });
+        const schemaModule = client.schemas["root"];
+        const schema = schemaModule["root"];
+        const schemaInput = DNodeUtilsV2.enhancePropForQuickInput(
+          schema,
+          client.schemas
+        );
+        const quickpick = createMockQuickPick({
+          value: "root",
+          selectedItems: [schemaInput],
+        });
         const lp = new LookupProviderV2(engOpts);
         await lp.onDidAccept(quickpick, engOpts);
         assert.strictEqual(
@@ -181,7 +193,16 @@ suite.only("schemas", function () {
       onWSInit(async () => {
         ws = DendronWorkspace.instance();
         client = ws.getEngine();
-        const quickpick = createMockQuickPick({ value: "foo" });
+        const schemaModule = client.schemas["foo"];
+        const schema = schemaModule["root"];
+        const schemaInput = DNodeUtilsV2.enhancePropForQuickInput(
+          schema,
+          client.schemas
+        );
+        const quickpick = createMockQuickPick({
+          value: "foo",
+          selectedItems: [schemaInput],
+        });
         const lp = new LookupProviderV2(engOpts);
         await lp.onDidAccept(quickpick, engOpts);
         assert.strictEqual(
@@ -190,6 +211,7 @@ suite.only("schemas", function () {
           ),
           "foo.schema.yml"
         );
+        done();
       });
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
@@ -199,7 +221,6 @@ suite.only("schemas", function () {
           });
         },
       });
-      done();
     });
   });
 });
@@ -276,7 +297,7 @@ suite("notes", function () {
         lsp: true,
         useCb: async (vaultPath) => {
           vault = vaultPath;
-          NodeTestUtils.createNotes(vaultPath, [
+          return NodeTestUtils.createNotes(vaultPath, [
             {
               id: "id.foo",
               fname: "foo",
@@ -325,7 +346,7 @@ suite("notes", function () {
         lsp: true,
         useCb: async (vaultPath) => {
           vault = vaultPath;
-          NodeTestUtils.createNotes(vaultPath, [
+          return NodeTestUtils.createNotes(vaultPath, [
             {
               id: "id.foo.bar",
               fname: "foo.bar",

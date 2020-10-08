@@ -1,8 +1,11 @@
 import { DendronError, DEngineV2 } from "@dendronhq/common-all";
 import {
+  SchemaQueryPayload,
+  SchemaQueryRequest,
   SchemaWritePayload,
   SchemaWriteRequest,
 } from "@dendronhq/common-server";
+import { DendronEngineV2 } from "@dendronhq/engine-server";
 import { MemoryStore } from "../../store/memoryStore";
 
 export class SchemaController {
@@ -30,5 +33,15 @@ export class SchemaController {
         data: undefined,
       };
     }
+  }
+
+  async query({ ws, qs }: SchemaQueryRequest): Promise<SchemaQueryPayload> {
+    const engine = await MemoryStore.instance().get<DendronEngineV2>(
+      `ws:${ws}`
+    );
+    if (!engine) {
+      throw "No Engine";
+    }
+    return await engine.querySchema(qs);
   }
 }

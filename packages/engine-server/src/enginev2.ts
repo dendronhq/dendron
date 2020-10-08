@@ -14,6 +14,7 @@ import {
   RespV2,
   SchemaModulePropsV2,
   SchemaPropsV2,
+  SchemaUtilsV2,
   WriteNoteResp,
 } from "@dendronhq/common-all";
 import { DLogger } from "@dendronhq/common-server";
@@ -151,10 +152,8 @@ export class DendronEngineV2 implements DEngineV2 {
     } else if (queryString === "*") {
       items = _.values(this.schemas);
     } else {
-      // const results = this.schemaIndex.search(queryString);
-      throw Error("not supported");
-      // TODO
-      // items = _.map(results, (resp) => resp.item);
+      const results = this.schemaIndex.search(queryString);
+      items = _.map(results, (resp) => this.schemas[resp.item.id]);
     }
     this.logger.info({ ctx, msg: "exit" });
     return {
@@ -180,14 +179,15 @@ export class DendronEngineV2 implements DEngineV2 {
 
     // ~~~ schema query
     if (mode === "schema") {
-      if (queryString === "") {
-        items = [this.schemas.root.root];
-      } else if (queryString === "*") {
-        items = _.values(this.schemas).map((ent) => ent.root);
-      } else {
-        const results = this.schemaIndex.search(queryString);
-        items = _.map(results, (resp) => resp.item);
-      }
+      throw Error("engine.query for schema is not supported");
+      // if (queryString === "") {
+      //   items = [this.schemas.root.root];
+      // } else if (queryString === "*") {
+      //   items = _.values(this.schemas).map((ent) => ent.root);
+      // } else {
+      //   const results = this.schemaIndex.search(queryString);
+      //   items = _.map(results, (resp) => resp.item);
+      // }
     } else {
       // ~~~ note query
       if (queryString === "") {
@@ -239,7 +239,7 @@ export class DendronEngineV2 implements DEngineV2 {
   async updateIndex(mode: DNodeTypeV2) {
     if (mode === "schema") {
       this.schemaIndex.setCollection(
-        _.map(_.values(this.schemas), (ent) => ent.root)
+        _.map(_.values(this.schemas), (ent) => SchemaUtilsV2.getModuleRoot(ent))
       );
     } else {
       this.notesIndex.setCollection(_.values(this.notes));

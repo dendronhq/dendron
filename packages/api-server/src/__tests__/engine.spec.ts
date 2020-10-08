@@ -1,11 +1,13 @@
 import {
   NotePropsV2,
   NoteUtilsV2,
+  SchemaModulePropsV2,
   SchemaUtilsV2 as su,
 } from "@dendronhq/common-all";
 import {
   NodeTestPresetsV2,
   NodeTestUtilsV2,
+  SchemaTestPresetsV2,
 } from "@dendronhq/common-test-utils";
 import {
   DendronAPI,
@@ -51,6 +53,106 @@ describe("schema", () => {
           rootName: "foo",
         });
       },
+    });
+  });
+
+  describe("query", () => {
+    beforeEach(async () => {
+      wsRoot = tmpDir().name;
+      vault = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vault);
+      await EngineTestUtils.setupVault({
+        vaultDir: vault,
+        initDirCb: async (vaultPath: string) => {
+          await NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+            vaultDir: vaultPath,
+          });
+        },
+      });
+    });
+
+    test("root", async () => {
+      const payload = {
+        uri: wsRoot,
+        config: {
+          vaults: [vault],
+        },
+      };
+      const api = new DendronAPI({
+        endpoint: "http://localhost:3005",
+        apiPath: "api",
+      });
+      await api.workspaceInit(payload);
+      const resp = await api.schemaQuery({
+        ws: wsRoot,
+        qs: "",
+      });
+      // expect(resp).toMatchSnapshot("root note");
+      _.map(
+        await SchemaTestPresetsV2.createQueryRootResults(
+          resp.data as SchemaModulePropsV2[]
+        ),
+        (ent) => {
+          const { actual, expected } = ent;
+          expect(actual).toEqual(expected);
+        }
+      );
+    });
+
+    test("all", async () => {
+      const payload = {
+        uri: wsRoot,
+        config: {
+          vaults: [vault],
+        },
+      };
+      const api = new DendronAPI({
+        endpoint: "http://localhost:3005",
+        apiPath: "api",
+      });
+      await api.workspaceInit(payload);
+      const resp = await api.schemaQuery({
+        ws: wsRoot,
+        qs: "*",
+      });
+      // expect(resp).toMatchSnapshot();
+      _.map(
+        await SchemaTestPresetsV2.createQueryAllResults(
+          resp.data as SchemaModulePropsV2[]
+        ),
+        (ent) => {
+          const { actual, expected } = ent;
+          expect(actual).toEqual(expected);
+        }
+      );
+    });
+
+    test("non-root", async () => {
+      const payload = {
+        uri: wsRoot,
+        config: {
+          vaults: [vault],
+        },
+      };
+      const api = new DendronAPI({
+        endpoint: "http://localhost:3005",
+        apiPath: "api",
+      });
+      await api.workspaceInit(payload);
+      const resp = await api.schemaQuery({
+        ws: wsRoot,
+        qs: "foo",
+      });
+      expect(resp).toMatchSnapshot();
+      _.map(
+        await SchemaTestPresetsV2.createQueryNonRootResults(
+          resp.data as SchemaModulePropsV2[]
+        ),
+        (ent) => {
+          const { actual, expected } = ent;
+          expect(actual).toEqual(expected);
+        }
+      );
     });
   });
 
@@ -119,12 +221,8 @@ describe("notes", () => {
       await EngineTestUtils.setupVault({
         vaultDir: vault,
         initDirCb: async (vaultPath: string) => {
-          await NodeTestUtilsV2.createNotes({ vaultPath });
-          await NodeTestUtilsV2.createSchemas({ vaultPath });
-          await NodeTestUtilsV2.createNoteProps({ vaultPath, rootName: "foo" });
-          await NodeTestUtilsV2.createSchemaModuleOpts({
+          await NodeTestPresetsV2.createOneNoteoneSchemaPreset({
             vaultDir: vaultPath,
-            rootName: "foo",
           });
         },
       });
@@ -148,12 +246,6 @@ describe("notes", () => {
         mode: "note" as const,
       });
       expect(resp).toMatchSnapshot("root note");
-      const schemas = await api.engineQuery({
-        ws: wsRoot,
-        queryString: "",
-        mode: "schema" as const,
-      });
-      expect(schemas).toMatchSnapshot("root schema ");
     });
 
     test("query root note with schema", async () => {

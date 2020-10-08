@@ -17,6 +17,7 @@ import {
 } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
+  NodeTestPresetsV2,
   NodeTestUtilsV2,
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
@@ -100,7 +101,7 @@ describe("engine, schema/", () => {
       expect(_.values(engine.schemas["foo"].schemas).length).toEqual(3);
 
       // query should have same results
-      const resp = await engine.query("*", "schema");
+      const resp = await engine.querySchema("*");
       expect(resp.data.length).toEqual(2);
 
       // should be written to file
@@ -139,12 +140,8 @@ describe("engine, schema/", () => {
     beforeEach(async () => {
       vaultDir = await EngineTestUtilsV2.setupVault({
         initDirCb: async (vaultPath: string) => {
-          await NodeTestUtilsV2.createSchemas({ vaultPath });
-          await NodeTestUtilsV2.createNotes({ vaultPath });
-          await NodeTestUtilsV2.createNoteProps({ vaultPath, rootName: "foo" });
-          await NodeTestUtilsV2.createSchemaModuleOpts({
+          await NodeTestPresetsV2.createOneNoteoneSchemaPreset({
             vaultDir: vaultPath,
-            rootName: "foo",
           });
         },
       });
@@ -159,14 +156,23 @@ describe("engine, schema/", () => {
 
     test("root", async () => {
       await engine.init();
-      const resp = await engine.query("", "schema");
-      expect(resp).toMatchSnapshot();
+      const resp = await engine.querySchema("");
+      // expect(resp).toMatchSnapshot();
+      expect(_.size(resp.data[0].schemas)).toEqual(1);
+    });
+
+    test("all", async () => {
+      await engine.init();
+      const resp = await engine.querySchema("*");
+      // expect(resp).toMatchSnapshot();
+      expect(_.size(resp.data)).toEqual(2);
     });
 
     test("non-root", async () => {
       await engine.init();
-      const resp = await engine.query("foo", "schema");
-      expect(resp).toMatchSnapshot();
+      const resp = await engine.querySchema("foo");
+      // expect(resp).toMatchSnapshot();
+      expect(_.size(resp.data[0].schemas)).toEqual(2);
     });
   });
 
@@ -193,7 +199,7 @@ describe("engine, schema/", () => {
       expect(error.status).toEqual(ENGINE_ERROR_CODES.NO_SCHEMA_FOUND);
     });
 
-    test("only root", async () => {
+    test("root", async () => {
       const { data } = await engine.init();
       const schemaModRoot = (data.schemas as SchemaModuleDictV2)[
         "root"
@@ -454,7 +460,7 @@ describe("engine, notes/", () => {
       expect(error.status).toEqual(ENGINE_ERROR_CODES.NO_ROOT_NOTE_FOUND);
     });
 
-    test("only root", async () => {
+    test("root", async () => {
       const { data } = await engine.init();
       expect(data.notes).toMatchSnapshot();
     });

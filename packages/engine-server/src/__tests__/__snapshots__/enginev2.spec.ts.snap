@@ -353,42 +353,6 @@ schemas:
 "
 `;
 
-exports[`engine, schema/ query/ non-root 1`] = `
-Object {
-  "data": Array [
-    Object {
-      "children": Array [
-        "ch1",
-      ],
-      "id": "foo",
-      "parent": "root",
-      "title": "foo",
-    },
-    Object {
-      "children": Array [],
-      "id": "root",
-      "parent": "root",
-      "title": "root",
-    },
-  ],
-  "error": null,
-}
-`;
-
-exports[`engine, schema/ query/ root 1`] = `
-Object {
-  "data": Array [
-    Object {
-      "children": Array [],
-      "id": "root",
-      "parent": "root",
-      "title": "root",
-    },
-  ],
-  "error": null,
-}
-`;
-
 exports[`engine, schema/ write/ update schema, add new prop to module: new schema file 1`] = `
 Object {
   "imports": Array [],

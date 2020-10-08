@@ -437,7 +437,9 @@ export class SchemaUtilsV2 {
       root: schema,
     };
   }
-  static getModuleRoot(module: SchemaModuleOptsV2): SchemaPropsV2 {
+  static getModuleRoot(
+    module: SchemaModuleOptsV2 | SchemaModulePropsV2
+  ): SchemaPropsV2 {
     const maybeRoot = _.find(module.schemas, { parent: "root" });
     if (!maybeRoot) {
       const rootSchemaRoot = _.find(module.schemas, {

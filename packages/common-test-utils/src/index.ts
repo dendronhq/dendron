@@ -4,6 +4,7 @@ import {
   NotePropsDictV2,
   NoteUtilsV2,
   SchemaModuleOptsV2,
+  SchemaModulePropsV2,
   SchemaPropsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
@@ -43,6 +44,36 @@ export class NodeTestPresetsV2 {
       vaultDir: vaultDir,
       rootName: "foo",
     });
+  }
+}
+
+export type SchemaTestResult = {
+  actual: any;
+  expected: any;
+  msg: string;
+};
+
+export class SchemaTestPresetsV2 {
+  static async createQueryRootResults(
+    schemas: SchemaModulePropsV2[]
+  ): Promise<SchemaTestResult[]> {
+    return [
+      { actual: _.size(schemas[0].schemas), expected: 1, msg: "schema " },
+    ];
+  }
+  static async createQueryAllResults(
+    schemas: SchemaModulePropsV2[]
+  ): Promise<SchemaTestResult[]> {
+    return [
+      { actual: _.size(schemas[0].schemas), expected: 2, msg: "schema " },
+    ];
+  }
+  static async createQueryNonRootResults(
+    schemas: SchemaModulePropsV2[]
+  ): Promise<SchemaTestResult[]> {
+    return [
+      { actual: _.size(schemas[0].schemas), expected: 2, msg: "schema " },
+    ];
   }
 }
 

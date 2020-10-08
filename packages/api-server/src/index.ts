@@ -10,7 +10,8 @@ function launch(opts?: { port?: number; logPath?: string }): Promise<number> {
   process.env["LOG_DST"] = LOG_DST;
   const L = createLogger("dendron.server");
   return new Promise((resolve) => {
-    const app = require("./Server").app;
+    const appModule = require("./Server").appModule;
+    const app = appModule({ logPath: LOG_DST });
     const server = app.listen(listenPort, () => {
       const port = (server.address() as any).port;
       L.info({ ctx, msg: "exit", port, LOG_DST });
@@ -19,4 +20,4 @@ function launch(opts?: { port?: number; logPath?: string }): Promise<number> {
   });
 }
 export { launch };
-export { app } from "./Server";
+export { appModule } from "./Server";

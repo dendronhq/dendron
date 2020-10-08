@@ -122,10 +122,105 @@ Object {
 }
 `;
 
-exports[`notes write grandchild of root, child is stub: root note 1`] = `
+exports[`notes query query root: root note 1`] = `
 Object {
-  "data": undefined,
-  "error": [RequestError: Error: connect ECONNREFUSED 127.0.0.1:3005],
+  "data": Array [
+    Object {
+      "body": "
+",
+      "children": Array [
+        "foo",
+      ],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "root",
+      "id": "root",
+      "parent": null,
+      "title": "Root",
+      "type": "note",
+      "updated": "1",
+    },
+  ],
+  "error": null,
+}
+`;
+
+exports[`schema query non-root 1`] = `
+Object {
+  "data": Array [
+    Object {
+      "fname": "foo",
+      "imports": Array [],
+      "root": Object {
+        "children": Array [
+          "ch1",
+        ],
+        "id": "foo",
+        "parent": "root",
+        "title": "foo",
+      },
+      "schemas": Object {
+        "ch1": Object {
+          "body": "",
+          "children": Array [],
+          "created": 1602179317715,
+          "data": Object {},
+          "desc": "",
+          "fname": "__empty",
+          "id": "ch1",
+          "parent": "foo",
+          "title": "ch1",
+          "type": "schema",
+          "updated": 1602179317715,
+        },
+        "foo": Object {
+          "body": "",
+          "children": Array [
+            "ch1",
+          ],
+          "created": 1602179317715,
+          "data": Object {},
+          "desc": "",
+          "fname": "__empty",
+          "id": "foo",
+          "parent": "root",
+          "title": "foo",
+          "type": "schema",
+          "updated": 1602179317715,
+        },
+      },
+      "version": 1,
+    },
+    Object {
+      "fname": "root",
+      "imports": Array [],
+      "root": Object {
+        "children": Array [],
+        "id": "root",
+        "parent": "root",
+        "title": "root",
+      },
+      "schemas": Object {
+        "root": Object {
+          "body": "",
+          "children": Array [],
+          "created": 1602179317715,
+          "data": Object {},
+          "desc": "",
+          "fname": "__empty",
+          "id": "root",
+          "parent": "root",
+          "title": "root",
+          "type": "schema",
+          "updated": 1602179317715,
+        },
+      },
+      "version": 1,
+    },
+  ],
+  "error": null,
 }
 `;
 

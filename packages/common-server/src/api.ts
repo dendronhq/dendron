@@ -97,6 +97,7 @@ export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
 export type EngineDeletePayload = APIPayload<EngineDeleteNotePayload>;
 
 export type SchemaReadPayload = APIPayload<SchemaModulePropsV2>;
+export type SchemaQueryPayload = APIPayload<SchemaModulePropsV2[]>;
 export type SchemaWritePayload = APIPayload<void>;
 export type SchemaUpdatePayload = APIPayload<void>;
 
@@ -143,6 +144,9 @@ export type EngineDeleteRequest = {
 
 export type SchemaReadRequest = {
   id: string;
+} & Partial<WorkspaceRequest>;
+export type SchemaQueryRequest = {
+  qs: string;
 } & Partial<WorkspaceRequest>;
 export type SchemaWriteRequest = {
   schema: SchemaModulePropsV2;
@@ -330,6 +334,15 @@ export class DendronAPI extends API {
       path: "schema/get",
       method: "get",
       qs: req,
+    });
+    return resp;
+  }
+
+  async schemaQuery(req: SchemaQueryRequest): Promise<SchemaQueryPayload> {
+    const resp = await this._makeRequest({
+      path: "schema/query",
+      method: "post",
+      body: req,
     });
     return resp;
   }

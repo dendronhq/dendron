@@ -235,7 +235,7 @@ describe("engine, schema/", () => {
 
     test("root", async () => {
       const { data } = await engine.init();
-      const schemaModRoot = (data.schemas as SchemaModuleDictV2)[
+      const schemaModRoot = (data?.schemas as SchemaModuleDictV2)[
         "root"
       ] as SchemaModulePropsV2;
       expect(_su.serializeModuleProps(schemaModRoot)).toMatchSnapshot();
@@ -424,6 +424,32 @@ describe("engine, notes/", () => {
       await engine.init();
       const { error } = await engine.deleteNote("root");
       expect(error?.status).toEqual(ENGINE_ERROR_CODES.CANT_DELETE_ROOT);
+    });
+  });
+
+  describe("getNoteByPath/", () => {
+    let engine: DEngineV2;
+    beforeEach(async () => {
+      ({ vaultDir, engine } = await beforePreset());
+    });
+
+    test("get existing note", async () => {
+      await engine.init();
+      const { data } = await engine.getNoteByPath({ npath: "foo" });
+      expect(data).toMatchSnapshot();
+      expect(data?.note).toEqual(engine.notes["foo"]);
+      expect(data?.changed).toEqual([]);
+    });
+
+    test("get new note", async () => {
+      await engine.init();
+      const { data } = await engine.getNoteByPath({
+        npath: "bar",
+        createIfNew: true,
+      });
+      expect(data).toMatchSnapshot();
+      expect(data?.note?.fname).toEqual("bar");
+      expect(data?.changed).toEqual([data?.note, engine.notes["root"]]);
     });
   });
 

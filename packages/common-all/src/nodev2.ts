@@ -8,6 +8,7 @@ import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
 import { DNode } from "./node";
 import {
+  DEngineClientV2,
   DNodeOptsV2,
   DNodePropsDictV2,
   DNodePropsQuickInputV2,
@@ -359,6 +360,17 @@ export class NoteUtilsV2 {
       throw Error(`${fname} not found`);
     }
     return out;
+  }
+
+  static getPath({
+    client,
+    note,
+  }: {
+    client: DEngineClientV2;
+    note: NotePropsV2;
+  }): string {
+    const root = client.vaults[0];
+    return path.join(root, note.fname + ".md");
   }
 
   static serialize(props: NotePropsV2): string {

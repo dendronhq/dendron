@@ -64,7 +64,7 @@ suite("startup", function () {
           todo: {
             prefix: "to",
             scope: "markdown,yaml",
-            body: "- [ ]",
+            body: "- [ ] ",
             description: "render todo box",
           },
           tag: {

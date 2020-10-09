@@ -7,6 +7,8 @@ import {
   EngineDeleteNotePayload,
   EngineDeleteOptsV2,
   EngineWriteOptsV2,
+  GetNoteOptsV2,
+  GetNotePayloadV2,
   NotePropsDictV2,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
@@ -95,6 +97,7 @@ export type InitializePayload = APIPayload<{
 }>;
 
 export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
+export type EngineGetNoteByPathPayload = APIPayload<GetNotePayloadV2>;
 export type EngineDeletePayload = APIPayload<EngineDeleteNotePayload>;
 
 export type SchemaDeletePayload = APIPayload<DEngineDeleteSchemaPayloadV2>;
@@ -135,6 +138,7 @@ type WorkspaceInitRequest = {
 type WorkspaceRequest = { ws: string };
 
 export type EngineQueryRequest = DEngineQuery & { ws: string };
+export type EngineGetNoteByPathRequest = GetNoteOptsV2 & { ws: string };
 export type EngineWriteRequest = {
   node: DNodePropsV2;
   opts?: EngineWriteOptsV2;
@@ -311,6 +315,17 @@ export class DendronAPI extends API {
   async engineDelete(req: EngineDeleteRequest): Promise<EngineDeletePayload> {
     const resp = await this._makeRequest({
       path: "note/delete",
+      method: "post",
+      body: req,
+    });
+    return resp;
+  }
+
+  async engineGetNoteByPath(
+    req: EngineGetNoteByPathRequest
+  ): Promise<EngineGetNoteByPathPayload> {
+    const resp = await this._makeRequest({
+      path: "note/getByPath",
       method: "post",
       body: req,
     });

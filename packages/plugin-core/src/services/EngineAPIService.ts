@@ -2,22 +2,26 @@ import {
   DendronError,
   DEngineClientV2,
   DEngineInitPayloadV2,
+  DEngineInitRespV2,
   DNodeData,
   DNodePropsV2,
   DNodeTypeV2,
   EngineDeleteOptsV2,
   EngineGetResp,
+  EngineQueryNoteResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
+  GetNoteOptsV2,
+  GetNotePayloadV2,
   NotePropsDictV2,
   NotePropsV2,
   QueryMode,
   QueryOneOpts,
-  QueryOpts,
   QueryOptsV2,
   RespV2,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
+  SchemaQueryResp,
   SchemaUtilsV2,
   WriteNoteResp,
 } from "@dendronhq/common-all";
@@ -30,6 +34,7 @@ import { DendronWorkspace } from "../workspace";
 export class EngineAPIService implements DEngineClientV2 {
   public notes: NotePropsDictV2;
   public schemas: SchemaModuleDictV2;
+  public vaults: string[];
   // public schemas: SchemaDict;
   // public props: Required<DEngineOpts>;
   // public initialized: boolean;
@@ -40,6 +45,8 @@ export class EngineAPIService implements DEngineClientV2 {
   constructor(public api: DendronAPI) {
     this.notes = {};
     this.schemas = {};
+    this.vaults =
+      DendronWorkspace.workspaceFolders()?.map((ent) => ent.uri.fsPath) || [];
     // this.fullNodes = new Set();
     // this.props = {} as any;
     // this.initialized = false;
@@ -50,14 +57,12 @@ export class EngineAPIService implements DEngineClientV2 {
   /**
    * Load all nodes
    */
-  async init(): Promise<RespV2<DEngineInitPayloadV2>> {
+  async init(): Promise<DEngineInitRespV2> {
     const ctx = "EngineAPIService:init";
     Logger.info({ ctx, msg: "enter" });
-    const vaults =
-      DendronWorkspace.workspaceFolders()?.map((ent) => ent.uri.fsPath) || [];
     const resp = await this.api.workspaceInit({
       uri: this.ws,
-      config: { vaults },
+      config: { vaults: this.vaults },
     });
     if (!resp.data) {
       throw new DendronError({ msg: "no data" });
@@ -100,16 +105,17 @@ export class EngineAPIService implements DEngineClientV2 {
     };
   }
 
-  /**
-   * Get node based on id
-   * get(id: ...)
-   */
-  async get(
-    _id: string,
-    _mode: QueryMode,
-    _opts?: QueryOpts
-  ): Promise<EngineGetResp<DNodeData>> {
-    throw Error("not implemented");
+  async getNoteByPath(opts: GetNoteOptsV2): Promise<RespV2<GetNotePayloadV2>> {
+    const resp = await this.api.engineGetNoteByPath({
+      ...opts,
+      ws: this.ws,
+    });
+    if (!_.isEmpty(resp.data?.changed)) {
+      // TODO
+      // this.refreshNotes(resp)
+    }
+    // TODO: update notes
+    return resp;
   }
 
   // getBatch: (scope: Scope, ids: string[]) => Promise<NodeGetBatchResp>;
@@ -124,7 +130,7 @@ export class EngineAPIService implements DEngineClientV2 {
     queryString: string,
     mode: DNodeTypeV2,
     opts?: QueryOptsV2
-  ): Promise<RespV2<DNodePropsV2[]>> {
+  ): Promise<EngineQueryNoteResp> {
     // TODO: look at cache
     const ctx = "query";
     const resp = await this.api.engineQuery({
@@ -207,7 +213,7 @@ export class EngineAPIService implements DEngineClientV2 {
     throw Error("not implemetned");
   }
 
-  async querySchema(qs: string): Promise<RespV2<SchemaModulePropsV2[]>> {
+  async querySchema(qs: string): Promise<SchemaQueryResp> {
     const out = await this.api.schemaQuery({ qs, ws: this.ws });
     return _.defaults(out, { data: [] });
   }

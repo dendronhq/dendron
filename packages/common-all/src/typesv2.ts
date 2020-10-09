@@ -90,7 +90,7 @@ export type SchemaModulePropsV2 = {
 // === Engine
 
 export interface RespV2<T> {
-  data: T;
+  data?: T;
   error: DendronError | null;
 }
 
@@ -114,6 +114,13 @@ export type EngineUpdateNodesOptsV2 = {
    * New Node, should add to `fullNode` cache
    */
   newNode: boolean;
+};
+export type GetNoteOptsV2 = {
+  npath: string;
+  /**
+   * If node does not exist, create it?
+   */
+  createIfNew?: boolean;
 };
 export type EngineDeleteOptsV2 = EngineDeleteOpts;
 export type EngineWriteOptsV2 = {
@@ -141,7 +148,9 @@ type NotesChanged = NotePropsV2[];
 /**
  * Returns list of notes that were changed
  */
-export type WriteNoteResp = RespV2<NotesChanged>;
+export type WriteNoteResp = Required<RespV2<NotesChanged>>;
+
+// --- Common
 
 export type DCommonMethods = {
   updateNote(note: NotePropsV2, opts?: EngineUpdateNodesOptsV2): Promise<void>;
@@ -154,34 +163,44 @@ export type DCommonMethods = {
   writeSchema: (schema: SchemaModulePropsV2) => Promise<void>;
 };
 
+// --- Engine
+
+export type DEngineInitRespV2 = Required<RespV2<DEngineInitPayloadV2>>;
 export type EngineDeleteNotePayload = NotesChanged;
+export type EngineDeleteNoteResp = Required<RespV2<EngineDeleteNotePayload>>;
+export type EngineQueryNoteResp = Required<RespV2<DNodePropsV2[]>>;
+export type SchemaQueryResp = Required<RespV2<SchemaModulePropsV2[]>>;
+export type GetNotePayloadV2 = {
+  note: NotePropsV2 | undefined;
+  changed: NotePropsV2[];
+};
 export type DEngineDeleteSchemaPayloadV2 = void;
 
 export type DEngineV2 = DCommonProps &
   DCommonMethods & {
     store: DStoreV2;
 
-    init: () => Promise<RespV2<DEngineInitPayloadV2>>;
+    init: () => Promise<DEngineInitRespV2>;
     deleteNote: (
       id: string,
       opts?: EngineDeleteOptsV2
-    ) => Promise<RespV2<EngineDeleteNotePayload>>;
+    ) => Promise<EngineDeleteNoteResp>;
     deleteSchema: (
       id: string,
       opts?: EngineDeleteOptsV2
     ) => Promise<RespV2<DEngineDeleteSchemaPayloadV2>>;
 
+    getNoteByPath: (opts: GetNoteOptsV2) => Promise<RespV2<GetNotePayloadV2>>;
     getSchema: (qs: string) => Promise<RespV2<SchemaModulePropsV2>>;
-
-    querySchema: (qs: string) => Promise<RespV2<SchemaModulePropsV2[]>>;
+    querySchema: (qs: string) => Promise<SchemaQueryResp>;
     query: (
       queryString: string,
       mode: DNodeTypeV2,
       opts?: QueryOptsV2
-    ) => Promise<RespV2<DNodePropsV2[]>>;
+    ) => Promise<EngineQueryNoteResp>;
   };
 
-export type DEngineClientV2 = Omit<DEngineV2, "store" | "vaults">;
+export type DEngineClientV2 = Omit<DEngineV2, "store">;
 
 export type StoreDeleteNoteResp = "stub" | "removed";
 

@@ -19,13 +19,13 @@ import { VSCodeUtils, WSUtils } from "./utils";
 import { MarkdownUtils } from "./utils/md";
 import { getOS } from "./utils/system";
 import { DendronTreeView } from "./views/DendronTreeView";
+import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { DendronWorkspace } from "./workspace";
 
 // === Main
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   const stage = getStage();
-  DendronTreeView.register(context);
   if (stage !== "test") {
     _activate(context);
   }
@@ -166,6 +166,11 @@ export async function _activate(context: vscode.ExtensionContext) {
   const ws = DendronWorkspace.getOrCreate(context, {
     skipSetup: stage === "test",
   });
+  if (DendronWorkspace.lsp()) {
+    DendronTreeViewV2.register(context);
+  } else {
+    DendronTreeView.register(context);
+  }
   const migratedGlobalVersion = context.globalState.get<string | undefined>(
     GLOBAL_STATE.VERSION
   );

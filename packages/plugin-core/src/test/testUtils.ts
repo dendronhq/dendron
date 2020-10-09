@@ -13,6 +13,13 @@ import { HistoryEvent, HistoryService } from "../services/HistoryService";
 import { DendronWorkspace } from "../workspace";
 import { DendronQuickPickerV2 } from "../components/lookup/LookupProvider";
 import { DNodePropsQuickInputV2 } from "@dendronhq/common-all";
+import { VSCodeUtils } from "../utils";
+
+export function getActiveEditorBasename() {
+  return path.basename(
+    VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+  );
+}
 
 function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
   const _settings = settings;

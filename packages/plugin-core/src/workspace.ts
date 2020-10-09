@@ -1,7 +1,6 @@
 import {
   CONSTANTS,
   DendronConfig,
-  DendronError,
   DEngine,
   DEngineClientV2,
   getStage,
@@ -58,6 +57,7 @@ import { NodeService } from "./services/nodeService/NodeService";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
 import { DendronTreeView } from "./views/DendronTreeView";
+import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -68,7 +68,7 @@ export type ServerConfiguration = {
 export class DendronWorkspace {
   static DENDRON_WORKSPACE_FILE: string = "dendron.code-workspace";
   static _SERVER_CONFIGURATION: Partial<ServerConfiguration>;
-  public dendronTreeView: DendronTreeView | undefined;
+  public dendronTreeView: DendronTreeView | DendronTreeViewV2 | undefined;
 
   static instance(): DendronWorkspace {
     if (!_DendronWorkspace) {
@@ -768,6 +768,9 @@ export class DendronWorkspace {
     this.disposableStore.add(
       this.fsWatcher.onDidCreate(async (uri: vscode.Uri) => {
         try {
+          if (DendronWorkspace.lsp()) {
+            return;
+          }
           const ctx = "fsWatcher.onDidCreate";
           this.L.info({ ctx, uri });
           const fname = path.basename(uri.fsPath, ".md");

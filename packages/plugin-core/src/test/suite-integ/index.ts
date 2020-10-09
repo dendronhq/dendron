@@ -14,16 +14,16 @@ export function run(): Promise<void> {
   return new Promise((c, e) => {
     const fname = process.env.TEST_TO_RUN;
     let pattern = "**/*.test.js";
-    if (fname) {
+    if (fname && fname !== "") {
       pattern = `**/${fname}.js`;
     }
     glob(pattern, { cwd: testsRoot }, (err, files) => {
       if (err) {
         return e(err);
       }
-
       // Add files to the test suite
       files.forEach((f) => mocha.addFile(path.resolve(testsRoot, f)));
+      console.log(`running tests on ${files}`);
 
       try {
         // Run the mocha test

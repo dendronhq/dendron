@@ -1,5 +1,4 @@
 import {
-  DEngineInitPayloadV2,
   DEngineMode,
   DEngineV2,
   DNodePropsV2,
@@ -8,6 +7,8 @@ import {
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
+  GetNotePayloadV2,
+  GetNoteOptsV2,
   NotePropsV2,
   NoteUtilsV2,
   QueryOptsV2,
@@ -16,6 +17,10 @@ import {
   SchemaPropsV2,
   SchemaUtilsV2,
   WriteNoteResp,
+  EngineQueryNoteResp,
+  SchemaQueryResp,
+  DEngineInitRespV2,
+  DendronError,
 } from "@dendronhq/common-all";
 import { DLogger } from "@dendronhq/common-server";
 import Fuse from "fuse.js";
@@ -87,7 +92,7 @@ export class DendronEngineV2 implements DEngineV2 {
   /**
    * Does not throw error but returns it
    */
-  async init(): Promise<RespV2<DEngineInitPayloadV2>> {
+  async init(): Promise<DEngineInitRespV2> {
     try {
       const { notes, schemas } = await this.store.init();
       this.updateIndex("note");
@@ -144,6 +149,36 @@ export class DendronEngineV2 implements DEngineV2 {
     }
   }
 
+  async getNoteByPath({
+    npath,
+    createIfNew,
+  }: GetNoteOptsV2): Promise<RespV2<GetNotePayloadV2>> {
+    const ctx = "getNoteByPath";
+    this.logger.debug({ ctx, npath, createIfNew, msg: "enter" });
+    const maybeNote = NoteUtilsV2.getNoteByFname(npath, this.notes);
+    this.logger.debug({ ctx, maybeNote, msg: "post-query" });
+    let noteNew: NotePropsV2 | undefined = maybeNote;
+    let changed: NotePropsV2[] = [];
+    let error = null;
+    if ((!maybeNote || maybeNote.stub) && createIfNew) {
+      this.logger.debug({ ctx, maybeNote, msg: "create-new" });
+      if (maybeNote?.stub) {
+        noteNew = maybeNote;
+        noteNew.stub = false;
+      } else {
+        noteNew = NoteUtilsV2.create({ fname: npath });
+      }
+      changed = (await this.writeNote(noteNew, { newNode: true })).data;
+    }
+    if (!createIfNew && !maybeNote) {
+      error = new DendronError({ status: "no_note_found" });
+    }
+    return {
+      data: { note: noteNew, changed },
+      error,
+    };
+  }
+
   async getSchema(id: string): Promise<RespV2<SchemaModulePropsV2>> {
     const ctx = "getSchema";
     const data = this.schemas[id];
@@ -154,9 +189,7 @@ export class DendronEngineV2 implements DEngineV2 {
     };
   }
 
-  async querySchema(
-    queryString: string
-  ): Promise<RespV2<SchemaModulePropsV2[]>> {
+  async querySchema(queryString: string): Promise<SchemaQueryResp> {
     const ctx = "querySchema";
 
     let items: SchemaModulePropsV2[] = [];
@@ -179,7 +212,7 @@ export class DendronEngineV2 implements DEngineV2 {
     queryString: string,
     mode: DNodeTypeV2,
     opts?: QueryOptsV2
-  ): Promise<RespV2<DNodePropsV2[]>> {
+  ): Promise<EngineQueryNoteResp> {
     const ctx = "query";
     const cleanOpts = _.defaults(opts || {}, {
       fullNode: false,

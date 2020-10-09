@@ -1,6 +1,7 @@
 import { DendronError, DEngineV2, WriteNoteResp } from "@dendronhq/common-all";
 import {
   EngineDeleteRequest,
+  EngineGetNoteByPathRequest,
   EngineQueryRequest,
   EngineWriteRequest,
 } from "@dendronhq/common-server";
@@ -18,6 +19,17 @@ router.post("/delete", async (req: Request, res: Response) => {
   }
   const { error, data } = await engine.deleteNote(id, opts);
   res.json({ error, data });
+});
+
+router.post("/getByPath", async (req: Request, res: Response) => {
+  const { ws, ...opts } = req.body as EngineGetNoteByPathRequest;
+  const engine = await MemoryStore.instance().get<DendronEngineV2>(`ws:${ws}`);
+  if (!engine) {
+    throw "No Engine";
+  }
+  const resp = await engine.getNoteByPath(opts);
+  console.log({ bond: true, resp: JSON.stringify(resp) });
+  res.json(resp);
 });
 
 router.post("/query", async (req: Request, res: Response) => {

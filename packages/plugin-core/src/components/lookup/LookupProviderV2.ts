@@ -1,5 +1,4 @@
 import {
-  DendronError,
   DEngineClientV2,
   DNodePropsDictV2,
   DNodePropsQuickInputV2,

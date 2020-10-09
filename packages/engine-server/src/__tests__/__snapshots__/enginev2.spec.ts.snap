@@ -206,6 +206,84 @@ Array [
 ]
 `;
 
+exports[`engine, notes/ getNoteByPath/ get existing note 1`] = `
+Object {
+  "changed": Array [],
+  "note": Object {
+    "body": "
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "parent": "root",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+  },
+}
+`;
+
+exports[`engine, notes/ getNoteByPath/ get new note 1`] = `
+Object {
+  "changed": Array [
+    Object {
+      "body": "",
+      "children": Array [],
+      "created": 1602277473303,
+      "data": Object {},
+      "desc": "",
+      "fname": "bar",
+      "id": "925676b0-ea50-4552-9369-9a67e78bdd37",
+      "parent": "root",
+      "title": "Bar",
+      "type": "note",
+      "updated": 1602277473303,
+    },
+    Object {
+      "body": "
+",
+      "children": Array [
+        "foo",
+        "925676b0-ea50-4552-9369-9a67e78bdd37",
+      ],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "root",
+      "id": "root",
+      "parent": null,
+      "title": "Root",
+      "type": "note",
+      "updated": "1",
+    },
+  ],
+  "note": Object {
+    "body": "",
+    "children": Array [],
+    "created": 1602277473303,
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "id": "925676b0-ea50-4552-9369-9a67e78bdd37",
+    "parent": "root",
+    "title": "Bar",
+    "type": "note",
+    "updated": 1602277473303,
+  },
+}
+`;
+
 exports[`engine, notes/ write/ write note, match schema: notes 1`] = `
 Object {
   "foo": Object {
@@ -368,7 +446,7 @@ Object {
       "root": Object {
         "body": "",
         "children": Array [],
-        "created": 1602205265491,
+        "created": 1602277473081,
         "data": Object {},
         "desc": "",
         "fname": "__empty",
@@ -376,7 +454,7 @@ Object {
         "parent": "root",
         "title": "root",
         "type": "schema",
-        "updated": 1602205265491,
+        "updated": 1602277473081,
       },
     },
     "version": 1,

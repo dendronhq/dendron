@@ -90,15 +90,10 @@ export class LookupProviderV2 {
     const ctx = "onAcceptNewSchema";
     const fname = PickerUtils.getValue(picker);
     Logger.info({ ctx, msg: "createNewPick", value: fname });
-    const selectedItem = PickerUtilsV2.getSelection(picker);
     let smodNew: SchemaModulePropsV2;
     const ws = DendronWorkspace.instance();
     const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
     const engine = ws.getEngine();
-    if (!_.isUndefined(selectedItem)) {
-      // should not happen
-      throw new DendronError({ msg: "selected item not undefined" });
-    }
     Logger.info({ ctx, msg: "create normal node" });
     smodNew = SchemaUtilsV2.createModuleProps({ fname });
     const uri = Uri.file(

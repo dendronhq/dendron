@@ -1,8 +1,9 @@
 import matter from "gray-matter";
+import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import minimatch from "minimatch";
 import moment from "moment";
-import YAML, { JSON_SCHEMA } from "js-yaml";
+import path from "path";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
 import { DNode } from "./node";
@@ -24,9 +25,6 @@ import {
   SchemaRawV2,
 } from "./typesv2";
 import { genUUID } from "./uuid";
-import { URI } from "vscode-uri";
-import { pathToFileURL } from "url";
-import path from "path";
 
 export class DNodeUtilsV2 {
   static addChild(parent: DNodePropsV2, child: DNodePropsV2) {

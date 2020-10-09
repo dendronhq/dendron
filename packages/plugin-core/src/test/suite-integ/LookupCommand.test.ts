@@ -222,6 +222,34 @@ suite("schemas", function () {
         },
       });
     });
+
+    test("new", function (done) {
+      onWSInit(async () => {
+        ws = DendronWorkspace.instance();
+        client = ws.getEngine();
+        const lp = new LookupProviderV2(engOpts);
+        const quickpick = createMockQuickPick({
+          value: "bar",
+          selectedItems: [lp.noActiveItem],
+        });
+        await lp.onDidAccept(quickpick, engOpts);
+        assert.strictEqual(
+          path.basename(
+            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+          ),
+          "bar.schema.yml"
+        );
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        lsp: true,
+        useCb: async (vaultPath) => {
+          return NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+            vaultDir: vaultPath,
+          });
+        },
+      });
+    });
   });
 });
 

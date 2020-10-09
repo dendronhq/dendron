@@ -1,5 +1,7 @@
 import { DendronError, DEngineV2 } from "@dendronhq/common-all";
 import {
+  SchemaDeletePayload,
+  SchemaDeleteRequest,
   SchemaQueryPayload,
   SchemaQueryRequest,
   SchemaWritePayload,
@@ -27,6 +29,26 @@ export class SchemaController {
     try {
       await engine.writeSchema(schema);
       return { error: null, data: undefined };
+    } catch (err) {
+      return {
+        error: new DendronError({ msg: JSON.stringify(err) }),
+        data: undefined,
+      };
+    }
+  }
+
+  async delete({
+    ws,
+    id,
+    opts,
+  }: SchemaDeleteRequest): Promise<SchemaDeletePayload> {
+    const engine = await MemoryStore.instance().get<DEngineV2>(`ws:${ws}`);
+    if (!engine) {
+      throw "No Engine";
+    }
+    try {
+      const data = await engine.deleteSchema(id, opts);
+      return data;
     } catch (err) {
       return {
         error: new DendronError({ msg: JSON.stringify(err) }),

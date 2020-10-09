@@ -56,6 +56,42 @@ describe("schema", () => {
     });
   });
 
+  describe("delete", () => {
+    beforeEach(async () => {
+      wsRoot = tmpDir().name;
+      vault = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vault);
+      await EngineTestUtils.setupVault({
+        vaultDir: vault,
+        initDirCb: async (vaultPath: string) => {
+          await NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+            vaultDir: vaultPath,
+          });
+        },
+      });
+    });
+
+    test("non-root", async () => {
+      const payload = {
+        uri: wsRoot,
+        config: {
+          vaults: [vault],
+        },
+      };
+      const api = new DendronAPI({
+        endpoint: "http://localhost:3005",
+        apiPath: "api",
+      });
+      await api.workspaceInit(payload);
+      await api.schemaDelete({
+        ws: wsRoot,
+        id: "foo",
+      });
+      const schemaPath = path.join(vault, "foo.schema.yml");
+      expect(fs.existsSync(schemaPath)).toBeFalsy();
+    });
+  });
+
   describe("query", () => {
     beforeEach(async () => {
       wsRoot = tmpDir().name;

@@ -365,6 +365,24 @@ export class FileStorageV2 implements DStoreV2 {
     }
   }
 
+  async deleteSchema(id: string, opts?: EngineDeleteOptsV2) {
+    const ctx = "deleteSchema";
+    this.logger.info({ ctx, msg: "enter", id });
+    if (id === "root") {
+      throw new DendronError({ status: ENGINE_ERROR_CODES.CANT_DELETE_ROOT });
+    }
+    const noteToDelete = this.schemas[id];
+    const ext = ".schema.yml";
+    const vault = this.vaults[0];
+    const fpath = path.join(vault, noteToDelete.fname + ext);
+
+    if (!opts?.metaOnly) {
+      fs.unlinkSync(fpath);
+    }
+    delete this.schemas[id];
+    return;
+  }
+
   loadNotesCache(): NotePropsCacheV2 {
     return {};
   }

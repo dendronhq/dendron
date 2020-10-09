@@ -353,6 +353,46 @@ schemas:
 "
 `;
 
+exports[`engine, schema/ delete/ delete non-root 1`] = `
+Object {
+  "root": Object {
+    "fname": "root",
+    "imports": Array [],
+    "root": Object {
+      "children": Array [],
+      "id": "root",
+      "parent": "root",
+      "title": "root",
+    },
+    "schemas": Object {
+      "root": Object {
+        "body": "",
+        "children": Array [],
+        "created": 1602204582408,
+        "data": Object {},
+        "desc": "",
+        "fname": "__empty",
+        "id": "root",
+        "parent": "root",
+        "title": "root",
+        "type": "schema",
+        "updated": 1602204582408,
+      },
+    },
+    "version": 1,
+  },
+}
+`;
+
+exports[`engine, schema/ delete/ delete non-root 2`] = `
+Array [
+  "foo.ch1.md",
+  "foo.md",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
 exports[`engine, schema/ write/ update schema, add new prop to module: new schema file 1`] = `
 Object {
   "imports": Array [],

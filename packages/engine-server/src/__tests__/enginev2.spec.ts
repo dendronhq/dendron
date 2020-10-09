@@ -76,6 +76,40 @@ describe("engine, schema/", () => {
   let vaultDir: string;
   let engine: DEngineV2;
 
+  describe("delete/", () => {
+    let vaultDir: string;
+    let engine: DEngineV2;
+    beforeEach(async () => {
+      ({ vaultDir, engine } = await beforePreset());
+    });
+
+    test("delete non-root", async () => {
+      await engine.init();
+      await engine.deleteSchema("foo");
+      expect(engine.schemas).toMatchSnapshot();
+
+      // node deleted from memory
+      expect(_.values(engine.schemas).length).toEqual(1);
+      expect(engine.schemas["foo"]).toBeUndefined();
+
+      // node removed from disk
+      expect(fs.readdirSync(vaultDir)).toMatchSnapshot();
+      expect(
+        _.includes(fs.readdirSync(vaultDir), "foo.schema.yml")
+      ).toBeFalsy();
+
+      // node not in index
+      const index = (engine as DendronEngineV2).notesIndex;
+      expect((index.getIndex().toJSON() as any).records.length).toEqual(3);
+    });
+
+    test("delete root", async () => {
+      await engine.init();
+      const { error } = await engine.deleteSchema("root");
+      expect(error?.status).toEqual(ENGINE_ERROR_CODES.CANT_DELETE_ROOT);
+    });
+  });
+
   describe("write/", () => {
     beforeEach(async () => {
       ({ vaultDir, engine } = await beforePreset());
@@ -384,6 +418,12 @@ describe("engine, notes/", () => {
       // note not in index
       const index = (engine as DendronEngineV2).notesIndex;
       expect((index.getIndex().toJSON() as any).records.length).toEqual(2);
+    });
+
+    test("root", async () => {
+      await engine.init();
+      const { error } = await engine.deleteNote("root");
+      expect(error?.status).toEqual(ENGINE_ERROR_CODES.CANT_DELETE_ROOT);
     });
   });
 

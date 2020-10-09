@@ -1,6 +1,7 @@
 import {
   createLogger,
   DendronError,
+  DEngineDeleteSchemaPayloadV2,
   DEngineQuery,
   DNodePropsV2,
   EngineDeleteNotePayload,
@@ -96,6 +97,7 @@ export type InitializePayload = APIPayload<{
 export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
 export type EngineDeletePayload = APIPayload<EngineDeleteNotePayload>;
 
+export type SchemaDeletePayload = APIPayload<DEngineDeleteSchemaPayloadV2>;
 export type SchemaReadPayload = APIPayload<SchemaModulePropsV2>;
 export type SchemaQueryPayload = APIPayload<SchemaModulePropsV2[]>;
 export type SchemaWritePayload = APIPayload<void>;
@@ -142,6 +144,10 @@ export type EngineDeleteRequest = {
   opts?: EngineDeleteOptsV2;
 } & { ws: string };
 
+export type SchemaDeleteRequest = {
+  id: string;
+  opts?: EngineDeleteOptsV2;
+} & Partial<WorkspaceRequest>;
 export type SchemaReadRequest = {
   id: string;
 } & Partial<WorkspaceRequest>;
@@ -323,6 +329,15 @@ export class DendronAPI extends API {
   async engineWrite(req: EngineWriteRequest): Promise<WriteNoteResp> {
     const resp = await this._makeRequest({
       path: "note/write",
+      method: "post",
+      body: req,
+    });
+    return resp;
+  }
+
+  async schemaDelete(req: SchemaDeleteRequest): Promise<SchemaDeletePayload> {
+    const resp = await this._makeRequest({
+      path: "schema/delete",
       method: "post",
       body: req,
     });

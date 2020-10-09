@@ -105,31 +105,44 @@ export class DendronEngineV2 implements DEngineV2 {
   }
 
   async deleteNote(id: string, opts?: EngineDeleteOptsV2) {
-    const note = this.notes[id];
-    const changed: NotePropsV2[] = [];
-    const status = await this.store.deleteNote(id, opts);
-    if (status === "removed") {
-      await this.removeNoteFromIndex(note);
-      if (note.parent) {
-        changed.push(this.notes[note.parent]);
+    try {
+      const note = this.notes[id];
+      const changed: NotePropsV2[] = [];
+      const status = await this.store.deleteNote(id, opts);
+      if (status === "removed") {
+        await this.removeNoteFromIndex(note);
+        if (note.parent) {
+          changed.push(this.notes[note.parent]);
+        }
       }
+      return {
+        data: changed,
+        error: null,
+      };
+    } catch (err) {
+      return {
+        data: [],
+        error: err,
+      };
     }
-    return {
-      data: changed,
-      error: null,
-    };
   }
 
-  // async delete(
-  //   id: string,
-  //   mode: DNodeTypeV2,
-  //   opts?: EngineDeleteOptsV2
-  // ): Promise<void> {
-  //   if (mode === "note") {
-  //     return this.deleteNote(id, opts)
-  //   }
-  //   throw Error("to implement");
-  // }
+  async deleteSchema(id: string, opts?: EngineDeleteOptsV2) {
+    const smod = this.schemas[id];
+    try {
+      await this.store.deleteSchema(id, opts);
+      await this.removeSchemaFromIndex(smod);
+      return {
+        data: undefined,
+        error: null,
+      };
+    } catch (err) {
+      return {
+        data: undefined,
+        error: err,
+      };
+    }
+  }
 
   async getSchema(id: string): Promise<RespV2<SchemaModulePropsV2>> {
     const ctx = "getSchema";
@@ -226,6 +239,16 @@ export class DendronEngineV2 implements DEngineV2 {
         return false;
       }
       return doc.id === note.id;
+    });
+  }
+
+  async removeSchemaFromIndex(smod: SchemaModulePropsV2) {
+    this.schemaIndex.remove((doc: SchemaPropsV2) => {
+      // FIXME: can be undefined, dunno why
+      if (!doc) {
+        return false;
+      }
+      return doc.id === SchemaUtilsV2.getModuleRoot(smod).id;
     });
   }
 

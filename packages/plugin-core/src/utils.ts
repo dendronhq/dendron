@@ -401,4 +401,18 @@ export class DendronClientUtilsV2 {
     }
     return note;
   };
+
+  static getSchemaModByFname = async ({
+    fname,
+    client,
+  }: {
+    fname: string;
+    client: DEngineClientV2;
+  }) => {
+    const smod = _.find(client.schemas, { fname });
+    if (!smod) {
+      throw new DendronError({ msg: "no note found" });
+    }
+    return smod;
+  };
 }

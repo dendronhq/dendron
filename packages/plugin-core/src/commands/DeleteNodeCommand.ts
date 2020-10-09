@@ -1,3 +1,4 @@
+import { SchemaUtilsV2 } from "@dendronhq/common-all";
 import path from "path";
 import { Uri, window } from "vscode";
 import { HistoryService } from "../services/HistoryService";
@@ -29,11 +30,19 @@ export class DeleteNodeCommand extends BasicCommand<
       uri: Uri.file(fsPath),
     });
     const mode = fsPath.endsWith(".md") ? "note" : "schema";
-    const trimEnd = mode === "note" ? ".md" : "schema.yml";
+    const trimEnd = mode === "note" ? ".md" : ".schema.yml";
     const fname = path.basename(fsPath, trimEnd);
     const client = DendronWorkspace.instance().getEngine();
-    const note = await DendronClientUtilsV2.getNoteByFname({ fname, client });
-    await client.deleteNote(note.id);
+    if (mode === "note") {
+      const note = await DendronClientUtilsV2.getNoteByFname({ fname, client });
+      await client.deleteNote(note.id);
+    } else {
+      const smod = await DendronClientUtilsV2.getSchemaModByFname({
+        fname,
+        client,
+      });
+      await client.deleteSchema(SchemaUtilsV2.getModuleRoot(smod).id);
+    }
     window.showInformationMessage(`${path.basename(fsPath)} deleted`);
     return;
   }

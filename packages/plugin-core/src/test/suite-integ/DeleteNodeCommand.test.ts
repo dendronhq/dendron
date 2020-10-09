@@ -49,3 +49,40 @@ suite("notes", function () {
     });
   });
 });
+
+suite("schemas", function () {
+  let root: DirResult;
+  let ctx: vscode.ExtensionContext;
+  let vaultPath: string;
+  this.timeout(TIMEOUT);
+
+  beforeEach(function () {
+    root = FileTestUtils.tmpDir();
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    DendronWorkspace.getOrCreate(ctx);
+  });
+
+  afterEach(function () {
+    HistoryService.instance().clearSubscriptions();
+  });
+
+  test("basic", (done) => {
+    onWSInit(async () => {
+      const notePath = path.join(vaultPath, "foo.schema.yml");
+      await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+      await new DeleteNodeCommand().execute();
+      const vaultFiles = fs.readdirSync(vaultPath);
+      const noteFiles = vaultFiles.filter((ent) => ent.endsWith(".schema.yml"));
+      assert.strictEqual(noteFiles.length, 1);
+      assert.deepStrictEqual(noteFiles.sort(), ["root.schema.yml"]);
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      useCb: async (vaultDir) => {
+        vaultPath = vaultDir;
+        await NodeTestPresetsV2.createOneNoteoneSchemaPreset({ vaultDir });
+      },
+    });
+  });
+});

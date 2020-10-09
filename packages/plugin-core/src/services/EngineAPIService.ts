@@ -5,7 +5,6 @@ import {
   DNodeData,
   DNodePropsV2,
   DNodeTypeV2,
-  EngineDeleteOpts,
   EngineDeleteOptsV2,
   EngineGetResp,
   EngineUpdateNodesOptsV2,
@@ -88,12 +87,17 @@ export class EngineAPIService implements DEngineClientV2 {
     };
   }
 
-  async delete(
-    _id: string,
-    _mode: QueryMode,
-    _opts?: EngineDeleteOpts
-  ): Promise<void> {
-    throw Error("not implemented");
+  async deleteSchema(id: string, opts?: EngineDeleteOptsV2) {
+    const ws = this.ws;
+    const resp = await this.api.schemaDelete({ id, opts, ws });
+    if (!resp.data) {
+      throw new DendronError({ msg: "no data" });
+    }
+    delete this.schemas[id];
+    return {
+      error: null,
+      data: resp.data,
+    };
   }
 
   /**

@@ -38,6 +38,10 @@ code fence
 - [[foo-wiki-link]]
 - [[label|foo-wiki-link]]
 - [[label|foo-wiki-link]]#foobar
+
+HTML
+
+*[HTML]: HyperText Markup Language
 `;
 
 describe("replaceRefs", () => {
@@ -97,5 +101,20 @@ describe("replaceRefs", () => {
     const out = proc.processSync(note.body);
 
     expect(out.toString()).toMatchSnapshot("raw");
+  });
+});
+
+describe("Markdown extensions", () => {
+  test("abbreviations are preserved", async () => {
+    const abbr = `
+HTML, JS and CSS are the fundamental building blocks of the web.
+
+*[CSS]: Cascading Style Sheets
+*[HTML]: HyperText Markup Language
+*[JS]: JavaScript
+    `;
+    const proc = getProcessor();
+    const out = await proc.process(abbr);
+    expect(out.toString()).toMatchSnapshot();
   });
 });

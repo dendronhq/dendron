@@ -245,6 +245,7 @@ Object {
     Object {
       "note": Object {
         "body": "[[baz]]
+
 ",
         "children": Array [],
         "created": "1",

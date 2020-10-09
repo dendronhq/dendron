@@ -55,6 +55,7 @@
         "--extensionTestsPath=${workspaceFolder}/out/test/suite-integ/index"
       ],
       "env": {
+        "TEST_TO_RUN": "",
         "STAGE": "test"
       },
       "outFiles": ["${workspaceFolder}/out/test/**/*.js"]

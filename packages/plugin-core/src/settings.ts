@@ -194,7 +194,7 @@ export class Snippets {
     todo: {
       prefix: "to",
       scope: "markdown,yaml",
-      body: "- [ ]",
+      body: "- [ ] ",
       description: "render todo box",
     },
     tag: {

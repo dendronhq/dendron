@@ -6,10 +6,12 @@ import {
   DNodePropsV2,
   EngineDeleteNotePayload,
   EngineDeleteOptsV2,
+  EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   GetNoteOptsV2,
   GetNotePayloadV2,
   NotePropsDictV2,
+  NotePropsV2,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
   WriteNoteResp,
@@ -91,21 +93,6 @@ type APIPayload<T = any> = {
   data?: T;
 };
 
-export type InitializePayload = APIPayload<{
-  notes: NotePropsDictV2;
-  schemas: SchemaModuleDictV2;
-}>;
-
-export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
-export type EngineGetNoteByPathPayload = APIPayload<GetNotePayloadV2>;
-export type EngineDeletePayload = APIPayload<EngineDeleteNotePayload>;
-
-export type SchemaDeletePayload = APIPayload<DEngineDeleteSchemaPayloadV2>;
-export type SchemaReadPayload = APIPayload<SchemaModulePropsV2>;
-export type SchemaQueryPayload = APIPayload<SchemaModulePropsV2[]>;
-export type SchemaWritePayload = APIPayload<void>;
-export type SchemaUpdatePayload = APIPayload<void>;
-
 // === Utilities
 
 const APIError = DendronError;
@@ -128,6 +115,7 @@ const STATUS_HANDLERS = {
   },
 };
 
+// --- Requests
 type WorkspaceInitRequest = {
   uri: string;
   config: {
@@ -139,6 +127,10 @@ type WorkspaceRequest = { ws: string };
 
 export type EngineQueryRequest = DEngineQuery & { ws: string };
 export type EngineGetNoteByPathRequest = GetNoteOptsV2 & { ws: string };
+export type EngineUpdateNoteRequest = { ws: string } & {
+  note: NotePropsV2;
+  opts?: EngineUpdateNodesOptsV2;
+};
 export type EngineWriteRequest = {
   node: DNodePropsV2;
   opts?: EngineWriteOptsV2;
@@ -163,6 +155,23 @@ export type SchemaWriteRequest = {
 } & WorkspaceRequest;
 
 export type SchemaUpdateRequest = SchemaWriteRequest;
+
+// --- Payload
+export type InitializePayload = APIPayload<{
+  notes: NotePropsDictV2;
+  schemas: SchemaModuleDictV2;
+}>;
+
+export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
+export type EngineGetNoteByPathPayload = APIPayload<GetNotePayloadV2>;
+export type EngineUpdateNotePayload = APIPayload<void>;
+export type EngineDeletePayload = APIPayload<EngineDeleteNotePayload>;
+
+export type SchemaDeletePayload = APIPayload<DEngineDeleteSchemaPayloadV2>;
+export type SchemaReadPayload = APIPayload<SchemaModulePropsV2>;
+export type SchemaQueryPayload = APIPayload<SchemaModulePropsV2[]>;
+export type SchemaWritePayload = APIPayload<void>;
+export type SchemaUpdatePayload = APIPayload<void>;
 
 // === Base
 
@@ -335,6 +344,17 @@ export class DendronAPI extends API {
   async engineQuery(req: EngineQueryRequest): Promise<EngineQueryPayload> {
     const resp = await this._makeRequest({
       path: "note/query",
+      method: "post",
+      body: req,
+    });
+    return resp;
+  }
+
+  async engineUpdateNote(
+    req: EngineUpdateNoteRequest
+  ): Promise<EngineUpdateNotePayload> {
+    const resp = await this._makeRequest({
+      path: "note/update",
       method: "post",
       body: req,
     });

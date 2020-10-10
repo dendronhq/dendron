@@ -525,6 +525,32 @@ describe("engine, notes/", () => {
     });
   });
 
+  describe("update", () => {
+    const PRESET = NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.update;
+
+    let vaultDir: string;
+    let engine: DEngineV2;
+    beforeEach(async () => {
+      ({ vaultDir, engine } = await beforePreset());
+    });
+
+    test(PRESET.noteNoChildren.label, async () => {
+      await engine.init();
+      const note = engine.notes["foo.ch1"];
+      const cnote = _.clone(note);
+      cnote.body = "new body";
+      await engine.updateNote(cnote);
+      const notes = engine.notes;
+      _.map(
+        await PRESET.noteNoChildren.results({
+          notes,
+          vaultDir,
+        }),
+        (ent) => expect(ent.expected).toEqual(ent.actual)
+      );
+    });
+  });
+
   describe("basics", () => {
     beforeEach(async () => {
       vaultDir = await EngineTestUtilsV2.setupVault({

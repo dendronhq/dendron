@@ -21,6 +21,8 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return {};
   }
   async execute(opts: CommandOpts) {
+    const ctx = "GotoNoteCommand";
+    this.L.info({ ctx, opts, msg: "enter" });
     const { qs, mode } = opts;
     if (DendronWorkspace.lsp()) {
       if (opts.mode === "note") {
@@ -33,6 +35,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         const npath = NoteUtilsV2.getPath({ note, client });
         const uri = Uri.file(npath);
         await VSCodeUtils.openFileInEditor(uri);
+        this.L.info({ ctx, opts, msg: "exit" });
         return note;
       } else {
         throw new DendronError({ msg: "goto schema not implemented" });

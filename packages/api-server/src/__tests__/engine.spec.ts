@@ -225,6 +225,8 @@ describe("schema", () => {
 
 const NOTE_DELETE_PRESET =
   NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.delete;
+const NOTE_UPDATE_PRESET =
+  NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.update;
 
 describe("notes", () => {
   let wsRoot: string;
@@ -387,6 +389,52 @@ describe("notes", () => {
         moduleId: "foo",
         schemaId: "ch1",
       });
+    });
+  });
+
+  describe("update", () => {
+    beforeEach(async () => {
+      wsRoot = tmpDir().name;
+      vault = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vault);
+      await EngineTestUtils.setupVault({
+        vaultDir: vault,
+        initDirCb: async (vaultPath: string) => {
+          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+            vaultDir: vaultPath,
+          });
+        },
+      });
+      api = await setupWS({ wsRoot, vault });
+    });
+
+    test(NOTE_UPDATE_PRESET.noteNoChildren.label, async () => {
+      const respNote = await api.engineGetNoteByPath({
+        npath: "foo.ch1",
+        ws: wsRoot,
+      });
+      const note = respNote.data?.note as NotePropsV2;
+      note.body = "new body";
+      await api.engineUpdateNote({ note, ws: wsRoot });
+      const resp = await api.engineQuery({
+        ws: wsRoot,
+        mode: "note",
+        queryString: "*",
+      });
+      const notes: NotePropsDictV2 = {};
+      _.forEach((resp.data as unknown) as NotePropsV2, (ent: NotePropsV2) => {
+        notes[ent.id] = ent;
+      });
+
+      _.map(
+        await NOTE_UPDATE_PRESET.noteNoChildren.results({
+          vaultDir: vault,
+          notes,
+        }),
+        (ent) => {
+          expect(ent.expected).toEqual(ent.actual);
+        }
+      );
     });
   });
 

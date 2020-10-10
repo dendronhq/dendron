@@ -56,6 +56,11 @@ export type TestResult = {
   msg?: string;
 };
 
+type UpdateNoteTestOptsV2 = {
+  notes: NotePropsDictV2;
+  vaultDir: string;
+};
+
 type DeleteNoteTestOptsV2 = {
   changed: NotePropsV2[];
   notes: NotePropsDictV2;
@@ -79,11 +84,32 @@ export class NoteTestPresetsV2 {
           }: DeleteNoteTestOptsV2): Promise<TestResult[]> => {
             return [
               { actual: changed[0].id, expected: "root", msg: "root updated" },
+              {
+                actual: changed[0].children,
+                expected: [],
+                msg: "root does not have children",
+              },
               { actual: _.size(notes), expected: 1 },
               { actual: notes["foo"], expected: undefined },
               {
                 actual: _.includes(fs.readdirSync(vaultDir), "foo.md"),
                 expected: false,
+              },
+            ];
+          },
+        },
+      },
+      update: {
+        noteNoChildren: {
+          label: "update note, no children",
+          results: async ({
+            notes,
+          }: UpdateNoteTestOptsV2): Promise<TestResult[]> => {
+            return [
+              {
+                actual: _.pick(notes["foo.ch1"], "body"),
+                expected: { body: "new body" },
+                msg: "update body",
               },
             ];
           },

@@ -189,22 +189,22 @@ Object {
     Object {
       "body": "",
       "children": Array [],
-      "created": 1602343203893,
+      "created": 1602349346124,
       "data": Object {},
       "desc": "",
       "fname": "bar",
-      "id": "e7269e97-c5d8-4ff4-9093-769a86a2b1c3",
+      "id": "e307a0ba-8291-476a-84d8-166a04803a76",
       "parent": "root",
       "title": "Bar",
       "type": "note",
-      "updated": 1602343203893,
+      "updated": 1602349346124,
     },
     Object {
       "body": "
 ",
       "children": Array [
         "foo",
-        "e7269e97-c5d8-4ff4-9093-769a86a2b1c3",
+        "e307a0ba-8291-476a-84d8-166a04803a76",
       ],
       "created": "1",
       "custom": Object {},
@@ -221,15 +221,15 @@ Object {
   "note": Object {
     "body": "",
     "children": Array [],
-    "created": 1602343203893,
+    "created": 1602349346124,
     "data": Object {},
     "desc": "",
     "fname": "bar",
-    "id": "e7269e97-c5d8-4ff4-9093-769a86a2b1c3",
+    "id": "e307a0ba-8291-476a-84d8-166a04803a76",
     "parent": "root",
     "title": "Bar",
     "type": "note",
-    "updated": 1602343203893,
+    "updated": 1602349346124,
   },
 }
 `;
@@ -396,7 +396,7 @@ Object {
       "root": Object {
         "body": "",
         "children": Array [],
-        "created": 1602343203712,
+        "created": 1602349345947,
         "data": Object {},
         "desc": "",
         "fname": "__empty",
@@ -404,7 +404,7 @@ Object {
         "parent": "root",
         "title": "root",
         "type": "schema",
-        "updated": 1602343203712,
+        "updated": 1602349345947,
       },
     },
     "version": 1,

@@ -11,8 +11,20 @@ export function appModule({ logPath }: { logPath: string }) {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   if (process.env.NODE_ENV !== "production") {
+    // @ts-ignore
+    morgan.token("body", function (req, res) {
+      return JSON.stringify(req.body);
+    });
     const accessLogStream = fs.createWriteStream(logPath, { flags: "a" });
-    app.use(morgan("combined", { stream: accessLogStream }));
+    app.use(
+      morgan(
+        ":method :url :status :response-time ms - :res[content-length] :body - :req[content-length]",
+        {
+          stream: accessLogStream,
+        }
+      )
+    );
+    //app.use(morgan("combined", { stream: accessLogStream }));
   }
 
   app.get("/api/static", (_req, res) => {

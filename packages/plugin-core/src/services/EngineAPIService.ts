@@ -109,9 +109,8 @@ export class EngineAPIService implements DEngineClientV2 {
       ...opts,
       ws: this.ws,
     });
-    if (!_.isEmpty(resp.data?.changed)) {
-      // TODO
-      // this.refreshNotes(resp)
+    if (!_.isUndefined(resp.data)) {
+      this.refreshNotes(resp.data.changed);
     }
     // TODO: update notes
     return resp;
@@ -169,11 +168,7 @@ export class EngineAPIService implements DEngineClientV2 {
   async refreshNotes(notes: NotePropsV2[]) {
     notes.forEach((node: DNodePropsV2) => {
       const { id } = node;
-      if (!_.has(this.notes, id)) {
-        this.notes[id] = node;
-      } else {
-        _.merge(this.notes[id], node);
-      }
+      this.notes[id] = node;
     });
   }
 
@@ -188,7 +183,9 @@ export class EngineAPIService implements DEngineClientV2 {
     note: NotePropsV2,
     opts?: EngineUpdateNodesOptsV2
   ): Promise<void> {
-    throw Error("not implemented");
+    await this.api.engineUpdateNote({ ws: this.ws, note, opts });
+    await this.refreshNotes([note]);
+    return;
   }
 
   async writeNote(

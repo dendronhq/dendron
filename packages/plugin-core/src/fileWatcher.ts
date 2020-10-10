@@ -1,4 +1,4 @@
-import { DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngineClientV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
@@ -57,11 +57,21 @@ export class VaultWatcher {
       }
 
       try {
-        this.L.debug({ ctx, uri, msg: "adding to engine" });
-        const note = file2Note(uri.fsPath);
-        this.engine.updateNote(note, {
+        this.L.debug({ ctx, uri, msg: "pre-add-to-engine" });
+        let note = file2Note(uri.fsPath);
+        const maybeNote = NoteUtilsV2.getNoteByFname(fname, this.engine.notes);
+        if (maybeNote) {
+          note = {
+            ...note,
+            stub: false,
+            schemaStub: false,
+            ..._.pick(maybeNote, ["children", "parent"]),
+          };
+        }
+        await this.engine.updateNote(note, {
           newNode: true,
         });
+        this.L.debug({ ctx, uri, msg: "post-add-to-engine", note });
       } catch (err) {
         this.L.error({ ctx, err });
       }

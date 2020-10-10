@@ -3,10 +3,12 @@ import {
   EngineDeleteRequest,
   EngineGetNoteByPathRequest,
   EngineQueryRequest,
+  EngineUpdateNoteRequest,
   EngineWriteRequest,
 } from "@dendronhq/common-server";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
 import { Request, Response, Router } from "express";
+import { NoteController } from "../modules/notes";
 import { MemoryStore } from "../store/memoryStore";
 
 const router = Router();
@@ -40,6 +42,13 @@ router.post("/query", async (req: Request, res: Response) => {
   }
   const { error, data } = await engine.query(queryString, mode);
   res.json({ error, data });
+});
+
+router.post("/update", async (req: Request, res: Response) => {
+  const resp = await NoteController.instance().update(
+    req.body as EngineUpdateNoteRequest
+  );
+  res.json(resp);
 });
 
 router.post("/write", async (req: Request, res: Response<WriteNoteResp>) => {

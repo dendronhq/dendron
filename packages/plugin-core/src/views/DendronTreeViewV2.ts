@@ -103,6 +103,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
     } else {
       Logger.info({ ctx, msg: "reconstructing tree" });
       const root = client.notes["root"];
+      Logger.debug({ ctx, notes: client.notes });
       return Promise.resolve(this.parseTree(root, client.notes).children);
     }
   }

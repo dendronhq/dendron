@@ -16,6 +16,9 @@ import {
   setupDendronWorkspace,
   TIMEOUT,
 } from "../testUtils";
+import fs from "fs-extra";
+import path from "path";
+import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 
 suite("notes", function () {
   let root: DirResult;
@@ -50,7 +53,38 @@ suite("notes", function () {
     });
   });
 
-  test("go to stub", (done) => {
+  test("go to a stub ", (done) => {
+    onWSInit(async () => {
+      const ws = DendronWorkspace.instance();
+      const engine = ws.getEngine();
+      let note = NoteUtilsV2.getNoteByFname("foo", engine.notes) as NotePropsV2;
+      assert.deepStrictEqual(_.pick(note, ["fname", "stub"]), {
+        fname: "foo",
+        stub: true,
+      });
+
+      const out = await new GotoNoteCommand().run({
+        qs: "foo",
+        mode: "note",
+      });
+      assert.deepStrictEqual(_.pick(out, ["fname", "stub", "id"]), {
+        fname: "foo",
+        id: note.id,
+      });
+      assert.strictEqual(getActiveEditorBasename(), "foo.md");
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      useCb: async (vaultDir) => {
+        vaultPath = vaultDir;
+        await NodeTestPresetsV2.createOneNoteoneSchemaPreset({ vaultDir });
+        fs.removeSync(path.join(vaultDir, "foo.md"));
+      },
+    });
+  });
+
+  test("go to new note", (done) => {
     onWSInit(async () => {
       const out = await new GotoNoteCommand().run({
         qs: "foo.ch2",

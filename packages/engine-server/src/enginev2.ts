@@ -164,7 +164,7 @@ export class DendronEngineV2 implements DEngineV2 {
       this.logger.debug({ ctx, maybeNote, msg: "create-new" });
       if (maybeNote?.stub) {
         noteNew = maybeNote;
-        noteNew.stub = false;
+        delete noteNew.stub;
       } else {
         noteNew = NoteUtilsV2.create({ fname: npath });
       }

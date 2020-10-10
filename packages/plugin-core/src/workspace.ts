@@ -51,6 +51,7 @@ import {
   GLOBAL_STATE,
 } from "./constants";
 import { cacheWorkspace } from "./external/memo/utils/utils";
+import { VaultWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { NodeService } from "./services/nodeService/NodeService";
@@ -633,7 +634,7 @@ export class DendronWorkspace {
    * - get workspace config and workspace folder
    * - activate workspacespace watchers
    */
-  async activateWorkspace() {
+  async activateWatchers() {
     const ctx = "activateWorkspace";
     const stage = getStage();
     this.L.info({ ctx, stage, msg: "enter" });
@@ -653,11 +654,19 @@ export class DendronWorkspace {
       throw Error("no folders set for workspace");
     }
     workspaceFolders = wsFolders;
-    // if (stage !== "test") {
+    if (DendronWorkspace.lsp()) {
+      const vaultWatcher = new VaultWatcher({
+        vaults: wsFolders as vscode.WorkspaceFolder[],
+      });
+      let disposables = vaultWatcher.activate();
+      disposables.map((d) => {
+        this.disposableStore.add(d);
+      });
+      return;
+    }
     this.createWorkspaceWatcher(workspaceFolders);
     this.createServerWatcher();
     this.createSchemaWatcher(workspaceFolders);
-    // }
   }
 
   async deactivate() {

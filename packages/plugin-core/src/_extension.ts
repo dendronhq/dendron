@@ -12,7 +12,7 @@ import {
   WORKSPACE_STATE,
 } from "./constants";
 import { Logger } from "./logger";
-import { startClient } from "./lsp";
+import { startClient as startLSPClient } from "./lsp";
 import { HistoryEvent, HistoryService } from "./services/HistoryService";
 import { Extensions } from "./settings";
 import { VSCodeUtils, WSUtils } from "./utils";
@@ -210,12 +210,12 @@ export async function _activate(context: vscode.ExtensionContext) {
     Logger.info({ ctx, msg: "wsActive", lspSupport });
     if (lspSupport) {
       Logger.info({ ctx, msg: "start with lsp support" });
-      await ws.activateWorkspace();
       const port: number = await startServer();
       Logger.info({ ctx, msg: "post-start-server", port });
       WSUtils.updateEngineAPI(port);
-      startClient({ context, port });
+      startLSPClient({ context, port });
       await reloadWorkspace();
+      await ws.activateWatchers();
       Logger.info({ ctx, msg: "fin startClient" });
     } else {
       ws._engine = DendronEngine.getOrCreateEngine({
@@ -223,7 +223,7 @@ export async function _activate(context: vscode.ExtensionContext) {
         forceNew: true,
         logger: ws.L,
       });
-      await ws.activateWorkspace();
+      await ws.activateWatchers();
       await reloadWorkspace();
     }
   } else {

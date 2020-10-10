@@ -376,6 +376,29 @@ describe("engine, notes/", () => {
     });
   });
 
+  const NOTE_INIT_PRESET =
+    NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.init;
+
+  describe("init/", () => {
+    let vaultDir: string;
+    let engine: DEngineV2;
+
+    beforeEach(async () => {
+      ({ vaultDir, engine } = await beforePreset());
+    });
+
+    test(NOTE_INIT_PRESET.domainStub.label, async () => {
+      await NOTE_INIT_PRESET.domainStub.before({ vaultDir });
+      await engine.init();
+      const notes = engine.notes;
+      await NodeTestPresetsV2.runJestHarness({
+        opts: { notes },
+        results: NOTE_INIT_PRESET.domainStub.results,
+        expect,
+      });
+    });
+  });
+
   const NOTE_DELETE_PRESET =
     NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.delete;
 

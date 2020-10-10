@@ -1,8 +1,10 @@
+import assert from "assert";
 import {
   DNodeUtilsV2,
   NoteChangeEntry,
   NoteOptsV2,
   NotePropsDictV2,
+  NotePropsV2,
   NoteUtilsV2,
   SchemaModuleOptsV2,
   SchemaModulePropsV2,
@@ -16,6 +18,7 @@ import {
 } from "@dendronhq/common-server";
 import _ from "lodash";
 import fs from "fs-extra";
+import path from "path";
 
 export type SetupVaultOpts = {
   vaultDir?: string;
@@ -32,6 +35,30 @@ export class EngineTestUtilsV2 {
 }
 
 export class NodeTestPresetsV2 {
+  static async runMochaHarness<TOpts>({
+    opts,
+    results,
+  }: {
+    opts: TOpts;
+    results: any;
+  }) {
+    return _.map(await results(opts), (ent) =>
+      assert.deepStrictEqual(ent.actual, ent.expected)
+    );
+  }
+  static async runJestHarness<TOpts>({
+    opts,
+    results,
+    expect,
+  }: {
+    opts: TOpts;
+    results: any;
+    expect: jest.Expect;
+  }) {
+    return _.map(await results(opts), (ent) =>
+      expect(ent.actual).toEqual(ent.expected)
+    );
+  }
   static async createOneNoteOneSchemaPreset({
     vaultDir,
   }: {
@@ -70,6 +97,25 @@ type DeleteNoteTestOptsV2 = {
 export class NoteTestPresetsV2 {
   static presets = {
     OneNoteOneSchemaPreset: {
+      init: {
+        domainStub: {
+          label: "domain stub",
+          before: async ({ vaultDir }: { vaultDir: string }) => {
+            fs.removeSync(path.join(vaultDir, "foo.md"));
+          },
+          results: async ({ notes }: { notes: NotePropsDictV2 }) => {
+            const note = NoteUtilsV2.getNoteByFname(
+              "foo",
+              notes
+            ) as NotePropsV2;
+            const scenarios = [
+              { actual: _.size(notes), expected: 3 },
+              { actual: notes["root"].children, expected: [note.id] },
+            ];
+            return scenarios;
+          },
+        },
+      },
       delete: {
         noteNoChildren: {
           label: "note w/no children",

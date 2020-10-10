@@ -220,6 +220,7 @@ export class NoteUtilsV2 {
     const changed: NotePropsV2[] = [];
     if (parent) {
       changed.push(parent);
+      DNodeUtilsV2.addChild(parent, note);
     }
     if (!parent && !createStubs) {
       const err = {
@@ -241,7 +242,6 @@ export class NoteUtilsV2 {
         changed.push(ent2);
       });
     }
-    DNodeUtilsV2.addChild(parent, note);
     return changed;
   }
 

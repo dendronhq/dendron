@@ -465,6 +465,46 @@ suite("notes", function () {
     //       });
     //     });
   });
+
+  describe.skip("onAccept", function () {
+    const engOpts: EngineOpts = { flavor: "note" };
+    let ws: DendronWorkspace;
+    let client: DEngineClientV2;
+
+    test("root", function (done) {
+      onWSInit(async () => {
+        ws = DendronWorkspace.instance();
+        client = ws.getEngine();
+        const schemaModule = client.schemas["root"];
+        const schema = schemaModule["root"];
+        const schemaInput = DNodeUtilsV2.enhancePropForQuickInput(
+          schema,
+          client.schemas
+        );
+        const quickpick = createMockQuickPick({
+          value: "root",
+          selectedItems: [schemaInput],
+        });
+        const lp = new LookupProviderV2(engOpts);
+        await lp.onDidAccept(quickpick, engOpts);
+        assert.strictEqual(
+          path.basename(
+            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+          ),
+          "root.schema.yml"
+        );
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        lsp: true,
+        useCb: async (vaultPath) => {
+          return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+            vaultDir: vaultPath,
+          });
+        },
+      });
+    });
+  });
 });
 
 // suite("Scratch Notes", function () {

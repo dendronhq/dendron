@@ -1,4 +1,3 @@
-import assert from "assert";
 import {
   DNodeUtilsV2,
   NoteChangeEntry,
@@ -16,8 +15,9 @@ import {
   schemaModuleOpts2File,
   tmpDir,
 } from "@dendronhq/common-server";
-import _ from "lodash";
+import assert from "assert";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 
 export type SetupVaultOpts = {
@@ -94,11 +94,54 @@ type DeleteNoteTestOptsV2 = {
   vaultDir: string;
 };
 
+type NoteTestPresetEntry<TBeforeOpts, TResultsOpts> = {
+  label: string;
+  init(): Promise<void>;
+  before: (opts: TBeforeOpts) => Promise<void>;
+  results: (opts: TResultsOpts) => Promise<TestResult[]>;
+};
+
+type NoteTestPresetGroup<TBeforeOpts, TResultsOpts> = {
+  [key: string]: NoteTestPresetEntry<TBeforeOpts, TResultsOpts>;
+};
+
+type NoteTestPresetModule<TBeforeOpts, TResultsOpts> = {
+  [key: string]: NoteTestPresetGroup<TBeforeOpts, TResultsOpts>;
+};
+
+type NoteTestPresetCollectionDict<TBeforeOpts = any, TResultsOpts = any> = {
+  [key: string]: NoteTestPresetModule<TBeforeOpts, TResultsOpts>;
+};
+
+class TestPresetEntry<TBeforeOpts, TResultsOpts>
+  implements NoteTestPresetEntry<TBeforeOpts, TResultsOpts> {
+  public label: string;
+  public before: (_opts: TBeforeOpts) => Promise<void>;
+  public results: (_opts: TResultsOpts) => Promise<TestResult[]>;
+  public init: () => Promise<void>;
+
+  constructor({
+    label,
+    results,
+    before,
+  }: {
+    label: string;
+    before?: (_opts: TBeforeOpts) => Promise<void>;
+    results: (_opts: TResultsOpts) => Promise<TestResult[]>;
+    //init?: ({engine}: {engine: DEngineV2}) => Promise<void>;
+  }) {
+    this.label = label;
+    this.results = results;
+    this.before = before ? before : async () => {};
+    this.init = async () => {};
+  }
+}
+
 export class NoteTestPresetsV2 {
-  static presets = {
+  static presets: NoteTestPresetCollectionDict = {
     OneNoteOneSchemaPreset: {
       init: {
-        domainStub: {
+        domainStub: new TestPresetEntry({
           label: "domain stub",
           before: async ({ vaultDir }: { vaultDir: string }) => {
             fs.removeSync(path.join(vaultDir, "foo.md"));
@@ -114,14 +157,14 @@ export class NoteTestPresetsV2 {
             ];
             return scenarios;
           },
-        },
+        }),
       },
       delete: {
-        noteNoChildren: {
+        noteNoChildren: new TestPresetEntry({
           label: "note w/no children",
           results: NoteTestPresetsV2.createDeleteNoteWNoChildrenResults,
-        },
-        domainChildren: {
+        }),
+        domainChildren: new TestPresetEntry({
           label: "domain with children",
           results: async ({
             changed,
@@ -151,8 +194,8 @@ export class NoteTestPresetsV2 {
               },
             ];
           },
-        },
-        domainNoChildren: {
+        }),
+        domainNoChildren: new TestPresetEntry({
           label: "domain w/no children",
           results: async ({
             changed,
@@ -178,10 +221,10 @@ export class NoteTestPresetsV2 {
               },
             ];
           },
-        },
+        }),
       },
       update: {
-        noteNoChildren: {
+        noteNoChildren: new TestPresetEntry({
           label: "update note, no children",
           results: async ({
             notes,
@@ -194,7 +237,41 @@ export class NoteTestPresetsV2 {
               },
             ];
           },
-        },
+        }),
+      },
+      write: {
+        domainStub: new TestPresetEntry({
+          label: "write child, parent stub",
+          before: async ({ vaultDir }: { vaultDir: string }) => {
+            const note = NoteUtilsV2.create({ fname: "bar.ch1" });
+            await note2File(note, vaultDir);
+          },
+          results: async ({ notes }: { notes: NotePropsDictV2 }) => {
+            const root = notes["root"];
+            const bar = NoteUtilsV2.getNoteByFname("bar", notes) as NotePropsV2;
+            const child = NoteUtilsV2.getNoteByFname(
+              "bar.ch1",
+              notes
+            ) as NotePropsV2;
+            return [
+              {
+                actual: _.size(root.children),
+                expected: 2,
+                msg: "root, foo, bar",
+              },
+              {
+                actual: _.pick(bar, "stub"),
+                expected: { stub: true },
+                msg: "bar created as stub",
+              },
+              {
+                actual: _.pick(child, ["fname", "stub"]),
+                expected: { fname: "bar.ch1" },
+                msg: "bar created as stub",
+              },
+            ];
+          },
+        }),
       },
     },
   };

@@ -500,11 +500,26 @@ describe("engine, notes/", () => {
     });
   });
 
+  const NOTE_WRITE_PRESET =
+    NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.write;
+
   describe("write/", () => {
     let vaultDir: string;
     let engine: DEngineV2;
     beforeEach(async () => {
       ({ vaultDir, engine } = await beforePreset());
+    });
+
+    test(NOTE_WRITE_PRESET["domainStub"].label, async () => {
+      await NOTE_WRITE_PRESET["domainStub"].before({ vaultDir });
+      const results = NOTE_WRITE_PRESET["domainStub"].results;
+      await engine.init();
+      const notes = engine.notes;
+      await NodeTestPresetsV2.runJestHarness({
+        opts: { notes },
+        results,
+        expect,
+      });
     });
 
     test("write note, no schema", async () => {

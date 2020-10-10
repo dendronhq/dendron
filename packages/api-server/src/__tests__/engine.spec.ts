@@ -37,6 +37,25 @@ async function setupWS({ wsRoot, vault }: { wsRoot: string; vault: string }) {
   return api;
 }
 
+const getNotes = async ({
+  api,
+  wsRoot,
+}: {
+  api: DendronAPI;
+  wsRoot: string;
+}) => {
+  const resp = await api.engineQuery({
+    ws: wsRoot,
+    mode: "note",
+    queryString: "*",
+  });
+  const notes: NotePropsDictV2 = {};
+  _.forEach((resp.data as unknown) as NotePropsV2, (ent: NotePropsV2) => {
+    notes[ent.id] = ent;
+  });
+  return notes;
+};
+
 describe("schema", () => {
   let wsRoot: string;
   let vault: string;
@@ -550,6 +569,35 @@ describe("notes", () => {
         "root.md",
         "root.schema.yml",
       ]);
+    });
+
+    const NOTE_WRITE_PRESET =
+      NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.write;
+    test(NOTE_WRITE_PRESET["domainStub"].label, async () => {
+      await NOTE_WRITE_PRESET["domainStub"].before({ vaultDir: vault });
+      const results = NOTE_WRITE_PRESET["domainStub"].results;
+      const payload = {
+        uri: wsRoot,
+        config: {
+          vaults: [vault],
+        },
+      };
+      const api = new DendronAPI({
+        endpoint: "http://localhost:3005",
+        apiPath: "api",
+      });
+      await api.workspaceInit(payload);
+      await api.engineWrite({
+        ws: wsRoot,
+        node: NoteUtilsV2.create({ id: "bar.ch1", fname: "bar.ch1" }),
+      });
+      const notes = await getNotes({ api, wsRoot });
+      await NodeTestPresetsV2.runMochaHarness({
+        opts: {
+          notes,
+        },
+        results,
+      });
     });
 
     test("grandchild of domain, child is stub", async () => {

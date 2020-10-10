@@ -7,13 +7,14 @@ export type HistoryEvent = {
   uri?: Uri;
 };
 
-type HistoryEventSource =
+export type HistoryEventSource =
   | "engine"
   | "src"
   | "extension"
   | "lspServer"
-  | "apiServer";
-type HistoryEventAction =
+  | "apiServer"
+  | "watcher";
+export type HistoryEventAction =
   | "delete"
   | "create"
   | "activate"
@@ -55,6 +56,7 @@ export class HistoryService implements IHistoryService {
       extension: [],
       lspServer: [],
       apiServer: [],
+      watcher: [],
     };
     this.pause = false;
   }
@@ -73,6 +75,7 @@ export class HistoryService implements IHistoryService {
       extension: [],
       lspServer: [],
       apiServer: [],
+      watcher: [],
     };
   }
 

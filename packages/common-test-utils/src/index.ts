@@ -1,8 +1,8 @@
 import {
   DNodeUtilsV2,
+  NoteChangeEntry,
   NoteOptsV2,
   NotePropsDictV2,
-  NotePropsV2,
   NoteUtilsV2,
   SchemaModuleOptsV2,
   SchemaModulePropsV2,
@@ -62,7 +62,7 @@ type UpdateNoteTestOptsV2 = {
 };
 
 type DeleteNoteTestOptsV2 = {
-  changed: NotePropsV2[];
+  changed: NoteChangeEntry[];
   notes: NotePropsDictV2;
   vaultDir: string;
 };
@@ -72,20 +72,55 @@ export class NoteTestPresetsV2 {
     OneNoteOneSchemaPreset: {
       delete: {
         noteNoChildren: {
-          label: "delete node w/no children",
+          label: "note w/no children",
           results: NoteTestPresetsV2.createDeleteNoteWNoChildrenResults,
         },
-        domainNoChildren: {
-          label: "delete domain w/no children",
+        domainChildren: {
+          label: "domain with children",
           results: async ({
             changed,
             notes,
             vaultDir,
           }: DeleteNoteTestOptsV2): Promise<TestResult[]> => {
             return [
-              { actual: changed[0].id, expected: "root", msg: "root updated" },
               {
-                actual: changed[0].children,
+                actual: changed,
+                expected: [{ note: notes["foo"], status: "update" }],
+                msg: "note updated",
+              },
+              {
+                actual: _.size(notes),
+                expected: 3,
+                msg: "same number of notes",
+              },
+              {
+                actual: notes["foo"].stub,
+                expected: true,
+                msg: "foo should be a stub",
+              },
+              {
+                actual: _.includes(fs.readdirSync(vaultDir), "foo.md"),
+                expected: false,
+                msg: "note should be deleted",
+              },
+            ];
+          },
+        },
+        domainNoChildren: {
+          label: "domain w/no children",
+          results: async ({
+            changed,
+            notes,
+            vaultDir,
+          }: DeleteNoteTestOptsV2): Promise<TestResult[]> => {
+            return [
+              {
+                actual: changed[0].note.id,
+                expected: "root",
+                msg: "root updated",
+              },
+              {
+                actual: changed[0].note.children,
                 expected: [],
                 msg: "root does not have children",
               },
@@ -122,13 +157,9 @@ export class NoteTestPresetsV2 {
     changed,
     notes,
     vaultDir,
-  }: {
-    changed: NotePropsV2[];
-    notes: NotePropsDictV2;
-    vaultDir: string;
-  }): Promise<TestResult[]> {
+  }: DeleteNoteTestOptsV2): Promise<TestResult[]> {
     return [
-      { actual: changed[0].id, expected: "foo" },
+      { actual: changed[0].note.id, expected: "foo" },
       { actual: _.size(notes), expected: 2 },
       { actual: notes["foo"].children, expected: [] },
       {

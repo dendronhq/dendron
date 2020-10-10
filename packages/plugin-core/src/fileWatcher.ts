@@ -113,6 +113,11 @@ export class VaultWatcher {
           throw `${fname} not found`;
         }
         await this.engine.deleteNote(nodeToDelete.id, { metaOnly: true });
+        await HistoryService.instance().add({
+          action: "delete",
+          source: "watcher",
+          uri: uri,
+        });
       } catch (err) {
         this.L.info({ ctx, uri, err });
         // NOTE: ignore, many legitimate reasons why this might happen

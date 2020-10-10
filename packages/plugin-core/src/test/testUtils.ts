@@ -9,7 +9,11 @@ import {
 } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
 import { _activate } from "../_extension";
-import { HistoryEvent, HistoryService } from "../services/HistoryService";
+import {
+  HistoryEvent,
+  HistoryEventAction,
+  HistoryService,
+} from "../services/HistoryService";
 import { DendronWorkspace } from "../workspace";
 import { DendronQuickPickerV2 } from "../components/lookup/LookupProvider";
 import { DNodePropsQuickInputV2 } from "@dendronhq/common-all";
@@ -155,6 +159,23 @@ export function onWSInit(cb: Function) {
     "extension",
     async (_event: HistoryEvent) => {
       if (_event.action === "initialized") {
+        await cb();
+      }
+    }
+  );
+}
+
+export function onWatcher({
+  action,
+  cb,
+}: {
+  action: HistoryEventAction;
+  cb: Function;
+}) {
+  HistoryService.instance().subscribe(
+    "watcher",
+    async (_event: HistoryEvent) => {
+      if (_event.action === action) {
         await cb();
       }
     }

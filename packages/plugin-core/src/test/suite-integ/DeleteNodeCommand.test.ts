@@ -1,4 +1,4 @@
-import { NotePropsV2 } from "@dendronhq/common-all/src";
+import { NoteChangeEntry } from "@dendronhq/common-all";
 import {
   DirResult,
   EngineDeletePayload,
@@ -66,7 +66,7 @@ suite("notes", function () {
       const notePath = path.join(vaultPath, "foo.md");
       await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
       const resp = await new DeleteNodeCommand().execute();
-      const changed = (resp as EngineDeletePayload).data as NotePropsV2[];
+      const changed = (resp as EngineDeletePayload).data as NoteChangeEntry[];
       const notes = DendronWorkspace.instance().getEngine().notes;
       _.map(
         await NOTE_DELETE_PRESET.domainNoChildren.results({

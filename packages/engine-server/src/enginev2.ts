@@ -21,6 +21,7 @@ import {
   SchemaQueryResp,
   DEngineInitRespV2,
   DendronError,
+  NoteChangeEntry,
 } from "@dendronhq/common-all";
 import { DLogger } from "@dendronhq/common-server";
 import Fuse from "fuse.js";
@@ -112,13 +113,13 @@ export class DendronEngineV2 implements DEngineV2 {
   async deleteNote(id: string, opts?: EngineDeleteOptsV2) {
     try {
       const note = this.notes[id];
-      const changed: NotePropsV2[] = [];
-      const status = await this.store.deleteNote(id, opts);
-      if (status === "removed") {
+      const changed = await this.store.deleteNote(id, opts);
+      const noteChangeEntry = _.find(
+        changed,
+        (ent) => ent.note.id === id
+      ) as NoteChangeEntry;
+      if (noteChangeEntry.status === "delete") {
         await this.removeNoteFromIndex(note);
-        if (note.parent) {
-          changed.push(this.notes[note.parent]);
-        }
       }
       return {
         data: changed,
@@ -158,7 +159,7 @@ export class DendronEngineV2 implements DEngineV2 {
     const maybeNote = NoteUtilsV2.getNoteByFname(npath, this.notes);
     this.logger.debug({ ctx, maybeNote, msg: "post-query" });
     let noteNew: NotePropsV2 | undefined = maybeNote;
-    let changed: NotePropsV2[] = [];
+    let changed: NoteChangeEntry[] = [];
     let error = null;
     if ((!maybeNote || maybeNote.stub) && createIfNew) {
       this.logger.debug({ ctx, maybeNote, msg: "create-new" });

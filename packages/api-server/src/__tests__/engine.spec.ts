@@ -1,4 +1,5 @@
 import {
+  NoteChangeEntry,
   NotePropsDictV2,
   NotePropsV2,
   NoteUtilsV2,
@@ -269,7 +270,7 @@ describe("notes", () => {
 
       _.map(
         await NOTE_DELETE_PRESET.noteNoChildren.results({
-          changed: changed.data as NotePropsV2[],
+          changed: changed.data as NoteChangeEntry[],
           vaultDir: vault,
           notes,
         }),
@@ -295,7 +296,7 @@ describe("notes", () => {
 
       _.map(
         await NOTE_DELETE_PRESET.domainNoChildren.results({
-          changed: changed.data as NotePropsV2[],
+          changed: changed.data as NoteChangeEntry[],
           vaultDir: vault,
           notes,
         }),
@@ -504,7 +505,7 @@ describe("notes", () => {
       expect(resp.data.length).toEqual(3);
       expect(
         _.intersection(
-          resp.data.map((ent) => _.pick(ent, "id").id).sort(),
+          resp.data.map((ent) => _.pick(ent.note, "id").id).sort(),
           expected
         ).sort()
       ).toEqual(expected);
@@ -536,7 +537,7 @@ describe("notes", () => {
         node: NoteUtilsV2.create({ id: "foo.ch2", fname: "foo.ch2" }),
       });
       expect(resp.data.length).toEqual(2);
-      expect(resp.data.map((ent) => _.pick(ent, "id").id).sort()).toEqual([
+      expect(resp.data.map((ent) => _.pick(ent.note, "id").id).sort()).toEqual([
         "foo",
         "foo.ch2",
       ]);
@@ -571,7 +572,7 @@ describe("notes", () => {
       expect(resp.data.length).toEqual(3);
       expect(
         _.intersection(
-          resp.data.map((ent) => _.pick(ent, "id").id).sort(),
+          resp.data.map((ent) => _.pick(ent.note, "id").id).sort(),
           expected
         )
       ).toEqual(expected);

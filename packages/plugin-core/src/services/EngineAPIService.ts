@@ -84,7 +84,12 @@ export class EngineAPIService implements DEngineClientV2 {
       throw new DendronError({ msg: "no data" });
     }
     delete this.notes[id];
-    await this.refreshNotes(resp.data);
+    await this.refreshNotes(
+      _.map(
+        _.filter(resp.data, (ent) => ent.status !== "delete"),
+        (ent) => ent.note
+      )
+    );
     return {
       error: null,
       data: resp.data,
@@ -110,7 +115,7 @@ export class EngineAPIService implements DEngineClientV2 {
       ws: this.ws,
     });
     if (!_.isUndefined(resp.data)) {
-      this.refreshNotes(resp.data.changed);
+      this.refreshNotes(_.map(resp.data.changed, (ent) => ent.note));
     }
     // TODO: update notes
     return resp;
@@ -199,7 +204,7 @@ export class EngineAPIService implements DEngineClientV2 {
       ws: this.ws,
     });
     const changed = resp.data;
-    await this.refreshNotes(changed);
+    await this.refreshNotes(_.map(changed, (ent) => ent.note));
     Logger.info({ ctx, msg: "exit", resp });
     return resp;
   }

@@ -84,78 +84,6 @@ Array [
 ]
 `;
 
-exports[`engine, notes/ delete/ delete node w/children 1`] = `
-Object {
-  "foo": Object {
-    "body": "
-",
-    "children": Array [
-      "foo.ch1",
-    ],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "foo",
-    "id": "foo",
-    "parent": "root",
-    "schema": Object {
-      "moduleId": "foo",
-      "schemaId": "foo",
-    },
-    "stub": true,
-    "title": "Foo",
-    "type": "note",
-    "updated": "1",
-  },
-  "foo.ch1": Object {
-    "body": "
-",
-    "children": Array [],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "foo.ch1",
-    "id": "foo.ch1",
-    "parent": "foo",
-    "schema": Object {
-      "moduleId": "foo",
-      "schemaId": "ch1",
-    },
-    "title": "Ch1",
-    "type": "note",
-    "updated": "1",
-  },
-  "root": Object {
-    "body": "
-",
-    "children": Array [
-      "foo",
-    ],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "root",
-    "id": "root",
-    "parent": null,
-    "title": "Root",
-    "type": "note",
-    "updated": "1",
-  },
-}
-`;
-
-exports[`engine, notes/ delete/ delete node w/children 2`] = `
-Array [
-  "foo.ch1.md",
-  "foo.schema.yml",
-  "root.md",
-  "root.schema.yml",
-]
-`;
-
 exports[`engine, notes/ getNoteByPath/ get existing note 1`] = `
 Object {
   "changed": Array [],
@@ -187,49 +115,55 @@ exports[`engine, notes/ getNoteByPath/ get new note 1`] = `
 Object {
   "changed": Array [
     Object {
-      "body": "",
-      "children": Array [],
-      "created": 1602349346124,
-      "data": Object {},
-      "desc": "",
-      "fname": "bar",
-      "id": "e307a0ba-8291-476a-84d8-166a04803a76",
-      "parent": "root",
-      "title": "Bar",
-      "type": "note",
-      "updated": 1602349346124,
+      "note": Object {
+        "body": "
+",
+        "children": Array [
+          "foo",
+          "55a386b0-d3f6-4a28-927b-74d7f85fb906",
+        ],
+        "created": "1",
+        "custom": Object {},
+        "data": Object {},
+        "desc": "",
+        "fname": "root",
+        "id": "root",
+        "parent": null,
+        "title": "Root",
+        "type": "note",
+        "updated": "1",
+      },
+      "status": "update",
     },
     Object {
-      "body": "
-",
-      "children": Array [
-        "foo",
-        "e307a0ba-8291-476a-84d8-166a04803a76",
-      ],
-      "created": "1",
-      "custom": Object {},
-      "data": Object {},
-      "desc": "",
-      "fname": "root",
-      "id": "root",
-      "parent": null,
-      "title": "Root",
-      "type": "note",
-      "updated": "1",
+      "note": Object {
+        "body": "",
+        "children": Array [],
+        "created": 1602354375431,
+        "data": Object {},
+        "desc": "",
+        "fname": "bar",
+        "id": "55a386b0-d3f6-4a28-927b-74d7f85fb906",
+        "parent": "root",
+        "title": "Bar",
+        "type": "note",
+        "updated": 1602354375431,
+      },
+      "status": "create",
     },
   ],
   "note": Object {
     "body": "",
     "children": Array [],
-    "created": 1602349346124,
+    "created": 1602354375431,
     "data": Object {},
     "desc": "",
     "fname": "bar",
-    "id": "e307a0ba-8291-476a-84d8-166a04803a76",
+    "id": "55a386b0-d3f6-4a28-927b-74d7f85fb906",
     "parent": "root",
     "title": "Bar",
     "type": "note",
-    "updated": 1602349346124,
+    "updated": 1602354375431,
   },
 }
 `;
@@ -396,7 +330,7 @@ Object {
       "root": Object {
         "body": "",
         "children": Array [],
-        "created": 1602349345947,
+        "created": 1602354375216,
         "data": Object {},
         "desc": "",
         "fname": "__empty",
@@ -404,7 +338,7 @@ Object {
         "parent": "root",
         "title": "root",
         "type": "schema",
-        "updated": 1602349345947,
+        "updated": 1602354375216,
       },
     },
     "version": 1,

@@ -3,6 +3,7 @@ import {
   DEngineV2,
   DNodeUtilsV2,
   ENGINE_ERROR_CODES,
+  NoteChangeEntry,
   NotePropsV2,
   NoteUtilsV2,
   SchemaModuleDictV2,
@@ -385,27 +386,6 @@ describe("engine, notes/", () => {
       ({ vaultDir, engine } = await beforePreset());
     });
 
-    test("delete node w/children", async () => {
-      await engine.init();
-      const changed = await engine.deleteNote("foo");
-
-      expect(engine.notes).toMatchSnapshot();
-      // nothing changed since parent is stub
-      expect(changed.data).toEqual([]);
-
-      // note not removed but changed into stub in memory
-      expect(_.values(engine.notes).length).toEqual(3);
-      expect(engine.notes["foo"].stub).toBeTruthy();
-
-      // note removed from disk
-      expect(fs.readdirSync(vaultDir)).toMatchSnapshot();
-      expect(_.includes(fs.readdirSync(vaultDir), "foo.md")).toBeFalsy();
-
-      // note still in index
-      const index = (engine as DendronEngineV2).notesIndex;
-      expect((index.getIndex().toJSON() as any).records.length).toEqual(3);
-    });
-
     test("delete node w/ no children", async () => {
       await engine.init();
       const changed = await engine.deleteNote("foo.ch1");
@@ -426,11 +406,28 @@ describe("engine, notes/", () => {
       expect((index.getIndex().toJSON() as any).records.length).toEqual(2);
     });
 
+    test(NOTE_DELETE_PRESET.domainChildren.label, async () => {
+      await engine.init();
+      const resp = await engine.deleteNote("foo");
+      const changed = resp.data as NoteChangeEntry[];
+      const notes = engine.notes;
+      _.map(
+        await NOTE_DELETE_PRESET.domainChildren.results({
+          changed,
+          notes,
+          vaultDir,
+        }),
+        (ent) => expect(ent.expected).toEqual(ent.actual)
+      );
+      const index = (engine as DendronEngineV2).notesIndex;
+      expect((index.getIndex().toJSON() as any).records.length).toEqual(3);
+    });
+
     test(NOTE_DELETE_PRESET.domainNoChildren.label, async () => {
       fs.removeSync(path.join(vaultDir, "foo.ch1.md"));
       await engine.init();
       const resp = await engine.deleteNote("foo");
-      const changed = resp.data as NotePropsV2[];
+      const changed = resp.data as NoteChangeEntry[];
       const notes = engine.notes;
       _.map(
         await NOTE_DELETE_PRESET.domainNoChildren.results({
@@ -471,7 +468,12 @@ describe("engine, notes/", () => {
       });
       expect(data).toMatchSnapshot();
       expect(data?.note?.fname).toEqual("bar");
-      expect(data?.changed).toEqual([data?.note, engine.notes["root"]]);
+      expect(
+        _.sortBy(
+          _.map(data?.changed, (ent) => ent.note),
+          "id"
+        )
+      ).toEqual([data?.note, engine.notes["root"]]);
     });
   });
 

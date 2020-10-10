@@ -7,6 +7,7 @@ import {
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   ENGINE_ERROR_CODES,
+  NoteChangeEntry,
   NotePropsDictV2,
   NotePropsV2,
   NoteUtilsV2,
@@ -338,6 +339,7 @@ export class FileStorageV2 implements DStoreV2 {
     const ext = ".md";
     const vault = this.vaults[0];
     const fpath = path.join(vault, noteToDelete.fname + ext);
+    const out: NoteChangeEntry[] = [];
 
     // remove from fs
     if (!opts?.metaOnly) {
@@ -349,20 +351,25 @@ export class FileStorageV2 implements DStoreV2 {
       this.logger.info({ ctx, noteToDelete, msg: "keep as stub" });
       noteToDelete.stub = true;
       this.updateNote(noteToDelete);
-      return "stub";
+      out.push({ note: noteToDelete, status: "update" });
     } else {
       this.logger.info({ ctx, noteToDelete, msg: "delete from parent" });
-      // no more children, delete from parent
-      if (noteToDelete.parent) {
-        const parentNote = this.notes[noteToDelete.parent] as NotePropsV2;
-        parentNote.children = _.reject(
-          parentNote.children,
-          (ent) => ent === noteToDelete.id
-        );
-        delete this.notes[noteToDelete.id];
+      if (!noteToDelete.parent) {
+        throw new DendronError({
+          status: ENGINE_ERROR_CODES.NO_PARENT_FOR_NOTE,
+        });
       }
-      return "removed";
+      // no more children, delete from parent
+      const parentNote = this.notes[noteToDelete.parent] as NotePropsV2;
+      parentNote.children = _.reject(
+        parentNote.children,
+        (ent) => ent === noteToDelete.id
+      );
+      delete this.notes[noteToDelete.id];
+      out.push({ note: parentNote, status: "update" });
+      out.push({ note: noteToDelete, status: "delete" });
     }
+    return out;
   }
 
   async deleteSchema(id: string, opts?: EngineDeleteOptsV2) {
@@ -437,7 +444,6 @@ export class FileStorageV2 implements DStoreV2 {
     _opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
     await note2File(note, this.vaults[0]);
-    const out = [note];
     const changed: NotePropsV2[] = NoteUtilsV2.addParent({
       note,
       notesList: _.values(this.notes),
@@ -454,9 +460,14 @@ export class FileStorageV2 implements DStoreV2 {
     await Promise.all(
       [note].concat(changed).map((ent) => this.updateNote(ent))
     );
+    const changedEntries = changed.map((ent) => ({
+      note: ent,
+      status: "update" as const,
+    })) as NoteChangeEntry[];
+    changedEntries.push({ note, status: "create" });
     return {
       error: null,
-      data: out.concat(changed),
+      data: changedEntries,
     };
   }
 

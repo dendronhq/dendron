@@ -144,11 +144,14 @@ export type DCommonProps = {
   vaults: string[];
 };
 
-type NotesChanged = NotePropsV2[];
+export type NoteChangeEntry = {
+  note: NotePropsV2;
+  status: "create" | "update" | "delete";
+};
 /**
  * Returns list of notes that were changed
  */
-export type WriteNoteResp = Required<RespV2<NotesChanged>>;
+export type WriteNoteResp = Required<RespV2<NoteChangeEntry[]>>;
 
 // --- Common
 
@@ -166,14 +169,16 @@ export type DCommonMethods = {
 // --- Engine
 
 export type DEngineInitRespV2 = Required<RespV2<DEngineInitPayloadV2>>;
-export type EngineDeleteNotePayload = NotesChanged;
+export type EngineDeleteNotePayload = NoteChangeEntry[];
 export type EngineDeleteNoteResp = Required<RespV2<EngineDeleteNotePayload>>;
 export type EngineQueryNoteResp = Required<RespV2<DNodePropsV2[]>>;
 export type NoteQueryResp = Required<RespV2<NotePropsV2[]>>;
 export type SchemaQueryResp = Required<RespV2<SchemaModulePropsV2[]>>;
+export type StoreDeleteNoteResp = EngineDeleteNotePayload;
+
 export type GetNotePayloadV2 = {
   note: NotePropsV2 | undefined;
-  changed: NotePropsV2[];
+  changed: NoteChangeEntry[];
 };
 export type DEngineDeleteSchemaPayloadV2 = void;
 
@@ -203,8 +208,6 @@ export type DEngineV2 = DCommonProps &
   };
 
 export type DEngineClientV2 = Omit<DEngineV2, "store">;
-
-export type StoreDeleteNoteResp = "stub" | "removed";
 
 export type DStoreV2 = DCommonProps &
   DCommonMethods & {

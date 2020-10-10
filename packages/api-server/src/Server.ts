@@ -13,6 +13,7 @@ export function appModule({ logPath }: { logPath: string }) {
   if (process.env.NODE_ENV !== "production") {
     // @ts-ignore
     morgan.token("body", function (req, res) {
+      // @ts-ignore
       return JSON.stringify(req.body);
     });
     const accessLogStream = fs.createWriteStream(logPath, { flags: "a" });

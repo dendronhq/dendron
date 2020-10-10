@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`notes delete node w/children delete 1`] = `
+exports[`notes delete note w/children 1`] = `
 Array [
   "foo.ch1.md",
   "foo.schema.yml",
@@ -165,7 +165,7 @@ Object {
         "ch1": Object {
           "body": "",
           "children": Array [],
-          "created": 1602205246225,
+          "created": 1602343290898,
           "data": Object {},
           "desc": "",
           "fname": "__empty",
@@ -173,14 +173,14 @@ Object {
           "parent": "foo",
           "title": "ch1",
           "type": "schema",
-          "updated": 1602205246225,
+          "updated": 1602343290898,
         },
         "foo": Object {
           "body": "",
           "children": Array [
             "ch1",
           ],
-          "created": 1602205246225,
+          "created": 1602343290898,
           "data": Object {},
           "desc": "",
           "fname": "__empty",
@@ -188,7 +188,7 @@ Object {
           "parent": "root",
           "title": "foo",
           "type": "schema",
-          "updated": 1602205246225,
+          "updated": 1602343290898,
         },
       },
       "version": 1,
@@ -206,7 +206,7 @@ Object {
         "root": Object {
           "body": "",
           "children": Array [],
-          "created": 1602205246226,
+          "created": 1602343290899,
           "data": Object {},
           "desc": "",
           "fname": "__empty",
@@ -214,7 +214,7 @@ Object {
           "parent": "root",
           "title": "root",
           "type": "schema",
-          "updated": 1602205246226,
+          "updated": 1602343290899,
         },
       },
       "version": 1,

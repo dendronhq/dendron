@@ -30,7 +30,7 @@ export class VaultWatcher {
   activate() {
     const disposables = [];
     disposables.push(this.watcher.onDidCreate(this.onDidCreate, this));
-    disposables.push(this.watcher.onDidDelete(this.onDidCreate, this));
+    disposables.push(this.watcher.onDidDelete(this.onDidDelete, this));
     return disposables;
   }
 
@@ -104,6 +104,7 @@ export class VaultWatcher {
         }
         await this.engine.deleteNote(nodeToDelete.id, { metaOnly: true });
       } catch (err) {
+        this.L.info({ ctx, uri, err });
         // NOTE: ignore, many legitimate reasons why this might happen
         // this.L.error({ ctx, err: JSON.stringify(err) });
       }

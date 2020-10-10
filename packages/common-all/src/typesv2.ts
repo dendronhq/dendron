@@ -169,6 +169,7 @@ export type DEngineInitRespV2 = Required<RespV2<DEngineInitPayloadV2>>;
 export type EngineDeleteNotePayload = NotesChanged;
 export type EngineDeleteNoteResp = Required<RespV2<EngineDeleteNotePayload>>;
 export type EngineQueryNoteResp = Required<RespV2<DNodePropsV2[]>>;
+export type NoteQueryResp = Required<RespV2<NotePropsV2[]>>;
 export type SchemaQueryResp = Required<RespV2<SchemaModulePropsV2[]>>;
 export type GetNotePayloadV2 = {
   note: NotePropsV2 | undefined;
@@ -193,6 +194,7 @@ export type DEngineV2 = DCommonProps &
     getNoteByPath: (opts: GetNoteOptsV2) => Promise<RespV2<GetNotePayloadV2>>;
     getSchema: (qs: string) => Promise<RespV2<SchemaModulePropsV2>>;
     querySchema: (qs: string) => Promise<SchemaQueryResp>;
+    queryNotes?: (qs: string) => Promise<NoteQueryResp>;
     query: (
       queryString: string,
       mode: DNodeTypeV2,

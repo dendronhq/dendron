@@ -2,6 +2,7 @@ import {
   DNodeUtilsV2,
   NoteOptsV2,
   NotePropsDictV2,
+  NotePropsV2,
   NoteUtilsV2,
   SchemaModuleOptsV2,
   SchemaModulePropsV2,
@@ -14,6 +15,8 @@ import {
   tmpDir,
 } from "@dendronhq/common-server";
 import _ from "lodash";
+import fs from "fs-extra";
+
 export type SetupVaultOpts = {
   vaultDir?: string;
   initDirCb?: (vaultPath: string) => void;
@@ -29,7 +32,7 @@ export class EngineTestUtilsV2 {
 }
 
 export class NodeTestPresetsV2 {
-  static async createOneNoteoneSchemaPreset({
+  static async createOneNoteOneSchemaPreset({
     vaultDir,
   }: {
     vaultDir: string;
@@ -47,30 +50,87 @@ export class NodeTestPresetsV2 {
   }
 }
 
-export type SchemaTestResult = {
+export type TestResult = {
   actual: any;
   expected: any;
-  msg: string;
+  msg?: string;
 };
+
+type DeleteNoteTestOptsV2 = {
+  changed: NotePropsV2[];
+  notes: NotePropsDictV2;
+  vaultDir: string;
+};
+
+export class NoteTestPresetsV2 {
+  static presets = {
+    OneNoteOneSchemaPreset: {
+      delete: {
+        noteNoChildren: {
+          label: "delete node w/no children",
+          results: NoteTestPresetsV2.createDeleteNoteWNoChildrenResults,
+        },
+        domainNoChildren: {
+          label: "delete domain w/no children",
+          results: async ({
+            changed,
+            notes,
+            vaultDir,
+          }: DeleteNoteTestOptsV2): Promise<TestResult[]> => {
+            return [
+              { actual: changed[0].id, expected: "root", msg: "root updated" },
+              { actual: _.size(notes), expected: 1 },
+              { actual: notes["foo"], expected: undefined },
+              {
+                actual: _.includes(fs.readdirSync(vaultDir), "foo.md"),
+                expected: false,
+              },
+            ];
+          },
+        },
+      },
+    },
+  };
+
+  static async createDeleteNoteWNoChildrenResults({
+    changed,
+    notes,
+    vaultDir,
+  }: {
+    changed: NotePropsV2[];
+    notes: NotePropsDictV2;
+    vaultDir: string;
+  }): Promise<TestResult[]> {
+    return [
+      { actual: changed[0].id, expected: "foo" },
+      { actual: _.size(notes), expected: 2 },
+      { actual: notes["foo"].children, expected: [] },
+      {
+        actual: _.includes(fs.readdirSync(vaultDir), "foo.ch1.md"),
+        expected: false,
+      },
+    ];
+  }
+}
 
 export class SchemaTestPresetsV2 {
   static async createQueryRootResults(
     schemas: SchemaModulePropsV2[]
-  ): Promise<SchemaTestResult[]> {
+  ): Promise<TestResult[]> {
     return [
       { actual: _.size(schemas[0].schemas), expected: 1, msg: "schema " },
     ];
   }
   static async createQueryAllResults(
     schemas: SchemaModulePropsV2[]
-  ): Promise<SchemaTestResult[]> {
+  ): Promise<TestResult[]> {
     return [
       { actual: _.size(schemas[0].schemas), expected: 2, msg: "schema " },
     ];
   }
   static async createQueryNonRootResults(
     schemas: SchemaModulePropsV2[]
-  ): Promise<SchemaTestResult[]> {
+  ): Promise<TestResult[]> {
     return [
       { actual: _.size(schemas[0].schemas), expected: 2, msg: "schema " },
     ];

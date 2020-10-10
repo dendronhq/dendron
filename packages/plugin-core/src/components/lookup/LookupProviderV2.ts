@@ -303,7 +303,7 @@ export class LookupProviderV2 {
       profile = getDurationMilliseconds(start);
       picker.busy = false;
       picker.justActivated = false;
-      Logger.info({ ctx, msg: "exit", queryOrig, source, profile, picker });
+      Logger.info({ ctx, msg: "exit", queryOrig, source, profile });
     }
   }
 

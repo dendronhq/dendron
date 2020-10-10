@@ -238,6 +238,8 @@ export class DendronEngineV2 implements DEngineV2 {
       // ~~~ note query
       if (queryString === "") {
         items = [this.notes.root];
+      } else if (queryString === "*") {
+        items = _.values(this.notes);
       } else {
         const results = this.notesIndex.search(queryString);
         items = _.map(results, (resp) => resp.item);

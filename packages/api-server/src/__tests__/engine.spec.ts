@@ -1,4 +1,5 @@
 import {
+  NotePropsDictV2,
   NotePropsV2,
   NoteUtilsV2,
   SchemaModulePropsV2,
@@ -7,6 +8,7 @@ import {
 import {
   NodeTestPresetsV2,
   NodeTestUtilsV2,
+  NoteTestPresetsV2,
   SchemaTestPresetsV2,
 } from "@dendronhq/common-test-utils";
 import {
@@ -64,7 +66,7 @@ describe("schema", () => {
       await EngineTestUtils.setupVault({
         vaultDir: vault,
         initDirCb: async (vaultPath: string) => {
-          await NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
           });
         },
@@ -100,7 +102,7 @@ describe("schema", () => {
       await EngineTestUtils.setupVault({
         vaultDir: vault,
         initDirCb: async (vaultPath: string) => {
-          await NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
           });
         },
@@ -221,12 +223,15 @@ describe("schema", () => {
   });
 });
 
+const NOTE_DELETE_PRESET =
+  NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.delete;
+
 describe("notes", () => {
   let wsRoot: string;
   let vault: string;
   let api: DendronAPI;
 
-  describe("delete node w/children", () => {
+  describe("delete", () => {
     beforeEach(async () => {
       wsRoot = tmpDir().name;
       vault = path.join(wsRoot, "vault");
@@ -234,7 +239,7 @@ describe("notes", () => {
       await EngineTestUtils.setupVault({
         vaultDir: vault,
         initDirCb: async (vaultPath: string) => {
-          await NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
           });
         },
@@ -242,10 +247,60 @@ describe("notes", () => {
       api = await setupWS({ wsRoot, vault });
     });
 
-    test("delete", async () => {
+    test("note w/children", async () => {
       await api.engineDelete({ id: "foo", ws: wsRoot });
       expect(fs.readdirSync(vault)).toMatchSnapshot();
       expect(_.includes(fs.readdirSync(vault), "foo.md")).toBeFalsy();
+    });
+
+    test(NOTE_DELETE_PRESET.noteNoChildren.label, async () => {
+      const changed = await api.engineDelete({ id: "foo.ch1", ws: wsRoot });
+      const resp = await api.engineQuery({
+        ws: wsRoot,
+        mode: "note",
+        queryString: "*",
+      });
+      const notes: NotePropsDictV2 = {};
+      _.forEach((resp.data as unknown) as NotePropsV2, (ent: NotePropsV2) => {
+        notes[ent.id] = ent;
+      });
+
+      _.map(
+        await NOTE_DELETE_PRESET.noteNoChildren.results({
+          changed: changed.data as NotePropsV2[],
+          vaultDir: vault,
+          notes,
+        }),
+        (ent) => {
+          expect(ent.expected).toEqual(ent.actual);
+        }
+      );
+    });
+
+    test(NOTE_DELETE_PRESET.domainNoChildren.label, async () => {
+      fs.removeSync(path.join(vault, "foo.ch1.md"));
+      api = await setupWS({ wsRoot, vault });
+      const changed = await api.engineDelete({ id: "foo", ws: wsRoot });
+      const resp = await api.engineQuery({
+        ws: wsRoot,
+        mode: "note",
+        queryString: "*",
+      });
+      const notes: NotePropsDictV2 = {};
+      _.forEach((resp.data as unknown) as NotePropsV2, (ent: NotePropsV2) => {
+        notes[ent.id] = ent;
+      });
+
+      _.map(
+        await NOTE_DELETE_PRESET.domainNoChildren.results({
+          changed: changed.data as NotePropsV2[],
+          vaultDir: vault,
+          notes,
+        }),
+        (ent) => {
+          expect(ent.expected).toEqual(ent.actual);
+        }
+      );
     });
   });
 
@@ -257,7 +312,7 @@ describe("notes", () => {
       await EngineTestUtils.setupVault({
         vaultDir: vault,
         initDirCb: async (vaultPath: string) => {
-          await NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
           });
         },

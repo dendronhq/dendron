@@ -1,4 +1,5 @@
 import {
+  DendronError,
   DNodeUtils,
   NotePropsDictV2,
   NotePropsV2,
@@ -114,13 +115,21 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
   }
 
   parseTree(note: NotePropsV2, ndict: NotePropsDictV2): TreeNote {
+    const ctx = "TreeViewV2:parseTree";
+    Logger.debug({ ctx, note, msg: "enter" });
     const tn = createTreeNote(note);
     this.tree[note.id] = tn;
     let children = note.children.map((c) => {
       const childNote = ndict[c];
+      if (!childNote) {
+        const err = { msg: `no childNote found: ${c}` };
+        Logger.error({ err });
+        throw new DendronError(err);
+      }
       return this.parseTree(childNote, ndict);
     });
     tn.children = this.sort(children).map((c) => c.id);
+    Logger.debug({ ctx, note, msg: "exit" });
     return tn;
   }
 }

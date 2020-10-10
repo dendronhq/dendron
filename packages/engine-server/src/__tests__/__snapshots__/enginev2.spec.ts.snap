@@ -84,56 +84,6 @@ Array [
 ]
 `;
 
-exports[`engine, notes/ delete/ delete node w/ no children 1`] = `
-Object {
-  "foo": Object {
-    "body": "
-",
-    "children": Array [],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "foo",
-    "id": "foo",
-    "parent": "root",
-    "schema": Object {
-      "moduleId": "foo",
-      "schemaId": "foo",
-    },
-    "title": "Foo",
-    "type": "note",
-    "updated": "1",
-  },
-  "root": Object {
-    "body": "
-",
-    "children": Array [
-      "foo",
-    ],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "root",
-    "id": "root",
-    "parent": null,
-    "title": "Root",
-    "type": "note",
-    "updated": "1",
-  },
-}
-`;
-
-exports[`engine, notes/ delete/ delete node w/ no children 2`] = `
-Array [
-  "foo.md",
-  "foo.schema.yml",
-  "root.md",
-  "root.schema.yml",
-]
-`;
-
 exports[`engine, notes/ delete/ delete node w/children 1`] = `
 Object {
   "foo": Object {
@@ -239,22 +189,22 @@ Object {
     Object {
       "body": "",
       "children": Array [],
-      "created": 1602277473303,
+      "created": 1602343203893,
       "data": Object {},
       "desc": "",
       "fname": "bar",
-      "id": "925676b0-ea50-4552-9369-9a67e78bdd37",
+      "id": "e7269e97-c5d8-4ff4-9093-769a86a2b1c3",
       "parent": "root",
       "title": "Bar",
       "type": "note",
-      "updated": 1602277473303,
+      "updated": 1602343203893,
     },
     Object {
       "body": "
 ",
       "children": Array [
         "foo",
-        "925676b0-ea50-4552-9369-9a67e78bdd37",
+        "e7269e97-c5d8-4ff4-9093-769a86a2b1c3",
       ],
       "created": "1",
       "custom": Object {},
@@ -271,15 +221,15 @@ Object {
   "note": Object {
     "body": "",
     "children": Array [],
-    "created": 1602277473303,
+    "created": 1602343203893,
     "data": Object {},
     "desc": "",
     "fname": "bar",
-    "id": "925676b0-ea50-4552-9369-9a67e78bdd37",
+    "id": "e7269e97-c5d8-4ff4-9093-769a86a2b1c3",
     "parent": "root",
     "title": "Bar",
     "type": "note",
-    "updated": 1602277473303,
+    "updated": 1602343203893,
   },
 }
 `;
@@ -446,7 +396,7 @@ Object {
       "root": Object {
         "body": "",
         "children": Array [],
-        "created": 1602277473081,
+        "created": 1602343203712,
         "data": Object {},
         "desc": "",
         "fname": "__empty",
@@ -454,7 +404,7 @@ Object {
         "parent": "root",
         "title": "root",
         "type": "schema",
-        "updated": 1602277473081,
+        "updated": 1602343203712,
       },
     },
     "version": 1,

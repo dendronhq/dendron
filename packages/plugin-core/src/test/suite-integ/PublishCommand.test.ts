@@ -41,7 +41,7 @@ suite("Publish", function () {
 
     setupDendronWorkspace(root.name, ctx, {
       useCb: async (vaultDir) => {
-        await NodeTestPresetsV2.createOneNoteoneSchemaPreset({ vaultDir });
+        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
       },
     });
   });
@@ -60,7 +60,7 @@ suite("Publish", function () {
 
     setupDendronWorkspace(root.name, ctx, {
       useCb: async (vaultDir) => {
-        await NodeTestPresetsV2.createOneNoteoneSchemaPreset({ vaultDir });
+        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
       },
     });
   });

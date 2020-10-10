@@ -1,7 +1,6 @@
 import {
   DendronError,
   DEngineClientV2,
-  DEngineInitPayloadV2,
   DEngineInitRespV2,
   DNodeData,
   DNodePropsV2,

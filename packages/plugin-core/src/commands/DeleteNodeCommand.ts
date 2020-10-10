@@ -1,4 +1,5 @@
 import { SchemaUtilsV2 } from "@dendronhq/common-all";
+import { EngineDeletePayload } from "@dendronhq/common-server";
 import path from "path";
 import { Uri, window } from "vscode";
 import { HistoryService } from "../services/HistoryService";
@@ -8,7 +9,7 @@ import { BasicCommand } from "./base";
 
 type CommandOpts = {};
 
-type CommandOutput = void;
+type CommandOutput = EngineDeletePayload | void;
 
 export class DeleteNodeCommand extends BasicCommand<
   CommandOpts,
@@ -35,7 +36,7 @@ export class DeleteNodeCommand extends BasicCommand<
     const client = DendronWorkspace.instance().getEngine();
     if (mode === "note") {
       const note = await DendronClientUtilsV2.getNoteByFname({ fname, client });
-      await client.deleteNote(note.id);
+      return await client.deleteNote(note.id);
     } else {
       const smod = await DendronClientUtilsV2.getSchemaModByFname({
         fname,

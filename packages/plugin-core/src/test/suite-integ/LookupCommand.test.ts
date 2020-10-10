@@ -78,7 +78,7 @@ suite("schemas", function () {
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
         useCb: async (vaultPath) => {
-          return NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+          return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
           });
         },
@@ -110,7 +110,7 @@ suite("schemas", function () {
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
         useCb: async (vaultPath) => {
-          return NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+          return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
           });
         },
@@ -142,7 +142,7 @@ suite("schemas", function () {
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
         useCb: async (vaultPath) => {
-          return NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+          return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
           });
         },
@@ -182,7 +182,7 @@ suite("schemas", function () {
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
         useCb: async (vaultPath) => {
-          return NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+          return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
           });
         },
@@ -216,7 +216,7 @@ suite("schemas", function () {
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
         useCb: async (vaultPath) => {
-          return NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+          return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
           });
         },
@@ -244,7 +244,7 @@ suite("schemas", function () {
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
         useCb: async (vaultPath) => {
-          return NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+          return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
           });
         },
@@ -409,7 +409,7 @@ suite("notes", function () {
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
         useCb: async (vaultPath) => {
-          await NodeTestPresetsV2.createOneNoteoneSchemaPreset({
+          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
           });
           fs.removeSync(path.join(vaultPath, "foo.ch1.md"));

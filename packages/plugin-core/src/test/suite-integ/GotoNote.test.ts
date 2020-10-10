@@ -48,7 +48,7 @@ suite("notes", function () {
       lsp: true,
       useCb: async (vaultDir) => {
         vaultPath = vaultDir;
-        await NodeTestPresetsV2.createOneNoteoneSchemaPreset({ vaultDir });
+        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
       },
     });
   });
@@ -78,7 +78,7 @@ suite("notes", function () {
       lsp: true,
       useCb: async (vaultDir) => {
         vaultPath = vaultDir;
-        await NodeTestPresetsV2.createOneNoteoneSchemaPreset({ vaultDir });
+        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         fs.removeSync(path.join(vaultDir, "foo.md"));
       },
     });
@@ -100,7 +100,7 @@ suite("notes", function () {
       lsp: true,
       useCb: async (vaultDir) => {
         vaultPath = vaultDir;
-        await NodeTestPresetsV2.createOneNoteoneSchemaPreset({ vaultDir });
+        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
       },
     });
   });

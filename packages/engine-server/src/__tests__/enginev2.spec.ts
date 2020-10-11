@@ -4,7 +4,6 @@ import {
   DNodeUtilsV2,
   ENGINE_ERROR_CODES,
   NoteChangeEntry,
-  NotePropsV2,
   NoteUtilsV2,
   SchemaModuleDictV2,
   SchemaModulePropsV2,

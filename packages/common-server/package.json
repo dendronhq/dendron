@@ -31,8 +31,8 @@
     "build": "npm run compile",
     "compile": "tsc -p tsconfig.build.json",
     "test": "npx jest",
-    "coverage": "npx jest --coverage",
-    "watch": "npm run compile -- --watch",
+    "coverage": "jest --coverage",
+    "watch": "npm run test -- --watch",
     "test:watch": "npm run test -- --watch -u"
   },
   "dependencies": {

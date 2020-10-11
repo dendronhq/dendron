@@ -137,7 +137,7 @@ export class EngineAPIService implements DEngineClientV2 {
   async query(
     queryString: string,
     mode: DNodeTypeV2,
-    opts?: QueryOptsV2
+    _opts?: QueryOptsV2
   ): Promise<EngineQueryNoteResp> {
     if (mode === "note") {
       const items = await this.queryNote({ qs: queryString });
@@ -145,26 +145,9 @@ export class EngineAPIService implements DEngineClientV2 {
         data: items,
         error: null,
       };
-    }
-
-    const resp = await this.api.engineQuery({
-      mode,
-      queryString,
-      opts,
-      ws: this.ws,
-    });
-    if (!resp.data) {
-      throw new DendronError({ msg: "no data" });
-    }
-    if (mode === "note") {
-      this.refreshNotes(resp.data);
     } else {
-      // TODO
+      throw Error("query schema nnot implemented");
     }
-    return {
-      error: null,
-      data: resp.data,
-    };
   }
   async queryNote({ qs }: { qs: string }): Promise<NotePropsV2[]> {
     return await this.fuseEngine.queryNote({ qs });

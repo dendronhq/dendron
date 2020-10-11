@@ -18,10 +18,12 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug test",
-      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "args": ["--findRelatedTests", "${relativeFile}"],
-      "cwd": "${workspaceRoot}"
+      "name": "common-server:debug test file",
+      "program": "${workspaceFolder:common-server}/node_modules/jest/bin/jest.js",
+      "sourceMaps": true,
+      "smartStep": true,
+      "cwd": "${workspaceFolder:common-server}",
+      "args": ["--runInBand", "${relativeFile}", "-u"]
     }
   ]
 }

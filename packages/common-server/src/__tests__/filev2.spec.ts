@@ -25,7 +25,7 @@ describe("schemaModuleProps2File", () => {
     expect(payload).toMatchSnapshot();
   });
 
-  it("non-root", async () => {
+  it.skip("non-root", async () => {
     const fname = "bond";
     const smp = _su.createModuleProps({ fname });
     const rootNote = smp.schemas["root"];

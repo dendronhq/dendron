@@ -120,7 +120,7 @@ Object {
 ",
         "children": Array [
           "foo",
-          "ddee4a45-5eda-4e0f-812c-5f908d98d99c",
+          "91c54858-7366-42f0-a363-a73d602d9264",
         ],
         "created": "1",
         "custom": Object {},
@@ -139,15 +139,15 @@ Object {
       "note": Object {
         "body": "",
         "children": Array [],
-        "created": 1602438394011,
+        "created": 1602452194832,
         "data": Object {},
         "desc": "",
         "fname": "bar",
-        "id": "ddee4a45-5eda-4e0f-812c-5f908d98d99c",
+        "id": "91c54858-7366-42f0-a363-a73d602d9264",
         "parent": "root",
         "title": "Bar",
         "type": "note",
-        "updated": 1602438394011,
+        "updated": 1602452194832,
       },
       "status": "create",
     },
@@ -155,17 +155,163 @@ Object {
   "note": Object {
     "body": "",
     "children": Array [],
-    "created": 1602438394011,
+    "created": 1602452194832,
     "data": Object {},
     "desc": "",
     "fname": "bar",
-    "id": "ddee4a45-5eda-4e0f-812c-5f908d98d99c",
+    "id": "91c54858-7366-42f0-a363-a73d602d9264",
     "parent": "root",
     "title": "Bar",
     "type": "note",
-    "updated": 1602438394011,
+    "updated": 1602452194832,
   },
 }
+`;
+
+exports[`engine, notes/ query/ * 1`] = `
+Array [
+  Object {
+    "body": "
+",
+    "children": Array [
+      "foo",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+  },
+  Object {
+    "body": "
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "parent": "root",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+  },
+  Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "id": "foo.ch1",
+    "parent": "foo",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "ch1",
+    },
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+  },
+]
+`;
+
+exports[`engine, notes/ query/ empty string 1`] = `
+Array [
+  Object {
+    "body": "
+",
+    "children": Array [
+      "foo",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+  },
+]
+`;
+
+exports[`engine, notes/ query/ foo 1`] = `
+Array [
+  Object {
+    "body": "
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "parent": "root",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+  },
+  Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "id": "foo.ch1",
+    "parent": "foo",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "ch1",
+    },
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+  },
+  Object {
+    "body": "
+",
+    "children": Array [
+      "foo",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+  },
+]
 `;
 
 exports[`engine, notes/ write/ write note, match schema: notes 1`] = `
@@ -330,7 +476,7 @@ Object {
       "root": Object {
         "body": "",
         "children": Array [],
-        "created": 1602438393748,
+        "created": 1602452194582,
         "data": Object {},
         "desc": "",
         "fname": "__empty",
@@ -338,7 +484,7 @@ Object {
         "parent": "root",
         "title": "root",
         "type": "schema",
-        "updated": 1602438393748,
+        "updated": 1602452194582,
       },
     },
     "version": 1,

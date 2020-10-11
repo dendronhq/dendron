@@ -101,7 +101,7 @@ describe("engine, schema/", () => {
       ).toBeFalsy();
 
       // node not in index
-      const index = (engine as DendronEngineV2).notesIndex;
+      const index = (engine as DendronEngineV2).fuseEngine.notesIndex;
       expect((index.getIndex().toJSON() as any).records.length).toEqual(3);
     });
 
@@ -449,7 +449,7 @@ describe("engine, notes/", () => {
       );
 
       // note not in index
-      const index = (engine as DendronEngineV2).notesIndex;
+      const index = (engine as DendronEngineV2).fuseEngine.notesIndex;
       expect((index.getIndex().toJSON() as any).records.length).toEqual(2);
     });
 
@@ -466,7 +466,7 @@ describe("engine, notes/", () => {
         }),
         (ent) => expect(ent.expected).toEqual(ent.actual)
       );
-      const index = (engine as DendronEngineV2).notesIndex;
+      const index = (engine as DendronEngineV2).fuseEngine.notesIndex;
       expect((index.getIndex().toJSON() as any).records.length).toEqual(3);
     });
 
@@ -521,6 +521,35 @@ describe("engine, notes/", () => {
           "id"
         )
       ).toEqual([data?.note, engine.notes["root"]]);
+    });
+  });
+
+  describe("query/", () => {
+    let engine: DEngineV2;
+    beforeEach(async () => {
+      ({ vaultDir, engine } = await beforePreset());
+    });
+
+    test("empty string", async () => {
+      await engine.init();
+      const { data } = await engine.query("", "note");
+      expect(data).toMatchSnapshot();
+      expect(data[0]).toEqual(engine.notes["root"]);
+      // expect(data?.changed).toEqual([]);
+    });
+
+    test("*", async () => {
+      await engine.init();
+      const { data } = await engine.query("*", "note");
+      expect(data).toMatchSnapshot();
+      expect(data.length).toEqual(3);
+    });
+
+    test("foo", async () => {
+      await engine.init();
+      const { data } = await engine.query("foo", "note");
+      expect(data).toMatchSnapshot();
+      expect(data[0]).toEqual(engine.notes["foo"]);
     });
   });
 

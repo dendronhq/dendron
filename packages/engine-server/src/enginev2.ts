@@ -1,31 +1,29 @@
 import {
+  DendronError,
+  DEngineInitRespV2,
   DEngineMode,
   DEngineV2,
   DNodePropsV2,
   DNodeTypeV2,
   DStoreV2,
   EngineDeleteOptsV2,
+  EngineQueryNoteResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
-  GetNotePayloadV2,
   GetNoteOptsV2,
+  GetNotePayloadV2,
+  NoteChangeEntry,
   NotePropsV2,
   NoteUtilsV2,
   QueryOptsV2,
   RespV2,
   SchemaModulePropsV2,
-  SchemaPropsV2,
-  SchemaUtilsV2,
-  WriteNoteResp,
-  EngineQueryNoteResp,
   SchemaQueryResp,
-  DEngineInitRespV2,
-  DendronError,
-  NoteChangeEntry,
+  WriteNoteResp,
 } from "@dendronhq/common-all";
 import { DLogger } from "@dendronhq/common-server";
-import Fuse from "fuse.js";
 import _ from "lodash";
+import { FuseEngine } from "./fuseEngine";
 
 type DendronEngineOptsV2 = {
   vaults: string[];
@@ -36,51 +34,53 @@ type DendronEngineOptsV2 = {
 };
 type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
 
-function createFuse<T>(
-  initList: T[],
-  opts: Fuse.IFuseOptions<any> & {
-    exactMatch: boolean;
-    preset: "schema" | "note";
-  }
-) {
-  const options = {
-    shouldSort: true,
-    threshold: opts.exactMatch ? 0.0 : 0.6,
-    location: 0,
-    distance: 100,
-    maxPatternLength: 32,
-    minMatchCharLength: 1,
-    keys: ["title", "fname", "basename"],
-    useExtendedSearch: true,
-  };
-  if (opts.preset === "schema") {
-    options.keys = ["id", "title"];
-  }
-  const fuse = new Fuse(initList, options);
-  return fuse;
-}
+// function createFuse<T>(
+//   initList: T[],
+//   opts: Fuse.IFuseOptions<any> & {
+//     exactMatch: boolean;
+//     preset: "schema" | "note";
+//   }
+// ) {
+//   const options = {
+//     shouldSort: true,
+//     threshold: opts.exactMatch ? 0.0 : 0.6,
+//     location: 0,
+//     distance: 100,
+//     maxPatternLength: 32,
+//     minMatchCharLength: 1,
+//     keys: ["title", "fname", "basename"],
+//     useExtendedSearch: true,
+//   };
+//   if (opts.preset === "schema") {
+//     options.keys = ["id", "title"];
+//   }
+//   const fuse = new Fuse(initList, options);
+//   return fuse;
+// }
 
 export class DendronEngineV2 implements DEngineV2 {
   public vaults: string[];
   public store: DStoreV2;
-  public notesIndex: Fuse<NotePropsV2>;
-  public schemaIndex: Fuse<SchemaPropsV2>;
+  // public notesIndex: Fuse<NotePropsV2>;
+  // public schemaIndex: Fuse<SchemaPropsV2>;
   protected props: DendronEnginePropsV2;
   public logger: DLogger;
+  public fuseEngine: FuseEngine;
 
   constructor(props: DendronEnginePropsV2) {
     this.vaults = props.vaults;
     this.store = props.store;
-    this.notesIndex = createFuse<NotePropsV2>([], {
-      exactMatch: props.mode === "exact",
-      preset: "note",
-    });
-    this.schemaIndex = createFuse<SchemaPropsV2>([], {
-      exactMatch: props.mode === "exact",
-      preset: "schema",
-    });
+    // this.notesIndex = createFuse<NotePropsV2>([], {
+    //   exactMatch: props.mode === "exact",
+    //   preset: "note",
+    // });
+    // this.schemaIndex = createFuse<SchemaPropsV2>([], {
+    //   exactMatch: props.mode === "exact",
+    //   preset: "schema",
+    // });
     this.logger = props.logger;
     this.props = props;
+    this.fuseEngine = new FuseEngine({ logger: props.logger });
   }
 
   get notes() {
@@ -119,7 +119,7 @@ export class DendronEngineV2 implements DEngineV2 {
         (ent) => ent.note.id === id
       ) as NoteChangeEntry;
       if (noteChangeEntry.status === "delete") {
-        await this.removeNoteFromIndex(note);
+        await this.fuseEngine.removeNoteFromIndex(note);
       }
       return {
         data: changed,
@@ -137,7 +137,7 @@ export class DendronEngineV2 implements DEngineV2 {
     const smod = this.schemas[id];
     try {
       await this.store.deleteSchema(id, opts);
-      await this.removeSchemaFromIndex(smod);
+      await this.fuseEngine.removeSchemaFromIndex(smod);
       return {
         data: undefined,
         error: null,
@@ -194,14 +194,16 @@ export class DendronEngineV2 implements DEngineV2 {
     const ctx = "querySchema";
 
     let items: SchemaModulePropsV2[] = [];
-    if (queryString === "") {
-      items = [this.schemas.root];
-    } else if (queryString === "*") {
-      items = _.values(this.schemas);
-    } else {
-      const results = this.schemaIndex.search(queryString);
-      items = _.map(results, (resp) => this.schemas[resp.item.id]);
-    }
+    const results = await this.fuseEngine.querySchema({ qs: queryString });
+    items = results.map((ent) => this.schemas[ent.id]);
+    // if (queryString === "") {
+    //   items = [this.schemas.root];
+    // } else if (queryString === "*") {
+    //   items = _.values(this.schemas);
+    // } else {
+    //   const results = this.schemaIndex.search(queryString);
+    //   items = _.map(results, (resp) => this.schemas[resp.item.id]);
+    // }
     this.logger.info({ ctx, msg: "exit" });
     return {
       error: null,
@@ -227,24 +229,17 @@ export class DendronEngineV2 implements DEngineV2 {
     // ~~~ schema query
     if (mode === "schema") {
       throw Error("engine.query for schema is not supported");
-      // if (queryString === "") {
-      //   items = [this.schemas.root.root];
-      // } else if (queryString === "*") {
-      //   items = _.values(this.schemas).map((ent) => ent.root);
-      // } else {
-      //   const results = this.schemaIndex.search(queryString);
-      //   items = _.map(results, (resp) => resp.item);
-      // }
     } else {
       // ~~~ note query
-      if (queryString === "") {
-        items = [this.notes.root];
-      } else if (queryString === "*") {
-        items = _.values(this.notes);
-      } else {
-        const results = this.notesIndex.search(queryString);
-        items = _.map(results, (resp) => resp.item);
-      }
+      items = await this.fuseEngine.queryNote({ qs: queryString });
+      // if (queryString === "") {
+      //   items = [this.notes.root];
+      // } else if (queryString === "*") {
+      //   items = _.values(this.notes);
+      // } else {
+      //   const results = this.notesIndex.search(queryString);
+      //   items = _.map(results, (resp) => resp.item);
+      // }
       if (cleanOpts.createIfNew) {
         let noteNew: NotePropsV2;
         if (items[0]?.fname === queryString && items[0]?.stub) {
@@ -268,25 +263,25 @@ export class DendronEngineV2 implements DEngineV2 {
     };
   }
 
-  async removeNoteFromIndex(note: NotePropsV2) {
-    this.notesIndex.remove((doc: NotePropsV2) => {
-      // FIXME: can be undefined, dunno why
-      if (!doc) {
-        return false;
-      }
-      return doc.id === note.id;
-    });
-  }
+  // async removeNoteFromIndex(note: NotePropsV2) {
+  //   this.notesIndex.remove((doc: NotePropsV2) => {
+  //     // FIXME: can be undefined, dunno why
+  //     if (!doc) {
+  //       return false;
+  //     }
+  //     return doc.id === note.id;
+  //   });
+  // }
 
-  async removeSchemaFromIndex(smod: SchemaModulePropsV2) {
-    this.schemaIndex.remove((doc: SchemaPropsV2) => {
-      // FIXME: can be undefined, dunno why
-      if (!doc) {
-        return false;
-      }
-      return doc.id === SchemaUtilsV2.getModuleRoot(smod).id;
-    });
-  }
+  // async removeSchemaFromIndex(smod: SchemaModulePropsV2) {
+  //   this.schemaIndex.remove((doc: SchemaPropsV2) => {
+  //     // FIXME: can be undefined, dunno why
+  //     if (!doc) {
+  //       return false;
+  //     }
+  //     return doc.id === SchemaUtilsV2.getModuleRoot(smod).id;
+  //   });
+  // }
 
   async updateNote(
     note: NotePropsV2,
@@ -297,12 +292,17 @@ export class DendronEngineV2 implements DEngineV2 {
 
   async updateIndex(mode: DNodeTypeV2) {
     if (mode === "schema") {
-      this.schemaIndex.setCollection(
-        _.map(_.values(this.schemas), (ent) => SchemaUtilsV2.getModuleRoot(ent))
-      );
+      this.fuseEngine.updateSchemaIndex(this.schemas);
     } else {
-      this.notesIndex.setCollection(_.values(this.notes));
+      this.fuseEngine.updateNotesIndex(this.notes);
     }
+    // if (mode === "schema") {
+    //   this.schemaIndex.setCollection(
+    //     _.map(_.values(this.schemas), (ent) => SchemaUtilsV2.getModuleRoot(ent))
+    //   );
+    // } else {
+    //   this.notesIndex.setCollection(_.values(this.notes));
+    // }
   }
 
   async updateSchema(schemaModule: SchemaModulePropsV2) {

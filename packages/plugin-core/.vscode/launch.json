@@ -17,6 +17,7 @@
       "env": {
         "STAGE": "dev",
         "VSCODE_DEBUGGING_EXTENSION": "dendron",
+        "LOG_LEVEL": "info"
       }
     },
     {

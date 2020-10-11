@@ -572,6 +572,13 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     type: "string",
     description: "Path to notesdir executable",
   },
+  LOG_LEVEL: {
+    key: "dendron.logLevel",
+    type: "string",
+    default: "info",
+    description: "control verbosity of dendron logs",
+    enum: ["debug", "info", "error"],
+  },
   SKIP_PROMPT: {
     key: "dendron.skipPrompt",
     type: "boolean",

@@ -379,7 +379,7 @@ export class DendronEngine implements DEngine {
       initialQuery: false,
       stub: false,
     });
-    const ctx = "query";
+    const ctx = "Engine:query";
     let data: EngineQueryResp;
 
     // handle all query case

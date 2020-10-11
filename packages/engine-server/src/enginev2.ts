@@ -214,7 +214,7 @@ export class DendronEngineV2 implements DEngineV2 {
     mode: DNodeTypeV2,
     opts?: QueryOptsV2
   ): Promise<EngineQueryNoteResp> {
-    const ctx = "query";
+    const ctx = "Engine:query";
     const cleanOpts = _.defaults(opts || {}, {
       fullNode: false,
       createIfNew: false,

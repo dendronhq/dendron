@@ -175,12 +175,12 @@ export class LookupProviderV2 {
     let profile: number;
     const queryEndsWithDot = queryOrig.endsWith(".");
     const engine = ws.getEngine();
-    Logger.info({ ctx, msg: "enter", queryOrig, source });
+    Logger.debug({ ctx, msg: "enter", queryOrig, source });
 
     // ~~~ update results
     try {
       if (querystring === "") {
-        Logger.info({ ctx, msg: "empty qs" });
+        Logger.debug({ ctx, msg: "empty qs" });
         picker.items = this.showRootResults(opts.flavor, engine);
         return;
       }
@@ -190,7 +190,7 @@ export class LookupProviderV2 {
 
       let updatedItems = PickerUtilsV2.filterCreateNewItem(items);
       updatedItems = [this.noActiveItem].concat(updatedItems);
-      Logger.info({
+      Logger.debug({
         ctx,
         pickerValue,
         items: updatedItems.map((ent) => _.pick(ent, ["id", "title"])),
@@ -279,7 +279,7 @@ export class LookupProviderV2 {
         noUpdatedItems ||
         (picker.activeItems.length === 0 && !perfectMatch && !queryEndsWithDot)
       ) {
-        Logger.info({ ctx, msg: "no matches" });
+        Logger.debug({ ctx, msg: "no matches" });
         picker.items = updatedItems;
         return;
       }

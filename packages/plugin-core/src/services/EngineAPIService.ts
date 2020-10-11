@@ -70,7 +70,7 @@ export class EngineAPIService implements DEngineClientV2 {
     const { notes, schemas } = resp.data;
     this.notes = notes;
     this.schemas = schemas;
-    Logger.info({ ctx, msg: "exit", resp });
+    Logger.info({ ctx, msg: "exit" });
     return {
       error: null,
       data: { notes, schemas },
@@ -135,7 +135,6 @@ export class EngineAPIService implements DEngineClientV2 {
     opts?: QueryOptsV2
   ): Promise<EngineQueryNoteResp> {
     // TODO: look at cache
-    const ctx = "query";
     const resp = await this.api.engineQuery({
       mode,
       queryString,
@@ -150,7 +149,6 @@ export class EngineAPIService implements DEngineClientV2 {
     } else {
       // TODO
     }
-    Logger.info({ ctx, msg: "exit", resp });
     return {
       error: null,
       data: resp.data,

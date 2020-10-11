@@ -1,9 +1,9 @@
-import { setEnv } from "@dendronhq/common-all";
+import { getStage, setEnv } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";
-import { ExtensionContext, OutputChannel, window } from "vscode";
-import { DENDRON_CHANNEL_NAME } from "./constants";
+import { ExtensionContext, OutputChannel, window, workspace } from "vscode";
+import { CONFIG, DENDRON_CHANNEL_NAME } from "./constants";
 
 export type TraceLevel = "debug" | "info" | "warn" | "error" | "fatal";
 const levels = ["debug", "info", "warn", "error", "fatal"];
@@ -16,15 +16,24 @@ export class Logger {
   static logPath?: string;
 
   static configure(context: ExtensionContext, level: TraceLevel) {
+    const ctx = "Logger:configure";
     fs.ensureDirSync(context.logPath);
     const logPath = path.join(context.logPath, "dendron.log");
     fs.ensureFileSync(logPath);
     fs.truncateSync(logPath);
+    let log_level: string;
+    if (getStage() === "test") {
+      log_level = process.env["LOG_LEVEL"] || "debug";
+    } else {
+      const conf = workspace.getConfiguration();
+      log_level = conf.get<string>(CONFIG.LOG_LEVEL.key) || "info";
+    }
     setEnv("LOG_DST", logPath);
-    setEnv("LOG_LEVEL", "debug");
+    setEnv("LOG_LEVEL", log_level);
     Logger.logPath = logPath;
     this.logger = createLogger("dendron", logPath);
     this.level = level;
+    Logger.info({ ctx, msg: "exit", log_level });
   }
   private static _level: TraceLevel = "debug";
 

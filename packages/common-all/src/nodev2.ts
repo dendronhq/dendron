@@ -114,13 +114,22 @@ export class DNodeUtilsV2 {
     }
   }
 
-  static findClosestParent(fpath: string, nodes: DNodePropsV2[]): DNodePropsV2 {
+  static findClosestParent(
+    fpath: string,
+    nodes: DNodePropsV2[],
+    opts?: {
+      noStubs: boolean;
+    }
+  ): DNodePropsV2 {
     const dirname = DNodeUtilsV2.dirName(fpath);
     if (dirname === "") {
       return _.find(nodes, { id: "root" }) as DNodePropsV2;
     }
     const maybeNode = _.find(nodes, { fname: dirname });
-    if (maybeNode) {
+    if (
+      (maybeNode && !opts?.noStubs) ||
+      (maybeNode && opts?.noStubs && !maybeNode.stub)
+    ) {
       return maybeNode;
     } else {
       return DNodeUtilsV2.findClosestParent(dirname, nodes);

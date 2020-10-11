@@ -996,6 +996,7 @@ suite("commands", function () {
             "root.md"
           )
         );
+        true;
         done();
       });
       setupDendronWorkspace(root.name, ctx, { useFixtures: true });
@@ -1003,18 +1004,6 @@ suite("commands", function () {
   });
 
   // figure better way of testing this
-  describe.skip("GoDown", function () {
-    test("basic", function (done) {
-      onWSInit(async () => {
-        const uri = vscode.Uri.file(path.join(root.name, "vault", "foo.md"));
-        await vscode.window.showTextDocument(uri);
-        const lookup = await new GoDownCommand().run();
-        assert.equal(lookup?.quickPick?.value, "foo.");
-        done();
-      });
-      setupDendronWorkspace(root.name, ctx, { useFixtures: true });
-    });
-  });
 
   // describe("ImportPod", function() {
   //   test("basic", function (done) {

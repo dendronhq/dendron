@@ -608,7 +608,7 @@ suite("notes", function () {
 //   });
 // });
 
-suite.only("scratch notes", function () {
+suite("scratch notes", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
   let vaultPath: string;
@@ -679,6 +679,120 @@ suite.only("scratch notes", function () {
       await vscode.window.showTextDocument(uri);
       await new LookupCommand().execute(lookupOpts);
       assert.ok(getActiveEditorBasename().startsWith("foo.scratch"));
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      configOverride: {
+        [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
+          "childOfDomain",
+      },
+      useCb: async (_vaultPath) => {
+        vaultPath = _vaultPath;
+        return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+          vaultDir: vaultPath,
+        });
+      },
+    });
+  });
+});
+
+suite("journal notes", function () {
+  let root: DirResult;
+  let ctx: vscode.ExtensionContext;
+  let vaultPath: string;
+  let noteType = "JOURNAL";
+  let lookupOpts: LookupCommandOpts = {
+    noteType: "journal",
+    noConfirm: true,
+    flavor: "note",
+  };
+  this.timeout(TIMEOUT);
+
+  beforeEach(function () {
+    root = FileTestUtils.tmpDir();
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    DendronWorkspace.getOrCreate(ctx);
+  });
+
+  afterEach(function () {
+    HistoryService.instance().clearSubscriptions();
+  });
+
+  test("basic", function (done) {
+    onWSInit(async () => {
+      const uri = vscode.Uri.file(path.join(vaultPath, "foo.ch1.md"));
+      await vscode.window.showTextDocument(uri);
+      await new LookupCommand().execute(lookupOpts);
+      assert.ok(getActiveEditorBasename().startsWith("foo.journal"));
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      useCb: async (_vaultPath) => {
+        vaultPath = _vaultPath;
+        return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+          vaultDir: vaultPath,
+        });
+      },
+    });
+  });
+
+  test.skip("add: childOfDomainNamespace", function (done) {
+    onWSInit(async () => {
+      const uri = vscode.Uri.file(path.join(vaultPath, "foo.ch1.md"));
+      await vscode.window.showTextDocument(uri);
+      await new LookupCommand().execute(lookupOpts);
+      assert.ok(getActiveEditorBasename().startsWith("foo.ch1.scratch"));
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      configOverride: {
+        [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
+          "childOfDomainNamespace",
+      },
+      useCb: async (_vaultPath) => {
+        vaultPath = _vaultPath;
+        return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+          vaultDir: vaultPath,
+        });
+      },
+    });
+  });
+
+  test.skip("add: diff name", function (_done) {});
+  test.skip("add: asOwnDomain", function (_done) {});
+
+  test("add: childOfCurrent", function (done) {
+    onWSInit(async () => {
+      const uri = vscode.Uri.file(path.join(vaultPath, "foo.ch1.md"));
+      await vscode.window.showTextDocument(uri);
+      await new LookupCommand().execute(lookupOpts);
+      assert.ok(getActiveEditorBasename().startsWith("foo.ch1.journal"));
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      configOverride: {
+        [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
+          "childOfCurrent",
+      },
+      useCb: async (_vaultPath) => {
+        vaultPath = _vaultPath;
+        return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+          vaultDir: vaultPath,
+        });
+      },
+    });
+  });
+
+  test("add: childOfDomain", function (done) {
+    onWSInit(async () => {
+      const uri = vscode.Uri.file(path.join(vaultPath, "foo.ch1.md"));
+      await vscode.window.showTextDocument(uri);
+      await new LookupCommand().execute(lookupOpts);
+      assert.ok(getActiveEditorBasename().startsWith("foo.journal"));
       done();
     });
     setupDendronWorkspace(root.name, ctx, {

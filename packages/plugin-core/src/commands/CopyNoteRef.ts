@@ -1,4 +1,4 @@
-import { DNodeUtils } from "@dendronhq/common-all";
+import { DNodeUtils, NotePropsV2 } from "@dendronhq/common-all";
 import clipboardy from "@dendronhq/clipboardy";
 import _ from "lodash";
 import { TextEditor, window, Selection, Range, Position } from "vscode";
@@ -81,7 +81,14 @@ export class CopyNoteRefCommand extends BasicCommand<
   async execute(_opts: CommandOpts) {
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const fname = DNodeUtils.uri2Fname(editor.document.uri);
-    const note = _.find(DendronWorkspace.instance().engine.notes, { fname });
+    let note: NotePropsV2 | undefined;
+    if (DendronWorkspace.lsp()) {
+      note = _.find(DendronWorkspace.instance().getEngine().notes, { fname });
+    } else {
+      note = (_.find(DendronWorkspace.instance().engine.notes, {
+        fname,
+      }) as unknown) as NotePropsV2;
+    }
     if (!note) {
       throw Error(`${fname} not found in engine`);
     }

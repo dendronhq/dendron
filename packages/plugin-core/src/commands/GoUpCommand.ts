@@ -1,10 +1,16 @@
-import { DNodeUtils, Note } from "@dendronhq/common-all";
+import {
+  DNodeUtils,
+  DNodeUtilsV2,
+  Note,
+  NotePropsV2,
+  NoteUtilsV2,
+} from "@dendronhq/common-all";
 import _ from "lodash";
-import { window, Uri } from "vscode";
+import path from "path";
+import { Uri, window } from "vscode";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
-import path from "path";
 
 type CommandOpts = {};
 
@@ -18,6 +24,19 @@ export class GoUpCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const maybeTextEditor = VSCodeUtils.getActiveTextEditor();
     if (_.isUndefined(maybeTextEditor)) {
       window.showErrorMessage("no active document found");
+      return;
+    }
+    if (DendronWorkspace.lsp()) {
+      const engine = DendronWorkspace.instance().getEngine();
+      const nparent = DNodeUtilsV2.findClosestParent(
+        path.basename(maybeTextEditor.document.uri.fsPath, ".md"),
+        _.values(engine.notes),
+        {
+          noStubs: true,
+        }
+      ) as NotePropsV2;
+      const nppath = NoteUtilsV2.getPath({ client: engine, note: nparent });
+      await VSCodeUtils.openFileInEditor(Uri.file(nppath));
       return;
     }
     const engine = DendronWorkspace.instance().engine;

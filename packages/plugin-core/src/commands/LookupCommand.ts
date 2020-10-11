@@ -5,6 +5,7 @@ import {
   DendronQuickPickerV2,
   EngineFlavor,
 } from "../components/lookup/LookupProvider";
+import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -19,6 +20,7 @@ type CommandOpts = {
   splitType?: LookupSplitType;
   flavor: EngineFlavor;
   noConfirm?: boolean;
+  value?: string;
 };
 
 type CommandOutput = DendronQuickPicker | DendronQuickPickerV2;
@@ -30,10 +32,16 @@ export class LookupCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return {};
   }
   async execute(opts: CommandOpts) {
+    const ctx = "LookupCommand:execute";
     if (DendronWorkspace.lsp()) {
+      Logger.info({ ctx, opts, msg: "enter" });
       const controller = new LookupControllerV2({ flavor: opts.flavor }, opts);
       const resp = await VSCodeUtils.extractRangeFromActiveEditor();
-      return controller.show({ ...resp, noConfirm: opts.noConfirm });
+      return controller.show({
+        ...resp,
+        noConfirm: opts.noConfirm,
+        value: opts.value,
+      });
     } else {
       const controller = new LookupController(
         DendronWorkspace.instance(),

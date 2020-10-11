@@ -22,7 +22,6 @@ import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
 import { CopyNoteRefCommand } from "./commands/CopyNoteRef";
 import { CopyNoteURLCommand } from "./commands/CopyNoteURL";
 import { CreateDailyJournalCommand } from "./commands/CreateDailyJournal";
-import { CreateScratchCommand } from "./commands/CreateScratch";
 import { DeleteNodeCommand } from "./commands/DeleteNodeCommand";
 import { DoctorCommand } from "./commands/Doctor";
 import { ExportPodCommand } from "./commands/ExportPod";
@@ -277,30 +276,9 @@ export class DendronWorkspace {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        DENDRON_COMMANDS.CREATE_SCRATCH_NOTE.key,
-        async () => {
-          await new CreateScratchCommand().run();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
         DENDRON_COMMANDS.SHOW_PREVIEW.key,
         async () => {
           await new ShowPreviewCommand().run();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.CREATE_JOURNAL_NOTE.key,
-        async () => {
-          await new LookupCommand().run({
-            noteType: "journal",
-            flavor: "note",
-          } as LookupCommandOpts);
         }
       )
     );

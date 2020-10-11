@@ -20,14 +20,17 @@ import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
+import { LookupCommand, LookupCommandOpts } from "../../commands/LookupCommand";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { EngineOpts } from "../../components/lookup/LookupProvider";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
+import { CONFIG, ConfigKey } from "../../constants";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import {
   createMockQuickPick,
+  getActiveEditorBasename,
   onWSInit,
   setupDendronWorkspace,
   TIMEOUT,
@@ -59,7 +62,7 @@ suite("schemas", function () {
         client = ws.getEngine();
         const lc = new LookupControllerV2(engOpts);
         const lp = new LookupProviderV2(engOpts);
-        const quickpick = lc.show();
+        const quickpick = await lc.show();
         quickpick.value = "root";
         await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
         const schemaModules = _.map(
@@ -91,7 +94,7 @@ suite("schemas", function () {
         client = ws.getEngine();
         const lc = new LookupControllerV2(engOpts);
         const lp = new LookupProviderV2(engOpts);
-        const quickpick = lc.show();
+        const quickpick = await lc.show();
         quickpick.value = "";
         await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
         const schemaModules = _.map(
@@ -123,7 +126,7 @@ suite("schemas", function () {
         client = ws.getEngine();
         const lc = new LookupControllerV2(engOpts);
         const lp = new LookupProviderV2(engOpts);
-        const quickpick = lc.show();
+        const quickpick = await lc.show();
         quickpick.value = "foo";
         await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
         const schemaModules = _.map(
@@ -279,7 +282,7 @@ suite("notes", function () {
         const engOpts: EngineOpts = { flavor: "note" };
         const lc = new LookupControllerV2(engOpts);
         const lp = new LookupProviderV2(engOpts);
-        const quickpick = lc.show();
+        const quickpick = await lc.show();
         quickpick.value = "";
         await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
         // two notes and root
@@ -313,7 +316,7 @@ suite("notes", function () {
         await VSCodeUtils.openFileInEditor(
           vscode.Uri.file(path.join(root.name, "vault", "foo.md"))
         );
-        const quickpick = lc.show();
+        const quickpick = await lc.show();
         await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
         quickpick.onDidChangeActive(() => {
           assert.equal(lc.quickPick?.activeItems.length, 1);
@@ -345,7 +348,7 @@ suite("notes", function () {
         const lc = new LookupControllerV2(engOpts);
         const lp = new LookupProviderV2(engOpts);
 
-        let quickpick = lc.show();
+        let quickpick = await lc.show();
         let note = _.find(quickpick.items, {
           fname: "foo",
         }) as DNodePropsQuickInputV2;
@@ -359,7 +362,7 @@ suite("notes", function () {
           "foo.md"
         );
 
-        quickpick = lc.show();
+        quickpick = await lc.show();
         note = _.find(quickpick.items, {
           fname: "foo",
         }) as DNodePropsQuickInputV2;
@@ -389,7 +392,7 @@ suite("notes", function () {
         const engOpts: EngineOpts = { flavor: "note" };
         const lc = new LookupControllerV2(engOpts);
         const lp = new LookupProviderV2(engOpts);
-        let quickpick = lc.show();
+        let quickpick = await lc.show();
         quickpick.value = "foo.";
         await lp.onUpdatePickerItem(quickpick, { flavor: "note" }, "manual");
         assert.deepStrictEqual(quickpick.items.length, 3);
@@ -604,3 +607,92 @@ suite("notes", function () {
 //     });
 //   });
 // });
+
+suite.only("scratch notes", function () {
+  let root: DirResult;
+  let ctx: vscode.ExtensionContext;
+  let vaultPath: string;
+  let noteType = "SCRATCH";
+  let lookupOpts: LookupCommandOpts = {
+    noteType: "scratch",
+    selectionType: "selection2link",
+    noConfirm: true,
+    flavor: "note",
+  };
+  this.timeout(TIMEOUT);
+
+  beforeEach(function () {
+    root = FileTestUtils.tmpDir();
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    DendronWorkspace.getOrCreate(ctx);
+  });
+
+  afterEach(function () {
+    HistoryService.instance().clearSubscriptions();
+  });
+
+  test("basic", function (done) {
+    onWSInit(async () => {
+      const uri = vscode.Uri.file(path.join(vaultPath, "foo.md"));
+      await vscode.window.showTextDocument(uri);
+      await new LookupCommand().execute(lookupOpts);
+      assert.ok(getActiveEditorBasename().startsWith("scratch"));
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      useCb: async (_vaultPath) => {
+        vaultPath = _vaultPath;
+        return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+          vaultDir: vaultPath,
+        });
+      },
+    });
+  });
+
+  test("add: childOfCurrent", function (done) {
+    onWSInit(async () => {
+      const uri = vscode.Uri.file(path.join(vaultPath, "foo.ch1.md"));
+      await vscode.window.showTextDocument(uri);
+      await new LookupCommand().execute(lookupOpts);
+      assert.ok(getActiveEditorBasename().startsWith("foo.ch1.scratch"));
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      configOverride: {
+        [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
+          "childOfCurrent",
+      },
+      useCb: async (_vaultPath) => {
+        vaultPath = _vaultPath;
+        return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+          vaultDir: vaultPath,
+        });
+      },
+    });
+  });
+
+  test("add: childOfDomain", function (done) {
+    onWSInit(async () => {
+      const uri = vscode.Uri.file(path.join(vaultPath, "foo.ch1.md"));
+      await vscode.window.showTextDocument(uri);
+      await new LookupCommand().execute(lookupOpts);
+      assert.ok(getActiveEditorBasename().startsWith("foo.scratch"));
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      configOverride: {
+        [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
+          "childOfDomain",
+      },
+      useCb: async (_vaultPath) => {
+        vaultPath = _vaultPath;
+        return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+          vaultDir: vaultPath,
+        });
+      },
+    });
+  });
+});

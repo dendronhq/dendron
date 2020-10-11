@@ -373,6 +373,10 @@ export class NoteUtilsV2 {
     return path.join(root, note.fname + ".md");
   }
 
+  static getPathUpTo(hpath: string, numCompoenents: number) {
+    return hpath.split(".").slice(0, numCompoenents).join(".");
+  }
+
   static serialize(props: NotePropsV2): string {
     const body = props.body;
     const builtinProps = _.pick(props, [

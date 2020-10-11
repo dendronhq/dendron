@@ -18,6 +18,7 @@ type CommandOpts = {
   noteType?: LookupNoteType;
   splitType?: LookupSplitType;
   flavor: EngineFlavor;
+  noConfirm?: boolean;
 };
 
 type CommandOutput = DendronQuickPicker | DendronQuickPickerV2;
@@ -32,7 +33,7 @@ export class LookupCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (DendronWorkspace.lsp()) {
       const controller = new LookupControllerV2({ flavor: opts.flavor }, opts);
       const resp = await VSCodeUtils.extractRangeFromActiveEditor();
-      return controller.show({ ...resp });
+      return controller.show({ ...resp, noConfirm: opts.noConfirm });
     } else {
       const controller = new LookupController(
         DendronWorkspace.instance(),

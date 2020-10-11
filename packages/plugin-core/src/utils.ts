@@ -21,8 +21,12 @@ import {
   DendronError,
   DEngine,
   DEngineClientV2,
+  DEngineV2,
   DNodeUtils,
+  DNodeUtilsV2,
+  NoteUtilsV2,
   SchemaUtils,
+  SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import moment from "moment";
 import { EngineAPIService } from "./services/EngineAPIService";
@@ -388,6 +392,86 @@ export class WSUtils {
 }
 
 export class DendronClientUtilsV2 {
+  static genNotePrefix(
+    fname: string,
+    addBehavior: AddBehavior,
+    opts: { engine: DEngineClientV2 }
+  ) {
+    let out: string;
+    switch (addBehavior) {
+      case "childOfDomain": {
+        out = DNodeUtilsV2.domainName(fname);
+        break;
+      }
+      case "childOfDomainNamespace": {
+        out = DNodeUtilsV2.domainName(fname);
+        const domain = NoteUtilsV2.getNoteByFname(out, opts.engine.notes);
+        if (domain && domain.schema) {
+          const smod = opts.engine.schemas[domain.schema.moduleId];
+          const schema = smod.schemas[domain.schema.schemaId];
+          if (schema && schema.data.namespace) {
+            out = NoteUtilsV2.getPathUpTo(fname, 2);
+          }
+        }
+        break;
+      }
+      case "childOfCurrent": {
+        out = fname;
+        break;
+      }
+      case "asOwnDomain": {
+        out = "";
+        break;
+      }
+      default: {
+        throw Error(`unknown add Behavior: ${addBehavior}`);
+      }
+    }
+    return out;
+  }
+
+  static genNoteName(
+    type: "JOURNAL" | "SCRATCH",
+    opts?: CreateFnameOpts
+  ): string {
+    // gather inputs
+    const dateFormatKey: ConfigKey = `DEFAULT_${type}_DATE_FORMAT` as ConfigKey;
+    const dateFormat = DendronWorkspace.configuration().get<string>(
+      CONFIG[dateFormatKey].key
+    );
+    const addKey = `DEFAULT_${type}_ADD_BEHAVIOR` as ConfigKey;
+    const addBehavior = DendronWorkspace.configuration().get<string>(
+      CONFIG[addKey].key
+    );
+    const nameKey: ConfigKey = `DEFAULT_${type}_NAME` as ConfigKey;
+    const name = DendronWorkspace.configuration().get<string>(
+      CONFIG[nameKey].key
+    );
+    if (!_.includes(_noteAddBehaviorEnum, addBehavior)) {
+      throw Error(
+        `${
+          CONFIG[addKey].key
+        } must be one of following ${_noteAddBehaviorEnum.join(", ")}`
+      );
+    }
+    const editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
+    if (!editorPath) {
+      throw Error("not currently in a note");
+    }
+    const engine = DendronWorkspace.instance().getEngine();
+    const cNoteFname =
+      opts?.overrides?.domain || path.basename(editorPath, ".md");
+    const prefix = DendronClientUtilsV2.genNotePrefix(
+      cNoteFname,
+      addBehavior as AddBehavior,
+      {
+        engine,
+      }
+    );
+    const noteDate = moment().format(dateFormat);
+    return [prefix, name, noteDate].filter((ent) => !_.isEmpty(ent)).join(".");
+  }
+
   static getNoteByFname = async ({
     fname,
     client,

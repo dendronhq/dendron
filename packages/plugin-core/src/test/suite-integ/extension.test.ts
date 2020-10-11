@@ -30,7 +30,6 @@ import { ConfigurePodCommand } from "../../commands/ConfigurePodCommand";
 import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
 import { CopyNoteRefCommand } from "../../commands/CopyNoteRef";
 import { CopyNoteURLCommand } from "../../commands/CopyNoteURL";
-import { CreateScratchCommand } from "../../commands/CreateScratch";
 import { DoctorCommand } from "../../commands/Doctor";
 import { ExportPodCommand } from "../../commands/ExportPod";
 import { GoDownCommand } from "../../commands/GoDownCommand";
@@ -55,12 +54,7 @@ import {
   LookupProvider,
 } from "../../components/lookup/LookupProvider";
 import { createNoActiveItem } from "../../components/lookup/utils";
-import {
-  CONFIG,
-  ConfigKey,
-  GLOBAL_STATE,
-  WORKSPACE_STATE,
-} from "../../constants";
+import { CONFIG, GLOBAL_STATE, WORKSPACE_STATE } from "../../constants";
 import {
   cacheRefs,
   findDanglingRefsByFsPath,
@@ -900,60 +894,6 @@ suite("commands", function () {
           } as LookupCommandOpts)
         )?.value as string;
         assert.ok(resp.startsWith("journal"));
-        done();
-      });
-    });
-  });
-
-  describe("CreateScratchCommand", function () {
-    let noteType = "SCRATCH";
-    let uri: vscode.Uri;
-
-    beforeEach(() => {
-      VSCodeUtils.showInputBox = async () => {
-        return "scratch";
-      };
-      uri = vscode.Uri.file(path.join(root.name, "vault", "dendron.faq.md"));
-    });
-
-    test("basic", function (done) {
-      onWSInit(async () => {
-        await vscode.window.showTextDocument(uri);
-        const resp = (await new CreateScratchCommand().run()) as vscode.Uri;
-        assert.ok(path.basename(resp.fsPath).startsWith("scratch"));
-        done();
-      });
-      setupDendronWorkspace(root.name, ctx);
-    });
-
-    test("add: childOfCurrent", function (done) {
-      setupDendronWorkspace(root.name, ctx, {
-        configOverride: {
-          [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
-            "childOfCurrent",
-        },
-      });
-      onWSInit(async () => {
-        await vscode.window.showTextDocument(uri);
-        const resp = await new CreateScratchCommand().run();
-        assert.ok(
-          (resp as vscode.Uri).fsPath.indexOf("dendron.faq.scratch") > 0
-        );
-        done();
-      });
-    });
-
-    test("add: childOfDomain", function (done) {
-      setupDendronWorkspace(root.name, ctx, {
-        configOverride: {
-          [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
-            "childOfDomain",
-        },
-      });
-      onWSInit(async () => {
-        await vscode.window.showTextDocument(uri);
-        const resp = await new CreateScratchCommand().run();
-        assert.ok((resp as vscode.Uri).fsPath.indexOf("dendron.scratch") > 0);
         done();
       });
     });

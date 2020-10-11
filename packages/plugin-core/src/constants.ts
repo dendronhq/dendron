@@ -75,22 +75,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.daily.gif)",
   },
-  CREATE_JOURNAL_NOTE: {
-    key: "dendron.createJournalNote",
-    title: `${CMD_PREFIX} Create Journal Note`,
-    group: "notes",
-    desc: "Create a hierarchy specific journal note",
-    docLink: "dendron.topic.special-notes.md",
-    docPreview: `<a href="https://www.loom.com/share/da562a166af9427e908a76be8bc38355"><img src="https://cdn.loom.com/sessions/thumbnails/da562a166af9427e908a76be8bc38355-with-play.gif"></a>`,
-  },
-  CREATE_SCRATCH_NOTE: {
-    key: "dendron.createScratchNote",
-    title: `${CMD_PREFIX} Create Scratch Note`,
-    group: "notes",
-    desc: "Create a hierarchy specific scratch note",
-    docLink: "dendron.topic.special-notes.md",
-    docPreview: `<a href="https://www.loom.com/share/104a3e0bb10f4012a831194d02483e4a"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/104a3e0bb10f4012a831194d02483e4a-with-play.gif"> </a>`,
-  },
   COPY_NOTE_LINK: {
     key: "dendron.copyNoteLink",
     title: `${CMD_PREFIX} Copy Note Link`,

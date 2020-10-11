@@ -6,7 +6,7 @@ import { QuickInputButton } from "vscode";
 import { LookupCommandOpts } from "../../commands/LookupCommand";
 import { CONFIG } from "../../constants";
 import { Logger } from "../../logger";
-import { VSCodeUtils } from "../../utils";
+import { DendronClientUtilsV2, VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import {
   ButtonType,
@@ -45,11 +45,12 @@ export class LookupControllerV2 {
     this.opts = opts;
   }
 
-  show(opts?: {
+  async show(opts?: {
     value?: string;
     ignoreFocusOut?: boolean;
     document?: vscode.TextDocument;
     range?: vscode.Range;
+    noConfirm?: boolean;
   }) {
     const ctx = "show";
     const cleanOpts = _.defaults(opts, {
@@ -107,7 +108,11 @@ export class LookupControllerV2 {
     });
 
     provider.provide(quickPick);
-    quickPick.show();
+    if (opts?.noConfirm) {
+      await provider.onDidAccept(quickPick, { flavor: this.opts.flavor });
+    } else {
+      quickPick.show();
+    }
     this.quickPick = quickPick;
     return quickPick;
   }
@@ -133,7 +138,7 @@ export class LookupControllerV2 {
     // determine value
     switch (noteResp?.type) {
       case "journal": {
-        const value = VSCodeUtils.genNoteName("JOURNAL");
+        const value = DendronClientUtilsV2.genNoteName("JOURNAL");
         quickPick.value = value;
         provider.onUpdatePickerItem(
           quickPick,
@@ -143,7 +148,7 @@ export class LookupControllerV2 {
         break;
       }
       case "scratch": {
-        const value = VSCodeUtils.genNoteName("SCRATCH");
+        const value = DendronClientUtilsV2.genNoteName("SCRATCH");
         quickPick.value = value;
         provider.onUpdatePickerItem(
           quickPick,

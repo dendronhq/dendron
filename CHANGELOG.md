@@ -5,14 +5,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.12.7-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.1...v0.12.7-alpha.2) (2020-10-11)
 
-**Note:** Version bump only for package root
-
-## [0.12.7-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.0...v0.12.7-alpha.1) (2020-10-11)
-
-**Note:** Version bump only for package root
-
-## [0.12.7-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.6...v0.12.7-alpha.0) (2020-10-11)
-
 ### Bug Fixes
 
 - **server:** schema stub not updated after creation ([045888a](https://github.com/dendronhq/dendron/commit/045888a527080626bd2da262278fd0774f490e65))
@@ -34,7 +26,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - **lookup:** schemas in lookup ([b4055fd](https://github.com/dendronhq/dendron/commit/b4055fd61d4918cf4c1a44591be31be69a71b93a))
 - **server:** schema names ([c457f96](https://github.com/dendronhq/dendron/commit/c457f96cc02accd2811a73e15025f68d6796256d))
 
-## 0.12.4 and Beyond
+## 0.12.4
 
 - All changelogs post 0.12.3 are now published on [Dendron](https://www.dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html)
 

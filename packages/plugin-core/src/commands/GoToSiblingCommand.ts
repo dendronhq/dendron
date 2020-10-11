@@ -1,9 +1,9 @@
-import { DNodeUtils, Note } from "@dendronhq/common-all";
+import { DNodeUtils, NotePropsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";
 import { UNKNOWN_ERROR_MSG } from "../logger";
-import { VSCodeUtils } from "../utils";
+import { DendronClientUtilsV2, VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -32,19 +32,33 @@ export class GoToSiblingCommand extends BasicCommand<
     }
     let value = "";
     value = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
-    let respNodes: Note[];
+    let respNodes: NotePropsV2[];
 
-    if (value === "root") {
-      respNodes = _.uniqBy(
-        _.map(_.values(ws.engine.notes), (ent) => ent.domain),
-        "domain.id"
-      );
+    if (DendronWorkspace.lsp()) {
+      const client = DendronWorkspace.instance().getEngine();
+      if (value === "root") {
+        respNodes = client.notes["root"].children
+          .map((ent) => client.notes[ent])
+          .concat([client.notes["root"]]);
+      } else {
+        const note = await DendronClientUtilsV2.getNoteByFname({
+          fname: value,
+          client,
+        });
+        respNodes = client.notes[note.parent as string].children.map(
+          (id) => client.notes[id]
+        );
+      }
     } else {
-      const node = DNodeUtils.getNoteByFname(value, ws.engine);
-      respNodes = node?.parent?.children as Note[];
-      // const nodeParent = DNodeUtils.dirName(value);
-      // let qs = `^` + nodeParent + ".";
-      // respNodes = (await ws.engine.query(qs, "note")).data as Note[];
+      if (value === "root") {
+        respNodes = (_.uniqBy(
+          _.map(_.values(ws.engine.notes), (ent) => ent.domain),
+          "domain.id"
+        ) as unknown) as NotePropsV2[];
+      } else {
+        const node = DNodeUtils.getNoteByFname(value, ws.engine);
+        respNodes = (node?.parent?.children as unknown) as NotePropsV2[];
+      }
     }
 
     if (respNodes.length <= 1) {

@@ -12,11 +12,21 @@ import { BasicCommand } from "./base";
 
 export type LookupSelectionType = "selection2link" | "selectionExtract";
 export type LookupNoteType = "journal" | "scratch";
-export type LookupSplitType = "horizontal" | "vertical";
+export type LookupSplitType = "horizontal";
 
 type CommandOpts = {
+  /**
+   * When creating new note, controls
+   * behavior of selected text
+   */
   selectionType?: LookupSelectionType;
+  /**
+   * If set, controls path of note
+   */
   noteType?: LookupNoteType;
+  /**
+   * If set, open note in a new split
+   */
   splitType?: LookupSplitType;
   flavor: EngineFlavor;
   noConfirm?: boolean;

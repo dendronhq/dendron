@@ -125,13 +125,15 @@ export class NoteParserV2 extends ParserBaseV2 {
             notesByFname,
             addParent: true,
           });
+          // need to be inside this loop
+          // deal with `src/__tests__/enginev2.spec.ts`, with stubs/ test case
+          node.forEach((ent) => {
+            notesByFname[ent.fname] = ent;
+            notesById[ent.id] = ent;
+          });
           return node;
         });
       lvl += 1;
-      currNodes.forEach((ent) => {
-        notesByFname[ent.fname] = ent;
-        notesById[ent.id] = ent;
-      });
       prevNodes = currNodes;
     }
 

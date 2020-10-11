@@ -386,6 +386,31 @@ describe("engine, notes/", () => {
       ({ vaultDir, engine } = await beforePreset());
     });
 
+    test("with stubs/", async () => {
+      const createNotes = (vaultPath: string) => {
+        return Promise.all([
+          note2File(
+            NoteUtilsV2.create({ fname: "foo.journal.2020.08.29" }),
+            vaultPath
+          ),
+          note2File(
+            NoteUtilsV2.create({ fname: "foo.journal.2020.08.30" }),
+            vaultPath
+          ),
+          note2File(
+            NoteUtilsV2.create({ fname: "foo.journal.2020.08.31" }),
+            vaultPath
+          ),
+        ]);
+      };
+      await createNotes(vaultDir);
+      await engine.init();
+      const notes = engine.notes;
+      expect(
+        notes["foo"].children.map((id) => _.pick(notes[id], ["fname"])).sort()
+      ).toEqual([{ fname: "foo.ch1" }, { fname: "foo.journal" }]);
+    });
+
     test(NOTE_INIT_PRESET.domainStub.label, async () => {
       await NOTE_INIT_PRESET.domainStub.before({ vaultDir });
       await engine.init();

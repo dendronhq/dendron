@@ -1,5 +1,5 @@
 import clipboardy from "@dendronhq/clipboardy";
-import { DNodeUtils } from "@dendronhq/common-all";
+import { NotePropsV2 } from "@dendronhq/common-all";
 import GithubSlugger from "github-slugger";
 import _ from "lodash";
 import path from "path";
@@ -30,7 +30,6 @@ export class CopyNoteURLCommand extends BasicCommand<
   }
 
   async execute() {
-    const ws = DendronWorkspace.instance();
     const urlRoot = DendronWorkspace.configuration().get<string>(
       CONFIG.COPY_NOTE_URL_ROOT.key
     );
@@ -48,9 +47,21 @@ export class CopyNoteURLCommand extends BasicCommand<
     }
     const notePrefix = "notes";
     const fname = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
-    const note = DNodeUtils.getNoteByFname(fname, ws.engine);
+    // const note = DNodeUtils.getNoteByFname(fname, ws.engine);
+    // if (!note) {
+    //   throw Error("no note found");
+    // }
+
+    let note: NotePropsV2 | undefined;
+    if (DendronWorkspace.lsp()) {
+      note = _.find(DendronWorkspace.instance().getEngine().notes, { fname });
+    } else {
+      note = (_.find(DendronWorkspace.instance().engine.notes, {
+        fname,
+      }) as unknown) as NotePropsV2;
+    }
     if (!note) {
-      throw Error("no note found");
+      throw Error(`${fname} not found in engine`);
     }
 
     let link = [root, notePrefix, note.id + ".html"].join("/");
@@ -64,7 +75,6 @@ export class CopyNoteURLCommand extends BasicCommand<
         link += `#${slug}`;
       }
     }
-
     this.showFeedback(link);
     clipboardy.writeSync(link);
     return link;

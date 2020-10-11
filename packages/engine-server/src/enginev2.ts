@@ -34,35 +34,9 @@ type DendronEngineOptsV2 = {
 };
 type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
 
-// function createFuse<T>(
-//   initList: T[],
-//   opts: Fuse.IFuseOptions<any> & {
-//     exactMatch: boolean;
-//     preset: "schema" | "note";
-//   }
-// ) {
-//   const options = {
-//     shouldSort: true,
-//     threshold: opts.exactMatch ? 0.0 : 0.6,
-//     location: 0,
-//     distance: 100,
-//     maxPatternLength: 32,
-//     minMatchCharLength: 1,
-//     keys: ["title", "fname", "basename"],
-//     useExtendedSearch: true,
-//   };
-//   if (opts.preset === "schema") {
-//     options.keys = ["id", "title"];
-//   }
-//   const fuse = new Fuse(initList, options);
-//   return fuse;
-// }
-
 export class DendronEngineV2 implements DEngineV2 {
   public vaults: string[];
   public store: DStoreV2;
-  // public notesIndex: Fuse<NotePropsV2>;
-  // public schemaIndex: Fuse<SchemaPropsV2>;
   protected props: DendronEnginePropsV2;
   public logger: DLogger;
   public fuseEngine: FuseEngine;
@@ -70,14 +44,6 @@ export class DendronEngineV2 implements DEngineV2 {
   constructor(props: DendronEnginePropsV2) {
     this.vaults = props.vaults;
     this.store = props.store;
-    // this.notesIndex = createFuse<NotePropsV2>([], {
-    //   exactMatch: props.mode === "exact",
-    //   preset: "note",
-    // });
-    // this.schemaIndex = createFuse<SchemaPropsV2>([], {
-    //   exactMatch: props.mode === "exact",
-    //   preset: "schema",
-    // });
     this.logger = props.logger;
     this.props = props;
     this.fuseEngine = new FuseEngine({ logger: props.logger });

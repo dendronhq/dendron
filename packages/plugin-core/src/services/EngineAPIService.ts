@@ -25,6 +25,7 @@ import {
   WriteNoteResp,
 } from "@dendronhq/common-all";
 import { DendronAPI } from "@dendronhq/common-server";
+import { FuseEngine } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { Logger } from "../logger";
@@ -39,11 +40,13 @@ export class EngineAPIService implements DEngineClientV2 {
   // public initialized: boolean;
   // public store: DEngineStore;
   public ws: string;
+  public fuseEngine: FuseEngine;
   // public fullNodes: Set<string>;
 
   constructor(public api: DendronAPI) {
     this.notes = {};
     this.schemas = {};
+    this.fuseEngine = new FuseEngine({ logger: Logger });
     this.vaults =
       DendronWorkspace.workspaceFolders()?.map((ent) => ent.uri.fsPath) || [];
     // this.fullNodes = new Set();
@@ -70,6 +73,8 @@ export class EngineAPIService implements DEngineClientV2 {
     const { notes, schemas } = resp.data;
     this.notes = notes;
     this.schemas = schemas;
+    await this.fuseEngine.updateNotesIndex(notes);
+    await this.fuseEngine.updateSchemaIndex(schemas);
     Logger.info({ ctx, msg: "exit" });
     return {
       error: null,
@@ -134,7 +139,14 @@ export class EngineAPIService implements DEngineClientV2 {
     mode: DNodeTypeV2,
     opts?: QueryOptsV2
   ): Promise<EngineQueryNoteResp> {
-    // TODO: look at cache
+    if (mode === "note") {
+      const items = await this.queryNote({ qs: queryString });
+      return {
+        data: items,
+        error: null,
+      };
+    }
+
     const resp = await this.api.engineQuery({
       mode,
       queryString,
@@ -153,6 +165,9 @@ export class EngineAPIService implements DEngineClientV2 {
       error: null,
       data: resp.data,
     };
+  }
+  async queryNote({ qs }: { qs: string }): Promise<NotePropsV2[]> {
+    return await this.fuseEngine.queryNote({ qs });
   }
 
   /**

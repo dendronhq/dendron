@@ -9,3 +9,4 @@ export * from "./utils";
 export * from "./soil";
 export * from "./topics/markdown";
 export * from "./topics/git";
+export * from "./fuseEngine";

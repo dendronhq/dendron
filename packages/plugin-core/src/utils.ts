@@ -21,12 +21,10 @@ import {
   DendronError,
   DEngine,
   DEngineClientV2,
-  DEngineV2,
   DNodeUtils,
   DNodeUtilsV2,
   NoteUtilsV2,
   SchemaUtils,
-  SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import moment from "moment";
 import { EngineAPIService } from "./services/EngineAPIService";

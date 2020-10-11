@@ -30,7 +30,7 @@ import { GotoNoteCommand, GotoNoteCommandOpts } from "./commands/GotoNote";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { GoUpCommand } from "./commands/GoUpCommand";
 import { ImportPodCommand } from "./commands/ImportPod";
-import { LookupCommand, LookupCommandOpts } from "./commands/LookupCommand";
+import { LookupCommand } from "./commands/LookupCommand";
 import { OpenLogsCommand } from "./commands/OpenLogs";
 import { PublishCommand } from "./commands/Publish";
 import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";

@@ -32,7 +32,6 @@ import { CopyNoteRefCommand } from "../../commands/CopyNoteRef";
 import { CopyNoteURLCommand } from "../../commands/CopyNoteURL";
 import { DoctorCommand } from "../../commands/Doctor";
 import { ExportPodCommand } from "../../commands/ExportPod";
-import { GoDownCommand } from "../../commands/GoDownCommand";
 import {
   GoToSiblingCommand,
   GoToSiblingCommandOpts,

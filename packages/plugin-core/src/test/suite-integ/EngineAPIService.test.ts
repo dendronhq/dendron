@@ -15,7 +15,6 @@ import { onWSInit, setupDendronWorkspace, TIMEOUT } from "../testUtils";
 suite("basic", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
-  let vaultPath: string;
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
@@ -45,7 +44,6 @@ suite("basic", function () {
     setupDendronWorkspace(root.name, ctx, {
       lsp: true,
       useCb: async (vaultDir) => {
-        vaultPath = vaultDir;
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         await NOTE_INIT_PRESET.domainStub.before({ vaultDir });
       },

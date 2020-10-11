@@ -140,18 +140,18 @@ class HorizontalSplitBtn extends DendronBtn {
   }
 }
 
-// @ts-ignore
-class VerticalSplitBtn extends DendronBtn {
-  static create(pressed?: boolean) {
-    return new DendronBtn({
-      title: "Split Vertical",
-      iconOff: "split-vertical",
-      iconOn: "menu-selection",
-      type: "vertical",
-      pressed,
-    });
-  }
-}
+// // @ts-ignore
+// class VerticalSplitBtn extends DendronBtn {
+//   static create(pressed?: boolean) {
+//     return new DendronBtn({
+//       title: "Split Vertical",
+//       iconOff: "split-vertical",
+//       iconOn: "menu-selection",
+//       type: "vertical",
+//       pressed,
+//     });
+//   }
+// }
 
 export function refreshButtons(
   quickpick: DendronQuickPicker | DendronQuickPickerV2,

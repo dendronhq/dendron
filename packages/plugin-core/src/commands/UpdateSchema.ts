@@ -1,17 +1,13 @@
-import { DNodeUtils, Note } from "@dendronhq/common-all";
-import _ from "lodash";
-import { window, Uri, ViewColumn } from "vscode";
-import { VSCodeUtils } from "../utils";
+import { ViewColumn, window } from "vscode";
+import { EngineAPIService } from "../services/EngineAPIService";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
-import path from "path";
-import { EngineAPIService } from "../services/EngineAPIService";
 
 type CommandOpts = {};
 
 type CommandOutput = void;
 
-async function getWebviewContent(): Promise<string> {
+export async function getWebviewContent(): Promise<string> {
   const ws = DendronWorkspace.instance();
   const engine = ws.getEngine() as EngineAPIService;
   const resp = await engine.api._makeRequest({

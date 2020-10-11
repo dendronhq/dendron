@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.7-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.6...v0.12.7-alpha.0) (2020-10-11)
+
+### Bug Fixes
+
+- **server:** schema stub not updated after creation ([045888a](https://github.com/dendronhq/dendron/commit/045888a527080626bd2da262278fd0774f490e65))
+
+### Enhancements
+
+- **workbench:** better todo snippet ([51dd968](https://github.com/dendronhq/dendron/commit/51dd9681dca23d8362bbb65ff231d26c02c94870))
+
 ## [0.12.6](https://github.com/dendronhq/dendron/compare/v0.12.5...v0.12.6) (2020-10-07)
 
 ### Enhancements

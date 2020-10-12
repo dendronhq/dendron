@@ -256,7 +256,7 @@ describe("engine, schema/", () => {
     test.skip("delete schema", async () => {});
   });
 
-  describe.only("import", () => {
+  describe("import", () => {
     let vaultDir: string;
     let engine: DEngineV2;
 
@@ -278,11 +278,31 @@ describe("engine, schema/", () => {
             parent: "root",
             created: "1",
             updated: "1",
-            children: ["bar.bar"],
+            children: ["bar.bar", "baz.baz"],
           });
           let module = SchemaUtilsV2.createModule({
             version: 1,
             schemas: [fooSchema],
+            imports: ["bar", "baz"],
+          });
+          await schemaModuleOpts2File(module, dirPath, fname);
+
+          fname = "baz";
+          const bazSchema = SchemaUtilsV2.create({
+            fname,
+            id: fname,
+            parent: "root",
+            created: "1",
+            updated: "1",
+            children: ["bar.bar", "ns"],
+          });
+          let childSchema = SchemaUtilsV2.create({
+            id: "ns",
+            namespace: true,
+          });
+          module = SchemaUtilsV2.createModule({
+            version: 1,
+            schemas: [bazSchema, childSchema],
             imports: ["bar"],
           });
           await schemaModuleOpts2File(module, dirPath, fname);
@@ -298,20 +318,45 @@ describe("engine, schema/", () => {
     });
 
     test("basic", async () => {
-      await engine.init();
-      expect(vaultDir).toMatchSnapshot("vaultDir");
-      expect(engine.schemas).toMatchSnapshot();
-      // await engine.write(new Note({ id: "foo.bar.id", fname: "foo.bar" }), {
-      //   newNode: true,
-      //   parentsAsStubs: true,
-      // });
-      // // expect(_.map(engine.schemas, s => s.toRawPropsRecursive())).toMatchSnapshot("bond");
-      // const note = engine.notes["foo.bar.id"];
-      // const schemaDomain = engine.schemas["foo"];
-      // const schemaMatch = SchemaUtils.matchNote(note, engine.schemas);
-      // const schema = _.find(schemaDomain.nodes, { id: "bar.bar" }) as Schema;
-      // expect(schemaMatch).toEqual(schema);
-      expect(1).toEqual(1);
+      const { error } = await engine.init();
+      expect(error).toBe(null);
+      expect(_.size(engine.schemas["foo"].schemas)).toEqual(7);
+      expect(_.size(engine.schemas["bar"].schemas)).toEqual(2);
+      expect(_.size(engine.schemas["baz"].schemas)).toEqual(4);
+      await engine.writeNote(
+        NoteUtilsV2.create({ id: "foo.bar", fname: "foo.bar" })
+      );
+      const note = engine.notes["foo.bar"];
+      expect(note.schema).toEqual({
+        moduleId: "foo",
+        schemaId: "bar.bar",
+      });
+    });
+
+    test("double import", async () => {
+      const { error } = await engine.init();
+      expect(error).toBe(null);
+      await engine.writeNote(
+        NoteUtilsV2.create({ id: "foo.baz.bar", fname: "foo.baz.bar" })
+      );
+      const note = engine.notes["foo.baz.bar"];
+      expect(note.schema).toEqual({
+        moduleId: "foo",
+        schemaId: "baz.bar.bar",
+      });
+    });
+
+    test("import and namespace", async () => {
+      const { error } = await engine.init();
+      expect(error).toBe(null);
+      await engine.writeNote(
+        NoteUtilsV2.create({ id: "foo.baz.ns.one", fname: "foo.baz.ns.one" })
+      );
+      const note = engine.notes["foo.baz.ns.one"];
+      expect(note.schema).toEqual({
+        moduleId: "foo",
+        schemaId: "baz.ns",
+      });
     });
   });
 });

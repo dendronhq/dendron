@@ -38,7 +38,7 @@ suite("startup", function () {
       HistoryService.instance().clearSubscriptions();
     });
 
-    it("workspace active, prior workspace version", function (done) {
+    it.only("workspace active, prior workspace version", function (done) {
       const pathToVault = path.join(root.name, "vault");
       const snippetFile = path.join(pathToVault, ".vscode", Snippets.filename);
       setupWorkspace(root.name);

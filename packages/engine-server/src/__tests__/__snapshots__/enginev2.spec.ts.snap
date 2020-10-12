@@ -1,5 +1,592 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`engine, schema/ import basic 1`] = `Object {}`;
+exports[`engine, notes/ basics bad parse  1`] = `"{\\"opts\\":{\\"status\\":\\"bad_parse_for_note\\",\\"msg\\":\\"{\\\\\\"fname\\\\\\":\\\\\\"foo.md\\\\\\",\\\\\\"error\\\\\\":\\\\\\"can not read a block mapping entry; a multiline key may not be an implicit key at line 5, column 1:\\\\\\\\n    \\\\\\\\n    ^\\\\\\"}\\"},\\"status\\":\\"bad_parse_for_note\\"}"`;
 
-exports[`engine, schema/ import basic: vaultDir 1`] = `"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-91983-KiMlB75U5s3Y"`;
+exports[`engine, notes/ basics root 1`] = `
+Object {
+  "root": Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+  },
+}
+`;
+
+exports[`engine, notes/ basics root and two notes 1`] = `
+Object {
+  "foo": Object {
+    "body": "
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "parent": "root",
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+  },
+  "foo.ch1": Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "id": "foo.ch1",
+    "parent": "foo",
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+  },
+  "root": Object {
+    "body": "
+",
+    "children": Array [
+      "foo",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+  },
+}
+`;
+
+exports[`engine, notes/ basics stub note 1`] = `
+Array [
+  "foo.ch1.md",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
+exports[`engine, notes/ getNoteByPath/ get existing note 1`] = `
+Object {
+  "changed": Array [],
+  "note": Object {
+    "body": "
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "parent": "root",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+  },
+}
+`;
+
+exports[`engine, notes/ getNoteByPath/ get new note 1`] = `
+Object {
+  "changed": Array [
+    Object {
+      "note": Object {
+        "body": "
+",
+        "children": Array [
+          "foo",
+          "c5f3cf6b-3484-4055-83a4-292f31d01b85",
+        ],
+        "created": "1",
+        "custom": Object {},
+        "data": Object {},
+        "desc": "",
+        "fname": "root",
+        "id": "root",
+        "parent": null,
+        "title": "Root",
+        "type": "note",
+        "updated": "1",
+      },
+      "status": "update",
+    },
+    Object {
+      "note": Object {
+        "body": "",
+        "children": Array [],
+        "created": 1602529967263,
+        "data": Object {},
+        "desc": "",
+        "fname": "bar",
+        "id": "c5f3cf6b-3484-4055-83a4-292f31d01b85",
+        "parent": "root",
+        "title": "Bar",
+        "type": "note",
+        "updated": 1602529967263,
+      },
+      "status": "create",
+    },
+  ],
+  "note": Object {
+    "body": "",
+    "children": Array [],
+    "created": 1602529967263,
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "id": "c5f3cf6b-3484-4055-83a4-292f31d01b85",
+    "parent": "root",
+    "title": "Bar",
+    "type": "note",
+    "updated": 1602529967263,
+  },
+}
+`;
+
+exports[`engine, notes/ query/ * 1`] = `
+Array [
+  Object {
+    "body": "
+",
+    "children": Array [
+      "foo",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+  },
+  Object {
+    "body": "
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "parent": "root",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+  },
+  Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "id": "foo.ch1",
+    "parent": "foo",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "ch1",
+    },
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+  },
+]
+`;
+
+exports[`engine, notes/ query/ empty string 1`] = `
+Array [
+  Object {
+    "body": "
+",
+    "children": Array [
+      "foo",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+  },
+]
+`;
+
+exports[`engine, notes/ query/ foo 1`] = `
+Array [
+  Object {
+    "body": "
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "parent": "root",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+  },
+  Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "id": "foo.ch1",
+    "parent": "foo",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "ch1",
+    },
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+  },
+  Object {
+    "body": "
+",
+    "children": Array [
+      "foo",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+  },
+]
+`;
+
+exports[`engine, notes/ write/ write note, match schema: notes 1`] = `
+Object {
+  "foo": Object {
+    "body": "
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "parent": "root",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+  },
+  "foo.ch1": Object {
+    "body": "",
+    "children": Array [],
+    "created": "1",
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "id": "foo.ch1",
+    "parent": "foo",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "ch1",
+    },
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+  },
+  "root": Object {
+    "body": "
+",
+    "children": Array [
+      "foo",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+  },
+}
+`;
+
+exports[`engine, notes/ write/ write note, no schema 1`] = `
+Object {
+  "bar": Object {
+    "body": "",
+    "children": Array [],
+    "created": "1",
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "id": "bar",
+    "parent": "root",
+    "title": "Bar",
+    "type": "note",
+    "updated": "1",
+  },
+  "foo": Object {
+    "body": "
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "parent": "root",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+  },
+  "foo.ch1": Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "id": "foo.ch1",
+    "parent": "foo",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "ch1",
+    },
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+  },
+  "root": Object {
+    "body": "
+",
+    "children": Array [
+      "foo",
+      "bar",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+  },
+}
+`;
+
+exports[`engine, schema/ basics/ root 1`] = `
+"version: 1
+imports: []
+schemas:
+  - id: root
+    children: []
+    title: root
+    parent: root
+"
+`;
+
+exports[`engine, schema/ delete/ delete non-root 1`] = `
+Object {
+  "root": Object {
+    "fname": "root",
+    "imports": Array [],
+    "root": Object {
+      "children": Array [],
+      "id": "root",
+      "parent": "root",
+      "title": "root",
+    },
+    "schemas": Object {
+      "root": Object {
+        "body": "",
+        "children": Array [],
+        "created": 1602529967049,
+        "data": Object {},
+        "desc": "",
+        "fname": "__empty",
+        "id": "root",
+        "parent": "root",
+        "title": "root",
+        "type": "schema",
+        "updated": 1602529967049,
+      },
+    },
+    "version": 1,
+  },
+}
+`;
+
+exports[`engine, schema/ delete/ delete non-root 2`] = `
+Array [
+  "foo.ch1.md",
+  "foo.md",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
+exports[`engine, schema/ write/ update schema, add new prop to module: new schema file 1`] = `
+Object {
+  "imports": Array [],
+  "schemas": Array [
+    Object {
+      "children": Array [
+        "ch1",
+        "ch2",
+      ],
+      "id": "foo",
+      "parent": "root",
+      "title": "foo",
+    },
+    Object {
+      "children": Array [],
+      "id": "ch1",
+      "title": "ch1",
+    },
+    Object {
+      "children": Array [],
+      "id": "ch2",
+      "title": "ch2",
+    },
+  ],
+  "version": 1,
+}
+`;
+
+exports[`note and schema basics/ root and two notes 1`] = `
+Object {
+  "foo": Object {
+    "body": "
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "parent": "root",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+  },
+  "foo.ch1": Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "id": "foo.ch1",
+    "parent": "foo",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "ch1",
+    },
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+  },
+  "root": Object {
+    "body": "
+",
+    "children": Array [
+      "foo",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+  },
+}
+`;

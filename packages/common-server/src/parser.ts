@@ -62,8 +62,8 @@ export class SchemaParserV2 extends ParserBaseV2 {
       return file2Schema(fpath);
     });
     const schemaPropsFromImport = schemaModulesFromImport.flatMap((mod) => {
+      const domain = mod.fname;
       return _.values(mod.schemas).map((ent) => {
-        const domain = SchemaUtils.fname(ent.fname);
         ent.data.pattern = ent.data.pattern || ent.id;
         ent.id = `${domain}.${ent.id}`;
         ent.fname = fname;

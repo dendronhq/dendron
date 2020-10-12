@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.7-alpha.5](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.4...v0.12.7-alpha.5) (2020-10-12)
+
+### Bug Fixes
+
+- **workbench:** issue upgrading snippets with comments ([af05350](https://github.com/dendronhq/dendron/commit/af0535049f27ed7aa8e5f634e79678d9a163b870))
+
 ## [0.12.7-alpha.4](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.3...v0.12.7-alpha.4) (2020-10-12)
 
 ### Bug Fixes

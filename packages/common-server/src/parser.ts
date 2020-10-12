@@ -88,7 +88,10 @@ export class SchemaParserV2 extends ParserBaseV2 {
       _.map(parent.children, (ch) => {
         const child = schemasDict[ch];
         if (!child) {
-          throw new DendronError({ status: ENGINE_ERROR_CODES.MISSING_SCHEMA });
+          throw new DendronError({
+            status: ENGINE_ERROR_CODES.MISSING_SCHEMA,
+            msg: JSON.stringify({ parent, missingChild: ch }),
+          });
         }
         DNodeUtilsV2.addChild(parent, child);
         return addConnections(child);

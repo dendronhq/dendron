@@ -212,61 +212,6 @@ export class SchemaParserV2 extends ParserBaseV2 {
     );
     return cSchemaParserV2.parseRaw(schemaOpts, { root, fname });
   }
-
-  // static parseSchemaModuleOpts(
-  //   schemaModuleProps: SchemaModuleOptsV2,
-  //   opts: { fname: string; root: string }
-  // ): SchemaModulePropsV2 {
-  //   const { imports, schemas, version } = schemaModuleProps;
-  //   const { fname, root } = opts;
-  //   let schemaModulesFromImport = _.flatMap(imports, (ent) => {
-  //     return SchemaParserV2.parseFile(`${ent}.yml`, root);
-  //   });
-  //   const schemaPropsFromImport = schemaModulesFromImport.flatMap((mod) => {
-  //     return _.values(mod.schemas).map((ent) => {
-  //       const domain = SchemaUtils.fname(ent.fname);
-  //       ent.data.pattern = ent.data.pattern || ent.id;
-  //       ent.id = `${domain}.${ent.id}`;
-  //       ent.fname = fname;
-  //       ent.parent = null;
-  //       ent.children = ent.children.map((ent) => `${domain}.${ent}`);
-  //       return ent;
-  //     });
-  //   });
-  //   const schemaPropsFromFile = schemas.map((ent) => {
-  //     return SchemaUtilsV2.create(ent);
-  //   });
-  //   const schemasAll = schemaPropsFromImport.concat(schemaPropsFromFile);
-
-  //   const schemasDict: SchemaPropsDictV2 = {};
-  //   schemasAll.forEach((ent) => {
-  //     schemasDict[ent.id] = ent;
-  //   });
-
-  //   const rootModule = SchemaUtilsV2.getModuleRoot(schemaModuleProps);
-
-  //   const addConnections = (parent: SchemaPropsV2) => {
-  //     _.map(parent.children, (ch) => {
-  //       const child = schemasDict[ch];
-  //       if (!child) {
-  //         throw new DendronError({ status: ENGINE_ERROR_CODES.MISSING_SCHEMA });
-  //       }
-  //       DNodeUtilsV2.addChild(parent, child);
-  //       return addConnections(child);
-  //     });
-  //   };
-  //   // add parent relationship
-  //   addConnections(rootModule);
-
-  //   return {
-  //     version,
-  //     imports,
-  //     root: rootModule,
-  //     schemas: schemasDict,
-  //     fname,
-  //   };
-  // }
-
   async parse(fpaths: string[], root: string): Promise<SchemaModulePropsV2[]> {
     const ctx = "parse";
     this.logger.info({ ctx, msg: "enter", fpaths, root });

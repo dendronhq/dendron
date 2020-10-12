@@ -49,10 +49,6 @@ export class EngineAPIService implements DEngineClientV2 {
     this.fuseEngine = new FuseEngine({ logger: Logger });
     this.vaults =
       DendronWorkspace.workspaceFolders()?.map((ent) => ent.uri.fsPath) || [];
-    // this.fullNodes = new Set();
-    // this.props = {} as any;
-    // this.initialized = false;
-    // this.store = {} as any;
     this.ws = path.dirname(DendronWorkspace.workspaceFile().fsPath);
   }
 

@@ -129,15 +129,20 @@ export class DendronTreeView {
       "extension",
       async (_event: HistoryEvent) => {
         if (_event.action === "initialized") {
+          const ctx = "DendronTreeView:register";
+          Logger.info({ ctx, msg: "enter" });
           const ws = DendronWorkspace.instance();
           const treeDataProvider = new EngineNoteProvider();
           await treeDataProvider.getChildren();
+          Logger.info({ ctx, msg: "post-dataProvider-init" });
           const treeView = window.createTreeView("dendronTreeView", {
             treeDataProvider,
             showCollapseAll: true,
           });
+          Logger.info({ ctx, msg: "post-treeView-init" });
           const _class = new DendronTreeView(treeView, treeDataProvider);
           ws.dendronTreeView = _class;
+          Logger.info({ ctx, msg: "exit" });
         }
       }
     );

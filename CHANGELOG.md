@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.7-alpha.8](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.7...v0.12.7-alpha.8) (2020-10-12)
+
+### Bug Fixes
+
+- **server:** issue with deleteing schemas ([2aab629](https://github.com/dendronhq/dendron/commit/2aab62961c4c2a6a073104034fc3961ed6cad2a5))
+
 ## [0.12.7-alpha.7](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.6...v0.12.7-alpha.7) (2020-10-12)
 
 ### Bug Fixes

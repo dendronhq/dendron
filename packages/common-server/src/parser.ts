@@ -8,7 +8,6 @@ import {
   SchemaOptsV2,
   SchemaPropsDictV2,
   SchemaPropsV2,
-  SchemaUtils,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -41,7 +40,9 @@ export class SchemaParserV2 extends ParserBaseV2 {
         const schema = SchemaUtilsV2.create(ent);
         schemaDict[schema.id] = schema;
       });
-      const maybeRoot = schemaDict["root"] as SchemaPropsV2;
+      const maybeRoot = _.find(_.values(schemaDict), {
+        parent: "root",
+      }) as SchemaPropsV2;
       return {
         version: 0,
         root: maybeRoot,

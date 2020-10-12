@@ -119,7 +119,7 @@ export class WorkspaceConfig {
     const changes = await Settings.upgrade(src, _SETTINGS);
     const vault = (DendronWorkspace.workspaceFolders() as WorkspaceFolder[])[0];
     const vscodeDir = path.join(vault.uri.fsPath, ".vscode");
-    const snippetChanges = Snippets.upgradeOrCreate(vscodeDir);
+    const snippetChanges = await Snippets.upgradeOrCreate(vscodeDir);
     Logger.info({ ctx, vscodeDir, snippetChanges });
     return {
       extensions: {},
@@ -238,7 +238,9 @@ export class Snippets {
     }
   };
 
-  static upgradeOrCreate(dirPath: string): { [key: string]: Snippet } {
+  static async upgradeOrCreate(
+    dirPath: string
+  ): Promise<{ [key: string]: Snippet }> {
     const out = Snippets.read(dirPath);
     if (!out) {
       Snippets.create(dirPath);
@@ -251,7 +253,7 @@ export class Snippets {
           changed[k] = v;
         }
       });
-      Snippets.write(dirPath, out, changed);
+      await Snippets.write(dirPath, out, changed);
       return changed;
     }
   }

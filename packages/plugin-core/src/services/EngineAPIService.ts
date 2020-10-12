@@ -26,7 +26,7 @@ import {
 } from "@dendronhq/common-all";
 import { DendronAPI } from "@dendronhq/common-server";
 import { FuseEngine } from "@dendronhq/engine-server";
-import _ from "lodash";
+import _, { repeat } from "lodash";
 import path from "path";
 import { Logger } from "../logger";
 import { DendronWorkspace } from "../workspace";
@@ -65,7 +65,12 @@ export class EngineAPIService implements DEngineClientV2 {
     if (!resp.data) {
       throw new DendronError({ msg: "no data" });
     }
-
+    if (resp.error) {
+      return {
+        error: resp.error,
+        data: { notes: {}, schemas: {} },
+      };
+    }
     const { notes, schemas } = resp.data;
     this.notes = notes;
     this.schemas = schemas;

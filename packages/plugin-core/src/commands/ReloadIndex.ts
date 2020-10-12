@@ -18,7 +18,10 @@ export class ReloadIndexCommand extends BasicCommand<
     const ws = DendronWorkspace.instance();
     if (DendronWorkspace.lsp()) {
       const engine = ws.getEngine();
-      await engine.init();
+      const { error } = await engine.init();
+      if (error) {
+        this.L.error({ ctx, error, msg: "unable to initialize engine" });
+      }
       this.L.info({ ctx, msg: "exit" });
       return engine;
     } else {

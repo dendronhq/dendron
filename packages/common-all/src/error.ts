@@ -1,12 +1,26 @@
 export class DendronError extends Error {
   public status: string;
-  constructor(public opts?: { msg?: string; status?: string; code?: number }) {
-    super(opts?.msg);
-    this.status = opts?.status || "ok";
-  }
+  public msg: string;
+  public friendly?: string;
+  public payload?: string;
 
-  get msg(): string {
-    return this.opts?.msg || "";
+  constructor({
+    friendly,
+    msg,
+    status,
+    payload,
+  }: {
+    friendly?: string;
+    msg?: string;
+    status?: string;
+    code?: number;
+    payload?: any;
+  }) {
+    super(msg);
+    this.status = status || "unknown";
+    this.msg = msg || "";
+    this.friendly = friendly;
+    this.payload = JSON.stringify(payload || {});
   }
 }
 

@@ -114,6 +114,43 @@ describe("schema", () => {
     });
   });
 
+  describe("init", () => {
+    beforeEach(async () => {
+      wsRoot = tmpDir().name;
+      vault = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vault);
+      await EngineTestUtils.setupVault({
+        vaultDir: vault,
+        initDirCb: async (vaultPath: string) => {
+          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+            vaultDir: vaultPath,
+          });
+          fs.writeFileSync(
+            path.join(vaultPath, "bond.schema.yml"),
+            `
+id: bond
+`
+          );
+        },
+      });
+    });
+
+    test("bad schema", async () => {
+      const payload = {
+        uri: wsRoot,
+        config: {
+          vaults: [vault],
+        },
+      };
+      const api = new DendronAPI({
+        endpoint: "http://localhost:3005",
+        apiPath: "api",
+      });
+      const { error } = await api.workspaceInit(payload);
+      expect(error?.friendly).toEqual("error initializing notes");
+    });
+  });
+
   describe("query", () => {
     beforeEach(async () => {
       wsRoot = tmpDir().name;
@@ -452,7 +489,7 @@ describe("notes", () => {
           notes,
         }),
         (ent) => {
-          expect(ent.expected).toEqual(ent.actual);
+          expect(ent.actual).toEqual(ent.expected);
         }
       );
     });

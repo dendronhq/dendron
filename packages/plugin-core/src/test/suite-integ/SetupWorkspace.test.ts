@@ -2,6 +2,7 @@ import {
   DirResult,
   FileTestUtils,
   NodeTestUtils,
+  readJSONWithComments,
 } from "@dendronhq/common-server";
 import * as assert from "assert";
 import _ from "lodash";
@@ -14,10 +15,11 @@ import { _activate } from "../../_extension";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { onWSInit, setupWorkspace } from "../testUtils";
+import { onWSInit, setupDendronWorkspace, setupWorkspace } from "../testUtils";
 import path from "path";
 import { Snippets } from "../../settings";
 import fs from "fs-extra";
+import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 
 const TIMEOUT = 60 * 1000 * 5;
 
@@ -38,7 +40,7 @@ suite("startup", function () {
       HistoryService.instance().clearSubscriptions();
     });
 
-    it.only("workspace active, prior workspace version", function (done) {
+    it("workspace active, prior workspace version", function (done) {
       const pathToVault = path.join(root.name, "vault");
       const snippetFile = path.join(pathToVault, ".vscode", Snippets.filename);
       setupWorkspace(root.name);
@@ -49,7 +51,7 @@ suite("startup", function () {
           ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
           "0.0.1"
         );
-        const payload = fs.readJSONSync(snippetFile);
+        const payload = readJSONWithComments(snippetFile);
         assert.deepStrictEqual(payload, {
           bond: {
             prefix: "bond",
@@ -161,7 +163,7 @@ suite("startup", function () {
   });
 });
 
-suite("startup with lsp", function () {
+suite.only("startup with lsp", function () {
   this.timeout(TIMEOUT);
   let ctx: ExtensionContext;
   let root: DirResult;
@@ -176,6 +178,29 @@ suite("startup with lsp", function () {
 
     afterEach(function () {
       HistoryService.instance().clearSubscriptions();
+    });
+
+    it.only("workspace active, bad schema", function (done) {
+      onWSInit(async (_event: HistoryEvent) => {
+        const client = DendronWorkspace.instance().getEngine();
+        assert.deepStrictEqual(client.notes, []);
+        // done();
+      });
+
+      setupDendronWorkspace(root.name, ctx, {
+        lsp: true,
+        useCb: async (vaultPath) => {
+          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+            vaultDir: vaultPath,
+          });
+          fs.writeFileSync(
+            path.join(vaultPath, "bond.schema.yml"),
+            `
+id: bond
+`
+          );
+        },
+      });
     });
 
     it("workspace active, no prior workspace version", function (done) {

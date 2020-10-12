@@ -285,11 +285,9 @@ export abstract class API {
     let payload = this._createPayload(paylaodData) as T;
     try {
       const resp = await this._doRequest(args);
-      if (_.every(["data", "error"], (ent) => _.has(resp, ent))) {
-        payload = resp;
-      } else {
-        payload.data = resp;
-      }
+      const { error, data } = resp;
+      payload.data = data;
+      payload.error = error;
     } catch (err) {
       payload.error = err;
     }

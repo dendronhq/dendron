@@ -69,8 +69,10 @@ export class DendronEngineV2 implements DEngineV2 {
         data: { notes, schemas },
       };
     } catch (error) {
+      const { message, stack, msg, status, friendly } = error;
+      let payload = { message, stack };
       return {
-        error,
+        error: new DendronError({ payload, msg, status, friendly }),
         data: {},
       };
     }
@@ -253,7 +255,9 @@ export class DendronEngineV2 implements DEngineV2 {
     note: NotePropsV2,
     opts?: EngineUpdateNodesOptsV2
   ): Promise<void> {
-    return this.store.updateNote(note, opts);
+    const out = this.store.updateNote(note, opts);
+    await this.updateIndex("note");
+    return out;
   }
 
   async updateIndex(mode: DNodeTypeV2) {
@@ -272,7 +276,9 @@ export class DendronEngineV2 implements DEngineV2 {
   }
 
   async updateSchema(schemaModule: SchemaModulePropsV2) {
-    return this.store.updateSchema(schemaModule);
+    const out = await this.store.updateSchema(schemaModule);
+    await this.updateIndex("schema");
+    return out;
   }
 
   async writeNote(

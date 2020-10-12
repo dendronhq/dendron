@@ -27,7 +27,11 @@ router.post("/initialize", async (req: Request, res: Response) => {
     mode: "fuzzy",
     logger,
   });
-  await engine.init();
+  const { error } = await engine.init();
+  if (error) {
+    error.friendly = "error initializing notes";
+    return res.json({ error });
+  }
   notes = engine.notes;
   schemas = engine.schemas;
   MemoryStore.instance().put(`ws:${uri}`, engine);

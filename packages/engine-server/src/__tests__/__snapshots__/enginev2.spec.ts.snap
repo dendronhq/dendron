@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`engine, notes/ basics bad parse  1`] = `"{\\"opts\\":{\\"status\\":\\"bad_parse_for_note\\",\\"msg\\":\\"{\\\\\\"fname\\\\\\":\\\\\\"foo.md\\\\\\",\\\\\\"error\\\\\\":\\\\\\"can not read a block mapping entry; a multiline key may not be an implicit key at line 5, column 1:\\\\\\\\n    \\\\\\\\n    ^\\\\\\"}\\"},\\"status\\":\\"bad_parse_for_note\\"}"`;
+exports[`engine, notes/ basics bad parse  1`] = `"{\\"status\\":\\"bad_parse_for_note\\",\\"msg\\":\\"{\\\\\\"fname\\\\\\":\\\\\\"foo.md\\\\\\",\\\\\\"error\\\\\\":\\\\\\"can not read a block mapping entry; a multiline key may not be an implicit key at line 5, column 1:\\\\\\\\n    \\\\\\\\n    ^\\\\\\"}\\",\\"payload\\":\\"{\\\\\\"message\\\\\\":\\\\\\"{\\\\\\\\\\\\\\"fname\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"foo.md\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"error\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"can not read a block mapping entry; a multiline key may not be an implicit key at line 5, column 1:\\\\\\\\\\\\\\\\n    \\\\\\\\\\\\\\\\n    ^\\\\\\\\\\\\\\"}\\\\\\",\\\\\\"stack\\\\\\":\\\\\\"Error: {\\\\\\\\\\\\\\"fname\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"foo.md\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"error\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"can not read a block mapping entry; a multiline key may not be an implicit key at line 5, column 1:\\\\\\\\\\\\\\\\n    \\\\\\\\\\\\\\\\n    ^\\\\\\\\\\\\\\"}\\\\\\\\n    at NoteParserV2.parseNoteProps (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:186:13)\\\\\\\\n    at /Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:106:28\\\\\\\\n    at Array.flatMap (<anonymous>)\\\\\\\\n    at NoteParserV2.parseFile (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:105:8)\\\\\\\\n    at NoteParserV2.parse (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:203:17)\\\\\\\\n    at FileStorageV2.initNotes (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:370:74)\\\\\\\\n    at FileStorageV2.init (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:265:33)\\\\\\\\n    at DendronEngineV2.init (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/enginev2.ts:64:34)\\\\\\\\n    at Object.<anonymous> (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/__tests__/enginev2.spec.ts:750:26)\\\\\\"}\\"}"`;
 
 exports[`engine, notes/ basics root 1`] = `
 Object {
@@ -120,7 +120,7 @@ Object {
 ",
         "children": Array [
           "foo",
-          "c5f3cf6b-3484-4055-83a4-292f31d01b85",
+          "02e3a798-6a1f-438c-863b-551e922fe150",
         ],
         "created": "1",
         "custom": Object {},
@@ -139,15 +139,15 @@ Object {
       "note": Object {
         "body": "",
         "children": Array [],
-        "created": 1602529967263,
+        "created": 1602538193166,
         "data": Object {},
         "desc": "",
         "fname": "bar",
-        "id": "c5f3cf6b-3484-4055-83a4-292f31d01b85",
+        "id": "02e3a798-6a1f-438c-863b-551e922fe150",
         "parent": "root",
         "title": "Bar",
         "type": "note",
-        "updated": 1602529967263,
+        "updated": 1602538193166,
       },
       "status": "create",
     },
@@ -155,15 +155,15 @@ Object {
   "note": Object {
     "body": "",
     "children": Array [],
-    "created": 1602529967263,
+    "created": 1602538193166,
     "data": Object {},
     "desc": "",
     "fname": "bar",
-    "id": "c5f3cf6b-3484-4055-83a4-292f31d01b85",
+    "id": "02e3a798-6a1f-438c-863b-551e922fe150",
     "parent": "root",
     "title": "Bar",
     "type": "note",
-    "updated": 1602529967263,
+    "updated": 1602538193166,
   },
 }
 `;
@@ -476,7 +476,7 @@ Object {
       "root": Object {
         "body": "",
         "children": Array [],
-        "created": 1602529967049,
+        "created": 1602538192907,
         "data": Object {},
         "desc": "",
         "fname": "__empty",
@@ -484,7 +484,7 @@ Object {
         "parent": "root",
         "title": "root",
         "type": "schema",
-        "updated": 1602529967049,
+        "updated": 1602538192907,
       },
     },
     "version": 1,

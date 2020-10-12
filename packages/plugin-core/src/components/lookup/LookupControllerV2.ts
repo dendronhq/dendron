@@ -52,7 +52,7 @@ export class LookupControllerV2 {
     range?: vscode.Range;
     noConfirm?: boolean;
   }) {
-    const ctx = "show";
+    const ctx = "LookupControllerV2:show";
     const cleanOpts = _.defaults(opts, {
       ignoreFocusOut: true,
     });

@@ -134,7 +134,7 @@ export class LookupController {
     document?: vscode.TextDocument;
     range?: vscode.Range;
   }) {
-    const ctx = "show";
+    const ctx = "LookupController:show";
     const cleanOpts = _.defaults(opts, {
       ignoreFocusOut: true,
     });

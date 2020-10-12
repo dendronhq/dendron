@@ -45,6 +45,7 @@
     "@types/node": "13.11.0",
     "@types/pino": "^6.3.0",
     "@types/tmp": "^0.2.0",
+    "comment-json": "^4.1.0",
     "fs-extra": "^9.0.1",
     "gray-matter": "^4.0.2",
     "js-yaml": "^3.14.0",
@@ -56,6 +57,7 @@
     "vscode-uri": "^2.1.2"
   },
   "devDependencies": {
+    "@types/comment-json": "^1.1.1",
     "coveralls": "^3.0.2",
     "jest": "^23.6.0",
     "prettier": "2.0.5",

@@ -41,8 +41,8 @@ async function reloadWorkspace() {
   const ctx = "reloadWorkspace";
   const ws = DendronWorkspace.instance();
   await ws.reloadWorkspace();
-  Logger.info({ ctx, msg: "post-reload-ws" });
-  // help with debug
+  Logger.info({ ctx, msg: "post-ws.reloadWorkspace" });
+  // help with debug, doesn't need to block
   fs.readJSON(DendronWorkspace.workspaceFile().fsPath).then((config) => {
     Logger.info({ ctx, msg: "gotConfig", config });
   });
@@ -94,20 +94,25 @@ async function postReloadWorkspace() {
     const newVersion = DendronWorkspace.version();
     if (semver.lt(previousWsVersion, newVersion)) {
       Logger.info({ ctx, msg: "preUpgrade: new wsVersion" });
-      const changes = await vscode.commands.executeCommand(
-        DENDRON_COMMANDS.UPGRADE_SETTINGS.key
-      );
-      Logger.info({
-        ctx,
-        msg: "postUpgrade: new wsVersion",
-        changes,
-        previousWsVersion,
-        newVersion,
-      });
-      await ws.context.workspaceState.update(
-        WORKSPACE_STATE.WS_VERSION,
-        newVersion
-      );
+      try {
+        const changes = await vscode.commands.executeCommand(
+          DENDRON_COMMANDS.UPGRADE_SETTINGS.key
+        );
+        Logger.info({
+          ctx,
+          msg: "postUpgrade: new wsVersion",
+          changes,
+          previousWsVersion,
+          newVersion,
+        });
+        await ws.context.workspaceState.update(
+          WORKSPACE_STATE.WS_VERSION,
+          newVersion
+        );
+      } catch (err) {
+        Logger.error({ msg: "error upgrading", err: JSON.stringify(err) });
+        return;
+      }
       HistoryService.instance().add({
         source: "extension",
         action: "upgraded",

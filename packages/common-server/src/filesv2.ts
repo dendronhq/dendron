@@ -12,6 +12,7 @@ import YAML from "js-yaml";
 import _ from "lodash";
 import path from "path";
 import { SchemaParserV2 } from "./parser";
+import { parse, stringify, assign } from "comment-json";
 
 export function file2Schema(fpath: string): SchemaModulePropsV2 {
   const root = path.dirname(fpath);
@@ -75,4 +76,23 @@ export function schemaModuleProps2File(
     path.join(vaultPath, fname + ext),
     SchemaUtilsV2.serializeModuleProps(schemaMProps)
   );
+}
+
+export function assignJSONWithComment(obj: any, data: any) {
+  return assign(
+    {
+      ...data,
+    },
+    obj
+  );
+}
+
+export function readJSONWithComments(fpath: string) {
+  const obj = parse(fs.readFileSync(fpath).toString());
+  return obj;
+}
+
+export function writeJSONWithComments(fpath: string, data: any) {
+  const payload = stringify(data, null, 4);
+  return fs.writeFile(fpath, payload);
 }

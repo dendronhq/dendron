@@ -1,3 +1,8 @@
+import {
+  readJSONWithComments,
+  assignJSONWithComment,
+  writeJSONWithComments,
+} from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -229,7 +234,7 @@ export class Snippets {
     if (!fs.existsSync(snippetPath)) {
       return false;
     } else {
-      return fs.readJSONSync(snippetPath);
+      return readJSONWithComments(snippetPath);
     }
   };
 
@@ -246,14 +251,19 @@ export class Snippets {
           changed[k] = v;
         }
       });
-      Snippets.write(dirPath, { ...out, ...changed });
+      Snippets.write(dirPath, out, changed);
       return changed;
     }
   }
 
-  static write(dirPath: string, snippets: { [key: string]: Snippet }) {
+  static write(
+    dirPath: string,
+    orig: { [key: string]: Snippet },
+    changed: { [key: string]: Snippet }
+  ) {
     const snippetPath = path.join(dirPath, Snippets.filename);
-    return fs.writeJSONSync(snippetPath, snippets, { spaces: 4 });
+    const snippets = assignJSONWithComment(orig, changed);
+    return writeJSONWithComments(snippetPath, snippets);
   }
 }
 

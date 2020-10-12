@@ -88,7 +88,6 @@ describe("engine, schema/", () => {
     test("delete non-root", async () => {
       await engine.init();
       await engine.deleteSchema("foo");
-      expect(engine.schemas).toMatchSnapshot();
 
       // node deleted from memory
       expect(_.values(engine.schemas).length).toEqual(1);
@@ -575,7 +574,6 @@ describe("engine, notes/", () => {
     test("get existing note", async () => {
       await engine.init();
       const { data } = await engine.getNoteByPath({ npath: "foo" });
-      expect(data).toMatchSnapshot();
       expect(data?.note).toEqual(engine.notes["foo"]);
       expect(data?.changed).toEqual([]);
     });
@@ -586,7 +584,6 @@ describe("engine, notes/", () => {
         npath: "bar",
         createIfNew: true,
       });
-      expect(data).toMatchSnapshot();
       expect(data?.note?.fname).toEqual("bar");
       expect(
         _.sortBy(

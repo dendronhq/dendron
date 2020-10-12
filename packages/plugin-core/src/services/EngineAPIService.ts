@@ -100,9 +100,6 @@ export class EngineAPIService implements DEngineClientV2 {
   async deleteSchema(id: string, opts?: EngineDeleteOptsV2) {
     const ws = this.ws;
     const resp = await this.api.schemaDelete({ id, opts, ws });
-    if (!resp.data) {
-      throw new DendronError({ msg: "no data" });
-    }
     delete this.schemas[id];
     return {
       error: null,

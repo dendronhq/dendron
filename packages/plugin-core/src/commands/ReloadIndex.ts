@@ -21,6 +21,7 @@ export class ReloadIndexCommand extends BasicCommand<
       const { error } = await engine.init();
       if (error) {
         this.L.error({ ctx, error, msg: "unable to initialize engine" });
+        return;
       }
       this.L.info({ ctx, msg: "exit" });
       return engine;

@@ -213,7 +213,6 @@ id: bond
     });
 
     it("workspace active, no prior workspace version", function (done) {
-      setupWorkspace(root.name, { lsp: true });
       onWSInit(async (_event: HistoryEvent) => {
         assert.strictEqual(DendronWorkspace.isActive(), true);
         assert.strictEqual(
@@ -226,6 +225,7 @@ id: bond
         assert.strictEqual(engine.notes["root"].fname, "root");
         done();
       });
+      setupWorkspace(root.name, { lsp: true });
 
       DendronWorkspace.version = () => "0.0.1";
       assert.strictEqual(

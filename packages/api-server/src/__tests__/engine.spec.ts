@@ -238,7 +238,6 @@ id: bond
         ws: wsRoot,
         qs: "foo",
       });
-      expect(resp).toMatchSnapshot();
       _.map(
         await SchemaTestPresetsV2.createQueryNonRootResults(
           resp.data as SchemaModulePropsV2[]

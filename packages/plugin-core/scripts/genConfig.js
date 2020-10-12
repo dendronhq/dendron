@@ -15,7 +15,9 @@ function genEntry(entryDict) {
 
 function updateConfig(configuration) {
   console.log("update config...");
-  configuration["properties"] = genEntry(CONFIG);
+  const config = genEntry(CONFIG);
+  configuration["properties"] = config;
+  return config;
 }
 
 function updateCommands(contributes) {
@@ -56,7 +58,7 @@ function main() {
   const pkg = fs.readJSONSync("package.json");
   const { contributes } = pkg;
   const { configuration } = contributes;
-  updateConfig(configuration);
+  const config = updateConfig(configuration);
   updateCommands(contributes);
   updateKeybindings(contributes);
   const commands = DENDRON_COMMANDS;
@@ -70,6 +72,11 @@ function main() {
     fs.writeJSONSync(
       path.join(pathToDocs, "data", "dendron-config.json"),
       groupBy,
+      { spaces: 4 }
+    );
+    fs.writeJSONSync(
+      path.join(pathToDocs, "data", "generated-config.json"),
+      config,
       { spaces: 4 }
     );
   }

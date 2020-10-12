@@ -5,10 +5,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.12.7-alpha.3](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.2...v0.12.7-alpha.3) (2020-10-11)
 
-**Note:** Version bump only for package root
-
-## [0.12.7-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.1...v0.12.7-alpha.2) (2020-10-11)
-
 ### Bug Fixes
 
 - **server:** schema stub not updated after creation ([045888a](https://github.com/dendronhq/dendron/commit/045888a527080626bd2da262278fd0774f490e65))
@@ -59,17 +55,13 @@ When building your site by running `Dendron: Build Pod`, Dendron will generate a
 
 ## [0.12.2](https://github.com/dendronhq/dendron/compare/v0.12.2-alpha.0...v0.12.2) (2020-09-24)
 
-**Note:** Version bump only for package root
+### Enhancements
 
-## [0.12.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.1...v0.12.2-alpha.0) (2020-09-24)
+- **refs:** support partial header selection ([6e35393](https://github.com/dendronhq/dendron/commit/6e35393fe2d321b8d708fe1efd40c1eb4ad304e3))
 
 ### Bug Fixes
 
 - **publishing:** incremental builds not setting correct links ([e3dedf5](https://github.com/dendronhq/dendron/commit/e3dedf52d79dede98041edc77a41966cc5d6e8b5))
-
-### Enhancements
-
-- **refs:** support partial header selection ([6e35393](https://github.com/dendronhq/dendron/commit/6e35393fe2d321b8d708fe1efd40c1eb4ad304e3))
 
 ## [0.12.1](https://github.com/dendronhq/dendron/compare/v0.12.1-alpha.2...v0.12.1) (2020-09-22)
 

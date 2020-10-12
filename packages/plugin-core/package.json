@@ -50,7 +50,7 @@
                 "dendron.defaultJournalName": {
                     "type": "string",
                     "default": "journal",
-                    "description": "named used for journal notes"
+                    "description": "name used for journal notes"
                 },
                 "dendron.defaultJournalDateFormat": {
                     "type": "string",
@@ -59,6 +59,7 @@
                 },
                 "dendron.defaultJournalAddBehavior": {
                     "default": "childOfDomain",
+                    "type": "string",
                     "description": "strategy for adding new journal notes",
                     "enum": [
                         "childOfDomain",
@@ -70,7 +71,7 @@
                 "dendron.defaultScratchName": {
                     "type": "string",
                     "default": "scratch",
-                    "description": "named used for scratch notes"
+                    "description": "name used for scratch notes"
                 },
                 "dendron.defaultScratchDateFormat": {
                     "type": "string",
@@ -79,6 +80,7 @@
                 },
                 "dendron.defaultScratchAddBehavior": {
                     "default": "asOwnDomain",
+                    "type": "string",
                     "description": "strategy for adding new scratch notes",
                     "enum": [
                         "childOfDomain",
@@ -89,10 +91,11 @@
                 },
                 "dendron.copyNoteUrlRoot": {
                     "type": "string",
-                    "description": "Override root url when getting note url"
+                    "description": "override root url when getting note url"
                 },
                 "dendron.defaultLookupCreateBehavior": {
                     "default": "selectionExtract",
+                    "type": "string",
                     "description": "when creating a new note with selected text, define behavior for selected text",
                     "enum": [
                         "selection2link",
@@ -104,14 +107,15 @@
                     "default": "",
                     "description": "location of dendron workspace"
                 },
-                "dendron.notesDirPath": {
+                "dendron.logLevel": {
                     "type": "string",
-                    "description": "Path to notesdir executable"
-                },
-                "dendron.skipPrompt": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "whether dendron prompts for confirmation for certain actions"
+                    "default": "info",
+                    "description": "control verbosity of dendron logs",
+                    "enum": [
+                        "debug",
+                        "info",
+                        "error"
+                    ]
                 },
                 "dendron.useExperimentalLSPSupport": {
                     "type": "boolean",
@@ -124,23 +128,21 @@
                         "messages",
                         "verbose"
                     ],
+                    "type": "string",
                     "default": "messages",
                     "description": "LSP log level"
                 },
                 "dendron.serverPort": {
                     "type": "number",
-                    "description": "port for server"
-                },
-                "dendron.publishRepoDir": {
-                    "type": "string",
-                    "description": "Path of git repo when running `Dendron: Publish`"
+                    "description": "port for server. If not set, will be randomly generated at startup."
                 }
             }
         },
         "commands": [
             {
                 "command": "dendron.gotoNote",
-                "title": "Goto Note"
+                "title": "Goto Note",
+                "desc": "Go to a note"
             },
             {
                 "command": "dendron.createDailyJournalNote",
@@ -319,7 +321,8 @@
             },
             {
                 "command": "dendron.updateSchema",
-                "title": "Dendron: Update Schema"
+                "title": "Dendron: Update Schema",
+                "desc": "Update schema"
             },
             {
                 "command": "dendron.showHelp",
@@ -345,7 +348,8 @@
             },
             {
                 "command": "dendron.dev.resetConfig",
-                "title": "Dendron:Dev: Reset Config"
+                "title": "Dendron:Dev: Reset Config",
+                "desc": "Reset the config"
             },
             {
                 "command": "dendron.dev.openLogs",

@@ -15,7 +15,7 @@ type KeyBinding = {
 type ConfigEntry = {
   key: string;
   description: string;
-  type?: "string" | "boolean" | "number";
+  type: "string" | "boolean" | "number";
   default?: any;
   enum?: string[];
   scope?: CommandEntry;
@@ -39,7 +39,7 @@ type CommandEntry = {
    * Skip doc generation
    */
   skipDocs?: boolean;
-  desc?: string;
+  desc: string;
   docs?: string;
   docLink?: string;
   docAnchor?: string;
@@ -59,6 +59,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     // no prefix, we don't want to show this command
     title: `Goto Note`,
     group: "notes",
+    desc: "Go to a note",
     skipDocs: true,
   },
   CREATE_DAILY_JOURNAL_NOTE: {
@@ -397,7 +398,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   UPDATE_SCHEMA: {
     key: "dendron.updateSchema",
     title: `${CMD_PREFIX} Update Schema`,
+    desc: "Update schema",
     group: "lookup",
+    skipDocs: true,
   },
   SHOW_HELP: {
     key: "dendron.showHelp",
@@ -437,6 +440,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   RESET_CONFIG: {
     key: "dendron.dev.resetConfig",
     title: `${CMD_PREFIX}Dev: Reset Config`,
+    desc: "Reset the config",
     group: "dev",
     skipDocs: true,
   },
@@ -492,7 +496,7 @@ export type ConfigKey = keyof typeof CONFIG;
 const _noteDateDesc = (type: "journal" | "scratch") =>
   `date format used for ${type} notes`;
 const _noteNameDesc = (type: "journal" | "scratch") =>
-  `named used for ${type} notes`;
+  `name used for ${type} notes`;
 const _noteAddBehaviorDesc = (type: "journal" | "scratch") =>
   `strategy for adding new ${type} notes`;
 
@@ -526,6 +530,7 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
   DEFAULT_JOURNAL_ADD_BEHAVIOR: {
     key: "dendron.defaultJournalAddBehavior",
     default: "childOfDomain",
+    type: "string",
     description: _noteAddBehaviorDesc("journal"),
     enum: _noteAddBehaviorEnum,
   },
@@ -544,17 +549,19 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
   DEFAULT_SCRATCH_ADD_BEHAVIOR: {
     key: "dendron.defaultScratchAddBehavior",
     default: "asOwnDomain",
+    type: "string",
     description: _noteAddBehaviorDesc("scratch"),
     enum: _noteAddBehaviorEnum,
   },
   COPY_NOTE_URL_ROOT: {
     key: "dendron.copyNoteUrlRoot",
     type: "string",
-    description: "Override root url when getting note url",
+    description: "override root url when getting note url",
   },
   DEFAULT_LOOKUP_CREATE_BEHAVIOR: {
     key: "dendron.defaultLookupCreateBehavior",
     default: "selectionExtract",
+    type: "string",
     description:
       "when creating a new note with selected text, define behavior for selected text",
     enum: ["selection2link", "selectionExtract"],
@@ -567,23 +574,12 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     description: "location of dendron workspace",
   },
   // --- other
-  NOTESDIR_PATH: {
-    key: "dendron.notesDirPath",
-    type: "string",
-    description: "Path to notesdir executable",
-  },
   LOG_LEVEL: {
     key: "dendron.logLevel",
     type: "string",
     default: "info",
     description: "control verbosity of dendron logs",
     enum: ["debug", "info", "error"],
-  },
-  SKIP_PROMPT: {
-    key: "dendron.skipPrompt",
-    type: "boolean",
-    default: false,
-    description: "whether dendron prompts for confirmation for certain actions",
   },
   USE_EXPERIMENTAL_LSP_SUPPORT: {
     key: "dendron.useExperimentalLSPSupport",
@@ -594,19 +590,14 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
   LSP_LOG_LVL: {
     key: "dendron.trace.server",
     enum: ["off", "messages", "verbose"],
+    type: "string",
     default: "messages",
     description: "LSP log level",
   },
   SERVER_PORT: {
     key: "dendron.serverPort",
     type: "number",
-    description: "port for server",
-  },
-  // --- publishing
-  PUBLISH_REPO_DIR: {
-    key: "dendron.publishRepoDir",
-    type: "string",
-    description: "Path of git repo when running `Dendron: Publish`",
-    scope: DENDRON_COMMANDS.PUBLISH,
+    description:
+      "port for server. If not set, will be randomly generated at startup.",
   },
 };

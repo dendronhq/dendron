@@ -101,6 +101,14 @@ export class EngineAPIService implements DEngineClientV2 {
     const ws = this.ws;
     const resp = await this.api.schemaDelete({ id, opts, ws });
     delete this.schemas[id];
+    if (!resp?.data?.notes || !resp?.data?.schemas) {
+      throw new DendronError({ msg: "bad delete operation" });
+    }
+    const { notes, schemas } = resp.data;
+    this.notes = notes;
+    this.schemas = schemas;
+    this.fuseEngine.updateNotesIndex(notes);
+    this.fuseEngine.updateSchemaIndex(schemas);
     return {
       error: null,
       data: resp.data,

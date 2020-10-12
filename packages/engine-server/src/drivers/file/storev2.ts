@@ -334,7 +334,7 @@ export class FileStorageV2 implements DStoreV2 {
       fs.unlinkSync(fpath);
     }
     delete this.schemas[id];
-    return;
+    return this.init();
   }
 
   loadNotesCache(): NotePropsCacheV2 {
@@ -383,7 +383,6 @@ export class FileStorageV2 implements DStoreV2 {
     this.schemas[schemaModule.root.id] = schemaModule;
     const vaultDir = this.vaults[0];
     await schemaModuleProps2File(schemaModule, vaultDir, schemaModule.fname);
-    return;
   }
 
   async writeNote(
@@ -420,6 +419,5 @@ export class FileStorageV2 implements DStoreV2 {
 
   async writeSchema(schemaModule: SchemaModulePropsV2) {
     return this.updateSchema(schemaModule);
-    throw Error("not implemetned: need to write");
   }
 }

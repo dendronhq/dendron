@@ -180,7 +180,8 @@ export type GetNotePayloadV2 = {
   note: NotePropsV2 | undefined;
   changed: NoteChangeEntry[];
 };
-export type DEngineDeleteSchemaPayloadV2 = void;
+// TODO: KLUDGE
+export type DEngineDeleteSchemaPayloadV2 = DEngineInitPayloadV2;
 
 export type DEngineV2 = DCommonProps &
   DCommonMethods & {

@@ -135,6 +135,10 @@ suite("schemas", function () {
       await new DeleteNodeCommand().execute();
       const vaultFiles = fs.readdirSync(vaultPath);
       const noteFiles = vaultFiles.filter((ent) => ent.endsWith(".schema.yml"));
+      assert.strictEqual(
+        DendronWorkspace.instance().getEngine().notes["foo"].schema,
+        undefined
+      );
       assert.strictEqual(noteFiles.length, 1);
       assert.deepStrictEqual(noteFiles.sort(), ["root.schema.yml"]);
       done();

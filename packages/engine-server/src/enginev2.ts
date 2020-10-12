@@ -102,14 +102,21 @@ export class DendronEngineV2 implements DEngineV2 {
   }
 
   async deleteSchema(id: string, opts?: EngineDeleteOptsV2) {
-    const smod = this.schemas[id];
     try {
-      await this.store.deleteSchema(id, opts);
-      await this.fuseEngine.removeSchemaFromIndex(smod);
+      const data = await this.store.deleteSchema(id, opts);
+      await this.updateIndex("note");
+      await this.updateIndex("schema");
       return {
-        data: undefined,
+        data,
         error: null,
       };
+      // FIXM:E not performant
+      // const smod = this.schemas[id];
+      // await this.fuseEngine.removeSchemaFromIndex(smod);
+      // return {
+      //   data: undefined,
+      //   error: null,
+      // };
     } catch (err) {
       return {
         data: undefined,

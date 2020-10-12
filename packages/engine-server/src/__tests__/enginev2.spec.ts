@@ -102,6 +102,10 @@ describe("engine, schema/", () => {
       // node not in index
       const index = (engine as DendronEngineV2).fuseEngine.notesIndex;
       expect((index.getIndex().toJSON() as any).records.length).toEqual(3);
+
+      const resp = await engine.query("foo", "note");
+      expect(resp).toMatchSnapshot();
+      expect(resp.data[0].schema).toBeUndefined();
     });
 
     test("delete root", async () => {

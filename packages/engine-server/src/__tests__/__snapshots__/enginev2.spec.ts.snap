@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`engine, notes/ basics bad parse  1`] = `"{\\"status\\":\\"bad_parse_for_note\\",\\"msg\\":\\"{\\\\\\"fname\\\\\\":\\\\\\"foo.md\\\\\\",\\\\\\"error\\\\\\":\\\\\\"can not read a block mapping entry; a multiline key may not be an implicit key at line 5, column 1:\\\\\\\\n    \\\\\\\\n    ^\\\\\\"}\\",\\"payload\\":\\"{\\\\\\"message\\\\\\":\\\\\\"{\\\\\\\\\\\\\\"fname\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"foo.md\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"error\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"can not read a block mapping entry; a multiline key may not be an implicit key at line 5, column 1:\\\\\\\\\\\\\\\\n    \\\\\\\\\\\\\\\\n    ^\\\\\\\\\\\\\\"}\\\\\\",\\\\\\"stack\\\\\\":\\\\\\"Error: {\\\\\\\\\\\\\\"fname\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"foo.md\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"error\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"can not read a block mapping entry; a multiline key may not be an implicit key at line 5, column 1:\\\\\\\\\\\\\\\\n    \\\\\\\\\\\\\\\\n    ^\\\\\\\\\\\\\\"}\\\\\\\\n    at NoteParserV2.parseNoteProps (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:186:13)\\\\\\\\n    at /Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:106:28\\\\\\\\n    at Array.flatMap (<anonymous>)\\\\\\\\n    at NoteParserV2.parseFile (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:105:8)\\\\\\\\n    at NoteParserV2.parse (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:203:17)\\\\\\\\n    at FileStorageV2.initNotes (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:370:74)\\\\\\\\n    at FileStorageV2.init (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:265:33)\\\\\\\\n    at DendronEngineV2.init (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/enginev2.ts:64:34)\\\\\\\\n    at Object.<anonymous> (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/__tests__/enginev2.spec.ts:747:26)\\\\\\"}\\"}"`;
+exports[`engine, notes/ basics bad parse  1`] = `"{\\"status\\":\\"bad_parse_for_note\\",\\"msg\\":\\"{\\\\\\"fname\\\\\\":\\\\\\"foo.md\\\\\\",\\\\\\"error\\\\\\":\\\\\\"can not read a block mapping entry; a multiline key may not be an implicit key at line 5, column 1:\\\\\\\\n    \\\\\\\\n    ^\\\\\\"}\\",\\"payload\\":\\"{\\\\\\"message\\\\\\":\\\\\\"{\\\\\\\\\\\\\\"fname\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"foo.md\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"error\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"can not read a block mapping entry; a multiline key may not be an implicit key at line 5, column 1:\\\\\\\\\\\\\\\\n    \\\\\\\\\\\\\\\\n    ^\\\\\\\\\\\\\\"}\\\\\\",\\\\\\"stack\\\\\\":\\\\\\"Error: {\\\\\\\\\\\\\\"fname\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"foo.md\\\\\\\\\\\\\\",\\\\\\\\\\\\\\"error\\\\\\\\\\\\\\":\\\\\\\\\\\\\\"can not read a block mapping entry; a multiline key may not be an implicit key at line 5, column 1:\\\\\\\\\\\\\\\\n    \\\\\\\\\\\\\\\\n    ^\\\\\\\\\\\\\\"}\\\\\\\\n    at NoteParserV2.parseNoteProps (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:186:13)\\\\\\\\n    at /Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:106:28\\\\\\\\n    at Array.flatMap (<anonymous>)\\\\\\\\n    at NoteParserV2.parseFile (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:105:8)\\\\\\\\n    at NoteParserV2.parse (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:203:17)\\\\\\\\n    at FileStorageV2.initNotes (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:370:74)\\\\\\\\n    at FileStorageV2.init (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/drivers/file/storev2.ts:265:33)\\\\\\\\n    at DendronEngineV2.init (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/enginev2.ts:64:34)\\\\\\\\n    at Object.<anonymous> (/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server/src/__tests__/enginev2.spec.ts:752:26)\\\\\\"}\\"}"`;
 
 exports[`engine, notes/ basics root 1`] = `
 Object {
@@ -384,6 +384,63 @@ Array [
   "root.md",
   "root.schema.yml",
 ]
+`;
+
+exports[`engine, schema/ delete/ delete non-root 2`] = `
+Object {
+  "data": Array [
+    Object {
+      "body": "
+",
+      "children": Array [
+        "foo.ch1",
+      ],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "foo",
+      "id": "foo",
+      "parent": "root",
+      "title": "Foo",
+      "type": "note",
+      "updated": "1",
+    },
+    Object {
+      "body": "
+",
+      "children": Array [],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "foo.ch1",
+      "id": "foo.ch1",
+      "parent": "foo",
+      "title": "Ch1",
+      "type": "note",
+      "updated": "1",
+    },
+    Object {
+      "body": "
+",
+      "children": Array [
+        "foo",
+      ],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "root",
+      "id": "root",
+      "parent": null,
+      "title": "Root",
+      "type": "note",
+      "updated": "1",
+    },
+  ],
+  "error": null,
+}
 `;
 
 exports[`engine, schema/ write/ update schema, add new prop to module: new schema file 1`] = `

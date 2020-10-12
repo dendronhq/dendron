@@ -303,7 +303,7 @@ async function showWelcomeOrWhatsNew(
             vscode.commands.executeCommand(
               "vscode.open",
               vscode.Uri.parse(
-                "https://github.com/dendronhq/dendron/blob/master/CHANGELOG.md#change-log"
+                "https://dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html"
               )
             );
           }

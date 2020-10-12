@@ -165,6 +165,23 @@ export function onWSInit(cb: Function) {
   );
 }
 
+export function onExtension({
+  action,
+  cb,
+}: {
+  action: HistoryEventAction;
+  cb: Function;
+}) {
+  HistoryService.instance().subscribe(
+    "extension",
+    async (_event: HistoryEvent) => {
+      if (_event.action === action) {
+        await cb();
+      }
+    }
+  );
+}
+
 export function onWatcher({
   action,
   cb,

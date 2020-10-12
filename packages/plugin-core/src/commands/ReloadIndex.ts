@@ -6,7 +6,7 @@ type ReloadIndexCommandOpts = {};
 
 export class ReloadIndexCommand extends BasicCommand<
   ReloadIndexCommandOpts,
-  DEngine | DEngineClientV2
+  DEngine | DEngineClientV2 | undefined
 > {
   /**
    * Update index

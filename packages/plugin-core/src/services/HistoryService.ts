@@ -19,6 +19,7 @@ export type HistoryEventAction =
   | "create"
   | "activate"
   | "initialized"
+  | "not_initialized"
   | "rename"
   | "upgraded"
   | APIServerEvent;

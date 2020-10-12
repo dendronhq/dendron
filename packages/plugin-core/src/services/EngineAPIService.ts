@@ -26,7 +26,7 @@ import {
 } from "@dendronhq/common-all";
 import { DendronAPI } from "@dendronhq/common-server";
 import { FuseEngine } from "@dendronhq/engine-server";
-import _, { repeat } from "lodash";
+import _ from "lodash";
 import path from "path";
 import { Logger } from "../logger";
 import { DendronWorkspace } from "../workspace";
@@ -35,13 +35,8 @@ export class EngineAPIService implements DEngineClientV2 {
   public notes: NotePropsDictV2;
   public schemas: SchemaModuleDictV2;
   public vaults: string[];
-  // public schemas: SchemaDict;
-  // public props: Required<DEngineOpts>;
-  // public initialized: boolean;
-  // public store: DEngineStore;
   public ws: string;
   public fuseEngine: FuseEngine;
-  // public fullNodes: Set<string>;
 
   constructor(public api: DendronAPI) {
     this.notes = {};
@@ -62,14 +57,14 @@ export class EngineAPIService implements DEngineClientV2 {
       uri: this.ws,
       config: { vaults: this.vaults },
     });
-    if (!resp.data) {
-      throw new DendronError({ msg: "no data" });
-    }
     if (resp.error) {
       return {
         error: resp.error,
         data: { notes: {}, schemas: {} },
       };
+    }
+    if (!resp.data) {
+      throw new DendronError({ msg: "no data" });
     }
     const { notes, schemas } = resp.data;
     this.notes = notes;

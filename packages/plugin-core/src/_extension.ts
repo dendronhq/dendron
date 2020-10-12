@@ -40,7 +40,10 @@ export function activate(context: vscode.ExtensionContext) {
 async function reloadWorkspace() {
   const ctx = "reloadWorkspace";
   const ws = DendronWorkspace.instance();
-  await ws.reloadWorkspace();
+  const maybeEngine = await ws.reloadWorkspace();
+  if (!maybeEngine) {
+    return maybeEngine;
+  }
   Logger.info({ ctx, msg: "post-ws.reloadWorkspace" });
   // help with debug, doesn't need to block
   fs.readJSON(DendronWorkspace.workspaceFile().fsPath).then((config) => {
@@ -66,7 +69,7 @@ async function reloadWorkspace() {
     source: "extension",
     action: "initialized",
   });
-  return;
+  return maybeEngine;
 }
 
 async function postReloadWorkspace() {
@@ -219,7 +222,14 @@ export async function _activate(context: vscode.ExtensionContext) {
       Logger.info({ ctx, msg: "post-start-server", port });
       WSUtils.updateEngineAPI(port);
       startLSPClient({ context, port });
-      await reloadWorkspace();
+      const reloadSuccess = await reloadWorkspace();
+      if (!reloadSuccess) {
+        HistoryService.instance().add({
+          source: "extension",
+          action: "not_initialized",
+        });
+        return;
+      }
       await ws.activateWatchers();
       Logger.info({ ctx, msg: "fin startClient" });
     } else {

@@ -407,10 +407,11 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RELOAD_INDEX.key,
         async (silent?: boolean) => {
-          await new ReloadIndexCommand().execute();
+          const out = await new ReloadIndexCommand().execute();
           if (!silent) {
             vscode.window.showInformationMessage(`finish reload`);
           }
+          return out;
         }
       )
     );
@@ -441,7 +442,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.UPGRADE_SETTINGS.key,
         async () => {
-          await new UpgradeSettingsCommand().execute({
+          return await new UpgradeSettingsCommand().execute({
             settingOpts: { force: true },
           });
         }
@@ -854,14 +855,14 @@ export class DendronWorkspace {
       mainVault = wsFolders![0].uri.fsPath;
     }
     try {
-      await vscode.commands.executeCommand(
+      const out = await vscode.commands.executeCommand(
         DENDRON_COMMANDS.RELOAD_INDEX.key,
         true
       );
       if (!DendronWorkspace.lsp()) {
         await cacheWorkspace();
       }
-      return;
+      return out;
     } catch (err) {
       vscode.window.showErrorMessage(
         `error initializing dendron: ${JSON.stringify(err)}`

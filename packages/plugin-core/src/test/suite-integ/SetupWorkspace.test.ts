@@ -15,7 +15,12 @@ import { _activate } from "../../_extension";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { onWSInit, setupDendronWorkspace, setupWorkspace } from "../testUtils";
+import {
+  onExtension,
+  onWSInit,
+  setupDendronWorkspace,
+  setupWorkspace,
+} from "../testUtils";
 import path from "path";
 import { Snippets } from "../../settings";
 import fs from "fs-extra";
@@ -43,7 +48,6 @@ suite("startup", function () {
     it("workspace active, prior workspace version", function (done) {
       const pathToVault = path.join(root.name, "vault");
       const snippetFile = path.join(pathToVault, ".vscode", Snippets.filename);
-      setupWorkspace(root.name);
 
       onWSInit((_event: HistoryEvent) => {
         assert.strictEqual(DendronWorkspace.isActive(), true);
@@ -78,6 +82,8 @@ suite("startup", function () {
         });
         done();
       });
+
+      setupWorkspace(root.name);
 
       DendronWorkspace.version = () => "0.0.1";
       assert.strictEqual(
@@ -163,7 +169,7 @@ suite("startup", function () {
   });
 });
 
-suite.only("startup with lsp", function () {
+suite("startup with lsp", function () {
   this.timeout(TIMEOUT);
   let ctx: ExtensionContext;
   let root: DirResult;
@@ -180,11 +186,14 @@ suite.only("startup with lsp", function () {
       HistoryService.instance().clearSubscriptions();
     });
 
-    it.only("workspace active, bad schema", function (done) {
-      onWSInit(async (_event: HistoryEvent) => {
-        const client = DendronWorkspace.instance().getEngine();
-        assert.deepStrictEqual(client.notes, []);
-        // done();
+    it("workspace active, bad schema", function (done) {
+      onExtension({
+        action: "not_initialized",
+        cb: async (_event: HistoryEvent) => {
+          const client = DendronWorkspace.instance().getEngine();
+          assert.deepStrictEqual(client.notes, {});
+          done();
+        },
       });
 
       setupDendronWorkspace(root.name, ctx, {

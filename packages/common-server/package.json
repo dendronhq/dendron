@@ -32,7 +32,7 @@
     "compile": "tsc -p tsconfig.build.json",
     "test": "npx jest",
     "coverage": "jest --coverage",
-    "watch": "npm run test -- --watch",
+    "watch": "npm run compile -- --watch",
     "test:watch": "npm run test -- --watch -u"
   },
   "dependencies": {

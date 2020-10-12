@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.7-alpha.4](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.3...v0.12.7-alpha.4) (2020-10-12)
+
+### Bug Fixes
+
+- **workbench:** treeview not initializing ([44acda2](https://github.com/dendronhq/dendron/commit/44acda22bf04bd5df9e132e3011697328d667850))
+
+### Enhancements
+
+- better docs for config ([9f33c86](https://github.com/dendronhq/dendron/commit/9f33c867ca09c6310e40588c817f83243b86d4c1))
+
 ## [0.12.7-alpha.3](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.2...v0.12.7-alpha.3) (2020-10-11)
 
 ### Bug Fixes

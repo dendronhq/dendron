@@ -1,8 +1,10 @@
 import { cleanName } from "@dendronhq/common-server";
 import * as vscode from "vscode";
 import { CONFIG } from "../constants";
+import { DendronClientUtilsV2 } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { CreateNoteCommand } from "./CreateNote";
+import { LookupCommand } from "./LookupCommand";
 
 type CommandOpts = {
   fname: string;
@@ -17,9 +19,16 @@ export class CreateDailyJournalCommand extends CreateNoteCommand {
     const dailyJournalDomain = DendronWorkspace.configuration().get<string>(
       CONFIG["DAILY_JOURNAL_DOMAIN"].key
     );
-    const fname = this.genFname("JOURNAL", {
-      overrides: { domain: dailyJournalDomain },
-    });
+    let fname: string;
+    if (DendronWorkspace.lsp()) {
+      fname = DendronClientUtilsV2.genNoteName("JOURNAL", {
+        overrides: { domain: dailyJournalDomain },
+      });
+    } else {
+      fname = this.genFname("JOURNAL", {
+        overrides: { domain: dailyJournalDomain },
+      });
+    }
     return { title: fname };
   }
 
@@ -33,6 +42,14 @@ export class CreateDailyJournalCommand extends CreateNoteCommand {
 
   async execute(opts: CommandOpts) {
     const { fname } = opts;
+    if (DendronWorkspace.lsp()) {
+      const lookupOpts = {
+        noConfirm: true,
+        value: fname,
+      };
+      await new LookupCommand().execute({ ...lookupOpts, flavor: "note" });
+      return vscode.Uri.file("/tmp");
+    }
     const uri = await super.execute({ ...opts, title: fname });
     await vscode.window.showTextDocument(uri);
     return uri;

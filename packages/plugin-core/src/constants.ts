@@ -162,6 +162,24 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.lookup.md",
     docPreview: "",
   },
+  // LOOKUP_JOURNAL_GLOBAL: {
+  //   key: "dendron.lookup",
+  //   shortcut: true,
+  //   title: `${CMD_PREFIX} Lookup (Daily Journal Note)`,
+  //   group: "navigation",
+  //   keybindings: {
+  //     key: "ctrl+shift+i",
+  //     mac: "cmd+shift+i",
+  //     args: {
+  //       noteType: "journal",
+  //       noConfirm: true,
+  //     },
+  //   },
+  //   desc: "Create daily journal note",
+  //   docLink: "dendron.topic.special-notes.md",
+  //   docPreview:
+  //     "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.daily.gif)",
+  // },
   LOOKUP_SCRATCH: {
     key: "dendron.lookup",
     shortcut: true,

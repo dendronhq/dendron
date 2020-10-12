@@ -3,7 +3,10 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { QuickInputButton } from "vscode";
-import { LookupCommandOpts } from "../../commands/LookupCommand";
+import {
+  LookupCommandOpts,
+  LookupNoteExistBehavior,
+} from "../../commands/LookupCommand";
 import { CONFIG } from "../../constants";
 import { Logger } from "../../logger";
 import { DendronClientUtilsV2, VSCodeUtils } from "../../utils";
@@ -51,13 +54,14 @@ export class LookupControllerV2 {
     document?: vscode.TextDocument;
     range?: vscode.Range;
     noConfirm?: boolean;
+    noteExistBehavior?: LookupNoteExistBehavior;
   }) {
     const ctx = "LookupControllerV2:show";
     const cleanOpts = _.defaults(opts, {
       ignoreFocusOut: true,
     });
     const { document, range } = cleanOpts;
-    Logger.info({ ctx, msg: "enter" });
+    Logger.info({ ctx, msg: "enter", cleanOpts });
     // create quick pick
     const quickPick = vscode.window.createQuickPick<
       DNodePropsQuickInputV2
@@ -70,7 +74,7 @@ export class LookupControllerV2 {
     quickPick.justActivated = true;
     const provider = new LookupProviderV2(this.opts);
 
-    this.updatePickerBehavior({
+    await this.updatePickerBehavior({
       quickPick,
       document,
       range,
@@ -79,7 +83,7 @@ export class LookupControllerV2 {
     });
     refreshButtons(quickPick, this.state.buttons);
 
-    quickPick.onDidTriggerButton((btn: QuickInputButton) => {
+    quickPick.onDidTriggerButton(async (btn: QuickInputButton) => {
       const btnType = (btn as IDendronQuickInputButton).type;
 
       const btnTriggered = _.find(this.state.buttons, {
@@ -98,7 +102,7 @@ export class LookupControllerV2 {
         }
       );
       refreshButtons(quickPick, this.state.buttons);
-      this.updatePickerBehavior({ quickPick, document, range, provider });
+      await this.updatePickerBehavior({ quickPick, document, range, provider });
     });
 
     // cleanup quickpick
@@ -109,6 +113,8 @@ export class LookupControllerV2 {
 
     provider.provide(quickPick);
     if (opts?.noConfirm) {
+      // would be empty if not set
+      quickPick.selectedItems = quickPick.items;
       await provider.onDidAccept(quickPick, { flavor: this.opts.flavor });
     } else {
       quickPick.show();
@@ -117,7 +123,7 @@ export class LookupControllerV2 {
     return quickPick;
   }
 
-  updatePickerBehavior(opts: {
+  async updatePickerBehavior(opts: {
     quickPick: DendronQuickPickerV2;
     document?: vscode.TextDocument;
     range?: vscode.Range;
@@ -140,7 +146,7 @@ export class LookupControllerV2 {
       case "journal": {
         const value = DendronClientUtilsV2.genNoteName("JOURNAL");
         quickPick.value = value;
-        provider.onUpdatePickerItem(
+        await provider.onUpdatePickerItem(
           quickPick,
           provider.opts,
           "updatePickerBehavior:journal"
@@ -150,7 +156,7 @@ export class LookupControllerV2 {
       case "scratch": {
         const value = DendronClientUtilsV2.genNoteName("SCRATCH");
         quickPick.value = value;
-        provider.onUpdatePickerItem(
+        await provider.onUpdatePickerItem(
           quickPick,
           provider.opts,
           "updatePickerBehavior:scratch"
@@ -166,7 +172,7 @@ export class LookupControllerV2 {
             quickPick.value = path.basename(editorPath, ".md");
           }
         }
-        provider.onUpdatePickerItem(
+        await provider.onUpdatePickerItem(
           quickPick,
           provider.opts,
           "updatePickerBehavior:normal"

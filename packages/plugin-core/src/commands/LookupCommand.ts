@@ -13,6 +13,7 @@ import { BasicCommand } from "./base";
 export type LookupSelectionType = "selection2link" | "selectionExtract";
 export type LookupNoteType = "journal" | "scratch";
 export type LookupSplitType = "horizontal";
+export type LookupNoteExistBehavior = "open" | "overwrite";
 
 type CommandOpts = {
   /**
@@ -31,6 +32,7 @@ type CommandOpts = {
   flavor: EngineFlavor;
   noConfirm?: boolean;
   value?: string;
+  noteExistBehavior?: LookupNoteExistBehavior;
 };
 
 type CommandOutput = DendronQuickPicker | DendronQuickPickerV2;

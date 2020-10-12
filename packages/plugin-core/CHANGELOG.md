@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.7-alpha.7](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.6...v0.12.7-alpha.7) (2020-10-12)
+
+### Bug Fixes
+
+- **workbench:** show error message on bad initialization ([402a23f](https://github.com/dendronhq/dendron/commit/402a23fcd10a01e1d3f251015dd2302e054b065d))
+- **workbench:** wait for snippets to be initialized before showing upgrade msg ([ea2ae09](https://github.com/dendronhq/dendron/commit/ea2ae09848f00c5e6406584ab2166d767a92d8b9))
+
+### Enhancements
+
+- **server:** enable daily journal note ([ca02481](https://github.com/dendronhq/dendron/commit/ca024818585265c28192348b3098ffcb2405e426))
+- **server:** support schema imports ([22d01e5](https://github.com/dendronhq/dendron/commit/22d01e5a8141eae5066155523b0369e5660e524c))
+
 ## [0.12.7-alpha.6](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.5...v0.12.7-alpha.6) (2020-10-12)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

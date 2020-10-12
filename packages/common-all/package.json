@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-all",
-  "version": "0.12.7-alpha.5",
+  "version": "0.12.7-alpha.7",
   "description": "common-all",
   "license": "GPLv3",
   "repository": {
@@ -61,7 +61,7 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.12.7-alpha.5",
+    "@dendronhq/common-test-utils": "^0.12.7-alpha.7",
     "@types/js-yaml": "^3.12.5",
     "@types/request-promise": "^4.1.46",
     "coveralls": "^3.0.2",

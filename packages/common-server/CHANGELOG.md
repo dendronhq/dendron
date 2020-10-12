@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.7-alpha.7](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.6...v0.12.7-alpha.7) (2020-10-12)
+
+### Bug Fixes
+
+- **server:** schema imports ([a24ada0](https://github.com/dendronhq/dendron/commit/a24ada0b07adedcecd016836359fa9d5913f547a))
+
+### Enhancements
+
+- **server:** support schema imports ([22d01e5](https://github.com/dendronhq/dendron/commit/22d01e5a8141eae5066155523b0369e5660e524c))
+
 ## [0.12.7-alpha.5](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.4...v0.12.7-alpha.5) (2020-10-12)
 
 ### Bug Fixes

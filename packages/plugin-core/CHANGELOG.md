@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.7-alpha.10](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.9...v0.12.7-alpha.10) (2020-10-13)
+
+### Bug Fixes
+
+- **server:** issue with journal notes ([4d0ba5c](https://github.com/dendronhq/dendron/commit/4d0ba5cfd80fea0247ac405ddb38549073e1cd56))
+
 ## [0.12.7-alpha.9](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.8...v0.12.7-alpha.9) (2020-10-13)
 
 ### Bug Fixes

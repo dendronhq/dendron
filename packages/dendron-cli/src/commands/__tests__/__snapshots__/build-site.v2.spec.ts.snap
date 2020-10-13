@@ -24,31 +24,6 @@ exports[`buildSite multiple roots: build-site.md 1`] = `
 "
 `;
 
-exports[`buildSite multiple roots: data 1`] = `
-Object {
-  "body": "
-- [[lbl|refactor.one]]
-
-- SECRETS <!--LOCAL_ONLY_LINE-->
-",
-  "children": Array [
-    "foo.one",
-    "foo.two",
-    "a2519109-c94e-42eb-9ba5-366638344621",
-  ],
-  "created": 123,
-  "desc": "",
-  "fname": "foo",
-  "hpath": "foo",
-  "id": "foo",
-  "nav_order": 0,
-  "parent": null,
-  "permalink": "/",
-  "title": "Foo",
-  "updated": 456,
-}
-`;
-
 exports[`buildSite multiple roots: foo.md 1`] = `
 "- [lbl](notes/refactor.one)
 "

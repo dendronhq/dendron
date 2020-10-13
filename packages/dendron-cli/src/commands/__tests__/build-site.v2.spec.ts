@@ -88,7 +88,6 @@ describe("buildSite", () => {
     expect(_.includes(dir, "build-site.md")).toBeTruthy();
     expect(_.includes(dir, "refactor.one.md")).toBeFalsy();
     let { data, content } = readMD(path.join(notesDir, "foo.md"));
-    expect(data).toMatchSnapshot("data");
     expect(data.nav_order).toEqual(0);
     expect(data.parent).toBe(null);
     expect(content).toMatchSnapshot("foo.md");

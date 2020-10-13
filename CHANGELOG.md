@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.7](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.10...v0.12.7) (2020-10-13)
+
+**Note:** Version bump only for package root
+
 ## [0.12.7-alpha.10](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.9...v0.12.7-alpha.10) (2020-10-13)
 
 ### Bug Fixes

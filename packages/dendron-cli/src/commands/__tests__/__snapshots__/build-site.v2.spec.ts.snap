@@ -1,0 +1,132 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildSite basic: bond 1`] = `
+"- [lbl](refactor.one)
+"
+`;
+
+exports[`buildSite ids are converted: converted 1`] = `
+"Build site home
+
+- [build-site.one](notes/id.build-site.one)
+"
+`;
+
+exports[`buildSite image prefix: sample.image-link.md 1`] = `
+"![link-alt](fake-s3.com/link-path.jpg)
+"
+`;
+
+exports[`buildSite multiple roots: build-site.md 1`] = `
+"Build site home
+
+- [build-site.one](id.build-site.one)
+"
+`;
+
+exports[`buildSite multiple roots: data 1`] = `
+Object {
+  "body": "
+- [[lbl|refactor.one]]
+
+- SECRETS <!--LOCAL_ONLY_LINE-->
+",
+  "children": Array [
+    "foo.one",
+    "foo.two",
+    "a2519109-c94e-42eb-9ba5-366638344621",
+  ],
+  "created": 123,
+  "desc": "",
+  "fname": "foo",
+  "hpath": "foo",
+  "id": "foo",
+  "nav_order": 0,
+  "parent": null,
+  "permalink": "/",
+  "title": "Foo",
+  "updated": 456,
+}
+`;
+
+exports[`buildSite multiple roots: foo.md 1`] = `
+"- [lbl](notes/refactor.one)
+"
+`;
+
+exports[`buildSite v2 write stubs no write stub 1`] = `
+Array [
+  "bar.one.md",
+  "foo.md",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
+exports[`buildSite v2 write stubs write stub 1`] = `
+Array [
+  "bar.md",
+  "bar.one.md",
+  "foo.md",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
+exports[`note refs note refs 1`] = `
+"# Foo Content
+
+# Bar Content 
+
+<div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\" >
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">bar</span></div>
+<a href=\\"notes/id.bar.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div>        
+  
+# I am bar
+
+ [foo](notes/id.foo)
+
+
+</div>    
+</div>
+"
+`;
+
+exports[`note refs note refs, disable pretty 1`] = `
+"# Foo Content
+
+# Bar Content # I am bar
+
+ [foo](notes/id.foo)
+"
+`;
+
+exports[`wiki link case sensitive link 1`] = `
+"[foo.Mixed_case](id.foo.mixed-case)
+"
+`;
+
+exports[`wiki link missing link 1`] = `
+"# Foo Content
+
+# Bar Content [missing-link](/404.html)
+"
+`;
+
+exports[`wiki link missing link 2`] = `
+Array [
+  Object {
+    "links": Array [
+      "missing-link",
+    ],
+    "source": "foo",
+  },
+]
+`;

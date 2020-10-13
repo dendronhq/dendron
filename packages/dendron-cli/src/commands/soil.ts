@@ -1,12 +1,12 @@
-import { DEngine } from "@dendronhq/common-all";
+import { DEngine, DEngineClientV2 } from "@dendronhq/common-all";
 import { resolvePath } from "@dendronhq/common-server";
 import { DendronEngine } from "@dendronhq/engine-server";
-import _ from "lodash";
 import yargs from "yargs";
 import { BaseCommand } from "./base";
 
 type CommandOpts = {
   engine: DEngine;
+  engineClient?: DEngineClientV2;
   wsRoot: string;
 };
 

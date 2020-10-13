@@ -4,6 +4,10 @@ import {
   DNodeUtils,
   Note,
   HierarchyConfig,
+  NoteUtilsV2,
+  NotePropsV2,
+  DEngineClientV2,
+  DNodeUtilsV2,
 } from "@dendronhq/common-all";
 import { resolvePath, tmpDir } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -15,6 +19,8 @@ import {
   getProcessor,
   replaceRefs,
   DConfig,
+  DendronEngineClient,
+  DendronEngine,
 } from "@dendronhq/engine-server";
 import Rsync from "rsync";
 import { SoilCommand, SoilCommandCLIOpts, SoilCommandOpts } from "./soil";
@@ -44,6 +50,14 @@ type DendronJekyllProps = {
   permalink?: string;
 };
 
+function getRoot(engine: DEngine | DEngineClientV2) {
+  if (engine instanceof DendronEngineClient) {
+    return engine.vaults[0];
+  } else {
+    return (engine as DendronEngine).props.root;
+  }
+}
+
 function rsyncCopy(src: string, dst: string) {
   // rsync -a --no-times --size-only /tmp/notes/* docs/notes
   return new Promise((resolve, reject) => {
@@ -71,10 +85,10 @@ function rsyncCopy(src: string, dst: string) {
   });
 }
 
-function stripSiteOnlyTags(note: Note) {
+function stripSiteOnlyTags(body: string) {
   const re = new RegExp(/(?<raw><!--SITE_ONLY(?<body>.*)-->)/, "ms");
   let matches;
-  let doc = note.body;
+  let doc = body;
   do {
     matches = doc.match(re);
     if (matches) {
@@ -92,18 +106,31 @@ type Jekyll2MdFileErrors = {
 };
 
 async function note2JekyllMdFile(
-  note: Note,
-  opts: { notesDir: string; engine: DEngine } & DendronSiteConfig
+  note: Note | NotePropsV2,
+  opts: {
+    notesDir: string;
+    engine: DEngine | DEngineClientV2;
+  } & DendronSiteConfig
 ): Promise<Jekyll2MdFileErrors[]> {
-  const meta = DNodeUtils.getMeta(note, {
-    pullCustomUp: true,
-    ignoreNullParent: true,
-  });
+  let meta: NotePropsV2;
+  if (note instanceof Note) {
+    meta = DNodeUtils.getMeta(note, {
+      pullCustomUp: true,
+      ignoreNullParent: true,
+    });
+  } else {
+    meta = {
+      ...NoteUtilsV2.serializeMeta(note),
+      body: note.body,
+      fname: note.fname,
+    };
+  }
   const jekyllProps: DendronJekyllProps = {
-    hpath: note.path,
+    hpath: note.fname,
   };
   const config: Partial<DendronSiteConfig> = opts.config || {};
-  let hConfig: HierarchyConfig = _.get(config, note.domain.fname, {
+  const domainPath = DNodeUtilsV2.domainName(note.fname);
+  let hConfig: HierarchyConfig = _.get(config, domainPath, {
     publishByDefault: true,
     noindexByDefault: false,
   });
@@ -119,27 +146,36 @@ async function note2JekyllMdFile(
     jekyllProps["permalink"] = "/";
     linkPrefix = path.basename(siteNotesDir) + "/";
   }
+  let parentFname =
+    note instanceof Note
+      ? note.parent?.fname
+      : NoteUtilsV2.getNoteByFname(
+          note.fname,
+          (opts.engine as DendronEngineClient).notes
+        )?.fname;
+
   // pull children of root to the top
-  if (note.parent?.fname === opts.siteIndex) {
-    // @ts-ignore
-    delete meta["parent"];
+  if (parentFname === opts.siteIndex) {
+    meta["parent"] = null;
   }
   if (hConfig.noindexByDefault && _.isUndefined(note.custom.noindex)) {
+    // @ts-ignore
     meta.noindex = true;
   }
 
   // delete parent from root
-  note.body = stripSiteOnlyTags(note);
+  note.body = stripSiteOnlyTags(note.body);
   // delete content that is not meant to be published
   note.body = stripLocalOnlyTags(note.body);
   const scratchPad1Dir = tmpDir();
   const scratchPad2Dir = tmpDir();
   const scratchPad1 = path.join(scratchPad1Dir.name, "scratch.txt");
   const scratchPad2 = path.join(scratchPad2Dir.name, "scratch.txt");
+  const root = getRoot(opts.engine);
   try {
     // convert links in the page
     note.body = getProcessor({
-      root: opts.engine.props.root,
+      root,
       renderWithOutline: opts.usePrettyRefs,
       // necessary when when finding refs
       replaceRefs: {
@@ -322,8 +358,64 @@ export class BuildSiteCommand extends SoilCommand<
     return _.flatten(errors);
   }
 
+  async doBuildV2(opts: {
+    engineClient: DEngineClientV2;
+    config: DendronSiteConfig;
+    writeStubs: boolean;
+    notesDir: string;
+  }): Promise<Jekyll2MdFileErrors[]> {
+    const { engineClient, config, writeStubs, notesDir } = opts;
+    const { siteHierarchies } = config;
+
+    let navOrder = 0;
+    const nodes: NotePropsV2[] = siteHierarchies.map((fname) => {
+      const note = NoteUtilsV2.getNoteByFname(fname, engineClient.notes, {
+        throwIfEmpty: true,
+      }) as NotePropsV2;
+      if (!note.custom) {
+        note.custom = {};
+      }
+      note.custom.nav_order = navOrder;
+      note.parent = null;
+      note.title = _.capitalize(note.title);
+      navOrder += 1;
+      return note;
+    });
+    const out = [];
+    let writeStubsQ: any = [];
+
+    // get rest of hieararchy
+    while (!_.isEmpty(nodes)) {
+      const node = nodes.pop() as NotePropsV2;
+      out.push(
+        note2JekyllMdFile(node, {
+          notesDir,
+          engine: engineClient,
+          ...config,
+        })
+      );
+      node.children.forEach((n) => nodes.push(engineClient.notes[n]));
+      if (writeStubs && node.stub) {
+        node.stub = false;
+        writeStubsQ.push(
+          engineClient.writeNote(node, { writeHierarchy: true })
+        );
+      }
+    }
+    await Promise.all(writeStubsQ);
+    const errors = await Promise.all(out);
+    return _.flatten(errors);
+  }
+
   async execute(opts: CommandOpts) {
-    let { engine, config, wsRoot, writeStubs, incremental } = _.defaults(opts, {
+    let {
+      engine,
+      config,
+      wsRoot,
+      writeStubs,
+      incremental,
+      engineClient,
+    } = _.defaults(opts, {
       incremental: false,
     });
     const ctx = "BuildSiteCommand";
@@ -340,12 +432,21 @@ export class BuildSiteCommand extends SoilCommand<
 
     if (incremental) {
       const staging = tmpDir();
-      errors = await this.doBuild({
-        engine,
-        config,
-        writeStubs,
-        notesDir: staging.name,
-      });
+      if (engineClient) {
+        errors = await this.doBuildV2({
+          engineClient,
+          config,
+          writeStubs,
+          notesDir: staging.name,
+        });
+      } else {
+        errors = await this.doBuild({
+          engine,
+          config,
+          writeStubs,
+          notesDir: staging.name,
+        });
+      }
       this.L.info({
         ctx,
         msg: "rsync",
@@ -359,18 +460,30 @@ export class BuildSiteCommand extends SoilCommand<
       }
     } else {
       fs.emptyDirSync(siteNotesDirPath);
-      errors = await this.doBuild({
-        engine,
-        config,
-        writeStubs,
-        notesDir: siteNotesDirPath,
-      });
+      if (engineClient) {
+        errors = await this.doBuildV2({
+          engineClient,
+          config,
+          writeStubs,
+          notesDir: siteNotesDirPath,
+        });
+      } else {
+        errors = await this.doBuild({
+          engine,
+          config,
+          writeStubs,
+          notesDir: siteNotesDirPath,
+        });
+      }
     }
 
     // move assets
     this.L.info({ ctx, msg: "copy assets..." });
     const assetsDir = "assets";
-    const vaultAssetsDir = path.join(engine.props.root, assetsDir);
+    const vaultAssetsDir = path.join(
+      getRoot(engineClient || engine),
+      assetsDir
+    );
     const siteAssetsDir = path.join(siteRootPath, assetsDir);
     if (!config.assetsPrefix) {
       try {

@@ -121,7 +121,6 @@ async function note2JekyllMdFile(
   } else {
     meta = {
       ...NoteUtilsV2.serializeMeta(note),
-      body: note.body,
       fname: note.fname,
     };
   }

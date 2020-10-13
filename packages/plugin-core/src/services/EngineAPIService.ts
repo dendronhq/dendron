@@ -121,9 +121,8 @@ export class EngineAPIService implements DEngineClientV2 {
       ws: this.ws,
     });
     if (!_.isUndefined(resp.data)) {
-      this.refreshNotes(_.map(resp.data.changed, (ent) => ent.note));
+      await this.refreshNotes(_.map(resp.data.changed, (ent) => ent.note));
     }
-    // TODO: update notes
     return resp;
   }
 
@@ -172,6 +171,7 @@ export class EngineAPIService implements DEngineClientV2 {
       const { id } = node;
       this.notes[id] = node;
     });
+    this.fuseEngine.updateNotesIndex(this.notes);
   }
 
   async refreshSchemas(smods: SchemaModulePropsV2[]) {

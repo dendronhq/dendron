@@ -213,7 +213,7 @@ id: bond
       });
     });
 
-    it("workspace active, no prior workspace version", function (done) {
+    it.only("workspace active, no prior workspace version", function (done) {
       onWSInit(async (_event: HistoryEvent) => {
         assert.strictEqual(DendronWorkspace.isActive(), true);
         assert.strictEqual(
@@ -229,7 +229,6 @@ id: bond
           "root.md",
           "root.schema.yml",
         ]);
-        // root.name
         done();
       });
 
@@ -238,6 +237,35 @@ id: bond
         lsp: true,
         useCb: async (_vaultPath) => {
           vaultPath = _vaultPath;
+        },
+      });
+    });
+
+    it("missing root.schema", function (done) {
+      onWSInit(async (_event: HistoryEvent) => {
+        assert.strictEqual(DendronWorkspace.isActive(), true);
+        assert.strictEqual(
+          ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
+          "0.0.1"
+        );
+        const engine = DendronWorkspace.instance().getEngine();
+        assert.strictEqual(_.values(engine.notes).length, 1);
+        // assert.strictEqual(engine.notes["id.foo"].fname, "foo");
+        // assert.strictEqual(engine.notes["root"].fname, "root");
+        assert.deepStrictEqual(fs.readdirSync(vaultPath).sort(), [
+          ".vscode",
+          "root.md",
+          "root.schema.yml",
+        ]);
+        done();
+      });
+
+      DendronWorkspace.version = () => "0.0.1";
+      setupDendronWorkspace(root.name, ctx, {
+        lsp: true,
+        useCb: async (_vaultPath) => {
+          vaultPath = _vaultPath;
+          fs.removeSync(path.join(_vaultPath, "root.schema.yml"));
         },
       });
     });

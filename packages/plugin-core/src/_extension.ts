@@ -12,7 +12,6 @@ import {
   WORKSPACE_STATE,
 } from "./constants";
 import { Logger } from "./logger";
-import { startClient as startLSPClient } from "./lsp";
 import { HistoryEvent, HistoryService } from "./services/HistoryService";
 import { Extensions } from "./settings";
 import { VSCodeUtils, WSUtils } from "./utils";
@@ -221,7 +220,7 @@ export async function _activate(context: vscode.ExtensionContext) {
       const port: number = await startServer();
       Logger.info({ ctx, msg: "post-start-server", port });
       WSUtils.updateEngineAPI(port);
-      startLSPClient({ context, port });
+      // startLSPClient({ context, port });
       const reloadSuccess = await reloadWorkspace();
       if (!reloadSuccess) {
         HistoryService.instance().add({

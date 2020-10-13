@@ -3,6 +3,7 @@ import { getStage } from "@dendronhq/common-all";
 import { DendronEngine } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
+import path from "path";
 import semver from "semver";
 import * as vscode from "vscode";
 import {
@@ -138,7 +139,10 @@ async function startServer() {
   );
   const logPath = DendronWorkspace.instance().context.logPath;
   if (!maybePort) {
-    return await launch({ port: maybePort, logPath });
+    return await launch({
+      port: maybePort,
+      logPath: path.join(logPath, "dendron.server.log"),
+    });
   }
   return maybePort;
 }

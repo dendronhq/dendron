@@ -38,6 +38,14 @@ export class EngineAPIService implements DEngineClientV2 {
   public ws: string;
   public fuseEngine: FuseEngine;
 
+  static create({ port }: { port: number | string }) {
+    const api = new DendronAPI({
+      endpoint: `http://localhost:${port}`,
+      apiPath: "api",
+    });
+    return new EngineAPIService(api);
+  }
+
   constructor(public api: DendronAPI) {
     this.notes = {};
     this.schemas = {};

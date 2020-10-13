@@ -379,12 +379,8 @@ export class VSCodeUtils {
 
 export class WSUtils {
   static updateEngineAPI(port: number | string) {
-    const api = new DendronAPI({
-      endpoint: `http://localhost:${port}`,
-      apiPath: "api",
-    });
     const ws = DendronWorkspace.instance();
-    ws.setEngine(new EngineAPIService(api));
+    ws.setEngine(EngineAPIService.create({ port }));
     return ws.getEngine();
   }
 }

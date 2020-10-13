@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.8-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.7...v0.12.8-alpha.0) (2020-10-13)
+
+### Enhancements
+
+- **server:** enable build pod cmd ([c27af60](https://github.com/dendronhq/dendron/commit/c27af6042e837c0b55335e63d71fd447ae7d3113))
+- **server:** support build-site with new engine ([37e4ab0](https://github.com/dendronhq/dendron/commit/37e4ab0fc78a0d7df641545e46f6035866af9b91))
+
 ## [0.12.7](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.10...v0.12.7) (2020-10-13)
 
 **Note:** Version bump only for package @dendronhq/dendron-cli

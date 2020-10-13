@@ -5,68 +5,25 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.12.7](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.10...v0.12.7) (2020-10-13)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.7-alpha.10](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.9...v0.12.7-alpha.10) (2020-10-13)
-
-### Bug Fixes
-
-- **server:** issue with journal notes ([4d0ba5c](https://github.com/dendronhq/dendron/commit/4d0ba5cfd80fea0247ac405ddb38549073e1cd56))
-
-## [0.12.7-alpha.9](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.8...v0.12.7-alpha.9) (2020-10-13)
-
-### Bug Fixes
-
-- **server:** update index after mutating notes ([9a71ae3](https://github.com/dendronhq/dendron/commit/9a71ae3852d9b58633ce47a37494a53a3a704561))
-
-## [0.12.7-alpha.8](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.7...v0.12.7-alpha.8) (2020-10-12)
-
-### Bug Fixes
-
-- **server:** issue with deleteing schemas ([2aab629](https://github.com/dendronhq/dendron/commit/2aab62961c4c2a6a073104034fc3961ed6cad2a5))
-
-## [0.12.7-alpha.7](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.6...v0.12.7-alpha.7) (2020-10-12)
-
-### Bug Fixes
-
-- **server:** schema imports ([a24ada0](https://github.com/dendronhq/dendron/commit/a24ada0b07adedcecd016836359fa9d5913f547a))
-- **workbench:** show error message on bad initialization ([402a23f](https://github.com/dendronhq/dendron/commit/402a23fcd10a01e1d3f251015dd2302e054b065d))
-- **workbench:** wait for snippets to be initialized before showing upgrade msg ([ea2ae09](https://github.com/dendronhq/dendron/commit/ea2ae09848f00c5e6406584ab2166d767a92d8b9))
-
 ### Enhancements
 
 - **server:** enable daily journal note ([ca02481](https://github.com/dendronhq/dendron/commit/ca024818585265c28192348b3098ffcb2405e426))
 - **server:** support schema imports ([22d01e5](https://github.com/dendronhq/dendron/commit/22d01e5a8141eae5066155523b0369e5660e524c))
-
-## [0.12.7-alpha.6](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.5...v0.12.7-alpha.6) (2020-10-12)
-
-**Note:** Version bump only for package root
-
-## [0.12.7-alpha.5](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.4...v0.12.7-alpha.5) (2020-10-12)
-
-### Bug Fixes
-
-- **workbench:** issue upgrading snippets with comments ([af05350](https://github.com/dendronhq/dendron/commit/af0535049f27ed7aa8e5f634e79678d9a163b870))
-
-## [0.12.7-alpha.4](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.3...v0.12.7-alpha.4) (2020-10-12)
-
-### Bug Fixes
-
-- **workbench:** treeview not initializing ([44acda2](https://github.com/dendronhq/dendron/commit/44acda22bf04bd5df9e132e3011697328d667850))
-
-### Enhancements
-
 - better docs for config ([9f33c86](https://github.com/dendronhq/dendron/commit/9f33c867ca09c6310e40588c817f83243b86d4c1))
-
-## [0.12.7-alpha.3](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.2...v0.12.7-alpha.3) (2020-10-11)
+- **workbench:** better todo snippet ([51dd968](https://github.com/dendronhq/dendron/commit/51dd9681dca23d8362bbb65ff231d26c02c94870))
 
 ### Bug Fixes
 
+- **server:** issue with journal notes ([4d0ba5c](https://github.com/dendronhq/dendron/commit/4d0ba5cfd80fea0247ac405ddb38549073e1cd56))
+- **server:** update index after mutating notes ([9a71ae3](https://github.com/dendronhq/dendron/commit/9a71ae3852d9b58633ce47a37494a53a3a704561))
+- **server:** issue with deleteing schemas ([2aab629](https://github.com/dendronhq/dendron/commit/2aab62961c4c2a6a073104034fc3961ed6cad2a5))
+
+- **server:** schema imports ([a24ada0](https://github.com/dendronhq/dendron/commit/a24ada0b07adedcecd016836359fa9d5913f547a))
+- **workbench:** show error message on bad initialization ([402a23f](https://github.com/dendronhq/dendron/commit/402a23fcd10a01e1d3f251015dd2302e054b065d))
+- **workbench:** wait for snippets to be initialized before showing upgrade msg ([ea2ae09](https://github.com/dendronhq/dendron/commit/ea2ae09848f00c5e6406584ab2166d767a92d8b9))
+- **workbench:** issue upgrading snippets with comments ([af05350](https://github.com/dendronhq/dendron/commit/af0535049f27ed7aa8e5f634e79678d9a163b870))
+- **workbench:** treeview not initializing ([44acda2](https://github.com/dendronhq/dendron/commit/44acda22bf04bd5df9e132e3011697328d667850))
 - **server:** schema stub not updated after creation ([045888a](https://github.com/dendronhq/dendron/commit/045888a527080626bd2da262278fd0774f490e65))
-
-### Enhancements
-
-- **workbench:** better todo snippet ([51dd968](https://github.com/dendronhq/dendron/commit/51dd9681dca23d8362bbb65ff231d26c02c94870))
 
 ## [0.12.6](https://github.com/dendronhq/dendron/compare/v0.12.5...v0.12.6) (2020-10-07)
 

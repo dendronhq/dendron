@@ -25,7 +25,6 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { runInThisContext } from "vm";
 import { FileStorageV2 } from "../drivers/file/storev2";
 import { DendronEngineV2 } from "../enginev2";
 

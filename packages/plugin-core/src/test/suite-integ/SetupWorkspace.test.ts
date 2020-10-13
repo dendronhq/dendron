@@ -173,6 +173,7 @@ suite("startup with lsp", function () {
   this.timeout(TIMEOUT);
   let ctx: ExtensionContext;
   let root: DirResult;
+  let vaultPath: string;
 
   describe("workspace", function () {
     beforeEach(async function () {
@@ -220,35 +221,25 @@ id: bond
           "0.0.1"
         );
         const engine = DendronWorkspace.instance().getEngine();
-        assert.strictEqual(_.values(engine.notes).length, 2);
-        assert.strictEqual(engine.notes["id.foo"].fname, "foo");
-        assert.strictEqual(engine.notes["root"].fname, "root");
+        assert.strictEqual(_.values(engine.notes).length, 1);
+        // assert.strictEqual(engine.notes["id.foo"].fname, "foo");
+        // assert.strictEqual(engine.notes["root"].fname, "root");
+        assert.deepStrictEqual(fs.readdirSync(vaultPath).sort(), [
+          ".vscode",
+          "root.md",
+          "root.schema.yml",
+        ]);
+        // root.name
         done();
       });
-      setupWorkspace(root.name, { lsp: true });
 
       DendronWorkspace.version = () => "0.0.1";
-      assert.strictEqual(
-        ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
-        undefined
-      );
-      new SetupWorkspaceCommand()
-        .execute({
-          rootDirRaw: root.name,
-          skipOpenWs: true,
-          skipConfirmation: true,
-          emptyWs: true,
-        })
-        .then(async () => {
-          const wsFolder = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
-          NodeTestUtils.createNotes(wsFolder[0].uri.fsPath, [
-            {
-              id: "id.foo",
-              fname: "foo",
-            },
-          ]);
-          _activate(ctx);
-        });
+      setupDendronWorkspace(root.name, ctx, {
+        lsp: true,
+        useCb: async (_vaultPath) => {
+          vaultPath = _vaultPath;
+        },
+      });
     });
   });
 });

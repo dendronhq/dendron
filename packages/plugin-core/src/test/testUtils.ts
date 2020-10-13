@@ -94,7 +94,7 @@ export function setupWorkspace(
   return { workspaceFolders: DendronWorkspace.workspaceFolders() };
 }
 
-export function setupDendronWorkspace(
+export async function setupDendronWorkspace(
   rootDir: string,
   ctx: vscode.ExtensionContext,
   opts?: {
@@ -125,16 +125,16 @@ export function setupDendronWorkspace(
     lsp: optsClean.lsp,
   });
   const wsFolder = (workspaceFolders as vscode.WorkspaceFolder[])[0];
-  return new SetupWorkspaceCommand()
-    .execute({
-      rootDirRaw: rootDir,
-      skipOpenWs: true,
-      ...optsClean.setupWsOverride,
-    })
-    .then(async () => {
-      await optsClean.useCb(wsFolder.uri.fsPath);
-      return _activate(ctx);
-    });
+  await new SetupWorkspaceCommand().execute({
+    rootDirRaw: rootDir,
+    skipOpenWs: true,
+    ...optsClean.setupWsOverride,
+  });
+  await optsClean.useCb(wsFolder.uri.fsPath);
+  await _activate(ctx);
+  return {
+    vaultPath: wsFolder.uri.fsPath,
+  };
 }
 
 /**

@@ -33,6 +33,62 @@ const beforePreset = async () => {
   return { vaultDir, engine };
 };
 
+describe("note", () => {
+  describe("serialize", () => {
+    test("basic", () => {
+      const note = NoteUtilsV2.create({
+        id: "foo",
+        fname: "foo",
+        created: "1",
+        updated: "1",
+      });
+      const serialized = NoteUtilsV2.serialize(note);
+      expect(serialized).toMatchSnapshot();
+      expect(serialized.indexOf("stub") >= 0).toBeFalsy();
+    });
+
+    test("with children", () => {
+      const note = NoteUtilsV2.create({
+        id: "foo",
+        fname: "foo",
+        created: "1",
+        updated: "1",
+        children: ["ch1", "ch2"],
+      });
+      const serialized = NoteUtilsV2.serialize(note);
+      expect(serialized).toMatchSnapshot();
+    });
+
+    test("with parent", () => {
+      const note = NoteUtilsV2.create({
+        id: "foo",
+        fname: "foo",
+        created: "1",
+        updated: "1",
+        parent: "root",
+      });
+      const serialized = NoteUtilsV2.serialize(note);
+      expect(serialized).toMatchSnapshot();
+    });
+
+    test("with custom", () => {
+      const note = NoteUtilsV2.create({
+        id: "foo",
+        fname: "foo",
+        created: "1",
+        updated: "1",
+        custom: {
+          bond: 42,
+        },
+      });
+      const serialized = NoteUtilsV2.serialize(note);
+      expect(serialized).toMatchSnapshot();
+      // should be at beginning of line
+      expect(serialized.match(/^bond/gm)).toBeTruthy();
+    });
+  });
+});
+
 describe("matchPath", () => {
   let engine: DEngineV2;
 

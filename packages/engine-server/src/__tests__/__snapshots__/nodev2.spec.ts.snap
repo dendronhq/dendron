@@ -20,3 +20,52 @@ Object {
   "schemaId": "foo",
 }
 `;
+
+exports[`note serialize basic 1`] = `
+"---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+"
+`;
+
+exports[`note serialize with children 1`] = `
+"---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+"
+`;
+
+exports[`note serialize with custom 1`] = `
+"---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+bond: 42
+---
+
+"
+`;
+
+exports[`note serialize with parent 1`] = `
+"---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+"
+`;

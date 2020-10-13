@@ -4,7 +4,7 @@ import { CONFIG } from "../constants";
 import { DendronClientUtilsV2 } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { CreateNoteCommand } from "./CreateNote";
-import { LookupCommand } from "./LookupCommand";
+import { GotoNoteCommand } from "./GotoNote";
 
 type CommandOpts = {
   fname: string;
@@ -43,11 +43,11 @@ export class CreateDailyJournalCommand extends CreateNoteCommand {
   async execute(opts: CommandOpts) {
     const { fname } = opts;
     if (DendronWorkspace.lsp()) {
-      const lookupOpts = {
-        noConfirm: true,
-        value: fname,
-      };
-      await new LookupCommand().execute({ ...lookupOpts, flavor: "note" });
+      // const lookupOpts = {
+      //   noConfirm: true,
+      //   value: fname,
+      // };
+      await new GotoNoteCommand().execute({ qs: fname, mode: "note" as const });
       return vscode.Uri.file("/tmp");
     }
     const uri = await super.execute({ ...opts, title: fname });

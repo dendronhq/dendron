@@ -122,9 +122,15 @@ export class LookupProviderV2 {
     const selectedItem = PickerUtilsV2.getSelection(picker);
     const resp = this.validate(picker.value, opts.flavor);
     const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
+    const ws = DendronWorkspace.instance();
     let uri: Uri;
     if (resp) {
       return window.showErrorMessage(resp);
+    }
+    const maybeNote = NoteUtilsV2.getNoteByFname(value, ws.getEngine().notes);
+    if (!selectedItem && opts.flavor === "note" && maybeNote) {
+      uri = node2Uri(maybeNote, wsFolders);
+      return showDocAndHidePicker(uri, picker);
     }
     if (PickerUtilsV2.isCreateNewNotePick(selectedItem)) {
       uri = await this.onAcceptNewNode(picker, opts);

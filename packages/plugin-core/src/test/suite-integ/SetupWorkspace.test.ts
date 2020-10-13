@@ -213,7 +213,7 @@ id: bond
       });
     });
 
-    it.only("workspace active, no prior workspace version", function (done) {
+    it("workspace active, no prior workspace version", function (done) {
       onWSInit(async (_event: HistoryEvent) => {
         assert.strictEqual(DendronWorkspace.isActive(), true);
         assert.strictEqual(

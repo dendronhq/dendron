@@ -17,15 +17,7 @@ import {
   WriteNoteResp,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-// import { nonEmptyGet, unwrapGet, unwrapSearch } from "./es";
-// import { L } from "./logger";
-// import { PlainNode } from "./nodev2";
-// import {
-//   IQPResultV2,
-//   IDendronTreeItemV2,
-//   IDendronTreeItemMetaV2,
-//   IDendronESItemV2
-// } from "./typesv2";
+
 const L = createLogger("api");
 
 // === Types

@@ -1,8 +1,4 @@
-import {
-  FileTestUtils,
-  resolveTilde,
-  DendronAPI,
-} from "@dendronhq/common-server";
+import { FileTestUtils, resolveTilde } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import os from "os";

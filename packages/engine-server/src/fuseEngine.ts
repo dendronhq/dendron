@@ -7,7 +7,6 @@ import {
   SchemaPropsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
-import { DLogger } from "@dendronhq/common-server";
 import Fuse from "fuse.js";
 import _ from "lodash";
 
@@ -36,14 +35,12 @@ function createFuse<T>(
 }
 
 type FuseEngineOpts = {
-  logger: DLogger;
   mode?: DEngineMode;
 };
 
 export class FuseEngine {
   public notesIndex: Fuse<NotePropsV2>;
   public schemaIndex: Fuse<SchemaPropsV2>;
-  public logger: DLogger;
 
   constructor(opts: FuseEngineOpts) {
     this.notesIndex = createFuse<NotePropsV2>([], {
@@ -54,7 +51,6 @@ export class FuseEngine {
       exactMatch: opts.mode === "exact",
       preset: "schema",
     });
-    this.logger = opts.logger;
   }
 
   async querySchema({ qs }: { qs: string }): Promise<SchemaPropsV2[]> {

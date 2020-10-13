@@ -45,13 +45,15 @@ export function file2Note(fpath: string): NotePropsV2 {
   return DNodeUtilsV2.create({ ...data, custom, fname, body, type: "note" });
 }
 
-export function note2File(note: NotePropsV2, vaultPath: string) {
+export function note2File(
+  note: NotePropsV2,
+  vaultPath: string,
+  opts?: { writeHierarchy?: boolean }
+) {
   const { fname } = note;
   const ext = ".md";
-  return fs.writeFile(
-    path.join(vaultPath, fname + ext),
-    NoteUtilsV2.serialize(note)
-  );
+  const payload = NoteUtilsV2.serialize(note, opts);
+  return fs.writeFile(path.join(vaultPath, fname + ext), payload);
 }
 
 export function schemaModuleOpts2File(

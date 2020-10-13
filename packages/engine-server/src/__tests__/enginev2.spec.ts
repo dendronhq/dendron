@@ -25,6 +25,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { runInThisContext } from "vm";
 import { FileStorageV2 } from "../drivers/file/storev2";
 import { DendronEngineV2 } from "../enginev2";
 
@@ -638,13 +639,33 @@ describe("engine, notes/", () => {
     });
 
     test(NOTE_WRITE_PRESET["domainStub"].label, async () => {
-      await NOTE_WRITE_PRESET["domainStub"].before({ vaultDir });
-      const results = NOTE_WRITE_PRESET["domainStub"].results;
-      await engine.init();
-      const notes = engine.notes;
-      await NodeTestPresetsV2.runJestHarness({
-        opts: { notes },
-        results,
+      await NoteTestPresetsV2.createJestTest({
+        entry: NOTE_WRITE_PRESET["domainStub"],
+        beforeArgs: { vaultDir },
+        executeCb: async () => {
+          await engine.init();
+          const notes = engine.notes;
+          return { notes };
+        },
+        expect,
+      });
+    });
+
+    test(NOTE_WRITE_PRESET["serializeChildWithHierarchy"].label, async () => {
+      await NoteTestPresetsV2.createJestTest({
+        entry: NOTE_WRITE_PRESET["serializeChildWithHierarchy"],
+        beforeArgs: { vaultDir },
+        executeCb: async () => {
+          await engine.init();
+          const noteNew = NoteUtilsV2.create({
+            fname: "foo.ch1",
+            id: "foo.ch1",
+            created: "1",
+            updated: "1",
+          });
+          await engine.writeNote(noteNew, { writeHierarchy: true });
+          return { vaultDir };
+        },
         expect,
       });
     });

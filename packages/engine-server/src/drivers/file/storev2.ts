@@ -387,9 +387,8 @@ export class FileStorageV2 implements DStoreV2 {
 
   async writeNote(
     note: NotePropsV2,
-    _opts?: EngineWriteOptsV2
+    opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
-    await note2File(note, this.vaults[0]);
     const changed: NotePropsV2[] = NoteUtilsV2.addParent({
       note,
       notesList: _.values(this.notes),
@@ -399,6 +398,8 @@ export class FileStorageV2 implements DStoreV2 {
       notePath: note.fname,
       schemaModDict: this.schemas,
     });
+    // order matters - only write file after parents are established
+    await note2File(note, this.vaults[0], opts);
     if (match) {
       const { schema, schemaModule } = match;
       NoteUtilsV2.addSchema({ note, schema, schemaModule });

@@ -138,6 +138,27 @@ class TestPresetEntry<TBeforeOpts, TResultsOpts>
 }
 
 export class NoteTestPresetsV2 {
+  static async createJestTest({
+    executeCb,
+    beforeArgs,
+    expect,
+    entry,
+  }: {
+    entry: TestPresetEntry<any, any>;
+    expect: jest.Expect;
+    beforeArgs?: any;
+    executeCb: () => Promise<any>;
+  }) {
+    await entry.before(beforeArgs);
+    const results = entry.results;
+    const executeResp = await executeCb();
+    await NodeTestPresetsV2.runJestHarness({
+      opts: executeResp,
+      results,
+      expect,
+    });
+  }
+
   static presets: NoteTestPresetCollectionDict = {
     OneNoteOneSchemaPreset: {
       init: {
@@ -268,6 +289,29 @@ export class NoteTestPresetsV2 {
                 actual: _.pick(child, ["fname", "stub"]),
                 expected: { fname: "bar.ch1" },
                 msg: "bar created as stub",
+              },
+            ];
+          },
+        }),
+        serializeChildWithHierarchy: new TestPresetEntry({
+          label: "write child, serialize with hierarchy",
+          before: async ({ vaultDir }: { vaultDir: string }) => {
+            fs.removeSync(path.join(vaultDir, "foo.ch1.md"));
+          },
+          results: async ({
+            vaultDir,
+          }: {
+            notes: NotePropsDictV2;
+            vaultDir: string;
+          }) => {
+            const rawNote = fs.readFileSync(path.join(vaultDir, "foo.ch1.md"), {
+              encoding: "utf8",
+            });
+            return [
+              {
+                actual: rawNote.match(/^parent: foo/gm),
+                expected: ["parent: foo"],
+                msg: "should have parent",
               },
             ];
           },

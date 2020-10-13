@@ -46,7 +46,7 @@ export class DendronEngineV2 implements DEngineV2 {
     this.store = props.store;
     this.logger = props.logger;
     this.props = props;
-    this.fuseEngine = new FuseEngine({ logger: props.logger });
+    this.fuseEngine = new FuseEngine({});
   }
 
   get notes() {

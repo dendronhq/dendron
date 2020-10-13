@@ -129,6 +129,10 @@ export type EngineWriteOptsV2 = {
    * default: false
    */
   recursive?: boolean;
+  /**
+   * Should persist hierarchy information to disk
+   */
+  writeHierarchy?: boolean;
 } & Partial<EngineUpdateNodesOptsV2>;
 
 export type DEngineInitPayloadV2 = {

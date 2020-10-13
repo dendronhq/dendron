@@ -495,6 +495,8 @@ describe("notes", () => {
   });
 
   describe("write", () => {
+    const NOTE_WRITE_PRESET =
+      NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.write;
     beforeEach(async () => {
       wsRoot = tmpDir().name;
       vault = path.join(wsRoot, "vault");
@@ -512,6 +514,40 @@ describe("notes", () => {
         },
       });
     });
+
+    test(NOTE_WRITE_PRESET["serializeChildWithHierarchy"].label, async () => {
+      await NoteTestPresetsV2.createJestTest({
+        entry: NOTE_WRITE_PRESET["serializeChildWithHierarchy"],
+        beforeArgs: { vaultDir: vault },
+        executeCb: async () => {
+          const payload = {
+            uri: wsRoot,
+            config: {
+              vaults: [vault],
+            },
+          };
+          const api = new DendronAPI({
+            endpoint: "http://localhost:3005",
+            apiPath: "api",
+          });
+          await api.workspaceInit(payload);
+          const noteNew = NoteUtilsV2.create({
+            fname: "foo.ch1",
+            id: "foo.ch1",
+            created: "1",
+            updated: "1",
+          });
+          await api.engineWrite({
+            ws: wsRoot,
+            node: noteNew,
+            opts: { writeHierarchy: true },
+          });
+          return { vaultDir: vault };
+        },
+        expect,
+      });
+    });
+
     test("new hierarchy", async () => {
       const payload = {
         uri: wsRoot,
@@ -607,8 +643,6 @@ describe("notes", () => {
       ]);
     });
 
-    const NOTE_WRITE_PRESET =
-      NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.write;
     test(NOTE_WRITE_PRESET["domainStub"].label, async () => {
       await NOTE_WRITE_PRESET["domainStub"].before({ vaultDir: vault });
       const results = NOTE_WRITE_PRESET["domainStub"].results;

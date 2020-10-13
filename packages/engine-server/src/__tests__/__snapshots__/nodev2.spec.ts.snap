@@ -58,6 +58,38 @@ bond: 42
 "
 `;
 
+exports[`note serialize with hierarchy 1`] = `
+"---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+parent: root
+children:
+  - ch1
+  - ch2
+---
+
+"
+`;
+
+exports[`note serialize with hierarchy and null parent 1`] = `
+"---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+parent: null
+children:
+  - ch1
+  - ch2
+---
+
+"
+`;
+
 exports[`note serialize with parent 1`] = `
 "---
 id: foo

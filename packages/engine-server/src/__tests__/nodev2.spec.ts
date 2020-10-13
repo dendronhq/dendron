@@ -86,6 +86,38 @@ describe("note", () => {
       // should be at beginning of line
       expect(serialized.match(/^bond/gm)).toBeTruthy();
     });
+
+    test("with hierarchy", () => {
+      const note = NoteUtilsV2.create({
+        id: "foo",
+        fname: "foo",
+        created: "1",
+        updated: "1",
+        children: ["ch1", "ch2"],
+        parent: "root",
+      });
+      const serialized = NoteUtilsV2.serialize(note, { writeHierarchy: true });
+      expect(serialized).toMatchSnapshot();
+      expect(serialized.match(/^parent: root/gm)).toBeTruthy();
+      expect(serialized.match(/ch1/gm)).toBeTruthy();
+      expect(serialized.match(/ch2/gm)).toBeTruthy();
+    });
+
+    test("with hierarchy and null parent", () => {
+      const note = NoteUtilsV2.create({
+        id: "foo",
+        fname: "foo",
+        created: "1",
+        updated: "1",
+        children: ["ch1", "ch2"],
+        parent: null,
+      });
+      const serialized = NoteUtilsV2.serialize(note, { writeHierarchy: true });
+      expect(serialized).toMatchSnapshot();
+      expect(serialized.match(/^parent: null/gm)).toBeTruthy();
+      expect(serialized.match(/ch1/gm)).toBeTruthy();
+      expect(serialized.match(/ch2/gm)).toBeTruthy();
+    });
   });
 });
 

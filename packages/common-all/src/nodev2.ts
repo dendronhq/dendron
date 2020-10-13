@@ -386,8 +386,7 @@ export class NoteUtilsV2 {
     return hpath.split(".").slice(0, numCompoenents).join(".");
   }
 
-  static serialize(props: NotePropsV2): string {
-    const body = props.body;
+  static serializeMeta(props: NotePropsV2) {
     const builtinProps = _.pick(props, [
       "id",
       "title",
@@ -395,9 +394,24 @@ export class NoteUtilsV2 {
       "updated",
       "created",
       "stub",
+      "parent",
+      "children",
     ]);
     const { custom: customProps } = props;
     const meta = { ...builtinProps, ...customProps };
+    return meta;
+  }
+
+  static serialize(
+    props: NotePropsV2,
+    opts?: { writeHierarchy?: boolean }
+  ): string {
+    const body = props.body;
+    let blacklist = ["parent", "children"];
+    if (opts?.writeHierarchy) {
+      blacklist = [];
+    }
+    const meta = _.omit(NoteUtilsV2.serializeMeta(props), blacklist);
     return matter.stringify(body || "", meta);
   }
 }

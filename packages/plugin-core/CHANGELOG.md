@@ -25,6 +25,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Bug Fixes
 
+- **server:** schema imports ([a24ada0](https://github.com/dendronhq/dendron/commit/a24ada0b07adedcecd016836359fa9d5913f547a))
 - **workbench:** show error message on bad initialization ([402a23f](https://github.com/dendronhq/dendron/commit/402a23fcd10a01e1d3f251015dd2302e054b065d))
 - **workbench:** wait for snippets to be initialized before showing upgrade msg ([ea2ae09](https://github.com/dendronhq/dendron/commit/ea2ae09848f00c5e6406584ab2166d767a92d8b9))
 
@@ -35,7 +36,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.12.7-alpha.6](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.5...v0.12.7-alpha.6) (2020-10-12)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.12.7-alpha.5](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.4...v0.12.7-alpha.5) (2020-10-12)
 
@@ -54,18 +55,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - better docs for config ([9f33c86](https://github.com/dendronhq/dendron/commit/9f33c867ca09c6310e40588c817f83243b86d4c1))
 
 ## [0.12.7-alpha.3](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.2...v0.12.7-alpha.3) (2020-10-11)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.7-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.1...v0.12.7-alpha.2) (2020-10-11)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.7-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.7-alpha.0...v0.12.7-alpha.1) (2020-10-11)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.7-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.6...v0.12.7-alpha.0) (2020-10-11)
 
 ### Bug Fixes
 
@@ -88,7 +77,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - **lookup:** schemas in lookup ([b4055fd](https://github.com/dendronhq/dendron/commit/b4055fd61d4918cf4c1a44591be31be69a71b93a))
 - **server:** schema names ([c457f96](https://github.com/dendronhq/dendron/commit/c457f96cc02accd2811a73e15025f68d6796256d))
 
-## 0.12.4 and Beyond
+## 0.12.4
 
 - All changelogs post 0.12.3 are now published on [Dendron](https://www.dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html)
 
@@ -117,17 +106,13 @@ When building your site by running `Dendron: Build Pod`, Dendron will generate a
 
 ## [0.12.2](https://github.com/dendronhq/dendron/compare/v0.12.2-alpha.0...v0.12.2) (2020-09-24)
 
-**Note:** Version bump only for package root
+### Enhancements
 
-## [0.12.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.1...v0.12.2-alpha.0) (2020-09-24)
+- **refs:** support partial header selection ([6e35393](https://github.com/dendronhq/dendron/commit/6e35393fe2d321b8d708fe1efd40c1eb4ad304e3))
 
 ### Bug Fixes
 
 - **publishing:** incremental builds not setting correct links ([e3dedf5](https://github.com/dendronhq/dendron/commit/e3dedf52d79dede98041edc77a41966cc5d6e8b5))
-
-### Enhancements
-
-- **refs:** support partial header selection ([6e35393](https://github.com/dendronhq/dendron/commit/6e35393fe2d321b8d708fe1efd40c1eb4ad304e3))
 
 ## [0.12.1](https://github.com/dendronhq/dendron/compare/v0.12.1-alpha.2...v0.12.1) (2020-09-22)
 

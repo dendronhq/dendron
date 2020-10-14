@@ -4,6 +4,7 @@ import _ from "lodash";
 import minimatch from "minimatch";
 import moment from "moment";
 import path from "path";
+import { domainToASCII } from "url";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
 import { DNode } from "./node";
@@ -128,11 +129,11 @@ export class DNodeUtilsV2 {
     const maybeNode = _.find(nodes, { fname: dirname });
     if (
       (maybeNode && !opts?.noStubs) ||
-      (maybeNode && opts?.noStubs && !maybeNode.stub)
+      (maybeNode && opts?.noStubs && !maybeNode.stub && !maybeNode.schemaStub)
     ) {
       return maybeNode;
     } else {
-      return DNodeUtilsV2.findClosestParent(dirname, nodes);
+      return DNodeUtilsV2.findClosestParent(dirname, nodes, opts);
     }
   }
 

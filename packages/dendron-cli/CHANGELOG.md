@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.9-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.8...v0.12.9-alpha.0) (2020-10-14)
+
+### Enhancements
+
+- **publishing:** add copyAssets option ([90c9c62](https://github.com/dendronhq/dendron/commit/90c9c6243f5e45868d423f4ef05adb16b4be8fac))
+
 ## [0.12.8](https://github.com/dendronhq/dendron/compare/v0.12.8-alpha.2...v0.12.8) (2020-10-14)
 
 **Note:** Version bump only for package @dendronhq/dendron-cli

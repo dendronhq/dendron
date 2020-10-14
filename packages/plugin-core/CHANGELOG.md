@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.9-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.8...v0.12.9-alpha.0) (2020-10-14)
+
+### Enhancements
+
+- **server:** read contents from disk when updating ts ([1bef413](https://github.com/dendronhq/dendron/commit/1bef413412bcacaf25bbb861cc03c2744b2a5575))
+
 ## [0.12.8](https://github.com/dendronhq/dendron/compare/v0.12.8-alpha.2...v0.12.8) (2020-10-14)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

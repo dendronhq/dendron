@@ -11,7 +11,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.12.8-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.8-alpha.0...v0.12.8-alpha.1) (2020-10-13)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.12.8-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.7...v0.12.8-alpha.0) (2020-10-13)
 

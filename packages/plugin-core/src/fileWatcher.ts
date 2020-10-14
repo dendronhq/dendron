@@ -7,6 +7,7 @@ import * as vscode from "vscode";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { DendronWorkspace } from "./workspace";
+import fs from "fs-extra";
 
 export class VaultWatcher {
   public watcher: vscode.FileSystemWatcher;
@@ -56,9 +57,9 @@ export class VaultWatcher {
       }
     }
 
-    const document = await vscode.workspace.openTextDocument(uri);
+    const content = fs.readFileSync(uri.fsPath, { encoding: "utf8" });
     const matchFM = /^---(.*)^---/ms;
-    const match = document.getText().match(matchFM);
+    const match = content.match(matchFM);
     if (!match) {
       return;
     }
@@ -73,10 +74,12 @@ export class VaultWatcher {
      */
     // either replace header by writing or `writeNote` will replace when `update` is missing
     const newHeader = match[0].replace(/^updated:.*/m, `updated: ${now}`);
-    const newText = document.getText().replace(matchFM, newHeader);
+    // TODO: potential race condition if content changed in this time
+    const newText = content.replace(matchFM, newHeader);
     const note = string2Note({ content: newText, fname });
     HistoryService.instance().add({ source: "watcher", action: "create", uri });
     await eclient.writeNote(note);
+    return note;
   }
 
   async onDidCreate(uri: vscode.Uri) {

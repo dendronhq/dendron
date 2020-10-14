@@ -24,6 +24,7 @@ import { CopyNoteURLCommand } from "./commands/CopyNoteURL";
 import { CreateDailyJournalCommand } from "./commands/CreateDailyJournal";
 import { DeleteNodeCommand } from "./commands/DeleteNodeCommand";
 import { DoctorCommand } from "./commands/Doctor";
+import { DumpStateCommand } from "./commands/DumpStateCommand";
 import { ExportPodCommand } from "./commands/ExportPod";
 import { GoDownCommand } from "./commands/GoDownCommand";
 import { GotoNoteCommand, GotoNoteCommandOpts } from "./commands/GotoNote";
@@ -288,6 +289,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.GOTO_NOTE.key,
         async (opts: GotoNoteCommandOpts) => {
           new GotoNoteCommand().execute(opts);
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.DUMP_STATE.key,
+        async () => {
+          return new DumpStateCommand().execute();
         }
       )
     );

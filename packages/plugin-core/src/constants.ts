@@ -455,6 +455,13 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview: `<a href="https://www.loom.com/share/bd045f708f8e474193de8e3de0dc820f"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/bd045f708f8e474193de8e3de0dc820f-with-play.gif"> </a>`,
   },
+  DUMP_STATE: {
+    key: "dendron.dev.dumpState",
+    title: `${CMD_PREFIX} Dump State`,
+    group: "dev",
+    desc: "Dump internal state of Dendron inside logs",
+    docs: "This is useful when diagnosing issues in Dendron",
+  },
   RESET_CONFIG: {
     key: "dendron.dev.resetConfig",
     title: `${CMD_PREFIX}Dev: Reset Config`,

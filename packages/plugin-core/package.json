@@ -347,6 +347,12 @@
                 "docPreview": "<a href=\"https://www.loom.com/share/bd045f708f8e474193de8e3de0dc820f\"> <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/bd045f708f8e474193de8e3de0dc820f-with-play.gif\"> </a>"
             },
             {
+                "command": "dendron.dev.dumpState",
+                "title": "Dendron: Dump State",
+                "desc": "Dump internal state of Dendron inside logs",
+                "docs": "This is useful when diagnosing issues in Dendron"
+            },
+            {
                 "command": "dendron.dev.resetConfig",
                 "title": "Dendron:Dev: Reset Config",
                 "desc": "Reset the config"

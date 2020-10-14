@@ -59,6 +59,8 @@ import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
+import { WindowWatcher } from "./windowWatcher";
+import { WorkspaceWatcher } from "./WorkspaceWatcher";
 
 let _DendronWorkspace: DendronWorkspace | null;
 
@@ -178,6 +180,7 @@ export class DendronWorkspace {
   }
 
   public context: vscode.ExtensionContext;
+  public windowWatcher?: WindowWatcher;
   public fsWatcher?: vscode.FileSystemWatcher;
   public serverWatcher?: vscode.FileSystemWatcher;
   public schemaWatcher?: vscode.FileSystemWatcher;
@@ -631,6 +634,15 @@ export class DendronWorkspace {
     const rootDir = DendronWorkspace.rootDir();
     if (!rootDir) {
       throw `rootDir not set`;
+    }
+
+    if (DendronWorkspace.lsp()) {
+      const windowWatcher = new WindowWatcher();
+      windowWatcher.activate(this.context);
+      windowWatcher.triggerUpdateDecorations();
+      this.windowWatcher = windowWatcher;
+      const workspaceWatcher = new WorkspaceWatcher();
+      workspaceWatcher.activate(this.context);
     }
 
     const wsFolders = DendronWorkspace.workspaceFolders();

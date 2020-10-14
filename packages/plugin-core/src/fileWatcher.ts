@@ -1,5 +1,6 @@
 import { DEngineClientV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import { file2Note, string2Note } from "@dendronhq/common-server";
+import fs from "fs-extra";
 import _ from "lodash";
 import moment from "moment";
 import path from "path";
@@ -7,7 +8,6 @@ import * as vscode from "vscode";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
 import { DendronWorkspace } from "./workspace";
-import fs from "fs-extra";
 
 export class VaultWatcher {
   public watcher: vscode.FileSystemWatcher;
@@ -21,7 +21,7 @@ export class VaultWatcher {
     const watcher = vscode.workspace.createFileSystemWatcher(
       pattern,
       false,
-      false,
+      true,
       false
     );
     this.watcher = watcher;
@@ -33,7 +33,7 @@ export class VaultWatcher {
     const disposables = [];
     disposables.push(this.watcher.onDidCreate(this.onDidCreate, this));
     disposables.push(this.watcher.onDidDelete(this.onDidDelete, this));
-    disposables.push(this.watcher.onDidChange(this.onDidChange, this));
+    // disposables.push(this.watcher.onDidChange(this.onDidChange, this));
     return disposables;
   }
 
@@ -58,11 +58,44 @@ export class VaultWatcher {
     }
 
     const content = fs.readFileSync(uri.fsPath, { encoding: "utf8" });
-    const matchFM = /^---(.*)^---/ms;
+    const matchFM = NoteUtilsV2.RE_FM;
     const match = content.match(matchFM);
     if (!match) {
       return;
     }
+
+    // we are making a change
+    const activeTextEditor = vscode.window.activeTextEditor;
+    if (activeTextEditor?.document.uri.fsPath === uri.fsPath) {
+      Logger.info({ ctx, msg: "update activeText editor" });
+      await activeTextEditor.edit((editBuilder) => {
+        const content = vscode.window.activeTextEditor?.document.getText() as string;
+        const match = NoteUtilsV2.RE_FM_UPDATED.exec(content);
+        if (match) {
+          const startPos = activeTextEditor.document.positionAt(match.index);
+          const endPos = activeTextEditor.document.positionAt(
+            match.index + match[0].length
+          );
+          editBuilder.replace(
+            new vscode.Range(startPos, endPos),
+            `updated: ${now}`
+          );
+        }
+      });
+      const newContent = activeTextEditor.document.getText();
+      const note = string2Note({ content: newContent, fname });
+      await eclient.updateNote(note);
+      DendronWorkspace.instance().windowWatcher?.triggerUpdateDecorations(
+        newContent
+      );
+      HistoryService.instance().add({
+        source: "watcher",
+        action: "create",
+        uri,
+      });
+      return;
+    }
+    Logger.info({ ctx, msg: "update non-activeText editor" });
     /**
      * '
      *  id: eb05789e-18ff-4612-8ff6-220677777775

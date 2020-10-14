@@ -1,14 +1,12 @@
-import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteUtilsV2 } from "@dendronhq/common-all";
 import { DirResult, FileTestUtils, note2File } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
-import assert from "assert";
-import fs from "fs-extra";
 import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
-import { VaultWatcher } from "../../fileWatcher";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
+import { WindowWatcher } from "../../windowWatcher";
 import { DendronWorkspace } from "../../workspace";
 import { onWSInit, setupDendronWorkspace, TIMEOUT } from "../testUtils";
 
@@ -17,7 +15,7 @@ suite("notes", function () {
   let ctx: vscode.ExtensionContext;
   let vaultPath: string;
   this.timeout(TIMEOUT);
-  let watcher: VaultWatcher;
+  let watcher: WindowWatcher;
 
   beforeEach(function () {
     root = FileTestUtils.tmpDir();
@@ -29,18 +27,20 @@ suite("notes", function () {
     HistoryService.instance().clearSubscriptions();
   });
 
-  describe.skip("onDidChange", function () {
+  describe("onDidChange", function () {
     test("basic", function (done) {
       onWSInit(async () => {
-        watcher = new VaultWatcher({
-          vaults: [{ name: "main", uri: vscode.Uri.file(vaultPath), index: 0 }],
-        });
+        watcher = new WindowWatcher();
         const notePath = path.join(vaultPath, "bar.md");
         const uri = vscode.Uri.file(notePath);
-        const note = (await watcher.onDidChange(uri)) as NotePropsV2;
-        const contentMod = fs.readFileSync(uri.fsPath, { encoding: "utf8" });
-        assert.ok(contentMod.indexOf(note.updated) >= 0);
+        await VSCodeUtils.openFileInEditor(uri);
+        await watcher.triggerUpdateDecorations();
+        // TODO: check for decorations
         done();
+        //const note = (await watcher.onDidChange(uri)) as NotePropsV2;
+        // const contentMod = fs.readFileSync(uri.fsPath, { encoding: "utf8" });
+        // assert.ok(contentMod.indexOf(note.updated) >= 0);
+        // done();
       });
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,

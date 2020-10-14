@@ -212,6 +212,9 @@ export class DNodeUtilsV2 {
 }
 
 export class NoteUtilsV2 {
+  static RE_FM = /^---(.*)^---/ms;
+  static RE_FM_UPDATED = /^updated:.*$/m;
+  static RE_FM_CREATED = /^created:.*$/m;
   /**
    * Add node to parent
    * Create stubs if no direct parent exists

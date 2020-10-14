@@ -104,6 +104,7 @@ describe("buildSite", () => {
       siteHierarchies: ["sample"],
       siteRootDir,
       assetsPrefix: "fake-s3.com/",
+      copyAssets: false,
     };
 
     await new BuildSiteCommand().execute({

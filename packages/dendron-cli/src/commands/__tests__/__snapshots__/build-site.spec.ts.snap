@@ -12,6 +12,11 @@ exports[`buildSite ids are converted: converted 1`] = `
 "
 `;
 
+exports[`buildSite image prefix and no copy assets: sample.image-link.md 1`] = `
+"![link-alt](fake-s3.com/link-path.jpg)
+"
+`;
+
 exports[`buildSite image prefix: sample.image-link.md 1`] = `
 "![link-alt](fake-s3.com/link-path.jpg)
 "

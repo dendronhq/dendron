@@ -430,9 +430,15 @@ export type LegacyDendronSiteConfig = {
 
 export type DendronSiteConfig = {
   /**
-   * If set, instead of copying assets, load assets from the assigned prefix
+   * If set, add prefix to all asset links
    */
   assetsPrefix?: string;
+
+  /**
+   * Copy assets from vault to site.
+   * Default: true
+   */
+  copyAssets?: boolean;
 
   /**
    * By default, the domain of your siteHiearchies page

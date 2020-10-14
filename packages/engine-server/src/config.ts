@@ -42,6 +42,7 @@ export class DConfig {
   static genDefaultConfig(): DendronConfig {
     return {
       site: {
+        copyAssets: true,
         siteHierarchies: ["root"],
         siteRootDir: "docs",
         usePrettyRefs: true,
@@ -67,6 +68,7 @@ export class DConfig {
 
   static cleanSiteConfig(config: DendronSiteConfig): DendronSiteConfig {
     let out = _.defaults(config, {
+      copyAssets: true,
       usePrettyRefs: true,
       siteNotesDir: "notes",
     });

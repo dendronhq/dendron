@@ -102,6 +102,30 @@ describe("buildSite", () => {
 
     expect(content).toMatchSnapshot("sample.image-link.md");
 
+    expect(_.includes(dir, "assets")).toBeTruthy();
+    expect(_.trim(content)).toEqual("![link-alt](fake-s3.com/link-path.jpg)");
+  });
+
+  test("image prefix and no copy assets", async () => {
+    const config: DendronSiteConfig = {
+      siteHierarchies: ["sample"],
+      siteRootDir,
+      assetsPrefix: "fake-s3.com/",
+      copyAssets: false,
+    };
+
+    await new BuildSiteCommand().execute({
+      engine,
+      config,
+      wsRoot: dendronRoot,
+      writeStubs,
+    });
+
+    const { content } = readMD(path.join(notesDir, "sample.image-link.md"));
+    const dir = fs.readdirSync(siteRootDir);
+
+    expect(content).toMatchSnapshot("sample.image-link.md");
+
     expect(_.includes(dir, "assets")).toBeFalsy();
     expect(_.trim(content)).toEqual("![link-alt](fake-s3.com/link-path.jpg)");
   });

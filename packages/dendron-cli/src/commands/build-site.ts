@@ -484,7 +484,7 @@ export class BuildSiteCommand extends SoilCommand<
       assetsDir
     );
     const siteAssetsDir = path.join(siteRootPath, assetsDir);
-    if (!config.assetsPrefix) {
+    if (config.copyAssets !== false) {
       try {
         await this.copyAssets({ vaultAssetsDir, siteAssetsDir });
       } catch (err) {

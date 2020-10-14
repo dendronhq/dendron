@@ -26,7 +26,13 @@ export function file2Schema(fpath: string): SchemaModulePropsV2 {
   return SchemaParserV2.parseRaw(schemaOpts, { root, fname });
 }
 
-export function file2Note(fpath: string): NotePropsV2 {
+export function string2Note({
+  content,
+  fname,
+}: {
+  content: string;
+  fname: string;
+}) {
   const options: any = {
     engines: {
       yaml: {
@@ -36,13 +42,15 @@ export function file2Note(fpath: string): NotePropsV2 {
       },
     },
   };
-  const { data, content: body } = matter(
-    fs.readFileSync(fpath, { encoding: "utf8" }),
-    options
-  );
-  const { name: fname } = path.parse(fpath);
+  const { data, content: body } = matter(content, options);
   const custom = DNodeUtilsV2.getCustomProps(data);
   return DNodeUtilsV2.create({ ...data, custom, fname, body, type: "note" });
+}
+
+export function file2Note(fpath: string): NotePropsV2 {
+  const content = fs.readFileSync(fpath, { encoding: "utf8" });
+  const { name: fname } = path.parse(fpath);
+  return string2Note({ content, fname });
 }
 
 export function note2File(

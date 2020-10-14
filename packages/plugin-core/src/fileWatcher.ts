@@ -1,6 +1,7 @@
 import { DEngineClientV2, NoteUtilsV2 } from "@dendronhq/common-all";
-import { file2Note } from "@dendronhq/common-server";
+import { file2Note, string2Note } from "@dendronhq/common-server";
 import _ from "lodash";
+import moment from "moment";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
@@ -19,7 +20,7 @@ export class VaultWatcher {
     const watcher = vscode.workspace.createFileSystemWatcher(
       pattern,
       false,
-      true,
+      false,
       false
     );
     this.watcher = watcher;
@@ -31,7 +32,51 @@ export class VaultWatcher {
     const disposables = [];
     disposables.push(this.watcher.onDidCreate(this.onDidCreate, this));
     disposables.push(this.watcher.onDidDelete(this.onDidDelete, this));
+    disposables.push(this.watcher.onDidChange(this.onDidChange, this));
     return disposables;
+  }
+
+  async onDidChange(uri: vscode.Uri) {
+    const ctx = "VaultWatcher:onDidChange";
+    this.L.info({ ctx, uri });
+    const eclient = DendronWorkspace.instance().getEngine();
+    const fname = path.basename(uri.fsPath, ".md");
+    // milleseconds
+    const now = moment.now();
+
+    const recentEvents = HistoryService.instance().lookBack();
+    if (recentEvents[0].uri?.fsPath === uri.fsPath) {
+      let lastUpdated: string | number =
+        NoteUtilsV2.getNoteByFname(fname, eclient.notes)?.updated || now;
+      if (_.isString(lastUpdated)) {
+        lastUpdated = _.parseInt(lastUpdated);
+      }
+      if (now - lastUpdated < 1 * 3e3) {
+        return;
+      }
+    }
+
+    const document = await vscode.workspace.openTextDocument(uri);
+    const matchFM = /^---(.*)^---/ms;
+    const match = document.getText().match(matchFM);
+    if (!match) {
+      return;
+    }
+    /**
+     * '
+     *  id: eb05789e-18ff-4612-8ff6-220677777775
+     *  title: Bond
+     *  desc: ''
+     *  updated: 1602550007005
+     *  created: 1602550007005
+     * '
+     */
+    // either replace header by writing or `writeNote` will replace when `update` is missing
+    const newHeader = match[0].replace(/^updated:.*/m, `updated: ${now}`);
+    const newText = document.getText().replace(matchFM, newHeader);
+    const note = string2Note({ content: newText, fname });
+    HistoryService.instance().add({ source: "watcher", action: "create", uri });
+    await eclient.writeNote(note);
   }
 
   async onDidCreate(uri: vscode.Uri) {

@@ -4,7 +4,6 @@ import _ from "lodash";
 import minimatch from "minimatch";
 import moment from "moment";
 import path from "path";
-import { domainToASCII } from "url";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
 import { DNode } from "./node";

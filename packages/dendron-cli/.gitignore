@@ -7,3 +7,4 @@ yarn-error.log*
 lib
 lib_test
 src/proto-*
+stdout

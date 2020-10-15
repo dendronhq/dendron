@@ -21,26 +21,6 @@ Object {
 }
 `;
 
-exports[`note findLinks basic 1`] = `
-Array [
-  Object {
-    "from": Object {
-      "fname": "foo",
-      "id": "foo",
-    },
-    "original": "[[bar]]",
-    "pos": Object {
-      "end": 7,
-      "start": 0,
-    },
-    "to": Object {
-      "fname": "",
-    },
-    "type": "wiki",
-  },
-]
-`;
-
 exports[`note serialize basic 1`] = `
 "---
 id: foo

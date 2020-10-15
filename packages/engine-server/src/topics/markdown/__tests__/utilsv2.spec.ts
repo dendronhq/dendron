@@ -38,6 +38,25 @@ describe(ParserUtilsV2, () => {
       expect(_.trim(out)).toEqual("[[bar]]");
     });
 
+    test("ref", async () => {
+      const content = ["((ref: [[bond]]))"].join("\n");
+      const from: DNoteLoc = {
+        fname: "bond",
+        vault: {
+          fsPath: "/tmp",
+        },
+      };
+      const to: DNoteLoc = {
+        fname: "bar",
+        vault: {
+          fsPath: "/tmp",
+        },
+      };
+      const out = await ParserUtilsV2.replaceLinks({ content, from, to });
+      expect(out).toMatchSnapshot();
+      expect(_.trim(out)).toEqual("((ref: [[bar]]))");
+    });
+
     test("multiple", async () => {
       const content = ["[[bond]]", "[[bond]]"].join("\n");
       const from: DNoteLoc = {

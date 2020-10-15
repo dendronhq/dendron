@@ -808,7 +808,6 @@ describe("engine, notes/", () => {
     test("bad parse ", async () => {
       fs.writeFileSync(path.join(vaultDir, "foo.md"), "---\nbar:\n--\nfoo");
       const { error } = (await engine.init()) as { error: DendronError };
-      expect(JSON.stringify(error)).toMatchSnapshot();
       expect(error.status).toEqual(ENGINE_ERROR_CODES.BAD_PARSE_FOR_NOTE);
     });
 

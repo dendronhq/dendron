@@ -45,6 +45,11 @@ exports[`ParserUtilsV2 replaceLinks one 1`] = `
 "
 `;
 
+exports[`ParserUtilsV2 replaceLinks ref 1`] = `
+"((ref: [[bar]]))
+"
+`;
+
 exports[`ParserUtilsV2 replaceLinks with alias 1`] = `
 "[[hero|bar]]
 "

@@ -19,7 +19,7 @@ export class PublishCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const cmd = new PublishNotesCommand();
     const wsRoot = DendronWorkspace.rootDir() as string;
     const ws = DendronWorkspace.instance();
-    const vault = ws.engine.props.root;
+    const vault = ws.rootWorkspace.uri.fsPath;
     const publishRepoDir = ws.config.site.siteRepoDir;
     await cmd.eval({ wsRoot, vault, publishRepoDir, ...opts });
     this.showResponse();

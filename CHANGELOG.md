@@ -5,14 +5,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.12.9](https://github.com/dendronhq/dendron/compare/v0.12.9-alpha.1...v0.12.9) (2020-10-15)
 
-**Note:** Version bump only for package root
-
-## [0.12.9-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.9-alpha.0...v0.12.9-alpha.1) (2020-10-15)
-
-**Note:** Version bump only for package root
-
-## [0.12.9-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.8...v0.12.9-alpha.0) (2020-10-14)
-
 ### Bug Fixes
 
 - **server:** issue with goup navigation ([f3722dd](https://github.com/dendronhq/dendron/commit/f3722dd199d7aa4800f88ab5e8388a2a70b611cf))

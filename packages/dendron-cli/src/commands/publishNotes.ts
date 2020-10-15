@@ -76,7 +76,14 @@ export class PublishNotesCommand extends SoilCommand<
   }
 
   async execute(opts: CommandOpts) {
-    const { wsRoot, noPush, incremental, writeStubs, publishRepoDir } = opts;
+    const {
+      wsRoot,
+      noPush,
+      incremental,
+      writeStubs,
+      publishRepoDir,
+      engineClient,
+    } = opts;
     const engine = opts.engine;
     const config = DConfig.getOrCreate(wsRoot);
     const siteConfig = config.site;
@@ -88,6 +95,7 @@ export class PublishNotesCommand extends SoilCommand<
 
     const { buildNotesRoot } = await new BuildSiteCommand().execute({
       engine,
+      engineClient,
       config: siteConfig,
       wsRoot: wsRoot,
       incremental,

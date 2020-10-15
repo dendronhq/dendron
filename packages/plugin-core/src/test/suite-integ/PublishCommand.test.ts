@@ -65,3 +65,56 @@ suite("Publish", function () {
     });
   });
 });
+
+suite("PublishV2", function () {
+  let root: DirResult;
+  let ctx: vscode.ExtensionContext;
+  this.timeout(TIMEOUT);
+
+  beforeEach(function () {
+    root = FileTestUtils.tmpDir();
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    DendronWorkspace.getOrCreate(ctx);
+  });
+
+  afterEach(function () {
+    HistoryService.instance().clearSubscriptions();
+  });
+
+  test("no repo", function (done) {
+    onWSInit(async () => {
+      try {
+        await new PublishCommand().execute({});
+      } catch (err) {
+        assert.strictEqual((err as DendronError).msg, "no repo found");
+        done();
+      }
+    });
+
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      useCb: async (vaultDir) => {
+        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+      },
+    });
+  });
+
+  test.skip("repo in docs", function (done) {
+    onWSInit(async () => {
+      const docsPath = path.join(root.name, "docs");
+      // TODO: setup remote git repo
+      await Git.createRepo(docsPath, { initCommit: true });
+      const config = DConfig.genDefaultConfig();
+      config.site.siteRepoDir = docsPath;
+      DConfig.writeConfig({ wsRoot: root.name, config });
+      await new PublishCommand().execute({});
+      done();
+    });
+
+    setupDendronWorkspace(root.name, ctx, {
+      useCb: async (vaultDir) => {
+        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+      },
+    });
+  });
+});

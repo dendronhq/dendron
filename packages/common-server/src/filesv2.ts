@@ -1,4 +1,5 @@
 import {
+  DLink,
   DNodeUtilsV2,
   NotePropsV2,
   NoteUtilsV2,
@@ -13,6 +14,7 @@ import _ from "lodash";
 import path from "path";
 import { SchemaParserV2 } from "./parser";
 import { parse, stringify, assign } from "comment-json";
+import { findLinks } from "./strings";
 
 export function file2Schema(fpath: string): SchemaModulePropsV2 {
   const root = path.dirname(fpath);
@@ -44,7 +46,16 @@ export function string2Note({
   };
   const { data, content: body } = matter(content, options);
   const custom = DNodeUtilsV2.getCustomProps(data);
-  return DNodeUtilsV2.create({ ...data, custom, fname, body, type: "note" });
+  const note = DNodeUtilsV2.create({
+    ...data,
+    custom,
+    fname,
+    body,
+    type: "note",
+  });
+  const links: DLink[] = findLinks({ note });
+  note.links = links;
+  return note;
 }
 
 export function file2Note(fpath: string): NotePropsV2 {

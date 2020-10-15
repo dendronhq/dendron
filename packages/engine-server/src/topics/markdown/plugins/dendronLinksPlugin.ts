@@ -1,10 +1,21 @@
 import RemarkParser, { Eat } from "remark-parse";
-import { Processor } from "unified";
+import { Plugin, Processor, Parser } from "unified";
 import { Node } from "unist";
-import { Note } from "@dendronhq/common-all";
 import { removeMDExtension } from "@dendronhq/common-server";
 
 const LINK_REGEX = /^\[\[(.+?)\]\]/;
+
+declare class RemarkParserClass implements Parser {
+  Parser: RemarkParserClass;
+  prototype: RemarkParserClass;
+  parse(): Node;
+  blockMethods: string[];
+  inlineTokenizers: {
+    [key: string]: RemarkParser.Tokenizer;
+  };
+
+  inlineMethods: string[];
+}
 
 export type WikiLinkData = {
   alias: string;
@@ -17,7 +28,7 @@ export type WikiLinkData = {
   toHTML?: boolean;
   prefix?: string;
   useId: boolean;
-  note?: Note;
+  note?: { id: string };
 };
 
 function locator(value: string, fromIndex: number) {
@@ -115,8 +126,8 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
   inlineTokenizer.locator = locator;
 
   // @ts-ignore
-  const Parser: RemarkParser.Parser = this.Parser;
-
+  let _this = (this as any) as RemarkParserClass;
+  const Parser: RemarkParser.Parser = _this.Parser;
   // @ts-ignore
   const inlineTokenizers = Parser.prototype.inlineTokenizers;
   // @ts-ignore
@@ -126,7 +137,7 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
 
   // Stringify for wiki link
   // @ts-ignore
-  const Compiler: Processor["Compiler"] = this.Compiler;
+  const Compiler: Processor["Compiler"] = _this.Compiler;
 
   if (Compiler != null) {
     const visitors = Compiler.prototype.visitors;

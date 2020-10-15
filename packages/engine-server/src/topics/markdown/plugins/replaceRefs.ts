@@ -46,10 +46,6 @@ export function replaceRefs(options: ReplaceRefOptions) {
   function transformer(tree: Node, _file: VFile) {
     visit(tree, (node) => {
       if (node.type === "image") {
-        // const replacement = _.get(refReplacements, node.url as string, false);
-        // if (replacement) {
-        //   node.url = replacement;
-        // }
         if (imageRefPrefix) {
           node.url = imageRefPrefix + node.url;
         }
@@ -79,6 +75,7 @@ export function replaceRefs(options: ReplaceRefOptions) {
             // @ts-ignore
             data.note = { id: "/404.html" };
             delete data["prefix"];
+            // add id to bad links
             fs.appendFileSync(scratch, data.permalink + "\n", {
               encoding: "utf8",
             });

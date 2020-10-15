@@ -9,6 +9,7 @@ import { DendronError } from "./error";
 import { DNode } from "./node";
 import {
   DEngineClientV2,
+  DLoc,
   DNodeOptsV2,
   DNodePropsDictV2,
   DNodePropsQuickInputV2,
@@ -38,6 +39,7 @@ export class DNodeUtilsV2 {
       id,
       type,
       desc,
+      links,
       fname,
       updated,
       created,
@@ -50,6 +52,7 @@ export class DNodeUtilsV2 {
       created: moment.now(),
       id: genUUID(),
       desc: "",
+      links: [],
       children: [],
       parent: null,
       body: "",
@@ -62,6 +65,7 @@ export class DNodeUtilsV2 {
       title,
       type,
       desc,
+      links,
       fname,
       updated,
       created,
@@ -416,6 +420,14 @@ export class NoteUtilsV2 {
     }
     const meta = _.omit(NoteUtilsV2.serializeMeta(props), blacklist);
     return matter.stringify(body || "", meta);
+  }
+
+  static toLoc(note: NotePropsV2): DLoc {
+    const { fname, id } = note;
+    return {
+      fname,
+      id,
+    };
   }
 }
 

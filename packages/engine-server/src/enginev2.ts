@@ -3,6 +3,7 @@ import {
   DEngineInitRespV2,
   DEngineMode,
   DEngineV2,
+  DLink,
   DNodePropsV2,
   DNodeTypeV2,
   DStoreV2,
@@ -40,6 +41,7 @@ export class DendronEngineV2 implements DEngineV2 {
   protected props: DendronEnginePropsV2;
   public logger: DLogger;
   public fuseEngine: FuseEngine;
+  public links: DLink[];
 
   constructor(props: DendronEnginePropsV2) {
     this.vaults = props.vaults;
@@ -47,6 +49,7 @@ export class DendronEngineV2 implements DEngineV2 {
     this.logger = props.logger;
     this.props = props;
     this.fuseEngine = new FuseEngine({});
+    this.links = [];
   }
 
   get notes() {

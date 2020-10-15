@@ -1,6 +1,7 @@
 import {
   DendronError,
   DEngineInitPayloadV2,
+  DLink,
   DNodeUtilsV2,
   DStoreV2,
   EngineDeleteOptsV2,
@@ -244,6 +245,7 @@ export class FileStorageV2 implements DStoreV2 {
   public schemas: SchemaModuleDictV2;
   public notesCache: NotePropsCacheV2;
   public logger: DLogger;
+  public links: DLink[];
 
   constructor(props: { vaults: string[]; logger: DLogger }) {
     const { vaults, logger } = props;
@@ -251,6 +253,7 @@ export class FileStorageV2 implements DStoreV2 {
     this.notes = {};
     this.schemas = {};
     this.notesCache = {};
+    this.links = [];
     this.logger = logger;
     const ctx = "FileStorageV2";
     this.logger.info({ ctx, vaults });

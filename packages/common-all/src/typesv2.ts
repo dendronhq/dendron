@@ -1,7 +1,42 @@
+import { URI } from "vscode-uri";
 import { DendronError } from "./error";
 import { EngineDeleteOpts, NoteData, SchemaData } from "./types";
 
 export type DNodePointerV2 = string;
+export type DLoc = {
+  fname?: string;
+  id?: string;
+  vault?: DVault;
+  uri?: URI;
+};
+export type DNoteLoc = {
+  fname: string;
+  id?: string;
+  vault: DVault;
+};
+export type DVault = {
+  fsPath: string;
+};
+export type DLink = {
+  type: "ref" | "wiki" | "md";
+  original: string;
+  pos: {
+    start: number;
+    end: number;
+  };
+  from: DLoc;
+  to?: DLoc;
+};
+export type DNoteLink = {
+  type: "ref" | "wiki" | "md";
+  original: string;
+  pos: {
+    start: number;
+    end: number;
+  };
+  from: DNoteLoc;
+  to?: DNoteLoc;
+};
 export type DNodeTypeV2 = "note" | "schema";
 
 export type SchemaDataV2 = SchemaData;
@@ -14,6 +49,7 @@ export type DNodePropsV2<T = any> = {
   id: string;
   title: string;
   desc: string;
+  links: DLink[];
   fname: string;
   type: DNodeTypeV2;
   updated: string;
@@ -145,6 +181,7 @@ export type DEngineInitPayloadV2 = {
 export type DCommonProps = {
   notes: NotePropsDictV2;
   schemas: SchemaModuleDictV2;
+  links: DLink[];
   vaults: string[];
 };
 

@@ -3,6 +3,7 @@ import {
   DEngineClientV2,
   DEngineInitRespV2,
   DNodeData,
+  DLink,
   DNodePropsV2,
   DNodeTypeV2,
   EngineDeleteOptsV2,
@@ -36,6 +37,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   public notes: NotePropsDictV2;
   public schemas: SchemaModuleDictV2;
   public vaults: string[];
+  public links: DLink[];
   public ws: string;
   public fuseEngine: FuseEngine;
   public api: DendronAPI;
@@ -64,6 +66,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.api = api;
     this.notes = {};
     this.schemas = {};
+    this.links = [];
     this.fuseEngine = new FuseEngine({});
     this.vaults = vaults;
     this.ws = ws;

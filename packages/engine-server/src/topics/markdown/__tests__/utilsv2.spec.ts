@@ -1,8 +1,23 @@
-import { DNoteLoc } from "@dendronhq/common-all";
+import { DNoteLoc, NoteUtilsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { ParserUtilsV2 } from "../utilsv2";
 
 describe(ParserUtilsV2, () => {
+  describe("findLinks", async () => {
+    test("one link", () => {
+      const note = NoteUtilsV2.create({
+        fname: "foo",
+        id: "foo",
+        created: "1",
+        updated: "1",
+        body: "[[bar]]",
+      });
+      const links = ParserUtilsV2.findLinks({ note });
+      expect(links).toMatchSnapshot("bond");
+      expect(links[0].to?.fname).toEqual("bar");
+    });
+  });
+
   describe("replaceLinks", async () => {
     test("one", async () => {
       const content = ["[[bond]]"].join("\n");

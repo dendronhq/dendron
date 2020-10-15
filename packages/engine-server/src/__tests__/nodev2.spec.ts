@@ -1,5 +1,5 @@
 import { DEngineV2, NoteUtilsV2, SchemaUtilsV2 } from "@dendronhq/common-all";
-import { createLogger, findLinks, note2File } from "@dendronhq/common-server";
+import { createLogger, note2File } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
   NodeTestUtilsV2,
@@ -34,34 +34,6 @@ const beforePreset = async () => {
 };
 
 describe("note", () => {
-  describe.only("findLinks", () => {
-    test("basic", () => {
-      const note = NoteUtilsV2.create({
-        id: "foo",
-        fname: "foo",
-        created: "1",
-        updated: "1",
-        body: [`[[bar]]`].join("\n"),
-      });
-      const links = findLinks({ note });
-      expect(links).toMatchSnapshot();
-      expect(links).toEqual([
-        {
-          from: {
-            fname: "foo",
-            id: "foo",
-          },
-          original: "[[bar]]",
-          pos: {
-            end: 7,
-            start: 0,
-          },
-          type: "wiki",
-        },
-      ]);
-    });
-  });
-
   describe("serialize", () => {
     test("basic", () => {
       const note = NoteUtilsV2.create({

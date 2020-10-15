@@ -1,5 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`ParserUtilsV2 findLinks one link: bond 1`] = `
+Array [
+  Object {
+    "alias": undefined,
+    "from": Object {
+      "fname": "foo",
+      "id": "foo",
+    },
+    "original": "[[bar]]",
+    "pos": Object {
+      "end": 7,
+      "start": 0,
+    },
+    "to": Object {
+      "fname": "bar",
+    },
+    "type": "wiki",
+    "value": "bar",
+  },
+]
+`;
+
 exports[`ParserUtilsV2 replaceLinks fenced code 1`] = `
 "\`\`\`
 [[bond]]

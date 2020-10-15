@@ -627,19 +627,42 @@ describe("engine, notes/", () => {
     });
   });
 
-  describe.only("rename/", () => {
+  describe("rename/", () => {
     let engine: DEngineV2;
     beforeEach(async () => {
       ({ vaultDir, engine } = await beforePreset());
+      let note = NoteUtilsV2.create({
+        fname: "foo",
+        id: "foo",
+        created: "1",
+        updated: "1",
+        body: "[[bar]]",
+      });
+      await note2File(note, vaultDir);
+      note = NoteUtilsV2.create({
+        fname: "bar",
+        id: "bar",
+        created: "1",
+        updated: "1",
+        body: "[[foo]]",
+      });
+      await note2File(note, vaultDir);
     });
 
     test("basic", async () => {
       await engine.init();
       const changed = await engine.renameNote({
         oldLoc: { fname: "foo", vault: { fsPath: vaultDir } },
-        newLoc: { fname: "bar", vault: { fsPath: vaultDir } },
+        newLoc: { fname: "baz", vault: { fsPath: vaultDir } },
       });
       expect(changed).toMatchSnapshot();
+      expect(_.trim((changed.data as NoteChangeEntry[])[0].note.body)).toEqual(
+        "[[baz]]"
+      );
+      const notes = fs.readdirSync(vaultDir);
+      expect(notes).toMatchSnapshot();
+      expect(_.includes(notes, "foo.md")).toBeFalsy();
+      expect(_.includes(notes, "baz.md")).toBeTruthy();
     });
   });
 

@@ -33,6 +33,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import YAML from "yamljs";
+import { ParserUtilsV2 } from "../../topics/markdown/utilsv2";
 
 type FileMetaV2 = {
   // file name: eg. foo.md, name = foo
@@ -292,9 +293,11 @@ export class FileStorageV2 implements DStoreV2 {
     const vault = this.vaults[0];
     const fpath = path.join(vault, noteToDelete.fname + ext);
     const out: NoteChangeEntry[] = [];
+    this.logger.info({ ctx, noteToDelete, opts });
 
     // remove from fs
     if (!opts?.metaOnly) {
+      this.logger.info({ ctx, noteToDelete, msg: "removing from disk", fpath });
       fs.unlinkSync(fpath);
     }
 
@@ -372,9 +375,22 @@ export class FileStorageV2 implements DStoreV2 {
       include: ["*.md"],
     }) as string[];
     const cache = this.loadNotesCache();
-    return new NoteParserV2({ store: this, cache, logger: this.logger }).parse(
-      noteFiles
+    const notes = await new NoteParserV2({
+      store: this,
+      cache,
+      logger: this.logger,
+    }).parse(noteFiles);
+    await Promise.all(
+      notes.map(async (n) => {
+        if (n.stub) {
+          return;
+        }
+        const links = ParserUtilsV2.findLinks({ note: n });
+        n.links = links;
+        return;
+      })
     );
+    return notes;
   }
 
   async renameNote(opts: RenameNoteOptsV2): Promise<RenameNotePayload> {
@@ -386,8 +402,23 @@ export class FileStorageV2 implements DStoreV2 {
       note: oldNote,
       notes: this.notes,
     });
-    const out = notesToChange;
-    return out.map((note) => ({
+    const notesChanged = await Promise.all(
+      notesToChange.map(async (n) => {
+        n.body = await ParserUtilsV2.replaceLinks({
+          content: n.body,
+          from: oldLoc,
+          to: newLoc,
+        });
+        const links = ParserUtilsV2.findLinks({ note: n });
+        n.links = links;
+        return n;
+      })
+    );
+    const newNote = { ...oldNote, fname: newLoc.fname };
+    await this.deleteNote(oldNote.id);
+    await this.writeNote(newNote, { newNode: true });
+    await Promise.all(notesChanged.map(async (n) => this.updateNote(n)));
+    return notesChanged.map((note) => ({
       status: "update",
       note,
     }));

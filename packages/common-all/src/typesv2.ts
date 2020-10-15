@@ -20,6 +20,8 @@ export type DVault = {
 export type DLink = {
   type: "ref" | "wiki" | "md";
   original: string;
+  value: string;
+  alias?: string;
   pos: {
     start: number;
     end: number;

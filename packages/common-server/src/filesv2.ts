@@ -1,5 +1,4 @@
 import {
-  DLink,
   DNodeUtilsV2,
   NotePropsV2,
   NoteUtilsV2,
@@ -7,14 +6,12 @@ import {
   SchemaModulePropsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
+import { assign, parse, stringify } from "comment-json";
 import fs from "fs-extra";
 import matter from "gray-matter";
 import YAML from "js-yaml";
-import _ from "lodash";
 import path from "path";
 import { SchemaParserV2 } from "./parser";
-import { parse, stringify, assign } from "comment-json";
-import { findLinks } from "./strings";
 
 export function file2Schema(fpath: string): SchemaModulePropsV2 {
   const root = path.dirname(fpath);
@@ -53,8 +50,6 @@ export function string2Note({
     body,
     type: "note",
   });
-  const links: DLink[] = findLinks({ note });
-  note.links = links;
   return note;
 }
 

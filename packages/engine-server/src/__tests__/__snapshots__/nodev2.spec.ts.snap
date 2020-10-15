@@ -33,6 +33,9 @@ Array [
       "end": 7,
       "start": 0,
     },
+    "to": Object {
+      "fname": "",
+    },
     "type": "wiki",
   },
 ]

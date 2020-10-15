@@ -5,17 +5,22 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.12.9-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.9-alpha.0...v0.12.9-alpha.1) (2020-10-15)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.12.9-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.8...v0.12.9-alpha.0) (2020-10-14)
 
+### Bug Fixes
+
+- **server:** issue with goup navigation ([f3722dd](https://github.com/dendronhq/dendron/commit/f3722dd199d7aa4800f88ab5e8388a2a70b611cf))
+
 ### Enhancements
 
+- **publishing:** add copyAssets option ([90c9c62](https://github.com/dendronhq/dendron/commit/90c9c6243f5e45868d423f4ef05adb16b4be8fac))
 - **server:** read contents from disk when updating ts ([1bef413](https://github.com/dendronhq/dendron/commit/1bef413412bcacaf25bbb861cc03c2744b2a5575))
 
 ## [0.12.8](https://github.com/dendronhq/dendron/compare/v0.12.8-alpha.2...v0.12.8) (2020-10-14)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.12.8-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.8-alpha.1...v0.12.8-alpha.2) (2020-10-14)
 

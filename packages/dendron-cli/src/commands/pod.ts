@@ -2,9 +2,11 @@ import { DendronError, DEngine } from "@dendronhq/common-all";
 import { DendronEngine } from "@dendronhq/engine-server";
 import {
   getPodConfig,
-  PodClassEntryV2,
-  PodItem,
   getPodConfigPath,
+  PodClassEntryV2,
+  PodClassEntryV3,
+  PodItem,
+  PodKind,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
@@ -20,12 +22,12 @@ type CommandOpts = {
 
 type CommandOutput = void;
 
-function fetchPodClass(
+export function fetchPodClass(
   podId: string,
   opts: {
     podSource: CommandCLIOpts["podSource"];
-    pods?: PodClassEntryV2[];
-    podType: "import" | "export";
+    pods?: PodClassEntryV2[] | PodClassEntryV3[];
+    podType: PodKind;
   }
 ) {
   const { podSource, pods } = opts;
@@ -35,12 +37,39 @@ function fetchPodClass(
     }
     const podClass = _.find(pods, {
       id: podId,
-    }) as PodClassEntryV2;
+    });
     return podClass;
   } else {
     const podEntry = require(podId);
     const key = opts.podType === "import" ? "importPod" : "exportPod";
     const podClass = podEntry[key];
+    if (!podClass) {
+      throw Error("no podClass found");
+    }
+    return podClass;
+  }
+}
+
+export function fetchPodClassV3(
+  podId: string,
+  opts: {
+    podSource: CommandCLIOpts["podSource"];
+    pods?: PodClassEntryV3[];
+    podType: PodKind;
+  }
+) {
+  const { podSource, pods } = opts;
+  if (podSource === "builtin") {
+    if (!pods) {
+      throw Error("pods needs to be defined");
+    }
+    const podClass = _.find(pods, {
+      id: podId,
+    });
+    return podClass;
+  } else {
+    const podEntry = require(podId);
+    const podClass = podEntry[opts.podType];
     if (!podClass) {
       throw Error("no podClass found");
     }

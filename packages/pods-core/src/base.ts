@@ -1,14 +1,29 @@
-import { DEngine } from "@dendronhq/common-all";
-import { DendronEngine } from "@dendronhq/engine-server";
+import { DEngine, DEngineClientV2 } from "@dendronhq/common-all";
+import {
+  DendronEngine,
+  DendronEngineV2,
+  FileStorageV2,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import { URI } from "vscode-uri";
 import { PodKind } from "./types";
-import { Logger, createLogger, resolvePath } from "@dendronhq/common-server";
+import {
+  Logger,
+  createLogger,
+  resolvePath,
+  DLogger,
+} from "@dendronhq/common-server";
 
 export type PodOptsV2 = {
   roots: string[];
   wsRoot: string;
   engine?: DEngine;
+};
+
+export type PodOptsV3 = {
+  vaults: string[];
+  wsRoot: string;
+  engine?: DEngineClientV2;
 };
 
 export type PodConfigEntry = {
@@ -45,6 +60,39 @@ export abstract class PodBaseV2 {
   async initEngine() {
     await this.engine.init();
   }
+}
+
+export abstract class PodBaseV3 {
+  public opts: PodOptsV3;
+  public L: DLogger;
+  public engine: DEngineClientV2;
+
+  constructor(opts: PodOptsV3) {
+    this.opts = opts;
+
+    const vaults = this.opts.vaults;
+    this.L = createLogger("PodLogger");
+    this.engine = opts.engine
+      ? opts.engine
+      : new DendronEngineV2({
+          vaults,
+          forceNew: true,
+          store: new FileStorageV2({ vaults, logger: this.L }),
+          mode: "fuzzy",
+          logger: this.L,
+        });
+  }
+
+  async initEngine() {
+    await this.engine.init();
+  }
+}
+
+export abstract class PublishPodBaseV3<
+  TConfig extends PublishConfig = PublishConfig
+> extends PodBaseV3 {
+  static kind = "publish" as PodKind;
+  abstract plant(opts: PublishPodOpts<TConfig>): Promise<void>;
 }
 
 export abstract class ExportPodBaseV2<
@@ -105,6 +153,12 @@ export type ExportConfig = {
    */
   includeBody?: boolean;
 };
+
+export type PublishConfig = {
+  dest: string;
+  fname: string;
+};
+
 export type ImportConfig = {
   src: string;
 };
@@ -129,12 +183,28 @@ export type ImportPodOpts<TConfig extends ImportConfig> = {
    */
   config: TConfig;
 };
+export type PublishPodOpts<TConfig extends PublishConfig> = {
+  /**
+   * Export schema or notes
+   */
+  mode: "notes" | "schemas";
+  /**
+   * Only export metadata?
+   */
+  config: TConfig;
+};
 
 export interface ExportPod<TConfig extends ExportConfig = any> {
   plant: (opts: ExportPodOpts<TConfig>) => Promise<void>;
 }
 
-export type Pod = ExportPod;
+export interface PublishPod<TConfig extends PublishConfig = any> {
+  plant: (opts: PublishPodOpts<TConfig>) => Promise<void>;
+}
+
+export type Pod = {
+  plant: (opts: any) => Promise<void>;
+};
 
 export interface ImportPod<TConfig extends ImportConfig = any> {
   plant: (opts: ImportPodOpts<TConfig>) => Promise<void>;

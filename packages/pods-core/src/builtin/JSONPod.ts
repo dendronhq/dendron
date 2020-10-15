@@ -1,4 +1,4 @@
-import { Note, NoteRawProps } from "@dendronhq/common-all";
+import { Note, NoteRawProps, NoteUtilsV2 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import { URI } from "vscode-uri";
@@ -11,6 +11,9 @@ import {
   ImportPodBaseV2,
   ImportPodOpts,
   PodConfigEntry,
+  PublishConfig,
+  PublishPodBaseV3,
+  PublishPodOpts,
 } from "../base";
 
 const ID = "dendron.pod.json";
@@ -93,6 +96,30 @@ export class JSONImportPod extends ImportPodBaseV2<ImportPodConfig> {
     } else {
       return notes;
     }
+  }
+}
+
+export class JSONPublishPod extends PublishPodBaseV3<PublishConfig> {
+  static id: string = ID;
+  static description: string = "publish json";
+
+  static config = (): PodConfigEntry[] => {
+    return [
+      {
+        key: "dest",
+        description: "where will output be stored",
+        type: "string",
+      },
+    ];
+  };
+
+  async plant(opts: PublishPodOpts<PublishConfig>): Promise<void> {
+    await this.initEngine();
+    const { fname, dest } = opts.config;
+    const note = NoteUtilsV2.getNoteByFname(fname, this.engine.notes, {
+      throwIfEmpty: true,
+    });
+    fs.writeJSONSync(dest, note, { encoding: "utf8" });
   }
 }
 

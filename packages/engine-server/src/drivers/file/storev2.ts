@@ -12,6 +12,8 @@ import {
   NotePropsDictV2,
   NotePropsV2,
   NoteUtilsV2,
+  RenameNoteOptsV2,
+  RenameNotePayload,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
   SchemaUtilsV2,
@@ -373,6 +375,22 @@ export class FileStorageV2 implements DStoreV2 {
     return new NoteParserV2({ store: this, cache, logger: this.logger }).parse(
       noteFiles
     );
+  }
+
+  async renameNote(opts: RenameNoteOptsV2): Promise<RenameNotePayload> {
+    const { oldLoc, newLoc } = opts;
+    const oldNote = NoteUtilsV2.getNoteByFname(oldLoc.fname, this.notes, {
+      throwIfEmpty: true,
+    }) as NotePropsV2;
+    const notesToChange = await NoteUtilsV2.getNotesWithLinkTo({
+      note: oldNote,
+      notes: this.notes,
+    });
+    const out = notesToChange;
+    return out.map((note) => ({
+      status: "update",
+      note,
+    }));
   }
 
   async updateNote(

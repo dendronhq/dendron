@@ -230,63 +230,10 @@ Array [
 ]
 `;
 
-exports[`engine, notes/ write/ write note, match schema: notes 1`] = `
+exports[`engine, notes/ rename/ basic 1`] = `
 Object {
-  "foo": Object {
-    "body": "
-",
-    "children": Array [
-      "foo.ch1",
-    ],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "foo",
-    "id": "foo",
-    "parent": "root",
-    "schema": Object {
-      "moduleId": "foo",
-      "schemaId": "foo",
-    },
-    "title": "Foo",
-    "type": "note",
-    "updated": "1",
-  },
-  "foo.ch1": Object {
-    "body": "",
-    "children": Array [],
-    "created": "1",
-    "data": Object {},
-    "desc": "",
-    "fname": "foo.ch1",
-    "id": "foo.ch1",
-    "parent": "foo",
-    "schema": Object {
-      "moduleId": "foo",
-      "schemaId": "ch1",
-    },
-    "title": "Ch1",
-    "type": "note",
-    "updated": "1",
-  },
-  "root": Object {
-    "body": "
-",
-    "children": Array [
-      "foo",
-    ],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "root",
-    "id": "root",
-    "parent": null,
-    "title": "Root",
-    "type": "note",
-    "updated": "1",
-  },
+  "data": Array [],
+  "error": null,
 }
 `;
 
@@ -440,34 +387,6 @@ Object {
     },
   ],
   "error": null,
-}
-`;
-
-exports[`engine, schema/ write/ update schema, add new prop to module: new schema file 1`] = `
-Object {
-  "imports": Array [],
-  "schemas": Array [
-    Object {
-      "children": Array [
-        "ch1",
-        "ch2",
-      ],
-      "id": "foo",
-      "parent": "root",
-      "title": "foo",
-    },
-    Object {
-      "children": Array [],
-      "id": "ch1",
-      "title": "ch1",
-    },
-    Object {
-      "children": Array [],
-      "id": "ch2",
-      "title": "ch2",
-    },
-  ],
-  "version": 1,
 }
 `;
 

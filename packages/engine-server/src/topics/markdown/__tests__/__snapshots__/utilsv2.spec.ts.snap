@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ParserUtilsV2 replaceLinks fenced code 1`] = `
+"\`\`\`
+[[bond]]
+\`\`\`
+"
+`;
+
+exports[`ParserUtilsV2 replaceLinks inline code 1`] = `
+"\`[[bond]]\`
+"
+`;
+
+exports[`ParserUtilsV2 replaceLinks multiple 1`] = `
+"[[bar]]
+[[bar]]
+"
+`;
+
+exports[`ParserUtilsV2 replaceLinks one 1`] = `
+"[[bar]]
+"
+`;
+
+exports[`ParserUtilsV2 replaceLinks with alias 1`] = `
+"[[hero|bar]]
+"
+`;
+
+exports[`ParserUtilsV2 replaceLinks with offset  1`] = `
+"   [[bar]]
+"
+`;

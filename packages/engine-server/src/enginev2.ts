@@ -17,6 +17,8 @@ import {
   NotePropsV2,
   NoteUtilsV2,
   QueryOptsV2,
+  RenameNoteOptsV2,
+  RenameNotePayload,
   RespV2,
   SchemaModulePropsV2,
   SchemaQueryResp,
@@ -241,25 +243,13 @@ export class DendronEngineV2 implements DEngineV2 {
     };
   }
 
-  // async removeNoteFromIndex(note: NotePropsV2) {
-  //   this.notesIndex.remove((doc: NotePropsV2) => {
-  //     // FIXME: can be undefined, dunno why
-  //     if (!doc) {
-  //       return false;
-  //     }
-  //     return doc.id === note.id;
-  //   });
-  // }
-
-  // async removeSchemaFromIndex(smod: SchemaModulePropsV2) {
-  //   this.schemaIndex.remove((doc: SchemaPropsV2) => {
-  //     // FIXME: can be undefined, dunno why
-  //     if (!doc) {
-  //       return false;
-  //     }
-  //     return doc.id === SchemaUtilsV2.getModuleRoot(smod).id;
-  //   });
-  // }
+  async renameNote(opts: RenameNoteOptsV2): Promise<RespV2<RenameNotePayload>> {
+    const resp = await this.store.renameNote(opts);
+    return {
+      error: null,
+      data: resp,
+    };
+  }
 
   async updateNote(
     note: NotePropsV2,

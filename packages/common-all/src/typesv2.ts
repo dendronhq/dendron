@@ -175,6 +175,10 @@ export type DEngineInitPayloadV2 = {
   notes?: NotePropsDictV2;
   schemas?: SchemaModuleDictV2;
 };
+export type RenameNoteOptsV2 = {
+  oldLoc: DNoteLoc;
+  newLoc: DNoteLoc;
+};
 
 // === Engine and Store Main
 
@@ -216,6 +220,7 @@ export type EngineQueryNoteResp = Required<RespV2<DNodePropsV2[]>>;
 export type NoteQueryResp = Required<RespV2<NotePropsV2[]>>;
 export type SchemaQueryResp = Required<RespV2<SchemaModulePropsV2[]>>;
 export type StoreDeleteNoteResp = EngineDeleteNotePayload;
+export type RenameNotePayload = NoteChangeEntry[];
 
 export type GetNotePayloadV2 = {
   note: NotePropsV2 | undefined;
@@ -247,6 +252,7 @@ export type DEngineV2 = DCommonProps &
       mode: DNodeTypeV2,
       opts?: QueryOptsV2
     ) => Promise<EngineQueryNoteResp>;
+    renameNote: (opts: RenameNoteOptsV2) => Promise<RespV2<RenameNotePayload>>;
   };
 
 export type DEngineClientV2 = Omit<DEngineV2, "store">;
@@ -262,4 +268,5 @@ export type DStoreV2 = DCommonProps &
       id: string,
       opts?: EngineDeleteOptsV2
     ) => Promise<DEngineDeleteSchemaPayloadV2>;
+    renameNote: (opts: RenameNoteOptsV2) => Promise<RenameNotePayload>;
   };

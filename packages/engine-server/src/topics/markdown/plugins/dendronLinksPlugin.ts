@@ -1,7 +1,8 @@
 import RemarkParser, { Eat } from "remark-parse";
-import { Plugin, Processor, Parser } from "unified";
+import { Processor, Parser } from "unified";
 import { Node } from "unist";
 import { removeMDExtension } from "@dendronhq/common-server";
+import { DNoteLoc } from "@dendronhq/common-all";
 
 const LINK_REGEX = /^\[\[(.+?)\]\]/;
 
@@ -24,11 +25,14 @@ export type WikiLinkData = {
   hName: string;
   hProperties: any;
   hChildren: any[];
+
+  // dendron specific
   toMd?: boolean;
   toHTML?: boolean;
   prefix?: string;
   useId: boolean;
   note?: { id: string };
+  replace?: DNoteLoc;
 };
 
 function locator(value: string, fromIndex: number) {
@@ -36,13 +40,16 @@ function locator(value: string, fromIndex: number) {
 }
 
 interface PluginOpts {
-  permalinks: string[];
-  pageResolver: (name: string) => string[];
-  newClassName: string;
-  wikiLinkClassName: string;
-  hrefTemplate: (permalink: string) => string;
-  aliasDivider: string;
+  permalinks?: string[];
+  pageResolver?: (name: string) => string[];
+  newClassName?: string;
+  wikiLinkClassName?: string;
+  hrefTemplate?: (permalink: string) => string;
+  aliasDivider?: string;
+  replaceLink?: { from: DNoteLoc; to: DNoteLoc };
 }
+
+export { PluginOpts as DendronLinksOpts };
 
 export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
   const permalinks = opts.permalinks || [];
@@ -142,7 +149,6 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
   if (Compiler != null) {
     const visitors = Compiler.prototype.visitors;
     if (visitors) {
-      // eslint-disable-next-line func-names
       visitors.wikiLink = function (node: Node) {
         const data = node.data as WikiLinkData;
         if (!node || !node.data || !node.data.alias) {
@@ -153,6 +159,13 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
             throw Error("no note");
           }
           node.value = data.note.id;
+        }
+        if (opts.replaceLink && opts.replaceLink.from.fname === node.value) {
+          // TODO: check for case
+          node.value = opts.replaceLink.to.fname;
+          if (node.data.alias === opts.replaceLink.from.fname) {
+            node.data.alias = opts.replaceLink.to.fname;
+          }
         }
         if (data.toMd) {
           return `[${data.alias}](${data.prefix || ""}${node.value})`;

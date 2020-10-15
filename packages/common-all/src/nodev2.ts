@@ -377,6 +377,26 @@ export class NoteUtilsV2 {
     }
     return out;
   }
+  static getNotesWithLinkTo({
+    note,
+    notes,
+  }: {
+    note: NotePropsV2;
+    notes: NotePropsDictV2;
+  }): NotePropsV2[] {
+    const maybe = _.values(notes).map((ent) => {
+      if (
+        _.find(ent.links, (l) => {
+          return l.to?.fname === note.fname;
+        })
+      ) {
+        return ent;
+      } else {
+        return;
+      }
+    });
+    return _.reject(maybe, _.isUndefined) as NotePropsV2[];
+  }
 
   static getPath({
     client,

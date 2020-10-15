@@ -627,6 +627,22 @@ describe("engine, notes/", () => {
     });
   });
 
+  describe.only("rename/", () => {
+    let engine: DEngineV2;
+    beforeEach(async () => {
+      ({ vaultDir, engine } = await beforePreset());
+    });
+
+    test("basic", async () => {
+      await engine.init();
+      const changed = await engine.renameNote({
+        oldLoc: { fname: "foo", vault: { fsPath: vaultDir } },
+        newLoc: { fname: "bar", vault: { fsPath: vaultDir } },
+      });
+      expect(changed).toMatchSnapshot();
+    });
+  });
+
   const NOTE_WRITE_PRESET =
     NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.write;
 

@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.9](https://github.com/dendronhq/dendron/compare/v0.12.9-alpha.1...v0.12.9) (2020-10-15)
+
+**Note:** Version bump only for package @dendronhq/lsp-client-uber
+
 ## [0.12.9-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.8...v0.12.9-alpha.0) (2020-10-14)
 
 **Note:** Version bump only for package @dendronhq/lsp-client-uber

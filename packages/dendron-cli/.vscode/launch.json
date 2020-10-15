@@ -17,7 +17,9 @@
         "--podId",
         "dendron.pod.json",
         "--noteByName",
-        "dendron"
+        "dendron",
+        "--config",
+        "/Users/kevinlin/projects/dendronv2/dendron/packages/dendron-cli/config.yml"
       ],
       "cwd": "${workspaceRoot}",
       "sourceMaps": true,

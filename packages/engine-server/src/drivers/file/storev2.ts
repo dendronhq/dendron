@@ -417,11 +417,14 @@ export class FileStorageV2 implements DStoreV2 {
     const newNote = { ...oldNote, fname: newLoc.fname };
     await this.deleteNote(oldNote.id);
     await this.writeNote(newNote, { newNode: true });
-    await Promise.all(notesChanged.map(async (n) => this.updateNote(n)));
-    return notesChanged.map((note) => ({
-      status: "update",
+    await Promise.all(notesChanged.map(async (n) => this.writeNote(n)));
+    let out: NoteChangeEntry[] = notesChanged.map((note) => ({
+      status: "update" as const,
       note,
     }));
+    out = out.concat([{ status: "delete" as const, note: oldNote }]);
+    out = out.concat([{ status: "create" as const, note: newNote }]);
+    return out;
   }
 
   async updateNote(

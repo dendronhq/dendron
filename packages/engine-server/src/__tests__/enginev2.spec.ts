@@ -656,6 +656,7 @@ describe("engine, notes/", () => {
         newLoc: { fname: "baz", vault: { fsPath: vaultDir } },
       });
       expect(changed).toMatchSnapshot();
+      expect(changed.data?.length).toEqual(3);
       expect(_.trim((changed.data as NoteChangeEntry[])[0].note.body)).toEqual(
         "[[baz]]"
       );
@@ -663,6 +664,11 @@ describe("engine, notes/", () => {
       expect(notes).toMatchSnapshot();
       expect(_.includes(notes, "foo.md")).toBeFalsy();
       expect(_.includes(notes, "baz.md")).toBeTruthy();
+      expect(
+        fs
+          .readFileSync(path.join(vaultDir, "bar.md"), { encoding: "utf8" })
+          .indexOf("[[baz]]") >= 0
+      ).toBeTruthy();
     });
   });
 

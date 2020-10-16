@@ -1,4 +1,4 @@
-import { getStage, setEnv } from "@dendronhq/common-all";
+import { DendronError, getStage, setEnv } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";
@@ -91,14 +91,17 @@ export class Logger {
 
   static log = (msg: any, lvl: TraceLevel, _opts?: { show?: boolean }) => {
     if (Logger.cmpLevel(lvl)) {
-      const stringMsg = customStringify(msg);
+      let stringMsg = customStringify(msg);
       Logger.logger && Logger.logger[lvl](msg);
       Logger.output?.appendLine(lvl + ": " + stringMsg);
       // FIXME: disable for now
       const shouldShow = false; // getStage() === "dev" && cleanOpts.show;
       if (shouldShow || Logger.cmpLevels(lvl, "error")) {
-        const cleanMsg = stringMsg;
+        let cleanMsg = stringMsg;
         if (Logger.cmpLevels(lvl, "error")) {
+          if (msg instanceof DendronError && msg.friendly) {
+            cleanMsg = msg.friendly;
+          }
           window.showErrorMessage(cleanMsg);
         } else if (Logger.cmpLevels(lvl, "info")) {
           window.showInformationMessage(cleanMsg);

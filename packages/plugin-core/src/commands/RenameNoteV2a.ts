@@ -63,7 +63,10 @@ export class RenameNoteV2aCommand extends BaseCommand<
     let newNote = NoteUtilsV2.getNoteByFname(inputs.dest, notes);
     let isStub = newNote?.stub;
     if (newNote && !isStub) {
-      throw new DendronError({ status: ENGINE_ERROR_CODES.NODE_EXISTS });
+      throw new DendronError({
+        status: ENGINE_ERROR_CODES.NODE_EXISTS,
+        friendly: `${inputs.dest} exists`,
+      });
     }
     newNote = NoteUtilsV2.create({ fname: inputs.dest, id: newNote?.id });
     const newUri = Uri.file(
@@ -114,9 +117,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
   async showResponse(res: CommandOutput) {
     const { changed } = res;
     if (changed.length > 0 && !this.silent) {
-      window.showInformationMessage(
-        `Dendron updated links in ${changed.length} files`
-      );
+      window.showInformationMessage(`Dendron updated ${changed.length} files`);
     }
   }
 

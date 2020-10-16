@@ -34,7 +34,7 @@ suite("notes", function () {
     HistoryService.instance().clearSubscriptions();
   });
 
-  test("note exists", (done) => {
+  test.only("note exists", (done) => {
     onWSInit(async () => {
       try {
         await VSCodeUtils.openFileInEditor(
@@ -64,8 +64,8 @@ suite("notes", function () {
         vscode.Uri.file(path.join(vaultDir, "foo.md"))
       );
       VSCodeUtils.showInputBox = async () => "bar";
-      const changed = await new RenameNoteV2aCommand().run();
-      assert.deepStrictEqual(changed, { changed: [] });
+      const resp = await new RenameNoteV2aCommand().run();
+      assert.deepStrictEqual(resp?.changed?.length, 2);
       assert.strictEqual(
         DNodeUtilsV2.fname(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
@@ -91,7 +91,7 @@ suite("notes", function () {
       VSCodeUtils.showInputBox = async () => "foo2";
       const resp = await new RenameNoteV2aCommand().run();
       const note = DendronWorkspace.instance().getEngine().notes["bar"];
-      assert.deepStrictEqual(resp?.changed.length, 1);
+      assert.deepStrictEqual(resp?.changed.length, 3);
       assert.deepStrictEqual(resp?.changed[0]?.note, note);
       assert.strictEqual(
         DNodeUtilsV2.fname(

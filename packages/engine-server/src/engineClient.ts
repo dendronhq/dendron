@@ -26,6 +26,7 @@ import {
   WriteNoteResp,
   RenameNoteOptsV2,
   RenameNotePayload,
+  NoteChangeEntry,
 } from "@dendronhq/common-all";
 import { DendronAPI } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -198,6 +199,18 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.fuseEngine.updateNotesIndex(this.notes);
   }
 
+  async refreshNotesV2(notes: NoteChangeEntry[]) {
+    notes.forEach((ent: NoteChangeEntry) => {
+      const { id } = ent.note;
+      if (ent.status === "delete") {
+        delete this.notes[id];
+      } else {
+        this.notes[id] = ent.note;
+      }
+    });
+    this.fuseEngine.updateNotesIndex(this.notes);
+  }
+
   async refreshSchemas(smods: SchemaModulePropsV2[]) {
     smods.forEach((smod) => {
       const id = SchemaUtilsV2.getModuleRoot(smod).id;
@@ -207,7 +220,7 @@ export class DendronEngineClient implements DEngineClientV2 {
 
   async renameNote(opts: RenameNoteOptsV2): Promise<RespV2<RenameNotePayload>> {
     const resp = await this.api.engineRenameNote({ ...opts, ws: this.ws });
-    await this.refreshNotes(resp.data?.map((n) => n.note) || []);
+    await this.refreshNotesV2(resp.data as NoteChangeEntry[]);
     return resp;
   }
 

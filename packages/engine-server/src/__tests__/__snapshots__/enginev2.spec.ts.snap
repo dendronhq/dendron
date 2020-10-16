@@ -279,6 +279,93 @@ Object {
       },
       "status": "update",
     },
+    Object {
+      "note": Object {
+        "body": "[[bar]]
+",
+        "children": Array [
+          "foo.ch1",
+        ],
+        "created": "1",
+        "custom": Object {},
+        "data": Object {},
+        "desc": "",
+        "fname": "foo",
+        "id": "foo",
+        "links": Array [
+          Object {
+            "alias": undefined,
+            "from": Object {
+              "fname": "foo",
+              "id": "foo",
+            },
+            "original": "[[bar]]",
+            "pos": Object {
+              "end": 7,
+              "start": 0,
+            },
+            "to": Object {
+              "fname": "bar",
+            },
+            "type": "wiki",
+            "value": "bar",
+          },
+        ],
+        "parent": "root",
+        "schema": Object {
+          "moduleId": "foo",
+          "schemaId": "foo",
+        },
+        "stub": true,
+        "title": "Foo",
+        "type": "note",
+        "updated": "1",
+      },
+      "status": "delete",
+    },
+    Object {
+      "note": Object {
+        "body": "[[bar]]
+",
+        "children": Array [
+          "foo.ch1",
+        ],
+        "created": "1",
+        "custom": Object {},
+        "data": Object {},
+        "desc": "",
+        "fname": "baz",
+        "id": "foo",
+        "links": Array [
+          Object {
+            "alias": undefined,
+            "from": Object {
+              "fname": "foo",
+              "id": "foo",
+            },
+            "original": "[[bar]]",
+            "pos": Object {
+              "end": 7,
+              "start": 0,
+            },
+            "to": Object {
+              "fname": "bar",
+            },
+            "type": "wiki",
+            "value": "bar",
+          },
+        ],
+        "parent": "root",
+        "schema": Object {
+          "moduleId": "foo",
+          "schemaId": "foo",
+        },
+        "title": "Foo",
+        "type": "note",
+        "updated": "1",
+      },
+      "status": "create",
+    },
   ],
   "error": null,
 }

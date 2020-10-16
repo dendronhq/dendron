@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.10-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.9...v0.12.10-alpha.0) (2020-10-16)
+
+### Bug Fixes
+
+- **server:** rename note doesn't get edits after engine init ([fc97c18](https://github.com/dendronhq/dendron/commit/fc97c18c4a59f41b9ccd33e7f10a5af0b4271e86))
+
 ## [0.12.9](https://github.com/dendronhq/dendron/compare/v0.12.9-alpha.1...v0.12.9) (2020-10-15)
 
 **Note:** Version bump only for package @dendronhq/engine-server

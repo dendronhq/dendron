@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.10-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.9...v0.12.10-alpha.0) (2020-10-16)
+
+### Enhancements
+
+- **server:** enable publishing ([9d3cc87](https://github.com/dendronhq/dendron/commit/9d3cc87d418f76eead047a26b9a47714a3fe5429))
+
 ## [0.12.9](https://github.com/dendronhq/dendron/compare/v0.12.9-alpha.1...v0.12.9) (2020-10-15)
 
 **Note:** Version bump only for package @dendronhq/dendron-cli

@@ -255,12 +255,12 @@ Object {
         "id": "bar",
         "links": Array [
           Object {
-            "alias": undefined,
+            "alias": "baz",
             "from": Object {
               "fname": "bar",
               "id": "bar",
             },
-            "original": "[[baz]]",
+            "original": "baz",
             "pos": Object {
               "end": 7,
               "start": 0,
@@ -294,12 +294,12 @@ Object {
         "id": "foo",
         "links": Array [
           Object {
-            "alias": undefined,
+            "alias": "bar",
             "from": Object {
               "fname": "foo",
               "id": "foo",
             },
-            "original": "[[bar]]",
+            "original": "bar",
             "pos": Object {
               "end": 7,
               "start": 0,
@@ -338,12 +338,12 @@ Object {
         "id": "foo",
         "links": Array [
           Object {
-            "alias": undefined,
+            "alias": "bar",
             "from": Object {
               "fname": "foo",
               "id": "foo",
             },
-            "original": "[[bar]]",
+            "original": "bar",
             "pos": Object {
               "end": 7,
               "start": 0,

@@ -1,14 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`ParserUtilsV2 findLinks empty link 1`] = `Array []`;
+
 exports[`ParserUtilsV2 findLinks one link: bond 1`] = `
 Array [
   Object {
-    "alias": undefined,
+    "alias": "bar",
     "from": Object {
       "fname": "foo",
       "id": "foo",
     },
-    "original": "[[bar]]",
+    "original": "bar",
     "pos": Object {
       "end": 7,
       "start": 0,

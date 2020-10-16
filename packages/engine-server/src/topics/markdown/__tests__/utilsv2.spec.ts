@@ -16,6 +16,19 @@ describe(ParserUtilsV2, () => {
       expect(links).toMatchSnapshot("bond");
       expect(links[0].to?.fname).toEqual("bar");
     });
+
+    test("empty link", () => {
+      const note = NoteUtilsV2.create({
+        fname: "foo",
+        id: "foo",
+        created: "1",
+        updated: "1",
+        body: "[[]]",
+      });
+      const links = ParserUtilsV2.findLinks({ note });
+      expect(links).toMatchSnapshot();
+      expect(_.isEmpty(links)).toBeTruthy();
+    });
   });
 
   describe("replaceLinks", async () => {

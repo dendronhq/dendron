@@ -18,6 +18,11 @@ declare class RemarkParserClass implements Parser {
   inlineMethods: string[];
 }
 
+export type WikiLinkNote = Node & {
+  data: WikiLinkData;
+  value: string;
+};
+
 export type WikiLinkData = {
   alias: string;
   permalink: string;

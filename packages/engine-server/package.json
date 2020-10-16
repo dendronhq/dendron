@@ -72,6 +72,7 @@
     "through2": "^4.0.2",
     "unified": "^9.1.0",
     "unified-engine": "^8.0.0",
+    "unist-util-select": "^3.0.1",
     "unist-util-visit": "^2.0.3",
     "vscode-uri": "^2.1.2",
     "yamljs": "^0.3.0"

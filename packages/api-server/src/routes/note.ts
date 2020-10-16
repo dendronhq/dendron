@@ -3,6 +3,7 @@ import {
   EngineDeleteRequest,
   EngineGetNoteByPathRequest,
   EngineQueryRequest,
+  EngineRenameNoteRequest,
   EngineUpdateNoteRequest,
   EngineWriteRequest,
 } from "@dendronhq/common-server";
@@ -31,6 +32,13 @@ router.post("/getByPath", async (req: Request, res: Response) => {
   }
   const resp = await engine.getNoteByPath(opts);
   console.log({ bond: true, resp: JSON.stringify(resp) });
+  res.json(resp);
+});
+
+router.post("/rename", async (req: Request, res: Response) => {
+  const resp = await NoteController.instance().rename(
+    req.body as EngineRenameNoteRequest
+  );
   res.json(resp);
 });
 

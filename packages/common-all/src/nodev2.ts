@@ -97,6 +97,10 @@ export class DNodeUtilsV2 {
     return nodePath.split(".")[0];
   }
 
+  static fname(nodePath: string) {
+    return path.basename(nodePath, ".md");
+  }
+
   static enhancePropForQuickInput(
     props: DNodePropsV2,
     schemaModules: SchemaModuleDictV2

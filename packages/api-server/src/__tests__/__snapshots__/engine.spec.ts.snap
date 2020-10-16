@@ -22,6 +22,7 @@ Object {
       "desc": "",
       "fname": "foo.ch1",
       "id": "foo.ch1",
+      "links": Array [],
       "parent": "foo",
       "schema": Object {
         "moduleId": "foo",
@@ -43,6 +44,7 @@ Object {
       "desc": "",
       "fname": "foo",
       "id": "foo",
+      "links": Array [],
       "parent": "root",
       "schema": Object {
         "moduleId": "foo",
@@ -72,6 +74,7 @@ Object {
       "desc": "",
       "fname": "foo",
       "id": "foo",
+      "links": Array [],
       "parent": "root",
       "schema": Object {
         "moduleId": "foo",
@@ -91,6 +94,7 @@ Object {
       "desc": "",
       "fname": "foo.ch1",
       "id": "foo.ch1",
+      "links": Array [],
       "parent": "foo",
       "schema": Object {
         "moduleId": "foo",
@@ -112,6 +116,7 @@ Object {
       "desc": "",
       "fname": "root",
       "id": "root",
+      "links": Array [],
       "parent": null,
       "title": "Root",
       "type": "note",
@@ -137,6 +142,7 @@ Object {
       "desc": "",
       "fname": "root",
       "id": "root",
+      "links": Array [],
       "parent": null,
       "title": "Root",
       "type": "note",
@@ -145,6 +151,61 @@ Object {
   ],
   "error": null,
 }
+`;
+
+exports[`notes rename/ basic 1`] = `
+Object {
+  "data": Array [
+    Object {
+      "note": Object {
+        "body": "[[baz]]
+",
+        "children": Array [],
+        "created": "1",
+        "custom": Object {},
+        "data": Object {},
+        "desc": "",
+        "fname": "bar",
+        "id": "bar",
+        "links": Array [
+          Object {
+            "from": Object {
+              "fname": "bar",
+              "id": "bar",
+            },
+            "original": "[[baz]]",
+            "pos": Object {
+              "end": 7,
+              "start": 0,
+            },
+            "to": Object {
+              "fname": "baz",
+            },
+            "type": "wiki",
+            "value": "baz",
+          },
+        ],
+        "parent": "root",
+        "title": "Bar",
+        "type": "note",
+        "updated": "1",
+      },
+      "status": "update",
+    },
+  ],
+  "error": null,
+}
+`;
+
+exports[`notes rename/ basic 2`] = `
+Array [
+  "bar.md",
+  "baz.md",
+  "foo.ch1.md",
+  "foo.schema.yml",
+  "root.md",
+  "root.schema.yml",
+]
 `;
 
 exports[`schema write simple schema 1`] = `

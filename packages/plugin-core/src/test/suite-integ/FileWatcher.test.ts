@@ -3,6 +3,7 @@ import { DirResult, FileTestUtils, note2File } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
+import _ from "lodash";
 import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
@@ -27,6 +28,65 @@ suite("notes", function () {
 
   afterEach(function () {
     HistoryService.instance().clearSubscriptions();
+  });
+  describe("onDidCreate", function () {
+    test("create", function (done) {
+      onWSInit(async () => {
+        watcher = new VaultWatcher({
+          vaults: [{ name: "main", uri: vscode.Uri.file(vaultPath), index: 0 }],
+        });
+        const bar = NoteUtilsV2.create({
+          fname: `bar`,
+          id: `bar`,
+          body: "bar body",
+          updated: "1",
+          created: "1",
+        });
+        await note2File(bar, vaultPath);
+        const notePath = path.join(vaultPath, "bar.md");
+        const uri = vscode.Uri.file(notePath);
+        const note = await watcher.onDidCreate(uri);
+        assert.deepStrictEqual(note?.id, bar.id);
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        lsp: true,
+        useCb: async (vaultDir) => {
+          vaultPath = vaultDir;
+          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+        },
+      });
+    });
+
+    test.skip("pause ", function (done) {
+      onWSInit(async () => {
+        // @ts-ignore
+        const watcher = new VaultWatcher({
+          vaults: [{ name: "main", uri: vscode.Uri.file(vaultPath), index: 0 }],
+        });
+        watcher.pause = true;
+        const bar = NoteUtilsV2.create({
+          fname: `bar`,
+          id: `bar`,
+          body: "bar body",
+          updated: "1",
+          created: "1",
+        });
+        await note2File(bar, vaultPath);
+        const notePath = path.join(vaultPath, "bar.md");
+        const uri = vscode.Uri.file(notePath);
+        const note = await watcher.onDidCreate(uri);
+        assert.ok(_.isUndefined(note));
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        lsp: true,
+        useCb: async (vaultDir) => {
+          vaultPath = vaultDir;
+          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+        },
+      });
+    });
   });
 
   describe.skip("onDidChange", function () {

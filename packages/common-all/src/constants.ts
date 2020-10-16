@@ -7,6 +7,7 @@ export const CONSTANTS = {
 };
 
 export const ENGINE_ERROR_CODES = {
+  NODE_EXISTS: "node_exists",
   NO_SCHEMA_FOUND: "no_schema_found",
   NO_ROOT_SCHEMA_FOUND: "no_root_schema_found",
   MISSING_SCHEMA: "missing_schema",

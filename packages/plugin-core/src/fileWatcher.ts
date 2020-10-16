@@ -1,4 +1,8 @@
-import { DEngineClientV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import {
+  DEngineClientV2,
+  NotePropsV2,
+  NoteUtilsV2,
+} from "@dendronhq/common-all";
 import { file2Note, string2Note } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -11,6 +15,10 @@ import { DendronWorkspace } from "./workspace";
 
 export class VaultWatcher {
   public watcher: vscode.FileSystemWatcher;
+  /**
+   * Should watching be paused
+   */
+  public pause: boolean;
   public L = Logger;
   public ws: DendronWorkspace;
   public engine: DEngineClientV2;
@@ -27,6 +35,7 @@ export class VaultWatcher {
     this.watcher = watcher;
     this.ws = DendronWorkspace.instance();
     this.engine = this.ws.getEngine();
+    this.pause = false;
   }
 
   activate() {
@@ -39,6 +48,9 @@ export class VaultWatcher {
 
   async onDidChange(uri: vscode.Uri) {
     const ctx = "VaultWatcher:onDidChange";
+    if (this.pause) {
+      return;
+    }
     this.L.info({ ctx, uri });
     const eclient = DendronWorkspace.instance().getEngine();
     const fname = path.basename(uri.fsPath, ".md");
@@ -115,8 +127,12 @@ export class VaultWatcher {
     return note;
   }
 
-  async onDidCreate(uri: vscode.Uri) {
+  async onDidCreate(uri: vscode.Uri): Promise<NotePropsV2 | undefined> {
     const ctx = "VaultWatcher:onDidCreate";
+    if (this.pause) {
+      this.L.info({ ctx, uri, msg: "paused" });
+      return;
+    }
     this.L.info({ ctx, uri });
     const fname = path.basename(uri.fsPath, ".md");
 
@@ -153,17 +169,22 @@ export class VaultWatcher {
           newNode: true,
         });
         this.L.debug({ ctx, uri, msg: "post-add-to-engine", note });
+        return note;
       } catch (err) {
         this.L.error({ ctx, err });
       }
     } finally {
       this.L.debug({ ctx, uri, msg: "refreshTree" });
       VaultWatcher.refreshTree();
+      return;
     }
   }
 
   async onDidDelete(uri: vscode.Uri) {
     const ctx = "VaultWatcher:onDidDelete";
+    if (this.pause) {
+      return;
+    }
     try {
       this.L.info({ ctx, uri });
       const fname = path.basename(uri.fsPath, ".md");

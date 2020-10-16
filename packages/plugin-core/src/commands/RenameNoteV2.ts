@@ -1,9 +1,15 @@
-import { DNodeUtils, Note } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DNodeUtils,
+  ENGINE_ERROR_CODES,
+  Note,
+} from "@dendronhq/common-all";
 import { mdFile2NodeProps } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _, { groupBy } from "lodash";
 import path from "path";
 import { TextEditor, Uri, window } from "vscode";
+import { FileItem } from "../external/fileutils/FileItem";
 import {
   cacheUris,
   containsMarkdownExt,
@@ -17,7 +23,6 @@ import { HistoryService } from "../services/HistoryService";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
-import { FileItem } from "../external/fileutils/FileItem";
 
 type CommandInput = {
   dest: string;
@@ -76,7 +81,7 @@ export class RenameNoteV2Command extends BaseCommand<
     let newNote = _.find(_.values(ws.engine.notes), { fname: inputs.dest });
     let isStub = newNote?.stub;
     if (newNote && !isStub) {
-      throw Error(`${inputs.dest} already exists`);
+      throw new DendronError({ status: ENGINE_ERROR_CODES.NODE_EXISTS });
     }
     newNote = new Note({ fname: inputs.dest, id: newNote?.id });
     const newUri = Uri.file(

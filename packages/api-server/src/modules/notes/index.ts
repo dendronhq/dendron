@@ -4,6 +4,8 @@ import {
   EngineDeleteRequest,
   EngineGetNoteByPathPayload,
   EngineGetNoteByPathRequest,
+  EngineRenameNotePayload,
+  EngineRenameNoteRequest,
   EngineUpdateNotePayload,
   EngineUpdateNoteRequest,
 } from "@dendronhq/common-server";
@@ -50,6 +52,25 @@ export class NoteController {
     }
     try {
       const data = await engine.getNoteByPath({ npath, createIfNew });
+      return data;
+    } catch (err) {
+      return {
+        error: new DendronError({ msg: JSON.stringify(err) }),
+        data: undefined,
+      };
+    }
+  }
+
+  async rename({
+    ws,
+    ...opts
+  }: EngineRenameNoteRequest): Promise<EngineRenameNotePayload> {
+    const engine = await MemoryStore.instance().get<DEngineV2>(`ws:${ws}`);
+    if (!engine) {
+      throw "No Engine";
+    }
+    try {
+      const data = await engine.renameNote(opts);
       return data;
     } catch (err) {
       return {

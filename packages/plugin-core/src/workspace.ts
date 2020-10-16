@@ -37,6 +37,7 @@ import { PublishCommand } from "./commands/Publish";
 import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import { RenameNoteV2Command } from "./commands/RenameNoteV2";
+import { RenameNoteV2aCommand } from "./commands/RenameNoteV2a";
 import { ResetConfigCommand } from "./commands/ResetConfig";
 import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import { ShowHelpCommand } from "./commands/ShowHelp";
@@ -71,7 +72,9 @@ export type ServerConfiguration = {
 export class DendronWorkspace {
   static DENDRON_WORKSPACE_FILE: string = "dendron.code-workspace";
   static _SERVER_CONFIGURATION: Partial<ServerConfiguration>;
+
   public dendronTreeView: DendronTreeView | DendronTreeViewV2 | undefined;
+  public vaultWatcher?: VaultWatcher;
 
   static instance(): DendronWorkspace {
     if (!_DendronWorkspace) {
@@ -481,7 +484,11 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RENAME_NOTE.key,
         async () => {
-          await new RenameNoteV2Command().run();
+          if (DendronWorkspace.lsp()) {
+            await new RenameNoteV2aCommand().run();
+          } else {
+            await new RenameNoteV2Command().run();
+          }
         }
       )
     );
@@ -663,6 +670,7 @@ export class DendronWorkspace {
       disposables.map((d) => {
         this.disposableStore.add(d);
       });
+      this.vaultWatcher = vaultWatcher;
       return;
     }
     this.createWorkspaceWatcher(workspaceFolders);

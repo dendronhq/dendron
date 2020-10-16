@@ -12,6 +12,8 @@ import {
   GetNotePayloadV2,
   NotePropsDictV2,
   NotePropsV2,
+  RenameNoteOptsV2,
+  RenameNotePayload,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
   WriteNoteResp,
@@ -119,6 +121,7 @@ type WorkspaceRequest = { ws: string };
 
 export type EngineQueryRequest = DEngineQuery & { ws: string };
 export type EngineGetNoteByPathRequest = GetNoteOptsV2 & { ws: string };
+export type EngineRenameNoteRequest = RenameNoteOptsV2 & { ws: string };
 export type EngineUpdateNoteRequest = { ws: string } & {
   note: NotePropsV2;
   opts?: EngineUpdateNodesOptsV2;
@@ -156,6 +159,7 @@ export type InitializePayload = APIPayload<{
 
 export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
 export type EngineGetNoteByPathPayload = APIPayload<GetNotePayloadV2>;
+export type EngineRenameNotePayload = APIPayload<RenameNotePayload>;
 export type EngineUpdateNotePayload = APIPayload<void>;
 export type EngineDeletePayload = APIPayload<EngineDeleteNotePayload>;
 
@@ -334,6 +338,17 @@ export class DendronAPI extends API {
   async engineQuery(req: EngineQueryRequest): Promise<EngineQueryPayload> {
     const resp = await this._makeRequest({
       path: "note/query",
+      method: "post",
+      body: req,
+    });
+    return resp;
+  }
+
+  async engineRenameNote(
+    req: EngineRenameNoteRequest
+  ): Promise<EngineRenameNotePayload> {
+    const resp = await this._makeRequest({
+      path: "note/rename",
       method: "post",
       body: req,
     });

@@ -16,6 +16,7 @@ import {
   DendronAPI,
   EngineTestUtils,
   file2Schema,
+  note2File,
   tmpDir,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -445,6 +446,56 @@ describe("notes", () => {
         moduleId: "foo",
         schemaId: "ch1",
       });
+    });
+  });
+
+  describe("rename/", () => {
+    beforeEach(async () => {
+      wsRoot = tmpDir().name;
+      vault = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vault);
+      await EngineTestUtils.setupVault({
+        vaultDir: vault,
+        initDirCb: async (vaultPath: string) => {
+          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+            vaultDir: vaultPath,
+          });
+          let note = NoteUtilsV2.create({
+            fname: "foo",
+            id: "foo",
+            created: "1",
+            updated: "1",
+            body: "[[bar]]",
+          });
+          await note2File(note, vaultPath);
+          note = NoteUtilsV2.create({
+            fname: "bar",
+            id: "bar",
+            created: "1",
+            updated: "1",
+            body: "[[foo]]",
+          });
+          await note2File(note, vaultPath);
+        },
+      });
+      api = await setupWS({ wsRoot, vault });
+    });
+
+    test("basic", async () => {
+      const vaultDir = vault;
+      const changed = await api.engineRenameNote({
+        ws: wsRoot,
+        oldLoc: { fname: "foo", vault: { fsPath: vaultDir } },
+        newLoc: { fname: "baz", vault: { fsPath: vaultDir } },
+      });
+      expect(changed).toMatchSnapshot();
+      expect(_.trim((changed.data as NoteChangeEntry[])[0].note.body)).toEqual(
+        "[[baz]]"
+      );
+      const notes = fs.readdirSync(vaultDir);
+      expect(notes).toMatchSnapshot();
+      expect(_.includes(notes, "foo.md")).toBeFalsy();
+      expect(_.includes(notes, "baz.md")).toBeTruthy();
     });
   });
 

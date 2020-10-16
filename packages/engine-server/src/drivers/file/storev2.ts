@@ -429,6 +429,7 @@ export class FileStorageV2 implements DStoreV2 {
     _opts?: EngineUpdateNodesOptsV2
   ): Promise<void> {
     this.notes[note.id] = note;
+    return;
   }
 
   async updateSchema(schemaModule: SchemaModulePropsV2) {

@@ -56,7 +56,7 @@
     },
     "editor.formatOnSave": false,
     "workbench.editor.showTabs": true,
-    "workbench.colorTheme": "Default Dark+",
+    "workbench.colorTheme": "Solarized Dark",
     "workbench.colorCustomizations": {
       "activityBar.activeBackground": "#3399ff",
       "activityBar.activeBorder": "#bf0060",

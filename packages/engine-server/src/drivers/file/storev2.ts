@@ -404,8 +404,11 @@ export class FileStorageV2 implements DStoreV2 {
     });
     const notesChanged = await Promise.all(
       notesToChange.map(async (n) => {
+        const vaultDir = this.vaults[0];
+        // read note in case its changed
+        const _n = file2Note(path.join(vaultDir, n.fname + ".md"));
         n.body = await ParserUtilsV2.replaceLinks({
-          content: n.body,
+          content: _n.body,
           from: oldLoc,
           to: newLoc,
         });

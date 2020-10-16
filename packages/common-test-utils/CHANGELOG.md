@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.10-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.10-alpha.1...v0.12.10-alpha.2) (2020-10-16)
+
+### Enhancements
+
+- **server:** apply schema templates in all cases ([2e7407a](https://github.com/dendronhq/dendron/commit/2e7407a05fad1356900582c431a1c9f9841f08a8))
+
 ## [0.12.10-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.9...v0.12.10-alpha.0) (2020-10-16)
 
 ### Enhancements

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.10-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.10-alpha.1...v0.12.10-alpha.2) (2020-10-16)
+
+### Enhancements
+
+- **server:** add doctor command ([51726b4](https://github.com/dendronhq/dendron/commit/51726b41f4467e8eb70843164a0223d8984dcee4))
+- **server:** apply schema templates in all cases ([2e7407a](https://github.com/dendronhq/dendron/commit/2e7407a05fad1356900582c431a1c9f9841f08a8))
+- **server:** migrate archive command ([54c3cd7](https://github.com/dendronhq/dendron/commit/54c3cd7a0b91cf5c7200e34b326130603e5cd52e))
+
 ## [0.12.10-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.10-alpha.0...v0.12.10-alpha.1) (2020-10-16)
 
 ### Enhancements

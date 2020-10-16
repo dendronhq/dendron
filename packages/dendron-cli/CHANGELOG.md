@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.10-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.10-alpha.1...v0.12.10-alpha.2) (2020-10-16)
+
+### Enhancements
+
+- **server:** add doctor command ([51726b4](https://github.com/dendronhq/dendron/commit/51726b41f4467e8eb70843164a0223d8984dcee4))
+
 ## [0.12.10-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.10-alpha.0...v0.12.10-alpha.1) (2020-10-16)
 
 **Note:** Version bump only for package @dendronhq/dendron-cli

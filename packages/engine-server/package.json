@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/engine-server",
-  "version": "0.12.10-alpha.1",
+  "version": "0.12.10-alpha.2",
   "description": "dendron-engine",
   "license": "GPLv3",
   "repository": {
@@ -38,8 +38,8 @@
     "test:unit:debug": "NODE_ENV=test  node --inspect node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.12.10-alpha.0",
-    "@dendronhq/common-server": "^0.12.10-alpha.0",
+    "@dendronhq/common-all": "^0.12.10-alpha.2",
+    "@dendronhq/common-server": "^0.12.10-alpha.2",
     "@types/fs-extra": "^9.0.1",
     "@types/jest": "^23.3.3",
     "@types/klaw": "^3.0.1",
@@ -78,7 +78,7 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.12.10-alpha.0",
+    "@dendronhq/common-test-utils": "^0.12.10-alpha.2",
     "@types/execa": "^2.0.0",
     "coveralls": "^3.0.2",
     "cross-env": "^7.0.2",

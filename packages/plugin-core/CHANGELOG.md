@@ -5,7 +5,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.12.10-alpha.4](https://github.com/dendronhq/dendron/compare/v0.12.10-alpha.3...v0.12.10-alpha.4) (2020-10-16)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.12.10-alpha.3](https://github.com/dendronhq/dendron/compare/v0.12.10-alpha.2...v0.12.10-alpha.3) (2020-10-16)
 
@@ -23,9 +23,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.12.10-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.10-alpha.0...v0.12.10-alpha.1) (2020-10-16)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Enhancements
+
+- **server:** better link parsing ([943a86c](https://github.com/dendronhq/dendron/commit/943a86cebd4aa0c9017f4f49124bb1b4039a327f))
 
 ## [0.12.10-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.9...v0.12.10-alpha.0) (2020-10-16)
+
+### Bug Fixes
+
+- **server:** rename note doesn't get edits after engine init ([fc97c18](https://github.com/dendronhq/dendron/commit/fc97c18c4a59f41b9ccd33e7f10a5af0b4271e86))
 
 ### Enhancements
 
@@ -33,14 +39,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - **server:** migrate refactor hierarchy cmd ([b39ab13](https://github.com/dendronhq/dendron/commit/b39ab131678cec43b8f74efdde5372e90e4c11ce))
 
 ## [0.12.9](https://github.com/dendronhq/dendron/compare/v0.12.9-alpha.1...v0.12.9) (2020-10-15)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.9-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.9-alpha.0...v0.12.9-alpha.1) (2020-10-15)
-
-**Note:** Version bump only for package root
-
-## [0.12.9-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.8...v0.12.9-alpha.0) (2020-10-14)
 
 ### Bug Fixes
 

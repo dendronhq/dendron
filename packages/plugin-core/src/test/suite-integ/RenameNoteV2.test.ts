@@ -34,7 +34,7 @@ suite("notes", function () {
     HistoryService.instance().clearSubscriptions();
   });
 
-  test.only("note exists", (done) => {
+  test("note exists", (done) => {
     onWSInit(async () => {
       try {
         await VSCodeUtils.openFileInEditor(

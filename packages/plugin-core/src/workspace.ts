@@ -35,6 +35,7 @@ import { LookupCommand } from "./commands/LookupCommand";
 import { OpenLogsCommand } from "./commands/OpenLogs";
 import { PublishCommand } from "./commands/Publish";
 import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";
+import { RefactorHierarchyCommandV2 } from "./commands/RefactorHierarchyV2";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import { RenameNoteV2Command } from "./commands/RenameNoteV2";
 import { RenameNoteV2aCommand } from "./commands/RenameNoteV2a";
@@ -515,7 +516,11 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.REFACTOR_HIERARCHY.key,
         async () => {
-          await new RefactorHierarchyCommand().run();
+          if (DendronWorkspace.lsp()) {
+            await new RefactorHierarchyCommandV2().run();
+          } else {
+            await new RefactorHierarchyCommand().run();
+          }
         }
       )
     );

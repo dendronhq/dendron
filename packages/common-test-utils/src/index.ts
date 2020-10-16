@@ -385,6 +385,28 @@ export class NodeTestUtilsV2 {
     return { foo, ch1 };
   };
 
+  static createNote = async (opts: {
+    withBody?: boolean;
+    vaultDir?: string;
+    noteProps?: NoteOptsV2;
+  }): Promise<NotePropsV2> => {
+    const cleanOpts = _.defaults(opts, {
+      withBody: true,
+      noteProps: [] as NoteOptsV2[],
+    });
+    const defaultOpts = {
+      created: "1",
+      updated: "1",
+    };
+    const n = cleanOpts.noteProps;
+    const body = n.body || cleanOpts.withBody ? n.fname + " body" : "";
+    const _n = NoteUtilsV2.create({ ...defaultOpts, ...n, body });
+    if (cleanOpts.vaultDir) {
+      await note2File(_n, cleanOpts.vaultDir);
+    }
+    return _n;
+  };
+
   static createNotes = async (opts: {
     withBody?: boolean;
     vaultPath?: string;

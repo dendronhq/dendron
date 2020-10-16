@@ -25,12 +25,13 @@ type CommandOpts = {
   silent: boolean;
   closeCurrentFile: boolean;
   openNewFile: boolean;
+  noModifyWatcher?: boolean;
 };
 type CommandOutput = {
   changed: NoteChangeEntry[];
 };
 
-export { CommandOutput as RenameNoteOutput };
+export { CommandOutput as RenameNoteOutputV2a };
 
 export class RenameNoteV2aCommand extends BaseCommand<
   CommandOpts,
@@ -128,7 +129,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
     try {
       const { files } = opts;
       const { newUri, oldUri } = files[0];
-      if (ws.vaultWatcher) {
+      if (ws.vaultWatcher && !opts.noModifyWatcher) {
         ws.vaultWatcher.pause = true;
       }
       const engine = ws.getEngine();
@@ -146,16 +147,18 @@ export class RenameNoteV2aCommand extends BaseCommand<
       const changed = resp.data as NoteChangeEntry[];
 
       // re-link
-      if (opts.closeCurrentFile) {
-        await VSCodeUtils.closeCurrentFileEditor();
+      if (!this.silent) {
+        if (opts.closeCurrentFile) {
+          await VSCodeUtils.closeCurrentFileEditor();
+        }
+        opts.openNewFile &&
+          (await VSCodeUtils.openFileInEditor(new FileItem(files[0].newUri)));
       }
-      opts.openNewFile &&
-        (await VSCodeUtils.openFileInEditor(new FileItem(files[0].newUri)));
       return {
         changed,
       };
     } finally {
-      if (ws.vaultWatcher) {
+      if (ws.vaultWatcher && !opts.noModifyWatcher) {
         setTimeout(() => {
           if (ws.vaultWatcher) {
             ws.vaultWatcher.pause = false;

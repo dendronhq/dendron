@@ -30,6 +30,8 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
   }
 
   async run(args?: any): Promise<TOut | undefined> {
+    // @ts-ignore
+    const ctx = `${this.__proto__.constructor.name}:run`;
     try {
       const out = await this.sanityCheck();
       if (!_.isUndefined(out)) {
@@ -44,6 +46,7 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
           return;
         }
         const resp = await this.execute({ ...opts, ...args });
+        this.L.info({ ctx, msg: "post-execute" });
         this.showResponse(resp);
         return resp;
       }

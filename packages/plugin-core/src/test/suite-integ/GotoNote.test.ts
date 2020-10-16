@@ -100,4 +100,23 @@ suite("notes", function () {
       },
     });
   });
+
+  test("go to new note with template", (done) => {
+    onWSInit(async () => {
+      await new GotoNoteCommand().run({
+        qs: "bar.ch1",
+        mode: "note",
+      });
+      assert.deepStrictEqual(getActiveEditorBasename(), "bar.ch1.md");
+      const content = VSCodeUtils.getActiveTextEditor()?.document.getText() as string;
+      assert.ok(content.indexOf("ch1 template") >= 0);
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      useCb: async (vaultDir) => {
+        await NodeTestPresetsV2.createSchemaPreset({ vaultDir });
+      },
+    });
+  });
 });

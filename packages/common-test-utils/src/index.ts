@@ -13,6 +13,7 @@ import {
 import {
   note2File,
   schemaModuleOpts2File,
+  schemaModuleProps2File,
   tmpDir,
 } from "@dendronhq/common-server";
 import assert from "assert";
@@ -58,6 +59,41 @@ export class NodeTestPresetsV2 {
     return _.map(await results(opts), (ent) =>
       expect(ent.actual).toEqual(ent.expected)
     );
+  }
+
+  static async createSchemaPreset({ vaultDir }: { vaultDir: string }) {
+    await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+    await NodeTestUtilsV2.createSchema({
+      vaultDir,
+      schemas: [
+        SchemaUtilsV2.create({
+          id: "bar",
+          parent: "root",
+          children: ["ch1", "ch2"],
+        }),
+        SchemaUtilsV2.create({
+          id: "ch1",
+          template: { id: "bar.template.ch1", type: "note" },
+        }),
+        SchemaUtilsV2.create({
+          id: "ch2",
+          template: { id: "bar.template.ch2", type: "note" },
+          namespace: true,
+        }),
+      ],
+      fname: "bar",
+    });
+    await NodeTestUtilsV2.createNote({
+      vaultDir,
+      noteProps: { body: "ch1 template", fname: "bar.template.ch1" },
+    });
+    await NodeTestUtilsV2.createNote({
+      vaultDir,
+      noteProps: {
+        body: "ch2 template",
+        fname: "bar.template.ch2",
+      },
+    });
   }
   static async createOneNoteOneSchemaPreset({
     vaultDir,
@@ -399,8 +435,8 @@ export class NodeTestUtilsV2 {
       updated: "1",
     };
     const n = cleanOpts.noteProps;
-    const body = n.body || cleanOpts.withBody ? n.fname + " body" : "";
-    const _n = NoteUtilsV2.create({ ...defaultOpts, ...n, body });
+    const body = cleanOpts.withBody ? n.fname + " body" : "";
+    const _n = NoteUtilsV2.create({ ...defaultOpts, body, ...n });
     if (cleanOpts.vaultDir) {
       await note2File(_n, cleanOpts.vaultDir);
     }
@@ -442,6 +478,24 @@ export class NodeTestUtilsV2 {
       await note2File(rootNote, cleanOpts.vaultPath);
     }
     return out;
+  };
+
+  static createSchema = async (opts: {
+    vaultDir?: string;
+    fname: string;
+    schemas: SchemaPropsV2[];
+  }): Promise<SchemaModulePropsV2> => {
+    const { vaultDir, schemas, fname } = opts;
+    const schema = SchemaUtilsV2.createModuleProps({
+      fname,
+    });
+    schemas.forEach((s) => {
+      schema.schemas[s.id] = s;
+    });
+    if (vaultDir) {
+      await schemaModuleProps2File(schema, vaultDir, fname);
+    }
+    return schema;
   };
 
   static createSchemas = async (opts: {

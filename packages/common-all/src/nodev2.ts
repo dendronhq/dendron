@@ -7,6 +7,7 @@ import path from "path";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
 import { DNode } from "./node";
+import { SchemaTemplate } from "./types";
 import {
   DEngineClientV2,
   DLoc,
@@ -281,6 +282,29 @@ export class NoteUtilsV2 {
     return DNodeUtilsV2.create({ ...cleanOpts, type: "note" });
   }
 
+  static createWithSchema({
+    noteOpts,
+    engine,
+  }: {
+    noteOpts: NoteOptsV2;
+    engine: DEngineClientV2;
+  }): NotePropsV2 {
+    const note = NoteUtilsV2.create(noteOpts);
+    const maybeMatch = SchemaUtilsV2.matchPath({
+      notePath: noteOpts.fname,
+      schemaModDict: engine.schemas,
+    });
+    if (maybeMatch) {
+      const { schema, schemaModule } = maybeMatch;
+      NoteUtilsV2.addSchema({ note, schemaModule, schema });
+      const maybeTemplate = schema.data.template;
+      if (maybeTemplate) {
+        SchemaUtilsV2.applyTemplate({ template: maybeTemplate, note, engine });
+      }
+    }
+    return note;
+  }
+
   static createRoot(opts: Partial<NoteOptsV2>): NotePropsV2 {
     return DNodeUtilsV2.create({
       ...opts,
@@ -463,6 +487,23 @@ type SchemaMatchResult = {
 };
 
 export class SchemaUtilsV2 {
+  static applyTemplate(opts: {
+    template: SchemaTemplate;
+    note: NotePropsV2;
+    engine: DEngineClientV2;
+  }) {
+    const { template, note, engine } = opts;
+    if (template.type === "note") {
+      const tempNote = _.find(_.values(engine.notes), { fname: template.id });
+      if (_.isUndefined(tempNote)) {
+        throw Error(`no template found for ${template}`);
+      }
+      note.body = tempNote.body;
+      return true;
+    }
+    return false;
+  }
+
   static create(opts: SchemaOptsV2 | SchemaRawV2): SchemaPropsV2 {
     const schemaDataOpts: (keyof SchemaDataV2)[] = [
       "namespace",
@@ -586,6 +627,19 @@ export class SchemaUtilsV2 {
 
   static getPath({ root, fname }: { root: string; fname: string }): string {
     return path.join(root, fname + ".schema.yml");
+  }
+
+  static getSchemaFromNote({
+    note,
+    engine,
+  }: {
+    note: NotePropsV2;
+    engine: DEngineClientV2;
+  }) {
+    if (note.schema) {
+      return engine.schemas[note.schema.moduleId];
+    }
+    return;
   }
 
   static hasSimplePattern = (schema: SchemaPropsV2): boolean => {

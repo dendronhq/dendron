@@ -147,7 +147,10 @@ export class DendronEngineV2 implements DEngineV2 {
         noteNew = maybeNote;
         delete noteNew.stub;
       } else {
-        noteNew = NoteUtilsV2.create({ fname: npath });
+        noteNew = NoteUtilsV2.createWithSchema({
+          noteOpts: { fname: npath },
+          engine: this,
+        });
       }
       changed = (await this.writeNote(noteNew, { newNode: true })).data;
     }

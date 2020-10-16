@@ -47,24 +47,43 @@ export class LookupProviderV2 {
     const ws = DendronWorkspace.instance();
     const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
     const engine = ws.getEngine();
-    if (_.isUndefined(selectedItem)) {
-      Logger.info({ ctx, msg: "create normal node" });
-      nodeNew = NoteUtilsV2.create({ fname });
-    } else if (selectedItem.stub) {
+    if (selectedItem?.stub) {
       Logger.info({ ctx, msg: "create stub" });
       nodeNew = engine.notes[selectedItem.id];
       nodeNew.stub = false;
       foundStub = true;
-    } else if (selectedItem.schemaStub) {
+    } else if (selectedItem?.schemaStub) {
       Logger.info({ ctx, msg: "create schema stub" });
       selectedItem.schemaStub = false;
       nodeNew = selectedItem;
     } else {
-      Logger.info({ ctx, msg: "create from label" });
-      // TODO: isn't this the same as undefined?
+      Logger.info({ ctx, msg: "create normal node" });
       nodeNew = NoteUtilsV2.create({ fname });
+      const result = SchemaUtilsV2.matchPath({
+        notePath: fname,
+        schemaModDict: engine.schemas,
+      });
+      if (result) {
+        NoteUtilsV2.addSchema({
+          note: nodeNew,
+          schemaModule: result.schemaModule,
+          schema: result.schema,
+        });
+      }
     }
-
+    const maybeSchema = SchemaUtilsV2.getSchemaFromNote({
+      note: nodeNew,
+      engine,
+    });
+    const maybeTemplate =
+      maybeSchema?.schemas[nodeNew.schema?.schemaId as string].data.template;
+    if (maybeSchema && maybeTemplate) {
+      SchemaUtilsV2.applyTemplate({
+        template: maybeTemplate,
+        note: nodeNew,
+        engine,
+      });
+    }
     const uri = node2Uri(nodeNew, wsFolders);
     const historyService = HistoryService.instance();
     historyService.add({ source: "engine", action: "create", uri });
@@ -108,6 +127,8 @@ export class LookupProviderV2 {
     picker: DendronQuickPickerV2,
     opts: EngineOpts
   ): Promise<Uri> {
+    const ctx = "onAcceptNewNode";
+    Logger.info({ ctx });
     if (opts.flavor === "schema") {
       return this._onAcceptNewSchema(picker);
     } else {

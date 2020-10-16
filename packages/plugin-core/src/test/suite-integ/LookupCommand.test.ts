@@ -472,7 +472,7 @@ suite("notes", function () {
     //     });
   });
 
-  describe.only("onAccept", function () {
+  describe("onAccept", function () {
     const engOpts: EngineOpts = { flavor: "note" };
     let ws: DendronWorkspace;
     let client: DEngineClientV2;

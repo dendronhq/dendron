@@ -139,6 +139,7 @@ export class VaultWatcher {
     // check if ignore
     const recentEvents = HistoryService.instance().lookBack();
     this.L.debug({ ctx, recentEvents, fname });
+    let note: NotePropsV2 | undefined;
     try {
       if (
         _.find(recentEvents, (event) => {
@@ -155,7 +156,7 @@ export class VaultWatcher {
 
       try {
         this.L.debug({ ctx, uri, msg: "pre-add-to-engine" });
-        let note = file2Note(uri.fsPath);
+        note = file2Note(uri.fsPath);
         const maybeNote = NoteUtilsV2.getNoteByFname(fname, this.engine.notes);
         if (maybeNote) {
           note = {
@@ -172,11 +173,12 @@ export class VaultWatcher {
         return note;
       } catch (err) {
         this.L.error({ ctx, err });
+        return note;
       }
     } finally {
       this.L.debug({ ctx, uri, msg: "refreshTree" });
       VaultWatcher.refreshTree();
-      return;
+      return note;
     }
   }
 

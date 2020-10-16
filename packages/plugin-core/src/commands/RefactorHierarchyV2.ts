@@ -182,7 +182,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
           changed: [],
         })
       );
-      return out;
+      return { changed: _.uniqBy(out.changed, (ent) => ent.note.fname) };
     } finally {
       if (ws.vaultWatcher) {
         setTimeout(() => {

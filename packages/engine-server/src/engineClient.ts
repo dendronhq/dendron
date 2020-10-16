@@ -24,6 +24,8 @@ import {
   SchemaQueryResp,
   SchemaUtilsV2,
   WriteNoteResp,
+  RenameNoteOptsV2,
+  RenameNotePayload,
 } from "@dendronhq/common-all";
 import { DendronAPI } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -201,6 +203,16 @@ export class DendronEngineClient implements DEngineClientV2 {
       const id = SchemaUtilsV2.getModuleRoot(smod).id;
       this.schemas[id] = smod;
     });
+  }
+
+  async renameNote(opts: RenameNoteOptsV2): Promise<RespV2<RenameNotePayload>> {
+    // const resp = await this.store.renameNote(opts);
+    // TODO
+    const resp: any[] = [];
+    return {
+      error: null,
+      data: resp,
+    };
   }
 
   async updateNote(

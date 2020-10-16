@@ -34,7 +34,7 @@ export class ParserUtilsV2 {
   static findLinks({ note }: { note: NotePropsV2 }): DLink[] {
     const content = note.body;
     const reWiki = ParserUtilsV2.createWikiLinkRE();
-    const wikiLinks = content.matchAll(new RegExp(reWiki, "i"));
+    const wikiLinks = content.matchAll(new RegExp(reWiki, "gi"));
     const wikiLinksMatches = Array.from(wikiLinks, (m) => {
       if (_.isUndefined(m.index)) {
         throw Error("no index found, findLinks");

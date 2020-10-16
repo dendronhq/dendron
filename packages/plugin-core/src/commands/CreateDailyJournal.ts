@@ -43,10 +43,6 @@ export class CreateDailyJournalCommand extends CreateNoteCommand {
   async execute(opts: CommandOpts) {
     const { fname } = opts;
     if (DendronWorkspace.lsp()) {
-      // const lookupOpts = {
-      //   noConfirm: true,
-      //   value: fname,
-      // };
       await new GotoNoteCommand().execute({ qs: fname, mode: "note" as const });
       return vscode.Uri.file("/tmp");
     }

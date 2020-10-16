@@ -220,6 +220,35 @@ export async function _activate(context: vscode.ExtensionContext) {
     );
     Logger.info({ ctx, msg: "wsActive", lspSupport });
     if (lspSupport) {
+      let startupProgress: vscode.Progress<{
+        message: string;
+        increment: number;
+      }>;
+      vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: "Starting Dendron...",
+          cancellable: true,
+        },
+        (progress, token) => {
+          startupProgress = progress;
+          token.onCancellationRequested(() => {
+            console.log("Cancelled");
+          });
+
+          const p = new Promise((resolve) => {
+            HistoryService.instance().subscribe(
+              "extension",
+              async (_event: HistoryEvent) => {
+                if (_event.action === "initialized") {
+                  resolve();
+                }
+              }
+            );
+          });
+          return p;
+        }
+      );
       Logger.info({ ctx, msg: "start with lsp support" });
       const port: number = await startServer();
       Logger.info({ ctx, msg: "post-start-server", port });

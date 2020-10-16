@@ -220,18 +220,13 @@ export async function _activate(context: vscode.ExtensionContext) {
     );
     Logger.info({ ctx, msg: "wsActive", lspSupport });
     if (lspSupport) {
-      let startupProgress: vscode.Progress<{
-        message: string;
-        increment: number;
-      }>;
       vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
           title: "Starting Dendron...",
           cancellable: true,
         },
-        (progress, token) => {
-          startupProgress = progress;
+        (_progress, token) => {
           token.onCancellationRequested(() => {
             console.log("Cancelled");
           });

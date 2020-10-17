@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 
-/* eslint-disable no-unused-expressions */
+import { env, setEnv } from "@dendronhq/common-all";
+
+if (!env("LOG_LEVEL", { shouldThrow: false })) {
+  setEnv("LOG_LEVEL", "error");
+}
+
 import { DendronEngine } from "@dendronhq/engine-server";
 import yargs from "yargs";
 import { BuildSiteCommand } from "../src";
@@ -68,7 +73,6 @@ PlantSeedCommand.buildCmd(buildYargs);
 BuildSiteCommand.buildCmd(buildYargs);
 PublishNotesCommand.buildCmd(buildYargs);
 PublishPodCLICommand.buildCmd(buildYargs);
-//.command(...PlantSeedCommand.cmd())
 // .command<RefactorFMCliOpts>(
 //   "refactorFM",
 //   "refactor frontmatter",

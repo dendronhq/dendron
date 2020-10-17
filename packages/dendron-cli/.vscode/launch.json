@@ -8,24 +8,23 @@
       "type": "node",
       "request": "launch",
       "name": "Debug dendron-cli",
-      "program": "${workspaceRoot}/lib/bin/dendron-cli.js",
+      "program": "${workspaceFolder:dendron-cli}/lib/bin/dendron-cli.js",
       "args": ["publishPod",
         "--vault",
         "/Users/kevinlin/projects/dendronv2/dendron-template/vault",
         "--wsRoot",
         "/Users/kevinlin/projects/dendronv2/dendron-template",
         "--podId",
-        "dendron.pod.json",
+        "dendron.md",
         "--noteByName",
         "dendron",
-        "--config",
-        "/Users/kevinlin/projects/dendronv2/dendron/packages/dendron-cli/config.yml"
       ],
+      "env": {"LOG_DST": "/tmp/dendron-cli.log", "LOG_LEVEL": "info"},
       "cwd": "${workspaceRoot}",
       "sourceMaps": true,
       "smartStep": true,
       "outFiles": [
-        "${workspaceRoot}/lib/*.js"
+        "${workspaceFolder:dendron-cli}/lib/**/*.js"
       ]
     },
     {

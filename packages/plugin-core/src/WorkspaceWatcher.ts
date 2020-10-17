@@ -7,7 +7,6 @@ import {
   Range,
   TextDocumentWillSaveEvent,
   TextEdit,
-  // @ts-ignore
   workspace,
 } from "vscode";
 import { Logger } from "./logger";
@@ -15,12 +14,12 @@ import { HistoryService } from "./services/HistoryService";
 import { DendronWorkspace } from "./workspace";
 
 export class WorkspaceWatcher {
-  activate(_context: ExtensionContext) {
-    // workspace.onWillSaveTextDocument(
-    //   this.onWillSaveTextDocument,
-    //   null,
-    //   context.subscriptions
-    // );
+  activate(context: ExtensionContext) {
+    workspace.onWillSaveTextDocument(
+      this.onWillSaveTextDocument,
+      null,
+      context.subscriptions
+    );
   }
 
   async onWillSaveTextDocument(ev: TextDocumentWillSaveEvent) {

@@ -95,6 +95,26 @@ export class NodeTestPresetsV2 {
       },
     });
   }
+
+  static async createOneNoteOneSchemaPresetWithBody({
+    vaultDir,
+  }: {
+    vaultDir: string;
+  }) {
+    await NodeTestUtilsV2.createSchemas({ vaultPath: vaultDir });
+    await NodeTestUtilsV2.createNotes({ vaultPath: vaultDir });
+    await NodeTestUtilsV2.createNoteProps({
+      vaultPath: vaultDir,
+      rootName: "foo",
+      props: {
+        body: "foo body",
+      },
+    });
+    await NodeTestUtilsV2.createSchemaModuleOpts({
+      vaultDir: vaultDir,
+      rootName: "foo",
+    });
+  }
   static async createOneNoteOneSchemaPreset({
     vaultDir,
   }: {
@@ -401,20 +421,23 @@ export class NodeTestUtilsV2 {
   static createNoteProps = async (opts: {
     rootName: string;
     vaultPath: string;
+    props?: Partial<NotePropsV2>;
   }) => {
-    const { rootName, vaultPath } = opts;
+    const { rootName, vaultPath, props } = opts;
     const foo = NoteUtilsV2.create({
       fname: `${rootName}`,
       id: `${rootName}`,
       created: "1",
       updated: "1",
       children: ["ch1"],
+      ...props,
     });
     const ch1 = NoteUtilsV2.create({
       fname: `${rootName}.ch1`,
       id: `${rootName}.ch1`,
       created: "1",
       updated: "1",
+      ...props,
     });
     await note2File(foo, vaultPath);
     await note2File(ch1, vaultPath);

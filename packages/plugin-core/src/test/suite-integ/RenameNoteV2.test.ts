@@ -58,7 +58,39 @@ suite("notes", function () {
     });
   });
 
-  test("change, no updated links", (done) => {
+  test.skip("body update, no updated links", (done) => {
+    onWSInit(async () => {
+      await VSCodeUtils.openFileInEditor(
+        vscode.Uri.file(path.join(vaultDir, "foo.md"))
+      );
+      let active = VSCodeUtils.getActiveTextEditor() as vscode.TextEditor;
+      await active.edit(async (editBuilder) => {
+        editBuilder.insert(new vscode.Position(5, 0), "hello");
+        await active.document.save();
+        VSCodeUtils.showInputBox = async () => "bar";
+        const resp = await new RenameNoteV2aCommand().run();
+        assert.deepStrictEqual(resp?.changed?.length, 2);
+        active = VSCodeUtils.getActiveTextEditor() as vscode.TextEditor;
+        assert.strictEqual(
+          DNodeUtilsV2.fname(active.document.uri.fsPath),
+          "bar"
+        );
+        assert.ok(active.document.getText().indexOf("hello") >= 0);
+        done();
+      });
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      useCb: async (_vaultDir) => {
+        vaultDir = _vaultDir;
+        await NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
+          vaultDir,
+        });
+      },
+    });
+  });
+
+  test("body update after open, no updated links", (done) => {
     onWSInit(async () => {
       await VSCodeUtils.openFileInEditor(
         vscode.Uri.file(path.join(vaultDir, "foo.md"))
@@ -66,19 +98,18 @@ suite("notes", function () {
       VSCodeUtils.showInputBox = async () => "bar";
       const resp = await new RenameNoteV2aCommand().run();
       assert.deepStrictEqual(resp?.changed?.length, 2);
-      assert.strictEqual(
-        DNodeUtilsV2.fname(
-          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-        ),
-        "bar"
-      );
+      const active = VSCodeUtils.getActiveTextEditor() as vscode.TextEditor;
+      assert.strictEqual(DNodeUtilsV2.fname(active.document.uri.fsPath), "bar");
+      assert.ok(active.document.getText().indexOf("foo body") >= 0);
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
       lsp: true,
       useCb: async (_vaultDir) => {
         vaultDir = _vaultDir;
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+        await NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
+          vaultDir,
+        });
       },
     });
   });

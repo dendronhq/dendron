@@ -395,9 +395,9 @@ export class FileStorageV2 implements DStoreV2 {
 
   async renameNote(opts: RenameNoteOptsV2): Promise<RenameNotePayload> {
     const { oldLoc, newLoc } = opts;
-    const oldNote = NoteUtilsV2.getNoteByFname(oldLoc.fname, this.notes, {
-      throwIfEmpty: true,
-    }) as NotePropsV2;
+    const vaultDir = this.vaults[0];
+    // read from disk since contents migh have changed
+    const oldNote = file2Note(path.join(vaultDir, oldLoc.fname + ".md"));
     const notesToChange = await NoteUtilsV2.getNotesWithLinkTo({
       note: oldNote,
       notes: this.notes,

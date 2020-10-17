@@ -58,26 +58,31 @@ suite("notes", function () {
     });
   });
 
-  test.skip("body update, no updated links", (done) => {
+  test("body update, no updated links", (done) => {
     onWSInit(async () => {
       await VSCodeUtils.openFileInEditor(
         vscode.Uri.file(path.join(vaultDir, "foo.md"))
       );
       let active = VSCodeUtils.getActiveTextEditor() as vscode.TextEditor;
-      await active.edit(async (editBuilder) => {
-        editBuilder.insert(new vscode.Position(5, 0), "hello");
-        await active.document.save();
-        VSCodeUtils.showInputBox = async () => "bar";
-        const resp = await new RenameNoteV2aCommand().run();
-        assert.deepStrictEqual(resp?.changed?.length, 2);
-        active = VSCodeUtils.getActiveTextEditor() as vscode.TextEditor;
-        assert.strictEqual(
-          DNodeUtilsV2.fname(active.document.uri.fsPath),
-          "bar"
-        );
-        assert.ok(active.document.getText().indexOf("hello") >= 0);
-        done();
-      });
+      await vscode.commands.executeCommand("cursorDown");
+      await vscode.commands.executeCommand("cursorDown");
+      await vscode.commands.executeCommand("cursorDown");
+      await vscode.commands.executeCommand("cursorDown");
+      await vscode.commands.executeCommand("cursorDown");
+      await vscode.commands.executeCommand("cursorDown");
+      await vscode.commands.executeCommand("cursorDown");
+      await vscode.commands.executeCommand("cursorDown");
+      await vscode.commands.executeCommand("cursorDown");
+      await vscode.commands.executeCommand("type", { text: "hello" });
+      await active.document.save();
+
+      VSCodeUtils.showInputBox = async () => "bar";
+      const resp = await new RenameNoteV2aCommand().run();
+      assert.deepStrictEqual(resp?.changed?.length, 2);
+      active = VSCodeUtils.getActiveTextEditor() as vscode.TextEditor;
+      assert.strictEqual(DNodeUtilsV2.fname(active.document.uri.fsPath), "bar");
+      assert.ok(active.document.getText().indexOf("hello") >= 0);
+      done();
     });
     setupDendronWorkspace(root.name, ctx, {
       lsp: true,

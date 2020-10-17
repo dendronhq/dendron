@@ -24,7 +24,7 @@ export type ReplaceRefOptions = {
   /**
    * Write errors that have occured
    */
-  scratch: string;
+  scratch?: string;
 };
 
 export function replaceRefs(options: ReplaceRefOptions) {
@@ -76,9 +76,11 @@ export function replaceRefs(options: ReplaceRefOptions) {
             data.note = { id: "/404.html" };
             delete data["prefix"];
             // add id to bad links
-            fs.appendFileSync(scratch, data.permalink + "\n", {
-              encoding: "utf8",
-            });
+            if (scratch) {
+              fs.appendFileSync(scratch, data.permalink + "\n", {
+                encoding: "utf8",
+              });
+            }
           }
         }
       }

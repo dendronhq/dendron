@@ -1,2 +1,0 @@
-const dummy = {};
-export { dummy };

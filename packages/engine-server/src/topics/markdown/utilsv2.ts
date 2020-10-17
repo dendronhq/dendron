@@ -34,39 +34,6 @@ export class ParserUtilsV2 {
       .use({ settings: { listItemIndent: "1", fences: true } });
   }
 
-  // static findLinks({ note }: { note: NotePropsV2 }): DLink[] {
-  //   const content = note.body;
-  //   const reWiki = ParserUtilsV2.createWikiLinkRE();
-  //   const wikiLinks = content.matchAll(new RegExp(reWiki, "gi"));
-  //   const wikiLinksMatches = Array.from(wikiLinks, (m) => {
-  //     if (_.isUndefined(m.index)) {
-  //       throw Error("no index found, findLinks");
-  //     }
-  //     // will barf at `[[]]` case
-  //     if (!m.groups?.name) {
-  //       throw Error(`no name found, findLInks, ${JSON.stringify(note)}`);
-  //     }
-  //     return {
-  //       match: m[0],
-  //       value: m.groups.name,
-  //       alias: m.groups?.alias,
-  //       start: m.index,
-  //       end: m.index + m[0].length,
-  //     };
-  //   });
-  //   return wikiLinksMatches.map((m) => ({
-  //     type: "wiki",
-  //     from: NoteUtilsV2.toLoc(note),
-  //     original: m.match,
-  //     value: m.value,
-  //     alias: m?.alias,
-  //     pos: { start: m.start, end: m.end },
-  //     to: {
-  //       fname: m.value,
-  //     },
-  //   }));
-  // }
-
   static findLinks({ note }: { note: NotePropsV2 }): DLink[] {
     const content = note.body;
     let remark = ParserUtilsV2.getRemark();

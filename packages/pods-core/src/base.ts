@@ -92,6 +92,13 @@ export abstract class PublishPodBaseV3<
   TConfig extends PublishConfig = PublishConfig
 > extends PodBaseV3 {
   static kind = "publish" as PodKind;
+
+  getDefaultConfig(): Required<PublishConfig> {
+    return {
+      dest: "stdout",
+    };
+  }
+
   abstract plant(opts: PublishPodOpts<TConfig>): Promise<void>;
 }
 
@@ -156,7 +163,6 @@ export type ExportConfig = {
 
 export type PublishConfig = {
   dest: string;
-  fname: string;
 };
 
 export type ImportConfig = {
@@ -183,7 +189,7 @@ export type ImportPodOpts<TConfig extends ImportConfig> = {
    */
   config: TConfig;
 };
-export type PublishPodOpts<TConfig extends PublishConfig> = {
+export type PublishPodOpts<TConfig extends PublishConfig = PublishConfig> = {
   /**
    * Export schema or notes
    */
@@ -191,7 +197,11 @@ export type PublishPodOpts<TConfig extends PublishConfig> = {
   /**
    * Only export metadata?
    */
-  config: TConfig;
+  config?: TConfig;
+  /**
+   * What note to publish
+   */
+  fname: string;
 };
 
 export interface ExportPod<TConfig extends ExportConfig = any> {

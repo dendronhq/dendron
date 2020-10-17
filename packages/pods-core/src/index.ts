@@ -8,6 +8,7 @@ import {
   JSONImportPod,
   JSONPublishPod,
 } from "./builtin";
+import { MarkdownPublishPod } from "./builtin/MarkdownPod";
 import { PodClassEntryV2, PodClassEntryV3 } from "./types";
 export * from "./types";
 export * from "./utils";
@@ -18,7 +19,7 @@ export function getAllExportPods(): PodClassEntryV2[] {
   return [JSONExportPod];
 }
 export function getAllPublishPods(): PodClassEntryV3[] {
-  return [JSONPublishPod];
+  return [JSONPublishPod, MarkdownPublishPod];
 }
 export function getAllImportPods(): PodClassEntryV2[] {
   return [FileImportPod, JSONImportPod];

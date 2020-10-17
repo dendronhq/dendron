@@ -5,6 +5,7 @@ import {
   PodClassEntryV3,
   PodItemV3,
   PodKind,
+  PublishPodOpts,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
@@ -17,12 +18,14 @@ type CommandOutput = {};
 type CommandOpts = SoilCommandOptsV2 & {
   podClass: PodClassEntryV3;
   config: any;
+  noteByName: string;
 };
 
 export type CommandCLIOpts = SoilCommandCLIOpts & {
   podId: string;
   podSource?: "remote" | "builtin";
   config?: string;
+  noteByName: string;
 };
 
 function buildPodArgs(args: yargs.Argv, _podItems: PodItemV3[]) {
@@ -80,7 +83,7 @@ export class PublishPodCLICommand extends SoilCommandV2<
       getAllPublishPods(),
       "publish"
     );
-    return { ...opts, ...opts2 };
+    return { ...opts, ...opts2, noteByName: args.noteByName };
   }
 
   static buildCmd(yargs: yargs.Argv): yargs.Argv {
@@ -94,14 +97,13 @@ export class PublishPodCLICommand extends SoilCommandV2<
   }
 
   async execute(opts: CommandOpts) {
-    console.log(JSON.stringify(_.omit(opts, "engine")));
-    const { podClass, vault, wsRoot, engine, config } = opts;
+    const { podClass, vault, wsRoot, engine, config, noteByName: fname } = opts;
     const pod = new podClass({
       vaults: [vault],
       wsRoot,
       engine,
     });
-    await pod.plant({ mode: "notes", config });
+    await pod.plant({ mode: "notes", config, fname } as PublishPodOpts);
     return {};
   }
 }

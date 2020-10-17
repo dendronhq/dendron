@@ -1,4 +1,4 @@
-import { createLogger, DEngine, DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngine, DEngineClientV2 } from "@dendronhq/common-all";
 import { resolvePath } from "@dendronhq/common-server";
 import {
   DendronEngine,
@@ -107,7 +107,7 @@ export abstract class SoilCommandV2<
     const cwd = process.cwd();
     wsRoot = resolvePath(wsRoot, cwd);
     vault = resolvePath(vault, cwd);
-    const logger = createLogger("dendron-cli");
+    const logger = this.L;
     const engine = new DendronEngineV2({
       vaults: [vault],
       forceNew: true,

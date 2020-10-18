@@ -5,8 +5,10 @@ import path from "path";
 import {
   ExtensionContext,
   Range,
+  TextDocumentChangeEvent,
   TextDocumentWillSaveEvent,
   TextEdit,
+  window,
   workspace,
 } from "vscode";
 import { Logger } from "./logger";
@@ -20,6 +22,19 @@ export class WorkspaceWatcher {
       null,
       context.subscriptions
     );
+    workspace.onDidChangeTextDocument(
+      this.onDidChangeTextDocument,
+      null,
+      context.subscriptions
+    );
+  }
+
+  async onDidChangeTextDocument(event: TextDocumentChangeEvent) {
+    const activeEditor = window.activeTextEditor;
+    if (activeEditor && event.document === activeEditor.document) {
+      DendronWorkspace.instance().windowWatcher?.triggerUpdateDecorations();
+    }
+    return;
   }
 
   async onWillSaveTextDocument(ev: TextDocumentWillSaveEvent) {

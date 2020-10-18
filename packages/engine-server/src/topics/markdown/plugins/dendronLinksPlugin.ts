@@ -56,6 +56,10 @@ interface PluginOpts {
 
 export { PluginOpts as DendronLinksOpts };
 
+/**
+ * Matches wiki-links
+ * @param opts
+ */
 export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
   const permalinks = opts.permalinks || [];
   const defaultPageResolver = (name: string) => [

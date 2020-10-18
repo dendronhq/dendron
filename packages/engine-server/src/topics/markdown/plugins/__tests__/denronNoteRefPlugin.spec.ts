@@ -1,13 +1,31 @@
-import { EngineTestUtils } from "@dendronhq/common-server";
+import { DEngineClientV2 } from "@dendronhq/common-all";
+import { createLogger, EngineTestUtils } from "@dendronhq/common-server";
 import { NodeTestUtilsV2 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
+import { FileStorageV2 } from "../../../../drivers/file/storev2";
+import { DendronEngineV2 } from "../../../../enginev2";
 import path from "path";
-import { getProcessor } from "../../../markdown/utils";
+import { ParserUtilsV2 } from "../../utilsv2";
+import {
+  dendronNoteRefPlugin,
+  DendronNoteRefPluginOpts,
+} from "../dendronNoteRefPlugin";
+
+function getProcessor(opts: DendronNoteRefPluginOpts) {
+  return ParserUtilsV2.getRemark().use(dendronNoteRefPlugin, opts);
+}
+let LOGGER = createLogger("engine-server.test.log");
 
 describe("basic", () => {
   describe("parse", () => {
+    const opts = {
+      renderWithOutline: true,
+      replaceRefOpts: {},
+      engine: {} as any,
+    } as DendronNoteRefPluginOpts;
+
     test("init", () => {
-      const resp = getProcessor().parse(`((ref:[[foo.md]]))`);
+      const resp = getProcessor(opts).parse(`((ref:[[foo.md]]))`);
       expect(resp).toMatchSnapshot();
       // child1 paragraph, child2 link
       // @ts-ignore
@@ -20,7 +38,7 @@ describe("basic", () => {
     });
 
     test("without suffix", () => {
-      const resp = getProcessor().parse(`((ref:[[foo]]))`);
+      const resp = getProcessor(opts).parse(`((ref:[[foo]]))`);
       expect(resp).toMatchSnapshot();
       // child1 paragraph, child2 link
       // @ts-ignore
@@ -33,7 +51,7 @@ describe("basic", () => {
     });
 
     test("with start anchor", () => {
-      const resp = getProcessor().parse(`((ref:[[foo]]#h1))`);
+      const resp = getProcessor(opts).parse(`((ref:[[foo]]#h1))`);
       expect(resp).toMatchSnapshot();
       // child1 paragraph, child2 link
       // @ts-ignore
@@ -46,7 +64,7 @@ describe("basic", () => {
     });
 
     test("with start and end", () => {
-      const resp = getProcessor().parse(`((ref:[[foo]]#h1:#h2))`);
+      const resp = getProcessor(opts).parse(`((ref:[[foo]]#h1:#h2))`);
       expect(resp).toMatchSnapshot();
       // child1 paragraph, child2 link
       // @ts-ignore
@@ -59,7 +77,7 @@ describe("basic", () => {
     });
 
     test("doesn't parse inline code block", () => {
-      const resp = getProcessor().parse("`((ref:[[foo.md]]))`");
+      const resp = getProcessor(opts).parse("`((ref:[[foo.md]]))`");
       expect(resp).toMatchSnapshot("bond");
       // @ts-ignore
       expect(resp.children[0].children[0].type).toEqual("inlineCode");
@@ -67,21 +85,43 @@ describe("basic", () => {
     test.skip("doesn't parse code block", () => {});
   });
 
-  describe("stingify", () => {
+  describe.only("stingify", () => {
     let root: string;
+    let opts: DendronNoteRefPluginOpts;
+    let engine: DEngineClientV2;
+    let vaultDir: string;
 
-    test("basic", async () => {
-      const txt = ["", `# Tasks`, "task1", "task2"];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
+    beforeEach(async () => {
+      root = await EngineTestUtils.setupVault({
+        initDirCb: async (_vaultDir: string) => {
+          vaultDir = _vaultDir;
+          await NodeTestUtilsV2.createNote({
+            vaultDir,
+            noteProps: {
+              fname: "daily.tasks",
+              body: ["", `# Tasks`, "task1", "task2"].join("\n"),
+            },
+          });
         },
       });
-      const out = getProcessor({ root })
+      engine = new DendronEngineV2({
+        vaults: [root],
+        forceNew: true,
+        store: new FileStorageV2({ vaults: [root], logger: LOGGER }),
+        mode: "fuzzy",
+        logger: LOGGER,
+      });
+
+      opts = {
+        renderWithOutline: false,
+        replaceRefOpts: {},
+        engine,
+      } as DendronNoteRefPluginOpts;
+    });
+
+    test("basic", async () => {
+      await engine.init();
+      const out = getProcessor(opts)
         .processSync(`((ref:[[daily.tasks]]))`)
         .toString();
       expect(out).toMatchSnapshot();
@@ -89,17 +129,8 @@ describe("basic", () => {
     });
 
     test("basic block", async () => {
-      const txt = ["", `# Tasks`, "task1", "task2"];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
-        },
-      });
-      const out = getProcessor({ root })
+      await engine.init();
+      const out = getProcessor(opts)
         .processSync(
           `# Foo Bar
 ((ref:[[daily.tasks]]))`
@@ -110,17 +141,16 @@ describe("basic", () => {
     });
 
     test("basic block with fm", async () => {
-      const txt = ["---", "id: foo", "---", `# Tasks`, "task1", "task2"];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "daily.tasks",
+          body: ["---", "id: foo", "---", `# Tasks`, "task1", "task2"].join(
+            "\n"
+          ),
         },
       });
-      const out = getProcessor({ root })
+      const out = getProcessor(opts)
         .processSync(
           `# Foo Bar
 ((ref:[[daily.tasks]]))`
@@ -142,16 +172,14 @@ describe("basic", () => {
         "## Header2",
         "task2",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "daily.tasks",
+          body: txt.join("\n"),
         },
       });
-      const out = getProcessor({ root })
+      const out = getProcessor(opts)
         .processSync(
           `# Foo Bar
 ((ref:[[daily.tasks]]#Header2))`
@@ -173,16 +201,14 @@ describe("basic", () => {
         "## Header2",
         "task2",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "daily.tasks",
+          body: txt.join("\n"),
         },
       });
-      const out = getProcessor({ root })
+      const out = getProcessor(opts)
         .processSync(
           `# Foo Bar
 ((ref:[[daily.tasks]]#badheader))`
@@ -207,16 +233,14 @@ describe("basic", () => {
         "BOND",
         "</div>",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "daily.tasks",
+          body: txt.join("\n"),
         },
       });
-      const out = getProcessor({ root })
+      const out = getProcessor(opts)
         .processSync(
           `# Foo Bar
 ((ref:[[daily.tasks]]#Header1:#badheader))`
@@ -238,16 +262,14 @@ describe("basic", () => {
         "## Header2",
         "task2",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "daily.tasks",
+          body: txt.join("\n"),
         },
       });
-      const out = getProcessor({ root })
+      const out = getProcessor(opts)
         .processSync(
           `# Foo Bar
 ((ref:[[daily.tasks]]#Header2,1))`
@@ -273,16 +295,14 @@ describe("basic", () => {
         "BOND",
         "</div>",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "daily.tasks",
+          body: txt.join("\n"),
         },
       });
-      const out = getProcessor({ root })
+      const out = getProcessor(opts)
         .processSync(
           `# Foo Bar
 ((ref:[[daily.tasks]]#Header1:#Header2))`
@@ -308,16 +328,14 @@ describe("basic", () => {
         "BOND",
         "</div>",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "daily.tasks",
+          body: txt.join("\n"),
         },
       });
-      const out = getProcessor({ root })
+      const out = getProcessor(opts)
         .processSync(
           `# Foo Bar
 ((ref:[[daily.tasks]]#Header1,1:#Header2))`
@@ -343,16 +361,14 @@ describe("basic", () => {
         "BOND",
         "</div>",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "daily.tasks",
+          body: txt.join("\n"),
         },
       });
-      const out = getProcessor({ root })
+      const out = getProcessor(opts)
         .processSync(
           `# Foo Bar
 ((ref:[[daily.tasks]]#*,1:#header2))`
@@ -378,16 +394,14 @@ describe("basic", () => {
         "BOND",
         "</div>",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "daily.tasks",
+          body: txt.join("\n"),
         },
       });
-      const out = getProcessor({ root })
+      const out = getProcessor(opts)
         .processSync(
           `# Foo Bar
 ((ref:[[daily.tasks]]#Header1,1:#*))`
@@ -399,7 +413,7 @@ describe("basic", () => {
       expect(out.indexOf("task2") >= 0).toBeFalsy();
     });
 
-    test.only("ref with ref", async () => {
+    test.skip("ref with ref", async () => {
       root = await EngineTestUtils.setupVault({
         initDirCb: async (vaultDir: string) => {
           await NodeTestUtilsV2.createNote({
@@ -441,16 +455,14 @@ describe("basic", () => {
         "BOND",
         "</div>",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "daily.tasks",
+          body: txt.join("\n"),
         },
       });
-      const out = getProcessor({ root, renderWithOutline: true })
+      const out = getProcessor({ ...opts, renderWithOutline: true })
         .processSync(
           `# Foo Bar
 ((ref:[[daily.tasks]]#Header1:#Header2))`

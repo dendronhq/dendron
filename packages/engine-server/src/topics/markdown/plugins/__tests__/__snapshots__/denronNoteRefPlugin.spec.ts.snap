@@ -18,7 +18,7 @@ Object {
             "hName": "a",
             "hProperties": Object {
               "className": "internal new",
-              "href": "#/page/ref:[[foo",
+              "href": "ref:[[foo",
             },
             "link": Object {
               "anchorEnd": undefined,
@@ -95,7 +95,7 @@ Object {
             "hName": "a",
             "hProperties": Object {
               "className": "internal new",
-              "href": "#/page/ref:[[foo]]#h1",
+              "href": "ref:[[foo]]#h1",
             },
             "link": Object {
               "anchorEnd": undefined,
@@ -172,7 +172,7 @@ Object {
             "hName": "a",
             "hProperties": Object {
               "className": "internal new",
-              "href": "#/page/ref:[[foo]]#h1:#h2",
+              "href": "ref:[[foo]]#h1:#h2",
             },
             "link": Object {
               "anchorEnd": "h2",
@@ -249,7 +249,7 @@ Object {
             "hName": "a",
             "hProperties": Object {
               "className": "internal new",
-              "href": "#/page/ref:[[foo]]",
+              "href": "ref:[[foo]]",
             },
             "link": Object {
               "anchorEnd": undefined,
@@ -406,13 +406,6 @@ task1
 "
 `;
 
-exports[`basic stingify ref with ref 1`] = `
-"# Foo
-
-foo.one body
-"
-`;
-
 exports[`basic stingify renderWithOutline 1`] = `
 "# Foo Bar
 
@@ -422,7 +415,7 @@ exports[`basic stingify renderWithOutline 1`] = `
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">daily.tasks</span></div>
-<a href=\\"daily.tasks.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"daily.tasks.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">

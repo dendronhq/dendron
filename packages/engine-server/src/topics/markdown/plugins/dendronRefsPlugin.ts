@@ -48,8 +48,9 @@ interface PluginOpts {
   wikiLinkClassName: string;
   hrefTemplate: (permalink: string) => string;
   aliasDivider: string;
-  root: string | undefined;
+  root?: string;
   renderWithOutline?: boolean;
+  refLvl?: number;
   replaceRefs?: ReplaceRefOptions;
 }
 
@@ -58,7 +59,11 @@ function isAlias(pageTitle: string) {
   return pageTitle.indexOf(aliasDivider) !== -1;
 }
 
-function findNoteRef(opts: {
+/**
+ * Find part of body to extract
+ * @param opts
+ */
+function extractNoteRef(opts: {
   body: string;
   link: DendronRefLink;
   replaceRefs?: ReplaceRefOptions;
@@ -108,11 +113,16 @@ function findNoteRef(opts: {
   if (!_.isUndefined(opts.replaceRefs)) {
     outProc = outProc.use(replaceRefs, opts.replaceRefs);
   }
-  let out = outProc.processSync(outProc.stringify(bodyAST)).toString();
-  if (anchorStartOffset) {
-    out = out.split("\n").slice(anchorStartOffset).join("\n");
+  try {
+    let out = outProc.processSync(outProc.stringify(bodyAST)).toString();
+    if (anchorStartOffset) {
+      out = out.split("\n").slice(anchorStartOffset).join("\n");
+    }
+    return out;
+  } catch (err) {
+    console.log(err);
+    throw err;
   }
-  return out;
 }
 
 function genMDError(opts: { msg: string; title: string }) {
@@ -238,7 +248,7 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
         const body = fs.readFileSync(path.join(root, data.link.name + ".md"), {
           encoding: "utf8",
         });
-        const out = findNoteRef({
+        const out = extractNoteRef({
           body,
           link: data.link,
           replaceRefs: opts.replaceRefs,

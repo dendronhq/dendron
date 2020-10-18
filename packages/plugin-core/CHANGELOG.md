@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.11-alpha.6](https://github.com/dendronhq/dendron/compare/v0.12.11-alpha.5...v0.12.11-alpha.6) (2020-10-18)
+
+### Bug Fixes
+
+- **workbench:** time decorator losing position after update ([41177be](https://github.com/dendronhq/dendron/commit/41177be2b094f9156e5bd365b4cf0608fe10d8ed))
+
 ## [0.12.11-alpha.5](https://github.com/dendronhq/dendron/compare/v0.12.11-alpha.4...v0.12.11-alpha.5) (2020-10-18)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

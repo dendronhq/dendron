@@ -24,6 +24,10 @@ export type ReplaceRefOptions = {
    * used for links in preview
    */
   forNoteRefInPreview?: boolean;
+  /**
+   * used for links in published site
+   */
+  forNoteRefInSite?: boolean;
   missingLinkBehavior?: "raiseError" | "404";
   /**
    * Write errors that have occured
@@ -41,13 +45,15 @@ export function replaceRefs(options: ReplaceRefOptions) {
     engine,
     missingLinkBehavior,
     forNoteRefInPreview,
+    forNoteRefInSite,
     scratch,
   } = _.defaults(options, {
     refReplacements: {},
     wikiLinkPrefix: false,
     wikiLink2Html: false,
     missingLinkBehavior: "404",
-    forNoteRefInPreview: true,
+    forNoteRefInPreview: false,
+    forNoteRefInSite: true,
   });
   function transformer(tree: Node, _file: VFile) {
     visit(tree, (node) => {
@@ -63,6 +69,9 @@ export function replaceRefs(options: ReplaceRefOptions) {
         }
         if (forNoteRefInPreview) {
           data.forNoteRefInPreview = true;
+        }
+        if (forNoteRefInSite) {
+          data.forNoteRefInSite = true;
         }
         if (wikiLink2Html) {
           data.toHTML = true;

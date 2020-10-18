@@ -8,7 +8,6 @@ import { Eat } from "remark-parse";
 import { Processor } from "unified";
 import { Node } from "unist";
 import { DendronRefLink, parseDendronRef } from "../../../utils";
-import { getProcessor } from "../utils";
 import { ParserUtilsV2 } from "../utilsv2";
 import { findIndex, isHeading } from "./inject";
 import { ReplaceRefOptions, replaceRefs } from "./replaceRefs";
@@ -275,8 +274,14 @@ function attachCompiler(
     if (renderWithOutline) {
       let link = data.link.name;
       link = _.trim(
-        getProcessor()
-          .use(replaceRefs, replaceRefOpts)
+        ParserUtilsV2.getRemark()
+          .use(plugin, {
+            engine,
+            renderWithOutline,
+            replaceRefOpts,
+            refLvl,
+          })
+          .use(replaceRefs, { ..._.omit(replaceRefOpts, "wikiLink2Md") })
           .processSync(`[[${link}]]`)
           .toString()
       );

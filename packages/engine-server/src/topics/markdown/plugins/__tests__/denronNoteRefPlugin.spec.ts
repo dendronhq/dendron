@@ -19,7 +19,9 @@ describe("basic", () => {
   describe("parse", () => {
     const opts = {
       renderWithOutline: true,
-      replaceRefOpts: {},
+      replaceRefOpts: {
+        forNoteRefInSite: true,
+      },
       engine: {} as any,
     } as DendronNoteRefPluginOpts;
 

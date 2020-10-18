@@ -1,5 +1,4 @@
 import { EngineTestUtils } from "@dendronhq/common-server";
-import { NodeTestUtilsV2 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import path from "path";
 import { getProcessor } from "../../../markdown/utils";
@@ -399,34 +398,6 @@ describe("basic", () => {
       expect(out.indexOf("task2") >= 0).toBeFalsy();
     });
 
-    test.only("ref with ref", async () => {
-      root = await EngineTestUtils.setupVault({
-        initDirCb: async (vaultDir: string) => {
-          await NodeTestUtilsV2.createNote({
-            vaultDir,
-            noteProps: {
-              fname: "foo.one",
-              body: ["# Foo.One", `((ref: [[foo.two]]))`].join("\n"),
-            },
-          });
-          await NodeTestUtilsV2.createNote({
-            vaultDir,
-            noteProps: {
-              fname: "foo.two",
-              body: ["# Foo.Two", `((ref: [[foo.one]]))`].join("\n"),
-            },
-          });
-        },
-      });
-      const out = getProcessor({ root })
-        .processSync(["# Foo", "((ref: [[foo.one]]))"].join("\n"))
-        .toString();
-      expect(out).toMatchSnapshot();
-      expect(out.indexOf("Header1") >= 0).toBeFalsy();
-      expect(out.indexOf("task1") >= 0).toBeTruthy();
-      expect(out.indexOf("task2") >= 0).toBeFalsy();
-    });
-
     test("renderWithOutline", async () => {
       const txt = [
         "---",
@@ -450,7 +421,11 @@ describe("basic", () => {
           );
         },
       });
-      const out = getProcessor({ root, renderWithOutline: true })
+      const out = getProcessor({
+        root,
+        renderWithOutline: true,
+        replaceRefs: { forNoteRefInSite: true },
+      })
         .processSync(
           `# Foo Bar
 ((ref:[[daily.tasks]]#Header1:#Header2))`

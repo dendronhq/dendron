@@ -188,6 +188,7 @@ async function note2JekyllMdFile(
           wikiLinkUseId: true,
           engine: opts.engine,
           scratch: scratchPad1,
+          forNoteRefInSite: true,
         },
         engine: opts.engine as DEngineClientV2,
       });
@@ -203,6 +204,7 @@ async function note2JekyllMdFile(
           wikiLinkUseId: true,
           engine: opts.engine,
           scratch: scratchPad1,
+          forNoteRefInSite: true,
         },
       });
     }
@@ -215,6 +217,7 @@ async function note2JekyllMdFile(
         wikiLinkUseId: true,
         engine: opts.engine,
         scratch: scratchPad2,
+        forNoteRefInSite: true,
       })
       .processSync(note.body)
       .toString();

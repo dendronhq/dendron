@@ -283,40 +283,15 @@ Object {
       "note": Object {
         "body": "[[bar]]
 ",
-        "children": Array [
-          "foo.ch1",
-        ],
+        "children": Array [],
         "created": "1",
         "custom": Object {},
         "data": Object {},
         "desc": "",
         "fname": "foo",
         "id": "foo",
-        "links": Array [
-          Object {
-            "alias": "bar",
-            "from": Object {
-              "fname": "foo",
-              "id": "foo",
-            },
-            "original": "bar",
-            "pos": Object {
-              "end": 7,
-              "start": 0,
-            },
-            "to": Object {
-              "fname": "bar",
-            },
-            "type": "wiki",
-            "value": "bar",
-          },
-        ],
-        "parent": "root",
-        "schema": Object {
-          "moduleId": "foo",
-          "schemaId": "foo",
-        },
-        "stub": true,
+        "links": Array [],
+        "parent": null,
         "title": "Foo",
         "type": "note",
         "updated": "1",
@@ -327,39 +302,15 @@ Object {
       "note": Object {
         "body": "[[bar]]
 ",
-        "children": Array [
-          "foo.ch1",
-        ],
+        "children": Array [],
         "created": "1",
         "custom": Object {},
         "data": Object {},
         "desc": "",
         "fname": "baz",
         "id": "foo",
-        "links": Array [
-          Object {
-            "alias": "bar",
-            "from": Object {
-              "fname": "foo",
-              "id": "foo",
-            },
-            "original": "bar",
-            "pos": Object {
-              "end": 7,
-              "start": 0,
-            },
-            "to": Object {
-              "fname": "bar",
-            },
-            "type": "wiki",
-            "value": "bar",
-          },
-        ],
+        "links": Array [],
         "parent": "root",
-        "schema": Object {
-          "moduleId": "foo",
-          "schemaId": "foo",
-        },
         "title": "Foo",
         "type": "note",
         "updated": "1",

@@ -39,6 +39,7 @@ export type WikiLinkData = {
   note?: { id: string };
   replace?: DNoteLoc;
   forNoteRefInPreview?: boolean;
+  forNoteRefInSite?: boolean;
 };
 
 function locator(value: string, fromIndex: number) {
@@ -182,6 +183,9 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
         }
         if (data.forNoteRefInPreview) {
           return `${data.prefix || ""}${node.value}.md`;
+        }
+        if (data.forNoteRefInSite) {
+          return `${data.prefix || ""}${node.value}.html`;
         }
         if (data.toHTML) {
           return `${data.prefix || ""}${node.value}.html`;

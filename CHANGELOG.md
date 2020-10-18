@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.11-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.11-alpha.1...v0.12.11-alpha.2) (2020-10-18)
+
+### Enhancements
+
+- **cli:** stop putting verbose logs to stdout ([7ccc9e2](https://github.com/dendronhq/dendron/commit/7ccc9e2aa33420c6c048fbba14b824357f8a40c8))
+
+### Features
+
+- **markdown:** support recursive note ref in preview ([7efe0de](https://github.com/dendronhq/dendron/commit/7efe0de6328202b3f381d56aacdc9c1db6705047))
+
+### Reverts
+
+- Revert "chore: turn off workspace watcher" ([2953bf6](https://github.com/dendronhq/dendron/commit/2953bf6ac8ea4a97133e152fc2a57f005d5498de))
+
 ## [0.12.11-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.11-alpha.0...v0.12.11-alpha.1) (2020-10-17)
 
 ### Bug Fixes

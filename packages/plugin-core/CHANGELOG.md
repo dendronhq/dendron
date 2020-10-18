@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.11-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.11-alpha.1...v0.12.11-alpha.2) (2020-10-18)
+
+### Reverts
+
+- Revert "chore: turn off workspace watcher" ([2953bf6](https://github.com/dendronhq/dendron/commit/2953bf6ac8ea4a97133e152fc2a57f005d5498de))
+
 ## [0.12.11-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.11-alpha.0...v0.12.11-alpha.1) (2020-10-17)
 
 ### Bug Fixes

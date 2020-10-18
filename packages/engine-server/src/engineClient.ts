@@ -6,7 +6,6 @@ import {
   DLink,
   DNodePropsV2,
   DNodeTypeV2,
-  EngineDeleteOptsV2,
   EngineGetResp,
   EngineQueryNoteResp,
   EngineUpdateNodesOptsV2,
@@ -27,6 +26,9 @@ import {
   RenameNoteOptsV2,
   RenameNotePayload,
   NoteChangeEntry,
+  EngineDeleteOptsV2,
+  EngineDeleteNoteResp,
+  DEngineDeleteSchemaPayloadV2,
 } from "@dendronhq/common-all";
 import { DendronAPI } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -103,7 +105,10 @@ export class DendronEngineClient implements DEngineClientV2 {
     };
   }
 
-  async deleteNote(id: string, opts?: EngineDeleteOptsV2) {
+  async deleteNote(
+    id: string,
+    opts?: EngineDeleteOptsV2
+  ): Promise<EngineDeleteNoteResp> {
     const ws = this.ws;
     const resp = await this.api.engineDelete({ id, opts, ws });
     if (!resp.data) {
@@ -122,7 +127,10 @@ export class DendronEngineClient implements DEngineClientV2 {
     };
   }
 
-  async deleteSchema(id: string, opts?: EngineDeleteOptsV2) {
+  async deleteSchema(
+    id: string,
+    opts?: EngineDeleteOptsV2
+  ): Promise<RespV2<DEngineDeleteSchemaPayloadV2>> {
     const ws = this.ws;
     const resp = await this.api.schemaDelete({ id, opts, ws });
     delete this.schemas[id];

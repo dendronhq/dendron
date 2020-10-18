@@ -20,6 +20,10 @@ export type ReplaceRefOptions = {
   wikiLinkUseId?: boolean;
   engine?: DEngine | DEngineClientV2;
   toHTML?: boolean;
+  /**
+   * used for links in preview
+   */
+  forNoteRefInPreview?: boolean;
   missingLinkBehavior?: "raiseError" | "404";
   /**
    * Write errors that have occured
@@ -36,12 +40,14 @@ export function replaceRefs(options: ReplaceRefOptions) {
     wikiLinkUseId,
     engine,
     missingLinkBehavior,
+    forNoteRefInPreview,
     scratch,
   } = _.defaults(options, {
     refReplacements: {},
     wikiLinkPrefix: false,
     wikiLink2Html: false,
     missingLinkBehavior: "404",
+    forNoteRefInPreview: true,
   });
   function transformer(tree: Node, _file: VFile) {
     visit(tree, (node) => {
@@ -54,6 +60,9 @@ export function replaceRefs(options: ReplaceRefOptions) {
         const data = node.data as WikiLinkData;
         if (wikiLink2Md) {
           data.toMd = true;
+        }
+        if (forNoteRefInPreview) {
+          data.forNoteRefInPreview = true;
         }
         if (wikiLink2Html) {
           data.toHTML = true;

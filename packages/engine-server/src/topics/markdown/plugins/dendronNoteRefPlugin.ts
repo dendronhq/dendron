@@ -78,14 +78,14 @@ function extractNoteRef(opts: {
     link,
     engine,
     renderWithOutline,
-    replaceRefOpts: dendronRefsOpts,
+    replaceRefOpts,
     refLvl,
   } = opts;
 
   const proc = ParserUtilsV2.getRemark().use(plugin, {
     engine,
     renderWithOutline,
-    replaceRefOpts: dendronRefsOpts,
+    replaceRefOpts,
     refLvl,
   });
 
@@ -130,7 +130,7 @@ function extractNoteRef(opts: {
   // take the output and convert it using the full md toolchain
   let outProc = ParserUtilsV2.getRemark()
     .use(plugin, opts)
-    .use(replaceRefs, dendronRefsOpts);
+    .use(replaceRefs, replaceRefOpts);
   try {
     let out = outProc.processSync(outProc.stringify(bodyAST)).toString();
     if (anchorStartOffset) {
@@ -250,7 +250,7 @@ function attachCompiler(
     proc,
     engine,
     renderWithOutline,
-    replaceRefOpts: dendronRefsOpts,
+    replaceRefOpts,
   } = _.defaults(opts, { refLvl: 0 });
 
   const Compiler = proc.Compiler;
@@ -269,17 +269,14 @@ function attachCompiler(
       link: data.link,
       engine,
       renderWithOutline,
-      replaceRefOpts: dendronRefsOpts,
+      replaceRefOpts,
       refLvl: refLvl + 1,
     });
     if (renderWithOutline) {
       let link = data.link.name;
       link = _.trim(
         getProcessor()
-          .use(replaceRefs, {
-            ..._.omit(dendronRefsOpts, "wikiLink2Md"),
-            wikiLink2Html: true,
-          })
+          .use(replaceRefs, replaceRefOpts)
           .processSync(`[[${link}]]`)
           .toString()
       );

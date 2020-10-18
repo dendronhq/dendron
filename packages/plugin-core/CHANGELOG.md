@@ -8,73 +8,35 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Bug Fixes
 
 - **workbench:** time decorator losing position after update ([41177be](https://github.com/dendronhq/dendron/commit/41177be2b094f9156e5bd365b4cf0608fe10d8ed))
+- **server:** rename note doesn't preserve body in some cases ([656e730](https://github.com/dendronhq/dendron/commit/656e730c998772b009086a2edaaac7d2566efd92))
 
-## [0.12.11-alpha.5](https://github.com/dendronhq/dendron/compare/v0.12.11-alpha.4...v0.12.11-alpha.5) (2020-10-18)
+### Enhancements
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+- **cli:** stop putting verbose logs to stdout ([7ccc9e2](https://github.com/dendronhq/dendron/commit/7ccc9e2aa33420c6c048fbba14b824357f8a40c8))
 
-## [0.12.11-alpha.4](https://github.com/dendronhq/dendron/compare/v0.12.11-alpha.3...v0.12.11-alpha.4) (2020-10-18)
+### Features
 
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.11-alpha.3](https://github.com/dendronhq/dendron/compare/v0.12.11-alpha.2...v0.12.11-alpha.3) (2020-10-18)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.11-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.11-alpha.1...v0.12.11-alpha.2) (2020-10-18)
+- **markdown:** support recursive note ref in preview ([7efe0de](https://github.com/dendronhq/dendron/commit/7efe0de6328202b3f381d56aacdc9c1db6705047))
 
 ### Reverts
 
 - Revert "chore: turn off workspace watcher" ([2953bf6](https://github.com/dendronhq/dendron/commit/2953bf6ac8ea4a97133e152fc2a57f005d5498de))
 
-## [0.12.11-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.11-alpha.0...v0.12.11-alpha.1) (2020-10-17)
-
-### Bug Fixes
-
-- **server:** rename note doesn't preserve body in some cases ([656e730](https://github.com/dendronhq/dendron/commit/656e730c998772b009086a2edaaac7d2566efd92))
-
-## [0.12.11-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.10...v0.12.11-alpha.0) (2020-10-17)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
 ## [0.12.10](https://github.com/dendronhq/dendron/compare/v0.12.10-alpha.4...v0.12.10) (2020-10-16)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.12.10-alpha.4](https://github.com/dendronhq/dendron/compare/v0.12.10-alpha.3...v0.12.10-alpha.4) (2020-10-16)
-
-**Note:** Version bump only for package root
-
-## [0.12.10-alpha.3](https://github.com/dendronhq/dendron/compare/v0.12.10-alpha.2...v0.12.10-alpha.3) (2020-10-16)
 
 ### Enhancements
 
 - **server:** progress indicator on startup ([5795366](https://github.com/dendronhq/dendron/commit/579536671211c57fe8088145edf144bd8a40e940))
-
-## [0.12.10-alpha.2](https://github.com/dendronhq/dendron/compare/v0.12.10-alpha.1...v0.12.10-alpha.2) (2020-10-16)
-
-### Enhancements
-
 - **server:** add doctor command ([51726b4](https://github.com/dendronhq/dendron/commit/51726b41f4467e8eb70843164a0223d8984dcee4))
 - **server:** apply schema templates in all cases ([2e7407a](https://github.com/dendronhq/dendron/commit/2e7407a05fad1356900582c431a1c9f9841f08a8))
 - **server:** migrate archive command ([54c3cd7](https://github.com/dendronhq/dendron/commit/54c3cd7a0b91cf5c7200e34b326130603e5cd52e))
-
-## [0.12.10-alpha.1](https://github.com/dendronhq/dendron/compare/v0.12.10-alpha.0...v0.12.10-alpha.1) (2020-10-16)
-
-### Enhancements
-
 - **server:** better link parsing ([943a86c](https://github.com/dendronhq/dendron/commit/943a86cebd4aa0c9017f4f49124bb1b4039a327f))
-
-## [0.12.10-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.9...v0.12.10-alpha.0) (2020-10-16)
+- **server:** enable publishing ([9d3cc87](https://github.com/dendronhq/dendron/commit/9d3cc87d418f76eead047a26b9a47714a3fe5429))
+- **server:** migrate refactor hierarchy cmd ([b39ab13](https://github.com/dendronhq/dendron/commit/b39ab131678cec43b8f74efdde5372e90e4c11ce))
 
 ### Bug Fixes
 
 - **server:** rename note doesn't get edits after engine init ([fc97c18](https://github.com/dendronhq/dendron/commit/fc97c18c4a59f41b9ccd33e7f10a5af0b4271e86))
-
-### Enhancements
-
-- **server:** enable publishing ([9d3cc87](https://github.com/dendronhq/dendron/commit/9d3cc87d418f76eead047a26b9a47714a3fe5429))
-- **server:** migrate refactor hierarchy cmd ([b39ab13](https://github.com/dendronhq/dendron/commit/b39ab131678cec43b8f74efdde5372e90e4c11ce))
 
 ## [0.12.9](https://github.com/dendronhq/dendron/compare/v0.12.9-alpha.1...v0.12.9) (2020-10-15)
 

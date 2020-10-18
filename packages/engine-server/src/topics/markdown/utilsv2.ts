@@ -13,6 +13,14 @@ import {
   dendronLinksPlugin,
   WikiLinkNote,
 } from "./plugins/dendronLinksPlugin";
+import {
+  root as mdastRoot,
+  paragraph,
+  text,
+  heading,
+  brk,
+} from "mdast-builder";
+
 const selectAll = require("unist-util-select").selectAll;
 
 export class ParserUtilsV2 {
@@ -25,6 +33,11 @@ export class ParserUtilsV2 {
     return "\\[\\[\\s*?(.*\\|)?\\s*(?<name>.*)\\s*\\]\\]";
   }
 
+  /**
+   * - parse frontmatter
+   * - parse wiki links
+   * @param opts
+   */
   static getRemark(opts?: { dendronLinksOpts: DendronLinksOpts }) {
     const { dendronLinksOpts } = _.defaults(opts, { dendronLinksOpts: {} });
     return remark()
@@ -59,6 +72,14 @@ export class ParserUtilsV2 {
 
   static escapeForRegExp(value: string) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  static genMDError(opts: { msg: string; title: string }) {
+    const { msg, title } = opts;
+    return mdastRoot([
+      heading(3, text(title)),
+      paragraph([paragraph(text(msg)), brk]),
+    ]);
   }
 
   static async replaceLinks(opts: {

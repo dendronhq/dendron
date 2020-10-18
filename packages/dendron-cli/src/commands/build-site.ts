@@ -1,30 +1,32 @@
 import {
   DendronSiteConfig,
   DEngine,
-  DNodeUtils,
-  Note,
-  HierarchyConfig,
-  NoteUtilsV2,
-  NotePropsV2,
   DEngineClientV2,
+  DNodeUtils,
   DNodeUtilsV2,
+  HierarchyConfig,
+  Note,
+  NotePropsV2,
+  NoteUtilsV2,
 } from "@dendronhq/common-all";
 import { resolvePath, tmpDir } from "@dendronhq/common-server";
+import {
+  DConfig,
+  DendronEngine,
+  DendronEngineClient,
+  dendronNoteRefPlugin,
+  getProcessor,
+  ParserUtilsV2,
+  replaceRefs,
+  stripLocalOnlyTags,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import matter from "gray-matter";
 import _ from "lodash";
 import path from "path";
-import {
-  stripLocalOnlyTags,
-  getProcessor,
-  replaceRefs,
-  DConfig,
-  DendronEngineClient,
-  DendronEngine,
-} from "@dendronhq/engine-server";
 import Rsync from "rsync";
-import { SoilCommand, SoilCommandCLIOpts, SoilCommandOpts } from "./soil";
 import yargs from "yargs";
+import { SoilCommand, SoilCommandCLIOpts, SoilCommandOpts } from "./soil";
 
 type CommandOutput = {
   buildNotesRoot: string;
@@ -110,6 +112,7 @@ async function note2JekyllMdFile(
   opts: {
     notesDir: string;
     engine: DEngine | DEngineClientV2;
+    v2?: boolean;
   } & DendronSiteConfig
 ): Promise<Jekyll2MdFileErrors[]> {
   let meta: NotePropsV2;
@@ -173,19 +176,38 @@ async function note2JekyllMdFile(
   const root = getRoot(opts.engine);
   try {
     // convert links in the page
-    note.body = getProcessor({
-      root,
-      renderWithOutline: opts.usePrettyRefs,
-      // necessary when when finding refs
-      replaceRefs: {
-        wikiLink2Md: true,
-        wikiLinkPrefix: linkPrefix,
-        imageRefPrefix: opts.assetsPrefix,
-        wikiLinkUseId: true,
-        engine: opts.engine,
-        scratch: scratchPad1,
-      },
-    })
+
+    let proc;
+    if (opts.v2) {
+      proc = ParserUtilsV2.getRemark().use(dendronNoteRefPlugin, {
+        renderWithOutline: opts.usePrettyRefs || false,
+        replaceRefOpts: {
+          wikiLink2Md: true,
+          wikiLinkPrefix: linkPrefix,
+          imageRefPrefix: opts.assetsPrefix,
+          wikiLinkUseId: true,
+          engine: opts.engine,
+          scratch: scratchPad1,
+        },
+        engine: opts.engine as DEngineClientV2,
+      });
+    } else {
+      proc = getProcessor({
+        root,
+        renderWithOutline: opts.usePrettyRefs,
+        // necessary when when finding refs
+        replaceRefs: {
+          wikiLink2Md: true,
+          wikiLinkPrefix: linkPrefix,
+          imageRefPrefix: opts.assetsPrefix,
+          wikiLinkUseId: true,
+          engine: opts.engine,
+          scratch: scratchPad1,
+        },
+      });
+    }
+    // replaces wiki-links with the markdown equivalent
+    note.body = proc
       .use(replaceRefs, {
         wikiLink2Md: true,
         wikiLinkPrefix: linkPrefix,
@@ -388,6 +410,7 @@ export class BuildSiteCommand extends SoilCommand<
       const node = nodes.pop() as NotePropsV2;
       out.push(
         note2JekyllMdFile(node, {
+          v2: true,
           notesDir,
           engine: engineClient,
           ...config,

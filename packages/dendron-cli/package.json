@@ -53,6 +53,7 @@
     "yargs": "^15.4.1"
   },
   "devDependencies": {
+    "@dendronhq/common-test-utils": "^0.12.11-alpha.1",
     "@types/fs-extra": "^9.0.1",
     "@types/jest": "^23.3.3",
     "@types/lodash": "^4.14.158",

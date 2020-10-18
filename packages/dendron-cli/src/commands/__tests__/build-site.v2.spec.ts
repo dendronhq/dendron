@@ -18,6 +18,7 @@ import _ from "lodash";
 import path from "path";
 import process from "process";
 import { BuildSiteCommand } from "../build-site";
+import { NodeTestUtilsV2 } from "@dendronhq/common-test-utils";
 
 describe("buildSite", () => {
   let vaultPath: string;
@@ -532,6 +533,7 @@ describe("wiki link", () => {
 
 describe("note refs", () => {
   let root: string;
+  let vaultDir: string;
   let engine: DEngine;
   let siteRootDir: string;
   let dendronRoot: string;
@@ -565,6 +567,7 @@ describe("note refs", () => {
         ]);
       },
     });
+    vaultDir = root;
     engine = {} as any;
     siteRootDir = FileTestUtils.tmpDir().name;
     dendronRoot = root;
@@ -598,6 +601,43 @@ describe("note refs", () => {
     const { content } = readMD(fooPath);
     expect(content).toMatchSnapshot();
     expect(content.indexOf("[foo](notes/id.foo)") >= 0).toBeTruthy();
+    expect(content.indexOf("portal-container") >= 0).toBeTruthy();
+  });
+
+  test("note refs, recursive", async () => {
+    const config: DendronSiteConfig = {
+      siteHierarchies: ["foo"],
+      siteRootDir,
+    };
+    await NodeTestUtilsV2.createNote({
+      vaultDir,
+      noteProps: {
+        fname: "bar.one",
+        body: ["# Bar.One"].join("\n"),
+      },
+    });
+    await NodeTestUtilsV2.createNote({
+      vaultDir,
+      noteProps: {
+        fname: "bar",
+        body: ["# Bar", `((ref: [[bar.one]]))`].join("\n"),
+      },
+    });
+    //{ id: "id.bar", fname: "bar", body: "# I am bar\n [[foo]]" },
+    const cmd = new BuildSiteCommand();
+    await cmd.execute({
+      engine,
+      engineClient,
+      config,
+      wsRoot: dendronRoot,
+      writeStubs,
+    });
+    let fooPath = path.join(notesDir, "id.foo.md");
+    const { content } = readMD(fooPath);
+    expect(content).toMatchSnapshot();
+    _.every(["# Bar", "# Bar.One"], (ent) => {
+      expect(content.indexOf(ent) >= 0).toBeTruthy();
+    });
     expect(content.indexOf("portal-container") >= 0).toBeTruthy();
   });
 

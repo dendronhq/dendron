@@ -1,8 +1,7 @@
-import { NoteRawProps } from "@dendronhq/common-all";
-import { mdFile2NodeProps, node2PropsMdFile } from "@dendronhq/common-server";
+import { NotePropsV2 } from "@dendronhq/common-all";
+import { file2Note, note2File } from "@dendronhq/common-server";
 import path from "path";
 import { RefactorBaseCommand, RefactorRule } from "./refactorBase";
-
 
 type RuleData = {
   from: { key: string };
@@ -13,7 +12,7 @@ type CommonOpts = {
   overwriteFields?: string[];
 };
 
-type TFile = NoteRawProps;
+type TFile = NotePropsV2;
 
 export class RefactorFMCommand extends RefactorBaseCommand<TFile, any> {
   constructor() {
@@ -22,7 +21,7 @@ export class RefactorFMCommand extends RefactorBaseCommand<TFile, any> {
 
   matchFile(_file: TFile) {
     return {
-      isMatch: true
+      isMatch: true,
     };
   }
 
@@ -37,7 +36,7 @@ export class RefactorFMCommand extends RefactorBaseCommand<TFile, any> {
       case "title2time": {
         const fname = file.fname;
         const t2 = fname.split(".").slice(-1);
-        const t3 = t2[0].split('-').slice(0, 3).join('-');
+        const t3 = t2[0].split("-").slice(0, 3).join("-");
         file.custom.date = t3;
         break;
       }
@@ -47,13 +46,13 @@ export class RefactorFMCommand extends RefactorBaseCommand<TFile, any> {
     return file;
   }
 
-  readFile(fpath: string) {
-    return mdFile2NodeProps(fpath);
+  readFile(fpath: string): NotePropsV2 {
+    return file2Note(fpath);
   }
 
   writeFile(fpath: string, data: TFile) {
     const root = path.dirname(fpath);
-    node2PropsMdFile(data, { root });
+    return note2File(data, root);
   }
 }
 

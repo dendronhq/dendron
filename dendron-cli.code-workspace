@@ -11,10 +11,13 @@
       },
       {
         "path": "packages/engine-server"
+      },
+      {
+        "path": "packages/common-test-utils"
+      },
+      {
+        "path": "packages/common-all"
       }
-      // {
-      //   "path": "vendor/vscode-languageserver-node"
-      // },
     ],
     "settings": {
       "files.exclude": {
@@ -42,7 +45,7 @@
       },
       "peacock.color": "#61dafb",
       "vim.statusBarColorControl": false,
-      "debug.node.autoAttach": "off"
+      "debug.node.autoAttach": "on"
     }
   }
   

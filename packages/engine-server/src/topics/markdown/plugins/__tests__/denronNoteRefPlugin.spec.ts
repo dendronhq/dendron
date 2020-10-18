@@ -1,10 +1,9 @@
 import { DEngineClientV2 } from "@dendronhq/common-all";
 import { createLogger, EngineTestUtils } from "@dendronhq/common-server";
 import { NodeTestUtilsV2 } from "@dendronhq/common-test-utils";
-import fs from "fs-extra";
+import _ from "lodash";
 import { FileStorageV2 } from "../../../../drivers/file/storev2";
 import { DendronEngineV2 } from "../../../../enginev2";
-import path from "path";
 import { ParserUtilsV2 } from "../../utilsv2";
 import {
   dendronNoteRefPlugin,
@@ -85,7 +84,7 @@ describe("basic", () => {
     test.skip("doesn't parse code block", () => {});
   });
 
-  describe.only("stingify", () => {
+  describe("stingify", () => {
     let root: string;
     let opts: DendronNoteRefPluginOpts;
     let engine: DEngineClientV2;
@@ -413,32 +412,99 @@ describe("basic", () => {
       expect(out.indexOf("task2") >= 0).toBeFalsy();
     });
 
-    test.skip("ref with ref", async () => {
-      root = await EngineTestUtils.setupVault({
-        initDirCb: async (vaultDir: string) => {
-          await NodeTestUtilsV2.createNote({
-            vaultDir,
-            noteProps: {
-              fname: "foo.one",
-              body: ["# Foo.One", `((ref: [[foo.two]]))`].join("\n"),
-            },
-          });
-          await NodeTestUtilsV2.createNote({
-            vaultDir,
-            noteProps: {
-              fname: "foo.two",
-              body: ["# Foo.Two", `((ref: [[foo.one]]))`].join("\n"),
-            },
-          });
+    test("2 lvl recursion", async () => {
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "foo.one",
+          body: ["# Foo.One", `((ref: [[foo.two]]))`].join("\n"),
         },
       });
-      const out = getProcessor({ root })
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "foo.two",
+          body: ["# Foo.Two", `blah`].join("\n"),
+        },
+      });
+      const out = getProcessor(opts)
         .processSync(["# Foo", "((ref: [[foo.one]]))"].join("\n"))
         .toString();
       expect(out).toMatchSnapshot();
-      expect(out.indexOf("Header1") >= 0).toBeFalsy();
-      expect(out.indexOf("task1") >= 0).toBeTruthy();
-      expect(out.indexOf("task2") >= 0).toBeFalsy();
+      _.every(["# Foo", "# Foo.One", "# Foo.Two"], (ent) => {
+        expect(out.indexOf(ent) >= 0).toBeTruthy();
+      });
+    });
+
+    test("3 levels of recursion", async () => {
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "foo.one",
+          body: ["# Foo.One", `((ref: [[foo.two]]))`].join("\n"),
+        },
+      });
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "foo.two",
+          body: ["# Foo.Two", `((ref: [[foo.three]]))`].join("\n"),
+        },
+      });
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "foo.three",
+          body: ["# Foo.Three", `Three`].join("\n"),
+        },
+      });
+      const out = getProcessor(opts)
+        .processSync(["# Foo", "((ref: [[foo.one]]))"].join("\n"))
+        .toString();
+      expect(out).toMatchSnapshot();
+      _.every(
+        [
+          "# Foo",
+          "# Foo.One",
+          "# Foo.Two",
+          "ERROR: Too many nested note references",
+        ],
+        (ent) => {
+          expect(out.indexOf(ent) >= 0).toBeTruthy();
+        }
+      );
+    });
+
+    test("ref with ref, inf recursion", async () => {
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "foo.one",
+          body: ["# Foo.One", `((ref: [[foo.two]]))`].join("\n"),
+        },
+      });
+      await NodeTestUtilsV2.createNote({
+        vaultDir,
+        noteProps: {
+          fname: "foo.two",
+          body: ["# Foo.Two", `((ref: [[foo.one]]))`].join("\n"),
+        },
+      });
+      const out = getProcessor(opts)
+        .processSync(["# Foo", "((ref: [[foo.one]]))"].join("\n"))
+        .toString();
+      expect(out).toMatchSnapshot();
+      _.every(
+        [
+          "# Foo",
+          "# Foo.One",
+          "# Foo.Two",
+          "ERROR: Too many nested note references",
+        ],
+        (ent) => {
+          expect(out.indexOf(ent) >= 0).toBeTruthy();
+        }
+      );
     });
 
     test("renderWithOutline", async () => {

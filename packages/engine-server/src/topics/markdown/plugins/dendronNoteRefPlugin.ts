@@ -10,7 +10,6 @@ import { Node } from "unist";
 import { DendronRefLink, parseDendronRef } from "../../../utils";
 import { getProcessor } from "../utils";
 import { ParserUtilsV2 } from "../utilsv2";
-import { dendronRefsPlugin } from "./dendronRefsPlugin";
 import { findIndex, isHeading } from "./inject";
 import { ReplaceRefOptions, replaceRefs } from "./replaceRefs";
 
@@ -64,29 +63,33 @@ ${content}
 `;
 }
 
+const MAX_REF_LVL = 2;
+
 function extractNoteRef(opts: {
   body: string;
   link: DendronRefLink;
   engine: DEngineClientV2;
   renderWithOutline: boolean;
-  dendronRefsOpts: ReplaceRefOptions;
+  replaceRefOpts: ReplaceRefOptions;
   refLvl: number;
 }) {
   const {
-    refLvl,
     body,
     link,
     engine,
     renderWithOutline,
-    dendronRefsOpts,
+    replaceRefOpts: dendronRefsOpts,
+    refLvl,
   } = opts;
-  const root = engine.vaults[0];
-  const proc = ParserUtilsV2.getRemark().use(dendronRefsPlugin, {
-    root,
+
+  const proc = ParserUtilsV2.getRemark().use(plugin, {
+    engine,
     renderWithOutline,
-    replaceRefs: dendronRefsOpts,
+    replaceRefOpts: dendronRefsOpts,
     refLvl,
   });
+
+  // parse it so we can slice it
   const bodyAST: Parent = proc.parse(body) as Parent;
   const { anchorStart, anchorEnd, anchorStartOffset } = link;
   let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
@@ -124,8 +127,10 @@ function extractNoteRef(opts: {
   }
   bodyAST.children = bodyAST.children.slice(anchorStartIndex, anchorEndIndex);
 
-  // convert links
-  let outProc = ParserUtilsV2.getRemark().use(replaceRefs, dendronRefsOpts);
+  // take the output and convert it using the full md toolchain
+  let outProc = ParserUtilsV2.getRemark()
+    .use(plugin, opts)
+    .use(replaceRefs, dendronRefsOpts);
   try {
     let out = outProc.processSync(outProc.stringify(bodyAST)).toString();
     if (anchorStartOffset) {
@@ -247,9 +252,13 @@ function attachCompiler(
     renderWithOutline,
     replaceRefOpts: dendronRefsOpts,
   } = _.defaults(opts, { refLvl: 0 });
+
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
   visitors.refLink = function (node: Node) {
+    if (refLvl >= MAX_REF_LVL) {
+      return "ERROR: Too many nested note references";
+    }
     const data = node.data as RefLinkData;
     const root = engine.vaults[0];
     const body = fs.readFileSync(path.join(root, data.link.name + ".md"), {
@@ -260,8 +269,8 @@ function attachCompiler(
       link: data.link,
       engine,
       renderWithOutline,
-      dendronRefsOpts,
-      refLvl,
+      replaceRefOpts: dendronRefsOpts,
+      refLvl: refLvl + 1,
     });
     if (renderWithOutline) {
       let link = data.link.name;

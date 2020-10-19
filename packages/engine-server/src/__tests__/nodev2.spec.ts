@@ -147,7 +147,9 @@ describe("matchPath", () => {
       notePath: "bond",
       schemaModDict: engine.schemas,
     });
+    expect(resp).toMatchSnapshot();
     expect(resp?.schema.id).toEqual("bond");
+    expect(resp?.namespace).toBeTruthy();
   });
 
   it("match path on domain as namespace, child", async () => {
@@ -160,7 +162,9 @@ describe("matchPath", () => {
       notePath: "bond.foo",
       schemaModDict: engine.schemas,
     });
+    expect(resp).toMatchSnapshot();
     expect(resp?.schema.id).toEqual("bond");
+    expect(resp?.namespace).toBeFalsy();
   });
 });
 

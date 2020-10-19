@@ -734,7 +734,7 @@ export class SchemaUtilsV2 {
         return {
           schema: domainSchema,
           notePath,
-          namespace: false,
+          namespace: domainSchema.data.namespace || false,
           schemaModule: match,
         };
       }
@@ -747,6 +747,15 @@ export class SchemaUtilsV2 {
     }
   }
 
+  /**
+   *
+   * @param param0
+   * @return
+   *  - schemaModule
+   *  - schema
+   *  - namespace
+   *  - notePath
+   */
   static matchPathWithSchema({
     notePath,
     matched,
@@ -774,12 +783,13 @@ export class SchemaUtilsV2 {
       matchNamespace,
     });
     if (match) {
-      const { schema } = match;
+      const { schema, namespace } = match;
+      // found a match
       if (notePath === nextNotePath) {
         return {
           schemaModule,
           schema,
-          namespace: false,
+          namespace,
           notePath,
         };
       }

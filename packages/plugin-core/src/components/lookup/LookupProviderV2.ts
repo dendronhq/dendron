@@ -271,7 +271,7 @@ export class LookupProviderV2 {
           schemaModDict: engine.schemas,
         });
         // since namespace matches everything, we don't do queries on that
-        if (results && !results.schema.data.namespace) {
+        if (results && !results.namespace) {
           const { schema, schemaModule } = results;
           const dirName = DNodeUtilsV2.dirName(queryOrig);
           const candidates = schema.children

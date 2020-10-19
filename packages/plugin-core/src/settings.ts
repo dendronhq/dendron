@@ -12,6 +12,7 @@ import {
   extensions,
   WorkspaceFolder,
 } from "vscode";
+import { CONFIG } from "./constants";
 import { Logger } from "./logger";
 import { DendronWorkspace } from "./workspace";
 
@@ -61,6 +62,7 @@ const _SETTINGS: ConfigUpdateChangeSet = {
   "pasteImage.path": { default: "${currentFileDir}/assets/images" },
   // required for jekyll image build
   "pasteImage.prefix": { default: "/" },
+  [CONFIG.USE_EXPERIMENTAL_LSP_SUPPORT.key]: { default: true },
   // -- md notes
   // prevent markdown-notes from mangling file names
   "markdown-preview-enhanced.enableWikiLinkSyntax": { default: true },
@@ -303,7 +305,11 @@ export class Settings {
     const errors: any = {};
     await Promise.all(
       _.map(
-        _.omit(target, ["workbench.colorTheme", "[markdown]"]),
+        _.omit(target, [
+          "workbench.colorTheme",
+          "[markdown]",
+          CONFIG.USE_EXPERIMENTAL_LSP_SUPPORT.key,
+        ]),
         async (entry, key) => {
           const item = src.inspect(key);
           if (

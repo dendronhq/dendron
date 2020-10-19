@@ -151,13 +151,18 @@ export class SetupWorkspaceCommand extends BasicCommand<
       fs.copySync(path.join(dendronWSTemplate.fsPath, "vault"), vaultPath, {
         filter: filterFunc,
       });
-    } else {
-      // make sure roto files exist
-      const note = NoteUtilsV2.createRoot({});
-      const schema = SchemaUtilsV2.createRootModule({});
-      await note2File(note, vaultPath);
-      await schemaModuleOpts2File(schema, vaultPath, "root");
     }
+    // make sure root files exist
+    const note = NoteUtilsV2.createRoot({
+      body: [
+        "# Welcome to Dendron",
+        "",
+        `This is the root fo your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top. `,
+      ].join("\n"),
+    });
+    const schema = SchemaUtilsV2.createRootModule({});
+    await note2File(note, vaultPath);
+    await schemaModuleOpts2File(schema, vaultPath, "root");
 
     // write workspace defaults
     WorkspaceConfig.write(rootDir);

@@ -381,11 +381,11 @@ export class NoteUtilsV2 {
       const domain = schemaMod.root;
       const schema = schemaMod.schemas[note.schema.schemaId];
       // case: recognized schema
-      prefixParts.push(`$(repo) ${domain.title}`);
+      prefixParts.push(`$(repo) ${domain.title || domain.id}`);
       // check if non-domain schema
       if (domain.id !== note.schema.schemaId) {
         prefixParts.push("$(breadcrumb-separator)");
-        prefixParts.push(schema.title);
+        prefixParts.push(schema.title || schema.id);
       }
     }
     return prefixParts.join(" ");

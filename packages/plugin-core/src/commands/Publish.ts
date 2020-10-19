@@ -16,6 +16,10 @@ export class PublishCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return {};
   }
   async execute(opts?: CommandOpts) {
+    if (DendronWorkspace.lsp()) {
+      const engineClient = DendronWorkspace.instance().getEngine();
+      opts = { ...opts, engineClient };
+    }
     const cmd = new PublishNotesCommand();
     const wsRoot = DendronWorkspace.rootDir() as string;
     const ws = DendronWorkspace.instance();

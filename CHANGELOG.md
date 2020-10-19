@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.12-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.11...v0.12.12-alpha.0) (2020-10-19)
+
+### Bug Fixes
+
+- **lookup:** display schema id if title undefined ([6c7cc70](https://github.com/dendronhq/dendron/commit/6c7cc70cf85181b11654074e17672e39a44fb874))
+
+### Features
+
+- **workbench:** set server mode as default ([19753ff](https://github.com/dendronhq/dendron/commit/19753ff2cbdf18977e23df33df41ca66334b8da9))
+
 ## [0.12.11](https://github.com/dendronhq/dendron/compare/v0.12.11-alpha.6...v0.12.11) (2020-10-18)
 
 **Note:** Version bump only for package root

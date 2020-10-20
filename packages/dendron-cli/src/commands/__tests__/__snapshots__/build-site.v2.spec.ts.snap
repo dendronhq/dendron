@@ -123,6 +123,58 @@ exports[`note refs note refs, recursive 1`] = `
 "
 `;
 
+exports[`toc generate toc 1`] = `
+"---
+id: bar
+title: Bar
+desc: ''
+updated: '1'
+created: '1'
+parent: null
+children: []
+toc: true
+nav_order: 0
+fname: bar
+hpath: bar
+permalink: /
+---
+# Header1
+
+## Table of Contents
+
+- [Header 1.1](#header-11)
+- [Header 2](#header-2)
+
+## Header 1.1
+
+## Header 2
+"
+`;
+
+exports[`toc no generate toc 1`] = `
+"---
+id: bar
+title: Bar
+desc: ''
+updated: '1'
+created: '1'
+parent: null
+children: []
+nav_order: 0
+fname: bar
+hpath: bar
+permalink: /
+---
+# Header1
+
+## Table of Contents
+
+## Header 1.1
+
+## Header 2
+"
+`;
+
 exports[`wiki link case sensitive link 1`] = `
 "[foo.Mixed_case](id.foo.mixed-case)
 "

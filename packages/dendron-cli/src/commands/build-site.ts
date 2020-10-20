@@ -19,6 +19,7 @@ import {
   ParserUtilsV2,
   replaceRefs,
   stripLocalOnlyTags,
+  toc,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import matter from "gray-matter";
@@ -208,21 +209,26 @@ async function note2JekyllMdFile(
         },
       });
     }
+
+    proc = proc.use(replaceRefs, {
+      wikiLink2Md: true,
+      wikiLinkPrefix: linkPrefix,
+      imageRefPrefix: opts.assetsPrefix,
+      wikiLinkUseId: true,
+      engine: opts.engine,
+      scratch: scratchPad2,
+      forNoteRefInSite: true,
+    });
+
+    if (note?.custom?.toc) {
+      proc = proc.use(toc);
+    }
+
     // replaces wiki-links with the markdown equivalent
-    note.body = proc
-      .use(replaceRefs, {
-        wikiLink2Md: true,
-        wikiLinkPrefix: linkPrefix,
-        imageRefPrefix: opts.assetsPrefix,
-        wikiLinkUseId: true,
-        engine: opts.engine,
-        scratch: scratchPad2,
-        forNoteRefInSite: true,
-      })
-      .processSync(note.body)
-      .toString();
+    note.body = proc.processSync(note.body).toString();
   } catch (err) {
     console.log(err);
+    throw err;
   }
   const filePath = path.join(opts.notesDir, meta.id + ".md");
   await fs.writeFile(

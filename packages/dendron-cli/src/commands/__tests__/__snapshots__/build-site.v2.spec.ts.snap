@@ -48,6 +48,54 @@ Array [
 ]
 `;
 
+exports[`custom frontmatter basic 1`] = `
+"---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+parent: null
+children:
+  - foo.ch1
+nav_order: 0
+fname: foo
+bond: 42
+hpath: foo
+permalink: /
+---
+foo body
+"
+`;
+
+exports[`custom frontmatter generate toc 1`] = `
+"---
+id: bar
+title: Bar
+desc: ''
+updated: '1'
+created: '1'
+parent: null
+children: []
+nav_order: 0
+fname: bar
+toc: true
+hpath: bar
+permalink: /
+---
+# Header1
+
+## Table of Contents
+
+- [Header 1.1](#header-11)
+- [Header 2](#header-2)
+
+## Header 1.1
+
+## Header 2
+"
+`;
+
 exports[`note refs note refs 1`] = `
 "# Foo Content
 

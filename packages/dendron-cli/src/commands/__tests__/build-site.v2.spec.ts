@@ -785,3 +785,126 @@ describe("toc", () => {
     expect(content.indexOf("[Header 1.1](#header-11)") >= 0).toBeFalsy();
   });
 });
+
+describe("custom frontmatter", () => {
+  let vaultDir: string;
+  let engine: DEngine;
+  let siteRootDir: string;
+  let notesDir: string;
+  let writeStubs = false;
+  let engineClient: DEngineClientV2;
+  let port: number;
+
+  beforeAll(async () => {
+    const logPath = process.env["LOG_PATH"];
+    port = await launch({ logPath });
+  });
+
+  beforeEach(async () => {
+    siteRootDir = FileTestUtils.tmpDir().name;
+    notesDir = path.join(siteRootDir, "notes");
+    vaultDir = await EngineTestUtilsV2.setupVault({
+      initDirCb: async (vaultDir) => {
+        await NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
+          vaultDir,
+        });
+      },
+    });
+  });
+
+  afterEach(() => {
+    fs.removeSync(vaultDir);
+  });
+
+  test("basic", async () => {
+    const wsRoot = path.join(vaultDir, "../");
+    engineClient = DendronEngineClient.create({
+      port,
+      vaults: [vaultDir],
+      ws: wsRoot,
+    });
+    await engineClient.init();
+
+    const config: DendronSiteConfig = {
+      siteHierarchies: ["foo"],
+      siteRootDir,
+      usePrettyRefs: true,
+      config: {
+        foo: {
+          customFrontmatter: [
+            {
+              key: "bond",
+              value: 42,
+            },
+          ],
+        },
+      },
+    };
+    const cmd = new BuildSiteCommand();
+    await cmd.execute({
+      engine,
+      engineClient,
+      config,
+      wsRoot,
+      writeStubs,
+    });
+    let fooPath = path.join(notesDir, "foo.md");
+    const content = fs.readFileSync(fooPath, { encoding: "utf8" });
+    // const { content } = readMD(fooPath);
+    expect(content).toMatchSnapshot();
+    expect(content.indexOf("bond: 42") >= 0).toBeTruthy();
+  });
+
+  test("generate toc", async () => {
+    await NodeTestUtilsV2.createNote({
+      vaultDir,
+      noteProps: {
+        id: "bar",
+        fname: "bar",
+        body: [
+          "# Header1",
+          "## Table of Contents",
+          "## Header 1.1",
+          "",
+          "## Header 2",
+        ].join("\n"),
+      },
+    });
+    const wsRoot = path.join(vaultDir, "../");
+    engineClient = DendronEngineClient.create({
+      port,
+      vaults: [vaultDir],
+      ws: wsRoot,
+    });
+    await engineClient.init();
+
+    const config: DendronSiteConfig = {
+      siteHierarchies: ["bar"],
+      siteRootDir,
+      usePrettyRefs: true,
+      config: {
+        bar: {
+          customFrontmatter: [
+            {
+              key: "toc",
+              value: true,
+            },
+          ],
+        },
+      },
+    };
+    const cmd = new BuildSiteCommand();
+    await cmd.execute({
+      engine,
+      engineClient,
+      config,
+      wsRoot,
+      writeStubs,
+    });
+    let fooPath = path.join(notesDir, "bar.md");
+    const content = fs.readFileSync(fooPath, { encoding: "utf8" });
+    // const { content } = readMD(fooPath);
+    expect(content).toMatchSnapshot();
+    expect(content.indexOf("[Header 1.1](#header-11)") >= 0).toBeTruthy();
+  });
+});

@@ -133,9 +133,10 @@ async function note2JekyllMdFile(
   };
   const config: Partial<DendronSiteConfig> = opts.config || {};
   const domainPath = DNodeUtilsV2.domainName(note.fname);
-  let hConfig: HierarchyConfig = _.get(config, domainPath, {
+  let hConfig: HierarchyConfig = _.defaults(_.get(config, domainPath, {}), {
     publishByDefault: true,
     noindexByDefault: false,
+    customFrontmatter: [],
   });
   const siteNotesDir = config.siteNotesDir || "notes";
 
@@ -165,6 +166,11 @@ async function note2JekyllMdFile(
     // @ts-ignore
     meta.noindex = true;
   }
+  hConfig.customFrontmatter?.forEach((fm) => {
+    const { key, value } = fm;
+    // @ts-ignore
+    meta[key] = value;
+  });
 
   // delete parent from root
   note.body = stripSiteOnlyTags(note.body);
@@ -220,7 +226,8 @@ async function note2JekyllMdFile(
       forNoteRefInSite: true,
     });
 
-    if (note?.custom?.toc) {
+    // @ts-ignore
+    if (meta?.toc) {
       proc = proc.use(toc);
     }
 

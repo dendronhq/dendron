@@ -407,8 +407,14 @@ export type DendronConfig = {
 };
 
 export type HierarchyConfig = {
-  publishByDefault: boolean;
-  noindexByDefault: boolean;
+  publishByDefault?: boolean;
+  noindexByDefault?: boolean;
+  customFrontmatter?: CustomFMEntry[];
+};
+
+export type CustomFMEntry = {
+  key: string;
+  value: any;
 };
 
 export type LegacyDendronSiteConfig = {

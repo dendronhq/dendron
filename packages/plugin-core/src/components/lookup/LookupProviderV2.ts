@@ -277,8 +277,14 @@ export class LookupProviderV2 {
           const candidates = schema.children
             .map((ent) => {
               const mschema = schemaModule.schemas[ent];
-              if (SchemaUtilsV2.hasSimplePattern(mschema)) {
-                const pattern = SchemaUtilsV2.getPattern(mschema);
+              if (
+                SchemaUtilsV2.hasSimplePattern(mschema, {
+                  isNotNamespace: true,
+                })
+              ) {
+                const pattern = SchemaUtilsV2.getPattern(mschema, {
+                  isNotNamespace: true,
+                });
                 const fname = [dirName, pattern].join(".");
                 return NoteUtilsV2.fromSchema({
                   schemaModule,

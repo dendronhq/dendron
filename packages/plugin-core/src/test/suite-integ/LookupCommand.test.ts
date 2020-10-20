@@ -605,6 +605,70 @@ suite("notes", function () {
       });
     });
 
+    test("lookup new node with schema template from suggestion", function (done) {
+      onWSInit(async () => {
+        ws = DendronWorkspace.instance();
+        client = ws.getEngine();
+        const lp = new LookupProviderV2(engOpts);
+        const picker = createMockQuickPick({
+          value: "bar.ns1.",
+        });
+        await lp.onUpdatePickerItem(picker, engOpts, "manual");
+        assert.deepStrictEqual(
+          _.find(picker.items, { fname: "bar.ns1.three" })?.schema,
+          { moduleId: "bar", schemaId: "three" }
+        );
+        picker.value = "bar.ns1.three";
+        await lp.onDidAccept(picker, engOpts);
+        const txtPath = vscode.window.activeTextEditor?.document.uri
+          .fsPath as string;
+        const node = file2Note(txtPath);
+        assert.strictEqual(_.trim(node.body), "text from alpha template");
+        done();
+      });
+      setupDendronWorkspace(root.name, ctx, {
+        lsp: true,
+        useCb: async (vaultDir: string) => {
+          await NodeTestUtilsV2.createNote({
+            vaultDir,
+            noteProps: { body: "Template text", fname: "bar.one.temp" },
+          });
+          await NodeTestUtilsV2.createNote({
+            vaultDir,
+            noteProps: {
+              body: "text from alpha template",
+              fname: "bar.temp.alpha",
+            },
+          });
+          await NodeTestUtilsV2.createSchema({
+            vaultDir,
+            schemas: [
+              SchemaUtilsV2.create({
+                id: "bar",
+                parent: "root",
+                namespace: true,
+                children: ["one", "three"],
+              }),
+              SchemaUtilsV2.create({
+                id: "one",
+                template: { id: "bar.one.temp", type: "note" },
+                children: ["alpha"],
+              }),
+              SchemaUtilsV2.create({ id: "alpha" }),
+              SchemaUtilsV2.create({
+                id: "three",
+                template: { id: "bar.temp.alpha", type: "note" },
+              }),
+            ],
+            fname: "bar",
+          });
+          return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+            vaultDir,
+          });
+        },
+      });
+    });
+
     test("new node with schema template for namespace", function (done) {
       onWSInit(async () => {
         ws = DendronWorkspace.instance();

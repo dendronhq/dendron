@@ -79,6 +79,7 @@ export class DNodeUtilsV2 {
     // don't include optional props
     const optionalProps: (keyof DNodeOptsV2)[] = [
       "stub",
+      "schema",
       "schemaStub",
       "custom",
     ];
@@ -602,9 +603,15 @@ export class SchemaUtilsV2 {
     return maybeRoot as SchemaPropsV2;
   }
 
-  static getPattern = (schema: SchemaPropsV2) => {
+  static getPattern = (
+    schema: SchemaPropsV2,
+    opts?: { isNotNamespace?: boolean }
+  ) => {
     const pattern = schema?.data?.pattern || schema.id;
-    const part = schema?.data?.namespace ? `${pattern}/*` : pattern;
+    const part =
+      schema?.data?.namespace && !opts?.isNotNamespace
+        ? `${pattern}/*`
+        : pattern;
     return part;
   };
 
@@ -642,8 +649,11 @@ export class SchemaUtilsV2 {
     return;
   }
 
-  static hasSimplePattern = (schema: SchemaPropsV2): boolean => {
-    const pattern: string = SchemaUtilsV2.getPattern(schema);
+  static hasSimplePattern = (
+    schema: SchemaPropsV2,
+    opts?: { isNotNamespace?: boolean }
+  ): boolean => {
+    const pattern: string = SchemaUtilsV2.getPattern(schema, opts);
     return !_.isNull(pattern.match(/^[a-zA-Z0-9_-]*$/));
   };
 

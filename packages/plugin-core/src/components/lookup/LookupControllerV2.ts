@@ -43,7 +43,7 @@ export class LookupControllerV2 {
 
     // initialize rest
     this.state = {
-      buttons: createAllButtons(initialTypes),
+      buttons: opts.flavor === "note" ? createAllButtons(initialTypes) : [],
     };
     this.opts = opts;
   }
@@ -66,7 +66,7 @@ export class LookupControllerV2 {
     const quickPick = vscode.window.createQuickPick<
       DNodePropsQuickInputV2
     >() as DendronQuickPickerV2;
-    let title = ["Lookup"];
+    let title = [`Lookup (${this.opts.flavor})`];
     title.push(`- version: ${DendronWorkspace.version()}`);
     quickPick.title = title.join(" ");
     quickPick.placeholder = "eg. hello.world";

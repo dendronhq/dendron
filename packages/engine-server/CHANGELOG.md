@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.13.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.13.0...v0.13.1-alpha.0) (2020-10-20)
+
+### Bug Fixes
+
+- **lookup:** schema suggestions on namespace ([56ee6c4](https://github.com/dendronhq/dendron/commit/56ee6c460dd562200931381923e72971681d1390))
+
 # [0.13.0](https://github.com/dendronhq/dendron/compare/v0.12.12-alpha.0...v0.13.0) (2020-10-19)
 
 **Note:** Version bump only for package @dendronhq/engine-server

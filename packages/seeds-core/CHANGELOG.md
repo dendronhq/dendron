@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.13.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.13.0...v0.13.1-alpha.0) (2020-10-20)
+
+### Bug Fixes
+
+- **seeds:** update replace merge strategy ([a02e08a](https://github.com/dendronhq/dendron/commit/a02e08a753c0603871a1ff76e6de78906a04b056))
+
 # [0.13.0](https://github.com/dendronhq/dendron/compare/v0.12.12-alpha.0...v0.13.0) (2020-10-19)
 
 **Note:** Version bump only for package @dendronhq/seeds-core

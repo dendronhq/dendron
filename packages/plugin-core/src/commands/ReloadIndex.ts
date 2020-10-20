@@ -37,6 +37,7 @@ export class ReloadIndexCommand extends BasicCommand<
         return;
       }
       this.L.info({ ctx, msg: "exit" });
+      ws.dendronTreeView?.treeProvider.refresh();
       return engine;
     } else {
       const engine = ws.engine;

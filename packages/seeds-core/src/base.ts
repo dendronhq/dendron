@@ -101,7 +101,7 @@ export abstract class DendronSeed<
         body = [resp.data.body, "\n", note.body].join("\n");
         break;
       case "replace":
-        body = resp.data.body;
+        body = note.body;
         break;
       default:
         throw Error(`unknown merge strategy: ${mergeStrategy}`);

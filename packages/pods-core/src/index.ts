@@ -2,13 +2,8 @@ import { readYAML } from "@dendronhq/common-server";
 import fs, { ensureDirSync, writeFileSync } from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import {
-  JSONExportPod,
-  FileImportPod,
-  JSONImportPod,
-  JSONPublishPod,
-} from "./builtin";
-import { MarkdownPublishPod } from "./builtin/MarkdownPod";
+import { JSONExportPod, JSONImportPod, JSONPublishPod } from "./builtin";
+import { MarkdownImportPod, MarkdownPublishPod } from "./builtin/MarkdownPod";
 import { PodClassEntryV2, PodClassEntryV3 } from "./types";
 export * from "./types";
 export * from "./utils";
@@ -22,7 +17,7 @@ export function getAllPublishPods(): PodClassEntryV3[] {
   return [JSONPublishPod, MarkdownPublishPod];
 }
 export function getAllImportPods(): PodClassEntryV2[] {
-  return [FileImportPod, JSONImportPod];
+  return [MarkdownImportPod, JSONImportPod];
 }
 
 // === utils

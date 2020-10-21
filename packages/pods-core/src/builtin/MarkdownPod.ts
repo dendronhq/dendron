@@ -7,8 +7,14 @@ import {
   PublishPodBaseV3,
   PublishPodOpts,
 } from "../base";
+import { FileImportPod } from "./FilePod";
 
 const ID = "dendron.markdown";
+
+export class MarkdownImportPod extends FileImportPod {
+  static id: string = ID;
+  static description: string = "import markdown";
+}
 
 export class MarkdownPublishPod extends PublishPodBaseV3<PublishConfig> {
   static id: string = ID;

@@ -18,7 +18,7 @@ export const showPodQuickPickItems = (podItem: PodItem[]) => {
     } as PodQuickPickItem;
   });
   return window.showQuickPick(pickItems, {
-    placeHolder: "Choose Pods to Import",
+    placeHolder: "Choose a Pod",
     ignoreFocusOut: false,
     matchOnDescription: true,
     canPickMany: false,
@@ -33,7 +33,7 @@ export const showPodQuickPickItemsV3 = (podItem: PodItemV3[]) => {
     } as PodQuickPickItemV3;
   });
   return window.showQuickPick(pickItems, {
-    placeHolder: "Choose Pods to Import",
+    placeHolder: "Choose a Pod",
     ignoreFocusOut: false,
     matchOnDescription: true,
     canPickMany: false,

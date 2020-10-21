@@ -16,7 +16,7 @@ import {
   PublishPodOpts,
 } from "../base";
 
-const ID = "dendron.pod.json";
+const ID = "dendron.json";
 
 export type ImportPodConfig = ImportConfig & {
   concatenate: boolean;

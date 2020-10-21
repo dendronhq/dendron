@@ -11,13 +11,17 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.13.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.13.1-alpha.0...v0.13.1-alpha.1) (2020-10-20)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Features
+
+- **publishing:** allow custom frontmatter ([782d637](https://github.com/dendronhq/dendron/commit/782d6374c55b00bcda36da9149fb2cedeac0c3d9))
+- **publishing:** generate toc ([53ee270](https://github.com/dendronhq/dendron/commit/53ee270c89f530b9224f33a28dc811de7e5cb2ad))
 
 ## [0.13.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.13.0...v0.13.1-alpha.0) (2020-10-20)
 
 ### Bug Fixes
 
 - **lookup:** schema suggestions on namespace ([56ee6c4](https://github.com/dendronhq/dendron/commit/56ee6c460dd562200931381923e72971681d1390))
+- **seeds:** update replace merge strategy ([a02e08a](https://github.com/dendronhq/dendron/commit/a02e08a753c0603871a1ff76e6de78906a04b056))
 - **workbench:** reload index will update tree view ([deadedc](https://github.com/dendronhq/dendron/commit/deadedc30358ee668806434196ddd45b74aff0cc))
 
 ### Enhancements
@@ -27,7 +31,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [0.13.0](https://github.com/dendronhq/dendron/compare/v0.12.12-alpha.0...v0.13.0) (2020-10-19)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
+gg
 
 ## [0.12.12-alpha.0](https://github.com/dendronhq/dendron/compare/v0.12.11...v0.12.12-alpha.0) (2020-10-19)
 

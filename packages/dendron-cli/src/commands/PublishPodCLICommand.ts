@@ -21,7 +21,7 @@ type CommandOpts = SoilCommandOptsV2 & {
   noteByName: string;
 };
 
-export type CommandCLIOpts = SoilCommandCLIOpts & {
+type CommandCLIOpts = SoilCommandCLIOpts & {
   podId: string;
   podSource?: "remote" | "builtin";
   config?: string;
@@ -65,6 +65,7 @@ function enrichPodArgs(
   };
 }
 
+export { CommandOpts as PublishPodCommandOpts };
 export class PublishPodCLICommand extends SoilCommandV2<
   CommandCLIOpts,
   CommandOpts,

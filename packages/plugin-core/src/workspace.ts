@@ -34,6 +34,7 @@ import { ImportPodCommand } from "./commands/ImportPod";
 import { LookupCommand } from "./commands/LookupCommand";
 import { OpenLogsCommand } from "./commands/OpenLogs";
 import { PublishCommand } from "./commands/Publish";
+import { PublishPodCommand } from "./commands/PublishPod";
 import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";
 import { RefactorHierarchyCommandV2 } from "./commands/RefactorHierarchyV2";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
@@ -332,6 +333,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.PUBLISH.key,
         async (args: any) => {
           await new PublishCommand().run(args);
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.PUBLISH_POD.key,
+        async (args: any) => {
+          await new PublishPodCommand().run(args);
         }
       )
     );

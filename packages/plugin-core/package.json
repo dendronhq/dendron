@@ -297,6 +297,13 @@
                 "docPreview": "<a href=\"https://www.loom.com/share/d49e5f4155af485cadc9cd810b6cab28\"> <img src=\"https://cdn.loom.com/sessions/thumbnails/d49e5f4155af485cadc9cd810b6cab28-with-play.gif\"> </a>"
             },
             {
+                "command": "dendron.publishPod",
+                "title": "Dendron: Publish Pod",
+                "desc": "Publish your note to a different format/location",
+                "docLink": "dendron.topic.pod.md",
+                "docPreview": ""
+            },
+            {
                 "command": "dendron.copyNoteURL",
                 "title": "Dendron: Copy Note URL",
                 "desc": "Get URL of current note from published site",

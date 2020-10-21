@@ -61,6 +61,14 @@ export class NodeTestPresetsV2 {
     );
   }
 
+  static async createNoteRefPreset({ vaultDir }: { vaultDir: string }) {
+    await NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({ vaultDir });
+    await NodeTestUtilsV2.createNote({
+      vaultDir,
+      noteProps: { body: "((ref: [[foo]]))", fname: "bar" },
+    });
+  }
+
   static async createSchemaPreset({ vaultDir }: { vaultDir: string }) {
     await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
     await NodeTestUtilsV2.createSchema({

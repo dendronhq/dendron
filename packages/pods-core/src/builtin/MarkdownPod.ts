@@ -24,7 +24,7 @@ export class MarkdownPublishPod extends PublishPodBaseV3<PublishConfig> {
     ];
   };
 
-  async plant(opts: PublishPodOpts<PublishConfig>): Promise<void> {
+  async plant(opts: PublishPodOpts<PublishConfig>): Promise<any> {
     await this.initEngine();
     const cleanOpts = _.defaults(opts, { config: this.getDefaultConfig() });
     //const { dest } = cleanOpts.config;
@@ -40,7 +40,6 @@ export class MarkdownPublishPod extends PublishPodBaseV3<PublishConfig> {
       replaceRefs: { engine: this.engine },
     });
     const out = remark.processSync(note.body).toString();
-    console.log(out);
-    //fs.writeFileSync(dest, note, { encoding: "utf8" });
+    return _.trim(out);
   }
 }

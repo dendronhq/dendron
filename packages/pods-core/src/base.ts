@@ -99,7 +99,7 @@ export abstract class PublishPodBaseV3<
     };
   }
 
-  abstract plant(opts: PublishPodOpts<TConfig>): Promise<void>;
+  abstract plant(opts: PublishPodOpts<TConfig>): Promise<any>;
 }
 
 export abstract class ExportPodBaseV2<
@@ -213,7 +213,7 @@ export interface PublishPod<TConfig extends PublishConfig = any> {
 }
 
 export type Pod = {
-  plant: (opts: any) => Promise<void>;
+  plant: (opts: any) => Promise<any>;
 };
 
 export interface ImportPod<TConfig extends ImportConfig = any> {

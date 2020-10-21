@@ -380,6 +380,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.pod.md",
     docPreview: `<a href="https://www.loom.com/share/d49e5f4155af485cadc9cd810b6cab28"> <img src="https://cdn.loom.com/sessions/thumbnails/d49e5f4155af485cadc9cd810b6cab28-with-play.gif"> </a>`,
   },
+  PUBLISH_POD: {
+    key: "dendron.publishPod",
+    title: `${CMD_PREFIX} Publish Pod`,
+    group: "pods",
+    desc: "Publish your note to a different format/location",
+    docLink: "dendron.topic.pod.md",
+    docPreview: ``,
+  },
   COPY_NOTE_URL: {
     key: "dendron.copyNoteURL",
     title: `${CMD_PREFIX} Copy Note URL`,

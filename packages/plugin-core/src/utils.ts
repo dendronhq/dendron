@@ -227,10 +227,10 @@ export class VSCodeUtils {
 
   static createWSContext(): vscode.ExtensionContext {
     const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
-    return {
+    return ({
       extensionMode: vscode.ExtensionMode.Development,
       logPath: FileTestUtils.tmpDir().name,
-      subscriptions: [],
+      subscriptions: [] as any[],
       extensionPath: pkgRoot,
       globalState: VSCodeUtils.createMockState({
         [GLOBAL_STATE.VERSION]: "0.0.1",
@@ -241,13 +241,13 @@ export class VSCodeUtils {
       storagePath: FileTestUtils.tmpDir().name,
       globalStoragePath: FileTestUtils.tmpDir().name,
       asAbsolutePath: {} as any, //vscode.Uri.file(wsPath)
-    } as vscode.ExtensionContext;
+    } as unknown) as vscode.ExtensionContext;
   }
 
   static getOrCreateMockContext(): vscode.ExtensionContext {
     if (!_MOCK_CONTEXT) {
       const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
-      _MOCK_CONTEXT = {
+      _MOCK_CONTEXT = ({
         extensionMode: vscode.ExtensionMode.Development,
         logPath: FileTestUtils.tmpDir().name,
         subscriptions: [],
@@ -261,7 +261,7 @@ export class VSCodeUtils {
         storagePath: FileTestUtils.tmpDir().name,
         globalStoragePath: FileTestUtils.tmpDir().name,
         asAbsolutePath: {} as any, //vscode.Uri.file(wsPath)
-      } as vscode.ExtensionContext;
+      } as unknown) as vscode.ExtensionContext;
     }
     return _MOCK_CONTEXT;
   }

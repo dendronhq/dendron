@@ -65,6 +65,7 @@
     "mdast-util-compact": "^2.0.1",
     "mdast-util-inject": "^1.1.0",
     "remark": "^12.0.1",
+    "remark-abbr": "^1.4.0",
     "remark-frontmatter": "^2.0.0",
     "remark-parse": "^8.0.3",
     "remark-toc": "^7.0.0",

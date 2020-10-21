@@ -368,6 +368,8 @@ exports[`basic stingify basic 1`] = `
 
 task1
 task2
+
+
 "
 `;
 
@@ -378,6 +380,8 @@ exports[`basic stingify basic block 1`] = `
 
 task1
 task2
+
+
 "
 `;
 
@@ -388,6 +392,8 @@ exports[`basic stingify basic block with fm 1`] = `
 
 task1
 task2
+
+
 "
 `;
 
@@ -397,6 +403,8 @@ exports[`basic stingify basic block with header and start  1`] = `
 ## Header2
 
 task2
+
+
 "
 `;
 
@@ -405,6 +413,8 @@ exports[`basic stingify basic block with header and start, offset  1`] = `
 
 
 task2
+
+
 "
 `;
 
@@ -414,6 +424,8 @@ exports[`basic stingify basic block with header and start, start invalid  1`] = 
 ### Note Ref Error
 
 start anchor badheader not found  
+
+
 "
 `;
 
@@ -423,6 +435,8 @@ exports[`basic stingify basic block with header, start and end  1`] = `
 ## Header1
 
 task1
+
+
 "
 `;
 
@@ -432,6 +446,8 @@ exports[`basic stingify basic block with header, start and end, end invalid  1`]
 ### Note Ref Error
 
 end anchor badheader not found  
+
+
 "
 `;
 
@@ -440,6 +456,8 @@ exports[`basic stingify basic block with header, start and end, offset  1`] = `
 
 
 task1
+
+
 "
 `;
 
@@ -450,6 +468,8 @@ exports[`basic stingify basic block with wildcard as 1st elem  1`] = `
 ## Header1
 
 task1
+
+
 "
 `;
 
@@ -458,6 +478,8 @@ exports[`basic stingify basic block with wildcard as 2nd elem  1`] = `
 
 
 task1
+
+
 "
 `;
 
@@ -482,7 +504,9 @@ exports[`basic stingify renderWithOutline 1`] = `
 task1
 
 
+
 </div>    
 </div>
+
 "
 `;

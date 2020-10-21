@@ -1,5 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Markdown extensions abbreviations are preserved 1`] = `
+"HTML, JS and CSS are the fundamental building blocks of the web.
+
+    
+
+*[HTML]: HyperText Markup Language
+*[JS]: JavaScript
+*[CSS]: Cascading Style Sheets"
+`;
+
 exports[`replaceRefs wiki2Md and swap id: raw 1`] = `
 "Replace-refs Text
 
@@ -7,6 +17,7 @@ exports[`replaceRefs wiki2Md and swap id: raw 1`] = `
 - [lbl](234)
 - [engine-server.replace-refs.one.md](234)
 - [lbl](234)
+
 "
 `;
 
@@ -354,5 +365,6 @@ exports[`replaceRefs wiki2Md: raw 1`] = `
 - [label](foo-wiki-link)
 - [label](foo-wiki-link)#foobar
     
+
 "
 `;

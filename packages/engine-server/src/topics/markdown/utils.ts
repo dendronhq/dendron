@@ -7,6 +7,8 @@ import markdownItRegex from "markdown-it-regex";
 import Token from "markdown-it/lib/token";
 import os from "os";
 import remark from "remark";
+/// <reference path="remark-abbr.d.ts"/>
+import abbrPlugin from "remark-abbr";
 import frontmatterPlugin from "remark-frontmatter";
 import markdownParse from "remark-parse";
 // import wikiLinkPlugin from "remark-wiki-link";
@@ -102,6 +104,7 @@ export function parse(markdown: string): Node {
     processor ||
     unified()
       .use(markdownParse, { gfm: true })
+      .use(abbrPlugin)
       .use(frontmatterPlugin, ["yaml"])
       .use(dendronLinksPlugin);
   return processor.parse(markdown);
@@ -326,6 +329,7 @@ export function getProcessor(opts?: {
   const { root, renderWithOutline, replaceRefs } = opts || {};
   return remark()
     .use(markdownParse, { gfm: true })
+    .use(abbrPlugin)
     .use(frontmatterPlugin, ["yaml"])
     .use(dendronLinksPlugin)
     .use(dendronRefsPlugin, { root, renderWithOutline, replaceRefs })

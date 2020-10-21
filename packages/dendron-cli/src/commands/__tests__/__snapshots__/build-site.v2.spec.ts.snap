@@ -2,6 +2,7 @@
 
 exports[`buildSite basic: bond 1`] = `
 "- [lbl](refactor.one)
+
 "
 `;
 
@@ -9,11 +10,13 @@ exports[`buildSite ids are converted: converted 1`] = `
 "Build site home
 
 - [build-site.one](notes/id.build-site.one)
+
 "
 `;
 
 exports[`buildSite image prefix: sample.image-link.md 1`] = `
 "![link-alt](fake-s3.com/link-path.jpg)
+
 "
 `;
 
@@ -21,11 +24,13 @@ exports[`buildSite multiple roots: build-site.md 1`] = `
 "Build site home
 
 - [build-site.one](id.build-site.one)
+
 "
 `;
 
 exports[`buildSite multiple roots: foo.md 1`] = `
 "- [lbl](notes/refactor.one)
+
 "
 `;
 
@@ -65,6 +70,7 @@ hpath: foo
 permalink: /
 ---
 foo body
+
 "
 `;
 
@@ -93,6 +99,7 @@ permalink: /
 ## Header 1.1
 
 ## Header 2
+
 "
 `;
 
@@ -117,8 +124,10 @@ exports[`note refs note refs 1`] = `
  [foo](notes/id.foo)
 
 
+
 </div>    
 </div>
+
 "
 `;
 
@@ -128,6 +137,8 @@ exports[`note refs note refs, disable pretty 1`] = `
 # Bar Content # I am bar
 
  [foo](notes/id.foo)
+
+
 "
 `;
 
@@ -166,8 +177,10 @@ exports[`note refs note refs, recursive 1`] = `
 </div>
 
 
+
 </div>    
 </div>
+
 "
 `;
 
@@ -196,6 +209,7 @@ permalink: /
 ## Header 1.1
 
 ## Header 2
+
 "
 `;
 
@@ -220,11 +234,13 @@ permalink: /
 ## Header 1.1
 
 ## Header 2
+
 "
 `;
 
 exports[`wiki link case sensitive link 1`] = `
 "[foo.Mixed_case](id.foo.mixed-case)
+
 "
 `;
 
@@ -232,6 +248,7 @@ exports[`wiki link missing link 1`] = `
 "# Foo Content
 
 # Bar Content [missing-link](/404.html)
+
 "
 `;
 

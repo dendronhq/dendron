@@ -509,6 +509,23 @@ task1
 "
 `;
 
+exports[`basic stingify missing ref 1`] = `
+"# Foo Bar
+
+### Note Ref Error
+
+missing not found  
+
+
+"
+`;
+
+exports[`basic stingify missing ref 2`] = `
+Array [
+  [Error: missing not found],
+]
+`;
+
 exports[`basic stingify ref with ref, inf recursion 1`] = `
 "# Foo
 

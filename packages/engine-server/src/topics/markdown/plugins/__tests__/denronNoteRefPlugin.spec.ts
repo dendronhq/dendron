@@ -1,4 +1,4 @@
-import { DEngineClientV2 } from "@dendronhq/common-all";
+import { DendronError, DEngineClientV2 } from "@dendronhq/common-all";
 import { createLogger, EngineTestUtils } from "@dendronhq/common-server";
 import { NodeTestUtilsV2 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
@@ -540,6 +540,21 @@ describe("basic", () => {
       expect(out.indexOf("Header1") >= 0).toBeTruthy();
       expect(out.indexOf("task1") >= 0).toBeTruthy();
       expect(out.indexOf("task2") >= 0).toBeFalsy();
+    });
+
+    test("missing ref", async () => {
+      const proc = getProcessor({ ...opts, renderWithOutline: true });
+      const out = proc
+        .processSync(
+          `# Foo Bar
+((ref:[[missing]]#Header1:#Header2))`
+        )
+        .toString();
+      expect(out).toMatchSnapshot();
+      const errors = proc.data("errors") as DendronError[];
+      expect(errors).toMatchSnapshot();
+      expect(errors[0].msg).toEqual("missing not found");
+      expect(out.indexOf("missing not found") >= 0).toBeTruthy();
     });
   });
 });

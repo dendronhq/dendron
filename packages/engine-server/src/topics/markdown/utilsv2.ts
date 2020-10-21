@@ -1,4 +1,5 @@
 import {
+  DendronError,
   DLink,
   DNoteLoc,
   NotePropsV2,
@@ -41,7 +42,9 @@ export class ParserUtilsV2 {
    */
   static getRemark(opts?: { dendronLinksOpts: DendronLinksOpts }) {
     const { dendronLinksOpts } = _.defaults(opts, { dendronLinksOpts: {} });
+    const errors: DendronError[] = [];
     return remark()
+      .data("errors", errors)
       .use(markdownParse, { gfm: true })
       .use(abbrPlugin)
       .use(frontmatterPlugin, ["yaml"])

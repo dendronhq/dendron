@@ -1,4 +1,4 @@
-import { DEngineClientV2, Note } from "@dendronhq/common-all";
+import { DendronError, DEngineClientV2, Note } from "@dendronhq/common-all";
 import { removeMDExtension } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -260,9 +260,22 @@ function attachCompiler(
     }
     const data = node.data as RefLinkData;
     const root = engine.vaults[0];
-    const body = fs.readFileSync(path.join(root, data.link.name + ".md"), {
-      encoding: "utf8",
-    });
+    let body: string;
+    try {
+      body = fs.readFileSync(path.join(root, data.link.name + ".md"), {
+        encoding: "utf8",
+      });
+    } catch (err) {
+      const errors = proc.data("errors") as DendronError[];
+      const msg = `${data.link.name} not found`;
+      errors.push(new DendronError({ msg }));
+      return proc.stringify(
+        ParserUtilsV2.genMDError({
+          msg,
+          title: "Note Ref Error",
+        })
+      );
+    }
     const out = extractNoteRef({
       body,
       link: data.link,

@@ -125,7 +125,7 @@ export function parseDendronRef(ref: string) {
     // eslint-disable-next-line no-use-before-define
     link = parseLink(cleanArgs);
   } else {
-    throw Error("not implemented");
+    throw Error(`parse non ref not implemented, ref: ${ref}`);
   }
   return { direction, link };
 }
@@ -178,7 +178,7 @@ function parseLink(ref: string): DendronRefLink | undefined {
   if (ref.indexOf("]") >= 0) {
     return parseFileLink(ref);
   } else {
-    throw Error("not implemented");
+    throw Error(`parseLink, non-file link, not implemented, ${ref}`);
   }
 }
 

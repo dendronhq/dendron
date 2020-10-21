@@ -45,6 +45,7 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
         if (_.isUndefined(opts)) {
           return;
         }
+        this.L.info({ ctx, msg: "pre-execute" });
         const resp = await this.execute({ ...opts, ...args });
         this.L.info({ ctx, msg: "post-execute" });
         this.showResponse(resp);

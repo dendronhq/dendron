@@ -31,7 +31,6 @@ export type CommandCLIOpts = SoilCommandCLIOpts & {
 function buildPodArgs(args: yargs.Argv, _podItems: PodItemV3[]) {
   args.option("podId", {
     describe: "pod to use",
-    //choices: podItems.map(ent => ent.id)
   });
   args.option("noteByName", {
     describe: "name of note",

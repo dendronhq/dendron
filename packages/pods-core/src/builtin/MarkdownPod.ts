@@ -8,7 +8,7 @@ import {
   PublishPodOpts,
 } from "../base";
 
-const ID = "dendron.md";
+const ID = "dendron.markdown";
 
 export class MarkdownPublishPod extends PublishPodBaseV3<PublishConfig> {
   static id: string = ID;
@@ -33,7 +33,7 @@ export class MarkdownPublishPod extends PublishPodBaseV3<PublishConfig> {
       throwIfEmpty: true,
     }) as NotePropsV2;
     const root = this.engine.vaults[0];
-    const renderWithOutline = true;
+    const renderWithOutline = false;
     const remark = ParserUtilsV2.getRemark().use(dendronRefsPlugin, {
       root,
       renderWithOutline,

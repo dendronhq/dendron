@@ -113,18 +113,14 @@ export class JSONPublishPod extends PublishPodBaseV3<PublishConfig> {
     ];
   };
 
-  async plant(opts: PublishPodOpts<PublishConfig>): Promise<void> {
+  async plant(opts: PublishPodOpts<PublishConfig>): Promise<any> {
     await this.initEngine();
-    const { dest } = _.defaults(opts.config, { dest: null });
     const { fname } = opts;
     const note = NoteUtilsV2.getNoteByFname(fname, this.engine.notes, {
       throwIfEmpty: true,
     });
-    if (dest) {
-      fs.writeJSONSync(dest, note, { encoding: "utf8" });
-    } else {
-      console.log(note);
-    }
+    const out = JSON.stringify(note, null, 4);
+    return out;
   }
 }
 

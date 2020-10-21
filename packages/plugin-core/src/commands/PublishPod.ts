@@ -92,6 +92,6 @@ export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
   }
 
   async showResponse() {
-    window.showInformationMessage("markdown copied to clipboard");
+    window.showInformationMessage("contents copied to clipboard");
   }
 }

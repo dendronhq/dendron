@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.13.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.13.1...v0.13.2-alpha.0) (2020-10-21)
+
+### Bug Fixes
+
+- **refs:** render error when ref doesn't exist ([ba1be1a](https://github.com/dendronhq/dendron/commit/ba1be1a12c4a1742e93ab4058d0f132b320be539))
+
+### Features
+
+- **publishing:** preserve abbreviations ([06d9191](https://github.com/dendronhq/dendron/commit/06d91912b34bc5f81b20fce77652366c501865ec))
+
 ## [0.13.1](https://github.com/dendronhq/dendron/compare/v0.13.1-alpha.2...v0.13.1) (2020-10-21)
 
 **Note:** Version bump only for package @dendronhq/engine-server

@@ -506,7 +506,12 @@ export class SchemaUtilsV2 {
       if (_.isUndefined(tempNote)) {
         throw Error(`no template found for ${template}`);
       }
-      note.body = tempNote.body;
+      const tempNoteProps = _.pick(tempNote, ["body", "desc", "custom"]);
+      _.forEach(tempNoteProps, (v, k) => {
+        // @ts-ignore
+        note[k] = v;
+      });
+
       return true;
     }
     return false;

@@ -689,6 +689,8 @@ suite("notes", function () {
           .fsPath as string;
         const node = file2Note(txtPath);
         assert.strictEqual(_.trim(node.body), "text from alpha template");
+        assert.strictEqual(_.trim(node.desc), "desc from alpha");
+        assert.deepStrictEqual(node.custom, { bond: 42 });
         done();
       });
       setupDendronWorkspace(root.name, ctx, {
@@ -703,6 +705,10 @@ suite("notes", function () {
             noteProps: {
               body: "text from alpha template",
               fname: "bar.temp.alpha",
+              desc: "desc from alpha",
+              custom: {
+                bond: 42,
+              },
             },
           });
           await NodeTestUtilsV2.createSchema({

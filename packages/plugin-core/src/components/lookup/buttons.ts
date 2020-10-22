@@ -155,7 +155,7 @@ class DirectChildFilterBtn extends DendronBtn {
   static create(pressed?: boolean) {
     return new DendronBtn({
       title: "Direct Child Filter",
-      iconOff: "symbol-class",
+      iconOff: "git-branch",
       iconOn: "menu-selection",
       type: "directChildOnly" as LookupFilterType,
       pressed,

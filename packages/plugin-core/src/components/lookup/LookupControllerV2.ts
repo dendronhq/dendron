@@ -129,29 +129,17 @@ export class LookupControllerV2 {
     return quickPick;
   }
 
-  async updatePickerBehavior(opts: {
+  async updateBehaviorByNoteType({
+    noteResp,
+    quickPick,
+    provider,
+    quickPickValue,
+  }: {
+    noteResp?: DendronBtn;
     quickPick: DendronQuickPickerV2;
-    document?: vscode.TextDocument;
-    range?: vscode.Range;
-    quickPickValue?: string;
     provider: LookupProviderV2;
-    changed?: DendronBtn;
+    quickPickValue?: string;
   }) {
-    const ctx = "updatePickerBehavior";
-    const { document, range, quickPick, quickPickValue, provider } = opts;
-    const buttons = this.state.buttons;
-    const resp = _.filter(buttons, { pressed: true });
-    Logger.info({ ctx, activeButtons: resp });
-    const noteResp = _.find(resp, (ent) => getButtonCategory(ent) === "note");
-    const selectionResp = _.find(
-      resp,
-      (ent) => getButtonCategory(ent) === "selection"
-    );
-    const filterResp = _.find(
-      resp,
-      (ent) => getButtonCategory(ent) === "filter"
-    );
-    // handle note resp
     switch (noteResp?.type) {
       case "journal": {
         const value = DendronClientUtilsV2.genNoteName("JOURNAL");
@@ -188,6 +176,47 @@ export class LookupControllerV2 {
           "updatePickerBehavior:normal"
         );
     }
+  }
+
+  async updatePickerBehavior(opts: {
+    quickPick: DendronQuickPickerV2;
+    document?: vscode.TextDocument;
+    range?: vscode.Range;
+    quickPickValue?: string;
+    provider: LookupProviderV2;
+    changed?: DendronBtn;
+  }) {
+    const ctx = "updatePickerBehavior";
+    const {
+      document,
+      range,
+      quickPick,
+      quickPickValue,
+      provider,
+      changed,
+    } = opts;
+    const buttons = this.state.buttons;
+    const resp = _.filter(buttons, { pressed: true });
+    Logger.info({ ctx, activeButtons: resp });
+    const noteResp = _.find(resp, (ent) => getButtonCategory(ent) === "note");
+    const selectionResp = _.find(
+      resp,
+      (ent) => getButtonCategory(ent) === "selection"
+    );
+    const filterResp = _.find(
+      resp,
+      (ent) => getButtonCategory(ent) === "filter"
+    );
+    // handle note resp
+    if (!changed || (changed && getButtonCategory(changed) === "note")) {
+      this.updateBehaviorByNoteType({
+        noteResp,
+        quickPick,
+        provider,
+        quickPickValue,
+      });
+    }
+
     // handle selection resp
     quickPick.onCreate = async (note: NotePropsV2) => {
       switch (selectionResp?.type) {

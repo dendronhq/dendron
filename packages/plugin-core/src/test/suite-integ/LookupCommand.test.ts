@@ -454,6 +454,40 @@ suite("notes", function () {
       });
     });
 
+    // TODO: need to mock pressing a button
+    test.skip("don't update note name if note button not pressed", function (done) {
+      onWSInit(async () => {
+        const engOpts: EngineOpts = { flavor: "note" };
+        const lc = new LookupControllerV2(engOpts);
+        // @ts-ignore
+        const lp = new LookupProviderV2(engOpts);
+        let quickpick = await lc.show();
+        quickpick.value = "foo.";
+        // quickpick.onDidTriggerButton(filterBtn)
+
+        // await lp.onUpdatePickerItem(quickpick, { flavor: "note" }, "manual");
+        // assert.deepStrictEqual(quickpick.items.length, 3);
+        // assert.deepStrictEqual(
+        //   _.find(quickpick.items, { fname: "foo.ch1.gch1" }),
+        //   undefined
+        // );
+        done();
+      });
+
+      setupDendronWorkspace(root.name, ctx, {
+        lsp: true,
+        useCb: async (vaultDir) => {
+          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+            vaultDir,
+          });
+          NodeTestUtilsV2.createNote({
+            vaultDir,
+            noteProps: { fname: "foo.ch1.gch1" },
+          });
+        },
+      });
+    });
+
     //     test("attach schema after creation", function (done) {
     //       onWSInit(async () => {
     //         const ws = DendronWorkspace.instance();

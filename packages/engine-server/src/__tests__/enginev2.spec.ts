@@ -142,13 +142,6 @@ describe("engine, schema/", () => {
       // query should have same results
       const resp = await engine.querySchema("*");
       expect(resp.data.length).toEqual(2);
-
-      // should be written to file
-      const data = readYAML(path.join(vaultDir, "foo.schema.yml"));
-      expect(data).toMatchSnapshot("new schema file");
-      expect(data.schemas.length).toEqual(3);
-      // should have added new child
-      expect(_.find(data.schemas, { id: "foo" }).children.length).toEqual(2);
     });
 
     test("write new module", async () => {

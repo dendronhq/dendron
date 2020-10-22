@@ -4,6 +4,8 @@ import {
   SchemaDeleteRequest,
   SchemaQueryPayload,
   SchemaQueryRequest,
+  SchemaUpdatePayload,
+  SchemaUpdateRequest,
   SchemaWritePayload,
   SchemaWriteRequest,
 } from "@dendronhq/common-server";
@@ -65,5 +67,24 @@ export class SchemaController {
       throw "No Engine";
     }
     return await engine.querySchema(qs);
+  }
+
+  async update({
+    ws,
+    schema,
+  }: SchemaUpdateRequest): Promise<SchemaUpdatePayload> {
+    const engine = await MemoryStore.instance().get<DEngineV2>(`ws:${ws}`);
+    if (!engine) {
+      throw "No Engine";
+    }
+    try {
+      await engine.updateSchema(schema);
+      return { error: null };
+    } catch (err) {
+      return {
+        error: new DendronError({ msg: JSON.stringify(err) }),
+        data: undefined,
+      };
+    }
   }
 }

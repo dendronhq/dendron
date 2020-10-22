@@ -62,6 +62,7 @@ import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
+import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
 
@@ -678,9 +679,13 @@ export class DendronWorkspace {
     }
     workspaceFolders = wsFolders;
     if (DendronWorkspace.lsp()) {
+      let vaults = wsFolders as vscode.WorkspaceFolder[];
       const vaultWatcher = new VaultWatcher({
-        vaults: wsFolders as vscode.WorkspaceFolder[],
+        vaults,
       });
+      const schemaWatcher = new SchemaWatcher({ vaults });
+      schemaWatcher.activate(this.context);
+
       let disposables = vaultWatcher.activate();
       disposables.map((d) => {
         this.disposableStore.add(d);

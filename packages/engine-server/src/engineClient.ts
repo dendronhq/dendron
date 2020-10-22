@@ -265,8 +265,10 @@ export class DendronEngineClient implements DEngineClientV2 {
     return _.defaults(out, { data: [] });
   }
 
-  async updateSchema(_schema: SchemaModulePropsV2): Promise<void> {
-    throw Error("not implemented");
+  async updateSchema(schema: SchemaModulePropsV2): Promise<void> {
+    await this.api.schemaUpdate({ schema, ws: this.ws });
+    await this.refreshSchemas([schema]);
+    return;
   }
 
   async writeSchema(schema: SchemaModulePropsV2): Promise<void> {

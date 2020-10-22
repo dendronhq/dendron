@@ -440,8 +440,9 @@ export class FileStorageV2 implements DStoreV2 {
 
   async updateSchema(schemaModule: SchemaModulePropsV2) {
     this.schemas[schemaModule.root.id] = schemaModule;
-    const vaultDir = this.vaults[0];
-    await schemaModuleProps2File(schemaModule, vaultDir, schemaModule.fname);
+    // const vaultDir = this.vaults[0];
+    // await schemaModuleProps2File(schemaModule, vaultDir, schemaModule.fname);
+    // TODO: update notes
   }
 
   async writeNote(
@@ -478,6 +479,8 @@ export class FileStorageV2 implements DStoreV2 {
   }
 
   async writeSchema(schemaModule: SchemaModulePropsV2) {
-    return this.updateSchema(schemaModule);
+    this.schemas[schemaModule.root.id] = schemaModule;
+    const vaultDir = this.vaults[0];
+    await schemaModuleProps2File(schemaModule, vaultDir, schemaModule.fname);
   }
 }

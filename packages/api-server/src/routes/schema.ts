@@ -1,6 +1,7 @@
 import {
   SchemaDeleteRequest,
   SchemaQueryRequest,
+  SchemaUpdateRequest,
   SchemaWriteRequest,
 } from "@dendronhq/common-server";
 import { Request, Response, Router } from "express";
@@ -18,6 +19,13 @@ router.post("/delete", async (req: Request, res: Response) => {
 router.post("/query", async (req: Request, res: Response) => {
   const resp = await SchemaController.instance().query(
     req.body as SchemaQueryRequest
+  );
+  res.json(resp);
+});
+
+router.post("/update", async (req: Request, res: Response) => {
+  const resp = await SchemaController.instance().update(
+    req.body as SchemaUpdateRequest
   );
   res.json(resp);
 });

@@ -1,5 +1,6 @@
 import {
   DNodeUtilsV2,
+  DVault,
   NotePropsV2,
   NoteUtilsV2,
   SchemaModuleOptsV2,
@@ -23,6 +24,20 @@ export function file2Schema(fpath: string): SchemaModulePropsV2 {
     }
   ) as SchemaModuleOptsV2;
   return SchemaParserV2.parseRaw(schemaOpts, { root, fname });
+}
+export function string2Schema({
+  vault,
+  content,
+  fname,
+}: {
+  vault: DVault;
+  content: string;
+  fname: string;
+}) {
+  const schemaOpts = YAML.safeLoad(content, {
+    schema: YAML.JSON_SCHEMA,
+  }) as SchemaModuleOptsV2;
+  return SchemaParserV2.parseRaw(schemaOpts, { root: vault.fsPath, fname });
 }
 
 export function string2Note({

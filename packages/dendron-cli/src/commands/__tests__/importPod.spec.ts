@@ -3,7 +3,7 @@ import {
   NodeTestUtils,
   writeYAML,
 } from "@dendronhq/common-server";
-import { FileImportPod, getPodConfigPath } from "@dendronhq/pods-core";
+import { getPodConfigPath, MarkdownImportPod } from "@dendronhq/pods-core";
 import fs, { ensureDirSync } from "fs-extra";
 import path from "path";
 import { ImportPodCLICommand } from "../importPod";
@@ -36,7 +36,7 @@ describe("import file pod", async () => {
   test("file import, no config", async () => {
     try {
       await ImportPodCLICommand.run({
-        podId: FileImportPod.id,
+        podId: MarkdownImportPod.id,
         wsRoot,
         vault,
       });
@@ -48,13 +48,13 @@ describe("import file pod", async () => {
   test("config present, default", async () => {
     const configPath = getPodConfigPath(
       path.join(wsRoot, "pods"),
-      FileImportPod
+      MarkdownImportPod
     );
     ensureDirSync(path.dirname(configPath));
     writeYAML(configPath, { src: importSrc });
 
     const cmd = await ImportPodCLICommand.run({
-      podId: FileImportPod.id,
+      podId: MarkdownImportPod.id,
       wsRoot,
       vault,
     });

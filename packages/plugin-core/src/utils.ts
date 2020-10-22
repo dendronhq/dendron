@@ -1,6 +1,18 @@
+import {
+  DendronError,
+  DEngine,
+  DEngineClientV2,
+  DNodeUtils,
+  DNodeUtilsV2,
+  DVault,
+  NoteUtilsV2,
+  SchemaUtils,
+} from "@dendronhq/common-all";
 import { FileTestUtils, resolveTilde } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
+import _md from "markdown-it";
+import moment from "moment";
 import os from "os";
 import path from "path";
 import * as vscode from "vscode";
@@ -11,19 +23,8 @@ import {
   _noteAddBehaviorEnum,
 } from "./constants";
 import { FileItem } from "./external/fileutils/FileItem";
-import _md from "markdown-it";
-import { DendronWorkspace } from "./workspace";
-import {
-  DendronError,
-  DEngine,
-  DEngineClientV2,
-  DNodeUtils,
-  DNodeUtilsV2,
-  NoteUtilsV2,
-  SchemaUtils,
-} from "@dendronhq/common-all";
-import moment from "moment";
 import { EngineAPIService } from "./services/EngineAPIService";
+import { DendronWorkspace } from "./workspace";
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
@@ -489,4 +490,15 @@ export class DendronClientUtilsV2 {
     }
     return smod;
   };
+
+  static getVault({
+    dirname,
+  }: {
+    dirname: string;
+    engine: DEngineClientV2;
+  }): DVault {
+    return {
+      fsPath: dirname,
+    };
+  }
 }

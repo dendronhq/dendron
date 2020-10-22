@@ -76,6 +76,20 @@ export class PickerUtilsV2 {
     return _.reject(items, { label: CREATE_NEW_LABEL });
   };
 
+  /**
+   * Reject all items that are over a given level
+   * @param items
+   * @param lvl
+   */
+  static filterByDepth = (
+    items: DNodePropsQuickInputV2[],
+    depth: number
+  ): DNodePropsQuickInputV2[] => {
+    return _.reject(items, (ent) => {
+      return DNodeUtilsV2.getDepth(ent) > depth;
+    });
+  };
+
   static isCreateNewNotePick(node: DNodePropsQuickInputV2): boolean {
     if (!node) {
       return true;
@@ -86,6 +100,7 @@ export class PickerUtilsV2 {
       return false;
     }
   }
+
   static slashToDot(ent: string) {
     return ent.replace(/\//g, ".");
   }

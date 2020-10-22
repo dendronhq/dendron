@@ -30,6 +30,7 @@ export type DendronQuickPickerV2 = QuickPick<
   justActivated?: boolean;
   prev?: { activeItems: any; items: any };
   onCreate?: (note: NotePropsV2) => Promise<void>;
+  showDirectChildrenOnly?: boolean;
 };
 
 const L = Logger;

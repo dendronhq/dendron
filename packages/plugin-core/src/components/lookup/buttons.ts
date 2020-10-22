@@ -2,15 +2,20 @@ import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
 import {
+  LookupFilterType,
   LookupNoteType,
   LookupSelectionType,
   LookupSplitType,
 } from "../../commands/LookupCommand";
 import { DendronQuickPicker, DendronQuickPickerV2 } from "./LookupProvider";
 
-export type ButtonType = LookupNoteType | LookupSelectionType | LookupSplitType;
+export type ButtonType =
+  | LookupNoteType
+  | LookupSelectionType
+  | LookupSplitType
+  | LookupFilterType;
 
-export type ButtonCategory = "selection" | "note" | "split";
+export type ButtonCategory = "selection" | "note" | "split" | "filter";
 
 export function getButtonCategory(button: DendronBtn): ButtonCategory {
   if (isSelectionBtn(button)) {
@@ -22,7 +27,14 @@ export function getButtonCategory(button: DendronBtn): ButtonCategory {
   if (isSplitButton(button)) {
     return "split";
   }
+  if (isFilterButton(button)) {
+    return "filter";
+  }
   throw Error(`unknown btn type ${button}`);
+}
+
+function isFilterButton(button: DendronBtn) {
+  return _.includes(["directChildOnly"], button.type);
 }
 
 function isSelectionBtn(button: DendronBtn) {
@@ -139,6 +151,17 @@ class HorizontalSplitBtn extends DendronBtn {
     });
   }
 }
+class DirectChildFilterBtn extends DendronBtn {
+  static create(pressed?: boolean) {
+    return new DendronBtn({
+      title: "Direct Child Filter",
+      iconOff: "symbol-class",
+      iconOn: "menu-selection",
+      type: "directChildOnly" as LookupFilterType,
+      pressed,
+    });
+  }
+}
 
 // // @ts-ignore
 // class VerticalSplitBtn extends DendronBtn {
@@ -164,6 +187,7 @@ export function createAllButtons(
   typesToTurnOn: ButtonType[] = []
 ): DendronBtn[] {
   const buttons = [
+    DirectChildFilterBtn.create(),
     SlectionExtractBtn.create(),
     Selection2LinkBtn.create(),
     JournalBtn.create(),

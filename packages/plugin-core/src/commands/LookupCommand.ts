@@ -10,6 +10,7 @@ import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
+export type LookupFilterType = "directChildOnly";
 export type LookupSelectionType = "selection2link" | "selectionExtract";
 export type LookupNoteType = "journal" | "scratch";
 export type LookupSplitType = "horizontal";
@@ -21,6 +22,7 @@ type CommandOpts = {
    * behavior of selected text
    */
   selectionType?: LookupSelectionType;
+  filterType?: LookupFilterType;
   /**
    * If set, controls path of note
    */

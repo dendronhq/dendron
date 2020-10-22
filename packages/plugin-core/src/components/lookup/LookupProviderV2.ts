@@ -198,6 +198,7 @@ export class LookupProviderV2 {
     }
     const querystring = PickerUtilsV2.slashToDot(pickerValue);
     const queryOrig = PickerUtilsV2.slashToDot(picker.value);
+    const depth = queryOrig.split(".").length;
     const ws = DendronWorkspace.instance();
     let profile: number;
     const queryEndsWithDot = queryOrig.endsWith(".");
@@ -315,6 +316,9 @@ export class LookupProviderV2 {
         Logger.debug({ ctx, msg: "no matches" });
         picker.items = updatedItems;
         return;
+      }
+      if (picker.showDirectChildrenOnly) {
+        updatedItems = PickerUtilsV2.filterByDepth(updatedItems, depth);
       }
 
       if (perfectMatch) {

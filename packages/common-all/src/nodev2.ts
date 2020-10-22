@@ -166,6 +166,13 @@ export class DNodeUtilsV2 {
     return _.omit(props, blacklist);
   }
 
+  static getDepth(node: DNodePropsV2): number {
+    if (node.id === "root") {
+      return 0;
+    }
+    return node.fname.split(".").length;
+  }
+
   static getDomain(
     node: DNodePropsV2,
     opts: {

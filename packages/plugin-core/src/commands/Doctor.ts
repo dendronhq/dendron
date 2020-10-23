@@ -20,6 +20,7 @@ type CommandOutput = {
 
 export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
+    window.showInformationMessage("Calling the doctor.");
     const {} = _.defaults(opts, {});
     const ws = DendronWorkspace.instance();
     const rootDir = DendronWorkspace.rootDir();
@@ -48,7 +49,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (!fs.existsSync(siteRoot)) {
       const f: Finding = { issue: "no siteRoot found" };
       const dendronJekyll = Uri.joinPath(ws.extensionAssetsDir, "jekyll");
-      fs.copySync(path.join(dendronJekyll.fsPath), path.join(siteRoot, "docs"));
       fs.copySync(dendronJekyll.fsPath, siteRoot);
       f.fix = `created siteRoot at ${siteRoot}`;
       findings.push(f);
@@ -59,6 +59,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     findings.data.forEach((f) => {
       window.showInformationMessage(`issue: ${f.issue}. fix: ${f.fix}`);
     });
-    window.showInformationMessage(`doctor finished checkup`);
+    window.showInformationMessage(`Doctor finished checkup 🍭`);
   }
 }

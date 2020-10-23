@@ -67,7 +67,6 @@ suite("notes", function () {
         "Gemfile",
         "_config.yml",
         "assets",
-        "docs",
         "favicon.ico",
       ]);
       done();

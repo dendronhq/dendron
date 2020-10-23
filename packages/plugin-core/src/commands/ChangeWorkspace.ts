@@ -1,31 +1,30 @@
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { DENDRON_WS_NAME } from "../constants";
-import { WorkspaceConfig } from "../settings";
+import { window } from "vscode";
+import { DENDRON_COMMANDS, DENDRON_WS_NAME } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { BasicCommand } from "./base";
 
 type ChangeWorkspaceCommandOpts = {
-  rootDirRaw: string
+  rootDirRaw: string;
   skipOpenWS?: boolean;
 };
 
 type CommandInput = {
-    rootDirRaw: string
-}
+  rootDirRaw: string;
+};
 
 export class ChangeWorkspaceCommand extends BasicCommand<
   ChangeWorkspaceCommandOpts,
   any
 > {
-
-  async gatherInputs(): Promise<CommandInput|undefined> {
+  async gatherInputs(): Promise<CommandInput | undefined> {
     const rootDirRaw = await VSCodeUtils.gatherFolderPath();
     if (_.isUndefined(rootDirRaw)) {
-        return;
-    } 
-    return {rootDirRaw};
+      return;
+    }
+    return { rootDirRaw };
   }
 
   async execute(opts: ChangeWorkspaceCommandOpts) {
@@ -34,7 +33,10 @@ export class ChangeWorkspaceCommand extends BasicCommand<
       throw Error(`${rootDirRaw} does not exist`);
     }
     if (!fs.existsSync(path.join(rootDirRaw, DENDRON_WS_NAME))) {
-      WorkspaceConfig.write(rootDirRaw, { rootVault: "." });
+      window.showErrorMessage(
+        `no workspace file found. please run ${DENDRON_COMMANDS.INIT_WS.title} to create a workspace at ${rootDirRaw}`
+      );
+      return;
     }
     if (!skipOpenWS) {
       VSCodeUtils.openWS(path.join(rootDirRaw, DENDRON_WS_NAME));

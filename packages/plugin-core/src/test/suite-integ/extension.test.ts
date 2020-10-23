@@ -1231,7 +1231,6 @@ suite("commands", function () {
           "Gemfile",
           "_config.yml",
           "assets",
-          "docs",
           "favicon.ico",
         ]);
         done();

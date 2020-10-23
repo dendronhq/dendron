@@ -325,14 +325,17 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Change Workspace`,
     group: "workspace",
     desc: "Change into existing workspace",
-    docs: [
-      "Dendron will create a `dendron.code-workspace` file in specified directory and then open the workspace (if a workspace file already exists, it will use that). It will also create a `root.md` file in that directory if it doesn't exist (currently this is part of the internal working of dendron).",
-      "",
-      "Dendron **does not** delete or overwrite any files during the **Change Workspace** operation.",
-    ].join("\n"),
     docLink: "dendron.topic.commands.md",
     docPreview: "",
   },
+  // ADD_VAULT: {
+  //   key: "dendron.addVault",
+  //   title: `${CMD_PREFIX} Add Vault`,
+  //   group: "workspace",
+  //   desc: "Add a vault to an existing workspace",
+  //   docLink: "dendron.topic.commands.md",
+  //   docPreview: "",
+  // },
   UPGRADE_SETTINGS: {
     key: "dendron.upgradeSettings",
     title: `${CMD_PREFIX} Upgrade Settings`,

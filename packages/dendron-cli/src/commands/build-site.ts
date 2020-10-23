@@ -133,11 +133,14 @@ async function note2JekyllMdFile(
   };
   const config: Partial<DendronSiteConfig> = opts.config || {};
   const domainPath = DNodeUtilsV2.domainName(note.fname);
-  let hConfig: HierarchyConfig = _.defaults(_.get(config, domainPath, {}), {
-    publishByDefault: true,
-    noindexByDefault: false,
-    customFrontmatter: [],
-  });
+  let rConfig: HierarchyConfig = _.defaults(
+    _.get(config, "root", {
+      publishByDefault: true,
+      noindexByDefault: false,
+      customFrontmatter: [],
+    })
+  );
+  let hConfig: HierarchyConfig = _.defaults(_.get(config, domainPath), rConfig);
   const siteNotesDir = config.siteNotesDir || "notes";
 
   if (!hConfig.publishByDefault && !note.custom.published) {

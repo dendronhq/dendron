@@ -908,3 +908,97 @@ describe("custom frontmatter", () => {
     expect(content.indexOf("[Header 1.1](#header-11)") >= 0).toBeTruthy();
   });
 });
+
+describe("per hierarchy config", () => {
+  let vaultDir: string;
+  let engine: DEngine;
+  let siteRootDir: string;
+  let notesDir: string;
+  let writeStubs = false;
+  let engineClient: DEngineClientV2;
+  let port: number;
+
+  beforeAll(async () => {
+    const logPath = process.env["LOG_PATH"];
+    port = await launch({ logPath });
+  });
+
+  beforeEach(async () => {
+    siteRootDir = FileTestUtils.tmpDir().name;
+    notesDir = path.join(siteRootDir, "notes");
+    vaultDir = await EngineTestUtilsV2.setupVault({
+      initDirCb: async (vaultDir) => {
+        await NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
+          vaultDir,
+        });
+      },
+    });
+  });
+
+  afterEach(() => {
+    fs.removeSync(vaultDir);
+  });
+
+  test("root config set", async () => {
+    const wsRoot = path.join(vaultDir, "../");
+    engineClient = DendronEngineClient.create({
+      port,
+      vaults: [vaultDir],
+      ws: wsRoot,
+    });
+    await engineClient.init();
+
+    const config: DendronSiteConfig = {
+      siteHierarchies: ["root"],
+      siteRootDir,
+      usePrettyRefs: true,
+      config: {
+        root: {
+          publishByDefault: false,
+        },
+      },
+    };
+    const cmd = new BuildSiteCommand();
+    await cmd.execute({
+      engine,
+      engineClient,
+      config,
+      wsRoot,
+      writeStubs,
+    });
+    expect(fs.readdirSync(notesDir)).toEqual([]);
+  });
+
+  test("root config and hierarchal config set", async () => {
+    const wsRoot = path.join(vaultDir, "../");
+    engineClient = DendronEngineClient.create({
+      port,
+      vaults: [vaultDir],
+      ws: wsRoot,
+    });
+    await engineClient.init();
+
+    const config: DendronSiteConfig = {
+      siteHierarchies: ["root"],
+      siteRootDir,
+      usePrettyRefs: true,
+      config: {
+        root: {
+          publishByDefault: false,
+        },
+        foo: {
+          publishByDefault: true,
+        },
+      },
+    };
+    const cmd = new BuildSiteCommand();
+    await cmd.execute({
+      engine,
+      engineClient,
+      config,
+      wsRoot,
+      writeStubs,
+    });
+    expect(fs.readdirSync(notesDir)).toEqual(["foo.ch1.md", "foo.md"]);
+  });
+});

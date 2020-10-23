@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.13.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.13.2...v0.13.3-alpha.0) (2020-10-23)
+
+### Enhancements
+
+- **schema:** add custom props from schema template ([5264544](https://github.com/dendronhq/dendron/commit/52645449b8e155e168baaac0fa4e99903efafcf0))
+
+### Features
+
+- **lookup:** support direct child lookup ([1cae082](https://github.com/dendronhq/dendron/commit/1cae08294baa844c0c0ee3c8d390e337bd6172be))
+
 ## [0.13.2](https://github.com/dendronhq/dendron/compare/v0.13.2-alpha.2...v0.13.2) (2020-10-22)
 
 **Note:** Version bump only for package @dendronhq/common-all

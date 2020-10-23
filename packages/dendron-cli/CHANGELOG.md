@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.13.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.13.2...v0.13.3-alpha.0) (2020-10-23)
+
+### Enhancements
+
+- **publish:** be able to set config for all hiearchies ([a27d94a](https://github.com/dendronhq/dendron/commit/a27d94a3c469a4efaf2ee8c2bca40a8a471773f2))
+
 ## [0.13.2](https://github.com/dendronhq/dendron/compare/v0.13.2-alpha.2...v0.13.2) (2020-10-22)
 
 **Note:** Version bump only for package @dendronhq/dendron-cli

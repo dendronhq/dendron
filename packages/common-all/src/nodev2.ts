@@ -322,6 +322,11 @@ export class NoteUtilsV2 {
     });
   }
 
+  /**
+   * Create stubs and add notes to parent
+   * @param from
+   * @param to
+   */
   static createStubs(from: NotePropsV2, to: NotePropsV2): NotePropsV2[] {
     const stubNodes: NotePropsV2[] = [];
     let fromPath = from.fname;
@@ -447,6 +452,17 @@ export class NoteUtilsV2 {
 
   static getPathUpTo(hpath: string, numCompoenents: number) {
     return hpath.split(".").slice(0, numCompoenents).join(".");
+  }
+
+  static hydrate({
+    noteRaw,
+    noteHydrated,
+  }: {
+    noteRaw: NotePropsV2;
+    noteHydrated: NotePropsV2;
+  }) {
+    const hydrateProps = _.pick(noteHydrated, ["parent", "children"]);
+    return { ...noteRaw, ...hydrateProps };
   }
 
   static serializeMeta(props: NotePropsV2) {

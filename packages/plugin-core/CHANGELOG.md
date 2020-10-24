@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.13.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.13.3-alpha.0...v0.13.3-alpha.1) (2020-10-24)
+
+### Bug Fixes
+
+- **notes:** refactor will miss links in newly created notes ([c8a5dde](https://github.com/dendronhq/dendron/commit/c8a5dde2ca46e2402bc50b1a8f635d9fb5318c9d))
+
 ## [0.13.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.13.2...v0.13.3-alpha.0) (2020-10-23)
 
 ### Bug Fixes

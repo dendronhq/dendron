@@ -15,6 +15,9 @@
           "env": {
             "PORT": "3005",
             "TS_NODE_LOG_ERROR": "1",
+            "LOG_NAME": "api-server",
+            "LOG_DST": "/tmp/api-server.txt",
+            "LOG_LEVEL": "debug"
           },
           "args": [
               "${workspaceFolder}/src/start.ts"

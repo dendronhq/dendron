@@ -74,6 +74,7 @@
       "titleBar.inactiveForeground": "#e7e7e799"
     },
     "peacock.color": "#007fff",
-    "vim.statusBarColorControl": false
+    "vim.statusBarColorControl": false,
+    "debug.node.autoAttach": "on"
   }
 }

@@ -7,17 +7,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Bug Fixes
 
+- **comp:common-server:** don't throw error on missing log vars ([9d00e55](https://github.com/dendronhq/dendron/commit/9d00e55b2104efa7739ec94f0bb2793daa888450))
 - **notes:** refactor will miss links in newly created notes ([c8a5dde](https://github.com/dendronhq/dendron/commit/c8a5dde2ca46e2402bc50b1a8f635d9fb5318c9d))
-
-## [0.13.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.13.2...v0.13.3-alpha.0) (2020-10-23)
-
-### Bug Fixes
-
 - **lookup:** don't update lookup unless note btn is pressed ([30140f7](https://github.com/dendronhq/dendron/commit/30140f7a16c6fb5ab81a9eae8af13f17575c78f3))
 
 ### Enhancements
 
 - **lookup:** update filter btn icon ([b4af860](https://github.com/dendronhq/dendron/commit/b4af8608ce1c1f05e04f1b23e23d1fff833bf3d9))
+- **publish:** be able to set config for all hiearchies ([a27d94a](https://github.com/dendronhq/dendron/commit/a27d94a3c469a4efaf2ee8c2bca40a8a471773f2))
 - **schema:** add custom props from schema template ([5264544](https://github.com/dendronhq/dendron/commit/52645449b8e155e168baaac0fa4e99903efafcf0))
 - **workbench:** reload index re-create root if not exist ([c66e242](https://github.com/dendronhq/dendron/commit/c66e242bac91c73404a5dd21ed3813c0dc2f022b))
 
@@ -27,7 +24,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.13.2](https://github.com/dendronhq/dendron/compare/v0.13.2-alpha.2...v0.13.2) (2020-10-22)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.13.2-alpha.2](https://github.com/dendronhq/dendron/compare/v0.13.2-alpha.1...v0.13.2-alpha.2) (2020-10-22)
 

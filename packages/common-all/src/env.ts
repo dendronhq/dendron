@@ -39,9 +39,11 @@ export function setEnv(name: ConfigKey, value: any): void {
 }
 
 export function env(name: ConfigKey, opts?: { shouldThrow?: boolean }): any {
+  const override = process.env[name];
+  if (override) {
+    return override;
+  }
   const stage = getStage();
   // @ts-ignore: multiple configs
-  const val = getOrThrow(config[stage], name, opts);
-  const override = process.env[name];
-  return override || val;
+  return getOrThrow(config[stage], name, opts);
 }

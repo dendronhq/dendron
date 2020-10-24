@@ -21,12 +21,14 @@ import {
   NodeTestPresetsV2,
   NodeTestUtilsV2,
   NoteTestPresetsV2,
+  RENAME_TEST_PRESETS,
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { FileStorageV2 } from "../drivers/file/storev2";
 import { DendronEngineV2 } from "../enginev2";
+import { ParserUtilsV2 } from "../topics/markdown";
 
 const _su = SchemaUtilsV2;
 
@@ -663,6 +665,74 @@ describe("engine, notes/", () => {
           .indexOf("[[baz]]") >= 0
       ).toBeTruthy();
     });
+
+    test(RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.label, async () => {
+      await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.before({ vaultDir });
+      await engine.init();
+      const resp = await engine.renameNote({
+        oldLoc: { fname: "bar", vault: { fsPath: vaultDir } },
+        newLoc: { fname: "baz", vault: { fsPath: vaultDir } },
+      });
+      const changed = resp.data;
+      await NodeTestPresetsV2.runJestHarness({
+        opts: { changed, vaultDir } as Parameters<
+          typeof RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.results
+        >[0],
+        results: RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.results,
+        expect,
+      });
+    });
+
+    test.skip(RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V2.label, async () => {
+      await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V2.before({ vaultDir });
+      await engine.init();
+      const {
+        alpha,
+        beta,
+      } = await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V2.after({ vaultDir });
+      await engine.writeNote(alpha);
+      await engine.writeNote(beta);
+      const resp = await engine.renameNote({
+        oldLoc: { fname: "beta", vault: { fsPath: vaultDir } },
+        newLoc: { fname: "gamma", vault: { fsPath: vaultDir } },
+      });
+      const changed = resp.data;
+      await NodeTestPresetsV2.runJestHarness({
+        opts: { changed, vaultDir } as Parameters<
+          typeof RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V2.results
+        >[0],
+        results: RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V2.results,
+        expect,
+      });
+    });
+
+    test(RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.label, async () => {
+      await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.before({ vaultDir });
+      await engine.init();
+      const {
+        alpha,
+        beta,
+      } = await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.after({
+        vaultDir,
+        findLinks: ParserUtilsV2.findLinks,
+      });
+      await engine.updateNote(alpha);
+      await engine.writeNote(beta);
+      const resp = await engine.renameNote({
+        oldLoc: { fname: "beta", vault: { fsPath: vaultDir } },
+        newLoc: { fname: "gamma", vault: { fsPath: vaultDir } },
+      });
+      const changed = resp.data;
+      expect(changed).toMatchSnapshot("changed");
+      expect(engine.notes).toMatchSnapshot("notes");
+      await NodeTestPresetsV2.runJestHarness({
+        opts: { changed, vaultDir } as Parameters<
+          typeof RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.results
+        >[0],
+        results: RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.results,
+        expect,
+      });
+    });
   });
 
   const NOTE_WRITE_PRESET =
@@ -707,7 +777,7 @@ describe("engine, notes/", () => {
       });
     });
 
-    test("write note, no schema", async () => {
+    test("write note, no schema, new domain", async () => {
       await engine.init();
       const barNote = NoteUtilsV2.create({
         fname: "bar",
@@ -721,6 +791,8 @@ describe("engine, notes/", () => {
       const note = resp.data[0];
       expect(_.values(engine.notes).length).toEqual(4);
       expect(note).toEqual(engine.notes["bar"]);
+      // parent is added
+      expect(note.parent).toEqual("root");
       expect(note.schema).toBeUndefined();
       expect(fs.readdirSync(vaultDir)).toEqual([
         "bar.md",

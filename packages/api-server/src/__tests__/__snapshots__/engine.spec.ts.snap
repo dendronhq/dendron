@@ -159,6 +159,7 @@ Object {
     Object {
       "note": Object {
         "body": "[[baz]]
+
 ",
         "children": Array [],
         "created": "1",
@@ -169,11 +170,12 @@ Object {
         "id": "bar",
         "links": Array [
           Object {
+            "alias": "baz",
             "from": Object {
               "fname": "bar",
               "id": "bar",
             },
-            "original": "[[baz]]",
+            "original": "baz",
             "pos": Object {
               "end": 7,
               "start": 0,
@@ -192,6 +194,44 @@ Object {
       },
       "status": "update",
     },
+    Object {
+      "note": Object {
+        "body": "[[bar]]
+",
+        "children": Array [],
+        "created": "1",
+        "custom": Object {},
+        "data": Object {},
+        "desc": "",
+        "fname": "foo",
+        "id": "foo",
+        "links": Array [],
+        "parent": null,
+        "title": "Foo",
+        "type": "note",
+        "updated": "1",
+      },
+      "status": "delete",
+    },
+    Object {
+      "note": Object {
+        "body": "[[bar]]
+",
+        "children": Array [],
+        "created": "1",
+        "custom": Object {},
+        "data": Object {},
+        "desc": "",
+        "fname": "baz",
+        "id": "foo",
+        "links": Array [],
+        "parent": "root",
+        "title": "Foo",
+        "type": "note",
+        "updated": "1",
+      },
+      "status": "create",
+    },
   ],
   "error": null,
 }
@@ -205,6 +245,86 @@ Array [
   "foo.schema.yml",
   "root.md",
   "root.schema.yml",
+]
+`;
+
+exports[`notes rename/ domain with no children, update exsiting node: changed 1`] = `
+Array [
+  Object {
+    "note": Object {
+      "body": "[[gamma]]
+
+",
+      "children": Array [],
+      "created": "1",
+      "data": Object {},
+      "desc": "",
+      "fname": "alpha",
+      "id": "alpha",
+      "links": Array [
+        Object {
+          "alias": "gamma",
+          "from": Object {
+            "fname": "alpha",
+            "id": "alpha",
+          },
+          "original": "gamma",
+          "pos": Object {
+            "end": 9,
+            "start": 0,
+          },
+          "to": Object {
+            "fname": "gamma",
+          },
+          "type": "wiki",
+          "value": "gamma",
+        },
+      ],
+      "parent": "root",
+      "title": "Alpha",
+      "type": "note",
+      "updated": "1",
+    },
+    "status": "update",
+  },
+  Object {
+    "note": Object {
+      "body": "[[alpha]]
+",
+      "children": Array [],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "beta",
+      "id": "beta",
+      "links": Array [],
+      "parent": null,
+      "title": "Beta",
+      "type": "note",
+      "updated": "1",
+    },
+    "status": "delete",
+  },
+  Object {
+    "note": Object {
+      "body": "[[alpha]]
+",
+      "children": Array [],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "gamma",
+      "id": "beta",
+      "links": Array [],
+      "parent": "root",
+      "title": "Beta",
+      "type": "note",
+      "updated": "1",
+    },
+    "status": "create",
+  },
 ]
 `;
 

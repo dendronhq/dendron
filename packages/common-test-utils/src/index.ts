@@ -20,6 +20,10 @@ import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { TestResult } from "./types";
+import { TestPresetEntry } from "./utils";
+export * from "./presets";
+export * from "./utils";
 
 export type SetupVaultOpts = {
   vaultDir?: string;
@@ -53,7 +57,7 @@ export class NodeTestPresetsV2 {
     expect,
   }: {
     opts: TOpts;
-    results: any;
+    results: Function;
     expect: jest.Expect;
   }) {
     return _.map(await results(opts), (ent) =>
@@ -141,12 +145,6 @@ export class NodeTestPresetsV2 {
   }
 }
 
-export type TestResult = {
-  actual: any;
-  expected: any;
-  msg?: string;
-};
-
 type UpdateNoteTestOptsV2 = {
   notes: NotePropsDictV2;
   vaultDir: string;
@@ -158,15 +156,8 @@ type DeleteNoteTestOptsV2 = {
   vaultDir: string;
 };
 
-type NoteTestPresetEntry<TBeforeOpts, TResultsOpts> = {
-  label: string;
-  init(): Promise<void>;
-  before: (opts: TBeforeOpts) => Promise<void>;
-  results: (opts: TResultsOpts) => Promise<TestResult[]>;
-};
-
 type NoteTestPresetGroup<TBeforeOpts, TResultsOpts> = {
-  [key: string]: NoteTestPresetEntry<TBeforeOpts, TResultsOpts>;
+  [key: string]: TestPresetEntry<TBeforeOpts, any, TResultsOpts>;
 };
 
 type NoteTestPresetModule<TBeforeOpts, TResultsOpts> = {
@@ -177,30 +168,6 @@ type NoteTestPresetCollectionDict<TBeforeOpts = any, TResultsOpts = any> = {
   [key: string]: NoteTestPresetModule<TBeforeOpts, TResultsOpts>;
 };
 
-class TestPresetEntry<TBeforeOpts, TResultsOpts>
-  implements NoteTestPresetEntry<TBeforeOpts, TResultsOpts> {
-  public label: string;
-  public before: (_opts: TBeforeOpts) => Promise<void>;
-  public results: (_opts: TResultsOpts) => Promise<TestResult[]>;
-  public init: () => Promise<void>;
-
-  constructor({
-    label,
-    results,
-    before,
-  }: {
-    label: string;
-    before?: (_opts: TBeforeOpts) => Promise<void>;
-    results: (_opts: TResultsOpts) => Promise<TestResult[]>;
-    //init?: ({engine}: {engine: DEngineV2}) => Promise<void>;
-  }) {
-    this.label = label;
-    this.results = results;
-    this.before = before ? before : async () => {};
-    this.init = async () => {};
-  }
-}
-
 export class NoteTestPresetsV2 {
   static async createJestTest({
     executeCb,
@@ -208,7 +175,7 @@ export class NoteTestPresetsV2 {
     expect,
     entry,
   }: {
-    entry: TestPresetEntry<any, any>;
+    entry: TestPresetEntry<any, any, any>;
     expect: jest.Expect;
     beforeArgs?: any;
     executeCb: () => Promise<any>;

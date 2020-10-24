@@ -5,7 +5,11 @@ import {
   NoteUtilsV2,
 } from "@dendronhq/common-all";
 import { DirResult, FileTestUtils, note2File } from "@dendronhq/common-server";
-import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
+import {
+  NodeTestPresetsV2,
+  RENAME_TEST_PRESETS,
+} from "@dendronhq/common-test-utils";
+import { ParserUtilsV2 } from "@dendronhq/engine-server";
 import assert from "assert";
 import { afterEach, beforeEach } from "mocha";
 import path from "path";
@@ -150,6 +154,42 @@ suite("notes", function () {
           created: "1",
         });
         await note2File(bar, vaultDir);
+      },
+    });
+  });
+
+  test(RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.label, (done) => {
+    onWSInit(async () => {
+      const engine = DendronWorkspace.instance().getEngine();
+      await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.before({ vaultDir });
+      await engine.init();
+      const {
+        alpha,
+        beta,
+      } = await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.after({
+        vaultDir,
+        findLinks: ParserUtilsV2.findLinks,
+      });
+      await engine.updateNote(alpha);
+      await engine.writeNote(beta);
+      const resp = await engine.renameNote({
+        oldLoc: { fname: "beta", vault: { fsPath: vaultDir } },
+        newLoc: { fname: "gamma", vault: { fsPath: vaultDir } },
+      });
+      const changed = resp.data;
+      await NodeTestPresetsV2.runMochaHarness({
+        opts: { changed, vaultDir } as Parameters<
+          typeof RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.results
+        >[0],
+        results: RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.results,
+      });
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      useCb: async (_vaultDir) => {
+        vaultDir = _vaultDir;
+        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
       },
     });
   });

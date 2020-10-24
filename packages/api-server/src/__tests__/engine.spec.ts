@@ -10,7 +10,9 @@ import {
   NodeTestPresetsV2,
   NodeTestUtilsV2,
   NoteTestPresetsV2,
+  RENAME_TEST_PRESETS,
   SchemaTestPresetsV2,
+  EngineAPIShim,
 } from "@dendronhq/common-test-utils";
 import {
   DendronAPI,
@@ -22,6 +24,7 @@ import {
 import fs from "fs-extra";
 import path from "path";
 import _ from "lodash";
+import { ParserUtilsV2 } from "@dendronhq/engine-server";
 
 async function setupWS({ wsRoot, vault }: { wsRoot: string; vault: string }) {
   const payload = {
@@ -450,6 +453,8 @@ describe("notes", () => {
   });
 
   describe("rename/", () => {
+    let engine: EngineAPIShim;
+
     beforeEach(async () => {
       wsRoot = tmpDir().name;
       vault = path.join(wsRoot, "vault");
@@ -479,6 +484,7 @@ describe("notes", () => {
         },
       });
       api = await setupWS({ wsRoot, vault });
+      engine = new EngineAPIShim({ api, wsRoot, vaults: [vault] });
     });
 
     test("basic", async () => {
@@ -496,6 +502,52 @@ describe("notes", () => {
       expect(notes).toMatchSnapshot();
       expect(_.includes(notes, "foo.md")).toBeFalsy();
       expect(_.includes(notes, "baz.md")).toBeTruthy();
+    });
+
+    test(RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.label, async () => {
+      const vaultDir = vault;
+      await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.before({ vaultDir });
+      const resp = await api.engineRenameNote({
+        ws: wsRoot,
+        oldLoc: { fname: "bar", vault: { fsPath: vaultDir } },
+        newLoc: { fname: "baz", vault: { fsPath: vaultDir } },
+      });
+      const changed = resp.data;
+      await NodeTestPresetsV2.runJestHarness({
+        opts: { changed, vaultDir } as Parameters<
+          typeof RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.results
+        >[0],
+        results: RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.results,
+        expect,
+      });
+    });
+
+    test(RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.label, async () => {
+      const vaultDir = vault;
+      await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.before({ vaultDir });
+      await engine.init();
+      const {
+        alpha,
+        beta,
+      } = await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.after({
+        vaultDir,
+        findLinks: ParserUtilsV2.findLinks,
+      });
+      await engine.updateNote(alpha);
+      await engine.writeNote(beta);
+      const resp = await engine.renameNote({
+        oldLoc: { fname: "beta", vault: { fsPath: vaultDir } },
+        newLoc: { fname: "gamma", vault: { fsPath: vaultDir } },
+      });
+      const changed = resp.data;
+      expect(changed).toMatchSnapshot("changed");
+      await NodeTestPresetsV2.runJestHarness({
+        opts: { changed, vaultDir } as Parameters<
+          typeof RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.results
+        >[0],
+        results: RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.results,
+        expect,
+      });
     });
   });
 

@@ -9,10 +9,12 @@ import {
 } from "@dendronhq/common-server";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
 import { Request, Response, Router } from "express";
+import { getLogger } from "../core";
 import { NoteController } from "../modules/notes";
 import { MemoryStore } from "../store/memoryStore";
 
 const router = Router();
+const L = getLogger();
 
 router.post("/delete", async (req: Request, res: Response) => {
   const { ws, id, opts } = req.body as EngineDeleteRequest;
@@ -53,9 +55,11 @@ router.post("/query", async (req: Request, res: Response) => {
 });
 
 router.post("/update", async (req: Request, res: Response) => {
+  const ctx = "router:note:update";
   const resp = await NoteController.instance().update(
     req.body as EngineUpdateNoteRequest
   );
+  L.debug({ ctx, msg: "exit", payload: req.body });
   res.json(resp);
 });
 

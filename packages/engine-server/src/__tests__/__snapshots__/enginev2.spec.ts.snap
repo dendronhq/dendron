@@ -334,6 +334,256 @@ Array [
 ]
 `;
 
+exports[`engine, notes/ rename/ domain with no children, update exsiting node: changed 1`] = `
+Array [
+  Object {
+    "note": Object {
+      "body": "[[gamma]]
+
+",
+      "children": Array [],
+      "created": "1",
+      "data": Object {},
+      "desc": "",
+      "fname": "alpha",
+      "id": "alpha",
+      "links": Array [
+        Object {
+          "alias": "gamma",
+          "from": Object {
+            "fname": "alpha",
+            "id": "alpha",
+          },
+          "original": "gamma",
+          "pos": Object {
+            "end": 9,
+            "start": 0,
+          },
+          "to": Object {
+            "fname": "gamma",
+          },
+          "type": "wiki",
+          "value": "gamma",
+        },
+      ],
+      "parent": "root",
+      "title": "Alpha",
+      "type": "note",
+      "updated": "1",
+    },
+    "status": "update",
+  },
+  Object {
+    "note": Object {
+      "body": "[[alpha]]
+",
+      "children": Array [],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "beta",
+      "id": "beta",
+      "links": Array [],
+      "parent": null,
+      "title": "Beta",
+      "type": "note",
+      "updated": "1",
+    },
+    "status": "delete",
+  },
+  Object {
+    "note": Object {
+      "body": "[[alpha]]
+",
+      "children": Array [],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "gamma",
+      "id": "beta",
+      "links": Array [],
+      "parent": "root",
+      "title": "Beta",
+      "type": "note",
+      "updated": "1",
+    },
+    "status": "create",
+  },
+]
+`;
+
+exports[`engine, notes/ rename/ domain with no children, update exsiting node: notes 1`] = `
+Object {
+  "alpha": Object {
+    "body": "[[gamma]]
+
+",
+    "children": Array [],
+    "created": "1",
+    "data": Object {},
+    "desc": "",
+    "fname": "alpha",
+    "id": "alpha",
+    "links": Array [
+      Object {
+        "alias": "gamma",
+        "from": Object {
+          "fname": "alpha",
+          "id": "alpha",
+        },
+        "original": "gamma",
+        "pos": Object {
+          "end": 9,
+          "start": 0,
+        },
+        "to": Object {
+          "fname": "gamma",
+        },
+        "type": "wiki",
+        "value": "gamma",
+      },
+    ],
+    "parent": "root",
+    "title": "Alpha",
+    "type": "note",
+    "updated": "1",
+  },
+  "bar": Object {
+    "body": "[[foo]]
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "id": "bar",
+    "links": Array [
+      Object {
+        "alias": "foo",
+        "from": Object {
+          "fname": "bar",
+          "id": "bar",
+        },
+        "original": "foo",
+        "pos": Object {
+          "end": 7,
+          "start": 0,
+        },
+        "to": Object {
+          "fname": "foo",
+        },
+        "type": "wiki",
+        "value": "foo",
+      },
+    ],
+    "parent": "root",
+    "title": "Bar",
+    "type": "note",
+    "updated": "1",
+  },
+  "beta": Object {
+    "body": "[[alpha]]
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "gamma",
+    "id": "beta",
+    "links": Array [],
+    "parent": "root",
+    "title": "Beta",
+    "type": "note",
+    "updated": "1",
+  },
+  "foo": Object {
+    "body": "[[bar]]
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "links": Array [
+      Object {
+        "alias": "bar",
+        "from": Object {
+          "fname": "foo",
+          "id": "foo",
+        },
+        "original": "bar",
+        "pos": Object {
+          "end": 7,
+          "start": 0,
+        },
+        "to": Object {
+          "fname": "bar",
+        },
+        "type": "wiki",
+        "value": "bar",
+      },
+    ],
+    "parent": "root",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+  },
+  "foo.ch1": Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "id": "foo.ch1",
+    "links": Array [],
+    "parent": "foo",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "ch1",
+    },
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+  },
+  "root": Object {
+    "body": "
+",
+    "children": Array [
+      "alpha",
+      "bar",
+      "foo",
+      "beta",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "root",
+    "links": Array [],
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+  },
+}
+`;
+
 exports[`engine, notes/ write/ write note, match schema: notes 1`] = `
 Object {
   "foo": Object {
@@ -397,7 +647,7 @@ Object {
 }
 `;
 
-exports[`engine, notes/ write/ write note, no schema 1`] = `
+exports[`engine, notes/ write/ write note, no schema, new domain 1`] = `
 Object {
   "bar": Object {
     "body": "",

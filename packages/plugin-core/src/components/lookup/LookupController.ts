@@ -7,6 +7,7 @@ import { LookupCommandOpts } from "../../commands/LookupCommand";
 import { CONFIG } from "../../constants";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
+import { DendronClientUtilsV2 } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import {
   ButtonType,
@@ -76,13 +77,23 @@ export class LookupController {
     // determine value
     switch (noteResp?.type) {
       case "journal": {
-        const value = VSCodeUtils.genNoteName("JOURNAL");
+        let value: string;
+        if (DendronWorkspace.lsp()) {
+          value = DendronClientUtilsV2.genNoteName("JOURNAL");
+        } else {
+          value = VSCodeUtils.genNoteName("JOURNAL");
+        }
         quickPick.value = value;
         provider.onUpdatePickerItem(quickPick, provider.opts);
         break;
       }
       case "scratch": {
-        const value = VSCodeUtils.genNoteName("SCRATCH");
+        let value: string;
+        if (DendronWorkspace.lsp()) {
+          value = DendronClientUtilsV2.genNoteName("SCRATCH");
+        } else {
+          value = VSCodeUtils.genNoteName("SCRATCH");
+        }
         quickPick.value = value;
         provider.onUpdatePickerItem(quickPick, provider.opts);
         break;

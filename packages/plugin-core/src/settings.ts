@@ -305,11 +305,7 @@ export class Settings {
     const errors: any = {};
     await Promise.all(
       _.map(
-        _.omit(target, [
-          "workbench.colorTheme",
-          "[markdown]",
-          CONFIG.USE_EXPERIMENTAL_LSP_SUPPORT.key,
-        ]),
+        _.omit(target, ["workbench.colorTheme", "[markdown]"]),
         async (entry, key) => {
           const item = src.inspect(key);
           if (

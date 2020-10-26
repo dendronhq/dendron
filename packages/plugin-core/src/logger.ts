@@ -1,6 +1,7 @@
-import { DendronError, getStage, setEnv } from "@dendronhq/common-all";
+import { getStage, setEnv } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 import { ExtensionContext, OutputChannel, window, workspace } from "vscode";
 import { CONFIG, DENDRON_CHANNEL_NAME } from "./constants";
@@ -99,7 +100,7 @@ export class Logger {
       if (shouldShow || Logger.cmpLevels(lvl, "error")) {
         let cleanMsg = stringMsg;
         if (Logger.cmpLevels(lvl, "error")) {
-          if (msg instanceof DendronError && msg.friendly) {
+          if (!_.isUndefined(msg?.friendly)) {
             cleanMsg = msg.friendly;
           }
           window.showErrorMessage(cleanMsg);

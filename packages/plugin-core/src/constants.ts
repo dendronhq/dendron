@@ -560,7 +560,7 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
   DEFAULT_JOURNAL_DATE_FORMAT: {
     key: "dendron.defaultJournalDateFormat",
     type: "string",
-    default: "Y-MM-DD",
+    default: "Y.MM.DD",
     description: _noteDateDesc("journal"),
   },
   DEFAULT_JOURNAL_ADD_BEHAVIOR: {
@@ -579,7 +579,7 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
   DEFAULT_SCRATCH_DATE_FORMAT: {
     key: "dendron.defaultScratchDateFormat",
     type: "string",
-    default: "Y-MM-DD-HHmmss",
+    default: "Y.MM.DD.HHmmss",
     description: _noteDateDesc("scratch"),
   },
   DEFAULT_SCRATCH_ADD_BEHAVIOR: {

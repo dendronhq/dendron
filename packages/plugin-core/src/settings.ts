@@ -305,7 +305,12 @@ export class Settings {
     const errors: any = {};
     await Promise.all(
       _.map(
-        _.omit(target, ["workbench.colorTheme", "[markdown]"]),
+        _.omit(target, [
+          "workbench.colorTheme",
+          "[markdown]",
+          CONFIG.DEFAULT_JOURNAL_DATE_FORMAT.key,
+          CONFIG.DEFAULT_SCRATCH_DATE_FORMAT.key,
+        ]),
         async (entry, key) => {
           const item = src.inspect(key);
           if (

@@ -54,7 +54,7 @@
                 },
                 "dendron.defaultJournalDateFormat": {
                     "type": "string",
-                    "default": "Y-MM-DD",
+                    "default": "Y.MM.DD",
                     "description": "date format used for journal notes"
                 },
                 "dendron.defaultJournalAddBehavior": {
@@ -75,7 +75,7 @@
                 },
                 "dendron.defaultScratchDateFormat": {
                     "type": "string",
-                    "default": "Y-MM-DD-HHmmss",
+                    "default": "Y.MM.DD.HHmmss",
                     "description": "date format used for scratch notes"
                 },
                 "dendron.defaultScratchAddBehavior": {
@@ -257,7 +257,6 @@
                 "command": "dendron.changeWS",
                 "title": "Dendron: Change Workspace",
                 "desc": "Change into existing workspace",
-                "docs": "Dendron will create a `dendron.code-workspace` file in specified directory and then open the workspace (if a workspace file already exists, it will use that). It will also create a `root.md` file in that directory if it doesn't exist (currently this is part of the internal working of dendron).\n\nDendron **does not** delete or overwrite any files during the **Change Workspace** operation.",
                 "docLink": "dendron.topic.commands.md",
                 "docPreview": ""
             },

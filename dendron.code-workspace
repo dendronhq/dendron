@@ -25,9 +25,6 @@
       "path": "packages/dendron-cli"
     },
     {
-      "path": "packages/lsp-server"
-    },
-    {
       "path": "packages/api-server"
     },
     {
@@ -44,9 +41,6 @@
     },
     {
       "path": "docs"
-    },
-    {
-      "path": "."
     }
   ],
   "settings": {

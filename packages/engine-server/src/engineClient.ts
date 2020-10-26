@@ -1,34 +1,35 @@
 import {
   DendronError,
   DEngineClientV2,
+  DEngineDeleteSchemaRespV2,
   DEngineInitRespV2,
-  DNodeData,
   DLink,
+  DNodeData,
   DNodePropsV2,
   DNodeTypeV2,
+  EngineDeleteNoteResp,
+  EngineDeleteOptsV2,
   EngineGetResp,
   EngineQueryNoteResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
+  ERROR_CODES,
   GetNoteOptsV2,
   GetNotePayloadV2,
+  NoteChangeEntry,
   NotePropsDictV2,
   NotePropsV2,
   QueryMode,
   QueryOneOpts,
   QueryOptsV2,
+  RenameNoteOptsV2,
+  RenameNotePayload,
   RespV2,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
   SchemaQueryResp,
   SchemaUtilsV2,
   WriteNoteResp,
-  RenameNoteOptsV2,
-  RenameNotePayload,
-  NoteChangeEntry,
-  EngineDeleteOptsV2,
-  EngineDeleteNoteResp,
-  DEngineDeleteSchemaPayloadV2,
 } from "@dendronhq/common-all";
 import { DendronAPI } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -85,7 +86,7 @@ export class DendronEngineClient implements DEngineClientV2 {
       uri: this.ws,
       config: { vaults: this.vaults },
     });
-    if (resp.error) {
+    if (resp.error && resp.error.code !== ERROR_CODES.MINOR) {
       return {
         error: resp.error,
         data: { notes: {}, schemas: {} },
@@ -100,7 +101,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     await this.fuseEngine.updateNotesIndex(notes);
     await this.fuseEngine.updateSchemaIndex(schemas);
     return {
-      error: null,
+      error: resp.error,
       data: { notes, schemas },
     };
   }
@@ -130,7 +131,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   async deleteSchema(
     id: string,
     opts?: EngineDeleteOptsV2
-  ): Promise<RespV2<DEngineDeleteSchemaPayloadV2>> {
+  ): Promise<DEngineDeleteSchemaRespV2> {
     const ws = this.ws;
     const resp = await this.api.schemaDelete({ id, opts, ws });
     delete this.schemas[id];

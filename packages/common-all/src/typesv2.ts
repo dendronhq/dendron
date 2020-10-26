@@ -174,8 +174,8 @@ export type EngineWriteOptsV2 = {
 } & Partial<EngineUpdateNodesOptsV2>;
 
 export type DEngineInitPayloadV2 = {
-  notes?: NotePropsDictV2;
-  schemas?: SchemaModuleDictV2;
+  notes: NotePropsDictV2;
+  schemas: SchemaModuleDictV2;
 };
 export type RenameNoteOptsV2 = {
   oldLoc: DNoteLoc;
@@ -217,6 +217,11 @@ export type DCommonMethods = {
 
 export type DEngineInitRespV2 = Required<RespV2<DEngineInitPayloadV2>>;
 export type EngineDeleteNotePayload = NoteChangeEntry[];
+// TODO: KLUDGE
+export type DEngineDeleteSchemaPayloadV2 = DEngineInitPayloadV2;
+export type DEngineDeleteSchemaRespV2 = DEngineInitRespV2;
+// --- KLUDGE END
+
 export type EngineDeleteNoteResp = Required<RespV2<EngineDeleteNotePayload>>;
 export type EngineQueryNoteResp = Required<RespV2<DNodePropsV2[]>>;
 export type NoteQueryResp = Required<RespV2<NotePropsV2[]>>;
@@ -228,8 +233,8 @@ export type GetNotePayloadV2 = {
   note: NotePropsV2 | undefined;
   changed: NoteChangeEntry[];
 };
-// TODO: KLUDGE
-export type DEngineDeleteSchemaPayloadV2 = DEngineInitPayloadV2;
+
+export type DEngineInitSchemaRespV2 = Required<RespV2<SchemaModulePropsV2[]>>;
 
 export type DEngineV2 = DCommonProps &
   DCommonMethods & {
@@ -243,7 +248,7 @@ export type DEngineV2 = DCommonProps &
     deleteSchema: (
       id: string,
       opts?: EngineDeleteOptsV2
-    ) => Promise<RespV2<DEngineDeleteSchemaPayloadV2>>;
+    ) => Promise<DEngineDeleteSchemaRespV2>;
 
     getNoteByPath: (opts: GetNoteOptsV2) => Promise<RespV2<GetNotePayloadV2>>;
     getSchema: (qs: string) => Promise<RespV2<SchemaModulePropsV2>>;
@@ -261,7 +266,7 @@ export type DEngineClientV2 = Omit<DEngineV2, "store">;
 
 export type DStoreV2 = DCommonProps &
   DCommonMethods & {
-    init: () => Promise<DEngineInitPayloadV2>;
+    init: () => Promise<DEngineInitRespV2>;
     deleteNote: (
       id: string,
       opts?: EngineDeleteOptsV2
@@ -269,6 +274,6 @@ export type DStoreV2 = DCommonProps &
     deleteSchema: (
       id: string,
       opts?: EngineDeleteOptsV2
-    ) => Promise<DEngineDeleteSchemaPayloadV2>;
+    ) => Promise<DEngineDeleteSchemaRespV2>;
     renameNote: (opts: RenameNoteOptsV2) => Promise<RenameNotePayload>;
   };

@@ -1,5 +1,8 @@
 import { DirResult, FileTestUtils } from "@dendronhq/common-server";
-import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
+import {
+  INIT_TEST_PRESETS,
+  NodeTestPresetsV2,
+} from "@dendronhq/common-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -71,6 +74,29 @@ suite("notes", function () {
       useCb: async (_vaultDir) => {
         vaultDir = _vaultDir;
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+      },
+    });
+  });
+
+  // need to pass error
+  test.skip("bad schema", (done) => {
+    onWSInit(async () => {
+      const engine = DendronWorkspace.instance().getEngine();
+      const resp = await new ReloadIndexCommand().run();
+      await NodeTestPresetsV2.runMochaHarness({
+        opts: {
+          engine,
+          resp,
+        },
+        results: INIT_TEST_PRESETS.BAD_SCHEMA.results,
+      });
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      useCb: async (_vaultDir) => {
+        vaultDir = _vaultDir;
+        await INIT_TEST_PRESETS.BAD_SCHEMA.before({ vaultDir });
       },
     });
   });

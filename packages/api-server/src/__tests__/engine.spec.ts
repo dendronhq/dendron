@@ -13,6 +13,7 @@ import {
   RENAME_TEST_PRESETS,
   SchemaTestPresetsV2,
   EngineAPIShim,
+  INIT_TEST_PRESETS,
 } from "@dendronhq/common-test-utils";
 import {
   DendronAPI,
@@ -125,33 +126,26 @@ describe("schema", () => {
       fs.ensureDirSync(vault);
       await EngineTestUtils.setupVault({
         vaultDir: vault,
-        initDirCb: async (vaultPath: string) => {
-          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
-            vaultDir: vaultPath,
-          });
-          fs.writeFileSync(
-            path.join(vaultPath, "bond.schema.yml"),
-            `
-id: bond
-`
-          );
-        },
+        initDirCb: async (_vaultPath: string) => {},
       });
     });
 
-    test("bad schema", async () => {
-      const payload = {
-        uri: wsRoot,
-        config: {
-          vaults: [vault],
-        },
-      };
+    test(INIT_TEST_PRESETS.BAD_SCHEMA.label, async () => {
+      const vaults = [vault];
+      const vaultDir = vault;
+      await INIT_TEST_PRESETS.BAD_SCHEMA.before({ vaultDir });
       const api = new DendronAPI({
         endpoint: "http://localhost:3005",
         apiPath: "api",
       });
-      const { error } = await api.workspaceInit(payload);
-      expect(error?.friendly).toEqual("error initializing notes");
+      const engine = new EngineAPIShim({ api, wsRoot, vaults });
+      const resp = await engine.init();
+      const results = INIT_TEST_PRESETS.BAD_SCHEMA.results;
+      await NodeTestPresetsV2.runJestHarness({
+        opts: { engine, resp },
+        results,
+        expect,
+      });
     });
   });
 

@@ -1,6 +1,7 @@
 import {
   DendronError,
-  DEngineInitPayloadV2,
+  DEngineInitRespV2,
+  DEngineInitSchemaRespV2,
   DLink,
   DNodeUtilsV2,
   DStoreV2,
@@ -8,6 +9,7 @@ import {
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   ENGINE_ERROR_CODES,
+  ERROR_CODES,
   NoteChangeEntry,
   NotePropsDictV2,
   NotePropsV2,
@@ -216,14 +218,38 @@ export class SchemaParserV2 extends ParserBaseV2 {
     );
     return cSchemaParserV2.parseRaw(schemaOpts, { root, fname });
   }
-  async parse(fpaths: string[], root: string): Promise<SchemaModulePropsV2[]> {
+  async parse(
+    fpaths: string[],
+    root: string
+  ): Promise<{
+    schemas: SchemaModulePropsV2[];
+    errors: DendronError[] | null;
+  }> {
     const ctx = "parse";
     this.logger.info({ ctx, msg: "enter", fpaths, root });
-    return Promise.all(
+    const out = await Promise.all(
       fpaths.flatMap((fpath) => {
-        return SchemaParserV2.parseFile(fpath, root);
+        try {
+          return SchemaParserV2.parseFile(fpath, root);
+        } catch (err) {
+          return new DendronError({
+            msg: ENGINE_ERROR_CODES.BAD_PARSE_FOR_SCHEMA,
+            payload: { fpath },
+          });
+        }
       })
     );
+    let errors = _.filter(
+      out,
+      (ent) => ent instanceof DendronError
+    ) as DendronError[];
+    return {
+      schemas: _.reject(
+        out,
+        (ent) => ent instanceof DendronError
+      ) as SchemaModulePropsV2[],
+      errors: _.isEmpty(errors) ? null : errors,
+    };
   }
 }
 
@@ -262,10 +288,17 @@ export class FileStorageV2 implements DStoreV2 {
     this.logger.info({ ctx, vaults });
   }
 
-  async init(): Promise<DEngineInitPayloadV2> {
+  async init(): Promise<DEngineInitRespV2> {
     try {
-      const _schemas = await this.initSchema();
-      _schemas.map((ent) => {
+      let error: DendronError | null = null;
+      const resp = await this.initSchema();
+      if (!_.isNull(resp.error)) {
+        error = new DendronError({
+          code: ERROR_CODES.MINOR,
+          payload: { schema: resp.error },
+        });
+      }
+      resp.data.map((ent) => {
         this.schemas[ent.root.id] = ent;
       });
       const _notes = await this.initNotes();
@@ -273,7 +306,7 @@ export class FileStorageV2 implements DStoreV2 {
         this.notes[ent.id] = ent;
       });
       const { notes, schemas } = this;
-      return { notes, schemas };
+      return { data: { notes, schemas }, error };
     } catch (err) {
       this.logger.error(err);
       throw err;
@@ -349,7 +382,7 @@ export class FileStorageV2 implements DStoreV2 {
     return {};
   }
 
-  async initSchema(): Promise<SchemaModulePropsV2[]> {
+  async initSchema(): Promise<DEngineInitSchemaRespV2> {
     const ctx = "initSchema";
     this.logger.info({ ctx, msg: "enter" });
     const schemaFiles = getAllFiles({
@@ -361,10 +394,16 @@ export class FileStorageV2 implements DStoreV2 {
     if (_.isEmpty(schemaFiles)) {
       throw new DendronError({ status: ENGINE_ERROR_CODES.NO_SCHEMA_FOUND });
     }
-    return new SchemaParserV2({ store: this, logger: this.logger }).parse(
-      schemaFiles,
-      root
-    );
+    const { schemas, errors } = await new SchemaParserV2({
+      store: this,
+      logger: this.logger,
+    }).parse(schemaFiles, root);
+    return {
+      data: schemas,
+      error: _.isNull(errors)
+        ? null
+        : new DendronError({ msg: "multiple errors", payload: errors }),
+    };
   }
 
   async initNotes(): Promise<NotePropsV2[]> {

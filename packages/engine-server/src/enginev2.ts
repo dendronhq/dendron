@@ -1,5 +1,6 @@
 import {
   DendronError,
+  DEngineDeleteSchemaRespV2,
   DEngineInitRespV2,
   DEngineMode,
   DEngineV2,
@@ -66,11 +67,12 @@ export class DendronEngineV2 implements DEngineV2 {
    */
   async init(): Promise<DEngineInitRespV2> {
     try {
-      const { notes, schemas } = await this.store.init();
+      const { data, error } = await this.store.init();
+      const { notes, schemas } = data;
       this.updateIndex("note");
       this.updateIndex("schema");
       return {
-        error: null,
+        error,
         data: { notes, schemas },
       };
     } catch (error) {
@@ -78,7 +80,10 @@ export class DendronEngineV2 implements DEngineV2 {
       let payload = { message, stack };
       return {
         error: new DendronError({ payload, msg, status, friendly }),
-        data: {},
+        data: {
+          notes: {},
+          schemas: {},
+        },
       };
     }
   }
@@ -106,15 +111,18 @@ export class DendronEngineV2 implements DEngineV2 {
     }
   }
 
-  async deleteSchema(id: string, opts?: EngineDeleteOptsV2) {
+  async deleteSchema(
+    id: string,
+    opts?: EngineDeleteOptsV2
+  ): Promise<DEngineDeleteSchemaRespV2> {
     try {
-      const data = await this.store.deleteSchema(id, opts);
+      const data = (await this.store.deleteSchema(
+        id,
+        opts
+      )) as DEngineDeleteSchemaRespV2;
       await this.updateIndex("note");
       await this.updateIndex("schema");
-      return {
-        data,
-        error: null,
-      };
+      return data;
       // FIXM:E not performant
       // const smod = this.schemas[id];
       // await this.fuseEngine.removeSchemaFromIndex(smod);
@@ -124,7 +132,10 @@ export class DendronEngineV2 implements DEngineV2 {
       // };
     } catch (err) {
       return {
-        data: undefined,
+        data: {
+          notes: {},
+          schemas: {},
+        },
         error: err,
       };
     }

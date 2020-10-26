@@ -51,6 +51,10 @@ export class EngineAPIShim implements DEngineClientV2 {
       },
     };
     const resp = await api.workspaceInit(payload);
+    const { data } = resp;
+    const { notes, schemas } = data || { notes: {}, schemas: {} };
+    this.notes = notes;
+    this.schemas = schemas;
     return resp as DEngineInitRespV2;
   }
 

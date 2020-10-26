@@ -18,6 +18,7 @@ import {
 } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
+  INIT_TEST_PRESETS,
   NodeTestPresetsV2,
   NodeTestUtilsV2,
   NoteTestPresetsV2,
@@ -251,7 +252,16 @@ describe("engine, schema/", () => {
       expect(_.values(engine.schemas["foo"].schemas).length).toEqual(2);
     });
 
-    test.skip("delete schema", async () => {});
+    test("schema with no root node", async () => {
+      await INIT_TEST_PRESETS.BAD_SCHEMA.before({ vaultDir });
+      const resp = await engine.init();
+      const results = INIT_TEST_PRESETS.BAD_SCHEMA.results;
+      await NodeTestPresetsV2.runJestHarness({
+        opts: { engine, resp },
+        results,
+        expect,
+      });
+    });
   });
 
   describe("import", () => {

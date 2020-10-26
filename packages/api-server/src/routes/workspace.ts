@@ -1,4 +1,8 @@
-import { NotePropsDictV2, SchemaModuleDictV2 } from "@dendronhq/common-all";
+import {
+  ERROR_CODES,
+  NotePropsDictV2,
+  SchemaModuleDictV2,
+} from "@dendronhq/common-all";
 import { createLogger, InitializePayload } from "@dendronhq/common-server";
 import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
 import { Request, Response, Router } from "express";
@@ -28,7 +32,7 @@ router.post("/initialize", async (req: Request, res: Response) => {
     logger,
   });
   const { error } = await engine.init();
-  if (error) {
+  if (error && error.code !== ERROR_CODES.MINOR) {
     error.friendly = "error initializing notes";
     return res.json({ error });
   }
@@ -36,7 +40,7 @@ router.post("/initialize", async (req: Request, res: Response) => {
   schemas = engine.schemas;
   MemoryStore.instance().put(`ws:${uri}`, engine);
   const payload: InitializePayload = {
-    error: null,
+    error,
     data: { notes, schemas },
   };
   return res.json(payload);

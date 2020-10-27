@@ -407,6 +407,9 @@ export class DendronWorkspace {
             return vscode.window.showErrorMessage("nothing selected");
           }
           const { text } = VSCodeUtils.getSelection();
+          if (_.isUndefined(text)) {
+            return vscode.window.showErrorMessage("nothing selected");
+          }
           const assetPath = resolvePath(text, this.rootWorkspace.uri.fsPath);
           if (!fs.existsSync(assetPath)) {
             return vscode.window.showErrorMessage(

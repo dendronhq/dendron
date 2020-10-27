@@ -64,7 +64,11 @@ export class CopyNoteRefCommand extends BasicCommand<
     };
     const { text, selection, editor } = VSCodeUtils.getSelection();
     let refLinkString: string = refLink2String(link);
-    if (!_.isEmpty(text)) {
+    if (
+      !_.isUndefined(selection) &&
+      !_.isEmpty(text) &&
+      !_.isUndefined(editor)
+    ) {
       const maybeHeaderText = this.isHeader(selection, editor);
       if (maybeHeaderText) {
         link.anchorStart = maybeHeaderText;

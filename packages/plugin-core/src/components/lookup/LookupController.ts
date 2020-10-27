@@ -125,7 +125,9 @@ export class LookupController {
             const { selection, text } = VSCodeUtils.getSelection();
             await editor?.edit((builder) => {
               const link = note.fname;
+              // @ts-ignore
               if (!selection.isEmpty) {
+                // @ts-ignore
                 builder.replace(selection, `[[${text}|${link}]]`);
               }
             });

@@ -230,7 +230,9 @@ export class Snippets {
     return fs.writeJSONSync(snippetPath, Snippets.defaults, { spaces: 4 });
   };
 
-  static read = (dirPath: string): false | { [key: string]: Snippet } => {
+  static read = async (
+    dirPath: string
+  ): Promise<false | { [key: string]: Snippet }> => {
     const snippetPath = path.join(dirPath, Snippets.filename);
     if (!fs.existsSync(snippetPath)) {
       return false;
@@ -242,7 +244,7 @@ export class Snippets {
   static async upgradeOrCreate(
     dirPath: string
   ): Promise<{ [key: string]: Snippet }> {
-    const out = Snippets.read(dirPath);
+    const out = await Snippets.read(dirPath);
     if (!out) {
       Snippets.create(dirPath);
       return Snippets.defaults;

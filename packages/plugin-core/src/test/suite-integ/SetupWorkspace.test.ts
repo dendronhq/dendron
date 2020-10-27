@@ -49,13 +49,13 @@ suite("startup", function () {
       const pathToVault = path.join(root.name, "vault");
       const snippetFile = path.join(pathToVault, ".vscode", Snippets.filename);
 
-      onWSInit((_event: HistoryEvent) => {
+      onWSInit(async (_event: HistoryEvent) => {
         assert.strictEqual(DendronWorkspace.isActive(), true);
         assert.strictEqual(
           ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
           "0.0.1"
         );
-        const payload = readJSONWithComments(snippetFile);
+        const payload = await readJSONWithComments(snippetFile);
         assert.deepStrictEqual(payload, {
           bond: {
             prefix: "bond",

@@ -118,8 +118,9 @@ export function assignJSONWithComment(obj: any, data: any) {
   );
 }
 
-export function readJSONWithComments(fpath: string) {
-  const obj = parse(fs.readFileSync(fpath).toString());
+export async function readJSONWithComments(fpath: string) {
+  const content = await fs.readFile(fpath);
+  const obj = parse(content.toString());
   return obj;
 }
 

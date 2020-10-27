@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.13.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.13.3...v0.13.4-alpha.0) (2020-10-27)
+
+### Bug Fixes
+
+- **workbench:** read json config with comments ([1741553](https://github.com/dendronhq/dendron/commit/1741553695b1c7cced54bf04b26700076a38a19c))
+
+### Enhancements
+
+- **notes:** scratch notes will now auto-slug selection as title ([9964339](https://github.com/dendronhq/dendron/commit/9964339138bde18dc022fdd62ce9ba9d529cfa2b))
+- **workbench:** graceful failure on bad schema ([4db5064](https://github.com/dendronhq/dendron/commit/4db5064e4eef61d9c95b9abe34f2dec41550bd9d))
+- **workbench:** nicer error messages ([9e371e1](https://github.com/dendronhq/dendron/commit/9e371e132b565ae2abebaa2bf1307a5a03a91b9b))
+
+### Features
+
+- **server:** upgrade existing workspaces to server mode ([d19b6ec](https://github.com/dendronhq/dendron/commit/d19b6ecb97fb60d8706e14f0181795113b5e108b))
+
 ## [0.13.3](https://github.com/dendronhq/dendron/compare/v0.13.3-alpha.1...v0.13.3) (2020-10-24)
 
 **Note:** Version bump only for package root

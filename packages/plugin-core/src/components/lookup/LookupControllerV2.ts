@@ -222,8 +222,13 @@ export class LookupControllerV2 {
       resp,
       (ent) => getButtonCategory(ent) === "filter"
     );
+    const selection2LinkChanged = changed?.type === "selection2link";
     // handle note resp
-    if (!changed || (changed && getButtonCategory(changed) === "note")) {
+    if (
+      !changed ||
+      (changed && getButtonCategory(changed) === "note") ||
+      selection2LinkChanged
+    ) {
       this.updateBehaviorByNoteType({
         noteResp,
         quickPick,

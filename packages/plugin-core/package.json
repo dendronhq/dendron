@@ -117,10 +117,9 @@
                         "error"
                     ]
                 },
-                "dendron.useExperimentalLSPSupport": {
+                "dendron.noServerMode": {
                     "type": "boolean",
-                    "default": false,
-                    "description": "launch dendron with lsp support"
+                    "description": "revert server mode"
                 },
                 "dendron.trace.server": {
                     "enum": [

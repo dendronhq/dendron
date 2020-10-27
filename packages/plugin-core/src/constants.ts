@@ -617,11 +617,10 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     description: "control verbosity of dendron logs",
     enum: ["debug", "info", "error"],
   },
-  USE_EXPERIMENTAL_LSP_SUPPORT: {
-    key: "dendron.useExperimentalLSPSupport",
+  REVERT_SERVER_MODE: {
+    key: "dendron.noServerMode",
     type: "boolean",
-    default: false,
-    description: "launch dendron with lsp support",
+    description: "revert server mode",
   },
   LSP_LOG_LVL: {
     key: "dendron.trace.server",

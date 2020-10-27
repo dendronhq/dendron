@@ -62,7 +62,6 @@ const _SETTINGS: ConfigUpdateChangeSet = {
   "pasteImage.path": { default: "${currentFileDir}/assets/images" },
   // required for jekyll image build
   "pasteImage.prefix": { default: "/" },
-  [CONFIG.USE_EXPERIMENTAL_LSP_SUPPORT.key]: { default: true },
   // -- md notes
   // prevent markdown-notes from mangling file names
   "markdown-preview-enhanced.enableWikiLinkSyntax": { default: true },

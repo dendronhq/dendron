@@ -215,9 +215,7 @@ export async function _activate(context: vscode.ExtensionContext) {
       workspace: ws.rootWorkspace.uri.fsPath,
     });
 
-    const lspSupport = DendronWorkspace.configuration().get(
-      CONFIG.USE_EXPERIMENTAL_LSP_SUPPORT.key
-    );
+    const lspSupport = DendronWorkspace.lsp();
     Logger.info({ ctx, msg: "wsActive", lspSupport });
     if (lspSupport) {
       vscode.window.withProgress(

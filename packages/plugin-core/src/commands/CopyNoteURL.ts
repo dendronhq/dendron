@@ -67,8 +67,8 @@ export class CopyNoteURLCommand extends BasicCommand<
     let link = [root, notePrefix, note.id + ".html"].join("/");
     // check if selection is present
     const { text, selection } = VSCodeUtils.getSelection();
-    if (!_.isEmpty(text)) {
-      if (this.isHeader(text, selection)) {
+    if (!_.isUndefined(text) && !_.isEmpty(text)) {
+      if (this.isHeader(text, selection as Selection)) {
         const slugger = new GithubSlugger();
         const headerText = _.trim(text, " #");
         const slug = slugger.slug(headerText);

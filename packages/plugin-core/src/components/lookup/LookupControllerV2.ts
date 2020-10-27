@@ -22,6 +22,7 @@ import {
 import { DendronQuickPickerV2, EngineOpts } from "./LookupProvider";
 import { LookupProviderV2 } from "./LookupProviderV2";
 import { LookupControllerState } from "./types";
+import GithubSlugger from "github-slugger";
 
 export class LookupControllerV2 {
   public quickPick?: DendronQuickPickerV2;
@@ -140,42 +141,56 @@ export class LookupControllerV2 {
     provider: LookupProviderV2;
     quickPickValue?: string;
   }) {
+    const { selection, text } = VSCodeUtils.getSelection();
+    const buttons = this.state.buttons;
+    let suffix: string | undefined;
+
+    if (
+      !_.isEmpty(selection) &&
+      !_.isUndefined(text) &&
+      !_.isEmpty(text) &&
+      _.find(_.filter(buttons, { pressed: true }), {
+        type: "selection2link",
+      }) &&
+      DendronWorkspace.configuration().get<string>(
+        CONFIG.LINK_SELECT_AUTO_TITLE_BEHAVIOR.key
+      ) === "slug"
+    ) {
+      const slugger = new GithubSlugger();
+      suffix = slugger.slug(text);
+    }
+    let onUpdateReason: any = "updatePickerBehavior:normal";
+    let onUpdateValue: string;
+
     switch (noteResp?.type) {
       case "journal": {
-        const value = DendronClientUtilsV2.genNoteName("JOURNAL");
-        quickPick.value = value;
-        await provider.onUpdatePickerItem(
-          quickPick,
-          provider.opts,
-          "updatePickerBehavior:journal"
-        );
+        onUpdateValue = DendronClientUtilsV2.genNoteName("JOURNAL");
+        onUpdateReason = "updatePickerBehavior:journal";
         break;
       }
       case "scratch": {
-        const value = DendronClientUtilsV2.genNoteName("SCRATCH");
-        quickPick.value = value;
-        await provider.onUpdatePickerItem(
-          quickPick,
-          provider.opts,
-          "updatePickerBehavior:scratch"
-        );
+        onUpdateValue = DendronClientUtilsV2.genNoteName("SCRATCH");
+        onUpdateReason = "updatePickerBehavior:scratch";
         break;
       }
       default:
         if (quickPickValue) {
-          quickPick.value = quickPickValue;
+          onUpdateValue = quickPickValue;
         } else {
           let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;
           if (editorPath && this.opts.flavor !== "schema") {
-            quickPick.value = path.basename(editorPath, ".md");
+            onUpdateValue = path.basename(editorPath, ".md");
+          } else {
+            onUpdateValue = "";
           }
         }
-        await provider.onUpdatePickerItem(
-          quickPick,
-          provider.opts,
-          "updatePickerBehavior:normal"
-        );
+        onUpdateReason = "updatePickerBehavior:normal";
     }
+    if (!_.isUndefined(suffix)) {
+      onUpdateValue = [onUpdateValue, suffix].join(".");
+    }
+    quickPick.value = onUpdateValue;
+    await provider.onUpdatePickerItem(quickPick, provider.opts, onUpdateReason);
   }
 
   async updatePickerBehavior(opts: {
@@ -234,7 +249,7 @@ export class LookupControllerV2 {
             const { selection, text } = VSCodeUtils.getSelection();
             await editor?.edit((builder) => {
               const link = note.fname;
-              if (!selection.isEmpty) {
+              if (!_.isUndefined(selection) && !selection.isEmpty) {
                 builder.replace(selection, `[[${text}|${link}]]`);
               }
             });

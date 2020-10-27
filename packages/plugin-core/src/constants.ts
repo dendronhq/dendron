@@ -594,6 +594,13 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     type: "string",
     description: "override root url when getting note url",
   },
+  LINK_SELECT_AUTO_TITLE_BEHAVIOR: {
+    key: "dendron.linkSelectAutoTitleBehavior",
+    type: "string",
+    description: "Control title behavior when using selection2link with lookup",
+    enum: ["none", "slug"],
+    default: "slug",
+  },
   DEFAULT_LOOKUP_CREATE_BEHAVIOR: {
     key: "dendron.defaultLookupCreateBehavior",
     default: "selectionExtract",

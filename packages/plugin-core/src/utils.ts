@@ -213,9 +213,9 @@ export class VSCodeUtils {
   }
 
   static getSelection() {
-    const editor = vscode.window.activeTextEditor as vscode.TextEditor;
-    const selection = editor.selection as vscode.Selection;
-    const text = editor.document.getText(selection);
+    const editor = vscode.window.activeTextEditor;
+    const selection = editor?.selection;
+    const text = editor?.document.getText(selection);
     return { text, selection, editor };
   }
 

@@ -92,7 +92,7 @@ suite("schemas", function () {
       });
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
-        useCb: createOneNoteOneSchemaPresetCallback
+        useCb: createOneNoteOneSchemaPresetCallback,
       });
     });
 
@@ -120,7 +120,7 @@ suite("schemas", function () {
       });
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
-        useCb: createOneNoteOneSchemaPresetCallback
+        useCb: createOneNoteOneSchemaPresetCallback,
       });
     });
 
@@ -148,7 +148,7 @@ suite("schemas", function () {
       });
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
-        useCb: createOneNoteOneSchemaPresetCallback
+        useCb: createOneNoteOneSchemaPresetCallback,
       });
     });
   });
@@ -184,7 +184,7 @@ suite("schemas", function () {
       });
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
-        useCb: createOneNoteOneSchemaPresetCallback
+        useCb: createOneNoteOneSchemaPresetCallback,
       });
     });
 
@@ -214,7 +214,7 @@ suite("schemas", function () {
       });
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
-        useCb: createOneNoteOneSchemaPresetCallback
+        useCb: createOneNoteOneSchemaPresetCallback,
       });
     });
 
@@ -238,7 +238,7 @@ suite("schemas", function () {
       });
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
-        useCb: createOneNoteOneSchemaPresetCallback
+        useCb: createOneNoteOneSchemaPresetCallback,
       });
     });
   });
@@ -550,7 +550,7 @@ suite("notes", function () {
       });
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
-        useCb: createOneNoteOneSchemaPresetCallback
+        useCb: createOneNoteOneSchemaPresetCallback,
       });
     });
 
@@ -584,7 +584,7 @@ suite("notes", function () {
       });
       setupDendronWorkspace(root.name, ctx, {
         lsp: true,
-        useCb: createOneNoteOneSchemaPresetCallback
+        useCb: createOneNoteOneSchemaPresetCallback,
       });
     });
 
@@ -877,6 +877,78 @@ suite("notes", function () {
 //   });
 // });
 
+suite("selection2Link", function () {
+  let root: DirResult;
+  let ctx: vscode.ExtensionContext;
+  let lookupOpts: LookupCommandOpts = {
+    noteType: "scratch",
+    selectionType: "selection2link",
+    noConfirm: true,
+    flavor: "note",
+  };
+  let vaultDir: string;
+  this.timeout(TIMEOUT);
+
+  beforeEach(function () {
+    root = FileTestUtils.tmpDir();
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    DendronWorkspace.getOrCreate(ctx);
+  });
+
+  afterEach(function () {
+    HistoryService.instance().clearSubscriptions();
+  });
+
+  test("slug title", function (done) {
+    onWSInit(async () => {
+      const uri = vscode.Uri.file(path.join(vaultDir, "foo.md"));
+      const editor = (await VSCodeUtils.openFileInEditor(
+        uri
+      )) as vscode.TextEditor;
+      editor.selection = new vscode.Selection(7, 0, 7, 12);
+      await new LookupCommand().execute(lookupOpts);
+      assert.ok(getActiveEditorBasename().startsWith("scratch"));
+      assert.ok(getActiveEditorBasename().endsWith("foo-body.md"));
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      useCb: (_vaultDir) => {
+        vaultDir = _vaultDir;
+        return NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
+          vaultDir,
+        });
+      },
+    });
+  });
+
+  test("no slug title", function (done) {
+    onWSInit(async () => {
+      const uri = vscode.Uri.file(path.join(vaultDir, "foo.md"));
+      const editor = (await VSCodeUtils.openFileInEditor(
+        uri
+      )) as vscode.TextEditor;
+      editor.selection = new vscode.Selection(7, 0, 7, 12);
+      await new LookupCommand().execute(lookupOpts);
+      assert.ok(getActiveEditorBasename().startsWith("scratch"));
+      assert.ok(!getActiveEditorBasename().endsWith("foo-body.md"));
+      done();
+    });
+    setupDendronWorkspace(root.name, ctx, {
+      lsp: true,
+      configOverride: {
+        [CONFIG.LINK_SELECT_AUTO_TITLE_BEHAVIOR.key]: "none",
+      },
+      useCb: (_vaultDir) => {
+        vaultDir = _vaultDir;
+        return NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
+          vaultDir,
+        });
+      },
+    });
+  });
+});
+
 suite("scratch notes", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
@@ -888,7 +960,6 @@ suite("scratch notes", function () {
     flavor: "note",
   };
   this.timeout(TIMEOUT);
-
 
   beforeEach(function () {
     root = FileTestUtils.tmpDir();
@@ -910,7 +981,7 @@ suite("scratch notes", function () {
     });
     setupDendronWorkspace(root.name, ctx, {
       lsp: true,
-      useCb: createOneNoteOneSchemaPresetCallback
+      useCb: createOneNoteOneSchemaPresetCallback,
     });
   });
 
@@ -928,7 +999,7 @@ suite("scratch notes", function () {
         [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
           "childOfCurrent",
       },
-      useCb: createOneNoteOneSchemaPresetCallback
+      useCb: createOneNoteOneSchemaPresetCallback,
     });
   });
 
@@ -946,7 +1017,7 @@ suite("scratch notes", function () {
         [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
           "childOfDomain",
       },
-      useCb: createOneNoteOneSchemaPresetCallback
+      useCb: createOneNoteOneSchemaPresetCallback,
     });
   });
 });
@@ -982,7 +1053,7 @@ suite("journal notes", function () {
     });
     setupDendronWorkspace(root.name, ctx, {
       lsp: true,
-      useCb: createOneNoteOneSchemaPresetCallback
+      useCb: createOneNoteOneSchemaPresetCallback,
     });
   });
 
@@ -1000,7 +1071,7 @@ suite("journal notes", function () {
         [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
           "childOfDomainNamespace",
       },
-      useCb: createOneNoteOneSchemaPresetCallback
+      useCb: createOneNoteOneSchemaPresetCallback,
     });
   });
 
@@ -1019,7 +1090,7 @@ suite("journal notes", function () {
         [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
           "asOwnDomain",
       },
-      useCb: createOneNoteOneSchemaPresetCallback
+      useCb: createOneNoteOneSchemaPresetCallback,
     });
   });
 
@@ -1037,7 +1108,7 @@ suite("journal notes", function () {
         [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
           "childOfCurrent",
       },
-      useCb: createOneNoteOneSchemaPresetCallback
+      useCb: createOneNoteOneSchemaPresetCallback,
     });
   });
 
@@ -1055,7 +1126,7 @@ suite("journal notes", function () {
         [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
           "childOfDomain",
       },
-      useCb: createOneNoteOneSchemaPresetCallback
+      useCb: createOneNoteOneSchemaPresetCallback,
     });
   });
 });

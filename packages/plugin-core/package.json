@@ -93,6 +93,15 @@
                     "type": "string",
                     "description": "override root url when getting note url"
                 },
+                "dendron.linkSelectAutoTitleBehavior": {
+                    "type": "string",
+                    "description": "Control title behavior when using selection2link with lookup",
+                    "enum": [
+                        "none",
+                        "slug"
+                    ],
+                    "default": "slug"
+                },
                 "dendron.defaultLookupCreateBehavior": {
                     "default": "selectionExtract",
                     "type": "string",

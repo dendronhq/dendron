@@ -190,6 +190,7 @@ function setupDendronWorkspace(
     _.forEach(optsClean.configOverride, (v, k) => {
       _.set(config, k, v);
     });
+    config[CONFIG.REVERT_SERVER_MODE.key] = true;
     return createMockConfig(config);
   };
 

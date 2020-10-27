@@ -72,6 +72,9 @@ export function setupWorkspace(
         useExperimentalLSPSupport: opts?.lsp ? true : false,
       },
     };
+    if (_.isUndefined(opts?.lsp)) {
+      config[CONFIG.REVERT_SERVER_MODE.key] = true;
+    }
     _.forEach(CONFIG, (ent) => {
       // @ts-ignore
       if (ent.default) {

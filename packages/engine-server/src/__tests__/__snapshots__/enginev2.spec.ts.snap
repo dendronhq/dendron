@@ -86,6 +86,28 @@ Array [
 ]
 `;
 
+exports[`engine, notes/ getNoteByPath/ get existing note with caps: bond 1`] = `
+Object {
+  "changed": Array [],
+  "note": Object {
+    "body": "
+This si some content",
+    "children": Array [],
+    "created": 1603892680423,
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "000 Index",
+    "id": "f95b2ebf-7cb5-47be-a8c0-def1236f0a8e",
+    "links": Array [],
+    "parent": "root",
+    "title": "000 index",
+    "type": "note",
+    "updated": 1603892680423,
+  },
+}
+`;
+
 exports[`engine, notes/ query/ * 1`] = `
 Array [
   Object {

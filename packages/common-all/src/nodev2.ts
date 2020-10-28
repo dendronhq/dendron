@@ -411,7 +411,7 @@ export class NoteUtilsV2 {
   ): NotePropsV2 | undefined {
     const out = _.find(
       _.values(notes),
-      (ent) => ent.fname.toLowerCase() === fname
+      (ent) => ent.fname.toLowerCase() === fname.toLowerCase()
     );
     if (opts?.throwIfEmpty && _.isUndefined(out)) {
       throw Error(`${fname} not found`);

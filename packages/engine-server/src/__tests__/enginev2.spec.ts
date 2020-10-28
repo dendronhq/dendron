@@ -587,6 +587,28 @@ describe("engine, notes/", () => {
       expect(data?.changed).toEqual([]);
     });
 
+    test("get existing note with caps", async () => {
+      fs.writeFileSync(
+        path.join(vaultDir, "000 Index.md"),
+        `---\n
+id: f95b2ebf-7cb5-47be-a8c0-def1236f0a8e
+title: 000 index
+desc: ''
+updated: 1603892680423
+created: 1603892680423
+---
+
+This si some content`,
+        { encoding: "utf8" }
+      );
+      await engine.init();
+      const { data } = await engine.getNoteByPath({
+        npath: "000 Index",
+        createIfNew: true,
+      });
+      expect(data).toMatchSnapshot("bond");
+    });
+
     test("get new note", async () => {
       await engine.init();
       const { data } = await engine.getNoteByPath({

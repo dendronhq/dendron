@@ -7,7 +7,6 @@ import markdownItRegex from "markdown-it-regex";
 import Token from "markdown-it/lib/token";
 import os from "os";
 import remark from "remark";
-/// <reference path="remark-abbr.d.ts"/>
 import abbrPlugin from "remark-abbr";
 import frontmatterPlugin from "remark-frontmatter";
 import markdownParse from "remark-parse";

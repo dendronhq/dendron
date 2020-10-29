@@ -48,6 +48,7 @@
     "@types/mdast": "^3.0.3",
     "@types/node": "13.11.0",
     "@types/pino": "^6.3.0",
+    "@types/remark-abbr": "^1.4.0",
     "@types/through2": "^2.0.36",
     "@types/unist": "^2.0.3",
     "@types/yamljs": "^0.2.31",

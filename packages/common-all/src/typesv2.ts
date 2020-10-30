@@ -15,6 +15,7 @@ export type DNoteLoc = {
   vault: DVault;
 };
 export type DVault = {
+  name?: string;
   fsPath: string;
 };
 export type DLink = {

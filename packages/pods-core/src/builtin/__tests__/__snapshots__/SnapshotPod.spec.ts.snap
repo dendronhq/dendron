@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SnapshotPod basic 1`] = `
+Array [
+  "vault",
+]
+`;
+
+exports[`SnapshotPod basic 2`] = `
+Array [
+  "assets",
+  "foo.ch1.md",
+  "foo.md",
+  "foo.schema.yml",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
+exports[`SnapshotPod empty ignore 1`] = `
+Array [
+  "vault",
+]
+`;
+
+exports[`SnapshotPod empty ignore 2`] = `
+Array [
+  ".git",
+  "assets",
+  "foo.ch1.md",
+  "foo.md",
+  "foo.schema.yml",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
+exports[`SnapshotPod ignore foo 1`] = `
+Array [
+  "vault",
+]
+`;
+
+exports[`SnapshotPod ignore foo 2`] = `
+Array [
+  ".git",
+  "assets",
+  "root.md",
+  "root.schema.yml",
+]
+`;

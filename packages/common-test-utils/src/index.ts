@@ -28,12 +28,49 @@ export * from "./utils";
 export type SetupVaultOpts = {
   vaultDir?: string;
   initDirCb?: (vaultPath: string) => void;
+  withAssets?: boolean;
+  withGit?: boolean;
 };
+export type SetupWSOpts = {
+  initDirCb?: (vaultPath: string) => void;
+  withAssets?: boolean;
+  withGit?: boolean;
+};
+
 export class EngineTestUtilsV2 {
+  static async setupWS(opts: SetupWSOpts) {
+    const { initDirCb, withAssets, withGit } = _.defaults(opts, {
+      withAssets: true,
+      withGit: true,
+    });
+    let wsRoot = tmpDir().name;
+    let vaultDir = path.join(wsRoot, "vault");
+    await fs.ensureDir(vaultDir);
+    await EngineTestUtilsV2.setupVault({
+      vaultDir,
+      initDirCb,
+      withAssets,
+      withGit,
+    });
+    let vaults = [vaultDir];
+    return {
+      wsRoot,
+      vaults,
+    };
+  }
   static async setupVault(opts: SetupVaultOpts): Promise<string> {
+    const { withAssets, withGit } = opts;
     let vaultDir = opts.vaultDir ? opts.vaultDir : tmpDir().name;
     if (opts?.initDirCb) {
       await opts.initDirCb(vaultDir);
+    }
+    if (withAssets) {
+      const assetsDir = path.join(vaultDir, "assets");
+      await fs.ensureDir(assetsDir);
+      await fs.ensureFile(path.join(assetsDir, "foo.jpg"));
+    }
+    if (withGit) {
+      fs.ensureDirSync(path.join(vaultDir, ".git"));
     }
     return vaultDir;
   }

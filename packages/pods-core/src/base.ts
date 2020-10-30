@@ -130,6 +130,41 @@ export abstract class ExportPodBaseV2<
   abstract plant(opts: ExportPodOpts<TConfig>): Promise<void>;
 }
 
+export abstract class ExportPodBaseV3<
+  TConfig extends ExportConfig = ExportConfig
+> extends PodBaseV3 implements ExportPod<TConfig> {
+  static kind = "export" as PodKind;
+
+  sub(orig: string) {
+    const mapping = {
+      $wsRoot: this.opts.wsRoot,
+    };
+    _.each(mapping, (v, k) => {
+      orig = _.replace(orig, k, v);
+    });
+    return orig;
+  }
+
+  cleanConfig(config: ExportConfig) {
+    let dest = this.sub(config.dest);
+    return {
+      ..._.defaults(config, { includeStubs: false, includeBody: true }),
+      dest: URI.file(resolvePath(dest, this.opts.wsRoot)),
+    };
+  }
+
+  prepareForExport(opts: ExportPodOpts<TConfig>) {
+    this.initEngine();
+    let nodes = _.values(this.engine[opts.mode]);
+    if (!opts.config.includeStubs) {
+      nodes = _.reject(nodes, { stub: true });
+    }
+    return nodes;
+  }
+
+  abstract plant(opts: ExportPodOpts<TConfig>): Promise<void>;
+}
+
 export abstract class ImportPodBaseV2<TConfig extends ImportConfig = any>
   extends PodBaseV2
   implements ImportPod<TConfig> {
@@ -159,6 +194,18 @@ export type ExportConfig = {
    * Default: true
    */
   includeBody?: boolean;
+};
+
+export type ExportCleanConfig = {
+  dest: URI;
+  /**
+   * Default: false
+   */
+  includeStubs: boolean;
+  /**
+   * Default: true
+   */
+  includeBody: boolean;
 };
 
 export type PublishConfig = {

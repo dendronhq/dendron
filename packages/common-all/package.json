@@ -39,6 +39,7 @@
   "dependencies": {
     "@types/jest": "^23.3.3",
     "@types/lodash": "^4.14.152",
+    "@types/luxon": "^1.25.0",
     "@types/minimatch": "^3.0.3",
     "@types/moment": "^2.13.0",
     "@types/node": "13.11.0",
@@ -51,6 +52,7 @@
     "isomorphic-fetch": "^2.2.1",
     "js-yaml": "^3.14.0",
     "lodash": "^4.17.15",
+    "luxon": "^1.25.0",
     "minimatch": "^3.0.4",
     "moment": "^2.27.0",
     "pino": "^6.3.1",

@@ -21,6 +21,7 @@
         "name": "pods-core:debug test",
         "program": "${workspaceFolder:pods-core}/node_modules/jest/bin/jest.js",
         "cwd": "${workspaceFolder:pods-core}",
+        "outFiles": ["${workspaceFolder:pods-core}/lib/*.js"],
         "args": ["--runInBand"]
       },
       {
@@ -30,6 +31,7 @@
         "program": "${workspaceFolder:pods-core}/node_modules/jest/bin/jest.js",
         "cwd": "${workspaceFolder:pods-core}",
         "args": ["--runInBand", "${relativeFile}", "-u"],
+        "outFiles": ["${workspaceFolder:pods-core}/lib/*.js"],
         "env": {"LOG_DST": "/tmp/pods-core.txt"}
       }
     ]

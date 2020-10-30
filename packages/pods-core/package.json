@@ -62,6 +62,7 @@
   "dependencies": {
     "@dendronhq/common-all": "^0.13.5",
     "@dendronhq/common-server": "^0.13.5",
+    "@dendronhq/common-test-utils": "^0.13.5",
     "@dendronhq/engine-server": "^0.13.5",
     "fast-csv": "^4.3.2",
     "fs-extra": "^9.0.1",

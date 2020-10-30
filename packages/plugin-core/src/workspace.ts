@@ -18,6 +18,7 @@ import { ArchiveHierarchyCommand } from "./commands/ArchiveHierarchy";
 import { BuildPodCommand } from "./commands/BuildPod";
 import { ChangeWorkspaceCommand } from "./commands/ChangeWorkspace";
 import { ConfigurePodCommand } from "./commands/ConfigurePodCommand";
+import { ContributeCommand } from "./commands/Contribute";
 import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
 import { CopyNoteRefCommand } from "./commands/CopyNoteRef";
 import { CopyNoteURLCommand } from "./commands/CopyNoteURL";
@@ -280,6 +281,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.INIT_WS.key,
         async () => {
           await new SetupWorkspaceCommand().run();
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.CONTRIBUTE.key,
+        async () => {
+          await new ContributeCommand().run();
         }
       )
     );

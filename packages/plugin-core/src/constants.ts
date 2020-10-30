@@ -54,6 +54,14 @@ export const ICONS = {
 
 export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   // --- Notes
+  CONTRIBUTE: {
+    key: "dendron.contributeToCause",
+    // no prefix, we don't want to show this command
+    title: `${CMD_PREFIX} Contribute`,
+    group: "lookup",
+    desc: "Become an environmentalist and keep Dendron sustainable",
+    skipDocs: true,
+  },
   GOTO_NOTE: {
     key: "dendron.gotoNote",
     // no prefix, we don't want to show this command

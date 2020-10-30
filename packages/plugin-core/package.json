@@ -148,6 +148,11 @@
         },
         "commands": [
             {
+                "command": "dendron.contributeToCause",
+                "title": "Dendron: Contribute",
+                "desc": "Become an environmentalist and keep Dendron sustainable"
+            },
+            {
                 "command": "dendron.gotoNote",
                 "title": "Goto Note",
                 "desc": "Go to a note"

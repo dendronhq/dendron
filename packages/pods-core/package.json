@@ -68,6 +68,7 @@
     "klaw": "^3.0.0",
     "lodash": "^4.17.20",
     "through2": "^4.0.2",
+    "twit-thread": "^2.1.0",
     "vscode-uri": "^2.1.2"
   },
   "gitHead": "47c197f18329be43e02389fb4bd63267dfc07874"

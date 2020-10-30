@@ -14,7 +14,7 @@
       "command": "npm run test:watch -- ${relativeFile} -u",
       "type": "shell",
       "problemMatcher": [],
-      "options": {"env": {"LOG_LEVEL": "debug"}}
+      "options": { "env": { "LOG_LEVEL": "debug" } }
     },
     {
       "type": "npm",

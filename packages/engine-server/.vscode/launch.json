@@ -30,9 +30,7 @@
       "sourceMaps": true,
       "smartStep": true,
       "cwd": "${workspaceFolder:engine-server}",
-      "args": [
-        "--findRelatedTests",
-        "--runInBand", "${relativeFile}", "-u"],
+      "args": ["--findRelatedTests", "--runInBand", "${relativeFile}", "-u"],
       "outFiles": ["${workspaceFolder:engine-server}/lib/**/*.js"]
     }
   ]

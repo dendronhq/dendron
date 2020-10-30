@@ -28,11 +28,7 @@
       "request": "launch",
       "name": "Debug test file",
       "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "args": [
-        "--runInBand",
-        "${relativeFile}",
-        "-u"
-      ],
+      "args": ["--runInBand", "${relativeFile}", "-u"],
       "cwd": "${workspaceRoot}"
     }
   ]

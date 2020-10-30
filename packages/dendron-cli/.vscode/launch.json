@@ -9,15 +9,34 @@
       "request": "launch",
       "name": "Debug dendron-cli",
       "program": "${workspaceFolder:dendron-cli}/lib/bin/dendron-cli.js",
-      "args": ["publishPod",
+      "args": [
+        "publishPod",
+        //"exportPod",
+
         "--vault",
-        "/Users/kevinlin/projects/dendronv2/dendron-template/vault",
+        //"/Users/kevinlin/projects/dendronv2/dendron-template/vault",
+        //"~/Dendron/vault",
+        "/home/ubuntuuser/Dendron/vault",
+
+        // check to see if this is needed for publish pod case
         "--wsRoot",
-        "/Users/kevinlin/projects/dendronv2/dendron-template",
+        //"/Users/kevinlin/projects/dendronv2/dendron-template",
+        //"/c/Users/Binit/Dendron",
+        //"~/Denron",
+        "/home/ubuntuuser/Dendron",
+
         "--podId",
-        "dendron.md",
+        //"dendron.json",   // dendron.twitter
+        "dendron.twitter",
+
         "--noteByName",
-        "dendron",
+        "dendron.tweetpod.sample",
+
+        // adding config (Added it in ~/Dendron/pods/dendron.json/config.export.yml)
+        // also created a sample config file in ~/Dendron/pods/dendron.twitter/config.publish.yml
+        //"--config",
+        //"/tmp/config.yml"
+        // --twitterConfig
       ],
       "env": {"LOG_DST": "/tmp/dendron-cli.log", "LOG_LEVEL": "info"},
       "cwd": "${workspaceRoot}",

@@ -407,6 +407,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "",
     docPreview: ``,
   },
+  RESTORE_VAULT: {
+    key: "dendron.restoreVault",
+    title: `${CMD_PREFIX} Restore Vault`,
+    group: "workspace",
+    desc: "Restore your vault from a snapshot",
+    docLink: "",
+    docPreview: ``,
+  },
   COPY_NOTE_URL: {
     key: "dendron.copyNoteURL",
     title: `${CMD_PREFIX} Copy Note URL`,

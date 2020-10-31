@@ -42,9 +42,11 @@ import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import { RenameNoteV2Command } from "./commands/RenameNoteV2";
 import { RenameNoteV2aCommand } from "./commands/RenameNoteV2a";
 import { ResetConfigCommand } from "./commands/ResetConfig";
+import { RestoreVaultCommand } from "./commands/RestoreVault";
 import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
 import { ShowHelpCommand } from "./commands/ShowHelp";
 import { ShowPreviewCommand } from "./commands/ShowPreview";
+import { SnapshotVaultCommand } from "./commands/SnapshotVault";
 import { UpdateSchemaCommand } from "./commands/UpdateSchema";
 import { UpgradeSettingsCommand } from "./commands/UpgradeSettings";
 import { LookupController } from "./components/lookup/LookupController";
@@ -285,6 +287,22 @@ export class DendronWorkspace {
       )
     );
 
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.SNAPSHOT_VAULT.key,
+        async () => {
+          await new SnapshotVaultCommand().run();
+        }
+      )
+    );
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.RESTORE_VAULT.key,
+        async () => {
+          await new RestoreVaultCommand().run();
+        }
+      )
+    );
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.CONTRIBUTE.key,

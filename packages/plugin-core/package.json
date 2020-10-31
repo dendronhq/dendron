@@ -323,6 +323,13 @@
                 "docPreview": ""
             },
             {
+                "command": "dendron.restoreVault",
+                "title": "Dendron: Restore Vault",
+                "desc": "Restore your vault from a snapshot",
+                "docLink": "",
+                "docPreview": ""
+            },
+            {
                 "command": "dendron.copyNoteURL",
                 "title": "Dendron: Copy Note URL",
                 "desc": "Get URL of current note from published site",

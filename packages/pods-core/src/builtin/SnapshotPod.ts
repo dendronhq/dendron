@@ -234,9 +234,11 @@ export class SnapshotImportPod extends ImportPod<
   }
 
   async plant(opts: SnapshotImportPodPlantOpts): Promise<void> {
+    const ctx = "SnapshotImportPod:plant";
     const { config, wsRoot, vaults } = opts;
     const { src } = config;
     const vaultSnapshots = fs.readdirSync(src.fsPath);
+    this.L.info({ ctx, src: src.fsPath });
 
     await Promise.all(
       vaultSnapshots.map((ent) => {

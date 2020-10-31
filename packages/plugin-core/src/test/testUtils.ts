@@ -18,6 +18,7 @@ import { DendronWorkspace } from "../workspace";
 import { DendronQuickPickerV2 } from "../components/lookup/LookupProvider";
 import { DNodePropsQuickInputV2 } from "@dendronhq/common-all";
 import { VSCodeUtils } from "../utils";
+import fs from "fs-extra";
 
 export function getActiveEditorBasename() {
   return path.basename(
@@ -103,6 +104,7 @@ export async function setupDendronWorkspace(
   opts?: {
     configOverride?: any;
     setupWsOverride?: Partial<SetupWorkspaceOpts>;
+    withAssets?: boolean;
     useCb?: (vaultPath: string) => Promise<void>;
     activateWorkspace?: boolean;
     lsp?: boolean;
@@ -128,6 +130,12 @@ export async function setupDendronWorkspace(
     lsp: optsClean.lsp,
   });
   const wsFolder = (workspaceFolders as vscode.WorkspaceFolder[])[0];
+  const vaultPath = wsFolder.uri.fsPath;
+  if (optsClean.withAssets) {
+    const assetsDir = path.join(vaultPath, "assets");
+    await fs.ensureDir(assetsDir);
+    await fs.ensureFile(path.join(assetsDir, "foo.jpg"));
+  }
   await new SetupWorkspaceCommand().execute({
     rootDirRaw: rootDir,
     skipOpenWs: true,
@@ -136,7 +144,7 @@ export async function setupDendronWorkspace(
   await optsClean.useCb(wsFolder.uri.fsPath);
   await _activate(ctx);
   return {
-    vaultPath: wsFolder.uri.fsPath,
+    vaultPath,
   };
 }
 

@@ -3,6 +3,7 @@ import { createLogger } from "@dendronhq/common-server/src";
 import {
   EngineTestUtilsV2,
   NodeTestPresetsV2,
+  PODS_CORE,
 } from "@dendronhq/common-test-utils";
 import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -37,21 +38,19 @@ describe("SnapshotPodExport", () => {
     expect(config).toMatchSnapshot();
   });
 
-  test("basic", async () => {
-    let dest = path.join(wsRoot, "snapshot");
+  test("with custom", async () => {
+    let customSnapshotRootPath = path.join(wsRoot, "custom");
     const pod = new SnapshotExportPod();
-    // { vaults, wsRoot, engine });
-    fs.ensureDirSync(dest);
     const { snapshotDirPath } = await pod.execute({
       config: {
-        dest,
+        dest: customSnapshotRootPath,
       },
       engine,
       vaults: vaults.map((ent) => ({ fsPath: ent })),
       wsRoot,
     });
     const snapshotDir = fs.readdirSync(snapshotDirPath);
-
+    expect(path.dirname(snapshotDirPath)).toEqual(customSnapshotRootPath);
     expect(snapshotDir).toMatchSnapshot();
     // backup vault
     const vaultPath = path.join(snapshotDirPath, "vault");
@@ -61,6 +60,24 @@ describe("SnapshotPodExport", () => {
     // copy assets
     const assetsDir = fs.readdirSync(path.join(vaultPath, "assets"));
     expect(assetsDir).toEqual(["foo.jpg"]);
+  });
+
+  test("with defaults", async () => {
+    const pod = new SnapshotExportPod();
+    const { snapshotDirPath } = await pod.execute({
+      config: {},
+      engine,
+      vaults: vaults.map((ent) => ({ fsPath: ent })),
+      wsRoot,
+    });
+    await NodeTestPresetsV2.runJestHarness({
+      opts: {
+        wsRoot,
+        snapshotDirPath,
+      },
+      results: PODS_CORE.SNAPSHOT.DEFAULTS.results,
+      expect,
+    });
   });
 
   test("empty ignore", async () => {
@@ -116,7 +133,7 @@ describe("SnapshotPodExport", () => {
   });
 });
 
-describe.skip("SnapshotPodImport", () => {
+describe("SnapshotPodImport", () => {
   let vaults: string[];
   let wsRoot: string;
   let engine: DEngineClientV2;
@@ -144,12 +161,14 @@ describe.skip("SnapshotPodImport", () => {
           });
         },
       });
-      const pod = new SnapshotExportPod({ vaults, wsRoot, engine });
-      const resp = await pod.plant({
+      const pod = new SnapshotExportPod();
+      const resp = await pod.execute({
         config: {
           dest,
         },
-        mode: "notes",
+        engine,
+        vaults: vaults.map((ent) => ({ fsPath: ent })),
+        wsRoot,
       });
       return resp;
     };
@@ -158,12 +177,14 @@ describe.skip("SnapshotPodImport", () => {
   });
 
   test("basic", async () => {
-    const pod = new SnapshotImportPod({ vaults, wsRoot, engine });
-    await pod.plant({
+    const pod = new SnapshotImportPod();
+    await pod.execute({
       config: {
         src: snapshotDirPath,
       },
-      mode: "schemas",
+      engine,
+      vaults: vaults.map((ent) => ({ fsPath: ent })),
+      wsRoot,
     });
     const vaultDir = fs.readdirSync(vaults[0]);
     expect(vaultDir).toMatchSnapshot();
@@ -177,12 +198,14 @@ describe.skip("SnapshotPodImport", () => {
   test("don't write git", async () => {
     fs.rmdirSync(path.join(vaults[0], ".git"));
     fs.ensureDirSync(path.join(snapshotDirPath, "vaults", ".git"));
-    const pod = new SnapshotImportPod({ vaults, wsRoot, engine });
-    await pod.plant({
+    const pod = new SnapshotImportPod();
+    await pod.execute({
       config: {
         src: snapshotDirPath,
       },
-      mode: "schemas",
+      engine,
+      vaults: vaults.map((ent) => ({ fsPath: ent })),
+      wsRoot,
     });
     const vaultDir = fs.readdirSync(vaults[0]);
     expect(vaultDir).toMatchSnapshot();

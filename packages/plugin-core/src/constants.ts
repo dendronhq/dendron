@@ -399,6 +399,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.pod.md",
     docPreview: ``,
   },
+  SNAPSHOT_VAULT: {
+    key: "dendron.snapshotVault",
+    title: `${CMD_PREFIX} Snapshot Vault`,
+    group: "workspace",
+    desc: "Create a snapshot of your vault",
+    docLink: "",
+    docPreview: ``,
+  },
   COPY_NOTE_URL: {
     key: "dendron.copyNoteURL",
     title: `${CMD_PREFIX} Copy Note URL`,

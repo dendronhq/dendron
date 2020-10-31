@@ -1,26 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SnapshotPodExport basic 1`] = `
-Array [
-  "vault",
-]
-`;
-
-exports[`SnapshotPodExport basic 2`] = `
-Array [
-  "assets",
-  "foo.ch1.md",
-  "foo.md",
-  "foo.schema.yml",
-  "root.md",
-  "root.schema.yml",
-]
-`;
-
 exports[`SnapshotPodExport config 1`] = `
 Array [
   Object {
-    "default": "$wsRoot/snapshots",
+    "default": "snapshots",
     "description": "where will output be stored",
     "key": "dest",
     "type": "string",
@@ -62,6 +45,23 @@ exports[`SnapshotPodExport ignore foo 2`] = `
 Array [
   ".git",
   "assets",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
+exports[`SnapshotPodExport with custom 1`] = `
+Array [
+  "vault",
+]
+`;
+
+exports[`SnapshotPodExport with custom 2`] = `
+Array [
+  "assets",
+  "foo.ch1.md",
+  "foo.md",
+  "foo.schema.yml",
   "root.md",
   "root.schema.yml",
 ]

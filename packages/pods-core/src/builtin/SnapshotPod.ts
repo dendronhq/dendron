@@ -4,12 +4,16 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { URI } from "vscode-uri";
-import { ImportConfig, ImportPodBaseV3, ImportPodOpts } from "../base";
 import {
   ExportPod,
   ExportPodCleanConfig,
   ExportPodPlantOpts,
   ExportPodRawConfig,
+  ImportPod,
+  ImportPodCleanConfig,
+  ImportPodPlantOpts,
+  ImportPodRawConfig,
+  PodCleanOpts,
 } from "../basev2";
 
 const ID = "dendron.snapshot";
@@ -33,7 +37,8 @@ export type SnapshotExportPodPlantOpts = ExportPodPlantOpts<
 
 export class SnapshotExportPod extends ExportPod<
   SnapshotExportPodRawConfig,
-  SnapshotExportPodCleanConfig
+  SnapshotExportPodCleanConfig,
+  SnapshotExportPodResp
 > {
   static id: string = ID;
   static description: string = "export notes to snapshot";
@@ -44,7 +49,7 @@ export class SnapshotExportPod extends ExportPod<
         key: "dest",
         description: "where will output be stored",
         type: "string" as const,
-        default: "$wsRoot/snapshots",
+        default: "snapshots",
       },
       {
         key: "ignore",
@@ -104,17 +109,6 @@ export class SnapshotExportPod extends ExportPod<
       ignore: cIgnore,
     };
   }
-
-  // cleanConfig(config: SnapshotExportPodConfig): SnapshotExportPodCleanConfig {
-  //   const _config = _.defaults(config, { dest: this.sub() });
-  //   const cleanConfig = _.defaults(super.cleanConfig(config), {
-  //     ignore: ".git",
-  //   }) as any;
-  //   cleanConfig.ignore = _.reject(cleanConfig.ignore.split(","), (ent) =>
-  //     _.isEmpty(ent)
-  //   );
-  //   return cleanConfig;
-  // }
 
   async plant(
     opts: SnapshotExportPodPlantOpts
@@ -183,14 +177,27 @@ class SnapshotUtils {
   }
 }
 
-type SnapshotImportPodConfig = ImportConfig;
+export type SnapshotImportPodRawConfig = ImportPodRawConfig & {
+  ignore?: string;
+};
+export type SnapshotImportPodCleanConfig = ImportPodCleanConfig & {};
+export type SnapshotImportPodResp = {
+  snapshotDirPath: string;
+};
+export type SnapshotImportPodPlantOpts = ImportPodPlantOpts<
+  SnapshotImportPodCleanConfig
+>;
 
-export class SnapshotImportPod extends ImportPodBaseV3<
-  SnapshotImportPodConfig
+export class SnapshotImportPod extends ImportPod<
+  SnapshotImportPodRawConfig,
+  SnapshotImportPodCleanConfig
 > {
   static id: string = ID;
   static description: string = "import snapshot";
 
+  get config() {
+    return [];
+  }
   async restoreVault({
     wsRoot,
     vaults,
@@ -212,23 +219,23 @@ export class SnapshotImportPod extends ImportPodBaseV3<
     });
   }
 
-  cleanConfig(config: SnapshotImportPodConfig) {
-    const cleanConfig = super.cleanConfig(config);
-    if (!fs.existsSync(config.src)) {
+  async clean(
+    opts: PodCleanOpts<SnapshotImportPodRawConfig>
+  ): Promise<SnapshotImportPodCleanConfig> {
+    const { config, wsRoot } = opts;
+    const { src } = config;
+    const srcURI = this.getPodPath({ fpath: src, wsRoot, pathKey: "src" });
+    if (!fs.existsSync(srcURI.fsPath)) {
       throw new DendronError({
-        friendly: `no snapshot found at ${config.src}`,
+        friendly: `no snapshot found at ${srcURI.fsPath}`,
       });
     }
-    return cleanConfig;
+    return { src: srcURI };
   }
 
-  async plant(opts: ImportPodOpts<SnapshotImportPodConfig>): Promise<void> {
-    const cleanConfig = this.cleanConfig(opts.config);
-    await this.prepare(opts);
-    const { src } = cleanConfig;
-    const { wsRoot, vaults: _vaults } = this.opts;
-    const vaults = _vaults.map((ent) => ({ fsPath: ent }));
-
+  async plant(opts: SnapshotImportPodPlantOpts): Promise<void> {
+    const { config, wsRoot, vaults } = opts;
+    const { src } = config;
     const vaultSnapshots = fs.readdirSync(src.fsPath);
 
     await Promise.all(

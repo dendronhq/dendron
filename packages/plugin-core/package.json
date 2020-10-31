@@ -316,6 +316,13 @@
                 "docPreview": ""
             },
             {
+                "command": "dendron.snapshotVault",
+                "title": "Dendron: Snapshot Vault",
+                "desc": "Create a snapshot of your vault",
+                "docLink": "",
+                "docPreview": ""
+            },
+            {
                 "command": "dendron.copyNoteURL",
                 "title": "Dendron: Copy Note URL",
                 "desc": "Get URL of current note from published site",

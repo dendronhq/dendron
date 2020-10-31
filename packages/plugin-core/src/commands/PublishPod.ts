@@ -2,7 +2,7 @@ import clipboardy from "@dendronhq/clipboardy";
 import { DNodeUtilsV2 } from "@dendronhq/common-all";
 import { PublishPodCommandOpts } from "@dendronhq/dendron-cli";
 import {
-  genPodConfig,
+  genPodConfigFile,
   getAllPublishPods,
   getPodConfig,
   podClassEntryToPodItemV3,
@@ -54,7 +54,7 @@ export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
     noteByName = DNodeUtilsV2.fname(noteByName);
 
     if (!maybeConfig && PodUtils.hasRequiredOpts(podChoice.podClass)) {
-      const configPath = genPodConfig(podsDir, podChoice.podClass);
+      const configPath = genPodConfigFile(podsDir, podChoice.podClass);
       await VSCodeUtils.openFileInEditor(Uri.file(configPath));
       window.showInformationMessage(
         "Looks like this is your first time running this pod. Please fill out the configuration and then run this command again. "

@@ -1,5 +1,5 @@
 import {
-  genPodConfig,
+  genPodConfigFile,
   getAllExportPods,
   PodClassEntryV2,
   podClassEntryToPodItem,
@@ -47,7 +47,7 @@ export class ConfigurePodCommand extends BasicCommand<
     const ctx = { ctx: "ConfigurePod" };
     this.L.info({ ctx, opts });
     const podsDir = DendronWorkspace.instance().podsDir;
-    const configPath = genPodConfig(podsDir, podClass);
+    const configPath = genPodConfigFile(podsDir, podClass);
     await VSCodeUtils.openFileInEditor(Uri.file(configPath));
   }
 }

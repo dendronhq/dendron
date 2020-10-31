@@ -1,5 +1,5 @@
 import {
-  genPodConfig,
+  genPodConfigFile,
   getAllExportPods,
   getPodConfig,
   PodClassEntryV2,
@@ -40,7 +40,7 @@ export class ExportPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
     const podsDir = DendronWorkspace.instance().podsDir;
     const maybeConfig = getPodConfig(podsDir, podChoice.podClass);
     if (!maybeConfig) {
-      const configPath = genPodConfig(podsDir, podChoice.podClass);
+      const configPath = genPodConfigFile(podsDir, podChoice.podClass);
       await VSCodeUtils.openFileInEditor(Uri.file(configPath));
       window.showInformationMessage(
         "Looks like this is your first time running this pod. Please fill out the configuration and then run this command again. "

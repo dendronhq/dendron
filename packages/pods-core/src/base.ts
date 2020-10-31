@@ -162,7 +162,7 @@ export abstract class ExportPodBaseV3<
     return nodes;
   }
 
-  abstract plant(opts: ExportPodOpts<TConfig>): Promise<void>;
+  abstract plant(opts: ExportPodOpts<TConfig>): Promise<any>;
 }
 
 export abstract class ImportPodBaseV2<TConfig extends ImportConfig = any>
@@ -177,6 +177,29 @@ export abstract class ImportPodBaseV2<TConfig extends ImportConfig = any>
     };
   }
 
+  async prepare(_opts: ImportPodOpts<TConfig>) {
+    await this.initEngine();
+  }
+
+  abstract plant(opts: ImportPodOpts<TConfig>): Promise<void>;
+}
+
+export abstract class ImportPodBaseV3<TConfig extends ImportConfig = any>
+  extends PodBaseV3
+  implements ImportPod<TConfig> {
+  static kind = "import" as PodKind;
+
+  cleanConfig(config: ImportConfig) {
+    return {
+      ..._.defaults(config),
+      src: URI.file(resolvePath(config.src, this.opts.wsRoot)),
+    };
+  }
+
+  /**
+   * Initialize the engine
+   * @param _opts
+   */
   async prepare(_opts: ImportPodOpts<TConfig>) {
     await this.initEngine();
   }

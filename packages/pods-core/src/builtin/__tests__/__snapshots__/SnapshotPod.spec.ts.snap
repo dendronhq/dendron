@@ -1,12 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SnapshotPod basic 1`] = `
+exports[`SnapshotPodExport basic 1`] = `
 Array [
   "vault",
 ]
 `;
 
-exports[`SnapshotPod basic 2`] = `
+exports[`SnapshotPodExport basic 2`] = `
 Array [
   "assets",
   "foo.ch1.md",
@@ -17,13 +17,13 @@ Array [
 ]
 `;
 
-exports[`SnapshotPod empty ignore 1`] = `
+exports[`SnapshotPodExport empty ignore 1`] = `
 Array [
   "vault",
 ]
 `;
 
-exports[`SnapshotPod empty ignore 2`] = `
+exports[`SnapshotPodExport empty ignore 2`] = `
 Array [
   ".git",
   "assets",
@@ -35,16 +35,39 @@ Array [
 ]
 `;
 
-exports[`SnapshotPod ignore foo 1`] = `
+exports[`SnapshotPodExport ignore foo 1`] = `
 Array [
   "vault",
 ]
 `;
 
-exports[`SnapshotPod ignore foo 2`] = `
+exports[`SnapshotPodExport ignore foo 2`] = `
 Array [
   ".git",
   "assets",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
+exports[`SnapshotPodImport basic 1`] = `
+Array [
+  ".git",
+  "assets",
+  "foo.ch1.md",
+  "foo.md",
+  "foo.schema.yml",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
+exports[`SnapshotPodImport don't write git 1`] = `
+Array [
+  "assets",
+  "foo.ch1.md",
+  "foo.md",
+  "foo.schema.yml",
   "root.md",
   "root.schema.yml",
 ]

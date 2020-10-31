@@ -11,7 +11,7 @@ import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { onWSInit, setupDendronWorkspace, TIMEOUT } from "../testUtils";
 
-const { DEFAULTS } = PODS_CORE.SNAPSHOT;
+const { DEFAULTS } = PODS_CORE.SNAPSHOT.EXPORT;
 suite("notes", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;

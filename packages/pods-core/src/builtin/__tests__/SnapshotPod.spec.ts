@@ -75,7 +75,7 @@ describe("SnapshotPodExport", () => {
         wsRoot,
         snapshotDirPath,
       },
-      results: PODS_CORE.SNAPSHOT.DEFAULTS.results,
+      results: PODS_CORE.SNAPSHOT.EXPORT.DEFAULTS.results,
       expect,
     });
   });
@@ -186,13 +186,13 @@ describe("SnapshotPodImport", () => {
       vaults: vaults.map((ent) => ({ fsPath: ent })),
       wsRoot,
     });
-    const vaultDir = fs.readdirSync(vaults[0]);
-    expect(vaultDir).toMatchSnapshot();
-    // +1 for git
-    expect(vaultDir.length).toEqual(7);
-    // copy assets
-    const assetsDir = fs.readdirSync(path.join(vaults[0], "assets"));
-    expect(assetsDir).toEqual(["foo.jpg"]);
+    await NodeTestPresetsV2.runJestHarness({
+      opts: {
+        vaultDirPath: vaults[0],
+      },
+      results: PODS_CORE.SNAPSHOT.IMPORT.BASIC.results,
+      expect,
+    });
   });
 
   test("don't write git", async () => {

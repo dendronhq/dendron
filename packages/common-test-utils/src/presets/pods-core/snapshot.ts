@@ -3,7 +3,7 @@ import path from "path";
 import { NodeTestPresetsV2 } from "../..";
 import { TestPresetEntry } from "../../utils";
 
-const DEFAULTS = new TestPresetEntry({
+const EXPORT_DEFAULTS = new TestPresetEntry({
   label: "with defaults",
   before: async ({ vaultDir }: { vaultDir: string }) => {
     await NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
@@ -40,8 +40,42 @@ const DEFAULTS = new TestPresetEntry({
   },
 });
 
+const IMPORT_BASIC = new TestPresetEntry({
+  label: "with defaults",
+  before: async ({ vaultDir }: { vaultDir: string }) => {
+    await NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
+      vaultDir,
+    });
+  },
+  results: async ({ vaultDirPath }: { vaultDirPath: string }) => {
+    const vaultDir = fs.readdirSync(vaultDirPath);
+
+    expect(vaultDir.length).toEqual(7);
+    // copy assets
+    const assetsDir = fs.readdirSync(path.join(vaultDirPath, "assets"));
+    expect(assetsDir).toEqual(["foo.jpg"]);
+
+    const scenarios = [
+      {
+        actual: vaultDir.length,
+        expected: 7,
+      },
+      {
+        actual: assetsDir,
+        expected: ["foo.jpg"],
+      },
+    ];
+    return scenarios;
+  },
+});
+
 const SNAPSHOT_TEST_PRESETS = {
-  DEFAULTS,
+  EXPORT: {
+    DEFAULTS: EXPORT_DEFAULTS,
+  },
+  IMPORT: {
+    BASIC: IMPORT_BASIC,
+  },
 };
 
 export default SNAPSHOT_TEST_PRESETS;

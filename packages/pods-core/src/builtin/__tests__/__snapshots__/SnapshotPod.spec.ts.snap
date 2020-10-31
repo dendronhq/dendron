@@ -67,18 +67,6 @@ Array [
 ]
 `;
 
-exports[`SnapshotPodImport basic 1`] = `
-Array [
-  ".git",
-  "assets",
-  "foo.ch1.md",
-  "foo.md",
-  "foo.schema.yml",
-  "root.md",
-  "root.schema.yml",
-]
-`;
-
 exports[`SnapshotPodImport don't write git 1`] = `
 Array [
   "assets",

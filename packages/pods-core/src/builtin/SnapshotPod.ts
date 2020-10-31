@@ -1,17 +1,16 @@
 import { DendronError, DUtils, DVault, Time } from "@dendronhq/common-all";
+import { resolvePath } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { URI } from "vscode-uri";
+import { ImportConfig, ImportPodBaseV3, ImportPodOpts } from "../base";
 import {
-  ExportCleanConfig,
-  ExportConfig,
-  ExportPodBaseV3,
-  ExportPodOpts,
-  ImportConfig,
-  ImportPodBaseV3,
-  ImportPodOpts,
-  PodConfigEntry,
-} from "../base";
+  ExportPod,
+  ExportPodCleanConfig,
+  ExportPodPlantOpts,
+  ExportPodRawConfig,
+} from "../basev2";
 
 const ID = "dendron.snapshot";
 
@@ -19,37 +18,42 @@ function genVaultId(vaultPath: string) {
   return path.basename(vaultPath);
 }
 
-type SnapshotExportPodConfig = ExportConfig & {
+export type SnapshotExportPodRawConfig = ExportPodRawConfig & {
   ignore?: string;
 };
-type SnapshotExportPodCleanConfig = ExportCleanConfig & {
+export type SnapshotExportPodCleanConfig = ExportPodCleanConfig & {
   ignore: string[];
 };
-type SnapshotExportPodOpts = ExportPodOpts<SnapshotExportPodConfig>;
 export type SnapshotExportPodResp = {
   snapshotDirPath: string;
 };
+export type SnapshotExportPodPlantOpts = ExportPodPlantOpts<
+  SnapshotExportPodCleanConfig
+>;
 
-export class SnapshotExportPod extends ExportPodBaseV3 {
+export class SnapshotExportPod extends ExportPod<
+  SnapshotExportPodRawConfig,
+  SnapshotExportPodCleanConfig
+> {
   static id: string = ID;
   static description: string = "export notes to snapshot";
 
-  static config = (): PodConfigEntry[] => {
+  get config() {
     return [
       {
         key: "dest",
         description: "where will output be stored",
-        type: "string",
+        type: "string" as const,
         default: "$wsRoot/snapshots",
       },
       {
         key: "ignore",
         description: "what files will be ignored during snapshot",
-        type: "string",
+        type: "string" as const,
         default: ".git",
       },
     ];
-  };
+  }
 
   async backupVault({
     vault,
@@ -74,24 +78,53 @@ export class SnapshotExportPod extends ExportPodBaseV3 {
     });
   }
 
-  cleanConfig(config: SnapshotExportPodConfig): SnapshotExportPodCleanConfig {
-    const cleanConfig = _.defaults(super.cleanConfig(config), {
-      ignore: ".git",
-    }) as any;
-    cleanConfig.ignore = _.reject(cleanConfig.ignore.split(","), (ent) =>
-      _.isEmpty(ent)
-    );
-    return cleanConfig;
+  async clean({
+    config,
+    wsRoot,
+  }: {
+    config: Partial<SnapshotExportPodRawConfig>;
+    wsRoot: string;
+  }): Promise<SnapshotExportPodCleanConfig> {
+    // set dest
+    let dest: URI;
+    let destPath: string | undefined = config.dest;
+    if (_.isUndefined(destPath)) {
+      const maybeDest = _.find(this.config, { key: "dest" });
+      if (_.isUndefined(maybeDest) || _.isUndefined(maybeDest.default)) {
+        throw new DendronError({ msg: "no dest specified" });
+      }
+      destPath = maybeDest.default;
+    }
+    dest = URI.file(resolvePath(destPath, wsRoot));
+    // set ignore
+    const { ignore } = _.defaults(config, { ignore: ".git" });
+    let cIgnore = _.reject(ignore.split(","), (ent) => _.isEmpty(ent));
+    return {
+      dest,
+      ignore: cIgnore,
+    };
   }
 
-  async plant(opts: SnapshotExportPodOpts): Promise<SnapshotExportPodResp> {
-    await this.initEngine();
-    const cleanConfig = this.cleanConfig(opts.config);
-    const { ignore } = cleanConfig;
+  // cleanConfig(config: SnapshotExportPodConfig): SnapshotExportPodCleanConfig {
+  //   const _config = _.defaults(config, { dest: this.sub() });
+  //   const cleanConfig = _.defaults(super.cleanConfig(config), {
+  //     ignore: ".git",
+  //   }) as any;
+  //   cleanConfig.ignore = _.reject(cleanConfig.ignore.split(","), (ent) =>
+  //     _.isEmpty(ent)
+  //   );
+  //   return cleanConfig;
+  // }
+
+  async plant(
+    opts: SnapshotExportPodPlantOpts
+  ): Promise<SnapshotExportPodResp> {
+    const { config, vaults } = opts;
+    const { ignore } = config;
     // const payload = this.prepareForExport(opts);
 
     // verify snapshot root
-    const snapshotRoot = cleanConfig.dest.fsPath;
+    const snapshotRoot = config.dest.fsPath;
     fs.ensureDirSync(snapshotRoot);
 
     // create snapshot folder
@@ -100,9 +133,9 @@ export class SnapshotExportPod extends ExportPodBaseV3 {
     fs.ensureDirSync(snapshotDirPath);
 
     await Promise.all(
-      this.opts.vaults.map((ent) => {
+      vaults.map((vault) => {
         return this.backupVault({
-          vault: { fsPath: ent },
+          vault,
           snapshotDirPath,
           ignore,
         });

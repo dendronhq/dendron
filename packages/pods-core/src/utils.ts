@@ -15,3 +15,9 @@ export const podClassEntryToPodItemV3 = (p: PodClassEntryV3): PodItemV3 => {
     podClass: p,
   };
 };
+
+export class PodUtils {
+  // TODO
+  // static requireArgs(): boolean {
+  // }
+}

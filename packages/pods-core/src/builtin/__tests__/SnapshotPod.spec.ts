@@ -32,15 +32,23 @@ describe("SnapshotPodExport", () => {
     });
   });
 
+  test("config", async () => {
+    const config = new SnapshotExportPod().config;
+    expect(config).toMatchSnapshot();
+  });
+
   test("basic", async () => {
     let dest = path.join(wsRoot, "snapshot");
-    const pod = new SnapshotExportPod({ vaults, wsRoot, engine });
+    const pod = new SnapshotExportPod();
+    // { vaults, wsRoot, engine });
     fs.ensureDirSync(dest);
-    const { snapshotDirPath } = await pod.plant({
+    const { snapshotDirPath } = await pod.execute({
       config: {
         dest,
       },
-      mode: "notes",
+      engine,
+      vaults: vaults.map((ent) => ({ fsPath: ent })),
+      wsRoot,
     });
     const snapshotDir = fs.readdirSync(snapshotDirPath);
 
@@ -57,14 +65,16 @@ describe("SnapshotPodExport", () => {
 
   test("empty ignore", async () => {
     let dest = path.join(wsRoot, "snapshot");
-    const pod = new SnapshotExportPod({ vaults, wsRoot, engine });
+    const pod = new SnapshotExportPod();
     fs.ensureDirSync(dest);
-    const { snapshotDirPath } = await pod.plant({
+    const { snapshotDirPath } = await pod.execute({
       config: {
         dest,
         ignore: "",
       },
-      mode: "notes",
+      engine,
+      vaults: vaults.map((ent) => ({ fsPath: ent })),
+      wsRoot,
     });
     const snapshotDir = fs.readdirSync(snapshotDirPath);
 
@@ -81,14 +91,16 @@ describe("SnapshotPodExport", () => {
 
   test("ignore foo", async () => {
     let dest = path.join(wsRoot, "snapshot");
-    const pod = new SnapshotExportPod({ vaults, wsRoot, engine });
+    const pod = new SnapshotExportPod();
     fs.ensureDirSync(dest);
-    const { snapshotDirPath } = await pod.plant({
+    const { snapshotDirPath } = await pod.execute({
       config: {
         dest,
         ignore: "foo*",
       },
-      mode: "notes",
+      engine,
+      vaults: vaults.map((ent) => ({ fsPath: ent })),
+      wsRoot,
     });
     const snapshotDir = fs.readdirSync(snapshotDirPath);
 
@@ -104,7 +116,7 @@ describe("SnapshotPodExport", () => {
   });
 });
 
-describe("SnapshotPodImport", () => {
+describe.skip("SnapshotPodImport", () => {
   let vaults: string[];
   let wsRoot: string;
   let engine: DEngineClientV2;

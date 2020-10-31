@@ -45,7 +45,7 @@ export function getPodConfig(
   }
 }
 
-export function genPodConfig(
+export function genPodConfigFile(
   podsDir: string,
   podClass: PodClassEntryV2 | PodClassEntryV3
 ) {

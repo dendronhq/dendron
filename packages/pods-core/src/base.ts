@@ -239,7 +239,7 @@ export type ImportConfig = {
   src: string;
 };
 
-export type ExportPodOpts<TConfig extends ExportConfig> = {
+export type ExportPodOpts<TConfig extends Partial<ExportConfig>> = {
   /**
    * Export schema or notes
    */

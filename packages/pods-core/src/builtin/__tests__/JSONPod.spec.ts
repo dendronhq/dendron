@@ -12,7 +12,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { ExportConfig, genPodConfig, getPodConfigPath } from "../..";
+import { ExportConfig, genPodConfigFile, getPodConfigPath } from "../..";
 import {
   JSONExportPod,
   JSONImportPod,
@@ -333,9 +333,9 @@ describe("JSONExportPod", () => {
   });
 
   test("write config", () => {
-    genPodConfig(podsDir, JSONExportPod);
+    genPodConfigFile(podsDir, JSONExportPod);
     const configPath = getPodConfigPath(podsDir, JSONExportPod);
-    genPodConfig(podsDir, JSONExportPod);
+    genPodConfigFile(podsDir, JSONExportPod);
     expect(fs.readFileSync(configPath, { encoding: "utf8" })).toMatchSnapshot();
   });
 });

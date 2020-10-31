@@ -17,6 +17,23 @@ Array [
 ]
 `;
 
+exports[`SnapshotPodExport config 1`] = `
+Array [
+  Object {
+    "default": "$wsRoot/snapshots",
+    "description": "where will output be stored",
+    "key": "dest",
+    "type": "string",
+  },
+  Object {
+    "default": ".git",
+    "description": "what files will be ignored during snapshot",
+    "key": "ignore",
+    "type": "string",
+  },
+]
+`;
+
 exports[`SnapshotPodExport empty ignore 1`] = `
 Array [
   "vault",

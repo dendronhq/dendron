@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-test-utils",
-  "version": "0.13.6-alpha.0",
+  "version": "0.14.0",
   "description": "",
   "license": "GPLv3",
   "repository": {
@@ -57,8 +57,8 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.13.6-alpha.0",
-    "@dendronhq/common-server": "^0.13.6-alpha.0",
+    "@dendronhq/common-all": "^0.14.0",
+    "@dendronhq/common-server": "^0.14.0",
     "fs-extra": "^9.0.1",
     "lodash": "^4.17.20"
   },

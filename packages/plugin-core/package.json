@@ -18,7 +18,6 @@
         "notes",
         "schema"
     ],
-    "preview": true,
     "activationEvents": [
         "*"
     ],

@@ -51,7 +51,6 @@ import { UpdateSchemaCommand } from "./commands/UpdateSchema";
 import { UpgradeSettingsCommand } from "./commands/UpgradeSettings";
 import { LookupController } from "./components/lookup/LookupController";
 import {
-  CONFIG,
   DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
@@ -123,10 +122,7 @@ export class DendronWorkspace {
   }
 
   static lsp(): boolean {
-    const resp = DendronWorkspace.configuration().get<boolean>(
-      CONFIG.REVERT_SERVER_MODE.key
-    );
-    return _.isUndefined(resp) ? true : !resp;
+    return true;
   }
 
   /**

@@ -126,10 +126,6 @@
                         "error"
                     ]
                 },
-                "dendron.noServerMode": {
-                    "type": "boolean",
-                    "description": "revert server mode"
-                },
                 "dendron.trace.server": {
                     "enum": [
                         "off",

@@ -648,11 +648,6 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     description: "control verbosity of dendron logs",
     enum: ["debug", "info", "error"],
   },
-  REVERT_SERVER_MODE: {
-    key: "dendron.noServerMode",
-    type: "boolean",
-    description: "revert server mode",
-  },
   LSP_LOG_LVL: {
     key: "dendron.trace.server",
     enum: ["off", "messages", "verbose"],

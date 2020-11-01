@@ -1,8 +1,5 @@
 export const DENDRON_WS_NAME = "dendron.code-workspace";
 export const extensionQualifiedId = `dendron.dendron`;
-// export const DENDRON_ENV = {
-//     DENDRON_WORKSPACE_FOLDERS: "DENDRON_WORKSPACE_FOLDERS"
-// };
 
 type KeyBinding = {
   key?: string;
@@ -60,7 +57,11 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Contribute`,
     group: "lookup",
     desc: "Become an environmentalist and keep Dendron sustainable",
-    skipDocs: true,
+    docs: [
+      "This command takes you to Dendron's [Environmentalist](https://accounts.dendron.so/account/subscribe) plans.",
+      "Environmentalists are users that can support Dendron financially through a monthly contribution. Environmentalist get access to insider builds, priority support, and access to exclusive dev channels.",
+    ].join("\n"),
+    skipDocs: false,
   },
   GOTO_NOTE: {
     key: "dendron.gotoNote",
@@ -71,7 +72,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     skipDocs: true,
   },
   CREATE_DAILY_JOURNAL_NOTE: {
-    key: "dendron.createDailyJournalNote",
+    key: "dendron.createDailyJornalNote",
     title: `${CMD_PREFIX} Create Daily Journal Note`,
     group: "notes",
     keybindings: {
@@ -404,6 +405,10 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Snapshot Vault`,
     group: "workspace",
     desc: "Create a snapshot of your vault",
+    docs: [
+      "Takes a snapshot of your entire vault, including assets. This command will ignore version control folders like .git when making a snapshot.",
+      "Snapshots are saved under {workspace}/snapshots/{timestamp}",
+    ].join("\n"),
     docLink: "",
     docPreview: ``,
   },
@@ -412,6 +417,9 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Restore Vault`,
     group: "workspace",
     desc: "Restore your vault from a snapshot",
+    docs: [
+      "Restores your vault based on a snapshot. When restoring, it will over-write any notes that have the same name as notes in the snapshot. It will ignore version control directories like .git when restoring your vault",
+    ].join("\n"),
     docLink: "",
     docPreview: ``,
   },

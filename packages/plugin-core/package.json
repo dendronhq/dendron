@@ -146,7 +146,8 @@
             {
                 "command": "dendron.contributeToCause",
                 "title": "Dendron: Contribute",
-                "desc": "Become an environmentalist and keep Dendron sustainable"
+                "desc": "Become an environmentalist and keep Dendron sustainable",
+                "docs": "This command takes you to Dendron's [Environmentalist](https://accounts.dendron.so/account/subscribe) plans.\nEnvironmentalists are users that can support Dendron financially through a monthly contribution. Environmentalist get access to insider builds, priority support, and access to exclusive dev channels."
             },
             {
                 "command": "dendron.gotoNote",
@@ -154,7 +155,7 @@
                 "desc": "Go to a note"
             },
             {
-                "command": "dendron.createDailyJournalNote",
+                "command": "dendron.createDailyJornalNote",
                 "title": "Dendron: Create Daily Journal Note",
                 "desc": "Create a global journal note",
                 "docLink": "dendron.topic.special-notes.md",
@@ -315,6 +316,7 @@
                 "command": "dendron.snapshotVault",
                 "title": "Dendron: Snapshot Vault",
                 "desc": "Create a snapshot of your vault",
+                "docs": "Takes a snapshot of your entire vault, including assets. This command will ignore version control folders like .git when making a snapshot.\nSnapshots are saved under {workspace}/snapshots/{timestamp}",
                 "docLink": "",
                 "docPreview": ""
             },
@@ -322,6 +324,7 @@
                 "command": "dendron.restoreVault",
                 "title": "Dendron: Restore Vault",
                 "desc": "Restore your vault from a snapshot",
+                "docs": "Restores your vault based on a snapshot. When restoring, it will over-write any notes that have the same name as notes in the snapshot. It will ignore version control directories like .git when restoring your vault",
                 "docLink": "",
                 "docPreview": ""
             },
@@ -396,7 +399,7 @@
         ],
         "keybindings": [
             {
-                "command": "dendron.createDailyJournalNote",
+                "command": "dendron.createDailyJornalNote",
                 "key": "ctrl+shift+i",
                 "mac": "cmd+shift+i",
                 "when": "editorFocus"

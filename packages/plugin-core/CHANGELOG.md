@@ -5,13 +5,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.13.6-alpha.2](https://github.com/dendronhq/dendron/compare/v0.13.6-alpha.1...v0.13.6-alpha.2) (2020-11-01)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.13.6-alpha.1](https://github.com/dendronhq/dendron/compare/v0.13.6-alpha.0...v0.13.6-alpha.1) (2020-11-01)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
 
-## [0.13.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.13.5...v0.13.6-alpha.0) (2020-10-31)
+- **publishing:** use remark-abbr types from DT ([04be351](https://github.com/dendronhq/dendron/commit/04be351f79a0abf21cb1059fbb284630ab2688a6))
 
 ### Features
 
@@ -20,11 +20,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.13.5](https://github.com/dendronhq/dendron/compare/v0.13.4...v0.13.5) (2020-10-28)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- **workbench:** tree view can delete notes with caps ([d37926d](https://github.com/dendronhq/dendron/commit/d37926d7f38d784f847a4c2a58fb75ba7c03b0e0))
 
 ## [0.13.4](https://github.com/dendronhq/dendron/compare/v0.13.4-alpha.1...v0.13.4) (2020-10-28)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.13.4-alpha.1](https://github.com/dendronhq/dendron/compare/v0.13.4-alpha.0...v0.13.4-alpha.1) (2020-10-27)
 

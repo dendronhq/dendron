@@ -12,7 +12,7 @@ export class ContributeCommand extends BasicCommand<
   CommandOutput
 > {
   async gatherInputs(): Promise<CommandInput | undefined> {
-    return;
+    return {};
   }
   async execute() {
     env.openExternal(

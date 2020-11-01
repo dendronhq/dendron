@@ -5,10 +5,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.13.6-alpha.1](https://github.com/dendronhq/dendron/compare/v0.13.6-alpha.0...v0.13.6-alpha.1) (2020-11-01)
 
-**Note:** Version bump only for package root
-
-## [0.13.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.13.5...v0.13.6-alpha.0) (2020-10-31)
-
 ### Bug Fixes
 
 - **publishing:** use remark-abbr types from DT ([04be351](https://github.com/dendronhq/dendron/commit/04be351f79a0abf21cb1059fbb284630ab2688a6))

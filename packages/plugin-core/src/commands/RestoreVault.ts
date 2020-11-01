@@ -27,9 +27,9 @@ export class RestoreVaultCommand extends BaseCommand<
     const choices = readdirSync(snapshots)
       .sort()
       .map((ent) => ({
-        label: Time.DateTime.fromMillis(parseInt(ent)).toLocaleString(
+        label: `${Time.DateTime.fromMillis(parseInt(ent)).toLocaleString(
           Time.DateTime.DATETIME_FULL
-        ),
+        )} (${ent})`,
         data: ent,
       }));
     return VSCodeUtils.showQuickPick(choices);

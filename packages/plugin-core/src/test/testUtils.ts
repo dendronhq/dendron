@@ -74,7 +74,7 @@ export function setupWorkspace(
       },
     };
     if (_.isUndefined(opts?.lsp)) {
-      config[CONFIG.REVERT_SERVER_MODE.key] = true;
+      config["dendron.noServerMode"] = true;
     }
     _.forEach(CONFIG, (ent) => {
       // @ts-ignore

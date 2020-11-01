@@ -121,7 +121,10 @@ export class DendronWorkspace {
   }
 
   static lsp(): boolean {
-    return true;
+    const resp = DendronWorkspace.configuration().get<boolean>(
+      "dendron.noServerMode"
+    );
+    return _.isUndefined(resp) ? true : !resp;
   }
 
   /**

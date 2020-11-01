@@ -4,11 +4,10 @@ import {
   DEngine,
   DEngineClientV2,
   getStage,
-  NodeBuilder,
   Note,
 } from "@dendronhq/common-all";
 import { mdFile2NodeProps, readMD } from "@dendronhq/common-server";
-import { DConfig, FileParser } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import open from "open";
@@ -188,7 +187,7 @@ export class DendronWorkspace {
   public windowWatcher?: WindowWatcher;
   public fsWatcher?: vscode.FileSystemWatcher;
   public serverWatcher?: vscode.FileSystemWatcher;
-  public schemaWatcher?: vscode.FileSystemWatcher;
+  public schemaWatcher?: SchemaWatcher;
   public L: typeof Logger;
   public _engine?: DEngine;
   public _enginev2?: DEngineClientV2;
@@ -712,6 +711,7 @@ export class DendronWorkspace {
       });
       const schemaWatcher = new SchemaWatcher({ vaults });
       schemaWatcher.activate(this.context);
+      this.schemaWatcher = schemaWatcher;
 
       let disposables = vaultWatcher.activate();
       disposables.map((d) => {
@@ -722,7 +722,6 @@ export class DendronWorkspace {
     }
     this.createWorkspaceWatcher(workspaceFolders);
     this.createServerWatcher();
-    this.createSchemaWatcher(workspaceFolders);
   }
 
   async deactivate() {
@@ -777,36 +776,6 @@ export class DendronWorkspace {
         const ctx = "createServerWatcher.onDidChange";
         this.L.info({ ctx, uri });
         updateServerConfig(uri);
-      }, this)
-    );
-  }
-  async createSchemaWatcher(
-    workspaceFolders: readonly vscode.WorkspaceFolder[]
-  ) {
-    const ctx = "createSchemaWatcher";
-    this.L.info({ ctx, msg: "enter" });
-    const rootFolder = workspaceFolders[0];
-    let pattern = new vscode.RelativePattern(rootFolder, "*.schema.yml");
-    this.schemaWatcher = vscode.workspace.createFileSystemWatcher(
-      pattern,
-      true,
-      false,
-      true
-    );
-
-    this.disposableStore.add(
-      this.schemaWatcher.onDidChange(async (uri: vscode.Uri) => {
-        this.L.info({ ctx, uri });
-
-        const schema = path.basename(uri.fsPath);
-        const engine = DendronWorkspace.instance().engine;
-        const fp = new FileParser(engine.store, { errorOnEmpty: false });
-        const data = fp.parseSchema([schema]);
-        const nodes = new NodeBuilder().buildSchemaFromProps(data);
-        await this.engine.updateNodes(nodes, {
-          parentsAsStubs: false,
-          newNode: false,
-        });
       }, this)
     );
   }

@@ -60,6 +60,9 @@ export class RestoreVaultCommand extends BaseCommand<
       if (ws.vaultWatcher) {
         ws.vaultWatcher.pause = true;
       }
+      if (ws.schemaWatcher) {
+        ws.schemaWatcher.pause = true;
+      }
       await pod.execute({
         vaults: [{ fsPath: vault }],
         wsRoot,
@@ -72,6 +75,9 @@ export class RestoreVaultCommand extends BaseCommand<
     } finally {
       if (ws.vaultWatcher) {
         ws.vaultWatcher.pause = false;
+      }
+      if (ws.schemaWatcher) {
+        ws.schemaWatcher.pause = false;
       }
     }
   }

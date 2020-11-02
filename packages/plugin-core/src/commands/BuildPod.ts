@@ -33,9 +33,9 @@ export class BuildPodCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     this.L.info({ ...ctx, config });
     let errors = [];
+    // @ts-ignore
     ({ errors } = await cmd.execute({
       config,
-      engine: {} as any,
       engineClient: engine as DEngineClientV2,
       wsRoot: dendronRoot,
       writeStubs,

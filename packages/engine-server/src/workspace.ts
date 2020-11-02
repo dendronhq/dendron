@@ -25,6 +25,10 @@ export class WorkspaceService {
     return;
   }
 
+  /**
+   * Iinitialize workspace with root
+   * @param opts
+   */
   async createWorkspace(opts: WorkspaceServiceCreateOpts) {
     const { wsRoot, vaults } = opts;
     fs.ensureDirSync(wsRoot);

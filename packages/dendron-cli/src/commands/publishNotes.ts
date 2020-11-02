@@ -84,7 +84,6 @@ export class PublishNotesCommand extends SoilCommand<
       publishRepoDir,
       engineClient,
     } = opts;
-    const engine = opts.engine;
     const config = DConfig.getOrCreate(wsRoot);
     const siteConfig = config.site;
     const git = new Git({ localUrl: publishRepoDir });
@@ -94,7 +93,6 @@ export class PublishNotesCommand extends SoilCommand<
     }
 
     const { buildNotesRoot } = await new BuildSiteCommand().execute({
-      engine,
       engineClient,
       config: siteConfig,
       wsRoot: wsRoot,

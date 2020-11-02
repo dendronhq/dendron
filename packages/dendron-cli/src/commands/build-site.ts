@@ -1,6 +1,5 @@
 import {
   DendronSiteConfig,
-  DEngine,
   DEngineClientV2,
   DNodeUtils,
   DNodeUtilsV2,
@@ -12,7 +11,6 @@ import {
 import { resolvePath, tmpDir } from "@dendronhq/common-server";
 import {
   DConfig,
-  DendronEngine,
   DendronEngineClient,
   dendronNoteRefPlugin,
   getProcessor,
@@ -53,12 +51,8 @@ type DendronJekyllProps = {
   permalink?: string;
 };
 
-function getRoot(engine: DEngine | DEngineClientV2) {
-  if (engine instanceof DendronEngineClient) {
-    return engine.vaults[0];
-  } else {
-    return (engine as DendronEngine).props.root;
-  }
+function getRoot(engine: DEngineClientV2) {
+  return engine.vaults[0];
 }
 
 function rsyncCopy(src: string, dst: string) {
@@ -112,7 +106,7 @@ async function note2JekyllMdFile(
   note: Note | NotePropsV2,
   opts: {
     notesDir: string;
-    engine: DEngine | DEngineClientV2;
+    engine: DEngineClientV2;
     v2?: boolean;
   } & DendronSiteConfig
 ): Promise<Jekyll2MdFileErrors[]> {
@@ -354,50 +348,6 @@ export class BuildSiteCommand extends SoilCommand<
     });
   }
 
-  async doBuild(opts: {
-    engine: DEngine;
-    config: DendronSiteConfig;
-    writeStubs: boolean;
-    notesDir: string;
-  }): Promise<Jekyll2MdFileErrors[]> {
-    const { engine, config, writeStubs, notesDir } = opts;
-    const { siteHierarchies } = config;
-
-    let navOrder = 0;
-    const nodes: Note[] = siteHierarchies.map((fname) => {
-      const note = DNodeUtils.getNoteByFname(fname, engine, {
-        throwIfEmpty: true,
-      }) as Note;
-      note.custom.nav_order = navOrder;
-      note.parent = null;
-      note.title = _.capitalize(note.title);
-      navOrder += 1;
-      return note;
-    });
-    const out = [];
-    let writeStubsQ: any = [];
-
-    // get rest of hieararchy
-    while (!_.isEmpty(nodes)) {
-      const node = nodes.pop() as Note;
-      out.push(
-        note2JekyllMdFile(node, {
-          notesDir,
-          engine,
-          ...config,
-        })
-      );
-      node.children.forEach((n) => nodes.push(n as Note));
-      if (writeStubs && node.stub) {
-        node.stub = false;
-        writeStubsQ.push(engine.write(node, { stub: false }));
-      }
-    }
-    await Promise.all(writeStubsQ);
-    const errors = await Promise.all(out);
-    return _.flatten(errors);
-  }
-
   async doBuildV2(opts: {
     engineClient: DEngineClientV2;
     config: DendronSiteConfig;
@@ -449,16 +399,12 @@ export class BuildSiteCommand extends SoilCommand<
   }
 
   async execute(opts: CommandOpts) {
-    let {
-      engine,
-      config,
-      wsRoot,
-      writeStubs,
-      incremental,
-      engineClient,
-    } = _.defaults(opts, {
-      incremental: false,
-    });
+    let { config, wsRoot, writeStubs, incremental, engineClient } = _.defaults(
+      opts,
+      {
+        incremental: false,
+      }
+    );
     const ctx = "BuildSiteCommand";
     config = DConfig.cleanSiteConfig(config);
     this.L.info({ ctx, config, incremental });
@@ -473,21 +419,12 @@ export class BuildSiteCommand extends SoilCommand<
 
     if (incremental) {
       const staging = tmpDir();
-      if (engineClient) {
-        errors = await this.doBuildV2({
-          engineClient,
-          config,
-          writeStubs,
-          notesDir: staging.name,
-        });
-      } else {
-        errors = await this.doBuild({
-          engine,
-          config,
-          writeStubs,
-          notesDir: staging.name,
-        });
-      }
+      errors = await this.doBuildV2({
+        engineClient,
+        config,
+        writeStubs,
+        notesDir: staging.name,
+      });
       this.L.info({
         ctx,
         msg: "rsync",
@@ -501,30 +438,18 @@ export class BuildSiteCommand extends SoilCommand<
       }
     } else {
       fs.emptyDirSync(siteNotesDirPath);
-      if (engineClient) {
-        errors = await this.doBuildV2({
-          engineClient,
-          config,
-          writeStubs,
-          notesDir: siteNotesDirPath,
-        });
-      } else {
-        errors = await this.doBuild({
-          engine,
-          config,
-          writeStubs,
-          notesDir: siteNotesDirPath,
-        });
-      }
+      errors = await this.doBuildV2({
+        engineClient,
+        config,
+        writeStubs,
+        notesDir: siteNotesDirPath,
+      });
     }
 
     // move assets
     this.L.info({ ctx, msg: "copy assets..." });
     const assetsDir = "assets";
-    const vaultAssetsDir = path.join(
-      getRoot(engineClient || engine),
-      assetsDir
-    );
+    const vaultAssetsDir = path.join(getRoot(engineClient), assetsDir);
     const siteAssetsDir = path.join(siteRootPath, assetsDir);
     if (config.copyAssets !== false) {
       try {

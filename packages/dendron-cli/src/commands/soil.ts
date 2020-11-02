@@ -1,16 +1,11 @@
-import { DEngine, DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngineClientV2 } from "@dendronhq/common-all";
 import { resolvePath } from "@dendronhq/common-server";
-import {
-  DendronEngine,
-  DendronEngineV2,
-  FileStorageV2,
-} from "@dendronhq/engine-server";
+import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
 import yargs from "yargs";
 import { BaseCommand } from "./base";
 
 type CommandOpts = {
-  engine: DEngine;
-  engineClient?: DEngineClientV2;
+  engineClient: DEngineClientV2;
   wsRoot: string;
 };
 
@@ -50,16 +45,21 @@ export abstract class SoilCommand<
 
   eval = (args: TCLIOpts) => {
     const opts = this.enrichArgs(args);
-    return opts.engine.init().then(() => {
+    return opts.engineClient.init().then(() => {
       return this.execute(opts);
     });
   };
 
   _enrichArgs(args: TCLIOpts): CommandOpts {
     let { vault, wsRoot } = args;
-    const engine = DendronEngine.getOrCreateEngine({
-      root: vault,
+
+    const logger = this.L;
+    const engineClient = new DendronEngineV2({
+      vaults: [vault],
       forceNew: true,
+      store: new FileStorageV2({ vaults: [vault], logger }),
+      mode: "fuzzy",
+      logger,
     });
 
     const cwd = process.cwd();
@@ -67,7 +67,7 @@ export abstract class SoilCommand<
     vault = resolvePath(vault, cwd);
     return {
       ...args,
-      engine,
+      engineClient,
       wsRoot,
     };
   }

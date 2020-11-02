@@ -1,21 +1,18 @@
 #!/usr/bin/env node
 
 import { env, setEnv } from "@dendronhq/common-all";
-
-if (!env("LOG_LEVEL", { shouldThrow: false })) {
-  setEnv("LOG_LEVEL", "error");
-}
-
-import { DendronEngine } from "@dendronhq/engine-server";
 import yargs from "yargs";
 import { BuildSiteCommand } from "../src";
-import { BackfillCliOpts, BackfillCommand } from "../src/commands/backfill";
 import { ExportPodCLICommand } from "../src/commands/exportPod";
 import { ImportPodCLICommand } from "../src/commands/importPod";
 import { PlantSeedCommand } from "../src/commands/plantSeed";
 import { PublishNotesCommand } from "../src/commands/publishNotes";
 import { PublishPodCLICommand } from "../src/commands/PublishPodCLICommand";
 import { RefactorRule } from "../src/commands/refactorBase";
+
+if (!env("LOG_LEVEL", { shouldThrow: false })) {
+  setEnv("LOG_LEVEL", "error");
+}
 
 export const addLayout: RefactorRule = {
   name: "add fm",
@@ -31,27 +28,6 @@ export const updateTime: RefactorRule = {
 };
 
 let buildYargs = yargs
-  .command<BackfillCliOpts>(
-    "backfill",
-    "backfill frontmatter",
-    (args) => {
-      args.option("vault", {
-        describe: "location of vault",
-      });
-      args.option("overwriteFields", {
-        describe: "location of site dir",
-        array: true,
-        default: [],
-      });
-    },
-    async (args) => {
-      const { vault, overwriteFields } = args;
-      const cmd = new BackfillCommand();
-      const engine = DendronEngine.getOrCreateEngine({ root: vault });
-      await engine.init();
-      await cmd.execute({ engine, overwriteFields });
-    }
-  )
   .command<any>(
     "exportPod",
     "export a pod",

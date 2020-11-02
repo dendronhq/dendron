@@ -181,7 +181,6 @@ export class DendronWorkspace {
   public serverWatcher?: vscode.FileSystemWatcher;
   public schemaWatcher?: SchemaWatcher;
   public L: typeof Logger;
-  public _engine?: DEngine;
   public _enginev2?: DEngineClientV2;
   private disposableStore: DisposableStore;
 

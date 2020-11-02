@@ -1,9 +1,4 @@
-import {
-  ProtoLink,
-  DEngine,
-  DNodeUtils,
-  DEngineClientV2,
-} from "@dendronhq/common-all";
+import { ProtoLink, DNodeUtils, DEngineClientV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Node } from "unist";
 import visit from "unist-util-visit";
@@ -18,7 +13,7 @@ export type ReplaceRefOptions = {
   wikiLink2Html?: boolean;
   wikiLinkPrefix?: string;
   wikiLinkUseId?: boolean;
-  engine?: DEngine | DEngineClientV2;
+  engine?: DEngineClientV2;
   toHTML?: boolean;
   /**
    * used for links in preview

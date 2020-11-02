@@ -1,5 +1,4 @@
 import {
-  DEngine,
   DEngineClientV2,
   ERROR_CODES,
   NoteUtilsV2,
@@ -15,7 +14,7 @@ type ReloadIndexCommandOpts = {};
 
 export class ReloadIndexCommand extends BasicCommand<
   ReloadIndexCommandOpts,
-  DEngine | DEngineClientV2 | undefined
+  DEngineClientV2 | undefined
 > {
   /**
    * Update index

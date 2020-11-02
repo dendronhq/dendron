@@ -247,40 +247,6 @@ let ctx: vscode.ExtensionContext;
 
 const TIMEOUT = 60 * 1000 * 5;
 
-suite("manual", function () {
-  before(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  beforeEach(async function () {
-    await new ResetConfigCommand().execute({ scope: "all" });
-    root = FileTestUtils.tmpDir();
-    //fs.removeSync(root.name);
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    return;
-  });
-
-  describe("SetupWorkspaceCommand", function () {
-    this.timeout(TIMEOUT);
-
-    test("not first time setup", function (done) {
-      setupWorkspace(root.name);
-      VSCodeUtils.gatherFolderPath = () => Promise.resolve(root.name);
-      // @ts-ignore
-      VSCodeUtils.showQuickPick = () =>
-        Promise.resolve("initialize empty repository");
-      const cmd = new SetupWorkspaceCommand();
-      ctx.globalState.update(GLOBAL_STATE.DENDRON_FIRST_WS, "init").then(() => {
-        cmd.gatherInputs().then((resp) => {
-          assert.deepEqual(resp, { rootDirRaw: root.name, emptyWs: true });
-          done();
-        });
-      });
-    });
-  });
-});
-
 suite.skip("startup", function () {
   this.timeout(TIMEOUT);
   let ctx: vscode.ExtensionContext;
@@ -305,14 +271,6 @@ suite.skip("startup", function () {
 
     afterEach(function () {
       resetWorkspaceFile();
-    });
-
-    test("workspace not activated", function (done) {
-      _activate(ctx);
-      onWSActive(async (_event: HistoryEvent) => {
-        assert.equal(DendronWorkspace.isActive(), false);
-        done();
-      });
     });
 
     test("workspace active, prior lower workspace version, setting with extra prop, upgrade", function (done) {

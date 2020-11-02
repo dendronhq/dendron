@@ -1,9 +1,5 @@
-import { NoteUtilsV2, SchemaUtilsV2 } from "@dendronhq/common-all";
-import {
-  note2File,
-  resolveTilde,
-  schemaModuleOpts2File,
-} from "@dendronhq/common-server";
+import { resolveTilde } from "@dendronhq/common-server";
+import { WorkspaceService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -107,6 +103,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
           return null;
         },
       });
+
       if (resp === "abort") {
         vscode.window.showInformationMessage(
           "did not initialize dendron workspace"
@@ -125,9 +122,11 @@ export class SetupWorkspaceCommand extends BasicCommand<
         vscode.window.showInformationMessage(`removed ${rootDir}`);
       }
     }
+    // create vault
+    const vaultPath = path.join(rootDir, "vault");
+    const vaults = [{ fsPath: vaultPath }];
+    await new WorkspaceService().createWorkspace({ vaults, wsRoot: rootDir });
 
-    // make sure root dir exists
-    fs.ensureDirSync(rootDir);
     const dendronWSTemplate = vscode.Uri.joinPath(
       ws.extensionAssetsDir,
       "dendronWS"
@@ -135,9 +134,6 @@ export class SetupWorkspaceCommand extends BasicCommand<
     // copy over jekyll config
     const dendronJekyll = vscode.Uri.joinPath(ws.extensionAssetsDir, "jekyll");
     fs.copySync(path.join(dendronJekyll.fsPath), path.join(rootDir, "docs"));
-    // create vault
-    const vaultPath = path.join(rootDir, "vault");
-    fs.ensureDirSync(vaultPath);
 
     // copy over notes
     if (!emptyWs) {
@@ -152,18 +148,6 @@ export class SetupWorkspaceCommand extends BasicCommand<
         filter: filterFunc,
       });
     }
-    // make sure root files exist
-    const note = NoteUtilsV2.createRoot({
-      body: [
-        "# Welcome to Dendron",
-        "",
-        `This is the root fo your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top. `,
-      ].join("\n"),
-    });
-    const schema = SchemaUtilsV2.createRootModule({});
-    await note2File(note, vaultPath);
-    await schemaModuleOpts2File(schema, vaultPath, "root");
-
     // write workspace defaults
     WorkspaceConfig.write(rootDir);
 

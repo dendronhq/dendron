@@ -26,7 +26,7 @@ export function getActiveEditorBasename() {
   );
 }
 
-function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
+export function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
   const _settings = settings;
   return {
     get: (_key: string) => {

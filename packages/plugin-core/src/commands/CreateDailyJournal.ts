@@ -20,15 +20,9 @@ export class CreateDailyJournalCommand extends CreateNoteCommand {
       CONFIG["DAILY_JOURNAL_DOMAIN"].key
     );
     let fname: string;
-    if (DendronWorkspace.lsp()) {
-      fname = DendronClientUtilsV2.genNoteName("JOURNAL", {
-        overrides: { domain: dailyJournalDomain },
-      });
-    } else {
-      fname = this.genFname("JOURNAL", {
-        overrides: { domain: dailyJournalDomain },
-      });
-    }
+    fname = DendronClientUtilsV2.genNoteName("JOURNAL", {
+      overrides: { domain: dailyJournalDomain },
+    });
     return { title: fname };
   }
 
@@ -42,12 +36,7 @@ export class CreateDailyJournalCommand extends CreateNoteCommand {
 
   async execute(opts: CommandOpts) {
     const { fname } = opts;
-    if (DendronWorkspace.lsp()) {
-      await new GotoNoteCommand().execute({ qs: fname, mode: "note" as const });
-      return vscode.Uri.file("/tmp");
-    }
-    const uri = await super.execute({ ...opts, title: fname });
-    await vscode.window.showTextDocument(uri);
-    return uri;
+    await new GotoNoteCommand().execute({ qs: fname, mode: "note" as const });
+    return vscode.Uri.file("/tmp");
   }
 }

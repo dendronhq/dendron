@@ -1,4 +1,4 @@
-import { DNodeUtils, NotePropsV2 } from "@dendronhq/common-all";
+import { NotePropsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";
@@ -34,31 +34,19 @@ export class GoToSiblingCommand extends BasicCommand<
     value = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
     let respNodes: NotePropsV2[];
 
-    if (DendronWorkspace.lsp()) {
-      const client = DendronWorkspace.instance().getEngine();
-      if (value === "root") {
-        respNodes = client.notes["root"].children
-          .map((ent) => client.notes[ent])
-          .concat([client.notes["root"]]);
-      } else {
-        const note = await DendronClientUtilsV2.getNoteByFname({
-          fname: value,
-          client,
-        });
-        respNodes = client.notes[note.parent as string].children.map(
-          (id) => client.notes[id]
-        );
-      }
+    const client = DendronWorkspace.instance().getEngine();
+    if (value === "root") {
+      respNodes = client.notes["root"].children
+        .map((ent) => client.notes[ent])
+        .concat([client.notes["root"]]);
     } else {
-      if (value === "root") {
-        respNodes = (_.uniqBy(
-          _.map(_.values(ws.engine.notes), (ent) => ent.domain),
-          "domain.id"
-        ) as unknown) as NotePropsV2[];
-      } else {
-        const node = DNodeUtils.getNoteByFname(value, ws.engine);
-        respNodes = (node?.parent?.children as unknown) as NotePropsV2[];
-      }
+      const note = await DendronClientUtilsV2.getNoteByFname({
+        fname: value,
+        client,
+      });
+      respNodes = client.notes[note.parent as string].children.map(
+        (id) => client.notes[id]
+      );
     }
 
     if (respNodes.length <= 1) {

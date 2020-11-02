@@ -14,9 +14,6 @@ export class DumpStateCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
   async execute() {
     const ctx = "DumpStateCommand";
-    if (!DendronWorkspace.lsp()) {
-      return;
-    }
     const engine = DendronWorkspace.instance().getEngine();
     const notes = _.mapValues(engine.notes, (val) => _.omit(val, "body"));
     const schemas = engine.schemas;

@@ -28,16 +28,10 @@ export class CopyNoteLinkCommand extends BasicCommand<
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const fname = DNodeUtils.uri2Fname(editor.document.uri);
     let note: NotePropsV2;
-    if (DendronWorkspace.lsp()) {
-      note = NoteUtilsV2.getNoteByFname(
-        fname,
-        DendronWorkspace.instance().getEngine().notes
-      ) as NotePropsV2;
-    } else {
-      note = (_.find(DendronWorkspace.instance().engine.notes, {
-        fname,
-      }) as unknown) as NotePropsV2;
-    }
+    note = NoteUtilsV2.getNoteByFname(
+      fname,
+      DendronWorkspace.instance().getEngine().notes
+    ) as NotePropsV2;
     if (!note) {
       throw Error(`${fname} not found in engine`);
     }

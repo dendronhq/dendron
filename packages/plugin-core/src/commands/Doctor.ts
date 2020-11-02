@@ -1,5 +1,5 @@
-import { DEngine, DEngineClientV2 } from "@dendronhq/common-all";
-import { BackfillCommand, BackfillV2Command } from "@dendronhq/dendron-cli";
+import { DEngineClientV2 } from "@dendronhq/common-all";
+import { BackfillV2Command } from "@dendronhq/dendron-cli";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -37,13 +37,9 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const siteRoot = path.join(rootDir, config.site.siteRootDir);
     // TODO
     const engine = await new ReloadIndexCommand().execute();
-    if (DendronWorkspace.lsp()) {
-      await new BackfillV2Command().execute({
-        engine: engine as DEngineClientV2,
-      });
-    } else {
-      await new BackfillCommand().execute({ engine: engine as DEngine });
-    }
+    await new BackfillV2Command().execute({
+      engine: engine as DEngineClientV2,
+    });
 
     // create site root, used for publication
     if (!fs.existsSync(siteRoot)) {

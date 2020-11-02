@@ -15,10 +15,10 @@ import {
   HistoryService,
 } from "../services/HistoryService";
 import { DendronWorkspace } from "../workspace";
-import { DendronQuickPickerV2 } from "../components/lookup/LookupProvider";
 import { DNodePropsQuickInputV2 } from "@dendronhq/common-all";
 import { VSCodeUtils } from "../utils";
 import fs from "fs-extra";
+import { DendronQuickPickerV2 } from "../components/lookup/types";
 
 export function getActiveEditorBasename() {
   return path.basename(

@@ -1,4 +1,4 @@
-import { DEngine, DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngineClientV2 } from "@dendronhq/common-all";
 import { BuildSiteCommand } from "@dendronhq/dendron-cli";
 import _ from "lodash";
 import { window } from "vscode";
@@ -33,24 +33,14 @@ export class BuildPodCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     this.L.info({ ...ctx, config });
     let errors = [];
-    if (DendronWorkspace.lsp()) {
-      ({ errors } = await cmd.execute({
-        config,
-        engine: {} as any,
-        engineClient: engine as DEngineClientV2,
-        wsRoot: dendronRoot,
-        writeStubs,
-        incremental,
-      }));
-    } else {
-      ({ errors } = await cmd.execute({
-        config,
-        engine: engine as DEngine,
-        wsRoot: dendronRoot,
-        writeStubs,
-        incremental,
-      }));
-    }
+    ({ errors } = await cmd.execute({
+      config,
+      engine: {} as any,
+      engineClient: engine as DEngineClientV2,
+      wsRoot: dendronRoot,
+      writeStubs,
+      incremental,
+    }));
     if (!_.isEmpty(errors)) {
       return VSCodeUtils.showWebView({
         title: "Errors while publishing",

@@ -86,13 +86,7 @@ export class CopyNoteRefCommand extends BasicCommand<
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const fname = DNodeUtils.uri2Fname(editor.document.uri);
     let note: NotePropsV2 | undefined;
-    if (DendronWorkspace.lsp()) {
-      note = _.find(DendronWorkspace.instance().getEngine().notes, { fname });
-    } else {
-      note = (_.find(DendronWorkspace.instance().engine.notes, {
-        fname,
-      }) as unknown) as NotePropsV2;
-    }
+    note = _.find(DendronWorkspace.instance().getEngine().notes, { fname });
     if (!note) {
       throw Error(`${fname} not found in engine`);
     }

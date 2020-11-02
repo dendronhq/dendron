@@ -1,13 +1,7 @@
-import { LookupController } from "../components/lookup/LookupController";
 import { LookupControllerV2 } from "../components/lookup/LookupControllerV2";
-import {
-  DendronQuickPicker,
-  DendronQuickPickerV2,
-  EngineFlavor,
-} from "../components/lookup/LookupProvider";
+import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 export type LookupFilterType = "directChildOnly";
@@ -31,13 +25,13 @@ type CommandOpts = {
    * If set, open note in a new split
    */
   splitType?: LookupSplitType;
-  flavor: EngineFlavor;
+  flavor: any;
   noConfirm?: boolean;
   value?: string;
   noteExistBehavior?: LookupNoteExistBehavior;
 };
 
-type CommandOutput = DendronQuickPicker | DendronQuickPickerV2;
+type CommandOutput = DendronQuickPickerV2;
 
 export { CommandOpts as LookupCommandOpts };
 
@@ -47,23 +41,13 @@ export class LookupCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
   async execute(opts: CommandOpts) {
     const ctx = "LookupCommand:execute";
-    if (DendronWorkspace.lsp()) {
-      Logger.info({ ctx, opts, msg: "enter" });
-      const controller = new LookupControllerV2({ flavor: opts.flavor }, opts);
-      const resp = await VSCodeUtils.extractRangeFromActiveEditor();
-      return controller.show({
-        ...resp,
-        noConfirm: opts.noConfirm,
-        value: opts.value,
-      });
-    } else {
-      const controller = new LookupController(
-        DendronWorkspace.instance(),
-        { flavor: "note" },
-        opts
-      );
-      const resp = await VSCodeUtils.extractRangeFromActiveEditor();
-      return controller.show({ ...resp });
-    }
+    Logger.info({ ctx, opts, msg: "enter" });
+    const controller = new LookupControllerV2({ flavor: opts.flavor }, opts);
+    const resp = await VSCodeUtils.extractRangeFromActiveEditor();
+    return controller.show({
+      ...resp,
+      noConfirm: opts.noConfirm,
+      value: opts.value,
+    });
   }
 }

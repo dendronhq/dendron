@@ -2,7 +2,6 @@ import {
   PublishNotesCommand,
   PublishNotesCommandOpts,
 } from "@dendronhq/dendron-cli";
-import _ from "lodash";
 import { window } from "vscode";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -16,10 +15,8 @@ export class PublishCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return {};
   }
   async execute(opts?: CommandOpts) {
-    if (DendronWorkspace.lsp()) {
-      const engineClient = DendronWorkspace.instance().getEngine();
-      opts = { ...opts, engineClient };
-    }
+    const engineClient = DendronWorkspace.instance().getEngine();
+    opts = { ...opts, engineClient };
     const cmd = new PublishNotesCommand();
     const wsRoot = DendronWorkspace.rootDir() as string;
     const ws = DendronWorkspace.instance();

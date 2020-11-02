@@ -45,12 +45,6 @@ export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
       );
       return;
     }
-    if (!DendronWorkspace.lsp()) {
-      window.showErrorMessage(
-        "server mode must be turned on to execute this command"
-      );
-      return;
-    }
     noteByName = DNodeUtilsV2.fname(noteByName);
 
     if (!maybeConfig && PodUtils.hasRequiredOpts(podChoice.podClass)) {

@@ -1,12 +1,10 @@
 import {
   CONSTANTS,
   DendronConfig,
-  DEngine,
   DEngineClientV2,
   getStage,
-  Note,
 } from "@dendronhq/common-all";
-import { mdFile2NodeProps, readMD } from "@dendronhq/common-server";
+import { readMD } from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -35,10 +33,8 @@ import { LookupCommand } from "./commands/LookupCommand";
 import { OpenLogsCommand } from "./commands/OpenLogs";
 import { PublishCommand } from "./commands/Publish";
 import { PublishPodCommand } from "./commands/PublishPod";
-import { RefactorHierarchyCommand } from "./commands/RefactorHierarchy";
 import { RefactorHierarchyCommandV2 } from "./commands/RefactorHierarchyV2";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
-import { RenameNoteV2Command } from "./commands/RenameNoteV2";
 import { RenameNoteV2aCommand } from "./commands/RenameNoteV2a";
 import { ResetConfigCommand } from "./commands/ResetConfig";
 import { RestoreVaultCommand } from "./commands/RestoreVault";
@@ -48,20 +44,16 @@ import { ShowPreviewCommand } from "./commands/ShowPreview";
 import { SnapshotVaultCommand } from "./commands/SnapshotVault";
 import { UpdateSchemaCommand } from "./commands/UpdateSchema";
 import { UpgradeSettingsCommand } from "./commands/UpgradeSettings";
-import { LookupController } from "./components/lookup/LookupController";
 import {
   DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
 } from "./constants";
-import { cacheWorkspace } from "./external/memo/utils/utils";
 import { VaultWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
-import { NodeService } from "./services/nodeService/NodeService";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
-import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
@@ -77,7 +69,7 @@ export class DendronWorkspace {
   static DENDRON_WORKSPACE_FILE: string = "dendron.code-workspace";
   static _SERVER_CONFIGURATION: Partial<ServerConfiguration>;
 
-  public dendronTreeView: DendronTreeView | DendronTreeViewV2 | undefined;
+  public dendronTreeView: DendronTreeViewV2 | undefined;
   public vaultWatcher?: VaultWatcher;
 
   static instance(): DendronWorkspace {
@@ -121,10 +113,7 @@ export class DendronWorkspace {
   }
 
   static lsp(): boolean {
-    const resp = DendronWorkspace.configuration().get<boolean>(
-      "dendron.noServerMode"
-    );
-    return _.isUndefined(resp) ? true : !resp;
+    return true;
   }
 
   /**
@@ -195,7 +184,6 @@ export class DendronWorkspace {
   public _engine?: DEngine;
   public _enginev2?: DEngineClientV2;
   private disposableStore: DisposableStore;
-  private history: HistoryService;
 
   static getOrCreate(
     context: vscode.ExtensionContext,
@@ -216,7 +204,6 @@ export class DendronWorkspace {
     _DendronWorkspace = this;
     this.L = Logger;
     this.disposableStore = new DisposableStore();
-    this.history = HistoryService.instance();
     if (!opts.skipSetup) {
       this._setupCommands();
     }
@@ -230,13 +217,6 @@ export class DendronWorkspace {
       throw `rootDir not set`;
     }
     return DConfig.getOrCreate(rootDir);
-  }
-
-  get engine(): DEngine {
-    if (!this._engine) {
-      throw Error("engine not initialized");
-    }
-    return this._engine;
   }
 
   get podsDir(): string {
@@ -386,11 +366,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.LOOKUP_SCHEMA.key,
         async () => {
-          if (DendronWorkspace.lsp()) {
-            return new LookupCommand().run({ flavor: "schema" });
-          }
-          const controller = new LookupController(this, { flavor: "schema" });
-          return controller.show();
+          return new LookupCommand().run({ flavor: "schema" });
         }
       )
     );
@@ -399,26 +375,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.DELETE_NODE.key,
         async () => {
-          if (DendronWorkspace.lsp()) {
-            return new DeleteNodeCommand().run();
-          }
-          const ctx = DENDRON_COMMANDS.DELETE_NODE;
-          this.L.info({ ctx });
-          const ns = new NodeService();
-          const fsPath = VSCodeUtils.getFsPathFromTextEditor(
-            VSCodeUtils.getActiveTextEditor() as vscode.TextEditor
-          );
-
-          this.history.add({
-            source: "engine",
-            action: "delete",
-            uri: vscode.Uri.file(fsPath),
-          });
-          const mode = fsPath.endsWith(".md") ? "note" : "schema";
-          await ns.deleteByPath(fsPath, mode);
-          vscode.window.showInformationMessage(
-            `${path.basename(fsPath)} deleted`
-          );
+          return new DeleteNodeCommand().run();
         }
       )
     );
@@ -525,11 +482,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RENAME_NOTE.key,
         async () => {
-          if (DendronWorkspace.lsp()) {
-            await new RenameNoteV2aCommand().run();
-          } else {
-            await new RenameNoteV2Command().run();
-          }
+          await new RenameNoteV2aCommand().run();
         }
       )
     );
@@ -556,11 +509,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.REFACTOR_HIERARCHY.key,
         async () => {
-          if (DendronWorkspace.lsp()) {
-            await new RefactorHierarchyCommandV2().run();
-          } else {
-            await new RefactorHierarchyCommand().run();
-          }
+          await new RefactorHierarchyCommandV2().run();
         }
       )
     );
@@ -682,20 +631,17 @@ export class DendronWorkspace {
     const ctx = "activateWorkspace";
     const stage = getStage();
     this.L.info({ ctx, stage, msg: "enter" });
-    let workspaceFolders: readonly vscode.WorkspaceFolder[] = [];
     const rootDir = DendronWorkspace.rootDir();
     if (!rootDir) {
       throw `rootDir not set`;
     }
 
-    if (DendronWorkspace.lsp()) {
-      const windowWatcher = new WindowWatcher();
-      windowWatcher.activate(this.context);
-      windowWatcher.triggerUpdateDecorations();
-      this.windowWatcher = windowWatcher;
-      const workspaceWatcher = new WorkspaceWatcher();
-      workspaceWatcher.activate(this.context);
-    }
+    const windowWatcher = new WindowWatcher();
+    windowWatcher.activate(this.context);
+    windowWatcher.triggerUpdateDecorations();
+    this.windowWatcher = windowWatcher;
+    const workspaceWatcher = new WorkspaceWatcher();
+    workspaceWatcher.activate(this.context);
 
     const wsFolders = DendronWorkspace.workspaceFolders();
     if (_.isUndefined(wsFolders) || _.isEmpty(wsFolders)) {
@@ -706,25 +652,19 @@ export class DendronWorkspace {
       });
       throw Error("no folders set for workspace");
     }
-    workspaceFolders = wsFolders;
-    if (DendronWorkspace.lsp()) {
-      let vaults = wsFolders as vscode.WorkspaceFolder[];
-      const vaultWatcher = new VaultWatcher({
-        vaults,
-      });
-      const schemaWatcher = new SchemaWatcher({ vaults });
-      schemaWatcher.activate(this.context);
-      this.schemaWatcher = schemaWatcher;
+    let vaults = wsFolders as vscode.WorkspaceFolder[];
+    const vaultWatcher = new VaultWatcher({
+      vaults,
+    });
+    const schemaWatcher = new SchemaWatcher({ vaults });
+    schemaWatcher.activate(this.context);
+    this.schemaWatcher = schemaWatcher;
 
-      let disposables = vaultWatcher.activate();
-      disposables.map((d) => {
-        this.disposableStore.add(d);
-      });
-      this.vaultWatcher = vaultWatcher;
-      return;
-    }
-    this.createWorkspaceWatcher(workspaceFolders);
-    this.createServerWatcher();
+    let disposables = vaultWatcher.activate();
+    disposables.map((d) => {
+      this.disposableStore.add(d);
+    });
+    this.vaultWatcher = vaultWatcher;
   }
 
   async deactivate() {
@@ -783,115 +723,6 @@ export class DendronWorkspace {
     );
   }
 
-  async createWorkspaceWatcher(
-    workspaceFolders: readonly vscode.WorkspaceFolder[]
-  ) {
-    const ctx = "createWorkspaceWatcher";
-    this.L.info({ ctx });
-    const rootFolder = workspaceFolders[0];
-    let pattern = new vscode.RelativePattern(rootFolder, "*.md");
-    this.fsWatcher = vscode.workspace.createFileSystemWatcher(
-      pattern,
-      false,
-      true,
-      false
-    );
-    const refreshTree = _.debounce(() => {
-      const ctx = "refreshTree";
-      Logger.info({ ctx });
-      this.dendronTreeView?.treeProvider.refresh();
-    }, 100);
-
-    this.disposableStore.add(
-      this.fsWatcher.onDidCreate(async (uri: vscode.Uri) => {
-        try {
-          if (DendronWorkspace.lsp()) {
-            return;
-          }
-          const ctx = "fsWatcher.onDidCreate";
-          this.L.info({ ctx, uri });
-          const fname = path.basename(uri.fsPath, ".md");
-          const noteRaw = mdFile2NodeProps(uri.fsPath);
-          const note = new Note({ ...noteRaw, parent: null, children: [] });
-
-          // check if ignore
-          const recentEvents = HistoryService.instance().lookBack();
-          this.L.debug({ ctx, recentEvents, fname });
-          if (
-            _.find(recentEvents, (event) => {
-              return _.every([
-                event?.uri?.fsPath === uri.fsPath,
-                event.source === "engine",
-                event.action === "create",
-              ]);
-            })
-          ) {
-            this.L.debug({ ctx, uri, msg: "create by engine, ignoring" });
-            return;
-          }
-
-          try {
-            this.L.debug({ ctx, uri, msg: "adding to engine" });
-            this.engine.updateNodes([note], {
-              newNode: true,
-              parentsAsStubs: true,
-            });
-          } catch (err) {
-            this.L.error({ ctx, err });
-          }
-        } finally {
-          refreshTree();
-        }
-      }, this)
-    );
-
-    this.disposableStore.add(
-      this.fsWatcher.onDidDelete(async (uri: vscode.Uri) => {
-        try {
-          const ctx = "fsWatcher.onDidDelete";
-          this.L.info({ ctx, uri });
-          const fname = path.basename(uri.fsPath, ".md");
-
-          // check if we should ignore
-          const recentEvents = HistoryService.instance().lookBack(5);
-          this.L.debug({ ctx, recentEvents, fname });
-          if (
-            _.find(recentEvents, (event) => {
-              return _.every([
-                event?.uri?.fsPath === uri.fsPath,
-                event.source === "engine",
-                _.includes(["delete", "rename"], event.action),
-              ]);
-            })
-          ) {
-            this.L.debug({
-              ctx,
-              uri,
-              msg: "recent action by engine, ignoring",
-            });
-            return;
-          }
-
-          try {
-            this.L.debug({ ctx, uri, msg: "preparing to delete" });
-            const nodeToDelete = _.find(this.engine.notes, { fname });
-            if (_.isUndefined(nodeToDelete)) {
-              throw `${fname} not found`;
-            }
-            await this.engine.delete(nodeToDelete.id, "note", {
-              metaOnly: true,
-            });
-          } catch (err) {
-            // NOTE: ignore, many legitimate reasons why this might happen
-            // this.L.error({ ctx, err: JSON.stringify(err) });
-          }
-        } finally {
-          refreshTree();
-        }
-      }, this)
-    );
-  }
-
   /**
    * Performs a series of step to initialize the workspace
    *  Calls activate workspace
@@ -908,9 +739,6 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.RELOAD_INDEX.key,
         true
       );
-      if (!DendronWorkspace.lsp()) {
-        await cacheWorkspace();
-      }
       return out;
     } catch (err) {
       vscode.window.showErrorMessage(
@@ -930,8 +758,6 @@ export class DendronWorkspace {
       const { content } = readMD(welcomeUri.fsPath);
       if (getStage() !== "test") {
         VSCodeUtils.showWebView({ title: "Welcome", content });
-        //   await vscode.window.showTextDocument(welcomeUri);
-        //   await MarkdownUtils.openPreview(opts);
       }
     } catch (err) {
       vscode.window.showErrorMessage(JSON.stringify(err));

@@ -1,7 +1,6 @@
 import { DNodeUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { RefactorHierarchyCommand } from "./RefactorHierarchy";
 import { RefactorHierarchyCommandV2 } from "./RefactorHierarchyV2";
@@ -24,11 +23,7 @@ export class ArchiveHierarchyCommand extends BasicCommand<
 
   constructor(name?: string) {
     super(name);
-    if (DendronWorkspace.lsp()) {
-      this.refactorCmd = new RefactorHierarchyCommandV2();
-    } else {
-      this.refactorCmd = new RefactorHierarchyCommand();
-    }
+    this.refactorCmd = new RefactorHierarchyCommandV2();
   }
 
   async gatherInputs(): Promise<CommandInput | undefined> {

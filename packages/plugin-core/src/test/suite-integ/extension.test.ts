@@ -53,7 +53,7 @@ import {
   LookupProvider,
 } from "../../components/lookup/LookupProvider";
 import { createNoActiveItem } from "../../components/lookup/utils";
-import { CONFIG, GLOBAL_STATE, WORKSPACE_STATE } from "../../constants";
+import { CONFIG, WORKSPACE_STATE } from "../../constants";
 import {
   cacheRefs,
   findDanglingRefsByFsPath,
@@ -65,7 +65,7 @@ import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { _activate } from "../../_extension";
-import { onWSActive, onWSInit, setupWorkspace } from "../testUtils";
+import { onWSActive, onWSInit } from "../testUtils";
 
 type ExportConfig = any;
 const expectedSettings = (opts?: { folders?: any; settings?: any }): any => {

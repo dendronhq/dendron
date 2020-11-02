@@ -5,6 +5,7 @@ export type HistoryEvent = {
   action: HistoryEventAction;
   source: HistoryEventSource;
   uri?: Uri;
+  data?: any;
 };
 
 export type HistoryEventSource =

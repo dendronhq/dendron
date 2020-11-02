@@ -1,23 +1,36 @@
+import { DVault } from "@dendronhq/common-all/src";
 import { EngineTestUtilsV2, SetupWSOpts } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import path from "path";
 import { ExtensionContext, Uri } from "vscode";
+import { SetupWorkspaceCommand } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
 import { DendronWorkspace } from "../workspace";
+import { _activate } from "../_extension";
 import { createMockConfig } from "./testUtils";
 
 type SetupCodeConfigurationV2 = {
-  configOverride?: Partial<typeof CONFIG>;
+  configOverride?: { [key: string]: any };
 };
+
+type SetupHookFunction = (opts: {
+  wsRoot: string;
+  vaults: DVault[];
+}) => Promise<void>;
 
 type SetupCodeWorkspaceV2 = SetupWSOpts &
   SetupCodeConfigurationV2 & {
     ctx: ExtensionContext;
-    activateWorkspace: boolean;
+    preActivateHook?: any;
+    postActivateHook?: any;
+    preSetupHook?: SetupHookFunction;
+    postSetupHook?: SetupHookFunction;
   };
 
 export function setupCodeConfiguration(opts: SetupCodeConfigurationV2) {
-  const copts = _.defaults(opts, { configOverride: {} });
+  const copts = _.defaults(opts, {
+    configOverride: {},
+  });
   DendronWorkspace.configuration = () => {
     const config: any = {
       dendron: {
@@ -37,6 +50,15 @@ export function setupCodeConfiguration(opts: SetupCodeConfigurationV2) {
 }
 
 export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
+  const copts = _.defaults(opts, {
+    setupWsOverride: {
+      skipConfirmation: true,
+      emptyWs: true,
+    },
+    preSetupHook: async () => {},
+    postSetupHook: async () => {},
+  });
+  const { preSetupHook, postSetupHook } = copts;
   const { wsRoot, vaults } = await EngineTestUtilsV2.setupWS(opts);
   setupCodeConfiguration(opts);
   // setup workspace file
@@ -49,5 +71,22 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
   };
   const workspaceFile = DendronWorkspace.workspaceFile();
   const workspaceFolders = DendronWorkspace.workspaceFolders();
+  await preSetupHook({
+    wsRoot,
+    vaults: vaults.map((ent) => {
+      return { fsPath: ent };
+    }),
+  });
+  await new SetupWorkspaceCommand().execute({
+    rootDirRaw: wsRoot,
+    skipOpenWs: true,
+    ...copts.setupWsOverride,
+  });
+  await postSetupHook({
+    wsRoot,
+    vaults: vaults.map((ent) => {
+      return { fsPath: ent };
+    }),
+  });
   return { wsRoot, vaults, workspaceFile, workspaceFolders };
 }

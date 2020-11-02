@@ -187,7 +187,7 @@ export function onExtension({
     "extension",
     async (_event: HistoryEvent) => {
       if (_event.action === action) {
-        await cb();
+        await cb(_event);
       }
     }
   );

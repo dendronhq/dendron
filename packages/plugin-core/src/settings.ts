@@ -16,7 +16,7 @@ import { CONFIG } from "./constants";
 import { Logger } from "./logger";
 import { DendronWorkspace } from "./workspace";
 
-type CodeConfig = {
+export type CodeConfigChanges = {
   settings?: ConfigChanges;
   extensions?: CodeExtensionsConfig;
   snippetChanges?: any;
@@ -114,7 +114,7 @@ export class WorkspaceConfig {
     );
   }
 
-  static async update(_wsRoot: string): Promise<Required<CodeConfig>> {
+  static async update(_wsRoot: string): Promise<Required<CodeConfigChanges>> {
     const ctx = "WorkspaceConfig:update";
     const src = DendronWorkspace.configuration();
     const changes = await Settings.upgrade(src, _SETTINGS);

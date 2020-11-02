@@ -1,113 +1,112 @@
-import {
-  DirResult,
-  FileTestUtils,
-  readJSONWithComments,
-} from "@dendronhq/common-server";
 import * as assert from "assert";
-import fs from "fs-extra";
+import _ from "lodash";
 import { afterEach, beforeEach, describe, it } from "mocha";
-import path from "path";
 import { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
-import { SetupWorkspaceCommand } from "../../commands/SetupWorkspace";
-import { WORKSPACE_STATE } from "../../constants";
-import { HistoryEvent, HistoryService } from "../../services/HistoryService";
-import { Snippets } from "../../settings";
+import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { _activate } from "../../_extension";
-import { onWSInit, setupWorkspace } from "../testUtils";
+import { onExtension } from "../testUtils";
+import { setupCodeWorkspaceV2 } from "../testUtilsv2";
 
 const TIMEOUT = 60 * 1000 * 5;
+const exepctedUpgradeSettings = () => {
+  return {
+    extensions: {},
+    settings: {
+      add: {
+        "dendron.rootDir": ".",
+        "editor.minimap.enabled": false,
+        "files.autoSave": "onFocusChange",
+        "pasteImage.path": "${currentFileDir}/assets/images",
+        "pasteImage.prefix": "/",
+        "markdown-preview-enhanced.enableWikiLinkSyntax": true,
+        "markdown-preview-enhanced.wikiLinkFileExtension": ".md",
+        "vscodeMarkdownNotes.noteCompletionConvention": "noExtension",
+        "vscodeMarkdownNotes.slugifyCharacter": "NONE",
+        "editor.snippetSuggestions": "inline",
+        "editor.suggest.snippetsPreventQuickSuggestions": false,
+        "editor.suggest.showSnippets": true,
+        "editor.tabCompletion": "on",
+      },
+      errors: {},
+    },
+    snippetChanges: {},
+  };
+};
 
-suite("upgrade", function () {
+/**
+ * NOTE: upgrade hard to test because we can't write to file
+ * without ACTUALLY initializing in a workspace
+ *
+ * TODO: test that setting a custom prop won't be overridden
+ */
+suite.only("upgrade", function () {
   this.timeout(TIMEOUT);
   let ctx: ExtensionContext;
-  let root: DirResult;
 
   describe("main", function () {
     beforeEach(async function () {
       ctx = VSCodeUtils.getOrCreateMockContext();
       DendronWorkspace.getOrCreate(ctx);
       await new ResetConfigCommand().execute({ scope: "all" });
-      root = FileTestUtils.tmpDir();
     });
 
     afterEach(function () {
       HistoryService.instance().clearSubscriptions();
     });
 
-    it("setting with extra prop", function (done) {
-      const pathToVault = path.join(root.name, "vault");
-      const snippetFile = path.join(pathToVault, ".vscode", Snippets.filename);
-
-      onWSInit(async (_event: HistoryEvent) => {
-        assert.strictEqual(DendronWorkspace.isActive(), true);
-        assert.strictEqual(
-          ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
-          "0.0.1"
-        );
-        const payload = await readJSONWithComments(snippetFile);
-        assert.deepStrictEqual(payload, {
-          bond: {
-            prefix: "bond",
-            desc: "diff_prefix",
-          },
-          time: {
-            prefix: "snippet_with_same_id",
-          },
-          snippet_with_same_prefix: {
-            prefix: "date",
-          },
-          todo: {
-            prefix: "to",
-            scope: "markdown,yaml",
-            body: "- [ ] ",
-            description: "render todo box",
-          },
-          tag: {
-            prefix: "#",
-            scope: "markdown,yaml",
-            body: "[[#${1:my-tag}|tag.${1}]]",
-            description: "tag",
-          },
-        });
-        done();
+    it("basic", function (done) {
+      onExtension({
+        action: "upgraded",
+        cb: async (ev: { data: any }) => {
+          assert.deepStrictEqual(
+            ev.data.changes.configUpdate,
+            exepctedUpgradeSettings()
+          );
+          done();
+        },
       });
 
-      setupWorkspace(root.name);
+      const run = async () => {
+        // not upgrading from scratch
+        DendronWorkspace.version = () => "0.0.1";
+        ({} = await setupCodeWorkspaceV2({
+          ctx,
+        }));
+        await _activate(ctx);
+      };
+      run();
+    });
 
-      DendronWorkspace.version = () => "0.0.1";
-      assert.strictEqual(
-        ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
-        undefined
-      );
-      ctx.globalState.update(WORKSPACE_STATE.WS_VERSION, "0.0.1").then(() => {
-        // setup workspace
-        new SetupWorkspaceCommand()
-          .execute({
-            rootDirRaw: root.name,
-            skipOpenWs: true,
-            skipConfirmation: true,
-            emptyWs: true,
-          })
-          .then(async () => {
-            fs.ensureFileSync(snippetFile);
-            fs.writeJSONSync(snippetFile, {
-              bond: {
-                prefix: "bond",
-                desc: "diff_prefix",
-              },
-              time: {
-                prefix: "snippet_with_same_id",
-              },
-              snippet_with_same_prefix: {
-                prefix: "date",
-              },
-            });
-            _activate(ctx);
-          });
+    it("don't override current settings", function (done) {
+      onExtension({
+        action: "upgraded",
+        cb: async (ev: { data: any }) => {
+          const expected = _.omit(
+            exepctedUpgradeSettings(),
+            "pasteImage.prefix"
+          );
+          assert.deepStrictEqual(ev.data.changes.configUpdate, expected);
+          const config = DendronWorkspace.configuration();
+          assert.strictEqual(config.get<string>("pasteImage.prefix"), "/foo");
+          done();
+        },
       });
+
+      const run = async () => {
+        // not upgrading from scratch
+        DendronWorkspace.version = () => "0.0.1";
+        ({} = await setupCodeWorkspaceV2({
+          ctx,
+          configOverride: {
+            "pasteImage.prefix": "/foo",
+          },
+        }));
+        await _activate(ctx);
+      };
+      run();
     });
   });
 });

@@ -99,9 +99,10 @@ async function postReloadWorkspace() {
   } else {
     const newVersion = DendronWorkspace.version();
     if (semver.lt(previousWsVersion, newVersion)) {
+      let changes: any;
       Logger.info({ ctx, msg: "preUpgrade: new wsVersion" });
       try {
-        const changes = await vscode.commands.executeCommand(
+        changes = await vscode.commands.executeCommand(
           DENDRON_COMMANDS.UPGRADE_SETTINGS.key
         );
         Logger.info({
@@ -122,6 +123,7 @@ async function postReloadWorkspace() {
       HistoryService.instance().add({
         source: "extension",
         action: "upgraded",
+        data: { changes },
       });
     } else {
       Logger.info({ ctx, msg: "same wsVersion" });

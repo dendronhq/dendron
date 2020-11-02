@@ -2,7 +2,11 @@ import { createLogger } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import { Extension, extensions, window } from "vscode";
-import { SettingsUpgradeOpts, WorkspaceConfig } from "../settings";
+import {
+  CodeConfigChanges,
+  SettingsUpgradeOpts,
+  WorkspaceConfig,
+} from "../settings";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -11,10 +15,13 @@ const L = createLogger("UpgradeSettingsCommand");
 type UpgradeSettingsCommandOpts = {
   settingOpts: SettingsUpgradeOpts;
 };
+export type UpgradeSettingsCommandResp = {
+  configUpdate: CodeConfigChanges;
+};
 
 export class UpgradeSettingsCommand extends BasicCommand<
   UpgradeSettingsCommandOpts,
-  any
+  UpgradeSettingsCommandResp
 > {
   async execute(opts: UpgradeSettingsCommandOpts) {
     const ctx = "Upgrade:execute";
@@ -48,5 +55,6 @@ export class UpgradeSettingsCommand extends BasicCommand<
         ]);
       window.showWarningMessage(msg.join(" "));
     }
+    return { configUpdate: newConfig };
   }
 }

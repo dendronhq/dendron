@@ -2,6 +2,7 @@ import {
   CONSTANTS,
   DendronConfig,
   DEngineClientV2,
+  DVault,
   getStage,
 } from "@dendronhq/common-all";
 import { readMD } from "@dendronhq/common-server";
@@ -241,6 +242,14 @@ export class DendronWorkspace {
       path.join(this.context.extensionPath, "assets")
     );
     return assetsDir;
+  }
+
+  get vaults(): DVault[] {
+    return (
+      DendronWorkspace.workspaceFolders()?.map((ent) => ({
+        fsPath: ent.uri.fsPath,
+      })) || []
+    );
   }
 
   getEngine(): DEngineClientV2 {

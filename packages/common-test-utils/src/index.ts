@@ -597,4 +597,8 @@ export class NodeTestUtilsV2 {
     );
     return schemaModuleProps[0][0];
   };
+
+  static normalizeNote({ note }: { note: NotePropsV2 }): NotePropsV2 {
+    return { ..._.omit(note, "body"), body: _.trim(note.body) };
+  }
 }

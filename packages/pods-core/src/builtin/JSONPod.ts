@@ -1,12 +1,9 @@
 import { Note, NoteRawProps, NoteUtilsV2 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
+import path from "path";
 import { URI } from "vscode-uri";
 import {
-  ExportConfig,
-  ExportPod,
-  ExportPodBaseV2,
-  ExportPodOpts,
   ImportConfig,
   ImportPodBaseV2,
   ImportPodOpts,
@@ -15,6 +12,13 @@ import {
   PublishPodBaseV3,
   PublishPodOpts,
 } from "../base";
+import {
+  ExportPod,
+  ExportPodCleanConfig,
+  ExportPodCleanOpts,
+  ExportPodPlantOpts,
+  ExportPodRawConfig,
+} from "../basev2";
 
 const ID = "dendron.json";
 
@@ -124,26 +128,27 @@ export class JSONPublishPod extends PublishPodBaseV3<PublishConfig> {
   }
 }
 
-export class JSONExportPod extends ExportPodBaseV2
-  implements ExportPod<ExportConfig> {
+export class JSONExportPod extends ExportPod<
+  ExportPodRawConfig,
+  ExportPodCleanConfig,
+  void
+> {
   static id: string = ID;
-  static description: string = "export json";
+  static description: string = "export notes to snapshot";
 
-  static config = (): PodConfigEntry[] => {
-    return [
-      {
-        key: "dest",
-        description: "where will output be stored",
-        type: "string",
-      },
-    ];
-  };
+  async clean(opts: ExportPodCleanOpts<ExportPodRawConfig>) {
+    return opts.config;
+  }
 
-  async plant(opts: ExportPodOpts<ExportConfig>): Promise<void> {
-    await this.initEngine();
-    const cleanConfig = this.cleanConfig(opts.config);
-    const payload = this.prepareForExport(opts);
-    const destPath = cleanConfig.dest.fsPath;
-    fs.writeJSONSync(destPath, payload, { encoding: "utf8" });
+  async plant(opts: ExportPodPlantOpts<ExportPodCleanConfig>) {
+    const { config, engine } = opts;
+    // verify root
+    const podDstPath = config.dest.fsPath;
+    fs.ensureDirSync(path.dirname(podDstPath));
+    const notes = this.preareNotesForExport({
+      config,
+      notes: _.values(engine.notes),
+    });
+    fs.writeJSONSync(podDstPath, notes, { encoding: "utf8" });
   }
 }

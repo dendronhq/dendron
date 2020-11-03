@@ -125,7 +125,6 @@ export class TestPresetEntry<TBeforeOpts, TAfterOpts, TResultsOpts> {
     before?: (_opts: TBeforeOpts) => Promise<any>;
     after?: (_opts: TAfterOpts) => Promise<any>;
     results: (_opts: TResultsOpts) => Promise<TestResult[]>;
-    //init?: ({engine}: {engine: DEngineV2}) => Promise<void>;
   }) {
     this.label = label;
     this.results = results;

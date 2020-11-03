@@ -1,19 +1,17 @@
-import { DendronError, DUtils, DVault, Time } from "@dendronhq/common-all";
-import { resolvePath } from "@dendronhq/common-server";
+import { DUtils, DVault, Time } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { URI } from "vscode-uri";
 import {
   ExportPod,
   ExportPodCleanConfig,
+  ExportPodCleanOpts,
   ExportPodPlantOpts,
-  ExportPodRawConfig,
   ImportPod,
   ImportPodCleanConfig,
+  ImportPodCleanOpts,
   ImportPodPlantOpts,
   ImportPodRawConfig,
-  PodCleanOpts,
 } from "../basev2";
 
 const ID = "dendron.snapshot";
@@ -22,7 +20,7 @@ function genVaultId(vaultPath: string) {
   return path.basename(vaultPath);
 }
 
-export type SnapshotExportPodRawConfig = ExportPodRawConfig & {
+export type SnapshotExportPodRawConfig = {
   ignore?: string;
 };
 export type SnapshotExportPodCleanConfig = ExportPodCleanConfig & {
@@ -83,29 +81,12 @@ export class SnapshotExportPod extends ExportPod<
     });
   }
 
-  async clean({
-    config,
-    wsRoot,
-  }: {
-    config: Partial<SnapshotExportPodRawConfig>;
-    wsRoot: string;
-  }): Promise<SnapshotExportPodCleanConfig> {
-    // set dest
-    let dest: URI;
-    let destPath: string | undefined = config.dest;
-    if (_.isUndefined(destPath)) {
-      const maybeDest = _.find(this.config, { key: "dest" });
-      if (_.isUndefined(maybeDest) || _.isUndefined(maybeDest.default)) {
-        throw new DendronError({ msg: "no dest specified" });
-      }
-      destPath = maybeDest.default;
-    }
-    dest = URI.file(resolvePath(destPath, wsRoot));
+  async clean(opts: ExportPodCleanOpts<SnapshotExportPodRawConfig>) {
     // set ignore
-    const { ignore } = _.defaults(config, { ignore: ".git" });
+    const { ignore } = _.defaults(opts.config, { ignore: ".git" });
     let cIgnore = _.reject(ignore.split(","), (ent) => _.isEmpty(ent));
     return {
-      dest,
+      ...opts.config,
       ignore: cIgnore,
     };
   }
@@ -198,6 +179,7 @@ export class SnapshotImportPod extends ImportPod<
   get config() {
     return [];
   }
+
   async restoreVault({
     wsRoot,
     vaults,
@@ -220,17 +202,10 @@ export class SnapshotImportPod extends ImportPod<
   }
 
   async clean(
-    opts: PodCleanOpts<SnapshotImportPodRawConfig>
+    opts: ImportPodCleanOpts<SnapshotImportPodRawConfig>
   ): Promise<SnapshotImportPodCleanConfig> {
-    const { config, wsRoot } = opts;
-    const { src } = config;
-    const srcURI = this.getPodPath({ fpath: src, wsRoot, pathKey: "src" });
-    if (!fs.existsSync(srcURI.fsPath)) {
-      throw new DendronError({
-        friendly: `no snapshot found at ${srcURI.fsPath}`,
-      });
-    }
-    return { src: srcURI };
+    const { config } = opts;
+    return config;
   }
 
   async plant(opts: SnapshotImportPodPlantOpts): Promise<void> {

@@ -285,6 +285,10 @@ export interface PublishPod<TConfig extends PublishConfig = any> {
 export type Pod = {
   plant: (opts: any) => Promise<any>;
 };
+export type Podv4 = {
+  config: PodConfigEntry[];
+  plant: (opts: any) => Promise<any>;
+};
 
 export interface ImportPod<TConfig extends ImportConfig = any> {
   plant: (opts: ImportPodOpts<TConfig>) => Promise<void>;

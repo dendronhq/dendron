@@ -1,11 +1,11 @@
-import { DendronError, DEngine } from "@dendronhq/common-all";
-import { DendronEngine } from "@dendronhq/engine-server";
+import { DendronError } from "@dendronhq/common-all";
+import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
 import {
   getPodConfig,
   getPodConfigPath,
-  PodClassEntryV2,
   PodClassEntryV3,
-  PodItem,
+  PodClassEntryV4,
+  PodItemV4,
   PodKind,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
@@ -14,8 +14,8 @@ import yargs from "yargs";
 import { BaseCommand } from "./base";
 
 type CommandOpts = {
-  engine: DEngine;
-  podClass: PodClassEntryV2;
+  engineClient: DendronEngineV2;
+  podClass: PodClassEntryV4;
   config: any;
   wsRoot: string;
 };
@@ -26,7 +26,7 @@ export function fetchPodClass(
   podId: string,
   opts: {
     podSource: CommandCLIOpts["podSource"];
-    pods?: PodClassEntryV2[] | PodClassEntryV3[];
+    pods?: PodClassEntryV4[];
     podType: PodKind;
   }
 ) {
@@ -90,7 +90,7 @@ export abstract class PodCLICommand extends BaseCommand<
 > {
   static async buildArgsCore(
     args: yargs.Argv<CommandCLIOpts>,
-    _podItems: PodItem[]
+    _podItems: PodItemV4[]
   ) {
     args.option("podId", {
       describe: "pod to use",
@@ -111,17 +111,22 @@ export abstract class PodCLICommand extends BaseCommand<
 
   async enrichArgs(
     args: CommandCLIOpts,
-    pods: PodClassEntryV2[],
+    pods: PodClassEntryV4[],
     podType: "import" | "export"
   ): Promise<CommandOpts> {
     const { vault, podId, wsRoot, podSource } = _.defaults(args, {
       podSource: "builtin",
     });
     const podsDir = path.join(wsRoot, "pods");
-    const engine = DendronEngine.getOrCreateEngine({
-      root: vault,
+    const logger = this.L;
+    const engineClient = new DendronEngineV2({
+      vaults: [vault],
       forceNew: true,
+      store: new FileStorageV2({ vaults: [vault], logger }),
+      mode: "fuzzy",
+      logger,
     });
+
     const podClass = fetchPodClass(podId, { podSource, pods, podType });
     const maybeConfig = getPodConfig(podsDir, podClass);
     if (!maybeConfig) {
@@ -132,20 +137,17 @@ export abstract class PodCLICommand extends BaseCommand<
       });
     }
     return {
-      engine,
       podClass,
       config: maybeConfig,
       wsRoot,
+      engineClient,
     };
   }
 
   async execute(opts: CommandOpts) {
-    const { podClass, engine, config, wsRoot } = opts;
-    const root = engine.props.root;
-    const pod = new podClass({
-      roots: [root],
-      wsRoot,
-    });
-    await pod.plant({ mode: "notes", config: config });
+    const { podClass, config, wsRoot, engineClient } = opts;
+    const vaults = engineClient.vaults.map((ent) => ({ fsPath: ent }));
+    const pod = new podClass();
+    await pod.execute({ wsRoot, config, engine: engineClient, vaults });
   }
 }

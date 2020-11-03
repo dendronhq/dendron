@@ -1,34 +1,28 @@
-import { ExportPodCLICommand } from "../exportPod";
+import { writeYAML } from "@dendronhq/common-server";
 import {
-  FileTestUtils,
-  EngineTestUtils,
-  writeYAML,
-  NodeTestUtils,
-} from "@dendronhq/common-server";
-import {
-  JSONExportPod,
-  getPodConfigPath,
-  getPodPath,
-} from "@dendronhq/pods-core";
-import fs, { ensureDirSync } from "fs-extra";
+  EngineTestUtilsV2,
+  NodeTestPresetsV2,
+  PODS_CORE,
+} from "@dendronhq/common-test-utils";
+import { JSONExportPod, PodUtils } from "@dendronhq/pods-core";
+import { ensureDirSync } from "fs-extra";
 import path from "path";
+import { ExportPodCLICommand } from "../exportPod";
 
 describe("exportPod", () => {
   let vault: string;
   let podsDir: string;
   let wsRoot: string;
+  let vaults: string[];
 
-  beforeEach(function () {
-    vault = EngineTestUtils.setupStoreDir({
-      copyFixtures: false,
-      initDirCb: (root) => {
-        NodeTestUtils.createNotes(root, [
-          { fname: "foo", stub: true },
-          { fname: "bar" },
-        ]);
+  beforeEach(async () => {
+    ({ vaults, wsRoot } = await EngineTestUtilsV2.setupWS({
+      initDirCb: async (vaultDir) => {
+        await NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
+          vaultDir,
+        });
       },
-    });
-    wsRoot = FileTestUtils.tmpDir().name;
+    }));
     podsDir = path.join(wsRoot, "pods");
   });
 
@@ -45,9 +39,10 @@ describe("exportPod", () => {
   });
 
   test("config present, default", async () => {
-    const configPath = getPodConfigPath(podsDir, JSONExportPod);
+    const podClass = JSONExportPod;
+    const configPath = PodUtils.getConfigPath({ podsDir, podClass });
     const exportDest = path.join(
-      getPodPath(podsDir, JSONExportPod),
+      PodUtils.getPath({ podsDir, podClass }),
       "export.json"
     );
     ensureDirSync(path.dirname(configPath));
@@ -55,14 +50,14 @@ describe("exportPod", () => {
     await ExportPodCLICommand.run({
       podId: JSONExportPod.id,
       wsRoot,
-      vault,
+      vault: vaults[0],
     });
-    const payload = fs.readJSONSync(exportDest);
-    expect(
-      NodeTestUtils.cleanNodeMeta({ payload, fields: ["fname", "body"] })
-    ).toEqual([
-      { fname: "root", body: "\n" },
-      { fname: "bar", body: "bar body\n" },
-    ]);
+    await NodeTestPresetsV2.runJestHarness({
+      opts: {
+        destPath: exportDest,
+      },
+      results: PODS_CORE.JSON.EXPORT.BASIC.results,
+      expect,
+    });
   });
 });

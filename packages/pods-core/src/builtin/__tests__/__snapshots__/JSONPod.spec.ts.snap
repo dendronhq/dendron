@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`JSONExportPod write config 1`] = `
-"# description: where will output be stored
+"# description: where to export to
 # type: string
 dest: TODO"
 `;

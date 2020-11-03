@@ -1,22 +1,30 @@
 import {
+  DEngineClientV2,
   DNodeRawProps,
   DNodeUtils,
   Note,
   NoteRawProps,
 } from "@dendronhq/common-all";
 import {
+  createLogger,
   EngineTestUtils,
   FileTestUtils,
   node2MdFile,
 } from "@dendronhq/common-server";
+import {
+  EngineTestUtilsV2,
+  NodeTestPresetsV2,
+  PODS_CORE,
+} from "@dendronhq/common-test-utils";
+import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { ExportConfig, genPodConfigFile, getPodConfigPath } from "../..";
+import { ExportConfig, PodUtils } from "../..";
 import {
+  ImportPodConfig as JSONImportPodConfig,
   JSONExportPod,
   JSONImportPod,
-  ImportPodConfig as JSONImportPodConfig,
 } from "../JSONPod";
 
 const createNotes = (vaultPath: string, notes: Partial<NoteRawProps>[]) => {
@@ -61,17 +69,6 @@ const assertNodeBody = (opts: {
     )
   ).toEqual(expected);
 };
-
-function setup(opts: { notes: Partial<NoteRawProps>[] }) {
-  const podsDir = FileTestUtils.tmpDir().name;
-  const storeDir = EngineTestUtils.setupStoreDir({
-    copyFixtures: false,
-    initDirCb: (dirPath: string) => {
-      createNotes(dirPath, opts.notes);
-    },
-  });
-  return { podsDir, storeDir };
-}
 
 function setupImport(opts: { jsonEntries: Partial<NoteRawProps>[] }) {
   const podsDir = FileTestUtils.tmpDir().name;
@@ -219,58 +216,63 @@ describe("JSONExportPod", () => {
   let storeDir: string;
   let podsDir: string;
   let wsRoot: string;
-
-  const createNotes = (): Partial<NoteRawProps>[] => [
-    { fname: "foo", body: "foo body" },
-    { fname: "bar", body: "bar body" },
-  ];
+  let engine: DEngineClientV2;
+  let vaults: string[];
 
   beforeEach(async () => {
-    ({ storeDir, podsDir } = await setup({ notes: createNotes() }));
-    wsRoot = path.dirname(podsDir).split("/").slice(0, -1).join("/");
+    podsDir = FileTestUtils.tmpDir().name;
+    ({ vaults, wsRoot } = await EngineTestUtilsV2.setupWS({
+      initDirCb: async (vaultDir) => {
+        await NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
+          vaultDir,
+        });
+      },
+    }));
+
+    const LOGGER = createLogger();
+    engine = new DendronEngineV2({
+      vaults,
+      forceNew: true,
+      store: new FileStorageV2({
+        vaults,
+        logger: LOGGER,
+      }),
+      mode: "fuzzy",
+      logger: LOGGER,
+    });
   });
 
   test("basic", async () => {
-    const pod = new JSONExportPod({ roots: [storeDir], wsRoot });
-    const mode = "notes";
+    const pod = new JSONExportPod();
     const destDir = FileTestUtils.tmpDir().name;
     const destPath = path.join(destDir, "export.json");
     const config = { dest: destPath };
-    await pod.plant({ mode, config });
-    const payload = fs.readJSONSync(destPath) as NoteRawProps[];
-    assertNodeMeta({
-      expect,
-      payload,
-      fields: ["fname"],
-      expected: [
-        {
-          fname: "root",
-        },
-        { fname: "bar" },
-        { fname: "foo" },
-      ],
+    await pod.execute({
+      config,
+      wsRoot,
+      engine,
+      vaults: [{ fsPath: storeDir }],
     });
-    assertNodeBody({
+    await NodeTestPresetsV2.runJestHarness({
+      opts: {
+        destPath,
+      },
+      results: PODS_CORE.JSON.EXPORT.BASIC.results,
       expect,
-      payload,
-      expected: [
-        {
-          fname: "root",
-          body: "",
-        },
-        { fname: "bar", body: "bar body" },
-        { fname: "foo", body: "foo body" },
-      ],
     });
   });
 
   test("basic w/rel path", async () => {
-    const pod = new JSONExportPod({ roots: [storeDir], wsRoot });
-    const mode = "notes";
+    const pod = new JSONExportPod();
 
     const fname = "export.json";
     const config = { dest: `./${fname}` };
-    await pod.plant({ mode, config });
+    await pod.execute({
+      config,
+      wsRoot,
+      engine,
+      vaults: [{ fsPath: storeDir }],
+    });
     const payload = fs.readJSONSync(path.join(wsRoot, fname)) as NoteRawProps[];
     assertNodeMeta({
       expect,
@@ -280,8 +282,8 @@ describe("JSONExportPod", () => {
         {
           fname: "root",
         },
-        { fname: "bar" },
         { fname: "foo" },
+        { fname: "foo.ch1" },
       ],
     });
     assertNodeBody({
@@ -292,19 +294,23 @@ describe("JSONExportPod", () => {
           fname: "root",
           body: "",
         },
-        { fname: "bar", body: "bar body" },
         { fname: "foo", body: "foo body" },
+        { fname: "foo.ch1", body: "foo body" },
       ],
     });
   });
 
   test("basic no body", async () => {
-    const pod = new JSONExportPod({ roots: [storeDir], wsRoot });
-    const mode = "notes";
+    const pod = new JSONExportPod();
     const destDir = FileTestUtils.tmpDir().name;
     const destPath = path.join(destDir, "export.json");
     const config: ExportConfig = { dest: destPath, includeBody: false };
-    await pod.plant({ mode, config });
+    await pod.execute({
+      config,
+      wsRoot,
+      engine,
+      vaults: [{ fsPath: storeDir }],
+    });
     const payload = fs.readJSONSync(destPath) as NoteRawProps[];
     assertNodeMeta({
       expect,
@@ -314,8 +320,8 @@ describe("JSONExportPod", () => {
         {
           fname: "root",
         },
-        { fname: "bar" },
         { fname: "foo" },
+        { fname: "foo.ch1" },
       ],
     });
     assertNodeBody({
@@ -326,16 +332,18 @@ describe("JSONExportPod", () => {
           fname: "root",
           body: "",
         },
-        { fname: "bar", body: "" },
         { fname: "foo", body: "" },
+        { fname: "foo.ch1", body: "" },
       ],
     });
   });
 
   test("write config", () => {
-    genPodConfigFile(podsDir, JSONExportPod);
-    const configPath = getPodConfigPath(podsDir, JSONExportPod);
-    genPodConfigFile(podsDir, JSONExportPod);
+    PodUtils.genConfigFile({ podsDir, podClass: JSONExportPod });
+    const configPath = PodUtils.getConfigPath({
+      podsDir,
+      podClass: JSONExportPod,
+    });
     expect(fs.readFileSync(configPath, { encoding: "utf8" })).toMatchSnapshot();
   });
 });

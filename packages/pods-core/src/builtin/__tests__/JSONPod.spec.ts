@@ -1,16 +1,11 @@
 import {
   DEngineClientV2,
   DNodeRawProps,
-  DNodeUtils,
-  Note,
+  NotePropsV2,
   NoteRawProps,
+  NoteUtilsV2,
 } from "@dendronhq/common-all";
-import {
-  createLogger,
-  EngineTestUtils,
-  FileTestUtils,
-  node2MdFile,
-} from "@dendronhq/common-server";
+import { createLogger, FileTestUtils } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
   NodeTestPresetsV2,
@@ -22,22 +17,10 @@ import _ from "lodash";
 import path from "path";
 import { ExportConfig, PodUtils } from "../..";
 import {
-  ImportPodConfig as JSONImportPodConfig,
   JSONExportPod,
   JSONImportPod,
+  JSONImportPodRawConfig,
 } from "../JSONPod";
-
-const createNotes = (vaultPath: string, notes: Partial<NoteRawProps>[]) => {
-  node2MdFile(new Note({ fname: "root", id: "root", title: "root" }), {
-    root: vaultPath,
-  });
-  notes.map((n) => {
-    // @ts-ignore
-    node2MdFile(new Note(n), {
-      root: vaultPath,
-    });
-  });
-};
 
 const assertNodeMeta = (opts: {
   expect: jest.Expect;
@@ -70,30 +53,32 @@ const assertNodeBody = (opts: {
   ).toEqual(expected);
 };
 
-function setupImport(opts: { jsonEntries: Partial<NoteRawProps>[] }) {
+async function setupImport(opts: { jsonEntries: Partial<NoteRawProps>[] }) {
   const podsDir = FileTestUtils.tmpDir().name;
   const importDir = FileTestUtils.tmpDir().name;
   const importSrc = path.join(importDir, "import.json");
   fs.writeJSONSync(importSrc, opts.jsonEntries);
-  const storeDir = EngineTestUtils.setupStoreDir({
-    copyFixtures: false,
-    initDirCb: (dirPath: string) => {
-      createNotes(dirPath, []);
+  const { vaults, wsRoot } = await EngineTestUtilsV2.setupWS({
+    initDirCb: async (vaultDir) => {
+      await NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
+        vaultDir,
+      });
     },
   });
-  return { podsDir, storeDir, importSrc, importDir };
+  return { podsDir, wsRoot, vaults, importSrc, importDir };
 }
 
 describe("JSONImportPod", () => {
-  let storeDir: string;
   let importSrc: string;
   let wsRoot: string;
-  const mode = "notes";
+  let engine: DEngineClientV2;
+  let vaults: string[];
+
   const createJSON = () => {
     return [
       {
         fname: "foo",
-        body: "foo body",
+        body: "foo body 2",
       },
       {
         fname: "bar",
@@ -103,51 +88,94 @@ describe("JSONImportPod", () => {
   };
 
   beforeEach(async () => {
-    ({ storeDir, importSrc } = await setupImport({
+    ({ wsRoot, vaults, importSrc } = await setupImport({
       jsonEntries: createJSON(),
     }));
-    wsRoot = path.dirname(importSrc).split("/").slice(0, -1).join("/");
+    const LOGGER = createLogger();
+    engine = new DendronEngineV2({
+      vaults,
+      forceNew: true,
+      store: new FileStorageV2({
+        vaults,
+        logger: LOGGER,
+      }),
+      mode: "fuzzy",
+      logger: LOGGER,
+    });
   });
 
   test("basic", async () => {
-    const pod = new JSONImportPod({ roots: [storeDir], wsRoot });
-    const config: JSONImportPodConfig = {
+    const pod = new JSONImportPod();
+    const config: JSONImportPodRawConfig = {
       src: importSrc,
       concatenate: false,
     };
-    await pod.plant({ mode, config });
-    let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(storeDir, [], {
-      add: ["root.md", "foo.md", "bar.md"],
+    await pod.execute({
+      config,
+      vaults: vaults.map((fsPath) => ({ fsPath })),
+      wsRoot,
+      engine,
     });
-    expect(expectedFiles).toEqual(actualFiles);
-    const importedNote = fs.readFileSync(path.join(storeDir, "foo.md"), {
-      encoding: "utf8",
+    await NodeTestPresetsV2.runJestHarness({
+      opts: {
+        vaultPath: vaults[0],
+      },
+      results: PODS_CORE.JSON.IMPORT.BASIC.results,
+      expect,
     });
-    expect(
-      _.every(["foo body"], (ent) => importedNote.match(ent))
-    ).toBeTruthy();
   });
 
   test("basic w/stubs", async () => {
-    ({ storeDir, importSrc } = await setupImport({
+    ({ wsRoot, vaults, importSrc } = await setupImport({
       jsonEntries: createJSON().concat([
         { fname: "baz.one", body: "baz body" },
       ]),
     }));
-    wsRoot = path.dirname(importSrc).split("/").slice(0, -1).join("/");
-    const pod = new JSONImportPod({ roots: [storeDir], wsRoot });
-    const config: JSONImportPodConfig = {
+    const pod = new JSONImportPod();
+    const config: JSONImportPodRawConfig = {
       src: importSrc,
       concatenate: false,
     };
-    await pod.plant({ mode, config });
-    let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(storeDir, [], {
-      add: ["root.md", "foo.md", "bar.md", "baz.one.md"],
+    const LOGGER = createLogger();
+    engine = new DendronEngineV2({
+      vaults,
+      forceNew: true,
+      store: new FileStorageV2({
+        vaults,
+        logger: LOGGER,
+      }),
+      mode: "fuzzy",
+      logger: LOGGER,
     });
+    await pod.execute({
+      config,
+      vaults: vaults.map((fsPath) => ({ fsPath })),
+      wsRoot,
+      engine,
+    });
+    let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
+      vaults[0],
+      [
+        ".git",
+        "assets",
+        "foo.md",
+        "foo.ch1.md",
+        "foo.schema.yml",
+        "root.md",
+        "root.schema.yml",
+      ],
+      {
+        add: ["bar.md", "baz.one.md"],
+      }
+    );
     expect(expectedFiles).toEqual(actualFiles);
-    const stubNote = DNodeUtils.getNoteByFname("baz", pod.engine) as Note;
+
+    const stubNote = NoteUtilsV2.getNoteByFname(
+      "baz",
+      engine.notes
+    ) as NotePropsV2;
     expect(stubNote.stub).toBeTruthy();
-    const importedNote = fs.readFileSync(path.join(storeDir, "foo.md"), {
+    const importedNote = fs.readFileSync(path.join(vaults[0], "foo.md"), {
       encoding: "utf8",
     });
     expect(
@@ -156,19 +184,37 @@ describe("JSONImportPod", () => {
   });
 
   test("basic w/rel path", async () => {
-    const pod = new JSONImportPod({ roots: [storeDir], wsRoot });
-    const dirname = path.dirname(importSrc).split("/").slice(-1)[0];
+    const pod = new JSONImportPod();
+    const importSrc = path.join(wsRoot, "import.json");
+    fs.writeJSONSync(importSrc, createJSON());
     const basename = path.basename(importSrc);
-    const config: JSONImportPodConfig = {
-      src: `./${path.join(dirname, basename)}`,
+    const config: JSONImportPodRawConfig = {
+      src: `./${basename}`,
       concatenate: false,
     };
-    await pod.plant({ mode, config });
-    let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(storeDir, [], {
-      add: ["root.md", "foo.md", "bar.md"],
+    await pod.execute({
+      config,
+      vaults: vaults.map((fsPath) => ({ fsPath })),
+      wsRoot,
+      engine,
     });
+    let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
+      vaults[0],
+      [
+        ".git",
+        "assets",
+        "foo.md",
+        "foo.ch1.md",
+        "foo.schema.yml",
+        "root.md",
+        "root.schema.yml",
+      ],
+      {
+        add: ["bar.md"],
+      }
+    );
     expect(expectedFiles).toEqual(actualFiles);
-    const importedNote = fs.readFileSync(path.join(storeDir, "foo.md"), {
+    const importedNote = fs.readFileSync(path.join(vaults[0], "foo.md"), {
       encoding: "utf8",
     });
     expect(
@@ -177,35 +223,55 @@ describe("JSONImportPod", () => {
   });
 
   test("concatenate", async () => {
-    const pod = new JSONImportPod({ roots: [storeDir], wsRoot });
-    const config: JSONImportPodConfig = {
+    const pod = new JSONImportPod();
+    const config: JSONImportPodRawConfig = {
       src: importSrc,
       concatenate: true,
       destName: "results",
     };
-    await pod.plant({ mode, config });
-    let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(storeDir, [], {
-      add: ["root.md", "results.md"],
+    await pod.execute({
+      config,
+      vaults: vaults.map((fsPath) => ({ fsPath })),
+      wsRoot,
+      engine,
     });
+    let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
+      vaults[0],
+      [
+        ".git",
+        "assets",
+        "foo.md",
+        "foo.ch1.md",
+        "foo.schema.yml",
+        "root.md",
+        "root.schema.yml",
+      ],
+      {
+        add: ["results.md"],
+      }
+    );
     expect(expectedFiles).toEqual(actualFiles);
-    const importedNote = fs.readFileSync(path.join(storeDir, "results.md"), {
+    const importedNote = fs.readFileSync(path.join(vaults[0], "results.md"), {
       encoding: "utf8",
     });
     expect(
-      _.every(["[[bar]]", "bar body", "foo body"], (ent) =>
-        importedNote.match(ent)
-      )
+      _.every(["foo body 2"], (ent) => importedNote.match(ent))
     ).toBeTruthy();
   });
 
   test("concatenate without dest set", async () => {
-    const pod = new JSONImportPod({ roots: [storeDir], wsRoot });
-    const config: JSONImportPodConfig = {
+    const pod = new JSONImportPod();
+    const config: JSONImportPodRawConfig = {
       src: importSrc,
       concatenate: true,
     };
     try {
-      await pod.plant({ mode, config });
+      await pod.execute({
+        config,
+        vaults: vaults.map((fsPath) => ({ fsPath })),
+        wsRoot,
+        engine,
+      });
     } catch (err) {
       expect(err).toBeTruthy();
     }

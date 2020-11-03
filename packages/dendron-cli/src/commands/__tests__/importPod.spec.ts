@@ -1,16 +1,66 @@
+import { DEngineClientV2 } from "@dendronhq/common-all";
 import {
+  createLogger,
   FileTestUtils,
   NodeTestUtils,
   writeYAML,
 } from "@dendronhq/common-server";
-import { getPodConfigPath, MarkdownImportPod } from "@dendronhq/pods-core";
+import { NodeTestPresetsV2, PODS_CORE } from "@dendronhq/common-test-utils";
+import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
+import {
+  getPodConfigPath,
+  JSONImportPod,
+  JSONImportPodRawConfig,
+  MarkdownImportPod,
+} from "@dendronhq/pods-core";
 import fs, { ensureDirSync } from "fs-extra";
 import path from "path";
 import { ImportPodCLICommand } from "../importPod";
 
 const { createFiles } = FileTestUtils;
 
-describe("import file pod", async () => {
+describe("json pod", () => {
+  let engine: DEngineClientV2;
+
+  test("json export, no config", async () => {
+    const {
+      wsRoot,
+      vaults,
+      importSrc,
+    } = await PODS_CORE.JSON.IMPORT.BASIC.before({});
+    const LOGGER = createLogger();
+    engine = new DendronEngineV2({
+      vaults,
+      forceNew: true,
+      store: new FileStorageV2({
+        vaults,
+        logger: LOGGER,
+      }),
+      mode: "fuzzy",
+      logger: LOGGER,
+    });
+    const pod = new JSONImportPod();
+    const config: JSONImportPodRawConfig = {
+      src: importSrc,
+      concatenate: false,
+    };
+    await pod.execute({
+      config,
+      vaults: vaults.map((fsPath: string) => ({ fsPath })),
+      wsRoot,
+      engine,
+    });
+    await NodeTestPresetsV2.runJestHarness({
+      opts: {
+        vaultPath: vaults[0],
+      },
+      results: PODS_CORE.JSON.IMPORT.BASIC.results,
+      expect,
+    });
+  });
+});
+
+describe.skip("import file pod", async () => {
   let importSrc: string;
   let wsRoot: string;
   let vault: string;

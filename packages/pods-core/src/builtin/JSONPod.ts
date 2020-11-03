@@ -1,12 +1,8 @@
-import { Note, NoteRawProps, NoteUtilsV2 } from "@dendronhq/common-all";
+import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { URI } from "vscode-uri";
 import {
-  ImportConfig,
-  ImportPodBaseV2,
-  ImportPodOpts,
   PodConfigEntry,
   PublishConfig,
   PublishPodBaseV3,
@@ -18,26 +14,38 @@ import {
   ExportPodCleanOpts,
   ExportPodPlantOpts,
   ExportPodRawConfig,
+  ImportPod,
+  ImportPodCleanConfig,
+  ImportPodCleanOpts,
+  ImportPodPlantOpts,
+  ImportPodRawConfig,
 } from "../basev2";
 
 const ID = "dendron.json";
 
-export type ImportPodConfig = ImportConfig & {
+export type JSONImportPodRawConfig = ImportPodRawConfig & {
   concatenate: boolean;
   destName?: string;
 };
+export type JSONImportPodCleanConfig = ImportPodCleanConfig & {
+  concatenate: boolean;
+  destName?: string;
+};
+export type JSONImportPodResp = any[];
 
-export class JSONImportPod extends ImportPodBaseV2<ImportPodConfig> {
+export type JSONImportPodPlantOpts = ImportPodPlantOpts<
+  JSONImportPodCleanConfig
+>;
+
+export class JSONImportPod extends ImportPod<
+  JSONImportPodRawConfig,
+  JSONImportPodCleanConfig
+> {
   static id: string = ID;
   static description: string = "import json";
 
-  static config = (): PodConfigEntry[] => {
-    return [
-      {
-        key: "src",
-        description: "where will notes be imported from",
-        type: "string",
-      },
+  get config() {
+    return super.config.concat([
       {
         key: "concatenate",
         description:
@@ -51,38 +59,35 @@ export class JSONImportPod extends ImportPodBaseV2<ImportPodConfig> {
           "if `concatenate: true`, specify name of concatenated note",
         type: "string",
       },
-    ];
-  };
-
-  async plant(opts: ImportPodOpts<ImportPodConfig>): Promise<void> {
-    const cleanConfig = this.cleanConfig(opts.config);
-    await this.prepare(opts);
-    await this.execute({ ...opts.config, ...cleanConfig });
+    ]);
   }
 
-  async execute(opts: { src: URI } & Omit<ImportPodConfig, "src">) {
+  async clean(opts: ImportPodCleanOpts<JSONImportPodRawConfig>) {
+    return opts.config;
+  }
+
+  async plant(opts: JSONImportPodPlantOpts): Promise<JSONImportPodResp> {
     const ctx = "JSONPod";
     this.L.info({ ctx, opts, msg: "enter" });
-    const { src, destName, concatenate } = opts;
+    const engine = opts.engine;
+    const { src, destName, concatenate } = opts.config;
     const entries = fs.readJSONSync(src.fsPath);
     const notes = await this._entries2Notes(entries, { destName, concatenate });
     return Promise.all(
-      _.map(notes, (n) =>
-        this.engine.write(n, { newNode: true, parentsAsStubs: true })
-      )
+      _.map(notes, (n) => engine.writeNote(n, { newNode: true }))
     );
   }
 
   async _entries2Notes(
-    entries: Partial<NoteRawProps>[],
-    opts: Pick<ImportPodConfig, "concatenate" | "destName">
-  ): Promise<Note[]> {
+    entries: Partial<NotePropsV2>[],
+    opts: Pick<JSONImportPodCleanConfig, "concatenate" | "destName">
+  ): Promise<NotePropsV2[]> {
     const notes = _.map(entries, (ent) => {
       if (!ent.fname) {
         throw Error("fname not defined");
       }
       let fname = ent.fname;
-      return new Note({ ...ent, fname, parent: null, children: [] });
+      return NoteUtilsV2.create({ ...ent, fname });
     });
     if (opts.concatenate) {
       if (!opts.destName) {
@@ -93,10 +98,12 @@ export class JSONImportPod extends ImportPodBaseV2<ImportPodConfig> {
       const acc: string[] = [""];
       _.forEach(notes, (n) => {
         acc.push(`# [[${n.fname}]]`);
-        acc.push(n.renderBody());
+        acc.push(n.body);
         acc.push("---");
       });
-      return [new Note({ fname: opts.destName, body: acc.join("\n") })];
+      return [
+        NoteUtilsV2.create({ fname: opts.destName, body: acc.join("\n") }),
+      ];
     } else {
       return notes;
     }

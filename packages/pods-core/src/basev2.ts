@@ -185,7 +185,17 @@ export abstract class ImportPod<
   TConfigRaw,
   TConfigClean extends ImportPodCleanConfig
 > extends BasePod<TConfigRaw & ImportPodRawConfig> {
-  abstract config: PodConfig[];
+  static kind: PodKind = "import";
+
+  get config(): PodConfig[] {
+    return [
+      {
+        key: "src",
+        description: "where to import from",
+        type: "string" as const,
+      },
+    ];
+  }
 
   abstract clean(opts: ImportPodCleanOpts<TConfigRaw>): Promise<TConfigClean>;
 

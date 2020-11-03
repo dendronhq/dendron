@@ -35,6 +35,7 @@ export type SetupWSOpts = {
   initDirCb?: (vaultPath: string) => void;
   withAssets?: boolean;
   withGit?: boolean;
+  wsRoot?: string;
 };
 
 export class EngineTestUtilsV2 {
@@ -43,7 +44,7 @@ export class EngineTestUtilsV2 {
       withAssets: true,
       withGit: true,
     });
-    let wsRoot = tmpDir().name;
+    let wsRoot = opts.wsRoot ? opts.wsRoot : tmpDir().name;
     let vaultDir = path.join(wsRoot, "vault");
     await fs.ensureDir(vaultDir);
     await EngineTestUtilsV2.setupVault({

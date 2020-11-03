@@ -3,7 +3,7 @@ import fs, { ensureDirSync, writeFileSync } from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { JSONExportPod, JSONImportPod, JSONPublishPod } from "./builtin";
-import { MarkdownPublishPod } from "./builtin/MarkdownPod";
+import { MarkdownImportPod, MarkdownPublishPod } from "./builtin/MarkdownPod";
 import { PodClassEntryV2, PodClassEntryV3, PodClassEntryV4 } from "./types";
 export * from "./base";
 export * from "./builtin";
@@ -17,7 +17,7 @@ export function getAllPublishPods(): PodClassEntryV3[] {
   return [JSONPublishPod, MarkdownPublishPod];
 }
 export function getAllImportPods(): PodClassEntryV4[] {
-  return [JSONImportPod];
+  return [JSONImportPod, MarkdownImportPod];
 }
 
 // === utils

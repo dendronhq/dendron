@@ -8,10 +8,10 @@ import {
 import { NodeTestPresetsV2, PODS_CORE } from "@dendronhq/common-test-utils";
 import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
 import {
-  getPodConfigPath,
   JSONImportPod,
   JSONImportPodRawConfig,
   MarkdownImportPod,
+  PodUtils,
 } from "@dendronhq/pods-core";
 import fs, { ensureDirSync } from "fs-extra";
 import path from "path";
@@ -60,7 +60,7 @@ describe("json pod", () => {
   });
 });
 
-describe.skip("import file pod", async () => {
+describe("markdown pod", async () => {
   let importSrc: string;
   let wsRoot: string;
   let vault: string;
@@ -96,10 +96,9 @@ describe.skip("import file pod", async () => {
   });
 
   test("config present, default", async () => {
-    const configPath = getPodConfigPath(
-      path.join(wsRoot, "pods"),
-      MarkdownImportPod
-    );
+    const podsDir = path.join(wsRoot, "pods");
+    const podClass = MarkdownImportPod;
+    const configPath = PodUtils.getConfigPath({ podsDir, podClass });
     ensureDirSync(path.dirname(configPath));
     writeYAML(configPath, { src: importSrc });
 

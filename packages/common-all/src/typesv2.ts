@@ -172,6 +172,11 @@ export type EngineWriteOptsV2 = {
    * Should persist hierarchy information to disk
    */
   writeHierarchy?: boolean;
+  /**
+   * Don't bother adding parent nodes.
+   * Used when importing existing notes in bulk
+   */
+  noAddParent?: boolean;
 } & Partial<EngineUpdateNodesOptsV2>;
 
 export type DEngineInitPayloadV2 = {

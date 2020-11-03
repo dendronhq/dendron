@@ -1,7 +1,7 @@
 import {
   getAllImportPods,
-  podClassEntryToPodItem,
-  PodItem,
+  podClassEntryToPodItemV4,
+  PodItemV4,
 } from "@dendronhq/pods-core";
 import yargs from "yargs";
 import { CommandCLIOpts, PodCLICommand } from "./pod";
@@ -12,8 +12,8 @@ export class ImportPodCLICommand extends PodCLICommand {
   }
 
   static async buildArgs(args: yargs.Argv<CommandCLIOpts>) {
-    const podItems: PodItem[] = ImportPodCLICommand.getPods().map((p) =>
-      podClassEntryToPodItem(p)
+    const podItems: PodItemV4[] = ImportPodCLICommand.getPods().map((p) =>
+      podClassEntryToPodItemV4(p)
     );
     return ImportPodCLICommand.buildArgsCore(args, podItems);
   }

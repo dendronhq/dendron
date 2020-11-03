@@ -488,11 +488,14 @@ export class FileStorageV2 implements DStoreV2 {
     note: NotePropsV2,
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
-    const changed: NotePropsV2[] = NoteUtilsV2.addParent({
-      note,
-      notesList: _.values(this.notes),
-      createStubs: true,
-    });
+    let changed: NotePropsV2[] = [];
+    if (!opts?.noAddParent) {
+      changed = NoteUtilsV2.addParent({
+        note,
+        notesList: _.values(this.notes),
+        createStubs: true,
+      });
+    }
     const match = SchemaUtilsV2.matchPath({
       notePath: note.fname,
       schemaModDict: this.schemas,

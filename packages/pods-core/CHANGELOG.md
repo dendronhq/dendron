@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.14.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.1...v0.14.1-alpha.2) (2020-11-03)
+
+### Bug Fixes
+
+- **pods:** don't re-initialize engine when using pods ([4687285](https://github.com/dendronhq/dendron/commit/4687285dabad761360b7108cc9d36f131c385e29))
+
 ## [0.14.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.0...v0.14.1-alpha.1) (2020-11-03)
 
 **Note:** Version bump only for package @dendronhq/pods-core

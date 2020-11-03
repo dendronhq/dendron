@@ -1,12 +1,23 @@
 import { NotePropsV2 } from "@dendronhq/common-all";
+import { writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
+import path from "path";
 import { NodeTestUtilsV2 } from "../..";
 import { TestPresetEntry } from "../../utils";
 
 const EXPORT_BASIC = new TestPresetEntry({
   label: "basic",
-  before: async (_opts) => {},
+  before: async ({
+    configPath,
+    exportDest,
+  }: {
+    configPath: string;
+    exportDest: string;
+  }) => {
+    fs.ensureDirSync(path.dirname(configPath));
+    writeYAML(configPath, { dest: exportDest });
+  },
   results: async ({ destPath }: { destPath: string }) => {
     const payload = fs.readJSONSync(destPath) as NotePropsV2[];
     return [

@@ -3,7 +3,6 @@ matrix:
   - os: linux
     env: BUILDARCH=x64
     dist: trusty
-  - os: osx
   - os: windows
 language: node_js
 node_js: '13'
@@ -21,3 +20,5 @@ notifications:
 env:
 - YARN_GPG=no
 cache: yarn
+deploy:
+  on: true

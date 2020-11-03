@@ -1,17 +1,15 @@
 import { readYAML } from "@dendronhq/common-server";
 import {
   getAllPublishPods,
-  PodClassEntryV3,
   PodClassEntryV4,
-  PodItemV3,
+  PodItemV4,
   PodKind,
   PodUtils,
-  PublishPodOpts,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
-import { fetchPodClassV3 } from "./pod";
+import { fetchPodClassV4 } from "./pod";
 import { SoilCommandCLIOpts, SoilCommandOptsV2, SoilCommandV2 } from "./soil";
 
 type CommandOutput = {};
@@ -29,7 +27,7 @@ type CommandCLIOpts = SoilCommandCLIOpts & {
   noteByName: string;
 };
 
-function buildPodArgs(args: yargs.Argv, _podItems: PodItemV3[]) {
+function buildPodArgs(args: yargs.Argv, _podItems: PodItemV4[]) {
   args.option("podId", {
     describe: "pod to use",
   });
@@ -46,14 +44,14 @@ function buildPodArgs(args: yargs.Argv, _podItems: PodItemV3[]) {
 
 function enrichPodArgs(
   args: CommandCLIOpts,
-  pods: PodClassEntryV3[],
+  pods: PodClassEntryV4[],
   podType: PodKind
 ) {
   const { podId, wsRoot, podSource, config } = _.defaults(args, {
     podSource: "builtin",
   });
   const podsDir = path.join(wsRoot, "pods");
-  const podClass = fetchPodClassV3(podId, { podSource, pods, podType });
+  const podClass = fetchPodClassV4(podId, { podSource, pods, podType });
   let cleanConfig: any;
   if (config) {
     cleanConfig = readYAML(config);
@@ -99,12 +97,13 @@ export class PublishPodCLICommand extends SoilCommandV2<
 
   async execute(opts: CommandOpts) {
     const { podClass, vault, wsRoot, engine, config, noteByName: fname } = opts;
-    const pod = new podClass({
-      vaults: [vault],
+    const pod = new podClass();
+    await pod.execute({
+      config: { ...config, fname },
+      vaults: [{ fsPath: vault }],
       wsRoot,
       engine,
     });
-    await pod.plant({ mode: "notes", config, fname } as PublishPodOpts);
     return {};
   }
 }

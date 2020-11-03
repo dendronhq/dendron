@@ -10,4 +10,5 @@ export type DendronQuickPickerV2 = QuickPick<DNodePropsQuickInputV2> & {
   justActivated?: boolean;
   prev?: { activeItems: any; items: any };
   onCreate?: (note: DNodePropsV2) => Promise<void>;
+  showDirectChildrenOnly?: boolean;
 };

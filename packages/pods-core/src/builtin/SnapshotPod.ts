@@ -7,6 +7,7 @@ import {
   ExportPodCleanConfig,
   ExportPodCleanOpts,
   ExportPodPlantOpts,
+  ExportPodRawConfig,
   ImportPod,
   ImportPodCleanConfig,
   ImportPodCleanOpts,
@@ -20,7 +21,7 @@ function genVaultId(vaultPath: string) {
   return path.basename(vaultPath);
 }
 
-export type SnapshotExportPodRawConfig = {
+export type SnapshotExportPodRawConfig = ExportPodRawConfig & {
   ignore?: string;
 };
 export type SnapshotExportPodCleanConfig = ExportPodCleanConfig & {

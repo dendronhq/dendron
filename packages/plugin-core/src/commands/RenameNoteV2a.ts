@@ -1,18 +1,14 @@
 import {
   DendronError,
-  DNodeUtils,
   DNodeUtilsV2,
   ENGINE_ERROR_CODES,
-  Note,
   NoteChangeEntry,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
-import { mdFile2NodeProps } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import { TextEditor, Uri, window } from "vscode";
 import { FileItem } from "../external/fileutils/FileItem";
-import { HistoryService } from "../services/HistoryService";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
@@ -86,33 +82,6 @@ export class RenameNoteV2aCommand extends BaseCommand<
       return "No document open";
     }
     return;
-  }
-
-  async moveNote(oldUri: Uri, newUri: Uri) {
-    // create new note
-    const ws = DendronWorkspace.instance();
-    const noteOld = DNodeUtils.getNoteByFname(
-      DNodeUtils.uri2Fname(oldUri),
-      ws.engine,
-      { throwIfEmpty: true }
-    ) as Note;
-    const props = mdFile2NodeProps(oldUri.fsPath);
-    const newFname = DNodeUtils.uri2Fname(newUri);
-    const noteNew = new Note({
-      ...props,
-      parent: null,
-      children: [],
-      id: noteOld.id,
-      fname: newFname,
-    });
-
-    // delete old note
-    await ws.engine.delete(noteOld.id, "note");
-    const historyService = HistoryService.instance();
-    historyService.add({ source: "engine", action: "create", uri: newUri });
-
-    // write new note
-    await ws.engine.write(noteNew, { newNode: true, parentsAsStubs: true });
   }
 
   async showResponse(res: CommandOutput) {

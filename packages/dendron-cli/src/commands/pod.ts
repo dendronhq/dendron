@@ -1,7 +1,6 @@
 import { DendronError } from "@dendronhq/common-all";
 import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
 import {
-  PodClassEntryV3,
   PodClassEntryV4,
   PodItemV4,
   PodKind,
@@ -21,39 +20,11 @@ type CommandOpts = {
 
 type CommandOutput = void;
 
-export function fetchPodClass(
+export function fetchPodClassV4(
   podId: string,
   opts: {
     podSource: CommandCLIOpts["podSource"];
     pods?: PodClassEntryV4[];
-    podType: PodKind;
-  }
-) {
-  const { podSource, pods } = opts;
-  if (podSource === "builtin") {
-    if (!pods) {
-      throw Error("pods needs to be defined");
-    }
-    const podClass = _.find(pods, {
-      id: podId,
-    });
-    return podClass;
-  } else {
-    const podEntry = require(podId);
-    const key = opts.podType === "import" ? "importPod" : "exportPod";
-    const podClass = podEntry[key];
-    if (!podClass) {
-      throw Error("no podClass found");
-    }
-    return podClass;
-  }
-}
-
-export function fetchPodClassV3(
-  podId: string,
-  opts: {
-    podSource: CommandCLIOpts["podSource"];
-    pods?: PodClassEntryV3[];
     podType: PodKind;
   }
 ) {
@@ -126,7 +97,7 @@ export abstract class PodCLICommand extends BaseCommand<
       logger,
     });
 
-    const podClass = fetchPodClass(podId, { podSource, pods, podType });
+    const podClass = fetchPodClassV4(podId, { podSource, pods, podType });
     const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
     if (!maybeConfig) {
       const podConfigPath = PodUtils.getConfigPath({ podsDir, podClass });

@@ -114,7 +114,7 @@ export type ImportPodExecuteOpts<TConfig> = BasePodExecuteOpts<
 >;
 
 export abstract class ExportPod<
-  TConfigRaw,
+  TConfigRaw extends ExportPodRawConfig,
   TConfigClean extends ExportPodCleanConfig,
   TOutput = any
 > extends BasePod<TConfigRaw & ExportPodRawConfig> {

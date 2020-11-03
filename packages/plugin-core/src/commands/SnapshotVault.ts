@@ -1,5 +1,5 @@
 import {
-  PodItemV3,
+  PodItemV4,
   SnapshotExportPod,
   SnapshotExportPodResp,
 } from "@dendronhq/pods-core";
@@ -9,7 +9,7 @@ import { BaseCommand } from "./base";
 
 type CommandOpts = {};
 
-type CommandInput = { podChoice: PodItemV3 };
+type CommandInput = { podChoice: PodItemV4 };
 
 type CommandOutput = SnapshotExportPodResp;
 export { CommandOpts as SnapshotVaultCommandOpts };

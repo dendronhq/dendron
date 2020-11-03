@@ -1,10 +1,10 @@
-import { DendronWorkspace } from "../../../workspace";
-import _ from "lodash";
 import { sort as sortPaths } from "cross-path-sort";
-import { WorkspaceCache, RefT } from "../types";
-import vscode, { workspace, Uri, TextDocument } from "vscode";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
+import vscode, { TextDocument, workspace } from "vscode";
+import { DendronWorkspace } from "../../../workspace";
+import { RefT, WorkspaceCache } from "../types";
 export { sortPaths };
 
 const workspaceCache: WorkspaceCache = {
@@ -164,25 +164,7 @@ export const parseRef = (rawRef: string): RefT => {
 
 // === Cache
 export const cacheWorkspace = async () => {
-  await cacheUris();
   await cacheRefs();
-};
-
-export const cacheUris = async () => {
-  const root = DendronWorkspace.instance().rootWorkspace;
-  const markdownUris = _.values(DendronWorkspace.instance().engine.notes)
-    .filter((n) => !n.stub)
-    .map((n) => {
-      return Uri.joinPath(root.uri, n.fname + ".md");
-    });
-  workspaceCache.markdownUris = sortPaths(markdownUris, {
-    pathKey: "path",
-    shallowFirst: true,
-  });
-  workspaceCache.allUris = sortPaths([...markdownUris], {
-    pathKey: "path",
-    shallowFirst: true,
-  });
 };
 
 export const cacheRefs = async () => {

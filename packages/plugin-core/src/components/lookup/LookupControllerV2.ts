@@ -19,10 +19,10 @@ import {
   IDendronQuickInputButton,
   refreshButtons,
 } from "./buttons";
-import { DendronQuickPickerV2, EngineOpts } from "./LookupProvider";
 import { LookupProviderV2 } from "./LookupProviderV2";
-import { LookupControllerState } from "./types";
+import { DendronQuickPickerV2, LookupControllerState } from "./types";
 import GithubSlugger from "github-slugger";
+import { EngineOpts } from "../../types";
 
 export class LookupControllerV2 {
   public quickPick?: DendronQuickPickerV2;

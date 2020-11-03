@@ -10,7 +10,7 @@ import { Uri, ViewColumn, window, WorkspaceFolder } from "vscode";
 import { Logger } from "../../logger";
 import { DendronBtn, getButtonCategory } from "./buttons";
 import { CREATE_NEW_DETAIL, CREATE_NEW_LABEL } from "./constants";
-import { DendronQuickPicker, DendronQuickPickerV2 } from "./LookupProvider";
+import { DendronQuickPickerV2 } from "./types";
 
 export function createNoActiveItem(): DNodePropsQuickInputV2 {
   const props = DNodeUtilsV2.create({ fname: CREATE_NEW_LABEL, type: "note" });
@@ -35,7 +35,7 @@ export function node2Uri(
 
 export async function showDocAndHidePicker(
   uri: Uri,
-  picker: DendronQuickPicker | DendronQuickPickerV2
+  picker: DendronQuickPickerV2
 ) {
   const ctx = "showDocAndHidePicker";
   const maybeSplitSelection = _.find(picker.buttons, (ent: DendronBtn) => {
@@ -66,6 +66,10 @@ export async function showDocAndHidePicker(
 }
 
 export class PickerUtilsV2 {
+  static getValue(picker: DendronQuickPickerV2) {
+    return picker.value;
+  }
+
   static getSelection(picker: DendronQuickPickerV2) {
     return picker.selectedItems[0];
   }

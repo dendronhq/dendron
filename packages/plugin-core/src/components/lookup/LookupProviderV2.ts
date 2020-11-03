@@ -13,14 +13,10 @@ import _ from "lodash";
 import { Uri, window, WorkspaceFolder } from "vscode";
 import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
+import { EngineFlavor, EngineOpts } from "../../types";
 import { getDurationMilliseconds, profile } from "../../utils/system";
 import { DendronWorkspace } from "../../workspace";
-import {
-  DendronQuickPickerV2,
-  EngineFlavor,
-  EngineOpts,
-  PickerUtils,
-} from "./LookupProvider";
+import { DendronQuickPickerV2 } from "./types";
 import {
   createNoActiveItem,
   node2Uri,
@@ -39,7 +35,7 @@ export class LookupProviderV2 {
 
   async _onAcceptNewNote(picker: DendronQuickPickerV2): Promise<Uri> {
     const ctx = "onAcceptNewNode";
-    const fname = PickerUtils.getValue(picker);
+    const fname = PickerUtilsV2.getValue(picker);
     Logger.info({ ctx, msg: "createNewPick", value: fname });
     const selectedItem = PickerUtilsV2.getSelection(picker);
     let nodeNew: DNodePropsV2;
@@ -106,7 +102,7 @@ export class LookupProviderV2 {
 
   async _onAcceptNewSchema(picker: DendronQuickPickerV2) {
     const ctx = "onAcceptNewSchema";
-    const fname = PickerUtils.getValue(picker);
+    const fname = PickerUtilsV2.getValue(picker);
     Logger.info({ ctx, msg: "createNewPick", value: fname });
     let smodNew: SchemaModulePropsV2;
     const ws = DendronWorkspace.instance();
@@ -138,7 +134,7 @@ export class LookupProviderV2 {
 
   async onDidAccept(picker: DendronQuickPickerV2, opts: EngineOpts) {
     const ctx = "onDidAccept";
-    const value = PickerUtils.getValue(picker);
+    const value = PickerUtilsV2.getValue(picker);
     Logger.info({ ctx, msg: "enter", value, opts });
     const selectedItem = PickerUtilsV2.getSelection(picker);
     const resp = this.validate(picker.value, opts.flavor);

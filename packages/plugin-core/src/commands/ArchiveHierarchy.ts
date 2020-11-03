@@ -2,7 +2,6 @@ import { DNodeUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { VSCodeUtils } from "../utils";
 import { BasicCommand } from "./base";
-import { RefactorHierarchyCommand } from "./RefactorHierarchy";
 import { RefactorHierarchyCommandV2 } from "./RefactorHierarchyV2";
 
 type CommandOpts = {
@@ -19,7 +18,7 @@ export class ArchiveHierarchyCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  private refactorCmd: RefactorHierarchyCommand | RefactorHierarchyCommandV2;
+  private refactorCmd: RefactorHierarchyCommandV2;
 
   constructor(name?: string) {
     super(name);

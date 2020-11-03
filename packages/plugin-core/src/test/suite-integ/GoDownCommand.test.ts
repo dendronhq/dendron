@@ -5,7 +5,7 @@ import { afterEach, beforeEach } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { GoDownCommand } from "../../commands/GoDownCommand";
-import { DendronQuickPickerV2 } from "../../components/lookup/LookupProvider";
+import { DendronQuickPickerV2 } from "../../components/lookup/types";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";

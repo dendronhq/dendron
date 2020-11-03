@@ -25,10 +25,10 @@ import path from "path";
 import * as vscode from "vscode";
 import { LookupCommand, LookupCommandOpts } from "../../commands/LookupCommand";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
-import { EngineOpts } from "../../components/lookup/LookupProvider";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
 import { CONFIG, ConfigKey } from "../../constants";
 import { HistoryService } from "../../services/HistoryService";
+import { EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import {

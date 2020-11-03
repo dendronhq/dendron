@@ -15,7 +15,8 @@ import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { ExportConfig, PodUtils } from "../..";
+import { ExportPodRawConfig } from "../../basev2";
+import { PodUtils } from "../../utils";
 import {
   JSONExportPod,
   JSONImportPod,
@@ -370,7 +371,7 @@ describe("JSONExportPod", () => {
     const pod = new JSONExportPod();
     const destDir = FileTestUtils.tmpDir().name;
     const destPath = path.join(destDir, "export.json");
-    const config: ExportConfig = { dest: destPath, includeBody: false };
+    const config: ExportPodRawConfig = { dest: destPath, includeBody: false };
     await pod.execute({
       config,
       wsRoot,

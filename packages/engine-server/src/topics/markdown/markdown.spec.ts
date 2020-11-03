@@ -3,7 +3,7 @@ import _ from "lodash";
 import { replaceRefs } from "./plugins/replaceRefs";
 import { getProcessor } from "./utils";
 import { DendronEngine } from "../../engine";
-import { DNodeUtils, Note } from "@dendronhq/common-all";
+import { DNodeUtils, DNodeUtilsV2, Note } from "@dendronhq/common-all";
 
 // @ts-ignore
 const mdSimple = `
@@ -89,7 +89,6 @@ describe("replaceRefs", () => {
     const proc = getProcessor().use(replaceRefs, {
       wikiLink2Md: true,
       wikiLinkUseId: true,
-      engine,
       scratch: "",
     });
 

@@ -4,7 +4,7 @@ import _ from "lodash";
 import path from "path";
 import { JSONExportPod, JSONImportPod, JSONPublishPod } from "./builtin";
 import { MarkdownImportPod, MarkdownPublishPod } from "./builtin/MarkdownPod";
-import { PodClassEntryV2, PodClassEntryV3, PodClassEntryV4 } from "./types";
+import { PodClassEntryV4 } from "./types";
 export * from "./base";
 export * from "./builtin";
 export * from "./types";
@@ -21,40 +21,6 @@ export function getAllImportPods(): PodClassEntryV4[] {
 }
 
 // === utils
-
-export function getPodConfigPath(
-  podsDir: string,
-  podClass: PodClassEntryV2 | PodClassEntryV3
-): string {
-  return path.join(podsDir, podClass.id, `config.${podClass.kind}.yml`);
-}
-
-export function getPodPath(podsDir: string, podClass: PodClassEntryV2): string {
-  return path.join(podsDir, podClass.id);
-}
-
-export function genPodConfigFile(
-  podsDir: string,
-  podClass: PodClassEntryV2 | PodClassEntryV3
-) {
-  const podConfigPath = getPodConfigPath(podsDir, podClass);
-  ensureDirSync(path.dirname(podConfigPath));
-  const config = podClass
-    .config()
-    .map((ent) => {
-      ent = _.defaults(ent, { default: "TODO" });
-      return [
-        `# description: ${ent.description}`,
-        `# type: ${ent.type}`,
-        `${ent.key}: ${ent.default}`,
-      ].join("\n");
-    })
-    .join("\n");
-  if (!fs.existsSync(podConfigPath)) {
-    writeFileSync(podConfigPath, config);
-  }
-  return podConfigPath;
-}
 
 export class PodUtils {
   static getConfig({

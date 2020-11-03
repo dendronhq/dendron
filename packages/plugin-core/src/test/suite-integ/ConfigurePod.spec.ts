@@ -1,23 +1,24 @@
-import { DirResult, FileTestUtils } from "@dendronhq/common-server";
-import { NodeTestPresetsV2, PODS_CORE } from "@dendronhq/common-test-utils";
+import { DirResult, FileTestUtils, writeYAML } from "@dendronhq/common-server";
+import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import {
   JSONExportPod,
   podClassEntryToPodItemV4,
   PodUtils,
 } from "@dendronhq/pods-core";
 import assert from "assert";
+import { ensureDirSync } from "fs-extra";
 import { afterEach, beforeEach } from "mocha";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
-import { ExportPodCommand } from "../../commands/ExportPod";
+import { ConfigurePodCommand } from "../../commands/ConfigurePodCommand";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { onWSInit, setupDendronWorkspace, TIMEOUT } from "../testUtils";
 
-suite("ExportPod", function () {
+suite("ConfigurePod", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
   let vaultDir: string;
@@ -37,20 +38,14 @@ suite("ExportPod", function () {
 
   test("no config", function (done) {
     onWSInit(async () => {
-      const cmd = new ExportPodCommand();
+      const cmd = new ConfigurePodCommand();
       const podChoice = podClassEntryToPodItemV4(JSONExportPod);
       cmd.gatherInputs = async () => {
-        return { podChoice };
+        return { podClass: podChoice.podClass };
       };
       await cmd.run();
-      const configPath = PodUtils.getConfigPath({
-        podsDir,
-        podClass: JSONExportPod,
-      });
-      assert.deepEqual(
-        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath,
-        configPath
-      );
+      const activePath = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
+      assert.ok(activePath?.endsWith("pods/dendron.json/config.export.yml"));
       done();
     });
 
@@ -65,28 +60,27 @@ suite("ExportPod", function () {
     });
   });
 
-  test("basic", function (done) {
+  test("config present", function (done) {
     onWSInit(async () => {
-      const podClass = JSONExportPod;
+      const cmd = new ConfigurePodCommand();
+      const podChoice = podClassEntryToPodItemV4(JSONExportPod);
+      const podClass = podChoice.podClass;
+      cmd.gatherInputs = async () => {
+        return { podClass };
+      };
+
+      // setup
       const configPath = PodUtils.getConfigPath({ podsDir, podClass });
       const exportDest = path.join(
         PodUtils.getPath({ podsDir, podClass }),
         "export.json"
       );
-      await PODS_CORE.JSON.EXPORT.BASIC.before({ configPath, exportDest });
-      // stub cmd
-      const cmd = new ExportPodCommand();
-      const podChoice = podClassEntryToPodItemV4(JSONExportPod);
-      cmd.gatherInputs = async () => {
-        return { podChoice };
-      };
+      ensureDirSync(path.dirname(configPath));
+
+      writeYAML(configPath, { dest: exportDest });
       await cmd.run();
-      await NodeTestPresetsV2.runMochaHarness({
-        opts: {
-          destPath: exportDest,
-        },
-        results: PODS_CORE.JSON.EXPORT.BASIC.results,
-      });
+      const activePath = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
+      assert.ok(activePath?.endsWith("pods/dendron.json/config.export.yml"));
       done();
     });
 

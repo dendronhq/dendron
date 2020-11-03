@@ -1,7 +1,6 @@
 import { DendronError } from "@dendronhq/common-all";
 import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
 import {
-  getPodConfigPath,
   PodClassEntryV3,
   PodClassEntryV4,
   PodItemV4,
@@ -130,7 +129,7 @@ export abstract class PodCLICommand extends BaseCommand<
     const podClass = fetchPodClass(podId, { podSource, pods, podType });
     const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
     if (!maybeConfig) {
-      const podConfigPath = getPodConfigPath(podsDir, podClass);
+      const podConfigPath = PodUtils.getConfigPath({ podsDir, podClass });
       throw new DendronError({
         status: "no-config",
         msg: `no config found. please create a config at ${podConfigPath}`,

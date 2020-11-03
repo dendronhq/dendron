@@ -96,6 +96,7 @@ export abstract class PodCLICommand extends BaseCommand<
       mode: "fuzzy",
       logger,
     });
+    await engineClient.init();
 
     const podClass = fetchPodClassV4(podId, { podSource, pods, podType });
     const maybeConfig = PodUtils.getConfig({ podsDir, podClass });

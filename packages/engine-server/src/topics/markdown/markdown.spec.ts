@@ -1,7 +1,7 @@
-import { DNodeUtils, Note } from "@dendronhq/common-all";
+import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import { EngineTestUtils } from "@dendronhq/common-server";
 import _ from "lodash";
-import { DendronEngine } from "../../engine";
+import { DendronEngineV2 } from "../../enginev2";
 import { replaceRefs } from "./plugins/replaceRefs";
 import { getProcessor } from "./utils";
 
@@ -84,19 +84,20 @@ describe("replaceRefs", () => {
   });
 
   test("wiki2Md and swap id", async () => {
-    const engine = DendronEngine.getOrCreateEngine({ root });
+    const engine = DendronEngineV2.create({ vaults: [root] });
     await engine.init();
     const proc = getProcessor().use(replaceRefs, {
       wikiLink2Md: true,
       wikiLinkUseId: true,
       scratch: "",
+      engine,
     });
 
-    const note = DNodeUtils.getNoteByFname(
+    const note = NoteUtilsV2.getNoteByFname(
       "engine-server.replace-refs",
-      engine,
+      engine.notes,
       { throwIfEmpty: true }
-    ) as Note;
+    ) as NotePropsV2;
     const out = proc.processSync(note.body);
 
     expect(out.toString()).toMatchSnapshot("raw");

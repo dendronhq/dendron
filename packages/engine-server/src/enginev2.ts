@@ -25,8 +25,9 @@ import {
   SchemaQueryResp,
   WriteNoteResp,
 } from "@dendronhq/common-all";
-import { DLogger } from "@dendronhq/common-server";
+import { createLogger, DLogger } from "@dendronhq/common-server";
 import _ from "lodash";
+import { FileStorageV2 } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
 
 type DendronEngineOptsV2 = {
@@ -53,6 +54,20 @@ export class DendronEngineV2 implements DEngineV2 {
     this.props = props;
     this.fuseEngine = new FuseEngine({});
     this.links = [];
+  }
+
+  static create({ vaults }: { vaults: string[] }) {
+    const LOGGER = createLogger();
+    return new DendronEngineV2({
+      vaults,
+      forceNew: true,
+      store: new FileStorageV2({
+        vaults,
+        logger: LOGGER,
+      }),
+      mode: "fuzzy",
+      logger: LOGGER,
+    });
   }
 
   get notes() {

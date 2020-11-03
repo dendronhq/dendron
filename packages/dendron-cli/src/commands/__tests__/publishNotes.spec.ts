@@ -23,15 +23,6 @@ describe("publishNotes", async () => {
       },
     });
     vault = vaults[0];
-    // vault = EngineTestUtils.setupStoreDir({
-    //   copyFixtures: false,
-    //   initDirCb: (root) => {
-    //     NodeTestUtils.createNotes(root, [
-    //       { id: "id-foo", fname: "foo", stub: true },
-    //       { id: "id-bar", fname: "bar" },
-    //     ]);
-    //   },
-    // });
     await DConfig.getOrCreate(wsRoot);
   });
 

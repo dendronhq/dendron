@@ -103,6 +103,7 @@ describe("JSONImportPod", () => {
       mode: "fuzzy",
       logger: LOGGER,
     });
+    await engine.init();
   });
 
   test("basic", async () => {
@@ -148,6 +149,7 @@ describe("JSONImportPod", () => {
       mode: "fuzzy",
       logger: LOGGER,
     });
+    await engine.init();
     await pod.execute({
       config,
       vaults: vaults.map((fsPath) => ({ fsPath })),
@@ -307,6 +309,7 @@ describe("JSONExportPod", () => {
       mode: "fuzzy",
       logger: LOGGER,
     });
+    await engine.init();
   });
 
   test("basic", async () => {

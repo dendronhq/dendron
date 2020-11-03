@@ -31,6 +31,7 @@ describe("SnapshotPodExport", () => {
       mode: "fuzzy",
       logger: LOGGER,
     });
+    await engine.init();
   });
 
   test("config", async () => {
@@ -174,6 +175,7 @@ describe("SnapshotPodImport", () => {
     };
 
     snapshotDirPath = (await createSnapshot()).snapshotDirPath;
+    await engine.init();
   });
 
   test("basic", async () => {

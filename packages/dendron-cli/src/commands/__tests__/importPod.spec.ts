@@ -39,6 +39,7 @@ describe("json pod", () => {
       mode: "fuzzy",
       logger: LOGGER,
     });
+    await engine.init();
     const pod = new JSONImportPod();
     const config: JSONImportPodRawConfig = {
       src: importSrc,

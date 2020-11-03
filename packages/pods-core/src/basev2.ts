@@ -171,7 +171,6 @@ export abstract class ExportPod<
 
   async execute(opts: ExportPodExecuteOpts<TConfigRaw>): Promise<TOutput> {
     const { config, engine, wsRoot, vaults } = opts;
-    await engine.init();
     const _config = this.cleanExportConfig({ config, wsRoot });
     const cleanConfig = await this.clean({
       config: { ...config, ..._config },
@@ -221,7 +220,6 @@ export abstract class ImportPod<
 
   async execute(opts: ImportPodExecuteOpts<TConfigRaw>) {
     const { config, engine, wsRoot, vaults } = opts;
-    await engine.init();
     const _config = this.cleanImportConfig({ config, wsRoot });
     const cleanConfig = await this.clean({
       config: { ...config, ..._config },
@@ -303,7 +301,6 @@ export abstract class PublishPod<
 
   async execute(opts: BasePodExecuteOpts<TConfigRaw>) {
     const { config, engine, wsRoot, vaults } = opts;
-    await engine.init();
     const _config = this.cleanPublishConfig({ config, wsRoot });
     const cleanConfig = await this.clean({
       config: { ...config, ..._config },

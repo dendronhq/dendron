@@ -2,23 +2,20 @@ import clipboardy from "@dendronhq/clipboardy";
 import { DNodeUtilsV2 } from "@dendronhq/common-all";
 import { PublishPodCommandOpts } from "@dendronhq/dendron-cli";
 import {
-  genPodConfigFile,
   getAllPublishPods,
-  getPodConfig,
-  podClassEntryToPodItemV3,
-  PodItemV3,
+  podClassEntryToPodItemV4,
+  PodItemV4,
   PodUtils,
-  PublishPodOpts,
 } from "@dendronhq/pods-core";
 import { Uri, window } from "vscode";
 import { VSCodeUtils } from "../utils";
-import { showPodQuickPickItemsV3 } from "../utils/pods";
+import { showPodQuickPickItemsV4 } from "../utils/pods";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 
 type CommandOpts = PublishPodCommandOpts;
 
-type CommandInput = { podChoice: PodItemV3 };
+type CommandInput = { podChoice: PodItemV4 };
 
 type CommandOutput = void;
 export { CommandOpts as PublishPodCommandOpts };
@@ -26,8 +23,8 @@ export { CommandOpts as PublishPodCommandOpts };
 export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
   async gatherInputs(): Promise<any> {
     const pods = getAllPublishPods();
-    const podItems: PodItemV3[] = pods.map((p) => podClassEntryToPodItemV3(p));
-    const podChoice = await showPodQuickPickItemsV3(podItems);
+    const podItems: PodItemV4[] = pods.map((p) => podClassEntryToPodItemV4(p));
+    const podChoice = await showPodQuickPickItemsV4(podItems);
     if (!podChoice) {
       return;
     }
@@ -37,7 +34,8 @@ export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
   async enrichInputs(inputs: CommandInput): Promise<CommandOpts | undefined> {
     const podChoice = inputs.podChoice;
     const podsDir = DendronWorkspace.instance().podsDir;
-    const maybeConfig = getPodConfig(podsDir, podChoice.podClass);
+    const podClass = podChoice.podClass;
+    const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
     let noteByName = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
     if (!noteByName) {
       window.showErrorMessage(
@@ -47,15 +45,14 @@ export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
     }
     noteByName = DNodeUtilsV2.fname(noteByName);
 
-    if (!maybeConfig && PodUtils.hasRequiredOpts(podChoice.podClass)) {
-      const configPath = genPodConfigFile(podsDir, podChoice.podClass);
+    if (!maybeConfig && PodUtils.hasRequiredOpts(podClass)) {
+      const configPath = PodUtils.genConfigFile({ podsDir, podClass });
       await VSCodeUtils.openFileInEditor(Uri.file(configPath));
       window.showInformationMessage(
         "Looks like this is your first time running this pod. Please fill out the configuration and then run this command again. "
       );
       return;
     }
-    const podClass = podChoice.podClass;
     const engine = DendronWorkspace.instance().getEngine();
     const vault = engine.vaults[0];
     const wsRoot = DendronWorkspace.rootDir() as string;
@@ -63,18 +60,15 @@ export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
   }
 
   async execute(opts: CommandOpts) {
-    const { podClass, config, noteByName, engine, wsRoot, vault } = opts;
+    const { podClass, config, noteByName, engine, wsRoot } = opts;
 
-    const pod = new podClass({
-      vaults: [vault],
+    const pod = new podClass();
+    const link = await pod.execute({
+      config: { ...config, fname: noteByName, dest: "stdout" },
+      vaults: DendronWorkspace.instance().vaults,
       wsRoot,
       engine,
     });
-    const link = await pod.plant({
-      mode: "notes",
-      config,
-      fname: noteByName,
-    } as PublishPodOpts);
     try {
       clipboardy.writeSync(link);
     } catch (err) {

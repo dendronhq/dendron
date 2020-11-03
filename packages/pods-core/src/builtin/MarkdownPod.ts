@@ -12,17 +12,14 @@ import _ from "lodash";
 import path from "path";
 import through2 from "through2";
 import {
-  PodConfigEntry,
-  PublishConfig,
-  PublishPodBaseV3,
-  PublishPodOpts,
-} from "../base";
-import {
+  BasePodExecuteOpts,
   ImportPod,
   ImportPodCleanConfig,
   ImportPodCleanOpts,
   ImportPodPlantOpts,
   ImportPodRawConfig,
+  PublishPod,
+  PublishPodCleanConfig,
 } from "../basev2";
 
 const ID = "dendron.markdown";
@@ -228,34 +225,24 @@ export class MarkdownImportPod extends ImportPod<
   }
 }
 
-export class MarkdownPublishPod extends PublishPodBaseV3<PublishConfig> {
+export class MarkdownPublishPod extends PublishPod {
   static id: string = ID;
   static description: string = "publish markdown";
 
-  static config = (): PodConfigEntry[] => {
-    return [
-      {
-        key: "dest",
-        description: "where will output be stored",
-        type: "string",
-      },
-    ];
-  };
-
-  async plant(opts: PublishPodOpts<PublishConfig>): Promise<any> {
-    await this.initEngine();
-    const cleanOpts = _.defaults(opts, { config: this.getDefaultConfig() });
+  async plant(opts: BasePodExecuteOpts<PublishPodCleanConfig>): Promise<any> {
+    const { config, engine } = opts;
+    //const cleanOpts = _.defaults(opts, { config: this.getDefaultConfig() });
     //const { dest } = cleanOpts.config;
-    const { fname } = cleanOpts;
-    const note = NoteUtilsV2.getNoteByFname(fname, this.engine.notes, {
+    const { fname } = config;
+    const note = NoteUtilsV2.getNoteByFname(fname, engine.notes, {
       throwIfEmpty: true,
     }) as NotePropsV2;
-    const root = this.engine.vaults[0];
+    const root = engine.vaults[0];
     const renderWithOutline = false;
     const remark = ParserUtilsV2.getRemark().use(dendronRefsPlugin, {
       root,
       renderWithOutline,
-      replaceRefs: { engine: this.engine },
+      replaceRefs: { engine },
     });
     const out = remark.processSync(note.body).toString();
     return _.trim(out);

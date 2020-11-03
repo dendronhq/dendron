@@ -3,12 +3,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import {
-  PodConfigEntry,
-  PublishConfig,
-  PublishPodBaseV3,
-  PublishPodOpts,
-} from "../base";
-import {
+  BasePodExecuteOpts,
   ExportPod,
   ExportPodCleanConfig,
   ExportPodCleanOpts,
@@ -19,6 +14,8 @@ import {
   ImportPodCleanOpts,
   ImportPodPlantOpts,
   ImportPodRawConfig,
+  PublishPod,
+  PublishPodCleanConfig,
 } from "../basev2";
 
 const ID = "dendron.json";
@@ -110,24 +107,14 @@ export class JSONImportPod extends ImportPod<
   }
 }
 
-export class JSONPublishPod extends PublishPodBaseV3<PublishConfig> {
+export class JSONPublishPod extends PublishPod {
   static id: string = ID;
   static description: string = "publish json";
 
-  static config = (): PodConfigEntry[] => {
-    return [
-      {
-        key: "dest",
-        description: "where will output be stored",
-        type: "string",
-      },
-    ];
-  };
-
-  async plant(opts: PublishPodOpts<PublishConfig>): Promise<any> {
-    await this.initEngine();
-    const { fname } = opts;
-    const note = NoteUtilsV2.getNoteByFname(fname, this.engine.notes, {
+  async plant(opts: BasePodExecuteOpts<PublishPodCleanConfig>): Promise<any> {
+    const { config, engine } = opts;
+    const { fname } = config;
+    const note = NoteUtilsV2.getNoteByFname(fname, engine.notes, {
       throwIfEmpty: true,
     });
     const out = JSON.stringify(note, null, 4);

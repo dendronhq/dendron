@@ -1,12 +1,12 @@
 import { DendronError } from "@dendronhq/common-all";
 import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
 import {
-  getPodConfig,
   getPodConfigPath,
   PodClassEntryV3,
   PodClassEntryV4,
   PodItemV4,
   PodKind,
+  PodUtils,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
@@ -128,7 +128,7 @@ export abstract class PodCLICommand extends BaseCommand<
     });
 
     const podClass = fetchPodClass(podId, { podSource, pods, podType });
-    const maybeConfig = getPodConfig(podsDir, podClass);
+    const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
     if (!maybeConfig) {
       const podConfigPath = getPodConfigPath(podsDir, podClass);
       throw new DendronError({

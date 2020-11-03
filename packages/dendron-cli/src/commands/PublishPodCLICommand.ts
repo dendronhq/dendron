@@ -1,10 +1,11 @@
 import { readYAML } from "@dendronhq/common-server";
 import {
   getAllPublishPods,
-  getPodConfig,
   PodClassEntryV3,
+  PodClassEntryV4,
   PodItemV3,
   PodKind,
+  PodUtils,
   PublishPodOpts,
 } from "@dendronhq/pods-core";
 import _ from "lodash";
@@ -16,7 +17,7 @@ import { SoilCommandCLIOpts, SoilCommandOptsV2, SoilCommandV2 } from "./soil";
 type CommandOutput = {};
 
 type CommandOpts = SoilCommandOptsV2 & {
-  podClass: PodClassEntryV3;
+  podClass: PodClassEntryV4;
   config: any;
   noteByName: string;
 };
@@ -57,7 +58,7 @@ function enrichPodArgs(
   if (config) {
     cleanConfig = readYAML(config);
   } else {
-    cleanConfig = getPodConfig(podsDir, podClass);
+    cleanConfig = PodUtils.getConfig({ podsDir, podClass });
   }
   return {
     podClass,

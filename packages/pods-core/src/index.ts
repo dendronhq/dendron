@@ -13,7 +13,7 @@ export * from "./utils";
 export function getAllExportPods(): PodClassEntryV4[] {
   return [JSONExportPod];
 }
-export function getAllPublishPods(): PodClassEntryV3[] {
+export function getAllPublishPods(): PodClassEntryV4[] {
   return [JSONPublishPod, MarkdownPublishPod];
 }
 export function getAllImportPods(): PodClassEntryV4[] {
@@ -31,18 +31,6 @@ export function getPodConfigPath(
 
 export function getPodPath(podsDir: string, podClass: PodClassEntryV2): string {
   return path.join(podsDir, podClass.id);
-}
-
-export function getPodConfig(
-  podsDir: string,
-  podClass: PodClassEntryV2 | PodClassEntryV3
-): false | any {
-  const podConfigPath = getPodConfigPath(podsDir, podClass);
-  if (!fs.existsSync(podConfigPath)) {
-    return false;
-  } else {
-    return readYAML(podConfigPath);
-  }
 }
 
 export function genPodConfigFile(

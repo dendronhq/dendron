@@ -230,3 +230,85 @@ export abstract class ImportPod<
     return this.plant({ config: cleanConfig, wsRoot, vaults, engine });
   }
 }
+
+export type PublishPodRawConfig = {
+  fname: string;
+  dest?: string;
+};
+export type PublishPodCleanConfig = {
+  fname: string;
+  dest: URI | "stdout";
+};
+export type PublishPodCleanOpts<TConfig> = {
+  config: TConfig & PublishPodCleanConfig;
+  wsRoot: string;
+};
+export type PublishPodPlantOpts = {};
+
+export type PublishPodExecuteOpts<TConfigRaw> = BasePodExecuteOpts<
+  TConfigRaw
+> & { fname: string };
+
+export abstract class PublishPod<
+  TConfigRaw extends PublishPodRawConfig = PublishPodRawConfig,
+  TConfigClean extends PublishPodCleanConfig = PublishPodCleanConfig
+> extends BasePod<TConfigRaw & PublishPodRawConfig> {
+  static kind: PodKind = "publish";
+
+  get config(): PodConfig[] {
+    return [
+      {
+        key: "dest",
+        description: "where to export to",
+        type: "string" as const,
+        default: "stdout",
+      },
+      {
+        key: "fname",
+        description: "where to export to",
+        type: "string" as const,
+      },
+    ];
+  }
+
+  async clean(opts: PublishPodCleanOpts<TConfigRaw>): Promise<TConfigClean> {
+    return opts.config as any;
+  }
+
+  abstract plant(opts: BasePodExecuteOpts<TConfigClean>): Promise<any>;
+
+  cleanPublishConfig({
+    wsRoot,
+    config,
+  }: {
+    config: PublishPodRawConfig;
+    wsRoot: string;
+  }): PublishPodCleanConfig {
+    let dest: URI | "stdout";
+    if (config.dest === "stdout") {
+      dest = "stdout" as const;
+    } else {
+      dest = this.getPodPath({ fpath: config.dest, wsRoot, pathKey: "src" });
+      if (!fs.existsSync(dest.fsPath)) {
+        throw new DendronError({
+          friendly: `no snapshot found at ${dest.fsPath}`,
+        });
+      }
+    }
+    return {
+      dest,
+      fname: config.fname,
+    };
+  }
+
+  async execute(opts: BasePodExecuteOpts<TConfigRaw>) {
+    const { config, engine, wsRoot, vaults } = opts;
+    await engine.init();
+    const _config = this.cleanPublishConfig({ config, wsRoot });
+    const cleanConfig = await this.clean({
+      config: { ...config, ..._config },
+      wsRoot,
+    });
+    return this.plant({ config: cleanConfig, wsRoot, vaults, engine });
+  }
+}

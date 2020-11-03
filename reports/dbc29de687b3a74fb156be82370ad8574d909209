@@ -1,0 +1,20 @@
+     519 text files.
+classified 519 filesDuplicate file check 519 files (429 known unique)Unique:      100 files                                          Unique:      200 files                                          Unique:      300 files                                          Unique:      400 files                                               468 unique files.                              
+Counting:  100Counting:  200Counting:  300Counting:  400     120 files ignored.
+
+github.com/AlDanial/cloc v 1.86  T=0.78 s (537.7 files/s, 151384.3 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+JSON                            73              6              0          72745
+TypeScript                     239           2661           2696          27036
+Markdown                        50           4706              0           5971
+JavaScript                      16            168             76           1349
+Bourne Shell                    24             40              9            181
+YAML                            13              3              3            158
+CSS                              2             17             32             72
+HTML                             1              0              0             14
+SVG                              1              0              0             12
+-------------------------------------------------------------------------------
+SUM:                           419           7601           2816         107538
+-------------------------------------------------------------------------------

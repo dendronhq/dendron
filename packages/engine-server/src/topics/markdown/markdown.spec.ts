@@ -1,9 +1,9 @@
+import { DNodeUtils, Note } from "@dendronhq/common-all";
 import { EngineTestUtils } from "@dendronhq/common-server";
 import _ from "lodash";
+import { DendronEngine } from "../../engine";
 import { replaceRefs } from "./plugins/replaceRefs";
 import { getProcessor } from "./utils";
-import { DendronEngine } from "../../engine";
-import { DNodeUtils, DNodeUtilsV2, Note } from "@dendronhq/common-all";
 
 // @ts-ignore
 const mdSimple = `

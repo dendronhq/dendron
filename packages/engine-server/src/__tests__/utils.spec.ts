@@ -280,22 +280,6 @@ head w.3 text
     ).toEqual('@import "ref.md" {line_begin=10}');
   });
 
-  // it.skip("anchor start alt", async () => {
-  //   const txt = ["", `# Tasks`, "task1", "task2"];
-  //   root = EngineTestUtils.setupStoreDir({
-  //     initDirCb: (dirPath: string) => {
-  //       fs.writeFileSync(path.join(dirPath, "daily.tasks.md"), txt.join("\n"), {
-  //         encoding: "utf8",
-  //       });
-  //     },
-  //   });
-  //   expect(
-  //     replaceRefWithMPEImport("((ref:[[daily.tasks]]#Tasks))", {
-  //       root,
-  //     })
-  //   ).toEqual('@import "daily.task.md" {line_begin=1}');
-  // });
-
   it("anchor start and end", () => {
     expect(
       replaceRefWithMPEImport("((ref:[[ref]]#head2.1:#head2.3))", {

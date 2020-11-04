@@ -14,10 +14,10 @@ import {
   SchemaTestPresetsV2,
   EngineAPIShim,
   INIT_TEST_PRESETS,
+  EngineTestUtilsV2,
 } from "@dendronhq/common-test-utils";
 import {
   DendronAPI,
-  EngineTestUtils,
   file2Schema,
   note2File,
   tmpDir,
@@ -69,7 +69,7 @@ describe("schema", () => {
     wsRoot = tmpDir().name;
     vault = path.join(wsRoot, "vault");
     fs.ensureDirSync(vault);
-    await EngineTestUtils.setupVault({
+    await EngineTestUtilsV2.setupVault({
       vaultDir: vault,
       initDirCb: async (vaultPath: string) => {
         await NodeTestUtilsV2.createNotes({ vaultPath });
@@ -88,7 +88,7 @@ describe("schema", () => {
       wsRoot = tmpDir().name;
       vault = path.join(wsRoot, "vault");
       fs.ensureDirSync(vault);
-      await EngineTestUtils.setupVault({
+      await EngineTestUtilsV2.setupVault({
         vaultDir: vault,
         initDirCb: async (vaultPath: string) => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
@@ -124,7 +124,7 @@ describe("schema", () => {
       wsRoot = tmpDir().name;
       vault = path.join(wsRoot, "vault");
       fs.ensureDirSync(vault);
-      await EngineTestUtils.setupVault({
+      await EngineTestUtilsV2.setupVault({
         vaultDir: vault,
         initDirCb: async (_vaultPath: string) => {},
       });
@@ -154,7 +154,7 @@ describe("schema", () => {
       wsRoot = tmpDir().name;
       vault = path.join(wsRoot, "vault");
       fs.ensureDirSync(vault);
-      await EngineTestUtils.setupVault({
+      await EngineTestUtilsV2.setupVault({
         vaultDir: vault,
         initDirCb: async (vaultPath: string) => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
@@ -292,7 +292,7 @@ describe("notes", () => {
       wsRoot = tmpDir().name;
       vault = path.join(wsRoot, "vault");
       fs.ensureDirSync(vault);
-      await EngineTestUtils.setupVault({
+      await EngineTestUtilsV2.setupVault({
         vaultDir: vault,
         initDirCb: async (vaultPath: string) => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
@@ -365,7 +365,7 @@ describe("notes", () => {
       wsRoot = tmpDir().name;
       vault = path.join(wsRoot, "vault");
       fs.ensureDirSync(vault);
-      await EngineTestUtils.setupVault({
+      await EngineTestUtilsV2.setupVault({
         vaultDir: vault,
         initDirCb: async (vaultPath: string) => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
@@ -453,7 +453,7 @@ describe("notes", () => {
       wsRoot = tmpDir().name;
       vault = path.join(wsRoot, "vault");
       fs.ensureDirSync(vault);
-      await EngineTestUtils.setupVault({
+      await EngineTestUtilsV2.setupVault({
         vaultDir: vault,
         initDirCb: async (vaultPath: string) => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
@@ -550,7 +550,7 @@ describe("notes", () => {
       wsRoot = tmpDir().name;
       vault = path.join(wsRoot, "vault");
       fs.ensureDirSync(vault);
-      await EngineTestUtils.setupVault({
+      await EngineTestUtilsV2.setupVault({
         vaultDir: vault,
         initDirCb: async (vaultPath: string) => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
@@ -598,7 +598,7 @@ describe("notes", () => {
       wsRoot = tmpDir().name;
       vault = path.join(wsRoot, "vault");
       fs.ensureDirSync(vault);
-      await EngineTestUtils.setupVault({
+      await EngineTestUtilsV2.setupVault({
         vaultDir: vault,
         initDirCb: async (vaultPath: string) => {
           await NodeTestUtilsV2.createNotes({ vaultPath });

@@ -1,9 +1,8 @@
+import { tmpDir, DendronAPI } from "@dendronhq/common-server";
 import {
-  EngineTestUtils,
-  NodeTestUtils,
-  tmpDir,
-  DendronAPI,
-} from "@dendronhq/common-server";
+  EngineTestUtilsV2,
+  NodeTestUtilsV2,
+} from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import path from "path";
 
@@ -15,15 +14,18 @@ describe("main", () => {
     wsRoot = tmpDir().name;
     vault = path.join(wsRoot, "vault");
     fs.ensureDirSync(vault);
-    await EngineTestUtils.setupVault({
+    await EngineTestUtilsV2.setupVault({
       vaultDir: vault,
       initDirCb: (dirPath: string) => {
-        NodeTestUtils.createNotes(dirPath, [
-          {
-            id: "id.foo",
-            fname: "foo",
-          },
-        ]);
+        NodeTestUtilsV2.createNotes({
+          vaultPath: dirPath,
+          noteProps: [
+            {
+              id: "id.foo",
+              fname: "foo",
+            },
+          ],
+        });
       },
     });
   });

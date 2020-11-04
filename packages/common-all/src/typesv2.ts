@@ -115,6 +115,7 @@ export type DNodePropsV2<T = any> = {
   body: string;
   custom?: any;
   schema?: { moduleId: string; schemaId: string };
+  vault?: DVault;
 };
 
 /**

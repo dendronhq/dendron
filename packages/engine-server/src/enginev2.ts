@@ -8,6 +8,7 @@ import {
   DNodePropsV2,
   DNodeTypeV2,
   DStoreV2,
+  DVault,
   EngineDeleteOptsV2,
   EngineQueryNoteResp,
   EngineUpdateNodesOptsV2,
@@ -32,12 +33,15 @@ import { FuseEngine } from "./fuseEngine";
 
 type DendronEngineOptsV2 = {
   vaults: string[];
+  vaultsv3?: DVault[];
   forceNew?: boolean;
   store?: any;
   mode?: DEngineMode;
   logger?: DLogger;
 };
-type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
+type DendronEnginePropsV2 = Required<Omit<DendronEngineOptsV2, "vaultsv3">> & {
+  vaultsv3?: DVault[];
+};
 
 export class DendronEngineV2 implements DEngineV2 {
   public vaults: string[];
@@ -46,6 +50,7 @@ export class DendronEngineV2 implements DEngineV2 {
   public logger: DLogger;
   public fuseEngine: FuseEngine;
   public links: DLink[];
+  public vaultsv3: DVault[];
 
   constructor(props: DendronEnginePropsV2) {
     this.vaults = props.vaults;
@@ -54,6 +59,9 @@ export class DendronEngineV2 implements DEngineV2 {
     this.props = props;
     this.fuseEngine = new FuseEngine({});
     this.links = [];
+    this.vaultsv3 = !_.isUndefined(props.vaultsv3)
+      ? props.vaultsv3
+      : this.vaults.map((ent) => ({ fsPath: ent }));
   }
 
   static create({ vaults }: { vaults: string[] }) {

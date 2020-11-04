@@ -40,6 +40,7 @@ Object {
     "title": "bond",
     "type": "schema",
     "updated": "1",
+    "vault": undefined,
   },
   "schemaModule": Object {
     "fname": "bond",
@@ -59,6 +60,7 @@ Object {
       "title": "bond",
       "type": "schema",
       "updated": "1",
+      "vault": undefined,
     },
     "schemas": Object {
       "bond": Object {
@@ -76,6 +78,7 @@ Object {
         "title": "bond",
         "type": "schema",
         "updated": "1",
+        "vault": undefined,
       },
     },
     "version": 1,
@@ -102,6 +105,7 @@ Object {
     "title": "bond",
     "type": "schema",
     "updated": "1",
+    "vault": undefined,
   },
   "schemaModule": Object {
     "fname": "bond",
@@ -121,6 +125,7 @@ Object {
       "title": "bond",
       "type": "schema",
       "updated": "1",
+      "vault": undefined,
     },
     "schemas": Object {
       "bond": Object {
@@ -138,6 +143,7 @@ Object {
         "title": "bond",
         "type": "schema",
         "updated": "1",
+        "vault": undefined,
       },
     },
     "version": 1,

@@ -48,6 +48,7 @@ export class DNodeUtilsV2 {
       children,
       body,
       data,
+      vault,
     } = _.defaults(opts, {
       updated: moment.now(),
       created: moment.now(),
@@ -64,6 +65,7 @@ export class DNodeUtilsV2 {
     const cleanProps: DNodePropsV2 = {
       id,
       title,
+      vault,
       type,
       desc,
       links,

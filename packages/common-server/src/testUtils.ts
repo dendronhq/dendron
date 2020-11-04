@@ -53,11 +53,6 @@ export class FileTestUtils {
     );
   }
 
-  static getFixturesRoot(base: string) {
-    const pkgRoot = FileTestUtils.getPkgRoot(base);
-    return path.join(pkgRoot, "fixtures");
-  }
-
   static getPkgRoot(base: string, fname?: string): string {
     fname = fname || "package.json";
     let acc = 10;

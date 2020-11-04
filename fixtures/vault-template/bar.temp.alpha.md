@@ -1,1 +1,0 @@
-text from alpha template

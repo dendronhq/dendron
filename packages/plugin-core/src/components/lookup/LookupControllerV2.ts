@@ -73,6 +73,7 @@ export class LookupControllerV2 {
     quickPick.placeholder = "eg. hello.world";
     quickPick.ignoreFocusOut = cleanOpts.ignoreFocusOut;
     quickPick.justActivated = true;
+    quickPick.canSelectMany = true;
     const provider = new LookupProviderV2(this.opts);
 
     await this.updatePickerBehavior({

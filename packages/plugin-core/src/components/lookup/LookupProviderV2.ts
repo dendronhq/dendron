@@ -33,11 +33,16 @@ export class LookupProviderV2 {
     this.opts = opts;
   }
 
-  async _onAcceptNewNote(picker: DendronQuickPickerV2): Promise<Uri> {
+  async _onAcceptNewNote({
+    picker,
+    selectedItem,
+  }: {
+    picker: DendronQuickPickerV2;
+    selectedItem: DNodePropsQuickInputV2;
+  }): Promise<Uri> {
     const ctx = "onAcceptNewNode";
     const fname = PickerUtilsV2.getValue(picker);
     Logger.info({ ctx, msg: "createNewPick", value: fname });
-    const selectedItem = PickerUtilsV2.getSelection(picker);
     let nodeNew: DNodePropsV2;
     let foundStub = false;
     const ws = DendronWorkspace.instance();
@@ -119,16 +124,21 @@ export class LookupProviderV2 {
     Logger.info({ ctx, msg: "engine.write", profile });
     return uri;
   }
-  async onAcceptNewNode(
-    picker: DendronQuickPickerV2,
-    opts: EngineOpts
-  ): Promise<Uri> {
+  async onAcceptNewNode({
+    picker,
+    opts,
+    selectedItem,
+  }: {
+    picker: DendronQuickPickerV2;
+    opts: EngineOpts;
+    selectedItem: DNodePropsQuickInputV2;
+  }): Promise<Uri> {
     const ctx = "onAcceptNewNode";
     Logger.info({ ctx });
     if (opts.flavor === "schema") {
       return this._onAcceptNewSchema(picker);
     } else {
-      return this._onAcceptNewNote(picker);
+      return this._onAcceptNewNote({ picker, selectedItem });
     }
   }
 
@@ -136,36 +146,59 @@ export class LookupProviderV2 {
     const ctx = "onDidAccept";
     const value = PickerUtilsV2.getValue(picker);
     Logger.info({ ctx, msg: "enter", value, opts });
-    const selectedItem = PickerUtilsV2.getSelection(picker);
+    const selectedItems = PickerUtilsV2.getSelection(picker);
     const resp = this.validate(picker.value, opts.flavor);
     const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
     const ws = DendronWorkspace.instance();
-    let uri: Uri;
+    let uris: Uri[];
     if (resp) {
       return window.showErrorMessage(resp);
     }
+
+    // check if we get note by quickpick value instead of selection
     const maybeNote = NoteUtilsV2.getNoteByFname(value, ws.getEngine().notes);
-    if (!selectedItem && opts.flavor === "note" && maybeNote) {
-      uri = node2Uri(maybeNote, wsFolders);
-      return showDocAndHidePicker(uri, picker);
+    if (!selectedItems && opts.flavor === "note" && maybeNote) {
+      uris = [node2Uri(maybeNote, wsFolders)];
+      return showDocAndHidePicker(uris, picker);
     }
-    if (PickerUtilsV2.isCreateNewNotePick(selectedItem)) {
-      uri = await this.onAcceptNewNode(picker, opts);
+
+    // get note by selection
+    const isCreateNew = _.some(
+      selectedItems.map(PickerUtilsV2.isCreateNewNotePick)
+    );
+    if (isCreateNew && selectedItems.length > 1) {
+      window.showErrorMessage(
+        `Can only select one item when creating new ${opts.flavor}`
+      );
+      return;
+    }
+    if (isCreateNew) {
+      uris = [
+        await this.onAcceptNewNode({
+          picker,
+          opts,
+          selectedItem: selectedItems[0],
+        }),
+      ];
     } else {
-      uri = node2Uri(selectedItem, wsFolders);
       if (opts.flavor === "schema") {
-        const smod = DendronWorkspace.instance().getEngine().schemas[
-          selectedItem.id
-        ];
-        uri = Uri.file(
-          SchemaUtilsV2.getPath({
-            root: DendronWorkspace.rootWorkspaceFolder()?.uri.fsPath as string,
-            fname: smod.fname,
-          })
+        const smods = selectedItems.map(
+          (item) => DendronWorkspace.instance().getEngine().schemas[item.id]
         );
+        uris = smods.map((smod) =>
+          Uri.file(
+            SchemaUtilsV2.getPath({
+              root: DendronWorkspace.rootWorkspaceFolder()?.uri
+                .fsPath as string,
+              fname: smod.fname,
+            })
+          )
+        );
+      } else {
+        uris = selectedItems.map((item) => node2Uri(item, wsFolders));
       }
     }
-    return showDocAndHidePicker(uri, picker);
+    return showDocAndHidePicker(uris, picker);
   }
 
   async onUpdatePickerItem(

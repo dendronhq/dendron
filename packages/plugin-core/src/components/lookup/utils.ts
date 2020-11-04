@@ -33,7 +33,7 @@ export function node2Uri(
 }
 
 export async function showDocAndHidePicker(
-  uri: Uri,
+  uris: Uri[],
   picker: DendronQuickPickerV2
 ) {
   const ctx = "showDocAndHidePicker";
@@ -51,16 +51,20 @@ export async function showDocAndHidePicker(
     }
   }
 
-  return window.showTextDocument(uri, { viewColumn }).then(
-    () => {
-      Logger.info({ ctx, msg: "showTextDocument" });
-      picker.hide();
-      return;
-    },
-    (err) => {
-      Logger.error({ ctx, err, msg: "exit" });
-      throw err;
-    }
+  return Promise.all(
+    uris.map(async (uri) => {
+      return window.showTextDocument(uri, { viewColumn }).then(
+        () => {
+          Logger.info({ ctx, msg: "showTextDocument" });
+          picker.hide();
+          return;
+        },
+        (err) => {
+          Logger.error({ ctx, err, msg: "exit" });
+          throw err;
+        }
+      );
+    })
   );
 }
 
@@ -69,8 +73,8 @@ export class PickerUtilsV2 {
     return picker.value;
   }
 
-  static getSelection(picker: DendronQuickPickerV2) {
-    return picker.selectedItems[0];
+  static getSelection(picker: DendronQuickPickerV2): DNodePropsQuickInputV2[] {
+    return [...picker.selectedItems];
   }
 
   static filterCreateNewItem = (

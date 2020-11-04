@@ -6,7 +6,8 @@ export type LookupControllerState = {
   buttons: DendronBtn[];
 };
 
-export type DendronQuickPickerV2 = QuickPick<DNodePropsQuickInputV2> & {
+export type DendronQuickPickItemV2 = QuickPick<DNodePropsQuickInputV2>;
+export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
   justActivated?: boolean;
   prev?: { activeItems: any; items: any };
   onCreate?: (note: DNodePropsV2) => Promise<void>;

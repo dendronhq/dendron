@@ -156,8 +156,13 @@ export class LookupProviderV2 {
     }
 
     // check if we get note by quickpick value instead of selection
-    const maybeNote = NoteUtilsV2.getNoteByFname(value, ws.getEngine().notes);
-    if (!selectedItems && opts.flavor === "note" && maybeNote) {
+    const activeItem = picker.activeItems[0];
+    const maybeNoteFname = activeItem ? activeItem.fname : value;
+    const maybeNote = NoteUtilsV2.getNoteByFname(
+      maybeNoteFname,
+      ws.getEngine().notes
+    );
+    if (_.isEmpty(selectedItems) && opts.flavor === "note" && maybeNote) {
       uris = [node2Uri(maybeNote, wsFolders)];
       return showDocAndHidePicker(uris, picker);
     }

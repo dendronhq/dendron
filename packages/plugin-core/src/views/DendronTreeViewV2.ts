@@ -1,6 +1,6 @@
 import {
   DendronError,
-  DNodeUtils,
+  DNodeUtilsV2,
   NotePropsDictV2,
   NotePropsV2,
   NoteUtilsV2,
@@ -50,7 +50,7 @@ export class TreeNote extends vscode.TreeItem {
     note: NotePropsV2;
     collapsibleState: vscode.TreeItemCollapsibleState;
   }) {
-    super(DNodeUtils.basename(note.fname, true), collapsibleState);
+    super(DNodeUtilsV2.basename(note.fname, true), collapsibleState);
     this.note = note;
     this.id = this.note.id;
     this.tooltip = this.note.title;
@@ -174,7 +174,7 @@ export class DendronTreeViewV2 {
     const uri = editor.document.uri;
     const basename = path.basename(uri.fsPath);
     if (basename.endsWith(".md")) {
-      const fname = DNodeUtils.uri2Fname(uri);
+      const fname = NoteUtilsV2.uri2Fname(uri);
       const notes = DendronWorkspace.instance().getEngine().notes;
       const note = NoteUtilsV2.getNoteByFname(fname, notes);
       if (note) {

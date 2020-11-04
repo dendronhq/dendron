@@ -1,7 +1,6 @@
 import {
   DendronSiteConfig,
   DEngineClientV2,
-  DNodeUtils,
   DNodeUtilsV2,
   HierarchyConfig,
   Note,
@@ -103,7 +102,7 @@ type Jekyll2MdFileErrors = {
 };
 
 async function note2JekyllMdFile(
-  note: Note | NotePropsV2,
+  note: NotePropsV2,
   opts: {
     notesDir: string;
     engine: DEngineClientV2;
@@ -111,17 +110,10 @@ async function note2JekyllMdFile(
   } & DendronSiteConfig
 ): Promise<Jekyll2MdFileErrors[]> {
   let meta: NotePropsV2;
-  if (note instanceof Note) {
-    meta = DNodeUtils.getMeta(note, {
-      pullCustomUp: true,
-      ignoreNullParent: true,
-    });
-  } else {
-    meta = {
-      ...NoteUtilsV2.serializeMeta(note),
-      fname: note.fname,
-    };
-  }
+  meta = {
+    ...NoteUtilsV2.serializeMeta(note),
+    fname: note.fname,
+  };
   const jekyllProps: DendronJekyllProps = {
     hpath: note.fname,
   };

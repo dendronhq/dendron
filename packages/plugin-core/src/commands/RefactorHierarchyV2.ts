@@ -1,4 +1,4 @@
-import { DNodeUtils } from "@dendronhq/common-all";
+import { NoteUtilsV2 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
@@ -34,7 +34,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     let value: string = "";
     const editor = VSCodeUtils.getActiveTextEditor();
     if (editor) {
-      value = DNodeUtils.uri2Fname(editor.document.uri);
+      value = NoteUtilsV2.uri2Fname(editor.document.uri);
     }
     match = await VSCodeUtils.showInputBox({
       prompt: "Enter match text",

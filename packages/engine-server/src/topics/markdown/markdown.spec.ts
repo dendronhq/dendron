@@ -53,11 +53,6 @@ describe("replaceRefs", () => {
   });
 
   test("imagePrefix", () => {
-    // const uri = path.join(root, "sample.image-link.md");
-    // const note = createNoteFromMarkdown(uri);
-    // expect(note.toRawProps(false, { ignoreNullParent: true })).toMatchSnapshot(
-    //   "rawprops"
-    // );
     const out = getProcessor()
       .use(replaceRefs, { imageRefPrefix: "bond/", scratch: "" })
       .processSync(`![alt-text](image-url.jpg)`);
@@ -92,6 +87,7 @@ describe("replaceRefs", () => {
       scratch: "",
       engine,
     });
+    debugger;
 
     const note = NoteUtilsV2.getNoteByFname(
       "engine-server.replace-refs",

@@ -3,7 +3,6 @@ import * as vscode from "vscode";
 import { CONFIG } from "../constants";
 import { DendronClientUtilsV2 } from "../utils";
 import { DendronWorkspace } from "../workspace";
-import { CreateNoteCommand } from "./CreateNote";
 import { GotoNoteCommand } from "./GotoNote";
 
 type CommandOpts = {
@@ -14,7 +13,7 @@ type CommandInput = {
   title: string;
 };
 
-export class CreateDailyJournalCommand extends CreateNoteCommand {
+export class CreateDailyJournalCommand {
   async gatherInputs(): Promise<CommandInput | undefined> {
     const dailyJournalDomain = DendronWorkspace.configuration().get<string>(
       CONFIG["DAILY_JOURNAL_DOMAIN"].key

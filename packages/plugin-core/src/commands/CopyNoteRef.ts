@@ -1,11 +1,11 @@
-import { DNodeUtils, NotePropsV2 } from "@dendronhq/common-all";
 import clipboardy from "@dendronhq/clipboardy";
+import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DendronRefLink, refLink2String } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { TextEditor, window, Selection, Range, Position } from "vscode";
+import { Position, Range, Selection, TextEditor, window } from "vscode";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
-import { DendronRefLink, refLink2String } from "@dendronhq/engine-server";
 
 type CommandOpts = {};
 type CommandOutput = string;
@@ -84,7 +84,7 @@ export class CopyNoteRefCommand extends BasicCommand<
 
   async execute(_opts: CommandOpts) {
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
-    const fname = DNodeUtils.uri2Fname(editor.document.uri);
+    const fname = NoteUtilsV2.uri2Fname(editor.document.uri);
     let note: NotePropsV2 | undefined;
     note = _.find(DendronWorkspace.instance().getEngine().notes, { fname });
     if (!note) {

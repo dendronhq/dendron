@@ -1,5 +1,5 @@
 import clipboardy from "@dendronhq/clipboardy";
-import { DNodeUtils, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { TextEditor, window } from "vscode";
 import { VSCodeUtils } from "../utils";
@@ -26,7 +26,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
 
   async execute(_opts: CommandOpts) {
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
-    const fname = DNodeUtils.uri2Fname(editor.document.uri);
+    const fname = NoteUtilsV2.uri2Fname(editor.document.uri);
     let note: NotePropsV2;
     note = NoteUtilsV2.getNoteByFname(
       fname,

@@ -3,10 +3,10 @@ import matter from "gray-matter";
 import _ from "lodash";
 import minimatch from "minimatch";
 import moment from "moment";
-import path from "path";
 import { URI } from "vscode-uri";
 import YAML from "yamljs";
 import { DendronError } from "./error";
+import { DNodeUtilsV2 } from "./nodev2";
 import {
   DEngine,
   DNodeData,
@@ -36,149 +36,26 @@ import { genUUID } from "./uuid";
 
 export const UNKNOWN_SCHEMA_ID = "_UNKNOWN_SCHEMA";
 
-export class DNodeUtils {
-  /**
-   * Last element of path
-   *
-   * // don't remove extension
-   * basename(foo.bar.md) // foo.bar
-   *
-   * @param nodePath
-   * @param rmExtension
-   */
-  static basename(nodePath: string, rmExtension?: boolean) {
-    if (rmExtension) {
-      const idx = nodePath.lastIndexOf(".md");
-      if (idx > 0) {
-        nodePath = nodePath.slice(0, idx);
-      }
-    }
-    const [first, ...rest] = nodePath.split(".");
-    return _.isEmpty(rest) ? first : rest.slice(-1)[0];
-  }
+export type CreatePropsOpts = {
+  returnExtra: boolean;
+};
 
-  /**
-   * Second last element
-   * @param nodePath
-   */
-  static dirName(nodePath: string) {
-    return nodePath.split(".").slice(0, -1).join(".");
-  }
-
-  /**
-   * First element
-   * eg. domainName(foo.bar.baz) // foo
-   * @param nodePath
-   */
-  static domainName(nodePath: string) {
-    return nodePath.split(".")[0];
-  }
-
+class DNodeUtils {
   static findParent(opts: {
     hpath: string;
     nodes: DNodeDict;
   }): DNode | undefined {
     const { hpath, nodes } = opts;
-    const dirname = DNodeUtils.dirName(hpath);
+    const dirname = DNodeUtilsV2.dirName(hpath);
     if (dirname === "") {
       return nodes["root"];
     }
     return _.find(nodes, { fname: dirname });
   }
-
-  static findClosestParent(
-    fpath: string,
-    nodes: DNodeDict,
-    opts?: { noStubs: boolean }
-  ): IDNode {
-    const cleanOpts = _.defaults(opts, { noStubs: false });
-    const dirname = DNodeUtils.dirName(fpath);
-    if (dirname === "") {
-      return nodes["root"];
-    }
-    const maybeNode = _.find(nodes, { fname: dirname });
-    // return if not a stub
-    if (
-      (maybeNode && cleanOpts.noStubs && !maybeNode?.stub) ||
-      (maybeNode && !cleanOpts.noStubs)
-    ) {
-      return maybeNode;
-    }
-    return DNodeUtils.findClosestParent(dirname, nodes, cleanOpts);
-  }
-
-  /**
-   *
-   * @param note
-   * - pullCustomUp: roll custom attributes to top level, default: false
-   * @param opts
-   */
-  static getMeta(
-    note: Note,
-    opts?: { pullCustomUp?: boolean; ignoreNullParent?: boolean }
-  ): any {
-    const { pullCustomUp, ignoreNullParent } = _.defaults(opts || {}, {
-      pullCustomUp: false,
-      ignoreNullParent: false,
-    });
-    let seed = {};
-    let fields = [
-      "id",
-      "title",
-      "desc",
-      "updated",
-      "created",
-      "data",
-      "fname",
-      "stub",
-    ];
-    if (pullCustomUp) {
-      seed = note.custom;
-      fields = _.reject(fields, (ent) => ent === "custom");
-    }
-    const meta = { ...seed, ..._.pick(note, [...fields]) };
-    const family = _.pick(note.toRawProps(true, { ignoreNullParent }), [
-      "parent",
-      "children",
-    ]);
-    return { ...meta, ...family };
-  }
-
-  static getNoteByFname(
-    fname: string,
-    engine: DEngine,
-    opts?: { throwIfEmpty: boolean }
-  ): Note | undefined {
-    const out = _.find(
-      _.values(engine.notes),
-      (ent) => ent.fname.toLowerCase() === fname
-    );
-    if (opts?.throwIfEmpty && _.isUndefined(out)) {
-      throw Error(`${fname} not found`);
-    }
-    return out;
-  }
-
-  static getPathUpTo(hpath: string, numCompoenents: number) {
-    return hpath.split(".").slice(0, numCompoenents).join(".");
-  }
-
   static isRoot(node: DNode): boolean {
     return node.id === "root";
   }
-
-  static uri2Fname(uri: URI) {
-    return path.basename(uri.fsPath, ".md");
-  }
-
-  static node2Uri(node: Note, engine: DEngine): URI {
-    return URI.file(path.join(engine.props.root, node.fname + ".md"));
-  }
 }
-
-export type CreatePropsOpts = {
-  returnExtra: boolean;
-};
 
 export class DNodeRaw {
   /**
@@ -286,7 +163,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
   public uri: URI;
 
   static defaultTitle(fname: string) {
-    return _.capitalize(DNodeUtils.basename(fname, true));
+    return _.capitalize(DNodeUtilsV2.basename(fname, true));
   }
 
   constructor(opts: IDNodeOpts<T>) {
@@ -332,7 +209,7 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
   }
 
   get basename(): string {
-    return DNodeUtils.basename(this.logicalPath);
+    return DNodeUtilsV2.basename(this.logicalPath);
   }
 
   get detail(): string {

@@ -4,6 +4,7 @@ import _ from "lodash";
 import minimatch from "minimatch";
 import moment from "moment";
 import path from "path";
+import { URI } from "vscode-uri";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
 import { DNode } from "./node";
@@ -89,6 +90,17 @@ export class DNodeUtilsV2 {
       }
     });
     return cleanProps;
+  }
+
+  static basename(nodePath: string, rmExtension?: boolean) {
+    if (rmExtension) {
+      const idx = nodePath.lastIndexOf(".md");
+      if (idx > 0) {
+        nodePath = nodePath.slice(0, idx);
+      }
+    }
+    const [first, ...rest] = nodePath.split(".");
+    return _.isEmpty(rest) ? first : rest.slice(-1)[0];
   }
 
   static dirName(nodePath: string) {
@@ -500,6 +512,10 @@ export class NoteUtilsV2 {
       fname,
       id,
     };
+  }
+
+  static uri2Fname(uri: URI) {
+    return path.basename(uri.fsPath, ".md");
   }
 }
 

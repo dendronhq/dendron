@@ -1,3 +1,0 @@
-/**
- * Helper functions for store
- */

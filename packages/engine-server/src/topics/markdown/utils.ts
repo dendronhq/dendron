@@ -1,20 +1,15 @@
 /* eslint-disable camelcase */
-import { DNodeUtils, LinkType, Note, ProtoLink } from "@dendronhq/common-all";
-import fs from "fs-extra";
 import _ from "lodash";
 import _markdownit from "markdown-it";
 import markdownItRegex from "markdown-it-regex";
 import Token from "markdown-it/lib/token";
-import os from "os";
 import remark from "remark";
 import abbrPlugin from "remark-abbr";
 import frontmatterPlugin from "remark-frontmatter";
 import markdownParse from "remark-parse";
 // import wikiLinkPlugin from "remark-wiki-link";
 import unified, { Processor } from "unified";
-import { Node, Parent, Point, Position } from "unist";
-import visit, { CONTINUE, EXIT } from "unist-util-visit";
-import YAML from "yamljs";
+import { Node, Position } from "unist";
 import { dendronLinksPlugin } from "./plugins/dendronLinksPlugin";
 import { dendronRefsPlugin } from "./plugins/dendronRefsPlugin";
 import { ReplaceRefOptions } from "./plugins/replaceRefs";
@@ -136,104 +131,6 @@ export function parse(markdown: string): Node {
 // }
 
 // TODO: stub
-function uriToSlug(uri: string) {
-  return uri;
-}
-
-export function createNoteFromMarkdown(uri: string, eol?: string): Note {
-  // eslint-disable-next-line prefer-const
-  const markdown = fs.readFileSync(uri, { encoding: "utf8" });
-  eol = eol || os.EOL;
-
-  const tree = parse(markdown);
-  let title: string | null = null;
-  let frontmatter: any = {};
-
-  visit(tree, (node) => {
-    if (node.type === "heading" && node.depth === 1) {
-      if (_.isNull(title)) {
-        title = ((node as Parent)!.children[0].value as string) || title;
-      }
-    }
-    return title === null ? CONTINUE : EXIT;
-  });
-
-  const links: ProtoLink[] = [];
-  let start: Point = { line: 1, column: 1, offset: 0 }; // start position of the note
-
-  visit(tree, (node) => {
-    if (node.type === "yaml") {
-      frontmatter = YAML.parse(node.value as string) ?? {}; // parseYAML returns null if the frontmatter is empty
-      if (frontmatter.tite) {
-        title = frontmatter.title;
-      }
-      // Update the start position of the note by exluding the metadata
-      start = {
-        line: node.position!.end.line! + 1,
-        column: 1,
-        offset: node.position!.end.offset! + 1,
-      };
-    }
-
-    if (node.type === "image") {
-      links.push({
-        type: LinkType.IMAGE_LINK,
-        url: node.url as string,
-        alt: node.alt as string,
-        position: node.position!,
-      });
-    }
-
-    if (node.type === "wikiLink") {
-      let maybeLbl: string | undefined;
-      let maybeUrl: string | undefined;
-      [maybeLbl, maybeUrl] = (node.value as string).split("|");
-      if (_.isUndefined(maybeUrl)) {
-        maybeUrl = maybeLbl;
-        maybeLbl = undefined;
-      }
-      links.push({
-        type: LinkType.WIKI_LINK,
-        position: node.position!,
-        url: maybeUrl,
-      });
-    }
-
-    // if (node.type === "definition") {
-    //   linkDefinitions.push({
-    //     label: node.label as string,
-    //     url: node.url as string,
-    //     title: node.title as string,
-    //     position: node.position,
-    //   });
-    // }
-  });
-
-  // Give precendence to the title from the frontmatter if it exists
-  // title = frontmatter.title ?? title;
-
-  const end = tree.position!.end;
-  // const definitions = getFoamDefinitions(linkDefinitions, end);
-
-  const props = {
-    properties: frontmatter,
-    slug: uriToSlug(uri),
-    title,
-    links,
-    source: {
-      tree,
-      uri,
-      text: markdown,
-      contentStart: start,
-      end,
-      eol,
-    },
-  };
-  const fname = DNodeUtils.basename(props.source.uri, true);
-  const note = new Note({ fname });
-  note.custom.props = props;
-  return note;
-}
 
 // === Text Edits
 

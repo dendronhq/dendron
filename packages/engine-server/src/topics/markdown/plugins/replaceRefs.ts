@@ -1,10 +1,10 @@
-import { ProtoLink, DNodeUtils, DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngineClientV2, NoteUtilsV2, ProtoLink } from "@dendronhq/common-all";
+import fs from "fs-extra";
 import _ from "lodash";
 import { Node } from "unist";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
 import { WikiLinkData } from "./dendronLinksPlugin";
-import fs from "fs-extra";
 
 export type ReplaceRefOptions = {
   refReplacements?: { [key: string]: ProtoLink };
@@ -81,9 +81,13 @@ export function replaceRefs(options: ReplaceRefOptions) {
             throw Error(`need engine when wikiLinkUseId is set`);
           }
           const throwIfEmpty = missingLinkBehavior === "raiseIfError";
-          data.note = DNodeUtils.getNoteByFname(data.permalink, engine, {
-            throwIfEmpty,
-          });
+          data.note = NoteUtilsV2.getNoteByFname(
+            data.permalink,
+            (engine as DEngineClientV2).notes,
+            {
+              throwIfEmpty,
+            }
+          );
           if (_.isUndefined(data.note) && missingLinkBehavior === "404") {
             // @ts-ignore
             data.note = { id: "/404.html" };

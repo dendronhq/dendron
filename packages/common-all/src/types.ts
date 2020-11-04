@@ -1,4 +1,40 @@
+import { DNodeTypeV2 } from "./typesv2";
+
 export type Stage = "dev" | "prod" | "test";
+
+export type DEngineQuery = {
+  queryString: string;
+  mode: DNodeTypeV2;
+  opts?: QueryOpts;
+};
+
+export type DEngineMode = "exact" | "fuzzy";
+
+export interface QueryOpts {
+  /**
+   * Should add to full nodes
+   */
+  fullNode?: boolean;
+  /**
+   * Just get one result
+   */
+  queryOne?: boolean;
+  /**
+   * Use with `createIfNew`
+   * If true, create a stub node.
+   * A stub node is not written to disk
+   */
+  stub?: boolean;
+  /**
+   * If node does not exist, create it?
+   */
+  createIfNew?: boolean;
+  // --- hints
+  // DEPPRECATE
+  webClient?: boolean;
+  initialQuery?: boolean;
+  mode?: DNodeTypeV2;
+}
 
 export interface Resp<T> {
   data: T;

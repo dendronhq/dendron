@@ -11,6 +11,7 @@ tmp.setGracefulCleanup();
 
 export type FileItem = {
   path: string;
+  body?: string;
 };
 
 export class FileTestUtils {
@@ -44,7 +45,10 @@ export class FileTestUtils {
     return Promise.all(
       _.map(files, async (ent) => {
         const fpath = path.join(root, ent.path);
-        return await fs.ensureFile(fpath);
+        await fs.ensureFile(fpath);
+        if (ent.body) {
+          fs.writeFileSync(fpath, ent.body, { encoding: "utf8" });
+        }
       })
     );
   }

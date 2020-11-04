@@ -1,5 +1,9 @@
 import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
-import { EngineTestUtils } from "@dendronhq/common-server";
+import { FileTestUtils } from "@dendronhq/common-server";
+import {
+  EngineTestUtilsV2,
+  NodeTestPresetsV2,
+} from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { DendronEngineV2 } from "../../enginev2";
 import { replaceRefs } from "./plugins/replaceRefs";
@@ -48,8 +52,43 @@ describe("replaceRefs", () => {
   // @ts-ignore
   let root: string;
 
-  beforeEach(() => {
-    root = EngineTestUtils.setupStoreDir();
+  beforeEach(async () => {
+    root = await EngineTestUtilsV2.setupVault({
+      initDirCb: async (vaultPath: string) => {
+        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+          vaultDir: vaultPath,
+        });
+        await FileTestUtils.createFiles(vaultPath, [
+          {
+            path: "engine-server.replace-refs.md",
+            body: `---
+id: 123
+title: replace-refs
+---
+
+Replace-refs Text
+
+- [[engine-server.replace-refs.one]]
+- [[lbl|engine-server.replace-refs.one]]
+- [[engine-server.replace-refs.one.md]]
+- [[lbl|engine-server.replace-refs.one.md]]
+          `,
+          },
+          {
+            path: "engine-server.replace-refs.one.md",
+            body: `---
+id: 234
+---
+
+store/engine-server.replace-refs.one text
+
+- [[engine-server.replace-refs]]
+- [[engine-server.replace-refs.md]]
+          `,
+          },
+        ]);
+      },
+    });
   });
 
   test("imagePrefix", () => {

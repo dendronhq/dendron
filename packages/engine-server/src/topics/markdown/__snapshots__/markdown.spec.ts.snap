@@ -17,6 +17,7 @@ exports[`replaceRefs wiki2Md and swap id: raw 1`] = `
 - [lbl](234)
 - [engine-server.replace-refs.one.md](234)
 - [lbl](234)
+          
 
 "
 `;

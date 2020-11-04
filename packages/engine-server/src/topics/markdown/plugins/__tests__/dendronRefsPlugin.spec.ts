@@ -1,7 +1,17 @@
-import { EngineTestUtils } from "@dendronhq/common-server";
+import { EngineTestUtilsV2 } from "@dendronhq/common-test-utils/src";
 import fs from "fs-extra";
 import path from "path";
 import { getProcessor } from "../../../markdown/utils";
+
+async function setupTestCase1({ txt }: { txt: string[] }) {
+  return await EngineTestUtilsV2.setupVault({
+    initDirCb: async (dirPath: string) => {
+      fs.writeFileSync(path.join(dirPath, "daily.tasks.md"), txt.join("\n"), {
+        encoding: "utf8",
+      });
+    },
+  });
+}
 
 describe("basic", () => {
   describe("parse", () => {
@@ -71,15 +81,7 @@ describe("basic", () => {
 
     test("basic", async () => {
       const txt = ["", `# Tasks`, "task1", "task2"];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
-        },
-      });
+      root = await setupTestCase1({ txt });
       const out = getProcessor({ root })
         .processSync(`((ref:[[daily.tasks]]))`)
         .toString();
@@ -89,15 +91,7 @@ describe("basic", () => {
 
     test("basic block", async () => {
       const txt = ["", `# Tasks`, "task1", "task2"];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
-        },
-      });
+      root = await setupTestCase1({ txt });
       const out = getProcessor({ root })
         .processSync(
           `# Foo Bar
@@ -110,15 +104,7 @@ describe("basic", () => {
 
     test("basic block with fm", async () => {
       const txt = ["---", "id: foo", "---", `# Tasks`, "task1", "task2"];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
-        },
-      });
+      root = await setupTestCase1({ txt });
       const out = getProcessor({ root })
         .processSync(
           `# Foo Bar
@@ -141,15 +127,7 @@ describe("basic", () => {
         "## Header2",
         "task2",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
-        },
-      });
+      root = await setupTestCase1({ txt });
       const out = getProcessor({ root })
         .processSync(
           `# Foo Bar
@@ -172,15 +150,7 @@ describe("basic", () => {
         "## Header2",
         "task2",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
-        },
-      });
+      root = await setupTestCase1({ txt });
       const out = getProcessor({ root })
         .processSync(
           `# Foo Bar
@@ -206,15 +176,7 @@ describe("basic", () => {
         "BOND",
         "</div>",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
-        },
-      });
+      root = await setupTestCase1({ txt });
       const out = getProcessor({ root })
         .processSync(
           `# Foo Bar
@@ -237,15 +199,7 @@ describe("basic", () => {
         "## Header2",
         "task2",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
-        },
-      });
+      root = await setupTestCase1({ txt });
       const out = getProcessor({ root })
         .processSync(
           `# Foo Bar
@@ -272,15 +226,7 @@ describe("basic", () => {
         "BOND",
         "</div>",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
-        },
-      });
+      root = await setupTestCase1({ txt });
       const out = getProcessor({ root })
         .processSync(
           `# Foo Bar
@@ -307,15 +253,7 @@ describe("basic", () => {
         "BOND",
         "</div>",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
-        },
-      });
+      root = await setupTestCase1({ txt });
       const out = getProcessor({ root })
         .processSync(
           `# Foo Bar
@@ -342,15 +280,7 @@ describe("basic", () => {
         "BOND",
         "</div>",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
-        },
-      });
+      root = await setupTestCase1({ txt });
       const out = getProcessor({ root })
         .processSync(
           `# Foo Bar
@@ -377,15 +307,7 @@ describe("basic", () => {
         "BOND",
         "</div>",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
-        },
-      });
+      root = await setupTestCase1({ txt });
       const out = getProcessor({ root })
         .processSync(
           `# Foo Bar
@@ -412,15 +334,7 @@ describe("basic", () => {
         "BOND",
         "</div>",
       ];
-      root = await EngineTestUtils.setupStoreDir({
-        initDirCb: (dirPath: string) => {
-          fs.writeFileSync(
-            path.join(dirPath, "daily.tasks.md"),
-            txt.join("\n"),
-            { encoding: "utf8" }
-          );
-        },
-      });
+      root = await setupTestCase1({ txt });
       const out = getProcessor({
         root,
         renderWithOutline: true,

@@ -1,17 +1,16 @@
+import { FileTestUtils } from "@dendronhq/common-server";
+import { EngineTestUtilsV2 } from "@dendronhq/common-test-utils";
+import _ from "lodash";
 import {
+  DendronRefLink,
+  extractBlock,
+  matchRefMarker,
   parseDendronRef,
   parseFileLink,
-  DendronRefLink,
-  matchRefMarker,
+  refLink2String,
   replaceRefWithMPEImport,
   stripLocalOnlyTags,
-  extractBlock,
-  refLink2String,
 } from "../utils";
-import _ from "lodash";
-import { EngineTestUtils } from "@dendronhq/common-server";
-import fs from "fs-extra";
-import path from "path";
 
 function createFileLink(opts?: Partial<DendronRefLink>): DendronRefLink {
   return {
@@ -232,7 +231,37 @@ Head 2.1.1 Text`)
 describe("replaceRefWithMPEImport", () => {
   let root: string;
   beforeEach(async () => {
-    root = await EngineTestUtils.setupStoreDir({ copyFixtures: true });
+    root = await EngineTestUtilsV2.setupVault({
+      initDirCb: async (vaultPath) => {
+        await FileTestUtils.createFiles(vaultPath, [
+          {
+            path: "ref.md",
+            body: `---
+id: 5668f5ec-0db3-4530-812d-f8bb4f3c551b
+title: ref
+desc: ref test
+---
+
+# head1
+
+Header 1 text
+
+## head2.1
+
+Header 2 text
+
+## head2.2
+
+head 2.2 text
+
+## head2.3
+
+head w.3 text
+          `,
+          },
+        ]);
+      },
+    });
   });
 
   it("basic", () => {
@@ -251,21 +280,21 @@ describe("replaceRefWithMPEImport", () => {
     ).toEqual('@import "ref.md" {line_begin=10}');
   });
 
-  it.skip("anchor start alt", async () => {
-    const txt = ["", `# Tasks`, "task1", "task2"];
-    root = EngineTestUtils.setupStoreDir({
-      initDirCb: (dirPath: string) => {
-        fs.writeFileSync(path.join(dirPath, "daily.tasks.md"), txt.join("\n"), {
-          encoding: "utf8",
-        });
-      },
-    });
-    expect(
-      replaceRefWithMPEImport("((ref:[[daily.tasks]]#Tasks))", {
-        root,
-      })
-    ).toEqual('@import "daily.task.md" {line_begin=1}');
-  });
+  // it.skip("anchor start alt", async () => {
+  //   const txt = ["", `# Tasks`, "task1", "task2"];
+  //   root = EngineTestUtils.setupStoreDir({
+  //     initDirCb: (dirPath: string) => {
+  //       fs.writeFileSync(path.join(dirPath, "daily.tasks.md"), txt.join("\n"), {
+  //         encoding: "utf8",
+  //       });
+  //     },
+  //   });
+  //   expect(
+  //     replaceRefWithMPEImport("((ref:[[daily.tasks]]#Tasks))", {
+  //       root,
+  //     })
+  //   ).toEqual('@import "daily.task.md" {line_begin=1}');
+  // });
 
   it("anchor start and end", () => {
     expect(

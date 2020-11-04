@@ -1,6 +1,9 @@
 import { DendronError, DEngineClientV2 } from "@dendronhq/common-all";
-import { createLogger, EngineTestUtils } from "@dendronhq/common-server";
-import { NodeTestUtilsV2 } from "@dendronhq/common-test-utils";
+import { createLogger, FileTestUtils } from "@dendronhq/common-server";
+import {
+  EngineTestUtilsV2,
+  NodeTestUtilsV2,
+} from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { FileStorageV2 } from "../../../../drivers/file/storev2";
 import { DendronEngineV2 } from "../../../../enginev2";
@@ -87,28 +90,53 @@ describe("basic", () => {
   });
 
   describe("stingify", () => {
-    let root: string;
     let opts: DendronNoteRefPluginOpts;
     let engine: DEngineClientV2;
     let vaultDir: string;
 
     beforeEach(async () => {
-      root = await EngineTestUtils.setupVault({
-        initDirCb: async (_vaultDir: string) => {
-          vaultDir = _vaultDir;
+      vaultDir = await EngineTestUtilsV2.setupVault({
+        initDirCb: async (vaultPath: string) => {
           await NodeTestUtilsV2.createNote({
-            vaultDir,
+            vaultDir: vaultPath,
             noteProps: {
               fname: "daily.tasks",
               body: ["", `# Tasks`, "task1", "task2"].join("\n"),
             },
           });
+          await FileTestUtils.createFiles(vaultPath, [
+            {
+              path: "ref.md",
+              body: `---
+id: 5668f5ec-0db3-4530-812d-f8bb4f3c551b
+title: ref
+desc: ref test
+---
+
+# head1
+
+Header 1 text
+
+## head2.1
+
+Header 2 text
+
+## head2.2
+
+head 2.2 text
+
+## head2.3
+
+head w.3 text
+          `,
+            },
+          ]);
         },
       });
       engine = new DendronEngineV2({
-        vaults: [root],
+        vaults: [vaultDir],
         forceNew: true,
-        store: new FileStorageV2({ vaults: [root], logger: LOGGER }),
+        store: new FileStorageV2({ vaults: [vaultDir], logger: LOGGER }),
         mode: "fuzzy",
         logger: LOGGER,
       });

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "dev:inspect": "NODE_OPTIONS='--inspect' next",
     "build": "next build && next export",
-    "start": "next start"
+    "start": "next start",
+    "watch": "echo 0"
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.14.1-alpha.3",

@@ -10,4 +10,5 @@ npx lerna run build --scope @dendronhq/seeds-core
 npx lerna run build --scope @dendronhq/lsp-server
 npx lerna run build --scope @dendronhq/plugin-core
 npx lerna run build --scope @dendronhq/api-server
+npx lerna run build --scope @dendronhq/dendron-next-server
 npx lerna run build --scope @dendronhq/common-test-utils

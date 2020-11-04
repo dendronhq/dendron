@@ -1,5 +1,6 @@
 import {
   DNodeUtilsV2,
+  DVault,
   NoteChangeEntry,
   NoteOptsV2,
   NotePropsDictV2,
@@ -37,6 +38,30 @@ export type SetupWSOpts = {
   withGit?: boolean;
   wsRoot?: string;
 };
+
+export class EngineTestUtilsV3 {
+  static async setupVaults(opts: SetupVaultOpts & { vaults?: DVault[] }) {
+    const { vaults } = _.defaults(opts, {
+      vaults: [
+        {
+          fsPath: tmpDir().name,
+          name: "main",
+        },
+        {
+          fsPath: tmpDir().name,
+          name: "other",
+        },
+      ],
+    });
+    await Promise.all(
+      vaults.map(async (ent) => {
+        const { fsPath: vaultDir } = ent;
+        return EngineTestUtilsV2.setupVault({ ...opts, vaultDir });
+      })
+    );
+    return vaults;
+  }
+}
 
 export class EngineTestUtilsV2 {
   static async setupWS(opts: SetupWSOpts) {

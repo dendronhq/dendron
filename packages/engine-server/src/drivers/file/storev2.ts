@@ -5,6 +5,7 @@ import {
   DLink,
   DNodeUtilsV2,
   DStoreV2,
+  DVault,
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
@@ -275,10 +276,18 @@ export class FileStorageV2 implements DStoreV2 {
   public notesCache: NotePropsCacheV2;
   public logger: DLogger;
   public links: DLink[];
+  public vaultsv3?: DVault[];
 
-  constructor(props: { vaults: string[]; logger: DLogger }) {
+  constructor(props: {
+    vaults: string[];
+    logger: DLogger;
+    vaultsv3?: DVault[];
+  }) {
     const { vaults, logger } = props;
     this.vaults = vaults;
+    this.vaultsv3 = !_.isUndefined(props.vaultsv3)
+      ? props.vaultsv3
+      : this.vaults.map((ent) => ({ fsPath: ent }));
     this.notes = {};
     this.schemas = {};
     this.notesCache = {};

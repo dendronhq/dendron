@@ -7,7 +7,6 @@ import path from "path";
 import { URI } from "vscode-uri";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
-import { DNode } from "./node";
 import { SchemaTemplate } from "./types";
 import {
   DEngineClientV2,
@@ -61,7 +60,7 @@ export class DNodeUtilsV2 {
       data: {},
       fname: null,
     });
-    const title = opts.title || DNode.defaultTitle(fname);
+    const title = opts.title || NoteUtilsV2.genTitle(fname);
     const cleanProps: DNodePropsV2 = {
       id,
       title,
@@ -414,6 +413,10 @@ export class NoteUtilsV2 {
       }
     }
     return prefixParts.join(" ");
+  }
+
+  static genTitle(fname: string) {
+    return _.capitalize(DNodeUtilsV2.basename(fname, true));
   }
 
   static getNoteByFname(

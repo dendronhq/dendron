@@ -1,6 +1,5 @@
 import {
   DendronError,
-  DNode,
   IDNodeType,
   NotePropsV2,
   NoteUtilsV2,
@@ -13,7 +12,7 @@ import { BasicCommand } from "./base";
 type CommandOpts = { qs: string; mode: IDNodeType };
 export { CommandOpts as GotoNoteCommandOpts };
 
-type CommandOutput = DNode | NotePropsV2;
+type CommandOutput = NotePropsV2;
 
 export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async gatherInputs(): Promise<any> {

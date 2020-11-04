@@ -1,4 +1,4 @@
-import { DVault } from "@dendronhq/common-all/src";
+import { DVault } from "@dendronhq/common-all";
 import { EngineTestUtilsV2, SetupWSOpts } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import path from "path";

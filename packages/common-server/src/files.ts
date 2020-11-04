@@ -1,4 +1,4 @@
-import { DNodeRaw, NoteRawProps } from "@dendronhq/common-all";
+import { NoteRawProps } from "@dendronhq/common-all";
 import fs, { Dirent } from "fs";
 import matter from "gray-matter";
 import YAML from "js-yaml";
@@ -120,25 +120,6 @@ export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
     }),
     _.isNull
   ) as Dirent[] | string[];
-}
-
-export function mdFile2NodeProps(fpath: string): NoteRawProps {
-  const options: any = {
-    engines: {
-      yaml: {
-        parse: (s: string) => YAML.safeLoad(s, { schema: YAML.JSON_SCHEMA }),
-        stringify: (s: string) =>
-          YAML.safeDump(s, { schema: YAML.JSON_SCHEMA }),
-      },
-    },
-  };
-  const { data, content: body } = matter(
-    fs.readFileSync(fpath, { encoding: "utf8" }),
-    options
-  );
-  const { name: fname } = path.parse(fpath);
-  const dataProps = DNodeRaw.createProps({ ...data, fname, body });
-  return dataProps as NoteRawProps;
 }
 
 export function node2PropsMdFile(props: NoteRawProps, opts: { root: string }) {

@@ -1,6 +1,6 @@
-import { BaseCommand } from "./base";
+import { DEngineClientV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { DEngineClientV2, DNode } from "@dendronhq/common-all";
+import { BaseCommand } from "./base";
 
 type CommandOpts = { engine: DEngineClientV2 } & CommonOpts;
 
@@ -19,7 +19,7 @@ export class BackfillV2Command extends BaseCommand<CommandOpts, CommandOutput> {
       _.values(engine.notes).map((n) => {
         overwriteFields.forEach((f) => {
           if (f === "title") {
-            n.title = DNode.defaultTitle(n.fname);
+            n.title = NoteUtilsV2.genTitle(n.fname);
           } else {
             throw Error(`unknown overwrite field: ${f}`);
           }

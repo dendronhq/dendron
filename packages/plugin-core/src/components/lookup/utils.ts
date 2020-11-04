@@ -1,5 +1,4 @@
 import {
-  DNode,
   DNodePropsQuickInputV2,
   DNodePropsV2,
   DNodeUtilsV2,
@@ -23,7 +22,7 @@ export function createNoActiveItem(): DNodePropsQuickInputV2 {
 }
 
 export function node2Uri(
-  node: DNode | DNodePropsV2,
+  node: DNodePropsV2,
   workspaceFolders: WorkspaceFolder[]
 ): Uri {
   const ext = node.type === "note" ? ".md" : ".yml";

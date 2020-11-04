@@ -1,6 +1,6 @@
 import {
   DendronError,
-  IDNodeType,
+  DNodeTypeV2,
   NotePropsV2,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
@@ -9,7 +9,7 @@ import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
-type CommandOpts = { qs: string; mode: IDNodeType };
+type CommandOpts = { qs: string; mode: DNodeTypeV2 };
 export { CommandOpts as GotoNoteCommandOpts };
 
 type CommandOutput = NotePropsV2;

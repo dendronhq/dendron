@@ -1,4 +1,3 @@
-import { NoteRawProps } from "@dendronhq/common-all";
 import fs, { Dirent } from "fs";
 import matter from "gray-matter";
 import YAML from "js-yaml";
@@ -120,25 +119,6 @@ export function getAllFiles(opts: getAllFilesOpts): Dirent[] | string[] {
     }),
     _.isNull
   ) as Dirent[] | string[];
-}
-
-export function node2PropsMdFile(props: NoteRawProps, opts: { root: string }) {
-  const { root } = opts;
-  const { body, fname, custom } = props;
-  const filePath = path.join(root, `${fname}.md`);
-  const blacklist = [
-    "body",
-    "stub",
-    "data",
-    "custom",
-    "fname",
-    "parent",
-    "children",
-  ];
-  return fs.writeFileSync(
-    filePath,
-    matter.stringify(body || "", { ..._.omit(props, blacklist), ...custom })
-  );
 }
 
 /**

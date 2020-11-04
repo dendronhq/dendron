@@ -1,8 +1,6 @@
 import {
   DEngineClientV2,
-  DNodeRawProps,
   NotePropsV2,
-  NoteRawProps,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
 import { createLogger, FileTestUtils } from "@dendronhq/common-server";
@@ -25,9 +23,9 @@ import {
 
 const assertNodeMeta = (opts: {
   expect: jest.Expect;
-  payload: DNodeRawProps[];
+  payload: any[];
   fields: string[];
-  expected: Partial<DNodeRawProps>[];
+  expected: any[];
 }) => {
   const { expect, payload, fields, expected } = opts;
   expect(_.sortBy(_.map(payload, (ent) => _.pick(ent, fields)))).toEqual(
@@ -37,7 +35,7 @@ const assertNodeMeta = (opts: {
 
 const assertNodeBody = (opts: {
   expect: jest.Expect;
-  payload: DNodeRawProps[];
+  payload: any[];
   expected: { fname: string; body: string }[];
 }) => {
   const { expect, payload, expected } = opts;
@@ -54,7 +52,7 @@ const assertNodeBody = (opts: {
   ).toEqual(expected);
 };
 
-async function setupImport(opts: { jsonEntries: Partial<NoteRawProps>[] }) {
+async function setupImport(opts: { jsonEntries: any[] }) {
   const podsDir = FileTestUtils.tmpDir().name;
   const importDir = FileTestUtils.tmpDir().name;
   const importSrc = path.join(importDir, "import.json");
@@ -343,7 +341,7 @@ describe("JSONExportPod", () => {
       engine,
       vaults: [{ fsPath: storeDir }],
     });
-    const payload = fs.readJSONSync(path.join(wsRoot, fname)) as NoteRawProps[];
+    const payload = fs.readJSONSync(path.join(wsRoot, fname));
     assertNodeMeta({
       expect,
       payload,
@@ -381,7 +379,7 @@ describe("JSONExportPod", () => {
       engine,
       vaults: [{ fsPath: storeDir }],
     });
-    const payload = fs.readJSONSync(destPath) as NoteRawProps[];
+    const payload = fs.readJSONSync(destPath);
     assertNodeMeta({
       expect,
       payload,

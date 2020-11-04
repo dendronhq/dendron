@@ -1,4 +1,4 @@
-import { DEngineClientV2, NoteUtilsV2, ProtoLink } from "@dendronhq/common-all";
+import { DEngineClientV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import { Node } from "unist";
@@ -7,7 +7,6 @@ import { VFile } from "vfile";
 import { WikiLinkData } from "./dendronLinksPlugin";
 
 export type ReplaceRefOptions = {
-  refReplacements?: { [key: string]: ProtoLink };
   imageRefPrefix?: string;
   wikiLink2Md?: boolean;
   wikiLink2Html?: boolean;
@@ -43,7 +42,6 @@ export function replaceRefs(options: ReplaceRefOptions) {
     forNoteRefInSite,
     scratch,
   } = _.defaults(options, {
-    refReplacements: {},
     wikiLinkPrefix: false,
     wikiLink2Html: false,
     missingLinkBehavior: "404",

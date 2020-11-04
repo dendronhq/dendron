@@ -7,7 +7,7 @@ import path from "path";
 import { URI } from "vscode-uri";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
-import { SchemaTemplate } from "./types";
+import { SchemaTemplate } from "./typesv2";
 import {
   DEngineClientV2,
   DLoc,

@@ -4,12 +4,10 @@ import {
   DEngineDeleteSchemaRespV2,
   DEngineInitRespV2,
   DLink,
-  DNodeData,
   DNodePropsV2,
   DNodeTypeV2,
   EngineDeleteNoteResp,
   EngineDeleteOptsV2,
-  EngineGetResp,
   EngineQueryNoteResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
@@ -19,8 +17,6 @@ import {
   NoteChangeEntry,
   NotePropsDictV2,
   NotePropsV2,
-  QueryMode,
-  QueryOneOpts,
   QueryOptsV2,
   RenameNoteOptsV2,
   RenameNotePayload,
@@ -185,17 +181,6 @@ export class DendronEngineClient implements DEngineClientV2 {
   }
   async queryNote({ qs }: { qs: string }): Promise<NotePropsV2[]> {
     return await this.fuseEngine.queryNote({ qs });
-  }
-
-  /**
-   * Shortcut Function
-   */
-  async queryOne(
-    _queryString: string,
-    _mode: QueryMode,
-    _opts?: QueryOneOpts
-  ): Promise<EngineGetResp<DNodeData>> {
-    return {} as any;
   }
 
   async buildNotes() {}

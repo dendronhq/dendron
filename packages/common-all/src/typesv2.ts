@@ -1,7 +1,57 @@
 import { URI } from "vscode-uri";
 import { DendronError } from "./error";
-import { EngineDeleteOpts, NoteData, SchemaData } from "./types";
+import { Position } from "unist";
 
+// === Old
+export enum LinkType {
+  WIKI_LINK = "WIKI_LINK",
+  IMAGE_LINK = "IMAGE_LINK",
+}
+export interface Link {
+  type: LinkType;
+  url: string;
+  position: Position;
+  label?: string;
+}
+
+export interface WikiLink extends Link {
+  type: LinkType.WIKI_LINK;
+}
+
+export interface ImageLink extends Link {
+  type: LinkType.IMAGE_LINK;
+  alt?: string;
+}
+
+export type EngineDeleteOpts = {
+  /**
+   * Only delete from meta
+   */
+  metaOnly?: boolean;
+};
+
+export type SchemaData = {
+  namespace?: boolean;
+  pattern?: string;
+  template?: SchemaTemplate;
+};
+
+export type SchemaTemplate = {
+  id: string;
+  type: "snippet" | "note";
+};
+
+export type NoteData = {
+  schemaId?: string;
+  links?: NoteLink[];
+};
+
+export type NoteLink = {
+  type: "note";
+  id: string;
+};
+
+// === New
 export type DNodePointerV2 = string;
 export type DLoc = {
   fname?: string;

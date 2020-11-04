@@ -1,6 +1,6 @@
-import { Note, Schema } from "./node";
-import { URI } from "vscode-uri";
 import { Position } from "unist";
+import { URI } from "vscode-uri";
+import { Note } from "./node";
 
 export type Stage = "dev" | "prod" | "test";
 
@@ -173,7 +173,6 @@ export type SchemaRawProps = DNodeRawProps<SchemaData>;
 export type ISchemaOpts = Omit<IDNodeOpts<SchemaData>, "type">;
 export type ISchemaProps = Required<ISchemaOpts>;
 export type ISchema = ISchemaProps;
-export type SchemaDict = { [id: string]: Schema };
 
 // === Engine Types
 export interface Resp<T> {
@@ -253,9 +252,9 @@ export type UpdateNodesOpts = {
   noAddParent?: boolean;
 };
 
-export type StoreQueryOpts = QueryOpts & {
-  schemas?: SchemaDict;
-};
+// export type StoreQueryOpts = QueryOpts & {
+//   schemas?: SchemaDict;
+// };
 export type StoreDeleteOpts = {
   fpath?: string;
 };
@@ -297,20 +296,6 @@ export type DEngineCache = {
   ): Promise<void>;
 };
 
-export interface DEngineStore<T = DNodeData, O extends DEngineStoreOpts = any> {
-  opts: O;
-  // fetchInitial: () => DNodeDict;
-  delete: (id: string, opts?: StoreDeleteOpts) => Promise<void>;
-  get: (id: string, opts?: QueryOpts) => Promise<StoreGetResp<T>>;
-  query: (
-    queryString: string,
-    mode: QueryMode,
-    opts?: StoreQueryOpts
-  ) => Promise<EngineQueryResp<T>>;
-  write: <T>(node: IDNode<T>, opts?: DEngineStoreWriteOpts) => Promise<void>;
-  updateNodes(nodes: IDNode[]): Promise<void>;
-}
-
 export type DEngineMode = "exact" | "fuzzy";
 
 export type DEngineOpts = {
@@ -331,76 +316,76 @@ export type DEngineQuery = {
  * Query: path based
  * Get: id based
  */
-export interface DEngine {
-  notes: NoteDict;
-  schemas: SchemaDict;
-  props: Required<DEngineOpts>;
-  initialized: boolean;
-  store: DEngineStore;
+// export interface DEngine {
+//   notes: NoteDict;
+//   schemas: SchemaDict;
+//   props: Required<DEngineOpts>;
+//   initialized: boolean;
+//   store: DEngineStore;
 
-  /**
-   * Load all nodes
-   */
-  init: () => Promise<void>;
+//   /**
+//    * Load all nodes
+//    */
+//   init: () => Promise<void>;
 
-  delete: (
-    id: string,
-    mode: QueryMode,
-    opts?: EngineDeleteOpts
-  ) => Promise<void>;
+//   delete: (
+//     id: string,
+//     mode: QueryMode,
+//     opts?: EngineDeleteOpts
+//   ) => Promise<void>;
 
-  /**
-   * Get node based on id
-   * get(id: ...)
-   */
-  get: (
-    id: string,
-    mode: QueryMode,
-    opts?: QueryOpts
-  ) => Promise<EngineGetResp<DNodeData>>;
+//   /**
+//    * Get node based on id
+//    * get(id: ...)
+//    */
+//   get: (
+//     id: string,
+//     mode: QueryMode,
+//     opts?: QueryOpts
+//   ) => Promise<EngineGetResp<DNodeData>>;
 
-  // getBatch: (scope: Scope, ids: string[]) => Promise<NodeGetBatchResp>;
+//   // getBatch: (scope: Scope, ids: string[]) => Promise<NodeGetBatchResp>;
 
-  /**
-   * Get node based on query
-   * query(scope: {username: lukesernau}, queryString: "project", nodeType: note)
-   * - []
-   * - [Node(id: ..., title: project, children: [])]
-   */
-  query: (
-    queryString: string,
-    mode: QueryMode,
-    opts?: QueryOpts
-  ) => Promise<EngineQueryResp<DNodeData>>;
+//   /**
+//    * Get node based on query
+//    * query(scope: {username: lukesernau}, queryString: "project", nodeType: note)
+//    * - []
+//    * - [Node(id: ..., title: project, children: [])]
+//    */
+//   query: (
+//     queryString: string,
+//     mode: QueryMode,
+//     opts?: QueryOpts
+//   ) => Promise<EngineQueryResp<DNodeData>>;
 
-  /**
-   * Shortcut Function
-   */
-  queryOne: (
-    queryString: string,
-    mode: QueryMode,
-    opts?: QueryOneOpts
-  ) => Promise<EngineGetResp<DNodeData>>;
+//   /**
+//    * Shortcut Function
+//    */
+//   queryOne: (
+//     queryString: string,
+//     mode: QueryMode,
+//     opts?: QueryOneOpts
+//   ) => Promise<EngineGetResp<DNodeData>>;
 
-  write: (node: IDNode<DNodeData>, opts?: NodeWriteOpts) => Promise<void>;
+//   write: (node: IDNode<DNodeData>, opts?: NodeWriteOpts) => Promise<void>;
 
-  /**
-   * Update engine properties
-   * @param opts
-   */
-  updateProps(opts: Partial<DEngineOpts>): void;
+//   /**
+//    * Update engine properties
+//    * @param opts
+//    */
+//   updateProps(opts: Partial<DEngineOpts>): void;
 
-  /**
-   * Update node metadata
-   * @param node
-   */
-  updateNodes(nodes: IDNode[], opts: UpdateNodesOpts): Promise<void>;
+//   /**
+//    * Update node metadata
+//    * @param node
+//    */
+//   updateNodes(nodes: IDNode[], opts: UpdateNodesOpts): Promise<void>;
 
-  // /**
-  //  * Write list of nodes
-  //  */
-  // writeBatch: (scope: Scope, nodes: DNodeDict) => Promise<void>;
-}
+//   // /**
+//   //  * Write list of nodes
+//   //  */
+//   // writeBatch: (scope: Scope, nodes: DNodeDict) => Promise<void>;
+// }
 
 export type DendronConfig = {
   site: DendronSiteConfig;

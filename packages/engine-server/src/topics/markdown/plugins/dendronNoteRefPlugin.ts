@@ -1,4 +1,4 @@
-import { DendronError, DEngineClientV2, Note } from "@dendronhq/common-all";
+import { DendronError, DEngineClientV2 } from "@dendronhq/common-all";
 import { removeMDExtension } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -33,7 +33,6 @@ type RefLinkData = {
   toMd?: boolean;
   prefix?: string;
   useId: boolean;
-  note?: Note;
 };
 // --- Utils
 function doRenderWithOutline(opts: {

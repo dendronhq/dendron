@@ -1,5 +1,8 @@
-import { FileTestUtils, NodeTestUtils } from "@dendronhq/common-server";
-import { EngineTestUtilsV2 } from "@dendronhq/common-test-utils";
+import { FileTestUtils } from "@dendronhq/common-server";
+import {
+  EngineTestUtilsV2,
+  NodeTestUtilsV2,
+} from "@dendronhq/common-test-utils";
 import { DConfig, Git, WorkspaceService } from "@dendronhq/engine-server";
 import path from "path";
 import { PublishNotesCommand } from "../publishNotes";
@@ -16,10 +19,13 @@ describe("publishNotes", async () => {
     const { vaults } = await EngineTestUtilsV2.setupWS({
       initDirCb: async (root) => {
         await new WorkspaceService().createVault({ vault: { fsPath: root } });
-        NodeTestUtils.createNotes(root, [
-          { id: "id-foo", fname: "foo", stub: true },
-          { id: "id-bar", fname: "bar" },
-        ]);
+        NodeTestUtilsV2.createNotes({
+          vaultPath: root,
+          noteProps: [
+            { id: "id-foo", fname: "foo", stub: true },
+            { id: "id-bar", fname: "bar" },
+          ],
+        });
       },
     });
     vault = vaults[0];

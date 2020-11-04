@@ -3,7 +3,6 @@ import {
   DEngineClientV2,
   DNodeUtilsV2,
   HierarchyConfig,
-  Note,
   NotePropsV2,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
@@ -139,13 +138,10 @@ async function note2JekyllMdFile(
     jekyllProps["permalink"] = "/";
     linkPrefix = path.basename(siteNotesDir) + "/";
   }
-  let parentFname =
-    note instanceof Note
-      ? note.parent?.fname
-      : NoteUtilsV2.getNoteByFname(
-          note.fname,
-          (opts.engine as DendronEngineClient).notes
-        )?.fname;
+  let parentFname = NoteUtilsV2.getNoteByFname(
+    note.fname,
+    (opts.engine as DendronEngineClient).notes
+  )?.fname;
 
   // pull children of root to the top
   if (parentFname === opts.siteIndex) {

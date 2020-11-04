@@ -489,319 +489,287 @@ export class Note extends DNode<NoteData> implements INote {
   }
 }
 
-export class Schema extends DNode<SchemaData> implements ISchema {
-  static createRawProps(opts: SchemaRawOptsFlat): SchemaRawProps {
-    if (opts.fname.indexOf(".schema") < 0) {
-      opts.fname += ".schema";
-    }
-    const schemaDataOpts: (keyof SchemaData)[] = [
-      "namespace",
-      "pattern",
-      "template",
-    ];
-    const optsWithoutData = _.omit<SchemaRawOptsFlat, keyof SchemaData>(
-      opts,
-      schemaDataOpts
-    );
-    const optsData = _.pick(opts, schemaDataOpts);
-    return DNodeRaw.createProps({
-      ..._.defaults(optsWithoutData, {
-        title: optsWithoutData.id,
-        parent: null,
-        children: [],
-        data: optsData,
-      }),
-    });
-  }
+// export class Schema extends DNode<SchemaData> implements ISchema {
+//   static createRawProps(opts: SchemaRawOptsFlat): SchemaRawProps {
+//     if (opts.fname.indexOf(".schema") < 0) {
+//       opts.fname += ".schema";
+//     }
+//     const schemaDataOpts: (keyof SchemaData)[] = [
+//       "namespace",
+//       "pattern",
+//       "template",
+//     ];
+//     const optsWithoutData = _.omit<SchemaRawOptsFlat, keyof SchemaData>(
+//       opts,
+//       schemaDataOpts
+//     );
+//     const optsData = _.pick(opts, schemaDataOpts);
+//     return DNodeRaw.createProps({
+//       ..._.defaults(optsWithoutData, {
+//         title: optsWithoutData.id,
+//         parent: null,
+//         children: [],
+//         data: optsData,
+//       }),
+//     });
+//   }
 
-  static createRoot() {
-    return new Schema({
-      id: "root",
-      title: "root",
-      fname: "root.schema",
-      parent: null,
-      children: [],
-    });
-  }
+//   static createRoot() {
+//     return new Schema({
+//       id: "root",
+//       title: "root",
+//       fname: "root.schema",
+//       parent: null,
+//       children: [],
+//     });
+//   }
 
-  static _UNKNOWN_SCHEMA: undefined | Schema = undefined;
+//   static _UNKNOWN_SCHEMA: undefined | Schema = undefined;
 
-  /**
-   * This is attached to notes that are part of a domain with schema but
-   * don't match any schema in it
-   */
-  static createUnkownSchema(): Schema {
-    if (_.isUndefined(Schema._UNKNOWN_SCHEMA)) {
-      const props = Schema.createRawProps({
-        id: UNKNOWN_SCHEMA_ID,
-        fname: UNKNOWN_SCHEMA_ID,
-        stub: true,
-        created: "-1",
-        updated: "-1",
-      });
-      Schema._UNKNOWN_SCHEMA = new Schema({
-        ...props,
-        parent: null,
-        children: [],
-      });
-    }
-    return Schema._UNKNOWN_SCHEMA as Schema;
-  }
+//   /**
+//    * This is attached to notes that are part of a domain with schema but
+//    * don't match any schema in it
+//    */
+//   static createUnkownSchema(): Schema {
+//     if (_.isUndefined(Schema._UNKNOWN_SCHEMA)) {
+//       const props = Schema.createRawProps({
+//         id: UNKNOWN_SCHEMA_ID,
+//         fname: UNKNOWN_SCHEMA_ID,
+//         stub: true,
+//         created: "-1",
+//         updated: "-1",
+//       });
+//       Schema._UNKNOWN_SCHEMA = new Schema({
+//         ...props,
+//         parent: null,
+//         children: [],
+//       });
+//     }
+//     return Schema._UNKNOWN_SCHEMA as Schema;
+//   }
 
-  static defaultTitle(fname: string) {
-    return fname.replace(".schema", "");
-  }
+//   static defaultTitle(fname: string) {
+//     return fname.replace(".schema", "");
+//   }
 
-  constructor(props: ISchemaOpts) {
-    if (props.fname.indexOf(".schema") < 0) {
-      props.fname += ".schema";
-    }
-    super({
-      type: "schema",
-      ..._.defaults(props, {
-        id: Schema.defaultTitle(props.fname),
-        title: Schema.defaultTitle(props.fname),
-        parent: null,
-        children: [],
-        data: {},
-      }),
-    });
-  }
+//   constructor(props: ISchemaOpts) {
+//     if (props.fname.indexOf(".schema") < 0) {
+//       props.fname += ".schema";
+//     }
+//     super({
+//       type: "schema",
+//       ..._.defaults(props, {
+//         id: Schema.defaultTitle(props.fname),
+//         title: Schema.defaultTitle(props.fname),
+//         parent: null,
+//         children: [],
+//         data: {},
+//       }),
+//     });
+//   }
 
-  get namespace(): boolean {
-    return this.data?.namespace || false;
-  }
+//   get namespace(): boolean {
+//     return this.data?.namespace || false;
+//   }
 
-  get label(): string {
-    return this.id;
-  }
+//   get label(): string {
+//     return this.id;
+//   }
 
-  get logicalPath(): string {
-    const part = this.namespace ? `${this.id}/*` : this.id;
-    if (this.parent && this.parent.id !== "root") {
-      const prefix = this.parent.logicalPath;
-      return [prefix, part].join("/");
-    } else {
-      return part;
-    }
-  }
+//   get logicalPath(): string {
+//     const part = this.namespace ? `${this.id}/*` : this.id;
+//     if (this.parent && this.parent.id !== "root") {
+//       const prefix = this.parent.logicalPath;
+//       return [prefix, part].join("/");
+//     } else {
+//       return part;
+//     }
+//   }
 
-  get patternMatch(): string {
-    const part = this.namespace ? `${this.pattern}/*` : this.pattern;
-    const parent: undefined | Schema = this.parent as Schema;
-    if (parent && parent.pattern !== "root") {
-      const prefix = parent.patternMatch;
-      return [prefix, part].join("/");
-    } else {
-      return part;
-    }
-  }
+//   get patternMatch(): string {
+//     const part = this.namespace ? `${this.pattern}/*` : this.pattern;
+//     const parent: undefined | Schema = this.parent as Schema;
+//     if (parent && parent.pattern !== "root") {
+//       const prefix = parent.patternMatch;
+//       return [prefix, part].join("/");
+//     } else {
+//       return part;
+//     }
+//   }
 
-  get pattern(): string {
-    return this.data.pattern?.replace(".", "/") || this.id;
-  }
+//   get pattern(): string {
+//     return this.data.pattern?.replace(".", "/") || this.id;
+//   }
 
-  get url(): string {
-    return `/schema/${this.id}`;
-  }
+//   get url(): string {
+//     return `/schema/${this.id}`;
+//   }
 
-  match(note: Note): boolean {
-    // TODO: simple version
-    return this.title === note.basename;
-  }
+//   match(note: Note): boolean {
+//     // TODO: simple version
+//     return this.title === note.basename;
+//   }
 
-  renderBody() {
-    const out = _.map(
-      this.toRawPropsRecursive({ ignoreNullParent: true }),
-      // TODO: don't hardcode, this only applies to new schemas
-      (props) => {
-        return {
-          ..._.pick(props, ["id", "title", "desc", "data"]),
-          parent: "root",
-        };
-      }
-    );
-    return YAML.stringify(out, undefined, 4);
-  }
+//   renderBody() {
+//     const out = _.map(
+//       this.toRawPropsRecursive({ ignoreNullParent: true }),
+//       // TODO: don't hardcode, this only applies to new schemas
+//       (props) => {
+//         return {
+//           ..._.pick(props, ["id", "title", "desc", "data"]),
+//           parent: "root",
+//         };
+//       }
+//     );
+//     return YAML.stringify(out, undefined, 4);
+//   }
 
-  render() {
-    const out = _.map(
-      this.toRawPropsRecursive({ ignoreNullParent: true }),
-      // TODO: don't hardcode, this only applies to new schemas
-      (props) => {
-        const data = props.data;
-        return {
-          ..._.pick(props, ["id", "title", "desc"]),
-          ...data,
-          parent: "root",
-        };
-      }
-    );
-    return YAML.stringify(out, undefined, 4);
-  }
-}
-
-const matchSchemaProps = (
-  id: string,
-  item: SchemaRawProps,
-  props: SchemaRawProps[]
-): SchemaRawProps => {
-  const out = _.find(props, (p) =>
-    _.every([p.id === id, item.fname === p.fname])
-  );
-  if (_.isUndefined(out)) {
-    throw Error(
-      `bad schema file. no match found for schema with id ${id}. schema file contents: ${JSON.stringify(
-        props
-      )}`
-    );
-  }
-  return out;
-};
-
-// TODO:move to node
-function getRoot(nodes: NoteRawProps[]) {
-  // nodes: {nodes}
-  const rootNode = _.find(
-    nodes,
-    (ent) => ent.title === "root" || _.isNull(ent.parent)
-  );
-  if (!rootNode) {
-    throw new DendronError({ msg: "no root node found" });
-  }
-  const node = new Note({ ...rootNode, parent: null, children: [] });
-  return { node, childrenIds: rootNode.children };
-}
+//   render() {
+//     const out = _.map(
+//       this.toRawPropsRecursive({ ignoreNullParent: true }),
+//       // TODO: don't hardcode, this only applies to new schemas
+//       (props) => {
+//         const data = props.data;
+//         return {
+//           ..._.pick(props, ["id", "title", "desc"]),
+//           ...data,
+//           parent: "root",
+//         };
+//       }
+//     );
+//     return YAML.stringify(out, undefined, 4);
+//   }
+// }
 
 /**
  * From nodes, return a connected note tree
  */
-export class NodeBuilder {
-  getDomainsRoot<T extends DNodeData>(
-    nodes: DNodeRawProps<T>[]
-  ): DNodeRawProps<T>[] {
-    return _.filter(nodes, (ent) => ent.parent === "root");
-  }
+// export class NodeBuilder {
+//   getDomainsRoot<T extends DNodeData>(
+//     nodes: DNodeRawProps<T>[]
+//   ): DNodeRawProps<T>[] {
+//     return _.filter(nodes, (ent) => ent.parent === "root");
+//   }
 
-  toNote(item: NoteRawProps, parents: Note[], opts: { schemas: Schema[] }) {
-    // _.map(schemas, (v, k) => {
-    // });
-    const node = new Note({ ...item, parent: null, children: [] });
-    // if (node.schemaId) {
-    //   node.schema = opts.schemas[node.schemaId];
-    // }
-    const { parent: parentId, children } = item;
-    const parent: Note = _.find(parents, { id: parentId }) as Note;
-    // const parent = undefined;
-    if (_.isUndefined(parent)) {
-      const error = JSON.stringify({
-        msg: "no parent found",
-        parentId,
-        parents: parents.map((p) => _.omit(p.toRawProps(), "body")),
-        item: _.omit(item, "body"),
-      });
-      throw Error(error);
-    }
-    // NOTE: parents don't get resolved until this is called
-    parent.addChild(node);
-    let filteredSchemas = opts.schemas;
-    const maybeSchema = SchemaUtils.matchNote(node, opts.schemas);
-    if (maybeSchema) {
-      node.schema = maybeSchema;
-    } else {
-      node.schema = Schema.createUnkownSchema();
-      filteredSchemas = [];
-    }
-    return { node, parent, children, schemas: filteredSchemas };
-  }
+//   toNote(item: NoteRawProps, parents: Note[], opts: { schemas: Schema[] }) {
+//     // _.map(schemas, (v, k) => {
+//     // });
+//     const node = new Note({ ...item, parent: null, children: [] });
+//     // if (node.schemaId) {
+//     //   node.schema = opts.schemas[node.schemaId];
+//     // }
+//     const { parent: parentId, children } = item;
+//     const parent: Note = _.find(parents, { id: parentId }) as Note;
+//     // const parent = undefined;
+//     if (_.isUndefined(parent)) {
+//       const error = JSON.stringify({
+//         msg: "no parent found",
+//         parentId,
+//         parents: parents.map((p) => _.omit(p.toRawProps(), "body")),
+//         item: _.omit(item, "body"),
+//       });
+//       throw Error(error);
+//     }
+//     // NOTE: parents don't get resolved until this is called
+//     parent.addChild(node);
+//     let filteredSchemas = opts.schemas;
+//     const maybeSchema = SchemaUtils.matchNote(node, opts.schemas);
+//     if (maybeSchema) {
+//       node.schema = maybeSchema;
+//     } else {
+//       node.schema = Schema.createUnkownSchema();
+//       filteredSchemas = [];
+//     }
+//     return { node, parent, children, schemas: filteredSchemas };
+//   }
 
-  toSchema(item: SchemaRawProps, parent: Schema, props: SchemaRawProps[]) {
-    // DEBUG: item: {item}, parents: {parents}
-    const node = new Schema({ ...item, parent, children: [] });
-    item.children.forEach((chId) => {
-      const match = matchSchemaProps(chId, item, props);
-      return this.toSchema(match, node, props);
-    });
-    parent.addChild(node);
-    return node;
-  }
+//   toSchema(item: SchemaRawProps, parent: Schema, props: SchemaRawProps[]) {
+//     // DEBUG: item: {item}, parents: {parents}
+//     const node = new Schema({ ...item, parent, children: [] });
+//     item.children.forEach((chId) => {
+//       const match = matchSchemaProps(chId, item, props);
+//       return this.toSchema(match, node, props);
+//     });
+//     parent.addChild(node);
+//     return node;
+//   }
 
-  buildNoteFromProps(
-    props: NoteRawProps[],
-    opts: { schemas: Schema[] }
-  ): Note[] {
-    const { node: rootNode, childrenIds } = getRoot(props);
-    const out = [];
-    out.push([rootNode]);
+//   buildNoteFromProps(
+//     props: NoteRawProps[],
+//     opts: { schemas: Schema[] }
+//   ): Note[] {
+//     const { node: rootNode, childrenIds } = getRoot(props);
+//     const out = [];
+//     out.push([rootNode]);
 
-    const getNoteFromId = (id: string, props: NoteRawProps[]): NoteRawProps => {
-      const nodePropsList = props.filter(
-        (ent) => ent.id === id
-      ) as NoteRawProps[];
-      if (nodePropsList.length > 1) {
-        const fnames = nodePropsList.map((ent) => ent.fname).join(", ");
-        throw Error(
-          `found multiple notes with the same id. please check the following notes: ${fnames}`
-        );
-      }
-      const nodeProps = nodePropsList[0];
-      return nodeProps;
-    };
+//     const getNoteFromId = (id: string, props: NoteRawProps[]): NoteRawProps => {
+//       const nodePropsList = props.filter(
+//         (ent) => ent.id === id
+//       ) as NoteRawProps[];
+//       if (nodePropsList.length > 1) {
+//         const fnames = nodePropsList.map((ent) => ent.fname).join(", ");
+//         throw Error(
+//           `found multiple notes with the same id. please check the following notes: ${fnames}`
+//         );
+//       }
+//       const nodeProps = nodePropsList[0];
+//       return nodeProps;
+//     };
 
-    let parentNodes = [rootNode];
-    let noteProps: {
-      nodeProps: NoteRawProps;
-      schemas: Schema[];
-    }[] = childrenIds.map((id) => {
-      return {
-        nodeProps: getNoteFromId(id, props),
-        schemas: opts.schemas,
-      };
-    });
+//     let parentNodes = [rootNode];
+//     let noteProps: {
+//       nodeProps: NoteRawProps;
+//       schemas: Schema[];
+//     }[] = childrenIds.map((id) => {
+//       return {
+//         nodeProps: getNoteFromId(id, props),
+//         schemas: opts.schemas,
+//       };
+//     });
 
-    while (!_.isEmpty(noteProps)) {
-      const currentNodes: Note[] = [];
+//     while (!_.isEmpty(noteProps)) {
+//       const currentNodes: Note[] = [];
 
-      noteProps = noteProps
-        .map(({ nodeProps, schemas }) => {
-          // convert note props to note
-          const { node, children, schemas: filteredSchemas } = this.toNote(
-            nodeProps,
-            parentNodes,
-            {
-              schemas,
-            }
-          );
-          currentNodes.push(node);
-          return children.map((id) => {
-            return {
-              nodeProps: getNoteFromId(id, props),
-              schemas: filteredSchemas,
-            };
-          });
-        })
-        .flat();
-      out.push(currentNodes);
-      parentNodes = currentNodes;
-    }
-    return out.flat();
-  }
+//       noteProps = noteProps
+//         .map(({ nodeProps, schemas }) => {
+//           // convert note props to note
+//           const { node, children, schemas: filteredSchemas } = this.toNote(
+//             nodeProps,
+//             parentNodes,
+//             {
+//               schemas,
+//             }
+//           );
+//           currentNodes.push(node);
+//           return children.map((id) => {
+//             return {
+//               nodeProps: getNoteFromId(id, props),
+//               schemas: filteredSchemas,
+//             };
+//           });
+//         })
+//         .flat();
+//       out.push(currentNodes);
+//       parentNodes = currentNodes;
+//     }
+//     return out.flat();
+//   }
 
-  buildSchemaFromProps(props: SchemaRawProps[]) {
-    const root = Schema.createRoot();
-    const rootDomains: SchemaRawProps[] = this.getDomainsRoot<SchemaData>(
-      props
-    );
-    const out = [root];
-    rootDomains.forEach((rootRaw) => {
-      const domain = this.toSchema(rootRaw, root, props);
-      out.push(domain);
-      //out = out.concat(domain.nodes as Schema[]);
-    });
-    // DEBUG ctx: "parseSchema", out:
-    return out;
-  }
-}
+//   buildSchemaFromProps(props: SchemaRawProps[]) {
+//     const root = Schema.createRoot();
+//     const rootDomains: SchemaRawProps[] = this.getDomainsRoot<SchemaData>(
+//       props
+//     );
+//     const out = [root];
+//     rootDomains.forEach((rootRaw) => {
+//       const domain = this.toSchema(rootRaw, root, props);
+//       out.push(domain);
+//       //out = out.concat(domain.nodes as Schema[]);
+//     });
+//     // DEBUG ctx: "parseSchema", out:
+//     return out;
+//   }
+// }
 
 function createBackLink(note: Note): NoteLink {
   return {
@@ -810,135 +778,135 @@ function createBackLink(note: Note): NoteLink {
   };
 }
 
-export class NoteUtils {
-  static addBackLink(from: Note, to: Note): void {
-    if (_.isUndefined(from.data.links)) {
-      from.data.links = [];
-    }
-    from.data.links.push(createBackLink(to));
-  }
+// export class NoteUtils {
+//   static addBackLink(from: Note, to: Note): void {
+//     if (_.isUndefined(from.data.links)) {
+//       from.data.links = [];
+//     }
+//     from.data.links.push(createBackLink(to));
+//   }
 
-  /**
-   * @param from
-   * @param to
-   */
-  static createStubNotes(from: Note, to: Note): Note[] {
-    const stubNodes: Note[] = [];
-    const fromPath = from.logicalPath;
-    const toPath = to.logicalPath;
-    const index = toPath.indexOf(fromPath) + fromPath.length;
-    const diffPath = _.trimStart(toPath.slice(index), ".").split(".");
-    let stubPath = fromPath;
-    let parent = from;
-    // last element is node
-    diffPath.slice(0, -1).forEach((part) => {
-      // handle starting from root, path = ""
-      if (_.isEmpty(stubPath)) {
-        stubPath = part;
-      } else {
-        stubPath += `.${part}`;
-      }
-      const n = Note.createStub(stubPath);
-      stubNodes.push(n);
-      parent.addChild(n);
-      parent = n;
-    });
-    parent.addChild(to);
-    return stubNodes;
-  }
-}
+//   /**
+//    * @param from
+//    * @param to
+//    */
+//   static createStubNotes(from: Note, to: Note): Note[] {
+//     const stubNodes: Note[] = [];
+//     const fromPath = from.logicalPath;
+//     const toPath = to.logicalPath;
+//     const index = toPath.indexOf(fromPath) + fromPath.length;
+//     const diffPath = _.trimStart(toPath.slice(index), ".").split(".");
+//     let stubPath = fromPath;
+//     let parent = from;
+//     // last element is node
+//     diffPath.slice(0, -1).forEach((part) => {
+//       // handle starting from root, path = ""
+//       if (_.isEmpty(stubPath)) {
+//         stubPath = part;
+//       } else {
+//         stubPath += `.${part}`;
+//       }
+//       const n = Note.createStub(stubPath);
+//       stubNodes.push(n);
+//       parent.addChild(n);
+//       parent = n;
+//     });
+//     parent.addChild(to);
+//     return stubNodes;
+//   }
+// }
 
-export class SchemaUtils {
-  static fname(nodePath: string, rmExtension?: boolean) {
-    if (rmExtension) {
-      const idx = nodePath.lastIndexOf(".yml");
-      if (idx > 0) {
-        nodePath = nodePath.slice(0, idx);
-      }
-    }
-    // remove trailing dot
-    return nodePath.slice(0, nodePath.lastIndexOf("schema") - 1);
-  }
-  static isUnkown(schema: Schema) {
-    return schema.id === UNKNOWN_SCHEMA_ID;
-  }
+// export class SchemaUtils {
+//   static fname(nodePath: string, rmExtension?: boolean) {
+//     if (rmExtension) {
+//       const idx = nodePath.lastIndexOf(".yml");
+//       if (idx > 0) {
+//         nodePath = nodePath.slice(0, idx);
+//       }
+//     }
+//     // remove trailing dot
+//     return nodePath.slice(0, nodePath.lastIndexOf("schema") - 1);
+//   }
+//   static isUnkown(schema: Schema) {
+//     return schema.id === UNKNOWN_SCHEMA_ID;
+//   }
 
-  static applyTemplate(opts: {
-    template: SchemaTemplate;
-    note: Note;
-    engine: DEngine;
-  }) {
-    const { template, note, engine } = opts;
-    if (template.type === "note") {
-      const tempNote = _.find(_.values(engine.notes), { fname: template.id });
-      if (_.isUndefined(tempNote)) {
-        throw Error(`no template found for ${template}`);
-      }
-      note.body = tempNote.body;
-      return true;
-    }
-    return false;
-  }
+//   static applyTemplate(opts: {
+//     template: SchemaTemplate;
+//     note: Note;
+//     engine: DEngine;
+//   }) {
+//     const { template, note, engine } = opts;
+//     if (template.type === "note") {
+//       const tempNote = _.find(_.values(engine.notes), { fname: template.id });
+//       if (_.isUndefined(tempNote)) {
+//         throw Error(`no template found for ${template}`);
+//       }
+//       note.body = tempNote.body;
+//       return true;
+//     }
+//     return false;
+//   }
 
-  /**
-   * Return true if template was applied, false otherwise
-   * @param opts
-   */
-  static matchAndApplyTemplate(opts: { note: Note; engine: DEngine }): boolean {
-    const { note, engine } = opts;
-    const schemas = SchemaUtils.matchNote(note, engine.schemas);
-    if (schemas.data.template) {
-      return SchemaUtils.applyTemplate({
-        template: schemas.data.template,
-        note,
-        engine,
-      });
-    } else {
-      return false;
-    }
-  }
+//   /**
+//    * Return true if template was applied, false otherwise
+//    * @param opts
+//    */
+//   static matchAndApplyTemplate(opts: { note: Note; engine: DEngine }): boolean {
+//     const { note, engine } = opts;
+//     const schemas = SchemaUtils.matchNote(note, engine.schemas);
+//     if (schemas.data.template) {
+//       return SchemaUtils.applyTemplate({
+//         template: schemas.data.template,
+//         note,
+//         engine,
+//       });
+//     } else {
+//       return false;
+//     }
+//   }
 
-  /**
-   *
-   * @param noteOrPath
-   * @param schemas
-   * @param opts
-   *   - matchNamespace: should match exact namespace note (in addition to wildcard), default: false
-   *   - matchPrefix: allow prefix match, default: false
-   */
-  static matchNote(
-    noteOrPath: Note | string,
-    schemas: SchemaDict | Schema[],
-    opts?: { matchNamespace?: boolean; matchPrefix?: boolean }
-  ): Schema {
-    const cleanOpts = _.defaults(opts, {
-      matchNamespace: true,
-      matchPrefix: false,
-    });
-    const schemaList = _.isArray(schemas) ? schemas : _.values(schemas);
-    const notePath = _.isString(noteOrPath) ? noteOrPath : noteOrPath.path;
-    const notePathClean = notePath.replace(/\./g, "/");
-    let match: Schema | undefined;
-    _.find(schemaList, (schemaDomain) => {
-      return _.some(schemaDomain.nodes as Schema[], (schema) => {
-        const patternMatch = schema.patternMatch;
-        if ((schema as Schema).namespace && cleanOpts.matchNamespace) {
-          if (minimatch(notePathClean, _.trimEnd(patternMatch, "/*"))) {
-            match = schema as Schema;
-            return true;
-          }
-        }
-        if (minimatch(notePathClean, patternMatch)) {
-          match = schema as Schema;
-          return true;
-        } else {
-          return false;
-        }
-      });
-    });
-    if (_.isUndefined(match)) {
-      return Schema.createUnkownSchema();
-    }
-    return match;
-  }
-}
+//   /**
+//    *
+//    * @param noteOrPath
+//    * @param schemas
+//    * @param opts
+//    *   - matchNamespace: should match exact namespace note (in addition to wildcard), default: false
+//    *   - matchPrefix: allow prefix match, default: false
+//    */
+//   static matchNote(
+//     noteOrPath: Note | string,
+//     schemas: SchemaDict | Schema[],
+//     opts?: { matchNamespace?: boolean; matchPrefix?: boolean }
+//   ): Schema {
+//     const cleanOpts = _.defaults(opts, {
+//       matchNamespace: true,
+//       matchPrefix: false,
+//     });
+//     const schemaList = _.isArray(schemas) ? schemas : _.values(schemas);
+//     const notePath = _.isString(noteOrPath) ? noteOrPath : noteOrPath.path;
+//     const notePathClean = notePath.replace(/\./g, "/");
+//     let match: Schema | undefined;
+//     _.find(schemaList, (schemaDomain) => {
+//       return _.some(schemaDomain.nodes as Schema[], (schema) => {
+//         const patternMatch = schema.patternMatch;
+//         if ((schema as Schema).namespace && cleanOpts.matchNamespace) {
+//           if (minimatch(notePathClean, _.trimEnd(patternMatch, "/*"))) {
+//             match = schema as Schema;
+//             return true;
+//           }
+//         }
+//         if (minimatch(notePathClean, patternMatch)) {
+//           match = schema as Schema;
+//           return true;
+//         } else {
+//           return false;
+//         }
+//       });
+//     });
+//     if (_.isUndefined(match)) {
+//       return Schema.createUnkownSchema();
+//     }
+//     return match;
+//   }
+// }

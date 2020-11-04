@@ -1,10 +1,4 @@
-import {
-  DNodeRaw,
-  genUUID,
-  Note,
-  NoteRawProps,
-  Schema,
-} from "@dendronhq/common-all";
+import { DNodeRaw, genUUID, Note, NoteRawProps } from "@dendronhq/common-all";
 import fs, { Dirent } from "fs";
 import matter from "gray-matter";
 import YAML from "js-yaml";
@@ -200,14 +194,6 @@ export function node2MdFile(node: Note, opts: { root: string }) {
   const { fname } = node;
   const filePath = path.join(root, `${fname}.md`);
   return fs.writeFileSync(filePath, node.render());
-}
-
-export function schema2YMLFile(schema: Schema, opts: { root: string }) {
-  const { root } = opts;
-  const { fname } = schema;
-  const filePath = path.join(root, `${fname}.yml`);
-  const out = schema.render();
-  return fs.writeFileSync(filePath, out);
 }
 
 export function resolveTilde(filePath: string) {

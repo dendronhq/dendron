@@ -501,7 +501,7 @@ export class NodeTestUtilsV2 {
     await Promise.all(
       cleanOpts.noteProps.map(async (n) => {
         const body = cleanOpts.withBody ? n.fname + " body" : "";
-        const _n = NoteUtilsV2.create({ ...defaultOpts, ...n, body });
+        const _n = NoteUtilsV2.create({ ...defaultOpts, body, ...n });
         DNodeUtilsV2.addChild(rootNote, _n);
         if (cleanOpts.vaultPath) {
           await note2File(_n, cleanOpts.vaultPath);

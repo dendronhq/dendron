@@ -1,12 +1,8 @@
-import {
-  DirResult,
-  FileTestUtils,
-  NodeTestUtils,
-} from "@dendronhq/common-server";
+import { DirResult, FileTestUtils } from "@dendronhq/common-server";
+import { NodeTestUtilsV2 } from "@dendronhq/common-test-utils";
 import * as assert from "assert";
 import _ from "lodash";
 import { afterEach, beforeEach } from "mocha";
-import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
@@ -14,7 +10,8 @@ import { BuildPodCommand } from "../../commands/BuildPod";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { onWSInit, setupDendronWorkspace, TIMEOUT } from "../testUtils";
+import { onWSInit, TIMEOUT } from "../testUtils";
+import { setupCodeWorkspaceV2 } from "../testUtilsv2";
 
 suite.skip("Build Site", function () {
   let root: DirResult;
@@ -40,15 +37,20 @@ suite.skip("Build Site", function () {
       done();
     });
 
-    setupDendronWorkspace(root.name, ctx, {
-      useCb: async () => {
-        NodeTestUtils.createNotes(path.join(root.name, "vault"), [
-          {
-            id: "id.foo",
-            fname: "foo",
-            body: "# Foo Content\n # Bar Content [[missing-link]]",
-          },
-        ]);
+    return setupCodeWorkspaceV2({
+      ctx,
+      wsRoot: root.name,
+      initDirCb: async (vaultPath) => {
+        await NodeTestUtilsV2.createNotes({
+          vaultPath,
+          noteProps: [
+            {
+              id: "id.foo",
+              fname: "foo",
+              body: "# Foo Content\n # Bar Content [[missing-link]]",
+            },
+          ],
+        });
       },
     });
   });

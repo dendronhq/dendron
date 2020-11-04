@@ -5,9 +5,7 @@ import {
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import {
-  EngineTestUtils,
   FileTestUtils,
-  NodeTestUtils,
   readMD,
   schemaModuleOpts2File,
 } from "@dendronhq/common-server";
@@ -22,6 +20,64 @@ import _ from "lodash";
 import path from "path";
 import process from "process";
 import { BuildSiteCommand } from "../build-site";
+
+const setupCase1 = async ({ vaultDir }: { vaultDir: string }) => {
+  await EngineTestUtilsV2.setupVault({
+    vaultDir,
+    initDirCb: async (vaultPath) => {
+      const root = SchemaUtilsV2.createRootModule();
+      await schemaModuleOpts2File(root, vaultDir, "root");
+      await NodeTestUtilsV2.createNotes({
+        vaultPath,
+        noteProps: [
+          {
+            id: "id.foo",
+            fname: "foo",
+          },
+          {
+            id: "id.bar.one",
+            fname: "bar.one",
+          },
+        ],
+      });
+    },
+  });
+};
+
+const setupCase2 = async ({}: {}) => {
+  return EngineTestUtilsV2.setupWS({
+    initDirCb: async (vaultPath) => {
+      const root = SchemaUtilsV2.createRootModule();
+      await schemaModuleOpts2File(root, vaultPath, "root");
+      await NodeTestUtilsV2.createNotes({
+        vaultPath,
+        noteProps: [
+          {
+            id: "id.foo",
+            fname: "foo",
+          },
+          {
+            id: "id.bar.one",
+            fname: "bar.one",
+          },
+        ],
+      });
+    },
+  });
+};
+
+const setupCaseCustom = async ({ noteProps }: { noteProps: any[] }) => {
+  return await EngineTestUtilsV2.setupVault({
+    initDirCb: async (vaultPath) => {
+      const root = SchemaUtilsV2.createRootModule();
+      await schemaModuleOpts2File(root, vaultPath, "root");
+      await NodeTestUtilsV2.createNotes({
+        vaultPath,
+        noteProps,
+      });
+    },
+  });
+};
 
 describe("buildSite v2", () => {
   let wsRoot: string;
@@ -42,24 +98,7 @@ describe("buildSite v2", () => {
       wsRoot = FileTestUtils.tmpDir().name;
       vault = path.join(wsRoot, "vault");
       fs.ensureDirSync(vault);
-      EngineTestUtils.setupStoreDir({
-        copyFixtures: false,
-        storeDstPath: vault,
-        initDirCb: async (dirPath: string) => {
-          const root = SchemaUtilsV2.createRootModule();
-          await schemaModuleOpts2File(root, dirPath, "root");
-          NodeTestUtils.createNotes(dirPath, [
-            {
-              id: "id.foo",
-              fname: "foo",
-            },
-            {
-              id: "id.bar.one",
-              fname: "bar.one",
-            },
-          ]);
-        },
-      });
+      await setupCase1({ vaultDir: vault });
       siteRootDir = path.join(wsRoot, "docs");
       fs.ensureDir(siteRootDir);
       notesDir = path.join(siteRootDir, "notes");
@@ -101,26 +140,10 @@ describe("buildSite v2", () => {
   });
 
   describe("write stubs", () => {
+    let vaults: string[];
     beforeEach(async () => {
-      wsRoot = await EngineTestUtils.setupStoreDir({
-        copyFixtures: false,
-        initDirCb: async (dirPath: string) => {
-          vault = dirPath;
-          const root = SchemaUtilsV2.createRootModule();
-          await schemaModuleOpts2File(root, dirPath, "root");
-          NodeTestUtils.createNotes(dirPath, [
-            {
-              id: "id.foo",
-              fname: "foo",
-            },
-            {
-              id: "id.bar.one",
-              fname: "bar.one",
-            },
-          ]);
-        },
-      });
-
+      ({ wsRoot, vaults } = await setupCase2({}));
+      vault = vaults[0];
       siteRootDir = FileTestUtils.tmpDir().name;
       notesDir = path.join(siteRootDir, "notes");
       engineClient = DendronEngineClient.create({
@@ -147,10 +170,10 @@ describe("buildSite v2", () => {
         wsRoot,
         writeStubs: false,
       });
-      const notesDir = wsRoot;
+      const notesDir = vault;
       const notes = fs.readdirSync(notesDir);
       expect(notes).toMatchSnapshot();
-      expect(notes.length).toEqual(4);
+      expect(notes.length).toEqual(6);
     });
 
     test("write stub", async () => {
@@ -165,10 +188,10 @@ describe("buildSite v2", () => {
         wsRoot,
         writeStubs: true,
       });
-      const notesDir = wsRoot;
+      const notesDir = vault;
       const notes = fs.readdirSync(notesDir);
       expect(notes).toMatchSnapshot();
-      expect(notes.length).toEqual(5);
+      expect(notes.length).toEqual(7);
     });
   });
 });
@@ -197,25 +220,15 @@ describe("wiki link", () => {
   });
 
   test("missing link", async () => {
-    root = await EngineTestUtils.setupStoreDir({
-      copyFixtures: false,
-      initDirCb: async (dirPath: string) => {
-        root = dirPath;
-        await schemaModuleOpts2File(
-          SchemaUtilsV2.createRootModule(),
-          dirPath,
-          "root"
-        );
-        NodeTestUtils.createNotes(dirPath, [
-          {
-            id: "id.foo",
-            fname: "foo",
-            body: "# Foo Content\n # Bar Content [[missing-link]]",
-          },
-        ]);
-      },
+    root = await setupCaseCustom({
+      noteProps: [
+        {
+          id: "id.foo",
+          fname: "foo",
+          body: "# Foo Content\n # Bar Content [[missing-link]]",
+        },
+      ],
     });
-
     engineClient = DendronEngineClient.create({
       port,
       vaults: [root],
@@ -246,28 +259,19 @@ describe("wiki link", () => {
       siteHierarchies: ["foo"],
       siteRootDir,
     };
-    root = EngineTestUtils.setupStoreDir({
-      copyFixtures: false,
-      initDirCb: async (dirPath: string) => {
-        await schemaModuleOpts2File(
-          SchemaUtilsV2.createRootModule(),
-          dirPath,
-          "root"
-        );
-        NodeTestUtils.createNotes(dirPath, [
-          {
-            fname: "foo.Mixed_case",
-            id: "id.foo.mixed-case",
-          },
-          {
-            fname: "foo.one",
-            id: "id.foo.one",
-            body: "[[foo.Mixed_case]]",
-          },
-        ]);
-      },
+    root = await setupCaseCustom({
+      noteProps: [
+        {
+          fname: "foo.Mixed_case",
+          id: "id.foo.mixed-case",
+        },
+        {
+          fname: "foo.one",
+          id: "id.foo.one",
+          body: "[[foo.Mixed_case]]",
+        },
+      ],
     });
-
     engineClient = DendronEngineClient.create({
       port,
       vaults: [root],
@@ -309,24 +313,16 @@ describe("note refs", () => {
   });
 
   beforeEach(async () => {
-    root = EngineTestUtils.setupStoreDir({
-      copyFixtures: false,
-      initDirCb: async (dirPath: string) => {
-        await schemaModuleOpts2File(
-          SchemaUtilsV2.createRootModule(),
-          dirPath,
-          "root"
-        );
-        NodeTestUtils.createNotes(dirPath, [
-          {
-            id: "id.foo",
-            fname: "foo",
-            body: "# Foo Content\n # Bar Content ((ref:[[bar]]))",
-          },
-          { id: "id.bar", fname: "bar", body: "# I am bar\n [[foo]]" },
-          { id: "id.c", fname: "c" },
-        ]);
-      },
+    root = await setupCaseCustom({
+      noteProps: [
+        {
+          id: "id.foo",
+          fname: "foo",
+          body: "# Foo Content\n # Bar Content ((ref:[[bar]]))",
+        },
+        { id: "id.bar", fname: "bar", body: "# I am bar\n [[foo]]" },
+        { id: "id.c", fname: "c" },
+      ],
     });
     vaultDir = root;
 

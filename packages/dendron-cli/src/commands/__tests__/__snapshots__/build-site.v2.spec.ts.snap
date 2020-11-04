@@ -2,6 +2,8 @@
 
 exports[`buildSite v2 write stubs no write stub 1`] = `
 Array [
+  ".git",
+  "assets",
   "bar.one.md",
   "foo.md",
   "root.md",
@@ -11,6 +13,8 @@ Array [
 
 exports[`buildSite v2 write stubs write stub 1`] = `
 Array [
+  ".git",
+  "assets",
   "bar.md",
   "bar.one.md",
   "foo.md",

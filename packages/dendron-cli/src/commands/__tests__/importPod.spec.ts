@@ -2,10 +2,13 @@ import { DEngineClientV2 } from "@dendronhq/common-all";
 import {
   createLogger,
   FileTestUtils,
-  NodeTestUtils,
   writeYAML,
 } from "@dendronhq/common-server";
-import { NodeTestPresetsV2, PODS_CORE } from "@dendronhq/common-test-utils";
+import {
+  NodeTestPresetsV2,
+  NodeTestUtilsV2,
+  PODS_CORE,
+} from "@dendronhq/common-test-utils";
 import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
 import {
   JSONImportPod,
@@ -70,7 +73,7 @@ describe("markdown pod", async () => {
     importSrc = FileTestUtils.tmpDir().name;
     wsRoot = FileTestUtils.tmpDir().name;
     vault = FileTestUtils.tmpDir().name;
-    await NodeTestUtils.createNotes(vault, []);
+    await NodeTestUtilsV2.createNotes({ vaultPath: vault });
 
     await createFiles(importSrc, [
       { path: "project/p2/n1.md" },

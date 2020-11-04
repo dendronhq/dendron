@@ -4,12 +4,7 @@ import {
   DNodeUtilsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
-import {
-  DirResult,
-  file2Note,
-  FileTestUtils,
-  NodeTestUtils,
-} from "@dendronhq/common-server";
+import { DirResult, file2Note, FileTestUtils } from "@dendronhq/common-server";
 import {
   NodeTestPresetsV2,
   NodeTestUtilsV2,
@@ -31,6 +26,7 @@ import { HistoryService } from "../../services/HistoryService";
 import { EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
+import { _activate } from "../../_extension";
 import {
   createMockQuickPick,
   getActiveEditorBasename,
@@ -38,6 +34,7 @@ import {
   setupDendronWorkspace,
   TIMEOUT,
 } from "../testUtils";
+import { setupCodeWorkspaceV2 } from "../testUtilsv2";
 
 // TODO: This could be cleaned up further+extended, but better for now
 let vaultPath: string;
@@ -244,6 +241,55 @@ suite("schemas", function () {
   });
 });
 
+function setupCase1({
+  ctx,
+  wsRoot,
+}: {
+  ctx: vscode.ExtensionContext;
+  wsRoot: string;
+}) {
+  return setupCodeWorkspaceV2({
+    ctx,
+    wsRoot,
+    initDirCb: async (vaultPath) => {
+      await NodeTestUtilsV2.createNotes({
+        vaultPath,
+        noteProps: [
+          {
+            id: "id.foo",
+            fname: "foo",
+          },
+          {
+            id: "id.bar",
+            fname: "bar",
+          },
+        ],
+      });
+    },
+  });
+}
+
+function setupCaseCustom({
+  ctx,
+  wsRoot,
+  noteProps,
+}: {
+  ctx: vscode.ExtensionContext;
+  wsRoot: string;
+  noteProps: any;
+}) {
+  return setupCodeWorkspaceV2({
+    ctx,
+    wsRoot,
+    initDirCb: async (vaultPath) => {
+      await NodeTestUtilsV2.createNotes({
+        vaultPath,
+        noteProps: noteProps,
+      });
+    },
+  });
+}
+
 suite("notes", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
@@ -277,22 +323,9 @@ suite("notes", function () {
         assert.equal(lc.quickPick?.items.length, 3);
         done();
       });
-
-      setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
-        useCb: async (vaultPath) => {
-          vault = vaultPath;
-          await NodeTestUtils.createNotes(vaultPath, [
-            {
-              id: "id.foo",
-              fname: "foo",
-            },
-            {
-              id: "id.bar",
-              fname: "bar",
-            },
-          ]);
-        },
+      setupCase1({ ctx, wsRoot: root.name }).then(({ vaults }) => {
+        vault = vaults[0];
+        _activate(ctx);
       });
     });
 
@@ -312,21 +345,8 @@ suite("notes", function () {
           done();
         });
       });
-      setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
-        useCb: async (vaultPath) => {
-          vault = vaultPath;
-          return NodeTestUtils.createNotes(vaultPath, [
-            {
-              id: "id.foo",
-              fname: "foo",
-            },
-            {
-              id: "id.bar",
-              fname: "bar",
-            },
-          ]);
-        },
+      setupCase1({ ctx, wsRoot: root.name }).then(() => {
+        _activate(ctx);
       });
     });
 
@@ -360,18 +380,18 @@ suite("notes", function () {
         //assert.ok(note.schema?.id, Schema.createUnkownSchema().id);
         done();
       });
-
-      setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
-        useCb: async (vaultPath) => {
-          vault = vaultPath;
-          return NodeTestUtils.createNotes(vaultPath, [
-            {
-              id: "id.foo.bar",
-              fname: "foo.bar",
-            },
-          ]);
-        },
+      setupCaseCustom({
+        ctx,
+        wsRoot: root.name,
+        noteProps: [
+          {
+            id: "id.foo.bar",
+            fname: "foo.bar",
+          },
+        ],
+      }).then(({ vaults }) => {
+        vault = vaults[0];
+        _activate(ctx);
       });
     });
 

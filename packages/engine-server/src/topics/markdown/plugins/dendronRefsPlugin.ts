@@ -1,8 +1,14 @@
-import { Note } from "@dendronhq/common-all";
 import { removeMDExtension } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { Parent } from "mdast";
+import {
+  brk,
+  heading,
+  paragraph,
+  root as mdastRoot,
+  text,
+} from "mdast-builder";
 import path from "path";
 import RemarkParser, { Eat } from "remark-parse";
 import { Processor } from "unified";
@@ -11,13 +17,6 @@ import { DendronRefLink, parseDendronRef } from "../../../utils";
 import { getProcessor } from "../utils";
 import { findIndex, isHeading } from "./inject";
 import { ReplaceRefOptions, replaceRefs } from "./replaceRefs";
-import {
-  root as mdastRoot,
-  paragraph,
-  text,
-  heading,
-  brk,
-} from "mdast-builder";
 
 // const LINK_REGEX = /^\[\[(.+?)\]\]/;
 const LINK_REGEX = /^\(\((?<ref>[^)]+)\)\)/;
@@ -34,7 +33,6 @@ type RefLinkData = {
   toMd?: boolean;
   prefix?: string;
   useId: boolean;
-  note?: Note;
 };
 
 function locator(value: string, fromIndex: number) {

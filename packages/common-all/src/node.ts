@@ -1,14 +1,10 @@
 /* eslint-disable no-loop-func */
 import matter from "gray-matter";
 import _ from "lodash";
-import minimatch from "minimatch";
 import moment from "moment";
 import { URI } from "vscode-uri";
-import YAML from "yamljs";
-import { DendronError } from "./error";
 import { DNodeUtilsV2 } from "./nodev2";
 import {
-  DEngine,
   DNodeData,
   DNodeDict,
   DNodeRawOpts,
@@ -16,21 +12,8 @@ import {
   IDNode,
   IDNodeOpts,
   IDNodeType,
-  INote,
-  INoteOpts,
-  ISchema,
-  ISchemaOpts,
-  NoteData,
-  NoteDict,
-  NoteLink,
   NoteProps,
-  NoteRawProps,
   RawPropsOpts,
-  SchemaData,
-  SchemaDict,
-  SchemaRawOptsFlat,
-  SchemaRawProps,
-  SchemaTemplate,
 } from "./types";
 import { genUUID } from "./uuid";
 
@@ -374,120 +357,120 @@ export abstract class DNode<T = DNodeData> implements IDNode<T>, QuickPickItem {
   }
 }
 
-export class Note extends DNode<NoteData> implements INote {
-  public schemaId: string;
-  public schema?: Schema;
-  public schemaStub: boolean;
+// export class Note extends DNode<NoteData> implements INote {
+//   public schemaId: string;
+//   public schema?: Schema;
+//   public schemaStub: boolean;
 
-  static createStub(fname: string, opts?: Partial<INoteOpts>): Note {
-    return new Note({ stub: true, fname, ...opts });
-  }
+//   static createStub(fname: string, opts?: Partial<INoteOpts>): Note {
+//     return new Note({ stub: true, fname, ...opts });
+//   }
 
-  static createRoot(): Note {
-    return new Note({ fname: "root", id: "root", title: "root" });
-  }
+//   static createRoot(): Note {
+//     return new Note({ fname: "root", id: "root", title: "root" });
+//   }
 
-  /**
-   * Create note using props and existing note dict
-   * Will merge properties of notes that already exist
-   * @param opts
-   */
-  static fromProps(opts: { props: NoteRawProps; noteDict: NoteDict }) {
-    let { props, noteDict } = opts;
-    const maybeExisting = noteDict[props.id];
-    if (maybeExisting) {
-      props = { ...props, ..._.omit(maybeExisting, ["parent", "children"]) };
-    }
-    if (props.id === "root") {
-      return new Note({
-        ...props,
-        parent: null,
-        children: maybeExisting?.children || [],
-      });
-    }
-    const maybeParent = DNodeUtils.findParent({
-      hpath: props.fname,
-      nodes: noteDict,
-    });
-    if (_.isUndefined(maybeParent)) {
-      throw Error("no parent found");
-    }
-    return new Note({
-      ...props,
-      parent: maybeParent as Note,
-      children: maybeExisting?.children || [],
-    });
-  }
+//   /**
+//    * Create note using props and existing note dict
+//    * Will merge properties of notes that already exist
+//    * @param opts
+//    */
+//   static fromProps(opts: { props: NoteRawProps; noteDict: NoteDict }) {
+//     let { props, noteDict } = opts;
+//     const maybeExisting = noteDict[props.id];
+//     if (maybeExisting) {
+//       props = { ...props, ..._.omit(maybeExisting, ["parent", "children"]) };
+//     }
+//     if (props.id === "root") {
+//       return new Note({
+//         ...props,
+//         parent: null,
+//         children: maybeExisting?.children || [],
+//       });
+//     }
+//     const maybeParent = DNodeUtils.findParent({
+//       hpath: props.fname,
+//       nodes: noteDict,
+//     });
+//     if (_.isUndefined(maybeParent)) {
+//       throw Error("no parent found");
+//     }
+//     return new Note({
+//       ...props,
+//       parent: maybeParent as Note,
+//       children: maybeExisting?.children || [],
+//     });
+//   }
 
-  static fromSchema(dirpath: string, schema: Schema): Note {
-    const fname = [dirpath, schema.pattern].join(".");
-    const note = new Note({
-      fname,
-      desc: schema.desc,
-      schemaStub: true,
-      data: { schemaId: schema.id },
-    });
-    note.schema = schema;
-    return note;
-  }
+//   static fromSchema(dirpath: string, schema: Schema): Note {
+//     const fname = [dirpath, schema.pattern].join(".");
+//     const note = new Note({
+//       fname,
+//       desc: schema.desc,
+//       schemaStub: true,
+//       data: { schemaId: schema.id },
+//     });
+//     note.schema = schema;
+//     return note;
+//   }
 
-  constructor(props: INoteOpts) {
-    const cleanProps = _.defaults(props, {
-      parent: null,
-      children: [],
-      schemaStub: false,
-    });
-    super({
-      type: "note",
-      ...cleanProps,
-    });
-    this.schemaId = props?.data?.schemaId || "-1";
-    this.schemaStub = cleanProps.schemaStub;
-  }
+//   constructor(props: INoteOpts) {
+//     const cleanProps = _.defaults(props, {
+//       parent: null,
+//       children: [],
+//       schemaStub: false,
+//     });
+//     super({
+//       type: "note",
+//       ...cleanProps,
+//     });
+//     this.schemaId = props?.data?.schemaId || "-1";
+//     this.schemaStub = cleanProps.schemaStub;
+//   }
 
-  // vscode detail pane
-  get detail(): string {
-    if (this.schema && this.schemaStub) {
-      return this.schema.desc;
-    }
-    return this.desc;
-  }
+//   // vscode detail pane
+//   get detail(): string {
+//     if (this.schema && this.schemaStub) {
+//       return this.schema.desc;
+//     }
+//     return this.desc;
+//   }
 
-  get description(): string | undefined {
-    const prefixParts = [];
-    if (this.title !== this.fname) {
-      prefixParts.push(this.title);
-    }
-    if (this.stub || this.schemaStub) {
-      prefixParts.push("$(gist-new)");
-    }
-    if (this.schema) {
-      // case: unknown schema
-      // eslint-disable-next-line no-use-before-define
-      if (SchemaUtils.isUnkown(this.schema)) {
-        prefixParts.push("$(question)");
-        return prefixParts.join(" ");
-      }
+//   get description(): string | undefined {
+//     const prefixParts = [];
+//     if (this.title !== this.fname) {
+//       prefixParts.push(this.title);
+//     }
+//     if (this.stub || this.schemaStub) {
+//       prefixParts.push("$(gist-new)");
+//     }
+//     if (this.schema) {
+//       // case: unknown schema
+//       // eslint-disable-next-line no-use-before-define
+//       if (SchemaUtils.isUnkown(this.schema)) {
+//         prefixParts.push("$(question)");
+//         return prefixParts.join(" ");
+//       }
 
-      // case: recognized schema
-      prefixParts.push(`$(repo) ${this.schema.domain.title}`);
-      // check if non-domain schema
-      if (this.schema.domain.id !== this.schema.id) {
-        prefixParts.push("$(breadcrumb-separator)");
-        prefixParts.push(this.schema.title);
-      }
-    }
-    return prefixParts.join(" ");
-  }
+//       // case: recognized schema
+//       prefixParts.push(`$(repo) ${this.schema.domain.title}`);
+//       // check if non-domain schema
+//       if (this.schema.domain.id !== this.schema.id) {
+//         prefixParts.push("$(breadcrumb-separator)");
+//         prefixParts.push(this.schema.title);
+//       }
+//     }
+//     return prefixParts.join(" ");
+//   }
 
-  get domain(): Note {
-    return super.domain as Note;
-  }
+//   get domain(): Note {
+//     return super.domain as Note;
+//   }
 
-  get url(): string {
-    return `/doc/${this.id}`;
-  }
-}
+//   get url(): string {
+//     return `/doc/${this.id}`;
+//   }
+// }
 
 // export class Schema extends DNode<SchemaData> implements ISchema {
 //   static createRawProps(opts: SchemaRawOptsFlat): SchemaRawProps {
@@ -770,13 +753,6 @@ export class Note extends DNode<NoteData> implements INote {
 //     return out;
 //   }
 // }
-
-function createBackLink(note: Note): NoteLink {
-  return {
-    type: "note",
-    id: "[[" + note.fname + "]]",
-  };
-}
 
 // export class NoteUtils {
 //   static addBackLink(from: Note, to: Note): void {

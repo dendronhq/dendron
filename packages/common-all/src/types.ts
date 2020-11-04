@@ -1,6 +1,5 @@
 import { Position } from "unist";
 import { URI } from "vscode-uri";
-import { Note } from "./node";
 
 export type Stage = "dev" | "prod" | "test";
 
@@ -152,7 +151,6 @@ export type INoteOpts = Omit<IDNodeOpts<NoteData>, "type"> & {
 };
 export type INoteProps = Required<INoteOpts>;
 export type INote = INoteProps & { domain: INote };
-export type NoteDict = { [id: string]: Note };
 
 // --- Schema
 // V1 {

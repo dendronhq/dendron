@@ -1,4 +1,4 @@
-import { DNodeRaw, genUUID, Note, NoteRawProps } from "@dendronhq/common-all";
+import { DNodeRaw, NoteRawProps } from "@dendronhq/common-all";
 import fs, { Dirent } from "fs";
 import matter from "gray-matter";
 import YAML from "js-yaml";
@@ -7,10 +7,6 @@ import minimatch from "minimatch";
 import os from "os";
 import path from "path";
 import tmp, { DirResult } from "tmp";
-
-interface FileMeta {
-  name: string;
-}
 
 export type getAllFilesOpts = {
   root: string;
@@ -84,23 +80,6 @@ export function readYAML(fpath: string): any {
 export function writeYAML(fpath: string, data: any) {
   const out = YAML.safeDump(data, { indent: 4, schema: YAML.JSON_SCHEMA });
   return fs.writeFileSync(fpath, out);
-}
-
-export function fileMeta2Node(body: string, meta: FileMeta): Note {
-  const title = meta.name;
-  // read id from file or generate one based on thte tile
-  const id = genUUID();
-  const note = new Note({
-    id,
-    title,
-    desc: "TODO",
-    data: {
-      schemaId: "-1",
-    },
-    body,
-    fname: meta.name,
-  });
-  return note;
 }
 
 export function deleteFile(fpath: string) {
@@ -189,13 +168,6 @@ export function node2PropsMdFile(props: NoteRawProps, opts: { root: string }) {
  * @param opts
  *   - root: root folder where files should be written to
  */
-export function node2MdFile(node: Note, opts: { root: string }) {
-  const { root } = opts;
-  const { fname } = node;
-  const filePath = path.join(root, `${fname}.md`);
-  return fs.writeFileSync(filePath, node.render());
-}
-
 export function resolveTilde(filePath: string) {
   if (!filePath || typeof filePath !== "string") {
     return "";

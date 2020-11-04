@@ -1,8 +1,12 @@
-import { DendronSoil, Git } from "@dendronhq/engine-server";
-import { Note } from "@dendronhq/common-all";
-import path from "path";
-import _ from "lodash";
+import {
+  createLogger,
+  DEngineClientV2,
+  NotePropsV2,
+} from "@dendronhq/common-all";
+import { DendronEngineV2, Git } from "@dendronhq/engine-server";
 import fs from "fs-extra";
+import _ from "lodash";
+import path from "path";
 
 type FetchResp = {
   root: string;
@@ -34,7 +38,42 @@ export type Asset = {
   srcPath: string;
   dstPath: string;
 };
-export type PrepareOutput = { notes: Note[]; assets: Asset[] };
+export type PrepareOutput = { notes: NotePropsV2[]; assets: Asset[] };
+
+type DendronSoilOpts = {
+  name: string;
+  wsRoot: string;
+  engine?: DEngineClientV2;
+  roots: string[];
+};
+
+export abstract class DendronSoil {
+  public opts: DendronSoilOpts;
+  public L: any;
+  public engine: DEngineClientV2;
+
+  buildDirPath(customDir?: string): string {
+    const root = this.opts.wsRoot;
+    let buildDirComp = [root, "build"];
+    if (customDir) {
+      buildDirComp.push(customDir);
+    }
+    const buildDirPath = path.join(...buildDirComp);
+    fs.ensureDirSync(buildDirPath);
+    return buildDirPath;
+  }
+
+  constructor(opts: DendronSoilOpts) {
+    this.opts = opts;
+    //@ts-ignore
+    this.L = createLogger(opts.name);
+    if (!_.isUndefined(this.opts.engine)) {
+      this.engine = this.opts.engine;
+    } else {
+      this.engine = DendronEngineV2.create({ vaults: this.opts.roots });
+    }
+  }
+}
 
 export abstract class DendronSeed<
   TConfig extends SeedConfig = SeedConfig
@@ -82,23 +121,22 @@ export abstract class DendronSeed<
     return;
   }
 
-  async mergeNote(note: Note): Promise<Note> {
+  async mergeNote(note: NotePropsV2): Promise<NotePropsV2> {
     const { mergeStrategy } = _.defaults(this.config(), {
       mergeStrategy: "appendToBottom",
     });
-    const resp = await this.engine.queryOne(note.fname, "note", {
-      fullNode: true,
-    });
+    const resp = await this.engine.getNoteByPath({ npath: note.fname });
     if (!resp.data) {
       throw Error("no note found");
     }
-    let body = resp.data.body;
+    let noteFromEngine = resp.data.note as NotePropsV2;
+    let body = noteFromEngine.body;
     switch (mergeStrategy) {
       case "insertAtTop":
-        body = [note.body, "\n", resp.data.body].join("\n");
+        body = [note.body, "\n", body].join("\n");
         break;
       case "appendToBottom":
-        body = [resp.data.body, "\n", note.body].join("\n");
+        body = [body, "\n", note.body].join("\n");
         break;
       case "replace":
         body = note.body;
@@ -106,8 +144,8 @@ export abstract class DendronSeed<
       default:
         throw Error(`unknown merge strategy: ${mergeStrategy}`);
     }
-    resp.data.body = body;
-    return resp.data as Note;
+    noteFromEngine.body = body;
+    return noteFromEngine;
   }
 
   async writeAssets(assets: Asset[]) {
@@ -115,17 +153,17 @@ export abstract class DendronSeed<
       assets.map(async (ent) => {
         const src = ent.srcPath;
         const dst = ent.dstPath;
-        const assetsDir = path.join(this.engine.props.root, "assets");
+        const assetsDir = path.join(this.engine.vaults[0], "assets");
         return fs.copyFile(src, path.join(assetsDir, dst));
       })
     );
   }
 
-  async writeNotes(notes: Note[]) {
+  async writeNotes(notes: NotePropsV2[]) {
     const source = this.config().source;
     return Promise.all(
-      notes.map(async (n: Note) => {
-        const notePath = path.join(this.engine.props.root, n.fname + ".md");
+      notes.map(async (n: NotePropsV2) => {
+        const notePath = path.join(this.engine.vaults[0], n.fname + ".md");
         if (fs.existsSync(notePath)) {
           n = await this.mergeNote(n);
         }
@@ -137,9 +175,8 @@ export abstract class DendronSeed<
         if (!_.find(sources, { url: source.url })) {
           sources.push(source);
         }
-        this.engine.write(n, {
+        this.engine.writeNote(n, {
           newNode: true,
-          parentsAsStubs: true,
         });
       })
     );

@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-next-server",
-  "version": "0.14.1-alpha.6",
+  "version": "0.14.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,7 +10,7 @@
     "watch": "echo 0"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.14.1-alpha.6",
+    "@dendronhq/common-all": "^0.14.1",
     "antd": "^4.6.6",
     "lodash": "^4.17.20",
     "next": "10.0.0",

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.14.1-alpha.7](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.6...v0.14.1-alpha.7) (2020-11-05)
+
+### Enhancements
+
+- **lookup:** add multi-select as toggle ([d84c03e](https://github.com/dendronhq/dendron/commit/d84c03eeac38a01cc0261ee3436d66a734659992))
+
 ## [0.14.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.5...v0.14.1-alpha.6) (2020-11-05)
 
 ### Features

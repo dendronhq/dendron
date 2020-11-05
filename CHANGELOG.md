@@ -5,56 +5,20 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.14.1](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.7...v0.14.1) (2020-11-05)
 
-**Note:** Version bump only for package root
-
-## [0.14.1-alpha.7](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.6...v0.14.1-alpha.7) (2020-11-05)
-
 ### Enhancements
 
 - **lookup:** add multi-select as toggle ([d84c03e](https://github.com/dendronhq/dendron/commit/d84c03eeac38a01cc0261ee3436d66a734659992))
-
-## [0.14.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.5...v0.14.1-alpha.6) (2020-11-05)
 
 ### Features
 
 - **lookup:** copy note link cmd ([e38743d](https://github.com/dendronhq/dendron/commit/e38743ddbac8486f2ac778bd546a6373a15a4f6d))
 - **lookup:** support multi-select ([b409c05](https://github.com/dendronhq/dendron/commit/b409c05d3b19797de714dbf10b6a4249758eae8a))
 
-## [0.14.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.4...v0.14.1-alpha.5) (2020-11-04)
-
-**Note:** Version bump only for package root
-
-## [0.14.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.3...v0.14.1-alpha.4) (2020-11-04)
-
-**Note:** Version bump only for package root
-
-## [0.14.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.2...v0.14.1-alpha.3) (2020-11-04)
-
-**Note:** Version bump only for package root
-
-## [0.14.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.1...v0.14.1-alpha.2) (2020-11-03)
-
 ### Bug Fixes
 
 - **pods:** don't re-initialize engine when using pods ([4687285](https://github.com/dendronhq/dendron/commit/4687285dabad761360b7108cc9d36f131c385e29))
 
-## [0.14.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.0...v0.14.1-alpha.1) (2020-11-03)
-
-**Note:** Version bump only for package root
-
-## [0.14.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.14.0...v0.14.1-alpha.0) (2020-11-03)
-
-**Note:** Version bump only for package root
-
 # [0.14.0](https://github.com/dendronhq/dendron/compare/v0.13.6-alpha.2...v0.14.0) (2020-11-01)
-
-**Note:** Version bump only for package root
-
-## [0.13.6-alpha.2](https://github.com/dendronhq/dendron/compare/v0.13.6-alpha.1...v0.13.6-alpha.2) (2020-11-01)
-
-**Note:** Version bump only for package root
-
-## [0.13.6-alpha.1](https://github.com/dendronhq/dendron/compare/v0.13.6-alpha.0...v0.13.6-alpha.1) (2020-11-01)
 
 ### Bug Fixes
 

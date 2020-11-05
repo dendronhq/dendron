@@ -1,10 +1,10 @@
+import clipboardy from "@dendronhq/clipboardy";
 import {
   DEngineClientV2,
   DNodePropsQuickInputV2,
   DNodeUtilsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
-import clipboardy from "@dendronhq/clipboardy";
 import { DirResult, file2Note, FileTestUtils } from "@dendronhq/common-server";
 import {
   NodeTestPresetsV2,
@@ -20,7 +20,10 @@ import path from "path";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { LookupCommand, LookupCommandOpts } from "../../commands/LookupCommand";
-import { CopyNoteLinkButton } from "../../components/lookup/buttons";
+import {
+  CopyNoteLinkButton,
+  MultiSelectBtn,
+} from "../../components/lookup/buttons";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
 import { createNoActiveItem } from "../../components/lookup/utils";
@@ -343,7 +346,7 @@ suite("notes", function () {
     });
 
     // TODO: onDidChangeActive doesn't work when multiselection is enabled
-    test.skip("opened note", function (done) {
+    test("opened note", function (done) {
       onWSInit(async () => {
         const engOpts: EngineOpts = { flavor: "note" };
         const lc = new LookupControllerV2(engOpts);
@@ -833,6 +836,7 @@ suite("notes", function () {
           value: "foo",
           selectedItems: items,
         });
+        quickpick.canSelectMany = true;
         const lp = new LookupProviderV2(engOpts);
         await lp.onDidAccept(quickpick, engOpts);
         const openWindows = vscode.workspace.textDocuments.map((ent) =>
@@ -861,6 +865,7 @@ suite("notes", function () {
           value: "bond",
           selectedItems: items.concat(createNoActiveItem()),
         });
+        quickpick.canSelectMany = true;
         const lp = new LookupProviderV2(engOpts);
         await lp.onDidAccept(quickpick, engOpts);
         const active = VSCodeUtils.getActiveTextEditor();
@@ -1144,6 +1149,9 @@ suite("effect buttons", function () {
           value: "foo",
           selectedItems: items,
         });
+        (_.find(lc.state.buttons, {
+          type: "multiSelect",
+        }) as MultiSelectBtn).pressed = true;
         await lc.onTriggerButton(CopyNoteLinkButton.create(true));
         assert.strictEqual(
           clipboardy.readSync(),

@@ -19,6 +19,7 @@ import { DNodePropsQuickInputV2 } from "@dendronhq/common-all";
 import { VSCodeUtils } from "../utils";
 import fs from "fs-extra";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
+import { DendronBtn } from "../components/lookup/buttons";
 
 export function getActiveEditorBasename() {
   return path.basename(
@@ -47,18 +48,24 @@ export function createMockConfig(settings: any): vscode.WorkspaceConfiguration {
 type QuickPickOpts = Partial<{
   value: string;
   selectedItems: DNodePropsQuickInputV2[];
+  canSelectMany: boolean;
+  buttons: DendronBtn[];
 }>;
 
 export function createMockQuickPick({
   value,
   selectedItems = [],
-}: QuickPickOpts): vscode.QuickPick<DNodePropsQuickInputV2> {
+  canSelectMany,
+  buttons,
+}: QuickPickOpts): DendronQuickPickerV2 {
   const qp = vscode.window.createQuickPick<DNodePropsQuickInputV2>();
   if (value) {
     qp.value = value;
   }
   qp.items = selectedItems;
   qp.selectedItems = selectedItems;
+  qp.canSelectMany = canSelectMany || false;
+  qp.buttons = buttons || [];
   return qp as DendronQuickPickerV2;
 }
 

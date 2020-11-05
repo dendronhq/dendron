@@ -33,6 +33,14 @@ export class LookupProviderV2 {
     this.opts = opts;
   }
 
+  createDefaultItems({ picker }: { picker: DendronQuickPickerV2 }) {
+    if (_.find(picker.buttons, { type: "multiSelect" })?.pressed) {
+      return [];
+    } else {
+      return [this.noActiveItem];
+    }
+  }
+
   async _onAcceptNewNote({
     picker,
     selectedItem,
@@ -141,12 +149,55 @@ export class LookupProviderV2 {
       return this._onAcceptNewNote({ picker, selectedItem });
     }
   }
-
   async onDidAccept(picker: DendronQuickPickerV2, opts: EngineOpts) {
+    if (picker.canSelectMany) {
+      return this.onDidAcceptForMulti(picker, opts);
+    } else {
+      return this.onDidAcceptForSingle(picker, opts);
+    }
+  }
+
+  async onDidAcceptForSingle(picker: DendronQuickPickerV2, opts: EngineOpts) {
+    const ctx = "onDidAcceptSingle";
+    const value = PickerUtilsV2.getValue(picker);
+    Logger.info({ ctx, msg: "enter", value, opts });
+    const selectedItem = PickerUtilsV2.getSelection(picker)[0];
+    const resp = this.validate(picker.value, opts.flavor);
+    const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
+    const ws = DendronWorkspace.instance();
+    let uri: Uri;
+    if (resp) {
+      return window.showErrorMessage(resp);
+    }
+    const maybeNote = NoteUtilsV2.getNoteByFname(value, ws.getEngine().notes);
+    if (!selectedItem && opts.flavor === "note" && maybeNote) {
+      uri = node2Uri(maybeNote, wsFolders);
+      return showDocAndHidePicker([uri], picker);
+    }
+    if (PickerUtilsV2.isCreateNewNotePickForSingle(selectedItem)) {
+      uri = await this.onAcceptNewNode({ picker, opts, selectedItem });
+    } else {
+      uri = node2Uri(selectedItem, wsFolders);
+      if (opts.flavor === "schema") {
+        const smod = DendronWorkspace.instance().getEngine().schemas[
+          selectedItem.id
+        ];
+        uri = Uri.file(
+          SchemaUtilsV2.getPath({
+            root: DendronWorkspace.rootWorkspaceFolder()?.uri.fsPath as string,
+            fname: smod.fname,
+          })
+        );
+      }
+    }
+    return showDocAndHidePicker([uri], picker);
+  }
+
+  async onDidAcceptForMulti(picker: DendronQuickPickerV2, opts: EngineOpts) {
     const ctx = "onDidAccept";
     const value = PickerUtilsV2.getValue(picker);
     Logger.info({ ctx, msg: "enter", value, opts });
-    const selectedItems = PickerUtilsV2.getSelection(picker);
+    let selectedItems = PickerUtilsV2.getSelection(picker);
     const resp = this.validate(picker.value, opts.flavor);
     const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
     const ws = DendronWorkspace.instance();
@@ -162,19 +213,25 @@ export class LookupProviderV2 {
       maybeNoteFname,
       ws.getEngine().notes
     );
-    if (_.isEmpty(selectedItems) && opts.flavor === "note" && maybeNote) {
-      uris = [node2Uri(maybeNote, wsFolders)];
-      return showDocAndHidePicker(uris, picker);
+    if (_.isEmpty(selectedItems) && opts.flavor === "note") {
+      if (maybeNote) {
+        if (maybeNote.stub) {
+          selectedItems = [...picker.activeItems];
+        } else {
+          uris = [node2Uri(maybeNote, wsFolders)];
+          return showDocAndHidePicker(uris, picker);
+        }
+      } else {
+        selectedItems = [createNoActiveItem()];
+      }
     }
 
     // get note by selection
-    const isCreateNew = _.some(
-      selectedItems.map(PickerUtilsV2.isCreateNewNotePick)
-    );
+    const isCreateNew =
+      _.some(selectedItems.map(PickerUtilsV2.isCreateNewNotePick)) ||
+      _.isEmpty(selectedItems);
     if (isCreateNew && selectedItems.length > 1) {
-      window.showErrorMessage(
-        `Can only select one item when creating new ${opts.flavor}`
-      );
+      window.showErrorMessage(`cannot create new note when multi-select is on`);
       return;
     }
     if (isCreateNew) {
@@ -251,7 +308,8 @@ export class LookupProviderV2 {
       const items: DNodePropsQuickInputV2[] = [...picker.items];
 
       let updatedItems = PickerUtilsV2.filterCreateNewItem(items);
-      updatedItems = [this.noActiveItem].concat(updatedItems);
+      updatedItems = this.createDefaultItems({ picker }).concat(updatedItems);
+
       Logger.debug({
         ctx,
         pickerValue,
@@ -275,7 +333,8 @@ export class LookupProviderV2 {
           const resp = await engine.querySchema(querystring);
           nodes = resp.data.map((ent) => SchemaUtilsV2.getModuleRoot(ent));
         }
-        updatedItems = [this.noActiveItem].concat(
+        // overwrite results
+        updatedItems = this.createDefaultItems({ picker }).concat(
           nodes.map((ent) =>
             DNodeUtilsV2.enhancePropForQuickInput(ent, engine.schemas)
           )

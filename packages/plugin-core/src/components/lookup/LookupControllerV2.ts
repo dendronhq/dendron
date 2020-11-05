@@ -1,9 +1,5 @@
-import clipboardy from "@dendronhq/clipboardy";
-import {
-  DNodePropsQuickInputV2,
-  NotePropsV2,
-  NoteUtilsV2,
-} from "@dendronhq/common-all";
+import { DNodePropsQuickInputV2, NotePropsV2 } from "@dendronhq/common-all";
+import GithubSlugger from "github-slugger";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
@@ -14,21 +10,19 @@ import {
 } from "../../commands/LookupCommand";
 import { CONFIG } from "../../constants";
 import { Logger } from "../../logger";
+import { EngineOpts } from "../../types";
 import { DendronClientUtilsV2, VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import {
+  ButtonCategory,
   ButtonType,
   createAllButtons,
   DendronBtn,
   getButtonCategory,
   IDendronQuickInputButton,
-  refreshButtons,
 } from "./buttons";
 import { LookupProviderV2 } from "./LookupProviderV2";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";
-import GithubSlugger from "github-slugger";
-import { EngineOpts } from "../../types";
-import { PickerUtilsV2 } from "./utils";
 
 export class LookupControllerV2 {
   public quickPick?: DendronQuickPickerV2;
@@ -36,7 +30,10 @@ export class LookupControllerV2 {
   protected opts: EngineOpts;
   public provider?: LookupProviderV2;
 
-  constructor(opts: EngineOpts, lookupOpts?: LookupCommandOpts) {
+  constructor(
+    opts: EngineOpts,
+    lookupOpts?: Omit<LookupCommandOpts, "flavor">
+  ) {
     // selection behaior
     let lookupSelectionType =
       lookupOpts?.selectionType ||
@@ -55,6 +52,7 @@ export class LookupControllerV2 {
     // initialize rest
     this.state = {
       buttons: opts.flavor === "note" ? createAllButtons(initialTypes) : [],
+      buttonsPrev: [],
     };
     this.opts = opts;
   }
@@ -80,14 +78,18 @@ export class LookupControllerV2 {
     }
     btnTriggered.pressed = !btnTriggered.pressed;
     const btnCategory = getButtonCategory(btnTriggered);
-    _.filter(this.state.buttons, (ent) => ent.type !== btnTriggered.type).map(
-      (ent) => {
-        if (getButtonCategory(ent) === btnCategory) {
-          ent.pressed = false;
+    // toggle other buttons in same category off
+    if (!_.includes(["effect"] as ButtonCategory[], btnCategory)) {
+      _.filter(this.state.buttons, (ent) => ent.type !== btnTriggered.type).map(
+        (ent) => {
+          if (getButtonCategory(ent) === btnCategory) {
+            ent.pressed = false;
+          }
         }
-      }
-    );
-    refreshButtons(quickPick, this.state.buttons);
+      );
+    }
+
+    this.refreshButtons(quickPick, this.state.buttons);
     await this.updatePickerBehavior({
       quickPick,
       document,
@@ -96,6 +98,13 @@ export class LookupControllerV2 {
       changed: btnTriggered,
     });
   };
+
+  refreshButtons(quickpick: DendronQuickPickerV2, buttons: DendronBtn[]) {
+    this.state.buttonsPrev = quickpick.buttons.map((b: DendronBtn) =>
+      b.clone()
+    );
+    quickpick.buttons = buttons;
+  }
 
   async show(opts?: {
     value?: string;
@@ -121,10 +130,11 @@ export class LookupControllerV2 {
     quickPick.placeholder = "eg. hello.world";
     quickPick.ignoreFocusOut = cleanOpts.ignoreFocusOut;
     quickPick.justActivated = true;
-    quickPick.canSelectMany = true;
+    quickPick.canSelectMany = false;
     const provider = new LookupProviderV2(this.opts);
     this.provider = provider;
 
+    this.refreshButtons(quickPick, this.state.buttons);
     await this.updatePickerBehavior({
       quickPick,
       document,
@@ -132,7 +142,6 @@ export class LookupControllerV2 {
       quickPickValue: cleanOpts.value,
       provider,
     });
-    refreshButtons(quickPick, this.state.buttons);
     quickPick.onDidTriggerButton(this.onTriggerButton);
 
     // cleanup quickpick
@@ -216,6 +225,22 @@ export class LookupControllerV2 {
     await provider.onUpdatePickerItem(quickPick, provider.opts, onUpdateReason);
   }
 
+  async updateBehaviorByEffect({
+    quickPick,
+  }: {
+    quickPick: DendronQuickPickerV2;
+  }) {
+    const effectResp = _.filter(
+      quickPick.buttons,
+      (ent) => getButtonCategory(ent) === "effect"
+    );
+    await Promise.all(
+      effectResp.map(async (effect) => {
+        return effect.handle({ quickPick });
+      })
+    );
+  }
+
   async updatePickerBehavior(opts: {
     quickPick: DendronQuickPickerV2;
     document?: vscode.TextDocument;
@@ -250,27 +275,7 @@ export class LookupControllerV2 {
     const selection2LinkChanged = changed?.type === "selection2link";
 
     // handle effect resp
-    const effectResp = _.find(
-      resp,
-      (ent) => getButtonCategory(ent) === "effect"
-    );
-    if (effectResp) {
-      switch (effectResp.type) {
-        case "copyNoteLink":
-          const links = quickPick.selectedItems
-            .filter((ent) => !PickerUtilsV2.isCreateNewNotePick(ent))
-            .map((note) => NoteUtilsV2.createWikiLink({ note }));
-          if (_.isEmpty(links)) {
-            vscode.window.showInformationMessage(`no items selected`);
-          } else {
-            clipboardy.writeSync(links.join("\n"));
-            vscode.window.showInformationMessage(
-              `${links.length} links copied`
-            );
-          }
-          break;
-      }
-    }
+    await this.updateBehaviorByEffect({ quickPick });
 
     // handle note resp, requires updating picker value
     if (

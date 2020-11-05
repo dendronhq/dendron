@@ -97,6 +97,17 @@ export class PickerUtilsV2 {
     });
   };
 
+  static isCreateNewNotePickForSingle(node: DNodePropsQuickInputV2): boolean {
+    if (!node) {
+      return true;
+    }
+    if (node.detail === CREATE_NEW_DETAIL || node.stub || node.schemaStub) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   static isCreateNewNotePick(node: DNodePropsQuickInputV2): boolean {
     if (!node) {
       return true;

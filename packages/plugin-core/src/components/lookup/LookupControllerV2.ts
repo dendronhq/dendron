@@ -1,4 +1,9 @@
-import { DNodePropsQuickInputV2, NotePropsV2 } from "@dendronhq/common-all";
+import clipboardy from "@dendronhq/clipboardy";
+import {
+  DNodePropsQuickInputV2,
+  NotePropsV2,
+  NoteUtilsV2,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
@@ -23,11 +28,13 @@ import { LookupProviderV2 } from "./LookupProviderV2";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";
 import GithubSlugger from "github-slugger";
 import { EngineOpts } from "../../types";
+import { PickerUtilsV2 } from "./utils";
 
 export class LookupControllerV2 {
   public quickPick?: DendronQuickPickerV2;
   public state: LookupControllerState;
   protected opts: EngineOpts;
+  public provider?: LookupProviderV2;
 
   constructor(opts: EngineOpts, lookupOpts?: LookupCommandOpts) {
     // selection behaior
@@ -41,6 +48,9 @@ export class LookupControllerV2 {
     if (noteSelectioType) {
       initialTypes.push(noteSelectioType);
     }
+    if (lookupOpts?.effectType) {
+      initialTypes.push(lookupOpts.effectType);
+    }
 
     // initialize rest
     this.state = {
@@ -48,6 +58,44 @@ export class LookupControllerV2 {
     };
     this.opts = opts;
   }
+
+  onTriggerButton = async (btn: QuickInputButton) => {
+    const quickPick = this.quickPick;
+    const provider = this.provider;
+    if (!quickPick || !provider) {
+      return;
+    }
+    const resp = await VSCodeUtils.extractRangeFromActiveEditor();
+    const { document, range } = _.defaults(resp, {
+      document: null,
+      range: null,
+    });
+    const btnType = (btn as IDendronQuickInputButton).type;
+
+    const btnTriggered = _.find(this.state.buttons, {
+      type: btnType,
+    }) as DendronBtn;
+    if (!btnTriggered) {
+      throw Error("bad button type");
+    }
+    btnTriggered.pressed = !btnTriggered.pressed;
+    const btnCategory = getButtonCategory(btnTriggered);
+    _.filter(this.state.buttons, (ent) => ent.type !== btnTriggered.type).map(
+      (ent) => {
+        if (getButtonCategory(ent) === btnCategory) {
+          ent.pressed = false;
+        }
+      }
+    );
+    refreshButtons(quickPick, this.state.buttons);
+    await this.updatePickerBehavior({
+      quickPick,
+      document,
+      range,
+      provider,
+      changed: btnTriggered,
+    });
+  };
 
   async show(opts?: {
     value?: string;
@@ -75,6 +123,7 @@ export class LookupControllerV2 {
     quickPick.justActivated = true;
     quickPick.canSelectMany = true;
     const provider = new LookupProviderV2(this.opts);
+    this.provider = provider;
 
     await this.updatePickerBehavior({
       quickPick,
@@ -84,34 +133,35 @@ export class LookupControllerV2 {
       provider,
     });
     refreshButtons(quickPick, this.state.buttons);
+    quickPick.onDidTriggerButton(this.onTriggerButton);
 
-    quickPick.onDidTriggerButton(async (btn: QuickInputButton) => {
-      const btnType = (btn as IDendronQuickInputButton).type;
+    // quickPick.onDidTriggerButton(async (btn: QuickInputButton) => {
+    //   const btnType = (btn as IDendronQuickInputButton).type;
 
-      const btnTriggered = _.find(this.state.buttons, {
-        type: btnType,
-      }) as DendronBtn;
-      if (!btnTriggered) {
-        throw Error("bad button type");
-      }
-      btnTriggered.pressed = !btnTriggered.pressed;
-      const btnCategory = getButtonCategory(btnTriggered);
-      _.filter(this.state.buttons, (ent) => ent.type !== btnTriggered.type).map(
-        (ent) => {
-          if (getButtonCategory(ent) === btnCategory) {
-            ent.pressed = false;
-          }
-        }
-      );
-      refreshButtons(quickPick, this.state.buttons);
-      await this.updatePickerBehavior({
-        quickPick,
-        document,
-        range,
-        provider,
-        changed: btnTriggered,
-      });
-    });
+    //   const btnTriggered = _.find(this.state.buttons, {
+    //     type: btnType,
+    //   }) as DendronBtn;
+    //   if (!btnTriggered) {
+    //     throw Error("bad button type");
+    //   }
+    //   btnTriggered.pressed = !btnTriggered.pressed;
+    //   const btnCategory = getButtonCategory(btnTriggered);
+    //   _.filter(this.state.buttons, (ent) => ent.type !== btnTriggered.type).map(
+    //     (ent) => {
+    //       if (getButtonCategory(ent) === btnCategory) {
+    //         ent.pressed = false;
+    //       }
+    //     }
+    //   );
+    //   refreshButtons(quickPick, this.state.buttons);
+    //   await this.updatePickerBehavior({
+    //     quickPick,
+    //     document,
+    //     range,
+    //     provider,
+    //     changed: btnTriggered,
+    //   });
+    // });
 
     // cleanup quickpick
     quickPick.onDidHide(() => {
@@ -212,9 +262,11 @@ export class LookupControllerV2 {
       changed,
     } = opts;
     const buttons = this.state.buttons;
+    // get all pressed buttons
     const resp = _.filter(buttons, { pressed: true });
     Logger.info({ ctx, activeButtons: resp });
     const noteResp = _.find(resp, (ent) => getButtonCategory(ent) === "note");
+    // collect info
     const selectionResp = _.find(
       resp,
       (ent) => getButtonCategory(ent) === "selection"
@@ -224,7 +276,31 @@ export class LookupControllerV2 {
       (ent) => getButtonCategory(ent) === "filter"
     );
     const selection2LinkChanged = changed?.type === "selection2link";
-    // handle note resp
+
+    // handle effect resp
+    const effectResp = _.find(
+      resp,
+      (ent) => getButtonCategory(ent) === "effect"
+    );
+    if (effectResp) {
+      switch (effectResp.type) {
+        case "copyNoteLink":
+          const links = quickPick.selectedItems
+            .filter((ent) => !PickerUtilsV2.isCreateNewNotePick(ent))
+            .map((note) => NoteUtilsV2.createWikiLink({ note }));
+          if (_.isEmpty(links)) {
+            vscode.window.showInformationMessage(`no items selected`);
+          } else {
+            clipboardy.writeSync(links.join("\n"));
+            vscode.window.showInformationMessage(
+              `${links.length} links copied`
+            );
+          }
+          break;
+      }
+    }
+
+    // handle note resp, requires updating picker value
     if (
       !changed ||
       (changed && getButtonCategory(changed) === "note") ||

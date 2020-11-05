@@ -35,8 +35,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
     if (!note) {
       throw Error(`${fname} not found in engine`);
     }
-    const { title } = note;
-    const link = `[[${title}|${fname}]]`;
+    const link = NoteUtilsV2.createWikiLink({ note });
     try {
       clipboardy.writeSync(link);
     } catch (err) {

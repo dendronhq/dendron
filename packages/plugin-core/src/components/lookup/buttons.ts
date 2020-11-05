@@ -2,6 +2,7 @@ import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
 import {
+  LookupEffectType,
   LookupFilterType,
   LookupNoteType,
   LookupSelectionType,
@@ -10,12 +11,18 @@ import {
 import { DendronQuickPickerV2 } from "./types";
 
 export type ButtonType =
+  | LookupEffectType
   | LookupNoteType
   | LookupSelectionType
   | LookupSplitType
   | LookupFilterType;
 
-export type ButtonCategory = "selection" | "note" | "split" | "filter";
+export type ButtonCategory =
+  | "selection"
+  | "note"
+  | "split"
+  | "filter"
+  | "effect";
 
 export function getButtonCategory(button: DendronBtn): ButtonCategory {
   if (isSelectionBtn(button)) {
@@ -30,9 +37,15 @@ export function getButtonCategory(button: DendronBtn): ButtonCategory {
   if (isFilterButton(button)) {
     return "filter";
   }
+  if (isEffectButton(button)) {
+    return "effect";
+  }
   throw Error(`unknown btn type ${button}`);
 }
 
+function isEffectButton(button: DendronBtn) {
+  return _.includes(["copyNoteLink", "copyNoteRef"], button.type);
+}
 function isFilterButton(button: DendronBtn) {
   return _.includes(["directChildOnly"], button.type);
 }
@@ -60,6 +73,7 @@ export class DendronBtn implements IDendronQuickInputButton {
   public iconPathPressed: ThemeIcon;
   public type: ButtonType;
   public pressed: boolean;
+  public canToggle: boolean;
   public title: string;
   onLookup = async (_payload: any) => {
     return;
@@ -71,6 +85,7 @@ export class DendronBtn implements IDendronQuickInputButton {
     iconOn: string;
     type: ButtonType;
     pressed?: boolean;
+    canToggle?: boolean;
   }) {
     const { iconOff, iconOn, type, title, pressed } = opts;
     this.iconPathNormal = new vscode.ThemeIcon(iconOff);
@@ -78,6 +93,7 @@ export class DendronBtn implements IDendronQuickInputButton {
     this.type = type;
     this.pressed = pressed || false;
     this.title = title;
+    this.canToggle = opts.canToggle || true;
   }
 
   get iconPath() {
@@ -162,6 +178,18 @@ class DirectChildFilterBtn extends DendronBtn {
     });
   }
 }
+export class CopyNoteLinkButton extends DendronBtn {
+  static create(pressed?: boolean) {
+    return new DendronBtn({
+      title: "Copy Note Link",
+      iconOff: "clippy",
+      iconOn: "menu-selection",
+      type: "copyNoteLink" as LookupEffectType,
+      pressed,
+      canToggle: false,
+    });
+  }
+}
 
 // // @ts-ignore
 // class VerticalSplitBtn extends DendronBtn {
@@ -187,6 +215,7 @@ export function createAllButtons(
   typesToTurnOn: ButtonType[] = []
 ): DendronBtn[] {
   const buttons = [
+    CopyNoteLinkButton.create(),
     DirectChildFilterBtn.create(),
     SlectionExtractBtn.create(),
     Selection2LinkBtn.create(),

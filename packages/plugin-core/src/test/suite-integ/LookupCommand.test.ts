@@ -4,6 +4,7 @@ import {
   DNodeUtilsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
+import clipboardy from "@dendronhq/clipboardy";
 import { DirResult, file2Note, FileTestUtils } from "@dendronhq/common-server";
 import {
   NodeTestPresetsV2,
@@ -19,6 +20,7 @@ import path from "path";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { LookupCommand, LookupCommandOpts } from "../../commands/LookupCommand";
+import { CopyNoteLinkButton } from "../../components/lookup/buttons";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
 import { createNoActiveItem } from "../../components/lookup/utils";
@@ -242,6 +244,15 @@ suite("schemas", function () {
     });
   });
 });
+
+async function setupCase2({ ctx }: { ctx: vscode.ExtensionContext }) {
+  const out = await setupCodeWorkspaceV2({
+    ctx,
+    initDirCb: createOneNoteOneSchemaPresetCallback,
+  });
+  await _activate(ctx);
+  return out;
+}
 
 function setupCase1({
   ctx,
@@ -1105,6 +1116,41 @@ suite("scratch notes", function () {
           "childOfDomain",
       },
       useCb: createOneNoteOneSchemaPresetCallback,
+    });
+  });
+});
+
+suite("effect buttons", function () {
+  let ctx: vscode.ExtensionContext;
+  this.timeout(TIMEOUT);
+
+  describe("copy note link", function () {
+    beforeEach(function () {
+      ctx = VSCodeUtils.getOrCreateMockContext();
+      DendronWorkspace.getOrCreate(ctx);
+    });
+
+    test("basic", function (done) {
+      setupCase2({ ctx }).then(async ({}) => {
+        const engOpts: EngineOpts = { flavor: "note" };
+        const lc = new LookupControllerV2(engOpts);
+        await lc.show();
+        const client = DendronWorkspace.instance().getEngine();
+        const notes = ["foo", "foo.ch1"].map((fname) => client.notes[fname]);
+        const items = notes.map((note) =>
+          DNodeUtilsV2.enhancePropForQuickInput(note, client.schemas)
+        );
+        lc.quickPick = createMockQuickPick({
+          value: "foo",
+          selectedItems: items,
+        });
+        await lc.onTriggerButton(CopyNoteLinkButton.create(true));
+        assert.strictEqual(
+          clipboardy.readSync(),
+          "[[Foo|foo]]\n[[Ch1|foo.ch1]]"
+        );
+        done();
+      });
     });
   });
 });

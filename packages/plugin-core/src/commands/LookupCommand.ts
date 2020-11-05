@@ -4,6 +4,7 @@ import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { BasicCommand } from "./base";
 
+export type LookupEffectType = "copyNoteLink" | "copyNoteRef";
 export type LookupFilterType = "directChildOnly";
 export type LookupSelectionType = "selection2link" | "selectionExtract";
 export type LookupNoteType = "journal" | "scratch";
@@ -29,6 +30,7 @@ type CommandOpts = {
   noConfirm?: boolean;
   value?: string;
   noteExistBehavior?: LookupNoteExistBehavior;
+  effectType?: LookupEffectType;
 };
 
 type CommandOutput = DendronQuickPickerV2;

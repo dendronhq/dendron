@@ -368,6 +368,12 @@ export class NoteUtilsV2 {
     return stubNodes;
   }
 
+  static createWikiLink({ note }: { note: NotePropsV2 }): string {
+    const { title, fname } = note;
+    const link = `[[${title}|${fname}]]`;
+    return link;
+  }
+
   static fromSchema({
     fname,
     schemaModule,

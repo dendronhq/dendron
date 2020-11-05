@@ -47,10 +47,6 @@ export class CopyNoteURLCommand extends BasicCommand<
     }
     const notePrefix = "notes";
     const fname = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
-    // const note = DNodeUtils.getNoteByFname(fname, ws.engine);
-    // if (!note) {
-    //   throw Error("no note found");
-    // }
 
     let note: NotePropsV2 | undefined;
     note = _.find(DendronWorkspace.instance().getEngine().notes, { fname });

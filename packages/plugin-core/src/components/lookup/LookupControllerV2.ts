@@ -135,34 +135,6 @@ export class LookupControllerV2 {
     refreshButtons(quickPick, this.state.buttons);
     quickPick.onDidTriggerButton(this.onTriggerButton);
 
-    // quickPick.onDidTriggerButton(async (btn: QuickInputButton) => {
-    //   const btnType = (btn as IDendronQuickInputButton).type;
-
-    //   const btnTriggered = _.find(this.state.buttons, {
-    //     type: btnType,
-    //   }) as DendronBtn;
-    //   if (!btnTriggered) {
-    //     throw Error("bad button type");
-    //   }
-    //   btnTriggered.pressed = !btnTriggered.pressed;
-    //   const btnCategory = getButtonCategory(btnTriggered);
-    //   _.filter(this.state.buttons, (ent) => ent.type !== btnTriggered.type).map(
-    //     (ent) => {
-    //       if (getButtonCategory(ent) === btnCategory) {
-    //         ent.pressed = false;
-    //       }
-    //     }
-    //   );
-    //   refreshButtons(quickPick, this.state.buttons);
-    //   await this.updatePickerBehavior({
-    //     quickPick,
-    //     document,
-    //     range,
-    //     provider,
-    //     changed: btnTriggered,
-    //   });
-    // });
-
     // cleanup quickpick
     quickPick.onDidHide(() => {
       quickPick.dispose();

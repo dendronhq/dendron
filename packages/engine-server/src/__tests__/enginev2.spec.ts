@@ -698,6 +698,38 @@ This is some content`,
       ).toBeTruthy();
     });
 
+    test("with note ref", async () => {
+      const note = NoteUtilsV2.create({
+        fname: "bar",
+        id: "bar",
+        created: "1",
+        updated: "1",
+        body:
+          "[[foo]]\n((ref: [[dendron.pro.dendron-next-server]]#quickstart,1:#*))",
+      });
+      await note2File(note, vaultDir);
+
+      await engine.init();
+      const changed = await engine.renameNote({
+        oldLoc: { fname: "foo", vault: { fsPath: vaultDir } },
+        newLoc: { fname: "baz", vault: { fsPath: vaultDir } },
+      });
+      expect(changed).toMatchSnapshot();
+      expect(changed.data?.length).toEqual(3);
+      expect(_.trim((changed.data as NoteChangeEntry[])[0].note.body)).toEqual(
+        "[[baz]]\n((ref: [[dendron.pro.dendron-next-server]]#quickstart,1:#*))"
+      );
+      const notes = fs.readdirSync(vaultDir);
+      expect(notes).toMatchSnapshot();
+      expect(_.includes(notes, "foo.md")).toBeFalsy();
+      expect(_.includes(notes, "baz.md")).toBeTruthy();
+      expect(
+        fs
+          .readFileSync(path.join(vaultDir, "bar.md"), { encoding: "utf8" })
+          .indexOf("[[baz]]") >= 0
+      ).toBeTruthy();
+    });
+
     test(RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.label, async () => {
       await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.before({ vaultDir });
       await engine.init();

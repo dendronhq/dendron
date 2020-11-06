@@ -40,16 +40,29 @@ export class ParserUtilsV2 {
    * - parse wiki links
    * @param opts
    */
-  static getRemark(opts?: { dendronLinksOpts: DendronLinksOpts }) {
-    const { dendronLinksOpts } = _.defaults(opts, { dendronLinksOpts: {} });
+  static getRemark(opts?: {
+    dendronLinksOpts: DendronLinksOpts;
+    useDendronNoteRefPluginForMd?: boolean;
+  }) {
+    const { dendronLinksOpts, useDendronNoteRefPluginForMd } = _.defaults(
+      opts,
+      {
+        dendronLinksOpts: {},
+        useDendronNoteRefPluginForMd: true,
+      }
+    );
     const errors: DendronError[] = [];
-    return remark()
+    let plugin = remark()
       .data("errors", errors)
       .use(markdownParse, { gfm: true })
       .use(abbrPlugin)
       .use(frontmatterPlugin, ["yaml"])
       .use(dendronLinksPlugin, dendronLinksOpts)
-      .use({ settings: { listItemIndent: "1", fences: true } });
+      .use({ settings: { listItemIndent: "1", fences: true, bullet: "-" } });
+    if (useDendronNoteRefPluginForMd) {
+      plugin.use(dendronNoteRefPluginForMd);
+    }
+    return plugin;
   }
 
   static findLinks({ note }: { note: NotePropsV2 }): DLink[] {

@@ -1,3 +1,8 @@
+import {
+  DendronError,
+  DNoteRefData,
+  DNoteRefLink,
+} from "@dendronhq/common-all";
 import { readMD } from "@dendronhq/common-server";
 import _ from "lodash";
 import _markdownIt from "markdown-it";
@@ -13,20 +18,28 @@ function normalize(text: string) {
 }
 
 export function refLink2String(
-  link: DendronRefLink,
-  opts?: { includeParen: boolean }
+  link: DNoteRefLink,
+  opts?: { includeParen: boolean; includeRefTag?: boolean }
 ): string {
-  const cleanOpts = _.defaults(opts, { includeParen: false });
+  const cleanOpts = _.defaults(opts, {
+    includeParen: false,
+    includeRefTag: false,
+  });
+  const { anchorStart, anchorStartOffset, anchorEnd } = link.data;
+  const { fname: name } = link.from;
   // [[foo]]#head1:#*"
-  const linkParts = [`[[${link.name}]]`];
-  if (link.anchorStart) {
-    linkParts.push(`#${normalize(link.anchorStart)}`);
+  const linkParts = [`[[${name}]]`];
+  if (anchorStart) {
+    linkParts.push(`#${normalize(anchorStart)}`);
   }
-  if (link.anchorStartOffset) {
-    linkParts.push(`,${link.anchorStartOffset}`);
+  if (anchorStartOffset) {
+    linkParts.push(`,${anchorStartOffset}`);
   }
-  if (link.anchorEnd) {
-    linkParts.push(`:#${normalize(link.anchorEnd)}`);
+  if (anchorEnd) {
+    linkParts.push(`:#${normalize(anchorEnd)}`);
+  }
+  if (cleanOpts.includeRefTag) {
+    linkParts.splice(0, 0, "ref: ");
   }
   if (cleanOpts.includeParen) {
     linkParts.splice(0, 0, "((");
@@ -41,23 +54,7 @@ function genAST(txt: string): ASTEnt[] {
   return markdownItAST.makeAST(tokens);
 }
 
-export type DendronRefLink = {
-  label?: string;
-  id?: string;
-  /**
-   * Name of file
-   */
-  name?: string;
-  anchorStart?: string;
-  anchorEnd?: string;
-  anchorStartOffset?: number;
-  type: "file" | "id";
-};
-
-type DendronRef = {
-  direction: "from" | "to";
-  link: DendronRefLink;
-};
+type LinkDirection = "from" | "to";
 
 export type ASTEnt = {
   nodeType: "heading" | "other";
@@ -68,15 +65,15 @@ export type ASTEnt = {
 
 export function extractBlock(
   txt: string,
-  link: DendronRefLink
+  link: DNoteRefLink
   //opts?: { linesOnly?: boolean }
 ): {
   block: string;
   lines?: { start: number | undefined; end: number | undefined };
 } {
   // const copts = _.defaults(opts, { linesOnly: false });
-  const { anchorStart, anchorEnd } = link;
-  if (link.type === "id") {
+  const { anchorStart, anchorEnd, type } = link.data;
+  if (type === "id") {
     throw Error(`id link not supported`);
   } else {
     //txt = _.trim(txt);
@@ -118,8 +115,8 @@ export function extractBlock(
 export function parseDendronRef(ref: string) {
   const [idOrRef, ...rest] = _.trim(ref).split(":");
   const cleanArgs = _.trim(rest.join(":"));
-  let link: DendronRefLink | undefined;
-  let direction: DendronRef["direction"];
+  let link: DNoteRefLink | undefined;
+  let direction: LinkDirection;
   if (idOrRef === "ref") {
     direction = "to";
     // eslint-disable-next-line no-use-before-define
@@ -130,7 +127,7 @@ export function parseDendronRef(ref: string) {
   return { direction, link };
 }
 
-export function parseFileLink(ref: string): DendronRefLink {
+export function parseFileLink(ref: string): DNoteRefLink {
   const wikiFileName = /([^\]:]+)/.source;
   const reLink = new RegExp(
     "" +
@@ -150,69 +147,43 @@ export function parseFileLink(ref: string): DendronRefLink {
     "i"
   );
   const groups = reLink.exec(ref)?.groups;
-  const clean: DendronRefLink = {
+  const clean: DNoteRefData = {
     type: "file",
   };
-  _.each<Partial<DendronRefLink>>(groups, (v, k: any) => {
+  let fname: string | undefined;
+  _.each<Partial<DNoteRefData>>(groups, (v, k) => {
+    if (_.isUndefined(v)) {
+      return;
+    }
     if (k === "name") {
-      // @ts-ignore
-      clean[k] = path.basename(v as string, ".md");
+      fname = path.basename(v as string, ".md");
     } else {
       // @ts-ignore
       clean[k] = v;
     }
   });
+  if (_.isUndefined(fname)) {
+    throw new DendronError({ msg: `fname for ${ref} is undefined` });
+  }
   if (clean.anchorStart && clean.anchorStart.indexOf(",") >= 0) {
     const [anchorStart, offset] = clean.anchorStart.split(",");
     clean.anchorStart = anchorStart;
     clean.anchorStartOffset = parseInt(offset);
   }
-  return clean;
+  return { from: { fname }, data: clean, type: "ref" };
 }
 
 // export function parseIdLink(ref: string): DendronRefLink {
 //     const reLink = /(?<id>[^:]+)(:([^:]+))?/;
 // };
 
-function parseLink(ref: string): DendronRefLink | undefined {
+function parseLink(ref: string): DNoteRefLink | undefined {
   if (ref.indexOf("]") >= 0) {
     return parseFileLink(ref);
   } else {
     throw Error(`parseLink, non-file link, not implemented, ${ref}`);
   }
 }
-
-// function testLineRef() {
-//     const ref = "ref: b9f5caaa-288e-41e9-a2a2-21f1d8e49625";
-//     return assert(parseDendronRef(ref), {
-//         type: 'ref',
-//         start: {id: 'b9f5caaa-288e-41e9-a2a2-21f1d8e49625'},
-//     });
-// };
-
-// function testFileWithLineRef() {
-//     const ref = "ref: [[foo]]#b9f5caaa-288e-41e9-a2a2-21f1d8e49625";
-//     return assert(parseDendronRef(ref), {
-//         type: 'ref',
-//         start: {id: 'b9f5caaa-288e-41e9-a2a2-21f1d8e49625', name: 'foo'},
-//     });
-// };
-
-// function testBlockRef() {
-//     const ref = "ref: {[[foo.md]]#b9f5caaa-288e-41e9-a2a2-21f1d8e49625:8cf13bab-a231-40a7-9860-f52b24083873}";
-//     return assert(parseDendronRef(ref), {
-//         type: 'ref',
-//         start: {id: 'b9f5caaa-288e-41e9-a2a2-21f1d8e49625', name: 'foo'},
-//         stop: {id: '8cf13bab-a231-40a7-9860-f52b24083873'}
-//     });
-// };
-
-// function runTests() {
-//     console.log(testFileRef());
-//     // console.log(testLineRef());
-//     // console.log(testFileWithLineRef());
-//     // console.log(testBlockRef());
-// }
 
 export const matchRefMarker = (txt: string) => {
   return txt.match(/\(\((?<ref>[^)]+)\)\)/);
@@ -233,12 +204,14 @@ export const replaceRefWithMPEImport = (
   }
   const { link } = parseDendronRef(ref);
   // unsupported
-  if (!link || !link.name) {
+  if (!link || !link.from.fname) {
     return line;
   }
-  const fsPath = path.join(opts.root, link.name + ".md");
-  prefix += ` "${link.name + ".md"}"`;
-  if (!link.anchorStart) {
+  const { fname: name } = link.from;
+  const { anchorEnd, anchorStart } = link.data;
+  const fsPath = path.join(opts.root, name + ".md");
+  prefix += ` "${name + ".md"}"`;
+  if (!anchorStart) {
     return prefix;
   }
   // {line_begin=2 line_end=10}
@@ -259,7 +232,7 @@ export const replaceRefWithMPEImport = (
   // +1 because header block gets parsed form line before
   const pad = 2 + fmOffset;
   offset.push(`line_begin=${lines.start + pad}`);
-  if (link.anchorEnd) {
+  if (anchorEnd) {
     // everything up to header is counted here
     offset.push(`line_end=${lines.end + pad - 1}`);
   }

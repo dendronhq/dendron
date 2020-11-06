@@ -1,4 +1,8 @@
-import { DendronError, DEngineClientV2 } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DEngineClientV2,
+  DNoteRefLink,
+} from "@dendronhq/common-all";
 import { removeMDExtension } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -7,8 +11,9 @@ import path from "path";
 import { Eat } from "remark-parse";
 import { Processor } from "unified";
 import { Node } from "unist";
-import { DendronRefLink, parseDendronRef } from "../../../utils";
-import { ParserUtilsV2 } from "../utilsv2";
+import { parseDendronRef, refLink2String } from "../../../utils";
+import { ReplaceLinkOpts } from "../../../types";
+import { ParserUtilsV2, RemarkUtilsV2 } from "../utilsv2";
 import { findIndex, isHeading } from "./inject";
 import { ReplaceRefOptions, replaceRefs } from "./replaceRefs";
 
@@ -21,8 +26,8 @@ type CompilerOpts = {
   refLvl?: number;
 };
 
-type RefLinkData = {
-  link: DendronRefLink;
+export type RefLinkData = {
+  link: DNoteRefLink;
   // --- Old
   alias: string;
   permalink: string;
@@ -65,7 +70,7 @@ const MAX_REF_LVL = 2;
 
 function extractNoteRef(opts: {
   body: string;
-  link: DendronRefLink;
+  link: DNoteRefLink;
   engine: DEngineClientV2;
   renderWithOutline: boolean;
   replaceRefOpts: ReplaceRefOptions;
@@ -89,7 +94,7 @@ function extractNoteRef(opts: {
 
   // parse it so we can slice it
   const bodyAST: Parent = proc.parse(body) as Parent;
-  const { anchorStart, anchorEnd, anchorStartOffset } = link;
+  const { anchorStart, anchorEnd, anchorStartOffset } = link.data;
   let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
   let anchorEndIndex = bodyAST.children.length;
   if (anchorStart) {
@@ -148,6 +153,43 @@ function plugin(opts: CompilerOpts) {
   let _this: Processor = this;
   attachParser({ proc: _this });
   attachCompiler({ proc: _this, ...opts });
+}
+
+export type PluginForMarkdownOpts = {
+  replaceLink?: ReplaceLinkOpts;
+};
+
+function pluginForMarkdown(opts?: PluginForMarkdownOpts) {
+  // @ts-ignore
+  let _this: Processor = this;
+  attachParser({ proc: _this });
+  attachCompilerForMarkdown({ proc: _this, opts });
+}
+
+function attachCompilerForMarkdown({
+  proc,
+  opts,
+}: {
+  proc: Processor;
+  opts?: PluginForMarkdownOpts;
+}) {
+  const Compiler = proc.Compiler;
+  const visitors = Compiler.prototype.visitors;
+  visitors.refLink = function (node: Node) {
+    const data = node.data as RefLinkData;
+    if (opts?.replaceLink) {
+      data.link = RemarkUtilsV2.replaceLink({
+        link: data.link,
+        opts: opts.replaceLink,
+      });
+    }
+    return refLink2String(data.link, {
+      includeParen: true,
+      includeRefTag: true,
+    });
+    //return `((${data.raw}))`
+  };
+  return Compiler;
 }
 
 function attachParser(opts: { proc: Processor }) {
@@ -260,13 +302,14 @@ function attachCompiler(
     const data = node.data as RefLinkData;
     const root = engine.vaults[0];
     let body: string;
+    let name = data.link.from.fname;
     try {
-      body = fs.readFileSync(path.join(root, data.link.name + ".md"), {
+      body = fs.readFileSync(path.join(root, name + ".md"), {
         encoding: "utf8",
       });
     } catch (err) {
       const errors = proc.data("errors") as DendronError[];
-      const msg = `${data.link.name} not found`;
+      const msg = `${name} not found`;
       errors.push(new DendronError({ msg }));
       return proc.stringify(
         ParserUtilsV2.genMDError({
@@ -284,7 +327,7 @@ function attachCompiler(
       refLvl: refLvl + 1,
     });
     if (renderWithOutline) {
-      let link = data.link.name;
+      let link = name;
       link = _.trim(
         ParserUtilsV2.getRemark()
           .use(plugin, {
@@ -299,7 +342,7 @@ function attachCompiler(
       );
       return doRenderWithOutline({
         content: out,
-        title: data.link.label || data.link.name || "no title",
+        title: data.link.from.alias || data.link.from.fname || "no title",
         link,
       });
     } else {
@@ -310,4 +353,5 @@ function attachCompiler(
 }
 
 export { plugin as dendronNoteRefPlugin };
+export { pluginForMarkdown as dendronNoteRefPluginForMd };
 export { CompilerOpts as DendronNoteRefPluginOpts };

@@ -630,6 +630,105 @@ Object {
 }
 `;
 
+exports[`engine, notes/ rename/ with note ref 1`] = `
+Object {
+  "data": Array [
+    Object {
+      "note": Object {
+        "body": "[[baz]]
+((ref: [[dendron.pro.dendron-next-server]]#quickstart,1:#*))
+
+",
+        "children": Array [],
+        "created": "1",
+        "custom": Object {},
+        "data": Object {},
+        "desc": "",
+        "fname": "bar",
+        "id": "bar",
+        "links": Array [
+          Object {
+            "alias": "baz",
+            "from": Object {
+              "fname": "bar",
+              "id": "bar",
+            },
+            "original": "baz",
+            "pos": Object {
+              "end": 7,
+              "start": 0,
+            },
+            "to": Object {
+              "fname": "baz",
+            },
+            "type": "wiki",
+            "value": "baz",
+          },
+        ],
+        "parent": "root",
+        "title": "Bar",
+        "type": "note",
+        "updated": "1",
+        "vault": undefined,
+      },
+      "status": "update",
+    },
+    Object {
+      "note": Object {
+        "body": "[[bar]]
+",
+        "children": Array [],
+        "created": "1",
+        "custom": Object {},
+        "data": Object {},
+        "desc": "",
+        "fname": "foo",
+        "id": "foo",
+        "links": Array [],
+        "parent": null,
+        "title": "Foo",
+        "type": "note",
+        "updated": "1",
+        "vault": undefined,
+      },
+      "status": "delete",
+    },
+    Object {
+      "note": Object {
+        "body": "[[bar]]
+",
+        "children": Array [],
+        "created": "1",
+        "custom": Object {},
+        "data": Object {},
+        "desc": "",
+        "fname": "baz",
+        "id": "foo",
+        "links": Array [],
+        "parent": "root",
+        "title": "Foo",
+        "type": "note",
+        "updated": "1",
+        "vault": undefined,
+      },
+      "status": "create",
+    },
+  ],
+  "error": null,
+}
+`;
+
+exports[`engine, notes/ rename/ with note ref 2`] = `
+Array [
+  "bar.md",
+  "baz.md",
+  "foo.ch1.md",
+  "foo.schema.yml",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
 exports[`engine, notes/ write/ write note, match schema: notes 1`] = `
 Object {
   "foo": Object {

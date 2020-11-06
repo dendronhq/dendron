@@ -1,3 +1,4 @@
+import { DNoteRefLink } from "@dendronhq/common-all";
 import { removeMDExtension } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -9,31 +10,18 @@ import {
   root as mdastRoot,
   text,
 } from "mdast-builder";
+import { RefLinkData } from "packages/engine-server/lib/topics/markdown/plugins/dendronNoteRefPlugin";
 import path from "path";
 import RemarkParser, { Eat } from "remark-parse";
 import { Processor } from "unified";
 import { Node } from "unist";
-import { DendronRefLink, parseDendronRef } from "../../../utils";
+import { parseDendronRef } from "../../../utils";
 import { getProcessor } from "../utils";
 import { findIndex, isHeading } from "./inject";
 import { ReplaceRefOptions, replaceRefs } from "./replaceRefs";
 
 // const LINK_REGEX = /^\[\[(.+?)\]\]/;
 const LINK_REGEX = /^\(\((?<ref>[^)]+)\)\)/;
-
-type RefLinkData = {
-  link: DendronRefLink;
-  // --- Old
-  alias: string;
-  permalink: string;
-  exists: boolean;
-  hName: string;
-  hProperties: any;
-  hChildren: any[];
-  toMd?: boolean;
-  prefix?: string;
-  useId: boolean;
-};
 
 function locator(value: string, fromIndex: number) {
   return value.indexOf("((", fromIndex);
@@ -63,14 +51,14 @@ function isAlias(pageTitle: string) {
  */
 function extractNoteRef(opts: {
   body: string;
-  link: DendronRefLink;
+  link: DNoteRefLink;
   replaceRefs?: ReplaceRefOptions;
 }) {
   const { body, link } = opts;
   let proc = getProcessor();
   const bodyAST: Parent = proc.parse(body) as Parent;
   // bumpHeadings(bodyAST, 2);
-  const { anchorStart, anchorEnd, anchorStartOffset } = link;
+  const { anchorStart, anchorEnd, anchorStartOffset } = link.data;
   let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
   let anchorEndIndex = bodyAST.children.length;
   if (anchorStart) {
@@ -240,10 +228,11 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
         if (!root) {
           throw Error("root not defined");
         }
-        if (!data?.link?.name) {
+        if (!data?.link?.from.fname) {
           throw Error("no link name foundjj");
         }
-        const body = fs.readFileSync(path.join(root, data.link.name + ".md"), {
+        let name = data.link.from.fname;
+        const body = fs.readFileSync(path.join(root, name + ".md"), {
           encoding: "utf8",
         });
         const out = extractNoteRef({
@@ -252,7 +241,7 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
           replaceRefs: opts.replaceRefs,
         });
         if (renderWithOutline) {
-          let link = data.link.name;
+          let link = name;
           // convert link
           if (!_.isUndefined(opts.replaceRefs)) {
             link = _.trim(
@@ -269,7 +258,7 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
           }
           return doRenderWithOutline({
             content: out,
-            title: data.link.label || data.link.name || "no title",
+            title: data.link.from.alias || data.link.from.fname || "no title",
             link,
           });
         }

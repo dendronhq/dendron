@@ -1,8 +1,8 @@
+import { DNoteRefData, DNoteRefLink } from "@dendronhq/common-all";
 import { FileTestUtils } from "@dendronhq/common-server";
 import { EngineTestUtilsV2 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import {
-  DendronRefLink,
   extractBlock,
   matchRefMarker,
   parseDendronRef,
@@ -12,11 +12,14 @@ import {
   stripLocalOnlyTags,
 } from "../utils";
 
-function createFileLink(opts?: Partial<DendronRefLink>): DendronRefLink {
+function createFileLink(data?: Partial<DNoteRefData>): DNoteRefLink {
+  let cleanData: DNoteRefData = _.defaults(data, { type: "file" });
   return {
-    name: "foo",
-    type: "file",
-    ...opts,
+    from: {
+      fname: "foo",
+    },
+    type: "ref",
+    data: cleanData,
   };
 }
 
@@ -31,36 +34,25 @@ describe("matchEmbedMarker", () => {
 
 describe("parseFileLink", () => {
   it("just file", () => {
-    expect(parseFileLink("[[foo]]")).toEqual({
-      name: "foo",
-      type: "file",
-    });
+    expect(parseFileLink("[[foo]]")).toEqual(createFileLink());
   });
 
   it("one anchor", () => {
-    expect(parseFileLink("[[foo]]#head1")).toEqual({
-      name: "foo",
-      anchorStart: "head1",
-      type: "file",
-    });
+    expect(parseFileLink("[[foo]]#head1")).toEqual(
+      createFileLink({ anchorStart: "head1" })
+    );
   });
 
   it("all parts", () => {
-    expect(parseFileLink("[[foo]]#head1:#head2")).toEqual({
-      anchorEnd: "head2",
-      anchorStart: "head1",
-      name: "foo",
-      type: "file",
-    });
+    expect(parseFileLink("[[foo]]#head1:#head2")).toEqual(
+      createFileLink({ anchorStart: "head1", anchorEnd: "head2" })
+    );
   });
 
   it("next anchor", () => {
-    expect(parseFileLink("[[foo]]#head1:#*")).toEqual({
-      anchorEnd: "*",
-      anchorStart: "head1",
-      name: "foo",
-      type: "file",
-    });
+    expect(parseFileLink("[[foo]]#head1:#*")).toEqual(
+      createFileLink({ anchorStart: "head1", anchorEnd: "*" })
+    );
   });
 });
 
@@ -68,41 +60,42 @@ describe("link2String", () => {
   test("file", () => {
     expect(
       refLink2String({
-        name: "foo",
-        type: "file",
+        type: "ref",
+        from: {
+          fname: "foo",
+        },
+        data: {
+          type: "file",
+        },
       })
     ).toEqual("[[foo]]");
   });
 
   it("one anchor", () => {
-    expect(
-      refLink2String({
-        name: "foo",
-        anchorStart: "head1",
-        type: "file",
-      })
-    ).toEqual("[[foo]]#head1");
+    expect(refLink2String(createFileLink({ anchorStart: "head1" }))).toEqual(
+      "[[foo]]#head1"
+    );
   });
 
   it("all parts", () => {
     expect(
-      refLink2String({
-        anchorEnd: "head2",
-        anchorStart: "head1",
-        name: "foo",
-        type: "file",
-      })
+      refLink2String(
+        createFileLink({
+          anchorEnd: "head2",
+          anchorStart: "head1",
+        })
+      )
     ).toEqual("[[foo]]#head1:#head2");
   });
 
   it("next anchor", () => {
     expect(
-      refLink2String({
-        anchorEnd: "*",
-        anchorStart: "head1",
-        name: "foo",
-        type: "file",
-      })
+      refLink2String(
+        createFileLink({
+          anchorEnd: "*",
+          anchorStart: "head1",
+        })
+      )
     ).toEqual("[[foo]]#head1:#*");
   });
 });

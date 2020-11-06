@@ -1,6 +1,11 @@
 import clipboardy from "@dendronhq/clipboardy";
-import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
-import { DendronRefLink, refLink2String } from "@dendronhq/engine-server";
+import {
+  DNoteRefData,
+  DNoteRefLink,
+  NotePropsV2,
+  NoteUtilsV2,
+} from "@dendronhq/common-all";
+import { refLink2String } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Position, Range, Selection, TextEditor, window } from "vscode";
 import { VSCodeUtils } from "../utils";
@@ -58,9 +63,15 @@ export class CopyNoteRefCommand extends BasicCommand<
 
   async buildLink(opts: { fname: string }) {
     const { fname } = opts;
-    const link: DendronRefLink = {
+    const linkData: DNoteRefData = {
       type: "file",
-      name: fname,
+    };
+    const link: DNoteRefLink = {
+      data: linkData,
+      type: "ref",
+      from: {
+        fname,
+      },
     };
     const { text, selection, editor } = VSCodeUtils.getSelection();
     let refLinkString: string = refLink2String(link);
@@ -71,11 +82,11 @@ export class CopyNoteRefCommand extends BasicCommand<
     ) {
       const maybeHeaderText = this.isHeader(selection, editor);
       if (maybeHeaderText) {
-        link.anchorStart = maybeHeaderText;
+        linkData.anchorStart = maybeHeaderText;
         if (this.hasNextHeader({ selection })) {
-          link.anchorEnd = "*";
+          linkData.anchorEnd = "*";
         }
-        link.anchorStartOffset = 1;
+        linkData.anchorStartOffset = 1;
         refLinkString = refLink2String(link);
       }
     }

@@ -61,8 +61,9 @@ export type DLoc = {
 };
 export type DNoteLoc = {
   fname: string;
+  alias?: string;
   id?: string;
-  vault: DVault;
+  vault?: DVault;
 };
 export type DVault = {
   name?: string;
@@ -80,17 +81,24 @@ export type DLink = {
   from: DLoc;
   to?: DLoc;
 };
-export type DNoteLink = {
+export type DNoteLink<TData = any> = {
   type: "ref" | "wiki" | "md";
-  original: string;
-  pos: {
+  pos?: {
     start: number;
     end: number;
   };
   from: DNoteLoc;
   to?: DNoteLoc;
+  data: TData;
 };
 export type DNodeTypeV2 = "note" | "schema";
+export type DNoteRefData = {
+  anchorStart?: string;
+  anchorEnd?: string;
+  anchorStartOffset?: number;
+  type: "file" | "id";
+};
+export type DNoteRefLink = DNoteLink<DNoteRefData>;
 
 export type SchemaDataV2 = SchemaData;
 export type NoteDataV2 = NoteData;

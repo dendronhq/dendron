@@ -1,6 +1,7 @@
 import {
   DendronError,
   DLink,
+  DNoteLink,
   DNoteLoc,
   NotePropsV2,
   NoteUtilsV2,
@@ -22,6 +23,11 @@ import {
   heading,
   brk,
 } from "mdast-builder";
+import {
+  dendronNoteRefPluginForMd,
+  PluginForMarkdownOpts,
+} from "./plugins/dendronNoteRefPlugin";
+import { ReplaceLinkOpts } from "../../types";
 
 const selectAll = require("unist-util-select").selectAll;
 
@@ -42,15 +48,18 @@ export class ParserUtilsV2 {
    */
   static getRemark(opts?: {
     dendronLinksOpts: DendronLinksOpts;
+    dendronRefLinkOpts?: PluginForMarkdownOpts;
     useDendronNoteRefPluginForMd?: boolean;
   }) {
-    const { dendronLinksOpts, useDendronNoteRefPluginForMd } = _.defaults(
-      opts,
-      {
-        dendronLinksOpts: {},
-        useDendronNoteRefPluginForMd: true,
-      }
-    );
+    const {
+      dendronLinksOpts,
+      useDendronNoteRefPluginForMd,
+      dendronRefLinkOpts,
+    } = _.defaults(opts, {
+      dendronLinksOpts: {},
+      useDendronNoteRefPluginForMd: true,
+      dendronRefLinkOpts: {},
+    });
     const errors: DendronError[] = [];
     let plugin = remark()
       .data("errors", errors)
@@ -60,7 +69,7 @@ export class ParserUtilsV2 {
       .use(dendronLinksPlugin, dendronLinksOpts)
       .use({ settings: { listItemIndent: "1", fences: true, bullet: "-" } });
     if (useDendronNoteRefPluginForMd) {
-      plugin.use(dendronNoteRefPluginForMd);
+      plugin.use(dendronNoteRefPluginForMd, dendronRefLinkOpts);
     }
     return plugin;
   }
@@ -110,8 +119,30 @@ export class ParserUtilsV2 {
       dendronLinksOpts: {
         replaceLink: { from, to },
       },
+      dendronRefLinkOpts: {
+        replaceLink: { from, to },
+      },
     });
     const out = await remark.process(content);
     return out.toString();
+  }
+}
+
+export class RemarkUtilsV2 {
+  static replaceLink({
+    link,
+    opts,
+  }: {
+    link: DNoteLink;
+    opts: ReplaceLinkOpts;
+  }) {
+    if (opts.from.fname === link.from.fname) {
+      // TODO: check for case
+      link.from.fname = opts.to.fname;
+      if (link.from.alias === opts.from.fname) {
+        link.from.alias = opts.to.fname;
+      }
+    }
+    return link;
   }
 }

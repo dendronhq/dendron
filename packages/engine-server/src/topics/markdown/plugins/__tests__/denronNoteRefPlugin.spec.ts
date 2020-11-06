@@ -12,6 +12,7 @@ import {
   dendronNoteRefPlugin,
   DendronNoteRefPluginOpts,
 } from "../dendronNoteRefPlugin";
+import { createRefLink } from "./utils";
 
 function getProcessor(opts: DendronNoteRefPluginOpts) {
   return ParserUtilsV2.getRemark().use(dendronNoteRefPlugin, opts);
@@ -33,12 +34,14 @@ describe("basic", () => {
       expect(resp).toMatchSnapshot();
       // child1 paragraph, child2 link
       // @ts-ignore
-      expect(resp.children[0].children[0].data.link).toEqual({
-        type: "file",
-        name: "foo",
-        anchorStart: undefined,
-        anchorEnd: undefined,
-      });
+      expect(resp.children[0].children[0].data.link).toEqual(
+        createRefLink({
+          type: "file",
+          fname: "foo",
+          anchorStart: undefined,
+          anchorEnd: undefined,
+        })
+      );
     });
 
     test("without suffix", () => {
@@ -46,12 +49,14 @@ describe("basic", () => {
       expect(resp).toMatchSnapshot();
       // child1 paragraph, child2 link
       // @ts-ignore
-      expect(resp.children[0].children[0].data.link).toEqual({
-        type: "file",
-        name: "foo",
-        anchorStart: undefined,
-        anchorEnd: undefined,
-      });
+      expect(resp.children[0].children[0].data.link).toEqual(
+        createRefLink({
+          type: "file",
+          fname: "foo",
+          anchorStart: undefined,
+          anchorEnd: undefined,
+        })
+      );
     });
 
     test("with start anchor", () => {
@@ -59,12 +64,14 @@ describe("basic", () => {
       expect(resp).toMatchSnapshot();
       // child1 paragraph, child2 link
       // @ts-ignore
-      expect(resp.children[0].children[0].data.link).toEqual({
-        type: "file",
-        name: "foo",
-        anchorStart: "h1",
-        anchorEnd: undefined,
-      });
+      expect(resp.children[0].children[0].data.link).toEqual(
+        createRefLink({
+          type: "file",
+          fname: "foo",
+          anchorStart: "h1",
+          anchorEnd: undefined,
+        })
+      );
     });
 
     test("with start and end", () => {
@@ -72,12 +79,14 @@ describe("basic", () => {
       expect(resp).toMatchSnapshot();
       // child1 paragraph, child2 link
       // @ts-ignore
-      expect(resp.children[0].children[0].data.link).toEqual({
-        type: "file",
-        name: "foo",
-        anchorStart: "h1",
-        anchorEnd: "h2",
-      });
+      expect(resp.children[0].children[0].data.link).toEqual(
+        createRefLink({
+          type: "file",
+          fname: "foo",
+          anchorStart: "h1",
+          anchorEnd: "h2",
+        })
+      );
     });
 
     test("doesn't parse inline code block", () => {

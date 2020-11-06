@@ -76,10 +76,13 @@ Object {
               "href": "ref:[[foo",
             },
             "link": Object {
-              "anchorEnd": undefined,
-              "anchorStart": undefined,
-              "name": "foo",
-              "type": "file",
+              "data": Object {
+                "type": "file",
+              },
+              "from": Object {
+                "fname": "foo",
+              },
+              "type": "ref",
             },
             "permalink": "ref:[[foo",
           },
@@ -153,10 +156,14 @@ Object {
               "href": "ref:[[foo]]#h1",
             },
             "link": Object {
-              "anchorEnd": undefined,
-              "anchorStart": "h1",
-              "name": "foo",
-              "type": "file",
+              "data": Object {
+                "anchorStart": "h1",
+                "type": "file",
+              },
+              "from": Object {
+                "fname": "foo",
+              },
+              "type": "ref",
             },
             "permalink": "ref:[[foo]]#h1",
           },
@@ -230,10 +237,15 @@ Object {
               "href": "ref:[[foo]]#h1:#h2",
             },
             "link": Object {
-              "anchorEnd": "h2",
-              "anchorStart": "h1",
-              "name": "foo",
-              "type": "file",
+              "data": Object {
+                "anchorEnd": "h2",
+                "anchorStart": "h1",
+                "type": "file",
+              },
+              "from": Object {
+                "fname": "foo",
+              },
+              "type": "ref",
             },
             "permalink": "ref:[[foo]]#h1:#h2",
           },
@@ -307,10 +319,13 @@ Object {
               "href": "ref:[[foo]]",
             },
             "link": Object {
-              "anchorEnd": undefined,
-              "anchorStart": undefined,
-              "name": "foo",
-              "type": "file",
+              "data": Object {
+                "type": "file",
+              },
+              "from": Object {
+                "fname": "foo",
+              },
+              "type": "ref",
             },
             "permalink": "ref:[[foo]]",
           },

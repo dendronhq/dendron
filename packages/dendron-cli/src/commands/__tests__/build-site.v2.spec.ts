@@ -11,6 +11,7 @@ import {
 } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
+  ENGINE_SERVER,
   NodeTestPresetsV2,
   NodeTestUtilsV2,
 } from "@dendronhq/common-test-utils";
@@ -413,6 +414,36 @@ describe("note refs", () => {
     const { content } = readMD(fooPath);
     expect(content).toMatchSnapshot();
     expect(content.indexOf("portal-container") >= 0).toBeFalsy();
+  });
+
+  test("TODO", async () => {
+    let vaults = [{ fsPath: vaultDir }];
+    const { note } = await ENGINE_SERVER.NOTE_REF.WILDCARD_LINK.before({
+      vaults,
+    });
+    const results = ENGINE_SERVER.NOTE_REF.WILDCARD_LINK.results;
+    await engineClient.init();
+
+    //
+    const config: DendronSiteConfig = {
+      siteHierarchies: ["journal"],
+      siteRootDir,
+      usePrettyRefs: false,
+    };
+    const cmd = new BuildSiteCommand();
+    await cmd.execute({
+      engineClient,
+      config,
+      wsRoot: dendronRoot,
+      writeStubs,
+    });
+    let fooPath = path.join(notesDir, note.id + ".md");
+    const { content } = readMD(fooPath);
+    await NodeTestPresetsV2.runJestHarness({
+      expect,
+      results,
+      opts: { body: content },
+    });
   });
 });
 

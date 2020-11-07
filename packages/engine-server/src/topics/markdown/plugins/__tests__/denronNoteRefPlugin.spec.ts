@@ -1,6 +1,10 @@
 import { DendronError, DEngineClientV2, DVault } from "@dendronhq/common-all";
 import { createLogger, FileTestUtils } from "@dendronhq/common-server";
-import { AssertUtils, NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
+import {
+  AssertUtils,
+  ENGINE_SERVER,
+  NodeTestPresetsV2,
+} from "@dendronhq/common-test-utils";
 import {
   EngineTestUtilsV2,
   EngineTestUtilsV3,
@@ -114,24 +118,10 @@ describe("basic", () => {
     });
 
     test("wildcard link", async () => {
-      await FileTestUtils.createFiles(vaults[0].fsPath, [
-        {
-          path: "journal.2020.07.01.md",
-          body: "journal0",
-        },
-        {
-          path: "journal.2020.08.01.md",
-          body: "journal1",
-        },
-        {
-          path: "journal.2020.08.02.md",
-          body: "journal2",
-        },
-        {
-          path: "journal.2020.08.03.md",
-          body: "journal3",
-        },
-      ]);
+      const { note } = await ENGINE_SERVER.NOTE_REF.WILDCARD_LINK.before({
+        vaults,
+      });
+      const results = ENGINE_SERVER.NOTE_REF.WILDCARD_LINK.results;
       await engine.init();
       opts = {
         renderWithOutline: false,
@@ -139,18 +129,13 @@ describe("basic", () => {
         engine,
       } as DendronNoteRefPluginOpts;
       const proc = getProcessor({ ...opts, renderWithOutline: true });
-      const resp = await proc.process(` ((ref:[[journal.2020.08.*]]))`);
+      const resp = await proc.process(note.body);
       const out = resp.toString();
-      const errors = proc.data("errors") as DendronError[];
-      expect(errors).toMatchSnapshot();
-      expect(out).toMatchSnapshot();
-      expect(
-        await AssertUtils.assertInString({
-          body: out,
-          match: ["journal1", "journal2", "journal3"],
-          nomatch: ["journal0"],
-        })
-      ).toBeTruthy();
+      await NodeTestPresetsV2.runJestHarness({
+        expect,
+        results,
+        opts: { body: out },
+      });
     });
   });
 

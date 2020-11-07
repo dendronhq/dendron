@@ -10,13 +10,13 @@ import {
   root as mdastRoot,
   text,
 } from "mdast-builder";
-import { RefLinkData } from "packages/engine-server/lib/topics/markdown/plugins/dendronNoteRefPlugin";
 import path from "path";
 import RemarkParser, { Eat } from "remark-parse";
 import { Processor } from "unified";
 import { Node } from "unist";
 import { parseDendronRef } from "../../../utils";
 import { getProcessor } from "../utils";
+import { RefLinkData } from "./dendronNoteRefPlugin";
 import { findIndex, isHeading } from "./inject";
 import { ReplaceRefOptions, replaceRefs } from "./replaceRefs";
 

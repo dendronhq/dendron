@@ -303,6 +303,11 @@ export class DendronEngineV2 implements DEngineV2 {
     };
   }
 
+  async sync() {
+    throw Error("sync not implemented");
+    return {} as any;
+  }
+
   async renameNote(opts: RenameNoteOptsV2): Promise<RespV2<RenameNotePayload>> {
     const resp = await this.store.renameNote(opts);
     return {

@@ -29,10 +29,10 @@ import {
   WriteNoteResp,
 } from "@dendronhq/common-all";
 import { DendronAPI } from "@dendronhq/common-server";
+import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { FuseEngine } from "./fuseEngine";
-import fs from "fs-extra";
 
 type DendronEngineClientOpts = {
   vaults: string[];
@@ -59,15 +59,12 @@ export class DendronEngineClient implements DEngineClientV2 {
     return new DendronEngineClient({ api, vaults, ws });
   }
 
-  static getPort({ wsRoot }: { wsRoot: string }): string {
-    const portFile = path.join(
-      path.dirname(wsRoot),
-      CONSTANTS.DENDRON_SERVER_PORT
-    );
+  static getPort({ wsRoot }: { wsRoot: string }): number {
+    const portFile = path.join(wsRoot, CONSTANTS.DENDRON_SERVER_PORT);
     if (!fs.pathExistsSync(portFile)) {
       throw new DendronError({ msg: "no port file" });
     }
-    return fs.readFileSync(portFile, { encoding: "utf8" });
+    return _.toInteger(_.trim(fs.readFileSync(portFile, { encoding: "utf8" })));
   }
 
   constructor({
@@ -238,6 +235,22 @@ export class DendronEngineClient implements DEngineClientV2 {
     const resp = await this.api.engineRenameNote({ ...opts, ws: this.ws });
     await this.refreshNotesV2(resp.data as NoteChangeEntry[]);
     return resp;
+  }
+
+  async sync(): Promise<DEngineInitRespV2> {
+    const resp = await this.api.workspaceSync({ ws: this.ws });
+    if (!resp.data) {
+      throw new DendronError({ msg: "no data" });
+    }
+    const { notes, schemas } = resp.data;
+    this.notes = notes;
+    this.schemas = schemas;
+    await this.fuseEngine.updateNotesIndex(notes);
+    await this.fuseEngine.updateSchemaIndex(schemas);
+    return {
+      error: resp.error,
+      data: { notes, schemas },
+    };
   }
 
   async updateNote(

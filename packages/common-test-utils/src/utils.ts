@@ -112,8 +112,15 @@ export class EngineAPIShim implements DEngineClientV2 {
   async query(_queryString: string, _mode: DNodeTypeV2, _opts?: QueryOptsV2) {
     return {} as any;
   }
+
   queryNotesSync({}: { qs: string }) {
     throw Error("queryNoteSync not implemented");
+    return {} as any;
+  }
+
+  async sync() {
+    throw Error("sync not implemented");
+    return {} as any;
   }
 
   async renameNote(opts: RenameNoteOptsV2) {

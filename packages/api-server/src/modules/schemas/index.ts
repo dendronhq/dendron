@@ -1,4 +1,4 @@
-import { DendronError, DEngineV2 } from "@dendronhq/common-all";
+import { DendronError } from "@dendronhq/common-all";
 import {
   SchemaDeletePayload,
   SchemaDeleteRequest,
@@ -9,8 +9,7 @@ import {
   SchemaWritePayload,
   SchemaWriteRequest,
 } from "@dendronhq/common-server";
-import { DendronEngineV2 } from "@dendronhq/engine-server";
-import { MemoryStore } from "../../store/memoryStore";
+import { getWS } from "../../utils";
 
 export class SchemaController {
   static singleton?: SchemaController;
@@ -24,10 +23,7 @@ export class SchemaController {
 
   async create(req: SchemaWriteRequest): Promise<SchemaWritePayload> {
     const { ws, schema } = req;
-    const engine = await MemoryStore.instance().get<DEngineV2>(`ws:${ws}`);
-    if (!engine) {
-      throw "No Engine";
-    }
+    const engine = await getWS({ ws });
     try {
       await engine.writeSchema(schema);
       return { error: null, data: undefined };
@@ -44,10 +40,7 @@ export class SchemaController {
     id,
     opts,
   }: SchemaDeleteRequest): Promise<SchemaDeletePayload> {
-    const engine = await MemoryStore.instance().get<DEngineV2>(`ws:${ws}`);
-    if (!engine) {
-      throw "No Engine";
-    }
+    const engine = await getWS({ ws: ws || "" });
     try {
       const data = await engine.deleteSchema(id, opts);
       return data;
@@ -60,12 +53,7 @@ export class SchemaController {
   }
 
   async query({ ws, qs }: SchemaQueryRequest): Promise<SchemaQueryPayload> {
-    const engine = await MemoryStore.instance().get<DendronEngineV2>(
-      `ws:${ws}`
-    );
-    if (!engine) {
-      throw "No Engine";
-    }
+    const engine = await getWS({ ws: ws || "" });
     return await engine.querySchema(qs);
   }
 
@@ -73,10 +61,7 @@ export class SchemaController {
     ws,
     schema,
   }: SchemaUpdateRequest): Promise<SchemaUpdatePayload> {
-    const engine = await MemoryStore.instance().get<DEngineV2>(`ws:${ws}`);
-    if (!engine) {
-      throw "No Engine";
-    }
+    const engine = await getWS({ ws: ws || "" });
     try {
       await engine.updateSchema(schema);
       return { error: null };

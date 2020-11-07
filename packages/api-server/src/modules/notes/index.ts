@@ -1,4 +1,4 @@
-import { DendronError, DEngineV2 } from "@dendronhq/common-all";
+import { DendronError } from "@dendronhq/common-all";
 import {
   EngineDeletePayload,
   EngineDeleteRequest,
@@ -9,7 +9,7 @@ import {
   EngineUpdateNotePayload,
   EngineUpdateNoteRequest,
 } from "@dendronhq/common-server";
-import { MemoryStore } from "../../store/memoryStore";
+import { getWS } from "../../utils";
 
 export class NoteController {
   static singleton?: NoteController;
@@ -26,10 +26,7 @@ export class NoteController {
     id,
     opts,
   }: EngineDeleteRequest): Promise<EngineDeletePayload> {
-    const engine = await MemoryStore.instance().get<DEngineV2>(`ws:${ws}`);
-    if (!engine) {
-      throw "No Engine";
-    }
+    const engine = await getWS({ ws });
     try {
       const data = await engine.deleteNote(id, opts);
       return data;
@@ -46,10 +43,7 @@ export class NoteController {
     npath,
     createIfNew,
   }: EngineGetNoteByPathRequest): Promise<EngineGetNoteByPathPayload> {
-    const engine = await MemoryStore.instance().get<DEngineV2>(`ws:${ws}`);
-    if (!engine) {
-      throw "No Engine";
-    }
+    const engine = await getWS({ ws });
     try {
       const data = await engine.getNoteByPath({ npath, createIfNew });
       return data;
@@ -65,10 +59,7 @@ export class NoteController {
     ws,
     ...opts
   }: EngineRenameNoteRequest): Promise<EngineRenameNotePayload> {
-    const engine = await MemoryStore.instance().get<DEngineV2>(`ws:${ws}`);
-    if (!engine) {
-      throw "No Engine";
-    }
+    const engine = await getWS({ ws });
     try {
       const data = await engine.renameNote(opts);
       return data;
@@ -85,10 +76,7 @@ export class NoteController {
     note,
     opts,
   }: EngineUpdateNoteRequest): Promise<EngineUpdateNotePayload> {
-    const engine = await MemoryStore.instance().get<DEngineV2>(`ws:${ws}`);
-    if (!engine) {
-      throw "No Engine";
-    }
+    const engine = await getWS({ ws });
     try {
       await engine.updateNote(note, opts);
       return { error: null };

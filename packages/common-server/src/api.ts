@@ -110,12 +110,13 @@ const STATUS_HANDLERS = {
 };
 
 // --- Requests
-type WorkspaceInitRequest = {
+export type WorkspaceInitRequest = {
   uri: string;
   config: {
     vaults: string[];
   };
 };
+export type WorkspaceSyncRequest = WorkspaceRequest;
 
 type WorkspaceRequest = { ws: string };
 
@@ -156,6 +157,8 @@ export type InitializePayload = APIPayload<{
   notes: NotePropsDictV2;
   schemas: SchemaModuleDictV2;
 }>;
+
+export type WorkspaceSyncPayload = InitializePayload;
 
 export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
 export type EngineGetNoteByPathPayload = APIPayload<GetNotePayloadV2>;
@@ -311,6 +314,15 @@ export class DendronAPI extends API {
     const resp = await this._makeRequest({
       path: "workspace/all",
       method: "get",
+    });
+    return this._createPayload(resp);
+  }
+
+  async workspaceSync(req: WorkspaceSyncRequest): Promise<InitializePayload> {
+    const resp = await this._makeRequest({
+      path: "workspace/sync",
+      method: "post",
+      body: req,
     });
     return this._createPayload(resp);
   }

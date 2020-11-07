@@ -1,4 +1,5 @@
 import {
+  CONSTANTS,
   DendronError,
   DEngineClientV2,
   DNoteRefData,
@@ -85,6 +86,11 @@ export async function getEngine(opts: {
       }, 5000);
     }
   });
+}
+
+export function getPortFilePath({ wsRoot }: { wsRoot: string }) {
+  const portFile = path.join(wsRoot, CONSTANTS.DENDRON_SERVER_PORT);
+  return portFile;
 }
 
 type LinkDirection = "from" | "to";

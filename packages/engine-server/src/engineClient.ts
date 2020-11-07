@@ -1,5 +1,4 @@
 import {
-  CONSTANTS,
   DendronError,
   DEngineClientV2,
   DEngineDeleteSchemaRespV2,
@@ -31,8 +30,8 @@ import {
 import { DendronAPI } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import path from "path";
 import { FuseEngine } from "./fuseEngine";
+import { getPortFilePath } from "./utils";
 
 type DendronEngineClientOpts = {
   vaults: string[];
@@ -60,7 +59,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   }
 
   static getPort({ wsRoot }: { wsRoot: string }): number {
-    const portFile = path.join(wsRoot, CONSTANTS.DENDRON_SERVER_PORT);
+    const portFile = getPortFilePath({ wsRoot });
     if (!fs.pathExistsSync(portFile)) {
       throw new DendronError({ msg: "no port file" });
     }

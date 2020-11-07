@@ -5,6 +5,7 @@ import yargs from "yargs";
 import { BuildSiteCommand } from "../src";
 import { ExportPodCLICommand } from "../src/commands/exportPod";
 import { ImportPodCLICommand } from "../src/commands/importPod";
+import { LaunchEngineServerCommand } from "../src/commands/launchEngineServer";
 import { PlantSeedCommand } from "../src/commands/plantSeed";
 import { PublishNotesCommand } from "../src/commands/publishNotes";
 import { PublishPodCLICommand } from "../src/commands/PublishPodCLICommand";
@@ -49,6 +50,7 @@ PlantSeedCommand.buildCmd(buildYargs);
 BuildSiteCommand.buildCmd(buildYargs);
 PublishNotesCommand.buildCmd(buildYargs);
 PublishPodCLICommand.buildCmd(buildYargs);
+LaunchEngineServerCommand.buildCmd(buildYargs);
 // .command<RefactorFMCliOpts>(
 //   "refactorFM",
 //   "refactor frontmatter",

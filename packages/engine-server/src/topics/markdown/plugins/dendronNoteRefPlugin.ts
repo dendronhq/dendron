@@ -109,7 +109,6 @@ function convertNoteRef(opts: ConvertNoteRefOpts) {
   } else {
     noteRefs.push(link.from);
   }
-  debugger;
   const out = noteRefs.map((refs) => {
     const root = refs.vault?.fsPath || defaultRoot;
     const name = refs.fname;

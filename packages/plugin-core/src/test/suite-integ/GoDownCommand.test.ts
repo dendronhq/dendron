@@ -33,14 +33,9 @@ suite("notes", function () {
       const notePath = path.join(vaultPath, "foo.md");
       await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
       const quickpick = (await new GoDownCommand().run()) as DendronQuickPickerV2;
-      quickpick.onDidChangeValue(() => {
-        debugger;
-      });
-      quickpick.onDidChangeSelection(() => {
-        debugger;
-      });
+      quickpick.onDidChangeValue(() => {});
+      quickpick.onDidChangeSelection(() => {});
       quickpick.onDidChangeActive(() => {
-        debugger;
         const item = quickpick.activeItems[0];
         assert.strictEqual(item.id, "foo.ch1");
         done();

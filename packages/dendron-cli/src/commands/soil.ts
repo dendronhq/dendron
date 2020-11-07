@@ -15,14 +15,25 @@ type CommandOptsV2 = {
   vault: string;
 };
 
+export type CommandOptsV3 = {
+  engine: DEngineClientV2;
+  wsRoot: string;
+};
+
 type CommandCLIOpts = {
   wsRoot: string;
   vault: string;
 };
+type CommandCLIOptsV3 = {
+  wsRoot: string;
+  vaults: string[];
+};
 
 export { CommandCLIOpts as SoilCommandCLIOpts };
+export { CommandCLIOptsV3 as SoilCommandCLIOptsV3 };
 export { CommandOpts as SoilCommandOpts };
 export { CommandOptsV2 as SoilCommandOptsV2 };
+export { CommandOptsV3 as SoilCommandOptsV3 };
 
 // @ts-ignore
 export abstract class SoilCommand<
@@ -121,4 +132,48 @@ export abstract class SoilCommandV2<
       wsRoot,
     };
   }
+}
+
+export abstract class SoilCommandV3<
+  TCLIOpts extends CommandCLIOptsV3 = CommandCLIOptsV3,
+  TCommandOpts extends CommandOptsV3 = CommandOptsV3,
+  TCommandOutput = void
+> extends BaseCommand<TCommandOpts, TCommandOutput> {
+  buildArgs(args: yargs.Argv) {
+    args.option("wsRoot", {
+      describe: "location of workspace",
+      demandOption: true,
+    });
+    args.option("vaults", {
+      describe: "location of vault",
+      type: "array",
+      demandOption: true,
+    });
+  }
+
+  /**
+   * Take CLI opts and transform them into command opts
+   * @param args
+   */
+  abstract enrichArgs(args: TCLIOpts): Promise<TCommandOpts>;
+
+  eval = async (args: TCLIOpts) => {
+    const opts = await this.enrichArgs(args);
+    return opts.engine.init().then(() => {
+      return this.execute(opts);
+    });
+  };
+
+  // _enrichArgs(args: TCLIOpts): CommandOptsV2 {
+  //   let { vault, wsRoot } = args;
+  //   const cwd = process.cwd();
+  //   wsRoot = resolvePath(wsRoot, cwd);
+  //   vault = resolvePath(vault, cwd);
+  //   const logger = this.L;
+  //   return {
+  //     ...args,
+  //     engine,
+  //     wsRoot,
+  //   };
+  // }
 }

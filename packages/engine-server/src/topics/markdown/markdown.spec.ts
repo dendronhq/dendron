@@ -126,7 +126,6 @@ store/engine-server.replace-refs.one text
       scratch: "",
       engine,
     });
-    debugger;
 
     const note = NoteUtilsV2.getNoteByFname(
       "engine-server.replace-refs",

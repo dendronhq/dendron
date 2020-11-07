@@ -1,6 +1,6 @@
-import { DVault, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DVault } from "@dendronhq/common-all";
 import { FileTestUtils } from "@dendronhq/common-server";
-import { NodeTestPresetsV2, NodeTestUtilsV2 } from "../..";
+import { NodeTestUtilsV2 } from "../..";
 import { AssertUtils, TestPresetEntry } from "../../utils";
 
 const WILDCARD_LINK = new TestPresetEntry({

@@ -416,7 +416,7 @@ describe("note refs", () => {
     expect(content.indexOf("portal-container") >= 0).toBeFalsy();
   });
 
-  test("TODO", async () => {
+  test(ENGINE_SERVER.NOTE_REF.WILDCARD_LINK.label, async () => {
     let vaults = [{ fsPath: vaultDir }];
     const { note } = await ENGINE_SERVER.NOTE_REF.WILDCARD_LINK.before({
       vaults,

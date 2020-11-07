@@ -1,4 +1,4 @@
-import { SchemaUtilsV2 } from "@dendronhq/common-all";
+import { NotePropsV2, NoteUtilsV2, SchemaUtilsV2 } from "@dendronhq/common-all";
 import { EngineDeletePayload } from "@dendronhq/common-server";
 import path from "path";
 import { Uri, window } from "vscode";
@@ -18,7 +18,8 @@ export class DeleteNodeCommand extends BasicCommand<
   async gatherInputs(): Promise<any> {
     return {};
   }
-  async execute() {
+
+  async execute(): Promise<CommandOutput> {
     const editor = VSCodeUtils.getActiveTextEditor();
     if (!editor) {
       window.showErrorMessage("no active text editor");
@@ -35,8 +36,10 @@ export class DeleteNodeCommand extends BasicCommand<
     const fname = path.basename(fsPath, trimEnd);
     const client = DendronWorkspace.instance().getEngine();
     if (mode === "note") {
-      const note = await DendronClientUtilsV2.getNoteByFname({ fname, client });
-      return await client.deleteNote(note.id);
+      const note = NoteUtilsV2.getNoteByFname(fname, client.notes, {
+        throwIfEmpty: true,
+      }) as NotePropsV2;
+      return (await client.deleteNote(note.id)) as EngineDeletePayload;
     } else {
       const smod = await DendronClientUtilsV2.getSchemaModByFname({
         fname,

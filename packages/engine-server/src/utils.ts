@@ -1,7 +1,9 @@
 import {
   DendronError,
+  DEngineClientV2,
   DNoteRefData,
   DNoteRefLink,
+  DVault,
 } from "@dendronhq/common-all";
 import { readMD } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -10,6 +12,7 @@ import _markdownIt from "markdown-it";
 import markdownItAST from "markdown-it-ast";
 import Token from "markdown-it/lib/token";
 import path from "path";
+import { DendronEngineClient } from "./engineClient";
 
 const markdownIt = _markdownIt();
 
@@ -52,6 +55,36 @@ export function refLink2String(
 function genAST(txt: string): ASTEnt[] {
   const tokens: Token[] = markdownIt.parse(txt, {});
   return markdownItAST.makeAST(tokens);
+}
+
+export async function getEngine(opts: {
+  numTries?: number;
+  wsRoot: string;
+  vaults: DVault[];
+}): Promise<{ error?: DendronError; data?: DEngineClientV2 }> {
+  const { numTries, wsRoot, vaults } = _.defaults(opts, { numTries: 5 });
+  if (numTries <= 0) {
+    return {
+      error: new DendronError({ msg: "exceeded numTries" }),
+    };
+  }
+  return new Promise((resolve, _reject) => {
+    try {
+      const port = DendronEngineClient.getPort({ wsRoot });
+      const dendronEngine = DendronEngineClient.create({
+        port,
+        ws: wsRoot,
+        vaults: vaults.map((ent) => ent.fsPath),
+      });
+      resolve({
+        data: dendronEngine,
+      });
+    } catch (err) {
+      setTimeout(() => {
+        resolve(getEngine({ ...opts, numTries: numTries - 1 }));
+      }, 5000);
+    }
+  });
 }
 
 type LinkDirection = "from" | "to";

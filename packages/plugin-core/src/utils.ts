@@ -4,6 +4,7 @@ import {
   DNodeUtilsV2,
   DVault,
   NoteUtilsV2,
+  SchemaModulePropsV2,
 } from "@dendronhq/common-all";
 import { FileTestUtils, resolveTilde } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -292,7 +293,7 @@ export class VSCodeUtils {
 }
 
 export class WSUtils {
-  static updateEngineAPI(port: number | string) {
+  static updateEngineAPI(port: number | string): DEngineClientV2 {
     const ws = DendronWorkspace.instance();
     ws.setEngine(EngineAPIService.create({ port }));
     return ws.getEngine();
@@ -390,27 +391,13 @@ export class DendronClientUtilsV2 {
     return [prefix, name, noteDate].filter((ent) => !_.isEmpty(ent)).join(".");
   }
 
-  static getNoteByFname = async ({
-    fname,
-    client,
-  }: {
-    fname: string;
-    client: DEngineClientV2;
-  }) => {
-    const note = _.find(client.notes, { fname });
-    if (!note) {
-      throw new DendronError({ msg: "no note found" });
-    }
-    return note;
-  };
-
   static getSchemaModByFname = async ({
     fname,
     client,
   }: {
     fname: string;
     client: DEngineClientV2;
-  }) => {
+  }): Promise<SchemaModulePropsV2> => {
     const smod = _.find(client.schemas, { fname });
     if (!smod) {
       throw new DendronError({ msg: "no note found" });

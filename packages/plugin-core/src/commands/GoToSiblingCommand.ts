@@ -1,9 +1,9 @@
-import { NotePropsV2 } from "@dendronhq/common-all";
+import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";
 import { UNKNOWN_ERROR_MSG } from "../logger";
-import { DendronClientUtilsV2, VSCodeUtils } from "../utils";
+import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -40,10 +40,9 @@ export class GoToSiblingCommand extends BasicCommand<
         .map((ent) => client.notes[ent])
         .concat([client.notes["root"]]);
     } else {
-      const note = await DendronClientUtilsV2.getNoteByFname({
-        fname: value,
-        client,
-      });
+      const note = NoteUtilsV2.getNoteByFname(value, client.notes, {
+        throwIfEmpty: true,
+      }) as NotePropsV2;
       respNodes = client.notes[note.parent as string].children.map(
         (id) => client.notes[id]
       );

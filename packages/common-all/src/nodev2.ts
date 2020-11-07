@@ -7,7 +7,7 @@ import path from "path";
 import { URI } from "vscode-uri";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
-import { SchemaTemplate } from "./typesv2";
+import { DNoteLoc, SchemaTemplate } from "./typesv2";
 import {
   DEngineClientV2,
   DLoc,
@@ -522,6 +522,15 @@ export class NoteUtilsV2 {
     return {
       fname,
       id,
+    };
+  }
+
+  static toNoteLoc(note: NotePropsV2): DNoteLoc {
+    const { fname, id, vault } = note;
+    return {
+      fname,
+      id,
+      vault,
     };
   }
 

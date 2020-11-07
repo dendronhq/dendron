@@ -17,6 +17,36 @@ import {
 import { DendronAPI } from "@dendronhq/common-server";
 import { TestResult } from "./types";
 
+export class AssertUtils {
+  static async assertInString({
+    body,
+    match,
+    nomatch,
+  }: {
+    body: string;
+    match: string[];
+    nomatch: string[];
+  }): Promise<boolean> {
+    await Promise.all(
+      match.map((m) => {
+        if (body.indexOf(m) < 0) {
+          throw `${m} not found in ${body}`;
+        }
+        return true;
+      })
+    );
+    await Promise.all(
+      nomatch.map((m) => {
+        if (body.indexOf(m) > 0) {
+          throw `${m} found in ${body}`;
+        }
+        return true;
+      })
+    );
+    return true;
+  }
+}
+
 export class EngineAPIShim implements DEngineClientV2 {
   public api: DendronAPI;
   public wsRoot: string;
@@ -81,6 +111,9 @@ export class EngineAPIShim implements DEngineClientV2 {
 
   async query(_queryString: string, _mode: DNodeTypeV2, _opts?: QueryOptsV2) {
     return {} as any;
+  }
+  queryNotesSync({}: { qs: string }) {
+    throw Error("queryNoteSync not implemented");
   }
 
   async renameNote(opts: RenameNoteOptsV2) {

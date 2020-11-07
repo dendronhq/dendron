@@ -378,7 +378,73 @@ Object {
 }
 `;
 
-exports[`basic stingify 2 lvl recursion 1`] = `
+exports[`basic stingify v3 wildcard link 1`] = `Array []`;
+
+exports[`basic stingify v3 wildcard link 2`] = `
+" 
+
+<div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\" >
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.*</span></div>
+<a href=\\"journal.2020.08.01.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div>        
+  
+journal1
+
+
+
+</div>    
+</div>
+
+
+
+<div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\" >
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.*</span></div>
+<a href=\\"journal.2020.08.02.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div>        
+  
+journal2
+
+
+
+</div>    
+</div>
+
+
+
+<div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\" >
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.*</span></div>
+<a href=\\"journal.2020.08.03.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div>        
+  
+journal3
+
+
+
+</div>    
+</div>
+
+"
+`;
+
+exports[`basic stringify/ 2 lvl recursion 1`] = `
 "# Foo
 
 # Foo.One
@@ -391,7 +457,7 @@ blah
 "
 `;
 
-exports[`basic stingify 3 levels of recursion 1`] = `
+exports[`basic stringify/ 3 levels of recursion 1`] = `
 "# Foo
 
 # Foo.One
@@ -404,7 +470,7 @@ ERROR: Too many nested note references
 "
 `;
 
-exports[`basic stingify basic 1`] = `
+exports[`basic stringify/ basic 1`] = `
 "# Tasks
 
 task1
@@ -414,7 +480,7 @@ task2
 "
 `;
 
-exports[`basic stingify basic block 1`] = `
+exports[`basic stringify/ basic block 1`] = `
 "# Foo Bar
 
 # Tasks
@@ -426,7 +492,7 @@ task2
 "
 `;
 
-exports[`basic stingify basic block with fm 1`] = `
+exports[`basic stringify/ basic block with fm 1`] = `
 "# Foo Bar
 
 # Tasks
@@ -438,7 +504,7 @@ task2
 "
 `;
 
-exports[`basic stingify basic block with header and start  1`] = `
+exports[`basic stringify/ basic block with header and start  1`] = `
 "# Foo Bar
 
 ## Header2
@@ -449,7 +515,7 @@ task2
 "
 `;
 
-exports[`basic stingify basic block with header and start, offset  1`] = `
+exports[`basic stringify/ basic block with header and start, offset  1`] = `
 "# Foo Bar
 
 
@@ -459,7 +525,7 @@ task2
 "
 `;
 
-exports[`basic stingify basic block with header and start, start invalid  1`] = `
+exports[`basic stringify/ basic block with header and start, start invalid  1`] = `
 "# Foo Bar
 
 ### Note Ref Error
@@ -470,7 +536,7 @@ start anchor badheader not found
 "
 `;
 
-exports[`basic stingify basic block with header, start and end  1`] = `
+exports[`basic stringify/ basic block with header, start and end  1`] = `
 "# Foo Bar
 
 ## Header1
@@ -481,7 +547,7 @@ task1
 "
 `;
 
-exports[`basic stingify basic block with header, start and end, end invalid  1`] = `
+exports[`basic stringify/ basic block with header, start and end, end invalid  1`] = `
 "# Foo Bar
 
 ### Note Ref Error
@@ -492,7 +558,7 @@ end anchor badheader not found
 "
 `;
 
-exports[`basic stingify basic block with header, start and end, offset  1`] = `
+exports[`basic stringify/ basic block with header, start and end, offset  1`] = `
 "# Foo Bar
 
 
@@ -502,7 +568,7 @@ task1
 "
 `;
 
-exports[`basic stingify basic block with wildcard as 1st elem  1`] = `
+exports[`basic stringify/ basic block with wildcard as 1st elem  1`] = `
 "# Foo Bar
 
 
@@ -514,7 +580,7 @@ task1
 "
 `;
 
-exports[`basic stingify basic block with wildcard as 2nd elem  1`] = `
+exports[`basic stringify/ basic block with wildcard as 2nd elem  1`] = `
 "# Foo Bar
 
 
@@ -524,7 +590,7 @@ task1
 "
 `;
 
-exports[`basic stingify missing ref 1`] = `
+exports[`basic stringify/ missing ref 1`] = `
 "# Foo Bar
 
 ### Note Ref Error
@@ -535,13 +601,13 @@ missing not found
 "
 `;
 
-exports[`basic stingify missing ref 2`] = `
+exports[`basic stringify/ missing ref 2`] = `
 Array [
   [Error: missing not found],
 ]
 `;
 
-exports[`basic stingify ref with ref, inf recursion 1`] = `
+exports[`basic stringify/ ref with ref, inf recursion 1`] = `
 "# Foo
 
 # Foo.One
@@ -554,7 +620,7 @@ ERROR: Too many nested note references
 "
 `;
 
-exports[`basic stingify renderWithOutline 1`] = `
+exports[`basic stringify/ renderWithOutline 1`] = `
 "# Foo Bar
 
 

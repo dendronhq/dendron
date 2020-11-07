@@ -39,6 +39,9 @@ export type SetupWSOpts = {
   wsRoot?: string;
 };
 
+/**
+ * Multi-vault setup
+ */
 export class EngineTestUtilsV3 {
   static async setupVaults(opts: SetupVaultOpts & { vaults?: DVault[] }) {
     const { vaults } = _.defaults(opts, {

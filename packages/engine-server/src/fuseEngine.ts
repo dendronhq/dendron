@@ -26,6 +26,7 @@ function createFuse<T>(
     minMatchCharLength: 1,
     keys: ["title", "fname", "basename"],
     useExtendedSearch: true,
+    includeScore: true,
   };
   if (opts.preset === "schema") {
     options.keys = ["id", "title"];
@@ -68,7 +69,7 @@ export class FuseEngine {
     return items;
   }
 
-  async queryNote({ qs }: { qs: string }): Promise<NotePropsV2[]> {
+  queryNote({ qs }: { qs: string }): NotePropsV2[] {
     let items: NotePropsV2[];
     if (qs === "") {
       const results = this.notesIndex.search("root");

@@ -185,6 +185,11 @@ export class DendronEngineClient implements DEngineClientV2 {
 
   async buildNotes() {}
 
+  queryNotesSync({}: { qs: string }) {
+    throw Error("queryNoteSync not implemented");
+    return [] as any;
+  }
+
   async refreshNotes(notes: NotePropsV2[]) {
     notes.forEach((node: DNodePropsV2) => {
       const { id } = node;

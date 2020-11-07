@@ -1,7 +1,9 @@
-import { DendronError, DEngineClientV2 } from "@dendronhq/common-all";
+import { DendronError, DEngineClientV2, DVault } from "@dendronhq/common-all";
 import { createLogger, FileTestUtils } from "@dendronhq/common-server";
+import { AssertUtils, NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import {
   EngineTestUtilsV2,
+  EngineTestUtilsV3,
   NodeTestUtilsV2,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
@@ -98,7 +100,61 @@ describe("basic", () => {
     test.skip("doesn't parse code block", () => {});
   });
 
-  describe("stingify", () => {
+  describe("stingify v3", () => {
+    let opts: DendronNoteRefPluginOpts;
+    let engine: DEngineClientV2;
+    let vaults: DVault[];
+    beforeEach(async () => {
+      vaults = await EngineTestUtilsV3.setupVaults({
+        initDirCb: async (vaultDir: string) => {
+          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+        },
+      });
+      engine = DendronEngineV2.createV3({ vaults });
+    });
+
+    test("wildcard link", async () => {
+      await FileTestUtils.createFiles(vaults[0].fsPath, [
+        {
+          path: "journal.2020.07.01.md",
+          body: "journal0",
+        },
+        {
+          path: "journal.2020.08.01.md",
+          body: "journal1",
+        },
+        {
+          path: "journal.2020.08.02.md",
+          body: "journal2",
+        },
+        {
+          path: "journal.2020.08.03.md",
+          body: "journal3",
+        },
+      ]);
+      await engine.init();
+      opts = {
+        renderWithOutline: false,
+        replaceRefOpts: {},
+        engine,
+      } as DendronNoteRefPluginOpts;
+      const proc = getProcessor({ ...opts, renderWithOutline: true });
+      const resp = await proc.process(` ((ref:[[journal.2020.08.*]]))`);
+      const out = resp.toString();
+      const errors = proc.data("errors") as DendronError[];
+      expect(errors).toMatchSnapshot();
+      expect(out).toMatchSnapshot();
+      expect(
+        await AssertUtils.assertInString({
+          body: out,
+          match: ["journal1", "journal2", "journal3"],
+          nomatch: ["journal0"],
+        })
+      ).toBeTruthy();
+    });
+  });
+
+  describe("stringify/", () => {
     let opts: DendronNoteRefPluginOpts;
     let engine: DEngineClientV2;
     let vaultDir: string;

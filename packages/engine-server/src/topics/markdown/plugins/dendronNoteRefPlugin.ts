@@ -1,7 +1,10 @@
 import {
   DendronError,
   DEngineClientV2,
+  DNoteLoc,
   DNoteRefLink,
+  DUtils,
+  NoteUtilsV2,
 } from "@dendronhq/common-all";
 import { removeMDExtension } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -11,8 +14,8 @@ import path from "path";
 import { Eat } from "remark-parse";
 import { Processor } from "unified";
 import { Node } from "unist";
-import { parseDendronRef, refLink2String } from "../../../utils";
 import { ReplaceLinkOpts } from "../../../types";
+import { parseDendronRef, refLink2String } from "../../../utils";
 import { ParserUtilsV2, RemarkUtilsV2 } from "../utilsv2";
 import { findIndex, isHeading } from "./inject";
 import { ReplaceRefOptions, replaceRefs } from "./replaceRefs";
@@ -67,6 +70,97 @@ ${content}
 }
 
 const MAX_REF_LVL = 2;
+
+type ConvertNoteRefOpts = {
+  refLvl: number;
+  link: DNoteRefLink;
+  proc: Processor;
+  renderWithOutline: boolean;
+  // --- Will be deprecated
+  /**
+   * HACK before we get multi-root implemented
+   */
+  defaultRoot: string;
+  engine: DEngineClientV2;
+  replaceRefOpts: ReplaceRefOptions;
+};
+function convertNoteRef(opts: ConvertNoteRefOpts) {
+  const {
+    replaceRefOpts,
+    renderWithOutline,
+    engine,
+    refLvl,
+    link,
+    defaultRoot,
+    proc,
+  } = _.defaults(opts);
+  if (refLvl >= MAX_REF_LVL) {
+    return "ERROR: Too many nested note references";
+  }
+
+  let noteRefs: DNoteLoc[] = [];
+  // check if link is normal
+  if (link.from.fname.endsWith("*")) {
+    const resp = engine.queryNotesSync({ qs: link.from.fname });
+    const out = _.filter(resp.data, (ent) =>
+      DUtils.minimatch(ent.fname, link.from.fname)
+    );
+    noteRefs = out.map((ent) => NoteUtilsV2.toNoteLoc(ent));
+  } else {
+    noteRefs.push(link.from);
+  }
+  debugger;
+  const out = noteRefs.map((refs) => {
+    const root = refs.vault?.fsPath || defaultRoot;
+    const name = refs.fname;
+    try {
+      const body = fs.readFileSync(path.join(root, name + ".md"), {
+        encoding: "utf8",
+      });
+      const out = extractNoteRef({
+        body,
+        link,
+        engine,
+        renderWithOutline,
+        replaceRefOpts,
+        refLvl: refLvl + 1,
+      });
+      if (renderWithOutline) {
+        let linkString = name;
+        linkString = _.trim(
+          ParserUtilsV2.getRemark()
+            .use(plugin, {
+              engine,
+              renderWithOutline,
+              replaceRefOpts,
+              refLvl,
+            })
+            .use(replaceRefs, { ..._.omit(replaceRefOpts, "wikiLink2Md") })
+            .processSync(`[[${linkString}]]`)
+            .toString()
+        );
+        return doRenderWithOutline({
+          content: out,
+          title: link.from.alias || link.from.fname || "no title",
+          link: linkString,
+        });
+      } else {
+        return out;
+      }
+    } catch (err) {
+      const errors = proc.data("errors") as DendronError[];
+      const msg = `${name} not found`;
+      errors.push(new DendronError({ msg }));
+      return proc.stringify(
+        ParserUtilsV2.genMDError({
+          msg,
+          title: "Note Ref Error",
+        })
+      );
+    }
+  });
+  return out.join("\n");
+}
 
 function extractNoteRef(opts: {
   body: string;
@@ -296,59 +390,71 @@ function attachCompiler(
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
   visitors.refLink = function (node: Node) {
-    if (refLvl >= MAX_REF_LVL) {
-      return "ERROR: Too many nested note references";
-    }
     const data = node.data as RefLinkData;
-    const root = engine.vaults[0];
-    let body: string;
-    let name = data.link.from.fname;
-    try {
-      body = fs.readFileSync(path.join(root, name + ".md"), {
-        encoding: "utf8",
-      });
-    } catch (err) {
-      const errors = proc.data("errors") as DendronError[];
-      const msg = `${name} not found`;
-      errors.push(new DendronError({ msg }));
-      return proc.stringify(
-        ParserUtilsV2.genMDError({
-          msg,
-          title: "Note Ref Error",
-        })
-      );
-    }
-    const out = extractNoteRef({
-      body,
-      link: data.link,
+    return convertNoteRef({
+      refLvl,
+      proc,
       engine,
       renderWithOutline,
       replaceRefOpts,
-      refLvl: refLvl + 1,
+      link: data.link,
+      defaultRoot: engine.vaults[0],
     });
-    if (renderWithOutline) {
-      let link = name;
-      link = _.trim(
-        ParserUtilsV2.getRemark()
-          .use(plugin, {
-            engine,
-            renderWithOutline,
-            replaceRefOpts,
-            refLvl,
-          })
-          .use(replaceRefs, { ..._.omit(replaceRefOpts, "wikiLink2Md") })
-          .processSync(`[[${link}]]`)
-          .toString()
-      );
-      return doRenderWithOutline({
-        content: out,
-        title: data.link.from.alias || data.link.from.fname || "no title",
-        link,
-      });
-    } else {
-      return out;
-    }
   };
+  // visitors.refLink = function (node: Node) {
+  //   if (refLvl >= MAX_REF_LVL) {
+  //     return "ERROR: Too many nested note references";
+  //   }
+  //   const data = node.data as RefLinkData;
+  //   const root = engine.vaults[0];
+  //   let body: string;
+  //   let name = data.link.from.fname;
+  //   try {
+  //     body = fs.readFileSync(path.join(root, name + ".md"), {
+  //       encoding: "utf8",
+  //     });
+  //   } catch (err) {
+  //     const errors = proc.data("errors") as DendronError[];
+  //     const msg = `${name} not found`;
+  //     errors.push(new DendronError({ msg }));
+  //     return proc.stringify(
+  //       ParserUtilsV2.genMDError({
+  //         msg,
+  //         title: "Note Ref Error",
+  //       })
+  //     );
+  //   }
+  //   const out = extractNoteRef({
+  //     body,
+  //     link: data.link,
+  //     engine,
+  //     renderWithOutline,
+  //     replaceRefOpts,
+  //     refLvl: refLvl + 1,
+  //   });
+  //   if (renderWithOutline) {
+  //     let link = name;
+  //     link = _.trim(
+  //       ParserUtilsV2.getRemark()
+  //         .use(plugin, {
+  //           engine,
+  //           renderWithOutline,
+  //           replaceRefOpts,
+  //           refLvl,
+  //         })
+  //         .use(replaceRefs, { ..._.omit(replaceRefOpts, "wikiLink2Md") })
+  //         .processSync(`[[${link}]]`)
+  //         .toString()
+  //     );
+  //     return doRenderWithOutline({
+  //       content: out,
+  //       title: data.link.from.alias || data.link.from.fname || "no title",
+  //       link,
+  //     });
+  //   } else {
+  //     return out;
+  //   }
+  // };
   return Compiler;
 }
 

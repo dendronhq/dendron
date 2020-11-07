@@ -321,6 +321,7 @@ export type DEngineV2 = DCommonProps &
     getSchema: (qs: string) => Promise<RespV2<SchemaModulePropsV2>>;
     querySchema: (qs: string) => Promise<SchemaQueryResp>;
     queryNotes?: (qs: string) => Promise<NoteQueryResp>;
+    queryNotesSync({ qs }: { qs: string }): NoteQueryResp;
     query: (
       queryString: string,
       mode: DNodeTypeV2,

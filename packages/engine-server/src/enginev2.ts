@@ -78,6 +78,21 @@ export class DendronEngineV2 implements DEngineV2 {
     });
   }
 
+  static createV3({ vaults }: { vaults: DVault[] }) {
+    const LOGGER = createLogger();
+    const _vaults = vaults.map((ent) => ent.fsPath);
+    return new DendronEngineV2({
+      vaults: _vaults,
+      forceNew: true,
+      store: new FileStorageV2({
+        vaults: _vaults,
+        logger: LOGGER,
+      }),
+      mode: "fuzzy",
+      logger: LOGGER,
+    });
+  }
+
   get notes() {
     return this.store.notes;
   }
@@ -204,6 +219,14 @@ export class DendronEngineV2 implements DEngineV2 {
     return {
       data,
       error: null,
+    };
+  }
+
+  queryNotesSync({ qs }: { qs: string }) {
+    const items = this.fuseEngine.queryNote({ qs });
+    return {
+      error: null,
+      data: items,
     };
   }
 

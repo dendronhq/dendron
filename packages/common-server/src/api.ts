@@ -324,7 +324,7 @@ export class DendronAPI extends API {
       method: "post",
       body: req,
     });
-    return this._createPayload(resp);
+    return resp;
   }
 
   async engineDelete(req: EngineDeleteRequest): Promise<EngineDeletePayload> {

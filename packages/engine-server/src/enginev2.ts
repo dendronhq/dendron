@@ -52,6 +52,8 @@ export class DendronEngineV2 implements DEngineV2 {
   public links: DLink[];
   public vaultsv3: DVault[];
 
+  static _instance: DendronEngineV2 | undefined;
+
   constructor(props: DendronEnginePropsV2) {
     this.vaults = props.vaults;
     this.store = props.store;
@@ -91,6 +93,13 @@ export class DendronEngineV2 implements DEngineV2 {
       mode: "fuzzy",
       logger: LOGGER,
     });
+  }
+
+  static instance({ vaults }: { vaults: DVault[] }) {
+    if (!DendronEngineV2._instance) {
+      DendronEngineV2._instance = DendronEngineV2.createV3({ vaults });
+    }
+    return DendronEngineV2._instance;
   }
 
   get notes() {

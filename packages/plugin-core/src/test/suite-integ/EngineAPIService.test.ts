@@ -1,4 +1,4 @@
-import { DirResult, FileTestUtils } from "@dendronhq/common-server";
+import { DirResult, tmpDir } from "@dendronhq/common-server";
 import {
   NodeTestPresetsV2,
   NoteTestPresetsV2,
@@ -18,7 +18,7 @@ suite("basic", function () {
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = FileTestUtils.tmpDir();
+    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });

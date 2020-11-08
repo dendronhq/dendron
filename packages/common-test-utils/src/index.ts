@@ -25,6 +25,7 @@ import { TestResult } from "./types";
 import { TestPresetEntry } from "./utils";
 export * from "./presets";
 export * from "./utils";
+export * from "./fileUtils";
 
 export type SetupVaultOpts = {
   vaultDir?: string;

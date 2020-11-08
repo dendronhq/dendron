@@ -1,4 +1,4 @@
-import { DirResult, FileTestUtils } from "@dendronhq/common-server";
+import { DirResult, tmpDir } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import { getPortFilePath, getVersionFilePath } from "@dendronhq/engine-server";
 import * as assert from "assert";
@@ -27,7 +27,7 @@ suite("startup with lsp", function () {
       ctx = VSCodeUtils.getOrCreateMockContext();
       DendronWorkspace.getOrCreate(ctx);
       await new ResetConfigCommand().execute({ scope: "all" });
-      root = FileTestUtils.tmpDir();
+      root = tmpDir();
     });
 
     afterEach(function () {

@@ -1,7 +1,7 @@
 import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
-import { FileTestUtils } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
+  FileTestUtils,
   NodeTestPresetsV2,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";

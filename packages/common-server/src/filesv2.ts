@@ -13,6 +13,7 @@ import matter from "gray-matter";
 import YAML from "js-yaml";
 import path from "path";
 import { SchemaParserV2 } from "./parser";
+import tmp, { DirResult } from "tmp";
 
 export function file2Schema(fpath: string): SchemaModulePropsV2 {
   const root = path.dirname(fpath);
@@ -74,6 +75,21 @@ export function file2Note(fpath: string): NotePropsV2 {
   return string2Note({ content, fname });
 }
 
+export function getPkgRoot(base: string, fname?: string): string {
+  fname = fname || "package.json";
+  let acc = 10;
+  const lvls = [];
+  while (acc > 0) {
+    const tryPath = path.join(base, ...lvls, fname);
+    if (fs.existsSync(tryPath)) {
+      return path.dirname(tryPath);
+    }
+    acc -= 1;
+    lvls.push("..");
+  }
+  throw Error(`no root found from ${base}`);
+}
+
 export function note2File(
   note: NotePropsV2,
   vaultPath: string,
@@ -124,7 +140,14 @@ export async function readJSONWithComments(fpath: string) {
   return obj;
 }
 
+export function tmpDir(): DirResult {
+  const dirPath = tmp.dirSync();
+  return dirPath;
+}
+
 export function writeJSONWithComments(fpath: string, data: any) {
   const payload = stringify(data, null, 4);
   return fs.writeFile(fpath, payload);
 }
+
+export { tmp, DirResult };

@@ -1,6 +1,7 @@
-import { FileTestUtils } from "@dendronhq/common-server";
+import { tmpDir } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
+  FileTestUtils,
   NodeTestUtilsV2,
 } from "@dendronhq/common-test-utils";
 import { DConfig, Git, WorkspaceService } from "@dendronhq/engine-server";
@@ -14,8 +15,8 @@ describe("publishNotes", async () => {
   let siteRootDir: string;
 
   beforeEach(async () => {
-    wsRoot = FileTestUtils.tmpDir().name;
-    siteRootDir = FileTestUtils.tmpDir().name;
+    wsRoot = tmpDir().name;
+    siteRootDir = tmpDir().name;
     const { vaults } = await EngineTestUtilsV2.setupWS({
       initDirCb: async (root) => {
         await new WorkspaceService().createVault({ vault: { fsPath: root } });

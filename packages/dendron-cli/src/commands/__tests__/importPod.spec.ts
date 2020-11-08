@@ -1,9 +1,5 @@
 import { DEngineClientV2 } from "@dendronhq/common-all";
-import {
-  createLogger,
-  FileTestUtils,
-  writeYAML,
-} from "@dendronhq/common-server";
+import { createLogger, tmpDir, writeYAML } from "@dendronhq/common-server";
 import {
   NodeTestPresetsV2,
   NodeTestUtilsV2,
@@ -19,6 +15,7 @@ import {
 import fs, { ensureDirSync } from "fs-extra";
 import path from "path";
 import { ImportPodCLICommand } from "../importPod";
+import { FileTestUtils } from "@dendronhq/common-test-utils";
 
 const { createFiles } = FileTestUtils;
 
@@ -70,9 +67,9 @@ describe("markdown pod", async () => {
   let vault: string;
 
   beforeEach(async function () {
-    importSrc = FileTestUtils.tmpDir().name;
-    wsRoot = FileTestUtils.tmpDir().name;
-    vault = FileTestUtils.tmpDir().name;
+    importSrc = tmpDir().name;
+    wsRoot = tmpDir().name;
+    vault = tmpDir().name;
     await NodeTestUtilsV2.createNotes({ vaultPath: vault });
 
     await createFiles(importSrc, [

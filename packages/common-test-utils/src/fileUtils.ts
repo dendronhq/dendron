@@ -1,11 +1,8 @@
+import { DirResult, tmp } from "@dendronhq/common-server";
 import fs from "fs-extra";
-import matter from "gray-matter";
 import _ from "lodash";
 import path from "path";
-import tmp, { DirResult } from "tmp";
-import { readYAML } from "./files";
 export { DirResult };
-// eslint-disable-next-line no-undef
 
 tmp.setGracefulCleanup();
 
@@ -68,25 +65,8 @@ export class FileTestUtils {
     throw Error(`no root found from ${base}`);
   }
 
-  static setupDir(from: string, to: string) {
-    fs.copySync(from, to);
-  }
-
   static tmpDir(): DirResult {
     const dirPath = tmp.dirSync();
     return dirPath;
   }
-
-  static readMDFile = (root: string, fname: string) => {
-    return matter.read(path.join(root, fname));
-  };
-
-  static readYMLFile = (root: string, fname: string) => {
-    return readYAML(path.join(root, fname));
-  };
-
-  static writeMDFile = (root: string, fname: string, fm: any, body: string) => {
-    const fmAndBody = matter.stringify(body, fm);
-    return fs.writeFileSync(path.join(root, fname), fmAndBody);
-  };
 }

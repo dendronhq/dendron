@@ -5,7 +5,7 @@ import {
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import {
-  FileTestUtils,
+  tmpDir,
   readMD,
   schemaModuleOpts2File,
 } from "@dendronhq/common-server";
@@ -96,7 +96,7 @@ describe("buildSite v2", () => {
     });
 
     beforeEach(async () => {
-      wsRoot = FileTestUtils.tmpDir().name;
+      wsRoot = tmpDir().name;
       vault = path.join(wsRoot, "vault");
       fs.ensureDirSync(vault);
       await setupCase1({ vaultDir: vault });
@@ -145,7 +145,7 @@ describe("buildSite v2", () => {
     beforeEach(async () => {
       ({ wsRoot, vaults } = await setupCase2({}));
       vault = vaults[0];
-      siteRootDir = FileTestUtils.tmpDir().name;
+      siteRootDir = tmpDir().name;
       notesDir = path.join(siteRootDir, "notes");
       engineClient = DendronEngineClient.create({
         port,
@@ -212,7 +212,7 @@ describe("wiki link", () => {
   });
 
   beforeEach(async () => {
-    siteRootDir = FileTestUtils.tmpDir().name;
+    siteRootDir = tmpDir().name;
     notesDir = path.join(siteRootDir, "notes");
   });
 
@@ -327,7 +327,7 @@ describe("note refs", () => {
     });
     vaultDir = root;
 
-    siteRootDir = FileTestUtils.tmpDir().name;
+    siteRootDir = tmpDir().name;
     dendronRoot = root;
     notesDir = path.join(siteRootDir, "notes");
     engineClient = DendronEngineClient.create({
@@ -462,7 +462,7 @@ describe("toc", () => {
   });
 
   beforeEach(async () => {
-    siteRootDir = FileTestUtils.tmpDir().name;
+    siteRootDir = tmpDir().name;
     notesDir = path.join(siteRootDir, "notes");
     vaultDir = await EngineTestUtilsV2.setupVault({
       initDirCb: async (vaultDir) => {
@@ -580,7 +580,7 @@ describe("custom frontmatter", () => {
   });
 
   beforeEach(async () => {
-    siteRootDir = FileTestUtils.tmpDir().name;
+    siteRootDir = tmpDir().name;
     notesDir = path.join(siteRootDir, "notes");
     vaultDir = await EngineTestUtilsV2.setupVault({
       initDirCb: async (vaultDir) => {
@@ -700,7 +700,7 @@ describe("per hierarchy config", () => {
   });
 
   beforeEach(async () => {
-    siteRootDir = FileTestUtils.tmpDir().name;
+    siteRootDir = tmpDir().name;
     notesDir = path.join(siteRootDir, "notes");
     vaultDir = await EngineTestUtilsV2.setupVault({
       initDirCb: async (vaultDir) => {

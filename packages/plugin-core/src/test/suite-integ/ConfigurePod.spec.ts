@@ -1,4 +1,4 @@
-import { DirResult, FileTestUtils, writeYAML } from "@dendronhq/common-server";
+import { DirResult, tmpDir, writeYAML } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import {
   JSONExportPod,
@@ -26,7 +26,7 @@ suite("ConfigurePod", function () {
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = FileTestUtils.tmpDir();
+    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
     podsDir = path.join(root.name, "pods");

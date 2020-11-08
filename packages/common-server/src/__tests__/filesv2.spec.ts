@@ -5,7 +5,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { tmpDir } from "../files";
+import { tmpDir } from "../filesv2";
 import { file2Schema, schemaModuleProps2File } from "../filesv2";
 
 describe("schemaModuleProps2File", () => {

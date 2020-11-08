@@ -1,4 +1,4 @@
-import { DirResult, FileTestUtils } from "@dendronhq/common-server";
+import { DirResult, tmpDir } from "@dendronhq/common-server";
 import { NodeTestUtilsV2 } from "@dendronhq/common-test-utils";
 import * as assert from "assert";
 import _ from "lodash";
@@ -19,7 +19,7 @@ suite.skip("Build Site", function () {
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = FileTestUtils.tmpDir();
+    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });

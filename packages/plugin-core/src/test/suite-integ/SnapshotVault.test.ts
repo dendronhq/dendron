@@ -1,4 +1,4 @@
-import { DirResult, FileTestUtils } from "@dendronhq/common-server";
+import { DirResult, tmpDir } from "@dendronhq/common-server";
 import { NodeTestPresetsV2, PODS_CORE } from "@dendronhq/common-test-utils";
 import { SnapshotExportPodResp } from "@dendronhq/pods-core";
 import { afterEach, beforeEach } from "mocha";
@@ -18,7 +18,7 @@ suite("notes", function () {
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = FileTestUtils.tmpDir();
+    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });

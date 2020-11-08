@@ -1,18 +1,18 @@
-import { FileTestUtils } from "@dendronhq/common-server";
+import { tmpDir } from "@dendronhq/common-server";
 import { Git } from "../git";
 // import fs from "fs-extra";
 // import path from "path";
 
 describe("isRepo", async () => {
   test("no repo", async () => {
-    const root = FileTestUtils.tmpDir().name;
+    const root = tmpDir().name;
     const repo = await Git.getRepo(root);
     expect(repo).toMatchSnapshot();
     expect(repo).toBeFalsy();
   });
 
   // test("repo", async () => {
-  //   const root = FileTestUtils.tmpDir().name;
+  //   const root = tmpDir().name;
   //   const repo = await nodegit.Repository.init(root, 0);
   //   const newFilePath = path.join(root, "bond.md");
   //   fs.writeFileSync(newFilePath, "hello", { encoding: "utf8" });

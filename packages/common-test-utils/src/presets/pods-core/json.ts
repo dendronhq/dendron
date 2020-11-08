@@ -9,7 +9,7 @@ import { TestPresetEntry } from "../../utils";
 const IMPORT_BASIC = new TestPresetEntry({
   label: "basic",
   before: async (opts: { wsRoot?: string }) => {
-    const importDir = FileTestUtils.tmpDir().name;
+    const importDir = tmpDir().name;
     const importSrc = path.join(importDir, "import.json");
     const jsonEntries = [
       {

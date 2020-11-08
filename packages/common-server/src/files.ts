@@ -5,7 +5,6 @@ import _ from "lodash";
 import minimatch from "minimatch";
 import os from "os";
 import path from "path";
-import tmp, { DirResult } from "tmp";
 
 export type getAllFilesOpts = {
   root: string;
@@ -169,9 +168,4 @@ export function removeMDExtension(nodePath: string) {
     nodePath = nodePath.slice(0, idx);
   }
   return nodePath;
-}
-
-export function tmpDir(): DirResult {
-  const dirPath = tmp.dirSync();
-  return dirPath;
 }

@@ -3,9 +3,10 @@ import {
   NotePropsV2,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
-import { createLogger, FileTestUtils } from "@dendronhq/common-server";
+import { createLogger, tmpDir } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
+  FileTestUtils,
   NodeTestPresetsV2,
   PODS_CORE,
 } from "@dendronhq/common-test-utils";
@@ -53,8 +54,8 @@ const assertNodeBody = (opts: {
 };
 
 async function setupImport(opts: { jsonEntries: any[] }) {
-  const podsDir = FileTestUtils.tmpDir().name;
-  const importDir = FileTestUtils.tmpDir().name;
+  const podsDir = tmpDir().name;
+  const importDir = tmpDir().name;
   const importSrc = path.join(importDir, "import.json");
   fs.writeJSONSync(importSrc, opts.jsonEntries);
   const { vaults, wsRoot } = await EngineTestUtilsV2.setupWS({
@@ -287,7 +288,7 @@ describe("JSONExportPod", () => {
   let vaults: string[];
 
   beforeEach(async () => {
-    podsDir = FileTestUtils.tmpDir().name;
+    podsDir = tmpDir().name;
     ({ vaults, wsRoot } = await EngineTestUtilsV2.setupWS({
       initDirCb: async (vaultDir) => {
         await NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
@@ -312,7 +313,7 @@ describe("JSONExportPod", () => {
 
   test("basic", async () => {
     const pod = new JSONExportPod();
-    const destDir = FileTestUtils.tmpDir().name;
+    const destDir = tmpDir().name;
     const destPath = path.join(destDir, "export.json");
     const config = { dest: destPath };
     await pod.execute({
@@ -370,7 +371,7 @@ describe("JSONExportPod", () => {
 
   test("basic no body", async () => {
     const pod = new JSONExportPod();
-    const destDir = FileTestUtils.tmpDir().name;
+    const destDir = tmpDir().name;
     const destPath = path.join(destDir, "export.json");
     const config: ExportPodRawConfig = { dest: destPath, includeBody: false };
     await pod.execute({

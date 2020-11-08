@@ -4,7 +4,7 @@ import {
   ENGINE_ERROR_CODES,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
-import { DirResult, FileTestUtils, note2File } from "@dendronhq/common-server";
+import { DirResult, tmpDir, note2File } from "@dendronhq/common-server";
 import {
   NodeTestPresetsV2,
   RENAME_TEST_PRESETS,
@@ -29,7 +29,7 @@ suite("notes", function () {
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = FileTestUtils.tmpDir();
+    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });

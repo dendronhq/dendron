@@ -2,7 +2,7 @@ import { NoteChangeEntry } from "@dendronhq/common-all";
 import {
   DirResult,
   EngineDeletePayload,
-  FileTestUtils,
+  tmpDir,
 } from "@dendronhq/common-server";
 import {
   NodeTestPresetsV2,
@@ -32,7 +32,7 @@ suite("notes", function () {
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = FileTestUtils.tmpDir();
+    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });
@@ -119,7 +119,7 @@ suite("schemas", function () {
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = FileTestUtils.tmpDir();
+    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });

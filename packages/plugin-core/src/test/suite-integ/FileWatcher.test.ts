@@ -1,5 +1,5 @@
 import { NoteUtilsV2 } from "@dendronhq/common-all";
-import { DirResult, FileTestUtils, note2File } from "@dendronhq/common-server";
+import { DirResult, tmpDir, note2File } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import _ from "lodash";
@@ -20,7 +20,7 @@ suite("notes", function () {
   let watcher: VaultWatcher;
 
   beforeEach(function () {
-    root = FileTestUtils.tmpDir();
+    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });

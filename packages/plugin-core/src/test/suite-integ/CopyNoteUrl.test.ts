@@ -1,5 +1,5 @@
 import { NoteUtilsV2 } from "@dendronhq/common-all";
-import { DirResult, FileTestUtils, note2File } from "@dendronhq/common-server";
+import { DirResult, note2File, tmpDir } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import { afterEach, beforeEach } from "mocha";
@@ -20,7 +20,7 @@ suite("notes", function () {
   let rootUrl = "dendron.so";
 
   beforeEach(function () {
-    root = FileTestUtils.tmpDir();
+    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });

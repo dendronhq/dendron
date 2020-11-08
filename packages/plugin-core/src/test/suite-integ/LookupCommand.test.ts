@@ -5,7 +5,7 @@ import {
   DNodeUtilsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
-import { DirResult, file2Note, FileTestUtils } from "@dendronhq/common-server";
+import { DirResult, file2Note, tmpDir } from "@dendronhq/common-server";
 import {
   NodeTestPresetsV2,
   NodeTestUtilsV2,
@@ -57,7 +57,7 @@ suite("schemas", function () {
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = FileTestUtils.tmpDir();
+    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });
@@ -312,7 +312,7 @@ suite("notes", function () {
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = FileTestUtils.tmpDir();
+    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });
@@ -888,7 +888,7 @@ suite("notes", function () {
 //   this.timeout(TIMEOUT);
 
 //   beforeEach(function () {
-//     root = FileTestUtils.tmpDir();
+//     root = tmpDir();
 //     ctx = VSCodeUtils.getOrCreateMockContext();
 //     DendronWorkspace.getOrCreate(ctx);
 //   });
@@ -993,7 +993,7 @@ suite("selection2Link", function () {
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = FileTestUtils.tmpDir();
+    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });
@@ -1065,7 +1065,7 @@ suite("scratch notes", function () {
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = FileTestUtils.tmpDir();
+    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });
@@ -1175,7 +1175,7 @@ suite("journal notes", function () {
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = FileTestUtils.tmpDir();
+    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });

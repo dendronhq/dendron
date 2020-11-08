@@ -1,9 +1,10 @@
 import { DendronError, DEngineClientV2, DVault } from "@dendronhq/common-all";
-import { createLogger, FileTestUtils } from "@dendronhq/common-server";
+import { createLogger } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
   EngineTestUtilsV3,
   ENGINE_SERVER,
+  FileTestUtils,
   NodeTestPresetsV2,
   NodeTestUtilsV2,
 } from "@dendronhq/common-test-utils";

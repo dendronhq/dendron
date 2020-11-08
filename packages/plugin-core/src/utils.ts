@@ -6,7 +6,7 @@ import {
   NoteUtilsV2,
   SchemaModulePropsV2,
 } from "@dendronhq/common-all";
-import { FileTestUtils, resolveTilde } from "@dendronhq/common-server";
+import { getPkgRoot, resolveTilde, tmpDir } from "@dendronhq/common-server";
 import { getPortFilePath } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -140,16 +140,16 @@ export class VSCodeUtils {
 
   static getVersionFromPkg(): string {
     const pkgJSON = fs.readJSONSync(
-      path.join(FileTestUtils.getPkgRoot(__dirname), "package.json")
+      path.join(getPkgRoot(__dirname), "package.json")
     );
     return `${pkgJSON.version}`;
   }
 
   static createWSContext(): vscode.ExtensionContext {
-    const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
+    const pkgRoot = getPkgRoot(__dirname);
     return ({
       extensionMode: vscode.ExtensionMode.Development,
-      logPath: FileTestUtils.tmpDir().name,
+      logPath: tmpDir().name,
       subscriptions: [] as any[],
       extensionPath: pkgRoot,
       globalState: VSCodeUtils.createMockState({
@@ -158,18 +158,18 @@ export class VSCodeUtils {
       workspaceState: VSCodeUtils.createMockState({}),
       extensionUri: vscode.Uri.file(pkgRoot),
       environmentVariableCollection: {} as any,
-      storagePath: FileTestUtils.tmpDir().name,
-      globalStoragePath: FileTestUtils.tmpDir().name,
+      storagePath: tmpDir().name,
+      globalStoragePath: tmpDir().name,
       asAbsolutePath: {} as any, //vscode.Uri.file(wsPath)
     } as unknown) as vscode.ExtensionContext;
   }
 
   static getOrCreateMockContext(): vscode.ExtensionContext {
     if (!_MOCK_CONTEXT) {
-      const pkgRoot = FileTestUtils.getPkgRoot(__dirname);
+      const pkgRoot = getPkgRoot(__dirname);
       _MOCK_CONTEXT = ({
         extensionMode: vscode.ExtensionMode.Development,
-        logPath: FileTestUtils.tmpDir().name,
+        logPath: tmpDir().name,
         subscriptions: [],
         extensionPath: pkgRoot,
         globalState: VSCodeUtils.createMockState({
@@ -178,8 +178,8 @@ export class VSCodeUtils {
         workspaceState: VSCodeUtils.createMockState({}),
         extensionUri: vscode.Uri.file(pkgRoot),
         environmentVariableCollection: {} as any,
-        storagePath: FileTestUtils.tmpDir().name,
-        globalStoragePath: FileTestUtils.tmpDir().name,
+        storagePath: tmpDir().name,
+        globalStoragePath: tmpDir().name,
         asAbsolutePath: {} as any, //vscode.Uri.file(wsPath)
       } as unknown) as vscode.ExtensionContext;
     }

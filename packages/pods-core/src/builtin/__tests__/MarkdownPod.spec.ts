@@ -22,10 +22,27 @@ describe("MarkdownPod", () => {
   // let wsRoot: string;
   let engine: DendronEngineV2;
   let executePod: (opts?: ExecutePodOpts) => Promise<any>;
+  let createFiles: () => Promise<any>;
+  let checkFiles: (opts: { vault: string }) => any;
 
   beforeEach(async () => {
     ({ wsRoot, vaults } = await EngineTestUtilsV3.setupWS({}));
     engine = DendronEngineV2.createV3({ vaults });
+    importSrc = tmpDir().name;
+    // setup
+    createFiles = async () => {
+      await FileTestUtils.createFiles(importSrc, [
+        { path: "foo.jpg" },
+        { path: "project/p2/n1.md" },
+        { path: "project/p1/n1.md" },
+        { path: "project/p1/n2.md" },
+        { path: "project/p1/.DS_STORE_TEST" },
+        { path: "project/p1/n3.pdf" },
+        { path: "project/p1/n1.pdf" },
+        { path: "project/p1/n1.pdf" },
+        { path: "project/p.3/n1.md" },
+      ]);
+    };
     executePod = async (opts?: { importSrc?: string }) => {
       const cleanOpts = _.defaults(opts, { importSrc: importSrc });
       const pod = new MarkdownImportPod();
@@ -39,32 +56,69 @@ describe("MarkdownPod", () => {
         wsRoot,
       });
     };
+    // check
+    checkFiles = ({ vault }: { vault: string }) => {
+      let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(vault, [
+        "assets",
+        "project.p1.md",
+        "project.p1.n1.md",
+        "project.p1.n2.md",
+        "project.p2.n1.md",
+        "project.p-3.n1.md",
+      ]);
+      expect(expectedFiles).toEqual(actualFiles);
+
+      return;
+    };
+  });
+
+  test("root with mult folders", async () => {
+    await createFiles();
+    await engine.init();
+    fs.ensureDirSync(path.join(importSrc, "project2"));
+    // await executePod({importSrc: path.join(importSrc, "project")});
+    await executePod({ importSrc });
+    const vault = vaults[0].fsPath;
+    checkFiles({ vault });
+    const body = fs.readFileSync(path.join(vault, "project.p1.md"), {
+      encoding: "utf8",
+    });
+    const out = await AssertUtils.assertInString({
+      body,
+      match: ["n1.pdf", "n3.pdf"],
+      nomatch: [],
+    });
+    expect(out).toBeTruthy();
+    const assets = fs.readdirSync(path.join(vault, "assets"));
+    expect(assets.length).toEqual(3);
+  });
+
+  test("root with asset", async () => {
+    await createFiles();
+    await engine.init();
+    fs.ensureDirSync(path.join(importSrc, "project2"));
+    // await executePod({importSrc: path.join(importSrc, "project")});
+    await executePod({ importSrc });
+    const vault = vaults[0].fsPath;
+    checkFiles({ vault });
+    const body = fs.readFileSync(path.join(vault, "project.p1.md"), {
+      encoding: "utf8",
+    });
+    const out = await AssertUtils.assertInString({
+      body,
+      match: ["n1.pdf", "n3.pdf"],
+      nomatch: [],
+    });
+    expect(out).toBeTruthy();
   });
 
   test("basic", async () => {
-    importSrc = tmpDir().name;
-    await FileTestUtils.createFiles(importSrc, [
-      { path: "project/p2/n1.md" },
-      { path: "project/p1/n1.md" },
-      { path: "project/p1/n2.md" },
-      { path: "project/p1/.DS_STORE_TEST" },
-      { path: "project/p1/n3.pdf" },
-      { path: "project/p1/n1.pdf" },
-      { path: "project/p1/n1.pdf" },
-      { path: "project/p.3/n1.md" },
-    ]);
+    await createFiles();
     await engine.init();
     await executePod();
     const vault = vaults[0].fsPath;
-    let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(vault, [
-      "assets",
-      "project.p1.md",
-      "project.p1.n1.md",
-      "project.p1.n2.md",
-      "project.p2.n1.md",
-      "project.p-3.n1.md",
-    ]);
-    expect(expectedFiles).toEqual(actualFiles);
+    checkFiles({ vault });
+
     const body = fs.readFileSync(path.join(vault, "project.p1.md"), {
       encoding: "utf8",
     });
@@ -77,7 +131,6 @@ describe("MarkdownPod", () => {
   });
 
   test("basic 2", async () => {
-    importSrc = tmpDir().name;
     await FileTestUtils.createFiles(importSrc, [
       { path: "project/p2/n1.md" },
       { path: "project/p1/n1.md" },
@@ -112,7 +165,6 @@ describe("MarkdownPod", () => {
   });
 
   test("special chars", async () => {
-    importSrc = tmpDir().name;
     await FileTestUtils.createFiles(importSrc, [
       // spaces
       { path: "project/p2/n 1.md" },
@@ -139,5 +191,25 @@ describe("MarkdownPod", () => {
     expect(expectedFiles).toEqual(actualFiles);
   });
 
-  test.skip("convert links", () => {});
+  test("convert links", async () => {
+    await createFiles();
+    fs.writeFileSync(
+      path.join(importSrc, "project/p2/n1.md"),
+      "[[project/p1/n1]]"
+    );
+    await engine.init();
+    await executePod();
+    const vault = vaults[0].fsPath;
+    checkFiles({ vault });
+    const body = fs.readFileSync(path.join(vault, "project.p2.n1.md"), {
+      encoding: "utf8",
+    });
+    expect(body).toMatchSnapshot();
+    const out = await AssertUtils.assertInString({
+      body,
+      match: ["[[project.p1.n1]]"],
+      nomatch: [],
+    });
+    expect(out).toBeTruthy();
+  });
 });

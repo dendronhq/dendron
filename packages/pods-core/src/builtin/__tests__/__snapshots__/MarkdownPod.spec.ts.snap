@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MarkdownPod convert links 1`] = `
+"---
+id: c546716a-9604-48b7-854d-309125c0b474
+title: N1
+desc: ''
+updated: 1604879627645
+created: 1604879627645
+---
+[[project.p1.n1]]
+
+"
+`;

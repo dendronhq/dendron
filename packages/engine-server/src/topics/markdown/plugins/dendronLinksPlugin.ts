@@ -3,6 +3,8 @@ import { Processor, Parser } from "unified";
 import { Node } from "unist";
 import { removeMDExtension } from "@dendronhq/common-server";
 import { DNoteLoc } from "@dendronhq/common-all";
+import { copySync } from "fs-extra";
+import _ from "lodash";
 
 const LINK_REGEX = /^\[\[(.+?)\]\]/;
 
@@ -53,7 +55,9 @@ interface PluginOpts {
   wikiLinkClassName?: string;
   hrefTemplate?: (permalink: string) => string;
   aliasDivider?: string;
+  // dendron opts
   replaceLink?: { from: DNoteLoc; to: DNoteLoc };
+  convertObsidianLinks?: boolean;
 }
 
 export { PluginOpts as DendronLinksOpts };
@@ -73,6 +77,7 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
   const defaultHrefTemplate = (permalink: string) => `#/page/${permalink}`;
   const hrefTemplate = opts.hrefTemplate || defaultHrefTemplate;
   const aliasDivider = opts.aliasDivider || "|";
+  const copts = _.defaults(opts, { convertObsidianLinks: false });
 
   function isAlias(pageTitle: string) {
     return pageTitle.indexOf(aliasDivider) !== -1;
@@ -193,6 +198,9 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
 
         if (node.data.alias !== node.value) {
           return `[[${node.data.alias}${aliasDivider}${node.value}]]`;
+        }
+        if (copts.convertObsidianLinks) {
+          node.value = _.replace(node.value as string, /\//g, ".");
         }
         return `[[${node.value}]]`;
       };

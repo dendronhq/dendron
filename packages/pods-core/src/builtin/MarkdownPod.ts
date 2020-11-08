@@ -102,7 +102,11 @@ export class MarkdownImportPod extends ImportPod<
     });
     // add assets
     _.values(assetFileDict).forEach((ent) => {
-      const dirname = path.dirname(ent.path);
+      let dirname = path.dirname(ent.path);
+      // root directories
+      if (dirname === ".") {
+        dirname = "";
+      }
       engineFileDict[dirname].entries.push(ent);
     });
     return { engineFileDict, assetFileDict };
@@ -215,7 +219,9 @@ export class MarkdownImportPod extends ImportPod<
       notes
         .filter((n) => !n.stub)
         .map(async (n) => {
-          const cBody = await ParserUtilsV2.getRemark().process(n.body);
+          const cBody = await ParserUtilsV2.getRemark({
+            dendronLinksOpts: { convertObsidianLinks: true },
+          }).process(n.body);
           n.body = cBody.toString();
           return engine.writeNote(n, {
             newNode: true,

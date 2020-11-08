@@ -40,11 +40,20 @@ export type SetupWSOpts = {
   wsRoot?: string;
 };
 
+type SetupVaultsOptsV3 = SetupVaultOpts & { vaults?: DVault[] };
+
+type SetupWSOptsV3 = SetupVaultsOptsV3 & { wsRoot?: string };
 /**
  * Multi-vault setup
  */
 export class EngineTestUtilsV3 {
-  static async setupVaults(opts: SetupVaultOpts & { vaults?: DVault[] }) {
+  static async setupWS(opts: SetupWSOptsV3) {
+    const wsRoot = tmpDir().name;
+    const vaults = await this.setupVaults(opts);
+    return { wsRoot, vaults };
+  }
+
+  static async setupVaults(opts: SetupVaultsOptsV3) {
     const { vaults } = _.defaults(opts, {
       vaults: [
         {

@@ -214,7 +214,9 @@ export class MarkdownImportPod extends ImportPod<
     const out = await Promise.all(
       notes
         .filter((n) => !n.stub)
-        .map((n) => {
+        .map(async (n) => {
+          const cBody = await ParserUtilsV2.getRemark().process(n.body);
+          n.body = cBody.toString();
           return engine.writeNote(n, {
             newNode: true,
             noAddParent: true,

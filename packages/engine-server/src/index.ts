@@ -7,3 +7,4 @@ export * from "./topics/git";
 export * from "./fuseEngine";
 export * from "./engineClient";
 export * from "./workspace";
+export * from "./types";

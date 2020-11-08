@@ -1,6 +1,13 @@
-import { DVault, NoteUtilsV2, SchemaUtilsV2 } from "@dendronhq/common-all";
+import {
+  DUtils,
+  DVault,
+  NoteUtilsV2,
+  SchemaUtilsV2,
+} from "@dendronhq/common-all";
 import { note2File, schemaModuleOpts2File } from "@dendronhq/common-server";
 import fs from "fs-extra";
+import _ from "lodash";
+import { getVersionFilePath } from "./utils";
 
 export type PathExistBehavior = "delete" | "abort" | "continue";
 
@@ -10,6 +17,25 @@ export type WorkspaceServiceCreateOpts = {
 };
 
 export class WorkspaceService {
+  static isNewVersionGreater({
+    oldVersion,
+    newVersion,
+  }: {
+    oldVersion: string;
+    newVersion: string;
+  }) {
+    return DUtils.semver.lt(oldVersion, newVersion);
+  }
+
+  static getVersion({ wsRoot }: { wsRoot: string }): string {
+    const fsPath = getVersionFilePath({ wsRoot });
+    if (!fs.existsSync(fsPath)) {
+      return "0.0.0";
+    } else {
+      return _.trim(fs.readFileSync(fsPath, { encoding: "utf8" }));
+    }
+  }
+
   async createVault({ vault }: { vault: DVault }) {
     fs.ensureDirSync(vault.fsPath);
     const note = NoteUtilsV2.createRoot({

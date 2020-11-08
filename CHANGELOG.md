@@ -5,10 +5,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.14.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.0...v0.14.2-alpha.1) (2020-11-07)
 
-**Note:** Version bump only for package root
-
-## [0.14.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.14.1...v0.14.2-alpha.0) (2020-11-07)
-
 ### Bug Fixes
 
 - **engine:** properly handle \* in refs when refactoring ([704a14f](https://github.com/dendronhq/dendron/commit/704a14f17196e18cb5b26f5fc98ed9f8d492e16a))

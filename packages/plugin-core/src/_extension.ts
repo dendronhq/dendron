@@ -1,6 +1,7 @@
 import { launch } from "@dendronhq/api-server";
 import { getStage } from "@dendronhq/common-all";
 import { readJSONWithComments } from "@dendronhq/common-server";
+import { getVersionFilePath } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -251,6 +252,12 @@ export async function _activate(context: vscode.ExtensionContext) {
       return;
     }
     await ws.activateWatchers();
+    const wsRoot = DendronWorkspace.rootDir() as string;
+    fs.writeFileSync(
+      getVersionFilePath({ wsRoot }),
+      DendronWorkspace.version(),
+      { encoding: "utf8" }
+    );
     Logger.info({ ctx, msg: "fin startClient" });
   } else {
     // ws not active

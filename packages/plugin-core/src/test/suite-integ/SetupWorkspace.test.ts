@@ -1,6 +1,6 @@
 import { DirResult, FileTestUtils } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
-import { getPortFilePath } from "@dendronhq/engine-server";
+import { getPortFilePath, getVersionFilePath } from "@dendronhq/engine-server";
 import * as assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -62,27 +62,35 @@ id: bond
     });
 
     it("workspace active, no prior workspace version", function (done) {
-      onWSInit(async (_event: HistoryEvent) => {
-        assert.strictEqual(DendronWorkspace.isActive(), true);
-        assert.strictEqual(
-          ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
-          "0.0.1"
-        );
-        const engine = DendronWorkspace.instance().getEngine();
-        const wsRoot = DendronWorkspace.rootDir() as string;
-        const port = getPortFilePath({ wsRoot });
-        fs.existsSync(port);
-        assert.ok(_.toInteger(fs.readFileSync(port, { encoding: "utf8" })) > 0);
-        assert.strictEqual;
-        assert.strictEqual(_.values(engine.notes).length, 1);
-        // assert.strictEqual(engine.notes["id.foo"].fname, "foo");
-        // assert.strictEqual(engine.notes["root"].fname, "root");
-        assert.deepStrictEqual(fs.readdirSync(vaultPath).sort(), [
-          ".vscode",
-          "root.md",
-          "root.schema.yml",
-        ]);
-        done();
+      onExtension({
+        action: "activate",
+        cb: async (_event: HistoryEvent) => {
+          assert.strictEqual(DendronWorkspace.isActive(), true);
+          assert.strictEqual(
+            ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
+            "0.0.1"
+          );
+          const engine = DendronWorkspace.instance().getEngine();
+          const wsRoot = DendronWorkspace.rootDir() as string;
+          const versionPath = getVersionFilePath({ wsRoot });
+          const port = getPortFilePath({ wsRoot });
+          assert.ok(
+            _.toInteger(fs.readFileSync(port, { encoding: "utf8" })) > 0
+          );
+          assert.strictEqual(
+            _.trim(fs.readFileSync(versionPath, { encoding: "utf8" })),
+            "0.0.1"
+          );
+          assert.strictEqual(_.values(engine.notes).length, 1);
+          // assert.strictEqual(engine.notes["id.foo"].fname, "foo");
+          // assert.strictEqual(engine.notes["root"].fname, "root");
+          assert.deepStrictEqual(fs.readdirSync(vaultPath).sort(), [
+            ".vscode",
+            "root.md",
+            "root.schema.yml",
+          ]);
+          done();
+        },
       });
 
       DendronWorkspace.version = () => "0.0.1";

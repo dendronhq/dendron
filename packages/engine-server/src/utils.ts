@@ -93,6 +93,11 @@ export function getPortFilePath({ wsRoot }: { wsRoot: string }) {
   return portFile;
 }
 
+export function getVersionFilePath({ wsRoot }: { wsRoot: string }) {
+  const filePath = path.join(wsRoot, CONSTANTS.DENDRON_VERSION);
+  return filePath;
+}
+
 type LinkDirection = "from" | "to";
 
 export type ASTEnt = {
@@ -158,7 +163,6 @@ export function parseDendronRef(ref: string) {
   let direction: LinkDirection;
   if (idOrRef === "ref") {
     direction = "to";
-    // eslint-disable-next-line no-use-before-define
     link = parseLink(cleanArgs);
   } else {
     throw Error(`parse non ref not implemented, ref: ${ref}`);

@@ -229,7 +229,7 @@ export function dendronRefsPlugin(opts: Partial<PluginOpts> = {}) {
           throw Error("root not defined");
         }
         if (!data?.link?.from.fname) {
-          throw Error("no link name foundjj");
+          throw Error("no link name found");
         }
         let name = data.link.from.fname;
         const body = fs.readFileSync(path.join(root, name + ".md"), {

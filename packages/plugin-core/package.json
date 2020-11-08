@@ -154,7 +154,7 @@
                 "desc": "Go to a note"
             },
             {
-                "command": "dendron.createDailyJornalNote",
+                "command": "dendron.createDailyJournalNote",
                 "title": "Dendron: Create Daily Journal Note",
                 "desc": "Create a global journal note",
                 "docLink": "dendron.topic.special-notes.md",
@@ -398,7 +398,7 @@
         ],
         "keybindings": [
             {
-                "command": "dendron.createDailyJornalNote",
+                "command": "dendron.createDailyJournalNote",
                 "key": "ctrl+shift+i",
                 "mac": "cmd+shift+i",
                 "when": "editorFocus"

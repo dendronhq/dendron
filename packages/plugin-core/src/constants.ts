@@ -72,7 +72,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     skipDocs: true,
   },
   CREATE_DAILY_JOURNAL_NOTE: {
-    key: "dendron.createDailyJornalNote",
+    key: "dendron.createDailyJournalNote",
     title: `${CMD_PREFIX} Create Daily Journal Note`,
     group: "notes",
     keybindings: {

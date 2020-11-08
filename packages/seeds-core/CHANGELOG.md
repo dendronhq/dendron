@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.14.2-alpha.5](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.1...v0.14.2-alpha.5) (2020-11-08)
+
+**Note:** Version bump only for package @dendronhq/seeds-core
+
 ## [0.14.2-alpha.3](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.2...v0.14.2-alpha.3) (2020-11-08)
 
 **Note:** Version bump only for package @dendronhq/seeds-core

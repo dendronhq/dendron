@@ -34,6 +34,9 @@
       "path": "packages/common-test-utils",
     },
     {
+      "path": "packages/dendron-next-server",
+    },
+    {
       "path": "bootstrap"
     },
     {

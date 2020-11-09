@@ -1,10 +1,9 @@
-import RemarkParser, { Eat } from "remark-parse";
-import { Processor, Parser } from "unified";
-import { Node } from "unist";
-import { removeMDExtension } from "@dendronhq/common-server";
 import { DNoteLoc } from "@dendronhq/common-all";
-import { copySync } from "fs-extra";
+import { removeMDExtension } from "@dendronhq/common-server";
 import _ from "lodash";
+import RemarkParser, { Eat } from "remark-parse";
+import { Parser, Processor } from "unified";
+import { Node } from "unist";
 
 const LINK_REGEX = /^\[\[(.+?)\]\]/;
 

@@ -8,31 +8,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Bug Fixes
 
 - typo in daily journal note cmd ([5ec96ef](https://github.com/dendronhq/dendron/commit/5ec96efd9a006e5e5999f2704dfb3d1e97e60a5c))
-
-## [0.14.2-alpha.6](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.5...v0.14.2-alpha.6) (2020-11-08)
-
-**Note:** Version bump only for package root
-
-## [0.14.2-alpha.5](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.1...v0.14.2-alpha.5) (2020-11-08)
-
-**Note:** Version bump only for package root
-
-## [0.14.2-alpha.4](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.3...v0.14.2-alpha.4) (2020-11-08)
-
-**Note:** Version bump only for package root
-
-## [0.14.2-alpha.3](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.2...v0.14.2-alpha.3) (2020-11-08)
-
-**Note:** Version bump only for package root
-
-## [0.14.2-alpha.2](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.1...v0.14.2-alpha.2) (2020-11-08)
-
-**Note:** Version bump only for package root
-
-## [0.14.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.0...v0.14.2-alpha.1) (2020-11-07)
-
-### Bug Fixes
-
 - **engine:** properly handle \* in refs when refactoring ([704a14f](https://github.com/dendronhq/dendron/commit/704a14f17196e18cb5b26f5fc98ed9f8d492e16a))
 
 ### Enhancements

@@ -10,6 +10,7 @@ import { VSCodeUtils } from "../utils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
+import { ReloadIndexCommand } from "./ReloadIndex";
 
 type CommandOutput = void;
 
@@ -62,6 +63,7 @@ export class ImportPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
     const vaults = DendronWorkspace.instance().vaults;
     const pod = new opts.podChoice.podClass();
     await pod.execute({ config: opts.config, engine, wsRoot, vaults });
+    await new ReloadIndexCommand().execute();
     window.showInformationMessage(`done importing.`);
   }
 }

@@ -20,7 +20,7 @@ export class ReloadIndexCommand extends BasicCommand<
    * Update index
    * @param opts
    */
-  async execute() {
+  async execute(): Promise<DEngineClientV2 | undefined> {
     const ctx = "ReloadIndex.execute";
     this.L.info({ ctx, msg: "enter" });
     const ws = DendronWorkspace.instance();

@@ -1,6 +1,11 @@
+import { Time } from "@dendronhq/common-all";
 import { DirResult, tmpDir } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
-import { getPortFilePath, getVersionFilePath } from "@dendronhq/engine-server";
+import {
+  getPortFilePath,
+  getWSMetaFilePath,
+  openWSMetaFile,
+} from "@dendronhq/engine-server";
 import * as assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -72,18 +77,15 @@ id: bond
           );
           const engine = DendronWorkspace.instance().getEngine();
           const wsRoot = DendronWorkspace.rootDir() as string;
-          const versionPath = getVersionFilePath({ wsRoot });
           const port = getPortFilePath({ wsRoot });
+          const fpath = getWSMetaFilePath({ wsRoot });
+          const meta = openWSMetaFile({ fpath });
           assert.ok(
             _.toInteger(fs.readFileSync(port, { encoding: "utf8" })) > 0
           );
-          assert.strictEqual(
-            _.trim(fs.readFileSync(versionPath, { encoding: "utf8" })),
-            "0.0.1"
-          );
+          assert.strictEqual(meta.version, "0.0.1");
+          assert.ok(meta.activationTime < Time.now().toMillis());
           assert.strictEqual(_.values(engine.notes).length, 1);
-          // assert.strictEqual(engine.notes["id.foo"].fname, "foo");
-          // assert.strictEqual(engine.notes["root"].fname, "root");
           assert.deepStrictEqual(fs.readdirSync(vaultPath).sort(), [
             ".vscode",
             "root.md",

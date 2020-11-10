@@ -1,7 +1,7 @@
 import { launch } from "@dendronhq/api-server";
-import { getStage } from "@dendronhq/common-all";
+import { getStage, Time } from "@dendronhq/common-all";
 import { readJSONWithComments } from "@dendronhq/common-server";
-import { getVersionFilePath } from "@dendronhq/engine-server";
+import { getWSMetaFilePath, writeWSMetaFile } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -186,6 +186,15 @@ export async function _activate(context: vscode.ExtensionContext) {
     GLOBAL_STATE.VERSION
   );
   if (DendronWorkspace.isActive()) {
+    const wsRoot = DendronWorkspace.rootDir() as string;
+    const fpath = getWSMetaFilePath({ wsRoot });
+    writeWSMetaFile({
+      fpath,
+      data: {
+        version: DendronWorkspace.version(),
+        activationTime: Time.now().toMillis(),
+      },
+    });
     const installedGlobalVersion = DendronWorkspace.version();
     const previousGlobalVersion = ws.context.globalState.get<
       string | undefined
@@ -252,12 +261,6 @@ export async function _activate(context: vscode.ExtensionContext) {
       return;
     }
     await ws.activateWatchers();
-    const wsRoot = DendronWorkspace.rootDir() as string;
-    fs.writeFileSync(
-      getVersionFilePath({ wsRoot }),
-      DendronWorkspace.version(),
-      { encoding: "utf8" }
-    );
     Logger.info({ ctx, msg: "fin startClient" });
   } else {
     // ws not active

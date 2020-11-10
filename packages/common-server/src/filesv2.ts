@@ -1,4 +1,5 @@
 import {
+  DendronError,
   DNodeUtilsV2,
   DVault,
   NotePropsV2,
@@ -8,12 +9,80 @@ import {
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import { assign, parse, stringify } from "comment-json";
+import { FSWatcher } from "fs";
 import fs from "fs-extra";
 import matter from "gray-matter";
 import YAML from "js-yaml";
+import _ from "lodash";
 import path from "path";
-import { SchemaParserV2 } from "./parser";
 import tmp, { DirResult } from "tmp";
+import { SchemaParserV2 } from "./parser";
+
+type FileWatcherCb = {
+  fpath: string;
+};
+
+type CreateFileWatcherOpts = {
+  fpath: string;
+  numTries?: number;
+  onChange: (opts: FileWatcherCb) => Promise<any>;
+  onCreate: (opts: FileWatcherCb) => Promise<any>;
+};
+type CreateFileWatcherResp = {
+  watcher: FSWatcher;
+  didCreate: boolean;
+};
+
+export async function createFileWatcher(
+  opts: CreateFileWatcherOpts
+): Promise<CreateFileWatcherResp> {
+  const { numTries, fpath, onChange } = _.defaults(opts, {
+    numTries: 5,
+  });
+  let didCreate = false;
+
+  return new Promise(async (resolve, _reject) => {
+    if (!fs.existsSync(fpath)) {
+      return setTimeout(() => {
+        resolve(
+          _createFileWatcher({
+            ...opts,
+            numTries: numTries - 1,
+            isCreate: true,
+          })
+        );
+      }, 3000);
+    }
+    const watcher = fs.watch(fpath, () => {
+      onChange({ fpath });
+    });
+    return resolve({ watcher, didCreate });
+  });
+}
+
+async function _createFileWatcher(
+  opts: CreateFileWatcherOpts & { isCreate: boolean }
+): Promise<CreateFileWatcherResp> {
+  const { numTries, fpath, onChange, onCreate } = _.defaults(opts, {
+    numTries: 5,
+  });
+  if (numTries <= 0) {
+    throw new DendronError({ msg: "exceeded numTries" });
+  }
+  return new Promise(async (resolve, _reject) => {
+    if (!fs.existsSync(fpath)) {
+      console.log({ fpath, msg: "not exist" });
+      return setTimeout(() => {
+        resolve(createFileWatcher({ ...opts, numTries: numTries - 1 }));
+      }, 3000);
+    }
+    await onCreate({ fpath });
+    const watcher = fs.watch(fpath, () => {
+      onChange({ fpath });
+    });
+    return resolve({ watcher, didCreate: true });
+  });
+}
 
 export function file2Schema(fpath: string): SchemaModulePropsV2 {
   const root = path.dirname(fpath);

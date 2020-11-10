@@ -340,13 +340,6 @@ export class DendronEngineV2 implements DEngineV2 {
     } else {
       this.fuseEngine.updateNotesIndex(this.notes);
     }
-    // if (mode === "schema") {
-    //   this.schemaIndex.setCollection(
-    //     _.map(_.values(this.schemas), (ent) => SchemaUtilsV2.getModuleRoot(ent))
-    //   );
-    // } else {
-    //   this.notesIndex.setCollection(_.values(this.notes));
-    // }
   }
 
   async updateSchema(schemaModule: SchemaModulePropsV2) {

@@ -6,7 +6,6 @@ import { ExtensionContext, Uri } from "vscode";
 import { SetupWorkspaceCommand } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
 import { DendronWorkspace } from "../workspace";
-import { _activate } from "../_extension";
 import { createMockConfig } from "./testUtils";
 
 type SetupCodeConfigurationV2 = {

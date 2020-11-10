@@ -10,10 +10,11 @@ import { BuildPodCommand } from "../../commands/BuildPod";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
+import { _activate } from "../../_extension";
 import { onWSInit, TIMEOUT } from "../testUtils";
 import { setupCodeWorkspaceV2 } from "../testUtilsv2";
 
-suite.skip("Build Site", function () {
+suite("Build Site", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
   this.timeout(TIMEOUT);
@@ -37,7 +38,7 @@ suite.skip("Build Site", function () {
       done();
     });
 
-    return setupCodeWorkspaceV2({
+    setupCodeWorkspaceV2({
       ctx,
       wsRoot: root.name,
       initDirCb: async (vaultPath) => {
@@ -52,6 +53,6 @@ suite.skip("Build Site", function () {
           ],
         });
       },
-    });
+    }).then(() => _activate(ctx));
   });
 });

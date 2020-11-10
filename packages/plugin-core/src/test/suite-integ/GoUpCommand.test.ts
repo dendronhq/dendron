@@ -1,5 +1,5 @@
-import { DirResult, tmpDir } from "@dendronhq/common-server";
-import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
+import { DirResult } from "@dendronhq/common-server";
+import { FileTestUtils, NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
 import { afterEach, beforeEach } from "mocha";
@@ -18,7 +18,7 @@ suite("notes", function () {
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = tmpDir();
+    root = FileTestUtils.tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });

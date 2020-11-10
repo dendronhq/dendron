@@ -14,6 +14,8 @@ import markdownItAST from "markdown-it-ast";
 import Token from "markdown-it/lib/token";
 import path from "path";
 import { DendronEngineClient } from "./engineClient";
+import fs from "fs-extra";
+import { WSMeta } from "./types";
 
 const markdownIt = _markdownIt();
 
@@ -93,9 +95,27 @@ export function getPortFilePath({ wsRoot }: { wsRoot: string }) {
   return portFile;
 }
 
-export function getVersionFilePath({ wsRoot }: { wsRoot: string }) {
-  const filePath = path.join(wsRoot, CONSTANTS.DENDRON_VERSION);
-  return filePath;
+export function getWSMetaFilePath({ wsRoot }: { wsRoot: string }) {
+  const fsPath = path.join(wsRoot, CONSTANTS.DENDRON_WS_META);
+  return fsPath;
+}
+
+export function openPortFile({ fpath }: { fpath: string }): number {
+  return _.toInteger(_.trim(fs.readFileSync(fpath, { encoding: "utf8" })));
+}
+
+export function openWSMetaFile({ fpath }: { fpath: string }): WSMeta {
+  return fs.readJSONSync(fpath) as WSMeta;
+}
+
+export function writeWSMetaFile({
+  fpath,
+  data,
+}: {
+  fpath: string;
+  data: WSMeta;
+}) {
+  return fs.writeJSONSync(fpath, data);
 }
 
 type LinkDirection = "from" | "to";

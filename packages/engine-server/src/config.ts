@@ -13,6 +13,7 @@ export class DConfig {
 
   static genDefaultConfig(): DendronConfig {
     return {
+      vaults: [],
       site: {
         copyAssets: true,
         siteHierarchies: ["root"],

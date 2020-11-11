@@ -4,16 +4,19 @@ import {
   DNodePropsQuickInputV2,
   DNodePropsV2,
   DNodeUtilsV2,
+  DVault,
   NotePropsV2,
   NoteUtilsV2,
   SchemaModulePropsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import _ from "lodash";
+import path from "path";
 import { Uri, window, WorkspaceFolder } from "vscode";
 import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
 import { EngineFlavor, EngineOpts } from "../../types";
+import { VSCodeUtils } from "../../utils";
 import { getDurationMilliseconds, profile } from "../../utils/system";
 import { DendronWorkspace } from "../../workspace";
 import { DendronQuickPickerV2 } from "./types";
@@ -113,7 +116,13 @@ export class LookupProviderV2 {
     return uri;
   }
 
-  async _onAcceptNewSchema(picker: DendronQuickPickerV2) {
+  async _onAcceptNewSchema({
+    picker,
+    vault,
+  }: {
+    picker: DendronQuickPickerV2;
+    vault: DVault;
+  }) {
     const ctx = "onAcceptNewSchema";
     const fname = PickerUtilsV2.getValue(picker);
     Logger.info({ ctx, msg: "createNewPick", value: fname });
@@ -122,7 +131,7 @@ export class LookupProviderV2 {
     const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
     const engine = ws.getEngine();
     Logger.info({ ctx, msg: "create normal node" });
-    smodNew = SchemaUtilsV2.createModuleProps({ fname });
+    smodNew = SchemaUtilsV2.createModuleProps({ fname, vault });
     const uri = Uri.file(
       SchemaUtilsV2.getPath({ root: wsFolders[0].uri.fsPath, fname })
     );
@@ -143,8 +152,23 @@ export class LookupProviderV2 {
   }): Promise<Uri> {
     const ctx = "onAcceptNewNode";
     Logger.info({ ctx });
+    const vaults = DendronWorkspace.instance().config.vaults;
+    let vault: DVault;
+
+    // get current vault
+    if (vaults.length > 1 && VSCodeUtils.getActiveTextEditor()?.document) {
+      vault = DNodeUtilsV2.getVaultByDir({
+        vaults,
+        dirPath: path.dirname(
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+        ),
+      });
+    } else {
+      vault = vaults[0];
+    }
+
     if (opts.flavor === "schema") {
-      return this._onAcceptNewSchema(picker);
+      return this._onAcceptNewSchema({ picker, vault });
     } else {
       return this._onAcceptNewNote({ picker, selectedItem });
     }
@@ -336,7 +360,11 @@ export class LookupProviderV2 {
         // overwrite results
         updatedItems = this.createDefaultItems({ picker }).concat(
           nodes.map((ent) =>
-            DNodeUtilsV2.enhancePropForQuickInput(ent, engine.schemas)
+            DNodeUtilsV2.enhancePropForQuickInput({
+              props: ent,
+              schemas: engine.schemas,
+              vaults: DendronWorkspace.instance().config.vaults,
+            })
           )
         );
         profile = getDurationMilliseconds(start);
@@ -396,7 +424,11 @@ export class LookupProviderV2 {
           );
           updatedItems = updatedItems.concat(
             candidatesToAdd.map((ent) => {
-              return DNodeUtilsV2.enhancePropForQuickInput(ent, engine.schemas);
+              return DNodeUtilsV2.enhancePropForQuickInput({
+                props: ent,
+                schemas: engine.schemas,
+                vaults: DendronWorkspace.instance().config.vaults,
+              });
             })
           );
         }
@@ -465,7 +497,11 @@ export class LookupProviderV2 {
       });
     }
     return nodes.map((ent) => {
-      return DNodeUtilsV2.enhancePropForQuickInput(ent, engine.schemas);
+      return DNodeUtilsV2.enhancePropForQuickInput({
+        props: ent,
+        schemas: engine.schemas,
+        vaults: DendronWorkspace.instance().config.vaults,
+      });
     });
   }
 

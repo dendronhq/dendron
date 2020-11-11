@@ -3,6 +3,7 @@ import {
   DEngineClientV2,
   DNodePropsQuickInputV2,
   DNodeUtilsV2,
+  DVault,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import { DirResult, file2Note, tmpDir } from "@dendronhq/common-server";
@@ -40,7 +41,10 @@ import {
   setupDendronWorkspace,
   TIMEOUT,
 } from "../testUtils";
-import { setupCodeWorkspaceV2 } from "../testUtilsv2";
+import {
+  setupCodeWorkspaceMultiVaultV2,
+  setupCodeWorkspaceV2,
+} from "../testUtilsv2";
 
 // TODO: This could be cleaned up further+extended, but better for now
 let vaultPath: string;
@@ -175,10 +179,11 @@ suite("schemas", function () {
         client = ws.getEngine();
         const schemaModule = client.schemas["root"];
         const schema = schemaModule["root"];
-        const schemaInput = DNodeUtilsV2.enhancePropForQuickInput(
-          schema,
-          client.schemas
-        );
+        const schemaInput = DNodeUtilsV2.enhancePropForQuickInput({
+          props: schema,
+          schemas: client.schemas,
+          vaults: DendronWorkspace.instance().config.vaults,
+        });
         const quickpick = createMockQuickPick({
           value: "root",
           selectedItems: [schemaInput],
@@ -205,10 +210,11 @@ suite("schemas", function () {
         client = ws.getEngine();
         const schemaModule = client.schemas["foo"];
         const schema = schemaModule["root"];
-        const schemaInput = DNodeUtilsV2.enhancePropForQuickInput(
-          schema,
-          client.schemas
-        );
+        const schemaInput = DNodeUtilsV2.enhancePropForQuickInput({
+          props: schema,
+          schemas: client.schemas,
+          vaults: DendronWorkspace.instance().config.vaults,
+        });
         const quickpick = createMockQuickPick({
           value: "foo",
           selectedItems: [schemaInput],
@@ -605,10 +611,11 @@ suite("notes", function () {
         ws = DendronWorkspace.instance();
         client = ws.getEngine();
         const note = client.notes["foo"];
-        const item = DNodeUtilsV2.enhancePropForQuickInput(
-          note,
-          client.schemas
-        );
+        const item = DNodeUtilsV2.enhancePropForQuickInput({
+          props: note,
+          schemas: client.schemas,
+          vaults: DendronWorkspace.instance().config.vaults,
+        });
         const quickpick = createMockQuickPick({
           value: "foo",
           selectedItems: [item],
@@ -830,7 +837,11 @@ suite("notes", function () {
         client = ws.getEngine();
         const notes = ["foo", "foo.ch1"].map((fname) => client.notes[fname]);
         const items = notes.map((note) =>
-          DNodeUtilsV2.enhancePropForQuickInput(note, client.schemas)
+          DNodeUtilsV2.enhancePropForQuickInput({
+            props: note,
+            schemas: client.schemas,
+            vaults: DendronWorkspace.instance().config.vaults,
+          })
         );
         const quickpick = createMockQuickPick({
           value: "foo",
@@ -859,7 +870,11 @@ suite("notes", function () {
         client = ws.getEngine();
         const notes = ["foo", "foo.ch1"].map((fname) => client.notes[fname]);
         const items = notes.map((note) =>
-          DNodeUtilsV2.enhancePropForQuickInput(note, client.schemas)
+          DNodeUtilsV2.enhancePropForQuickInput({
+            props: note,
+            schemas: client.schemas,
+            vaults: DendronWorkspace.instance().config.vaults,
+          })
         );
         const quickpick = createMockQuickPick({
           value: "bond",
@@ -979,6 +994,72 @@ suite("notes", function () {
 //     });
 //   });
 // });
+
+suite("notes, multi", function () {
+  let root: string;
+  let ctx: vscode.ExtensionContext;
+  let vaults: DVault[];
+  this.timeout(TIMEOUT);
+
+  beforeEach(function () {
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    DendronWorkspace.getOrCreate(ctx);
+  });
+
+  afterEach(function () {
+    HistoryService.instance().clearSubscriptions();
+  });
+
+  describe("updateItems", function () {
+    test("empty qs", function (done) {
+      onWSInit(async () => {
+        const engOpts: EngineOpts = { flavor: "note" };
+        const lc = new LookupControllerV2(engOpts);
+        const lp = new LookupProviderV2(engOpts);
+        const quickpick = await lc.show();
+        quickpick.value = "";
+        await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
+        // two notes and root
+        assert.strictEqual(lc.quickPick?.items.length, 4);
+        done();
+      });
+      setupCodeWorkspaceMultiVaultV2({ ctx }).then(
+        ({ wsRoot, vaults: _vaults }) => {
+          root = wsRoot;
+          vaults = _vaults;
+          _activate(ctx);
+        }
+      );
+    });
+
+    test("opened note", function (done) {
+      onWSInit(async () => {
+        const engOpts: EngineOpts = { flavor: "note" };
+        const lc = new LookupControllerV2(engOpts);
+        const lp = new LookupProviderV2(engOpts);
+        await VSCodeUtils.openFileInEditor(
+          vscode.Uri.file(path.join(vaults[0].fsPath, "foo.md"))
+        );
+        const quickpick = await lc.show();
+        quickpick.value = "";
+        await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
+        quickpick.onDidChangeActive(() => {
+          assert.strictEqual(lc.quickPick?.activeItems.length, 1);
+          assert.strictEqual(lc.quickPick?.activeItems[0].fname, "foo");
+          done();
+        });
+        await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
+      });
+      setupCodeWorkspaceMultiVaultV2({ ctx }).then(
+        ({ wsRoot, vaults: _vaults }) => {
+          root = wsRoot;
+          vaults = _vaults;
+          _activate(ctx);
+        }
+      );
+    });
+  });
+});
 
 suite("selection2Link", function () {
   let root: DirResult;
@@ -1143,7 +1224,11 @@ suite("effect buttons", function () {
         const client = DendronWorkspace.instance().getEngine();
         const notes = ["foo", "foo.ch1"].map((fname) => client.notes[fname]);
         const items = notes.map((note) =>
-          DNodeUtilsV2.enhancePropForQuickInput(note, client.schemas)
+          DNodeUtilsV2.enhancePropForQuickInput({
+            props: note,
+            schemas: client.schemas,
+            vaults: DendronWorkspace.instance().config.vaults,
+          })
         );
         lc.quickPick = createMockQuickPick({
           value: "foo",

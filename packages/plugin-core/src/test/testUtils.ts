@@ -20,6 +20,7 @@ import { VSCodeUtils } from "../utils";
 import fs from "fs-extra";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { DendronBtn } from "../components/lookup/buttons";
+import { DConfig } from "@dendronhq/engine-server";
 
 export function getActiveEditorBasename() {
   return path.basename(
@@ -125,7 +126,7 @@ export async function setupDendronWorkspace(
     },
     useCb: (_vaultPath: string) => {},
     activateWorkspace: false,
-    lsp: false,
+    lsp: true,
   });
 
   if (optsClean.activateWorkspace) {
@@ -149,6 +150,9 @@ export async function setupDendronWorkspace(
     ...optsClean.setupWsOverride,
   });
   await optsClean.useCb(wsFolder.uri.fsPath);
+  const config = DConfig.getOrCreate(rootDir);
+  config.vaults = [{ fsPath: wsFolder.uri.fsPath }];
+  DConfig.writeConfig({ wsRoot: rootDir, config });
   await _activate(ctx);
   return {
     vaultPath,

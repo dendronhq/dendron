@@ -43,7 +43,7 @@ export interface Resp<T> {
 
 export type DendronConfig = {
   site: DendronSiteConfig;
-  vaults?: DVault[];
+  vaults: DVault[];
 };
 
 export type HierarchyConfig = {

@@ -116,24 +116,31 @@ export class DNodeUtilsV2 {
     return path.basename(nodePath, ".md");
   }
 
-  static enhancePropForQuickInput(
-    props: DNodePropsV2,
-    schemaModules: SchemaModuleDictV2
-  ): DNodePropsQuickInputV2 {
+  static enhancePropForQuickInput({
+    props,
+    schemas,
+    vaults,
+  }: {
+    props: DNodePropsV2;
+    schemas: SchemaModuleDictV2;
+    vaults: DVault[];
+  }): DNodePropsQuickInputV2 {
+    const vaultSuffix =
+      vaults.length > 1
+        ? ` (${path.basename(props.vault?.fsPath as string)})`
+        : "";
     if (props.type === "note") {
       const isRoot = DNodeUtilsV2.isRoot(props);
       const label = isRoot ? "root" : props.fname;
       const detail = props.desc;
-      const sm = props.schema
-        ? schemaModules[props.schema.moduleId]
-        : undefined;
-      const description = NoteUtilsV2.genSchemaDesc(props, sm);
+      const sm = props.schema ? schemas[props.schema.moduleId] : undefined;
+      const description = NoteUtilsV2.genSchemaDesc(props, sm) + vaultSuffix;
       const out = { ...props, label, detail, description };
       return out;
     } else {
       const label = DNodeUtilsV2.isRoot(props) ? "root" : props.id;
       const detail = props.desc;
-      const out = { ...props, label, detail };
+      const out = { ...props, label, detail, description: vaultSuffix };
       return out;
     }
   }

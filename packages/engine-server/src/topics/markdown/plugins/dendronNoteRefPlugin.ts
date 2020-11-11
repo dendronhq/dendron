@@ -105,13 +105,17 @@ function convertNoteRef(opts: ConvertNoteRefOpts) {
     const out = _.filter(resp.data, (ent) =>
       DUtils.minimatch(ent.fname, link.from.fname)
     );
-    noteRefs = out.map((ent) => NoteUtilsV2.toNoteLoc(ent));
+    noteRefs = _.sortBy(
+      out.map((ent) => NoteUtilsV2.toNoteLoc(ent)),
+      "fname"
+    );
   } else {
     noteRefs.push(link.from);
   }
-  const out = noteRefs.map((refs) => {
-    const root = refs.vault?.fsPath || defaultRoot;
-    const name = refs.fname;
+  const out = noteRefs.map((ref) => {
+    const root = ref.vault?.fsPath || defaultRoot;
+    const name = ref.fname;
+    const alias = ref.alias;
     try {
       const body = fs.readFileSync(path.join(root, name + ".md"), {
         encoding: "utf8",
@@ -140,7 +144,7 @@ function convertNoteRef(opts: ConvertNoteRefOpts) {
         );
         return doRenderWithOutline({
           content: out,
-          title: link.from.alias || link.from.fname || "no title",
+          title: alias || name || "no title",
           link: linkString,
         });
       } else {

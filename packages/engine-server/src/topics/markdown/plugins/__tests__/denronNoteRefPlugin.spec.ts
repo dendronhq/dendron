@@ -129,6 +129,7 @@ describe("basic", () => {
       const proc = getProcessor({ ...opts, renderWithOutline: true });
       const resp = await proc.process(note.body);
       const out = resp.toString();
+      expect(out).toMatchSnapshot();
       await NodeTestPresetsV2.runJestHarness({
         expect,
         results,

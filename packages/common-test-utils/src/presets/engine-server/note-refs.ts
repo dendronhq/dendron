@@ -15,12 +15,12 @@ const WILDCARD_LINK = new TestPresetEntry({
         body: "journal1",
       },
       {
-        path: "journal.2020.08.02.md",
-        body: "journal2",
-      },
-      {
         path: "journal.2020.08.03.md",
         body: "journal3",
+      },
+      {
+        path: "journal.2020.08.02.md",
+        body: "journal2",
       },
     ]);
     const note = await NodeTestUtilsV2.createNote({

@@ -6,6 +6,7 @@ import {
   DLink,
   DNodePropsV2,
   DNodeTypeV2,
+  DVault,
   EngineDeleteNoteResp,
   EngineDeleteOptsV2,
   EngineQueryNoteResp,
@@ -45,6 +46,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   public ws: string;
   public fuseEngine: FuseEngine;
   public api: DendronAPI;
+  public vaultsv3: DVault[];
 
   static create({
     port,
@@ -81,6 +83,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.links = [];
     this.fuseEngine = new FuseEngine({});
     this.vaults = vaults;
+    this.vaultsv3 = vaults.map((ent) => ({ fsPath: ent }));
     this.ws = ws;
   }
 

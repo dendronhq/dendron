@@ -286,15 +286,17 @@ describe("JSONExportPod", () => {
     const destDir = tmpDir().name;
     const destPath = path.join(destDir, "export.json");
     const config = { dest: destPath };
+    const vault = { fsPath: vaults[0] };
     await pod.execute({
       config,
       wsRoot,
       engine,
-      vaults: [{ fsPath: storeDir }],
+      vaults: [vault],
     });
     await NodeTestPresetsV2.runJestHarness({
       opts: {
         destPath,
+        vault,
       },
       results: PODS_CORE.JSON.EXPORT.BASIC.results,
       expect,

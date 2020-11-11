@@ -84,6 +84,7 @@ suite("ExportPod", function () {
       await NodeTestPresetsV2.runMochaHarness({
         opts: {
           destPath: exportDest,
+          vault: { fsPath: vaultDir },
         },
         results: PODS_CORE.JSON.EXPORT.BASIC.results,
       });

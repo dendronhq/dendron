@@ -77,7 +77,7 @@ export class NoteParserV2 extends ParserBaseV2 {
     this.cache = opts.cache;
   }
 
-  async parseFile(fpath: string[]): Promise<NotePropsV2[]> {
+  async parseFile(fpath: string[], vault: DVault): Promise<NotePropsV2[]> {
     const ctx = "parseFile";
     const fileMetaDict: FileMetaDictV2 = getFileMetaV2(fpath);
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
@@ -98,6 +98,7 @@ export class NoteParserV2 extends ParserBaseV2 {
     const rootNote = this.parseNoteProps({
       fileMeta: rootFile,
       addParent: false,
+      vault,
     })[0];
     this.logger.debug({ ctx, rootNote, msg: "post-parse-rootNote" });
 
@@ -110,7 +111,11 @@ export class NoteParserV2 extends ParserBaseV2 {
       // don't count root node
       .filter((n) => n.fpath !== "root.md")
       .flatMap((ent) => {
-        const notes = this.parseNoteProps({ fileMeta: ent, addParent: false });
+        const notes = this.parseNoteProps({
+          fileMeta: ent,
+          addParent: false,
+          vault,
+        });
         return notes;
       });
     prevNodes.forEach((ent) => {
@@ -131,6 +136,7 @@ export class NoteParserV2 extends ParserBaseV2 {
             parents: prevNodes,
             notesByFname,
             addParent: true,
+            vault,
           });
           // need to be inside this loop
           // deal with `src/__tests__/enginev2.spec.ts`, with stubs/ test case
@@ -164,6 +170,7 @@ export class NoteParserV2 extends ParserBaseV2 {
     parents?: NotePropsV2[];
     addParent: boolean;
     createStubs?: boolean;
+    vault: DVault;
   }): NotePropsV2[] {
     const cleanOpts = _.defaults(opts, {
       addParent: true,
@@ -171,16 +178,16 @@ export class NoteParserV2 extends ParserBaseV2 {
       notesByFname: {},
       parents: [] as NotePropsV2[],
     });
-    const { fileMeta, parents, notesByFname } = cleanOpts;
+    const { fileMeta, parents, notesByFname, vault } = cleanOpts;
     const ctx = "parseNoteProps";
     this.logger.debug({ ctx, msg: "enter", fileMeta });
-    const root = this.opts.store.vaults[0];
+    const root = vault.fsPath;
     let out: NotePropsV2[] = [];
     let noteProps: NotePropsV2;
 
     // get note props
     try {
-      noteProps = file2Note(path.join(root, fileMeta.fpath));
+      noteProps = file2Note(path.join(root, fileMeta.fpath), vault);
     } catch (_err) {
       const err = {
         status: ENGINE_ERROR_CODES.BAD_PARSE_FOR_NOTE,
@@ -206,8 +213,8 @@ export class NoteParserV2 extends ParserBaseV2 {
     return out;
   }
 
-  async parse(fpaths: string[]): Promise<NotePropsV2[]> {
-    return this.parseFile(fpaths);
+  async parse(fpaths: string[], vault: DVault): Promise<NotePropsV2[]> {
+    return this.parseFile(fpaths, vault);
   }
 }
 
@@ -276,7 +283,7 @@ export class FileStorageV2 implements DStoreV2 {
   public notesCache: NotePropsCacheV2;
   public logger: DLogger;
   public links: DLink[];
-  public vaultsv3?: DVault[];
+  public vaultsv3: DVault[];
   public multivault: boolean;
 
   constructor(props: {
@@ -461,8 +468,26 @@ export class FileStorageV2 implements DStoreV2 {
   async initNotes(): Promise<NotePropsV2[]> {
     const ctx = "initNotes";
     this.logger.info({ ctx, msg: "enter" });
+    if (this.multivault) {
+      const out = await Promise.all(
+        (this.vaultsv3 as DVault[]).map(async (vault) => {
+          return this._initNotes(vault);
+        })
+      );
+      return _.flatten(out);
+    } else {
+      const notes = await this._initNotes({
+        fsPath: this.vaults[0],
+      });
+      return notes;
+    }
+  }
+
+  async _initNotes(vault: DVault): Promise<NotePropsV2[]> {
+    const ctx = "initNotes";
+    this.logger.info({ ctx, msg: "enter" });
     const noteFiles = getAllFiles({
-      root: this.vaults[0],
+      root: vault.fsPath,
       include: ["*.md"],
     }) as string[];
     const cache = this.loadNotesCache();
@@ -470,7 +495,7 @@ export class FileStorageV2 implements DStoreV2 {
       store: this,
       cache,
       logger: this.logger,
-    }).parse(noteFiles);
+    }).parse(noteFiles, vault);
     await Promise.all(
       notes.map(async (n) => {
         if (n.stub) {
@@ -487,8 +512,11 @@ export class FileStorageV2 implements DStoreV2 {
   async renameNote(opts: RenameNoteOptsV2): Promise<RenameNotePayload> {
     const { oldLoc, newLoc } = opts;
     const vaultDir = this.vaults[0];
+    // TODO: MULTI_VAULT
     // read from disk since contents migh have changed
-    const oldNote = file2Note(path.join(vaultDir, oldLoc.fname + ".md"));
+    const oldNote = file2Note(path.join(vaultDir, oldLoc.fname + ".md"), {
+      fsPath: vaultDir,
+    });
     const notesToChange = await NoteUtilsV2.getNotesWithLinkTo({
       note: oldNote,
       notes: this.notes,
@@ -497,7 +525,9 @@ export class FileStorageV2 implements DStoreV2 {
       notesToChange.map(async (n) => {
         const vaultDir = this.vaults[0];
         // read note in case its changed
-        const _n = file2Note(path.join(vaultDir, n.fname + ".md"));
+        const _n = file2Note(path.join(vaultDir, n.fname + ".md"), {
+          fsPath: vaultDir,
+        });
         n.body = await ParserUtilsV2.replaceLinks({
           content: _n.body,
           from: oldLoc,

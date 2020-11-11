@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`engine, notes/ init/ basic/ 1`] = `
+exports[`engine, notes/ init/ basic/: dir1 1`] = `"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-hBFrR30GB6Rm"`;
+
+exports[`engine, notes/ init/ basic/: dir1 2`] = `
 Array [
   "foo.ch1.md",
   "foo.md",
@@ -10,7 +12,9 @@ Array [
 ]
 `;
 
-exports[`engine, notes/ init/ basic/ 2`] = `
+exports[`engine, notes/ init/ basic/: dir2 1`] = `"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-c5W5UFwuk4Wj"`;
+
+exports[`engine, notes/ init/ basic/: dir2 2`] = `
 Array [
   "bar.ch1.md",
   "bar.md",
@@ -18,4 +22,293 @@ Array [
   "root.md",
   "root.schema.yml",
 ]
+`;
+
+exports[`engine, notes/ init/ basic/: notes 1`] = `
+Object {
+  "3996773e-a1b2-4f6e-a8e8-4f180acde4e8": Object {
+    "body": "
+",
+    "children": Array [
+      "foo",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "3996773e-a1b2-4f6e-a8e8-4f180acde4e8",
+    "links": Array [],
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-hBFrR30GB6Rm",
+    },
+  },
+  "bar": Object {
+    "body": "
+",
+    "children": Array [
+      "bar.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "id": "bar",
+    "links": Array [],
+    "parent": "d03a2986-9ad1-4f3f-8650-605a54e3614e",
+    "schema": Object {
+      "moduleId": "bar",
+      "schemaId": "bar",
+    },
+    "title": "Bar",
+    "type": "note",
+    "updated": "1",
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-c5W5UFwuk4Wj",
+    },
+  },
+  "bar.ch1": Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "bar.ch1",
+    "id": "bar.ch1",
+    "links": Array [],
+    "parent": "bar",
+    "schema": Object {
+      "moduleId": "bar",
+      "schemaId": "ch1",
+    },
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-c5W5UFwuk4Wj",
+    },
+  },
+  "d03a2986-9ad1-4f3f-8650-605a54e3614e": Object {
+    "body": "
+",
+    "children": Array [
+      "bar",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "id": "d03a2986-9ad1-4f3f-8650-605a54e3614e",
+    "links": Array [],
+    "parent": null,
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-c5W5UFwuk4Wj",
+    },
+  },
+  "foo": Object {
+    "body": "
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "links": Array [],
+    "parent": "3996773e-a1b2-4f6e-a8e8-4f180acde4e8",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-hBFrR30GB6Rm",
+    },
+  },
+  "foo.ch1": Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "id": "foo.ch1",
+    "links": Array [],
+    "parent": "foo",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "ch1",
+    },
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-hBFrR30GB6Rm",
+    },
+  },
+}
+`;
+
+exports[`engine, notes/ init/ basic/: schemas 1`] = `
+Object {
+  "bar": Object {
+    "fname": "bar",
+    "imports": Array [],
+    "root": Object {
+      "children": Array [
+        "ch1",
+      ],
+      "id": "bar",
+      "parent": "root",
+      "title": "bar",
+    },
+    "schemas": Object {
+      "bar": Object {
+        "body": "",
+        "children": Array [
+          "ch1",
+        ],
+        "created": 1605123127398,
+        "data": Object {},
+        "desc": "",
+        "fname": "__empty",
+        "id": "bar",
+        "links": Array [],
+        "parent": "root",
+        "title": "bar",
+        "type": "schema",
+        "updated": 1605123127398,
+        "vault": Object {
+          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-c5W5UFwuk4Wj",
+        },
+      },
+      "ch1": Object {
+        "body": "",
+        "children": Array [],
+        "created": 1605123127398,
+        "data": Object {},
+        "desc": "",
+        "fname": "__empty",
+        "id": "ch1",
+        "links": Array [],
+        "parent": "bar",
+        "title": "ch1",
+        "type": "schema",
+        "updated": 1605123127398,
+        "vault": Object {
+          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-c5W5UFwuk4Wj",
+        },
+      },
+    },
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-c5W5UFwuk4Wj",
+    },
+    "version": 1,
+  },
+  "foo": Object {
+    "fname": "foo",
+    "imports": Array [],
+    "root": Object {
+      "children": Array [
+        "ch1",
+      ],
+      "id": "foo",
+      "parent": "root",
+      "title": "foo",
+    },
+    "schemas": Object {
+      "ch1": Object {
+        "body": "",
+        "children": Array [],
+        "created": 1605123127396,
+        "data": Object {},
+        "desc": "",
+        "fname": "__empty",
+        "id": "ch1",
+        "links": Array [],
+        "parent": "foo",
+        "title": "ch1",
+        "type": "schema",
+        "updated": 1605123127396,
+        "vault": Object {
+          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-hBFrR30GB6Rm",
+        },
+      },
+      "foo": Object {
+        "body": "",
+        "children": Array [
+          "ch1",
+        ],
+        "created": 1605123127395,
+        "data": Object {},
+        "desc": "",
+        "fname": "__empty",
+        "id": "foo",
+        "links": Array [],
+        "parent": "root",
+        "title": "foo",
+        "type": "schema",
+        "updated": 1605123127395,
+        "vault": Object {
+          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-hBFrR30GB6Rm",
+        },
+      },
+    },
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-hBFrR30GB6Rm",
+    },
+    "version": 1,
+  },
+  "root": Object {
+    "fname": "root",
+    "imports": Array [],
+    "root": Object {
+      "children": Array [],
+      "id": "root",
+      "parent": "root",
+      "title": "root",
+    },
+    "schemas": Object {
+      "root": Object {
+        "body": "",
+        "children": Array [],
+        "created": 1605123127397,
+        "data": Object {},
+        "desc": "",
+        "fname": "__empty",
+        "id": "root",
+        "links": Array [],
+        "parent": "root",
+        "title": "root",
+        "type": "schema",
+        "updated": 1605123127397,
+        "vault": Object {
+          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-hBFrR30GB6Rm",
+        },
+      },
+    },
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72386-hBFrR30GB6Rm",
+    },
+    "version": 1,
+  },
+}
 `;

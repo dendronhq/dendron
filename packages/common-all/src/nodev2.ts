@@ -265,7 +265,11 @@ export class DNodeUtilsV2 {
     dirPath: string;
     vaults: DVault[];
   }) {
-    return _.find(vaults, { fsPath: dirPath });
+    const vault = _.find(vaults, { fsPath: dirPath });
+    if (_.isUndefined(vault)) {
+      throw new DendronError({ msg: `no vault found. ${dirPath}, ${vaults}` });
+    }
+    return vault;
   }
 
   static isRoot(note: DNodePropsV2) {

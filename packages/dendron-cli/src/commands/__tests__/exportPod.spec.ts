@@ -55,6 +55,7 @@ describe("exportPod", () => {
     await NodeTestPresetsV2.runJestHarness({
       opts: {
         destPath: exportDest,
+        vault: { fsPath: vaults[0] },
       },
       results: PODS_CORE.JSON.EXPORT.BASIC.results,
       expect,

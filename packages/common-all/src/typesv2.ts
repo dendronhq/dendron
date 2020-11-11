@@ -254,7 +254,7 @@ export type DCommonProps = {
   notes: NotePropsDictV2;
   schemas: SchemaModuleDictV2;
   multivault?: boolean;
-  vaultsv3?: DVault[];
+  vaultsv3: DVault[];
   links: DLink[];
   vaults: string[];
 };

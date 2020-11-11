@@ -1,4 +1,4 @@
-import { NotePropsV2 } from "@dendronhq/common-all";
+import { DVault, NotePropsV2 } from "@dendronhq/common-all";
 import { tmpDir, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -91,7 +91,7 @@ const EXPORT_BASIC = new TestPresetEntry({
     fs.ensureDirSync(path.dirname(configPath));
     writeYAML(configPath, { dest: exportDest });
   },
-  results: async ({ destPath }: { destPath: string }) => {
+  results: async ({ destPath, vault }: { destPath: string; vault: DVault }) => {
     const payload = fs.readJSONSync(destPath) as NotePropsV2[];
     return [
       {
@@ -111,6 +111,7 @@ const EXPORT_BASIC = new TestPresetEntry({
             title: "Root",
             type: "note",
             updated: "1",
+            vault,
           },
           {
             body: "foo body",
@@ -125,6 +126,7 @@ const EXPORT_BASIC = new TestPresetEntry({
             title: "Foo",
             type: "note",
             updated: "1",
+            vault,
           },
           {
             body: "foo body",
@@ -139,6 +141,7 @@ const EXPORT_BASIC = new TestPresetEntry({
             title: "Ch1",
             type: "note",
             updated: "1",
+            vault,
           },
         ],
       },

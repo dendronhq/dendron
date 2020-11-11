@@ -14,7 +14,9 @@ Array [
     "title": "Root",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-ACDMZHiuR5e5",
+    },
   },
 ]
 `;
@@ -35,7 +37,9 @@ Array [
     "title": "Root",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-0S6VOptH6aBS",
+    },
   },
   Object {
     "body": "",
@@ -51,7 +55,9 @@ Array [
     "title": "Foo",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-0S6VOptH6aBS",
+    },
   },
   Object {
     "body": "",
@@ -65,7 +71,9 @@ Array [
     "title": "Ch1",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-0S6VOptH6aBS",
+    },
   },
 ]
 `;
@@ -91,7 +99,9 @@ Object {
   "title": "000 index",
   "type": "note",
   "updated": 1603892680423,
-  "vault": undefined,
+  "vault": Object {
+    "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-74Q3lrmDUwE1",
+  },
 }
 `;
 
@@ -111,7 +121,9 @@ Array [
     "title": "Root",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-kjjpr7ekyPHT",
+    },
   },
   Object {
     "body": "",
@@ -131,7 +143,9 @@ Array [
     "title": "Foo",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-kjjpr7ekyPHT",
+    },
   },
   Object {
     "body": "",
@@ -149,7 +163,9 @@ Array [
     "title": "Ch1",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-kjjpr7ekyPHT",
+    },
   },
 ]
 `;
@@ -170,7 +186,9 @@ Array [
     "title": "Root",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-IGB5QEIOo9p2",
+    },
   },
 ]
 `;
@@ -195,7 +213,9 @@ Array [
     "title": "Foo",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-IscUfUiUbF6y",
+    },
   },
   Object {
     "body": "",
@@ -213,7 +233,9 @@ Array [
     "title": "Ch1",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-IscUfUiUbF6y",
+    },
   },
   Object {
     "body": "",
@@ -229,7 +251,9 @@ Array [
     "title": "Root",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-IscUfUiUbF6y",
+    },
   },
 ]
 `;
@@ -272,7 +296,9 @@ Array [
     "title": "Root",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-eAhrtfCCknXR",
+    },
   },
   Object {
     "body": "",
@@ -292,7 +318,9 @@ Array [
     "title": "Foo",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-eAhrtfCCknXR",
+    },
   },
   Object {
     "body": "",
@@ -331,7 +359,9 @@ Array [
     "title": "Root",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-Z1uYCjP2E14l",
+    },
   },
   Object {
     "body": "",
@@ -351,7 +381,9 @@ Array [
     "title": "Foo",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-Z1uYCjP2E14l",
+    },
   },
   Object {
     "body": "",
@@ -369,7 +401,9 @@ Array [
     "title": "Ch1",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-Z1uYCjP2E14l",
+    },
   },
   Object {
     "body": "",
@@ -423,7 +457,9 @@ Array [
     "title": "Root",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-nKIwnuQA6lr4",
+    },
   },
   Object {
     "body": "",
@@ -443,7 +479,9 @@ Array [
     "title": "Foo",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-nKIwnuQA6lr4",
+    },
   },
   Object {
     "body": "",
@@ -461,7 +499,9 @@ Array [
     "title": "Ch1",
     "type": "note",
     "updated": "1",
-    "vault": undefined,
+    "vault": Object {
+      "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72376-nKIwnuQA6lr4",
+    },
   },
 ]
 `;

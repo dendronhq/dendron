@@ -51,6 +51,13 @@ const createOneNoteOneSchemaPresetCallback = async (_vaultPath: string) => {
   });
 };
 
+const getNoteFromTextEditor = () => {
+  const txtPath = vscode.window.activeTextEditor?.document.uri.fsPath as string;
+  const vault = { fsPath: path.dirname(txtPath) };
+  const node = file2Note(txtPath, vault);
+  return node;
+};
+
 suite("schemas", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
@@ -582,7 +589,8 @@ suite("notes", function () {
         );
         const txtPath = vscode.window.activeTextEditor?.document.uri
           .fsPath as string;
-        const node = file2Note(txtPath);
+        const vault = { fsPath: path.dirname(txtPath) };
+        const node = file2Note(txtPath, vault);
         assert.strictEqual(node.title, "Bond");
         done();
       });
@@ -613,9 +621,7 @@ suite("notes", function () {
           ),
           "foo"
         );
-        const txtPath = vscode.window.activeTextEditor?.document.uri
-          .fsPath as string;
-        const node = file2Note(txtPath);
+        const node = getNoteFromTextEditor();
         assert.strictEqual(node.title, "Foo");
         assert.strictEqual(node.created, "1");
         done();
@@ -637,9 +643,7 @@ suite("notes", function () {
         });
         await lp.onUpdatePickerItem(picker, engOpts, "manual");
         await lp.onDidAccept(picker, engOpts);
-        const txtPath = vscode.window.activeTextEditor?.document.uri
-          .fsPath as string;
-        const node = file2Note(txtPath);
+        const node = getNoteFromTextEditor();
         assert.strictEqual(_.trim(node.body), "text from alpha template");
         done();
       });
@@ -702,9 +706,7 @@ suite("notes", function () {
         );
         picker.value = "bar.ns1.three";
         await lp.onDidAccept(picker, engOpts);
-        const txtPath = vscode.window.activeTextEditor?.document.uri
-          .fsPath as string;
-        const node = file2Note(txtPath);
+        const node = getNoteFromTextEditor();
         assert.strictEqual(_.trim(node.body), "text from alpha template");
         assert.strictEqual(_.trim(node.desc), "desc from alpha");
         assert.deepStrictEqual(node.custom, { bond: 42 });
@@ -768,9 +770,7 @@ suite("notes", function () {
         });
         await lp.onUpdatePickerItem(picker, engOpts, "manual");
         await lp.onDidAccept(picker, engOpts);
-        const txtPath = vscode.window.activeTextEditor?.document.uri
-          .fsPath as string;
-        const node = file2Note(txtPath);
+        const node = getNoteFromTextEditor();
         assert.strictEqual(_.trim(node.body), "Template text");
         done();
       });

@@ -1,5 +1,6 @@
 import {
   DEngineClientV2,
+  DNodeUtilsV2,
   NotePropsV2,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
@@ -59,7 +60,11 @@ export class VaultWatcher {
     const fname = path.basename(uri.fsPath, ".md");
     const doc = await vscode.workspace.openTextDocument(uri);
     const content = doc.getText();
-    let note = string2Note({ content, fname });
+    const vault = DNodeUtilsV2.getVaultByDir({
+      vaults: eclient.vaultsv3,
+      dirPath: path.dirname(uri.fsPath),
+    });
+    let note = string2Note({ content, fname, vault });
     const noteHydrated = NoteUtilsV2.getNoteByFname(
       fname,
       eclient.notes
@@ -100,7 +105,8 @@ export class VaultWatcher {
 
       try {
         this.L.debug({ ctx, uri, msg: "pre-add-to-engine" });
-        note = file2Note(uri.fsPath);
+        // TODO: MULTI_VAULT
+        note = file2Note(uri.fsPath, { fsPath: path.dirname(uri.fsPath) });
         const maybeNote = NoteUtilsV2.getNoteByFname(fname, this.engine.notes);
         if (maybeNote) {
           note = {

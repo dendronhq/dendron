@@ -2,7 +2,6 @@ import {
   DEngineV2,
   DNodeUtilsV2,
   DVault,
-  NotePropsV2,
   SchemaModulePropsV2,
 } from "@dendronhq/common-all";
 import { EngineTestUtilsV3 } from "@dendronhq/common-test-utils";
@@ -24,7 +23,7 @@ const setupCase1 = async () => {
   return { vaults, engine };
 };
 
-describe.skip("engine, notes/", () => {
+describe("engine, notes/", () => {
   describe("init/", () => {
     // @ts-ignore
     let vaults: DVault[];
@@ -65,21 +64,44 @@ describe.skip("engine, notes/", () => {
       ]);
       // check note correct
       expect(
-        _.map(
+        _.sortBy(
           _.reject(
-            _.values(engine.notes),
+            _.map(_.values(engine.notes), ({ fname, vault }) => ({
+              fname,
+              vault,
+            })),
             DNodeUtilsV2.isRoot
-          ) as NotePropsV2[],
-          ({ fname, vault }) => ({
-            fname,
-            vault,
-          })
-        ).sort()
-      ).toEqual([]);
+          ),
+          ["fname"]
+        )
+      ).toEqual([
+        {
+          fname: "bar",
+          vault: {
+            fsPath: vaults[1].fsPath,
+          },
+        },
+        {
+          fname: "bar.ch1",
+          vault: {
+            fsPath: vaults[1].fsPath,
+          },
+        },
+        {
+          fname: "foo",
+          vault: { fsPath: vaults[0].fsPath },
+        },
+        {
+          fname: "foo.ch1",
+          vault: { fsPath: vaults[0].fsPath },
+        },
+      ]);
       const dir1 = fs.readdirSync(vaults[0].fsPath);
       const dir2 = fs.readdirSync(vaults[1].fsPath);
-      expect(dir1).toMatchSnapshot();
-      expect(dir2).toMatchSnapshot();
+      expect(vaults[0].fsPath).toMatchSnapshot("dir1");
+      expect(vaults[1].fsPath).toMatchSnapshot("dir2");
+      expect(dir1).toMatchSnapshot("dir1");
+      expect(dir2).toMatchSnapshot("dir2");
     });
 
     // test(NOTE_INIT_PRESET.domainStub.label, async () => {

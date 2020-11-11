@@ -47,7 +47,7 @@ export class RefactorFMCommand extends RefactorBaseCommand<TFile, any> {
   }
 
   readFile(fpath: string): NotePropsV2 {
-    return file2Note(fpath);
+    return file2Note(fpath, { fsPath: path.dirname(fpath) });
   }
 
   writeFile(fpath: string, data: TFile) {

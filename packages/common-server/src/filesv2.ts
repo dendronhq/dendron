@@ -113,9 +113,11 @@ export function string2Schema({
 export function string2Note({
   content,
   fname,
+  vault,
 }: {
   content: string;
   fname: string;
+  vault: DVault;
 }) {
   const options: any = {
     engines: {
@@ -134,14 +136,15 @@ export function string2Note({
     fname,
     body,
     type: "note",
+    vault,
   });
   return note;
 }
 
-export function file2Note(fpath: string): NotePropsV2 {
+export function file2Note(fpath: string, vault: DVault): NotePropsV2 {
   const content = fs.readFileSync(fpath, { encoding: "utf8" });
   const { name: fname } = path.parse(fpath);
-  return string2Note({ content, fname });
+  return string2Note({ content, fname, vault });
 }
 
 export function getPkgRoot(base: string, fname?: string): string {

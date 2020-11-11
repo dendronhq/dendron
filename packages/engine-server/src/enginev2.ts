@@ -38,7 +38,6 @@ type DendronEngineOptsV2 = {
   store?: any;
   mode?: DEngineMode;
   logger?: DLogger;
-  multivault?: boolean;
 };
 type DendronEnginePropsV2 = Required<Omit<DendronEngineOptsV2, "vaultsv3">> & {
   vaultsv3?: DVault[];
@@ -52,7 +51,6 @@ export class DendronEngineV2 implements DEngineV2 {
   public fuseEngine: FuseEngine;
   public links: DLink[];
   public vaultsv3: DVault[];
-  public multivault: boolean;
 
   static _instance: DendronEngineV2 | undefined;
 
@@ -61,7 +59,6 @@ export class DendronEngineV2 implements DEngineV2 {
     this.store = props.store;
     this.logger = props.logger;
     this.props = props;
-    this.multivault = props.multivault;
     this.fuseEngine = new FuseEngine({});
     this.links = [];
     this.vaultsv3 = !_.isUndefined(props.vaultsv3)
@@ -80,7 +77,6 @@ export class DendronEngineV2 implements DEngineV2 {
       }),
       mode: "fuzzy",
       logger: LOGGER,
-      multivault: false,
     });
   }
 
@@ -94,11 +90,9 @@ export class DendronEngineV2 implements DEngineV2 {
       store: new FileStorageV2({
         vaults: _vaults,
         logger: LOGGER,
-        multivault: true,
       }),
       mode: "fuzzy",
       logger: LOGGER,
-      multivault: true,
     });
   }
 

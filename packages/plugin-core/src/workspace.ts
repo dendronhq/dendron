@@ -737,11 +737,7 @@ export class DendronWorkspace {
    * - initializes DendronEngine
    * @param mainVault
    */
-  async reloadWorkspace(mainVault?: string) {
-    if (!mainVault) {
-      const wsFolders = DendronWorkspace.workspaceFolders();
-      mainVault = wsFolders![0].uri.fsPath;
-    }
+  async reloadWorkspace() {
     try {
       const out = await vscode.commands.executeCommand(
         DENDRON_COMMANDS.RELOAD_INDEX.key,

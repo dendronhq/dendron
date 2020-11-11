@@ -25,6 +25,7 @@ export class ReloadIndexCommand extends BasicCommand<
     this.L.info({ ctx, msg: "enter" });
     const ws = DendronWorkspace.instance();
     const engine = ws.getEngine();
+
     await Promise.all(
       engine.vaults.map(async (vaultDir) => {
         const rootNotePath = path.join(vaultDir, "root.md");

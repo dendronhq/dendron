@@ -1,7 +1,11 @@
 import { launch } from "@dendronhq/api-server";
-import { getStage, Time } from "@dendronhq/common-all";
+import { DendronError, getStage, Time } from "@dendronhq/common-all";
 import { readJSONWithComments } from "@dendronhq/common-server";
-import { getWSMetaFilePath, writeWSMetaFile } from "@dendronhq/engine-server";
+import {
+  DConfig,
+  getWSMetaFilePath,
+  writeWSMetaFile,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -186,7 +190,17 @@ export async function _activate(context: vscode.ExtensionContext) {
     GLOBAL_STATE.VERSION
   );
   if (DendronWorkspace.isActive()) {
+    const config = ws.config;
     const wsRoot = DendronWorkspace.rootDir() as string;
+    if (_.isUndefined(config.vaults)) {
+      const wsFolders = DendronWorkspace.workspaceFolders();
+      if (_.isUndefined(wsFolders)) {
+        throw new DendronError({ msg: "no vaults detected" });
+      }
+      config.vaults = [{ fsPath: wsFolders[0].uri.fsPath }];
+      DConfig.writeConfig({ wsRoot, config });
+    }
+
     const fpath = getWSMetaFilePath({ wsRoot });
     writeWSMetaFile({
       fpath,

@@ -1,7 +1,8 @@
-import { Time } from "@dendronhq/common-all";
-import { DirResult, tmpDir } from "@dendronhq/common-server";
+import { DendronConfig, Time } from "@dendronhq/common-all";
+import { DirResult, readYAML, tmpDir } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import {
+  DConfig,
   getPortFilePath,
   getWSMetaFilePath,
   openWSMetaFile,
@@ -77,6 +78,11 @@ id: bond
           );
           const engine = DendronWorkspace.instance().getEngine();
           const wsRoot = DendronWorkspace.rootDir() as string;
+          // check for config file
+          const config = readYAML(DConfig.configPath(wsRoot)) as DendronConfig;
+          assert.deepStrictEqual(config.vaults, [{ fsPath: vaultPath }]);
+
+          // check for meta
           const port = getPortFilePath({ wsRoot });
           const fpath = getWSMetaFilePath({ wsRoot });
           const meta = openWSMetaFile({ fpath });

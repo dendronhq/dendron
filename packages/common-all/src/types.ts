@@ -1,4 +1,4 @@
-import { DNodeTypeV2 } from "./typesv2";
+import { DNodeTypeV2, DVault } from "./typesv2";
 
 export type Stage = "dev" | "prod" | "test";
 
@@ -43,6 +43,7 @@ export interface Resp<T> {
 
 export type DendronConfig = {
   site: DendronSiteConfig;
+  vaults?: DVault[];
 };
 
 export type HierarchyConfig = {

@@ -284,17 +284,14 @@ export class FileStorageV2 implements DStoreV2 {
   public logger: DLogger;
   public links: DLink[];
   public vaultsv3: DVault[];
-  public multivault: boolean;
 
   constructor(props: {
     vaults: string[];
     logger: DLogger;
     vaultsv3?: DVault[];
-    multivault?: boolean;
   }) {
     const { vaults, logger } = props;
     this.vaults = vaults;
-    this.multivault = props.multivault || false;
     this.vaultsv3 = !_.isUndefined(props.vaultsv3)
       ? props.vaultsv3
       : this.vaults.map((ent) => ({ fsPath: ent }));
@@ -305,6 +302,10 @@ export class FileStorageV2 implements DStoreV2 {
     this.logger = logger;
     const ctx = "FileStorageV2";
     this.logger.info({ ctx, vaults });
+  }
+
+  get multivault() {
+    return this.vaultsv3.length > 1;
   }
 
   async init(): Promise<DEngineInitRespV2> {

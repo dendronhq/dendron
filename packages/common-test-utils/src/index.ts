@@ -27,6 +27,7 @@ export * from "./presets";
 export * from "./utils";
 export * from "./fileUtils";
 
+type InitVaultFunc = (vaultPath: string) => void;
 export type SetupVaultOpts = {
   vaultDir?: string;
   initDirCb?: (vaultPath: string) => void;
@@ -40,7 +41,11 @@ export type SetupWSOpts = {
   wsRoot?: string;
 };
 
-type SetupVaultsOptsV3 = SetupVaultOpts & { vaults?: DVault[] };
+type SetupVaultsOptsV3 = Omit<SetupVaultOpts, "initDirCb"> & {
+  vaults?: DVault[];
+  initVault1?: InitVaultFunc;
+  initVault2?: InitVaultFunc;
+};
 
 type SetupWSOptsV3 = SetupVaultsOptsV3 & { wsRoot?: string };
 /**
@@ -66,10 +71,15 @@ export class EngineTestUtilsV3 {
         },
       ],
     });
+    const cb = [opts.initVault1, opts.initVault2];
     await Promise.all(
-      vaults.map(async (ent) => {
+      vaults.map(async (ent, idx) => {
         const { fsPath: vaultDir } = ent;
-        return EngineTestUtilsV2.setupVault({ ...opts, vaultDir });
+        return EngineTestUtilsV2.setupVault({
+          ...opts,
+          vaultDir,
+          initDirCb: cb[idx],
+        });
       })
     );
     return vaults;

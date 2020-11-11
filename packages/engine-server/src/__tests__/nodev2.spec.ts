@@ -1,15 +1,12 @@
 import { DEngineV2, NoteUtilsV2, SchemaUtilsV2 } from "@dendronhq/common-all";
-import { createLogger, note2File } from "@dendronhq/common-server";
+import { note2File } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
   NodeTestUtilsV2,
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import path from "path";
-import { FileStorageV2 } from "../drivers/file/storev2";
 import { DendronEngineV2 } from "../enginev2";
-
-let LOGGER = createLogger("enginev2.spec", "/tmp/engine-server.log");
 
 const beforePreset = async () => {
   const vaultDir = await EngineTestUtilsV2.setupVault({
@@ -23,13 +20,8 @@ const beforePreset = async () => {
       });
     },
   });
-  const engine = new DendronEngineV2({
-    vaults: [vaultDir],
-    forceNew: true,
-    store: new FileStorageV2({ vaults: [vaultDir], logger: LOGGER }),
-    mode: "fuzzy",
-    logger: LOGGER,
-  });
+
+  const engine = DendronEngineV2.create({ vaults: [vaultDir] });
   return { vaultDir, engine };
 };
 

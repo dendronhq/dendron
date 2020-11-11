@@ -1,30 +1,19 @@
 import { DEngineV2, DVault } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-server";
-import {
-  EngineTestUtilsV3,
-  NodeTestPresetsV2,
-} from "@dendronhq/common-test-utils";
-import { FileStorageV2 } from "../drivers/file/storev2";
+import { EngineTestUtilsV3 } from "@dendronhq/common-test-utils";
+import { NotePresetsUtils } from "@dendronhq/common-test-utils/lib/presets/utils";
+import fs from "fs-extra";
 import { DendronEngineV2 } from "../enginev2";
-
-let LOGGER = createLogger("enginev2.spec", "/tmp/engine-server.log");
 
 const setupCase1 = async () => {
   const vaults = await EngineTestUtilsV3.setupVaults({
-    initDirCb: async (vaultPath: string) => {
-      await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
-        vaultDir: vaultPath,
-      });
+    initVault1: async (vaultDir: string) => {
+      await NotePresetsUtils.createBasic({ vaultDir, fname: "foo" });
+    },
+    initVault2: async (vaultDir: string) => {
+      await NotePresetsUtils.createBasic({ vaultDir, fname: "bar" });
     },
   });
-  const engine = new DendronEngineV2({
-    vaultsv3: vaults,
-    vaults: [],
-    forceNew: true,
-    store: new FileStorageV2({ vaultsv3: vaults, vaults: [], logger: LOGGER }),
-    mode: "fuzzy",
-    logger: LOGGER,
-  });
+  const engine = DendronEngineV2.createV3({ vaults });
   return { vaults, engine };
 };
 
@@ -40,8 +29,12 @@ describe("engine, notes/", () => {
 
     test("basic/", async () => {
       await engine.init();
-      expect(engine.notes).toMatchSnapshot();
-      expect(engine.schemas).toMatchSnapshot();
+      // expect(engine.notes).toMatchSnapshot();
+      // expect(engine.schemas).toMatchSnapshot();
+      const dir1 = fs.readdirSync(vaults[0].fsPath);
+      const dir2 = fs.readdirSync(vaults[1].fsPath);
+      expect(dir1).toMatchSnapshot();
+      expect(dir2).toMatchSnapshot();
     });
 
     // test(NOTE_INIT_PRESET.domainStub.label, async () => {

@@ -1,5 +1,4 @@
 import { DendronError, DEngineClientV2, DVault } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
   EngineTestUtilsV3,
@@ -9,7 +8,6 @@ import {
   NodeTestUtilsV2,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
-import { FileStorageV2 } from "../../../../drivers/file/storev2";
 import { DendronEngineV2 } from "../../../../enginev2";
 import { ParserUtilsV2 } from "../../utilsv2";
 import {
@@ -21,7 +19,6 @@ import { createRefLink } from "./utils";
 function getProcessor(opts: DendronNoteRefPluginOpts) {
   return ParserUtilsV2.getRemark().use(dendronNoteRefPlugin, opts);
 }
-let LOGGER = createLogger("engine-server.test.log");
 
 describe("basic", () => {
   describe("parse", () => {
@@ -108,7 +105,7 @@ describe("basic", () => {
     let vaults: DVault[];
     beforeEach(async () => {
       vaults = await EngineTestUtilsV3.setupVaults({
-        initDirCb: async (vaultDir: string) => {
+        initVault1: async (vaultDir: string) => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         },
       });
@@ -182,13 +179,7 @@ head w.3 text
           ]);
         },
       });
-      engine = new DendronEngineV2({
-        vaults: [vaultDir],
-        forceNew: true,
-        store: new FileStorageV2({ vaults: [vaultDir], logger: LOGGER }),
-        mode: "fuzzy",
-        logger: LOGGER,
-      });
+      engine = DendronEngineV2.create({ vaults: [vaultDir] });
 
       opts = {
         renderWithOutline: false,

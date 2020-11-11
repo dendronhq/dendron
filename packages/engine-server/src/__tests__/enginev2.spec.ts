@@ -10,7 +10,6 @@ import {
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import {
-  createLogger,
   note2File,
   readYAML,
   schemaModuleOpts2File,
@@ -27,7 +26,6 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { FileStorageV2 } from "../drivers/file/storev2";
 import { DendronEngineV2 } from "../enginev2";
 import { ParserUtilsV2 } from "../topics/markdown";
 
@@ -53,8 +51,6 @@ const createNotes = async (opts: { rootName: string; vaultDir: string }) => {
   return { foo, ch1 };
 };
 
-let LOGGER = createLogger("enginev2.spec", "/tmp/engine-server.log");
-
 const beforePreset = async () => {
   const vaultDir = await EngineTestUtilsV2.setupVault({
     initDirCb: async (vaultPath: string) => {
@@ -67,13 +63,7 @@ const beforePreset = async () => {
       });
     },
   });
-  const engine = new DendronEngineV2({
-    vaults: [vaultDir],
-    forceNew: true,
-    store: new FileStorageV2({ vaults: [vaultDir], logger: LOGGER }),
-    mode: "fuzzy",
-    logger: LOGGER,
-  });
+  const engine = DendronEngineV2.create({ vaults: [vaultDir] });
   return { vaultDir, engine };
 };
 
@@ -180,13 +170,7 @@ describe("engine, schema/", () => {
           });
         },
       });
-      engine = new DendronEngineV2({
-        vaults: [vaultDir],
-        forceNew: true,
-        store: new FileStorageV2({ vaults: [vaultDir], logger: LOGGER }),
-        mode: "fuzzy",
-        logger: LOGGER,
-      });
+      engine = DendronEngineV2.create({ vaults: [vaultDir] });
     });
 
     test("root", async () => {
@@ -219,13 +203,7 @@ describe("engine, schema/", () => {
           await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
         },
       });
-      engine = new DendronEngineV2({
-        vaults: [vaultDir],
-        forceNew: true,
-        store: new FileStorageV2({ vaults: [vaultDir], logger: LOGGER }),
-        mode: "fuzzy",
-        logger: LOGGER,
-      });
+      engine = DendronEngineV2.create({ vaults: [vaultDir] });
     });
 
     test("no root", async () => {
@@ -316,13 +294,7 @@ describe("engine, schema/", () => {
           await schemaModuleOpts2File(module, dirPath, fname);
         },
       });
-      engine = new DendronEngineV2({
-        vaults: [vaultDir],
-        forceNew: true,
-        store: new FileStorageV2({ vaults: [vaultDir], logger: LOGGER }),
-        mode: "fuzzy",
-        logger: LOGGER,
-      });
+      engine = DendronEngineV2.create({ vaults: [vaultDir] });
     });
 
     test("basic", async () => {
@@ -372,7 +344,6 @@ describe("engine, schema/", () => {
 describe("engine, notes/", () => {
   let vaultDir: string;
   let engine: DEngineV2;
-  let logger = createLogger("enginev2.spec");
 
   describe("basic test v0/", () => {
     beforeEach(async () => {
@@ -382,13 +353,7 @@ describe("engine, notes/", () => {
           await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
         },
       });
-      engine = new DendronEngineV2({
-        vaults: [vaultDir],
-        forceNew: true,
-        store: new FileStorageV2({ vaults: [vaultDir], logger }),
-        mode: "fuzzy",
-        logger,
-      });
+      engine = DendronEngineV2.create({ vaults: [vaultDir] });
     });
 
     test("fetch node with custom att", async () => {
@@ -920,13 +885,7 @@ This is some content`,
           await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
         },
       });
-      engine = new DendronEngineV2({
-        vaults: [vaultDir],
-        forceNew: true,
-        store: new FileStorageV2({ vaults: [vaultDir], logger }),
-        mode: "fuzzy",
-        logger,
-      });
+      engine = DendronEngineV2.create({ vaults: [vaultDir] });
     });
 
     test("no root", async () => {
@@ -977,13 +936,7 @@ describe("note and schema", async () => {
         await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
       },
     });
-    engine = new DendronEngineV2({
-      vaults: [vaultDir],
-      forceNew: true,
-      store: new FileStorageV2({ vaults: [vaultDir], logger: LOGGER }),
-      mode: "fuzzy",
-      logger: LOGGER,
-    });
+    engine = DendronEngineV2.create({ vaults: [vaultDir] });
   });
 
   describe("basics/", () => {
@@ -994,13 +947,7 @@ describe("note and schema", async () => {
           await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
         },
       });
-      engine = new DendronEngineV2({
-        vaults: [vaultDir],
-        forceNew: true,
-        store: new FileStorageV2({ vaults: [vaultDir], logger: LOGGER }),
-        mode: "fuzzy",
-        logger: LOGGER,
-      });
+      engine = DendronEngineV2.create({ vaults: [vaultDir] });
     });
 
     test("root and two notes", async () => {

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.0...v0.15.1-alpha.1) (2020-11-11)
+
+### Enhancements
+
+- **refs:** wildcard refs get nice links ([98a1177](https://github.com/dendronhq/dendron/commit/98a117715a967492ab9d7b8749d964b07bde4055))
+
 ## [0.15.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.15.0...v0.15.1-alpha.0) (2020-11-10)
 
 **Note:** Version bump only for package root

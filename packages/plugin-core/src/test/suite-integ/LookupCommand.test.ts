@@ -996,6 +996,7 @@ suite("notes", function () {
 // });
 
 suite("notes, multi", function () {
+  // @ts-ignore
   let root: string;
   let ctx: vscode.ExtensionContext;
   let vaults: DVault[];

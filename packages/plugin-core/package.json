@@ -370,6 +370,14 @@
                 "docPreview": ""
             },
             {
+                "command": "dendron.configure",
+                "title": "Dendron: Configure",
+                "desc": "Modify Dendron Config",
+                "docs": "",
+                "docLink": "",
+                "docPreview": ""
+            },
+            {
                 "command": "dendron.dev.doctor",
                 "title": "Dendron: Doctor",
                 "desc": "Auto fix issues with frontmatter",

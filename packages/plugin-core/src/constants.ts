@@ -484,6 +484,16 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview: "",
   },
+  // -- Workbench
+  CONFIGURE: {
+    key: "dendron.configure",
+    title: `${CMD_PREFIX} Configure`,
+    group: "workspace",
+    desc: "Modify Dendron Config",
+    docs: [""].join("\n"),
+    docLink: "",
+    docPreview: ``,
+  },
   // --- Dev
   DOCTOR: {
     key: "dendron.dev.doctor",
@@ -670,9 +680,9 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
       "port for server. If not set, will be randomly generated at startup.",
   },
   // --- New
-  MULTI_VAULT: {
-    key: "dendron.beta.multiVault",
-    type: "boolean",
-    description: `enable multivault`,
-  },
+  // MULTI_VAULT: {
+  //   key: "dendron.beta.multiVault",
+  //   type: "boolean",
+  //   description: `enable multivault`,
+  // },
 };

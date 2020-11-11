@@ -303,6 +303,10 @@ export type GetNotePayloadV2 = {
 
 export type DEngineInitSchemaRespV2 = Required<RespV2<SchemaModulePropsV2[]>>;
 
+export type DEngineV2SyncOpts = {
+  metaOnly?: boolean;
+};
+
 export type DEngineV2 = DCommonProps &
   DCommonMethods & {
     store: DStoreV2;
@@ -316,7 +320,7 @@ export type DEngineV2 = DCommonProps &
       id: string,
       opts?: EngineDeleteOptsV2
     ) => Promise<DEngineDeleteSchemaRespV2>;
-    sync: () => Promise<DEngineInitRespV2>;
+    sync: (opts?: DEngineV2SyncOpts) => Promise<DEngineInitRespV2>;
 
     getNoteByPath: (opts: GetNoteOptsV2) => Promise<RespV2<GetNotePayloadV2>>;
     getSchema: (qs: string) => Promise<RespV2<SchemaModulePropsV2>>;

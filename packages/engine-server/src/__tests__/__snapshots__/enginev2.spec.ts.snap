@@ -1,68 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`engine, notes/ basics root 1`] = `
-Object {
-  "root": Object {
-    "body": "
-",
+Array [
+  Object {
+    "body": "",
     "children": Array [],
     "created": "1",
     "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "root",
-    "id": "root",
     "links": Array [],
-    "parent": null,
     "title": "Root",
     "type": "note",
     "updated": "1",
     "vault": undefined,
   },
-}
+]
 `;
 
 exports[`engine, notes/ basics root and two notes 1`] = `
-Object {
-  "foo": Object {
-    "body": "
-",
-    "children": Array [
-      "foo.ch1",
-    ],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "foo",
-    "id": "foo",
-    "links": Array [],
-    "parent": "root",
-    "title": "Foo",
-    "type": "note",
-    "updated": "1",
-    "vault": undefined,
-  },
-  "foo.ch1": Object {
-    "body": "
-",
-    "children": Array [],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "foo.ch1",
-    "id": "foo.ch1",
-    "links": Array [],
-    "parent": "foo",
-    "title": "Ch1",
-    "type": "note",
-    "updated": "1",
-    "vault": undefined,
-  },
-  "root": Object {
-    "body": "
-",
+Array [
+  Object {
+    "body": "",
     "children": Array [
       "foo",
     ],
@@ -71,15 +31,43 @@ Object {
     "data": Object {},
     "desc": "",
     "fname": "root",
-    "id": "root",
     "links": Array [],
-    "parent": null,
     "title": "Root",
     "type": "note",
     "updated": "1",
     "vault": undefined,
   },
-}
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "links": Array [],
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+    "vault": undefined,
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "links": Array [],
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+    "vault": undefined,
+  },
+]
 `;
 
 exports[`engine, notes/ basics stub note 1`] = `
@@ -90,34 +78,27 @@ Array [
 ]
 `;
 
-exports[`engine, notes/ getNoteByPath/ get existing note with caps: bond 1`] = `
+exports[`engine, notes/ getNoteByPath/ get existing note with caps 1`] = `
 Object {
-  "changed": Array [],
-  "note": Object {
-    "body": "
-This is some content",
-    "children": Array [],
-    "created": 1603892680423,
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "000 Index",
-    "id": "f95b2ebf-7cb5-47be-a8c0-def1236f0a8e",
-    "links": Array [],
-    "parent": "root",
-    "title": "000 index",
-    "type": "note",
-    "updated": 1603892680423,
-    "vault": undefined,
-  },
+  "body": "This is some content",
+  "children": Array [],
+  "created": 1603892680423,
+  "custom": Object {},
+  "data": Object {},
+  "desc": "",
+  "fname": "000 Index",
+  "links": Array [],
+  "title": "000 index",
+  "type": "note",
+  "updated": 1603892680423,
+  "vault": undefined,
 }
 `;
 
 exports[`engine, notes/ query/ * 1`] = `
 Array [
   Object {
-    "body": "
-",
+    "body": "",
     "children": Array [
       "foo",
     ],
@@ -126,17 +107,14 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "root",
-    "id": "root",
     "links": Array [],
-    "parent": null,
     "title": "Root",
     "type": "note",
     "updated": "1",
     "vault": undefined,
   },
   Object {
-    "body": "
-",
+    "body": "",
     "children": Array [
       "foo.ch1",
     ],
@@ -145,9 +123,7 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo",
-    "id": "foo",
     "links": Array [],
-    "parent": "root",
     "schema": Object {
       "moduleId": "foo",
       "schemaId": "foo",
@@ -158,17 +134,14 @@ Array [
     "vault": undefined,
   },
   Object {
-    "body": "
-",
+    "body": "",
     "children": Array [],
     "created": "1",
     "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.ch1",
-    "id": "foo.ch1",
     "links": Array [],
-    "parent": "foo",
     "schema": Object {
       "moduleId": "foo",
       "schemaId": "ch1",
@@ -184,8 +157,7 @@ Array [
 exports[`engine, notes/ query/ empty string 1`] = `
 Array [
   Object {
-    "body": "
-",
+    "body": "",
     "children": Array [
       "foo",
     ],
@@ -194,9 +166,7 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "root",
-    "id": "root",
     "links": Array [],
-    "parent": null,
     "title": "Root",
     "type": "note",
     "updated": "1",
@@ -208,8 +178,7 @@ Array [
 exports[`engine, notes/ query/ foo 1`] = `
 Array [
   Object {
-    "body": "
-",
+    "body": "",
     "children": Array [
       "foo.ch1",
     ],
@@ -218,9 +187,7 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "foo",
-    "id": "foo",
     "links": Array [],
-    "parent": "root",
     "schema": Object {
       "moduleId": "foo",
       "schemaId": "foo",
@@ -231,17 +198,14 @@ Array [
     "vault": undefined,
   },
   Object {
-    "body": "
-",
+    "body": "",
     "children": Array [],
     "created": "1",
     "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.ch1",
-    "id": "foo.ch1",
     "links": Array [],
-    "parent": "foo",
     "schema": Object {
       "moduleId": "foo",
       "schemaId": "ch1",
@@ -252,8 +216,7 @@ Array [
     "vault": undefined,
   },
   Object {
-    "body": "
-",
+    "body": "",
     "children": Array [
       "foo",
     ],
@@ -262,9 +225,7 @@ Array [
     "data": Object {},
     "desc": "",
     "fname": "root",
-    "id": "root",
     "links": Array [],
-    "parent": null,
     "title": "Root",
     "type": "note",
     "updated": "1",
@@ -274,93 +235,6 @@ Array [
 `;
 
 exports[`engine, notes/ rename/ basic 1`] = `
-Object {
-  "data": Array [
-    Object {
-      "note": Object {
-        "body": "[[baz]]
-
-",
-        "children": Array [],
-        "created": "1",
-        "custom": Object {},
-        "data": Object {},
-        "desc": "",
-        "fname": "bar",
-        "id": "bar",
-        "links": Array [
-          Object {
-            "alias": "baz",
-            "from": Object {
-              "fname": "bar",
-              "id": "bar",
-            },
-            "original": "baz",
-            "pos": Object {
-              "end": 7,
-              "start": 0,
-            },
-            "to": Object {
-              "fname": "baz",
-            },
-            "type": "wiki",
-            "value": "baz",
-          },
-        ],
-        "parent": "root",
-        "title": "Bar",
-        "type": "note",
-        "updated": "1",
-        "vault": undefined,
-      },
-      "status": "update",
-    },
-    Object {
-      "note": Object {
-        "body": "[[bar]]
-",
-        "children": Array [],
-        "created": "1",
-        "custom": Object {},
-        "data": Object {},
-        "desc": "",
-        "fname": "foo",
-        "id": "foo",
-        "links": Array [],
-        "parent": null,
-        "title": "Foo",
-        "type": "note",
-        "updated": "1",
-        "vault": undefined,
-      },
-      "status": "delete",
-    },
-    Object {
-      "note": Object {
-        "body": "[[bar]]
-",
-        "children": Array [],
-        "created": "1",
-        "custom": Object {},
-        "data": Object {},
-        "desc": "",
-        "fname": "baz",
-        "id": "foo",
-        "links": Array [],
-        "parent": "root",
-        "title": "Foo",
-        "type": "note",
-        "updated": "1",
-        "vault": undefined,
-      },
-      "status": "create",
-    },
-  ],
-  "error": null,
-}
-`;
-
-exports[`engine, notes/ rename/ basic 2`] = `
 Array [
   "bar.md",
   "baz.md",
@@ -371,354 +245,7 @@ Array [
 ]
 `;
 
-exports[`engine, notes/ rename/ domain with no children, update exsiting node: changed 1`] = `
-Array [
-  Object {
-    "note": Object {
-      "body": "[[gamma]]
-
-",
-      "children": Array [],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "alpha",
-      "id": "alpha",
-      "links": Array [
-        Object {
-          "alias": "gamma",
-          "from": Object {
-            "fname": "alpha",
-            "id": "alpha",
-          },
-          "original": "gamma",
-          "pos": Object {
-            "end": 9,
-            "start": 0,
-          },
-          "to": Object {
-            "fname": "gamma",
-          },
-          "type": "wiki",
-          "value": "gamma",
-        },
-      ],
-      "parent": "root",
-      "title": "Alpha",
-      "type": "note",
-      "updated": "1",
-      "vault": undefined,
-    },
-    "status": "update",
-  },
-  Object {
-    "note": Object {
-      "body": "[[alpha]]
-",
-      "children": Array [],
-      "created": "1",
-      "custom": Object {},
-      "data": Object {},
-      "desc": "",
-      "fname": "beta",
-      "id": "beta",
-      "links": Array [],
-      "parent": null,
-      "title": "Beta",
-      "type": "note",
-      "updated": "1",
-      "vault": undefined,
-    },
-    "status": "delete",
-  },
-  Object {
-    "note": Object {
-      "body": "[[alpha]]
-",
-      "children": Array [],
-      "created": "1",
-      "custom": Object {},
-      "data": Object {},
-      "desc": "",
-      "fname": "gamma",
-      "id": "beta",
-      "links": Array [],
-      "parent": "root",
-      "title": "Beta",
-      "type": "note",
-      "updated": "1",
-      "vault": undefined,
-    },
-    "status": "create",
-  },
-]
-`;
-
-exports[`engine, notes/ rename/ domain with no children, update exsiting node: notes 1`] = `
-Object {
-  "alpha": Object {
-    "body": "[[gamma]]
-
-",
-    "children": Array [],
-    "created": "1",
-    "data": Object {},
-    "desc": "",
-    "fname": "alpha",
-    "id": "alpha",
-    "links": Array [
-      Object {
-        "alias": "gamma",
-        "from": Object {
-          "fname": "alpha",
-          "id": "alpha",
-        },
-        "original": "gamma",
-        "pos": Object {
-          "end": 9,
-          "start": 0,
-        },
-        "to": Object {
-          "fname": "gamma",
-        },
-        "type": "wiki",
-        "value": "gamma",
-      },
-    ],
-    "parent": "root",
-    "title": "Alpha",
-    "type": "note",
-    "updated": "1",
-    "vault": undefined,
-  },
-  "bar": Object {
-    "body": "[[foo]]
-",
-    "children": Array [],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "bar",
-    "id": "bar",
-    "links": Array [
-      Object {
-        "alias": "foo",
-        "from": Object {
-          "fname": "bar",
-          "id": "bar",
-        },
-        "original": "foo",
-        "pos": Object {
-          "end": 7,
-          "start": 0,
-        },
-        "to": Object {
-          "fname": "foo",
-        },
-        "type": "wiki",
-        "value": "foo",
-      },
-    ],
-    "parent": "root",
-    "title": "Bar",
-    "type": "note",
-    "updated": "1",
-    "vault": undefined,
-  },
-  "beta": Object {
-    "body": "[[alpha]]
-",
-    "children": Array [],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "gamma",
-    "id": "beta",
-    "links": Array [],
-    "parent": "root",
-    "title": "Beta",
-    "type": "note",
-    "updated": "1",
-    "vault": undefined,
-  },
-  "foo": Object {
-    "body": "[[bar]]
-",
-    "children": Array [
-      "foo.ch1",
-    ],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "foo",
-    "id": "foo",
-    "links": Array [
-      Object {
-        "alias": "bar",
-        "from": Object {
-          "fname": "foo",
-          "id": "foo",
-        },
-        "original": "bar",
-        "pos": Object {
-          "end": 7,
-          "start": 0,
-        },
-        "to": Object {
-          "fname": "bar",
-        },
-        "type": "wiki",
-        "value": "bar",
-      },
-    ],
-    "parent": "root",
-    "schema": Object {
-      "moduleId": "foo",
-      "schemaId": "foo",
-    },
-    "title": "Foo",
-    "type": "note",
-    "updated": "1",
-    "vault": undefined,
-  },
-  "foo.ch1": Object {
-    "body": "
-",
-    "children": Array [],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "foo.ch1",
-    "id": "foo.ch1",
-    "links": Array [],
-    "parent": "foo",
-    "schema": Object {
-      "moduleId": "foo",
-      "schemaId": "ch1",
-    },
-    "title": "Ch1",
-    "type": "note",
-    "updated": "1",
-    "vault": undefined,
-  },
-  "root": Object {
-    "body": "
-",
-    "children": Array [
-      "alpha",
-      "bar",
-      "foo",
-      "beta",
-    ],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "root",
-    "id": "root",
-    "links": Array [],
-    "parent": null,
-    "title": "Root",
-    "type": "note",
-    "updated": "1",
-    "vault": undefined,
-  },
-}
-`;
-
 exports[`engine, notes/ rename/ with note ref 1`] = `
-Object {
-  "data": Array [
-    Object {
-      "note": Object {
-        "body": "[[baz]]
-((ref: [[dendron.pro.dendron-next-server]]#quickstart,1:#*))
-
-",
-        "children": Array [],
-        "created": "1",
-        "custom": Object {},
-        "data": Object {},
-        "desc": "",
-        "fname": "bar",
-        "id": "bar",
-        "links": Array [
-          Object {
-            "alias": "baz",
-            "from": Object {
-              "fname": "bar",
-              "id": "bar",
-            },
-            "original": "baz",
-            "pos": Object {
-              "end": 7,
-              "start": 0,
-            },
-            "to": Object {
-              "fname": "baz",
-            },
-            "type": "wiki",
-            "value": "baz",
-          },
-        ],
-        "parent": "root",
-        "title": "Bar",
-        "type": "note",
-        "updated": "1",
-        "vault": undefined,
-      },
-      "status": "update",
-    },
-    Object {
-      "note": Object {
-        "body": "[[bar]]
-",
-        "children": Array [],
-        "created": "1",
-        "custom": Object {},
-        "data": Object {},
-        "desc": "",
-        "fname": "foo",
-        "id": "foo",
-        "links": Array [],
-        "parent": null,
-        "title": "Foo",
-        "type": "note",
-        "updated": "1",
-        "vault": undefined,
-      },
-      "status": "delete",
-    },
-    Object {
-      "note": Object {
-        "body": "[[bar]]
-",
-        "children": Array [],
-        "created": "1",
-        "custom": Object {},
-        "data": Object {},
-        "desc": "",
-        "fname": "baz",
-        "id": "foo",
-        "links": Array [],
-        "parent": "root",
-        "title": "Foo",
-        "type": "note",
-        "updated": "1",
-        "vault": undefined,
-      },
-      "status": "create",
-    },
-  ],
-  "error": null,
-}
-`;
-
-exports[`engine, notes/ rename/ with note ref 2`] = `
 Array [
   "bar.md",
   "baz.md",
@@ -730,52 +257,9 @@ Array [
 `;
 
 exports[`engine, notes/ write/ write note, match schema: notes 1`] = `
-Object {
-  "foo": Object {
-    "body": "
-",
-    "children": Array [
-      "foo.ch1",
-    ],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "foo",
-    "id": "foo",
-    "links": Array [],
-    "parent": "root",
-    "schema": Object {
-      "moduleId": "foo",
-      "schemaId": "foo",
-    },
-    "title": "Foo",
-    "type": "note",
-    "updated": "1",
-    "vault": undefined,
-  },
-  "foo.ch1": Object {
+Array [
+  Object {
     "body": "",
-    "children": Array [],
-    "created": "1",
-    "data": Object {},
-    "desc": "",
-    "fname": "foo.ch1",
-    "id": "foo.ch1",
-    "links": Array [],
-    "parent": "foo",
-    "schema": Object {
-      "moduleId": "foo",
-      "schemaId": "ch1",
-    },
-    "title": "Ch1",
-    "type": "note",
-    "updated": "1",
-    "vault": undefined,
-  },
-  "root": Object {
-    "body": "
-",
     "children": Array [
       "foo",
     ],
@@ -784,37 +268,14 @@ Object {
     "data": Object {},
     "desc": "",
     "fname": "root",
-    "id": "root",
     "links": Array [],
-    "parent": null,
     "title": "Root",
     "type": "note",
     "updated": "1",
     "vault": undefined,
   },
-}
-`;
-
-exports[`engine, notes/ write/ write note, no schema, new domain 1`] = `
-Object {
-  "bar": Object {
+  Object {
     "body": "",
-    "children": Array [],
-    "created": "1",
-    "data": Object {},
-    "desc": "",
-    "fname": "bar",
-    "id": "bar",
-    "links": Array [],
-    "parent": "root",
-    "title": "Bar",
-    "type": "note",
-    "updated": "1",
-    "vault": undefined,
-  },
-  "foo": Object {
-    "body": "
-",
     "children": Array [
       "foo.ch1",
     ],
@@ -823,9 +284,7 @@ Object {
     "data": Object {},
     "desc": "",
     "fname": "foo",
-    "id": "foo",
     "links": Array [],
-    "parent": "root",
     "schema": Object {
       "moduleId": "foo",
       "schemaId": "foo",
@@ -835,18 +294,14 @@ Object {
     "updated": "1",
     "vault": undefined,
   },
-  "foo.ch1": Object {
-    "body": "
-",
+  Object {
+    "body": "",
     "children": Array [],
     "created": "1",
-    "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.ch1",
-    "id": "foo.ch1",
     "links": Array [],
-    "parent": "foo",
     "schema": Object {
       "moduleId": "foo",
       "schemaId": "ch1",
@@ -856,9 +311,13 @@ Object {
     "updated": "1",
     "vault": undefined,
   },
-  "root": Object {
-    "body": "
-",
+]
+`;
+
+exports[`engine, notes/ write/ write note, no schema, new domain 1`] = `
+Array [
+  Object {
+    "body": "",
     "children": Array [
       "foo",
       "bar",
@@ -868,15 +327,64 @@ Object {
     "data": Object {},
     "desc": "",
     "fname": "root",
-    "id": "root",
     "links": Array [],
-    "parent": null,
     "title": "Root",
     "type": "note",
     "updated": "1",
     "vault": undefined,
   },
-}
+  Object {
+    "body": "",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "links": Array [],
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+    "vault": undefined,
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "links": Array [],
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "ch1",
+    },
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+    "vault": undefined,
+  },
+  Object {
+    "body": "",
+    "children": Array [],
+    "created": "1",
+    "data": Object {},
+    "desc": "",
+    "fname": "bar",
+    "links": Array [],
+    "title": "Bar",
+    "type": "note",
+    "updated": "1",
+    "vault": undefined,
+  },
+]
 `;
 
 exports[`engine, schema/ basics/ root 1`] = `
@@ -899,74 +407,26 @@ Array [
 ]
 `;
 
-exports[`engine, schema/ delete/ delete non-root 2`] = `
-Object {
-  "data": Array [
-    Object {
-      "body": "
-",
-      "children": Array [
-        "foo.ch1",
-      ],
-      "created": "1",
-      "custom": Object {},
-      "data": Object {},
-      "desc": "",
-      "fname": "foo",
-      "id": "foo",
-      "links": Array [],
-      "parent": "root",
-      "title": "Foo",
-      "type": "note",
-      "updated": "1",
-      "vault": undefined,
-    },
-    Object {
-      "body": "
-",
-      "children": Array [],
-      "created": "1",
-      "custom": Object {},
-      "data": Object {},
-      "desc": "",
-      "fname": "foo.ch1",
-      "id": "foo.ch1",
-      "links": Array [],
-      "parent": "foo",
-      "title": "Ch1",
-      "type": "note",
-      "updated": "1",
-      "vault": undefined,
-    },
-    Object {
-      "body": "
-",
-      "children": Array [
-        "foo",
-      ],
-      "created": "1",
-      "custom": Object {},
-      "data": Object {},
-      "desc": "",
-      "fname": "root",
-      "id": "root",
-      "links": Array [],
-      "parent": null,
-      "title": "Root",
-      "type": "note",
-      "updated": "1",
-      "vault": undefined,
-    },
-  ],
-  "error": null,
-}
-`;
-
 exports[`note and schema basics/ root and two notes 1`] = `
-Object {
-  "foo": Object {
-    "body": "
-",
+Array [
+  Object {
+    "body": "",
+    "children": Array [
+      "foo",
+    ],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "root",
+    "links": Array [],
+    "title": "Root",
+    "type": "note",
+    "updated": "1",
+    "vault": undefined,
+  },
+  Object {
+    "body": "",
     "children": Array [
       "foo.ch1",
     ],
@@ -975,9 +435,7 @@ Object {
     "data": Object {},
     "desc": "",
     "fname": "foo",
-    "id": "foo",
     "links": Array [],
-    "parent": "root",
     "schema": Object {
       "moduleId": "foo",
       "schemaId": "foo",
@@ -987,18 +445,15 @@ Object {
     "updated": "1",
     "vault": undefined,
   },
-  "foo.ch1": Object {
-    "body": "
-",
+  Object {
+    "body": "",
     "children": Array [],
     "created": "1",
     "custom": Object {},
     "data": Object {},
     "desc": "",
     "fname": "foo.ch1",
-    "id": "foo.ch1",
     "links": Array [],
-    "parent": "foo",
     "schema": Object {
       "moduleId": "foo",
       "schemaId": "ch1",
@@ -1008,24 +463,5 @@ Object {
     "updated": "1",
     "vault": undefined,
   },
-  "root": Object {
-    "body": "
-",
-    "children": Array [
-      "foo",
-    ],
-    "created": "1",
-    "custom": Object {},
-    "data": Object {},
-    "desc": "",
-    "fname": "root",
-    "id": "root",
-    "links": Array [],
-    "parent": null,
-    "title": "Root",
-    "type": "note",
-    "updated": "1",
-    "vault": undefined,
-  },
-}
+]
 `;

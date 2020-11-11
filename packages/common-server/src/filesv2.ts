@@ -85,7 +85,7 @@ async function _createFileWatcher(
 }
 
 export function file2Schema(fpath: string): SchemaModulePropsV2 {
-  const root = path.dirname(fpath);
+  const root = { fsPath: path.dirname(fpath) };
   const fname = path.basename(fpath, ".schema.yml");
   const schemaOpts = YAML.safeLoad(
     fs.readFileSync(fpath, { encoding: "utf8" }),
@@ -107,7 +107,7 @@ export function string2Schema({
   const schemaOpts = YAML.safeLoad(content, {
     schema: YAML.JSON_SCHEMA,
   }) as SchemaModuleOptsV2;
-  return SchemaParserV2.parseRaw(schemaOpts, { root: vault.fsPath, fname });
+  return SchemaParserV2.parseRaw(schemaOpts, { root: vault, fname });
 }
 
 export function string2Note({

@@ -2,6 +2,7 @@ import {
   DendronError,
   DNodeUtilsV2,
   DStoreV2,
+  DVault,
   ENGINE_ERROR_CODES,
   SchemaModuleOptsV2,
   SchemaModulePropsV2,
@@ -25,7 +26,7 @@ export class ParserBaseV2 {
 export class SchemaParserV2 extends ParserBaseV2 {
   static parseRaw(
     schemaOpts: SchemaModuleOptsV2,
-    opts: { root: string; fname: string }
+    opts: { root: DVault; fname: string }
   ): SchemaModulePropsV2 {
     const version = _.isArray(schemaOpts) ? 0 : 1;
     if (version > 0) {
@@ -48,18 +49,19 @@ export class SchemaParserV2 extends ParserBaseV2 {
         root: maybeRoot,
         schemas: schemaDict,
         fname: opts.fname,
+        vault: opts.root,
       };
     }
   }
 
   static parseSchemaModuleOpts(
     schemaModuleProps: SchemaModuleOptsV2,
-    opts: { fname: string; root: string }
+    opts: { fname: string; root: DVault }
   ): SchemaModulePropsV2 {
     const { imports, schemas, version } = schemaModuleProps;
     const { fname, root } = opts;
     let schemaModulesFromImport = _.flatMap(imports, (ent) => {
-      const fpath = path.join(root, ent + ".schema.yml");
+      const fpath = path.join(root.fsPath, ent + ".schema.yml");
       return file2Schema(fpath);
     });
     const schemaPropsFromImport = schemaModulesFromImport.flatMap((mod) => {
@@ -70,11 +72,12 @@ export class SchemaParserV2 extends ParserBaseV2 {
         ent.fname = fname;
         ent.parent = null;
         ent.children = ent.children.map((ent) => `${domain}.${ent}`);
+        ent.vault = root;
         return ent;
       });
     });
     const schemaPropsFromFile = schemas.map((ent) => {
-      return SchemaUtilsV2.create(ent);
+      return SchemaUtilsV2.create({ ...ent, vault: root });
     });
     const schemasAll = schemaPropsFromImport.concat(schemaPropsFromFile);
 
@@ -107,6 +110,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
       root: rootModule,
       schemas: schemasDict,
       fname,
+      vault: root,
     };
   }
 }

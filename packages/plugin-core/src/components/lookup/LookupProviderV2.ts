@@ -455,9 +455,9 @@ export class LookupProviderV2 {
     let nodes: DNodePropsV2[];
     if (flavor === "note") {
       nodeDict = engine.notes;
-      nodes = _.map(nodeDict["root"].children, (ent) => nodeDict[ent]).concat(
-        nodeDict["root"]
-      );
+      const roots = NoteUtilsV2.getRoots(nodeDict);
+      const childrenOfRoot = roots.flatMap((ent) => ent.children);
+      nodes = _.map(childrenOfRoot, (ent) => nodeDict[ent]).concat(roots);
     } else {
       nodeDict = _.mapValues(engine.schemas, (ent) => ent.root);
       nodes = _.map(_.values(engine.schemas), (ent: SchemaModulePropsV2) => {

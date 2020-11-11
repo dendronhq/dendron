@@ -5,6 +5,7 @@ import {
   AssertUtils,
   EngineTestUtilsV3,
   FileTestUtils,
+  NotePresetsUtils,
 } from "@dendronhq/common-test-utils";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -26,7 +27,14 @@ describe("MarkdownPod", () => {
   let checkFiles: (opts: { vault: string }) => any;
 
   beforeEach(async () => {
-    ({ wsRoot, vaults } = await EngineTestUtilsV3.setupWS({}));
+    ({ wsRoot, vaults } = await EngineTestUtilsV3.setupWS({
+      initVault1: async (vaultDir: string) => {
+        await NotePresetsUtils.createBasic({ vaultDir, fname: "foo" });
+      },
+      initVault2: async (vaultDir: string) => {
+        await NotePresetsUtils.createBasic({ vaultDir, fname: "bar" });
+      },
+    }));
     engine = DendronEngineV2.createV3({ vaults });
     importSrc = tmpDir().name;
     // setup
@@ -65,6 +73,11 @@ describe("MarkdownPod", () => {
         "project.p1.n2.md",
         "project.p2.n1.md",
         "project.p-3.n1.md",
+        "foo.ch1.md",
+        "foo.md",
+        "foo.schema.yml",
+        "root.schema.yml",
+        "root.md",
       ]);
       expect(expectedFiles).toEqual(actualFiles);
 
@@ -151,6 +164,11 @@ describe("MarkdownPod", () => {
       "project.p1.n2.md",
       "project.p2.n1.md",
       "project.p-3.n1.md",
+      "foo.ch1.md",
+      "foo.md",
+      "foo.schema.yml",
+      "root.schema.yml",
+      "root.md",
     ]);
     expect(expectedFiles).toEqual(actualFiles);
     const body = fs.readFileSync(path.join(vault, "project.p1.md"), {
@@ -187,6 +205,11 @@ describe("MarkdownPod", () => {
       "project.p-1.n2.md",
       "project.p2.n-1.md",
       "project.p-3.n1.md",
+      "foo.ch1.md",
+      "foo.md",
+      "foo.schema.yml",
+      "root.schema.yml",
+      "root.md",
     ]);
     expect(expectedFiles).toEqual(actualFiles);
   });
@@ -204,7 +227,6 @@ describe("MarkdownPod", () => {
     const body = fs.readFileSync(path.join(vault, "project.p2.n1.md"), {
       encoding: "utf8",
     });
-    expect(body).toMatchSnapshot();
     const out = await AssertUtils.assertInString({
       body,
       match: ["[[project.p1.n1]]"],

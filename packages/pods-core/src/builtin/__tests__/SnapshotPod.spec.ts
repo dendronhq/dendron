@@ -1,11 +1,10 @@
 import { DEngineClientV2 } from "@dendronhq/common-all/src";
-import { createLogger } from "@dendronhq/common-server/src";
 import {
   EngineTestUtilsV2,
   NodeTestPresetsV2,
   PODS_CORE,
 } from "@dendronhq/common-test-utils";
-import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
+import { DendronEngineV2 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
 import { SnapshotExportPod, SnapshotImportPod } from "../SnapshotPod";
@@ -23,14 +22,7 @@ describe("SnapshotPodExport", () => {
         });
       },
     }));
-    const LOGGER = createLogger();
-    engine = new DendronEngineV2({
-      vaults,
-      forceNew: true,
-      store: new FileStorageV2({ vaults, logger: LOGGER }),
-      mode: "fuzzy",
-      logger: LOGGER,
-    });
+    engine = DendronEngineV2.create({ vaults });
     await engine.init();
   });
 
@@ -142,14 +134,7 @@ describe("SnapshotPodImport", () => {
 
   beforeEach(async () => {
     ({ wsRoot, vaults } = await EngineTestUtilsV2.setupWS({}));
-    const LOGGER = createLogger();
-    engine = new DendronEngineV2({
-      vaults,
-      forceNew: true,
-      store: new FileStorageV2({ vaults, logger: LOGGER }),
-      mode: "fuzzy",
-      logger: LOGGER,
-    });
+    engine = DendronEngineV2.create({ vaults });
     let dest = path.join(wsRoot, "snapshot");
     fs.ensureDirSync(dest);
 

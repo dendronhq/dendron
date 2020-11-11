@@ -212,16 +212,16 @@ export class NoteParserV2 extends ParserBaseV2 {
 }
 
 export class SchemaParserV2 extends ParserBaseV2 {
-  static parseFile(fpath: string, root: string): SchemaModulePropsV2 {
+  static parseFile(fpath: string, root: DVault): SchemaModulePropsV2 {
     const fname = path.basename(fpath, ".schema.yml");
     const schemaOpts: any = YAML.parse(
-      fs.readFileSync(path.join(root, fpath), "utf8")
+      fs.readFileSync(path.join(root.fsPath, fpath), "utf8")
     );
     return cSchemaParserV2.parseRaw(schemaOpts, { root, fname });
   }
   async parse(
     fpaths: string[],
-    root: string
+    root: DVault
   ): Promise<{
     schemas: SchemaModulePropsV2[];
     errors: DendronError[] | null;
@@ -397,24 +397,64 @@ export class FileStorageV2 implements DStoreV2 {
   async initSchema(): Promise<DEngineInitSchemaRespV2> {
     const ctx = "initSchema";
     this.logger.info({ ctx, msg: "enter" });
+    if (this.multivault) {
+      const out = await Promise.all(
+        (this.vaultsv3 as DVault[]).map(async (vault) => {
+          return this._initSchema(vault);
+        })
+      );
+      const _out = _.reduce<
+        { data: SchemaModulePropsV2[]; errors: any[] },
+        { data: SchemaModulePropsV2[]; errors: any[] }
+      >(
+        out,
+        (ent, acc) => {
+          acc.data = acc.data.concat(ent.data);
+          acc.errors = acc.errors.concat(ent.errors);
+          return acc;
+        },
+        { data: [], errors: [] }
+      );
+      const { data, errors } = _out;
+      return {
+        data,
+        error: _.isEmpty(errors)
+          ? null
+          : new DendronError({ msg: "multiple errors", payload: errors }),
+      };
+    } else {
+      const { data, errors } = await this._initSchema({
+        fsPath: this.vaults[0],
+      });
+      return {
+        data,
+        error: _.isEmpty(errors)
+          ? null
+          : new DendronError({ msg: "multiple errors", payload: errors }),
+      };
+    }
+  }
+
+  async _initSchema(
+    vault: DVault
+  ): Promise<{ data: SchemaModulePropsV2[]; errors: any[] }> {
+    const ctx = "initSchema";
+    this.logger.info({ ctx, msg: "enter" });
     const schemaFiles = getAllFiles({
-      root: this.vaults[0],
+      root: vault.fsPath,
       include: ["*.schema.yml"],
     }) as string[];
     this.logger.info({ ctx, schemaFiles });
-    const root = this.vaults[0];
     if (_.isEmpty(schemaFiles)) {
       throw new DendronError({ status: ENGINE_ERROR_CODES.NO_SCHEMA_FOUND });
     }
     const { schemas, errors } = await new SchemaParserV2({
       store: this,
       logger: this.logger,
-    }).parse(schemaFiles, root);
+    }).parse(schemaFiles, vault);
     return {
       data: schemas,
-      error: _.isNull(errors)
-        ? null
-        : new DendronError({ msg: "multiple errors", payload: errors }),
+      errors: _.isNull(errors) ? [] : errors,
     };
   }
 

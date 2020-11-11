@@ -81,6 +81,7 @@ Object {
         "vault": undefined,
       },
     },
+    "vault": undefined,
     "version": 1,
   },
 }
@@ -146,6 +147,7 @@ Object {
         "vault": undefined,
       },
     },
+    "vault": undefined,
     "version": 1,
   },
 }

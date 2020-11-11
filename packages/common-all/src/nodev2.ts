@@ -7,7 +7,7 @@ import path from "path";
 import { URI } from "vscode-uri";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
-import { DNoteLoc, SchemaTemplate } from "./typesv2";
+import { DNoteLoc, DVault, SchemaTemplate } from "./typesv2";
 import {
   DEngineClientV2,
   DLoc,
@@ -121,7 +121,8 @@ export class DNodeUtilsV2 {
     schemaModules: SchemaModuleDictV2
   ): DNodePropsQuickInputV2 {
     if (props.type === "note") {
-      const label = props.id === "root" ? "root" : props.fname;
+      const isRoot = DNodeUtilsV2.isRoot(props);
+      const label = isRoot ? "root" : props.fname;
       const detail = props.desc;
       const sm = props.schema
         ? schemaModules[props.schema.moduleId]
@@ -130,7 +131,7 @@ export class DNodeUtilsV2 {
       const out = { ...props, label, detail, description };
       return out;
     } else {
-      const label = props.id === "root" ? "root" : props.id;
+      const label = DNodeUtilsV2.isRoot(props) ? "root" : props.id;
       const detail = props.desc;
       const out = { ...props, label, detail };
       return out;
@@ -142,11 +143,27 @@ export class DNodeUtilsV2 {
     nodes: DNodePropsV2[],
     opts?: {
       noStubs: boolean;
+      vault?: DVault;
     }
   ): DNodePropsV2 {
+    const { vault } = opts || {};
     const dirname = DNodeUtilsV2.dirName(fpath);
     if (dirname === "") {
-      return _.find(nodes, { id: "root" }) as DNodePropsV2;
+      // TODO: multi-vault compatilbe
+      const _nodes = _.filter(nodes, { fname: "root" }) as DNodePropsV2[];
+      if (_nodes.length > 1) {
+        const node = _.find(
+          _nodes,
+          (ent) => ent.vault?.fsPath === vault?.fsPath
+        );
+        if (_.isUndefined(node)) {
+          throw new DendronError({
+            msg: `multiple root notes found for ${fpath}`,
+          });
+        }
+      } else {
+        return nodes[0];
+      }
     }
     const maybeNode = _.find(nodes, { fname: dirname });
     if (
@@ -180,7 +197,7 @@ export class DNodeUtilsV2 {
   }
 
   static getDepth(node: DNodePropsV2): number {
-    if (node.id === "root") {
+    if (node.fname === "root") {
       return 0;
     }
     return node.fname.split(".").length;
@@ -192,10 +209,11 @@ export class DNodeUtilsV2 {
       nodeDict: DNodePropsDictV2;
     }
   ): DNodePropsV2 {
-    if (node.id === "root") {
+    if (node.fname === "root") {
       throw Error("root has no domain");
     }
-    if (node.parent === "root") {
+    const isRoot = DNodeUtilsV2.isRoot(opts.nodeDict[node.parent as string]);
+    if (isRoot) {
       return node;
     } else {
       return DNodeUtilsV2.getDomain(DNodeUtilsV2.getParent(node, opts), opts);
@@ -208,7 +226,7 @@ export class DNodeUtilsV2 {
       nodeDict: DNodePropsDictV2;
     }
   ): DNodePropsV2 {
-    if (node.id === "root") {
+    if (DNodeUtilsV2.isRoot(node)) {
       throw Error("root has no parent");
     }
     const parent = opts.nodeDict[node.parent as string];
@@ -238,6 +256,20 @@ export class DNodeUtilsV2 {
       );
     }
     return children;
+  }
+
+  static getVaultByDir({
+    vaults,
+    dirPath,
+  }: {
+    dirPath: string;
+    vaults: DVault[];
+  }) {
+    return _.find(vaults, { fsPath: dirPath });
+  }
+
+  static isRoot(note: DNodePropsV2) {
+    return note.fname === "root";
   }
 }
 
@@ -331,7 +363,7 @@ export class NoteUtilsV2 {
       ...opts,
       type: "note",
       fname: "root",
-      id: "root",
+      id: genUUID(),
     });
   }
 
@@ -343,7 +375,7 @@ export class NoteUtilsV2 {
   static createStubs(from: NotePropsV2, to: NotePropsV2): NotePropsV2[] {
     const stubNodes: NotePropsV2[] = [];
     let fromPath = from.fname;
-    if (from.id === "root") {
+    if (DNodeUtilsV2.isRoot(from)) {
       fromPath = "";
     }
     const toPath = to.fname;
@@ -430,12 +462,25 @@ export class NoteUtilsV2 {
   static getNoteByFname(
     fname: string,
     notes: NotePropsDictV2,
-    opts?: { throwIfEmpty: boolean }
+    opts?: { throwIfEmpty?: boolean; vault?: DVault }
   ): NotePropsV2 | undefined {
-    const out = _.find(
-      _.values(notes),
-      (ent) => ent.fname.toLowerCase() === fname.toLowerCase()
-    );
+    const _out = _.filter(_.values(notes), (ent) => {
+      return ent.fname.toLowerCase() === fname.toLowerCase();
+    });
+    let out;
+    if (_out.length > 1) {
+      if (!opts?.vault) {
+        throw new DendronError({
+          msg: `multiple nodes found and no vault given for ${fname}`,
+        });
+      }
+      out = _.find(_out, { vault: opts.vault.fsPath }) as NotePropsV2;
+      if (_.isUndefined(out)) {
+        throw new DendronError({ msg: "no note found for vault" });
+      }
+    } else {
+      out = _out[0];
+    }
     if (opts?.throwIfEmpty && _.isUndefined(out)) {
       throw Error(`${fname} not found`);
     }
@@ -475,6 +520,10 @@ export class NoteUtilsV2 {
 
   static getPathUpTo(hpath: string, numCompoenents: number) {
     return hpath.split(".").slice(0, numCompoenents).join(".");
+  }
+
+  static getRoots(notes: NotePropsDictV2): NotePropsV2[] {
+    return _.filter(_.values(notes), DNodeUtilsV2.isRoot);
   }
 
   static hydrate({
@@ -591,8 +640,11 @@ export class SchemaUtilsV2 {
     return opts;
   }
 
-  static createModuleProps(opts: { fname: string }): SchemaModulePropsV2 {
-    const { fname } = opts;
+  static createModuleProps(opts: {
+    fname: string;
+    vault: DVault;
+  }): SchemaModulePropsV2 {
+    const { fname, vault } = opts;
     const root = SchemaUtilsV2.create({
       id: `${fname}`,
       fname,
@@ -607,6 +659,7 @@ export class SchemaUtilsV2 {
       root,
       schemas: { [root.id]: root },
       imports: [],
+      vault,
     };
   }
 
@@ -628,6 +681,7 @@ export class SchemaUtilsV2 {
 
   static createRootModuleProps(
     fname: string,
+    vault: DVault,
     opts?: Partial<SchemaPropsV2>
   ): SchemaModulePropsV2 {
     const schema = SchemaUtilsV2.create({
@@ -644,6 +698,7 @@ export class SchemaUtilsV2 {
       schemas: { root: schema },
       fname,
       root: schema,
+      vault,
     };
   }
 

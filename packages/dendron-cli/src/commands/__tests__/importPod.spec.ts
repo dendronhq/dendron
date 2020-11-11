@@ -1,11 +1,12 @@
 import { DEngineClientV2 } from "@dendronhq/common-all";
-import { createLogger, tmpDir, writeYAML } from "@dendronhq/common-server";
+import { tmpDir, writeYAML } from "@dendronhq/common-server";
 import {
+  FileTestUtils,
   NodeTestPresetsV2,
   NodeTestUtilsV2,
   PODS_CORE,
 } from "@dendronhq/common-test-utils";
-import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
+import { DendronEngineV2 } from "@dendronhq/engine-server";
 import {
   JSONImportPod,
   JSONImportPodRawConfig,
@@ -15,7 +16,6 @@ import {
 import fs, { ensureDirSync } from "fs-extra";
 import path from "path";
 import { ImportPodCLICommand } from "../importPod";
-import { FileTestUtils } from "@dendronhq/common-test-utils";
 
 const { createFiles } = FileTestUtils;
 
@@ -28,17 +28,7 @@ describe("json pod", () => {
       vaults,
       importSrc,
     } = await PODS_CORE.JSON.IMPORT.BASIC.before({});
-    const LOGGER = createLogger();
-    engine = new DendronEngineV2({
-      vaults,
-      forceNew: true,
-      store: new FileStorageV2({
-        vaults,
-        logger: LOGGER,
-      }),
-      mode: "fuzzy",
-      logger: LOGGER,
-    });
+    engine = DendronEngineV2.create({ vaults });
     await engine.init();
     const pod = new JSONImportPod();
     const config: JSONImportPodRawConfig = {

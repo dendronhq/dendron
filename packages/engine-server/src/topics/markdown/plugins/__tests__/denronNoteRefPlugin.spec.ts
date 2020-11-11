@@ -108,6 +108,9 @@ describe("basic", () => {
         initVault1: async (vaultDir: string) => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         },
+        initVault2: async (vaultDir: string) => {
+          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+        },
       });
       engine = DendronEngineV2.createV3({ vaults });
     });

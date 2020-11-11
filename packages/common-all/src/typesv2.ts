@@ -183,6 +183,7 @@ export type SchemaModulePropsV2 = {
   schemas: SchemaPropsDictV2;
   root: SchemaPropsV2;
   fname: string;
+  vault: DVault;
 };
 
 // === Engine

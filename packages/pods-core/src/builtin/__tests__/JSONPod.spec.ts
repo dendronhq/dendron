@@ -3,14 +3,14 @@ import {
   NotePropsV2,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
-import { createLogger, tmpDir } from "@dendronhq/common-server";
+import { tmpDir } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
   FileTestUtils,
   NodeTestPresetsV2,
   PODS_CORE,
 } from "@dendronhq/common-test-utils";
-import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
+import { DendronEngineV2 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -91,17 +91,7 @@ describe("JSONImportPod", () => {
     ({ wsRoot, vaults, importSrc } = await setupImport({
       jsonEntries: createJSON(),
     }));
-    const LOGGER = createLogger();
-    engine = new DendronEngineV2({
-      vaults,
-      forceNew: true,
-      store: new FileStorageV2({
-        vaults,
-        logger: LOGGER,
-      }),
-      mode: "fuzzy",
-      logger: LOGGER,
-    });
+    engine = DendronEngineV2.create({ vaults });
     await engine.init();
   });
 
@@ -137,17 +127,7 @@ describe("JSONImportPod", () => {
       src: importSrc,
       concatenate: false,
     };
-    const LOGGER = createLogger();
-    engine = new DendronEngineV2({
-      vaults,
-      forceNew: true,
-      store: new FileStorageV2({
-        vaults,
-        logger: LOGGER,
-      }),
-      mode: "fuzzy",
-      logger: LOGGER,
-    });
+    engine = DendronEngineV2.create({ vaults });
     await engine.init();
     await pod.execute({
       config,
@@ -297,17 +277,7 @@ describe("JSONExportPod", () => {
       },
     }));
 
-    const LOGGER = createLogger();
-    engine = new DendronEngineV2({
-      vaults,
-      forceNew: true,
-      store: new FileStorageV2({
-        vaults,
-        logger: LOGGER,
-      }),
-      mode: "fuzzy",
-      logger: LOGGER,
-    });
+    engine = DendronEngineV2.create({ vaults });
     await engine.init();
   });
 

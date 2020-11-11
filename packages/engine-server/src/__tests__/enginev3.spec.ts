@@ -1,7 +1,14 @@
-import { DEngineV2, DVault } from "@dendronhq/common-all";
+import {
+  DEngineV2,
+  DNodeUtilsV2,
+  DVault,
+  NotePropsV2,
+  SchemaModulePropsV2,
+} from "@dendronhq/common-all";
 import { EngineTestUtilsV3 } from "@dendronhq/common-test-utils";
 import { NotePresetsUtils } from "@dendronhq/common-test-utils/lib/presets/utils";
 import fs from "fs-extra";
+import _ from "lodash";
 import { DendronEngineV2 } from "../enginev2";
 
 const setupCase1 = async () => {
@@ -17,7 +24,7 @@ const setupCase1 = async () => {
   return { vaults, engine };
 };
 
-describe("engine, notes/", () => {
+describe.skip("engine, notes/", () => {
   describe("init/", () => {
     // @ts-ignore
     let vaults: DVault[];
@@ -29,8 +36,46 @@ describe("engine, notes/", () => {
 
     test("basic/", async () => {
       await engine.init();
-      // expect(engine.notes).toMatchSnapshot();
-      // expect(engine.schemas).toMatchSnapshot();
+      expect(engine.notes).toMatchSnapshot("notes");
+      expect(engine.schemas).toMatchSnapshot("schemas");
+      // check schema correct
+      expect(_.size(engine.schemas)).toEqual(3);
+      expect(
+        _.map(
+          _.reject(
+            _.values(engine.schemas),
+            DNodeUtilsV2.isRoot
+          ) as SchemaModulePropsV2[],
+          ({ fname, vault }) => ({
+            fname,
+            vault,
+          })
+        ).sort()
+      ).toEqual([
+        {
+          fname: "bar",
+          vault: {
+            fsPath: vaults[1].fsPath,
+          },
+        },
+        {
+          fname: "foo",
+          vault: { fsPath: vaults[0].fsPath },
+        },
+      ]);
+      // check note correct
+      expect(
+        _.map(
+          _.reject(
+            _.values(engine.notes),
+            DNodeUtilsV2.isRoot
+          ) as NotePropsV2[],
+          ({ fname, vault }) => ({
+            fname,
+            vault,
+          })
+        ).sort()
+      ).toEqual([]);
       const dir1 = fs.readdirSync(vaults[0].fsPath);
       const dir2 = fs.readdirSync(vaults[1].fsPath);
       expect(dir1).toMatchSnapshot();

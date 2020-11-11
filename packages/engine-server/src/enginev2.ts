@@ -89,6 +89,7 @@ export class DendronEngineV2 implements DEngineV2 {
     const _vaults = vaults.map((ent) => ent.fsPath);
     return new DendronEngineV2({
       vaults: _vaults,
+      vaultsv3: vaults,
       forceNew: true,
       store: new FileStorageV2({
         vaults: _vaults,

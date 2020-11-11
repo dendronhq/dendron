@@ -4,6 +4,7 @@ import {
   DNodeUtilsV2,
   ENGINE_ERROR_CODES,
   NoteChangeEntry,
+  NotePropsV2,
   NoteUtilsV2,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
@@ -30,6 +31,7 @@ import { DendronEngineV2 } from "../enginev2";
 import { ParserUtilsV2 } from "../topics/markdown";
 
 const _su = SchemaUtilsV2;
+const { normalizeNote, normalizeNotes } = NodeTestUtilsV2;
 
 const createNotes = async (opts: { rootName: string; vaultDir: string }) => {
   const { rootName, vaultDir } = opts;
@@ -97,7 +99,6 @@ describe("engine, schema/", () => {
       expect((index.getIndex().toJSON() as any).records.length).toEqual(3);
 
       const resp = await engine.query("foo", "note");
-      expect(resp).toMatchSnapshot();
       expect(resp.data[0].schema).toBeUndefined();
     });
 
@@ -147,7 +148,7 @@ describe("engine, schema/", () => {
       });
       const mProps = cSchemaParserV2.parseSchemaModuleOpts(mOpts, {
         fname: "bar",
-        root: vaultDir,
+        root: { fsPath: vaultDir },
       });
       await engine.writeSchema(mProps);
 
@@ -176,21 +177,18 @@ describe("engine, schema/", () => {
     test("root", async () => {
       await engine.init();
       const resp = await engine.querySchema("");
-      // expect(resp).toMatchSnapshot();
       expect(_.size(resp.data[0].schemas)).toEqual(1);
     });
 
     test("all", async () => {
       await engine.init();
       const resp = await engine.querySchema("*");
-      // expect(resp).toMatchSnapshot();
       expect(_.size(resp.data)).toEqual(2);
     });
 
     test("non-root", async () => {
       await engine.init();
       const resp = await engine.querySchema("foo");
-      // expect(resp).toMatchSnapshot();
       expect(_.size(resp.data[0].schemas)).toEqual(2);
     });
   });
@@ -571,7 +569,9 @@ This is some content`,
         npath: "000 Index",
         createIfNew: true,
       });
-      expect(data).toMatchSnapshot("bond");
+      expect(
+        normalizeNote({ note: data?.note as NotePropsV2 })
+      ).toMatchSnapshot();
     });
 
     test("get new note", async () => {
@@ -584,9 +584,9 @@ This is some content`,
       expect(
         _.sortBy(
           _.map(data?.changed, (ent) => ent.note),
-          "id"
+          "fname"
         )
-      ).toEqual([data?.note, engine.notes["root"]]);
+      ).toEqual([data?.note, NoteUtilsV2.getNoteByFname("root", engine.notes)]);
     });
   });
 
@@ -599,22 +599,21 @@ This is some content`,
     test("empty string", async () => {
       await engine.init();
       const { data } = await engine.query("", "note");
-      expect(data).toMatchSnapshot();
-      expect(data[0]).toEqual(engine.notes["root"]);
-      // expect(data?.changed).toEqual([]);
+      expect(normalizeNotes(data)).toMatchSnapshot();
+      expect(data[0]).toEqual(NoteUtilsV2.getNoteByFname("root", engine.notes));
     });
 
     test("*", async () => {
       await engine.init();
       const { data } = await engine.query("*", "note");
-      expect(data).toMatchSnapshot();
+      expect(normalizeNotes(data)).toMatchSnapshot();
       expect(data.length).toEqual(3);
     });
 
     test("foo", async () => {
       await engine.init();
       const { data } = await engine.query("foo", "note");
-      expect(data).toMatchSnapshot();
+      expect(normalizeNotes(data)).toMatchSnapshot();
       expect(data[0]).toEqual(engine.notes["foo"]);
     });
   });
@@ -647,7 +646,6 @@ This is some content`,
         oldLoc: { fname: "foo", vault: { fsPath: vaultDir } },
         newLoc: { fname: "baz", vault: { fsPath: vaultDir } },
       });
-      expect(changed).toMatchSnapshot();
       expect(changed.data?.length).toEqual(3);
       expect(_.trim((changed.data as NoteChangeEntry[])[0].note.body)).toEqual(
         "[[baz]]"
@@ -679,7 +677,6 @@ This is some content`,
         oldLoc: { fname: "foo", vault: { fsPath: vaultDir } },
         newLoc: { fname: "baz", vault: { fsPath: vaultDir } },
       });
-      expect(changed).toMatchSnapshot();
       expect(changed.data?.length).toEqual(3);
       expect(_.trim((changed.data as NoteChangeEntry[])[0].note.body)).toEqual(
         "[[baz]]\n((ref: [[dendron.pro.dendron-next-server]]#quickstart,1:#*))"
@@ -752,8 +749,6 @@ This is some content`,
         newLoc: { fname: "gamma", vault: { fsPath: vaultDir } },
       });
       const changed = resp.data;
-      expect(changed).toMatchSnapshot("changed");
-      expect(engine.notes).toMatchSnapshot("notes");
       await NodeTestPresetsV2.runJestHarness({
         opts: { changed, vaultDir } as Parameters<
           typeof RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.results
@@ -815,13 +810,14 @@ This is some content`,
         updated: "1",
       });
       await engine.writeNote(barNote);
-      expect(engine.notes).toMatchSnapshot();
+      expect(normalizeNotes(engine.notes)).toMatchSnapshot();
       const resp = await engine.query("bar", "note");
       const note = resp.data[0];
       expect(_.values(engine.notes).length).toEqual(4);
       expect(note).toEqual(engine.notes["bar"]);
       // parent is added
-      expect(note.parent).toEqual("root");
+      const noteParent = engine.notes[note.parent as string] as NotePropsV2;
+      expect(noteParent.fname).toEqual("root");
       expect(note.schema).toBeUndefined();
       expect(fs.readdirSync(vaultDir)).toEqual([
         "bar.md",
@@ -843,7 +839,7 @@ This is some content`,
         updated: "1",
       });
       await engine.writeNote(noteNew);
-      expect(engine.notes).toMatchSnapshot("notes");
+      expect(normalizeNotes(engine.notes)).toMatchSnapshot("notes");
       expect(engine.notes["foo.ch1"].schema).toEqual({
         moduleId: "foo",
         schemaId: "ch1",
@@ -896,7 +892,7 @@ This is some content`,
 
     test("root", async () => {
       const { data } = await engine.init();
-      expect(data.notes).toMatchSnapshot();
+      expect(normalizeNotes(data.notes)).toMatchSnapshot();
     });
 
     test("bad parse ", async () => {
@@ -919,7 +915,7 @@ This is some content`,
     test("root and two notes", async () => {
       await createNotes({ rootName: "foo", vaultDir });
       await engine.init();
-      expect(engine.notes).toMatchSnapshot();
+      expect(normalizeNotes(engine.notes)).toMatchSnapshot();
       expect(_.values(engine.notes).length).toEqual(3);
     });
   });
@@ -957,7 +953,7 @@ describe("note and schema", async () => {
         rootName: "foo",
       });
       await engine.init();
-      expect(engine.notes).toMatchSnapshot();
+      expect(normalizeNotes(engine.notes)).toMatchSnapshot();
       expect(_.values(engine.notes).length).toEqual(3);
       expect(engine.notes["foo"].schema).toEqual({
         schemaId: "foo",

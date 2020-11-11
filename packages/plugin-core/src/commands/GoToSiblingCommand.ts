@@ -1,4 +1,10 @@
-import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DNodeUtilsV2,
+  DVault,
+  NotePropsV2,
+  NoteUtilsV2,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";
@@ -36,9 +42,19 @@ export class GoToSiblingCommand extends BasicCommand<
 
     const client = DendronWorkspace.instance().getEngine();
     if (value === "root") {
-      respNodes = client.notes["root"].children
+      const vault = DNodeUtilsV2.getVaultByDir({
+        vaults: client.vaultsv3 as DVault[],
+        dirPath: path.dirname(maybeTextEditor.document.uri.fsPath),
+      });
+      const rootNode = NoteUtilsV2.getNoteByFname(value, client.notes, {
+        vault,
+      });
+      if (_.isUndefined(rootNode)) {
+        throw new DendronError({ msg: "no root node found" });
+      }
+      respNodes = rootNode.children
         .map((ent) => client.notes[ent])
-        .concat([client.notes["root"]]);
+        .concat([rootNode]);
     } else {
       const note = NoteUtilsV2.getNoteByFname(value, client.notes, {
         throwIfEmpty: true,

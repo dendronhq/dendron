@@ -289,9 +289,13 @@ export class NoteTestPresetsV2 {
               "foo",
               notes
             ) as NotePropsV2;
+            const vault = note.vault;
+            const root = NoteUtilsV2.getNoteByFname("root", notes, {
+              vault,
+            }) as NotePropsV2;
             const scenarios = [
               { actual: _.size(notes), expected: 3 },
-              { actual: notes["root"].children, expected: [note.id] },
+              { actual: root.children, expected: [note.id] },
             ];
             return scenarios;
           },
@@ -342,7 +346,7 @@ export class NoteTestPresetsV2 {
           }: DeleteNoteTestOptsV2): Promise<TestResult[]> => {
             return [
               {
-                actual: changed[0].note.id,
+                actual: changed[0].note.fname,
                 expected: "root",
                 msg: "root updated",
               },
@@ -385,7 +389,10 @@ export class NoteTestPresetsV2 {
             await note2File(note, vaultDir);
           },
           results: async ({ notes }: { notes: NotePropsDictV2 }) => {
-            const root = notes["root"];
+            const root = NoteUtilsV2.getNoteByFname(
+              "root",
+              notes
+            ) as NotePropsV2;
             const bar = NoteUtilsV2.getNoteByFname("bar", notes) as NotePropsV2;
             const child = NoteUtilsV2.getNoteByFname(
               "bar.ch1",
@@ -565,20 +572,19 @@ export class NodeTestUtilsV2 {
   };
 
   static createSchema = async (opts: {
-    vaultDir?: string;
+    vaultDir: string;
     fname: string;
     schemas: SchemaPropsV2[];
   }): Promise<SchemaModulePropsV2> => {
     const { vaultDir, schemas, fname } = opts;
     const schema = SchemaUtilsV2.createModuleProps({
       fname,
+      vault: { fsPath: vaultDir },
     });
     schemas.forEach((s) => {
       schema.schemas[s.id] = s;
     });
-    if (vaultDir) {
-      await schemaModuleProps2File(schema, vaultDir, fname);
-    }
+    await schemaModuleProps2File(schema, vaultDir, fname);
     return schema;
   };
 
@@ -647,7 +653,22 @@ export class NodeTestUtilsV2 {
     return schemaModuleProps[0][0];
   };
 
-  static normalizeNote({ note }: { note: NotePropsV2 }): NotePropsV2 {
-    return { ..._.omit(note, "body"), body: _.trim(note.body) };
+  static normalizeNote({ note }: { note: NotePropsV2 }): Partial<NotePropsV2> {
+    return {
+      ..._.omit(note, ["body", "parent", "id"]),
+      body: _.trim(note.body),
+    };
+  }
+
+  static normalizeNotes(
+    notes: NotePropsV2[] | NotePropsDictV2
+  ): Partial<NotePropsV2>[] {
+    if (!_.isArray(notes)) {
+      notes = _.values(notes);
+    }
+    return notes.map((note) => {
+      return NodeTestUtilsV2.normalizeNote({ note });
+      //return { ..._.omit(note, ["body", "parent", "id"]), body: _.trim(note.body) };
+    });
   }
 }

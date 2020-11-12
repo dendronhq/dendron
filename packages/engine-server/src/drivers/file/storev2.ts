@@ -204,7 +204,7 @@ export class NoteParserV2 extends ParserBaseV2 {
     if (cleanOpts.addParent) {
       const stubs = NoteUtilsV2.addParent({
         note: noteProps,
-        notesList: _.values(notesByFname).concat(parents),
+        notesList: _.uniqBy(_.values(notesByFname).concat(parents), "id"),
         createStubs: cleanOpts.createStubs,
       });
       out = out.concat(stubs);
@@ -572,6 +572,7 @@ export class FileStorageV2 implements DStoreV2 {
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
     let changed: NotePropsV2[] = [];
+    const maybeNote = NoteUtilsV2.getNoteByFname(note.fname, this.notes);
     if (!opts?.noAddParent) {
       changed = NoteUtilsV2.addParent({
         note,
@@ -583,6 +584,24 @@ export class FileStorageV2 implements DStoreV2 {
       notePath: note.fname,
       schemaModDict: this.schemas,
     });
+
+    // if note exists, remove from parent and transplant children
+    if (maybeNote) {
+      // update changed
+      const parentNote = _.find(changed, {
+        id: note.parent as string,
+      }) as NotePropsV2;
+      parentNote.children = _.reject<string[]>(
+        parentNote.children,
+        (ent: string) => ent === maybeNote.id
+      ) as string[];
+      // update internal
+      this.notes[note.parent as string].children = parentNote.children;
+      // update return note
+      note.children = maybeNote.children;
+      // delete note
+      delete this.notes[maybeNote.id];
+    }
     // order matters - only write file after parents are established
     await note2File(note, this.vaults[0], opts);
     if (match) {
@@ -597,6 +616,9 @@ export class FileStorageV2 implements DStoreV2 {
       status: "update" as const,
     })) as NoteChangeEntry[];
     changedEntries.push({ note, status: "create" });
+    if (maybeNote) {
+      changedEntries.push({ note: maybeNote, status: "delete" });
+    }
     return {
       error: null,
       data: changedEntries,

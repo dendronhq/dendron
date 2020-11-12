@@ -35,8 +35,8 @@ describe("engine, notes/", () => {
 
     test("basic/", async () => {
       await engine.init();
-      expect(engine.notes).toMatchSnapshot("notes");
-      expect(engine.schemas).toMatchSnapshot("schemas");
+      // expect(engine.notes).toMatchSnapshot("notes");
+      // expect(engine.schemas).toMatchSnapshot("schemas");
       // check schema correct
       expect(_.size(engine.schemas)).toEqual(3);
       expect(
@@ -98,8 +98,6 @@ describe("engine, notes/", () => {
       ]);
       const dir1 = fs.readdirSync(vaults[0].fsPath);
       const dir2 = fs.readdirSync(vaults[1].fsPath);
-      expect(vaults[0].fsPath).toMatchSnapshot("dir1");
-      expect(vaults[1].fsPath).toMatchSnapshot("dir2");
       expect(dir1).toMatchSnapshot("dir1");
       expect(dir2).toMatchSnapshot("dir2");
     });

@@ -692,14 +692,7 @@ describe("notes", () => {
         ws: wsRoot,
         node: NoteUtilsV2.create({ id: "bond.ch1", fname: "bond.ch1" }),
       });
-      const expected = ["bond.ch1", "root"];
       expect(resp.data.length).toEqual(3);
-      expect(
-        _.intersection(
-          resp.data.map((ent) => _.pick(ent.note, "id").id).sort(),
-          expected
-        ).sort()
-      ).toEqual(expected);
       const out = fs.readdirSync(vault);
       expect(out.sort()).toEqual([
         "bond.ch1.md",

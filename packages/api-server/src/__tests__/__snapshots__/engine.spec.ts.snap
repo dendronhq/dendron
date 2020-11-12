@@ -31,6 +31,9 @@ Object {
       "title": "Ch1",
       "type": "note",
       "updated": "1",
+      "vault": Object {
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-6652-TlMDgrlFHx90/vault",
+      },
     },
     Object {
       "body": "
@@ -45,7 +48,7 @@ Object {
       "fname": "foo",
       "id": "foo",
       "links": Array [],
-      "parent": "root",
+      "parent": "1c2ab222-7bf1-436f-9562-c37283a11396",
       "schema": Object {
         "moduleId": "foo",
         "schemaId": "foo",
@@ -53,6 +56,9 @@ Object {
       "title": "Foo",
       "type": "note",
       "updated": "1",
+      "vault": Object {
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-6652-TlMDgrlFHx90/vault",
+      },
     },
   ],
   "error": null,
@@ -75,7 +81,7 @@ Object {
       "fname": "foo",
       "id": "foo",
       "links": Array [],
-      "parent": "root",
+      "parent": "496f8502-00e7-4658-91f0-1e7554ce8beb",
       "schema": Object {
         "moduleId": "foo",
         "schemaId": "foo",
@@ -83,6 +89,9 @@ Object {
       "title": "Foo",
       "type": "note",
       "updated": "1",
+      "vault": Object {
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-6652-xPCD15iTN4Nd/vault",
+      },
     },
     Object {
       "body": "
@@ -103,6 +112,9 @@ Object {
       "title": "Ch1",
       "type": "note",
       "updated": "1",
+      "vault": Object {
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-6652-xPCD15iTN4Nd/vault",
+      },
     },
     Object {
       "body": "
@@ -115,12 +127,15 @@ Object {
       "data": Object {},
       "desc": "",
       "fname": "root",
-      "id": "root",
+      "id": "496f8502-00e7-4658-91f0-1e7554ce8beb",
       "links": Array [],
       "parent": null,
       "title": "Root",
       "type": "note",
       "updated": "1",
+      "vault": Object {
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-6652-xPCD15iTN4Nd/vault",
+      },
     },
   ],
   "error": null,
@@ -141,12 +156,15 @@ Object {
       "data": Object {},
       "desc": "",
       "fname": "root",
-      "id": "root",
+      "id": "efe99f11-5f50-4a86-be6d-0725d5c6fe2a",
       "links": Array [],
       "parent": null,
       "title": "Root",
       "type": "note",
       "updated": "1",
+      "vault": Object {
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-6652-YrqOvZhkGjHq/vault",
+      },
     },
   ],
   "error": null,
@@ -187,10 +205,13 @@ Object {
             "value": "baz",
           },
         ],
-        "parent": "root",
+        "parent": "003b0583-a4ca-417a-a5f9-988604968aca",
         "title": "Bar",
         "type": "note",
         "updated": "1",
+        "vault": Object {
+          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-6652-blvhYU9gajcv/vault",
+        },
       },
       "status": "update",
     },
@@ -210,6 +231,9 @@ Object {
         "title": "Foo",
         "type": "note",
         "updated": "1",
+        "vault": Object {
+          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-6652-blvhYU9gajcv/vault",
+        },
       },
       "status": "delete",
     },
@@ -225,10 +249,13 @@ Object {
         "fname": "baz",
         "id": "foo",
         "links": Array [],
-        "parent": "root",
+        "parent": "003b0583-a4ca-417a-a5f9-988604968aca",
         "title": "Foo",
         "type": "note",
         "updated": "1",
+        "vault": Object {
+          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-6652-blvhYU9gajcv/vault",
+        },
       },
       "status": "create",
     },
@@ -280,7 +307,7 @@ Array [
           "value": "gamma",
         },
       ],
-      "parent": "root",
+      "parent": "3f268d6f-17e7-43e1-98af-cc0bb79a8dc7",
       "title": "Alpha",
       "type": "note",
       "updated": "1",
@@ -303,6 +330,9 @@ Array [
       "title": "Beta",
       "type": "note",
       "updated": "1",
+      "vault": Object {
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-6652-2sjiu6gXirRB/vault",
+      },
     },
     "status": "delete",
   },
@@ -318,10 +348,13 @@ Array [
       "fname": "gamma",
       "id": "beta",
       "links": Array [],
-      "parent": "root",
+      "parent": "3f268d6f-17e7-43e1-98af-cc0bb79a8dc7",
       "title": "Beta",
       "type": "note",
       "updated": "1",
+      "vault": Object {
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-6652-2sjiu6gXirRB/vault",
+      },
     },
     "status": "create",
   },

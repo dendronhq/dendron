@@ -142,7 +142,6 @@ describe("matchPath", () => {
       notePath: "bond",
       schemaModDict: engine.schemas,
     });
-    expect(resp).toMatchSnapshot();
     expect(resp?.schema.id).toEqual("bond");
     expect(resp?.namespace).toBeTruthy();
   });
@@ -160,7 +159,6 @@ describe("matchPath", () => {
       notePath: "bond.foo",
       schemaModDict: engine.schemas,
     });
-    expect(resp).toMatchSnapshot();
     expect(resp?.schema.id).toEqual("bond");
     expect(resp?.namespace).toBeFalsy();
   });
@@ -177,7 +175,6 @@ describe("matchDomain", () => {
   it("match path on domain, reg", async () => {
     await engine.init();
     const schema = engine.notes["foo"].schema;
-    expect(schema).toMatchSnapshot();
     expect(schema).toEqual({ moduleId: "foo", schemaId: "foo" });
   });
 
@@ -196,7 +193,6 @@ describe("matchDomain", () => {
     fs.removeSync(path.join(vaultDir, "foo.schema.yml"));
     await engine.init();
     const schema = engine.notes["bond"].schema;
-    expect(schema).toMatchSnapshot();
     expect(schema).toEqual({ moduleId: "bond", schemaId: "bond" });
   });
 
@@ -219,7 +215,6 @@ describe("matchDomain", () => {
     fs.removeSync(path.join(vaultDir, "foo.schema.yml"));
     await engine.init();
     const schema = engine.notes["bond.ch1"].schema;
-    expect(schema).toMatchSnapshot();
     expect(schema).toEqual({ moduleId: "bond", schemaId: "bond" });
   });
 });

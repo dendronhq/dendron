@@ -111,7 +111,6 @@ const EXPORT_BASIC = new TestPresetEntry({
             title: "Root",
             type: "note",
             updated: "1",
-            vault,
           },
           {
             body: "foo body",
@@ -126,7 +125,6 @@ const EXPORT_BASIC = new TestPresetEntry({
             title: "Foo",
             type: "note",
             updated: "1",
-            vault,
           },
           {
             body: "foo body",
@@ -141,7 +139,6 @@ const EXPORT_BASIC = new TestPresetEntry({
             title: "Ch1",
             type: "note",
             updated: "1",
-            vault,
           },
         ],
       },

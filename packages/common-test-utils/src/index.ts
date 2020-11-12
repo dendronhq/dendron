@@ -412,7 +412,7 @@ export class NoteTestPresetsV2 {
               {
                 actual: _.pick(child, ["fname", "stub"]),
                 expected: { fname: "bar.ch1" },
-                msg: "bar created as stub",
+                msg: "child is not stub",
               },
             ];
           },
@@ -655,7 +655,7 @@ export class NodeTestUtilsV2 {
 
   static normalizeNote({ note }: { note: NotePropsV2 }): Partial<NotePropsV2> {
     return {
-      ..._.omit(note, ["body", "parent", "id"]),
+      ..._.omit(note, ["body", "parent", "id", "vault"]),
       body: _.trim(note.body),
     };
   }

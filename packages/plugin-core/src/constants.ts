@@ -679,10 +679,4 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     description:
       "port for server. If not set, will be randomly generated at startup.",
   },
-  // --- New
-  // MULTI_VAULT: {
-  //   key: "dendron.beta.multiVault",
-  //   type: "boolean",
-  //   description: `enable multivault`,
-  // },
 };

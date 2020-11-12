@@ -368,17 +368,6 @@ Array [
 ]
 `;
 
-exports[`engine, schema/ basics/ root 1`] = `
-"version: 1
-imports: []
-schemas:
-  - id: root
-    children: []
-    title: root
-    parent: root
-"
-`;
-
 exports[`engine, schema/ delete/ delete non-root 1`] = `
 Array [
   "foo.ch1.md",

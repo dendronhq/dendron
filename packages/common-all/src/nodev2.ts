@@ -720,6 +720,29 @@ export class SchemaUtilsV2 {
     };
   }
 
+  static enhanceForQuickInput({
+    props,
+    vaults,
+  }: {
+    props: SchemaModulePropsV2;
+    vaults: DVault[];
+  }): DNodePropsQuickInputV2 {
+    const vaultSuffix =
+      vaults.length > 1
+        ? ` (${path.basename(props.vault?.fsPath as string)})`
+        : "";
+    const label = DNodeUtilsV2.isRoot(props.root) ? "root" : props.root.id;
+    const detail = props.root.desc;
+    const out = {
+      ...props.root,
+      label,
+      detail,
+      description: vaultSuffix,
+      vault: props.vault,
+    };
+    return out;
+  }
+
   static getModuleRoot(
     module: SchemaModuleOptsV2 | SchemaModulePropsV2
   ): SchemaPropsV2 {

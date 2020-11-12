@@ -27,6 +27,7 @@ import {
 } from "../../components/lookup/buttons";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
+import { DendronQuickPickerV2 } from "../../components/lookup/types";
 import { createNoActiveItem } from "../../components/lookup/utils";
 import { CONFIG, ConfigKey } from "../../constants";
 import { HistoryService } from "../../services/HistoryService";
@@ -41,7 +42,7 @@ import {
   setupDendronWorkspace,
   TIMEOUT,
 } from "../testUtils";
-import { setupCodeWorkspaceV2 } from "../testUtilsv2";
+import { getNoteFromTextEditor, setupCodeWorkspaceV2 } from "../testUtilsv2";
 
 const { LOOKUP_SINGLE_TEST_PRESET } = PLUGIN_CORE;
 // TODO: This could be cleaned up further+extended, but better for now
@@ -52,12 +53,60 @@ const createOneNoteOneSchemaPresetCallback = async (_vaultPath: string) => {
     vaultDir: vaultPath,
   });
 };
+const runAcceptItemTest = async (opts: {
+  ctx: vscode.ExtensionContext;
+  beforeActivateCb?: (opts: {
+    vaults: DVault[];
+    wsRoot: string;
+  }) => Promise<void>;
+  onInitCb: (opts: {
+    lc: LookupControllerV2;
+    lp: LookupProviderV2;
+    wsRoot: string;
+    vaults: DVault[];
+  }) => Promise<void>;
+}) => {
+  // setup workspace
+  const root = tmpDir();
+  const ctx = opts.ctx;
+  const wsRoot = root.name;
+  const vault = { fsPath: tmpDir().name };
+  const vaults = [vault];
 
-const getNoteFromTextEditor = () => {
-  const txtPath = vscode.window.activeTextEditor?.document.uri.fsPath as string;
-  const vault = { fsPath: path.dirname(txtPath) };
-  const node = file2Note(txtPath, vault);
-  return node;
+  // setup test
+  onInitForAccept({ onInitCb: opts.onInitCb, wsRoot, vaults });
+
+  await setupDendronWorkspace(root.name, ctx, {
+    useCb: async (vaultDir) => {
+      await createOneNoteOneSchemaPresetCallback(vaultDir);
+      if (opts.beforeActivateCb) {
+        await opts.beforeActivateCb({
+          wsRoot,
+          vaults: [{ fsPath: vaultDir }],
+        });
+      }
+    },
+    vault,
+  });
+};
+
+const onInitForAccept = async (opts: {
+  onInitCb: (opts: {
+    lc: LookupControllerV2;
+    lp: LookupProviderV2;
+    wsRoot: string;
+    vaults: DVault[];
+  }) => Promise<void>;
+  wsRoot: string;
+  vaults: DVault[];
+}) => {
+  onWSInit(async () => {
+    const { onInitCb, wsRoot, vaults } = opts;
+    const engOpts: EngineOpts = { flavor: "note" };
+    const lc = new LookupControllerV2(engOpts);
+    const lp = new LookupProviderV2(engOpts);
+    await onInitCb({ lp, lc, wsRoot, vaults });
+  });
 };
 
 suite("schemas", function () {
@@ -170,91 +219,100 @@ suite("schemas", function () {
     const engOpts: EngineOpts = { flavor: "schema" };
     let ws: DendronWorkspace;
     let client: DEngineClientV2;
+    let vault: DVault;
 
     test("root", function (done) {
-      onWSInit(async () => {
-        ws = DendronWorkspace.instance();
-        client = ws.getEngine();
-        const schemaModule = client.schemas["root"];
-        const schema = schemaModule["root"];
-        const schemaInput = DNodeUtilsV2.enhancePropForQuickInput({
-          props: schema,
-          schemas: client.schemas,
-          vaults: DendronWorkspace.instance().config.vaults,
-        });
-        const quickpick = createMockQuickPick({
-          value: "root",
-          selectedItems: [schemaInput],
-        });
-        const lp = new LookupProviderV2(engOpts);
-        await lp.onDidAccept(quickpick, engOpts);
-        assert.strictEqual(
-          path.basename(
-            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-          ),
-          "root.schema.yml"
-        );
-        done();
-      });
-      setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
-        useCb: createOneNoteOneSchemaPresetCallback,
+      runAcceptItemTest({
+        ctx,
+        onInitCb: async ({ lp }) => {
+          ws = DendronWorkspace.instance();
+          client = ws.getEngine();
+          const schemaModule = client.schemas["root"];
+          const schemaInput = SchemaUtilsV2.enhanceForQuickInput({
+            props: schemaModule,
+            vaults: DendronWorkspace.instance().config.vaults,
+          });
+          const quickpick = createMockQuickPick({
+            value: "root",
+            selectedItems: [schemaInput],
+          });
+          await lp.onDidAccept(quickpick, engOpts);
+          assert.strictEqual(
+            path.basename(
+              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+            ),
+            "root.schema.yml"
+          );
+          done();
+        },
       });
     });
 
     test("non-root", function (done) {
-      onWSInit(async () => {
-        ws = DendronWorkspace.instance();
-        client = ws.getEngine();
-        const schemaModule = client.schemas["foo"];
-        const schema = schemaModule["root"];
-        const schemaInput = DNodeUtilsV2.enhancePropForQuickInput({
-          props: schema,
-          schemas: client.schemas,
-          vaults: DendronWorkspace.instance().config.vaults,
-        });
-        const quickpick = createMockQuickPick({
-          value: "foo",
-          selectedItems: [schemaInput],
-        });
-        const lp = new LookupProviderV2(engOpts);
-        await lp.onDidAccept(quickpick, engOpts);
-        assert.strictEqual(
-          path.basename(
-            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-          ),
-          "foo.schema.yml"
-        );
-        done();
-      });
-      setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
-        useCb: createOneNoteOneSchemaPresetCallback,
+      runAcceptItemTest({
+        ctx,
+        onInitCb: async ({ lp }) => {
+          ws = DendronWorkspace.instance();
+          client = ws.getEngine();
+          const schemaModule = client.schemas["foo"];
+          const schemaInput = SchemaUtilsV2.enhanceForQuickInput({
+            props: schemaModule,
+            vaults: DendronWorkspace.instance().config.vaults,
+          });
+          const quickpick = createMockQuickPick({
+            value: "foo",
+            selectedItems: [schemaInput],
+          });
+          await lp.onDidAccept(quickpick, engOpts);
+          assert.strictEqual(
+            path.basename(
+              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+            ),
+            "foo.schema.yml"
+          );
+          done();
+        },
       });
     });
 
     test("new", function (done) {
-      onWSInit(async () => {
-        ws = DendronWorkspace.instance();
-        client = ws.getEngine();
-        const lp = new LookupProviderV2(engOpts);
-        const quickpick = createMockQuickPick({
-          value: "bar",
-          selectedItems: [lp.noActiveItem],
-        });
-        await lp.onDidAccept(quickpick, engOpts);
-        assert.strictEqual(
-          path.basename(
-            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-          ),
-          "bar.schema.yml"
-        );
-        done();
+      runAcceptItemTest({
+        ctx,
+        onInitCb: async ({ lp }) => {
+          ws = DendronWorkspace.instance();
+          client = ws.getEngine();
+          const quickpick = createMockQuickPick({
+            value: "bar",
+            selectedItems: [createNoActiveItem(vault)],
+          });
+          await lp.onDidAccept(quickpick, engOpts);
+          assert.strictEqual(
+            path.basename(
+              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+            ),
+            "bar.schema.yml"
+          );
+          done();
+        },
       });
-      setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
-        useCb: createOneNoteOneSchemaPresetCallback,
-      });
+
+      // onWSInit(async () => {
+      //   ws = DendronWorkspace.instance();
+      //   client = ws.getEngine();
+      //   const lp = new LookupProviderV2(engOpts);
+      //   const quickpick = createMockQuickPick({
+      //     value: "bar",
+      //     selectedItems: [createNoActiveItem(vault)],
+      //   });
+      //   await lp.onDidAccept(quickpick, engOpts);
+      //   assert.strictEqual(
+      //     path.basename(
+      //       VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+      //     ),
+      //     "bar.schema.yml"
+      //   );
+      //   done();
+      // });
     });
   });
 });
@@ -279,16 +337,19 @@ function setupCase1({
     ctx,
     wsRoot,
     initDirCb: async (vaultPath) => {
+      const vault = { fsPath: vaultPath };
       await NodeTestUtilsV2.createNotes({
         vaultPath,
         noteProps: [
           {
             id: "id.foo",
             fname: "foo",
+            vault,
           },
           {
             id: "id.bar",
             fname: "bar",
+            vault,
           },
         ],
       });
@@ -320,8 +381,6 @@ function setupCaseCustom({
 suite("notes", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
-  let wsRoot: string;
-  let vaults: DVault[];
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
@@ -334,7 +393,7 @@ suite("notes", function () {
     HistoryService.instance().clearSubscriptions();
   });
 
-  const runAcceptItemTest = async (opts: {
+  const runUpdateItemTest = async (opts: {
     beforeActivateCb?: (opts: {
       vaults: DVault[];
       wsRoot: string;
@@ -342,31 +401,33 @@ suite("notes", function () {
     onInitCb: (opts: {
       lc: LookupControllerV2;
       lp: LookupProviderV2;
+      quickpick: DendronQuickPickerV2;
     }) => Promise<void>;
   }) => {
-    // setup test
-    onInit({ onInitCb: opts.onInitCb });
+    const { onInitCb } = opts;
+    onInitForUpdateItems({ onInitCb });
 
     // setup workspace
-    const _wsRoot = root.name;
+    const wsRoot = root.name;
 
-    const { vaultPath: _vault } = await setupDendronWorkspace(root.name, ctx, {
-      useCb: createOneNoteOneSchemaPresetCallback,
+    await setupDendronWorkspace(root.name, ctx, {
+      useCb: async (vaultDir) => {
+        await createOneNoteOneSchemaPresetCallback(vaultDir);
+        if (opts.beforeActivateCb) {
+          await opts.beforeActivateCb({
+            wsRoot,
+            vaults: [{ fsPath: vaultDir }],
+          });
+        }
+      },
     });
-
-    wsRoot = _wsRoot;
-    vaults = [{ fsPath: _vault }];
-    if (opts.beforeActivateCb) {
-      await opts.beforeActivateCb({ wsRoot, vaults });
-    }
-
-    //await _activate(ctx);
   };
 
-  const onInit = async (opts: {
+  const onInitForUpdateItems = async (opts: {
     onInitCb: (opts: {
       lc: LookupControllerV2;
       lp: LookupProviderV2;
+      quickpick: DendronQuickPickerV2;
     }) => Promise<void>;
   }) => {
     onWSInit(async () => {
@@ -374,7 +435,8 @@ suite("notes", function () {
       const engOpts: EngineOpts = { flavor: "note" };
       const lc = new LookupControllerV2(engOpts);
       const lp = new LookupProviderV2(engOpts);
-      await onInitCb({ lp, lc });
+      const quickpick = await lc.show();
+      await onInitCb({ lp, quickpick, lc });
     });
   };
 
@@ -500,69 +562,59 @@ suite("notes", function () {
     });
 
     test("filter by depth", function (done) {
-      onWSInit(async () => {
-        const engOpts: EngineOpts = { flavor: "note" };
-        const lc = new LookupControllerV2(engOpts);
-        const lp = new LookupProviderV2(engOpts);
-        let quickpick = await lc.show();
-        quickpick.value = "foo.";
-        quickpick.showDirectChildrenOnly = true;
-        await lp.onUpdatePickerItem(quickpick, { flavor: "note" }, "manual");
-        assert.deepStrictEqual(quickpick.items.length, 3);
-        assert.deepStrictEqual(
-          _.find(quickpick.items, { fname: "foo.ch1.gch1" }),
-          undefined
-        );
-        done();
-      });
-
-      setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
-        useCb: async (vaultDir) => {
-          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
-            vaultDir,
-          });
+      runUpdateItemTest({
+        beforeActivateCb: async ({ vaults }) => {
+          const vault = vaults[0];
           NodeTestUtilsV2.createNote({
-            vaultDir,
-            noteProps: { fname: "foo.ch1.gch1" },
+            vaultDir: vault.fsPath,
+            noteProps: { fname: "foo.ch1.gch1", vault },
           });
         },
+        onInitCb: async ({ lp, quickpick }) => {
+          quickpick.value = "foo.";
+          quickpick.showDirectChildrenOnly = true;
+          await lp.onUpdatePickerItem(quickpick, { flavor: "note" }, "manual");
+          assert.deepStrictEqual(quickpick.items.length, 3);
+          assert.deepStrictEqual(
+            _.find(quickpick.items, { fname: "foo.ch1.gch1" }),
+            undefined
+          );
+          done();
+        },
       });
+
+      // onWSInit(async () => {
+      //   const engOpts: EngineOpts = { flavor: "note" };
+      //   const lc = new LookupControllerV2(engOpts);
+      //   const lp = new LookupProviderV2(engOpts);
+      //   let quickpick = await lc.show();
+      //   quickpick.value = "foo.";
+      //   quickpick.showDirectChildrenOnly = true;
+      //   await lp.onUpdatePickerItem(quickpick, { flavor: "note" }, "manual");
+      //   assert.deepStrictEqual(quickpick.items.length, 3);
+      //   assert.deepStrictEqual(
+      //     _.find(quickpick.items, { fname: "foo.ch1.gch1" }),
+      //     undefined
+      //   );
+      //   done();
+      // });
+
+      // setupDendronWorkspace(root.name, ctx, {
+      //   lsp: true,
+      //   useCb: async (vaultDir) => {
+      //     await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+      //       vaultDir,
+      //     });
+      //     NodeTestUtilsV2.createNote({
+      //       vaultDir,
+      //       noteProps: { fname: "foo.ch1.gch1" },
+      //     });
+      //   },
+      // });
     });
 
     // TODO: need to mock pressing a button
-    test.skip("don't update note name if note button not pressed", function (done) {
-      onWSInit(async () => {
-        const engOpts: EngineOpts = { flavor: "note" };
-        const lc = new LookupControllerV2(engOpts);
-        // @ts-ignore
-        const lp = new LookupProviderV2(engOpts);
-        let quickpick = await lc.show();
-        quickpick.value = "foo.";
-        // quickpick.onDidTriggerButton(filterBtn)
-
-        // await lp.onUpdatePickerItem(quickpick, { flavor: "note" }, "manual");
-        // assert.deepStrictEqual(quickpick.items.length, 3);
-        // assert.deepStrictEqual(
-        //   _.find(quickpick.items, { fname: "foo.ch1.gch1" }),
-        //   undefined
-        // );
-        done();
-      });
-
-      setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
-        useCb: async (vaultDir) => {
-          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
-            vaultDir,
-          });
-          NodeTestUtilsV2.createNote({
-            vaultDir,
-            noteProps: { fname: "foo.ch1.gch1" },
-          });
-        },
-      });
-    });
+    test.skip("don't update note name if note button not pressed", function () {});
 
     //     test("attach schema after creation", function (done) {
     //       onWSInit(async () => {
@@ -619,36 +671,35 @@ suite("notes", function () {
     let client: DEngineClientV2;
 
     test("new node", function (done) {
-      onWSInit(async () => {
-        ws = DendronWorkspace.instance();
-        client = ws.getEngine();
-        const quickpick = createMockQuickPick({
-          value: "bond",
-          selectedItems: [createNoActiveItem()],
-        });
-        const lp = new LookupProviderV2(engOpts);
-        await lp.onDidAccept(quickpick, engOpts);
-        assert.strictEqual(
-          DNodeUtilsV2.fname(
-            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-          ),
-          "bond"
-        );
-        const txtPath = vscode.window.activeTextEditor?.document.uri
-          .fsPath as string;
-        const vault = { fsPath: path.dirname(txtPath) };
-        const node = file2Note(txtPath, vault);
-        assert.strictEqual(node.title, "Bond");
-        done();
-      });
-      setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
-        useCb: createOneNoteOneSchemaPresetCallback,
+      runAcceptItemTest({
+        ctx,
+        onInitCb: async ({ lp, vaults }) => {
+          ws = DendronWorkspace.instance();
+          client = ws.getEngine();
+          const quickpick = createMockQuickPick({
+            value: "bond",
+            selectedItems: [createNoActiveItem(vaults[0])],
+          });
+          await lp.onDidAccept(quickpick, engOpts);
+          assert.strictEqual(
+            DNodeUtilsV2.fname(
+              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+            ),
+            "bond"
+          );
+          const txtPath = vscode.window.activeTextEditor?.document.uri
+            .fsPath as string;
+          const vault = { fsPath: path.dirname(txtPath) };
+          const node = file2Note(txtPath, vault);
+          assert.strictEqual(node.title, "Bond");
+          done();
+        },
       });
     });
 
     test("existing note", function (done) {
       runAcceptItemTest({
+        ctx,
         onInitCb: async ({ lp }) => {
           ws = DendronWorkspace.instance();
           client = ws.getEngine();
@@ -679,32 +730,21 @@ suite("notes", function () {
     });
 
     test("lookup new node with schema template", function (done) {
-      onWSInit(async () => {
-        ws = DendronWorkspace.instance();
-        client = ws.getEngine();
-        const lp = new LookupProviderV2(engOpts);
-        const picker = createMockQuickPick({
-          value: "bar.ns1.three",
-          selectedItems: [createNoActiveItem()],
-        });
-        await lp.onUpdatePickerItem(picker, engOpts, "manual");
-        await lp.onDidAccept(picker, engOpts);
-        const node = getNoteFromTextEditor();
-        assert.strictEqual(_.trim(node.body), "text from alpha template");
-        done();
-      });
-      setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
-        useCb: async (vaultDir: string) => {
+      runAcceptItemTest({
+        ctx,
+        beforeActivateCb: async ({ vaults }) => {
+          const vaultDir = vaults[0].fsPath;
+          const vault = vaults[0];
           await NodeTestUtilsV2.createNote({
             vaultDir,
-            noteProps: { body: "Template text", fname: "bar.one.temp" },
+            noteProps: { body: "Template text", fname: "bar.one.temp", vault },
           });
           await NodeTestUtilsV2.createNote({
             vaultDir,
             noteProps: {
               body: "text from alpha template",
               fname: "bar.temp.alpha",
+              vault,
             },
           });
           await NodeTestUtilsV2.createSchema({
@@ -729,41 +769,32 @@ suite("notes", function () {
             ],
             fname: "bar",
           });
-          return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
-            vaultDir,
+        },
+        onInitCb: async ({ lp, vaults }) => {
+          ws = DendronWorkspace.instance();
+          client = ws.getEngine();
+          const picker = createMockQuickPick({
+            value: "bar.ns1.three",
+            selectedItems: [createNoActiveItem(vaults[0])],
           });
+          await lp.onUpdatePickerItem(picker, engOpts, "manual");
+          await lp.onDidAccept(picker, engOpts);
+          const node = getNoteFromTextEditor();
+          assert.strictEqual(_.trim(node.body), "text from alpha template");
+          done();
         },
       });
     });
 
     test("lookup new node with schema template from suggestion", function (done) {
-      onWSInit(async () => {
-        ws = DendronWorkspace.instance();
-        client = ws.getEngine();
-        const lp = new LookupProviderV2(engOpts);
-        const picker = createMockQuickPick({
-          value: "bar.ns1.",
-          selectedItems: [createNoActiveItem()],
-        });
-        await lp.onUpdatePickerItem(picker, engOpts, "manual");
-        assert.deepStrictEqual(
-          _.find(picker.items, { fname: "bar.ns1.three" })?.schema,
-          { moduleId: "bar", schemaId: "three" }
-        );
-        picker.value = "bar.ns1.three";
-        await lp.onDidAccept(picker, engOpts);
-        const node = getNoteFromTextEditor();
-        assert.strictEqual(_.trim(node.body), "text from alpha template");
-        assert.strictEqual(_.trim(node.desc), "desc from alpha");
-        assert.deepStrictEqual(node.custom, { bond: 42 });
-        done();
-      });
-      setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
-        useCb: async (vaultDir: string) => {
+      runAcceptItemTest({
+        ctx,
+        beforeActivateCb: async ({ vaults }) => {
+          const vault = vaults[0];
+          const vaultDir = vault.fsPath;
           await NodeTestUtilsV2.createNote({
             vaultDir,
-            noteProps: { body: "Template text", fname: "bar.one.temp" },
+            noteProps: { body: "Template text", fname: "bar.one.temp", vault },
           });
           await NodeTestUtilsV2.createNote({
             vaultDir,
@@ -774,6 +805,7 @@ suite("notes", function () {
               custom: {
                 bond: 42,
               },
+              vault,
             },
           });
           await NodeTestUtilsV2.createSchema({
@@ -798,34 +830,43 @@ suite("notes", function () {
             ],
             fname: "bar",
           });
-          return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
-            vaultDir,
+        },
+        onInitCb: async ({ lp, vaults }) => {
+          ws = DendronWorkspace.instance();
+          client = ws.getEngine();
+          const picker = createMockQuickPick({
+            value: "bar.ns1.",
+            selectedItems: [createNoActiveItem(vaults[0])],
           });
+          await lp.onUpdatePickerItem(picker, engOpts, "manual");
+          assert.deepStrictEqual(
+            _.find(picker.items, { fname: "bar.ns1.three" })?.schema,
+            { moduleId: "bar", schemaId: "three" }
+          );
+          picker.value = "bar.ns1.three";
+          await lp.onDidAccept(picker, engOpts);
+          const node = getNoteFromTextEditor();
+          assert.strictEqual(_.trim(node.body), "text from alpha template");
+          assert.strictEqual(_.trim(node.desc), "desc from alpha");
+          assert.deepStrictEqual(node.custom, { bond: 42 });
+          done();
         },
       });
     });
 
     test("new node with schema template for namespace", function (done) {
-      onWSInit(async () => {
-        ws = DendronWorkspace.instance();
-        client = ws.getEngine();
-        const lp = new LookupProviderV2(engOpts);
-        const picker = createMockQuickPick({
-          value: "journal.2020.08.10",
-          selectedItems: [createNoActiveItem()],
-        });
-        await lp.onUpdatePickerItem(picker, engOpts, "manual");
-        await lp.onDidAccept(picker, engOpts);
-        const node = getNoteFromTextEditor();
-        assert.strictEqual(_.trim(node.body), "Template text");
-        done();
-      });
-      setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
-        useCb: async (vaultDir: string) => {
+      runAcceptItemTest({
+        ctx,
+        beforeActivateCb: async ({ vaults }) => {
+          const vault = vaults[0];
+          const vaultDir = vault.fsPath;
           await NodeTestUtilsV2.createNote({
             vaultDir,
-            noteProps: { body: "Template text", fname: "journal.template" },
+            noteProps: {
+              body: "Template text",
+              fname: "journal.template",
+              vault,
+            },
           });
           await NodeTestUtilsV2.createSchema({
             vaultDir,
@@ -857,9 +898,19 @@ suite("notes", function () {
             ],
             fname: "journal",
           });
-          return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
-            vaultDir,
+        },
+        onInitCb: async ({ lp, vaults }) => {
+          ws = DendronWorkspace.instance();
+          client = ws.getEngine();
+          const picker = createMockQuickPick({
+            value: "journal.2020.08.10",
+            selectedItems: [createNoActiveItem(vaults[0])],
           });
+          await lp.onUpdatePickerItem(picker, engOpts, "manual");
+          await lp.onDidAccept(picker, engOpts);
+          const node = getNoteFromTextEditor();
+          assert.strictEqual(_.trim(node.body), "Template text");
+          done();
         },
       });
     });
@@ -903,35 +954,31 @@ suite("notes", function () {
     });
 
     test("new note, when multipe notes selected", function (done) {
-      onWSInit(async () => {
-        await VSCodeUtils.closeAllEditors();
-        ws = DendronWorkspace.instance();
-        client = ws.getEngine();
-        const notes = ["foo", "foo.ch1"].map((fname) => client.notes[fname]);
-        const items = notes.map((note) =>
-          DNodeUtilsV2.enhancePropForQuickInput({
-            props: note,
-            schemas: client.schemas,
-            vaults: DendronWorkspace.instance().config.vaults,
-          })
-        );
-        const quickpick = createMockQuickPick({
-          value: "bond",
-          selectedItems: items.concat(createNoActiveItem()),
-        });
-        quickpick.canSelectMany = true;
-        const lp = new LookupProviderV2(engOpts);
-        await lp.onDidAccept(quickpick, engOpts);
-        const active = VSCodeUtils.getActiveTextEditor();
-        assert.ok(_.isUndefined(active));
-        done();
-      });
-
-      setupCodeWorkspaceV2({
+      runAcceptItemTest({
         ctx,
-        initDirCb: createOneNoteOneSchemaPresetCallback,
-        wsRoot: root.name,
-      }).then(() => _activate(ctx));
+        onInitCb: async ({ lp, vaults }) => {
+          await VSCodeUtils.closeAllEditors();
+          ws = DendronWorkspace.instance();
+          client = ws.getEngine();
+          const notes = ["foo", "foo.ch1"].map((fname) => client.notes[fname]);
+          const items = notes.map((note) =>
+            DNodeUtilsV2.enhancePropForQuickInput({
+              props: note,
+              schemas: client.schemas,
+              vaults: DendronWorkspace.instance().config.vaults,
+            })
+          );
+          const quickpick = createMockQuickPick({
+            value: "bond",
+            selectedItems: items.concat(createNoActiveItem(vaults[0])),
+          });
+          quickpick.canSelectMany = true;
+          await lp.onDidAccept(quickpick, engOpts);
+          const active = VSCodeUtils.getActiveTextEditor();
+          assert.ok(_.isUndefined(active));
+          done();
+        },
+      });
     });
   });
 });

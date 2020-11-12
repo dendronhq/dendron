@@ -155,7 +155,11 @@ export class NodeTestPresetsV2 {
     await NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({ vaultDir });
     await NodeTestUtilsV2.createNote({
       vaultDir,
-      noteProps: { body: "((ref: [[foo]]))", fname: "bar" },
+      noteProps: {
+        body: "((ref: [[foo]]))",
+        fname: "bar",
+        vault: { fsPath: vaultDir },
+      },
     });
   }
 
@@ -181,15 +185,17 @@ export class NodeTestPresetsV2 {
       ],
       fname: "bar",
     });
+    const vault = { fsPath: vaultDir } as DVault;
     await NodeTestUtilsV2.createNote({
       vaultDir,
-      noteProps: { body: "ch1 template", fname: "bar.template.ch1" },
+      noteProps: { body: "ch1 template", fname: "bar.template.ch1", vault },
     });
     await NodeTestUtilsV2.createNote({
       vaultDir,
       noteProps: {
         body: "ch2 template",
         fname: "bar.template.ch2",
+        vault,
       },
     });
   }
@@ -385,7 +391,10 @@ export class NoteTestPresetsV2 {
         domainStub: new TestPresetEntry({
           label: "write child, parent stub",
           before: async ({ vaultDir }: { vaultDir: string }) => {
-            const note = NoteUtilsV2.create({ fname: "bar.ch1" });
+            const note = NoteUtilsV2.create({
+              fname: "bar.ch1",
+              vault: { fsPath: vaultDir },
+            });
             await note2File(note, vaultDir);
           },
           results: async ({ notes }: { notes: NotePropsDictV2 }) => {
@@ -492,6 +501,7 @@ export class NodeTestUtilsV2 {
     props?: Partial<NotePropsV2>;
   }) => {
     const { rootName, vaultPath, props } = opts;
+    const vault = { fsPath: vaultPath };
     const foo = NoteUtilsV2.create({
       fname: `${rootName}`,
       id: `${rootName}`,
@@ -499,12 +509,14 @@ export class NodeTestUtilsV2 {
       updated: "1",
       children: ["ch1"],
       ...props,
+      vault,
     });
     const ch1 = NoteUtilsV2.create({
       fname: `${rootName}.ch1`,
       id: `${rootName}.ch1`,
       created: "1",
       updated: "1",
+      vault,
       ...props,
     });
     await note2File(foo, vaultPath);

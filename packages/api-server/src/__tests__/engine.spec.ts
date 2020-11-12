@@ -1,4 +1,5 @@
 import {
+  DVault,
   NoteChangeEntry,
   NotePropsDictV2,
   NotePropsV2,
@@ -15,6 +16,7 @@ import {
   EngineAPIShim,
   INIT_TEST_PRESETS,
   EngineTestUtilsV2,
+  ENGINE_SERVER,
 } from "@dendronhq/common-test-utils";
 import {
   DendronAPI,
@@ -26,6 +28,8 @@ import fs from "fs-extra";
 import path from "path";
 import _ from "lodash";
 import { ParserUtilsV2 } from "@dendronhq/engine-server";
+
+const { SCHEMAS } = ENGINE_SERVER.ENGINE_SINGLE_TEST_PRESET;
 
 async function setupWS({ wsRoot, vault }: { wsRoot: string; vault: string }) {
   const payload = {
@@ -63,14 +67,16 @@ const getNotes = async ({
 
 describe("schema", () => {
   let wsRoot: string;
-  let vault: string;
+  let vaultString: string;
+  let vault: DVault;
 
   beforeEach(async () => {
     wsRoot = tmpDir().name;
-    vault = path.join(wsRoot, "vault");
-    fs.ensureDirSync(vault);
+    vaultString = path.join(wsRoot, "vault");
+    vault = { fsPath: vaultString };
+    fs.ensureDirSync(vaultString);
     await EngineTestUtilsV2.setupVault({
-      vaultDir: vault,
+      vaultDir: vaultString,
       initDirCb: async (vaultPath: string) => {
         await NodeTestUtilsV2.createNotes({ vaultPath });
         await NodeTestUtilsV2.createSchemas({ vaultPath });
@@ -86,10 +92,10 @@ describe("schema", () => {
   describe("delete", () => {
     beforeEach(async () => {
       wsRoot = tmpDir().name;
-      vault = path.join(wsRoot, "vault");
-      fs.ensureDirSync(vault);
+      vaultString = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vaultString);
       await EngineTestUtilsV2.setupVault({
-        vaultDir: vault,
+        vaultDir: vaultString,
         initDirCb: async (vaultPath: string) => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
@@ -102,7 +108,7 @@ describe("schema", () => {
       const payload = {
         uri: wsRoot,
         config: {
-          vaults: [vault],
+          vaults: [vaultString],
         },
       };
       const api = new DendronAPI({
@@ -114,7 +120,7 @@ describe("schema", () => {
         ws: wsRoot,
         id: "foo",
       });
-      const schemaPath = path.join(vault, "foo.schema.yml");
+      const schemaPath = path.join(vaultString, "foo.schema.yml");
       expect(fs.existsSync(schemaPath)).toBeFalsy();
     });
   });
@@ -122,17 +128,21 @@ describe("schema", () => {
   describe("init", () => {
     beforeEach(async () => {
       wsRoot = tmpDir().name;
-      vault = path.join(wsRoot, "vault");
-      fs.ensureDirSync(vault);
+      vaultString = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vaultString);
       await EngineTestUtilsV2.setupVault({
-        vaultDir: vault,
-        initDirCb: async (_vaultPath: string) => {},
+        vaultDir: vaultString,
+        initDirCb: async (_vaultPath: string) => {
+          return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
+            vaultDir: _vaultPath,
+          });
+        },
       });
     });
 
     test(INIT_TEST_PRESETS.BAD_SCHEMA.label, async () => {
-      const vaults = [vault];
-      const vaultDir = vault;
+      const vaults = [vaultString];
+      const vaultDir = vaultString;
       await INIT_TEST_PRESETS.BAD_SCHEMA.before({ vaultDir });
       const api = new DendronAPI({
         endpoint: "http://localhost:3005",
@@ -147,15 +157,34 @@ describe("schema", () => {
         expect,
       });
     });
+
+    test("root", async () => {
+      const vaults = [vaultString];
+      const api = new DendronAPI({
+        endpoint: "http://localhost:3005",
+        apiPath: "api",
+      });
+      const engine = new EngineAPIShim({ api, wsRoot, vaults });
+      const resp = await engine.init();
+      const schemas = resp.data.schemas;
+      await NodeTestPresetsV2.runJestHarness({
+        opts: {
+          schemas,
+          vault: { fsPath: vaultString },
+        },
+        results: SCHEMAS.INIT.ROOT.results,
+        expect,
+      });
+    });
   });
 
   describe("query", () => {
     beforeEach(async () => {
       wsRoot = tmpDir().name;
-      vault = path.join(wsRoot, "vault");
-      fs.ensureDirSync(vault);
+      vaultString = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vaultString);
       await EngineTestUtilsV2.setupVault({
-        vaultDir: vault,
+        vaultDir: vaultString,
         initDirCb: async (vaultPath: string) => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
@@ -168,7 +197,7 @@ describe("schema", () => {
       const payload = {
         uri: wsRoot,
         config: {
-          vaults: [vault],
+          vaults: [vaultString],
         },
       };
       const api = new DendronAPI({
@@ -196,7 +225,7 @@ describe("schema", () => {
       const payload = {
         uri: wsRoot,
         config: {
-          vaults: [vault],
+          vaults: [vaultString],
         },
       };
       const api = new DendronAPI({
@@ -224,7 +253,7 @@ describe("schema", () => {
       const payload = {
         uri: wsRoot,
         config: {
-          vaults: [vault],
+          vaults: [vaultString],
         },
       };
       const api = new DendronAPI({
@@ -253,7 +282,7 @@ describe("schema", () => {
       const payload = {
         uri: wsRoot,
         config: {
-          vaults: [vault],
+          vaults: [vaultString],
         },
       };
       const api = new DendronAPI({
@@ -270,7 +299,7 @@ describe("schema", () => {
         ws: wsRoot,
         schema,
       });
-      const schemaPath = path.join(vault, "pro.schema.yml");
+      const schemaPath = path.join(vaultString, "pro.schema.yml");
       const schemaOut = file2Schema(schemaPath);
       expect(
         fs.readFileSync(schemaPath, { encoding: "utf8" })
@@ -287,29 +316,31 @@ const NOTE_UPDATE_PRESET =
 
 describe("notes", () => {
   let wsRoot: string;
-  let vault: string;
+  let vaultString: string;
+  let vault: DVault;
   let api: DendronAPI;
 
   describe("delete", () => {
     beforeEach(async () => {
       wsRoot = tmpDir().name;
-      vault = path.join(wsRoot, "vault");
-      fs.ensureDirSync(vault);
+      vaultString = path.join(wsRoot, "vault");
+      vault = { fsPath: vaultString };
+      fs.ensureDirSync(vaultString);
       await EngineTestUtilsV2.setupVault({
-        vaultDir: vault,
+        vaultDir: vaultString,
         initDirCb: async (vaultPath: string) => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
           });
         },
       });
-      api = await setupWS({ wsRoot, vault });
+      api = await setupWS({ wsRoot, vault: vaultString });
     });
 
     test("note w/children", async () => {
       await api.engineDelete({ id: "foo", ws: wsRoot });
-      expect(fs.readdirSync(vault)).toMatchSnapshot();
-      expect(_.includes(fs.readdirSync(vault), "foo.md")).toBeFalsy();
+      expect(fs.readdirSync(vaultString)).toMatchSnapshot();
+      expect(_.includes(fs.readdirSync(vaultString), "foo.md")).toBeFalsy();
     });
 
     test(NOTE_DELETE_PRESET.noteNoChildren.label, async () => {
@@ -327,7 +358,7 @@ describe("notes", () => {
       _.map(
         await NOTE_DELETE_PRESET.noteNoChildren.results({
           changed: changed.data as NoteChangeEntry[],
-          vaultDir: vault,
+          vaultDir: vaultString,
           notes,
         }),
         (ent) => {
@@ -337,8 +368,8 @@ describe("notes", () => {
     });
 
     test(NOTE_DELETE_PRESET.domainNoChildren.label, async () => {
-      fs.removeSync(path.join(vault, "foo.ch1.md"));
-      api = await setupWS({ wsRoot, vault });
+      fs.removeSync(path.join(vaultString, "foo.ch1.md"));
+      api = await setupWS({ wsRoot, vault: vaultString });
       const changed = await api.engineDelete({ id: "foo", ws: wsRoot });
       const resp = await api.engineQuery({
         ws: wsRoot,
@@ -353,7 +384,7 @@ describe("notes", () => {
       _.map(
         await NOTE_DELETE_PRESET.domainNoChildren.results({
           changed: changed.data as NoteChangeEntry[],
-          vaultDir: vault,
+          vaultDir: vaultString,
           notes,
         }),
         (ent) => {
@@ -366,10 +397,10 @@ describe("notes", () => {
   describe("query", () => {
     beforeEach(async () => {
       wsRoot = tmpDir().name;
-      vault = path.join(wsRoot, "vault");
-      fs.ensureDirSync(vault);
+      vaultString = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vaultString);
       await EngineTestUtilsV2.setupVault({
-        vaultDir: vault,
+        vaultDir: vaultString,
         initDirCb: async (vaultPath: string) => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
@@ -382,7 +413,7 @@ describe("notes", () => {
       const payload = {
         uri: wsRoot,
         config: {
-          vaults: [vault],
+          vaults: [vaultString],
         },
       };
       const api = new DendronAPI({
@@ -402,7 +433,7 @@ describe("notes", () => {
       const payload = {
         uri: wsRoot,
         config: {
-          vaults: [vault],
+          vaults: [vaultString],
         },
       };
       const api = new DendronAPI({
@@ -427,7 +458,7 @@ describe("notes", () => {
       const payload = {
         uri: wsRoot,
         config: {
-          vaults: [vault],
+          vaults: [vaultString],
         },
       };
       const api = new DendronAPI({
@@ -454,10 +485,10 @@ describe("notes", () => {
 
     beforeEach(async () => {
       wsRoot = tmpDir().name;
-      vault = path.join(wsRoot, "vault");
-      fs.ensureDirSync(vault);
+      vaultString = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vaultString);
       await EngineTestUtilsV2.setupVault({
-        vaultDir: vault,
+        vaultDir: vaultString,
         initDirCb: async (vaultPath: string) => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
@@ -468,6 +499,7 @@ describe("notes", () => {
             created: "1",
             updated: "1",
             body: "[[bar]]",
+            vault,
           });
           await note2File(note, vaultPath);
           note = NoteUtilsV2.create({
@@ -476,16 +508,17 @@ describe("notes", () => {
             created: "1",
             updated: "1",
             body: "[[foo]]",
+            vault,
           });
           await note2File(note, vaultPath);
         },
       });
-      api = await setupWS({ wsRoot, vault });
-      engine = new EngineAPIShim({ api, wsRoot, vaults: [vault] });
+      api = await setupWS({ wsRoot, vault: vaultString });
+      engine = new EngineAPIShim({ api, wsRoot, vaults: [vaultString] });
     });
 
     test("basic", async () => {
-      const vaultDir = vault;
+      const vaultDir = vaultString;
       const changed = await api.engineRenameNote({
         ws: wsRoot,
         oldLoc: { fname: "foo", vault: { fsPath: vaultDir } },
@@ -502,7 +535,7 @@ describe("notes", () => {
     });
 
     test(RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.label, async () => {
-      const vaultDir = vault;
+      const vaultDir = vaultString;
       await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.before({ vaultDir });
       const resp = await api.engineRenameNote({
         ws: wsRoot,
@@ -520,7 +553,7 @@ describe("notes", () => {
     });
 
     test(RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.label, async () => {
-      const vaultDir = vault;
+      const vaultDir = vaultString;
       await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.before({ vaultDir });
       await engine.init();
       const {
@@ -551,17 +584,17 @@ describe("notes", () => {
   describe("update", () => {
     beforeEach(async () => {
       wsRoot = tmpDir().name;
-      vault = path.join(wsRoot, "vault");
-      fs.ensureDirSync(vault);
+      vaultString = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vaultString);
       await EngineTestUtilsV2.setupVault({
-        vaultDir: vault,
+        vaultDir: vaultString,
         initDirCb: async (vaultPath: string) => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
           });
         },
       });
-      api = await setupWS({ wsRoot, vault });
+      api = await setupWS({ wsRoot, vault: vaultString });
     });
 
     test(NOTE_UPDATE_PRESET.noteNoChildren.label, async () => {
@@ -584,7 +617,7 @@ describe("notes", () => {
 
       _.map(
         await NOTE_UPDATE_PRESET.noteNoChildren.results({
-          vaultDir: vault,
+          vaultDir: vaultString,
           notes,
         }),
         (ent) => {
@@ -599,10 +632,10 @@ describe("notes", () => {
       NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.write;
     beforeEach(async () => {
       wsRoot = tmpDir().name;
-      vault = path.join(wsRoot, "vault");
-      fs.ensureDirSync(vault);
+      vaultString = path.join(wsRoot, "vault");
+      fs.ensureDirSync(vaultString);
       await EngineTestUtilsV2.setupVault({
-        vaultDir: vault,
+        vaultDir: vaultString,
         initDirCb: async (vaultPath: string) => {
           await NodeTestUtilsV2.createNotes({ vaultPath });
           await NodeTestUtilsV2.createSchemas({ vaultPath });
@@ -618,12 +651,12 @@ describe("notes", () => {
     test(NOTE_WRITE_PRESET["serializeChildWithHierarchy"].label, async () => {
       await NoteTestPresetsV2.createJestTest({
         entry: NOTE_WRITE_PRESET["serializeChildWithHierarchy"],
-        beforeArgs: { vaultDir: vault },
+        beforeArgs: { vaultDir: vaultString },
         executeCb: async () => {
           const payload = {
             uri: wsRoot,
             config: {
-              vaults: [vault],
+              vaults: [vaultString],
             },
           };
           const api = new DendronAPI({
@@ -636,13 +669,14 @@ describe("notes", () => {
             id: "foo.ch1",
             created: "1",
             updated: "1",
+            vault,
           });
           await api.engineWrite({
             ws: wsRoot,
             node: noteNew,
             opts: { writeHierarchy: true },
           });
-          return { vaultDir: vault };
+          return { vaultDir: vaultString };
         },
         expect,
       });
@@ -652,7 +686,7 @@ describe("notes", () => {
       const payload = {
         uri: wsRoot,
         config: {
-          vaults: [vault],
+          vaults: [vaultString],
         },
       };
       const api = new DendronAPI({
@@ -662,10 +696,10 @@ describe("notes", () => {
       await api.workspaceInit(payload);
       const resp = await api.engineWrite({
         ws: wsRoot,
-        node: NoteUtilsV2.create({ fname: "bond" }),
+        node: NoteUtilsV2.create({ fname: "bond", vault }),
       });
       expect(resp.data.length).toEqual(2);
-      const out = fs.readdirSync(vault);
+      const out = fs.readdirSync(vaultString);
       expect(out).toEqual([
         "bond.md",
         "foo.ch1.md",
@@ -680,7 +714,7 @@ describe("notes", () => {
       const payload = {
         uri: wsRoot,
         config: {
-          vaults: [vault],
+          vaults: [vaultString],
         },
       };
       const api = new DendronAPI({
@@ -690,10 +724,10 @@ describe("notes", () => {
       await api.workspaceInit(payload);
       const resp = await api.engineWrite({
         ws: wsRoot,
-        node: NoteUtilsV2.create({ id: "bond.ch1", fname: "bond.ch1" }),
+        node: NoteUtilsV2.create({ id: "bond.ch1", fname: "bond.ch1", vault }),
       });
       expect(resp.data.length).toEqual(3);
-      const out = fs.readdirSync(vault);
+      const out = fs.readdirSync(vaultString);
       expect(out.sort()).toEqual([
         "bond.ch1.md",
         "foo.ch1.md",
@@ -708,7 +742,7 @@ describe("notes", () => {
       const payload = {
         uri: wsRoot,
         config: {
-          vaults: [vault],
+          vaults: [vaultString],
         },
       };
       const api = new DendronAPI({
@@ -718,14 +752,14 @@ describe("notes", () => {
       await api.workspaceInit(payload);
       const resp = await api.engineWrite({
         ws: wsRoot,
-        node: NoteUtilsV2.create({ id: "foo.ch2", fname: "foo.ch2" }),
+        node: NoteUtilsV2.create({ id: "foo.ch2", fname: "foo.ch2", vault }),
       });
       expect(resp.data.length).toEqual(2);
       expect(resp.data.map((ent) => _.pick(ent.note, "id").id).sort()).toEqual([
         "foo",
         "foo.ch2",
       ]);
-      const out = fs.readdirSync(vault);
+      const out = fs.readdirSync(vaultString);
       expect(out.sort()).toEqual([
         "foo.ch1.md",
         "foo.ch2.md",
@@ -737,12 +771,12 @@ describe("notes", () => {
     });
 
     test(NOTE_WRITE_PRESET["domainStub"].label, async () => {
-      await NOTE_WRITE_PRESET["domainStub"].before({ vaultDir: vault });
+      await NOTE_WRITE_PRESET["domainStub"].before({ vaultDir: vaultString });
       const results = NOTE_WRITE_PRESET["domainStub"].results;
       const payload = {
         uri: wsRoot,
         config: {
-          vaults: [vault],
+          vaults: [vaultString],
         },
       };
       const api = new DendronAPI({
@@ -752,7 +786,7 @@ describe("notes", () => {
       await api.workspaceInit(payload);
       await api.engineWrite({
         ws: wsRoot,
-        node: NoteUtilsV2.create({ id: "bar.ch1", fname: "bar.ch1" }),
+        node: NoteUtilsV2.create({ id: "bar.ch1", fname: "bar.ch1", vault }),
       });
       const notes = await getNotes({ api, wsRoot });
       await NodeTestPresetsV2.runMochaHarness({
@@ -767,7 +801,7 @@ describe("notes", () => {
       const payload = {
         uri: wsRoot,
         config: {
-          vaults: [vault],
+          vaults: [vaultString],
         },
       };
       const api = new DendronAPI({
@@ -777,7 +811,11 @@ describe("notes", () => {
       await api.workspaceInit(payload);
       const resp = await api.engineWrite({
         ws: wsRoot,
-        node: NoteUtilsV2.create({ id: "foo.ch2.gch1", fname: "foo.ch2.gch1" }),
+        node: NoteUtilsV2.create({
+          id: "foo.ch2.gch1",
+          fname: "foo.ch2.gch1",
+          vault,
+        }),
       });
       const expected = ["foo", "foo.ch2.gch1"];
       expect(resp.data.length).toEqual(3);
@@ -787,7 +825,7 @@ describe("notes", () => {
           expected
         )
       ).toEqual(expected);
-      const out = fs.readdirSync(vault);
+      const out = fs.readdirSync(vaultString);
       expect(out.sort()).toEqual([
         "foo.ch1.md",
         "foo.ch2.gch1.md",

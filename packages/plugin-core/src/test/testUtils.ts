@@ -15,7 +15,7 @@ import {
   HistoryService,
 } from "../services/HistoryService";
 import { DendronWorkspace } from "../workspace";
-import { DNodePropsQuickInputV2 } from "@dendronhq/common-all";
+import { DNodePropsQuickInputV2, DVault } from "@dendronhq/common-all";
 import { VSCodeUtils } from "../utils";
 import fs from "fs-extra";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
@@ -116,6 +116,7 @@ export async function setupDendronWorkspace(
     useCb?: (vaultPath: string) => Promise<void>;
     activateWorkspace?: boolean;
     lsp?: boolean;
+    vault?: DVault;
   }
 ) {
   const optsClean = _.defaults(opts, {
@@ -137,8 +138,9 @@ export async function setupDendronWorkspace(
     configOverride: optsClean.configOverride,
     lsp: optsClean.lsp,
   });
-  const wsFolder = (workspaceFolders as vscode.WorkspaceFolder[])[0];
-  const vaultPath = wsFolder.uri.fsPath;
+  const vaultPath = optsClean.vault?.fsPath
+    ? optsClean.vault.fsPath
+    : (workspaceFolders as vscode.WorkspaceFolder[])[0].uri.fsPath;
   if (optsClean.withAssets) {
     const assetsDir = path.join(vaultPath, "assets");
     await fs.ensureDir(assetsDir);
@@ -149,9 +151,9 @@ export async function setupDendronWorkspace(
     skipOpenWs: true,
     ...optsClean.setupWsOverride,
   });
-  await optsClean.useCb(wsFolder.uri.fsPath);
+  await optsClean.useCb(vaultPath);
   const config = DConfig.getOrCreate(rootDir);
-  config.vaults = [{ fsPath: wsFolder.uri.fsPath }];
+  config.vaults = [{ fsPath: vaultPath }];
   DConfig.writeConfig({ wsRoot: rootDir, config });
   await _activate(ctx);
   return {

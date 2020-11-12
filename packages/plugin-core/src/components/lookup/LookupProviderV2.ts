@@ -27,10 +27,8 @@ import {
 
 export class LookupProviderV2 {
   public opts: EngineOpts;
-  public noActiveItem: DNodePropsQuickInputV2;
 
   constructor(opts: EngineOpts) {
-    this.noActiveItem = createNoActiveItem();
     this.opts = opts;
   }
 
@@ -55,7 +53,6 @@ export class LookupProviderV2 {
     let nodeNew: DNodePropsV2;
     let foundStub = false;
     const ws = DendronWorkspace.instance();
-    const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
     const engine = ws.getEngine();
     if (selectedItem?.stub) {
       Logger.info({ ctx, msg: "create stub" });
@@ -67,8 +64,9 @@ export class LookupProviderV2 {
       selectedItem.schemaStub = false;
       nodeNew = selectedItem;
     } else {
+      const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
       Logger.info({ ctx, msg: "create normal node" });
-      nodeNew = NoteUtilsV2.create({ fname });
+      nodeNew = NoteUtilsV2.create({ fname, vault });
       const result = SchemaUtilsV2.matchPath({
         notePath: fname,
         schemaModDict: engine.schemas,
@@ -94,7 +92,7 @@ export class LookupProviderV2 {
         engine,
       });
     }
-    const uri = node2Uri(nodeNew, wsFolders);
+    const uri = node2Uri(nodeNew);
     const historyService = HistoryService.instance();
     historyService.add({ source: "engine", action: "create", uri });
 
@@ -126,13 +124,10 @@ export class LookupProviderV2 {
     Logger.info({ ctx, msg: "createNewPick", value: fname });
     let smodNew: SchemaModulePropsV2;
     const ws = DendronWorkspace.instance();
-    const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
     const engine = ws.getEngine();
     Logger.info({ ctx, msg: "create normal node" });
     smodNew = SchemaUtilsV2.createModuleProps({ fname, vault });
-    const uri = Uri.file(
-      SchemaUtilsV2.getPath({ root: wsFolders[0].uri.fsPath, fname })
-    );
+    const uri = Uri.file(SchemaUtilsV2.getPath({ root: vault.fsPath, fname }));
     const historyService = HistoryService.instance();
     historyService.add({ source: "engine", action: "create", uri });
     await engine.writeSchema(smodNew);
@@ -173,7 +168,6 @@ export class LookupProviderV2 {
     Logger.info({ ctx, msg: "enter", value, opts });
     const selectedItem = PickerUtilsV2.getSelection(picker)[0];
     const resp = this.validate(picker.value, opts.flavor);
-    const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
     const ws = DendronWorkspace.instance();
     let uri: Uri;
     if (resp) {
@@ -181,20 +175,20 @@ export class LookupProviderV2 {
     }
     const maybeNote = NoteUtilsV2.getNoteByFname(value, ws.getEngine().notes);
     if (!selectedItem && opts.flavor === "note" && maybeNote) {
-      uri = node2Uri(maybeNote, wsFolders);
+      uri = node2Uri(maybeNote);
       return showDocAndHidePicker([uri], picker);
     }
     if (PickerUtilsV2.isCreateNewNotePickForSingle(selectedItem)) {
       uri = await this.onAcceptNewNode({ picker, opts, selectedItem });
     } else {
-      uri = node2Uri(selectedItem, wsFolders);
+      uri = node2Uri(selectedItem);
       if (opts.flavor === "schema") {
         const smod = DendronWorkspace.instance().getEngine().schemas[
           selectedItem.id
         ];
         uri = Uri.file(
           SchemaUtilsV2.getPath({
-            root: DendronWorkspace.rootWorkspaceFolder()?.uri.fsPath as string,
+            root: smod.vault.fsPath,
             fname: smod.fname,
           })
         );
@@ -209,7 +203,6 @@ export class LookupProviderV2 {
     Logger.info({ ctx, msg: "enter", value, opts });
     let selectedItems = PickerUtilsV2.getSelection(picker);
     const resp = this.validate(picker.value, opts.flavor);
-    const wsFolders = DendronWorkspace.workspaceFolders() as WorkspaceFolder[];
     const ws = DendronWorkspace.instance();
     let uris: Uri[];
     if (resp) {
@@ -228,11 +221,11 @@ export class LookupProviderV2 {
         if (maybeNote.stub) {
           selectedItems = [...picker.activeItems];
         } else {
-          uris = [node2Uri(maybeNote, wsFolders)];
+          uris = [node2Uri(maybeNote)];
           return showDocAndHidePicker(uris, picker);
         }
       } else {
-        selectedItems = [createNoActiveItem()];
+        selectedItems = [];
       }
     }
 
@@ -267,7 +260,7 @@ export class LookupProviderV2 {
           )
         );
       } else {
-        uris = selectedItems.map((item) => node2Uri(item, wsFolders));
+        uris = selectedItems.map((item) => node2Uri(item));
       }
     }
     return showDocAndHidePicker(uris, picker);

@@ -52,7 +52,7 @@ suite("notes, multi", function () {
     }) => Promise<void>;
   }) => {
     const { onInitCb } = opts;
-    onInitForUpdateIttems({ onInitCb });
+    onInitForUpdateItems({ onInitCb });
     const {
       wsRoot: _wsRoot,
       vaults: _vaults,
@@ -89,7 +89,7 @@ suite("notes, multi", function () {
     await _activate(ctx);
   };
 
-  const onInitForUpdateIttems = async (opts: {
+  const onInitForUpdateItems = async (opts: {
     onInitCb: (opts: {
       lc: LookupControllerV2;
       lp: LookupProviderV2;

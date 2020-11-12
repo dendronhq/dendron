@@ -123,15 +123,15 @@ export type DNodePropsV2<T = any> = {
   body: string;
   custom?: any;
   schema?: { moduleId: string; schemaId: string };
-  vault?: DVault;
+  vault: DVault;
 };
 
 /**
  * Opts are arguments used when creating a node
  */
 export type DNodeOptsV2<T = any> = Partial<
-  Omit<DNodePropsV2<T>, "fname|type"> & { fname: string; type: DNodeTypeV2 }
-> & { fname: string; type: DNodeTypeV2 };
+  Omit<DNodePropsV2<T>, "fname|type|vault">
+> & { fname: string; type: DNodeTypeV2; vault: DVault };
 
 export type SchemaRawV2 = Pick<SchemaPropsV2, "id"> &
   Partial<SchemaDataV2> & { title?: string; desc?: string } & Partial<

@@ -2,12 +2,11 @@ import {
   DendronError,
   DEngineV2,
   DNodeUtilsV2,
+  DVault,
   ENGINE_ERROR_CODES,
   NoteChangeEntry,
   NotePropsV2,
   NoteUtilsV2,
-  SchemaModuleDictV2,
-  SchemaModulePropsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import {
@@ -18,6 +17,7 @@ import {
 } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
+  ENGINE_SERVER,
   INIT_TEST_PRESETS,
   NodeTestPresetsV2,
   NodeTestUtilsV2,
@@ -30,23 +30,26 @@ import path from "path";
 import { DendronEngineV2 } from "../enginev2";
 import { ParserUtilsV2 } from "../topics/markdown";
 
-const _su = SchemaUtilsV2;
+const { SCHEMAS } = ENGINE_SERVER.ENGINE_SINGLE_TEST_PRESET;
 const { normalizeNote, normalizeNotes } = NodeTestUtilsV2;
 
 const createNotes = async (opts: { rootName: string; vaultDir: string }) => {
   const { rootName, vaultDir } = opts;
+  const vault = { fsPath: vaultDir };
   const foo = NoteUtilsV2.create({
     fname: `${rootName}`,
     id: `${rootName}`,
     created: "1",
     updated: "1",
     children: ["ch1"],
+    vault,
   });
   const ch1 = NoteUtilsV2.create({
     fname: `${rootName}.ch1`,
     id: `${rootName}.ch1`,
     created: "1",
     updated: "1",
+    vault,
   });
   await note2File(foo, vaultDir);
   await note2File(ch1, vaultDir);
@@ -194,6 +197,7 @@ describe("engine, schema/", () => {
   });
 
   describe("basics/", () => {
+    let vault: DVault;
     beforeEach(async () => {
       vaultDir = await EngineTestUtilsV2.setupVault({
         initDirCb: async (dirPath: string) => {
@@ -201,6 +205,7 @@ describe("engine, schema/", () => {
           await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
         },
       });
+      vault = { fsPath: vaultDir };
       engine = DendronEngineV2.create({ vaults: [vaultDir] });
     });
 
@@ -212,10 +217,14 @@ describe("engine, schema/", () => {
 
     test("root", async () => {
       const { data } = await engine.init();
-      const schemaModRoot = (data?.schemas as SchemaModuleDictV2)[
-        "root"
-      ] as SchemaModulePropsV2;
-      expect(_su.serializeModuleProps(schemaModRoot)).toMatchSnapshot();
+      await NodeTestPresetsV2.runJestHarness({
+        results: SCHEMAS.INIT.ROOT.results,
+        opts: {
+          schemas: data.schemas,
+          vault,
+        },
+        expect,
+      });
     });
 
     test("root and one schem", async () => {
@@ -301,8 +310,9 @@ describe("engine, schema/", () => {
       expect(_.size(engine.schemas["foo"].schemas)).toEqual(7);
       expect(_.size(engine.schemas["bar"].schemas)).toEqual(2);
       expect(_.size(engine.schemas["baz"].schemas)).toEqual(4);
+      const vault = { fsPath: vaultDir };
       await engine.writeNote(
-        NoteUtilsV2.create({ id: "foo.bar", fname: "foo.bar" })
+        NoteUtilsV2.create({ id: "foo.bar", fname: "foo.bar", vault })
       );
       const note = engine.notes["foo.bar"];
       expect(note.schema).toEqual({
@@ -314,8 +324,9 @@ describe("engine, schema/", () => {
     test("double import", async () => {
       const { error } = await engine.init();
       expect(error).toBe(null);
+      const vault = { fsPath: vaultDir };
       await engine.writeNote(
-        NoteUtilsV2.create({ id: "foo.baz.bar", fname: "foo.baz.bar" })
+        NoteUtilsV2.create({ id: "foo.baz.bar", fname: "foo.baz.bar", vault })
       );
       const note = engine.notes["foo.baz.bar"];
       expect(note.schema).toEqual({
@@ -327,8 +338,13 @@ describe("engine, schema/", () => {
     test("import and namespace", async () => {
       const { error } = await engine.init();
       expect(error).toBe(null);
+      const vault = { fsPath: vaultDir };
       await engine.writeNote(
-        NoteUtilsV2.create({ id: "foo.baz.ns.one", fname: "foo.baz.ns.one" })
+        NoteUtilsV2.create({
+          id: "foo.baz.ns.one",
+          fname: "foo.baz.ns.one",
+          vault,
+        })
       );
       const note = engine.notes["foo.baz.ns.one"];
       expect(note.schema).toEqual({
@@ -342,6 +358,7 @@ describe("engine, schema/", () => {
 describe("engine, notes/", () => {
   let vaultDir: string;
   let engine: DEngineV2;
+  let vault: DVault;
 
   describe("basic test v0/", () => {
     beforeEach(async () => {
@@ -351,10 +368,12 @@ describe("engine, notes/", () => {
           await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
         },
       });
+      vault = { fsPath: vaultDir };
       engine = DendronEngineV2.create({ vaults: [vaultDir] });
     });
 
     test("fetch node with custom att", async () => {
+      const vault = { fsPath: vaultDir };
       await NodeTestUtilsV2.createNotes({
         vaultPath: vaultDir,
         noteProps: [
@@ -364,6 +383,7 @@ describe("engine, notes/", () => {
             custom: {
               bond: 42,
             },
+            vault,
           },
         ],
       });
@@ -374,6 +394,7 @@ describe("engine, notes/", () => {
     });
 
     test("write node with custom att", async () => {
+      const vault = { fsPath: vaultDir };
       await NodeTestUtilsV2.createNotes({
         vaultPath: vaultDir,
         noteProps: [
@@ -383,6 +404,7 @@ describe("engine, notes/", () => {
             custom: {
               bond: 42,
             },
+            vault,
           },
         ],
       });
@@ -405,6 +427,7 @@ describe("engine, notes/", () => {
           {
             id: "foo",
             fname: "foo",
+            vault,
           },
         ],
       });
@@ -425,24 +448,26 @@ describe("engine, notes/", () => {
   describe("init/", () => {
     let vaultDir: string;
     let engine: DEngineV2;
+    let vault: DVault;
 
     beforeEach(async () => {
       ({ vaultDir, engine } = await beforePreset());
+      vault = { fsPath: vaultDir };
     });
 
     test("with stubs/", async () => {
       const createNotes = (vaultPath: string) => {
         return Promise.all([
           note2File(
-            NoteUtilsV2.create({ fname: "foo.journal.2020.08.29" }),
+            NoteUtilsV2.create({ fname: "foo.journal.2020.08.29", vault }),
             vaultPath
           ),
           note2File(
-            NoteUtilsV2.create({ fname: "foo.journal.2020.08.30" }),
+            NoteUtilsV2.create({ fname: "foo.journal.2020.08.30", vault }),
             vaultPath
           ),
           note2File(
-            NoteUtilsV2.create({ fname: "foo.journal.2020.08.31" }),
+            NoteUtilsV2.create({ fname: "foo.journal.2020.08.31", vault }),
             vaultPath
           ),
         ]);
@@ -620,14 +645,18 @@ This is some content`,
 
   describe("rename/", () => {
     let engine: DEngineV2;
+    let vault: DVault;
+
     beforeEach(async () => {
       ({ vaultDir, engine } = await beforePreset());
+      vault = { fsPath: vaultDir };
       let note = NoteUtilsV2.create({
         fname: "foo",
         id: "foo",
         created: "1",
         updated: "1",
         body: "[[bar]]",
+        vault,
       });
       await note2File(note, vaultDir);
       note = NoteUtilsV2.create({
@@ -636,6 +665,7 @@ This is some content`,
         created: "1",
         updated: "1",
         body: "[[foo]]",
+        vault,
       });
       await note2File(note, vaultDir);
     });
@@ -669,6 +699,7 @@ This is some content`,
         updated: "1",
         body:
           "[[foo]]\n((ref: [[dendron.pro.dendron-next-server]]#quickstart,1:#*))",
+        vault,
       });
       await note2File(note, vaultDir);
 
@@ -765,8 +796,11 @@ This is some content`,
   describe("write/", () => {
     let vaultDir: string;
     let engine: DEngineV2;
+    let vault: DVault;
+
     beforeEach(async () => {
       ({ vaultDir, engine } = await beforePreset());
+      vault = { fsPath: vaultDir };
     });
 
     test(NOTE_WRITE_PRESET["domainStub"].label, async () => {
@@ -793,6 +827,7 @@ This is some content`,
             id: "foo.ch1",
             created: "1",
             updated: "1",
+            vault,
           });
           await engine.writeNote(noteNew, { writeHierarchy: true });
           return { vaultDir };
@@ -808,6 +843,7 @@ This is some content`,
         id: "bar",
         created: "1",
         updated: "1",
+        vault,
       });
       await engine.writeNote(barNote);
       expect(normalizeNotes(engine.notes)).toMatchSnapshot();
@@ -837,6 +873,7 @@ This is some content`,
         id: "foo.ch1",
         created: "1",
         updated: "1",
+        vault,
       });
       await engine.writeNote(noteNew);
       expect(normalizeNotes(engine.notes)).toMatchSnapshot("notes");
@@ -874,7 +911,10 @@ This is some content`,
   });
 
   describe("basics", () => {
+    let vault: DVault;
+
     beforeEach(async () => {
+      vault = { fsPath: vaultDir };
       vaultDir = await EngineTestUtilsV2.setupVault({
         initDirCb: async (dirPath: string) => {
           await NodeTestUtilsV2.createSchemas({ vaultPath: dirPath });
@@ -902,7 +942,10 @@ This is some content`,
     });
 
     test("stub note", async () => {
-      await note2File(NoteUtilsV2.create({ fname: "foo.ch1" }), vaultDir);
+      await note2File(
+        NoteUtilsV2.create({ fname: "foo.ch1", vault }),
+        vaultDir
+      );
       await engine.init();
       expect(_.values(engine.notes).length).toEqual(3);
       const stubNote = NoteUtilsV2.getNoteByFname("foo", engine.notes);

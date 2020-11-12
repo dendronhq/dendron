@@ -6,7 +6,7 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
-import { Uri, ViewColumn, window, WorkspaceFolder } from "vscode";
+import { Uri, ViewColumn, window } from "vscode";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
@@ -14,7 +14,7 @@ import { DendronBtn, getButtonCategory } from "./buttons";
 import { CREATE_NEW_DETAIL, CREATE_NEW_LABEL } from "./constants";
 import { DendronQuickPickerV2 } from "./types";
 
-export function createNoActiveItem(vault?: DVault): DNodePropsQuickInputV2 {
+export function createNoActiveItem(vault: DVault): DNodePropsQuickInputV2 {
   const props = DNodeUtilsV2.create({
     fname: CREATE_NEW_LABEL,
     type: "note",
@@ -28,14 +28,10 @@ export function createNoActiveItem(vault?: DVault): DNodePropsQuickInputV2 {
   };
 }
 
-export function node2Uri(
-  node: DNodePropsV2,
-  workspaceFolders: WorkspaceFolder[]
-): Uri {
+export function node2Uri(node: DNodePropsV2): Uri {
   const ext = node.type === "note" ? ".md" : ".yml";
   const nodePath = node.fname + ext;
-  const rootWs = workspaceFolders[0];
-  const rootPath = rootWs.uri.path;
+  const rootPath = node.vault.fsPath;
   return Uri.file(path.join(rootPath, nodePath));
 }
 
@@ -118,6 +114,15 @@ export class PickerUtilsV2 {
       vault = vaults[0];
     }
     return vault;
+  }
+
+  static getOrPromptVaultForOpenEditor(): DVault {
+    try {
+      return PickerUtilsV2.getVaultForOpenEditor();
+    } catch (err) {
+      throw err;
+      // TODO
+    }
   }
 
   static isCreateNewNotePickForSingle(node: DNodePropsQuickInputV2): boolean {

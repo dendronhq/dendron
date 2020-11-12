@@ -1,7 +1,49 @@
-import { DVault, NotePropsDictV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import {
+  DVault,
+  NotePropsDictV2,
+  NoteUtilsV2,
+  SchemaModuleDictV2,
+  SchemaModulePropsV2,
+  SchemaUtilsV2,
+} from "@dendronhq/common-all";
 import { note2File } from "@dendronhq/common-server";
 import _ from "lodash";
 import { TestPresetEntry } from "../../utils";
+
+const SCHEMAS = {
+  INIT: {
+    ROOT: new TestPresetEntry({
+      label: "root",
+      results: async ({
+        schemas,
+        vault,
+      }: {
+        schemas: SchemaModuleDictV2;
+        vault: DVault;
+      }) => {
+        const schemaModRoot = schemas["root"] as SchemaModulePropsV2;
+        return [
+          {
+            actual: _.trim(SchemaUtilsV2.serializeModuleProps(schemaModRoot)),
+            expected: _.trim(`
+version: 1
+imports: []
+schemas:
+  - id: root
+    children: []
+    title: root
+    parent: root
+            `),
+          },
+          {
+            actual: schemaModRoot.vault.fsPath,
+            expected: vault.fsPath,
+          },
+        ];
+      },
+    }),
+  },
+};
 
 const INIT = {
   WITH_STUBS: new TestPresetEntry({
@@ -50,6 +92,7 @@ const INIT = {
 
 const ENGINE_SINGLE_TEST_PRESET = {
   INIT,
+  SCHEMAS,
 };
 
 export default ENGINE_SINGLE_TEST_PRESET;

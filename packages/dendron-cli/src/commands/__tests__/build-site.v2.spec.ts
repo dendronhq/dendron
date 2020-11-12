@@ -23,10 +23,11 @@ import process from "process";
 import { BuildSiteCommand } from "../build-site";
 
 const setupCase1 = async ({ vaultDir }: { vaultDir: string }) => {
+  const vault = { fsPath: vaultDir };
   await EngineTestUtilsV2.setupVault({
     vaultDir,
     initDirCb: async (vaultPath) => {
-      const root = SchemaUtilsV2.createRootModule();
+      const root = SchemaUtilsV2.createRootModule({ vault });
       await schemaModuleOpts2File(root, vaultDir, "root");
       await NodeTestUtilsV2.createNotes({
         vaultPath,
@@ -34,10 +35,12 @@ const setupCase1 = async ({ vaultDir }: { vaultDir: string }) => {
           {
             id: "id.foo",
             fname: "foo",
+            vault,
           },
           {
             id: "id.bar.one",
             fname: "bar.one",
+            vault,
           },
         ],
       });
@@ -48,7 +51,8 @@ const setupCase1 = async ({ vaultDir }: { vaultDir: string }) => {
 const setupCase2 = async ({}: {}) => {
   return EngineTestUtilsV2.setupWS({
     initDirCb: async (vaultPath) => {
-      const root = SchemaUtilsV2.createRootModule();
+      const vault = { fsPath: vaultPath };
+      const root = SchemaUtilsV2.createRootModule({ vault });
       await schemaModuleOpts2File(root, vaultPath, "root");
       await NodeTestUtilsV2.createNotes({
         vaultPath,
@@ -56,10 +60,12 @@ const setupCase2 = async ({}: {}) => {
           {
             id: "id.foo",
             fname: "foo",
+            vault,
           },
           {
             id: "id.bar.one",
             fname: "bar.one",
+            vault,
           },
         ],
       });
@@ -70,7 +76,8 @@ const setupCase2 = async ({}: {}) => {
 const setupCaseCustom = async ({ noteProps }: { noteProps: any[] }) => {
   return await EngineTestUtilsV2.setupVault({
     initDirCb: async (vaultPath) => {
-      const root = SchemaUtilsV2.createRootModule();
+      const vault = { fsPath: vaultPath };
+      const root = SchemaUtilsV2.createRootModule({ vault });
       await schemaModuleOpts2File(root, vaultPath, "root");
       await NodeTestUtilsV2.createNotes({
         vaultPath,

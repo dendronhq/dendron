@@ -49,13 +49,15 @@ const DOMAIN_NO_CHILDREN = new TestPresetEntry({
 const DOMAIN_NO_CHILDREN_V2 = new TestPresetEntry({
   label: "domain with no children, write new node",
   before: async ({}: { vaultDir: string }) => {},
-  after: async ({}: { vaultDir: string }) => {
+  after: async ({ vaultDir }: { vaultDir: string }) => {
+    const vault = { fsPath: vaultDir };
     let alpha = NoteUtilsV2.create({
       fname: "alpha",
       id: "alpha",
       created: "1",
       updated: "1",
       body: "[[beta]]",
+      vault,
     });
     let beta = NoteUtilsV2.create({
       fname: "beta",
@@ -63,6 +65,7 @@ const DOMAIN_NO_CHILDREN_V2 = new TestPresetEntry({
       created: "1",
       updated: "1",
       body: "[[alpha]]",
+      vault,
     });
     return { alpha, beta };
   },
@@ -124,12 +127,14 @@ const DOMAIN_NO_CHILDREN_V3 = new TestPresetEntry({
     vaultDir: string;
     findLinks: Function;
   }) => {
+    const vault = { fsPath: vaultDir };
     let alpha = NoteUtilsV2.create({
       fname: "alpha",
       id: "alpha",
       created: "1",
       updated: "1",
       body: "[[beta]]",
+      vault,
     });
     let beta = NoteUtilsV2.create({
       fname: "beta",
@@ -137,6 +142,7 @@ const DOMAIN_NO_CHILDREN_V3 = new TestPresetEntry({
       created: "1",
       updated: "1",
       body: "[[alpha]]",
+      vault,
     });
     await note2File(alpha, vaultDir);
     const links = findLinks({ note: alpha });

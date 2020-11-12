@@ -1,4 +1,4 @@
-import { tmpDir, DendronAPI } from "@dendronhq/common-server";
+import { DendronAPI, tmpDir } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
   NodeTestUtilsV2,
@@ -8,14 +8,14 @@ import path from "path";
 
 describe("main", () => {
   let wsRoot: string;
-  let vault: string;
+  let vaultString: string;
 
   beforeEach(async () => {
     wsRoot = tmpDir().name;
-    vault = path.join(wsRoot, "vault");
-    fs.ensureDirSync(vault);
+    vaultString = path.join(wsRoot, "vault");
+    fs.ensureDirSync(vaultString);
     await EngineTestUtilsV2.setupVault({
-      vaultDir: vault,
+      vaultDir: vaultString,
       initDirCb: (dirPath: string) => {
         NodeTestUtilsV2.createNotes({
           vaultPath: dirPath,
@@ -23,6 +23,7 @@ describe("main", () => {
             {
               id: "id.foo",
               fname: "foo",
+              vault: { fsPath: dirPath },
             },
           ],
         });
@@ -34,7 +35,7 @@ describe("main", () => {
     const payload = {
       uri: wsRoot,
       config: {
-        vaults: [vault],
+        vaults: [vaultString],
       },
     };
     const api = new DendronAPI({

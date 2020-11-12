@@ -40,12 +40,11 @@ export class NoteController {
 
   async getByPath({
     ws,
-    npath,
-    createIfNew,
+    ...opts
   }: EngineGetNoteByPathRequest): Promise<EngineGetNoteByPathPayload> {
     const engine = await getWS({ ws });
     try {
-      const data = await engine.getNoteByPath({ npath, createIfNew });
+      const data = await engine.getNoteByPath(opts);
       return data;
     } catch (err) {
       return {

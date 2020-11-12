@@ -369,7 +369,9 @@ export class NoteUtilsV2 {
     return note;
   }
 
-  static createRoot(opts: Partial<NoteOptsV2>): NotePropsV2 {
+  static createRoot(
+    opts: Partial<NoteOptsV2> & { vault: DVault }
+  ): NotePropsV2 {
     return DNodeUtilsV2.create({
       ...opts,
       type: "note",
@@ -636,7 +638,9 @@ export class SchemaUtilsV2 {
     return false;
   }
 
-  static create(opts: SchemaOptsV2 | SchemaRawV2): SchemaPropsV2 {
+  static create(
+    opts: (SchemaOptsV2 | SchemaRawV2) & { vault: DVault }
+  ): SchemaPropsV2 {
     const schemaDataOpts: (keyof SchemaDataV2)[] = [
       "namespace",
       "pattern",
@@ -644,7 +648,9 @@ export class SchemaUtilsV2 {
     ];
     const optsWithoutData = _.omit(opts, schemaDataOpts);
     const optsData = _.pick(opts, schemaDataOpts);
+    const vault = opts.vault;
     return DNodeUtilsV2.create({
+      vault,
       ..._.defaults(optsWithoutData, {
         title: optsWithoutData.id,
         data: optsData,
@@ -670,6 +676,7 @@ export class SchemaUtilsV2 {
       created: "1",
       updated: "1",
       children: [],
+      vault,
     });
     return {
       version: 1,
@@ -681,7 +688,9 @@ export class SchemaUtilsV2 {
     };
   }
 
-  static createRootModule(opts?: Partial<SchemaPropsV2>): SchemaModuleOptsV2 {
+  static createRootModule(
+    opts: Partial<SchemaPropsV2> & { vault: DVault }
+  ): SchemaModuleOptsV2 {
     const schema = SchemaUtilsV2.create({
       id: "root",
       title: "root",
@@ -708,6 +717,7 @@ export class SchemaUtilsV2 {
       fname: "root",
       parent: "root",
       children: [],
+      vault,
       ...opts,
     });
     return {
@@ -1022,11 +1032,14 @@ export class SchemaUtilsV2 {
   static serializeSchemaProps(
     props: SchemaPropsV2 | SchemaOptsV2
   ): SchemaRawV2 {
-    const builtinProps: Omit<SchemaOptsV2, "fname"> = _.pick(props, [
+    const builtinProps: Omit<SchemaOptsV2, "fname" | "vault"> = _.pick(props, [
       "id",
       "children",
     ]);
-    const optional: (keyof Omit<SchemaOptsV2, "fname">)[] = ["title", "desc"];
+    const optional: (keyof Omit<SchemaOptsV2, "fname" | "vault">)[] = [
+      "title",
+      "desc",
+    ];
     _.forEach(optional, (opt) => {
       if (props[opt]) {
         builtinProps[opt] = props[opt];

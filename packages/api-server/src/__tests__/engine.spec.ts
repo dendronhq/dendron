@@ -68,12 +68,10 @@ const getNotes = async ({
 describe("schema", () => {
   let wsRoot: string;
   let vaultString: string;
-  let vault: DVault;
 
   beforeEach(async () => {
     wsRoot = tmpDir().name;
     vaultString = path.join(wsRoot, "vault");
-    vault = { fsPath: vaultString };
     fs.ensureDirSync(vaultString);
     await EngineTestUtilsV2.setupVault({
       vaultDir: vaultString,
@@ -601,6 +599,7 @@ describe("notes", () => {
       const respNote = await api.engineGetNoteByPath({
         npath: "foo.ch1",
         ws: wsRoot,
+        vault: { fsPath: vaultString },
       });
       const note = respNote.data?.note as NotePropsV2;
       note.body = "new body";

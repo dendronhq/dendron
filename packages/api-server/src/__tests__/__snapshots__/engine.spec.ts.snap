@@ -32,7 +32,7 @@ Object {
       "type": "note",
       "updated": "1",
       "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-56154-db7EUn42YPh1/vault",
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-66049-s9SLEl5MWAbN/vault",
       },
     },
     Object {
@@ -48,7 +48,7 @@ Object {
       "fname": "foo",
       "id": "foo",
       "links": Array [],
-      "parent": "62878518-540c-4045-a370-605d6c9dd75b",
+      "parent": "304a3321-d5da-4f1d-9590-fe530007bee4",
       "schema": Object {
         "moduleId": "foo",
         "schemaId": "foo",
@@ -57,7 +57,7 @@ Object {
       "type": "note",
       "updated": "1",
       "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-56154-db7EUn42YPh1/vault",
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-66049-s9SLEl5MWAbN/vault",
       },
     },
   ],
@@ -81,7 +81,7 @@ Object {
       "fname": "foo",
       "id": "foo",
       "links": Array [],
-      "parent": "0bab8cf8-b16c-486a-89eb-9360f6517434",
+      "parent": "912fc0ca-cdc5-4b70-b759-50bae3184d87",
       "schema": Object {
         "moduleId": "foo",
         "schemaId": "foo",
@@ -90,7 +90,7 @@ Object {
       "type": "note",
       "updated": "1",
       "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-56154-7NIpxLyuPyyr/vault",
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-66049-UAvIra435Huq/vault",
       },
     },
     Object {
@@ -113,7 +113,7 @@ Object {
       "type": "note",
       "updated": "1",
       "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-56154-7NIpxLyuPyyr/vault",
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-66049-UAvIra435Huq/vault",
       },
     },
     Object {
@@ -127,14 +127,43 @@ Object {
       "data": Object {},
       "desc": "",
       "fname": "root",
-      "id": "0bab8cf8-b16c-486a-89eb-9360f6517434",
+      "id": "912fc0ca-cdc5-4b70-b759-50bae3184d87",
       "links": Array [],
       "parent": null,
       "title": "Root",
       "type": "note",
       "updated": "1",
       "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-56154-7NIpxLyuPyyr/vault",
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-66049-UAvIra435Huq/vault",
+      },
+    },
+  ],
+  "error": null,
+}
+`;
+
+exports[`notes query query root: root note 1`] = `
+Object {
+  "data": Array [
+    Object {
+      "body": "
+",
+      "children": Array [
+        "foo",
+      ],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "root",
+      "id": "cc0668b8-d333-4ba1-8ac2-068c3c828a5c",
+      "links": Array [],
+      "parent": null,
+      "title": "Root",
+      "type": "note",
+      "updated": "1",
+      "vault": Object {
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-66049-VgXduiOkwID4/vault",
       },
     },
   ],
@@ -176,12 +205,12 @@ Object {
             "value": "baz",
           },
         ],
-        "parent": "7aa7ac13-5507-42a5-a67b-0f3be58faa50",
+        "parent": "b1a1e915-a0cd-4bf7-99c6-ff66f8e433b5",
         "title": "Bar",
         "type": "note",
         "updated": "1",
         "vault": Object {
-          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-56154-1tUG8lp6gm0O/vault",
+          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-66049-eVA4ZK6Au9Yg/vault",
         },
       },
       "status": "update",
@@ -203,7 +232,7 @@ Object {
         "type": "note",
         "updated": "1",
         "vault": Object {
-          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-56154-1tUG8lp6gm0O/vault",
+          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-66049-eVA4ZK6Au9Yg/vault",
         },
       },
       "status": "delete",
@@ -220,12 +249,12 @@ Object {
         "fname": "baz",
         "id": "foo",
         "links": Array [],
-        "parent": "7aa7ac13-5507-42a5-a67b-0f3be58faa50",
+        "parent": "b1a1e915-a0cd-4bf7-99c6-ff66f8e433b5",
         "title": "Foo",
         "type": "note",
         "updated": "1",
         "vault": Object {
-          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-56154-1tUG8lp6gm0O/vault",
+          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-66049-eVA4ZK6Au9Yg/vault",
         },
       },
       "status": "create",
@@ -246,18 +275,90 @@ Array [
 ]
 `;
 
-exports[`notes write grandchild of root, child is stub 1`] = `
-Object {
-  "data": undefined,
-  "error": [RequestError: Error: connect ECONNREFUSED 127.0.0.1:3005],
-}
-`;
+exports[`notes rename/ domain with no children, update exsiting node: changed 1`] = `
+Array [
+  Object {
+    "note": Object {
+      "body": "[[gamma]]
 
-exports[`notes write write child, parent stub: root note 1`] = `
-Object {
-  "data": undefined,
-  "error": [RequestError: Error: connect ECONNREFUSED 127.0.0.1:3005],
-}
+",
+      "children": Array [],
+      "created": "1",
+      "data": Object {},
+      "desc": "",
+      "fname": "alpha",
+      "id": "alpha",
+      "links": Array [
+        Object {
+          "alias": "gamma",
+          "from": Object {
+            "fname": "alpha",
+            "id": "alpha",
+          },
+          "original": "gamma",
+          "pos": Object {
+            "end": 9,
+            "start": 0,
+          },
+          "to": Object {
+            "fname": "gamma",
+          },
+          "type": "wiki",
+          "value": "gamma",
+        },
+      ],
+      "parent": "bd2e5aeb-1f82-4d2f-8fd2-5cf5ddfc3ef8",
+      "title": "Alpha",
+      "type": "note",
+      "updated": "1",
+    },
+    "status": "update",
+  },
+  Object {
+    "note": Object {
+      "body": "[[alpha]]
+",
+      "children": Array [],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "beta",
+      "id": "beta",
+      "links": Array [],
+      "parent": null,
+      "title": "Beta",
+      "type": "note",
+      "updated": "1",
+      "vault": Object {
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-66049-t7YeVMhQY5B7/vault",
+      },
+    },
+    "status": "delete",
+  },
+  Object {
+    "note": Object {
+      "body": "[[alpha]]
+",
+      "children": Array [],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "gamma",
+      "id": "beta",
+      "links": Array [],
+      "parent": "bd2e5aeb-1f82-4d2f-8fd2-5cf5ddfc3ef8",
+      "title": "Beta",
+      "type": "note",
+      "updated": "1",
+      "vault": Object {
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-66049-t7YeVMhQY5B7/vault",
+      },
+    },
+    "status": "create",
+  },
+]
 `;
 
 exports[`schema write simple schema 1`] = `

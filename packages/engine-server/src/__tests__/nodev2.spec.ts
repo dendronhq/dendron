@@ -5,6 +5,7 @@ import {
   NodeTestUtilsV2,
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
+import { tmpdir } from "os";
 import path from "path";
 import { DendronEngineV2 } from "../enginev2";
 
@@ -26,6 +27,8 @@ const beforePreset = async () => {
 };
 
 describe("note", () => {
+  const vault = { fsPath: tmpdir() };
+
   describe("serialize", () => {
     test("basic", () => {
       const note = NoteUtilsV2.create({
@@ -33,6 +36,7 @@ describe("note", () => {
         fname: "foo",
         created: "1",
         updated: "1",
+        vault,
       });
       const serialized = NoteUtilsV2.serialize(note);
       expect(serialized).toMatchSnapshot();
@@ -46,6 +50,7 @@ describe("note", () => {
         created: "1",
         updated: "1",
         children: ["ch1", "ch2"],
+        vault,
       });
       const serialized = NoteUtilsV2.serialize(note);
       expect(serialized).toMatchSnapshot();
@@ -58,6 +63,7 @@ describe("note", () => {
         created: "1",
         updated: "1",
         parent: "root",
+        vault,
       });
       const serialized = NoteUtilsV2.serialize(note);
       expect(serialized).toMatchSnapshot();
@@ -72,6 +78,7 @@ describe("note", () => {
         custom: {
           bond: 42,
         },
+        vault,
       });
       const serialized = NoteUtilsV2.serialize(note);
       expect(serialized).toMatchSnapshot();
@@ -87,6 +94,7 @@ describe("note", () => {
         updated: "1",
         children: ["ch1", "ch2"],
         parent: "root",
+        vault,
       });
       const serialized = NoteUtilsV2.serialize(note, { writeHierarchy: true });
       expect(serialized).toMatchSnapshot();
@@ -103,6 +111,7 @@ describe("note", () => {
         updated: "1",
         children: ["ch1", "ch2"],
         parent: null,
+        vault,
       });
       const serialized = NoteUtilsV2.serialize(note, { writeHierarchy: true });
       expect(serialized).toMatchSnapshot();
@@ -210,6 +219,7 @@ describe("matchDomain", () => {
       id: `${rootName}.ch1`,
       created: "1",
       updated: "1",
+      vault: { fsPath: vaultDir },
     });
     await note2File(ch1, vaultDir);
     fs.removeSync(path.join(vaultDir, "foo.schema.yml"));

@@ -28,13 +28,14 @@ export class WorkspaceService {
   async createVault({ vault }: { vault: DVault }) {
     fs.ensureDirSync(vault.fsPath);
     const note = NoteUtilsV2.createRoot({
+      vault,
       body: [
         "# Welcome to Dendron",
         "",
         `This is the root of your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top. `,
       ].join("\n"),
     });
-    const schema = SchemaUtilsV2.createRootModule({});
+    const schema = SchemaUtilsV2.createRootModule({ vault });
     await note2File(note, vault.fsPath);
     await schemaModuleOpts2File(schema, vault.fsPath, "root");
     return;

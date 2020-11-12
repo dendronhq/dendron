@@ -27,16 +27,17 @@ export class ReloadIndexCommand extends BasicCommand<
     const engine = ws.getEngine();
 
     await Promise.all(
-      engine.vaults.map(async (vaultDir) => {
+      engine.vaultsv3.map(async (vault) => {
+        const vaultDir = vault.fsPath;
         const rootNotePath = path.join(vaultDir, "root.md");
         const rootSchemaPath = path.join(vaultDir, "root.schema.yml");
         if (!(await fs.pathExists(rootSchemaPath))) {
-          const schema = SchemaUtilsV2.createRootModule({});
+          const schema = SchemaUtilsV2.createRootModule({ vault });
           this.L.info({ ctx, vaultDir, msg: "creating root schema" });
           await schemaModuleOpts2File(schema, vaultDir, "root");
         }
         if (!fs.pathExistsSync(rootNotePath)) {
-          const note = NoteUtilsV2.createRoot({});
+          const note = NoteUtilsV2.createRoot({ vault });
           this.L.info({ ctx, vaultDir, msg: "creating root note" });
           await note2File(note, vaultDir);
         }

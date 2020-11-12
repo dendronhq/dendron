@@ -126,11 +126,13 @@ describe("engine, schema/", () => {
       // update schema
       const module = engine.schemas["foo"];
       const moduleRoot = module.schemas[module.root.id];
+      const vault = { fsPath: vaultDir };
       const ch2 = SchemaUtilsV2.create({
         fname: "foo",
         id: "ch2",
         created: "1",
         updated: "1",
+        vault,
       });
       DNodeUtilsV2.addChild(moduleRoot, ch2);
       module.schemas[ch2.id] = ch2;
@@ -259,6 +261,7 @@ describe("engine, schema/", () => {
     beforeEach(async () => {
       vaultDir = await EngineTestUtilsV2.setupVault({
         initDirCb: async (dirPath: string) => {
+          const vault = { fsPath: dirPath };
           await NodeTestUtilsV2.createSchemas({ vaultPath: dirPath });
           await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
 
@@ -275,6 +278,7 @@ describe("engine, schema/", () => {
             created: "1",
             updated: "1",
             children: ["bar.bar", "baz.baz"],
+            vault,
           });
           let module = SchemaUtilsV2.createModule({
             version: 1,
@@ -291,10 +295,12 @@ describe("engine, schema/", () => {
             created: "1",
             updated: "1",
             children: ["bar.bar", "ns"],
+            vault,
           });
           let childSchema = SchemaUtilsV2.create({
             id: "ns",
             namespace: true,
+            vault,
           });
           module = SchemaUtilsV2.createModule({
             version: 1,

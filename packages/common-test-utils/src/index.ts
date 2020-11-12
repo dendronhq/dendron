@@ -164,6 +164,7 @@ export class NodeTestPresetsV2 {
   }
 
   static async createSchemaPreset({ vaultDir }: { vaultDir: string }) {
+    const vault = { fsPath: vaultDir };
     await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
     await NodeTestUtilsV2.createSchema({
       vaultDir,
@@ -172,20 +173,22 @@ export class NodeTestPresetsV2 {
           id: "bar",
           parent: "root",
           children: ["ch1", "ch2"],
+          vault,
         }),
         SchemaUtilsV2.create({
           id: "ch1",
           template: { id: "bar.template.ch1", type: "note" },
+          vault,
         }),
         SchemaUtilsV2.create({
           id: "ch2",
           template: { id: "bar.template.ch2", type: "note" },
           namespace: true,
+          vault,
         }),
       ],
       fname: "bar",
     });
-    const vault = { fsPath: vaultDir } as DVault;
     await NodeTestUtilsV2.createNote({
       vaultDir,
       noteProps: { body: "ch1 template", fname: "bar.template.ch1", vault },
@@ -206,7 +209,9 @@ export class NodeTestPresetsV2 {
     vaultDir: string;
   }) {
     await NodeTestUtilsV2.createSchemas({ vaultPath: vaultDir });
-    await NodeTestUtilsV2.createNotes({ vaultPath: vaultDir });
+    await NodeTestUtilsV2.createNotes({
+      vaultPath: vaultDir,
+    });
     await NodeTestUtilsV2.createNoteProps({
       vaultPath: vaultDir,
       rootName: "foo",
@@ -526,8 +531,8 @@ export class NodeTestUtilsV2 {
 
   static createNote = async (opts: {
     withBody?: boolean;
-    vaultDir?: string;
-    noteProps?: NoteOptsV2;
+    vaultDir: string;
+    noteProps?: Omit<NoteOptsV2, "vault"> & { vault?: DVault };
   }): Promise<NotePropsV2> => {
     const cleanOpts = _.defaults(opts, {
       withBody: true,
@@ -539,28 +544,29 @@ export class NodeTestUtilsV2 {
     };
     const n = cleanOpts.noteProps;
     const body = cleanOpts.withBody ? n.fname + " body" : "";
-    const _n = NoteUtilsV2.create({ ...defaultOpts, body, ...n });
-    if (cleanOpts.vaultDir) {
-      await note2File(_n, cleanOpts.vaultDir);
-    }
+    const vault = { fsPath: cleanOpts.vaultDir };
+    const _n = NoteUtilsV2.create({ ...defaultOpts, body, ...n, vault });
+    await note2File(_n, cleanOpts.vaultDir);
     return _n;
   };
 
   static createNotes = async (opts: {
     withBody?: boolean;
-    vaultPath?: string;
-    noteProps?: NoteOptsV2[];
+    vaultPath: string;
+    noteProps?: (Omit<NoteOptsV2, "vault"> & { vault?: DVault })[];
   }): Promise<NotePropsDictV2> => {
     const cleanOpts = _.defaults(opts, {
       withBody: true,
       noteProps: [] as NoteOptsV2[],
     });
+    const vault = { fsPath: cleanOpts.vaultPath };
     const defaultOpts = {
       created: "1",
       updated: "1",
     };
     const rootNote = await NoteUtilsV2.createRoot({
       ...defaultOpts,
+      vault,
     });
     const out: NotePropsDictV2 = {
       root: rootNote,
@@ -568,7 +574,7 @@ export class NodeTestUtilsV2 {
     await Promise.all(
       cleanOpts.noteProps.map(async (n) => {
         const body = cleanOpts.withBody ? n.fname + " body" : "";
-        const _n = NoteUtilsV2.create({ ...defaultOpts, body, ...n });
+        const _n = NoteUtilsV2.create({ ...defaultOpts, body, ...n, vault });
         DNodeUtilsV2.addChild(rootNote, _n);
         if (cleanOpts.vaultPath) {
           await note2File(_n, cleanOpts.vaultPath);
@@ -577,9 +583,7 @@ export class NodeTestUtilsV2 {
         return;
       })
     );
-    if (cleanOpts.vaultPath) {
-      await note2File(rootNote, cleanOpts.vaultPath);
-    }
+    await note2File(rootNote, cleanOpts.vaultPath);
     return out;
   };
 
@@ -601,20 +605,20 @@ export class NodeTestUtilsV2 {
   };
 
   static createSchemas = async (opts: {
-    vaultPath?: string;
+    vaultPath: string;
     schemaMO?: [SchemaModuleOptsV2, string][];
   }) => {
     const cleanOpts = _.defaults(opts, {
       schemaMO: [] as [SchemaModuleOptsV2, string][],
     });
     const { vaultPath, schemaMO } = cleanOpts;
+    const vault = { fsPath: vaultPath };
     const rootModule = SchemaUtilsV2.createRootModule({
       created: "1",
       updated: "1",
+      vault,
     });
-    if (vaultPath) {
-      await schemaModuleOpts2File(rootModule, vaultPath, "root");
-    }
+    await schemaModuleOpts2File(rootModule, vaultPath, "root");
     await Promise.all(
       schemaMO.map(async (ent) => {
         const [module, fname] = ent;
@@ -631,6 +635,7 @@ export class NodeTestUtilsV2 {
     rootOpts?: Partial<SchemaPropsV2>;
   }) => {
     const { vaultDir, rootName, rootOpts } = opts;
+    const vault = { fsPath: vaultDir };
     const schema = SchemaUtilsV2.create({
       fname: `${rootName}`,
       id: `${rootName}`,
@@ -638,10 +643,12 @@ export class NodeTestUtilsV2 {
       created: "1",
       updated: "1",
       children: ["ch1"],
+      vault,
       ...rootOpts,
     });
     const ch1 = SchemaUtilsV2.create({
       fname: `${rootName}`,
+      vault,
       id: "ch1",
       created: "1",
       updated: "1",

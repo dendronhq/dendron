@@ -189,7 +189,7 @@ export class DendronEngineClient implements DEngineClientV2 {
         error: null,
       };
     } else {
-      throw Error("query schema nnot implemented");
+      throw Error("query schema not implemented");
     }
   }
   async queryNote({ qs }: { qs: string }): Promise<NotePropsV2[]> {

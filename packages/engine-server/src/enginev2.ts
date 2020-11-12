@@ -89,6 +89,7 @@ export class DendronEngineV2 implements DEngineV2 {
       forceNew: true,
       store: new FileStorageV2({
         vaults: _vaults,
+        vaultsv3: vaults,
         logger: LOGGER,
       }),
       mode: "fuzzy",

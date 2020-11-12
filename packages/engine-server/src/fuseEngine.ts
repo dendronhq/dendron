@@ -24,7 +24,7 @@ function createFuse<T>(
     distance: 100,
     maxPatternLength: 32,
     minMatchCharLength: 1,
-    keys: ["title", "fname", "basename"],
+    keys: ["title", "fname"],
     useExtendedSearch: true,
     includeScore: true,
   };

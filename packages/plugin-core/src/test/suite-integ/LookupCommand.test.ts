@@ -3,17 +3,16 @@ import {
   DEngineClientV2,
   DNodePropsQuickInputV2,
   DNodeUtilsV2,
-  DVault,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import { DirResult, file2Note, tmpDir } from "@dendronhq/common-server";
 import {
   NodeTestPresetsV2,
   NodeTestUtilsV2,
+  PLUGIN_CORE,
   SchemaTestPresetsV2,
 } from "@dendronhq/common-test-utils";
 import assert from "assert";
-import fs from "fs-extra";
 import _ from "lodash";
 import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
@@ -41,11 +40,9 @@ import {
   setupDendronWorkspace,
   TIMEOUT,
 } from "../testUtils";
-import {
-  setupCodeWorkspaceMultiVaultV2,
-  setupCodeWorkspaceV2,
-} from "../testUtilsv2";
+import { setupCodeWorkspaceV2 } from "../testUtilsv2";
 
+const { LOOKUP_SINGLE_TEST_PRESET } = PLUGIN_CORE;
 // TODO: This could be cleaned up further+extended, but better for now
 let vaultPath: string;
 const createOneNoteOneSchemaPresetCallback = async (_vaultPath: string) => {
@@ -433,17 +430,12 @@ suite("notes", function () {
         let quickpick = await lc.show();
         quickpick.value = "foo.";
         await lp.onUpdatePickerItem(quickpick, { flavor: "note" }, "manual");
+        await NodeTestPresetsV2.runMochaHarness({
+          results:
+            LOOKUP_SINGLE_TEST_PRESET.UPDATE_ITEMS.SCHEMA_SUGGESTION.results,
+          opts: { items: quickpick.items },
+        });
         assert.deepStrictEqual(quickpick.items.length, 3);
-        assert.deepStrictEqual(
-          _.pick(_.find(quickpick.items, { fname: "foo.ch1" }), [
-            "fname",
-            "schemaStub",
-          ]),
-          {
-            fname: "foo.ch1",
-            schemaStub: true,
-          }
-        );
         done();
       });
 
@@ -453,7 +445,9 @@ suite("notes", function () {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
             vaultDir: vaultPath,
           });
-          fs.removeSync(path.join(vaultPath, "foo.ch1.md"));
+          await LOOKUP_SINGLE_TEST_PRESET.UPDATE_ITEMS.SCHEMA_SUGGESTION.before(
+            { vault: { fsPath: vaultPath } }
+          );
         },
       });
     });
@@ -994,73 +988,6 @@ suite("notes", function () {
 //     });
 //   });
 // });
-
-suite("notes, multi", function () {
-  // @ts-ignore
-  let root: string;
-  let ctx: vscode.ExtensionContext;
-  let vaults: DVault[];
-  this.timeout(TIMEOUT);
-
-  beforeEach(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
-  });
-
-  describe("updateItems", function () {
-    test("empty qs", function (done) {
-      onWSInit(async () => {
-        const engOpts: EngineOpts = { flavor: "note" };
-        const lc = new LookupControllerV2(engOpts);
-        const lp = new LookupProviderV2(engOpts);
-        const quickpick = await lc.show();
-        quickpick.value = "";
-        await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
-        // two notes and root
-        assert.strictEqual(lc.quickPick?.items.length, 4);
-        done();
-      });
-      setupCodeWorkspaceMultiVaultV2({ ctx }).then(
-        ({ wsRoot, vaults: _vaults }) => {
-          root = wsRoot;
-          vaults = _vaults;
-          _activate(ctx);
-        }
-      );
-    });
-
-    test("opened note", function (done) {
-      onWSInit(async () => {
-        const engOpts: EngineOpts = { flavor: "note" };
-        const lc = new LookupControllerV2(engOpts);
-        const lp = new LookupProviderV2(engOpts);
-        await VSCodeUtils.openFileInEditor(
-          vscode.Uri.file(path.join(vaults[0].fsPath, "foo.md"))
-        );
-        const quickpick = await lc.show();
-        quickpick.value = "";
-        await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
-        quickpick.onDidChangeActive(() => {
-          assert.strictEqual(lc.quickPick?.activeItems.length, 1);
-          assert.strictEqual(lc.quickPick?.activeItems[0].fname, "foo");
-          done();
-        });
-        await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
-      });
-      setupCodeWorkspaceMultiVaultV2({ ctx }).then(
-        ({ wsRoot, vaults: _vaults }) => {
-          root = wsRoot;
-          vaults = _vaults;
-          _activate(ctx);
-        }
-      );
-    });
-  });
-});
 
 suite("selection2Link", function () {
   let root: DirResult;

@@ -402,7 +402,11 @@ export class NoteUtilsV2 {
       } else {
         stubPath += `.${part}`;
       }
-      const n = NoteUtilsV2.create({ fname: stubPath, stub: true });
+      const n = NoteUtilsV2.create({
+        fname: stubPath,
+        stub: true,
+        vault: to.vault,
+      });
       stubNodes.push(n);
       DNodeUtilsV2.addChild(parent, n);
       parent = n;
@@ -421,10 +425,12 @@ export class NoteUtilsV2 {
     fname,
     schemaModule,
     schemaId,
+    vault,
   }: {
     fname: string;
     schemaModule: SchemaModulePropsV2;
     schemaId: string;
+    vault: DVault;
   }) {
     const mschema = schemaModule.schemas[schemaId];
     return NoteUtilsV2.create({
@@ -435,6 +441,7 @@ export class NoteUtilsV2 {
         moduleId: schemaModule.root.id,
         schemaId,
       },
+      vault,
     });
   }
 

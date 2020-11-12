@@ -4,11 +4,17 @@ import {
   DVault,
   SchemaModulePropsV2,
 } from "@dendronhq/common-all";
-import { EngineTestUtilsV3 } from "@dendronhq/common-test-utils";
+import {
+  EngineTestUtilsV3,
+  ENGINE_SERVER,
+  NodeTestPresetsV2,
+} from "@dendronhq/common-test-utils";
 import { NotePresetsUtils } from "@dendronhq/common-test-utils/lib/presets/utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import { DendronEngineV2 } from "../enginev2";
+
+const { INIT } = ENGINE_SERVER.ENGINE_MULTI_TEST_PRESET;
 
 const setupCase1 = async () => {
   const vaults = await EngineTestUtilsV3.setupVaults({
@@ -35,8 +41,6 @@ describe("engine, notes/", () => {
 
     test("basic/", async () => {
       await engine.init();
-      // expect(engine.notes).toMatchSnapshot("notes");
-      // expect(engine.schemas).toMatchSnapshot("schemas");
       // check schema correct
       expect(_.size(engine.schemas)).toEqual(3);
       expect(
@@ -53,13 +57,11 @@ describe("engine, notes/", () => {
       ).toEqual([
         {
           fname: "bar",
-          vault: {
-            fsPath: vaults[1].fsPath,
-          },
+          vault: vaults[1],
         },
         {
           fname: "foo",
-          vault: { fsPath: vaults[0].fsPath },
+          vault: vaults[0],
         },
       ]);
       // check note correct
@@ -77,23 +79,19 @@ describe("engine, notes/", () => {
       ).toEqual([
         {
           fname: "bar",
-          vault: {
-            fsPath: vaults[1].fsPath,
-          },
+          vault: vaults[1],
         },
         {
           fname: "bar.ch1",
-          vault: {
-            fsPath: vaults[1].fsPath,
-          },
+          vault: vaults[1],
         },
         {
           fname: "foo",
-          vault: { fsPath: vaults[0].fsPath },
+          vault: vaults[0],
         },
         {
           fname: "foo.ch1",
-          vault: { fsPath: vaults[0].fsPath },
+          vault: vaults[0],
         },
       ]);
       const dir1 = fs.readdirSync(vaults[0].fsPath);
@@ -102,15 +100,14 @@ describe("engine, notes/", () => {
       expect(dir2).toMatchSnapshot("dir2");
     });
 
-    // test(NOTE_INIT_PRESET.domainStub.label, async () => {
-    //   await NOTE_INIT_PRESET.domainStub.before({ vaultDir });
-    //   await engine.init();
-    //   const notes = engine.notes;
-    //   await NodeTestPresetsV2.runJestHarness({
-    //     opts: { notes },
-    //     results: NOTE_INIT_PRESET.domainStub.results,
-    //     expect,
-    //   });
-    // });
+    test("with stubs/", async () => {
+      await INIT.WITH_STUBS.before({ vault: vaults[0] });
+      await engine.init();
+      await NodeTestPresetsV2.runJestHarness({
+        opts: { notes: engine.notes, vault: vaults[0] },
+        results: INIT.WITH_STUBS.results,
+        expect,
+      });
+    });
   });
 });

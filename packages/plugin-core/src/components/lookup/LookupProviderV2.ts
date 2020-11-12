@@ -11,12 +11,10 @@ import {
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import path from "path";
 import { Uri, window, WorkspaceFolder } from "vscode";
 import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
 import { EngineFlavor, EngineOpts } from "../../types";
-import { VSCodeUtils } from "../../utils";
 import { getDurationMilliseconds, profile } from "../../utils/system";
 import { DendronWorkspace } from "../../workspace";
 import { DendronQuickPickerV2 } from "./types";
@@ -40,7 +38,7 @@ export class LookupProviderV2 {
     if (_.find(picker.buttons, { type: "multiSelect" })?.pressed) {
       return [];
     } else {
-      return [this.noActiveItem];
+      return [createNoActiveItem(PickerUtilsV2.getVaultForOpenEditor())];
     }
   }
 
@@ -141,6 +139,7 @@ export class LookupProviderV2 {
     Logger.info({ ctx, msg: "engine.write", profile });
     return uri;
   }
+
   async onAcceptNewNode({
     picker,
     opts,
@@ -152,20 +151,7 @@ export class LookupProviderV2 {
   }): Promise<Uri> {
     const ctx = "onAcceptNewNode";
     Logger.info({ ctx });
-    const vaults = DendronWorkspace.instance().config.vaults;
-    let vault: DVault;
-
-    // get current vault
-    if (vaults.length > 1 && VSCodeUtils.getActiveTextEditor()?.document) {
-      vault = DNodeUtilsV2.getVaultByDir({
-        vaults,
-        dirPath: path.dirname(
-          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-        ),
-      });
-    } else {
-      vault = vaults[0];
-    }
+    let vault: DVault = PickerUtilsV2.getVaultForOpenEditor();
 
     if (opts.flavor === "schema") {
       return this._onAcceptNewSchema({ picker, vault });
@@ -412,6 +398,7 @@ export class LookupProviderV2 {
                   schemaModule,
                   schemaId: ent,
                   fname,
+                  vault: PickerUtilsV2.getVaultForOpenEditor(),
                 });
               }
               return;

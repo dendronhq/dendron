@@ -2,17 +2,24 @@ import {
   DNodePropsQuickInputV2,
   DNodePropsV2,
   DNodeUtilsV2,
+  DVault,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Uri, ViewColumn, window, WorkspaceFolder } from "vscode";
 import { Logger } from "../../logger";
+import { VSCodeUtils } from "../../utils";
+import { DendronWorkspace } from "../../workspace";
 import { DendronBtn, getButtonCategory } from "./buttons";
 import { CREATE_NEW_DETAIL, CREATE_NEW_LABEL } from "./constants";
 import { DendronQuickPickerV2 } from "./types";
 
-export function createNoActiveItem(): DNodePropsQuickInputV2 {
-  const props = DNodeUtilsV2.create({ fname: CREATE_NEW_LABEL, type: "note" });
+export function createNoActiveItem(vault?: DVault): DNodePropsQuickInputV2 {
+  const props = DNodeUtilsV2.create({
+    fname: CREATE_NEW_LABEL,
+    type: "note",
+    vault,
+  });
   return {
     ...props,
     label: CREATE_NEW_LABEL,
@@ -96,6 +103,22 @@ export class PickerUtilsV2 {
       return DNodeUtilsV2.getDepth(ent) > depth;
     });
   };
+
+  static getVaultForOpenEditor(): DVault {
+    const vaults = DendronWorkspace.instance().config.vaults;
+    let vault: DVault;
+    if (vaults.length > 1 && VSCodeUtils.getActiveTextEditor()?.document) {
+      vault = DNodeUtilsV2.getVaultByDir({
+        vaults,
+        dirPath: path.dirname(
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+        ),
+      });
+    } else {
+      vault = vaults[0];
+    }
+    return vault;
+  }
 
   static isCreateNewNotePickForSingle(node: DNodePropsQuickInputV2): boolean {
     if (!node) {

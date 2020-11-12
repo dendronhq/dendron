@@ -91,7 +91,7 @@ const EXPORT_BASIC = new TestPresetEntry({
     fs.ensureDirSync(path.dirname(configPath));
     writeYAML(configPath, { dest: exportDest });
   },
-  results: async ({ destPath, vault }: { destPath: string; vault: DVault }) => {
+  results: async ({ destPath }: { destPath: string; vault: DVault }) => {
     const payload = fs.readJSONSync(destPath) as NotePropsV2[];
     return [
       {

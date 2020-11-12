@@ -1,4 +1,5 @@
-import { DVault } from "@dendronhq/common-all";
+import { DVault, NotePropsV2 } from "@dendronhq/common-all";
+import { file2Note } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
   EngineTestUtilsV3,
@@ -8,7 +9,7 @@ import {
 import { DConfig } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
-import { ExtensionContext, Uri } from "vscode";
+import { ExtensionContext, Uri, window } from "vscode";
 import { SetupWorkspaceCommand } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
 import { DendronWorkspace } from "../workspace";
@@ -157,3 +158,10 @@ export async function setupCodeWorkspaceMultiVaultV2(
   });
   return { wsRoot, vaults, workspaceFile, workspaceFolders };
 }
+
+export const getNoteFromTextEditor = (): NotePropsV2 => {
+  const txtPath = window.activeTextEditor?.document.uri.fsPath as string;
+  const vault = { fsPath: path.dirname(txtPath) };
+  const node = file2Note(txtPath, vault);
+  return node;
+};

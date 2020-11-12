@@ -1,4 +1,5 @@
-import { DVault } from "@dendronhq/common-all";
+import { DNodeUtilsV2, DVault } from "@dendronhq/common-all";
+import { NodeTestPresetsV2, PLUGIN_CORE } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -15,8 +16,13 @@ import { EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { _activate } from "../../_extension";
-import { onWSInit, TIMEOUT } from "../testUtils";
-import { setupCodeWorkspaceMultiVaultV2 } from "../testUtilsv2";
+import { createMockQuickPick, onWSInit, TIMEOUT } from "../testUtils";
+import {
+  getNoteFromTextEditor,
+  setupCodeWorkspaceMultiVaultV2,
+} from "../testUtilsv2";
+
+const { LOOKUP_SINGLE_TEST_PRESET } = PLUGIN_CORE;
 
 suite("notes, multi", function () {
   let wsRoot: string;
@@ -34,25 +40,56 @@ suite("notes, multi", function () {
     HistoryService.instance().clearSubscriptions();
   });
 
-  const setup = async (opts?: {
-    beforeActivateCb: (opts: {
+  const runUpdateItemTest = async (opts: {
+    beforeActivateCb?: (opts: {
       vaults: DVault[];
       wsRoot: string;
     }) => Promise<void>;
+    onInitCb: (opts: {
+      lc: LookupControllerV2;
+      lp: LookupProviderV2;
+      quickpick: DendronQuickPickerV2;
+    }) => Promise<void>;
   }) => {
+    const { onInitCb } = opts;
+    onInitForUpdateIttems({ onInitCb });
     const {
       wsRoot: _wsRoot,
       vaults: _vaults,
     } = await setupCodeWorkspaceMultiVaultV2({ ctx });
     wsRoot = _wsRoot;
     vaults = _vaults;
-    if (opts?.beforeActivateCb) {
+    if (opts.beforeActivateCb) {
       await opts.beforeActivateCb({ wsRoot, vaults });
     }
     await _activate(ctx);
   };
 
-  const onInit = async (opts: {
+  const runAcceptItemTest = async (opts: {
+    beforeActivateCb?: (opts: {
+      vaults: DVault[];
+      wsRoot: string;
+    }) => Promise<void>;
+    onInitCb: (opts: {
+      lc: LookupControllerV2;
+      lp: LookupProviderV2;
+    }) => Promise<void>;
+  }) => {
+    const { onInitCb } = opts;
+    onInitForAcceptItems({ onInitCb });
+    const {
+      wsRoot: _wsRoot,
+      vaults: _vaults,
+    } = await setupCodeWorkspaceMultiVaultV2({ ctx });
+    wsRoot = _wsRoot;
+    vaults = _vaults;
+    if (opts.beforeActivateCb) {
+      await opts.beforeActivateCb({ wsRoot, vaults });
+    }
+    await _activate(ctx);
+  };
+
+  const onInitForUpdateIttems = async (opts: {
     onInitCb: (opts: {
       lc: LookupControllerV2;
       lp: LookupProviderV2;
@@ -69,9 +106,24 @@ suite("notes, multi", function () {
     });
   };
 
+  const onInitForAcceptItems = async (opts: {
+    onInitCb: (opts: {
+      lc: LookupControllerV2;
+      lp: LookupProviderV2;
+    }) => Promise<void>;
+  }) => {
+    onWSInit(async () => {
+      const { onInitCb } = opts;
+      const engOpts: EngineOpts = { flavor: "note" };
+      const lc = new LookupControllerV2(engOpts);
+      const lp = new LookupProviderV2(engOpts);
+      await onInitCb({ lp, lc });
+    });
+  };
+
   describe("updateItems", function () {
     test("empty qs", function (done) {
-      onInit({
+      runUpdateItemTest({
         onInitCb: async ({ quickpick, lp, lc }) => {
           quickpick.value = "";
           await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
@@ -79,7 +131,6 @@ suite("notes, multi", function () {
           done();
         },
       });
-      setup();
     });
 
     // TODO: this causes next test to fail
@@ -101,11 +152,10 @@ suite("notes, multi", function () {
         });
         await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
       });
-      setup();
     });
 
     test("schema suggestion", function (done) {
-      onInit({
+      runUpdateItemTest({
         onInitCb: async ({ quickpick, lp }) => {
           quickpick.value = "foo.";
           await lp.onUpdatePickerItem(quickpick, { flavor: "note" }, "manual");
@@ -122,11 +172,41 @@ suite("notes, multi", function () {
           );
           done();
         },
-      });
-
-      setup({
         beforeActivateCb: async ({ vaults }) => {
           fs.removeSync(path.join(vaults[0].fsPath, "foo.ch1.md"));
+        },
+      });
+    });
+  });
+
+  describe.only("accept items", function () {
+    test("exiting item", function (done) {
+      runAcceptItemTest({
+        onInitCb: async ({ lp }) => {
+          const ws = DendronWorkspace.instance();
+          const client = ws.getEngine();
+          const note = client.notes["foo"];
+          const item = DNodeUtilsV2.enhancePropForQuickInput({
+            props: note,
+            schemas: client.schemas,
+            vaults: DendronWorkspace.instance().config.vaults,
+          });
+          const quickpick = createMockQuickPick({
+            value: "foo",
+            selectedItems: [item],
+          });
+          await lp.onDidAccept(quickpick, engOpts);
+          await NodeTestPresetsV2.runMochaHarness({
+            opts: {
+              activeFileName: DNodeUtilsV2.fname(
+                VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+              ),
+              activeNote: getNoteFromTextEditor(),
+            },
+            results:
+              LOOKUP_SINGLE_TEST_PRESET.ACCEPT_ITEMS.EXISTING_ITEM.results,
+          });
+          done();
         },
       });
     });

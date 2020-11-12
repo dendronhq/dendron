@@ -28,8 +28,36 @@ const UPDATE_ITEMS = {
   }),
 };
 
+const ACCEPT_ITEMS = {
+  EXISTING_ITEM: new TestPresetEntry({
+    label: "existing item",
+    results: async ({
+      activeFileName,
+      activeNote,
+    }: {
+      activeFileName: string;
+      activeNote: NotePropsV2;
+    }) => {
+      return [
+        {
+          actual: activeFileName,
+          expected: "foo",
+        },
+        {
+          actual: _.pick(activeNote, ["title", "created"]),
+          expected: {
+            title: "Foo",
+            created: "1",
+          },
+        },
+      ];
+    },
+  }),
+};
+
 const LOOKUP_SINGLE_TEST_PRESET = {
   UPDATE_ITEMS,
+  ACCEPT_ITEMS,
 };
 
 export default LOOKUP_SINGLE_TEST_PRESET;

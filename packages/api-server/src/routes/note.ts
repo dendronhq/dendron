@@ -38,9 +38,9 @@ router.post("/rename", async (req: Request, res: Response) => {
 });
 
 router.post("/query", async (req: Request, res: Response) => {
-  const { ws, queryString, mode } = req.body as EngineQueryRequest;
+  const { ws, queryString } = req.body as EngineQueryRequest;
   const engine = await getWS({ ws: ws || "" });
-  const { error, data } = await engine.query(queryString, mode);
+  const { error, data } = await engine.queryNotes({ qs: queryString });
   res.json({ error, data });
 });
 

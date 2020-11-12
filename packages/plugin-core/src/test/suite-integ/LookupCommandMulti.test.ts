@@ -24,7 +24,7 @@ import {
 
 const { LOOKUP_SINGLE_TEST_PRESET } = PLUGIN_CORE;
 
-suite("notes, multi", function () {
+suite.skip("notes, multi", function () {
   let wsRoot: string;
   let vaults: DVault[];
   let ctx: vscode.ExtensionContext;
@@ -179,7 +179,7 @@ suite("notes, multi", function () {
     });
   });
 
-  describe.only("accept items", function () {
+  describe("accept items", function () {
     test("exiting item", function (done) {
       runAcceptItemTest({
         onInitCb: async ({ lp }) => {

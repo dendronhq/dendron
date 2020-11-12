@@ -11,7 +11,7 @@ import {
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { Uri, window, WorkspaceFolder } from "vscode";
+import { Uri, window } from "vscode";
 import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
 import { EngineFlavor, EngineOpts } from "../../types";
@@ -330,7 +330,7 @@ export class LookupProviderV2 {
         Logger.info({ ctx, msg: "first query" });
         let nodes: DNodePropsV2[];
         if (opts.flavor === "note") {
-          const resp = await engine.query(querystring, opts.flavor);
+          const resp = await engine.queryNotes({ qs: querystring });
           nodes = resp.data;
         } else {
           const resp = await engine.querySchema(querystring);

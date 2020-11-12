@@ -5,12 +5,10 @@ import {
   DEngineMode,
   DEngineV2,
   DLink,
-  DNodePropsV2,
   DNodeTypeV2,
   DStoreV2,
   DVault,
   EngineDeleteOptsV2,
-  EngineQueryNoteResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   GetNoteOptsV2,
@@ -18,7 +16,7 @@ import {
   NoteChangeEntry,
   NotePropsV2,
   NoteUtilsV2,
-  QueryOptsV2,
+  QueryNotesOpts,
   RenameNoteOptsV2,
   RenameNotePayload,
   RespV2,
@@ -193,6 +191,7 @@ export class DendronEngineV2 implements DEngineV2 {
   async getNoteByPath({
     npath,
     createIfNew,
+    vault,
   }: GetNoteOptsV2): Promise<RespV2<GetNotePayloadV2>> {
     const ctx = "getNoteByPath";
     this.logger.debug({ ctx, npath, createIfNew, msg: "enter" });
@@ -208,7 +207,7 @@ export class DendronEngineV2 implements DEngineV2 {
         delete noteNew.stub;
       } else {
         noteNew = NoteUtilsV2.createWithSchema({
-          noteOpts: { fname: npath },
+          noteOpts: { fname: npath, vault },
           engine: this,
         });
       }
@@ -262,57 +261,84 @@ export class DendronEngineV2 implements DEngineV2 {
     };
   }
 
-  async query(
-    queryString: string,
-    mode: DNodeTypeV2,
-    opts?: QueryOptsV2
-  ): Promise<EngineQueryNoteResp> {
-    const ctx = "Engine:query";
-    const cleanOpts = _.defaults(opts || {}, {
-      fullNode: false,
-      createIfNew: false,
-      initialQuery: false,
-      stub: false,
-    });
-    this.logger.info({ ctx, msg: "enter" });
-    let items: DNodePropsV2[] = [];
-
-    // ~~~ schema query
-    if (mode === "schema") {
-      throw Error("engine.query for schema is not supported");
-    } else {
-      // ~~~ note query
-      items = await this.fuseEngine.queryNote({ qs: queryString });
-      // if (queryString === "") {
-      //   items = [this.notes.root];
-      // } else if (queryString === "*") {
-      //   items = _.values(this.notes);
-      // } else {
-      //   const results = this.notesIndex.search(queryString);
-      //   items = _.map(results, (resp) => resp.item);
-      // }
-      if (cleanOpts.createIfNew) {
-        let noteNew: NotePropsV2;
-        if (items[0]?.fname === queryString && items[0]?.stub) {
-          noteNew = items[0];
-          noteNew.stub = false;
-        } else {
-          noteNew = NoteUtilsV2.create({ fname: queryString });
+  async queryNotes(opts: QueryNotesOpts) {
+    const ctx = "Engine:queryNotes";
+    const { qs, vault, createIfNew } = opts;
+    const items = await this.fuseEngine.queryNote({ qs });
+    if (createIfNew) {
+      let noteNew: NotePropsV2;
+      if (items[0]?.fname === qs && items[0]?.stub) {
+        noteNew = items[0];
+        noteNew.stub = false;
+      } else {
+        if (_.isUndefined(vault)) {
+          return {
+            error: new DendronError({ msg: "no vault specified" }),
+            data: null as any,
+          };
         }
-        await this.writeNote(noteNew, { newNode: true });
+        noteNew = NoteUtilsV2.create({ fname: qs, vault });
       }
-      if (cleanOpts.fullNode) {
-        throw Error("not implemented");
-      }
+      await this.writeNote(noteNew, { newNode: true });
     }
-
-    // ~~~ exit
     this.logger.info({ ctx, msg: "exit" });
     return {
       error: null,
       data: items,
     };
   }
+
+  // async query(
+  //   queryString: string,
+  //   mode: DNodeTypeV2,
+  //   opts?: QueryOptsV2
+  // ): Promise<EngineQueryNoteResp> {
+  //   const ctx = "Engine:query";
+  //   const cleanOpts = _.defaults(opts || {}, {
+  //     fullNode: false,
+  //     createIfNew: false,
+  //     initialQuery: false,
+  //     stub: false,
+  //   });
+  //   this.logger.info({ ctx, msg: "enter" });
+  //   let items: DNodePropsV2[] = [];
+
+  //   // ~~~ schema query
+  //   if (mode === "schema") {
+  //     throw Error("engine.query for schema is not supported");
+  //   } else {
+  //     // ~~~ note query
+  //     items = await this.fuseEngine.queryNote({ qs: queryString });
+  //     // if (queryString === "") {
+  //     //   items = [this.notes.root];
+  //     // } else if (queryString === "*") {
+  //     //   items = _.values(this.notes);
+  //     // } else {
+  //     //   const results = this.notesIndex.search(queryString);
+  //     //   items = _.map(results, (resp) => resp.item);
+  //     // }
+  //     if (cleanOpts.createIfNew) {
+  //       let noteNew: NotePropsV2;
+  //       if (items[0]?.fname === queryString && items[0]?.stub) {
+  //         noteNew = items[0];
+  //         noteNew.stub = false;
+  //       } else {
+  //         noteNew = NoteUtilsV2.create({ fname: queryString });
+  //       }
+  //       await this.writeNote(noteNew, { newNode: true });
+  //     }
+  //     if (cleanOpts.fullNode) {
+  //       throw Error("not implemented");
+  //     }
+  //   }
+
+  //   // ~~~ exit
+  //   this.logger.info({ ctx, msg: "exit" });
+  //   return {
+  //     error: null,
+  //     data: items,
+  //   };
+  // }
 
   async sync() {
     throw Error("sync not implemented");

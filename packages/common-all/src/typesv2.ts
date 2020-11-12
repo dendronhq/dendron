@@ -215,6 +215,7 @@ export type EngineUpdateNodesOptsV2 = {
   newNode: boolean;
 };
 export type GetNoteOptsV2 = {
+  vault: DVault;
   npath: string;
   /**
    * If node does not exist, create it?
@@ -300,6 +301,11 @@ export type GetNotePayloadV2 = {
   note: NotePropsV2 | undefined;
   changed: NoteChangeEntry[];
 };
+export type QueryNotesOpts = {
+  qs: string;
+  vault?: DVault;
+  createIfNew?: boolean;
+};
 
 export type DEngineInitSchemaRespV2 = Required<RespV2<SchemaModulePropsV2[]>>;
 
@@ -325,13 +331,13 @@ export type DEngineV2 = DCommonProps &
     getNoteByPath: (opts: GetNoteOptsV2) => Promise<RespV2<GetNotePayloadV2>>;
     getSchema: (qs: string) => Promise<RespV2<SchemaModulePropsV2>>;
     querySchema: (qs: string) => Promise<SchemaQueryResp>;
-    queryNotes?: (qs: string) => Promise<NoteQueryResp>;
+    queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;
     queryNotesSync({ qs }: { qs: string }): NoteQueryResp;
-    query: (
-      queryString: string,
-      mode: DNodeTypeV2,
-      opts?: QueryOptsV2
-    ) => Promise<EngineQueryNoteResp>;
+    // query?: (
+    //   queryString: string,
+    //   mode: DNodeTypeV2,
+    //   opts?: QueryOptsV2
+    // ) => Promise<EngineQueryNoteResp>;
     renameNote: (opts: RenameNoteOptsV2) => Promise<RespV2<RenameNotePayload>>;
   };
 

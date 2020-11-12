@@ -5,11 +5,9 @@ import {
   DEngineInitRespV2,
   DLink,
   DNodePropsV2,
-  DNodeTypeV2,
   DVault,
   EngineDeleteNoteResp,
   EngineDeleteOptsV2,
-  EngineQueryNoteResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   ERROR_CODES,
@@ -18,7 +16,7 @@ import {
   NoteChangeEntry,
   NotePropsDictV2,
   NotePropsV2,
-  QueryOptsV2,
+  QueryNotesOpts,
   RenameNoteOptsV2,
   RenameNotePayload,
   RespV2,
@@ -177,23 +175,32 @@ export class DendronEngineClient implements DEngineClientV2 {
    * - []
    * - [Node(id: ..., title: project, children: [])]
    */
-  async query(
-    queryString: string,
-    mode: DNodeTypeV2,
-    _opts?: QueryOptsV2
-  ): Promise<EngineQueryNoteResp> {
-    if (mode === "note") {
-      const items = await this.queryNote({ qs: queryString });
-      return {
-        data: items,
-        error: null,
-      };
-    } else {
-      throw Error("query schema not implemented");
-    }
-  }
+  // async query(
+  //   queryString: string,
+  //   mode: DNodeTypeV2,
+  //   _opts?: QueryOptsV2
+  // ): Promise<EngineQueryNoteResp> {
+  //   if (mode === "note") {
+  //     const items = await this.queryNote({ qs: queryString });
+  //     return {
+  //       data: items,
+  //       error: null,
+  //     };
+  //   } else {
+  //     throw Error("query schema not implemented");
+  //   }
+  // }
+
   async queryNote({ qs }: { qs: string }): Promise<NotePropsV2[]> {
     return await this.fuseEngine.queryNote({ qs });
+  }
+
+  async queryNotes(opts: QueryNotesOpts) {
+    const items = await this.queryNote({ qs: opts.qs });
+    return {
+      data: items,
+      error: null,
+    };
   }
 
   async buildNotes() {}

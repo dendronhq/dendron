@@ -268,9 +268,6 @@ export async function main() {
     limit: 10,
   });
   L.info("done");
-  //   const store = createStorage();
-  //   const resp = await store.query({ username: 'kevin' }, '**/*', {});
-  //   console.log({ resp });
 }
 
 // console.log("start");

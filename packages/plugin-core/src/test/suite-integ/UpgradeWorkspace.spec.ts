@@ -42,7 +42,7 @@ const exepctedUpgradeSettings = () => {
  *
  * TODO: test that setting a custom prop won't be overridden
  */
-suite.only("upgrade", function () {
+suite("upgrade", function () {
   this.timeout(TIMEOUT);
   let ctx: ExtensionContext;
 

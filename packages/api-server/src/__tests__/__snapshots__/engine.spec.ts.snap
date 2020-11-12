@@ -142,35 +142,6 @@ Object {
 }
 `;
 
-exports[`notes query query root: root note 1`] = `
-Object {
-  "data": Array [
-    Object {
-      "body": "
-",
-      "children": Array [
-        "foo",
-      ],
-      "created": "1",
-      "custom": Object {},
-      "data": Object {},
-      "desc": "",
-      "fname": "root",
-      "id": "ee9ccae9-4dae-4a42-a957-f93bc05876ab",
-      "links": Array [],
-      "parent": null,
-      "title": "Root",
-      "type": "note",
-      "updated": "1",
-      "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-56154-vG7tegKRpCM9/vault",
-      },
-    },
-  ],
-  "error": null,
-}
-`;
-
 exports[`notes rename/ basic 1`] = `
 Object {
   "data": Array [
@@ -275,90 +246,18 @@ Array [
 ]
 `;
 
-exports[`notes rename/ domain with no children, update exsiting node: changed 1`] = `
-Array [
-  Object {
-    "note": Object {
-      "body": "[[gamma]]
+exports[`notes write grandchild of root, child is stub 1`] = `
+Object {
+  "data": undefined,
+  "error": [RequestError: Error: connect ECONNREFUSED 127.0.0.1:3005],
+}
+`;
 
-",
-      "children": Array [],
-      "created": "1",
-      "data": Object {},
-      "desc": "",
-      "fname": "alpha",
-      "id": "alpha",
-      "links": Array [
-        Object {
-          "alias": "gamma",
-          "from": Object {
-            "fname": "alpha",
-            "id": "alpha",
-          },
-          "original": "gamma",
-          "pos": Object {
-            "end": 9,
-            "start": 0,
-          },
-          "to": Object {
-            "fname": "gamma",
-          },
-          "type": "wiki",
-          "value": "gamma",
-        },
-      ],
-      "parent": "b2f412f4-ca26-49e4-bbfa-fa368d6bb80b",
-      "title": "Alpha",
-      "type": "note",
-      "updated": "1",
-    },
-    "status": "update",
-  },
-  Object {
-    "note": Object {
-      "body": "[[alpha]]
-",
-      "children": Array [],
-      "created": "1",
-      "custom": Object {},
-      "data": Object {},
-      "desc": "",
-      "fname": "beta",
-      "id": "beta",
-      "links": Array [],
-      "parent": null,
-      "title": "Beta",
-      "type": "note",
-      "updated": "1",
-      "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-56154-A15LbDGnDpUr/vault",
-      },
-    },
-    "status": "delete",
-  },
-  Object {
-    "note": Object {
-      "body": "[[alpha]]
-",
-      "children": Array [],
-      "created": "1",
-      "custom": Object {},
-      "data": Object {},
-      "desc": "",
-      "fname": "gamma",
-      "id": "beta",
-      "links": Array [],
-      "parent": "b2f412f4-ca26-49e4-bbfa-fa368d6bb80b",
-      "title": "Beta",
-      "type": "note",
-      "updated": "1",
-      "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-56154-A15LbDGnDpUr/vault",
-      },
-    },
-    "status": "create",
-  },
-]
+exports[`notes write write child, parent stub: root note 1`] = `
+Object {
+  "data": undefined,
+  "error": [RequestError: Error: connect ECONNREFUSED 127.0.0.1:3005],
+}
 `;
 
 exports[`schema write simple schema 1`] = `

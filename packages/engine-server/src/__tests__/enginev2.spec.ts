@@ -79,8 +79,11 @@ describe("engine, schema/", () => {
   describe("delete/", () => {
     let vaultDir: string;
     let engine: DEngineV2;
+    let vault: DVault;
+
     beforeEach(async () => {
       ({ vaultDir, engine } = await beforePreset());
+      vault = { fsPath: vaultDir };
     });
 
     test("delete non-root", async () => {
@@ -101,7 +104,7 @@ describe("engine, schema/", () => {
       const index = (engine as DendronEngineV2).fuseEngine.notesIndex;
       expect((index.getIndex().toJSON() as any).records.length).toEqual(3);
 
-      const resp = await engine.query("foo", "note");
+      const resp = await engine.queryNotes({ qs: "foo", vault });
       expect(resp.data[0].schema).toBeUndefined();
     });
 
@@ -388,7 +391,7 @@ describe("engine, notes/", () => {
         ],
       });
       await engine.init();
-      const resp = await engine.query("foo", "note");
+      const resp = await engine.queryNotes({ qs: "foo", vault });
       expect(resp.data[0].title).toEqual("Foo");
       expect(resp.data[0].custom).toEqual({ bond: 42 });
     });
@@ -409,12 +412,12 @@ describe("engine, notes/", () => {
         ],
       });
       await engine.init();
-      let resp = await engine.query("foo", "note");
+      let resp = await engine.queryNotes({ qs: "foo", vault });
       const note = resp.data[0];
       note.body = "custom body";
       await engine.writeNote(note);
 
-      resp = await engine.query("foo", "note");
+      resp = await engine.queryNotes({ qs: "foo", vault });
       expect(resp.data[0].title).toEqual("Foo");
       expect(resp.data[0].body).toEqual(note.body);
       expect(resp.data[0].custom).toEqual({ bond: 42 });
@@ -432,11 +435,11 @@ describe("engine, notes/", () => {
         ],
       });
       await engine.init();
-      let resp = await engine.query("foo", "note");
+      let resp = await engine.queryNotes({ qs: "foo", vault });
       const note = resp.data[0];
       note.custom = { bond: 43 };
       await engine.writeNote(note);
-      resp = await engine.query("foo", "note");
+      resp = await engine.queryNotes({ qs: "foo", vault });
       expect(resp.data[0].title).toEqual("Foo");
       expect(resp.data[0].custom).toEqual({ bond: 43 });
     });
@@ -564,13 +567,15 @@ describe("engine, notes/", () => {
 
   describe("getNoteByPath/", () => {
     let engine: DEngineV2;
+    let vault: DVault;
     beforeEach(async () => {
       ({ vaultDir, engine } = await beforePreset());
+      vault = { fsPath: vaultDir };
     });
 
     test("get existing note", async () => {
       await engine.init();
-      const { data } = await engine.getNoteByPath({ npath: "foo" });
+      const { data } = await engine.getNoteByPath({ npath: "foo", vault });
       expect(data?.note).toEqual(engine.notes["foo"]);
       expect(data?.changed).toEqual([]);
     });
@@ -592,6 +597,7 @@ This is some content`,
       await engine.init();
       const { data } = await engine.getNoteByPath({
         npath: "000 Index",
+        vault,
         createIfNew: true,
       });
       expect(
@@ -603,6 +609,7 @@ This is some content`,
       await engine.init();
       const { data } = await engine.getNoteByPath({
         npath: "bar",
+        vault,
         createIfNew: true,
       });
       expect(data?.note?.fname).toEqual("bar");
@@ -623,21 +630,21 @@ This is some content`,
 
     test("empty string", async () => {
       await engine.init();
-      const { data } = await engine.query("", "note");
+      const { data } = await engine.queryNotes({ qs: "", vault });
       expect(normalizeNotes(data)).toMatchSnapshot();
       expect(data[0]).toEqual(NoteUtilsV2.getNoteByFname("root", engine.notes));
     });
 
     test("*", async () => {
       await engine.init();
-      const { data } = await engine.query("*", "note");
+      const { data } = await engine.queryNotes({ qs: "*", vault });
       expect(normalizeNotes(data)).toMatchSnapshot();
       expect(data.length).toEqual(3);
     });
 
     test("foo", async () => {
       await engine.init();
-      const { data } = await engine.query("foo", "note");
+      const { data } = await engine.queryNotes({ qs: "foo", vault });
       expect(normalizeNotes(data)).toMatchSnapshot();
       expect(data[0]).toEqual(engine.notes["foo"]);
     });
@@ -847,7 +854,7 @@ This is some content`,
       });
       await engine.writeNote(barNote);
       expect(normalizeNotes(engine.notes)).toMatchSnapshot();
-      const resp = await engine.query("bar", "note");
+      const resp = await engine.queryNotes({ qs: "bar", vault });
       const note = resp.data[0];
       expect(_.values(engine.notes).length).toEqual(4);
       expect(note).toEqual(engine.notes["bar"]);

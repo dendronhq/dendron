@@ -10,6 +10,7 @@ import {
   GetNoteOptsV2,
   NotePropsDictV2,
   NotePropsV2,
+  QueryNotesOpts,
   QueryOptsV2,
   RenameNoteOptsV2,
   SchemaModuleDictV2,
@@ -108,7 +109,7 @@ export class EngineAPIShim implements DEngineClientV2 {
   async querySchema(_qs: string) {
     return {} as any;
   }
-  async queryNotes?(_qs: string) {
+  async queryNotes(_opts: QueryNotesOpts) {
     return {} as any;
   }
 

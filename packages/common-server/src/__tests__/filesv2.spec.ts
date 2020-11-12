@@ -5,8 +5,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { tmpDir } from "../filesv2";
-import { file2Schema, schemaModuleProps2File } from "../filesv2";
+import { file2Schema, schemaModuleProps2File, tmpDir } from "../filesv2";
 
 describe("schemaModuleProps2File", () => {
   let root: string;
@@ -17,7 +16,7 @@ describe("schemaModuleProps2File", () => {
 
   it("root", async () => {
     const fname = "root";
-    const sm = _su.createRootModuleProps(fname);
+    const sm = _su.createRootModuleProps(fname, { fsPath: root });
     await schemaModuleProps2File(sm, root, fname);
     const payload = fs.readFileSync(path.join(root, `${fname}.schema.yml`), {
       encoding: "utf8",
@@ -27,7 +26,7 @@ describe("schemaModuleProps2File", () => {
 
   it("non-root", async () => {
     const fname = "bond";
-    const smp = _su.createModuleProps({ fname });
+    const smp = _su.createModuleProps({ fname, vault: { fsPath: root } });
     const rootNote = smp.schemas["bond"];
     const ch1 = _su.create({ id: "ch1", fname });
     smp.schemas["ch1"] = ch1;

@@ -131,7 +131,10 @@ describe("matchPath", () => {
 
   it("match path on domain as namespace", async () => {
     await engine.init();
-    const schema = SchemaUtilsV2.createModuleProps({ fname: "bond" });
+    const schema = SchemaUtilsV2.createModuleProps({
+      fname: "bond",
+      vault: engine.vaultsv3[0],
+    });
     schema.schemas[schema.root.id].data.namespace = true;
     await engine.init();
     await engine.updateSchema(schema);
@@ -146,7 +149,10 @@ describe("matchPath", () => {
 
   it("match path on domain as namespace, child", async () => {
     await engine.init();
-    const schema = SchemaUtilsV2.createModuleProps({ fname: "bond" });
+    const schema = SchemaUtilsV2.createModuleProps({
+      fname: "bond",
+      vault: engine.vaultsv3[0],
+    });
     schema.schemas[schema.root.id].data.namespace = true;
     await engine.init();
     await engine.updateSchema(schema);

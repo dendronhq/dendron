@@ -3,6 +3,7 @@ import {
   DEngineInitRespV2,
   DLink,
   DNodeTypeV2,
+  DVault,
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
@@ -54,6 +55,7 @@ export class EngineAPIShim implements DEngineClientV2 {
   public notes: NotePropsDictV2;
   public schemas: SchemaModuleDictV2;
   public links: DLink[];
+  public vaultsv3: DVault[];
 
   constructor({
     api,
@@ -70,6 +72,7 @@ export class EngineAPIShim implements DEngineClientV2 {
     this.notes = {};
     this.schemas = {};
     this.links = [];
+    this.vaultsv3 = [];
   }
   async init() {
     const { api, wsRoot, vaults } = this;

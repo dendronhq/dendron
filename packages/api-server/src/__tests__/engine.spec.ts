@@ -260,7 +260,10 @@ describe("schema", () => {
         endpoint: "http://localhost:3005",
         apiPath: "api",
       });
-      const schema = su.createModuleProps({ fname: "pro" });
+      const schema = su.createModuleProps({
+        fname: "pro",
+        vault: { fsPath: "" },
+      });
       await api.workspaceInit(payload);
       api.workspaceList();
       await api.schemaWrite({

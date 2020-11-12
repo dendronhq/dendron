@@ -1,10 +1,10 @@
 #!/bin/bash
 
 echo "building..."
-npx lerna run build --scope @dendronhq/common-all || exit 1
-npx lerna run build --scope @dendronhq/common-server  || exit 1
+# npx lerna run build --scope @dendronhq/common-all || exit 1
+# npx lerna run build --scope @dendronhq/common-server  || exit 1
 
-npx lerna run build --scope @dendronhq/common-test-utils || exit 1
+# npx lerna run build --scope @dendronhq/common-test-utils || exit 1
 
 npx lerna run build --scope @dendronhq/engine-server  || exit 1
 npx lerna run build --scope @dendronhq/lsp-server  || exit 1

@@ -4,6 +4,7 @@ import { DConfig } from "@dendronhq/engine-server";
 import assert from "assert";
 import fs from "fs-extra";
 import { afterEach, beforeEach } from "mocha";
+import path from "path";
 import * as vscode from "vscode";
 import { VaultAddCommand } from "../../commands/VaultAddCommand";
 import { HistoryService } from "../../services/HistoryService";
@@ -27,11 +28,11 @@ suite("VaultAddCommand", function () {
   });
 
   // TODO: need to update DendronWorkspace to have proper settings in path
-  test.skip("basic", (done) => {
+  test("add absolute path", (done) => {
     runSingleVaultTest({
       ctx,
-      onInit: async ({ vault }) => {
-        const vpath = tmpDir().name;
+      onInit: async ({ vault, wsRoot }) => {
+        const vpath = path.join(wsRoot, "vault2");
         let acc = 0;
 
         // need to ignore to keep compiler from complaining
@@ -55,14 +56,14 @@ suite("VaultAddCommand", function () {
         );
         const config = readYAML(configPath) as DendronConfig;
         assert.deepStrictEqual(
-          config.vaults.map((ent) => ent.fsPath).sort(),
-          [vault.fsPath, vpath].sort()
+          config.vaults.map((ent) => ent.fsPath),
+          [vault.fsPath, "vault2"]
         );
         const wsPath = DendronWorkspace.workspaceFile().fsPath;
         const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
         assert.deepStrictEqual(settings.folders, [
           { path: vault.fsPath },
-          { path: vpath },
+          { path: "vault2" },
         ]);
         done();
       },

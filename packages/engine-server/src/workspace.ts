@@ -8,6 +8,7 @@ import {
 import { note2File, schemaModuleOpts2File } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
+import { createNormVault } from "../lib";
 import { DConfig } from "./config";
 
 export type PathExistBehavior = "delete" | "abort" | "continue";
@@ -62,9 +63,11 @@ export class WorkspaceService {
     await note2File(note, vault.fsPath);
     await schemaModuleOpts2File(schema, vault.fsPath, "root");
 
+    const wsRoot = this.wsRoot;
+    const { vault: nvault } = createNormVault({ vault, wsRoot });
     // update config
     const config = this.config;
-    config.vaults.push(vault);
+    config.vaults.push(nvault);
     await this.setConfig(config);
     return;
   }

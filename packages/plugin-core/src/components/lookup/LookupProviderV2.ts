@@ -358,7 +358,7 @@ export class LookupProviderV2 {
             DNodeUtilsV2.enhancePropForQuickInput({
               props: ent,
               schemas: engine.schemas,
-              vaults: DendronWorkspace.instance().config.vaults,
+              vaults: DendronWorkspace.instance().vaults,
             })
           )
         );
@@ -423,7 +423,7 @@ export class LookupProviderV2 {
               return DNodeUtilsV2.enhancePropForQuickInput({
                 props: ent,
                 schemas: engine.schemas,
-                vaults: DendronWorkspace.instance().config.vaults,
+                vaults: DendronWorkspace.instance().vaults,
               });
             })
           );
@@ -496,7 +496,7 @@ export class LookupProviderV2 {
       return DNodeUtilsV2.enhancePropForQuickInput({
         props: ent,
         schemas: engine.schemas,
-        vaults: DendronWorkspace.instance().config.vaults,
+        vaults: DendronWorkspace.instance().vaults,
       });
     });
   }

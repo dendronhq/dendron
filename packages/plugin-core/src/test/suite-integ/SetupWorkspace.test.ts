@@ -18,7 +18,9 @@ import { WORKSPACE_STATE } from "../../constants";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
+import { _activate } from "../../_extension";
 import { onExtension, onWSInit, setupDendronWorkspace } from "../testUtils";
+import { runSingleVaultTest, setupCodeWorkspaceV2 } from "../testUtilsv2";
 
 const TIMEOUT = 60 * 1000 * 5;
 
@@ -64,6 +66,59 @@ id: bond
 `
           );
         },
+      });
+    });
+
+    it("upgrade config", function (done) {
+      DendronWorkspace.version = () => "0.0.1";
+      setupCodeWorkspaceV2({
+        ctx,
+        postSetupHook: async ({ wsRoot }) => {
+          fs.removeSync(DConfig.configPath(wsRoot));
+          await DConfig.getOrCreate(wsRoot);
+        },
+      }).then(({ vaults }) => {
+        onExtension({
+          action: "activate",
+          cb: async (_event: HistoryEvent) => {
+            assert.strictEqual(DendronWorkspace.isActive(), true);
+            assert.strictEqual(
+              ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
+              "0.0.1"
+            );
+            const engine = DendronWorkspace.instance().getEngine();
+            const wsRoot = DendronWorkspace.rootDir() as string;
+            // check for config file
+            const config = readYAML(
+              DConfig.configPath(wsRoot)
+            ) as DendronConfig;
+
+            // cehck that config was upgraded using relative file
+            assert.deepStrictEqual(config.vaults, [
+              { fsPath: path.basename(vaults[0]) },
+            ]);
+
+            // check for meta
+            const port = getPortFilePath({ wsRoot });
+            const fpath = getWSMetaFilePath({ wsRoot });
+            const meta = openWSMetaFile({ fpath });
+            assert.ok(
+              _.toInteger(fs.readFileSync(port, { encoding: "utf8" })) > 0
+            );
+            assert.strictEqual(meta.version, "0.0.1");
+            assert.ok(meta.activationTime < Time.now().toMillis());
+            assert.strictEqual(_.values(engine.notes).length, 1);
+            assert.deepStrictEqual(fs.readdirSync(vaults[0]).sort(), [
+              ".git",
+              ".vscode",
+              "assets",
+              "root.md",
+              "root.schema.yml",
+            ]);
+            done();
+          },
+        });
+        _activate(ctx);
       });
     });
 

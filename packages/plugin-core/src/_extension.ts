@@ -2,6 +2,7 @@ import { launch } from "@dendronhq/api-server";
 import { DendronError, getStage, Time } from "@dendronhq/common-all";
 import { readJSONWithComments } from "@dendronhq/common-server";
 import {
+  createNormVault,
   DConfig,
   getWSMetaFilePath,
   writeWSMetaFile,
@@ -48,7 +49,7 @@ async function reloadWorkspace() {
   // help with debug, doesn't need to block
   readJSONWithComments(DendronWorkspace.workspaceFile().fsPath).then(
     (config) => {
-      Logger.info({ ctx, msg: "gotConfig", config });
+      Logger.info({ ctx, msg: "configDump", config });
     }
   );
   // check if first time install workspace, if so, show tutorial
@@ -201,7 +202,11 @@ export async function _activate(context: vscode.ExtensionContext) {
       if (_.isUndefined(wsFolders)) {
         throw new DendronError({ msg: "no vaults detected" });
       }
-      config.vaults = [{ fsPath: wsFolders[0].uri.fsPath }];
+      const { vault } = createNormVault({
+        wsRoot,
+        vault: { fsPath: wsFolders[0].uri.fsPath },
+      });
+      config.vaults = [vault];
       DConfig.writeConfig({ wsRoot, config });
     }
     Logger.info({ ctx, config, msg: "isActive" });

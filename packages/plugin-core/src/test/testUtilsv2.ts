@@ -15,7 +15,10 @@ import { DConfig } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { ExtensionContext, Uri, window } from "vscode";
-import { SetupWorkspaceCommand } from "../commands/SetupWorkspace";
+import {
+  SetupWorkspaceCommand,
+  SetupWorkspaceOpts,
+} from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
 import { WorkspaceFolderRaw } from "../types";
 import { DendronWorkspace } from "../workspace";
@@ -50,15 +53,12 @@ type SetupCodeWorkspaceMultiVaultV2Opts = SetupCodeConfigurationV2 & {
 
 export async function runSingleVaultTest(
   opts: SetupCodeWorkspaceV2 & {
-    onInit: ({ vault }: { vault: DVault }) => Promise<void>;
+    onInit: (opts: { vault: DVault; wsRoot: string }) => Promise<void>;
   }
 ) {
   let vault = { fsPath: tmpDir().name };
   const { ctx, onInit } = opts;
-  onWSInit(async () => {
-    await onInit({ vault });
-  });
-  await setupCodeWorkspaceV2(
+  const { wsRoot } = await setupCodeWorkspaceV2(
     _.defaults(opts, {
       initDirCb: async (vaultDir: string) => {
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
@@ -66,6 +66,9 @@ export async function runSingleVaultTest(
       vaultDir: vault.fsPath,
     })
   );
+  onWSInit(async () => {
+    await onInit({ vault, wsRoot });
+  });
   await _activate(ctx);
 }
 
@@ -110,7 +113,11 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
   });
   const { preSetupHook, postSetupHook } = copts;
   const { wsRoot, vaults } = await EngineTestUtilsV2.setupWS(opts);
+  let setupWsOverride = copts.setupWsOverride as Partial<SetupWorkspaceOpts>;
   setupCodeConfiguration(opts);
+  if (opts.vaultDir) {
+    setupWsOverride.vault = { fsPath: opts.vaultDir };
+  }
   DendronWorkspace.workspaceFile = () => {
     return Uri.file(path.join(wsRoot, "dendron.code-workspace"));
   };
@@ -120,6 +127,9 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
   };
   const workspaceFile = DendronWorkspace.workspaceFile();
   const workspaceFolders = DendronWorkspace.workspaceFolders();
+  // const config = DConfig.getOrCreate(wsRoot);
+  // config.vaults = vaults.map((ent) => ({ fsPath: ent }));
+  // DConfig.writeConfig({ wsRoot, config });
   await preSetupHook({
     wsRoot,
     vaults: vaults.map((ent) => {
@@ -129,7 +139,14 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
   await new SetupWorkspaceCommand().execute({
     rootDirRaw: wsRoot,
     skipOpenWs: true,
-    ...copts.setupWsOverride,
+    ...setupWsOverride,
+  });
+  DendronWorkspace.updateWorkspaceFile({
+    updateCb: (settings) => {
+      const folders = vaults.map((ent) => ({ path: ent }));
+      settings = assignJSONWithComment({ folders }, settings);
+      return settings;
+    },
   });
   await postSetupHook({
     wsRoot,
@@ -137,9 +154,6 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
       return { fsPath: ent };
     }),
   });
-  const config = DConfig.getOrCreate(wsRoot);
-  config.vaults = vaults.map((ent) => ({ fsPath: ent }));
-  DConfig.writeConfig({ wsRoot, config });
   return { wsRoot, vaults, workspaceFile, workspaceFolders };
 }
 

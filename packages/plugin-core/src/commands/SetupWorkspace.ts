@@ -9,9 +9,11 @@ import { Snippets, WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
+import { DVault } from "@dendronhq/common-all";
 
 type CommandOpts = {
   rootDirRaw: string;
+  vault?: DVault;
   skipOpenWs?: boolean;
   emptyWs?: boolean;
   /**
@@ -123,7 +125,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
       }
     }
     // create vault
-    const vaultPath = path.join(rootDir, "vault");
+    const vaultPath = opts.vault?.fsPath || path.join(rootDir, "vault");
     const vaults = [{ fsPath: vaultPath }];
     await WorkspaceService.createWorkspace({ vaults, wsRoot: rootDir });
 

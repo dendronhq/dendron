@@ -6,7 +6,7 @@ import {
   DNoteRefLink,
   DVault,
 } from "@dendronhq/common-all";
-import { readMD } from "@dendronhq/common-server";
+import { readMD, resolvePath } from "@dendronhq/common-server";
 import _ from "lodash";
 import _markdownIt from "markdown-it";
 // @ts-ignoreig
@@ -18,6 +18,26 @@ import fs from "fs-extra";
 import { WSMeta } from "./types";
 
 const markdownIt = _markdownIt();
+
+export function createNormVault({
+  wsRoot,
+  vault,
+}: {
+  wsRoot: string;
+  vault: DVault;
+}) {
+  const fullVaultPath = resolvePath(vault.fsPath, wsRoot);
+  let relVaultPath = "";
+  if (fullVaultPath.indexOf(wsRoot) >= 0) {
+    relVaultPath = _.trim(fullVaultPath.slice(wsRoot.length + 1), "/\\");
+  }
+  if (!_.isEmpty(relVaultPath)) {
+    vault.fsPath = relVaultPath;
+    return { vault, changed: true };
+  } else {
+    return { vault, changed: false };
+  }
+}
 
 function normalize(text: string) {
   return _.toLower(_.trim(text, " #"));

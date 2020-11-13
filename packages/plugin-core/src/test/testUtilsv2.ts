@@ -98,7 +98,6 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
   const { preSetupHook, postSetupHook } = copts;
   const { wsRoot, vaults } = await EngineTestUtilsV2.setupWS(opts);
   setupCodeConfiguration(opts);
-  // setup workspace file
   DendronWorkspace.workspaceFile = () => {
     return Uri.file(path.join(wsRoot, "dendron.code-workspace"));
   };

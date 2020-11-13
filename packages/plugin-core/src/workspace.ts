@@ -47,6 +47,10 @@ import { SnapshotVaultCommand } from "./commands/SnapshotVault";
 import { UpdateSchemaCommand } from "./commands/UpdateSchema";
 import { UpgradeSettingsCommand } from "./commands/UpgradeSettings";
 import {
+  VaultAddCommand,
+  VaultAddCommandOpts,
+} from "./commands/VaultAddCommand";
+import {
   DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
@@ -318,6 +322,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.GOTO_NOTE.key,
         async (opts: GotoNoteCommandOpts) => {
           new GotoNoteCommand().execute(opts);
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.VAULT_ADD.key,
+        async (opts: VaultAddCommandOpts) => {
+          new VaultAddCommand().run(opts);
         }
       )
     );

@@ -320,6 +320,22 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-down.gif)",
   },
   // --- Workspace
+  VAULT_ADD: {
+    key: "dendron.vaultAdd",
+    title: `${CMD_PREFIX} Vault: Add`,
+    group: "workspace",
+    desc: "Add a new vault",
+    docLink: "",
+    docPreview: "",
+  },
+  VAULT_REMOVE: {
+    key: "dendron.vaultRemove",
+    title: `${CMD_PREFIX} Vault: Remove`,
+    group: "workspace",
+    desc: "Remove a vault",
+    docLink: "",
+    docPreview: "",
+  },
   INIT_WS: {
     key: "dendron.initWS",
     title: `${CMD_PREFIX} Initialize Workspace`,

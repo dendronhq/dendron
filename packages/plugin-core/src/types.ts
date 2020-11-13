@@ -1,7 +1,10 @@
-import { WorkspaceFolder } from "vscode";
+export type WorkspaceFolderRaw = {
+  path: string;
+  name?: string;
+};
 
 export type WorkspaceSettings = {
-  folders: WorkspaceFolder[];
+  folders: WorkspaceFolderRaw[];
   settings: any;
   extensions: any;
 };

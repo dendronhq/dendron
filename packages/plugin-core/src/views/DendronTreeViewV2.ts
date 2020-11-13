@@ -102,7 +102,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
     Logger.debug({ ctx, id });
     const client = DendronWorkspace.instance().getEngine();
     if (!client.notes["root"]) {
-      vscode.window.showInformationMessage("No notes found");
+      // vscode.window.showInformationMessage("No notes found");
       return Promise.resolve([]);
     }
     if (id) {

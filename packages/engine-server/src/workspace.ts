@@ -1,4 +1,5 @@
 import {
+  DendronConfig,
   DUtils,
   DVault,
   NoteUtilsV2,
@@ -6,12 +7,17 @@ import {
 } from "@dendronhq/common-all";
 import { note2File, schemaModuleOpts2File } from "@dendronhq/common-server";
 import fs from "fs-extra";
+import { DConfig } from "./config";
 
 export type PathExistBehavior = "delete" | "abort" | "continue";
 
 export type WorkspaceServiceCreateOpts = {
   wsRoot: string;
   vaults: DVault[];
+};
+
+export type WorkspaceServiceOpts = {
+  wsRoot: string;
 };
 
 export class WorkspaceService {
@@ -25,8 +31,24 @@ export class WorkspaceService {
     return DUtils.semver.lt(oldVersion, newVersion);
   }
 
+  public wsRoot: string;
+
+  constructor({ wsRoot }: WorkspaceServiceOpts) {
+    this.wsRoot = wsRoot;
+  }
+
+  get config(): DendronConfig {
+    return DConfig.getOrCreate(this.wsRoot);
+  }
+
+  async setConfig(config: DendronConfig) {
+    const wsRoot = this.wsRoot;
+    return DConfig.writeConfig({ wsRoot, config });
+  }
+
   async createVault({ vault }: { vault: DVault }) {
     fs.ensureDirSync(vault.fsPath);
+
     const note = NoteUtilsV2.createRoot({
       vault,
       body: [
@@ -38,6 +60,11 @@ export class WorkspaceService {
     const schema = SchemaUtilsV2.createRootModule({ vault });
     await note2File(note, vault.fsPath);
     await schemaModuleOpts2File(schema, vault.fsPath, "root");
+
+    // update config
+    const config = this.config;
+    config.vaults.push(vault);
+    await this.setConfig(config);
     return;
   }
 
@@ -45,13 +72,15 @@ export class WorkspaceService {
    * Iinitialize workspace with root
    * @param opts
    */
-  async createWorkspace(opts: WorkspaceServiceCreateOpts) {
+  static async createWorkspace(opts: WorkspaceServiceCreateOpts) {
     const { wsRoot, vaults } = opts;
+    const ws = new WorkspaceService({ wsRoot });
     fs.ensureDirSync(wsRoot);
     await Promise.all(
       vaults.map(async (vault) => {
-        return this.createVault({ vault });
+        return ws.createVault({ vault });
       })
     );
+    return ws;
   }
 }

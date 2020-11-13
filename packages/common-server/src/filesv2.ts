@@ -219,7 +219,7 @@ export function tmpDir(): DirResult {
 
 export function writeJSONWithComments(fpath: string, data: any) {
   const payload = stringify(data, null, 4);
-  return fs.writeFile(fpath, payload);
+  return fs.writeFileSync(fpath, payload);
 }
 
 export { tmp, DirResult };

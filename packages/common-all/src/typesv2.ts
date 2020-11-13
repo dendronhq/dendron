@@ -1,6 +1,7 @@
 import { URI } from "vscode-uri";
 import { DendronError } from "./error";
 import { Position } from "unist";
+import { DendronConfig } from "./types";
 
 // === Old
 export enum LinkType {
@@ -269,8 +270,11 @@ export type NoteChangeEntry = {
 export type WriteNoteResp = Required<RespV2<NoteChangeEntry[]>>;
 
 // --- Common
+export type ConfigGetPayload = DendronConfig;
 
 export type DCommonMethods = {
+  // TODO
+  // configGet(): RespV2<ConfigGetPayload>
   updateNote(note: NotePropsV2, opts?: EngineUpdateNodesOptsV2): Promise<void>;
   updateSchema: (schema: SchemaModulePropsV2) => Promise<void>;
 

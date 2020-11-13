@@ -19,7 +19,9 @@ describe("publishNotes", async () => {
     siteRootDir = tmpDir().name;
     const { vaults } = await EngineTestUtilsV2.setupWS({
       initDirCb: async (root) => {
-        await new WorkspaceService().createVault({ vault: { fsPath: root } });
+        await new WorkspaceService({ wsRoot }).createVault({
+          vault: { fsPath: root },
+        });
         NodeTestUtilsV2.createNotes({
           vaultPath: root,
           noteProps: [

@@ -256,6 +256,20 @@
                 "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-down.gif)"
             },
             {
+                "command": "dendron.vaultAdd",
+                "title": "Dendron: Vault: Add",
+                "desc": "Add a new vault",
+                "docLink": "",
+                "docPreview": ""
+            },
+            {
+                "command": "dendron.vaultRemove",
+                "title": "Dendron: Vault: Remove",
+                "desc": "Remove a vault",
+                "docLink": "",
+                "docPreview": ""
+            },
+            {
                 "command": "dendron.initWS",
                 "title": "Dendron: Initialize Workspace",
                 "desc": "Create a new workspace",

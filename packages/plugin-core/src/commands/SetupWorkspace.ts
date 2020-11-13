@@ -125,7 +125,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
     // create vault
     const vaultPath = path.join(rootDir, "vault");
     const vaults = [{ fsPath: vaultPath }];
-    await new WorkspaceService().createWorkspace({ vaults, wsRoot: rootDir });
+    await WorkspaceService.createWorkspace({ vaults, wsRoot: rootDir });
 
     const dendronWSTemplate = vscode.Uri.joinPath(
       ws.extensionAssetsDir,

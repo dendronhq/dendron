@@ -605,7 +605,7 @@ export class FileStorageV2 implements DStoreV2 {
       delete this.notes[maybeNote.id];
     }
     // order matters - only write file after parents are established
-    await note2File(note, this.vaults[0], opts);
+    await note2File(note, note.vault.fsPath, opts);
     if (match) {
       const { schema, schemaModule } = match;
       NoteUtilsV2.addSchema({ note, schema, schemaModule });

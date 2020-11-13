@@ -1,4 +1,4 @@
-import { DNodeUtilsV2, DVault } from "@dendronhq/common-all";
+import { DNodeUtilsV2, DVault, NotePropsV2 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import { NodeTestPresetsV2, PLUGIN_CORE } from "@dendronhq/common-test-utils";
 import assert from "assert";
@@ -84,7 +84,12 @@ suite("notes, multi", function () {
       wsRoot: _wsRoot,
       vaults: _vaults,
       workspaceFolders,
-    } = await setupCodeWorkspaceMultiVaultV2({ ctx });
+    } = await setupCodeWorkspaceMultiVaultV2({
+      ctx,
+      configOverride: {
+        //"dendron.serverPort": 3005
+      },
+    });
     console.log(
       "runAcceptItemTest:setupCodeWorkspaceV2",
       JSON.stringify({ vaults, workspaceFolders })
@@ -228,6 +233,43 @@ suite("notes, multi", function () {
           const ws = DendronWorkspace.instance();
           const client = ws.getEngine();
           const note = client.notes["foo"];
+          await VSCodeUtils.openFileInEditor(
+            vscode.Uri.file(path.join(note.vault.fsPath, note.fname + ".md"))
+          );
+          const quickpick = createMockQuickPick({
+            value: "bond",
+            selectedItems: [createNoActiveItem(vaults[0])],
+          });
+          await lp.onDidAccept(quickpick, engOpts);
+          assert.strictEqual(
+            DNodeUtilsV2.fname(
+              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+            ),
+            "bond"
+          );
+          const txtPath = vscode.window.activeTextEditor?.document.uri
+            .fsPath as string;
+          const vault = { fsPath: path.dirname(txtPath) };
+          const node = file2Note(txtPath, vault);
+          assert.strictEqual(node.title, "Bond");
+          console.log("onInitCb:exit");
+          done();
+        },
+      });
+    });
+
+    test("new item in other", function (done) {
+      runAcceptItemTest({
+        onInitCb: async ({ lp }) => {
+          console.log("onInitCb:enter");
+          const ws = DendronWorkspace.instance();
+          const vaults = DendronWorkspace.instance().vaults;
+          const client = ws.getEngine();
+          const note = _.find(client.notes, (ent) => {
+            return (
+              ent.vault.fsPath === vaults[1].fsPath && ent.fname === "root"
+            );
+          }) as NotePropsV2;
           await VSCodeUtils.openFileInEditor(
             vscode.Uri.file(path.join(note.vault.fsPath, note.fname + ".md"))
           );

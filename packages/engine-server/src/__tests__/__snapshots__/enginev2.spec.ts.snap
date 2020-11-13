@@ -222,17 +222,6 @@ Array [
 ]
 `;
 
-exports[`engine, notes/ rename/ basic 1`] = `
-Array [
-  "bar.md",
-  "baz.md",
-  "foo.ch1.md",
-  "foo.schema.yml",
-  "root.md",
-  "root.schema.yml",
-]
-`;
-
 exports[`engine, notes/ rename/ with note ref 1`] = `
 Array [
   "bar.md",

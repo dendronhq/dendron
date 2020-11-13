@@ -511,7 +511,9 @@ export class FileStorageV2 implements DStoreV2 {
   }
 
   async renameNote(opts: RenameNoteOptsV2): Promise<RenameNotePayload> {
+    const ctx = "Store:renameNote";
     const { oldLoc, newLoc } = opts;
+    this.logger.info({ ctx, msg: "enter", opts });
     const vaultDir = this.vaults[0];
     // TODO: MULTI_VAULT
     // read from disk since contents migh have changed
@@ -522,6 +524,7 @@ export class FileStorageV2 implements DStoreV2 {
       note: oldNote,
       notes: this.notes,
     });
+    // update note body of all notes that have changed
     const notesChanged = await Promise.all(
       notesToChange.map(async (n) => {
         const vaultDir = this.vaults[0];
@@ -540,15 +543,21 @@ export class FileStorageV2 implements DStoreV2 {
       })
     );
     const newNote = { ...oldNote, fname: newLoc.fname };
-    await this.deleteNote(oldNote.id);
+    // NOTE: order matters. need to delete old note, otherwise can't write new note
+    await this.deleteNote(oldNote.id, { metaOnly: true });
     await this.writeNote(newNote, { newNode: true });
+    // update all new notes
     await Promise.all(notesChanged.map(async (n) => this.writeNote(n)));
     let out: NoteChangeEntry[] = notesChanged.map((note) => ({
       status: "update" as const,
       note,
     }));
+    // remove old note only when rename is success
+    fs.removeSync(NoteUtilsV2.getPath({ note: oldNote }));
+
     out = out.concat([{ status: "delete" as const, note: oldNote }]);
     out = out.concat([{ status: "create" as const, note: newNote }]);
+    this.logger.info({ ctx, msg: "exit", opts });
     return out;
   }
 

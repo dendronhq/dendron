@@ -6,9 +6,38 @@ import path from "path";
 import { NodeTestUtilsV2 } from "..";
 import { TestPresetEntry } from "../utils";
 
+/**
+ * # Setup:
+ *
+ * ## Before Init
+ * - foo: [[bar]]
+ * - bar: [[foo]]
+ */
+// beforeEach(async () => {
+//   ({ vaultDir, engine } = await beforePreset());
+//   vault = { fsPath: vaultDir };
+//   let note = NoteUtilsV2.create({
+//     fname: "foo",
+//     id: "foo",
+//     created: "1",
+//     updated: "1",
+//     body: "[[bar]]",
+//     vault,
+//   });
+//   await note2File(note, vaultDir);
+//   note = NoteUtilsV2.create({
+//     fname: "bar",
+//     id: "bar",
+//     created: "1",
+//     updated: "1",
+//     body: "[[foo]]",
+//     vault,
+//   });
+//   await note2File(note, vaultDir);
+// });
+
 const DOMAIN_NO_CHILDREN = new TestPresetEntry({
   label: "domain with no children",
-  before: async ({}: { vaultDir: string }) => {},
   results: async ({
     changed,
     vaultDir,
@@ -46,6 +75,11 @@ const DOMAIN_NO_CHILDREN = new TestPresetEntry({
   },
 });
 
+/**
+ * create two notes that are written to after initialization with links to each other
+ * rename one of the newly written notes
+ * the other newly written note should be updated
+ */
 const DOMAIN_NO_CHILDREN_V2 = new TestPresetEntry({
   label: "domain with no children, write new node",
   before: async ({}: { vaultDir: string }) => {},
@@ -106,6 +140,16 @@ const DOMAIN_NO_CHILDREN_V2 = new TestPresetEntry({
   },
 });
 
+/**
+ * - pre:init
+ *    - note A without body
+ * - post;init
+ *    - note A is updated with link to note B
+ *    - note B is written
+ *    - note B is re-written
+ * - expect
+ *    - note A should be updated
+ */
 const DOMAIN_NO_CHILDREN_V3 = new TestPresetEntry({
   label: "domain with no children, update exsiting node",
   before: async ({ vaultDir }: { vaultDir: string }) => {

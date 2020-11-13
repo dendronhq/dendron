@@ -16,8 +16,10 @@ import {
   SchemaParserV2 as cSchemaParserV2,
 } from "@dendronhq/common-server";
 import {
+  AssertUtils,
   EngineTestUtilsV2,
   ENGINE_SERVER,
+  FileTestUtils,
   INIT_TEST_PRESETS,
   NodeTestPresetsV2,
   NodeTestUtilsV2,
@@ -683,27 +685,6 @@ This is some content`,
       await note2File(note, vaultDir);
     });
 
-    test("basic", async () => {
-      await engine.init();
-      const changed = await engine.renameNote({
-        oldLoc: { fname: "foo", vault: { fsPath: vaultDir } },
-        newLoc: { fname: "baz", vault: { fsPath: vaultDir } },
-      });
-      expect(changed.data?.length).toEqual(3);
-      expect(_.trim((changed.data as NoteChangeEntry[])[0].note.body)).toEqual(
-        "[[baz]]"
-      );
-      const notes = fs.readdirSync(vaultDir);
-      expect(notes).toMatchSnapshot();
-      expect(_.includes(notes, "foo.md")).toBeFalsy();
-      expect(_.includes(notes, "baz.md")).toBeTruthy();
-      expect(
-        fs
-          .readFileSync(path.join(vaultDir, "bar.md"), { encoding: "utf8" })
-          .indexOf("[[baz]]") >= 0
-      ).toBeTruthy();
-    });
-
     test("with note ref", async () => {
       const note = NoteUtilsV2.create({
         fname: "bar",
@@ -737,7 +718,6 @@ This is some content`,
     });
 
     test(RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.label, async () => {
-      await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.before({ vaultDir });
       await engine.init();
       const resp = await engine.renameNote({
         oldLoc: { fname: "bar", vault: { fsPath: vaultDir } },
@@ -753,6 +733,7 @@ This is some content`,
       });
     });
 
+    // doesn't work yet
     test.skip(RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V2.label, async () => {
       await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V2.before({ vaultDir });
       await engine.init();
@@ -767,6 +748,7 @@ This is some content`,
         newLoc: { fname: "gamma", vault: { fsPath: vaultDir } },
       });
       const changed = resp.data;
+      expect(changed).toMatchSnapshot("bond");
       await NodeTestPresetsV2.runJestHarness({
         opts: { changed, vaultDir } as Parameters<
           typeof RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V2.results

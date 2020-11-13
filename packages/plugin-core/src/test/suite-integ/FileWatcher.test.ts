@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { DVault, NoteUtilsV2 } from "@dendronhq/common-all";
 import { DirResult, tmpDir, note2File } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import assert from "assert";
@@ -16,6 +16,7 @@ suite("notes", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
   let vaultPath: string;
+  let vault: DVault;
   this.timeout(TIMEOUT);
   let watcher: VaultWatcher;
 
@@ -40,6 +41,7 @@ suite("notes", function () {
           body: "bar body",
           updated: "1",
           created: "1",
+          vault,
         });
         await note2File(bar, vaultPath);
         const notePath = path.join(vaultPath, "bar.md");
@@ -52,6 +54,7 @@ suite("notes", function () {
         lsp: true,
         useCb: async (vaultDir) => {
           vaultPath = vaultDir;
+          vault = { fsPath: vaultPath };
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         },
       });
@@ -70,6 +73,7 @@ suite("notes", function () {
           body: "bar body",
           updated: "1",
           created: "1",
+          vault,
         });
         await note2File(bar, vaultPath);
         const notePath = path.join(vaultPath, "bar.md");
@@ -82,6 +86,7 @@ suite("notes", function () {
         lsp: true,
         useCb: async (vaultDir) => {
           vaultPath = vaultDir;
+          vault = { fsPath: vaultPath };
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         },
       });

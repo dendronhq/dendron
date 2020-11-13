@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { DVault, NoteUtilsV2 } from "@dendronhq/common-all";
 import { DirResult, note2File, tmpDir } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import assert from "assert";
@@ -15,6 +15,7 @@ suite("notes", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
   let vaultPath: string;
+  let vault: DVault;
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
@@ -59,6 +60,7 @@ suite("notes", function () {
       lsp: true,
       useCb: async (vaultDir) => {
         vaultPath = vaultDir;
+        vault = { fsPath: vaultDir };
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         const rootName = "bar";
         const note = NoteUtilsV2.create({
@@ -67,6 +69,7 @@ suite("notes", function () {
           created: "1",
           updated: "1",
           body: "## Foo\nfoo text\n## Header\n Header text",
+          vault,
         });
         await note2File(note, vaultDir);
       },
@@ -88,6 +91,7 @@ suite("notes", function () {
       lsp: true,
       useCb: async (vaultDir) => {
         vaultPath = vaultDir;
+        vault = { fsPath: vaultDir };
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         const rootName = "bar";
         const note = NoteUtilsV2.create({
@@ -96,6 +100,7 @@ suite("notes", function () {
           created: "1",
           updated: "1",
           body: "## Foo\nfoo text\n## Header\n Header text",
+          vault,
         });
         await note2File(note, vaultDir);
       },
@@ -117,6 +122,7 @@ suite("notes", function () {
       lsp: true,
       useCb: async (vaultDir) => {
         vaultPath = vaultDir;
+        vault = { fsPath: vaultDir };
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         const rootName = "bar";
         const note = NoteUtilsV2.create({
@@ -125,6 +131,7 @@ suite("notes", function () {
           created: "1",
           updated: "1",
           body: "## Foo\nfoo text\n",
+          vault,
         });
         await note2File(note, vaultDir);
       },

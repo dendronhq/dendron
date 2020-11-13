@@ -8,6 +8,7 @@ import {
 import _ from "lodash";
 import path from "path";
 import { TextEditor, Uri, window } from "vscode";
+import { PickerUtilsV2 } from "../components/lookup/utils";
 import { FileItem } from "../external/fileutils/FileItem";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
@@ -65,7 +66,12 @@ export class RenameNoteV2aCommand extends BaseCommand<
         friendly: `${inputs.dest} exists`,
       });
     }
-    newNote = NoteUtilsV2.create({ fname: inputs.dest, id: newNote?.id });
+    const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+    newNote = NoteUtilsV2.create({
+      fname: inputs.dest,
+      id: newNote?.id,
+      vault,
+    });
     const newUri = Uri.file(
       path.join(ws.rootWorkspace.uri.fsPath, inputs.dest + ".md")
     );

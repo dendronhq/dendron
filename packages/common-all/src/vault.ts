@@ -1,7 +1,7 @@
 import { DVault } from "./typesv2";
 import path from "path";
 import _ from "lodash";
-import { DendronError } from "../lib";
+import { DendronError } from "./error";
 
 export class VaultUtils {
   static getName(vault: DVault): string {

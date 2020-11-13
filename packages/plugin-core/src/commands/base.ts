@@ -29,7 +29,7 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
     return;
   }
 
-  async run(args?: any): Promise<TOut | undefined> {
+  async run(args?: Partial<TOpts>): Promise<TOut | undefined> {
     // @ts-ignore
     const ctx = `${this.__proto__.constructor.name}:run`;
     try {

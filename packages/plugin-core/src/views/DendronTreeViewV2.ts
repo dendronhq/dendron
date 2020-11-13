@@ -16,6 +16,7 @@ import vscode, {
   Uri,
   window,
 } from "vscode";
+import { GotoNoteCommandOpts } from "../commands/GotoNote";
 import { DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
 import { HistoryEvent, HistoryService } from "../services/HistoryService";
@@ -61,7 +62,13 @@ export class TreeNote extends vscode.TreeItem {
     this.command = {
       command: DENDRON_COMMANDS.GOTO_NOTE.key,
       title: "",
-      arguments: [{ qs: this.note.fname, mode: "note" }],
+      arguments: [
+        {
+          qs: this.note.fname,
+          mode: "note",
+          vault: this.note.vault,
+        } as GotoNoteCommandOpts,
+      ],
     };
     this.L = DendronWorkspace.instance().L;
   }

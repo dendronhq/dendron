@@ -29,17 +29,18 @@ suite("notes", function () {
   });
 
   const createNotes = (vaultPath: string) => {
+    const vault = { fsPath: vaultPath };
     return Promise.all([
       note2File(
-        NoteUtilsV2.create({ fname: "foo.journal.2020.08.29" }),
+        NoteUtilsV2.create({ fname: "foo.journal.2020.08.29", vault }),
         vaultPath
       ),
       note2File(
-        NoteUtilsV2.create({ fname: "foo.journal.2020.08.30" }),
+        NoteUtilsV2.create({ fname: "foo.journal.2020.08.30", vault }),
         vaultPath
       ),
       note2File(
-        NoteUtilsV2.create({ fname: "foo.journal.2020.08.31" }),
+        NoteUtilsV2.create({ fname: "foo.journal.2020.08.31", vault }),
         vaultPath
       ),
     ]);
@@ -85,14 +86,15 @@ suite("notes", function () {
       lsp: true,
       useCb: async (vaultDir) => {
         vaultPath = vaultDir;
+        const vault = { fsPath: vaultPath };
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         await createNotes(vaultDir);
         await note2File(
-          NoteUtilsV2.create({ fname: "foo.journal.2020.08" }),
+          NoteUtilsV2.create({ fname: "foo.journal.2020.08", vault }),
           vaultPath
         );
         await note2File(
-          NoteUtilsV2.create({ fname: "foo.journal.2020.09" }),
+          NoteUtilsV2.create({ fname: "foo.journal.2020.09", vault }),
           vaultPath
         );
       },
@@ -139,9 +141,10 @@ suite("notes", function () {
       lsp: true,
       useCb: async (vaultDir) => {
         vaultPath = vaultDir;
+        const vault = { fsPath: vaultPath };
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         await note2File(
-          NoteUtilsV2.create({ fname: "foo.journal.2020.08.29" }),
+          NoteUtilsV2.create({ fname: "foo.journal.2020.08.29", vault }),
           vaultPath
         );
       },
@@ -181,9 +184,13 @@ suite("notes", function () {
       lsp: true,
       useCb: async (vaultDir) => {
         vaultPath = vaultDir;
+        const vault = { fsPath: vaultPath };
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         // needed because traversal on root doesn't include root
-        await note2File(NoteUtilsV2.create({ fname: "gamma" }), vaultPath);
+        await note2File(
+          NoteUtilsV2.create({ fname: "gamma", vault }),
+          vaultPath
+        );
       },
     });
   });

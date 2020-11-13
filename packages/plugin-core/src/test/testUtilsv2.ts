@@ -1,8 +1,9 @@
 import { DVault, NotePropsV2 } from "@dendronhq/common-all";
-import { file2Note } from "@dendronhq/common-server";
+import { file2Note, tmpDir } from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
   EngineTestUtilsV3,
+  NodeTestPresetsV2,
   NotePresetsUtils,
   SetupWSOpts,
 } from "@dendronhq/common-test-utils";
@@ -13,7 +14,8 @@ import { ExtensionContext, Uri, window } from "vscode";
 import { SetupWorkspaceCommand } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
 import { DendronWorkspace } from "../workspace";
-import { createMockConfig } from "./testUtils";
+import { _activate } from "../_extension";
+import { createMockConfig, onWSInit } from "./testUtils";
 
 type SetupCodeConfigurationV2 = {
   configOverride?: { [key: string]: any };
@@ -40,6 +42,27 @@ type SetupCodeWorkspaceMultiVaultV2 = SetupCodeConfigurationV2 & {
   preSetupHook?: SetupHookFunction;
   postSetupHook?: SetupHookFunction;
 };
+
+export async function runSingleVaultTest(
+  opts: SetupCodeWorkspaceV2 & {
+    onInit: ({ vault }: { vault: DVault }) => Promise<void>;
+  }
+) {
+  let vault = { fsPath: tmpDir().name };
+  const { ctx, onInit } = opts;
+  onWSInit(async () => {
+    await onInit({ vault });
+  });
+  await setupCodeWorkspaceV2(
+    _.defaults(opts, {
+      initDirCb: async (vaultDir: string) => {
+        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+      },
+      vaultDir: vault.fsPath,
+    })
+  );
+  await _activate(ctx);
+}
 
 export function setupCodeConfiguration(opts: SetupCodeConfigurationV2) {
   const copts = _.defaults(opts, {

@@ -532,14 +532,8 @@ export class NoteUtilsV2 {
     return _.reject(maybe, _.isUndefined) as NotePropsV2[];
   }
 
-  static getPath({
-    client,
-    note,
-  }: {
-    client: DEngineClientV2;
-    note: NotePropsV2;
-  }): string {
-    const root = client.vaults[0];
+  static getPath({ note }: { note: NotePropsV2 }): string {
+    const root = note.vault.fsPath;
     return path.join(root, note.fname + ".md");
   }
 

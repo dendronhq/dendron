@@ -1,8 +1,10 @@
-import { DirResult, tmpDir } from "@dendronhq/common-server";
+import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import assert from "assert";
+import fs from "fs-extra";
 import _ from "lodash";
 import { afterEach, beforeEach } from "mocha";
+import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
@@ -10,23 +12,14 @@ import { GotoNoteCommand } from "../../commands/GotoNote";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import {
-  getActiveEditorBasename,
-  onWSInit,
-  setupDendronWorkspace,
-  TIMEOUT,
-} from "../testUtils";
-import fs from "fs-extra";
-import path from "path";
-import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { getActiveEditorBasename, TIMEOUT } from "../testUtils";
+import { runSingleVaultTest } from "../testUtilsv2";
 
 suite("notes", function () {
-  let root: DirResult;
   let ctx: vscode.ExtensionContext;
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });
@@ -36,86 +29,90 @@ suite("notes", function () {
   });
 
   test("basic", (done) => {
-    onWSInit(async () => {
-      const note = DendronWorkspace.instance().getEngine().notes["foo"];
-      const out = await new GotoNoteCommand().run({ qs: "foo", mode: "note" });
-      assert.deepStrictEqual(out, note);
-      assert.strictEqual(getActiveEditorBasename(), "foo.md");
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+    runSingleVaultTest({
+      ctx,
+      onInit: async ({ vault }) => {
+        const note = DendronWorkspace.instance().getEngine().notes["foo"];
+        const out = await new GotoNoteCommand().run({
+          qs: "foo",
+          mode: "note",
+          vault,
+        });
+        assert.deepStrictEqual(out, note);
+        assert.strictEqual(getActiveEditorBasename(), "foo.md");
+        done();
       },
     });
   });
 
   test("go to a stub ", (done) => {
-    onWSInit(async () => {
-      const ws = DendronWorkspace.instance();
-      const engine = ws.getEngine();
-      let note = NoteUtilsV2.getNoteByFname("foo", engine.notes) as NotePropsV2;
-      assert.deepStrictEqual(_.pick(note, ["fname", "stub"]), {
-        fname: "foo",
-        stub: true,
-      });
-
-      const out = await new GotoNoteCommand().run({
-        qs: "foo",
-        mode: "note",
-      });
-      assert.deepStrictEqual(_.pick(out, ["fname", "stub", "id"]), {
-        fname: "foo",
-        id: note.id,
-      });
-      assert.strictEqual(getActiveEditorBasename(), "foo.md");
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+    runSingleVaultTest({
+      ctx,
+      postSetupHook: async ({ vaults }) => {
+        const vaultDir = vaults[0].fsPath;
         fs.removeSync(path.join(vaultDir, "foo.md"));
+      },
+      onInit: async ({ vault }) => {
+        const ws = DendronWorkspace.instance();
+        const engine = ws.getEngine();
+        let note = NoteUtilsV2.getNoteByFname(
+          "foo",
+          engine.notes
+        ) as NotePropsV2;
+        assert.deepStrictEqual(_.pick(note, ["fname", "stub"]), {
+          fname: "foo",
+          stub: true,
+        });
+
+        const out = await new GotoNoteCommand().run({
+          qs: "foo",
+          mode: "note",
+          vault,
+        });
+        assert.deepStrictEqual(_.pick(out, ["fname", "stub", "id"]), {
+          fname: "foo",
+          id: note.id,
+        });
+        assert.strictEqual(getActiveEditorBasename(), "foo.md");
+        done();
       },
     });
   });
 
   test("go to new note", (done) => {
-    onWSInit(async () => {
-      const out = await new GotoNoteCommand().run({
-        qs: "foo.ch2",
-        mode: "note",
-      });
-      assert.deepStrictEqual(_.pick(out, ["fname", "stub"]), {
-        fname: "foo.ch2",
-      });
-      assert.strictEqual(getActiveEditorBasename(), "foo.ch2.md");
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+    runSingleVaultTest({
+      ctx,
+      onInit: async ({ vault }) => {
+        const out = await new GotoNoteCommand().run({
+          qs: "foo.ch2",
+          mode: "note",
+          vault,
+        });
+        assert.deepStrictEqual(_.pick(out, ["fname", "stub"]), {
+          fname: "foo.ch2",
+        });
+        assert.strictEqual(getActiveEditorBasename(), "foo.ch2.md");
+        done();
       },
     });
   });
 
   test("go to new note with template", (done) => {
-    onWSInit(async () => {
-      await new GotoNoteCommand().run({
-        qs: "bar.ch1",
-        mode: "note",
-      });
-      assert.deepStrictEqual(getActiveEditorBasename(), "bar.ch1.md");
-      const content = VSCodeUtils.getActiveTextEditor()?.document.getText() as string;
-      assert.ok(content.indexOf("ch1 template") >= 0);
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
+    runSingleVaultTest({
+      ctx,
+      initDirCb: async (vaultDir) => {
         await NodeTestPresetsV2.createSchemaPreset({ vaultDir });
+      },
+      onInit: async ({ vault }) => {
+        await new GotoNoteCommand().run({
+          qs: "bar.ch1",
+          mode: "note",
+          vault,
+        });
+        assert.deepStrictEqual(getActiveEditorBasename(), "bar.ch1.md");
+        const content = VSCodeUtils.getActiveTextEditor()?.document.getText() as string;
+        assert.ok(content.indexOf("ch1 template") >= 0);
+        done();
       },
     });
   });

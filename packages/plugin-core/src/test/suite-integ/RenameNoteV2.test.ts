@@ -4,7 +4,7 @@ import {
   ENGINE_ERROR_CODES,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
-import { DirResult, tmpDir, note2File } from "@dendronhq/common-server";
+import { DirResult, note2File, tmpDir } from "@dendronhq/common-server";
 import {
   NodeTestPresetsV2,
   RENAME_TEST_PRESETS,
@@ -152,6 +152,7 @@ suite("notes", function () {
           body: "[[foo]]",
           updated: "1",
           created: "1",
+          vault: { fsPath: vaultDir },
         });
         await note2File(bar, vaultDir);
       },

@@ -1,6 +1,6 @@
 import {
-  readJSONWithComments,
   assignJSONWithComment,
+  readJSONWithComments,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -8,9 +8,8 @@ import _ from "lodash";
 import path from "path";
 import {
   ConfigurationTarget,
-  WorkspaceConfiguration,
   extensions,
-  WorkspaceFolder,
+  WorkspaceConfiguration,
 } from "vscode";
 import { CONFIG } from "./constants";
 import { Logger } from "./logger";

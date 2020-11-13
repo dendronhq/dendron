@@ -39,6 +39,7 @@ export type SetupWSOpts = {
   withAssets?: boolean;
   withGit?: boolean;
   wsRoot?: string;
+  vaultDir?: string;
 };
 
 type SetupVaultsOptsV3 = Omit<SetupVaultOpts, "initDirCb"> & {
@@ -48,6 +49,7 @@ type SetupVaultsOptsV3 = Omit<SetupVaultOpts, "initDirCb"> & {
 };
 
 type SetupWSOptsV3 = SetupVaultsOptsV3 & { wsRoot?: string };
+
 /**
  * Multi-vault setup
  */
@@ -93,7 +95,7 @@ export class EngineTestUtilsV2 {
       withGit: true,
     });
     let wsRoot = opts.wsRoot ? opts.wsRoot : tmpDir().name;
-    let vaultDir = path.join(wsRoot, "vault");
+    let vaultDir = opts.vaultDir ? opts.vaultDir : path.join(wsRoot, "vault");
     await fs.ensureDir(vaultDir);
     await EngineTestUtilsV2.setupVault({
       vaultDir,

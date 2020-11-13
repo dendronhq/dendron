@@ -30,7 +30,7 @@ export class GoUpCommand extends BasicCommand<CommandOpts, CommandOutput> {
         vault: PickerUtilsV2.getVaultForOpenEditor(),
       }
     ) as NotePropsV2;
-    const nppath = NoteUtilsV2.getPath({ client: engine, note: nparent });
+    const nppath = NoteUtilsV2.getPath({ note: nparent });
     await VSCodeUtils.openFileInEditor(Uri.file(nppath));
     return;
   }

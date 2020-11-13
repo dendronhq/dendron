@@ -70,6 +70,7 @@ suite("notes", function () {
         [CONFIG.COPY_NOTE_URL_ROOT.key]: rootUrl,
       },
       useCb: async (vaultDir) => {
+        const vault = { fsPath: vaultDir };
         vaultPath = vaultDir;
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         const rootName = "bar";
@@ -79,6 +80,7 @@ suite("notes", function () {
           created: "1",
           updated: "1",
           body: "## Foo\nfoo text\n## Header\n Header text",
+          vault,
         });
         await note2File(note, vaultDir);
       },

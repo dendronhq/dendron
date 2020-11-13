@@ -5,7 +5,6 @@ import {
   writeJSONWithComments,
 } from "@dendronhq/common-server";
 import { WorkspaceService } from "@dendronhq/engine-server";
-import fs from "fs-extra";
 import _ from "lodash";
 import { window } from "vscode";
 import { Logger } from "../logger";
@@ -38,11 +37,11 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       return window.showErrorMessage("need to specify value for path");
     }
     const vpathFull = resolvePath(vpath, DendronWorkspace.rootDir());
-    if (fs.existsSync(vpath) && fs.readdirSync(vpath).length !== 0) {
-      return window.showErrorMessage(
-        `vault path ${vpathFull} already exists and is not empty`
-      );
-    }
+    // if (fs.existsSync(vpath) && fs.readdirSync(vpath).length !== 0) {
+    //   return window.showErrorMessage(
+    //     `vault path ${vpathFull} already exists and is not empty`
+    //   );
+    // }
     return { vname, vpath: vpathFull, vpathOrig: vpath };
   }
 

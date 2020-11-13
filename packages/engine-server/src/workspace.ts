@@ -8,8 +8,8 @@ import {
 import { note2File, schemaModuleOpts2File } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import { createNormVault } from "../lib";
 import { DConfig } from "./config";
+import { createNormVault } from "./utils";
 
 export type PathExistBehavior = "delete" | "abort" | "continue";
 
@@ -60,8 +60,16 @@ export class WorkspaceService {
       ].join("\n"),
     });
     const schema = SchemaUtilsV2.createRootModule({ vault });
-    await note2File(note, vault.fsPath);
-    await schemaModuleOpts2File(schema, vault.fsPath, "root");
+    if (!fs.existsSync(NoteUtilsV2.getPath({ note }))) {
+      await note2File(note, vault.fsPath);
+    }
+    if (
+      !fs.existsSync(
+        SchemaUtilsV2.getPath({ root: this.wsRoot, fname: "root" })
+      )
+    ) {
+      await schemaModuleOpts2File(schema, vault.fsPath, "root");
+    }
 
     const wsRoot = this.wsRoot;
     const { vault: nvault } = createNormVault({ vault, wsRoot });

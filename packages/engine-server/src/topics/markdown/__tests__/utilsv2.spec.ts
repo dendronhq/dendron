@@ -3,6 +3,7 @@ import _ from "lodash";
 import { ParserUtilsV2 } from "../utilsv2";
 
 describe(ParserUtilsV2, () => {
+  const vault = { fsPath: "dummy" };
   describe("findLinks", async () => {
     test("one link", () => {
       const note = NoteUtilsV2.create({
@@ -11,6 +12,7 @@ describe(ParserUtilsV2, () => {
         created: "1",
         updated: "1",
         body: "[[bar]]",
+        vault,
       });
       const links = ParserUtilsV2.findLinks({ note });
       expect(links).toMatchSnapshot("bond");
@@ -24,6 +26,7 @@ describe(ParserUtilsV2, () => {
         created: "1",
         updated: "1",
         body: "[[]]",
+        vault,
       });
       const links = ParserUtilsV2.findLinks({ note });
       expect(links).toMatchSnapshot();

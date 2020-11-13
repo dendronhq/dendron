@@ -125,7 +125,10 @@ export abstract class DendronSeed<
     const { mergeStrategy } = _.defaults(this.config(), {
       mergeStrategy: "appendToBottom",
     });
-    const resp = await this.engine.getNoteByPath({ npath: note.fname });
+    const resp = await this.engine.getNoteByPath({
+      npath: note.fname,
+      vault: note.vault,
+    });
     if (!resp.data) {
       throw Error("no note found");
     }

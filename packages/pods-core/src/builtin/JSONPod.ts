@@ -1,4 +1,4 @@
-import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DVault, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -69,7 +69,12 @@ export class JSONImportPod extends ImportPod<
     const engine = opts.engine;
     const { src, destName, concatenate } = opts.config;
     const entries = fs.readJSONSync(src.fsPath);
-    const notes = await this._entries2Notes(entries, { destName, concatenate });
+    const vault = engine.vaultsv3[0];
+    const notes = await this._entries2Notes(entries, {
+      vault,
+      destName,
+      concatenate,
+    });
     return Promise.all(
       _.map(notes, (n) => engine.writeNote(n, { newNode: true }))
     );
@@ -77,14 +82,17 @@ export class JSONImportPod extends ImportPod<
 
   async _entries2Notes(
     entries: Partial<NotePropsV2>[],
-    opts: Pick<JSONImportPodCleanConfig, "concatenate" | "destName">
+    opts: Pick<JSONImportPodCleanConfig, "concatenate" | "destName"> & {
+      vault: DVault;
+    }
   ): Promise<NotePropsV2[]> {
+    const { vault } = opts;
     const notes = _.map(entries, (ent) => {
       if (!ent.fname) {
         throw Error("fname not defined");
       }
       let fname = ent.fname;
-      return NoteUtilsV2.create({ ...ent, fname });
+      return NoteUtilsV2.create({ ...ent, fname, vault });
     });
     if (opts.concatenate) {
       if (!opts.destName) {
@@ -99,7 +107,11 @@ export class JSONImportPod extends ImportPod<
         acc.push("---");
       });
       return [
-        NoteUtilsV2.create({ fname: opts.destName, body: acc.join("\n") }),
+        NoteUtilsV2.create({
+          fname: opts.destName,
+          body: acc.join("\n"),
+          vault,
+        }),
       ];
     } else {
       return notes;

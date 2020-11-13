@@ -118,6 +118,7 @@ export class MarkdownImportPod extends ImportPod<
     vaultPath: string;
   }): HierarichalDict {
     const { files, src, vaultPath } = opts;
+    const vault = { fsPath: vaultPath };
     const out: HierarichalDict = {};
     _.forEach(files, (item) => {
       const fname = cleanFileName(item.path, {
@@ -128,7 +129,7 @@ export class MarkdownImportPod extends ImportPod<
         out[lvl] = [];
       }
       const stub = item.stats.isDirectory() && _.isEmpty(item.entries);
-      const noteProps = NoteUtilsV2.create({ fname, stub });
+      const noteProps = NoteUtilsV2.create({ fname, stub, vault });
       if (item?.body) {
         noteProps.body = item.body;
       }

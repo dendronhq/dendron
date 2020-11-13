@@ -135,8 +135,11 @@ export async function setupCodeWorkspaceMultiVaultV2(
     return Uri.file(path.join(wsRoot, "dendron.code-workspace"));
   };
   DendronWorkspace.workspaceFolders = () => {
-    const uri = Uri.file(path.join(wsRoot, "vault"));
-    return [{ uri, name: "vault", index: 0 }];
+    return vaults.map((v) => ({
+      name: v.name,
+      index: 1,
+      uri: Uri.file(v.fsPath),
+    }));
   };
   const workspaceFile = DendronWorkspace.workspaceFile();
   const workspaceFolders = DendronWorkspace.workspaceFolders();

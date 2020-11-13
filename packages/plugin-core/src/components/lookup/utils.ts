@@ -100,16 +100,23 @@ export class PickerUtilsV2 {
     });
   };
 
-  static getVaultForOpenEditor(): DVault {
-    const vaults = DendronWorkspace.instance().config.vaults;
+  static getVaultForOpenEditor(opts?: { throwIfEmpty: boolean }): DVault {
+    const vaults = DendronWorkspace.instance().vaults;
     let vault: DVault;
     if (vaults.length > 1 && VSCodeUtils.getActiveTextEditor()?.document) {
-      vault = DNodeUtilsV2.getVaultByDir({
-        vaults,
-        dirPath: path.dirname(
-          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-        ),
-      });
+      try {
+        vault = DNodeUtilsV2.getVaultByDir({
+          vaults,
+          dirPath: path.dirname(
+            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+          ),
+        });
+      } catch (err) {
+        if (opts?.throwIfEmpty) {
+          throw err;
+        }
+        return vaults[0];
+      }
     } else {
       vault = vaults[0];
     }

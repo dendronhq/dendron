@@ -572,7 +572,9 @@ export class FileStorageV2 implements DStoreV2 {
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
     let changed: NotePropsV2[] = [];
-    const maybeNote = NoteUtilsV2.getNoteByFname(note.fname, this.notes);
+    const maybeNote = NoteUtilsV2.getNoteByFname(note.fname, this.notes, {
+      vault: note.vault,
+    });
     if (!opts?.noAddParent) {
       changed = NoteUtilsV2.addParent({
         note,

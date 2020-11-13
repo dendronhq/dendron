@@ -167,30 +167,6 @@ export class DendronEngineClient implements DEngineClientV2 {
     return resp;
   }
 
-  // getBatch: (scope: Scope, ids: string[]) => Promise<NodeGetBatchResp>;
-
-  /**
-   * Get node based on query
-   * query(scope: {username: lukesernau}, queryString: "project", nodeType: note)
-   * - []
-   * - [Node(id: ..., title: project, children: [])]
-   */
-  // async query(
-  //   queryString: string,
-  //   mode: DNodeTypeV2,
-  //   _opts?: QueryOptsV2
-  // ): Promise<EngineQueryNoteResp> {
-  //   if (mode === "note") {
-  //     const items = await this.queryNote({ qs: queryString });
-  //     return {
-  //       data: items,
-  //       error: null,
-  //     };
-  //   } else {
-  //     throw Error("query schema not implemented");
-  //   }
-  // }
-
   async queryNote({ qs }: { qs: string }): Promise<NotePropsV2[]> {
     return await this.fuseEngine.queryNote({ qs });
   }

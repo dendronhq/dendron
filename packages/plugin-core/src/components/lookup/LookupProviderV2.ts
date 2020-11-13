@@ -173,28 +173,44 @@ export class LookupProviderV2 {
     if (resp) {
       return window.showErrorMessage(resp);
     }
-    const maybeNote = NoteUtilsV2.getNoteByFname(value, ws.getEngine().notes);
-    if (!selectedItem && opts.flavor === "note" && maybeNote) {
-      uri = node2Uri(maybeNote);
-      return showDocAndHidePicker([uri], picker);
-    }
-    if (PickerUtilsV2.isCreateNewNotePickForSingle(selectedItem)) {
-      uri = await this.onAcceptNewNode({ picker, opts, selectedItem });
-    } else {
-      uri = node2Uri(selectedItem);
-      if (opts.flavor === "schema") {
-        const smod = DendronWorkspace.instance().getEngine().schemas[
-          selectedItem.id
-        ];
-        uri = Uri.file(
-          SchemaUtilsV2.getPath({
-            root: smod.vault.fsPath,
-            fname: smod.fname,
-          })
-        );
+    if (selectedItem) {
+      if (PickerUtilsV2.isCreateNewNotePickForSingle(selectedItem)) {
+        uri = await this.onAcceptNewNode({ picker, opts, selectedItem });
+      } else {
+        uri = node2Uri(selectedItem);
+        if (opts.flavor === "schema") {
+          const smod = DendronWorkspace.instance().getEngine().schemas[
+            selectedItem.id
+          ];
+          uri = Uri.file(
+            SchemaUtilsV2.getPath({
+              root: smod.vault.fsPath,
+              fname: smod.fname,
+            })
+          );
+        }
       }
+      return showDocAndHidePicker([uri], picker);
+    } else {
+      // item from pressing enter
+      if (opts.flavor === "note") {
+        try {
+          const maybeNote = NoteUtilsV2.getNoteByFname(
+            value,
+            ws.getEngine().notes
+          );
+          if (maybeNote) {
+            uri = node2Uri(maybeNote);
+            return showDocAndHidePicker([uri], picker);
+          }
+        } catch (err) {
+          return window.showErrorMessage(
+            "multiple notes found. please select one"
+          );
+        }
+      }
+      return;
     }
-    return showDocAndHidePicker([uri], picker);
   }
 
   async onDidAcceptForMulti(picker: DendronQuickPickerV2, opts: EngineOpts) {

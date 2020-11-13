@@ -246,11 +246,7 @@ export class DendronWorkspace {
   }
 
   get vaults(): DVault[] {
-    return (
-      DendronWorkspace.workspaceFolders()?.map((ent) => ({
-        fsPath: ent.uri.fsPath,
-      })) || []
-    );
+    return DendronWorkspace.instance().config.vaults;
   }
 
   getEngine(): DEngineClientV2 {

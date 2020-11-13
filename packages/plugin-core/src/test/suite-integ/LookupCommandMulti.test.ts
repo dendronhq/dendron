@@ -1,4 +1,5 @@
 import { DNodeUtilsV2, DVault } from "@dendronhq/common-all";
+import { file2Note } from "@dendronhq/common-server";
 import { NodeTestPresetsV2, PLUGIN_CORE } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
@@ -11,6 +12,7 @@ import * as vscode from "vscode";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
 import { DendronQuickPickerV2 } from "../../components/lookup/types";
+import { createNoActiveItem } from "../../components/lookup/utils";
 import { HistoryService } from "../../services/HistoryService";
 import { EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
@@ -24,7 +26,7 @@ import {
 
 const { LOOKUP_SINGLE_TEST_PRESET } = PLUGIN_CORE;
 
-suite.skip("notes, multi", function () {
+suite("notes, multi", function () {
   let wsRoot: string;
   let vaults: DVault[];
   let ctx: vscode.ExtensionContext;
@@ -75,18 +77,26 @@ suite.skip("notes, multi", function () {
       lp: LookupProviderV2;
     }) => Promise<void>;
   }) => {
+    console.log("runAcceptItemTest:enter");
     const { onInitCb } = opts;
     onInitForAcceptItems({ onInitCb });
     const {
       wsRoot: _wsRoot,
       vaults: _vaults,
+      workspaceFolders,
     } = await setupCodeWorkspaceMultiVaultV2({ ctx });
+    console.log(
+      "runAcceptItemTest:setupCodeWorkspaceV2",
+      JSON.stringify({ vaults, workspaceFolders })
+    );
     wsRoot = _wsRoot;
     vaults = _vaults;
     if (opts.beforeActivateCb) {
       await opts.beforeActivateCb({ wsRoot, vaults });
     }
+    console.log("runAcceptItemTest:pre_activate");
     await _activate(ctx);
+    console.log("runAcceptItemTest:post_activate");
   };
 
   const onInitForUpdateItems = async (opts: {
@@ -206,6 +216,38 @@ suite.skip("notes, multi", function () {
             results:
               LOOKUP_SINGLE_TEST_PRESET.ACCEPT_ITEMS.EXISTING_ITEM.results,
           });
+          done();
+        },
+      });
+    });
+
+    test("new item", function (done) {
+      runAcceptItemTest({
+        onInitCb: async ({ lp }) => {
+          console.log("onInitCb:enter");
+          const ws = DendronWorkspace.instance();
+          const client = ws.getEngine();
+          const note = client.notes["foo"];
+          await VSCodeUtils.openFileInEditor(
+            vscode.Uri.file(path.join(note.vault.fsPath, note.fname + ".md"))
+          );
+          const quickpick = createMockQuickPick({
+            value: "bond",
+            selectedItems: [createNoActiveItem(vaults[0])],
+          });
+          await lp.onDidAccept(quickpick, engOpts);
+          assert.strictEqual(
+            DNodeUtilsV2.fname(
+              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+            ),
+            "bond"
+          );
+          const txtPath = vscode.window.activeTextEditor?.document.uri
+            .fsPath as string;
+          const vault = { fsPath: path.dirname(txtPath) };
+          const node = file2Note(txtPath, vault);
+          assert.strictEqual(node.title, "Bond");
+          console.log("onInitCb:exit");
           done();
         },
       });

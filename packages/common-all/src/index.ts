@@ -10,3 +10,4 @@ export * from "./constants";
 export * from "./error";
 export * from "./time";
 export * from "./utils";
+export * from "./vault";

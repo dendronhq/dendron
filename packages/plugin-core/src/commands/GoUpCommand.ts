@@ -2,6 +2,7 @@ import { DNodeUtilsV2, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";
+import { PickerUtilsV2 } from "../components/lookup/utils";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -26,6 +27,7 @@ export class GoUpCommand extends BasicCommand<CommandOpts, CommandOutput> {
       _.values(engine.notes),
       {
         noStubs: true,
+        vault: PickerUtilsV2.getVaultForOpenEditor(),
       }
     ) as NotePropsV2;
     const nppath = NoteUtilsV2.getPath({ client: engine, note: nparent });

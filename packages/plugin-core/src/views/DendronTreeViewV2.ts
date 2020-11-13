@@ -4,6 +4,7 @@ import {
   NotePropsDictV2,
   NotePropsV2,
   NoteUtilsV2,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
@@ -54,9 +55,8 @@ export class TreeNote extends vscode.TreeItem {
     this.note = note;
     this.id = this.note.id;
     this.tooltip = this.note.title;
-    const mainVault = (DendronWorkspace.workspaceFolders() as vscode.WorkspaceFolder[])[0];
     this.uri = Uri.file(
-      path.join(mainVault.uri.fsPath, this.note.fname + ".md")
+      path.join(this.note.vault.fsPath, this.note.fname + ".md")
     );
     this.command = {
       command: DENDRON_COMMANDS.GOTO_NOTE.key,
@@ -174,9 +174,13 @@ export class DendronTreeViewV2 {
     const uri = editor.document.uri;
     const basename = path.basename(uri.fsPath);
     if (basename.endsWith(".md")) {
+      const vault = VaultUtils.getVaultByFsPath({
+        fsPath: path.dirname(uri.fsPath),
+        vaults: DendronWorkspace.instance().vaults,
+      });
       const fname = NoteUtilsV2.uri2Fname(uri);
       const notes = DendronWorkspace.instance().getEngine().notes;
-      const note = NoteUtilsV2.getNoteByFname(fname, notes);
+      const note = NoteUtilsV2.getNoteByFname(fname, notes, { vault });
       if (note) {
         this.treeView.reveal(note.id);
       }

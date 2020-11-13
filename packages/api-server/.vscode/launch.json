@@ -26,18 +26,7 @@
       {
         "type": "node",
         "request": "launch",
-        "name": "api-server:test file",
-        "program": "${workspaceFolder:api-server}/lib/${fileBasenameNoExtension}.js",
-        "cwd": "${workspaceFolder:api-server}",
-        "sourceMaps": true,
-        "smartStep": true,
-        "preLaunchTask": "build",
-        "outFiles": ["${workspaceFolder:api-server}/lib/*.js"]
-      },
-      {
-        "type": "node",
-        "request": "launch",
-        "name": "api-server:debug test",
+        "name": "api-server:debug test all",
         "program": "${workspaceFolder:api-server}/node_modules/jest/bin/jest.js",
         "cwd": "${workspaceFolder:api-server}",
         "args": ["--runInBand"]

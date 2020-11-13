@@ -148,24 +148,30 @@ export class DNodeUtilsV2 {
   static findClosestParent(
     fpath: string,
     nodes: DNodePropsV2[],
-    opts?: {
-      noStubs: boolean;
-      vault?: DVault;
+    opts: {
+      noStubs?: boolean;
+      vault: DVault;
     }
   ): DNodePropsV2 {
-    const { vault } = opts || {};
+    const { vault } = opts;
     const dirname = DNodeUtilsV2.dirName(fpath);
     if (dirname === "") {
-      // TODO: multi-vault compatilbe
-      const _nodes = _.filter(nodes, { fname: "root" }) as DNodePropsV2[];
+      const _nodes = _.filter(nodes, {
+        fname: "root",
+        vault,
+      }) as DNodePropsV2[];
       if (_nodes.length > 1) {
+        throw new DendronError({
+          msg: `findClosestParent issue: multiple root notes found for ${fpath}`,
+        });
+
         const node = _.find(
           _nodes,
-          (ent) => ent.vault?.fsPath === vault?.fsPath
+          (ent) => ent.vault?.fsPath === vault.fsPath
         );
         if (_.isUndefined(node)) {
           throw new DendronError({
-            msg: `multiple root notes found for ${fpath}`,
+            msg: `findClosestParent issue: multiple root notes found for ${fpath}`,
           });
         }
       } else {
@@ -317,10 +323,9 @@ export class NoteUtilsV2 {
       throw new DendronError(err);
     }
     if (!parent) {
-      parent = DNodeUtilsV2.findClosestParent(
-        note.fname,
-        notesList
-      ) as NotePropsV2;
+      parent = DNodeUtilsV2.findClosestParent(note.fname, notesList, {
+        vault: note.vault,
+      }) as NotePropsV2;
       changed.push(parent);
       const stubNodes = NoteUtilsV2.createStubs(parent, note);
       stubNodes.forEach((ent2) => {

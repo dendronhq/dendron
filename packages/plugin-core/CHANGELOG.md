@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.5...v0.15.1-alpha.6) (2020-11-13)
+
+### Enhancements
+
+- **engine:** add vault with existing files ([0c04294](https://github.com/dendronhq/dendron/commit/0c04294f17da741f7b96ed443b9972f4b33a5774))
+- **engine:** remove relative vault ([437ba7f](https://github.com/dendronhq/dendron/commit/437ba7f1e68f8d145c430aaa24b272522275885a))
+- **engine:** support adding relative vaults ([0ea4d92](https://github.com/dendronhq/dendron/commit/0ea4d922a5e45c5836a511f6219457abdc441f4d))
+
 ## [0.15.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.4...v0.15.1-alpha.5) (2020-11-13)
 
 ### Bug Fixes

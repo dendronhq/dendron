@@ -7,6 +7,7 @@ import {
 } from "@dendronhq/common-all";
 import { note2File, schemaModuleOpts2File } from "@dendronhq/common-server";
 import fs from "fs-extra";
+import _ from "lodash";
 import { DConfig } from "./config";
 
 export type PathExistBehavior = "delete" | "abort" | "continue";
@@ -66,6 +67,16 @@ export class WorkspaceService {
     config.vaults.push(vault);
     await this.setConfig(config);
     return;
+  }
+
+  /**
+   * Remove vaults. Currently doesn't delete an yfiles
+   * @param param0
+   */
+  async removeVault({ vault }: { vault: DVault }) {
+    const config = this.config;
+    config.vaults = _.reject(config.vaults, { fsPath: vault.fsPath });
+    await this.setConfig(config);
   }
 
   /**

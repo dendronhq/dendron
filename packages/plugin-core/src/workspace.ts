@@ -5,7 +5,11 @@ import {
   DVault,
   getStage,
 } from "@dendronhq/common-all";
-import { readMD } from "@dendronhq/common-server";
+import {
+  readJSONWithComments,
+  readMD,
+  writeJSONWithComments,
+} from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -51,6 +55,10 @@ import {
   VaultAddCommandOpts,
 } from "./commands/VaultAddCommand";
 import {
+  VaultRemoveCommand,
+  VaultRemoveCommandOpts,
+} from "./commands/VaultRemoveCommand";
+import {
   DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
@@ -58,6 +66,7 @@ import {
 import { VaultWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
+import { WorkspaceSettings } from "./types";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
@@ -200,6 +209,17 @@ export class DendronWorkspace {
     return _DendronWorkspace;
   }
 
+  static async updateWorkspaceFile(opts: {
+    updateCb: (settings: WorkspaceSettings) => WorkspaceSettings;
+  }) {
+    const { updateCb } = opts;
+    const wsPath = DendronWorkspace.workspaceFile().fsPath;
+    let settings = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
+    settings = updateCb(settings);
+    await writeJSONWithComments(wsPath, settings);
+    return settings;
+  }
+
   constructor(
     context: vscode.ExtensionContext,
     opts?: { skipSetup?: boolean }
@@ -331,6 +351,15 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.VAULT_ADD.key,
         async (opts: VaultAddCommandOpts) => {
           new VaultAddCommand().run(opts);
+        }
+      )
+    );
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.VAULT_REMOVE.key,
+        async (opts: VaultRemoveCommandOpts) => {
+          new VaultRemoveCommand().run(opts);
         }
       )
     );

@@ -1,5 +1,9 @@
 import { DVault, NotePropsV2 } from "@dendronhq/common-all";
-import { file2Note, tmpDir } from "@dendronhq/common-server";
+import {
+  assignJSONWithComment,
+  file2Note,
+  tmpDir,
+} from "@dendronhq/common-server";
 import {
   EngineTestUtilsV2,
   EngineTestUtilsV3,
@@ -13,6 +17,7 @@ import path from "path";
 import { ExtensionContext, Uri, window } from "vscode";
 import { SetupWorkspaceCommand } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
+import { WorkspaceFolderRaw } from "../types";
 import { DendronWorkspace } from "../workspace";
 import { _activate } from "../_extension";
 import { createMockConfig, onWSInit } from "./testUtils";
@@ -35,7 +40,7 @@ type SetupCodeWorkspaceV2 = SetupWSOpts &
     postSetupHook?: SetupHookFunction;
   };
 
-type SetupCodeWorkspaceMultiVaultV2 = SetupCodeConfigurationV2 & {
+type SetupCodeWorkspaceMultiVaultV2Opts = SetupCodeConfigurationV2 & {
   ctx: ExtensionContext;
   preActivateHook?: any;
   postActivateHook?: any;
@@ -61,6 +66,14 @@ export async function runSingleVaultTest(
       vaultDir: vault.fsPath,
     })
   );
+  await _activate(ctx);
+}
+
+export async function runMultiVaultTest(
+  opts: SetupCodeWorkspaceMultiVaultV2Opts
+) {
+  const { ctx } = opts;
+  await setupCodeWorkspaceMultiVaultV2(opts);
   await _activate(ctx);
 }
 
@@ -131,7 +144,7 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
 }
 
 export async function setupCodeWorkspaceMultiVaultV2(
-  opts: SetupCodeWorkspaceMultiVaultV2
+  opts: SetupCodeWorkspaceMultiVaultV2Opts
 ) {
   const copts = _.defaults(opts, {
     setupWsOverride: {
@@ -174,9 +187,23 @@ export async function setupCodeWorkspaceMultiVaultV2(
     skipOpenWs: true,
     ...copts.setupWsOverride,
   });
+
+  // update vscode settings
+  await DendronWorkspace.updateWorkspaceFile({
+    updateCb: (settings) => {
+      const folders: WorkspaceFolderRaw[] = vaults.map((ent) => ({
+        path: ent.fsPath,
+      }));
+      settings = assignJSONWithComment({ folders }, settings);
+      return settings;
+    },
+  });
+
+  // update config
   const config = DConfig.getOrCreate(wsRoot);
   config.vaults = vaults;
   DConfig.writeConfig({ wsRoot, config });
+
   await postSetupHook({
     wsRoot,
     vaults,

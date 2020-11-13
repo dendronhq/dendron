@@ -172,6 +172,7 @@ export async function _activate(context: vscode.ExtensionContext) {
   const isDebug = VSCodeUtils.isDebuggingExtension();
   const ctx = "_activate";
   const stage = getStage();
+  const { workspaceFile, workspaceFolders } = vscode.workspace;
   const { logPath, extensionPath, extensionUri, storagePath } = context;
   Logger.info({
     ctx,
@@ -181,6 +182,8 @@ export async function _activate(context: vscode.ExtensionContext) {
     extensionPath,
     extensionUri,
     storagePath,
+    workspaceFile,
+    workspaceFolders,
   });
   // needs to be initialized to setup commands
   const ws = DendronWorkspace.getOrCreate(context, {
@@ -192,7 +195,8 @@ export async function _activate(context: vscode.ExtensionContext) {
   if (DendronWorkspace.isActive()) {
     const config = ws.config;
     const wsRoot = DendronWorkspace.rootDir() as string;
-    if (_.isUndefined(config.vaults)) {
+    if (_.isEmpty(config.vaults)) {
+      Logger.info({ ctx, msg: "config.vaults empty" });
       const wsFolders = DendronWorkspace.workspaceFolders();
       if (_.isUndefined(wsFolders)) {
         throw new DendronError({ msg: "no vaults detected" });
@@ -200,6 +204,7 @@ export async function _activate(context: vscode.ExtensionContext) {
       config.vaults = [{ fsPath: wsFolders[0].uri.fsPath }];
       DConfig.writeConfig({ wsRoot, config });
     }
+    Logger.info({ ctx, config, msg: "isActive" });
 
     const fpath = getWSMetaFilePath({ wsRoot });
     writeWSMetaFile({

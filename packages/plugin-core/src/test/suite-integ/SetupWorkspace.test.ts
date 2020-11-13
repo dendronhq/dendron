@@ -20,7 +20,7 @@ import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { _activate } from "../../_extension";
 import { onExtension, onWSInit, setupDendronWorkspace } from "../testUtils";
-import { runSingleVaultTest, setupCodeWorkspaceV2 } from "../testUtilsv2";
+import { setupCodeWorkspaceV2 } from "../testUtilsv2";
 
 const TIMEOUT = 60 * 1000 * 5;
 

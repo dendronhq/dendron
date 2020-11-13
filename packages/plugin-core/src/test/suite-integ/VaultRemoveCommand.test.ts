@@ -29,7 +29,7 @@ suite("VaultRemoveCommand", function () {
   test("basic", (done) => {
     runMultiVaultTest({
       ctx,
-      postSetupHook: async ({ vaults }) => {
+      onInit: async ({ vaults }) => {
         // @ts-ignore
         VSCodeUtils.showQuickPick = () => {
           return { data: vaults[1] };

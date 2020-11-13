@@ -73,10 +73,13 @@ export async function runSingleVaultTest(
 }
 
 export async function runMultiVaultTest(
-  opts: SetupCodeWorkspaceMultiVaultV2Opts
+  opts: SetupCodeWorkspaceMultiVaultV2Opts & {
+    onInit: (opts: { vaults: DVault[]; wsRoot: string }) => Promise<void>;
+  }
 ) {
   const { ctx } = opts;
-  await setupCodeWorkspaceMultiVaultV2(opts);
+  const { vaults, wsRoot } = await setupCodeWorkspaceMultiVaultV2(opts);
+  opts.onInit({ wsRoot, vaults });
   await _activate(ctx);
 }
 

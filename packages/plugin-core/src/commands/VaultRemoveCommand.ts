@@ -21,7 +21,7 @@ export class VaultRemoveCommand extends BasicCommand<
   CommandOutput
 > {
   async gatherInputs(): Promise<any> {
-    const vaults = DendronWorkspace.instance().vaults;
+    const vaults = DendronWorkspace.instance().config.vaults;
     const vaultQuickPick = await VSCodeUtils.showQuickPick(
       vaults.map((ent) => ({
         label: VaultUtils.getName(ent),
@@ -37,6 +37,7 @@ export class VaultRemoveCommand extends BasicCommand<
 
   async execute(opts: CommandOpts) {
     const ctx = "VaultRemove";
+    // NOTE: relative vault
     const { vault } = opts;
     const wsRoot = DendronWorkspace.rootDir() as string;
     const wsService = new WorkspaceService({ wsRoot });

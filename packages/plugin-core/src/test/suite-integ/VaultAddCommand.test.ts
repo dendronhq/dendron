@@ -1,5 +1,5 @@
 import { DendronConfig } from "@dendronhq/common-all";
-import { readYAML, tmpDir } from "@dendronhq/common-server";
+import { readYAML } from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
 import assert from "assert";
 import fs from "fs-extra";

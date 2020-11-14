@@ -32,13 +32,13 @@ export class LookupProviderV2 {
     this.opts = opts;
   }
 
-  createDefaultItems({ picker }: { picker: DendronQuickPickerV2 }) {
+  createDefaultItems = ({ picker }: { picker: DendronQuickPickerV2 }) => {
     if (_.find(picker.buttons, { type: "multiSelect" })?.pressed) {
       return [];
     } else {
       return [createNoActiveItem(PickerUtilsV2.getVaultForOpenEditor())];
     }
-  }
+  };
 
   async _onAcceptNewNote({
     picker,
@@ -285,12 +285,12 @@ export class LookupProviderV2 {
   async onUpdatePickerItem(
     picker: DendronQuickPickerV2,
     opts: EngineOpts,
-    source:
-      | "updatePickerBehavior:journal"
-      | "updatePickerBehavior:scratch"
-      | "updatePickerBehavior:normal"
-      | "onValueChange"
-      | "manual"
+    source: string
+    // | "updatePickerBehavior:journal"
+    // | "updatePickerBehavior:scratch"
+    // | "updatePickerBehavior:normal"
+    // | "onValueChange"
+    // | "manual"
   ) {
     // ~~~ setup variables
     const start = process.hrtime();
@@ -456,6 +456,7 @@ export class LookupProviderV2 {
         picker.items = updatedItems;
       }
     } catch (err) {
+      window.showErrorMessage(err);
       throw Error(err);
     } finally {
       profile = getDurationMilliseconds(start);
@@ -467,11 +468,16 @@ export class LookupProviderV2 {
 
   provide(picker: DendronQuickPickerV2) {
     const { opts } = this;
+    const _this = this;
     picker.onDidAccept(async () => {
       this.onDidAccept(picker, opts);
     });
     picker.onDidChangeValue(() => {
-      this.onUpdatePickerItem(picker, opts, "onValueChange");
+      _.debounce(_.bind(this.onUpdatePickerItem, _this), 30, {})(
+        picker,
+        opts,
+        "onValueChange"
+      );
     });
   }
 

@@ -14,6 +14,10 @@ import { DendronBtn, getButtonCategory } from "./buttons";
 import { CREATE_NEW_DETAIL, CREATE_NEW_LABEL } from "./constants";
 import { DendronQuickPickerV2 } from "./types";
 
+export const UPDATET_SOURCE = {
+  UPDATE_PICKER_FILTER: "UPDATE_PICKER_FILTER",
+};
+
 export function createNoActiveItem(vault: DVault): DNodePropsQuickInputV2 {
   const props = DNodeUtilsV2.create({
     fname: CREATE_NEW_LABEL,

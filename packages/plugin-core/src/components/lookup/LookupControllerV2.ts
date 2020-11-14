@@ -23,6 +23,7 @@ import {
 } from "./buttons";
 import { LookupProviderV2 } from "./LookupProviderV2";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";
+import { UPDATET_SOURCE } from "./utils";
 
 export class LookupControllerV2 {
   public quickPick?: DendronQuickPickerV2;
@@ -328,9 +329,13 @@ export class LookupControllerV2 {
     } else {
       quickPick.showDirectChildrenOnly = false;
     }
-    if (quickPick.showDirectChildrenOnly !== before) {
+    if (!_.isUndefined(before) && quickPick.showDirectChildrenOnly !== before) {
       Logger.info({ ctx, msg: "toggle showDirectChildOnly behavior" });
-      await provider.onUpdatePickerItem(quickPick, provider.opts, "manual");
+      await provider.onUpdatePickerItem(
+        quickPick,
+        provider.opts,
+        UPDATET_SOURCE.UPDATE_PICKER_FILTER
+      );
     }
   }
 }

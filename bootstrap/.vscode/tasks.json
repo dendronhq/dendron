@@ -96,6 +96,15 @@
       "problemMatcher": []
     },
     {
+      "label": "Plugin: Release Early Seed",
+      "type": "shell",
+      "command": "scripts/publish-insider.sh",
+      "options": {
+        "cwd": "./../build/dendron/packages/plugin-core/"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Plugin: Release Insider",
       "type": "shell",
       "command": "scripts/publish-insider.sh",

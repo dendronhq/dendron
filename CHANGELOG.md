@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.1-alpha.7](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.6...v0.15.1-alpha.7) (2020-11-14)
+
+### Enhancements
+
+- **engine:** delete for multi-vault ([83676dc](https://github.com/dendronhq/dendron/commit/83676dc3c5761b489ff44fd18364233ccb4310c8))
+- **engine:** support tree view ([e283160](https://github.com/dendronhq/dendron/commit/e283160bfea1d8adee726497947abab1c6f2e0c7))
+- **workbench:** reload after adding vault ([1230163](https://github.com/dendronhq/dendron/commit/1230163ba41e915395438821724bfbaaaa212e76))
+
 ## [0.15.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.5...v0.15.1-alpha.6) (2020-11-13)
 
 ### Enhancements

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.1-alpha.7](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.6...v0.15.1-alpha.7) (2020-11-14)
+
+### Enhancements
+
+- **engine:** support tree view ([e283160](https://github.com/dendronhq/dendron/commit/e283160bfea1d8adee726497947abab1c6f2e0c7))
+
 ## [0.15.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.5...v0.15.1-alpha.6) (2020-11-13)
 
 **Note:** Version bump only for package @dendronhq/api-server

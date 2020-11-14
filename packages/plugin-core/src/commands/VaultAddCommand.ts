@@ -1,4 +1,4 @@
-import { DVault } from "@dendronhq/common-all";
+import { DVault, getStage } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   readJSONWithComments,
@@ -6,7 +6,7 @@ import {
 } from "@dendronhq/common-server";
 import { WorkspaceService } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { window } from "vscode";
+import { commands, window } from "vscode";
 import { Logger } from "../logger";
 import { WorkspaceFolderRaw, WorkspaceSettings } from "../types";
 import { resolvePath, VSCodeUtils } from "../utils";
@@ -69,6 +69,9 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       await writeJSONWithComments(wsPath, out);
     }
     window.showInformationMessage("finished adding vault");
+    if (getStage() !== "test") {
+      await commands.executeCommand("workbench.action.reloadWindow");
+    }
     return { vault };
   }
 }

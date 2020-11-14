@@ -20,8 +20,10 @@ export class Logger {
     const ctx = "Logger:configure";
     fs.ensureDirSync(context.logPath);
     const logPath = path.join(context.logPath, "dendron.log");
+    if (fs.existsSync(logPath)) {
+      fs.moveSync(logPath, `${logPath}.old`);
+    }
     fs.ensureFileSync(logPath);
-    fs.truncateSync(logPath);
     let log_level: string;
     if (getStage() === "test") {
       log_level = process.env["LOG_LEVEL"] || "debug";

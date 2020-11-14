@@ -53,11 +53,7 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
       }
       return;
     } catch (err) {
-      if (err instanceof DendronError) {
-        Logger.error(err);
-      } else {
-        Logger.error(err.message);
-      }
+      Logger.error({ err: JSON.stringify(err) });
       return;
     }
   }

@@ -10,7 +10,7 @@ import {
   SchemaModulePropsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
-import _ from "lodash";
+import _, { DebouncedFunc } from "lodash";
 import { Uri, window } from "vscode";
 import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
@@ -27,6 +27,7 @@ import {
 
 export class LookupProviderV2 {
   public opts: EngineOpts;
+  protected onDidChangeValueDebounced?: DebouncedFunc<any>;
 
   constructor(opts: EngineOpts) {
     this.opts = opts;
@@ -154,7 +155,10 @@ export class LookupProviderV2 {
       return this._onAcceptNewNote({ picker, selectedItem });
     }
   }
-  async onDidAccept(picker: DendronQuickPickerV2, opts: EngineOpts) {
+  onDidAccept(picker: DendronQuickPickerV2, opts: EngineOpts) {
+    if (this.onDidChangeValueDebounced?.cancel) {
+      this.onDidChangeValueDebounced.cancel();
+    }
     if (picker.canSelectMany) {
       return this.onDidAcceptForMulti(picker, opts);
     } else {
@@ -472,8 +476,14 @@ export class LookupProviderV2 {
     picker.onDidAccept(async () => {
       this.onDidAccept(picker, opts);
     });
+    this.onDidChangeValueDebounced = _.debounce(
+      _.bind(this.onUpdatePickerItem, _this),
+      30,
+      { leading: true }
+    );
     picker.onDidChangeValue(() => {
-      _.debounce(_.bind(this.onUpdatePickerItem, _this), 30, {})(
+      this.onDidChangeValueDebounced = (this
+        .onDidChangeValueDebounced as DebouncedFunc<any>)(
         picker,
         opts,
         "onValueChange"

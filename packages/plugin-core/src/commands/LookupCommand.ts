@@ -2,6 +2,7 @@ import { LookupControllerV2 } from "../components/lookup/LookupControllerV2";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
+import { getDurationMilliseconds } from "../utils/system";
 import { BasicCommand } from "./base";
 
 export type LookupEffectType = "copyNoteLink" | "copyNoteRef" | "multiSelect";
@@ -42,14 +43,23 @@ export class LookupCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return {};
   }
   async execute(opts: CommandOpts) {
+    let profile;
+    const start = process.hrtime();
     const ctx = "LookupCommand:execute";
     Logger.info({ ctx, opts, msg: "enter" });
     const controller = new LookupControllerV2({ flavor: opts.flavor }, opts);
+    profile = getDurationMilliseconds(start);
+    Logger.info({ ctx, profile, msg: "postCreateController" });
     const resp = await VSCodeUtils.extractRangeFromActiveEditor();
-    return controller.show({
+    profile = getDurationMilliseconds(start);
+    Logger.info({ ctx, profile, msg: "post:extractRange" });
+    const out = controller.show({
       ...resp,
       noConfirm: opts.noConfirm,
       value: opts.value,
     });
+    profile = getDurationMilliseconds(start);
+    Logger.info({ ctx, profile, msg: "post:show" });
+    return out;
   }
 }

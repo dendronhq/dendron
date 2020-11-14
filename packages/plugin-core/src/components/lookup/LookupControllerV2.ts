@@ -12,6 +12,7 @@ import { CONFIG } from "../../constants";
 import { Logger } from "../../logger";
 import { EngineOpts } from "../../types";
 import { DendronClientUtilsV2, VSCodeUtils } from "../../utils";
+import { getDurationMilliseconds } from "../../utils/system";
 import { DendronWorkspace } from "../../workspace";
 import {
   ButtonCategory,
@@ -115,6 +116,8 @@ export class LookupControllerV2 {
     noConfirm?: boolean;
     noteExistBehavior?: LookupNoteExistBehavior;
   }) {
+    let profile;
+    const start = process.hrtime();
     const ctx = "LookupControllerV2:show";
     const cleanOpts = _.defaults(opts, {
       ignoreFocusOut: true,
@@ -132,8 +135,15 @@ export class LookupControllerV2 {
     quickPick.ignoreFocusOut = cleanOpts.ignoreFocusOut;
     quickPick.justActivated = true;
     quickPick.canSelectMany = false;
+
+    profile = getDurationMilliseconds(start);
+    Logger.info({ ctx, profile, msg: "post:createQuickPick" });
+
     const provider = new LookupProviderV2(this.opts);
     this.provider = provider;
+
+    profile = getDurationMilliseconds(start);
+    Logger.info({ ctx, profile, msg: "post:createProvider" });
 
     this.refreshButtons(quickPick, this.state.buttons);
     await this.updatePickerBehavior({
@@ -143,6 +153,7 @@ export class LookupControllerV2 {
       quickPickValue: cleanOpts.value,
       provider,
     });
+    Logger.info({ ctx, profile, msg: "post:updatePickerBehavior" });
     quickPick.onDidTriggerButton(this.onTriggerButton);
 
     // cleanup quickpick
@@ -151,7 +162,15 @@ export class LookupControllerV2 {
       this.quickPick = undefined;
     });
 
+    quickPick.onDidChangeSelection(() => {
+      Logger.info({
+        ctx: "quickPick:onDidChangeSelection",
+        payload: quickPick.selectedItems,
+      });
+    });
+
     provider.provide(quickPick);
+    Logger.info({ ctx, profile, msg: "post:provide" });
     if (opts?.noConfirm) {
       // would be empty if not set
       quickPick.selectedItems = quickPick.items;
@@ -160,6 +179,7 @@ export class LookupControllerV2 {
       quickPick.show();
     }
     this.quickPick = quickPick;
+    Logger.info({ ctx, profile, msg: "exit" });
     return quickPick;
   }
 

@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.1](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.7...v0.15.1) (2020-11-14)
+
+**Note:** Version bump only for package @dendronhq/engine-server
+
 ## [0.15.1-alpha.7](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.6...v0.15.1-alpha.7) (2020-11-14)
 
 ### Enhancements

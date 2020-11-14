@@ -162,13 +162,6 @@ export class LookupControllerV2 {
       this.quickPick = undefined;
     });
 
-    quickPick.onDidChangeSelection(() => {
-      Logger.info({
-        ctx: "quickPick:onDidChangeSelection",
-        payload: quickPick.selectedItems,
-      });
-    });
-
     provider.provide(quickPick);
     Logger.info({ ctx, profile, msg: "post:provide" });
     if (opts?.noConfirm) {

@@ -59,6 +59,9 @@ export class TreeNote extends vscode.TreeItem {
     this.uri = Uri.file(
       path.join(this.note.vault.fsPath, this.note.fname + ".md")
     );
+    if (DNodeUtilsV2.isRoot(note)) {
+      this.label = `root (${VaultUtils.getName(note.vault)})`;
+    }
     this.command = {
       command: DENDRON_COMMANDS.GOTO_NOTE.key,
       title: "",
@@ -101,17 +104,18 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
     const ctx = "TreeView:getChildren";
     Logger.debug({ ctx, id });
     const client = DendronWorkspace.instance().getEngine();
-    if (!client.notes["root"]) {
-      // vscode.window.showInformationMessage("No notes found");
+    const roots = _.filter(_.values(client.notes), DNodeUtilsV2.isRoot);
+    if (!roots) {
+      vscode.window.showInformationMessage("No notes found");
       return Promise.resolve([]);
     }
     if (id) {
       return Promise.resolve(this.tree[id].children);
     } else {
       Logger.info({ ctx, msg: "reconstructing tree" });
-      const root = client.notes["root"];
-      Logger.debug({ ctx, notes: client.notes });
-      return Promise.resolve(this.parseTree(root, client.notes).children);
+      return Promise.all(
+        roots.flatMap((root) => this.parseTree(root, client.notes).id)
+      );
     }
   }
 

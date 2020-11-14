@@ -26,7 +26,6 @@ router.post("/getByPath", async (req: Request, res: Response) => {
   const { ws, ...opts } = req.body as EngineGetNoteByPathRequest;
   const engine = await getWS({ ws: ws || "" });
   const resp = await engine.getNoteByPath(opts);
-  console.log({ bond: true, resp: JSON.stringify(resp) });
   res.json(resp);
 });
 

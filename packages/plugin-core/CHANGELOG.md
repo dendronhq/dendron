@@ -10,35 +10,20 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - **engine:** delete for multi-vault ([83676dc](https://github.com/dendronhq/dendron/commit/83676dc3c5761b489ff44fd18364233ccb4310c8))
 - **engine:** support tree view ([e283160](https://github.com/dendronhq/dendron/commit/e283160bfea1d8adee726497947abab1c6f2e0c7))
 - **workbench:** reload after adding vault ([1230163](https://github.com/dendronhq/dendron/commit/1230163ba41e915395438821724bfbaaaa212e76))
-
-## [0.15.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.5...v0.15.1-alpha.6) (2020-11-13)
-
-### Enhancements
-
 - **engine:** add vault with existing files ([0c04294](https://github.com/dendronhq/dendron/commit/0c04294f17da741f7b96ed443b9972f4b33a5774))
 - **engine:** remove relative vault ([437ba7f](https://github.com/dendronhq/dendron/commit/437ba7f1e68f8d145c430aaa24b272522275885a))
 - **engine:** support adding relative vaults ([0ea4d92](https://github.com/dendronhq/dendron/commit/0ea4d922a5e45c5836a511f6219457abdc441f4d))
 
-## [0.15.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.4...v0.15.1-alpha.5) (2020-11-13)
-
 ### Bug Fixes
 
 - **engine:** init with empty config ([7beb90f](https://github.com/dendronhq/dendron/commit/7beb90fa243bc73563a3ce16b5305345f7348d9f))
+- **engine:** rename fail in some cases ([de44f9f](https://github.com/dendronhq/dendron/commit/de44f9f4d38651d75433ae885fdc78bb762fb1f6))
+- **notes:** fix issue when importing note that already exists ([a08a34a](https://github.com/dendronhq/dendron/commit/a08a34a0563bb4047bd9c7cfc5f2bf150873fdc8))
 
 ### Features
 
 - **engine:** add remove vault cmd ([cd77cf2](https://github.com/dendronhq/dendron/commit/cd77cf2705a61c5631a2f229a069644e30ba966c))
 - **workspace:** vault add command ([f2bba25](https://github.com/dendronhq/dendron/commit/f2bba254b4923c97fec6b5830bff3779c533447f))
-
-## [0.15.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.3...v0.15.1-alpha.4) (2020-11-13)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.15.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.2...v0.15.1-alpha.3) (2020-11-12)
-
-### Bug Fixes
-
-- **notes:** fix issue when importing note that already exists ([a08a34a](https://github.com/dendronhq/dendron/commit/a08a34a0563bb4047bd9c7cfc5f2bf150873fdc8))
 
 ## [0.15.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.1...v0.15.1-alpha.2) (2020-11-12)
 
@@ -46,114 +31,44 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 - **workbench:** add configure command ([db51dc3](https://github.com/dendronhq/dendron/commit/db51dc35864d0c4434f70620ef0e88451c198fa4))
 
-## [0.15.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.0...v0.15.1-alpha.1) (2020-11-11)
+### Enhancements
 
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.15.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.15.0...v0.15.1-alpha.0) (2020-11-10)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
+- **refs:** wildcard refs get nice links ([98a1177](https://github.com/dendronhq/dendron/commit/98a117715a967492ab9d7b8749d964b07bde4055))
 
 # [0.15.0](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.7...v0.15.0) (2020-11-09)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.14.2-alpha.7](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.6...v0.14.2-alpha.7) (2020-11-09)
 
 ### Bug Fixes
 
 - typo in daily journal note cmd ([5ec96ef](https://github.com/dendronhq/dendron/commit/5ec96efd9a006e5e5999f2704dfb3d1e97e60a5c))
-
-## [0.14.2-alpha.6](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.5...v0.14.2-alpha.6) (2020-11-08)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.14.2-alpha.5](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.1...v0.14.2-alpha.5) (2020-11-08)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.14.2-alpha.4](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.3...v0.14.2-alpha.4) (2020-11-08)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.14.2-alpha.3](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.2...v0.14.2-alpha.3) (2020-11-08)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.14.2-alpha.2](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.1...v0.14.2-alpha.2) (2020-11-08)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.14.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.14.2-alpha.0...v0.14.2-alpha.1) (2020-11-07)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.14.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.14.1...v0.14.2-alpha.0) (2020-11-07)
-
-### Bug Fixes
-
 - **engine:** properly handle \* in refs when refactoring ([704a14f](https://github.com/dendronhq/dendron/commit/704a14f17196e18cb5b26f5fc98ed9f8d492e16a))
 
 ### Enhancements
 
+- **engine:** add sync method ([ec58d39](https://github.com/dendronhq/dendron/commit/ec58d395003640384b7764f4f8b483429cc1ece3))
 - **workspace:** write server port in workspace ([6a0ff84](https://github.com/dendronhq/dendron/commit/6a0ff845ebbf010073b271123779fc3f56ac2821))
 
 ### Features
 
 - **cli:** launch engine server using cli ([25eae3f](https://github.com/dendronhq/dendron/commit/25eae3fddd6a2d26dcf9e2f3e664b377c2cca978))
+- **markdown:** wildcard links in note refs ([b8dea8f](https://github.com/dendronhq/dendron/commit/b8dea8f4441cfc01f5acc522ffa3a6402ff50572))
+- **refs:** support wildcard links when publishing ([74079fa](https://github.com/dendronhq/dendron/commit/74079fa4ed9c08b1890852738df858f1f393bec6))
 
 ## [0.14.1](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.7...v0.14.1) (2020-11-05)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.14.1-alpha.7](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.6...v0.14.1-alpha.7) (2020-11-05)
 
 ### Enhancements
 
 - **lookup:** add multi-select as toggle ([d84c03e](https://github.com/dendronhq/dendron/commit/d84c03eeac38a01cc0261ee3436d66a734659992))
-
-## [0.14.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.5...v0.14.1-alpha.6) (2020-11-05)
 
 ### Features
 
 - **lookup:** copy note link cmd ([e38743d](https://github.com/dendronhq/dendron/commit/e38743ddbac8486f2ac778bd546a6373a15a4f6d))
 - **lookup:** support multi-select ([b409c05](https://github.com/dendronhq/dendron/commit/b409c05d3b19797de714dbf10b6a4249758eae8a))
 
-## [0.14.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.4...v0.14.1-alpha.5) (2020-11-04)
-
-**Note:** Version bump only for package root
-
-## [0.14.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.3...v0.14.1-alpha.4) (2020-11-04)
-
-**Note:** Version bump only for package root
-
-## [0.14.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.2...v0.14.1-alpha.3) (2020-11-04)
-
-**Note:** Version bump only for package root
-
-## [0.14.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.1...v0.14.1-alpha.2) (2020-11-03)
-
 ### Bug Fixes
 
 - **pods:** don't re-initialize engine when using pods ([4687285](https://github.com/dendronhq/dendron/commit/4687285dabad761360b7108cc9d36f131c385e29))
 
-## [0.14.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.14.1-alpha.0...v0.14.1-alpha.1) (2020-11-03)
-
-**Note:** Version bump only for package root
-
-## [0.14.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.14.0...v0.14.1-alpha.0) (2020-11-03)
-
-**Note:** Version bump only for package root
-
 # [0.14.0](https://github.com/dendronhq/dendron/compare/v0.13.6-alpha.2...v0.14.0) (2020-11-01)
-
-**Note:** Version bump only for package root
-
-## [0.13.6-alpha.2](https://github.com/dendronhq/dendron/compare/v0.13.6-alpha.1...v0.13.6-alpha.2) (2020-11-01)
-
-**Note:** Version bump only for package root
-
-## [0.13.6-alpha.1](https://github.com/dendronhq/dendron/compare/v0.13.6-alpha.0...v0.13.6-alpha.1) (2020-11-01)
 
 ### Bug Fixes
 

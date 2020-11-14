@@ -10,36 +10,20 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - **engine:** delete for multi-vault ([83676dc](https://github.com/dendronhq/dendron/commit/83676dc3c5761b489ff44fd18364233ccb4310c8))
 - **engine:** support tree view ([e283160](https://github.com/dendronhq/dendron/commit/e283160bfea1d8adee726497947abab1c6f2e0c7))
 - **workbench:** reload after adding vault ([1230163](https://github.com/dendronhq/dendron/commit/1230163ba41e915395438821724bfbaaaa212e76))
-
-## [0.15.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.5...v0.15.1-alpha.6) (2020-11-13)
-
-### Enhancements
-
 - **engine:** add vault with existing files ([0c04294](https://github.com/dendronhq/dendron/commit/0c04294f17da741f7b96ed443b9972f4b33a5774))
 - **engine:** remove relative vault ([437ba7f](https://github.com/dendronhq/dendron/commit/437ba7f1e68f8d145c430aaa24b272522275885a))
 - **engine:** support adding relative vaults ([0ea4d92](https://github.com/dendronhq/dendron/commit/0ea4d922a5e45c5836a511f6219457abdc441f4d))
-
-## [0.15.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.4...v0.15.1-alpha.5) (2020-11-13)
 
 ### Bug Fixes
 
 - **engine:** init with empty config ([7beb90f](https://github.com/dendronhq/dendron/commit/7beb90fa243bc73563a3ce16b5305345f7348d9f))
 - **engine:** rename fail in some cases ([de44f9f](https://github.com/dendronhq/dendron/commit/de44f9f4d38651d75433ae885fdc78bb762fb1f6))
+- **notes:** fix issue when importing note that already exists ([a08a34a](https://github.com/dendronhq/dendron/commit/a08a34a0563bb4047bd9c7cfc5f2bf150873fdc8))
 
 ### Features
 
 - **engine:** add remove vault cmd ([cd77cf2](https://github.com/dendronhq/dendron/commit/cd77cf2705a61c5631a2f229a069644e30ba966c))
 - **workspace:** vault add command ([f2bba25](https://github.com/dendronhq/dendron/commit/f2bba254b4923c97fec6b5830bff3779c533447f))
-
-## [0.15.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.3...v0.15.1-alpha.4) (2020-11-13)
-
-**Note:** Version bump only for package root
-
-## [0.15.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.2...v0.15.1-alpha.3) (2020-11-12)
-
-### Bug Fixes
-
-- **notes:** fix issue when importing note that already exists ([a08a34a](https://github.com/dendronhq/dendron/commit/a08a34a0563bb4047bd9c7cfc5f2bf150873fdc8))
 
 ## [0.15.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.1...v0.15.1-alpha.2) (2020-11-12)
 

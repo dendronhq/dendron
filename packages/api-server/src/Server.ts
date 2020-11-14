@@ -18,7 +18,7 @@ export function appModule({ logPath }: { logPath: string }) {
       return JSON.stringify(req.body);
     });
     if (fs.existsSync(logPath)) {
-      fs.moveSync(logPath, `${logPath}.old`);
+      fs.moveSync(logPath, `${logPath}.old`, { overwrite: true });
     }
     const accessLogStream = fs.createWriteStream(logPath, { flags: "a" });
     setLogger({ logPath });

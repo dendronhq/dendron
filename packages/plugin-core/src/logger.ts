@@ -21,7 +21,7 @@ export class Logger {
     fs.ensureDirSync(context.logPath);
     const logPath = path.join(context.logPath, "dendron.log");
     if (fs.existsSync(logPath)) {
-      fs.moveSync(logPath, `${logPath}.old`);
+      fs.moveSync(logPath, `${logPath}.old`, { overwrite: true });
     }
     fs.ensureFileSync(logPath);
     let log_level: string;
@@ -104,6 +104,9 @@ export class Logger {
         if (Logger.cmpLevels(lvl, "error")) {
           if (!_.isUndefined(msg?.friendly)) {
             cleanMsg = msg.friendly;
+          }
+          if (!_.isUndefined(msg?.err?.friendly)) {
+            cleanMsg = msg.err.friendly;
           }
           window.showErrorMessage(cleanMsg);
         } else if (Logger.cmpLevels(lvl, "info")) {

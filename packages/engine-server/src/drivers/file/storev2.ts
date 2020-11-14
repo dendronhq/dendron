@@ -343,8 +343,8 @@ export class FileStorageV2 implements DStoreV2 {
     }
     const noteToDelete = this.notes[id];
     const ext = ".md";
-    const vault = this.vaults[0];
-    const fpath = path.join(vault, noteToDelete.fname + ext);
+    const vault = noteToDelete.vault;
+    const fpath = path.join(vault.fsPath, noteToDelete.fname + ext);
     const out: NoteChangeEntry[] = [];
     this.logger.info({ ctx, noteToDelete, opts });
 

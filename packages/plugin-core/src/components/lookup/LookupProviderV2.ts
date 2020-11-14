@@ -1,4 +1,5 @@
 import {
+  DendronError,
   DEngineClientV2,
   DNodePropsDictV2,
   DNodePropsQuickInputV2,
@@ -474,7 +475,17 @@ export class LookupProviderV2 {
     const { opts } = this;
     const _this = this;
     picker.onDidAccept(async () => {
-      this.onDidAccept(picker, opts);
+      const ctx = "LookupProvider:onAccept";
+      this.onDidAccept(picker, opts).catch((err) => {
+        Logger.error({
+          ctx,
+          err: new DendronError({
+            friendly:
+              "something went wrong. please submit a bug report to https://github.com/dendronhq/dendron/issues/new?assignees=&labels=&template=bug_report.md&title= with the output of `Dendron: Open Log`",
+            payload: err,
+          }),
+        });
+      });
     });
     this.onDidChangeValueDebounced = _.debounce(
       _.bind(this.onUpdatePickerItem, _this),

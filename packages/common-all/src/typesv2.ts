@@ -67,7 +67,10 @@ export type DNoteLoc = {
   vault?: DVault;
 };
 export type DVault = {
+  /** Name of vault */
   name?: string;
+
+  /** Filesystem path to fault */
   fsPath: string;
 };
 export type DLink = {

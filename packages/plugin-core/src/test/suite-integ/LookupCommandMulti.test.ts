@@ -9,6 +9,7 @@ import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
+import { CancellationToken } from "vscode-languageclient";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
 import { DendronQuickPickerV2 } from "../../components/lookup/types";
@@ -31,11 +32,13 @@ suite("notes, multi", function () {
   let vaults: DVault[];
   let ctx: vscode.ExtensionContext;
   const engOpts: EngineOpts = { flavor: "note" };
+  let token: CancellationToken;
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
+    token = new vscode.CancellationTokenSource().token;
   });
 
   afterEach(function () {
@@ -142,7 +145,7 @@ suite("notes, multi", function () {
       runUpdateItemTest({
         onInitCb: async ({ quickpick, lp, lc }) => {
           quickpick.value = "";
-          await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
+          await lp.onUpdatePickerItem(quickpick, engOpts, "manual", token);
           assert.strictEqual(lc.quickPick?.items.length, 4);
           done();
         },
@@ -160,13 +163,13 @@ suite("notes, multi", function () {
         );
         const quickpick = await lc.show();
         quickpick.value = "";
-        await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
+        await lp.onUpdatePickerItem(quickpick, engOpts, "manual", token);
         quickpick.onDidChangeActive(() => {
           assert.strictEqual(lc.quickPick?.activeItems.length, 1);
           assert.strictEqual(lc.quickPick?.activeItems[0].fname, "foo");
           done();
         });
-        await lp.onUpdatePickerItem(quickpick, engOpts, "manual");
+        await lp.onUpdatePickerItem(quickpick, engOpts, "manual", token);
       });
     });
 
@@ -174,7 +177,12 @@ suite("notes, multi", function () {
       runUpdateItemTest({
         onInitCb: async ({ quickpick, lp }) => {
           quickpick.value = "foo.";
-          await lp.onUpdatePickerItem(quickpick, { flavor: "note" }, "manual");
+          await lp.onUpdatePickerItem(
+            quickpick,
+            { flavor: "note" },
+            "manual",
+            token
+          );
           assert.deepStrictEqual(quickpick.items.length, 4);
           assert.deepStrictEqual(
             _.pick(_.find(quickpick.items, { fname: "foo.ch1" }), [
@@ -198,7 +206,7 @@ suite("notes, multi", function () {
   describe("accept items", function () {
     test("exiting item", function (done) {
       runAcceptItemTest({
-        onInitCb: async ({ lp }) => {
+        onInitCb: async ({ lp, lc }) => {
           const ws = DendronWorkspace.instance();
           const client = ws.getEngine();
           const note = client.notes["foo"];
@@ -211,7 +219,7 @@ suite("notes, multi", function () {
             value: "foo",
             selectedItems: [item],
           });
-          await lp.onDidAccept(quickpick, engOpts);
+          await lp.onDidAccept({ picker: quickpick, opts: engOpts, lc });
           await NodeTestPresetsV2.runMochaHarness({
             opts: {
               activeFileName: DNodeUtilsV2.fname(
@@ -229,7 +237,7 @@ suite("notes, multi", function () {
 
     test("new item", function (done) {
       runAcceptItemTest({
-        onInitCb: async ({ lp }) => {
+        onInitCb: async ({ lp, lc }) => {
           console.log("onInitCb:enter");
           const ws = DendronWorkspace.instance();
           const client = ws.getEngine();
@@ -241,7 +249,7 @@ suite("notes, multi", function () {
             value: "bond",
             selectedItems: [createNoActiveItem(vaults[0])],
           });
-          await lp.onDidAccept(quickpick, engOpts);
+          await lp.onDidAccept({ picker: quickpick, opts: engOpts, lc });
           assert.strictEqual(
             DNodeUtilsV2.fname(
               VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
@@ -261,7 +269,7 @@ suite("notes, multi", function () {
 
     test("new item in other", function (done) {
       runAcceptItemTest({
-        onInitCb: async ({ lp }) => {
+        onInitCb: async ({ lp, lc }) => {
           console.log("onInitCb:enter");
           const ws = DendronWorkspace.instance();
           const vaults = DendronWorkspace.instance().vaults;
@@ -278,7 +286,7 @@ suite("notes, multi", function () {
             value: "bond",
             selectedItems: [createNoActiveItem(vaults[0])],
           });
-          await lp.onDidAccept(quickpick, engOpts);
+          await lp.onDidAccept({ picker: quickpick, opts: engOpts, lc });
           assert.strictEqual(
             DNodeUtilsV2.fname(
               VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string

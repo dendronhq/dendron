@@ -13,12 +13,13 @@ import {
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import _, { DebouncedFunc } from "lodash";
-import { Uri, window } from "vscode";
+import { CancellationToken, Uri, window } from "vscode";
 import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
 import { EngineFlavor, EngineOpts } from "../../types";
 import { getDurationMilliseconds, profile } from "../../utils/system";
 import { DendronWorkspace } from "../../workspace";
+import { LookupControllerV2 } from "./LookupControllerV2";
 import { DendronQuickPickerV2 } from "./types";
 import {
   createNoActiveItem,
@@ -163,10 +164,19 @@ export class LookupProviderV2 {
       return this._onAcceptNewNote({ picker, selectedItem });
     }
   }
-  onDidAccept(picker: DendronQuickPickerV2, opts: EngineOpts) {
+  onDidAccept({
+    picker,
+    opts,
+    lc,
+  }: {
+    picker: DendronQuickPickerV2;
+    opts: EngineOpts;
+    lc: LookupControllerV2;
+  }) {
     if (this.onDidChangeValueDebounced?.cancel) {
       this.onDidChangeValueDebounced.cancel();
     }
+    lc.cancelToken.cancel();
     if (picker.canSelectMany) {
       return this.onDidAcceptForMulti(picker, opts);
     } else {
@@ -177,8 +187,16 @@ export class LookupProviderV2 {
   async onDidAcceptForSingle(picker: DendronQuickPickerV2, opts: EngineOpts) {
     const ctx = "onDidAcceptSingle";
     const value = PickerUtilsV2.getValue(picker);
-    Logger.info({ ctx, msg: "enter", value, opts });
-    const selectedItem = PickerUtilsV2.getSelection(picker)[0];
+    const selectedItems = PickerUtilsV2.getSelection(picker);
+    const selectedItem = selectedItems[0];
+    Logger.info({
+      ctx,
+      msg: "enter",
+      value,
+      opts,
+      selectedItems: selectedItems.map((ent) => NoteUtilsV2.toLogObj(ent)),
+      activeItems: picker.activeItems.map((ent) => NoteUtilsV2.toLogObj(ent)),
+    });
     const resp = this.validate(picker.value, opts.flavor);
     const ws = DendronWorkspace.instance();
     let uri: Uri;
@@ -297,7 +315,8 @@ export class LookupProviderV2 {
   onUpdatePickerItem = async (
     picker: DendronQuickPickerV2,
     opts: EngineOpts,
-    source: string
+    source: string,
+    token: CancellationToken
     // | "updatePickerBehavior:journal"
     // | "updatePickerBehavior:scratch"
     // | "updatePickerBehavior:normal"
@@ -325,7 +344,7 @@ export class LookupProviderV2 {
     let profile: number;
     const queryEndsWithDot = queryOrig.endsWith(".");
     const engine = ws.getEngine();
-    Logger.debug({ ctx, msg: "enter", queryOrig, source });
+    Logger.info({ ctx, msg: "enter", queryOrig, source });
 
     // ~~~ update results
     try {
@@ -357,6 +376,9 @@ export class LookupProviderV2 {
       ) {
         Logger.info({ ctx, msg: "first query" });
         let nodes: DNodePropsV2[];
+        if (token.isCancellationRequested) {
+          return;
+        }
         if (opts.flavor === "note") {
           const resp = await engine.queryNotes({ qs: querystring });
           nodes = resp.data;
@@ -378,6 +400,9 @@ export class LookupProviderV2 {
         Logger.info({ ctx, msg: "engine.query", profile });
       }
 
+      if (token.isCancellationRequested) {
+        return;
+      }
       // check if single item query, vscode doesn't surface single letter queries
       if (picker.activeItems.length === 0 && querystring.length === 1) {
         picker.items = updatedItems;
@@ -441,6 +466,9 @@ export class LookupProviderV2 {
           );
         }
       }
+      if (token.isCancellationRequested) {
+        return;
+      }
       // check if new item, return if that's the case
       if (
         noUpdatedItems ||
@@ -474,11 +502,24 @@ export class LookupProviderV2 {
       profile = getDurationMilliseconds(start);
       picker.busy = false;
       picker.justActivated = false;
-      Logger.info({ ctx, msg: "exit", queryOrig, source, profile });
+      Logger.info({
+        ctx,
+        msg: "exit",
+        queryOrig,
+        source,
+        profile,
+        cancelled: token.isCancellationRequested,
+      });
     }
   };
 
-  provide(picker: DendronQuickPickerV2) {
+  provide({
+    picker,
+    lc,
+  }: {
+    picker: DendronQuickPickerV2;
+    lc: LookupControllerV2;
+  }) {
     const { opts } = this;
     const _this = this;
     picker.onDidAccept(() => {
@@ -487,7 +528,7 @@ export class LookupProviderV2 {
       if (getStage() === "test") {
         return;
       }
-      this.onDidAccept(picker, opts).catch((err) => {
+      this.onDidAccept({ picker, opts, lc }).catch((err) => {
         Logger.error({
           ctx,
           err: new DendronError({
@@ -502,22 +543,28 @@ export class LookupProviderV2 {
     // create debounced update method
     this.onDidChangeValueDebounced = _.debounce(
       _.bind(this.onUpdatePickerItem, _this),
-      30,
-      { leading: true }
+      120,
+      { leading: true, maxWait: 240 }
     ) as DebouncedFunc<typeof _this.onUpdatePickerItem>;
 
-    // this.onDidChangeValueDebounced = (this
-    //   .onDidChangeValueDebounced as DebouncedFunc<any>)(
-    //   picker,
-    //   opts,
-    //   "onValueChange"
-    // );
+    // picker.onDidChangeSelection(() => {
+    //   Logger.info({ctx: "onDidChangeSelection", picker: PickerUtilsV2.dumpPicker(picker)})
+    // });
+    // picker.onDidChangeActive(()=> {
+    //   Logger.info({ctx: "onDidChangeActive", picker: PickerUtilsV2.dumpPicker(picker)})
+    // })
 
     picker.onDidChangeValue(() => {
       if (_.isUndefined(this.onDidChangeValueDebounced)) {
         throw new DendronError({ msg: "onAccept already called" });
       }
-      this.onDidChangeValueDebounced(picker, opts, "onValueChange");
+
+      this.onDidChangeValueDebounced(
+        picker,
+        opts,
+        "onValueChange",
+        lc.createCancelSource().token
+      );
     });
   }
 

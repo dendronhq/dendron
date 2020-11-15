@@ -1,9 +1,14 @@
-import { DNodePropsQuickInputV2, NotePropsV2 } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DNodePropsQuickInputV2,
+  NotePropsV2,
+} from "@dendronhq/common-all";
 import GithubSlugger from "github-slugger";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { QuickInputButton } from "vscode";
+import { CancellationTokenSource } from "vscode-languageclient";
 import {
   LookupCommandOpts,
   LookupNoteExistBehavior,
@@ -29,9 +34,10 @@ import { UPDATET_SOURCE } from "./utils";
 export class LookupControllerV2 {
   public quickPick?: DendronQuickPickerV2;
   public state: LookupControllerState;
+  public provider?: LookupProviderV2;
   protected opts: EngineOpts;
   protected _onDidHide?: () => void;
-  public provider?: LookupProviderV2;
+  protected _cancelTokenSource?: CancellationTokenSource;
 
   constructor(
     opts: EngineOpts,
@@ -58,6 +64,24 @@ export class LookupControllerV2 {
       buttonsPrev: [],
     };
     this.opts = opts;
+    this.createCancelSource();
+  }
+
+  get cancelToken() {
+    if (_.isUndefined(this._cancelTokenSource)) {
+      throw new DendronError({ msg: "no cancel token" });
+    }
+    return this._cancelTokenSource;
+  }
+
+  createCancelSource() {
+    const tokenSource = new CancellationTokenSource();
+    if (this._cancelTokenSource) {
+      this._cancelTokenSource.cancel();
+      this._cancelTokenSource.dispose();
+    }
+    this._cancelTokenSource = tokenSource;
+    return tokenSource;
   }
 
   onDidHide = (cb: () => void) => {
@@ -139,6 +163,7 @@ export class LookupControllerV2 {
     quickPick.canSelectMany = false;
 
     profile = getDurationMilliseconds(start);
+    const cancelToken = this.createCancelSource();
     Logger.info({ ctx, profile, msg: "post:createQuickPick" });
 
     const provider = new LookupProviderV2(this.opts);
@@ -162,18 +187,28 @@ export class LookupControllerV2 {
     quickPick.onDidHide(() => {
       quickPick.dispose();
       this.quickPick = undefined;
+      this.cancelToken?.dispose();
       if (this._onDidHide) {
         this._onDidHide();
       }
     });
 
-    provider.provide(quickPick);
+    provider.provide({ picker: quickPick, lc: this });
     Logger.info({ ctx, profile, msg: "post:provide" });
     if (opts?.noConfirm) {
-      await provider.onUpdatePickerItem(quickPick, this.opts, "manual");
+      await provider.onUpdatePickerItem(
+        quickPick,
+        this.opts,
+        "manual",
+        cancelToken.token
+      );
       // would be empty if not set
       quickPick.selectedItems = quickPick.items;
-      await provider.onDidAccept(quickPick, { flavor: this.opts.flavor });
+      await provider.onDidAccept({
+        picker: quickPick,
+        opts: { flavor: this.opts.flavor },
+        lc: this,
+      });
     } else {
       quickPick.show();
     }
@@ -242,7 +277,13 @@ export class LookupControllerV2 {
       onUpdateValue = [onUpdateValue, suffix].join(".");
     }
     quickPick.value = onUpdateValue;
-    await provider.onUpdatePickerItem(quickPick, provider.opts, onUpdateReason);
+    const tokenSource = this.createCancelSource();
+    await provider.onUpdatePickerItem(
+      quickPick,
+      provider.opts,
+      onUpdateReason,
+      tokenSource.token
+    );
   }
 
   async updateBehaviorByEffect({
@@ -350,10 +391,12 @@ export class LookupControllerV2 {
     }
     if (!_.isUndefined(before) && quickPick.showDirectChildrenOnly !== before) {
       Logger.info({ ctx, msg: "toggle showDirectChildOnly behavior" });
+      const tokenSource = this.createCancelSource();
       await provider.onUpdatePickerItem(
         quickPick,
         provider.opts,
-        UPDATET_SOURCE.UPDATE_PICKER_FILTER
+        UPDATET_SOURCE.UPDATE_PICKER_FILTER,
+        tokenSource.token
       );
     }
   }

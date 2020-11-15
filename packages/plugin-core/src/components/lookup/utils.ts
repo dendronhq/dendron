@@ -3,6 +3,7 @@ import {
   DNodePropsV2,
   DNodeUtilsV2,
   DVault,
+  NoteUtilsV2,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
@@ -76,6 +77,17 @@ export async function showDocAndHidePicker(
 }
 
 export class PickerUtilsV2 {
+  static dumpPicker(picker: DendronQuickPickerV2) {
+    const activeItems = picker.activeItems.map((ent) =>
+      NoteUtilsV2.toLogObj(ent)
+    );
+    const selectedItems = picker.selectedItems.map((ent) =>
+      NoteUtilsV2.toLogObj(ent)
+    );
+    const value = picker.value;
+    return { activeItems, selectedItems, value };
+  }
+
   static getValue(picker: DendronQuickPickerV2) {
     return picker.value;
   }

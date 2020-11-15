@@ -382,6 +382,7 @@ export class LookupProviderV2 {
         if (opts.flavor === "note") {
           const resp = await engine.queryNotes({ qs: querystring });
           nodes = resp.data;
+          Logger.info({ ctx, msg: "post:queryNotes" });
         } else {
           const resp = await engine.querySchema(querystring);
           nodes = resp.data.map((ent) => SchemaUtilsV2.getModuleRoot(ent));
@@ -543,8 +544,8 @@ export class LookupProviderV2 {
     // create debounced update method
     this.onDidChangeValueDebounced = _.debounce(
       _.bind(this.onUpdatePickerItem, _this),
-      120,
-      { leading: true, maxWait: 240 }
+      60,
+      { leading: true, maxWait: 120 }
     ) as DebouncedFunc<typeof _this.onUpdatePickerItem>;
 
     // picker.onDidChangeSelection(() => {

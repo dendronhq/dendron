@@ -71,10 +71,7 @@ export class LookupControllerV2 {
       return;
     }
     const resp = await VSCodeUtils.extractRangeFromActiveEditor();
-    const { document, range } = _.defaults(resp, {
-      document: null,
-      range: null,
-    });
+    const { document, range } = resp || {};
     const btnType = (btn as IDendronQuickInputButton).type;
 
     const btnTriggered = _.find(this.state.buttons, {

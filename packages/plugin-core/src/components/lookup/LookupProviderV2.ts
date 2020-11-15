@@ -1,10 +1,12 @@
 import {
+  DendronError,
   DEngineClientV2,
   DNodePropsDictV2,
   DNodePropsQuickInputV2,
   DNodePropsV2,
   DNodeUtilsV2,
   DVault,
+  getStage,
   NotePropsV2,
   NoteUtilsV2,
   SchemaModulePropsV2,
@@ -78,6 +80,7 @@ export class LookupProviderV2 {
           schema: result.schema,
         });
       }
+      Logger.info({ ctx, msg: "post:maybeAddSchema", schema: result });
     }
     const maybeSchema = SchemaUtilsV2.getSchemaFromNote({
       note: nodeNew,
@@ -96,6 +99,7 @@ export class LookupProviderV2 {
     const historyService = HistoryService.instance();
     historyService.add({ source: "engine", action: "create", uri });
 
+    Logger.info({ ctx, msg: "pre:checkNoteExist", uri });
     // TODO: check for overwriting schema
     let noteExists = NoteUtilsV2.getNoteByFname(nodeNew.fname, engine.notes);
     if (noteExists && !foundStub && !selectedItem?.schemaStub) {
@@ -103,8 +107,10 @@ export class LookupProviderV2 {
       throw Error("action will overwrite existing note");
     }
     if (picker.onCreate) {
+      Logger.info({ ctx, msg: "pre:pickerOnCreate", uri });
       await picker.onCreate(nodeNew);
     }
+    Logger.info({ ctx, msg: "pre:engine.write", uri });
     await engine.writeNote(nodeNew, {
       newNode: true,
     });
@@ -467,8 +473,22 @@ export class LookupProviderV2 {
 
   provide(picker: DendronQuickPickerV2) {
     const { opts } = this;
-    picker.onDidAccept(async () => {
-      this.onDidAccept(picker, opts);
+    picker.onDidAccept(() => {
+      const ctx = "LookupProvider:onAccept";
+      // NOTE: unfortunate hack
+      if (getStage() === "test") {
+        return;
+      }
+      this.onDidAccept(picker, opts).catch((err) => {
+        Logger.error({
+          ctx,
+          err: new DendronError({
+            friendly:
+              "something went wrong. please submit a bug report to https://github.com/dendronhq/dendron/issues/new?assignees=&labels=&template=bug_report.md&title= with the output of `Dendron: Open Log`",
+            payload: err,
+          }),
+        });
+      });
     });
     picker.onDidChangeValue(() => {
       this.onUpdatePickerItem(picker, opts, "onValueChange");

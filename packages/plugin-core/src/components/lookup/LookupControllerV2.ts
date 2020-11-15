@@ -28,6 +28,7 @@ export class LookupControllerV2 {
   public quickPick?: DendronQuickPickerV2;
   public state: LookupControllerState;
   protected opts: EngineOpts;
+  protected _onDidHide?: () => void;
   public provider?: LookupProviderV2;
 
   constructor(
@@ -56,6 +57,10 @@ export class LookupControllerV2 {
     };
     this.opts = opts;
   }
+
+  onDidHide = (cb: () => void) => {
+    this._onDidHide = cb;
+  };
 
   onTriggerButton = async (btn: QuickInputButton) => {
     const quickPick = this.quickPick;
@@ -148,6 +153,9 @@ export class LookupControllerV2 {
     quickPick.onDidHide(() => {
       quickPick.dispose();
       this.quickPick = undefined;
+      if (this._onDidHide) {
+        this._onDidHide();
+      }
     });
 
     provider.provide(quickPick);

@@ -499,22 +499,25 @@ suite("notes", function () {
         assert.ok(note.stub);
         quickpick.selectedItems = [note];
         await lp.onDidAccept(quickpick, engOpts);
-        assert.equal(
-          path.basename(
-            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-          ),
-          "foo.md"
-        );
-
-        quickpick = await lc.show();
-        note = _.find(quickpick.items, {
-          fname: "foo",
-        }) as DNodePropsQuickInputV2;
-        assert.ok(!note.stub);
-        // TODO
-        // no schema file
-        //assert.ok(note.schema?.id, Schema.createUnkownSchema().id);
-        done();
+        lc.onDidHide(async () => {
+          assert.equal(
+            path.basename(
+              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+            ),
+            "foo.md"
+          );
+          const lc2 = new LookupControllerV2(engOpts);
+          const quickpick2 = await lc2.show();
+          note = _.find(quickpick2.items, {
+            fname: "foo",
+          }) as DNodePropsQuickInputV2;
+          assert.ok(!note.stub);
+          // TODO
+          // no schema file
+          //assert.ok(note.schema?.id, Schema.createUnkownSchema().id);
+          done();
+        });
+        quickpick.hide();
       });
       setupCaseCustom({
         ctx,

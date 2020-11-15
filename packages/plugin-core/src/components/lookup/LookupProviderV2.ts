@@ -29,7 +29,9 @@ import {
 
 export class LookupProviderV2 {
   public opts: EngineOpts;
-  protected onDidChangeValueDebounced?: DebouncedFunc<any>;
+  protected onDidChangeValueDebounced?: DebouncedFunc<
+    InstanceType<typeof LookupProviderV2>["onUpdatePickerItem"]
+  >;
 
   constructor(opts: EngineOpts) {
     this.opts = opts;
@@ -292,7 +294,7 @@ export class LookupProviderV2 {
     return showDocAndHidePicker(uris, picker);
   }
 
-  async onUpdatePickerItem(
+  onUpdatePickerItem = async (
     picker: DendronQuickPickerV2,
     opts: EngineOpts,
     source: string
@@ -301,7 +303,7 @@ export class LookupProviderV2 {
     // | "updatePickerBehavior:normal"
     // | "onValueChange"
     // | "manual"
-  ) {
+  ) => {
     // ~~~ setup variables
     const start = process.hrtime();
     const ctx = "updatePickerItems";
@@ -474,7 +476,7 @@ export class LookupProviderV2 {
       picker.justActivated = false;
       Logger.info({ ctx, msg: "exit", queryOrig, source, profile });
     }
-  }
+  };
 
   provide(picker: DendronQuickPickerV2) {
     const { opts } = this;
@@ -496,18 +498,26 @@ export class LookupProviderV2 {
         });
       });
     });
+
+    // create debounced update method
     this.onDidChangeValueDebounced = _.debounce(
       _.bind(this.onUpdatePickerItem, _this),
       30,
       { leading: true }
-    );
+    ) as DebouncedFunc<typeof _this.onUpdatePickerItem>;
+
+    // this.onDidChangeValueDebounced = (this
+    //   .onDidChangeValueDebounced as DebouncedFunc<any>)(
+    //   picker,
+    //   opts,
+    //   "onValueChange"
+    // );
+
     picker.onDidChangeValue(() => {
-      this.onDidChangeValueDebounced = (this
-        .onDidChangeValueDebounced as DebouncedFunc<any>)(
-        picker,
-        opts,
-        "onValueChange"
-      );
+      if (_.isUndefined(this.onDidChangeValueDebounced)) {
+        throw new DendronError({ msg: "onAccept already called" });
+      }
+      this.onDidChangeValueDebounced(picker, opts, "onValueChange");
     });
   }
 

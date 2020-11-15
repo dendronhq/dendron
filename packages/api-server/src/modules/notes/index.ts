@@ -9,6 +9,7 @@ import {
   EngineUpdateNotePayload,
   EngineUpdateNoteRequest,
 } from "@dendronhq/common-server";
+import { getLogger } from "../../core";
 import { getWS } from "../../utils";
 
 export class NoteController {
@@ -59,10 +60,13 @@ export class NoteController {
     ...opts
   }: EngineRenameNoteRequest): Promise<EngineRenameNotePayload> {
     const engine = await getWS({ ws });
+    const ctx = "NoteController:rename";
     try {
+      getLogger().info({ ctx, msg: "enter" });
       const data = await engine.renameNote(opts);
       return data;
     } catch (err) {
+      getLogger().error({ ctx, err });
       return {
         error: new DendronError({ payload: err }),
         data: undefined,

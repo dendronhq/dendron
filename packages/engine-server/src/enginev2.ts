@@ -238,7 +238,7 @@ export class DendronEngineV2 implements DEngineV2 {
     const items = this.fuseEngine.queryNote({ qs });
     return {
       error: null,
-      data: items,
+      data: items.map((ent) => this.notes[ent.id]),
     };
   }
 
@@ -267,10 +267,11 @@ export class DendronEngineV2 implements DEngineV2 {
     const ctx = "Engine:queryNotes";
     const { qs, vault, createIfNew } = opts;
     const items = await this.fuseEngine.queryNote({ qs });
+    let item = this.notes[items[0].id];
     if (createIfNew) {
       let noteNew: NotePropsV2;
-      if (items[0]?.fname === qs && items[0]?.stub) {
-        noteNew = items[0];
+      if (item?.fname === qs && item?.stub) {
+        noteNew = item;
         noteNew.stub = false;
       } else {
         if (_.isUndefined(vault)) {
@@ -286,7 +287,7 @@ export class DendronEngineV2 implements DEngineV2 {
     this.logger.info({ ctx, msg: "exit" });
     return {
       error: null,
-      data: items,
+      data: items.map((ent) => this.notes[ent.id]),
     };
   }
 

@@ -10,6 +10,12 @@ import {
 import Fuse from "fuse.js";
 import _ from "lodash";
 
+export type NoteIndexProps = {
+  id: string;
+  title: string;
+  fname: string;
+};
+
 function createFuse<T>(
   initList: T[],
   opts: Fuse.IFuseOptions<any> & {
@@ -40,7 +46,7 @@ type FuseEngineOpts = {
 };
 
 export class FuseEngine {
-  public notesIndex: Fuse<NotePropsV2>;
+  public notesIndex: Fuse<NoteIndexProps>;
   public schemaIndex: Fuse<SchemaPropsV2>;
 
   constructor(opts: FuseEngineOpts) {
@@ -69,8 +75,8 @@ export class FuseEngine {
     return items;
   }
 
-  queryNote({ qs }: { qs: string }): NotePropsV2[] {
-    let items: NotePropsV2[];
+  queryNote({ qs }: { qs: string }): NoteIndexProps[] {
+    let items: NoteIndexProps[];
     if (qs === "") {
       const results = this.notesIndex.search("root");
       items = [results[0].item];
@@ -91,11 +97,13 @@ export class FuseEngine {
   }
 
   async updateNotesIndex(notes: NotePropsDictV2) {
-    this.notesIndex.setCollection(_.values(notes));
+    this.notesIndex.setCollection(
+      _.map(notes, ({ fname, title, id }, _key) => ({ fname, id, title }))
+    );
   }
 
   async removeNoteFromIndex(note: NotePropsV2) {
-    this.notesIndex.remove((doc: NotePropsV2) => {
+    this.notesIndex.remove((doc) => {
       // FIXME: can be undefined, dunno why
       if (!doc) {
         return false;

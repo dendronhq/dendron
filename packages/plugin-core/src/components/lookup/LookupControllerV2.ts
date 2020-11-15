@@ -12,6 +12,7 @@ import { CONFIG } from "../../constants";
 import { Logger } from "../../logger";
 import { EngineOpts } from "../../types";
 import { DendronClientUtilsV2, VSCodeUtils } from "../../utils";
+import { getDurationMilliseconds } from "../../utils/system";
 import { DendronWorkspace } from "../../workspace";
 import {
   ButtonCategory,
@@ -23,6 +24,7 @@ import {
 } from "./buttons";
 import { LookupProviderV2 } from "./LookupProviderV2";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";
+import { UPDATET_SOURCE } from "./utils";
 
 export class LookupControllerV2 {
   public quickPick?: DendronQuickPickerV2;
@@ -119,6 +121,8 @@ export class LookupControllerV2 {
     noConfirm?: boolean;
     noteExistBehavior?: LookupNoteExistBehavior;
   }) {
+    let profile;
+    const start = process.hrtime();
     const ctx = "LookupControllerV2:show";
     const cleanOpts = _.defaults(opts, {
       ignoreFocusOut: true,
@@ -136,8 +140,15 @@ export class LookupControllerV2 {
     quickPick.ignoreFocusOut = cleanOpts.ignoreFocusOut;
     quickPick.justActivated = true;
     quickPick.canSelectMany = false;
+
+    profile = getDurationMilliseconds(start);
+    Logger.info({ ctx, profile, msg: "post:createQuickPick" });
+
     const provider = new LookupProviderV2(this.opts);
     this.provider = provider;
+
+    profile = getDurationMilliseconds(start);
+    Logger.info({ ctx, profile, msg: "post:createProvider" });
 
     this.refreshButtons(quickPick, this.state.buttons);
     await this.updatePickerBehavior({
@@ -147,6 +158,7 @@ export class LookupControllerV2 {
       quickPickValue: cleanOpts.value,
       provider,
     });
+    Logger.info({ ctx, profile, msg: "post:updatePickerBehavior" });
     quickPick.onDidTriggerButton(this.onTriggerButton);
 
     // cleanup quickpick
@@ -159,6 +171,7 @@ export class LookupControllerV2 {
     });
 
     provider.provide(quickPick);
+    Logger.info({ ctx, profile, msg: "post:provide" });
     if (opts?.noConfirm) {
       // would be empty if not set
       quickPick.selectedItems = quickPick.items;
@@ -167,6 +180,7 @@ export class LookupControllerV2 {
       quickPick.show();
     }
     this.quickPick = quickPick;
+    Logger.info({ ctx, profile, msg: "exit" });
     return quickPick;
   }
 
@@ -336,9 +350,13 @@ export class LookupControllerV2 {
     } else {
       quickPick.showDirectChildrenOnly = false;
     }
-    if (quickPick.showDirectChildrenOnly !== before) {
+    if (!_.isUndefined(before) && quickPick.showDirectChildrenOnly !== before) {
       Logger.info({ ctx, msg: "toggle showDirectChildOnly behavior" });
-      await provider.onUpdatePickerItem(quickPick, provider.opts, "manual");
+      await provider.onUpdatePickerItem(
+        quickPick,
+        provider.opts,
+        UPDATET_SOURCE.UPDATE_PICKER_FILTER
+      );
     }
   }
 }

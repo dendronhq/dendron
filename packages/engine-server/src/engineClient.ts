@@ -168,7 +168,8 @@ export class DendronEngineClient implements DEngineClientV2 {
   }
 
   async queryNote({ qs }: { qs: string }): Promise<NotePropsV2[]> {
-    return await this.fuseEngine.queryNote({ qs });
+    const noteIndexProps = await this.fuseEngine.queryNote({ qs });
+    return noteIndexProps.map((ent) => this.notes[ent.id]);
   }
 
   async queryNotes(opts: QueryNotesOpts) {
@@ -185,7 +186,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     const items = this.fuseEngine.queryNote({ qs });
     return {
       error: null,
-      data: items,
+      data: items.map((ent) => this.notes[ent.id]),
     };
   }
 

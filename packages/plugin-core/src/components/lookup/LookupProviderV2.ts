@@ -12,7 +12,7 @@ import {
   SchemaModulePropsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
-import _ from "lodash";
+import _, { DebouncedFunc } from "lodash";
 import { Uri, window } from "vscode";
 import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
@@ -29,18 +29,19 @@ import {
 
 export class LookupProviderV2 {
   public opts: EngineOpts;
+  protected onDidChangeValueDebounced?: DebouncedFunc<any>;
 
   constructor(opts: EngineOpts) {
     this.opts = opts;
   }
 
-  createDefaultItems({ picker }: { picker: DendronQuickPickerV2 }) {
+  createDefaultItems = ({ picker }: { picker: DendronQuickPickerV2 }) => {
     if (_.find(picker.buttons, { type: "multiSelect" })?.pressed) {
       return [];
     } else {
       return [createNoActiveItem(PickerUtilsV2.getVaultForOpenEditor())];
     }
-  }
+  };
 
   async _onAcceptNewNote({
     picker,
@@ -160,7 +161,10 @@ export class LookupProviderV2 {
       return this._onAcceptNewNote({ picker, selectedItem });
     }
   }
-  async onDidAccept(picker: DendronQuickPickerV2, opts: EngineOpts) {
+  onDidAccept(picker: DendronQuickPickerV2, opts: EngineOpts) {
+    if (this.onDidChangeValueDebounced?.cancel) {
+      this.onDidChangeValueDebounced.cancel();
+    }
     if (picker.canSelectMany) {
       return this.onDidAcceptForMulti(picker, opts);
     } else {
@@ -291,12 +295,12 @@ export class LookupProviderV2 {
   async onUpdatePickerItem(
     picker: DendronQuickPickerV2,
     opts: EngineOpts,
-    source:
-      | "updatePickerBehavior:journal"
-      | "updatePickerBehavior:scratch"
-      | "updatePickerBehavior:normal"
-      | "onValueChange"
-      | "manual"
+    source: string
+    // | "updatePickerBehavior:journal"
+    // | "updatePickerBehavior:scratch"
+    // | "updatePickerBehavior:normal"
+    // | "onValueChange"
+    // | "manual"
   ) {
     // ~~~ setup variables
     const start = process.hrtime();
@@ -462,6 +466,7 @@ export class LookupProviderV2 {
         picker.items = updatedItems;
       }
     } catch (err) {
+      window.showErrorMessage(err);
       throw Error(err);
     } finally {
       profile = getDurationMilliseconds(start);
@@ -473,6 +478,7 @@ export class LookupProviderV2 {
 
   provide(picker: DendronQuickPickerV2) {
     const { opts } = this;
+    const _this = this;
     picker.onDidAccept(() => {
       const ctx = "LookupProvider:onAccept";
       // NOTE: unfortunate hack
@@ -490,8 +496,18 @@ export class LookupProviderV2 {
         });
       });
     });
+    this.onDidChangeValueDebounced = _.debounce(
+      _.bind(this.onUpdatePickerItem, _this),
+      30,
+      { leading: true }
+    );
     picker.onDidChangeValue(() => {
-      this.onUpdatePickerItem(picker, opts, "onValueChange");
+      this.onDidChangeValueDebounced = (this
+        .onDidChangeValueDebounced as DebouncedFunc<any>)(
+        picker,
+        opts,
+        "onValueChange"
+      );
     });
   }
 

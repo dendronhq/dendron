@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.15.2...v0.15.3-alpha.0) (2020-11-14)
+
+### Enhancements
+
+- **lookup:** better lookup performance ([f14eed8](https://github.com/dendronhq/dendron/commit/f14eed8da822eb75f130edb7364a1f9f0c2fe354))
+- **lookup:** intelligently debounce queries ([2f0ac56](https://github.com/dendronhq/dendron/commit/2f0ac56bd6f64d0b99fcb82d6effa9f062d18fc2))
+
 ## [0.15.2](https://github.com/dendronhq/dendron/compare/v0.15.1...v0.15.2) (2020-11-14)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

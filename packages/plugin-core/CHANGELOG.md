@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.16.0](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.5...v0.16.0) (2020-11-15)
+
+**Note:** Version bump only for package @dendronhq/plugin-core
+
 ## [0.15.3-alpha.5](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.4...v0.15.3-alpha.5) (2020-11-15)
 
 ### Enhancements

@@ -1129,7 +1129,6 @@ suite("selection2Link", function () {
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
       useCb: (_vaultDir) => {
         vaultDir = _vaultDir;
         return NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
@@ -1380,7 +1379,6 @@ suite("journal notes", function () {
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
       configOverride: {
         [CONFIG[`DEFAULT_${noteType}_ADD_BEHAVIOR` as ConfigKey].key]:
           "childOfDomain",

@@ -61,6 +61,7 @@ suite("notes, multi", function () {
     } = await setupCodeWorkspaceMultiVaultV2({ ctx });
     wsRoot = _wsRoot;
     vaults = _vaults;
+    await VSCodeUtils.closeAllEditors();
     if (opts.beforeActivateCb) {
       await opts.beforeActivateCb({ wsRoot, vaults });
     }

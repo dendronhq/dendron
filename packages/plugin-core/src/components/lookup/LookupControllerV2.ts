@@ -170,6 +170,7 @@ export class LookupControllerV2 {
     provider.provide(quickPick);
     Logger.info({ ctx, profile, msg: "post:provide" });
     if (opts?.noConfirm) {
+      await provider.onUpdatePickerItem(quickPick, this.opts, "manual");
       // would be empty if not set
       quickPick.selectedItems = quickPick.items;
       await provider.onDidAccept(quickPick, { flavor: this.opts.flavor });

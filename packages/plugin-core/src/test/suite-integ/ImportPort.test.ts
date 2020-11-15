@@ -66,7 +66,6 @@ suite("ImportPod", function () {
     });
 
     setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
       useCb: async (_vaultDir) => {
         vaultDir = _vaultDir;
         ({ importSrc } = await PODS_CORE.JSON.IMPORT.BASIC.before({

@@ -187,7 +187,6 @@ suite("notes", function () {
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
       useCb: async (_vaultDir) => {
         vaultDir = _vaultDir;
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });

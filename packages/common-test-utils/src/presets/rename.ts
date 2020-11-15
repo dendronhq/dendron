@@ -143,7 +143,7 @@ const DOMAIN_NO_CHILDREN_V2 = new TestPresetEntry({
 /**
  * - pre:init
  *    - note A without body
- * - post;init
+ * - post:init
  *    - note A is updated with link to note B
  *    - note B is written
  *    - note B is re-written

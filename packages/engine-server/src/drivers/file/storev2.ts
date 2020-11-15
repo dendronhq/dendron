@@ -517,8 +517,12 @@ export class FileStorageV2 implements DStoreV2 {
     const vaultDir = this.vaults[0];
     // TODO: MULTI_VAULT
     // read from disk since contents migh have changed
-    const oldNote = file2Note(path.join(vaultDir, oldLoc.fname + ".md"), {
+    const noteRaw = file2Note(path.join(vaultDir, oldLoc.fname + ".md"), {
       fsPath: vaultDir,
+    });
+    const oldNote = NoteUtilsV2.hydrate({
+      noteRaw,
+      noteHydrated: this.notes[noteRaw.id],
     });
     const notesToChange = await NoteUtilsV2.getNotesWithLinkTo({
       note: oldNote,
@@ -565,6 +569,10 @@ export class FileStorageV2 implements DStoreV2 {
     note: NotePropsV2,
     _opts?: EngineUpdateNodesOptsV2
   ): Promise<void> {
+    const maybeNote = this.notes[note.id];
+    if (maybeNote) {
+      note = NoteUtilsV2.hydrate({ noteRaw: note, noteHydrated: maybeNote });
+    }
     this.notes[note.id] = note;
     return;
   }
@@ -576,14 +584,34 @@ export class FileStorageV2 implements DStoreV2 {
     // TODO: update notes
   }
 
-  async writeNote(
-    note: NotePropsV2,
-    opts?: EngineWriteOptsV2
-  ): Promise<WriteNoteResp> {
+  async _writeNewNote({
+    note,
+    maybeNote,
+    opts,
+  }: {
+    note: NotePropsV2;
+    maybeNote?: NotePropsV2;
+    opts?: EngineWriteOptsV2;
+  }) {
     let changed: NotePropsV2[] = [];
-    const maybeNote = NoteUtilsV2.getNoteByFname(note.fname, this.notes, {
-      vault: note.vault,
-    });
+    // if note exists, remove from parent and transplant children
+    if (maybeNote) {
+      // update changed
+      const parentNote = this.notes[maybeNote.parent as string] as NotePropsV2;
+
+      // remove existing note from parent's children
+      parentNote.children = _.reject<string[]>(
+        parentNote.children,
+        (ent: string) => ent === maybeNote.id
+      ) as string[];
+      // update parent's children
+      this.notes[maybeNote.parent as string].children = parentNote.children;
+      // move maybeNote's children to newly written note
+      note.children = maybeNote.children;
+      // delete maybeNote
+      delete this.notes[maybeNote.id];
+    }
+    // after we have deleted parent, add the current note as a parent
     if (!opts?.noAddParent) {
       changed = NoteUtilsV2.addParent({
         note,
@@ -591,28 +619,36 @@ export class FileStorageV2 implements DStoreV2 {
         createStubs: true,
       });
     }
+    return changed;
+  }
+
+  async writeNote(
+    note: NotePropsV2,
+    opts?: EngineWriteOptsV2
+  ): Promise<WriteNoteResp> {
+    const ctx = "FileStore:writeNote";
+    let changed: NotePropsV2[] = [];
+    this.logger.info({
+      ctx,
+      msg: "enter",
+      opts,
+      note: NoteUtilsV2.toLogObj(note),
+    });
+    const maybeNote = NoteUtilsV2.getNoteByFname(note.fname, this.notes, {
+      vault: note.vault,
+    });
+    if (maybeNote?.stub) {
+      // inherit stub's parent and children
+      note = { ...maybeNote, ...note };
+    } else {
+      changed = await this._writeNewNote({ note, maybeNote, opts });
+    }
+
+    // add schema if applicable
     const match = SchemaUtilsV2.matchPath({
       notePath: note.fname,
       schemaModDict: this.schemas,
     });
-
-    // if note exists, remove from parent and transplant children
-    if (maybeNote) {
-      // update changed
-      const parentNote = _.find(changed, {
-        id: note.parent as string,
-      }) as NotePropsV2;
-      parentNote.children = _.reject<string[]>(
-        parentNote.children,
-        (ent: string) => ent === maybeNote.id
-      ) as string[];
-      // update internal
-      this.notes[note.parent as string].children = parentNote.children;
-      // update return note
-      note.children = maybeNote.children;
-      // delete note
-      delete this.notes[maybeNote.id];
-    }
     // order matters - only write file after parents are established
     await note2File(note, note.vault.fsPath, opts);
     if (match) {
@@ -627,7 +663,7 @@ export class FileStorageV2 implements DStoreV2 {
       status: "update" as const,
     })) as NoteChangeEntry[];
     changedEntries.push({ note, status: "create" });
-    if (maybeNote) {
+    if (maybeNote && !maybeNote.stub) {
       changedEntries.push({ note: maybeNote, status: "delete" });
     }
     return {

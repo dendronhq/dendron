@@ -243,6 +243,10 @@ export class DendronEngineClient implements DEngineClientV2 {
     opts?: EngineUpdateNodesOptsV2
   ): Promise<void> {
     await this.api.engineUpdateNote({ ws: this.ws, note, opts });
+    const maybeNote = this.notes[note.id];
+    if (maybeNote) {
+      note = { ...maybeNote, ...note };
+    }
     await this.refreshNotes([note]);
     return;
   }
@@ -257,7 +261,7 @@ export class DendronEngineClient implements DEngineClientV2 {
       ws: this.ws,
     });
     const changed = resp.data;
-    await this.refreshNotes(_.map(changed, (ent) => ent.note));
+    await this.refreshNotesV2(changed);
     return resp;
   }
 

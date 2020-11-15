@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.3-alpha.2](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.1...v0.15.3-alpha.2) (2020-11-15)
+
+### Bug Fixes
+
+- don't throw error on no document ([c31c611](https://github.com/dendronhq/dendron/commit/c31c611d975b8eeee4f63abec742edf88dac66ac))
+
 ## [0.15.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.0...v0.15.3-alpha.1) (2020-11-15)
 
 ### Bug Fixes

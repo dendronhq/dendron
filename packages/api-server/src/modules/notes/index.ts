@@ -64,7 +64,7 @@ export class NoteController {
       return data;
     } catch (err) {
       return {
-        error: new DendronError({ msg: JSON.stringify(err) }),
+        error: new DendronError({ payload: err }),
         data: undefined,
       };
     }

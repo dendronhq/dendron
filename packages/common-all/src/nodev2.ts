@@ -298,7 +298,7 @@ export class NoteUtilsV2 {
    * Add node to parent
    * Create stubs if no direct parent exists
    * @param opts
-   * @returns All notes that were changed
+   * @returns All notes that were changed including the parent
    */
   static addParent(opts: {
     note: NotePropsV2;
@@ -586,6 +586,14 @@ export class NoteUtilsV2 {
   }
 
   static toLoc(note: NotePropsV2): DLoc {
+    const { fname, id } = note;
+    return {
+      fname,
+      id,
+    };
+  }
+
+  static toLogObj(note: NotePropsV2) {
     const { fname, id } = note;
     return {
       fname,

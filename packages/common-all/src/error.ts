@@ -24,7 +24,14 @@ export class DendronError extends Error {
     this.status = status || "unknown";
     this.msg = msg || "";
     this.friendly = friendly;
-    this.payload = JSON.stringify(payload || {});
+    if (payload?.message && payload?.stack) {
+      this.payload = JSON.stringify({
+        msg: payload.message,
+        stack: payload.stack,
+      });
+    } else {
+      this.payload = JSON.stringify(payload || {});
+    }
     this.code = code;
   }
 }

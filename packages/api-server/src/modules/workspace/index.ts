@@ -10,6 +10,7 @@ import {
   WorkspaceSyncRequest,
 } from "@dendronhq/common-server";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
+import { getLogger } from "../../core";
 import { getWS, putWS } from "../../utils";
 
 export class WorkspaceController {
@@ -25,7 +26,8 @@ export class WorkspaceController {
     let notes: NotePropsDictV2;
     let schemas: SchemaModuleDictV2;
     const { vaults } = config;
-    const engine = DendronEngineV2.create({ vaults });
+    const logger = getLogger();
+    const engine = DendronEngineV2.create({ vaults, logger });
     const { error } = await engine.init();
     if (error && error.code !== ERROR_CODES.MINOR) {
       error.friendly = "error initializing notes";

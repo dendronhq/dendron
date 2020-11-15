@@ -64,8 +64,8 @@ export class DendronEngineV2 implements DEngineV2 {
       : this.vaults.map((ent) => ({ fsPath: ent }));
   }
 
-  static create({ vaults }: { vaults: string[] }) {
-    const LOGGER = createLogger();
+  static create({ vaults, logger }: { vaults: string[]; logger?: DLogger }) {
+    const LOGGER = logger || createLogger();
     return new DendronEngineV2({
       vaults,
       forceNew: true,

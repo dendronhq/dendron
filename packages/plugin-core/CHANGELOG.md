@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.3-alpha.3](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.2...v0.15.3-alpha.3) (2020-11-15)
+
+### Enhancements
+
+- update getting started ([af5dde9](https://github.com/dendronhq/dendron/commit/af5dde91d153ce46089c8688caec0e583eddb939))
+
 ## [0.15.3-alpha.2](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.1...v0.15.3-alpha.2) (2020-11-15)
 
 ### Bug Fixes

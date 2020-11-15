@@ -141,8 +141,6 @@ export class SetupWorkspaceCommand extends BasicCommand<
     if (!emptyWs) {
       const filterFunc = (src: string, _dest: string) => {
         const basename = path.basename(src, ".md");
-        // const blacklist = ["project", "meet", "lsp", "p"];
-        // will filter the directory first
         const whitelist = ["dendron", "vault"];
         return _.some(whitelist, (ent) => basename.startsWith(ent));
       };

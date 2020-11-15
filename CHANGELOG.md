@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.3-alpha.4](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.3...v0.15.3-alpha.4) (2020-11-15)
+
+### Bug Fixes
+
+- make tests better ([bfb07d7](https://github.com/dendronhq/dendron/commit/bfb07d721f88553004206121f45d99a86dd35a7c))
+- **lookup:** proprely debounce lookup ([4ee86dd](https://github.com/dendronhq/dendron/commit/4ee86dd26db21025fadb4f936fc286550983753a))
+
 ## [0.15.3-alpha.3](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.2...v0.15.3-alpha.3) (2020-11-15)
 
 ### Bug Fixes

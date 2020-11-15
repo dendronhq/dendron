@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.0...v0.15.3-alpha.1) (2020-11-15)
+
+### Bug Fixes
+
+- sync issues btw server and client nodes ([a446aba](https://github.com/dendronhq/dendron/commit/a446aba9d931d7732553e1ecb43302208d6f798a))
+
 ## [0.15.1](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.7...v0.15.1) (2020-11-14)
 
 **Note:** Version bump only for package @dendronhq/common-test-utils

@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.0...v0.15.3-alpha.1) (2020-11-15)
+
+### Bug Fixes
+
+- overwrite old log files ([3f1362c](https://github.com/dendronhq/dendron/commit/3f1362c224ff7dae5de721dd2f2c8cba22db4d84))
+- sync issues btw server and client nodes ([a446aba](https://github.com/dendronhq/dendron/commit/a446aba9d931d7732553e1ecb43302208d6f798a))
+
+### Enhancements
+
+- better logging ([2d7fd78](https://github.com/dendronhq/dendron/commit/2d7fd780d3c548a362dcf01a2620409b1bcdff3e))
+- better logging on lookup ([3d09986](https://github.com/dendronhq/dendron/commit/3d09986f1270b70849f7c0dbc67c2c4cc5fdba58))
+- nicer error messages ([e1e87a1](https://github.com/dendronhq/dendron/commit/e1e87a16186b1e8b8aae6f77fe8a2c5c865c4071))
+
 ## [0.15.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.15.2...v0.15.3-alpha.0) (2020-11-14)
 
 ### Enhancements

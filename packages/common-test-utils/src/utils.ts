@@ -19,6 +19,9 @@ import {
 import { DendronAPI } from "@dendronhq/common-server";
 import { TestResult } from "./types";
 
+export const toPlainObject = <R>(value: unknown): R =>
+  value !== undefined ? JSON.parse(JSON.stringify(value)) : value;
+
 export class AssertUtils {
   static async assertInString({
     body,

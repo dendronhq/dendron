@@ -17,32 +17,20 @@ import open from "open";
 import path from "path";
 import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
-import { ArchiveHierarchyCommand } from "./commands/ArchiveHierarchy";
 import { BuildPodCommand } from "./commands/BuildPod";
 import { ChangeWorkspaceCommand } from "./commands/ChangeWorkspace";
 import { ConfigureCommand } from "./commands/ConfigureCommand";
-import { ConfigurePodCommand } from "./commands/ConfigurePodCommand";
 import { ContributeCommand } from "./commands/Contribute";
-import { CopyNoteLinkCommand } from "./commands/CopyNoteLink";
-import { CopyNoteRefCommand } from "./commands/CopyNoteRef";
-import { CopyNoteURLCommand } from "./commands/CopyNoteURL";
-import { CreateDailyJournalCommand } from "./commands/CreateDailyJournal";
 import { DeleteNodeCommand } from "./commands/DeleteNodeCommand";
-import { DoctorCommand } from "./commands/Doctor";
 import { DumpStateCommand } from "./commands/DumpStateCommand";
-import { ExportPodCommand } from "./commands/ExportPod";
-import { GoDownCommand } from "./commands/GoDownCommand";
 import { GotoNoteCommand, GotoNoteCommandOpts } from "./commands/GotoNote";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
-import { GoUpCommand } from "./commands/GoUpCommand";
 import { ImportPodCommand } from "./commands/ImportPod";
 import { LookupCommand } from "./commands/LookupCommand";
 import { OpenLogsCommand } from "./commands/OpenLogs";
 import { PublishCommand } from "./commands/Publish";
 import { PublishPodCommand } from "./commands/PublishPod";
-import { RefactorHierarchyCommandV2 } from "./commands/RefactorHierarchyV2";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
-import { RenameNoteV2aCommand } from "./commands/RenameNoteV2a";
 import { ResetConfigCommand } from "./commands/ResetConfig";
 import { RestoreVaultCommand } from "./commands/RestoreVault";
 import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
@@ -64,6 +52,7 @@ import {
   extensionQualifiedId,
   GLOBAL_STATE,
 } from "./constants";
+import DocumentLinkProvider from "./features/DocumentLinkProvider";
 import { VaultWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
@@ -233,6 +222,7 @@ export class DendronWorkspace {
     if (!opts.skipSetup) {
       this._setupCommands();
     }
+    this.setupLanguageFeatures();
     const ctx = "DendronWorkspace";
     this.L.info({ ctx, msg: "initialized" });
   }
@@ -290,6 +280,14 @@ export class DendronWorkspace {
 
   setEngine(engine: DEngineClientV2) {
     this._enginev2 = engine;
+  }
+
+  setupLanguageFeatures() {
+    const mdLangSelector = { language: "markdown", scheme: "*" };
+    vscode.languages.registerDocumentLinkProvider(
+      mdLangSelector,
+      new DocumentLinkProvider()
+    );
   }
 
   _setupCommands() {

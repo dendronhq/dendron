@@ -27,6 +27,7 @@ export class EngineConnector {
   public port: number | undefined;
   public onReady?: ({ ws }: { ws: EngineConnector }) => Promise<void>;
   public serverPortWatcher?: FSWatcher;
+  public initialized: boolean;
 
   static _ENGINE_CONNECTOR: EngineConnector | undefined;
 
@@ -41,6 +42,7 @@ export class EngineConnector {
     this.wsRoot = wsRoot;
     this.vaults = vaults;
     EngineConnector._ENGINE_CONNECTOR = this;
+    this.initialized = false;
   }
 
   async init(opts?: EngineConnectorInitOpts) {
@@ -108,5 +110,6 @@ export class EngineConnector {
     if (_.isUndefined(portPrev) && this.onReady) {
       this.onReady({ ws: this });
     }
+    this.initialized = true;
   }
 }

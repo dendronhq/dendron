@@ -100,7 +100,7 @@ export class EngineConnector {
     }
     // race condition were old workspace file is found
     setTimeout(() => {
-      if (fs.existsSync(fpath)) {
+      if (fs.existsSync(fpath) && portCreated > wsActivation) {
         const port = openPortFile({ fpath });
         this.onChangePort({ port });
       }

@@ -89,15 +89,24 @@ export class EngineConnector {
     const metaFpath = getWSMetaFilePath({ wsRoot });
     const wsMeta = openWSMetaFile({ fpath: metaFpath });
     const wsActivation = wsMeta.activationTime;
-    // worskapce just activated in last 10s
+
+    // check if port was created after current ws
     const portCreated = Time.DateTime.fromJSDate(
       fs.statSync(fpath).ctime
     ).toMillis();
-    console.log({ portCreated, wsActivation });
     if (portCreated > wsActivation) {
       const port = openPortFile({ fpath });
       this.onChangePort({ port });
     }
+    // race condition were old workspace file is found
+    setTimeout(() => {
+      if (fs.existsSync(fpath)) {
+        const port = openPortFile({ fpath });
+        this.onChangePort({ port });
+      }
+    }, 10000);
+
+    // attach watcher
     this.serverPortWatcher = watcher;
   }
 

@@ -58,16 +58,8 @@ export class Logger {
   }
   static set level(value: TraceLevel) {
     this._level = value;
-    // if silent, remove output channel
-    // if (value === TraceLevel.Silent) {
-    //     if (this.output !== undefined) {
-    //         this.output.dispose();
-    //         this.output = undefined;
-    //     }
-    // } else {
     this.output =
       this.output || window.createOutputChannel(DENDRON_CHANNEL_NAME);
-    // }
   }
 
   // private static lvl2Method = (lvl: TraceLevel) => {

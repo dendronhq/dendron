@@ -4,7 +4,7 @@ import GithubSlugger from "github-slugger";
 import _ from "lodash";
 import path from "path";
 import { Selection, window } from "vscode";
-import { CONFIG } from "../constants";
+import { CONFIG, DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -17,6 +17,7 @@ export class CopyNoteURLCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
+  static key = DENDRON_COMMANDS.COPY_NOTE_URL.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

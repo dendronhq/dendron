@@ -3,6 +3,7 @@ import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
+import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -12,6 +13,7 @@ type CommandOpts = {};
 type CommandOutput = void;
 
 export class GoUpCommand extends BasicCommand<CommandOpts, CommandOutput> {
+  static key = DENDRON_COMMANDS.GO_UP_HIERARCHY.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

@@ -4,6 +4,7 @@ import _ from "lodash";
 import _md from "markdown-it";
 import path from "path";
 import { Uri, ViewColumn, window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { VaultWatcher } from "../fileWatcher";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
@@ -28,6 +29,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
+  static key = DENDRON_COMMANDS.REFACTOR_HIERARCHY.key;
   async gatherInputs(): Promise<CommandOpts | undefined> {
     let match: string | undefined;
     let replace: string | undefined;

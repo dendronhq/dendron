@@ -1,5 +1,6 @@
 import path from "path";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
+import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { BasicCommand } from "./base";
 import { LookupCommand } from "./LookupCommand";
@@ -9,6 +10,7 @@ type CommandOpts = {};
 type CommandOutput = DendronQuickPickerV2;
 
 export class GoDownCommand extends BasicCommand<CommandOpts, CommandOutput> {
+  static key = DENDRON_COMMANDS.GO_DOWN_HIERARCHY.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

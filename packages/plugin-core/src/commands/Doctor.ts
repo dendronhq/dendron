@@ -4,6 +4,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
@@ -19,6 +20,7 @@ type CommandOutput = {
 };
 
 export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
+  static key = DENDRON_COMMANDS.DOCTOR.key;
   async execute(opts: CommandOpts) {
     window.showInformationMessage("Calling the doctor.");
     const {} = _.defaults(opts, {});

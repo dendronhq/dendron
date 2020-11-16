@@ -2,6 +2,7 @@ import clipboardy from "@dendronhq/clipboardy";
 import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { TextEditor, window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -13,6 +14,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
+  static key = DENDRON_COMMANDS.COPY_NOTE_LINK.key;
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
       return "No document open";

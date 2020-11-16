@@ -8,6 +8,7 @@ import {
 import { refLink2String } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Position, Range, Selection, TextEditor, window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -19,6 +20,7 @@ export class CopyNoteRefCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
+  static key = DENDRON_COMMANDS.COPY_NOTE_REF.key;
   async sanityCheck() {
     if (_.isUndefined(VSCodeUtils.getActiveTextEditor())) {
       return "No document open";

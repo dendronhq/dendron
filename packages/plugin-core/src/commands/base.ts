@@ -3,6 +3,14 @@ import _ from "lodash";
 import { window } from "vscode";
 import { Logger } from "../logger";
 
+export type CodeCommandConstructor = {
+  key: string;
+  new (): CodeCommandInstance;
+};
+export type CodeCommandInstance = {
+  run: (opts?: any) => Promise<void>;
+};
+
 export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
   public L: DLogger;
 

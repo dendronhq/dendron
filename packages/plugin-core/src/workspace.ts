@@ -16,6 +16,7 @@ import _ from "lodash";
 import open from "open";
 import path from "path";
 import * as vscode from "vscode";
+import { ALL_COMMANDS } from "./commands";
 import { ArchiveHierarchyCommand } from "./commands/ArchiveHierarchy";
 import { BuildPodCommand } from "./commands/BuildPod";
 import { ChangeWorkspaceCommand } from "./commands/ChangeWorkspace";
@@ -292,6 +293,13 @@ export class DendronWorkspace {
   }
 
   _setupCommands() {
+    ALL_COMMANDS.map((Cmd) => {
+      this.context.subscriptions.push(
+        vscode.commands.registerCommand(Cmd.key, async (args: any) => {
+          await new Cmd().run(args);
+        })
+      );
+    });
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.INIT_WS.key,
@@ -535,107 +543,13 @@ export class DendronWorkspace {
       )
     );
 
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(DENDRON_COMMANDS.DOCTOR.key, async () => {
-        await new DoctorCommand().run();
-      })
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.RENAME_NOTE.key,
-        async () => {
-          await new RenameNoteV2aCommand().run();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.COPY_NOTE_LINK.key,
-        async () => {
-          await new CopyNoteLinkCommand().run();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.COPY_NOTE_REF.key,
-        async () => {
-          await new CopyNoteRefCommand().run();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.REFACTOR_HIERARCHY.key,
-        async () => {
-          await new RefactorHierarchyCommandV2().run();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.ARCHIVE_HIERARCHY.key,
-        async () => {
-          await new ArchiveHierarchyCommand().run();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key,
-        async () => {
-          await new CreateDailyJournalCommand().run();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.GO_UP_HIERARCHY.key,
-        async () => {
-          await new GoUpCommand().run();
-        }
-      )
-    );
+    // ---
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.UPDATE_SCHEMA.key,
         async () => {
           await new UpdateSchemaCommand().run();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.EXPORT_POD.key,
-        async () => {
-          await new ExportPodCommand().run();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.CONFIGURE_POD.key,
-        async () => {
-          await new ConfigurePodCommand().run();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.COPY_NOTE_URL.key,
-        async () => {
-          await new CopyNoteURLCommand().run();
         }
       )
     );
@@ -654,15 +568,6 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
         async () => {
           await new GoToSiblingCommand().execute({ direction: "prev" });
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.GO_DOWN_HIERARCHY.key,
-        async () => {
-          await new GoDownCommand().run();
         }
       )
     );

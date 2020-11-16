@@ -7,6 +7,7 @@ import {
   PodUtils,
 } from "@dendronhq/pods-core";
 import { Uri } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
 import { DendronWorkspace } from "../workspace";
@@ -23,6 +24,7 @@ export class ConfigurePodCommand extends BasicCommand<
   CommandOutput
 > {
   public pods: PodClassEntryV4[];
+  static key = DENDRON_COMMANDS.CONFIGURE_POD.key;
 
   constructor(_name?: string) {
     super(_name);

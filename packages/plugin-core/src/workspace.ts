@@ -313,57 +313,8 @@ export class DendronWorkspace {
         })
       );
     });
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.INIT_WS.key,
-        async () => {
-          await new SetupWorkspaceCommand().run();
-        }
-      )
-    );
 
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.SNAPSHOT_VAULT.key,
-        async () => {
-          await new SnapshotVaultCommand().run();
-        }
-      )
-    );
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.RESTORE_VAULT.key,
-        async () => {
-          await new RestoreVaultCommand().run();
-        }
-      )
-    );
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.CONTRIBUTE.key,
-        async () => {
-          await new ContributeCommand().run();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.CONFIGURE.key,
-        async () => {
-          await new ConfigureCommand().run();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.SHOW_PREVIEW.key,
-        async () => {
-          await new ShowPreviewCommand().run();
-        }
-      )
-    );
+    // ----
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
@@ -376,49 +327,12 @@ export class DendronWorkspace {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        DENDRON_COMMANDS.VAULT_ADD.key,
-        async (opts: VaultAddCommandOpts) => {
-          new VaultAddCommand().run(opts);
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.VAULT_REMOVE.key,
-        async (opts: VaultRemoveCommandOpts) => {
-          new VaultRemoveCommand().run(opts);
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.DUMP_STATE.key,
-        async () => {
-          return new DumpStateCommand().execute();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
         DENDRON_COMMANDS.CHANGE_WS.key,
         async () => {
           await new ChangeWorkspaceCommand().run();
         }
       )
     );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.RESET_CONFIG.key,
-        async () => {
-          await new ResetConfigCommand().run();
-        }
-      )
-    );
-
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.PUBLISH.key,
@@ -451,15 +365,6 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.LOOKUP_SCHEMA.key,
         async () => {
           return new LookupCommand().run({ flavor: "schema" });
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.DELETE_NODE.key,
-        async () => {
-          return new DeleteNodeCommand().run();
         }
       )
     );
@@ -510,15 +415,6 @@ export class DendronWorkspace {
             vscode.window.showInformationMessage(`finish reload`);
           }
           return out;
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.SHOW_HELP.key,
-        async () => {
-          await new ShowHelpCommand().execute();
         }
       )
     );

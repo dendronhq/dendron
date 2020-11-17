@@ -1,6 +1,7 @@
 import _ from "lodash";
 import path from "path";
 import { env, Uri, window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -10,6 +11,7 @@ type CommandInput = {};
 type CommandOutput = void;
 
 export class ShowHelpCommand extends BasicCommand<CommandOpts, CommandOutput> {
+  static key = DENDRON_COMMANDS.SHOW_HELP.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     const resp = await window.showInputBox({
       prompt: "Select your folder for dendron",

@@ -3,6 +3,7 @@ import { EngineDeletePayload } from "@dendronhq/common-server";
 import path from "path";
 import { Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
+import { DENDRON_COMMANDS } from "../constants";
 import { HistoryService } from "../services/HistoryService";
 import { DendronClientUtilsV2, VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
@@ -16,6 +17,7 @@ export class DeleteNodeCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
+  static key = DENDRON_COMMANDS.DELETE_NODE.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

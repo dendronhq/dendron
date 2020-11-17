@@ -4,7 +4,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import vscode from "vscode";
-import { DENDRON_WS_NAME, GLOBAL_STATE } from "../constants";
+import { DENDRON_COMMANDS, DENDRON_WS_NAME, GLOBAL_STATE } from "../constants";
 import { Snippets, WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
@@ -35,6 +35,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
+  static key = DENDRON_COMMANDS.INIT_WS.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     const rootDirRaw = await VSCodeUtils.gatherFolderPath({
       default: path.join(resolveTilde("~"), "Dendron"),

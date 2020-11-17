@@ -1,4 +1,5 @@
 import { env, Uri } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -11,6 +12,7 @@ export class ContributeCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
+  static key = DENDRON_COMMANDS.CONTRIBUTE.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     return {};
   }

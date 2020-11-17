@@ -4,6 +4,7 @@ import {
   SnapshotExportPodResp,
 } from "@dendronhq/pods-core";
 import { window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 
@@ -18,6 +19,7 @@ export class SnapshotVaultCommand extends BaseCommand<
   CommandOpts,
   CommandOutput
 > {
+  static key = DENDRON_COMMANDS.SNAPSHOT_VAULT.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

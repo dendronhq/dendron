@@ -3,6 +3,7 @@ import { SnapshotImportPod } from "@dendronhq/pods-core";
 import fs, { readdirSync } from "fs-extra";
 import path from "path";
 import { window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
@@ -18,6 +19,7 @@ export class RestoreVaultCommand extends BaseCommand<
   CommandOpts,
   CommandOutput
 > {
+  static key = DENDRON_COMMANDS.RESTORE_VAULT.key;
   async gatherInputs(): Promise<any> {
     const snapshots = path.join(
       DendronWorkspace.rootDir() as string,

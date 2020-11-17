@@ -7,6 +7,7 @@ import {
 import { WorkspaceService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { commands, window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { WorkspaceFolderRaw, WorkspaceSettings } from "../types";
 import { resolvePath, VSCodeUtils } from "../utils";
@@ -24,6 +25,7 @@ type CommandOutput = { vault: DVault };
 export { CommandOpts as VaultAddCommandOpts };
 
 export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
+  static key = DENDRON_COMMANDS.VAULT_ADD.key;
   async gatherInputs(): Promise<any> {
     const vpath = await VSCodeUtils.showInputBox({
       prompt: "Path to your new vault",

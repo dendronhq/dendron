@@ -7,6 +7,7 @@ import {
 import { note2File, schemaModuleOpts2File } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";
+import { DENDRON_COMMANDS } from "../constants";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -16,6 +17,7 @@ export class ReloadIndexCommand extends BasicCommand<
   ReloadIndexCommandOpts,
   DEngineClientV2 | undefined
 > {
+  static key = DENDRON_COMMANDS.RELOAD_INDEX.key;
   /**
    * Update index
    * @param opts

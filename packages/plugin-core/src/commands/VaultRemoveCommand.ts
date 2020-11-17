@@ -3,6 +3,7 @@ import { assignJSONWithComment } from "@dendronhq/common-server";
 import { WorkspaceService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { commands, window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
@@ -20,6 +21,7 @@ export class VaultRemoveCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
+  static key = DENDRON_COMMANDS.VAULT_REMOVE.key;
   async gatherInputs(): Promise<any> {
     const vaults = DendronWorkspace.instance().config.vaults;
     const vaultQuickPick = await VSCodeUtils.showQuickPick(

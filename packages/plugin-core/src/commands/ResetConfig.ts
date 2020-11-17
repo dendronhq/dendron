@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { window } from "vscode";
-import { GLOBAL_STATE, WORKSPACE_STATE } from "../constants";
+import { DENDRON_COMMANDS, GLOBAL_STATE, WORKSPACE_STATE } from "../constants";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -21,6 +21,7 @@ export class ResetConfigCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
+  static key = DENDRON_COMMANDS.RESET_CONFIG.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     const scope = await window.showInputBox({
       prompt: "Select scope",

@@ -54,6 +54,7 @@ import {
 } from "./constants";
 import DefinitionProvider from "./features/DefinitionProvider";
 import DocumentLinkProvider from "./features/DocumentLinkProvider";
+import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import { VaultWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
@@ -297,6 +298,10 @@ export class DendronWorkspace {
     vscode.languages.registerDefinitionProvider(
       mdLangSelector,
       new DefinitionProvider()
+    );
+    vscode.languages.registerHoverProvider(
+      mdLangSelector,
+      new ReferenceHoverProvider()
     );
   }
 

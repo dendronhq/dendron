@@ -4,6 +4,24 @@ import { ParserUtilsV2 } from "../utilsv2";
 
 describe(ParserUtilsV2, () => {
   const vault = { fsPath: "dummy" };
+
+  describe("findHeaders", async () => {
+    test("one header", () => {
+      const note = NoteUtilsV2.create({
+        fname: "foo",
+        id: "foo",
+        created: "1",
+        updated: "1",
+        body: "# h1",
+        vault,
+      });
+      const out = ParserUtilsV2.findHeaders(note.body);
+      expect(out).toMatchSnapshot("bond");
+      expect(_.size(out)).toEqual(1);
+      expect(out[0].depth).toEqual(1);
+    });
+  });
+
   describe("findLinks", async () => {
     test("one link", () => {
       const note = NoteUtilsV2.create({

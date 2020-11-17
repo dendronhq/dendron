@@ -28,6 +28,7 @@ import {
   PluginForMarkdownOpts,
 } from "./plugins/dendronNoteRefPlugin";
 import { ReplaceLinkOpts } from "../../types";
+import { Heading } from "mdast";
 
 const selectAll = require("unist-util-select").selectAll;
 
@@ -74,10 +75,16 @@ export class ParserUtilsV2 {
     return plugin;
   }
 
+  static findHeaders(content: string): Heading[] {
+    let remark = ParserUtilsV2.getRemark();
+    let out = remark.parse(content);
+    let out2: Heading[] = selectAll("heading", out);
+    return out2;
+  }
+
   static findLinks({ note }: { note: NotePropsV2 }): DLink[] {
     const content = note.body;
     let remark = ParserUtilsV2.getRemark();
-    //const out = remark.processSync(content);
     let out = remark.parse(content);
     let out2: WikiLinkNote[] = selectAll("wikiLink", out);
     const dlinks = out2.map(

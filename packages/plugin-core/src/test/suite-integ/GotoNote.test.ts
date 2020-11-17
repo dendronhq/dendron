@@ -12,10 +12,11 @@ import { GotoNoteCommand } from "../../commands/GotoNote";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { GOTO_NOTE_PRESET } from "../presets/GotoNotePreset";
+import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { getActiveEditorBasename, TIMEOUT } from "../testUtils";
 import { runSingleVaultTest } from "../testUtilsv2";
 
+const { ANCHOR_WITH_SPECIAL_CHARS, ANCHOR } = GOTO_NOTE_PRESETS;
 suite("GotoNote", function () {
   let ctx: vscode.ExtensionContext;
   this.timeout(TIMEOUT);
@@ -122,7 +123,7 @@ suite("GotoNote", function () {
     runSingleVaultTest({
       ctx,
       initDirCb: async (vaultDir) => {
-        await GOTO_NOTE_PRESET.preSetupHook({
+        await ANCHOR.preSetupHook({
           wsRoot: "",
           vaults: [{ fsPath: vaultDir }],
         });
@@ -139,7 +140,35 @@ suite("GotoNote", function () {
         });
         assert.deepStrictEqual(getActiveEditorBasename(), "alpha.md");
         const selection = VSCodeUtils.getActiveTextEditor()?.selection;
-        console.log(selection);
+        assert.strictEqual(selection?.start.line, 9);
+        assert.strictEqual(selection?.start.character, 0);
+        done();
+      },
+    });
+  });
+
+  test("anchor with special chars", (done) => {
+    let specialCharsHeader: string;
+    runSingleVaultTest({
+      ctx,
+      initDirCb: async (vaultDir) => {
+        ({ specialCharsHeader } = await ANCHOR_WITH_SPECIAL_CHARS.preSetupHook({
+          wsRoot: "",
+          vaults: [{ fsPath: vaultDir }],
+        }));
+      },
+      onInit: async ({ vault }) => {
+        await new GotoNoteCommand().run({
+          qs: "alpha",
+          mode: "note",
+          vault,
+          anchor: {
+            type: "header",
+            value: specialCharsHeader,
+          },
+        });
+        assert.deepStrictEqual(getActiveEditorBasename(), "alpha.md");
+        const selection = VSCodeUtils.getActiveTextEditor()?.selection;
         assert.strictEqual(selection?.start.line, 9);
         assert.strictEqual(selection?.start.character, 0);
         done();

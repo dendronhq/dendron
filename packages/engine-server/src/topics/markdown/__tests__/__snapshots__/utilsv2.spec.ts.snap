@@ -1,5 +1,46 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`ParserUtilsV2 findHeaders one header: bond 1`] = `
+Array [
+  Object {
+    "children": Array [
+      Object {
+        "position": Position {
+          "end": Object {
+            "column": 5,
+            "line": 1,
+            "offset": 4,
+          },
+          "indent": Array [],
+          "start": Object {
+            "column": 3,
+            "line": 1,
+            "offset": 2,
+          },
+        },
+        "type": "text",
+        "value": "h1",
+      },
+    ],
+    "depth": 1,
+    "position": Position {
+      "end": Object {
+        "column": 5,
+        "line": 1,
+        "offset": 4,
+      },
+      "indent": Array [],
+      "start": Object {
+        "column": 1,
+        "line": 1,
+        "offset": 0,
+      },
+    },
+    "type": "heading",
+  },
+]
+`;
+
 exports[`ParserUtilsV2 findLinks empty link 1`] = `Array []`;
 
 exports[`ParserUtilsV2 findLinks one link: bond 1`] = `

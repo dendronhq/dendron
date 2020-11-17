@@ -6,7 +6,7 @@ export type TestResult = {
   msg?: string;
 };
 
-export type SetupHookFunction = (opts: {
+export type SetupHookFunction<T = any> = (opts: {
   wsRoot: string;
   vaults: DVault[];
-}) => Promise<void>;
+}) => Promise<T>;

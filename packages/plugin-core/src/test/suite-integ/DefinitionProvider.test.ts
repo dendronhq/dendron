@@ -10,8 +10,9 @@ import * as vscode from "vscode";
 import DefinitionProvider from "../../features/DefinitionProvider";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
+import { getSlugger } from "../../utils/strings";
 import { DendronWorkspace } from "../../workspace";
-import { GOTO_NOTE_PRESET } from "../presets/GotoNotePreset";
+import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { TIMEOUT } from "../testUtils";
 import { LocationTestUtils, runMultiVaultTest } from "../testUtilsv2";
 
@@ -68,7 +69,7 @@ suite("DocumentLinkProvider", function () {
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {
         const vault = vaults[0];
-        await GOTO_NOTE_PRESET.preSetupHook({ wsRoot, vaults });
+        await GOTO_NOTE_PRESETS.ANCHOR.preSetupHook({ wsRoot, vaults });
         await NoteTestUtilsV3.createNote({
           fname: "beta",
           vault,
@@ -92,7 +93,47 @@ suite("DocumentLinkProvider", function () {
           LocationTestUtils.getBasenameFromLocation(loc),
           "alpha.md"
         );
-        await runMochaHarness(GOTO_NOTE_PRESET.results);
+        await runMochaHarness(GOTO_NOTE_PRESETS.ANCHOR.results);
+        done();
+      },
+    });
+  });
+
+  const { ANCHOR_WITH_SPECIAL_CHARS } = GOTO_NOTE_PRESETS;
+  test("anchor with special chars", (done) => {
+    let specialCharsHeader: string;
+    runMultiVaultTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        ({ specialCharsHeader } = await ANCHOR_WITH_SPECIAL_CHARS.preSetupHook({
+          wsRoot,
+          vaults: [vault],
+        }));
+        await NoteTestUtilsV3.createNote({
+          fname: "beta",
+          vault,
+          body: `[[alpha#${getSlugger().slug(specialCharsHeader)}]]`,
+        });
+      },
+      onInit: async ({ vaults }) => {
+        const notePath = path.join(vaults[0].fsPath, "beta.md");
+        const editor = await VSCodeUtils.openFileInEditor(
+          vscode.Uri.file(notePath)
+        );
+        const doc = editor?.document as vscode.TextDocument;
+        const provider = new DefinitionProvider();
+        const pos = LocationTestUtils.getPresetWikiLinkPosition();
+        const loc = (await provider.provideDefinition(
+          doc,
+          pos,
+          null as any
+        )) as vscode.Location;
+        assert.strictEqual(
+          LocationTestUtils.getBasenameFromLocation(loc),
+          "alpha.md"
+        );
+        await runMochaHarness(ANCHOR_WITH_SPECIAL_CHARS.results);
         done();
       },
     });

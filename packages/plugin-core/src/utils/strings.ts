@@ -1,3 +1,5 @@
+import GithubSlugger from "github-slugger";
+
 export const matchAll = (
   pattern: RegExp,
   text: string
@@ -12,4 +14,8 @@ export const matchAll = (
   }
 
   return out;
+};
+
+export const getSlugger = () => {
+  return new GithubSlugger();
 };

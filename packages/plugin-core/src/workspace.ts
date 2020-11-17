@@ -52,7 +52,9 @@ import {
   extensionQualifiedId,
   GLOBAL_STATE,
 } from "./constants";
+import DefinitionProvider from "./features/DefinitionProvider";
 import DocumentLinkProvider from "./features/DocumentLinkProvider";
+import ReferenceProvider from "./features/ReferenceProvider";
 import { VaultWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { HistoryService } from "./services/HistoryService";
@@ -287,6 +289,14 @@ export class DendronWorkspace {
     vscode.languages.registerDocumentLinkProvider(
       mdLangSelector,
       new DocumentLinkProvider()
+    );
+    vscode.languages.registerReferenceProvider(
+      mdLangSelector,
+      new ReferenceProvider()
+    );
+    vscode.languages.registerDefinitionProvider(
+      mdLangSelector,
+      new DefinitionProvider()
     );
   }
 

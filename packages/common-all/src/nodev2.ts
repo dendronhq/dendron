@@ -484,6 +484,25 @@ export class NoteUtilsV2 {
     return _.capitalize(DNodeUtilsV2.basename(fname, true));
   }
 
+  static getNotesByFname({
+    fname,
+    engine,
+    vault,
+  }: {
+    fname: string;
+    engine: DEngineClientV2;
+    vault?: DVault;
+  }): NotePropsV2[] {
+    const notes = engine.notes;
+    const out = _.filter(_.values(notes), (ent) => {
+      return (
+        ent.fname.toLowerCase() === fname.toLowerCase() &&
+        (vault ? ent.vault.fsPath === vault.fsPath : true)
+      );
+    });
+    return out;
+  }
+
   static getNoteByFname(
     fname: string,
     notes: NotePropsDictV2,

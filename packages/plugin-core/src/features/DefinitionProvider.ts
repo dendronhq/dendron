@@ -1,5 +1,7 @@
 import { NoteUtilsV2 } from "@dendronhq/common-all";
 import vscode, { Location, Position, Uri } from "vscode";
+import { GotoNoteCommand } from "../commands/GotoNote";
+import { PickerUtilsV2 } from "../components/lookup/utils";
 import { getReferenceAtPosition } from "../utils/md";
 import { DendronWorkspace } from "../workspace";
 
@@ -25,7 +27,16 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     } else if (out.length === 1) {
       return out[0];
     } else {
-      return;
+      const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+      const note = await new GotoNoteCommand().execute({
+        qs: refAtPos.ref,
+        mode: "note" as const,
+        vault,
+      });
+      return new Location(
+        Uri.file(NoteUtilsV2.getPath({ note })),
+        new Position(0, 0)
+      );
     }
   }
 }

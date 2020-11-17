@@ -159,14 +159,14 @@ export const parseRef = (rawRef: string): RefT => {
       : rawRef.indexOf("|");
 
   return {
-    ref: dividerPosition !== -1 ? rawRef.slice(0, dividerPosition) : rawRef,
-    label:
+    label: dividerPosition !== -1 ? rawRef.slice(0, dividerPosition) : "",
+    ref:
       dividerPosition !== -1
         ? rawRef.slice(
             dividerPosition + (escapedDividerPosition !== -1 ? 2 : 1),
             rawRef.length
           )
-        : "",
+        : rawRef,
   };
 };
 

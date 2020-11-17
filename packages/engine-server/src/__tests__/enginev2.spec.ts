@@ -579,6 +579,13 @@ describe("engine, notes/", () => {
       vault = { fsPath: vaultDir };
     });
 
+    test("get root", async () => {
+      await engine.init();
+      const { data } = await engine.getNoteByPath({ npath: "root", vault });
+      expect(data?.note).toEqual(_.find(engine.notes, DNodeUtilsV2.isRoot));
+      expect(data?.changed).toEqual([]);
+    });
+
     test("get existing note", async () => {
       await engine.init();
       const { data } = await engine.getNoteByPath({ npath: "foo", vault });

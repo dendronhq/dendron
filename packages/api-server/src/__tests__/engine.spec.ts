@@ -28,6 +28,7 @@ import fs from "fs-extra";
 import path from "path";
 import _ from "lodash";
 import { ParserUtilsV2 } from "@dendronhq/engine-server";
+import { runTest } from "./utils";
 
 const { SCHEMAS } = ENGINE_SERVER.ENGINE_SINGLE_TEST_PRESET;
 
@@ -392,6 +393,21 @@ describe("notes", () => {
     });
   });
 
+  describe("getNoteByPath", async () => {
+    test("get root", async () => {
+      await runTest(async ({ api, vaults, wsRoot: ws }) => {
+        const vault = vaults[0];
+        const resp = await api.engineGetNoteByPath({
+          npath: "root",
+          vault,
+          ws,
+        });
+        expect(resp).toMatchSnapshot();
+        expect(resp.data?.changed).toEqual([]);
+      });
+    });
+  });
+
   describe("query", () => {
     beforeEach(async () => {
       wsRoot = tmpDir().name;
@@ -629,9 +645,12 @@ describe("notes", () => {
   describe("write", () => {
     const NOTE_WRITE_PRESET =
       NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.write;
+
+    let vault: DVault;
     beforeEach(async () => {
       wsRoot = tmpDir().name;
       vaultString = path.join(wsRoot, "vault");
+      vault = { fsPath: vaultString };
       fs.ensureDirSync(vaultString);
       await EngineTestUtilsV2.setupVault({
         vaultDir: vaultString,

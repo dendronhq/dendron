@@ -9,6 +9,36 @@ Array [
 ]
 `;
 
+exports[`notes getNoteByPath get root 1`] = `
+Object {
+  "data": Object {
+    "changed": Array [],
+    "note": Object {
+      "body": "
+",
+      "children": Array [
+        "foo",
+      ],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "root",
+      "id": "899e212c-8a7f-477c-a9ec-e88979246bb7",
+      "links": Array [],
+      "parent": null,
+      "title": "Root",
+      "type": "note",
+      "updated": "1",
+      "vault": Object {
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-88100-iWDByzKrsYnC/vault",
+      },
+    },
+  },
+  "error": null,
+}
+`;
+
 exports[`notes query query child note with schema 1`] = `
 Object {
   "data": Array [
@@ -32,7 +62,7 @@ Object {
       "type": "note",
       "updated": "1",
       "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72355-Sn2ZY0Bijvdj/vault",
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-88100-3r2cKPIEsWtd/vault",
       },
     },
     Object {
@@ -48,7 +78,7 @@ Object {
       "fname": "foo",
       "id": "foo",
       "links": Array [],
-      "parent": "bd85bd58-27bf-45df-8b14-803f7bd9fc4c",
+      "parent": "e039bf61-f59a-4383-82b8-45c7506a1dfc",
       "schema": Object {
         "moduleId": "foo",
         "schemaId": "foo",
@@ -57,7 +87,7 @@ Object {
       "type": "note",
       "updated": "1",
       "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72355-Sn2ZY0Bijvdj/vault",
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-88100-3r2cKPIEsWtd/vault",
       },
     },
   ],
@@ -81,7 +111,7 @@ Object {
       "fname": "foo",
       "id": "foo",
       "links": Array [],
-      "parent": "417681e7-b10a-4e1d-884d-126da8fe4259",
+      "parent": "28bf991a-9c09-4dff-89f8-36cdbd7fa230",
       "schema": Object {
         "moduleId": "foo",
         "schemaId": "foo",
@@ -90,7 +120,7 @@ Object {
       "type": "note",
       "updated": "1",
       "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72355-HgdO5SIQuwup/vault",
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-88100-vVodiEyAHnTD/vault",
       },
     },
     Object {
@@ -113,7 +143,7 @@ Object {
       "type": "note",
       "updated": "1",
       "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72355-HgdO5SIQuwup/vault",
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-88100-vVodiEyAHnTD/vault",
       },
     },
     Object {
@@ -127,14 +157,14 @@ Object {
       "data": Object {},
       "desc": "",
       "fname": "root",
-      "id": "417681e7-b10a-4e1d-884d-126da8fe4259",
+      "id": "28bf991a-9c09-4dff-89f8-36cdbd7fa230",
       "links": Array [],
       "parent": null,
       "title": "Root",
       "type": "note",
       "updated": "1",
       "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72355-HgdO5SIQuwup/vault",
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-88100-vVodiEyAHnTD/vault",
       },
     },
   ],
@@ -156,14 +186,14 @@ Object {
       "data": Object {},
       "desc": "",
       "fname": "root",
-      "id": "ed1054aa-b639-4684-99a5-d8f652876865",
+      "id": "c6d983d7-6535-4d64-9ab4-fe7f015920f5",
       "links": Array [],
       "parent": null,
       "title": "Root",
       "type": "note",
       "updated": "1",
       "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72355-Tgva8heT8aAC/vault",
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-88100-Fnz6Tu3R5w1B/vault",
       },
     },
   ],
@@ -205,12 +235,12 @@ Object {
             "value": "baz",
           },
         ],
-        "parent": "8b7b8a9b-4ff6-4ea2-8fd3-7fac4940570e",
+        "parent": "cba4a67b-7baa-4eeb-b304-b4d098324f87",
         "title": "Bar",
         "type": "note",
         "updated": "1",
         "vault": Object {
-          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72355-oY8dssrNSrIP/vault",
+          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-88100-DCzRkk8eusIj/vault",
         },
       },
       "status": "update",
@@ -219,7 +249,9 @@ Object {
       "note": Object {
         "body": "[[bar]]
 ",
-        "children": Array [],
+        "children": Array [
+          "foo.ch1",
+        ],
         "created": "1",
         "custom": Object {},
         "data": Object {},
@@ -227,12 +259,12 @@ Object {
         "fname": "foo",
         "id": "foo",
         "links": Array [],
-        "parent": null,
+        "parent": "cba4a67b-7baa-4eeb-b304-b4d098324f87",
         "title": "Foo",
         "type": "note",
         "updated": "1",
         "vault": Object {
-          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72355-oY8dssrNSrIP/vault",
+          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-88100-DCzRkk8eusIj/vault",
         },
       },
       "status": "delete",
@@ -241,7 +273,9 @@ Object {
       "note": Object {
         "body": "[[bar]]
 ",
-        "children": Array [],
+        "children": Array [
+          "foo.ch1",
+        ],
         "created": "1",
         "custom": Object {},
         "data": Object {},
@@ -249,12 +283,12 @@ Object {
         "fname": "baz",
         "id": "foo",
         "links": Array [],
-        "parent": "8b7b8a9b-4ff6-4ea2-8fd3-7fac4940570e",
+        "parent": "cba4a67b-7baa-4eeb-b304-b4d098324f87",
         "title": "Foo",
         "type": "note",
         "updated": "1",
         "vault": Object {
-          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72355-oY8dssrNSrIP/vault",
+          "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-88100-DCzRkk8eusIj/vault",
         },
       },
       "status": "create",
@@ -307,12 +341,12 @@ Array [
           "value": "gamma",
         },
       ],
-      "parent": "8b08b9d2-0ee8-4d80-9b64-e772d7500c82",
+      "parent": "260cbca4-3705-4b5f-84d6-d206bbadfdc2",
       "title": "Alpha",
       "type": "note",
       "updated": "1",
       "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72355-tl29ddtkoco1/vault",
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-88100-AWqU1xoFgVxC/vault",
       },
     },
     "status": "update",
@@ -329,12 +363,12 @@ Array [
       "fname": "beta",
       "id": "beta",
       "links": Array [],
-      "parent": null,
+      "parent": "260cbca4-3705-4b5f-84d6-d206bbadfdc2",
       "title": "Beta",
       "type": "note",
       "updated": "1",
       "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72355-tl29ddtkoco1/vault",
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-88100-AWqU1xoFgVxC/vault",
       },
     },
     "status": "delete",
@@ -351,12 +385,12 @@ Array [
       "fname": "gamma",
       "id": "beta",
       "links": Array [],
-      "parent": "8b08b9d2-0ee8-4d80-9b64-e772d7500c82",
+      "parent": "260cbca4-3705-4b5f-84d6-d206bbadfdc2",
       "title": "Beta",
       "type": "note",
       "updated": "1",
       "vault": Object {
-        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-72355-tl29ddtkoco1/vault",
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-88100-AWqU1xoFgVxC/vault",
       },
     },
     "status": "create",

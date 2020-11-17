@@ -518,9 +518,14 @@ export class NoteUtilsV2 {
           msg: `multiple nodes found and no vault given for ${fname}`,
         });
       }
-      out = _.find(_out, { vault: opts.vault.fsPath }) as NotePropsV2;
+      out = _.find(
+        _out,
+        (ent) => ent.vault.fsPath === opts?.vault?.fsPath
+      ) as NotePropsV2;
       if (_.isUndefined(out)) {
-        throw new DendronError({ msg: "no note found for vault" });
+        throw new DendronError({
+          msg: `no note found for vault: ${opts.vault.fsPath}`,
+        });
       }
     } else {
       out = _out[0];

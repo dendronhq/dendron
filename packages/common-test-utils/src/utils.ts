@@ -17,7 +17,9 @@ import {
   SchemaModulePropsV2,
 } from "@dendronhq/common-all";
 import { DendronAPI } from "@dendronhq/common-server";
-import { TestResult } from "./types";
+import _ from "lodash";
+import { SetupHookFunction, TestResult } from "./types";
+import assert from "assert";
 
 export const toPlainObject = <R>(value: unknown): R =>
   value !== undefined ? JSON.parse(JSON.stringify(value)) : value;
@@ -158,6 +160,7 @@ export class EngineAPIShim implements DEngineClientV2 {
 export class TestPresetEntry<TBeforeOpts, TAfterOpts, TResultsOpts> {
   public label: string;
   public before: (_opts: TBeforeOpts) => Promise<any>;
+  public preSetupHook: SetupHookFunction;
   public after: (_opts: TAfterOpts) => Promise<any>;
   public results: (_opts: TResultsOpts) => Promise<TestResult[]>;
   public init: () => Promise<void>;
@@ -167,8 +170,11 @@ export class TestPresetEntry<TBeforeOpts, TAfterOpts, TResultsOpts> {
     results,
     before,
     after,
+    preSetupHook,
   }: {
     label: string;
+    preSetupHook?: SetupHookFunction;
+    beforeSetup?: (_opts: TBeforeOpts) => Promise<any>;
     before?: (_opts: TBeforeOpts) => Promise<any>;
     after?: (_opts: TAfterOpts) => Promise<any>;
     results: (_opts: TResultsOpts) => Promise<TestResult[]>;
@@ -176,7 +182,27 @@ export class TestPresetEntry<TBeforeOpts, TAfterOpts, TResultsOpts> {
     this.label = label;
     this.results = results;
     this.before = before ? before : async () => {};
+    this.preSetupHook = preSetupHook ? preSetupHook : async () => {};
     this.after = after ? after : async () => {};
     this.init = async () => {};
   }
 }
+
+export async function runMochaHarness<TOpts>(results: any, opts?: TOpts) {
+  return _.map(await results(opts), (ent) =>
+    assert.deepStrictEqual(ent.actual, ent.expected)
+  );
+}
+// export async function runJestHarness<TOpts>({
+//   opts,
+//   results,
+//   expect,
+// }: {
+//   opts: TOpts;
+//   results: Function;
+//   expect: jest.Expect;
+// }) {
+//   return _.map(await results(opts), (ent) =>
+//     expect(ent.actual).toEqual(ent.expected)
+//   );
+// }

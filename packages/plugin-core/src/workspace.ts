@@ -320,7 +320,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.GOTO_NOTE.key,
         async (opts: GotoNoteCommandOpts) => {
-          new GotoNoteCommand().execute(opts);
+          return new GotoNoteCommand().execute(opts);
         }
       )
     );

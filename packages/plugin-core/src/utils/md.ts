@@ -1,4 +1,4 @@
-import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DNoteAnchor, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import fs from "fs";
 import _ from "lodash";
 import path from "path";
@@ -10,6 +10,7 @@ import { matchAll } from "./strings";
 export type RefT = {
   label: string;
   ref: string;
+  anchor?: DNoteAnchor;
 };
 
 export type FoundRefT = {
@@ -119,7 +120,12 @@ export const isInCodeSpan = (
 export const getReferenceAtPosition = (
   document: vscode.TextDocument,
   position: vscode.Position
-): { range: vscode.Range; ref: string; label: string } | null => {
+): {
+  range: vscode.Range;
+  ref: string;
+  label: string;
+  anchor?: DNoteAnchor;
+} | null => {
   if (
     isInFencedCodeBlock(document, position.line) ||
     isInCodeSpan(document, position.line, position.character)
@@ -136,7 +142,7 @@ export const getReferenceAtPosition = (
     return null;
   }
 
-  const { ref, label } = parseRef(
+  const { ref, label, anchor } = parseRef(
     document
       .getText(range)
       .replace("![[", "")
@@ -148,6 +154,7 @@ export const getReferenceAtPosition = (
     ref,
     label,
     range,
+    anchor,
   };
 };
 
@@ -158,7 +165,7 @@ export const parseRef = (rawRef: string): RefT => {
       ? escapedDividerPosition
       : rawRef.indexOf("|");
 
-  return {
+  const out: RefT = {
     label: dividerPosition !== -1 ? rawRef.slice(0, dividerPosition) : "",
     ref:
       dividerPosition !== -1
@@ -168,6 +175,12 @@ export const parseRef = (rawRef: string): RefT => {
           )
         : rawRef,
   };
+  if (out.ref.indexOf("#") >= 0) {
+    const [ref, ...anchor] = out.ref.split("#");
+    out.ref = ref;
+    out.anchor = { type: "header", value: anchor[0] };
+  }
+  return out;
 };
 
 export const findReferences = async (

@@ -12,10 +12,11 @@ import { GotoNoteCommand } from "../../commands/GotoNote";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
+import { GOTO_NOTE_PRESET } from "../presets/GotoNotePreset";
 import { getActiveEditorBasename, TIMEOUT } from "../testUtils";
 import { runSingleVaultTest } from "../testUtilsv2";
 
-suite("notes", function () {
+suite("GotoNote", function () {
   let ctx: vscode.ExtensionContext;
   this.timeout(TIMEOUT);
 
@@ -33,11 +34,11 @@ suite("notes", function () {
       ctx,
       onInit: async ({ vault }) => {
         const note = DendronWorkspace.instance().getEngine().notes["foo"];
-        const out = await new GotoNoteCommand().run({
+        const { note: out } = (await new GotoNoteCommand().run({
           qs: "foo",
           mode: "note",
           vault,
-        });
+        })) as { note: NotePropsV2 };
         assert.deepStrictEqual(out, note);
         assert.strictEqual(getActiveEditorBasename(), "foo.md");
         done();
@@ -64,11 +65,11 @@ suite("notes", function () {
           stub: true,
         });
 
-        const out = await new GotoNoteCommand().run({
+        const { note: out } = (await new GotoNoteCommand().run({
           qs: "foo",
           mode: "note",
           vault,
-        });
+        })) as { note: NotePropsV2 };
         assert.deepStrictEqual(_.pick(out, ["fname", "stub", "id"]), {
           fname: "foo",
           id: note.id,
@@ -83,11 +84,11 @@ suite("notes", function () {
     runSingleVaultTest({
       ctx,
       onInit: async ({ vault }) => {
-        const out = await new GotoNoteCommand().run({
+        const { note: out } = (await new GotoNoteCommand().run({
           qs: "foo.ch2",
           mode: "note",
           vault,
-        });
+        })) as { note: NotePropsV2 };
         assert.deepStrictEqual(_.pick(out, ["fname", "stub"]), {
           fname: "foo.ch2",
         });
@@ -112,6 +113,35 @@ suite("notes", function () {
         assert.deepStrictEqual(getActiveEditorBasename(), "bar.ch1.md");
         const content = VSCodeUtils.getActiveTextEditor()?.document.getText() as string;
         assert.ok(content.indexOf("ch1 template") >= 0);
+        done();
+      },
+    });
+  });
+
+  test("go to note with anchor", (done) => {
+    runSingleVaultTest({
+      ctx,
+      initDirCb: async (vaultDir) => {
+        await GOTO_NOTE_PRESET.preSetupHook({
+          wsRoot: "",
+          vaults: [{ fsPath: vaultDir }],
+        });
+      },
+      onInit: async ({ vault }) => {
+        await new GotoNoteCommand().run({
+          qs: "alpha",
+          mode: "note",
+          vault,
+          anchor: {
+            type: "header",
+            value: "H3",
+          },
+        });
+        assert.deepStrictEqual(getActiveEditorBasename(), "alpha.md");
+        const selection = VSCodeUtils.getActiveTextEditor()?.selection;
+        console.log(selection);
+        assert.strictEqual(selection?.start.line, 9);
+        assert.strictEqual(selection?.start.character, 0);
         done();
       },
     });

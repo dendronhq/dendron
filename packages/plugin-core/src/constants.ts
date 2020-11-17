@@ -322,19 +322,22 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   // --- Workspace
   VAULT_ADD: {
     key: "dendron.vaultAdd",
-    title: `${CMD_PREFIX} Vault: Add`,
+    title: `${CMD_PREFIX} Vault Add`,
     group: "workspace",
     desc: "Add a new vault",
+    docPreview: `<div style="position: relative; padding-bottom: 62.5%; height: 0;"><iframe src="https://www.loom.com/embed/b4171372f9794dd7be609c043f343fa3" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>`,
     docLink: "",
-    docPreview: "",
   },
   VAULT_REMOVE: {
     key: "dendron.vaultRemove",
-    title: `${CMD_PREFIX} Vault: Remove`,
+    title: `${CMD_PREFIX} Vault Remove`,
     group: "workspace",
     desc: "Remove a vault",
     docLink: "",
-    docPreview: "",
+    docPreview: [
+      `Remove a vault from your workspace. Note that the underlying files wil **not** be deleted - the vault will lose its association with your workspace.`,
+      `<div style="position: relative; padding-bottom: 62.5%; height: 0;"><iframe src="https://www.loom.com/embed/307effc22b8d4c59a32933529a8393e1" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div>`,
+    ].join("\n"),
   },
   INIT_WS: {
     key: "dendron.initWS",

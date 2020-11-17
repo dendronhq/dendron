@@ -9,12 +9,13 @@ import {
   EngineTestUtilsV3,
   NodeTestPresetsV2,
   NotePresetsUtils,
+  SetupHookFunction,
   SetupWSOpts,
 } from "@dendronhq/common-test-utils";
 import { DConfig } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
-import { ExtensionContext, Uri, window } from "vscode";
+import { ExtensionContext, Location, Position, Uri, window } from "vscode";
 import {
   SetupWorkspaceCommand,
   SetupWorkspaceOpts,
@@ -28,11 +29,6 @@ import { createMockConfig, onWSInit } from "./testUtils";
 type SetupCodeConfigurationV2 = {
   configOverride?: { [key: string]: any };
 };
-
-type SetupHookFunction = (opts: {
-  wsRoot: string;
-  vaults: DVault[];
-}) => Promise<void>;
 
 type SetupCodeWorkspaceV2 = SetupWSOpts &
   SetupCodeConfigurationV2 & {
@@ -234,3 +230,12 @@ export const getNoteFromTextEditor = (): NotePropsV2 => {
   const node = file2Note(txtPath, vault);
   return node;
 };
+
+export class LocationTestUtils {
+  /**
+   * get default wiki link position
+   */
+  static getPresetWikiLinkPosition = () => new Position(7, 2);
+  static getBasenameFromLocation = (loc: Location) =>
+    path.basename(loc.uri.fsPath);
+}

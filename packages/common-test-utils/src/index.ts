@@ -26,6 +26,8 @@ import { TestPresetEntry } from "./utils";
 export * from "./presets";
 export * from "./utils";
 export * from "./fileUtils";
+export * from "./types";
+export * from "./noteUtils";
 
 type InitVaultFunc = (vaultPath: string) => void;
 export type SetupVaultOpts = {

@@ -66,6 +66,14 @@ export type DNoteLoc = {
   id?: string;
   vault?: DVault;
 };
+
+export type DNoteAnchor = {
+  /**
+   * In the future, we could have ID based anchors
+   */
+  type: "header";
+  value: string;
+};
 export type DVault = {
   name?: string;
   fsPath: string;
@@ -97,6 +105,10 @@ export type DNoteRefData = {
   anchorStart?: string;
   anchorEnd?: string;
   anchorStartOffset?: number;
+  /**
+   * File link: wiki based links (eg. [[foo]])
+   * Id link: TBD (eg. ^1234)
+   */
   type: "file" | "id";
 };
 export type DNoteRefLink = DNoteLink<DNoteRefData>;

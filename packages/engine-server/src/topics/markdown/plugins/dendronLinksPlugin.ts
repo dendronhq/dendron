@@ -5,7 +5,7 @@ import RemarkParser, { Eat } from "remark-parse";
 import { Parser, Processor } from "unified";
 import { Node } from "unist";
 
-const LINK_REGEX = /^\[\[(.+?)\]\]/;
+export const LINK_REGEX = /^\[\[(.+?)\]\]/;
 
 declare class RemarkParserClass implements Parser {
   Parser: RemarkParserClass;

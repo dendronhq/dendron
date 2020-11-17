@@ -1,4 +1,8 @@
-import { NodeTestUtilsV2 } from "@dendronhq/common-test-utils";
+import {
+  NodeTestUtilsV2,
+  NoteTestUtilsV3,
+  runMochaHarness,
+} from "@dendronhq/common-test-utils";
 import assert from "assert";
 import { afterEach, beforeEach } from "mocha";
 import path from "path";
@@ -7,8 +11,9 @@ import DefinitionProvider from "../../features/DefinitionProvider";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
+import { GOTO_NOTE_PRESET } from "../presets/GotoNotePreset";
 import { TIMEOUT } from "../testUtils";
-import { runMultiVaultTest } from "../testUtilsv2";
+import { LocationTestUtils, runMultiVaultTest } from "../testUtilsv2";
 
 suite("DocumentLinkProvider", function () {
   let ctx: vscode.ExtensionContext;
@@ -53,9 +58,41 @@ suite("DocumentLinkProvider", function () {
           path.basename(locations.uri.fsPath as string),
           "alpha.md"
         );
-        // const range = new vscode.Range(new vscode.Position(2, 7), new vscode.Position(2, 7))
-        // assert.deepStrictEqual(locations.map(l => path.basename(l.uri.fsPath)), ["alpha.md", "beta.md"]);
-        // assert.deepStrictEqual(links.map(l => l.range.start), [range, range]);
+        done();
+      },
+    });
+  });
+
+  test("with anchor", (done) => {
+    runMultiVaultTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        await GOTO_NOTE_PRESET.preSetupHook({ wsRoot, vaults });
+        await NoteTestUtilsV3.createNote({
+          fname: "beta",
+          vault,
+          body: `[[alpha#h3]]`,
+        });
+      },
+      onInit: async ({ vaults }) => {
+        const notePath = path.join(vaults[0].fsPath, "beta.md");
+        const editor = await VSCodeUtils.openFileInEditor(
+          vscode.Uri.file(notePath)
+        );
+        const doc = editor?.document as vscode.TextDocument;
+        const provider = new DefinitionProvider();
+        const pos = LocationTestUtils.getPresetWikiLinkPosition();
+        const loc = (await provider.provideDefinition(
+          doc,
+          pos,
+          null as any
+        )) as vscode.Location;
+        assert.strictEqual(
+          LocationTestUtils.getBasenameFromLocation(loc),
+          "alpha.md"
+        );
+        await runMochaHarness(GOTO_NOTE_PRESET.results);
         done();
       },
     });

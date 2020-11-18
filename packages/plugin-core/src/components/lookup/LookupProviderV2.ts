@@ -17,6 +17,7 @@ import { CancellationToken, Uri, window } from "vscode";
 import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
 import { EngineFlavor, EngineOpts } from "../../types";
+import { VSCodeUtils } from "../../utils";
 import { getDurationMilliseconds, profile } from "../../utils/system";
 import { DendronWorkspace } from "../../workspace";
 import { LookupControllerV2 } from "./LookupControllerV2";
@@ -106,7 +107,12 @@ export class LookupProviderV2 {
     Logger.info({ ctx, msg: "pre:checkNoteExist", uri });
     // TODO: check for overwriting schema
     let noteExists = NoteUtilsV2.getNoteByFname(nodeNew.fname, engine.notes);
-    if (noteExists && !foundStub && !selectedItem?.schemaStub) {
+    if (
+      noteExists &&
+      !foundStub &&
+      !selectedItem?.schemaStub &&
+      nodeNew.vault.fsPath === noteExists.vault.fsPath
+    ) {
       Logger.error({ ctx, msg: "action will overwrite existing note" });
       throw Error("action will overwrite existing note");
     }
@@ -486,7 +492,11 @@ export class LookupProviderV2 {
       if (perfectMatch) {
         Logger.debug({ ctx, msg: "active = qs" });
         picker.activeItems = [perfectMatch];
-        picker.items = PickerUtilsV2.filterCreateNewItem(updatedItems);
+        // TODO: this defaults to current vault if no note is open
+        const openedVault = PickerUtilsV2.getVaultForOpenEditor();
+        if (perfectMatch.vault.fsPath === openedVault.fsPath) {
+          picker.items = PickerUtilsV2.filterCreateNewItem(updatedItems);
+        }
       } else if (queryEndsWithDot) {
         // don't show noActiveItem for dot queries
         Logger.debug({ ctx, msg: "active != qs, end with ." });

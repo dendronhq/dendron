@@ -3,6 +3,7 @@ import {
   DEngineClientV2,
   DNodeUtilsV2,
   DVault,
+  NotePropsV2,
   NoteUtilsV2,
   SchemaModulePropsV2,
 } from "@dendronhq/common-all";
@@ -212,6 +213,29 @@ export class VSCodeUtils {
       uri,
       name: path.basename(root),
     };
+  }
+
+  static async openNoteByPath({
+    vault,
+    fname,
+  }: {
+    vault: DVault;
+    fname: string;
+  }) {
+    const notePath = path.join(vault.fsPath, `${fname}.md`);
+    const editor = await VSCodeUtils.openFileInEditor(
+      vscode.Uri.file(notePath)
+    );
+    return editor as vscode.TextEditor;
+  }
+
+  static async openNote(note: NotePropsV2) {
+    const { vault, fname } = note;
+    const notePath = path.join(vault.fsPath, `${fname}.md`);
+    const editor = await VSCodeUtils.openFileInEditor(
+      vscode.Uri.file(notePath)
+    );
+    return editor as vscode.TextEditor;
   }
 
   static async openFileInEditor(

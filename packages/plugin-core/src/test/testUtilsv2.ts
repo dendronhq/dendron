@@ -13,6 +13,7 @@ import {
   SetupWSOpts,
 } from "@dendronhq/common-test-utils";
 import { DConfig } from "@dendronhq/engine-server";
+import assert from "assert";
 import _ from "lodash";
 import path from "path";
 import { ExtensionContext, Location, Position, Uri, window } from "vscode";
@@ -240,4 +241,12 @@ export class LocationTestUtils {
   static getPresetWikiLinkPosition = () => new Position(7, 2);
   static getBasenameFromLocation = (loc: Location) =>
     path.basename(loc.uri.fsPath);
+}
+
+export function expect(value: any) {
+  return {
+    toEqual: (value2: any) => {
+      assert.deepStrictEqual(value, value2);
+    },
+  };
 }

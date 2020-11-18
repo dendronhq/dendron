@@ -17,18 +17,9 @@ import open from "open";
 import path from "path";
 import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
-import { BuildPodCommand } from "./commands/BuildPod";
-import { ChangeWorkspaceCommand } from "./commands/ChangeWorkspace";
-import { GotoNoteCommand, GotoNoteCommandOpts } from "./commands/GotoNote";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
-import { ImportPodCommand } from "./commands/ImportPod";
 import { LookupCommand } from "./commands/LookupCommand";
-import { OpenLogsCommand } from "./commands/OpenLogs";
-import { PublishCommand } from "./commands/Publish";
-import { PublishPodCommand } from "./commands/PublishPod";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
-import { UpdateSchemaCommand } from "./commands/UpdateSchema";
-import { UpgradeSettingsCommand } from "./commands/UpgradeSettings";
 import {
   DENDRON_COMMANDS,
   extensionQualifiedId,
@@ -321,41 +312,6 @@ export class DendronWorkspace {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        DENDRON_COMMANDS.GOTO_NOTE.key,
-        async (opts: GotoNoteCommandOpts) => {
-          return new GotoNoteCommand().execute(opts);
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.CHANGE_WS.key,
-        async () => {
-          await new ChangeWorkspaceCommand().run();
-        }
-      )
-    );
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.PUBLISH.key,
-        async (args: any) => {
-          await new PublishCommand().run(args);
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.PUBLISH_POD.key,
-        async (args: any) => {
-          await new PublishPodCommand().run(args);
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
         DENDRON_COMMANDS.LOOKUP.key,
         async (args: any) => {
           new LookupCommand().run({ ...args, flavor: "note" });
@@ -402,15 +358,6 @@ export class DendronWorkspace {
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        DENDRON_COMMANDS.IMPORT_POD.key,
-        async () => {
-          await new ImportPodCommand().run();
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
         DENDRON_COMMANDS.RELOAD_INDEX.key,
         async (silent?: boolean) => {
           const out = await new ReloadIndexCommand().execute();
@@ -422,49 +369,7 @@ export class DendronWorkspace {
       )
     );
 
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.OPEN_LOGS.key,
-        async () => {
-          try {
-            await new OpenLogsCommand().execute({});
-          } catch (err) {
-            Logger.error(JSON.stringify(err));
-          }
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.UPGRADE_SETTINGS.key,
-        async () => {
-          return await new UpgradeSettingsCommand().execute({
-            settingOpts: { force: true },
-          });
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.BUILD_POD.key,
-        async (args: any) => {
-          await new BuildPodCommand().run(args);
-        }
-      )
-    );
-
     // ---
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.UPDATE_SCHEMA.key,
-        async () => {
-          await new UpdateSchemaCommand().run();
-        }
-      )
-    );
 
     this.context.subscriptions.push(
       vscode.commands.registerCommand(

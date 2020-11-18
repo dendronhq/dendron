@@ -5,7 +5,6 @@ import {
   findReferences,
   FoundRefT,
   sortPaths,
-  trimSlashes,
 } from "../utils/md";
 import _ from "lodash";
 // import groupBy from 'lodash.groupby';

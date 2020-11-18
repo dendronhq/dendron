@@ -1,4 +1,5 @@
 import { ViewColumn, window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { EngineAPIService } from "../services/EngineAPIService";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -44,6 +45,7 @@ export class UpdateSchemaCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
+  static key = DENDRON_COMMANDS.UPDATE_SCHEMA.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

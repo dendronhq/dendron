@@ -8,6 +8,7 @@ import {
   PodUtils,
 } from "@dendronhq/pods-core";
 import { Uri, window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
 import { DendronWorkspace } from "../workspace";
@@ -21,6 +22,7 @@ type CommandOutput = void;
 export { CommandOpts as PublishPodCommandOpts };
 
 export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
+  static key = DENDRON_COMMANDS.PUBLISH_POD.key;
   async gatherInputs(): Promise<any> {
     const pods = getAllPublishPods();
     const podItems: PodItemV4[] = pods.map((p) => podClassEntryToPodItemV4(p));

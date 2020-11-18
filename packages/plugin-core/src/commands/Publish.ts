@@ -3,6 +3,7 @@ import {
   PublishNotesCommandOpts,
 } from "@dendronhq/dendron-cli";
 import { window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -11,6 +12,7 @@ type CommandOpts = Partial<PublishNotesCommandOpts>;
 type CommandOutput = void;
 
 export class PublishCommand extends BasicCommand<CommandOpts, CommandOutput> {
+  static key = DENDRON_COMMANDS.PUBLISH.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

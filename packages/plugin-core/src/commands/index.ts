@@ -15,16 +15,12 @@ import { DumpStateCommand } from "./DumpStateCommand";
 import { ExportPodCommand } from "./ExportPod";
 import { GoDownCommand } from "./GoDownCommand";
 import { GotoNoteCommand } from "./GotoNote";
-import { GoToSiblingCommand } from "./GoToSiblingCommand";
 import { GoUpCommand } from "./GoUpCommand";
 import { ImportPodCommand } from "./ImportPod";
-import { LookupCommand } from "./LookupCommand";
 import { OpenLogsCommand } from "./OpenLogs";
 import { PublishCommand } from "./Publish";
 import { PublishPodCommand } from "./PublishPod";
-import { RefactorCommand } from "./Refactor";
 import { RefactorHierarchyCommandV2 } from "./RefactorHierarchyV2";
-import { ReloadIndexCommand } from "./ReloadIndex";
 import { RenameNoteV2aCommand } from "./RenameNoteV2a";
 import { ResetConfigCommand } from "./ResetConfig";
 import { RestoreVaultCommand } from "./RestoreVault";
@@ -39,9 +35,9 @@ import { VaultRemoveCommand } from "./VaultRemoveCommand";
 
 export const ALL_COMMANDS = [
   ArchiveHierarchyCommand,
-  //   BuildPodCommand,
-  //   ChangeWorkspaceCommand,
-  //   ConfigureCommand,
+  BuildPodCommand,
+  ChangeWorkspaceCommand,
+  ConfigureCommand,
   ConfigurePodCommand,
   ContributeCommand,
   CopyNoteLinkCommand,
@@ -55,13 +51,12 @@ export const ALL_COMMANDS = [
   GoDownCommand,
   //   GoToSiblingCommand,
   GoUpCommand,
-  //   GotoNoteCommand,
-  //   ImportPodCommand,
+  GotoNoteCommand,
+  ImportPodCommand,
   //   LookupCommand,
-  //   OpenLogsCommand,
-  //   PublishCommand,
-  //   PublishPodCommand,
-  //   RefactorCommand,
+  OpenLogsCommand,
+  PublishCommand,
+  PublishPodCommand,
   RefactorHierarchyCommandV2,
   // ReloadIndexCommand,
   RenameNoteV2aCommand,
@@ -71,8 +66,8 @@ export const ALL_COMMANDS = [
   ShowHelpCommand,
   ShowPreviewCommand,
   SnapshotVaultCommand,
-  //   UpdateSchemaCommand,
-  // UpgradeSettingsCommand,
+  UpdateSchemaCommand,
+  UpgradeSettingsCommand,
   VaultAddCommand,
   VaultRemoveCommand,
 ] as CodeCommandConstructor[];

@@ -9,6 +9,7 @@ import {
 import { Heading, ParserUtilsV2 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Position, Selection, Uri, window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { getSlugger } from "../utils/strings";
 import { DendronWorkspace } from "../workspace";
@@ -25,6 +26,7 @@ export { CommandOpts as GotoNoteCommandOpts };
 type CommandOutput = { note: NotePropsV2; pos?: Position } | undefined;
 
 export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
+  static key = DENDRON_COMMANDS.GOTO_NOTE.key;
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const ctx = "GotoNoteCommand";
     this.L.info({ ctx, opts, msg: "enter" });

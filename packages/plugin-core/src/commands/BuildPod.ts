@@ -2,6 +2,7 @@ import { DEngineClientV2 } from "@dendronhq/common-all";
 import { BuildSiteCommand } from "@dendronhq/dendron-cli";
 import _ from "lodash";
 import { window } from "vscode";
+import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -12,6 +13,7 @@ type CommandOpts = {};
 type CommandOutput = void;
 
 export class BuildPodCommand extends BasicCommand<CommandOpts, CommandOutput> {
+  static key = DENDRON_COMMANDS.BUILD_POD.key;
   async execute(opts: CommandOpts) {
     const ctx = { ctx: "PlantNotesCommand" };
     const { writeStubs, incremental } = _.defaults(opts, {

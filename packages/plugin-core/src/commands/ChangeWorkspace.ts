@@ -19,6 +19,7 @@ export class ChangeWorkspaceCommand extends BasicCommand<
   ChangeWorkspaceCommandOpts,
   any
 > {
+  static key = DENDRON_COMMANDS.CHANGE_WS.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     const rootDirRaw = await VSCodeUtils.gatherFolderPath();
     if (_.isUndefined(rootDirRaw)) {

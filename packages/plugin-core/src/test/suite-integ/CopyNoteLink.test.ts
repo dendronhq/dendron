@@ -47,7 +47,6 @@ suite("notes", function () {
 
   test("with anchor", function (done) {
     let noteWithTarget: NotePropsV2;
-    let noteWithLink: NotePropsV2;
 
     runMultiVaultTest({
       ctx,
@@ -55,7 +54,7 @@ suite("notes", function () {
         noteWithTarget = await NOTE_PRESETS.NOTE_WITH_ANCHOR_TARGET({
           vault: vaults[0],
         });
-        noteWithLink = await NOTE_PRESETS.NOTE_WITH_ANCHOR_LINK({
+        await NOTE_PRESETS.NOTE_WITH_ANCHOR_LINK({
           vault: vaults[0],
         });
       },

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.3-alpha.2](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.1...v0.16.3-alpha.2) (2020-11-18)
+
+### Enhancements
+
+- support copy relative header link ([2f4c965](https://github.com/dendronhq/dendron/commit/2f4c96528e696aa8b1171d1d561d73bfa68fcb50))
+
 ## [0.16.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.0...v0.16.3-alpha.1) (2020-11-18)
 
 ### Enhancements

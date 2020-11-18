@@ -1,4 +1,5 @@
-import { NodeTestUtilsV2 } from "@dendronhq/common-test-utils";
+import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { NOTE_PRESETS } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import { afterEach, beforeEach } from "mocha";
 import path from "path";
@@ -8,7 +9,17 @@ import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { TIMEOUT } from "../testUtils";
-import { runMultiVaultTest } from "../testUtilsv2";
+import { expect, runMultiVaultTest } from "../testUtilsv2";
+
+async function provide(editor: vscode.TextEditor) {
+  const doc = editor?.document as vscode.TextDocument;
+  const referenceProvider = new ReferenceProvider();
+  const links = await referenceProvider.provideReferences(
+    doc,
+    new vscode.Position(7, 2)
+  );
+  return links;
+}
 
 suite("DocumentLinkProvider", function () {
   let ctx: vscode.ExtensionContext;
@@ -24,36 +35,106 @@ suite("DocumentLinkProvider", function () {
   });
 
   test("basic", (done) => {
+    let noteWithTarget1: NotePropsV2;
+    let noteWithTarget2: NotePropsV2;
     runMultiVaultTest({
       ctx,
       preSetupHook: async ({ vaults }) => {
-        const root = vaults[0];
-        await NodeTestUtilsV2.createNote({
-          vaultDir: root.fsPath,
-          noteProps: { body: "[[alpha]]", fname: "alpha" },
+        noteWithTarget1 = await NOTE_PRESETS.NOTE_WITH_TARGET({
+          fname: "alpha",
+          vault: vaults[0],
         });
-        await NodeTestUtilsV2.createNote({
-          vaultDir: root.fsPath,
-          noteProps: { body: "[[alpha]]", fname: "beta" },
+        noteWithTarget2 = await NOTE_PRESETS.NOTE_WITH_TARGET({
+          fname: "beta",
+          vault: vaults[0],
         });
       },
-      onInit: async ({ vaults }) => {
-        const notePath = path.join(vaults[0].fsPath, "alpha.md");
-        const editor = await VSCodeUtils.openFileInEditor(
-          vscode.Uri.file(notePath)
+      onInit: async ({}) => {
+        const editor = await VSCodeUtils.openNote(noteWithTarget1);
+        const links = await provide(editor);
+        expect(links.map((l) => l.uri.fsPath)).toEqual(
+          [noteWithTarget1, noteWithTarget2].map((note) =>
+            NoteUtilsV2.getPath({ note })
+          )
         );
-        const doc = editor?.document as vscode.TextDocument;
-        const referenceProvider = new ReferenceProvider();
-        const links = await referenceProvider.provideReferences(
-          doc,
-          new vscode.Position(7, 2)
+        done();
+      },
+    });
+  });
+
+  test("with multiple vaults", (done) => {
+    let noteWithTarget1: NotePropsV2;
+    let noteWithTarget2: NotePropsV2;
+    runMultiVaultTest({
+      ctx,
+      preSetupHook: async ({ vaults }) => {
+        noteWithTarget1 = await NOTE_PRESETS.NOTE_WITH_TARGET({
+          fname: "alpha",
+          vault: vaults[0],
+        });
+        noteWithTarget2 = await NOTE_PRESETS.NOTE_WITH_TARGET({
+          fname: "beta",
+          vault: vaults[1],
+        });
+      },
+      onInit: async ({}) => {
+        const editor = await VSCodeUtils.openNote(noteWithTarget1);
+        const links = await provide(editor);
+        expect(links.map((l) => l.uri.fsPath)).toEqual(
+          [noteWithTarget1, noteWithTarget2].map((note) =>
+            NoteUtilsV2.getPath({ note })
+          )
         );
-        // const range = new vscode.Range(new vscode.Position(2, 7), new vscode.Position(2, 7))
-        assert.deepStrictEqual(
-          links.map((l) => path.basename(l.uri.fsPath)),
-          ["alpha.md", "beta.md"]
+        done();
+      },
+    });
+  });
+
+  test("with anchor", (done) => {
+    let noteWithTarget: NotePropsV2;
+    let noteWithLink: NotePropsV2;
+
+    runMultiVaultTest({
+      ctx,
+      preSetupHook: async ({ vaults }) => {
+        noteWithTarget = await NOTE_PRESETS.NOTE_WITH_ANCHOR_TARGET({
+          vault: vaults[0],
+        });
+        noteWithLink = await NOTE_PRESETS.NOTE_WITH_ANCHOR_LINK({
+          vault: vaults[0],
+        });
+      },
+      onInit: async ({}) => {
+        const editor = await VSCodeUtils.openNote(noteWithLink);
+        const links = await provide(editor);
+        expect(links.map((l) => l.uri.fsPath)).toEqual(
+          [noteWithLink].map((note) => NoteUtilsV2.getPath({ note }))
         );
-        // assert.deepStrictEqual(links.map(l => l.range.start), [range, range]);
+        done();
+      },
+    });
+  });
+
+  test("with alias", (done) => {
+    let noteWithTarget: NotePropsV2;
+    let noteWithLink: NotePropsV2;
+
+    runMultiVaultTest({
+      ctx,
+      preSetupHook: async ({ vaults }) => {
+        noteWithTarget = await NOTE_PRESETS.NOTE_WITH_TARGET({
+          vault: vaults[0],
+        });
+        noteWithLink = await NOTE_PRESETS.NOTE_WITH_ALIAS_LINK({
+          vault: vaults[0],
+        });
+      },
+      onInit: async ({}) => {
+        const editor = await VSCodeUtils.openNote(noteWithLink);
+        const links = await provide(editor);
+        expect(links.map((l) => l.uri.fsPath)).toEqual(
+          [noteWithLink].map((note) => NoteUtilsV2.getPath({ note }))
+        );
         done();
       },
     });

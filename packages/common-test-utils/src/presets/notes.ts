@@ -1,13 +1,21 @@
-import { DVault, NotePropsV2 } from "@dendronhq/common-all";
+import { DVault } from "@dendronhq/common-all";
 import { NoteTestUtilsV3 } from "../noteUtils";
 
 // type CreateNoteFunc = ({ vault }: { vault: DVault }) => Promise<NotePropsV2>;
-type CreateNotePresetOpts = { vault: DVault; genRandomId?: boolean };
+type CreateNotePresetOpts = {
+  vault: DVault;
+  genRandomId?: boolean;
+  fname?: string;
+};
 
 export const NOTE_PRESETS = {
-  NOTE_WITH_TARGET: async ({ vault, genRandomId }: CreateNotePresetOpts) => {
+  NOTE_WITH_TARGET: async ({
+    vault,
+    genRandomId,
+    fname,
+  }: CreateNotePresetOpts) => {
     return await NoteTestUtilsV3.createNote({
-      fname: "alpha",
+      fname: fname || "alpha",
       vault,
       body: "[[beta]]",
       genRandomId,
@@ -18,6 +26,13 @@ export const NOTE_PRESETS = {
       fname: "beta",
       vault,
       body: "[[alpha]]",
+    });
+  },
+  NOTE_WITH_ALIAS_LINK: async ({ vault }: CreateNotePresetOpts) => {
+    return await NoteTestUtilsV3.createNote({
+      fname: "beta",
+      vault,
+      body: "[[some label|alpha]]",
     });
   },
   NOTE_WITH_ANCHOR_TARGET: async ({ vault }: CreateNotePresetOpts) => {

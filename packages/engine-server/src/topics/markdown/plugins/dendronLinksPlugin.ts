@@ -24,6 +24,12 @@ export type WikiLinkNote = Node & {
   value: string;
 };
 
+export type WikiLinkProps = {
+  alias: string;
+  value: string;
+  anchorHeader?: string;
+};
+
 export type WikiLinkData = {
   alias: string;
   permalink: string;
@@ -31,6 +37,7 @@ export type WikiLinkData = {
   hName: string;
   hProperties: any;
   hChildren: any[];
+  anchorHeader?: string;
 
   // dendron specific
   toMd?: boolean;
@@ -83,18 +90,24 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
   }
 
   function parseAliasLink(pageTitle: string) {
-    const [displayName, name] = pageTitle.split(aliasDivider);
-    return { name, displayName };
+    const [alias, value] = pageTitle.split(aliasDivider);
+    return { alias, value };
   }
 
   function parsePageTitle(pageTitle: string) {
-    if (isAlias(pageTitle)) {
-      return parseAliasLink(pageTitle);
-    }
-    return {
-      name: pageTitle,
-      displayName: pageTitle,
+    let out: WikiLinkProps = {
+      value: pageTitle,
+      alias: pageTitle,
     };
+    if (isAlias(pageTitle)) {
+      out = parseAliasLink(pageTitle);
+    }
+    if (out.value.indexOf("#") !== -1) {
+      const [value, anchorHeader] = out.value.split("#");
+      out.value = value;
+      out.anchorHeader = anchorHeader;
+    }
+    return out;
   }
 
   function inlineTokenizer(eat: Eat, value: string) {
@@ -102,9 +115,9 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
 
     if (match) {
       const pageName = match[1].trim();
-      const { name, displayName } = parsePageTitle(pageName);
+      const { value, alias, anchorHeader } = parsePageTitle(pageName);
 
-      const pagePermalinks = pageResolver(name);
+      const pagePermalinks = pageResolver(value);
       let permalink = pagePermalinks.find((p) => permalinks.indexOf(p) !== -1);
       const exists = permalink !== undefined;
 
@@ -123,10 +136,11 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
 
       return eat(match[0])({
         type: "wikiLink",
-        value: name,
+        value,
         data: {
-          alias: displayName,
+          alias,
           permalink,
+          anchorHeader,
           exists,
           hName: "a",
           hProperties: {
@@ -136,7 +150,7 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
           hChildren: [
             {
               type: "text",
-              value: displayName,
+              value: alias,
             },
           ],
         },

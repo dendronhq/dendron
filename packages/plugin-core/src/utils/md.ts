@@ -196,7 +196,7 @@ export const findReferences = async (
   const engine = DendronWorkspace.instance().getEngine();
   engine.notes;
   const doc = VSCodeUtils.getActiveTextEditor()?.document;
-  // const fname = DNodeUtilsV2.basename(path.basename(doc?.uri.fsPath as string), true);
+  // clean for anchor
   const fname = ref;
   const note = NoteUtilsV2.getNoteByFname(fname, engine.notes, {
     vault: { fsPath: path.dirname(doc?.uri.fsPath as string) },
@@ -216,15 +216,32 @@ export const findReferences = async (
 
     const fileContent = fs.readFileSync(fsPath).toString();
     const refRegexp = new RegExp(
-      `\\[\\[(${escapeForRegExp(ref)}(\\|[^\\[\\]]+?)?)\\]\\]`,
+      `\\[\\[([^\\[\\]]+?\\|)?(${escapeForRegExp(ref)}(\\#[^\\[\\]]+?)?)\\]\\]`,
       "gi"
     );
+    // const refRegexp = new RegExp(
+    //   `\\[\\[([^\\[\\]]+?\\|)(${escapeForRegExp(ref)}([^\\[\\]]+?)?)\\]\\]`,
+    //   "gi"
+    // );
+    // const refRegexp = new RegExp(
+    //   `\\[\\[(${escapeForRegExp(ref)}(\\|[^\\[\\]]+?)?)\\]\\]`,
+    //   "gi"
+    // );
+    // const refRegexp2 = new RegExp(
+    //   `\\[\\[
+    //     (
+    //       ${escapeForRegExp(ref)}
+    //         (\\|[^\\[\\]]+?)
+    //     ?)
+    //     \\]\\]`,
+    //   "gi"
+    // );
 
     const fileContentLines = fileContent.split(/\r?\n/g);
 
     fileContentLines.forEach((lineText, lineNum) => {
       for (const match of matchAll(refRegexp, lineText)) {
-        const [, reference] = match;
+        const reference = match[2].split("#")[0];
         const offset = (match.index || 0) + 2;
 
         if (

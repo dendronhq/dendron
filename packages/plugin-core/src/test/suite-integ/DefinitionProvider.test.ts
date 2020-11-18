@@ -19,7 +19,7 @@ import { LINKS_PRESETS } from "../presets/LinkPresets";
 import { TIMEOUT } from "../testUtils";
 import { expect, LocationTestUtils, runMultiVaultTest } from "../testUtilsv2";
 
-const { NOTES_SAME_VAULT, NOTES_DIFF_VAULT } = LINKS_PRESETS;
+const { NOTES_DIFF_VAULT } = LINKS_PRESETS;
 
 async function provide(editor: TextEditor) {
   const doc = editor?.document as vscode.TextDocument;
@@ -47,13 +47,13 @@ suite("DefinitionProvider", function () {
 
   describe("same vault", function () {
     let noteWithLink: NotePropsV2;
-    let noteTarget: NotePropsV2;
+    let noteWithTarget: NotePropsV2;
 
     test("basic", (done) => {
       runMultiVaultTest({
         ctx,
         preSetupHook: async ({ vaults }) => {
-          noteTarget = await NOTE_PRESETS.NOTE_WITH_TARGET({
+          noteWithTarget = await NOTE_PRESETS.NOTE_WITH_TARGET({
             vault: vaults[0],
             genRandomId: true,
           });
@@ -62,7 +62,7 @@ suite("DefinitionProvider", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNote(noteTarget);
+          const editor = await VSCodeUtils.openNote(noteWithTarget);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath).toEqual(
             NoteUtilsV2.getPath({ note: noteWithLink })
@@ -102,6 +102,31 @@ suite("DefinitionProvider", function () {
             "alpha.md"
           );
           await runMochaHarness(GOTO_NOTE_PRESETS.ANCHOR.results);
+          done();
+        },
+      });
+    });
+
+    test("with alias", (done) => {
+      let noteWithTarget: NotePropsV2;
+      let noteWithLink: NotePropsV2;
+
+      runMultiVaultTest({
+        ctx,
+        preSetupHook: async ({ vaults }) => {
+          noteWithTarget = await NOTE_PRESETS.NOTE_WITH_TARGET({
+            vault: vaults[0],
+          });
+          noteWithLink = await NOTE_PRESETS.NOTE_WITH_ALIAS_LINK({
+            vault: vaults[0],
+          });
+        },
+        onInit: async () => {
+          const editor = await VSCodeUtils.openNote(noteWithLink);
+          const location = (await provide(editor)) as vscode.Location;
+          expect(location.uri.fsPath).toEqual(
+            NoteUtilsV2.getPath({ note: noteWithTarget })
+          );
           done();
         },
       });
@@ -199,10 +224,7 @@ suite("DefinitionProvider", function () {
           });
         },
         onInit: async () => {
-          const editor = await VSCodeUtils.openNoteByPath({
-            vault: noteWithLink.vault,
-            fname: noteWithLink.fname,
-          });
+          const editor = await VSCodeUtils.openNote(noteWithLink);
           const locations = (await provide(editor)) as vscode.Location[];
           assert.deepStrictEqual(locations.length, 2);
           assert.deepStrictEqual(
@@ -218,23 +240,21 @@ suite("DefinitionProvider", function () {
     });
 
     test("with anchor", (done) => {
-      let alpha: NotePropsV2;
+      let noteWithTarget: NotePropsV2;
+      let noteWithLink: NotePropsV2;
 
       runMultiVaultTest({
         ctx,
         preSetupHook: async ({ vaults }) => {
-          alpha = await NOTE_PRESETS.NOTE_WITH_ANCHOR_TARGET({
+          noteWithTarget = await NOTE_PRESETS.NOTE_WITH_ANCHOR_TARGET({
             vault: vaults[0],
           });
-          await NOTE_PRESETS.NOTE_WITH_ANCHOR_LINK({
+          noteWithLink = await NOTE_PRESETS.NOTE_WITH_ANCHOR_LINK({
             vault: vaults[1],
           });
         },
-        onInit: async ({ vaults }) => {
-          const editor = await VSCodeUtils.openNoteByPath({
-            vault: vaults[1],
-            fname: "beta",
-          });
+        onInit: async () => {
+          const editor = await VSCodeUtils.openNote(noteWithLink);
           const doc = editor?.document as vscode.TextDocument;
           const provider = new DefinitionProvider();
           const pos = LocationTestUtils.getPresetWikiLinkPosition();
@@ -245,7 +265,7 @@ suite("DefinitionProvider", function () {
           )) as vscode.Location;
           assert.strictEqual(
             loc.uri.fsPath,
-            NoteUtilsV2.getPath({ note: alpha })
+            NoteUtilsV2.getPath({ note: noteWithTarget })
           );
           await runMochaHarness(GOTO_NOTE_PRESETS.ANCHOR.results);
           done();

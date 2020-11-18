@@ -1,4 +1,9 @@
-import { NoteTestUtilsV3, toPlainObject } from "@dendronhq/common-test-utils";
+import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import {
+  NoteTestUtilsV3,
+  NOTE_PRESETS,
+  toPlainObject,
+} from "@dendronhq/common-test-utils";
 import assert from "assert";
 import { afterEach, beforeEach } from "mocha";
 import path from "path";
@@ -42,23 +47,21 @@ suite("BacklinksTreeDataProvider", function () {
   });
 
   test("basics", function (done) {
+    let noteWithLink: NotePropsV2;
+    let noteWithTarget: NotePropsV2;
+
     runMultiVaultTest({
       ctx,
       preSetupHook: async ({ vaults }) => {
-        await NoteTestUtilsV3.createNote({
-          fname: "alpha",
-          body: `[[beta]]`,
+        noteWithTarget = await NOTE_PRESETS.NOTE_WITH_TARGET({
           vault: vaults[0],
         });
-        await NoteTestUtilsV3.createNote({
-          fname: "beta",
-          body: `[[alpha]]`,
+        noteWithLink = await NOTE_PRESETS.NOTE_WITH_LINK({
           vault: vaults[0],
         });
       },
       onInit: async ({ vaults }) => {
-        const notePath = path.join(vaults[0].fsPath, "alpha.md");
-        await VSCodeUtils.openFileInEditor(Uri.file(notePath));
+        await VSCodeUtils.openNote(noteWithTarget);
         const out = toPlainObject(await getChildren()) as any;
         assert.strictEqual(
           out[0].command.arguments[0].path as string,
@@ -92,6 +95,60 @@ suite("BacklinksTreeDataProvider", function () {
         assert.strictEqual(
           out[0].command.arguments[0].path as string,
           path.join(vaults[1].fsPath, "beta.md")
+        );
+        assert.strictEqual(out.length, 1);
+        done();
+      },
+    });
+  });
+
+  test("with anchor", function (done) {
+    let noteWithTarget: NotePropsV2;
+    let noteWithLink: NotePropsV2;
+
+    runMultiVaultTest({
+      ctx,
+      preSetupHook: async ({ vaults }) => {
+        noteWithTarget = await NOTE_PRESETS.NOTE_WITH_ANCHOR_TARGET({
+          vault: vaults[0],
+        });
+        noteWithLink = await NOTE_PRESETS.NOTE_WITH_ANCHOR_LINK({
+          vault: vaults[0],
+        });
+      },
+      onInit: async () => {
+        await VSCodeUtils.openNote(noteWithTarget);
+        const out = toPlainObject(await getChildren()) as any;
+        assert.strictEqual(
+          out[0].command.arguments[0].path as string,
+          NoteUtilsV2.getPath({ note: noteWithLink })
+        );
+        assert.strictEqual(out.length, 1);
+        done();
+      },
+    });
+  });
+
+  test("with alias", function (done) {
+    let noteWithTarget: NotePropsV2;
+    let noteWithLink: NotePropsV2;
+
+    runMultiVaultTest({
+      ctx,
+      preSetupHook: async ({ vaults }) => {
+        noteWithTarget = await NOTE_PRESETS.NOTE_WITH_TARGET({
+          vault: vaults[0],
+        });
+        noteWithLink = await NOTE_PRESETS.NOTE_WITH_ALIAS_LINK({
+          vault: vaults[0],
+        });
+      },
+      onInit: async () => {
+        await VSCodeUtils.openNote(noteWithTarget);
+        const out = toPlainObject(await getChildren()) as any;
+        assert.strictEqual(
+          out[0].command.arguments[0].path as string,
+          NoteUtilsV2.getPath({ note: noteWithLink })
         );
         assert.strictEqual(out.length, 1);
         done();

@@ -49,17 +49,20 @@ export type NoteLink = {
 
 // === New
 export type DNodePointerV2 = string;
+
 export type DLoc = {
   fname?: string;
   id?: string;
   vault?: DVault;
   uri?: URI;
+  anchorHeader?: string;
 };
 export type DNoteLoc = {
   fname: string;
   alias?: string;
   id?: string;
   vault?: DVault;
+  anchorHeader?: string;
 };
 
 export type DNoteAnchor = {

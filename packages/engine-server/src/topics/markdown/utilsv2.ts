@@ -103,6 +103,7 @@ export class ParserUtilsV2 {
           pos: { start: m.position?.start.offset, end: m.position?.end.offset },
           to: {
             fname: m.value,
+            anchorHeader: m.data.anchorHeader,
           },
         } as DLink)
     );

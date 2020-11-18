@@ -1,8 +1,6 @@
 import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import { NOTE_PRESETS } from "@dendronhq/common-test-utils";
-import assert from "assert";
 import { afterEach, beforeEach } from "mocha";
-import path from "path";
 import * as vscode from "vscode";
 import ReferenceProvider from "../../features/ReferenceProvider";
 import { HistoryService } from "../../services/HistoryService";
@@ -91,13 +89,12 @@ suite("DocumentLinkProvider", function () {
   });
 
   test("with anchor", (done) => {
-    let noteWithTarget: NotePropsV2;
     let noteWithLink: NotePropsV2;
 
     runMultiVaultTest({
       ctx,
       preSetupHook: async ({ vaults }) => {
-        noteWithTarget = await NOTE_PRESETS.NOTE_WITH_ANCHOR_TARGET({
+        await NOTE_PRESETS.NOTE_WITH_ANCHOR_TARGET({
           vault: vaults[0],
         });
         noteWithLink = await NOTE_PRESETS.NOTE_WITH_ANCHOR_LINK({
@@ -116,13 +113,12 @@ suite("DocumentLinkProvider", function () {
   });
 
   test("with alias", (done) => {
-    let noteWithTarget: NotePropsV2;
     let noteWithLink: NotePropsV2;
 
     runMultiVaultTest({
       ctx,
       preSetupHook: async ({ vaults }) => {
-        noteWithTarget = await NOTE_PRESETS.NOTE_WITH_TARGET({
+        await NOTE_PRESETS.NOTE_WITH_TARGET({
           vault: vaults[0],
         });
         noteWithLink = await NOTE_PRESETS.NOTE_WITH_ALIAS_LINK({

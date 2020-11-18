@@ -17,7 +17,6 @@ import { CancellationToken, Uri, window } from "vscode";
 import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
 import { EngineFlavor, EngineOpts } from "../../types";
-import { VSCodeUtils } from "../../utils";
 import { getDurationMilliseconds, profile } from "../../utils/system";
 import { DendronWorkspace } from "../../workspace";
 import { LookupControllerV2 } from "./LookupControllerV2";

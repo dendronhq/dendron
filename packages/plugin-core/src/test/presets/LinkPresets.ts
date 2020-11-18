@@ -1,8 +1,4 @@
-import {
-  NodeTestUtilsV2,
-  NoteTestUtilsV3,
-  TestPresetEntry,
-} from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV3, TestPresetEntry } from "@dendronhq/common-test-utils";
 
 const NOTES_SAME_VAULT = new TestPresetEntry({
   label: "basic",

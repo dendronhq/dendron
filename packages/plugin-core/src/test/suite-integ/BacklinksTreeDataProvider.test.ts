@@ -47,7 +47,6 @@ suite("BacklinksTreeDataProvider", function () {
   });
 
   test("basics", function (done) {
-    let noteWithLink: NotePropsV2;
     let noteWithTarget: NotePropsV2;
 
     runMultiVaultTest({
@@ -56,7 +55,7 @@ suite("BacklinksTreeDataProvider", function () {
         noteWithTarget = await NOTE_PRESETS.NOTE_WITH_TARGET({
           vault: vaults[0],
         });
-        noteWithLink = await NOTE_PRESETS.NOTE_WITH_LINK({
+        await NOTE_PRESETS.NOTE_WITH_LINK({
           vault: vaults[0],
         });
       },

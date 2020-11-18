@@ -90,6 +90,7 @@ Object {
                 Object {
                   "data": Object {
                     "alias": "foo-wiki-link",
+                    "anchorHeader": undefined,
                     "exists": false,
                     "hChildren": Array [
                       Object {
@@ -161,6 +162,7 @@ Object {
                 Object {
                   "data": Object {
                     "alias": "label",
+                    "anchorHeader": undefined,
                     "exists": false,
                     "hChildren": Array [
                       Object {
@@ -232,6 +234,7 @@ Object {
                 Object {
                   "data": Object {
                     "alias": "label",
+                    "anchorHeader": undefined,
                     "exists": false,
                     "hChildren": Array [
                       Object {

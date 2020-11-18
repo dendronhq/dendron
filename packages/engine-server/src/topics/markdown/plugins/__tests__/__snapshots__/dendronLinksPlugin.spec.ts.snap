@@ -63,6 +63,7 @@ Object {
         Object {
           "data": Object {
             "alias": "\\"foo.md\\"",
+            "anchorHeader": undefined,
             "exists": false,
             "hChildren": Array [
               Object {

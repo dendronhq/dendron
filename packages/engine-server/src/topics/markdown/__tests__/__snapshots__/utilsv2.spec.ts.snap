@@ -57,6 +57,7 @@ Array [
       "start": 0,
     },
     "to": Object {
+      "anchorHeader": undefined,
       "fname": "bar",
     },
     "type": "wiki",

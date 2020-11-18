@@ -42,11 +42,6 @@ export type SchemaTemplate = {
   type: "snippet" | "note";
 };
 
-export type NoteData = {
-  schemaId?: string;
-  links?: NoteLink[];
-};
-
 export type NoteLink = {
   type: "note";
   id: string;
@@ -79,7 +74,7 @@ export type DVault = {
   fsPath: string;
 };
 export type DLink = {
-  type: "ref" | "wiki" | "md";
+  type: "ref" | "wiki" | "md" | "backlink";
   original: string;
   value: string;
   alias?: string;
@@ -114,7 +109,6 @@ export type DNoteRefData = {
 export type DNoteRefLink = DNoteLink<DNoteRefData>;
 
 export type SchemaDataV2 = SchemaData;
-export type NoteDataV2 = NoteData;
 
 /**
  * Props are the official interface for a node
@@ -154,7 +148,7 @@ export type SchemaRawV2 = Pick<SchemaPropsV2, "id"> &
 export type SchemaOptsV2 = Omit<DNodeOptsV2<SchemaData>, "type" | "id"> & {
   id: string;
 };
-export type NoteOptsV2 = Omit<DNodeOptsV2<NoteDataV2>, "type">;
+export type NoteOptsV2 = Omit<DNodeOptsV2, "type">;
 
 export type DNodePropsQuickInputV2<T = any> = DNodePropsV2<T> & {
   label: string;
@@ -163,7 +157,7 @@ export type DNodePropsQuickInputV2<T = any> = DNodePropsV2<T> & {
 };
 
 export type SchemaPropsV2 = DNodePropsV2<SchemaData>;
-export type NotePropsV2 = DNodePropsV2<NoteDataV2>;
+export type NotePropsV2 = DNodePropsV2;
 
 export type DNodePropsDictV2 = {
   [key: string]: DNodePropsV2;

@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.0...v0.16.3-alpha.1) (2020-11-18)
+
+### Enhancements
+
+- support alias links ([bb56e72](https://github.com/dendronhq/dendron/commit/bb56e7217c23e486f2402deffe9398cfa8edee2f))
+- support creating same note in multiple vaults ([64fe9d0](https://github.com/dendronhq/dendron/commit/64fe9d0081c90ca0d30fc58e69310b74172ba849))
+
 ## [0.16.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.16.2...v0.16.3-alpha.0) (2020-11-18)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

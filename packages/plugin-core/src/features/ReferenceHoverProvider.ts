@@ -22,7 +22,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       const engine = DendronWorkspace.instance().getEngine();
       const notes = NoteUtilsV2.getNotesByFname({
         fname: refAtPos.ref,
-        engine,
+        notes: engine.notes,
       });
       const uris = notes.map((note) => Uri.file(NoteUtilsV2.getPath({ note })));
       const foundUri = uris[0];

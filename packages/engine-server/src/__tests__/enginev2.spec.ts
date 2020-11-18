@@ -23,6 +23,7 @@ import {
   NodeTestUtilsV2,
   NoteTestPresetsV2,
   RENAME_TEST_PRESETS,
+  runJestHarness,
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -30,7 +31,7 @@ import path from "path";
 import { DendronEngineV2 } from "../enginev2";
 import { ParserUtilsV2 } from "../topics/markdown";
 
-const { SCHEMAS } = ENGINE_SERVER.ENGINE_SINGLE_TEST_PRESET;
+const { SCHEMAS, NOTES } = ENGINE_SERVER.ENGINE_SINGLE_TEST_PRESET;
 const { normalizeNote, normalizeNotes } = NodeTestUtilsV2;
 
 const createNotes = async (opts: { rootName: string; vaultDir: string }) => {
@@ -454,14 +455,35 @@ describe("engine, notes/", () => {
   const NOTE_INIT_PRESET =
     NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.init;
 
+  const { WITH_BACKLINKS, WITH_BACKLINKS_V2 } = NOTES.INIT;
+
   describe("init/", () => {
     let vaultDir: string;
     let engine: DEngineV2;
     let vault: DVault;
+    let wsRoot = "";
 
     beforeEach(async () => {
       ({ vaultDir, engine } = await beforePreset());
       vault = { fsPath: vaultDir };
+    });
+
+    test("with backlinks/", async () => {
+      await WITH_BACKLINKS.preSetupHook({ wsRoot, vaults: [vault] });
+      await engine.init();
+      expect(engine.notes).toMatchSnapshot("bond");
+      await runJestHarness(WITH_BACKLINKS.results, expect, {
+        notes: engine.notes,
+      });
+    });
+
+    test(WITH_BACKLINKS_V2.label, async () => {
+      await WITH_BACKLINKS_V2.preSetupHook({ wsRoot, vaults: [vault] });
+      await engine.init();
+      expect(engine.notes).toMatchSnapshot("bond");
+      await runJestHarness(WITH_BACKLINKS_V2.results, expect, {
+        notes: engine.notes,
+      });
     });
 
     test("with stubs/", async () => {

@@ -82,6 +82,11 @@ export class ParserUtilsV2 {
     return out2;
   }
 
+  /**
+   * Get all links from the note body
+   * Currently, just look for wiki links
+   * @param param0
+   */
   static findLinks({ note }: { note: NotePropsV2 }): DLink[] {
     const content = note.body;
     let remark = ParserUtilsV2.getRemark();

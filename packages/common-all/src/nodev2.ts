@@ -7,14 +7,16 @@ import path from "path";
 import { URI } from "vscode-uri";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
-import { DNoteLoc, DVault, SchemaTemplate } from "./typesv2";
 import {
   DEngineClientV2,
+  DLink,
   DLoc,
   DNodeOptsV2,
   DNodePropsDictV2,
   DNodePropsQuickInputV2,
   DNodePropsV2,
+  DNoteLoc,
+  DVault,
   NoteOptsV2,
   NotePropsDictV2,
   NotePropsV2,
@@ -26,6 +28,7 @@ import {
   SchemaPropsDictV2,
   SchemaPropsV2,
   SchemaRawV2,
+  SchemaTemplate,
 } from "./typesv2";
 import { genUUID } from "./uuid";
 
@@ -294,6 +297,28 @@ export class NoteUtilsV2 {
   static RE_FM = /^---(.*)^---/ms;
   static RE_FM_UPDATED = /^updated:.*$/m;
   static RE_FM_CREATED = /^created:.*$/m;
+
+  static addBacklink({
+    from,
+    to,
+    link,
+  }: {
+    from: NotePropsV2;
+    to: NotePropsV2;
+    link: DLink;
+  }) {
+    // const backlinks = _.filter(to.links, { type: "backlink" });
+    // if (!_.find(backlinks, (ent) => ent.from.fname === from.fname)) {
+    to.links.push({
+      from: { fname: from.fname, vault: from.vault },
+      type: "backlink",
+      original: link.original,
+      pos: link.pos,
+      value: link.value,
+    });
+    // }
+  }
+
   /**
    * Add node to parent
    * Create stubs if no direct parent exists
@@ -486,15 +511,17 @@ export class NoteUtilsV2 {
 
   static getNotesByFname({
     fname,
-    engine,
+    notes,
     vault,
   }: {
     fname: string;
-    engine: DEngineClientV2;
+    notes: NotePropsDictV2 | NotePropsV2[];
     vault?: DVault;
   }): NotePropsV2[] {
-    const notes = engine.notes;
-    const out = _.filter(_.values(notes), (ent) => {
+    if (!_.isArray(notes)) {
+      notes = _.values(notes);
+    }
+    const out = _.filter(notes, (ent) => {
       return (
         ent.fname.toLowerCase() === fname.toLowerCase() &&
         (vault ? ent.vault.fsPath === vault.fsPath : true)

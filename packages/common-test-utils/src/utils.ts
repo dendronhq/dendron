@@ -193,6 +193,17 @@ export async function runMochaHarness<TOpts>(results: any, opts?: TOpts) {
     assert.deepStrictEqual(ent.actual, ent.expected)
   );
 }
+
+export async function runJestHarness<TOpts>(
+  results: any,
+  expect: jest.Expect,
+  opts?: TOpts
+) {
+  return _.map(await results(opts), (ent) =>
+    expect(ent.actual).toEqual(ent.expected)
+  );
+}
+
 // export async function runJestHarness<TOpts>({
 //   opts,
 //   results,

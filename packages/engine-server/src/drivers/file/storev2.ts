@@ -453,12 +453,49 @@ export class FileStorageV2 implements DStoreV2 {
   async initNotes(): Promise<NotePropsV2[]> {
     const ctx = "initNotes";
     this.logger.info({ ctx, msg: "enter" });
+    let notesWithLinks: NotePropsV2[] = [];
     const out = await Promise.all(
       (this.vaultsv3 as DVault[]).map(async (vault) => {
-        return this._initNotes(vault);
+        const notes = await this._initNotes(vault);
+        notesWithLinks = notesWithLinks.concat(
+          _.filter(notes, (n) => !_.isEmpty(n.links))
+        );
+        return notes;
       })
     );
-    return _.flatten(out);
+    const allNotes = _.flatten(out);
+    await this._addBacklinks({ notesWithLinks, allNotes });
+    return allNotes;
+  }
+
+  async _addBacklinks({
+    notesWithLinks,
+    allNotes,
+  }: {
+    notesWithLinks: NotePropsV2[];
+    allNotes: NotePropsV2[];
+  }) {
+    return _.map(notesWithLinks, async (noteFrom) => {
+      return Promise.all(
+        noteFrom.links.map(async (link) => {
+          const fname = link.to?.fname;
+          if (fname) {
+            const notes = NoteUtilsV2.getNotesByFname({
+              fname,
+              notes: allNotes,
+            });
+            return notes.map((noteTo) => {
+              return NoteUtilsV2.addBacklink({
+                from: noteFrom,
+                to: noteTo,
+                link,
+              });
+            });
+          }
+          return;
+        })
+      );
+    });
   }
 
   async _initNotes(vault: DVault): Promise<NotePropsV2[]> {

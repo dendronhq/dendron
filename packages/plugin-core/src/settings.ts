@@ -65,8 +65,8 @@ const _SETTINGS: ConfigUpdateChangeSet = {
   // prevent markdown-notes from mangling file names
   "markdown-preview-enhanced.enableWikiLinkSyntax": { default: true },
   "markdown-preview-enhanced.wikiLinkFileExtension": { default: ".md" },
-  "vscodeMarkdownNotes.noteCompletionConvention": { default: "noExtension" },
-  "vscodeMarkdownNotes.slugifyCharacter": { default: "NONE" },
+  // "vscodeMarkdownNotes.noteCompletionConvention": { default: "noExtension" },
+  // "vscodeMarkdownNotes.slugifyCharacter": { default: "NONE" },
   // --- snippets
   // add snippet completion
   "editor.snippetSuggestions": { default: "inline" },
@@ -81,8 +81,8 @@ const _EXTENSIONS: ConfigUpdateEntry[] = [
   { default: "dendron.dendron-markdown-shortcuts" },
   { default: "dendron.dendron-markdown-preview-enhanced" },
   { default: "dendron.dendron-markdown-links" },
-  { default: "dendron.dendron-markdown-notes" },
   { default: "github.github-vscode-theme" },
+  { default: "dendron.dendron-markdown-notes", action: "REMOVE" },
   { default: "shd101wyy.markdown-preview-enhanced", action: "REMOVE" },
   { default: "kortina.vscode-markdown-notes", action: "REMOVE" },
   { default: "mushan.vscode-paste-image", action: "REMOVE" },

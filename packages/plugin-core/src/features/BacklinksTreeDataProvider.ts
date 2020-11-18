@@ -7,17 +7,6 @@ import {
   sortPaths,
 } from "../utils/md";
 import _ from "lodash";
-// import groupBy from 'lodash.groupby';
-
-// import {
-//   containsMarkdownExt,
-//   findReferences,
-//   getWorkspaceFolder,
-//   trimSlashes,
-//   sortPaths,
-//   getMemoConfigProperty,
-// } from '../utils';
-// import { FoundRefT } from '../types';
 
 class Backlink extends vscode.TreeItem {
   constructor(

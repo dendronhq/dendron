@@ -262,8 +262,10 @@ export class DendronWorkspace {
   }
 
   async setupViews(context: vscode.ExtensionContext) {
+    const ctx = "setupViews";
     HistoryService.instance().subscribe("extension", async (event) => {
       if (event.action === "initialized") {
+        Logger.info({ ctx, msg: "init:backlinks" });
         const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
         vscode.window.onDidChangeActiveTextEditor(
           async () => await backlinksTreeDataProvider.refresh()

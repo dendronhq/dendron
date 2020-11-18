@@ -39,7 +39,7 @@ export const NOTE_PRESETS = {
     return await NoteTestUtilsV3.createNote({
       vault,
       fname: "alpha",
-      body: [`# H1`, `# H2`, `# H3`, "", "Some Content"].join("\n"),
+      body: [`# H1`, `# H2 ^8a`, `# H3`, "", "Some Content"].join("\n"),
     });
   },
   NOTE_WITH_ANCHOR_LINK: async ({ vault }: CreateNotePresetOpts) => {

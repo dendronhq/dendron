@@ -1,9 +1,9 @@
 import {
   DendronError,
   DNodePropsQuickInputV2,
+  getSlugger,
   NotePropsV2,
 } from "@dendronhq/common-all";
-import GithubSlugger from "github-slugger";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
@@ -243,7 +243,7 @@ export class LookupControllerV2 {
         CONFIG.LINK_SELECT_AUTO_TITLE_BEHAVIOR.key
       ) === "slug"
     ) {
-      const slugger = new GithubSlugger();
+      const slugger = getSlugger();
       suffix = slugger.slug(text);
     }
     let onUpdateReason: any = "updatePickerBehavior:normal";

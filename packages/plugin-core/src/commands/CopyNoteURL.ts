@@ -1,6 +1,5 @@
 import clipboardy from "@dendronhq/clipboardy";
-import { NotePropsV2 } from "@dendronhq/common-all";
-import GithubSlugger from "github-slugger";
+import { getSlugger, NotePropsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Selection, window } from "vscode";
@@ -60,7 +59,7 @@ export class CopyNoteURLCommand extends BasicCommand<
     const { text, selection } = VSCodeUtils.getSelection();
     if (!_.isUndefined(text) && !_.isEmpty(text)) {
       if (this.isHeader(text, selection as Selection)) {
-        const slugger = new GithubSlugger();
+        const slugger = getSlugger();
         const headerText = _.trim(text, " #");
         const slug = slugger.slug(headerText);
         link += `#${slug}`;

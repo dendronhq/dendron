@@ -3,6 +3,7 @@ import {
   DNodeTypeV2,
   DNoteAnchor,
   DVault,
+  getSlugger,
   NotePropsV2,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
@@ -11,7 +12,6 @@ import _ from "lodash";
 import { Position, Selection, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { getSlugger } from "../utils/strings";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 

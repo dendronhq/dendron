@@ -30,6 +30,7 @@ import {
   SchemaRawV2,
   SchemaTemplate,
 } from "./typesv2";
+import { getSlugger } from "./utils";
 import { genUUID } from "./uuid";
 
 export class DNodeUtilsV2 {
@@ -447,9 +448,20 @@ export class NoteUtilsV2 {
     return stubNodes;
   }
 
-  static createWikiLink({ note }: { note: NotePropsV2 }): string {
+  static createWikiLink({
+    note,
+    header,
+  }: {
+    note: NotePropsV2;
+    header?: string;
+  }): string {
     const { title, fname } = note;
-    const link = `[[${title}|${fname}]]`;
+    let suffix = "";
+    const slugger = getSlugger();
+    if (header) {
+      suffix = "#" + slugger.slug(header);
+    }
+    const link = `[[${title}|${fname}${suffix}]]`;
     return link;
   }
 

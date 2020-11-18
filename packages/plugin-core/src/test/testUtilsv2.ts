@@ -238,7 +238,10 @@ export class LocationTestUtils {
   /**
    * get default wiki link position
    */
-  static getPresetWikiLinkPosition = () => new Position(7, 2);
+  static getPresetWikiLinkPosition = (opts?: {
+    line?: number;
+    char?: number;
+  }) => new Position(opts?.line || 7, opts?.char || 2);
   static getBasenameFromLocation = (loc: Location) =>
     path.basename(loc.uri.fsPath);
 }

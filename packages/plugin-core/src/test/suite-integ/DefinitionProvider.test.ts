@@ -1,4 +1,4 @@
-import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { getSlugger, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV3,
   NOTE_PRESETS,
@@ -12,7 +12,6 @@ import { TextEditor } from "vscode";
 import DefinitionProvider from "../../features/DefinitionProvider";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
-import { getSlugger } from "../../utils/strings";
 import { DendronWorkspace } from "../../workspace";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { LINKS_PRESETS } from "../presets/LinkPresets";

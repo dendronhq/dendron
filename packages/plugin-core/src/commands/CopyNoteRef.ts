@@ -10,6 +10,7 @@ import _ from "lodash";
 import { Position, Range, Selection, TextEditor, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
+import { getHeaderFromSelection } from "../utils/editor";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -30,23 +31,6 @@ export class CopyNoteRefCommand extends BasicCommand<
 
   async showFeedback(link: string) {
     window.showInformationMessage(`${link} copied`);
-  }
-
-  isHeader(selection: Selection, editor: TextEditor): false | string {
-    // multi-line
-    if (selection.start.line !== selection.end.line) {
-      return false;
-    }
-    const lineRange = new Range(
-      new Position(selection.start.line, 0),
-      new Position(selection.start.line + 1, 0)
-    );
-    const headerText = _.trim(editor.document.getText(lineRange).slice(0, -1));
-    if (headerText.startsWith("#")) {
-      return headerText;
-    } else {
-      return false;
-    }
   }
 
   hasNextHeader(opts: { selection: Selection }) {
@@ -75,22 +59,16 @@ export class CopyNoteRefCommand extends BasicCommand<
         fname,
       },
     };
-    const { text, selection, editor } = VSCodeUtils.getSelection();
+    //const { selection } = VSCodeUtils.getSelection();
     let refLinkString: string = refLink2String(link);
-    if (
-      !_.isUndefined(selection) &&
-      !_.isEmpty(text) &&
-      !_.isUndefined(editor)
-    ) {
-      const maybeHeaderText = this.isHeader(selection, editor);
-      if (maybeHeaderText) {
-        linkData.anchorStart = maybeHeaderText;
-        if (this.hasNextHeader({ selection })) {
-          linkData.anchorEnd = "*";
-        }
-        linkData.anchorStartOffset = 1;
-        refLinkString = refLink2String(link);
+    const { header, selection } = getHeaderFromSelection();
+    if (header && selection) {
+      linkData.anchorStart = header;
+      if (this.hasNextHeader({ selection })) {
+        linkData.anchorEnd = "*";
       }
+      linkData.anchorStartOffset = 1;
+      refLinkString = refLink2String(link);
     }
     return ["((", "ref: ", refLinkString, "))"].join("");
   }

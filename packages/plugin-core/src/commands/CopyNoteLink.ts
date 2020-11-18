@@ -4,6 +4,7 @@ import _ from "lodash";
 import { TextEditor, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
+import { getHeaderFromSelection } from "../utils/editor";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -37,7 +38,8 @@ export class CopyNoteLinkCommand extends BasicCommand<
     if (!note) {
       throw Error(`${fname} not found in engine`);
     }
-    const link = NoteUtilsV2.createWikiLink({ note });
+    const { header } = getHeaderFromSelection({ clean: true });
+    const link = NoteUtilsV2.createWikiLink({ note, header });
     try {
       clipboardy.writeSync(link);
     } catch (err) {

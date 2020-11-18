@@ -558,7 +558,7 @@ export class NoteUtilsV2 {
       out = _out[0];
     }
     if (opts?.throwIfEmpty && _.isUndefined(out)) {
-      throw Error(`${fname} not found`);
+      throw Error(`${fname} not found in getNoteByFname`);
     }
     return out;
   }

@@ -268,3 +268,27 @@ export const trimTrailingSlash = (value: string) =>
   value.replace(/\/+$|\\+$/g, "");
 export const trimSlashes = (value: string) =>
   trimLeadingSlash(trimTrailingSlash(value));
+export const normalizeSlashes = (value: string) => value.replace(/\\/gi, "/");
+
+export const fsPathToRef = ({
+  path: fsPath,
+  keepExt,
+  basePath,
+}: {
+  path: string;
+  keepExt?: boolean;
+  basePath?: string;
+}): string | null => {
+  const ref =
+    basePath && fsPath.startsWith(basePath)
+      ? normalizeSlashes(fsPath.replace(basePath, ""))
+      : path.basename(fsPath);
+
+  if (keepExt) {
+    return trimLeadingSlash(ref);
+  }
+
+  return trimLeadingSlash(
+    ref.includes(".") ? ref.slice(0, ref.lastIndexOf(".")) : ref
+  );
+};

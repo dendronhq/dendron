@@ -35,6 +35,7 @@ import {
   GLOBAL_STATE,
 } from "./constants";
 import BacklinksTreeDataProvider from "./features/BacklinksTreeDataProvider";
+import { completionProvider } from "./features/completionProvider";
 import DefinitionProvider from "./features/DefinitionProvider";
 import DocumentLinkProvider from "./features/DocumentLinkProvider";
 import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
@@ -208,7 +209,7 @@ export class DendronWorkspace {
     if (!opts.skipSetup) {
       this._setupCommands();
     }
-    this.setupLanguageFeatures();
+    this.setupLanguageFeatures(context);
     this.setupViews(context);
     const ctx = "DendronWorkspace";
     this.L.info({ ctx, msg: "initialized" });
@@ -270,19 +271,23 @@ export class DendronWorkspace {
   }
 
   async setupViews(context: vscode.ExtensionContext) {
-    const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
-    vscode.window.onDidChangeActiveTextEditor(
-      async () => await backlinksTreeDataProvider.refresh()
-    );
-    context.subscriptions.push(
-      vscode.window.createTreeView("dendron.backlinksPanel", {
-        treeDataProvider: backlinksTreeDataProvider,
-        showCollapseAll: true,
-      })
-    );
+    HistoryService.instance().subscribe("extension", async (event) => {
+      if (event.action === "initialized") {
+        const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
+        vscode.window.onDidChangeActiveTextEditor(
+          async () => await backlinksTreeDataProvider.refresh()
+        );
+        context.subscriptions.push(
+          vscode.window.createTreeView("dendron.backlinksPanel", {
+            treeDataProvider: backlinksTreeDataProvider,
+            showCollapseAll: true,
+          })
+        );
+      }
+    });
   }
 
-  setupLanguageFeatures() {
+  setupLanguageFeatures(context: vscode.ExtensionContext) {
     const mdLangSelector = { language: "markdown", scheme: "*" };
     vscode.languages.registerDocumentLinkProvider(
       mdLangSelector,
@@ -300,6 +305,7 @@ export class DendronWorkspace {
       mdLangSelector,
       new ReferenceHoverProvider()
     );
+    completionProvider.activate(context);
   }
 
   _setupCommands() {

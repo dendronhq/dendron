@@ -35,6 +35,11 @@
                     "id": "dendronTreeView",
                     "name": "Dendron Tree View",
                     "visibility": "visible"
+                },
+                {
+                    "id": "dendron.backlinksPanel",
+                    "name": "Backlinks",
+                    "visibility": "visible"
                 }
             ]
         },

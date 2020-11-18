@@ -6,6 +6,7 @@ import vscode, { commands, extensions, Location, TextDocument } from "vscode";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { matchAll } from "./strings";
+import { sort as sortPaths } from "cross-path-sort";
 
 export type RefT = {
   label: string;
@@ -18,8 +19,10 @@ export type FoundRefT = {
   matchText: string;
 };
 
+const markdownExtRegex = /\.md$/i;
 export const refPattern = "(\\[\\[)([^\\[\\]]+?)(\\]\\])";
 export const REGEX_FENCED_CODE_BLOCK = /^( {0,3}|\t)```[^`\r\n]*$[\w\W]+?^( {0,3}|\t)``` *$/gm;
+export { sortPaths };
 const REGEX_CODE_SPAN = /`[^`]*?`/gm;
 
 export class MarkdownUtils {
@@ -255,3 +258,13 @@ export const findReferences = async (
 
 export const escapeForRegExp = (value: string) =>
   value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+export const containsMarkdownExt = (pathParam: string): boolean =>
+  !!markdownExtRegex.exec(path.parse(pathParam).ext);
+
+export const trimLeadingSlash = (value: string) =>
+  value.replace(/^\/+|^\\+/g, "");
+export const trimTrailingSlash = (value: string) =>
+  value.replace(/\/+$|\\+$/g, "");
+export const trimSlashes = (value: string) =>
+  trimLeadingSlash(trimTrailingSlash(value));

@@ -19,10 +19,6 @@ import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
 import { BuildPodCommand } from "./commands/BuildPod";
 import { ChangeWorkspaceCommand } from "./commands/ChangeWorkspace";
-import { ConfigureCommand } from "./commands/ConfigureCommand";
-import { ContributeCommand } from "./commands/Contribute";
-import { DeleteNodeCommand } from "./commands/DeleteNodeCommand";
-import { DumpStateCommand } from "./commands/DumpStateCommand";
 import { GotoNoteCommand, GotoNoteCommandOpts } from "./commands/GotoNote";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { ImportPodCommand } from "./commands/ImportPod";
@@ -31,27 +27,14 @@ import { OpenLogsCommand } from "./commands/OpenLogs";
 import { PublishCommand } from "./commands/Publish";
 import { PublishPodCommand } from "./commands/PublishPod";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
-import { ResetConfigCommand } from "./commands/ResetConfig";
-import { RestoreVaultCommand } from "./commands/RestoreVault";
-import { SetupWorkspaceCommand } from "./commands/SetupWorkspace";
-import { ShowHelpCommand } from "./commands/ShowHelp";
-import { ShowPreviewCommand } from "./commands/ShowPreview";
-import { SnapshotVaultCommand } from "./commands/SnapshotVault";
 import { UpdateSchemaCommand } from "./commands/UpdateSchema";
 import { UpgradeSettingsCommand } from "./commands/UpgradeSettings";
-import {
-  VaultAddCommand,
-  VaultAddCommandOpts,
-} from "./commands/VaultAddCommand";
-import {
-  VaultRemoveCommand,
-  VaultRemoveCommandOpts,
-} from "./commands/VaultRemoveCommand";
 import {
   DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
 } from "./constants";
+import BacklinksTreeDataProvider from "./features/BacklinksTreeDataProvider";
 import DefinitionProvider from "./features/DefinitionProvider";
 import DocumentLinkProvider from "./features/DocumentLinkProvider";
 import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
@@ -226,6 +209,7 @@ export class DendronWorkspace {
       this._setupCommands();
     }
     this.setupLanguageFeatures();
+    this.setupViews(context);
     const ctx = "DendronWorkspace";
     this.L.info({ ctx, msg: "initialized" });
   }
@@ -283,6 +267,19 @@ export class DendronWorkspace {
 
   setEngine(engine: DEngineClientV2) {
     this._enginev2 = engine;
+  }
+
+  async setupViews(context: vscode.ExtensionContext) {
+    const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
+    vscode.window.onDidChangeActiveTextEditor(
+      async () => await backlinksTreeDataProvider.refresh()
+    );
+    context.subscriptions.push(
+      vscode.window.createTreeView("dendron.backlinksPanel", {
+        treeDataProvider: backlinksTreeDataProvider,
+        showCollapseAll: true,
+      })
+    );
   }
 
   setupLanguageFeatures() {

@@ -1,10 +1,16 @@
 import { DNodeUtilsV2, DVault, NotePropsV2 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
-import { NodeTestPresetsV2, PLUGIN_CORE } from "@dendronhq/common-test-utils";
+import {
+  NodeTestPresetsV2,
+  NoteTestUtilsV3,
+  PLUGIN_CORE,
+  runMochaHarness,
+} from "@dendronhq/common-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import { afterEach, beforeEach, describe } from "mocha";
+import { ENGINE_SERVER } from "@dendronhq/common-test-utils";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
@@ -22,12 +28,43 @@ import { _activate } from "../../_extension";
 import { createMockQuickPick, onWSInit, TIMEOUT } from "../testUtils";
 import {
   getNoteFromTextEditor,
+  runMultiVaultTest,
   setupCodeWorkspaceMultiVaultV2,
 } from "../testUtilsv2";
 
 const { LOOKUP_SINGLE_TEST_PRESET } = PLUGIN_CORE;
 
-suite("notes, multi", function () {
+const { SCHEMAS } = ENGINE_SERVER.ENGINE_SINGLE_TEST_PRESET;
+
+suite("Lookup Schema, Multi/", function () {
+  let ctx: vscode.ExtensionContext;
+  this.timeout(TIMEOUT);
+
+  beforeEach(function () {
+    ctx = VSCodeUtils.getOrCreateMockContext();
+    DendronWorkspace.getOrCreate(ctx);
+    VSCodeUtils.closeAllEditors();
+  });
+
+  afterEach(function () {
+    HistoryService.instance().clearSubscriptions();
+    VSCodeUtils.closeAllEditors();
+  });
+
+  test.skip("basics", function (done) {
+    runMultiVaultTest({
+      ctx,
+      onInit: async ({ vaults, wsRoot }) => {
+        const engine = DendronWorkspace.instance().getEngine();
+        await SCHEMAS.WRITE.BASICS.postSetupHook({ wsRoot, vaults, engine });
+        await runMochaHarness(SCHEMAS.WRITE.BASICS.results, { engine });
+        done();
+      },
+    });
+  });
+});
+
+suite("Lookup notes, multi", function () {
   let wsRoot: string;
   let vaults: DVault[];
   let ctx: vscode.ExtensionContext;
@@ -152,24 +189,20 @@ suite("notes, multi", function () {
       });
     });
 
-    // TODO: this causes next test to fail
-    test.skip("opened note", function (done) {
-      onWSInit(async () => {
-        const engOpts: EngineOpts = { flavor: "note" };
-        const lc = new LookupControllerV2(engOpts);
-        const lp = new LookupProviderV2(engOpts);
-        await VSCodeUtils.openFileInEditor(
-          vscode.Uri.file(path.join(vaults[0].fsPath, "foo.md"))
-        );
-        const quickpick = await lc.show();
-        quickpick.value = "";
-        await lp.onUpdatePickerItem(quickpick, engOpts, "manual", token);
-        quickpick.onDidChangeActive(() => {
-          assert.strictEqual(lc.quickPick?.activeItems.length, 1);
-          assert.strictEqual(lc.quickPick?.activeItems[0].fname, "foo");
-          done();
-        });
-        await lp.onUpdatePickerItem(quickpick, engOpts, "manual", token);
+    test("opened note", function (done) {
+      runUpdateItemTest({
+        onInitCb: async ({ quickpick, lp, lc }) => {
+          await VSCodeUtils.openFileInEditor(
+            vscode.Uri.file(path.join(vaults[0].fsPath, "foo.md"))
+          );
+          quickpick.value = "";
+          await lp.onUpdatePickerItem(quickpick, engOpts, "manual", token);
+          quickpick.onDidChangeActive(() => {
+            assert.strictEqual(lc.quickPick?.activeItems.length, 1);
+            assert.strictEqual(lc.quickPick?.activeItems[0].fname, "foo");
+            done();
+          });
+        },
       });
     });
 

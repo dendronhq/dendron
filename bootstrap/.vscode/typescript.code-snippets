@@ -23,5 +23,22 @@
 			"}",
 		],
 		"description": "Log output to console"
-	}
+	},
+	"tentry": {
+		"prefix": "tentry",
+		"body": [
+		  "new TestPresetEntry({",
+		  "  label: \"$0\",",
+		  "  preSetupHook: async({vaults, wsRoot}) => {",
+		  "  },",
+		  "  postSetupHook: async({vaults, wsRoot}) => {",
+		  "  },",
+		  "  results: async ({ }: { }) => {",
+		  "    return [];",
+		  "  }",
+		  "})",
+		  ""
+		],
+		"description": ""
+	  },
 }

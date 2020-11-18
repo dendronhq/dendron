@@ -75,7 +75,9 @@ export async function runMultiVaultTest(
 ) {
   const { ctx } = opts;
   const { vaults, wsRoot } = await setupCodeWorkspaceMultiVaultV2(opts);
-  opts.onInit({ wsRoot, vaults });
+  onWSInit(async () => {
+    await opts.onInit({ wsRoot, vaults });
+  });
   await _activate(ctx);
 }
 

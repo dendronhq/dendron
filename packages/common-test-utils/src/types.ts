@@ -1,4 +1,4 @@
-import { DVault } from "@dendronhq/common-all";
+import { DEngineClientV2, DVault } from "@dendronhq/common-all";
 
 export type TestResult = {
   actual: any;
@@ -9,4 +9,5 @@ export type TestResult = {
 export type SetupHookFunction<T = any> = (opts: {
   wsRoot: string;
   vaults: DVault[];
+  engine?: DEngineClientV2;
 }) => Promise<T>;

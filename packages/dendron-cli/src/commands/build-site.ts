@@ -268,7 +268,7 @@ export class BuildSiteCommand extends SoilCommand<
     });
   }
 
-  enrichArgs(args: CommandCLIOpts) {
+  enrichArgs(args: CommandCLIOpts): any {
     const args1 = super._enrichArgs(args);
     const config = DConfig.getOrCreate(args.wsRoot).site;
     return { ...args1, config, writeStubs: args.writeStubs || false };

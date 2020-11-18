@@ -76,6 +76,7 @@ const beforePreset = async () => {
 describe("engine, schema/", () => {
   let vaultDir: string;
   let engine: DEngineV2;
+  let wsRoot = "";
 
   describe("delete/", () => {
     let vaultDir: string;
@@ -122,29 +123,14 @@ describe("engine, schema/", () => {
     });
 
     test("update schema, add new prop to module", async () => {
-      const { error } = await engine.init();
-      expect(error).toBeNull();
-      // update schema
-      const module = engine.schemas["foo"];
-      const moduleRoot = module.schemas[module.root.id];
+      await engine.init();
       const vault = { fsPath: vaultDir };
-      const ch2 = SchemaUtilsV2.create({
-        fname: "foo",
-        id: "ch2",
-        created: "1",
-        updated: "1",
-        vault,
+      await SCHEMAS.WRITE.BASICS.postSetupHook({
+        wsRoot,
+        vaults: [vault],
+        engine,
       });
-      DNodeUtilsV2.addChild(moduleRoot, ch2);
-      module.schemas[ch2.id] = ch2;
-      await engine.updateSchema(module);
-
-      expect(_.values(engine.schemas).length).toEqual(2);
-      expect(_.values(engine.schemas["foo"].schemas).length).toEqual(3);
-
-      // query should have same results
-      const resp = await engine.querySchema("*");
-      expect(resp.data.length).toEqual(2);
+      await runJestHarness(SCHEMAS.WRITE.BASICS.results, expect, { engine });
     });
 
     test("write new module", async () => {
@@ -223,13 +209,9 @@ describe("engine, schema/", () => {
 
     test("root", async () => {
       const { data } = await engine.init();
-      await NodeTestPresetsV2.runJestHarness({
-        results: SCHEMAS.INIT.ROOT.results,
-        opts: {
-          schemas: data.schemas,
-          vault,
-        },
-        expect,
+      await runJestHarness(SCHEMAS.INIT.ROOT.results, expect, {
+        schemas: data.schemas,
+        vault,
       });
     });
 
@@ -468,7 +450,7 @@ describe("engine, notes/", () => {
       vault = { fsPath: vaultDir };
     });
 
-    test("with backlinks/", async () => {
+    test.skip("with backlinks/", async () => {
       await WITH_BACKLINKS.preSetupHook({ wsRoot, vaults: [vault] });
       await engine.init();
       expect(engine.notes).toMatchSnapshot("bond");
@@ -477,7 +459,7 @@ describe("engine, notes/", () => {
       });
     });
 
-    test(WITH_BACKLINKS_V2.label, async () => {
+    test.skip(WITH_BACKLINKS_V2.label, async () => {
       await WITH_BACKLINKS_V2.preSetupHook({ wsRoot, vaults: [vault] });
       await engine.init();
       expect(engine.notes).toMatchSnapshot("bond");

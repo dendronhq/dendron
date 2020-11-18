@@ -157,10 +157,34 @@ export class EngineAPIShim implements DEngineClientV2 {
   }
 }
 
+export abstract class EngineTest<TPreSetupOut = any, TPostSetupOut = any> {
+  public preSetupHook: SetupHookFunction<TPreSetupOut>;
+  public postSetupHook: SetupHookFunction<TPostSetupOut>;
+  public engine: DEngineClientV2;
+
+  constructor(opts: {
+    preSetupHook?: SetupHookFunction<TPreSetupOut>;
+    postSetupHook?: SetupHookFunction<TPostSetupOut>;
+    engine: DEngineClientV2;
+  }) {
+    const { preSetupHook, postSetupHook, engine } = _.defaults(opts, {
+      preSetupHook: async () => {},
+      postSetupHook: async () => {},
+    });
+    this.preSetupHook = preSetupHook;
+    this.postSetupHook = postSetupHook;
+    this.engine = engine;
+  }
+
+  runJest = () => {};
+  runMocha = () => {};
+}
+
 export class TestPresetEntry<TBeforeOpts, TAfterOpts, TResultsOpts> {
   public label: string;
   public before: (_opts: TBeforeOpts) => Promise<any>;
   public preSetupHook: SetupHookFunction;
+  public postSetupHook: SetupHookFunction;
   public after: (_opts: TAfterOpts) => Promise<any>;
   public results: (_opts: TResultsOpts) => Promise<TestResult[]>;
   public init: () => Promise<void>;
@@ -171,9 +195,11 @@ export class TestPresetEntry<TBeforeOpts, TAfterOpts, TResultsOpts> {
     before,
     after,
     preSetupHook,
+    postSetupHook,
   }: {
     label: string;
     preSetupHook?: SetupHookFunction;
+    postSetupHook?: SetupHookFunction;
     beforeSetup?: (_opts: TBeforeOpts) => Promise<any>;
     before?: (_opts: TBeforeOpts) => Promise<any>;
     after?: (_opts: TAfterOpts) => Promise<any>;
@@ -183,6 +209,7 @@ export class TestPresetEntry<TBeforeOpts, TAfterOpts, TResultsOpts> {
     this.results = results;
     this.before = before ? before : async () => {};
     this.preSetupHook = preSetupHook ? preSetupHook : async () => {};
+    this.postSetupHook = postSetupHook ? postSetupHook : async () => {};
     this.after = after ? after : async () => {};
     this.init = async () => {};
   }
@@ -203,17 +230,3 @@ export async function runJestHarness<TOpts>(
     expect(ent.actual).toEqual(ent.expected)
   );
 }
-
-// export async function runJestHarness<TOpts>({
-//   opts,
-//   results,
-//   expect,
-// }: {
-//   opts: TOpts;
-//   results: Function;
-//   expect: jest.Expect;
-// }) {
-//   return _.map(await results(opts), (ent) =>
-//     expect(ent.actual).toEqual(ent.expected)
-//   );
-// }

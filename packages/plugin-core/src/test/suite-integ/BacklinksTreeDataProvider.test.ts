@@ -11,18 +11,6 @@ import { DendronWorkspace } from "../../workspace";
 import { TIMEOUT } from "../testUtils";
 import { runMultiVaultTest } from "../testUtilsv2";
 
-// import BacklinksTreeDataProvider from './BacklinksTreeDataProvider';
-// import {
-//   createFile,
-//   rndName,
-//   openTextDocument,
-//   closeEditorsAndCleanWorkspace,
-//   getWorkspaceFolder,
-//   toPlainObject,
-//   updateMemoConfigProperty,
-//   getMemoConfigProperty,
-// } from '../test/testUtils';
-
 const getChildren = async () => {
   const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
   const parents = await backlinksTreeDataProvider.getChildren();

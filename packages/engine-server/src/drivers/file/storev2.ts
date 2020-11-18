@@ -464,7 +464,7 @@ export class FileStorageV2 implements DStoreV2 {
       })
     );
     const allNotes = _.flatten(out);
-    await this._addBacklinks({ notesWithLinks, allNotes });
+    // await this._addBacklinks({ notesWithLinks, allNotes });
     return allNotes;
   }
 

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.16.1-alpha.1...v0.16.1-alpha.2) (2020-11-18)
+
+### Bug Fixes
+
+- **engine:** resolve ntoes with same title in multiple vaults ([6326aff](https://github.com/dendronhq/dendron/commit/6326aff28b5f2ff52edf6d190c068364023be8e9))
+
 ## [0.16.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.16.1-alpha.0...v0.16.1-alpha.1) (2020-11-16)
 
 **Note:** Version bump only for package @dendronhq/api-server

@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.16.1-alpha.1...v0.16.1-alpha.2) (2020-11-18)
+
+### Bug Fixes
+
+- missing init note ([4e41724](https://github.com/dendronhq/dendron/commit/4e41724a52ec5e32cbf6a290763eeaef7cbd50aa))
+
+### Enhancements
+
+- support alias completion ([34268c1](https://github.com/dendronhq/dendron/commit/34268c18b28214fffb98a702c4fc74ef59cc76d5))
+- **md:** go to link via slug ([a0f9556](https://github.com/dendronhq/dendron/commit/a0f9556e49c34f83288f87dd7423ebb8e4dbf43f))
+- in house link provider ([3c54022](https://github.com/dendronhq/dendron/commit/3c54022724d78d8019a25e60a489e585e7af8209))
+- update label parsing ([b0fadac](https://github.com/dendronhq/dendron/commit/b0fadac6e4dd32227225c589ffa87605fb7c3b99))
+
+### Features
+
+- add backlinks provider ([aee483c](https://github.com/dendronhq/dendron/commit/aee483c92fd628ffdcb8250bc812cc2efae8a247))
+- add completion provider ([9c5ab61](https://github.com/dendronhq/dendron/commit/9c5ab61213a046b7719472faca9bb5e79592fa2f))
+- **workbench:** navigate to relative wiki-links ([49c3b54](https://github.com/dendronhq/dendron/commit/49c3b5439fb34b8c6f1f5505fcd90193cbfa28cd))
+- add hover provider ([8b55251](https://github.com/dendronhq/dendron/commit/8b552517c27bf6ded5515e9c0a7912e788420827))
+- add language features ([9c379c1](https://github.com/dendronhq/dendron/commit/9c379c1fb7beda476a8454538a318f43072ad1f0))
+
 ## [0.16.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.16.1-alpha.0...v0.16.1-alpha.1) (2020-11-16)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

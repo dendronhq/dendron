@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.16.1-alpha.1...v0.16.1-alpha.2) (2020-11-18)
+
+### Bug Fixes
+
+- **engine:** resolve ntoes with same title in multiple vaults ([6326aff](https://github.com/dendronhq/dendron/commit/6326aff28b5f2ff52edf6d190c068364023be8e9))
+
+### Enhancements
+
+- **md:** go to link via slug ([a0f9556](https://github.com/dendronhq/dendron/commit/a0f9556e49c34f83288f87dd7423ebb8e4dbf43f))
+
+### Features
+
+- **workbench:** navigate to relative wiki-links ([49c3b54](https://github.com/dendronhq/dendron/commit/49c3b5439fb34b8c6f1f5505fcd90193cbfa28cd))
+
 ## [0.16.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.16.1-alpha.0...v0.16.1-alpha.1) (2020-11-16)
 
 **Note:** Version bump only for package @dendronhq/engine-server

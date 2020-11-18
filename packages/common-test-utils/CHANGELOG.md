@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.16.1-alpha.1...v0.16.1-alpha.2) (2020-11-18)
+
+### Enhancements
+
+- **md:** go to link via slug ([a0f9556](https://github.com/dendronhq/dendron/commit/a0f9556e49c34f83288f87dd7423ebb8e4dbf43f))
+- in house link provider ([3c54022](https://github.com/dendronhq/dendron/commit/3c54022724d78d8019a25e60a489e585e7af8209))
+
+### Features
+
+- **workbench:** navigate to relative wiki-links ([49c3b54](https://github.com/dendronhq/dendron/commit/49c3b5439fb34b8c6f1f5505fcd90193cbfa28cd))
+
 # [0.16.0](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.5...v0.16.0) (2020-11-15)
 
 **Note:** Version bump only for package @dendronhq/common-test-utils

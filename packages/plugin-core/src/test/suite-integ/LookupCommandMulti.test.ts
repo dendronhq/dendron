@@ -1,8 +1,8 @@
 import { DNodeUtilsV2, DVault, NotePropsV2 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import {
+  ENGINE_SERVER,
   NodeTestPresetsV2,
-  NoteTestUtilsV3,
   PLUGIN_CORE,
   runMochaHarness,
 } from "@dendronhq/common-test-utils";
@@ -10,7 +10,6 @@ import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import { afterEach, beforeEach, describe } from "mocha";
-import { ENGINE_SERVER } from "@dendronhq/common-test-utils";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it

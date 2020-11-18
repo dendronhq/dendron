@@ -10,7 +10,7 @@ import {
 } from "vscode";
 import path from "path";
 import _ from "lodash";
-import { fsPathToRef } from "../utils/md";
+import { fsPathToRef, RE_WIKI_LINK_ALIAS } from "../utils/md";
 import { DendronWorkspace } from "../workspace";
 import { NoteUtilsV2 } from "@dendronhq/common-all";
 
@@ -26,7 +26,9 @@ export const provideCompletionItems = (
 
   const isResourceAutocomplete = linePrefix.match(/\!\[\[\w*$/);
   const isDocsAutocomplete = linePrefix.match(/\[\[\w*$/);
-  const isAliasAutocomplete = linePrefix.match(/\[\[\w*\|\w*$/);
+  const isAliasAutocomplete = linePrefix.match(
+    new RegExp(RE_WIKI_LINK_ALIAS, "gi")
+  );
 
   if (!isDocsAutocomplete && !isResourceAutocomplete && !isAliasAutocomplete) {
     return undefined;

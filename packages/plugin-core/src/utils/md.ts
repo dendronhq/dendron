@@ -24,6 +24,7 @@ export const refPattern = "(\\[\\[)([^\\[\\]]+?)(\\]\\])";
 export const REGEX_FENCED_CODE_BLOCK = /^( {0,3}|\t)```[^`\r\n]*$[\w\W]+?^( {0,3}|\t)``` *$/gm;
 export { sortPaths };
 const REGEX_CODE_SPAN = /`[^`]*?`/gm;
+export const RE_WIKI_LINK_ALIAS = "([^\\[\\]]+?\\|)?";
 
 export class MarkdownUtils {
   static async openPreview(opts?: { reuseWindow?: boolean }) {
@@ -219,24 +220,6 @@ export const findReferences = async (
       `\\[\\[([^\\[\\]]+?\\|)?(${escapeForRegExp(ref)}(\\#[^\\[\\]]+?)?)\\]\\]`,
       "gi"
     );
-    // const refRegexp = new RegExp(
-    //   `\\[\\[([^\\[\\]]+?\\|)(${escapeForRegExp(ref)}([^\\[\\]]+?)?)\\]\\]`,
-    //   "gi"
-    // );
-    // const refRegexp = new RegExp(
-    //   `\\[\\[(${escapeForRegExp(ref)}(\\|[^\\[\\]]+?)?)\\]\\]`,
-    //   "gi"
-    // );
-    // const refRegexp2 = new RegExp(
-    //   `\\[\\[
-    //     (
-    //       ${escapeForRegExp(ref)}
-    //         (\\|[^\\[\\]]+?)
-    //     ?)
-    //     \\]\\]`,
-    //   "gi"
-    // );
-
     const fileContentLines = fileContent.split(/\r?\n/g);
 
     fileContentLines.forEach((lineText, lineNum) => {

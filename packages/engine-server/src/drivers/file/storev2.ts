@@ -304,10 +304,6 @@ export class FileStorageV2 implements DStoreV2 {
     this.logger.info({ ctx, vaults });
   }
 
-  get multivault() {
-    return this.vaultsv3.length > 1;
-  }
-
   async init(): Promise<DEngineInitRespV2> {
     try {
       let error: DendronError | null = null;
@@ -405,42 +401,30 @@ export class FileStorageV2 implements DStoreV2 {
   async initSchema(): Promise<DEngineInitSchemaRespV2> {
     const ctx = "initSchema";
     this.logger.info({ ctx, msg: "enter" });
-    if (this.multivault) {
-      const out = await Promise.all(
-        (this.vaultsv3 as DVault[]).map(async (vault) => {
-          return this._initSchema(vault);
-        })
-      );
-      const _out = _.reduce<
-        { data: SchemaModulePropsV2[]; errors: any[] },
-        { data: SchemaModulePropsV2[]; errors: any[] }
-      >(
-        out,
-        (ent, acc) => {
-          acc.data = acc.data.concat(ent.data);
-          acc.errors = acc.errors.concat(ent.errors);
-          return acc;
-        },
-        { data: [], errors: [] }
-      );
-      const { data, errors } = _out;
-      return {
-        data,
-        error: _.isEmpty(errors)
-          ? null
-          : new DendronError({ msg: "multiple errors", payload: errors }),
-      };
-    } else {
-      const { data, errors } = await this._initSchema({
-        fsPath: this.vaults[0],
-      });
-      return {
-        data,
-        error: _.isEmpty(errors)
-          ? null
-          : new DendronError({ msg: "multiple errors", payload: errors }),
-      };
-    }
+    const out = await Promise.all(
+      (this.vaultsv3 as DVault[]).map(async (vault) => {
+        return this._initSchema(vault);
+      })
+    );
+    const _out = _.reduce<
+      { data: SchemaModulePropsV2[]; errors: any[] },
+      { data: SchemaModulePropsV2[]; errors: any[] }
+    >(
+      out,
+      (ent, acc) => {
+        acc.data = acc.data.concat(ent.data);
+        acc.errors = acc.errors.concat(ent.errors);
+        return acc;
+      },
+      { data: [], errors: [] }
+    );
+    const { data, errors } = _out;
+    return {
+      data,
+      error: _.isEmpty(errors)
+        ? null
+        : new DendronError({ msg: "multiple errors", payload: errors }),
+    };
   }
 
   async _initSchema(
@@ -469,19 +453,12 @@ export class FileStorageV2 implements DStoreV2 {
   async initNotes(): Promise<NotePropsV2[]> {
     const ctx = "initNotes";
     this.logger.info({ ctx, msg: "enter" });
-    if (this.multivault) {
-      const out = await Promise.all(
-        (this.vaultsv3 as DVault[]).map(async (vault) => {
-          return this._initNotes(vault);
-        })
-      );
-      return _.flatten(out);
-    } else {
-      const notes = await this._initNotes({
-        fsPath: this.vaults[0],
-      });
-      return notes;
-    }
+    const out = await Promise.all(
+      (this.vaultsv3 as DVault[]).map(async (vault) => {
+        return this._initNotes(vault);
+      })
+    );
+    return _.flatten(out);
   }
 
   async _initNotes(vault: DVault): Promise<NotePropsV2[]> {

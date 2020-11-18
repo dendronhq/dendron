@@ -14,16 +14,6 @@ import { fsPathToRef } from "../utils/md";
 import { DendronWorkspace } from "../workspace";
 import { NoteUtilsV2 } from "@dendronhq/common-all";
 
-//   import groupBy from 'lodash.groupby';
-
-//   import {
-//     getWorkspaceCache,
-//     fsPathToRef,
-//     containsImageExt,
-//     containsOtherKnownExts,
-//     getMemoConfigProperty,
-//   } from '../utils';
-
 const padWithZero = (n: number): string => (n < 10 ? "0" + n : String(n));
 
 export const provideCompletionItems = (
@@ -36,8 +26,9 @@ export const provideCompletionItems = (
 
   const isResourceAutocomplete = linePrefix.match(/\!\[\[\w*$/);
   const isDocsAutocomplete = linePrefix.match(/\[\[\w*$/);
+  const isAliasAutocomplete = linePrefix.match(/\[\[\w*\|\w*$/);
 
-  if (!isDocsAutocomplete && !isResourceAutocomplete) {
+  if (!isDocsAutocomplete && !isResourceAutocomplete && !isAliasAutocomplete) {
     return undefined;
   }
 

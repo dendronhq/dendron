@@ -19,7 +19,8 @@
       "label": "npm:test:watch:integ",
       "command": "npm run test:watch:integ -- ${relativeFile} -u",
       "type": "shell",
-      "problemMatcher": []
+      "problemMatcher": [], 
+      "options": {"env": {"LOG_DST": "/tmp/api-server.log"}}
     },
     {
       "type": "npm",

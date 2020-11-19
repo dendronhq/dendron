@@ -1,6 +1,9 @@
 import { launch } from "@dendronhq/api-server";
 import { resolvePath } from "@dendronhq/common-server";
-import { DendronEngineClient } from "@dendronhq/engine-server";
+import {
+  DendronEngineClient,
+  WorkspaceService,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
 import { SoilCommandCLIOptsV3, SoilCommandOptsV3, SoilCommandV3 } from "./soil";
@@ -35,21 +38,23 @@ export class LaunchEngineServerCommand extends SoilCommandV3<
   }
 
   async enrichArgs(args: CommandCLIOpts) {
-    let { vaults, wsRoot, port } = args;
+    let { wsRoot, port } = args;
     const cwd = process.cwd();
     wsRoot = resolvePath(wsRoot, cwd);
-    vaults = vaults.map((v) => resolvePath(v, cwd));
+    const ws = new WorkspaceService({ wsRoot });
+    const vaults = ws.config.vaults;
+    const vaultPaths = vaults.map((v) => resolvePath(v.fsPath, cwd));
     const _port = await launch({ port });
     const engine = DendronEngineClient.create({
       port: _port,
-      vaults,
+      vaults: vaultPaths,
       ws: wsRoot,
     });
     return {
       ...args,
       engine,
       wsRoot,
-      vaults,
+      vaults: vaultPaths,
       port: _port,
     };
   }

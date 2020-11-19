@@ -27,6 +27,7 @@ type CommandOutput = { note: NotePropsV2; pos?: Position } | undefined;
 
 export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   static key = DENDRON_COMMANDS.GOTO_NOTE.key;
+
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const ctx = "GotoNoteCommand";
     this.L.info({ ctx, opts, msg: "enter" });

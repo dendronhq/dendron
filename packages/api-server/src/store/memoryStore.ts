@@ -1,3 +1,5 @@
+import { DendronError } from "@dendronhq/common-all";
+import { DendronEngineV2 } from "@dendronhq/engine-server";
 import _ from "lodash";
 
 const STORE: any = {};
@@ -18,6 +20,14 @@ export class MemoryStore {
 
   async put(key: string, value: any) {
     STORE[key] = value;
+  }
+
+  getEngine(): DendronEngineV2 {
+    const out = _.values(STORE)[0];
+    if (!out) {
+      throw new DendronError({ msg: "STORE is empty" });
+    }
+    return out;
   }
 
   async get<T>(key: string): Promise<T | undefined> {

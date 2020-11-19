@@ -1,4 +1,4 @@
-import { DendronError } from "@dendronhq/common-all";
+import { DendronError, EngineQueryNoteResp } from "@dendronhq/common-all";
 import {
   EngineDeletePayload,
   EngineDeleteRequest,
@@ -8,8 +8,10 @@ import {
   EngineRenameNoteRequest,
   EngineUpdateNotePayload,
   EngineUpdateNoteRequest,
+  NoteQueryRequest,
 } from "@dendronhq/common-server";
 import { getLogger } from "../../core";
+import { MemoryStore } from "../../store/memoryStore";
 import { getWS } from "../../utils";
 
 export class NoteController {
@@ -51,6 +53,21 @@ export class NoteController {
       return {
         error: new DendronError({ msg: JSON.stringify(err) }),
         data: undefined,
+      };
+    }
+  }
+
+  async query({ ws, ...opts }: NoteQueryRequest): Promise<EngineQueryNoteResp> {
+    const engine = ws
+      ? await getWS({ ws })
+      : MemoryStore.instance().getEngine();
+    try {
+      const data = await engine.queryNotes(opts);
+      return data;
+    } catch (err) {
+      return {
+        error: new DendronError({ msg: JSON.stringify(err) }),
+        data: [],
       };
     }
   }

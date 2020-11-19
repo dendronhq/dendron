@@ -2,10 +2,10 @@ import { DendronError, WriteNoteResp } from "@dendronhq/common-all";
 import {
   EngineDeleteRequest,
   EngineGetNoteByPathRequest,
-  EngineQueryRequest,
   EngineRenameNoteRequest,
   EngineUpdateNoteRequest,
   EngineWriteRequest,
+  NoteQueryRequest,
 } from "@dendronhq/common-server";
 import { Request, Response, Router } from "express";
 import { getLogger } from "../core";
@@ -37,10 +37,10 @@ router.post("/rename", async (req: Request, res: Response) => {
 });
 
 router.post("/query", async (req: Request, res: Response) => {
-  const { ws, queryString } = req.body as EngineQueryRequest;
-  const engine = await getWS({ ws: ws || "" });
-  const { error, data } = await engine.queryNotes({ qs: queryString });
-  res.json({ error, data });
+  const resp = await NoteController.instance().query(
+    req.body as NoteQueryRequest
+  );
+  res.json(resp);
 });
 
 router.post("/update", async (req: Request, res: Response) => {

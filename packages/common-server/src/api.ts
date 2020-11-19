@@ -1,11 +1,11 @@
 import {
-  createLogger,
   DendronError,
   DEngineDeleteSchemaPayloadV2,
   DEngineQuery,
   DNodePropsV2,
   EngineDeleteNotePayload,
   EngineDeleteOptsV2,
+  EngineQueryNoteResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   GetNoteOptsV2,
@@ -19,6 +19,7 @@ import {
   WriteNoteResp,
 } from "@dendronhq/common-all";
 import _ from "lodash";
+import { createLogger } from "./logger";
 
 const L = createLogger("api");
 
@@ -135,6 +136,10 @@ export type EngineDeleteRequest = {
   id: string;
   opts?: EngineDeleteOptsV2;
 } & { ws: string };
+
+export type NoteQueryRequest = {
+  qs: string;
+} & Partial<WorkspaceRequest>;
 
 export type SchemaDeleteRequest = {
   id: string;
@@ -347,14 +352,14 @@ export class DendronAPI extends API {
     return resp;
   }
 
-  async engineQuery(req: EngineQueryRequest): Promise<EngineQueryPayload> {
-    const resp = await this._makeRequest({
-      path: "note/query",
-      method: "post",
-      body: req,
-    });
-    return resp;
-  }
+  // async engineQuery(req: EngineQueryRequest): Promise<EngineQueryPayload> {
+  //   const resp = await this._makeRequest({
+  //     path: "note/query",
+  //     method: "post",
+  //     body: req,
+  //   });
+  //   return resp;
+  // }
 
   async engineRenameNote(
     req: EngineRenameNoteRequest
@@ -381,6 +386,15 @@ export class DendronAPI extends API {
   async engineWrite(req: EngineWriteRequest): Promise<WriteNoteResp> {
     const resp = await this._makeRequest({
       path: "note/write",
+      method: "post",
+      body: req,
+    });
+    return resp;
+  }
+
+  async noteQuery(req: NoteQueryRequest): Promise<EngineQueryNoteResp> {
+    const resp = await this._makeRequest({
+      path: "note/query",
       method: "post",
       body: req,
     });

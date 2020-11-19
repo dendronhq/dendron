@@ -19,6 +19,7 @@ import {
   ENGINE_SERVER,
 } from "@dendronhq/common-test-utils";
 import {
+  createLogger,
   DendronAPI,
   file2Schema,
   note2File,
@@ -42,6 +43,7 @@ async function setupWS({ wsRoot, vault }: { wsRoot: string; vault: string }) {
   const api = new DendronAPI({
     endpoint: "http://localhost:3005",
     apiPath: "api",
+    logger: createLogger("api-server", "/tmp/api-server.log"),
   });
   await api.workspaceInit(payload);
   return api;
@@ -54,10 +56,9 @@ const getNotes = async ({
   api: DendronAPI;
   wsRoot: string;
 }) => {
-  const resp = await api.engineQuery({
+  const resp = await api.noteQuery({
     ws: wsRoot,
-    mode: "note",
-    queryString: "*",
+    qs: "*",
   });
   const notes: NotePropsDictV2 = {};
   _.forEach((resp.data as unknown) as NotePropsV2, (ent: NotePropsV2) => {
@@ -344,10 +345,9 @@ describe("notes", () => {
 
     test(NOTE_DELETE_PRESET.noteNoChildren.label, async () => {
       const changed = await api.engineDelete({ id: "foo.ch1", ws: wsRoot });
-      const resp = await api.engineQuery({
+      const resp = await api.noteQuery({
         ws: wsRoot,
-        mode: "note",
-        queryString: "*",
+        qs: "*",
       });
       const notes: NotePropsDictV2 = {};
       _.forEach((resp.data as unknown) as NotePropsV2, (ent: NotePropsV2) => {
@@ -361,7 +361,7 @@ describe("notes", () => {
           notes,
         }),
         (ent) => {
-          expect(ent.expected).toEqual(ent.actual);
+          expect(ent.actual).toEqual(ent.expected);
         }
       );
     });
@@ -370,10 +370,9 @@ describe("notes", () => {
       fs.removeSync(path.join(vaultString, "foo.ch1.md"));
       api = await setupWS({ wsRoot, vault: vaultString });
       const changed = await api.engineDelete({ id: "foo", ws: wsRoot });
-      const resp = await api.engineQuery({
+      const resp = await api.noteQuery({
         ws: wsRoot,
-        mode: "note",
-        queryString: "*",
+        qs: "*",
       });
       const notes: NotePropsDictV2 = {};
       _.forEach((resp.data as unknown) as NotePropsV2, (ent: NotePropsV2) => {
@@ -387,7 +386,7 @@ describe("notes", () => {
           notes,
         }),
         (ent) => {
-          expect(ent.expected).toEqual(ent.actual);
+          expect(ent.actual).toEqual(ent.expected);
         }
       );
     });
@@ -435,14 +434,14 @@ describe("notes", () => {
         apiPath: "api",
       });
       await api.workspaceInit(payload);
-      const resp = await api.engineQuery({
+      const resp = await api.noteQuery({
         ws: wsRoot,
-        queryString: "",
-        mode: "note" as const,
+        qs: "",
       });
       expect(resp).toMatchSnapshot("root note");
     });
 
+    // we aren't getting schema anymore
     test("query root note with schema", async () => {
       const payload = {
         uri: wsRoot,
@@ -455,10 +454,9 @@ describe("notes", () => {
         apiPath: "api",
       });
       await api.workspaceInit(payload);
-      const resp = await api.engineQuery({
+      const resp = await api.noteQuery({
         ws: wsRoot,
-        queryString: "foo",
-        mode: "note" as const,
+        qs: "foo",
       });
       const note = (resp.data as NotePropsV2[])[0] as NotePropsV2;
       expect(resp).toMatchSnapshot();
@@ -480,10 +478,9 @@ describe("notes", () => {
         apiPath: "api",
       });
       await api.workspaceInit(payload);
-      const resp = await api.engineQuery({
+      const resp = await api.noteQuery({
         ws: wsRoot,
-        queryString: "foo.ch1",
-        mode: "note" as const,
+        qs: "foo.ch1",
       });
       const note = (resp.data as any[])[0] as NotePropsV2;
       expect(resp).toMatchSnapshot();
@@ -620,10 +617,9 @@ describe("notes", () => {
       const note = respNote.data?.note as NotePropsV2;
       note.body = "new body";
       await api.engineUpdateNote({ note, ws: wsRoot });
-      const resp = await api.engineQuery({
+      const resp = await api.noteQuery({
         ws: wsRoot,
-        mode: "note",
-        queryString: "*",
+        qs: "*",
       });
       const notes: NotePropsDictV2 = {};
       _.forEach((resp.data as unknown) as NotePropsV2, (ent: NotePropsV2) => {

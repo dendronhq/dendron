@@ -395,8 +395,8 @@ export class DendronAPI extends API {
   async noteQuery(req: NoteQueryRequest): Promise<EngineQueryNoteResp> {
     const resp = await this._makeRequest({
       path: "note/query",
-      method: "post",
-      body: req,
+      method: "get",
+      qs: req,
     });
     return resp;
   }

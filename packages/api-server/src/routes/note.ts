@@ -36,9 +36,9 @@ router.post("/rename", async (req: Request, res: Response) => {
   res.json(resp);
 });
 
-router.post("/query", async (req: Request, res: Response) => {
+router.get("/query", async (req: Request, res: Response) => {
   const resp = await NoteController.instance().query(
-    req.body as NoteQueryRequest
+    req.query as NoteQueryRequest
   );
   res.json(resp);
 });

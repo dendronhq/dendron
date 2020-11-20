@@ -33,7 +33,7 @@ suite("notes", function () {
     test("create", function (done) {
       onWSInit(async () => {
         watcher = new VaultWatcher({
-          vaults: [{ name: "main", uri: vscode.Uri.file(vaultPath), index: 0 }],
+          vaults: [{ fsPath: vaultPath }],
         });
         const bar = NoteUtilsV2.create({
           fname: `bar`,
@@ -64,7 +64,7 @@ suite("notes", function () {
       onWSInit(async () => {
         // @ts-ignore
         const watcher = new VaultWatcher({
-          vaults: [{ name: "main", uri: vscode.Uri.file(vaultPath), index: 0 }],
+          vaults: [{ fsPath: vaultPath }],
         });
         watcher.pause = true;
         const bar = NoteUtilsV2.create({

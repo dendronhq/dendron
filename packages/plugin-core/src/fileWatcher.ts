@@ -1,6 +1,7 @@
 import {
   DEngineClientV2,
   DNodeUtilsV2,
+  DVault,
   NotePropsV2,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
@@ -14,7 +15,7 @@ import { HistoryService } from "./services/HistoryService";
 import { DendronWorkspace } from "./workspace";
 
 export class VaultWatcher {
-  public watcher: vscode.FileSystemWatcher;
+  public watchers: { vault: DVault; watcher: vscode.FileSystemWatcher }[];
   /**
    * Should watching be paused
    */
@@ -23,30 +24,31 @@ export class VaultWatcher {
   public ws: DendronWorkspace;
   public engine: DEngineClientV2;
 
-  constructor({ vaults }: { vaults: vscode.WorkspaceFolder[] }) {
-    const rootFolder = vaults[0];
-    const pattern = new vscode.RelativePattern(rootFolder, "*.md");
-    const watcher = vscode.workspace.createFileSystemWatcher(
-      pattern,
-      false,
-      false,
-      false
-    );
-    this.watcher = watcher;
+  constructor({ vaults }: { vaults: DVault[] }) {
+    this.watchers = vaults.map((vault) => {
+      const rootFolder = vault.fsPath;
+      const pattern = new vscode.RelativePattern(rootFolder, "*.md");
+      const watcher = vscode.workspace.createFileSystemWatcher(
+        pattern,
+        false,
+        false,
+        false
+      );
+      return { vault, watcher };
+    });
     this.ws = DendronWorkspace.instance();
     this.engine = this.ws.getEngine();
     this.pause = false;
   }
 
-  activate() {
-    const disposables = [];
-    disposables.push(this.watcher.onDidCreate(this.onDidCreate, this));
-    disposables.push(this.watcher.onDidDelete(this.onDidDelete, this));
-    disposables.push(this.watcher.onDidChange(this.onDidChange, this));
-    disposables.push(
-      this.watcher.onDidChange(_.debounce(this.onDidChange, 500), this)
-    );
-    return disposables;
+  activate(context: vscode.ExtensionContext) {
+    this.watchers.forEach(({ watcher }) => {
+      context.subscriptions.push(watcher.onDidCreate(this.onDidCreate, this));
+      context.subscriptions.push(watcher.onDidDelete(this.onDidDelete, this));
+      context.subscriptions.push(
+        watcher.onDidChange(_.debounce(this.onDidChange, 500), this)
+      );
+    });
   }
 
   async onDidChange(uri: vscode.Uri) {

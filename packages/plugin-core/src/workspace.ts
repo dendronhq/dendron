@@ -449,17 +449,15 @@ export class DendronWorkspace {
       throw Error("no folders set for workspace");
     }
     let vaults = wsFolders as vscode.WorkspaceFolder[];
+    let realVaults = DendronWorkspace.instance().vaults;
     const vaultWatcher = new VaultWatcher({
-      vaults,
+      vaults: realVaults,
     });
     const schemaWatcher = new SchemaWatcher({ vaults });
     schemaWatcher.activate(this.context);
     this.schemaWatcher = schemaWatcher;
 
-    let disposables = vaultWatcher.activate();
-    disposables.map((d) => {
-      this.disposableStore.add(d);
-    });
+    vaultWatcher.activate(DendronWorkspace.instance().context);
     this.vaultWatcher = vaultWatcher;
   }
 

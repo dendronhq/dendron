@@ -16,10 +16,16 @@ import {
   SchemaModuleDictV2,
   SchemaModulePropsV2,
 } from "@dendronhq/common-all";
-import { DendronAPI } from "@dendronhq/common-server";
+import { DendronAPI, tmpDir } from "@dendronhq/common-server";
 import _ from "lodash";
-import { SetupHookFunction, TestResult } from "./types";
+import {
+  PostSetupHookFunction,
+  SetupHookFunction,
+  TestResult,
+  WorkspaceOpts,
+} from "./types";
 import assert from "assert";
+import { EngineTestUtilsV3, NotePresetsUtils } from ".";
 
 export const toPlainObject = <R>(value: unknown): R =>
   value !== undefined ? JSON.parse(JSON.stringify(value)) : value;
@@ -229,4 +235,47 @@ export async function runJestHarness<TOpts>(
   return _.map(await results(opts), (ent) =>
     expect(ent.actual).toEqual(ent.expected)
   );
+}
+
+export async function runJestHarnessV2(results: any, expect: jest.Expect) {
+  return _.map(await results, (ent) =>
+    expect(ent.actual).toEqual(ent.expected)
+  );
+}
+
+export type RunEngineTestFunctionOpts = {
+  engine: DEngineClientV2;
+} & WorkspaceOpts;
+export type RunEngineTestFunction = (
+  opts: RunEngineTestFunctionOpts
+) => Promise<any>;
+export type CreateEngineFunction = (opts: WorkspaceOpts) => DEngineClientV2;
+
+export async function runEngineTest(
+  func: RunEngineTestFunction,
+  opts: {
+    preSetupHook?: SetupHookFunction;
+    postSetupHook?: PostSetupHookFunction;
+    createEngine: CreateEngineFunction;
+  }
+) {
+  const { preSetupHook, createEngine } = _.defaults(opts, {
+    preSetupHook: async ({}) => {},
+    postSetupHook: async ({}) => {},
+  });
+
+  const wsRoot = tmpDir().name;
+  const vaults = await EngineTestUtilsV3.setupVaults({
+    initVault1: async (vaultDir: string) => {
+      await NotePresetsUtils.createBasic({ vaultDir, fname: "foo" });
+    },
+    initVault2: async (vaultDir: string) => {
+      await NotePresetsUtils.createBasic({ vaultDir, fname: "bar" });
+    },
+  });
+  await preSetupHook({ wsRoot, vaults });
+  const engine = createEngine({ wsRoot, vaults });
+  await engine.init();
+  // const resp = await postSetupHook({wsRoot, vaults, engine})
+  await func({ wsRoot, vaults, engine });
 }

@@ -2,12 +2,18 @@ import {
   DEngineV2,
   DNodeUtilsV2,
   DVault,
+  NotePropsV2,
+  NoteUtilsV2,
   SchemaModulePropsV2,
 } from "@dendronhq/common-all";
 import {
   EngineTestUtilsV3,
   ENGINE_SERVER,
   NodeTestPresetsV2,
+  runEngineTest,
+  runJestHarnessV2,
+  TestResult,
+  WorkspaceOpts,
 } from "@dendronhq/common-test-utils";
 import { NotePresetsUtils } from "@dendronhq/common-test-utils/lib/presets/utils";
 import fs from "fs-extra";
@@ -29,7 +35,46 @@ const setupCase1 = async () => {
   return { vaults, engine };
 };
 
+const createEngine = ({ vaults }: WorkspaceOpts) => {
+  return DendronEngineV2.createV3({ vaults });
+};
+
 describe("engine, notes/", () => {
+  describe("write/", () => {
+    test("add domain to second vault", async () => {
+      await runEngineTest(
+        async ({ engine, vaults }) => {
+          let note = NoteUtilsV2.create({ fname: "alpha", vault: vaults[1] });
+          await engine.writeNote(note);
+          const root = NoteUtilsV2.getNotesByFname({
+            fname: "root",
+            notes: engine.notes,
+            vault: vaults[1],
+          })[0] as NotePropsV2;
+          const newNote = NoteUtilsV2.getNotesByFname({
+            fname: "alpha",
+            notes: engine.notes,
+            vault: vaults[1],
+          })[0] as NotePropsV2;
+          const results = [
+            {
+              actual: root.children.length,
+              expected: 2,
+            },
+            {
+              actual: newNote.parent,
+              expected: root.id,
+            },
+          ] as TestResult[];
+          await runJestHarnessV2(results, expect);
+        },
+        {
+          createEngine,
+        }
+      );
+    });
+  });
+
   describe("init/", () => {
     // @ts-ignore
     let vaults: DVault[];

@@ -6,8 +6,19 @@ export type TestResult = {
   msg?: string;
 };
 
-export type SetupHookFunction<T = any> = (opts: {
+export type WorkspaceOpts = {
   wsRoot: string;
   vaults: DVault[];
-  engine?: DEngineClientV2;
-}) => Promise<T>;
+};
+
+export type SetupHookFunction<T = any> = (
+  opts: {
+    engine?: DEngineClientV2;
+  } & WorkspaceOpts
+) => Promise<T>;
+
+export type PostSetupHookFunction<T = any> = (
+  opts: {
+    engine: DEngineClientV2;
+  } & WorkspaceOpts
+) => Promise<T>;

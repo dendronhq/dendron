@@ -160,27 +160,14 @@ export class DNodeUtilsV2 {
     const { vault } = opts;
     const dirname = DNodeUtilsV2.dirName(fpath);
     if (dirname === "") {
-      const _nodes = _.filter(nodes, {
-        fname: "root",
-        vault,
-      }) as DNodePropsV2[];
-      if (_nodes.length > 1) {
-        throw new DendronError({
-          msg: `findClosestParent issue: multiple root notes found for ${fpath}`,
-        });
-
-        const node = _.find(
-          _nodes,
-          (ent) => ent.vault?.fsPath === vault.fsPath
-        );
-        if (_.isUndefined(node)) {
-          throw new DendronError({
-            msg: `findClosestParent issue: multiple root notes found for ${fpath}`,
-          });
-        }
-      } else {
-        return nodes[0];
+      const _node = _.find(
+        nodes,
+        (ent) => ent.fname === "root" && ent.vault.fsPath === vault.fsPath
+      );
+      if (_.isUndefined(_node)) {
+        throw new DendronError({ msg: `no root found for ${fpath}` });
       }
+      return _node;
     }
     const maybeNode = _.find(nodes, { fname: dirname });
     if (
@@ -333,7 +320,11 @@ export class NoteUtilsV2 {
   }): NotePropsV2[] {
     const { note, notesList, createStubs } = opts;
     const parentPath = DNodeUtilsV2.dirName(note.fname);
-    let parent = _.find(notesList, (p) => p.fname === parentPath) || null;
+    let parent =
+      _.find(
+        notesList,
+        (p) => p.fname === parentPath && p.vault.fsPath === note.vault.fsPath
+      ) || null;
     const changed: NotePropsV2[] = [];
     if (parent) {
       changed.push(parent);

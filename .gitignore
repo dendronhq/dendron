@@ -12,3 +12,4 @@ dendron.code-workspace
 _site
 shell.code-snippets
 packages/pods-core/lib/index.d.ts
+packages/dendron-cli/stdout.old

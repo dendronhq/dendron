@@ -72,9 +72,14 @@ export type DNoteAnchor = {
   type: "header";
   value: string;
 };
+export type VaultRemote = {
+  type: "git";
+  url: string;
+};
 export type DVault = {
   name?: string;
   fsPath: string;
+  remote?: VaultRemote;
 };
 export type DLink = {
   type: "ref" | "wiki" | "md" | "backlink";

@@ -47,6 +47,16 @@ export type ServerConfiguration = {
   serverPort: string;
 };
 
+/**
+ * Check for boolean toggles
+ */
+export function when(key: keyof DendronConfig, cb: () => void): void {
+  const out = DendronWorkspace.instance().config[key];
+  if (out === false || _.isUndefined(out) ? false : true) {
+    cb();
+  }
+}
+
 export class DendronWorkspace {
   static DENDRON_WORKSPACE_FILE: string = "dendron.code-workspace";
   static _SERVER_CONFIGURATION: Partial<ServerConfiguration>;

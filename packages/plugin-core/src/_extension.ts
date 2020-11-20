@@ -242,7 +242,7 @@ export async function _activate(context: vscode.ExtensionContext) {
       previousWsVersion,
       platform,
       extensions,
-      workspace: ws.rootWorkspace.uri.fsPath,
+      vaults: ws.vaults,
     });
 
     vscode.window.withProgress(

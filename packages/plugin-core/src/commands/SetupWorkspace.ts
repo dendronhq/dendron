@@ -1,5 +1,6 @@
-import { resolveTilde } from "@dendronhq/common-server";
-import { WorkspaceService } from "@dendronhq/engine-server";
+import { DendronError, DVault } from "@dendronhq/common-all";
+import { resolvePath, resolveTilde } from "@dendronhq/common-server";
+import { DConfig, GitV2, WorkspaceService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -7,9 +8,9 @@ import vscode from "vscode";
 import { DENDRON_COMMANDS, DENDRON_WS_NAME, GLOBAL_STATE } from "../constants";
 import { Snippets, WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, when } from "../workspace";
 import { BasicCommand } from "./base";
-import { DVault } from "@dendronhq/common-all";
+import { VaultAddCommand } from "./VaultAddCommand";
 
 type CommandOpts = {
   rootDirRaw: string;
@@ -20,22 +21,31 @@ type CommandOpts = {
    * override prompts
    */
   skipConfirmation?: boolean;
+  initType?: InitializeType;
 };
 
 type CommandInput = {
   rootDirRaw: string;
   emptyWs: boolean;
+  initType?: InitializeType;
 };
 
-type CommandOutput = any;
+type CommandOutput = DVault[];
 
 export { CommandOpts as SetupWorkspaceOpts };
+
+export enum InitializeType {
+  "TUTORIAL_NOTES",
+  "EMPTY",
+  "TEMPLATE",
+}
 
 export class SetupWorkspaceCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
   static key = DENDRON_COMMANDS.INIT_WS.key;
+
   async gatherInputs(): Promise<CommandInput | undefined> {
     const rootDirRaw = await VSCodeUtils.gatherFolderPath({
       default: path.join(resolveTilde("~"), "Dendron"),
@@ -52,34 +62,36 @@ export class SetupWorkspaceCommand extends BasicCommand<
       "initialize with dendron tutorial notes",
       "initialize empty repository",
     ];
+    when("betaFeatures", () => {
+      options.push("initialize from git");
+    });
 
     // don't prompt for option if first ws
     if (isFirstWS) {
       return { rootDirRaw, emptyWs: false };
     }
 
-    const initializeEmpty = await VSCodeUtils.showQuickPick(options, {
+    const initializeChoice = await VSCodeUtils.showQuickPick(options, {
       placeHolder: "initialize with dendron tutorial notes",
       ignoreFocusOut: true,
     });
-    if (!initializeEmpty) {
+    if (!initializeChoice) {
       return;
     }
-    const emptyWs = initializeEmpty === options[1];
-    return { rootDirRaw, emptyWs };
+    InitializeType;
+    const initType = options.indexOf(initializeChoice) as InitializeType;
+    const emptyWs = initializeChoice === options[1];
+    return { rootDirRaw, emptyWs, initType };
   }
 
-  async execute(opts: CommandOpts) {
-    const ctx = "SetupWorkspaceCommand extends BaseCommand";
-    const ws = DendronWorkspace.instance();
-    const { rootDirRaw: rootDir, skipOpenWs, emptyWs } = _.defaults(opts, {
-      skipOpenWs: false,
-      emptyWs: false,
-    });
-    ws.L.info({ ctx, rootDir, skipOpenWs });
-
-    // handle existing
-    if (fs.existsSync(rootDir) && !opts.skipConfirmation) {
+  handleExistingRoot = async ({
+    rootDir,
+    skipConfirmation,
+  }: {
+    rootDir: string;
+    skipConfirmation?: boolean;
+  }): Promise<boolean> => {
+    if (fs.existsSync(rootDir) && !skipConfirmation) {
       const options = {
         delete: { msg: "delete existing folder", alias: "d" },
         abort: { msg: "abort current operation", alias: "a" },
@@ -111,20 +123,83 @@ export class SetupWorkspaceCommand extends BasicCommand<
         vscode.window.showInformationMessage(
           "did not initialize dendron workspace"
         );
-        return;
+        return false;
       } else if (resp === "delete") {
         try {
           fs.removeSync(rootDir);
+          return true;
         } catch (err) {
-          ws.L.error(JSON.stringify(err));
+          this.L.error(JSON.stringify(err));
           vscode.window.showErrorMessage(
             `error removing ${rootDir}. please check that it's not currently open`
           );
-          return;
+          return false;
         }
-        vscode.window.showInformationMessage(`removed ${rootDir}`);
       }
+      return true;
     }
+    return true;
+  };
+
+  handleInitializeType = async ({
+    initType,
+    rootDir,
+  }: {
+    initType: InitializeType;
+    rootDir: string;
+  }): Promise<DVault[]> => {
+    switch (initType) {
+      case InitializeType.TEMPLATE:
+        // TDOO:
+        const remote =
+          "git@github.com:dendronhq/dendron-workspace-template.git";
+        await GitV2.clone(`${remote} ${rootDir}`);
+        const config = DConfig.getOrCreate(rootDir);
+        const vaults = await Promise.all(
+          config.vaults.map(async (ent) => {
+            if (!ent.remote) {
+              throw new DendronError({ msg: "no remote found for vault" });
+            }
+            const { url } = ent.remote;
+            await GitV2.clone(`${url} ${ent.fsPath}`, { cwd: rootDir });
+            const vpath = resolvePath(ent.fsPath, rootDir);
+            return await new VaultAddCommand().execute({
+              vpath,
+              vpathOrig: ent.fsPath,
+            });
+          })
+        );
+        return _.map(vaults, (ent) => ent.vault);
+      default:
+        throw new DendronError({ msg: `init type ${initType} not supported` });
+    }
+  };
+
+  async execute(opts: CommandOpts): Promise<DVault[]> {
+    const ctx = "SetupWorkspaceCommand extends BaseCommand";
+    const ws = DendronWorkspace.instance();
+    const { rootDirRaw: rootDir, skipOpenWs, emptyWs, initType } = _.defaults(
+      opts,
+      {
+        skipOpenWs: false,
+        emptyWs: false,
+      }
+    );
+    ws.L.info({ ctx, rootDir, skipOpenWs });
+
+    if (
+      !(await this.handleExistingRoot({
+        rootDir,
+        skipConfirmation: opts.skipConfirmation,
+      }))
+    ) {
+      return [];
+    }
+
+    if (initType) {
+      return this.handleInitializeType({ initType, rootDir });
+    }
+
     // create vault
     const vaultPath = opts.vault?.fsPath || path.join(rootDir, "vault");
     const vaults = [{ fsPath: vaultPath }];
@@ -158,10 +233,11 @@ export class SetupWorkspaceCommand extends BasicCommand<
 
     if (!opts.skipOpenWs) {
       vscode.window.showInformationMessage("opening dendron workspace");
-      return VSCodeUtils.openWS(
+      VSCodeUtils.openWS(
         vscode.Uri.file(path.join(rootDir, DENDRON_WS_NAME)).fsPath
       );
+      return vaults;
     }
-    return;
+    return vaults;
   }
 }

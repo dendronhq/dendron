@@ -14,13 +14,18 @@ import { afterEach, beforeEach, describe, it } from "mocha";
 import path from "path";
 import { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
+import { InitializeType } from "../../commands/SetupWorkspace";
 import { WORKSPACE_STATE } from "../../constants";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { _activate } from "../../_extension";
 import { onExtension, onWSInit, setupDendronWorkspace } from "../testUtils";
-import { setupCodeWorkspaceV2 } from "../testUtilsv2";
+import {
+  expect,
+  runMultiVaultTestV3,
+  setupCodeWorkspaceV2,
+} from "../testUtilsv2";
 
 const TIMEOUT = 60 * 1000 * 5;
 
@@ -190,6 +195,23 @@ id: bond
         useCb: async (_vaultPath) => {
           vaultPath = _vaultPath;
           fs.removeSync(path.join(_vaultPath, "root.schema.yml"));
+        },
+      });
+    });
+
+    it("with template", function (done) {
+      runMultiVaultTestV3({
+        ctx,
+        setupWsOverride: {
+          skipConfirmation: true,
+          emptyWs: false,
+          initType: InitializeType.TEMPLATE,
+          skipOpenWs: true,
+        },
+        onInit: async ({ wsRoot }) => {
+          const dendronRoot = path.join(wsRoot);
+          expect(fs.existsSync(dendronRoot)).toEqual(true);
+          done();
         },
       });
     });

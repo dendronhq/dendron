@@ -619,6 +619,10 @@ export class NoteUtilsV2 {
     return { ...noteRaw, ...hydrateProps };
   }
 
+  static isDefaultTitle(props: NotePropsV2) {
+    return props.title === NoteUtilsV2.genTitle(props.fname);
+  }
+
   static serializeMeta(props: NotePropsV2) {
     const builtinProps = _.pick(props, [
       "id",

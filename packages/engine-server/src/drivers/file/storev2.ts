@@ -560,7 +560,14 @@ export class FileStorageV2 implements DStoreV2 {
         return n;
       })
     );
-    const newNote = { ...oldNote, fname: newLoc.fname };
+    const newNote = {
+      ...oldNote,
+      fname: newLoc.fname,
+      title: NoteUtilsV2.isDefaultTitle(oldNote)
+        ? NoteUtilsV2.genTitle(newLoc.fname)
+        : oldNote.title,
+    };
+
     // NOTE: order matters. need to delete old note, otherwise can't write new note
     await this.deleteNote(oldNote.id, { metaOnly: true });
     await this.writeNote(newNote, { newNode: true });

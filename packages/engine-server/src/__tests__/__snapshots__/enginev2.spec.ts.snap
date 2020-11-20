@@ -222,6 +222,103 @@ Array [
 ]
 `;
 
+exports[`engine, notes/ rename/ domain with no children: bond 1`] = `
+Array [
+  Object {
+    "note": Object {
+      "body": "[[baz]]
+
+",
+      "children": Array [
+        "foo.ch1",
+      ],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "foo",
+      "id": "foo",
+      "links": Array [
+        Object {
+          "alias": "baz",
+          "from": Object {
+            "fname": "foo",
+            "id": "foo",
+          },
+          "original": "baz",
+          "pos": Object {
+            "end": 7,
+            "start": 0,
+          },
+          "to": Object {
+            "anchorHeader": undefined,
+            "fname": "baz",
+          },
+          "type": "wiki",
+          "value": "baz",
+        },
+      ],
+      "parent": "d0688e08-afea-4fa4-bd56-ccfef94b1339",
+      "schema": Object {
+        "moduleId": "foo",
+        "schemaId": "foo",
+      },
+      "title": "Foo",
+      "type": "note",
+      "updated": "1",
+      "vault": Object {
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-2722-KaRLNUsIlCUm",
+      },
+    },
+    "status": "update",
+  },
+  Object {
+    "note": Object {
+      "body": "[[foo]]
+",
+      "children": Array [],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "bar",
+      "id": "bar",
+      "links": Array [],
+      "parent": "d0688e08-afea-4fa4-bd56-ccfef94b1339",
+      "title": "Bar",
+      "type": "note",
+      "updated": "1",
+      "vault": Object {
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-2722-KaRLNUsIlCUm",
+      },
+    },
+    "status": "delete",
+  },
+  Object {
+    "note": Object {
+      "body": "[[foo]]
+",
+      "children": Array [],
+      "created": "1",
+      "custom": Object {},
+      "data": Object {},
+      "desc": "",
+      "fname": "baz",
+      "id": "bar",
+      "links": Array [],
+      "parent": "d0688e08-afea-4fa4-bd56-ccfef94b1339",
+      "title": "Baz",
+      "type": "note",
+      "updated": "1",
+      "vault": Object {
+        "fsPath": "/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-2722-KaRLNUsIlCUm",
+      },
+    },
+    "status": "create",
+  },
+]
+`;
+
 exports[`engine, notes/ rename/ with note ref 1`] = `
 Array [
   "bar.md",

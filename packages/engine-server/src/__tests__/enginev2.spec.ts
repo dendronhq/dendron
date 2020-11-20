@@ -733,13 +733,12 @@ This is some content`,
         newLoc: { fname: "baz", vault: { fsPath: vaultDir } },
       });
       const changed = resp.data;
-      await NodeTestPresetsV2.runJestHarness({
-        opts: { changed, vaultDir } as Parameters<
-          typeof RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.results
-        >[0],
-        results: RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.results,
+      expect(changed).toMatchSnapshot("bond");
+      await runJestHarness(
+        RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.results,
         expect,
-      });
+        { changed, vaultDir }
+      );
     });
 
     // doesn't work yet
@@ -791,6 +790,26 @@ This is some content`,
         results: RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.results,
         expect,
       });
+    });
+
+    test(RENAME_TEST_PRESETS.DOMAIN_DIFF_TITLE.label, async () => {
+      let wsRoot = "";
+      const vaults = [{ fsPath: vaultDir }];
+      await RENAME_TEST_PRESETS.DOMAIN_DIFF_TITLE.preSetupHook({
+        vaults,
+        wsRoot,
+      });
+      await engine.init();
+      const resp = await RENAME_TEST_PRESETS.DOMAIN_DIFF_TITLE.postSetupHook({
+        vaults,
+        wsRoot,
+        engine,
+      });
+      await runJestHarness(
+        RENAME_TEST_PRESETS.DOMAIN_DIFF_TITLE.results,
+        expect,
+        { changed: resp.data }
+      );
     });
   });
 

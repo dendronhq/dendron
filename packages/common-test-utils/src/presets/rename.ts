@@ -1,9 +1,14 @@
-import { NoteChangeEntry, NoteUtilsV2 } from "@dendronhq/common-all";
+import {
+  DendronError,
+  NoteChangeEntry,
+  NoteUtilsV2,
+} from "@dendronhq/common-all";
 import { note2File } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { NodeTestUtilsV2 } from "..";
+import { NoteTestUtilsV3 } from "../noteUtils";
 import { TestPresetEntry } from "../utils";
 
 /**
@@ -36,6 +41,11 @@ import { TestPresetEntry } from "../utils";
 //   await note2File(note, vaultDir);
 // });
 
+const findCreated = (changed: NoteChangeEntry[]) => {
+  const created = _.find(changed, { status: "create" });
+  return created;
+};
+
 const DOMAIN_NO_CHILDREN = new TestPresetEntry({
   label: "domain with no children",
   results: async ({
@@ -50,6 +60,7 @@ const DOMAIN_NO_CHILDREN = new TestPresetEntry({
       status: ent.status,
       fname: ent.note.fname,
     })).sort();
+    const created = _.find(changed, { status: "create" });
     const scenarios = [
       {
         actual: updated,
@@ -63,6 +74,7 @@ const DOMAIN_NO_CHILDREN = new TestPresetEntry({
       { actual: _.includes(notesInVault, "bar.md"), expected: false },
       { actual: _.includes(notesInVault, "baz.md"), expected: true },
       { actual: _.includes(notesInVault, "foo.md"), expected: true },
+      { actual: created?.note.title, expected: "Baz" },
       {
         actual:
           fs
@@ -247,8 +259,38 @@ const DOMAIN_NO_CHILDREN_V3 = new TestPresetEntry({
   },
 });
 
+const DOMAIN_DIFF_TITLE = new TestPresetEntry({
+  label: "domain diff title",
+  preSetupHook: async ({ vaults }) => {
+    await NoteTestUtilsV3.createNote({
+      vault: vaults[0],
+      fname: "alpha",
+      props: { title: "a title" },
+    });
+  },
+  postSetupHook: async ({ engine, vaults }) => {
+    if (!engine) {
+      throw new DendronError({ msg: "no engine" });
+    }
+    const vaultDir = vaults[0].fsPath;
+    await engine?.init();
+    return await engine.renameNote({
+      oldLoc: { fname: "alpha", vault: { fsPath: vaultDir } },
+      newLoc: { fname: "beta", vault: { fsPath: vaultDir } },
+    });
+  },
+  results: async ({ changed }: { changed: NoteChangeEntry[] }) => {
+    const created = findCreated(changed);
+    return [
+      { actual: created?.note.title, expected: "a title" },
+      { actual: created?.note.fname, expected: "beta" },
+    ];
+  },
+});
+
 export const RENAME_TEST_PRESETS = {
   DOMAIN_NO_CHILDREN,
   DOMAIN_NO_CHILDREN_V2,
   DOMAIN_NO_CHILDREN_V3,
+  DOMAIN_DIFF_TITLE,
 };

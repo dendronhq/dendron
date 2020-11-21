@@ -349,6 +349,15 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docPreview:
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workspace-init.gif)",
   },
+  INIT_WS_V2: {
+    key: "dendron.initWSV2",
+    title: `${CMD_PREFIX} Initialize Workspace V2`,
+    group: "workspace",
+    desc: "Create a new workspace",
+    docLink: "dendron.topic.commands.md",
+    docPreview:
+      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workspace-init.gif)",
+  },
   CHANGE_WS: {
     key: "dendron.changeWS",
     title: `${CMD_PREFIX} Change Workspace`,

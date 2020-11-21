@@ -11,6 +11,7 @@ import { DendronWorkspace } from "../../workspace";
 import { _activate } from "../../_extension";
 import { expect, resetCodeWorkspace } from "../testUtilsv2";
 import { stubSetupWorkspace } from "./SetupWorkspace.test";
+import fs from "fs-extra";
 
 const TIMEOUT = 60 * 1000 * 5;
 
@@ -24,7 +25,7 @@ suite("Extension", function () {
     await resetCodeWorkspace();
   });
 
-  describe("basics", function () {
+  describe("setup workspace", function () {
     it("not active", function (done) {
       _activate(ctx).then((resp) => {
         expect(resp).toBeFalsy();
@@ -41,6 +42,26 @@ suite("Extension", function () {
           skipOpenWs: true,
           skipConfirmation: true,
         } as SetupWorkspaceOpts);
+        done();
+      });
+    });
+  });
+
+  describe("setup workspace v2", function () {
+    it("not active/ init", function (done) {
+      const wsRoot = tmpDir().name;
+      _activate(ctx).then(async (resp) => {
+        expect(resp).toBeFalsy();
+        stubSetupWorkspace({ wsRoot, initType: InitializeType.EMPTY });
+        await vscode.commands.executeCommand(DENDRON_COMMANDS.INIT_WS_V2.key, {
+          skipOpenWs: true,
+          skipConfirmation: true,
+        } as SetupWorkspaceOpts);
+        expect(fs.readdirSync(wsRoot)).toEqual([
+          "dendron",
+          "docs",
+          "vault-main",
+        ]);
         done();
       });
     });

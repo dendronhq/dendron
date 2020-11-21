@@ -33,7 +33,13 @@ export function createNormVault({
   }
   if (!_.isEmpty(relVaultPath)) {
     vault.fsPath = relVaultPath;
-    return { vault, changed: true };
+    return {
+      vault: {
+        ...vault,
+        fsPath: relVaultPath,
+      },
+      changed: true,
+    };
   } else {
     return { vault, changed: false };
   }

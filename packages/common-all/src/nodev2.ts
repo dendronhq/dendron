@@ -591,6 +591,17 @@ export class NoteUtilsV2 {
     return path.join(root, note.fname + ".md");
   }
 
+  static getPathV2({
+    note,
+    wsRoot,
+  }: {
+    note: NotePropsV2;
+    wsRoot: string;
+  }): string {
+    const root = path.join(wsRoot, note.vault.fsPath);
+    return path.join(root, note.fname + ".md");
+  }
+
   static getPathUpTo(hpath: string, numCompoenents: number) {
     return hpath.split(".").slice(0, numCompoenents).join(".");
   }

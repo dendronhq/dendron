@@ -84,6 +84,11 @@ export function getWS() {
   return DendronWorkspace.instance();
 }
 
+export function resolveRelToWSRoot(fpath: string): string {
+  return resolvePath(fpath, DendronWorkspace.wsRoot() as string);
+}
+
+// --- Main
 export class DendronWorkspace {
   static DENDRON_WORKSPACE_FILE: string = "dendron.code-workspace";
   static _SERVER_CONFIGURATION: Partial<ServerConfiguration>;

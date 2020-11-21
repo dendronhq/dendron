@@ -38,7 +38,7 @@ export class AssertUtils {
   }: {
     body: string;
     match: string[];
-    nomatch: string[];
+    nomatch?: string[];
   }): Promise<boolean> {
     await Promise.all(
       match.map((m) => {
@@ -49,7 +49,7 @@ export class AssertUtils {
       })
     );
     await Promise.all(
-      nomatch.map((m) => {
+      (nomatch || []).map((m) => {
         if (body.indexOf(m) > 0) {
           throw `${m} found in ${body}`;
         }

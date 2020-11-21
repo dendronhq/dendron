@@ -29,7 +29,7 @@ import {
 
 const TIMEOUT = 60 * 1000 * 5;
 
-suite("startup with lsp", function () {
+suite("SetupWorkspace", function () {
   this.timeout(TIMEOUT);
   let ctx: ExtensionContext;
   let root: DirResult;
@@ -199,7 +199,7 @@ id: bond
       });
     });
 
-    it("with template", function (done) {
+    it.skip("with template", function (done) {
       runMultiVaultTestV3({
         ctx,
         setupWsOverride: {

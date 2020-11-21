@@ -11,6 +11,9 @@ export type ReplaceRefOptions = {
   wikiLink2Md?: boolean;
   wikiLink2Html?: boolean;
   wikiLinkPrefix?: string;
+  /**
+   * Use the note id for the link
+   */
   wikiLinkUseId?: boolean;
   engine?: DEngineClientV2;
   toHTML?: boolean;
@@ -29,6 +32,9 @@ export type ReplaceRefOptions = {
   scratch?: string;
 };
 
+/**
+ * Used in refactoring, renaming and publishing
+ */
 export function replaceRefs(options: ReplaceRefOptions) {
   const {
     imageRefPrefix,

@@ -43,6 +43,9 @@ function normalize(text: string) {
   return _.toLower(_.trim(text, " #"));
 }
 
+/**
+ * take a ref link and parse it as regular markdown
+ */
 export function refLink2String(
   link: DNoteRefLink,
   opts?: { includeParen: boolean; includeRefTag?: boolean }

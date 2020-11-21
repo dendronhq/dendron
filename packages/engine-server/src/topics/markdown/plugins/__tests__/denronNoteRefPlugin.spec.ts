@@ -10,12 +10,10 @@ import {
 import _ from "lodash";
 import { DendronEngineV2 } from "../../../../enginev2";
 import { ParserUtilsV2 } from "../../utilsv2";
-import {
-  dendronNoteRefPlugin,
-  DendronNoteRefPluginOpts,
-} from "../dendronNoteRefPlugin";
+import { dendronNoteRefPlugin } from "../dendronNoteRefPlugin";
 import { createRefLink } from "./utils";
 
+type DendronNoteRefPluginOpts = Parameters<typeof dendronNoteRefPlugin>[0];
 function getProcessor(opts: DendronNoteRefPluginOpts) {
   return ParserUtilsV2.getRemark().use(dendronNoteRefPlugin, opts);
 }

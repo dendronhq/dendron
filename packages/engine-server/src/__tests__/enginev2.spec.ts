@@ -733,7 +733,6 @@ This is some content`,
         newLoc: { fname: "baz", vault: { fsPath: vaultDir } },
       });
       const changed = resp.data;
-      expect(changed).toMatchSnapshot("bond");
       await runJestHarness(
         RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.results,
         expect,

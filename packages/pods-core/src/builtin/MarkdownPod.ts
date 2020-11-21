@@ -5,7 +5,7 @@ import {
   NoteUtilsV2,
 } from "@dendronhq/common-all";
 import { cleanFileName, readMD } from "@dendronhq/common-server";
-import { dendronRefsPlugin, ParserUtilsV2 } from "@dendronhq/engine-server";
+import { dendronNoteRefPlugin, ParserUtilsV2 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import klaw, { Item } from "klaw";
 import _ from "lodash";
@@ -240,18 +240,16 @@ export class MarkdownPublishPod extends PublishPod {
 
   async plant(opts: BasePodExecuteOpts<PublishPodCleanConfig>): Promise<any> {
     const { config, engine } = opts;
-    //const cleanOpts = _.defaults(opts, { config: this.getDefaultConfig() });
-    //const { dest } = cleanOpts.config;
     const { fname } = config;
     const note = NoteUtilsV2.getNoteByFname(fname, engine.notes, {
       throwIfEmpty: true,
     }) as NotePropsV2;
-    const root = engine.vaults[0];
-    const renderWithOutline = false;
-    const remark = ParserUtilsV2.getRemark().use(dendronRefsPlugin, {
-      root,
-      renderWithOutline,
-      replaceRefs: { engine },
+    // const root = engine.vaults[0];
+    // const renderWithOutline = false;
+    const remark = ParserUtilsV2.getRemark().use(dendronNoteRefPlugin, {
+      engine,
+      renderWithOutline: false,
+      replaceRefOpts: {},
     });
     const out = remark.processSync(note.body).toString();
     return _.trim(out);

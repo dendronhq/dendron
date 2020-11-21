@@ -22,11 +22,15 @@ import { ReplaceRefOptions, replaceRefs } from "./replaceRefs";
 
 const LINK_REGEX = /^\(\((?<ref>[^)]+)\)\)/;
 
-type CompilerOpts = {
+type HTMLCompilerOpts = {
   engine: DEngineClientV2;
   renderWithOutline: boolean;
   replaceRefOpts: ReplaceRefOptions;
   refLvl?: number;
+};
+
+type MDCompilerOpts = {
+  replaceLink?: ReplaceLinkOpts;
 };
 
 export type RefLinkData = {
@@ -245,18 +249,14 @@ function extractNoteRef(opts: {
 
 // --- Main
 
-function plugin(opts: CompilerOpts) {
+function plugin(opts: HTMLCompilerOpts) {
   // @ts-ignore
   let _this: Processor = this;
   attachParser({ proc: _this });
   attachCompiler({ proc: _this, ...opts });
 }
 
-export type PluginForMarkdownOpts = {
-  replaceLink?: ReplaceLinkOpts;
-};
-
-function pluginForMarkdown(opts?: PluginForMarkdownOpts) {
+function pluginForMarkdown(opts?: MDCompilerOpts) {
   // @ts-ignore
   let _this: Processor = this;
   attachParser({ proc: _this });
@@ -268,7 +268,7 @@ function attachCompilerForMarkdown({
   opts,
 }: {
   proc: Processor;
-  opts?: PluginForMarkdownOpts;
+  opts?: MDCompilerOpts;
 }) {
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
@@ -380,7 +380,7 @@ function attachParser(opts: { proc: Processor }) {
 function attachCompiler(
   opts: {
     proc: Processor;
-  } & CompilerOpts
+  } & HTMLCompilerOpts
 ) {
   const {
     refLvl,
@@ -463,4 +463,3 @@ function attachCompiler(
 
 export { plugin as dendronNoteRefPlugin };
 export { pluginForMarkdown as dendronNoteRefPluginForMd };
-export { CompilerOpts as DendronNoteRefPluginOpts };

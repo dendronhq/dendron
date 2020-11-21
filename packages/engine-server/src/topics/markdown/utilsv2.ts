@@ -7,28 +7,25 @@ import {
   NoteUtilsV2,
 } from "@dendronhq/common-all";
 import _ from "lodash";
+import { Heading } from "mdast";
+import {
+  brk,
+  heading,
+  paragraph,
+  root as mdastRoot,
+  text,
+} from "mdast-builder";
 import remark from "remark";
 import abbrPlugin from "remark-abbr";
 import frontmatterPlugin from "remark-frontmatter";
 import markdownParse from "remark-parse";
+import { ReplaceLinkOpts } from "../../types";
 import {
   DendronLinksOpts,
   dendronLinksPlugin,
   WikiLinkNote,
 } from "./plugins/dendronLinksPlugin";
-import {
-  root as mdastRoot,
-  paragraph,
-  text,
-  heading,
-  brk,
-} from "mdast-builder";
-import {
-  dendronNoteRefPluginForMd,
-  PluginForMarkdownOpts,
-} from "./plugins/dendronNoteRefPlugin";
-import { ReplaceLinkOpts } from "../../types";
-import { Heading } from "mdast";
+import { dendronNoteRefPluginForMd } from "./plugins/dendronNoteRefPlugin";
 
 const selectAll = require("unist-util-select").selectAll;
 
@@ -49,13 +46,15 @@ export class ParserUtilsV2 {
    */
   static getRemark(opts?: {
     dendronLinksOpts: DendronLinksOpts;
-    dendronRefLinkOpts?: PluginForMarkdownOpts;
+    dendronNoteRefPluginForMdOpts?: Parameters<
+      typeof dendronNoteRefPluginForMd
+    >[0];
     useDendronNoteRefPluginForMd?: boolean;
   }) {
     const {
       dendronLinksOpts,
       useDendronNoteRefPluginForMd,
-      dendronRefLinkOpts,
+      dendronNoteRefPluginForMdOpts: dendronRefLinkOpts,
     } = _.defaults(opts, {
       dendronLinksOpts: {},
       useDendronNoteRefPluginForMd: true,
@@ -92,6 +91,7 @@ export class ParserUtilsV2 {
     let remark = ParserUtilsV2.getRemark();
     let out = remark.parse(content);
     let out2: WikiLinkNote[] = selectAll("wikiLink", out);
+    // let refLink = selectAll("refLink", out)
     const dlinks = out2.map(
       (m: WikiLinkNote) =>
         ({
@@ -132,7 +132,7 @@ export class ParserUtilsV2 {
       dendronLinksOpts: {
         replaceLink: { from, to },
       },
-      dendronRefLinkOpts: {
+      dendronNoteRefPluginForMdOpts: {
         replaceLink: { from, to },
       },
     });

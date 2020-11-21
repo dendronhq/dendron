@@ -1,5 +1,5 @@
 import { tmpDir } from "@dendronhq/common-server";
-import { beforeEach, describe, it } from "mocha";
+import { beforeEach, afterEach, describe, it } from "mocha";
 import vscode, { ExtensionContext } from "vscode";
 import {
   InitializeType,
@@ -12,6 +12,7 @@ import { _activate } from "../../_extension";
 import { expect, resetCodeWorkspace } from "../testUtilsv2";
 import { stubSetupWorkspace } from "./SetupWorkspace.test";
 import fs from "fs-extra";
+import { HistoryService } from "../../services/HistoryService";
 
 const TIMEOUT = 60 * 1000 * 5;
 
@@ -23,6 +24,10 @@ suite("Extension", function () {
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
     await resetCodeWorkspace();
+  });
+
+  afterEach(function () {
+    HistoryService.instance().clearSubscriptions();
   });
 
   describe("setup workspace", function () {
@@ -47,7 +52,7 @@ suite("Extension", function () {
     });
   });
 
-  describe("setup workspace v2", function () {
+  describe.skip("setup workspace v2", function () {
     it("not active/ init", function (done) {
       const wsRoot = tmpDir().name;
       _activate(ctx).then(async (resp) => {

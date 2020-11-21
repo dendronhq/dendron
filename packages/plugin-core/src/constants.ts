@@ -366,14 +366,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview: "",
   },
-  // ADD_VAULT: {
-  //   key: "dendron.addVault",
-  //   title: `${CMD_PREFIX} Add Vault`,
-  //   group: "workspace",
-  //   desc: "Add a vault to an existing workspace",
-  //   docLink: "dendron.topic.commands.md",
-  //   docPreview: "",
-  // },
   UPGRADE_SETTINGS: {
     key: "dendron.upgradeSettings",
     title: `${CMD_PREFIX} Upgrade Settings`,
@@ -699,6 +691,12 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     type: "string",
     default: "",
     description: "location of dendron workspace",
+  },
+  DENDRON_DIR: {
+    key: "dendron.dendronDir",
+    type: "string",
+    default: "",
+    description: "location of dendron configuration",
   },
   // --- other
   LOG_LEVEL: {

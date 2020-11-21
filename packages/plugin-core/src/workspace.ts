@@ -253,12 +253,23 @@ export class DendronWorkspace {
     this.L.info({ ctx, msg: "initialized" });
   }
 
-  get config(): DendronConfig {
-    const rootDir = DendronWorkspace.wsRoot();
-    if (!rootDir) {
-      throw `rootDir not set when get config`;
+  get dendronRoot(): string {
+    const dendronDir = getCodeConfig<string | undefined>(
+      CONFIG.DENDRON_DIR.key
+    );
+    if (_.isEmpty(dendronDir) || _.isUndefined(dendronDir)) {
+      return DendronWorkspace.wsRoot();
+    } else {
+      return resolveRelToWSRoot(dendronDir);
     }
-    return DConfig.getOrCreate(rootDir);
+  }
+
+  get config(): DendronConfig {
+    const dendronRoot = getWS().dendronRoot;
+    if (!dendronRoot) {
+      throw `dendronRoot not set when get config`;
+    }
+    return DConfig.getOrCreate(dendronRoot);
   }
 
   get podsDir(): string {

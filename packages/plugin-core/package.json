@@ -119,6 +119,11 @@
                     "default": "",
                     "description": "location of dendron workspace"
                 },
+                "dendron.dendronDir": {
+                    "type": "string",
+                    "default": "",
+                    "description": "location of dendron configuration"
+                },
                 "dendron.logLevel": {
                     "type": "string",
                     "default": "info",

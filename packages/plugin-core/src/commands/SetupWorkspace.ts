@@ -8,7 +8,7 @@ import vscode from "vscode";
 import { DENDRON_COMMANDS, DENDRON_WS_NAME, GLOBAL_STATE } from "../constants";
 import { Snippets, WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getGlobalState } from "../workspace";
+import { DendronWorkspace, getGlobalState, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 import { VaultAddCommand } from "./VaultAddCommand";
 
@@ -203,6 +203,11 @@ export class SetupWorkspaceCommand extends BasicCommand<
     const vaultPath = opts.vault?.fsPath || path.join(rootDir, "vault");
     const vaults = [{ fsPath: vaultPath }];
     await WorkspaceService.createWorkspace({ vaults, wsRoot: rootDir });
+
+    // create dendron root
+    if (getWS().dendronRoot !== rootDir) {
+      fs.ensureDirSync(getWS().dendronRoot);
+    }
 
     const dendronWSTemplate = vscode.Uri.joinPath(
       ws.extensionAssetsDir,

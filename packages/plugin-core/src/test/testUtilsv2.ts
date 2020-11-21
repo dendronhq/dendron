@@ -34,7 +34,7 @@ import { DendronWorkspace } from "../workspace";
 import { _activate } from "../_extension";
 import { createMockConfig, onWSInit } from "./testUtils";
 
-type SetupCodeConfigurationV2 = {
+export type SetupCodeConfigurationV2 = {
   configOverride?: { [key: string]: any };
 };
 
@@ -47,7 +47,7 @@ type SetupCodeWorkspaceV2 = SetupWSOpts &
     postSetupHook?: SetupHookFunction;
   };
 
-type SetupCodeWorkspaceMultiVaultV2Opts = SetupCodeConfigurationV2 & {
+export type SetupCodeWorkspaceMultiVaultV2Opts = SetupCodeConfigurationV2 & {
   ctx: ExtensionContext;
   preActivateHook?: any;
   postActivateHook?: any;
@@ -167,9 +167,6 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
   };
   const workspaceFile = DendronWorkspace.workspaceFile();
   const workspaceFolders = DendronWorkspace.workspaceFolders();
-  // const config = DConfig.getOrCreate(wsRoot);
-  // config.vaults = vaults.map((ent) => ({ fsPath: ent }));
-  // DConfig.writeConfig({ wsRoot, config });
   await preSetupHook({
     wsRoot,
     vaults: vaults.map((ent) => {
@@ -291,26 +288,6 @@ export async function setupCodeWorkspaceV3(
       uri: Uri.file(v.fsPath),
     }));
   };
-
-  // update vscode settings
-  // await DendronWorkspace.updateWorkspaceFile({
-  //   updateCb: (settings) => {
-  //     const folders: WorkspaceFolderRaw[] = vaults.map((ent) => ({
-  //       path: ent.fsPath,
-  //     }));
-  //     settings = assignJSONWithComment({ folders }, settings);
-  //     return settings;
-  //   },
-  // });
-
-  // update config
-  // const config = DConfig.getOrCreate(wsRoot);
-  // config.vaults = vaults;
-  // DConfig.writeConfig({ wsRoot, config });
-  // await postSetupHook({
-  //   wsRoot,
-  //   vaults,
-  // });
   return { wsRoot, vaults, workspaceFile, workspaceFolders };
 }
 
@@ -332,11 +309,13 @@ export class LocationTestUtils {
   static getBasenameFromLocation = (loc: Location) =>
     path.basename(loc.uri.fsPath);
 }
-
-export const stubWorkspace = ({ wsRoot, vaults }: WorkspaceOpts) => {
+export const stubWorkspaceFile = (wsRoot: string) => {
   DendronWorkspace.workspaceFile = () => {
     return Uri.file(path.join(wsRoot, "dendron.code-workspace"));
   };
+};
+
+export const stubWorkspaceVaults = (vaults: DVault[]) => {
   DendronWorkspace.workspaceFolders = () => {
     return vaults.map((v) => ({
       name: VaultUtils.getName(v),
@@ -344,6 +323,11 @@ export const stubWorkspace = ({ wsRoot, vaults }: WorkspaceOpts) => {
       uri: Uri.file(v.fsPath),
     }));
   };
+};
+
+export const stubWorkspace = ({ wsRoot, vaults }: WorkspaceOpts) => {
+  stubWorkspaceFile(wsRoot);
+  stubWorkspaceVaults(vaults);
 };
 
 export function expect(value: any) {

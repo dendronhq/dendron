@@ -57,7 +57,7 @@ export class ImportPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const ctx = { ctx: "ImportPod" };
     this.L.info({ ctx, opts });
-    const wsRoot = DendronWorkspace.rootDir();
+    const wsRoot = DendronWorkspace.wsRoot();
     if (!wsRoot) {
       throw Error("ws root not defined");
     }

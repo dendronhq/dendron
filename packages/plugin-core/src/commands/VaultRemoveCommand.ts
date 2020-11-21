@@ -41,7 +41,7 @@ export class VaultRemoveCommand extends BasicCommand<
     const ctx = "VaultRemove";
     // NOTE: relative vault
     const { vault } = opts;
-    const wsRoot = DendronWorkspace.rootDir() as string;
+    const wsRoot = DendronWorkspace.wsRoot() as string;
     const wsService = new WorkspaceService({ wsRoot });
     Logger.info({ ctx, msg: "preRemoveVault", vault });
     await wsService.removeVault({ vault });

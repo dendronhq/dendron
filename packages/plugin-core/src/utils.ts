@@ -321,7 +321,7 @@ export class WSUtils {
   static updateEngineAPI(port: number | string): DEngineClientV2 {
     const ws = DendronWorkspace.instance();
     ws.setEngine(EngineAPIService.create({ port }));
-    const wsRoot = DendronWorkspace.rootDir() as string;
+    const wsRoot = DendronWorkspace.wsRoot() as string;
     const portFilePath = getPortFilePath({ wsRoot });
     fs.writeFileSync(portFilePath, port, { encoding: "utf8" });
     const engine = ws.getEngine();

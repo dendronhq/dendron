@@ -25,7 +25,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     window.showInformationMessage("Calling the doctor.");
     const {} = _.defaults(opts, {});
     const ws = DendronWorkspace.instance();
-    const rootDir = DendronWorkspace.rootDir();
+    const rootDir = DendronWorkspace.wsRoot();
     const findings: Finding[] = [];
     if (_.isUndefined(rootDir)) {
       throw Error("rootDir undefined");

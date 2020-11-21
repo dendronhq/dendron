@@ -8,7 +8,7 @@ import vscode from "vscode";
 import { DENDRON_COMMANDS, DENDRON_WS_NAME, GLOBAL_STATE } from "../constants";
 import { Snippets, WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, when } from "../workspace";
+import { DendronWorkspace, getGlobalState } from "../workspace";
 import { BasicCommand } from "./base";
 import { VaultAddCommand } from "./VaultAddCommand";
 
@@ -53,23 +53,22 @@ export class SetupWorkspaceCommand extends BasicCommand<
     if (_.isUndefined(rootDirRaw)) {
       return;
     }
-    const isFirstWS = _.isUndefined(
-      DendronWorkspace.instance().context.globalState.get<string | undefined>(
-        GLOBAL_STATE.DENDRON_FIRST_WS
-      )
+    // if first workspace, don't prompt
+    //const globalState = DendronWorkspace.instance().context.globalState;
+    const firstWs = _.isUndefined(
+      getGlobalState(GLOBAL_STATE.DENDRON_FIRST_WS)
     );
+    if (firstWs) {
+      return { rootDirRaw, emptyWs: false };
+    }
+
     const options = [
       "initialize with dendron tutorial notes",
       "initialize empty repository",
     ];
-    when("betaFeatures", () => {
-      options.push("initialize from git");
-    });
-
-    // don't prompt for option if first ws
-    if (isFirstWS) {
-      return { rootDirRaw, emptyWs: false };
-    }
+    // when("betaFeatures", () => {
+    //   options.push("initialize from git");
+    // });
 
     const initializeChoice = await VSCodeUtils.showQuickPick(options, {
       placeHolder: "initialize with dendron tutorial notes",
@@ -196,7 +195,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
       return [];
     }
 
-    if (initType) {
+    if (initType === InitializeType.TEMPLATE) {
       return this.handleInitializeType({ initType, rootDir });
     }
 

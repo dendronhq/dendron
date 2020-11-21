@@ -38,7 +38,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (_.isEmpty(vpath) || _.isUndefined(vpath)) {
       return window.showErrorMessage("need to specify value for path");
     }
-    const vpathFull = resolvePath(vpath, DendronWorkspace.rootDir());
+    const vpathFull = resolvePath(vpath, DendronWorkspace.wsRoot());
     // if (fs.existsSync(vpath) && fs.readdirSync(vpath).length !== 0) {
     //   return window.showErrorMessage(
     //     `vault path ${vpathFull} already exists and is not empty`
@@ -53,7 +53,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (opts.vname) {
       vault.name = opts.vname;
     }
-    const wsRoot = DendronWorkspace.rootDir() as string;
+    const wsRoot = DendronWorkspace.wsRoot() as string;
     const wsService = new WorkspaceService({ wsRoot });
     Logger.info({ ctx, msg: "preCreateVault", vault });
     await wsService.createVault({ vault });

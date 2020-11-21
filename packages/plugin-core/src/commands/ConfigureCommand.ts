@@ -15,7 +15,7 @@ export class ConfigureCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return {};
   }
   async execute() {
-    const wsRoot = DendronWorkspace.rootDir() as string;
+    const wsRoot = DendronWorkspace.wsRoot() as string;
     const configPath = DConfig.configPath(wsRoot);
     const uri = Uri.file(configPath);
     VSCodeUtils.openFileInEditor(uri);

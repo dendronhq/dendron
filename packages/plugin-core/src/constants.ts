@@ -48,6 +48,7 @@ export const ICONS = {
   STUB: "gist-new",
   SCHEMA: "repo",
 };
+export const DENDRON_WORKSPACE_FILE = "dendron.code-workspace";
 
 export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   // --- Notes
@@ -568,19 +569,32 @@ export const WORKSPACE_STATE = {
   WS_VERSION: "dendron.wsVersion",
 };
 
-export const GLOBAL_STATE = {
-  VERSION: "dendron.version",
-  VERSION_PREV: "dendron.versionPrev",
+export enum GLOBAL_STATE {
+  VERSION = "dendron.version",
+  VERSION_PREV = "dendron.versionPrev",
   /**
    * Set the first time a dendron workspace is activated
    */
-  DENDRON_FIRST_WS: "dendron.first_ws",
-  DENDRON_FIRST_WS_TUTORIAL_STEP: "dendron.first_ws.tutorial_step",
+  DENDRON_FIRST_WS = "dendron.first_ws",
+  DENDRON_FIRST_WS_TUTORIAL_STEP = "dendron.first_ws.tutorial_step",
   /**
    * Extension is being debugged
    */
-  VSCODE_DEBUGGING_EXTENSION: "dendron.vscode_debugging_extension",
-};
+  VSCODE_DEBUGGING_EXTENSION = "dendron.vscode_debugging_extension",
+}
+// export const GLOBAL_STATE = {
+//   VERSION: "dendron.version",
+//   VERSION_PREV: "dendron.versionPrev",
+//   /**
+//    * Set the first time a dendron workspace is activated
+//    */
+//   DENDRON_FIRST_WS: "dendron.first_ws",
+//   DENDRON_FIRST_WS_TUTORIAL_STEP: "dendron.first_ws.tutorial_step",
+//   /**
+//    * Extension is being debugged
+//    */
+//   VSCODE_DEBUGGING_EXTENSION: "dendron.vscode_debugging_extension",
+// };
 
 // type ConfigEntry = {
 //   key: string;

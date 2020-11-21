@@ -1,4 +1,4 @@
-import { DendronConfig, Time } from "@dendronhq/common-all";
+import { DendronConfig, DVault, Time } from "@dendronhq/common-all";
 import { DirResult, readYAML, tmpDir } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import {
@@ -14,20 +14,48 @@ import { afterEach, beforeEach, describe, it } from "mocha";
 import path from "path";
 import { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
-import { InitializeType } from "../../commands/SetupWorkspace";
-import { WORKSPACE_STATE } from "../../constants";
+import {
+  InitializeType,
+  SetupWorkspaceCommand,
+} from "../../commands/SetupWorkspace";
+import { GLOBAL_STATE, WORKSPACE_STATE } from "../../constants";
 import { HistoryEvent, HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
+import { DendronWorkspace, getWS } from "../../workspace";
 import { _activate } from "../../_extension";
 import { onExtension, onWSInit, setupDendronWorkspace } from "../testUtils";
 import {
   expect,
+  genEmptyWSFiles,
   runWorkspaceTestV3,
   setupCodeWorkspaceV2,
+  stubWorkspace,
 } from "../testUtilsv2";
 
 const TIMEOUT = 60 * 1000 * 5;
+
+export function stubSetupWorkspace({
+  wsRoot,
+  initType,
+}: {
+  wsRoot: string;
+  initType: InitializeType;
+}) {
+  // @ts-ignore
+  VSCodeUtils.gatherFolderPath = () => {
+    return wsRoot;
+  };
+  switch (initType) {
+    case InitializeType.EMPTY:
+      // @ts-ignore
+      VSCodeUtils.showQuickPick = () => {
+        return "initialize empty repository";
+      };
+      break;
+    default:
+      throw Error(`inittype ${initType} not handled`);
+  }
+}
 
 suite("SetupWorkspace", function () {
   this.timeout(TIMEOUT);
@@ -92,7 +120,7 @@ id: bond
               "0.0.1"
             );
             const engine = DendronWorkspace.instance().getEngine();
-            const wsRoot = DendronWorkspace.rootDir() as string;
+            const wsRoot = DendronWorkspace.wsRoot() as string;
             // check for config file
             const config = readYAML(
               DConfig.configPath(wsRoot)
@@ -248,6 +276,63 @@ id: bond
           done();
         },
       });
+    });
+
+    // new style
+    it("first setup", function (done) {
+      const wsRoot = tmpDir().name;
+      stubWorkspace({ wsRoot, vaults: [] });
+      // @ts-ignore
+      VSCodeUtils.gatherFolderPath = () => {
+        return wsRoot;
+      };
+      new SetupWorkspaceCommand()
+        .run({ skipConfirmation: true, skipOpenWs: true })
+        .then((vaults) => {
+          let _vaults = vaults as DVault[];
+          expect(_vaults.map((v) => v.fsPath)).toEqual(
+            vaults?.map((ent) => ent.fsPath)
+          );
+          expect(fs.readdirSync(getWS().vaults[0].fsPath)).toEqual([
+            ".vscode",
+            "dendron.md",
+            "dendron.welcome.md",
+            "root.md",
+            "root.schema.yml",
+          ]);
+          done();
+        });
+    });
+
+    it("not first setup, choose empty", function (done) {
+      const wsRoot = tmpDir().name;
+      stubWorkspace({ wsRoot, vaults: [] });
+
+      // @ts-ignore
+      VSCodeUtils.gatherFolderPath = () => {
+        return wsRoot;
+      };
+      // @ts-ignore
+      VSCodeUtils.showQuickPick = () => {
+        return "initialize empty repository";
+      };
+
+      getWS()
+        .context.globalState.update(GLOBAL_STATE.DENDRON_FIRST_WS, false)
+        .then(() => {
+          new SetupWorkspaceCommand()
+            .run({ skipConfirmation: true, skipOpenWs: true, emptyWs: true })
+            .then((vaults) => {
+              let _vaults = vaults as DVault[];
+              expect(_vaults.map((v) => v.fsPath)).toEqual(
+                vaults?.map((ent) => ent.fsPath)
+              );
+              expect(fs.readdirSync(getWS().vaults[0].fsPath)).toEqual(
+                genEmptyWSFiles()
+              );
+              done();
+            });
+        });
     });
   });
 });

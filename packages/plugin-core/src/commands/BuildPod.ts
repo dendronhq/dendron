@@ -29,7 +29,7 @@ export class BuildPodCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const cmd = new BuildSiteCommand();
     // @ts-ignore
     cmd.L = this.L;
-    const dendronRoot = DendronWorkspace.rootDir();
+    const dendronRoot = DendronWorkspace.wsRoot();
     if (_.isUndefined(dendronRoot)) {
       throw Error("dendronRoot note set");
     }

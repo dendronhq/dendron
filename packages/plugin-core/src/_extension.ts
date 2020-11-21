@@ -192,7 +192,7 @@ export async function _activate(context: vscode.ExtensionContext) {
   );
   if (DendronWorkspace.isActive()) {
     const config = ws.config;
-    const wsRoot = DendronWorkspace.rootDir() as string;
+    const wsRoot = DendronWorkspace.wsRoot() as string;
     if (_.isEmpty(config.vaults)) {
       Logger.info({ ctx, msg: "config.vaults empty" });
       const wsFolders = DendronWorkspace.workspaceFolders();
@@ -286,6 +286,7 @@ export async function _activate(context: vscode.ExtensionContext) {
   } else {
     // ws not active
     Logger.info({ ctx: "dendron not active" });
+    return false;
   }
 
   showWelcomeOrWhatsNew(DendronWorkspace.version(), migratedGlobalVersion).then(
@@ -296,6 +297,7 @@ export async function _activate(context: vscode.ExtensionContext) {
       });
     }
   );
+  return true;
 }
 
 // this method is called when your extension is deactivated

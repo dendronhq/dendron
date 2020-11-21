@@ -22,7 +22,7 @@ export class RestoreVaultCommand extends BaseCommand<
   static key = DENDRON_COMMANDS.RESTORE_VAULT.key;
   async gatherInputs(): Promise<any> {
     const snapshots = path.join(
-      DendronWorkspace.rootDir() as string,
+      DendronWorkspace.wsRoot() as string,
       "snapshots"
     );
 
@@ -39,7 +39,7 @@ export class RestoreVaultCommand extends BaseCommand<
 
   async enrichInputs(inputs: CommandInput): Promise<CommandOpts | undefined> {
     const snapshots = path.join(
-      DendronWorkspace.rootDir() as string,
+      DendronWorkspace.wsRoot() as string,
       "snapshots"
     );
     const { data } = inputs;
@@ -58,7 +58,7 @@ export class RestoreVaultCommand extends BaseCommand<
       const pod = new SnapshotImportPod();
       const engine = DendronWorkspace.instance().getEngine();
       const vault = engine.vaults[0];
-      const wsRoot = DendronWorkspace.rootDir() as string;
+      const wsRoot = DendronWorkspace.wsRoot() as string;
       if (ws.vaultWatcher) {
         ws.vaultWatcher.pause = true;
       }

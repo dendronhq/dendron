@@ -21,6 +21,7 @@ import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { LookupCommand } from "./commands/LookupCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import {
+  CONFIG,
   DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
@@ -57,6 +58,32 @@ export function when(key: keyof DendronConfig, cb: () => void): void {
   }
 }
 
+export function whenGlobalState(key: string, cb?: () => boolean): boolean {
+  cb =
+    cb ||
+    function () {
+      return true;
+    };
+  // @ts-ignore
+  const out = DendronWorkspace.instance().getGlobalState(key);
+  if (out === false || _.isUndefined(out) ? false : true) {
+    return cb();
+  }
+  return false;
+}
+
+export function getGlobalState<T>(key: GLOBAL_STATE) {
+  return DendronWorkspace.instance().getGlobalState<T>(key);
+}
+
+export function getCodeConfig<T>(key: string): T | undefined {
+  return DendronWorkspace.configuration().get<T>(key);
+}
+
+export function getWS() {
+  return DendronWorkspace.instance();
+}
+
 export class DendronWorkspace {
   static DENDRON_WORKSPACE_FILE: string = "dendron.code-workspace";
   static _SERVER_CONFIGURATION: Partial<ServerConfiguration>;
@@ -91,17 +118,13 @@ export class DendronWorkspace {
   /**
    * Full path to workspace root
    */
-  static rootDir(): string | undefined {
-    const rootDir = DendronWorkspace.configuration().get<string>(
-      "dendron.rootDir"
-    );
+  static wsRoot(): string {
+    const rootDir = getCodeConfig<string>(CONFIG.ROOT_DIR.key);
+    const workspaceDir = path.dirname(DendronWorkspace.workspaceFile().fsPath);
     if (rootDir) {
-      return resolvePath(
-        rootDir,
-        path.dirname(DendronWorkspace.workspaceFile().fsPath)
-      );
+      return resolvePath(rootDir, workspaceDir);
     }
-    return rootDir;
+    return workspaceDir;
   }
 
   static lsp(): boolean {
@@ -134,8 +157,18 @@ export class DendronWorkspace {
    * Currently, this is a check to see if rootDir is defined in settings
    */
   static isActive(): boolean {
-    const rootDir = DendronWorkspace.rootDir();
-    return !_.isUndefined(rootDir) && !_.isEmpty(rootDir);
+    /**
+     * we do a try catch because `DendronWorkspace.workspaceFile` throws an error if workspace file doesn't exist
+     * the reason we don't use `vscode.*` method is because we need to stub this value during tests
+     */
+    try {
+      return (
+        path.basename(DendronWorkspace.workspaceFile().fsPath) ===
+        this.DENDRON_WORKSPACE_FILE
+      );
+    } catch (err) {
+      return false;
+    }
   }
 
   static version(): string {
@@ -206,9 +239,7 @@ export class DendronWorkspace {
     _DendronWorkspace = this;
     this.L = Logger;
     this.disposableStore = new DisposableStore();
-    if (!opts.skipSetup) {
-      this._setupCommands();
-    }
+    this._setupCommands();
     this.setupLanguageFeatures(context);
     this.setupViews(context);
     const ctx = "DendronWorkspace";
@@ -216,17 +247,17 @@ export class DendronWorkspace {
   }
 
   get config(): DendronConfig {
-    const rootDir = DendronWorkspace.rootDir();
+    const rootDir = DendronWorkspace.wsRoot();
     if (!rootDir) {
-      throw `rootDir not set`;
+      throw `rootDir not set when get config`;
     }
     return DConfig.getOrCreate(rootDir);
   }
 
   get podsDir(): string {
-    const rootDir = DendronWorkspace.rootDir();
+    const rootDir = DendronWorkspace.wsRoot();
     if (!rootDir) {
-      throw `rootdir not set`;
+      throw `rootdir not set when get podsDir`;
     }
     const podsPath = path.join(rootDir, "pods");
     fs.ensureDirSync(podsPath);
@@ -255,7 +286,7 @@ export class DendronWorkspace {
     const vaults = DendronWorkspace.instance().config.vaults;
     return vaults.map((ent) => ({
       ...ent,
-      fsPath: resolvePath(ent.fsPath, DendronWorkspace.rootDir() as string),
+      fsPath: resolvePath(ent.fsPath, DendronWorkspace.wsRoot() as string),
     }));
   }
 
@@ -408,9 +439,9 @@ export class DendronWorkspace {
 
   // === Utils
 
-  getGlobalState<T>(key: keyof typeof GLOBAL_STATE) {
-    const _key = GLOBAL_STATE[key];
-    return this.context.globalState.get<T>(_key);
+  getGlobalState<T>(key: GLOBAL_STATE) {
+    //const _key = GLOBAL_STATE[key];
+    return this.context.globalState.get<T>(key);
   }
 
   updateGlobalState(key: keyof typeof GLOBAL_STATE, value: any) {
@@ -427,9 +458,9 @@ export class DendronWorkspace {
     const ctx = "activateWorkspace";
     const stage = getStage();
     this.L.info({ ctx, stage, msg: "enter" });
-    const rootDir = DendronWorkspace.rootDir();
+    const rootDir = DendronWorkspace.wsRoot();
     if (!rootDir) {
-      throw `rootDir not set`;
+      throw `rootDir not set when activating Watcher`;
     }
 
     const windowWatcher = new WindowWatcher();

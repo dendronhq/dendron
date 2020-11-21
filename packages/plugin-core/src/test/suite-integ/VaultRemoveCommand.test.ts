@@ -47,7 +47,7 @@ suite("VaultRemoveCommand", function () {
 
         // check config updated
         const configPath = DConfig.configPath(
-          DendronWorkspace.rootDir() as string
+          DendronWorkspace.wsRoot() as string
         );
         const config = readYAML(configPath) as DendronConfig;
         assert.deepStrictEqual(

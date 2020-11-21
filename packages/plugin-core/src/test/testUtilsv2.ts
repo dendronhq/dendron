@@ -1,4 +1,4 @@
-import { DVault, NotePropsV2 } from "@dendronhq/common-all";
+import { DVault, NotePropsV2, VaultUtils } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   file2Note,
@@ -51,6 +51,10 @@ type SetupCodeWorkspaceMultiVaultV2Opts = SetupCodeConfigurationV2 & {
   postSetupHook?: SetupHookFunction;
   setupWsOverride?: Partial<SetupWorkspaceOpts>;
 };
+
+export function genEmptyWSFiles() {
+  return [".vscode", "root.md", "root.schema.yml"];
+}
 
 export async function runSingleVaultTest(
   opts: SetupCodeWorkspaceV2 & {
@@ -120,6 +124,17 @@ export function setupCodeConfiguration(opts: SetupCodeConfigurationV2) {
       _.set(config, k, v);
     });
     return createMockConfig(config);
+  };
+}
+
+export async function resetCodeWorkspace() {
+  // @ts-ignore
+  DendronWorkspace.workspaceFile = () => {
+    return undefined;
+  };
+  // @ts-ignore
+  DendronWorkspace.workspaceFolders = () => {
+    return undefined;
   };
 }
 
@@ -201,16 +216,7 @@ export async function setupCodeWorkspaceMultiVaultV2(
   });
   setupCodeConfiguration(opts);
   // setup workspace file
-  DendronWorkspace.workspaceFile = () => {
-    return Uri.file(path.join(wsRoot, "dendron.code-workspace"));
-  };
-  DendronWorkspace.workspaceFolders = () => {
-    return vaults.map((v) => ({
-      name: v.name,
-      index: 1,
-      uri: Uri.file(v.fsPath),
-    }));
-  };
+  stubWorkspace({ wsRoot, vaults });
   const workspaceFile = DendronWorkspace.workspaceFile();
   const workspaceFolders = DendronWorkspace.workspaceFolders();
   await preSetupHook({
@@ -323,10 +329,29 @@ export class LocationTestUtils {
     path.basename(loc.uri.fsPath);
 }
 
+export const stubWorkspace = ({ wsRoot, vaults }: WorkspaceOpts) => {
+  DendronWorkspace.workspaceFile = () => {
+    return Uri.file(path.join(wsRoot, "dendron.code-workspace"));
+  };
+  DendronWorkspace.workspaceFolders = () => {
+    return vaults.map((v) => ({
+      name: VaultUtils.getName(v),
+      index: 1,
+      uri: Uri.file(v.fsPath),
+    }));
+  };
+};
+
 export function expect(value: any) {
   return {
     toEqual: (value2: any) => {
       assert.deepStrictEqual(value, value2);
+    },
+    toBeTruthy: () => {
+      assert.ok(value);
+    },
+    toBeFalsy: () => {
+      assert.ok(!value);
     },
   };
 }

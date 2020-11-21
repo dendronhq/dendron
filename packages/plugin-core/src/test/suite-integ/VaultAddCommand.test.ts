@@ -72,7 +72,7 @@ suite("VaultAddCommand", function () {
           "root.schema.yml",
         ]);
         const configPath = DConfig.configPath(
-          DendronWorkspace.rootDir() as string
+          DendronWorkspace.wsRoot() as string
         );
         const config = readYAML(configPath) as DendronConfig;
         assert.deepStrictEqual(
@@ -117,7 +117,7 @@ suite("VaultAddCommand", function () {
           "root.schema.yml",
         ]);
         const configPath = DConfig.configPath(
-          DendronWorkspace.rootDir() as string
+          DendronWorkspace.wsRoot() as string
         );
         const config = readYAML(configPath) as DendronConfig;
         assert.deepStrictEqual(

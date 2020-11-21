@@ -30,7 +30,7 @@ suite("notes", function () {
   // need to add git folder
   test.skip("basic", (done) => {
     onWSInit(async () => {
-      const wsRoot = DendronWorkspace.rootDir();
+      const wsRoot = DendronWorkspace.wsRoot();
       const {
         snapshotDirPath,
       } = (await new SnapshotVaultCommand().run()) as SnapshotExportPodResp;

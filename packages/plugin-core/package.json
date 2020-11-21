@@ -281,13 +281,6 @@
                 "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workspace-init.gif)"
             },
             {
-                "command": "dendron.initWSV2",
-                "title": "Dendron: Initialize Workspace V2",
-                "desc": "Create a new workspace",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workspace-init.gif)"
-            },
-            {
                 "command": "dendron.changeWS",
                 "title": "Dendron: Change Workspace",
                 "desc": "Change into existing workspace",

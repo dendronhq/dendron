@@ -52,10 +52,12 @@ export type ServerConfiguration = {
  * Check for boolean toggles
  */
 export function when(key: keyof DendronConfig, cb: () => void): void {
-  const out = DendronWorkspace.instance().config[key];
-  if (out === false || _.isUndefined(out) ? false : true) {
-    cb();
-  }
+  try {
+    const out = DendronWorkspace.instance().config[key];
+    if (out === false || _.isUndefined(out) ? false : true) {
+      cb();
+    }
+  } catch (err) {}
 }
 
 export function whenGlobalState(key: string, cb?: () => boolean): boolean {

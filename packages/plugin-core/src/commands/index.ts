@@ -25,7 +25,6 @@ import { RenameNoteV2aCommand } from "./RenameNoteV2a";
 import { ResetConfigCommand } from "./ResetConfig";
 import { RestoreVaultCommand } from "./RestoreVault";
 import { SetupWorkspaceCommand } from "./SetupWorkspace";
-import { SetupWorkspaceCommandV2 } from "./SetupWorkspaceV2";
 import { ShowHelpCommand } from "./ShowHelp";
 import { ShowPreviewCommand } from "./ShowPreview";
 import { SnapshotVaultCommand } from "./SnapshotVault";
@@ -34,7 +33,7 @@ import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
 
-export const ALL_COMMANDS = [
+const ALL_COMMANDS = [
   ArchiveHierarchyCommand,
   BuildPodCommand,
   ChangeWorkspaceCommand,
@@ -64,7 +63,6 @@ export const ALL_COMMANDS = [
   ResetConfigCommand,
   RestoreVaultCommand,
   SetupWorkspaceCommand,
-  SetupWorkspaceCommandV2,
   ShowHelpCommand,
   ShowPreviewCommand,
   SnapshotVaultCommand,
@@ -73,3 +71,9 @@ export const ALL_COMMANDS = [
   VaultAddCommand,
   VaultRemoveCommand,
 ] as CodeCommandConstructor[];
+
+// when("betaFeatures", ()=> {
+//   ALL_COMMANDS.push(SetupWorkspaceCommandV2 as CodeCommandConstructor);
+// })
+
+export { ALL_COMMANDS };

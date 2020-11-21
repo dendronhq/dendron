@@ -1,14 +1,9 @@
-import { DEngineClientV2, DVault } from "@dendronhq/common-all";
+import { DEngineClientV2, WorkspaceOpts } from "@dendronhq/common-all";
 
 export type TestResult = {
   actual: any;
   expected: any;
   msg?: string;
-};
-
-export type WorkspaceOpts = {
-  wsRoot: string;
-  vaults: DVault[];
 };
 
 export type EngineOpt = {

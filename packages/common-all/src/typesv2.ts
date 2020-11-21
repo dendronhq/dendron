@@ -374,3 +374,10 @@ export type DStoreV2 = DCommonProps &
     ) => Promise<DEngineDeleteSchemaRespV2>;
     renameNote: (opts: RenameNoteOptsV2) => Promise<RenameNotePayload>;
   };
+
+// === Workspace
+
+export type WorkspaceOpts = {
+  wsRoot: string;
+  vaults: DVault[];
+};

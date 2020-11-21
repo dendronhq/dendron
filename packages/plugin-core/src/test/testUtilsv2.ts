@@ -1,4 +1,9 @@
-import { DVault, NotePropsV2, VaultUtils } from "@dendronhq/common-all";
+import {
+  DVault,
+  NotePropsV2,
+  VaultUtils,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   file2Note,
@@ -12,7 +17,6 @@ import {
   NotePresetsUtils,
   SetupHookFunction,
   SetupWSOpts,
-  WorkspaceOpts,
 } from "@dendronhq/common-test-utils";
 import { DConfig } from "@dendronhq/engine-server";
 import assert from "assert";

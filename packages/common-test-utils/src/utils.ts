@@ -15,17 +15,13 @@ import {
   RenameNoteOptsV2,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { DendronAPI, tmpDir } from "@dendronhq/common-server";
-import _ from "lodash";
-import {
-  PostSetupHookFunction,
-  SetupHookFunction,
-  TestResult,
-  WorkspaceOpts,
-} from "./types";
 import assert from "assert";
+import _ from "lodash";
 import { EngineTestUtilsV3, NotePresetsUtils } from ".";
+import { PostSetupHookFunction, SetupHookFunction, TestResult } from "./types";
 
 export const toPlainObject = <R>(value: unknown): R =>
   value !== undefined ? JSON.parse(JSON.stringify(value)) : value;

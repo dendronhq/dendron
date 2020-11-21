@@ -5,6 +5,7 @@ import {
   NotePropsV2,
   NoteUtilsV2,
   SchemaModulePropsV2,
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
   EngineTestUtilsV3,
@@ -13,7 +14,6 @@ import {
   runEngineTest,
   runJestHarnessV2,
   TestResult,
-  WorkspaceOpts,
 } from "@dendronhq/common-test-utils";
 import { NotePresetsUtils } from "@dendronhq/common-test-utils/lib/presets/utils";
 import fs from "fs-extra";

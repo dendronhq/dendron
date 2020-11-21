@@ -42,6 +42,7 @@ export interface Resp<T> {
 }
 
 export type DendronConfig = {
+  version: number;
   site: DendronSiteConfig;
   vaults: DVault[];
   betaFeatures?: boolean;

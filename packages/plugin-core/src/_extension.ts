@@ -1,12 +1,7 @@
 import { launch } from "@dendronhq/api-server";
-import { DendronError, getStage, Time } from "@dendronhq/common-all";
+import { getStage, Time } from "@dendronhq/common-all";
 import { readJSONWithComments } from "@dendronhq/common-server";
-import {
-  createNormVault,
-  DConfig,
-  getWSMetaFilePath,
-  writeWSMetaFile,
-} from "@dendronhq/engine-server";
+import { getWSMetaFilePath, writeWSMetaFile } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -19,6 +14,7 @@ import {
   WORKSPACE_STATE,
 } from "./constants";
 import { Logger } from "./logger";
+import { migrateConfig } from "./migration";
 import { HistoryEvent, HistoryService } from "./services/HistoryService";
 import { Extensions } from "./settings";
 import { VSCodeUtils, WSUtils } from "./utils";
@@ -193,20 +189,10 @@ export async function _activate(context: vscode.ExtensionContext) {
   if (DendronWorkspace.isActive()) {
     const config = ws.config;
     const wsRoot = DendronWorkspace.wsRoot() as string;
-    if (_.isEmpty(config.vaults)) {
-      Logger.info({ ctx, msg: "config.vaults empty" });
-      const wsFolders = DendronWorkspace.workspaceFolders();
-      if (_.isUndefined(wsFolders)) {
-        throw new DendronError({ msg: "no vaults detected" });
-      }
-      const { vault } = createNormVault({
-        wsRoot,
-        vault: { fsPath: wsFolders[0].uri.fsPath },
-      });
-      config.vaults = [vault];
-      DConfig.writeConfig({ wsRoot, config });
-    }
-    Logger.info({ ctx, config, msg: "isActive" });
+
+    // migrate legacy config files
+    const configMigrated = migrateConfig({ config, wsRoot });
+    Logger.info({ ctx, config, msg: "isActive", configMigrated });
 
     const fpath = getWSMetaFilePath({ wsRoot });
     writeWSMetaFile({

@@ -5,15 +5,18 @@ import {
   tmpDir,
 } from "@dendronhq/common-server";
 import {
+  EngineOpt,
   EngineTestUtilsV2,
   EngineTestUtilsV3,
   NodeTestPresetsV2,
   NotePresetsUtils,
   SetupHookFunction,
   SetupWSOpts,
+  WorkspaceOpts,
 } from "@dendronhq/common-test-utils";
 import { DConfig } from "@dendronhq/engine-server";
 import assert from "assert";
+import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { ExtensionContext, Location, Position, Uri, window } from "vscode";
@@ -26,7 +29,6 @@ import { WorkspaceFolderRaw } from "../types";
 import { DendronWorkspace } from "../workspace";
 import { _activate } from "../_extension";
 import { createMockConfig, onWSInit } from "./testUtils";
-import fs from "fs-extra";
 
 type SetupCodeConfigurationV2 = {
   configOverride?: { [key: string]: any };
@@ -84,16 +86,18 @@ export async function runMultiVaultTest(
   await _activate(ctx);
 }
 
-export async function runMultiVaultTestV3(
+export async function runWorkspaceTestV3(
   opts: SetupCodeWorkspaceMultiVaultV2Opts & {
-    onInit: (opts: { vaults: DVault[]; wsRoot: string }) => Promise<void>;
+    onInit: (opts: WorkspaceOpts & EngineOpt) => Promise<void>;
   }
 ) {
   const { ctx } = opts;
-  const { vaults, wsRoot } = await setupCodeWorkspaceMultiVaultV3(opts);
+  const { vaults, wsRoot } = await setupCodeWorkspaceV3(opts);
   onWSInit(async () => {
-    await opts.onInit({ wsRoot, vaults });
+    const engine = DendronWorkspace.instance().getEngine();
+    await opts.onInit({ wsRoot, vaults, engine });
   });
+  opts?.preActivateHook ? await opts.preActivateHook() : null;
   await _activate(ctx);
 }
 
@@ -242,7 +246,10 @@ export async function setupCodeWorkspaceMultiVaultV2(
   return { wsRoot, vaults, workspaceFile, workspaceFolders };
 }
 
-export async function setupCodeWorkspaceMultiVaultV3(
+/**
+ * Used for setup workspace test
+ */
+export async function setupCodeWorkspaceV3(
   opts: SetupCodeWorkspaceMultiVaultV2Opts
 ) {
   const copts = _.defaults(opts, {
@@ -260,14 +267,6 @@ export async function setupCodeWorkspaceMultiVaultV3(
   DendronWorkspace.workspaceFile = () => {
     return Uri.file(path.join(wsRoot, "dendron.code-workspace"));
   };
-  DendronWorkspace.workspaceFolders = () => {
-    return [];
-    // return vaults.map((v) => ({
-    //   name: v.name,
-    //   index: 1,
-    //   uri: Uri.file(v.fsPath),
-    // }));
-  };
   const workspaceFile = DendronWorkspace.workspaceFile();
   const workspaceFolders = DendronWorkspace.workspaceFolders();
   const vaults = await new SetupWorkspaceCommand().execute({
@@ -275,6 +274,13 @@ export async function setupCodeWorkspaceMultiVaultV3(
     skipOpenWs: true,
     ...copts.setupWsOverride,
   });
+  DendronWorkspace.workspaceFolders = () => {
+    return vaults.map((v) => ({
+      name: v.name || path.basename(v.fsPath),
+      index: 1,
+      uri: Uri.file(v.fsPath),
+    }));
+  };
 
   // update vscode settings
   // await DendronWorkspace.updateWorkspaceFile({

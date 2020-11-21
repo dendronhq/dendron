@@ -11,6 +11,10 @@ export type WorkspaceOpts = {
   vaults: DVault[];
 };
 
+export type EngineOpt = {
+  engine: DEngineClientV2;
+};
+
 export type SetupHookFunction<T = any> = (
   opts: {
     engine?: DEngineClientV2;

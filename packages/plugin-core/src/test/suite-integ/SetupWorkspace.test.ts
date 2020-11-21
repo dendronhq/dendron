@@ -23,7 +23,7 @@ import { _activate } from "../../_extension";
 import { onExtension, onWSInit, setupDendronWorkspace } from "../testUtils";
 import {
   expect,
-  runMultiVaultTestV3,
+  runWorkspaceTestV3,
   setupCodeWorkspaceV2,
 } from "../testUtilsv2";
 
@@ -128,19 +128,20 @@ id: bond
     });
 
     it("workspace active, no prior workspace version", function (done) {
-      onExtension({
-        action: "activate",
-        cb: async (_event: HistoryEvent) => {
+      runWorkspaceTestV3({
+        ctx,
+        preActivateHook: () => {
+          DendronWorkspace.version = () => "0.0.1";
+        },
+        onInit: async ({ wsRoot, vaults, engine }) => {
           assert.strictEqual(DendronWorkspace.isActive(), true);
           assert.strictEqual(
             ctx.workspaceState.get(WORKSPACE_STATE.WS_VERSION),
             "0.0.1"
           );
-          const engine = DendronWorkspace.instance().getEngine();
-          const wsRoot = DendronWorkspace.rootDir() as string;
-          // check for config file
+          // check config
           const config = readYAML(DConfig.configPath(wsRoot)) as DendronConfig;
-          assert.deepStrictEqual(config.vaults, [{ fsPath: vaultPath }]);
+          assert.deepStrictEqual(config.vaults, vaults);
 
           // check for meta
           const port = getPortFilePath({ wsRoot });
@@ -151,21 +152,54 @@ id: bond
           );
           assert.strictEqual(meta.version, "0.0.1");
           assert.ok(meta.activationTime < Time.now().toMillis());
-          assert.strictEqual(_.values(engine.notes).length, 1);
-          assert.deepStrictEqual(fs.readdirSync(vaultPath).sort(), [
-            ".vscode",
-            "root.md",
-            "root.schema.yml",
-          ]);
-          done();
-        },
-      });
 
-      DendronWorkspace.version = () => "0.0.1";
-      setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
-        useCb: async (_vaultPath) => {
-          vaultPath = _vaultPath;
+          // check settings
+          const payload = fs.readJSONSync(
+            path.join(wsRoot, "dendron.code-workspace")
+          );
+          expect(payload).toEqual({
+            extensions: {
+              recommendations: [
+                "dendron.dendron-paste-image",
+                "equinusocio.vsc-material-theme",
+                "dendron.dendron-markdown-shortcuts",
+                "dendron.dendron-markdown-preview-enhanced",
+                "dendron.dendron-markdown-links",
+                "github.github-vscode-theme",
+              ],
+              unwantedRecommendations: [
+                "dendron.dendron-markdown-notes",
+                "shd101wyy.markdown-preview-enhanced",
+                "kortina.vscode-markdown-notes",
+                "mushan.vscode-paste-image",
+              ],
+            },
+            folders: [
+              {
+                path: "vault",
+              },
+            ],
+            settings: {
+              "dendron.rootDir": ".",
+              "editor.snippetSuggestions": "inline",
+              "editor.suggest.showSnippets": true,
+              "editor.suggest.snippetsPreventQuickSuggestions": false,
+              "editor.tabCompletion": "on",
+              "files.autoSave": "onFocusChange",
+              "markdown-preview-enhanced.enableWikiLinkSyntax": true,
+              "markdown-preview-enhanced.wikiLinkFileExtension": ".md",
+              "pasteImage.path": "${currentFileDir}/assets/images",
+              "pasteImage.prefix": "/",
+            },
+          });
+
+          // check for notes
+          assert.deepStrictEqual(
+            fs.readdirSync(DendronWorkspace.instance().vaults[0].fsPath).sort(),
+            [".vscode", "root.md", "root.schema.yml"]
+          );
+          assert.strictEqual(_.values(engine.notes).length, 1);
+          done();
         },
       });
     });
@@ -200,7 +234,7 @@ id: bond
     });
 
     it.skip("with template", function (done) {
-      runMultiVaultTestV3({
+      runWorkspaceTestV3({
         ctx,
         setupWsOverride: {
           skipConfirmation: true,

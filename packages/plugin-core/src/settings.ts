@@ -48,14 +48,14 @@ const _SETTINGS: ConfigUpdateChangeSet = {
   "dendron.rootDir": {
     default: ".",
   },
-  "editor.minimap.enabled": {
-    default: false,
-  },
+  // "editor.minimap.enabled": {
+  //   default: false,
+  // },
   //"dendron.rootDir": opts.rootDir,
   "files.autoSave": {
     default: "onFocusChange",
   },
-  "workbench.colorTheme": { default: "GitHub Light" },
+  // "workbench.colorTheme": { default: "GitHub Light" },
   // "workbench.colorTheme": { default: "Kimbie Dark" },
   // --- images
   "pasteImage.path": { default: "${currentFileDir}/assets/images" },

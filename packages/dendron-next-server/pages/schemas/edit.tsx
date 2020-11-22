@@ -1,14 +1,11 @@
-import { MinusOutlined } from "@ant-design/icons";
 import dynamic from "next/dynamic";
 import { SchemaPropsV2 } from "@dendronhq/common-all";
-import { Button, Card, Col, Row, Typography } from "antd";
+import { Box, Button, Heading } from "@chakra-ui/react";
 import Head from "next/head";
 import React, { useState } from "react";
 import { ReactD3TreeItem } from "react-d3-tree";
 import { useWindowSize } from "../../components/hooks";
 import _ from "lodash";
-const { Title, Text, Paragraph } = Typography;
-const { Meta } = Card;
 
 const Tree = dynamic(
   () => {
@@ -58,28 +55,24 @@ export default function Edit() {
     translate: { x: 0, y: 0 },
   });
   if (_.isUndefined(size.height)) {
-      return null;
+    return null;
   }
   if (!_.isEqual(window, size)) {
-      setWindow(size)
+    setWindow(size);
     setTreeViewState({
       translate: {
         x: size.width / 2,
         y: size.height / 5,
       },
     });
-
   }
 
   const generateNodeProps = () => {
     return {
       buttons: [
-        <Button
-          type="dashed"
-          shape="circle"
-          icon={<MinusOutlined />}
-          size="small"
-        />,
+        <Button variant="outline" borderRadius="full" size="sm">
+          -
+        </Button>,
       ],
     };
   };
@@ -89,18 +82,18 @@ export default function Edit() {
       <Head>
         <title>Edit Schema</title>
       </Head>
-      <Row>
-        <Col span={24}>
-          <h1> Edit Schema</h1>
-        </Col>
-        <Col span={24}>
-          <div style={{ height: "100vh" }}>
-            <Tree 
-            orientation={"vertical"}
-            data={myTreeData} translate={treeViewState.translate} />
-          </div>
-        </Col>
-      </Row>
+
+      <Box>
+        <Heading as="h1"> Edit Schema</Heading>
+      </Box>
+
+      <Box height="100%">
+        <Tree
+          orientation={"vertical"}
+          data={myTreeData}
+          translate={treeViewState.translate}
+        />
+      </Box>
     </>
   );
 }

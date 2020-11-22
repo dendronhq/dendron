@@ -3,6 +3,7 @@ import {DendronConfig} from "@dendronhq/common-all";
 const getConfigData = (): {data: DendronConfig} => {
     return {
         data: {
+            version: 0,
             vaults: [{
                 fsPath: "vault"
             }],

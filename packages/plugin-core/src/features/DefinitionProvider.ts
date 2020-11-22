@@ -25,6 +25,9 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     const out = uris.map((uri) => new Location(uri, new Position(0, 0)));
     if (out.length > 1) {
       return out;
+    } else if (out.length === 1) {
+      const loc = out[0];
+      return loc;
     } else {
       const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
       const out = await new GotoNoteCommand().execute({

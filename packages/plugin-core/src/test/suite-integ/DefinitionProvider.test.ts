@@ -1,9 +1,5 @@
 import { getSlugger, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
-import {
-  NoteTestUtilsV3,
-  NOTE_PRESETS,
-  runMochaHarness,
-} from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV3, NOTE_PRESETS } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
@@ -101,7 +97,6 @@ suite("DefinitionProvider", function () {
             LocationTestUtils.getBasenameFromLocation(loc),
             "alpha.md"
           );
-          await runMochaHarness(GOTO_NOTE_PRESETS.ANCHOR.results);
           done();
         },
       });
@@ -168,7 +163,6 @@ suite("DefinitionProvider", function () {
             LocationTestUtils.getBasenameFromLocation(loc),
             "alpha.md"
           );
-          await runMochaHarness(ANCHOR_WITH_SPECIAL_CHARS.results);
           done();
         },
       });
@@ -267,7 +261,6 @@ suite("DefinitionProvider", function () {
             loc.uri.fsPath,
             NoteUtilsV2.getPath({ note: noteWithTarget })
           );
-          await runMochaHarness(GOTO_NOTE_PRESETS.ANCHOR.results);
           done();
         },
       });

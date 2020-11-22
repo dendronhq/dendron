@@ -31,6 +31,9 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       prompt: "Path to your new vault",
       placeHolder: "vault-2",
     });
+    if (_.isUndefined(vpath)) {
+      return;
+    }
     const vname = await VSCodeUtils.showInputBox({
       prompt: "Name of new vault (optional, press enter to skip)",
     });

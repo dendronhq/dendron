@@ -14,8 +14,12 @@ import {
   Input,
   Stack,
   Switch,
-  Text,
-  Tooltip,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverArrow,
+  PopoverBody,
+  Link,
 } from "@chakra-ui/react";
 import { get } from "lodash";
 import Head from "next/head";
@@ -132,50 +136,70 @@ export default function ConfigSamplePage() {
                 <Stack spacing={8}>
                   <Box as="fieldset">
                     <Heading size="md" as="legend">
-                      Vaults
-                    </Heading>
-
-                    <Stack spacing={4}>
-                      {configData.vaults.map((vault, index) => (
-                        <Tooltip
-                          label="Vaults are not yet editable via this form."
-                          placement="top"
-                          hasArrow
-                        >
-                          <Stack direction="row" spacing={2}>
-                            <FormLabel
-                              htmlFor={`vaults[${index}].fsPath`}
-                              whiteSpace="nowrap"
-                              paddingTop={2} // align with text field
-                            >
-                              Vault {index}
-                            </FormLabel>
-
-                            <InputControl
-                              name={`vaults[${index}].fsPath`}
-                              placeholder="./filesystemPath"
-                              help="Vault location"
-                              disabled
-                            />
-
-                            <InputControl
-                              name={`vaults[${index}].name`}
-                              placeholder="name"
-                              help="Vault name"
-                              disabled
-                            />
-                          </Stack>
-                        </Tooltip>
-                      ))}
-                    </Stack>
-                  </Box>
-
-                  <Box as="fieldset">
-                    <Heading size="md" as="legend">
                       Site
                     </Heading>
 
                     <Stack spacing={4}>
+                      <Popover trigger="hover" placement="top" gutter={-12}>
+                        <PopoverTrigger>
+                          {/* Superfluous box because Popover doesn't work on disabled Input */}
+                          <Box>
+                            <InputControl
+                              label="Vault"
+                              name={`vaults[0].fsPath`}
+                              placeholder="./filesystemPath"
+                              help="The vault's location on your filesystem."
+                              disabled
+                            />
+                          </Box>
+                        </PopoverTrigger>
+
+                        <PopoverContent>
+                          <PopoverArrow />
+
+                          <PopoverBody>
+                            You can update vaults using{" "}
+                            <Link
+                              href="https://dendron.so/notes/eea2b078-1acc-4071-a14e-18299fc28f47.html#vault-add"
+                              target="_blank"
+                            >
+                              Dendron Vault Commands
+                            </Link>
+                            .
+                          </PopoverBody>
+                        </PopoverContent>
+                      </Popover>
+
+                      <Popover trigger="hover" placement="top" gutter={-12}>
+                        <PopoverTrigger>
+                          {/* Superfluous box because Popover doesn't work on disabled Input */}
+                          <Box>
+                            <InputControl
+                              label="Site hierarchy"
+                              name="site.siteHierarchies[0]"
+                              placeholder="dendron"
+                              help="The hierarchy to publish."
+                              disabled
+                            />
+                          </Box>
+                        </PopoverTrigger>
+
+                        <PopoverContent>
+                          <PopoverArrow />
+
+                          <PopoverBody>
+                            You can configure published hierarchies{" "}
+                            <Link
+                              href="https://www.dendron.so/notes/ffa6a4ba-5eda-48c7-add5-8e2333ba27b4.html#sitehierarchies-str"
+                              target="_blank"
+                            >
+                              in the configuration file
+                            </Link>
+                            .
+                          </PopoverBody>
+                        </PopoverContent>
+                      </Popover>
+
                       <InputControl
                         label="Site root directory"
                         name="site.siteRootDir"
@@ -279,43 +303,6 @@ export default function ConfigSamplePage() {
                           the site.
                         </FormHelperText>
                       </FormControl>
-                    </Stack>
-                  </Box>
-
-                  <Box as="fieldset">
-                    <Heading size="md" as="legend">
-                      Site hierarchies
-                    </Heading>
-
-                    <Stack spacing={4}>
-                      {configData.site?.siteHierarchies?.map(
-                        (hierarchy, index) => (
-                          <Tooltip
-                            label="Site hierarchies are not yet editable via this form."
-                            placement="top"
-                            hasArrow
-                          >
-                            <FormControl as={Stack} direction="row" spacing={2}>
-                              <Text
-                                htmlFor={`site.siteHierarchies[${index}]`}
-                                whiteSpace="nowrap"
-                                paddingTop={2} // align with text field
-                              >
-                                Hierarchy {index}
-                              </Text>
-
-                              <Box flexGrow={1}>
-                                <InputControl
-                                  name={`site.siteHierarchies[${index}]`}
-                                  placeholder="dendron"
-                                  help="A hierarchy to publish"
-                                  disabled
-                                />
-                              </Box>
-                            </FormControl>
-                          </Tooltip>
-                        )
-                      )}
                     </Stack>
                   </Box>
 

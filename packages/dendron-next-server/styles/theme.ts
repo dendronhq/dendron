@@ -31,4 +31,13 @@ export const theme = extendTheme({
       },
     },
   },
+
+  components: {
+    Link: {
+      baseStyle: {
+        textDecoration: "underline",
+        color: "blue.500",
+      },
+    },
+  },
 });

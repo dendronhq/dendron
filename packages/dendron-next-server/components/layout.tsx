@@ -45,6 +45,8 @@ export default function Layout({ children }: Props) {
             <Link
               target="_blank"
               href="https://dendron.memberful.com/account/subscriptions"
+              color="currentColor"
+              textDecoration="none"
             >
               Update Subscription
             </Link>

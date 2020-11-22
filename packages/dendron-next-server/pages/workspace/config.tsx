@@ -20,6 +20,7 @@ import {
   PopoverArrow,
   PopoverBody,
   Link,
+  useToast,
 } from "@chakra-ui/react";
 import { get } from "lodash";
 import Head from "next/head";
@@ -111,6 +112,8 @@ export default function ConfigSamplePage() {
     console.log("save", JSON.stringify(configData, null, 2));
   }, [JSON.stringify(configData)]);
 
+  const toast = useToast();
+
   return (
     <>
       <Head>
@@ -124,7 +127,22 @@ export default function ConfigSamplePage() {
           <Formik
             enableReinitialize
             initialValues={configData}
-            onSubmit={(formValues) => saveConfigData(formValues)}
+            onSubmit={(formValues) => {
+              saveConfigData(formValues);
+
+              // TODO when plumbing this to real data, you'll want to ensure
+              // that the rendered toast is relevant to the result of the
+              // operation -- i.e. "success" vs "failed", and only rendered when
+              // the operation is finished.
+              toast({
+                title: "Changes saved",
+                description:
+                  "Your Dendron configuration file has been successfully updated.",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+              });
+            }}
           >
             {({
               touched,

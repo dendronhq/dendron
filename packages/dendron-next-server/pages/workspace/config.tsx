@@ -279,19 +279,23 @@ export default function ConfigSamplePage() {
                         }
                       >
                         <Stack direction="row" align="center">
-                          <FormLabel margin={0}>Use pretty refs?</FormLabel>
-
                           <Field name="site.usePrettyRefs">
                             {({ form: { setFieldValue }, field: { name } }) => (
-                              <Switch
-                                id={name}
-                                name={name}
-                                isChecked={values?.site?.usePrettyRefs}
-                                onChange={(e) =>
-                                  setFieldValue(name, e.target.checked)
-                                }
-                                colorScheme="positive"
-                              />
+                              <>
+                                <FormLabel htmlFor={name} margin={0}>
+                                  Use pretty refs?
+                                </FormLabel>
+
+                                <Switch
+                                  id={name}
+                                  name={name}
+                                  isChecked={values?.site?.usePrettyRefs}
+                                  onChange={(e) =>
+                                    setFieldValue(name, e.target.checked)
+                                  }
+                                  colorScheme="positive"
+                                />
+                              </>
                             )}
                           </Field>
                         </Stack>
@@ -310,23 +314,27 @@ export default function ConfigSamplePage() {
                         }
                       >
                         <Stack direction="row" align="center">
-                          <FormLabel margin={0}>Copy assets?</FormLabel>
-
                           <Field name="site.copyAssets">
                             {({
                               form: { setFieldValue },
                               field: { name, value },
                             }) => (
-                              <Switch
-                                id={name}
-                                name={name}
-                                value={value}
-                                isChecked={values?.site?.copyAssets}
-                                onChange={(e) =>
-                                  setFieldValue(name, e.target.checked)
-                                }
-                                colorScheme="positive"
-                              />
+                              <>
+                                <FormLabel htmlFor={name} margin={0}>
+                                  Copy assets?
+                                </FormLabel>
+
+                                <Switch
+                                  id={name}
+                                  name={name}
+                                  value={value}
+                                  isChecked={values?.site?.copyAssets}
+                                  onChange={(e) =>
+                                    setFieldValue(name, e.target.checked)
+                                  }
+                                  colorScheme="positive"
+                                />
+                              </>
                             )}
                           </Field>
                         </Stack>

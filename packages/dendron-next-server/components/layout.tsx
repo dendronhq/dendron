@@ -29,14 +29,15 @@ export default function Layout({ children }: Props) {
           as="header"
           bgColor="gray.900"
           color="white"
-          padding={4}
+          paddingX={4}
+          paddingY={2}
           alignItems="center"
         >
           <Image
             src="https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png"
             id="logo"
             alt={name}
-            boxSize={16}
+            boxSize={12}
           />
 
           <Box marginLeft="auto">

@@ -11,26 +11,24 @@ export function appModule({ logPath }: { logPath: string }) {
   const app = express();
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-  if (process.env.NODE_ENV !== "production") {
+  // @ts-ignore
+  morgan.token("body", function (req, res) {
     // @ts-ignore
-    morgan.token("body", function (req, res) {
-      // @ts-ignore
-      return JSON.stringify(req.body);
-    });
-    if (fs.existsSync(logPath)) {
-      fs.moveSync(logPath, `${logPath}.old`, { overwrite: true });
-    }
-    const accessLogStream = fs.createWriteStream(logPath, { flags: "a" });
-    setLogger({ logPath });
-    app.use(
-      morgan(
-        ":method :url :status :response-time ms - :res[content-length] :body - :req[content-length]",
-        {
-          stream: accessLogStream,
-        }
-      )
-    );
+    return JSON.stringify(req.body);
+  });
+  if (fs.existsSync(logPath)) {
+    fs.moveSync(logPath, `${logPath}.old`, { overwrite: true });
   }
+  const accessLogStream = fs.createWriteStream(logPath, { flags: "a" });
+  setLogger({ logPath });
+  app.use(
+    morgan(
+      ":method :url :status :response-time ms - :res[content-length] :body - :req[content-length]",
+      {
+        stream: accessLogStream,
+      }
+    )
+  );
 
   app.get("/api/static", (_req, res) => {
     res.redirect("http://localhost:1568/");

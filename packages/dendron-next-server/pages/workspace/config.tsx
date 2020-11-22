@@ -85,6 +85,8 @@ function InputControl({
     <Field name={name}>
       {({ form: { errors, touched } }) => (
         <FormControl
+          isRequired={required}
+          isDisabled={disabled}
           isInvalid={
             /**
              * If field has errors AND they've interacted with this field, mark
@@ -100,8 +102,6 @@ function InputControl({
             name={name}
             placeholder={placeholder}
             id={name}
-            disabled={disabled}
-            required={required}
           />
 
           <FormErrorMessage>{errors.site?.siteRootDir}</FormErrorMessage>

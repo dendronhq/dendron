@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.3-alpha.4](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.3...v0.16.3-alpha.4) (2020-11-22)
+
+### Enhancements
+
+- better completion ([e7489b3](https://github.com/dendronhq/dendron/commit/e7489b324fb8b5b1a0cb3daf4bd33978073bd90a))
+
 ## [0.16.3-alpha.3](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.2...v0.16.3-alpha.3) (2020-11-20)
 
 ### Bug Fixes

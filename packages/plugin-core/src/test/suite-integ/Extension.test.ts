@@ -1,18 +1,29 @@
 import { tmpDir } from "@dendronhq/common-server";
-import { beforeEach, afterEach, describe, it } from "mocha";
+import fs from "fs-extra";
+import { afterEach, beforeEach, describe, it } from "mocha";
+import path from "path";
 import vscode, { ExtensionContext } from "vscode";
+import { ResetConfigCommand } from "../../commands/ResetConfig";
 import {
   InitializeType,
   SetupWorkspaceOpts,
 } from "../../commands/SetupWorkspace";
-import { DENDRON_COMMANDS } from "../../constants";
-import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
-import { _activate } from "../../_extension";
-import { expect, resetCodeWorkspace } from "../testUtilsv2";
-import { stubSetupWorkspace } from "./SetupWorkspace.test";
-import fs from "fs-extra";
+import {
+  DEFAULT_LEGACY_VAULT_NAME,
+  DENDRON_COMMANDS,
+  GLOBAL_STATE,
+} from "../../constants";
 import { HistoryService } from "../../services/HistoryService";
+import { VSCodeUtils } from "../../utils";
+import { DendronWorkspace, getWS } from "../../workspace";
+import { _activate } from "../../_extension";
+import {
+  expect,
+  genEmptyWSFiles,
+  genTutorialWSFiles,
+  resetCodeWorkspace,
+} from "../testUtilsv2";
+import { stubSetupWorkspace } from "../testUtilsV3";
 
 const TIMEOUT = 60 * 1000 * 5;
 
@@ -24,6 +35,7 @@ suite("Extension", function () {
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
     await resetCodeWorkspace();
+    await new ResetConfigCommand().execute({ scope: "all" });
   });
 
   afterEach(function () {
@@ -38,7 +50,7 @@ suite("Extension", function () {
       });
     });
 
-    it("not active/ init", function (done) {
+    it("not active/ init, first time", function (done) {
       const wsRoot = tmpDir().name;
       _activate(ctx).then(async (resp) => {
         expect(resp).toBeFalsy();
@@ -47,8 +59,35 @@ suite("Extension", function () {
           skipOpenWs: true,
           skipConfirmation: true,
         } as SetupWorkspaceOpts);
+
+        // first time init
+        expect(
+          fs.readdirSync(path.join(wsRoot, DEFAULT_LEGACY_VAULT_NAME))
+        ).toEqual(genTutorialWSFiles());
         done();
       });
+    });
+
+    it("not active/ init, not first time", function (done) {
+      const wsRoot = tmpDir().name;
+      getWS()
+        .context.globalState.update(GLOBAL_STATE.DENDRON_FIRST_WS, false)
+        .then(() => {
+          _activate(ctx).then(async (resp) => {
+            expect(resp).toBeFalsy();
+            stubSetupWorkspace({ wsRoot, initType: InitializeType.EMPTY });
+            await vscode.commands.executeCommand(DENDRON_COMMANDS.INIT_WS.key, {
+              skipOpenWs: true,
+              skipConfirmation: true,
+            } as SetupWorkspaceOpts);
+
+            // first time init
+            expect(
+              fs.readdirSync(path.join(wsRoot, DEFAULT_LEGACY_VAULT_NAME))
+            ).toEqual(genEmptyWSFiles());
+            done();
+          });
+        });
     });
   });
 

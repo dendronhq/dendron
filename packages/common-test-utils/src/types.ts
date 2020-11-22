@@ -16,6 +16,10 @@ export type SetupHookFunction<T = any> = (
   } & WorkspaceOpts
 ) => Promise<T>;
 
+export type PreSetupHookFunction<T = any> = (
+  opts: Pick<WorkspaceOpts, "wsRoot">
+) => Promise<T>;
+
 export type PostSetupHookFunction<T = any> = (
   opts: {
     engine: DEngineClientV2;

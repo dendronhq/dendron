@@ -30,7 +30,7 @@ import {
 } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
 import { WorkspaceFolderRaw } from "../types";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, resolveRelToWSRoot } from "../workspace";
 import { _activate } from "../_extension";
 import { createMockConfig, onWSInit } from "./testUtils";
 
@@ -58,6 +58,48 @@ export type SetupCodeWorkspaceMultiVaultV2Opts = SetupCodeConfigurationV2 & {
 
 export function genEmptyWSFiles() {
   return [".vscode", "root.md", "root.schema.yml"];
+}
+
+export function genTutorialWSFiles() {
+  return [...genEmptyWSFiles(), "dendron.md", "dendron.welcome.md"].sort();
+}
+
+export function genDefaultSettings() {
+  return {
+    extensions: {
+      recommendations: [
+        "dendron.dendron-paste-image",
+        "equinusocio.vsc-material-theme",
+        "dendron.dendron-markdown-shortcuts",
+        "dendron.dendron-markdown-preview-enhanced",
+        "dendron.dendron-markdown-links",
+        "github.github-vscode-theme",
+      ],
+      unwantedRecommendations: [
+        "dendron.dendron-markdown-notes",
+        "shd101wyy.markdown-preview-enhanced",
+        "kortina.vscode-markdown-notes",
+        "mushan.vscode-paste-image",
+      ],
+    },
+    folders: [
+      {
+        path: "vault",
+      },
+    ],
+    settings: {
+      "dendron.rootDir": ".",
+      "editor.snippetSuggestions": "inline",
+      "editor.suggest.showSnippets": true,
+      "editor.suggest.snippetsPreventQuickSuggestions": false,
+      "editor.tabCompletion": "on",
+      "files.autoSave": "onFocusChange",
+      "markdown-preview-enhanced.enableWikiLinkSyntax": true,
+      "markdown-preview-enhanced.wikiLinkFileExtension": ".md",
+      "pasteImage.path": "${currentFileDir}/assets/images",
+      "pasteImage.prefix": "/",
+    },
+  };
 }
 
 export async function runSingleVaultTest(
@@ -315,19 +357,19 @@ export const stubWorkspaceFile = (wsRoot: string) => {
   };
 };
 
-export const stubWorkspaceVaults = (vaults: DVault[]) => {
+export const stubWorkspaceFolders = (vaults: DVault[]) => {
   DendronWorkspace.workspaceFolders = () => {
     return vaults.map((v) => ({
       name: VaultUtils.getName(v),
       index: 1,
-      uri: Uri.file(v.fsPath),
+      uri: Uri.file(resolveRelToWSRoot(v.fsPath)),
     }));
   };
 };
 
 export const stubWorkspace = ({ wsRoot, vaults }: WorkspaceOpts) => {
   stubWorkspaceFile(wsRoot);
-  stubWorkspaceVaults(vaults);
+  stubWorkspaceFolders(vaults);
 };
 
 export function expect(value: any) {

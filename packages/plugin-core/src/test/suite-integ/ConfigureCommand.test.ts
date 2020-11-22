@@ -25,7 +25,7 @@ suite("ConfigureCommand", function () {
       });
     });
 
-    test("diff dendronRoot", function (done) {
+    test.skip("diff dendronRoot", function (done) {
       runLegacySingleWorkspaceTest({
         ctx,
         configOverride: {

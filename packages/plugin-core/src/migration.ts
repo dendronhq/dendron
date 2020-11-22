@@ -1,12 +1,33 @@
 import {
   DendronConfig,
+  DendronError,
   WorkspaceOpts,
-} from "@dendronhq/api-server/node_modules/@dendronhq/common-all/src";
-import { DendronError } from "@dendronhq/common-all";
+} from "@dendronhq/common-all";
+import { writeJSONWithComments } from "@dendronhq/common-server";
 import { createNormVault, DConfig } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Logger } from "./logger";
+import { WorkspaceSettings } from "./types";
 import { DendronWorkspace } from "./workspace";
+
+export function migrateSettings({ settings }: { settings: WorkspaceSettings }) {
+  const mdNotes = _.find(
+    settings?.extensions?.recommendations,
+    (ent) => ent === "dendron.dendron-markdown-notes"
+  );
+  let changed = false;
+  if (mdNotes) {
+    const recommendations = _.reject(
+      settings?.extensions?.recommendations,
+      (ent) => ent === "dendron.dendron-markdown-notes"
+    );
+    settings.extensions.recommendations = recommendations;
+    // settings = assignJSONWithComment(extensions, settings)
+    writeJSONWithComments(DendronWorkspace.workspaceFile().fsPath, settings);
+    changed = true;
+  }
+  return { changed, settings };
+}
 
 export function migrateConfig({
   config,

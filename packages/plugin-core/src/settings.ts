@@ -13,6 +13,7 @@ import {
 } from "vscode";
 import { CONFIG } from "./constants";
 import { Logger } from "./logger";
+import { WorkspaceExtensionSetting, WorkspaceSettings } from "./types";
 import { DendronWorkspace } from "./workspace";
 
 export type CodeConfigChanges = {
@@ -90,22 +91,27 @@ const _EXTENSIONS: ConfigUpdateEntry[] = [
 
 export type WriteConfigOpts = {
   rootVault?: string;
+  overrides?: Partial<WorkspaceSettings>;
 };
 
 export class WorkspaceConfig {
   static write(wsRoot: string, opts?: WriteConfigOpts) {
     const cleanOpts = _.defaults(opts, {
       rootVault: "vault",
+      overrides: {},
     });
-    const jsonBody = {
-      folders: [
-        {
-          path: cleanOpts.rootVault,
-        },
-      ],
-      settings: Settings.defaults(),
-      extensions: Extensions.defaults(),
-    };
+    const jsonBody: WorkspaceSettings = _.merge(
+      {
+        folders: [
+          {
+            path: cleanOpts.rootVault,
+          },
+        ],
+        settings: Settings.defaults(),
+        extensions: Extensions.defaults(),
+      },
+      cleanOpts.overrides
+    );
     return fs.writeJSONSync(
       path.join(wsRoot, DendronWorkspace.DENDRON_WORKSPACE_FILE),
       jsonBody,
@@ -132,7 +138,7 @@ export class WorkspaceConfig {
 export class Extensions {
   static EXTENSION_FILE_NAME = "extensions.json";
 
-  static defaults(): CodeExtensionsConfig {
+  static defaults(): WorkspaceExtensionSetting {
     const recommendations = Extensions.configEntries()
       .filter((ent) => {
         return _.isUndefined(ent.action) || ent?.action !== "REMOVE";

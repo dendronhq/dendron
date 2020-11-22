@@ -3,10 +3,14 @@ export type WorkspaceFolderRaw = {
   name?: string;
 };
 
+export type WorkspaceExtensionSetting = {
+  recommendations: string[];
+  unwantedRecommendations: string[];
+};
 export type WorkspaceSettings = {
   folders: WorkspaceFolderRaw[];
   settings: any;
-  extensions: any;
+  extensions: WorkspaceExtensionSetting;
 };
 
 export type EngineFlavor = "note" | "schema";

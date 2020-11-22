@@ -11,21 +11,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - initialize dendron when no ws present ([c1aabb4](https://github.com/dendronhq/dendron/commit/c1aabb4a6b2084990269ea169c1a90d800b430c3))
 - vault add cancel if no input ([86baed6](https://github.com/dendronhq/dendron/commit/86baed6e0938132709e4cfbd2008f1f8fadc77cb))
 - **pods:** publishing markdown in multi-vault ([cc50327](https://github.com/dendronhq/dendron/commit/cc503276a0ca0545e2793449f7382bc810216377))
+- add note to correct parent when writing in multi-vault ([6daeebc](https://github.com/dendronhq/dendron/commit/6daeebc7bd2bbc68fc105766d30bc10444bcaf61))
 
 ### Enhancements
 
 - better completion ([e7489b3](https://github.com/dendronhq/dendron/commit/e7489b324fb8b5b1a0cb3daf4bd33978073bd90a))
 - remove opinionated presets ([6b6bd8d](https://github.com/dendronhq/dendron/commit/6b6bd8d1b866bfe881b8ed7c341e5f2191bfa741))
 - support relative links in publishing ([d7d612d](https://github.com/dendronhq/dendron/commit/d7d612d00bf0fedfc5e7dc9beda1e00927be83a9))
-
-## [0.16.3-alpha.3](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.2...v0.16.3-alpha.3) (2020-11-20)
-
-### Bug Fixes
-
-- add note to correct parent when writing in multi-vault ([6daeebc](https://github.com/dendronhq/dendron/commit/6daeebc7bd2bbc68fc105766d30bc10444bcaf61))
-
-### Enhancements
-
 - **notes:** change fm title on rename ([32c77a1](https://github.com/dendronhq/dendron/commit/32c77a1a97162150b88c97c9266bd2a42a816aa0))
 
 ## [0.16.3-alpha.2](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.1...v0.16.3-alpha.2) (2020-11-18)

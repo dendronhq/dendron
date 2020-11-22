@@ -197,12 +197,12 @@ export function schemaModuleProps2File(
   );
 }
 
-export function assignJSONWithComment(obj: any, data: any) {
+export function assignJSONWithComment(jsonObj: any, dataToAdd: any) {
   return assign(
     {
-      ...data,
+      ...dataToAdd,
     },
-    obj
+    jsonObj
   );
 }
 

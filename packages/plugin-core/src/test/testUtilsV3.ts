@@ -19,7 +19,7 @@ import {
 } from "../commands/SetupWorkspace";
 import { HistoryService } from "../services/HistoryService";
 import { WorkspaceConfig } from "../settings";
-import { WorkspaceFolderRaw } from "../types";
+import { WorkspaceFolderRaw, WorkspaceSettings } from "../types";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 import { _activate } from "../_extension";
@@ -52,9 +52,12 @@ export type SetupLegacyWorkspaceMultiOpts = SetupCodeConfigurationV2 & {
   preSetupHook?: PreSetupHookFunction;
   postSetupHook?: PostSetupWorkspaceHook;
   setupWsOverride?: Partial<SetupWorkspaceOpts>;
+  wsSettingsOverride?: Partial<WorkspaceSettings>;
 };
 
-async function setupLegacyWorkspace(opts: SetupLegacyWorkspaceOpts) {
+export async function setupLegacyWorkspace(
+  opts: SetupLegacyWorkspaceOpts
+): Promise<WorkspaceOpts> {
   const copts = _.defaults(opts, {
     setupWsOverride: {
       skipConfirmation: true,
@@ -86,7 +89,9 @@ async function setupLegacyWorkspace(opts: SetupLegacyWorkspaceOpts) {
   return { wsRoot, vaults };
 }
 
-async function setupLegacyWorkspaceMulti(opts: SetupLegacyWorkspaceMultiOpts) {
+export async function setupLegacyWorkspaceMulti(
+  opts: SetupLegacyWorkspaceMultiOpts
+): Promise<any> {
   const copts = _.defaults(opts, {
     setupWsOverride: {
       skipConfirmation: true,
@@ -94,8 +99,9 @@ async function setupLegacyWorkspaceMulti(opts: SetupLegacyWorkspaceMultiOpts) {
     },
     preSetupHook: async () => {},
     postSetupHook: async () => {},
+    wsSettingsOverride: {},
   });
-  const { preSetupHook, postSetupHook } = copts;
+  const { preSetupHook, postSetupHook, wsSettingsOverride } = copts;
   const { wsRoot, vaults } = await EngineTestUtilsV3.setupWS({
     ...opts,
     initVault1: async (vaultDir: string) => {
@@ -112,7 +118,7 @@ async function setupLegacyWorkspaceMulti(opts: SetupLegacyWorkspaceMultiOpts) {
   const workspaceFolders = DendronWorkspace.workspaceFolders();
 
   // setup
-  WorkspaceConfig.write(wsRoot);
+  WorkspaceConfig.write(wsRoot, { overrides: wsSettingsOverride });
   await preSetupHook({
     wsRoot,
     vaults,

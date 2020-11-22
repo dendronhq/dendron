@@ -381,7 +381,7 @@ export function expect(value: any) {
       assert.ok(value);
     },
     toBeFalsy: () => {
-      assert.ok(!value);
+      assert.ok(_.isUndefined(value) || !value);
     },
   };
 }

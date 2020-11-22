@@ -14,9 +14,10 @@ import {
   WORKSPACE_STATE,
 } from "./constants";
 import { Logger } from "./logger";
-import { migrateConfig } from "./migration";
+import { migrateConfig, migrateSettings } from "./migration";
 import { HistoryEvent, HistoryService } from "./services/HistoryService";
 import { Extensions } from "./settings";
+import { WorkspaceSettings } from "./types";
 import { VSCodeUtils, WSUtils } from "./utils";
 import { MarkdownUtils } from "./utils/md";
 import { getOS } from "./utils/system";
@@ -42,12 +43,6 @@ async function reloadWorkspace() {
     return maybeEngine;
   }
   Logger.info({ ctx, msg: "post-ws.reloadWorkspace" });
-  // help with debug, doesn't need to block
-  readJSONWithComments(DendronWorkspace.workspaceFile().fsPath).then(
-    (config) => {
-      Logger.info({ ctx, msg: "configDump", config });
-    }
-  );
   // check if first time install workspace, if so, show tutorial
   if (isFirstInstall(ws.context)) {
     Logger.info({ ctx, msg: "first dendron ws, show welcome" });
@@ -192,7 +187,14 @@ export async function _activate(context: vscode.ExtensionContext) {
 
     // migrate legacy config files
     const configMigrated = migrateConfig({ config, wsRoot });
-    Logger.info({ ctx, config, msg: "isActive", configMigrated });
+    Logger.info({ ctx, config, configMigrated, msg: "read dendron config" });
+
+    // migrate legacy settings
+    const wsConfig = (await readJSONWithComments(
+      DendronWorkspace.workspaceFile().fsPath
+    )) as WorkspaceSettings;
+    const wsConfigMigrated = migrateSettings({ settings: wsConfig });
+    Logger.info({ ctx, wsConfig, wsConfigMigrated, msg: "read wsConfig" });
 
     const fpath = getWSMetaFilePath({ wsRoot });
     writeWSMetaFile({

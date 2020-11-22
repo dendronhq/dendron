@@ -161,6 +161,7 @@ export default function ConfigSamplePage() {
               errors,
               values,
               resetForm, // NOTE only works on fields which have configData keys
+              dirty,
             }) => (
               <Box as={Form} onChange={console.log}>
                 <Stack spacing={8}>
@@ -343,8 +344,9 @@ export default function ConfigSamplePage() {
                       type="button"
                       variant="ghost"
                       onClick={() => resetForm()}
+                      disabled={!dirty}
                     >
-                      Reset
+                      Clear changes
                     </Button>
 
                     <Button type="submit" colorScheme="green">

@@ -17,16 +17,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - initialize dendron when no ws present ([c1aabb4](https://github.com/dendronhq/dendron/commit/c1aabb4a6b2084990269ea169c1a90d800b430c3))
 - vault add cancel if no input ([86baed6](https://github.com/dendronhq/dendron/commit/86baed6e0938132709e4cfbd2008f1f8fadc77cb))
 - **pods:** publishing markdown in multi-vault ([cc50327](https://github.com/dendronhq/dendron/commit/cc503276a0ca0545e2793449f7382bc810216377))
+- add note to correct parent when writing in multi-vault ([6daeebc](https://github.com/dendronhq/dendron/commit/6daeebc7bd2bbc68fc105766d30bc10444bcaf61))
 
 ### Enhancements
 
 - better completion ([e7489b3](https://github.com/dendronhq/dendron/commit/e7489b324fb8b5b1a0cb3daf4bd33978073bd90a))
 - remove opinionated presets ([6b6bd8d](https://github.com/dendronhq/dendron/commit/6b6bd8d1b866bfe881b8ed7c341e5f2191bfa741))
 - support relative links in publishing ([d7d612d](https://github.com/dendronhq/dendron/commit/d7d612d00bf0fedfc5e7dc9beda1e00927be83a9))
-
-## [0.16.3-alpha.3](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.2...v0.16.3-alpha.3) (2020-11-20)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
+- **notes:** change fm title on rename ([32c77a1](https://github.com/dendronhq/dendron/commit/32c77a1a97162150b88c97c9266bd2a42a816aa0))
 
 ## [0.16.3-alpha.2](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.1...v0.16.3-alpha.2) (2020-11-18)
 
@@ -43,21 +41,22 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.16.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.16.2...v0.16.3-alpha.0) (2020-11-18)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.16.2](https://github.com/dendronhq/dendron/compare/v0.16.1...v0.16.2) (2020-11-18)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.16.1](https://github.com/dendronhq/dendron/compare/v0.16.1-alpha.2...v0.16.1) (2020-11-18)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.16.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.16.1-alpha.1...v0.16.1-alpha.2) (2020-11-18)
 
 ### Bug Fixes
 
 - missing init note ([4e41724](https://github.com/dendronhq/dendron/commit/4e41724a52ec5e32cbf6a290763eeaef7cbd50aa))
+- **engine:** resolve ntoes with same title in multiple vaults ([6326aff](https://github.com/dendronhq/dendron/commit/6326aff28b5f2ff52edf6d190c068364023be8e9))
 
 ### Enhancements
 
@@ -76,15 +75,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.16.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.16.1-alpha.0...v0.16.1-alpha.1) (2020-11-16)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.16.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.16.0...v0.16.1-alpha.0) (2020-11-16)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 # [0.16.0](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.5...v0.16.0) (2020-11-15)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.15.3-alpha.5](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.4...v0.15.3-alpha.5) (2020-11-15)
 
@@ -101,43 +100,22 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.15.3-alpha.3](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.2...v0.15.3-alpha.3) (2020-11-15)
 
-### Enhancements
-
-- update getting started ([af5dde9](https://github.com/dendronhq/dendron/commit/af5dde91d153ce46089c8688caec0e583eddb939))
-
-## [0.15.3-alpha.2](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.1...v0.15.3-alpha.2) (2020-11-15)
-
 ### Bug Fixes
 
 - don't throw error on no document ([c31c611](https://github.com/dendronhq/dendron/commit/c31c611d975b8eeee4f63abec742edf88dac66ac))
-
-## [0.15.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.15.3-alpha.0...v0.15.3-alpha.1) (2020-11-15)
-
-### Bug Fixes
-
 - overwrite old log files ([3f1362c](https://github.com/dendronhq/dendron/commit/3f1362c224ff7dae5de721dd2f2c8cba22db4d84))
 - sync issues btw server and client nodes ([a446aba](https://github.com/dendronhq/dendron/commit/a446aba9d931d7732553e1ecb43302208d6f798a))
 
 ### Enhancements
 
+- update getting started ([af5dde9](https://github.com/dendronhq/dendron/commit/af5dde91d153ce46089c8688caec0e583eddb939))
 - better logging ([2d7fd78](https://github.com/dendronhq/dendron/commit/2d7fd780d3c548a362dcf01a2620409b1bcdff3e))
 - better logging on lookup ([3d09986](https://github.com/dendronhq/dendron/commit/3d09986f1270b70849f7c0dbc67c2c4cc5fdba58))
 - nicer error messages ([e1e87a1](https://github.com/dendronhq/dendron/commit/e1e87a16186b1e8b8aae6f77fe8a2c5c865c4071))
-
-## [0.15.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.15.2...v0.15.3-alpha.0) (2020-11-14)
-
-### Enhancements
-
 - **lookup:** better lookup performance ([f14eed8](https://github.com/dendronhq/dendron/commit/f14eed8da822eb75f130edb7364a1f9f0c2fe354))
 - **lookup:** intelligently debounce queries ([2f0ac56](https://github.com/dendronhq/dendron/commit/2f0ac56bd6f64d0b99fcb82d6effa9f062d18fc2))
 
 ## [0.15.2](https://github.com/dendronhq/dendron/compare/v0.15.1...v0.15.2) (2020-11-14)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.15.1](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.7...v0.15.1) (2020-11-14)
-
-## [0.15.1-alpha.7](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.6...v0.15.1-alpha.7) (2020-11-14)
 
 ### Enhancements
 
@@ -159,7 +137,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - **engine:** add remove vault cmd ([cd77cf2](https://github.com/dendronhq/dendron/commit/cd77cf2705a61c5631a2f229a069644e30ba966c))
 - **workspace:** vault add command ([f2bba25](https://github.com/dendronhq/dendron/commit/f2bba254b4923c97fec6b5830bff3779c533447f))
 
-## [0.15.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.1...v0.15.1-alpha.2) (2020-11-12)
+## [0.15.1](https://github.com/dendronhq/dendron/compare/v0.15.1-alpha.7...v0.15.1) (2020-11-14)
 
 ### Features
 

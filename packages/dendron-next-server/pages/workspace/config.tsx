@@ -359,7 +359,6 @@ export default function ConfigSamplePage() {
 
                     <Button
                       type="submit"
-                      variant={dirty ? "solid" : "outline"}
                       colorScheme={dirty ? "positive" : "gray"}
                     >
                       Save changes

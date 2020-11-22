@@ -24,7 +24,7 @@ export default function Layout({ children }: Props) {
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
-      <Flex height="full" direction="column" data-FUCK>
+      <Flex height="full" direction="column">
         <Flex
           as="header"
           bgColor="gray.900"

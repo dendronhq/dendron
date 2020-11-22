@@ -21,6 +21,7 @@ export type FoundRefT = {
 
 const markdownExtRegex = /\.md$/i;
 export const refPattern = "(\\[\\[)([^\\[\\]]+?)(\\]\\])";
+const partialRefPattern = "(\\[\\[)([^\\[\\]]+)";
 export const REGEX_FENCED_CODE_BLOCK = /^( {0,3}|\t)```[^`\r\n]*$[\w\W]+?^( {0,3}|\t)``` *$/gm;
 export { sortPaths };
 const REGEX_CODE_SPAN = /`[^`]*?`/gm;
@@ -123,7 +124,8 @@ export const isInCodeSpan = (
 
 export const getReferenceAtPosition = (
   document: vscode.TextDocument,
-  position: vscode.Position
+  position: vscode.Position,
+  partial?: boolean
 ): {
   range: vscode.Range;
   ref: string;
@@ -137,10 +139,8 @@ export const getReferenceAtPosition = (
     return null;
   }
 
-  const range = document.getWordRangeAtPosition(
-    position,
-    new RegExp(refPattern)
-  );
+  const re = partial ? partialRefPattern : refPattern;
+  const range = document.getWordRangeAtPosition(position, new RegExp(re));
 
   if (!range) {
     return null;

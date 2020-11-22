@@ -27,6 +27,8 @@ import {
 } from "./plugins/dendronLinksPlugin";
 import { dendronNoteRefPluginForMd } from "./plugins/dendronNoteRefPlugin";
 
+export const WIKI_LINK_VALUE_RE = /(^\])/;
+
 const selectAll = require("unist-util-select").selectAll;
 
 export class ParserUtilsV2 {

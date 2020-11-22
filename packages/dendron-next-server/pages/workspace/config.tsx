@@ -349,8 +349,12 @@ export default function ConfigSamplePage() {
                       Clear changes
                     </Button>
 
-                    <Button type="submit" colorScheme="green">
-                      Submit
+                    <Button
+                      type="submit"
+                      variant={dirty ? "solid" : "outline"}
+                      colorScheme={dirty ? "positive" : "gray"}
+                    >
+                      Save changes
                     </Button>
                   </Stack>
                 </Stack>

@@ -16,7 +16,8 @@ import { DendronWorkspace } from "../../workspace";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { LINKS_PRESETS } from "../presets/LinkPresets";
 import { TIMEOUT } from "../testUtils";
-import { expect, LocationTestUtils, runMultiVaultTest } from "../testUtilsv2";
+import { expect, LocationTestUtils } from "../testUtilsv2";
+import { runLegacyMultiWorkspaceTest } from "../testUtilsV3";
 
 const { NOTES_DIFF_VAULT } = LINKS_PRESETS;
 
@@ -49,7 +50,7 @@ suite("DefinitionProvider", function () {
     let noteWithTarget: NotePropsV2;
 
     test("basic", (done) => {
-      runMultiVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ vaults }) => {
           noteWithTarget = await NOTE_PRESETS.NOTE_WITH_TARGET({
@@ -72,7 +73,7 @@ suite("DefinitionProvider", function () {
     });
 
     test("with anchor", (done) => {
-      runMultiVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
           const vault = vaults[0];
@@ -110,7 +111,7 @@ suite("DefinitionProvider", function () {
       let noteWithTarget: NotePropsV2;
       let noteWithLink: NotePropsV2;
 
-      runMultiVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ vaults }) => {
           noteWithTarget = await NOTE_PRESETS.NOTE_WITH_TARGET({
@@ -134,7 +135,7 @@ suite("DefinitionProvider", function () {
     const { ANCHOR_WITH_SPECIAL_CHARS } = GOTO_NOTE_PRESETS;
     test("anchor with special chars", (done) => {
       let specialCharsHeader: string;
-      runMultiVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
           const vault = vaults[0];
@@ -176,7 +177,7 @@ suite("DefinitionProvider", function () {
 
   describe("multi vault", function () {
     test("basic", (done) => {
-      runMultiVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NOTES_DIFF_VAULT.preSetupHook({ wsRoot, vaults });
@@ -207,7 +208,7 @@ suite("DefinitionProvider", function () {
       let noteTarget1: NotePropsV2;
       let noteTarget2: NotePropsV2;
 
-      runMultiVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ vaults }) => {
           noteTarget1 = await NOTE_PRESETS.NOTE_WITH_TARGET({
@@ -242,7 +243,7 @@ suite("DefinitionProvider", function () {
       let noteWithTarget: NotePropsV2;
       let noteWithLink: NotePropsV2;
 
-      runMultiVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ vaults }) => {
           noteWithTarget = await NOTE_PRESETS.NOTE_WITH_ANCHOR_TARGET({

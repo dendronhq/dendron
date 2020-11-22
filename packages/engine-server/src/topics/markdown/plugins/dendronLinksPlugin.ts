@@ -68,6 +68,13 @@ interface PluginOpts {
 
 export { PluginOpts as DendronLinksOpts };
 
+function genLinkValue(value: string, data: WikiLinkData) {
+  if (data.anchorHeader) {
+    value = value += `#${data.anchorHeader}`;
+  }
+  return value;
+}
+
 /**
  * Matches wiki-links
  * @param opts
@@ -196,8 +203,9 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
             node.data.alias = opts.replaceLink.to.fname;
           }
         }
+        const nodeValue = genLinkValue(node.value as string, data);
         if (data.toMd) {
-          return `[${data.alias}](${data.prefix || ""}${node.value})`;
+          return `[${data.alias}](${data.prefix || ""}${nodeValue})`;
         }
         if (data.forNoteRefInPreview) {
           return `${data.prefix || ""}${node.value}.md`;
@@ -210,12 +218,12 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
         }
 
         if (node.data.alias !== node.value) {
-          return `[[${node.data.alias}${aliasDivider}${node.value}]]`;
+          return `[[${node.data.alias}${aliasDivider}${nodeValue}]]`;
         }
         if (copts.convertObsidianLinks) {
           node.value = _.replace(node.value as string, /\//g, ".");
         }
-        return `[[${node.value}]]`;
+        return `[[${nodeValue}]]`;
       };
     }
   }

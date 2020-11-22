@@ -53,7 +53,7 @@ type SetupVaultsOptsV3 = Omit<SetupVaultOpts, "initDirCb"> & {
 type SetupWSOptsV3 = SetupVaultsOptsV3 & { wsRoot?: string };
 
 /**
- * Multi-vault setup
+ * Legacy Multi-vault setup
  */
 export class EngineTestUtilsV3 {
   static async setupWS(opts: SetupWSOptsV3) {

@@ -2,7 +2,9 @@ import { launch } from "@dendronhq/api-server";
 import {
   DendronSiteConfig,
   DEngineClientV2,
+  NoteUtilsV2,
   SchemaUtilsV2,
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
   tmpDir,
@@ -14,6 +16,8 @@ import {
   ENGINE_SERVER,
   NodeTestPresetsV2,
   NodeTestUtilsV2,
+  NoteTestUtilsV3,
+  runEngineTest,
 } from "@dendronhq/common-test-utils";
 import { DendronEngineClient } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -205,8 +209,6 @@ describe("buildSite v2", () => {
 });
 
 describe("wiki link", () => {
-  let root: string;
-
   let siteRootDir: string;
   let notesDir: string;
   let writeStubs = false;
@@ -223,84 +225,118 @@ describe("wiki link", () => {
     notesDir = path.join(siteRootDir, "notes");
   });
 
-  afterEach(() => {
-    fs.removeSync(root);
+  const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
+    return (engineClient = DendronEngineClient.create({
+      port,
+      vaults: vaults.map((ent) => ent.fsPath),
+      ws: wsRoot,
+    }));
+  };
+
+  test("relative link", async () => {
+    await runEngineTest(
+      async ({ wsRoot }) => {
+        const config: DendronSiteConfig = {
+          siteHierarchies: ["alpha"],
+          siteRootDir,
+        };
+        const cmd = new BuildSiteCommand();
+        await cmd.execute({
+          engineClient,
+          config,
+          wsRoot,
+          writeStubs,
+        });
+        let fooPath = path.join(notesDir, "alpha.md");
+        const { content } = readMD(fooPath);
+        expect(_.trim(content)).toEqual("[foo#one](notes/foo#one)");
+      },
+      {
+        preSetupHook: async ({ vaults }) => {
+          await NoteTestUtilsV3.createNote({
+            fname: "alpha",
+            vault: vaults[0],
+            body: "[[foo#one]]",
+          });
+        },
+        createEngine,
+      }
+    );
   });
 
   test("missing link", async () => {
-    root = await setupCaseCustom({
-      noteProps: [
-        {
-          id: "id.foo",
-          fname: "foo",
-          body: "# Foo Content\n # Bar Content [[missing-link]]",
+    await runEngineTest(
+      async ({ wsRoot }) => {
+        const config: DendronSiteConfig = {
+          siteHierarchies: ["foo"],
+          siteRootDir,
+        };
+        const cmd = new BuildSiteCommand();
+        const { errors } = await cmd.execute({
+          engineClient,
+          config,
+          wsRoot,
+          writeStubs,
+        });
+        let fooPath = path.join(notesDir, "foo.md");
+        const { content } = readMD(fooPath);
+        expect(content).toMatchSnapshot();
+        expect(content.indexOf("[missing-link](/404.html)") >= 0).toBeTruthy();
+        expect(errors).toMatchSnapshot();
+        expect(errors).toEqual([{ links: ["missing-link"], source: "foo" }]);
+      },
+      {
+        createEngine,
+        preSetupHook: async ({ vaults }) => {
+          await NoteTestUtilsV3.createNote({
+            fname: "foo",
+            body: "# Foo Content\n # Bar Content [[missing-link]]",
+            vault: vaults[0],
+          });
         },
-      ],
-    });
-    engineClient = DendronEngineClient.create({
-      port,
-      vaults: [root],
-      ws: path.join(root, "../"),
-    });
-    await engineClient.init();
-    const config: DendronSiteConfig = {
-      siteHierarchies: ["foo"],
-      siteRootDir,
-    };
-    const cmd = new BuildSiteCommand();
-    const { errors } = await cmd.execute({
-      engineClient,
-      config,
-      wsRoot: root,
-      writeStubs,
-    });
-    let fooPath = path.join(notesDir, "id.foo.md");
-    const { content } = readMD(fooPath);
-    expect(content).toMatchSnapshot();
-    expect(content.indexOf("[missing-link](/404.html)") >= 0).toBeTruthy();
-    expect(errors).toMatchSnapshot();
-    expect(errors).toEqual([{ links: ["missing-link"], source: "foo" }]);
+      }
+    );
   });
 
   test("case sensitive link", async () => {
-    const config: DendronSiteConfig = {
-      siteHierarchies: ["foo"],
-      siteRootDir,
-    };
-    root = await setupCaseCustom({
-      noteProps: [
-        {
-          fname: "foo.Mixed_case",
-          id: "id.foo.mixed-case",
+    await runEngineTest(
+      async ({ wsRoot }) => {
+        const config: DendronSiteConfig = {
+          siteHierarchies: ["foo"],
+          siteRootDir,
+        };
+        const cmd = new BuildSiteCommand();
+        const { errors } = await cmd.execute({
+          engineClient,
+          config,
+          wsRoot,
+          writeStubs,
+        });
+        let fooPath = path.join(notesDir, "id.foo.one.md");
+        const { content } = readMD(fooPath);
+        expect(content).toMatchSnapshot();
+        expect(
+          content.indexOf("[foo.Mixed_case](id.foo.mixed-case)") >= 0
+        ).toBeTruthy();
+        expect(errors).toEqual([]);
+      },
+      {
+        createEngine,
+        preSetupHook: async ({ vaults }) => {
+          await NoteTestUtilsV3.createNote({
+            fname: "foo.Mixed_case",
+            props: { id: "id.foo.mixed-case" },
+            vault: vaults[0],
+          });
+          await NoteTestUtilsV3.createNote({
+            fname: "foo.one",
+            props: { id: "id.foo.one" },
+            vault: vaults[0],
+            body: "[[foo.Mixed_case]]",
+          });
         },
-        {
-          fname: "foo.one",
-          id: "id.foo.one",
-          body: "[[foo.Mixed_case]]",
-        },
-      ],
-    });
-    engineClient = DendronEngineClient.create({
-      port,
-      vaults: [root],
-      ws: path.join(root, "../"),
-    });
-    await engineClient.init();
-
-    const cmd = new BuildSiteCommand();
-    const { errors } = await cmd.execute({
-      engineClient,
-      config,
-      wsRoot: root,
-      writeStubs,
-    });
-    let fooPath = path.join(notesDir, "id.foo.one.md");
-    const { content } = readMD(fooPath);
-    expect(content).toMatchSnapshot();
-    expect(
-      content.indexOf("[foo.Mixed_case](id.foo.mixed-case)") >= 0
-    ).toBeTruthy();
-    expect(errors).toEqual([]);
+      }
+    );
   });
 });
 

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.3-alpha.5](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.4...v0.16.3-alpha.5) (2020-11-22)
+
+### Enhancements
+
+- **workbench:** auto-update workspace settings ([fec9cf3](https://github.com/dendronhq/dendron/commit/fec9cf315f0b508d5b185788deff1b889d4904ec))
+
 ## [0.16.3-alpha.4](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.3...v0.16.3-alpha.4) (2020-11-22)
 
 **Note:** Version bump only for package @dendronhq/common-server

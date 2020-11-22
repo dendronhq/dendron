@@ -25,6 +25,18 @@ import {
 import { get } from "lodash";
 import Head from "next/head";
 
+// TODO Temporarily copied here from engine-server/src/config.ts to use default
+// values for input placeholders.
+const genDefaultConfig = (): DendronConfig => ({
+  vaults: [],
+  site: {
+    copyAssets: true,
+    siteHierarchies: ["root"],
+    siteRootDir: "docs",
+    usePrettyRefs: true,
+  },
+});
+
 const getConfigData = (): { data: DendronConfig } => {
   return {
     data: {
@@ -195,7 +207,9 @@ export default function ConfigSamplePage() {
                             <InputControl
                               label="Site hierarchy"
                               name="site.siteHierarchies[0]"
-                              placeholder="dendron"
+                              placeholder={
+                                genDefaultConfig().site.siteHierarchies[0]
+                              }
                               help="The hierarchy to publish."
                               disabled
                             />
@@ -221,7 +235,7 @@ export default function ConfigSamplePage() {
                       <InputControl
                         label="Site root directory"
                         name="site.siteRootDir"
-                        placeholder="./docs"
+                        placeholder={genDefaultConfig().site.siteRootDir}
                         help="Where your site will be published. Relative to Dendron workspace."
                         required
                       />
@@ -229,7 +243,7 @@ export default function ConfigSamplePage() {
                       <InputControl
                         label="Site notes directory"
                         name="site.siteNotesDir"
-                        placeholder="./notes"
+                        placeholder={genDefaultConfig().site.siteNotesDir}
                         help={`Folder where your notes will be kept. By default, "notes"`}
                         required
                       />
@@ -237,14 +251,14 @@ export default function ConfigSamplePage() {
                       <InputControl
                         label="Assets prefix"
                         name="site.assetsPrefix"
-                        placeholder="/static/"
+                        placeholder={genDefaultConfig().site.assetsPrefix}
                         help="If set, add prefix to all asset links"
                       />
 
                       <InputControl
                         label="Site repo directory"
                         name="site.siteRepoDir"
-                        placeholder="./ (workspace root)"
+                        placeholder={genDefaultConfig().site.siteRepoDir}
                         help={
                           <>
                             Location of the github repo where your site notes

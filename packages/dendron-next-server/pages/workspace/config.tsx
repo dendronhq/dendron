@@ -53,6 +53,7 @@ type InputControlProps = {
   placeholder: string;
   help: string | ReactNode;
   disabled?: boolean;
+  required?: boolean;
 };
 
 function InputControl({
@@ -61,6 +62,7 @@ function InputControl({
   placeholder,
   help,
   disabled,
+  required,
 }: InputControlProps) {
   return (
     <Field name={name}>
@@ -82,6 +84,7 @@ function InputControl({
             placeholder={placeholder}
             id={name}
             disabled={disabled}
+            required={required}
           />
 
           <FormErrorMessage>{errors.site?.siteRootDir}</FormErrorMessage>
@@ -178,6 +181,7 @@ export default function ConfigSamplePage() {
                         name="site.siteRootDir"
                         placeholder="./docs"
                         help="Where your site will be published. Relative to Dendron workspace."
+                        required
                       />
 
                       <InputControl
@@ -185,6 +189,7 @@ export default function ConfigSamplePage() {
                         name="site.siteNotesDir"
                         placeholder="./notes"
                         help={`Folder where your notes will be kept. By default, "notes"`}
+                        required
                       />
 
                       <InputControl
@@ -205,6 +210,7 @@ export default function ConfigSamplePage() {
                             <Code>workspaceRoot</Code> if not set.
                           </>
                         }
+                        required
                       />
 
                       <FormControl

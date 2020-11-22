@@ -1,4 +1,5 @@
-import { Box, Link, Image, Flex, ChakraProvider } from "@chakra-ui/react";
+import { Box, Link, Icon, Image, Flex, ChakraProvider } from "@chakra-ui/react";
+import { GoLinkExternal } from "react-icons/go";
 import Head from "next/head";
 import React, { PropsWithChildren } from "react";
 import { theme } from "../styles/theme";
@@ -47,8 +48,18 @@ export default function Layout({ children }: Props) {
               href="https://dendron.memberful.com/account/subscriptions"
               color="currentColor"
               textDecoration="none"
+              _hover={{ textDecoration: "inherit" }}
+              role="group"
             >
-              Update Subscription
+              Contribute to Dendron{" "}
+              <Box as="span" _groupHover={{ display: "none" }}>
+                🌱
+              </Box>
+              <Icon
+                as={GoLinkExternal}
+                display="none"
+                _groupHover={{ display: "inline-block" }}
+              />
             </Link>
           </Box>
         </Flex>

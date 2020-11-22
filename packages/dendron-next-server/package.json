@@ -20,7 +20,8 @@
     "next": "10.0.0",
     "react": "17.0.1",
     "react-d3-tree": "^1.16.1",
-    "react-dom": "17.0.1"
+    "react-dom": "17.0.1",
+    "react-icons": "^3.11.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.161",

@@ -48,12 +48,12 @@ const getConfigData = (): { data: DendronConfig } => {
       ],
       site: {
         assetsPrefix: "",
-        copyAssets: false,
+        copyAssets: true,
         siteHierarchies: ["dendron"],
         siteNotesDir: "",
         siteRepoDir: "",
         siteRootDir: "docs",
-        usePrettyRefs: false,
+        usePrettyRefs: true,
       },
     },
   };

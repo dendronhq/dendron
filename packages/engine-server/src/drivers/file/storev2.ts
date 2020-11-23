@@ -572,7 +572,9 @@ export class FileStorageV2 implements DStoreV2 {
     await this.deleteNote(oldNote.id, { metaOnly: true });
     await this.writeNote(newNote, { newNode: true });
     // update all new notes
-    await Promise.all(notesChanged.map(async (n) => this.writeNote(n)));
+    await Promise.all(
+      notesChanged.map(async (n) => this.writeNote(n, { updateExisting: true }))
+    );
     let out: NoteChangeEntry[] = notesChanged.map((note) => ({
       status: "update" as const,
       note,
@@ -658,8 +660,8 @@ export class FileStorageV2 implements DStoreV2 {
     const maybeNote = NoteUtilsV2.getNoteByFname(note.fname, this.notes, {
       vault: note.vault,
     });
-    if (maybeNote?.stub) {
-      // inherit stub's parent and children
+    // should use existing note
+    if (maybeNote?.stub || opts?.updateExisting) {
       note = { ...maybeNote, ...note };
     } else {
       changed = await this._writeNewNote({ note, maybeNote, opts });

@@ -253,6 +253,10 @@ export type EngineWriteOptsV2 = {
    * Used when importing existing notes in bulk
    */
   noAddParent?: boolean;
+  /**
+   * Should update existing note instead of overwriting
+   */
+  updateExisting?: boolean;
 } & Partial<EngineUpdateNodesOptsV2>;
 
 export type DEngineInitPayloadV2 = {

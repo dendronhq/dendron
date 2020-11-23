@@ -16,13 +16,16 @@ import {
   SchemaParserV2 as cSchemaParserV2,
 } from "@dendronhq/common-server";
 import {
+  AssertUtils,
   EngineTestUtilsV2,
   ENGINE_SERVER,
   INIT_TEST_PRESETS,
   NodeTestPresetsV2,
   NodeTestUtilsV2,
   NoteTestPresetsV2,
+  NoteTestUtilsV3,
   RENAME_TEST_PRESETS,
+  runEngineTest,
   runJestHarness,
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
@@ -808,6 +811,43 @@ This is some content`,
         RENAME_TEST_PRESETS.DOMAIN_DIFF_TITLE.results,
         expect,
         { changed: resp.data }
+      );
+    });
+
+    test("rename with link at root", async () => {
+      await runEngineTest(
+        async ({ vaults, engine }) => {
+          await engine.renameNote({
+            oldLoc: { fname: "alpha" },
+            newLoc: { fname: "beta" },
+          });
+          const node = NoteUtilsV2.getNotesByFname({
+            fname: "root",
+            notes: engine.notes,
+            vault: vaults[0],
+          })[0];
+          // expect(fs.readdirSync(vaults[0].fsPath)).toMatchSnapshot();
+          expect(
+            AssertUtils.assertInString({
+              body: node.body,
+              match: ["[[beta]]"],
+            })
+          ).toBeTruthy();
+        },
+        {
+          createEngine: ({ vaults }) => {
+            const engine = DendronEngineV2.createV3({ vaults });
+            return engine;
+          },
+          preSetupHook: async ({ vaults }) => {
+            await NoteTestUtilsV3.createNote({
+              fname: "alpha",
+              vault: vaults[0],
+            });
+            const root = path.join(path.join(vaults[0].fsPath), "root.md");
+            fs.appendFileSync(root, "[[alpha]]");
+          },
+        }
       );
     });
   });

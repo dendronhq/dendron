@@ -1,4 +1,5 @@
 import { DNoteAnchor, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { sort as sortPaths } from "cross-path-sort";
 import fs from "fs";
 import _ from "lodash";
 import path from "path";
@@ -6,7 +7,6 @@ import vscode, { commands, extensions, Location, TextDocument } from "vscode";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { matchAll } from "./strings";
-import { sort as sortPaths } from "cross-path-sort";
 
 export type RefT = {
   label: string;
@@ -26,6 +26,41 @@ export const REGEX_FENCED_CODE_BLOCK = /^( {0,3}|\t)```[^`\r\n]*$[\w\W]+?^( {0,3
 export { sortPaths };
 const REGEX_CODE_SPAN = /`[^`]*?`/gm;
 export const RE_WIKI_LINK_ALIAS = "([^\\[\\]]+?\\|)?";
+const uncPathRegex = /^[\\\/]{2,}[^\\\/]+[\\\/]+[^\\\/]+/;
+export const otherExts = [
+  "doc",
+  "docx",
+  "rtf",
+  "txt",
+  "odt",
+  "xls",
+  "xlsx",
+  "ppt",
+  "pptm",
+  "pptx",
+  "pdf",
+  "pages",
+  "mp4",
+  "mov",
+  "wmv",
+  "flv",
+  "avi",
+  "mkv",
+  "mp3",
+  "webm",
+  "wav",
+  "m4a",
+  "ogg",
+  "3gp",
+  "flac",
+];
+
+export const imageExts = ["png", "jpg", "jpeg", "svg", "gif", "webp"];
+const imageExtsRegex = new RegExp(`.(${imageExts.join("|")})$`, "i");
+export const isUncPath = (path: string): boolean => uncPathRegex.test(path);
+const otherExtsRegex = new RegExp(`.(${otherExts.join("|")})$`, "i");
+export const containsOtherKnownExts = (pathParam: string): boolean =>
+  !!otherExtsRegex.exec(path.parse(pathParam).ext);
 
 export class MarkdownUtils {
   static async openPreview(opts?: { reuseWindow?: boolean }) {
@@ -187,6 +222,30 @@ export const parseRef = (rawRef: string): RefT => {
   return out;
 };
 
+export const containsUnknownExt = (pathParam: string): boolean =>
+  path.parse(pathParam).ext !== "" &&
+  !containsMarkdownExt(pathParam) &&
+  !containsImageExt(pathParam) &&
+  !containsOtherKnownExts(pathParam);
+
+export const isLongRef = (path: string) => path.split("/").length > 1;
+
+export const containsNonMdExt = (ref: string) => {
+  return (
+    containsImageExt(ref) ||
+    containsOtherKnownExts(ref) ||
+    containsUnknownExt(ref)
+  );
+};
+
+// export const findNonMdURI = (uri: Uri, ref: string) => {
+//   const basenameLowerCased = path.basename(uri.fsPath).toLowerCase();
+//   return (
+//     basenameLowerCased === ref.toLowerCase() ||
+//     basenameLowerCased === `${ref.toLowerCase()}.md`
+//   );
+// };
+
 export const findReferences = async (
   ref: string,
   excludePaths: string[] = []
@@ -292,3 +351,6 @@ export const fsPathToRef = ({
     ref.includes(".") ? ref.slice(0, ref.lastIndexOf(".")) : ref
   );
 };
+
+export const containsImageExt = (pathParam: string): boolean =>
+  !!imageExtsRegex.exec(path.parse(pathParam).ext);

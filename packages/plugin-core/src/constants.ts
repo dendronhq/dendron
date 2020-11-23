@@ -554,17 +554,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   },
 };
 
-// DENDRON_COMMANDS["LOOKUP_JOURNAL"] = {
-//   ...DENDRON_COMMANDS["LOOKUP"],
-//   keybindings: {
-//     key: "ctrl+shift+j",
-//     mac: "cmd+shift+j",
-//     args: {
-//       noteType: "journal",
-//     },
-//   },
-// };
-
 export const DENDRON_CHANNEL_NAME = "Dendron";
 
 export const WORKSPACE_STATE = {

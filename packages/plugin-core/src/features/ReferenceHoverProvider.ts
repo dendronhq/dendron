@@ -1,8 +1,17 @@
 import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { MarkdownPublishPod } from "@dendronhq/pods-core";
 import fs from "fs";
+import _ from "lodash";
+import path from "path";
 import vscode, { Uri } from "vscode";
-import { getReferenceAtPosition } from "../utils/md";
-import { DendronWorkspace } from "../workspace";
+import {
+  containsImageExt,
+  containsNonMdExt,
+  containsOtherKnownExts,
+  getReferenceAtPosition,
+  isUncPath,
+} from "../utils/md";
+import { DendronWorkspace, getWS, resolveRelToWSRoot } from "../workspace";
 
 export default class ReferenceHoverProvider implements vscode.HoverProvider {
   public async provideHover(
@@ -18,14 +27,34 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
         new vscode.Position(range.end.line, range.end.character - 2)
       );
 
-      // start block
+      let foundUri: Uri;
       const engine = DendronWorkspace.instance().getEngine();
-      const notes = NoteUtilsV2.getNotesByFname({
-        fname: refAtPos.ref,
-        notes: engine.notes,
-      });
-      const uris = notes.map((note) => Uri.file(NoteUtilsV2.getPath({ note })));
-      const foundUri = uris[0];
+
+      if (containsNonMdExt(ref)) {
+        let fpath: string | undefined;
+        const v = _.find(engine.vaultsv3, (v) => {
+          fpath = path.join(resolveRelToWSRoot(v.fsPath), ref);
+          return fs.existsSync(fpath);
+        });
+        if (v && fpath) {
+          foundUri = Uri.file(fpath);
+        } else {
+          return new vscode.Hover(
+            `"${ref}" is not created yet. Click to create.`,
+            hoverRange
+          );
+        }
+      } else {
+        const notes = NoteUtilsV2.getNotesByFname({
+          fname: refAtPos.ref,
+          notes: engine.notes,
+        });
+        const uris = notes.map((note) =>
+          Uri.file(NoteUtilsV2.getPath({ note }))
+        );
+        foundUri = uris[0];
+      }
+      // start block
 
       //   const uris = getWorkspaceCache().allUris;
       //   const foundUri = findUriByRef(uris, ref);
@@ -40,27 +69,41 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       //   }
 
       if (foundUri && fs.existsSync(foundUri.fsPath)) {
-        // const imageMaxHeight = Math.max(
-        //     200,
-        //getMemoConfigProperty('links.preview.imageMaxHeight', 200),
-        //   10,
-        // );
-        const getContent = () => {
-          //   if (containsImageExt(foundUri.fsPath)) {
-          //     return `![${
-          //       isUncPath(foundUri.fsPath)
-          //         ? 'UNC paths are not supported for images preview due to VSCode Content Security Policy. Use markdown preview or open image via cmd (ctrl) + click instead.'
-          //         : ''
-          //     }](${vscode.Uri.file(foundUri.fsPath).toString()}|height=${imageMaxHeight})`;
-          //   } else if (containsOtherKnownExts(foundUri.fsPath)) {
-          //     const ext = path.parse(foundUri.fsPath).ext;
-          //     return `Preview is not supported for "${ext}" file type. Click to open in the default app.`;
-          //   }
+        const imageMaxHeight = Math.max(
+          200,
+          //getMemoConfigProperty('links.preview.imageMaxHeight', 200),
+          10
+        );
+        const getContent = async () => {
+          if (containsImageExt(foundUri.fsPath)) {
+            return `![${
+              isUncPath(foundUri.fsPath)
+                ? "UNC paths are not supported for images preview due to VSCode Content Security Policy. Use markdown preview or open image via cmd (ctrl) + click instead."
+                : ""
+            }](${vscode.Uri.file(
+              foundUri.fsPath
+            ).toString()}|height=${imageMaxHeight})`;
+          } else if (containsOtherKnownExts(foundUri.fsPath)) {
+            const ext = path.parse(foundUri.fsPath).ext;
+            return `Preview is not supported for "${ext}" file type. Click to open in the default app.`;
+          }
 
-          return fs.readFileSync(foundUri.fsPath).toString();
+          const fname = path.basename(foundUri.fsPath, ".md");
+          const out = await new MarkdownPublishPod().plant({
+            config: {
+              fname,
+              dest: "stdout",
+            },
+            engine: getWS().getEngine(),
+            vaults: getWS().vaults,
+            wsRoot: DendronWorkspace.wsRoot(),
+          });
+
+          return out;
         };
+        const content = await getContent();
 
-        return new vscode.Hover(getContent(), hoverRange);
+        return new vscode.Hover(content, hoverRange);
       }
 
       return new vscode.Hover(

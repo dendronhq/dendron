@@ -30,6 +30,7 @@ import BacklinksTreeDataProvider from "./features/BacklinksTreeDataProvider";
 import { completionProvider } from "./features/completionProvider";
 import DefinitionProvider from "./features/DefinitionProvider";
 import DocumentLinkProvider from "./features/DocumentLinkProvider";
+import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import { VaultWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
@@ -352,10 +353,10 @@ export class DendronWorkspace {
       mdLangSelector,
       new DefinitionProvider()
     );
-    // vscode.languages.registerHoverProvider(
-    //   mdLangSelector,
-    //   new ReferenceHoverProvider()
-    // );
+    vscode.languages.registerHoverProvider(
+      mdLangSelector,
+      new ReferenceHoverProvider()
+    );
     completionProvider.activate(context);
   }
 

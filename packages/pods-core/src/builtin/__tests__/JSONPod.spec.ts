@@ -91,7 +91,10 @@ describe("JSONImportPod", () => {
     ({ wsRoot, vaults, importSrc } = await setupImport({
       jsonEntries: createJSON(),
     }));
-    engine = DendronEngineV2.create({ vaults });
+    engine = DendronEngineV2.createV3({
+      wsRoot,
+      vaults: vaults.map((fsPath) => ({ fsPath })),
+    });
     await engine.init();
   });
 
@@ -127,7 +130,10 @@ describe("JSONImportPod", () => {
       src: importSrc,
       concatenate: false,
     };
-    engine = DendronEngineV2.create({ vaults });
+    engine = DendronEngineV2.createV3({
+      wsRoot,
+      vaults: vaults.map((fsPath) => ({ fsPath })),
+    });
     await engine.init();
     await pod.execute({
       config,
@@ -277,7 +283,10 @@ describe("JSONExportPod", () => {
       },
     }));
 
-    engine = DendronEngineV2.create({ vaults });
+    engine = DendronEngineV2.createV3({
+      wsRoot,
+      vaults: vaults.map((fsPath) => ({ fsPath })),
+    });
     await engine.init();
   });
 

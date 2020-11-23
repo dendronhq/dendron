@@ -100,6 +100,7 @@ describe("basic", () => {
   describe("stingify v3", () => {
     let opts: DendronNoteRefPluginOpts;
     let engine: DEngineClientV2;
+    let wsRoot = "";
     let vaults: DVault[];
     beforeEach(async () => {
       vaults = await EngineTestUtilsV3.setupVaults({
@@ -110,7 +111,7 @@ describe("basic", () => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         },
       });
-      engine = DendronEngineV2.createV3({ vaults });
+      engine = DendronEngineV2.createV3({ wsRoot, vaults });
     });
 
     test("wildcard link", async () => {
@@ -140,6 +141,7 @@ describe("basic", () => {
     let opts: DendronNoteRefPluginOpts;
     let engine: DEngineClientV2;
     let vaultDir: string;
+    let wsRoot = "";
 
     beforeEach(async () => {
       vaultDir = await EngineTestUtilsV2.setupVault({
@@ -180,7 +182,10 @@ head w.3 text
           ]);
         },
       });
-      engine = DendronEngineV2.create({ vaults: [vaultDir] });
+      engine = DendronEngineV2.createV3({
+        vaults: [{ fsPath: vaultDir }],
+        wsRoot,
+      });
 
       opts = {
         renderWithOutline: false,

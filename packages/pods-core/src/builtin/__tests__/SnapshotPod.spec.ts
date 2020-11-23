@@ -22,7 +22,10 @@ describe("SnapshotPodExport", () => {
         });
       },
     }));
-    engine = DendronEngineV2.create({ vaults });
+    engine = DendronEngineV2.createV3({
+      vaults: vaults.map((fsPath) => ({ fsPath })),
+      wsRoot,
+    });
     await engine.init();
   });
 
@@ -134,7 +137,10 @@ describe("SnapshotPodImport", () => {
 
   beforeEach(async () => {
     ({ wsRoot, vaults } = await EngineTestUtilsV2.setupWS({}));
-    engine = DendronEngineV2.create({ vaults });
+    engine = DendronEngineV2.createV3({
+      vaults: vaults.map((fsPath) => ({ fsPath })),
+      wsRoot,
+    });
     let dest = path.join(wsRoot, "snapshot");
     fs.ensureDirSync(dest);
 

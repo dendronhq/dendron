@@ -27,7 +27,11 @@ export class WorkspaceController {
     let schemas: SchemaModuleDictV2;
     const { vaults } = config;
     const logger = getLogger();
-    const engine = DendronEngineV2.create({ vaults, logger });
+    const engine = DendronEngineV2.createV3({
+      wsRoot: uri,
+      vaults: vaults.map((ent) => ({ fsPath: ent })),
+      logger,
+    });
     const { error } = await engine.init();
     if (error && error.code !== ERROR_CODES.MINOR) {
       error.friendly = "error initializing notes";

@@ -273,6 +273,7 @@ export type RenameNoteOptsV2 = {
 export type DCommonProps = {
   notes: NotePropsDictV2;
   schemas: SchemaModuleDictV2;
+  wsRoot: string;
   vaultsv3: DVault[];
   links: DLink[];
   vaults: string[];

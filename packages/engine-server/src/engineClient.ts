@@ -38,6 +38,7 @@ type DendronEngineClientOpts = {
 };
 export class DendronEngineClient implements DEngineClientV2 {
   public notes: NotePropsDictV2;
+  public wsRoot: string;
   public schemas: SchemaModuleDictV2;
   public vaults: string[];
   public links: DLink[];
@@ -82,6 +83,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.fuseEngine = new FuseEngine({});
     this.vaults = vaults;
     this.vaultsv3 = vaults.map((ent) => ({ fsPath: ent }));
+    this.wsRoot = ws;
     this.ws = ws;
   }
 

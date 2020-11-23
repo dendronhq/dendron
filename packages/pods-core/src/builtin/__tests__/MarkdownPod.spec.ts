@@ -35,7 +35,7 @@ describe("MarkdownPod", () => {
         await NotePresetsUtils.createBasic({ vaultDir, fname: "bar" });
       },
     }));
-    engine = DendronEngineV2.createV3({ vaults });
+    engine = DendronEngineV2.createV3({ vaults, wsRoot });
     importSrc = tmpDir().name;
     // setup
     createFiles = async () => {
@@ -227,6 +227,7 @@ describe("MarkdownPod", () => {
     const body = fs.readFileSync(path.join(vault, "project.p2.n1.md"), {
       encoding: "utf8",
     });
+    expect(body).toMatchSnapshot("bond");
     const out = await AssertUtils.assertInString({
       body,
       match: ["[[project.p1.n1]]"],

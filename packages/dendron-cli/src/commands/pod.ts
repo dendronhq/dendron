@@ -1,5 +1,5 @@
 import { DendronError } from "@dendronhq/common-all";
-import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
+import { DendronEngineV2 } from "@dendronhq/engine-server";
 import {
   PodClassEntryV4,
   PodItemV4,
@@ -89,11 +89,9 @@ export abstract class PodCLICommand extends BaseCommand<
     });
     const podsDir = path.join(wsRoot, "pods");
     const logger = this.L;
-    const engineClient = new DendronEngineV2({
-      vaults: [vault],
-      forceNew: true,
-      store: new FileStorageV2({ vaults: [vault], logger }),
-      mode: "fuzzy",
+    const engineClient = DendronEngineV2.createV3({
+      vaults: [{ fsPath: vault }],
+      wsRoot,
       logger,
     });
     await engineClient.init();

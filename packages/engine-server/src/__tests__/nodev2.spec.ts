@@ -7,7 +7,7 @@ import {
 import fs from "fs-extra";
 import { tmpdir } from "os";
 import path from "path";
-import { DendronEngineV2 } from "../enginev2";
+import { createEngine } from "../topics/markdown/plugins/__tests__/utils";
 
 const beforePreset = async () => {
   const vaultDir = await EngineTestUtilsV2.setupVault({
@@ -22,7 +22,7 @@ const beforePreset = async () => {
     },
   });
 
-  const engine = DendronEngineV2.create({ vaults: [vaultDir] });
+  const engine = createEngine({ wsRoot: "", vaults: [{ fsPath: vaultDir }] });
   return { vaultDir, engine };
 };
 

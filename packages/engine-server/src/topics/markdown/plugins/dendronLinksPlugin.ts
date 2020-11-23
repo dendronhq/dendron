@@ -203,7 +203,7 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
             node.data.alias = opts.replaceLink.to.fname;
           }
         }
-        const nodeValue = genLinkValue(node.value as string, data);
+        let nodeValue = genLinkValue(node.value as string, data);
         if (data.toMd) {
           return `[${data.alias}](${data.prefix || ""}${nodeValue})`;
         }
@@ -221,7 +221,7 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
           return `[[${node.data.alias}${aliasDivider}${nodeValue}]]`;
         }
         if (copts.convertObsidianLinks) {
-          node.value = _.replace(node.value as string, /\//g, ".");
+          nodeValue = _.replace(nodeValue as string, /\//g, ".");
         }
         return `[[${nodeValue}]]`;
       };

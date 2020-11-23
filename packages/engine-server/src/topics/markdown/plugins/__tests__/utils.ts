@@ -1,4 +1,9 @@
-import { DNoteRefData, DNoteRefLink } from "@dendronhq/common-all";
+import {
+  DNoteRefData,
+  DNoteRefLink,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
+import { DendronEngineV2 } from "../../../../enginev2";
 
 export function createRefLink({
   fname,
@@ -12,3 +17,8 @@ export function createRefLink({
     type: "ref",
   };
 }
+
+export const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
+  const engine = DendronEngineV2.createV3({ vaults, wsRoot });
+  return engine;
+};

@@ -22,13 +22,13 @@ const { createFiles } = FileTestUtils;
 describe("json pod", () => {
   let engine: DEngineClientV2;
 
-  test("json export, no config", async () => {
+  test.skip("json export, no config", async () => {
     const {
       wsRoot,
       vaults,
       importSrc,
     } = await PODS_CORE.JSON.IMPORT.BASIC.before({});
-    engine = DendronEngineV2.create({ vaults });
+    engine = DendronEngineV2.createV3({ vaults, wsRoot });
     await engine.init();
     const pod = new JSONImportPod();
     const config: JSONImportPodRawConfig = {

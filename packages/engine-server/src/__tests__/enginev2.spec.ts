@@ -8,6 +8,7 @@ import {
   NotePropsV2,
   NoteUtilsV2,
   SchemaUtilsV2,
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
   note2File,
@@ -37,6 +38,11 @@ import { ParserUtilsV2 } from "../topics/markdown";
 const { SCHEMAS, NOTES } = ENGINE_SERVER.ENGINE_SINGLE_TEST_PRESET;
 const { normalizeNote, normalizeNotes } = NodeTestUtilsV2;
 
+const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
+  const engine = DendronEngineV2.createV3({ vaults, wsRoot });
+  return engine;
+};
+
 const createNotes = async (opts: { rootName: string; vaultDir: string }) => {
   const { rootName, vaultDir } = opts;
   const vault = { fsPath: vaultDir };
@@ -61,6 +67,7 @@ const createNotes = async (opts: { rootName: string; vaultDir: string }) => {
 };
 
 const beforePreset = async () => {
+  const wsRoot = "";
   const vaultDir = await EngineTestUtilsV2.setupVault({
     initDirCb: async (vaultPath: string) => {
       await NodeTestUtilsV2.createSchemas({ vaultPath });
@@ -72,7 +79,10 @@ const beforePreset = async () => {
       });
     },
   });
-  const engine = DendronEngineV2.create({ vaults: [vaultDir] });
+  const engine = DendronEngineV2.createV3({
+    wsRoot,
+    vaults: [{ fsPath: vaultDir }],
+  });
   return { vaultDir, engine };
 };
 
@@ -169,7 +179,10 @@ describe("engine, schema/", () => {
           });
         },
       });
-      engine = DendronEngineV2.create({ vaults: [vaultDir] });
+      engine = DendronEngineV2.createV3({
+        wsRoot,
+        vaults: [{ fsPath: vaultDir }],
+      });
     });
 
     test("root", async () => {
@@ -201,7 +214,10 @@ describe("engine, schema/", () => {
         },
       });
       vault = { fsPath: vaultDir };
-      engine = DendronEngineV2.create({ vaults: [vaultDir] });
+      engine = DendronEngineV2.createV3({
+        wsRoot,
+        vaults: [{ fsPath: vaultDir }],
+      });
     });
 
     test("no root", async () => {
@@ -296,7 +312,10 @@ describe("engine, schema/", () => {
           await schemaModuleOpts2File(module, dirPath, fname);
         },
       });
-      engine = DendronEngineV2.create({ vaults: [vaultDir] });
+      engine = DendronEngineV2.createV3({
+        wsRoot,
+        vaults: [{ fsPath: vaultDir }],
+      });
     });
 
     test("basic", async () => {
@@ -354,6 +373,7 @@ describe("engine, notes/", () => {
   let vaultDir: string;
   let engine: DEngineV2;
   let vault: DVault;
+  let wsRoot = "";
 
   describe("basic test v0/", () => {
     beforeEach(async () => {
@@ -364,7 +384,10 @@ describe("engine, notes/", () => {
         },
       });
       vault = { fsPath: vaultDir };
-      engine = DendronEngineV2.create({ vaults: [vaultDir] });
+      engine = DendronEngineV2.createV3({
+        wsRoot,
+        vaults: [{ fsPath: vaultDir }],
+      });
     });
 
     test("fetch node with custom att", async () => {
@@ -644,6 +667,7 @@ This is some content`,
 
   describe("query/", () => {
     let engine: DEngineV2;
+
     beforeEach(async () => {
       ({ vaultDir, engine } = await beforePreset());
     });
@@ -826,7 +850,6 @@ This is some content`,
             notes: engine.notes,
             vault: vaults[0],
           })[0];
-          // expect(fs.readdirSync(vaults[0].fsPath)).toMatchSnapshot();
           expect(
             AssertUtils.assertInString({
               body: node.body,
@@ -835,10 +858,7 @@ This is some content`,
           ).toBeTruthy();
         },
         {
-          createEngine: ({ vaults }) => {
-            const engine = DendronEngineV2.createV3({ vaults });
-            return engine;
-          },
+          createEngine,
           preSetupHook: async ({ vaults }) => {
             await NoteTestUtilsV3.createNote({
               fname: "alpha",
@@ -846,6 +866,42 @@ This is some content`,
             });
             const root = path.join(path.join(vaults[0].fsPath), "root.md");
             fs.appendFileSync(root, "[[alpha]]");
+          },
+        }
+      );
+    });
+
+    test.skip("rename note in other vault", async () => {
+      await runEngineTest(
+        async ({ vaults, engine }) => {
+          await engine.renameNote({
+            oldLoc: { fname: "alpha" },
+            newLoc: { fname: "gamma" },
+          });
+          const node = NoteUtilsV2.getNotesByFname({
+            fname: "beta",
+            notes: engine.notes,
+            vault: vaults[1],
+          })[0];
+          expect(
+            AssertUtils.assertInString({
+              body: node.body,
+              match: ["[[alpha]]"],
+            })
+          ).toBeTruthy();
+        },
+        {
+          createEngine,
+          preSetupHook: async ({ vaults }) => {
+            await NoteTestUtilsV3.createNote({
+              fname: "alpha",
+              vault: vaults[1],
+            });
+            await NoteTestUtilsV3.createNote({
+              fname: "beta",
+              vault: vaults[1],
+              body: "[[alpha]]",
+            });
           },
         }
       );
@@ -983,7 +1039,10 @@ This is some content`,
           await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
         },
       });
-      engine = DendronEngineV2.create({ vaults: [vaultDir] });
+      engine = DendronEngineV2.createV3({
+        wsRoot,
+        vaults: [{ fsPath: vaultDir }],
+      });
     });
 
     test("no root", async () => {
@@ -1029,6 +1088,7 @@ This is some content`,
 describe("note and schema", async () => {
   let vaultDir: string;
   let engine: DEngineV2;
+  let wsRoot = "";
 
   beforeEach(async () => {
     vaultDir = await EngineTestUtilsV2.setupVault({
@@ -1037,7 +1097,10 @@ describe("note and schema", async () => {
         await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
       },
     });
-    engine = DendronEngineV2.create({ vaults: [vaultDir] });
+    engine = DendronEngineV2.createV3({
+      wsRoot,
+      vaults: [{ fsPath: vaultDir }],
+    });
   });
 
   describe("basics/", () => {
@@ -1048,7 +1111,10 @@ describe("note and schema", async () => {
           await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
         },
       });
-      engine = DendronEngineV2.create({ vaults: [vaultDir] });
+      engine = DendronEngineV2.createV3({
+        wsRoot,
+        vaults: [{ fsPath: vaultDir }],
+      });
     });
 
     test("root and two notes", async () => {

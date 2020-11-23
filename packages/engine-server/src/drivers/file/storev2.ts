@@ -284,24 +284,20 @@ export class FileStorageV2 implements DStoreV2 {
   public logger: DLogger;
   public links: DLink[];
   public vaultsv3: DVault[];
+  public wsRoot: string;
 
-  constructor(props: {
-    vaults: string[];
-    logger: DLogger;
-    vaultsv3?: DVault[];
-  }) {
-    const { vaults, logger } = props;
-    this.vaults = vaults;
-    this.vaultsv3 = !_.isUndefined(props.vaultsv3)
-      ? props.vaultsv3
-      : this.vaults.map((ent) => ({ fsPath: ent }));
+  constructor(props: { wsRoot: string; logger: DLogger; vaultsv3: DVault[] }) {
+    const { vaultsv3, logger, wsRoot } = props;
+    this.wsRoot = wsRoot;
+    this.vaultsv3 = vaultsv3;
+    this.vaults = vaultsv3.map((ent) => ent.fsPath);
     this.notes = {};
     this.schemas = {};
     this.notesCache = {};
     this.links = [];
     this.logger = logger;
     const ctx = "FileStorageV2";
-    this.logger.info({ ctx, vaults });
+    this.logger.info({ ctx, wsRoot, vaultsv3 });
   }
 
   async init(): Promise<DEngineInitRespV2> {

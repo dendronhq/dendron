@@ -4,9 +4,9 @@ import {
   runEngineTest,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
-import { DendronEngineV2 } from "../../../../enginev2";
 import { ParserUtilsV2 } from "../../utilsv2";
 import { ReplaceRefOptions, replaceRefs } from "../replaceRefs";
+import { createEngine } from "./utils";
 
 const getProc = (opts: ReplaceRefOptions) => {
   return ParserUtilsV2.getRemark().use(replaceRefs, opts);
@@ -66,9 +66,7 @@ describe("replaceRefs", () => {
           expect(_.trim(out.toString())).toEqual("[alpha#foo](alpha#foo)");
         },
         {
-          createEngine: ({ vaults }) => {
-            return DendronEngineV2.createV3({ vaults });
-          },
+          createEngine,
         }
       );
     });
@@ -85,9 +83,7 @@ describe("replaceRefs", () => {
           expect(_.trim(out.toString())).toEqual("[alpha](alpha-id)");
         },
         {
-          createEngine: ({ vaults }) => {
-            return DendronEngineV2.createV3({ vaults });
-          },
+          createEngine,
           preSetupHook: async ({ vaults }) => {
             await NoteTestUtilsV3.createNote({
               fname: "alpha",
@@ -111,9 +107,7 @@ describe("replaceRefs", () => {
           expect(_.trim(out.toString())).toEqual("[alpha#foo](alpha-id#foo)");
         },
         {
-          createEngine: ({ vaults }) => {
-            return DendronEngineV2.createV3({ vaults });
-          },
+          createEngine,
           preSetupHook: async ({ vaults }) => {
             await NoteTestUtilsV3.createNote({
               fname: "alpha",

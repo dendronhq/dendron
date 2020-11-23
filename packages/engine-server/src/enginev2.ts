@@ -22,6 +22,7 @@ import {
   RespV2,
   SchemaModulePropsV2,
   SchemaQueryResp,
+  WorkspaceOpts,
   WriteNoteResp,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger } from "@dendronhq/common-server";
@@ -30,18 +31,17 @@ import { FileStorageV2 } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
 
 type DendronEngineOptsV2 = {
-  vaults: string[];
-  vaultsv3?: DVault[];
+  wsRoot: string;
+  vaultsv3: DVault[];
   forceNew?: boolean;
   store?: any;
   mode?: DEngineMode;
   logger?: DLogger;
 };
-type DendronEnginePropsV2 = Required<Omit<DendronEngineOptsV2, "vaultsv3">> & {
-  vaultsv3?: DVault[];
-};
+type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
 
 export class DendronEngineV2 implements DEngineV2 {
+  public wsRoot: string;
   public vaults: string[];
   public store: DStoreV2;
   protected props: DendronEnginePropsV2;
@@ -53,40 +53,28 @@ export class DendronEngineV2 implements DEngineV2 {
   static _instance: DendronEngineV2 | undefined;
 
   constructor(props: DendronEnginePropsV2) {
-    this.vaults = props.vaults;
+    this.wsRoot = props.wsRoot;
     this.store = props.store;
     this.logger = props.logger;
     this.props = props;
     this.fuseEngine = new FuseEngine({});
     this.links = [];
-    this.vaultsv3 = !_.isUndefined(props.vaultsv3)
-      ? props.vaultsv3
-      : this.vaults.map((ent) => ({ fsPath: ent }));
+    this.vaultsv3 = props.vaultsv3;
+    this.vaults = props.vaultsv3.map((ent) => ent.fsPath);
   }
 
-  static create({ vaults, logger }: { vaults: string[]; logger?: DLogger }) {
+  static createV3({
+    vaults,
+    wsRoot,
+    logger,
+  }: WorkspaceOpts & { logger?: DLogger }) {
     const LOGGER = logger || createLogger();
     return new DendronEngineV2({
-      vaults,
-      forceNew: true,
-      store: new FileStorageV2({
-        vaults,
-        logger: LOGGER,
-      }),
-      mode: "fuzzy",
-      logger: LOGGER,
-    });
-  }
-
-  static createV3({ vaults }: { vaults: DVault[] }) {
-    const LOGGER = createLogger();
-    const _vaults = vaults.map((ent) => ent.fsPath);
-    return new DendronEngineV2({
-      vaults: _vaults,
+      wsRoot,
       vaultsv3: vaults,
       forceNew: true,
       store: new FileStorageV2({
-        vaults: _vaults,
+        wsRoot,
         vaultsv3: vaults,
         logger: LOGGER,
       }),
@@ -95,9 +83,9 @@ export class DendronEngineV2 implements DEngineV2 {
     });
   }
 
-  static instance({ vaults }: { vaults: DVault[] }) {
+  static instance({ vaults, wsRoot }: { vaults: DVault[]; wsRoot: string }) {
     if (!DendronEngineV2._instance) {
-      DendronEngineV2._instance = DendronEngineV2.createV3({ vaults });
+      DendronEngineV2._instance = DendronEngineV2.createV3({ vaults, wsRoot });
     }
     return DendronEngineV2._instance;
   }

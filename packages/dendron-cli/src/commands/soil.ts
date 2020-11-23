@@ -65,14 +65,12 @@ export abstract class SoilCommand<
     let { vault, wsRoot } = args;
 
     const logger = this.L;
-    const engineClient = new DendronEngineV2({
-      vaults: [vault],
-      forceNew: true,
-      store: new FileStorageV2({ vaults: [vault], logger }),
-      mode: "fuzzy",
+
+    const engineClient = DendronEngineV2.createV3({
+      vaults: [{ fsPath: vault }],
+      wsRoot,
       logger,
     });
-
     const cwd = process.cwd();
     wsRoot = resolvePath(wsRoot, cwd);
     vault = resolvePath(vault, cwd);
@@ -119,12 +117,10 @@ export abstract class SoilCommandV2<
     wsRoot = resolvePath(wsRoot, cwd);
     vault = resolvePath(vault, cwd);
     const logger = this.L;
-    const engine = new DendronEngineV2({
-      vaults: [vault],
-      forceNew: true,
-      store: new FileStorageV2({ vaults: [vault], logger }),
-      mode: "fuzzy",
+    const engine = DendronEngineV2.createV3({
+      vaults: [{ fsPath: vault }],
       logger,
+      wsRoot,
     });
     return {
       ...args,

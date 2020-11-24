@@ -41,4 +41,60 @@
 		],
 		"description": ""
 	  },
+	  "den.presetup": {
+		"prefix": "den.presetup",
+		"body": [
+		  "const preSetupHook: SetupHookFunction = async ({ vaults, wsRoot }) => {",
+		  "  await NoteTestUtilsV4.createNote({ fname: \"foo\", vault: vaults[0], wsRoot });",
+		  "  await NoteTestUtilsV4.createSchema({",
+		  "    fname: \"foo\",",
+		  "    vault: vaults[0],",
+		  "    wsRoot,",
+		  "  });",
+		  "  await NoteTestUtilsV4.createNote({ fname: \"bar\", vault: vaults[1], wsRoot });",
+		  "  await NoteTestUtilsV4.createSchema({",
+		  "    fname: \"bar\",",
+		  "    vault: vaults[1],",
+		  "    wsRoot,",
+		  "  });",
+		  "};"
+		],
+		"description": ""
+	  },
+	  "den.run-engine-test": {
+		"prefix": "den.run-engine-test",
+		"body": [
+		  "await runEngineTestV4(",
+		  "  async ({ vaults, engine }) => {",
+		  "    let note = NoteUtilsV2.create({ fname: \"alpha\", vault: vaults[1] });",
+		  "    await engine.writeNote(note);",
+		  "    const root = NoteUtilsV2.getNotesByFname({",
+		  "      fname: \"root\",",
+		  "      notes: engine.notes,",
+		  "      vault: vaults[1],",
+		  "    })[0] as NotePropsV2;",
+		  "    const newNote = NoteUtilsV2.getNotesByFname({",
+		  "      fname: \"alpha\",",
+		  "      notes: engine.notes,",
+		  "      vault: vaults[1],",
+		  "    })[0] as NotePropsV2;",
+		  "    const results = [",
+		  "      {",
+		  "        actual: root.children.length,",
+		  "        expected: 1,",
+		  "      },",
+		  "      {",
+		  "        actual: newNote.parent,",
+		  "        expected: root.id,",
+		  "      },",
+		  "    ] as TestResult[];",
+		  "    await runJestHarnessV2(results, expect);",
+		  "  },",
+		  "  {",
+		  "    createEngine,",
+		  "  }",
+		  ");"
+		],
+		"description": ""
+	  }
 }

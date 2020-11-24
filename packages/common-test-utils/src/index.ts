@@ -80,7 +80,6 @@ export class EngineTestUtilsV4 {
   static async setupVault(opts: SetupVaultsOptsV4 & { wsRoot: string }) {
     const { wsRoot, vault } = opts;
     const vpath = resolvePath(vault.fsPath, wsRoot);
-    debugger;
     fs.ensureDirSync(vpath);
     if (opts.preSetupHook) {
       await opts.preSetupHook({ wsRoot, vault, vpath });

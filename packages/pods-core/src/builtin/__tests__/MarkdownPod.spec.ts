@@ -227,7 +227,6 @@ describe("MarkdownPod", () => {
     const body = fs.readFileSync(path.join(vault, "project.p2.n1.md"), {
       encoding: "utf8",
     });
-    expect(body).toMatchSnapshot("bond");
     const out = await AssertUtils.assertInString({
       body,
       match: ["[[project.p1.n1]]"],

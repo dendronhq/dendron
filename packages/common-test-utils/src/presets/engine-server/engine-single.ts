@@ -9,7 +9,7 @@ import {
   SchemaModulePropsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
-import { note2File } from "@dendronhq/common-server";
+import { note2File, resolvePath } from "@dendronhq/common-server";
 import _ from "lodash";
 import { NoteTestUtilsV3 } from "../../noteUtils";
 import { TestPresetEntry } from "../../utils";
@@ -169,9 +169,11 @@ const INIT = {
   }),
   WITH_STUBS: new TestPresetEntry({
     label: "with stubs",
-    before: async ({ vault }: { vault: DVault }) => {
+    before: async ({ vault, wsRoot }: { vault: DVault; wsRoot?: string }) => {
       const createNotes = ({ vault }: { vault: DVault }) => {
-        const vaultPath = vault.fsPath;
+        const vaultPath = wsRoot
+          ? resolvePath(vault.fsPath, wsRoot)
+          : vault.fsPath;
         return Promise.all([
           note2File(
             NoteUtilsV2.create({ fname: "foo.journal.2020.08.29", vault }),

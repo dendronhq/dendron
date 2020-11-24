@@ -16,6 +16,7 @@ import YAML from "js-yaml";
 import _ from "lodash";
 import path from "path";
 import tmp, { DirResult } from "tmp";
+import { resolvePath } from "./files";
 import { SchemaParserV2 } from "./parser";
 
 type FileWatcherCb = {
@@ -187,12 +188,12 @@ export function schemaModuleOpts2File(
 
 export function schemaModuleProps2File(
   schemaMProps: SchemaModulePropsV2,
-  vaultPath: string,
+  vpath: string,
   fname: string
 ) {
   const ext = ".schema.yml";
   return fs.writeFile(
-    path.join(vaultPath, fname + ext),
+    path.join(vpath, fname + ext),
     SchemaUtilsV2.serializeModuleProps(schemaMProps)
   );
 }
@@ -216,6 +217,16 @@ export function tmpDir(): DirResult {
   const dirPath = tmp.dirSync();
   return dirPath;
 }
+
+export const vault2Path = ({
+  vault,
+  wsRoot,
+}: {
+  vault: DVault;
+  wsRoot: string;
+}) => {
+  return resolvePath(vault.fsPath, wsRoot);
+};
 
 export function writeJSONWithComments(fpath: string, data: any) {
   const payload = stringify(data, null, 4);

@@ -7,8 +7,8 @@ import { note2File } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { NodeTestUtilsV2 } from "..";
-import { NoteTestUtilsV3 } from "../noteUtils";
+import { NodeTestUtilsV2, SetupHookFunction } from "..";
+import { NoteTestUtilsV3, NoteTestUtilsV4 } from "../noteUtils";
 import { TestPresetEntry } from "../utils";
 
 /**
@@ -44,6 +44,21 @@ import { TestPresetEntry } from "../utils";
 const findCreated = (changed: NoteChangeEntry[]) => {
   const created = _.find(changed, { status: "create" });
   return created;
+};
+
+const preSetupHookSingle: SetupHookFunction = async ({ vaults, wsRoot }) => {
+  await NoteTestUtilsV4.createNote({
+    fname: "foo",
+    vault: vaults[0],
+    wsRoot,
+    body: "[[bar]]",
+  });
+  await NoteTestUtilsV4.createNote({
+    fname: "bar",
+    vault: vaults[0],
+    wsRoot,
+    body: "[[foo",
+  });
 };
 
 const DOMAIN_NO_CHILDREN = new TestPresetEntry({
@@ -287,6 +302,10 @@ const DOMAIN_DIFF_TITLE = new TestPresetEntry({
     ];
   },
 });
+
+export const RENAME_TEST_HOOKS = {
+  preSetupHookSingle,
+};
 
 export const RENAME_TEST_PRESETS = {
   DOMAIN_NO_CHILDREN,

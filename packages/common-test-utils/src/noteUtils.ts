@@ -3,8 +3,13 @@ import {
   genUUID,
   NotePropsV2,
   NoteUtilsV2,
+  SchemaUtilsV2,
 } from "@dendronhq/common-all";
-import { note2File, resolvePath } from "@dendronhq/common-server";
+import {
+  note2File,
+  resolvePath,
+  schemaModuleProps2File,
+} from "@dendronhq/common-server";
 import _ from "lodash";
 
 type CreateNoteOpts = {
@@ -55,7 +60,26 @@ type CreateNoteOptsV4 = {
   noWrite?: boolean;
 };
 
+type CreateSchemaOptsV4 = {
+  vault: DVault;
+  wsRoot: string;
+  fname: string;
+  noWrite?: boolean;
+};
+
 export class NoteTestUtilsV4 {
+  static createSchema = async (opts: CreateSchemaOptsV4) => {
+    const { fname, vault, noWrite, wsRoot } = _.defaults(opts, {
+      noWrite: false,
+    });
+
+    const schema = SchemaUtilsV2.createModuleProps({ fname, vault });
+    if (!noWrite) {
+      const vpath = resolvePath(vault.fsPath, wsRoot);
+      await schemaModuleProps2File(schema, vpath, fname);
+    }
+    return schema;
+  };
   static createNote = async (opts: CreateNoteOptsV4) => {
     const {
       fname,

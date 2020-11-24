@@ -12,28 +12,40 @@
       "cwd": "${workspaceFolder:engine-server}",
       "sourceMaps": true,
       "smartStep": true,
-      "outFiles": ["${workspaceFolder:engine-server}/lib/*.js"]
+      "outFiles": [
+        "${workspaceFolder:engine-server}/lib/*.js"
+      ]
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "debug test",
+      "name": "debug all tests",
       "program": "${workspaceFolder:engine-server}/node_modules/jest/bin/jest.js",
       "cwd": "${workspaceFolder:engine-server}",
-      "args": ["--runInBand"]
+      "args": [
+        "--runInBand"
+      ]
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "debug test file",
+      "name": "debug one test",
       "program": "${workspaceFolder:engine-server}/node_modules/jest/bin/jest.js",
       "sourceMaps": true,
       "smartStep": true,
       "cwd": "${workspaceFolder:engine-server}",
+      "env": {
+        "LOG_DST": "/tmp/engine-server.txt"
+      },
       "args": [
         "--findRelatedTests",
-        "--runInBand", "${relativeFile}", "-u"],
-      "outFiles": ["${workspaceFolder:engine-server}/lib/**/*.js"]
+        "--runInBand",
+        "${relativeFile}",
+        "-u"
+      ],
+      "outFiles": [
+        "${workspaceFolder:engine-server}/lib/**/*.js"
+      ]
     }
   ]
 }

@@ -361,13 +361,3 @@ export function stripLocalOnlyTags(doc: string) {
   } while (matches);
   return doc;
 }
-
-export const vault2Path = ({
-  vault,
-  wsRoot,
-}: {
-  vault: DVault;
-  wsRoot: string;
-}) => {
-  return resolvePath(vault.fsPath, wsRoot);
-};

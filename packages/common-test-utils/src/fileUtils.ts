@@ -1,7 +1,9 @@
-import { DirResult, tmp } from "@dendronhq/common-server";
+import { DVault } from "@dendronhq/common-all";
+import { DirResult, tmp, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { AssertUtils } from "./utils";
 export { DirResult };
 
 tmp.setGracefulCleanup();
@@ -36,6 +38,22 @@ export class FileTestUtils {
         })
         .sort(),
     ];
+  };
+
+  static assertInVault = ({
+    vault,
+    wsRoot,
+    match,
+    nomatch,
+  }: {
+    match?: string[];
+    nomatch?: string[];
+    vault: DVault;
+    wsRoot: string;
+  }) => {
+    const vpath = vault2Path({ vault, wsRoot });
+    const body = fs.readdirSync(vpath).join("\n");
+    return AssertUtils.assertInString({ body, match, nomatch });
   };
 
   static async createFiles(root: string, files: FileItem[]) {

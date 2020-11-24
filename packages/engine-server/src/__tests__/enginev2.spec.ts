@@ -511,8 +511,10 @@ describe("engine, notes/", () => {
           ),
         ]);
       };
+
       await createNotes(vaultDir);
       await engine.init();
+
       const notes = engine.notes;
       expect(
         notes["foo"].children.map((id) => _.pick(notes[id], ["fname"])).sort()

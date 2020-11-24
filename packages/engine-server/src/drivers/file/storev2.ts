@@ -31,13 +31,14 @@ import {
   note2File,
   schemaModuleProps2File,
   SchemaParserV2 as cSchemaParserV2,
+  vault2Path,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import YAML from "yamljs";
 import { ParserUtilsV2 } from "../../topics/markdown/utilsv2";
-import { loc2Path, vault2Path } from "../../utils";
+import { loc2Path } from "../../utils";
 
 type FileMetaV2 = {
   // file name: eg. foo.md, name = foo
@@ -182,13 +183,14 @@ export class NoteParserV2 extends ParserBaseV2 {
     const { fileMeta, parents, notesByFname, vault } = cleanOpts;
     const ctx = "parseNoteProps";
     this.logger.debug({ ctx, msg: "enter", fileMeta });
-    const root = vault.fsPath;
+    const wsRoot = this.opts.store.wsRoot;
+    const vpath = vault2Path({ vault, wsRoot });
     let out: NotePropsV2[] = [];
     let noteProps: NotePropsV2;
 
     // get note props
     try {
-      noteProps = file2Note(path.join(root, fileMeta.fpath), vault);
+      noteProps = file2Note(path.join(vpath, fileMeta.fpath), vault);
     } catch (_err) {
       const err = {
         status: ENGINE_ERROR_CODES.BAD_PARSE_FOR_NOTE,
@@ -220,13 +222,16 @@ export class NoteParserV2 extends ParserBaseV2 {
 }
 
 export class SchemaParserV2 extends ParserBaseV2 {
-  static parseFile(fpath: string, root: DVault): SchemaModulePropsV2 {
+  parseFile(fpath: string, root: DVault): SchemaModulePropsV2 {
     const fname = path.basename(fpath, ".schema.yml");
+    const wsRoot = this.opts.store.wsRoot;
+    const vpath = vault2Path({ vault: root, wsRoot });
     const schemaOpts: any = YAML.parse(
-      fs.readFileSync(path.join(root.fsPath, fpath), "utf8")
+      fs.readFileSync(path.join(vpath, fpath), "utf8")
     );
     return cSchemaParserV2.parseRaw(schemaOpts, { root, fname });
   }
+
   async parse(
     fpaths: string[],
     root: DVault
@@ -236,15 +241,11 @@ export class SchemaParserV2 extends ParserBaseV2 {
   }> {
     const ctx = "parse";
     this.logger.info({ ctx, msg: "enter", fpaths, root });
+
     const out = await Promise.all(
-      fpaths.flatMap((fsPath) => {
-        const fpath = vault2Path({
-          vault: { fsPath },
-          wsRoot: this.opts.store.wsRoot,
-        });
-        debugger;
+      fpaths.flatMap((fpath) => {
         try {
-          return SchemaParserV2.parseFile(fpath, root);
+          return this.parseFile(fpath, root);
         } catch (err) {
           return new DendronError({
             msg: ENGINE_ERROR_CODES.BAD_PARSE_FOR_SCHEMA,
@@ -434,8 +435,9 @@ export class FileStorageV2 implements DStoreV2 {
   ): Promise<{ data: SchemaModulePropsV2[]; errors: any[] }> {
     const ctx = "initSchema";
     this.logger.info({ ctx, msg: "enter" });
+    const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
     const schemaFiles = getAllFiles({
-      root: vault.fsPath,
+      root: vpath,
       include: ["*.schema.yml"],
     }) as string[];
     this.logger.info({ ctx, schemaFiles });
@@ -503,8 +505,10 @@ export class FileStorageV2 implements DStoreV2 {
   async _initNotes(vault: DVault): Promise<NotePropsV2[]> {
     const ctx = "initNotes";
     this.logger.info({ ctx, msg: "enter" });
+    const wsRoot = this.wsRoot;
+    const vpath = vault2Path({ vault, wsRoot });
     const noteFiles = getAllFiles({
-      root: vault.fsPath,
+      root: vpath,
       include: ["*.md"],
     }) as string[];
     const cache = this.loadNotesCache();
@@ -676,7 +680,8 @@ export class FileStorageV2 implements DStoreV2 {
       schemaModDict: this.schemas,
     });
     // order matters - only write file after parents are established
-    await note2File(note, note.vault.fsPath, opts);
+    const vpath = vault2Path({ vault: note.vault, wsRoot: this.wsRoot });
+    await note2File(note, vpath, opts);
     if (match) {
       const { schema, schemaModule } = match;
       NoteUtilsV2.addSchema({ note, schema, schemaModule });

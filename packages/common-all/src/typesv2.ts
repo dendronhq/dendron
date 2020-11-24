@@ -79,6 +79,10 @@ export type VaultRemote = {
 export type DVault = {
   name?: string;
   fsPath: string;
+  // /**
+  //  * Uri which is relative from root
+  //  */
+  // uri: string;
   remote?: VaultRemote;
 };
 export type DLink = {

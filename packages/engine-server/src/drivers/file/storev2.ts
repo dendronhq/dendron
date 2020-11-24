@@ -37,6 +37,7 @@ import _ from "lodash";
 import path from "path";
 import YAML from "yamljs";
 import { ParserUtilsV2 } from "../../topics/markdown/utilsv2";
+import { loc2Path, vault2Path } from "../../utils";
 
 type FileMetaV2 = {
   // file name: eg. foo.md, name = foo
@@ -236,7 +237,12 @@ export class SchemaParserV2 extends ParserBaseV2 {
     const ctx = "parse";
     this.logger.info({ ctx, msg: "enter", fpaths, root });
     const out = await Promise.all(
-      fpaths.flatMap((fpath) => {
+      fpaths.flatMap((fsPath) => {
+        const fpath = vault2Path({
+          vault: { fsPath },
+          wsRoot: this.opts.store.wsRoot,
+        });
+        debugger;
         try {
           return SchemaParserV2.parseFile(fpath, root);
         } catch (err) {
@@ -523,13 +529,15 @@ export class FileStorageV2 implements DStoreV2 {
   async renameNote(opts: RenameNoteOptsV2): Promise<RenameNotePayload> {
     const ctx = "Store:renameNote";
     const { oldLoc, newLoc } = opts;
+    const { wsRoot } = this;
     this.logger.info({ ctx, msg: "enter", opts });
-    const vaultDir = this.vaults[0];
-    // TODO: MULTI_VAULT
+    const oldVault = oldLoc.vault;
+    const oldLocPath = loc2Path({ loc: oldLoc, wsRoot });
+    if (!oldVault) {
+      throw new DendronError({ msg: "vault not set for loation" });
+    }
     // read from disk since contents migh have changed
-    const noteRaw = file2Note(path.join(vaultDir, oldLoc.fname + ".md"), {
-      fsPath: vaultDir,
-    });
+    const noteRaw = file2Note(oldLocPath, oldVault);
     const oldNote = NoteUtilsV2.hydrate({
       noteRaw,
       noteHydrated: this.notes[noteRaw.id],
@@ -541,11 +549,10 @@ export class FileStorageV2 implements DStoreV2 {
     // update note body of all notes that have changed
     const notesChanged = await Promise.all(
       notesToChange.map(async (n) => {
-        const vaultDir = this.vaults[0];
+        const vault = n.vault;
+        const vaultPath = vault2Path({ vault, wsRoot });
         // read note in case its changed
-        const _n = file2Note(path.join(vaultDir, n.fname + ".md"), {
-          fsPath: vaultDir,
-        });
+        const _n = file2Note(path.join(vaultPath, n.fname + ".md"), vault);
         n.body = await ParserUtilsV2.replaceLinks({
           content: _n.body,
           from: oldLoc,

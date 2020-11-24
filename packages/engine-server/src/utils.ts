@@ -2,11 +2,13 @@ import {
   CONSTANTS,
   DendronError,
   DEngineClientV2,
+  DNoteLoc,
   DNoteRefData,
   DNoteRefLink,
   DVault,
 } from "@dendronhq/common-all";
 import { readMD, resolvePath } from "@dendronhq/common-server";
+import fs from "fs-extra";
 import _ from "lodash";
 import _markdownIt from "markdown-it";
 // @ts-ignoreig
@@ -14,7 +16,6 @@ import markdownItAST from "markdown-it-ast";
 import Token from "markdown-it/lib/token";
 import path from "path";
 import { DendronEngineClient } from "./engineClient";
-import fs from "fs-extra";
 import { WSMeta } from "./types";
 
 const markdownIt = _markdownIt();
@@ -44,6 +45,21 @@ export function createNormVault({
     return { vault, changed: false };
   }
 }
+
+export const loc2Path = ({
+  loc,
+  wsRoot,
+}: {
+  loc: DNoteLoc;
+  wsRoot: string;
+}) => {
+  const fname = loc.fname;
+  if (!loc.vault) {
+    throw new DendronError({ msg: "no vault for loc, loc2Path" });
+  }
+  const fpath = resolvePath(loc.vault.fsPath, wsRoot);
+  return path.join(fpath, fname + ".md");
+};
 
 function normalize(text: string) {
   return _.toLower(_.trim(text, " #"));
@@ -345,3 +361,13 @@ export function stripLocalOnlyTags(doc: string) {
   } while (matches);
   return doc;
 }
+
+export const vault2Path = ({
+  vault,
+  wsRoot,
+}: {
+  vault: DVault;
+  wsRoot: string;
+}) => {
+  return resolvePath(vault.fsPath, wsRoot);
+};

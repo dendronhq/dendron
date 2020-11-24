@@ -11,8 +11,13 @@ import {
   EngineTestUtilsV3,
   ENGINE_SERVER,
   NodeTestPresetsV2,
+  NoteTestUtilsV3,
+  NoteTestUtilsV4,
+  PreSetupHookFunctionV4,
   runEngineTest,
+  runEngineTestV4,
   runJestHarnessV2,
+  SetupHookFunction,
   TestResult,
 } from "@dendronhq/common-test-utils";
 import { NotePresetsUtils } from "@dendronhq/common-test-utils/lib/presets/utils";
@@ -31,16 +36,21 @@ const setupCase1 = async () => {
       await NotePresetsUtils.createBasic({ vaultDir, fname: "bar" });
     },
   });
-  const engine = DendronEngineV2.createV3({ vaults });
+  const engine = DendronEngineV2.createV3({ vaults, wsRoot: "" });
   return { vaults, engine };
 };
 
-const createEngine = ({ vaults }: WorkspaceOpts) => {
-  return DendronEngineV2.createV3({ vaults });
+const createEngine = ({ wsRoot, vaults }: WorkspaceOpts) => {
+  return DendronEngineV2.createV3({ wsRoot, vaults });
+};
+
+const preSetupHook: SetupHookFunction = async ({ vaults, wsRoot }) => {
+  await NoteTestUtilsV4.createNote({ fname: "foo", vault: vaults[0], wsRoot });
+  await NoteTestUtilsV4.createNote({ fname: "bar", vault: vaults[1], wsRoot });
 };
 
 describe("engine, notes/", () => {
-  describe("write/", () => {
+  describe.skip("write/", () => {
     test("add domain to second vault", async () => {
       await runEngineTest(
         async ({ engine, vaults }) => {
@@ -76,7 +86,6 @@ describe("engine, notes/", () => {
   });
 
   describe("init/", () => {
-    // @ts-ignore
     let vaults: DVault[];
     let engine: DEngineV2;
 
@@ -84,7 +93,71 @@ describe("engine, notes/", () => {
       ({ vaults, engine } = await setupCase1());
     });
 
-    test("basic/", async () => {
+    test.only("basic", async () => {
+      await runEngineTestV4(
+        async ({ vaults, engine }) => {
+          expect(vaults.map((ent) => ent.fsPath)).toEqual(["vault1", "vault2"]);
+          // expect(
+          //   _.map(
+          //     _.reject(
+          //       _.values(engine.schemas),
+          //       DNodeUtilsV2.isRoot
+          //     ) as SchemaModulePropsV2[],
+          //     ({ fname, vault }) => ({
+          //       fname,
+          //       vault,
+          //     })
+          //   ).sort()
+          // ).toEqual([
+          //   {
+          //     fname: "bar",
+          //     vault: vaults[1],
+          //   },
+          //   {
+          //     fname: "foo",
+          //     vault: vaults[0],
+          //   },
+          // ]);
+          // check note correct
+          expect(
+            _.sortBy(
+              _.reject(
+                _.map(_.values(engine.notes), ({ fname, vault }) => ({
+                  fname,
+                  vault,
+                })),
+                DNodeUtilsV2.isRoot
+              ),
+              ["fname"]
+            )
+          ).toEqual([
+            {
+              fname: "bar",
+              vault: vaults[1],
+            },
+            {
+              fname: "bar.ch1",
+              vault: vaults[1],
+            },
+            {
+              fname: "foo",
+              vault: vaults[0],
+            },
+            {
+              fname: "foo.ch1",
+              vault: vaults[0],
+            },
+          ]);
+          const dir1 = fs.readdirSync(vaults[0].fsPath);
+          const dir2 = fs.readdirSync(vaults[1].fsPath);
+          expect(dir1).toMatchSnapshot("dir1");
+          expect(dir2).toMatchSnapshot("dir2");
+        },
+        { createEngine, preSetupHook }
+      );
+    });
+
+    test.skip("basic/", async () => {
       await engine.init();
       // check schema correct
       expect(_.size(engine.schemas)).toEqual(3);
@@ -146,6 +219,23 @@ describe("engine, notes/", () => {
     });
 
     test("with stubs/", async () => {
+      await runEngineTestV4(
+        async ({ vaults, engine }) => {
+          await NodeTestPresetsV2.runJestHarness({
+            opts: { notes: engine.notes, vault: vaults[0] },
+            results: INIT.WITH_STUBS.results,
+            expect,
+          });
+        },
+        {
+          createEngine,
+          preSetupHook: async ({ vaults }) => {
+            await INIT.WITH_STUBS.before({ vault: vaults[0] });
+          },
+        }
+      );
+    });
+    test.skip("with stubs/", async () => {
       await INIT.WITH_STUBS.before({ vault: vaults[0] });
       await engine.init();
       await NodeTestPresetsV2.runJestHarness({

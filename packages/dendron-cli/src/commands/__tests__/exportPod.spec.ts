@@ -52,7 +52,6 @@ describe("exportPod", () => {
       wsRoot,
       vault: vaults[0],
     });
-    debugger;
     await NodeTestPresetsV2.runJestHarness({
       opts: {
         destPath: exportDest,

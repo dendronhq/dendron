@@ -841,9 +841,10 @@ This is some content`,
     test("rename with link at root", async () => {
       await runEngineTest(
         async ({ vaults, engine }) => {
+          const vault = vaults[0];
           await engine.renameNote({
-            oldLoc: { fname: "alpha" },
-            newLoc: { fname: "beta" },
+            oldLoc: { fname: "alpha", vault },
+            newLoc: { fname: "beta", vault },
           });
           const node = NoteUtilsV2.getNotesByFname({
             fname: "root",

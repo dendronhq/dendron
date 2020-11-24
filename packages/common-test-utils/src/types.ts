@@ -1,4 +1,4 @@
-import { DEngineClientV2, WorkspaceOpts } from "@dendronhq/common-all";
+import { DEngineClientV2, DVault, WorkspaceOpts } from "@dendronhq/common-all";
 
 export type TestResult = {
   actual: any;
@@ -17,6 +17,11 @@ export type SetupHookFunction<T = any> = (
 ) => Promise<T>;
 
 export type PreSetupHookFunction<T = any> = (opts: WorkspaceOpts) => Promise<T>;
+export type PreSetupHookFunctionV4<T = any> = (opts: {
+  wsRoot: string;
+  vault: DVault;
+  vpath: string;
+}) => Promise<T>;
 
 export type PreSetupCmdHookFunction<T = any> = (
   opts: Pick<WorkspaceOpts, "wsRoot">

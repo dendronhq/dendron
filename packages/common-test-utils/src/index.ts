@@ -10,9 +10,11 @@ import {
   SchemaModulePropsV2,
   SchemaPropsV2,
   SchemaUtilsV2,
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
   note2File,
+  resolvePath,
   schemaModuleOpts2File,
   schemaModuleProps2File,
   tmpDir,
@@ -21,13 +23,14 @@ import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { TestResult } from "./types";
+import { PreSetupHookFunctionV4, TestResult } from "./types";
 import { TestPresetEntry } from "./utils";
-export * from "./presets";
-export * from "./utils";
 export * from "./fileUtils";
-export * from "./types";
 export * from "./noteUtils";
+export * from "./presets";
+export * from "./types";
+export * from "./utils";
+export * from "./utilsv2";
 
 type InitVaultFunc = (vaultPath: string) => void;
 export type SetupVaultOpts = {
@@ -51,6 +54,40 @@ type SetupVaultsOptsV3 = Omit<SetupVaultOpts, "initDirCb"> & {
 };
 
 type SetupWSOptsV3 = SetupVaultsOptsV3 & { wsRoot?: string };
+
+/**
+ * Relative vaults
+ */
+
+export type SetupVaultsOptsV4 = {
+  preSetupHook?: PreSetupHookFunctionV4;
+  vault: DVault;
+};
+
+export class EngineTestUtilsV4 {
+  static async setupWS(
+    opts: { wsRoot?: string } & { setupVaultsOpts: SetupVaultsOptsV4[] }
+  ): Promise<WorkspaceOpts> {
+    const wsRoot = opts.wsRoot || tmpDir().name;
+    const vaults = await Promise.all(
+      opts.setupVaultsOpts.flatMap((ent) => {
+        return this.setupVault({ ...ent, wsRoot });
+      })
+    );
+    return { wsRoot, vaults };
+  }
+
+  static async setupVault(opts: SetupVaultsOptsV4 & { wsRoot: string }) {
+    const { wsRoot, vault } = opts;
+    const vpath = resolvePath(vault.fsPath, wsRoot);
+    debugger;
+    fs.ensureDirSync(vpath);
+    if (opts.preSetupHook) {
+      await opts.preSetupHook({ wsRoot, vault, vpath });
+    }
+    return opts.vault;
+  }
+}
 
 /**
  * Legacy Multi-vault setup

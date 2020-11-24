@@ -1,3 +1,4 @@
+import { DendronError, ENGINE_ERROR_CODES } from "@dendronhq/common-all";
 import {
   WorkspaceInitRequest,
   WorkspaceSyncRequest,
@@ -24,10 +25,19 @@ router.get("/all", async (_req: Request, res: Response) => {
 });
 
 router.post("/sync", async (req: Request, res: Response) => {
-  const resp = await WorkspaceController.instance().sync(
-    req.body as WorkspaceSyncRequest
-  );
-  res.json(resp);
+  try {
+    const resp = await WorkspaceController.instance().sync(
+      req.body as WorkspaceSyncRequest
+    );
+    res.json(resp);
+  } catch (err) {
+    res.json({
+      error: new DendronError({
+        msg: ENGINE_ERROR_CODES.ENGINE_NOT_SET,
+        payload: err,
+      }),
+    });
+  }
 });
 
 export { router as workspaceRouter };

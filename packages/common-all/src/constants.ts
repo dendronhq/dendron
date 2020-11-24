@@ -17,6 +17,7 @@ export const ENGINE_ERROR_CODES = {
   BAD_PARSE_FOR_SCHEMA: "bad_parse_for_schema",
   NO_PARENT_FOR_NOTE: "no_parent_for_note",
   CANT_DELETE_ROOT: "no_delete_root_node",
+  ENGINE_NOT_SET: "no_engine_set",
 };
 
 export enum ERROR_CODES {

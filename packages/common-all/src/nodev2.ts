@@ -533,6 +533,27 @@ export class NoteUtilsV2 {
     return out;
   }
 
+  static getNoteByFnameV4({
+    fname,
+    notes,
+    vault,
+  }: {
+    fname: string;
+    notes: NotePropsDictV2 | NotePropsV2[];
+    vault: DVault;
+  }): NotePropsV2 | undefined {
+    if (!_.isArray(notes)) {
+      notes = _.values(notes);
+    }
+    const out = _.find(notes, (ent) => {
+      return (
+        ent.fname.toLowerCase() === fname.toLowerCase() &&
+        (vault ? ent.vault.fsPath === vault.fsPath : true)
+      );
+    });
+    return out;
+  }
+
   static getNoteByFname(
     fname: string,
     notes: NotePropsDictV2,

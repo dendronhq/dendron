@@ -234,3 +234,29 @@ export function writeJSONWithComments(fpath: string, data: any) {
 }
 
 export { tmp, DirResult };
+
+export class VaultUtils {
+  static getName(vault: DVault): string {
+    return vault.name || path.basename(vault.fsPath);
+  }
+
+  static getVaultByNotePathV4({
+    vaults,
+    fsPath,
+  }: {
+    /**
+     * Path to note
+     */
+    fsPath: string;
+    wsRoot: string;
+    vaults: DVault[];
+  }) {
+    // get diname
+    fsPath = path.dirname(fsPath);
+    const vault = _.find(vaults, { fsPath });
+    if (!vault) {
+      throw new DendronError({ msg: "no vault found" });
+    }
+    return vault;
+  }
+}

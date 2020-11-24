@@ -5,6 +5,7 @@ import {
   NoteChangeEntry,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
+import { vault2Path, VaultUtils } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import { TextEditor, Uri, window } from "vscode";
@@ -60,7 +61,12 @@ export class RenameNoteV2aCommand extends BaseCommand<
     const oldUri: Uri = editor.document.uri;
     const ws = DendronWorkspace.instance();
     const notes = ws.getEngine().notes;
-    let newNote = NoteUtilsV2.getNoteByFname(inputs.dest, notes);
+    const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+    let newNote = NoteUtilsV2.getNoteByFnameV4({
+      fname: inputs.dest,
+      notes,
+      vault,
+    });
     let isStub = newNote?.stub;
     if (newNote && !isStub) {
       throw new DendronError({
@@ -68,15 +74,14 @@ export class RenameNoteV2aCommand extends BaseCommand<
         friendly: `${inputs.dest} exists`,
       });
     }
-    const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
     newNote = NoteUtilsV2.create({
       fname: inputs.dest,
       id: newNote?.id,
       vault,
     });
-    const newUri = Uri.file(
-      path.join(ws.rootWorkspace.uri.fsPath, inputs.dest + ".md")
-    );
+
+    const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
+    const newUri = Uri.file(path.join(vpath, inputs.dest + ".md"));
     return {
       files: [{ oldUri, newUri }],
       silent: false,
@@ -110,15 +115,21 @@ export class RenameNoteV2aCommand extends BaseCommand<
         ws.vaultWatcher.pause = true;
       }
       const engine = ws.getEngine();
+      const oldFname = DNodeUtilsV2.fname(oldUri.fsPath);
+      const vault = VaultUtils.getVaultByNotePathV4({
+        fsPath: oldUri.fsPath,
+        wsRoot: DendronWorkspace.wsRoot(),
+        vaults: engine.vaultsv3,
+      });
 
       const resp = await engine.renameNote({
         oldLoc: {
-          fname: DNodeUtilsV2.fname(oldUri.fsPath),
-          vault: { fsPath: ws.rootWorkspace.uri.fsPath },
+          fname: oldFname,
+          vault,
         },
         newLoc: {
           fname: DNodeUtilsV2.fname(newUri.fsPath),
-          vault: { fsPath: ws.rootWorkspace.uri.fsPath },
+          vault,
         },
       });
       const changed = resp.data as NoteChangeEntry[];

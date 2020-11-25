@@ -1,14 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`engine, schema/ delete/ delete non-root 1`] = `
-Array [
-  "foo.ch1.md",
-  "foo.md",
-  "root.md",
-  "root.schema.yml",
-]
-`;
-
 exports[`note and schema basics/ root and two notes 1`] = `
 Array [
   Object {

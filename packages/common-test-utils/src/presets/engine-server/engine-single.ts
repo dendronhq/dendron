@@ -14,85 +14,6 @@ import _ from "lodash";
 import { NoteTestUtilsV3 } from "../../noteUtils";
 import { TestPresetEntry } from "../../utils";
 
-const SCHEMAS = {
-  WRITE: {
-    BASICS: new TestPresetEntry({
-      label: "basic",
-      preSetupHook: async () => {},
-      postSetupHook: async ({
-        engine,
-        vaults,
-      }): Promise<{ noteToWrite: NotePropsV2 }> => {
-        if (!engine) {
-          throw new Error("no engine set");
-        }
-        const module = engine.schemas["foo"];
-        const moduleRoot = module.schemas[module.root.id];
-        const noteToWrite = await NoteTestUtilsV3.createNote({
-          fname: "foo",
-          vault: vaults[0],
-          noWrite: true,
-          props: { id: "ch2" },
-        });
-        DNodeUtilsV2.addChild(moduleRoot, noteToWrite);
-        module.schemas[noteToWrite.id] = noteToWrite;
-        await engine.updateSchema(module);
-        return { noteToWrite };
-      },
-      results: async ({ engine }: { engine: DEngineClientV2 }) => {
-        const resp = await engine.querySchema("*");
-        return [
-          {
-            actual: _.values(engine.schemas).length,
-            expected: 2,
-          },
-          {
-            actual: _.values(engine.schemas["foo"].schemas).length,
-            expected: 3,
-          },
-          {
-            actual: resp.data.length,
-            expected: 2,
-            msg: "query should have same results",
-          },
-        ];
-      },
-    }),
-  },
-  INIT: {
-    ROOT: new TestPresetEntry({
-      label: "root",
-      results: async ({
-        schemas,
-        vault,
-      }: {
-        schemas: SchemaModuleDictV2;
-        vault: DVault;
-      }) => {
-        const schemaModRoot = schemas["root"] as SchemaModulePropsV2;
-        return [
-          {
-            actual: _.trim(SchemaUtilsV2.serializeModuleProps(schemaModRoot)),
-            expected: _.trim(`
-version: 1
-imports: []
-schemas:
-  - id: root
-    children: []
-    title: root
-    parent: root
-            `),
-          },
-          {
-            actual: schemaModRoot.vault.fsPath,
-            expected: vault.fsPath,
-          },
-        ];
-      },
-    }),
-  },
-};
-
 const INIT = {
   WITH_BACKLINKS: new TestPresetEntry({
     label: "with backlinks",
@@ -217,7 +138,6 @@ const ENGINE_SINGLE_TEST_PRESET = {
   NOTES: {
     INIT,
   },
-  SCHEMAS,
 };
 
 export default ENGINE_SINGLE_TEST_PRESET;

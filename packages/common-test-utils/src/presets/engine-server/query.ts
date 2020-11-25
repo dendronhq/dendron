@@ -1,25 +1,71 @@
-import { DNodeUtilsV2, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
-import _ from "lodash";
-import { NoteTestUtilsV4 } from "../../noteUtils";
-import { PreSetupHookFunction } from "../../types";
+import {
+  DNodeUtilsV2,
+  NoteUtilsV2,
+  SchemaUtilsV2,
+} from "@dendronhq/common-all";
 import { TestPresetEntryV4 } from "../../utilsv2";
-import { NOTE_PRESETS_V4, SCHEMA_PRESETS_V4 } from "../notes";
+import { NOTE_PRESETS_V4 } from "../notes";
+import { SCHEMA_PRESETS_V4 } from "../schemas";
+import { setupBasic } from "./utils";
 
-const setupBasic: PreSetupHookFunction = async ({ vaults, wsRoot }) => {
-  const vault = vaults[0];
-  await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
-    vault,
-    wsRoot,
-  });
-  await NOTE_PRESETS_V4.NOTE_SIMPLE_CHILD.create({
-    vault,
-    wsRoot,
-  });
-  await NOTE_PRESETS_V4.NOTE_SIMPLE_OTHER.create({
-    vault,
-    wsRoot,
-  });
-  await SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.create({ vault, wsRoot });
+const SCHEMAS = {
+  EMPTY_QS: new TestPresetEntryV4(
+    async ({ vaults, engine }) => {
+      const vault = vaults[0];
+      const schemas = engine.schemas;
+      const { data } = await engine.querySchema("");
+      const expectedNote = SchemaUtilsV2.getSchemaModuleByFnameV4({
+        fname: "root",
+        schemas,
+        vault,
+      });
+      return [
+        {
+          actual: data[0],
+          expected: expectedNote,
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
+    }
+  ),
+  STAR_QUERY: new TestPresetEntryV4(
+    async ({ engine }) => {
+      const { data } = await engine.querySchema("*");
+      return [
+        {
+          actual: data.length,
+          expected: 2,
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
+    }
+  ),
+  SIMPLE: new TestPresetEntryV4(
+    async ({ engine, vaults }) => {
+      const schemas = engine.schemas;
+      const vault = vaults[0];
+      const sid = SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname;
+      const { data } = await engine.querySchema(sid);
+      const expectedSchema = SchemaUtilsV2.getSchemaModuleByFnameV4({
+        fname: sid,
+        schemas,
+        vault,
+      });
+      return [
+        {
+          actual: data[0],
+          expected: expectedSchema,
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
+    }
+  ),
 };
 
 const NOTES = {
@@ -122,4 +168,5 @@ const NOTES = {
 };
 export const ENGINE_QUERY_PRESETS = {
   NOTES,
+  SCHEMAS,
 };

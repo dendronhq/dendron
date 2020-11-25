@@ -155,6 +155,7 @@ export class DendronEngineV2 implements DEngineV2 {
         id,
         opts
       )) as DEngineDeleteSchemaRespV2;
+      // deleted schema might affect notes
       await this.updateIndex("note");
       await this.updateIndex("schema");
       return data;

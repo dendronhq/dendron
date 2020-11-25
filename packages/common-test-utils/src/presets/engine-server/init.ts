@@ -1,5 +1,6 @@
 import {
   ENGINE_ERROR_CODES,
+  ERROR_CODES,
   NotePropsV2,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
@@ -9,7 +10,47 @@ import { NOTE_PRESETS_V4 } from "../notes";
 import fs from "fs-extra";
 import { vault2Path } from "@dendronhq/common-server";
 import path from "path";
+import { setupBasic } from "./utils";
+import _ from "lodash";
+import { SCHEMA_PRESETS_V4 } from "../schemas";
 
+const SCHEMAS = {
+  BASICS: new TestPresetEntryV4(
+    async ({ engine }) => {
+      const fname = SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname;
+      const schema = engine.schemas[fname];
+      return [
+        {
+          actual: _.size(schema.schemas),
+          expected: 2,
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
+    }
+  ),
+  BAD_SCHEMA: new TestPresetEntryV4(
+    async ({ engine, initResp }) => {
+      const schemas = _.keys(engine.schemas);
+      return [
+        {
+          actual: schemas.sort(),
+          expected: ["foo", "root"],
+          msg: "bad schema not included",
+        },
+        { actual: initResp.error?.code, expected: ERROR_CODES.MINOR },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        const vault = vaults[0];
+        await setupBasic({ vaults, wsRoot });
+        await SCHEMA_PRESETS_V4.BAD_SCHEMA.create({ vault, wsRoot });
+      },
+    }
+  ),
+};
 const NOTES = {
   DOMAIN_STUB: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
@@ -98,4 +139,5 @@ const NOTES = {
 };
 export const ENGINE_INIT_PRESETS = {
   NOTES,
+  SCHEMAS,
 };

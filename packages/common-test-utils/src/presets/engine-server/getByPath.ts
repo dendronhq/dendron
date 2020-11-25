@@ -2,6 +2,7 @@ import { NoteUtilsV2 } from "@dendronhq/common-all";
 import { TestPresetEntryV4 } from "../../utilsv2";
 import { NOTE_PRESETS_V4 } from "../notes";
 
+const SCHEMAS = {};
 const NOTES = {
   ROOT: new TestPresetEntryV4(async ({ vaults, engine }) => {
     const vault = vaults[0];
@@ -109,4 +110,5 @@ const NOTES = {
 };
 export const ENGINE_GET_NOTE_BY_PATH_PRESETS = {
   NOTES,
+  SCHEMAS,
 };

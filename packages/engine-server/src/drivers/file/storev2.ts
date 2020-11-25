@@ -386,10 +386,11 @@ export class FileStorageV2 implements DStoreV2 {
     if (id === "root") {
       throw new DendronError({ status: ENGINE_ERROR_CODES.CANT_DELETE_ROOT });
     }
-    const noteToDelete = this.schemas[id];
+    const schemaToDelete = this.schemas[id];
     const ext = ".schema.yml";
-    const vault = this.vaults[0];
-    const fpath = path.join(vault, noteToDelete.fname + ext);
+    const vault = schemaToDelete.vault;
+    const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
+    const fpath = path.join(vpath, schemaToDelete.fname + ext);
 
     if (!opts?.metaOnly) {
       fs.unlinkSync(fpath);
@@ -712,7 +713,8 @@ export class FileStorageV2 implements DStoreV2 {
 
   async writeSchema(schemaModule: SchemaModulePropsV2) {
     this.schemas[schemaModule.root.id] = schemaModule;
-    const vaultDir = this.vaults[0];
-    await schemaModuleProps2File(schemaModule, vaultDir, schemaModule.fname);
+    const vault = schemaModule.vault;
+    const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
+    await schemaModuleProps2File(schemaModule, vpath, schemaModule.fname);
   }
 }

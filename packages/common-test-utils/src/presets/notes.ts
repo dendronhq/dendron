@@ -1,13 +1,7 @@
-import {
-  DNodeUtilsV2,
-  DVault,
-  SchemaModulePropsV2,
-  SchemaUtilsV2,
-} from "@dendronhq/common-all";
+import { DVault } from "@dendronhq/common-all";
 import _ from "lodash";
 import {
   CreateNoteOptsV4,
-  CreateSchemaOptsV4,
   NoteTestUtilsV3,
   NoteTestUtilsV4,
 } from "../noteUtils";
@@ -27,15 +21,6 @@ type CreateNotePresetOptsV4 = {
   noWrite?: boolean;
   body?: string;
   props?: CreateNoteOptsV4["props"];
-};
-
-type CreateSchemaPresetOptsV4 = {
-  wsRoot: string;
-  vault: DVault;
-  genRandomId?: boolean;
-  fname?: string;
-  noWrite?: boolean;
-  modifier?: (schema: SchemaModulePropsV2) => SchemaModulePropsV2;
 };
 
 export const NOTE_PRESETS = {
@@ -86,7 +71,6 @@ export const NOTE_BODY_PRESETS_V4 = {
 };
 
 type CreateNoteFactoryOpts = Omit<CreateNoteOptsV4, "vault" | "wsRoot">;
-type CreateSchemaFactoryOpts = Omit<CreateSchemaOptsV4, "vault" | "wsRoot">;
 
 const CreateNoteFactory = (opts: CreateNoteFactoryOpts) => {
   const func = ({
@@ -115,31 +99,6 @@ const CreateNoteFactory = (opts: CreateNoteFactoryOpts) => {
   return { create: func, fname: opts.fname };
 };
 
-const CreateSchemaFactory = (opts: CreateSchemaFactoryOpts) => {
-  const func = ({ vault, wsRoot, noWrite }: CreateSchemaPresetOptsV4) => {
-    const _opts: CreateSchemaOptsV4 = {
-      ...opts,
-      vault,
-      wsRoot,
-      noWrite,
-    };
-    return NoteTestUtilsV4.createSchema(_opts);
-  };
-  return { create: func, fname: opts.fname };
-};
-
-export const SCHEMA_PRESETS_V4 = {
-  SCHEMA_SIMPLE: CreateSchemaFactory({
-    fname: "foo",
-    modifier: (schema) => {
-      const vault = schema.root.vault;
-      const child = SchemaUtilsV2.create({ id: "ch1", vault });
-      schema.schemas["ch1"] = child;
-      DNodeUtilsV2.addChild(schema.root, child);
-      return schema;
-    },
-  }),
-};
 export const NOTE_PRESETS_V4 = {
   NOTE_SIMPLE: CreateNoteFactory({ fname: "foo", body: "foo body" }),
   NOTE_SIMPLE_OTHER: CreateNoteFactory({ fname: "bar", body: "bar body" }),

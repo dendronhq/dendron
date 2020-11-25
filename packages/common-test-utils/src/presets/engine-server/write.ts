@@ -11,6 +11,70 @@ import fs from "fs-extra";
 import path from "path";
 import { vault2Path } from "@dendronhq/common-server";
 import { FileTestUtils, NOTE_PRESETS_V4 } from "../..";
+import { setupBasic } from "./utils";
+import { SCHEMA_PRESETS_V4 } from "../schemas";
+
+const SCHEMAS = {
+  ADD_NEW_SCHEMA: new TestPresetEntryV4(
+    async ({ vaults, engine }) => {
+      const schemaModId = SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname;
+      const module = engine.schemas[schemaModId];
+      const vault = vaults[0];
+      const schema = SchemaUtilsV2.create({ id: "ch2", vault });
+      DNodeUtilsV2.addChild(module.root, schema);
+      module.schemas[schema.id] = schema;
+      await engine.updateSchema(module);
+      const resp = await engine.querySchema("*");
+      return [
+        {
+          actual: _.values(engine.schemas).length,
+          expected: 2,
+        },
+        {
+          actual: _.values(engine.schemas["foo"].schemas).length,
+          expected: 3,
+        },
+        {
+          actual: resp.data.length,
+          expected: 2,
+          msg: "query should have same results",
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
+    }
+  ),
+  ADD_NEW_MODULE: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      const vault = vaults[0];
+      const schemaModNew = await SCHEMA_PRESETS_V4.SCHEMA_SIMPLE_OTHER.create({
+        vault,
+        wsRoot,
+        noWrite: true,
+      });
+      await engine.writeSchema(schemaModNew);
+
+      return [
+        {
+          actual: _.values(engine.schemas).length,
+          expected: 3,
+        },
+        {
+          actual: _.values(engine.schemas["foo"].schemas).length,
+          expected: 2,
+        },
+        {
+          actual: _.values(engine.schemas["bar"].schemas).length,
+          expected: 2,
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
+    }
+  ),
+};
 
 const NOTES = {
   SERIALIZE_CHILD_WITH_HIERARCHY: new TestPresetEntryV4(
@@ -291,4 +355,5 @@ const NOTES = {
 
 export const ENGINE_WRITE_PRESETS = {
   NOTES,
+  SCHEMAS,
 };

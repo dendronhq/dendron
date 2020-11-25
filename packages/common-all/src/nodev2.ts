@@ -903,6 +903,27 @@ export class SchemaUtilsV2 {
     return path.join(root, fname + ".schema.yml");
   }
 
+  static getSchemaModuleByFnameV4({
+    fname,
+    schemas,
+    vault,
+  }: {
+    fname: string;
+    schemas: SchemaModuleDictV2 | SchemaModulePropsV2[];
+    vault: DVault;
+  }): SchemaModulePropsV2 | undefined {
+    if (!_.isArray(schemas)) {
+      schemas = _.values(schemas);
+    }
+    const out = _.find(schemas, (ent) => {
+      return (
+        ent.fname.toLowerCase() === fname.toLowerCase() &&
+        (vault ? ent.vault.fsPath === vault.fsPath : true)
+      );
+    });
+    return out;
+  }
+
   static getSchemaFromNote({
     note,
     engine,

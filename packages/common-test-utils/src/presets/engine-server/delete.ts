@@ -1,10 +1,37 @@
 import { NoteChangeEntry, NoteUtilsV2 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import fs from "fs-extra";
+import fs, { outputFile } from "fs-extra";
 import _ from "lodash";
+import { FileTestUtils } from "../..";
 import { NoteTestUtilsV4 } from "../../noteUtils";
 import { TestPresetEntryV4 } from "../../utilsv2";
+import { SCHEMA_PRESETS_V4 } from "../schemas";
+import { setupBasic } from "./utils";
 
+const SCHEMAS = {
+  BASIC: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      const vault = vaults[0];
+      const schemaId = SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname;
+      await engine.deleteSchema(schemaId);
+      return [
+        { actual: _.size(engine.schemas), expected: 1 },
+        { actual: engine.schemas[schemaId], expected: undefined },
+        {
+          actual: await FileTestUtils.assertInVault({
+            vault,
+            wsRoot,
+            nomatch: [`${schemaId}.schema.yml`],
+          }),
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
+    }
+  ),
+};
 const NOTES = {
   NOTE_NO_CHILDREN: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
@@ -137,4 +164,5 @@ const NOTES = {
 };
 export const ENGINE_DELETE_PRESETS = {
   NOTES,
+  SCHEMAS,
 };

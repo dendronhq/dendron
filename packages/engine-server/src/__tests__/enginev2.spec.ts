@@ -17,6 +17,7 @@ import {
 import {
   AssertUtils,
   EngineTestUtilsV2,
+  ENGINE_PRESETS,
   ENGINE_SERVER,
   INIT_TEST_PRESETS,
   NodeTestPresetsV2,
@@ -29,7 +30,7 @@ import {
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
-import path from "path";
+import path, { toNamespacedPath } from "path";
 import { DendronEngineV2 } from "../enginev2";
 import { ParserUtilsV2 } from "../topics/markdown";
 
@@ -90,171 +91,6 @@ describe("engine, schema/", () => {
   let vaultDir: string;
   let engine: DEngineV2;
   let wsRoot = "";
-
-  describe("delete/", () => {
-    let vaultDir: string;
-    let engine: DEngineV2;
-    let vault: DVault;
-
-    beforeEach(async () => {
-      ({ vaultDir, engine } = await beforePreset());
-      vault = { fsPath: vaultDir };
-    });
-
-    test("delete non-root", async () => {
-      await engine.init();
-      await engine.deleteSchema("foo");
-
-      // node deleted from memory
-      expect(_.values(engine.schemas).length).toEqual(1);
-      expect(engine.schemas["foo"]).toBeUndefined();
-
-      // node removed from disk
-      expect(fs.readdirSync(vaultDir)).toMatchSnapshot();
-      expect(
-        _.includes(fs.readdirSync(vaultDir), "foo.schema.yml")
-      ).toBeFalsy();
-
-      // node not in index
-      const index = (engine as DendronEngineV2).fuseEngine.notesIndex;
-      expect((index.getIndex().toJSON() as any).records.length).toEqual(3);
-
-      const resp = await engine.queryNotes({ qs: "foo", vault });
-      expect(resp.data[0].schema).toBeUndefined();
-    });
-
-    test("delete root", async () => {
-      await engine.init();
-      const { error } = await engine.deleteSchema("root");
-      expect(error?.status).toEqual(ENGINE_ERROR_CODES.CANT_DELETE_ROOT);
-    });
-  });
-
-  describe("write/", () => {
-    beforeEach(async () => {
-      ({ vaultDir, engine } = await beforePreset());
-    });
-
-    test("update schema, add new prop to module", async () => {
-      await engine.init();
-      const vault = { fsPath: vaultDir };
-      await SCHEMAS.WRITE.BASICS.postSetupHook({
-        wsRoot,
-        vaults: [vault],
-        engine,
-      });
-      await runJestHarness(SCHEMAS.WRITE.BASICS.results, expect, { engine });
-    });
-
-    test("write new module", async () => {
-      await engine.init();
-
-      // update schema
-      const mOpts = await NodeTestUtilsV2.createSchemaModuleOpts({
-        vaultDir,
-        rootName: "bar",
-      });
-      const mProps = cSchemaParserV2.parseSchemaModuleOpts(mOpts, {
-        fname: "bar",
-        root: { fsPath: vaultDir },
-      });
-      await engine.writeSchema(mProps);
-
-      expect(_.values(engine.schemas).length).toEqual(3);
-      expect(_.values(engine.schemas["foo"].schemas).length).toEqual(2);
-      expect(_.values(engine.schemas["bar"].schemas).length).toEqual(2);
-
-      // should be written to file
-      const data = readYAML(path.join(vaultDir, "bar.schema.yml"));
-      expect(data.schemas.length).toEqual(2);
-    });
-  });
-
-  describe("query/", () => {
-    beforeEach(async () => {
-      vaultDir = await EngineTestUtilsV2.setupVault({
-        initDirCb: async (vaultPath: string) => {
-          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
-            vaultDir: vaultPath,
-          });
-        },
-      });
-      engine = DendronEngineV2.createV3({
-        wsRoot,
-        vaults: [{ fsPath: vaultDir }],
-      });
-    });
-
-    test("root", async () => {
-      await engine.init();
-      const resp = await engine.querySchema("");
-      expect(_.size(resp.data[0].schemas)).toEqual(1);
-    });
-
-    test("all", async () => {
-      await engine.init();
-      const resp = await engine.querySchema("*");
-      expect(_.size(resp.data)).toEqual(2);
-    });
-
-    test("non-root", async () => {
-      await engine.init();
-      const resp = await engine.querySchema("foo");
-      expect(_.size(resp.data[0].schemas)).toEqual(2);
-    });
-  });
-
-  describe("basics/", () => {
-    let vault: DVault;
-    beforeEach(async () => {
-      vaultDir = await EngineTestUtilsV2.setupVault({
-        initDirCb: async (dirPath: string) => {
-          await NodeTestUtilsV2.createSchemas({ vaultPath: dirPath });
-          await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
-        },
-      });
-      vault = { fsPath: vaultDir };
-      engine = DendronEngineV2.createV3({
-        wsRoot,
-        vaults: [{ fsPath: vaultDir }],
-      });
-    });
-
-    test("no root", async () => {
-      fs.removeSync(path.join(vaultDir, "root.schema.yml"));
-      const { error } = (await engine.init()) as { error: DendronError };
-      expect(error.status).toEqual(ENGINE_ERROR_CODES.NO_SCHEMA_FOUND);
-    });
-
-    test("root", async () => {
-      const { data } = await engine.init();
-      await runJestHarness(SCHEMAS.INIT.ROOT.results, expect, {
-        schemas: data.schemas,
-        vault,
-      });
-    });
-
-    test("root and one schem", async () => {
-      await NodeTestUtilsV2.createSchemaModuleOpts({
-        vaultDir,
-        rootName: "foo",
-      });
-      await engine.init();
-      expect(_.values(engine.schemas).length).toEqual(2);
-      expect(_.values(engine.schemas["foo"].schemas).length).toEqual(2);
-    });
-
-    test("schema with no root node", async () => {
-      await INIT_TEST_PRESETS.BAD_SCHEMA.before({ vaultDir });
-      const resp = await engine.init();
-      const results = INIT_TEST_PRESETS.BAD_SCHEMA.results;
-      await NodeTestPresetsV2.runJestHarness({
-        opts: { engine, resp },
-        results,
-        expect,
-      });
-    });
-  });
 
   describe("import", () => {
     let vaultDir: string;
@@ -369,81 +205,38 @@ describe("engine, schema/", () => {
   });
 });
 
-describe.only("engine, notes/", () => {
-  describe("init", () => {
-    test.each(
-      _.map(ENGINE_SERVER.ENGINE_INIT_PRESETS.NOTES, (v, k) => {
-        return [k, v];
-      })
-    )("%p", async (_key, TestCase) => {
-      const { testFunc, ...opts } = TestCase;
-      await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+describe.only("engine, schemas/", () => {
+  const nodeType = "SCHEMAS";
+
+  ENGINE_PRESETS.forEach((pre) => {
+    const { name, presets } = pre;
+    describe(name, () => {
+      test.each(
+        _.map(presets[nodeType], (v, k) => {
+          return [k, v];
+        })
+      )("%p", async (_key, TestCase) => {
+        const { testFunc, ...opts } = TestCase;
+        await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+      });
     });
   });
+});
 
-  describe("delete", () => {
-    test.each(
-      _.map(ENGINE_SERVER.ENGINE_DELETE_PRESETS.NOTES, (v, k) => {
-        return [k, v];
-      })
-    )("%p", async (_key, TestCase) => {
-      const { testFunc, ...opts } = TestCase;
-      await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
-    });
-  });
+describe("engine, notes/", () => {
+  const nodeType = "NOTES";
 
-  describe("getNoteByPath/", () => {
-    test.each(
-      _.map(ENGINE_SERVER.ENGINE_GET_NOTE_BY_PATH_PRESETS.NOTES, (v, k) => {
-        return [k, v];
-      })
-    )("%p", async (_key, TestCase) => {
-      const { testFunc, ...opts } = TestCase;
-      await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
-    });
-  });
-
-  describe("query/", () => {
-    test.each(
-      _.map(ENGINE_SERVER.ENGINE_QUERY_PRESETS.NOTES, (v, k) => {
-        return [k, v];
-      })
-    )("%p", async (_key, TestCase) => {
-      const { testFunc, ...opts } = TestCase;
-      await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
-    });
-  });
-
-  describe("rename/", () => {
-    test.each(
-      _.map(ENGINE_SERVER.ENGINE_RENAME_PRESETS.NOTES, (v, k) => {
-        return [k, v];
-      })
-    )("%p", async (_key, TestCase) => {
-      const { testFunc, ...opts } = TestCase;
-      await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
-    });
-  });
-
-  describe("write", () => {
-    test.each(
-      _.map(ENGINE_SERVER.ENGINE_WRITE_PRESETS.NOTES, (v, k) => {
-        return [k, v];
-      })
-    )("%p", async (_key, TestCase) => {
-      const { testFunc, ...opts } = TestCase;
-      await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
-    });
-  });
-
-  describe("update", () => {
-    test.each(
-      _.map(ENGINE_UPDATE_PRESETS.NOTES, (v, k) => {
-        return [k, v];
-      })
-    )("%p", async (_key, TestCase) => {
-      const { testFunc, ...opts } = TestCase;
-      await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+  ENGINE_PRESETS.forEach((pre) => {
+    const { name, presets } = pre;
+    describe(name, () => {
+      test.each(
+        _.map(presets[nodeType], (v, k) => {
+          return [k, v];
+        })
+      )("%p", async (_key, TestCase) => {
+        const { testFunc, ...opts } = TestCase;
+        await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+      });
     });
   });
 });

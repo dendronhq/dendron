@@ -72,6 +72,7 @@
     },
     "peacock.color": "#007fff",
     "vim.statusBarColorControl": false,
+    "editor.snippetSuggestions": "none",
     "debug.node.autoAttach": "on"
   }
 }

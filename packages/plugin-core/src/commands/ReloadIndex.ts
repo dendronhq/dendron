@@ -41,7 +41,7 @@ export class ReloadIndexCommand extends BasicCommand<
         if (!fs.pathExistsSync(rootNotePath)) {
           const note = NoteUtilsV2.createRoot({ vault });
           this.L.info({ ctx, vaultDir, msg: "creating root note" });
-          await note2File(note, vaultDir);
+          await note2File({ note, vault, wsRoot: DendronWorkspace.wsRoot() });
         }
       })
     );

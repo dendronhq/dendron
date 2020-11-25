@@ -163,15 +163,22 @@ export function getPkgRoot(base: string, fname?: string): string {
   throw Error(`no root found from ${base}`);
 }
 
-export function note2File(
-  note: NotePropsV2,
-  vaultPath: string,
-  opts?: { writeHierarchy?: boolean }
-) {
+export function note2File({
+  note,
+  vault,
+  wsRoot,
+  opts,
+}: {
+  note: NotePropsV2;
+  vault: DVault;
+  wsRoot: string;
+  opts?: { writeHierarchy?: boolean };
+}) {
   const { fname } = note;
   const ext = ".md";
   const payload = NoteUtilsV2.serialize(note, opts);
-  return fs.writeFile(path.join(vaultPath, fname + ext), payload);
+  const vpath = vault2Path({ vault, wsRoot });
+  return fs.writeFile(path.join(vpath, fname + ext), payload);
 }
 
 export function schemaModuleOpts2File(

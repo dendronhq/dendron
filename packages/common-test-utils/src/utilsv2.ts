@@ -9,9 +9,31 @@ import {
   CreateEngineFunction,
   EngineTestUtilsV4,
   RunEngineTestFunction,
+  RunEngineTestFunctionV4,
+  runJestHarnessV2,
   SetupVaultsOptsV4,
 } from ".";
-import { PostSetupHookFunction, SetupHookFunction } from "./types";
+import {
+  PostSetupHookFunction,
+  PreSetupHookFunction,
+  SetupHookFunction,
+} from "./types";
+
+export class TestPresetEntryV4 {
+  public preSetupHook: PreSetupHookFunction;
+  public testFunc: RunEngineTestFunctionV4;
+
+  constructor(
+    func: RunEngineTestFunctionV4,
+    opts?: {
+      preSetupHook?: PreSetupHookFunction;
+    }
+  ) {
+    let { preSetupHook } = opts || {};
+    this.preSetupHook = preSetupHook ? preSetupHook : async () => {};
+    this.testFunc = func;
+  }
+}
 
 /**
  * Run engine test with relative vaults
@@ -22,6 +44,7 @@ export async function runEngineTestV4(
     preSetupHook?: SetupHookFunction;
     postSetupHook?: PostSetupHookFunction;
     createEngine: CreateEngineFunction;
+    expect: any;
   }
 ) {
   const { preSetupHook, createEngine } = _.defaults(opts, {
@@ -34,7 +57,7 @@ export async function runEngineTestV4(
   const setupVaultsOpts: SetupVaultsOptsV4[] = ["vault1", "vault2"].map(
     (ent) => ({
       vault: { fsPath: ent },
-      preSetupHook: async ({ vpath, vault }) => {
+      preSetupHook: async ({ vpath, vault, wsRoot }) => {
         const rootModule = SchemaUtilsV2.createRootModule({
           created: "1",
           updated: "1",
@@ -47,7 +70,7 @@ export async function runEngineTestV4(
           updated: "1",
           vault,
         });
-        await note2File(rootNote, vpath);
+        await note2File({ note: rootNote, vault, wsRoot });
       },
     })
   );
@@ -57,5 +80,7 @@ export async function runEngineTestV4(
   const engine = createEngine({ wsRoot, vaults: resp.vaults });
   await engine.init();
   // const resp = await postSetupHook({wsRoot, vaults, engine})
-  await func({ wsRoot, vaults: resp.vaults, engine });
+  const results = await func({ wsRoot, vaults: resp.vaults, engine });
+
+  await runJestHarnessV2(results, expect);
 }

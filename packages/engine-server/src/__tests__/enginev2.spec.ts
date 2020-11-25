@@ -27,6 +27,7 @@ import {
   NoteTestUtilsV3,
   RENAME_TEST_PRESETS,
   runEngineTest,
+  runEngineTestV4,
   runJestHarness,
 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
@@ -36,6 +37,7 @@ import { DendronEngineV2 } from "../enginev2";
 import { ParserUtilsV2 } from "../topics/markdown";
 
 const { SCHEMAS, NOTES } = ENGINE_SERVER.ENGINE_SINGLE_TEST_PRESET;
+const { ENGINE_UPDATE_PRESETS } = ENGINE_SERVER;
 const { normalizeNote, normalizeNotes } = NodeTestUtilsV2;
 
 const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
@@ -460,210 +462,36 @@ describe("engine, notes/", () => {
     });
   });
 
-  const NOTE_INIT_PRESET =
-    NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.init;
-
-  const { WITH_BACKLINKS, WITH_BACKLINKS_V2 } = NOTES.INIT;
-
-  describe("init/", () => {
-    let vaultDir: string;
-    let engine: DEngineV2;
-    let vault: DVault;
-    let wsRoot = "";
-
-    beforeEach(async () => {
-      ({ vaultDir, engine } = await beforePreset());
-      vault = { fsPath: vaultDir };
-    });
-
-    test.skip("with backlinks/", async () => {
-      await WITH_BACKLINKS.preSetupHook({ wsRoot, vaults: [vault] });
-      await engine.init();
-      expect(engine.notes).toMatchSnapshot("bond");
-      await runJestHarness(WITH_BACKLINKS.results, expect, {
-        notes: engine.notes,
-      });
-    });
-
-    test.skip(WITH_BACKLINKS_V2.label, async () => {
-      await WITH_BACKLINKS_V2.preSetupHook({ wsRoot, vaults: [vault] });
-      await engine.init();
-      expect(engine.notes).toMatchSnapshot("bond");
-      await runJestHarness(WITH_BACKLINKS_V2.results, expect, {
-        notes: engine.notes,
-      });
-    });
-
-    test("with stubs/", async () => {
-      const createNotes = (vaultPath: string) => {
-        return Promise.all([
-          note2File(
-            NoteUtilsV2.create({ fname: "foo.journal.2020.08.29", vault }),
-            vaultPath
-          ),
-          note2File(
-            NoteUtilsV2.create({ fname: "foo.journal.2020.08.30", vault }),
-            vaultPath
-          ),
-          note2File(
-            NoteUtilsV2.create({ fname: "foo.journal.2020.08.31", vault }),
-            vaultPath
-          ),
-        ]);
-      };
-
-      await createNotes(vaultDir);
-      await engine.init();
-
-      const notes = engine.notes;
-      expect(
-        notes["foo"].children.map((id) => _.pick(notes[id], ["fname"])).sort()
-      ).toEqual([{ fname: "foo.ch1" }, { fname: "foo.journal" }]);
-    });
-
-    test(NOTE_INIT_PRESET.domainStub.label, async () => {
-      await NOTE_INIT_PRESET.domainStub.before({ vaultDir });
-      await engine.init();
-      const notes = engine.notes;
-      await NodeTestPresetsV2.runJestHarness({
-        opts: { notes },
-        results: NOTE_INIT_PRESET.domainStub.results,
-        expect,
-      });
+  describe("init", () => {
+    test.each(
+      _.map(ENGINE_SERVER.ENGINE_INIT_PRESETS.NOTES, (v, k) => {
+        return [k, v];
+      })
+    )("%p", async (_key, TestCase) => {
+      const { testFunc, ...opts } = TestCase;
+      await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
     });
   });
 
-  const NOTE_DELETE_PRESET =
-    NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.delete;
-
-  describe("delete/", () => {
-    let vaultDir: string;
-    let engine: DEngineV2;
-    beforeEach(async () => {
-      ({ vaultDir, engine } = await beforePreset());
-    });
-
-    test("delete node w/ no children", async () => {
-      await engine.init();
-      const changed = await engine.deleteNote("foo.ch1");
-
-      _.map(
-        await NoteTestPresetsV2.createDeleteNoteWNoChildrenResults({
-          changed: changed.data,
-          notes: engine.notes,
-          vaultDir,
-        }),
-        (ent) => {
-          expect(ent.expected).toEqual(ent.actual);
-        }
-      );
-
-      // note not in index
-      const index = (engine as DendronEngineV2).fuseEngine.notesIndex;
-      expect((index.getIndex().toJSON() as any).records.length).toEqual(2);
-    });
-
-    test(NOTE_DELETE_PRESET.domainChildren.label, async () => {
-      await engine.init();
-      const resp = await engine.deleteNote("foo");
-      const changed = resp.data as NoteChangeEntry[];
-      const notes = engine.notes;
-      _.map(
-        await NOTE_DELETE_PRESET.domainChildren.results({
-          changed,
-          notes,
-          vaultDir,
-        }),
-        (ent) => expect(ent.expected).toEqual(ent.actual)
-      );
-      const index = (engine as DendronEngineV2).fuseEngine.notesIndex;
-      expect((index.getIndex().toJSON() as any).records.length).toEqual(3);
-    });
-
-    test(NOTE_DELETE_PRESET.domainNoChildren.label, async () => {
-      fs.removeSync(path.join(vaultDir, "foo.ch1.md"));
-      await engine.init();
-      const resp = await engine.deleteNote("foo");
-      const changed = resp.data as NoteChangeEntry[];
-      const notes = engine.notes;
-      _.map(
-        await NOTE_DELETE_PRESET.domainNoChildren.results({
-          changed,
-          notes,
-          vaultDir,
-        }),
-        (ent) => expect(ent.expected).toEqual(ent.actual)
-      );
-    });
-
-    test("root", async () => {
-      await engine.init();
-      const { error } = await engine.deleteNote("root");
-      expect(error?.status).toEqual(ENGINE_ERROR_CODES.CANT_DELETE_ROOT);
+  describe("delete", () => {
+    test.each(
+      _.map(ENGINE_SERVER.ENGINE_DELETE_PRESETS.NOTES, (v, k) => {
+        return [k, v];
+      })
+    )("%p", async (_key, TestCase) => {
+      const { testFunc, ...opts } = TestCase;
+      await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
     });
   });
 
-  describe("getNoteByPath/", () => {
-    let engine: DEngineV2;
-    let vault: DVault;
-    beforeEach(async () => {
-      ({ vaultDir, engine } = await beforePreset());
-      vault = { fsPath: vaultDir };
-    });
-
-    test("get root", async () => {
-      await engine.init();
-      const { data } = await engine.getNoteByPath({ npath: "root", vault });
-      expect(data?.note).toEqual(_.find(engine.notes, DNodeUtilsV2.isRoot));
-      expect(data?.changed).toEqual([]);
-    });
-
-    test("get existing note", async () => {
-      await engine.init();
-      const { data } = await engine.getNoteByPath({ npath: "foo", vault });
-      expect(data?.note).toEqual(engine.notes["foo"]);
-      expect(data?.changed).toEqual([]);
-    });
-
-    test("get existing note with caps", async () => {
-      fs.writeFileSync(
-        path.join(vaultDir, "000 Index.md"),
-        `---\n
-id: f95b2ebf-7cb5-47be-a8c0-def1236f0a8e
-title: 000 index
-desc: ''
-updated: 1603892680423
-created: 1603892680423
----
-
-This is some content`,
-        { encoding: "utf8" }
-      );
-      await engine.init();
-      const { data } = await engine.getNoteByPath({
-        npath: "000 Index",
-        vault,
-        createIfNew: true,
-      });
-      expect(
-        normalizeNote({ note: data?.note as NotePropsV2 })
-      ).toMatchSnapshot();
-    });
-
-    test("get new note", async () => {
-      await engine.init();
-      const { data } = await engine.getNoteByPath({
-        npath: "bar",
-        vault,
-        createIfNew: true,
-      });
-      expect(data?.note?.fname).toEqual("bar");
-      expect(
-        _.sortBy(
-          _.map(data?.changed, (ent) => ent.note),
-          "fname"
-        )
-      ).toEqual([data?.note, NoteUtilsV2.getNoteByFname("root", engine.notes)]);
+  describe.only("getNoteByPath/", () => {
+    test.each(
+      _.map(ENGINE_SERVER.ENGINE_GET_NOTE_BY_PATH_PRESETS.NOTES, (v, k) => {
+        return [k, v];
+      })
+    )("%p", async (_key, TestCase) => {
+      const { testFunc, ...opts } = TestCase;
+      await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
     });
   });
 
@@ -911,123 +739,25 @@ This is some content`,
     });
   });
 
-  const NOTE_WRITE_PRESET =
-    NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.write;
-
-  describe("write/", () => {
-    let vaultDir: string;
-    let engine: DEngineV2;
-    let vault: DVault;
-
-    beforeEach(async () => {
-      ({ vaultDir, engine } = await beforePreset());
-      vault = { fsPath: vaultDir };
-    });
-
-    test(NOTE_WRITE_PRESET["domainStub"].label, async () => {
-      await NoteTestPresetsV2.createJestTest({
-        entry: NOTE_WRITE_PRESET["domainStub"],
-        beforeArgs: { vaultDir },
-        executeCb: async () => {
-          await engine.init();
-          const notes = engine.notes;
-          return { notes };
-        },
-        expect,
-      });
-    });
-
-    test(NOTE_WRITE_PRESET["serializeChildWithHierarchy"].label, async () => {
-      await NoteTestPresetsV2.createJestTest({
-        entry: NOTE_WRITE_PRESET["serializeChildWithHierarchy"],
-        beforeArgs: { vaultDir },
-        executeCb: async () => {
-          await engine.init();
-          const noteNew = NoteUtilsV2.create({
-            fname: "foo.ch1",
-            id: "foo.ch1",
-            created: "1",
-            updated: "1",
-            vault,
-          });
-          await engine.writeNote(noteNew, { writeHierarchy: true });
-          return { vaultDir };
-        },
-        expect,
-      });
-    });
-
-    test("write note, no schema, new domain", async () => {
-      await engine.init();
-      const barNote = NoteUtilsV2.create({
-        fname: "bar",
-        id: "bar",
-        created: "1",
-        updated: "1",
-        vault,
-      });
-      await engine.writeNote(barNote);
-      expect(normalizeNotes(engine.notes)).toMatchSnapshot();
-      const resp = await engine.queryNotes({ qs: "bar", vault });
-      const note = resp.data[0];
-      expect(_.values(engine.notes).length).toEqual(4);
-      expect(note).toEqual(engine.notes["bar"]);
-      // parent is added
-      const noteParent = engine.notes[note.parent as string] as NotePropsV2;
-      expect(noteParent.fname).toEqual("root");
-      expect(note.schema).toBeUndefined();
-      expect(fs.readdirSync(vaultDir)).toEqual([
-        "bar.md",
-        "foo.ch1.md",
-        "foo.md",
-        "foo.schema.yml",
-        "root.md",
-        "root.schema.yml",
-      ]);
-    });
-
-    test("write note, match schema", async () => {
-      fs.removeSync(path.join(vaultDir, "foo.ch1.md"));
-      await engine.init();
-      const noteNew = NoteUtilsV2.create({
-        fname: "foo.ch1",
-        id: "foo.ch1",
-        created: "1",
-        updated: "1",
-        vault,
-      });
-      await engine.writeNote(noteNew);
-      expect(normalizeNotes(engine.notes)).toMatchSnapshot("notes");
-      expect(engine.notes["foo.ch1"].schema).toEqual({
-        moduleId: "foo",
-        schemaId: "ch1",
-      });
+  describe("write", () => {
+    test.each(
+      _.map(ENGINE_SERVER.ENGINE_WRITE_PRESETS.NOTES, (v, k) => {
+        return [k, v];
+      })
+    )("%p", async (_key, TestCase) => {
+      const { testFunc, ...opts } = TestCase;
+      await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
     });
   });
 
   describe("update", () => {
-    const PRESET = NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.update;
-
-    let vaultDir: string;
-    let engine: DEngineV2;
-    beforeEach(async () => {
-      ({ vaultDir, engine } = await beforePreset());
-    });
-
-    test(PRESET.noteNoChildren.label, async () => {
-      await engine.init();
-      const note = engine.notes["foo.ch1"];
-      const cnote = _.clone(note);
-      cnote.body = "new body";
-      await engine.updateNote(cnote);
-      const notes = engine.notes;
-      _.map(
-        await PRESET.noteNoChildren.results({
-          notes,
-          vaultDir,
-        }),
-        (ent) => expect(ent.expected).toEqual(ent.actual)
-      );
+    test.each(
+      _.map(ENGINE_UPDATE_PRESETS.NOTES, (v, k) => {
+        return [k, v];
+      })
+    )("%p", async (_key, TestCase) => {
+      const { testFunc, ...opts } = TestCase;
+      await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
     });
   });
 

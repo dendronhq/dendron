@@ -329,65 +329,7 @@ export class NoteTestPresetsV2 {
 
   static presets: NoteTestPresetCollectionDict = {
     OneNoteOneSchemaPreset: {
-      init: {
-        domainStub: new TestPresetEntry({
-          label: "domain stub",
-          before: async ({ vaultDir }: { vaultDir: string }) => {
-            fs.removeSync(path.join(vaultDir, "foo.md"));
-          },
-          results: async ({ notes }: { notes: NotePropsDictV2 }) => {
-            const note = NoteUtilsV2.getNoteByFname(
-              "foo",
-              notes
-            ) as NotePropsV2;
-            const vault = note.vault;
-            const root = NoteUtilsV2.getNoteByFname("root", notes, {
-              vault,
-            }) as NotePropsV2;
-            const scenarios = [
-              { actual: _.size(notes), expected: 3 },
-              { actual: root.children, expected: [note.id] },
-            ];
-            return scenarios;
-          },
-        }),
-      },
       delete: {
-        noteNoChildren: new TestPresetEntry({
-          label: "note w/no children",
-          results: NoteTestPresetsV2.createDeleteNoteWNoChildrenResults,
-        }),
-        domainChildren: new TestPresetEntry({
-          label: "domain with children",
-          results: async ({
-            changed,
-            notes,
-            vaultDir,
-          }: DeleteNoteTestOptsV2): Promise<TestResult[]> => {
-            return [
-              {
-                actual: changed,
-                expected: [{ note: notes["foo"], status: "update" }],
-                msg: "note updated",
-              },
-              {
-                actual: _.size(notes),
-                expected: 3,
-                msg: "same number of notes",
-              },
-              {
-                actual: notes["foo"].stub,
-                expected: true,
-                msg: "foo should be a stub",
-              },
-              {
-                actual: _.includes(fs.readdirSync(vaultDir), "foo.md"),
-                expected: false,
-                msg: "note should be deleted",
-              },
-            ];
-          },
-        }),
         domainNoChildren: new TestPresetEntry({
           label: "domain w/no children",
           results: async ({
@@ -416,61 +358,7 @@ export class NoteTestPresetsV2 {
           },
         }),
       },
-      update: {
-        noteNoChildren: new TestPresetEntry({
-          label: "update note, no children",
-          results: async ({
-            notes,
-          }: UpdateNoteTestOptsV2): Promise<TestResult[]> => {
-            return [
-              {
-                actual: _.pick(notes["foo.ch1"], "body"),
-                expected: { body: "new body" },
-                msg: "update body",
-              },
-            ];
-          },
-        }),
-      },
       write: {
-        domainStub: new TestPresetEntry({
-          label: "write child, parent stub",
-          before: async ({ vaultDir }: { vaultDir: string }) => {
-            const note = NoteUtilsV2.create({
-              fname: "bar.ch1",
-              vault: { fsPath: vaultDir },
-            });
-            await note2File(note, vaultDir);
-          },
-          results: async ({ notes }: { notes: NotePropsDictV2 }) => {
-            const root = NoteUtilsV2.getNoteByFname(
-              "root",
-              notes
-            ) as NotePropsV2;
-            const bar = NoteUtilsV2.getNoteByFname("bar", notes) as NotePropsV2;
-            const child = NoteUtilsV2.getNoteByFname(
-              "bar.ch1",
-              notes
-            ) as NotePropsV2;
-            return [
-              {
-                actual: _.size(root.children),
-                expected: 2,
-                msg: "root, foo, bar",
-              },
-              {
-                actual: _.pick(bar, "stub"),
-                expected: { stub: true },
-                msg: "bar created as stub",
-              },
-              {
-                actual: _.pick(child, ["fname", "stub"]),
-                expected: { fname: "bar.ch1" },
-                msg: "child is not stub",
-              },
-            ];
-          },
-        }),
         serializeChildWithHierarchy: new TestPresetEntry({
           label: "write child, serialize with hierarchy",
           before: async ({ vaultDir }: { vaultDir: string }) => {

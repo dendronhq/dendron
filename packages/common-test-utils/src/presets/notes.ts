@@ -59,6 +59,34 @@ export const NOTE_PRESETS = {
 };
 
 export const NOTE_PRESETS_V4 = {
+  NOTE_SIMPLE: async ({
+    vault,
+    genRandomId,
+    fname,
+    wsRoot,
+  }: CreateNotePresetOptsV4) => {
+    return await NoteTestUtilsV4.createNote({
+      fname: fname || "foo",
+      wsRoot,
+      vault,
+      body: "foo body",
+      genRandomId,
+    });
+  },
+  NOTE_SIMPLE_CHILD: async ({
+    vault,
+    genRandomId,
+    fname,
+    wsRoot,
+  }: CreateNotePresetOptsV4) => {
+    return await NoteTestUtilsV4.createNote({
+      fname: fname || "foo.ch1",
+      wsRoot,
+      vault,
+      body: "foo.ch1 body",
+      genRandomId,
+    });
+  },
   NOTE_WITH_TARGET: async ({
     vault,
     genRandomId,
@@ -106,6 +134,16 @@ export const NOTE_PRESETS_V4 = {
       vault,
       fname: "beta",
       body: `[[alpha#h3]]`,
+    });
+  },
+  NOTE_WITH_CAPS_AND_SPACE: async ({
+    vault,
+    wsRoot,
+  }: CreateNotePresetOptsV4) => {
+    return await NoteTestUtilsV4.createNote({
+      wsRoot,
+      vault,
+      fname: "000 Index.md",
     });
   },
 };

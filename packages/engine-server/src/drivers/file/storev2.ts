@@ -343,7 +343,8 @@ export class FileStorageV2 implements DStoreV2 {
     const noteToDelete = this.notes[id];
     const ext = ".md";
     const vault = noteToDelete.vault;
-    const fpath = path.join(vault.fsPath, noteToDelete.fname + ext);
+    const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
+    const fpath = path.join(vpath, noteToDelete.fname + ext);
     const out: NoteChangeEntry[] = [];
     this.logger.info({ ctx, noteToDelete, opts });
 
@@ -680,8 +681,13 @@ export class FileStorageV2 implements DStoreV2 {
       schemaModDict: this.schemas,
     });
     // order matters - only write file after parents are established
-    const vpath = vault2Path({ vault: note.vault, wsRoot: this.wsRoot });
-    await note2File(note, vpath, opts);
+    await note2File({
+      note,
+      vault: note.vault,
+      wsRoot: this.wsRoot,
+      opts: { writeHierarchy: opts?.writeHierarchy },
+    });
+
     if (match) {
       const { schema, schemaModule } = match;
       NoteUtilsV2.addSchema({ note, schema, schemaModule });

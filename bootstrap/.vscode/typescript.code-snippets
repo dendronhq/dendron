@@ -44,7 +44,7 @@
 	  "den.presetup": {
 		"prefix": "den.presetup",
 		"body": [
-		  "const preSetupHook: SetupHookFunction = async ({ vaults, wsRoot }) => {",
+		  "async ({ vaults, wsRoot }) => {",
 		  "  await NoteTestUtilsV4.createNote({ fname: \"foo\", vault: vaults[0], wsRoot });",
 		  "  await NoteTestUtilsV4.createSchema({",
 		  "    fname: \"foo\",",
@@ -57,7 +57,7 @@
 		  "    vault: vaults[1],",
 		  "    wsRoot,",
 		  "  });",
-		  "};"
+		  "}"
 		],
 		"description": ""
 	  },
@@ -94,6 +94,52 @@
 		  "    createEngine,",
 		  "  }",
 		  ");"
+		],
+		"description": ""
+	  },
+	  "den.preset.engine": {
+		"prefix": "den.preset.engine",
+		"body": [
+		  "import { NotePropsV2, NoteUtilsV2 } from \"@dendronhq/common-all\";",
+		  "import _ from \"lodash\";",
+		  "import { NoteTestUtilsV4 } from \"../../noteUtils\";",
+		  "import { TestPresetEntryV4 } from \"../../utilsv2\";",
+		  "",
+		  "const NOTES = {",
+		  "  NOTE_NO_CHILDREN: new TestPresetEntryV4(",
+		  "    async ({ wsRoot, vaults, engine }) => {",
+		  "      return [",
+		  "      ];",
+		  "      return [{}];",
+		  "    },",
+		  "    {",
+		  "      preSetupHook: async ({ vaults, wsRoot }) => {",
+		  "        await NoteTestUtilsV4.createNote({",
+		  "          fname: \"foo\",",
+		  "          vault: vaults[0],",
+		  "          wsRoot,",
+		  "          body: \"old body\",",
+		  "        });",
+		  "      },",
+		  "    }",
+		  "  ),",
+		  "};",
+		  "export const ENGINE_UPDATE_PRESETS = {",
+		  "  NOTES,",
+		  "};",
+		  ""
+		],
+		"description": ""
+	  },
+	  "den.test.vault": {
+		"prefix": "den.test.vault",
+		"body": [
+		  "const checkVault = await FileTestUtils.assertInVault({",
+		  "    wsRoot,",
+		  "    vault",
+		  "    match: [],",
+		  "    nomatch: [],",
+		  "  });"
 		],
 		"description": ""
 	  }

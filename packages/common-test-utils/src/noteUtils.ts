@@ -3,6 +3,7 @@ import {
   genUUID,
   NotePropsV2,
   NoteUtilsV2,
+  SchemaModulePropsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import {
@@ -65,6 +66,7 @@ type CreateSchemaOptsV4 = {
   wsRoot: string;
   fname: string;
   noWrite?: boolean;
+  modifier?: (schema: SchemaModulePropsV2) => SchemaModulePropsV2;
 };
 
 export class NoteTestUtilsV4 {
@@ -73,13 +75,17 @@ export class NoteTestUtilsV4 {
       noWrite: false,
     });
 
-    const schema = SchemaUtilsV2.createModuleProps({ fname, vault });
+    let schema = SchemaUtilsV2.createModuleProps({ fname, vault });
+    if (opts.modifier) {
+      schema = opts.modifier(schema);
+    }
     if (!noWrite) {
       const vpath = resolvePath(vault.fsPath, wsRoot);
       await schemaModuleProps2File(schema, vpath, fname);
     }
     return schema;
   };
+
   static createNote = async (opts: CreateNoteOptsV4) => {
     const {
       fname,
@@ -107,8 +113,7 @@ export class NoteTestUtilsV4 {
       body,
     });
     if (!noWrite) {
-      const vpath = resolvePath(vault.fsPath, wsRoot);
-      await note2File(note, vpath);
+      await note2File({ note, vault, wsRoot });
     }
     return note;
   };

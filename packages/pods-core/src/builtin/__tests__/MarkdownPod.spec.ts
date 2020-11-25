@@ -214,7 +214,7 @@ describe("MarkdownPod", () => {
     expect(expectedFiles).toEqual(actualFiles);
   });
 
-  test("convert links", async () => {
+  test.skip("convert links", async () => {
     await createFiles();
     fs.writeFileSync(
       path.join(importSrc, "project/p2/n1.md"),

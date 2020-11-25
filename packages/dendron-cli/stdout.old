@@ -1,2 +1,2 @@
-POST /api/workspace/initialize 200 5.662 ms - 2360 {"uri":"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/","config":{"vaults":["/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-80191-PMm94RFpnWoV"]}} - 155
-POST /api/workspace/initialize 200 6.322 ms - 2726 {"uri":"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/","config":{"vaults":["/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-80191-u0wjGc8chDoc"]}} - 155
+POST /api/workspace/initialize 200 6.323 ms - 2360 {"uri":"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/","config":{"vaults":["/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-95376-2nqWdtogVgsf"]}} - 155
+POST /api/workspace/initialize 200 5.599 ms - 2726 {"uri":"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/","config":{"vaults":["/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-95376-hGhNE2diLY3P"]}} - 155

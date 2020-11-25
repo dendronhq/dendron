@@ -41,4 +41,4 @@ To stay up to date on Dendron developments and all things knowledge management, 
 
 ## Contributing
 
-If you would like to contribute to the docs or the code, you can find instructions to do so [here](vault/dendron.contribute.md)
+If you would like to contribute to the docs or the code, you can find instructions to do so [here](https://www.dendron.so/notes/64f0e2d5-2c83-43df-9144-40f2c68935aa.html)

@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.17.0...v0.17.1-alpha.0) (2020-11-25)
+
+### Bug Fixes
+
+- hover provider ([9c55a2f](https://github.com/dendronhq/dendron/commit/9c55a2fd91ae25455d3b232a3ed0bdb274b8f973))
+
+### Features
+
+- add hover provider ([8d19a1b](https://github.com/dendronhq/dendron/commit/8d19a1b47f114ae738f7483fd751b62f68b46d24))
+
 # [0.17.0](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.5...v0.17.0) (2020-11-22)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

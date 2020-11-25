@@ -132,7 +132,7 @@ export type RunEngineTestFunction = (
 ) => Promise<any>;
 
 export type RunEngineTestFunctionV4 = (
-  opts: RunEngineTestFunctionOpts
+  opts: RunEngineTestFunctionOpts & { extra?: any }
 ) => Promise<TestResult[]>;
 
 export type CreateEngineFunction = (opts: WorkspaceOpts) => DEngineClientV2;
@@ -161,7 +161,6 @@ export async function runEngineTest(
   });
   await preSetupHook({ wsRoot, vaults });
   const engine = createEngine({ wsRoot, vaults });
-  await engine.init();
-  // const resp = await postSetupHook({wsRoot, vaults, engine})
-  await func({ wsRoot, vaults, engine });
+  const initResp = await engine.init();
+  await func({ wsRoot, vaults, engine, initResp });
 }

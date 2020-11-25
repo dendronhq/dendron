@@ -5,3 +5,5 @@ export const PODS_CORE = {
   SNAPSHOT,
   JSON,
 };
+
+export const PODS_PRESETS = [{ name: "json", presets: JSON }];

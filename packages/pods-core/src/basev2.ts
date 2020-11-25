@@ -1,19 +1,17 @@
 import {
+  BasePodExecuteOpts,
   DendronError,
   DEngineClientV2,
+  DPod,
   DVault,
   NotePropsV2,
+  PodConfig,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { createLogger, DLogger, resolvePath } from "@dendronhq/common-server";
 import { URI } from "vscode-uri";
 import fs from "fs-extra";
 import { PodKind } from "./types";
-
-export type DPod<TConfig> = {
-  config: PodConfig[];
-  execute(opts: BasePodExecuteOpts<TConfig>): Promise<any>;
-};
 
 export abstract class BasePod<TConfig> implements DPod<TConfig> {
   public L: DLogger;
@@ -44,22 +42,6 @@ export abstract class BasePod<TConfig> implements DPod<TConfig> {
     return URI.file(resolvePath(destPath, wsRoot));
   }
 }
-
-export type PodConfig = {
-  key: string;
-  description: string;
-  type: "string" | "number" | "boolean";
-  default?: any;
-};
-
-// BASE
-export type BasePodExecuteOpts<TConfig> = {
-  config: TConfig;
-  engine: DEngineClientV2;
-  wsRoot: string;
-  vaults: DVault[];
-};
-
 // EXPORT
 
 export type ExportPodCleanOpts<TConfig> = {

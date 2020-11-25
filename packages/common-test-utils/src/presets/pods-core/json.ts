@@ -1,22 +1,49 @@
-import { DVault, NotePropsV2 } from "@dendronhq/common-all";
-import { tmpDir, writeYAML } from "@dendronhq/common-server";
+import { DPod, DVault, NoteUtilsV2 } from "@dendronhq/common-all";
+import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
-import _ from "lodash";
 import path from "path";
-import {
-  EngineTestUtilsV2,
-  FileTestUtils,
-  NodeTestPresetsV2,
-  NodeTestUtilsV2,
-} from "../..";
-import { TestPresetEntry } from "../../utils";
+import { AssertUtils, FileTestUtils } from "../..";
+import { TestPresetEntryV4 } from "../../utilsv2";
+import { setupBasic } from "../engine-server/utils";
 
-const IMPORT_BASIC = new TestPresetEntry({
-  label: "basic",
-  before: async (opts: { wsRoot?: string }) => {
-    const importDir = tmpDir().name;
-    const importSrc = path.join(importDir, "import.json");
-    const jsonEntries = [
+type JSONEntry = {
+  fname: string;
+  body?: string;
+};
+
+const createJSONEntries = (
+  jsonEntries: JSONEntry[],
+  opts?: { customRoot?: string }
+) => {
+  const importDir = opts?.customRoot || tmpDir().name;
+  const importSrc = path.join(importDir, "import.json");
+  fs.writeJSONSync(importSrc, jsonEntries);
+  return importSrc;
+};
+
+const assertInNote = ({
+  vault,
+  wsRoot,
+  fname,
+  match,
+  nomatch,
+}: { vault: DVault; wsRoot: string; fname: string } & Omit<
+  Parameters<typeof AssertUtils.assertInString>[0],
+  "body"
+>) => {
+  const vpath = vault2Path({ vault, wsRoot });
+  const importedNote = fs.readFileSync(path.join(vpath, fname + ".md"), {
+    encoding: "utf8",
+  });
+  return AssertUtils.assertInString({ body: importedNote, match, nomatch });
+};
+
+const IMPORT = {
+  BASIC: new TestPresetEntryV4(async ({ wsRoot, engine, vaults, extra }) => {
+    const { pod } = extra as { pod: DPod<any> };
+    const vault = vaults[0];
+
+    const importSrc = createJSONEntries([
       {
         fname: "foo",
         body: "foo body 2",
@@ -25,133 +52,242 @@ const IMPORT_BASIC = new TestPresetEntry({
         fname: "bar",
         body: "bar body",
       },
-    ];
-    fs.writeJSONSync(importSrc, jsonEntries);
-    const { vaults, wsRoot } = await EngineTestUtilsV2.setupWS({
-      wsRoot: opts.wsRoot,
-      initDirCb: async (vaultDir) => {
-        await NodeTestPresetsV2.createOneNoteOneSchemaPresetWithBody({
-          vaultDir,
-        });
-      },
+    ]);
+    const config = {
+      src: importSrc,
+      concatenate: false,
+    };
+    await pod.execute({
+      config,
+      vaults,
+      wsRoot,
+      engine,
     });
-    return { wsRoot, vaults, importSrc };
-  },
-  results: async ({
-    vaultPath,
-    vscode,
-  }: {
-    vaultPath: string;
-    vscode: boolean;
-  }) => {
-    const filesInit = [
-      ".git",
-      "assets",
-      "foo.md",
-      "foo.ch1.md",
-      "foo.schema.yml",
-      "root.md",
-      "root.schema.yml",
-    ];
-    if (vscode) {
-      filesInit.push(".vscode");
-    }
-    let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
-      vaultPath,
-      filesInit,
-      {
-        add: ["bar.md"],
-      }
-    );
-    const importedNote = fs.readFileSync(path.join(vaultPath, "foo.md"), {
+    const vpath = vault2Path({ vault, wsRoot });
+    const importedNote = fs.readFileSync(path.join(vpath, "foo.md"), {
       encoding: "utf8",
     });
     return [
       {
-        actual: actualFiles,
-        expected: expectedFiles,
+        actual: await FileTestUtils.assertInVault({
+          vault,
+          wsRoot,
+          match: ["foo.md", "bar.md"],
+        }),
+        expected: true,
       },
       {
-        actual: _.every(["foo body 2"], (ent) => importedNote.match(ent)),
+        actual: await AssertUtils.assertInString({
+          body: importedNote,
+          match: ["foo body 2"],
+        }),
         expected: true,
       },
     ];
-  },
-});
+  }),
+  BASIC_W_STUBS: new TestPresetEntryV4(
+    async ({ wsRoot, engine, vaults, extra }) => {
+      const { pod } = extra as { pod: DPod<any> };
+      const vault = vaults[0];
+      const importSrc = createJSONEntries([
+        {
+          fname: "baz.one",
+        },
+      ]);
 
-const EXPORT_BASIC = new TestPresetEntry({
-  label: "basic",
-  before: async ({
-    configPath,
-    exportDest,
-  }: {
-    configPath: string;
-    exportDest: string;
-  }) => {
-    fs.ensureDirSync(path.dirname(configPath));
-    writeYAML(configPath, { dest: exportDest });
-  },
-  results: async ({ destPath }: { destPath: string; vault: DVault }) => {
-    const payload = fs.readJSONSync(destPath) as NotePropsV2[];
-    return [
-      {
-        actual: _.map(payload, (note) =>
-          NodeTestUtilsV2.normalizeNote({ note })
-        ),
-        expected: [
+      const config = {
+        src: importSrc,
+        concatenate: false,
+      };
+      await pod.execute({
+        config,
+        vaults,
+        wsRoot,
+        engine,
+      });
+      const note = NoteUtilsV2.getNoteByFnameV4({
+        fname: "baz",
+        vault,
+        notes: engine.notes,
+      });
+
+      return [
+        {
+          actual: await FileTestUtils.assertInVault({
+            vault,
+            wsRoot,
+            match: ["baz.one.md"],
+            nomatch: ["baz.md"],
+          }),
+          expected: true,
+        },
+        {
+          actual: note?.stub,
+          expected: true,
+        },
+      ];
+    }
+  ),
+  BASIC_W_REL_PATH: new TestPresetEntryV4(
+    async ({ wsRoot, engine, vaults, extra }) => {
+      const { pod } = extra as { pod: DPod<any> };
+      const vault = vaults[0];
+      const importSrc = createJSONEntries(
+        [
           {
-            body: "",
-            children: ["foo"],
-            created: "1",
-            custom: {},
-            data: {},
-            desc: "",
-            fname: "root",
-            links: [],
-            title: "Root",
-            type: "note",
-            updated: "1",
-          },
-          {
-            body: "foo body",
-            children: ["foo.ch1"],
-            created: "1",
-            custom: {},
-            data: {},
-            desc: "",
             fname: "foo",
-            links: [],
-            schema: { moduleId: "foo", schemaId: "foo" },
-            title: "Foo",
-            type: "note",
-            updated: "1",
-          },
-          {
-            body: "foo body",
-            children: [],
-            created: "1",
-            custom: {},
-            data: {},
-            desc: "",
-            fname: "foo.ch1",
-            links: [],
-            schema: { moduleId: "foo", schemaId: "ch1" },
-            title: "Ch1",
-            type: "note",
-            updated: "1",
           },
         ],
-      },
-    ];
-  },
-});
+        { customRoot: wsRoot }
+      );
+
+      const basename = path.basename(importSrc);
+      const config = {
+        src: `./${basename}`,
+        concatenate: false,
+      };
+      await pod.execute({
+        config,
+        vaults,
+        wsRoot,
+        engine,
+      });
+
+      return [
+        {
+          actual: await FileTestUtils.assertInVault({
+            vault,
+            wsRoot,
+            match: ["foo.md"],
+          }),
+          expected: true,
+        },
+      ];
+    }
+  ),
+  CONCATENATE: new TestPresetEntryV4(
+    async ({ wsRoot, engine, vaults, extra }) => {
+      const { pod } = extra as { pod: DPod<any> };
+      const vault = vaults[0];
+      const importSrc = createJSONEntries([
+        {
+          fname: "foo",
+          body: "foo body",
+        },
+        {
+          fname: "bar",
+          body: "bar body",
+        },
+      ]);
+
+      const config = {
+        src: importSrc,
+        concatenate: true,
+        destName: "results",
+      };
+      await pod.execute({
+        config,
+        vaults,
+        wsRoot,
+        engine,
+      });
+
+      return [
+        {
+          actual: await FileTestUtils.assertInVault({
+            vault,
+            wsRoot,
+            match: ["results.md"],
+          }),
+          expected: true,
+        },
+        {
+          actual: await assertInNote({
+            wsRoot,
+            vault,
+            fname: "results",
+            match: ["foo body", "bar body"],
+          }),
+          expected: true,
+        },
+      ];
+    }
+  ),
+  CONCATENATE_W_NO_DEST: new TestPresetEntryV4(
+    async ({ wsRoot, engine, vaults, extra }) => {
+      const { pod } = extra as { pod: DPod<any> };
+      const importSrc = createJSONEntries([
+        {
+          fname: "foo",
+          body: "foo body",
+        },
+        {
+          fname: "bar",
+          body: "bar body",
+        },
+      ]);
+
+      const config = {
+        src: importSrc,
+        concatenate: true,
+      };
+      try {
+        await pod.execute({
+          config,
+          vaults,
+          wsRoot,
+          engine,
+        });
+      } catch (err) {
+        return [];
+      }
+      throw new Error("bad test");
+    }
+  ),
+};
+
+const EXPORT = {
+  BASIC: new TestPresetEntryV4(
+    async ({ wsRoot, engine, vaults, extra }) => {
+      const { pod } = extra as { pod: DPod<any> };
+      const destDir = tmpDir().name;
+      const destPath = path.join(destDir, "export.json");
+      const config = { dest: destPath };
+
+      await pod.execute({
+        config,
+        vaults,
+        wsRoot,
+        engine,
+      });
+      const importedNote = fs.readFileSync(path.join(destPath), {
+        encoding: "utf8",
+      });
+      return [
+        {
+          actual: await AssertUtils.assertInString({
+            body: importedNote,
+            match: ["foo body", "bar body"],
+          }),
+          expected: true,
+        },
+        {
+          actual: await AssertUtils.assertInString({
+            body: importedNote,
+            match: ["foo body"],
+          }),
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
+    }
+  ),
+};
 
 const JSON_TEST_PRESET = {
-  EXPORT: {
-    BASIC: EXPORT_BASIC,
-  },
-  IMPORT: {
-    BASIC: IMPORT_BASIC,
-  },
+  EXPORT,
+  IMPORT,
 };
 export default JSON_TEST_PRESET;

@@ -30,5 +30,6 @@ export type PreSetupCmdHookFunction<T = any> = (
 export type PostSetupHookFunction<T = any> = (
   opts: {
     engine: DEngineClientV2;
+    extra?: any;
   } & WorkspaceOpts
 ) => Promise<T>;

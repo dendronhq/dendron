@@ -3,7 +3,6 @@ import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { AssertUtils } from "../..";
 import { FileTestUtils } from "../../fileUtils";
 import { TestPresetEntryV4 } from "../../utilsv2";
 import { NOTE_BODY_PRESETS_V4, NOTE_PRESETS_V4 } from "../notes";
@@ -483,4 +482,5 @@ const NOTES = {
 };
 export const ENGINE_RENAME_PRESETS = {
   NOTES,
+  SCHEMAS: {},
 };

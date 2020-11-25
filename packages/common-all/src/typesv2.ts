@@ -390,3 +390,23 @@ export type WorkspaceOpts = {
   wsRoot: string;
   vaults: DVault[];
 };
+
+// === Pods
+export type DPod<TConfig> = {
+  config: PodConfig[];
+  execute(opts: BasePodExecuteOpts<TConfig>): Promise<any>;
+};
+
+export type PodConfig = {
+  key: string;
+  description: string;
+  type: "string" | "number" | "boolean";
+  default?: any;
+};
+
+export type BasePodExecuteOpts<TConfig> = {
+  config: TConfig;
+  engine: DEngineClientV2;
+  wsRoot: string;
+  vaults: DVault[];
+};

@@ -8,7 +8,6 @@ import _ from "lodash";
 import {
   CreateEngineFunction,
   EngineTestUtilsV4,
-  RunEngineTestFunction,
   RunEngineTestFunctionV4,
   runJestHarnessV2,
   SetupVaultsOptsV4,
@@ -21,17 +20,23 @@ import {
 
 export class TestPresetEntryV4 {
   public preSetupHook: PreSetupHookFunction;
+  public postSetupHook: PostSetupHookFunction;
   public testFunc: RunEngineTestFunctionV4;
+  public extraOpts: any;
 
   constructor(
     func: RunEngineTestFunctionV4,
     opts?: {
       preSetupHook?: PreSetupHookFunction;
+      postSetupHook?: PostSetupHookFunction;
+      extraOpts?: any;
     }
   ) {
-    let { preSetupHook } = opts || {};
+    let { preSetupHook, postSetupHook, extraOpts } = opts || {};
     this.preSetupHook = preSetupHook ? preSetupHook : async () => {};
+    this.postSetupHook = postSetupHook ? postSetupHook : async () => {};
     this.testFunc = func;
+    this.extraOpts = extraOpts;
   }
 }
 
@@ -44,12 +49,14 @@ export async function runEngineTestV4(
     preSetupHook?: SetupHookFunction;
     postSetupHook?: PostSetupHookFunction;
     createEngine: CreateEngineFunction;
+    extra?: any;
     expect: any;
   }
 ) {
-  const { preSetupHook, createEngine } = _.defaults(opts, {
+  const { preSetupHook, createEngine, extra } = _.defaults(opts, {
     preSetupHook: async ({}) => {},
     postSetupHook: async ({}) => {},
+    extra: {},
   });
 
   // setup root and vaults
@@ -80,7 +87,13 @@ export async function runEngineTestV4(
   const engine = createEngine({ wsRoot, vaults: resp.vaults });
   const initResp = await engine.init();
   // const resp = await postSetupHook({wsRoot, vaults, engine})
-  const results = await func({ wsRoot, vaults: resp.vaults, engine, initResp });
+  const results = await func({
+    wsRoot,
+    vaults: resp.vaults,
+    engine,
+    initResp,
+    extra,
+  });
 
   await runJestHarnessV2(results, expect);
 }

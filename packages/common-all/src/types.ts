@@ -72,7 +72,7 @@ export type DendronSiteConfig = {
   copyAssets?: boolean;
 
   /**
-   * By default, the domain of your siteHiearchies page
+   * By default, the domain of your `siteHiearchies` page
    */
   siteIndex?: string;
   /**
@@ -97,6 +97,7 @@ export type DendronSiteConfig = {
    */
   siteNotesDir?: string;
 
+  /** Pretty refs help you identify when content is embedded from elsewhere and provide links back to the source */
   usePrettyRefs?: boolean;
 
   /**

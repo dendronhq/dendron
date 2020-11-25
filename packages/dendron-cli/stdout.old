@@ -1,2 +1,2 @@
-POST /api/workspace/initialize 200 6.323 ms - 2360 {"uri":"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/","config":{"vaults":["/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-95376-2nqWdtogVgsf"]}} - 155
-POST /api/workspace/initialize 200 5.599 ms - 2726 {"uri":"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/","config":{"vaults":["/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-95376-hGhNE2diLY3P"]}} - 155
+POST /api/workspace/initialize 200 4.779 ms - 2360 {"uri":"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/","config":{"vaults":["/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-96374-jI6CJESuEgB5"]}} - 155
+POST /api/workspace/initialize 200 8.085 ms - 2726 {"uri":"/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/","config":{"vaults":["/var/folders/65/c9lrx0tx6k7b_zlb4v1bs2rr0000gn/T/tmp-96374-xvckG5J5qrKm"]}} - 155

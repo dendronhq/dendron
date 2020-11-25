@@ -35,6 +35,7 @@ const genDefaultConfig = (): DendronConfig => ({
     siteRootDir: "docs",
     usePrettyRefs: true,
   },
+  version: 0
 });
 
 const getConfigData = (): { data: DendronConfig } => {
@@ -55,6 +56,7 @@ const getConfigData = (): { data: DendronConfig } => {
         siteRootDir: "docs",
         usePrettyRefs: true,
       },
+      version: 0
     },
   };
 };

@@ -39,7 +39,7 @@ export class TestPresetEntryV4 {
  * Run engine test with relative vaults
  */
 export async function runEngineTestV4(
-  func: RunEngineTestFunction,
+  func: RunEngineTestFunctionV4,
   opts: {
     preSetupHook?: SetupHookFunction;
     postSetupHook?: PostSetupHookFunction;
@@ -78,9 +78,9 @@ export async function runEngineTestV4(
 
   await preSetupHook({ wsRoot, vaults: resp.vaults });
   const engine = createEngine({ wsRoot, vaults: resp.vaults });
-  await engine.init();
+  const initResp = await engine.init();
   // const resp = await postSetupHook({wsRoot, vaults, engine})
-  const results = await func({ wsRoot, vaults: resp.vaults, engine });
+  const results = await func({ wsRoot, vaults: resp.vaults, engine, initResp });
 
   await runJestHarnessV2(results, expect);
 }

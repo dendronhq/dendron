@@ -1,16 +1,14 @@
 import {
   DendronError,
   DEngineV2,
-  DNodeUtilsV2,
   DVault,
   ENGINE_ERROR_CODES,
-  NoteChangeEntry,
-  NotePropsV2,
   NoteUtilsV2,
   SchemaUtilsV2,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
+  createLogger,
   note2File,
   readYAML,
   schemaModuleOpts2File,
@@ -23,7 +21,6 @@ import {
   INIT_TEST_PRESETS,
   NodeTestPresetsV2,
   NodeTestUtilsV2,
-  NoteTestPresetsV2,
   NoteTestUtilsV3,
   RENAME_TEST_PRESETS,
   runEngineTest,
@@ -41,7 +38,8 @@ const { ENGINE_UPDATE_PRESETS } = ENGINE_SERVER;
 const { normalizeNote, normalizeNotes } = NodeTestUtilsV2;
 
 const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
-  const engine = DendronEngineV2.createV3({ vaults, wsRoot });
+  const logger = createLogger("testLogger", "/tmp/engine-server.txt");
+  const engine = DendronEngineV2.createV3({ vaults, wsRoot, logger });
   return engine;
 };
 
@@ -371,97 +369,7 @@ describe("engine, schema/", () => {
   });
 });
 
-describe("engine, notes/", () => {
-  let vaultDir: string;
-  let engine: DEngineV2;
-  let vault: DVault;
-  let wsRoot = "";
-
-  describe("basic test v0/", () => {
-    beforeEach(async () => {
-      vaultDir = await EngineTestUtilsV2.setupVault({
-        initDirCb: async (dirPath: string) => {
-          await NodeTestUtilsV2.createSchemas({ vaultPath: dirPath });
-          await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
-        },
-      });
-      vault = { fsPath: vaultDir };
-      engine = DendronEngineV2.createV3({
-        wsRoot,
-        vaults: [{ fsPath: vaultDir }],
-      });
-    });
-
-    test("fetch node with custom att", async () => {
-      const vault = { fsPath: vaultDir };
-      await NodeTestUtilsV2.createNotes({
-        vaultPath: vaultDir,
-        noteProps: [
-          {
-            id: "foo",
-            fname: "foo",
-            custom: {
-              bond: 42,
-            },
-            vault,
-          },
-        ],
-      });
-      await engine.init();
-      const resp = await engine.queryNotes({ qs: "foo", vault });
-      expect(resp.data[0].title).toEqual("Foo");
-      expect(resp.data[0].custom).toEqual({ bond: 42 });
-    });
-
-    test("write node with custom att", async () => {
-      const vault = { fsPath: vaultDir };
-      await NodeTestUtilsV2.createNotes({
-        vaultPath: vaultDir,
-        noteProps: [
-          {
-            id: "foo",
-            fname: "foo",
-            custom: {
-              bond: 42,
-            },
-            vault,
-          },
-        ],
-      });
-      await engine.init();
-      let resp = await engine.queryNotes({ qs: "foo", vault });
-      const note = resp.data[0];
-      note.body = "custom body";
-      await engine.writeNote(note);
-
-      resp = await engine.queryNotes({ qs: "foo", vault });
-      expect(resp.data[0].title).toEqual("Foo");
-      expect(resp.data[0].body).toEqual(note.body);
-      expect(resp.data[0].custom).toEqual({ bond: 42 });
-    });
-
-    test("add custom att to node", async () => {
-      await NodeTestUtilsV2.createNotes({
-        vaultPath: vaultDir,
-        noteProps: [
-          {
-            id: "foo",
-            fname: "foo",
-            vault,
-          },
-        ],
-      });
-      await engine.init();
-      let resp = await engine.queryNotes({ qs: "foo", vault });
-      const note = resp.data[0];
-      note.custom = { bond: 43 };
-      await engine.writeNote(note);
-      resp = await engine.queryNotes({ qs: "foo", vault });
-      expect(resp.data[0].title).toEqual("Foo");
-      expect(resp.data[0].custom).toEqual({ bond: 43 });
-    });
-  });
-
+describe.only("engine, notes/", () => {
   describe("init", () => {
     test.each(
       _.map(ENGINE_SERVER.ENGINE_INIT_PRESETS.NOTES, (v, k) => {
@@ -484,7 +392,7 @@ describe("engine, notes/", () => {
     });
   });
 
-  describe.only("getNoteByPath/", () => {
+  describe("getNoteByPath/", () => {
     test.each(
       _.map(ENGINE_SERVER.ENGINE_GET_NOTE_BY_PATH_PRESETS.NOTES, (v, k) => {
         return [k, v];
@@ -496,246 +404,24 @@ describe("engine, notes/", () => {
   });
 
   describe("query/", () => {
-    let engine: DEngineV2;
-
-    beforeEach(async () => {
-      ({ vaultDir, engine } = await beforePreset());
-    });
-
-    test("empty string", async () => {
-      await engine.init();
-      const { data } = await engine.queryNotes({ qs: "", vault });
-      expect(normalizeNotes(data)).toMatchSnapshot();
-      expect(data[0]).toEqual(NoteUtilsV2.getNoteByFname("root", engine.notes));
-    });
-
-    test("*", async () => {
-      await engine.init();
-      const { data } = await engine.queryNotes({ qs: "*", vault });
-      expect(normalizeNotes(data)).toMatchSnapshot();
-      expect(data.length).toEqual(3);
-    });
-
-    test("foo", async () => {
-      await engine.init();
-      const { data } = await engine.queryNotes({ qs: "foo", vault });
-      expect(normalizeNotes(data)).toMatchSnapshot();
-      expect(data[0]).toEqual(engine.notes["foo"]);
+    test.each(
+      _.map(ENGINE_SERVER.ENGINE_QUERY_PRESETS.NOTES, (v, k) => {
+        return [k, v];
+      })
+    )("%p", async (_key, TestCase) => {
+      const { testFunc, ...opts } = TestCase;
+      await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
     });
   });
 
   describe("rename/", () => {
-    let engine: DEngineV2;
-    let vault: DVault;
-
-    beforeEach(async () => {
-      ({ vaultDir, engine } = await beforePreset());
-      vault = { fsPath: vaultDir };
-      let note = NoteUtilsV2.create({
-        fname: "foo",
-        id: "foo",
-        created: "1",
-        updated: "1",
-        body: "[[bar]]",
-        vault,
-      });
-      await note2File(note, vaultDir);
-      note = NoteUtilsV2.create({
-        fname: "bar",
-        id: "bar",
-        created: "1",
-        updated: "1",
-        body: "[[foo]]",
-        vault,
-      });
-      await note2File(note, vaultDir);
-    });
-
-    test("with note ref", async () => {
-      const note = NoteUtilsV2.create({
-        fname: "bar",
-        id: "bar",
-        created: "1",
-        updated: "1",
-        body:
-          "[[foo]]\n((ref: [[dendron.pro.dendron-next-server]]#quickstart,1:#*))",
-        vault,
-      });
-      await note2File(note, vaultDir);
-
-      await engine.init();
-      const changed = await engine.renameNote({
-        oldLoc: { fname: "foo", vault: { fsPath: vaultDir } },
-        newLoc: { fname: "baz", vault: { fsPath: vaultDir } },
-      });
-      expect(changed.data?.length).toEqual(3);
-      expect(_.trim((changed.data as NoteChangeEntry[])[0].note.body)).toEqual(
-        "[[baz]]\n((ref: [[dendron.pro.dendron-next-server]]#quickstart,1:#*))"
-      );
-      const notes = fs.readdirSync(vaultDir);
-      expect(notes).toMatchSnapshot();
-      expect(_.includes(notes, "foo.md")).toBeFalsy();
-      expect(_.includes(notes, "baz.md")).toBeTruthy();
-      expect(
-        fs
-          .readFileSync(path.join(vaultDir, "bar.md"), { encoding: "utf8" })
-          .indexOf("[[baz]]") >= 0
-      ).toBeTruthy();
-    });
-
-    test(RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.label, async () => {
-      await engine.init();
-      const resp = await engine.renameNote({
-        oldLoc: { fname: "bar", vault: { fsPath: vaultDir } },
-        newLoc: { fname: "baz", vault: { fsPath: vaultDir } },
-      });
-      const changed = resp.data;
-      await runJestHarness(
-        RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN.results,
-        expect,
-        { changed, vaultDir }
-      );
-    });
-
-    // doesn't work yet
-    test.skip(RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V2.label, async () => {
-      await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V2.before({ vaultDir });
-      await engine.init();
-      const {
-        alpha,
-        beta,
-      } = await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V2.after({ vaultDir });
-      await engine.writeNote(alpha);
-      await engine.writeNote(beta);
-      const resp = await engine.renameNote({
-        oldLoc: { fname: "beta", vault: { fsPath: vaultDir } },
-        newLoc: { fname: "gamma", vault: { fsPath: vaultDir } },
-      });
-      const changed = resp.data;
-      expect(changed).toMatchSnapshot("bond");
-      await NodeTestPresetsV2.runJestHarness({
-        opts: { changed, vaultDir } as Parameters<
-          typeof RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V2.results
-        >[0],
-        results: RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V2.results,
-        expect,
-      });
-    });
-
-    test(RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.label, async () => {
-      await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.before({ vaultDir });
-      await engine.init();
-      const {
-        alpha,
-        beta,
-      } = await RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.after({
-        vaultDir,
-        findLinks: ParserUtilsV2.findLinks,
-      });
-      await engine.updateNote(alpha);
-      await engine.writeNote(beta);
-      const resp = await engine.renameNote({
-        oldLoc: { fname: "beta", vault: { fsPath: vaultDir } },
-        newLoc: { fname: "gamma", vault: { fsPath: vaultDir } },
-      });
-      const changed = resp.data;
-      await NodeTestPresetsV2.runJestHarness({
-        opts: { changed, vaultDir } as Parameters<
-          typeof RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.results
-        >[0],
-        results: RENAME_TEST_PRESETS.DOMAIN_NO_CHILDREN_V3.results,
-        expect,
-      });
-    });
-
-    test(RENAME_TEST_PRESETS.DOMAIN_DIFF_TITLE.label, async () => {
-      let wsRoot = "";
-      const vaults = [{ fsPath: vaultDir }];
-      await RENAME_TEST_PRESETS.DOMAIN_DIFF_TITLE.preSetupHook({
-        vaults,
-        wsRoot,
-      });
-      await engine.init();
-      const resp = await RENAME_TEST_PRESETS.DOMAIN_DIFF_TITLE.postSetupHook({
-        vaults,
-        wsRoot,
-        engine,
-      });
-      await runJestHarness(
-        RENAME_TEST_PRESETS.DOMAIN_DIFF_TITLE.results,
-        expect,
-        { changed: resp.data }
-      );
-    });
-
-    test("rename with link at root", async () => {
-      await runEngineTest(
-        async ({ vaults, engine }) => {
-          const vault = vaults[0];
-          await engine.renameNote({
-            oldLoc: { fname: "alpha", vault },
-            newLoc: { fname: "beta", vault },
-          });
-          const node = NoteUtilsV2.getNotesByFname({
-            fname: "root",
-            notes: engine.notes,
-            vault: vaults[0],
-          })[0];
-          expect(
-            AssertUtils.assertInString({
-              body: node.body,
-              match: ["[[beta]]"],
-            })
-          ).toBeTruthy();
-        },
-        {
-          createEngine,
-          preSetupHook: async ({ vaults }) => {
-            await NoteTestUtilsV3.createNote({
-              fname: "alpha",
-              vault: vaults[0],
-            });
-            const root = path.join(path.join(vaults[0].fsPath), "root.md");
-            fs.appendFileSync(root, "[[alpha]]");
-          },
-        }
-      );
-    });
-
-    test.skip("rename note in other vault", async () => {
-      await runEngineTest(
-        async ({ vaults, engine }) => {
-          await engine.renameNote({
-            oldLoc: { fname: "alpha" },
-            newLoc: { fname: "gamma" },
-          });
-          const node = NoteUtilsV2.getNotesByFname({
-            fname: "beta",
-            notes: engine.notes,
-            vault: vaults[1],
-          })[0];
-          expect(
-            AssertUtils.assertInString({
-              body: node.body,
-              match: ["[[alpha]]"],
-            })
-          ).toBeTruthy();
-        },
-        {
-          createEngine,
-          preSetupHook: async ({ vaults }) => {
-            await NoteTestUtilsV3.createNote({
-              fname: "alpha",
-              vault: vaults[1],
-            });
-            await NoteTestUtilsV3.createNote({
-              fname: "beta",
-              vault: vaults[1],
-              body: "[[alpha]]",
-            });
-          },
-        }
-      );
+    test.each(
+      _.map(ENGINE_SERVER.ENGINE_RENAME_PRESETS.NOTES, (v, k) => {
+        return [k, v];
+      })
+    )("%p", async (_key, TestCase) => {
+      const { testFunc, ...opts } = TestCase;
+      await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
     });
   });
 
@@ -758,62 +444,6 @@ describe("engine, notes/", () => {
     )("%p", async (_key, TestCase) => {
       const { testFunc, ...opts } = TestCase;
       await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
-    });
-  });
-
-  describe("basics", () => {
-    let vault: DVault;
-
-    beforeEach(async () => {
-      vault = { fsPath: vaultDir };
-      vaultDir = await EngineTestUtilsV2.setupVault({
-        initDirCb: async (dirPath: string) => {
-          await NodeTestUtilsV2.createSchemas({ vaultPath: dirPath });
-          await NodeTestUtilsV2.createNotes({ vaultPath: dirPath });
-        },
-      });
-      engine = DendronEngineV2.createV3({
-        wsRoot,
-        vaults: [{ fsPath: vaultDir }],
-      });
-    });
-
-    test("no root", async () => {
-      fs.removeSync(path.join(vaultDir, "root.md"));
-      const { error } = (await engine.init()) as { error: DendronError };
-      expect(error.status).toEqual(ENGINE_ERROR_CODES.NO_ROOT_NOTE_FOUND);
-    });
-
-    test("root", async () => {
-      const { data } = await engine.init();
-      expect(normalizeNotes(data.notes)).toMatchSnapshot();
-    });
-
-    test("bad parse ", async () => {
-      fs.writeFileSync(path.join(vaultDir, "foo.md"), "---\nbar:\n--\nfoo");
-      const { error } = (await engine.init()) as { error: DendronError };
-      expect(error.status).toEqual(ENGINE_ERROR_CODES.BAD_PARSE_FOR_NOTE);
-    });
-
-    test("stub note", async () => {
-      await note2File(
-        NoteUtilsV2.create({ fname: "foo.ch1", vault }),
-        vaultDir
-      );
-      await engine.init();
-      expect(_.values(engine.notes).length).toEqual(3);
-      const stubNote = NoteUtilsV2.getNoteByFname("foo", engine.notes);
-      expect(_.pick(stubNote, ["stub"])).toEqual({ stub: true });
-      const vaultFiles = fs.readdirSync(vaultDir);
-      expect(vaultFiles).toMatchSnapshot();
-      expect(vaultFiles.length).toEqual(3);
-    });
-
-    test("root and two notes", async () => {
-      await createNotes({ rootName: "foo", vaultDir });
-      await engine.init();
-      expect(normalizeNotes(engine.notes)).toMatchSnapshot();
-      expect(_.values(engine.notes).length).toEqual(3);
     });
   });
 });

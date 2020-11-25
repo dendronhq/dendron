@@ -587,8 +587,9 @@ export class FileStorageV2 implements DStoreV2 {
       status: "update" as const,
       note,
     }));
+
     // remove old note only when rename is success
-    fs.removeSync(NoteUtilsV2.getPath({ note: oldNote }));
+    fs.removeSync(oldLocPath);
 
     out = out.concat([{ status: "delete" as const, note: oldNote }]);
     out = out.concat([{ status: "create" as const, note: newNote }]);

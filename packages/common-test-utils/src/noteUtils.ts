@@ -51,7 +51,7 @@ export class NoteTestUtilsV3 {
   };
 }
 
-type CreateNoteOptsV4 = {
+export type CreateNoteOptsV4 = {
   vault: DVault;
   wsRoot: string;
   fname: string;
@@ -61,7 +61,7 @@ type CreateNoteOptsV4 = {
   noWrite?: boolean;
 };
 
-type CreateSchemaOptsV4 = {
+export type CreateSchemaOptsV4 = {
   vault: DVault;
   wsRoot: string;
   fname: string;

@@ -10,7 +10,7 @@ import { TestPresetEntryV4 } from "../../utilsv2";
 import fs from "fs-extra";
 import path from "path";
 import { vault2Path } from "@dendronhq/common-server";
-import { FileTestUtils } from "../..";
+import { FileTestUtils, NOTE_PRESETS_V4 } from "../..";
 
 const NOTES = {
   SERIALIZE_CHILD_WITH_HIERARCHY: new TestPresetEntryV4(
@@ -35,6 +35,61 @@ const NOTES = {
           msg: "should have parent",
         },
       ];
+    }
+  ),
+
+  CUSTOM_ATT: new TestPresetEntryV4(async ({ wsRoot, vaults, engine }) => {
+    const note = await NOTE_PRESETS_V4.NOTE_WITH_CUSTOM_ATT.create({
+      wsRoot,
+      vault: vaults[0],
+      noWrite: true,
+    });
+    await engine.writeNote(note);
+    const noteRoot = NoteUtilsV2.getNoteByFnameV4({
+      fname: note.fname,
+      notes: engine.notes,
+      vault: vaults[0],
+    }) as NotePropsV2;
+    return [
+      {
+        actual: noteRoot.fname,
+        expected: "foo",
+      },
+      {
+        actual: noteRoot.custom,
+        expected: { bond: 42 },
+      },
+    ];
+  }),
+  CUSTOM_ATT_ADD: new TestPresetEntryV4(
+    async ({ vaults, engine }) => {
+      const note = NoteUtilsV2.getNoteByFnameV4({
+        fname: "foo",
+        notes: engine.notes,
+        vault: vaults[0],
+      }) as NotePropsV2;
+      note.custom = { bond: 43 };
+      await engine.writeNote(note, { updateExisting: true });
+      const newNote = NoteUtilsV2.getNoteByFnameV4({
+        fname: "foo",
+        notes: engine.notes,
+        vault: vaults[0],
+      }) as NotePropsV2;
+      return [
+        {
+          actual: newNote,
+          expected: note,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "foo",
+          vault: vaults[0],
+          wsRoot,
+        });
+      },
     }
   ),
   NEW_DOMAIN: new TestPresetEntryV4(async ({ vaults, engine }) => {

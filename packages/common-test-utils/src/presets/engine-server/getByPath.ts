@@ -45,7 +45,7 @@ const NOTES = {
     {
       preSetupHook: async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        await NOTE_PRESETS_V4.NOTE_SIMPLE({ vault, wsRoot });
+        await NOTE_PRESETS_V4.NOTE_SIMPLE.create({ vault, wsRoot });
       },
     }
   ),
@@ -75,7 +75,10 @@ const NOTES = {
     {
       preSetupHook: async ({ vaults, wsRoot }) => {
         const vault = vaults[0];
-        await NOTE_PRESETS_V4.NOTE_WITH_CAPS_AND_SPACE({ vault, wsRoot });
+        await NOTE_PRESETS_V4.NOTE_WITH_CAPS_AND_SPACE.create({
+          vault,
+          wsRoot,
+        });
       },
     }
   ),

@@ -33,7 +33,7 @@ const NOTES = {
     },
     {
       preSetupHook: async ({ vaults, wsRoot }) => {
-        await NOTE_PRESETS_V4.NOTE_SIMPLE({ wsRoot, vault: vaults[0] });
+        await NOTE_PRESETS_V4.NOTE_SIMPLE.create({ wsRoot, vault: vaults[0] });
       },
     }
   ),

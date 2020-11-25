@@ -1,4 +1,8 @@
-import { DEngineClientV2, WorkspaceOpts } from "@dendronhq/common-all";
+import {
+  DEngineClientV2,
+  DEngineInitRespV2,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import assert from "assert";
 import _ from "lodash";
@@ -120,6 +124,7 @@ export async function runJestHarnessV2(results: any, expect: jest.Expect) {
 
 export type RunEngineTestFunctionOpts = {
   engine: DEngineClientV2;
+  initResp: DEngineInitRespV2;
 } & WorkspaceOpts;
 
 export type RunEngineTestFunction = (

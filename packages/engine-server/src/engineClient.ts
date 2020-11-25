@@ -263,7 +263,11 @@ export class DendronEngineClient implements DEngineClientV2 {
       opts,
       ws: this.ws,
     });
-    const changed = resp.data;
+    let changed = resp.data;
+    // we are updating in place, remove deletes
+    if (opts?.updateExisting) {
+      changed = _.reject(changed, (ent) => ent.status === "delete");
+    }
     await this.refreshNotesV2(changed);
     return resp;
   }

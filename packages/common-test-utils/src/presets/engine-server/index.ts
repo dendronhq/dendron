@@ -4,6 +4,8 @@ import ENGINE_SINGLE_TEST_PRESET from "./engine-single";
 import { ENGINE_GET_NOTE_BY_PATH_PRESETS } from "./getByPath";
 import { ENGINE_INIT_PRESETS } from "./init";
 import NOTE_REF from "./note-refs";
+import { ENGINE_QUERY_PRESETS } from "./query";
+import { ENGINE_RENAME_PRESETS } from "./rename";
 import { ENGINE_UPDATE_PRESETS } from "./update";
 import { ENGINE_WRITE_PRESETS } from "./write";
 
@@ -16,4 +18,6 @@ export const ENGINE_SERVER = {
   ENGINE_UPDATE_PRESETS,
   ENGINE_DELETE_PRESETS,
   ENGINE_GET_NOTE_BY_PATH_PRESETS,
+  ENGINE_RENAME_PRESETS,
+  ENGINE_QUERY_PRESETS,
 };

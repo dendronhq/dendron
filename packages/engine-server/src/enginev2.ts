@@ -22,6 +22,7 @@ import {
   RespV2,
   SchemaModulePropsV2,
   SchemaQueryResp,
+  WriteConfigOpts,
   WriteNoteResp,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger } from "@dendronhq/common-server";
@@ -390,5 +391,10 @@ export class DendronEngineV2 implements DEngineV2 {
 
   async writeSchema(schema: SchemaModulePropsV2) {
     return this.store.writeSchema(schema);
+  }
+
+  async writeConfig(opts: WriteConfigOpts) {
+    this.wsRoot;
+    return;
   }
 }

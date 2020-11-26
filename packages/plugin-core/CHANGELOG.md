@@ -22,7 +22,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # [0.17.0](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.5...v0.17.0) (2020-11-22)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.16.3-alpha.5](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.4...v0.16.3-alpha.5) (2020-11-22)
 

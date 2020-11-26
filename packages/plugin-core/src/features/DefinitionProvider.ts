@@ -1,7 +1,8 @@
 import { NoteUtilsV2 } from "@dendronhq/common-all";
+import fs from "fs-extra";
 import _ from "lodash";
 import vscode, { Location, Position, Uri } from "vscode";
-import { GotoNoteCommand } from "../commands/GotoNote";
+import { findHeaderPos, GotoNoteCommand } from "../commands/GotoNote";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { getReferenceAtPosition } from "../utils/md";
 import { DendronWorkspace } from "../workspace";
@@ -27,6 +28,14 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       return out;
     } else if (out.length === 1) {
       const loc = out[0];
+      if (refAtPos.anchor) {
+        const text = fs.readFileSync(loc.uri.fsPath, { encoding: "utf8" });
+        const pos = await findHeaderPos({
+          anchor: refAtPos.anchor.value,
+          text,
+        });
+        return new Location(loc.uri, pos);
+      }
       return loc;
     } else {
       const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();

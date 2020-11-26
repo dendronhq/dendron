@@ -18,7 +18,7 @@ export function isHeaderSelection(
     new Position(selection.start.line, 0),
     new Position(selection.start.line + 1, 0)
   );
-  const headerText = _.trim(editor.document.getText(lineRange).slice(0, -1));
+  const headerText = _.trim(editor.document.getText(lineRange));
   if (headerText.startsWith("#")) {
     return headerText;
   } else {

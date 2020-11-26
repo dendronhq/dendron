@@ -28,6 +28,7 @@ import Head from "next/head";
 // TODO Temporarily copied here from engine-server/src/config.ts to use default
 // values for input placeholders.
 const genDefaultConfig = (): DendronConfig => ({
+  version: 1,
   vaults: [],
   site: {
     copyAssets: true,
@@ -41,6 +42,7 @@ const genDefaultConfig = (): DendronConfig => ({
 const getConfigData = (): { data: DendronConfig } => {
   return {
     data: {
+      version: 1,
       vaults: [
         {
           fsPath: "vault",

@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-next-server",
-  "version": "0.17.0",
+  "version": "0.17.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,13 +10,18 @@
     "watch": "echo 0"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.17.0",
-    "antd": "^4.6.6",
+    "@chakra-ui/react": "^1.0.0",
+    "@dendronhq/common-all": "^0.17.1",
+    "@emotion/react": "^11.1.1",
+    "@emotion/styled": "^11.0.0",
+    "formik": "^2.2.5",
+    "framer-motion": "^2.9.4",
     "lodash": "^4.17.20",
     "next": "10.0.0",
     "react": "17.0.1",
     "react-d3-tree": "^1.16.1",
-    "react-dom": "17.0.1"
+    "react-dom": "17.0.1",
+    "react-icons": "^3.11.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.161",

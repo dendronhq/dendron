@@ -1,17 +1,15 @@
 import { NoteUtilsV2 } from "@dendronhq/common-all";
 import { MarkdownPublishPod } from "@dendronhq/pods-core";
 import fs from "fs";
-import _ from "lodash";
 import path from "path";
 import vscode, { Uri } from "vscode";
 import {
   containsImageExt,
-  containsNonMdExt,
   containsOtherKnownExts,
   getReferenceAtPosition,
   isUncPath,
 } from "../utils/md";
-import { DendronWorkspace, getWS, resolveRelToWSRoot } from "../workspace";
+import { DendronWorkspace, getWS } from "../workspace";
 
 export default class ReferenceHoverProvider implements vscode.HoverProvider {
   public async provideHover(
@@ -30,20 +28,22 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       let foundUri: Uri;
       const engine = DendronWorkspace.instance().getEngine();
 
-      if (containsNonMdExt(ref)) {
-        let fpath: string | undefined;
-        const v = _.find(engine.vaultsv3, (v) => {
-          fpath = path.join(resolveRelToWSRoot(v.fsPath), ref);
-          return fs.existsSync(fpath);
-        });
-        if (v && fpath) {
-          foundUri = Uri.file(fpath);
-        } else {
-          return new vscode.Hover(
-            `"${ref}" is not created yet. Click to create.`,
-            hoverRange
-          );
-        }
+      // if (containsNonMdExt(ref)) {
+      //   let fpath: string | undefined;
+      //   const v = _.find(engine.vaultsv3, (v) => {
+      //     fpath = path.join(resolveRelToWSRoot(v.fsPath), ref);
+      //     return fs.existsSync(fpath);
+      //   });
+      //   if (v && fpath) {
+      //     foundUri = Uri.file(fpath);
+      //   } else {
+      //     return new vscode.Hover(
+      //       `"${ref}" is not created yet. Click to create.`,
+      //       hoverRange
+      //     );
+      //   }
+      if (containsImageExt(refAtPos.ref)) {
+        foundUri = Uri.file(refAtPos.ref);
       } else {
         const notes = NoteUtilsV2.getNotesByFname({
           fname: refAtPos.ref,

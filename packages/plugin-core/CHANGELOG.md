@@ -3,9 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [0.17.0](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.5...v0.17.0) (2020-11-22)
+## [0.17.1](https://github.com/dendronhq/dendron/compare/v0.17.1-alpha.1...v0.17.1) (2020-11-26)
 
 **Note:** Version bump only for package @dendronhq/plugin-core
+
+## [0.17.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.17.1-alpha.0...v0.17.1-alpha.1) (2020-11-26)
+
+### Bug Fixes
+
+- copy header will chop of last character ([34c2530](https://github.com/dendronhq/dendron/commit/34c253036cf959ef00620db9063c8de36ae9c848))
+- relative links sometimes don't resolve ([c1ffa54](https://github.com/dendronhq/dendron/commit/c1ffa54ab780bec98cb5b322b4d0905cc26acce7))
+
+## [0.17.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.17.0...v0.17.1-alpha.0) (2020-11-25)
+
+### Bug Fixes
+
+- hover provider ([9c55a2f](https://github.com/dendronhq/dendron/commit/9c55a2fd91ae25455d3b232a3ed0bdb274b8f973))
+
+### Features
+
+- add hover provider ([8d19a1b](https://github.com/dendronhq/dendron/commit/8d19a1b47f114ae738f7483fd751b62f68b46d24))
+
+# [0.17.0](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.5...v0.17.0) (2020-11-22)
+
+**Note:** Version bump only for package root
 
 ## [0.16.3-alpha.5](https://github.com/dendronhq/dendron/compare/v0.16.3-alpha.4...v0.16.3-alpha.5) (2020-11-22)
 

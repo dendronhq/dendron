@@ -1,13 +1,10 @@
-import { MinusOutlined } from "@ant-design/icons";
 import { SchemaPropsV2 } from "@dendronhq/common-all";
-import { Button, Card, Typography } from "antd";
+import { Button } from "@chakra-ui/react";
 import _ from "lodash";
 import dynamic from "next/dynamic";
 import React, { useState } from "react";
 import { ReactD3TreeItem } from "react-d3-tree";
 import { useWindowSize } from "./hooks";
-const { Title, Text, Paragraph } = Typography;
-const { Meta } = Card;
 
 const Tree = dynamic(
   () => {
@@ -72,12 +69,9 @@ export default function DendronTree() {
   const generateNodeProps = () => {
     return {
       buttons: [
-        <Button
-          type="dashed"
-          shape="circle"
-          icon={<MinusOutlined />}
-          size="small"
-        />,
+        <Button variant="outline" borderRadius="full" size="sm">
+          -
+        </Button>,
       ],
     };
   };

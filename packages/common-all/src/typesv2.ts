@@ -77,7 +77,10 @@ export type VaultRemote = {
   url: string;
 };
 export type DVault = {
+  /** Name of vault */
   name?: string;
+
+  /** Filesystem path to fault */
   fsPath: string;
   // /**
   //  * Uri which is relative from root

@@ -214,7 +214,6 @@
 //     expect(expectedFiles).toEqual(actualFiles);
 //   });
 
-//   test("convert links", async () => {
 //     await createFiles();
 //     fs.writeFileSync(
 //       path.join(importSrc, "project/p2/n1.md"),

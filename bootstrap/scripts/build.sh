@@ -11,6 +11,7 @@ npx lerna run build --scope @dendronhq/lsp-server  || exit 1
 npx lerna run build --scope @dendronhq/api-server  || exit 1
 
 npx lerna run build --parallel --scope @dendronhq/pods-core  --scope @dendronhq/seeds-core  || exit 1
+
 npx lerna run build --scope @dendronhq/dendron-cli  || exit 1
 npx lerna run build --scope @dendronhq/dendron-next-server  || exit 1
 

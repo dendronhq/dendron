@@ -25,6 +25,7 @@ const CreateNoteFactory = (opts: CreateNoteFactoryOpts) => {
     genRandomId,
     noWrite,
     body,
+    fname,
     props,
   }: CreateNotePresetOptsV4) => {
     const _opts: CreateNoteOptsV4 = {
@@ -39,6 +40,9 @@ const CreateNoteFactory = (opts: CreateNoteFactoryOpts) => {
     }
     if (!_.isUndefined(props)) {
       _opts.props = props;
+    }
+    if (!_.isUndefined(fname)) {
+      _opts.fname = fname;
     }
     return NoteTestUtilsV4.createNote(_opts);
   };

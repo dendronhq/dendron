@@ -1,3 +1,5 @@
+import { SchemaUtilsV2 } from "@dendronhq/common-all";
+import { NoteTestUtilsV4 } from "../../noteUtils";
 import { PreSetupHookFunction } from "../../types";
 import { NOTE_PRESETS_V4 } from "../notes";
 import { SCHEMA_PRESETS_V4 } from "../schemas";
@@ -17,4 +19,57 @@ export const setupBasic: PreSetupHookFunction = async ({ vaults, wsRoot }) => {
     wsRoot,
   });
   await SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.create({ vault, wsRoot });
+};
+
+export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
+  await setupBasic(opts);
+  const { wsRoot, vaults } = opts;
+  const vault = vaults[0];
+  NoteTestUtilsV4.createSchema({
+    fname: "bar",
+    wsRoot,
+    vault,
+    modifier: (schema) => {
+      const schemas = [
+        SchemaUtilsV2.create({
+          id: "bar",
+          parent: "root",
+          children: ["ch1", "ch2"],
+          vault,
+        }),
+        SchemaUtilsV2.create({
+          id: "ch1",
+          template: { id: "bar.template.ch1", type: "note" },
+          vault,
+        }),
+        SchemaUtilsV2.create({
+          id: "ch2",
+          template: { id: "bar.template.ch2", type: "note" },
+          namespace: true,
+          vault,
+        }),
+      ];
+      schemas.map((s) => {
+        schema.schemas[s.id] = s;
+      });
+      return schema;
+    },
+  });
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    body: "ch1 template",
+    fname: "bar.template.ch1",
+    vault,
+  });
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    body: "ch2 template",
+    fname: "bar.template.ch2",
+    vault,
+  });
+};
+
+export const ENGINE_HOOKS = {
+  setupBasic,
+  setupSchemaPreseet,
 };

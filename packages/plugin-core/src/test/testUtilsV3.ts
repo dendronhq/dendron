@@ -1,13 +1,13 @@
-import { WorkspaceOpts } from "@dendronhq/common-all";
+import { DEngineClientV2, WorkspaceOpts } from "@dendronhq/common-all";
 import { assignJSONWithComment, tmpDir } from "@dendronhq/common-server";
 import {
+  CreateEngineFunction,
   EngineOpt,
-  EngineTestUtilsV3,
-  NotePresetsUtils,
+  EngineTestUtilsV4,
   PreSetupCmdHookFunction,
   PreSetupHookFunction,
 } from "@dendronhq/common-test-utils";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig, DendronEngineV2 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { afterEach, beforeEach } from "mocha";
@@ -54,6 +54,8 @@ export type SetupLegacyWorkspaceMultiOpts = SetupCodeConfigurationV2 & {
   setupWsOverride?: Partial<SetupWorkspaceOpts>;
   wsSettingsOverride?: Partial<WorkspaceSettings>;
 };
+
+export async function setupWorkspace() {}
 
 export async function setupLegacyWorkspace(
   opts: SetupLegacyWorkspaceOpts
@@ -102,15 +104,8 @@ export async function setupLegacyWorkspaceMulti(
     wsSettingsOverride: {},
   });
   const { preSetupHook, postSetupHook, wsSettingsOverride } = copts;
-  const { wsRoot, vaults } = await EngineTestUtilsV3.setupWS({
-    ...opts,
-    initVault1: async (vaultDir: string) => {
-      await NotePresetsUtils.createBasic({ vaultDir, fname: "foo" });
-    },
-    initVault2: async (vaultDir: string) => {
-      await NotePresetsUtils.createBasic({ vaultDir, fname: "bar" });
-    },
-  });
+
+  const { wsRoot, vaults } = await EngineTestUtilsV4.setupWS();
   setupCodeConfiguration(opts);
   // setup workspace file
   stubWorkspace({ wsRoot, vaults });
@@ -151,6 +146,9 @@ export async function setupLegacyWorkspaceMulti(
   return { wsRoot, vaults, workspaceFile, workspaceFolders };
 }
 
+/**
+ * Old style layout
+ */
 export async function runLegacySingleWorkspaceTest(
   opts: SetupLegacyWorkspaceOpts & { onInit: OnInitHook }
 ) {
@@ -163,6 +161,9 @@ export async function runLegacySingleWorkspaceTest(
   return;
 }
 
+/**
+ * Old style layout
+ */
 export async function runLegacyMultiWorkspaceTest(
   opts: SetupLegacyWorkspaceMultiOpts & { onInit: OnInitHook }
 ) {
@@ -215,3 +216,29 @@ export function stubSetupWorkspace({
       throw Error(`inittype ${initType} not handled`);
   }
 }
+
+class FakeEngine {
+  get notes() {
+    return getWS().getEngine().notes;
+  }
+}
+
+type EngineOverride = {
+  [P in keyof DendronEngineV2]: (opts: WorkspaceOpts) => DendronEngineV2[P];
+};
+
+export const createEngineFactory = (
+  overrides?: Partial<EngineOverride>
+): CreateEngineFunction => {
+  const createEngine: CreateEngineFunction = (
+    opts: WorkspaceOpts
+  ): DEngineClientV2 => {
+    const engine = new FakeEngine() as DEngineClientV2;
+    _.map(overrides || {}, (method, key: keyof DendronEngineV2) => {
+      // @ts-ignore
+      engine[key] = method(opts);
+    });
+    return engine;
+  };
+  return createEngine;
+};

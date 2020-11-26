@@ -255,17 +255,17 @@ export const findReferences = async (
   // TODO: sanitize reference
   const engine = DendronWorkspace.instance().getEngine();
   engine.notes;
-  const doc = VSCodeUtils.getActiveTextEditor()?.document;
   // clean for anchor
   const fname = ref;
-  const note = NoteUtilsV2.getNoteByFname(fname, engine.notes, {
-    vault: { fsPath: path.dirname(doc?.uri.fsPath as string) },
-    throwIfEmpty: true,
-  }) as NotePropsV2;
-  const notesWithRefs = (await NoteUtilsV2.getNotesWithLinkTo({
-    note,
-    notes: engine.notes,
-  })) as NotePropsV2[];
+  const notes = NoteUtilsV2.getNotesByFname({ fname, notes: engine.notes });
+  const notesWithRefs = await Promise.all(
+    notes.flatMap((note) => {
+      return NoteUtilsV2.getNotesWithLinkTo({
+        note,
+        notes: engine.notes,
+      });
+    })
+  );
 
   _.forEach(notesWithRefs, (note) => {
     const fsPath = NoteUtilsV2.getPath({ note });

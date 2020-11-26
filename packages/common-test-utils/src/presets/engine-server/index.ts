@@ -5,6 +5,7 @@ import NOTE_REF from "./note-refs";
 import { ENGINE_QUERY_PRESETS } from "./query";
 import { ENGINE_RENAME_PRESETS } from "./rename";
 import { ENGINE_UPDATE_PRESETS } from "./update";
+export { ENGINE_HOOKS } from "./utils";
 import { ENGINE_WRITE_PRESETS } from "./write";
 
 export const ENGINE_SERVER = {
@@ -27,3 +28,5 @@ export const ENGINE_PRESETS = [
   { name: "update", presets: ENGINE_SERVER.ENGINE_UPDATE_PRESETS },
   { name: "write", presets: ENGINE_SERVER.ENGINE_WRITE_PRESETS },
 ];
+
+export { ENGINE_RENAME_PRESETS };

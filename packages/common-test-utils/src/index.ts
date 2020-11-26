@@ -1,5 +1,15 @@
-import { DVault, WorkspaceOpts } from "@dendronhq/common-all";
-import { resolvePath, tmpDir } from "@dendronhq/common-server";
+import {
+  DVault,
+  NoteUtilsV2,
+  SchemaUtilsV2,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
+import {
+  note2File,
+  resolvePath,
+  schemaModuleOpts2File,
+  tmpDir,
+} from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -45,11 +55,32 @@ export type SetupVaultsOptsV4 = {
 
 export class EngineTestUtilsV4 {
   static async setupWS(
-    opts: { wsRoot?: string } & { setupVaultsOpts: SetupVaultsOptsV4[] }
+    opts?: { wsRoot?: string } & { setupVaultsOpts?: SetupVaultsOptsV4[] }
   ): Promise<WorkspaceOpts> {
-    const wsRoot = opts.wsRoot || tmpDir().name;
+    const wsRoot = opts?.wsRoot || tmpDir().name;
+    const setupVaultsOpts: SetupVaultsOptsV4[] =
+      opts?.setupVaultsOpts ||
+      ["vault1", "vault2"].map((ent) => ({
+        vault: { fsPath: ent },
+        preSetupHook: async ({ vpath, vault, wsRoot }) => {
+          const rootModule = SchemaUtilsV2.createRootModule({
+            created: "1",
+            updated: "1",
+            vault,
+          });
+          await schemaModuleOpts2File(rootModule, vpath, "root");
+
+          const rootNote = await NoteUtilsV2.createRoot({
+            created: "1",
+            updated: "1",
+            vault,
+          });
+          await note2File({ note: rootNote, vault, wsRoot });
+        },
+      }));
+
     const vaults = await Promise.all(
-      opts.setupVaultsOpts.flatMap((ent) => {
+      setupVaultsOpts.flatMap((ent) => {
         return this.setupVault({ ...ent, wsRoot });
       })
     );

@@ -7,7 +7,12 @@ import {
   NoteUtilsV2,
   SchemaModulePropsV2,
 } from "@dendronhq/common-all";
-import { getPkgRoot, resolveTilde, tmpDir } from "@dendronhq/common-server";
+import {
+  getPkgRoot,
+  resolveTilde,
+  tmpDir,
+  vault2Path,
+} from "@dendronhq/common-server";
 import { getPortFilePath } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -24,7 +29,7 @@ import {
 } from "./constants";
 import { FileItem } from "./external/fileutils/FileItem";
 import { EngineAPIService } from "./services/EngineAPIService";
-import { DendronWorkspace } from "./workspace";
+import { DendronWorkspace, getWS } from "./workspace";
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
@@ -231,7 +236,9 @@ export class VSCodeUtils {
 
   static async openNote(note: NotePropsV2) {
     const { vault, fname } = note;
-    const notePath = path.join(vault.fsPath, `${fname}.md`);
+    const wsRoot = DendronWorkspace.wsRoot();
+    const vpath = vault2Path({ vault, wsRoot });
+    const notePath = path.join(vpath, `${fname}.md`);
     const editor = await VSCodeUtils.openFileInEditor(
       vscode.Uri.file(notePath)
     );

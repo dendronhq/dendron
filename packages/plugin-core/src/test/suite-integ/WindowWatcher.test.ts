@@ -28,8 +28,8 @@ suite("notes", function () {
     test("basic", function (done) {
       runSingleVaultTest({
         ctx,
-        initDirCb: async (vaultPath) => {
-          const vault = { fsPath: vaultPath };
+        postSetupHook: async ({ vaults, wsRoot }) => {
+          const vault = vaults[0];
           const bar = NoteUtilsV2.create({
             fname: `bar`,
             id: `bar`,
@@ -38,7 +38,7 @@ suite("notes", function () {
             created: "1",
             vault,
           });
-          await note2File(bar, vaultPath);
+          await note2File({ note: bar, vault, wsRoot });
         },
         onInit: async ({ vault }) => {
           const vaultPath = vault.fsPath;

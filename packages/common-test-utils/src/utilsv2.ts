@@ -1,16 +1,9 @@
-import { NoteUtilsV2, SchemaUtilsV2 } from "@dendronhq/common-all";
-import {
-  note2File,
-  schemaModuleOpts2File,
-  tmpDir,
-} from "@dendronhq/common-server";
 import _ from "lodash";
 import {
   CreateEngineFunction,
   EngineTestUtilsV4,
   RunEngineTestFunctionV4,
   runJestHarnessV2,
-  SetupVaultsOptsV4,
 } from ".";
 import {
   PostSetupHookFunction,
@@ -59,37 +52,15 @@ export async function runEngineTestV4(
     extra: {},
   });
 
-  // setup root and vaults
-  const wsRoot = tmpDir().name;
-  const setupVaultsOpts: SetupVaultsOptsV4[] = ["vault1", "vault2"].map(
-    (ent) => ({
-      vault: { fsPath: ent },
-      preSetupHook: async ({ vpath, vault, wsRoot }) => {
-        const rootModule = SchemaUtilsV2.createRootModule({
-          created: "1",
-          updated: "1",
-          vault,
-        });
-        await schemaModuleOpts2File(rootModule, vpath, "root");
+  const { wsRoot, vaults } = await EngineTestUtilsV4.setupWS();
 
-        const rootNote = await NoteUtilsV2.createRoot({
-          created: "1",
-          updated: "1",
-          vault,
-        });
-        await note2File({ note: rootNote, vault, wsRoot });
-      },
-    })
-  );
-  const resp = await EngineTestUtilsV4.setupWS({ wsRoot, setupVaultsOpts });
-
-  await preSetupHook({ wsRoot, vaults: resp.vaults });
-  const engine = createEngine({ wsRoot, vaults: resp.vaults });
+  await preSetupHook({ wsRoot, vaults: vaults });
+  const engine = createEngine({ wsRoot, vaults: vaults });
   const initResp = await engine.init();
   // const resp = await postSetupHook({wsRoot, vaults, engine})
   const results = await func({
     wsRoot,
-    vaults: resp.vaults,
+    vaults,
     engine,
     initResp,
     extra,

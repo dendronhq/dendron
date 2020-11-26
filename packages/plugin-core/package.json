@@ -561,9 +561,9 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
+        "@dendronhq/common-all": "^0.17.1",
         "@dendronhq/api-server": "^0.17.1",
         "@dendronhq/clipboardy": "^2.3.0",
-        "@dendronhq/common-all": "^0.17.1",
         "@dendronhq/common-server": "^0.17.1",
         "@dendronhq/dendron-cli": "^0.17.1",
         "@dendronhq/engine-server": "^0.17.1",

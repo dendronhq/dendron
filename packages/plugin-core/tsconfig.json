@@ -1,6 +1,8 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "skipLibCheck": true
+    "paths": {
+      "@dendronhq/common-all": ["node_modules/@dendronhq/common-all"]
+    }
   }
 }

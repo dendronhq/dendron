@@ -9,8 +9,9 @@ import {
   EngineOpt,
   EngineTestUtilsV2,
   EngineTestUtilsV3,
-  NodeTestPresetsV2,
+  ENGINE_HOOKS,
   NotePresetsUtils,
+  PreSetupHookFunction,
   SetupHookFunction,
   SetupWSOpts,
 } from "@dendronhq/common-test-utils";
@@ -39,7 +40,7 @@ type SetupCodeWorkspaceV2 = SetupWSOpts &
     ctx: ExtensionContext;
     preActivateHook?: any;
     postActivateHook?: any;
-    preSetupHook?: SetupHookFunction;
+    preSetupHook?: PreSetupHookFunction;
     postSetupHook?: SetupHookFunction;
   };
 
@@ -103,12 +104,15 @@ export async function runSingleVaultTest(
     onInit: (opts: { vault: DVault; wsRoot: string }) => Promise<void>;
   }
 ) {
+  let wsRoot = tmpDir().name;
   let vault = { fsPath: tmpDir().name };
   const { ctx, onInit } = opts;
-  const { wsRoot } = await setupCodeWorkspaceV2(
+  await setupCodeWorkspaceV2(
     _.defaults(opts, {
-      initDirCb: async (vaultDir: string) => {
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+      wsRoot,
+      initDirCb: async () => {
+        //const vaults = [vault];
+        await ENGINE_HOOKS.setupBasic({ vaults: [vault], wsRoot });
       },
       vaultDir: vault.fsPath,
     })

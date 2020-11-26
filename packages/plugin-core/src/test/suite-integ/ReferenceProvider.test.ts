@@ -1,13 +1,16 @@
 import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
-import { NOTE_PRESETS } from "@dendronhq/common-test-utils";
+import { vault2Path } from "@dendronhq/common-server";
+import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { afterEach, beforeEach } from "mocha";
+import path from "path";
 import * as vscode from "vscode";
 import ReferenceProvider from "../../features/ReferenceProvider";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
+import { DendronWorkspace, getWS } from "../../workspace";
 import { TIMEOUT } from "../testUtils";
-import { expect, runMultiVaultTest } from "../testUtilsv2";
+import { expect } from "../testUtilsv2";
+import { runLegacyMultiWorkspaceTest } from "../testUtilsV3";
 
 async function provide(editor: vscode.TextEditor) {
   const doc = editor?.document as vscode.TextDocument;
@@ -35,16 +38,18 @@ suite("DocumentLinkProvider", function () {
   test("basic", (done) => {
     let noteWithTarget1: NotePropsV2;
     let noteWithTarget2: NotePropsV2;
-    runMultiVaultTest({
+    runLegacyMultiWorkspaceTest({
       ctx,
-      preSetupHook: async ({ vaults }) => {
-        noteWithTarget1 = await NOTE_PRESETS.NOTE_WITH_TARGET({
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        noteWithTarget1 = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
           fname: "alpha",
           vault: vaults[0],
+          wsRoot,
         });
-        noteWithTarget2 = await NOTE_PRESETS.NOTE_WITH_TARGET({
+        noteWithTarget2 = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
           fname: "beta",
           vault: vaults[0],
+          wsRoot,
         });
       },
       onInit: async ({}) => {
@@ -52,7 +57,7 @@ suite("DocumentLinkProvider", function () {
         const links = await provide(editor);
         expect(links.map((l) => l.uri.fsPath)).toEqual(
           [noteWithTarget1, noteWithTarget2].map((note) =>
-            NoteUtilsV2.getPath({ note })
+            NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
           )
         );
         done();
@@ -63,16 +68,18 @@ suite("DocumentLinkProvider", function () {
   test("with multiple vaults", (done) => {
     let noteWithTarget1: NotePropsV2;
     let noteWithTarget2: NotePropsV2;
-    runMultiVaultTest({
+    runLegacyMultiWorkspaceTest({
       ctx,
-      preSetupHook: async ({ vaults }) => {
-        noteWithTarget1 = await NOTE_PRESETS.NOTE_WITH_TARGET({
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        noteWithTarget1 = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
           fname: "alpha",
           vault: vaults[0],
+          wsRoot,
         });
-        noteWithTarget2 = await NOTE_PRESETS.NOTE_WITH_TARGET({
+        noteWithTarget2 = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
           fname: "beta",
           vault: vaults[1],
+          wsRoot,
         });
       },
       onInit: async ({}) => {
@@ -80,7 +87,7 @@ suite("DocumentLinkProvider", function () {
         const links = await provide(editor);
         expect(links.map((l) => l.uri.fsPath)).toEqual(
           [noteWithTarget1, noteWithTarget2].map((note) =>
-            NoteUtilsV2.getPath({ note })
+            NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
           )
         );
         done();
@@ -91,21 +98,25 @@ suite("DocumentLinkProvider", function () {
   test("with anchor", (done) => {
     let noteWithLink: NotePropsV2;
 
-    runMultiVaultTest({
+    runLegacyMultiWorkspaceTest({
       ctx,
-      preSetupHook: async ({ vaults }) => {
-        await NOTE_PRESETS.NOTE_WITH_ANCHOR_TARGET({
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.create({
           vault: vaults[0],
+          wsRoot,
         });
-        noteWithLink = await NOTE_PRESETS.NOTE_WITH_ANCHOR_LINK({
+        noteWithLink = await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_LINK.create({
           vault: vaults[0],
+          wsRoot,
         });
       },
       onInit: async ({}) => {
         const editor = await VSCodeUtils.openNote(noteWithLink);
         const links = await provide(editor);
         expect(links.map((l) => l.uri.fsPath)).toEqual(
-          [noteWithLink].map((note) => NoteUtilsV2.getPath({ note }))
+          [noteWithLink].map((note) =>
+            NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+          )
         );
         done();
       },
@@ -115,21 +126,26 @@ suite("DocumentLinkProvider", function () {
   test("with alias", (done) => {
     let noteWithLink: NotePropsV2;
 
-    runMultiVaultTest({
+    runLegacyMultiWorkspaceTest({
       ctx,
-      preSetupHook: async ({ vaults }) => {
-        await NOTE_PRESETS.NOTE_WITH_TARGET({
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
           vault: vaults[0],
+          wsRoot,
         });
-        noteWithLink = await NOTE_PRESETS.NOTE_WITH_ALIAS_LINK({
+        noteWithLink = await NOTE_PRESETS_V4.NOTE_WITH_ALIAS_LINK.create({
           vault: vaults[0],
+
+          wsRoot,
         });
       },
       onInit: async ({}) => {
         const editor = await VSCodeUtils.openNote(noteWithLink);
         const links = await provide(editor);
         expect(links.map((l) => l.uri.fsPath)).toEqual(
-          [noteWithLink].map((note) => NoteUtilsV2.getPath({ note }))
+          [noteWithLink].map((note) =>
+            NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+          )
         );
         done();
       },

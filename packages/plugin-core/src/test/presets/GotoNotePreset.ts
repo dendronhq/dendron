@@ -1,17 +1,16 @@
-import { NodeTestUtilsV2, TestPresetEntry } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4, TestPresetEntry } from "@dendronhq/common-test-utils";
 import { VSCodeUtils } from "../../utils";
 import { getActiveEditorBasename } from "../testUtils";
 
 const ANCHOR = new TestPresetEntry({
   label: "anchor",
-  preSetupHook: async ({ vaults }) => {
+  preSetupHook: async ({ wsRoot, vaults }) => {
     const vault = vaults[0];
-    await NodeTestUtilsV2.createNote({
-      vaultDir: vault.fsPath,
-      noteProps: {
-        fname: "alpha",
-        body: [`# H1`, `# H2`, `# H3`, "", "Some Content"].join("\n"),
-      },
+    await NoteTestUtilsV4.createNote({
+      wsRoot,
+      vault,
+      fname: "alpha",
+      body: [`# H1`, `# H2`, `# H3`, "", "Some Content"].join("\n"),
     });
   },
   results: async () => {
@@ -35,21 +34,20 @@ const ANCHOR = new TestPresetEntry({
 
 const ANCHOR_WITH_SPECIAL_CHARS = new TestPresetEntry({
   label: "anchor with special chars",
-  preSetupHook: async ({ vaults }) => {
+  preSetupHook: async ({ wsRoot, vaults }) => {
     const vault = vaults[0];
     const specialCharsHeader = `H3 &$#@`;
-    await NodeTestUtilsV2.createNote({
-      vaultDir: vault.fsPath,
-      noteProps: {
-        fname: "alpha",
-        body: [
-          `# H1`,
-          `# H2`,
-          `# ${specialCharsHeader}`,
-          "",
-          "Some Content",
-        ].join("\n"),
-      },
+    await NoteTestUtilsV4.createNote({
+      wsRoot,
+      vault,
+      fname: "alpha",
+      body: [
+        `# H1`,
+        `# H2`,
+        `# ${specialCharsHeader}`,
+        "",
+        "Some Content",
+      ].join("\n"),
     });
     return { specialCharsHeader };
   },

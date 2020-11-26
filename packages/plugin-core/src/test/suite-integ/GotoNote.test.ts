@@ -1,5 +1,5 @@
 import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
-import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -102,8 +102,8 @@ suite("GotoNote", function () {
   test("go to new note with template", (done) => {
     runSingleVaultTest({
       ctx,
-      initDirCb: async (vaultDir) => {
-        await NodeTestPresetsV2.createSchemaPreset({ vaultDir });
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        await ENGINE_HOOKS.setupSchemaPreseet({ wsRoot, vaults });
       },
       onInit: async ({ vault }) => {
         await new GotoNoteCommand().run({

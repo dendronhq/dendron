@@ -47,7 +47,7 @@ suite("VaultAddCommand", function () {
           vault: { fsPath: vpath },
           body: ["existing note"].join("\n"),
         });
-        await note2File(note, vault.fsPath);
+        await note2File({ note, vault, wsRoot });
         const schema = SchemaUtilsV2.createRootModule({ vault });
         await schemaModuleOpts2File(schema, vault.fsPath, "root");
       },

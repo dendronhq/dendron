@@ -533,6 +533,10 @@ export class NoteUtilsV2 {
     return out;
   }
 
+  /**
+   * Get a note.
+   * If no vault is entered as a parameter, get first match
+   */
   static getNoteByFnameV4({
     fname,
     notes,
@@ -548,7 +552,12 @@ export class NoteUtilsV2 {
     const out = _.find(notes, (ent) => {
       return (
         ent.fname.toLowerCase() === fname.toLowerCase() &&
-        (vault ? ent.vault.fsPath === vault.fsPath : true)
+        ((vault &&
+        (vault.fsPath.startsWith("/") || vault.fsPath.startsWith("\\"))
+          ? ent.vault.fsPath === vault.fsPath
+          : true) ||
+          // FIXME: for backward compatibility with full length vaults
+          (vault ? path.basename(ent.vault.fsPath) === vault.fsPath : true))
       );
     });
     return out;
@@ -612,7 +621,7 @@ export class NoteUtilsV2 {
     return path.join(root, note.fname + ".md");
   }
 
-  static getPathV2({
+  static getPathV4({
     note,
     wsRoot,
   }: {

@@ -1,6 +1,5 @@
 import { DendronConfig, Time } from "@dendronhq/common-all";
-import { DirResult, readYAML, tmpDir } from "@dendronhq/common-server";
-import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
+import { readYAML } from "@dendronhq/common-server";
 import {
   DConfig,
   getPortFilePath,
@@ -16,9 +15,7 @@ import { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
 import { InitializeType } from "../../commands/SetupWorkspace";
 import { DEFAULT_LEGACY_VAULT_NAME } from "../../constants";
-import { HistoryEvent } from "../../services/HistoryService";
 import { DendronWorkspace, resolveRelToWSRoot } from "../../workspace";
-import { onExtension, setupDendronWorkspace } from "../testUtils";
 import {
   expect,
   genDefaultSettings,
@@ -30,42 +27,15 @@ import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("SetupWorkspace", function () {
   let ctx: ExtensionContext;
-  let root: DirResult;
 
   describe("workspace", function () {
     ctx = setupBeforeAfter(this, {
       beforeHook: async () => {
         await new ResetConfigCommand().execute({ scope: "all" });
-        root = tmpDir();
       },
     });
 
     // update test for partial failure
-    it.skip("workspace active, bad schema", function (done) {
-      onExtension({
-        action: "not_initialized",
-        cb: async (_event: HistoryEvent) => {
-          const client = DendronWorkspace.instance().getEngine();
-          assert.deepStrictEqual(client.notes, {});
-          done();
-        },
-      });
-
-      setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
-        useCb: async (vaultPath) => {
-          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
-            vaultDir: vaultPath,
-          });
-          fs.writeFileSync(
-            path.join(vaultPath, "bond.schema.yml"),
-            `
-id: bond
-`
-          );
-        },
-      });
-    });
 
     it("basic", function (done) {
       DendronWorkspace.version = () => "0.0.1";

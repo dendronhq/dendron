@@ -114,7 +114,7 @@ export class WorkspaceService {
       ].join("\n"),
     });
     const schema = SchemaUtilsV2.createRootModule({ vault });
-    const notePath = NoteUtilsV2.getPathV2({ note, wsRoot });
+    const notePath = NoteUtilsV2.getPathV4({ note, wsRoot });
     if (!fs.existsSync(notePath)) {
       await note2File({ note, vault, wsRoot: this.wsRoot });
     }

@@ -116,7 +116,7 @@ export async function runJestHarness<TOpts>(
   );
 }
 
-export async function runJestHarnessV2(results: any, expect: jest.Expect) {
+export async function runJestHarnessV2(results: any, expect: any) {
   return _.map(await results, (ent) =>
     expect(ent.actual).toEqual(ent.expected)
   );

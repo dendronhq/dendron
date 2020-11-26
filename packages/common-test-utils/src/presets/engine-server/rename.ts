@@ -3,6 +3,7 @@ import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import { AssertUtils } from "../..";
 import { FileTestUtils } from "../../fileUtils";
 import { TestPresetEntryV4 } from "../../utilsv2";
 import { NOTE_BODY_PRESETS_V4, NOTE_PRESETS_V4 } from "../notes";
@@ -11,6 +12,11 @@ const findCreated = (changed: NoteChangeEntry[]) => {
   const created = _.find(changed, { status: "create" });
   return created;
 };
+
+// const findUpdated = (changed: NoteChangeEntry[]) => {
+//   const note = _.find(changed, { status: "update" });
+//   return note;
+// };
 
 const NOTES = {
   NOTE_REF: new TestPresetEntryV4(
@@ -170,15 +176,17 @@ const NOTES = {
         notes: engine.notes,
         vault,
       });
-
       return [
         {
           actual: changed.data?.length,
           expected: 3,
         },
         {
-          actual: _.trim(changedNote?.body as string),
-          expected: "[[gamma]]",
+          actual: await AssertUtils.assertInString({
+            body: changedNote?.body as string,
+            match: ["[[gamma]]"],
+          }),
+          expected: true,
         },
         {
           actual: checkVault,

@@ -28,6 +28,20 @@ import {
   showDocAndHidePicker,
 } from "./utils";
 
+type OnDidAcceptReturn = Promise<
+  | {
+      uris: Uri[];
+      node: NotePropsV2 | SchemaModulePropsV2 | undefined;
+      resp?: any;
+    }
+  | undefined
+>;
+type OnDidAcceptNewNodeReturn = Promise<{
+  uri: Uri;
+  node: NotePropsV2 | SchemaModulePropsV2;
+  resp?: any | undefined;
+}>;
+
 export class LookupProviderV2 {
   public opts: EngineOpts;
   protected onDidChangeValueDebounced?: DebouncedFunc<
@@ -52,7 +66,7 @@ export class LookupProviderV2 {
   }: {
     picker: DendronQuickPickerV2;
     selectedItem: DNodePropsQuickInputV2;
-  }): Promise<Uri> {
+  }): OnDidAcceptNewNodeReturn {
     const ctx = "onAcceptNewNode";
     const fname = PickerUtilsV2.getValue(picker);
     Logger.info({ ctx, msg: "createNewPick", value: fname });
@@ -120,11 +134,11 @@ export class LookupProviderV2 {
       await picker.onCreate(nodeNew);
     }
     Logger.info({ ctx, msg: "pre:engine.write", uri });
-    await engine.writeNote(nodeNew, {
+    const resp = await engine.writeNote(nodeNew, {
       newNode: true,
     });
     Logger.info({ ctx, msg: "engine.write", profile });
-    return uri;
+    return { uri, node: nodeNew, resp };
   }
 
   async _onAcceptNewSchema({
@@ -133,7 +147,7 @@ export class LookupProviderV2 {
   }: {
     picker: DendronQuickPickerV2;
     vault: DVault;
-  }) {
+  }): OnDidAcceptNewNodeReturn {
     const ctx = "onAcceptNewSchema";
     const fname = PickerUtilsV2.getValue(picker);
     Logger.info({ ctx, msg: "createNewPick", value: fname });
@@ -145,9 +159,9 @@ export class LookupProviderV2 {
     const uri = Uri.file(SchemaUtilsV2.getPath({ root: vault.fsPath, fname }));
     const historyService = HistoryService.instance();
     historyService.add({ source: "engine", action: "create", uri });
-    await engine.writeSchema(smodNew);
+    const resp = await engine.writeSchema(smodNew);
     Logger.info({ ctx, msg: "engine.write", profile });
-    return uri;
+    return { uri, node: smodNew, resp };
   }
 
   async onAcceptNewNode({
@@ -158,7 +172,7 @@ export class LookupProviderV2 {
     picker: DendronQuickPickerV2;
     opts: EngineOpts;
     selectedItem: DNodePropsQuickInputV2;
-  }): Promise<Uri> {
+  }): OnDidAcceptNewNodeReturn {
     const ctx = "onAcceptNewNode";
     Logger.info({ ctx });
     let vault: DVault = PickerUtilsV2.getVaultForOpenEditor();
@@ -189,7 +203,10 @@ export class LookupProviderV2 {
     }
   }
 
-  async onDidAcceptForSingle(picker: DendronQuickPickerV2, opts: EngineOpts) {
+  async onDidAcceptForSingle(
+    picker: DendronQuickPickerV2,
+    opts: EngineOpts
+  ): OnDidAcceptReturn {
     const ctx = "onDidAcceptSingle";
     const value = PickerUtilsV2.getValue(picker);
     const selectedItems = PickerUtilsV2.getSelection(picker);
@@ -205,12 +222,18 @@ export class LookupProviderV2 {
     const resp = this.validate(picker.value, opts.flavor);
     const ws = DendronWorkspace.instance();
     let uri: Uri;
+    let newNode: NotePropsV2 | SchemaModulePropsV2 | undefined;
     if (resp) {
-      return window.showErrorMessage(resp);
+      window.showErrorMessage(resp);
+      return;
     }
     if (selectedItem) {
       if (PickerUtilsV2.isCreateNewNotePickForSingle(selectedItem)) {
-        uri = await this.onAcceptNewNode({ picker, opts, selectedItem });
+        ({ uri, node: newNode } = await this.onAcceptNewNode({
+          picker,
+          opts,
+          selectedItem,
+        }));
       } else {
         uri = node2Uri(selectedItem);
         if (opts.flavor === "schema") {
@@ -225,7 +248,8 @@ export class LookupProviderV2 {
           );
         }
       }
-      return showDocAndHidePicker([uri], picker);
+      await showDocAndHidePicker([uri], picker);
+      return { uris: [uri], node: newNode };
     } else {
       // item from pressing enter
       if (opts.flavor === "note") {
@@ -236,19 +260,22 @@ export class LookupProviderV2 {
           );
           if (maybeNote) {
             uri = node2Uri(maybeNote);
-            return showDocAndHidePicker([uri], picker);
+            await showDocAndHidePicker([uri], picker);
+            return { uris: [uri], node: undefined };
           }
         } catch (err) {
-          return window.showErrorMessage(
-            "multiple notes found. please select one"
-          );
+          window.showErrorMessage("multiple notes found. please select one");
+          return;
         }
       }
       return;
     }
   }
 
-  async onDidAcceptForMulti(picker: DendronQuickPickerV2, opts: EngineOpts) {
+  async onDidAcceptForMulti(
+    picker: DendronQuickPickerV2,
+    opts: EngineOpts
+  ): OnDidAcceptReturn {
     const ctx = "onDidAccept";
     const value = PickerUtilsV2.getValue(picker);
     Logger.info({ ctx, msg: "enter", value, opts });
@@ -257,7 +284,8 @@ export class LookupProviderV2 {
     const ws = DendronWorkspace.instance();
     let uris: Uri[];
     if (resp) {
-      return window.showErrorMessage(resp);
+      window.showErrorMessage(resp);
+      return;
     }
 
     // check if we get note by quickpick value instead of selection
@@ -273,7 +301,8 @@ export class LookupProviderV2 {
           selectedItems = [...picker.activeItems];
         } else {
           uris = [node2Uri(maybeNote)];
-          return showDocAndHidePicker(uris, picker);
+          await showDocAndHidePicker(uris, picker);
+          return;
         }
       } else {
         selectedItems = [];
@@ -289,13 +318,12 @@ export class LookupProviderV2 {
       return;
     }
     if (isCreateNew) {
-      uris = [
-        await this.onAcceptNewNode({
-          picker,
-          opts,
-          selectedItem: selectedItems[0],
-        }),
-      ];
+      const newNode = await this.onAcceptNewNode({
+        picker,
+        opts,
+        selectedItem: selectedItems[0],
+      });
+      uris = [newNode.uri];
     } else {
       if (opts.flavor === "schema") {
         const smods = selectedItems.map(
@@ -314,7 +342,8 @@ export class LookupProviderV2 {
         uris = selectedItems.map((item) => node2Uri(item));
       }
     }
-    return showDocAndHidePicker(uris, picker);
+    await showDocAndHidePicker(uris, picker);
+    return;
   }
 
   onUpdatePickerItem = async (

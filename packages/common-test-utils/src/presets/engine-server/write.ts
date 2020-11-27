@@ -200,7 +200,7 @@ const NOTES = {
     return [
       {
         actual: note,
-        expected: engine.notes["bar"],
+        expected: engine.notes[note.id],
         msg: "bar should be written in engine",
       },
       {

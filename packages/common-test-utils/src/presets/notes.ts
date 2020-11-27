@@ -57,6 +57,10 @@ export const NOTE_PRESETS_V4 = {
     fname: "foo.ch1",
     body: "foo.ch1 body",
   }),
+  NOTE_SIMPLE_GRANDCHILD: CreateNoteFactory({
+    fname: "foo.ch1.gch1",
+    body: "foo.ch1.gch1 body",
+  }),
   NOTE_WITH_CUSTOM_ATT: CreateNoteFactory({
     fname: "foo",
     props: {

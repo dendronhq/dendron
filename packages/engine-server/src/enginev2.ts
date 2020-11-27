@@ -1,5 +1,6 @@
 import {
   DendronError,
+  DEngineClientV2,
   DEngineDeleteSchemaRespV2,
   DEngineInitRespV2,
   DEngineMode,
@@ -14,12 +15,14 @@ import {
   GetNoteOptsV2,
   GetNotePayloadV2,
   NoteChangeEntry,
+  NotePropsDictV2,
   NotePropsV2,
   NoteUtilsV2,
   QueryNotesOpts,
   RenameNoteOptsV2,
   RenameNotePayload,
   RespV2,
+  SchemaModuleDictV2,
   SchemaModulePropsV2,
   SchemaQueryResp,
   WorkspaceOpts,
@@ -90,10 +93,10 @@ export class DendronEngineV2 implements DEngineV2 {
     return DendronEngineV2._instance;
   }
 
-  get notes() {
+  get notes(): NotePropsDictV2 {
     return this.store.notes;
   }
-  get schemas() {
+  get schemas(): SchemaModuleDictV2 {
     return this.store.schemas;
   }
 
@@ -123,7 +126,10 @@ export class DendronEngineV2 implements DEngineV2 {
     }
   }
 
-  async deleteNote(id: string, opts?: EngineDeleteOptsV2) {
+  async deleteNote(
+    id: string,
+    opts?: EngineDeleteOptsV2
+  ): ReturnType<DEngineClientV2["deleteNote"]> {
     try {
       const note = this.notes[id];
       const changed = await this.store.deleteNote(id, opts);
@@ -223,7 +229,11 @@ export class DendronEngineV2 implements DEngineV2 {
     };
   }
 
-  queryNotesSync({ qs }: { qs: string }) {
+  queryNotesSync({
+    qs,
+  }: {
+    qs: string;
+  }): ReturnType<DEngineClientV2["queryNotesSync"]> {
     const items = this.fuseEngine.queryNote({ qs });
     return {
       error: null,
@@ -252,7 +262,9 @@ export class DendronEngineV2 implements DEngineV2 {
     };
   }
 
-  async queryNotes(opts: QueryNotesOpts) {
+  async queryNotes(
+    opts: QueryNotesOpts
+  ): ReturnType<DEngineClientV2["queryNotes"]> {
     const ctx = "Engine:queryNotes";
     const { qs, vault, createIfNew } = opts;
     let items = await this.fuseEngine.queryNote({ qs });

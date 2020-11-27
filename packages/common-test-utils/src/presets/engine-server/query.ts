@@ -3,7 +3,6 @@ import {
   NoteUtilsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
-import { match } from "assert";
 import _ from "lodash";
 import { TestPresetEntryV4 } from "../../utilsv2";
 import { NOTE_PRESETS_V4 } from "../notes";

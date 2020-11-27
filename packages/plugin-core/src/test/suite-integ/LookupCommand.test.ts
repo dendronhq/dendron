@@ -25,7 +25,7 @@ import {
   runJestHarnessV2,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { DendronEngineV2 } from "@dendronhq/engine-server";
+import { DendronEngineV2, loc2Path } from "@dendronhq/engine-server";
 import assert from "assert";
 import _ from "lodash";
 import { afterEach, beforeEach, describe } from "mocha";
@@ -45,7 +45,7 @@ import { DendronQuickPickerV2 } from "../../components/lookup/types";
 import { createNoActiveItem } from "../../components/lookup/utils";
 import { CONFIG, ConfigKey } from "../../constants";
 import { HistoryService } from "../../services/HistoryService";
-import { EngineOpts } from "../../types";
+import { EngineFlavor, EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
 import { _activate } from "../../_extension";
@@ -67,6 +67,7 @@ import {
   runLegacySingleWorkspaceTest,
 } from "../testUtilsV3";
 import fs from "fs-extra";
+import { lookup } from "dns";
 
 const { LOOKUP_SINGLE_TEST_PRESET } = PLUGIN_CORE;
 
@@ -101,7 +102,7 @@ const createEngineForSchemaUpdateItems = createEngineFactory({
 
 const createEngineForNoteUpdateItems = createEngineFactory({
   queryNotes: (_opts: WorkspaceOpts) => {
-    const querySchema: DendronEngineV2["queryNotes"] = async (opts) => {
+    const queryNotes: DendronEngineV2["queryNotes"] = async (opts) => {
       return new Promise(async (resolve) => {
         const engOpts: EngineOpts = { flavor: "note" };
         const ws = DendronWorkspace.instance();
@@ -136,9 +137,17 @@ const createEngineForNoteUpdateItems = createEngineFactory({
         // };
       });
     };
-    return querySchema;
+    return queryNotes;
   },
 });
+
+const lookupHelper = async (flavor: EngineFlavor) => {
+  const engOpts: EngineOpts = { flavor };
+  const lc = new LookupControllerV2(engOpts);
+  const lp = new LookupProviderV2(engOpts);
+  const picker = await lc.show();
+  return { lc, lp, picker };
+};
 
 const schemaAcceptHelper = async (qs: string) => {
   const engOpts: EngineOpts = { flavor: "schema" };
@@ -155,12 +164,12 @@ const schemaAcceptHelper = async (qs: string) => {
   });
   const lc = new LookupControllerV2(engOpts);
   const lp = new LookupProviderV2(engOpts);
-  const uris = (await lp.onDidAccept({
+  const resp = await lp.onDidAccept({
     picker: quickpick,
     opts: engOpts,
     lc,
-  })) as vscode.Uri[];
-  return uris;
+  });
+  return resp?.uris;
 };
 
 const createEngineForSchemaAcceptQuery = createEngineFactory({
@@ -173,18 +182,19 @@ const createEngineForSchemaAcceptQuery = createEngineFactory({
       });
       const lc = new LookupControllerV2(engOpts);
       const lp = new LookupProviderV2(engOpts);
-      (await lp.onDidAccept({
+      await lp.onDidAccept({
         picker: quickpick,
         opts: engOpts,
         lc,
-      })) as vscode.Uri[];
+      });
+      await quickpick.hide();
     };
     return func;
   },
   querySchema: (_opts: WorkspaceOpts) => {
     const querySchema: DendronEngineV2["querySchema"] = async (qs) => {
       const uris = await schemaAcceptHelper(qs);
-      const schemas = uris.map((ent) => {
+      const schemas = uris?.map((ent) => {
         return SchemaUtilsV2.getSchemaModuleByFnameV4({
           fname: path.basename(ent.fsPath, ".schema.yml"),
           schemas: getWS().getEngine().schemas,
@@ -197,6 +207,36 @@ const createEngineForSchemaAcceptQuery = createEngineFactory({
       };
     };
     return querySchema;
+  },
+});
+
+const createEngineForNoteAccept = createEngineFactory({
+  writeNote: (_opts: WorkspaceOpts) => {
+    const func: DendronEngineV2["writeNote"] = async (note) => {
+      const engOpts: EngineOpts = { flavor: "note" };
+      const quickpick = createMockQuickPick({
+        value: note.fname,
+        selectedItems: [createNoActiveItem(note.vault)],
+      });
+      const lc = new LookupControllerV2(engOpts);
+      const lp = new LookupProviderV2(engOpts);
+      const resp = await lp.onDidAccept({
+        picker: quickpick,
+        opts: engOpts,
+        lc,
+      });
+      if (_.isUndefined(resp)) {
+        throw Error("undefined");
+      }
+      return resp.resp;
+    };
+    return func;
+  },
+  queryNotes: (_opts: WorkspaceOpts) => {
+    const queryNotes: DendronEngineV2["queryNotes"] = async (opts) => {
+      return getWS().getEngine().queryNotes(opts);
+    };
+    return queryNotes;
   },
 });
 
@@ -247,7 +287,7 @@ suite("schemas", function () {
     );
   });
 
-  describe("onAccept", function () {
+  describe.skip("onAccept", function () {
     _.map(
       _.pick(ENGINE_QUERY_PRESETS["SCHEMAS"], "SIMPLE"),
       (TestCase: TestPresetEntryV4, name) => {
@@ -314,62 +354,11 @@ suite("schemas", function () {
   });
 });
 
-function setupCase1({
-  ctx,
-  wsRoot,
-}: {
-  ctx: vscode.ExtensionContext;
-  wsRoot: string;
-}) {
-  return setupCodeWorkspaceV2({
-    ctx,
-    wsRoot,
-    initDirCb: async (vaultPath) => {
-      const vault = { fsPath: vaultPath };
-      await NodeTestUtilsV2.createNotes({
-        vaultPath,
-        noteProps: [
-          {
-            id: "id.foo",
-            fname: "foo",
-            vault,
-          },
-          {
-            id: "id.bar",
-            fname: "bar",
-            vault,
-          },
-        ],
-      });
-    },
-  });
-}
-
-function setupCaseCustom({
-  ctx,
-  wsRoot,
-  noteProps,
-}: {
-  ctx: vscode.ExtensionContext;
-  wsRoot: string;
-  noteProps: any;
-}) {
-  return setupCodeWorkspaceV2({
-    ctx,
-    wsRoot,
-    initDirCb: async (vaultPath) => {
-      await NodeTestUtilsV2.createNotes({
-        vaultPath,
-        noteProps: noteProps,
-      });
-    },
-  });
-}
-suite.only("notesv2", function () {
+suite("notesv2", function () {
   let ctx: vscode.ExtensionContext;
   this.timeout(TIMEOUT);
-
   beforeEach(function () {
+    HistoryService.instance().clearSubscriptions();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });
@@ -379,7 +368,7 @@ suite.only("notesv2", function () {
   });
 
   describe("updateItems", function () {
-    _.map(
+    _.forEach(
       ENGINE_QUERY_PRESETS["NOTES"],
       (TestCase: TestPresetEntryV4, name) => {
         test(name, (done) => {
@@ -492,10 +481,7 @@ suite.only("notesv2", function () {
           fs.removeSync(path.join(vpath, "foo.ch1.md"));
         },
         onInit: async ({}) => {
-          const engOpts: EngineOpts = { flavor: "note" };
-          const lc = new LookupControllerV2(engOpts);
-          const lp = new LookupProviderV2(engOpts);
-          let quickpick = await lc.show();
+          const { lc, lp, picker: quickpick } = await lookupHelper("note");
           quickpick.value = "foo.";
           await lp.onUpdatePickerItem(
             quickpick,
@@ -523,84 +509,19 @@ suite.only("notesv2", function () {
         },
       });
     });
-  });
-});
 
-suite("notes", function () {
-  let root: DirResult;
-  let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
-
-  beforeEach(function () {
-    root = tmpDir();
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
-  });
-
-  const runUpdateItemTest = async (opts: {
-    beforeActivateCb?: (opts: {
-      vaults: DVault[];
-      wsRoot: string;
-    }) => Promise<void>;
-    onInitCb: (opts: {
-      lc: LookupControllerV2;
-      lp: LookupProviderV2;
-      quickpick: DendronQuickPickerV2;
-    }) => Promise<void>;
-  }) => {
-    const { onInitCb } = opts;
-    onInitForUpdateItems({ onInitCb });
-
-    // setup workspace
-    const wsRoot = root.name;
-
-    await setupDendronWorkspace(root.name, ctx, {
-      useCb: async (vaultDir) => {
-        await createOneNoteOneSchemaPresetCallback(vaultDir);
-        if (opts.beforeActivateCb) {
-          await opts.beforeActivateCb({
+    test("filter by depth", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+          await NOTE_PRESETS_V4.NOTE_SIMPLE_GRANDCHILD.create({
             wsRoot,
-            vaults: [{ fsPath: vaultDir }],
-          });
-        }
-      },
-    });
-  };
-
-  const onInitForUpdateItems = async (opts: {
-    onInitCb: (opts: {
-      lc: LookupControllerV2;
-      lp: LookupProviderV2;
-      quickpick: DendronQuickPickerV2;
-    }) => Promise<void>;
-  }) => {
-    onWSInit(async () => {
-      const { onInitCb } = opts;
-      const engOpts: EngineOpts = { flavor: "note" };
-      const lc = new LookupControllerV2(engOpts);
-      const lp = new LookupProviderV2(engOpts);
-      const quickpick = await lc.show();
-      await onInitCb({ lp, quickpick, lc });
-    });
-  };
-
-  describe("updateItems", function () {
-    let vault: string;
-
-    test("filter by depth", function (done) {
-      runUpdateItemTest({
-        beforeActivateCb: async ({ vaults }) => {
-          const vault = vaults[0];
-          NodeTestUtilsV2.createNote({
-            vaultDir: vault.fsPath,
-            noteProps: { fname: "foo.ch1.gch1", vault },
+            vault: vaults[0],
           });
         },
-        onInitCb: async ({ lc, lp, quickpick }) => {
+        onInit: async ({}) => {
+          const { picker: quickpick, lp, lc } = await lookupHelper("note");
           quickpick.value = "foo.";
           quickpick.showDirectChildrenOnly = true;
           await lp.onUpdatePickerItem(
@@ -609,7 +530,7 @@ suite("notes", function () {
             "manual",
             lc.cancelToken.token
           );
-          assert.deepStrictEqual(quickpick.items.length, 3);
+          assert.deepStrictEqual(quickpick.items.length, 4);
           assert.deepStrictEqual(
             _.find(quickpick.items, { fname: "foo.ch1.gch1" }),
             undefined
@@ -617,120 +538,53 @@ suite("notes", function () {
           done();
         },
       });
-
-      // onWSInit(async () => {
-      //   const engOpts: EngineOpts = { flavor: "note" };
-      //   const lc = new LookupControllerV2(engOpts);
-      //   const lp = new LookupProviderV2(engOpts);
-      //   let quickpick = await lc.show();
-      //   quickpick.value = "foo.";
-      //   quickpick.showDirectChildrenOnly = true;
-      //   await lp.onUpdatePickerItem(quickpick, { flavor: "note" }, "manual");
-      //   assert.deepStrictEqual(quickpick.items.length, 3);
-      //   assert.deepStrictEqual(
-      //     _.find(quickpick.items, { fname: "foo.ch1.gch1" }),
-      //     undefined
-      //   );
-      //   done();
-      // });
-
-      // setupDendronWorkspace(root.name, ctx, {
-      //   lsp: true,
-      //   useCb: async (vaultDir) => {
-      //     await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
-      //       vaultDir,
-      //     });
-      //     NodeTestUtilsV2.createNote({
-      //       vaultDir,
-      //       noteProps: { fname: "foo.ch1.gch1" },
-      //     });
-      //   },
-      // });
     });
-
-    // TODO: need to mock pressing a button
-    test.skip("don't update note name if note button not pressed", function () {});
-
-    //     test("attach schema after creation", function (done) {
-    //       onWSInit(async () => {
-    //         const ws = DendronWorkspace.instance();
-    //         const engOpts: EngineOpts = { flavor: "note" };
-    //         const lc = new LookupController(ws, engOpts);
-    //         const lp = new LookupProvider(engOpts);
-
-    //         let quickpick = lc.show();
-    //         let note = _.find(quickpick.items, { fname: "foo" }) as Note;
-    //         assert.ok(note.stub);
-    //         quickpick.selectedItems = [note];
-    //         await lp.onDidAccept(quickpick, engOpts);
-    //         assert.equal(
-    //           path.basename(
-    //             VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-    //           ),
-    //           "foo.md"
-    //         );
-
-    //         quickpick = lc.show();
-    //         note = _.find(quickpick.items, { fname: "foo" }) as Note;
-    //         assert.ok(!note.stub);
-    //         // no schema file
-    //         assert.ok(note.schema?.id, "foo");
-    //         done();
-    //       });
-
-    //       setupDendronWorkspace(root.name, ctx, {
-    //         activateWorkspace: true,
-    //         useCb: async (vaultPath: string) => {
-    //           node2MdFile(new Note({ fname: "root", id: "root", title: "root" }), {
-    //             root: vaultPath,
-    //           });
-    //           node2MdFile(new Note({ fname: "foo.bar" }), { root: vaultPath });
-    //           const schemaPath = path.join(vaultPath, "foo.schema.yml");
-    //           writeYAML(schemaPath, {
-    //             version: 1,
-    //             schemas: [
-    //               {
-    //                 id: "foo",
-    //                 parent: "root",
-    //               },
-    //             ],
-    //           });
-    //         },
-    //       });
-    //     });
   });
+
+  describe.only("onAccept", function () {
+    _.map(
+      _.pick(ENGINE_WRITE_PRESETS["NOTES"], "NEW_DOMAIN"),
+      (TestCase: TestPresetEntryV4, name) => {
+        test(name, (done) => {
+          const { testFunc, preSetupHook } = TestCase;
+          runLegacyMultiWorkspaceTest({
+            ctx,
+            postSetupHook: async ({ wsRoot, vaults }) => {
+              await preSetupHook({
+                wsRoot,
+                vaults,
+              });
+            },
+            onInit: async ({ vaults, wsRoot }) => {
+              const engineMock = createEngineForNoteAccept({
+                wsRoot,
+                vaults,
+              });
+              const results = await testFunc({
+                engine: engineMock,
+                vaults,
+                wsRoot,
+                initResp: {} as any,
+              });
+              await runJestHarnessV2(results, expect);
+              done();
+            },
+          });
+        });
+      }
+    );
+  });
+});
+
+suite.skip("notes", function () {
+  let root: DirResult;
+  let ctx: vscode.ExtensionContext;
+  this.timeout(TIMEOUT);
 
   describe("onAccept", function () {
     const engOpts: EngineOpts = { flavor: "note" };
     let ws: DendronWorkspace;
     let client: DEngineClientV2;
-
-    test("new node", function (done) {
-      runAcceptItemTest({
-        ctx,
-        onInitCb: async ({ lp, vaults, lc }) => {
-          ws = DendronWorkspace.instance();
-          client = ws.getEngine();
-          const quickpick = createMockQuickPick({
-            value: "bond",
-            selectedItems: [createNoActiveItem(vaults[0])],
-          });
-          await lp.onDidAccept({ picker: quickpick, opts: engOpts, lc });
-          assert.strictEqual(
-            DNodeUtilsV2.fname(
-              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-            ),
-            "bond"
-          );
-          const txtPath = vscode.window.activeTextEditor?.document.uri
-            .fsPath as string;
-          const vault = { fsPath: path.dirname(txtPath) };
-          const node = file2Note(txtPath, vault);
-          assert.strictEqual(node.title, "Bond");
-          done();
-        },
-      });
-    });
 
     test("existing note", function (done) {
       runAcceptItemTest({
@@ -1287,7 +1141,7 @@ suite.skip("scratch notes", function () {
   });
 });
 
-suite("effect buttons", function () {
+suite.skip("effect buttons", function () {
   let ctx: vscode.ExtensionContext;
   this.timeout(TIMEOUT);
 

@@ -83,7 +83,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     const content = [
       "# Error - Refactoring would overwrite files",
       "",
-      "### The following files woudl be overwritten",
+      "### The following files would be overwritten",
     ]
       .concat(
         operations.map(({ oldUri, newUri }) => {

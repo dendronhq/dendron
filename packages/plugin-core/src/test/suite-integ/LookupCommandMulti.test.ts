@@ -2,7 +2,6 @@ import { DNodeUtilsV2, DVault, NotePropsV2 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import {
   ENGINE_SERVER,
-  NodeTestPresetsV2,
   PLUGIN_CORE,
   runMochaHarness,
 } from "@dendronhq/common-test-utils";
@@ -33,35 +32,33 @@ import {
 
 const { LOOKUP_SINGLE_TEST_PRESET } = PLUGIN_CORE;
 
-const { SCHEMAS } = ENGINE_SERVER.ENGINE_SINGLE_TEST_PRESET;
+// suite("Lookup Schema, Multi/", function () {
+//   let ctx: vscode.ExtensionContext;
+//   this.timeout(TIMEOUT);
 
-suite("Lookup Schema, Multi/", function () {
-  let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
+//   beforeEach(function () {
+//     ctx = VSCodeUtils.getOrCreateMockContext();
+//     DendronWorkspace.getOrCreate(ctx);
+//     VSCodeUtils.closeAllEditors();
+//   });
 
-  beforeEach(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-    VSCodeUtils.closeAllEditors();
-  });
+//   afterEach(function () {
+//     HistoryService.instance().clearSubscriptions();
+//     VSCodeUtils.closeAllEditors();
+//   });
 
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
-    VSCodeUtils.closeAllEditors();
-  });
-
-  test.skip("basics", function (done) {
-    runMultiVaultTest({
-      ctx,
-      onInit: async ({ vaults, wsRoot }) => {
-        const engine = DendronWorkspace.instance().getEngine();
-        await SCHEMAS.WRITE.BASICS.postSetupHook({ wsRoot, vaults, engine });
-        await runMochaHarness(SCHEMAS.WRITE.BASICS.results, { engine });
-        done();
-      },
-    });
-  });
-});
+//   test.skip("basics", function (done) {
+//     runMultiVaultTest({
+//       ctx,
+//       onInit: async ({ vaults, wsRoot }) => {
+//         const engine = DendronWorkspace.instance().getEngine();
+//         await SCHEMAS.WRITE.BASICS.postSetupHook({ wsRoot, vaults, engine });
+//         await runMochaHarness(SCHEMAS.WRITE.BASICS.results, { engine });
+//         done();
+//       },
+//     });
+//   });
+// });
 
 suite("Lookup notes, multi", function () {
   let wsRoot: string;

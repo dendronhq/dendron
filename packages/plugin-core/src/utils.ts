@@ -29,7 +29,7 @@ import {
 } from "./constants";
 import { FileItem } from "./external/fileutils/FileItem";
 import { EngineAPIService } from "./services/EngineAPIService";
-import { DendronWorkspace, getWS } from "./workspace";
+import { DendronWorkspace } from "./workspace";
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();

@@ -3,6 +3,8 @@ import {
   NoteUtilsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
+import { match } from "assert";
+import _ from "lodash";
 import { TestPresetEntryV4 } from "../../utilsv2";
 import { NOTE_PRESETS_V4 } from "../notes";
 import { SCHEMA_PRESETS_V4 } from "../schemas";
@@ -79,9 +81,10 @@ const NOTES = {
         notes,
         vault,
       });
+      const matchNote = _.find(data, { id: expectedNote?.id });
       return [
         {
-          actual: data[0],
+          actual: matchNote,
           expected: expectedNote,
         },
       ];
@@ -145,13 +148,14 @@ const NOTES = {
         notes,
         vault,
       });
+      const matchNote = _.find(data, { id: expectedNote?.id });
       return [
         {
-          actual: data[0],
+          actual: matchNote,
           expected: expectedNote,
         },
         {
-          actual: data[0].schema,
+          actual: matchNote?.schema,
           expected: {
             moduleId: SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname,
             schemaId: DNodeUtilsV2.basename(

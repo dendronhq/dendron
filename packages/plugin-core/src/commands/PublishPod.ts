@@ -18,7 +18,7 @@ type CommandOpts = PublishPodCommandOpts;
 
 type CommandInput = { podChoice: PodItemV4 };
 
-type CommandOutput = void;
+type CommandOutput = string;
 export { CommandOpts as PublishPodCommandOpts };
 
 export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {

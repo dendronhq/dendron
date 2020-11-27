@@ -319,7 +319,7 @@ export class LookupProviderV2 {
 
   onUpdatePickerItem = async (
     picker: DendronQuickPickerV2,
-    opts: EngineOpts,
+    opts: EngineOpts & { force?: boolean },
     source: string,
     token: CancellationToken
     // | "updatePickerBehavior:journal"
@@ -377,7 +377,8 @@ export class LookupProviderV2 {
       if (
         queryEndsWithDot ||
         queryOrig.split(".").length < 2 ||
-        picker.justActivated
+        picker.justActivated ||
+        opts?.force
       ) {
         Logger.info({ ctx, msg: "first query" });
         let nodes: DNodePropsV2[];
@@ -520,6 +521,7 @@ export class LookupProviderV2 {
         profile,
         cancelled: token.isCancellationRequested,
       });
+      return picker;
     }
   };
 

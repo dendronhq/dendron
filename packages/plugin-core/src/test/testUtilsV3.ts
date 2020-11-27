@@ -113,7 +113,7 @@ export async function setupLegacyWorkspaceMulti(
   const workspaceFolders = DendronWorkspace.workspaceFolders();
 
   // setup
-  WorkspaceConfig.write(wsRoot, { overrides: wsSettingsOverride });
+  WorkspaceConfig.write(wsRoot, { overrides: wsSettingsOverride, vaults });
   await preSetupHook({
     wsRoot,
     vaults,
@@ -220,6 +220,9 @@ export function stubSetupWorkspace({
 class FakeEngine {
   get notes() {
     return getWS().getEngine().notes;
+  }
+  get schemas() {
+    return getWS().getEngine().schemas;
   }
 }
 

@@ -1,13 +1,11 @@
 import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
 import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { afterEach, beforeEach } from "mocha";
-import path from "path";
 import * as vscode from "vscode";
 import ReferenceProvider from "../../features/ReferenceProvider";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace, getWS } from "../../workspace";
+import { DendronWorkspace } from "../../workspace";
 import { TIMEOUT } from "../testUtils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest } from "../testUtilsV3";

@@ -45,6 +45,33 @@ const SCHEMAS = {
       preSetupHook: setupBasic,
     }
   ),
+  ADD_NEW_MODULE_NO_CHILD: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      const vault = vaults[0];
+      const schemaModNew = await SCHEMA_PRESETS_V4.SCHEMA_SIMPLE_OTHER_NO_CHILD.create(
+        {
+          vault,
+          wsRoot,
+          noWrite: true,
+        }
+      );
+      await engine.writeSchema(schemaModNew);
+
+      return [
+        {
+          actual: _.values(engine.schemas).length,
+          expected: 3,
+        },
+        {
+          actual: _.values(engine.schemas["bar"].schemas).length,
+          expected: 1,
+        },
+      ];
+    },
+    {
+      preSetupHook: setupBasic,
+    }
+  ),
   ADD_NEW_MODULE: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];

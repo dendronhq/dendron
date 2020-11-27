@@ -927,7 +927,12 @@ export class SchemaUtilsV2 {
     const out = _.find(schemas, (ent) => {
       return (
         ent.fname.toLowerCase() === fname.toLowerCase() &&
-        (vault ? ent.vault.fsPath === vault.fsPath : true)
+        ((vault &&
+        (vault.fsPath.startsWith("/") || vault.fsPath.startsWith("\\"))
+          ? ent.vault.fsPath === vault.fsPath
+          : true) ||
+          // FIXME: for backward compatibility with full length vaults
+          (vault ? path.basename(ent.vault.fsPath) === vault.fsPath : true))
       );
     });
     return out;

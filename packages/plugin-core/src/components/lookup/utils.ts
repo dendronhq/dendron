@@ -59,9 +59,9 @@ export async function showDocAndHidePicker(
     }
   }
 
-  return Promise.all(
+  await Promise.all(
     uris.map(async (uri) => {
-      return window.showTextDocument(uri, { viewColumn }).then(
+      window.showTextDocument(uri, { viewColumn }).then(
         () => {
           Logger.info({ ctx, msg: "showTextDocument" });
           picker.hide();
@@ -74,6 +74,7 @@ export async function showDocAndHidePicker(
       );
     })
   );
+  return uris;
 }
 
 export class PickerUtilsV2 {

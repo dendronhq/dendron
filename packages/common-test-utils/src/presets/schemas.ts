@@ -52,6 +52,9 @@ export const SCHEMA_PRESETS_V4 = {
       return schema;
     },
   }),
+  SCHEMA_SIMPLE_OTHER_NO_CHILD: CreateSchemaFactory({
+    fname: "bar",
+  }),
   BAD_SCHEMA: {
     create: ({ vault, wsRoot }: CreateSchemaPresetOptsV4) => {
       const vpath = vault2Path({ vault, wsRoot });

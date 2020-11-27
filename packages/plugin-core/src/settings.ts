@@ -1,3 +1,4 @@
+import { DVault } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   readJSONWithComments,
@@ -90,23 +91,19 @@ const _EXTENSIONS: ConfigUpdateEntry[] = [
 ];
 
 export type WriteConfigOpts = {
-  rootVault?: string;
+  vaults?: DVault[];
   overrides?: Partial<WorkspaceSettings>;
 };
 
 export class WorkspaceConfig {
   static write(wsRoot: string, opts?: WriteConfigOpts) {
     const cleanOpts = _.defaults(opts, {
-      rootVault: "vault",
+      vaults: [{ fsPath: "vault" }],
       overrides: {},
     });
     const jsonBody: WorkspaceSettings = _.merge(
       {
-        folders: [
-          {
-            path: cleanOpts.rootVault,
-          },
-        ],
+        folders: cleanOpts.vaults.map((ent) => ({ path: ent.fsPath })),
         settings: Settings.defaults(),
         extensions: Extensions.defaults(),
       },

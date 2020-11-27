@@ -1,10 +1,9 @@
-import { DNoteAnchor, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DNoteAnchor, NoteUtilsV2 } from "@dendronhq/common-all";
 import { sort as sortPaths } from "cross-path-sort";
 import fs from "fs";
 import _ from "lodash";
 import path from "path";
 import vscode, { commands, extensions, Location, TextDocument } from "vscode";
-import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { matchAll } from "./strings";
 

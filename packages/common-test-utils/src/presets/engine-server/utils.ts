@@ -69,7 +69,63 @@ export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
   });
 };
 
+export const setupSchemaPreseetWithNamespaceTemplate: PreSetupHookFunction = async (
+  opts
+) => {
+  await setupBasic(opts);
+  const { wsRoot, vaults } = opts;
+  const vault = vaults[0];
+  NoteTestUtilsV4.createSchema({
+    fname: "journal",
+    wsRoot,
+    vault,
+    modifier: (schema) => {
+      const schemas = [
+        SchemaUtilsV2.create({
+          id: "journal",
+          parent: "root",
+          children: ["year"],
+          vault,
+        }),
+        SchemaUtilsV2.create({
+          id: "year",
+          pattern: "[0-2][0-9][0-9][0-9]",
+          children: ["month"],
+          vault,
+        }),
+        SchemaUtilsV2.create({
+          id: "month",
+          pattern: "[0-9][0-9]",
+          children: ["day"],
+          vault,
+        }),
+        SchemaUtilsV2.create({
+          id: "day",
+          pattern: "[0-9][0-9]",
+          namespace: true,
+          template: {
+            id: "journal.template",
+            type: "note",
+          },
+          vault,
+        }),
+      ];
+      schemas.map((s) => {
+        schema.schemas[s.id] = s;
+      });
+      return schema;
+    },
+  });
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    body: "Template text",
+    fname: "journal.template",
+    vault,
+  });
+};
+
 export const ENGINE_HOOKS = {
   setupBasic,
   setupSchemaPreseet,
+  setupSchemaPreseetWithNamespaceTemplate,
 };

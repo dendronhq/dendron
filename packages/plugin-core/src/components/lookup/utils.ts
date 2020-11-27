@@ -61,7 +61,7 @@ export async function showDocAndHidePicker(
 
   await Promise.all(
     uris.map(async (uri) => {
-      window.showTextDocument(uri, { viewColumn }).then(
+      return window.showTextDocument(uri, { viewColumn }).then(
         () => {
           Logger.info({ ctx, msg: "showTextDocument" });
           picker.hide();

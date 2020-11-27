@@ -25,7 +25,7 @@ import {
   WorkspaceOpts,
   WriteNoteResp,
 } from "@dendronhq/common-all";
-import { createLogger, DLogger } from "@dendronhq/common-server";
+import { createLogger, DLogger, VaultUtils } from "@dendronhq/common-server";
 import _ from "lodash";
 import { FileStorageV2 } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
@@ -255,7 +255,7 @@ export class DendronEngineV2 implements DEngineV2 {
   async queryNotes(opts: QueryNotesOpts) {
     const ctx = "Engine:queryNotes";
     const { qs, vault, createIfNew } = opts;
-    const items = await this.fuseEngine.queryNote({ qs });
+    let items = await this.fuseEngine.queryNote({ qs });
     let item = this.notes[items[0].id];
     if (createIfNew) {
       let noteNew: NotePropsV2;
@@ -274,9 +274,13 @@ export class DendronEngineV2 implements DEngineV2 {
       await this.writeNote(noteNew, { newNode: true });
     }
     this.logger.info({ ctx, msg: "exit" });
+    let notes = items.map((ent) => this.notes[ent.id]);
+    if (!_.isUndefined(vault)) {
+      notes = notes.filter((ent) => VaultUtils.isEqual(vault, ent.vault));
+    }
     return {
       error: null,
-      data: items.map((ent) => this.notes[ent.id]),
+      data: notes,
     };
   }
 

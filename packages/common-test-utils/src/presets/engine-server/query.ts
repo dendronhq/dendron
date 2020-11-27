@@ -100,7 +100,7 @@ const NOTES = {
       return [
         {
           actual: data.length,
-          expected: 5,
+          expected: 4,
         },
       ];
     },

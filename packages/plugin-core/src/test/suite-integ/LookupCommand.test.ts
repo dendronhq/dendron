@@ -8,11 +8,19 @@ import {
   SchemaUtilsV2,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { DirResult, file2Note, tmpDir } from "@dendronhq/common-server";
+import {
+  DirResult,
+  file2Note,
+  tmpDir,
+  vault2Path,
+} from "@dendronhq/common-server";
 import {
   ENGINE_HOOKS,
   ENGINE_QUERY_PRESETS,
   ENGINE_WRITE_PRESETS,
+  NotePresetsUtils,
+  NoteTestUtilsV4,
+  NOTE_PRESETS_V4,
   PLUGIN_CORE,
   runJestHarnessV2,
   TestPresetEntryV4,
@@ -56,73 +64,11 @@ import {
 import {
   createEngineFactory,
   runLegacyMultiWorkspaceTest,
+  runLegacySingleWorkspaceTest,
 } from "../testUtilsV3";
+import fs from "fs-extra";
 
 const { LOOKUP_SINGLE_TEST_PRESET } = PLUGIN_CORE;
-// TODO: This could be cleaned up further+extended, but better for now
-let vaultPath: string;
-// const createOneNoteOneSchemaPresetCallback = async (_vaultPath: string) => {
-//   vaultPath = _vaultPath;
-//   return NodeTestPresetsV2.createOneNoteOneSchemaPreset({
-//     vaultDir: vaultPath,
-//   });
-// };
-// const runAcceptItemTest = async (opts: {
-//   ctx: vscode.ExtensionContext;
-//   beforeActivateCb?: (opts: {
-//     vaults: DVault[];
-//     wsRoot: string;
-//   }) => Promise<void>;
-//   onInitCb: (opts: {
-//     lc: LookupControllerV2;
-//     lp: LookupProviderV2;
-//     wsRoot: string;
-//     vaults: DVault[];
-//   }) => Promise<void>;
-// }) => {
-//   // setup workspace
-//   const root = tmpDir();
-//   const ctx = opts.ctx;
-//   const wsRoot = root.name;
-//   const vault = { fsPath: tmpDir().name };
-//   const vaults = [vault];
-
-//   // setup test
-//   onInitForAccept({ onInitCb: opts.onInitCb, wsRoot, vaults });
-
-//   // await setupDendronWorkspace(root.name, ctx, {
-//   //   useCb: async (vaultDir) => {
-//   //     await createOneNoteOneSchemaPresetCallback(vaultDir);
-//   //     if (opts.beforeActivateCb) {
-//   //       await opts.beforeActivateCb({
-//   //         wsRoot,
-//   //         vaults: [{ fsPath: vaultDir }],
-//   //       });
-//   //     }
-//   //   },
-//   //   vault,
-//   // });
-// };
-
-// const onInitForAccept = async (opts: {
-//   onInitCb: (opts: {
-//     lc: LookupControllerV2;
-//     lp: LookupProviderV2;
-//     wsRoot: string;
-//     vaults: DVault[];
-//   }) => Promise<void>;
-//   wsRoot: string;
-//   vaults: DVault[];
-// }) => {
-//   onWSInit(async () => {
-//     const { onInitCb, wsRoot, vaults } = opts;
-//     const engOpts: EngineOpts = { flavor: "note" };
-//     const lc = new LookupControllerV2(engOpts);
-//     lc.createCancelSource();
-//     const lp = new LookupProviderV2(engOpts);
-//     await onInitCb({ lp, lc, wsRoot, vaults });
-//   });
-// };
 
 const createEngineForSchemaUpdateItems = createEngineFactory({
   querySchema: (_opts: WorkspaceOpts) => {
@@ -368,15 +314,6 @@ suite("schemas", function () {
   });
 });
 
-async function setupCase2({ ctx }: { ctx: vscode.ExtensionContext }) {
-  const out = await setupCodeWorkspaceV2({
-    ctx,
-    initDirCb: createOneNoteOneSchemaPresetCallback,
-  });
-  await _activate(ctx);
-  return out;
-}
-
 function setupCase1({
   ctx,
   wsRoot,
@@ -443,10 +380,7 @@ suite.only("notesv2", function () {
 
   describe("updateItems", function () {
     _.map(
-      _.pick<typeof ENGINE_QUERY_PRESETS["NOTES"]>(
-        ENGINE_QUERY_PRESETS["NOTES"],
-        "CHILD_QUERY_WITH_SCHEMA"
-      ),
+      ENGINE_QUERY_PRESETS["NOTES"],
       (TestCase: TestPresetEntryV4, name) => {
         test(name, (done) => {
           const { testFunc, preSetupHook } = TestCase;
@@ -468,6 +402,7 @@ suite.only("notesv2", function () {
                 vaults,
                 wsRoot,
                 initResp: {} as any,
+                extra: { vscode: true },
               });
               await runJestHarnessV2(results, expect);
               done();
@@ -503,6 +438,88 @@ suite.only("notesv2", function () {
             "manual",
             lc.cancelToken.token
           );
+        },
+      });
+    });
+
+    test("remove stub status after creation", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await NOTE_PRESETS_V4.NOTE_SIMPLE_CHILD.create({
+            vault: vaults[0],
+            wsRoot,
+          });
+        },
+        onInit: async ({}) => {
+          const engOpts: EngineOpts = { flavor: "note" };
+          const lc = new LookupControllerV2(engOpts);
+          const lp = new LookupProviderV2(engOpts);
+
+          let quickpick = await lc.show();
+          let note = _.find(quickpick.items, {
+            fname: "foo",
+          }) as DNodePropsQuickInputV2;
+          assert.ok(note.stub);
+          quickpick.selectedItems = [note];
+          await lp.onDidAccept({ picker: quickpick, opts: engOpts, lc });
+          lc.onDidHide(async () => {
+            assert.equal(
+              path.basename(
+                VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+              ),
+              "foo.md"
+            );
+            const lc2 = new LookupControllerV2(engOpts);
+            const quickpick2 = await lc2.show();
+            note = _.find(quickpick2.items, {
+              fname: "foo",
+            }) as DNodePropsQuickInputV2;
+            assert.ok(!note.stub);
+            done();
+          });
+          quickpick.hide();
+        },
+      });
+    });
+
+    test("schema suggestion", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        postSetupHook: async ({ wsRoot, vaults }) => {
+          await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+          const vpath = vault2Path({ vault: vaults[0], wsRoot });
+          fs.removeSync(path.join(vpath, "foo.ch1.md"));
+        },
+        onInit: async ({}) => {
+          const engOpts: EngineOpts = { flavor: "note" };
+          const lc = new LookupControllerV2(engOpts);
+          const lp = new LookupProviderV2(engOpts);
+          let quickpick = await lc.show();
+          quickpick.value = "foo.";
+          await lp.onUpdatePickerItem(
+            quickpick,
+            { flavor: "note" },
+            "manual",
+            lc.cancelToken.token
+          );
+          const schemaItem = _.pick(
+            _.find(quickpick.items, { fname: "foo.ch1" }),
+            ["fname", "schemaStub"]
+          );
+          await runJestHarnessV2(
+            [
+              {
+                actual: schemaItem,
+                expected: {
+                  fname: "foo.ch1",
+                  schemaStub: true,
+                },
+              },
+            ],
+            expect
+          );
+          done();
         },
       });
     });
@@ -573,90 +590,6 @@ suite("notes", function () {
 
   describe("updateItems", function () {
     let vault: string;
-
-    // TODO: onDidChangeActive doesn't work when multiselection is enabled
-    test("remove stub status after creation", function (done) {
-      onWSInit(async () => {
-        const engOpts: EngineOpts = { flavor: "note" };
-        const lc = new LookupControllerV2(engOpts);
-        const lp = new LookupProviderV2(engOpts);
-
-        let quickpick = await lc.show();
-        let note = _.find(quickpick.items, {
-          fname: "foo",
-        }) as DNodePropsQuickInputV2;
-        assert.ok(note.stub);
-        quickpick.selectedItems = [note];
-        await lp.onDidAccept({ picker: quickpick, opts: engOpts, lc });
-        lc.onDidHide(async () => {
-          assert.equal(
-            path.basename(
-              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-            ),
-            "foo.md"
-          );
-          const lc2 = new LookupControllerV2(engOpts);
-          const quickpick2 = await lc2.show();
-          note = _.find(quickpick2.items, {
-            fname: "foo",
-          }) as DNodePropsQuickInputV2;
-          assert.ok(!note.stub);
-          // TODO
-          // no schema file
-          //assert.ok(note.schema?.id, Schema.createUnkownSchema().id);
-          done();
-        });
-        quickpick.hide();
-      });
-      setupCaseCustom({
-        ctx,
-        wsRoot: root.name,
-        noteProps: [
-          {
-            id: "id.foo.bar",
-            fname: "foo.bar",
-          },
-        ],
-      }).then(({ vaults }) => {
-        vault = vaults[0];
-        _activate(ctx);
-      });
-    });
-
-    test("schema suggestion", function (done) {
-      onWSInit(async () => {
-        const engOpts: EngineOpts = { flavor: "note" };
-        const lc = new LookupControllerV2(engOpts);
-        const lp = new LookupProviderV2(engOpts);
-        let quickpick = await lc.show();
-        quickpick.value = "foo.";
-        await lp.onUpdatePickerItem(
-          quickpick,
-          { flavor: "note" },
-          "manual",
-          lc.cancelToken.token
-        );
-        await NodeTestPresetsV2.runMochaHarness({
-          results:
-            LOOKUP_SINGLE_TEST_PRESET.UPDATE_ITEMS.SCHEMA_SUGGESTION.results,
-          opts: { items: quickpick.items },
-        });
-        assert.deepStrictEqual(quickpick.items.length, 3);
-        done();
-      });
-
-      setupDendronWorkspace(root.name, ctx, {
-        lsp: true,
-        useCb: async (vaultPath) => {
-          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({
-            vaultDir: vaultPath,
-          });
-          await LOOKUP_SINGLE_TEST_PRESET.UPDATE_ITEMS.SCHEMA_SUGGESTION.before(
-            { vault: { fsPath: vaultPath } }
-          );
-        },
-      });
-    });
 
     test("filter by depth", function (done) {
       runUpdateItemTest({

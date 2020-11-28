@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { configRouter } from "./config";
 import { noteRouter } from "./note";
 import { schemaRouter } from "./schema";
 import { workspaceRouter } from "./workspace";
@@ -10,6 +11,7 @@ const router = Router();
 router.use("/workspace", workspaceRouter);
 router.use("/note", noteRouter);
 router.use("/schema", schemaRouter);
+router.use("/config", configRouter);
 
 // const engineRouter = Router();
 // engineRouter.get("health", async (_req: Request, res: Response) => {

@@ -5,6 +5,7 @@ export const CONSTANTS = {
   ALL_QUERY: "**/*",
   DENDRON_SERVER_PORT: ".dendron.port",
   DENDRON_WS_META: ".dendron.ws",
+  DENDRON_CONFIG_FILE: "dendron.yml",
 };
 
 export const ENGINE_ERROR_CODES = {

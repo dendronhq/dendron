@@ -275,12 +275,20 @@ export type RenameNoteOptsV2 = {
   newLoc: DNoteLoc;
 };
 
+export type ConfigWriteOpts = {
+  config: DendronConfig;
+};
+
 // === Engine and Store Main
 
 export type DCommonProps = {
   notes: NotePropsDictV2;
   schemas: SchemaModuleDictV2;
   wsRoot: string;
+  /**
+   * NOTE: currently same as wsRoot. in the future, the two will be decoupled
+   */
+  configRoot: string;
   vaultsv3: DVault[];
   links: DLink[];
   vaults: string[];
@@ -363,12 +371,11 @@ export type DEngineV2 = DCommonProps &
     querySchema: (qs: string) => Promise<SchemaQueryResp>;
     queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;
     queryNotesSync({ qs }: { qs: string }): NoteQueryResp;
-    // query?: (
-    //   queryString: string,
-    //   mode: DNodeTypeV2,
-    //   opts?: QueryOptsV2
-    // ) => Promise<EngineQueryNoteResp>;
     renameNote: (opts: RenameNoteOptsV2) => Promise<RespV2<RenameNotePayload>>;
+
+    // config
+    writeConfig: (opts: ConfigWriteOpts) => Promise<RespV2<void>>;
+    getConfig: () => Promise<RespV2<ConfigGetPayload>>;
   };
 
 export type DEngineClientV2 = Omit<DEngineV2, "store">;

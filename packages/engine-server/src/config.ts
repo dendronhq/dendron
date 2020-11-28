@@ -1,14 +1,16 @@
-import { DendronConfig, DendronSiteConfig } from "@dendronhq/common-all";
+import {
+  CONSTANTS,
+  DendronConfig,
+  DendronSiteConfig,
+} from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 
-const DENDRON_CONFIG_FILE = "dendron.yml";
-
 export class DConfig {
   static configPath(wsRoot: string): string {
-    return path.join(wsRoot, DENDRON_CONFIG_FILE);
+    return path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE);
   }
 
   static genDefaultConfig(): DendronConfig {

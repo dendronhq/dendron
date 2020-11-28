@@ -96,6 +96,7 @@ const NOTES = {
     async ({ vaults, engine }) => {
       const vault = vaults[0];
       const { data } = await engine.queryNotes({ qs: "*", vault });
+      debugger;
       return [
         {
           actual: data.length,

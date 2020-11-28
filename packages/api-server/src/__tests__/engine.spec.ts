@@ -1,6 +1,7 @@
 import _ from "lodash";
 import {
   CreateEngineFunction,
+  ENGINE_CONFIG_PRESETS,
   ENGINE_PRESETS,
   runEngineTestV4,
 } from "@dendronhq/common-test-utils";
@@ -41,6 +42,22 @@ describe("engine, notes/", () => {
     describe(name, () => {
       test.each(
         _.map(presets[nodeType], (v, k) => {
+          return [k, v];
+        })
+      )("%p", async (_key, TestCase) => {
+        // @ts-ignore
+        const { testFunc, ...opts } = TestCase;
+        await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+      });
+    });
+  });
+});
+
+describe("engine, config/", () => {
+  _.map(ENGINE_CONFIG_PRESETS, (presets, name) => {
+    describe(name, () => {
+      test.each(
+        _.map(presets, (v, k) => {
           return [k, v];
         })
       )("%p", async (_key, TestCase) => {

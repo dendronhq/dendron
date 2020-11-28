@@ -1,6 +1,10 @@
 import { WorkspaceOpts } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
-import { ENGINE_PRESETS, runEngineTestV4 } from "@dendronhq/common-test-utils";
+import {
+  ENGINE_CONFIG_PRESETS,
+  ENGINE_PRESETS,
+  runEngineTestV4,
+} from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { DendronEngineV2 } from "../enginev2";
 
@@ -149,6 +153,21 @@ describe("engine, notes/", () => {
     describe(name, () => {
       test.each(
         _.map(presets[nodeType], (v, k) => {
+          return [k, v];
+        })
+      )("%p", async (_key, TestCase) => {
+        const { testFunc, ...opts } = TestCase;
+        await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+      });
+    });
+  });
+});
+
+describe("engine, config/", () => {
+  _.map(ENGINE_CONFIG_PRESETS, (presets, name) => {
+    describe(name, () => {
+      test.each(
+        _.map(presets, (v, k) => {
           return [k, v];
         })
       )("%p", async (_key, TestCase) => {

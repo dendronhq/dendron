@@ -1,5 +1,6 @@
 import {
   DEngineMode,
+  DVault,
   NotePropsDictV2,
   NotePropsV2,
   SchemaModuleDictV2,
@@ -14,6 +15,7 @@ export type NoteIndexProps = {
   id: string;
   title: string;
   fname: string;
+  vault: DVault;
 };
 
 function createFuse<T>(
@@ -98,7 +100,12 @@ export class FuseEngine {
 
   async updateNotesIndex(notes: NotePropsDictV2) {
     this.notesIndex.setCollection(
-      _.map(notes, ({ fname, title, id }, _key) => ({ fname, id, title }))
+      _.map(notes, ({ fname, title, id, vault }, _key) => ({
+        fname,
+        id,
+        title,
+        vault,
+      }))
     );
   }
 

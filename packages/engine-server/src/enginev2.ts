@@ -1,4 +1,6 @@
 import {
+  ConfigWriteOpts,
+  DendronConfig,
   DendronError,
   DEngineClientV2,
   DEngineDeleteSchemaRespV2,
@@ -28,8 +30,15 @@ import {
   WorkspaceOpts,
   WriteNoteResp,
 } from "@dendronhq/common-all";
-import { createLogger, DLogger, VaultUtils } from "@dendronhq/common-server";
+import {
+  createLogger,
+  DLogger,
+  readYAML,
+  VaultUtils,
+  writeYAML,
+} from "@dendronhq/common-server";
 import _ from "lodash";
+import { DConfig } from "./config";
 import { FileStorageV2 } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
 
@@ -52,11 +61,13 @@ export class DendronEngineV2 implements DEngineV2 {
   public fuseEngine: FuseEngine;
   public links: DLink[];
   public vaultsv3: DVault[];
+  public configRoot: string;
 
   static _instance: DendronEngineV2 | undefined;
 
   constructor(props: DendronEnginePropsV2) {
     this.wsRoot = props.wsRoot;
+    this.configRoot = props.wsRoot;
     this.store = props.store;
     this.logger = props.logger;
     this.props = props;
@@ -216,6 +227,15 @@ export class DendronEngineV2 implements DEngineV2 {
     return {
       data: { note: noteNew, changed },
       error,
+    };
+  }
+
+  async getConfig() {
+    const cpath = DConfig.configPath(this.configRoot);
+    const config = readYAML(cpath) as DendronConfig;
+    return {
+      error: null,
+      data: config,
     };
   }
 
@@ -382,6 +402,17 @@ export class DendronEngineV2 implements DEngineV2 {
     const out = await this.store.updateSchema(schemaModule);
     await this.updateIndex("schema");
     return out;
+  }
+
+  async writeConfig(
+    opts: ConfigWriteOpts
+  ): ReturnType<DEngineV2["writeConfig"]> {
+    const { configRoot } = this;
+    const cpath = DConfig.configPath(configRoot);
+    writeYAML(cpath, opts.config);
+    return {
+      error: null,
+    };
   }
 
   async writeNote(

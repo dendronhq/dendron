@@ -1,3 +1,4 @@
+import { ENGINE_CONFIG_PRESETS } from "./config";
 import { ENGINE_DELETE_PRESETS } from "./delete";
 import { ENGINE_GET_NOTE_BY_PATH_PRESETS } from "./getByPath";
 import { ENGINE_INIT_PRESETS } from "./init";
@@ -32,3 +33,4 @@ export const ENGINE_PRESETS = [
 export { ENGINE_RENAME_PRESETS };
 export { ENGINE_QUERY_PRESETS };
 export { ENGINE_WRITE_PRESETS };
+export { ENGINE_CONFIG_PRESETS };

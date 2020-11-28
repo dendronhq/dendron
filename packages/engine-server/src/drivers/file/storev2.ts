@@ -292,10 +292,12 @@ export class FileStorageV2 implements DStoreV2 {
   public links: DLink[];
   public vaultsv3: DVault[];
   public wsRoot: string;
+  public configRoot: string;
 
   constructor(props: { wsRoot: string; logger: DLogger; vaultsv3: DVault[] }) {
     const { vaultsv3, logger, wsRoot } = props;
     this.wsRoot = wsRoot;
+    this.configRoot = wsRoot;
     this.vaultsv3 = vaultsv3;
     this.vaults = vaultsv3.map((ent) => ent.fsPath);
     this.notes = {};

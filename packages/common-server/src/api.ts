@@ -1,4 +1,6 @@
+import { ConfigWriteOpts, RespV2 } from "@dendronhq/common-all";
 import {
+  ConfigGetPayload,
   DendronError,
   DEngineDeleteSchemaPayloadV2,
   DEngineQuery,
@@ -119,7 +121,7 @@ export type WorkspaceInitRequest = {
 };
 export type WorkspaceSyncRequest = WorkspaceRequest;
 
-type WorkspaceRequest = { ws: string };
+export type WorkspaceRequest = { ws: string };
 
 export type EngineQueryRequest = DEngineQuery & { ws: string };
 export type EngineGetNoteByPathRequest = GetNoteOptsV2 & { ws: string };
@@ -303,6 +305,28 @@ export abstract class API {
 
 export class DendronAPI extends API {
   static instance: DendronAPI;
+
+  async configGet(
+    req: WorkspaceRequest
+  ): Promise<APIPayload<ConfigGetPayload>> {
+    const resp = await this._makeRequest({
+      path: "config/get",
+      method: "get",
+      qs: req,
+    });
+    return resp;
+  }
+
+  async configWrite(
+    req: ConfigWriteOpts & WorkspaceRequest
+  ): Promise<RespV2<void>> {
+    const resp = await this._makeRequest({
+      path: "config/write",
+      method: "post",
+      body: req,
+    });
+    return resp;
+  }
 
   async workspaceInit(req: WorkspaceInitRequest): Promise<InitializePayload> {
     const resp = await this._makeRequest({

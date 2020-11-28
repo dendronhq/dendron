@@ -1,8 +1,11 @@
 import {
+  ConfigGetPayload,
+  ConfigWriteOpts,
   DendronError,
   DEngineClientV2,
   DEngineDeleteSchemaRespV2,
   DEngineInitRespV2,
+  DEngineV2,
   DLink,
   DNodePropsV2,
   DVault,
@@ -26,7 +29,7 @@ import {
   SchemaUtilsV2,
   WriteNoteResp,
 } from "@dendronhq/common-all";
-import { DendronAPI } from "@dendronhq/common-server";
+import { DendronAPI, VaultUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { FuseEngine } from "./fuseEngine";
@@ -46,6 +49,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   public fuseEngine: FuseEngine;
   public api: DendronAPI;
   public vaultsv3: DVault[];
+  public configRoot: string;
 
   static create({
     port,
@@ -85,6 +89,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.vaultsv3 = vaults.map((ent) => ({ fsPath: ent }));
     this.wsRoot = ws;
     this.ws = ws;
+    this.configRoot = this.wsRoot;
   }
 
   /**
@@ -158,6 +163,13 @@ export class DendronEngineClient implements DEngineClientV2 {
     };
   }
 
+  async getConfig(): Promise<RespV2<ConfigGetPayload>> {
+    const resp = await this.api.configGet({
+      ws: this.ws,
+    });
+    return resp;
+  }
+
   async getNoteByPath(opts: GetNoteOptsV2): Promise<RespV2<GetNotePayloadV2>> {
     const resp = await this.api.engineGetNoteByPath({
       ...opts,
@@ -169,13 +181,22 @@ export class DendronEngineClient implements DEngineClientV2 {
     return resp;
   }
 
-  async queryNote({ qs }: { qs: string }): Promise<NotePropsV2[]> {
-    const noteIndexProps = await this.fuseEngine.queryNote({ qs });
+  async queryNote(
+    opts: Parameters<DEngineClientV2["queryNotes"]>[0]
+  ): Promise<NotePropsV2[]> {
+    const { qs, vault } = opts;
+    let noteIndexProps = await this.fuseEngine.queryNote({ qs });
+    // TODO: hack
+    if (!_.isUndefined(vault)) {
+      noteIndexProps = noteIndexProps.filter((ent) =>
+        VaultUtils.isEqual(vault, ent.vault)
+      );
+    }
     return noteIndexProps.map((ent) => this.notes[ent.id]);
   }
 
   async queryNotes(opts: QueryNotesOpts) {
-    const items = await this.queryNote({ qs: opts.qs });
+    const items = await this.queryNote(opts);
     return {
       data: items,
       error: null,
@@ -286,6 +307,15 @@ export class DendronEngineClient implements DEngineClientV2 {
     await this.api.schemaUpdate({ schema, ws: this.ws });
     await this.refreshSchemas([schema]);
     return;
+  }
+
+  async writeConfig(
+    opts: ConfigWriteOpts
+  ): ReturnType<DEngineV2["writeConfig"]> {
+    await this.api.configWrite({ ...opts, ws: this.ws });
+    return {
+      error: null,
+    };
   }
 
   async writeSchema(schema: SchemaModulePropsV2): Promise<void> {

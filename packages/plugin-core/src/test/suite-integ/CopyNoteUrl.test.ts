@@ -82,7 +82,7 @@ suite("notes", function () {
           body: "## Foo\nfoo text\n## Header\n Header text",
           vault,
         });
-        await note2File(note, vaultDir);
+        await note2File({ note, vault, wsRoot: "FAKE_ROOT" });
       },
     });
   });

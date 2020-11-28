@@ -1,7 +1,6 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
-import { DirResult, tmpDir, note2File } from "@dendronhq/common-server";
-import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
-import assert from "assert";
+import { DVault, NoteUtilsV2 } from "@dendronhq/common-all";
+import { note2File, vault2Path } from "@dendronhq/common-server";
+import { runJestHarnessV2 } from "@dendronhq/common-test-utils";
 import { afterEach, beforeEach } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
@@ -9,17 +8,16 @@ import { GoToSiblingCommand } from "../../commands/GoToSiblingCommand";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { onWSInit, setupDendronWorkspace, TIMEOUT } from "../testUtils";
+import { TIMEOUT } from "../testUtils";
+import { expect } from "../testUtilsv2";
+import { runLegacyMultiWorkspaceTest } from "../testUtilsV3";
 
 suite("notes", function () {
-  let root: DirResult;
   let ctx: vscode.ExtensionContext;
-  let vaultPath: string;
   let direction = "next" as const;
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
   });
@@ -28,169 +26,233 @@ suite("notes", function () {
     HistoryService.instance().clearSubscriptions();
   });
 
-  const createNotes = (vaultPath: string) => {
-    const vault = { fsPath: vaultPath };
+  const createNotes = (wsRoot: string, vault: DVault) => {
     return Promise.all([
-      note2File(
-        NoteUtilsV2.create({ fname: "foo.journal.2020.08.29", vault }),
-        vaultPath
-      ),
-      note2File(
-        NoteUtilsV2.create({ fname: "foo.journal.2020.08.30", vault }),
-        vaultPath
-      ),
-      note2File(
-        NoteUtilsV2.create({ fname: "foo.journal.2020.08.31", vault }),
-        vaultPath
-      ),
+      note2File({
+        note: NoteUtilsV2.create({ fname: "foo.journal.2020.08.29", vault }),
+        vault,
+        wsRoot,
+      }),
+      note2File({
+        note: NoteUtilsV2.create({ fname: "foo.journal.2020.08.30", vault }),
+        vault,
+        wsRoot,
+      }),
+      note2File({
+        note: NoteUtilsV2.create({ fname: "foo.journal.2020.08.31", vault }),
+        vault,
+        wsRoot,
+      }),
     ]);
   };
 
   test("basic", (done) => {
-    onWSInit(async () => {
-      const notePath = path.join(vaultPath, "foo.journal.2020.08.30.md");
-      await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-      const resp = await new GoToSiblingCommand().execute({ direction });
-      assert.deepStrictEqual(resp, { msg: "ok" });
-      assert.ok(
-        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-          "foo.journal.2020.08.31.md"
-        )
-      );
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        vaultPath = vaultDir;
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
-        await createNotes(vaultDir);
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        await createNotes(wsRoot, vaults[0]);
+      },
+      onInit: async ({ vaults, wsRoot }) => {
+        const vault = vaults[0];
+        const vpath = vault2Path({ wsRoot, vault });
+        const notePath = path.join(vpath, "foo.journal.2020.08.30.md");
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+        const resp = await new GoToSiblingCommand().execute({ direction });
+        await runJestHarnessV2(
+          [
+            {
+              actual: resp,
+              expected: { msg: "ok" },
+            },
+            {
+              actual: VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+                "foo.journal.2020.08.31.md"
+              ),
+              expected: true,
+            },
+          ],
+          expect
+        );
+        done();
       },
     });
   });
 
   test("traversal from parent", (done) => {
-    onWSInit(async () => {
-      const notePath = path.join(vaultPath, "foo.journal.2020.08.md");
-      await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-      const resp = await new GoToSiblingCommand().execute({ direction });
-      assert.deepStrictEqual(resp, { msg: "ok" });
-      assert.ok(
-        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-          "foo.journal.2020.09.md"
-        )
-      );
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        vaultPath = vaultDir;
-        const vault = { fsPath: vaultPath };
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
-        await createNotes(vaultDir);
-        await note2File(
-          NoteUtilsV2.create({ fname: "foo.journal.2020.08", vault }),
-          vaultPath
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        await createNotes(wsRoot, vault);
+        await note2File({
+          note: NoteUtilsV2.create({ fname: "foo.journal.2020.08", vault }),
+          vault,
+          wsRoot,
+        });
+        await note2File({
+          note: NoteUtilsV2.create({ fname: "foo.journal.2020.09", vault }),
+          vault,
+          wsRoot,
+        });
+      },
+      onInit: async ({ vaults, wsRoot }) => {
+        const vault = vaults[0];
+        const vpath = vault2Path({ wsRoot, vault });
+
+        const notePath = path.join(vpath, "foo.journal.2020.08.md");
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+        const resp = await new GoToSiblingCommand().execute({ direction });
+        await runJestHarnessV2(
+          [
+            {
+              actual: resp,
+              expected: { msg: "ok" },
+            },
+            {
+              actual: VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+                "foo.journal.2020.09.md"
+              ),
+              expected: true,
+            },
+          ],
+          expect
         );
-        await note2File(
-          NoteUtilsV2.create({ fname: "foo.journal.2020.09", vault }),
-          vaultPath
-        );
+        done();
       },
     });
   });
 
   test("go over index", (done) => {
-    onWSInit(async () => {
-      const notePath = path.join(vaultPath, "foo.journal.2020.08.31.md");
-      await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-      const resp = await new GoToSiblingCommand().execute({ direction });
-      assert.deepStrictEqual(resp, { msg: "ok" });
-      assert.ok(
-        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-          "foo.journal.2020.08.29.md"
-        )
-      );
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        vaultPath = vaultDir;
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
-        await createNotes(vaultDir);
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        await createNotes(wsRoot, vault);
+      },
+      onInit: async ({ vaults, wsRoot }) => {
+        const vault = vaults[0];
+        const vpath = vault2Path({ wsRoot, vault });
+
+        const notePath = path.join(vpath, "foo.journal.2020.08.31.md");
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+        const resp = await new GoToSiblingCommand().execute({ direction });
+        await runJestHarnessV2(
+          [
+            {
+              actual: resp,
+              expected: { msg: "ok" },
+            },
+            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+              "foo.journal.2020.08.29.md"
+            ),
+          ],
+          expect
+        );
+        done();
       },
     });
   });
 
   test("no siblings", (done) => {
-    onWSInit(async () => {
-      const notePath = path.join(vaultPath, "foo.journal.2020.08.29.md");
-      await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-      const resp = await new GoToSiblingCommand().execute({ direction });
-      assert.deepStrictEqual(resp, { msg: "no_siblings" });
-      assert.ok(
-        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-          "foo.journal.2020.08.29.md"
-        )
-      );
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        vaultPath = vaultDir;
-        const vault = { fsPath: vaultPath };
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
-        await note2File(
-          NoteUtilsV2.create({ fname: "foo.journal.2020.08.29", vault }),
-          vaultPath
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        await note2File({
+          note: NoteUtilsV2.create({ fname: "foo.journal.2020.08.29", vault }),
+          vault,
+          wsRoot,
+        });
+      },
+      onInit: async ({ vaults, wsRoot }) => {
+        const vault = vaults[0];
+        const vpath = vault2Path({ wsRoot, vault });
+
+        const notePath = path.join(vpath, "foo.journal.2020.08.29.md");
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+        const resp = await new GoToSiblingCommand().execute({ direction });
+        await runJestHarnessV2(
+          [
+            {
+              actual: resp,
+              expected: { msg: "no_siblings" },
+            },
+            {
+              actual: VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+                "foo.journal.2020.08.29.md"
+              ),
+              expected: true,
+            },
+          ],
+          expect
         );
+        done();
       },
     });
   });
 
   test("no open editor", (done) => {
-    onWSInit(async () => {
-      await VSCodeUtils.closeAllEditors();
-      const resp = await new GoToSiblingCommand().execute({ direction });
-      assert.deepStrictEqual(resp, { msg: "no_editor" });
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        vaultPath = vaultDir;
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        await note2File({
+          note: NoteUtilsV2.create({ fname: "foo.journal.2020.08.29", vault }),
+          vault,
+          wsRoot,
+        });
+      },
+      onInit: async ({}) => {
+        await VSCodeUtils.closeAllEditors();
+        const resp = await new GoToSiblingCommand().execute({ direction });
+        await runJestHarnessV2(
+          [
+            {
+              actual: resp,
+              expected: { msg: "no_editor" },
+            },
+          ],
+          expect
+        );
+        done();
       },
     });
   });
 
   test("nav in root", (done) => {
-    onWSInit(async () => {
-      const notePath = path.join(vaultPath, "root.md");
-      await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-      const resp = await new GoToSiblingCommand().execute({ direction });
-      assert.deepStrictEqual(resp, { msg: "ok" });
-      assert.ok(
-        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-          "foo.md"
-        )
-      );
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        vaultPath = vaultDir;
-        const vault = { fsPath: vaultPath };
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
-        // needed because traversal on root doesn't include root
-        await note2File(
-          NoteUtilsV2.create({ fname: "gamma", vault }),
-          vaultPath
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        await note2File({
+          note: NoteUtilsV2.create({ fname: "gamma", vault }),
+          vault,
+          wsRoot,
+        });
+      },
+      onInit: async ({ vaults, wsRoot }) => {
+        const vault = vaults[0];
+        const vpath = vault2Path({ wsRoot, vault });
+
+        const notePath = path.join(vpath, "root.md");
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+        const resp = await new GoToSiblingCommand().execute({ direction });
+        await runJestHarnessV2(
+          [
+            {
+              actual: resp,
+              expected: { msg: "ok" },
+            },
+            {
+              actual: VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+                "gamma.md"
+              ),
+              expected: true,
+            },
+          ],
+          expect
         );
+        done();
       },
     });
   });

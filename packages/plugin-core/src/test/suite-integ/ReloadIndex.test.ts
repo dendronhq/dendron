@@ -51,7 +51,7 @@ suite("ReloadIndex", function () {
     });
   });
 
-  test.only("don't overwrite if root exists", (done) => {
+  test("don't overwrite if root exists", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
       postSetupHook: async ({ wsRoot, vaults }) => {

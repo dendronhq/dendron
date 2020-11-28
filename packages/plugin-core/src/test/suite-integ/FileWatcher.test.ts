@@ -43,7 +43,12 @@ suite("notes", function () {
           created: "1",
           vault,
         });
-        await note2File(bar, vaultPath);
+        await note2File({
+          note: bar,
+          vault: { fsPath: vaultPath },
+          wsRoot: "FAKE_ROOT",
+        });
+
         const notePath = path.join(vaultPath, "bar.md");
         const uri = vscode.Uri.file(notePath);
         const note = await watcher.onDidCreate(uri);
@@ -75,7 +80,11 @@ suite("notes", function () {
           created: "1",
           vault,
         });
-        await note2File(bar, vaultPath);
+        await note2File({
+          note: bar,
+          vault: { fsPath: vaultPath },
+          wsRoot: "FAKE_ROOT",
+        });
         const notePath = path.join(vaultPath, "bar.md");
         const uri = vscode.Uri.file(notePath);
         const note = await watcher.onDidCreate(uri);

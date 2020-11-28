@@ -27,7 +27,7 @@ suite("notes", function () {
     HistoryService.instance().clearSubscriptions();
   });
 
-  test.only("basic", (done) => {
+  test("basic", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {

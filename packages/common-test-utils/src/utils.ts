@@ -135,6 +135,14 @@ export type RunEngineTestFunctionV4 = (
   opts: RunEngineTestFunctionOpts & { extra?: any }
 ) => Promise<TestResult[]>;
 
+export type SetupTestFunctionV4 = (
+  opts: RunEngineTestFunctionOpts & { extra?: any }
+) => Promise<any>;
+
+export type GenTestResults = (
+  opts: RunEngineTestFunctionOpts & { extra?: any }
+) => Promise<TestResult[]>;
+
 export type CreateEngineFunction = (opts: WorkspaceOpts) => DEngineClientV2;
 
 export async function runEngineTest(

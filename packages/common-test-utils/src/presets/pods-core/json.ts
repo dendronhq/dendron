@@ -1,8 +1,14 @@
 import { DPod, DVault, NoteUtilsV2 } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
-import { AssertUtils, FileTestUtils } from "../..";
+import {
+  AssertUtils,
+  FileTestUtils,
+  GenTestResults,
+  SetupTestFunctionV4,
+} from "../..";
 import { TestPresetEntryV4 } from "../../utilsv2";
 import { setupBasic } from "../engine-server/utils";
 
@@ -246,42 +252,52 @@ const IMPORT = {
   ),
 };
 
+const genTestResultsForExportBasic: GenTestResults = async (opts) => {
+  const destPath = opts.extra.destPath;
+  const importedNote = fs.readFileSync(path.join(destPath), {
+    encoding: "utf8",
+  });
+  return [
+    {
+      actual: await AssertUtils.assertInString({
+        body: importedNote,
+        match: ["foo body", "bar body"],
+      }),
+      expected: true,
+    },
+    {
+      actual: await AssertUtils.assertInString({
+        body: importedNote,
+        match: ["foo body"],
+      }),
+      expected: true,
+    },
+  ];
+};
+
+const setupTestForExportBasic: SetupTestFunctionV4 = async (opts) => {
+  const { extra } = opts;
+  const { pod } = extra as { pod: DPod<any> };
+  const destDir = tmpDir().name;
+  const destPath = path.join(destDir, "export.json");
+  const config = { dest: destPath };
+  await pod.execute({
+    config,
+    ...opts,
+  });
+  return { destPath };
+};
+
 const EXPORT = {
   BASIC: new TestPresetEntryV4(
-    async ({ wsRoot, engine, vaults, extra }) => {
-      const { pod } = extra as { pod: DPod<any> };
-      const destDir = tmpDir().name;
-      const destPath = path.join(destDir, "export.json");
-      const config = { dest: destPath };
-
-      await pod.execute({
-        config,
-        vaults,
-        wsRoot,
-        engine,
-      });
-      const importedNote = fs.readFileSync(path.join(destPath), {
-        encoding: "utf8",
-      });
-      return [
-        {
-          actual: await AssertUtils.assertInString({
-            body: importedNote,
-            match: ["foo body", "bar body"],
-          }),
-          expected: true,
-        },
-        {
-          actual: await AssertUtils.assertInString({
-            body: importedNote,
-            match: ["foo body"],
-          }),
-          expected: true,
-        },
-      ];
+    async function (this: Required<TestPresetEntryV4>, opts) {
+      const { destPath } = await this.setupTest(opts);
+      return this.genTestResults({ ...opts, extra: { destPath } });
     },
     {
       preSetupHook: setupBasic,
+      genTestResults: genTestResultsForExportBasic,
+      setupTest: setupTestForExportBasic,
     }
   ),
 };

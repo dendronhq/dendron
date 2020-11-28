@@ -1,7 +1,7 @@
 import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV3,
-  NOTE_PRESETS,
+  NOTE_PRESETS_V4,
   toPlainObject,
 } from "@dendronhq/common-test-utils";
 import assert from "assert";
@@ -51,11 +51,13 @@ suite("BacklinksTreeDataProvider", function () {
 
     runMultiVaultTest({
       ctx,
-      preSetupHook: async ({ vaults }) => {
-        noteWithTarget = await NOTE_PRESETS.NOTE_WITH_TARGET({
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          wsRoot,
           vault: vaults[0],
         });
-        await NOTE_PRESETS.NOTE_WITH_LINK({
+        await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
+          wsRoot,
           vault: vaults[0],
         });
       },
@@ -107,11 +109,13 @@ suite("BacklinksTreeDataProvider", function () {
 
     runMultiVaultTest({
       ctx,
-      preSetupHook: async ({ vaults }) => {
-        noteWithTarget = await NOTE_PRESETS.NOTE_WITH_ANCHOR_TARGET({
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.create({
+          wsRoot,
           vault: vaults[0],
         });
-        noteWithLink = await NOTE_PRESETS.NOTE_WITH_ANCHOR_LINK({
+        noteWithLink = await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_LINK.create({
+          wsRoot,
           vault: vaults[0],
         });
       },
@@ -134,11 +138,13 @@ suite("BacklinksTreeDataProvider", function () {
 
     runMultiVaultTest({
       ctx,
-      preSetupHook: async ({ vaults }) => {
-        noteWithTarget = await NOTE_PRESETS.NOTE_WITH_TARGET({
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          wsRoot,
           vault: vaults[0],
         });
-        noteWithLink = await NOTE_PRESETS.NOTE_WITH_ALIAS_LINK({
+        noteWithLink = await NOTE_PRESETS_V4.NOTE_WITH_ALIAS_LINK.create({
+          wsRoot,
           vault: vaults[0],
         });
       },

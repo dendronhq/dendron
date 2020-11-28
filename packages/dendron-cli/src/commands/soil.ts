@@ -1,6 +1,6 @@
 import { DEngineClientV2 } from "@dendronhq/common-all";
 import { resolvePath } from "@dendronhq/common-server";
-import { DendronEngineV2, FileStorageV2 } from "@dendronhq/engine-server";
+import { DendronEngineV2 } from "@dendronhq/engine-server";
 import yargs from "yargs";
 import { BaseCommand } from "./base";
 

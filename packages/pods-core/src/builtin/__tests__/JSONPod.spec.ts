@@ -18,7 +18,7 @@ const podsDict = {
 
 const JSON_PRESETS = PODS_CORE.JSON;
 _.map(JSON_PRESETS, (presets, name) => {
-  describe.only(name, () => {
+  describe(name, () => {
     test.each(
       _.map(presets, (v, k) => {
         return [k, v];

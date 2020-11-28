@@ -1,8 +1,8 @@
-import { DirResult, tmpDir, writeYAML } from "@dendronhq/common-server";
-import { NodeTestPresetsV2, PODS_CORE } from "@dendronhq/common-test-utils";
+import { DPod } from "@dendronhq/common-all";
+import { writeYAML } from "@dendronhq/common-server";
+import { PODS_CORE } from "@dendronhq/common-test-utils";
 import {
   JSONImportPod,
-  JSONImportPodRawConfig,
   podClassEntryToPodItemV4,
   PodUtils,
 } from "@dendronhq/pods-core";
@@ -15,22 +15,17 @@ import * as vscode from "vscode";
 import { ImportPodCommand } from "../../commands/ImportPod";
 import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
-import { onWSInit, setupDendronWorkspace, TIMEOUT } from "../testUtils";
+import { DendronWorkspace, getWS } from "../../workspace";
+import { TIMEOUT } from "../testUtils";
+import { runLegacyMultiWorkspaceTest } from "../testUtilsV3";
 
 suite("ImportPod", function () {
-  let root: DirResult;
   let ctx: vscode.ExtensionContext;
-  let vaultDir: string;
-  let podsDir: string;
-  let importSrc: string;
   this.timeout(TIMEOUT);
 
   beforeEach(function () {
-    root = tmpDir();
     ctx = VSCodeUtils.getOrCreateMockContext();
     DendronWorkspace.getOrCreate(ctx);
-    podsDir = path.join(root.name, "pods");
   });
 
   afterEach(function () {
@@ -38,39 +33,42 @@ suite("ImportPod", function () {
   });
 
   test("basic", function (done) {
-    onWSInit(async () => {
-      const podClass = JSONImportPod;
-      const configPath = PodUtils.getConfigPath({ podsDir, podClass });
-      const config: JSONImportPodRawConfig = {
-        src: importSrc,
-        concatenate: false,
-      };
-      ensureDirSync(path.dirname(configPath));
-      writeYAML(configPath, config);
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        await PODS_CORE.JSON.IMPORT.BASIC.preSetupHook({ wsRoot, vaults });
+      },
+      onInit: async ({ vaults, wsRoot }) => {
+        const podClass = JSONImportPod;
+        const podsDir = path.join(wsRoot, "pods");
+        const configPath = PodUtils.getConfigPath({ podsDir, podClass });
 
-      // stub cmd
-      const cmd = new ImportPodCommand();
-      const podChoice = podClassEntryToPodItemV4(JSONImportPod);
-      cmd.gatherInputs = async () => {
-        return { podChoice };
-      };
-      await cmd.run();
-      await NodeTestPresetsV2.runMochaHarness({
-        opts: {
-          vaultPath: vaultDir,
-          vscode: true,
-        },
-        results: PODS_CORE.JSON.IMPORT.BASIC.results,
-      });
-      done();
-    });
+        const fakePod = (): DPod<any> => {
+          return {
+            config: [],
+            execute: async ({ config }) => {
+              ensureDirSync(path.dirname(configPath));
+              writeYAML(configPath, config);
 
-    setupDendronWorkspace(root.name, ctx, {
-      useCb: async (_vaultDir) => {
-        vaultDir = _vaultDir;
-        ({ importSrc } = await PODS_CORE.JSON.IMPORT.BASIC.before({
-          wsRoot: root.name,
-        }));
+              const cmd = new ImportPodCommand();
+              const podChoice = podClassEntryToPodItemV4(JSONImportPod);
+              cmd.gatherInputs = async () => {
+                return { podChoice };
+              };
+              await cmd.run();
+            },
+          };
+        };
+        const pod = fakePod();
+        const engine = getWS().getEngine();
+        await PODS_CORE.JSON.IMPORT.BASIC.testFunc({
+          engine,
+          wsRoot,
+          vaults,
+          extra: { pod },
+          initResp: {} as any,
+        });
+        done();
       },
     });
   });

@@ -671,7 +671,7 @@ suite("notesv2", function () {
     });
   });
 
-  describe.only("onAccept:multiple", function () {
+  describe("onAccept:multiple", function () {
     test("existing notes", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,

@@ -1,6 +1,9 @@
 import { NotePropsV2 } from "@dendronhq/common-all";
 import { DirResult, tmpDir } from "@dendronhq/common-server";
-import { NodeTestPresetsV2, NOTE_PRESETS } from "@dendronhq/common-test-utils";
+import {
+  NodeTestPresetsV2,
+  NOTE_PRESETS_V4,
+} from "@dendronhq/common-test-utils";
 import assert from "assert";
 import { afterEach, beforeEach } from "mocha";
 import path from "path";
@@ -50,11 +53,13 @@ suite("notes", function () {
 
     runMultiVaultTest({
       ctx,
-      preSetupHook: async ({ vaults }) => {
-        noteWithTarget = await NOTE_PRESETS.NOTE_WITH_ANCHOR_TARGET({
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.create({
+          wsRoot,
           vault: vaults[0],
         });
-        await NOTE_PRESETS.NOTE_WITH_ANCHOR_LINK({
+        await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_LINK.create({
+          wsRoot,
           vault: vaults[0],
         });
       },

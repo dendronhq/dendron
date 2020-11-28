@@ -1,5 +1,5 @@
 import { NotePropsV2 } from "@dendronhq/common-all";
-import { file2Note, note2File } from "@dendronhq/common-server";
+import { file2Note } from "@dendronhq/common-server";
 import path from "path";
 import { RefactorBaseCommand, RefactorRule } from "./refactorBase";
 
@@ -50,9 +50,10 @@ export class RefactorFMCommand extends RefactorBaseCommand<TFile, any> {
     return file2Note(fpath, { fsPath: path.dirname(fpath) });
   }
 
-  writeFile(fpath: string, data: TFile) {
-    const root = path.dirname(fpath);
-    return note2File(data, root);
+  writeFile(_fpath: string, _data: TFile) {
+    // const root = path.dirname(fpath);
+    throw Error("not implemented");
+    // return note2File(data, root);
   }
 }
 

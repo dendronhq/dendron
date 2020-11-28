@@ -1,10 +1,6 @@
 import { DNodeUtilsV2, DVault, NotePropsV2 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
-import {
-  ENGINE_SERVER,
-  PLUGIN_CORE,
-  runMochaHarness,
-} from "@dendronhq/common-test-utils";
+import { NodeTestPresetsV2, PLUGIN_CORE } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -26,7 +22,6 @@ import { _activate } from "../../_extension";
 import { createMockQuickPick, onWSInit, TIMEOUT } from "../testUtils";
 import {
   getNoteFromTextEditor,
-  runMultiVaultTest,
   setupCodeWorkspaceMultiVaultV2,
 } from "../testUtilsv2";
 

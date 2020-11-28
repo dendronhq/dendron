@@ -139,7 +139,7 @@ suite("RenameNote", function () {
   //   _.pick(ENGINE_RENAME_PRESETS["NOTES"], "TARGET_IN_VAULT1_AND_LINK_IN_VAULT2"),
   //   (TestCase: TestPresetEntryV4, name: string) => {
   _.map(ENGINE_RENAME_PRESETS["NOTES"], (TestCase: TestPresetEntryV4, name) => {
-    test.only(name, (done) => {
+    test(name, (done) => {
       const { testFunc, preSetupHook } = TestCase;
 
       runLegacyMultiWorkspaceTest({

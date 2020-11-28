@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.17.1-alpha.1...v0.17.2-alpha.0) (2020-11-28)
+
+### Bug Fixes
+
+- issues with rename in multi-vault ([e26b294](https://github.com/dendronhq/dendron/commit/e26b294e8bbe1e49e44318152c247595e82639bb))
+
+### Enhancements
+
+- enable rename with multivault ([50304da](https://github.com/dendronhq/dendron/commit/50304da8b419ad1ff3e8380e2c2d57e4fa8694b3))
+
 ## [0.17.1](https://github.com/dendronhq/dendron/compare/v0.17.1-alpha.1...v0.17.1) (2020-11-26)
 
 **Note:** Version bump only for package @dendronhq/common-server

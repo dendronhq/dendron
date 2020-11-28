@@ -270,10 +270,16 @@ export async function _activate(context: vscode.ExtensionContext) {
       return;
     }
     await ws.activateWatchers();
+
+    toggleViews(true);
+
     Logger.info({ ctx, msg: "fin startClient" });
   } else {
     // ws not active
     Logger.info({ ctx: "dendron not active" });
+
+    toggleViews(false);
+
     return false;
   }
 
@@ -288,12 +294,25 @@ export async function _activate(context: vscode.ExtensionContext) {
   return true;
 }
 
+function toggleViews(enabled: boolean) {
+  const ctx = "toggleViews";
+  Logger.info({ ctx, msg: `views enabled: ${enabled}` });
+  vscode.commands.executeCommand("setContext", "dendron:showTreeView", enabled);
+  vscode.commands.executeCommand(
+    "setContext",
+    "dendron:showBacklinksPanel",
+    enabled
+  );
+}
+
 // this method is called when your extension is deactivated
 export function deactivate() {
   const ctx = "deactivate";
   const ws = DendronWorkspace.instance();
   ws.deactivate();
   ws.L.info({ ctx });
+
+  toggleViews(false);
 }
 
 async function showWelcomeOrWhatsNew(

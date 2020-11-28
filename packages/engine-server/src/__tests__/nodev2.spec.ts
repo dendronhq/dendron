@@ -128,8 +128,9 @@ describe("matchPath", () => {
           schemaModDict: engine.schemas,
         });
         expect(resp?.schema.id).toEqual("foo");
+        return [];
       },
-      { createEngine, preSetupHook }
+      { createEngine, preSetupHook, expect }
     );
   });
 
@@ -142,8 +143,10 @@ describe("matchPath", () => {
         });
         expect(resp?.schema.id).toEqual("bond");
         expect(resp?.namespace).toBeTruthy();
+        return [];
       },
       {
+        expect,
         createEngine,
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createSchema({
@@ -169,8 +172,10 @@ describe("matchPath", () => {
         });
         expect(resp?.schema.id).toEqual("bond");
         expect(resp?.namespace).toBeFalsy();
+        return [];
       },
       {
+        expect,
         createEngine,
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createSchema({
@@ -194,8 +199,10 @@ describe("matchDomain", () => {
       async ({ engine }) => {
         const schema = engine.notes["foo"].schema;
         expect(schema).toEqual({ moduleId: "foo", schemaId: "foo" });
+        return [];
       },
       {
+        expect,
         createEngine,
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createNote({
@@ -218,8 +225,10 @@ describe("matchDomain", () => {
       async ({ engine }) => {
         const schema = engine.notes["bond"].schema;
         expect(schema).toEqual({ moduleId: "bond", schemaId: "bond" });
+        return [];
       },
       {
+        expect,
         createEngine,
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createNote({
@@ -246,8 +255,10 @@ describe("matchDomain", () => {
       async ({ engine }) => {
         const schema = engine.notes["bond.ch1"].schema;
         expect(schema).toEqual({ moduleId: "bond", schemaId: "bond" });
+        return [];
       },
       {
+        expect,
         createEngine,
         preSetupHook: async ({ vaults, wsRoot }) => {
           await NoteTestUtilsV4.createNote({

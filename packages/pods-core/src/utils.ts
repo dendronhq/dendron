@@ -62,7 +62,7 @@ export class PodUtils {
     ensureDirSync(path.dirname(podConfigPath));
     const pod = new podClass();
     const config = pod.config
-      .map((ent) => {
+      .map((ent: any) => {
         ent = _.defaults(ent, { default: "TODO" });
         return [
           `# description: ${ent.description}`,

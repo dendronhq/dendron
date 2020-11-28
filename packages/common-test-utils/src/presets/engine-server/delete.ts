@@ -1,6 +1,6 @@
 import { NoteChangeEntry, NoteUtilsV2 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
-import fs, { outputFile } from "fs-extra";
+import fs from "fs-extra";
 import _ from "lodash";
 import { FileTestUtils } from "../..";
 import { NoteTestUtilsV4 } from "../../noteUtils";

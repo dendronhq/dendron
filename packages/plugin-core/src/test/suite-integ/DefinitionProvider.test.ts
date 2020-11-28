@@ -107,7 +107,6 @@ suite.skip("DefinitionProvider", function () {
     });
 
     test("with alias", (done) => {
-      let noteWithTarget: NotePropsV2;
       let noteWithLink: NotePropsV2;
       let _wsRoot: string;
 

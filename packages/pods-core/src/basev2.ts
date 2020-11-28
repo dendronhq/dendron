@@ -291,3 +291,5 @@ export abstract class PublishPod<
     return this.plant({ config: cleanConfig, wsRoot, vaults, engine });
   }
 }
+
+export { DPod };

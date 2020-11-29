@@ -569,6 +569,7 @@
         "@dendronhq/engine-server": "^0.17.2-alpha.0",
         "@dendronhq/lsp-server": "^0.17.2-alpha.0",
         "@dendronhq/pods-core": "^0.17.2-alpha.0",
+        "@dendronhq/dendron-next-server": "^0.17.2-alpha.0",
         "cross-path-sort": "^1.0.0",
         "execa": "^4.0.2",
         "fs-extra": "^9.0.1",

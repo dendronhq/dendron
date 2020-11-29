@@ -98,6 +98,7 @@ export class DendronWorkspace {
 
   public dendronTreeView: DendronTreeViewV2 | undefined;
   public vaultWatcher?: VaultWatcher;
+  public port?: number;
 
   static instance(): DendronWorkspace {
     if (!_DendronWorkspace) {

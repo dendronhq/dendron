@@ -11,5 +11,6 @@ export function useDendronConfig() {
     config: data?.data as DendronConfig,
     isLoading: !error && !data,
     isError: error || data?.error,
+    error
   };
 }

@@ -41,8 +41,9 @@ export default function Layout({ children }: Props) {
             boxSize={12}
           />
 
+
+            {/*
           <Box marginLeft="auto">
-            {" "}
             <Link
               target="_blank"
               href="https://dendron.memberful.com/account/subscriptions"
@@ -62,6 +63,7 @@ export default function Layout({ children }: Props) {
               />
             </Link>
           </Box>
+            */}
         </Flex>
 
         <Box flexGrow={1} padding={8}>

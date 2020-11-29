@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { EngineAPIService } from "../services/EngineAPIService";
@@ -18,13 +19,17 @@ export async function getWebviewContent(): Promise<string> {
   return resp.data as string;
 }
 
-function getWebviewContent2() {
+function getWebviewContent2(opts: { title: string }) {
+  const port = DendronWorkspace.instance().port;
+  if (_.isUndefined(port)) {
+    return `<head> Still starting up </head>`;
+  }
   return `<!DOCTYPE html>
   <html lang="en">
   <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Cat Coding</title>
+      <title>${opts.title}</title>
       <style>
       *       {margin:0;padding:0;}
       html, 
@@ -36,7 +41,7 @@ function getWebviewContent2() {
     </style>
   </head>
   <body>
-    <iframe width="100%" height="100%" src="http://localhost:3000/posts/proto2"></iframe>
+    <iframe width="100%" height="100%" src="http://localhost:${port}/workspace/config.html"></iframe>
   </body>
   </html>`;
 }
@@ -50,16 +55,16 @@ export class UpdateSchemaCommand extends BasicCommand<
     return {};
   }
   async execute() {
+    const title = "Dendron Configuration";
     const panel = window.createWebviewPanel(
-      "catCoding", // Identifies the type of the webview. Used internally
-      "Cat Coding", // Title of the panel displayed to the user
+      "dendronIframe", // Identifies the type of the webview. Used internally
+      title, // Title of the panel displayed to the user
       ViewColumn.One, // Editor column to show the new webview panel in.
       {
         enableScripts: true,
       } // Webview options. More on these later.
     );
-    const resp = await getWebviewContent2();
+    const resp = await getWebviewContent2({ title });
     panel.webview.html = resp;
-    window.showInformationMessage("bond");
   }
 }

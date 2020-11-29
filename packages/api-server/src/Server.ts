@@ -24,7 +24,8 @@ export function appModule({ logPath }: { logPath: string }) {
     )
   );
 
-  app.use(express.static("static"));
+  const staticDir = path.join(__dirname, "static");
+  app.use(express.static(staticDir));
 
   app.get("/health", async (_req: Request, res: Response) => {
     return res.json({ ok: 1 });

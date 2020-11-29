@@ -1,7 +1,3 @@
-import { DendronConfig } from "@dendronhq/common-all";
-import useSWR from "swr";
-import { Formik, Field, Form, FieldArray } from "formik";
-import React, { ReactNode, useState } from "react";
 import {
   Box,
   Button,
@@ -13,24 +9,33 @@ import {
   FormLabel,
   Heading,
   Input,
-  Stack,
+
+
+
+
+
+
+
+
+
+
+  ListItem, OrderedList, Stack,
   Switch,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverArrow,
-  PopoverBody,
-  Link,
-  useToast,
-  OrderedList,
-  ListItem,
-  ListIcon,
+
+
+
+
+
+
+  useToast
 } from "@chakra-ui/react";
-import { get } from "lodash";
+import { DendronConfig } from "@dendronhq/common-all";
+import { Field, FieldArray, Form, Formik } from "formik";
+import _, { get } from "lodash";
 import Head from "next/head";
-import { useDendronConfig } from "../../lib/hooks";
+import React, { ReactNode } from "react";
 import { configWrite } from "../../lib/effects";
-import { LockIcon } from "@chakra-ui/icons";
+import { useDendronConfig } from "../../lib/hooks";
 
 // TODO Temporarily copied here from engine-server/src/config.ts to use default
 // values for input placeholders.
@@ -126,6 +131,13 @@ const PAGE_TITLE = "Dendron Configuration";
 
 const saveConfigData = async (config: DendronConfig) => {
   console.log("saving", config);
+  // FIXME: hack
+  // empty string is different from undefined
+  _.forEach(config.site, (v, k) => {
+    if (_.isEmpty(v) && _.isString(v)) {
+      delete config.site[k]
+    }
+  });
   const resp = await configWrite(config);
 };
 
@@ -133,8 +145,8 @@ export default function ConfigSamplePage() {
   // const { data: configData } = getConfigData();
 
   const toast = useToast();
-  const { isError, isLoading, config: configData } = useDendronConfig();
-  if (isError) return <div>failed to load</div>;
+  const { isError, isLoading, config: configData, error } = useDendronConfig();
+  if (isError) return <div>failed to load: {JSON.stringify(error)}</div>;
   if (!configData) return <div>loading...</div>;
 
   return (

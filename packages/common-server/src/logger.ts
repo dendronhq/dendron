@@ -36,8 +36,7 @@ function createLogger(
   dest?: string,
   opts?: { lvl?: "debug" }
 ): pino.Logger {
-  const level =
-    opts?.lvl || env("LOG_LEVEL", { shouldThrow: false }) || "error";
+  const level = opts?.lvl || env("LOG_LEVEL", { shouldThrow: false }) || "info";
   const nameClean = name || env("LOG_NAME", { shouldThrow: false });
   const logDst = dest || env("LOG_DST", { shouldThrow: false });
   if (!logDst || _.isEmpty(logDst) || logDst === "stdout") {

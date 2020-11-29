@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.2-alpha.5](https://github.com/dendronhq/dendron/compare/v0.17.2-alpha.4...v0.17.2-alpha.5) (2020-11-29)
+
+### Enhancements
+
+- update config commands ([44dce76](https://github.com/dendronhq/dendron/commit/44dce76b6fd447cd29a2f4f594632ef758eff927))
+
 ## [0.17.2-alpha.4](https://github.com/dendronhq/dendron/compare/v0.17.2-alpha.3...v0.17.2-alpha.4) (2020-11-29)
 
 **Note:** Version bump only for package root

@@ -12,7 +12,7 @@ export const ENV: {[key: string]: StageEnv} = {
 export type CONFIG_KEY = keyof typeof CONFIG;
 
 export const CONFIG = {
-  DEBUG: false,
+  DEBUG: true,
   DEBUG_PREFIX: "http://localhost:3005"
 };
 

@@ -5,7 +5,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.17.2](https://github.com/dendronhq/dendron/compare/v0.17.2-alpha.5...v0.17.2) (2020-11-29)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.17.2-alpha.5](https://github.com/dendronhq/dendron/compare/v0.17.2-alpha.4...v0.17.2-alpha.5) (2020-11-29)
 
@@ -15,11 +15,11 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.17.2-alpha.4](https://github.com/dendronhq/dendron/compare/v0.17.2-alpha.3...v0.17.2-alpha.4) (2020-11-29)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.17.2-alpha.3](https://github.com/dendronhq/dendron/compare/v0.17.2-alpha.2...v0.17.2-alpha.3) (2020-11-29)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.17.2-alpha.2](https://github.com/dendronhq/dendron/compare/v0.17.2-alpha.1...v0.17.2-alpha.2) (2020-11-29)
 
@@ -29,17 +29,33 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.17.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.17.2-alpha.0...v0.17.2-alpha.1) (2020-11-29)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- **cli:** maybe vaults relative to wsRoot ([a45a371](https://github.com/dendronhq/dendron/commit/a45a371c2bd9d95b56eb51a901118ea2e7f2604e))
+
+### Enhancements
+
+- update config api ([41fb2d9](https://github.com/dendronhq/dendron/commit/41fb2d9888bbf446bee65f39ee82ab0ec668dddb))
+- update ui ([83ccc97](https://github.com/dendronhq/dendron/commit/83ccc9702a6c946832adf275e64ce1888fac1d64))
+
+### Features
+
+- add config apis ([f022689](https://github.com/dendronhq/dendron/commit/f0226890ff01c4e5c1746d0cee7b9e99db07d4d6))
 
 ## [0.17.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.17.1-alpha.1...v0.17.2-alpha.0) (2020-11-28)
 
 ### Bug Fixes
 
 - issues with rename in multi-vault ([e26b294](https://github.com/dendronhq/dendron/commit/e26b294e8bbe1e49e44318152c247595e82639bb))
+- renaming notes with links within root note ([cb74117](https://github.com/dendronhq/dendron/commit/cb74117ae3fd3d1658e94966a4050c15cf491885))
+
+### Enhancements
+
+- enable rename with multivault ([50304da](https://github.com/dendronhq/dendron/commit/50304da8b419ad1ff3e8380e2c2d57e4fa8694b3))
 
 ## [0.17.1](https://github.com/dendronhq/dendron/compare/v0.17.1-alpha.1...v0.17.1) (2020-11-26)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.17.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.17.1-alpha.0...v0.17.1-alpha.1) (2020-11-26)
 

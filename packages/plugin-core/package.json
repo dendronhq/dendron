@@ -374,11 +374,6 @@
                 "docPreview": "<a href=\"https://www.loom.com/share/01250485e20a4cdca2a053dd6047ac68\"><img src=\"https://cdn.loom.com/sessions/thumbnails/01250485e20a4cdca2a053dd6047ac68-with-play.gif\"> </a>"
             },
             {
-                "command": "dendron.updateSchema",
-                "title": "Dendron: Update Schema",
-                "desc": "Update schema"
-            },
-            {
                 "command": "dendron.showHelp",
                 "title": "Dendron: Show Help",
                 "desc": "Dendron will open your current browser to the [[cheatsheet|dendron.cheatsheet]] page. ",
@@ -393,9 +388,17 @@
                 "docPreview": ""
             },
             {
-                "command": "dendron.configure",
+                "command": "dendron.configureRaw",
+                "title": "Dendron: Configure (yaml)",
+                "desc": "Modify Dendron Config as raw YAML",
+                "docs": "",
+                "docLink": "",
+                "docPreview": ""
+            },
+            {
+                "command": "dendron.configureUI",
                 "title": "Dendron: Configure",
-                "desc": "Modify Dendron Config",
+                "desc": "Modify Dendron Config using Dendron UI",
                 "docs": "",
                 "docLink": "",
                 "docPreview": ""

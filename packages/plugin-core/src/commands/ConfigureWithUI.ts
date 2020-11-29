@@ -46,11 +46,11 @@ function getWebviewContent2(opts: { title: string }) {
   </html>`;
 }
 
-export class UpdateSchemaCommand extends BasicCommand<
+export class ConfigureWithUICommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.UPDATE_SCHEMA.key;
+  static key = DENDRON_COMMANDS.CONFIGURE_UI.key;
   async gatherInputs(): Promise<any> {
     return {};
   }

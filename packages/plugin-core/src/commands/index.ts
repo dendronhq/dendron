@@ -28,7 +28,7 @@ import { SetupWorkspaceCommand } from "./SetupWorkspace";
 import { ShowHelpCommand } from "./ShowHelp";
 import { ShowPreviewCommand } from "./ShowPreview";
 import { SnapshotVaultCommand } from "./SnapshotVault";
-import { UpdateSchemaCommand } from "./UpdateSchema";
+import { ConfigureWithUICommand } from "./ConfigureWithUI";
 import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
@@ -66,7 +66,7 @@ const ALL_COMMANDS = [
   ShowHelpCommand,
   ShowPreviewCommand,
   SnapshotVaultCommand,
-  UpdateSchemaCommand,
+  ConfigureWithUICommand,
   UpgradeSettingsCommand,
   VaultAddCommand,
   VaultRemoveCommand,

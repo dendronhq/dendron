@@ -63,7 +63,7 @@ function main() {
   updateKeybindings(contributes);
   const commands = DENDRON_COMMANDS;
   fs.writeJSONSync("package.json", pkg, { spaces: 4 });
-  const pathToDocs = path.join("../../build/dendron-template");
+  const pathToDocs = path.join("../../../dendron-site");
   if (fs.existsSync(pathToDocs)) {
     const groupBy = _.groupBy(
       _.values(commands).map((c) => _.defaults(c, { skipDocs: false })),

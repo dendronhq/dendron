@@ -478,13 +478,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.links.md",
     docPreview: `<a href="https://www.loom.com/share/01250485e20a4cdca2a053dd6047ac68"><img src="https://cdn.loom.com/sessions/thumbnails/01250485e20a4cdca2a053dd6047ac68-with-play.gif"> </a>`,
   },
-  UPDATE_SCHEMA: {
-    key: "dendron.updateSchema",
-    title: `${CMD_PREFIX} Update Schema`,
-    desc: "Update schema",
-    group: "lookup",
-    skipDocs: true,
-  },
   SHOW_HELP: {
     key: "dendron.showHelp",
     title: `${CMD_PREFIX} Show Help`,
@@ -507,11 +500,20 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docPreview: "",
   },
   // -- Workbench
-  CONFIGURE: {
-    key: "dendron.configure",
+  CONFIGURE_RAW: {
+    key: "dendron.configureRaw",
+    title: `${CMD_PREFIX} Configure (yaml)`,
+    group: "workspace",
+    desc: "Modify Dendron Config as raw YAML",
+    docs: [""].join("\n"),
+    docLink: "",
+    docPreview: ``,
+  },
+  CONFIGURE_UI: {
+    key: "dendron.configureUI",
     title: `${CMD_PREFIX} Configure`,
     group: "workspace",
-    desc: "Modify Dendron Config",
+    desc: "Modify Dendron Config using Dendron UI",
     docs: [""].join("\n"),
     docLink: "",
     docPreview: ``,

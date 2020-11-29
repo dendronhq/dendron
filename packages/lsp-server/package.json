@@ -1,7 +1,7 @@
 {
 	"name": "@dendronhq/lsp-server",
 	"description": "Example implementation of a language server in node.",
-	"version": "0.17.2-alpha.2",
+	"version": "0.17.2-alpha.3",
 	"author": "Dendron",
 	"license": "MIT",
 	"engines": {

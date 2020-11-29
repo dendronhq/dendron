@@ -1,5 +1,6 @@
 import { DendronConfig } from "@dendronhq/common-all";
-import { Formik, Field, Form } from "formik";
+import useSWR from "swr";
+import { Formik, Field, Form, FieldArray } from "formik";
 import React, { ReactNode, useState } from "react";
 import {
   Box,
@@ -21,9 +22,15 @@ import {
   PopoverBody,
   Link,
   useToast,
+  OrderedList,
+  ListItem,
+  ListIcon,
 } from "@chakra-ui/react";
 import { get } from "lodash";
 import Head from "next/head";
+import { useDendronConfig } from "../../lib/hooks";
+import { configWrite } from "../../lib/effects";
+import { LockIcon } from "@chakra-ui/icons";
 
 // TODO Temporarily copied here from engine-server/src/config.ts to use default
 // values for input placeholders.
@@ -35,7 +42,7 @@ const genDefaultConfig = (): DendronConfig => ({
     siteRootDir: "docs",
     usePrettyRefs: true,
   },
-  version: 0
+  version: 0,
 });
 
 const getConfigData = (): { data: DendronConfig } => {
@@ -56,7 +63,7 @@ const getConfigData = (): { data: DendronConfig } => {
         siteRootDir: "docs",
         usePrettyRefs: true,
       },
-      version: 0
+      version: 0,
     },
   };
 };
@@ -115,18 +122,20 @@ function InputControl({
   );
 }
 
-const PAGE_TITLE = "Dendron config editor";
+const PAGE_TITLE = "Dendron Configuration";
+
+const saveConfigData = async (config: DendronConfig) => {
+  console.log("saving", config);
+  const resp = await configWrite(config);
+};
 
 export default function ConfigSamplePage() {
   // const { data: configData } = getConfigData();
 
-  const [configData, saveConfigData] = useState(getConfigData().data);
-
-  React.useEffect(() => {
-    console.log("save", JSON.stringify(configData, null, 2));
-  }, [JSON.stringify(configData)]);
-
   const toast = useToast();
+  const { isError, isLoading, config: configData } = useDendronConfig();
+  if (isError) return <div>failed to load</div>;
+  if (!configData) return <div>loading...</div>;
 
   return (
     <>
@@ -142,20 +151,29 @@ export default function ConfigSamplePage() {
             enableReinitialize
             initialValues={configData}
             onSubmit={(formValues) => {
-              saveConfigData(formValues);
-
-              // TODO when plumbing this to real data, you'll want to ensure
-              // that the rendered toast is relevant to the result of the
-              // operation -- i.e. "success" vs "failed", and only rendered when
-              // the operation is finished.
-              toast({
-                title: "Changes saved",
-                description:
-                  "Your Dendron configuration file has been successfully updated.",
-                status: "success",
-                duration: 5000,
-                isClosable: true,
-              });
+              saveConfigData(formValues)
+                .then(() => {
+                  toast({
+                    title: "Changes saved",
+                    description:
+                      "Your Dendron configuration file has been successfully updated.",
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                  });
+                })
+                .catch((err) => {
+                  toast({
+                    title: "Error saving",
+                    description: JSON.stringify({
+                      error: err.message,
+                      stack: err.stack,
+                    }),
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                  });
+                });
             }}
           >
             {({
@@ -169,72 +187,39 @@ export default function ConfigSamplePage() {
                 <Stack spacing={8}>
                   <Box as="fieldset">
                     <Heading size="md" as="legend">
-                      Site
+                      Site Config
                     </Heading>
-
                     <Stack spacing={4}>
-                      <Popover trigger="hover" placement="top" gutter={-12}>
-                        <PopoverTrigger>
-                          {/* Superfluous box because Popover doesn't work on disabled Input */}
-                          <Box>
-                            <InputControl
-                              label="Vault"
-                              name={`vaults[0].fsPath`}
-                              placeholder="./filesystemPath"
-                              help="The vault's location on your filesystem."
-                              disabled
-                            />
-                          </Box>
-                        </PopoverTrigger>
-
-                        <PopoverContent>
-                          <PopoverArrow />
-
-                          <PopoverBody>
-                            You can update vaults using{" "}
-                            <Link
-                              href="https://dendron.so/notes/eea2b078-1acc-4071-a14e-18299fc28f47.html#vault-add"
-                              target="_blank"
-                            >
-                              Dendron Vault Commands
-                            </Link>
-                            .
-                          </PopoverBody>
-                        </PopoverContent>
-                      </Popover>
-
-                      <Popover trigger="hover" placement="top" gutter={-12}>
-                        <PopoverTrigger>
-                          {/* Superfluous box because Popover doesn't work on disabled Input */}
-                          <Box>
-                            <InputControl
-                              label="Site hierarchy"
-                              name="site.siteHierarchies[0]"
-                              placeholder={
-                                genDefaultConfig().site.siteHierarchies[0]
-                              }
-                              help="The hierarchy to publish."
-                              disabled
-                            />
-                          </Box>
-                        </PopoverTrigger>
-
-                        <PopoverContent>
-                          <PopoverArrow />
-
-                          <PopoverBody>
-                            You can configure published hierarchies{" "}
-                            <Link
-                              href="https://www.dendron.so/notes/ffa6a4ba-5eda-48c7-add5-8e2333ba27b4.html#sitehierarchies-str"
-                              target="_blank"
-                            >
-                              in the configuration file
-                            </Link>
-                            .
-                          </PopoverBody>
-                        </PopoverContent>
-                      </Popover>
-
+                      <Box as="fieldset">
+                        <FieldArray
+                          name="site.siteHierarchies"
+                          render={(arrayHelpers) => (
+                            <OrderedList>
+                              {values.site.siteHierarchies.map((ent, idx) => (
+                                <ListItem>
+                                  <Field
+                                    as={Input}
+                                    key={idx}
+                                    name={`site.siteHierarchies.${idx}`}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => arrayHelpers.remove(idx)}
+                                  >
+                                    -
+                                  </button>
+                                </ListItem>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={() => arrayHelpers.push("")}
+                              >
+                                +
+                              </button>
+                            </OrderedList>
+                          )}
+                        />
+                      </Box>
                       <InputControl
                         label="Site root directory"
                         name="site.siteRootDir"
@@ -248,7 +233,6 @@ export default function ConfigSamplePage() {
                         name="site.siteNotesDir"
                         placeholder={genDefaultConfig().site.siteNotesDir}
                         help={`Folder where your notes will be kept. By default, "notes"`}
-                        required
                       />
 
                       <InputControl
@@ -269,7 +253,6 @@ export default function ConfigSamplePage() {
                             <Code>workspaceRoot</Code> if not set.
                           </>
                         }
-                        required
                       />
 
                       <FormControl

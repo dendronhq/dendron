@@ -3,6 +3,9 @@
       {
         "path": "packages/dendron-next-server"
       },
+      {
+        "path": "packages/api-server"
+      },
     ],
     "settings": {
       "files.exclude": {

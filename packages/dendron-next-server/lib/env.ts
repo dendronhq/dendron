@@ -14,3 +14,4 @@ export function env(key: keyof StageEnv): any {
 export function dump(): StageEnv {
     return ENV[getStage()];
 }
+

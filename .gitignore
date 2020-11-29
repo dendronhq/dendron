@@ -18,3 +18,4 @@ packages/dendron-cli/stdout.old
 packages/plugin-core/.DS_Store
 .DS_Store
 packages/dendron-cli/stdout.old
+packages/api-server/stdout.old

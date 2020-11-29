@@ -5,7 +5,6 @@ let L: DLogger | undefined;
 
 export function setLogger({ logPath }: { logPath: string }) {
   const logLevel = process.env.LOG_LEVEL || "debug";
-  console.log("log level: ", logLevel);
   // @ts-ignore
   L = createLogger("dendron.server", logPath, { lvl: logLevel });
   L.info({ ctx: "setLogger", msg: "set" });

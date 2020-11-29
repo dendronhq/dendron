@@ -1,4 +1,3 @@
-import { launch } from "@dendronhq/api-server";
 import { getStage, Time } from "@dendronhq/common-all";
 import { readJSONWithComments } from "@dendronhq/common-server";
 import { getWSMetaFilePath, writeWSMetaFile } from "@dendronhq/engine-server";
@@ -127,11 +126,14 @@ function isFirstInstall(context: vscode.ExtensionContext): boolean {
 }
 
 async function startServer() {
+  const ctx = "startServeer";
   const maybePort = DendronWorkspace.configuration().get<number | undefined>(
     CONFIG.SERVER_PORT.key
   );
   const logPath = DendronWorkspace.instance().context.logPath;
+  Logger.info({ ctx: ctx, logLevel: process.env["LOG_LEVEL"] });
   if (!maybePort) {
+    const { launch } = require("@dendronhq/api-server");
     return await launch({
       port: maybePort,
       logPath: path.join(logPath, "dendron.server.log"),
@@ -162,12 +164,14 @@ export async function _activate(context: vscode.ExtensionContext) {
   const ctx = "_activate";
   const stage = getStage();
   const { workspaceFile, workspaceFolders } = vscode.workspace;
+  const logLevel = process.env["LOG_LEVEL"];
   const { logPath, extensionPath, extensionUri, storagePath } = context;
   Logger.info({
     ctx,
     stage,
     isDebug,
     logPath,
+    logLevel,
     extensionPath,
     extensionUri,
     storagePath,

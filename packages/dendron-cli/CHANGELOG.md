@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.17.2-alpha.0...v0.17.2-alpha.1) (2020-11-29)
+
+### Bug Fixes
+
+- **cli:** maybe vaults relative to wsRoot ([a45a371](https://github.com/dendronhq/dendron/commit/a45a371c2bd9d95b56eb51a901118ea2e7f2604e))
+
 ## [0.17.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.17.1-alpha.1...v0.17.2-alpha.0) (2020-11-28)
 
 **Note:** Version bump only for package @dendronhq/dendron-cli

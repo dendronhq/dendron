@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.17.2-alpha.0...v0.17.2-alpha.1) (2020-11-29)
+
+### Enhancements
+
+- update ui ([83ccc97](https://github.com/dendronhq/dendron/commit/83ccc9702a6c946832adf275e64ce1888fac1d64))
+
 ## [0.17.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.17.1-alpha.1...v0.17.2-alpha.0) (2020-11-28)
 
 **Note:** Version bump only for package @dendronhq/dendron-next-server

@@ -566,7 +566,6 @@
         "@dendronhq/common-all": "^0.17.2-alpha.1",
         "@dendronhq/common-server": "^0.17.2-alpha.1",
         "@dendronhq/dendron-cli": "^0.17.2-alpha.2",
-        "@dendronhq/dendron-next-server": "^0.17.2-alpha.2",
         "@dendronhq/engine-server": "^0.17.2-alpha.1",
         "@dendronhq/lsp-server": "^0.17.2-alpha.3",
         "@dendronhq/pods-core": "^0.17.2-alpha.1",

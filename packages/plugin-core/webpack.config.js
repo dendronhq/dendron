@@ -37,7 +37,7 @@ const config = {
     }),
     new CopyPlugin({
       patterns: [
-        { from: path.join("node_modules", "@dendronhq", "dendron-next-server"), to: 'next-server'},
+        { from: path.join("assets", "static" ), to: 'static'},
       ],
     }),
   ],

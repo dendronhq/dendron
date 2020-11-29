@@ -11,5 +11,6 @@ cat package.json | jq '.repository = { "url": "https://github.com/dendronhq/dend
 mv tmp.json package.json
 
 ./scripts/sync_vault.sh
+./scripts/sync_static.sh
 npm install
 vsce package

@@ -53,7 +53,7 @@
     {
       "label": "NPM: Publish",
       "type": "shell",
-      "command": "./bootstrap/scripts/publish.sh",
+      "command": "./bootstrap/scripts/publish-patch.sh",
       "options": {
         "cwd": "./.."
       },

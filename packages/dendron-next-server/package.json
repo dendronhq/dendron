@@ -1,7 +1,12 @@
 {
   "name": "@dendronhq/dendron-next-server",
   "version": "0.17.2-alpha.1",
-  "private": true,
+  "license": "GPLv3",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/dendronhq/dendron.git",
+    "directory": "packages/dendron-next-server"
+  },
   "scripts": {
     "dev": "next dev",
     "dev:inspect": "NODE_OPTIONS='--inspect' next",

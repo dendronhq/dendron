@@ -2,10 +2,10 @@ import {
   ConfigGetPayload,
   ConfigWriteOpts,
   DendronError,
-  DEngineClientV2,
   RespV2,
 } from "@dendronhq/common-all";
 import { WorkspaceRequest } from "@dendronhq/common-server";
+import { MemoryStore } from "../store/memoryStore";
 import { getWS } from "../utils";
 
 export class ConfigController {
@@ -19,7 +19,9 @@ export class ConfigController {
   }
 
   async get({ ws }: WorkspaceRequest): Promise<RespV2<ConfigGetPayload>> {
-    const engine = (await getWS({ ws })) as DEngineClientV2;
+    const engine = ws
+      ? await getWS({ ws })
+      : MemoryStore.instance().getEngine();
     try {
       const resp = await engine.getConfig();
       return resp;
@@ -35,7 +37,9 @@ export class ConfigController {
     ws,
     ...opts
   }: WorkspaceRequest & ConfigWriteOpts): Promise<RespV2<void>> {
-    const engine = (await getWS({ ws })) as DEngineClientV2;
+    const engine = ws
+      ? await getWS({ ws })
+      : MemoryStore.instance().getEngine();
     try {
       const resp = await engine.writeConfig(opts);
       return resp;

@@ -1,14 +1,36 @@
 import { createLogger, DLogger } from "@dendronhq/common-server";
+import fs from "fs-extra";
 
 let L: DLogger | undefined;
 
 export function setLogger({ logPath }: { logPath: string }) {
-  L = createLogger("dendron.server", logPath);
+  const logLevel = process.env.LOG_LEVEL || "debug";
+  console.log("log level: ", logLevel);
+  // @ts-ignore
+  L = createLogger("dendron.server", logPath, { lvl: logLevel });
+  L.info({ ctx: "setLogger", msg: "set" });
+  return L;
 }
 
 export function getLogger() {
   if (!L) {
-    L = createLogger("dendron.server");
+    const logPath = process.env.LOG_DST || "stdout";
+
+    L = configureLogger(logPath);
   }
+  L.info({ ctx: "getLogger" });
   return L;
+}
+
+export function configureLogger(logPath?: string) {
+  if (!logPath) {
+    logPath = "stdout";
+  } else {
+    if (fs.existsSync(logPath)) {
+      console.log(`moving old log: ${logPath}`);
+      fs.moveSync(logPath, `${logPath}.old`, { overwrite: true });
+    }
+    fs.ensureFileSync(logPath);
+  }
+  return setLogger({ logPath });
 }

@@ -4,35 +4,27 @@ import fs from "fs-extra";
 import { BAD_REQUEST } from "http-status-codes";
 import morgan from "morgan";
 import path from "path";
-import { setLogger } from "./core";
 import { baseRouter } from "./routes";
 
 export function appModule({ logPath }: { logPath: string }) {
   const app = express();
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-  // @ts-ignore
-  morgan.token("body", function (req, res) {
-    // @ts-ignore
-    return JSON.stringify(req.body);
-  });
-  if (fs.existsSync(logPath)) {
-    fs.moveSync(logPath, `${logPath}.old`, { overwrite: true });
-  }
+  // morgan.token("body", function (req, res) {
+  //   // @ts-ignore
+  //   return JSON.stringify(req.body);
+  // });
   const accessLogStream = fs.createWriteStream(logPath, { flags: "a" });
-  setLogger({ logPath });
   app.use(
     morgan(
-      ":method :url :status :response-time ms - :res[content-length] :body - :req[content-length]",
+      ":method :url :status :response-time ms - :res[content-length] - :req[content-length]",
       {
         stream: accessLogStream,
       }
     )
   );
 
-  app.get("/api/static", (_req, res) => {
-    res.redirect("http://localhost:1568/");
-  });
+  app.use(express.static("static"));
 
   app.get("/health", async (_req: Request, res: Response) => {
     return res.json({ ok: 1 });

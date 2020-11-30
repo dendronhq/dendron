@@ -18,16 +18,19 @@ import { Logger } from "../../logger";
 import { HistoryService } from "../../services/HistoryService";
 import { EngineFlavor, EngineOpts } from "../../types";
 import { getDurationMilliseconds, profile } from "../../utils/system";
-import { DendronWorkspace } from "../../workspace";
+import { DendronWorkspace, getWS } from "../../workspace";
+import { MORE_RESULTS_LABEL } from "./constants";
 import { LookupControllerV2 } from "./LookupControllerV2";
 import { DendronQuickPickerV2 } from "./types";
 import {
+  createMoreResults,
   createNoActiveItem,
   node2Uri,
   PickerUtilsV2,
   showDocAndHidePicker,
 } from "./utils";
 
+const PAGINATE_LIMIT = 50;
 type OnDidAcceptReturn = Promise<
   | {
       uris: Uri[];
@@ -53,11 +56,16 @@ export class LookupProviderV2 {
   }
 
   createDefaultItems = ({ picker }: { picker: DendronQuickPickerV2 }) => {
+    let out = [];
     if (_.find(picker.buttons, { type: "multiSelect" })?.pressed) {
       return [];
     } else {
-      return [createNoActiveItem(PickerUtilsV2.getVaultForOpenEditor())];
+      out.push(createNoActiveItem(PickerUtilsV2.getVaultForOpenEditor()));
     }
+    if (picker.moreResults) {
+      out.push(createMoreResults());
+    }
+    return out;
   };
 
   async _onAcceptNewNote({
@@ -234,6 +242,9 @@ export class LookupProviderV2 {
           opts,
           selectedItem,
         }));
+      } else if (selectedItem.label === MORE_RESULTS_LABEL) {
+        await this.paginatePickerItems({ picker });
+        return;
       } else {
         uri = node2Uri(selectedItem);
         if (opts.flavor === "schema") {
@@ -346,6 +357,76 @@ export class LookupProviderV2 {
     return;
   }
 
+  paginatePickerItems = async (opts: { picker: DendronQuickPickerV2 }) => {
+    const { picker } = opts;
+    const allResults = opts.picker.allResults;
+    const { offset } = picker as { offset: number };
+    const engine = getWS().getEngine();
+    const newItems = allResults!
+      .slice(offset, offset + PAGINATE_LIMIT)
+      .map((ent) =>
+        DNodeUtilsV2.enhancePropForQuickInput({
+          props: ent,
+          schemas: engine.schemas,
+          vaults: DendronWorkspace.instance().vaults,
+        })
+      );
+    let oldItems = [...picker.items];
+    // update state
+    picker.offset = picker.offset! + PAGINATE_LIMIT;
+    // no more results
+    if (newItems.length <= picker.offset) {
+      oldItems = _.reject(oldItems, (ent) => ent.label === MORE_RESULTS_LABEL);
+      picker.moreResults = false;
+    }
+    picker.items = oldItems.concat(newItems);
+    picker.activeItems = picker.items;
+  };
+
+  async createPickerItemsFromEngine(opts: {
+    flavor: EngineFlavor;
+    picker: DendronQuickPickerV2;
+    qs: string;
+  }) {
+    const ctx = "createPickerItemsFromEngine";
+    const start = process.hrtime();
+    const { picker, qs } = opts;
+    const engine = getWS().getEngine();
+    Logger.info({ ctx, msg: "first query" });
+    let nodes: DNodePropsV2[];
+    if (opts.flavor === "note") {
+      // if we are doing a query, reset pagination options
+      PickerUtilsV2.resetPaginationOpts(picker);
+      const resp = await engine.queryNotes({ qs });
+      nodes = resp.data;
+      Logger.info({ ctx, msg: "post:queryNotes" });
+    } else {
+      const resp = await engine.querySchema(qs);
+      nodes = resp.data.map((ent) => SchemaUtilsV2.getModuleRoot(ent));
+    }
+    if (nodes.length > PAGINATE_LIMIT) {
+      picker.allResults = nodes;
+      picker.offset = PAGINATE_LIMIT;
+      picker.moreResults = true;
+      nodes = nodes.slice(0, PAGINATE_LIMIT);
+    }
+    // overwrite results
+    const updatedItems = this.createDefaultItems({ picker }).concat(
+      await Promise.all(
+        nodes.map(async (ent) =>
+          DNodeUtilsV2.enhancePropForQuickInput({
+            props: ent,
+            schemas: engine.schemas,
+            vaults: DendronWorkspace.instance().vaults,
+          })
+        )
+      )
+    );
+    const profile = getDurationMilliseconds(start);
+    Logger.info({ ctx, msg: "engine.query", profile });
+    return updatedItems;
+  }
+
   onUpdatePickerItem = async (
     picker: DendronQuickPickerV2,
     opts: EngineOpts & { force?: boolean },
@@ -388,18 +469,19 @@ export class LookupProviderV2 {
         return;
       }
 
-      // current items
+      // current items without default items present
       const items: DNodePropsQuickInputV2[] = [...picker.items];
-
-      let updatedItems = PickerUtilsV2.filterCreateNewItem(items);
-      updatedItems = this.createDefaultItems({ picker }).concat(updatedItems);
+      let updatedItems = PickerUtilsV2.filterDefaultItems(items);
 
       Logger.debug({
         ctx,
         pickerValue,
-        items: updatedItems.map((ent) => _.pick(ent, ["id", "title"])),
         msg: "qs",
       });
+      // check if need to cancel
+      if (token.isCancellationRequested) {
+        return;
+      }
 
       // first query, show all results
       // subsequent query, only show next level children
@@ -409,31 +491,14 @@ export class LookupProviderV2 {
         picker.justActivated ||
         opts?.force
       ) {
-        Logger.info({ ctx, msg: "first query" });
-        let nodes: DNodePropsV2[];
-        if (token.isCancellationRequested) {
-          return;
-        }
-        if (opts.flavor === "note") {
-          const resp = await engine.queryNotes({ qs: querystring });
-          nodes = resp.data;
-          Logger.info({ ctx, msg: "post:queryNotes" });
-        } else {
-          const resp = await engine.querySchema(querystring);
-          nodes = resp.data.map((ent) => SchemaUtilsV2.getModuleRoot(ent));
-        }
-        // overwrite results
-        updatedItems = this.createDefaultItems({ picker }).concat(
-          nodes.map((ent) =>
-            DNodeUtilsV2.enhancePropForQuickInput({
-              props: ent,
-              schemas: engine.schemas,
-              vaults: DendronWorkspace.instance().vaults,
-            })
-          )
-        );
-        profile = getDurationMilliseconds(start);
-        Logger.info({ ctx, msg: "engine.query", profile });
+        updatedItems = await this.createPickerItemsFromEngine({
+          picker,
+          flavor: opts.flavor,
+          qs: querystring,
+        });
+      } else {
+        // add create new
+        updatedItems = this.createDefaultItems({ picker }).concat(updatedItems);
       }
 
       if (token.isCancellationRequested) {

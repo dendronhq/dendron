@@ -12,7 +12,11 @@ import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { DendronBtn, getButtonCategory } from "./buttons";
-import { CREATE_NEW_DETAIL, CREATE_NEW_LABEL } from "./constants";
+import {
+  CREATE_NEW_DETAIL,
+  CREATE_NEW_LABEL,
+  MORE_RESULTS_LABEL,
+} from "./constants";
 import { DendronQuickPickerV2 } from "./types";
 
 export const UPDATET_SOURCE = {
@@ -29,6 +33,14 @@ export function createNoActiveItem(vault: DVault): DNodePropsQuickInputV2 {
     ...props,
     label: CREATE_NEW_LABEL,
     detail: CREATE_NEW_DETAIL,
+    alwaysShow: true,
+  };
+}
+export function createMoreResults(): DNodePropsQuickInputV2 {
+  // @ts-ignore
+  return {
+    label: MORE_RESULTS_LABEL,
+    detail: "",
     alwaysShow: true,
   };
 }
@@ -103,6 +115,16 @@ export class PickerUtilsV2 {
     return _.reject(items, { label: CREATE_NEW_LABEL });
   };
 
+  static filterDefaultItems = (
+    items: DNodePropsQuickInputV2[]
+  ): DNodePropsQuickInputV2[] => {
+    return _.reject(
+      items,
+      (ent) =>
+        ent.label === CREATE_NEW_LABEL || ent.label === MORE_RESULTS_LABEL
+    );
+  };
+
   /**
    * Reject all items that are over a given level
    * @param items
@@ -169,6 +191,12 @@ export class PickerUtilsV2 {
     } else {
       return false;
     }
+  }
+
+  static resetPaginationOpts(picker: DendronQuickPickerV2) {
+    delete picker.moreResults;
+    delete picker.offset;
+    delete picker.allResults;
   }
 
   static slashToDot(ent: string) {

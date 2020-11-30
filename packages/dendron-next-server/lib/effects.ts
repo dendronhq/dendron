@@ -1,6 +1,5 @@
 import { DendronConfig } from "@dendronhq/common-all";
-import { api, CONFIG } from "./config";
-import { env } from "./env";
+import { api } from "./config";
 
 export const configWrite = (config: DendronConfig) => {
   const body = JSON.stringify({ config });

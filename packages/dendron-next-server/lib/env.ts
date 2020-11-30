@@ -6,12 +6,14 @@ export function getStage() {
   return process.env.STAGE
 }
 
-export function env(key: keyof StageEnv): any {
+export function getEnv(key: keyof StageEnv): any {
     const stage = getStage();
-    return ENV[stage][key]
+    // NOTE: this only works server side, not client side
+    const override = _.get(process.env, key)
+    return override || ENV[stage][key]
 }
 
-export function dump(): StageEnv {
+export function dumpEnv(): StageEnv {
     return ENV[getStage()];
 }
 

@@ -3,6 +3,7 @@ const {
   PHASE_PRODUCTION_BUILD,
 } = require('next/constants')
 const {} = "./lib/"
+const _ = require("lodash");
 
 module.exports = (phase) => {
   // when started in development mode `next dev` or `npm run dev` regardless of the value of STAGING environmental variable
@@ -14,8 +15,12 @@ module.exports = (phase) => {
     phase === PHASE_PRODUCTION_BUILD && process.env.STAGING === '1'
 
   console.log(`isDev:${isDev}  isProd:${isProd}   isStaging:${isStaging}`)
+  const CONFIG = [
+    'ENGINE_ENDPOINT_PORT'
+  ];
 
   const env = {
+    ..._.pick(process.env, CONFIG),
     STAGE: isDev? "dev" : "prod"
   }
 

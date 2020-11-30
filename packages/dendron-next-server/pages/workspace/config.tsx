@@ -142,8 +142,6 @@ const saveConfigData = async (config: DendronConfig) => {
 };
 
 export default function ConfigSamplePage() {
-  // const { data: configData } = getConfigData();
-
   const toast = useToast();
   const { isError, isLoading, config: configData, error } = useDendronConfig();
   if (isError) return <div>failed to load: {JSON.stringify(error)}</div>;

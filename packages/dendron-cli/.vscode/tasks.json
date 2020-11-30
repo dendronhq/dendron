@@ -17,6 +17,12 @@
       "options": {"env": {"LOG_DST": "/tmp/denron-cli.txt"}}
     },
     {
+      "label": "chmod +x",
+      "command": "chmod +x lib/bin/dendron-cli.js",
+      "type": "shell",
+      "problemMatcher": []
+    },
+    {
       "type": "npm",
       "label": "clean",
       "script": "clean",

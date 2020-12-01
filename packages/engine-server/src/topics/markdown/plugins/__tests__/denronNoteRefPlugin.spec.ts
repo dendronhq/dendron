@@ -1,11 +1,14 @@
-import { DendronError, DEngineClientV2, DVault } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DEngineClientV2,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import {
   EngineTestUtilsV2,
-  EngineTestUtilsV3,
   ENGINE_SERVER,
   FileTestUtils,
-  NodeTestPresetsV2,
   NodeTestUtilsV2,
+  runEngineTestV4,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { DendronEngineV2 } from "../../../../enginev2";
@@ -97,44 +100,38 @@ describe("basic", () => {
     test.skip("doesn't parse code block", () => {});
   });
 
-  describe("stingify v3", () => {
-    let opts: DendronNoteRefPluginOpts;
-    let engine: DEngineClientV2;
-    let wsRoot = "";
-    let vaults: DVault[];
-    beforeEach(async () => {
-      vaults = await EngineTestUtilsV3.setupVaults({
-        wsRoot,
-        initVault1: async (vaultDir: string) => {
-          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
-        },
-        initVault2: async (vaultDir: string) => {
-          await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
-        },
-      });
-      engine = DendronEngineV2.createV3({ wsRoot, vaults });
-    });
+  const createEngine = (opts: WorkspaceOpts) => {
+    return DendronEngineV2.createV3(opts);
+  };
 
-    test("wildcard link", async () => {
-      const { note } = await ENGINE_SERVER.NOTE_REF.WILDCARD_LINK.before({
-        vaults,
-      });
-      const results = ENGINE_SERVER.NOTE_REF.WILDCARD_LINK.results;
-      await engine.init();
-      opts = {
-        renderWithOutline: false,
-        replaceRefOpts: {},
-        engine,
-      } as DendronNoteRefPluginOpts;
-      const proc = getProcessor({ ...opts, renderWithOutline: true });
-      const resp = await proc.process(note.body);
-      const out = resp.toString();
-      expect(out).toMatchSnapshot();
-      await NodeTestPresetsV2.runJestHarness({
-        expect,
-        results,
-        opts: { body: out },
-      });
+  describe("stingify v3", () => {
+    test("wildcard link bond", async () => {
+      await runEngineTestV4(
+        async ({ engine }) => {
+          let opts = {
+            renderWithOutline: false,
+            replaceRefOpts: {},
+            engine,
+          } as DendronNoteRefPluginOpts;
+          const proc = getProcessor({ ...opts, renderWithOutline: false });
+          const note = engine.notes["id.journal"];
+          const resp = await proc.process(note.body);
+
+          const out = resp.toString();
+          expect(out).toMatchSnapshot();
+
+          // @ts-ignore
+          return ENGINE_SERVER.NOTE_REF.WILDCARD_LINK_V4.genTestResults!({
+            engine,
+            extra: { body: out },
+          });
+        },
+        {
+          expect,
+          createEngine,
+          preSetupHook: ENGINE_SERVER.NOTE_REF.WILDCARD_LINK_V4.preSetupHook,
+        }
+      );
     });
   });
 

@@ -19,6 +19,7 @@ export class FileTestUtils {
    * @param root
    * @param expected
    * @param opts
+   * @return [actualFiles, expectedFiles]
    */
   static cmpFiles = (
     root: string,

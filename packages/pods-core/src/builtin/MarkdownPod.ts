@@ -5,7 +5,7 @@ import {
   NotePropsV2,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
-import { cleanFileName, readMD } from "@dendronhq/common-server";
+import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
 import { dendronNoteRefPlugin, ParserUtilsV2 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import klaw, { Item } from "klaw";
@@ -116,8 +116,9 @@ export class MarkdownImportPod extends ImportPod<
     files: DItem[];
     src: string;
     vaultPath: string;
+    wsRoot: string;
   }): HierarichalDict {
-    const { files, src, vaultPath } = opts;
+    const { files, src, vaultPath, wsRoot } = opts;
     const vault = { fsPath: vaultPath };
     const out: HierarichalDict = {};
     _.forEach(files, (item) => {
@@ -142,7 +143,8 @@ export class MarkdownImportPod extends ImportPod<
         // move entries over
         // TODO: don't hardcode assets
         const assetDirName = "assets";
-        const assetDir = path.join(vaultPath, assetDirName);
+        const vpath = vault2Path({ vault, wsRoot });
+        const assetDir = path.join(vpath, assetDirName);
         fs.ensureDirSync(assetDir);
         const mdLinks: string[] = [];
         item.entries.map((_item) => {
@@ -214,6 +216,7 @@ export class MarkdownImportPod extends ImportPod<
       files: _.values(engineFileDict),
       src: src.fsPath,
       vaultPath: mainVault,
+      wsRoot,
     });
     const notes = this.hDict2Notes(hDict);
     const out = await Promise.all(

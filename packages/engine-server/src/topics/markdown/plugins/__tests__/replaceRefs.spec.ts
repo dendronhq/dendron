@@ -1,6 +1,6 @@
 import {
   AssertUtils,
-  NoteTestUtilsV3,
+  NoteTestUtilsV4,
   runEngineTest,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
@@ -79,14 +79,16 @@ describe("replaceRefs", () => {
             wikiLinkUseId: true,
             engine,
           });
+
           const out = proc.processSync("[[alpha]]");
           expect(_.trim(out.toString())).toEqual("[alpha](alpha-id)");
         },
         {
           createEngine,
-          preSetupHook: async ({ vaults }) => {
-            await NoteTestUtilsV3.createNote({
+          preSetupHook: async ({ vaults, wsRoot }) => {
+            await NoteTestUtilsV4.createNote({
               fname: "alpha",
+              wsRoot,
               vault: vaults[0],
               props: { id: "alpha-id" },
             });
@@ -108,8 +110,9 @@ describe("replaceRefs", () => {
         },
         {
           createEngine,
-          preSetupHook: async ({ vaults }) => {
-            await NoteTestUtilsV3.createNote({
+          preSetupHook: async ({ vaults, wsRoot }) => {
+            await NoteTestUtilsV4.createNote({
+              wsRoot,
               fname: "alpha",
               vault: vaults[0],
               props: { id: "alpha-id" },

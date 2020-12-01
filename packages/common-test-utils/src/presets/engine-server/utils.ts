@@ -69,7 +69,7 @@ export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
   });
 };
 
-export const setupSchemaPreseetWithNamespaceTemplate: PreSetupHookFunction = async (
+export const setupSchemaPresetWithNamespaceTemplate: PreSetupHookFunction = async (
   opts
 ) => {
   await setupBasic(opts);
@@ -127,5 +127,5 @@ export const setupSchemaPreseetWithNamespaceTemplate: PreSetupHookFunction = asy
 export const ENGINE_HOOKS = {
   setupBasic,
   setupSchemaPreseet,
-  setupSchemaPreseetWithNamespaceTemplate,
+  setupSchemaPresetWithNamespaceTemplate,
 };

@@ -637,7 +637,7 @@ suite("Lookup, notesv2", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         postSetupHook: async ({ wsRoot, vaults }) => {
-          await ENGINE_HOOKS.setupSchemaPreseetWithNamespaceTemplate({
+          await ENGINE_HOOKS.setupSchemaPresetWithNamespaceTemplate({
             wsRoot,
             vaults,
           });

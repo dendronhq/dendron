@@ -16,6 +16,7 @@ import {
   NodeTestPresetsV2,
   NodeTestUtilsV2,
   NoteTestUtilsV3,
+  NoteTestUtilsV4,
   runEngineTest,
 } from "@dendronhq/common-test-utils";
 import { DendronEngineClient } from "@dendronhq/engine-server";
@@ -251,11 +252,12 @@ describe("wiki link", () => {
         expect(_.trim(content)).toEqual("[foo#one](notes/foo#one)");
       },
       {
-        preSetupHook: async ({ vaults }) => {
-          await NoteTestUtilsV3.createNote({
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await NoteTestUtilsV4.createNote({
             fname: "alpha",
             vault: vaults[0],
             body: "[[foo#one]]",
+            wsRoot,
           });
         },
         createEngine,
@@ -286,8 +288,9 @@ describe("wiki link", () => {
       },
       {
         createEngine,
-        preSetupHook: async ({ vaults }) => {
-          await NoteTestUtilsV3.createNote({
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
             fname: "foo",
             body: "# Foo Content\n # Bar Content [[missing-link]]",
             vault: vaults[0],
@@ -321,13 +324,15 @@ describe("wiki link", () => {
       },
       {
         createEngine,
-        preSetupHook: async ({ vaults }) => {
-          await NoteTestUtilsV3.createNote({
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
             fname: "foo.Mixed_case",
             props: { id: "id.foo.mixed-case" },
             vault: vaults[0],
           });
-          await NoteTestUtilsV3.createNote({
+          await NoteTestUtilsV4.createNote({
+            wsRoot,
             fname: "foo.one",
             props: { id: "id.foo.one" },
             vault: vaults[0],

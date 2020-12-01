@@ -224,6 +224,17 @@ export class DNodeUtilsV2 {
     }
   }
 
+  static getFullPath(opts: {
+    wsRoot: string;
+    vault: DVault;
+    basename: string;
+  }) {
+    const root = path.isAbsolute(opts.vault.fsPath)
+      ? opts.vault.fsPath
+      : path.join(opts.wsRoot, opts.vault.fsPath);
+    return path.join(root, opts.basename);
+  }
+
   static getParent(
     node: DNodePropsV2,
     opts: {
@@ -628,8 +639,11 @@ export class NoteUtilsV2 {
     note: NotePropsV2;
     wsRoot: string;
   }): string {
-    const root = path.isAbsolute(note.vault.fsPath) ? note.vault.fsPath :path.join(wsRoot, note.vault.fsPath);
-    return path.join(root, note.fname + ".md");
+    return DNodeUtilsV2.getFullPath({
+      wsRoot,
+      vault: note.vault,
+      basename: note.fname + ".md",
+    });
   }
 
   static getPathUpTo(hpath: string, numCompoenents: number) {

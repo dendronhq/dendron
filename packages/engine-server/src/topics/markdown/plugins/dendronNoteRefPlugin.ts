@@ -1,6 +1,7 @@
 import {
   DendronError,
   DEngineClientV2,
+  DNodeUtilsV2,
   DNoteLoc,
   DNoteRefLink,
   DUtils,
@@ -10,7 +11,6 @@ import { removeMDExtension } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { Parent } from "mdast";
-import path from "path";
 import { Eat } from "remark-parse";
 import { Processor } from "unified";
 import { Node } from "unist";
@@ -117,13 +117,17 @@ function convertNoteRef(opts: ConvertNoteRefOpts) {
     noteRefs.push(link.from);
   }
   const out = noteRefs.map((ref) => {
-    const root = ref.vault?.fsPath || defaultRoot;
+    const vaultPath = ref.vault?.fsPath || defaultRoot;
     const name = ref.fname;
     const alias = ref.alias;
+
+    const npath = DNodeUtilsV2.getFullPath({
+      wsRoot: engine.wsRoot,
+      vault: { fsPath: vaultPath },
+      basename: name + ".md",
+    });
     try {
-      const body = fs.readFileSync(path.join(root, name + ".md"), {
-        encoding: "utf8",
-      });
+      const body = fs.readFileSync(npath, { encoding: "utf8" });
       const out = extractNoteRef({
         body,
         link,

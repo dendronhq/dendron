@@ -26,7 +26,6 @@ export function configureLogger(logPath?: string) {
     logPath = "stdout";
   } else {
     if (fs.existsSync(logPath)) {
-      console.log(`moving old log: ${logPath}`);
       fs.moveSync(logPath, `${logPath}.old`, { overwrite: true });
     }
     fs.ensureFileSync(logPath);

@@ -4,6 +4,7 @@ import { DConfig } from "@dendronhq/engine-server";
 import assert from "assert";
 import fs from "fs-extra";
 import { afterEach, beforeEach } from "mocha";
+import path from "path";
 import * as vscode from "vscode";
 import { VaultRemoveCommand } from "../../commands/VaultRemoveCommand";
 import { HistoryService } from "../../services/HistoryService";
@@ -29,7 +30,7 @@ suite("VaultRemoveCommand", function () {
   test("basic", (done) => {
     runMultiVaultTest({
       ctx,
-      onInit: async ({ vaults }) => {
+      onInit: async ({ wsRoot, vaults }) => {
         // @ts-ignore
         VSCodeUtils.showQuickPick = () => {
           return { data: vaults[1] };
@@ -37,7 +38,7 @@ suite("VaultRemoveCommand", function () {
         await new VaultRemoveCommand().run();
 
         // check no files deleted
-        assert.deepStrictEqual(fs.readdirSync(vaults[1].fsPath), [
+        assert.deepStrictEqual(fs.readdirSync(path.join(wsRoot, vaults[1].fsPath)), [
           "bar.ch1.md",
           "bar.md",
           "bar.schema.yml",

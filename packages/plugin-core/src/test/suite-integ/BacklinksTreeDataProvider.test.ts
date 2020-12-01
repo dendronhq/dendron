@@ -1,6 +1,6 @@
 import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import {
-  NoteTestUtilsV3,
+  NoteTestUtilsV4,
   NOTE_PRESETS_V4,
   toPlainObject,
 } from "@dendronhq/common-test-utils";
@@ -15,6 +15,7 @@ import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { TIMEOUT } from "../testUtils";
 import { runMultiVaultTest } from "../testUtilsv2";
+import { runLegacyMultiWorkspaceTest } from "../testUtilsV3";
 
 const getChildren = async () => {
   const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
@@ -49,7 +50,7 @@ suite("BacklinksTreeDataProvider", function () {
   test("basics", function (done) {
     let noteWithTarget: NotePropsV2;
 
-    runMultiVaultTest({
+    runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {
         noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
@@ -61,41 +62,43 @@ suite("BacklinksTreeDataProvider", function () {
           vault: vaults[0],
         });
       },
-      onInit: async ({ vaults }) => {
+      onInit: async ({ wsRoot, vaults }) => {
         await VSCodeUtils.openNote(noteWithTarget);
         const out = toPlainObject(await getChildren()) as any;
         assert.strictEqual(
           out[0].command.arguments[0].path as string,
-          path.join(vaults[0].fsPath, "beta.md")
+          path.join(wsRoot, vaults[0].fsPath, "beta.md")
         );
         assert.strictEqual(out.length, 1);
         done();
       },
-    });
+    })
   });
 
   test("multi", function (done) {
     runMultiVaultTest({
       ctx,
-      preSetupHook: async ({ vaults }) => {
-        await NoteTestUtilsV3.createNote({
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
           fname: "alpha",
           body: `[[beta]]`,
           vault: vaults[0],
+          wsRoot
         });
-        await NoteTestUtilsV3.createNote({
+        await NoteTestUtilsV4.createNote({
           fname: "beta",
           body: `[[alpha]]`,
           vault: vaults[1],
+          wsRoot
         });
       },
-      onInit: async ({ vaults }) => {
-        const notePath = path.join(vaults[0].fsPath, "alpha.md");
+      onInit: async ({ wsRoot, vaults }) => {
+        const notePath = path.join(wsRoot, vaults[0].fsPath, "alpha.md");
         await VSCodeUtils.openFileInEditor(Uri.file(notePath));
         const out = toPlainObject(await getChildren()) as any;
         assert.strictEqual(
           out[0].command.arguments[0].path as string,
-          path.join(vaults[1].fsPath, "beta.md")
+          path.join(wsRoot, vaults[1].fsPath, "beta.md")
         );
         assert.strictEqual(out.length, 1);
         done();
@@ -124,7 +127,7 @@ suite("BacklinksTreeDataProvider", function () {
         const out = toPlainObject(await getChildren()) as any;
         assert.strictEqual(
           out[0].command.arguments[0].path as string,
-          NoteUtilsV2.getPath({ note: noteWithLink })
+          NoteUtilsV2.getPathV4({ note: noteWithLink, wsRoot: DendronWorkspace.wsRoot()  })
         );
         assert.strictEqual(out.length, 1);
         done();
@@ -148,12 +151,12 @@ suite("BacklinksTreeDataProvider", function () {
           vault: vaults[0],
         });
       },
-      onInit: async () => {
+      onInit: async ({wsRoot}) => {
         await VSCodeUtils.openNote(noteWithTarget);
         const out = toPlainObject(await getChildren()) as any;
         assert.strictEqual(
           out[0].command.arguments[0].path as string,
-          NoteUtilsV2.getPath({ note: noteWithLink })
+          NoteUtilsV2.getPathV4({ note: noteWithLink, wsRoot })
         );
         assert.strictEqual(out.length, 1);
         done();

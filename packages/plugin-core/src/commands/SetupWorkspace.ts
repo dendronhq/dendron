@@ -1,6 +1,6 @@
 import { DendronError, DVault } from "@dendronhq/common-all";
-import { resolvePath, resolveTilde } from "@dendronhq/common-server";
-import { DConfig, GitV2, WorkspaceService } from "@dendronhq/engine-server";
+import { resolveTilde, vault2Path } from "@dendronhq/common-server";
+import { WorkspaceService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -10,7 +10,6 @@ import { Snippets, WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getGlobalState } from "../workspace";
 import { BasicCommand } from "./base";
-import { VaultAddCommand } from "./VaultAddCommand";
 
 type CommandOpts = {
   rootDirRaw: string;
@@ -139,33 +138,33 @@ export class SetupWorkspaceCommand extends BasicCommand<
 
   handleInitializeType = async ({
     initType,
-    rootDir,
   }: {
     initType: InitializeType;
     rootDir: string;
   }): Promise<DVault[]> => {
     switch (initType) {
-      case InitializeType.TEMPLATE:
-        // TDOO:
-        const remote =
-          "git@github.com:dendronhq/dendron-workspace-template.git";
-        await GitV2.clone(`${remote} ${rootDir}`);
-        const config = DConfig.getOrCreate(rootDir);
-        const vaults = await Promise.all(
-          config.vaults.map(async (ent) => {
-            if (!ent.remote) {
-              throw new DendronError({ msg: "no remote found for vault" });
-            }
-            const { url } = ent.remote;
-            await GitV2.clone(`${url} ${ent.fsPath}`, { cwd: rootDir });
-            const vpath = resolvePath(ent.fsPath, rootDir);
-            return await new VaultAddCommand().execute({
-              vpath,
-              vpathOrig: ent.fsPath,
-            });
-          })
-        );
-        return _.map(vaults, (ent) => ent.vault);
+      // case InitializeType.TEMPLATE:
+      //   // TDOO:
+      //   const remote =
+      //     "git@github.com:dendronhq/dendron-workspace-template.git";
+      //   await GitV2.clone(`${remote} ${rootDir}`);
+      //   const config = DConfig.getOrCreate(rootDir);
+      //   const vaults = await Promise.all(
+      //     config.vaults.map(async (ent) => {
+      //       if (!ent.remote) {
+      //         throw new DendronError({ msg: "no remote found for vault" });
+      //       }
+      //       const { url } = ent.remote;
+      //       await GitV2.clone(`${url} ${ent.fsPath}`, { cwd: rootDir });
+      //       const vpath = resolvePath(ent.fsPath, rootDir);
+      //       path.relative(rootDir, ent.fsPath)
+      //       return await new VaultAddCommand().execute({
+      //         vpath,
+      //         vpathOrig: ent.fsPath,
+      //       });
+      //     })
+      //   );
+      //   return _.map(vaults, (ent) => ent.vault);
       default:
         throw new DendronError({ msg: `init type ${initType} not supported` });
     }
@@ -196,10 +195,12 @@ export class SetupWorkspaceCommand extends BasicCommand<
       return this.handleInitializeType({ initType, rootDir });
     }
 
+    
     // create vault
-    const vaultPath = opts.vault?.fsPath || path.join(rootDir, "vault");
+    const vaultPath = opts.vault?.fsPath || "vault";
     const vaults = [{ fsPath: vaultPath }];
     await WorkspaceService.createWorkspace({ vaults, wsRoot: rootDir });
+    const vpath = vault2Path({vault: vaults[0], wsRoot: rootDir})
 
     // create dendron root
     // if (getWS().dendronRoot !== rootDir) {
@@ -221,7 +222,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
         const whitelist = ["dendron", "vault"];
         return _.some(whitelist, (ent) => basename.startsWith(ent));
       };
-      fs.copySync(path.join(dendronWSTemplate.fsPath, "vault"), vaultPath, {
+      fs.copySync(path.join(dendronWSTemplate.fsPath, "vault"), vpath, {
         filter: filterFunc,
       });
     }
@@ -229,7 +230,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
     WorkspaceConfig.write(rootDir);
 
     // write snippets
-    const vscodeDir = path.join(vaultPath, ".vscode");
+    const vscodeDir = path.join(vpath, ".vscode");
     Snippets.create(vscodeDir);
 
     if (!opts.skipOpenWs) {

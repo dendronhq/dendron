@@ -57,7 +57,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         vault,
       });
       const note = data?.note as NotePropsV2;
-      const npath = NoteUtilsV2.getPath({ note });
+      const npath = NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() });
       const uri = Uri.file(npath);
       const editor = await VSCodeUtils.openFileInEditor(uri);
       this.L.info({ ctx, opts, msg: "exit" });

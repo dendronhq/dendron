@@ -9,8 +9,8 @@ import _ from "lodash";
 import path from "path";
 
 export class DConfig {
-  static configPath(wsRoot: string): string {
-    return path.join(wsRoot, CONSTANTS.DENDRON_CONFIG_FILE);
+  static configPath(configRoot: string): string {
+    return path.join(configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
   }
 
   static genDefaultConfig(): DendronConfig {

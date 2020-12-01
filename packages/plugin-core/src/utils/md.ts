@@ -267,7 +267,7 @@ export const findReferences = async (
   );
 
   _.forEach(notesWithRefs, (note) => {
-    const fsPath = NoteUtilsV2.getPath({ note });
+    const fsPath = NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot()  });
 
     if (excludePaths.includes(fsPath) || !fs.existsSync(fsPath)) {
       return;

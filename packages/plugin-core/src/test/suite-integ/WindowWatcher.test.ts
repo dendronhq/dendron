@@ -40,10 +40,10 @@ suite("notes", function () {
           });
           await note2File({ note: bar, vault, wsRoot });
         },
-        onInit: async ({ vault }) => {
+        onInit: async ({ vault, wsRoot })  => {
           const vaultPath = vault.fsPath;
           watcher = new WindowWatcher();
-          const notePath = path.join(vaultPath, "bar.md");
+          const notePath = path.join(wsRoot, vaultPath, "bar.md");
           const uri = vscode.Uri.file(notePath);
           await VSCodeUtils.openFileInEditor(uri);
           await watcher.triggerUpdateDecorations();

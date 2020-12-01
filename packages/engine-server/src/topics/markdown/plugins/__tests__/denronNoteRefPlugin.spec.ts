@@ -104,6 +104,7 @@ describe("basic", () => {
     let vaults: DVault[];
     beforeEach(async () => {
       vaults = await EngineTestUtilsV3.setupVaults({
+        wsRoot,
         initVault1: async (vaultDir: string) => {
           await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         },

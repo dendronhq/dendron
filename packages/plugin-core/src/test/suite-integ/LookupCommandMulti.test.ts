@@ -55,7 +55,7 @@ const { LOOKUP_SINGLE_TEST_PRESET } = PLUGIN_CORE;
 //   });
 // });
 
-suite("Lookup notes, multi", function () {
+suite.skip("Lookup notes, multi", function () {
   let wsRoot: string;
   let vaults: DVault[];
   let ctx: vscode.ExtensionContext;

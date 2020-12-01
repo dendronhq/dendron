@@ -160,6 +160,7 @@ export async function runEngineTest(
 
   const wsRoot = tmpDir().name;
   const vaults = await EngineTestUtilsV3.setupVaults({
+    wsRoot,
     initVault1: async (vaultDir: string) => {
       await NotePresetsUtils.createBasic({ vaultDir, fname: "foo" });
     },

@@ -49,12 +49,13 @@ export type SetupWSOpts = {
 };
 
 type SetupVaultsOptsV3 = Omit<SetupVaultOpts, "initDirCb"> & {
+  wsRoot: string;
   vaults?: DVault[];
   initVault1?: InitVaultFunc;
   initVault2?: InitVaultFunc;
 };
 
-type SetupWSOptsV3 = SetupVaultsOptsV3 & { wsRoot?: string };
+type SetupWSOptsV3 = Omit<SetupVaultsOptsV3, "wsRoot"> & { wsRoot?: string };
 
 /**
  * Relative vaults
@@ -116,30 +117,36 @@ export class EngineTestUtilsV4 {
 export class EngineTestUtilsV3 {
   static async setupWS(opts: SetupWSOptsV3) {
     const wsRoot = tmpDir().name;
-    const vaults = await this.setupVaults(opts);
+    const vaults = await this.setupVaults({...opts, wsRoot});
     return { wsRoot, vaults };
   }
 
   static async setupVaults(opts: SetupVaultsOptsV3) {
     const { vaults } = _.defaults(opts, {
-      vaults: [
-        {
-          fsPath: tmpDir().name,
-          name: "main",
-        },
-        {
-          fsPath: tmpDir().name,
-          name: "other",
-        },
-      ],
+      vaults: [[tmpDir().name, "main"], [tmpDir().name, "other"]].map(([vpath, vname])=> {
+        return {
+          fsPath: path.relative(opts.wsRoot, vpath),
+          name: vname
+        }
+      })
     });
+    //     {
+    //       fsPath: tmpDir().name,
+    //       name: "main",
+    //     },
+    //     {
+    //       fsPath: tmpDir().name,
+    //       name: "other",
+    //     },
+    //   ],
+    // });
     const cb = [opts.initVault1, opts.initVault2];
     await Promise.all(
       vaults.map(async (ent, idx) => {
-        const { fsPath: vaultDir } = ent;
+        const { fsPath } = ent;
         return EngineTestUtilsV2.setupVault({
           ...opts,
-          vaultDir,
+          vaultDir: path.join(opts.wsRoot,fsPath ),
           initDirCb: cb[idx],
         });
       })

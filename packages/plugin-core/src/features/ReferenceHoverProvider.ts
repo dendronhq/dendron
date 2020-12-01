@@ -50,7 +50,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
           notes: engine.notes,
         });
         const uris = notes.map((note) =>
-          Uri.file(NoteUtilsV2.getPath({ note }))
+          Uri.file(NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot()  }))
         );
         foundUri = uris[0];
       }

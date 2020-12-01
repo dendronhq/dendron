@@ -209,7 +209,7 @@ const createEngineForNoteAcceptNewItem = createEngineFactory({
   },
 });
 
-suite("schemas", function () {
+suite("Lookup, schemas", function () {
   let ctx: vscode.ExtensionContext;
   this.timeout(TIMEOUT);
 
@@ -323,7 +323,7 @@ suite("schemas", function () {
   });
 });
 
-suite("notesv2", function () {
+suite("Lookup, notesv2", function () {
   let ctx: vscode.ExtensionContext;
   this.timeout(TIMEOUT);
   const engOpts: EngineOpts = { flavor: "note" };

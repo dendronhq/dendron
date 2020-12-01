@@ -628,7 +628,7 @@ export class NoteUtilsV2 {
     note: NotePropsV2;
     wsRoot: string;
   }): string {
-    const root = path.join(wsRoot, note.vault.fsPath);
+    const root = path.isAbsolute(note.vault.fsPath) ? note.vault.fsPath :path.join(wsRoot, note.vault.fsPath);
     return path.join(root, note.fname + ".md");
   }
 

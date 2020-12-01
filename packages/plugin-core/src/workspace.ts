@@ -255,7 +255,7 @@ export class DendronWorkspace {
     this.L.info({ ctx, msg: "initialized" });
   }
 
-  get dendronRoot(): string {
+  get configRoot(): string {
     const dendronDir = getCodeConfig<string | undefined>(
       CONFIG.DENDRON_DIR.key
     );
@@ -267,7 +267,7 @@ export class DendronWorkspace {
   }
 
   get config(): DendronConfig {
-    const dendronRoot = getWS().dendronRoot;
+    const dendronRoot = getWS().configRoot;
     if (!dendronRoot) {
       throw `dendronRoot not set when get config`;
     }

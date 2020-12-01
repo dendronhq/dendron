@@ -1,4 +1,4 @@
-import { NodeTestUtilsV2, toPlainObject } from "@dendronhq/common-test-utils";
+import { NoteTestUtilsV4, toPlainObject } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import { afterEach, beforeEach } from "mocha";
 import path from "path";
@@ -26,15 +26,16 @@ suite("DocumentLinkProvider", function () {
   test("basic", (done) => {
     runMultiVaultTest({
       ctx,
-      preSetupHook: async ({ vaults }) => {
-        const root = vaults[0];
-        await NodeTestUtilsV2.createNote({
-          vaultDir: root.fsPath,
-          noteProps: { body: "[[foo]]", fname: "gamma" },
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          vault: vaults[0],
+          wsRoot,
+          fname: "gamma",
+          body: "[[foo]]"
         });
       },
-      onInit: async ({ vaults }) => {
-        const notePath = path.join(vaults[0].fsPath, "gamma.md");
+      onInit: async ({ wsRoot, vaults }) => {
+        const notePath = path.join(wsRoot, vaults[0].fsPath, "gamma.md");
         const editor = await VSCodeUtils.openFileInEditor(
           vscode.Uri.file(notePath)
         );

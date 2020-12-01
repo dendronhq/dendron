@@ -66,7 +66,8 @@ export class WorkspaceService {
   }
 
   async createVault({ vault }: { vault: DVault }) {
-    fs.ensureDirSync(vault.fsPath);
+    const vpath = resolvePath(vault.fsPath, this.wsRoot);
+    fs.ensureDirSync(vpath);
 
     const note = NoteUtilsV2.createRoot({
       vault,
@@ -77,7 +78,8 @@ export class WorkspaceService {
       ].join("\n"),
     });
     const schema = SchemaUtilsV2.createRootModule({ vault });
-    if (!fs.existsSync(NoteUtilsV2.getPath({ note }))) {
+    
+    if (!fs.existsSync(NoteUtilsV2.getPathV4({note, wsRoot: this.wsRoot}))) {
       await note2File({ note, vault, wsRoot: this.wsRoot });
     }
     if (
@@ -85,7 +87,7 @@ export class WorkspaceService {
         SchemaUtilsV2.getPath({ root: this.wsRoot, fname: "root" })
       )
     ) {
-      await schemaModuleOpts2File(schema, vault.fsPath, "root");
+      await schemaModuleOpts2File(schema, vpath, "root");
     }
 
     const wsRoot = this.wsRoot;

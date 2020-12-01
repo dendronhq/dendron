@@ -22,7 +22,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       fname: refAtPos.ref,
       notes: engine.notes,
     });
-    const uris = notes.map((note) => Uri.file(NoteUtilsV2.getPath({ note })));
+    const uris = notes.map((note) => Uri.file(NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })));
     const out = uris.map((uri) => new Location(uri, new Position(0, 0)));
     if (out.length > 1) {
       return out;
@@ -50,7 +50,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       }
       const { note, pos } = out;
       return new Location(
-        Uri.file(NoteUtilsV2.getPath({ note })),
+        Uri.file(NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot()  })),
         pos ? pos : new Position(0, 0)
       );
     }

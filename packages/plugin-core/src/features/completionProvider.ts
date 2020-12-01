@@ -53,7 +53,7 @@ export const provideCompletionItems = (
   const completionItems: CompletionItem[] = [];
   const notes = DendronWorkspace.instance().getEngine().notes;
   const uris: Uri[] = _.values(notes).map((note) =>
-    Uri.file(NoteUtilsV2.getPath({ note }))
+    Uri.file(NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot()  }))
   );
 
   uris.forEach((uri, index) => {

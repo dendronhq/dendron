@@ -6,6 +6,7 @@ import {
 } from "@dendronhq/common-server";
 import { WorkspaceService } from "@dendronhq/engine-server";
 import _ from "lodash";
+import path from "path";
 import { commands, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
@@ -18,6 +19,7 @@ type CommandOpts = {
   vname?: string;
   vpath: string;
   vpathOrig: string;
+  vpathRel: string;
 };
 
 type CommandOutput = { vault: DVault };
@@ -42,17 +44,14 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       return window.showErrorMessage("need to specify value for path");
     }
     const vpathFull = resolvePath(vpath, DendronWorkspace.wsRoot());
-    // if (fs.existsSync(vpath) && fs.readdirSync(vpath).length !== 0) {
-    //   return window.showErrorMessage(
-    //     `vault path ${vpathFull} already exists and is not empty`
-    //   );
-    // }
-    return { vname, vpath: vpathFull, vpathOrig: vpath };
+    const vpathRel = path.relative(DendronWorkspace.wsRoot(), vpath);
+
+    return { vname, vpath: vpathFull, vpathOrig: vpath, vpathRel };
   }
 
   async execute(opts: CommandOpts) {
     const ctx = "VaultAdd";
-    const vault: DVault = { fsPath: opts.vpath };
+    const vault: DVault = { fsPath: opts.vpathRel };
     if (opts.vname) {
       vault.name = opts.vname;
     }
@@ -65,7 +64,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const wsPath = DendronWorkspace.workspaceFile().fsPath;
     let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
     if (!_.find(out.folders, (ent) => ent.path === vault.fsPath)) {
-      const vault2Folder: WorkspaceFolderRaw = { path: vault.fsPath };
+      const vault2Folder: WorkspaceFolderRaw = { path: opts.vpathRel };
       if (vault.name) {
         vault2Folder.name = vault.name;
       }

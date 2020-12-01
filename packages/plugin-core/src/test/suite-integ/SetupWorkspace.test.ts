@@ -18,6 +18,7 @@ import { DEFAULT_LEGACY_VAULT_NAME } from "../../constants";
 import { DendronWorkspace, resolveRelToWSRoot } from "../../workspace";
 import {
   expect,
+  genDefaultConfig,
   genDefaultSettings,
   genEmptyWSFiles,
   runWorkspaceTestV3,
@@ -57,6 +58,9 @@ suite("SetupWorkspace", function () {
           const settings = fs.readJSONSync(
             path.join(wsRoot, "dendron.code-workspace")
           );
+          const configRoot = DendronWorkspace.instance().configRoot;
+          const out = readYAML(DConfig.configPath(configRoot)) as DendronConfig;
+          expect(out).toEqual(genDefaultConfig());
           expect(settings).toEqual(genDefaultSettings());
           expect(fs.readdirSync(vault)).toEqual(genEmptyWSFiles());
           done();

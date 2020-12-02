@@ -20,32 +20,6 @@ import { WSMeta } from "./types";
 
 const markdownIt = _markdownIt();
 
-export function createNormVault({
-  wsRoot,
-  vault,
-}: {
-  wsRoot: string;
-  vault: DVault;
-}) {
-  const fullVaultPath = resolvePath(vault.fsPath, wsRoot);
-  let relVaultPath = "";
-  if (fullVaultPath.indexOf(wsRoot) >= 0) {
-    relVaultPath = _.trim(fullVaultPath.slice(wsRoot.length + 1), "/\\");
-  }
-  if (!_.isEmpty(relVaultPath)) {
-    vault.fsPath = relVaultPath;
-    return {
-      vault: {
-        ...vault,
-        fsPath: relVaultPath,
-      },
-      changed: true,
-    };
-  } else {
-    return { vault, changed: false };
-  }
-}
-
 export const loc2Path = ({
   loc,
   wsRoot,

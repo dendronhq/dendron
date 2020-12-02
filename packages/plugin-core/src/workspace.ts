@@ -284,6 +284,14 @@ export class DendronWorkspace {
     return podsPath;
   }
 
+  get repoDir(): string {
+    const repoDir = path.join(
+      DendronWorkspace.wsRoot(),
+      CONSTANTS.DENDRON_REPO_DIR
+    );
+    return repoDir;
+  }
+
   get rootWorkspace(): vscode.WorkspaceFolder {
     const wsFolders = DendronWorkspace.workspaceFolders();
     if (_.isEmpty(wsFolders) || _.isUndefined(wsFolders)) {

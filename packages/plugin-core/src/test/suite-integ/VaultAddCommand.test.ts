@@ -12,16 +12,56 @@ import {
 import { DConfig } from "@dendronhq/engine-server";
 import assert from "assert";
 import fs from "fs-extra";
-import { afterEach, beforeEach } from "mocha";
+import _ from "lodash";
+import { afterEach, beforeEach, describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
-import { VaultAddCommand } from "../../commands/VaultAddCommand";
+import {
+  VaultAddCommand,
+  VaultRemoteSource,
+} from "../../commands/VaultAddCommand";
 import { HistoryService } from "../../services/HistoryService";
 import { WorkspaceSettings } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { TIMEOUT } from "../testUtils";
-import { runSingleVaultTest } from "../testUtilsv2";
+import { expect, runSingleVaultTest } from "../testUtilsv2";
+import { runLegacySingleWorkspaceTest } from "../testUtilsV3";
+
+const stubVaultInput = (opts: {
+  sourceType: VaultRemoteSource;
+  sourcePath: string;
+  sourceName?: string;
+}): void => {
+  let acc = 0;
+  // @ts-ignore
+  VSCodeUtils.showQuickPick = async () => ({ label: opts.sourceType });
+
+  VSCodeUtils.showInputBox = async () => {
+    if (acc === 0) {
+      acc += 1;
+      return opts.sourcePath;
+    } else if (acc === 1) {
+      acc += 1;
+      return opts.sourceName;
+    } else {
+      throw Error("exceed acc limit");
+    }
+  };
+  return;
+};
+
+const getConfig = (opts: { wsRoot: string }) => {
+  const configPath = DConfig.configPath(opts.wsRoot);
+  const config = readYAML(configPath) as DendronConfig;
+  return config;
+};
+
+const getWorkspaceFolders = () => {
+  const wsPath = DendronWorkspace.workspaceFile().fsPath;
+  const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
+  return _.toArray(settings.folders);
+};
 
 suite("VaultAddCommand", function () {
   let ctx: vscode.ExtensionContext;
@@ -34,6 +74,35 @@ suite("VaultAddCommand", function () {
 
   afterEach(function () {
     HistoryService.instance().clearSubscriptions();
+  });
+
+  describe("remote", function () {
+    test.only("basic", (done) => {
+      runLegacySingleWorkspaceTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults }) => {
+          const vault = vaults[0];
+          stubVaultInput({
+            sourceType: "remote",
+            sourcePath: "https://github.com/dendronhq/dendron-site.git",
+            sourceName: "dendron",
+          });
+          const resp = await new VaultAddCommand().run();
+          const newVault = resp!.vaults[0];
+          expect(resp!.vaults.map((ent) => ent.fsPath)).toEqual([
+            "repos/dendron-site/vault",
+          ]);
+          const config = getConfig({ wsRoot });
+          expect(config.vaults).toEqual([vault, resp!.vaults[0]]);
+          const wsFolders = getWorkspaceFolders();
+          expect(wsFolders).toEqual([
+            { path: vault.fsPath },
+            { path: newVault.fsPath },
+          ]);
+          done();
+        },
+      });
+    });
   });
 
   test("add to existing folder", (done) => {

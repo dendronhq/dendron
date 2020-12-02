@@ -193,6 +193,10 @@ export class PickerUtilsV2 {
     }
   }
 
+  static isInputEmpty(value?: string): boolean {
+    return _.some([_.isEmpty, _.isUndefined], (ent) => ent(value));
+  }
+
   static resetPaginationOpts(picker: DendronQuickPickerV2) {
     delete picker.moreResults;
     delete picker.offset;

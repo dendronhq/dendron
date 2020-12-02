@@ -64,9 +64,11 @@ export function genTutorialWSFiles() {
 export function genDefaultConfig() {
   return {
     version: 1,
-    vaults: [{
-      fsPath: 'vault'
-    }],
+    vaults: [
+      {
+        fsPath: "vault",
+      },
+    ],
     site: {
       copyAssets: true,
       siteHierarchies: ["root"],
@@ -119,9 +121,9 @@ export async function runSingleVaultTest(
   }
 ) {
   let wsRoot = tmpDir().name;
-  const vaultDir= tmpDir().name;
-  const vaultRel = path.relative(wsRoot, vaultDir)
-  let vault = { fsPath:  vaultRel };
+  const vaultDir = tmpDir().name;
+  const vaultRel = path.relative(wsRoot, vaultDir);
+  let vault = { fsPath: vaultRel };
   const { ctx, onInit } = opts;
   await setupCodeWorkspaceV2(
     _.defaults(opts, {
@@ -210,7 +212,10 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
     postSetupHook: async () => {},
   });
   const { preSetupHook, postSetupHook } = copts;
-  const { wsRoot, vaults: vaultsWithFullPaths } = await EngineTestUtilsV2.setupWS(opts);
+  const {
+    wsRoot,
+    vaults: vaultsWithFullPaths,
+  } = await EngineTestUtilsV2.setupWS(opts);
   let setupWsOverride = copts.setupWsOverride as Partial<SetupWorkspaceOpts>;
   setupCodeConfiguration(opts);
   if (opts.vaultDir) {
@@ -236,7 +241,7 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
     skipOpenWs: true,
     ...setupWsOverride,
   });
-  DendronWorkspace.updateWorkspaceFile({
+  await DendronWorkspace.updateWorkspaceFile({
     updateCb: (settings) => {
       const folders = vaults2.map((ent) => ({ path: ent.fsPath }));
       settings = assignJSONWithComment({ folders }, settings);
@@ -249,7 +254,12 @@ export async function setupCodeWorkspaceV2(opts: SetupCodeWorkspaceV2) {
       return { fsPath: ent };
     }),
   });
-  return { wsRoot, vaults: vaultsWithFullPaths, workspaceFile, workspaceFolders };
+  return {
+    wsRoot,
+    vaults: vaultsWithFullPaths,
+    workspaceFile,
+    workspaceFolders,
+  };
 }
 
 export async function setupCodeWorkspaceMultiVaultV2(

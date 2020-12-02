@@ -9,12 +9,12 @@ import {
   note2File,
   resolvePath,
   schemaModuleOpts2File,
+  vault2Path,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DConfig } from "./config";
-import { createNormVault } from "./utils";
 
 export type PathExistBehavior = "delete" | "abort" | "continue";
 
@@ -66,7 +66,7 @@ export class WorkspaceService {
   }
 
   async createVault({ vault }: { vault: DVault }) {
-    const vpath = resolvePath(vault.fsPath, this.wsRoot);
+    const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
     fs.ensureDirSync(vpath);
 
     const note = NoteUtilsV2.createRoot({
@@ -78,8 +78,8 @@ export class WorkspaceService {
       ].join("\n"),
     });
     const schema = SchemaUtilsV2.createRootModule({ vault });
-    
-    if (!fs.existsSync(NoteUtilsV2.getPathV4({note, wsRoot: this.wsRoot}))) {
+
+    if (!fs.existsSync(NoteUtilsV2.getPathV4({ note, wsRoot: this.wsRoot }))) {
       await note2File({ note, vault, wsRoot: this.wsRoot });
     }
     if (
@@ -90,11 +90,11 @@ export class WorkspaceService {
       await schemaModuleOpts2File(schema, vpath, "root");
     }
 
-    const wsRoot = this.wsRoot;
-    const { vault: nvault } = createNormVault({ vault, wsRoot });
+    // const wsRoot = this.wsRoot;
+    //const { vault: nvault } = createNormVault({ vault, wsRoot });
     // update config
     const config = this.config;
-    config.vaults.push(nvault);
+    config.vaults.push(vault);
     await this.setConfig(config);
     return;
   }
@@ -128,10 +128,9 @@ export class WorkspaceService {
       await schemaModuleOpts2File(schema, vaultFullPath, "root");
     }
 
-    const { vault: nvault } = createNormVault({ vault, wsRoot });
     // update config
     const config = this.configV2;
-    config.vaults.push(nvault);
+    config.vaults.push(vault);
     await this.setConfigV2(config);
     return;
   }

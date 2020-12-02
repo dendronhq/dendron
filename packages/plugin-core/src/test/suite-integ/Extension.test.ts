@@ -1,5 +1,4 @@
-import _ from "lodash";
-import { readJSONWithComments, tmpDir } from "@dendronhq/common-server";
+import { tmpDir } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import { afterEach, beforeEach, describe, it } from "mocha";
 import path from "path";
@@ -15,7 +14,6 @@ import {
   GLOBAL_STATE,
 } from "../../constants";
 import { HistoryService } from "../../services/HistoryService";
-import { WorkspaceSettings } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
 import { _activate } from "../../_extension";
@@ -25,7 +23,7 @@ import {
   genTutorialWSFiles,
   resetCodeWorkspace,
 } from "../testUtilsv2";
-import { setupLegacyWorkspaceMulti, stubSetupWorkspace } from "../testUtilsV3";
+import { stubSetupWorkspace } from "../testUtilsV3";
 
 const TIMEOUT = 60 * 1000 * 5;
 
@@ -42,38 +40,6 @@ suite("Extension", function () {
 
   afterEach(function () {
     HistoryService.instance().clearSubscriptions();
-  });
-
-  describe("setup workspace/ active", function () {
-    test("remove bad extension", function (done) {
-      setupLegacyWorkspaceMulti({
-        ctx,
-        wsSettingsOverride: {
-          extensions: {
-            recommendations: ["foo", "dendron.dendron-markdown-notes"],
-            unwantedRecommendations: [],
-          },
-        },
-      }).then(async () => {
-        await _activate(ctx);
-        const out = (await readJSONWithComments(
-          DendronWorkspace.workspaceFile().fsPath
-        )) as WorkspaceSettings;
-        expect(
-          _.find(
-            out.extensions.recommendations,
-            (ent) => ent === "dendron.dendron-markdown-notes"
-          )
-        ).toBeFalsy();
-        expect(
-          _.find(
-            out.extensions.unwantedRecommendations,
-            (ent) => ent === "dendron.dendron-markdown-notes"
-          )
-        ).toBeTruthy();
-        done();
-      });
-    });
   });
 
   describe("setup workspace", function () {

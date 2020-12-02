@@ -7,7 +7,7 @@ import {
   assignJSONWithComment,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
-import { createNormVault, DConfig } from "@dendronhq/engine-server";
+import { DConfig } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { Logger } from "./logger";
@@ -51,10 +51,9 @@ export function migrateConfig({
     if (_.isUndefined(wsFolders)) {
       throw new DendronError({ msg: "no vaults detected" });
     }
-    const { vault } = createNormVault({
-      wsRoot,
-      vault: { fsPath: wsFolders[0].uri.fsPath },
-    });
+    const vault = {
+      fsPath: path.relative(wsRoot, wsFolders[0].uri.fsPath),
+    };
     config.vaults = [vault];
     changed = true;
   }

@@ -77,7 +77,7 @@ suite("VaultAddCommand", function () {
   });
 
   describe("remote", function () {
-    test.only("basic", (done) => {
+    test("basic", (done) => {
       runLegacySingleWorkspaceTest({
         ctx,
         onInit: async ({ wsRoot, vaults }) => {
@@ -105,146 +105,112 @@ suite("VaultAddCommand", function () {
     });
   });
 
-  test("add to existing folder", (done) => {
-    runSingleVaultTest({
-      ctx,
-      postSetupHook: async ({ wsRoot }) => {
-        const vpath = path.join(wsRoot, "vault2");
-        fs.ensureDirSync(vpath);
-        const vault = { fsPath: vpath };
+  describe("local", function () {
+    test("add to existing folder", (done) => {
+      runSingleVaultTest({
+        ctx,
+        postSetupHook: async ({ wsRoot }) => {
+          const vpath = path.join(wsRoot, "vault2");
+          fs.ensureDirSync(vpath);
+          const vault = { fsPath: vpath };
 
-        const note = NoteUtilsV2.createRoot({
-          vault: { fsPath: vpath },
-          body: ["existing note"].join("\n"),
-        });
-        await note2File({ note, vault, wsRoot });
-        const schema = SchemaUtilsV2.createRootModule({ vault });
-        await schemaModuleOpts2File(schema, vault.fsPath, "root");
-      },
-      onInit: async ({ vault, wsRoot }) => {
-        const vpath = path.join(wsRoot, "vault2");
-        let acc = 0;
+          const note = NoteUtilsV2.createRoot({
+            vault: { fsPath: vpath },
+            body: ["existing note"].join("\n"),
+          });
+          await note2File({ note, vault, wsRoot });
+          const schema = SchemaUtilsV2.createRootModule({ vault });
+          await schemaModuleOpts2File(schema, vault.fsPath, "root");
+        },
+        onInit: async ({ vault, wsRoot }) => {
+          const vpath = path.join(wsRoot, "vault2");
+          stubVaultInput({ sourceType: "local", sourcePath: vpath });
+          await new VaultAddCommand().run();
+          assert.deepStrictEqual(fs.readdirSync(vpath), [
+            "root.md",
+            "root.schema.yml",
+          ]);
+          const configPath = DConfig.configPath(
+            DendronWorkspace.wsRoot() as string
+          );
+          const config = readYAML(configPath) as DendronConfig;
+          assert.deepStrictEqual(
+            config.vaults.map((ent) => ent.fsPath),
+            [vault.fsPath, "vault2"]
+          );
+          const wsPath = DendronWorkspace.workspaceFile().fsPath;
+          const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
+          assert.deepStrictEqual(settings.folders, [
+            { path: vault.fsPath },
+            { path: "vault2" },
+          ]);
 
-        // need to ignore to keep compiler from complaining
-        // @ts-ignore
-        VSCodeUtils.showInputBox = () => {
-          if (acc === 0) {
-            acc += 1;
-            return vpath;
-          } else {
-            return;
-          }
-        };
-
-        await new VaultAddCommand().run();
-        assert.deepStrictEqual(fs.readdirSync(vpath), [
-          "root.md",
-          "root.schema.yml",
-        ]);
-        const configPath = DConfig.configPath(
-          DendronWorkspace.wsRoot() as string
-        );
-        const config = readYAML(configPath) as DendronConfig;
-        assert.deepStrictEqual(
-          config.vaults.map((ent) => ent.fsPath),
-          [vault.fsPath, "vault2"]
-        );
-        const wsPath = DendronWorkspace.workspaceFile().fsPath;
-        const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
-        assert.deepStrictEqual(settings.folders, [
-          { path: vault.fsPath },
-          { path: "vault2" },
-        ]);
-
-        const body = fs.readFileSync(path.join(vpath, "root.md"));
-        assert.ok(body.indexOf("existing note") >= 0);
-        done();
-      },
+          const body = fs.readFileSync(path.join(vpath, "root.md"));
+          assert.ok(body.indexOf("existing note") >= 0);
+          done();
+        },
+      });
     });
-  });
 
-  test("add absolute path inside wsRoot", (done) => {
-    runSingleVaultTest({
-      ctx,
-      onInit: async ({ vault, wsRoot }) => {
-        const vpath = path.join(wsRoot, "vault2");
-        let acc = 0;
-
-        // need to ignore to keep compiler from complaining
-        // @ts-ignore
-        VSCodeUtils.showInputBox = () => {
-          if (acc === 0) {
-            acc += 1;
-            return vpath;
-          } else {
-            return;
-          }
-        };
-
-        await new VaultAddCommand().run();
-        assert.deepStrictEqual(fs.readdirSync(vpath), [
-          "root.md",
-          "root.schema.yml",
-        ]);
-        const configPath = DConfig.configPath(
-          DendronWorkspace.wsRoot() as string
-        );
-        const config = readYAML(configPath) as DendronConfig;
-        assert.deepStrictEqual(
-          config.vaults.map((ent) => ent.fsPath),
-          [vault.fsPath, "vault2"]
-        );
-        const wsPath = DendronWorkspace.workspaceFile().fsPath;
-        const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
-        assert.deepStrictEqual(settings.folders, [
-          { path: vault.fsPath },
-          { path: "vault2" },
-        ]);
-        done();
-      },
+    test("add absolute path inside wsRoot", (done) => {
+      runSingleVaultTest({
+        ctx,
+        onInit: async ({ vault, wsRoot }) => {
+          const vpath = path.join(wsRoot, "vault2");
+          stubVaultInput({ sourceType: "local", sourcePath: vpath });
+          await new VaultAddCommand().run();
+          assert.deepStrictEqual(fs.readdirSync(vpath), [
+            "root.md",
+            "root.schema.yml",
+          ]);
+          const configPath = DConfig.configPath(
+            DendronWorkspace.wsRoot() as string
+          );
+          const config = readYAML(configPath) as DendronConfig;
+          assert.deepStrictEqual(
+            config.vaults.map((ent) => ent.fsPath),
+            [vault.fsPath, "vault2"]
+          );
+          const wsPath = DendronWorkspace.workspaceFile().fsPath;
+          const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
+          assert.deepStrictEqual(settings.folders, [
+            { path: vault.fsPath },
+            { path: "vault2" },
+          ]);
+          done();
+        },
+      });
     });
-  });
 
-  test("add absolute path outside of wsRoot", (done) => {
-    runSingleVaultTest({
-      ctx,
-      onInit: async ({ vault, wsRoot }) => {
-        const vpath = tmpDir().name;
-        const vaultRelPath = path.relative(wsRoot, vpath);
-        let acc = 0;
-
-        // need to ignore to keep compiler from complaining
-        // @ts-ignore
-        VSCodeUtils.showInputBox = () => {
-          if (acc === 0) {
-            acc += 1;
-            return vpath;
-          } else {
-            return;
-          }
-        };
-
-        await new VaultAddCommand().run();
-        assert.deepStrictEqual(fs.readdirSync(vpath), [
-          "root.md",
-          "root.schema.yml",
-        ]);
-        const configPath = DConfig.configPath(
-          DendronWorkspace.wsRoot() as string
-        );
-        const config = readYAML(configPath) as DendronConfig;
-        assert.deepStrictEqual(
-          config.vaults.map((ent) => ent.fsPath),
-          [vault.fsPath, vaultRelPath]
-        );
-        const wsPath = DendronWorkspace.workspaceFile().fsPath;
-        const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
-        assert.deepStrictEqual(settings.folders, [
-          { path: vault.fsPath },
-          { path: vaultRelPath },
-        ]);
-        done();
-      },
+    test("add absolute path outside of wsRoot", (done) => {
+      runSingleVaultTest({
+        ctx,
+        onInit: async ({ vault, wsRoot }) => {
+          const vpath = tmpDir().name;
+          const vaultRelPath = path.relative(wsRoot, vpath);
+          stubVaultInput({ sourceType: "local", sourcePath: vpath });
+          await new VaultAddCommand().run();
+          assert.deepStrictEqual(fs.readdirSync(vpath), [
+            "root.md",
+            "root.schema.yml",
+          ]);
+          const configPath = DConfig.configPath(
+            DendronWorkspace.wsRoot() as string
+          );
+          const config = readYAML(configPath) as DendronConfig;
+          assert.deepStrictEqual(
+            config.vaults.map((ent) => ent.fsPath),
+            [vault.fsPath, vaultRelPath]
+          );
+          const wsPath = DendronWorkspace.workspaceFile().fsPath;
+          const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
+          assert.deepStrictEqual(settings.folders, [
+            { path: vault.fsPath },
+            { path: vaultRelPath },
+          ]);
+          done();
+        },
+      });
     });
   });
 });

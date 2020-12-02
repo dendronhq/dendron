@@ -489,14 +489,12 @@
             },
             {
                 "command": "dendron.goNextHierarchy",
-                "mac": "cmd+shift+right",
-                "key": "ctrl+shift+right",
+                "key": "ctrl+shift+]",
                 "when": "editorFocus"
             },
             {
                 "command": "dendron.goPrevHierarchy",
-                "mac": "cmd+shift+left",
-                "key": "ctrl+shift+left",
+                "key": "ctrl+shift+[",
                 "when": "editorFocus"
             },
             {

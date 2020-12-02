@@ -284,8 +284,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Go Next Sibling`,
     group: "hierarchies",
     keybindings: {
-      mac: "cmd+shift+right",
-      key: "ctrl+shift+right",
+      key: "ctrl+shift+]",
       when: "editorFocus",
     },
     desc: "Go to the next sibling",
@@ -298,8 +297,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Go Previous Sibling`,
     group: "hierarchies",
     keybindings: {
-      mac: "cmd+shift+left",
-      key: "ctrl+shift+left",
+      key: "ctrl+shift+[",
       when: "editorFocus",
     },
     desc: "Go to the previous sibling",

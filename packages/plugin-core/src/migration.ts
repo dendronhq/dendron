@@ -3,29 +3,38 @@ import {
   DendronError,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { writeJSONWithComments } from "@dendronhq/common-server";
+import {
+  assignJSONWithComment,
+  writeJSONWithComments,
+} from "@dendronhq/common-server";
 import { createNormVault, DConfig } from "@dendronhq/engine-server";
 import _ from "lodash";
+import path from "path";
 import { Logger } from "./logger";
 import { WorkspaceSettings } from "./types";
 import { DendronWorkspace } from "./workspace";
 
-export function migrateSettings({ settings }: { settings: WorkspaceSettings }) {
-  const mdNotes = _.find(
-    settings?.extensions?.recommendations,
-    (ent) => ent === "dendron.dendron-markdown-notes"
-  );
+export async function migrateSettings({
+  settings,
+}: {
+  settings: WorkspaceSettings;
+  config: DendronConfig;
+}) {
   let changed = false;
-  if (mdNotes) {
-    const recommendations = _.reject(
-      settings?.extensions?.recommendations,
-      (ent) => ent === "dendron.dendron-markdown-notes"
-    );
-    settings.extensions.recommendations = recommendations;
-    // settings = assignJSONWithComment(extensions, settings)
-    writeJSONWithComments(DendronWorkspace.workspaceFile().fsPath, settings);
-    changed = true;
+  const newFolders: WorkspaceSettings["folders"] = [];
+  settings.folders.forEach((ent) => {
+    if (path.isAbsolute(ent.path)) {
+      const relPath = path.relative(DendronWorkspace.wsRoot(), ent.path);
+      changed = true;
+      newFolders.push({ ...ent, path: relPath });
+    } else {
+      newFolders.push(ent);
+    }
+  });
+  if (changed) {
+    settings = await assignJSONWithComment({ folders: newFolders }, settings);
   }
+  writeJSONWithComments(DendronWorkspace.workspaceFile().fsPath, settings);
   return { changed, settings };
 }
 
@@ -35,6 +44,7 @@ export function migrateConfig({
 }: { config: DendronConfig } & Omit<WorkspaceOpts, "vaults">) {
   const ctx = "migrateConfig";
   let changed = false;
+  // if no config, write it in
   if (_.isEmpty(config.vaults)) {
     Logger.info({ ctx, msg: "config.vaults empty" });
     const wsFolders = DendronWorkspace.workspaceFolders();
@@ -48,10 +58,18 @@ export function migrateConfig({
     config.vaults = [vault];
     changed = true;
   }
+  // if no version, write it in
   if (_.isUndefined(config.version)) {
     config.version = 0;
     changed = true;
   }
+  // check if vaults are relative path, if so, change
+  config.vaults.forEach((ent) => {
+    if (path.isAbsolute(ent.fsPath)) {
+      ent.fsPath = path.relative(wsRoot, ent.fsPath);
+      changed = true;
+    }
+  });
 
   if (changed) {
     DConfig.writeConfig({ wsRoot, config });

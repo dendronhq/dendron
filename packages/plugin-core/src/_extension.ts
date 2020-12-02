@@ -197,7 +197,7 @@ export async function _activate(context: vscode.ExtensionContext) {
     const wsConfig = (await readJSONWithComments(
       DendronWorkspace.workspaceFile().fsPath
     )) as WorkspaceSettings;
-    const wsConfigMigrated = migrateSettings({ settings: wsConfig });
+    const wsConfigMigrated = migrateSettings({ settings: wsConfig, config });
     Logger.info({ ctx, wsConfig, wsConfigMigrated, msg: "read wsConfig" });
 
     const fpath = getWSMetaFilePath({ wsRoot });

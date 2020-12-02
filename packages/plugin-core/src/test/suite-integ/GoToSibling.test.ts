@@ -1,6 +1,7 @@
 import { DVault, NoteUtilsV2 } from "@dendronhq/common-all";
 import { note2File, vault2Path } from "@dendronhq/common-server";
 import { runJestHarnessV2 } from "@dendronhq/common-test-utils";
+import _ from "lodash";
 import { afterEach, beforeEach } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
@@ -251,6 +252,45 @@ suite("notes", function () {
             },
           ],
           expect
+        );
+        done();
+      },
+    });
+  });
+
+  test("nav in multi-root", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        await createNotes(wsRoot, vaults[0]);
+        await createNotes(wsRoot, vaults[1]);
+      },
+      onInit: async ({ vaults, wsRoot }) => {
+        await _.reduce(
+          vaults,
+          async (prev, vault) => {
+            await prev;
+            const vpath = vault2Path({ wsRoot, vault });
+            const notePath = path.join(vpath, "foo.journal.2020.08.30.md");
+            await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+            const resp = await new GoToSiblingCommand().execute({ direction });
+            await runJestHarnessV2(
+              [
+                {
+                  actual: resp,
+                  expected: { msg: "ok" },
+                },
+                {
+                  actual: VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+                    `${path.basename(vault.fsPath)}/foo.journal.2020.08.31.md`
+                  ),
+                  expected: true,
+                },
+              ],
+              expect
+            );
+          },
+          Promise.resolve()
         );
         done();
       },

@@ -5,9 +5,11 @@ import {
   NotePropsV2,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";
+import { PickerUtilsV2 } from "../components/lookup/utils";
 import { UNKNOWN_ERROR_MSG } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
@@ -56,12 +58,15 @@ export class GoToSiblingCommand extends BasicCommand<
         .map((ent) => client.notes[ent])
         .concat([rootNode]);
     } else {
-      const note = NoteUtilsV2.getNoteByFname(value, client.notes, {
-        throwIfEmpty: true,
-      }) as NotePropsV2;
-      respNodes = client.notes[note.parent as string].children.map(
-        (id) => client.notes[id]
-      );
+      const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+      const note = NoteUtilsV2.getNotesByFname({
+        fname: value,
+        notes: client.notes,
+        vault,
+      })[0] as NotePropsV2;
+      respNodes = client.notes[note.parent as string].children
+        .map((id) => client.notes[id])
+        .filter((ent) => _.isUndefined(ent.stub));
     }
 
     if (respNodes.length <= 1) {
@@ -89,8 +94,12 @@ export class GoToSiblingCommand extends BasicCommand<
           ? sorted.slice(-1)[0]
           : sorted[indexOfCurrentNote - 1];
     }
+    const vpath = vault2Path({
+      vault: siblingNote.vault,
+      wsRoot: DendronWorkspace.wsRoot(),
+    });
     await VSCodeUtils.openFileInEditor(
-      Uri.joinPath(ws.rootWorkspace.uri, siblingNote.fname + ".md")
+      Uri.joinPath(Uri.file(vpath), siblingNote.fname + ".md")
     );
     return { msg: "ok" as const };
   }

@@ -1,6 +1,6 @@
 import { tmpDir } from "@dendronhq/common-server";
 import fs from "fs-extra";
-import { afterEach, beforeEach, describe, it } from "mocha";
+import { describe, it } from "mocha";
 import path from "path";
 import vscode, { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
@@ -13,9 +13,7 @@ import {
   DENDRON_COMMANDS,
   GLOBAL_STATE,
 } from "../../constants";
-import { HistoryService } from "../../services/HistoryService";
-import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace, getWS } from "../../workspace";
+import { getWS } from "../../workspace";
 import { _activate } from "../../_extension";
 import {
   expect,
@@ -23,23 +21,16 @@ import {
   genTutorialWSFiles,
   resetCodeWorkspace,
 } from "../testUtilsv2";
-import { stubSetupWorkspace } from "../testUtilsV3";
-
-const TIMEOUT = 60 * 1000 * 5;
+import { setupBeforeAfter, stubSetupWorkspace } from "../testUtilsV3";
 
 suite("Extension", function () {
   let ctx: ExtensionContext;
-  this.timeout(TIMEOUT);
 
-  beforeEach(async function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-    await resetCodeWorkspace();
-    await new ResetConfigCommand().execute({ scope: "all" });
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
+  ctx = setupBeforeAfter(this, {
+    beforeHook: async () => {
+      await resetCodeWorkspace();
+      await new ResetConfigCommand().execute({ scope: "all" });
+    },
   });
 
   describe("setup workspace", function () {

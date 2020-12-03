@@ -19,8 +19,8 @@ import { VaultUtils } from "@dendronhq/common-server";
 import { GotoNoteCommandOpts } from "../commands/GotoNote";
 import { DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
-import { HistoryEvent, HistoryService } from "../services/HistoryService";
 import { DendronWorkspace } from "../workspace";
+import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
 
 function createTreeNote(note: NotePropsV2) {
   const collapsibleState = _.isEmpty(note.children)

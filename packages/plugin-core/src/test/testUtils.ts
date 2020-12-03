@@ -9,18 +9,18 @@ import {
 } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
 import { _activate } from "../_extension";
-import {
-  HistoryEvent,
-  HistoryEventAction,
-  HistoryService,
-} from "../services/HistoryService";
 import { DendronWorkspace } from "../workspace";
 import { DNodePropsQuickInputV2, DVault } from "@dendronhq/common-all";
 import { VSCodeUtils } from "../utils";
 import fs from "fs-extra";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { DendronBtn } from "../components/lookup/buttons";
-import { DConfig } from "@dendronhq/engine-server";
+import {
+  DConfig,
+  HistoryEvent,
+  HistoryEventAction,
+  HistoryService,
+} from "@dendronhq/engine-server";
 
 export function getActiveEditorBasename() {
   return path.basename(

@@ -3,28 +3,19 @@ import { readYAML } from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
 import assert from "assert";
 import fs from "fs-extra";
-import { afterEach, beforeEach } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { VaultRemoveCommand } from "../../commands/VaultRemoveCommand";
-import { HistoryService } from "../../services/HistoryService";
 import { WorkspaceSettings } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { TIMEOUT } from "../testUtils";
 import { runMultiVaultTest } from "../testUtilsv2";
+import { setupBeforeAfter } from "../testUtilsV3";
 
 suite("VaultRemoveCommand", function () {
   let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
-
-  beforeEach(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
+  ctx = setupBeforeAfter(this, {
+    beforeHook: () => {},
   });
 
   test("basic", (done) => {
@@ -38,13 +29,16 @@ suite("VaultRemoveCommand", function () {
         await new VaultRemoveCommand().run();
 
         // check no files deleted
-        assert.deepStrictEqual(fs.readdirSync(path.join(wsRoot, vaults[1].fsPath)), [
-          "bar.ch1.md",
-          "bar.md",
-          "bar.schema.yml",
-          "root.md",
-          "root.schema.yml",
-        ]);
+        assert.deepStrictEqual(
+          fs.readdirSync(path.join(wsRoot, vaults[1].fsPath)),
+          [
+            "bar.ch1.md",
+            "bar.md",
+            "bar.schema.yml",
+            "root.md",
+            "root.schema.yml",
+          ]
+        );
 
         // check config updated
         const configPath = DConfig.configPath(

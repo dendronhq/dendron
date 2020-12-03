@@ -1,14 +1,11 @@
 import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
-import { afterEach, beforeEach } from "mocha";
 import * as vscode from "vscode";
 import ReferenceProvider from "../../features/ReferenceProvider";
-import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { TIMEOUT } from "../testUtils";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest } from "../testUtilsV3";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 async function provide(editor: vscode.TextEditor) {
   const doc = editor?.document as vscode.TextDocument;
@@ -22,15 +19,8 @@ async function provide(editor: vscode.TextEditor) {
 
 suite("DocumentLinkProvider", function () {
   let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
-
-  beforeEach(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
+  ctx = setupBeforeAfter(this, {
+    beforeHook: () => {},
   });
 
   test("basic", (done) => {

@@ -3,28 +3,17 @@ import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
-import { afterEach, beforeEach } from "mocha";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { RefactorHierarchyCommandV2 } from "../../commands/RefactorHierarchyV2";
-import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
-import { TIMEOUT } from "../testUtils";
-import { runLegacyMultiWorkspaceTest } from "../testUtilsV3";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("notes", function () {
   let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
-
-  beforeEach(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
+  ctx = setupBeforeAfter(this, {
+    beforeHook: () => {},
   });
 
   test("basic", (done) => {

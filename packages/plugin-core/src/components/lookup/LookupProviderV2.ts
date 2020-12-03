@@ -15,7 +15,6 @@ import {
 import _, { DebouncedFunc } from "lodash";
 import { CancellationToken, Uri, window } from "vscode";
 import { Logger } from "../../logger";
-import { HistoryService } from "../../services/HistoryService";
 import { EngineFlavor, EngineOpts } from "../../types";
 import { getDurationMilliseconds, profile } from "../../utils/system";
 import { DendronWorkspace, getWS } from "../../workspace";
@@ -121,8 +120,6 @@ export class LookupProviderV2 {
       });
     }
     const uri = node2Uri(nodeNew);
-    const historyService = HistoryService.instance();
-    historyService.add({ source: "engine", action: "create", uri });
 
     Logger.info({ ctx, msg: "pre:checkNoteExist", uri });
     // TODO: check for overwriting schema
@@ -164,8 +161,6 @@ export class LookupProviderV2 {
     Logger.info({ ctx, msg: "create normal node" });
     smodNew = SchemaUtilsV2.createModuleProps({ fname, vault });
     const uri = Uri.file(SchemaUtilsV2.getPath({ root: vault.fsPath, fname }));
-    const historyService = HistoryService.instance();
-    historyService.add({ source: "engine", action: "create", uri });
     const resp = await engine.writeSchema(smodNew);
     Logger.info({ ctx, msg: "engine.write", profile });
     return { uri, node: smodNew, resp };

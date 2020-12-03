@@ -1,6 +1,11 @@
 import { getStage, Time } from "@dendronhq/common-all";
 import { readJSONWithComments } from "@dendronhq/common-server";
-import { getWSMetaFilePath, writeWSMetaFile } from "@dendronhq/engine-server";
+import {
+  getWSMetaFilePath,
+  HistoryEvent,
+  HistoryService,
+  writeWSMetaFile,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -14,7 +19,6 @@ import {
 } from "./constants";
 import { Logger } from "./logger";
 import { migrateConfig, migrateSettings } from "./migration";
-import { HistoryEvent, HistoryService } from "./services/HistoryService";
 import { Extensions } from "./settings";
 import { WorkspaceSettings } from "./types";
 import { VSCodeUtils, WSUtils } from "./utils";

@@ -6,12 +6,11 @@ import {
   NoteUtilsV2,
 } from "@dendronhq/common-all";
 import { file2Note, string2Note } from "@dendronhq/common-server";
-import { ParserUtilsV2 } from "@dendronhq/engine-server";
+import { HistoryService, ParserUtilsV2 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
-import { HistoryService } from "./services/HistoryService";
 import { DendronWorkspace } from "./workspace";
 
 export class VaultWatcher {
@@ -116,9 +115,9 @@ export class VaultWatcher {
             stub: false,
             schemaStub: false,
             ..._.pick(maybeNote, ["children", "parent"]),
-          };
+          } as NotePropsV2;
         }
-        await this.engine.updateNote(note, {
+        await this.engine.updateNote(note as NotePropsV2, {
           newNode: true,
         });
         this.L.debug({ ctx, uri, msg: "post-add-to-engine", note });

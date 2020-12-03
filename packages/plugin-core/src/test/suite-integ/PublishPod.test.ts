@@ -10,30 +10,19 @@ import {
   podClassEntryToPodItemV4,
 } from "@dendronhq/pods-core";
 import * as assert from "assert";
-import { afterEach, beforeEach } from "mocha";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { PublishPodCommand } from "../../commands/PublishPod";
-import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
-import { TIMEOUT } from "../testUtils";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest } from "../testUtilsV3";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("PublishV2", function () {
   let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
-
-  beforeEach(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
+  ctx = setupBeforeAfter(this, {
+    beforeHook: () => {},
   });
 
   test("basic", (done) => {

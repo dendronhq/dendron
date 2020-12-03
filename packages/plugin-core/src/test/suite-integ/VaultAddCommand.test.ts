@@ -13,20 +13,18 @@ import { DConfig } from "@dendronhq/engine-server";
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
-import { afterEach, beforeEach, describe } from "mocha";
+import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import {
   VaultAddCommand,
   VaultRemoteSource,
 } from "../../commands/VaultAddCommand";
-import { HistoryService } from "../../services/HistoryService";
 import { WorkspaceSettings } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { TIMEOUT } from "../testUtils";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
-import { runLegacySingleWorkspaceTest } from "../testUtilsV3";
+import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 const stubVaultInput = (opts: {
   sourceType: VaultRemoteSource;
@@ -65,15 +63,8 @@ const getWorkspaceFolders = () => {
 
 suite("VaultAddCommand", function () {
   let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
-
-  beforeEach(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
+  ctx = setupBeforeAfter(this, {
+    beforeHook: () => {},
   });
 
   describe("remote", function () {

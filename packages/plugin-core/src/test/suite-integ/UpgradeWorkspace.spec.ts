@@ -1,14 +1,13 @@
 import * as assert from "assert";
 import _ from "lodash";
-import { afterEach, beforeEach, describe, it } from "mocha";
+import { describe, it } from "mocha";
 import { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
-import { HistoryService } from "../../services/HistoryService";
-import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { _activate } from "../../_extension";
 import { onExtension } from "../testUtils";
 import { setupCodeWorkspaceV2 } from "../testUtilsv2";
+import { setupBeforeAfter } from "../testUtilsV3";
 
 const TIMEOUT = 60 * 1000 * 5;
 const exepctedUpgradeSettings = () => {
@@ -47,14 +46,10 @@ suite("upgrade", function () {
   let ctx: ExtensionContext;
 
   describe("main", function () {
-    beforeEach(async function () {
-      ctx = VSCodeUtils.getOrCreateMockContext();
-      DendronWorkspace.getOrCreate(ctx);
-      await new ResetConfigCommand().execute({ scope: "all" });
-    });
-
-    afterEach(function () {
-      HistoryService.instance().clearSubscriptions();
+    ctx = setupBeforeAfter(this, {
+      beforeHook: async () => {
+        await new ResetConfigCommand().execute({ scope: "all" });
+      },
     });
 
     it("basic", function (done) {

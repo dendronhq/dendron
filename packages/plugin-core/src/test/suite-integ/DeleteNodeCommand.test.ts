@@ -11,16 +11,15 @@ import {
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
-import { afterEach, beforeEach } from "mocha";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { DeleteNodeCommand } from "../../commands/DeleteNodeCommand";
-import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { onWSInit, setupDendronWorkspace, TIMEOUT } from "../testUtils";
+import { onWSInit, setupDendronWorkspace } from "../testUtils";
+import { setupBeforeAfter } from "../testUtilsV3";
 
 const NOTE_DELETE_PRESET =
   NoteTestPresetsV2.presets.OneNoteOneSchemaPreset.delete;
@@ -29,16 +28,11 @@ suite("notes", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
   let vaultPath: string;
-  this.timeout(TIMEOUT);
 
-  beforeEach(function () {
-    root = tmpDir();
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
+  ctx = setupBeforeAfter(this, {
+    beforeHook: () => {
+      root = tmpDir();
+    },
   });
 
   test("basic", (done) => {
@@ -116,16 +110,11 @@ suite("schemas", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
   let vaultPath: string;
-  this.timeout(TIMEOUT);
 
-  beforeEach(function () {
-    root = tmpDir();
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
+  ctx = setupBeforeAfter(this, {
+    beforeHook: () => {
+      root = tmpDir();
+    },
   });
 
   test("basic", (done) => {

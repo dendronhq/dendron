@@ -1,4 +1,5 @@
 import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import moment from "moment";
 import path from "path";
@@ -12,7 +13,6 @@ import {
   workspace,
 } from "vscode";
 import { Logger } from "./logger";
-import { HistoryService } from "./services/HistoryService";
 import { DendronWorkspace } from "./workspace";
 
 export class WorkspaceWatcher {

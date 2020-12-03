@@ -2,30 +2,18 @@ import { DVault, NoteUtilsV2 } from "@dendronhq/common-all";
 import { note2File, vault2Path } from "@dendronhq/common-server";
 import { runJestHarnessV2 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
-import { afterEach, beforeEach } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { GoToSiblingCommand } from "../../commands/GoToSiblingCommand";
-import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
-import { TIMEOUT } from "../testUtils";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest } from "../testUtilsV3";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("notes", function () {
   let ctx: vscode.ExtensionContext;
   let direction = "next" as const;
-  this.timeout(TIMEOUT);
 
-  beforeEach(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
-  });
+  ctx = setupBeforeAfter(this, {});
 
   const createNotes = (wsRoot: string, vault: DVault) => {
     return Promise.all([

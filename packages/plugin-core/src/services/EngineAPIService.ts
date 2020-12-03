@@ -1,7 +1,6 @@
-import { DendronEngineClient } from "@dendronhq/engine-server";
+import { DendronEngineClient, HistoryService } from "@dendronhq/engine-server";
 import path from "path";
 import { DendronWorkspace } from "../workspace";
-import { HistoryService } from "./HistoryService";
 
 export class EngineAPIService extends DendronEngineClient {
   static create({ port }: { port: number | string }) {

@@ -1,10 +1,9 @@
 import { NotePropsV2, NoteUtilsV2, SchemaUtilsV2 } from "@dendronhq/common-all";
 import { EngineDeletePayload } from "@dendronhq/common-server";
 import path from "path";
-import { Uri, window } from "vscode";
+import { window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
-import { HistoryService } from "../services/HistoryService";
 import { DendronClientUtilsV2, VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -29,11 +28,6 @@ export class DeleteNodeCommand extends BasicCommand<
       return;
     }
     const fsPath = VSCodeUtils.getFsPathFromTextEditor(editor);
-    HistoryService.instance().add({
-      source: "engine",
-      action: "delete",
-      uri: Uri.file(fsPath),
-    });
     const mode = fsPath.endsWith(".md") ? "note" : "schema";
     const trimEnd = mode === "note" ? ".md" : ".schema.yml";
     const fname = path.basename(fsPath, trimEnd);

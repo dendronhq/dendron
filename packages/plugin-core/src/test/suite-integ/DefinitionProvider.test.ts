@@ -1,19 +1,16 @@
 import { getSlugger, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import { NoteTestUtilsV3, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import assert from "assert";
-import { afterEach, beforeEach, describe } from "mocha";
+import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { TextEditor } from "vscode";
 import DefinitionProvider from "../../features/DefinitionProvider";
-import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { LINKS_PRESETS } from "../presets/LinkPresets";
-import { TIMEOUT } from "../testUtils";
 import { expect, LocationTestUtils } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest } from "../testUtilsV3";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 const { NOTES_DIFF_VAULT } = LINKS_PRESETS;
 
@@ -30,15 +27,9 @@ async function provide(editor: TextEditor) {
 
 suite.skip("DefinitionProvider", function () {
   let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
 
-  beforeEach(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
+  ctx = setupBeforeAfter(this, {
+    beforeHook: () => {},
   });
 
   describe("same vault", function () {

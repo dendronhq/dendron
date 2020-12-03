@@ -5,17 +5,14 @@ import {
   toPlainObject,
 } from "@dendronhq/common-test-utils";
 import assert from "assert";
-import { afterEach, beforeEach } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { Uri } from "vscode";
 import BacklinksTreeDataProvider from "../../features/BacklinksTreeDataProvider";
-import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { TIMEOUT } from "../testUtils";
 import { runMultiVaultTest } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest } from "../testUtilsV3";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 const getChildren = async () => {
   const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
@@ -34,17 +31,14 @@ const getChildren = async () => {
 
 suite("BacklinksTreeDataProvider", function () {
   let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
 
-  beforeEach(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-    VSCodeUtils.closeAllEditors();
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
-    VSCodeUtils.closeAllEditors();
+  ctx = setupBeforeAfter(this, {
+    beforeHook: () => {
+      VSCodeUtils.closeAllEditors();
+    },
+    afterHook: () => {
+      VSCodeUtils.closeAllEditors();
+    },
   });
 
   test("basics", function (done) {
@@ -72,7 +66,7 @@ suite("BacklinksTreeDataProvider", function () {
         assert.strictEqual(out.length, 1);
         done();
       },
-    })
+    });
   });
 
   test("multi", function (done) {
@@ -83,13 +77,13 @@ suite("BacklinksTreeDataProvider", function () {
           fname: "alpha",
           body: `[[beta]]`,
           vault: vaults[0],
-          wsRoot
+          wsRoot,
         });
         await NoteTestUtilsV4.createNote({
           fname: "beta",
           body: `[[alpha]]`,
           vault: vaults[1],
-          wsRoot
+          wsRoot,
         });
       },
       onInit: async ({ wsRoot, vaults }) => {
@@ -127,7 +121,10 @@ suite("BacklinksTreeDataProvider", function () {
         const out = toPlainObject(await getChildren()) as any;
         assert.strictEqual(
           out[0].command.arguments[0].path as string,
-          NoteUtilsV2.getPathV4({ note: noteWithLink, wsRoot: DendronWorkspace.wsRoot()  })
+          NoteUtilsV2.getPathV4({
+            note: noteWithLink,
+            wsRoot: DendronWorkspace.wsRoot(),
+          })
         );
         assert.strictEqual(out.length, 1);
         done();
@@ -151,7 +148,7 @@ suite("BacklinksTreeDataProvider", function () {
           vault: vaults[0],
         });
       },
-      onInit: async ({wsRoot}) => {
+      onInit: async ({ wsRoot }) => {
         await VSCodeUtils.openNote(noteWithTarget);
         const out = toPlainObject(await getChildren()) as any;
         assert.strictEqual(

@@ -1,5 +1,6 @@
 import {
   DendronError,
+  DEngineDeleteSchemaRespV2,
   DEngineInitRespV2,
   DEngineInitSchemaRespV2,
   DLink,
@@ -382,7 +383,10 @@ export class FileStorageV2 implements DStoreV2 {
     return out;
   }
 
-  async deleteSchema(id: string, opts?: EngineDeleteOptsV2) {
+  async deleteSchema(
+    id: string,
+    opts?: EngineDeleteOptsV2
+  ): Promise<DEngineDeleteSchemaRespV2> {
     const ctx = "deleteSchema";
     this.logger.info({ ctx, msg: "enter", id });
     if (id === "root") {
@@ -627,7 +631,7 @@ export class FileStorageV2 implements DStoreV2 {
     note: NotePropsV2;
     maybeNote?: NotePropsV2;
     opts?: EngineWriteOptsV2;
-  }) {
+  }): Promise<NotePropsV2[]> {
     let changed: NotePropsV2[] = [];
     // if note exists, remove from parent and transplant children
     if (maybeNote) {

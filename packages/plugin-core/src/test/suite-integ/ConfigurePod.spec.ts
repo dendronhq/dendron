@@ -7,33 +7,26 @@ import {
 } from "@dendronhq/pods-core";
 import assert from "assert";
 import { ensureDirSync } from "fs-extra";
-import { afterEach, beforeEach } from "mocha";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { ConfigurePodCommand } from "../../commands/ConfigurePodCommand";
-import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
-import { onWSInit, setupDendronWorkspace, TIMEOUT } from "../testUtils";
+import { onWSInit, setupDendronWorkspace } from "../testUtils";
+import { setupBeforeAfter } from "../testUtilsV3";
 
 suite("ConfigurePod", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
   let vaultDir: string;
   let podsDir: string;
-  this.timeout(TIMEOUT);
 
-  beforeEach(function () {
-    root = tmpDir();
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-    podsDir = path.join(root.name, "pods");
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
+  ctx = setupBeforeAfter(this, {
+    beforeHook: () => {
+      root = tmpDir();
+      podsDir = path.join(root.name, "pods");
+    },
   });
 
   test("no config", function (done) {

@@ -20,7 +20,7 @@ import { DendronEngineV2 } from "@dendronhq/engine-server";
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
-import { afterEach, beforeEach, describe } from "mocha";
+import { describe } from "mocha";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
@@ -29,7 +29,6 @@ import { CancellationTokenSource } from "vscode-languageclient";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
 import { createNoActiveItem } from "../../components/lookup/utils";
-import { HistoryService } from "../../services/HistoryService";
 import { EngineFlavor, EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
@@ -38,6 +37,7 @@ import { expect, getNoteFromTextEditor } from "../testUtilsv2";
 import {
   createEngineFactory,
   runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
 } from "../testUtilsV3";
 
 const createEngineForSchemaUpdateItems = createEngineFactory({
@@ -211,16 +211,7 @@ const createEngineForNoteAcceptNewItem = createEngineFactory({
 
 suite("Lookup, schemas", function () {
   let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
-
-  beforeEach(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
-  });
+  ctx = setupBeforeAfter(this, {});
 
   describe("updateItems", function () {
     _.map(
@@ -328,15 +319,7 @@ suite("Lookup, notesv2", function () {
   this.timeout(TIMEOUT);
   const engOpts: EngineOpts = { flavor: "note" };
 
-  beforeEach(function () {
-    HistoryService.instance().clearSubscriptions();
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
-  });
+  ctx = setupBeforeAfter(this, {});
 
   describe("updateItems", function () {
     _.forEach(

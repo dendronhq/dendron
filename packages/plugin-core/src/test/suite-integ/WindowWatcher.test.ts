@@ -1,27 +1,19 @@
 import { NoteUtilsV2 } from "@dendronhq/common-all";
 import { note2File } from "@dendronhq/common-server";
-import { afterEach, beforeEach, describe } from "mocha";
+import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
-import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { WindowWatcher } from "../../windowWatcher";
-import { DendronWorkspace } from "../../workspace";
-import { TIMEOUT } from "../testUtils";
 import { runSingleVaultTest } from "../testUtilsv2";
+import { setupBeforeAfter } from "../testUtilsV3";
 
 suite("notes", function () {
   let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
   let watcher: WindowWatcher;
 
-  beforeEach(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
+  ctx = setupBeforeAfter(this, {
+    beforeHook: () => {},
   });
 
   describe("onDidChange", function () {
@@ -40,7 +32,7 @@ suite("notes", function () {
           });
           await note2File({ note: bar, vault, wsRoot });
         },
-        onInit: async ({ vault, wsRoot })  => {
+        onInit: async ({ vault, wsRoot }) => {
           const vaultPath = vault.fsPath;
           watcher = new WindowWatcher();
           const notePath = path.join(wsRoot, vaultPath, "bar.md");

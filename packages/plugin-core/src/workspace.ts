@@ -10,7 +10,7 @@ import {
   readMD,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
-import { DConfig } from "@dendronhq/engine-server";
+import { DConfig, HistoryService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import open from "open";
@@ -34,7 +34,6 @@ import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import { VaultWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
-import { HistoryService } from "./services/HistoryService";
 import { WorkspaceSettings } from "./types";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";

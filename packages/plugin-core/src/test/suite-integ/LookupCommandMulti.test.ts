@@ -4,7 +4,7 @@ import { NodeTestPresetsV2, PLUGIN_CORE } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
-import { afterEach, beforeEach, describe } from "mocha";
+import { describe } from "mocha";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
@@ -14,7 +14,6 @@ import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
 import { DendronQuickPickerV2 } from "../../components/lookup/types";
 import { createNoActiveItem } from "../../components/lookup/utils";
-import { HistoryService } from "../../services/HistoryService";
 import { EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
@@ -24,6 +23,7 @@ import {
   getNoteFromTextEditor,
   setupCodeWorkspaceMultiVaultV2,
 } from "../testUtilsv2";
+import { setupBeforeAfter } from "../testUtilsV3";
 
 const { LOOKUP_SINGLE_TEST_PRESET } = PLUGIN_CORE;
 
@@ -63,14 +63,10 @@ suite.skip("Lookup notes, multi", function () {
   let token: CancellationToken;
   this.timeout(TIMEOUT);
 
-  beforeEach(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-    token = new vscode.CancellationTokenSource().token;
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
+  ctx = setupBeforeAfter(this, {
+    beforeHook: () => {
+      token = new vscode.CancellationTokenSource().token;
+    },
   });
 
   const runUpdateItemTest = async (opts: {

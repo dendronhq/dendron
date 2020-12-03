@@ -5,15 +5,13 @@ import {
   NOTE_PRESETS_V4,
 } from "@dendronhq/common-test-utils";
 import assert from "assert";
-import { afterEach, beforeEach } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { CopyNoteLinkCommand } from "../../commands/CopyNoteLink";
-import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
 import { onWSInit, setupDendronWorkspace, TIMEOUT } from "../testUtils";
 import { expect, LocationTestUtils, runMultiVaultTest } from "../testUtilsv2";
+import { setupBeforeAfter } from "../testUtilsV3";
 
 suite("notes", function () {
   let root: DirResult;
@@ -21,14 +19,10 @@ suite("notes", function () {
   let vaultPath: string;
   this.timeout(TIMEOUT);
 
-  beforeEach(function () {
-    root = tmpDir();
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
-  });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
+  ctx = setupBeforeAfter(this, {
+    beforeHook: () => {
+      root = tmpDir();
+    },
   });
 
   test("basic", (done) => {

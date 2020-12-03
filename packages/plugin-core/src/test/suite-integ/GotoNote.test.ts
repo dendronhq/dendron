@@ -3,33 +3,25 @@ import { ENGINE_HOOKS } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
-import { afterEach, beforeEach } from "mocha";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { GotoNoteCommand } from "../../commands/GotoNote";
-import { HistoryService } from "../../services/HistoryService";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
-import { getActiveEditorBasename, TIMEOUT } from "../testUtils";
+import { getActiveEditorBasename } from "../testUtils";
 import { runSingleVaultTest } from "../testUtilsv2";
+import { setupBeforeAfter } from "../testUtilsV3";
 
 const { ANCHOR_WITH_SPECIAL_CHARS, ANCHOR } = GOTO_NOTE_PRESETS;
 suite("GotoNote", function () {
   let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
 
-  beforeEach(function () {
-    ctx = VSCodeUtils.getOrCreateMockContext();
-    DendronWorkspace.getOrCreate(ctx);
+  ctx = setupBeforeAfter(this, {
+    beforeHook: () => {},
   });
-
-  afterEach(function () {
-    HistoryService.instance().clearSubscriptions();
-  });
-
   test("basic", (done) => {
     runSingleVaultTest({
       ctx,

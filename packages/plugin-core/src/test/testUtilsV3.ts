@@ -7,7 +7,11 @@ import {
   PreSetupCmdHookFunction,
   PreSetupHookFunction,
 } from "@dendronhq/common-test-utils";
-import { DConfig, DendronEngineV2 } from "@dendronhq/engine-server";
+import {
+  DConfig,
+  DendronEngineV2,
+  HistoryService,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { afterEach, beforeEach } from "mocha";
@@ -17,7 +21,6 @@ import {
   SetupWorkspaceCommand,
   SetupWorkspaceOpts,
 } from "../commands/SetupWorkspace";
-import { HistoryService } from "../services/HistoryService";
 import { WorkspaceConfig } from "../settings";
 import { WorkspaceFolderRaw, WorkspaceSettings } from "../types";
 import { VSCodeUtils } from "../utils";
@@ -180,7 +183,10 @@ export function runSingleWorkspaceTest() {}
 
 export function runMultiWorkspaceTest() {}
 
-export function setupBeforeAfter(_this: any, opts?: { beforeHook?: any }) {
+export function setupBeforeAfter(
+  _this: any,
+  opts?: { beforeHook?: any; afterHook?: any }
+) {
   let ctx: ExtensionContext;
   _this.timeout(TIMEOUT);
   ctx = VSCodeUtils.getOrCreateMockContext();
@@ -188,8 +194,9 @@ export function setupBeforeAfter(_this: any, opts?: { beforeHook?: any }) {
     DendronWorkspace.getOrCreate(ctx);
     opts?.beforeHook && (await opts.beforeHook());
   });
-  afterEach(function () {
+  afterEach(async function () {
     HistoryService.instance().clearSubscriptions();
+    opts?.afterHook && (await opts.afterHook());
   });
   return ctx;
 }

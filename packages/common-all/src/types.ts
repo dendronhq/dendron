@@ -81,6 +81,11 @@ export type DendronSiteConfig = {
   siteHierarchies: string[];
 
   /**
+   * Vaults that cannot be published from
+   */
+  privateVaults?: string[];
+
+  /**
    * Where your site will be published.
    * Relative to Dendron workspace
    */

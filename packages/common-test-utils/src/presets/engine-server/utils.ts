@@ -21,6 +21,27 @@ export const setupBasic: PreSetupHookFunction = async ({ vaults, wsRoot }) => {
   await SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.create({ vault, wsRoot });
 };
 
+export const setupBasicMulti: PreSetupHookFunction = async ({
+  vaults,
+  wsRoot,
+}) => {
+  const vault1 = vaults[0];
+  const vault2 = vaults[1];
+  await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
+    vault: vault1,
+    wsRoot,
+  });
+  await NOTE_PRESETS_V4.NOTE_SIMPLE_CHILD.create({
+    vault: vault1,
+    wsRoot,
+  });
+  await NOTE_PRESETS_V4.NOTE_SIMPLE_OTHER.create({
+    vault: vault2,
+    wsRoot,
+  });
+  await SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.create({ vault: vault1, wsRoot });
+};
+
 export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
   await setupBasic(opts);
   const { wsRoot, vaults } = opts;
@@ -128,4 +149,8 @@ export const ENGINE_HOOKS = {
   setupBasic,
   setupSchemaPreseet,
   setupSchemaPresetWithNamespaceTemplate,
+};
+
+export const ENGINE_HOOKS_MULTI = {
+  setupBasicMulti,
 };

@@ -22,6 +22,7 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { createLogger } from "./logger";
+const requests = require("request-promise");
 
 const L = createLogger("api");
 
@@ -196,7 +197,7 @@ export abstract class API {
       },
     });
     if (!opts._request) {
-      opts._request = require("request-promise");
+      opts._request = requests;
     }
 
     this.opts = opts as IAPIOpts;

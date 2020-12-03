@@ -7,7 +7,7 @@ import {
   NotePropsV2,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
-import { resolvePath, tmpDir } from "@dendronhq/common-server";
+import { resolvePath, tmpDir, VaultUtils } from "@dendronhq/common-server";
 import {
   DConfig,
   DendronEngineClient,
@@ -128,6 +128,13 @@ async function note2JekyllMdFile(
   const siteNotesDir = config.siteNotesDir || "notes";
 
   if (!hConfig.publishByDefault && !note.custom.published) {
+    return [];
+  }
+  if (
+    _.some(opts.privateVaults || [], (ent) => {
+      return VaultUtils.isEqual(note.vault, { fsPath: ent });
+    })
+  ) {
     return [];
   }
 

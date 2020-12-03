@@ -1,4 +1,4 @@
-import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DNodeUtilsV2, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import moment from "moment";
@@ -45,12 +45,20 @@ export class WorkspaceWatcher {
     const eclient = DendronWorkspace.instance().getEngine();
     const fname = path.basename(uri.fsPath, ".md");
     const now = moment.now();
+    const vault = DNodeUtilsV2.getVaultByDir({
+      dirPath: path.dirname(uri.fsPath),
+      vaults: eclient.vaultsv3,
+    });
+    const note = NoteUtilsV2.getNoteByFnameV4({
+      fname,
+      vault,
+      notes: eclient.notes,
+    }) as NotePropsV2;
 
     // if recently changed, ignore
     const recentEvents = HistoryService.instance().lookBack();
     if (recentEvents[0].uri?.fsPath === uri.fsPath) {
-      let lastUpdated: string | number =
-        NoteUtilsV2.getNoteByFname(fname, eclient.notes)?.updated || now;
+      let lastUpdated: string | number = note?.updated || now;
       if (_.isString(lastUpdated)) {
         lastUpdated = _.parseInt(lastUpdated);
       }
@@ -71,9 +79,6 @@ export class WorkspaceWatcher {
       const startPos = ev.document.positionAt(match.index);
       const endPos = ev.document.positionAt(match.index + match[0].length);
       const p = new Promise(async (resolve) => {
-        const note = NoteUtilsV2.getNoteByFname(fname, eclient.notes, {
-          throwIfEmpty: true,
-        }) as NotePropsV2;
         note.updated = now.toString();
         await eclient.updateNote(note);
         resolve([

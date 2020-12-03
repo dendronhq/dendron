@@ -19,7 +19,7 @@ import { VaultUtils } from "@dendronhq/common-server";
 import { GotoNoteCommandOpts } from "../commands/GotoNote";
 import { DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getEngine } from "../workspace";
 import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
 
 function createTreeNote(note: NotePropsV2) {
@@ -193,8 +193,11 @@ export class DendronTreeViewV2 {
         vaults: DendronWorkspace.instance().vaults,
       });
       const fname = NoteUtilsV2.uri2Fname(uri);
-      const notes = DendronWorkspace.instance().getEngine().notes;
-      const note = NoteUtilsV2.getNoteByFname(fname, notes, { vault });
+      const note = NoteUtilsV2.getNoteByFnameV4({
+        fname,
+        vault,
+        notes: getEngine().notes,
+      }) as NotePropsV2;
       if (note) {
         this.treeView.reveal(note.id);
       }

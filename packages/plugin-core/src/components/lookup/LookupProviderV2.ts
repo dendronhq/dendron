@@ -17,7 +17,7 @@ import { CancellationToken, Uri, window } from "vscode";
 import { Logger } from "../../logger";
 import { EngineFlavor, EngineOpts } from "../../types";
 import { getDurationMilliseconds, profile } from "../../utils/system";
-import { DendronWorkspace, getWS } from "../../workspace";
+import { DendronWorkspace, getEngine, getWS } from "../../workspace";
 import { MORE_RESULTS_LABEL } from "./constants";
 import { LookupControllerV2 } from "./LookupControllerV2";
 import { DendronQuickPickerV2 } from "./types";
@@ -123,7 +123,12 @@ export class LookupProviderV2 {
 
     Logger.info({ ctx, msg: "pre:checkNoteExist", uri });
     // TODO: check for overwriting schema
-    let noteExists = NoteUtilsV2.getNoteByFname(nodeNew.fname, engine.notes);
+    const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+    const noteExists = NoteUtilsV2.getNoteByFnameV4({
+      fname: nodeNew.fname,
+      vault,
+      notes: engine.notes,
+    }) as NotePropsV2;
     if (
       noteExists &&
       !foundStub &&
@@ -222,7 +227,6 @@ export class LookupProviderV2 {
       activeItems: picker.activeItems.map((ent) => NoteUtilsV2.toLogObj(ent)),
     });
     const resp = this.validate(picker.value, opts.flavor);
-    const ws = DendronWorkspace.instance();
     let uri: Uri;
     let newNode: NotePropsV2 | SchemaModulePropsV2 | undefined;
     if (resp) {
@@ -259,10 +263,12 @@ export class LookupProviderV2 {
       // item from pressing enter
       if (opts.flavor === "note") {
         try {
-          const maybeNote = NoteUtilsV2.getNoteByFname(
-            value,
-            ws.getEngine().notes
-          );
+          const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+          const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+            fname: value,
+            vault,
+            notes: getEngine().notes,
+          });
           if (maybeNote) {
             uri = node2Uri(maybeNote);
             await showDocAndHidePicker([uri], picker);
@@ -286,7 +292,6 @@ export class LookupProviderV2 {
     Logger.info({ ctx, msg: "enter", value, opts });
     let selectedItems = PickerUtilsV2.getSelection(picker);
     const resp = this.validate(picker.value, opts.flavor);
-    const ws = DendronWorkspace.instance();
     let uris: Uri[];
     if (resp) {
       window.showErrorMessage(resp);
@@ -296,10 +301,12 @@ export class LookupProviderV2 {
     // check if we get note by quickpick value instead of selection
     const activeItem = picker.activeItems[0];
     const maybeNoteFname = activeItem ? activeItem.fname : value;
-    const maybeNote = NoteUtilsV2.getNoteByFname(
-      maybeNoteFname,
-      ws.getEngine().notes
-    );
+    const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+    const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+      fname: maybeNoteFname,
+      vault,
+      notes: getEngine().notes,
+    }) as NotePropsV2;
     if (_.isEmpty(selectedItems) && opts.flavor === "note") {
       if (maybeNote) {
         if (maybeNote.stub) {

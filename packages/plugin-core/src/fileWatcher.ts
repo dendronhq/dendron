@@ -66,10 +66,11 @@ export class VaultWatcher {
       dirPath: path.dirname(uri.fsPath),
     });
     let note = string2Note({ content, fname, vault });
-    const noteHydrated = NoteUtilsV2.getNoteByFname(
+    const noteHydrated = NoteUtilsV2.getNoteByFnameV4({
       fname,
-      eclient.notes
-    ) as NotePropsV2;
+      vault,
+      notes: eclient.notes,
+    }) as NotePropsV2;
     note = NoteUtilsV2.hydrate({ noteRaw: note, noteHydrated });
     const links = ParserUtilsV2.findLinks({ note });
     note.links = links;
@@ -106,9 +107,16 @@ export class VaultWatcher {
 
       try {
         this.L.debug({ ctx, uri, msg: "pre-add-to-engine" });
-        // TODO: MULTI_VAULT
-        note = file2Note(uri.fsPath, { fsPath: path.dirname(uri.fsPath) });
-        const maybeNote = NoteUtilsV2.getNoteByFname(fname, this.engine.notes);
+        const vault = DNodeUtilsV2.getVaultByDir({
+          dirPath: path.dirname(uri.fsPath),
+          vaults: this.engine.vaultsv3,
+        });
+        note = file2Note(uri.fsPath, vault);
+        const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+          fname,
+          vault,
+          notes: this.engine.notes,
+        }) as NotePropsV2;
         if (maybeNote) {
           note = {
             ...note,

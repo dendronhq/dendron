@@ -117,7 +117,7 @@ suite("Scratch Notes", function () {
       });
     });
 
-    test.only("domainAsNamespace", function (done) {
+    test("domainAsNamespace", function (done) {
       runLegacyMultiWorkspaceTest({
         ctx,
         configOverride: {

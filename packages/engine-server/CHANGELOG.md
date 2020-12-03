@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.18.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.18.1-alpha.2...v0.18.1-alpha.3) (2020-12-03)
+
+### Bug Fixes
+
+- enable multi-vault for publishing ([0ebac81](https://github.com/dendronhq/dendron/commit/0ebac8191291f48ab42fbc30279e9615c96a5245))
+
 ## [0.18.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.18.1-alpha.1...v0.18.1-alpha.2) (2020-12-03)
 
 ### Bug Fixes

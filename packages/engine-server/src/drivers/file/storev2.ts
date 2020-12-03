@@ -669,10 +669,11 @@ export class FileStorageV2 implements DStoreV2 {
       opts,
       note: NoteUtilsV2.toLogObj(note),
     });
-    const maybeNote = NoteUtilsV2.getNoteByFname(note.fname, this.notes, {
+    const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+      fname: note.fname,
+      notes: this.notes,
       vault: note.vault,
     });
-    // should use existing note
     if (maybeNote?.stub || opts?.updateExisting) {
       note = { ...maybeNote, ...note };
     } else {

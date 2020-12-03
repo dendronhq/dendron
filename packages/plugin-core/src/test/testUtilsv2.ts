@@ -1,4 +1,9 @@
-import { DVault, NotePropsV2, WorkspaceOpts } from "@dendronhq/common-all";
+import {
+  DNodeUtilsV2,
+  DVault,
+  NotePropsV2,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   file2Note,
@@ -362,7 +367,12 @@ export async function setupCodeWorkspaceV3(
 export const getNoteFromTextEditor = (): NotePropsV2 => {
   const txtPath = window.activeTextEditor?.document.uri.fsPath as string;
   const vault = { fsPath: path.dirname(txtPath) };
-  const node = file2Note(txtPath, vault);
+  const fullPath = DNodeUtilsV2.getFullPath({
+    wsRoot: DendronWorkspace.wsRoot(),
+    vault,
+    basename: path.basename(txtPath),
+  });
+  const node = file2Note(fullPath, vault);
   return node;
 };
 

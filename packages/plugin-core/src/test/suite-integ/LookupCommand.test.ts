@@ -26,6 +26,7 @@ import path from "path";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
+import { LookupCommand } from "../../commands/LookupCommand";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
 import { createNoActiveItem } from "../../components/lookup/utils";
@@ -699,103 +700,66 @@ suite("Lookup, notesv2", function () {
   });
 });
 
-// suite("Scratch Notes", function () {
-//   let root: DirResult;
-//   let ctx: vscode.ExtensionContext;
-//   this.timeout(TIMEOUT);
+suite.only("Scratch Notes", function () {
+  let ctx: vscode.ExtensionContext;
+  this.timeout(TIMEOUT);
 
-//   beforeEach(function () {
-//     root = tmpDir();
-//     ctx = VSCodeUtils.getOrCreateMockContext();
-//     DendronWorkspace.getOrCreate(ctx);
-//   });
+  ctx = setupBeforeAfter(this, {});
 
-//   afterEach(function () {
-//     HistoryService.instance().clearSubscriptions();
-//   });
+  test("basic", function (done) {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        await NOTE_PRESETS_V4.NOTE_SIMPLE.create({ vault: vaults[0], wsRoot });
+      },
+      onInit: async ({ vaults }) => {
+        const vault = vaults[0];
+        const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
+        const notes = getWS().getEngine().notes;
+        const note = NoteUtilsV2.getNoteByFnameV4({ fname, notes, vault });
+        const editor = await VSCodeUtils.openNote(note!);
+        const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);
+        editor.selection = SIMPLE_SELECTION;
+        await new LookupCommand().execute({
+          selectionType: "selection2link",
+          noteType: "scratch",
+          flavor: "note",
+          noConfirm: true,
+        });
+        const scratchNote = getNoteFromTextEditor();
+        expect(scratchNote.fname.startsWith("scratch")).toBeTruthy();
+        done();
+      },
+    });
+  });
 
-//   test("Lookup scratch note", function (done) {
-//     onWSInit(async () => {
-//       // const editor = VSCodeUtils.getActiveTextEditor();
-//       const uri = vscode.Uri.file(path.join(root.name, "vault", "foo.md"));
-//       const editor = (await VSCodeUtils.openFileInEditor(
-//         uri
-//       )) as vscode.TextEditor;
-//       editor.selection = new vscode.Selection(9, 0, 9, 12);
-//       await new LookupCommand().execute({
-//         selectionType: "selection2link",
-//         noteType: "journal",
-//       });
-//       done();
-//     });
-
-//     setupDendronWorkspace(root.name, ctx, {
-//       lsp: true,
-//       useCb: async () => {
-//         NodeTestUtils.createNotes(path.join(root.name, "vault"), [
-//           {
-//             id: "id.foo",
-//             fname: "foo",
-//             body: "# Foo Content\nFoo line",
-//           },
-//         ]);
-//       },
-//     });
-//   });
-
-//   test("Lookup scratch note", function (done) {
-//     onWSInit(async () => {
-//       // const editor = VSCodeUtils.getActiveTextEditor();
-//       const uri = vscode.Uri.file(path.join(root.name, "vault", "foo.md"));
-//       const editor = (await VSCodeUtils.openFileInEditor(
-//         uri
-//       )) as vscode.TextEditor;
-//       editor.selection = new vscode.Selection(9, 0, 9, 12);
-//       await new LookupCommand().execute({
-//         selectionType: "selection2link",
-//         noteType: "scratch",
-//       });
-//       done();
-//     });
-
-//     setupDendronWorkspace(root.name, ctx, {
-//       useCb: async () => {
-//         NodeTestUtils.createNotes(path.join(root.name, "vault"), [
-//           {
-//             id: "id.foo",
-//             fname: "foo",
-//             body: "# Foo Content\nFoo line",
-//           },
-//         ]);
-//       },
-//     });
-//   });
-
-//   test("Lookup selection2link", function (done) {
-//     onWSInit(async () => {
-//       // const editor = VSCodeUtils.getActiveTextEditor();
-//       const uri = vscode.Uri.file(path.join(root.name, "vault", "foo.md"));
-//       const editor = (await VSCodeUtils.openFileInEditor(
-//         uri
-//       )) as vscode.TextEditor;
-//       editor.selection = new vscode.Selection(9, 0, 9, 12);
-//       await new LookupCommand().execute({ selectionType: "selection2link" });
-//       done();
-//     });
-
-//     setupDendronWorkspace(root.name, ctx, {
-//       useCb: async () => {
-//         NodeTestUtils.createNotes(path.join(root.name, "vault"), [
-//           {
-//             id: "id.foo",
-//             fname: "foo",
-//             body: "# Foo Content\nFoo line",
-//           },
-//         ]);
-//       },
-//     });
-//   });
-// });
+  test("basic, multi", function (done) {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        await NOTE_PRESETS_V4.NOTE_SIMPLE.create({ vault: vaults[1], wsRoot });
+      },
+      onInit: async ({ vaults }) => {
+        const vault = vaults[1];
+        const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
+        const notes = getWS().getEngine().notes;
+        const note = NoteUtilsV2.getNoteByFnameV4({ fname, notes, vault });
+        const editor = await VSCodeUtils.openNote(note!);
+        const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);
+        editor.selection = SIMPLE_SELECTION;
+        await new LookupCommand().execute({
+          selectionType: "selection2link",
+          noteType: "scratch",
+          flavor: "note",
+          noConfirm: true,
+        });
+        const scratchNote = getNoteFromTextEditor();
+        expect(scratchNote.fname.startsWith("scratch")).toBeTruthy();
+        done();
+      },
+    });
+  });
+});
 
 // suite.skip("selection2Link", function () {
 //   let root: DirResult;

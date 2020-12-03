@@ -206,6 +206,12 @@ export class LookupControllerV2 {
       );
       // would be empty if not set
       quickPick.selectedItems = quickPick.items;
+      // FIXME: used for testing
+      if (quickPick.value && _.isEmpty(quickPick.items)) {
+        const items = provider.createDefaultItems({ picker: quickPick });
+        quickPick.items = items;
+        quickPick.selectedItems = items;
+      }
       await provider.onDidAccept({
         picker: quickPick,
         opts: { flavor: this.opts.flavor },

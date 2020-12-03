@@ -26,7 +26,6 @@ import path from "path";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
-import { LookupCommand } from "../../commands/LookupCommand";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
 import { createNoActiveItem } from "../../components/lookup/utils";
@@ -696,67 +695,6 @@ suite("Lookup, notesv2", function () {
           done();
         },
       });
-    });
-  });
-});
-
-suite.only("Scratch Notes", function () {
-  let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
-
-  ctx = setupBeforeAfter(this, {});
-
-  test("basic", function (done) {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      postSetupHook: async ({ wsRoot, vaults }) => {
-        await NOTE_PRESETS_V4.NOTE_SIMPLE.create({ vault: vaults[0], wsRoot });
-      },
-      onInit: async ({ vaults }) => {
-        const vault = vaults[0];
-        const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
-        const notes = getWS().getEngine().notes;
-        const note = NoteUtilsV2.getNoteByFnameV4({ fname, notes, vault });
-        const editor = await VSCodeUtils.openNote(note!);
-        const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);
-        editor.selection = SIMPLE_SELECTION;
-        await new LookupCommand().execute({
-          selectionType: "selection2link",
-          noteType: "scratch",
-          flavor: "note",
-          noConfirm: true,
-        });
-        const scratchNote = getNoteFromTextEditor();
-        expect(scratchNote.fname.startsWith("scratch")).toBeTruthy();
-        done();
-      },
-    });
-  });
-
-  test("basic, multi", function (done) {
-    runLegacyMultiWorkspaceTest({
-      ctx,
-      postSetupHook: async ({ wsRoot, vaults }) => {
-        await NOTE_PRESETS_V4.NOTE_SIMPLE.create({ vault: vaults[1], wsRoot });
-      },
-      onInit: async ({ vaults }) => {
-        const vault = vaults[1];
-        const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
-        const notes = getWS().getEngine().notes;
-        const note = NoteUtilsV2.getNoteByFnameV4({ fname, notes, vault });
-        const editor = await VSCodeUtils.openNote(note!);
-        const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);
-        editor.selection = SIMPLE_SELECTION;
-        await new LookupCommand().execute({
-          selectionType: "selection2link",
-          noteType: "scratch",
-          flavor: "note",
-          noConfirm: true,
-        });
-        const scratchNote = getNoteFromTextEditor();
-        expect(scratchNote.fname.startsWith("scratch")).toBeTruthy();
-        done();
-      },
     });
   });
 });

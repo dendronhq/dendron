@@ -2,6 +2,7 @@ import {
   DNodeUtilsV2,
   DVault,
   NotePropsV2,
+  NoteUtilsV2,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
@@ -32,7 +33,8 @@ import {
 } from "../commands/SetupWorkspace";
 import { CONFIG } from "../constants";
 import { WorkspaceFolderRaw } from "../types";
-import { DendronWorkspace, resolveRelToWSRoot } from "../workspace";
+import { VSCodeUtils } from "../utils";
+import { DendronWorkspace, getWS, resolveRelToWSRoot } from "../workspace";
 import { _activate } from "../_extension";
 import { createMockConfig, onWSInit } from "./testUtils";
 
@@ -364,6 +366,11 @@ export async function setupCodeWorkspaceV3(
   return { wsRoot, vaults, workspaceFile, workspaceFolders };
 }
 
+export const getNoteFromFname = (opts: { fname: string; vault: DVault }) => {
+  const notes = getWS().getEngine().notes;
+  const note = NoteUtilsV2.getNoteByFnameV4({ ...opts, notes });
+  return VSCodeUtils.openNote(note!);
+};
 export const getNoteFromTextEditor = (): NotePropsV2 => {
   const txtPath = window.activeTextEditor?.document.uri.fsPath as string;
   const vault = { fsPath: path.dirname(txtPath) };

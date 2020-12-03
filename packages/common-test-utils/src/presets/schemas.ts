@@ -55,6 +55,14 @@ export const SCHEMA_PRESETS_V4 = {
   SCHEMA_SIMPLE_OTHER_NO_CHILD: CreateSchemaFactory({
     fname: "bar",
   }),
+  SCHEMA_DOMAIN_NAMESPACE: CreateSchemaFactory({
+    fname: "pro",
+    modifier: (schema) => {
+      //const vault = schema.root.vault;
+      schema.schemas[schema.root.id].data.namespace = true;
+      return schema;
+    },
+  }),
   BAD_SCHEMA: {
     create: ({ vault, wsRoot }: CreateSchemaPresetOptsV4) => {
       const vpath = vault2Path({ vault, wsRoot });

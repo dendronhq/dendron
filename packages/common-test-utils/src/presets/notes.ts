@@ -17,7 +17,10 @@ export const NOTE_BODY_PRESETS_V4 = {
   NOTE_REF_TARGET_BODY: "# Header1\nbody1\n# Header2\nbody2",
 };
 
-type CreateNoteFactoryOpts = Omit<CreateNoteOptsV4, "vault" | "wsRoot">;
+type CreateNoteFactoryOpts = Omit<CreateNoteOptsV4, "vault" | "wsRoot"> & {
+  selection?: [number, number, number, number];
+};
+const SIMPLE_SELECTION: [number, number, number, number] = [7, 0, 7, 12];
 
 const CreateNoteFactory = (opts: CreateNoteFactoryOpts) => {
   const func = ({
@@ -47,7 +50,11 @@ const CreateNoteFactory = (opts: CreateNoteFactoryOpts) => {
     }
     return NoteTestUtilsV4.createNote(_opts);
   };
-  return { create: func, fname: opts.fname };
+  return {
+    create: func,
+    fname: opts.fname,
+    selection: opts.selection || SIMPLE_SELECTION,
+  };
 };
 
 export const NOTE_PRESETS_V4 = {
@@ -68,6 +75,11 @@ export const NOTE_PRESETS_V4 = {
         bond: 42,
       },
     },
+  }),
+  NOTE_DOMAIN_NAMESPACE: CreateNoteFactory({ fname: "pro" }),
+  NOTE_DOMAIN_NAMESPACE_CHILD: CreateNoteFactory({
+    fname: "pro.foo",
+    body: "pro.foo.body",
   }),
   // START CHANGE
   NOTE_WITH_TARGET: CreateNoteFactory({ fname: "alpha", body: "[[beta]]" }),

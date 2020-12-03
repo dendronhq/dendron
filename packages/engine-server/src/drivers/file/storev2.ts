@@ -327,6 +327,11 @@ export class FileStorageV2 implements DStoreV2 {
       _notes.map((ent) => {
         this.notes[ent.id] = ent;
       });
+
+      // FIXME: for testing
+      // const _notes = await fs.readJSON("/tmp/notes.json") as NotePropsDictV2;
+      // this.notes = _notes;
+
       const { notes, schemas } = this;
       return { data: { notes, schemas }, error };
     } catch (err) {

@@ -19,6 +19,7 @@ import {
   NoteChangeEntry,
   NotePropsDictV2,
   NotePropsV2,
+  NoteUtilsV2,
   QueryNotesOpts,
   RenameNoteOptsV2,
   RenameNotePayload,
@@ -33,6 +34,7 @@ import { DendronAPI, VaultUtils } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { FuseEngine } from "./fuseEngine";
+import { HistoryService } from "./history";
 import { getPortFilePath } from "./utils";
 
 type DendronEngineClientOpts = {
@@ -50,17 +52,22 @@ export class DendronEngineClient implements DEngineClientV2 {
   public api: DendronAPI;
   public vaultsv3: DVault[];
   public configRoot: string;
+  public history?: HistoryService;
 
   static create({
     port,
     vaults,
     ws,
-  }: { port: number | string } & DendronEngineClientOpts) {
+    history,
+  }: {
+    port: number | string;
+    history?: HistoryService;
+  } & DendronEngineClientOpts) {
     const api = new DendronAPI({
       endpoint: `http://localhost:${port}`,
       apiPath: "api",
     });
-    return new DendronEngineClient({ api, vaults, ws });
+    return new DendronEngineClient({ api, vaults, ws, history });
   }
 
   static getPort({ wsRoot }: { wsRoot: string }): number {
@@ -75,10 +82,12 @@ export class DendronEngineClient implements DEngineClientV2 {
     api,
     vaults,
     ws,
+    history,
   }: {
     api: DendronAPI;
     vaults: string[];
     ws: string;
+    history?: HistoryService;
   }) {
     this.api = api;
     this.notes = {};
@@ -90,6 +99,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.wsRoot = ws;
     this.ws = ws;
     this.configRoot = this.wsRoot;
+    this.history = history;
   }
 
   /**
@@ -129,13 +139,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     if (!resp.data) {
       throw new DendronError({ msg: "no data" });
     }
-    delete this.notes[id];
-    await this.refreshNotes(
-      _.map(
-        _.filter(resp.data, (ent) => ent.status !== "delete"),
-        (ent) => ent.note
-      )
-    );
+    await this.refreshNotesV2(resp.data);
     return {
       error: null,
       data: resp.data,
@@ -176,7 +180,7 @@ export class DendronEngineClient implements DEngineClientV2 {
       ws: this.ws,
     });
     if (!_.isUndefined(resp.data)) {
-      await this.refreshNotes(_.map(resp.data.changed, (ent) => ent.note));
+      await this.refreshNotesV2(resp.data.changed);
     }
     return resp;
   }
@@ -224,9 +228,16 @@ export class DendronEngineClient implements DEngineClientV2 {
   async refreshNotesV2(notes: NoteChangeEntry[]) {
     notes.forEach((ent: NoteChangeEntry) => {
       const { id } = ent.note;
+      const uri = NoteUtilsV2.getURI({ note: ent.note, wsRoot: this.wsRoot });
       if (ent.status === "delete") {
         delete this.notes[id];
+        this.history &&
+          this.history.add({ source: "engine", action: "delete", uri });
       } else {
+        if (ent.status === "create") {
+          this.history &&
+            this.history.add({ source: "engine", action: "create", uri });
+        }
         this.notes[id] = ent.note;
       }
     });

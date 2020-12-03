@@ -125,7 +125,6 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
       client.notes[(this.tree[id] as TreeNote).note.parent || ""];
     return maybeParent ? maybeParent.id : null;
   }
-
   parseTree(note: NotePropsV2, ndict: NotePropsDictV2): TreeNote {
     const ctx = "TreeViewV2:parseTree";
     Logger.debug({ ctx, note, msg: "enter" });

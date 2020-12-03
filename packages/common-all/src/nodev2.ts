@@ -641,6 +641,10 @@ export class NoteUtilsV2 {
     });
   }
 
+  static getURI({ note, wsRoot }: { note: NotePropsV2; wsRoot: string }): URI {
+    return URI.file(this.getPathV4({ note, wsRoot }));
+  }
+
   static getPathUpTo(hpath: string, numCompoenents: number) {
     return hpath.split(".").slice(0, numCompoenents).join(".");
   }

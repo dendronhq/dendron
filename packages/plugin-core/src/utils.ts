@@ -21,6 +21,7 @@ import moment from "moment";
 import os from "os";
 import path from "path";
 import * as vscode from "vscode";
+import { PickerUtilsV2 } from "./components/lookup/utils";
 import {
   CONFIG,
   ConfigKey,
@@ -351,7 +352,12 @@ export class DendronClientUtilsV2 {
       }
       case "childOfDomainNamespace": {
         out = DNodeUtilsV2.domainName(fname);
-        const domain = NoteUtilsV2.getNoteByFname(out, opts.engine.notes);
+        const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+        const domain = NoteUtilsV2.getNoteByFnameV4({
+          fname,
+          notes: opts.engine.notes,
+          vault,
+        });
         if (domain && domain.schema) {
           const smod = opts.engine.schemas[domain.schema.moduleId];
           const schema = smod.schemas[domain.schema.schemaId];

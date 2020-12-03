@@ -49,10 +49,11 @@ suite("GotoNote", function () {
       onInit: async ({ vault }) => {
         const ws = DendronWorkspace.instance();
         const engine = ws.getEngine();
-        let note = NoteUtilsV2.getNoteByFname(
-          "foo",
-          engine.notes
-        ) as NotePropsV2;
+        let note = NoteUtilsV2.getNoteByFnameV4({
+          fname: "foo",
+          notes: engine.notes,
+          vault,
+        }) as NotePropsV2;
         assert.deepStrictEqual(_.pick(note, ["fname", "stub"]), {
           fname: "foo",
           stub: true,

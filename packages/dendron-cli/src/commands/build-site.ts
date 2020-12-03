@@ -1,4 +1,5 @@
 import {
+  DendronError,
   DendronSiteConfig,
   DEngineClientV2,
   DNodeUtilsV2,
@@ -136,10 +137,12 @@ async function note2JekyllMdFile(
     jekyllProps["permalink"] = "/";
     linkPrefix = path.basename(siteNotesDir) + "/";
   }
-  let parentFname = NoteUtilsV2.getNoteByFname(
-    note.fname,
-    (opts.engine as DendronEngineClient).notes
-  )?.fname;
+  let engine = opts.engine as DendronEngineClient;
+  let parentFname = NoteUtilsV2.getNoteByFnameV4({
+    fname: note.fname,
+    notes: engine.notes,
+    vault: note.vault,
+  })?.fname;
 
   // pull children of root to the top
   if (parentFname === opts.siteIndex) {
@@ -324,9 +327,18 @@ export class BuildSiteCommand extends SoilCommand<
 
     let navOrder = 0;
     const nodes: NotePropsV2[] = siteHierarchies.map((fname) => {
-      const note = NoteUtilsV2.getNoteByFname(fname, engineClient.notes, {
-        throwIfEmpty: true,
-      }) as NotePropsV2;
+      const notes = NoteUtilsV2.getNotesByFname({
+        fname,
+        notes: engineClient.notes,
+      });
+      let note: NotePropsV2;
+      if (notes.length > 1) {
+        throw new DendronError({ msg: `mult notes found for ${fname}` });
+      } else if (notes.length < 1) {
+        throw new DendronError({ msg: `no notes found for ${fname}` });
+      } else {
+        note = notes[0];
+      }
       if (!note.custom) {
         note.custom = {};
       }

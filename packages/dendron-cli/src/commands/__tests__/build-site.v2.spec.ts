@@ -283,7 +283,14 @@ describe("wiki link", () => {
         expect(content).toMatchSnapshot();
         expect(content.indexOf("[missing-link](/404.html)") >= 0).toBeTruthy();
         expect(errors).toMatchSnapshot();
-        expect(errors).toEqual([{ links: ["missing-link"], source: "foo" }]);
+        expect(errors).toEqual([
+          {
+            links: [
+              "missing-link:no note found for following link: missing-link",
+            ],
+            source: "foo",
+          },
+        ]);
       },
       {
         createEngine,

@@ -1,4 +1,8 @@
-import { DEngineClientV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DEngineClientV2,
+  NoteUtilsV2,
+} from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import { Node } from "unist";
@@ -31,6 +35,22 @@ export type ReplaceRefOptions = {
    */
   scratch?: string;
 };
+
+export function handleMissingWikiLink(opts: {
+  data: WikiLinkData;
+  scratch: string;
+  msg: string;
+}) {
+  const { data, scratch, msg } = opts;
+  data.note = { id: "/404.html" };
+  delete data["prefix"];
+  // add id to bad links
+  if (scratch) {
+    fs.appendFileSync(scratch, [data.permalink, msg].join(":") + "\n", {
+      encoding: "utf8",
+    });
+  }
+}
 
 /**
  * Used in refactoring, renaming and publishing
@@ -84,23 +104,24 @@ export function replaceRefs(options: ReplaceRefOptions) {
           if (!engine) {
             throw Error(`need engine when wikiLinkUseId is set`);
           }
-          const throwIfEmpty = missingLinkBehavior === "raiseIfError";
-          data.note = NoteUtilsV2.getNoteByFname(
-            data.permalink,
-            (engine as DEngineClientV2).notes,
-            {
-              throwIfEmpty,
-            }
-          );
-          if (_.isUndefined(data.note) && missingLinkBehavior === "404") {
-            // @ts-ignore
-            data.note = { id: "/404.html" };
-            delete data["prefix"];
-            // add id to bad links
-            if (scratch) {
-              fs.appendFileSync(scratch, data.permalink + "\n", {
-                encoding: "utf8",
-              });
+          const notes = NoteUtilsV2.getNotesByFname({
+            fname: data.permalink,
+            notes: (engine as DEngineClientV2).notes,
+          });
+          let errorMsg: string | undefined;
+          if (notes.length < 1) {
+            errorMsg = `no note found for following link: ${data.permalink}`;
+          } else if (notes.length > 1) {
+            errorMsg = `multiple notes found for following link: ${data.permalink}`;
+          } else {
+            data.note = notes[0];
+          }
+          // check for error
+          if (_.isUndefined(data.note)) {
+            if (missingLinkBehavior === "404") {
+              handleMissingWikiLink({ data, scratch, msg: errorMsg! });
+            } else {
+              throw new DendronError({ msg: errorMsg });
             }
           }
         }

@@ -226,7 +226,7 @@ exports[`wiki link missing link 2`] = `
 Array [
   Object {
     "links": Array [
-      "missing-link",
+      "missing-link:no note found for following link: missing-link",
     ],
     "source": "foo",
   },

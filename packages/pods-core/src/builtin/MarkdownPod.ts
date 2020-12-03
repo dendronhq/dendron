@@ -243,12 +243,12 @@ export class MarkdownPublishPod extends PublishPod {
 
   async plant(opts: BasePodExecuteOpts<PublishPodCleanConfig>): Promise<any> {
     const { config, engine } = opts;
-    const { fname } = config;
-    const note = NoteUtilsV2.getNoteByFname(fname, engine.notes, {
-      throwIfEmpty: true,
-    }) as NotePropsV2;
-    // const root = engine.vaults[0];
-    // const renderWithOutline = false;
+    const { fname, vault } = config;
+    const note = NoteUtilsV2.getNoteByFnameV4({
+      fname,
+      notes: engine.notes,
+      vault,
+    })!;
     const remark = ParserUtilsV2.getRemark().use(dendronNoteRefPlugin, {
       engine,
       renderWithOutline: false,

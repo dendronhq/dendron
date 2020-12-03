@@ -3,11 +3,13 @@ import { DNodeUtilsV2 } from "@dendronhq/common-all";
 import { PublishPodCommandOpts } from "@dendronhq/dendron-cli";
 import {
   getAllPublishPods,
+  JSONPublishPod,
   podClassEntryToPodItemV4,
   PodItemV4,
   PodUtils,
 } from "@dendronhq/pods-core";
 import { Uri, window } from "vscode";
+import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
@@ -64,21 +66,27 @@ export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const { podClass, config, noteByName, engine, wsRoot } = opts;
 
-    const pod = new podClass();
-    const link = await pod.execute({
-      config: { ...config, fname: noteByName, dest: "stdout" },
-      vaults: DendronWorkspace.instance().vaults,
-      wsRoot,
-      engine,
-    });
+    const pod = new podClass() as JSONPublishPod;
+    const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
     try {
+      const link = await pod.execute({
+        config: {
+          ...config,
+          fname: noteByName,
+          vault: vault.fsPath,
+          dest: "stdout",
+        },
+        vaults: DendronWorkspace.instance().vaultsv4,
+        wsRoot,
+        engine,
+      });
       clipboardy.writeSync(link);
+      this.showResponse();
+      return link;
     } catch (err) {
-      this.L.error({ err, link });
+      this.L.error({ err });
       throw err;
     }
-    this.showResponse();
-    return link;
   }
 
   async showResponse() {

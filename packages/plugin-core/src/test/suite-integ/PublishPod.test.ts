@@ -29,7 +29,7 @@ suite("PublishV2", function () {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {
-        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
       onInit: async ({ vaults, wsRoot }) => {
         const vault = vaults[0];

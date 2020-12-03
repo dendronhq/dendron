@@ -321,6 +321,19 @@ export class DendronWorkspace {
     }));
   }
 
+  /**
+   * Relative vaults
+   */
+  get vaultsv4(): DVault[] {
+    const vaults = DendronWorkspace.instance().config.vaults;
+    return vaults.map((ent) => ({
+      ...ent,
+      fsPath: path.isAbsolute(ent.fsPath)
+        ? path.relative(DendronWorkspace.wsRoot(), ent.fsPath)
+        : ent.fsPath,
+    }));
+  }
+
   getEngine(): DEngineClientV2 {
     if (!this._enginev2) {
       throw Error("engine not set");

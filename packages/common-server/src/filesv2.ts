@@ -259,6 +259,28 @@ export class VaultUtils {
     }
   }
 
+  static getByVaultPath({
+    wsRoot,
+    vaults,
+    vaultPath,
+  }: {
+    wsRoot: string;
+    vaultPath: string;
+    vaults: DVault[];
+  }) {
+    // get diname
+    const vault = _.find(vaults, (ent) => {
+      let cmp = path.isAbsolute(vaultPath)
+        ? path.relative(wsRoot, vaultPath)
+        : vaultPath;
+      return ent.fsPath === cmp;
+    });
+    if (!vault) {
+      throw new DendronError({ msg: "no vault found" });
+    }
+    return vault;
+  }
+
   static getVaultByNotePathV4({
     vaults,
     fsPath,

@@ -129,9 +129,11 @@ export class JSONPublishPod extends PublishPod {
 
   async plant(opts: BasePodExecuteOpts<PublishPodCleanConfig>): Promise<any> {
     const { config, engine } = opts;
-    const { fname } = config;
-    const note = NoteUtilsV2.getNoteByFname(fname, engine.notes, {
-      throwIfEmpty: true,
+    const { fname, vault } = config;
+    const note = NoteUtilsV2.getNoteByFnameV4({
+      fname,
+      notes: engine.notes,
+      vault,
     });
     const out = JSON.stringify(note, null, 4);
     return out;

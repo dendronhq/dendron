@@ -8,7 +8,12 @@ import {
   PodConfig,
 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { createLogger, DLogger, resolvePath } from "@dendronhq/common-server";
+import {
+  createLogger,
+  DLogger,
+  resolvePath,
+  VaultUtils,
+} from "@dendronhq/common-server";
 import { URI } from "vscode-uri";
 import fs from "fs-extra";
 import { PodKind } from "./types";
@@ -214,10 +219,12 @@ export abstract class ImportPod<
 export type PublishPodRawConfig = {
   fname: string;
   dest?: string;
+  vault: string;
 };
 export type PublishPodCleanConfig = {
   fname: string;
   dest: URI | "stdout";
+  vault: DVault;
 };
 export type PublishPodCleanOpts<TConfig> = {
   config: TConfig & PublishPodCleanConfig;
@@ -248,6 +255,11 @@ export abstract class PublishPod<
         description: "where to export to",
         type: "string" as const,
       },
+      {
+        key: "vault",
+        description: "vault path",
+        type: "string" as const,
+      },
     ];
   }
 
@@ -260,9 +272,11 @@ export abstract class PublishPod<
   cleanPublishConfig({
     wsRoot,
     config,
+    vaults,
   }: {
     config: PublishPodRawConfig;
     wsRoot: string;
+    vaults: DVault[];
   }): PublishPodCleanConfig {
     let dest: URI | "stdout";
     if (config.dest === "stdout") {
@@ -275,15 +289,21 @@ export abstract class PublishPod<
         });
       }
     }
+    const vault = VaultUtils.getByVaultPath({
+      wsRoot,
+      vaults,
+      vaultPath: config.vault,
+    });
     return {
       dest,
       fname: config.fname,
+      vault,
     };
   }
 
   async execute(opts: BasePodExecuteOpts<TConfigRaw>) {
     const { config, engine, wsRoot, vaults } = opts;
-    const _config = this.cleanPublishConfig({ config, wsRoot });
+    const _config = this.cleanPublishConfig({ config, wsRoot, vaults });
     const cleanConfig = await this.clean({
       config: { ...config, ..._config },
       wsRoot,

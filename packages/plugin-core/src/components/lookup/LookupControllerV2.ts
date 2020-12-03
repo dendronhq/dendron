@@ -161,6 +161,8 @@ export class LookupControllerV2 {
     quickPick.ignoreFocusOut = cleanOpts.ignoreFocusOut;
     quickPick.justActivated = true;
     quickPick.canSelectMany = false;
+    quickPick.matchOnDescription = false;
+    quickPick.matchOnDetail = false;
 
     profile = getDurationMilliseconds(start);
     const cancelToken = this.createCancelSource();

@@ -27,17 +27,17 @@ function createFuse<T>(
 ) {
   const options = {
     shouldSort: true,
-    threshold: opts.exactMatch ? 0.0 : 0.6,
+    threshold: opts.exactMatch ? 0.0 : 0.5,
     location: 0,
-    distance: 100,
+    distance: 50,
     maxPatternLength: 32,
-    minMatchCharLength: 1,
-    keys: ["title", "fname"],
+    minMatchCharLength: 2,
+    keys: ["fname"],
     useExtendedSearch: true,
     includeScore: true,
   };
   if (opts.preset === "schema") {
-    options.keys = ["id", "title"];
+    options.keys = ["fname"];
   }
   const fuse = new Fuse(initList, options);
   return fuse;

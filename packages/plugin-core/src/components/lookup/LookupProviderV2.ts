@@ -62,9 +62,9 @@ export class LookupProviderV2 {
     } else {
       out.push(createNoActiveItem(PickerUtilsV2.getVaultForOpenEditor()));
     }
-    if (picker.moreResults) {
-      out.push(createMoreResults());
-    }
+    // if (picker.moreResults) {
+    //   out.push(createMoreResults());
+    // }
     return out;
   };
 
@@ -409,8 +409,9 @@ export class LookupProviderV2 {
       picker.offset = PAGINATE_LIMIT;
       picker.moreResults = true;
       nodes = nodes.slice(0, PAGINATE_LIMIT);
+    } else {
+      PickerUtilsV2.resetPaginationOpts(picker);
     }
-    // overwrite results
     const updatedItems = this.createDefaultItems({ picker }).concat(
       await Promise.all(
         nodes.map(async (ent) =>
@@ -486,10 +487,11 @@ export class LookupProviderV2 {
       // first query, show all results
       // subsequent query, only show next level children
       if (
-        queryEndsWithDot ||
-        queryOrig.split(".").length < 2 ||
-        picker.justActivated ||
-        opts?.force
+        true
+        // queryEndsWithDot ||
+        // queryOrig.split(".").length < 2 ||
+        // picker.justActivated ||
+        // opts?.force
       ) {
         updatedItems = await this.createPickerItemsFromEngine({
           picker,

@@ -30,7 +30,6 @@ export class GoToSiblingCommand extends BasicCommand<
 
   async execute(opts: CommandOpts) {
     const ctx = "GoToSiblingCommand";
-    const ws = DendronWorkspace.instance();
     const maybeTextEditor = VSCodeUtils.getActiveTextEditor();
     if (!maybeTextEditor) {
       window.showErrorMessage("You need to be in a note to use this command");

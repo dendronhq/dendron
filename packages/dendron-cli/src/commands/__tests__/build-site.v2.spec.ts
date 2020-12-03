@@ -15,7 +15,6 @@ import {
   ENGINE_SERVER,
   NodeTestPresetsV2,
   NodeTestUtilsV2,
-  NoteTestUtilsV3,
   NoteTestUtilsV4,
   runEngineTest,
 } from "@dendronhq/common-test-utils";

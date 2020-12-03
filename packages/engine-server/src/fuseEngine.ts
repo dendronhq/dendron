@@ -37,7 +37,7 @@ function createFuse<T>(
     includeScore: true,
   };
   if (opts.preset === "schema") {
-    options.keys = ["fname"];
+    options.keys = ["fname", "id"];
   }
   const fuse = new Fuse(initList, options);
   return fuse;

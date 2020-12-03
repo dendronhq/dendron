@@ -117,18 +117,21 @@ export class EngineTestUtilsV4 {
 export class EngineTestUtilsV3 {
   static async setupWS(opts: SetupWSOptsV3) {
     const wsRoot = tmpDir().name;
-    const vaults = await this.setupVaults({...opts, wsRoot});
+    const vaults = await this.setupVaults({ ...opts, wsRoot });
     return { wsRoot, vaults };
   }
 
   static async setupVaults(opts: SetupVaultsOptsV3) {
     const { vaults } = _.defaults(opts, {
-      vaults: [[tmpDir().name, "main"], [tmpDir().name, "other"]].map(([vpath, vname])=> {
+      vaults: [
+        [tmpDir().name, "main"],
+        [tmpDir().name, "other"],
+      ].map(([vpath, vname]) => {
         return {
           fsPath: path.relative(opts.wsRoot, vpath),
-          name: vname
-        }
-      })
+          name: vname,
+        };
+      }),
     });
     //     {
     //       fsPath: tmpDir().name,
@@ -146,7 +149,7 @@ export class EngineTestUtilsV3 {
         const { fsPath } = ent;
         return EngineTestUtilsV2.setupVault({
           ...opts,
-          vaultDir: path.join(opts.wsRoot,fsPath ),
+          vaultDir: path.join(opts.wsRoot, fsPath),
           initDirCb: cb[idx],
         });
       })

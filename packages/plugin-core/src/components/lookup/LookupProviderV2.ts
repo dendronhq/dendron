@@ -23,7 +23,6 @@ import { MORE_RESULTS_LABEL } from "./constants";
 import { LookupControllerV2 } from "./LookupControllerV2";
 import { DendronQuickPickerV2 } from "./types";
 import {
-  createMoreResults,
   createNoActiveItem,
   node2Uri,
   PickerUtilsV2,

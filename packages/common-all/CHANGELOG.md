@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.18.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.18.1-alpha.1...v0.18.1-alpha.2) (2020-12-03)
+
+### Bug Fixes
+
+- ignore files added by engine ([f76b0ba](https://github.com/dendronhq/dendron/commit/f76b0bacf77186f1023aadb68a0f9e0cdfe74364))
+
 ## [0.18.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.18.1-alpha.0...v0.18.1-alpha.1) (2020-12-03)
 
 ### Features

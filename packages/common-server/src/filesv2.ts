@@ -242,21 +242,16 @@ export function writeJSONWithComments(fpath: string, data: any) {
 
 export { tmp, DirResult };
 
-const isAbsolutePath = (str: string) => {
-  return str.startsWith("/") || str.startsWith("\\");
-};
-
 export class VaultUtils {
   static getName(vault: DVault): string {
     return vault.name || path.basename(vault.fsPath);
   }
 
-  static isEqual(vaultSrc: DVault, vaultCmp: DVault) {
-    if (_.some([vaultSrc, vaultCmp], (ent) => isAbsolutePath(ent.fsPath))) {
-      return path.basename(vaultSrc.fsPath) === path.basename(vaultCmp.fsPath);
-    } else {
-      return vaultSrc.fsPath === vaultCmp.fsPath;
-    }
+  static isEqual(vaultSrc: DVault, vaultCmp: DVault, wsRoot: string) {
+    return (
+      this.normVaultPath({ vault: vaultSrc, wsRoot }) ===
+      this.normVaultPath({ vault: vaultCmp, wsRoot })
+    );
   }
 
   static getByVaultPath({
@@ -300,4 +295,10 @@ export class VaultUtils {
     }
     return vault;
   }
+
+  static normVaultPath = (opts: { vault: DVault; wsRoot: string }) => {
+    return path.isAbsolute(opts.vault.fsPath)
+      ? path.relative(opts.wsRoot, opts.vault.fsPath)
+      : opts.vault.fsPath;
+  };
 }

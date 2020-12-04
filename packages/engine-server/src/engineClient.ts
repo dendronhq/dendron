@@ -193,7 +193,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     // TODO: hack
     if (!_.isUndefined(vault)) {
       noteIndexProps = noteIndexProps.filter((ent) =>
-        VaultUtils.isEqual(vault, ent.vault)
+        VaultUtils.isEqual(vault, ent.vault, this.wsRoot)
       );
     }
     return noteIndexProps.map((ent) => this.notes[ent.id]);

@@ -132,7 +132,11 @@ async function note2JekyllMdFile(
   }
   if (
     _.some(opts.privateVaults || [], (ent) => {
-      return VaultUtils.isEqual(note.vault, { fsPath: ent });
+      return VaultUtils.isEqual(
+        note.vault,
+        { fsPath: ent },
+        opts.engine.wsRoot
+      );
     })
   ) {
     return [];
@@ -334,10 +338,14 @@ export class BuildSiteCommand extends SoilCommand<
 
     let navOrder = 0;
     const nodes: NotePropsV2[] = siteHierarchies.map((fname) => {
-      const notes = NoteUtilsV2.getNotesByFname({
+      let notes = NoteUtilsV2.getNotesByFname({
         fname,
         notes: engineClient.notes,
       });
+      // remove blacklist notes
+      // (opts.config.privateVaults || []).forEach(vaultPath => {
+      //   notes = _.reject(notes, ent => VaultUtils.isEqual(ent.vault, {fsPath: vaultPath}, opts.engineClient.wsRoot));
+      // });
       let note: NotePropsV2;
       if (notes.length > 1) {
         throw new DendronError({ msg: `mult notes found for ${fname}` });

@@ -4,24 +4,28 @@ import _ from "lodash";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 
-type CommandOpts = {};
+type CommandOpts = { skipReload?: boolean };
 
 type CommandOutput = void;
 
 export class BuildPodCommand extends BasicCommand<CommandOpts, CommandOutput> {
   static key = DENDRON_COMMANDS.BUILD_POD.key;
   async execute(opts: CommandOpts) {
-    const ctx = { ctx: "PlantNotesCommand" };
+    const ctx = { ctx: "PlantNotesCommand", opts };
     const { writeStubs, incremental } = _.defaults(opts, {
       writeStubs: false,
       incremental: false,
     });
     const ws = DendronWorkspace.instance();
-    let engine = await new ReloadIndexCommand().execute();
+    let engine = getEngine();
+    if (!opts.skipReload) {
+      this.L.info({ ctx, msg: "doing reload..." });
+      engine = (await new ReloadIndexCommand().execute()) as DEngineClientV2;
+    }
     const config = ws.config?.site;
     if (_.isUndefined(config)) {
       throw Error("no config found");

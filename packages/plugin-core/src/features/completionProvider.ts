@@ -11,7 +11,7 @@ import {
   workspace,
 } from "vscode";
 import { Logger } from "../logger";
-import { escapeForRegExp, fsPathToRef, RE_WIKI_LINK_ALIAS } from "../utils/md";
+import { fsPathToRef } from "../utils/md";
 import { DendronWorkspace } from "../workspace";
 
 const padWithZero = (n: number): string => (n < 10 ? "0" + n : String(n));
@@ -27,12 +27,9 @@ export const provideCompletionItems = (
   Logger.debug({ ctx, linePrefix, position, msg: "enter" });
 
   const isResourceAutocomplete = linePrefix.match(/\!\[\[\w*$/);
-  const isDocsAutocomplete = linePrefix.match(/\[\[\w*$/);
-  const isAliasAutocomplete = linePrefix.match(
-    new RegExp(RE_WIKI_LINK_ALIAS, "gi")
-  );
+  const isDocsAutocomplete = linePrefix.match(/\[\[[\w\|\.\#]*$/);
 
-  if (!isDocsAutocomplete && !isResourceAutocomplete && !isAliasAutocomplete) {
+  if (!isDocsAutocomplete && !isResourceAutocomplete) {
     return undefined;
   }
 

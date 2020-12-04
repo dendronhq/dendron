@@ -32,7 +32,9 @@ const partialRefPattern = "(\\[\\[)([^\\[\\]]+)";
 export const REGEX_FENCED_CODE_BLOCK = /^( {0,3}|\t)```[^`\r\n]*$[\w\W]+?^( {0,3}|\t)``` *$/gm;
 export { sortPaths };
 const REGEX_CODE_SPAN = /`[^`]*?`/gm;
-export const RE_WIKI_LINK_ALIAS = "([^\\[\\]]+?\\|)?";
+// export const RE_WIKI_LINK_ALIAS = "([^\\[\\]]+?\\|)?";
+// const isResourceAutocomplete = linePrefix.match(/\!\[\[\w*$/);
+//   const isDocsAutocomplete = linePrefix.match(/\[\[\w*$/);
 const uncPathRegex = /^[\\\/]{2,}[^\\\/]+[\\\/]+[^\\\/]+/;
 export const otherExts = [
   "doc",

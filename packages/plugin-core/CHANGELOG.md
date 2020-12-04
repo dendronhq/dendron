@@ -5,48 +5,26 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.18.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.18.1-alpha.3...v0.18.1-alpha.4) (2020-12-04)
 
+### Features
+
+- support adding remote vaults ([d7501b9](https://github.com/dendronhq/dendron/commit/d7501b9a5cb116faae64d26798cfd7ccfc73a4b0))
+
 ### Enhancements
 
 - support pods for multi-vault ([661fe21](https://github.com/dendronhq/dendron/commit/661fe218d448e6f32f86bf60dabe635b71d67251))
-
-## [0.18.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.18.1-alpha.2...v0.18.1-alpha.3) (2020-12-03)
+- faster lookup on large results ([3ddeba8](https://github.com/dendronhq/dendron/commit/3ddeba8a596be4bc9316e0cc5e63025d7bf4460f))
+- support sibling nav for multi-vault ([235bfc7](https://github.com/dendronhq/dendron/commit/235bfc77505b403bf32c78ce3df6b7005c37dfba))
 
 ### Bug Fixes
 
 - enable multi-vault for publishing ([0ebac81](https://github.com/dendronhq/dendron/commit/0ebac8191291f48ab42fbc30279e9615c96a5245))
 - prefix generation for special notes in multi-vault ([5c04ccd](https://github.com/dendronhq/dendron/commit/5c04ccd666511abb79554b7a24c02efd46d93c3a))
 - remove single-vault note references ([fd5a381](https://github.com/dendronhq/dendron/commit/fd5a381674384588850b07b193fc0bf609abc0fd))
-
-## [0.18.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.18.1-alpha.1...v0.18.1-alpha.2) (2020-12-03)
-
-### Bug Fixes
-
 - ignore files added by engine ([f76b0ba](https://github.com/dendronhq/dendron/commit/f76b0bacf77186f1023aadb68a0f9e0cdfe74364))
-
-## [0.18.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.18.1-alpha.0...v0.18.1-alpha.1) (2020-12-03)
-
-### Enhancements
-
-- faster lookup on large results ([3ddeba8](https://github.com/dendronhq/dendron/commit/3ddeba8a596be4bc9316e0cc5e63025d7bf4460f))
-- support sibling nav for multi-vault ([235bfc7](https://github.com/dendronhq/dendron/commit/235bfc77505b403bf32c78ce3df6b7005c37dfba))
-
-### Features
-
-- support adding remote vaults ([d7501b9](https://github.com/dendronhq/dendron/commit/d7501b9a5cb116faae64d26798cfd7ccfc73a4b0))
-
-## [0.18.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.18.0...v0.18.1-alpha.0) (2020-11-30)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
 
 # [0.18.0](https://github.com/dendronhq/dendron/compare/v0.17.2...v0.18.0) (2020-11-29)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
-
 ## [0.17.2](https://github.com/dendronhq/dendron/compare/v0.17.2-alpha.5...v0.17.2) (2020-11-29)
-
-**Note:** Version bump only for package root
-
-## [0.17.2-alpha.5](https://github.com/dendronhq/dendron/compare/v0.17.2-alpha.4...v0.17.2-alpha.5) (2020-11-29)
 
 ### Enhancements
 

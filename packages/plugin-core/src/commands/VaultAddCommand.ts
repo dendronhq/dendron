@@ -49,7 +49,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (sourceType === "remote") {
       let out = await VSCodeUtils.showInputBox({
         prompt: "URL of remote Vault or Workspace",
-        placeHolder: "https://github.com/dendronhq/dendron-site.git",
+        placeHolder: "https://github.com/dendronhq/dendron-site-vault.git",
       });
       if (PickerUtilsV2.isInputEmpty(out)) return;
       sourcePath = out!;

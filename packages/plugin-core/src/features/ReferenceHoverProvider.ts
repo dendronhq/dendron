@@ -3,6 +3,7 @@ import { MarkdownPublishPod } from "@dendronhq/pods-core";
 import fs from "fs";
 import path from "path";
 import vscode, { Uri } from "vscode";
+import { PickerUtilsV2 } from "../components/lookup/utils";
 import {
   containsImageExt,
   containsOtherKnownExts,
@@ -50,7 +51,9 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
           notes: engine.notes,
         });
         const uris = notes.map((note) =>
-          Uri.file(NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot()  }))
+          Uri.file(
+            NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+          )
         );
         foundUri = uris[0];
       }
@@ -93,6 +96,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
             config: {
               fname,
               dest: "stdout",
+              vault: PickerUtilsV2.getOrPromptVaultForOpenEditor(),
             },
             engine: getWS().getEngine(),
             vaults: getWS().vaults,

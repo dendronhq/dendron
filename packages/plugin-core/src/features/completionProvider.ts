@@ -53,7 +53,7 @@ export const provideCompletionItems = (
   const completionItems: CompletionItem[] = [];
   const notes = DendronWorkspace.instance().getEngine().notes;
   const uris: Uri[] = _.values(notes).map((note) =>
-    Uri.file(NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot()  }))
+    Uri.file(NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() }))
   );
 
   uris.forEach((uri, index) => {
@@ -78,11 +78,7 @@ export const provideCompletionItems = (
     }
 
     const item = new CompletionItem(longRef, CompletionItemKind.File);
-
-    let insertText = _.isEmpty(refString)
-      ? longRef
-      : _.replace(longRef, new RegExp(`^${escapeForRegExp(refString)}`), "");
-    item.insertText = insertText;
+    item.insertText = longRef; //insertText;
 
     item.sortText = padWithZero(index);
 

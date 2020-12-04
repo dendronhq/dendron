@@ -28,6 +28,18 @@
         "github.github-vscode-theme"
     ],
     "contributes": {
+        "languages": [
+            {
+              "id": "markdown",
+              "extensions": [
+                ".md"
+              ],
+              "aliases": [
+                  "markdown"
+              ],
+              "configuration": "./language-configuration.json"
+            }
+        ],
         "views": {
             "explorer": [
                 {

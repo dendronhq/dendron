@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.18.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.18.1...v0.18.2-alpha.0) (2020-12-04)
+
+### Enhancements
+
+- add hover for images ([a726f33](https://github.com/dendronhq/dendron/commit/a726f3322bab98ba33a0690f37e34e5d2e822f2a))
+
 ## [0.18.1](https://github.com/dendronhq/dendron/compare/v0.18.1-alpha.4...v0.18.1) (2020-12-04)
 
 **Note:** Version bump only for package @dendronhq/common-all

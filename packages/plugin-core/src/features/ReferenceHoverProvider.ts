@@ -1,4 +1,5 @@
 import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
 import { MarkdownPublishPod } from "@dendronhq/pods-core";
 import fs from "fs";
 import path from "path";
@@ -44,7 +45,13 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       //     );
       //   }
       if (containsImageExt(refAtPos.ref)) {
-        foundUri = Uri.file(refAtPos.ref);
+        // check for /assests
+        // if (path.isAbsolute(refAtPos.ref)) {
+        const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+        const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
+        const fullPath = path.join(vpath, refAtPos.ref);
+        // }
+        foundUri = Uri.file(fullPath);
       } else {
         const notes = NoteUtilsV2.getNotesByFname({
           fname: refAtPos.ref,

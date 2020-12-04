@@ -17,12 +17,19 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     if (!refAtPos) {
       return;
     }
+    if (refAtPos.refType === "refv2") {
+      return;
+    }
     const engine = DendronWorkspace.instance().getEngine();
     const notes = NoteUtilsV2.getNotesByFname({
       fname: refAtPos.ref,
       notes: engine.notes,
     });
-    const uris = notes.map((note) => Uri.file(NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })));
+    const uris = notes.map((note) =>
+      Uri.file(
+        NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+      )
+    );
     const out = uris.map((uri) => new Location(uri, new Position(0, 0)));
     if (out.length > 1) {
       return out;
@@ -50,7 +57,9 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       }
       const { note, pos } = out;
       return new Location(
-        Uri.file(NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot()  })),
+        Uri.file(
+          NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+        ),
         pos ? pos : new Position(0, 0)
       );
     }

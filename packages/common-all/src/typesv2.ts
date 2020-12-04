@@ -1,28 +1,6 @@
 import { URI } from "vscode-uri";
 import { DendronError } from "./error";
-import { Position } from "unist";
 import { DendronConfig } from "./types";
-
-// === Old
-export enum LinkType {
-  WIKI_LINK = "WIKI_LINK",
-  IMAGE_LINK = "IMAGE_LINK",
-}
-export interface Link {
-  type: LinkType;
-  url: string;
-  position: Position;
-  label?: string;
-}
-
-export interface WikiLink extends Link {
-  type: LinkType.WIKI_LINK;
-}
-
-export interface ImageLink extends Link {
-  type: LinkType.IMAGE_LINK;
-  alt?: string;
-}
 
 export type EngineDeleteOpts = {
   /**
@@ -88,6 +66,9 @@ export type DVault = {
   // uri: string;
   remote?: VaultRemote;
 };
+
+export type DLinkType = "wiki" | "refv2";
+
 export type DLink = {
   type: "ref" | "wiki" | "md" | "backlink";
   original: string;

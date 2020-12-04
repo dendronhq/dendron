@@ -1,9 +1,17 @@
 import { DNoteAnchor, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DLinkType } from "@dendronhq/common-all";
 import { sort as sortPaths } from "cross-path-sort";
 import fs from "fs";
 import _ from "lodash";
 import path from "path";
-import vscode, { commands, extensions, Location, TextDocument } from "vscode";
+import vscode, {
+  commands,
+  extensions,
+  Location,
+  Position,
+  Range,
+  TextDocument,
+} from "vscode";
 import { DendronWorkspace } from "../workspace";
 import { matchAll } from "./strings";
 
@@ -165,7 +173,9 @@ export const getReferenceAtPosition = (
   ref: string;
   label: string;
   anchor?: DNoteAnchor;
+  refType?: DLinkType;
 } | null => {
+  let refType: DLinkType | undefined;
   if (
     isInFencedCodeBlock(document, position.line) ||
     isInCodeSpan(document, position.line, position.character)
@@ -180,19 +190,27 @@ export const getReferenceAtPosition = (
     return null;
   }
 
+  const docText = document.getText(range);
   const { ref, label, anchor } = parseRef(
-    document
-      .getText(range)
-      .replace("![[", "")
-      .replace("[[", "")
-      .replace("]]", "")
+    docText.replace("![[", "").replace("[[", "").replace("]]", "")
   );
+
+  const startChar = range.start.character;
+  // because
+  const prefixRange = new Range(
+    new Position(range.start.line, startChar - 1),
+    new Position(range.start.line, startChar + 2)
+  );
+  if (document.getText(prefixRange).indexOf("![[") >= 0) {
+    refType = "refv2";
+  }
 
   return {
     ref,
     label,
     range,
     anchor,
+    refType,
   };
 };
 
@@ -267,7 +285,10 @@ export const findReferences = async (
   );
 
   _.forEach(notesWithRefs, (note) => {
-    const fsPath = NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot()  });
+    const fsPath = NoteUtilsV2.getPathV4({
+      note,
+      wsRoot: DendronWorkspace.wsRoot(),
+    });
 
     if (excludePaths.includes(fsPath) || !fs.existsSync(fsPath)) {
       return;

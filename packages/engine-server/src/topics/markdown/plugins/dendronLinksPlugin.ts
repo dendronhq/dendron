@@ -113,6 +113,10 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
       const [value, anchorHeader] = out.value.split("#");
       out.value = value;
       out.anchorHeader = anchorHeader;
+      // if we didn't have an alias, links with a # anchor shouldn't have # portion be in the title
+      if (!isAlias(pageTitle)) {
+        out.alias = value;
+      }
     }
     return out;
   }

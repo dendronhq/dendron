@@ -288,7 +288,6 @@ function attachCompilerForMarkdown({
       includeParen: true,
       includeRefTag: true,
     });
-    //return `((${data.raw}))`
   };
   return Compiler;
 }

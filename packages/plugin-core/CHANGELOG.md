@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.18.2-alpha.2](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.1...v0.18.2-alpha.2) (2020-12-05)
+
+### Bug Fixes
+
+- errors with doctor ([35f10c1](https://github.com/dendronhq/dendron/commit/35f10c10b2271dd3f8f86c2cdc47ba1b8fc92e21))
+
 ## [0.18.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.0...v0.18.2-alpha.1) (2020-12-05)
 
 ### Bug Fixes

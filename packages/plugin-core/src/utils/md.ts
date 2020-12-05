@@ -200,7 +200,7 @@ export const getReferenceAtPosition = (
   const startChar = range.start.character;
   // because
   const prefixRange = new Range(
-    new Position(range.start.line, startChar - 1),
+    new Position(range.start.line, Math.max(0, startChar - 1)),
     new Position(range.start.line, startChar + 2)
   );
   if (document.getText(prefixRange).indexOf("![[") >= 0) {

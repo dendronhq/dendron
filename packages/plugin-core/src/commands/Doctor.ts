@@ -5,7 +5,7 @@ import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 
@@ -22,6 +22,7 @@ type CommandOutput = {
 export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   static key = DENDRON_COMMANDS.DOCTOR.key;
   async execute(opts: CommandOpts) {
+    const ctx = "DoctorCommand:execute";
     window.showInformationMessage("Calling the doctor.");
     const {} = _.defaults(opts, {});
     const ws = DendronWorkspace.instance();
@@ -37,11 +38,15 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
 
     const siteRoot = path.join(rootDir, config.site.siteRootDir);
+    getWS().vaultWatcher!.pause = true;
+    this.L.info({ ctx, msg: "pre:Reload" });
     // TODO
     const engine = await new ReloadIndexCommand().execute();
     await new BackfillV2Command().execute({
       engine: engine as DEngineClientV2,
     });
+    getWS().vaultWatcher!.pause = false;
+    await new ReloadIndexCommand().execute();
 
     // create site root, used for publication
     if (!fs.existsSync(siteRoot)) {

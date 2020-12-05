@@ -4,6 +4,7 @@ import _ from "lodash";
 import RemarkParser, { Eat } from "remark-parse";
 import { Parser, Processor } from "unified";
 import { Node } from "unist";
+import { LinkOpts } from "./types";
 
 export const LINK_REGEX = /^\[\[(.+?)\]\]/;
 
@@ -48,13 +49,13 @@ export type WikiLinkData = {
   replace?: DNoteLoc;
   forNoteRefInPreview?: boolean;
   forNoteRefInSite?: boolean;
-};
+} & LinkOpts;
 
 function locator(value: string, fromIndex: number) {
   return value.indexOf("[", fromIndex);
 }
 
-interface PluginOpts {
+type PluginOpts = {
   permalinks?: string[];
   pageResolver?: (name: string) => string[];
   newClassName?: string;
@@ -64,7 +65,7 @@ interface PluginOpts {
   // dendron opts
   replaceLink?: { from: DNoteLoc; to: DNoteLoc };
   convertObsidianLinks?: boolean;
-}
+} & LinkOpts;
 
 export { PluginOpts as DendronLinksOpts };
 
@@ -99,6 +100,13 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
   function parseAliasLink(pageTitle: string) {
     const [alias, value] = pageTitle.split(aliasDivider);
     return { alias, value };
+  }
+  function parseAnchorIfExist(link: string) {
+    if (link.indexOf("#") !== -1) {
+      return link.split("#");
+    } else {
+      return [link, undefined];
+    }
   }
 
   function parsePageTitle(pageTitle: string) {
@@ -150,6 +158,7 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
         value,
         data: {
           alias,
+          toMdEnhancedPreview: opts.toMdEnhancedPreview,
           permalink,
           anchorHeader,
           exists,
@@ -164,7 +173,7 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
               value: alias,
             },
           ],
-        },
+        } as WikiLinkData,
       });
     }
     return;
@@ -226,6 +235,9 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
         }
         if (copts.convertObsidianLinks) {
           nodeValue = _.replace(nodeValue as string, /\//g, ".");
+        }
+        if (data.toMdEnhancedPreview) {
+          return `[[${parseAnchorIfExist(node.value as string)[0]}]]`;
         }
         return `[[${nodeValue}]]`;
       };

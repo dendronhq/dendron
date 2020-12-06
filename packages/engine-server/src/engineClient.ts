@@ -30,9 +30,15 @@ import {
   SchemaUtilsV2,
   WriteNoteResp,
 } from "@dendronhq/common-all";
-import { DendronAPI, VaultUtils } from "@dendronhq/common-server";
+import {
+  createLogger,
+  DendronAPI,
+  DLogger,
+  VaultUtils,
+} from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
+import { FileStorageV2 } from "../lib";
 import { FuseEngine } from "./fuseEngine";
 import { HistoryService } from "./history";
 import { getPortFilePath } from "./utils";
@@ -53,6 +59,8 @@ export class DendronEngineClient implements DEngineClientV2 {
   public vaultsv3: DVault[];
   public configRoot: string;
   public history?: HistoryService;
+  public logger: DLogger;
+  public store: FileStorageV2;
 
   static create({
     port,
@@ -83,11 +91,13 @@ export class DendronEngineClient implements DEngineClientV2 {
     vaults,
     ws,
     history,
+    logger,
   }: {
     api: DendronAPI;
     vaults: string[];
     ws: string;
     history?: HistoryService;
+    logger?: DLogger;
   }) {
     this.api = api;
     this.notes = {};
@@ -100,6 +110,12 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.ws = ws;
     this.configRoot = this.wsRoot;
     this.history = history;
+    this.logger = logger || createLogger();
+    this.store = new FileStorageV2({
+      wsRoot: this.ws,
+      vaultsv3: this.vaultsv3,
+      logger: this.logger,
+    });
   }
 
   /**
@@ -110,6 +126,7 @@ export class DendronEngineClient implements DEngineClientV2 {
       uri: this.ws,
       config: { vaults: this.vaults },
     });
+
     if (resp.error && resp.error.code !== ERROR_CODES.MINOR) {
       return {
         error: resp.error,
@@ -124,6 +141,8 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.schemas = schemas;
     await this.fuseEngine.updateNotesIndex(notes);
     await this.fuseEngine.updateSchemaIndex(schemas);
+    this.store.notes = notes;
+    this.store.schemas = schemas;
     return {
       error: resp.error,
       data: { notes, schemas },

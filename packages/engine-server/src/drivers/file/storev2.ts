@@ -41,6 +41,9 @@ import YAML from "yamljs";
 import { ParserUtilsV2 } from "../../topics/markdown/utilsv2";
 import { loc2Path } from "../../utils";
 
+type BulkAddNoteOpts = {
+  notes: NotePropsV2[];
+};
 type FileMetaV2 = {
   // file name: eg. foo.md, name = foo
   prefix: string;
@@ -541,6 +544,18 @@ export class FileStorageV2 implements DStoreV2 {
       })
     );
     return notes;
+  }
+
+  async bulkAddNotes(opts: BulkAddNoteOpts) {
+    return Promise.all(
+      opts.notes.map(async (note) => {
+        await note2File({
+          note,
+          vault: note.vault,
+          wsRoot: this.wsRoot,
+        });
+      })
+    );
   }
 
   async renameNote(opts: RenameNoteOptsV2): Promise<RenameNotePayload> {

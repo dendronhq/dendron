@@ -1,0 +1,19 @@
+---
+pagination:
+    data: notesOnly
+    size: 1
+    alias: note
+    resolve: values
+    addAllPagesToCollections: true
+permalink: "{% if note.custom.permalink == '/' %}index.html{% else %}notes/{{ note.id }}.html{% endif %}"
+templateEngineOverride: liquid
+layout: layouts/single.liquid
+---
+{%- assign vault = {{note.vault}} -%}
+{%- dendronMd note -%}
+
+{% if note.custom.has_collection %}
+{{ note | toCollection: notesOnly}}
+{% else %}
+{{ note | toToc: notesOnly}}
+{% endif %}

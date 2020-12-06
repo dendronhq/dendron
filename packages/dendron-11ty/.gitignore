@@ -1,0 +1,10 @@
+node_modules
+_site
+stdout
+stdout.old
+fixtures/test-workspace/.dendron.port
+fixtures/test-workspace/.dendron.ws
+local
+dist
+yarn-error.log
+dendron-local.code-workspace

@@ -1,0 +1,63 @@
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+  {% assign pageTitle = nodeCurrent.title | append: ' - ' | append: site.title
+  %}
+  <title>{{ pageTitle }}</title>
+  {% if description %}
+  <meta name="Description" content="{{ description }}" />
+  {% endif %}
+
+  <link
+    rel="shortcut icon"
+    href="{{ 'favicon.ico' | absolute_url }}"
+    type="image/x-icon"
+  />
+  <link
+    rel="stylesheet"
+    href="{{ '/assets/css/just-the-docs-default.css' | absolute_url }}"
+  />
+  <script
+    type="text/javascript"
+    src="{{ '/assets/js/just-the-docs.js' | absolute_url }}"
+  ></script>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.22.0/themes/prism.min.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+    integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X"
+    crossorigin="anonymous"
+  />
+
+  {%- if site.customHeaderPath -%}
+  {% addHeader %}
+  {%- endif -%}
+
+  {% if site.search_enabled != false %}
+  <script
+    type="text/javascript"
+    src="{{ '/assets/js/vendor/lunr.min.js' | absolute_url }}"
+  ></script>
+  {% endif %}
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  {% if nodeCurrent.custom.noindex %}
+  <meta name="robots" content="noindex, nofollow" />
+  {% endif %} 
+  {% seo %}
+  <meta property="og:title" content="{{ pageTitle }}" />
+  <meta name="twitter:title" content="{{ pageTitle }}" />
+  {% if site.ga_tracking != nil and processEnv.stage == "prod" %}
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{site.ga_tracking}}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', '{{site.ga_tracking}}');
+  </script>
+  {% endif %}
+</head>

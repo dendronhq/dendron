@@ -38,7 +38,7 @@ import {
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import { FileStorageV2 } from "../lib";
+import { FileStorageV2 } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
 import { HistoryService } from "./history";
 import { getPortFilePath } from "./utils";

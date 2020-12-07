@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.18.2-alpha.8](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.7...v0.18.2-alpha.8) (2020-12-07)
+
+### Bug Fixes
+
+- tree view adding new nodes in wrong place ([173f57b](https://github.com/dendronhq/dendron/commit/173f57bfb2730da2361950df35054a53f0aba765))
+
 ## [0.18.2-alpha.7](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.6...v0.18.2-alpha.7) (2020-12-07)
 
 **Note:** Version bump only for package @dendronhq/common-test-utils

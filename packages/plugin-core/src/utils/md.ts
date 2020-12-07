@@ -196,7 +196,7 @@ export const getReferenceAtPosition = (
 
   // check if image
   if (rangeForImage) {
-    const docText = document.getText(range);
+    const docText = document.getText(rangeForImage);
     const maybeImage = _.trim(docText.match("\\((.*)\\)")![0], "()");
     if (containsImageExt(maybeImage)) {
       return {

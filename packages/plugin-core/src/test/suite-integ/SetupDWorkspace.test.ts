@@ -29,7 +29,7 @@ suite.skip("startup", function () {
         wsRoot,
       }));
       fs.removeSync(getPortFilePath({ wsRoot }));
-      cengine = new EngineConnector({ wsRoot, vaults: [] });
+      cengine = new EngineConnector({ wsRoot });
     });
 
     it("no server file", function (done) {

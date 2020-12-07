@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-cli",
-  "version": "0.18.2-alpha.5",
+  "version": "0.18.2-alpha.7",
   "description": "dendron-cli",
   "license": "GPLv3",
   "repository": {
@@ -41,11 +41,11 @@
     "test:unit:debug": "NODE_ENV=test  node --inspect node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
-    "@dendronhq/api-server": "^0.18.2-alpha.5",
-    "@dendronhq/common-all": "^0.18.2-alpha.2",
-    "@dendronhq/common-server": "^0.18.2-alpha.2",
-    "@dendronhq/engine-server": "^0.18.2-alpha.5",
-    "@dendronhq/pods-core": "^0.18.2-alpha.5",
+    "@dendronhq/api-server": "^0.18.2-alpha.7",
+    "@dendronhq/common-all": "^0.18.2-alpha.7",
+    "@dendronhq/common-server": "^0.18.2-alpha.7",
+    "@dendronhq/engine-server": "^0.18.2-alpha.7",
+    "@dendronhq/pods-core": "^0.18.2-alpha.7",
     "fs-extra": "^9.0.1",
     "gray-matter": "^4.0.2",
     "lodash": "^4.17.19",
@@ -53,7 +53,7 @@
     "yargs": "^15.4.1"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.18.2-alpha.2",
+    "@dendronhq/common-test-utils": "^0.18.2-alpha.7",
     "@types/fs-extra": "^9.0.1",
     "@types/jest": "^23.3.3",
     "@types/lodash": "^4.14.158",

@@ -11,46 +11,111 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.18.2-alpha.7](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.6...v0.18.2-alpha.7) (2020-12-07)
 
+### Bug Fixes
+
+- issue with local vault command ([fb202e9](https://github.com/dendronhq/dendron/commit/fb202e91e501cfd5506fd73c9a005807954e48d3))
+
+## [0.18.2-alpha.6](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.5...v0.18.2-alpha.6) (2020-12-07)
+
+**Note:** Version bump only for package root
+
+## [0.18.2-alpha.5](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.4...v0.18.2-alpha.5) (2020-12-07)
+
 ### Enhancements
 
 - support image hover ([8fee313](https://github.com/dendronhq/dendron/commit/8fee313785dfc4ac2564f74911a4b51879be0673))
-- add hover for images ([a726f33](https://github.com/dendronhq/dendron/commit/a726f3322bab98ba33a0690f37e34e5d2e822f2a))
-- better completion ([d9d4598](https://github.com/dendronhq/dendron/commit/d9d4598c1996fdb5eb24e4bda0e51e777b476f6e))
+
+## [0.18.2-alpha.4](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.3...v0.18.2-alpha.4) (2020-12-06)
+
+**Note:** Version bump only for package root
+
+## [0.18.2-alpha.3](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.2...v0.18.2-alpha.3) (2020-12-06)
 
 ### Bug Fixes
 
 - doctor errors when backfilling +100 notes ([862e917](https://github.com/dendronhq/dendron/commit/862e9173e92a2e5d964273bb87c19e79177a6200))
+
+### Enhancements
+
+- support relative links in preview ([a485570](https://github.com/dendronhq/dendron/commit/a485570213d4e345e97306983211a7d5e200fb74))
+
+## [0.18.2-alpha.2](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.1...v0.18.2-alpha.2) (2020-12-05)
+
+### Bug Fixes
+
 - errors with doctor ([35f10c1](https://github.com/dendronhq/dendron/commit/35f10c10b2271dd3f8f86c2cdc47ba1b8fc92e21))
+
+### Enhancements
+
+- nicer relative note titles ([cd40080](https://github.com/dendronhq/dendron/commit/cd400804d168883be6d12af90e98bc4db0b33f32))
+
+## [0.18.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.0...v0.18.2-alpha.1) (2020-12-05)
+
+### Bug Fixes
+
 - issue with ref parsing ([b2dbdfc](https://github.com/dendronhq/dendron/commit/b2dbdfc9e49aa1fa74d5097500eeaddf05bf7ccc))
+
+## [0.18.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.18.1...v0.18.2-alpha.0) (2020-12-04)
+
+### Bug Fixes
+
 - completion only fire for wiki links ([f49972e](https://github.com/dendronhq/dendron/commit/f49972ee436f9f637bd68729e702ba2169e68faf))
-- issue with local vault command ([fb202e9](https://github.com/dendronhq/dendron/commit/fb202e91e501cfd5506fd73c9a005807954e48d3))
+
+### Enhancements
+
+- add hover for images ([a726f33](https://github.com/dendronhq/dendron/commit/a726f3322bab98ba33a0690f37e34e5d2e822f2a))
+- better completion ([d9d4598](https://github.com/dendronhq/dendron/commit/d9d4598c1996fdb5eb24e4bda0e51e777b476f6e))
 
 ## [0.18.1](https://github.com/dendronhq/dendron/compare/v0.18.1-alpha.4...v0.18.1) (2020-12-04)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.18.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.18.1-alpha.3...v0.18.1-alpha.4) (2020-12-04)
-
-### Features
-
-- support adding remote vaults ([d7501b9](https://github.com/dendronhq/dendron/commit/d7501b9a5cb116faae64d26798cfd7ccfc73a4b0))
 
 ### Enhancements
 
 - support pods for multi-vault ([661fe21](https://github.com/dendronhq/dendron/commit/661fe218d448e6f32f86bf60dabe635b71d67251))
-- faster lookup on large results ([3ddeba8](https://github.com/dendronhq/dendron/commit/3ddeba8a596be4bc9316e0cc5e63025d7bf4460f))
-- support sibling nav for multi-vault ([235bfc7](https://github.com/dendronhq/dendron/commit/235bfc77505b403bf32c78ce3df6b7005c37dfba))
+- support private vaults ([98b4961](https://github.com/dendronhq/dendron/commit/98b4961d791b8a30c45e408fdf926838dfd5e431))
+
+## [0.18.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.18.1-alpha.2...v0.18.1-alpha.3) (2020-12-03)
 
 ### Bug Fixes
 
 - enable multi-vault for publishing ([0ebac81](https://github.com/dendronhq/dendron/commit/0ebac8191291f48ab42fbc30279e9615c96a5245))
 - prefix generation for special notes in multi-vault ([5c04ccd](https://github.com/dendronhq/dendron/commit/5c04ccd666511abb79554b7a24c02efd46d93c3a))
 - remove single-vault note references ([fd5a381](https://github.com/dendronhq/dendron/commit/fd5a381674384588850b07b193fc0bf609abc0fd))
+
+## [0.18.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.18.1-alpha.1...v0.18.1-alpha.2) (2020-12-03)
+
+### Bug Fixes
+
+- getNoteByPath get wrong note ([03589f1](https://github.com/dendronhq/dendron/commit/03589f1eafeca3d5b9e919ab11897cc1bdc87415))
 - ignore files added by engine ([f76b0ba](https://github.com/dendronhq/dendron/commit/f76b0bacf77186f1023aadb68a0f9e0cdfe74364))
+
+## [0.18.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.18.1-alpha.0...v0.18.1-alpha.1) (2020-12-03)
+
+### Enhancements
+
+- faster lookup on large results ([3ddeba8](https://github.com/dendronhq/dendron/commit/3ddeba8a596be4bc9316e0cc5e63025d7bf4460f))
+- support sibling nav for multi-vault ([235bfc7](https://github.com/dendronhq/dendron/commit/235bfc77505b403bf32c78ce3df6b7005c37dfba))
+
+### Features
+
+- support adding remote vaults ([d7501b9](https://github.com/dendronhq/dendron/commit/d7501b9a5cb116faae64d26798cfd7ccfc73a4b0))
+
+## [0.18.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.18.0...v0.18.1-alpha.0) (2020-11-30)
+
+**Note:** Version bump only for package root
 
 # [0.18.0](https://github.com/dendronhq/dendron/compare/v0.17.2...v0.18.0) (2020-11-29)
 
+**Note:** Version bump only for package root
+
 ## [0.17.2](https://github.com/dendronhq/dendron/compare/v0.17.2-alpha.5...v0.17.2) (2020-11-29)
+
+**Note:** Version bump only for package root
+
+## [0.17.2-alpha.5](https://github.com/dendronhq/dendron/compare/v0.17.2-alpha.4...v0.17.2-alpha.5) (2020-11-29)
 
 ### Enhancements
 

@@ -11,3 +11,4 @@ export * from "./error";
 export * from "./time";
 export * from "./utils";
 export * from "./md";
+export * from "./vault";

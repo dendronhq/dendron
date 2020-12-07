@@ -242,6 +242,7 @@ export function writeJSONWithComments(fpath: string, data: any) {
 
 export { tmp, DirResult };
 
+// @deprecated - use VaultUtils in common-all
 export class VaultUtils {
   static getName(vault: DVault): string {
     return vault.name || path.basename(vault.fsPath);

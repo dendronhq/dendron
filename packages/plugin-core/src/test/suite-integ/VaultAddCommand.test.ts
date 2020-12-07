@@ -173,6 +173,37 @@ suite("VaultAddCommand", function () {
       });
     });
 
+    test("add rel path inside wsRoot", (done) => {
+      runSingleVaultTest({
+        ctx,
+        onInit: async ({ vault, wsRoot }) => {
+          const sourcePath = "vault2";
+          stubVaultInput({ sourceType: "local", sourcePath });
+          await new VaultAddCommand().run();
+          const vpath = path.join(wsRoot, sourcePath);
+          assert.deepStrictEqual(fs.readdirSync(vpath), [
+            "root.md",
+            "root.schema.yml",
+          ]);
+          const configPath = DConfig.configPath(
+            DendronWorkspace.wsRoot() as string
+          );
+          const config = readYAML(configPath) as DendronConfig;
+          assert.deepStrictEqual(
+            config.vaults.map((ent) => ent.fsPath),
+            [vault.fsPath, sourcePath]
+          );
+          const wsPath = DendronWorkspace.workspaceFile().fsPath;
+          const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
+          assert.deepStrictEqual(settings.folders, [
+            { path: vault.fsPath },
+            { path: sourcePath },
+          ]);
+          done();
+        },
+      });
+    });
+
     test("add absolute path outside of wsRoot", (done) => {
       runSingleVaultTest({
         ctx,

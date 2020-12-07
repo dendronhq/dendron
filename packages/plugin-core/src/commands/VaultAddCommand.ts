@@ -1,4 +1,4 @@
-import { DVault, getStage } from "@dendronhq/common-all";
+import { DVault, getStage, VaultUtils } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   GitUtils,
@@ -122,7 +122,11 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (opts.type === "remote") {
       vaults = await this.handleRemoteRepo(opts);
     } else {
-      const fsPath = path.relative(DendronWorkspace.wsRoot(), opts.path);
+      const wsRoot = DendronWorkspace.wsRoot();
+      const fsPath = VaultUtils.normVaultPath({
+        vault: { fsPath: opts.path },
+        wsRoot,
+      });
       const vault: DVault = { fsPath };
       if (opts.name) {
         vault.name = opts.name;

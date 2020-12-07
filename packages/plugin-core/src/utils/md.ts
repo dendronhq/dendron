@@ -28,8 +28,7 @@ export type FoundRefT = {
 
 const markdownExtRegex = /\.md$/i;
 export const refPattern = "(\\[\\[)([^\\[\\]]+?)(\\]\\])";
-export const mdImageLinkPattern =
-  "(\\[)([^\\[\\]]+?)(\\]\\()([^\\[\\]]+?)(\\))";
+export const mdImageLinkPattern = "(\\[)([^\\[\\]]*)(\\]\\()([^\\[\\]]+?)(\\))";
 const partialRefPattern = "(\\[\\[)([^\\[\\]]+)";
 export const REGEX_FENCED_CODE_BLOCK = /^( {0,3}|\t)```[^`\r\n]*$[\w\W]+?^( {0,3}|\t)``` *$/gm;
 export { sortPaths };

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.18.2-alpha.5](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.4...v0.18.2-alpha.5) (2020-12-07)
+
+### Enhancements
+
+- support image hover ([8fee313](https://github.com/dendronhq/dendron/commit/8fee313785dfc4ac2564f74911a4b51879be0673))
+
 ## [0.18.2-alpha.4](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.3...v0.18.2-alpha.4) (2020-12-06)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

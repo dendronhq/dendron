@@ -3,6 +3,7 @@ import { createLogger } from "@dendronhq/common-server";
 import {
   ENGINE_CONFIG_PRESETS,
   ENGINE_PRESETS,
+  ENGINE_PRESETS_MULTI,
   runEngineTestV4,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
@@ -149,6 +150,24 @@ describe("engine, notes/", () => {
   const nodeType = "NOTES";
 
   ENGINE_PRESETS.forEach((pre) => {
+    const { name, presets } = pre;
+    describe(name, () => {
+      test.each(
+        _.map(presets[nodeType], (v, k) => {
+          return [k, v];
+        })
+      )("%p", async (_key, TestCase) => {
+        const { testFunc, ...opts } = TestCase;
+        await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+      });
+    });
+  });
+});
+
+describe("engine, notes/multi/", () => {
+  const nodeType = "NOTES";
+
+  ENGINE_PRESETS_MULTI.forEach((pre) => {
     const { name, presets } = pre;
     describe(name, () => {
       test.each(

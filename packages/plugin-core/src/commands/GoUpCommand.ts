@@ -30,9 +30,13 @@ export class GoUpCommand extends BasicCommand<CommandOpts, CommandOutput> {
       {
         noStubs: true,
         vault: PickerUtilsV2.getVaultForOpenEditor(),
+        wsRoot: DendronWorkspace.wsRoot(),
       }
     ) as NotePropsV2;
-    const nppath = NoteUtilsV2.getPathV4({ note: nparent, wsRoot: DendronWorkspace.wsRoot() });
+    const nppath = NoteUtilsV2.getPathV4({
+      note: nparent,
+      wsRoot: DendronWorkspace.wsRoot(),
+    });
     await VSCodeUtils.openFileInEditor(Uri.file(nppath));
     return;
   }

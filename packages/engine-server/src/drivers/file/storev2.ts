@@ -213,6 +213,7 @@ export class NoteParserV2 extends ParserBaseV2 {
         note: noteProps,
         notesList: _.uniqBy(_.values(notesByFname).concat(parents), "id"),
         createStubs: cleanOpts.createStubs,
+        wsRoot: this.opts.store.wsRoot,
       });
       out = out.concat(stubs);
     }
@@ -676,6 +677,7 @@ export class FileStorageV2 implements DStoreV2 {
         note,
         notesList: _.values(this.notes),
         createStubs: true,
+        wsRoot: this.wsRoot,
       });
     }
     return changed;

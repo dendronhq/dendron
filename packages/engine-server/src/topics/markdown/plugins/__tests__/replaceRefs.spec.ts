@@ -63,7 +63,7 @@ describe("replaceRefs", () => {
             engine,
           });
           const out = proc.processSync("[[alpha#foo]]");
-          expect(_.trim(out.toString())).toEqual("[alpha#foo](alpha#foo)");
+          expect(_.trim(out.toString())).toEqual("[alpha](alpha#foo)");
         },
         {
           createEngine,
@@ -106,7 +106,7 @@ describe("replaceRefs", () => {
             engine,
           });
           const out = proc.processSync("[[alpha#foo]]");
-          expect(_.trim(out.toString())).toEqual("[alpha#foo](alpha-id#foo)");
+          expect(_.trim(out.toString())).toEqual("[alpha](alpha-id#foo)");
         },
         {
           createEngine,

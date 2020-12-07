@@ -77,6 +77,7 @@ Object {
               "href": "#/page/\\"foo",
             },
             "permalink": "\\"foo",
+            "toMdEnhancedPreview": undefined,
           },
           "position": Position {
             "end": Object {

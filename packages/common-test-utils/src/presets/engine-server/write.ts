@@ -379,8 +379,68 @@ const NOTES = {
     }
   ),
 };
+const NOTES_MULTI = {
+  NEW_DOMAIN: new TestPresetEntryV4(async ({ vaults, engine }) => {
+    const vault = vaults[1];
+    const noteNew = NoteUtilsV2.create({
+      id: "bar",
+      fname: "bar",
+      created: "1",
+      updated: "1",
+      vault: vaults[1],
+    });
+    await engine.writeNote(noteNew);
+
+    const resp = await engine.queryNotes({ qs: "bar", vault });
+    const note = resp.data[0];
+
+    return [
+      {
+        actual: note,
+        expected: engine.notes[note.id],
+        msg: "bar should be written in engine",
+      },
+      {
+        actual: DNodeUtilsV2.isRoot(engine.notes[note.parent as string]),
+        expected: true,
+      },
+    ];
+  }),
+  NEW_DOMAIN_WITH_FULL_PATH_VAULT: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      const vault = { ...vaults[1] };
+      vault.fsPath = path.join(wsRoot, vault.fsPath);
+      const noteNew = NoteUtilsV2.create({
+        id: "bar",
+        fname: "bar",
+        created: "1",
+        updated: "1",
+        vault: vaults[1],
+      });
+      await engine.writeNote(noteNew);
+
+      const resp = await engine.queryNotes({ qs: "bar", vault });
+      const note = resp.data[0];
+
+      return [
+        {
+          actual: note,
+          expected: engine.notes[note.id],
+          msg: "bar should be written in engine",
+        },
+        {
+          actual: DNodeUtilsV2.isRoot(engine.notes[note.parent as string]),
+          expected: true,
+        },
+      ];
+    }
+  ),
+};
 
 export const ENGINE_WRITE_PRESETS = {
   NOTES,
   SCHEMAS,
+};
+export const ENGINE_WRITE_PRESETS_MULTI = {
+  NOTES: NOTES_MULTI,
 };

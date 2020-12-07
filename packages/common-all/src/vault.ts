@@ -8,7 +8,17 @@ export class VaultUtils {
     return vault.name || path.basename(vault.fsPath);
   }
 
-  static isEqual(vaultSrc: DVault, vaultCmp: DVault, wsRoot: string) {
+  static isEqual(
+    vaultSrc: DVault | string,
+    vaultCmp: DVault | string,
+    wsRoot: string
+  ) {
+    if (_.isString(vaultSrc)) {
+      vaultSrc = { fsPath: vaultSrc };
+    }
+    if (_.isString(vaultCmp)) {
+      vaultCmp = { fsPath: vaultCmp };
+    }
     return (
       this.normVaultPath({ vault: vaultSrc, wsRoot }) ===
       this.normVaultPath({ vault: vaultCmp, wsRoot })

@@ -9,7 +9,7 @@ import { VSCodeUtils } from "../../utils";
 import { onWSInit, setupDendronWorkspace } from "../testUtils";
 import { setupBeforeAfter } from "../testUtilsV3";
 
-suite("notes", function () {
+suite("GoUpCommand", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
   let vaultPath: string;

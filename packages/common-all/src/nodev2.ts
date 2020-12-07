@@ -32,6 +32,7 @@ import {
 } from "./typesv2";
 import { getSlugger } from "./utils";
 import { genUUID } from "./uuid";
+import { VaultUtils } from "./vault";
 
 export class DNodeUtilsV2 {
   static addChild(parent: DNodePropsV2, child: DNodePropsV2) {
@@ -155,6 +156,7 @@ export class DNodeUtilsV2 {
     opts: {
       noStubs?: boolean;
       vault: DVault;
+      wsRoot: string;
     }
   ): DNodePropsV2 {
     const { vault } = opts;
@@ -162,14 +164,20 @@ export class DNodeUtilsV2 {
     if (dirname === "") {
       const _node = _.find(
         nodes,
-        (ent) => ent.fname === "root" && ent.vault.fsPath === vault.fsPath
+        (ent) =>
+          ent.fname === "root" &&
+          VaultUtils.isEqual(ent.vault, vault, opts.wsRoot)
       );
       if (_.isUndefined(_node)) {
         throw new DendronError({ msg: `no root found for ${fpath}` });
       }
       return _node;
     }
-    const maybeNode = _.find(nodes, { fname: dirname });
+    const maybeNode = NoteUtilsV2.getNoteByFnameV4({
+      fname: dirname,
+      notes: nodes,
+      vault,
+    });
     if (
       (maybeNode && !opts?.noStubs) ||
       (maybeNode && opts?.noStubs && !maybeNode.stub && !maybeNode.schemaStub)
@@ -328,13 +336,16 @@ export class NoteUtilsV2 {
     note: NotePropsV2;
     notesList: NotePropsV2[];
     createStubs: boolean;
+    wsRoot: string;
   }): NotePropsV2[] {
-    const { note, notesList, createStubs } = opts;
+    const { note, notesList, createStubs, wsRoot } = opts;
     const parentPath = DNodeUtilsV2.dirName(note.fname);
     let parent =
       _.find(
         notesList,
-        (p) => p.fname === parentPath && p.vault.fsPath === note.vault.fsPath
+        (p) =>
+          p.fname === parentPath &&
+          VaultUtils.isEqual(p.vault.fsPath, note.vault.fsPath, wsRoot)
       ) || null;
     const changed: NotePropsV2[] = [];
     if (parent) {
@@ -353,6 +364,7 @@ export class NoteUtilsV2 {
     if (!parent) {
       parent = DNodeUtilsV2.findClosestParent(note.fname, notesList, {
         vault: note.vault,
+        wsRoot,
       }) as NotePropsV2;
       changed.push(parent);
       const stubNodes = NoteUtilsV2.createStubs(parent, note);

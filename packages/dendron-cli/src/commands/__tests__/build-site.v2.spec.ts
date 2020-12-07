@@ -250,7 +250,7 @@ describe("wiki link", () => {
         });
         let fooPath = path.join(notesDir, "alpha.md");
         const { content } = readMD(fooPath);
-        expect(_.trim(content)).toEqual("[foo#one](notes/foo#one)");
+        expect(_.trim(content)).toEqual("[foo](notes/foo#one)");
       },
       {
         preSetupHook: async ({ vaults, wsRoot }) => {

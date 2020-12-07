@@ -5,52 +5,19 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.18.2-alpha.7](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.6...v0.18.2-alpha.7) (2020-12-07)
 
-### Bug Fixes
-
-- issue with local vault command ([fb202e9](https://github.com/dendronhq/dendron/commit/fb202e91e501cfd5506fd73c9a005807954e48d3))
-
-## [0.18.2-alpha.6](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.5...v0.18.2-alpha.6) (2020-12-07)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.18.2-alpha.5](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.4...v0.18.2-alpha.5) (2020-12-07)
-
 ### Enhancements
 
 - support image hover ([8fee313](https://github.com/dendronhq/dendron/commit/8fee313785dfc4ac2564f74911a4b51879be0673))
-
-## [0.18.2-alpha.4](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.3...v0.18.2-alpha.4) (2020-12-06)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.18.2-alpha.3](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.2...v0.18.2-alpha.3) (2020-12-06)
+- add hover for images ([a726f33](https://github.com/dendronhq/dendron/commit/a726f3322bab98ba33a0690f37e34e5d2e822f2a))
+- better completion ([d9d4598](https://github.com/dendronhq/dendron/commit/d9d4598c1996fdb5eb24e4bda0e51e777b476f6e))
 
 ### Bug Fixes
 
 - doctor errors when backfilling +100 notes ([862e917](https://github.com/dendronhq/dendron/commit/862e9173e92a2e5d964273bb87c19e79177a6200))
-
-## [0.18.2-alpha.2](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.1...v0.18.2-alpha.2) (2020-12-05)
-
-### Bug Fixes
-
 - errors with doctor ([35f10c1](https://github.com/dendronhq/dendron/commit/35f10c10b2271dd3f8f86c2cdc47ba1b8fc92e21))
-
-## [0.18.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.0...v0.18.2-alpha.1) (2020-12-05)
-
-### Bug Fixes
-
 - issue with ref parsing ([b2dbdfc](https://github.com/dendronhq/dendron/commit/b2dbdfc9e49aa1fa74d5097500eeaddf05bf7ccc))
-
-## [0.18.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.18.1...v0.18.2-alpha.0) (2020-12-04)
-
-### Bug Fixes
-
 - completion only fire for wiki links ([f49972e](https://github.com/dendronhq/dendron/commit/f49972ee436f9f637bd68729e702ba2169e68faf))
-
-### Enhancements
-
-- add hover for images ([a726f33](https://github.com/dendronhq/dendron/commit/a726f3322bab98ba33a0690f37e34e5d2e822f2a))
-- better completion ([d9d4598](https://github.com/dendronhq/dendron/commit/d9d4598c1996fdb5eb24e4bda0e51e777b476f6e))
+- issue with local vault command ([fb202e9](https://github.com/dendronhq/dendron/commit/fb202e91e501cfd5506fd73c9a005807954e48d3))
 
 ## [0.18.1](https://github.com/dendronhq/dendron/compare/v0.18.1-alpha.4...v0.18.1) (2020-12-04)
 

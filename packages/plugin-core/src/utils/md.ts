@@ -28,6 +28,8 @@ export type FoundRefT = {
 
 const markdownExtRegex = /\.md$/i;
 export const refPattern = "(\\[\\[)([^\\[\\]]+?)(\\]\\])";
+export const mdImageLinkPattern =
+  "(\\[)([^\\[\\]]+?)(\\]\\()([^\\[\\]]+?)(\\))";
 const partialRefPattern = "(\\[\\[)([^\\[\\]]+)";
 export const REGEX_FENCED_CODE_BLOCK = /^( {0,3}|\t)```[^`\r\n]*$[\w\W]+?^( {0,3}|\t)``` *$/gm;
 export { sortPaths };
@@ -188,6 +190,23 @@ export const getReferenceAtPosition = (
   const re = partial ? partialRefPattern : refPattern;
   const range = document.getWordRangeAtPosition(position, new RegExp(re));
 
+  const rangeForImage = document.getWordRangeAtPosition(
+    position,
+    new RegExp(mdImageLinkPattern)
+  );
+
+  // check if image
+  if (rangeForImage) {
+    const docText = document.getText(range);
+    const maybeImage = _.trim(docText.match("\\((.*)\\)")![0], "()");
+    if (containsImageExt(maybeImage)) {
+      return {
+        ref: maybeImage,
+        label: "",
+        range: rangeForImage,
+      };
+    }
+  }
   if (!range) {
     return null;
   }

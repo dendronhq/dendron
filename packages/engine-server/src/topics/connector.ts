@@ -1,4 +1,5 @@
 import {
+  DendronConfig,
   DendronError,
   DEngineClientV2,
   DVault,
@@ -7,6 +8,7 @@ import {
 import { createFileWatcher } from "@dendronhq/common-server";
 import fs, { FSWatcher } from "fs-extra";
 import _ from "lodash";
+import { DConfig } from "../config";
 import { DendronEngineClient } from "../engineClient";
 import {
   getPortFilePath,
@@ -18,16 +20,18 @@ import {
 export type EngineConnectorInitOpts = {
   onReady: ({}: { ws: EngineConnector }) => Promise<void>;
   numRetries?: number;
+  portOverride?: number;
 };
 
 export class EngineConnector {
   public wsRoot: string;
-  public vaults: DVault[];
+  //public vaults: DVault[];
   public _engine: DEngineClientV2 | undefined;
   public port: number | undefined;
   public onReady?: ({ ws }: { ws: EngineConnector }) => Promise<void>;
   public serverPortWatcher?: FSWatcher;
   public initialized: boolean;
+  public config: DendronConfig;
 
   static _ENGINE_CONNECTOR: EngineConnector | undefined;
 
@@ -38,17 +42,25 @@ export class EngineConnector {
     return this._ENGINE_CONNECTOR;
   }
 
-  constructor({ wsRoot, vaults }: { wsRoot: string; vaults: DVault[] }) {
+  constructor({ wsRoot }: { wsRoot: string }) {
     this.wsRoot = wsRoot;
-    this.vaults = vaults;
+    this.config = DConfig.getOrCreate(wsRoot);
     EngineConnector._ENGINE_CONNECTOR = this;
     this.initialized = false;
+  }
+
+  get vaults(): DVault[] {
+    return this.config.vaults.map((ent) => ({ fsPath: ent.fsPath }));
   }
 
   async init(opts?: EngineConnectorInitOpts) {
     // init engine
     this.onReady = opts?.onReady;
-    return this.createServerWatcher({ numRetries: opts?.numRetries });
+    if (opts?.portOverride) {
+      await this.initEngine({ port: opts.portOverride });
+    } else {
+      return this.createServerWatcher({ numRetries: opts?.numRetries });
+    }
   }
 
   async initEngine({ port }: { port: number }) {

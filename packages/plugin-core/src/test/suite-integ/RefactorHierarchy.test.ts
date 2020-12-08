@@ -1,5 +1,5 @@
 import { vault2Path } from "@dendronhq/common-server";
-import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { FileTestUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -8,9 +8,10 @@ import _ from "lodash";
 import * as vscode from "vscode";
 import { RefactorHierarchyCommandV2 } from "../../commands/RefactorHierarchyV2";
 import { VSCodeUtils } from "../../utils";
+import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
-suite("notes", function () {
+suite("RefactorHiearchy", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this, {
     beforeHook: () => {},
@@ -21,12 +22,6 @@ suite("notes", function () {
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {
         const vault = vaults[0];
-        await NoteTestUtilsV4.createNote({
-          vault,
-          wsRoot,
-          fname: "refactor",
-          body: ["- [[refactor.one]]", "- [[refactor.two]]"].join("\n"),
-        });
         await NoteTestUtilsV4.createNote({
           vault,
           wsRoot,
@@ -71,6 +66,72 @@ suite("notes", function () {
         const out2 = _.intersection(notes, notExist);
         assert.strictEqual(out.length, 3);
         assert.strictEqual(out2.length, 0);
+        done();
+      },
+    });
+  });
+
+  test("multi", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        const vault1 = vaults[0];
+        const vault2 = vaults[1];
+        await NoteTestUtilsV4.createNote({
+          vault: vault2,
+          wsRoot,
+          fname: "refactor",
+          body: ["- [[refactor.one]]", "- [[refactor.two]]"].join("\n"),
+        });
+        await NoteTestUtilsV4.createNote({
+          vault: vault1,
+          wsRoot,
+          fname: "refactor.one",
+          body: ["- [[refactor.two]]"].join("\n"),
+        });
+        await NoteTestUtilsV4.createNote({
+          vault: vault1,
+          wsRoot,
+          fname: "refactor.two",
+          body: [""].join("\n"),
+        });
+      },
+      onInit: async ({ vaults, wsRoot }) => {
+        let acc = 0;
+        VSCodeUtils.showInputBox = async () => {
+          if (acc == 0) {
+            acc += 1;
+            return "refactor";
+          } else {
+            return "bond";
+          }
+        };
+        // @ts-ignore
+        VSCodeUtils.showQuickPick = async () => {
+          return "proceed";
+        };
+        const resp = await new RefactorHierarchyCommandV2().run();
+
+        expect(resp.changed.length).toEqual(6);
+
+        const vault1 = vaults[0];
+        const vault2 = vaults[1];
+        expect(
+          await FileTestUtils.assertInVault({
+            vault: vault1,
+            wsRoot,
+            match: ["bond.one.md", "bond.two.md"],
+            nomatch: ["bond.md"],
+          })
+        ).toBeTruthy();
+        expect(
+          await FileTestUtils.assertInVault({
+            vault: vault2,
+            wsRoot,
+            nomatch: ["bond.one.md", "bond.two.md"],
+            match: ["bond.md"],
+          })
+        ).toBeTruthy();
         done();
       },
     });

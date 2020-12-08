@@ -1,4 +1,5 @@
 import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
@@ -109,13 +110,14 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     const ws = DendronWorkspace.instance();
     const notes = ws.getEngine().notes;
     const re = new RegExp(`(.*)(${match})(.*)`);
-    const candidates = _.map(notes, (n) => {
+    const candidates = _.filter(notes, (n) => {
       if (n.stub) {
         return false;
       }
-      return re.exec(n.fname);
-    }).filter(Boolean);
-    const operations = candidates.map((matchObj) => {
+      return !_.isNull(re.exec(n.fname));
+    });
+    const operations = candidates.map((note) => {
+      const matchObj = re.exec(note.fname);
       // @ts-ignore
       let [
         src,
@@ -130,7 +132,10 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
         .filter((ent) => !_.isEmpty(ent))
         .join("");
 
-      const rootUri = ws.rootWorkspace.uri;
+      const wsRoot = DendronWorkspace.wsRoot();
+      const vault = note.vault;
+      const vpath = vault2Path({ wsRoot, vault });
+      const rootUri = Uri.file(vpath);
       const oldUri = Uri.joinPath(rootUri, src + ".md");
       const newUri = Uri.joinPath(rootUri, dst + ".md");
       return { oldUri, newUri };

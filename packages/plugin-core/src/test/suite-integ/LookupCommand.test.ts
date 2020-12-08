@@ -628,7 +628,7 @@ suite("Lookup, notesv2", function () {
         onInit: async ({ vaults }) => {
           const { lp, lc } = await lookupHelper("note");
           const picker = createMockQuickPick({
-            value: "journal.2020.08.10",
+            value: "daily.journal.2020.08.10",
             selectedItems: [createNoActiveItem(vaults[0])],
           });
           await lp.onUpdatePickerItem(

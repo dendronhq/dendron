@@ -1,8 +1,6 @@
 import { NoteUtilsV2 } from "@dendronhq/common-all";
 import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
-// // You can import and use all API from the 'vscode' module
-// // as well as import your extension to test it
 import * as vscode from "vscode";
 import { LookupCommand } from "../../commands/LookupCommand";
 import { VSCodeUtils } from "../../utils";

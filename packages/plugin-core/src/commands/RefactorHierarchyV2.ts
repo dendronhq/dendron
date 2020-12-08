@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { DVault, NoteUtilsV2 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -22,6 +22,7 @@ type CommandOpts = {
 type CommandOutput = any;
 
 type RenameOperation = {
+  vault: DVault;
   oldUri: Uri;
   newUri: Uri;
 };
@@ -58,26 +59,35 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
   }
 
   async showPreview(operations: RenameOperation[]) {
-    const content = [
+    let content = [
       "# Refactor Preview",
       "",
-      "### The following files will be renamed",
-    ]
-      .concat(
-        operations.map(({ oldUri, newUri }) => {
-          return `- ${path.basename(oldUri.fsPath)} --> ${path.basename(
-            newUri.fsPath
-          )}`;
-        })
+      "## The following files will be renamed",
+    ];
+    content = content.concat(
+      _.map(
+        _.groupBy(operations, "vault.fsPath"),
+        (ops: RenameOperation[], k: string) => {
+          const out = [`${k}`];
+          return out
+            .concat(
+              ops.map(({ oldUri, newUri }) => {
+                return `- ${path.basename(oldUri.fsPath)} --> ${path.basename(
+                  newUri.fsPath
+                )}`;
+              })
+            )
+            .join("\n");
+        }
       )
-      .join("\n");
+    );
     const panel = window.createWebviewPanel(
       "refactorPreview", // Identifies the type of the webview. Used internally
       "Refactor Preview", // Title of the panel displayed to the user
       ViewColumn.One, // Editor column to show the new webview panel in.
       {} // Webview options. More on these later.
     );
-    panel.webview.html = md.render(content);
+    panel.webview.html = md.render(content.join("\n"));
   }
 
   async showError(operations: RenameOperation[]) {
@@ -138,7 +148,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       const rootUri = Uri.file(vpath);
       const oldUri = Uri.joinPath(rootUri, src + ".md");
       const newUri = Uri.joinPath(rootUri, dst + ".md");
-      return { oldUri, newUri };
+      return { oldUri, newUri, vault: note.vault };
     });
     // NOTE: async version doesn't work, not sure why
     const filesThatExist: RenameOperation[] = _.filter(operations, (op) => {

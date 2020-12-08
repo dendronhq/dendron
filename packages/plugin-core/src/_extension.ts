@@ -1,4 +1,4 @@
-import { getStage, Time } from "@dendronhq/common-all";
+import { DendronError, getStage, Time } from "@dendronhq/common-all";
 import { readJSONWithComments } from "@dendronhq/common-server";
 import {
   getWSMetaFilePath,
@@ -113,7 +113,10 @@ async function postReloadWorkspace() {
           newVersion
         );
       } catch (err) {
-        Logger.error({ msg: "error upgrading", err: JSON.stringify(err) });
+        Logger.error({
+          msg: "error upgrading",
+          err: new DendronError({ msg: JSON.stringify(err) }),
+        });
         return;
       }
       HistoryService.instance().add({

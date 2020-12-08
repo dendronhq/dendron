@@ -1,4 +1,4 @@
-import { getStage, setEnv } from "@dendronhq/common-all";
+import { DendronError, getStage, setEnv } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -8,6 +8,12 @@ import { CONFIG, DENDRON_CHANNEL_NAME } from "./constants";
 
 export type TraceLevel = "debug" | "info" | "warn" | "error" | "fatal";
 const levels = ["debug", "info", "warn", "error", "fatal"];
+export type LogPayload = Partial<{
+  ctx: string;
+  err: DendronError;
+  msg: string;
+  friendly: string;
+}>;
 
 export const UNKNOWN_ERROR_MSG = `You found a bug! We didn't think this could happen but you proved us wrong. Please file the bug here -->  https://github.com/dendronhq/dendron/issues/new?assignees=&labels=&template=bug_report.md&title= We will put our best bug exterminators on this right away!`;
 
@@ -72,7 +78,7 @@ export class Logger {
   //     }[lvl];
   // }
 
-  static error(msg: any) {
+  static error(msg: LogPayload) {
     Logger.log(msg, "error");
   }
 
@@ -84,7 +90,11 @@ export class Logger {
     Logger.log(msg, "debug");
   }
 
-  static log = (msg: any, lvl: TraceLevel, _opts?: { show?: boolean }) => {
+  static log = (
+    msg: LogPayload,
+    lvl: TraceLevel,
+    _opts?: { show?: boolean }
+  ) => {
     if (Logger.cmpLevel(lvl)) {
       let stringMsg = customStringify(msg);
       Logger.logger && Logger.logger[lvl](msg);
@@ -98,7 +108,7 @@ export class Logger {
             cleanMsg = msg.friendly;
           }
           if (!_.isUndefined(msg?.err?.friendly)) {
-            cleanMsg = msg.err.friendly;
+            cleanMsg = msg.err!.friendly;
           }
           window.showErrorMessage(cleanMsg);
         } else if (Logger.cmpLevels(lvl, "info")) {

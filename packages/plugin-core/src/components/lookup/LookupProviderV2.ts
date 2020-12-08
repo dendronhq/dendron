@@ -146,6 +146,10 @@ export class LookupProviderV2 {
     const resp = await engine.writeNote(nodeNew, {
       newNode: true,
     });
+    if (resp.error) {
+      Logger.error({ err: resp.error });
+      throw Error();
+    }
     Logger.info({ ctx, msg: "engine.write", profile });
     return { uri, node: nodeNew, resp };
   }

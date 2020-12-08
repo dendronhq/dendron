@@ -519,7 +519,7 @@ export class DendronWorkspace {
       this.L.error({
         ctx,
         msg: "no folders set for workspace",
-        action: "Please set folder",
+        friendly: "Please set folder",
       });
       throw Error("no folders set for workspace");
     }

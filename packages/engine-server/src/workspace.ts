@@ -65,7 +65,16 @@ export class WorkspaceService {
     return DConfig.writeConfig({ wsRoot, config });
   }
 
-  async createVault({ vault }: { vault: DVault }) {
+  /**
+   * Create vault files if it does not exist
+   */
+  async createVault({
+    vault,
+    noAddToConfig,
+  }: {
+    vault: DVault;
+    noAddToConfig?: boolean;
+  }) {
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
     fs.ensureDirSync(vpath);
 
@@ -90,12 +99,11 @@ export class WorkspaceService {
       await schemaModuleOpts2File(schema, vpath, "root");
     }
 
-    // const wsRoot = this.wsRoot;
-    //const { vault: nvault } = createNormVault({ vault, wsRoot });
-    // update config
-    const config = this.config;
-    config.vaults.push(vault);
-    await this.setConfig(config);
+    if (!noAddToConfig) {
+      const config = this.config;
+      config.vaults.push(vault);
+      await this.setConfig(config);
+    }
     return;
   }
 

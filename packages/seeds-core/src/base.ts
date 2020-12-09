@@ -1,7 +1,7 @@
 import {
   createLogger,
   DEngineClientV2,
-  NotePropsV2,
+  NotePropsV2
 } from "@dendronhq/common-all";
 import { DendronEngineV2, Git } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -47,6 +47,10 @@ type DendronSoilOpts = {
   roots: string[];
 };
 
+type PlantOpts = {
+  json?: boolean
+}
+
 export abstract class DendronSoil {
   public opts: DendronSoilOpts;
   public L: any;
@@ -55,6 +59,17 @@ export abstract class DendronSoil {
   buildDirPath(customDir?: string): string {
     const root = this.opts.wsRoot;
     let buildDirComp = [root, "build"];
+    if (customDir) {
+      buildDirComp.push(customDir);
+    }
+    const buildDirPath = path.join(...buildDirComp);
+    fs.ensureDirSync(buildDirPath);
+    return buildDirPath;
+  }
+
+  dataDirPath(customDir?: string): string {
+    const root = this.opts.wsRoot;
+    let buildDirComp = [root, "data"];
     if (customDir) {
       buildDirComp.push(customDir);
     }
@@ -165,7 +180,7 @@ export abstract class DendronSeed<
     );
   }
 
-  async writeNotes(notes: NotePropsV2[]) {
+  async writeNotes(notes: NotePropsV2[], opts?: PlantOpts) {
     const source = this.config().source;
     return Promise.all(
       notes.map(async (n: NotePropsV2) => {
@@ -180,6 +195,8 @@ export abstract class DendronSeed<
         }
         if (!_.find(sources, { url: source.url })) {
           sources.push(source);
+        }
+        if (opts?.json) {
         }
         this.engine.writeNote(n, {
           newNode: true,

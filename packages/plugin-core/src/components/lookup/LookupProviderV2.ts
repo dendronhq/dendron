@@ -464,6 +464,8 @@ export class LookupProviderV2 {
     const ws = DendronWorkspace.instance();
     let profile: number;
     const queryEndsWithDot = queryOrig.endsWith(".");
+    const queryUpToLastDot = queryOrig.lastIndexOf(".") >= 0 ? queryOrig.slice(0, queryOrig.lastIndexOf(".")) : undefined;
+
     const engine = ws.getEngine();
     Logger.info({ ctx, msg: "enter", queryOrig, source });
 
@@ -527,15 +529,15 @@ export class LookupProviderV2 {
       const noUpdatedItems = updatedItems.length === 0;
 
       // add schema suggestions
-      if (opts.flavor === "note" && queryEndsWithDot) {
+      if (opts.flavor === "note" && !_.isUndefined(queryUpToLastDot)) {
         const results = SchemaUtilsV2.matchPath({
-          notePath: _.trimEnd(queryOrig, "."),
+          notePath: queryUpToLastDot,
           schemaModDict: engine.schemas,
         });
         // since namespace matches everything, we don't do queries on that
         if (results && !results.namespace) {
           const { schema, schemaModule } = results;
-          const dirName = DNodeUtilsV2.dirName(queryOrig);
+          const dirName = queryUpToLastDot;
           const candidates = schema.children
             .map((ent) => {
               const mschema = schemaModule.schemas[ent];

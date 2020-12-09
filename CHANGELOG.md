@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.19.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.19.1...v0.19.2-alpha.0) (2020-12-09)
+
+### Bug Fixes
+
+- completion on schema suggestions ([223d6a5](https://github.com/dendronhq/dendron/commit/223d6a501bd9e51331d28e21d77408b7ca3fba50))
+
+### Enhancements
+
+- add aws as a remote preset ([818bc05](https://github.com/dendronhq/dendron/commit/818bc0510e3b3b99057ef7cda8d9c61be2b6ebc6))
+- nicer refactor formatting ([0e7749a](https://github.com/dendronhq/dendron/commit/0e7749a175a0ce80903cde5c9773649779100a9c))
+- preset remote vaults ([c7ba3a4](https://github.com/dendronhq/dendron/commit/c7ba3a4c7e82628676cea4702635acfca7cd91e7))
+- support refactor for multi-vault ([e370811](https://github.com/dendronhq/dendron/commit/e37081174e56662c5cd29c95344c07433b7155e3))
+- upgrade seed interface ([86a3b13](https://github.com/dendronhq/dendron/commit/86a3b131f4dd2dae6269497dae482769d640c7db))
+
 ## [0.19.1](https://github.com/dendronhq/dendron/compare/v0.19.0...v0.19.1) (2020-12-07)
 
 **Note:** Version bump only for package root

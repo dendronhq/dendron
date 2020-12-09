@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.19.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.19.1...v0.19.2-alpha.0) (2020-12-09)
+
+### Enhancements
+
+- upgrade seed interface ([86a3b13](https://github.com/dendronhq/dendron/commit/86a3b131f4dd2dae6269497dae482769d640c7db))
+
 # [0.19.0](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.8...v0.19.0) (2020-12-07)
 
 **Note:** Version bump only for package @dendronhq/seeds-core

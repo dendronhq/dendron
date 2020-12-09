@@ -193,7 +193,7 @@ export class PickerUtilsV2 {
     }
   }
 
-  static isInputEmpty(value?: string): boolean {
+  static isInputEmpty(value?: any): boolean {
     return _.some([_.isEmpty, _.isUndefined], (ent) => ent(value));
   }
 

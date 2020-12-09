@@ -100,6 +100,8 @@ export class VSCodeUtils {
     return vscode.commands.executeCommand("workbench.action.closeAllEditors");
   }
 
+  static createQuickPick = vscode.window.createQuickPick;
+
   static extractRangeFromActiveEditor = async (
     documentParam?: vscode.TextDocument,
     rangeParam?: vscode.Range

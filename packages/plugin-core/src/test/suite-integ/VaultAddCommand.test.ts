@@ -67,7 +67,7 @@ suite("VaultAddCommand", function () {
     beforeHook: () => {},
   });
 
-  describe("remote", function () {
+  describe.skip("remote", function () {
     test("basic", (done) => {
       runLegacySingleWorkspaceTest({
         ctx,

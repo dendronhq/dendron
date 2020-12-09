@@ -19,6 +19,12 @@ type ConfigEntry = {
   scope?: CommandEntry;
 };
 
+type Entry = {
+  name: string;
+  description: string;
+  data: any;
+};
+
 type CommandEntry = {
   key: string;
   title: string;
@@ -50,6 +56,16 @@ export const ICONS = {
   SCHEMA: "repo",
 };
 export const DENDRON_WORKSPACE_FILE = "dendron.code-workspace";
+
+export const DENDRON_REMOTE_VAULTS: Entry[] = [
+  {
+    name: "dendron",
+    description: "dendron.so notes",
+    data: "https://github.com/dendronhq/dendron-site-vault.git",
+  },
+  { name: "aws", description: "aws notes", data: "" },
+  { name: "cli", description: "cli notes", data: "" },
+];
 
 export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   // --- Notes

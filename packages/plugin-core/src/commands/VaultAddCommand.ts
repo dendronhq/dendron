@@ -10,9 +10,9 @@ import { WorkspaceService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { commands, window } from "vscode";
+import { commands, QuickPickItem, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
-import { DENDRON_COMMANDS } from "../constants";
+import { DENDRON_COMMANDS, DENDRON_REMOTE_VAULTS } from "../constants";
 import { Logger } from "../logger";
 import { WorkspaceFolderRaw, WorkspaceSettings } from "../types";
 import { VSCodeUtils } from "../utils";
@@ -30,8 +30,24 @@ export type VaultRemoteSource = "local" | "remote";
 
 export { CommandOpts as VaultAddCommandOpts };
 
+type SourceQuickPickEntry = QuickPickItem & { src: string };
 export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   static key = DENDRON_COMMANDS.VAULT_ADD.key;
+
+  generateRemoteEntries = (): SourceQuickPickEntry[] => {
+    return (DENDRON_REMOTE_VAULTS.map(
+      ({ name: label, description, data: src }) => {
+        return { label, description, src };
+      }
+    ) as SourceQuickPickEntry[]).concat([
+      {
+        label: "custom",
+        description: "custom endpoint",
+        alwaysShow: true,
+        src: "",
+      },
+    ]);
+  };
 
   async gatherInputs(): Promise<CommandOpts | undefined> {
     const vaultRemoteSource = await VSCodeUtils.showQuickPick([
@@ -47,12 +63,35 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     }
     sourceType = vaultRemoteSource.label as VaultRemoteSource;
     if (sourceType === "remote") {
-      let out = await VSCodeUtils.showInputBox({
-        prompt: "URL of remote Vault or Workspace",
-        placeHolder: "https://github.com/dendronhq/dendron-site-vault.git",
+      const out = new Promise<CommandOpts | undefined>(async (resolve) => {
+        const qp = VSCodeUtils.createQuickPick<SourceQuickPickEntry>();
+        qp.ignoreFocusOut = true;
+        qp.placeholder = "choose a preset or enter a custom git endpoint";
+        qp.items = this.generateRemoteEntries();
+        qp.onDidAccept(async () => {
+          const value = qp.value;
+          const selected = qp.selectedItems[0];
+          if (selected.label === "custom") {
+            if (PickerUtilsV2.isInputEmpty(value)) {
+              return window.showInformationMessage("please enter an endpoint");
+            }
+            selected.src = qp.value;
+          }
+          sourcePath = selected.src;
+          sourceName = await VSCodeUtils.showInputBox({
+            prompt: "Name of new vault (optional, press enter to skip)",
+          });
+          window.showInformationMessage(JSON.stringify(selected));
+          qp.hide();
+          return resolve({
+            type: sourceType!,
+            name: sourceName,
+            path: sourcePath,
+          });
+        });
+        qp.show();
       });
-      if (PickerUtilsV2.isInputEmpty(out)) return;
-      sourcePath = out!;
+      return out;
     } else {
       let out = await VSCodeUtils.showInputBox({
         prompt: "Path to your new vault (relative to your workspace root)",

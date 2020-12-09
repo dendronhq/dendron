@@ -63,8 +63,8 @@ export const DENDRON_REMOTE_VAULTS: Entry[] = [
     description: "dendron.so notes",
     data: "https://github.com/dendronhq/dendron-site-vault.git",
   },
-  { name: "aws", description: "aws notes", data: "" },
-  { name: "cli", description: "cli notes", data: "" },
+  { name: "aws", description: "aws notes", data: "https://github.com/dendronhq/dendron-aws-vault.git" },
+  //{ name: "cli", description: "cli notes", data: "" },
 ];
 
 export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {

@@ -36,4 +36,8 @@ export class GitUtils {
       return { vaults: [{ fsPath: path.resolve(wsRoot, repoPath) }] };
     }
   }
+
+  static isRepo(src: string) {
+    return fs.existsSync(src) && fs.existsSync(path.join(src, ".git"))
+  }
 }

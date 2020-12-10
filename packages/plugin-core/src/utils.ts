@@ -291,7 +291,6 @@ export class VSCodeUtils {
     if (getStage() !== "test") {
       await vscode.commands.executeCommand("workbench.action.reloadWindow");
     }
-    HistoryService.instance().add({ source: "extension", action: "reload" });
   }
 
   static async gatherFolderPath(opts?: {

@@ -32,6 +32,8 @@ export * from "./utils";
 export * from "./utilsv2";
 import assert from "assert";
 import { TestPresetEntry } from "./utils";
+import sinon from "sinon";
+export { sinon };
 
 type InitVaultFunc = (vaultPath: string) => void;
 export type SetupVaultOpts = {

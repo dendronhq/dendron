@@ -14,6 +14,7 @@ export class GitUtils {
 
   static getVaultsFromRepo(opts: {
     repoPath: string;
+    repoUrl: string;
     wsRoot: string;
   }): { vaults: DVault[] } {
     const { repoPath, wsRoot } = opts;
@@ -33,11 +34,18 @@ export class GitUtils {
         vaults,
       };
     } else {
-      return { vaults: [{ fsPath: path.resolve(wsRoot, repoPath) }] };
+      return {
+        vaults: [
+          {
+            fsPath: path.relative(wsRoot, repoPath),
+            remote: { type: "git", url: opts.repoUrl },
+          },
+        ],
+      };
     }
   }
 
   static isRepo(src: string) {
-    return fs.existsSync(src) && fs.existsSync(path.join(src, ".git"))
+    return fs.existsSync(src) && fs.existsSync(path.join(src, ".git"));
   }
 }

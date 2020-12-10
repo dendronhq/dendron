@@ -25,12 +25,24 @@ import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import { sinon } from "@dendronhq/common-test-utils";
 
 const stubVaultInput = (opts: {
+  cmd?: VaultAddCommand;
   sourceType: VaultRemoteSource;
   sourcePath: string;
   sourceName?: string;
 }): void => {
+  if (opts.cmd) {
+    sinon.stub(opts.cmd, "gatherInputs").returns(
+      Promise.resolve({
+        type: opts.sourceType,
+        name: opts.sourceName,
+        path: opts.sourcePath,
+      })
+    );
+  }
+
   let acc = 0;
   // @ts-ignore
   VSCodeUtils.showQuickPick = async () => ({ label: opts.sourceType });
@@ -65,23 +77,35 @@ suite("VaultAddCommand", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this, {
     beforeHook: () => {},
+    afterHook: () => {
+      sinon.restore();
+    },
   });
 
-  describe.skip("remote", function () {
+  describe("remote", function () {
     test("basic", (done) => {
       runLegacySingleWorkspaceTest({
         ctx,
         onInit: async ({ wsRoot, vaults }) => {
           const vault = vaults[0];
+          const cmd = new VaultAddCommand();
+          const remote = "https://github.com/dendronhq/dendron-site-vault.git";
           stubVaultInput({
+            cmd,
             sourceType: "remote",
-            sourcePath: "https://github.com/dendronhq/dendron-site.git",
+            sourcePath: remote,
             sourceName: "dendron",
           });
-          const resp = await new VaultAddCommand().run();
+          const resp = await cmd.run();
           const newVault = resp!.vaults[0];
-          expect(resp!.vaults.map((ent) => ent.fsPath)).toEqual([
-            "repos/dendron-site/vault",
+          expect(resp!.vaults).toEqual([
+            {
+              fsPath: "repos/dendron-site-vault",
+              remote: {
+                type: "git",
+                url: remote,
+              },
+            },
           ]);
           const config = getConfig({ wsRoot });
           expect(config.vaults).toEqual([vault, resp!.vaults[0]]);

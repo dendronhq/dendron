@@ -121,8 +121,8 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const { vaults } = GitUtils.getVaultsFromRepo({
       repoPath,
       wsRoot: DendronWorkspace.wsRoot(),
+      repoUrl: opts.path,
     });
-    console.log(vaults);
     await _.reduce<DVault, Promise<void>>(
       vaults,
       async (resp, vault: DVault) => {

@@ -59,8 +59,10 @@
   "dependencies": {
     "@dendronhq/common-all": "^0.19.2-alpha.0",
     "@dendronhq/common-server": "^0.19.2-alpha.0",
+    "@types/sinon": "^9.0.9",
     "fs-extra": "^9.0.1",
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.20",
+    "sinon": "^9.2.1"
   },
   "gitHead": "846f7aefa034a7d56a8302b682210164be109988"
 }

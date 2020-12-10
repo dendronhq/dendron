@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.19.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.19.2-alpha.0...v0.19.2-alpha.1) (2020-12-10)
+
+### Enhancements
+
+- initialize remote vaults on startup ([1919fe4](https://github.com/dendronhq/dendron/commit/1919fe4e6d853d1f6ef63564ebbcc9af1e11a41a))
+
 ## [0.19.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.19.1...v0.19.2-alpha.0) (2020-12-09)
 
 **Note:** Version bump only for package @dendronhq/common-all

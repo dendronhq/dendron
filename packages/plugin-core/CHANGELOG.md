@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.19.2-alpha.2](https://github.com/dendronhq/dendron/compare/v0.19.2-alpha.1...v0.19.2-alpha.2) (2020-12-10)
+
+### Enhancements
+
+- choose vault when creating new note ([18fbbbf](https://github.com/dendronhq/dendron/commit/18fbbbf2c47e1ba1cafc6f373cb9bc922883e783))
+
 ## [0.19.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.19.2-alpha.0...v0.19.2-alpha.1) (2020-12-10)
 
 ### Enhancements

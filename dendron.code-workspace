@@ -1,81 +1,81 @@
 {
-  "folders": [
-    {
-      "path": "packages/common-all"
-    },
-    {
-      "path": "packages/common-server"
-    },
-    {
-      "path": "packages/plugin-core"
-    },
-    {
-      "path": "packages/dendron-next-server"
-    },
-    {
-      "path": "packages/engine-server"
-    },
-    {
-      "path": "packages/dendron-cli"
-    },
-    {
-      "path": "packages/pods-core"
-    },
-    {
-      "path": "packages/seeds-core"
-    },
-    {
-      "path": "packages/dendron-cli"
-    },
-    {
-      "path": "packages/api-server"
-    },
-    {
-      "path": "packages/express-client"
-    },
-    {
-      "path": "packages/common-test-utils",
-    },
-    {
-      "path": "packages/dendron-next-server",
-    },
-    {
-      "path": "bootstrap"
-    },
-    {
-      "path": "fixtures"
-    },
-    {
-      "path": "docs"
+    "folders": [
+        {
+            "path": "packages/common-all"
+        },
+        {
+            "path": "packages/common-server"
+        },
+        {
+            "path": "packages/plugin-core"
+        },
+        {
+            "path": "packages/dendron-next-server"
+        },
+        {
+            "path": "packages/engine-server"
+        },
+        {
+            "path": "packages/dendron-cli"
+        },
+        {
+            "path": "packages/pods-core"
+        },
+        {
+            "path": "packages/seeds-core"
+        },
+        {
+            "path": "packages/dendron-cli"
+        },
+        {
+            "path": "packages/api-server"
+        },
+        {
+            "path": "packages/express-client"
+        },
+        {
+            "path": "packages/common-test-utils"
+        },
+        {
+            "path": "packages/dendron-next-server"
+        },
+        {
+            "path": "bootstrap"
+        },
+        {
+            "path": "fixtures"
+        },
+        {
+            "path": "docs"
+        }
+    ],
+    "settings": {
+        "files.exclude": {
+            "*.d.ts": true,
+            "packages": true
+        },
+        "editor.formatOnSave": false,
+        "workbench.editor.showTabs": true,
+        "workbench.colorTheme": "Solarized Dark",
+        "workbench.colorCustomizations": {
+            "activityBar.activeBackground": "#3399ff",
+            "activityBar.activeBorder": "#bf0060",
+            "activityBar.background": "#3399ff",
+            "activityBar.foreground": "#15202b",
+            "activityBar.inactiveForeground": "#15202b99",
+            "activityBarBadge.background": "#bf0060",
+            "activityBarBadge.foreground": "#e7e7e7",
+            "statusBar.background": "#007fff",
+            "statusBar.foreground": "#e7e7e7",
+            "statusBarItem.hoverBackground": "#3399ff",
+            "titleBar.activeBackground": "#007fff",
+            "titleBar.activeForeground": "#e7e7e7",
+            "titleBar.inactiveBackground": "#007fff99",
+            "titleBar.inactiveForeground": "#e7e7e799"
+        },
+        "peacock.color": "#007fff",
+        "vim.statusBarColorControl": false,
+        "editor.snippetSuggestions": "none",
+        "debug.node.autoAttach": "on"
     }
-  ],
-  "settings": {
-    "files.exclude": {
-      "*.d.ts": true,
-      "packages": true
-    },
-    "editor.formatOnSave": false,
-    "workbench.editor.showTabs": true,
-    "workbench.colorTheme": "Solarized Dark",
-    "workbench.colorCustomizations": {
-      "activityBar.activeBackground": "#3399ff",
-      "activityBar.activeBorder": "#bf0060",
-      "activityBar.background": "#3399ff",
-      "activityBar.foreground": "#15202b",
-      "activityBar.inactiveForeground": "#15202b99",
-      "activityBarBadge.background": "#bf0060",
-      "activityBarBadge.foreground": "#e7e7e7",
-      "statusBar.background": "#007fff",
-      "statusBar.foreground": "#e7e7e7",
-      "statusBarItem.hoverBackground": "#3399ff",
-      "titleBar.activeBackground": "#007fff",
-      "titleBar.activeForeground": "#e7e7e7",
-      "titleBar.inactiveBackground": "#007fff99",
-      "titleBar.inactiveForeground": "#e7e7e799"
-    },
-    "peacock.color": "#007fff",
-    "vim.statusBarColorControl": false,
-    "editor.snippetSuggestions": "none",
-    "debug.node.autoAttach": "on"
-  }
 }

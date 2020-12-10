@@ -72,7 +72,6 @@ export abstract class DendronSeed<TConfig extends SeedConfig = SeedConfig> {
     return out;
   }
 
-
   async fetch(config: TConfig): Promise<string> {
     let resp;
     switch (config.type) {
@@ -132,7 +131,9 @@ export abstract class DendronSeed<TConfig extends SeedConfig = SeedConfig> {
     let { notes } = await this.prepare({ root: repoPath });
     notes = await this.enrichNotes(notes, opts);
     if (opts?.jsonOnly) {
-      fs.writeJSONSync(path.join(this.seedBuildPath, "notes.json"), notes, {spaces: 4});
+      fs.writeJSONSync(path.join(this.seedBuildPath, "notes.json"), notes, {
+        spaces: 4,
+      });
     }
   }
 }

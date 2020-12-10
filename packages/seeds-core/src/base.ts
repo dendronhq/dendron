@@ -1,7 +1,7 @@
 import {
   createLogger,
   DEngineClientV2,
-  NotePropsV2
+  NotePropsV2,
 } from "@dendronhq/common-all";
 import { DendronEngineV2, Git } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -48,8 +48,8 @@ type DendronSoilOpts = {
 };
 
 type PlantOpts = {
-  json?: boolean
-}
+  json?: boolean;
+};
 
 export abstract class DendronSoil {
   public opts: DendronSoilOpts;

@@ -3,6 +3,7 @@ import {
   DEngineClientV2,
   DNodeUtilsV2,
   DVault,
+  getStage,
   NotePropsV2,
   NoteUtilsV2,
   SchemaModulePropsV2,
@@ -13,7 +14,7 @@ import {
   tmpDir,
   vault2Path,
 } from "@dendronhq/common-server";
-import { getPortFilePath } from "@dendronhq/engine-server";
+import { getPortFilePath, HistoryService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
@@ -284,6 +285,13 @@ export class VSCodeUtils {
       "vscode.openFolder",
       vscode.Uri.file(wsFile)
     );
+  }
+
+  static async reloadWindow() {
+    if (getStage() !== "test") {
+      await vscode.commands.executeCommand("workbench.action.reloadWindow");
+    }
+    HistoryService.instance().add({ source: "extension", action: "reload" });
   }
 
   static async gatherFolderPath(opts?: {

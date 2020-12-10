@@ -24,7 +24,11 @@ import { WorkspaceSettings } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
-import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import {
+  getConfig,
+  runLegacySingleWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 import { sinon } from "@dendronhq/common-test-utils";
 
 const stubVaultInput = (opts: {
@@ -59,12 +63,6 @@ const stubVaultInput = (opts: {
     }
   };
   return;
-};
-
-const getConfig = (opts: { wsRoot: string }) => {
-  const configPath = DConfig.configPath(opts.wsRoot);
-  const config = readYAML(configPath) as DendronConfig;
-  return config;
 };
 
 const getWorkspaceFolders = () => {

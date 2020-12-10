@@ -1,14 +1,17 @@
 import {
   DendronConfig,
+  DendronError,
   DUtils,
   DVault,
   NoteUtilsV2,
   SchemaUtilsV2,
+  WorkspaceUtilsCommon,
 } from "@dendronhq/common-all";
 import {
   note2File,
   resolvePath,
   schemaModuleOpts2File,
+  simpleGit,
   vault2Path,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -180,5 +183,19 @@ export class WorkspaceService {
       })
     );
     return ws;
+  }
+
+  async cloneVault(opts: { vault: DVault }) {
+    const { vault } = opts;
+    const wsRoot = this.wsRoot;
+    if (!vault.remote || vault.remote.type !== "git") {
+      throw new DendronError({ msg: "cloning non-git vault" });
+    }
+    const repoPath = WorkspaceUtilsCommon.getPathForVault({ wsRoot, vault });
+    const repoDir = WorkspaceUtilsCommon.getRepoDir(wsRoot);
+    fs.ensureDirSync(repoDir);
+    const git = simpleGit({ baseDir: repoDir });
+    await git.clone(vault.remote.url);
+    return repoPath;
   }
 }

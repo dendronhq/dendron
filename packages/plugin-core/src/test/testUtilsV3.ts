@@ -1,5 +1,14 @@
-import { DEngineClientV2, WorkspaceOpts } from "@dendronhq/common-all";
-import { assignJSONWithComment, tmpDir } from "@dendronhq/common-server";
+import {
+  DendronConfig,
+  DEngineClientV2,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
+import {
+  assignJSONWithComment,
+  readYAML,
+  tmpDir,
+  writeYAML,
+} from "@dendronhq/common-server";
 import {
   CreateEngineFunction,
   EngineOpt,
@@ -35,6 +44,16 @@ import {
   stubWorkspaceFolders,
 } from "./testUtilsv2";
 
+export const DENDRON_REMOTE =
+  "https://github.com/dendronhq/dendron-site-vault.git";
+export const DENDRON_REMOTE_VAULT = {
+  fsPath: "repos/dendron-site-vault",
+  remote: {
+    type: "git" as const,
+    url: DENDRON_REMOTE,
+  },
+};
+
 type OnInitHook = (opts: WorkspaceOpts & EngineOpt) => Promise<void>;
 
 type PostSetupWorkspaceHook = (opts: WorkspaceOpts) => Promise<void>;
@@ -56,6 +75,20 @@ export type SetupLegacyWorkspaceMultiOpts = SetupCodeConfigurationV2 & {
   postSetupHook?: PostSetupWorkspaceHook;
   setupWsOverride?: Partial<SetupWorkspaceOpts>;
   wsSettingsOverride?: Partial<WorkspaceSettings>;
+};
+
+export const getConfig = (opts: { wsRoot: string }) => {
+  const configPath = DConfig.configPath(opts.wsRoot);
+  const config = readYAML(configPath) as DendronConfig;
+  return config;
+};
+
+export const writeConfig = (opts: {
+  config: DendronConfig;
+  wsRoot: string;
+}) => {
+  const configPath = DConfig.configPath(opts.wsRoot);
+  return writeYAML(configPath, opts.config);
 };
 
 export async function setupWorkspace() {}

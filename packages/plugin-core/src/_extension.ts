@@ -1,9 +1,15 @@
-import { DendronError, getStage, Time } from "@dendronhq/common-all";
+import {
+  DendronError,
+  getStage,
+  Time,
+  WorkspaceUtilsCommon,
+} from "@dendronhq/common-all";
 import { readJSONWithComments } from "@dendronhq/common-server";
 import {
   getWSMetaFilePath,
   HistoryEvent,
   HistoryService,
+  WorkspaceService,
   writeWSMetaFile,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -200,6 +206,31 @@ export async function _activate(context: vscode.ExtensionContext) {
   if (DendronWorkspace.isActive()) {
     const config = ws.config;
     const wsRoot = DendronWorkspace.wsRoot() as string;
+
+    // check for remotes
+    const emptyRemoteVaults = config.vaults.filter(
+      (vault) =>
+        !_.isUndefined(vault.remote) &&
+        !fs.existsSync(WorkspaceUtilsCommon.getPathForVault({ vault, wsRoot }))
+    );
+    if (!_.isEmpty(emptyRemoteVaults)) {
+      vscode.window.showInformationMessage(
+        `the following remote vaults have not been initialized: ${emptyRemoteVaults
+          .map((ent) => ent.remote!.url)
+          .join(", ")}. Initializing now`
+      );
+      const wsService = new WorkspaceService({ wsRoot });
+      await Promise.all(
+        emptyRemoteVaults.map(async (vault) => {
+          return wsService.cloneVault({ vault });
+        })
+      );
+      vscode.window.showInformationMessage(
+        "finish initializing remote vaults. reloading workspace"
+      );
+      setTimeout(VSCodeUtils.reloadWindow, 200);
+      return;
+    }
 
     // migrate legacy config files
     const configMigrated = migrateConfig({ config, wsRoot });

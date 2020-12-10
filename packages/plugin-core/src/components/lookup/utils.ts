@@ -198,7 +198,7 @@ export class PickerUtilsV2 {
   }
 
   static promptVault(): Promise<DVault | undefined> {
-    const items = DendronWorkspace.instance().vaultsv4.map((ent) => ({
+    const items = DendronWorkspace.instance().vaults.map((ent) => ({
       ...ent,
       label: ent.fsPath,
     }));

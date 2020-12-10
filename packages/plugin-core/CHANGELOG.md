@@ -29,14 +29,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 - nicer refactor formatting ([0e7749a](https://github.com/dendronhq/dendron/commit/0e7749a175a0ce80903cde5c9773649779100a9c))
 - preset remote vaults ([c7ba3a4](https://github.com/dendronhq/dendron/commit/c7ba3a4c7e82628676cea4702635acfca7cd91e7))
 - support refactor for multi-vault ([e370811](https://github.com/dendronhq/dendron/commit/e37081174e56662c5cd29c95344c07433b7155e3))
+- upgrade seed interface ([86a3b13](https://github.com/dendronhq/dendron/commit/86a3b131f4dd2dae6269497dae482769d640c7db))
 
 ## [0.19.1](https://github.com/dendronhq/dendron/compare/v0.19.0...v0.19.1) (2020-12-07)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 # [0.19.0](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.8...v0.19.0) (2020-12-07)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.18.2-alpha.8](https://github.com/dendronhq/dendron/compare/v0.18.2-alpha.7...v0.18.2-alpha.8) (2020-12-07)
 

@@ -119,9 +119,8 @@ export class LookupProviderV2 {
         engine,
       });
     }
-    const uri = node2Uri(nodeNew);
 
-    Logger.info({ ctx, msg: "pre:checkNoteExist", uri });
+    Logger.info({ ctx, msg: "pre:checkNoteExist" });
     // TODO: check for overwriting schema
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
     const noteExists = NoteUtilsV2.getNoteByFnameV4({
@@ -139,9 +138,16 @@ export class LookupProviderV2 {
       throw Error("action will overwrite existing note");
     }
     if (picker.onCreate) {
-      Logger.info({ ctx, msg: "pre:pickerOnCreate", uri });
+      Logger.info({ ctx, msg: "pre:pickerOnCreate" });
       await picker.onCreate(nodeNew);
     }
+    // NOTE: this needs to be after picker.onCreate since uri can still be modified at that point
+    let uri = NoteUtilsV2.getURI({
+      note: nodeNew,
+      wsRoot: DendronWorkspace.wsRoot(),
+    });
+    // vscode won't open a URI...
+    uri = Uri.file(uri.fsPath);
     Logger.info({ ctx, msg: "pre:engine.write", uri });
     const resp = await engine.writeNote(nodeNew, {
       newNode: true,
@@ -266,21 +272,18 @@ export class LookupProviderV2 {
     } else {
       // item from pressing enter
       if (opts.flavor === "note") {
-        try {
-          const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-          const maybeNote = NoteUtilsV2.getNoteByFnameV4({
-            fname: value,
-            vault,
-            notes: getEngine().notes,
-          });
-          if (maybeNote) {
-            uri = node2Uri(maybeNote);
-            await showDocAndHidePicker([uri], picker);
-            return { uris: [uri], node: undefined };
-          }
-        } catch (err) {
-          window.showErrorMessage("multiple notes found. please select one");
-          return;
+        const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+        const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+          fname: value,
+          vault,
+          notes: getEngine().notes,
+        });
+        if (maybeNote) {
+          uri = node2Uri(maybeNote);
+          await showDocAndHidePicker([uri], picker);
+          return { uris: [uri], node: maybeNote };
+        } else {
+          throw new DendronError({ msg: `note ${value} not found` });
         }
       }
       return;
@@ -464,7 +467,10 @@ export class LookupProviderV2 {
     const ws = DendronWorkspace.instance();
     let profile: number;
     const queryEndsWithDot = queryOrig.endsWith(".");
-    const queryUpToLastDot = queryOrig.lastIndexOf(".") >= 0 ? queryOrig.slice(0, queryOrig.lastIndexOf(".")) : undefined;
+    const queryUpToLastDot =
+      queryOrig.lastIndexOf(".") >= 0
+        ? queryOrig.slice(0, queryOrig.lastIndexOf("."))
+        : undefined;
 
     const engine = ws.getEngine();
     Logger.info({ ctx, msg: "enter", queryOrig, source });

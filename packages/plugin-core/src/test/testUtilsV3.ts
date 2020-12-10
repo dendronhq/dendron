@@ -24,7 +24,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import { afterEach, beforeEach } from "mocha";
-import { ExtensionContext } from "vscode";
+import { ExtensionContext, Uri } from "vscode";
 import {
   InitializeType,
   SetupWorkspaceCommand,
@@ -77,10 +77,27 @@ export type SetupLegacyWorkspaceMultiOpts = SetupCodeConfigurationV2 & {
   wsSettingsOverride?: Partial<WorkspaceSettings>;
 };
 
+export class EditorUtils {
+  static async getURIForActiveEditor(): Promise<Uri> {
+    return VSCodeUtils.getActiveTextEditor()!.document.uri;
+  }
+}
+
 export const getConfig = (opts: { wsRoot: string }) => {
   const configPath = DConfig.configPath(opts.wsRoot);
   const config = readYAML(configPath) as DendronConfig;
   return config;
+};
+
+export const withConfig = (
+  func: (config: DendronConfig) => DendronConfig,
+  opts: { wsRoot: string }
+) => {
+  const config = getConfig(opts);
+
+  const newConfig = func(config);
+  writeConfig({ config: newConfig, wsRoot: opts.wsRoot });
+  return newConfig;
 };
 
 export const writeConfig = (opts: {

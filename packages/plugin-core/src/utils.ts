@@ -14,7 +14,7 @@ import {
   tmpDir,
   vault2Path,
 } from "@dendronhq/common-server";
-import { getPortFilePath, HistoryService } from "@dendronhq/engine-server";
+import { getPortFilePath } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";

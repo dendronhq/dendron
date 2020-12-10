@@ -46,6 +46,7 @@ export type DendronConfig = {
   site: DendronSiteConfig;
   vaults: DVault[];
   betaFeatures?: boolean;
+  lookupConfirmVaultOnCreate?: boolean;
 };
 
 export type HierarchyConfig = {

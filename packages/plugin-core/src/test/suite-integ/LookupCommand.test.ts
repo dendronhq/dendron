@@ -14,6 +14,7 @@ import {
   ENGINE_WRITE_PRESETS,
   NOTE_PRESETS_V4,
   runJestHarnessV2,
+  sinon,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
@@ -28,7 +29,10 @@ import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
-import { createNoActiveItem } from "../../components/lookup/utils";
+import {
+  createNoActiveItem,
+  PickerUtilsV2,
+} from "../../components/lookup/utils";
 import { EngineFlavor, EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
@@ -36,8 +40,10 @@ import { createMockQuickPick, TIMEOUT } from "../testUtils";
 import { expect, getNoteFromTextEditor } from "../testUtilsv2";
 import {
   createEngineFactory,
+  EditorUtils,
   runLegacyMultiWorkspaceTest,
   setupBeforeAfter,
+  withConfig,
 } from "../testUtilsV3";
 
 const createEngineForSchemaUpdateItems = createEngineFactory({
@@ -118,6 +124,15 @@ const lookupHelper = async (flavor: EngineFlavor) => {
   return { lc, lp, picker };
 };
 
+const lookupHelperForNote = async () => {
+  const engOpts: EngineOpts = { flavor: "note" };
+  const lc = new LookupControllerV2(engOpts);
+  const lp = new LookupProviderV2(engOpts);
+  const picker = createMockQuickPick({});
+
+  return { lc, lp, picker };
+};
+
 const schemaAcceptHelper = async (qs: string) => {
   const engOpts: EngineOpts = { flavor: "schema" };
   const ws = DendronWorkspace.instance();
@@ -195,7 +210,7 @@ const createEngineForNoteAcceptNewItem = createEngineFactory({
         lc,
       });
       if (_.isUndefined(resp)) {
-        throw Error("undefined");
+        throw Error("resp is undefined");
       }
       return resp.resp;
     };
@@ -247,7 +262,7 @@ suite("Lookup, schemas", function () {
     );
   });
 
-  describe.skip("onAccept", function () {
+  describe("onAccept", function () {
     _.map(
       _.pick(ENGINE_QUERY_PRESETS["SCHEMAS"], "SIMPLE"),
       (TestCase: TestPresetEntryV4, name) => {
@@ -319,7 +334,11 @@ suite("Lookup, notesv2", function () {
   this.timeout(TIMEOUT);
   const engOpts: EngineOpts = { flavor: "note" };
 
-  ctx = setupBeforeAfter(this, {});
+  ctx = setupBeforeAfter(this, {
+    afterHook: async () => {
+      sinon.restore();
+    },
+  });
 
   describe("updateItems", function () {
     _.forEach(
@@ -495,7 +514,89 @@ suite("Lookup, notesv2", function () {
     });
   });
 
-  describe("onAccept", function () {
+  describe.only("onAccept with modifiers", function () {
+    test("with lookupPrompt on current vault", function (done) {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults }) => {
+          const engOpts: EngineOpts = { flavor: "note" };
+          withConfig(
+            (config) => {
+              config.lookupConfirmVaultOnCreate = true;
+              return config;
+            },
+            { wsRoot }
+          );
+
+          const vault = vaults[0];
+          let { lc, lp, picker } = await lookupHelperForNote();
+          await lc.updatePickerBehavior({ quickPick: picker, provider: lp });
+
+          picker.value = "alpha";
+          sinon.stub(picker, "selectedItems").get(function () {
+            return [createNoActiveItem(vault)];
+          });
+          sinon
+            .stub(PickerUtilsV2, "promptVault")
+            .returns(Promise.resolve(vaults[0]));
+
+          await lp.onDidAccept({
+            picker,
+            opts: engOpts,
+            lc,
+          });
+          expect(
+            (await EditorUtils.getURIForActiveEditor()).fsPath.endsWith(
+              "vault1/alpha.md"
+            )
+          ).toBeTruthy();
+          done();
+        },
+      });
+    });
+    test("with lookupPrompt on other vault", function (done) {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults }) => {
+          const engOpts: EngineOpts = { flavor: "note" };
+          withConfig(
+            (config) => {
+              config.lookupConfirmVaultOnCreate = true;
+              return config;
+            },
+            { wsRoot }
+          );
+
+          const vault = vaults[0];
+          let { lc, lp, picker } = await lookupHelperForNote();
+          await lc.updatePickerBehavior({ quickPick: picker, provider: lp });
+
+          picker.value = "alpha";
+          sinon.stub(picker, "selectedItems").get(function () {
+            return [createNoActiveItem(vault)];
+          });
+          sinon
+            .stub(PickerUtilsV2, "promptVault")
+            .returns(Promise.resolve(vaults[1]));
+
+          await lp.onDidAccept({
+            picker,
+            opts: engOpts,
+            lc,
+          });
+          expect(
+            (await EditorUtils.getURIForActiveEditor()).fsPath.endsWith(
+              "vault2/alpha.md"
+            )
+          ).toBeTruthy();
+          done();
+        },
+      });
+    });
+  });
+
+  // TODO: don't skip
+  describe.skip("onAccept", function () {
     _.map(
       _.pick(ENGINE_WRITE_PRESETS["NOTES"], "NEW_DOMAIN"),
       (TestCase: TestPresetEntryV4, name) => {

@@ -51,11 +51,14 @@ export type ServerConfiguration = {
 /**
  * Check for boolean toggles
  */
-export function when(key: keyof DendronConfig, cb: () => void): void {
+export async function when(
+  key: keyof DendronConfig,
+  cb: () => Promise<void>
+): Promise<void> {
   try {
     const out = DendronWorkspace.instance().config[key];
     if (out === false || _.isUndefined(out) ? false : true) {
-      cb();
+      return cb();
     }
   } catch (err) {}
 }

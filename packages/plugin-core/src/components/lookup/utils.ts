@@ -75,7 +75,7 @@ export async function showDocAndHidePicker(
     uris.map(async (uri) => {
       return window.showTextDocument(uri, { viewColumn }).then(
         () => {
-          Logger.info({ ctx, msg: "showTextDocument" });
+          Logger.info({ ctx, msg: "showTextDocument", fsPath: uri.fsPath });
           picker.hide();
           return;
         },
@@ -195,6 +195,17 @@ export class PickerUtilsV2 {
 
   static isInputEmpty(value?: any): boolean {
     return _.some([_.isEmpty, _.isUndefined], (ent) => ent(value));
+  }
+
+  static promptVault(): Promise<DVault | undefined> {
+    const items = DendronWorkspace.instance().vaultsv4.map((ent) => ({
+      ...ent,
+      label: ent.fsPath,
+    }));
+    const resp = VSCodeUtils.showQuickPick(items) as Promise<
+      DVault | undefined
+    >;
+    return resp;
   }
 
   static resetPaginationOpts(picker: DendronQuickPickerV2) {

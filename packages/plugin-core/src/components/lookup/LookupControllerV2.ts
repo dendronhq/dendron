@@ -18,7 +18,7 @@ import { Logger } from "../../logger";
 import { EngineOpts } from "../../types";
 import { DendronClientUtilsV2, VSCodeUtils } from "../../utils";
 import { getDurationMilliseconds } from "../../utils/system";
-import { DendronWorkspace } from "../../workspace";
+import { DendronWorkspace, when } from "../../workspace";
 import {
   ButtonCategory,
   ButtonType,
@@ -29,7 +29,7 @@ import {
 } from "./buttons";
 import { LookupProviderV2 } from "./LookupProviderV2";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";
-import { UPDATET_SOURCE } from "./utils";
+import { PickerUtilsV2, UPDATET_SOURCE } from "./utils";
 
 export class LookupControllerV2 {
   public quickPick?: DendronQuickPickerV2;
@@ -362,6 +362,15 @@ export class LookupControllerV2 {
 
     // handle selection resp
     quickPick.onCreate = async (note: NotePropsV2) => {
+      await when("lookupConfirmVaultOnCreate", async () => {
+        const maybeVault = await PickerUtilsV2.promptVault();
+        if (_.isUndefined(maybeVault)) {
+          throw new DendronError({ msg: "no vault selected" });
+        }
+        note.vault = maybeVault;
+        return;
+      });
+
       switch (selectionResp?.type) {
         case "selectionExtract": {
           if (!_.isUndefined(document)) {

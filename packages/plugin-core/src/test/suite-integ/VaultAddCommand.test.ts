@@ -25,6 +25,7 @@ import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import {
+  DENDRON_REMOTE,
   getConfig,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
@@ -81,7 +82,7 @@ suite("VaultAddCommand", function () {
   });
 
   describe("remote", function () {
-    test("basic", (done) => {
+    test("basic, no gitignore", (done) => {
       runLegacySingleWorkspaceTest({
         ctx,
         onInit: async ({ wsRoot, vaults }) => {
@@ -112,6 +113,49 @@ suite("VaultAddCommand", function () {
             { path: vault.fsPath },
             { path: newVault.fsPath },
           ]);
+          expect(fs.existsSync(path.join(wsRoot, ".gitignore"))).toBeFalsy();
+          done();
+        },
+      });
+    });
+
+    test("basic, gitignore", (done) => {
+      runLegacySingleWorkspaceTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults }) => {
+          const gitIgnore = path.join(wsRoot, ".gitignore");
+          fs.writeFileSync(gitIgnore, "foo\n");
+          const vault = vaults[0];
+          const cmd = new VaultAddCommand();
+          const remote = DENDRON_REMOTE;
+          stubVaultInput({
+            cmd,
+            sourceType: "remote",
+            sourcePath: remote,
+            sourceName: "dendron",
+          });
+          const resp = await cmd.run();
+          const newVault = resp!.vaults[0];
+          expect(resp!.vaults).toEqual([
+            {
+              fsPath: "repos/dendron-site-vault",
+              remote: {
+                type: "git",
+                url: remote,
+              },
+            },
+          ]);
+          const config = getConfig({ wsRoot });
+          expect(config.vaults).toEqual([vault, resp!.vaults[0]]);
+          const wsFolders = getWorkspaceFolders();
+          expect(wsFolders).toEqual([
+            { path: vault.fsPath },
+            { path: newVault.fsPath },
+          ]);
+          expect(fs.existsSync(gitIgnore)).toBeTruthy();
+          expect(fs.readFileSync(gitIgnore, { encoding: "utf8" })).toEqual(
+            "foo\nrepos/dendron-site-vault\n"
+          );
           done();
         },
       });

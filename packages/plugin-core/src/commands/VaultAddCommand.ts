@@ -151,6 +151,12 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       out = assignJSONWithComment({ folders }, out);
       writeJSONWithComments(wsPath, out);
     }
+
+    // check for .gitignore
+    const gitIgnore = path.join(wsRoot, ".gitignore");
+    if (fs.existsSync(gitIgnore)) {
+      fs.appendFileSync(gitIgnore, vault.fsPath + "\n", { encoding: "utf8" });
+    }
     return;
   }
 

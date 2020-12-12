@@ -1,8 +1,9 @@
-import { NotePropsV2 } from "@dendronhq/common-all";
+import { DNoteRefLink, NotePropsV2 } from "@dendronhq/common-all";
 import MDAST from "mdast";
 
 export type DendronASTNode = MDAST.Parent & {
   notes?: NotePropsV2[];
+  children: MDAST.Parent["children"] | DendronASTNode[];
 };
 
 export enum DendronASTTypes {
@@ -31,4 +32,14 @@ export type WikiLinkDataV4 = {
   alias: string;
   anchorHeader?: string;
   prefix?: string;
+};
+
+export type NoteRefNoteV4 = DendronASTNode & {
+  type: DendronASTTypes.REF_LINK;
+  value: string;
+  data: NoteRefDataV4;
+};
+
+export type NoteRefDataV4 = {
+  link: DNoteRefLink;
 };

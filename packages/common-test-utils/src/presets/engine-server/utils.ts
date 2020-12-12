@@ -42,6 +42,30 @@ export const setupBasicMulti: PreSetupHookFunction = async ({
   await SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.create({ vault: vault1, wsRoot });
 };
 
+export const setupNoteRefRecursive: PreSetupHookFunction = async ({
+  vaults,
+  wsRoot,
+}) => {
+  const vault = vaults[0];
+  await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
+    vault,
+    wsRoot,
+    body: "((ref: [[foo.one]]))",
+  });
+  await NoteTestUtilsV4.createNote({
+    vault,
+    fname: "foo.one",
+    body: ["# Foo.One", `((ref: [[foo.two]]))`].join("\n"),
+    wsRoot,
+  });
+  await NoteTestUtilsV4.createNote({
+    vault,
+    fname: "foo.two",
+    body: ["# Foo.Two", `blah`].join("\n"),
+    wsRoot,
+  });
+};
+
 export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
   await setupBasic(opts);
   const { wsRoot, vaults } = opts;
@@ -177,6 +201,7 @@ export const ENGINE_HOOKS = {
   setupBasic,
   setupSchemaPreseet,
   setupSchemaPresetWithNamespaceTemplate,
+  setupNoteRefRecursive,
 };
 
 export const ENGINE_HOOKS_MULTI = {

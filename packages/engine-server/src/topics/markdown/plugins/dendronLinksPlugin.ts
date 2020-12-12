@@ -169,7 +169,6 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
     const visitors = Compiler.prototype.visitors;
     if (visitors) {
       visitors.wikiLink = function (node: Node) {
-        debugger;
         const data = node.data as WikiLinkData;
         if (!node || !node.data || !node.data.alias) {
           throw Error(`no alias found: ${JSON.stringify(node)}`);

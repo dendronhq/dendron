@@ -1,6 +1,9 @@
-import { DendronError, NotePropsV2 } from "@dendronhq/common-all";
+import { DendronError, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Processor } from "unified";
+import { WikiLinkProps } from "../../topics/markdown";
+
+export const ALIAS_DIVIDER = "|";
 
 export function addError(proc: Processor, err: DendronError) {
   const errors = proc.data("errors") as DendronError[];
@@ -30,4 +33,36 @@ export function getNoteOrError(
   }
   note = notes[0];
   return { error, note };
+}
+
+export class LinkUtils {
+  static isAlias(link: string) {
+    return link.indexOf("|") !== -1;
+  }
+
+  static parseAliasLink(link: string) {
+    const [alias, value] = link.split("|").map(_.trim);
+    return { alias, value: NoteUtilsV2.normalizeFname(value) };
+  }
+
+  static parseLink(linkMatch: string) {
+    linkMatch = NoteUtilsV2.normalizeFname(linkMatch);
+    let out: WikiLinkProps = {
+      value: linkMatch,
+      alias: linkMatch,
+    };
+    if (LinkUtils.isAlias(linkMatch)) {
+      out = LinkUtils.parseAliasLink(linkMatch);
+    }
+    if (out.value.indexOf("#") !== -1) {
+      const [value, anchorHeader] = out.value.split("#").map(_.trim);
+      out.value = value;
+      out.anchorHeader = anchorHeader;
+      // if we didn't have an alias, links with a # anchor shouldn't have # portion be in the title
+      if (!LinkUtils.isAlias(linkMatch)) {
+        out.alias = value;
+      }
+    }
+    return out;
+  }
 }

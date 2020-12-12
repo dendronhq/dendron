@@ -1,5 +1,4 @@
-import { DEngineClientV2 } from "@dendronhq/common-all";
-import { WorkspaceOpts } from "@dendronhq/common-all/src";
+import { DEngineClientV2, WorkspaceOpts } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import { NoteTestUtilsV4, runEngineTestV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";

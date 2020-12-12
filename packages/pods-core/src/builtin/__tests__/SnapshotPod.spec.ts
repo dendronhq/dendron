@@ -1,4 +1,4 @@
-import { DEngineClientV2 } from "@dendronhq/common-all/src";
+import { DEngineClientV2 } from "@dendronhq/common-all";
 import {
   EngineTestUtilsV2,
   NodeTestPresetsV2,

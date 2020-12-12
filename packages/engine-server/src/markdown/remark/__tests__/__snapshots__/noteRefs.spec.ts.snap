@@ -1,0 +1,83 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`compilev2 MD_REGULAR "recursive": bond 1`] = `
+VFile {
+  "contents": "# Foo.One
+
+# Foo.Two
+
+blah
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`parse init 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "ref: [[foo",
+            "link": Object {
+              "data": Object {
+                "type": "file",
+              },
+              "from": Object {
+                "fname": "foo",
+              },
+              "type": "ref",
+            },
+          },
+          "position": Position {
+            "end": Object {
+              "column": 20,
+              "line": 1,
+              "offset": 19,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "type": "refLink",
+          "value": "ref: [[foo",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 20,
+          "line": 1,
+          "offset": 19,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 20,
+      "line": 1,
+      "offset": 19,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;

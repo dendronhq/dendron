@@ -1,4 +1,4 @@
-import { DEngineV2 } from "@dendronhq/common-all/src";
+import { DEngineV2 } from "@dendronhq/common-all";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { MemoryStore } from "./store/memoryStore";

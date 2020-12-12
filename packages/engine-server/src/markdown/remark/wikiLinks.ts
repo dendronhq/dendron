@@ -5,7 +5,8 @@ import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { WikiLinkProps } from "../../topics/markdown";
 import { DendronASTDest, WikiLinkDataV4, WikiLinkNoteV4 } from "../types";
-import { addError, getNoteOrError } from "./utils";
+import { addError, getNoteOrError, LinkUtils } from "./utils";
+import { MDUtilsV4 } from "../utils";
 
 export const LINK_REGEX = /^\[\[(.+?)\]\]/;
 
@@ -17,18 +18,6 @@ type CompilerOpts = {
   useId?: boolean;
   prefix?: string;
 };
-
-function getEngine(proc: Unified.Processor) {
-  const engine = proc.data("engine") as DEngineClientV2;
-  let error: DendronError | undefined;
-  if (_.isUndefined(engine) || _.isNull(engine)) {
-    error = new DendronError({ msg: "engine not defined" });
-  }
-  return {
-    error,
-    engine,
-  };
-}
 
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
   attachParser(this);
@@ -49,7 +38,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
     visitors.wikiLink = function (node: WikiLinkNoteV4) {
       const data = node.data;
       let value = node.value;
-      const { error, engine } = getEngine(proc);
+      const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
       if (error) {
         addError(proc, error);
         return "error with engine";
@@ -86,13 +75,8 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
 }
 
 function attachParser(proc: Unified.Processor) {
-  debugger;
   function locator(value: string, fromIndex: number) {
     return value.indexOf("[", fromIndex);
-  }
-
-  function isAlias(pageTitle: string) {
-    return pageTitle.indexOf("|") !== -1;
   }
 
   function parseAliasLink(pageTitle: string) {
@@ -106,7 +90,7 @@ function attachParser(proc: Unified.Processor) {
       value: linkMatch,
       alias: linkMatch,
     };
-    if (isAlias(linkMatch)) {
+    if (LinkUtils.isAlias(linkMatch)) {
       out = parseAliasLink(linkMatch);
     }
     if (out.value.indexOf("#") !== -1) {
@@ -114,7 +98,7 @@ function attachParser(proc: Unified.Processor) {
       out.value = value;
       out.anchorHeader = anchorHeader;
       // if we didn't have an alias, links with a # anchor shouldn't have # portion be in the title
-      if (!isAlias(linkMatch)) {
+      if (!LinkUtils.isAlias(linkMatch)) {
         out.alias = value;
       }
     }

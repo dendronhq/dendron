@@ -1,0 +1,84 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`basic init: compiled 1`] = `
+VFile {
+  "contents": "<p><a class=\\"internal new\\" href=\\"45a154ad-4b5e-4dd3-bdf6-e24a3a60ca68.html\\">foo.md</a></p>",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`basic init: raw 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "foo.md",
+            "anchorHeader": undefined,
+            "exists": false,
+            "hChildren": Array [
+              Object {
+                "type": "text",
+                "value": "foo.md",
+              },
+            ],
+            "hName": "a",
+            "hProperties": Object {
+              "className": "internal new",
+              "href": "#/page/foo",
+            },
+            "permalink": "foo",
+            "toMdEnhancedPreview": undefined,
+          },
+          "position": Position {
+            "end": Object {
+              "column": 11,
+              "line": 1,
+              "offset": 10,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "type": "wikiLink",
+          "value": "foo.md",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 11,
+          "line": 1,
+          "offset": 10,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 11,
+      "line": 1,
+      "offset": 10,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;

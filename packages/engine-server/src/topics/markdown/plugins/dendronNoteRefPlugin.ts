@@ -19,6 +19,7 @@ import { parseDendronRef, refLink2String } from "../../../utils";
 import { ParserUtilsV2, RemarkUtilsV2 } from "../utilsv2";
 import { findIndex, isHeading } from "./inject";
 import { ReplaceRefOptions, replaceRefs } from "./replaceRefs";
+import { RefLinkData } from "./types";
 
 const LINK_REGEX = /^\(\((?<ref>[^)]+)\)\)/;
 
@@ -33,19 +34,6 @@ type MDCompilerOpts = {
   replaceLink?: ReplaceLinkOpts;
 };
 
-export type RefLinkData = {
-  link: DNoteRefLink;
-  // --- Old
-  alias: string;
-  permalink: string;
-  exists: boolean;
-  hName: string;
-  hProperties: any;
-  hChildren: any[];
-  toMd?: boolean;
-  prefix?: string;
-  useId: boolean;
-};
 // --- Utils
 function doRenderWithOutline(opts: {
   content: string;

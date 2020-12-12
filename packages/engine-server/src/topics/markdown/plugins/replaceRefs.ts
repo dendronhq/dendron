@@ -8,7 +8,7 @@ import _ from "lodash";
 import { Node } from "unist";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
-import { WikiLinkData } from "./dendronLinksPlugin";
+import { WikiLinkData } from "./types";
 
 export type ReplaceRefOptions = {
   imageRefPrefix?: string;

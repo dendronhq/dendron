@@ -18,7 +18,7 @@ import {
 } from "../utils";
 
 export type EngineConnectorInitOpts = {
-  onReady: ({}: { ws: EngineConnector }) => Promise<void>;
+  onReady?: ({}: { ws: EngineConnector }) => Promise<void>;
   numRetries?: number;
   portOverride?: number;
 };
@@ -72,6 +72,7 @@ export class EngineConnector {
     });
     await dendronEngine.sync();
     this._engine = dendronEngine;
+    this.initialized = true;
     return dendronEngine;
   }
 

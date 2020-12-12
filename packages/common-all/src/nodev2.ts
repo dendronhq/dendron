@@ -680,6 +680,15 @@ export class NoteUtilsV2 {
     return props.title === NoteUtilsV2.genTitle(props.fname);
   }
 
+  static normalizeFname(nodePath: string) {
+    // remove md extension
+    const idx = nodePath.lastIndexOf(".md");
+    if (idx > 0) {
+      nodePath = nodePath.slice(0, idx);
+    }
+    return _.trim(nodePath);
+  }
+
   static serializeMeta(props: NotePropsV2) {
     const builtinProps = _.pick(props, [
       "id",

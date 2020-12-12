@@ -23,9 +23,9 @@ import { ReplaceLinkOpts } from "../../types";
 import {
   DendronLinksOpts,
   dendronLinksPlugin,
-  WikiLinkNote,
 } from "./plugins/dendronLinksPlugin";
 import { dendronNoteRefPluginForMd } from "./plugins/dendronNoteRefPlugin";
+import { WikiLinkNote } from "./plugins/types";
 
 export const WIKI_LINK_VALUE_RE = /(^\])/;
 

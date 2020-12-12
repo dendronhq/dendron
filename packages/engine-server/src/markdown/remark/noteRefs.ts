@@ -5,24 +5,35 @@ import {
   DNoteRefLink,
   RespV2,
 } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
+import fs from "fs-extra";
 import _ from "lodash";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
-import { getEngine, parseDendronRef } from "../../utils";
+import { Node } from "unist";
+import { parseDendronRef } from "../../utils";
 import { DendronASTDest, DendronASTNode, NoteRefNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { LinkUtils } from "./utils";
-import fs from "fs-extra";
-import { Node } from "unist";
-import { vault2Path } from "@dendronhq/common-server";
 
 const LINK_REGEX = /^\(\((?<ref>[^)]+)\)\)/;
 
 type PluginOpts = CompilerOpts;
+
 type CompilerOpts = {
   dest: DendronASTDest;
-  refLvl?: number;
   prettyRefs?: boolean;
+};
+
+type ConvertNoteRefOpts = {
+  link: DNoteRefLink;
+  proc: Unified.Processor;
+  compilerOpts: CompilerOpts;
+};
+
+type ConvertNoteRefHelperOpts = ConvertNoteRefOpts & {
+  refLvl: number;
+  body: string;
 };
 
 const plugin: Plugin<[PluginOpts]> = function (
@@ -81,37 +92,14 @@ function attachCompiler(proc: Unified.Processor, opts: CompilerOpts) {
       const { error, data } = convertNoteRef({
         link: ndata.link,
         proc,
+        compilerOpts: copts,
       });
       return data;
-      // switch (copts.dest) {
-      //   case DendronASTDest.MD_REGULAR: {
-      //     const alias = data.alias ? data.alias : value;
-      //     return `[${alias}](${copts.prefix || ""}${value})`;
-      //   }
-      //   case DendronASTDest.HTML: {
-      //     const alias = data.alias ? data.alias : value;
-      //     return `[${alias}](${copts.prefix || ""}${value}.html)`;
-      //   }
-      //   default:
-      //     return `unhandled case: ${copts.dest}`;
-      // }
     };
   }
 }
 
 const MAX_REF_LVL = 3;
-
-type ConvertNoteRefOpts = {
-  link: DNoteRefLink;
-  proc: Unified.Processor;
-};
-
-type ConvertNoteRefHelperOpts = {
-  proc: Unified.Processor;
-  body: string;
-  link: DNoteRefLink;
-  refLvl: number;
-};
 
 /**
  * Look at links and do initial pass
@@ -121,8 +109,12 @@ function convertNoteRef(
 ): { error: DendronError | undefined; data: string | undefined } {
   let data: string | undefined;
   let errors: DendronError[] = [];
-  const { link, proc } = opts;
+  const { link, proc, compilerOpts } = opts;
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
+  let { prettyRefs } = compilerOpts;
+  if (!prettyRefs && compilerOpts.dest === DendronASTDest.HTML) {
+    prettyRefs = true;
+  }
 
   if (refLvl >= MAX_REF_LVL) {
     return {
@@ -158,11 +150,20 @@ function convertNoteRef(
         link,
         refLvl: refLvl + 1,
         proc,
+        compilerOpts,
       });
       if (error) {
         errors.push(error);
       }
-      return data;
+      if (prettyRefs) {
+        return renderPretty({
+          content: data,
+          title: alias || name || "no title",
+          link: "TODO",
+        });
+      } else {
+        return data;
+      }
     } catch (err) {
       errors.push(new DendronError({ msg: `error reading file, ${npath}` }));
     }
@@ -227,6 +228,27 @@ function findHeader(nodes: DendronASTNode["children"], match: string) {
     return MDUtilsV4.isHeading(node, match);
   });
   return foundIndex;
+}
+
+function renderPretty(opts: { content: string; title: string; link: string }) {
+  const { content, title, link } = opts;
+  return `
+<div class="portal-container">
+<div class="portal-head">
+<div class="portal-backlink" >
+<div class="portal-title">From <span class="portal-text-title">${title}</span></div>
+<a href="${link}" class="portal-arrow">Go to text <span class="right-arrow">→</span></a>
+</div>
+</div>
+<div id="portal-parent-anchor" class="portal-parent" markdown="1">
+<div class="portal-parent-fader-top"></div>
+<div class="portal-parent-fader-bottom"></div>        
+  
+${content}
+
+</div>    
+</div>
+`;
 }
 
 export { plugin as noteRefs };

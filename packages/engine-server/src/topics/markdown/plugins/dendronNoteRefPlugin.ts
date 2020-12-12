@@ -395,60 +395,6 @@ function attachCompiler(
       defaultRoot: engine.vaults[0],
     });
   };
-  // visitors.refLink = function (node: Node) {
-  //   if (refLvl >= MAX_REF_LVL) {
-  //     return "ERROR: Too many nested note references";
-  //   }
-  //   const data = node.data as RefLinkData;
-  //   const root = engine.vaults[0];
-  //   let body: string;
-  //   let name = data.link.from.fname;
-  //   try {
-  //     body = fs.readFileSync(path.join(root, name + ".md"), {
-  //       encoding: "utf8",
-  //     });
-  //   } catch (err) {
-  //     const errors = proc.data("errors") as DendronError[];
-  //     const msg = `${name} not found`;
-  //     errors.push(new DendronError({ msg }));
-  //     return proc.stringify(
-  //       ParserUtilsV2.genMDError({
-  //         msg,
-  //         title: "Note Ref Error",
-  //       })
-  //     );
-  //   }
-  //   const out = extractNoteRef({
-  //     body,
-  //     link: data.link,
-  //     engine,
-  //     renderWithOutline,
-  //     replaceRefOpts,
-  //     refLvl: refLvl + 1,
-  //   });
-  //   if (renderWithOutline) {
-  //     let link = name;
-  //     link = _.trim(
-  //       ParserUtilsV2.getRemark()
-  //         .use(plugin, {
-  //           engine,
-  //           renderWithOutline,
-  //           replaceRefOpts,
-  //           refLvl,
-  //         })
-  //         .use(replaceRefs, { ..._.omit(replaceRefOpts, "wikiLink2Md") })
-  //         .processSync(`[[${link}]]`)
-  //         .toString()
-  //     );
-  //     return doRenderWithOutline({
-  //       content: out,
-  //       title: data.link.from.alias || data.link.from.fname || "no title",
-  //       link,
-  //     });
-  //   } else {
-  //     return out;
-  //   }
-  // };
   return Compiler;
 }
 

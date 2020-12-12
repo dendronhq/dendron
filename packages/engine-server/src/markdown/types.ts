@@ -1,5 +1,6 @@
 import { DNoteRefLink, NotePropsV2 } from "@dendronhq/common-all";
 import MDAST from "mdast";
+import { Processor } from "unified";
 
 export type DendronASTNode = MDAST.Parent & {
   notes?: NotePropsV2[];
@@ -43,3 +44,5 @@ export type NoteRefNoteV4 = DendronASTNode & {
 export type NoteRefDataV4 = {
   link: DNoteRefLink;
 };
+
+export { Processor };

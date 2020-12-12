@@ -50,89 +50,116 @@ describe.skip("parse", () => {
 describe("compilev2", () => {
   const linkWithNoExtension = "((ref: [[foo]]))";
 
-  const testCases = [
-    // {
-    //   testCase: "regular",
-    //   linkProcess: linkWithNoExtension,
-    //   preSetupHook: basicSetup,
-    //   procOpts: {},
-    //   expected: {
-    //     [DendronASTDest.HTML]: {
-    //       result: "foo body",
-    //     },
-    //     [DendronASTDest.MD_REGULAR]: {
-    //       result: "foo body",
-    //     },
-    //   },
-    // },
-    {
-      testCase: "recursive",
-      linkProcess: linkWithNoExtension,
-      preSetupHook: ENGINE_HOOKS.setupNoteRefRecursive,
-      procOpts: {},
-      expected: {
-        [DendronASTDest.HTML]: {
-          result: "foo body",
-        },
-        [DendronASTDest.MD_REGULAR]: {
-          result: "foo body",
-        },
+  function createTestCases(opts: {
+    name: string;
+    setupFunc: TestPresetEntryV4["testFunc"];
+    verifyFuncDict: { [key in DendronASTDest]: TestPresetEntryV4["testFunc"] };
+    preSetupHook?: TestPresetEntryV4["preSetupHook"];
+  }) {
+    const { name, setupFunc, verifyFuncDict } = opts;
+    return Object.values(DendronASTDest).map((dest) => {
+      const verifyFunc = verifyFuncDict[dest];
+      return {
+        name,
+        dest,
+        testCase: new TestPresetEntryV4(
+          async (presetOpts) => {
+            const extra = await setupFunc({ ...presetOpts, extra: { dest } });
+            return await verifyFunc({ ...presetOpts, extra });
+          },
+          { preSetupHook: opts.preSetupHook }
+        ),
+      };
+    });
+  }
+
+  const REGULAR_CASE = createTestCases({
+    name: "regular",
+    setupFunc: async ({ engine, extra }) => {
+      const resp = await proc(engine, {
+        dest: extra.dest,
+      }).process(linkWithNoExtension);
+      return { resp, proc };
+    },
+    verifyFuncDict: {
+      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+        const { resp } = extra;
+        expect(resp).toMatchSnapshot();
+        return [
+          {
+            actual: await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["foo body"],
+            }),
+            expected: true,
+          },
+        ];
+      },
+      [DendronASTDest.HTML]: async ({ extra }) => {
+        const { resp } = extra;
+        expect(resp).toMatchSnapshot();
+        return [
+          {
+            actual: await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["foo body", "portal"],
+            }),
+            expected: true,
+          },
+        ];
       },
     },
-  ];
+    preSetupHook: ENGINE_HOOKS.setupBasic,
+  });
+  const RECURSIVE_TEST_CASES = createTestCases({
+    name: "recursive",
+    setupFunc: async ({ engine, extra }) => {
+      const resp = await proc(engine, {
+        dest: extra.dest,
+      }).process(linkWithNoExtension);
+      return { resp, proc };
+    },
+    verifyFuncDict: {
+      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+        const { resp } = extra;
+        expect(resp).toMatchSnapshot();
+        return [
+          {
+            actual: await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["# Foo", "# Foo.One", "# Foo.Two"],
+            }),
+            expected: true,
+          },
+        ];
+      },
+      [DendronASTDest.HTML]: async ({ extra }) => {
+        const { resp } = extra;
+        expect(resp).toMatchSnapshot();
+        return [
+          {
+            actual: await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["# Foo", "# Foo.One", "# Foo.Two", "portal"],
+            }),
+            expected: true,
+          },
+        ];
+      },
+    },
+    preSetupHook: ENGINE_HOOKS.setupNoteRefRecursive,
+  });
 
-  Object.values(DendronASTDest)
-    .slice(0, 1)
-    .map((key) => {
-      const dest = key as DendronASTDest;
-
-      const testCases = [
-        {
-          name: "recursive",
-          testCase: new TestPresetEntryV4(
-            async ({ engine }) => {
-              const resp = await proc(engine, {
-                dest,
-              }).process(linkWithNoExtension);
-              expect(resp).toMatchSnapshot("bond");
-              return [
-                {
-                  actual: await AssertUtils.assertInString({
-                    body: resp.toString(),
-                    match: ["# Foo", "# Foo.One", "# Foo.Two"],
-                  }),
-                  expected: true,
-                },
-              ];
-            },
-            {
-              preSetupHook: ENGINE_HOOKS.setupNoteRefRecursive,
-            }
-          ),
-        },
-      ];
-
-      describe(dest, () => {
-        test.each(testCases.map((ent) => [ent.name, ent]))(
-          "%p",
-          async (_key, obj: typeof testCases[0]) => {
-            // const { linkProcess, preSetupHook, procOpts, expected } = obj;
-            const { testCase } = obj;
-            await runEngineTestV4(
-              testCase.testFunc,
-
-              // async ({ engine }) => {
-              //   const resp = await proc(engine, {
-              //     dest,
-              //     ...procOpts,
-              //   }).process(linkProcess);
-              //   expect(resp).toMatchSnapshot();
-              //   expect(_.trim(resp.toString())).toEqual(expected[dest].result);
-              // },
-              { expect, createEngine, preSetupHook: testCase.preSetupHook }
-            );
-          }
-        );
+  const ALL_TEST_CASES = [...REGULAR_CASE, ...RECURSIVE_TEST_CASES];
+  describe("compile", () => {
+    test.each(
+      ALL_TEST_CASES.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
+    )("%p", async (_key, testCase: TestPresetEntryV4) => {
+      await runEngineTestV4(testCase.testFunc, {
+        expect,
+        createEngine,
+        preSetupHook: testCase.preSetupHook,
       });
     });
+  });
 });

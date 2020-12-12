@@ -1,0 +1,225 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`compilev2 HTML "alias" 1`] = `
+VFile {
+  "contents": "[bar](foo.html)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 HTML "regular" 1`] = `
+VFile {
+  "contents": "[foo](foo.html)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 HTML "regularWithExtension" 1`] = `
+VFile {
+  "contents": "[foo](foo.html)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 HTML "textString1" 1`] = `
+VFile {
+  "contents": "See the [FAQ](dendron.faq.html) for answers for
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 HTML "withId" 1`] = `
+VFile {
+  "contents": "[foo](foo-id.html)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 MD_REGULAR "alias" 1`] = `
+VFile {
+  "contents": "[bar](foo)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 MD_REGULAR "regular" 1`] = `
+VFile {
+  "contents": "[foo](foo)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 MD_REGULAR "regularWithExtension" 1`] = `
+VFile {
+  "contents": "[foo](foo)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 MD_REGULAR "textString1" 1`] = `
+VFile {
+  "contents": "See the [FAQ](dendron.faq) for answers for
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 MD_REGULAR "withId" 1`] = `
+VFile {
+  "contents": "[foo](foo-id)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`parse doesn't parse inline code block: bond 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 13,
+              "line": 1,
+              "offset": 12,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "type": "inlineCode",
+          "value": "[[foo.md]]",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 13,
+          "line": 1,
+          "offset": 12,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 13,
+      "line": 1,
+      "offset": 12,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`parse init 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "foo",
+            "anchorHeader": undefined,
+          },
+          "position": Position {
+            "end": Object {
+              "column": 11,
+              "line": 1,
+              "offset": 10,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "type": "wikiLink",
+          "value": "foo",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 11,
+          "line": 1,
+          "offset": 10,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 11,
+      "line": 1,
+      "offset": 10,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;

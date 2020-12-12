@@ -111,7 +111,7 @@ export async function runEngineTestV4(
     return { opts: testOpts, resp: opts.preSetupHook(testOpts) };
   }
   // const resp = await postSetupHook({wsRoot, vaults, engine})
-  const results = await func(testOpts);
+  const results = (await func(testOpts)) || [];
 
   await runJestHarnessV2(results, expect);
   return { opts: testOpts, resp: undefined };

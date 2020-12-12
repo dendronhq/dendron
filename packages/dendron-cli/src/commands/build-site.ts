@@ -74,7 +74,7 @@ function rsyncCopy(src: string, dst: string) {
         });
         reject(err);
       } else {
-        resolve();
+        resolve(undefined);
       }
     });
   });
@@ -293,7 +293,7 @@ export class BuildSiteCommand extends SoilCommand<
             reject(err);
           }
           this.L.info({ msg: "finish copying" });
-          resolve();
+          resolve(undefined);
         }
       );
     });
@@ -321,7 +321,7 @@ export class BuildSiteCommand extends SoilCommand<
           reject(err);
         } else {
           this.L.info({ msg: "finish copying" });
-          resolve();
+          resolve(undefined);
         }
       });
     });

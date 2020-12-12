@@ -2,7 +2,6 @@ import {
   DendronConfig,
   DendronError,
   DEngineClientV2,
-  DVault,
   Time,
 } from "@dendronhq/common-all";
 import { createFileWatcher } from "@dendronhq/common-server";
@@ -42,6 +41,13 @@ export class EngineConnector {
     return this._ENGINE_CONNECTOR;
   }
 
+  static getOrCreate({ wsRoot }: { wsRoot: string }) {
+    if (!this._ENGINE_CONNECTOR) {
+      return new EngineConnector({ wsRoot });
+    }
+    return this._ENGINE_CONNECTOR;
+  }
+
   constructor({ wsRoot }: { wsRoot: string }) {
     this.wsRoot = wsRoot;
     this.config = DConfig.getOrCreate(wsRoot);
@@ -49,8 +55,8 @@ export class EngineConnector {
     this.initialized = false;
   }
 
-  get vaults(): DVault[] {
-    return this.config.vaults.map((ent) => ({ fsPath: ent.fsPath }));
+  get vaults(): string[] {
+    return this.config.vaults.map((ent) => ent.fsPath);
   }
 
   async init(opts?: EngineConnectorInitOpts) {
@@ -68,7 +74,7 @@ export class EngineConnector {
     const dendronEngine = DendronEngineClient.create({
       port,
       ws: wsRoot,
-      vaults: vaults.map((ent) => ent.fsPath),
+      vaults: vaults.map((ent) => ent),
     });
     await dendronEngine.sync();
     this._engine = dendronEngine;

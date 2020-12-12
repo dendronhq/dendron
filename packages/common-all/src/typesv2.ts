@@ -375,6 +375,40 @@ export type DStoreV2 = DCommonProps &
     renameNote: (opts: RenameNoteOptsV2) => Promise<RenameNotePayload>;
   };
 
+// TODO: not used yet
+export type DEngineV4 = {
+  // Properties
+  notes: NotePropsDictV2;
+  schemas: SchemaModuleDictV2;
+  wsRoot: string;
+  vaults: DVault[];
+  initialized: boolean;
+} & DEngineV4Methods;
+
+export type DEngineV4Methods = {
+  init: () => Promise<DEngineInitRespV2>;
+  deleteNote: (
+    id: string,
+    opts?: EngineDeleteOptsV2
+  ) => Promise<EngineDeleteNoteResp>;
+  deleteSchema: (
+    id: string,
+    opts?: EngineDeleteOptsV2
+  ) => Promise<DEngineDeleteSchemaRespV2>;
+  sync: (opts?: DEngineV2SyncOpts) => Promise<DEngineInitRespV2>;
+
+  getNoteByPath: (opts: GetNoteOptsV2) => Promise<RespV2<GetNotePayloadV2>>;
+  getSchema: (qs: string) => Promise<RespV2<SchemaModulePropsV2>>;
+  querySchema: (qs: string) => Promise<SchemaQueryResp>;
+  queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;
+  queryNotesSync({ qs }: { qs: string }): NoteQueryResp;
+  renameNote: (opts: RenameNoteOptsV2) => Promise<RespV2<RenameNotePayload>>;
+
+  // config
+  writeConfig: (opts: ConfigWriteOpts) => Promise<RespV2<void>>;
+  getConfig: () => Promise<RespV2<ConfigGetPayload>>;
+};
+
 // === Workspace
 
 export type WorkspaceOpts = {

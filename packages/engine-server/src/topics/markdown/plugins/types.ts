@@ -1,31 +1,11 @@
-import { DNoteLoc, DNoteRefLink, NotePropsV2 } from "@dendronhq/common-all";
-import MDAST from "mdast";
-
-export enum DendronASTTypes {
-  WIKI_LINK = "wikiLink",
-  REF_LINK = "refLink",
-  PARAGRAPH = "paragraph",
-}
-
-export enum DendronASTDest {
-  MD_ENHANCED_PREVIEW,
-  MD_REGULAR,
-  HTML,
-}
+import { DNoteLoc, DNoteRefLink } from "@dendronhq/common-all";
+import { DendronASTNode, DendronASTTypes } from "../../../markdown/types";
 
 // --- General
-
-export type DendronASTData = {
-  dest: DendronASTDest;
-};
 
 // @deprecate
 export type LinkOpts = {
   toMdEnhancedPreview?: boolean;
-};
-
-export type DendronASTNode = MDAST.Parent & {
-  notes?: NotePropsV2[];
 };
 
 // --- WIKI Link
@@ -80,3 +60,9 @@ export type WikiLinkData = {
   forNoteRefInPreview?: boolean;
   forNoteRefInSite?: boolean;
 } & LinkOpts;
+
+export type WikiLinkProps = {
+  alias: string;
+  value: string;
+  anchorHeader?: string;
+};

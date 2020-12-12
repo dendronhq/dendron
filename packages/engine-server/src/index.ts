@@ -10,3 +10,4 @@ export * from "./engineClient";
 export * from "./workspace";
 export * from "./types";
 export * from "./history";
+export * from "./markdown";

@@ -133,7 +133,7 @@ export type RunEngineTestFunction = (
 
 export type RunEngineTestFunctionV4 = (
   opts: RunEngineTestFunctionOpts & { extra?: any }
-) => Promise<TestResult[]>;
+) => Promise<TestResult[] | void>;
 
 export type SetupTestFunctionV4 = (
   opts: RunEngineTestFunctionOpts & { extra?: any }

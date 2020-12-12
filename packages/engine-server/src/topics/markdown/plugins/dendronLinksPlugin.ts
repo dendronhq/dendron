@@ -4,7 +4,7 @@ import _ from "lodash";
 import RemarkParser, { Eat } from "remark-parse";
 import { Parser, Processor } from "unified";
 import { Node } from "unist";
-import { LinkOpts, WikiLinkData } from "./types";
+import { LinkOpts, WikiLinkData, WikiLinkProps } from "./types";
 
 export const LINK_REGEX = /^\[\[(.+?)\]\]/;
 
@@ -19,12 +19,6 @@ declare class RemarkParserClass implements Parser {
 
   inlineMethods: string[];
 }
-
-export type WikiLinkProps = {
-  alias: string;
-  value: string;
-  anchorHeader?: string;
-};
 
 function locator(value: string, fromIndex: number) {
   return value.indexOf("[", fromIndex);
@@ -175,6 +169,7 @@ export function dendronLinksPlugin(opts: Partial<PluginOpts> = {}) {
     const visitors = Compiler.prototype.visitors;
     if (visitors) {
       visitors.wikiLink = function (node: Node) {
+        debugger;
         const data = node.data as WikiLinkData;
         if (!node || !node.data || !node.data.alias) {
           throw Error(`no alias found: ${JSON.stringify(node)}`);

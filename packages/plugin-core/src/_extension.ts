@@ -296,7 +296,7 @@ export async function _activate(context: vscode.ExtensionContext) {
             "extension",
             async (_event: HistoryEvent) => {
               if (_event.action === "initialized") {
-                resolve();
+                resolve(undefined);
               }
             }
           );

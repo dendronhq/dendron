@@ -1,6 +1,7 @@
-import { DNoteRefLink, NotePropsV2 } from "@dendronhq/common-all";
+import { DNoteRefLink, DVault, NotePropsV2 } from "@dendronhq/common-all";
 import MDAST from "mdast";
 import { Processor } from "unified";
+import { WikiLinksOpts } from "./remark/wikiLinks";
 
 export type DendronASTNode = MDAST.Parent & {
   notes?: NotePropsV2[];
@@ -21,7 +22,11 @@ export enum DendronASTDest {
 
 export type DendronASTData = {
   dest: DendronASTDest;
+  vault?: DVault;
+  wikiLinkOpts?: WikiLinksOpts;
 };
+
+// NODES
 
 export type WikiLinkNoteV4 = DendronASTNode & {
   type: DendronASTTypes.WIKI_LINK;

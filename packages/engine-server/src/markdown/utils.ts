@@ -1,13 +1,13 @@
-import { DendronError, DEngineClientV2 } from "@dendronhq/common-all";
+import { DendronError, DEngineClientV2, DVault } from "@dendronhq/common-all";
 import remark from "remark";
 import frontmatterPlugin from "remark-frontmatter";
-import Unified from "unified";
+import Unified, { Processor } from "unified";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import _ from "lodash";
 import { Node } from "unist";
 import { Heading } from "mdast";
 import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
-import { DendronASTDest } from "./types";
+import { DendronASTData, DendronASTDest } from "./types";
 const toString = require("mdast-util-to-string");
 
 type ProcOpts = {
@@ -23,6 +23,16 @@ export class MDUtilsV4 {
     }
     return -1;
   }
+
+  static getDendronData(proc: Processor) {
+    return proc.data("dendron") as DendronASTData;
+  }
+
+  static setDendronData(proc: Processor, data: DendronASTData) {
+    const _data = proc.data("dendron") as DendronASTData;
+    return proc.data("dendron", { ..._data, ...data });
+  }
+
   static getEngineFromProc(proc: Unified.Processor) {
     const engine = proc.data("engine") as DEngineClientV2;
     let error: DendronError | undefined;
@@ -69,7 +79,6 @@ export class MDUtilsV4 {
     let _proc = remark()
       .data("errors", errors)
       .data("engine", engine)
-      //.use(markdownParse, { gfm: true })
       .use(frontmatterPlugin, ["yaml"]);
     return _proc;
   }
@@ -77,14 +86,16 @@ export class MDUtilsV4 {
   static procFull(
     opts: ProcOpts & {
       dest: DendronASTDest;
+      vault?: DVault;
       wikiLinksOpts?: WikiLinksOpts;
       noteRefOpts?: NoteRefsOpts;
     }
   ) {
-    const { dest } = opts;
+    const { dest, vault } = opts;
     const proc = this.proc(opts)
-      .use(wikiLinks, opts.wikiLinksOpts || { dest })
-      .use(noteRefs, opts.noteRefOpts || { dest });
+      .data("dendron", { dest, vault } as DendronASTData)
+      .use(wikiLinks, opts.wikiLinksOpts)
+      .use(noteRefs, { ...opts.noteRefOpts, wikiLinkOpts: opts.wikiLinksOpts });
     return proc;
   }
 }

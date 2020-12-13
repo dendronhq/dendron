@@ -1,25 +1,24 @@
-import { DEngineClientV2, WorkspaceOpts } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-server";
+import { DEngineClientV2 } from "@dendronhq/common-all";
 import {
   AssertUtils,
   ENGINE_HOOKS,
   runEngineTestV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { DendronEngineV2 } from "../../../enginev2";
-import { DendronASTDest } from "../../types";
+import { DendronASTData, DendronASTDest } from "../../types";
 import { MDUtilsV4 } from "../../utils";
 import { noteRefs, NoteRefsOpts } from "../noteRefs";
+import { createEngine } from "./utils";
 
-function proc(engine: DEngineClientV2, opts: NoteRefsOpts) {
-  return MDUtilsV4.proc({ engine }).use(noteRefs, opts);
+function proc(
+  engine: DEngineClientV2,
+  dendron: DendronASTData,
+  opts?: NoteRefsOpts
+) {
+  return MDUtilsV4.proc({ engine })
+    .data("dendron", dendron)
+    .use(noteRefs, opts);
 }
-
-const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
-  const logger = createLogger("testLogger", "/tmp/engine-server.txt");
-  const engine = DendronEngineV2.createV3({ vaults, wsRoot, logger });
-  return engine;
-};
 
 describe.skip("parse", () => {
   let engine: any;
@@ -75,9 +74,10 @@ describe("compilev2", () => {
 
   const REGULAR_CASE = createTestCases({
     name: "regular",
-    setupFunc: async ({ engine, extra }) => {
+    setupFunc: async ({ engine, vaults, extra }) => {
       const resp = await proc(engine, {
         dest: extra.dest,
+        vault: vaults[0],
       }).process(linkWithNoExtension);
       return { resp, proc };
     },
@@ -113,9 +113,10 @@ describe("compilev2", () => {
   });
   const RECURSIVE_TEST_CASES = createTestCases({
     name: "recursive",
-    setupFunc: async ({ engine, extra }) => {
+    setupFunc: async ({ engine, extra, vaults }) => {
       const resp = await proc(engine, {
         dest: extra.dest,
+        vault: vaults[0],
       }).process(linkWithNoExtension);
       return { resp, proc };
     },

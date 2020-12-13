@@ -57,6 +57,9 @@ export const setupNoteRefRecursive: PreSetupHookFunction = async ({
     fname: "foo.one",
     body: ["# Foo.One", `((ref: [[foo.two]]))`].join("\n"),
     wsRoot,
+    props: {
+      id: "foo.one-id",
+    },
   });
   await NoteTestUtilsV4.createNote({
     vault,

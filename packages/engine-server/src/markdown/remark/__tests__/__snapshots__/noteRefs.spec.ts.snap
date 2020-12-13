@@ -7,7 +7,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
-<a href=\\"TODO\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -18,7 +18,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.one</span></div>
-<a href=\\"TODO\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.one.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -31,7 +31,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.two</span></div>
-<a href=\\"TODO\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.two.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
@@ -66,7 +66,7 @@ VFile {
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
-<a href=\\"TODO\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+<a href=\\"foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
 </div>
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">

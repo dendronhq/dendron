@@ -1,12 +1,11 @@
+import { NoteUtilsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
-import { DendronError, NoteUtilsV2 } from "@dendronhq/common-all";
-import { DEngineClientV2 } from "packages/engine-server/lib";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { WikiLinkProps } from "../../topics/markdown";
 import { DendronASTDest, WikiLinkDataV4, WikiLinkNoteV4 } from "../types";
-import { addError, getNoteOrError, LinkUtils } from "./utils";
 import { MDUtilsV4 } from "../utils";
+import { addError, getNoteOrError, LinkUtils } from "./utils";
 
 export const LINK_REGEX = /^\[\[(.+?)\]\]/;
 
@@ -14,12 +13,14 @@ type PluginOpts = CompilerOpts;
 
 type CompilerOpts = {
   convertObsidianLinks?: boolean;
-  dest?: DendronASTDest;
   useId?: boolean;
   prefix?: string;
 };
 
-const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
+const plugin: Plugin<[CompilerOpts?]> = function (
+  this: Unified.Processor,
+  opts?: PluginOpts
+) {
   attachParser(this);
   if (this.Compiler != null) {
     attachCompiler(this, opts);
@@ -33,6 +34,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
   });
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
+  const { dest, vault } = MDUtilsV4.getDendronData(proc);
 
   if (visitors) {
     visitors.wikiLink = function (node: WikiLinkNoteV4) {
@@ -45,9 +47,11 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
       }
 
       if (copts.useId) {
+        // TODO: check for vault
         const notes = NoteUtilsV2.getNotesByFname({
           fname: value,
           notes: engine.notes,
+          vault,
         });
         const { error, note } = getNoteOrError(notes, value);
         if (error) {
@@ -58,7 +62,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         }
       }
 
-      switch (copts.dest) {
+      switch (dest) {
         case DendronASTDest.MD_REGULAR: {
           const alias = data.alias ? data.alias : value;
           return `[${alias}](${copts.prefix || ""}${value})`;
@@ -68,7 +72,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
           return `[${alias}](${copts.prefix || ""}${value}.html)`;
         }
         default:
-          return `unhandled case: ${copts.dest}`;
+          return `unhandled case: ${dest}`;
       }
     };
   }

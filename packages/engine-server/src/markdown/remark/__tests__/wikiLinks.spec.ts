@@ -3,26 +3,33 @@ import { createLogger } from "@dendronhq/common-server";
 import { NoteTestUtilsV4, runEngineTestV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { DendronEngineV2 } from "../../../enginev2";
-import { DendronASTDest } from "../../types";
+import { DendronASTData, DendronASTDest } from "../../types";
 import { MDUtilsV4 } from "../../utils";
 import { wikiLinks, WikiLinksOpts } from "../wikiLinks";
 
-function proc(engine: DEngineClientV2, opts?: WikiLinksOpts) {
-  return MDUtilsV4.proc({ engine }).use(wikiLinks, opts);
+function proc(
+  engine: DEngineClientV2,
+  dendron: DendronASTData,
+  opts?: WikiLinksOpts
+) {
+  return MDUtilsV4.proc({ engine })
+    .data("dendron", dendron)
+    .use(wikiLinks, opts);
 }
 
 describe("parse", () => {
   let engine: any;
+  let dendronData = { dest: DendronASTDest.MD_REGULAR };
 
   test("init", () => {
-    const resp = proc(engine).parse(`[[foo.md]]`);
+    const resp = proc(engine, dendronData).parse(`[[foo.md]]`);
     expect(resp).toMatchSnapshot();
     // @ts-ignore
     expect(resp.children[0].children[0].type).toEqual("wikiLink");
   });
 
   test("doesn't parse inline code block", () => {
-    const resp = proc(engine).parse("`[[foo.md]]`");
+    const resp = proc(engine, dendronData).parse("`[[foo.md]]`");
     expect(resp).toMatchSnapshot("bond");
     // @ts-ignore
     expect(resp.children[0].children[0].type).toEqual("inlineCode");
@@ -129,10 +136,13 @@ describe("compilev2", () => {
           const { testCase, linkProcess, preSetupHook, procOpts } = obj;
           await runEngineTestV4(
             async ({ engine }) => {
-              const resp = await proc(engine, {
-                dest,
-                ...procOpts,
-              }).process(linkProcess);
+              const resp = await proc(
+                engine,
+                {
+                  dest,
+                },
+                procOpts
+              ).process(linkProcess);
               expect(resp).toMatchSnapshot();
               expect(_.trim(resp.toString())).toEqual(
                 expected[dest][testCase].link

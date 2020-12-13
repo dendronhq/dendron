@@ -3,10 +3,10 @@ import {
   DNodeUtilsV2,
   DNoteLoc,
   DNoteRefLink,
+  NoteUtilsV2,
   RespV2,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
-import fs from "fs-extra";
+import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
@@ -15,14 +15,15 @@ import { parseDendronRef } from "../../utils";
 import { DendronASTDest, DendronASTNode, NoteRefNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { LinkUtils } from "./utils";
+import { WikiLinksOpts } from "./wikiLinks";
 
 const LINK_REGEX = /^\(\((?<ref>[^)]+)\)\)/;
 
 type PluginOpts = CompilerOpts;
 
 type CompilerOpts = {
-  dest: DendronASTDest;
   prettyRefs?: boolean;
+  wikiLinkOpts?: WikiLinksOpts;
 };
 
 type ConvertNoteRefOpts = {
@@ -30,16 +31,12 @@ type ConvertNoteRefOpts = {
   proc: Unified.Processor;
   compilerOpts: CompilerOpts;
 };
-
 type ConvertNoteRefHelperOpts = ConvertNoteRefOpts & {
   refLvl: number;
   body: string;
 };
 
-const plugin: Plugin<[PluginOpts]> = function (
-  this: Unified.Processor,
-  opts: PluginOpts
-) {
+const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
   attachParser(this);
   if (this.Compiler != null) {
     attachCompiler(this, opts);
@@ -81,7 +78,7 @@ function attachParser(proc: Unified.Processor) {
   return Parser;
 }
 
-function attachCompiler(proc: Unified.Processor, opts: CompilerOpts) {
+function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
   const copts = _.defaults(opts || {}, {});
@@ -94,6 +91,9 @@ function attachCompiler(proc: Unified.Processor, opts: CompilerOpts) {
         proc,
         compilerOpts: copts,
       });
+      if (error) {
+        return `ERROR converting ref: ${error.msg}`;
+      }
       return data;
     };
   }
@@ -111,8 +111,12 @@ function convertNoteRef(
   let errors: DendronError[] = [];
   const { link, proc, compilerOpts } = opts;
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
-  let { prettyRefs } = compilerOpts;
-  if (!prettyRefs && compilerOpts.dest === DendronASTDest.HTML) {
+  const { dest, vault } = MDUtilsV4.getDendronData(proc);
+  if (!vault) {
+    return { error: new DendronError({ msg: "no vault specified" }), data: "" };
+  }
+  let { prettyRefs, wikiLinkOpts } = compilerOpts;
+  if (!prettyRefs && dest === DendronASTDest.HTML) {
     prettyRefs = true;
   }
 
@@ -131,20 +135,20 @@ function convertNoteRef(
   }
 
   const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
-  const { wsRoot, vaultsv3 } = engine;
-  const firstVaultPath = vault2Path({ wsRoot, vault: vaultsv3[0] });
 
   const out = noteRefs.map((ref) => {
-    const vaultPath = ref.vault?.fsPath || firstVaultPath;
-    const name = ref.fname;
+    const fname = ref.fname;
     const alias = ref.alias;
+    // TODO: find first unit with path
     const npath = DNodeUtilsV2.getFullPath({
       wsRoot: engine.wsRoot,
-      vault: { fsPath: vaultPath },
-      basename: name + ".md",
+      vault,
+      basename: fname + ".md",
     });
     try {
-      const body = fs.readFileSync(npath, { encoding: "utf8" });
+      const note = file2Note(npath, vault);
+      const body = note.body;
+      //const body = fs.readFileSync(npath, { encoding: "utf8" });
       const { error, data } = convertNoteRefHelper({
         body,
         link,
@@ -156,16 +160,40 @@ function convertNoteRef(
         errors.push(error);
       }
       if (prettyRefs) {
+        // const linkProc = MDUtilsV4.setDendronData(MDUtilsV4.proc({ engine }), {
+        //   dest,
+        //   vault,
+        // }).use(wikiLinks, {useId});
+        wikiLinkOpts?.prefix || "";
+        let suffix = "";
+        let href = fname;
+        if (dest === DendronASTDest.HTML) {
+          suffix = ".html";
+        }
+        if (wikiLinkOpts?.useId) {
+          const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+            fname,
+            notes: engine.notes,
+            vault,
+          });
+          if (!maybeNote) {
+            return `error with ${ref}`;
+          }
+          href = maybeNote?.id;
+        }
+        const link = `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`;
         return renderPretty({
           content: data,
-          title: alias || name || "no title",
-          link: "TODO",
+          title: alias || fname || "no title",
+          link,
         });
       } else {
         return data;
       }
     } catch (err) {
-      errors.push(new DendronError({ msg: `error reading file, ${npath}` }));
+      const msg = `error reading file, ${npath}`;
+      errors.push(new DendronError({ msg }));
+      return msg;
     }
   });
   return { error, data: out.join("\n") };
@@ -212,7 +240,6 @@ function convertNoteRefHelper(
     }
     return { error: null, data: out };
   } catch (err) {
-    debugger;
     return {
       error: new DendronError({
         msg: "error processing note ref",
@@ -237,7 +264,7 @@ function renderPretty(opts: { content: string; title: string; link: string }) {
 <div class="portal-head">
 <div class="portal-backlink" >
 <div class="portal-title">From <span class="portal-text-title">${title}</span></div>
-<a href="${link}" class="portal-arrow">Go to text <span class="right-arrow">→</span></a>
+<a href=${link} class="portal-arrow">Go to text <span class="right-arrow">→</span></a>
 </div>
 </div>
 <div id="portal-parent-anchor" class="portal-parent" markdown="1">

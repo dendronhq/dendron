@@ -12,6 +12,18 @@ export class GitUtils {
     return path.basename(url, ".git");
   }
 
+  static getVaultFromRepo(opts: {
+    repoPath: string;
+    repoUrl: string;
+    wsRoot: string;
+  }): DVault {
+    const { repoPath, wsRoot } = opts;
+    return {
+      fsPath: path.relative(wsRoot, repoPath),
+      remote: { type: "git", url: opts.repoUrl },
+    };
+  }
+
   static getVaultsFromRepo(opts: {
     repoPath: string;
     repoUrl: string;

@@ -118,20 +118,16 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     await git.clone(opts.path);
     const repoName = GitUtils.getRepoNameFromURL(opts.path);
     const repoPath = path.join(repoDir, repoName);
-    const { vaults } = GitUtils.getVaultsFromRepo({
+    const vault = GitUtils.getVaultFromRepo({
       repoPath,
       wsRoot: DendronWorkspace.wsRoot(),
       repoUrl: opts.path,
     });
-    await _.reduce<DVault, Promise<void>>(
-      vaults,
-      async (resp, vault: DVault) => {
-        await resp;
-        return this.addVaultToWorkspace(vault);
-      },
-      Promise.resolve()
-    );
-    return vaults;
+    if (opts.name) {
+      vault.name = opts.name;
+    }
+    await this.addVaultToWorkspace(vault);
+    return [vault];
   }
 
   async addVaultToWorkspace(vault: DVault) {
@@ -143,7 +139,9 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const wsPath = DendronWorkspace.workspaceFile().fsPath;
     let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
     if (!_.find(out.folders, (ent) => ent.path === vault.fsPath)) {
-      const vault2Folder: WorkspaceFolderRaw = { path: vault.fsPath };
+      const vault2Folder: WorkspaceFolderRaw = {
+        path: vault.fsPath,
+      };
       if (vault.name) {
         vault2Folder.name = vault.name;
       }

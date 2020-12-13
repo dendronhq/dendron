@@ -1,15 +1,14 @@
 import {
-  DendronConfig,
   NoteUtilsV2,
   SchemaUtilsV2,
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
   note2File,
-  readYAML,
   schemaModuleOpts2File,
   tmpDir,
 } from "@dendronhq/common-server";
-import { DConfig } from "@dendronhq/engine-server";
+import { sinon } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -20,7 +19,7 @@ import {
   VaultAddCommand,
   VaultRemoteSource,
 } from "../../commands/VaultAddCommand";
-import { WorkspaceSettings } from "../../types";
+import { WorkspaceFolderRaw, WorkspaceSettings } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
@@ -30,7 +29,6 @@ import {
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
 } from "../testUtilsV3";
-import { sinon } from "@dendronhq/common-test-utils";
 
 const stubVaultInput = (opts: {
   cmd?: VaultAddCommand;
@@ -72,6 +70,22 @@ const getWorkspaceFolders = () => {
   return _.toArray(settings.folders);
 };
 
+function checkVaults(opts: WorkspaceOpts) {
+  const { wsRoot, vaults } = opts;
+  const config = getConfig({ wsRoot });
+  expect(config.vaults).toEqual(vaults);
+  const wsFolders = getWorkspaceFolders();
+  expect(wsFolders).toEqual(
+    vaults.map((ent) => {
+      const out: WorkspaceFolderRaw = { path: ent.fsPath };
+      if (ent.name) {
+        out.name = ent.name;
+      }
+      return out;
+    })
+  );
+}
+
 suite("VaultAddCommand", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this, {
@@ -97,22 +111,20 @@ suite("VaultAddCommand", function () {
           });
           const resp = await cmd.run();
           const newVault = resp!.vaults[0];
-          expect(resp!.vaults).toEqual([
-            {
-              fsPath: "repos/dendron-site-vault",
-              remote: {
-                type: "git",
-                url: remote,
+          checkVaults({
+            wsRoot,
+            vaults: [
+              vault,
+              {
+                fsPath: newVault.fsPath,
+                name: "dendron",
+                remote: {
+                  type: "git",
+                  url: remote,
+                },
               },
-            },
-          ]);
-          const config = getConfig({ wsRoot });
-          expect(config.vaults).toEqual([vault, resp!.vaults[0]]);
-          const wsFolders = getWorkspaceFolders();
-          expect(wsFolders).toEqual([
-            { path: vault.fsPath },
-            { path: newVault.fsPath },
-          ]);
+            ],
+          });
           expect(fs.existsSync(path.join(wsRoot, ".gitignore"))).toBeFalsy();
           done();
         },
@@ -136,22 +148,21 @@ suite("VaultAddCommand", function () {
           });
           const resp = await cmd.run();
           const newVault = resp!.vaults[0];
-          expect(resp!.vaults).toEqual([
-            {
-              fsPath: "repos/dendron-site-vault",
-              remote: {
-                type: "git",
-                url: remote,
+
+          checkVaults({
+            wsRoot,
+            vaults: [
+              vault,
+              {
+                fsPath: newVault.fsPath,
+                name: "dendron",
+                remote: {
+                  type: "git",
+                  url: remote,
+                },
               },
-            },
-          ]);
-          const config = getConfig({ wsRoot });
-          expect(config.vaults).toEqual([vault, resp!.vaults[0]]);
-          const wsFolders = getWorkspaceFolders();
-          expect(wsFolders).toEqual([
-            { path: vault.fsPath },
-            { path: newVault.fsPath },
-          ]);
+            ],
+          });
           expect(fs.existsSync(gitIgnore)).toBeTruthy();
           expect(fs.readFileSync(gitIgnore, { encoding: "utf8" })).toEqual(
             "foo\nrepos/dendron-site-vault\n"
@@ -187,23 +198,20 @@ suite("VaultAddCommand", function () {
             "root.md",
             "root.schema.yml",
           ]);
-          const configPath = DConfig.configPath(
-            DendronWorkspace.wsRoot() as string
-          );
-          const config = readYAML(configPath) as DendronConfig;
-          assert.deepStrictEqual(
-            config.vaults.map((ent) => ent.fsPath),
-            [vault.fsPath, "vault2"]
-          );
-          const wsPath = DendronWorkspace.workspaceFile().fsPath;
-          const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
-          assert.deepStrictEqual(settings.folders, [
-            { path: vault.fsPath },
-            { path: "vault2" },
-          ]);
+
+          checkVaults({
+            wsRoot,
+            vaults: [
+              vault,
+              {
+                fsPath: "vault2",
+              },
+            ],
+          });
 
           const body = fs.readFileSync(path.join(vpath, "root.md"));
           assert.ok(body.indexOf("existing note") >= 0);
+
           done();
         },
       });
@@ -220,20 +228,15 @@ suite("VaultAddCommand", function () {
             "root.md",
             "root.schema.yml",
           ]);
-          const configPath = DConfig.configPath(
-            DendronWorkspace.wsRoot() as string
-          );
-          const config = readYAML(configPath) as DendronConfig;
-          assert.deepStrictEqual(
-            config.vaults.map((ent) => ent.fsPath),
-            [vault.fsPath, "vault2"]
-          );
-          const wsPath = DendronWorkspace.workspaceFile().fsPath;
-          const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
-          assert.deepStrictEqual(settings.folders, [
-            { path: vault.fsPath },
-            { path: "vault2" },
-          ]);
+          checkVaults({
+            wsRoot,
+            vaults: [
+              vault,
+              {
+                fsPath: "vault2",
+              },
+            ],
+          });
           done();
         },
       });
@@ -251,20 +254,15 @@ suite("VaultAddCommand", function () {
             "root.md",
             "root.schema.yml",
           ]);
-          const configPath = DConfig.configPath(
-            DendronWorkspace.wsRoot() as string
-          );
-          const config = readYAML(configPath) as DendronConfig;
-          assert.deepStrictEqual(
-            config.vaults.map((ent) => ent.fsPath),
-            [vault.fsPath, sourcePath]
-          );
-          const wsPath = DendronWorkspace.workspaceFile().fsPath;
-          const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
-          assert.deepStrictEqual(settings.folders, [
-            { path: vault.fsPath },
-            { path: sourcePath },
-          ]);
+          checkVaults({
+            wsRoot,
+            vaults: [
+              vault,
+              {
+                fsPath: "vault2",
+              },
+            ],
+          });
           done();
         },
       });
@@ -282,20 +280,17 @@ suite("VaultAddCommand", function () {
             "root.md",
             "root.schema.yml",
           ]);
-          const configPath = DConfig.configPath(
-            DendronWorkspace.wsRoot() as string
-          );
-          const config = readYAML(configPath) as DendronConfig;
-          assert.deepStrictEqual(
-            config.vaults.map((ent) => ent.fsPath),
-            [vault.fsPath, vaultRelPath]
-          );
-          const wsPath = DendronWorkspace.workspaceFile().fsPath;
-          const settings = fs.readJSONSync(wsPath) as WorkspaceSettings;
-          assert.deepStrictEqual(settings.folders, [
-            { path: vault.fsPath },
-            { path: vaultRelPath },
-          ]);
+
+          checkVaults({
+            wsRoot,
+            vaults: [
+              vault,
+              {
+                fsPath: vaultRelPath,
+              },
+            ],
+          });
+
           done();
         },
       });

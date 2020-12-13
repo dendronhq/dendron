@@ -145,7 +145,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       if (vault.name) {
         vault2Folder.name = vault.name;
       }
-      const folders = out.folders.concat(vault2Folder);
+      const folders = [vault2Folder].concat(out.folders);
       out = assignJSONWithComment({ folders }, out);
       writeJSONWithComments(wsPath, out);
     }

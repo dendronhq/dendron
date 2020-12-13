@@ -114,7 +114,6 @@ suite("VaultAddCommand", function () {
           checkVaults({
             wsRoot,
             vaults: [
-              vault,
               {
                 fsPath: newVault.fsPath,
                 name: "dendron",
@@ -123,6 +122,7 @@ suite("VaultAddCommand", function () {
                   url: remote,
                 },
               },
+              vault,
             ],
           });
           expect(fs.existsSync(path.join(wsRoot, ".gitignore"))).toBeFalsy();
@@ -152,7 +152,6 @@ suite("VaultAddCommand", function () {
           checkVaults({
             wsRoot,
             vaults: [
-              vault,
               {
                 fsPath: newVault.fsPath,
                 name: "dendron",
@@ -161,6 +160,7 @@ suite("VaultAddCommand", function () {
                   url: remote,
                 },
               },
+              vault,
             ],
           });
           expect(fs.existsSync(gitIgnore)).toBeTruthy();
@@ -202,10 +202,10 @@ suite("VaultAddCommand", function () {
           checkVaults({
             wsRoot,
             vaults: [
-              vault,
               {
                 fsPath: "vault2",
               },
+              vault,
             ],
           });
 
@@ -231,10 +231,10 @@ suite("VaultAddCommand", function () {
           checkVaults({
             wsRoot,
             vaults: [
-              vault,
               {
                 fsPath: "vault2",
               },
+              vault,
             ],
           });
           done();
@@ -257,10 +257,10 @@ suite("VaultAddCommand", function () {
           checkVaults({
             wsRoot,
             vaults: [
-              vault,
               {
                 fsPath: "vault2",
               },
+              vault,
             ],
           });
           done();
@@ -284,10 +284,10 @@ suite("VaultAddCommand", function () {
           checkVaults({
             wsRoot,
             vaults: [
-              vault,
               {
                 fsPath: vaultRelPath,
               },
+              vault,
             ],
           });
 

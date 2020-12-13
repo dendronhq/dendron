@@ -104,7 +104,7 @@ export class WorkspaceService {
 
     if (!noAddToConfig) {
       const config = this.config;
-      config.vaults.push(vault);
+      config.vaults.unshift(vault);
       await this.setConfig(config);
     }
     return;

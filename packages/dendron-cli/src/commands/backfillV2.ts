@@ -16,16 +16,18 @@ export class BackfillV2Command extends BaseCommand<CommandOpts, CommandOutput> {
       overwriteFields: [],
     });
     const notes = await Promise.all(
-      _.values(engine.notes).map(async (n) => {
-        overwriteFields.forEach((f) => {
-          if (f === "title") {
-            n.title = NoteUtilsV2.genTitle(n.fname);
-          } else {
-            throw Error(`unknown overwrite field: ${f}`);
-          }
-        });
-        return n;
-      })
+      _.values(engine.notes)
+        .filter((n) => !n.stub)
+        .map(async (n) => {
+          overwriteFields.forEach((f) => {
+            if (f === "title") {
+              n.title = NoteUtilsV2.genTitle(n.fname);
+            } else {
+              throw Error(`unknown overwrite field: ${f}`);
+            }
+          });
+          return n;
+        })
     );
     // @ts-ignore
     await engine.store.bulkAddNotes({ notes });

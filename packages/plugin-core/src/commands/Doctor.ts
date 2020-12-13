@@ -40,7 +40,6 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const siteRoot = path.join(rootDir, config.site.siteRootDir);
     getWS().vaultWatcher!.pause = true;
     this.L.info({ ctx, msg: "pre:Reload" });
-    // TODO
     const engine = await new ReloadIndexCommand().execute();
     await new BackfillV2Command().execute({
       engine: engine as DEngineClientV2,

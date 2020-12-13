@@ -532,6 +532,9 @@ export class NoteUtilsV2 {
   }
 
   static genTitle(fname: string) {
+    if (_.toLower(fname) == fname) {
+      return _.upperFirst(DNodeUtilsV2.basename(fname, true));
+    }
     return DNodeUtilsV2.basename(fname, true);
   }
 

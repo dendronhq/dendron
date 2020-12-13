@@ -378,6 +378,55 @@ const NOTES = {
       },
     }
   ),
+  TITLE_MATCHES_TITLE_CASE: new TestPresetEntryV4(
+    async ({ vaults, wsRoot, engine }) => {
+      const vault = vaults[0];
+      const noteA = await NoteTestUtilsV4.createNote({
+        fname: "Upper Upper",
+        vault: vaults[0],
+        wsRoot,
+      });
+      await engine.writeNote(noteA);
+      const noteB = await NoteTestUtilsV4.createNote({
+        fname: "lower lower",
+        vault: vaults[0],
+        wsRoot,
+      });
+      await engine.writeNote(noteB);
+      const noteC = await NoteTestUtilsV4.createNote({
+        fname: "lower Upper",
+        vault: vaults[0],
+        wsRoot,
+      });
+      await engine.writeNote(noteC);
+      return [
+        {
+          actual: NoteUtilsV2.getNoteByFnameV4({
+            fname: "Upper Upper",
+            notes: engine.notes,
+            vault,
+          })?.title,
+          expected: "Upper Upper"
+        },
+        {
+          actual: NoteUtilsV2.getNoteByFnameV4({
+            fname: "lower lower",
+            notes: engine.notes,
+            vault,
+          })?.title,
+          expected: "Lower lower"
+        },
+        {
+          actual: NoteUtilsV2.getNoteByFnameV4({
+            fname: "lower Upper",
+            notes: engine.notes,
+            vault,
+          })?.title,
+          expected: "lower Upper"
+        },
+      ]
+    }
+  ),
 };
 const NOTES_MULTI = {
   NEW_DOMAIN: new TestPresetEntryV4(async ({ vaults, engine }) => {

@@ -51,23 +51,30 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     let pos: undefined | Position;
     if (opts.mode === "note") {
       const client = DendronWorkspace.instance().getEngine();
-      const { data } = await client.getNoteByPath({
-        npath: qs,
-        createIfNew: true,
-        vault,
-      });
-      const note = data?.note as NotePropsV2;
-      const npath = NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() });
-      const uri = Uri.file(npath);
-      const editor = await VSCodeUtils.openFileInEditor(uri);
-      this.L.info({ ctx, opts, msg: "exit" });
-      if (opts.anchor && editor) {
-        const text = editor.document.getText();
-        const pos = findHeaderPos({ anchor: opts.anchor.value, text });
-        editor.selection = new Selection(pos, pos);
-        editor.revealRange(editor.selection);
-      }
-      return { note, pos };
+      return DendronWorkspace.instance().pauseWatchers<CommandOutput>(
+        async () => {
+          const { data } = await client.getNoteByPath({
+            npath: qs,
+            createIfNew: true,
+            vault,
+          });
+          const note = data?.note as NotePropsV2;
+          const npath = NoteUtilsV2.getPathV4({
+            note,
+            wsRoot: DendronWorkspace.wsRoot(),
+          });
+          const uri = Uri.file(npath);
+          const editor = await VSCodeUtils.openFileInEditor(uri);
+          this.L.info({ ctx, opts, msg: "exit" });
+          if (opts.anchor && editor) {
+            const text = editor.document.getText();
+            const pos = findHeaderPos({ anchor: opts.anchor.value, text });
+            editor.selection = new Selection(pos, pos);
+            editor.revealRange(editor.selection);
+          }
+          return { note, pos };
+        }
+      );
     } else {
       throw new DendronError({ msg: "goto schema not implemented" });
     }

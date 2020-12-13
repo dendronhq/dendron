@@ -130,6 +130,26 @@ export class DendronWorkspace {
     return vscode.workspace.getConfiguration(section);
   }
 
+  async pauseWatchers<T = void>(cb: () => Promise<T>) {
+    if (this.vaultWatcher) {
+      this.vaultWatcher.pause = true;
+    }
+    if (this.dendronTreeView) {
+      this.dendronTreeView.pause = true;
+    }
+    const out = await cb();
+    if (this.vaultWatcher) {
+      this.vaultWatcher.pause = false;
+    }
+    if (this.dendronTreeView) {
+      this.dendronTreeView.pause = false;
+      // force refresh
+      this.dendronTreeView.treeProvider.getChildren();
+      // VaultWatcher.refreshTree();
+    }
+    return out;
+  }
+
   /**
    * Full path to workspace root
    */

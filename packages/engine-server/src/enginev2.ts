@@ -210,18 +210,20 @@ export class DendronEngineV2 implements DEngineV2 {
     let noteNew: NotePropsV2 | undefined = maybeNote;
     let changed: NoteChangeEntry[] = [];
     let error = null;
+    let updateExisting = false;
     if ((!maybeNote || maybeNote.stub) && createIfNew) {
       this.logger.debug({ ctx, maybeNote, msg: "create-new" });
       if (maybeNote?.stub) {
         noteNew = maybeNote;
         delete noteNew.stub;
+        updateExisting = true;
       } else {
         noteNew = NoteUtilsV2.createWithSchema({
           noteOpts: { fname: npath, vault },
           engine: this,
         });
       }
-      changed = (await this.writeNote(noteNew, { newNode: true })).data;
+      changed = (await this.writeNote(noteNew, { updateExisting })).data;
     }
     if (!createIfNew && !maybeNote) {
       error = new DendronError({ status: "no_note_found" });

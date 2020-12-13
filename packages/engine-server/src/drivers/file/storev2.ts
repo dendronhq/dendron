@@ -700,8 +700,11 @@ export class FileStorageV2 implements DStoreV2 {
       notes: this.notes,
       vault: note.vault,
     });
+    // don't count as delete if we're updating existing note
+    let noDelete = false;
     if (maybeNote?.stub || opts?.updateExisting) {
       note = { ...maybeNote, ...note };
+      noDelete = true;
     } else {
       changed = await this._writeNewNote({ note, maybeNote, opts });
     }
@@ -711,7 +714,7 @@ export class FileStorageV2 implements DStoreV2 {
       notePath: note.fname,
       schemaModDict: this.schemas,
     });
-    // order matters - only write file after parents are established
+    // order matters - only write file after parents are established @see(_writeNewNote)
     await note2File({
       note,
       vault: note.vault,
@@ -731,7 +734,7 @@ export class FileStorageV2 implements DStoreV2 {
       status: "update" as const,
     })) as NoteChangeEntry[];
     changedEntries.push({ note, status: "create" });
-    if (maybeNote && !maybeNote.stub) {
+    if (maybeNote && !noDelete) {
       changedEntries.push({ note: maybeNote, status: "delete" });
     }
     return {

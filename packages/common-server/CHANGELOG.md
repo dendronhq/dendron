@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.19.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.19.3-alpha.0...v0.19.3-alpha.1) (2020-12-13)
+
+### Bug Fixes
+
+- add name to remote vaults ([6da3973](https://github.com/dendronhq/dendron/commit/6da39730f735f4700479f002f57d2a7802398ff5))
+
 ## [0.19.2](https://github.com/dendronhq/dendron/compare/v0.19.2-alpha.2...v0.19.2) (2020-12-10)
 
 **Note:** Version bump only for package @dendronhq/common-server

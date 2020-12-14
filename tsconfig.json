@@ -5,11 +5,11 @@
         "baseUrl": ".",
         "paths": {
             //"@dendronhq/*": ["packages/*/src"],
-            "@dendronhq/common-server": ["packages/common-server/src"],
             "@dendronhq/api-server": ["packages/api-server/src"],
             "@dendronhq/common-all": ["packages/common-all/src"],
             "@dendronhq/common-server": ["packages/common-server/src"],
             "@dendronhq/common-test-utils": ["packages/common-test-utils/src"],
+            "@dendronhq/engine-test-utils": ["packages/engine-test-utils/src"],
             "@dendronhq/dendron-cli": ["packages/dendron-cli/src"],
             "@dendronhq/dendron-next-server": ["packages/dendron-next-server/src"],
             "@dendronhq/engine-server": ["packages/engine-server/src"],

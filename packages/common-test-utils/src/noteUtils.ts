@@ -7,11 +7,14 @@ import {
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
 import {
+  file2Note,
   note2File,
   resolvePath,
   schemaModuleProps2File,
+  vault2Path,
 } from "@dendronhq/common-server";
 import _ from "lodash";
+import path from "path";
 
 export type CreateNoteOptsV4 = {
   vault: DVault;
@@ -79,4 +82,15 @@ export class NoteTestUtilsV4 {
     }
     return note;
   };
+
+  static async modifyNoteByPath(
+    opts: { wsRoot: string; vault: DVault; fname: string },
+    cb: (note: NotePropsV2) => NotePropsV2
+  ) {
+    const { fname, vault, wsRoot } = opts;
+    const npath = path.join(vault2Path({ vault, wsRoot }), fname + ".md");
+    const note = file2Note(npath, vault);
+    const newNote = cb(note);
+    return await note2File({ note: newNote, vault, wsRoot });
+  }
 }

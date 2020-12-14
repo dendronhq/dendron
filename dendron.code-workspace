@@ -37,6 +37,9 @@
             "path": "packages/common-test-utils"
         },
         {
+            "path": "packages/engine-test-utils"
+        },
+        {
             "path": "packages/dendron-next-server"
         },
         {

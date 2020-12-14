@@ -145,6 +145,7 @@ export type GenTestResults = (
 
 export type CreateEngineFunction = (opts: WorkspaceOpts) => DEngineClientV2;
 
+// @deprecated
 export async function runEngineTest(
   func: RunEngineTestFunction,
   opts: {

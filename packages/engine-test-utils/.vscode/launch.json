@@ -1,0 +1,29 @@
+{
+  // Use IntelliSense to learn about possible Node.js debug attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "debug one test",
+      "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+      "sourceMaps": true,
+      "smartStep": true,
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "LOG_DST": "/tmp/engine-server.txt"
+      },
+      "args": [
+        "--findRelatedTests",
+        "--runInBand",
+        "${relativeFile}",
+        "-u"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/lib/**/*.js"
+      ]
+    }
+  ]
+}

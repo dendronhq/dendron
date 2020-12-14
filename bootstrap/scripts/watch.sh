@@ -13,3 +13,4 @@ npx lerna run watch --parallel
     \ --scope @dendronhq/api-server
     \ --scope @dendronhq/dendron-next-server
     \ --scope @dendronhq/common-test-utils
+    \ --scope @dendronhq/engine-test-utils

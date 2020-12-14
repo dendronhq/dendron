@@ -144,8 +144,8 @@ export class DendronWorkspace {
     if (this.dendronTreeView) {
       this.dendronTreeView.pause = false;
       // force refresh
-      this.dendronTreeView.treeProvider.getChildren();
-      // VaultWatcher.refreshTree();
+      // this.dendronTreeView.treeProvider.getChildren();
+      VaultWatcher.refreshTree();
     }
     return out;
   }

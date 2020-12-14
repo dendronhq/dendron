@@ -114,7 +114,9 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
     } else {
       Logger.info({ ctx, msg: "reconstructing tree" });
       return Promise.all(
-        roots.flatMap((root) => this.parseTree(root, client.notes).id)
+        roots.flatMap(
+          async (root) => (await this.parseTree(root, client.notes)).id
+        )
       );
     }
   }
@@ -126,25 +128,30 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
     return maybeParent ? maybeParent.id : null;
   }
 
-  parseTree(note: NotePropsV2, ndict: NotePropsDictV2): TreeNote {
-    const ctx = "TreeViewV2:parseTree";
-    Logger.debug({ ctx, note, msg: "enter" });
+  async parseTree(
+    note: NotePropsV2,
+    ndict: NotePropsDictV2
+  ): Promise<TreeNote> {
+    // const ctx = "TreeViewV2:parseTree";
+    // Logger.debug({ ctx, msg: "enter" });
     const tn = createTreeNote(note);
     this.tree[note.id] = tn;
-    let children = note.children.map((c) => {
-      const childNote = ndict[c];
-      if (!childNote) {
-        const payload = {
-          msg: `no childNote found: ${c}, current note: ${note.id}`,
-        };
-        const err = new DendronError({ payload });
-        Logger.error({ err });
-        throw err;
-      }
-      return this.parseTree(childNote, ndict);
-    });
-    tn.children = this.sort(children).map((c) => c.id);
-    Logger.debug({ ctx, note, msg: "exit" });
+    tn.children = await Promise.all(
+      note.children.map(async (c) => {
+        const childNote = ndict[c];
+        if (!childNote) {
+          const payload = {
+            msg: `no childNote found: ${c}, current note: ${note.id}`,
+          };
+          const err = new DendronError({ payload });
+          Logger.error({ err });
+          throw err;
+        }
+        return (await this.parseTree(childNote, ndict)).id;
+      })
+    );
+    // tn.children = this.sort(children).map((c) => c.id);
+    // Logger.debug({ ctx, msg: "exit" });
     return tn;
   }
 }

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.19.3-alpha.2](https://github.com/dendronhq/dendron/compare/v0.19.3-alpha.1...v0.19.3-alpha.2) (2020-12-14)
+
+### Bug Fixes
+
+- vault not being matched ([fda8d72](https://github.com/dendronhq/dendron/commit/fda8d724f4146cdadd90f2bb44c9a37a8a4d1ecd))
+
+### Enhancements
+
+- better tree view perf ([bbc5860](https://github.com/dendronhq/dendron/commit/bbc5860e94cad6062a1da044cdc3bdc600ff29f0))
+- faster tree view ([a1fac4f](https://github.com/dendronhq/dendron/commit/a1fac4fd3cf4bffc7f6181d79b23db92af8fa9a0))
+
 ## [0.19.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.19.3-alpha.0...v0.19.3-alpha.1) (2020-12-13)
 
 ### Bug Fixes

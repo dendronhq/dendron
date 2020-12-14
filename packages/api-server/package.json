@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/api-server",
-  "version": "0.19.3-alpha.1",
+  "version": "0.19.3-alpha.2",
   "description": "",
   "license": "GPLv3",
   "repository": {
@@ -39,7 +39,7 @@
     "start:integ:watch": "env PORT=3005 LOG_DST=/tmp/api-server.txt LOG_LEVEL=debug npx nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts'"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.19.3-alpha.1",
+    "@dendronhq/common-test-utils": "^0.19.3-alpha.2",
     "@types/express": "^4.17.8",
     "@types/fs-extra": "^9.0.1",
     "@types/jest": "^26.0.13",
@@ -63,9 +63,9 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.19.3-alpha.1",
-    "@dendronhq/common-server": "^0.19.3-alpha.1",
-    "@dendronhq/engine-server": "^0.19.3-alpha.1",
+    "@dendronhq/common-all": "^0.19.3-alpha.2",
+    "@dendronhq/common-server": "^0.19.3-alpha.2",
+    "@dendronhq/engine-server": "^0.19.3-alpha.2",
     "express": "^4.17.1",
     "fs-extra": "^9.0.1",
     "http-status-codes": "^2.1.4",

@@ -434,3 +434,8 @@ export class DendronEngineV2 implements DEngineV2 {
     return this.store.writeSchema(schema);
   }
 }
+
+export const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
+  const engine = DendronEngineV2.createV3({ vaults, wsRoot });
+  return engine;
+};

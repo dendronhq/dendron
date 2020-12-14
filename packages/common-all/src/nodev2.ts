@@ -580,7 +580,9 @@ export class NoteUtilsV2 {
           ? ent.vault.fsPath === vault.fsPath
           : true) ||
           // FIXME: for backward compatibility with full length vaults
-          (vault ? path.basename(ent.vault.fsPath) === vault.fsPath : true))
+          (vault
+            ? path.basename(ent.vault.fsPath) === path.basename(vault.fsPath)
+            : true))
       );
     });
     return out;

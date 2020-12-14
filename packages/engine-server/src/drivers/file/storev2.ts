@@ -239,18 +239,18 @@ export class SchemaParserV2 extends ParserBaseV2 {
 
   async parse(
     fpaths: string[],
-    root: DVault
+    vault: DVault
   ): Promise<{
     schemas: SchemaModulePropsV2[];
     errors: DendronError[] | null;
   }> {
     const ctx = "parse";
-    this.logger.info({ ctx, msg: "enter", fpaths, root });
+    this.logger.info({ ctx, msg: "enter", fpaths, vault });
 
     const out = await Promise.all(
       fpaths.flatMap((fpath) => {
         try {
-          return this.parseFile(fpath, root);
+          return this.parseFile(fpath, vault);
         } catch (err) {
           return new DendronError({
             msg: ENGINE_ERROR_CODES.BAD_PARSE_FOR_SCHEMA,

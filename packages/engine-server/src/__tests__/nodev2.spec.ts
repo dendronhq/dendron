@@ -1,11 +1,13 @@
 import { NoteUtilsV2, SchemaUtilsV2 } from "@dendronhq/common-all";
 import {
+  ENGINE_HOOKS,
   NoteTestUtilsV4,
   runEngineTestV4,
   SetupHookFunction,
 } from "@dendronhq/common-test-utils";
 import { tmpdir } from "os";
-import { createEngine } from "../topics/markdown/plugins/__tests__/utils";
+import path from "path";
+import { createEngine } from "../enginev2";
 
 const preSetupHook: SetupHookFunction = async ({ vaults, wsRoot }) => {
   await NoteTestUtilsV4.createNote({ fname: "foo", vault: vaults[0], wsRoot });
@@ -25,6 +27,68 @@ const preSetupHook: SetupHookFunction = async ({ vaults, wsRoot }) => {
 
 describe("note", () => {
   const vault = { fsPath: tmpdir() };
+
+  describe("getNoteByFnameV4", async () => {
+    test("basic", async () => {
+      await runEngineTestV4(
+        async ({ vaults, engine }) => {
+          const fname = "foo";
+          const resp = NoteUtilsV2.getNoteByFnameV4({
+            fname,
+            notes: engine.notes,
+            vault: vaults[0],
+          });
+          expect(resp).toEqual(engine.notes["foo"]);
+          return [];
+        },
+        {
+          expect,
+          createEngine,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+
+    test("full path on input", async () => {
+      await runEngineTestV4(
+        async ({ vaults, engine, wsRoot }) => {
+          const fname = "foo";
+          const resp = NoteUtilsV2.getNoteByFnameV4({
+            fname,
+            notes: engine.notes,
+            vault: { fsPath: path.join(wsRoot, vaults[0].fsPath) },
+          });
+          expect(resp).toEqual(engine.notes["foo"]);
+          return [];
+        },
+        {
+          expect,
+          createEngine,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+
+    test("full path on node", async () => {
+      await runEngineTestV4(
+        async ({ vaults, engine, wsRoot }) => {
+          const fname = "foo";
+          const resp = NoteUtilsV2.getNoteByFnameV4({
+            fname,
+            notes: engine.notes,
+            vault: { fsPath: path.join(wsRoot, vaults[0].fsPath) },
+          });
+          expect(resp).toEqual(engine.notes["foo"]);
+          return [];
+        },
+        {
+          expect,
+          createEngine,
+          preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+  });
 
   describe("serialize", () => {
     test("basic", () => {

@@ -1,6 +1,6 @@
 import { URI } from "vscode-uri";
 import { DendronError } from "./error";
-import { DendronConfig } from "./types";
+import { DendronConfig, DendronSiteFM } from "./types";
 
 export type EngineDeleteOpts = {
   /**
@@ -109,7 +109,7 @@ export type SchemaDataV2 = SchemaData;
 /**
  * Props are the official interface for a node
  */
-export type DNodePropsV2<T = any> = {
+export type DNodePropsV2<T = any, TCustom = any> = {
   id: string;
   title: string;
   desc: string;
@@ -124,7 +124,7 @@ export type DNodePropsV2<T = any> = {
   children: DNodePointerV2[];
   data: T;
   body: string;
-  custom?: any;
+  custom?: TCustom;
   schema?: { moduleId: string; schemaId: string };
   vault: DVault;
 };
@@ -153,7 +153,7 @@ export type DNodePropsQuickInputV2<T = any> = DNodePropsV2<T> & {
 };
 
 export type SchemaPropsV2 = DNodePropsV2<SchemaData>;
-export type NotePropsV2 = DNodePropsV2;
+export type NotePropsV2 = DNodePropsV2<any, DendronSiteFM>;
 
 export type DNodePropsDictV2 = {
   [key: string]: DNodePropsV2;

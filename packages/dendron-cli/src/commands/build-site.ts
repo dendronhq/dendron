@@ -108,6 +108,7 @@ async function note2JekyllMdFile(
   } & DendronSiteConfig
 ): Promise<Jekyll2MdFileErrors[]> {
   let meta: NotePropsV2;
+  // @ts-ignore
   meta = {
     ...NoteUtilsV2.serializeMeta(note),
     fname: note.fname,

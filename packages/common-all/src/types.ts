@@ -60,6 +60,12 @@ export type CustomFMEntry = {
   value: any;
 };
 
+export type DendronSiteFM = {
+  published?: boolean;
+  noindex?: boolean;
+  nav_order?: number;
+};
+
 export type DendronSiteConfig = {
   /**
    * If set, add prefix to all asset links

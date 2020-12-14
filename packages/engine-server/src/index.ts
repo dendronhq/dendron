@@ -5,6 +5,7 @@ export * from "./utils";
 export * from "./topics/markdown";
 export * from "./topics/connector";
 export * from "./topics/git";
+export * from "./topics/site";
 export * from "./fuseEngine";
 export * from "./engineClient";
 export * from "./workspace";

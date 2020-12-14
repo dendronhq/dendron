@@ -406,7 +406,7 @@ const NOTES = {
             notes: engine.notes,
             vault,
           })?.title,
-          expected: "Upper Upper"
+          expected: "Upper Upper",
         },
         {
           actual: NoteUtilsV2.getNoteByFnameV4({
@@ -414,7 +414,7 @@ const NOTES = {
             notes: engine.notes,
             vault,
           })?.title,
-          expected: "Lower lower"
+          expected: "Lower lower",
         },
         {
           actual: NoteUtilsV2.getNoteByFnameV4({
@@ -422,9 +422,9 @@ const NOTES = {
             notes: engine.notes,
             vault,
           })?.title,
-          expected: "lower Upper"
+          expected: "lower Upper",
         },
-      ]
+      ];
     }
   ),
 };

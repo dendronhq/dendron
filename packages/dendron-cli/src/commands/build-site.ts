@@ -127,7 +127,7 @@ async function note2JekyllMdFile(
   let hConfig: HierarchyConfig = _.defaults(_.get(config, domainPath), rConfig);
   const siteNotesDir = config.siteNotesDir || "notes";
 
-  if (!hConfig.publishByDefault && !note.custom.published) {
+  if (!hConfig.publishByDefault && !note.custom?.published) {
     return [];
   }
   if (
@@ -159,7 +159,7 @@ async function note2JekyllMdFile(
   if (parentFname === opts.siteIndex) {
     meta["parent"] = null;
   }
-  if (hConfig.noindexByDefault && _.isUndefined(note.custom.noindex)) {
+  if (hConfig.noindexByDefault && _.isUndefined(note.custom?.noindex)) {
     // @ts-ignore
     meta.noindex = true;
   }

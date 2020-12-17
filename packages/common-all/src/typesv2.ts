@@ -153,7 +153,7 @@ export type DNodePropsQuickInputV2<T = any> = DNodePropsV2<T> & {
 };
 
 export type SchemaPropsV2 = DNodePropsV2<SchemaData>;
-export type NotePropsV2 = DNodePropsV2<any, DendronSiteFM>;
+export type NotePropsV2 = DNodePropsV2<any, DendronSiteFM & any>;
 
 export type DNodePropsDictV2 = {
   [key: string]: DNodePropsV2;

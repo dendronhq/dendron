@@ -154,7 +154,6 @@ function convertNoteRef(
     try {
       const note = file2Note(npath, vault);
       const body = note.body;
-      //const body = fs.readFileSync(npath, { encoding: "utf8" });
       const { error, data } = convertNoteRefHelper({
         body,
         link,
@@ -168,9 +167,6 @@ function convertNoteRef(
       if (prettyRefs) {
         let suffix = "";
         let href = fname;
-        if (dest === DendronASTDest.HTML) {
-          suffix = ".html";
-        }
         if (wikiLinkOpts?.useId) {
           const maybeNote = NoteUtilsV2.getNoteByFnameV4({
             fname,
@@ -181,6 +177,18 @@ function convertNoteRef(
             return `error with ${ref}`;
           }
           href = maybeNote?.id;
+        }
+        if (dest === DendronASTDest.HTML) {
+          const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+            fname,
+            notes: engine.notes,
+            vault,
+          });
+          suffix = ".html";
+          if (maybeNote?.custom.permalink === "/") {
+            href = "";
+            suffix = "";
+          }
         }
         const link = `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`;
         return renderPretty({

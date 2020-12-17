@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.20.0...v0.20.1-alpha.0) (2020-12-17)
+
+### Enhancements
+
+- handle note ref for published home page ([42245d9](https://github.com/dendronhq/dendron/commit/42245d9225a4119acdc2a2470f0f483dcc21ee0f))
+
 # [0.20.0](https://github.com/dendronhq/dendron/compare/v0.19.3-alpha.2...v0.20.0) (2020-12-14)
 
 **Note:** Version bump only for package @dendronhq/engine-server

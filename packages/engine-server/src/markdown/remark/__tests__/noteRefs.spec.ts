@@ -190,8 +190,12 @@ describe("compilev2", () => {
     preSetupHook: ENGINE_SERVER.NOTE_REF.WILDCARD_LINK_V4.preSetupHook,
   });
 
-  // const ALL_TEST_CASES = [...REGULAR_CASE, ...RECURSIVE_TEST_CASES];
-  const ALL_TEST_CASES = WILDCARD_CASE;
+  const ALL_TEST_CASES = [
+    ...REGULAR_CASE,
+    ...RECURSIVE_TEST_CASES,
+    ...WILDCARD_CASE,
+  ];
+  //const ALL_TEST_CASES = WILDCARD_CASE;
   describe("compile", () => {
     test.each(
       ALL_TEST_CASES.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])

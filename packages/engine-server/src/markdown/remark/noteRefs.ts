@@ -166,11 +166,6 @@ function convertNoteRef(
         errors.push(error);
       }
       if (prettyRefs) {
-        // const linkProc = MDUtilsV4.setDendronData(MDUtilsV4.proc({ engine }), {
-        //   dest,
-        //   vault,
-        // }).use(wikiLinks, {useId});
-        wikiLinkOpts?.prefix || "";
         let suffix = "";
         let href = fname;
         if (dest === DendronASTDest.HTML) {

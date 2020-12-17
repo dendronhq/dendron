@@ -56,6 +56,7 @@ describe("markdown pod", async () => {
     });
     cmd.L.info({ msg: "in test file" });
 
+    // @ts-ignore
     let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(vault, [
       "assets",
       "project.p1.md",

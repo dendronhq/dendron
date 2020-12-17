@@ -46,6 +46,7 @@ describe("exportPod", () => {
         },
       };
     };
+    // @ts-ignore
     const { opts, resp } = await runEngineTestV4(preset.testFunc, {
       ...preset,
       createEngine: createMockEngine,

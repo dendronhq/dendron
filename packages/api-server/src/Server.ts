@@ -10,19 +10,17 @@ export function appModule({ logPath }: { logPath: string }) {
   const app = express();
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-  // morgan.token("body", function (req, res) {
-  //   // @ts-ignore
-  //   return JSON.stringify(req.body);
-  // });
-  const accessLogStream = fs.createWriteStream(logPath, { flags: "a" });
-  app.use(
-    morgan(
-      ":method :url :status :response-time ms - :res[content-length] - :req[content-length]",
-      {
-        stream: accessLogStream,
-      }
-    )
-  );
+  if (logPath !== "stdout") {
+    const accessLogStream = fs.createWriteStream(logPath, { flags: "a" });
+    app.use(
+      morgan(
+        ":method :url :status :response-time ms - :res[content-length] - :req[content-length]",
+        {
+          stream: accessLogStream,
+        }
+      )
+    );
+  }
 
   const staticDir = path.join(__dirname, "static");
   app.use(express.static(staticDir));

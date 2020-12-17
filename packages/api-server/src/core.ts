@@ -24,7 +24,8 @@ export function getLogger() {
 export function configureLogger(logPath?: string) {
   if (!logPath) {
     logPath = "stdout";
-  } else {
+  }
+  if (logPath !== "stdout") {
     if (fs.existsSync(logPath)) {
       fs.moveSync(logPath, `${logPath}.old`, { overwrite: true });
     }

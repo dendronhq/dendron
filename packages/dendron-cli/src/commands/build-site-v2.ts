@@ -41,6 +41,7 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
     let { wsRoot, engine, port, serve, stage } = args;
+    console.log("bond0");
 
     if (engine) {
       return {
@@ -83,11 +84,11 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
       "..",
       "node_modules/@dendronhq/dendron-11ty"
     );
-    this.L.info({ ctx, wsRoot, port, stage });
+    console.log({ ctx, wsRoot, port, stage });
     process.env["ENGINE_PORT"] = _.toString(port);
     process.env["WS_ROOT"] = wsRoot;
     process.env["STAGE"] = stage;
-    await compile({ cwd }, { serve: opts.serve });
+    await compile({ cwd }, { serve: opts.serve, input: "." });
     console.log("done with build site");
     return {};
   }

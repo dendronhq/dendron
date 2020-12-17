@@ -1,5 +1,6 @@
 import { DendronError, DEngineClientV2, DVault } from "@dendronhq/common-all";
 import remark from "remark";
+import remarkParse from "remark-parse";
 import frontmatterPlugin from "remark-frontmatter";
 import Unified, { Processor } from "unified";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
@@ -77,9 +78,11 @@ export class MDUtilsV4 {
     const { engine } = opts;
     const errors: DendronError[] = [];
     let _proc = remark()
+      .use(remarkParse, { gfm: true })
       .data("errors", errors)
       .data("engine", engine)
-      .use(frontmatterPlugin, ["yaml"]);
+      .use(frontmatterPlugin, ["yaml"])
+      .use({ settings: { listItemIndent: "1", fences: true, bullet: "-" } });
     return _proc;
   }
 

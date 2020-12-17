@@ -3,6 +3,7 @@ import {
   DNodeUtilsV2,
   DNoteLoc,
   DNoteRefLink,
+  DUtils,
   NoteUtilsV2,
   RespV2,
 } from "@dendronhq/common-all";
@@ -126,16 +127,21 @@ function convertNoteRef(
       data,
     };
   }
+  const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
 
   let noteRefs: DNoteLoc[] = [];
   if (link.from.fname.endsWith("*")) {
-    throw new Error("not implemented, wildcard link refs");
+    const resp = engine.queryNotesSync({ qs: link.from.fname });
+    const out = _.filter(resp.data, (ent) =>
+      DUtils.minimatch(ent.fname, link.from.fname)
+    );
+    noteRefs = _.sortBy(
+      out.map((ent) => NoteUtilsV2.toNoteLoc(ent)),
+      "fname"
+    );
   } else {
     noteRefs.push(link.from);
   }
-
-  const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
-
   const out = noteRefs.map((ref) => {
     const fname = ref.fname;
     const alias = ref.alias;

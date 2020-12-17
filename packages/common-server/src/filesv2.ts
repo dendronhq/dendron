@@ -15,7 +15,8 @@ import matter from "gray-matter";
 import YAML from "js-yaml";
 import _ from "lodash";
 import path from "path";
-import tmp, { DirResult } from "tmp";
+// @ts-ignore
+import tmp, { DirResult, dirSync, setGracefulCleanup } from "tmp";
 import { resolvePath } from "./files";
 import { SchemaParserV2 } from "./parser";
 
@@ -221,7 +222,7 @@ export async function readJSONWithComments(fpath: string) {
 }
 
 export function tmpDir(): DirResult {
-  const dirPath = tmp.dirSync();
+  const dirPath = dirSync();
   return dirPath;
 }
 

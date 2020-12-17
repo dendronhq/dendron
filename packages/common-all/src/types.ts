@@ -64,6 +64,8 @@ export type DendronSiteFM = {
   published?: boolean;
   noindex?: boolean;
   nav_order?: number;
+  nav_exclude?: boolean;
+  permalink?: string;
 };
 
 export type DendronSiteConfig = {
@@ -77,6 +79,12 @@ export type DendronSiteConfig = {
    * Default: true
    */
   copyAssets?: boolean;
+
+  /**
+   * Path to favicon. Should be somewhere inside your workspace.
+   * Default: "favicon.ico"
+   */
+  siteFaviconPath?: string;
 
   /**
    * By default, the domain of your `siteHiearchies` page
@@ -108,6 +116,17 @@ export type DendronSiteConfig = {
    * Folder where your notes will be kept. By default, "notes"
    */
   siteNotesDir?: string;
+
+  /**
+   * Url of site without trailing slash
+   * eg. dendron.so
+   */
+  siteUrl?: string;
+  /**
+   * Cname used for github pages
+   */
+  githubCname?: string;
+  siteProtocol?: "http" | "https";
 
   /** Pretty refs help you identify when content is embedded from elsewhere and provide links back to the source */
   usePrettyRefs?: boolean;

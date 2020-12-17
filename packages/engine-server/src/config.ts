@@ -21,6 +21,7 @@ export class DConfig {
         copyAssets: true,
         siteHierarchies: ["root"],
         siteRootDir: "docs",
+        siteProtocol: "https",
         usePrettyRefs: true,
       },
     };
@@ -38,11 +39,16 @@ export class DConfig {
     return config;
   }
 
+  /**
+   * fill in defaults
+   */
   static cleanSiteConfig(config: DendronSiteConfig): DendronSiteConfig {
     let out = _.defaults(config, {
       copyAssets: true,
       usePrettyRefs: true,
       siteNotesDir: "notes",
+      siteProtocol: "https",
+      siteFaviconPath: "favicon.ico",
     });
     let { siteRootDir, siteHierarchies, siteIndex } = out;
     if (!siteRootDir) {

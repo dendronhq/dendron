@@ -24,8 +24,7 @@
     "main": "./out/extension.js",
     "extensionPack": [
         "dendron.dendron-markdown-preview-enhanced",
-        "dendron.dendron-snippet-maker",
-        "github.github-vscode-theme"
+        "dendron.dendron-snippet-maker"
     ],
     "contributes": {
         "languages": [

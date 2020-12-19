@@ -26,7 +26,6 @@ type CommandCLIOpts = {
 };
 type CommandCLIOptsV3 = {
   wsRoot: string;
-  vaults: string[];
 };
 
 export { CommandCLIOpts as SoilCommandCLIOpts };

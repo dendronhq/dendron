@@ -1,3 +1,5 @@
+import execa from "execa";
+
 export * from "./enginev2";
 export * from "./config";
 export * from "./drivers/file/storev2";
@@ -12,3 +14,4 @@ export * from "./workspace";
 export * from "./types";
 export * from "./history";
 export * from "./markdown";
+export { execa };

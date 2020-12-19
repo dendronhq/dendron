@@ -326,6 +326,11 @@ export class DendronWorkspace {
     return wsFolders[0] as vscode.WorkspaceFolder;
   }
 
+  get extensionDir(): string {
+    // return "/Users/kevinlin/.vscode-insiders/extensions/dendron.dendron-0.20.1-alpha.5"
+    return path.join(this.context.extensionPath);
+  }
+
   get extensionAssetsDir(): vscode.Uri {
     const assetsDir = vscode.Uri.file(
       path.join(this.context.extensionPath, "assets")

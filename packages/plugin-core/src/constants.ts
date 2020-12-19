@@ -63,7 +63,11 @@ export const DENDRON_REMOTE_VAULTS: Entry[] = [
     description: "dendron.so notes",
     data: "https://github.com/dendronhq/dendron-site-vault.git",
   },
-  { name: "aws", description: "aws notes", data: "https://github.com/dendronhq/dendron-aws-vault.git" },
+  {
+    name: "aws",
+    description: "aws notes",
+    data: "https://github.com/dendronhq/dendron-aws-vault.git",
+  },
   //{ name: "cli", description: "cli notes", data: "" },
 ];
 
@@ -482,6 +486,15 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docs: "",
     docLink: "",
     docPreview: `<a href="https://www.loom.com/share/c58edf543e234a8fa164095237579ccc"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/c58edf543e234a8fa164095237579ccc-with-play.gif"> </a>`,
+  },
+  SITE_BUILD: {
+    key: "dendron.siteBuild",
+    title: `${CMD_PREFIX} Site Build`,
+    group: "publishing",
+    desc: "build your notes",
+    docs: "",
+    docLink: "",
+    docPreview: ``,
   },
   // --- Misc
   OPEN_LINK: {

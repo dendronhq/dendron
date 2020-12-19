@@ -1,4 +1,5 @@
 export * from "./build-site";
+export * from "./build-site-v2";
 export * from "./exportPod";
 export * from "./publishNotes";
 export * from "./backfillV2";

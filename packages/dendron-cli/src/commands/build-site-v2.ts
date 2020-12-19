@@ -4,22 +4,24 @@ import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
 import { LaunchEngineServerCommand } from "./launchEngineServer";
-import { SoilCommandCLIOptsV3, SoilCommandOptsV3, SoilCommandV3 } from "./soil";
+import { SoilCommandV3 } from "./soil";
 const { compile } = require("@dendronhq/dendron-11ty");
 
 // type CommandCLIOpts = SoilCommandCLIOpts & {
 //   dryRun?: boolean;
 // };
-export type CommandCLIOpts = SoilCommandCLIOptsV3 & {
+type CommandCLIOpts = {
+  wsRoot: string;
   port?: number;
   engine?: DEngineClientV2;
+  cwd?: string;
   serve: boolean;
   stage: "dev" | "prod";
 };
-type CommandOpts = SoilCommandOptsV3 & Required<CommandCLIOpts>;
+type CommandOpts = CommandCLIOpts & { engine: DEngineClientV2 };
 type CommandOutput = {};
 
-export { CommandCLIOpts as BuildSiteCommandCLIOpts };
+export { CommandCLIOpts as BuildSiteV2CommandCLIOpts };
 
 export class BuildSiteCommandV2 extends SoilCommandV3<
   CommandCLIOpts,
@@ -42,14 +44,12 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
     let { wsRoot, engine, port, serve, stage } = args;
-    console.log("bond0");
 
     if (engine) {
       return {
         ...args,
         engine,
         wsRoot,
-        vaults: engine.vaults,
         port: port!,
         serve,
         stage,
@@ -75,29 +75,21 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
       _cmd.eval
     );
   }
+
   async execute(opts: CommandOpts) {
-    let { wsRoot, port, stage } = _.defaults(opts);
-    const ctx = "BuildSiteV2";
-    const cwd = path.join(
-      goUpTo(__dirname, "node_modules"),
-      "node_modules",
-      "@dendronhq",
-      "dendron-11ty"
-    );
-    // const cwd = path.join(
-    //   __dirname,
-    //   "..",
-    //   "..",
-    //   "..",
-    //   "node_modules/@dendronhq/dendron-11ty"
-    // );
-    console.log("bond1", cwd);
-    console.log({ ctx, wsRoot, port, stage, cwd });
+    let { wsRoot, port, stage, cwd } = _.defaults(opts, {
+      cwd: path.join(
+        goUpTo(__dirname, "node_modules"),
+        "node_modules",
+        "@dendronhq",
+        "dendron-11ty"
+      ),
+    });
     process.env["ENGINE_PORT"] = _.toString(port);
     process.env["WS_ROOT"] = wsRoot;
     process.env["STAGE"] = stage;
-    await compile({ cwd }, { serve: opts.serve, input: "." });
-    console.log("done with build site");
+    debugger;
+    await compile({ cwd }, { serve: opts.serve });
     return {};
   }
 }

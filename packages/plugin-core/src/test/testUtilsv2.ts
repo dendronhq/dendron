@@ -76,12 +76,12 @@ export function genDefaultConfig() {
         fsPath: "vault",
       },
     ],
-    site: {
+    site: DConfig.cleanSiteConfig({
       copyAssets: true,
       siteHierarchies: ["root"],
       siteRootDir: "docs",
       usePrettyRefs: true,
-    },
+    }),
   };
 }
 export function genDefaultSettings() {

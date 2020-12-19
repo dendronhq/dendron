@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.4...v0.20.1-alpha.5) (2020-12-19)
+
+**Note:** Version bump only for package @dendronhq/api-server
+
 ## [0.20.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.0...v0.20.1-alpha.1) (2020-12-17)
 
 ### Bug Fixes

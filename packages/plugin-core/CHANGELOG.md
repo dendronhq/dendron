@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.1-alpha.7](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.6...v0.20.1-alpha.7) (2020-12-19)
+
+### Enhancements
+
+- remove github light theme ([33d5708](https://github.com/dendronhq/dendron/commit/33d57086510cdaefbb8af8f72c945d6f5e02be5c))
+
 ## [0.20.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.5...v0.20.1-alpha.6) (2020-12-19)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

@@ -40,6 +40,11 @@ const config = {
         { from: path.join("assets", "static" ), to: 'static'},
       ],
     }),
+    new CopyPlugin({
+      patterns: [
+        { from: path.join("node_modules", "@dendronhq", "dendron-11ty"), to: 'dendron-11ty'},
+      ],
+    }),
   ],
   module: {
     rules: [

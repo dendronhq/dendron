@@ -126,6 +126,10 @@ export type DendronSiteConfig = {
    * Cname used for github pages
    */
   githubCname?: string;
+
+  /**
+   * Website protocol. Default is https
+   */
   siteProtocol?: "http" | "https";
 
   /** Pretty refs help you identify when content is embedded from elsewhere and provide links back to the source */

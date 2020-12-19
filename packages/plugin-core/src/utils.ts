@@ -9,7 +9,7 @@ import {
   SchemaModulePropsV2,
 } from "@dendronhq/common-all";
 import {
-  getPkgRoot,
+  goUpTo,
   resolveTilde,
   tmpDir,
   vault2Path,
@@ -150,13 +150,13 @@ export class VSCodeUtils {
 
   static getVersionFromPkg(): string {
     const pkgJSON = fs.readJSONSync(
-      path.join(getPkgRoot(__dirname), "package.json")
+      path.join(goUpTo(__dirname), "package.json")
     );
     return `${pkgJSON.version}`;
   }
 
   static createWSContext(): vscode.ExtensionContext {
-    const pkgRoot = getPkgRoot(__dirname);
+    const pkgRoot = goUpTo(__dirname);
     return ({
       extensionMode: vscode.ExtensionMode.Development,
       logPath: tmpDir().name,
@@ -176,7 +176,7 @@ export class VSCodeUtils {
 
   static getOrCreateMockContext(): vscode.ExtensionContext {
     if (!_MOCK_CONTEXT) {
-      const pkgRoot = getPkgRoot(__dirname);
+      const pkgRoot = goUpTo(__dirname);
       _MOCK_CONTEXT = ({
         extensionMode: vscode.ExtensionMode.Development,
         logPath: tmpDir().name,

@@ -1,4 +1,5 @@
 import { DEngineClientV2 } from "@dendronhq/common-all";
+import { goUpTo } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
@@ -78,13 +79,20 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
     let { wsRoot, port, stage } = _.defaults(opts);
     const ctx = "BuildSiteV2";
     const cwd = path.join(
-      __dirname,
-      "..",
-      "..",
-      "..",
-      "node_modules/@dendronhq/dendron-11ty"
+      goUpTo(__dirname, "node_modules"),
+      "node_modules",
+      "@dendronhq",
+      "dendron-11ty"
     );
-    console.log({ ctx, wsRoot, port, stage });
+    // const cwd = path.join(
+    //   __dirname,
+    //   "..",
+    //   "..",
+    //   "..",
+    //   "node_modules/@dendronhq/dendron-11ty"
+    // );
+    console.log("bond1", cwd);
+    console.log({ ctx, wsRoot, port, stage, cwd });
     process.env["ENGINE_PORT"] = _.toString(port);
     process.env["WS_ROOT"] = wsRoot;
     process.env["STAGE"] = stage;

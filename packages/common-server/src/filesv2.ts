@@ -149,7 +149,7 @@ export function file2Note(fpath: string, vault: DVault): NotePropsV2 {
   return string2Note({ content, fname, vault });
 }
 
-export function getPkgRoot(base: string, fname?: string): string {
+export function goUpTo(base: string, fname?: string): string {
   fname = fname || "package.json";
   let acc = 10;
   const lvls = [];

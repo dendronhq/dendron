@@ -44,7 +44,7 @@
     "@dendronhq/api-server": "^0.20.1-alpha.5",
     "@dendronhq/common-all": "^0.20.1-alpha.5",
     "@dendronhq/common-server": "^0.20.1-alpha.5",
-    "@dendronhq/dendron-11ty": "1.1.3",
+    "@dendronhq/dendron-11ty": "1.1.4",
     "@dendronhq/engine-server": "^0.20.1-alpha.5",
     "@dendronhq/pods-core": "^0.20.1-alpha.5",
     "fs-extra": "^9.0.1",

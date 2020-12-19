@@ -4,6 +4,7 @@
 
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
+const { IgnorePlugin } = require("webpack");
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -41,6 +42,11 @@ const config = {
     new CopyPlugin({
       patterns: [{ from: path.join("assets", "static"), to: "static" }],
     }),
+    new IgnorePlugin({
+      // resourceRegExp: /^\.\/locale$/,
+      resourceRegExp: /^@dendronhq\/dendron-11ty$/,
+      contextRegExp: /commands$/
+    })
   ],
   module: {
     rules: [

@@ -5,7 +5,6 @@ import path from "path";
 import yargs from "yargs";
 import { LaunchEngineServerCommand } from "./launchEngineServer";
 import { SoilCommandV3 } from "./soil";
-const { compile } = require("@dendronhq/dendron-11ty");
 
 // type CommandCLIOpts = SoilCommandCLIOpts & {
 //   dryRun?: boolean;
@@ -88,7 +87,7 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
     process.env["ENGINE_PORT"] = _.toString(port);
     process.env["WS_ROOT"] = wsRoot;
     process.env["STAGE"] = stage;
-    debugger;
+    const { compile } = require("@dendronhq/dendron-11ty");
     await compile({ cwd }, { serve: opts.serve });
     return {};
   }

@@ -3,7 +3,7 @@
 "use strict";
 
 const path = require("path");
-const CopyPlugin = require('copy-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -18,12 +18,12 @@ const config = {
     devtoolModuleFilenameTemplate: "../[resource-path]",
   },
   node: {
-    __dirname: false
+    __dirname: false,
   },
   devtool: "source-map",
   externals: {
     vscode: "commonjs vscode", // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
-    "pino-pretty": "pino-pretty"
+    "pino-pretty": "pino-pretty",
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
@@ -32,18 +32,14 @@ const config = {
   plugins: [
     new CopyPlugin({
       patterns: [
-        { from: path.join("node_modules", "@dendronhq", "lsp-server"), to: 'lsp-server'},
+        {
+          from: path.join("node_modules", "@dendronhq", "lsp-server"),
+          to: "lsp-server",
+        },
       ],
     }),
     new CopyPlugin({
-      patterns: [
-        { from: path.join("assets", "static" ), to: 'static'},
-      ],
-    }),
-    new CopyPlugin({
-      patterns: [
-        { from: path.join("node_modules", "@dendronhq", "dendron-11ty"), to: 'dendron-11ty'},
-      ],
+      patterns: [{ from: path.join("assets", "static"), to: "static" }],
     }),
   ],
   module: {

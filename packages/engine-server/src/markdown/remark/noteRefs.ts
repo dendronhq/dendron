@@ -117,7 +117,10 @@ function convertNoteRef(
     return { error: new DendronError({ msg: "no vault specified" }), data: "" };
   }
   let { prettyRefs, wikiLinkOpts } = compilerOpts;
-  if (!prettyRefs && dest === DendronASTDest.HTML) {
+  if (
+    !prettyRefs &&
+    _.includes([DendronASTDest.HTML, DendronASTDest.MD_ENHANCED_PREVIEW], dest)
+  ) {
     prettyRefs = true;
   }
 
@@ -131,7 +134,7 @@ function convertNoteRef(
 
   let noteRefs: DNoteLoc[] = [];
   if (link.from.fname.endsWith("*")) {
-    const resp = engine.queryNotesSync({ qs: link.from.fname });
+    const resp = engine.queryNotesSync({ qs: link.from.fname, vault });
     const out = _.filter(resp.data, (ent) =>
       DUtils.minimatch(ent.fname, link.from.fname)
     );
@@ -189,6 +192,9 @@ function convertNoteRef(
             href = "";
             suffix = "";
           }
+        }
+        if (dest === DendronASTDest.MD_ENHANCED_PREVIEW) {
+          suffix = ".md";
         }
         const link = `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`;
         return renderPretty({

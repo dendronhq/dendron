@@ -109,6 +109,18 @@ describe("compilev2", () => {
           },
         ];
       },
+      [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+        const { resp } = extra;
+        return [
+          {
+            actual: await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["foo body", "portal"],
+            }),
+            expected: true,
+          },
+        ];
+      },
     },
     preSetupHook: ENGINE_HOOKS.setupBasic,
   });
@@ -149,6 +161,19 @@ describe("compilev2", () => {
           },
         ];
       },
+      [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+        const { resp } = extra;
+        expect(resp).toMatchSnapshot();
+        return [
+          {
+            actual: await AssertUtils.assertInString({
+              body: resp.toString(),
+              match: ["# Foo", "# Foo.One", "# Foo.Two", "portal"],
+            }),
+            expected: true,
+          },
+        ];
+      },
     },
     preSetupHook: ENGINE_HOOKS.setupNoteRefRecursive,
   });
@@ -176,15 +201,10 @@ describe("compilev2", () => {
       [DendronASTDest.HTML]: async ({ extra }) => {
         const { resp } = extra;
         expect(resp).toMatchSnapshot();
-        // return [
-        //   {
-        //     actual: await AssertUtils.assertInString({
-        //       body: resp.toString(),
-        //       match: ["# Foo", "# Foo.One", "# Foo.Two", "portal"],
-        //     }),
-        //     expected: true,
-        //   },
-        // ];
+      },
+      [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+        const { resp } = extra;
+        expect(resp).toMatchSnapshot();
       },
     },
     preSetupHook: ENGINE_SERVER.NOTE_REF.WILDCARD_LINK_V4.preSetupHook,

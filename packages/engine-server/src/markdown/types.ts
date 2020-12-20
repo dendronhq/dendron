@@ -15,7 +15,7 @@ export enum DendronASTTypes {
 }
 
 export enum DendronASTDest {
-  // MD_ENHANCED_PREVIEW = "MD_ENHANCED_PREVIEW",
+  MD_ENHANCED_PREVIEW = "MD_ENHANCED_PREVIEW",
   MD_REGULAR = "MD_REGULAR",
   HTML = "HTML",
 }

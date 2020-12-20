@@ -17,6 +17,14 @@ type CompilerOpts = {
   prefix?: string;
 };
 
+function parseAnchorIfExist(link: string) {
+  if (link.indexOf("#") !== -1) {
+    return link.split("#");
+  } else {
+    return [link, undefined];
+  }
+}
+
 const plugin: Plugin<[CompilerOpts?]> = function (
   this: Unified.Processor,
   opts?: PluginOpts
@@ -66,6 +74,12 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         case DendronASTDest.MD_REGULAR: {
           const alias = data.alias ? data.alias : value;
           return `[${alias}](${copts.prefix || ""}${value})`;
+        }
+        case DendronASTDest.MD_ENHANCED_PREVIEW: {
+          const alias = data.alias ? data.alias : value;
+          return `[${alias}](${copts.prefix || ""}${
+            parseAnchorIfExist(value)[0]
+          }.md)`;
         }
         case DendronASTDest.HTML: {
           const alias = data.alias ? data.alias : value;

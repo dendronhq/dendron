@@ -228,8 +228,13 @@ export class DendronEngineClient implements DEngineClientV2 {
 
   async buildNotes() {}
 
-  queryNotesSync({ qs }: { qs: string }) {
-    const items = this.fuseEngine.queryNote({ qs });
+  queryNotesSync({ qs, vault }: { qs: string; vault?: DVault }) {
+    let items = this.fuseEngine.queryNote({ qs });
+    if (vault) {
+      items = items.filter((ent) => {
+        return VaultUtils.isEqual(ent.vault, vault, this.wsRoot);
+      });
+    }
     return {
       error: null,
       data: items.map((ent) => this.notes[ent.id]),

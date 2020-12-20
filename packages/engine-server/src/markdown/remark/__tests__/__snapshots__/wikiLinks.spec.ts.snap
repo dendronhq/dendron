@@ -55,6 +55,61 @@ VFile {
 }
 `;
 
+exports[`compilev2 MD_ENHANCED_PREVIEW "alias" 1`] = `
+VFile {
+  "contents": "[bar](foo.md)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 MD_ENHANCED_PREVIEW "regular" 1`] = `
+VFile {
+  "contents": "[foo](foo.md)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 MD_ENHANCED_PREVIEW "regularWithExtension" 1`] = `
+VFile {
+  "contents": "[foo](foo.md)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 MD_ENHANCED_PREVIEW "textString1" 1`] = `
+VFile {
+  "contents": "See the [FAQ](dendron.faq.md) for answers for
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 MD_ENHANCED_PREVIEW "withId" 1`] = `
+VFile {
+  "contents": "[foo](foo-id.md)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`compilev2 MD_REGULAR "alias" 1`] = `
 VFile {
   "contents": "[bar](foo)

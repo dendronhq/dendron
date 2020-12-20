@@ -94,11 +94,23 @@ describe("compilev2", () => {
         link: getTextString1(`[FAQ](dendron.faq)`),
       },
     },
-    // [DendronASTDest.MD_ENHANCED_PREVIEW]: {
-    //   regular: {
-    //     link: `[foo](foo)`,
-    //   },
-    // },
+    [DendronASTDest.MD_ENHANCED_PREVIEW]: {
+      regular: {
+        link: `[foo](foo.md)`,
+      },
+      regularWithExtension: {
+        link: `[foo](foo.md)`,
+      },
+      alias: {
+        link: `[bar](foo.md)`,
+      },
+      withId: {
+        link: `[foo](foo-id.md)`,
+      },
+      textString1: {
+        link: getTextString1(`[FAQ](dendron.faq.md)`),
+      },
+    },
   };
 
   const testCases = [

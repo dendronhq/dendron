@@ -1,3 +1,4 @@
+import { Time } from "@dendronhq/common-all";
 import {
   DendronConfig,
   DendronError,
@@ -18,6 +19,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DConfig } from "./config";
+import { getPortFilePath, getWSMetaFilePath, writeWSMetaFile } from "./utils";
 
 export type PathExistBehavior = "delete" | "abort" | "continue";
 
@@ -197,5 +199,23 @@ export class WorkspaceService {
     const git = simpleGit({ baseDir: repoDir });
     await git.clone(vault.remote.url);
     return repoPath;
+  }
+
+  writePort(port: number) {
+    const wsRoot = this.wsRoot;
+    const portFilePath = getPortFilePath({ wsRoot });
+    fs.writeFileSync(portFilePath, port, { encoding: "utf8" });
+  }
+
+  writeMeta(opts: { version: string }) {
+    const { version } = opts;
+    const fpath = getWSMetaFilePath({ wsRoot: this.wsRoot });
+    return writeWSMetaFile({
+      fpath,
+      data: {
+        version,
+        activationTime: Time.now().toMillis(),
+      },
+    });
   }
 }

@@ -1,16 +1,13 @@
 import {
   DendronError,
   getStage,
-  Time,
   WorkspaceUtilsCommon,
 } from "@dendronhq/common-all";
 import { readJSONWithComments } from "@dendronhq/common-server";
 import {
-  getWSMetaFilePath,
   HistoryEvent,
   HistoryService,
   WorkspaceService,
-  writeWSMetaFile,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -206,6 +203,7 @@ export async function _activate(context: vscode.ExtensionContext) {
   if (DendronWorkspace.isActive()) {
     const config = ws.config;
     const wsRoot = DendronWorkspace.wsRoot() as string;
+    const wsService = new WorkspaceService({ wsRoot });
 
     // check for remotes
     const emptyRemoteVaults = config.vaults.filter(
@@ -219,7 +217,7 @@ export async function _activate(context: vscode.ExtensionContext) {
           .map((ent) => ent.remote!.url)
           .join(", ")}. Initializing now`
       );
-      const wsService = new WorkspaceService({ wsRoot });
+
       await Promise.all(
         emptyRemoteVaults.map(async (vault) => {
           return wsService.cloneVault({ vault });
@@ -242,15 +240,8 @@ export async function _activate(context: vscode.ExtensionContext) {
     )) as WorkspaceSettings;
     const wsConfigMigrated = migrateSettings({ settings: wsConfig, config });
     Logger.info({ ctx, wsConfig, wsConfigMigrated, msg: "read wsConfig" });
+    wsService.writeMeta({ version: DendronWorkspace.version() });
 
-    const fpath = getWSMetaFilePath({ wsRoot });
-    writeWSMetaFile({
-      fpath,
-      data: {
-        version: DendronWorkspace.version(),
-        activationTime: Time.now().toMillis(),
-      },
-    });
     const installedGlobalVersion = DendronWorkspace.version();
     const previousGlobalVersion = ws.context.globalState.get<
       string | undefined
@@ -307,6 +298,7 @@ export async function _activate(context: vscode.ExtensionContext) {
     const port: number = await startServer();
     Logger.info({ ctx, msg: "post-start-server", port });
     WSUtils.updateEngineAPI(port);
+    wsService.writePort(port);
     // startLSPClient({ context, port });
     const reloadSuccess = await reloadWorkspace();
     if (!reloadSuccess) {

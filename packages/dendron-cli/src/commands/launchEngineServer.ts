@@ -41,11 +41,12 @@ export class LaunchEngineServerCommand extends SoilCommandV3<
     let { wsRoot, port } = args;
     const cwd = process.cwd();
     wsRoot = resolvePath(wsRoot, cwd);
-
     const ws = new WorkspaceService({ wsRoot });
     const vaults = ws.config.vaults;
     const vaultPaths = vaults.map((v) => resolvePath(v.fsPath, wsRoot));
     const _port = await launch({ port, logPath: process.env["LOG_DST"] });
+    ws.writeMeta({ version: "dendron-cli" });
+    ws.writePort(_port);
     const engine = DendronEngineClient.create({
       port: _port,
       vaults: vaultPaths,
@@ -62,6 +63,7 @@ export class LaunchEngineServerCommand extends SoilCommandV3<
 
   async execute(opts: CommandOpts) {
     const { port } = opts;
+    console.log(`engine runnig on port ${port}`);
 
     return {
       port: _.toInteger(port),

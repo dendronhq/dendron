@@ -14,7 +14,6 @@ import {
   tmpDir,
   vault2Path,
 } from "@dendronhq/common-server";
-import { getPortFilePath } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
@@ -339,9 +338,6 @@ export class WSUtils {
     const ws = DendronWorkspace.instance();
     ws.setEngine(EngineAPIService.create({ port }));
     ws.port = _.toInteger(port);
-    const wsRoot = DendronWorkspace.wsRoot() as string;
-    const portFilePath = getPortFilePath({ wsRoot });
-    fs.writeFileSync(portFilePath, port, { encoding: "utf8" });
     const engine = ws.getEngine();
     return engine;
   }

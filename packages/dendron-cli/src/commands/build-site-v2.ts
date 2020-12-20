@@ -14,6 +14,7 @@ type CommandCLIOpts = {
   port?: number;
   engine?: DEngineClientV2;
   cwd?: string;
+  servePort: number;
   serve: boolean;
   stage: "dev" | "prod";
 };
@@ -39,10 +40,14 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
       default: "dev",
       choices: ["dev", "prod"],
     });
+    args.option("servePort", {
+      describe: "port to serve over",
+      default: "8080",
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
-    let { wsRoot, engine, port, serve, stage } = args;
+    let { wsRoot, engine, port, serve, stage, servePort } = args;
 
     if (engine) {
       return {
@@ -52,6 +57,7 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
         port: port!,
         serve,
         stage,
+        servePort,
       };
     } else {
       const launchEngineOpts = await new LaunchEngineServerCommand().enrichArgs(
@@ -61,6 +67,7 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
         ...launchEngineOpts,
         serve,
         stage,
+        servePort,
       } as CommandOpts;
     }
   }
@@ -76,7 +83,7 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
   }
 
   async execute(opts: CommandOpts) {
-    let { wsRoot, port, stage, cwd } = _.defaults(opts, {
+    let { wsRoot, port, stage, cwd, servePort } = _.defaults(opts, {
       cwd: path.join(
         goUpTo(__dirname, "node_modules"),
         "node_modules",
@@ -87,8 +94,9 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
     process.env["ENGINE_PORT"] = _.toString(port);
     process.env["WS_ROOT"] = wsRoot;
     process.env["STAGE"] = stage;
+    process.env["ELEV_PORT"] = _.toString(servePort);
     const { compile } = require("@dendronhq/dendron-11ty");
-    await compile({ cwd }, { serve: opts.serve });
+    await compile({ cwd }, { serve: opts.serve, port: servePort });
     return {};
   }
 }

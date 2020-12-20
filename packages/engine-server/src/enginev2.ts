@@ -41,6 +41,7 @@ import _ from "lodash";
 import { DConfig } from "./config";
 import { FileStorageV2 } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
+import { ParserUtilsV2 } from "./topics/markdown/utilsv2";
 
 type DendronEngineOptsV2 = {
   wsRoot: string;
@@ -228,6 +229,7 @@ export class DendronEngineV2 implements DEngineV2 {
     if (!createIfNew && !maybeNote) {
       error = new DendronError({ status: "no_note_found" });
     }
+    await this.refreshNotesV2(changed);
     return {
       data: { note: noteNew, changed },
       error,
@@ -307,7 +309,8 @@ export class DendronEngineV2 implements DEngineV2 {
         }
         noteNew = NoteUtilsV2.create({ fname: qs, vault });
       }
-      await this.writeNote(noteNew, { newNode: true });
+      const changed = await this.writeNote(noteNew, { newNode: true });
+      await this.refreshNotesV2(changed.data);
     }
     this.logger.info({ ctx, msg: "exit" });
     let notes = items.map((ent) => this.notes[ent.id]);
@@ -322,69 +325,45 @@ export class DendronEngineV2 implements DEngineV2 {
     };
   }
 
-  // async query(
-  //   queryString: string,
-  //   mode: DNodeTypeV2,
-  //   opts?: QueryOptsV2
-  // ): Promise<EngineQueryNoteResp> {
-  //   const ctx = "Engine:query";
-  //   const cleanOpts = _.defaults(opts || {}, {
-  //     fullNode: false,
-  //     createIfNew: false,
-  //     initialQuery: false,
-  //     stub: false,
-  //   });
-  //   this.logger.info({ ctx, msg: "enter" });
-  //   let items: DNodePropsV2[] = [];
-
-  //   // ~~~ schema query
-  //   if (mode === "schema") {
-  //     throw Error("engine.query for schema is not supported");
-  //   } else {
-  //     // ~~~ note query
-  //     items = await this.fuseEngine.queryNote({ qs: queryString });
-  //     // if (queryString === "") {
-  //     //   items = [this.notes.root];
-  //     // } else if (queryString === "*") {
-  //     //   items = _.values(this.notes);
-  //     // } else {
-  //     //   const results = this.notesIndex.search(queryString);
-  //     //   items = _.map(results, (resp) => resp.item);
-  //     // }
-  //     if (cleanOpts.createIfNew) {
-  //       let noteNew: NotePropsV2;
-  //       if (items[0]?.fname === queryString && items[0]?.stub) {
-  //         noteNew = items[0];
-  //         noteNew.stub = false;
-  //       } else {
-  //         noteNew = NoteUtilsV2.create({ fname: queryString });
-  //       }
-  //       await this.writeNote(noteNew, { newNode: true });
-  //     }
-  //     if (cleanOpts.fullNode) {
-  //       throw Error("not implemented");
-  //     }
-  //   }
-
-  //   // ~~~ exit
-  //   this.logger.info({ ctx, msg: "exit" });
-  //   return {
-  //     error: null,
-  //     data: items,
-  //   };
-  // }
-
   async sync() {
     throw Error("sync not implemented");
     return {} as any;
   }
 
+  async refreshNotesV2(notes: NoteChangeEntry[]) {
+    notes.forEach((ent: NoteChangeEntry) => {
+      const { id } = ent.note;
+      //const uri = NoteUtilsV2.getURI({ note: ent.note, wsRoot: this.wsRoot });
+      if (ent.status === "delete") {
+        delete this.notes[id];
+        // this.history &&
+        //   this.history.add({ source: "engine", action: "delete", uri });
+      } else {
+        if (ent.status === "create") {
+          // this.history &&
+          //   this.history.add({ source: "engine", action: "create", uri });
+        }
+        const links = ParserUtilsV2.findLinks({ note: ent.note });
+        ent.note.links = links;
+        this.notes[id] = ent.note;
+      }
+    });
+    this.fuseEngine.updateNotesIndex(this.notes);
+  }
+
   async renameNote(opts: RenameNoteOptsV2): Promise<RespV2<RenameNotePayload>> {
-    const resp = await this.store.renameNote(opts);
-    return {
-      error: null,
-      data: resp,
-    };
+    try {
+      const resp = await this.store.renameNote(opts);
+      await this.refreshNotesV2(resp);
+      return {
+        error: null,
+        data: resp,
+      };
+    } catch (err) {
+      return {
+        error: new DendronError({ payload: err }),
+      };
+    }
   }
 
   async updateNote(
@@ -426,7 +405,7 @@ export class DendronEngineV2 implements DEngineV2 {
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
     const out = await this.store.writeNote(note, opts);
-    await this.updateIndex("note");
+    await this.refreshNotesV2(out.data);
     return out;
   }
 

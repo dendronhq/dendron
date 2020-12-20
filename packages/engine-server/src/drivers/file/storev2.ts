@@ -591,8 +591,7 @@ export class FileStorageV2 implements DStoreV2 {
           from: oldLoc,
           to: newLoc,
         });
-        const links = ParserUtilsV2.findLinks({ note: n });
-        n.links = links;
+
         return n;
       })
     );

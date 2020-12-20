@@ -233,6 +233,14 @@ export function runSingleWorkspaceTest() {}
 
 export function runMultiWorkspaceTest() {}
 
+export function addDebugServerOverride() {
+  return {
+    configOverride: {
+      "dendron.serverPort": "3005",
+    },
+  };
+}
+
 export function setupBeforeAfter(
   _this: any,
   opts?: { beforeHook?: any; afterHook?: any }

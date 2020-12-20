@@ -184,7 +184,11 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
         operations,
         async (resp, op) => {
           let acc = await resp;
-          this.L.info({ orig: op.oldUri.fsPath, replace: op.newUri.fsPath });
+          this.L.info({
+            ctx,
+            orig: op.oldUri.fsPath,
+            replace: op.newUri.fsPath,
+          });
           const resp2 = await renameCmd.execute({
             files: [op],
             silent: true,

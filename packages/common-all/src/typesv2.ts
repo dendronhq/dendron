@@ -351,7 +351,7 @@ export type DEngineV2 = DCommonProps &
     getSchema: (qs: string) => Promise<RespV2<SchemaModulePropsV2>>;
     querySchema: (qs: string) => Promise<SchemaQueryResp>;
     queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;
-    queryNotesSync({ qs }: { qs: string }): NoteQueryResp;
+    queryNotesSync({ qs }: { qs: string; vault?: DVault }): NoteQueryResp;
     renameNote: (opts: RenameNoteOptsV2) => Promise<RespV2<RenameNotePayload>>;
 
     // config

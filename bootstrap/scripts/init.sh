@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 ./bootstrap/scripts/bootstrap.sh
 ./bootstrap/scripts/build.sh
 cd packages/plugin-core/

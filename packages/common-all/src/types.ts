@@ -42,10 +42,23 @@ export interface Resp<T> {
 }
 
 export type DendronConfig = {
+  /**
+   * Dendron version. Setup by plugin
+   */
   version: number;
+  /**
+   * Configuration related to publishing notes
+   */
   site: DendronSiteConfig;
+  /**
+   * Dendron vaults in workspace.
+   * Setup by plugin.
+   */
   vaults: DVault[];
-  betaFeatures?: boolean;
+  /**
+   * Pick vault when creating new note.
+   * Docs: https://dendron.so/notes/24b176f1-685d-44e1-a1b0-1704b1a92ca0.html#specify-vault-location-when-creating-a-note
+   */
   lookupConfirmVaultOnCreate?: boolean;
 };
 
@@ -90,6 +103,7 @@ export type DendronSiteConfig = {
    * By default, the domain of your `siteHiearchies` page
    */
   siteIndex?: string;
+
   /**
    * Hiearchies to publish
    */
@@ -131,6 +145,15 @@ export type DendronSiteConfig = {
    * Website protocol. Default is https
    */
   siteProtocol?: "http" | "https";
+
+  /**
+   * If set, add edit on github to this site"
+   */
+  gh_edit_link?: string;
+  gh_edit_link_text?: string;
+  gh_edit_branch?: string;
+  gh_edit_view_mode?: string;
+  gh_edit_repository?: string;
 
   /** Pretty refs help you identify when content is embedded from elsewhere and provide links back to the source */
   usePrettyRefs?: boolean;

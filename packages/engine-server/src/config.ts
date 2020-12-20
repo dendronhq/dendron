@@ -43,18 +43,23 @@ export class DConfig {
    * fill in defaults
    */
   static cleanSiteConfig(config: DendronSiteConfig): DendronSiteConfig {
-    let out = _.defaults(config, {
+    let out: DendronSiteConfig = _.defaults(config, {
       copyAssets: true,
       usePrettyRefs: true,
       siteNotesDir: "notes",
       siteProtocol: "https",
       siteFaviconPath: "favicon.ico",
+      gh_edit_link: true,
+      gh_edit_link_text: "Edit this page on GitHub",
+      gh_edit_branch: "master",
+      gh_root: "docs/",
+      gh_edit_view_mode: "edit",
     });
     let { siteRootDir, siteHierarchies, siteIndex } = out;
     if (!siteRootDir) {
       throw `siteRootDir is undefined`;
     }
-    if (siteHierarchies.length < 1) {
+    if (_.size(siteHierarchies) < 1) {
       throw `siteHiearchies must have at least one hiearchy`;
     }
     out.siteIndex = siteIndex || siteHierarchies[0];

@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-cli",
-  "version": "0.20.1-alpha.8",
+  "version": "0.20.1-alpha.10",
   "description": "dendron-cli",
   "license": "GPLv3",
   "repository": {
@@ -40,15 +40,13 @@
     "test:watch": "LOG_PATH=/tmp/dendron-cli.test.log npm run test -- --watch",
     "test:unit:debug": "NODE_ENV=test  node --inspect node_modules/.bin/jest --runInBand"
   },
-  "peerDependencies": {
-  },
   "dependencies": {
-    "@dendronhq/dendron-11ty": "1.1.4",
-    "@dendronhq/api-server": "^0.20.1-alpha.7",
+    "@dendronhq/api-server": "^0.20.1-alpha.10",
     "@dendronhq/common-all": "^0.20.1-alpha.6",
     "@dendronhq/common-server": "^0.20.1-alpha.6",
-    "@dendronhq/engine-server": "^0.20.1-alpha.7",
-    "@dendronhq/pods-core": "^0.20.1-alpha.7",
+    "@dendronhq/dendron-11ty": "1.1.4",
+    "@dendronhq/engine-server": "^0.20.1-alpha.10",
+    "@dendronhq/pods-core": "^0.20.1-alpha.10",
     "fs-extra": "^9.0.1",
     "gray-matter": "^4.0.2",
     "lodash": "^4.17.19",

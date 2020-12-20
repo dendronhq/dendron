@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.1-alpha.10](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.9...v0.20.1-alpha.10) (2020-12-20)
+
+### Bug Fixes
+
+- refactor hiearchy miss self referential links ([00b385d](https://github.com/dendronhq/dendron/commit/00b385dd0d13e5809da012bbc88388886012b837))
+
 ## [0.20.1-alpha.9](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.8...v0.20.1-alpha.9) (2020-12-19)
 
 **Note:** Version bump only for package root

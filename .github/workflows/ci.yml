@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - github-actions
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    strategy:
+      # Allow other matrix jobs to continue after one fails, allowing us to
+      # isolate platform-specific issues.
+      fail-fast: false
+
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+        node-version:
+          - 12.x
+          - 13.x
+        suite:
+          - cli
+          - plugin
+
+    timeout-minutes: 20
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      # Retain Node modules across builds; some packages download/build binaries
+      # here.
+      - name: Restore Node modules cache
+        uses: actions/cache@v2
+        id: node-modules-cache
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.node-version }}-node-modules-
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Publish tests won't work if we haven't configured our committer details.
+      - name: Configure Git user
+        run: |
+          git config --global user.name CI
+          git config --global user.email ci@dendron.so
+
+      - name: Initialize
+        run: ./bootstrap/scripts/init.sh
+        shell: bash
+
+      - name: Run CLI tests
+        if: matrix.suite == 'cli'
+        run: ./bootstrap/scripts/test-ci-cli.sh
+        shell: bash
+        timeout-minutes: 10
+
+      - name: Run plugin tests
+        if: matrix.suite == 'plugin'
+        run: |
+          if [ "$RUNNER_OS" != "Windows" ]; then
+            Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+            export DISPLAY=':99.0'
+          fi
+          ./bootstrap/scripts/test-ci-plugin.sh
+        shell: bash
+        timeout-minutes: 10

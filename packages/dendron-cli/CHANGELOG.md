@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.1-alpha.12](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.11...v0.20.1-alpha.12) (2020-12-21)
+
+### Enhancements
+
+- pass server port when building ([61449ca](https://github.com/dendronhq/dendron/commit/61449cad6d74bd44444405b368f9c5aa2946aa62))
+
 ## [0.20.1-alpha.11](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.10...v0.20.1-alpha.11) (2020-12-20)
 
 ### Enhancements

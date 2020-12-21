@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.1-alpha.14](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.13...v0.20.1-alpha.14) (2020-12-21)
+
+### Bug Fixes
+
+- handle single hiearchy properly ([3e822a6](https://github.com/dendronhq/dendron/commit/3e822a6d659c5f4da6bd3ddad9bf1d93a5c353e3))
+
 ## [0.20.1-alpha.13](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.12...v0.20.1-alpha.13) (2020-12-21)
 
 ### Enhancements

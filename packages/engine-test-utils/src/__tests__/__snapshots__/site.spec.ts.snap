@@ -2,25 +2,25 @@
 
 exports[`SiteUtils gen no write stub 1`] = `
 Object {
-  "1f940238-142c-4ea1-aee0-8c315f563515": Object {
+  "fc378060-07e6-41e5-861a-294a9054e0c5": Object {
     "body": "",
     "children": Array [
       "foobar.ch1",
     ],
-    "created": 1608525880209,
+    "created": 1608525937498,
     "custom": Object {
       "nav_order": 1,
     },
     "data": Object {},
     "desc": "",
     "fname": "foobar",
-    "id": "1f940238-142c-4ea1-aee0-8c315f563515",
+    "id": "fc378060-07e6-41e5-861a-294a9054e0c5",
     "links": Array [],
     "parent": null,
     "stub": true,
     "title": "Foobar",
     "type": "note",
-    "updated": 1608525880209,
+    "updated": 1608525937498,
     "vault": Object {
       "fsPath": "vault1",
     },
@@ -87,7 +87,7 @@ Object {
     "fname": "foobar.ch1",
     "id": "foobar.ch1",
     "links": Array [],
-    "parent": "1f940238-142c-4ea1-aee0-8c315f563515",
+    "parent": "fc378060-07e6-41e5-861a-294a9054e0c5",
     "title": "Ch1",
     "type": "note",
     "updated": "1",
@@ -112,25 +112,25 @@ Array [
 
 exports[`SiteUtils gen write stub 1`] = `
 Object {
-  "4b5f6cfb-8f5c-458d-a24d-44717211692b": Object {
+  "5bea6988-f34f-418f-b9a9-05bad572cb19": Object {
     "body": "",
     "children": Array [
       "foobar.ch1",
     ],
-    "created": 1608525880181,
+    "created": 1608525937460,
     "custom": Object {
       "nav_order": 1,
     },
     "data": Object {},
     "desc": "",
     "fname": "foobar",
-    "id": "4b5f6cfb-8f5c-458d-a24d-44717211692b",
+    "id": "5bea6988-f34f-418f-b9a9-05bad572cb19",
     "links": Array [],
     "parent": null,
     "stub": false,
     "title": "Foobar",
     "type": "note",
-    "updated": 1608525880181,
+    "updated": 1608525937460,
     "vault": Object {
       "fsPath": "vault1",
     },
@@ -197,7 +197,7 @@ Object {
     "fname": "foobar.ch1",
     "id": "foobar.ch1",
     "links": Array [],
-    "parent": "4b5f6cfb-8f5c-458d-a24d-44717211692b",
+    "parent": "5bea6988-f34f-418f-b9a9-05bad572cb19",
     "title": "Ch1",
     "type": "note",
     "updated": "1",

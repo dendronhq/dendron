@@ -41,28 +41,44 @@ export class SiteUtils {
   static async filterByConfig(opts: {
     engine: DEngineClientV2;
     config: DendronSiteConfig;
-  }): Promise<NotePropsDictV2> {
+  }): Promise<{ notes: NotePropsDictV2; domains: NotePropsV2[] }> {
     const { engine, config } = opts;
     const { siteHierarchies } = config;
+    let domains: NotePropsV2[] = [];
     // TODO: return domains from here
     const hiearchiesToPublish = await Promise.all(
       siteHierarchies.map(async (domain, idx) => {
-        const hiearchy = await SiteUtils.filterByHiearchy({
+        const out = await SiteUtils.filterByHiearchy({
           domain,
           config: DConfig.cleanSiteConfig(config),
           engine,
           navOrder: idx,
         });
-        return hiearchy;
+        if (_.isUndefined(out)) {
+          return {};
+        }
+        domains.push(out.domain);
+        return out.notes;
       })
     );
-    return _.reduce(
-      hiearchiesToPublish,
-      (ent, acc) => {
-        return _.merge(acc, ent);
-      },
-      {}
-    );
+    // if single hiearchy, domain includes all immediate children
+    if (config.siteHierarchies.length === 1 && domains.length === 1) {
+      const rootDomain = domains[0];
+      domains = domains.concat(
+        rootDomain.children.map((id) => engine.notes[id])
+      );
+    }
+
+    return {
+      notes: _.reduce(
+        hiearchiesToPublish,
+        (ent, acc) => {
+          return _.merge(acc, ent);
+        },
+        {}
+      ),
+      domains,
+    };
   }
 
   static async filterByHiearchy(opts: {
@@ -70,7 +86,7 @@ export class SiteUtils {
     config: DendronSiteConfig;
     engine: DEngineClientV2;
     navOrder: number;
-  }): Promise<NotePropsDictV2> {
+  }): Promise<{ notes: NotePropsDictV2; domain: NotePropsV2 } | undefined> {
     const { domain, engine, navOrder, config } = opts;
 
     // get config
@@ -86,7 +102,6 @@ export class SiteUtils {
       rConfig
     );
     const dupBehavior = config.duplicateNoteBehavior;
-    debugger;
     // get the domain note
     let notes = NoteUtilsV2.getNotesByFname({
       fname: domain,
@@ -102,7 +117,7 @@ export class SiteUtils {
         );
         if (maybeDomainNote.length < 1) {
           // TODO: add warning
-          return {};
+          return;
         }
         domainNote = maybeDomainNote[0];
       } else {
@@ -110,7 +125,7 @@ export class SiteUtils {
       }
     } else if (notes.length < 1) {
       // TODO: add warning
-      return {};
+      return;
     } else {
       domainNote = { ...notes[0] };
     }
@@ -148,7 +163,7 @@ export class SiteUtils {
         };
       }
     }
-    return out;
+    return { notes: out, domain: domainNote };
   }
 
   static filterByNote(opts: {
@@ -176,9 +191,9 @@ export class SiteUtils {
     config: DendronSiteConfig;
   }): NotePropsV2[] {
     const { notes, config } = opts;
-    if (_.isEqual(config.siteHierarchies, ["root"])) {
-      // TODO: multiple roots
-      const rootNotes = NoteUtilsV2.getNotesByFname({ fname: "root", notes });
+    if (config.siteHierarchies.length === 1) {
+      const fname = config.siteHierarchies[0];
+      const rootNotes = NoteUtilsV2.getNotesByFname({ fname, notes });
       return [rootNotes[0]].concat(
         rootNotes[0].children.map((ent) => notes[ent])
       );

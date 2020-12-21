@@ -70,8 +70,12 @@ describe("SiteUtils", () => {
             siteHierarchies: ["foo", "foobar"],
             siteRootDir,
           };
-          const notes = await SiteUtils.filterByConfig({ engine, config });
+          const { notes, domains } = await SiteUtils.filterByConfig({
+            engine,
+            config,
+          });
           expect(notes).toMatchSnapshot();
+          expect(domains.length).toEqual(2);
           expect(_.size(notes)).toEqual(4);
           const vpath = vault2Path({ wsRoot, vault: vaults[0] });
           const vaultNotes = fs.readdirSync(vpath, { encoding: "utf8" });
@@ -105,7 +109,7 @@ describe("SiteUtils", () => {
             siteRootDir,
             writeStubs: false,
           };
-          const notes = await SiteUtils.filterByConfig({ engine, config });
+          const { notes } = await SiteUtils.filterByConfig({ engine, config });
           expect(notes).toMatchSnapshot();
           expect(_.size(notes)).toEqual(4);
           const vpath = vault2Path({ wsRoot, vault: vaults[0] });
@@ -142,7 +146,7 @@ describe("SiteUtils", () => {
             siteRootDir,
             usePrettyRefs: true,
           };
-          const notes = await SiteUtils.filterByConfig({ engine, config });
+          const { notes } = await SiteUtils.filterByConfig({ engine, config });
           expect(notes).toMatchSnapshot();
           expect(_.size(notes)).toEqual(1);
           checkNotes({
@@ -177,7 +181,7 @@ describe("SiteUtils", () => {
             siteRootDir,
             usePrettyRefs: true,
           };
-          const notes = await SiteUtils.filterByConfig({ engine, config });
+          const { notes } = await SiteUtils.filterByConfig({ engine, config });
           expect(notes).toMatchSnapshot();
           expect(_.size(notes)).toEqual(2);
           checkNotes({
@@ -229,12 +233,16 @@ describe("SiteUtils", () => {
               },
             },
           };
-          const notes = await SiteUtils.filterByConfig({ engine, config });
+          const { notes, domains } = await SiteUtils.filterByConfig({
+            engine,
+            config,
+          });
           const root = NoteUtilsV2.getNoteByFnameV4({
             fname: "root",
             notes: engine.notes,
             vault: vaults[0],
           });
+          expect(domains.length).toEqual(3);
           checkNotes({
             filteredNotes: notes,
             engineNotes: engine.notes,
@@ -275,7 +283,7 @@ describe("SiteUtils", () => {
               },
             },
           };
-          const notes = await SiteUtils.filterByConfig({ engine, config });
+          const { notes } = await SiteUtils.filterByConfig({ engine, config });
           checkNotes({
             filteredNotes: notes,
             engineNotes: engine.notes,
@@ -300,7 +308,7 @@ describe("SiteUtils", () => {
             siteRootDir,
             usePrettyRefs: true,
           };
-          const notes = await SiteUtils.filterByConfig({ engine, config });
+          const { notes } = await SiteUtils.filterByConfig({ engine, config });
           checkNotes({
             filteredNotes: notes,
             engineNotes: engine.notes,
@@ -323,7 +331,7 @@ describe("SiteUtils", () => {
             siteRootDir,
             usePrettyRefs: true,
           };
-          const notes = await SiteUtils.filterByConfig({ engine, config });
+          const { notes } = await SiteUtils.filterByConfig({ engine, config });
           checkNotes({
             filteredNotes: notes,
             engineNotes: engine.notes,

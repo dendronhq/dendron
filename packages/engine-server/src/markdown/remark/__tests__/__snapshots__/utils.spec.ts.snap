@@ -1,8 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`html dest "HTML: asset_prefix undefined" 1`] = `
+VFile {
+  "contents": "![alt-text](image-url.jpg)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`html dest "HTML: asset_prefix" 1`] = `
 VFile {
   "contents": "![alt-text](bond/image-url.jpg)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`html dest "MD_REGULAR: asset_prefix undefined" 1`] = `
+VFile {
+  "contents": "![alt-text](image-url.jpg)
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},

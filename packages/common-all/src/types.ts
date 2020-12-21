@@ -162,4 +162,15 @@ export type DendronSiteConfig = {
    * Control publication on a per hierarchy basis
    */
   config?: { [key: string]: HierarchyConfig };
+
+  duplicateNoteBehavior?: DuplicateNoteBehavior;
 };
+
+type UseVaultBehavior = {
+  action: "useVault";
+  payload: {
+    vault: DVault;
+  };
+};
+
+export type DuplicateNoteBehavior = UseVaultBehavior;

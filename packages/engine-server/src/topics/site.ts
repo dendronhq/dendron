@@ -6,6 +6,7 @@ import {
   NotePropsDictV2,
   NotePropsV2,
   NoteUtilsV2,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DConfig } from "../config";
@@ -18,9 +19,9 @@ import { vault2Path } from "@dendronhq/common-server";
 export class SiteUtils {
   static canPublish(opts: { note: NotePropsV2; config: HierarchyConfig }) {
     const { note, config } = opts;
-    return _.some([
+    return !_.some([
       // not blacklisted
-      note.custom?.published !== false,
+      note.custom?.published === false,
       // not whitelisted
       !config.publishByDefault && !note.custom?.published,
       // TODO: check vault
@@ -43,6 +44,7 @@ export class SiteUtils {
   }): Promise<NotePropsDictV2> {
     const { engine, config } = opts;
     const { siteHierarchies } = config;
+    // TODO: return domains from here
     const hiearchiesToPublish = await Promise.all(
       siteHierarchies.map(async (domain, idx) => {
         const hiearchy = SiteUtils.filterByHiearchy({
@@ -68,30 +70,47 @@ export class SiteUtils {
     config: DendronSiteConfig;
     engine: DEngineClientV2;
     navOrder: number;
-  }) {
-    const { domain: fname, engine, navOrder, config } = opts;
+  }): NotePropsDictV2 {
+    const { domain, engine, navOrder, config } = opts;
 
     // get config
     let rConfig: HierarchyConfig = _.defaults(
-      _.get(config, "root", {
+      _.get(config.config, "root", {
         publishByDefault: true,
         noindexByDefault: false,
         customFrontmatter: [],
       })
     );
-    let hConfig: HierarchyConfig = _.defaults(_.get(config, fname), rConfig);
-
+    let hConfig: HierarchyConfig = _.defaults(
+      _.get(config.config, domain),
+      rConfig
+    );
+    const dupBehavior = config.duplicateNoteBehavior;
+    debugger;
     // get the domain note
     let notes = NoteUtilsV2.getNotesByFname({
-      fname,
+      fname: domain,
       notes: engine.notes,
     }).filter((note) => SiteUtils.canPublish({ note, config: hConfig }));
 
     let domainNote: NotePropsV2;
     if (notes.length > 1) {
-      throw new DendronError({ msg: `mult notes found for ${fname}` });
+      if (dupBehavior) {
+        const vault = dupBehavior.payload.vault;
+        const maybeDomainNote = notes.filter((n) =>
+          VaultUtils.isEqual(n.vault, vault, engine.wsRoot)
+        );
+        if (maybeDomainNote.length < 1) {
+          // TODO: add warning
+          return {};
+        }
+        domainNote = maybeDomainNote[0];
+      } else {
+        throw new DendronError({ msg: `mult notes found for ${domain}` });
+      }
     } else if (notes.length < 1) {
-      throw new DendronError({ msg: `no notes found for ${fname}` });
+      // TODO: add warning
+      return {};
     } else {
       domainNote = { ...notes[0] };
     }
@@ -147,5 +166,21 @@ export class SiteUtils {
       ...note,
       body: stripLocalOnlyTags(note.body),
     };
+  }
+
+  static getDomains(opts: {
+    notes: NotePropsDictV2;
+    config: DendronSiteConfig;
+  }): NotePropsV2[] {
+    const { notes, config } = opts;
+    if (_.isEqual(config.siteHierarchies, ["root"])) {
+      // TODO: multiple roots
+      const rootNotes = NoteUtilsV2.getNotesByFname({ fname: "root", notes });
+      return [rootNotes[0]].concat(
+        rootNotes[0].children.map((ent) => notes[ent])
+      );
+    } else {
+      return _.filter(_.values(notes), { parent: null });
+    }
   }
 }

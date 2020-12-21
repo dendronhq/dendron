@@ -2,14 +2,10 @@ import {
   DendronSiteConfig,
   NotePropsDictV2,
   NotePropsV2,
+  NoteUtilsV2,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import {
-  file2Note,
-  note2File,
-  tmpDir,
-  vault2Path,
-} from "@dendronhq/common-server";
+import { tmpDir } from "@dendronhq/common-server";
 import {
   ENGINE_HOOKS,
   NoteTestUtilsV4,
@@ -18,7 +14,6 @@ import {
 } from "@dendronhq/common-test-utils";
 import { createEngine, SiteUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
-import path from "path";
 
 const basicSetup = (preSetupHook?: SetupHookFunction) => ({
   createEngine,
@@ -35,24 +30,24 @@ const checkNotes = (opts: {
   filteredNotes: NotePropsDictV2;
   engineNotes: NotePropsDictV2;
   match: ({
-    fname: string;
+    id: string;
   } & Partial<NotePropsV2>)[];
   noMatch?: {
-    fname: string;
+    id: string;
   }[];
 }) => {
   const { noMatch, filteredNotes, engineNotes } = opts;
   const notesActual = _.sortBy(_.values(opts.filteredNotes), "id");
   const notesExpected = _.map(opts.match, (opts) => {
-    let note = { ...engineNotes[opts.fname] };
+    let note = { ...engineNotes[opts.id] };
     note = { ...note, ...opts };
     return note;
   });
   expect(notesActual).toEqual(_.sortBy(notesExpected, "id"));
   if (noMatch) {
     expect(
-      _.every(noMatch, ({ fname }) => {
-        return !_.has(filteredNotes, fname);
+      _.every(noMatch, ({ id }) => {
+        return !_.has(filteredNotes, id);
       })
     ).toBeTruthy();
   }
@@ -73,11 +68,6 @@ describe("SiteUtils", () => {
             siteHierarchies: ["foo"],
             siteRootDir,
             usePrettyRefs: true,
-            config: {
-              root: {
-                publishByDefault: false,
-              },
-            },
           };
           const notes = await SiteUtils.filterByConfig({ engine, config });
           expect(notes).toMatchSnapshot();
@@ -85,8 +75,8 @@ describe("SiteUtils", () => {
           checkNotes({
             filteredNotes: notes,
             engineNotes: engine.notes,
-            match: [{ fname: "foo", parent: null, children: [] }],
-            noMatch: [{ fname: "foo.ch1" }],
+            match: [{ id: "foo", parent: null, children: [] }],
+            noMatch: [{ id: "foo.ch1" }],
           });
           expect(notes["foo"].children).toEqual([]);
         },
@@ -113,11 +103,6 @@ describe("SiteUtils", () => {
             siteHierarchies: ["foo"],
             siteRootDir,
             usePrettyRefs: true,
-            config: {
-              root: {
-                publishByDefault: false,
-              },
-            },
           };
           const notes = await SiteUtils.filterByConfig({ engine, config });
           expect(notes).toMatchSnapshot();
@@ -125,7 +110,7 @@ describe("SiteUtils", () => {
           checkNotes({
             filteredNotes: notes,
             engineNotes: engine.notes,
-            match: [{ fname: "foo", parent: null }, { fname: "foo.ch1" }],
+            match: [{ id: "foo", parent: null }, { id: "foo.ch1" }],
           });
         },
         {
@@ -152,13 +137,65 @@ describe("SiteUtils", () => {
       siteRootDir = tmpDir().name;
     });
 
-    test.skip("all hiearchies", async () => {
+    test("root, publish all with dup", async () => {
       await runEngineTestV4(
-        async ({ engine }) => {
+        async ({ engine, vaults }) => {
           const config: DendronSiteConfig = {
             siteHierarchies: ["root"],
             siteRootDir,
             usePrettyRefs: true,
+            duplicateNoteBehavior: {
+              action: "useVault",
+              payload: {
+                vault: vaults[0],
+              },
+            },
+            config: {
+              root: {
+                publishByDefault: true,
+              },
+            },
+          };
+          const notes = await SiteUtils.filterByConfig({ engine, config });
+          const root = NoteUtilsV2.getNoteByFnameV4({
+            fname: "root",
+            notes: engine.notes,
+            vault: vaults[0],
+          });
+          checkNotes({
+            filteredNotes: notes,
+            engineNotes: engine.notes,
+            match: [
+              { id: root!.id },
+              { id: "foo" },
+              { id: "bar" },
+              { id: "foo.ch1" },
+            ],
+          });
+        },
+        {
+          createEngine,
+          expect,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+          },
+        }
+      );
+    });
+
+    test("root, publish none with dup", async () => {
+      await runEngineTestV4(
+        async ({ engine, vaults }) => {
+          const config: DendronSiteConfig = {
+            siteHierarchies: ["root"],
+            siteRootDir,
+            usePrettyRefs: true,
+            duplicateNoteBehavior: {
+              action: "useVault",
+              payload: {
+                vault: vaults[0],
+              },
+            },
             config: {
               root: {
                 publishByDefault: false,
@@ -169,24 +206,14 @@ describe("SiteUtils", () => {
           checkNotes({
             filteredNotes: notes,
             engineNotes: engine.notes,
-            match: [
-              { fname: "foo", parent: null },
-              { fname: "bar", parent: null },
-              { fname: "foo.ch1" },
-            ],
+            match: [],
           });
         },
         {
           createEngine,
           expect,
           preSetupHook: async (opts) => {
-            ENGINE_HOOKS.setupBasic(opts);
-            const vault = opts.vaults[1];
-            const wsRoot = opts.wsRoot;
-            const npath = path.join(vault2Path({ vault, wsRoot }), "root.md");
-            const note = file2Note(npath, vault);
-            note.custom = { published: false };
-            await note2File({ note, vault, wsRoot });
+            await ENGINE_HOOKS.setupBasic(opts);
           },
         }
       );
@@ -199,17 +226,12 @@ describe("SiteUtils", () => {
             siteHierarchies: ["foo"],
             siteRootDir,
             usePrettyRefs: true,
-            config: {
-              root: {
-                publishByDefault: false,
-              },
-            },
           };
           const notes = await SiteUtils.filterByConfig({ engine, config });
           checkNotes({
             filteredNotes: notes,
             engineNotes: engine.notes,
-            match: [{ fname: "foo", parent: null }, { fname: "foo.ch1" }],
+            match: [{ id: "foo", parent: null }, { id: "foo.ch1" }],
           });
         },
         {
@@ -227,20 +249,15 @@ describe("SiteUtils", () => {
             siteHierarchies: ["foo", "bar"],
             siteRootDir,
             usePrettyRefs: true,
-            config: {
-              root: {
-                publishByDefault: false,
-              },
-            },
           };
           const notes = await SiteUtils.filterByConfig({ engine, config });
           checkNotes({
             filteredNotes: notes,
             engineNotes: engine.notes,
             match: [
-              { fname: "foo", parent: null },
-              { fname: "foo.ch1" },
-              { fname: "bar", parent: null },
+              { id: "foo", parent: null },
+              { id: "foo.ch1" },
+              { id: "bar", parent: null },
             ],
           });
         },

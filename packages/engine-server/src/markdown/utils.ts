@@ -9,6 +9,7 @@ import { Node } from "unist";
 import { Heading } from "mdast";
 import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
 import { DendronASTData, DendronASTDest } from "./types";
+import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 const toString = require("mdast-util-to-string");
 
 type ProcOpts = {
@@ -92,6 +93,7 @@ export class MDUtilsV4 {
       vault?: DVault;
       wikiLinksOpts?: WikiLinksOpts;
       noteRefOpts?: NoteRefsOpts;
+      publishOpts?: DendronPubOpts;
     }
   ) {
     const { dest, vault } = opts;
@@ -99,6 +101,9 @@ export class MDUtilsV4 {
       .data("dendron", { dest, vault } as DendronASTData)
       .use(wikiLinks, opts.wikiLinksOpts)
       .use(noteRefs, { ...opts.noteRefOpts, wikiLinkOpts: opts.wikiLinksOpts });
+    if (dest === DendronASTDest.HTML) {
+      return proc.use(dendronPub, opts.publishOpts);
+    }
     return proc;
   }
 }

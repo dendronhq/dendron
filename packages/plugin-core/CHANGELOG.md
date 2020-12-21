@@ -5,67 +5,16 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.20.1-alpha.12](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.11...v0.20.1-alpha.12) (2020-12-21)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.20.1-alpha.11](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.10...v0.20.1-alpha.11) (2020-12-20)
-
 ### Enhancements
 
 - creating engine via cli also initializes meta files ([d72f097](https://github.com/dendronhq/dendron/commit/d72f097e63d1fda065ac7ad50f85bebe99d6da66))
-
-## [0.20.1-alpha.10](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.9...v0.20.1-alpha.10) (2020-12-20)
+- remove github light theme ([33d5708](https://github.com/dendronhq/dendron/commit/33d57086510cdaefbb8af8f72c945d6f5e02be5c))
 
 ### Bug Fixes
 
 - refactor hiearchy miss self referential links ([00b385d](https://github.com/dendronhq/dendron/commit/00b385dd0d13e5809da012bbc88388886012b837))
 
-## [0.20.1-alpha.9](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.8...v0.20.1-alpha.9) (2020-12-19)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.20.1-alpha.8](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.7...v0.20.1-alpha.8) (2020-12-19)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.20.1-alpha.7](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.6...v0.20.1-alpha.7) (2020-12-19)
-
-### Enhancements
-
-- remove github light theme ([33d5708](https://github.com/dendronhq/dendron/commit/33d57086510cdaefbb8af8f72c945d6f5e02be5c))
-
-## [0.20.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.5...v0.20.1-alpha.6) (2020-12-19)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.20.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.4...v0.20.1-alpha.5) (2020-12-19)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.20.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.3...v0.20.1-alpha.4) (2020-12-17)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.20.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.2...v0.20.1-alpha.3) (2020-12-17)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.20.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.1...v0.20.1-alpha.2) (2020-12-17)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.20.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.0...v0.20.1-alpha.1) (2020-12-17)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.20.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.20.0...v0.20.1-alpha.0) (2020-12-17)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
 # [0.20.0](https://github.com/dendronhq/dendron/compare/v0.19.3-alpha.2...v0.20.0) (2020-12-14)
-
-**Note:** Version bump only for package @dendronhq/plugin-core
-
-## [0.19.3-alpha.2](https://github.com/dendronhq/dendron/compare/v0.19.3-alpha.1...v0.19.3-alpha.2) (2020-12-14)
 
 ### Bug Fixes
 

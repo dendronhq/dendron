@@ -94,7 +94,7 @@ export type DendronSiteConfig = {
   copyAssets?: boolean;
 
   /**
-   * Path to favicon. Should be somewhere inside your workspace.
+   * Path to favicon. Relative to workspace.
    * Default: "favicon.ico"
    */
   siteFaviconPath?: string;
@@ -140,11 +140,13 @@ export type DendronSiteConfig = {
 
   /**
    * Cname used for github pages
+   * - default: none
    */
   githubCname?: string;
 
   /**
-   * Website protocol. Default is https
+   * Website protocol
+   * - default: https
    */
   siteProtocol?: "http" | "https";
 

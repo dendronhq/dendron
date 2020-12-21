@@ -47,7 +47,7 @@ export class SiteUtils {
     // TODO: return domains from here
     const hiearchiesToPublish = await Promise.all(
       siteHierarchies.map(async (domain, idx) => {
-        const hiearchy = SiteUtils.filterByHiearchy({
+        const hiearchy = await SiteUtils.filterByHiearchy({
           domain,
           config: DConfig.cleanSiteConfig(config),
           engine,
@@ -65,12 +65,12 @@ export class SiteUtils {
     );
   }
 
-  static filterByHiearchy(opts: {
+  static async filterByHiearchy(opts: {
     domain: string;
     config: DendronSiteConfig;
     engine: DEngineClientV2;
     navOrder: number;
-  }): NotePropsDictV2 {
+  }): Promise<NotePropsDictV2> {
     const { domain, engine, navOrder, config } = opts;
 
     // get config
@@ -128,15 +128,18 @@ export class SiteUtils {
     const processQ = [domainNote];
     while (!_.isEmpty(processQ)) {
       const note = processQ.pop() as NotePropsV2;
-      // if (note.parent && engine.notes[note.parent].fname === config.siteIndex) {
-      //note.parent = null;
-      // }
       const maybeNote = SiteUtils.filterByNote({ note, hConfig });
       if (maybeNote) {
+        if (config.writeStubs && maybeNote.stub) {
+          maybeNote.stub = false;
+          await engine.writeNote(note);
+        }
+
         let children = maybeNote.children.map((id) => engine.notes[id]);
         children = _.filter(children, (note: NotePropsV2) =>
           SiteUtils.canPublish({ note, config: hConfig })
         );
+        config.writeStubs;
         children.forEach((n: NotePropsV2) => processQ.push(n));
         // updated children
         out[maybeNote.id] = {

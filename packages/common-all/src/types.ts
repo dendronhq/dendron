@@ -110,7 +110,7 @@ export type DendronSiteConfig = {
   siteHierarchies: string[];
 
   /**
-   * Vaults that cannot be published from
+   * Vaults that should never be published
    */
   privateVaults?: string[];
 
@@ -128,6 +128,7 @@ export type DendronSiteConfig = {
 
   /**
    * Folder where your notes will be kept. By default, "notes"
+   * @deprecated: no longer used in 11ty
    */
   siteNotesDir?: string;
 
@@ -136,6 +137,7 @@ export type DendronSiteConfig = {
    * eg. dendron.so
    */
   siteUrl?: string;
+
   /**
    * Cname used for github pages
    */
@@ -155,7 +157,10 @@ export type DendronSiteConfig = {
   gh_edit_view_mode?: string;
   gh_edit_repository?: string;
 
-  /** Pretty refs help you identify when content is embedded from elsewhere and provide links back to the source */
+  /**
+   * Pretty refs help you identify when content is embedded from
+   * elsewhere and provide links back to the source
+   */
   usePrettyRefs?: boolean;
 
   /**
@@ -163,7 +168,19 @@ export type DendronSiteConfig = {
    */
   config?: { [key: string]: HierarchyConfig };
 
+  /**
+   * When publishing in multi-vault scenario,
+   * how to handle duplicate notes
+   */
   duplicateNoteBehavior?: DuplicateNoteBehavior;
+
+  /**
+   * When publishing, should stubs be written to disk?
+   * Default: true
+   * NOTE: if this isn't set to true, will cause
+   * stub notes to be published with different ids each time
+   */
+  writeStubs?: boolean;
 };
 
 type UseVaultBehavior = {

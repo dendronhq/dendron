@@ -54,6 +54,7 @@ export class DConfig {
       gh_edit_branch: "master",
       gh_root: "docs/",
       gh_edit_view_mode: "edit",
+      writeStubs: true,
     });
     let { siteRootDir, siteHierarchies, siteIndex } = out;
     if (!siteRootDir) {

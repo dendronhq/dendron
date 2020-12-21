@@ -1,5 +1,226 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`SiteUtils gen no write stub 1`] = `
+Object {
+  "1f940238-142c-4ea1-aee0-8c315f563515": Object {
+    "body": "",
+    "children": Array [
+      "foobar.ch1",
+    ],
+    "created": 1608525880209,
+    "custom": Object {
+      "nav_order": 1,
+    },
+    "data": Object {},
+    "desc": "",
+    "fname": "foobar",
+    "id": "1f940238-142c-4ea1-aee0-8c315f563515",
+    "links": Array [],
+    "parent": null,
+    "stub": true,
+    "title": "Foobar",
+    "type": "note",
+    "updated": 1608525880209,
+    "vault": Object {
+      "fsPath": "vault1",
+    },
+  },
+  "foo": Object {
+    "body": "foo body
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {
+      "nav_order": 0,
+      "permalink": "/",
+    },
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "links": Array [],
+    "parent": null,
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+    "vault": Object {
+      "fsPath": "vault1",
+    },
+  },
+  "foo.ch1": Object {
+    "body": "foo.ch1 body
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "id": "foo.ch1",
+    "links": Array [],
+    "parent": "foo",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "ch1",
+    },
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+    "vault": Object {
+      "fsPath": "vault1",
+    },
+  },
+  "foobar.ch1": Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foobar.ch1",
+    "id": "foobar.ch1",
+    "links": Array [],
+    "parent": "1f940238-142c-4ea1-aee0-8c315f563515",
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+    "vault": Object {
+      "fsPath": "vault1",
+    },
+  },
+}
+`;
+
+exports[`SiteUtils gen no write stub 2`] = `
+Array [
+  "bar.md",
+  "foo.ch1.md",
+  "foo.md",
+  "foo.schema.yml",
+  "foobar.ch1.md",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
+exports[`SiteUtils gen write stub 1`] = `
+Object {
+  "4b5f6cfb-8f5c-458d-a24d-44717211692b": Object {
+    "body": "",
+    "children": Array [
+      "foobar.ch1",
+    ],
+    "created": 1608525880181,
+    "custom": Object {
+      "nav_order": 1,
+    },
+    "data": Object {},
+    "desc": "",
+    "fname": "foobar",
+    "id": "4b5f6cfb-8f5c-458d-a24d-44717211692b",
+    "links": Array [],
+    "parent": null,
+    "stub": false,
+    "title": "Foobar",
+    "type": "note",
+    "updated": 1608525880181,
+    "vault": Object {
+      "fsPath": "vault1",
+    },
+  },
+  "foo": Object {
+    "body": "foo body
+",
+    "children": Array [
+      "foo.ch1",
+    ],
+    "created": "1",
+    "custom": Object {
+      "nav_order": 0,
+      "permalink": "/",
+    },
+    "data": Object {},
+    "desc": "",
+    "fname": "foo",
+    "id": "foo",
+    "links": Array [],
+    "parent": null,
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "foo",
+    },
+    "title": "Foo",
+    "type": "note",
+    "updated": "1",
+    "vault": Object {
+      "fsPath": "vault1",
+    },
+  },
+  "foo.ch1": Object {
+    "body": "foo.ch1 body
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foo.ch1",
+    "id": "foo.ch1",
+    "links": Array [],
+    "parent": "foo",
+    "schema": Object {
+      "moduleId": "foo",
+      "schemaId": "ch1",
+    },
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+    "vault": Object {
+      "fsPath": "vault1",
+    },
+  },
+  "foobar.ch1": Object {
+    "body": "
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {},
+    "data": Object {},
+    "desc": "",
+    "fname": "foobar.ch1",
+    "id": "foobar.ch1",
+    "links": Array [],
+    "parent": "4b5f6cfb-8f5c-458d-a24d-44717211692b",
+    "title": "Ch1",
+    "type": "note",
+    "updated": "1",
+    "vault": Object {
+      "fsPath": "vault1",
+    },
+  },
+}
+`;
+
+exports[`SiteUtils gen write stub 2`] = `
+Array [
+  "bar.md",
+  "foo.ch1.md",
+  "foo.md",
+  "foo.schema.yml",
+  "foobar.ch1.md",
+  "foobar.md",
+  "root.md",
+  "root.schema.yml",
+]
+`;
+
 exports[`SiteUtils per note config blacklist note 1`] = `
 Object {
   "foo": Object {

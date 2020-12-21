@@ -5,8 +5,9 @@ import {
   NoteUtilsV2,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { tmpDir } from "@dendronhq/common-server";
+import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
+  AssertUtils,
   ENGINE_HOOKS,
   NoteTestUtilsV4,
   runEngineTestV4,
@@ -14,6 +15,7 @@ import {
 } from "@dendronhq/common-test-utils";
 import { createEngine, SiteUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
+import fs from "fs-extra";
 
 const basicSetup = (preSetupHook?: SetupHookFunction) => ({
   createEngine,
@@ -58,6 +60,77 @@ describe("SiteUtils", () => {
 
   beforeEach(() => {
     siteRootDir = tmpDir().name;
+  });
+
+  describe("gen", () => {
+    test("write stub", async () => {
+      await runEngineTestV4(
+        async ({ engine, vaults, wsRoot }) => {
+          const config: DendronSiteConfig = {
+            siteHierarchies: ["foo", "foobar"],
+            siteRootDir,
+          };
+          const notes = await SiteUtils.filterByConfig({ engine, config });
+          expect(notes).toMatchSnapshot();
+          expect(_.size(notes)).toEqual(4);
+          const vpath = vault2Path({ wsRoot, vault: vaults[0] });
+          const vaultNotes = fs.readdirSync(vpath, { encoding: "utf8" });
+          expect(vaultNotes).toMatchSnapshot();
+          expect(
+            await AssertUtils.assertInString({
+              body: vaultNotes.join(" "),
+              match: ["foobar.md"],
+            })
+          ).toBeTruthy();
+        },
+        {
+          ...basicSetup(async (opts) => {
+            const wsRoot = opts.wsRoot;
+            const vault = opts.vaults[0];
+            await NoteTestUtilsV4.createNote({
+              fname: "foobar.ch1",
+              vault,
+              wsRoot,
+            });
+          }),
+        }
+      );
+    });
+
+    test("no write stub", async () => {
+      await runEngineTestV4(
+        async ({ engine, vaults, wsRoot }) => {
+          const config: DendronSiteConfig = {
+            siteHierarchies: ["foo", "foobar"],
+            siteRootDir,
+            writeStubs: false,
+          };
+          const notes = await SiteUtils.filterByConfig({ engine, config });
+          expect(notes).toMatchSnapshot();
+          expect(_.size(notes)).toEqual(4);
+          const vpath = vault2Path({ wsRoot, vault: vaults[0] });
+          const vaultNotes = fs.readdirSync(vpath, { encoding: "utf8" });
+          expect(vaultNotes).toMatchSnapshot();
+          expect(
+            await AssertUtils.assertInString({
+              body: vaultNotes.join(" "),
+              nomatch: ["foobar.md"],
+            })
+          ).toBeTruthy();
+        },
+        {
+          ...basicSetup(async (opts) => {
+            const wsRoot = opts.wsRoot;
+            const vault = opts.vaults[0];
+            await NoteTestUtilsV4.createNote({
+              fname: "foobar.ch1",
+              vault,
+              wsRoot,
+            });
+          }),
+        }
+      );
+    });
   });
 
   describe("per note config", () => {

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.1-alpha.13](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.12...v0.20.1-alpha.13) (2020-12-21)
+
+### Enhancements
+
+- enable assetPrefix option ([0ae1e23](https://github.com/dendronhq/dendron/commit/0ae1e237c8c89745b42661e88f91b2fdcba28f7e))
+
 ## [0.20.1-alpha.12](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.11...v0.20.1-alpha.12) (2020-12-21)
 
 ### Enhancements

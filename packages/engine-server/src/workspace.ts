@@ -204,7 +204,7 @@ export class WorkspaceService {
   writePort(port: number) {
     const wsRoot = this.wsRoot;
     const portFilePath = getPortFilePath({ wsRoot });
-    fs.writeFileSync(portFilePath, port, { encoding: "utf8" });
+    fs.writeFileSync(portFilePath, _.toString(port), { encoding: "utf8" });
   }
 
   writeMeta(opts: { version: string }) {

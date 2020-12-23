@@ -135,6 +135,7 @@ export class SiteUtils {
     if (!domainNote.custom) {
       domainNote.custom = {};
     }
+    // set domain note settings
     domainNote.custom.nav_order = navOrder;
     domainNote.parent = null;
     domainNote.title = _.capitalize(domainNote.title);

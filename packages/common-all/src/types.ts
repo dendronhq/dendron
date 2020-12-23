@@ -100,6 +100,11 @@ export type DendronSiteConfig = {
   siteFaviconPath?: string;
 
   /**
+   * Path to site logo
+   */
+  logo?: string;
+
+  /**
    * By default, the domain of your `siteHiearchies` page
    */
   siteIndex?: string;
@@ -183,6 +188,15 @@ export type DendronSiteConfig = {
    * stub notes to be published with different ids each time
    */
   writeStubs?: boolean;
+
+  /**
+   * SEO related values
+   */
+  title?: string;
+  description?: string;
+  author?: string;
+  twitter?: string;
+  image?: string;
 };
 
 type UseVaultBehavior = {

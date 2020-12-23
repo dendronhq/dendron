@@ -35,7 +35,10 @@ export class SiteUtils {
   }) {
     const { wsRoot, vault, siteAssetsDir } = opts;
     const vaultAssetsDir = path.join(vault2Path({ wsRoot, vault }), "assets");
-    return fs.copy(path.join(vaultAssetsDir), path.join(siteAssetsDir));
+    if (fs.existsSync(vaultAssetsDir)) {
+      return fs.copy(path.join(vaultAssetsDir), path.join(siteAssetsDir));
+    }
+    return;
   }
 
   static async filterByConfig(opts: {

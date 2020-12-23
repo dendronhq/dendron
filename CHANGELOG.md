@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.21.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.0...v0.21.1-alpha.1) (2020-12-23)
+
+### Bug Fixes
+
+- check for assets folder ([dabf54e](https://github.com/dendronhq/dendron/commit/dabf54e7bb60910e7ee4d75420915020fb56a9b9))
+
+### Enhancements
+
+- exist cli if not watching ([a337cd2](https://github.com/dendronhq/dendron/commit/a337cd26ec6bcbc3b77153aff28c3e518e1bfc02))
+
 ## [0.21.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.21.0...v0.21.1-alpha.0) (2020-12-22)
 
 ### Bug Fixes

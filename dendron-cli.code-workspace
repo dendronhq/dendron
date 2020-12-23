@@ -1,54 +1,35 @@
 {
-    "folders": [
-      {
-        "path": "packages/dendron-cli"
-      },
-      {
-        "path": "packages/plugin-core"
-      },
-      {
-        "path": "packages/pods-core"
-      },
-      {
-        "path": "packages/engine-server"
-      },
-      {
-        "path": "packages/common-test-utils"
-      },
-      {
-        "path": "packages/common-all"
-      },
-      {
-        "path": "packages/seeds-core"
-      }
-    ],
-    "settings": {
-      "files.exclude": {
-        "*.d.ts": true,
-        "packages": true
-      },
-      "editor.formatOnSave": false,
-      "workbench.editor.showTabs": true,
-      "workbench.colorTheme": "Default Dark+",
-      "workbench.colorCustomizations": {
-        "activityBar.activeBackground": "#93e6fc",
-        "activityBar.activeBorder": "#fa45d4",
-        "activityBar.background": "#93e6fc",
-        "activityBar.foreground": "#15202b",
-        "activityBar.inactiveForeground": "#15202b99",
-        "activityBarBadge.background": "#fa45d4",
-        "activityBarBadge.foreground": "#15202b",
-        "statusBar.background": "#61dafb",
-        "statusBar.foreground": "#15202b",
-        "statusBarItem.hoverBackground": "#2fcefa",
-        "titleBar.activeBackground": "#61dafb",
-        "titleBar.activeForeground": "#15202b",
-        "titleBar.inactiveBackground": "#61dafb99",
-        "titleBar.inactiveForeground": "#15202b99"
-      },
-      "peacock.color": "#61dafb",
-      "vim.statusBarColorControl": false,
-      "debug.node.autoAttach": "on"
+  "folders": [
+    {
+      "path": "packages/dendron-cli"
+    },
+    {
+      "path": "packages/plugin-core"
+    },
+    {
+      "path": "packages/pods-core"
+    },
+    {
+      "path": "packages/engine-server"
+    },
+    {
+      "path": "packages/common-test-utils"
+    },
+    {
+      "path": "packages/common-all"
+    },
+    {
+      "path": "packages/seeds-core"
     }
+  ],
+  "settings": {
+    "files.exclude": {
+      "*.d.ts": true,
+      "packages": true
+    },
+    "editor.formatOnSave": false,
+    "workbench.editor.showTabs": true,
+    "vim.statusBarColorControl": false,
+    "debug.node.autoAttach": "on"
   }
-  
+}

@@ -97,6 +97,9 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
     process.env["ELEV_PORT"] = _.toString(servePort);
     const { compile } = require("@dendronhq/dendron-11ty");
     await compile({ cwd }, { serve: opts.serve, port: servePort });
+    if (!opts.serve) {
+      process.exit();
+    }
     return {};
   }
 }

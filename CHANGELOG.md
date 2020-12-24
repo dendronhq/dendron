@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.21.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.3...v0.21.1-alpha.4) (2020-12-24)
+
+### Bug Fixes
+
+- early exit ([f007ce7](https://github.com/dendronhq/dendron/commit/f007ce774a7dd55f1626c810be3a4e438d4bd993))
+
 ## [0.21.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.2...v0.21.1-alpha.3) (2020-12-24)
 
 ### Bug Fixes

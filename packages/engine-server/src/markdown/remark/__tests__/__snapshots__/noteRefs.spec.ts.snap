@@ -23,7 +23,7 @@ VFile {
 </div>
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -83,7 +83,7 @@ Regular wikilink: [foo.two](foo.two.html)
 </div>
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -109,7 +109,7 @@ foo body
 </div>
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -163,7 +163,7 @@ journal3
 </div>
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -177,7 +177,7 @@ VFile {
 ((ref:[[foo]]#foo:#*))
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -189,7 +189,7 @@ VFile {
   "contents": "((ref:[[foo]]))
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -201,7 +201,7 @@ VFile {
   "contents": "((ref:[[foo]]))
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -213,7 +213,7 @@ VFile {
   "contents": "((ref:[[journal.2020.08.*]]))
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -246,7 +246,7 @@ VFile {
 </div>
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -307,7 +307,7 @@ Regular wikilink: [foo.two](foo.two.md)
 </div>
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -334,7 +334,7 @@ foo body
 </div>
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -395,7 +395,7 @@ journal3
 </div>
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -414,7 +414,7 @@ Regular wikilink: [foo.two](foo.two)
 
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -427,7 +427,7 @@ VFile {
 
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -444,7 +444,7 @@ journal3
 
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],

@@ -112,7 +112,10 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
     const { compile } = require("@dendronhq/dendron-11ty");
     await compile({ cwd }, { serve: opts.serve, port: servePort });
     if (!opts.serve) {
-      process.exit();
+      // hack, give postBuild a chance to complete
+      setTimeout(() => {
+        process.exit();
+      }, 5000);
     }
     return {};
   }

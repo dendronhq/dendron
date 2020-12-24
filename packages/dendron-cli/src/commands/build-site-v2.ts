@@ -1,12 +1,12 @@
 import { DEngineClientV2 } from "@dendronhq/common-all";
-import { goUpTo } from "@dendronhq/common-server";
+import { goUpTo, resolvePath } from "@dendronhq/common-server";
+import { EngineConnector } from "@dendronhq/engine-server";
+import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
 import { LaunchEngineServerCommand } from "./launchEngineServer";
 import { SoilCommandV3 } from "./soil";
-import fs from "fs-extra";
-import { EngineConnector } from "@dendronhq/engine-server";
 
 // type CommandCLIOpts = SoilCommandCLIOpts & {
 //   dryRun?: boolean;
@@ -54,6 +54,7 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
     let { wsRoot, enginePort, port, serve, stage, servePort } = args;
+    wsRoot = resolvePath(wsRoot, process.cwd());
 
     if (enginePort) {
       const engineConnector = EngineConnector.getOrCreate({
@@ -79,6 +80,7 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
         serve,
         stage,
         servePort,
+        wsRoot,
       } as CommandOpts;
     }
   }

@@ -6,6 +6,7 @@ import yargs from "yargs";
 import { LaunchEngineServerCommand } from "./launchEngineServer";
 import { SoilCommandV3 } from "./soil";
 import fs from "fs-extra";
+import { EngineConnector } from "@dendronhq/engine-server";
 
 // type CommandCLIOpts = SoilCommandCLIOpts & {
 //   dryRun?: boolean;
@@ -16,6 +17,7 @@ type CommandCLIOpts = {
   engine?: DEngineClientV2;
   cwd?: string;
   servePort?: number;
+  enginePort?: number;
   serve: boolean;
   stage: "dev" | "prod";
 };
@@ -45,15 +47,23 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
       describe: "port to serve over",
       default: "8080",
     });
+    args.option("enginePort", {
+      describe: "port that engine is running on",
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
-    let { wsRoot, engine, port, serve, stage, servePort } = args;
+    let { wsRoot, enginePort, port, serve, stage, servePort } = args;
 
-    if (engine) {
+    if (enginePort) {
+      const engineConnector = EngineConnector.getOrCreate({
+        wsRoot,
+      });
+      console.log("connect to existing engine", enginePort);
+      await engineConnector.init({ portOverride: enginePort });
       return {
         ...args,
-        engine,
+        engine: engineConnector.engine,
         wsRoot,
         port: port!,
         serve,

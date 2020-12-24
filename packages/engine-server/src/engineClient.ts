@@ -284,7 +284,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   async sync(): Promise<DEngineInitRespV2> {
     const resp = await this.api.workspaceSync({ ws: this.ws });
     if (!resp.data) {
-      throw new DendronError({ msg: "no data" });
+      throw new DendronError({ msg: "no data", payload: resp });
     }
     const { notes, schemas } = resp.data;
     this.notes = notes;

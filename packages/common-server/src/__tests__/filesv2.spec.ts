@@ -5,7 +5,36 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { file2Schema, schemaModuleProps2File, tmpDir } from "../filesv2";
+import {
+  file2Schema,
+  goUpTo,
+  schemaModuleProps2File,
+  tmpDir,
+} from "../filesv2";
+
+describe("goUpTo", () => {
+  let root: string;
+  let cwd: string;
+
+  beforeEach(() => {
+    root = tmpDir().name;
+    cwd = path.join(root, "foo", "bar");
+    fs.ensureDirSync(cwd);
+  });
+
+  test("basic", () => {
+    expect(goUpTo(cwd, "foo")).toEqual(path.join(root));
+  });
+
+  // used in dendron-cli/src/commands/build-site-v2.ts
+  test("double", () => {
+    let cwd2 = path.join(cwd, "foo", "bar");
+    fs.ensureDirSync(cwd2);
+    const match1 = goUpTo(cwd2, "foo");
+    expect(match1).toEqual(cwd);
+    expect(goUpTo(path.join(match1, ".."), "foo")).toEqual(root);
+  });
+});
 
 describe("schemaModuleProps2File", () => {
   let root: string;

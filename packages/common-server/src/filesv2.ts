@@ -149,6 +149,9 @@ export function file2Note(fpath: string, vault: DVault): NotePropsV2 {
   return string2Note({ content, fname, vault });
 }
 
+/**
+ * Go to dirname that {fname} is contained in
+ */
 export function goUpTo(base: string, fname?: string): string {
   fname = fname || "package.json";
   let acc = 10;

@@ -5,6 +5,7 @@ import path from "path";
 import yargs from "yargs";
 import { LaunchEngineServerCommand } from "./launchEngineServer";
 import { SoilCommandV3 } from "./soil";
+import fs from "fs-extra";
 
 // type CommandCLIOpts = SoilCommandCLIOpts & {
 //   dryRun?: boolean;
@@ -14,7 +15,7 @@ type CommandCLIOpts = {
   port?: number;
   engine?: DEngineClientV2;
   cwd?: string;
-  servePort: number;
+  servePort?: number;
   serve: boolean;
   stage: "dev" | "prod";
 };
@@ -83,14 +84,15 @@ export class BuildSiteCommandV2 extends SoilCommandV3<
   }
 
   async execute(opts: CommandOpts) {
-    let { wsRoot, port, stage, cwd, servePort } = _.defaults(opts, {
-      cwd: path.join(
-        goUpTo(__dirname, "node_modules"),
-        "node_modules",
-        "@dendronhq",
-        "dendron-11ty"
-      ),
-    });
+    let nmPath = goUpTo(__dirname, "node_modules");
+    let cwd = path.join(nmPath, "node_modules", "@dendronhq", "dendron-11ty");
+    // fix for /home/runner/work/dendron-site/dendron-site/node_modules/@dendronhq/dendron-cli/node_modules/@dendronhq/dendron-11ty'
+    if (!fs.existsSync(cwd)) {
+      nmPath = goUpTo(path.join(nmPath, ".."), "node_modules");
+      cwd = path.join(nmPath, "node_modules", "@dendronhq", "dendron-11ty");
+    }
+    let { wsRoot, port, stage, servePort } = _.defaults(opts, {});
+    cwd = opts.cwd || cwd;
     process.env["ENGINE_PORT"] = _.toString(port);
     process.env["WS_ROOT"] = wsRoot;
     process.env["STAGE"] = stage;

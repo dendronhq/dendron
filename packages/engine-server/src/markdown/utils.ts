@@ -1,15 +1,21 @@
 import { DendronError, DEngineClientV2, DVault } from "@dendronhq/common-all";
-import remark from "remark";
-import remarkParse from "remark-parse";
-import frontmatterPlugin from "remark-frontmatter";
-import Unified, { Processor } from "unified";
-import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import _ from "lodash";
-import { Node } from "unist";
 import { Heading } from "mdast";
-import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
-import { DendronASTData, DendronASTDest } from "./types";
+import raw from "rehype-raw";
+import rehypeStringify from "rehype-stringify";
+import remark from "remark";
+import frontmatterPlugin from "remark-frontmatter";
+import remarkParse from "remark-parse";
+import remark2rehype from "remark-rehype";
+import unified from "unified";
+import Unified, { Processor } from "unified";
+import { Node } from "unist";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
+import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
+import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
+import { DendronASTData, DendronASTDest } from "./types";
+import math from "remark-math";
+import mathjax from "rehype-mathjax";
 const toString = require("mdast-util-to-string");
 
 type ProcOpts = {
@@ -105,5 +111,25 @@ export class MDUtilsV4 {
       return proc.use(dendronPub, opts.publishOpts);
     }
     return proc;
+  }
+
+  static procRehype(opts: {
+    proc?: Processor;
+    mdPlugins?: Processor[];
+    mathjax?: boolean;
+  }) {
+    const { proc, mdPlugins } = _.defaults(opts, { mdPlugins: [] });
+    let _proc = proc || unified().use(remarkParse, { gfm: true });
+    mdPlugins.forEach((p) => {
+      _proc.use(p);
+    });
+    if (opts.mathjax) {
+      _proc.use(math);
+    }
+    _proc.use(remark2rehype, { allowDangerousHtml: true }).use(raw);
+    if (opts.mathjax) {
+      _proc.use(mathjax);
+    }
+    return _proc.use(rehypeStringify);
   }
 }

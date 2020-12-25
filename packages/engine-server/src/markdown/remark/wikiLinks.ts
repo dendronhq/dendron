@@ -83,7 +83,9 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         }
         case DendronASTDest.HTML: {
           const alias = data.alias ? data.alias : value;
-          return `[${alias}](${copts.prefix || ""}${value}.html)`;
+          return `[${alias}](${copts.prefix || ""}${value}.html${
+            data.anchorHeader ? "#" + data.anchorHeader : ""
+          })`;
         }
         default:
           return `unhandled case: ${dest}`;

@@ -285,8 +285,8 @@ function renderPretty(opts: { content: string; title: string; link: string }) {
 <div id="portal-parent-anchor" class="portal-parent" markdown="1">
 <div class="portal-parent-fader-top"></div>
 <div class="portal-parent-fader-bottom"></div>        
-  
-${content}
+
+${_.trim(content)}
 
 </div>    
 </div>

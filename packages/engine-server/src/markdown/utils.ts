@@ -118,13 +118,12 @@ export class MDUtilsV4 {
     if (opts.mathOpts?.katex) {
       proc = proc.use(math);
     }
-    if (dest === DendronASTDest.HTML) {
-      return proc.use(dendronPub, {
-        ...opts.publishOpts,
-        wikiLinkOpts: opts.wikiLinksOpts,
-      });
-    }
-    return proc;
+    // if (dest === DendronASTDest.HTML) {
+    return proc.use(dendronPub, {
+      ...opts.publishOpts,
+      wikiLinkOpts: opts.wikiLinksOpts,
+    });
+    //return proc;
   }
 
   static procRehype(opts: {

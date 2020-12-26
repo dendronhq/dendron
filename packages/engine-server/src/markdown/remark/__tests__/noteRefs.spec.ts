@@ -99,16 +99,32 @@ describe("compilev2", () => {
         dest: extra.dest,
         vault: vaults[0],
       }).process(linkWithNoExtension);
-      return { resp, proc };
+
+      const proc2 = await MDUtilsV4.procFull({
+        engine,
+        wikiLinksOpts: { useId: true },
+        dest: extra.dest,
+        vault: vaults[0],
+      });
+      const resp2 = await proc2.process(linkWithNoExtension);
+      return { resp, proc, resp2 };
     },
     verifyFuncDict: {
       [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { resp } = extra;
+        const { resp, resp2 } = extra;
         expect(resp).toMatchSnapshot();
+        expect(resp2).toMatchSnapshot();
         return [
           {
             actual: await AssertUtils.assertInString({
               body: resp.toString(),
+              match: ["foo body"],
+            }),
+            expected: true,
+          },
+          {
+            actual: await AssertUtils.assertInString({
+              body: resp2.toString(),
               match: ["foo body"],
             }),
             expected: true,
@@ -129,11 +145,20 @@ describe("compilev2", () => {
         ];
       },
       [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-        const { resp } = extra;
+        const { resp, resp2 } = extra;
+        expect(resp).toMatchSnapshot();
+        expect(resp2).toMatchSnapshot();
         return [
           {
             actual: await AssertUtils.assertInString({
               body: resp.toString(),
+              match: ["foo body", "portal"],
+            }),
+            expected: true,
+          },
+          {
+            actual: await AssertUtils.assertInString({
+              body: resp2.toString(),
               match: ["foo body", "portal"],
             }),
             expected: true,

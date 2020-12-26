@@ -322,7 +322,6 @@ export function convertNoteRefAST(
         return paragraph(data);
       }
     } catch (err) {
-      debugger;
       const msg = `error reading file, ${npath}`;
       errors.push(new DendronError({ msg }));
       throw Error(msg);
@@ -495,7 +494,8 @@ function renderPrettyAST(opts: {
 </div>
 <div id="portal-parent-anchor" class="portal-parent" markdown="1">
 <div class="portal-parent-fader-top"></div>
-<div class="portal-parent-fader-bottom"></div>\n`;
+<div class="portal-parent-fader-bottom"></div>
+`;
   const bottom = `\n</div>    
 </div>`;
   return paragraph([html(top)].concat([content]).concat([html(bottom)]));

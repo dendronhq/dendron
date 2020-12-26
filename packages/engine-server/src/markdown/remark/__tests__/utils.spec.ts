@@ -129,9 +129,7 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
     }
   },
   verifyFuncDict: {
-    [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-      const { resp } = extra;
-    },
+    [DendronASTDest.MD_REGULAR]: async () => {},
     [DendronASTDest.HTML]: async ({ extra }) => {
       const { resp, respParse, respTransform } = extra;
       expect(resp).toMatchSnapshot();
@@ -149,9 +147,7 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
         })
       ).toBeTruthy();
     },
-    [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-      const { resp } = extra;
-    },
+    [DendronASTDest.MD_ENHANCED_PREVIEW]: async () => {},
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
@@ -180,9 +176,7 @@ const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
     }
   },
   verifyFuncDict: {
-    [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-      const { resp } = extra;
-    },
+    [DendronASTDest.MD_REGULAR]: async () => {},
     [DendronASTDest.HTML]: async ({ extra }) => {
       const { resp, respParse, respTransform } = extra;
       expect(resp).toMatchSnapshot();
@@ -201,9 +195,7 @@ const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
         })
       ).toBeTruthy();
     },
-    [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-      const { resp } = extra;
-    },
+    [DendronASTDest.MD_ENHANCED_PREVIEW]: async () => {},
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupNoteRefRecursive({

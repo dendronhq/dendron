@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.21.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.4...v0.21.1-alpha.5) (2020-12-26)
+
+### Bug Fixes
+
+- note refs for remarkable rendering ([5a9ae3d](https://github.com/dendronhq/dendron/commit/5a9ae3ddf7b4de25890877609baf63378bbd5a97))
+- relative links rendering in html ([a4b995c](https://github.com/dendronhq/dendron/commit/a4b995c33c81ce3b31aed9b46193306c4d3d4f98))
+
+### Enhancements
+
+- better highlight support ([605f46e](https://github.com/dendronhq/dendron/commit/605f46eb2bf59649fef285ff6120debe8972cf80))
+
 ## [0.21.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.2...v0.21.1-alpha.3) (2020-12-24)
 
 ### Enhancements

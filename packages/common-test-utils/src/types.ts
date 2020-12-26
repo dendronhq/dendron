@@ -16,7 +16,9 @@ export type SetupHookFunction<T = any> = (
   } & WorkspaceOpts
 ) => Promise<T>;
 
-export type PreSetupHookFunction<T = any> = (opts: WorkspaceOpts) => Promise<T>;
+export type PreSetupHookFunction<T = any> = (
+  opts: WorkspaceOpts & { extra?: any }
+) => Promise<T>;
 export type PreSetupHookFunctionV4<T = any> = (opts: {
   wsRoot: string;
   vault: DVault;

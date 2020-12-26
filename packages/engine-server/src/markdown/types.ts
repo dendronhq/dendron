@@ -5,7 +5,7 @@ import { WikiLinksOpts } from "./remark/wikiLinks";
 
 export type DendronASTNode = MDAST.Parent & {
   notes?: NotePropsV2[];
-  children: MDAST.Parent["children"] | DendronASTNode[];
+  children?: MDAST.Parent["children"] | DendronASTNode[];
 };
 
 export enum DendronASTTypes {

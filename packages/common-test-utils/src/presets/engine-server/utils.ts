@@ -12,11 +12,21 @@ import { SCHEMA_PRESETS_V4 } from "../schemas";
  *   - vault2:
  *     - bar
  */
-export const setupBasic: PreSetupHookFunction = async ({ vaults, wsRoot }) => {
+export const setupBasic: PreSetupHookFunction = async ({
+  vaults,
+  wsRoot,
+  extra,
+}) => {
   const vault = vaults[0];
+  // TODO: HACK
+  let props;
+  if (extra?.idv2) {
+    props = { id: "foo-id" };
+  }
   await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
     vault,
     wsRoot,
+    props,
   });
   await NOTE_PRESETS_V4.NOTE_SIMPLE_CHILD.create({
     vault,
@@ -53,12 +63,19 @@ export const setupBasicMulti: PreSetupHookFunction = async ({
 export const setupNoteRefRecursive: PreSetupHookFunction = async ({
   vaults,
   wsRoot,
+  extra,
 }) => {
   const vault = vaults[0];
+  // TODO: HACK
+  let props;
+  if (extra?.idv2) {
+    props = { id: "foo-id" };
+  }
   await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
     vault,
     wsRoot,
     body: "((ref: [[foo.one]]))",
+    props,
   });
   await NoteTestUtilsV4.createNote({
     vault,

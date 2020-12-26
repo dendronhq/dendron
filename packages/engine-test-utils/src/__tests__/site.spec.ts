@@ -74,12 +74,10 @@ describe("SiteUtils", () => {
             engine,
             config,
           });
-          expect(notes).toMatchSnapshot();
           expect(domains.length).toEqual(2);
           expect(_.size(notes)).toEqual(4);
           const vpath = vault2Path({ wsRoot, vault: vaults[0] });
           const vaultNotes = fs.readdirSync(vpath, { encoding: "utf8" });
-          expect(vaultNotes).toMatchSnapshot();
           expect(
             await AssertUtils.assertInString({
               body: vaultNotes.join(" "),
@@ -110,11 +108,9 @@ describe("SiteUtils", () => {
             writeStubs: false,
           };
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
-          expect(notes).toMatchSnapshot();
           expect(_.size(notes)).toEqual(4);
           const vpath = vault2Path({ wsRoot, vault: vaults[0] });
           const vaultNotes = fs.readdirSync(vpath, { encoding: "utf8" });
-          expect(vaultNotes).toMatchSnapshot();
           expect(
             await AssertUtils.assertInString({
               body: vaultNotes.join(" "),

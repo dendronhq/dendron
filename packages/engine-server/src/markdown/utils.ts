@@ -1,21 +1,22 @@
 import { DendronError, DEngineClientV2, DVault } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Heading } from "mdast";
+import { paragraph, root, text } from "mdast-builder";
+import katex from "rehype-katex";
 import raw from "rehype-raw";
 import rehypeStringify from "rehype-stringify";
 import remark from "remark";
 import frontmatterPlugin from "remark-frontmatter";
+import math from "remark-math";
 import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
-import unified from "unified";
-import Unified, { Processor } from "unified";
-import { Node } from "unist";
+import { default as unified, default as Unified, Processor } from "unified";
+import { Node, Parent } from "unist";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTData, DendronASTDest } from "./types";
-import math from "remark-math";
-import mathjax from "rehype-mathjax";
+
 const toString = require("mdast-util-to-string");
 
 type ProcOpts = {
@@ -30,6 +31,10 @@ export class MDUtilsV4 {
       }
     }
     return -1;
+  }
+
+  static genMDMsg(msg: string): Parent {
+    return root(paragraph(text(msg)));
   }
 
   static getDendronData(proc: Processor) {
@@ -100,15 +105,24 @@ export class MDUtilsV4 {
       wikiLinksOpts?: WikiLinksOpts;
       noteRefOpts?: NoteRefsOpts;
       publishOpts?: DendronPubOpts;
+      mathOpts?: {
+        katex?: boolean;
+      };
     }
   ) {
     const { dest, vault } = opts;
-    const proc = this.proc(opts)
+    let proc = this.proc(opts)
       .data("dendron", { dest, vault } as DendronASTData)
       .use(wikiLinks, opts.wikiLinksOpts)
       .use(noteRefs, { ...opts.noteRefOpts, wikiLinkOpts: opts.wikiLinksOpts });
+    if (opts.mathOpts?.katex) {
+      proc = proc.use(math);
+    }
     if (dest === DendronASTDest.HTML) {
-      return proc.use(dendronPub, opts.publishOpts);
+      return proc.use(dendronPub, {
+        ...opts.publishOpts,
+        wikiLinkOpts: opts.wikiLinksOpts,
+      });
     }
     return proc;
   }
@@ -121,14 +135,11 @@ export class MDUtilsV4 {
     const { proc, mdPlugins } = _.defaults(opts, { mdPlugins: [] });
     let _proc = proc || unified().use(remarkParse, { gfm: true });
     mdPlugins.forEach((p) => {
-      _proc.use(p);
+      _proc = _proc.use(p);
     });
+    _proc = _proc.use(remark2rehype, { allowDangerousHtml: true }).use(raw);
     if (opts.mathjax) {
-      _proc.use(math);
-    }
-    _proc.use(remark2rehype, { allowDangerousHtml: true }).use(raw);
-    if (opts.mathjax) {
-      _proc.use(mathjax);
+      _proc = _proc.use(katex);
     }
     return _proc.use(rehypeStringify);
   }

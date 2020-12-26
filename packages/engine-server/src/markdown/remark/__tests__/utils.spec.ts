@@ -1,4 +1,5 @@
 import {
+  AssertUtils,
   ENGINE_HOOKS,
   runEngineTestV4,
   TestPresetEntryV4,
@@ -106,9 +107,120 @@ const WITH_ASSET_PREFIX = createProcTests({
   preSetupHook: ENGINE_HOOKS.setupBasic,
 });
 
-const ALL_TEST_CASES = [...WITH_ASSET_PREFIX, ...WITH_ASSET_PREFIX_UNDEFINED];
+const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
+  name: "NOTE_REF_WITH_REHYPE",
+  setupFunc: async ({ engine, vaults, extra }) => {
+    const proc = await MDUtilsV4.procFull({
+      engine,
+      wikiLinksOpts: { useId: true },
+      dest: extra.dest,
+      vault: vaults[0],
+    });
+    const txt = `((ref: [[foo.md]]))`;
+    if (extra.dest === DendronASTDest.HTML) {
+      const procRehype = MDUtilsV4.procRehype({ proc });
+      const resp = await procRehype.process(txt);
+      const respParse = await procRehype.parse(txt);
+      const respTransform = await procRehype.run(respParse);
+      return { resp, proc, respParse, respTransform };
+    } else {
+      const resp = await proc.process(txt);
+      return { resp, proc };
+    }
+  },
+  verifyFuncDict: {
+    [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+      const { resp } = extra;
+    },
+    [DendronASTDest.HTML]: async ({ extra }) => {
+      const { resp, respParse, respTransform } = extra;
+      expect(resp).toMatchSnapshot();
+      expect(respParse).toMatchSnapshot();
+      expect(respTransform).toMatchSnapshot();
+      expect(
+        await AssertUtils.assertInString({
+          body: resp.contents,
+          match: [
+            // link by id
+            `<a href=\"foo-id.html\"`,
+            // html quoted
+            `<p>foo body</p>`,
+          ],
+        })
+      ).toBeTruthy();
+    },
+    [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+      const { resp } = extra;
+    },
+  },
+  preSetupHook: async (opts) => {
+    await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
+  },
+});
 
-describe("html dest", () => {
+const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
+  name: "NOTE_REF_RECURSIVE_WITH_REHYPE",
+  setupFunc: async ({ engine, vaults, extra }) => {
+    const proc = await MDUtilsV4.procFull({
+      engine,
+      wikiLinksOpts: { useId: true },
+      dest: extra.dest,
+      vault: vaults[0],
+    });
+    const txt = `((ref: [[foo.md]]))`;
+    if (extra.dest === DendronASTDest.HTML) {
+      const procRehype = MDUtilsV4.procRehype({ proc });
+      const resp = await procRehype.process(txt);
+      const respParse = await procRehype.parse(txt);
+      const respTransform = await procRehype.run(respParse);
+      return { resp, proc, respParse, respTransform };
+    } else {
+      const resp = await proc.process(txt);
+      return { resp, proc };
+    }
+  },
+  verifyFuncDict: {
+    [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+      const { resp } = extra;
+    },
+    [DendronASTDest.HTML]: async ({ extra }) => {
+      const { resp, respParse, respTransform } = extra;
+      expect(resp).toMatchSnapshot();
+      expect(respParse).toMatchSnapshot();
+      expect(respTransform).toMatchSnapshot();
+      expect(
+        await AssertUtils.assertInString({
+          body: resp.contents,
+          match: [
+            // link by id
+            `<a href=\"foo-id.html\"`,
+            // html quoted
+            `<h1>Foo.One</h1>`,
+            `<h1>Foo.Two</h1>`,
+          ],
+        })
+      ).toBeTruthy();
+    },
+    [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+      const { resp } = extra;
+    },
+  },
+  preSetupHook: async (opts) => {
+    await ENGINE_HOOKS.setupNoteRefRecursive({
+      ...opts,
+      extra: { idv2: true },
+    });
+  },
+});
+
+const ALL_TEST_CASES = [
+  ...WITH_ASSET_PREFIX,
+  ...WITH_ASSET_PREFIX_UNDEFINED,
+  ...NOTE_REF_BASIC_WITH_REHYPE,
+  ...NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE,
+];
+
+describe("MDUtils.proc", () => {
   test.each(
     ALL_TEST_CASES.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
   )("%p", async (_key, testCase: TestPresetEntryV4) => {

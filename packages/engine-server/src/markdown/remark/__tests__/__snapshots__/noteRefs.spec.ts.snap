@@ -13,7 +13,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
+
 <div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
@@ -24,7 +24,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
+
 # Foo.One
 
 <div class=\\"portal-container\\">
@@ -37,7 +37,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
+
 # Foo.Two
 
 blah
@@ -47,7 +47,6 @@ blah
 
 </div>    
 </div>
-
 
 </div>    
 </div>
@@ -72,9 +71,8 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
-foo body
 
+foo body
 
 </div>    
 </div>
@@ -99,9 +97,8 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
-journal1
 
+journal1
 
 </div>    
 </div>
@@ -117,9 +114,8 @@ journal1
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
-journal2
 
+journal2
 
 </div>    
 </div>
@@ -135,9 +131,8 @@ journal2
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
-journal3
 
+journal3
 
 </div>    
 </div>
@@ -162,7 +157,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
+
 <div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
@@ -173,7 +168,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
+
 # Foo.One
 
 <div class=\\"portal-container\\">
@@ -186,7 +181,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
+
 # Foo.Two
 
 blah
@@ -196,7 +191,6 @@ blah
 
 </div>    
 </div>
-
 
 </div>    
 </div>
@@ -221,9 +215,8 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
-journal1
 
+journal1
 
 </div>    
 </div>
@@ -239,9 +232,8 @@ journal1
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
-journal2
 
+journal2
 
 </div>    
 </div>
@@ -257,9 +249,8 @@ journal2
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
-  
-journal3
 
+journal3
 
 </div>    
 </div>
@@ -312,6 +303,61 @@ journal3
 }
 `;
 
+exports[`parse doesn't parse inline code block: bond 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 22,
+              "line": 1,
+              "offset": 21,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "type": "inlineCode",
+          "value": "((ref: [[foo.md]]))",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 22,
+          "line": 1,
+          "offset": 21,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 22,
+      "line": 1,
+      "offset": 21,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
 exports[`parse init 1`] = `
 Object {
   "children": Array [
@@ -345,6 +391,151 @@ Object {
           },
           "type": "refLink",
           "value": "ref: [[foo",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 20,
+          "line": 1,
+          "offset": 19,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 20,
+      "line": 1,
+      "offset": 19,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`parse init with inject 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "ref: [[foo",
+            "link": Object {
+              "data": Object {
+                "type": "file",
+              },
+              "from": Object {
+                "fname": "foo",
+              },
+              "type": "ref",
+            },
+          },
+          "position": Position {
+            "end": Object {
+              "column": 20,
+              "line": 1,
+              "offset": 19,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "type": "refLink",
+          "value": "ref: [[foo",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 20,
+          "line": 1,
+          "offset": 19,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 20,
+      "line": 1,
+      "offset": 19,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`parse init with inject 2`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "children": Array [
+            Object {
+              "children": Array [
+                Object {
+                  "position": Position {
+                    "end": Object {
+                      "column": 9,
+                      "line": 1,
+                      "offset": 8,
+                    },
+                    "indent": Array [],
+                    "start": Object {
+                      "column": 1,
+                      "line": 1,
+                      "offset": 0,
+                    },
+                  },
+                  "type": "text",
+                  "value": "foo body",
+                },
+              ],
+              "position": Position {
+                "end": Object {
+                  "column": 9,
+                  "line": 1,
+                  "offset": 8,
+                },
+                "indent": Array [],
+                "start": Object {
+                  "column": 1,
+                  "line": 1,
+                  "offset": 0,
+                },
+              },
+              "type": "paragraph",
+            },
+          ],
+          "type": "paragraph",
         },
       ],
       "position": Position {

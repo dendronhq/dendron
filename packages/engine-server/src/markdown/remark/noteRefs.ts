@@ -9,11 +9,18 @@ import {
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
+import { html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
-import { Node } from "unist";
+import { Node, Parent } from "unist";
+import visit from "unist-util-visit";
 import { parseDendronRef } from "../../utils";
-import { DendronASTDest, DendronASTNode, NoteRefNoteV4 } from "../types";
+import {
+  DendronASTDest,
+  DendronASTNode,
+  NoteRefDataV4,
+  NoteRefNoteV4,
+} from "../types";
 import { MDUtilsV4 } from "../utils";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
@@ -214,6 +221,186 @@ function convertNoteRef(
   return { error, data: out.join("\n") };
 }
 
+export function convertNoteRefAST(
+  opts: ConvertNoteRefOpts
+): { error: DendronError | undefined; data: Parent[] | undefined } {
+  let errors: DendronError[] = [];
+  const { link, proc, compilerOpts } = opts;
+  const refLvl = MDUtilsV4.getNoteRefLvl(proc());
+  const { dest, vault } = MDUtilsV4.getDendronData(proc);
+  if (!vault) {
+    return { error: new DendronError({ msg: "no vault specified" }), data: [] };
+  }
+  let { prettyRefs, wikiLinkOpts } = compilerOpts;
+  if (
+    !prettyRefs &&
+    _.includes([DendronASTDest.HTML, DendronASTDest.MD_ENHANCED_PREVIEW], dest)
+  ) {
+    prettyRefs = true;
+  }
+
+  if (refLvl >= MAX_REF_LVL) {
+    return {
+      error: new DendronError({ msg: "too many nested note refs" }),
+      data: [MDUtilsV4.genMDMsg("too many nested note refs")],
+    };
+  }
+  const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
+
+  let noteRefs: DNoteLoc[] = [];
+  if (link.from.fname.endsWith("*")) {
+    const resp = engine.queryNotesSync({ qs: link.from.fname, vault });
+    const out = _.filter(resp.data, (ent) =>
+      DUtils.minimatch(ent.fname, link.from.fname)
+    );
+    noteRefs = _.sortBy(
+      out.map((ent) => NoteUtilsV2.toNoteLoc(ent)),
+      "fname"
+    );
+  } else {
+    noteRefs.push(link.from);
+  }
+  const out: Parent[] = noteRefs.map((ref) => {
+    const fname = ref.fname;
+    const alias = ref.alias;
+    // TODO: find first unit with path
+    const npath = DNodeUtilsV2.getFullPath({
+      wsRoot: engine.wsRoot,
+      vault,
+      basename: fname + ".md",
+    });
+    try {
+      const note = file2Note(npath, vault);
+      const body = note.body;
+      const { error, data } = convertNoteRefHelperAST({
+        body,
+        link,
+        refLvl: refLvl + 1,
+        proc,
+        compilerOpts,
+      });
+      if (error) {
+        errors.push(error);
+      }
+      if (prettyRefs) {
+        let suffix = "";
+        let href = fname;
+        if (wikiLinkOpts?.useId) {
+          const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+            fname,
+            notes: engine.notes,
+            vault,
+          });
+          if (!maybeNote) {
+            throw Error("error with ref");
+            //return `error with ${ref}`;
+          }
+          href = maybeNote?.id;
+        }
+        if (dest === DendronASTDest.HTML) {
+          const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+            fname,
+            notes: engine.notes,
+            vault,
+          });
+          suffix = ".html";
+          if (maybeNote?.custom.permalink === "/") {
+            href = "";
+            suffix = "";
+          }
+        }
+        if (dest === DendronASTDest.MD_ENHANCED_PREVIEW) {
+          suffix = ".md";
+        }
+        const link = `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`;
+        return renderPrettyAST({
+          content: data,
+          title: alias || fname || "no title",
+          link,
+        });
+      } else {
+        return paragraph(data);
+      }
+    } catch (err) {
+      debugger;
+      const msg = `error reading file, ${npath}`;
+      errors.push(new DendronError({ msg }));
+      throw Error(msg);
+      // return msg;
+    }
+  });
+  return { error, data: out };
+}
+
+function convertNoteRefHelperAST(
+  opts: ConvertNoteRefHelperOpts
+): Required<RespV2<Parent>> {
+  const { body, proc, refLvl, link } = opts;
+  const noteRefProc = proc();
+  MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
+  const bodyAST = noteRefProc.parse(body) as DendronASTNode;
+  const { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {
+    anchorStartOffset: 0,
+  });
+
+  // TODO: can i just strip frontmatter when reading?
+  let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
+  let anchorEndIndex = bodyAST.children.length;
+
+  if (anchorStart) {
+    anchorStartIndex = findHeader(bodyAST.children, anchorStart);
+    if (anchorStartIndex < 0) {
+      const data = MDUtilsV4.genMDMsg("Start anchor ${anchorStart} not found");
+      return { data, error: null };
+    }
+  }
+
+  if (anchorEnd) {
+    anchorEndIndex = findHeader(
+      bodyAST.children.slice(anchorStartIndex + 1),
+      anchorEnd
+    );
+    if (anchorEndIndex < 0) {
+      const data = MDUtilsV4.genMDMsg("end anchor ${anchorEnd} not found");
+      return { data, error: null };
+    }
+    anchorEndIndex += anchorStartIndex + 1;
+  }
+  // slice of interested range
+  try {
+    const out = root(
+      bodyAST.children.slice(
+        anchorStartIndex + anchorStartOffset,
+        anchorEndIndex
+      )
+    );
+    visit(out, (node, _idx, parent) => {
+      if (node.type === "refLink") {
+        const ndata = node.data as NoteRefDataV4;
+        const copts = opts.compilerOpts;
+        const { data } = convertNoteRefAST({
+          link: ndata.link,
+          proc,
+          compilerOpts: copts,
+        });
+        if (data) {
+          parent!.children = data;
+        }
+      }
+    });
+    //const _out = noteRefProc.runSync(out) as Parent
+    return { error: null, data: out };
+  } catch (err) {
+    return {
+      error: new DendronError({
+        msg: "error processing note ref",
+        payload: err,
+      }),
+      data: MDUtilsV4.genMDMsg("error processing ref"),
+    };
+  }
+}
+
 function convertNoteRefHelper(
   opts: ConvertNoteRefHelperOpts
 ): Required<RespV2<string>> {
@@ -244,7 +431,7 @@ function convertNoteRefHelper(
     }
     anchorEndIndex += anchorStartIndex + 1;
   }
-  // interested range
+  // slice of interested range
   try {
     bodyAST.children = bodyAST.children.slice(anchorStartIndex, anchorEndIndex);
     let out = noteRefProc
@@ -291,6 +478,27 @@ ${_.trim(content)}
 </div>    
 </div>
 `;
+}
+
+function renderPrettyAST(opts: {
+  content: Parent;
+  title: string;
+  link: string;
+}) {
+  const { content, title, link } = opts;
+  const top = `<div class="portal-container">
+<div class="portal-head">
+<div class="portal-backlink" >
+<div class="portal-title">From <span class="portal-text-title">${title}</span></div>
+<a href=${link} class="portal-arrow">Go to text <span class="right-arrow">→</span></a>
+</div>
+</div>
+<div id="portal-parent-anchor" class="portal-parent" markdown="1">
+<div class="portal-parent-fader-top"></div>
+<div class="portal-parent-fader-bottom"></div>\n`;
+  const bottom = `\n</div>    
+</div>`;
+  return paragraph([html(top)].concat([content]).concat([html(bottom)]));
 }
 
 export { plugin as noteRefs };

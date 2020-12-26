@@ -8,6 +8,7 @@ import {
 } from "@dendronhq/common-test-utils";
 import { DendronASTData, DendronASTDest } from "../../types";
 import { MDUtilsV4 } from "../../utils";
+import { dendronPub } from "../dendronPub";
 import { noteRefs, NoteRefsOpts } from "../noteRefs";
 import { createEngine } from "./utils";
 
@@ -21,7 +22,7 @@ function proc(
     .use(noteRefs, opts);
 }
 
-describe.skip("parse", () => {
+describe("parse", () => {
   let engine: any;
   let dest: DendronASTDest.MD_REGULAR;
 
@@ -30,6 +31,24 @@ describe.skip("parse", () => {
     expect(resp).toMatchSnapshot();
     // @ts-ignore
     expect(resp.children[0].children[0].type).toEqual("refLink");
+  });
+
+  test("init with inject", async () => {
+    await runEngineTestV4(
+      async ({ engine, vaults }) => {
+        let _proc = proc(engine, { dest, vault: vaults[0] }).use(dendronPub);
+        const resp = _proc.parse(`((ref: [[foo.md]]))`);
+        expect(resp).toMatchSnapshot();
+        const resp2 = _proc.runSync(resp);
+        expect(resp2).toMatchSnapshot();
+        return;
+      },
+      {
+        expect,
+        createEngine,
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+      }
+    );
   });
 
   test("doesn't parse inline code block", () => {

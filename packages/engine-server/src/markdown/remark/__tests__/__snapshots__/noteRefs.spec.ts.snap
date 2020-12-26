@@ -230,7 +230,8 @@ foo body
 
 exports[`compilev2 compile "MD_ENHANCED_PREVIEW: regular" 2`] = `
 VFile {
-  "contents": "<div class=\\"portal-container\\">
+  "contents": "
+<div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
@@ -239,7 +240,8 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div>        
+
 foo body
 
 </div>    

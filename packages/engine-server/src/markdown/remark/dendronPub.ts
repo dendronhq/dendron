@@ -16,7 +16,10 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const { dest } = MDUtilsV4.getDendronData(proc);
   function transformer(tree: Node, _file: VFile) {
     visit(tree, (node, _idx, parent) => {
-      if (node.type === "refLink") {
+      if (
+        node.type === "refLink" &&
+        dest !== DendronASTDest.MD_ENHANCED_PREVIEW
+      ) {
         const ndata = node.data as NoteRefDataV4;
         const copts: NoteRefsOpts = {
           wikiLinkOpts: opts?.wikiLinkOpts,

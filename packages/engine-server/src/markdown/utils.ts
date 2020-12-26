@@ -16,6 +16,7 @@ import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTData, DendronASTDest } from "./types";
+import highlight from "remark-highlight.js";
 
 const toString = require("mdast-util-to-string");
 
@@ -133,6 +134,7 @@ export class MDUtilsV4 {
   }) {
     const { proc, mdPlugins } = _.defaults(opts, { mdPlugins: [] });
     let _proc = proc || unified().use(remarkParse, { gfm: true });
+    _proc = _proc.use(highlight);
     mdPlugins.forEach((p) => {
       _proc = _proc.use(p);
     });

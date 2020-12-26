@@ -2,6 +2,7 @@ import { DendronError, DEngineClientV2, DVault } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Heading } from "mdast";
 import { paragraph, root, text } from "mdast-builder";
+// @ts-ignore
 import katex from "rehype-katex";
 import raw from "rehype-raw";
 import rehypeStringify from "rehype-stringify";
@@ -16,6 +17,7 @@ import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTData, DendronASTDest } from "./types";
+// @ts-ignore
 import highlight from "remark-highlight.js";
 
 const toString = require("mdast-util-to-string");

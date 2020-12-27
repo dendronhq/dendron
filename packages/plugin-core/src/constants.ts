@@ -1,3 +1,5 @@
+import { truncateSync } from "fs";
+
 export const DENDRON_WS_NAME = "dendron.code-workspace";
 export const extensionQualifiedId = `dendron.dendron`;
 export const DEFAULT_LEGACY_VAULT_NAME = "vault";
@@ -73,9 +75,23 @@ export const DENDRON_REMOTE_VAULTS: Entry[] = [
 
 export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   // --- Notes
+  PASTE_LINK: {
+    key: "dendron.pasteLink",
+    title: `${CMD_PREFIX} paste link`,
+    group: "notes",
+    desc: "Copy wiki link to note",
+    docLink: "dendron.topic.commands.md",
+    docPreview:
+      "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/command.copy-link.gif)",
+    keybindings: {
+      key: "shift+ctrl+v",
+      mac: "shift+cmd+v",
+      when: "editorFocus",
+    },
+  },
   CONTRIBUTE: {
     key: "dendron.contributeToCause",
-    // no prefix, we don't want to show this command
+    // no prefix, we don't want to show   this command
     title: `${CMD_PREFIX} Contribute`,
     group: "lookup",
     desc: "Become an environmentalist and keep Dendron sustainable",

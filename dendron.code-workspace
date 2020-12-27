@@ -59,8 +59,16 @@
         },
         "editor.formatOnSave": false,
         "workbench.editor.showTabs": true,
-       
         "editor.snippetSuggestions": "none",
-        "debug.node.autoAttach": "on"
+        "debug.node.autoAttach": "on",
+        "dendron.rootDir": ".",
+        "files.autoSave": "onFocusChange",
+        "pasteImage.path": "${currentFileDir}/assets/images",
+        "pasteImage.prefix": "/",
+        "markdown-preview-enhanced.enableWikiLinkSyntax": true,
+        "markdown-preview-enhanced.wikiLinkFileExtension": ".md",
+        "editor.suggest.snippetsPreventQuickSuggestions": false,
+        "editor.suggest.showSnippets": true,
+        "editor.tabCompletion": "on"
     }
 }

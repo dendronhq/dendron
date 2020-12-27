@@ -33,6 +33,7 @@ import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
 import { SiteBuildCommand } from "./SiteBuild";
+import { PasteLinkCommand } from "./PasteLink";
 
 const ALL_COMMANDS = [
   ArchiveHierarchyCommand,
@@ -72,6 +73,7 @@ const ALL_COMMANDS = [
   UpgradeSettingsCommand,
   VaultAddCommand,
   VaultRemoveCommand,
+  PasteLinkCommand,
 ] as CodeCommandConstructor[];
 
 // when("betaFeatures", ()=> {

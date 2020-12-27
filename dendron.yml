@@ -1,0 +1,11 @@
+version: 1
+vaults:
+    -
+        fsPath: packages/common-all
+site:
+    copyAssets: true
+    siteHierarchies:
+        - root
+    siteRootDir: docs
+    siteProtocol: https
+    usePrettyRefs: true

@@ -163,6 +163,13 @@
         },
         "commands": [
             {
+                "command": "dendron.pasteLink",
+                "title": "Dendron: paste link",
+                "desc": "Copy wiki link to note",
+                "docLink": "dendron.topic.commands.md",
+                "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/command.copy-link.gif)"
+            },
+            {
                 "command": "dendron.contributeToCause",
                 "title": "Dendron: Contribute",
                 "desc": "Become an environmentalist and keep Dendron sustainable",
@@ -378,6 +385,14 @@
                 "docPreview": "<a href=\"https://www.loom.com/share/c58edf543e234a8fa164095237579ccc\"> <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/c58edf543e234a8fa164095237579ccc-with-play.gif\"> </a>"
             },
             {
+                "command": "dendron.siteBuild",
+                "title": "Dendron: Site Build",
+                "desc": "build your notes",
+                "docs": "",
+                "docLink": "",
+                "docPreview": ""
+            },
+            {
                 "command": "dendron.openLink",
                 "title": "Dendron: Open Link",
                 "desc": "Open link to external file (eg. pdf, .mov, etc) use system default",
@@ -442,6 +457,12 @@
             }
         ],
         "keybindings": [
+            {
+                "command": "dendron.pasteLink",
+                "key": "shift+ctrl+v",
+                "mac": "shift+cmd+v",
+                "when": "editorFocus"
+            },
             {
                 "command": "dendron.createDailyJournalNote",
                 "key": "ctrl+shift+i",

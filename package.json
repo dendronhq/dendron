@@ -41,6 +41,7 @@
   "dependencies": {
     "@dendronhq/conventional-changelog-dendron": "^5.0.11",
     "github-slugger": "^1.3.0",
-    "nodegit": "^0.27.0"
+    "nodegit": "^0.27.0",
+    "open-graph-scraper": "^4.7.1"
   }
 }

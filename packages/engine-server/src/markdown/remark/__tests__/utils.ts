@@ -6,6 +6,7 @@ import {
 } from "@dendronhq/common-test-utils";
 import { DendronEngineV2 } from "../../../enginev2";
 import { DendronASTDest } from "../../types";
+import _ from "lodash";
 
 export const basicSetup = async ({ wsRoot, vaults }: WorkspaceOpts) => {
   await NoteTestUtilsV4.createNote({
@@ -26,23 +27,52 @@ export const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
 export const createProcTests = (opts: {
   name: string;
   setupFunc: TestPresetEntryV4["testFunc"];
-  verifyFuncDict: { [key in DendronASTDest]: TestPresetEntryV4["testFunc"] };
+  verifyFuncDict?: { [key in DendronASTDest]?: TestPresetEntryV4["testFunc"] };
+  verifyFuncAll?: TestPresetEntryV4["testFunc"];
   preSetupHook?: TestPresetEntryV4["preSetupHook"];
 }) => {
   const { name, setupFunc, verifyFuncDict } = opts;
-  return Object.values(DendronASTDest).map((dest) => {
-    // return [DendronASTDest.HTML].map((dest) => {
-    const verifyFunc = verifyFuncDict[dest];
-    return {
-      name,
-      dest,
-      testCase: new TestPresetEntryV4(
-        async (presetOpts) => {
-          const extra = await setupFunc({ ...presetOpts, extra: { dest } });
-          return await verifyFunc({ ...presetOpts, extra });
-        },
-        { preSetupHook: opts.preSetupHook }
-      ),
-    };
-  });
+  let allTests: any = [];
+  if (verifyFuncDict) {
+    allTests = Object.values(DendronASTDest)
+      .map((dest) => {
+        const verifyFunc = verifyFuncDict[dest];
+        if (verifyFunc) {
+          return {
+            name,
+            dest,
+            testCase: new TestPresetEntryV4(
+              async (presetOpts) => {
+                const extra = await setupFunc({
+                  ...presetOpts,
+                  extra: { dest },
+                });
+                return await verifyFunc({ ...presetOpts, extra });
+              },
+              { preSetupHook: opts.preSetupHook }
+            ),
+          };
+        }
+      })
+      .filter((ent) => !_.isUndefined(ent));
+  }
+  // if (verifyFuncAll) {
+  //   allTests = allTests.concat(
+  //     Object.values(DendronASTDest).map((dest) => {
+  //       const verifyFunc = verifyFuncAll;
+  //       return {
+  //         name,
+  //         dest,
+  //         testCase: new TestPresetEntryV4(
+  //           async (presetOpts) => {
+  //             const extra = await setupFunc({ ...presetOpts, extra: { dest } });
+  //             return await verifyFunc({ ...presetOpts, extra });
+  //           },
+  //           { preSetupHook: opts.preSetupHook }
+  //         ),
+  //       };
+  //     })
+  //   );
+  // }
+  return allTests;
 };

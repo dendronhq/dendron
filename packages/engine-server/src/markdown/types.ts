@@ -23,6 +23,7 @@ export enum DendronASTDest {
 export type DendronASTData = {
   dest: DendronASTDest;
   vault?: DVault;
+  fname?: string;
   wikiLinkOpts?: WikiLinksOpts;
 };
 

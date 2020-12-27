@@ -89,6 +89,15 @@ export class MDUtilsV4 {
 
     return true;
   }
+
+  static remark() {
+    let _proc = remark()
+      .use(remarkParse, { gfm: true })
+      .use(frontmatterPlugin, ["yaml"])
+      .use({ settings: { listItemIndent: "1", fences: true, bullet: "-" } });
+    return _proc;
+  }
+
   static proc(opts: ProcOpts) {
     const { engine } = opts;
     const errors: DendronError[] = [];
@@ -105,6 +114,7 @@ export class MDUtilsV4 {
     opts: ProcOpts & {
       dest: DendronASTDest;
       vault?: DVault;
+      fname?: string;
       wikiLinksOpts?: WikiLinksOpts;
       noteRefOpts?: NoteRefsOpts;
       publishOpts?: DendronPubOpts;
@@ -113,9 +123,9 @@ export class MDUtilsV4 {
       };
     }
   ) {
-    const { dest, vault } = opts;
+    const { dest, vault, fname } = opts;
     let proc = this.proc(opts)
-      .data("dendron", { dest, vault } as DendronASTData)
+      .data("dendron", { dest, vault, fname } as DendronASTData)
       .use(wikiLinks, opts.wikiLinksOpts)
       .use(noteRefs, { ...opts.noteRefOpts, wikiLinkOpts: opts.wikiLinksOpts });
     if (opts.mathOpts?.katex) {

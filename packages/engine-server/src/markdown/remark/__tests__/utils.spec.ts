@@ -6,12 +6,50 @@ import {
   runEngineTestV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
+import fs from "fs-extra";
 import _ from "lodash";
+import path from "path";
 import { DendronASTDest } from "../../types";
 import { MDUtilsV4 } from "../../utils";
 import { createEngine, createProcTests } from "./utils";
 
 const IMAGE_LINK = `![alt-text](image-url.jpg)`;
+
+const WITH_TITLE = createProcTests({
+  name: "WITH_TITLE",
+  setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+    const proc = await MDUtilsV4.procFull({
+      engine,
+      dest: extra.dest,
+      fname: "foo",
+      vault: vaults[0],
+      publishOpts: {
+        insertTitle: true,
+      },
+    });
+    const noteRaw = fs.readFileSync(
+      path.join(wsRoot, vaults[0].fsPath, "foo.md"),
+      { encoding: "utf8" }
+    );
+    const resp = proc.processSync(noteRaw);
+    const respParse = proc.parse(noteRaw);
+    expect(resp).toMatchSnapshot();
+    expect(respParse).toMatchSnapshot("respParse");
+    return { resp, proc };
+  },
+  verifyFuncDict: {
+    [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+      const { resp } = extra;
+      expect(
+        await AssertUtils.assertInString({
+          body: resp.contents,
+          match: ["# Foo", "foo body"],
+        })
+      ).toBeTruthy();
+    },
+  },
+  preSetupHook: ENGINE_HOOKS.setupBasic,
+});
 
 const WITH_ASSET_PREFIX_UNDEFINED = createProcTests({
   name: "asset_prefix undefined",
@@ -215,6 +253,7 @@ const ALL_TEST_CASES = [
   ...WITH_ASSET_PREFIX_UNDEFINED,
   ...NOTE_REF_BASIC_WITH_REHYPE,
   ...NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE,
+  ...WITH_TITLE,
 ];
 
 describe("MDUtils.proc", () => {

@@ -1,7 +1,9 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
-import { Image } from "mdast";
+import { DendronError, NoteUtilsV2 } from "@dendronhq/common-all";
+import _ from "lodash";
+import { Image, Root } from "mdast";
 import Unified, { Transformer } from "unified";
 import { Node } from "unist";
+import u from "unist-builder";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
 import { DendronASTDest, NoteRefDataV4, WikiLinkNoteV4 } from "../types";
@@ -11,12 +13,38 @@ import { addError, getNoteOrError } from "./utils";
 
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
+  insertTitle?: boolean;
 };
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  const { dest, vault } = MDUtilsV4.getDendronData(proc);
+  const { dest, vault, fname } = MDUtilsV4.getDendronData(proc);
   function transformer(tree: Node, _file: VFile) {
+    let root = tree as Root;
+    const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
+
+    if (opts?.insertTitle && root.children) {
+      if (!fname || !vault) {
+        throw new DendronError({
+          msg: `no fname for node: ${JSON.stringify(tree)}`,
+        });
+      }
+      const note = NoteUtilsV2.getNoteByFnameV4({
+        fname,
+        notes: engine.notes,
+        vault: vault,
+      });
+      if (!note) {
+        throw new DendronError({ msg: `no note found for ${fname}` });
+      }
+      const idx = _.findIndex(root.children, (ent) => ent.type === "paragraph");
+      root.children.splice(
+        idx,
+        0,
+        u("heading", { depth: 1 }, [u("text", note.title)])
+      );
+    }
+    debugger;
     visit(tree, (node, _idx, parent) => {
       if (
         node.type === "wikiLink" &&
@@ -25,7 +53,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         let _node = node as WikiLinkNoteV4;
         let value = node.value as string;
         const data = _node.data;
-        const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
         if (error) {
           addError(proc, error);
         }

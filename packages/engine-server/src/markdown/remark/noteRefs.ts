@@ -11,16 +11,10 @@ import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
 import { html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
-import Unified, { Plugin } from "unified";
+import Unified, { Plugin, Processor } from "unified";
 import { Node, Parent } from "unist";
-import visit from "unist-util-visit";
 import { parseDendronRef } from "../../utils";
-import {
-  DendronASTDest,
-  DendronASTNode,
-  NoteRefDataV4,
-  NoteRefNoteV4,
-} from "../types";
+import { DendronASTDest, DendronASTNode, NoteRefNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
@@ -367,29 +361,19 @@ function convertNoteRefHelperAST(
   }
   // slice of interested range
   try {
-    const out = root(
+    let out = root(
       bodyAST.children.slice(
         anchorStartIndex + anchorStartOffset,
         anchorEndIndex
       )
     );
-    visit(out, (node, _idx, parent) => {
-      if (node.type === "refLink") {
-        const ndata = node.data as NoteRefDataV4;
-        const copts = opts.compilerOpts;
-        const { data } = convertNoteRefAST({
-          link: ndata.link,
-          proc,
-          compilerOpts: copts,
-        });
-        if (data) {
-          parent!.children = data;
-        }
-      }
-    });
-    //const _out = noteRefProc.runSync(out) as Parent
+    let _proc = proc.data("procFull") as Processor;
+    let out2 = _proc.stringify(out);
+    out = _proc.parse(out2) as Parent;
     return { error: null, data: out };
   } catch (err) {
+    console.log("ERROR WITH RE in AST");
+    console.log(JSON.stringify(err));
     return {
       error: new DendronError({
         msg: "error processing note ref",
@@ -441,6 +425,8 @@ function convertNoteRefHelper(
     }
     return { error: null, data: out };
   } catch (err) {
+    console.log("ERROR WITH REF++++");
+    console.log(JSON.stringify(err));
     return {
       error: new DendronError({
         msg: "error processing note ref",

@@ -45,6 +45,8 @@ blah
 </div>    
 </div>
 
+Regular wikilink: \\\\[[foo.two]]
+
 </div>    
 </div>
 
@@ -189,6 +191,8 @@ blah
 </div>    
 </div>
 
+Regular wikilink: \\\\[[foo.two]]
+
 </div>    
 </div>
 
@@ -321,6 +325,8 @@ VFile {
 # Foo.Two
 
 blah
+
+Regular wikilink: \\\\[[foo.two]]
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -567,36 +573,10 @@ Object {
                 Object {
                   "children": Array [
                     Object {
-                      "position": Position {
-                        "end": Object {
-                          "column": 9,
-                          "line": 1,
-                          "offset": 8,
-                        },
-                        "indent": Array [],
-                        "start": Object {
-                          "column": 1,
-                          "line": 1,
-                          "offset": 0,
-                        },
-                      },
                       "type": "text",
-                      "value": "foo body",
+                      "value": "error processing ref",
                     },
                   ],
-                  "position": Position {
-                    "end": Object {
-                      "column": 9,
-                      "line": 1,
-                      "offset": 8,
-                    },
-                    "indent": Array [],
-                    "start": Object {
-                      "column": 1,
-                      "line": 1,
-                      "offset": 0,
-                    },
-                  },
                   "type": "paragraph",
                 },
               ],

@@ -122,10 +122,12 @@ export class MDUtilsV4 {
       proc = proc.use(math);
     }
     // if (dest === DendronASTDest.HTML) {
-    return proc.use(dendronPub, {
+    proc = proc.use(dendronPub, {
       ...opts.publishOpts,
       wikiLinkOpts: opts.wikiLinksOpts,
     });
+    proc = proc.data("procFull", proc().freeze());
+    return proc;
     //return proc;
   }
 

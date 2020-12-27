@@ -31,6 +31,7 @@ export const createProcTests = (opts: {
 }) => {
   const { name, setupFunc, verifyFuncDict } = opts;
   return Object.values(DendronASTDest).map((dest) => {
+    // return [DendronASTDest.HTML].map((dest) => {
     const verifyFunc = verifyFuncDict[dest];
     return {
       name,

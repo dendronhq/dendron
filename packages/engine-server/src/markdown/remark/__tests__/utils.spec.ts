@@ -1,6 +1,8 @@
+import { NotePropsV2 } from "@dendronhq/common-all";
 import {
   AssertUtils,
   ENGINE_HOOKS,
+  NoteTestUtilsV4,
   runEngineTestV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
@@ -120,9 +122,7 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
     if (extra.dest === DendronASTDest.HTML) {
       const procRehype = MDUtilsV4.procRehype({ proc });
       const resp = await procRehype.process(txt);
-      const respParse = await procRehype.parse(txt);
-      const respTransform = await procRehype.run(respParse);
-      return { resp, proc, respParse, respTransform };
+      return { resp, proc };
     } else {
       const resp = await proc.process(txt);
       return { resp, proc };
@@ -131,10 +131,8 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
   verifyFuncDict: {
     [DendronASTDest.MD_REGULAR]: async () => {},
     [DendronASTDest.HTML]: async ({ extra }) => {
-      const { resp, respParse, respTransform } = extra;
-      expect(resp).toMatchSnapshot();
-      expect(respParse).toMatchSnapshot();
-      expect(respTransform).toMatchSnapshot();
+      const { resp } = extra;
+      expect(resp).toMatchSnapshot("respRehype");
       expect(
         await AssertUtils.assertInString({
           body: resp.contents,
@@ -142,7 +140,7 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
             // link by id
             `<a href=\"foo-id.html\"`,
             // html quoted
-            `<p>foo body</p>`,
+            `<p><a href=\"bar.html\">bar</a></p>`,
           ],
         })
       ).toBeTruthy();
@@ -151,6 +149,13 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
+    await NoteTestUtilsV4.modifyNoteByPath(
+      { wsRoot: opts.wsRoot, vault: opts.vaults[0], fname: "foo" },
+      (note: NotePropsV2) => {
+        note.body = `[[bar]]`;
+        return note;
+      }
+    );
   },
 });
 

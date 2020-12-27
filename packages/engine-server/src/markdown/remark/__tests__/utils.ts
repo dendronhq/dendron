@@ -53,6 +53,7 @@ export const createProcTests = (opts: {
             ),
           };
         }
+        return;
       })
       .filter((ent) => !_.isUndefined(ent));
   }

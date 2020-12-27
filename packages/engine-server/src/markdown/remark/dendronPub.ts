@@ -37,14 +37,13 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       if (!note) {
         throw new DendronError({ msg: `no note found for ${fname}` });
       }
-      const idx = _.findIndex(root.children, (ent) => ent.type === "paragraph");
+      const idx = _.findIndex(root.children, (ent) => ent.type !== "yaml");
       root.children.splice(
         idx,
         0,
         u("heading", { depth: 1 }, [u("text", note.title)])
       );
     }
-    debugger;
     visit(tree, (node, _idx, parent) => {
       if (
         node.type === "wikiLink" &&

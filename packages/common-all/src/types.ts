@@ -60,6 +60,10 @@ export type DendronConfig = {
    * Docs: https://dendron.so/notes/24b176f1-685d-44e1-a1b0-1704b1a92ca0.html#specify-vault-location-when-creating-a-note
    */
   lookupConfirmVaultOnCreate?: boolean;
+  /**
+   * Use the title from frontmatter
+   */
+  useFMTitle?: boolean;
 };
 
 export type HierarchyConfig = {

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.21.1-alpha.8](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.7...v0.21.1-alpha.8) (2020-12-27)
+
+### Enhancements
+
+- better note refs ([3b4f442](https://github.com/dendronhq/dendron/commit/3b4f442d886442255a98b62049807e2c8f3bf80d))
+
 ## [0.21.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.4...v0.21.1-alpha.5) (2020-12-26)
 
 **Note:** Version bump only for package @dendronhq/common-test-utils

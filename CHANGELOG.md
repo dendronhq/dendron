@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.21.1-alpha.7](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.6...v0.21.1-alpha.7) (2020-12-27)
+
+### Enhancements
+
+- enable wiki link with rehype ([d561279](https://github.com/dendronhq/dendron/commit/d5612798d75d1b5f587dd5f5835c8f1bb1693726))
+
 ## [0.21.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.5...v0.21.1-alpha.6) (2020-12-26)
 
 **Note:** Version bump only for package root

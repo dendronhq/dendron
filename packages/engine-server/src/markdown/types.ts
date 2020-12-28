@@ -1,11 +1,11 @@
 import { DNoteRefLink, DVault, NotePropsV2 } from "@dendronhq/common-all";
-import MDAST from "mdast";
+import { Parent } from "mdast";
 import { Processor } from "unified";
 import { WikiLinksOpts } from "./remark/wikiLinks";
 
-export type DendronASTNode = MDAST.Parent & {
+export type DendronASTNode = Parent & {
   notes?: NotePropsV2[];
-  children?: MDAST.Parent["children"] | DendronASTNode[];
+  children?: Parent["children"] | DendronASTNode[];
 };
 
 export enum DendronASTTypes {

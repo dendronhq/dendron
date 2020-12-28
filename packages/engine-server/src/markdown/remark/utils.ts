@@ -1,6 +1,9 @@
 import { DendronError, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
+import { Heading, Root } from "mdast";
 import { Processor } from "unified";
+import { Node } from "unist";
+import { VFile } from "vfile";
 import { WikiLinkProps } from "../../topics/markdown";
 
 export const ALIAS_DIVIDER = "|";
@@ -64,5 +67,22 @@ export class LinkUtils {
       }
     }
     return out;
+  }
+}
+
+export class RemarkUtils {
+  static h1ToTitle(note: NotePropsV2) {
+    return function (this: Processor, opts?: any) {
+      return (tree: Node, _vfile: VFile) => {
+        let root = tree as Root;
+        const idx = _.findIndex(root.children, (ent) => ent.type === "heading");
+        if (idx >= 0) {
+          const head = root.children.splice(idx, 1)[0] as Heading;
+          if (head.children.length === 1 && head.children[0].type === "text") {
+            note.title = head.children[0].value;
+          }
+        }
+      };
+    };
   }
 }

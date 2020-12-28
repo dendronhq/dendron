@@ -84,10 +84,28 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
   const copts = _.defaults(opts || {}, {});
+  const { dest } = MDUtilsV4.getDendronData(proc);
 
   if (visitors) {
     visitors.refLink = function (node: NoteRefNoteV4) {
       const ndata = node.data;
+      if (dest === DendronASTDest.MD_DENDRON) {
+        const { fname, alias } = ndata.link.from;
+        const { anchorStart, anchorStartOffset, anchorEnd } = ndata.link.data;
+        let link = alias ? `${alias}|${fname}` : fname;
+        let suffix = "";
+        if (anchorStart) {
+          suffix += `# ${anchorStart}`;
+        }
+        if (anchorStartOffset) {
+          suffix += `,${anchorStartOffset}`;
+        }
+        if (anchorEnd) {
+          suffix += `# ${anchorEnd}`;
+        }
+        return `((ref:[[${link}]]${suffix}))`;
+      }
+
       const { error, data } = convertNoteRef({
         link: ndata.link,
         proc,

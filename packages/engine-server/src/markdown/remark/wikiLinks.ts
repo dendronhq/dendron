@@ -48,6 +48,11 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
     visitors.wikiLink = function (node: WikiLinkNoteV4) {
       const data = node.data;
       let value = node.value;
+      if (dest === DendronASTDest.MD_DENDRON) {
+        const { alias, anchorHeader } = data;
+        let link = alias !== value ? `${alias}|${value}` : value;
+        return `[[${link}${anchorHeader || ""}]]`;
+      }
       const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
       if (error) {
         addError(proc, error);

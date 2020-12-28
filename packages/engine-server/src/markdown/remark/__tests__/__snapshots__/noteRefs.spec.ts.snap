@@ -2,8 +2,7 @@
 
 exports[`compilev2 compile "HTML: recursive" 1`] = `
 VFile {
-  "contents": "
-<div class=\\"portal-container\\">
+  "contents": "<div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
@@ -12,8 +11,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
-
+<div class=\\"portal-parent-fader-bottom\\"></div>
 <div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
@@ -45,7 +43,7 @@ blah
 </div>    
 </div>
 
-Regular wikilink: \\\\[[foo.two]]
+Regular wikilink: [foo.two](foo.two.html)
 
 </div>    
 </div>
@@ -62,8 +60,7 @@ Regular wikilink: \\\\[[foo.two]]
 
 exports[`compilev2 compile "HTML: regular" 1`] = `
 VFile {
-  "contents": "
-<div class=\\"portal-container\\">
+  "contents": "<div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
@@ -72,8 +69,7 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
-
+<div class=\\"portal-parent-fader-bottom\\"></div>
 foo body
 
 </div>    
@@ -88,8 +84,7 @@ foo body
 
 exports[`compilev2 compile "HTML: wildcard" 1`] = `
 VFile {
-  "contents": "
-<div class=\\"portal-container\\">
+  "contents": "<div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
@@ -98,15 +93,11 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
-
+<div class=\\"portal-parent-fader-bottom\\"></div>
 journal1
 
 </div>    
-</div>
-
-
-<div class=\\"portal-container\\">
+</div><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.02</span></div>
@@ -115,15 +106,11 @@ journal1
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
-
+<div class=\\"portal-parent-fader-bottom\\"></div>
 journal2
 
 </div>    
-</div>
-
-
-<div class=\\"portal-container\\">
+</div><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.03</span></div>
@@ -132,12 +119,44 @@ journal2
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
-
+<div class=\\"portal-parent-fader-bottom\\"></div>
 journal3
 
 </div>    
 </div>
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 compile "MD_DENDRON: recursive" 1`] = `
+VFile {
+  "contents": "((ref:[[foo]]))
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 compile "MD_DENDRON: regular" 1`] = `
+VFile {
+  "contents": "((ref:[[foo]]))
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 compile "MD_DENDRON: wildcard" 1`] = `
+VFile {
+  "contents": "((ref:[[journal.2020.08.*]]))
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -191,7 +210,7 @@ blah
 </div>    
 </div>
 
-Regular wikilink: \\\\[[foo.two]]
+Regular wikilink: [foo.two](foo.two.md)
 
 </div>    
 </div>
@@ -207,32 +226,6 @@ Regular wikilink: \\\\[[foo.two]]
 `;
 
 exports[`compilev2 compile "MD_ENHANCED_PREVIEW: regular" 1`] = `
-VFile {
-  "contents": "
-<div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
-<a href=\\"foo.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
-
-foo body
-
-</div>    
-</div>
-",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`compilev2 compile "MD_ENHANCED_PREVIEW: regular" 2`] = `
 VFile {
   "contents": "
 <div class=\\"portal-container\\">
@@ -326,7 +319,7 @@ VFile {
 
 blah
 
-Regular wikilink: \\\\[[foo.two]]
+Regular wikilink: [foo.two](foo.two)
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -346,23 +339,10 @@ VFile {
 }
 `;
 
-exports[`compilev2 compile "MD_REGULAR: regular" 2`] = `
-VFile {
-  "contents": "foo body
-",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
 exports[`compilev2 compile "MD_REGULAR: wildcard" 1`] = `
 VFile {
   "contents": "journal1
-
 journal2
-
 journal3
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",

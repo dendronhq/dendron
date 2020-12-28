@@ -131,14 +131,15 @@ export class MDUtilsV4 {
     if (opts.mathOpts?.katex) {
       proc = proc.use(math);
     }
-    // if (dest === DendronASTDest.HTML) {
-    proc = proc.use(dendronPub, {
-      ...opts.publishOpts,
-      wikiLinkOpts: opts.wikiLinksOpts,
-    });
+    // MD_DENDRON, convert back to itself, no need for transformations
+    if (dest !== DendronASTDest.MD_DENDRON) {
+      proc = proc.use(dendronPub, {
+        ...opts.publishOpts,
+        wikiLinkOpts: opts.wikiLinksOpts,
+      });
+    }
     proc = proc.data("procFull", proc().freeze());
     return proc;
-    //return proc;
   }
 
   static procRehype(opts: {

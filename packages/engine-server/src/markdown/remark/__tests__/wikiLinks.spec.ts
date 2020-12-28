@@ -54,12 +54,29 @@ const basicSetup = async ({ wsRoot, vaults }: WorkspaceOpts) => {
 const getTextString1 = (link = `[[FAQ | dendron.faq]]`) =>
   `See the ${link} for answers for`;
 describe("compilev2", () => {
-  const linkWithNoExtension = "[[foo]]";
+  const linkRegular = "[[foo]]";
   const linkWithExtension = "[[foo.md]]";
   const linkWithAlias = `[[bar|foo]]`;
   const textString1 = getTextString1();
 
   const expected: { [key in DendronASTDest]: any } = {
+    [DendronASTDest.MD_DENDRON]: {
+      regular: {
+        link: linkRegular,
+      },
+      regularWithExtension: {
+        link: linkRegular,
+      },
+      alias: {
+        link: linkWithAlias,
+      },
+      withId: {
+        link: linkRegular,
+      },
+      textString1: {
+        link: getTextString1(`[[FAQ|dendron.faq]]`),
+      },
+    },
     [DendronASTDest.HTML]: {
       regular: {
         link: `[foo](foo.html)`,
@@ -116,7 +133,7 @@ describe("compilev2", () => {
   const testCases = [
     {
       testCase: "regular",
-      linkProcess: linkWithNoExtension,
+      linkProcess: linkRegular,
       preSetupHook: undefined,
       procOpts: {},
     },

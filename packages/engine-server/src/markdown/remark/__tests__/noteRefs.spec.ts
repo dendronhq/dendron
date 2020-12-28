@@ -10,7 +10,7 @@ import { DendronASTData, DendronASTDest } from "../../types";
 import { MDUtilsV4 } from "../../utils";
 import { dendronPub } from "../dendronPub";
 import { noteRefs, NoteRefsOpts } from "../noteRefs";
-import { createEngine } from "./utils";
+import { createEngine, createProcTests } from "./utils";
 
 function proc(
   engine: DEngineClientV2,
@@ -67,64 +67,38 @@ describe("parse", () => {
 // };
 
 describe("compilev2", () => {
-  const linkWithNoExtension = "((ref: [[foo]]))";
+  const linkWithNoExtension = "((ref:[[foo]]))";
 
-  function createTestCases(opts: {
-    name: string;
-    setupFunc: TestPresetEntryV4["testFunc"];
-    verifyFuncDict: { [key in DendronASTDest]: TestPresetEntryV4["testFunc"] };
-    preSetupHook?: TestPresetEntryV4["preSetupHook"];
-  }) {
-    const { name, setupFunc, verifyFuncDict } = opts;
-    return Object.values(DendronASTDest).map((dest) => {
-      const verifyFunc = verifyFuncDict[dest];
-      return {
-        name,
-        dest,
-        testCase: new TestPresetEntryV4(
-          async (presetOpts) => {
-            const extra = await setupFunc({ ...presetOpts, extra: { dest } });
-            return await verifyFunc({ ...presetOpts, extra });
-          },
-          { preSetupHook: opts.preSetupHook }
-        ),
-      };
-    });
-  }
-
-  const REGULAR_CASE = createTestCases({
+  const REGULAR_CASE = createProcTests({
     name: "regular",
     setupFunc: async ({ engine, vaults, extra }) => {
-      const resp = await proc(engine, {
-        dest: extra.dest,
-        vault: vaults[0],
-      }).process(linkWithNoExtension);
-
       const proc2 = await MDUtilsV4.procFull({
         engine,
         wikiLinksOpts: { useId: true },
         dest: extra.dest,
         vault: vaults[0],
       });
-      const resp2 = await proc2.process(linkWithNoExtension);
-      return { resp, proc, resp2 };
+      const resp = await proc2.process(linkWithNoExtension);
+      return { resp, proc };
     },
     verifyFuncDict: {
-      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { resp, resp2 } = extra;
+      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+        const { resp } = extra;
         expect(resp).toMatchSnapshot();
-        expect(resp2).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents,
+            match: [linkWithNoExtension],
+          })
+        ).toBeTruthy();
+      },
+      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+        const { resp } = extra;
+        expect(resp).toMatchSnapshot();
         return [
           {
             actual: await AssertUtils.assertInString({
               body: resp.toString(),
-              match: ["foo body"],
-            }),
-            expected: true,
-          },
-          {
-            actual: await AssertUtils.assertInString({
-              body: resp2.toString(),
               match: ["foo body"],
             }),
             expected: true,
@@ -145,20 +119,12 @@ describe("compilev2", () => {
         ];
       },
       [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-        const { resp, resp2 } = extra;
+        const { resp } = extra;
         expect(resp).toMatchSnapshot();
-        expect(resp2).toMatchSnapshot();
         return [
           {
             actual: await AssertUtils.assertInString({
               body: resp.toString(),
-              match: ["foo body", "portal"],
-            }),
-            expected: true,
-          },
-          {
-            actual: await AssertUtils.assertInString({
-              body: resp2.toString(),
               match: ["foo body", "portal"],
             }),
             expected: true,
@@ -169,16 +135,27 @@ describe("compilev2", () => {
     preSetupHook: ENGINE_HOOKS.setupBasic,
   });
 
-  const RECURSIVE_TEST_CASES = createTestCases({
+  const RECURSIVE_TEST_CASES = createProcTests({
     name: "recursive",
     setupFunc: async ({ engine, extra, vaults }) => {
-      const resp = await proc(engine, {
+      const resp = await MDUtilsV4.procFull({
+        engine,
         dest: extra.dest,
         vault: vaults[0],
       }).process(linkWithNoExtension);
-      return { resp, proc };
+      return { resp };
     },
     verifyFuncDict: {
+      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+        const { resp } = extra;
+        expect(resp).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents,
+            match: [linkWithNoExtension],
+          })
+        ).toBeTruthy();
+      },
       [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
         const { resp } = extra;
         expect(resp).toMatchSnapshot();
@@ -222,17 +199,33 @@ describe("compilev2", () => {
     preSetupHook: ENGINE_HOOKS.setupNoteRefRecursive,
   });
 
-  const WILDCARD_CASE = createTestCases({
+  const WILDCARD_CASE = createProcTests({
     name: "wildcard",
     setupFunc: async ({ engine, extra, vaults }) => {
       const note = engine.notes["id.journal"];
-      const resp = await proc(engine, {
+      // const resp = await proc(engine, {
+      //   dest: extra.dest,
+      //   vault: vaults[0],
+      // }).process(note.body);
+      const resp = await MDUtilsV4.procFull({
+        engine,
         dest: extra.dest,
         vault: vaults[0],
       }).process(note.body);
-      return { resp, proc };
+      return { resp };
     },
     verifyFuncDict: {
+      [DendronASTDest.MD_DENDRON]: async ({ extra, engine }) => {
+        const note = engine.notes["id.journal"];
+        const { resp } = extra;
+        expect(resp).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents,
+            match: [note.body],
+          })
+        ).toBeTruthy();
+      },
       [DendronASTDest.MD_REGULAR]: async ({ extra, engine }) => {
         const { resp } = extra;
         expect(resp).toMatchSnapshot();

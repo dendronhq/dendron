@@ -1,3 +1,4 @@
+import { NotePropsV2 } from "@dendronhq/common-all";
 import {
   DendronASTDest,
   MDUtilsV4,
@@ -18,6 +19,7 @@ type CommandCLIOpts = {
   enginePort?: number;
   query?: string;
   limit?: number;
+  dryRun?: boolean;
 };
 
 type CommandOpts = CommandOptsV3 & CommandCLIOpts;
@@ -53,6 +55,10 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       describe: "limit num changes",
       type: "number",
     });
+    args.option("dryRun", {
+      describe: "dry run",
+      type: "boolean",
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
@@ -61,7 +67,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async execute(opts: CommandOpts) {
-    const { actions, engine, query, limit } = _.defaults(opts, {
+    const { actions, engine, query, limit, dryRun } = _.defaults(opts, {
       limit: 99999,
     });
     const proc = MDUtilsV4.procFull({
@@ -72,60 +78,70 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     let notes = query
       ? engine.queryNotesSync({ qs: query }).data
       : _.values(engine.notes);
+    notes = notes.filter((n) => !n.stub);
     this.L.info({ msg: "prep doctor", numResults: notes.length });
     let numChanges = 0;
+    let engineWrite = dryRun
+      ? () => {}
+      : throttle(_.bind(engine.writeNote, engine), 300, {
+          leading: true,
+        });
+
     await _.reduce<any, Promise<any>>(
       actions,
       async (acc, action) => {
         await acc;
+        let doctorAction: any;
         switch (action) {
           case DoctorActions.H1_TO_TITLE: {
-            return Promise.all(
-              notes.map(async (note) => {
-                this.L.info({ msg: `processing ${note.fname}` });
-                let changes: RemarkChangeEntry[] = [];
-                const newBody = await proc()
-                  .use(RemarkUtils.h1ToTitle(note, changes))
-                  .process(note.body);
-                note.body = newBody.toString();
+            doctorAction = async (note: NotePropsV2) => {
+              let changes: RemarkChangeEntry[] = [];
+              const newBody = await proc()
+                .use(RemarkUtils.h1ToTitle(note, changes))
+                .process(note.body);
+              note.body = newBody.toString();
+              if (!_.isEmpty(changes)) {
+                await engineWrite(note);
                 this.L.info({ msg: `changes ${note.fname}`, changes });
+                numChanges += 1;
                 return;
-              })
-            );
+              } else {
+                return;
+              }
+            };
+            break;
           }
           case DoctorActions.HI_TO_H2: {
-            const engineWrite = throttle(
-              _.bind(engine.writeNote, engine),
-              300,
-              { leading: true }
-            );
-            return _.reduce<any, Promise<any>>(
-              notes,
-              async (accInner, note) => {
-                await accInner;
-                if (numChanges >= limit) {
-                  return;
-                }
-                this.L.debug({ msg: `processing for h1_to_h2 ${note.fname}` });
-                let changes: RemarkChangeEntry[] = [];
-                const newBody = await proc()
-                  .use(RemarkUtils.h1ToH2(changes))
-                  .process(note.body);
-                note.body = newBody.toString();
-                if (!_.isEmpty(changes)) {
-                  await engineWrite(note);
-                  this.L.info({ msg: `changes ${note.fname}`, changes });
-                  numChanges += 1;
-                  return;
-                } else {
-                  return;
-                }
-              },
-              Promise.resolve()
-            );
+            doctorAction = async (note: NotePropsV2) => {
+              let changes: RemarkChangeEntry[] = [];
+              const newBody = await proc()
+                .use(RemarkUtils.h1ToH2(changes))
+                .process(note.body);
+              note.body = newBody.toString();
+              if (!_.isEmpty(changes)) {
+                await engineWrite(note);
+                this.L.info({ msg: `changes ${note.fname}`, changes });
+                numChanges += 1;
+                return;
+              } else {
+                return;
+              }
+            };
+            break;
           }
         }
-        return;
+        return _.reduce<any, Promise<any>>(
+          notes,
+          async (accInner, note) => {
+            await accInner;
+            if (numChanges >= limit) {
+              return;
+            }
+            this.L.debug({ msg: `processing ${note.fname}` });
+            return doctorAction(note);
+          },
+          Promise.resolve()
+        );
       },
       Promise.resolve()
     );
@@ -133,71 +149,3 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     return;
   }
 }
-
-// export class DoctorCommand extends SoilCommandV3<
-//   CommandCLIOpts,
-//   CommandOpts,
-//   CommandOutput
-// > {
-
-//   static buildCmd(yargs: yargs.Argv): yargs.Argv {
-//     const _cmd = new DoctorCommand();
-//     return yargs.command(
-//       "doctor",
-//       "run doctor command",
-//       _cmd.buildArgs,
-//       _cmd.eval
-//     );
-//   }
-
-//   buildArgs(args: yargs.Argv) {
-//     super.buildArgs(args);
-//     args.option("actions", {
-//       describe: "what actions the doctor should take",
-//       requiresArg: true,
-//       type: "array",
-//       choices: ["h1ToTitle", "otherAction"]
-//     });
-//     args.option("enginePort", {
-//       describe: "port that engine is running on"
-//     });
-//   }
-
-//   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
-//     console.log("setupengine pre");
-//     const engineArgs = await setupEngine(args);
-//     console.log("setupengine post");
-//     return { ...args, ...engineArgs };
-//   }
-
-//   async execute(opts: CommandOpts) {
-//     console.log("engine init");
-//     const { actions, engine } = opts;
-//     const proc = MDUtilsV4.procFull({
-//       dest: DendronASTDest.MD_DENDRON,
-//       engine,
-//       mathOpts: { katex: true }
-//     });
-//     await _.reduce<any, Promise<any>>(
-//       actions,
-//       async (acc, action) => {
-//         await acc;
-//         if (action === DoctorActions.H1_TO_TITLE) {
-//           return Promise.all(
-//             _.values(engine.notes).map(async note => {
-//               const newBody = await proc()
-//                 .use(RemarkUtils.h1ToTitle(note))
-//                 .process(note.body);
-//               note.body = newBody.toString();
-//               await engine.writeNote(note, { updateExisting: true });
-//               return;
-//             })
-//           );
-//         }
-//         return;
-//       },
-//       Promise.resolve()
-//     );
-//     return;
-//   }
-// }

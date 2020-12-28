@@ -1,4 +1,4 @@
-import { file2Note, tmpDir } from "@dendronhq/common-server";
+import { file2Note } from "@dendronhq/common-server";
 import { NoteTestUtilsV4, runEngineTestV4 } from "@dendronhq/common-test-utils";
 import { createEngine } from "@dendronhq/engine-server";
 import path from "path";

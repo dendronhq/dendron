@@ -4,12 +4,13 @@ import {
   RemarkChangeEntry,
   RemarkUtils,
 } from "@dendronhq/engine-server";
+// @ts-ignore
+import throttle from "@jcoreio/async-throttle";
 import _ from "lodash";
 import yargs from "yargs";
 import { CLICommand } from "./base";
 import { CommandOptsV3 } from "./soil";
 import { setupEngine } from "./utils";
-import throttle from "@jcoreio/async-throttle";
 
 type CommandCLIOpts = {
   wsRoot: string;
@@ -25,6 +26,7 @@ type CommandOutput = void;
 export enum DoctorActions {
   H1_TO_TITLE = "h1ToTitle",
   HI_TO_H2 = "h1ToH2",
+  FM_CUSTOM = "fmCustom",
 }
 
 export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
@@ -72,7 +74,6 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       : _.values(engine.notes);
     this.L.info({ msg: "prep doctor", numResults: notes.length });
     let numChanges = 0;
-    let notesSeeked = 0;
     await _.reduce<any, Promise<any>>(
       actions,
       async (acc, action) => {
@@ -95,7 +96,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           case DoctorActions.HI_TO_H2: {
             const engineWrite = throttle(
               _.bind(engine.writeNote, engine),
-              5000,
+              300,
               { leading: true }
             );
             return _.reduce<any, Promise<any>>(

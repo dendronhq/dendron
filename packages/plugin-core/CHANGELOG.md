@@ -5,67 +5,101 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.21.1-alpha.14](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.13...v0.21.1-alpha.14) (2020-12-28)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Enhancements
+
+- support anchor headings ([576c50a](https://github.com/dendronhq/dendron/commit/576c50a5893256c0a850f385269e6ec7894332ac))
 
 ## [0.21.1-alpha.13](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.12...v0.21.1-alpha.13) (2020-12-28)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.21.1-alpha.12](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.11...v0.21.1-alpha.12) (2020-12-28)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.21.1-alpha.11](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.10...v0.21.1-alpha.11) (2020-12-28)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.21.1-alpha.10](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.9...v0.21.1-alpha.10) (2020-12-27)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.21.1-alpha.9](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.8...v0.21.1-alpha.9) (2020-12-27)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Enhancements
+
+- add useFMTitle ([b50c68c](https://github.com/dendronhq/dendron/commit/b50c68c59ccee6d8170d6d3826521993642e6911))
+- auto title insertion ([21773c6](https://github.com/dendronhq/dendron/commit/21773c6133c91ec9d6f45bf733cb7ad21d5801b1))
 
 ## [0.21.1-alpha.8](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.7...v0.21.1-alpha.8) (2020-12-27)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Enhancements
+
+- better note refs ([3b4f442](https://github.com/dendronhq/dendron/commit/3b4f442d886442255a98b62049807e2c8f3bf80d))
 
 ## [0.21.1-alpha.7](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.6...v0.21.1-alpha.7) (2020-12-27)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Enhancements
+
+- enable wiki link with rehype ([d561279](https://github.com/dendronhq/dendron/commit/d5612798d75d1b5f587dd5f5835c8f1bb1693726))
 
 ## [0.21.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.5...v0.21.1-alpha.6) (2020-12-26)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.21.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.4...v0.21.1-alpha.5) (2020-12-26)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- note refs for remarkable rendering ([5a9ae3d](https://github.com/dendronhq/dendron/commit/5a9ae3ddf7b4de25890877609baf63378bbd5a97))
+- relative links rendering in html ([a4b995c](https://github.com/dendronhq/dendron/commit/a4b995c33c81ce3b31aed9b46193306c4d3d4f98))
+
+### Enhancements
+
+- better highlight support ([605f46e](https://github.com/dendronhq/dendron/commit/605f46eb2bf59649fef285ff6120debe8972cf80))
 
 ## [0.21.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.3...v0.21.1-alpha.4) (2020-12-24)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- early exit ([f007ce7](https://github.com/dendronhq/dendron/commit/f007ce774a7dd55f1626c810be3a4e438d4bd993))
 
 ## [0.21.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.2...v0.21.1-alpha.3) (2020-12-24)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- resolve relative path ([710509d](https://github.com/dendronhq/dendron/commit/710509d893b595142c517881924e90a239798669))
+
+### Enhancements
+
+- add enginePort option ([03ded39](https://github.com/dendronhq/dendron/commit/03ded39c0aa782889b216e539373c0b18eae1420))
 
 ## [0.21.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.1...v0.21.1-alpha.2) (2020-12-24)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- build-site not working in certain os ([279701d](https://github.com/dendronhq/dendron/commit/279701d00b658398ee22f5ce5b41be69b58255e4))
 
 ## [0.21.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.0...v0.21.1-alpha.1) (2020-12-23)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- check for assets folder ([dabf54e](https://github.com/dendronhq/dendron/commit/dabf54e7bb60910e7ee4d75420915020fb56a9b9))
+
+### Enhancements
+
+- exist cli if not watching ([a337cd2](https://github.com/dendronhq/dendron/commit/a337cd26ec6bcbc3b77153aff28c3e518e1bfc02))
 
 ## [0.21.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.21.0...v0.21.1-alpha.0) (2020-12-22)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- typecast when writing port ([b5def56](https://github.com/dendronhq/dendron/commit/b5def5687ac977232f89152c42b1e1f849cf2f7a))
 
 # [0.21.0](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.15...v0.21.0) (2020-12-21)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.20.1-alpha.15](https://github.com/dendronhq/dendron/compare/v0.20.1-alpha.14...v0.20.1-alpha.15) (2020-12-21)
 

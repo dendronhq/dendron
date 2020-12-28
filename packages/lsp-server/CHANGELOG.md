@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.22.0](https://github.com/Microsoft/vscode-extension-samples/compare/v0.21.1-alpha.14...v0.22.0) (2020-12-28)
+
+**Note:** Version bump only for package @dendronhq/lsp-server
+
 ## [0.21.1-alpha.14](https://github.com/Microsoft/vscode-extension-samples/compare/v0.21.1-alpha.13...v0.21.1-alpha.14) (2020-12-28)
 
 **Note:** Version bump only for package @dendronhq/lsp-server

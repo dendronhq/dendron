@@ -140,7 +140,7 @@ export abstract class SoilCommandV3<
       demandOption: true,
     });
     args.option("vaults", {
-      describe: "location of vault",
+      describe: "location of vaults",
       type: "array",
       demandOption: false,
     });

@@ -22,6 +22,17 @@ VFile {
 }
 `;
 
+exports[`compilev2 HTML "regularWithAnchor" 1`] = `
+VFile {
+  "contents": "[foo](foo.html#one)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`compilev2 HTML "regularWithExtension" 1`] = `
 VFile {
   "contents": "[foo](foo.html)
@@ -69,6 +80,17 @@ VFile {
 exports[`compilev2 MD_DENDRON "regular" 1`] = `
 VFile {
   "contents": "[[foo]]
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 MD_DENDRON "regularWithAnchor" 1`] = `
+VFile {
+  "contents": "[[foo#one]]
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -132,6 +154,17 @@ VFile {
 }
 `;
 
+exports[`compilev2 MD_ENHANCED_PREVIEW "regularWithAnchor" 1`] = `
+VFile {
+  "contents": "[foo](foo.md)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`compilev2 MD_ENHANCED_PREVIEW "regularWithExtension" 1`] = `
 VFile {
   "contents": "[foo](foo.md)
@@ -177,6 +210,17 @@ VFile {
 `;
 
 exports[`compilev2 MD_REGULAR "regular" 1`] = `
+VFile {
+  "contents": "[foo](foo)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 MD_REGULAR "regularWithAnchor" 1`] = `
 VFile {
   "contents": "[foo](foo)
 ",

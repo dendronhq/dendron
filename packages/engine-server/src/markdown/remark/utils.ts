@@ -70,17 +70,52 @@ export class LinkUtils {
   }
 }
 
+export type RemarkChangeEntry = {
+  shouldWrite?: boolean;
+  data?: any;
+};
+
 export class RemarkUtils {
-  static h1ToTitle(note: NotePropsV2) {
-    return function (this: Processor, opts?: any) {
+  static h1ToTitle(note: NotePropsV2, changes: RemarkChangeEntry[]) {
+    return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         let root = tree as Root;
-        const idx = _.findIndex(root.children, (ent) => ent.type === "heading");
+        const idx = _.findIndex(
+          root.children,
+          (ent) => ent.type === "heading" && ent.depth === 1
+        );
         if (idx >= 0) {
           const head = root.children.splice(idx, 1)[0] as Heading;
           if (head.children.length === 1 && head.children[0].type === "text") {
             note.title = head.children[0].value;
           }
+          changes.push({
+            shouldWrite: true,
+            data: {
+              head: note.title,
+            },
+          });
+        }
+      };
+    };
+  }
+  static h1ToH2(changes: RemarkChangeEntry[]) {
+    return function (this: Processor) {
+      return (tree: Node, _vfile: VFile) => {
+        let root = tree as Root;
+        const idx = _.findIndex(
+          root.children,
+          (ent) => ent.type === "heading" && ent.depth === 1
+        );
+        if (idx >= 0) {
+          const head = root.children[idx] as Heading;
+          head.depth = 2;
+          changes.push({
+            shouldWrite: true,
+            data: {
+              head: head.children[0].value,
+            },
+          });
         }
       };
     };

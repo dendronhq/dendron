@@ -51,7 +51,8 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
       if (dest === DendronASTDest.MD_DENDRON) {
         const { alias, anchorHeader } = data;
         let link = alias !== value ? `${alias}|${value}` : value;
-        return `[[${link}${anchorHeader || ""}]]`;
+        let anchor = anchorHeader ? `#${anchorHeader}` : "";
+        return `[[${link}${anchor}]]`;
       }
       const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
       if (error) {

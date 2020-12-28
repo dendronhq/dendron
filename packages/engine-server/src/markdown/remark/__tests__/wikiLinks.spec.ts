@@ -55,6 +55,7 @@ const getTextString1 = (link = `[[FAQ | dendron.faq]]`) =>
   `See the ${link} for answers for`;
 describe("compilev2", () => {
   const linkRegular = "[[foo]]";
+  const linkWithAnchor = "[[foo#one]]";
   const linkWithExtension = "[[foo.md]]";
   const linkWithAlias = `[[bar|foo]]`;
   const textString1 = getTextString1();
@@ -63,6 +64,9 @@ describe("compilev2", () => {
     [DendronASTDest.MD_DENDRON]: {
       regular: {
         link: linkRegular,
+      },
+      regularWithAnchor: {
+        link: linkWithAnchor,
       },
       regularWithExtension: {
         link: linkRegular,
@@ -81,6 +85,9 @@ describe("compilev2", () => {
       regular: {
         link: `[foo](foo.html)`,
       },
+      regularWithAnchor: {
+        link: `[foo](foo.html#one)`,
+      },
       regularWithExtension: {
         link: `[foo](foo.html)`,
       },
@@ -98,6 +105,9 @@ describe("compilev2", () => {
       regular: {
         link: `[foo](foo)`,
       },
+      regularWithAnchor: {
+        link: `[foo](foo)`,
+      },
       regularWithExtension: {
         link: `[foo](foo)`,
       },
@@ -113,6 +123,9 @@ describe("compilev2", () => {
     },
     [DendronASTDest.MD_ENHANCED_PREVIEW]: {
       regular: {
+        link: `[foo](foo.md)`,
+      },
+      regularWithAnchor: {
         link: `[foo](foo.md)`,
       },
       regularWithExtension: {
@@ -134,6 +147,12 @@ describe("compilev2", () => {
     {
       testCase: "regular",
       linkProcess: linkRegular,
+      preSetupHook: undefined,
+      procOpts: {},
+    },
+    {
+      testCase: "regularWithAnchor",
+      linkProcess: linkWithAnchor,
       preSetupHook: undefined,
       procOpts: {},
     },

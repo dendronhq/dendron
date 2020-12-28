@@ -50,6 +50,7 @@
     "@dendronhq/engine-server": "^0.21.1-alpha.10",
     "@dendronhq/engine-test-utils": "^0.21.1-alpha.10",
     "@dendronhq/pods-core": "^0.21.1-alpha.10",
+    "@jcoreio/async-throttle": "^1.3.2",
     "fs-extra": "^9.0.1",
     "gray-matter": "^4.0.2",
     "lodash": "^4.17.19",

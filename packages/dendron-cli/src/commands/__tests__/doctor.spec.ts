@@ -5,11 +5,6 @@ import path from "path";
 import { DoctorActions, DoctorCLICommand } from "../doctor";
 
 describe("basic", () => {
-  let siteRootDir: string;
-  beforeEach(async () => {
-    siteRootDir = tmpDir().name;
-  });
-
   test("basic", async () => {
     await runEngineTestV4(
       async ({ engine, wsRoot, vaults }) => {

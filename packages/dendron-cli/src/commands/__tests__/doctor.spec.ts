@@ -1,14 +1,8 @@
-import { file2Note, note2File, tmpDir } from "@dendronhq/common-server";
-import {
-  ENGINE_HOOKS,
-  NoteTestUtilsV4,
-  runEngineTestV4,
-} from "@dendronhq/common-test-utils";
+import { file2Note, tmpDir } from "@dendronhq/common-server";
+import { NoteTestUtilsV4, runEngineTestV4 } from "@dendronhq/common-test-utils";
 import { createEngine } from "@dendronhq/engine-server";
-import { ConfigUtils } from "@dendronhq/engine-test-utils";
 import path from "path";
-import { BuildSiteCommandV2 } from "../build-site-v2";
-import { DoctorActions, DoctorCommand } from "../doctor";
+import { DoctorActions, DoctorCLICommand } from "../doctor";
 
 describe("basic", () => {
   let siteRootDir: string;
@@ -20,7 +14,7 @@ describe("basic", () => {
     await runEngineTestV4(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
-        const cmd = new DoctorCommand();
+        const cmd = new DoctorCLICommand();
         await cmd.execute({
           wsRoot,
           engine,

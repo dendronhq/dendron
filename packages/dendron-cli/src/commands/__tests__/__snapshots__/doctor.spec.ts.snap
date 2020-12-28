@@ -2,7 +2,8 @@
 
 exports[`basic basic 1`] = `
 Object {
-  "body": "## Foo Content
+  "body": "# Foo Header
+## Foo Content
 ",
   "children": Array [],
   "created": "1",
@@ -13,7 +14,7 @@ Object {
   "id": "foo",
   "links": Array [],
   "parent": null,
-  "title": "Foo Header",
+  "title": "Foo",
   "type": "note",
   "updated": "1",
   "vault": Object {

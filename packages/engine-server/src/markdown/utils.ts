@@ -19,6 +19,8 @@ import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTData, DendronASTDest } from "./types";
 // @ts-ignore
 import highlight from "remark-highlight.js";
+import slug from "rehype-slug";
+import link from "rehype-autolink-headings";
 
 const toString = require("mdast-util-to-string");
 
@@ -153,7 +155,33 @@ export class MDUtilsV4 {
     mdPlugins.forEach((p) => {
       _proc = _proc.use(p);
     });
-    _proc = _proc.use(remark2rehype, { allowDangerousHtml: true }).use(raw);
+    _proc = _proc
+      .use(remark2rehype, { allowDangerousHtml: true })
+      .use(raw)
+      .use(slug)
+      .use(link, {
+        properties: {
+          "aria-hidden": "true",
+          class: "anchor-heading",
+        },
+        content: {
+          type: "element",
+          tagName: "svg",
+          properties: {
+            "aria-hidden": "true",
+            viewBox: "0 0 16 16",
+          },
+          children: [
+            {
+              type: "element",
+              tagName: "use",
+              properties: {
+                "xlink:href": "#svg-link",
+              },
+            },
+          ],
+        },
+      });
     if (opts.mathjax) {
       _proc = _proc.use(katex);
     }

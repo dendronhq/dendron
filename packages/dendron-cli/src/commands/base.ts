@@ -36,6 +36,7 @@ export abstract class CLICommand<TOpts, TOut> extends BaseCommand<TOpts, TOut> {
   abstract enrichArgs(args: any): Promise<TOpts>;
 
   eval = async (args: any) => {
+    this.L.info({ args });
     const opts = await this.enrichArgs(args);
     return this.execute(opts);
   };

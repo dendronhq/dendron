@@ -8,6 +8,7 @@ export async function setupEngine(opts: {
 }) {
   let { wsRoot, enginePort } = opts;
   let engine: DEngineClientV2;
+  let port: number;
   wsRoot = resolvePath(wsRoot, process.cwd());
   if (enginePort) {
     const engineConnector = EngineConnector.getOrCreate({
@@ -15,8 +16,9 @@ export async function setupEngine(opts: {
     });
     await engineConnector.init({ portOverride: enginePort });
     engine = engineConnector.engine;
+    port = enginePort;
   } else {
-    ({ engine } = await new LaunchEngineServerCommand().enrichArgs(opts));
+    ({ engine, port } = await new LaunchEngineServerCommand().enrichArgs(opts));
   }
-  return { wsRoot, engine };
+  return { wsRoot, engine, port };
 }

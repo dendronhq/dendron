@@ -2,7 +2,7 @@ import { tmpDir } from "@dendronhq/common-server";
 import { ENGINE_HOOKS, runEngineTestV4 } from "@dendronhq/common-test-utils";
 import { createEngine } from "@dendronhq/engine-server";
 import { ConfigUtils } from "@dendronhq/engine-test-utils";
-import { BuildSiteCommandV2 } from "../build-site-v2";
+import { BuildSiteV2CLICommand } from "../build-site-v2";
 
 // TODO
 describe("basic", () => {
@@ -14,7 +14,7 @@ describe("basic", () => {
   test.skip("basic", async () => {
     await runEngineTestV4(
       async ({ wsRoot }) => {
-        const cmd = new BuildSiteCommandV2();
+        const cmd = new BuildSiteV2CLICommand();
         const resp = await cmd.eval({ wsRoot, stage: "dev", serve: false });
         return resp;
       },

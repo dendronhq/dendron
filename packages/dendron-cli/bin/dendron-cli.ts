@@ -3,7 +3,7 @@
 import { env, setEnv } from "@dendronhq/common-all";
 import yargs from "yargs";
 import { BuildSiteCommand } from "../src";
-import { BuildSiteCommandV2 } from "../src/commands/build-site-v2";
+import { BuildSiteV2CLICommand } from "../src/commands/build-site-v2";
 import { DoctorCLICommand } from "../src/commands/doctor";
 import { ExportPodCLICommand } from "../src/commands/exportPod";
 import { ImportPodCLICommand } from "../src/commands/importPod";
@@ -50,10 +50,10 @@ let buildYargs = yargs
 
 PlantSeedCommand.buildCmd(buildYargs);
 BuildSiteCommand.buildCmd(buildYargs);
-BuildSiteCommandV2.buildCmd(buildYargs);
 PublishNotesCommand.buildCmd(buildYargs);
 PublishPodCLICommand.buildCmd(buildYargs);
 LaunchEngineServerCommand.buildCmd(buildYargs);
+new BuildSiteV2CLICommand().buildCmd(buildYargs);
 new DoctorCLICommand().buildCmd(buildYargs);
 
 /**

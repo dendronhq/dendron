@@ -36,9 +36,6 @@ describe("H1_TO_TITLE", () => {
           engine,
           actions: [DoctorActions.H1_TO_TITLE],
         });
-        // const fpath = path.join(wsRoot, vault.fsPath, "foo.md");
-        // const note = file2Note(fpath, vault);
-        // expect(note).toMatchSnapshot();
         const names = ["Foo", "Bar"];
         await Promise.all(
           names.map(async (nm) => {

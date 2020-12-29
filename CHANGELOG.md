@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.22.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.22.0...v0.22.1-alpha.0) (2020-12-29)
+
+### Enhancements
+
+- add more site specific fm def ([51ef599](https://github.com/dendronhq/dendron/commit/51ef599d6fe00579a61993a3a33791773d4be91f))
+- add prism highlighting ([5542a53](https://github.com/dendronhq/dendron/commit/5542a53a0cacdbd9c3f508b6da56d3582e98d319))
+- build site work with existing workspace ([88740a2](https://github.com/dendronhq/dendron/commit/88740a258a1305a4088feb7bbe2c00a5c9db17a5))
+- support dry-run doctor cmd ([9080bd0](https://github.com/dendronhq/dendron/commit/9080bd004785a1d68e7b04f29aa95f0a24130731))
+
 # [0.22.0](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.14...v0.22.0) (2020-12-28)
 
 **Note:** Version bump only for package root

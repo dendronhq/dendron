@@ -83,6 +83,16 @@ export type DendronSiteFM = {
   nav_order?: number;
   nav_exclude?: boolean;
   permalink?: string;
+  /**
+   * If collection, don't show in nav
+   * and have custom sorting rules
+   */
+  has_collection?: boolean;
+  /**
+   * Default: created
+   */
+  sort_by?: "created" | "title";
+  sort_order?: "reverse" | "normal";
 };
 
 export type DendronSiteConfig = {

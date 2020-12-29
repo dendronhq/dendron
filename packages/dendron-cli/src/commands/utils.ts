@@ -19,6 +19,7 @@ export async function setupEngine(opts: {
     port = enginePort;
   } else {
     ({ engine, port } = await new LaunchEngineServerCommand().enrichArgs(opts));
+    await engine.init();
   }
   return { wsRoot, engine, port };
 }

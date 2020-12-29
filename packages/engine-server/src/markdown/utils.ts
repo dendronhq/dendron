@@ -17,10 +17,11 @@ import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTData, DendronASTDest } from "./types";
-// @ts-ignore
-import highlight from "remark-highlight.js";
 import slug from "rehype-slug";
 import link from "rehype-autolink-headings";
+
+// @ts-ignore
+import rehypePrism from "@mapbox/rehype-prism";
 
 const toString = require("mdast-util-to-string");
 
@@ -151,12 +152,12 @@ export class MDUtilsV4 {
   }) {
     const { proc, mdPlugins } = _.defaults(opts, { mdPlugins: [] });
     let _proc = proc || unified().use(remarkParse, { gfm: true });
-    _proc = _proc.use(highlight);
     mdPlugins.forEach((p) => {
       _proc = _proc.use(p);
     });
     _proc = _proc
       .use(remark2rehype, { allowDangerousHtml: true })
+      .use(rehypePrism)
       .use(raw)
       .use(slug)
       .use(link, {

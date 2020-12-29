@@ -23,8 +23,7 @@ export class SiteUtils {
       // not blacklisted
       note.custom?.published === false,
       // not whitelisted
-      !config.publishByDefault && !note.custom?.published,
-      // TODO: check vault
+      !config.publishByDefault ? !note.custom?.published : false,
     ]);
   }
 
@@ -104,6 +103,7 @@ export class SiteUtils {
       _.get(config.config, domain),
       rConfig
     );
+    // console.log(`hConfig for ${domain}`, hConfig); DEBUG
     const dupBehavior = config.duplicateNoteBehavior;
     // get the domain note
     let notes = NoteUtilsV2.getNotesByFname({
@@ -158,7 +158,6 @@ export class SiteUtils {
         children = _.filter(children, (note: NotePropsV2) =>
           SiteUtils.canPublish({ note, config: hConfig })
         );
-        config.writeStubs;
         children.forEach((n: NotePropsV2) => processQ.push(n));
         // updated children
         out[maybeNote.id] = {

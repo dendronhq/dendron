@@ -21,9 +21,9 @@ export class SiteUtils {
     const { note, config } = opts;
     return !_.some([
       // not blacklisted
-      note.custom?.published === false,
+      note?.custom?.published === false,
       // not whitelisted
-      !config.publishByDefault ? !note.custom?.published : false,
+      !config?.publishByDefault ? !note.custom?.published : false,
     ]);
   }
 
@@ -181,6 +181,9 @@ export class SiteUtils {
       // @ts-ignore
       meta[key] = value;
     });
+    if (hConfig.noindexByDefault && !_.has(note, "custom.noindex")) {
+      _.set(note, "custom.noindex", true);
+    }
 
     // remove site-only stuff
     return {

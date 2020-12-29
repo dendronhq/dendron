@@ -1,7 +1,4 @@
-import {
-  BuildSiteCommandV2,
-  BuildSiteV2CommandCLIOpts,
-} from "@dendronhq/dendron-cli";
+import { BuildSiteV2CLICommandOpts } from "@dendronhq/dendron-cli";
 import _ from "lodash";
 import path from "path";
 import { window } from "vscode";
@@ -11,7 +8,7 @@ import { BasicCommand } from "./base";
 import fs from "fs-extra";
 import { execa } from "@dendronhq/engine-server";
 
-type CommandOpts = Partial<BuildSiteV2CommandCLIOpts>;
+type CommandOpts = Partial<BuildSiteV2CLICommandOpts>;
 
 type CommandOutput = void;
 

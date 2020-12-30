@@ -1,5 +1,4 @@
 import { DendronError } from "@dendronhq/common-all";
-import { resolvePath } from "@dendronhq/common-server";
 import { WorkspaceService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";

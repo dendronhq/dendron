@@ -31,7 +31,7 @@
     "build": "npm run compile",
     "compile": "tsc -p tsconfig.build.json",
     "test": "env LOG_DST=/tmp/engine-server.log NODE_OPTIONS='--unhandled-rejections=strict' npx jest",
-    "test:unit:all": "cross-env LOG_LEVEL=error yarn test",
+    "test:unit:all": "cross-env LOG_LEVEL=error npm test",
     "coverage": "jest --coverage",
     "watch": "npm run compile -- --watch",
     "test:watch": "npm run test -- --watch -u",

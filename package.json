@@ -28,7 +28,6 @@
     "packages/*",
     "vendor/*"
   ],
-  "npmClient": "yarn",
   "useWorkspaces": false,
   "husky": {
     "hooks": {

@@ -1,4 +1,4 @@
 #!/bin/bash
 
 echo "bootstrapping..."
-npx lerna bootstrap
+npx lerna bootstrap $@

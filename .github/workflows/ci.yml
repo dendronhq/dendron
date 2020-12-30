@@ -60,7 +60,7 @@ jobs:
           git config --global user.email ci@dendron.so
 
       - name: Initialize
-        run: ./bootstrap/scripts/init.sh
+        run: ./bootstrap/scripts/init-ci.sh
         shell: bash
 
       - name: Run CLI tests

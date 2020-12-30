@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.22.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.22.1-alpha.1...v0.22.1-alpha.2) (2020-12-30)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
 ## [0.22.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.22.0...v0.22.1-alpha.0) (2020-12-29)
 
 **Note:** Version bump only for package @dendronhq/dendron-next-server

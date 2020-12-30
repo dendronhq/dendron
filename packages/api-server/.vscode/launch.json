@@ -16,7 +16,7 @@
             "PORT": "3005",
             "TS_NODE_LOG_ERROR": "1",
             "LOG_NAME": "api-server",
-            "LOG_DST": "/tmp/api-server.txt",
+            "LOG_DST": "../../logs/api-server.log",
             "LOG_LEVEL": "debug"
           },
           "args": [
@@ -38,7 +38,7 @@
         "program": "${workspaceFolder:api-server}/node_modules/jest/bin/jest.js",
         "cwd": "${workspaceFolder:api-server}",
         "args": ["--runInBand", "${relativeFile}", "-u"],
-        "env": {"LOG_DST": "/tmp/api-server.txt"}
+        "env": {"LOG_DST": "../../logs/api-server.log"}
       }
     ]
   }

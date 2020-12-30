@@ -14,7 +14,7 @@
       "command": "npm run test:watch -- ${relativeFile} -u",
       "type": "shell",
       "problemMatcher": [],
-      "options": {"env": {"LOG_DST": "/tmp/denron-cli.txt"}}
+      "options": {"env": {"LOG_DST": "../../logs/dendron-cli.log"}}
     },
     {
       "label": "chmod +x",

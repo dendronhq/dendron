@@ -4,13 +4,14 @@ import {
   ENGINE_CONFIG_PRESETS,
   ENGINE_PRESETS,
   ENGINE_PRESETS_MULTI,
+  getLogFilePath,
   runEngineTestV4,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { DendronEngineV2 } from "../enginev2";
 
 const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
-  const logger = createLogger("testLogger", "/tmp/engine-server.txt");
+  const logger = createLogger("testLogger", getLogFilePath("engine-server"));
   const engine = DendronEngineV2.createV3({ vaults, wsRoot, logger });
   return engine;
 };

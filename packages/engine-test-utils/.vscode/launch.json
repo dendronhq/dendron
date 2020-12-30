@@ -13,7 +13,7 @@
       "smartStep": true,
       "cwd": "${workspaceFolder}",
       "env": {
-        "LOG_DST": "/tmp/engine-server.txt"
+        "LOG_DST": "../../logs/engine-test-utils.log"
       },
       "args": [
         "--findRelatedTests",

@@ -20,7 +20,7 @@
       "command": "npm run test:watch:integ -- ${relativeFile} -u",
       "type": "shell",
       "problemMatcher": [], 
-      "options": {"env": {"LOG_DST": "/tmp/api-server.log"}}
+      "options": {"env": {"LOG_DST": "${env:TEMP}/dendron-api-server.log"}}
     },
     {
       "type": "npm",

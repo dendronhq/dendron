@@ -27,7 +27,7 @@ describe("exportPod", () => {
     }
   });
 
-  test("config present, default", async () => {
+  test.skip("config present, default", async () => {
     const preset = PODS_CORE.JSON.EXPORT.BASIC;
     const fakePod = (): DPod<any> => {
       return {

@@ -16,6 +16,7 @@ type CommandCLIOpts = {
   enginePort?: number;
   serve: boolean;
   stage: "dev" | "prod";
+  output?: string;
 };
 type CommandOpts = CommandCLIOpts & { engine: DEngineClientV2 };
 type CommandOutput = {};
@@ -51,6 +52,10 @@ export class BuildSiteV2CLICommand extends CLICommand<
     args.option("enginePort", {
       describe: "port that engine is running on",
     });
+    args.option("output", {
+      describe: "if set, override output from config.yml",
+      type: "string",
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
@@ -67,12 +72,15 @@ export class BuildSiteV2CLICommand extends CLICommand<
       nmPath = goUpTo(path.join(nmPath, ".."), "node_modules");
       cwd = path.join(nmPath, "node_modules", "@dendronhq", "dendron-11ty");
     }
-    let { wsRoot, port, stage, servePort } = _.defaults(opts, {});
+    let { wsRoot, port, stage, servePort, output } = _.defaults(opts, {});
     cwd = opts.cwd || cwd;
     process.env["ENGINE_PORT"] = _.toString(port);
     process.env["WS_ROOT"] = wsRoot;
     process.env["STAGE"] = stage;
     process.env["ELEV_PORT"] = _.toString(servePort);
+    if (output) {
+      process.env["OUTPUT"] = output;
+    }
     const { compile } = require("@dendronhq/dendron-11ty");
     await compile({ cwd }, { serve: opts.serve, port: servePort });
     if (!opts.serve) {

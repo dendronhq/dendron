@@ -23,7 +23,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
-<h1>Foo.One</h1>
+<h1 id=\\"fooone\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fooone\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo.One</h1>
 <div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\">
@@ -34,7 +34,7 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
-<h1>Foo.Two</h1>
+<h1 id=\\"footwo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#footwo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo.Two</h1>
 <p>blah</p>
 </div>    
 </div>
@@ -1294,6 +1294,34 @@ Object {
                     Object {
                       "children": Array [
                         Object {
+                          "children": Array [
+                            Object {
+                              "children": Array [
+                                Object {
+                                  "properties": Object {
+                                    "xlink:href": "#svg-link",
+                                  },
+                                  "tagName": "use",
+                                  "type": "element",
+                                },
+                              ],
+                              "properties": Object {
+                                "aria-hidden": "true",
+                                "viewBox": "0 0 16 16",
+                              },
+                              "tagName": "svg",
+                              "type": "element",
+                            },
+                          ],
+                          "properties": Object {
+                            "aria-hidden": "true",
+                            "class": "anchor-heading",
+                            "href": "#fooone",
+                          },
+                          "tagName": "a",
+                          "type": "element",
+                        },
+                        Object {
                           "position": Object {
                             "end": Object {
                               "column": 10,
@@ -1322,7 +1350,9 @@ Object {
                           "offset": 451,
                         },
                       },
-                      "properties": Object {},
+                      "properties": Object {
+                        "id": "fooone",
+                      },
                       "tagName": "h1",
                       "type": "element",
                     },
@@ -1751,6 +1781,34 @@ Object {
                             Object {
                               "children": Array [
                                 Object {
+                                  "children": Array [
+                                    Object {
+                                      "children": Array [
+                                        Object {
+                                          "properties": Object {
+                                            "xlink:href": "#svg-link",
+                                          },
+                                          "tagName": "use",
+                                          "type": "element",
+                                        },
+                                      ],
+                                      "properties": Object {
+                                        "aria-hidden": "true",
+                                        "viewBox": "0 0 16 16",
+                                      },
+                                      "tagName": "svg",
+                                      "type": "element",
+                                    },
+                                  ],
+                                  "properties": Object {
+                                    "aria-hidden": "true",
+                                    "class": "anchor-heading",
+                                    "href": "#footwo",
+                                  },
+                                  "tagName": "a",
+                                  "type": "element",
+                                },
+                                Object {
                                   "position": Object {
                                     "end": Object {
                                       "column": 10,
@@ -1779,7 +1837,9 @@ Object {
                                   "offset": 909,
                                 },
                               },
-                              "properties": Object {},
+                              "properties": Object {
+                                "id": "footwo",
+                              },
                               "tagName": "h1",
                               "type": "element",
                             },

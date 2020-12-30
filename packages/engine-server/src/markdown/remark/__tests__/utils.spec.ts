@@ -232,8 +232,8 @@ const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
             // link by id
             `<a href=\"foo-id.html\"`,
             // html quoted
-            `<h1>Foo.One</h1>`,
-            `<h1>Foo.Two</h1>`,
+            `Foo.One</h1>`,
+            `Foo.Two</h1>`,
           ],
         })
       ).toBeTruthy();

@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/pods-core",
-  "version": "0.22.1-alpha.2",
+  "version": "0.22.1-alpha.5",
   "description": "pods-core",
   "license": "GPLv3",
   "repository": {
@@ -63,7 +63,7 @@
     "@dendronhq/common-all": "^0.22.1-alpha.2",
     "@dendronhq/common-server": "^0.22.1-alpha.2",
     "@dendronhq/common-test-utils": "^0.22.1-alpha.2",
-    "@dendronhq/engine-server": "^0.22.1-alpha.2",
+    "@dendronhq/engine-server": "^0.22.1-alpha.5",
     "fast-csv": "^4.3.2",
     "fs-extra": "^9.0.1",
     "klaw": "^3.0.0",

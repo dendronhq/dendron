@@ -49,7 +49,7 @@ suite("Extension", function () {
       });
     });
 
-    it("not active/ init, first time", function (done) {
+    it.skip("not active/ init, first time", function (done) {
       const wsRoot = tmpDir().name;
       _activate(ctx).then(async (resp) => {
         expect(resp).toBeFalsy();

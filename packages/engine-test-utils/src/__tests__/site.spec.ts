@@ -415,7 +415,7 @@ describe("SiteUtils", () => {
       );
     });
 
-    test("mult hiearchy, diff publishByDefault", async () => {
+    test.skip("mult hiearchy, diff publishByDefault", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
           const config = ConfigUtils.withConfig(

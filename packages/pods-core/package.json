@@ -44,6 +44,7 @@
     "@types/node": "13.11.0",
     "@types/through2": "^2.0.36",
     "jest": "^23.6.0",
+    "jest-serializer-path": "^0.1.15",
     "prettier": "2.0.5",
     "rimraf": "^2.6.2",
     "ts-jest": "^23.10.3",

@@ -94,6 +94,7 @@
     "coveralls": "^3.0.2",
     "cross-env": "^7.0.2",
     "jest": "^23.6.0",
+    "jest-serializer-path": "^0.1.15",
     "prettier": "2.0.5",
     "rimraf": "^2.6.2",
     "ts-jest": "^23.10.3",

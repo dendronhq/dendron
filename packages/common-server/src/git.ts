@@ -8,6 +8,14 @@ export { simpleGit, SimpleGit };
 
 // comment
 export class GitUtils {
+  static getGithubAccessTokenUrl(opts: {
+    remotePath: string;
+    accessToken: string;
+  }) {
+    const repoPath = opts.remotePath.split(":").slice(-1)[0];
+    return `https://${opts.accessToken}:x-oauth-basic@github.com/${repoPath}`;
+  }
+
   static getRepoNameFromURL(url: string): string {
     return path.basename(url, ".git");
   }

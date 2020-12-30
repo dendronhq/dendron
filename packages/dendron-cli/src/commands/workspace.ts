@@ -12,6 +12,7 @@ type CommandCLIOpts = {
   fromConfig?: boolean;
   dryRun?: boolean;
   action: Action;
+  useGithubAccessToken?: boolean;
 };
 
 type CommandOpts = CommandOptsV3 & CommandCLIOpts;
@@ -51,7 +52,7 @@ export class WorkspaceCLICommand extends CLICommand<
     switch (action) {
       case Action.INIT: {
         if (fromConfig) {
-          await WorkspaceService.createFromConfig(wsRoot);
+          await WorkspaceService.createFromConfig({ wsRoot });
           process.exit();
         } else {
           throw Error("this command is not supported yet");

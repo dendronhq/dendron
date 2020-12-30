@@ -10,6 +10,7 @@ import {
 } from "@dendronhq/common-all";
 import {
   createLogger,
+  GitUtils,
   note2File,
   resolvePath,
   schemaModuleOpts2File,
@@ -189,7 +190,8 @@ export class WorkspaceService {
     return ws;
   }
 
-  static async createFromConfig(wsRoot: string) {
+  static async createFromConfig(opts: { wsRoot: string }) {
+    const { wsRoot } = opts;
     const config = DConfig.getOrCreate(wsRoot);
     const ws = new WorkspaceService({ wsRoot });
     await Promise.all(
@@ -208,10 +210,19 @@ export class WorkspaceService {
     if (!vault.remote || vault.remote.type !== "git") {
       throw new DendronError({ msg: "cloning non-git vault" });
     }
+    let remotePath = vault.remote.url;
     const localPath = path.join(this.wsRoot, vault.fsPath);
     const git = simpleGit();
-    logger.info({ msg: "cloning", remote: vault.remote.url, localPath });
-    await git.clone(vault.remote.url, localPath);
+    logger.info({ msg: "cloning", remotePath, localPath });
+    const accessToken = process.env["GITHUB_ACCESS_TOKEN"];
+    if (accessToken) {
+      logger.info({ msg: "using access token" });
+      remotePath = GitUtils.getGithubAccessTokenUrl({
+        remotePath,
+        accessToken,
+      });
+    }
+    await git.clone(remotePath, localPath);
   }
 
   async cloneVault(opts: { vault: DVault }) {

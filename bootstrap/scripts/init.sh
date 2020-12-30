@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-./bootstrap/scripts/bootstrap.sh
-./bootstrap/scripts/build.sh
+npm run-script bootstrap:init
+
 cd packages/plugin-core/
 ./scripts/sync_vault.sh

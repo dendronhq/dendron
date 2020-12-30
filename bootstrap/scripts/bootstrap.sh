@@ -1,4 +1,3 @@
 #!/bin/bash
 
-echo "bootstrapping..."
-npx lerna bootstrap $@
+npm run-script bootstrap:bootstrap

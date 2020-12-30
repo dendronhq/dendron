@@ -60,22 +60,20 @@ jobs:
           git config --global user.email ci@dendron.so
 
       - name: Initialize
-        run: ./bootstrap/scripts/init-ci.sh
-        shell: bash
+        run: npm run-script ci:init
 
       - name: Run CLI tests
         if: matrix.suite == 'cli'
-        run: ./bootstrap/scripts/test-ci-cli.sh
-        shell: bash
+        run: npm run-script ci:test:cli
         timeout-minutes: 10
+
+      - name: Start Xvfb
+        if: runner.os == 'Linux' && matrix.suite == 'plugin'
+        run: |
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          echo 'DISPLAY=:99.0' >>$GITHUB_ENV
 
       - name: Run plugin tests
         if: matrix.suite == 'plugin'
-        run: |
-          if [ "$RUNNER_OS" != "Windows" ]; then
-            Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-            export DISPLAY=':99.0'
-          fi
-          ./bootstrap/scripts/test-ci-plugin.sh
-        shell: bash
+        run: npm run-script ci:test:plugin
         timeout-minutes: 10

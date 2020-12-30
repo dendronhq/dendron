@@ -9,6 +9,7 @@ import {
   WorkspaceUtilsCommon,
 } from "@dendronhq/common-all";
 import {
+  createLogger,
   note2File,
   resolvePath,
   schemaModuleOpts2File,
@@ -21,6 +22,7 @@ import path from "path";
 import { DConfig } from "./config";
 import { getPortFilePath, getWSMetaFilePath, writeWSMetaFile } from "./utils";
 
+const logger = createLogger();
 export type PathExistBehavior = "delete" | "abort" | "continue";
 
 export type WorkspaceServiceCreateOpts = {
@@ -187,6 +189,31 @@ export class WorkspaceService {
     return ws;
   }
 
+  static async createFromConfig(wsRoot: string) {
+    const config = DConfig.getOrCreate(wsRoot);
+    const ws = new WorkspaceService({ wsRoot });
+    await Promise.all(
+      config.vaults.map(async (vault) => {
+        return ws.cloneVaultV2({ vault });
+      })
+    );
+    return;
+  }
+
+  /**
+   * Used in createFromConfig
+   */
+  async cloneVaultV2(opts: { vault: DVault }) {
+    const { vault } = opts;
+    if (!vault.remote || vault.remote.type !== "git") {
+      throw new DendronError({ msg: "cloning non-git vault" });
+    }
+    const localPath = path.join(this.wsRoot, vault.fsPath);
+    const git = simpleGit();
+    logger.info({ msg: "cloning", remote: vault.remote.url, localPath });
+    await git.clone(vault.remote.url, localPath);
+  }
+
   async cloneVault(opts: { vault: DVault }) {
     const { vault } = opts;
     const wsRoot = this.wsRoot;
@@ -196,6 +223,7 @@ export class WorkspaceService {
     const repoPath = WorkspaceUtilsCommon.getPathForVault({ wsRoot, vault });
     const repoDir = WorkspaceUtilsCommon.getRepoDir(wsRoot);
     fs.ensureDirSync(repoDir);
+    logger.info({ msg: "cloning", repoPath, repoDir });
     const git = simpleGit({ baseDir: repoDir });
     await git.clone(vault.remote.url);
     return repoPath;

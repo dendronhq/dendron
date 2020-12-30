@@ -1,12 +1,14 @@
 import { resolvePath } from "@dendronhq/common-server";
 import { DEngineClientV2, EngineConnector } from "@dendronhq/engine-server";
 import { LaunchEngineServerCommand } from "./launchEngineServer";
+import _ from "lodash";
 
 export async function setupEngine(opts: {
   wsRoot: string;
   enginePort?: number;
+  init?: boolean;
 }) {
-  let { wsRoot, enginePort } = opts;
+  let { wsRoot, enginePort, init } = _.defaults(opts, { init: true });
   let engine: DEngineClientV2;
   let port: number;
   wsRoot = resolvePath(wsRoot, process.cwd());
@@ -19,7 +21,9 @@ export async function setupEngine(opts: {
     port = enginePort;
   } else {
     ({ engine, port } = await new LaunchEngineServerCommand().enrichArgs(opts));
-    await engine.init();
+    if (init) {
+      await engine.init();
+    }
   }
   return { wsRoot, engine, port };
 }

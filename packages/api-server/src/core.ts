@@ -7,17 +7,14 @@ export function setLogger({ logPath }: { logPath: string }) {
   const logLevel = process.env.LOG_LEVEL || "debug";
   // @ts-ignore
   L = createLogger("dendron.server", logPath, { lvl: logLevel });
-  L.info({ ctx: "setLogger", msg: "set" });
   return L;
 }
 
 export function getLogger() {
   if (!L) {
     const logPath = process.env.LOG_DST || "stdout";
-
     L = configureLogger(logPath);
   }
-  L.info({ ctx: "getLogger" });
   return L;
 }
 

@@ -12,6 +12,7 @@ import { PlantSeedCommand } from "../src/commands/plantSeed";
 import { PublishNotesCommand } from "../src/commands/publishNotes";
 import { PublishPodCLICommand } from "../src/commands/PublishPodCLICommand";
 import { RefactorRule } from "../src/commands/refactorBase";
+import { WorkspaceCLICommand } from "../src/commands/workspace";
 
 if (!env("LOG_LEVEL", { shouldThrow: false })) {
   setEnv("LOG_LEVEL", "error");
@@ -55,6 +56,7 @@ PublishPodCLICommand.buildCmd(buildYargs);
 LaunchEngineServerCommand.buildCmd(buildYargs);
 new BuildSiteV2CLICommand().buildCmd(buildYargs);
 new DoctorCLICommand().buildCmd(buildYargs);
+new WorkspaceCLICommand().buildCmd(buildYargs);
 
 /**
  * new Command().build(buildYargs)

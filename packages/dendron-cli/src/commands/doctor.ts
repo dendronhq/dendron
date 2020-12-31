@@ -11,11 +11,11 @@ import _ from "lodash";
 import yargs from "yargs";
 import { CLICommand } from "./base";
 import { CommandOptsV3 } from "./soil";
-import { setupEngine } from "./utils";
+import { setupEngine, setupEngineArgs } from "./utils";
 
 type CommandCLIOpts = {
   wsRoot: string;
-  actions: DoctorActions[];
+  action: DoctorActions;
   enginePort?: number;
   query?: string;
   limit?: number;
@@ -28,7 +28,7 @@ type CommandOutput = void;
 export enum DoctorActions {
   H1_TO_TITLE = "h1ToTitle",
   HI_TO_H2 = "h1ToH2",
-  FM_CUSTOM = "fmCustom",
+  // FIX_FM = "fixFM"
 }
 
 export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
@@ -38,14 +38,13 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
   buildArgs(args: yargs.Argv) {
     super.buildArgs(args);
+    setupEngineArgs(args);
     args.option("actions", {
       describe: "what actions the doctor should take",
+      type: "string",
       requiresArg: true,
-      type: "array",
       choices: Object.values(DoctorActions),
-    });
-    args.option("enginePort", {
-      describe: "port that engine is running on",
+      // default: DoctorActions.FIX_FM
     });
     args.option("query", {
       describe: "run doctor over a query",
@@ -67,7 +66,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async execute(opts: CommandOpts) {
-    const { actions, engine, query, limit, dryRun } = _.defaults(opts, {
+    const { action, engine, query, limit, dryRun } = _.defaults(opts, {
       limit: 99999,
     });
     const proc = MDUtilsV4.procFull({
@@ -87,61 +86,54 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           leading: true,
         });
 
-    await _.reduce<any, Promise<any>>(
-      actions,
-      async (acc, action) => {
-        await acc;
-        let doctorAction: any;
-        switch (action) {
-          case DoctorActions.H1_TO_TITLE: {
-            doctorAction = async (note: NotePropsV2) => {
-              let changes: RemarkChangeEntry[] = [];
-              const newBody = await proc()
-                .use(RemarkUtils.h1ToTitle(note, changes))
-                .process(note.body);
-              note.body = newBody.toString();
-              if (!_.isEmpty(changes)) {
-                await engineWrite(note);
-                this.L.info({ msg: `changes ${note.fname}`, changes });
-                numChanges += 1;
-                return;
-              } else {
-                return;
-              }
-            };
-            break;
+    let doctorAction: any;
+    switch (action) {
+      case DoctorActions.H1_TO_TITLE: {
+        doctorAction = async (note: NotePropsV2) => {
+          let changes: RemarkChangeEntry[] = [];
+          const newBody = await proc()
+            .use(RemarkUtils.h1ToTitle(note, changes))
+            .process(note.body);
+          note.body = newBody.toString();
+          if (!_.isEmpty(changes)) {
+            await engineWrite(note);
+            this.L.info({ msg: `changes ${note.fname}`, changes });
+            numChanges += 1;
+            return;
+          } else {
+            return;
           }
-          case DoctorActions.HI_TO_H2: {
-            doctorAction = async (note: NotePropsV2) => {
-              let changes: RemarkChangeEntry[] = [];
-              const newBody = await proc()
-                .use(RemarkUtils.h1ToH2(changes))
-                .process(note.body);
-              note.body = newBody.toString();
-              if (!_.isEmpty(changes)) {
-                await engineWrite(note);
-                this.L.info({ msg: `changes ${note.fname}`, changes });
-                numChanges += 1;
-                return;
-              } else {
-                return;
-              }
-            };
-            break;
+        };
+        break;
+      }
+      case DoctorActions.HI_TO_H2: {
+        doctorAction = async (note: NotePropsV2) => {
+          let changes: RemarkChangeEntry[] = [];
+          const newBody = await proc()
+            .use(RemarkUtils.h1ToH2(changes))
+            .process(note.body);
+          note.body = newBody.toString();
+          if (!_.isEmpty(changes)) {
+            await engineWrite(note);
+            this.L.info({ msg: `changes ${note.fname}`, changes });
+            numChanges += 1;
+            return;
+          } else {
+            return;
           }
+        };
+        break;
+      }
+    }
+    return _.reduce<any, Promise<any>>(
+      notes,
+      async (accInner, note) => {
+        await accInner;
+        if (numChanges >= limit) {
+          return;
         }
-        return _.reduce<any, Promise<any>>(
-          notes,
-          async (accInner, note) => {
-            await accInner;
-            if (numChanges >= limit) {
-              return;
-            }
-            this.L.debug({ msg: `processing ${note.fname}` });
-            return doctorAction(note);
-          },
-          Promise.resolve()
-        );
+        this.L.debug({ msg: `processing ${note.fname}` });
+        return doctorAction(note);
       },
       Promise.resolve()
     );

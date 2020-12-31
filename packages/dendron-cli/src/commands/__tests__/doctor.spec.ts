@@ -25,39 +25,13 @@ const setupBasic = async (opts: WorkspaceOpts) => {
   });
 };
 
-describe("H1_TO_TITLE", () => {
-  test("basic", async () => {
-    await runEngineTestV4(
-      async ({ engine, wsRoot, vaults }) => {
-        const vault = vaults[0];
-        const cmd = new DoctorCLICommand();
-        await cmd.execute({
-          wsRoot,
-          engine,
-          actions: [DoctorActions.H1_TO_TITLE],
-        });
-        const names = ["Foo", "Bar"];
-        await Promise.all(
-          names.map(async (nm) => {
-            const fpath = path.join(
-              wsRoot,
-              vault.fsPath,
-              `${nm.toLowerCase()}.md`
-            );
-            const note = file2Note(fpath, vault);
-            expect(note).toMatchSnapshot();
-            expect(note.title).toEqual(`${nm} Header`);
-          })
-        );
-      },
-      {
-        createEngine,
-        expect,
-        preSetupHook: setupBasic,
-      }
-    );
-  });
-});
+// const setupNoFM= async (opts: WorkspaceOpts) => {
+//   const { wsRoot, vaults } = opts;
+//   const vpath = path.join(wsRoot, vaults[0].fsPath)
+
+//   fs.writeFileSync( path.join(vpath, "foo.md"), "Foo Body", {encoding: "utf8"})
+//   fs.writeFileSync( path.join(vpath, "bar.md"), "Bar Body", {encoding: "utf8"})
+// };
 
 describe(DoctorActions.HI_TO_H2, () => {
   const action = DoctorActions.HI_TO_H2;
@@ -70,7 +44,7 @@ describe(DoctorActions.HI_TO_H2, () => {
         await cmd.execute({
           wsRoot,
           engine,
-          actions: [action],
+          action,
         });
         const names = ["Foo", "Bar"];
         await Promise.all(
@@ -107,7 +81,7 @@ describe(DoctorActions.HI_TO_H2, () => {
         await cmd.execute({
           wsRoot,
           engine,
-          actions: [action],
+          action,
           dryRun: true,
         });
         const names = ["Foo", "Bar"];
@@ -137,3 +111,72 @@ describe(DoctorActions.HI_TO_H2, () => {
     );
   });
 });
+
+describe("H1_TO_TITLE", () => {
+  const action = DoctorActions.H1_TO_TITLE;
+  test("basic", async () => {
+    await runEngineTestV4(
+      async ({ engine, wsRoot, vaults }) => {
+        const vault = vaults[0];
+        const cmd = new DoctorCLICommand();
+        await cmd.execute({
+          wsRoot,
+          engine,
+          action,
+        });
+        const names = ["Foo", "Bar"];
+        await Promise.all(
+          names.map(async (nm) => {
+            const fpath = path.join(
+              wsRoot,
+              vault.fsPath,
+              `${nm.toLowerCase()}.md`
+            );
+            const note = file2Note(fpath, vault);
+            expect(note).toMatchSnapshot();
+            expect(note.title).toEqual(`${nm} Header`);
+          })
+        );
+      },
+      {
+        createEngine,
+        expect,
+        preSetupHook: setupBasic,
+      }
+    );
+  });
+});
+
+// describe.only(DoctorActions.FIX_FM, () => {
+//   const action = DoctorActions.FIX_FM;
+//   test("basic", async () => {
+//     await runEngineTestV4(
+//       async ({ engine, wsRoot, vaults }) => {
+//         const vault = vaults[0];
+//         const cmd = new DoctorCLICommand();
+//         await cmd.execute({
+//           wsRoot,
+//           engine,
+//           action,
+//         });
+//         const names = ["Foo", "Bar"];
+//         await Promise.all(
+//           names.map(async (nm) => {
+//             const fpath = path.join(
+//               wsRoot,
+//               vault.fsPath,
+//               `${nm.toLowerCase()}.md`
+//             );
+//             const note = file2Note(fpath, vault);
+//             expect(note).toMatchSnapshot();
+//           })
+//         );
+//       },
+//       {
+//         createEngine,
+//         expect,
+//         preSetupHook: setupNoFM,
+//       }
+//     );
+//   });
+// });

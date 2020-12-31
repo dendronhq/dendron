@@ -2,6 +2,7 @@ import { resolvePath } from "@dendronhq/common-server";
 import { DEngineClientV2, EngineConnector } from "@dendronhq/engine-server";
 import { LaunchEngineServerCommand } from "./launchEngineServer";
 import _ from "lodash";
+import yargs from "yargs";
 
 export async function setupEngine(opts: {
   wsRoot: string;
@@ -26,4 +27,11 @@ export async function setupEngine(opts: {
     }
   }
   return { wsRoot, engine, port };
+}
+
+export function setupEngineArgs(args: yargs.Argv) {
+  args.option("enginePort", {
+    describe:
+      "If set, connecto to running engine. If not set, create new instance of Dendron Engine",
+  });
 }

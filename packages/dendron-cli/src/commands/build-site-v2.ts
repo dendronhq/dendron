@@ -5,7 +5,7 @@ import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
 import { CLICommand } from "./base";
-import { setupEngine } from "./utils";
+import { setupEngine, setupEngineArgs } from "./utils";
 
 type CommandCLIOpts = {
   wsRoot: string;
@@ -35,6 +35,7 @@ export class BuildSiteV2CLICommand extends CLICommand<
 
   buildArgs(args: yargs.Argv) {
     super.buildArgs(args);
+    setupEngineArgs(args);
     args.option("serve", {
       describe: "serve over local http server",
       default: false,
@@ -48,9 +49,6 @@ export class BuildSiteV2CLICommand extends CLICommand<
     args.option("servePort", {
       describe: "port to serve over",
       default: "8080",
-    });
-    args.option("enginePort", {
-      describe: "port that engine is running on",
     });
     args.option("output", {
       describe: "if set, override output from config.yml",

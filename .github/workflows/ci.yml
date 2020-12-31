@@ -64,18 +64,12 @@ jobs:
       - name: Initialize
         run: npm run-script ci:init
 
-      - name: Run CLI tests
-        if: matrix.suite == 'cli'
-        run: npm run-script ci:test:cli
-        timeout-minutes: 10
-
       - name: Start Xvfb
         if: runner.os == 'Linux' && matrix.suite == 'plugin'
         run: |
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
 
-      - name: Run plugin tests
-        if: matrix.suite == 'plugin'
-        run: npm run-script ci:test:plugin
+      - name: Run tests
+        run: npm run-script ci:test:${{ matrix.suite }}
         timeout-minutes: 10

@@ -44,33 +44,28 @@ export class PasteLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
     // use open graph to scrape metadata
     const options = { url: url };
-    var meta = "";
-    ogs(options)
-      .then((data) => {
-        const { error, result } = data;
-        const { ogUrl, ogSiteName, ogTitle, ogDescription, ogImage } = result;
+    return this.scrape(options, editor, function (result: string) {
+      return result;
+    });
+  }
 
-        // format text and replace formatted text with selected text/line
-        try {
-          // window.showInformationMessage(`${link} copied`);
-          // const metaData = `Link: ${ogUrl}\n\nSite Name: ${ogSiteName}\n\nTitle: ${ogTitle}\n\nDecription: ${ogDescription}`
-          const metaData = `[${ogTitle}](${ogUrl})`;
-          // changed selected text
-          editor.edit((selectedText) => {
-            selectedText.replace(editor.selection, metaData);
-          });
-          // catch potential errors
-        } catch (err) {
-          this.L.error({ err });
-          throw err;
-        }
-      })
-      .then(undefined, (err) => {
-        // catch errors with open graph
-        this.showFeedback("Error: Invalid URL");
-        console.error("Not valid url");
-      });
-
-    return "success";
+  scrape(options, editor, callback) {
+    return ogs(options, (error, results, response) => {
+      if (error) {
+        this.showFeedback("invalid url");
+        return callback("error");
+      }
+      const { ogUrl, ogSiteName, ogTitle, ogDescription, ogImage } = results;
+      try {
+        const metaData = `[${ogTitle}](${ogUrl})`;
+        editor.edit((selectedText) => {
+          selectedText.replace(editor.selection, metaData);
+        });
+        return callback(metaData);
+      } catch (err) {
+        this.L.error({ err });
+        return callback(err);
+      }
+    });
   }
 }

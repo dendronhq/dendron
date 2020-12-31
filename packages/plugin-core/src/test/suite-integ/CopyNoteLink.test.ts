@@ -31,6 +31,7 @@ suite("notes", function () {
       await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
       const link = await new CopyNoteLinkCommand().run();
       assert.strictEqual(link, "[[Foo|foo]]");
+      console.log("asndoasndo");
       done();
     });
     setupDendronWorkspace(root.name, ctx, {

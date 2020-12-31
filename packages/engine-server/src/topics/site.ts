@@ -1,6 +1,7 @@
 import {
   DendronError,
   DendronSiteConfig,
+  DendronSiteFM,
   DVault,
   HierarchyConfig,
   NotePropsDictV2,
@@ -153,8 +154,19 @@ export class SiteUtils {
           maybeNote.stub = false;
           await engine.writeNote(note);
         }
-
+        const siteFM = maybeNote.custom || ({} as DendronSiteFM);
         let children = maybeNote.children.map((id) => engine.notes[id]);
+        if (siteFM.skipLevels) {
+          let acc = 0;
+          while (acc !== siteFM.skipLevels) {
+            children = children.flatMap((ent) =>
+              ent.children.map((id) => engine.notes[id])
+            );
+            acc += 1;
+          }
+          maybeNote.children = children.map((ent) => ent.id);
+          children.forEach((ent) => (ent.parent = maybeNote.id));
+        }
         children = _.filter(children, (note: NotePropsV2) =>
           SiteUtils.canPublish({ note, config: hConfig })
         );

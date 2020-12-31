@@ -93,6 +93,7 @@ export type DendronSiteFM = {
    */
   sort_by?: "created" | "title";
   sort_order?: "reverse" | "normal";
+  skipLevels?: number;
 };
 
 export type DendronSiteConfig = {

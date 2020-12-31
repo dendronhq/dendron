@@ -1,5 +1,6 @@
 import {
   DendronSiteConfig,
+  DendronSiteFM,
   NotePropsDictV2,
   NotePropsV2,
   NoteUtilsV2,
@@ -342,6 +343,48 @@ describe("SiteUtils", () => {
           createEngine,
           expect,
           preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+
+    test("skip levels", async () => {
+      await runEngineTestV4(
+        async ({ engine }) => {
+          const config: DendronSiteConfig = {
+            siteHierarchies: ["daily"],
+            siteRootDir,
+          };
+          const { notes } = await SiteUtils.filterByConfig({ engine, config });
+          expect(_.values(notes).map((ent) => ent.fname)).toEqual([
+            "daily",
+            "daily.journal",
+            "daily.journal.2020.07.05.two",
+            "daily.journal.2020.07.01.one",
+          ]);
+          // checkNotes({
+          //   filteredNotes: notes,
+          //   engineNotes: engine.notes,
+          //   match: [
+
+          //   ]
+          // });
+        },
+        {
+          createEngine,
+          expect,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupJournals(opts);
+            const { wsRoot, vaults } = opts;
+            const vault = vaults[0];
+            await NoteTestUtilsV4.modifyNoteByPath(
+              { wsRoot, vault, fname: "daily.journal" },
+              (note) => {
+                (note.custom as DendronSiteFM).skipLevels = 3;
+                return note;
+              }
+            );
+            console.log(wsRoot, vault);
+          },
         }
       );
     });

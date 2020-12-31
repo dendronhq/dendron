@@ -39,6 +39,30 @@ export const setupBasic: PreSetupHookFunction = async ({
   await SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.create({ vault, wsRoot });
 };
 
+export const setupJournals: PreSetupHookFunction = async ({
+  vaults,
+  wsRoot,
+}) => {
+  const vault = vaults[0];
+  const names = [
+    "daily",
+    "daily.journal",
+    "daily.journal.2020",
+    "daily.journal.2020.07",
+    "daily.journal.2020.07.01.one",
+    "daily.journal.2020.07.05.two",
+  ];
+  return Promise.all(
+    names.map((fname) => {
+      return NoteTestUtilsV4.createNote({
+        wsRoot,
+        vault,
+        fname,
+      });
+    })
+  );
+};
+
 export const setupBasicMulti: PreSetupHookFunction = async ({
   vaults,
   wsRoot,
@@ -234,6 +258,7 @@ export const ENGINE_HOOKS = {
   setupSchemaPreseet,
   setupSchemaPresetWithNamespaceTemplate,
   setupNoteRefRecursive,
+  setupJournals,
 };
 
 export const ENGINE_HOOKS_MULTI = {

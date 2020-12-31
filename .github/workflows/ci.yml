@@ -28,11 +28,22 @@ jobs:
           - cli
           - plugin
 
+        include:
+          - os: macos-latest
+            env: env
+          - os: ubuntu-latest
+            env: env
+          - os: windows-latest
+            env: Get-ChildItem Env:\
+
     timeout-minutes: 20
 
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Gather environment data
+        run: ${{ matrix.env }}
+
       - name: Checkout source
         uses: actions/checkout@v2
 

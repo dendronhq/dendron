@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.22.1](https://github.com/dendronhq/dendron/compare/v0.22.1-alpha.5...v0.22.1) (2020-12-31)
+
+### Enhancements
+
+- skip children directive ([de136d7](https://github.com/dendronhq/dendron/commit/de136d7d1adc3a35aaf1a567e260cb3c9254125c))
+
 ## [0.22.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.22.1-alpha.1...v0.22.1-alpha.2) (2020-12-30)
 
 **Note:** Version bump only for package @dendronhq/common-test-utils

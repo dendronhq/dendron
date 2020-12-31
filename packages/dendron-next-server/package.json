@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-next-server",
-  "version": "0.22.1-alpha.5",
+  "version": "0.22.1",
   "license": "GPLv3",
   "repository": {
     "type": "git",
@@ -16,8 +16,8 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^1.0.0",
-    "@dendronhq/common-all": "^0.22.1-alpha.2",
-    "@dendronhq/engine-server": "^0.22.1-alpha.5",
+    "@dendronhq/common-all": "^0.22.1",
+    "@dendronhq/engine-server": "^0.22.1",
     "@emotion/react": "^11.1.1",
     "@emotion/styled": "^11.0.0",
     "formik": "^2.2.5",

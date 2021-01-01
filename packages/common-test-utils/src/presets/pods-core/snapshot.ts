@@ -1,6 +1,6 @@
 import fs from "fs-extra";
 import path from "path";
-import { NodeTestPresetsV2 } from "../..";
+import { filterDotFiles, NodeTestPresetsV2 } from "../..";
 import { TestPresetEntry } from "../../utils";
 
 const EXPORT_DEFAULTS = new TestPresetEntry({
@@ -19,7 +19,7 @@ const EXPORT_DEFAULTS = new TestPresetEntry({
   }) => {
     let defaultSnapshotRootPath = path.join(wsRoot, "snapshots");
     const vaultPath = path.join(snapshotDirPath, "vault");
-    const snapshotVault = fs.readdirSync(vaultPath);
+    const snapshotVault = filterDotFiles(fs.readdirSync(vaultPath));
     const assetsDir = fs.readdirSync(path.join(vaultPath, "assets"));
 
     const scenarios = [

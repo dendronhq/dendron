@@ -35,6 +35,10 @@ import { TestPresetEntry } from "./utils";
 import sinon from "sinon";
 export { sinon };
 
+export function filterDotFiles(filenames: string[]) {
+  return filenames.filter((filename) => !/(^|\/)\.[^\/\.]/g.test(filename));
+}
+
 export function getLogFilePath(name: string) {
   // Placing these in the system temp directory proved difficult, as we both
   // want to generate paths here and pass them from npm in the various LOG_DST

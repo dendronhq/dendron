@@ -1,27 +1,34 @@
-import { DendronError, DEngineClientV2, DVault } from "@dendronhq/common-all";
+import {
+  DendronError,
+  DEngineClientV2,
+  DVault,
+  NoteUtilsV2,
+} from "@dendronhq/common-all";
+// @ts-ignore
+import rehypePrism from "@mapbox/rehype-prism";
 import _ from "lodash";
 import { Heading } from "mdast";
 import { paragraph, root, text } from "mdast-builder";
+import link from "rehype-autolink-headings";
 // @ts-ignore
 import katex from "rehype-katex";
 import raw from "rehype-raw";
+import slug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import remark from "remark";
+// @ts-ignore
+import variables from "remark-variables";
 import frontmatterPlugin from "remark-frontmatter";
 import math from "remark-math";
 import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
+import remarkStringify from "remark-stringify";
 import { default as unified, default as Unified, Processor } from "unified";
 import { Node, Parent } from "unist";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTData, DendronASTDest } from "./types";
-import slug from "rehype-slug";
-import link from "rehype-autolink-headings";
-
-// @ts-ignore
-import rehypePrism from "@mapbox/rehype-prism";
 
 const toString = require("mdast-util-to-string");
 
@@ -106,6 +113,7 @@ export class MDUtilsV4 {
     const errors: DendronError[] = [];
     let _proc = remark()
       .use(remarkParse, { gfm: true })
+      //.use(remarkStringify)
       .data("errors", errors)
       .data("engine", engine)
       .use(frontmatterPlugin, ["yaml"])
@@ -127,8 +135,24 @@ export class MDUtilsV4 {
     }
   ) {
     const { dest, vault, fname } = opts;
-    let proc = this.proc(opts)
+    let proc = this.proc(opts);
+    if (vault && fname) {
+      const engine = MDUtilsV4.getEngineFromProc(proc).engine;
+      const note = NoteUtilsV2.getNoteByFnameV4({
+        fname,
+        notes: engine.notes,
+        vault,
+      });
+      const fm = {
+        ...note?.custom,
+        title: note?.title,
+      };
+      proc = proc.data("fm", fm);
+    }
+    proc = proc
       .data("dendron", { dest, vault, fname } as DendronASTData)
+      //.use(extract, { name: "fm" })
+      .use(variables)
       .use(wikiLinks, opts.wikiLinksOpts)
       .use(noteRefs, { ...opts.noteRefOpts, wikiLinkOpts: opts.wikiLinksOpts });
     if (opts.mathOpts?.katex) {
@@ -143,6 +167,12 @@ export class MDUtilsV4 {
     }
     proc = proc.data("procFull", proc().freeze());
     return proc;
+  }
+
+  static procRemark(opts: { proc?: Processor }) {
+    const { proc } = opts;
+    let _proc = proc || this.remark();
+    return _proc.use(remarkParse, { gfm: true }).use(remarkStringify);
   }
 
   static procRehype(opts: {

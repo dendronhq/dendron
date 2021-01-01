@@ -51,6 +51,60 @@ const WITH_TITLE = createProcTests({
   preSetupHook: ENGINE_HOOKS.setupBasic,
 });
 
+const WITH_VARIABLE = createProcTests({
+  name: "WITH_VARIABLE",
+  setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
+    let proc = await MDUtilsV4.procFull({
+      engine,
+      dest: extra.dest,
+      fname: "foo",
+      vault: vaults[0],
+      publishOpts: {
+        insertTitle: true,
+      },
+    });
+    const noteRaw = fs.readFileSync(
+      path.join(wsRoot, vaults[0].fsPath, "foo.md"),
+      { encoding: "utf8" }
+    );
+    const resp = proc.processSync(noteRaw);
+    const respParse = proc.parse(noteRaw);
+    const respRehype = MDUtilsV4.procRehype({ proc: proc() }).processSync(
+      noteRaw
+    );
+    expect(resp).toMatchSnapshot();
+    expect(respParse).toMatchSnapshot("respParse");
+    expect(respRehype).toMatchSnapshot("respRehype");
+    return { resp, proc, respRehype };
+  },
+  verifyFuncDict: {
+    [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+      const { resp, respRehype } = extra;
+      Promise.all(
+        [resp, respRehype].map(async (ent) => {
+          expect(
+            await AssertUtils.assertInString({
+              body: ent.contents,
+              match: ["Title: Foo", "Bond: 42"],
+            })
+          ).toBeTruthy();
+        })
+      );
+    },
+  },
+  preSetupHook: async (opts) => {
+    await ENGINE_HOOKS.setupBasic(opts);
+    await NoteTestUtilsV4.modifyNoteByPath(
+      { wsRoot: opts.wsRoot, vault: opts.vaults[0], fname: "foo" },
+      (note: NotePropsV2) => {
+        note.custom = { bond: 42 };
+        note.body = `Title: {{fm.title}}. Bond: {{fm.bond}}`;
+        return note;
+      }
+    );
+  },
+});
+
 const WITH_ASSET_PREFIX_UNDEFINED = createProcTests({
   name: "asset_prefix undefined",
   setupFunc: async ({ engine, vaults, extra }) => {
@@ -249,6 +303,7 @@ const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
 });
 
 const ALL_TEST_CASES = [
+  ...WITH_VARIABLE,
   ...WITH_ASSET_PREFIX,
   ...WITH_ASSET_PREFIX_UNDEFINED,
   ...NOTE_REF_BASIC_WITH_REHYPE,

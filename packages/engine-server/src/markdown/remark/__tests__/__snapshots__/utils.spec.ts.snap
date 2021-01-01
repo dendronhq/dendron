@@ -2350,6 +2350,175 @@ created: '1'",
 }
 `;
 
+exports[`MDUtils.proc "MD_REGULAR: WITH_VARIABLE" 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+bond: 42
+---
+
+# Foo
+
+Title: Foo. Bond: 42
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_VARIABLE": respParse 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "position": Position {
+        "end": Object {
+          "column": 4,
+          "line": 8,
+          "offset": 70,
+        },
+        "indent": Array [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+        ],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "yaml",
+      "value": "id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+bond: 42",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 8,
+              "line": 9,
+              "offset": 78,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 9,
+              "offset": 71,
+            },
+          },
+          "type": "text",
+          "value": "Title: ",
+        },
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 20,
+              "line": 9,
+              "offset": 90,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 8,
+              "line": 9,
+              "offset": 78,
+            },
+          },
+          "type": "text",
+          "value": "Foo",
+        },
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 28,
+              "line": 9,
+              "offset": 98,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 20,
+              "line": 9,
+              "offset": 90,
+            },
+          },
+          "type": "text",
+          "value": ". Bond: ",
+        },
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 39,
+              "line": 9,
+              "offset": 109,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 28,
+              "line": 9,
+              "offset": 98,
+            },
+          },
+          "type": "text",
+          "value": "42",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 39,
+          "line": 9,
+          "offset": 109,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 9,
+          "offset": 71,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 1,
+      "line": 10,
+      "offset": 110,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_VARIABLE": respRehype 1`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+<p>Title: Foo. Bond: 42</p>",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`MDUtils.proc "MD_REGULAR: asset_prefix undefined" 1`] = `
 VFile {
   "contents": "![alt-text](image-url.jpg)

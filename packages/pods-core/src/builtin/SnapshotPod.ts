@@ -74,7 +74,7 @@ export class SnapshotExportPod extends ExportPod<
         if (_.isEmpty(ignore)) {
           return true;
         }
-        src = _.trimStart(_.replace(src, vault.fsPath, ""), "/");
+        src = path.relative(vault.fsPath, src);
         return !_.some(ignore, (ent) => {
           return DUtils.minimatch(src, ent);
         });

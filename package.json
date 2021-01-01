@@ -43,7 +43,7 @@
     "ci:bootstrap": "npx lerna bootstrap --ci",
     "ci:init": "npm run-script ci:bootstrap && npm run-script bootstrap:build && npm run-script bootstrap:build:plugin-core:sync-vault",
     "ci:test:cli": "npx lerna run test --ignore @dendronhq/plugin-core --concurrency 1 --stream -- -- --forceExit",
-    "ci:test:plugin": "npx lerna run test --scope @dendronhq/plugin-core"
+    "ci:test:plugin": "npx lerna run test --scope @dendronhq/plugin-core --stream"
   },
   "packages": [
     "packages/*",

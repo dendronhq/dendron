@@ -414,7 +414,7 @@ const NOTES = {
             notes: engine.notes,
             vault,
           })?.title,
-          expected: "Lower lower",
+          expected: "Lower Lower",
         },
         {
           actual: NoteUtilsV2.getNoteByFnameV4({
@@ -427,6 +427,40 @@ const NOTES = {
       ];
     }
   ),
+  TITLE_WITH_DASH: new TestPresetEntryV4(async ({ vaults, wsRoot, engine }) => {
+    const vault = vaults[0];
+    const noteA = await NoteTestUtilsV4.createNote({
+      fname: "foo-with-dash",
+      vault: vaults[0],
+      wsRoot,
+    });
+    // this should still only get last component
+    const noteB = await NoteTestUtilsV4.createNote({
+      fname: "foo.foo-with-dash",
+      vault: vaults[0],
+      wsRoot,
+    });
+    await engine.writeNote(noteA);
+    await engine.writeNote(noteB);
+    return [
+      {
+        actual: NoteUtilsV2.getNoteByFnameV4({
+          fname: "foo-with-dash",
+          notes: engine.notes,
+          vault,
+        })?.title,
+        expected: "Foo with Dash",
+      },
+      {
+        actual: NoteUtilsV2.getNoteByFnameV4({
+          fname: "foo.foo-with-dash",
+          notes: engine.notes,
+          vault,
+        })?.title,
+        expected: "Foo with Dash",
+      },
+    ];
+  }),
 };
 const NOTES_MULTI = {
   NEW_DOMAIN: new TestPresetEntryV4(async ({ vaults, engine }) => {

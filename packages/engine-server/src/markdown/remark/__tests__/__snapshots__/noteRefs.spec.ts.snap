@@ -48,8 +48,10 @@ Regular wikilink: [foo.two](foo.two.html)
 </div>    
 </div>
 
+
 </div>    
 </div>
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -72,8 +74,10 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div>
 foo body
 
+
 </div>    
 </div>
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -96,6 +100,7 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div>
 journal1
 
+
 </div>    
 </div><div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
@@ -108,6 +113,7 @@ journal1
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>
 journal2
+
 
 </div>    
 </div><div class=\\"portal-container\\">
@@ -122,8 +128,10 @@ journal2
 <div class=\\"portal-parent-fader-bottom\\"></div>
 journal3
 
+
 </div>    
 </div>
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -135,6 +143,7 @@ journal3
 exports[`compilev2 compile "MD_DENDRON: recursive" 1`] = `
 VFile {
   "contents": "((ref:[[foo]]))
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -146,6 +155,7 @@ VFile {
 exports[`compilev2 compile "MD_DENDRON: regular" 1`] = `
 VFile {
   "contents": "((ref:[[foo]]))
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -157,6 +167,7 @@ VFile {
 exports[`compilev2 compile "MD_DENDRON: wildcard" 1`] = `
 VFile {
   "contents": "((ref:[[journal.2020.08.*]]))
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -217,6 +228,7 @@ Regular wikilink: [foo.two](foo.two.md)
 
 </div>    
 </div>
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -243,6 +255,7 @@ foo body
 
 </div>    
 </div>
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -303,6 +316,7 @@ journal3
 
 </div>    
 </div>
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -320,6 +334,8 @@ VFile {
 blah
 
 Regular wikilink: [foo.two](foo.two)
+
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -331,6 +347,8 @@ Regular wikilink: [foo.two](foo.two)
 exports[`compilev2 compile "MD_REGULAR: regular" 1`] = `
 VFile {
   "contents": "foo body
+
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -342,8 +360,12 @@ VFile {
 exports[`compilev2 compile "MD_REGULAR: wildcard" 1`] = `
 VFile {
   "contents": "journal1
+
 journal2
+
 journal3
+
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},

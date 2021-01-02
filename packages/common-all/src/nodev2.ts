@@ -33,6 +33,7 @@ import {
 import { getSlugger } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
+import title from "title";
 
 export class DNodeUtilsV2 {
   static addChild(parent: DNodePropsV2, child: DNodePropsV2) {
@@ -531,11 +532,17 @@ export class NoteUtilsV2 {
     return prefixParts.join(" ");
   }
 
-  static genTitle(fname: string) {
+  static genTitle(fname: string): string {
+    const titleFromBasename = DNodeUtilsV2.basename(fname, true);
+    // check if title is unchanged from default. if so, add default title
     if (_.toLower(fname) == fname) {
-      return _.upperFirst(DNodeUtilsV2.basename(fname, true));
+      fname = titleFromBasename.replace(/-/g, " ");
+      // type definitions are wrong
+      // @ts-ignore
+      return title(fname) as string;
     }
-    return DNodeUtilsV2.basename(fname, true);
+    // if user customized title, return the title as user specified
+    return titleFromBasename;
   }
 
   static getNotesByFname({

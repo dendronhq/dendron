@@ -3,6 +3,7 @@
 exports[`H1_TO_TITLE basic 1`] = `
 Object {
   "body": "## Foo Content
+
 ",
   "children": Array [],
   "created": "1",
@@ -25,6 +26,7 @@ Object {
 exports[`H1_TO_TITLE basic 2`] = `
 Object {
   "body": "## Bar Content
+
 ",
   "children": Array [],
   "created": "1",
@@ -49,6 +51,7 @@ Object {
   "body": "## Foo Header
 
 ## Foo Content
+
 ",
   "children": Array [],
   "created": "1",
@@ -73,6 +76,7 @@ Object {
   "body": "## Bar Header
 
 ## Bar Content
+
 ",
   "children": Array [],
   "created": "1",

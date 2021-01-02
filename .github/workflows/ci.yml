@@ -31,16 +31,32 @@ jobs:
         include:
           - os: macos-latest
             env: env
+            versions: ''
           - os: ubuntu-latest
             env: env
+            versions: ''
           - os: windows-latest
             env: Get-ChildItem Env:\
+            versions: choco --version
 
     timeout-minutes: 20
 
     runs-on: ${{ matrix.os }}
 
     steps:
+      # The closest we can get to rsync natively is cwRsync. Instead let's get
+      # rsync installed via Cygwin and put that on PATH.
+      - name: Install dependencies
+        if: runner.os == 'Windows'
+        run: |
+          choco install cygwin
+          C:\tools\cygwin\cygwinsetup.exe `
+              --quiet-mode --no-desktop --upgrade-also --wait `
+              --root C:\tools\cygwin `
+              --only-site --site http://mirrors.kernel.org/sourceware/cygwin/ `
+              --packages rsync
+          "C:\tools\cygwin\bin" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+
       - name: Gather environment data
         run: |
           ${{ matrix.env }}

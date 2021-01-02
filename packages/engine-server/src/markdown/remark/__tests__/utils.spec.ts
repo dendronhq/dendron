@@ -1,4 +1,4 @@
-import { NotePropsV2 } from "@dendronhq/common-all";
+import { NotePropsV2, WorkspaceOpts } from "@dendronhq/common-all";
 import {
   AssertUtils,
   ENGINE_HOOKS,
@@ -9,40 +9,75 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { DendronASTDest } from "../../types";
+import { DendronASTDest, Processor } from "../../types";
 import { MDUtilsV4 } from "../../utils";
 import { createEngine, createProcTests } from "./utils";
 
 const IMAGE_LINK = `![alt-text](image-url.jpg)`;
 
+// --- Utils
+const readAndProcess = (opts: { npath: string; proc: Processor }) => {
+  const { npath, proc } = opts;
+  const noteRaw = fs.readFileSync(npath, { encoding: "utf8" });
+  const respParse = proc.parse(noteRaw);
+  const respProcess = proc.processSync(noteRaw);
+  const respRehype = MDUtilsV4.procRehype({ proc: proc() }).processSync(
+    noteRaw
+  );
+  expect(respParse).toMatchSnapshot("respParse");
+  expect(respProcess).toMatchSnapshot("respProcess");
+  expect(respRehype).toMatchSnapshot("respRehype");
+  return { proc, respProcess, respParse, respRehype };
+};
+
+const modifyNote = async (
+  opts: WorkspaceOpts,
+  cb: (note: NotePropsV2) => NotePropsV2
+) => {
+  await NoteTestUtilsV4.modifyNoteByPath(
+    { wsRoot: opts.wsRoot, vault: opts.vaults[0], fname: "foo" },
+    cb
+  );
+};
+
+const createProc = async (
+  opts: Parameters<TestPresetEntryV4["testFunc"]>[0],
+  procOverride?: Partial<Parameters<typeof MDUtilsV4.procFull>[0]>
+) => {
+  const { engine, vaults, extra } = opts;
+  const proc = await MDUtilsV4.procFull(
+    _.defaults(
+      {
+        engine,
+        dest: extra.dest,
+        fname: "foo",
+        vault: vaults[0],
+      },
+      procOverride
+    )
+  );
+  return proc;
+};
+
+// --- Test Cases
+
 const WITH_TITLE = createProcTests({
   name: "WITH_TITLE",
-  setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
-    const proc = await MDUtilsV4.procFull({
-      engine,
-      dest: extra.dest,
-      fname: "foo",
-      vault: vaults[0],
+  setupFunc: async (opts) => {
+    let proc = await createProc(opts, {
       publishOpts: {
         insertTitle: true,
       },
     });
-    const noteRaw = fs.readFileSync(
-      path.join(wsRoot, vaults[0].fsPath, "foo.md"),
-      { encoding: "utf8" }
-    );
-    const resp = proc.processSync(noteRaw);
-    const respParse = proc.parse(noteRaw);
-    expect(resp).toMatchSnapshot();
-    expect(respParse).toMatchSnapshot("respParse");
-    return { resp, proc };
+    const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
+    return readAndProcess({ npath, proc });
   },
   verifyFuncDict: {
     [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-      const { resp } = extra;
+      const { respProcess } = extra;
       expect(
         await AssertUtils.assertInString({
-          body: resp.contents,
+          body: respProcess.contents,
           match: ["# Foo", "foo body"],
         })
       ).toBeTruthy();
@@ -53,35 +88,16 @@ const WITH_TITLE = createProcTests({
 
 const WITH_VARIABLE = createProcTests({
   name: "WITH_VARIABLE",
-  setupFunc: async ({ engine, vaults, extra, wsRoot }) => {
-    let proc = await MDUtilsV4.procFull({
-      engine,
-      dest: extra.dest,
-      fname: "foo",
-      vault: vaults[0],
-      publishOpts: {
-        insertTitle: true,
-      },
-    });
-    const noteRaw = fs.readFileSync(
-      path.join(wsRoot, vaults[0].fsPath, "foo.md"),
-      { encoding: "utf8" }
-    );
-    const resp = proc.processSync(noteRaw);
-    const respParse = proc.parse(noteRaw);
-    const respRehype = MDUtilsV4.procRehype({ proc: proc() }).processSync(
-      noteRaw
-    );
-    expect(resp).toMatchSnapshot();
-    expect(respParse).toMatchSnapshot("respParse");
-    expect(respRehype).toMatchSnapshot("respRehype");
-    return { resp, proc, respRehype };
+  setupFunc: async (opts) => {
+    let proc = await createProc(opts);
+    const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
+    return readAndProcess({ npath, proc });
   },
   verifyFuncDict: {
     [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-      const { resp, respRehype } = extra;
+      const { respProcess, respRehype } = extra;
       Promise.all(
-        [resp, respRehype].map(async (ent) => {
+        [respProcess, respRehype].map(async (ent) => {
           expect(
             await AssertUtils.assertInString({
               body: ent.contents,
@@ -91,40 +107,56 @@ const WITH_VARIABLE = createProcTests({
         })
       );
     },
-    [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-      const { resp, respRehype } = extra;
-      Promise.all(
-        [resp, respRehype].map(async (ent) => {
-          expect(
-            await AssertUtils.assertInString({
-              body: ent.contents,
-              match: ["Title: Foo", "Bond: 42"],
-            })
-          ).toBeTruthy();
+    [DendronASTDest.MD_ENHANCED_PREVIEW]: DendronASTDest.MD_REGULAR,
+  },
+  preSetupHook: async (opts) => {
+    await ENGINE_HOOKS.setupBasic(opts);
+    await modifyNote(opts, (note: NotePropsV2) => {
+      note.custom = { bond: 42 };
+      note.body = `Title: {{fm.title}}. Bond: {{fm.bond}}`;
+      return note;
+    });
+  },
+});
+
+const WITH_ABBR = createProcTests({
+  name: "WITH_ABBR",
+  setupFunc: async (opts) => {
+    let proc = await createProc(opts);
+    const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
+    return readAndProcess({ npath, proc });
+  },
+  verifyFuncDict: {
+    [DendronASTDest.HTML]: async ({ extra }) => {
+      const { respRehype } = extra;
+      expect(
+        await AssertUtils.assertInString({
+          body: respRehype.contents,
+          match: [
+            `<p>This plugin works on <abbr title="Markdown Abstract Syntax Tree">MDAST</abbr>, a Markdown <abbr title="Abstract syntax tree">AST</abbr> implemented by <a href="https://github.com/remarkjs/remark">remark</a></p>`,
+          ],
         })
-      );
+      ).toBeTruthy();
     },
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupBasic(opts);
-    await NoteTestUtilsV4.modifyNoteByPath(
-      { wsRoot: opts.wsRoot, vault: opts.vaults[0], fname: "foo" },
-      (note: NotePropsV2) => {
-        note.custom = { bond: 42 };
-        note.body = `Title: {{fm.title}}. Bond: {{fm.bond}}`;
-        return note;
-      }
-    );
+    await modifyNote(opts, (note: NotePropsV2) => {
+      note.body = [
+        "This plugin works on MDAST, a Markdown AST implemented by [remark](https://github.com/remarkjs/remark)",
+        "",
+        "*[MDAST]: Markdown Abstract Syntax Tree",
+        "*[AST]: Abstract syntax tree",
+      ].join("\n");
+      return note;
+    });
   },
 });
 
 const WITH_ASSET_PREFIX_UNDEFINED = createProcTests({
   name: "asset_prefix undefined",
-  setupFunc: async ({ engine, vaults, extra }) => {
-    const proc = await MDUtilsV4.procFull({
-      engine,
-      dest: extra.dest,
-      vault: vaults[0],
+  setupFunc: async (opts) => {
+    let proc = await createProc(opts, {
       publishOpts: {
         assetsPrefix: undefined,
       },
@@ -143,36 +175,16 @@ const WITH_ASSET_PREFIX_UNDEFINED = createProcTests({
         },
       ];
     },
-    [DendronASTDest.HTML]: async ({ extra }) => {
-      const { resp } = extra;
-      expect(resp).toMatchSnapshot();
-      return [
-        {
-          actual: _.trim(resp.toString()),
-          expected: "![alt-text](image-url.jpg)",
-        },
-      ];
-    },
-    [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-      const { resp } = extra;
-      return [
-        {
-          actual: _.trim(resp.toString()),
-          expected: "![alt-text](image-url.jpg)",
-        },
-      ];
-    },
+    [DendronASTDest.HTML]: DendronASTDest.MD_REGULAR,
+    [DendronASTDest.MD_ENHANCED_PREVIEW]: DendronASTDest.MD_REGULAR,
   },
   preSetupHook: ENGINE_HOOKS.setupBasic,
 });
 
 const WITH_ASSET_PREFIX = createProcTests({
   name: "asset_prefix",
-  setupFunc: async ({ engine, vaults, extra }) => {
-    const proc = await MDUtilsV4.procFull({
-      engine,
-      dest: extra.dest,
-      vault: vaults[0],
+  setupFunc: async (opts) => {
+    let proc = await createProc(opts, {
       publishOpts: {
         assetsPrefix: "bond/",
       },
@@ -201,30 +213,20 @@ const WITH_ASSET_PREFIX = createProcTests({
         },
       ];
     },
-    [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-      const { resp } = extra;
-      return [
-        {
-          actual: _.trim(resp.toString()),
-          expected: "![alt-text](image-url.jpg)",
-        },
-      ];
-    },
+    [DendronASTDest.MD_ENHANCED_PREVIEW]: DendronASTDest.MD_REGULAR,
   },
   preSetupHook: ENGINE_HOOKS.setupBasic,
 });
 
 const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
   name: "NOTE_REF_WITH_REHYPE",
-  setupFunc: async ({ engine, vaults, extra }) => {
-    const proc = await MDUtilsV4.procFull({
-      engine,
+  setupFunc: async (opts) => {
+    let proc = await createProc(opts, {
       wikiLinksOpts: { useId: true },
-      dest: extra.dest,
-      vault: vaults[0],
     });
+
     const txt = `((ref: [[foo.md]]))`;
-    if (extra.dest === DendronASTDest.HTML) {
+    if (opts.extra.dest === DendronASTDest.HTML) {
       const procRehype = MDUtilsV4.procRehype({ proc });
       const resp = await procRehype.process(txt);
       return { resp, proc };
@@ -250,31 +252,24 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
         })
       ).toBeTruthy();
     },
-    [DendronASTDest.MD_ENHANCED_PREVIEW]: async () => {},
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
-    await NoteTestUtilsV4.modifyNoteByPath(
-      { wsRoot: opts.wsRoot, vault: opts.vaults[0], fname: "foo" },
-      (note: NotePropsV2) => {
-        note.body = `[[bar]]`;
-        return note;
-      }
-    );
+    await modifyNote(opts, (note: NotePropsV2) => {
+      note.body = `[[bar]]`;
+      return note;
+    });
   },
 });
 
 const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
   name: "NOTE_REF_RECURSIVE_WITH_REHYPE",
-  setupFunc: async ({ engine, vaults, extra }) => {
-    const proc = await MDUtilsV4.procFull({
-      engine,
+  setupFunc: async (opts) => {
+    let proc = await createProc(opts, {
       wikiLinksOpts: { useId: true },
-      dest: extra.dest,
-      vault: vaults[0],
     });
     const txt = `((ref: [[foo.md]]))`;
-    if (extra.dest === DendronASTDest.HTML) {
+    if (opts.extra.dest === DendronASTDest.HTML) {
       const procRehype = MDUtilsV4.procRehype({ proc });
       const resp = await procRehype.process(txt);
       const respParse = await procRehype.parse(txt);
@@ -316,6 +311,7 @@ const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
 });
 
 const ALL_TEST_CASES = [
+  ...WITH_ABBR,
   ...WITH_VARIABLE,
   ...WITH_ASSET_PREFIX,
   ...WITH_ASSET_PREFIX_UNDEFINED,

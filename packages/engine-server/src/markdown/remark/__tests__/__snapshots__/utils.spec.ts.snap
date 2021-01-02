@@ -368,8 +368,8 @@ Object {
               "position": Object {
                 "end": Object {
                   "column": 1,
-                  "line": 37,
-                  "offset": 1006,
+                  "line": 38,
+                  "offset": 1007,
                 },
                 "start": Object {
                   "column": 1,
@@ -2224,9 +2224,243 @@ VFile {
 }
 `;
 
+exports[`MDUtils.proc "HTML: WITH_ABBR": respParse 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "position": Position {
+        "end": Object {
+          "column": 4,
+          "line": 7,
+          "offset": 61,
+        },
+        "indent": Array [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+        ],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "yaml",
+      "value": "id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 59,
+              "line": 8,
+              "offset": 120,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 8,
+              "offset": 62,
+            },
+          },
+          "type": "text",
+          "value": "This plugin works on MDAST, a Markdown AST implemented by ",
+        },
+        Object {
+          "children": Array [
+            Object {
+              "position": Position {
+                "end": Object {
+                  "column": 66,
+                  "line": 8,
+                  "offset": 127,
+                },
+                "indent": Array [],
+                "start": Object {
+                  "column": 60,
+                  "line": 8,
+                  "offset": 121,
+                },
+              },
+              "type": "text",
+              "value": "remark",
+            },
+          ],
+          "position": Position {
+            "end": Object {
+              "column": 103,
+              "line": 8,
+              "offset": 164,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 59,
+              "line": 8,
+              "offset": 120,
+            },
+          },
+          "title": null,
+          "type": "link",
+          "url": "https://github.com/remarkjs/remark",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 103,
+          "line": 8,
+          "offset": 164,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 8,
+          "offset": 62,
+        },
+      },
+      "type": "paragraph",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "abbr": "MDAST",
+          "children": Array [
+            Object {
+              "type": "text",
+              "value": "MDAST",
+            },
+          ],
+          "data": Object {
+            "hName": "abbr",
+            "hProperties": Object {
+              "title": "Markdown Abstract Syntax Tree",
+            },
+          },
+          "position": Position {
+            "end": Object {
+              "column": 1,
+              "line": 11,
+              "offset": 206,
+            },
+            "indent": Array [
+              1,
+            ],
+            "start": Object {
+              "column": 1,
+              "line": 10,
+              "offset": 166,
+            },
+          },
+          "reference": "Markdown Abstract Syntax Tree",
+          "type": "abbr",
+        },
+        Object {
+          "abbr": "AST",
+          "children": Array [
+            Object {
+              "type": "text",
+              "value": "AST",
+            },
+          ],
+          "data": Object {
+            "hName": "abbr",
+            "hProperties": Object {
+              "title": "Abstract syntax tree",
+            },
+          },
+          "position": Position {
+            "end": Object {
+              "column": 29,
+              "line": 11,
+              "offset": 234,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 11,
+              "offset": 206,
+            },
+          },
+          "reference": "Abstract syntax tree",
+          "type": "abbr",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 29,
+          "line": 11,
+          "offset": 234,
+        },
+        "indent": Array [
+          1,
+        ],
+        "start": Object {
+          "column": 1,
+          "line": 10,
+          "offset": 166,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 1,
+      "line": 12,
+      "offset": 235,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`MDUtils.proc "HTML: WITH_ABBR": respProcess 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+This plugin works on MDAST, a Markdown AST implemented by [remark](https://github.com/remarkjs/remark)
+
+*[MDAST]: Markdown Abstract Syntax Tree
+*[AST]: Abstract syntax tree",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "HTML: WITH_ABBR": respRehype 1`] = `
+VFile {
+  "contents": "<p>This plugin works on <abbr title=\\"Markdown Abstract Syntax Tree\\">MDAST</abbr>, a Markdown <abbr title=\\"Abstract syntax tree\\">AST</abbr> implemented by <a href=\\"https://github.com/remarkjs/remark\\">remark</a></p>",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`MDUtils.proc "HTML: asset_prefix undefined" 1`] = `
 VFile {
   "contents": "![alt-text](image-url.jpg)
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -2238,28 +2472,7 @@ VFile {
 exports[`MDUtils.proc "HTML: asset_prefix" 1`] = `
 VFile {
   "contents": "![alt-text](bond/image-url.jpg)
-",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
 
-exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_VARIABLE" 1`] = `
-VFile {
-  "contents": "---
-id: foo
-title: Foo
-desc: ''
-updated: '1'
-created: '1'
-bond: 42
----
-
-# Foo
-
-Title: Foo. Bond: 42
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -2404,18 +2617,7 @@ bond: 42",
 }
 `;
 
-exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_VARIABLE": respRehype 1`] = `
-VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<p>Title: Foo. Bond: 42</p>",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`MDUtils.proc "MD_REGULAR: WITH_TITLE" 1`] = `
+exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_VARIABLE": respProcess 1`] = `
 VFile {
   "contents": "---
 id: foo
@@ -2423,11 +2625,45 @@ title: Foo
 desc: ''
 updated: '1'
 created: '1'
+bond: 42
 ---
 
-# Foo
+Title: Foo. Bond: 42
 
-foo body
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_VARIABLE": respRehype 1`] = `
+VFile {
+  "contents": "<p>Title: Foo. Bond: 42</p>",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: asset_prefix undefined" 1`] = `
+VFile {
+  "contents": "![alt-text](image-url.jpg)
+
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: asset_prefix" 1`] = `
+VFile {
+  "contents": "![alt-text](image-url.jpg)
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -2519,7 +2755,7 @@ created: '1'",
 }
 `;
 
-exports[`MDUtils.proc "MD_REGULAR: WITH_VARIABLE" 1`] = `
+exports[`MDUtils.proc "MD_REGULAR: WITH_TITLE": respProcess 1`] = `
 VFile {
   "contents": "---
 id: foo
@@ -2527,13 +2763,24 @@ title: Foo
 desc: ''
 updated: '1'
 created: '1'
-bond: 42
 ---
 
 # Foo
 
-Title: Foo. Bond: 42
+foo body
+
 ",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_TITLE": respRehype 1`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+<p>foo body</p>",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
   "history": Array [],
@@ -2677,10 +2924,30 @@ bond: 42",
 }
 `;
 
+exports[`MDUtils.proc "MD_REGULAR: WITH_VARIABLE": respProcess 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+bond: 42
+---
+
+Title: Foo. Bond: 42
+
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`MDUtils.proc "MD_REGULAR: WITH_VARIABLE": respRehype 1`] = `
 VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<p>Title: Foo. Bond: 42</p>",
+  "contents": "<p>Title: Foo. Bond: 42</p>",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
   "history": Array [],
@@ -2691,6 +2958,7 @@ VFile {
 exports[`MDUtils.proc "MD_REGULAR: asset_prefix undefined" 1`] = `
 VFile {
   "contents": "![alt-text](image-url.jpg)
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -2702,6 +2970,7 @@ VFile {
 exports[`MDUtils.proc "MD_REGULAR: asset_prefix" 1`] = `
 VFile {
   "contents": "![alt-text](image-url.jpg)
+
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},

@@ -21,3 +21,4 @@ packages/dendron-cli/stdout.old
 packages/api-server/stdout.old
 packages/api-server/src/static
 packages/common-server/src/proto.ts
+.dendron.*

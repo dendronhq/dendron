@@ -27,8 +27,9 @@ export const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
 export const createProcTests = (opts: {
   name: string;
   setupFunc: TestPresetEntryV4["testFunc"];
-  verifyFuncDict?: { [key in DendronASTDest]?: TestPresetEntryV4["testFunc"] };
-  verifyFuncAll?: TestPresetEntryV4["testFunc"];
+  verifyFuncDict?: {
+    [key in DendronASTDest]?: TestPresetEntryV4["testFunc"] | DendronASTDest;
+  };
   preSetupHook?: TestPresetEntryV4["preSetupHook"];
 }) => {
   const { name, setupFunc, verifyFuncDict } = opts;
@@ -36,44 +37,34 @@ export const createProcTests = (opts: {
   if (verifyFuncDict) {
     allTests = Object.values(DendronASTDest)
       .map((dest) => {
-        const verifyFunc = verifyFuncDict[dest];
-        if (verifyFunc) {
-          return {
-            name,
-            dest,
-            testCase: new TestPresetEntryV4(
-              async (presetOpts) => {
-                const extra = await setupFunc({
-                  ...presetOpts,
-                  extra: { dest },
-                });
-                return await verifyFunc({ ...presetOpts, extra });
-              },
-              { preSetupHook: opts.preSetupHook }
-            ),
-          };
+        let funcOrKey = verifyFuncDict[dest];
+        let verifyFunc: TestPresetEntryV4["testFunc"];
+        if (_.isUndefined(funcOrKey)) {
+          return;
         }
-        return;
+        if (_.isString(funcOrKey)) {
+          verifyFunc = verifyFuncDict[
+            funcOrKey
+          ] as TestPresetEntryV4["testFunc"];
+        } else {
+          verifyFunc = funcOrKey;
+        }
+        return {
+          name,
+          dest,
+          testCase: new TestPresetEntryV4(
+            async (presetOpts) => {
+              const extra = await setupFunc({
+                ...presetOpts,
+                extra: { dest },
+              });
+              return await verifyFunc({ ...presetOpts, extra });
+            },
+            { preSetupHook: opts.preSetupHook }
+          ),
+        };
       })
       .filter((ent) => !_.isUndefined(ent));
   }
-  // if (verifyFuncAll) {
-  //   allTests = allTests.concat(
-  //     Object.values(DendronASTDest).map((dest) => {
-  //       const verifyFunc = verifyFuncAll;
-  //       return {
-  //         name,
-  //         dest,
-  //         testCase: new TestPresetEntryV4(
-  //           async (presetOpts) => {
-  //             const extra = await setupFunc({ ...presetOpts, extra: { dest } });
-  //             return await verifyFunc({ ...presetOpts, extra });
-  //           },
-  //           { preSetupHook: opts.preSetupHook }
-  //         ),
-  //       };
-  //     })
-  //   );
-  // }
   return allTests;
 };

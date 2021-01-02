@@ -29,6 +29,7 @@ import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTData, DendronASTDest } from "./types";
+import abbrPlugin from "remark-abbr";
 
 const toString = require("mdast-util-to-string");
 
@@ -152,6 +153,7 @@ export class MDUtilsV4 {
     proc = proc
       .data("dendron", { dest, vault, fname } as DendronASTData)
       //.use(extract, { name: "fm" })
+      .use(abbrPlugin)
       .use(variables)
       .use(wikiLinks, opts.wikiLinksOpts)
       .use(noteRefs, { ...opts.noteRefOpts, wikiLinkOpts: opts.wikiLinksOpts });

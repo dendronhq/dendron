@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.22.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.22.1...v0.22.2-alpha.0) (2021-01-02)
+
+### Features
+
+- variable support ([c56b826](https://github.com/dendronhq/dendron/commit/c56b8265da5ee6b85c5d7abf37a9154b6824ad6f))
+
 ## [0.22.1](https://github.com/dendronhq/dendron/compare/v0.22.1-alpha.5...v0.22.1) (2020-12-31)
 
 ### Enhancements

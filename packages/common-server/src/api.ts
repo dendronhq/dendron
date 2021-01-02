@@ -377,15 +377,6 @@ export class DendronAPI extends API {
     return resp;
   }
 
-  // async engineQuery(req: EngineQueryRequest): Promise<EngineQueryPayload> {
-  //   const resp = await this._makeRequest({
-  //     path: "note/query",
-  //     method: "post",
-  //     body: req,
-  //   });
-  //   return resp;
-  // }
-
   async engineRenameNote(
     req: EngineRenameNoteRequest
   ): Promise<EngineRenameNotePayload> {

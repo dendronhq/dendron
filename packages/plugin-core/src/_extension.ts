@@ -141,7 +141,7 @@ function isFirstInstall(context: vscode.ExtensionContext): boolean {
 }
 
 async function startServer() {
-  const ctx = "startServeer";
+  const ctx = "startServer";
   const maybePort = DendronWorkspace.configuration().get<number | undefined>(
     CONFIG.SERVER_PORT.key
   );

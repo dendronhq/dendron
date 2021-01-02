@@ -311,7 +311,7 @@ export class FileStorageV2 implements DStoreV2 {
     this.links = [];
     this.logger = logger;
     const ctx = "FileStorageV2";
-    this.logger.info({ ctx, wsRoot, vaultsv3 });
+    this.logger.info({ ctx, wsRoot, vaultsv3, level: this.logger.level });
   }
 
   async init(): Promise<DEngineInitRespV2> {
@@ -628,10 +628,13 @@ export class FileStorageV2 implements DStoreV2 {
     note: NotePropsV2,
     _opts?: EngineUpdateNodesOptsV2
   ): Promise<void> {
+    const ctx = "updateNote";
     const maybeNote = this.notes[note.id];
     if (maybeNote) {
       note = NoteUtilsV2.hydrate({ noteRaw: note, noteHydrated: maybeNote });
     }
+    // TODO: remove
+    this.logger.debug({ ctx, note });
     this.notes[note.id] = note;
     return;
   }

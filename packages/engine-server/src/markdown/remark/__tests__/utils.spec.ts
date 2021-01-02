@@ -91,6 +91,19 @@ const WITH_VARIABLE = createProcTests({
         })
       );
     },
+    [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+      const { resp, respRehype } = extra;
+      Promise.all(
+        [resp, respRehype].map(async (ent) => {
+          expect(
+            await AssertUtils.assertInString({
+              body: ent.contents,
+              match: ["Title: Foo", "Bond: 42"],
+            })
+          ).toBeTruthy();
+        })
+      );
+    },
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupBasic(opts);

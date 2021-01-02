@@ -4,7 +4,8 @@
     "outDir": "out",
     "rootDirs": ["src"],
     "declaration": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "strictNullChecks": true
   },
   "exclude": [
     "node_modules",

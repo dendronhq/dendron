@@ -67,6 +67,9 @@ export class VaultUtils {
     return vault;
   }
 
+  /**
+   * Vault path relative to root
+   */
   static normVaultPath = (opts: { vault: DVault; wsRoot: string }) => {
     return path.isAbsolute(opts.vault.fsPath)
       ? path.relative(opts.wsRoot, opts.vault.fsPath)

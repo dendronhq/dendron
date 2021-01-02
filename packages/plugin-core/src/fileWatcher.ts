@@ -4,6 +4,8 @@ import {
   DVault,
   NotePropsV2,
   NoteUtilsV2,
+  VaultUtils,
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { file2Note, string2Note } from "@dendronhq/common-server";
 import { HistoryService, ParserUtilsV2 } from "@dendronhq/engine-server";
@@ -23,9 +25,14 @@ export class VaultWatcher {
   public ws: DendronWorkspace;
   public engine: DEngineClientV2;
 
-  constructor({ vaults }: { vaults: DVault[] }) {
+  constructor(opts: WorkspaceOpts) {
+    const { vaults, wsRoot } = opts;
     this.watchers = vaults.map((vault) => {
-      const rootFolder = vault.fsPath;
+      const vpath = path.join(
+        wsRoot,
+        VaultUtils.normVaultPath({ vault, wsRoot })
+      );
+      const rootFolder = vpath;
       const pattern = new vscode.RelativePattern(rootFolder, "*.md");
       const watcher = vscode.workspace.createFileSystemWatcher(
         pattern,
@@ -74,8 +81,8 @@ export class VaultWatcher {
     note = NoteUtilsV2.hydrate({ noteRaw: note, noteHydrated });
     const links = ParserUtilsV2.findLinks({ note });
     note.links = links;
-    await eclient.updateNote(note);
     this.L.info({ ctx, fname, msg: "exit" });
+    return await eclient.updateNote(note);
   }
 
   async onDidCreate(uri: vscode.Uri): Promise<NotePropsV2 | undefined> {

@@ -530,8 +530,8 @@ export class DendronWorkspace {
     const ctx = "activateWorkspace";
     const stage = getStage();
     this.L.info({ ctx, stage, msg: "enter" });
-    const rootDir = DendronWorkspace.wsRoot();
-    if (!rootDir) {
+    const wsRoot = DendronWorkspace.wsRoot();
+    if (!wsRoot) {
       throw `rootDir not set when activating Watcher`;
     }
 
@@ -554,6 +554,7 @@ export class DendronWorkspace {
     let vaults = wsFolders as vscode.WorkspaceFolder[];
     let realVaults = DendronWorkspace.instance().vaults;
     const vaultWatcher = new VaultWatcher({
+      wsRoot,
       vaults: realVaults,
     });
     const schemaWatcher = new SchemaWatcher({ vaults });

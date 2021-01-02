@@ -42,7 +42,11 @@ jobs:
 
     steps:
       - name: Gather environment data
-        run: ${{ matrix.env }}
+        run: |
+          ${{ matrix.env }}
+          node --version
+          npm --version
+          rsync --version
 
       - name: Checkout source
         uses: actions/checkout@v2

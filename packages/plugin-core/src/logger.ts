@@ -1,4 +1,4 @@
-import { DendronError, getStage, setEnv } from "@dendronhq/common-all";
+import { DendronError, setEnv } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -31,12 +31,8 @@ export class Logger {
     }
     fs.ensureFileSync(logPath);
     let log_level: string;
-    if (getStage() === "test") {
-      log_level = process.env["LOG_LEVEL"] || "debug";
-    } else {
-      const conf = workspace.getConfiguration();
-      log_level = conf.get<string>(CONFIG.LOG_LEVEL.key) || "info";
-    }
+    const conf = workspace.getConfiguration();
+    log_level = conf.get<string>(CONFIG.LOG_LEVEL.key) || "info";
     setEnv("LOG_DST", logPath);
     setEnv("LOG_LEVEL", log_level);
     Logger.logPath = logPath;

@@ -27,7 +27,7 @@ function createFuse<T>(
 ) {
   const options = {
     shouldSort: true,
-    threshold: opts.exactMatch ? 0.0 : 0.5,
+    threshold: opts.exactMatch ? 0.0 : 0.6,
     location: 0,
     distance: 50,
     maxPatternLength: 32,

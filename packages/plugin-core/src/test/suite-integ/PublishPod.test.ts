@@ -9,7 +9,6 @@ import {
   MarkdownPublishPod,
   podClassEntryToPodItemV4,
 } from "@dendronhq/pods-core";
-import * as assert from "assert";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
@@ -36,13 +35,19 @@ suite("PublishV2", function () {
         const vpath = vault2Path({ vault, wsRoot });
         const fpath = path.join(vpath, "foo.md");
         await VSCodeUtils.openFileInEditor(vscode.Uri.file(fpath));
+
+        // when a user runs publish pod, they are presented with a list of pods
+        // to execute
+        // this mocks that command so that Markdown is the only option
         const cmd = new PublishPodCommand();
         const podChoice = podClassEntryToPodItemV4(MarkdownPublishPod);
         cmd.gatherInputs = async () => {
           return { podChoice };
         };
+
+        // this runs the command
         const out = await cmd.run();
-        assert.strictEqual(out, "foo body");
+        expect(out).toEqual("foo body");
         done();
       },
     });

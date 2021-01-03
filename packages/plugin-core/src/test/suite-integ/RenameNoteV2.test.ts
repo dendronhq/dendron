@@ -13,7 +13,6 @@ import {
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
-import assert from "assert";
 import _ from "lodash";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
@@ -57,26 +56,40 @@ const createEngine = createEngineFactory({
 suite("RenameNote", function () {
   let ctx: vscode.ExtensionContext;
 
-  ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
-  });
+  // mocks workspac context needed for extension to start
+  ctx = setupBeforeAfter(this);
 
+  /**
+   * When renaing a note, Dendron should throw an error if the note already exists.
+   * We pass in `done` to the test because it is asynchronous.
+   */
   test("note exists", (done) => {
+    // start a workspace with a single vault
     runLegacySingleWorkspaceTest({
+      // this is needed to setup the mock workspace
       ctx,
+      // code that runs after the workspace and vault folders have been created
       postSetupHook: async ({ wsRoot, vaults }) => {
+        // ENGINE_HOOKS creates a bunch of preset note fixtures
+        // `setupBasic` creates a basic workspace with  `foo.md`, `foo.ch1.md, and `bar.md`
         await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
       },
+      // this runs when the workspace is activated
+      // the test code goes here
       onInit: async ({ vaults, wsRoot }) => {
+        // right now, vaultPaths can be absolute or relative depending on what version of Dendron
+        // is running. this method normalizes the path relative to the workspace root
         const vaultDir = vault2Path({ vault: vaults[0], wsRoot });
         try {
+          // this will open `foo.ch1` in the editor
           await VSCodeUtils.openFileInEditor(
             vscode.Uri.file(path.join(vaultDir, "foo.ch1.md"))
           );
+          // we expect the command to throw an error when checking the inputs
+          // see command lifecycle here: https://dendron.so/notes/d410c0d6-9ede-42ef-9c96-662902e4f488.html#running-a-command
           await new RenameNoteV2aCommand().enrichInputs({ dest: "foo" });
         } catch (err) {
-          assert.strictEqual(
-            (err as DendronError).status,
+          expect((err as DendronError).status).toEqual(
             ENGINE_ERROR_CODES.NODE_EXISTS
           );
           done();
@@ -113,13 +126,12 @@ suite("RenameNote", function () {
 
           VSCodeUtils.showInputBox = async () => "foobar";
           const resp = await new RenameNoteV2aCommand().run();
-          assert.deepStrictEqual(resp?.changed?.length, 2);
+          expect(resp?.changed?.length).toEqual(2);
           active = VSCodeUtils.getActiveTextEditor() as vscode.TextEditor;
-          assert.strictEqual(
-            DNodeUtilsV2.fname(active.document.uri.fsPath),
+          expect(DNodeUtilsV2.fname(active.document.uri.fsPath)).toEqual(
             "foobar"
           );
-          assert.ok(active.document.getText().indexOf("hello") >= 0);
+          expect(active.document.getText().indexOf("hello") >= 0).toBeTruthy();
           done();
         }
       },

@@ -25,9 +25,9 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
     return {} as any;
   }
 
-  abstract async enrichInputs(inputs: TInput): Promise<TOpts | undefined>;
+  abstract enrichInputs(inputs: TInput): Promise<TOpts | undefined>;
 
-  abstract async execute(opts: TOpts): Promise<TOut>;
+  abstract execute(opts: TOpts): Promise<TOut>;
 
   async showResponse(_resp: TOut) {
     return;

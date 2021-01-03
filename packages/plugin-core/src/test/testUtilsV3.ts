@@ -69,11 +69,29 @@ export type SetupLegacyWorkspaceOpts = SetupCodeConfigurationV2 & {
 
 export type SetupLegacyWorkspaceMultiOpts = SetupCodeConfigurationV2 & {
   ctx: ExtensionContext;
-  preActivateHook?: any;
-  postActivateHook?: any;
+  /**
+   * Runs before the workspace is initialized
+   */
   preSetupHook?: PreSetupHookFunction;
+  /**
+   * Runs after the workspace is initialized
+   */
   postSetupHook?: PostSetupWorkspaceHook;
+  /**
+   * Runs before the workspace is activated
+   */
+  preActivateHook?: any;
+  /**
+   * Run after workspace is activated
+   */
+  postActivateHook?: any;
+  /**
+   * By default, create workspace and vaults in a random temporary dir.
+   */
   setupWsOverride?: Partial<SetupWorkspaceOpts>;
+  /**
+   * Overrid default Dendron settings (https://dendron.so/notes/eea2b078-1acc-4071-a14e-18299fc28f48.html)
+   */
   wsSettingsOverride?: Partial<WorkspaceSettings>;
 };
 

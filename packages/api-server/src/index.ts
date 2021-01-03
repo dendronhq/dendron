@@ -1,11 +1,16 @@
+import { LogLvl } from "@dendronhq/common-server";
 import { getLogger, configureLogger } from "./core";
 
-function launch(opts?: { port?: number; logPath?: string }): Promise<number> {
+function launch(opts?: {
+  port?: number;
+  logPath?: string;
+  logLevel?: LogLvl;
+}): Promise<number> {
   const ctx = "launch";
 
   const listenPort = opts?.port || 0;
   const LOG_DST = opts?.logPath ? opts.logPath : "stdout";
-  configureLogger(LOG_DST);
+  configureLogger({ logPath: LOG_DST });
 
   return new Promise((resolve) => {
     const appModule = require("./Server").appModule;

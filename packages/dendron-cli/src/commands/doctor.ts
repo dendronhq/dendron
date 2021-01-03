@@ -20,6 +20,7 @@ type CommandCLIOpts = {
   query?: string;
   limit?: number;
   dryRun?: boolean;
+  exit?: boolean;
 };
 
 type CommandOpts = CommandOptsV3 & CommandCLIOpts;
@@ -31,6 +32,7 @@ export enum DoctorActions {
   // FIX_FM = "fixFM"
 }
 
+export { CommandOpts as DoctorCLICommandOpts };
 export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   constructor() {
     super({ name: "doctor", desc: "doctor helps you fix your notes" });
@@ -66,8 +68,9 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async execute(opts: CommandOpts) {
-    const { action, engine, query, limit, dryRun } = _.defaults(opts, {
+    const { action, engine, query, limit, dryRun, exit } = _.defaults(opts, {
       limit: 99999,
+      exit: true,
     });
     const proc = MDUtilsV4.procFull({
       dest: DendronASTDest.MD_DENDRON,
@@ -97,6 +100,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           note.body = newBody.toString();
           if (!_.isEmpty(changes)) {
             await engineWrite(note);
+            console.log(`doctor changing ${note.fname}`);
             this.L.info({ msg: `changes ${note.fname}`, changes });
             numChanges += 1;
             return;
@@ -115,6 +119,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           note.body = newBody.toString();
           if (!_.isEmpty(changes)) {
             await engineWrite(note);
+            console.log(`doctor changing ${note.fname}`);
             this.L.info({ msg: `changes ${note.fname}`, changes });
             numChanges += 1;
             return;
@@ -125,7 +130,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         break;
       }
     }
-    return _.reduce<any, Promise<any>>(
+    await _.reduce<any, Promise<any>>(
       notes,
       async (accInner, note) => {
         await accInner;
@@ -137,7 +142,11 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       },
       Promise.resolve()
     );
+    console.log(`doctor fixed ${numChanges} notes`);
     this.L.info({ msg: "doctor done", numChanges });
+    if (exit) {
+      process.exit();
+    }
     return;
   }
 }

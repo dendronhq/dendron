@@ -67,13 +67,16 @@ export class DendronEngineClient implements DEngineClientV2 {
     vaults,
     ws,
     history,
+    logger,
   }: {
     port: number | string;
     history?: HistoryService;
+    logger?: DLogger;
   } & DendronEngineClientOpts) {
     const api = new DendronAPI({
       endpoint: `http://localhost:${port}`,
       apiPath: "api",
+      logger,
     });
     return new DendronEngineClient({ api, vaults, ws, history });
   }

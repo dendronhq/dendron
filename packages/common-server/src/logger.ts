@@ -4,6 +4,8 @@ import { env } from "@dendronhq/common-all";
 import _ from "lodash";
 import pino from "pino";
 
+export type LogLvl = "debug" | "info" | "error";
+
 export class Logger {
   public name: string;
   public level: string;
@@ -34,16 +36,18 @@ export class Logger {
 function createLogger(
   name?: string,
   dest?: string,
-  opts?: { lvl?: "debug" }
+  // TODO: not using pretty option
+  opts?: { lvl?: LogLvl; pretty?: boolean }
 ): pino.Logger {
-  const level = opts?.lvl || env("LOG_LEVEL", { shouldThrow: false }) || "info";
+  const { lvl } = _.defaults(opts, { lvl: "error", pretty: false });
+  const level = lvl || env("LOG_LEVEL", { shouldThrow: false }) || "info";
   const nameClean = name || env("LOG_NAME", { shouldThrow: false });
   const logDst = dest || env("LOG_DST", { shouldThrow: false });
+  const pinoOpts = { name: nameClean, level };
   if (!logDst || _.isEmpty(logDst) || logDst === "stdout") {
-    const out = pino({ name: nameClean, level });
-    return out;
+    return pino(pinoOpts);
   } else {
-    return pino(pino.destination(logDst)).child({ name: nameClean, level });
+    return pino(pino.destination(logDst)).child(pinoOpts);
   }
 }
 

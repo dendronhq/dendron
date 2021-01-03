@@ -7,7 +7,11 @@ import {
 } from "@dendronhq/common-test-utils";
 import { createEngine } from "@dendronhq/engine-server";
 import path from "path";
-import { DoctorActions, DoctorCLICommand } from "../doctor";
+import {
+  DoctorActions,
+  DoctorCLICommand,
+  DoctorCLICommandOpts,
+} from "../doctor";
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
@@ -22,6 +26,14 @@ const setupBasic = async (opts: WorkspaceOpts) => {
     vault: vaults[0],
     fname: "bar",
     body: [`# Bar Header`, `## Bar Content`].join("\n"),
+  });
+};
+
+const runDoctor = (opts: DoctorCLICommandOpts) => {
+  const cmd = new DoctorCLICommand();
+  return cmd.execute({
+    exit: false,
+    ...opts,
   });
 };
 
@@ -40,8 +52,7 @@ describe(DoctorActions.HI_TO_H2, () => {
     await runEngineTestV4(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
-        const cmd = new DoctorCLICommand();
-        await cmd.execute({
+        await runDoctor({
           wsRoot,
           engine,
           action,
@@ -77,8 +88,7 @@ describe(DoctorActions.HI_TO_H2, () => {
     await runEngineTestV4(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
-        const cmd = new DoctorCLICommand();
-        await cmd.execute({
+        await runDoctor({
           wsRoot,
           engine,
           action,
@@ -118,8 +128,7 @@ describe("H1_TO_TITLE", () => {
     await runEngineTestV4(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
-        const cmd = new DoctorCLICommand();
-        await cmd.execute({
+        await runDoctor({
           wsRoot,
           engine,
           action,

@@ -4,7 +4,7 @@ import {
   DEngineClientV2,
   Time,
 } from "@dendronhq/common-all";
-import { createFileWatcher } from "@dendronhq/common-server";
+import { createFileWatcher, DLogger } from "@dendronhq/common-server";
 import fs, { FSWatcher } from "fs-extra";
 import _ from "lodash";
 import { DConfig } from "../config";
@@ -31,6 +31,7 @@ export class EngineConnector {
   public serverPortWatcher?: FSWatcher;
   public initialized: boolean;
   public config: DendronConfig;
+  public logger?: DLogger;
 
   static _ENGINE_CONNECTOR: EngineConnector | undefined;
 
@@ -41,15 +42,16 @@ export class EngineConnector {
     return this._ENGINE_CONNECTOR;
   }
 
-  static getOrCreate({ wsRoot }: { wsRoot: string }) {
+  static getOrCreate({ wsRoot, logger }: { wsRoot: string; logger?: DLogger }) {
     if (!this._ENGINE_CONNECTOR) {
-      return new EngineConnector({ wsRoot });
+      return new EngineConnector({ wsRoot, logger });
     }
     return this._ENGINE_CONNECTOR;
   }
 
-  constructor({ wsRoot }: { wsRoot: string }) {
+  constructor({ wsRoot, logger }: { wsRoot: string; logger?: DLogger }) {
     this.wsRoot = wsRoot;
+    this.logger = logger;
     this.config = DConfig.getOrCreate(wsRoot);
     EngineConnector._ENGINE_CONNECTOR = this;
     this.initialized = false;
@@ -75,6 +77,7 @@ export class EngineConnector {
       port,
       ws: wsRoot,
       vaults: vaults.map((ent) => ent),
+      logger: this.logger,
     });
     await dendronEngine.sync();
     this._engine = dendronEngine;

@@ -1,5 +1,5 @@
 import { launch } from "@dendronhq/api-server";
-import { resolvePath } from "@dendronhq/common-server";
+import { LogLvl, resolvePath } from "@dendronhq/common-server";
 import {
   DendronEngineClient,
   WorkspaceService,
@@ -44,7 +44,11 @@ export class LaunchEngineServerCommand extends SoilCommandV3<
     const ws = new WorkspaceService({ wsRoot });
     const vaults = ws.config.vaults;
     const vaultPaths = vaults.map((v) => resolvePath(v.fsPath, wsRoot));
-    const _port = await launch({ port, logPath: process.env["LOG_DST"] });
+    const _port = await launch({
+      port,
+      logPath: process.env["LOG_DST"],
+      logLevel: (process.env["LOG_LEVEL"] as LogLvl) || "error",
+    });
     ws.writeMeta({ version: "dendron-cli" });
     ws.writePort(_port);
     const engine = DendronEngineClient.create({

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.22.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.22.2-alpha.0...v0.22.2-alpha.1) (2021-01-03)
+
+### Bug Fixes
+
+- doctor exit after running ([7411362](https://github.com/dendronhq/dendron/commit/74113626a176bee54a94a226c5368b4d2c60a0b4))
+
+### Enhancements
+
+- add abbreviations back ([6c3b2b4](https://github.com/dendronhq/dendron/commit/6c3b2b4eec50850135799f5bc920705c8247f3ba))
+- better titles ([774c826](https://github.com/dendronhq/dendron/commit/774c82660a3e6413953748c790bec202f401e22f))
+- tweak fuzzyness results ([9dd55c9](https://github.com/dendronhq/dendron/commit/9dd55c960baa4eadf4b02df6b8b35eea7b47c0b0))
+
 ## [0.22.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.22.1...v0.22.2-alpha.0) (2021-01-02)
 
 ### Features

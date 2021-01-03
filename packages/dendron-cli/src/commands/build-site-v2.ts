@@ -64,14 +64,16 @@ export class BuildSiteV2CLICommand extends CLICommand<
 
   async execute(opts: CommandOpts) {
     let nmPath = goUpTo(__dirname, "node_modules");
-    let cwd = path.join(nmPath, "node_modules", "@dendronhq", "dendron-11ty");
-    // fix for /home/runner/work/dendron-site/dendron-site/node_modules/@dendronhq/dendron-cli/node_modules/@dendronhq/dendron-11ty'
-    if (!fs.existsSync(cwd)) {
-      nmPath = goUpTo(path.join(nmPath, ".."), "node_modules");
-      cwd = path.join(nmPath, "node_modules", "@dendronhq", "dendron-11ty");
-    }
     let { wsRoot, port, stage, servePort, output } = _.defaults(opts, {});
-    cwd = opts.cwd || cwd;
+    let cwd = opts.cwd;
+    if (!cwd) {
+      cwd = path.join(nmPath, "node_modules", "@dendronhq", "dendron-11ty");
+      // fix for /home/runner/work/dendron-site/dendron-site/node_modules/@dendronhq/dendron-cli/node_modules/@dendronhq/dendron-11ty'
+      if (!fs.existsSync(cwd)) {
+        nmPath = goUpTo(path.join(nmPath, ".."), "node_modules");
+        cwd = path.join(nmPath, "node_modules", "@dendronhq", "dendron-11ty");
+      }
+    }
     process.env["ENGINE_PORT"] = _.toString(port);
     process.env["WS_ROOT"] = wsRoot;
     process.env["STAGE"] = stage;

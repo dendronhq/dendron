@@ -5,43 +5,66 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.22.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.22.2-alpha.0...v0.22.2-alpha.1) (2021-01-03)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- doctor exit after running ([7411362](https://github.com/dendronhq/dendron/commit/74113626a176bee54a94a226c5368b4d2c60a0b4))
+
+### Enhancements
+
+- add abbreviations back ([6c3b2b4](https://github.com/dendronhq/dendron/commit/6c3b2b4eec50850135799f5bc920705c8247f3ba))
+- better titles ([774c826](https://github.com/dendronhq/dendron/commit/774c82660a3e6413953748c790bec202f401e22f))
+- tweak fuzzyness results ([9dd55c9](https://github.com/dendronhq/dendron/commit/9dd55c960baa4eadf4b02df6b8b35eea7b47c0b0))
 
 ## [0.22.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.22.1...v0.22.2-alpha.0) (2021-01-02)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Features
+
+- variable support ([c56b826](https://github.com/dendronhq/dendron/commit/c56b8265da5ee6b85c5d7abf37a9154b6824ad6f))
 
 ## [0.22.1](https://github.com/dendronhq/dendron/compare/v0.22.1-alpha.5...v0.22.1) (2020-12-31)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Enhancements
+
+- skip children directive ([de136d7](https://github.com/dendronhq/dendron/commit/de136d7d1adc3a35aaf1a567e260cb3c9254125c))
 
 ## [0.22.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.22.1-alpha.4...v0.22.1-alpha.5) (2020-12-30)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.22.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.22.1-alpha.3...v0.22.1-alpha.4) (2020-12-30)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Enhancements
+
+- add output override to build-site ([92ffc59](https://github.com/dendronhq/dendron/commit/92ffc599f17f53c96d38ea4ab3405503e5166013))
 
 ## [0.22.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.22.1-alpha.2...v0.22.1-alpha.3) (2020-12-30)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.22.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.22.1-alpha.1...v0.22.1-alpha.2) (2020-12-30)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Enhancements
+
+- add github access token init ([6d14076](https://github.com/dendronhq/dendron/commit/6d14076b339bd086652ed9758ba230803647720c))
 
 ## [0.22.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.22.1-alpha.0...v0.22.1-alpha.1) (2020-12-29)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- regression in build-site cli ([c7f9b38](https://github.com/dendronhq/dendron/commit/c7f9b38eb7443f198265176342b49a481cea188c))
 
 ## [0.22.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.22.0...v0.22.1-alpha.0) (2020-12-29)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Enhancements
+
+- add more site specific fm def ([51ef599](https://github.com/dendronhq/dendron/commit/51ef599d6fe00579a61993a3a33791773d4be91f))
+- add prism highlighting ([5542a53](https://github.com/dendronhq/dendron/commit/5542a53a0cacdbd9c3f508b6da56d3582e98d319))
+- build site work with existing workspace ([88740a2](https://github.com/dendronhq/dendron/commit/88740a258a1305a4088feb7bbe2c00a5c9db17a5))
+- support dry-run doctor cmd ([9080bd0](https://github.com/dendronhq/dendron/commit/9080bd004785a1d68e7b04f29aa95f0a24130731))
 
 # [0.22.0](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.14...v0.22.0) (2020-12-28)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.21.1-alpha.14](https://github.com/dendronhq/dendron/compare/v0.21.1-alpha.13...v0.21.1-alpha.14) (2020-12-28)
 

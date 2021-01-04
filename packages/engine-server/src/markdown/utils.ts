@@ -189,7 +189,7 @@ export class MDUtilsV4 {
     });
     _proc = _proc
       .use(remark2rehype, { allowDangerousHtml: true })
-      .use(rehypePrism)
+      .use(rehypePrism, { ignoreMissing: true })
       .use(raw)
       .use(slug)
       .use(link, {

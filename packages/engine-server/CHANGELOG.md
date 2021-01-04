@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.23.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.23.0...v0.23.1-alpha.0) (2021-01-04)
+
+### Enhancements
+
+- ignore un-supported code blocks ([27cccca](https://github.com/dendronhq/dendron/commit/27cccca3a7c5df3a2ca1f0b123f9fb14f5f2de1a))
+
 # [0.23.0](https://github.com/dendronhq/dendron/compare/v0.22.2-alpha.1...v0.23.0) (2021-01-04)
 
 **Note:** Version bump only for package @dendronhq/engine-server

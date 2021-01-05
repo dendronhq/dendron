@@ -21,11 +21,20 @@ describe("parse", () => {
   let engine: any;
   let dendronData = { dest: DendronASTDest.MD_REGULAR };
 
-  test("init", () => {
+  test("basic", () => {
     const resp = proc(engine, dendronData).parse(`[[foo.md]]`);
     expect(resp).toMatchSnapshot();
     // @ts-ignore
     expect(resp.children[0].children[0].type).toEqual("wikiLink");
+  });
+
+  test("link with space", () => {
+    const resp = proc(engine, dendronData).parse(`[[foo bar]]`);
+    expect(resp).toMatchSnapshot();
+    // @ts-ignore
+    expect(resp.children[0].children[0].type).toEqual("wikiLink");
+    // @ts-ignore
+    expect(resp.children[0].children[0].value).toEqual("foo bar");
   });
 
   test("doesn't parse inline code block", () => {
@@ -58,6 +67,7 @@ describe("compilev2", () => {
   const linkWithAnchor = "[[foo#one]]";
   const linkWithExtension = "[[foo.md]]";
   const linkWithAlias = `[[bar|foo]]`;
+  const linkWithSpace = `[[bar|foo bar]]`;
   const textString1 = getTextString1();
 
   const expected: { [key in DendronASTDest]: any } = {
@@ -76,6 +86,9 @@ describe("compilev2", () => {
       },
       withId: {
         link: linkRegular,
+      },
+      withSpace: {
+        link: linkWithSpace,
       },
       textString1: {
         link: getTextString1(`[[FAQ|dendron.faq]]`),
@@ -97,6 +110,9 @@ describe("compilev2", () => {
       withId: {
         link: `[foo](foo-id.html)`,
       },
+      withSpace: {
+        link: `[bar](foo bar.html)`,
+      },
       textString1: {
         link: getTextString1(`[FAQ](dendron.faq.html)`),
       },
@@ -117,6 +133,9 @@ describe("compilev2", () => {
       withId: {
         link: `[foo](foo-id)`,
       },
+      withSpace: {
+        link: `[bar](foo%20bar)`,
+      },
       textString1: {
         link: getTextString1(`[FAQ](dendron.faq)`),
       },
@@ -136,6 +155,9 @@ describe("compilev2", () => {
       },
       withId: {
         link: `[foo](foo-id.md)`,
+      },
+      withSpace: {
+        link: `[bar](foo%20bar.md)`,
       },
       textString1: {
         link: getTextString1(`[FAQ](dendron.faq.md)`),
@@ -172,6 +194,11 @@ describe("compilev2", () => {
     {
       testCase: "textString1",
       linkProcess: textString1,
+    },
+    {
+      testCase: "withSpace",
+      linkProcess: linkWithSpace,
+      preSetupHook: basicSetup,
     },
   ];
 

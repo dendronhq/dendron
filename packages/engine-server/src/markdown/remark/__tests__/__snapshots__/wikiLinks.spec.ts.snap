@@ -66,6 +66,17 @@ VFile {
 }
 `;
 
+exports[`compilev2 HTML "withSpace" 1`] = `
+VFile {
+  "contents": "[bar](foo bar.html)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`compilev2 MD_DENDRON "alias" 1`] = `
 VFile {
   "contents": "[[bar|foo]]
@@ -124,6 +135,17 @@ VFile {
 exports[`compilev2 MD_DENDRON "withId" 1`] = `
 VFile {
   "contents": "[[foo]]
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 MD_DENDRON "withSpace" 1`] = `
+VFile {
+  "contents": "[[bar|foo bar]]
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
@@ -198,6 +220,17 @@ VFile {
 }
 `;
 
+exports[`compilev2 MD_ENHANCED_PREVIEW "withSpace" 1`] = `
+VFile {
+  "contents": "[bar](foo%20bar.md)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`compilev2 MD_REGULAR "alias" 1`] = `
 VFile {
   "contents": "[bar](foo)
@@ -264,6 +297,76 @@ VFile {
 }
 `;
 
+exports[`compilev2 MD_REGULAR "withSpace" 1`] = `
+VFile {
+  "contents": "[bar](foo%20bar)
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`parse basic 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "foo",
+            "anchorHeader": undefined,
+          },
+          "position": Position {
+            "end": Object {
+              "column": 11,
+              "line": 1,
+              "offset": 10,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "type": "wikiLink",
+          "value": "foo",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 11,
+          "line": 1,
+          "offset": 10,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 11,
+      "line": 1,
+      "offset": 10,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
 exports[`parse doesn't parse inline code block: bond 1`] = `
 Object {
   "children": Array [
@@ -319,21 +422,21 @@ Object {
 }
 `;
 
-exports[`parse init 1`] = `
+exports[`parse link with space 1`] = `
 Object {
   "children": Array [
     Object {
       "children": Array [
         Object {
           "data": Object {
-            "alias": "foo",
+            "alias": "foo bar",
             "anchorHeader": undefined,
           },
           "position": Position {
             "end": Object {
-              "column": 11,
+              "column": 12,
               "line": 1,
-              "offset": 10,
+              "offset": 11,
             },
             "indent": Array [],
             "start": Object {
@@ -343,14 +446,14 @@ Object {
             },
           },
           "type": "wikiLink",
-          "value": "foo",
+          "value": "foo bar",
         },
       ],
       "position": Position {
         "end": Object {
-          "column": 11,
+          "column": 12,
           "line": 1,
-          "offset": 10,
+          "offset": 11,
         },
         "indent": Array [],
         "start": Object {
@@ -364,9 +467,9 @@ Object {
   ],
   "position": Object {
     "end": Object {
-      "column": 11,
+      "column": 12,
       "line": 1,
-      "offset": 10,
+      "offset": 11,
     },
     "start": Object {
       "column": 1,

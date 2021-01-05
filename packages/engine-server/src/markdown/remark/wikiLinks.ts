@@ -25,6 +25,10 @@ function parseAnchorIfExist(link: string) {
   }
 }
 
+function normalizeSpaces(link: string) {
+  return link.replace(/ /g, "%20");
+}
+
 const plugin: Plugin<[CompilerOpts?]> = function (
   this: Unified.Processor,
   opts?: PluginOpts
@@ -79,13 +83,13 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
       switch (dest) {
         case DendronASTDest.MD_REGULAR: {
           const alias = data.alias ? data.alias : value;
-          return `[${alias}](${copts.prefix || ""}${value})`;
+          return `[${alias}](${copts.prefix || ""}${normalizeSpaces(value)})`;
         }
         case DendronASTDest.MD_ENHANCED_PREVIEW: {
           const alias = data.alias ? data.alias : value;
-          return `[${alias}](${copts.prefix || ""}${
-            parseAnchorIfExist(value)[0]
-          }.md)`;
+          return `[${alias}](${copts.prefix || ""}${normalizeSpaces(
+            parseAnchorIfExist(value)[0] as string
+          )}.md)`;
         }
         case DendronASTDest.HTML: {
           const alias = data.alias ? data.alias : value;

@@ -262,6 +262,34 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
   },
 });
 
+const NOTE_W_LINK_AND_SPACE = createProcTests({
+  name: "NOTE_W_LINK_AND_SPACE",
+  setupFunc: async (opts) => {
+    let proc = await createProc(opts);
+    const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
+    return readAndProcess({ npath, proc });
+  },
+  verifyFuncDict: {
+    // NOTE: this shouldn't hapen since publishing should always be by id...
+    [DendronASTDest.HTML]: async ({ extra }) => {
+      const { respRehype } = extra;
+      expect(
+        await AssertUtils.assertInString({
+          body: respRehype.contents,
+          match: [`<a href=\"foo bar.html\"`],
+        })
+      ).toBeTruthy();
+    },
+  },
+  preSetupHook: async (opts) => {
+    await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
+    await modifyNote(opts, (note: NotePropsV2) => {
+      note.body = `[[foo bar]]`;
+      return note;
+    });
+  },
+});
+
 const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
   name: "NOTE_REF_RECURSIVE_WITH_REHYPE",
   setupFunc: async (opts) => {
@@ -318,6 +346,7 @@ const ALL_TEST_CASES = [
   ...NOTE_REF_BASIC_WITH_REHYPE,
   ...NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE,
   ...WITH_TITLE,
+  ...NOTE_W_LINK_AND_SPACE,
 ];
 
 describe("MDUtils.proc", () => {

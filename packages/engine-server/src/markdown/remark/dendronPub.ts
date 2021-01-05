@@ -6,6 +6,7 @@ import { Node } from "unist";
 import u from "unist-builder";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
+import { SiteUtils } from "../../topics/site";
 import { DendronASTDest, NoteRefDataV4, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { convertNoteRefAST, NoteRefsOpts } from "./noteRefs";
@@ -14,11 +15,12 @@ import { addError, getNoteOrError } from "./utils";
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
   insertTitle?: boolean;
+  transformNoPublish?: boolean;
 };
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  const { dest, vault, fname } = MDUtilsV4.getDendronData(proc);
+  const { dest, vault, fname, config } = MDUtilsV4.getDendronData(proc);
   function transformer(tree: Node, _file: VFile) {
     let root = tree as Root;
     const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
@@ -58,7 +60,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
 
         const copts = opts?.wikiLinkOpts;
         if (copts?.useId) {
-          // TODO: check for vault
           const notes = NoteUtilsV2.getNotesByFname({
             fname: value,
             notes: engine.notes,
@@ -69,6 +70,27 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             addError(proc, error);
           } else {
             value = note!.id;
+          }
+        }
+        if (opts?.transformNoPublish) {
+          const notes = NoteUtilsV2.getNotesByFname({
+            fname: value,
+            notes: engine.notes,
+            vault,
+          });
+          const { error, note } = getNoteOrError(notes, value);
+          if (error) {
+            value = "403";
+            addError(proc, error);
+          } else {
+            if (!note || !config) {
+              value = "403";
+              addError(proc, new DendronError({ msg: "no note or config" }));
+            } else {
+              if (!SiteUtils.canPublish({ note, config })) {
+                value = "403";
+              }
+            }
           }
         }
         const alias = data.alias ? data.alias : value;

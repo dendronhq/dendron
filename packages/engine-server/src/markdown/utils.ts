@@ -1,5 +1,6 @@
 import {
   DendronError,
+  DendronSiteConfig,
   DEngineClientV2,
   DVault,
   NoteUtilsV2,
@@ -126,6 +127,7 @@ export class MDUtilsV4 {
     opts: ProcOpts & {
       dest: DendronASTDest;
       vault?: DVault;
+      config?: DendronSiteConfig;
       fname?: string;
       wikiLinksOpts?: WikiLinksOpts;
       noteRefOpts?: NoteRefsOpts;
@@ -135,7 +137,7 @@ export class MDUtilsV4 {
       };
     }
   ) {
-    const { dest, vault, fname } = opts;
+    const { dest, vault, fname, config } = opts;
     let proc = this.proc(opts);
     if (vault && fname) {
       const engine = MDUtilsV4.getEngineFromProc(proc).engine;
@@ -151,7 +153,7 @@ export class MDUtilsV4 {
       proc = proc.data("fm", fm);
     }
     proc = proc
-      .data("dendron", { dest, vault, fname } as DendronASTData)
+      .data("dendron", { dest, vault, fname, config } as DendronASTData)
       //.use(extract, { name: "fm" })
       .use(abbrPlugin)
       .use(variables)

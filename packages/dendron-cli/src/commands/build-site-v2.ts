@@ -1,5 +1,6 @@
 import { DEngineClientV2 } from "@dendronhq/common-all";
 import { goUpTo } from "@dendronhq/common-server";
+import { SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -59,6 +60,15 @@ export class BuildSiteV2CLICommand extends CLICommand<
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
     const engineArgs = await setupEngine(args);
     this.L.info({ msg: `connecting to engine on port: ${engineArgs.port}` });
+    // add site specific notes
+    if (args.enginePort) {
+      const siteNotes = SiteUtils.addSiteOnlyNotes({
+        engine: engineArgs.engine,
+      });
+      _.forEach(siteNotes, (ent) => {
+        engineArgs.engine.notes[ent.id] = ent;
+      });
+    }
     return { ...args, ...engineArgs };
   }
 

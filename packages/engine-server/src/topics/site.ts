@@ -2,6 +2,7 @@ import {
   DendronError,
   DendronSiteConfig,
   DendronSiteFM,
+  DNodeUtilsV2,
   DVault,
   HierarchyConfig,
   NotePropsDictV2,
@@ -18,7 +19,24 @@ import path from "path";
 import { vault2Path } from "@dendronhq/common-server";
 
 export class SiteUtils {
-  static canPublish(opts: { note: NotePropsV2; config: HierarchyConfig }) {
+  static canPublish(opts: { note: NotePropsV2; config: DendronSiteConfig }) {
+    const { note, config } = opts;
+    const hconfig = this.getConfigForHierarchy({ config, note });
+    const domain = DNodeUtilsV2.domainName(note.fname);
+    return _.every([
+      config.siteHierarchies !== ["root"] &&
+        config.siteHierarchies.indexOf(domain) >= 0,
+      // not blacklisted
+      note?.custom?.published !== false,
+      // not whitelisted
+      hconfig?.publishByDefault ? true : !note.custom?.published || false,
+    ]);
+  }
+
+  static canPublishFiltered(opts: {
+    note: NotePropsV2;
+    config: HierarchyConfig;
+  }) {
     const { note, config } = opts;
     return !_.some([
       // not blacklisted
@@ -39,6 +57,19 @@ export class SiteUtils {
       return fs.copy(path.join(vaultAssetsDir), path.join(siteAssetsDir));
     }
     return;
+  }
+
+  static addSiteOnlyNotes(opts: { engine: DEngineClientV2 }) {
+    const { engine } = opts;
+    const vaults = engine.vaultsv3;
+    const note = NoteUtilsV2.create({
+      vault: vaults[0],
+      fname: "403",
+      id: "403",
+      title: "Access Denied",
+      body: ["You are not allowed to view this page"].join("\n"),
+    });
+    return [note];
   }
 
   static async filterByConfig(opts: {
@@ -110,7 +141,9 @@ export class SiteUtils {
     let notes = NoteUtilsV2.getNotesByFname({
       fname: domain,
       notes: engine.notes,
-    }).filter((note) => SiteUtils.canPublish({ note, config: hConfig }));
+    }).filter((note) =>
+      SiteUtils.canPublishFiltered({ note, config: hConfig })
+    );
 
     let domainNote: NotePropsV2;
     if (notes.length > 1) {
@@ -168,7 +201,7 @@ export class SiteUtils {
           children.forEach((ent) => (ent.parent = maybeNote.id));
         }
         children = _.filter(children, (note: NotePropsV2) =>
-          SiteUtils.canPublish({ note, config: hConfig })
+          SiteUtils.canPublishFiltered({ note, config: hConfig })
         );
         children.forEach((n: NotePropsV2) => processQ.push(n));
         // updated children
@@ -202,6 +235,28 @@ export class SiteUtils {
       ...note,
       body: stripLocalOnlyTags(note.body),
     };
+  }
+
+  static getConfigForHierarchy(opts: {
+    config: DendronSiteConfig;
+    note: NotePropsV2;
+  }) {
+    const { config, note } = opts;
+    const domain = DNodeUtilsV2.domainName(note.fname);
+    const siteConfig = config;
+    // get config
+    let rConfig: HierarchyConfig = _.defaults(
+      _.get(siteConfig.config, "root", {
+        publishByDefault: true,
+        noindexByDefault: false,
+        customFrontmatter: [],
+      })
+    );
+    let hConfig: HierarchyConfig = _.defaults(
+      _.get(siteConfig.config, domain),
+      rConfig
+    );
+    return hConfig;
   }
 
   static getDomains(opts: {

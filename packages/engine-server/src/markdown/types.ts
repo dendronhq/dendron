@@ -1,4 +1,9 @@
-import { DNoteRefLink, DVault, NotePropsV2 } from "@dendronhq/common-all";
+import {
+  DendronSiteConfig,
+  DNoteRefLink,
+  DVault,
+  NotePropsV2,
+} from "@dendronhq/common-all";
 import { Parent } from "mdast";
 import { Processor } from "unified";
 import { WikiLinksOpts } from "./remark/wikiLinks";
@@ -26,6 +31,7 @@ export type DendronASTData = {
   vault?: DVault;
   fname?: string;
   wikiLinkOpts?: WikiLinksOpts;
+  config?: DendronSiteConfig;
 };
 
 // NODES

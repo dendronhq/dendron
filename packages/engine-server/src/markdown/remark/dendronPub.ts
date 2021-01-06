@@ -85,11 +85,11 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           });
           const { error, note } = getNoteOrError(notes, value);
           if (error) {
-            value = "403";
+            //value = "403";
             addError(proc, error);
           } else {
             if (!note || !config) {
-              value = "403";
+              //value = "403";
               addError(proc, new DendronError({ msg: "no note or config" }));
             } else {
               if (!SiteUtils.canPublish({ note, config })) {

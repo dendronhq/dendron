@@ -3,7 +3,7 @@ import { execa } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { window } from "vscode";
+import { ProgressLocation, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -47,17 +47,6 @@ export class SiteBuildCommand extends BasicCommand<CommandOpts, CommandOutput> {
     });
     window.showInformationMessage("finish building site");
   }
-
-  // runWithoutShell() {
-  //   const port = DendronWorkspace.instance().port!;
-  //   const cmd = new BuildSiteV2CLICommand();
-  //   const ws = getWS();
-  //   const engine = ws.getEngine();
-  //   const cwd = "/Users/kevinlin/projects/dendronv2/dendron-11ty";
-  //   //this.L.info({ctx, cwd, ws, port});
-  //   await cmd.execute({engine, wsRoot, serve: false, stage: "prod", cwd, enginePort: port})
-
-  // }
 
   pkgCreate(pkgPath: string) {
     return fs.writeJSONSync(pkgPath, packageJson);
@@ -123,15 +112,25 @@ export class SiteBuildCommand extends BasicCommand<CommandOpts, CommandOutput> {
         if (resp !== "Update") {
           return undefined;
         }
-        await _.reduce(
-          outOfDate,
-          async (prev, opts) => {
-            await prev;
-            let { pkg, version } = opts;
-            return this.pkgUpgrade(pkg, version);
+        await window.withProgress(
+          {
+            location: ProgressLocation.Notification,
+            title: "upgrading dependencies",
+            cancellable: false,
           },
-          Promise.resolve()
+          async (_progress, _token) => {
+            await _.reduce(
+              outOfDate,
+              async (prev, opts) => {
+                await prev;
+                let { pkg, version } = opts;
+                return this.pkgUpgrade(pkg, version);
+              },
+              Promise.resolve()
+            );
+          }
         );
+        window.showInformationMessage("finish updating dependencies");
       } else {
         return true;
         // check NODE_MODULES TODO
@@ -153,7 +152,7 @@ const packageJson = {
   main: "index.js",
   license: "MIT",
   dependencies: {
-    "@dendronhq/dendron-11ty": "^1.22.1",
-    "@dendronhq/dendron-cli": "^0.22.1-alpha.1",
+    "@dendronhq/dendron-11ty": "^1.23.3",
+    "@dendronhq/dendron-cli": "^0.23.1-alpha.4",
   },
 };

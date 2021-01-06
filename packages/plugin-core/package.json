@@ -378,6 +378,14 @@
                 "docPreview": "<a href=\"https://www.loom.com/share/c58edf543e234a8fa164095237579ccc\"> <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/c58edf543e234a8fa164095237579ccc-with-play.gif\"> </a>"
             },
             {
+                "command": "dendron.siteBuild",
+                "title": "Dendron: Site Build",
+                "desc": "build your notes",
+                "docs": "",
+                "docLink": "",
+                "docPreview": ""
+            },
+            {
                 "command": "dendron.openLink",
                 "title": "Dendron: Open Link",
                 "desc": "Open link to external file (eg. pdf, .mov, etc) use system default",

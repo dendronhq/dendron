@@ -60,6 +60,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         let value = node.value as string;
         // we change this later
         let valueOrig = value;
+        let canPublish = true;
         const data = _node.data;
         if (error) {
           addError(proc, error);
@@ -81,13 +82,14 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
               value = "403";
               addError(proc, new DendronError({ msg: "no note or config" }));
             } else {
-              if (!SiteUtils.canPublish({ note, config })) {
+              canPublish = SiteUtils.canPublish({ note, config });
+              if (!canPublish) {
                 value = "403";
               }
             }
           }
         }
-        if (copts?.useId) {
+        if (copts?.useId && canPublish) {
           const notes = NoteUtilsV2.getNotesByFname({
             fname: valueOrig,
             notes: engine.notes,

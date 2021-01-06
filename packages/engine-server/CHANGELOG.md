@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.23.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.3...v0.23.1-alpha.4) (2021-01-06)
+
+### Bug Fixes
+
+- 403 followup ([91c2b46](https://github.com/dendronhq/dendron/commit/91c2b460c1fa642860bcd25cbb16506dee2ced3e))
+
 ## [0.23.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.2...v0.23.1-alpha.3) (2021-01-06)
 
 ### Bug Fixes

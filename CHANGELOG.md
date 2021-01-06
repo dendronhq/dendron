@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.23.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.0...v0.23.1-alpha.1) (2021-01-06)
+
+### Bug Fixes
+
+- publish wiki links with spaces ([e41d6ca](https://github.com/dendronhq/dendron/commit/e41d6ca8423b9ceb1da05a9e9b3f9b55117890c0))
+
+### Enhancements
+
+- access denied on non-published links ([bff651f](https://github.com/dendronhq/dendron/commit/bff651fb018ba941a5277ec4af18dcf696ae0e32))
+
+### Features
+
+- support footnotes in markdown ([a86d067](https://github.com/dendronhq/dendron/commit/a86d067e925b7d3ce82e942e6a19bd335425f76c))
+- support new note ref syntax ([2659d63](https://github.com/dendronhq/dendron/commit/2659d634e5bd147574054ff4c39f74d025cbccba))
+
 ## [0.23.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.23.0...v0.23.1-alpha.0) (2021-01-04)
 
 ### Enhancements

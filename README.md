@@ -37,7 +37,7 @@ The burning need for a tool that would not only overcome this problem but actual
 
 ## Hierarchies
 
-Dendron proposes **hierarchies** as the **human solution** to information overload. This is because there are few things as effective as a multi-level hiearchy for quickly filtering an overwhelming amount of information to something humans can work with. You can read [this blog post](https://kevinslin.com/organizing/its_not_you_its_your_knowledge_base/) for the extended rationale behind this.
+Dendron proposes **hierarchies** as the **human solution** to information overload. This is because there are few things as effective as a multi-level hiearchy for quickly filtering an overwhelming amount of information to something humans can work with. You can read [this blog post](https://www.kevinslin.com/notes/e1455752-b052-4212-ac6e-cc054659f2bb.html) for the extended rationale behind this.
 
 In Dendron, you can quickly **lookup** related notes by their hierarchy. Hierarchies are simply `.` delimited filenames, similar to the hierarchies made by domain names (eg. `github.com`).
 

@@ -4,6 +4,7 @@ import {
   DNoteLoc,
   DNoteRefLink,
   DUtils,
+  getSlugger,
   NoteUtilsV2,
   RespV2,
 } from "@dendronhq/common-all";
@@ -13,13 +14,13 @@ import { html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
 import Unified, { Plugin, Processor } from "unified";
 import { Node, Parent } from "unist";
-import { parseDendronRef } from "../../utils";
+import { parseFileLinkV2 } from "../../utils";
 import { DendronASTDest, DendronASTNode, NoteRefNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
 
-const LINK_REGEX = /^\(\((?<ref>[^)]+)\)\)/;
+const LINK_REGEX = /^\!\[\[(.+?)\]\]/;
 
 type PluginOpts = CompilerOpts;
 
@@ -47,22 +48,20 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
 
 function attachParser(proc: Unified.Processor) {
   function locator(value: string, fromIndex: number) {
-    return value.indexOf("((", fromIndex);
+    return value.indexOf("![[", fromIndex);
   }
 
   function inlineTokenizer(eat: Eat, value: string) {
     const match = LINK_REGEX.exec(value);
     if (match) {
       const linkMatch = match[1].trim();
-      const { link } = parseDendronRef(linkMatch);
-      //const { name, displayName } = LinkUtils.parseLink(linkMatch);
-      const { value, alias } = LinkUtils.parseLink(linkMatch);
+      const link = parseFileLinkV2(linkMatch);
+      const { value } = LinkUtils.parseLink(linkMatch);
 
       return eat(match[0])({
-        type: "refLink",
+        type: "refLinkV2",
         value,
         data: {
-          alias,
           link,
         },
       });
@@ -75,8 +74,8 @@ function attachParser(proc: Unified.Processor) {
   const Parser = proc.Parser;
   const inlineTokenizers = Parser.prototype.inlineTokenizers;
   const inlineMethods = Parser.prototype.inlineMethods;
-  inlineTokenizers.refLink = inlineTokenizer;
-  inlineMethods.splice(inlineMethods.indexOf("link"), 0, "refLink");
+  inlineTokenizers.refLinkV2 = inlineTokenizer;
+  inlineMethods.splice(inlineMethods.indexOf("link"), 0, "refLinkV2");
   return Parser;
 }
 
@@ -87,7 +86,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
   const { dest } = MDUtilsV4.getDendronData(proc);
 
   if (visitors) {
-    visitors.refLink = function (node: NoteRefNoteV4) {
+    visitors.refLinkV2 = function (node: NoteRefNoteV4) {
       const ndata = node.data;
       if (dest === DendronASTDest.MD_DENDRON) {
         const { fname, alias } = ndata.link.from;
@@ -95,15 +94,15 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         let link = alias ? `${alias}|${fname}` : fname;
         let suffix = "";
         if (anchorStart) {
-          suffix += `# ${anchorStart}`;
+          suffix += `#${anchorStart}`;
         }
         if (anchorStartOffset) {
           suffix += `,${anchorStartOffset}`;
         }
         if (anchorEnd) {
-          suffix += `# ${anchorEnd}`;
+          suffix += `:#${anchorEnd}`;
         }
-        return `((ref:[[${link}]]${suffix}))`;
+        return `![[${link}${suffix}]]`;
       }
 
       const { error, data } = convertNoteRef({
@@ -176,11 +175,16 @@ function convertNoteRef(
     try {
       const note = file2Note(npath, vault);
       const body = note.body;
+      // let noteRefProc = proc();
+      // MDUtilsV4.setDendronData(proc, {overrides: {insertTitle: false}});
       const { error, data } = convertNoteRefHelper({
         body,
         link,
         refLvl: refLvl + 1,
-        proc,
+        proc: MDUtilsV4.setDendronData(proc(), {
+          overrides: { insertTitle: false },
+        }),
+        //proc,
         compilerOpts,
       });
       if (error) {
@@ -233,7 +237,7 @@ function convertNoteRef(
   return { error, data: out.join("\n") };
 }
 
-export function convertNoteRefAST(
+export function convertNoteRefASTV2(
   opts: ConvertNoteRefOpts
 ): { error: DendronError | undefined; data: Parent[] | undefined } {
   let errors: DendronError[] = [];
@@ -357,9 +361,14 @@ function convertNoteRefHelperAST(
   // TODO: can i just strip frontmatter when reading?
   let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
   let anchorEndIndex = bodyAST.children.length;
+  const slugger = getSlugger();
 
   if (anchorStart) {
-    anchorStartIndex = findHeader(bodyAST.children, anchorStart);
+    anchorStartIndex = findHeader({
+      nodes: bodyAST.children,
+      match: anchorStart,
+      slugger,
+    });
     if (anchorStartIndex < 0) {
       const data = MDUtilsV4.genMDMsg(`Start anchor ${anchorStart} not found`);
       return { data, error: null };
@@ -367,10 +376,11 @@ function convertNoteRefHelperAST(
   }
 
   if (anchorEnd) {
-    anchorEndIndex = findHeader(
-      bodyAST.children.slice(anchorStartIndex + 1),
-      anchorEnd
-    );
+    anchorEndIndex = findHeader({
+      nodes: bodyAST.children.slice(anchorStartIndex + 1),
+      match: anchorEnd,
+      slugger,
+    });
     if (anchorEndIndex < 0) {
       const data = MDUtilsV4.genMDMsg(`end anchor ${anchorEnd} not found`);
       return { data, error: null };
@@ -414,21 +424,27 @@ function convertNoteRefHelper(
   // TODO: can i just strip frontmatter when reading?
   let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
   let anchorEndIndex = bodyAST.children.length;
+  const slugger = getSlugger();
 
   if (anchorStart) {
-    anchorStartIndex = findHeader(bodyAST.children, anchorStart);
+    anchorStartIndex = findHeader({
+      nodes: bodyAST.children,
+      match: anchorStart,
+      slugger,
+    });
     if (anchorStartIndex < 0) {
-      return { data: "Start anchor ${anchorStart} not found", error: null };
+      return { data: `Start anchor ${anchorStart} not found`, error: null };
     }
   }
 
   if (anchorEnd) {
-    anchorEndIndex = findHeader(
-      bodyAST.children.slice(anchorStartIndex + 1),
-      anchorEnd
-    );
+    anchorEndIndex = findHeader({
+      nodes: bodyAST.children.slice(anchorStartIndex + 1),
+      match: anchorEnd,
+      slugger,
+    });
     if (anchorEndIndex < 0) {
-      return { data: "end anchor ${anchorEnd} not found", error: null };
+      return { data: `end anchor ${anchorEnd} not found`, error: null };
     }
     anchorEndIndex += anchorStartIndex + 1;
   }
@@ -443,7 +459,7 @@ function convertNoteRefHelper(
     }
     return { error: null, data: out };
   } catch (err) {
-    console.log("ERROR WITH REF++++");
+    console.log("ERROR WITH REF");
     console.log(JSON.stringify(err));
     return {
       error: new DendronError({
@@ -455,9 +471,17 @@ function convertNoteRefHelper(
   }
 }
 
-function findHeader(nodes: DendronASTNode["children"], match: string) {
+function findHeader({
+  nodes,
+  match,
+  slugger,
+}: {
+  nodes: DendronASTNode["children"];
+  match: string;
+  slugger: ReturnType<typeof getSlugger>;
+}) {
   const foundIndex = MDUtilsV4.findIndex(nodes, function (node: Node) {
-    return MDUtilsV4.isHeading(node, match);
+    return MDUtilsV4.matchHeading(node, match, { slugger });
   });
   return foundIndex;
 }
@@ -465,22 +489,22 @@ function findHeader(nodes: DendronASTNode["children"], match: string) {
 function renderPretty(opts: { content: string; title: string; link: string }) {
   const { content, title, link } = opts;
   return `
-<div class="portal-container">
-<div class="portal-head">
-<div class="portal-backlink" >
-<div class="portal-title">From <span class="portal-text-title">${title}</span></div>
-<a href=${link} class="portal-arrow">Go to text <span class="right-arrow">→</span></a>
-</div>
-</div>
-<div id="portal-parent-anchor" class="portal-parent" markdown="1">
-<div class="portal-parent-fader-top"></div>
-<div class="portal-parent-fader-bottom"></div>        
-
-${_.trim(content)}
-
-</div>    
-</div>
-`;
+  <div class="portal-container">
+  <div class="portal-head">
+  <div class="portal-backlink" >
+  <div class="portal-title">From <span class="portal-text-title">${title}</span></div>
+  <a href=${link} class="portal-arrow">Go to text <span class="right-arrow">→</span></a>
+  </div>
+  </div>
+  <div id="portal-parent-anchor" class="portal-parent" markdown="1">
+  <div class="portal-parent-fader-top"></div>
+  <div class="portal-parent-fader-bottom"></div>        
+  
+  ${_.trim(content)}
+  
+  </div>    
+  </div>
+  `;
 }
 
 function renderPrettyAST(opts: {
@@ -490,20 +514,20 @@ function renderPrettyAST(opts: {
 }) {
   const { content, title, link } = opts;
   const top = `<div class="portal-container">
-<div class="portal-head">
-<div class="portal-backlink" >
-<div class="portal-title">From <span class="portal-text-title">${title}</span></div>
-<a href=${link} class="portal-arrow">Go to text <span class="right-arrow">→</span></a>
-</div>
-</div>
-<div id="portal-parent-anchor" class="portal-parent" markdown="1">
-<div class="portal-parent-fader-top"></div>
-<div class="portal-parent-fader-bottom"></div>
-`;
+  <div class="portal-head">
+  <div class="portal-backlink" >
+  <div class="portal-title">From <span class="portal-text-title">${title}</span></div>
+  <a href=${link} class="portal-arrow">Go to text <span class="right-arrow">→</span></a>
+  </div>
+  </div>
+  <div id="portal-parent-anchor" class="portal-parent" markdown="1">
+  <div class="portal-parent-fader-top"></div>
+  <div class="portal-parent-fader-bottom"></div>
+  `;
   const bottom = `\n</div>    
-</div>`;
+  </div>`;
   return paragraph([html(top)].concat([content]).concat([html(bottom)]));
 }
 
-export { plugin as noteRefs };
-export { PluginOpts as NoteRefsOpts };
+export { plugin as noteRefsV2 };
+export { PluginOpts as NoteRefsOptsV2 };

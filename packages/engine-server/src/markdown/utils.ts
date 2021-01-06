@@ -3,6 +3,7 @@ import {
   DendronSiteConfig,
   DEngineClientV2,
   DVault,
+  getSlugger,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
 // @ts-ignore
@@ -31,6 +32,7 @@ import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTData, DendronASTDest } from "./types";
 import abbrPlugin from "remark-abbr";
+import { noteRefsV2 } from "./remark/noteRefsV2";
 
 const toString = require("mdast-util-to-string");
 
@@ -56,7 +58,7 @@ export class MDUtilsV4 {
     return proc.data("dendron") as DendronASTData;
   }
 
-  static setDendronData(proc: Processor, data: DendronASTData) {
+  static setDendronData(proc: Processor, data: Partial<DendronASTData>) {
     const _data = proc.data("dendron") as DendronASTData;
     return proc.data("dendron", { ..._data, ...data });
   }
@@ -81,6 +83,7 @@ export class MDUtilsV4 {
     return proc.data("noteRefLvl", lvl);
   }
 
+  // @deprecate
   static isHeading(node: Node, text: string, depth?: number) {
     if (node.type !== "heading") {
       return false;
@@ -93,6 +96,33 @@ export class MDUtilsV4 {
     if (text) {
       var headingText = toString(node);
       return text.trim().toLowerCase() === headingText.trim().toLowerCase();
+    }
+
+    if (depth) {
+      return (node as Heading).depth <= depth;
+    }
+
+    return true;
+  }
+
+  static matchHeading(
+    node: Node,
+    text: string,
+    opts: { depth?: number; slugger: ReturnType<typeof getSlugger> }
+  ) {
+    const { depth, slugger } = opts;
+    if (node.type !== "heading") {
+      return false;
+    }
+
+    // wildcard is always true
+    if (text === "*") {
+      return true;
+    }
+
+    if (text) {
+      var headingText = toString(node);
+      return text.trim().toLowerCase() === slugger.slug(headingText.trim());
     }
 
     if (depth) {
@@ -158,6 +188,10 @@ export class MDUtilsV4 {
       .use(abbrPlugin)
       .use(variables)
       .use(wikiLinks, opts.wikiLinksOpts)
+      .use(noteRefsV2, {
+        ...opts.noteRefOpts,
+        wikiLinkOpts: opts.wikiLinksOpts,
+      })
       .use(noteRefs, { ...opts.noteRefOpts, wikiLinkOpts: opts.wikiLinksOpts });
     if (opts.mathOpts?.katex) {
       proc = proc.use(math);

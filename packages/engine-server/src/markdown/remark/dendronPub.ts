@@ -10,6 +10,7 @@ import { SiteUtils } from "../../topics/site";
 import { DendronASTDest, NoteRefDataV4, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { convertNoteRefAST, NoteRefsOpts } from "./noteRefs";
+import { convertNoteRefASTV2 } from "./noteRefsV2";
 import { addError, getNoteOrError } from "./utils";
 
 type PluginOpts = NoteRefsOpts & {
@@ -20,12 +21,16 @@ type PluginOpts = NoteRefsOpts & {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  const { dest, vault, fname, config } = MDUtilsV4.getDendronData(proc);
+  const { dest, vault, fname, config, overrides } = MDUtilsV4.getDendronData(
+    proc
+  );
   function transformer(tree: Node, _file: VFile) {
     let root = tree as Root;
     const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
-
-    if (opts?.insertTitle && root.children) {
+    const insertTitle = !_.isUndefined(overrides?.insertTitle)
+      ? overrides?.insertTitle
+      : opts?.insertTitle;
+    if (insertTitle && root.children) {
       if (!fname || !vault) {
         throw new DendronError({
           msg: `no fname for node: ${JSON.stringify(tree)}`,
@@ -128,6 +133,24 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           prettyRefs: opts?.prettyRefs,
         };
         const { data } = convertNoteRefAST({
+          link: ndata.link,
+          proc,
+          compilerOpts: copts,
+        });
+        if (data) {
+          parent!.children = data;
+        }
+      }
+      if (
+        node.type === "refLinkV2" &&
+        dest !== DendronASTDest.MD_ENHANCED_PREVIEW
+      ) {
+        const ndata = node.data as NoteRefDataV4;
+        const copts: NoteRefsOpts = {
+          wikiLinkOpts: opts?.wikiLinkOpts,
+          prettyRefs: opts?.prettyRefs,
+        };
+        const { data } = convertNoteRefASTV2({
           link: ndata.link,
           proc,
           compilerOpts: copts,

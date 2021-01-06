@@ -1,12 +1,15 @@
-import { WorkspaceOpts } from "@dendronhq/common-all";
+import { NotePropsV2, WorkspaceOpts } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import {
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
 import { DendronEngineV2 } from "../../../enginev2";
-import { DendronASTDest } from "../../types";
+import { DendronASTDest, Processor } from "../../types";
 import _ from "lodash";
+import { MDUtilsV4 } from "../../utils";
+import path from "path";
+import fs from "fs";
 
 export const basicSetup = async ({ wsRoot, vaults }: WorkspaceOpts) => {
   await NoteTestUtilsV4.createNote({
@@ -22,6 +25,25 @@ export const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
   const logger = createLogger("testLogger", "/tmp/engine-server.txt");
   const engine = DendronEngineV2.createV3({ vaults, wsRoot, logger });
   return engine;
+};
+
+export const createProc = async (
+  opts: Parameters<TestPresetEntryV4["testFunc"]>[0],
+  procOverride?: Partial<Parameters<typeof MDUtilsV4.procFull>[0]>
+) => {
+  const { engine, vaults, extra } = opts;
+  const proc = await MDUtilsV4.procFull(
+    _.defaults(
+      {
+        engine,
+        dest: extra.dest,
+        fname: "foo",
+        vault: vaults[0],
+      },
+      procOverride
+    )
+  );
+  return proc;
 };
 
 export const createProcTests = (opts: {
@@ -67,4 +89,33 @@ export const createProcTests = (opts: {
       .filter((ent) => !_.isUndefined(ent));
   }
   return allTests;
+};
+
+export const modifyNote = async (
+  opts: WorkspaceOpts,
+  fname: string,
+  cb: (note: NotePropsV2) => NotePropsV2
+) => {
+  await NoteTestUtilsV4.modifyNoteByPath(
+    { wsRoot: opts.wsRoot, vault: opts.vaults[0], fname },
+    cb
+  );
+};
+
+export const processText = (opts: { text: string; proc: Processor }) => {
+  const { text, proc } = opts;
+  const respParse = proc.parse(text);
+  const respProcess = proc.processSync(text);
+  return { proc, respParse, respProcess };
+};
+
+export const processNote = (opts: {
+  fname: string;
+  proc: Processor;
+  wopts: WorkspaceOpts;
+}) => {
+  const { fname, wopts, proc } = opts;
+  const npath = path.join(wopts.wsRoot, wopts.vaults[0].fsPath, fname + ".md");
+  const text = fs.readFileSync(npath, { encoding: "utf8" });
+  return processText({ text, proc });
 };

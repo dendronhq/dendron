@@ -255,9 +255,49 @@ export function parseFileLink(ref: string): DNoteRefLink {
   return { from: { fname }, data: clean, type: "ref" };
 }
 
-// export function parseIdLink(ref: string): DendronRefLink {
-//     const reLink = /(?<id>[^:]+)(:([^:]+))?/;
-// };
+export function parseFileLinkV2(ref: string): DNoteRefLink {
+  const wikiFileName = /([^\]:#]+)/.source;
+  const reLink = new RegExp(
+    "" +
+      `(?<name>${wikiFileName})` +
+      `(${
+        new RegExp(
+          // anchor start
+          "" +
+            /#?/.source +
+            `(?<anchorStart>${wikiFileName})` +
+            // anchor stop
+            `(:#(?<anchorEnd>${wikiFileName}))?`
+        ).source
+      })?`,
+    "i"
+  );
+  const groups = reLink.exec(ref)?.groups;
+  const clean: DNoteRefData = {
+    type: "file",
+  };
+  let fname: string | undefined;
+  _.each<Partial<DNoteRefData>>(groups, (v, k) => {
+    if (_.isUndefined(v)) {
+      return;
+    }
+    if (k === "name") {
+      fname = path.basename(v as string, ".md");
+    } else {
+      // @ts-ignore
+      clean[k] = v;
+    }
+  });
+  if (_.isUndefined(fname)) {
+    throw new DendronError({ msg: `fname for ${ref} is undefined` });
+  }
+  if (clean.anchorStart && clean.anchorStart.indexOf(",") >= 0) {
+    const [anchorStart, offset] = clean.anchorStart.split(",");
+    clean.anchorStart = anchorStart;
+    clean.anchorStartOffset = parseInt(offset);
+  }
+  return { from: { fname }, data: clean, type: "ref" };
+}
 
 function parseLink(ref: string): DNoteRefLink | undefined {
   if (ref.indexOf("]") >= 0) {

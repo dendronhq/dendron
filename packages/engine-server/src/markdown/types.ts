@@ -6,6 +6,7 @@ import {
 } from "@dendronhq/common-all";
 import { Parent } from "mdast";
 import { Processor } from "unified";
+import { DendronPubOpts } from "./remark/dendronPub";
 import { WikiLinksOpts } from "./remark/wikiLinks";
 
 export type DendronASTNode = Parent & {
@@ -32,6 +33,7 @@ export type DendronASTData = {
   fname?: string;
   wikiLinkOpts?: WikiLinksOpts;
   config?: DendronSiteConfig;
+  overrides?: Partial<DendronPubOpts>;
 };
 
 // NODES

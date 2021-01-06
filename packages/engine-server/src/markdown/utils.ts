@@ -33,6 +33,7 @@ import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTData, DendronASTDest } from "./types";
 import abbrPlugin from "remark-abbr";
 import { noteRefsV2 } from "./remark/noteRefsV2";
+import footnotes from "remark-footnotes";
 
 const toString = require("mdast-util-to-string");
 
@@ -187,6 +188,7 @@ export class MDUtilsV4 {
       //.use(extract, { name: "fm" })
       .use(abbrPlugin)
       .use(variables)
+      .use(footnotes)
       .use(wikiLinks, opts.wikiLinksOpts)
       .use(noteRefsV2, {
         ...opts.noteRefOpts,

@@ -22,7 +22,7 @@ import {
   createProc,
   createProcTests,
   modifyNote,
-  processNote,
+  generateVerifyFunction,
   processText,
 } from "./utils";
 
@@ -61,21 +61,6 @@ function checkLink(node: any, link: { link: DNoteRefLink }) {
   expect(refNode.type).toEqual("refLinkV2");
   expect(refNode.data).toEqual(link);
 }
-
-const generateVerifyFunction = (opts: {
-  target: DendronASTDest;
-  exclude?: DendronASTDest[];
-}) => {
-  const { target, exclude } = _.defaults(opts, { exclude: [] });
-  const out: any = {};
-  const excludeList = exclude.concat(target);
-  Object.values(DendronASTDest)
-    .filter((ent) => !_.includes(excludeList, ent))
-    .forEach((ent) => {
-      out[ent] = target;
-    });
-  return out;
-};
 
 describe("parse", () => {
   let engine: any;

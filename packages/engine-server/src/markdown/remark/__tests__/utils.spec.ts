@@ -11,7 +11,7 @@ import _ from "lodash";
 import path from "path";
 import { DendronASTDest, Processor } from "../../types";
 import { MDUtilsV4 } from "../../utils";
-import { createEngine, createProcTests } from "./utils";
+import { createEngine, createProcTests, generateVerifyFunction } from "./utils";
 
 const IMAGE_LINK = `![alt-text](image-url.jpg)`;
 
@@ -147,6 +147,41 @@ const WITH_ABBR = createProcTests({
         "",
         "*[MDAST]: Markdown Abstract Syntax Tree",
         "*[AST]: Abstract syntax tree",
+      ].join("\n");
+      return note;
+    });
+  },
+});
+
+const WITH_FOOTNOTES = createProcTests({
+  name: "WITH_FOOTNOTES",
+  setupFunc: async (opts) => {
+    let proc = await createProc(opts);
+    const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
+    return readAndProcess({ npath, proc });
+  },
+  verifyFuncDict: {
+    [DendronASTDest.HTML]: async ({ extra }) => {
+      const { respRehype, respProcess } = extra;
+      expect(respProcess).toMatchSnapshot();
+      expect(
+        await AssertUtils.assertInString({
+          body: respRehype.contents,
+          match: [
+            `Here is the footnote.<a href="#fnref-1" class="footnote-backref">↩</a>`,
+          ],
+        })
+      ).toBeTruthy();
+    },
+    ...generateVerifyFunction({ target: DendronASTDest.HTML }),
+  },
+  preSetupHook: async (opts) => {
+    await ENGINE_HOOKS.setupBasic(opts);
+    await modifyNote(opts, (note: NotePropsV2) => {
+      note.body = [
+        "Here is a footnote reference,[^1]",
+        "",
+        "[^1]: Here is the footnote.",
       ].join("\n");
       return note;
     });
@@ -347,6 +382,7 @@ const ALL_TEST_CASES = [
   ...NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE,
   ...WITH_TITLE,
   ...NOTE_W_LINK_AND_SPACE,
+  ...WITH_FOOTNOTES,
 ];
 
 describe("MDUtils.proc", () => {

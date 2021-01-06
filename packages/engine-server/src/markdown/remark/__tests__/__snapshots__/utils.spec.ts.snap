@@ -2574,6 +2574,222 @@ VFile {
 }
 `;
 
+exports[`MDUtils.proc "HTML: WITH_FOOTNOTES" 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+Here is a footnote reference,[^1]
+
+[^1]: Here is the footnote.
+
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "HTML: WITH_FOOTNOTES": respParse 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "position": Position {
+        "end": Object {
+          "column": 4,
+          "line": 7,
+          "offset": 61,
+        },
+        "indent": Array [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+        ],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "yaml",
+      "value": "id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 30,
+              "line": 8,
+              "offset": 91,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 8,
+              "offset": 62,
+            },
+          },
+          "type": "text",
+          "value": "Here is a footnote reference,",
+        },
+        Object {
+          "identifier": "1",
+          "label": "1",
+          "position": Position {
+            "end": Object {
+              "column": 34,
+              "line": 8,
+              "offset": 95,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 30,
+              "line": 8,
+              "offset": 91,
+            },
+          },
+          "type": "footnoteReference",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 34,
+          "line": 8,
+          "offset": 95,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 8,
+          "offset": 62,
+        },
+      },
+      "type": "paragraph",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "children": Array [
+            Object {
+              "position": Position {
+                "end": Object {
+                  "column": 28,
+                  "line": 10,
+                  "offset": 124,
+                },
+                "indent": Array [],
+                "start": Object {
+                  "column": 7,
+                  "line": 10,
+                  "offset": 103,
+                },
+              },
+              "type": "text",
+              "value": "Here is the footnote.",
+            },
+          ],
+          "position": Position {
+            "end": Object {
+              "column": 28,
+              "line": 10,
+              "offset": 124,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 7,
+              "line": 10,
+              "offset": 103,
+            },
+          },
+          "type": "paragraph",
+        },
+      ],
+      "identifier": "1",
+      "label": "1",
+      "position": Position {
+        "end": Object {
+          "column": 28,
+          "line": 10,
+          "offset": 124,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 10,
+          "offset": 97,
+        },
+      },
+      "type": "footnoteDefinition",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 1,
+      "line": 11,
+      "offset": 125,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`MDUtils.proc "HTML: WITH_FOOTNOTES": respProcess 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+Here is a footnote reference,[^1]
+
+[^1]: Here is the footnote.
+
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "HTML: WITH_FOOTNOTES": respRehype 1`] = `
+VFile {
+  "contents": "<p>Here is a footnote reference,<sup id=\\"fnref-1\\"><a href=\\"#fn-1\\" class=\\"footnote-ref\\">1</a></sup></p>
+<div class=\\"footnotes\\">
+<hr>
+<ol>
+<li id=\\"fn-1\\">Here is the footnote.<a href=\\"#fnref-1\\" class=\\"footnote-backref\\">↩</a></li>
+</ol>
+</div>",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`MDUtils.proc "HTML: asset_prefix undefined" 1`] = `
 VFile {
   "contents": "![alt-text](image-url.jpg)
@@ -2591,6 +2807,438 @@ VFile {
   "contents": "![alt-text](bond/image-url.jpg)
 
 ",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_DENDRON: WITH_FOOTNOTES" 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+Here is a footnote reference,[^1]
+
+[^1]: Here is the footnote.
+
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_DENDRON: WITH_FOOTNOTES": respParse 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "position": Position {
+        "end": Object {
+          "column": 4,
+          "line": 7,
+          "offset": 61,
+        },
+        "indent": Array [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+        ],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "yaml",
+      "value": "id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 30,
+              "line": 8,
+              "offset": 91,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 8,
+              "offset": 62,
+            },
+          },
+          "type": "text",
+          "value": "Here is a footnote reference,",
+        },
+        Object {
+          "identifier": "1",
+          "label": "1",
+          "position": Position {
+            "end": Object {
+              "column": 34,
+              "line": 8,
+              "offset": 95,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 30,
+              "line": 8,
+              "offset": 91,
+            },
+          },
+          "type": "footnoteReference",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 34,
+          "line": 8,
+          "offset": 95,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 8,
+          "offset": 62,
+        },
+      },
+      "type": "paragraph",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "children": Array [
+            Object {
+              "position": Position {
+                "end": Object {
+                  "column": 28,
+                  "line": 10,
+                  "offset": 124,
+                },
+                "indent": Array [],
+                "start": Object {
+                  "column": 7,
+                  "line": 10,
+                  "offset": 103,
+                },
+              },
+              "type": "text",
+              "value": "Here is the footnote.",
+            },
+          ],
+          "position": Position {
+            "end": Object {
+              "column": 28,
+              "line": 10,
+              "offset": 124,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 7,
+              "line": 10,
+              "offset": 103,
+            },
+          },
+          "type": "paragraph",
+        },
+      ],
+      "identifier": "1",
+      "label": "1",
+      "position": Position {
+        "end": Object {
+          "column": 28,
+          "line": 10,
+          "offset": 124,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 10,
+          "offset": 97,
+        },
+      },
+      "type": "footnoteDefinition",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 1,
+      "line": 11,
+      "offset": 125,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`MDUtils.proc "MD_DENDRON: WITH_FOOTNOTES": respProcess 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+Here is a footnote reference,[^1]
+
+[^1]: Here is the footnote.
+
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_DENDRON: WITH_FOOTNOTES": respRehype 1`] = `
+VFile {
+  "contents": "<p>Here is a footnote reference,<sup id=\\"fnref-1\\"><a href=\\"#fn-1\\" class=\\"footnote-ref\\">1</a></sup></p>
+<div class=\\"footnotes\\">
+<hr>
+<ol>
+<li id=\\"fn-1\\">Here is the footnote.<a href=\\"#fnref-1\\" class=\\"footnote-backref\\">↩</a></li>
+</ol>
+</div>",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_FOOTNOTES" 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+Here is a footnote reference,[^1]
+
+[^1]: Here is the footnote.
+
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_FOOTNOTES": respParse 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "position": Position {
+        "end": Object {
+          "column": 4,
+          "line": 7,
+          "offset": 61,
+        },
+        "indent": Array [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+        ],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "yaml",
+      "value": "id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 30,
+              "line": 8,
+              "offset": 91,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 8,
+              "offset": 62,
+            },
+          },
+          "type": "text",
+          "value": "Here is a footnote reference,",
+        },
+        Object {
+          "identifier": "1",
+          "label": "1",
+          "position": Position {
+            "end": Object {
+              "column": 34,
+              "line": 8,
+              "offset": 95,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 30,
+              "line": 8,
+              "offset": 91,
+            },
+          },
+          "type": "footnoteReference",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 34,
+          "line": 8,
+          "offset": 95,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 8,
+          "offset": 62,
+        },
+      },
+      "type": "paragraph",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "children": Array [
+            Object {
+              "position": Position {
+                "end": Object {
+                  "column": 28,
+                  "line": 10,
+                  "offset": 124,
+                },
+                "indent": Array [],
+                "start": Object {
+                  "column": 7,
+                  "line": 10,
+                  "offset": 103,
+                },
+              },
+              "type": "text",
+              "value": "Here is the footnote.",
+            },
+          ],
+          "position": Position {
+            "end": Object {
+              "column": 28,
+              "line": 10,
+              "offset": 124,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 7,
+              "line": 10,
+              "offset": 103,
+            },
+          },
+          "type": "paragraph",
+        },
+      ],
+      "identifier": "1",
+      "label": "1",
+      "position": Position {
+        "end": Object {
+          "column": 28,
+          "line": 10,
+          "offset": 124,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 10,
+          "offset": 97,
+        },
+      },
+      "type": "footnoteDefinition",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 1,
+      "line": 11,
+      "offset": 125,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_FOOTNOTES": respProcess 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+Here is a footnote reference,[^1]
+
+[^1]: Here is the footnote.
+
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_FOOTNOTES": respRehype 1`] = `
+VFile {
+  "contents": "<p>Here is a footnote reference,<sup id=\\"fnref-1\\"><a href=\\"#fn-1\\" class=\\"footnote-ref\\">1</a></sup></p>
+<div class=\\"footnotes\\">
+<hr>
+<ol>
+<li id=\\"fn-1\\">Here is the footnote.<a href=\\"#fnref-1\\" class=\\"footnote-backref\\">↩</a></li>
+</ol>
+</div>",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
   "history": Array [],
@@ -2782,6 +3430,222 @@ VFile {
   "contents": "![alt-text](image-url.jpg)
 
 ",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_FOOTNOTES" 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+Here is a footnote reference,[^1]
+
+[^1]: Here is the footnote.
+
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_FOOTNOTES": respParse 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "position": Position {
+        "end": Object {
+          "column": 4,
+          "line": 7,
+          "offset": 61,
+        },
+        "indent": Array [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+        ],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "yaml",
+      "value": "id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 30,
+              "line": 8,
+              "offset": 91,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 8,
+              "offset": 62,
+            },
+          },
+          "type": "text",
+          "value": "Here is a footnote reference,",
+        },
+        Object {
+          "identifier": "1",
+          "label": "1",
+          "position": Position {
+            "end": Object {
+              "column": 34,
+              "line": 8,
+              "offset": 95,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 30,
+              "line": 8,
+              "offset": 91,
+            },
+          },
+          "type": "footnoteReference",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 34,
+          "line": 8,
+          "offset": 95,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 8,
+          "offset": 62,
+        },
+      },
+      "type": "paragraph",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "children": Array [
+            Object {
+              "position": Position {
+                "end": Object {
+                  "column": 28,
+                  "line": 10,
+                  "offset": 124,
+                },
+                "indent": Array [],
+                "start": Object {
+                  "column": 7,
+                  "line": 10,
+                  "offset": 103,
+                },
+              },
+              "type": "text",
+              "value": "Here is the footnote.",
+            },
+          ],
+          "position": Position {
+            "end": Object {
+              "column": 28,
+              "line": 10,
+              "offset": 124,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 7,
+              "line": 10,
+              "offset": 103,
+            },
+          },
+          "type": "paragraph",
+        },
+      ],
+      "identifier": "1",
+      "label": "1",
+      "position": Position {
+        "end": Object {
+          "column": 28,
+          "line": 10,
+          "offset": 124,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 10,
+          "offset": 97,
+        },
+      },
+      "type": "footnoteDefinition",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 1,
+      "line": 11,
+      "offset": 125,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_FOOTNOTES": respProcess 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+Here is a footnote reference,[^1]
+
+[^1]: Here is the footnote.
+
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_FOOTNOTES": respRehype 1`] = `
+VFile {
+  "contents": "<p>Here is a footnote reference,<sup id=\\"fnref-1\\"><a href=\\"#fn-1\\" class=\\"footnote-ref\\">1</a></sup></p>
+<div class=\\"footnotes\\">
+<hr>
+<ol>
+<li id=\\"fn-1\\">Here is the footnote.<a href=\\"#fnref-1\\" class=\\"footnote-backref\\">↩</a></li>
+</ol>
+</div>",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
   "data": Object {},
   "history": Array [],

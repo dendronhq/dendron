@@ -58,15 +58,38 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       ) {
         let _node = node as WikiLinkNoteV4;
         let value = node.value as string;
+        // we change this later
+        let valueOrig = value;
         const data = _node.data;
         if (error) {
           addError(proc, error);
         }
 
         const copts = opts?.wikiLinkOpts;
+        if (opts?.transformNoPublish) {
+          const notes = NoteUtilsV2.getNotesByFname({
+            fname: valueOrig,
+            notes: engine.notes,
+            vault,
+          });
+          const { error, note } = getNoteOrError(notes, value);
+          if (error) {
+            value = "403";
+            addError(proc, error);
+          } else {
+            if (!note || !config) {
+              value = "403";
+              addError(proc, new DendronError({ msg: "no note or config" }));
+            } else {
+              if (!SiteUtils.canPublish({ note, config })) {
+                value = "403";
+              }
+            }
+          }
+        }
         if (copts?.useId) {
           const notes = NoteUtilsV2.getNotesByFname({
-            fname: value,
+            fname: valueOrig,
             notes: engine.notes,
             vault,
           });
@@ -75,27 +98,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             addError(proc, error);
           } else {
             value = note!.id;
-          }
-        }
-        if (opts?.transformNoPublish) {
-          const notes = NoteUtilsV2.getNotesByFname({
-            fname: value,
-            notes: engine.notes,
-            vault,
-          });
-          const { error, note } = getNoteOrError(notes, value);
-          if (error) {
-            //value = "403";
-            addError(proc, error);
-          } else {
-            if (!note || !config) {
-              //value = "403";
-              addError(proc, new DendronError({ msg: "no note or config" }));
-            } else {
-              if (!SiteUtils.canPublish({ note, config })) {
-                value = "403";
-              }
-            }
           }
         }
         const alias = data.alias ? data.alias : value;

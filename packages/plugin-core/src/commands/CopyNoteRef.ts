@@ -5,7 +5,7 @@ import {
   NotePropsV2,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
-import { refLink2String } from "@dendronhq/engine-server";
+import { refLink2Stringv2 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Position, Range, Selection, TextEditor, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
@@ -59,8 +59,7 @@ export class CopyNoteRefCommand extends BasicCommand<
         fname,
       },
     };
-    //const { selection } = VSCodeUtils.getSelection();
-    let refLinkString: string = refLink2String(link);
+    let refLinkString: string = refLink2Stringv2(link);
     const { header, selection } = getHeaderFromSelection();
     if (header && selection) {
       linkData.anchorStart = header;
@@ -68,9 +67,9 @@ export class CopyNoteRefCommand extends BasicCommand<
         linkData.anchorEnd = "*";
       }
       linkData.anchorStartOffset = 1;
-      refLinkString = refLink2String(link);
+      refLinkString = refLink2Stringv2(link);
     }
-    return ["((", "ref: ", refLinkString, "))"].join("");
+    return refLinkString;
   }
 
   async execute(_opts: CommandOpts) {

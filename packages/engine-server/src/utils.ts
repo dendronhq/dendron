@@ -6,6 +6,7 @@ import {
   DNoteRefData,
   DNoteRefLink,
   DVault,
+  getSlugger,
 } from "@dendronhq/common-all";
 import { readMD, resolvePath } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -39,6 +40,14 @@ function normalize(text: string) {
   return _.toLower(_.trim(text, " #"));
 }
 
+function normalizev2(text: string, slugger: ReturnType<typeof getSlugger>) {
+  const u = _.trim(text, " #");
+  if (u === "*") {
+    return u;
+  }
+  return slugger.slug(u);
+}
+
 /**
  * take a ref link and parse it as regular markdown
  */
@@ -70,6 +79,25 @@ export function refLink2String(
     linkParts.splice(0, 0, "((");
     linkParts.push("))");
   }
+  return linkParts.join("");
+}
+
+export function refLink2Stringv2(link: DNoteRefLink): string {
+  const slugger = getSlugger();
+  const { anchorStart, anchorStartOffset, anchorEnd } = link.data;
+  const { fname: name } = link.from;
+  // [[foo]]#head1:#*"
+  const linkParts = [`![[`, name];
+  if (anchorStart) {
+    linkParts.push(`#${normalizev2(anchorStart, slugger)}`);
+  }
+  if (anchorStartOffset) {
+    linkParts.push(`,${anchorStartOffset}`);
+  }
+  if (anchorEnd) {
+    linkParts.push(`:#${normalizev2(anchorEnd, slugger)}`);
+  }
+  linkParts.push("]]");
   return linkParts.join("");
 }
 

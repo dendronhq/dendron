@@ -27,7 +27,7 @@ suite("notes", function () {
       const notePath = path.join(vaultPath, "foo.md");
       await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
       const link = await new CopyNoteRefCommand().run();
-      assert.deepStrictEqual(link, "((ref: [[foo]]))");
+      assert.deepStrictEqual(link, "![[foo]]");
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
@@ -47,7 +47,7 @@ suite("notes", function () {
       )) as vscode.TextEditor;
       editor.selection = new vscode.Selection(7, 0, 7, 12);
       const link = await new CopyNoteRefCommand().run();
-      assert.equal(link, "((ref: [[bar]]#foo,1:#*))");
+      assert.equal(link, "![[bar#foo,1:#*]]");
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
@@ -78,7 +78,7 @@ suite("notes", function () {
       )) as vscode.TextEditor;
       editor.selection = new vscode.Selection(7, 0, 7, 4);
       const link = await new CopyNoteRefCommand().run();
-      assert.equal(link, "((ref: [[bar]]#foo,1:#*))");
+      assert.equal(link, "![[bar#foo,1:#*]]");
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
@@ -109,7 +109,7 @@ suite("notes", function () {
       )) as vscode.TextEditor;
       editor.selection = new vscode.Selection(7, 0, 7, 12);
       const link = await new CopyNoteRefCommand().run();
-      assert.equal(link, "((ref: [[bar]]#foo,1))");
+      assert.equal(link, "![[bar#foo,1]]");
       done();
     });
     setupDendronWorkspace(root.name, ctx, {

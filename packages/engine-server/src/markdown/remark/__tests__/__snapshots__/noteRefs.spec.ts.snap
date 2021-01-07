@@ -170,6 +170,20 @@ journal3
 }
 `;
 
+exports[`compilev2 compile "MD_DENDRON: TITLE_IN_FM" 1`] = `
+VFile {
+  "contents": "# Foo Bar
+
+((ref:[[foo]]#foo:#*))
+
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`compilev2 compile "MD_DENDRON: recursive" 1`] = `
 VFile {
   "contents": "((ref:[[foo]]))

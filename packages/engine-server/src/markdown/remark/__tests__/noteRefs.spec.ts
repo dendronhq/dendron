@@ -176,7 +176,7 @@ describe("compilev2", () => {
       });
       return processText({
         proc: proc2,
-        text: "# Foo Bar\n((ref: [[foo]]#foo:#*))",
+        text: "# Foo Bar\n((ref:[[foo]]#foo:#*))",
       });
     },
     verifyFuncDict: {
@@ -189,6 +189,19 @@ describe("compilev2", () => {
             actual: await AssertUtils.assertInString({
               body: respProcess.toString(),
               match: ["# Foo", "# Tasks"],
+            }),
+            expected: true,
+          },
+        ];
+      },
+      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+        const { respProcess } = extra;
+        expect(respProcess).toMatchSnapshot();
+        return [
+          {
+            actual: await AssertUtils.assertInString({
+              body: respProcess.toString(),
+              match: ["((ref:[[foo]]#foo:#*))"],
             }),
             expected: true,
           },

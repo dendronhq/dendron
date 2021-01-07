@@ -96,13 +96,13 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         let link = alias ? `${alias}|${fname}` : fname;
         let suffix = "";
         if (anchorStart) {
-          suffix += `# ${anchorStart}`;
+          suffix += `#${anchorStart}`;
         }
         if (anchorStartOffset) {
           suffix += `,${anchorStartOffset}`;
         }
         if (anchorEnd) {
-          suffix += `# ${anchorEnd}`;
+          suffix += `:#${anchorEnd}`;
         }
         return `((ref:[[${link}]]${suffix}))`;
       }
@@ -354,7 +354,7 @@ function convertNoteRefHelperAST(
   const noteRefProc = proc();
   MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
   const bodyAST = noteRefProc.parse(body) as DendronASTNode;
-  const { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {
+  let { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {
     anchorStartOffset: 0,
   });
 
@@ -363,8 +363,9 @@ function convertNoteRefHelperAST(
   let anchorEndIndex = bodyAST.children.length;
 
   if (anchorStart) {
-    if (anchorStart.toLowerCase() === opts.title.toLowerCase()) {
+    if (_.trim(anchorStart).toLowerCase() === opts.title.toLowerCase()) {
       anchorEndIndex = anchorStartIndex;
+      anchorStartOffset = 0;
     } else {
       anchorStartIndex = findHeader(bodyAST.children, anchorStart);
     }
@@ -417,14 +418,18 @@ function convertNoteRefHelper(
   const noteRefProc = proc();
   MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
   const bodyAST = noteRefProc.parse(body) as DendronASTNode;
-  const { anchorStart, anchorEnd, anchorStartOffset } = link.data;
+  let { anchorStart, anchorEnd, anchorStartOffset } = link.data;
 
   // TODO: can i just strip frontmatter when reading?
   let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
   let anchorEndIndex = bodyAST.children.length;
 
   if (anchorStart) {
-    if (opts.title.toLowerCase() !== anchorStart.toLowerCase()) {
+    if (_.trim(anchorStart).toLowerCase() === opts.title.toLowerCase()) {
+      console.log("title match");
+      anchorEndIndex = anchorStartIndex;
+      anchorStartOffset = 0;
+    } else {
       anchorStartIndex = findHeader(bodyAST.children, anchorStart);
     }
     if (anchorStartIndex < 0) {

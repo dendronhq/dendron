@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.23.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.4...v0.23.1-alpha.5) (2021-01-07)
+
+### Enhancements
+
+- add sitebuild command ([dccde03](https://github.com/dendronhq/dendron/commit/dccde0387f1438084ff8b6efa56796fc4791643a))
+- betters ite build integrations ([30185a4](https://github.com/dendronhq/dendron/commit/30185a4fcd8a23dd52eae13cbc921de7d4365891))
+
+### Features
+
+- site preview command ([7bc838b](https://github.com/dendronhq/dendron/commit/7bc838bae885e6932752ea8335e9a76935377a69))
+
 ## [0.23.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.3...v0.23.1-alpha.4) (2021-01-06)
 
 ### Bug Fixes

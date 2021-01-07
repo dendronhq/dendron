@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.23.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.5...v0.23.1-alpha.6) (2021-01-07)
+
+### Enhancements
+
+- use new style note ref ([f709ee5](https://github.com/dendronhq/dendron/commit/f709ee5db07c87df24c245f1cb81bfe3ca0a25e7))
+
 ## [0.23.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.4...v0.23.1-alpha.5) (2021-01-07)
 
 ### Enhancements

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.23.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.5...v0.23.1-alpha.6) (2021-01-07)
+
+### Bug Fixes
+
+- issue with noteRef mangling when using doctor ([5d9b711](https://github.com/dendronhq/dendron/commit/5d9b711d37ab7ac1688bd66908d82285a242edd9))
+- remove debug line ([4ca3a1e](https://github.com/dendronhq/dendron/commit/4ca3a1efb9101c1fc7975dbdd43b0f6379f6b8b1))
+
+### Enhancements
+
+- support note ref based on inserted header ([78bd906](https://github.com/dendronhq/dendron/commit/78bd906243dbbae8fba4c9531542e660601f8224))
+- use new style note ref ([f709ee5](https://github.com/dendronhq/dendron/commit/f709ee5db07c87df24c245f1cb81bfe3ca0a25e7))
+
 ## [0.23.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.4...v0.23.1-alpha.5) (2021-01-07)
 
 ### Enhancements

@@ -1,8 +1,8 @@
 import { BuildSiteV2CLICommandOpts } from "@dendronhq/dendron-cli";
 import { execa } from "@dendronhq/engine-server";
-import { window } from "vscode";
+import { env, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { checkPreReq } from "../utils/site";
+import { checkPreReq, getSiteRootDirPath } from "../utils/site";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -26,13 +26,23 @@ export class SiteBuildCommand extends BasicCommand<CommandOpts, CommandOutput> {
     window.showInformationMessage("building...");
     const port = DendronWorkspace.instance().port!;
     // TODO: show progress
-    const cmdBuild = `npx dendron-cli buildSiteV2 --wsRoot ${wsRoot} --stage prod --enginePort ${port}`;
-    await execa.command(cmdBuild, {
-      shell: true,
+    const cmdBuild = `dendron-cli buildSiteV2 --wsRoot ${wsRoot} --stage prod --enginePort ${port}`.split(
+      " "
+    );
+    await execa("npx", cmdBuild, {
       cwd: wsRoot,
     });
   }
   async showResponse() {
-    window.showInformationMessage("SiteBuild completed");
+    window
+      .showInformationMessage(
+        `build complete. files available at ${getSiteRootDirPath()}`,
+        "Open Folder"
+      )
+      .then((resp) => {
+        if (resp === "Open Folder") {
+          env.openExternal(Uri.parse(getSiteRootDirPath()));
+        }
+      });
   }
 }

@@ -1,13 +1,11 @@
 import { BuildSiteV2CLICommandOpts } from "@dendronhq/dendron-cli";
 import { execa } from "@dendronhq/engine-server";
 import fs from "fs-extra";
-import _ from "lodash";
-import path from "path";
 import stream from "stream";
 import { env, ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { checkPreReq } from "../utils/site";
-import { DendronWorkspace, getWS } from "../workspace";
+import { checkPreReq, getSiteRootDirPath } from "../utils/site";
+import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = Partial<BuildSiteV2CLICommandOpts>;
@@ -26,8 +24,7 @@ export class SitePreviewCommand extends BasicCommand<
 
   async sanityCheck() {
     await checkPreReq();
-    const wsRoot = DendronWorkspace.wsRoot();
-    const sitePath = path.join(wsRoot, getWS().config.site.siteRootDir);
+    const sitePath = getSiteRootDirPath();
     if (!fs.existsSync(sitePath)) {
       return "no site found";
     }

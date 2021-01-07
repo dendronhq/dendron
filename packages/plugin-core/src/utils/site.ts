@@ -3,7 +3,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { ProgressLocation, window } from "vscode";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWS } from "../workspace";
 
 const packageJson = {
   name: "dendron-site",
@@ -22,17 +22,18 @@ const pkgCreate = (pkgPath: string) => {
   return fs.writeJSONSync(pkgPath, packageJson);
 };
 const pkgInstall = async () => {
-  const cmdInstall = "npm install";
-  await execa.command(cmdInstall, {
-    shell: true,
+  await execa("npm", ["install"], {
     cwd: DendronWorkspace.wsRoot(),
   });
 };
 
 const pkgUpgrade = async (pkg: string, version: string) => {
-  const cmdInstall = `npm install --save ${pkg}${_.replace(version, "^", "@")}`;
-  await execa.command(cmdInstall, {
-    shell: true,
+  const cmdInstall: string[] = `install --save ${pkg}${_.replace(
+    version,
+    "^",
+    "@"
+  )}`.split(" ");
+  await execa("npm", cmdInstall, {
     cwd: DendronWorkspace.wsRoot(),
   });
 };
@@ -102,4 +103,10 @@ export const checkPreReq = async () => {
     }
   }
   return undefined;
+};
+
+export const getSiteRootDirPath = () => {
+  const wsRoot = DendronWorkspace.wsRoot();
+  const sitePath = path.join(wsRoot, getWS().config.site.siteRootDir);
+  return sitePath;
 };

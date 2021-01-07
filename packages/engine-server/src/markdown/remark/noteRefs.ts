@@ -426,7 +426,6 @@ function convertNoteRefHelper(
 
   if (anchorStart) {
     if (_.trim(anchorStart).toLowerCase() === opts.title.toLowerCase()) {
-      console.log("title match");
       anchorEndIndex = anchorStartIndex;
       anchorStartOffset = 0;
     } else {

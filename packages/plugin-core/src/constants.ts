@@ -496,6 +496,15 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "",
     docPreview: ``,
   },
+  SITE_PREVIEW: {
+    key: "dendron.sitePreview",
+    title: `${CMD_PREFIX} Site Preview`,
+    group: "publishing",
+    desc: "preview your notes",
+    docs: "",
+    docLink: "",
+    docPreview: ``,
+  },
   // --- Misc
   OPEN_LINK: {
     key: "dendron.openLink",

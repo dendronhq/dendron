@@ -33,6 +33,7 @@ import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
 import { SiteBuildCommand } from "./SiteBuild";
+import { SitePreviewCommand } from "./SitePreview";
 
 const ALL_COMMANDS = [
   ArchiveHierarchyCommand,
@@ -67,6 +68,7 @@ const ALL_COMMANDS = [
   ShowHelpCommand,
   ShowPreviewCommand,
   SiteBuildCommand,
+  SitePreviewCommand,
   SnapshotVaultCommand,
   ConfigureWithUICommand,
   UpgradeSettingsCommand,

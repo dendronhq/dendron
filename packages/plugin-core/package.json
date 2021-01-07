@@ -386,6 +386,14 @@
                 "docPreview": ""
             },
             {
+                "command": "dendron.sitePreview",
+                "title": "Dendron: Site Preview",
+                "desc": "preview your notes",
+                "docs": "",
+                "docLink": "",
+                "docPreview": ""
+            },
+            {
                 "command": "dendron.openLink",
                 "title": "Dendron: Open Link",
                 "desc": "Open link to external file (eg. pdf, .mov, etc) use system default",

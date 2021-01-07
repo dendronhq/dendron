@@ -8,6 +8,7 @@ import { DoctorCLICommand } from "../src/commands/doctor";
 import { ExportPodCLICommand } from "../src/commands/exportPod";
 import { ImportPodCLICommand } from "../src/commands/importPod";
 import { LaunchEngineServerCommand } from "../src/commands/launchEngineServer";
+import { NoteCLICommand } from "../src/commands/notes";
 import { PlantSeedCommand } from "../src/commands/plantSeed";
 import { PublishNotesCommand } from "../src/commands/publishNotes";
 import { PublishPodCLICommand } from "../src/commands/PublishPodCLICommand";
@@ -57,6 +58,7 @@ LaunchEngineServerCommand.buildCmd(buildYargs);
 new BuildSiteV2CLICommand().buildCmd(buildYargs);
 new DoctorCLICommand().buildCmd(buildYargs);
 new WorkspaceCLICommand().buildCmd(buildYargs);
+new NoteCLICommand().buildCmd(buildYargs);
 
 /**
  * new Command().build(buildYargs)

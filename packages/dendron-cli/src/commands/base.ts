@@ -35,7 +35,6 @@ export abstract class CLICommand<TOpts, TOut> extends BaseCommand<TOpts, TOut> {
     return yargs.command(this.name, this.desc, this.buildArgs, this.eval);
   }
 
-  // abstract buildArgs(args: yargs.Argv): void;
   abstract enrichArgs(args: any): Promise<TOpts>;
 
   eval = async (args: any) => {

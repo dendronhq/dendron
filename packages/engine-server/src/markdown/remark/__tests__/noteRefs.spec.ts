@@ -1,4 +1,8 @@
-import { DEngineClientV2 } from "@dendronhq/common-all";
+import {
+  DEngineClientV2,
+  NotePropsV2,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import {
   AssertUtils,
   ENGINE_HOOKS,
@@ -10,7 +14,12 @@ import { DendronASTData, DendronASTDest } from "../../types";
 import { MDUtilsV4 } from "../../utils";
 import { dendronPub } from "../dendronPub";
 import { noteRefs, NoteRefsOpts } from "../noteRefs";
-import { createEngine, createProcTests } from "./utils";
+import {
+  createEngine,
+  createProcTests,
+  modifyNote,
+  processText,
+} from "./utils";
 
 function proc(
   engine: DEngineClientV2,
@@ -135,6 +144,59 @@ describe("compilev2", () => {
     preSetupHook: ENGINE_HOOKS.setupBasic,
   });
 
+  const WITH_ANCHOR_PRE_SETUP = async (opts: WorkspaceOpts) => {
+    await ENGINE_HOOKS.setupBasic(opts);
+    await modifyNote(opts, "foo", (note: NotePropsV2) => {
+      const txt = [
+        "---",
+        "id: foo",
+        "title: foo",
+        "---",
+        `# Tasks`,
+        "## Header1",
+        "task1",
+        "## Header2",
+        "task2",
+      ];
+      note.body = txt.join("\n");
+      return note;
+    });
+  };
+
+  const TITLE_IN_FM = createProcTests({
+    name: "TITLE_IN_FM",
+    preSetupHook: WITH_ANCHOR_PRE_SETUP,
+    setupFunc: async ({ engine, vaults, extra }) => {
+      const proc2 = await MDUtilsV4.procFull({
+        engine,
+        dest: extra.dest,
+        fname: "foo",
+        vault: vaults[0],
+        publishOpts: { insertTitle: true },
+      });
+      return processText({
+        proc: proc2,
+        text: "# Foo Bar\n((ref: [[foo]]#foo:#*))",
+      });
+    },
+    verifyFuncDict: {
+      [DendronASTDest.HTML]: DendronASTDest.MD_ENHANCED_PREVIEW,
+      [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+        const { respProcess } = extra;
+        expect(respProcess).toMatchSnapshot();
+        return [
+          {
+            actual: await AssertUtils.assertInString({
+              body: respProcess.toString(),
+              match: ["# Foo", "# Tasks"],
+            }),
+            expected: true,
+          },
+        ];
+      },
+    },
+  });
+
   const RECURSIVE_TEST_CASES = createProcTests({
     name: "recursive",
     setupFunc: async ({ engine, extra, vaults }) => {
@@ -251,6 +313,7 @@ describe("compilev2", () => {
     ...REGULAR_CASE,
     ...RECURSIVE_TEST_CASES,
     ...WILDCARD_CASE,
+    ...TITLE_IN_FM,
   ];
   //const ALL_TEST_CASES = WILDCARD_CASE;
   describe("compile", () => {

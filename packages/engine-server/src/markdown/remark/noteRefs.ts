@@ -36,6 +36,7 @@ type ConvertNoteRefOpts = {
 type ConvertNoteRefHelperOpts = ConvertNoteRefOpts & {
   refLvl: number;
   body: string;
+  title: string;
 };
 
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
@@ -175,6 +176,7 @@ function convertNoteRef(
     });
     try {
       const note = file2Note(npath, vault);
+      const title = note.title;
       const body = note.body;
       const { error, data } = convertNoteRefHelper({
         body,
@@ -182,6 +184,7 @@ function convertNoteRef(
         refLvl: refLvl + 1,
         proc,
         compilerOpts,
+        title,
       });
       if (error) {
         errors.push(error);
@@ -290,6 +293,7 @@ export function convertNoteRefAST(
         refLvl: refLvl + 1,
         proc,
         compilerOpts,
+        title: note.title,
       });
       if (error) {
         errors.push(error);
@@ -359,7 +363,11 @@ function convertNoteRefHelperAST(
   let anchorEndIndex = bodyAST.children.length;
 
   if (anchorStart) {
-    anchorStartIndex = findHeader(bodyAST.children, anchorStart);
+    if (anchorStart.toLowerCase() === opts.title.toLowerCase()) {
+      anchorEndIndex = anchorStartIndex;
+    } else {
+      anchorStartIndex = findHeader(bodyAST.children, anchorStart);
+    }
     if (anchorStartIndex < 0) {
       const data = MDUtilsV4.genMDMsg(`Start anchor ${anchorStart} not found`);
       return { data, error: null };
@@ -416,7 +424,9 @@ function convertNoteRefHelper(
   let anchorEndIndex = bodyAST.children.length;
 
   if (anchorStart) {
-    anchorStartIndex = findHeader(bodyAST.children, anchorStart);
+    if (opts.title.toLowerCase() !== anchorStart.toLowerCase()) {
+      anchorStartIndex = findHeader(bodyAST.children, anchorStart);
+    }
     if (anchorStartIndex < 0) {
       return { data: "Start anchor ${anchorStart} not found", error: null };
     }

@@ -1,5 +1,35 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`compilev2 compile "HTML: TITLE_IN_FM" 1`] = `
+VFile {
+  "contents": "# Foo
+
+# Foo Bar
+
+<div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\" >
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+<a href=\\"foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div>
+# Tasks
+
+
+</div>    
+</div>
+
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`compilev2 compile "HTML: recursive" 1`] = `
 VFile {
   "contents": "<div class=\\"portal-container\\">
@@ -167,6 +197,39 @@ VFile {
 exports[`compilev2 compile "MD_DENDRON: wildcard" 1`] = `
 VFile {
   "contents": "((ref:[[journal.2020.08.*]]))
+
+",
+  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 compile "MD_ENHANCED_PREVIEW: TITLE_IN_FM" 1`] = `
+VFile {
+  "contents": "# Foo
+
+# Foo Bar
+
+
+<div class=\\"portal-container\\">
+<div class=\\"portal-head\\">
+<div class=\\"portal-backlink\\" >
+<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+<a href=\\"foo.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+</div>
+</div>
+<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+<div class=\\"portal-parent-fader-top\\"></div>
+<div class=\\"portal-parent-fader-bottom\\"></div>        
+
+# Foo
+
+# Tasks
+
+</div>    
+</div>
 
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",

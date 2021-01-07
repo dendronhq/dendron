@@ -42,9 +42,7 @@ export const checkPreReq = async () => {
   // check for package.json
   const pkgPath = path.join(DendronWorkspace.wsRoot(), "package.json");
   if (!fs.existsSync(pkgPath)) {
-    window.showInformationMessage("no package.json. creating package.json");
     pkgCreate(pkgPath);
-    window.showInformationMessage("created package.json");
     const resp = await window.showInformationMessage(
       "install dependencies from package.json?",
       "Install",

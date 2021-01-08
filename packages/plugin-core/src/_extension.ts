@@ -277,8 +277,8 @@ export async function _activate(context: vscode.ExtensionContext) {
         title: "Starting Dendron...",
         cancellable: true,
       },
-      (_progress, token) => {
-        token.onCancellationRequested(() => {
+      (_progress, _token) => {
+        _token.onCancellationRequested(() => {
           console.log("Cancelled");
         });
 
@@ -287,6 +287,15 @@ export async function _activate(context: vscode.ExtensionContext) {
             "extension",
             async (_event: HistoryEvent) => {
               if (_event.action === "initialized") {
+                resolve(undefined);
+              }
+            }
+          );
+          HistoryService.instance().subscribe(
+            "extension",
+            async (_event: HistoryEvent) => {
+              if (_event.action === "not_initialized") {
+                Logger.error({ ctx, msg: "issue initializing Dendron" });
                 resolve(undefined);
               }
             }

@@ -282,20 +282,6 @@ export class DNodeUtilsV2 {
     return children;
   }
 
-  static getVaultByDir({
-    vaults,
-    dirPath,
-  }: {
-    dirPath: string;
-    vaults: DVault[];
-  }) {
-    const vault = _.find(vaults, { fsPath: dirPath });
-    if (_.isUndefined(vault)) {
-      throw new DendronError({ msg: `no vault found. ${dirPath}, ${vaults}` });
-    }
-    return vault;
-  }
-
   static isRoot(note: DNodePropsV2) {
     return note.fname === "root";
   }
@@ -897,6 +883,7 @@ export class SchemaUtilsV2 {
     const detail = props.root.desc;
     const out = {
       ...props.root,
+      fname: props.fname,
       label,
       detail,
       description: vaultSuffix,
@@ -958,28 +945,31 @@ export class SchemaUtilsV2 {
     return path.join(root, fname + ".schema.yml");
   }
 
+  /**
+   @deprecated
+   */
   static getSchemaModuleByFnameV4({
     fname,
     schemas,
+    wsRoot,
     vault,
   }: {
     fname: string;
     schemas: SchemaModuleDictV2 | SchemaModulePropsV2[];
+    wsRoot: string;
     vault: DVault;
   }): SchemaModulePropsV2 | undefined {
     if (!_.isArray(schemas)) {
       schemas = _.values(schemas);
     }
     const out = _.find(schemas, (ent) => {
-      return (
-        ent.fname.toLowerCase() === fname.toLowerCase() &&
-        ((vault &&
-        (vault.fsPath.startsWith("/") || vault.fsPath.startsWith("\\"))
-          ? ent.vault.fsPath === vault.fsPath
-          : true) ||
-          // FIXME: for backward compatibility with full length vaults
-          (vault ? path.basename(ent.vault.fsPath) === vault.fsPath : true))
-      );
+      if (ent.fname.toLowerCase() !== fname.toLowerCase()) {
+        return false;
+      }
+      if (vault) {
+        return VaultUtils.isEqual(vault, ent.vault, wsRoot);
+      }
+      return true;
     });
     return out;
   }

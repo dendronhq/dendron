@@ -292,7 +292,7 @@ suite.skip("Lookup notes, multi", function () {
         onInitCb: async ({ lp, lc }) => {
           console.log("onInitCb:enter");
           const ws = DendronWorkspace.instance();
-          const vaults = DendronWorkspace.instance().vaults;
+          const vaults = DendronWorkspace.instance().vaultsv4;
           const client = ws.getEngine();
           const note = _.find(client.notes, (ent) => {
             return (

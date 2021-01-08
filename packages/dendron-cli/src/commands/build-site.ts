@@ -6,8 +6,9 @@ import {
   HierarchyConfig,
   NotePropsV2,
   NoteUtilsV2,
+  VaultUtils,
 } from "@dendronhq/common-all";
-import { resolvePath, tmpDir, VaultUtils } from "@dendronhq/common-server";
+import { resolvePath, tmpDir } from "@dendronhq/common-server";
 import {
   DConfig,
   DendronEngineClient,

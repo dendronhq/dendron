@@ -49,6 +49,7 @@ export class VaultUtils {
 
   static getVaultByNotePathV4({
     vaults,
+    wsRoot,
     fsPath,
   }: {
     /**
@@ -58,9 +59,11 @@ export class VaultUtils {
     wsRoot: string;
     vaults: DVault[];
   }) {
-    // get diname
-    fsPath = path.dirname(fsPath);
-    const vault = _.find(vaults, { fsPath });
+    const normPath = this.normPathByWsRoot({
+      wsRoot,
+      fsPath: path.dirname(fsPath),
+    });
+    const vault = _.find(vaults, { fsPath: normPath });
     if (!vault) {
       throw new DendronError({ msg: "no vault found" });
     }
@@ -74,5 +77,9 @@ export class VaultUtils {
     return path.isAbsolute(opts.vault.fsPath)
       ? path.relative(opts.wsRoot, opts.vault.fsPath)
       : opts.vault.fsPath;
+  };
+
+  static normPathByWsRoot = (opts: { fsPath: string; wsRoot: string }) => {
+    return path.relative(opts.wsRoot, opts.fsPath);
   };
 }

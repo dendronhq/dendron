@@ -4,8 +4,9 @@ import {
   ENGINE_ERROR_CODES,
   NoteChangeEntry,
   NoteUtilsV2,
+  VaultUtils,
 } from "@dendronhq/common-all";
-import { vault2Path, VaultUtils } from "@dendronhq/common-server";
+import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import { TextEditor, Uri, window } from "vscode";

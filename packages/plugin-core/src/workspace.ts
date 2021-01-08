@@ -297,7 +297,8 @@ export class DendronWorkspace {
     if (!dendronRoot) {
       throw `dendronRoot not set when get config`;
     }
-    return DConfig.getOrCreate(dendronRoot);
+    const config = DConfig.getOrCreate(dendronRoot);
+    return config;
   }
 
   get podsDir(): string {
@@ -340,6 +341,7 @@ export class DendronWorkspace {
 
   /**
    * Get vaults with path fully resolved
+   @deprecated removed in future
    */
   get vaults(): DVault[] {
     const vaults = DendronWorkspace.instance().config.vaults;
@@ -552,7 +554,7 @@ export class DendronWorkspace {
       throw Error("no folders set for workspace");
     }
     let vaults = wsFolders as vscode.WorkspaceFolder[];
-    let realVaults = DendronWorkspace.instance().vaults;
+    let realVaults = DendronWorkspace.instance().vaultsv4;
     const vaultWatcher = new VaultWatcher({
       wsRoot,
       vaults: realVaults,

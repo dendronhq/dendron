@@ -12,6 +12,7 @@ import {
   SchemaModulePropsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
 import _, { DebouncedFunc } from "lodash";
 import { CancellationToken, Uri, window } from "vscode";
 import { Logger } from "../../logger";
@@ -175,7 +176,8 @@ export class LookupProviderV2 {
     const engine = ws.getEngine();
     Logger.info({ ctx, msg: "create normal node" });
     smodNew = SchemaUtilsV2.createModuleProps({ fname, vault });
-    const uri = Uri.file(SchemaUtilsV2.getPath({ root: vault.fsPath, fname }));
+    const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
+    const uri = Uri.file(SchemaUtilsV2.getPath({ root: vpath, fname }));
     const resp = await engine.writeSchema(smodNew);
     Logger.info({ ctx, msg: "engine.write", profile });
     return { uri, node: smodNew, resp };
@@ -255,13 +257,17 @@ export class LookupProviderV2 {
         return;
       } else {
         uri = node2Uri(selectedItem);
+        const vpath = vault2Path({
+          vault: selectedItem.vault,
+          wsRoot: DendronWorkspace.wsRoot(),
+        });
         if (opts.flavor === "schema") {
           const smod = DendronWorkspace.instance().getEngine().schemas[
             selectedItem.id
           ];
           uri = Uri.file(
             SchemaUtilsV2.getPath({
-              root: smod.vault.fsPath,
+              root: vpath,
               fname: smod.fname,
             })
           );
@@ -351,8 +357,10 @@ export class LookupProviderV2 {
         uris = smods.map((smod) =>
           Uri.file(
             SchemaUtilsV2.getPath({
-              root: DendronWorkspace.rootWorkspaceFolder()?.uri
-                .fsPath as string,
+              root: vault2Path({
+                vault: smod.vault,
+                wsRoot: DendronWorkspace.wsRoot(),
+              }),
               fname: smod.fname,
             })
           )
@@ -376,7 +384,7 @@ export class LookupProviderV2 {
         DNodeUtilsV2.enhancePropForQuickInput({
           props: ent,
           schemas: engine.schemas,
-          vaults: DendronWorkspace.instance().vaults,
+          vaults: DendronWorkspace.instance().vaultsv4,
         })
       );
     let oldItems = [...picker.items];
@@ -426,7 +434,7 @@ export class LookupProviderV2 {
           DNodeUtilsV2.enhancePropForQuickInput({
             props: ent,
             schemas: engine.schemas,
-            vaults: DendronWorkspace.instance().vaults,
+            vaults: DendronWorkspace.instance().vaultsv4,
           })
         )
       )
@@ -576,7 +584,7 @@ export class LookupProviderV2 {
               return DNodeUtilsV2.enhancePropForQuickInput({
                 props: ent,
                 schemas: engine.schemas,
-                vaults: DendronWorkspace.instance().vaults,
+                vaults: DendronWorkspace.instance().vaultsv4,
               });
             })
           );
@@ -710,7 +718,7 @@ export class LookupProviderV2 {
       return DNodeUtilsV2.enhancePropForQuickInput({
         props: ent,
         schemas: engine.schemas,
-        vaults: DendronWorkspace.instance().vaults,
+        vaults: DendronWorkspace.instance().vaultsv4,
       });
     });
   }

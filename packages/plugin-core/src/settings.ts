@@ -120,7 +120,7 @@ export class WorkspaceConfig {
     const ctx = "WorkspaceConfig:update";
     const src = DendronWorkspace.configuration();
     const changes = await Settings.upgrade(src, _SETTINGS);
-    const vault = DendronWorkspace.instance().vaults[0];
+    const vault = DendronWorkspace.instance().vaultsv4[0];
     const vscodeDir = path.join(vault.fsPath, ".vscode");
     const snippetChanges = await Snippets.upgradeOrCreate(vscodeDir);
     Logger.info({ ctx, vscodeDir, snippetChanges });

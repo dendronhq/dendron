@@ -6,16 +6,12 @@ import {
   DVault,
   NotePropsV2,
   PodConfig,
-} from "@dendronhq/common-all";
-import _ from "lodash";
-import {
-  createLogger,
-  DLogger,
-  resolvePath,
   VaultUtils,
-} from "@dendronhq/common-server";
-import { URI } from "vscode-uri";
+} from "@dendronhq/common-all";
+import { createLogger, DLogger, resolvePath } from "@dendronhq/common-server";
 import fs from "fs-extra";
+import _ from "lodash";
+import { URI } from "vscode-uri";
 import { PodKind } from "./types";
 
 export abstract class BasePod<TConfig> implements DPod<TConfig> {

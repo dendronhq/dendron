@@ -106,7 +106,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
               vault: PickerUtilsV2.getOrPromptVaultForOpenEditor(),
             },
             engine: getWS().getEngine(),
-            vaults: getWS().vaults,
+            vaults: getWS().vaultsv4,
             wsRoot: DendronWorkspace.wsRoot(),
           });
 

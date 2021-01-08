@@ -68,9 +68,10 @@ export class VaultWatcher {
     const fname = path.basename(uri.fsPath, ".md");
     const doc = await vscode.workspace.openTextDocument(uri);
     const content = doc.getText();
-    const vault = DNodeUtilsV2.getVaultByDir({
+    const vault = VaultUtils.getVaultByNotePathV4({
       vaults: eclient.vaultsv3,
-      dirPath: path.dirname(uri.fsPath),
+      wsRoot: DendronWorkspace.wsRoot(),
+      fsPath: uri.fsPath,
     });
     let note = string2Note({ content, fname, vault });
     const noteHydrated = NoteUtilsV2.getNoteByFnameV4({
@@ -114,9 +115,10 @@ export class VaultWatcher {
 
       try {
         this.L.debug({ ctx, uri, msg: "pre-add-to-engine" });
-        const vault = DNodeUtilsV2.getVaultByDir({
-          dirPath: path.dirname(uri.fsPath),
+        const vault = VaultUtils.getVaultByNotePathV4({
           vaults: this.engine.vaultsv3,
+          fsPath: uri.fsPath,
+          wsRoot: DendronWorkspace.wsRoot(),
         });
         note = file2Note(uri.fsPath, vault);
         const maybeNote = NoteUtilsV2.getNoteByFnameV4({

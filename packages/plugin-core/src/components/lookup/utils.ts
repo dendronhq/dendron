@@ -4,7 +4,9 @@ import {
   DNodeUtilsV2,
   DVault,
   NoteUtilsV2,
+  VaultUtils,
 } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import { Uri, ViewColumn, window } from "vscode";
@@ -48,8 +50,10 @@ export function createMoreResults(): DNodePropsQuickInputV2 {
 export function node2Uri(node: DNodePropsV2): Uri {
   const ext = node.type === "note" ? ".md" : ".yml";
   const nodePath = node.fname + ext;
-  const rootPath = node.vault.fsPath;
-  return Uri.file(path.join(rootPath, nodePath));
+  const wsRoot = DendronWorkspace.wsRoot();
+  const vault = node.vault;
+  const vpath = vault2Path({ wsRoot, vault });
+  return Uri.file(path.join(vpath, nodePath));
 }
 
 export async function showDocAndHidePicker(
@@ -140,15 +144,15 @@ export class PickerUtilsV2 {
   };
 
   static getVaultForOpenEditor(opts?: { throwIfEmpty: boolean }): DVault {
-    const vaults = DendronWorkspace.instance().vaults;
+    const vaults = DendronWorkspace.instance().vaultsv4;
     let vault: DVault;
     if (vaults.length > 1 && VSCodeUtils.getActiveTextEditor()?.document) {
       try {
-        vault = DNodeUtilsV2.getVaultByDir({
+        vault = VaultUtils.getVaultByNotePathV4({
           vaults,
-          dirPath: path.dirname(
-            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-          ),
+          wsRoot: DendronWorkspace.wsRoot(),
+          fsPath: VSCodeUtils.getActiveTextEditor()?.document.uri
+            .fsPath as string,
         });
       } catch (err) {
         if (opts?.throwIfEmpty) {
@@ -198,7 +202,7 @@ export class PickerUtilsV2 {
   }
 
   static promptVault(): Promise<DVault | undefined> {
-    const items = DendronWorkspace.instance().vaults.map((ent) => ({
+    const items = DendronWorkspace.instance().vaultsv4.map((ent) => ({
       ...ent,
       label: ent.fsPath,
     }));

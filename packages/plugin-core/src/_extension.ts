@@ -268,7 +268,7 @@ export async function _activate(context: vscode.ExtensionContext) {
       previousWsVersion,
       platform,
       extensions,
-      vaults: ws.vaults,
+      vaults: ws.vaultsv4,
     });
 
     vscode.window.withProgress(

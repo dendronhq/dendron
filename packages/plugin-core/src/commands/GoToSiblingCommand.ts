@@ -1,9 +1,8 @@
 import {
   DendronError,
-  DNodeUtilsV2,
-  DVault,
   NotePropsV2,
   NoteUtilsV2,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -43,9 +42,10 @@ export class GoToSiblingCommand extends BasicCommand<
 
     const client = DendronWorkspace.instance().getEngine();
     if (value === "root") {
-      const vault = DNodeUtilsV2.getVaultByDir({
-        vaults: client.vaultsv3 as DVault[],
-        dirPath: path.dirname(maybeTextEditor.document.uri.fsPath),
+      const vault = VaultUtils.getVaultByNotePathV4({
+        vaults: client.vaultsv3,
+        wsRoot: DendronWorkspace.wsRoot(),
+        fsPath: maybeTextEditor.document.uri.fsPath,
       });
       const rootNode = NoteUtilsV2.getNoteByFnameV4({
         fname: value,

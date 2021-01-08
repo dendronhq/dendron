@@ -3,13 +3,13 @@ import {
   DVault,
   NotePropsV2,
   NoteUtilsV2,
+  VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   file2Note,
   tmpDir,
-  VaultUtils,
 } from "@dendronhq/common-server";
 import {
   EngineOpt,

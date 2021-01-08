@@ -1,4 +1,4 @@
-import { DNodeUtilsV2, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { NotePropsV2, NoteUtilsV2, VaultUtils } from "@dendronhq/common-all";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import moment from "moment";
@@ -45,9 +45,11 @@ export class WorkspaceWatcher {
     const eclient = DendronWorkspace.instance().getEngine();
     const fname = path.basename(uri.fsPath, ".md");
     const now = moment.now();
-    const vault = DNodeUtilsV2.getVaultByDir({
-      dirPath: path.dirname(uri.fsPath),
+
+    const vault = VaultUtils.getVaultByNotePathV4({
+      fsPath: uri.fsPath,
       vaults: eclient.vaultsv3,
+      wsRoot: DendronWorkspace.wsRoot(),
     });
     const note = NoteUtilsV2.getNoteByFnameV4({
       fname,

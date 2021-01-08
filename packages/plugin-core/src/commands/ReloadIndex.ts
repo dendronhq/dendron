@@ -4,7 +4,11 @@ import {
   NoteUtilsV2,
   SchemaUtilsV2,
 } from "@dendronhq/common-all";
-import { note2File, schemaModuleOpts2File } from "@dendronhq/common-server";
+import {
+  note2File,
+  schemaModuleOpts2File,
+  vault2Path,
+} from "@dendronhq/common-server";
 import fs from "fs-extra";
 import path from "path";
 import { DENDRON_COMMANDS } from "../constants";
@@ -26,11 +30,12 @@ export class ReloadIndexCommand extends BasicCommand<
     const ctx = "ReloadIndex.execute";
     this.L.info({ ctx, msg: "enter" });
     const ws = DendronWorkspace.instance();
+    const wsRoot = DendronWorkspace.wsRoot();
     const engine = ws.getEngine();
 
     await Promise.all(
       engine.vaultsv3.map(async (vault) => {
-        const vaultDir = vault.fsPath;
+        const vaultDir = vault2Path({ wsRoot, vault });
         const rootNotePath = path.join(vaultDir, "root.md");
         const rootSchemaPath = path.join(vaultDir, "root.schema.yml");
         if (!(await fs.pathExists(rootSchemaPath))) {

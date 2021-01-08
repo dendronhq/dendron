@@ -11,13 +11,14 @@ import { setupBasic } from "./utils";
 
 const SCHEMAS = {
   EMPTY_QS: new TestPresetEntryV4(
-    async ({ vaults, engine }) => {
+    async ({ vaults, engine, wsRoot }) => {
       const vault = vaults[0];
       const schemas = engine.schemas;
       const { data } = await engine.querySchema("");
       const expectedNote = SchemaUtilsV2.getSchemaModuleByFnameV4({
         fname: "root",
         schemas,
+        wsRoot,
         vault,
       });
       return [
@@ -46,13 +47,14 @@ const SCHEMAS = {
     }
   ),
   SIMPLE: new TestPresetEntryV4(
-    async ({ engine, vaults }) => {
+    async ({ engine, vaults, wsRoot }) => {
       const schemas = engine.schemas;
       const vault = vaults[0];
       const sid = SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname;
       const { data } = await engine.querySchema(sid);
       const expectedSchema = SchemaUtilsV2.getSchemaModuleByFnameV4({
         fname: sid,
+        wsRoot,
         schemas,
         vault,
       });

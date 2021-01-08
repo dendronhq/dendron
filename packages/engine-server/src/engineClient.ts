@@ -28,14 +28,10 @@ import {
   SchemaModulePropsV2,
   SchemaQueryResp,
   SchemaUtilsV2,
+  VaultUtils,
   WriteNoteResp,
 } from "@dendronhq/common-all";
-import {
-  createLogger,
-  DendronAPI,
-  DLogger,
-  VaultUtils,
-} from "@dendronhq/common-server";
+import { createLogger, DendronAPI, DLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { FileStorageV2 } from "./drivers/file/storev2";

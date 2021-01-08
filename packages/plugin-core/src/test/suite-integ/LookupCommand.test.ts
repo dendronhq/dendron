@@ -184,6 +184,7 @@ const createEngineForSchemaAcceptQuery = createEngineFactory({
           fname: path.basename(ent.fsPath, ".schema.yml"),
           schemas: getWS().getEngine().schemas,
           vault: { fsPath: path.dirname(ent.fsPath) },
+          wsRoot: _opts.wsRoot,
         });
       }) as SchemaModulePropsV2[];
       return {

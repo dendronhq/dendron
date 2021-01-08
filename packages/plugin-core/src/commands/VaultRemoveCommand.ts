@@ -1,5 +1,5 @@
-import { DVault, getStage } from "@dendronhq/common-all";
-import { assignJSONWithComment, VaultUtils } from "@dendronhq/common-server";
+import { DVault, getStage, VaultUtils } from "@dendronhq/common-all";
+import { assignJSONWithComment } from "@dendronhq/common-server";
 import { WorkspaceService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { commands, window } from "vscode";

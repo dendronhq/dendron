@@ -4,6 +4,7 @@ import {
   NotePropsDictV2,
   NotePropsV2,
   NoteUtilsV2,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
@@ -15,7 +16,6 @@ import vscode, {
   Uri,
   window,
 } from "vscode";
-import { VaultUtils } from "@dendronhq/common-server";
 import { GotoNoteCommandOpts } from "../commands/GotoNote";
 import { DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
@@ -200,7 +200,7 @@ export class DendronTreeViewV2 {
       const vault = VaultUtils.getVaultByNotePathV4({
         fsPath: uri.fsPath,
         wsRoot: DendronWorkspace.wsRoot(),
-        vaults: DendronWorkspace.instance().vaults,
+        vaults: DendronWorkspace.instance().vaultsv4,
       });
       const fname = NoteUtilsV2.uri2Fname(uri);
       const note = NoteUtilsV2.getNoteByFnameV4({

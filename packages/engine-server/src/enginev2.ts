@@ -27,6 +27,7 @@ import {
   SchemaModuleDictV2,
   SchemaModulePropsV2,
   SchemaQueryResp,
+  VaultUtils,
   WorkspaceOpts,
   WriteNoteResp,
 } from "@dendronhq/common-all";
@@ -34,7 +35,6 @@ import {
   createLogger,
   DLogger,
   readYAML,
-  VaultUtils,
   writeYAML,
 } from "@dendronhq/common-server";
 import _ from "lodash";

@@ -373,23 +373,23 @@
                 "command": "dendron.publish",
                 "title": "Dendron: Publish",
                 "desc": "Build, commit and publish your notes with a single command",
-                "docs": "",
+                "docs": "- NOTE: this is mean for v1 publishing. V2 publishing currently does not have a publish command.",
                 "docLink": "",
                 "docPreview": "<a href=\"https://www.loom.com/share/c58edf543e234a8fa164095237579ccc\"> <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/c58edf543e234a8fa164095237579ccc-with-play.gif\"> </a>"
             },
             {
                 "command": "dendron.siteBuild",
                 "title": "Dendron: Site Build",
-                "desc": "build your notes",
-                "docs": "",
+                "desc": "Build your notes using publishing v2",
+                "docs": "This command works by running `dendron-cli` in the background.\n- NOTE: this has not yet been tested on windows ",
                 "docLink": "",
                 "docPreview": ""
             },
             {
                 "command": "dendron.sitePreview",
                 "title": "Dendron: Site Preview",
-                "desc": "preview your notes",
-                "docs": "",
+                "desc": "Preview your notes on localhost using publishing v2",
+                "docs": "This command works by running `dendron-cli` in the background.\n- NOTE: this has not yet been tested on windows ",
                 "docLink": "",
                 "docPreview": ""
             },

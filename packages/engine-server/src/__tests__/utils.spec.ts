@@ -1,13 +1,10 @@
 import { DNoteRefData, DNoteRefLink } from "@dendronhq/common-all";
-import { EngineTestUtilsV2, FileTestUtils } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import {
-  extractBlock,
   matchRefMarker,
   parseDendronRef,
   parseFileLink,
   refLink2String,
-  replaceRefWithMPEImport,
   stripLocalOnlyTags,
 } from "../utils";
 
@@ -137,147 +134,6 @@ describe("parseRef", () => {
         anchorStartOffset: 1,
       }),
     });
-  });
-});
-
-const FILE_TEXT = `
-# Head 1
-
-Head 1 Text
-
-## Head 2.1
-
-Head 2.1 Text
-
-### Head 2.1.1
-
-Head 2.1.1 Text
-
-## Head 2.2
-
-Head 2.2 Text`;
-
-describe("extractBlock", () => {
-  it("no anchor", () => {
-    expect(extractBlock(FILE_TEXT, createFileLink()).block).toEqual(FILE_TEXT);
-  });
-
-  it("anchor start", () => {
-    expect(
-      extractBlock(
-        FILE_TEXT,
-        createFileLink({
-          anchorStart: "Head 2.1",
-        })
-      ).block
-    ).toEqual(
-      _.trim(`
-## Head 2.1
-
-Head 2.1 Text
-
-### Head 2.1.1
-
-Head 2.1.1 Text
-
-## Head 2.2
-
-Head 2.2 Text`)
-    );
-  });
-
-  it("anchor start alt", () => {
-    const txt = ["", `# Tasks`, "task1", "task2"];
-    expect(
-      extractBlock(
-        txt.join("\n"),
-        createFileLink({
-          anchorStart: "Tasks",
-        })
-      ).block
-    ).toEqual(_.trim(txt.join("\n")));
-  });
-
-  it("anchor stard and end", () => {
-    expect(
-      extractBlock(
-        FILE_TEXT,
-        createFileLink({
-          anchorStart: "Head 2.1",
-          anchorEnd: "Head 2.2",
-        })
-      ).block
-    ).toEqual(
-      _.trim(`
-## Head 2.1
-
-Head 2.1 Text
-
-### Head 2.1.1
-
-Head 2.1.1 Text`)
-    );
-  });
-});
-
-describe("replaceRefWithMPEImport", () => {
-  let root: string;
-  beforeEach(async () => {
-    root = await EngineTestUtilsV2.setupVault({
-      initDirCb: async (vaultPath) => {
-        await FileTestUtils.createFiles(vaultPath, [
-          {
-            path: "ref.md",
-            body: `---
-id: 5668f5ec-0db3-4530-812d-f8bb4f3c551b
-title: ref
-desc: ref test
----
-
-# head1
-
-Header 1 text
-
-## head2.1
-
-Header 2 text
-
-## head2.2
-
-head 2.2 text
-
-## head2.3
-
-head w.3 text
-          `,
-          },
-        ]);
-      },
-    });
-  });
-
-  it("basic", () => {
-    expect(
-      replaceRefWithMPEImport("((ref:[[foo]]))", {
-        root,
-      })
-    ).toEqual('@import "foo.md"');
-  });
-
-  it("anchor start", () => {
-    expect(
-      replaceRefWithMPEImport("((ref:[[ref]]#head2.1))", {
-        root,
-      })
-    ).toEqual('@import "ref.md" {line_begin=10}');
-  });
-
-  it("anchor start and end", () => {
-    expect(
-      replaceRefWithMPEImport("((ref:[[ref]]#head2.1:#head2.3))", {
-        root,
-      })
-    ).toEqual('@import "ref.md" {line_begin=10 line_end=18}');
   });
 });
 

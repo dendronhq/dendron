@@ -8,18 +8,12 @@ import {
   DVault,
   getSlugger,
 } from "@dendronhq/common-all";
-import { readMD, resolvePath } from "@dendronhq/common-server";
+import { resolvePath } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import _markdownIt from "markdown-it";
-// @ts-ignoreig
-import markdownItAST from "markdown-it-ast";
-import Token from "markdown-it/lib/token";
 import path from "path";
 import { DendronEngineClient } from "./engineClient";
 import { WSMeta } from "./types";
-
-const markdownIt = _markdownIt();
 
 export const loc2Path = ({
   loc,
@@ -101,12 +95,6 @@ export function refLink2Stringv2(link: DNoteRefLink): string {
   return linkParts.join("");
 }
 
-// const testString = "<!--(([[class.mba.chapters.2]]))-->";
-function genAST(txt: string): ASTEnt[] {
-  const tokens: Token[] = markdownIt.parse(txt, {});
-  return markdownItAST.makeAST(tokens);
-}
-
 export async function getEngine(opts: {
   numTries?: number;
   wsRoot: string;
@@ -166,62 +154,6 @@ export function writeWSMetaFile({
 }
 
 type LinkDirection = "from" | "to";
-
-export type ASTEnt = {
-  nodeType: "heading" | "other";
-  openNode: Token;
-  closeNode: Token;
-  children: Token[];
-};
-
-export function extractBlock(
-  txt: string,
-  link: DNoteRefLink
-  //opts?: { linesOnly?: boolean }
-): {
-  block: string;
-  lines?: { start: number | undefined; end: number | undefined };
-} {
-  // const copts = _.defaults(opts, { linesOnly: false });
-  const { anchorStart, anchorEnd, type } = link.data;
-  if (type === "id") {
-    throw Error(`id link not supported`);
-  } else {
-    //txt = _.trim(txt);
-    if (!anchorStart) {
-      return { block: txt };
-    }
-    const ast = genAST(txt);
-    const clean = {
-      anchorStart: _.trim(anchorStart),
-      anchorEnd: _.trim(anchorEnd),
-    };
-    const out: any = {
-      anchorStart: null,
-      anchorEnd: null,
-    };
-    ast.forEach((ent) => {
-      if (ent.nodeType === "heading") {
-        const matchKey: keyof typeof clean = _.isNull(out["anchorStart"])
-          ? "anchorStart"
-          : "anchorEnd";
-        if (_.trim(ent.children[0].content) === clean[matchKey]) {
-          out[matchKey] = ent.openNode.map;
-        }
-      }
-    });
-    const txtAsLines = txt.split("\n");
-    if (_.isNull(out.anchorStart)) {
-      return { block: "invalid link" };
-    }
-    const start = out.anchorStart[0] - 1;
-    const end = _.isNull(out["anchorEnd"])
-      ? txtAsLines.length
-      : out["anchorEnd"][0];
-    const block = _.trim(txtAsLines.slice(start, end).join("\n"));
-    return { block, lines: { start, end } };
-  }
-}
 
 export function parseDendronRef(ref: string) {
   const [idOrRef, ...rest] = _.trim(ref).split(":");
@@ -337,57 +269,6 @@ function parseLink(ref: string): DNoteRefLink | undefined {
 
 export const matchRefMarker = (txt: string) => {
   return txt.match(/\(\((?<ref>[^)]+)\)\)/);
-};
-
-export const replaceRefWithMPEImport = (
-  line: string,
-  opts: { root: string }
-): string => {
-  const match = matchRefMarker(line);
-  let prefix = `@import`;
-  if (!match || !match.groups) {
-    return line;
-  }
-  const ref = match.groups["ref"];
-  if (!ref) {
-    return line;
-  }
-  const { link } = parseDendronRef(ref);
-  // unsupported
-  if (!link || !link.from.fname) {
-    return line;
-  }
-  const { fname: name } = link.from;
-  const { anchorEnd, anchorStart } = link.data;
-  const fsPath = path.join(opts.root, name + ".md");
-  prefix += ` "${name + ".md"}"`;
-  if (!anchorStart) {
-    return prefix;
-  }
-  // {line_begin=2 line_end=10}
-  const offset = [];
-  //TODO: will be more sophisticated when multi-vault
-  // @ts-ignore
-  const { content, matter } = readMD(fsPath);
-  // the last --- isn't counted, shoud be +1
-  // but since mpe is 0 delimited, it cancels each other out
-  const fmOffset = matter.split("\n").length;
-  // @ts-ignore
-  const { lines } = extractBlock(content, link);
-  // TODO: throw error
-  if (!lines?.start) {
-    return line;
-  }
-  // +1 because extract block does -1 for 0-indexing file
-  // +1 because header block gets parsed form line before
-  const pad = 2 + fmOffset;
-  offset.push(`line_begin=${lines.start + pad}`);
-  if (anchorEnd) {
-    // everything up to header is counted here
-    offset.push(`line_end=${lines.end + pad - 1}`);
-  }
-  prefix += ` {${offset.join(" ")}}`;
-  return prefix;
 };
 
 export function stripLocalOnlyTags(doc: string) {

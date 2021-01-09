@@ -62,7 +62,7 @@ export class ImportPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
       throw Error("ws root not defined");
     }
     const engine = DendronWorkspace.instance().getEngine();
-    const vaults = DendronWorkspace.instance().vaults;
+    const vaults = DendronWorkspace.instance().vaultsv4;
     const pod = new opts.podChoice.podClass();
     await pod.execute({ config: opts.config, engine, wsRoot, vaults });
     await new ReloadIndexCommand().execute();

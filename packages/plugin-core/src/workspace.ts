@@ -340,18 +340,6 @@ export class DendronWorkspace {
   }
 
   /**
-   * Get vaults with path fully resolved
-   @deprecated removed in future
-   */
-  get vaults(): DVault[] {
-    const vaults = DendronWorkspace.instance().config.vaults;
-    return vaults.map((ent) => ({
-      ...ent,
-      fsPath: resolvePath(ent.fsPath, DendronWorkspace.wsRoot() as string),
-    }));
-  }
-
-  /**
    * Relative vaults
    */
   get vaultsv4(): DVault[] {

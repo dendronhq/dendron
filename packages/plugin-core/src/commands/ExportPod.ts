@@ -56,7 +56,7 @@ export class ExportPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts) {
     const ctx = { ctx: "ExportPod" };
     this.L.info({ ctx, opts });
-    const vaults = DendronWorkspace.instance().vaults;
+    const vaults = DendronWorkspace.instance().vaultsv4;
     const wsRoot = DendronWorkspace.wsRoot();
     if (!wsRoot) {
       throw Error("ws root not defined");

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.23.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.23.1...v0.23.2-alpha.1) (2021-01-09)
+
+### Enhancements
+
+- update access denied message ([3f9fe14](https://github.com/dendronhq/dendron/commit/3f9fe142f45ec3d42b3322dc5094a363c6c5499d))
+
 ## [0.23.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.23.1...v0.23.2-alpha.0) (2021-01-09)
 
 ### Enhancements

@@ -1,5 +1,4 @@
 import {
-  createLogger,
   DendronError,
   DendronSiteConfig,
   DendronSiteFM,
@@ -17,7 +16,7 @@ import { DEngineClientV2 } from "../types";
 import { stripLocalOnlyTags } from "../utils";
 import fs from "fs-extra";
 import path from "path";
-import { vault2Path } from "@dendronhq/common-server";
+import { createLogger, vault2Path } from "@dendronhq/common-server";
 const logger = createLogger();
 
 export class SiteUtils {

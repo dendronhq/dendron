@@ -3,7 +3,6 @@ export * from "./typesv2";
 export * from "./nodev2";
 export * from "./helpers";
 export * from "./env";
-export * from "./logger";
 export * from "./assert";
 export * from "./uuid";
 export * from "./constants";

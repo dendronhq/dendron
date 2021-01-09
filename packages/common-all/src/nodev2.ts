@@ -5,7 +5,7 @@ import minimatch from "minimatch";
 import path from "path";
 import title from "title";
 import { URI } from "vscode-uri";
-import { Time } from "../lib";
+import { Time } from "./time";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
 import {

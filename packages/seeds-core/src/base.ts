@@ -1,8 +1,5 @@
-import {
-  createLogger,
-  DEngineClientV2,
-  NotePropsV2,
-} from "@dendronhq/common-all";
+import { DEngineClientV2, NotePropsV2 } from "@dendronhq/common-all";
+import { createLogger } from "@dendronhq/common-server";
 import { DendronEngineV2, Git } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -80,7 +77,6 @@ export abstract class DendronSoil {
 
   constructor(opts: DendronSoilOpts) {
     this.opts = opts;
-    //@ts-ignore
     this.L = createLogger(opts.name);
     if (!_.isUndefined(this.opts.engine)) {
       this.engine = this.opts.engine;

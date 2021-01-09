@@ -362,14 +362,21 @@ export class LookupControllerV2 {
 
     // handle selection resp
     quickPick.onCreate = async (note: NotePropsV2) => {
-      await when("lookupConfirmVaultOnCreate", async () => {
-        const maybeVault = await PickerUtilsV2.promptVault();
-        if (_.isUndefined(maybeVault)) {
-          throw new DendronError({ msg: "no vault selected" });
+      const resp = await when<undefined | NotePropsV2>(
+        "lookupConfirmVaultOnCreate",
+        async () => {
+          const maybeVault = await PickerUtilsV2.promptVault();
+          if (_.isUndefined(maybeVault)) {
+            vscode.window.showInformationMessage("Note creation cancelled");
+            return undefined;
+          }
+          note.vault = maybeVault;
+          return note;
         }
-        note.vault = maybeVault;
-        return;
-      });
+      );
+      if (_.isUndefined(resp)) {
+        return undefined;
+      }
 
       switch (selectionResp?.type) {
         case "selectionExtract": {
@@ -378,7 +385,7 @@ export class LookupControllerV2 {
             note.body = body;
             await VSCodeUtils.deleteRange(document, range as vscode.Range);
           }
-          break;
+          return note;
         }
         case "selection2link": {
           if (!_.isUndefined(document)) {
@@ -391,10 +398,13 @@ export class LookupControllerV2 {
               }
             });
           }
-          break;
+          return note;
         }
         default: {
-          quickPick.onCreate = async () => {};
+          quickPick.onCreate = async () => {
+            return undefined;
+          };
+          return undefined;
         }
       }
     };

@@ -2,6 +2,12 @@ import { URI } from "vscode-uri";
 import { DendronError } from "./error";
 import { DendronConfig, DendronSiteFM } from "./types";
 
+export enum ResponseCode {
+  OK = 200,
+  // 412
+  PRECONDITION_FAILED = 412,
+}
+
 export type EngineDeleteOpts = {
   /**
    * Only delete from meta

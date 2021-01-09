@@ -4,6 +4,7 @@ import {
   DEngineClientV2,
   DVault,
   getStage,
+  ResponseCode,
 } from "@dendronhq/common-all";
 import {
   readJSONWithComments,
@@ -51,16 +52,19 @@ export type ServerConfiguration = {
 /**
  * Check for boolean toggles
  */
-export async function when(
+export async function when<T = any>(
   key: keyof DendronConfig,
-  cb: () => Promise<void>
-): Promise<void> {
+  cb: () => Promise<T>
+): Promise<T | ResponseCode> {
   try {
     const out = DendronWorkspace.instance().config[key];
     if (out === false || _.isUndefined(out) ? false : true) {
       return cb();
     }
-  } catch (err) {}
+    return ResponseCode.PRECONDITION_FAILED;
+  } catch (err) {
+    return err;
+  }
 }
 
 export function whenGlobalState(key: string, cb?: () => boolean): boolean {

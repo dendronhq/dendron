@@ -38,11 +38,14 @@ type OnDidAcceptReturn = Promise<
     }
   | undefined
 >;
-type OnDidAcceptNewNodeReturn = Promise<{
-  uri: Uri;
-  node: NotePropsV2 | SchemaModulePropsV2;
-  resp?: any | undefined;
-}>;
+type OnDidAcceptNewNodeReturn = Promise<
+  | {
+      uri: Uri;
+      node: NotePropsV2 | SchemaModulePropsV2;
+      resp?: any | undefined;
+    }
+  | undefined
+>;
 
 export class LookupProviderV2 {
   public opts: EngineOpts;
@@ -140,7 +143,10 @@ export class LookupProviderV2 {
     }
     if (picker.onCreate) {
       Logger.info({ ctx, msg: "pre:pickerOnCreate" });
-      await picker.onCreate(nodeNew);
+      const out = await picker.onCreate(nodeNew);
+      if (_.isUndefined(out)) {
+        return;
+      }
     }
     // NOTE: this needs to be after picker.onCreate since uri can still be modified at that point
     let uri = NoteUtilsV2.getURI({
@@ -247,11 +253,16 @@ export class LookupProviderV2 {
     }
     if (selectedItem) {
       if (PickerUtilsV2.isCreateNewNotePickForSingle(selectedItem)) {
-        ({ uri, node: newNode } = await this.onAcceptNewNode({
+        const acceptResp = await this.onAcceptNewNode({
+          //({ uri, node: newNode } = await this.onAcceptNewNode({
           picker,
           opts,
           selectedItem,
-        }));
+        });
+        if (_.isUndefined(acceptResp)) {
+          return;
+        }
+        ({ uri, node: newNode } = acceptResp);
       } else if (selectedItem.label === MORE_RESULTS_LABEL) {
         await this.paginatePickerItems({ picker });
         return;
@@ -348,6 +359,9 @@ export class LookupProviderV2 {
         opts,
         selectedItem: selectedItems[0],
       });
+      if (!newNode) {
+        return;
+      }
       uris = [newNode.uri];
     } else {
       if (opts.flavor === "schema") {

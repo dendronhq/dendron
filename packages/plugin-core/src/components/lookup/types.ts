@@ -12,7 +12,7 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
   buttons: DendronBtn[];
   justActivated?: boolean;
   prev?: { activeItems: any; items: any };
-  onCreate?: (note: DNodePropsV2) => Promise<void>;
+  onCreate?: (note: DNodePropsV2) => Promise<DNodePropsV2 | undefined>;
   showDirectChildrenOnly?: boolean;
   // pagiation
   offset?: number;

@@ -52,7 +52,12 @@ export class SchemaWatcher {
     const content = document.getText();
 
     try {
-      const maybeSchema = string2Schema({ vault, content, fname });
+      const maybeSchema = string2Schema({
+        vault,
+        content,
+        fname,
+        wsRoot: DendronWorkspace.wsRoot(),
+      });
       await engine.updateSchema(maybeSchema);
       vscode.window.showInformationMessage("schema updated");
     } catch (err) {

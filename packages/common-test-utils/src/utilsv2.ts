@@ -90,6 +90,7 @@ export async function runEngineTestV4(
     extra?: any;
     expect: any;
     setupOnly?: boolean;
+    singleVault?: boolean;
   }
 ) {
   const { preSetupHook, createEngine, extra } = _.defaults(opts, {
@@ -98,7 +99,9 @@ export async function runEngineTestV4(
     extra: {},
   });
 
-  const { wsRoot, vaults } = await EngineTestUtilsV4.setupWS();
+  const { wsRoot, vaults } = await EngineTestUtilsV4.setupWS({
+    singleVault: opts.singleVault,
+  });
 
   await preSetupHook({ wsRoot, vaults: vaults });
   const engine = createEngine({ wsRoot, vaults: vaults });

@@ -1,4 +1,3 @@
-import { Time } from "@dendronhq/common-all";
 import {
   DendronConfig,
   DendronError,
@@ -6,13 +5,13 @@ import {
   DVault,
   NoteUtilsV2,
   SchemaUtilsV2,
+  Time,
   WorkspaceUtilsCommon,
 } from "@dendronhq/common-all";
 import {
   createLogger,
   GitUtils,
   note2File,
-  resolvePath,
   schemaModuleOpts2File,
   simpleGit,
   vault2Path,
@@ -119,7 +118,7 @@ export class WorkspaceService {
    * Not fully resolved vault
    */
   async createVaultV2({ vault }: { vault: DVault }) {
-    const vaultFullPath = resolvePath(vault.fsPath, this.wsRoot);
+    const vaultFullPath = vault2Path({ vault, wsRoot: this.wsRoot });
     fs.ensureDirSync(vaultFullPath);
     const wsRoot = this.wsRoot;
 
@@ -152,7 +151,7 @@ export class WorkspaceService {
   }
 
   /**
-   * Remove vaults. Currently doesn't delete an yfiles
+   * Remove vaults. Currently doesn't delete any files
    * @param param0
    */
   async removeVault({ vault }: { vault: DVault }) {
@@ -211,7 +210,7 @@ export class WorkspaceService {
       throw new DendronError({ msg: "cloning non-git vault" });
     }
     let remotePath = vault.remote.url;
-    const localPath = path.join(this.wsRoot, vault.fsPath);
+    const localPath = vault2Path({ vault, wsRoot: this.wsRoot });
     const git = simpleGit();
     logger.info({ msg: "cloning", remotePath, localPath });
     const accessToken = process.env["GITHUB_ACCESS_TOKEN"];

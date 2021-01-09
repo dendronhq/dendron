@@ -1,69 +1,52 @@
-import { tmpDir } from "@dendronhq/common-server";
-import {
-  EngineTestUtilsV2,
-  FileTestUtils,
-  NodeTestUtilsV2,
-} from "@dendronhq/common-test-utils";
-import { DConfig, Git, WorkspaceService } from "@dendronhq/engine-server";
+import { ENGINE_HOOKS, runEngineTestV4 } from "@dendronhq/common-test-utils";
+import { createEngine } from "@dendronhq/engine-server";
+import fs from "fs";
 import path from "path";
 import { PublishNotesCommand } from "../publishNotes";
 
 describe("publishNotes", async () => {
-  let wsRoot: string;
-  let vault: string;
-  // @ts-ignore
-  let siteRootDir: string;
-
-  beforeEach(async () => {
-    wsRoot = tmpDir().name;
-    siteRootDir = tmpDir().name;
-    const { vaults } = await EngineTestUtilsV2.setupWS({
-      initDirCb: async (root) => {
-        await new WorkspaceService({ wsRoot }).createVault({
-          vault: { fsPath: root },
-        });
-        NodeTestUtilsV2.createNotes({
-          vaultPath: root,
-          noteProps: [
-            { id: "id-foo", fname: "foo", stub: true },
-            { id: "id-bar", fname: "bar" },
-          ],
-        });
-      },
-    });
-    vault = vaults[0];
-    await DConfig.getOrCreate(wsRoot);
-  });
-
   test("publish, no push", async () => {
-    const { buildNotesRoot } = await PublishNotesCommand.run({
-      wsRoot,
-      vault,
-      noPush: true,
-    });
-    const notesDir = path.join(buildNotesRoot, "notes");
-    FileTestUtils.cmpFiles(notesDir, ["id-bar.md", "id-foo.md", "root.md"]);
+    await runEngineTestV4(
+      async ({ vaults, wsRoot }) => {
+        const { buildNotesRoot } = await PublishNotesCommand.run({
+          wsRoot,
+          vault: vaults[0],
+          noPush: true,
+        });
+        const notesDir = path.join(buildNotesRoot, "notes");
+        expect(fs.readdirSync(notesDir).length).toEqual(4);
+      },
+      {
+        createEngine,
+        expect,
+        preSetupHook: async (opts) => {
+          await ENGINE_HOOKS.setupBasic(opts);
+        },
+        singleVault: true,
+      }
+    );
   });
 
   test("publish but no git", async () => {
-    try {
-      await PublishNotesCommand.run({
-        wsRoot,
-        vault,
-      });
-    } catch (err) {
-      expect(err.message).toEqual("no repo found");
-    }
-  });
-
-  test("publish, ok", async () => {
-    await Git.createRepo(wsRoot, { initCommit: true });
-    const { buildNotesRoot } = await PublishNotesCommand.run({
-      wsRoot,
-      vault,
-      noPush: true,
-    });
-    const notesDir = path.join(buildNotesRoot, "notes");
-    FileTestUtils.cmpFiles(notesDir, ["id-bar.md", "id-foo.md", "root.md"]);
+    await runEngineTestV4(
+      async ({ vaults, wsRoot }) => {
+        try {
+          await PublishNotesCommand.run({
+            wsRoot,
+            vault: vaults[0],
+          });
+        } catch (err) {
+          expect(err.message).toEqual("no repo found");
+        }
+      },
+      {
+        createEngine,
+        expect,
+        preSetupHook: async (opts) => {
+          await ENGINE_HOOKS.setupBasic(opts);
+        },
+        singleVault: true,
+      }
+    );
   });
 });

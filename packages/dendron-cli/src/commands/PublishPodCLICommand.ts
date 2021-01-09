@@ -78,7 +78,7 @@ export class PublishPodCLICommand extends SoilCommandV2<
   enrichArgs(args: CommandCLIOpts) {
     const opts = super._enrichArgs(args);
     const opts2 = enrichPodArgs(
-      { ...args, ...opts },
+      { ...args, ...opts, vault: opts.vault },
       getAllPublishPods(),
       "publish"
     );
@@ -100,7 +100,7 @@ export class PublishPodCLICommand extends SoilCommandV2<
     const pod = new podClass();
     await pod.execute({
       config: { ...config, fname },
-      vaults: [{ fsPath: vault }],
+      vaults: [vault],
       wsRoot,
       engine,
     });

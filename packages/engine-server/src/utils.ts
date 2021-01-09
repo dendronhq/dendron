@@ -2,33 +2,16 @@ import {
   CONSTANTS,
   DendronError,
   DEngineClientV2,
-  DNoteLoc,
   DNoteRefData,
   DNoteRefLink,
   DVault,
   getSlugger,
 } from "@dendronhq/common-all";
-import { resolvePath } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DendronEngineClient } from "./engineClient";
 import { WSMeta } from "./types";
-
-export const loc2Path = ({
-  loc,
-  wsRoot,
-}: {
-  loc: DNoteLoc;
-  wsRoot: string;
-}) => {
-  const fname = loc.fname;
-  if (!loc.vault) {
-    throw new DendronError({ msg: "no vault for loc, loc2Path" });
-  }
-  const fpath = resolvePath(loc.vault.fsPath, wsRoot);
-  return path.join(fpath, fname + ".md");
-};
 
 function normalize(text: string) {
   return _.toLower(_.trim(text, " #"));

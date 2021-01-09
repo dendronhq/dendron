@@ -55,7 +55,6 @@ type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
 
 export class DendronEngineV2 implements DEngineV2 {
   public wsRoot: string;
-  public vaults: string[];
   public store: DStoreV2;
   protected props: DendronEnginePropsV2;
   public logger: DLogger;
@@ -75,7 +74,6 @@ export class DendronEngineV2 implements DEngineV2 {
     this.fuseEngine = new FuseEngine({});
     this.links = [];
     this.vaultsv3 = props.vaultsv3;
-    this.vaults = props.vaultsv3.map((ent) => ent.fsPath);
   }
 
   static createV3({

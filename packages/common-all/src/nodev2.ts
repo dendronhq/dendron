@@ -584,6 +584,9 @@ export class NoteUtilsV2 {
     return out;
   }
 
+  /**
+   @deprecated
+   */
   static getNoteByFname(
     fname: string,
     notes: NotePropsDictV2,

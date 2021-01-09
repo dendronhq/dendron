@@ -86,7 +86,10 @@ async function _createFileWatcher(
   });
 }
 
-export function file2Schema(fpath: string): SchemaModulePropsV2 {
+export function file2Schema(
+  fpath: string,
+  wsRoot: string
+): SchemaModulePropsV2 {
   const root = { fsPath: path.dirname(fpath) };
   const fname = path.basename(fpath, ".schema.yml");
   const schemaOpts = YAML.safeLoad(
@@ -95,21 +98,23 @@ export function file2Schema(fpath: string): SchemaModulePropsV2 {
       schema: YAML.JSON_SCHEMA,
     }
   ) as SchemaModuleOptsV2;
-  return SchemaParserV2.parseRaw(schemaOpts, { root, fname });
+  return SchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
 }
 export function string2Schema({
   vault,
   content,
   fname,
+  wsRoot,
 }: {
   vault: DVault;
   content: string;
   fname: string;
+  wsRoot: string;
 }) {
   const schemaOpts = YAML.safeLoad(content, {
     schema: YAML.JSON_SCHEMA,
   }) as SchemaModuleOptsV2;
-  return SchemaParserV2.parseRaw(schemaOpts, { root: vault, fname });
+  return SchemaParserV2.parseRaw(schemaOpts, { root: vault, fname, wsRoot });
 }
 
 export function string2Note({

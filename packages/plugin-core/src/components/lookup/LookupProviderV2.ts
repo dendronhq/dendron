@@ -11,6 +11,7 @@ import {
   NoteUtilsV2,
   SchemaModulePropsV2,
   SchemaUtilsV2,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import _, { DebouncedFunc } from "lodash";
@@ -186,7 +187,11 @@ export class LookupProviderV2 {
       noteExists &&
       !foundStub &&
       !selectedItem?.schemaStub &&
-      nodeNew.vault.fsPath === noteExists.vault.fsPath
+      VaultUtils.isEqual(
+        nodeNew.vault,
+        noteExists.vault,
+        DendronWorkspace.wsRoot()
+      )
     ) {
       Logger.error({ ctx, msg: "action will overwrite existing note" });
       throw Error("action will overwrite existing note");
@@ -691,7 +696,14 @@ export class LookupProviderV2 {
         picker.items = updatedItems;
         // TODO: this defaults to current vault if no note is open
         const openedVault = PickerUtilsV2.getVaultForOpenEditor();
-        if (perfectMatch.vault.fsPath === openedVault.fsPath) {
+
+        if (
+          VaultUtils.isEqual(
+            openedVault,
+            perfectMatch.vault,
+            DendronWorkspace.wsRoot()
+          )
+        ) {
           picker.items = PickerUtilsV2.filterCreateNewItem(updatedItems);
         }
       } else if (queryEndsWithDot) {

@@ -1,4 +1,4 @@
-import { DendronError } from "@dendronhq/common-all";
+import { DendronError, DVault } from "@dendronhq/common-all";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
 import {
   PodClassEntryV4,
@@ -50,7 +50,7 @@ export function fetchPodClassV4(
 export type CommandCLIOpts = {
   podId: string;
   wsRoot: string;
-  vault: string;
+  vault: DVault;
   podSource?: "remote" | "builtin";
 };
 
@@ -90,7 +90,7 @@ export abstract class PodCLICommand extends BaseCommand<
     const podsDir = path.join(wsRoot, "pods");
     const logger = this.L;
     const engineClient = DendronEngineV2.createV3({
-      vaults: [{ fsPath: vault }],
+      vaults: [vault],
       wsRoot,
       logger,
     });
@@ -115,7 +115,7 @@ export abstract class PodCLICommand extends BaseCommand<
 
   async execute(opts: CommandOpts) {
     const { podClass, config, wsRoot, engineClient } = opts;
-    const vaults = engineClient.vaults.map((ent) => ({ fsPath: ent }));
+    const vaults = engineClient.vaultsv3;
     const pod = new podClass();
     await pod.execute({ wsRoot, config, engine: engineClient, vaults });
   }

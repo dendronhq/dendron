@@ -1,4 +1,4 @@
-import { NotePropsV2 } from "@dendronhq/common-all";
+import { DVault, NotePropsV2 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import path from "path";
 import { RefactorBaseCommand, RefactorRule } from "./refactorBase";
@@ -58,5 +58,5 @@ export class RefactorFMCommand extends RefactorBaseCommand<TFile, any> {
 }
 
 export type RefactorFMCliOpts = {
-  vault: string;
+  vault: DVault;
 } & CommonOpts;

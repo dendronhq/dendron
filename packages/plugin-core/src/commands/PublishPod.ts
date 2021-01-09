@@ -58,8 +58,8 @@ export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
       return;
     }
     const engine = DendronWorkspace.instance().getEngine();
-    const vault = engine.vaults[0];
     const wsRoot = DendronWorkspace.wsRoot() as string;
+    const vault = engine.vaultsv3[0];
     return { podClass, config: maybeConfig, noteByName, engine, wsRoot, vault };
   }
 

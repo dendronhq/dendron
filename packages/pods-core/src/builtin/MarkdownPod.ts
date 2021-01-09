@@ -1,6 +1,7 @@
 import {
   BasePodExecuteOpts,
   DNodeUtilsV2,
+  DVault,
   genUUID,
   NotePropsV2,
   NoteUtilsV2,
@@ -115,11 +116,10 @@ export class MarkdownImportPod extends ImportPod<
   _files2HierarichalDict(opts: {
     files: DItem[];
     src: string;
-    vaultPath: string;
+    vault: DVault;
     wsRoot: string;
   }): HierarichalDict {
-    const { files, src, vaultPath, wsRoot } = opts;
-    const vault = { fsPath: vaultPath };
+    const { files, src, vault, wsRoot } = opts;
     const out: HierarichalDict = {};
     _.forEach(files, (item) => {
       const fname = cleanFileName(item.path, {
@@ -211,11 +211,11 @@ export class MarkdownImportPod extends ImportPod<
     // get all items
     const items = await this._collectItems(src.fsPath);
     const { engineFileDict } = await this._prepareItems(items);
-    const mainVault = engine.vaults[0];
+    const mainVault = engine.vaultsv3[0];
     const hDict = this._files2HierarichalDict({
       files: _.values(engineFileDict),
       src: src.fsPath,
-      vaultPath: mainVault,
+      vault: mainVault,
       wsRoot,
     });
     const notes = this.hDict2Notes(hDict);

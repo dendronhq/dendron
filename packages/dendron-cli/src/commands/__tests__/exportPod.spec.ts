@@ -1,4 +1,4 @@
-import { DPod } from "@dendronhq/common-all";
+import { DPod, DVault } from "@dendronhq/common-all";
 import { writeYAML } from "@dendronhq/common-server";
 import {
   createMockEngine,
@@ -11,7 +11,7 @@ import path from "path";
 import { ExportPodCLICommand } from "../exportPod";
 
 describe("exportPod", () => {
-  let vault: string;
+  let vault: DVault;
   let podsDir: string;
   let wsRoot: string;
 
@@ -41,7 +41,7 @@ describe("exportPod", () => {
           await ExportPodCLICommand.run({
             podId: JSONExportPod.id,
             wsRoot,
-            vault: vaults[0].fsPath,
+            vault: vaults[0],
           });
         },
       };

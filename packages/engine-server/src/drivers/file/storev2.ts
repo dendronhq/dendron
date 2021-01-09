@@ -39,7 +39,6 @@ import _ from "lodash";
 import path from "path";
 import YAML from "yamljs";
 import { ParserUtilsV2 } from "../../topics/markdown/utilsv2";
-import { loc2Path } from "../../utils";
 
 type BulkAddNoteOpts = {
   notes: NotePropsV2[];
@@ -234,7 +233,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
     const schemaOpts: any = YAML.parse(
       fs.readFileSync(path.join(vpath, fpath), "utf8")
     );
-    return cSchemaParserV2.parseRaw(schemaOpts, { root, fname });
+    return cSchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
   }
 
   async parse(
@@ -565,10 +564,11 @@ export class FileStorageV2 implements DStoreV2 {
     const { wsRoot } = this;
     this.logger.info({ ctx, msg: "enter", opts });
     const oldVault = oldLoc.vault;
-    const oldLocPath = loc2Path({ loc: oldLoc, wsRoot });
     if (!oldVault) {
       throw new DendronError({ msg: "vault not set for loation" });
     }
+    const vpath = vault2Path({ wsRoot, vault: oldVault });
+    const oldLocPath = path.join(vpath, oldLoc.fname + ".md");
     // read from disk since contents migh have changed
     const noteRaw = file2Note(oldLocPath, oldVault);
     const oldNote = NoteUtilsV2.hydrate({

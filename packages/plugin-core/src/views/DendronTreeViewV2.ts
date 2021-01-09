@@ -21,6 +21,7 @@ import { DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
 import { DendronWorkspace, getEngine } from "../workspace";
 import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
+import { vault2Path } from "@dendronhq/common-server";
 
 function createTreeNote(note: NotePropsV2) {
   const collapsibleState = _.isEmpty(note.children)
@@ -56,9 +57,11 @@ export class TreeNote extends vscode.TreeItem {
     this.note = note;
     this.id = this.note.id;
     this.tooltip = this.note.title;
-    this.uri = Uri.file(
-      path.join(this.note.vault.fsPath, this.note.fname + ".md")
-    );
+    const vpath = vault2Path({
+      vault: this.note.vault,
+      wsRoot: DendronWorkspace.wsRoot(),
+    });
+    this.uri = Uri.file(path.join(vpath, this.note.fname + ".md"));
     if (DNodeUtilsV2.isRoot(note)) {
       this.label = `root (${VaultUtils.getName(note.vault)})`;
     }

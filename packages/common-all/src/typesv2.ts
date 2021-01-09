@@ -278,7 +278,6 @@ export type DCommonProps = {
   configRoot: string;
   vaultsv3: DVault[];
   links: DLink[];
-  vaults: string[];
 };
 
 export type NoteChangeEntry = {

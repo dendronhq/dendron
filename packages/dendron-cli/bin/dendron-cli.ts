@@ -14,7 +14,6 @@ import { ExportPodCLICommand } from "../src/commands/exportPod";
 import { ImportPodCLICommand } from "../src/commands/importPod";
 import { LaunchEngineServerCommand } from "../src/commands/launchEngineServer";
 import { NoteCLICommand } from "../src/commands/notes";
-import { PlantSeedCommand } from "../src/commands/plantSeed";
 import { PublishNotesCommand } from "../src/commands/publishNotes";
 import { PublishPodCLICommand } from "../src/commands/PublishPodCLICommand";
 import { RefactorRule } from "../src/commands/refactorBase";
@@ -51,7 +50,6 @@ let buildYargs = yargs
     }
   );
 
-PlantSeedCommand.buildCmd(buildYargs);
 BuildSiteCommand.buildCmd(buildYargs);
 PublishNotesCommand.buildCmd(buildYargs);
 PublishPodCLICommand.buildCmd(buildYargs);

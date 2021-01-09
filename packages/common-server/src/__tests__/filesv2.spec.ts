@@ -109,7 +109,7 @@ schemas:
 `,
       { encoding: "utf-8" }
     );
-    const schema = file2Schema(fpath);
+    const schema = file2Schema(fpath, root);
     expect(_.values(schema.schemas).length).toEqual(8);
   });
 });

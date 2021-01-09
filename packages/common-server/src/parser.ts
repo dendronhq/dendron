@@ -13,7 +13,9 @@ import {
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
-import { file2Schema } from "./filesv2";
+import { file2Schema, vault2Path } from "./filesv2";
+import { createLogger } from "./logger";
+const logger = createLogger();
 
 export class ParserBaseV2 {
   constructor(public opts: { store: DStoreV2; logger: any }) {}
@@ -26,7 +28,7 @@ export class ParserBaseV2 {
 export class SchemaParserV2 extends ParserBaseV2 {
   static parseRaw(
     schemaOpts: SchemaModuleOptsV2,
-    opts: { root: DVault; fname: string }
+    opts: { root: DVault; fname: string; wsRoot: string }
   ): SchemaModulePropsV2 {
     const version = _.isArray(schemaOpts) ? 0 : 1;
     if (version > 0) {
@@ -56,13 +58,15 @@ export class SchemaParserV2 extends ParserBaseV2 {
 
   static parseSchemaModuleOpts(
     schemaModuleProps: SchemaModuleOptsV2,
-    opts: { fname: string; root: DVault }
+    opts: { fname: string; root: DVault; wsRoot: string }
   ): SchemaModulePropsV2 {
     const { imports, schemas, version } = schemaModuleProps;
-    const { fname, root } = opts;
+    const { fname, root, wsRoot } = opts;
+    logger.info({ ctx: "parseSchemaModuleOpts", fname, root, imports });
+    const vpath = vault2Path({ vault: root, wsRoot });
     let schemaModulesFromImport = _.flatMap(imports, (ent) => {
-      const fpath = path.join(root.fsPath, ent + ".schema.yml");
-      return file2Schema(fpath);
+      const fpath = path.join(vpath, ent + ".schema.yml");
+      return file2Schema(fpath, wsRoot);
     });
     const schemaPropsFromImport = schemaModulesFromImport.flatMap((mod) => {
       const domain = mod.fname;
@@ -76,9 +80,11 @@ export class SchemaParserV2 extends ParserBaseV2 {
         return ent;
       });
     });
+    logger.debug({ ctx: "parseSchemaModuleOpts", schemaPropsFromImport });
     const schemaPropsFromFile = schemas.map((ent) => {
       return SchemaUtilsV2.create({ ...ent, vault: root });
     });
+    logger.debug({ ctx: "parseSchemaModuleOpts", schemaPropsFromFile });
     const schemasAll = schemaPropsFromImport.concat(schemaPropsFromFile);
 
     const schemasDict: SchemaPropsDictV2 = {};

@@ -1,4 +1,4 @@
-import { DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngineClientV2, DVault } from "@dendronhq/common-all";
 import { resolvePath } from "@dendronhq/common-server";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
 import yargs from "yargs";
@@ -12,7 +12,7 @@ type CommandOpts = {
 type CommandOptsV2 = {
   engine: DEngineClientV2;
   wsRoot: string;
-  vault: string;
+  vault: DVault;
 };
 
 export type CommandOptsV3 = {
@@ -22,7 +22,7 @@ export type CommandOptsV3 = {
 
 type CommandCLIOpts = {
   wsRoot: string;
-  vault: string;
+  vault: DVault;
 };
 type CommandCLIOptsV3 = {
   wsRoot: string;
@@ -66,13 +66,12 @@ export abstract class SoilCommand<
     const logger = this.L;
 
     const engineClient = DendronEngineV2.createV3({
-      vaults: [{ fsPath: vault }],
+      vaults: [vault],
       wsRoot,
       logger,
     });
     const cwd = process.cwd();
     wsRoot = resolvePath(wsRoot, cwd);
-    vault = resolvePath(vault, cwd);
     return {
       ...args,
       engineClient,
@@ -114,10 +113,9 @@ export abstract class SoilCommandV2<
     let { vault, wsRoot } = args;
     const cwd = process.cwd();
     wsRoot = resolvePath(wsRoot, cwd);
-    vault = resolvePath(vault, cwd);
     const logger = this.L;
     const engine = DendronEngineV2.createV3({
-      vaults: [{ fsPath: vault }],
+      vaults: [vault],
       logger,
       wsRoot,
     });
@@ -125,6 +123,7 @@ export abstract class SoilCommandV2<
       ...args,
       engine,
       wsRoot,
+      vault: engine.vaultsv3[0],
     };
   }
 }

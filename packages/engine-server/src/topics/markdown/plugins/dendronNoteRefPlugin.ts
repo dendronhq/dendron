@@ -7,7 +7,7 @@ import {
   DUtils,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
-import { removeMDExtension } from "@dendronhq/common-server";
+import { removeMDExtension, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { Parent } from "mdast";
@@ -385,6 +385,9 @@ function attachCompiler(
   const visitors = Compiler.prototype.visitors;
   visitors.refLink = function (node: Node) {
     const data = node.data as RefLinkData;
+    const wsRoot = engine.wsRoot;
+    const vault = engine.vaultsv3[0];
+    const vpath = vault2Path({ wsRoot, vault });
     return convertNoteRef({
       refLvl,
       proc,
@@ -392,7 +395,7 @@ function attachCompiler(
       renderWithOutline,
       replaceRefOpts,
       link: data.link,
-      defaultRoot: engine.vaults[0],
+      defaultRoot: vpath,
     });
   };
   return Compiler;

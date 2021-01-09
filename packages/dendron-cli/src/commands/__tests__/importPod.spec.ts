@@ -1,4 +1,5 @@
-import { tmpDir, writeYAML } from "@dendronhq/common-server";
+import { DVault } from "@dendronhq/common-all";
+import { tmpDir, vault2Path, writeYAML } from "@dendronhq/common-server";
 import { FileTestUtils, NodeTestUtilsV2 } from "@dendronhq/common-test-utils";
 import { MarkdownImportPod, PodUtils } from "@dendronhq/pods-core";
 import fs, { ensureDirSync } from "fs-extra";
@@ -10,13 +11,13 @@ const { createFiles } = FileTestUtils;
 describe("markdown pod", async () => {
   let importSrc: string;
   let wsRoot: string;
-  let vault: string;
+  let vault: DVault;
 
   beforeEach(async function () {
     importSrc = tmpDir().name;
     wsRoot = tmpDir().name;
-    vault = tmpDir().name;
-    await NodeTestUtilsV2.createNotes({ vaultPath: vault });
+    vault = { fsPath: tmpDir().name };
+    await NodeTestUtilsV2.createNotes({ vaultPath: vault.fsPath });
 
     await createFiles(importSrc, [
       { path: "project/p2/n1.md" },
@@ -56,8 +57,8 @@ describe("markdown pod", async () => {
     });
     cmd.L.info({ msg: "in test file" });
 
-    // @ts-ignore
-    let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(vault, [
+    const vpath = vault2Path({ wsRoot, vault });
+    let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(vpath, [
       "assets",
       "project.p1.md",
       "project.p1.n1.md",
@@ -67,9 +68,9 @@ describe("markdown pod", async () => {
       "root.md",
     ]);
     expect(expectedFiles).toEqual(actualFiles);
-    const assetsDir = fs.readdirSync(path.join(vault, "assets"));
+    const assetsDir = fs.readdirSync(path.join(vault.fsPath, "assets"));
     expect(assetsDir.length).toEqual(2);
-    const fileBody = fs.readFileSync(path.join(vault, "project.p1.md"), {
+    const fileBody = fs.readFileSync(path.join(vault.fsPath, "project.p1.md"), {
       encoding: "utf8",
     });
     expect(fileBody.match("n1.pdf")).toBeTruthy();

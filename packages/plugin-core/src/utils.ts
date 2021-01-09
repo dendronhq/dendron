@@ -230,7 +230,8 @@ export class VSCodeUtils {
     vault: DVault;
     fname: string;
   }) {
-    const notePath = path.join(vault.fsPath, `${fname}.md`);
+    const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
+    const notePath = path.join(vpath, `${fname}.md`);
     const editor = await VSCodeUtils.openFileInEditor(
       vscode.Uri.file(notePath)
     );

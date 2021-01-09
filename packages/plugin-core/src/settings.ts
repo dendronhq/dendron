@@ -2,6 +2,7 @@ import { DVault } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   readJSONWithComments,
+  vault2Path,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -121,7 +122,9 @@ export class WorkspaceConfig {
     const src = DendronWorkspace.configuration();
     const changes = await Settings.upgrade(src, _SETTINGS);
     const vault = DendronWorkspace.instance().vaultsv4[0];
-    const vscodeDir = path.join(vault.fsPath, ".vscode");
+    const wsRoot = DendronWorkspace.wsRoot();
+    const vpath = vault2Path({ wsRoot, vault });
+    const vscodeDir = path.join(vpath, ".vscode");
     const snippetChanges = await Snippets.upgradeOrCreate(vscodeDir);
     Logger.info({ ctx, vscodeDir, snippetChanges });
     return {

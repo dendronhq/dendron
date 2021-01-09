@@ -1,5 +1,5 @@
 import { DEngineClientV2, NotePropsV2 } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-server";
+import { createLogger, vault2Path } from "@dendronhq/common-server";
 import { DendronEngineV2, Git } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -166,11 +166,13 @@ export abstract class DendronSeed<
   }
 
   async writeAssets(assets: Asset[]) {
+    const wsRoot = this.opts.wsRoot;
     return Promise.all(
       assets.map(async (ent) => {
         const src = ent.srcPath;
         const dst = ent.dstPath;
-        const assetsDir = path.join(this.engine.vaults[0], "assets");
+        const vpath = vault2Path({ wsRoot, vault: this.engine.vaultsv3[0] });
+        const assetsDir = path.join(vpath, "assets");
         return fs.copyFile(src, path.join(assetsDir, dst));
       })
     );
@@ -178,9 +180,11 @@ export abstract class DendronSeed<
 
   async writeNotes(notes: NotePropsV2[], opts?: PlantOpts) {
     const source = this.config().source;
+    const wsRoot = this.opts.wsRoot;
     return Promise.all(
       notes.map(async (n: NotePropsV2) => {
-        const notePath = path.join(this.engine.vaults[0], n.fname + ".md");
+        const vpath = vault2Path({ wsRoot, vault: this.engine.vaultsv3[0] });
+        const notePath = path.join(vpath, n.fname + ".md");
         if (fs.existsSync(notePath)) {
           n = await this.mergeNote(n);
         }

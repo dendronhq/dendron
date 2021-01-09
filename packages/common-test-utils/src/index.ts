@@ -70,12 +70,16 @@ export type SetupVaultsOptsV4 = {
 
 export class EngineTestUtilsV4 {
   static async setupWS(
-    opts?: { wsRoot?: string } & { setupVaultsOpts?: SetupVaultsOptsV4[] }
+    opts?: { wsRoot?: string } & {
+      setupVaultsOpts?: SetupVaultsOptsV4[];
+      singleVault?: boolean;
+    }
   ): Promise<WorkspaceOpts> {
     const wsRoot = opts?.wsRoot || tmpDir().name;
+    const defaultVaults = opts?.singleVault ? ["vault1"] : ["vault1", "vault2"];
     const setupVaultsOpts: SetupVaultsOptsV4[] =
       opts?.setupVaultsOpts ||
-      ["vault1", "vault2"].map((ent) => ({
+      defaultVaults.map((ent) => ({
         vault: { fsPath: ent },
         preSetupHook: async ({ vpath, vault, wsRoot }) => {
           const rootModule = SchemaUtilsV2.createRootModule({

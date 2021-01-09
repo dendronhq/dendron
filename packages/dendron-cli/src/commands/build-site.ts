@@ -8,7 +8,7 @@ import {
   NoteUtilsV2,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { resolvePath, tmpDir } from "@dendronhq/common-server";
+import { resolvePath, tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
   DConfig,
   DendronEngineClient,
@@ -51,7 +51,9 @@ type DendronJekyllProps = {
 };
 
 function getRoot(engine: DEngineClientV2) {
-  return engine.vaults[0];
+  const wsRoot = engine.wsRoot;
+  const vault = engine.vaultsv3[0];
+  return vault2Path({ vault, wsRoot });
 }
 
 function rsyncCopy(src: string, dst: string) {

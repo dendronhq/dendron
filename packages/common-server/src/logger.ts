@@ -37,14 +37,13 @@ function createLogger(
   name?: string,
   dest?: string,
   // TODO: not using pretty option
-  opts?: { lvl?: LogLvl; pretty?: boolean }
+  opts?: { lvl?: LogLvl }
 ): pino.Logger {
-  const { lvl } = _.defaults(opts, { lvl: "info", pretty: false });
-  const level = lvl || env("LOG_LEVEL", { shouldThrow: false }) || "info";
-  const nameClean = name || env("LOG_NAME", { shouldThrow: false });
-  const logDst = dest || env("LOG_DST", { shouldThrow: false });
+  const level = opts?.lvl || env("LOG_LEVEL", { shouldThrow: false }) || "info";
+  const nameClean = name || env("LOG_NAME", { shouldThrow: false }) || "logger";
+  const logDst = dest || env("LOG_DST", { shouldThrow: false }) || "stdout";
   const pinoOpts = { name: nameClean, level };
-  if (!logDst || _.isEmpty(logDst) || logDst === "stdout") {
+  if (logDst === "stdout") {
     return pino(pinoOpts);
   } else {
     return pino(pino.destination(logDst)).child(pinoOpts);

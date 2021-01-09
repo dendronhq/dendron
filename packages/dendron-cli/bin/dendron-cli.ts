@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 
 import { env, setEnv } from "@dendronhq/common-all";
+
+if (!env("LOG_LEVEL", { shouldThrow: false })) {
+  setEnv("LOG_LEVEL", "error");
+}
+
 import yargs from "yargs";
 import { BuildSiteCommand } from "../src";
 import { BuildSiteV2CLICommand } from "../src/commands/build-site-v2";
@@ -14,10 +19,6 @@ import { PublishNotesCommand } from "../src/commands/publishNotes";
 import { PublishPodCLICommand } from "../src/commands/PublishPodCLICommand";
 import { RefactorRule } from "../src/commands/refactorBase";
 import { WorkspaceCLICommand } from "../src/commands/workspace";
-
-if (!env("LOG_LEVEL", { shouldThrow: false })) {
-  setEnv("LOG_LEVEL", "error");
-}
 
 export const addLayout: RefactorRule = {
   name: "add fm",

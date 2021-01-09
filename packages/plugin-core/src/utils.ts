@@ -7,6 +7,7 @@ import {
   NotePropsV2,
   NoteUtilsV2,
   SchemaModulePropsV2,
+  Time,
 } from "@dendronhq/common-all";
 import {
   goUpTo,
@@ -17,7 +18,6 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
-import moment from "moment";
 import os from "os";
 import path from "path";
 import * as vscode from "vscode";
@@ -402,7 +402,7 @@ export class DendronClientUtilsV2 {
     const dateFormatKey: ConfigKey = `DEFAULT_${type}_DATE_FORMAT` as ConfigKey;
     const dateFormat = DendronWorkspace.configuration().get<string>(
       CONFIG[dateFormatKey].key
-    );
+    ) as string;
     const addKey = `DEFAULT_${type}_ADD_BEHAVIOR` as ConfigKey;
     const addBehavior = DendronWorkspace.configuration().get<string>(
       CONFIG[addKey].key
@@ -435,7 +435,8 @@ export class DendronClientUtilsV2 {
         engine,
       }
     );
-    const noteDate = moment().format(dateFormat);
+
+    const noteDate = Time.now().toFormat(dateFormat);
     return [prefix, name, noteDate].filter((ent) => !_.isEmpty(ent)).join(".");
   }
 

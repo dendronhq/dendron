@@ -2,7 +2,10 @@ import { NoteUtilsV2 } from "@dendronhq/common-all";
 import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import * as vscode from "vscode";
-import { LookupCommand } from "../../commands/LookupCommand";
+import {
+  LookupCommand,
+  LookupNoteTypeEnum,
+} from "../../commands/LookupCommand";
 import { VSCodeUtils } from "../../utils";
 import { getWS } from "../../workspace";
 import { TIMEOUT } from "../testUtils";
@@ -39,7 +42,7 @@ suite("Scratch Notes", function () {
           editor.selection = SIMPLE_SELECTION;
           await new LookupCommand().execute({
             selectionType: "selection2link",
-            noteType: "scratch",
+            noteType: LookupNoteTypeEnum.scratch,
             flavor: "note",
             noConfirm: true,
           });
@@ -72,7 +75,7 @@ suite("Scratch Notes", function () {
           editor.selection = new vscode.Selection(...selection);
           await new LookupCommand().execute({
             selectionType: "selection2link",
-            noteType: "scratch",
+            noteType: LookupNoteTypeEnum.scratch,
             flavor: "note",
             noConfirm: true,
           });
@@ -104,7 +107,7 @@ suite("Scratch Notes", function () {
           editor.selection = SIMPLE_SELECTION;
           await new LookupCommand().execute({
             selectionType: "selection2link",
-            noteType: "scratch",
+            noteType: LookupNoteTypeEnum.scratch,
             flavor: "note",
             noConfirm: true,
           });
@@ -137,7 +140,7 @@ suite("Scratch Notes", function () {
           editor.selection = new vscode.Selection(...selection);
           await new LookupCommand().execute({
             selectionType: "selection2link",
-            noteType: "scratch",
+            noteType: LookupNoteTypeEnum.scratch,
             flavor: "note",
             noConfirm: true,
           });

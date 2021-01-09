@@ -17,3 +17,8 @@ export type EngineFlavor = "note" | "schema";
 export type EngineOpts = {
   flavor: EngineFlavor;
 };
+
+export enum CodeConfigKeys {
+  DEFAULT_JOURNAL_NAME = "dendron.defaultJournalName",
+  DEFAULT_JOURNAL_DATE_FORMAT = "dendron.defaultJournalDateFormat",
+}

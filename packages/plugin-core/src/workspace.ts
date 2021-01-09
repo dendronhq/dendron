@@ -35,7 +35,7 @@ import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import { VaultWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
-import { WorkspaceSettings } from "./types";
+import { CodeConfigKeys, WorkspaceSettings } from "./types";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
@@ -81,10 +81,20 @@ export function whenGlobalState(key: string, cb?: () => boolean): boolean {
   return false;
 }
 
+/**
+ * Get VSCode config or Dendron Config
+ */
+export function getConfigValue(key: CodeConfigKeys) {
+  return DendronWorkspace.configuration().get(key);
+}
+
 export function getGlobalState<T>(key: GLOBAL_STATE) {
   return DendronWorkspace.instance().getGlobalState<T>(key);
 }
 
+/**
+ @deprecated: use `getConfigValue`
+ */
 export function getCodeConfig<T>(key: string): T | undefined {
   return DendronWorkspace.configuration().get<T>(key);
 }

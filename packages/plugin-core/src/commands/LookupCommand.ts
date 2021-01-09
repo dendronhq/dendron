@@ -8,9 +8,13 @@ import { BasicCommand } from "./base";
 export type LookupEffectType = "copyNoteLink" | "copyNoteRef" | "multiSelect";
 export type LookupFilterType = "directChildOnly";
 export type LookupSelectionType = "selection2link" | "selectionExtract";
-export type LookupNoteType = "journal" | "scratch";
+export type LookupNoteType = LookupNoteTypeEnum;
 export type LookupSplitType = "horizontal";
 export type LookupNoteExistBehavior = "open" | "overwrite";
+export enum LookupNoteTypeEnum {
+  "journal" = "journal",
+  "scratch" = "scratch",
+}
 
 type CommandOpts = {
   /**

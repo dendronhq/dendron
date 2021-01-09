@@ -68,7 +68,7 @@
                 },
                 "dendron.defaultJournalDateFormat": {
                     "type": "string",
-                    "default": "Y.MM.DD",
+                    "default": "y.MM.dd",
                     "description": "date format used for journal notes"
                 },
                 "dendron.defaultJournalAddBehavior": {
@@ -89,7 +89,7 @@
                 },
                 "dendron.defaultScratchDateFormat": {
                     "type": "string",
-                    "default": "Y.MM.DD.HHmmss",
+                    "default": "y.MM.dd.HHmmss",
                     "description": "date format used for scratch notes"
                 },
                 "dendron.defaultScratchAddBehavior": {
@@ -569,7 +569,6 @@
         "@types/luxon": "^1.25.0",
         "@types/markdown-it": "^10.0.2",
         "@types/mocha": "^7.0.2",
-        "@types/moment": "^2.13.0",
         "@types/node": "^13.11.0",
         "@types/open": "^6.2.1",
         "@types/semver": "^7.3.1",
@@ -605,7 +604,6 @@
         "luxon": "^1.25.0",
         "markdown-it": "^11.0.0",
         "markdown-it-regex": "^0.2.0",
-        "moment": "^2.27.0",
         "open": "^7.0.4",
         "semver": "^7.3.2",
         "vscode-languageclient": "^6.1.3"

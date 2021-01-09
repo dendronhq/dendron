@@ -7,6 +7,7 @@ import {
   LookupEffectType,
   LookupFilterType,
   LookupNoteType,
+  LookupNoteTypeEnum,
   LookupSelectionType,
   LookupSplitType,
 } from "../../commands/LookupCommand";
@@ -161,7 +162,7 @@ class JournalBtn extends DendronBtn {
       title: "Create Journal Note",
       iconOff: "calendar",
       iconOn: "menu-selection",
-      type: "journal",
+      type: LookupNoteTypeEnum.journal,
       pressed,
     });
   }
@@ -173,7 +174,7 @@ class ScratchBtn extends DendronBtn {
       title: "Create Scratch Note",
       iconOff: "new-file",
       iconOn: "menu-selection",
-      type: "scratch",
+      type: LookupNoteTypeEnum.scratch,
       pressed,
     });
   }

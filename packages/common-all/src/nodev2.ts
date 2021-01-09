@@ -2,9 +2,10 @@ import matter from "gray-matter";
 import YAML, { JSON_SCHEMA } from "js-yaml";
 import _ from "lodash";
 import minimatch from "minimatch";
-import moment from "moment";
 import path from "path";
+import title from "title";
 import { URI } from "vscode-uri";
+import { Time } from "../lib";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
 import {
@@ -33,7 +34,6 @@ import {
 import { getSlugger } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
-import title from "title";
 
 export class DNodeUtilsV2 {
   static addChild(parent: DNodePropsV2, child: DNodePropsV2) {
@@ -56,8 +56,8 @@ export class DNodeUtilsV2 {
       data,
       vault,
     } = _.defaults(opts, {
-      updated: moment.now(),
-      created: moment.now(),
+      updated: Time.now().toMillis(),
+      created: Time.now().toMillis(),
       id: genUUID(),
       desc: "",
       links: [],

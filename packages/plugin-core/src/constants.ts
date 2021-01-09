@@ -1,3 +1,5 @@
+import { CodeConfigKeys } from "./types";
+
 export const DENDRON_WS_NAME = "dendron.code-workspace";
 export const extensionQualifiedId = `dendron.dendron`;
 export const DEFAULT_LEGACY_VAULT_NAME = "vault";
@@ -665,15 +667,15 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
     description: "domain where daily journals are kept",
   },
   DEFAULT_JOURNAL_NAME: {
-    key: "dendron.defaultJournalName",
+    key: CodeConfigKeys.DEFAULT_JOURNAL_NAME,
     type: "string",
     default: "journal",
     description: _noteNameDesc("journal"),
   },
   DEFAULT_JOURNAL_DATE_FORMAT: {
-    key: "dendron.defaultJournalDateFormat",
+    key: CodeConfigKeys.DEFAULT_JOURNAL_DATE_FORMAT,
     type: "string",
-    default: "Y.MM.DD",
+    default: "y.MM.dd",
     description: _noteDateDesc("journal"),
   },
   DEFAULT_JOURNAL_ADD_BEHAVIOR: {
@@ -692,7 +694,7 @@ export const CONFIG: { [key: string]: ConfigEntry } = {
   DEFAULT_SCRATCH_DATE_FORMAT: {
     key: "dendron.defaultScratchDateFormat",
     type: "string",
-    default: "Y.MM.DD.HHmmss",
+    default: "y.MM.dd.HHmmss",
     description: _noteDateDesc("scratch"),
   },
   DEFAULT_SCRATCH_ADD_BEHAVIOR: {

@@ -1,4 +1,5 @@
 import {
+  createLogger,
   DendronError,
   DendronSiteConfig,
   DendronSiteFM,
@@ -17,6 +18,7 @@ import { stripLocalOnlyTags } from "../utils";
 import fs from "fs-extra";
 import path from "path";
 import { vault2Path } from "@dendronhq/common-server";
+const logger = createLogger();
 
 export class SiteUtils {
   static canPublish(opts: { note: NotePropsV2; config: DendronSiteConfig }) {
@@ -82,6 +84,7 @@ export class SiteUtils {
   }): Promise<{ notes: NotePropsDictV2; domains: NotePropsV2[] }> {
     const { engine, config } = opts;
     const { siteHierarchies } = config;
+    logger.info({ ctx: "filterByConfig", config });
     let domains: NotePropsV2[] = [];
     // TODO: return domains from here
     const hiearchiesToPublish = await Promise.all(
@@ -106,6 +109,10 @@ export class SiteUtils {
         rootDomain.children.map((id) => engine.notes[id])
       );
     }
+    logger.info({
+      ctx: "filterByConfig",
+      domains: domains.map((ent) => ent.fname),
+    });
 
     return {
       notes: _.reduce(
@@ -126,6 +133,7 @@ export class SiteUtils {
     navOrder: number;
   }): Promise<{ notes: NotePropsDictV2; domain: NotePropsV2 } | undefined> {
     const { domain, engine, navOrder, config } = opts;
+    logger.info({ ctx: "filterByHiearchy", domain });
 
     // get config
     let rConfig: HierarchyConfig = _.defaults(
@@ -148,6 +156,11 @@ export class SiteUtils {
     }).filter((note) =>
       SiteUtils.canPublishFiltered({ note, config: hConfig })
     );
+    logger.info({
+      ctx: "filterByHiearchy",
+      msg: "post-filter",
+      filteredNotes: notes.map((ent) => ent.fname),
+    });
 
     let domainNote: NotePropsV2;
     if (notes.length > 1) {
@@ -157,14 +170,26 @@ export class SiteUtils {
           VaultUtils.isEqual(n.vault, vault, engine.wsRoot)
         );
         if (maybeDomainNote.length < 1) {
-          // TODO: add warning
+          logger.error({
+            ctx: "filterByHiearchy",
+            msg: "dup-resolution: no note found",
+            vault,
+          });
           return;
         }
         domainNote = maybeDomainNote[0];
+        // merge children
+        domainNote.children = notes.flatMap((ent) => ent.children);
+        logger.info({
+          ctx: "filterByHiearchy",
+          msg: "dup-resolution: resolving dup",
+          children: domainNote.children,
+        });
       } else {
         throw new DendronError({ msg: `mult notes found for ${domain}` });
       }
     } else if (notes.length < 1) {
+      logger.error({ ctx: "filterByHiearchy", msg: "not not found", domain });
       // TODO: add warning
       return;
     } else {
@@ -183,6 +208,7 @@ export class SiteUtils {
 
     const out: NotePropsDictV2 = {};
     const processQ = [domainNote];
+    logger.info({ ctx: "filterByHiearchy", domainNote: domainNote.fname });
     while (!_.isEmpty(processQ)) {
       const note = processQ.pop() as NotePropsV2;
       const maybeNote = SiteUtils.filterByNote({ note, hConfig });

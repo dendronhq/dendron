@@ -1,6 +1,5 @@
 import {
   DEngineClientV2,
-  DNodeUtilsV2,
   DVault,
   NotePropsV2,
   NoteUtilsV2,

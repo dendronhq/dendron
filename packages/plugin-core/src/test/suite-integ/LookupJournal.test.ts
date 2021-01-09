@@ -7,7 +7,10 @@ import {
 import _ from "lodash";
 import { describe } from "mocha";
 import * as vscode from "vscode";
-import { LookupCommand } from "../../commands/LookupCommand";
+import {
+  LookupCommand,
+  LookupNoteTypeEnum,
+} from "../../commands/LookupCommand";
 import { VSCodeUtils } from "../../utils";
 import { getWS } from "../../workspace";
 import { TIMEOUT } from "../testUtils";
@@ -37,7 +40,7 @@ suite("Scratch Notes", function () {
           const note = NoteUtilsV2.getNoteByFnameV4({ fname, notes, vault });
           await VSCodeUtils.openNote(note!);
           await new LookupCommand().execute({
-            noteType: "journal",
+            noteType: LookupNoteTypeEnum.journal,
             flavor: "note",
             noConfirm: true,
           });
@@ -64,7 +67,7 @@ suite("Scratch Notes", function () {
           const note = NoteUtilsV2.getNoteByFnameV4({ fname, notes, vault });
           await VSCodeUtils.openNote(note!);
           await new LookupCommand().execute({
-            noteType: "journal",
+            noteType: LookupNoteTypeEnum.journal,
             flavor: "note",
             noConfirm: true,
           });

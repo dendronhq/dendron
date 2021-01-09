@@ -15,10 +15,16 @@ import {
 import { vault2Path } from "@dendronhq/common-server";
 import _, { DebouncedFunc } from "lodash";
 import { CancellationToken, Uri, window } from "vscode";
+import { LookupNoteTypeEnum } from "../../commands/LookupCommand";
 import { Logger } from "../../logger";
-import { EngineFlavor, EngineOpts } from "../../types";
+import { CodeConfigKeys, EngineFlavor, EngineOpts } from "../../types";
 import { getDurationMilliseconds, profile } from "../../utils/system";
-import { DendronWorkspace, getEngine, getWS } from "../../workspace";
+import {
+  DendronWorkspace,
+  getConfigValue,
+  getEngine,
+  getWS,
+} from "../../workspace";
 import { MORE_RESULTS_LABEL } from "./constants";
 import { LookupControllerV2 } from "./LookupControllerV2";
 import { DendronQuickPickerV2 } from "./types";
@@ -47,6 +53,44 @@ type OnDidAcceptNewNodeReturn = Promise<
   | undefined
 >;
 
+// utils
+
+type NoteOverride = {
+  title?: string;
+};
+function checkAndCreateNoteOverrides(opts: {
+  lc: LookupControllerV2;
+  pickerValue: string;
+}): NoteOverride {
+  const { lc, pickerValue } = opts;
+  const titleOverride = _.filter(lc.state.buttons, (ent) =>
+    _.includes(Object.values(LookupNoteTypeEnum), ent.type as any)
+  );
+  if (!_.isEmpty(titleOverride)) {
+    const button = titleOverride[0];
+    // journal or scratch
+    if (button.type === LookupNoteTypeEnum.journal) {
+      const journalName = getConfigValue(
+        CodeConfigKeys.DEFAULT_JOURNAL_NAME
+      ) as string;
+      const journalIndex = pickerValue.indexOf(journalName);
+      if (journalIndex < 0) {
+        return {};
+      }
+      const maybeDatePortion = pickerValue.slice(
+        journalIndex + journalName.length + 1
+      );
+      if (maybeDatePortion.match(/\d\d\d\d\.\d\d\.\d\d$/)) {
+        return {
+          title: maybeDatePortion.replace(/\./g, "-"),
+        };
+      }
+      return {};
+    }
+  }
+  return {};
+}
+
 export class LookupProviderV2 {
   public opts: EngineOpts;
   protected onDidChangeValueDebounced?: DebouncedFunc<
@@ -73,9 +117,11 @@ export class LookupProviderV2 {
   async _onAcceptNewNote({
     picker,
     selectedItem,
+    overrides,
   }: {
     picker: DendronQuickPickerV2;
     selectedItem: DNodePropsQuickInputV2;
+    overrides?: NoteOverride;
   }): OnDidAcceptNewNodeReturn {
     const ctx = "onAcceptNewNode";
     const fname = PickerUtilsV2.getValue(picker);
@@ -123,7 +169,11 @@ export class LookupProviderV2 {
         engine,
       });
     }
+    // modify note title if necessary
 
+    if (overrides && overrides.title) {
+      nodeNew.title = overrides.title;
+    }
     Logger.info({ ctx, msg: "pre:checkNoteExist" });
     // TODO: check for overwriting schema
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
@@ -195,7 +245,7 @@ export class LookupProviderV2 {
     selectedItem,
   }: {
     picker: DendronQuickPickerV2;
-    opts: EngineOpts;
+    opts: EngineOpts & { overrides?: NoteOverride };
     selectedItem: DNodePropsQuickInputV2;
   }): OnDidAcceptNewNodeReturn {
     const ctx = "onAcceptNewNode";
@@ -205,9 +255,14 @@ export class LookupProviderV2 {
     if (opts.flavor === "schema") {
       return this._onAcceptNewSchema({ picker, vault });
     } else {
-      return this._onAcceptNewNote({ picker, selectedItem });
+      return this._onAcceptNewNote({
+        picker,
+        selectedItem,
+        overrides: opts.overrides,
+      });
     }
   }
+
   onDidAccept({
     picker,
     opts,
@@ -224,23 +279,31 @@ export class LookupProviderV2 {
     if (picker.canSelectMany) {
       return this.onDidAcceptForMulti(picker, opts);
     } else {
-      return this.onDidAcceptForSingle(picker, opts);
+      return this.onDidAcceptForSingle(picker, opts, lc);
     }
   }
 
   async onDidAcceptForSingle(
     picker: DendronQuickPickerV2,
-    opts: EngineOpts
+    opts: EngineOpts,
+    lc: LookupControllerV2
   ): OnDidAcceptReturn {
     const ctx = "onDidAcceptSingle";
     const value = PickerUtilsV2.getValue(picker);
     const selectedItems = PickerUtilsV2.getSelection(picker);
     const selectedItem = selectedItems[0];
+
+    const noteOverrides = checkAndCreateNoteOverrides({
+      lc,
+      pickerValue: value,
+    });
+
     Logger.info({
       ctx,
       msg: "enter",
       value,
       opts,
+      noteOverrides,
       selectedItems: selectedItems.map((ent) => NoteUtilsV2.toLogObj(ent)),
       activeItems: picker.activeItems.map((ent) => NoteUtilsV2.toLogObj(ent)),
     });
@@ -254,15 +317,15 @@ export class LookupProviderV2 {
     if (selectedItem) {
       if (PickerUtilsV2.isCreateNewNotePickForSingle(selectedItem)) {
         const acceptResp = await this.onAcceptNewNode({
-          //({ uri, node: newNode } = await this.onAcceptNewNode({
           picker,
-          opts,
+          opts: { flavor: opts.flavor, overrides: noteOverrides },
           selectedItem,
         });
         if (_.isUndefined(acceptResp)) {
           return;
         }
         ({ uri, node: newNode } = acceptResp);
+        // TODO: not used
       } else if (selectedItem.label === MORE_RESULTS_LABEL) {
         await this.paginatePickerItems({ picker });
         return;
@@ -670,7 +733,7 @@ export class LookupProviderV2 {
     const _this = this;
     picker.onDidAccept(() => {
       const ctx = "LookupProvider:onAccept";
-      // NOTE: unfortunate hack
+      // NOTE: unfortunate hack to not get prompted for testing
       if (getStage() === "test") {
         return;
       }

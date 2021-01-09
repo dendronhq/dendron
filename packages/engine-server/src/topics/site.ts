@@ -66,8 +66,12 @@ export class SiteUtils {
       vault: vaults[0],
       fname: "403",
       id: "403",
-      title: "Access Denied",
-      body: ["You are not allowed to view this page"].join("\n"),
+      title: "Your viewing an unpublished page",
+      body: [
+        "[Dendron](https://dendron.so/) (the tool used to generate this site) lets authors selective publish content. This means you will stumble into links that point to this page from time to time",
+        "",
+        "Maybe its a surprise. Maybe its an awkward photo. Only the author knows",
+      ].join("\n"),
     });
     return [note];
   }

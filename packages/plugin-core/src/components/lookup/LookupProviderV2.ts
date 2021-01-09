@@ -462,10 +462,12 @@ export class LookupProviderV2 {
     let pickerValue = picker.value;
     // if we just started, show all results of current parent
     if (picker.justActivated) {
+      // no hiearchy, query everything
       const lastDotIndex = pickerValue.lastIndexOf(".");
       if (lastDotIndex < 0) {
         pickerValue = "";
       } else {
+        // assume query from last dot
         pickerValue = pickerValue.slice(0, lastDotIndex + 1);
       }
     }
@@ -609,6 +611,7 @@ export class LookupProviderV2 {
       if (perfectMatch) {
         Logger.debug({ ctx, msg: "active = qs" });
         picker.activeItems = [perfectMatch];
+        picker.items = updatedItems;
         // TODO: this defaults to current vault if no note is open
         const openedVault = PickerUtilsV2.getVaultForOpenEditor();
         if (perfectMatch.vault.fsPath === openedVault.fsPath) {

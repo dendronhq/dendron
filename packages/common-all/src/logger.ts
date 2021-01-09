@@ -3,7 +3,7 @@ import pino from "pino";
 
 function createLogger(name?: string) {
   const level = env("LOG_LEVEL", { shouldThrow: false }) || "debug";
-  const nameClean = name || env("LOG_NAME");
+  const nameClean = name || env("LOG_NAME", { shouldThrow: false }) || "logger";
   return pino({ name: nameClean, level });
 }
 

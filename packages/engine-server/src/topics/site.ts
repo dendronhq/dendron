@@ -50,6 +50,14 @@ export class SiteUtils {
       wsRoot,
     });
     assert(noteVault !== false, "noteVault should exist");
+    const cNoteVault = noteVault as DVault;
+
+    let publishByDefault = undefined;
+    if (config?.publishByDefault) {
+      publishByDefault = _.isBoolean(config.publishByDefault)
+        ? config.publishByDefault
+        : config.publishByDefault[VaultUtils.getName(cNoteVault)];
+    }
 
     return !_.some([
       // not from private vault
@@ -58,7 +66,7 @@ export class SiteUtils {
       // not blacklisted
       note?.custom?.published === false,
       // not whitelisted
-      !config?.publishByDefault ? !note.custom?.published : false,
+      !publishByDefault ? !note.custom?.published : false,
     ]);
   }
 

@@ -1,6 +1,8 @@
 import {
   DendronSiteConfig,
   DendronSiteFM,
+  DuplicateNoteAction,
+  DVault,
   DVaultVisibility,
   NotePropsDictV2,
   NotePropsV2,
@@ -31,6 +33,17 @@ const basicSetup = (preSetupHook?: SetupHookFunction) => ({
     }
   },
 });
+
+const dupNote = (vault: DVault) => {
+  return {
+    duplicateNoteBehavior: {
+      action: DuplicateNoteAction.USE_VAULT,
+      payload: {
+        vault,
+      },
+    },
+  };
+};
 
 const checkNotes = (opts: {
   filteredNotes: NotePropsDictV2;
@@ -172,7 +185,6 @@ describe("SiteUtils", () => {
             }
           );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
-          expect(notes).toMatchSnapshot();
           expect(_.size(notes)).toEqual(1);
           checkNotes({
             filteredNotes: notes,
@@ -215,7 +227,6 @@ describe("SiteUtils", () => {
             }
           );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
-          expect(notes).toMatchSnapshot();
           expect(_.size(notes)).toEqual(2);
           checkNotes({
             filteredNotes: notes,
@@ -255,13 +266,7 @@ describe("SiteUtils", () => {
               config.site = {
                 siteHierarchies: ["root"],
                 siteRootDir,
-                usePrettyRefs: true,
-                duplicateNoteBehavior: {
-                  action: "useVault",
-                  payload: {
-                    vault: vaults[0],
-                  },
-                },
+                ...dupNote(vaults[0]),
                 config: {
                   root: {
                     publishByDefault: true,
@@ -314,13 +319,7 @@ describe("SiteUtils", () => {
               config.site = {
                 siteHierarchies: ["root"],
                 siteRootDir,
-                usePrettyRefs: true,
-                duplicateNoteBehavior: {
-                  action: "useVault",
-                  payload: {
-                    vault: vaults[0],
-                  },
-                },
+                ...dupNote(vaults[0]),
                 config: {
                   root: {
                     publishByDefault: false,
@@ -416,6 +415,56 @@ describe("SiteUtils", () => {
       );
     });
 
+    test("mult hiearchy, diff publishByDefault", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot, vaults }) => {
+          const config = ConfigUtils.withConfig(
+            (config) => {
+              config.site = {
+                siteHierarchies: ["foo", "bar"],
+                siteRootDir,
+                ...dupNote(vaults[0]),
+                config: {
+                  foo: {
+                    publishByDefault: {
+                      vault1: true,
+                      vault2: false,
+                    },
+                  },
+                },
+              };
+              return config;
+            },
+            {
+              wsRoot,
+            }
+          );
+          const { notes } = await SiteUtils.filterByConfig({ engine, config });
+          checkNotes({
+            filteredNotes: notes,
+            engineNotes: engine.notes,
+            match: [
+              { id: "foo", parent: null },
+              { id: "foo.ch1" },
+              { id: "bar", parent: null },
+            ],
+          });
+        },
+        {
+          createEngine,
+          expect,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
+            await NoteTestUtilsV4.createNote({
+              fname: "foo.ch2",
+              vault: opts.vaults[1],
+              wsRoot: opts.wsRoot,
+            });
+          },
+        }
+      );
+    });
+
     test("skip levels", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
@@ -438,13 +487,6 @@ describe("SiteUtils", () => {
             "daily.journal.2020.07.05.two",
             "daily.journal.2020.07.01.one",
           ]);
-          // checkNotes({
-          //   filteredNotes: notes,
-          //   engineNotes: engine.notes,
-          //   match: [
-
-          //   ]
-          // });
         },
         {
           createEngine,
@@ -485,12 +527,7 @@ describe("SiteUtils", () => {
               const sconfig: DendronSiteConfig = {
                 siteHierarchies: ["root"],
                 siteRootDir,
-                duplicateNoteBehavior: {
-                  action: "useVault",
-                  payload: {
-                    vault: vaults[0],
-                  },
-                },
+                ...dupNote(vaults[0]),
                 config: {
                   root: {
                     publishByDefault: true,
@@ -512,7 +549,6 @@ describe("SiteUtils", () => {
             vault: vaults[0],
           });
           expect(domains.length).toEqual(2);
-          expect(notes).toMatchSnapshot();
           checkNotes({
             filteredNotes: notes,
             engineNotes: engine.notes,

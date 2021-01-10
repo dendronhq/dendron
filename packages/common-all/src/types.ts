@@ -67,7 +67,7 @@ export type DendronConfig = {
 };
 
 export type HierarchyConfig = {
-  publishByDefault?: boolean;
+  publishByDefault?: boolean | { [key: string]: boolean };
   noindexByDefault?: boolean;
   customFrontmatter?: CustomFMEntry[];
 };
@@ -214,8 +214,12 @@ export type DendronSiteConfig = {
   image?: string;
 };
 
+export enum DuplicateNoteAction {
+  USE_VAULT = "useVault",
+}
+
 type UseVaultBehavior = {
-  action: "useVault";
+  action: DuplicateNoteAction;
   payload: {
     vault: DVault;
   };

@@ -187,6 +187,7 @@ export class SiteUtils {
     logger.info({
       ctx: "filterByHiearchy",
       msg: "post-filter",
+      hConfig,
       filteredNotes: notes.map((ent) => ent.fname),
     });
 
@@ -217,7 +218,7 @@ export class SiteUtils {
         throw new DendronError({ msg: `mult notes found for ${domain}` });
       }
     } else if (notes.length < 1) {
-      logger.error({ ctx: "filterByHiearchy", msg: "not not found", domain });
+      logger.error({ ctx: "filterByHiearchy", msg: "note not found", domain });
       // TODO: add warning
       return;
     } else {

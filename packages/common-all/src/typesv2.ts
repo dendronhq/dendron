@@ -60,10 +60,14 @@ export type VaultRemote = {
   type: "git";
   url: string;
 };
+export enum DVaultVisibility {
+  PRIVATE = "private",
+}
+
 export type DVault = {
   /** Name of vault */
   name?: string;
-
+  visibility?: DVaultVisibility;
   /** Filesystem path to fault */
   fsPath: string;
   // /**

@@ -1,5 +1,5 @@
 import clipboardy from "@dendronhq/clipboardy";
-import { DNodeUtilsV2 } from "@dendronhq/common-all";
+import { DNodeUtilsV2, VaultUtils } from "@dendronhq/common-all";
 import { PublishPodCommandOpts } from "@dendronhq/dendron-cli";
 import {
   getAllPublishPods,
@@ -73,7 +73,7 @@ export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
         config: {
           ...config,
           fname: noteByName,
-          vault: vault.fsPath,
+          vault: VaultUtils.normVaultPath({ vault, wsRoot }),
           dest: "stdout",
         },
         vaults: DendronWorkspace.instance().vaultsv4,

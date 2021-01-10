@@ -1,9 +1,12 @@
 import {
+  assert,
+  DendronConfig,
   DendronError,
   DendronSiteConfig,
   DendronSiteFM,
   DNodeUtilsV2,
   DVault,
+  DVaultVisibility,
   HierarchyConfig,
   NotePropsDictV2,
   NotePropsV2,
@@ -37,9 +40,21 @@ export class SiteUtils {
   static canPublishFiltered(opts: {
     note: NotePropsV2;
     config: HierarchyConfig;
+    vaults: DVault[];
+    wsRoot: string;
   }) {
-    const { note, config } = opts;
+    const { note, config, vaults, wsRoot } = opts;
+    const noteVault = VaultUtils.matchVault({
+      vault: note.vault,
+      vaults,
+      wsRoot,
+    });
+    assert(noteVault !== false, "noteVault should exist");
+
     return !_.some([
+      // not from private vault
+      (noteVault as DVault).visibility &&
+        (noteVault as DVault).visibility === DVaultVisibility.PRIVATE,
       // not blacklisted
       note?.custom?.published === false,
       // not whitelisted
@@ -69,9 +84,7 @@ export class SiteUtils {
       id: "403",
       title: "Your viewing an unpublished page",
       body: [
-        "[Dendron](https://dendron.so/) (the tool used to generate this site) lets authors selective publish content. This means you will stumble into links that point to this page from time to time",
-        "",
-        "Maybe its a surprise. Maybe its an awkward photo. Only the author knows",
+        "[Dendron](https://dendron.so/) (the tool used to generate this site) lets authors selective publish content. You will see this page whenever you click on a link to a page that is not published.",
       ].join("\n"),
     });
     return [note];
@@ -79,10 +92,12 @@ export class SiteUtils {
 
   static async filterByConfig(opts: {
     engine: DEngineClientV2;
-    config: DendronSiteConfig;
+    config: DendronConfig;
   }): Promise<{ notes: NotePropsDictV2; domains: NotePropsV2[] }> {
     const { engine, config } = opts;
-    const { siteHierarchies } = config;
+    config.site = DConfig.cleanSiteConfig(config.site);
+    const sconfig = config.site;
+    const { siteHierarchies } = sconfig;
     logger.info({ ctx: "filterByConfig", config });
     let domains: NotePropsV2[] = [];
     // TODO: return domains from here
@@ -90,7 +105,7 @@ export class SiteUtils {
       siteHierarchies.map(async (domain, idx) => {
         const out = await SiteUtils.filterByHiearchy({
           domain,
-          config: DConfig.cleanSiteConfig(config),
+          config,
           engine,
           navOrder: idx,
         });
@@ -102,7 +117,7 @@ export class SiteUtils {
       })
     );
     // if single hiearchy, domain includes all immediate children
-    if (config.siteHierarchies.length === 1 && domains.length === 1) {
+    if (siteHierarchies.length === 1 && domains.length === 1) {
       const rootDomain = domains[0];
       domains = domains.concat(
         rootDomain.children.map((id) => engine.notes[id])
@@ -127,33 +142,39 @@ export class SiteUtils {
 
   static async filterByHiearchy(opts: {
     domain: string;
-    config: DendronSiteConfig;
+    config: DendronConfig;
     engine: DEngineClientV2;
     navOrder: number;
   }): Promise<{ notes: NotePropsDictV2; domain: NotePropsV2 } | undefined> {
     const { domain, engine, navOrder, config } = opts;
     logger.info({ ctx: "filterByHiearchy", domain });
+    const sconfig = config.site;
 
     // get config
     let rConfig: HierarchyConfig = _.defaults(
-      _.get(config.config, "root", {
+      _.get(sconfig.config, "root", {
         publishByDefault: true,
         noindexByDefault: false,
         customFrontmatter: [],
       })
     );
     let hConfig: HierarchyConfig = _.defaults(
-      _.get(config.config, domain),
+      _.get(sconfig.config, domain),
       rConfig
     );
     // console.log(`hConfig for ${domain}`, hConfig); DEBUG
-    const dupBehavior = config.duplicateNoteBehavior;
+    const dupBehavior = sconfig.duplicateNoteBehavior;
     // get the domain note
     let notes = NoteUtilsV2.getNotesByFname({
       fname: domain,
       notes: engine.notes,
     }).filter((note) =>
-      SiteUtils.canPublishFiltered({ note, config: hConfig })
+      SiteUtils.canPublishFiltered({
+        note,
+        config: hConfig,
+        vaults: config.vaults,
+        wsRoot: engine.wsRoot,
+      })
     );
     logger.info({
       ctx: "filterByHiearchy",
@@ -201,7 +222,7 @@ export class SiteUtils {
     domainNote.custom.nav_order = navOrder;
     domainNote.parent = null;
     domainNote.title = _.capitalize(domainNote.title);
-    if (domainNote.fname === config.siteIndex) {
+    if (domainNote.fname === sconfig.siteIndex) {
       domainNote.custom.permalink = "/";
     }
 
@@ -212,7 +233,7 @@ export class SiteUtils {
       const note = processQ.pop() as NotePropsV2;
       const maybeNote = SiteUtils.filterByNote({ note, hConfig });
       if (maybeNote) {
-        if (config.writeStubs && maybeNote.stub) {
+        if (sconfig.writeStubs && maybeNote.stub) {
           maybeNote.stub = false;
           await engine.writeNote(note);
         }
@@ -230,7 +251,12 @@ export class SiteUtils {
           children.forEach((ent) => (ent.parent = maybeNote.id));
         }
         children = _.filter(children, (note: NotePropsV2) =>
-          SiteUtils.canPublishFiltered({ note, config: hConfig })
+          SiteUtils.canPublishFiltered({
+            note,
+            config: hConfig,
+            vaults: config.vaults,
+            wsRoot: engine.wsRoot,
+          })
         );
         children.forEach((n: NotePropsV2) => processQ.push(n));
         // updated children

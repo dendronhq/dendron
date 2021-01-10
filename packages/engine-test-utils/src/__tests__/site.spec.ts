@@ -1,6 +1,7 @@
 import {
   DendronSiteConfig,
   DendronSiteFM,
+  DVaultVisibility,
   NotePropsDictV2,
   NotePropsV2,
   NoteUtilsV2,
@@ -10,13 +11,15 @@ import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
   ENGINE_HOOKS,
+  ENGINE_HOOKS_MULTI,
   NoteTestUtilsV4,
-  runEngineTestV4,
   SetupHookFunction,
 } from "@dendronhq/common-test-utils";
 import { createEngine, SiteUtils } from "@dendronhq/engine-server";
-import _ from "lodash";
 import fs from "fs-extra";
+import _ from "lodash";
+import { ConfigUtils } from "../config";
+import { runEngineTestV5 } from "../engine";
 
 const basicSetup = (preSetupHook?: SetupHookFunction) => ({
   createEngine,
@@ -65,12 +68,20 @@ describe("SiteUtils", () => {
 
   describe("gen", () => {
     test("write stub", async () => {
-      await runEngineTestV4(
+      await runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {
-          const config: DendronSiteConfig = {
-            siteHierarchies: ["foo", "foobar"],
-            siteRootDir,
-          };
+          const config = ConfigUtils.withConfig(
+            (config) => {
+              config.site = {
+                siteHierarchies: ["foo", "foobar"],
+                siteRootDir,
+              };
+              return config;
+            },
+            {
+              wsRoot,
+            }
+          );
           const { notes, domains } = await SiteUtils.filterByConfig({
             engine,
             config,
@@ -101,13 +112,22 @@ describe("SiteUtils", () => {
     });
 
     test("no write stub", async () => {
-      await runEngineTestV4(
+      await runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {
-          const config: DendronSiteConfig = {
-            siteHierarchies: ["foo", "foobar"],
-            siteRootDir,
-            writeStubs: false,
-          };
+          const config = ConfigUtils.withConfig(
+            (config) => {
+              config.site = {
+                siteHierarchies: ["foo", "foobar"],
+                siteRootDir,
+                writeStubs: false,
+              };
+              return config;
+            },
+            {
+              wsRoot,
+            }
+          );
+
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           expect(_.size(notes)).toEqual(4);
           const vpath = vault2Path({ wsRoot, vault: vaults[0] });
@@ -136,13 +156,21 @@ describe("SiteUtils", () => {
 
   describe("per note config", () => {
     test("blacklist note", async () => {
-      await runEngineTestV4(
-        async ({ engine }) => {
-          const config: DendronSiteConfig = {
-            siteHierarchies: ["foo"],
-            siteRootDir,
-            usePrettyRefs: true,
-          };
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const config = ConfigUtils.withConfig(
+            (config) => {
+              config.site = {
+                siteHierarchies: ["foo"],
+                siteRootDir,
+                usePrettyRefs: true,
+              };
+              return config;
+            },
+            {
+              wsRoot,
+            }
+          );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           expect(notes).toMatchSnapshot();
           expect(_.size(notes)).toEqual(1);
@@ -171,13 +199,21 @@ describe("SiteUtils", () => {
     });
 
     test("nav_exclude", async () => {
-      await runEngineTestV4(
-        async ({ engine }) => {
-          const config: DendronSiteConfig = {
-            siteHierarchies: ["foo"],
-            siteRootDir,
-            usePrettyRefs: true,
-          };
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const config = ConfigUtils.withConfig(
+            (config) => {
+              config.site = {
+                siteHierarchies: ["foo"],
+                siteRootDir,
+                usePrettyRefs: true,
+              };
+              return config;
+            },
+            {
+              wsRoot,
+            }
+          );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           expect(notes).toMatchSnapshot();
           expect(_.size(notes)).toEqual(2);
@@ -212,24 +248,33 @@ describe("SiteUtils", () => {
     });
 
     test("root, publish all with dup", async () => {
-      await runEngineTestV4(
-        async ({ engine, vaults }) => {
-          const config: DendronSiteConfig = {
-            siteHierarchies: ["root"],
-            siteRootDir,
-            usePrettyRefs: true,
-            duplicateNoteBehavior: {
-              action: "useVault",
-              payload: {
-                vault: vaults[0],
-              },
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const config = ConfigUtils.withConfig(
+            (config) => {
+              config.site = {
+                siteHierarchies: ["root"],
+                siteRootDir,
+                usePrettyRefs: true,
+                duplicateNoteBehavior: {
+                  action: "useVault",
+                  payload: {
+                    vault: vaults[0],
+                  },
+                },
+                config: {
+                  root: {
+                    publishByDefault: true,
+                  },
+                },
+              };
+              return config;
             },
-            config: {
-              root: {
-                publishByDefault: true,
-              },
-            },
-          };
+            {
+              wsRoot,
+            }
+          );
+
           const { notes, domains } = await SiteUtils.filterByConfig({
             engine,
             config,
@@ -262,24 +307,32 @@ describe("SiteUtils", () => {
     });
 
     test("root, publish none with dup", async () => {
-      await runEngineTestV4(
-        async ({ engine, vaults }) => {
-          const config: DendronSiteConfig = {
-            siteHierarchies: ["root"],
-            siteRootDir,
-            usePrettyRefs: true,
-            duplicateNoteBehavior: {
-              action: "useVault",
-              payload: {
-                vault: vaults[0],
-              },
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const config = ConfigUtils.withConfig(
+            (config) => {
+              config.site = {
+                siteHierarchies: ["root"],
+                siteRootDir,
+                usePrettyRefs: true,
+                duplicateNoteBehavior: {
+                  action: "useVault",
+                  payload: {
+                    vault: vaults[0],
+                  },
+                },
+                config: {
+                  root: {
+                    publishByDefault: false,
+                  },
+                },
+              };
+              return config;
             },
-            config: {
-              root: {
-                publishByDefault: false,
-              },
-            },
-          };
+            {
+              wsRoot,
+            }
+          );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           checkNotes({
             filteredNotes: notes,
@@ -298,13 +351,21 @@ describe("SiteUtils", () => {
     });
 
     test("one hiearchy", async () => {
-      await runEngineTestV4(
-        async ({ engine }) => {
-          const config: DendronSiteConfig = {
-            siteHierarchies: ["foo"],
-            siteRootDir,
-            usePrettyRefs: true,
-          };
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const config = ConfigUtils.withConfig(
+            (config) => {
+              config.site = {
+                siteHierarchies: ["foo"],
+                siteRootDir,
+                usePrettyRefs: true,
+              };
+              return config;
+            },
+            {
+              wsRoot,
+            }
+          );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           checkNotes({
             filteredNotes: notes,
@@ -321,13 +382,21 @@ describe("SiteUtils", () => {
     });
 
     test("mult hiearchy", async () => {
-      await runEngineTestV4(
-        async ({ engine }) => {
-          const config: DendronSiteConfig = {
-            siteHierarchies: ["foo", "bar"],
-            siteRootDir,
-            usePrettyRefs: true,
-          };
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const config = ConfigUtils.withConfig(
+            (config) => {
+              config.site = {
+                siteHierarchies: ["foo", "bar"],
+                siteRootDir,
+                usePrettyRefs: true,
+              };
+              return config;
+            },
+            {
+              wsRoot,
+            }
+          );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           checkNotes({
             filteredNotes: notes,
@@ -348,12 +417,20 @@ describe("SiteUtils", () => {
     });
 
     test("skip levels", async () => {
-      await runEngineTestV4(
-        async ({ engine }) => {
-          const config: DendronSiteConfig = {
-            siteHierarchies: ["daily"],
-            siteRootDir,
-          };
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const config = ConfigUtils.withConfig(
+            (config) => {
+              config.site = {
+                siteHierarchies: ["daily"],
+                siteRootDir,
+              };
+              return config;
+            },
+            {
+              wsRoot,
+            }
+          );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
           expect(_.values(notes).map((ent) => ent.fname)).toEqual([
             "daily",
@@ -384,6 +461,69 @@ describe("SiteUtils", () => {
               }
             );
             console.log(wsRoot, vault);
+          },
+        }
+      );
+    });
+  });
+
+  describe("per vault config", () => {
+    let siteRootDir: string;
+    beforeEach(() => {
+      siteRootDir = tmpDir().name;
+    });
+
+    test("blacklist vault", async () => {
+      await runEngineTestV5(
+        async ({ engine, vaults, wsRoot }) => {
+          const config = ConfigUtils.withConfig(
+            (config) => {
+              const bvault = config.vaults.find(
+                (ent) => ent.fsPath === "vault2"
+              );
+              bvault!.visibility = DVaultVisibility.PRIVATE;
+              const sconfig: DendronSiteConfig = {
+                siteHierarchies: ["root"],
+                siteRootDir,
+                duplicateNoteBehavior: {
+                  action: "useVault",
+                  payload: {
+                    vault: vaults[0],
+                  },
+                },
+                config: {
+                  root: {
+                    publishByDefault: true,
+                  },
+                },
+              };
+              config.site = sconfig;
+              return config;
+            },
+            { wsRoot }
+          );
+          const { notes, domains } = await SiteUtils.filterByConfig({
+            engine,
+            config,
+          });
+          const root = NoteUtilsV2.getNoteByFnameV4({
+            fname: "root",
+            notes: engine.notes,
+            vault: vaults[0],
+          });
+          expect(domains.length).toEqual(2);
+          expect(notes).toMatchSnapshot();
+          checkNotes({
+            filteredNotes: notes,
+            engineNotes: engine.notes,
+            match: [{ id: root!.id }, { id: "foo" }, { id: "foo.ch1" }],
+          });
+        },
+        {
+          createEngine,
+          expect,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
           },
         }
       );

@@ -70,6 +70,22 @@ export class VaultUtils {
     return vault;
   }
 
+  static matchVault = (opts: {
+    vault: DVault;
+    vaults: DVault[];
+    wsRoot: string;
+  }) => {
+    const { vault, vaults, wsRoot } = opts;
+    const maybeMatch = _.filter(vaults, (v) => {
+      return VaultUtils.isEqual(v, vault, wsRoot);
+    });
+    if (maybeMatch.length === 1) {
+      return maybeMatch[0];
+    } else {
+      return false;
+    }
+  };
+
   /**
    * Vault path relative to root
    */

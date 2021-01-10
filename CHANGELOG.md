@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.23.2-alpha.4](https://github.com/dendronhq/dendron/compare/v0.23.2-alpha.3...v0.23.2-alpha.4) (2021-01-10)
+
+### Enhancements
+
+- more flexible assetprefix tags ([ba0fd5e](https://github.com/dendronhq/dendron/commit/ba0fd5e464fd854bd61449ebeb0cc8e018e6deb0))
+
 ## [0.23.2-alpha.3](https://github.com/dendronhq/dendron/compare/v0.23.2-alpha.2...v0.23.2-alpha.3) (2021-01-10)
 
 ### Enhancements

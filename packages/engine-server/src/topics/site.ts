@@ -23,27 +23,33 @@ import { createLogger, vault2Path } from "@dendronhq/common-server";
 const logger = createLogger();
 
 export class SiteUtils {
-  static canPublish(opts: { note: NotePropsV2; config: DendronSiteConfig }) {
-    const { note, config } = opts;
-    const hconfig = this.getConfigForHierarchy({ config, note });
-    const domain = DNodeUtilsV2.domainName(note.fname);
-    return _.every([
-      config.siteHierarchies !== ["root"] &&
-        config.siteHierarchies.indexOf(domain) >= 0,
-      // not blacklisted
-      note?.custom?.published !== false,
-      // not whitelisted
-      hconfig?.publishByDefault ? true : !note.custom?.published || false,
-    ]);
-  }
-
-  static canPublishFiltered(opts: {
+  static canPublish(opts: {
     note: NotePropsV2;
-    config: HierarchyConfig;
+    config: DendronSiteConfig;
     vaults: DVault[];
     wsRoot: string;
   }) {
     const { note, config, vaults, wsRoot } = opts;
+    // check if note is in index
+    const domain = DNodeUtilsV2.domainName(note.fname);
+    if (
+      config.siteHierarchies !== ["root"] &&
+      config.siteHierarchies.indexOf(domain) < 0
+    ) {
+      return false;
+    }
+    // check if note is note blocked
+    const hconfig = this.getConfigForHierarchy({ config, noteOrName: note });
+    return this.canPublishFiltered({ note, hconfig, vaults, wsRoot });
+  }
+
+  static canPublishFiltered(opts: {
+    note: NotePropsV2;
+    hconfig: HierarchyConfig;
+    vaults: DVault[];
+    wsRoot: string;
+  }) {
+    const { note, hconfig, vaults, wsRoot } = opts;
     const noteVault = VaultUtils.matchVault({
       vault: note.vault,
       vaults,
@@ -53,10 +59,10 @@ export class SiteUtils {
     const cNoteVault = noteVault as DVault;
 
     let publishByDefault = undefined;
-    if (config?.publishByDefault) {
-      publishByDefault = _.isBoolean(config.publishByDefault)
-        ? config.publishByDefault
-        : config.publishByDefault[VaultUtils.getName(cNoteVault)];
+    if (hconfig?.publishByDefault) {
+      publishByDefault = _.isBoolean(hconfig.publishByDefault)
+        ? hconfig.publishByDefault
+        : hconfig.publishByDefault[VaultUtils.getName(cNoteVault)];
     }
 
     return !_.some([
@@ -157,20 +163,10 @@ export class SiteUtils {
     const { domain, engine, navOrder, config } = opts;
     logger.info({ ctx: "filterByHiearchy", domain });
     const sconfig = config.site;
-
-    // get config
-    let rConfig: HierarchyConfig = _.defaults(
-      _.get(sconfig.config, "root", {
-        publishByDefault: true,
-        noindexByDefault: false,
-        customFrontmatter: [],
-      })
-    );
-    let hConfig: HierarchyConfig = _.defaults(
-      _.get(sconfig.config, domain),
-      rConfig
-    );
-    // console.log(`hConfig for ${domain}`, hConfig); DEBUG
+    let hConfig = this.getConfigForHierarchy({
+      config: sconfig,
+      noteOrName: domain,
+    });
     const dupBehavior = sconfig.duplicateNoteBehavior;
     // get the domain note
     let notes = NoteUtilsV2.getNotesByFname({
@@ -179,7 +175,7 @@ export class SiteUtils {
     }).filter((note) =>
       SiteUtils.canPublishFiltered({
         note,
-        config: hConfig,
+        hconfig: hConfig,
         vaults: config.vaults,
         wsRoot: engine.wsRoot,
       })
@@ -262,7 +258,7 @@ export class SiteUtils {
         children = _.filter(children, (note: NotePropsV2) =>
           SiteUtils.canPublishFiltered({
             note,
-            config: hConfig,
+            hconfig: hConfig,
             vaults: config.vaults,
             wsRoot: engine.wsRoot,
           })
@@ -303,10 +299,11 @@ export class SiteUtils {
 
   static getConfigForHierarchy(opts: {
     config: DendronSiteConfig;
-    note: NotePropsV2;
+    noteOrName: NotePropsV2 | string;
   }) {
-    const { config, note } = opts;
-    const domain = DNodeUtilsV2.domainName(note.fname);
+    const { config, noteOrName } = opts;
+    const fname = _.isString(noteOrName) ? noteOrName : noteOrName.fname;
+    const domain = DNodeUtilsV2.domainName(fname);
     const siteConfig = config;
     // get config
     let rConfig: HierarchyConfig = _.defaults(

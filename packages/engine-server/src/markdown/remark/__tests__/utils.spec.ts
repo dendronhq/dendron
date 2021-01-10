@@ -244,7 +244,7 @@ const WITH_ASSET_PREFIX = createProcTests({
       return [
         {
           actual: _.trim(resp.toString()),
-          expected: "![alt-text](bond/image-url.jpg)",
+          expected: "![alt-text](/bond/image-url.jpg)",
         },
       ];
     },

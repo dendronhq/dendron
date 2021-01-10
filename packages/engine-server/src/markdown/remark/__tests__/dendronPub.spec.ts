@@ -24,7 +24,14 @@ describe("basics", () => {
     const out = proc(engine, dendronData, {
       assetsPrefix: "bond/",
     }).processSync(`![alt-text](image-url.jpg)`);
-    expect(_.trim(out.toString())).toEqual("![alt-text](bond/image-url.jpg)");
+    expect(_.trim(out.toString())).toEqual("![alt-text](/bond/image-url.jpg)");
+  });
+
+  test("imagePrefix2", () => {
+    const out = proc(engine, dendronData, {
+      assetsPrefix: "/bond/",
+    }).processSync(`![alt-text](/image-url.jpg)`);
+    expect(_.trim(out.toString())).toEqual("![alt-text](/bond/image-url.jpg)");
   });
 
   test("can't publish", async () => {

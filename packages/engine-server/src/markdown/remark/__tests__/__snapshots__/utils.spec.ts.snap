@@ -2804,7 +2804,7 @@ VFile {
 
 exports[`MDUtils.proc "HTML: asset_prefix" 1`] = `
 VFile {
-  "contents": "![alt-text](bond/image-url.jpg)
+  "contents": "![alt-text](/bond/image-url.jpg)
 
 ",
   "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",

@@ -173,7 +173,11 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       if (node.type === "image" && dest === DendronASTDest.HTML) {
         let imageNode = node as Image;
         if (opts?.assetsPrefix) {
-          imageNode.url = opts.assetsPrefix + imageNode.url;
+          imageNode.url =
+            "/" +
+            _.trim(opts.assetsPrefix, "/") +
+            "/" +
+            _.trim(imageNode.url, "/");
         }
       }
     });

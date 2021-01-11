@@ -1,8 +1,9 @@
-import { resolvePath } from "@dendronhq/common-server";
+import { createLogger, resolvePath } from "@dendronhq/common-server";
 import { DEngineClientV2, EngineConnector } from "@dendronhq/engine-server";
 import { LaunchEngineServerCommand } from "./launchEngineServer";
 import _ from "lodash";
 import yargs from "yargs";
+const logger = createLogger();
 
 export async function setupEngine(opts: {
   wsRoot: string;
@@ -14,6 +15,11 @@ export async function setupEngine(opts: {
   let port: number;
   wsRoot = resolvePath(wsRoot, process.cwd());
   if (enginePort) {
+    logger.info({
+      ctx: "setupEngine",
+      msg: "connecting to engine",
+      enginePort,
+    });
     const engineConnector = EngineConnector.getOrCreate({
       wsRoot,
     });
@@ -21,6 +27,7 @@ export async function setupEngine(opts: {
     engine = engineConnector.engine;
     port = enginePort;
   } else {
+    logger.info({ ctx: "setupEngine", msg: "initialize new engine" });
     ({ engine, port } = await new LaunchEngineServerCommand().enrichArgs(opts));
     if (init) {
       await engine.init();

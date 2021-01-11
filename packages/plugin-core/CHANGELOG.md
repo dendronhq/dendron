@@ -8,97 +8,38 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Enhancements
 
 - more flexible assetprefix tags ([ba0fd5e](https://github.com/dendronhq/dendron/commit/ba0fd5e464fd854bd61449ebeb0cc8e018e6deb0))
-
-## [0.23.2-alpha.3](https://github.com/dendronhq/dendron/compare/v0.23.2-alpha.2...v0.23.2-alpha.3) (2021-01-10)
-
-### Enhancements
-
 - enable pass dict to publish ([ccbc017](https://github.com/dendronhq/dendron/commit/ccbc0178cdc0399230a47e4ab1c90d345e447aeb))
 - use enhanced filter when creating 403 links ([65afe8c](https://github.com/dendronhq/dendron/commit/65afe8c084d1a657e943edb3ef1b497f3fd97ea6))
-
-## [0.23.2-alpha.2](https://github.com/dendronhq/dendron/compare/v0.23.2-alpha.1...v0.23.2-alpha.2) (2021-01-09)
-
-**Note:** Version bump only for package root
-
-## [0.23.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.23.1...v0.23.2-alpha.1) (2021-01-09)
+- better default journal note titles ([99e0a03](https://github.com/dendronhq/dendron/commit/99e0a033bd042f23fc28ebdc78d942d9d83a7aca))
+- update access denied message ([3f9fe14](https://github.com/dendronhq/dendron/commit/3f9fe142f45ec3d42b3322dc5094a363c6c5499d))
 
 ### Bug Fixes
 
 - don't throw error if user doesn't choose vault ([c744bc1](https://github.com/dendronhq/dendron/commit/c744bc11429c309a3d045f14039f1548bfa53478))
 - perfect match queries sometimes don't show results ([c05b33a](https://github.com/dendronhq/dendron/commit/c05b33ac9cc9ca82f6999d693c9a19ee53efc8dc))
-
-### Enhancements
-
-- better default journal note titles ([99e0a03](https://github.com/dendronhq/dendron/commit/99e0a033bd042f23fc28ebdc78d942d9d83a7aca))
-- update access denied message ([3f9fe14](https://github.com/dendronhq/dendron/commit/3f9fe142f45ec3d42b3322dc5094a363c6c5499d))
-
-## [0.23.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.23.1...v0.23.2-alpha.0) (2021-01-09)
-
-### Bug Fixes
-
 - don't throw error if user doesn't choose vault ([c744bc1](https://github.com/dendronhq/dendron/commit/c744bc11429c309a3d045f14039f1548bfa53478))
 - perfect match queries sometimes don't show results ([c05b33a](https://github.com/dendronhq/dendron/commit/c05b33ac9cc9ca82f6999d693c9a19ee53efc8dc))
-
-### Enhancements
-
-- better default journal note titles ([99e0a03](https://github.com/dendronhq/dendron/commit/99e0a033bd042f23fc28ebdc78d942d9d83a7aca))
-- update access denied message ([3f9fe14](https://github.com/dendronhq/dendron/commit/3f9fe142f45ec3d42b3322dc5094a363c6c5499d))
 
 ## [0.23.1](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.6...v0.23.1) (2021-01-08)
-
-**Note:** Version bump only for package root
-
-## [0.23.1-alpha.6](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.5...v0.23.1-alpha.6) (2021-01-07)
 
 ### Bug Fixes
 
 - issue with noteRef mangling when using doctor ([5d9b711](https://github.com/dendronhq/dendron/commit/5d9b711d37ab7ac1688bd66908d82285a242edd9))
 - remove debug line ([4ca3a1e](https://github.com/dendronhq/dendron/commit/4ca3a1efb9101c1fc7975dbdd43b0f6379f6b8b1))
+- spurious 403 links ([b13d2a5](https://github.com/dendronhq/dendron/commit/b13d2a527d8db50d5cbd09f7eacf652103f2f32c))
+- publish wiki links with spaces ([e41d6ca](https://github.com/dendronhq/dendron/commit/e41d6ca8423b9ceb1da05a9e9b3f9b55117890c0))
 
 ### Enhancements
 
 - support note ref based on inserted header ([78bd906](https://github.com/dendronhq/dendron/commit/78bd906243dbbae8fba4c9531542e660601f8224))
 - use new style note ref ([f709ee5](https://github.com/dendronhq/dendron/commit/f709ee5db07c87df24c245f1cb81bfe3ca0a25e7))
-
-## [0.23.1-alpha.5](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.4...v0.23.1-alpha.5) (2021-01-07)
-
-### Enhancements
-
 - add sitebuild command ([dccde03](https://github.com/dendronhq/dendron/commit/dccde0387f1438084ff8b6efa56796fc4791643a))
 - betters ite build integrations ([30185a4](https://github.com/dendronhq/dendron/commit/30185a4fcd8a23dd52eae13cbc921de7d4365891))
-
-### Features
-
-- site preview command ([7bc838b](https://github.com/dendronhq/dendron/commit/7bc838bae885e6932752ea8335e9a76935377a69))
-
-## [0.23.1-alpha.4](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.3...v0.23.1-alpha.4) (2021-01-06)
-
-### Bug Fixes
-
-- 403 followup ([91c2b46](https://github.com/dendronhq/dendron/commit/91c2b460c1fa642860bcd25cbb16506dee2ced3e))
-
-## [0.23.1-alpha.3](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.2...v0.23.1-alpha.3) (2021-01-06)
-
-### Bug Fixes
-
-- spurious 403 links ([b13d2a5](https://github.com/dendronhq/dendron/commit/b13d2a527d8db50d5cbd09f7eacf652103f2f32c))
-
-## [0.23.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.1...v0.23.1-alpha.2) (2021-01-06)
-
-**Note:** Version bump only for package root
-
-## [0.23.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.23.1-alpha.0...v0.23.1-alpha.1) (2021-01-06)
-
-### Bug Fixes
-
-- publish wiki links with spaces ([e41d6ca](https://github.com/dendronhq/dendron/commit/e41d6ca8423b9ceb1da05a9e9b3f9b55117890c0))
-
-### Enhancements
-
 - access denied on non-published links ([bff651f](https://github.com/dendronhq/dendron/commit/bff651fb018ba941a5277ec4af18dcf696ae0e32))
 
 ### Features
 
+- site preview command ([7bc838b](https://github.com/dendronhq/dendron/commit/7bc838bae885e6932752ea8335e9a76935377a69))
 - support footnotes in markdown ([a86d067](https://github.com/dendronhq/dendron/commit/a86d067e925b7d3ce82e942e6a19bd335425f76c))
 - support new note ref syntax ([2659d63](https://github.com/dendronhq/dendron/commit/2659d634e5bd147574054ff4c39f74d025cbccba))
 

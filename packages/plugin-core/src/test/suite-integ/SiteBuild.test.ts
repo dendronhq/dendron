@@ -1,3 +1,4 @@
+import { DuplicateNoteAction } from "@dendronhq/common-all";
 import { ENGINE_HOOKS } from "@dendronhq/common-test-utils";
 import { ConfigUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
@@ -27,7 +28,7 @@ suite("SiteBuild", function () {
         await ConfigUtils.withConfig(
           (config) => {
             config.site.duplicateNoteBehavior = {
-              action: "useVault",
+              action: DuplicateNoteAction.USE_VAULT,
               payload: { vault },
             };
             return config;

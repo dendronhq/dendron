@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.24.1-alpha.1](https://github.com/dendronhq/dendron/compare/v0.24.1-alpha.0...v0.24.1-alpha.1) (2021-01-12)
+
+### Bug Fixes
+
+- issue with publishing from root ([b258cd1](https://github.com/dendronhq/dendron/commit/b258cd1c4b09d80c45d51a367cf6b9609480e016))
+
 ## [0.24.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.24.0...v0.24.1-alpha.0) (2021-01-12)
 
 ### Bug Fixes

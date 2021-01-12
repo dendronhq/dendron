@@ -109,6 +109,11 @@ export type DendronSiteConfig = {
   copyAssets?: boolean;
 
   /**
+   * If set, path to a custom header to include in published sites
+   */
+  customHeaderPath?: string;
+
+  /**
    * Path to favicon. Relative to workspace.
    * Default: "favicon.ico"
    */

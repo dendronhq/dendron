@@ -1,8 +1,11 @@
-import { NotePropsV2 } from "@dendronhq/common-all";
+import {
+  NoteChangeEntry,
+  NotePropsV2,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import {
   DendronASTDest,
   MDUtilsV4,
-  RemarkChangeEntry,
   RemarkUtils,
 } from "@dendronhq/engine-server";
 // @ts-ignore
@@ -29,6 +32,7 @@ type CommandOutput = void;
 export enum DoctorActions {
   H1_TO_TITLE = "h1ToTitle",
   HI_TO_H2 = "h1ToH2",
+  REMOVE_STUBS = "removeStubs",
   // FIX_FM = "fixFM"
 }
 
@@ -88,18 +92,23 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       : throttle(_.bind(engine.writeNote, engine), 300, {
           leading: true,
         });
+    let engineDelete = dryRun
+      ? () => {}
+      : throttle(_.bind(engine.deleteNote, engine), 300, {
+          leading: true,
+        });
 
     let doctorAction: any;
     switch (action) {
       case DoctorActions.H1_TO_TITLE: {
         doctorAction = async (note: NotePropsV2) => {
-          let changes: RemarkChangeEntry[] = [];
+          let changes: NoteChangeEntry[] = [];
           const newBody = await proc()
             .use(RemarkUtils.h1ToTitle(note, changes))
             .process(note.body);
           note.body = newBody.toString();
           if (!_.isEmpty(changes)) {
-            await engineWrite(note);
+            await engineWrite(note, { updateExisting: true });
             console.log(`doctor changing ${note.fname}`);
             this.L.info({ msg: `changes ${note.fname}`, changes });
             numChanges += 1;
@@ -112,15 +121,38 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       }
       case DoctorActions.HI_TO_H2: {
         doctorAction = async (note: NotePropsV2) => {
-          let changes: RemarkChangeEntry[] = [];
+          let changes: NoteChangeEntry[] = [];
           const newBody = await proc()
-            .use(RemarkUtils.h1ToH2(changes))
+            .use(RemarkUtils.h1ToH2(note, changes))
             .process(note.body);
           note.body = newBody.toString();
           if (!_.isEmpty(changes)) {
-            await engineWrite(note);
+            await engineWrite(note, { updateExisting: true });
             console.log(`doctor changing ${note.fname}`);
             this.L.info({ msg: `changes ${note.fname}`, changes });
+            numChanges += 1;
+            return;
+          } else {
+            return;
+          }
+        };
+        break;
+      }
+      case DoctorActions.REMOVE_STUBS: {
+        doctorAction = async (note: NotePropsV2) => {
+          let changes: NoteChangeEntry[] = [];
+          if (_.trim(note.body) === "") {
+            changes.push({
+              status: "delete",
+              note,
+            });
+          }
+          if (!_.isEmpty(changes)) {
+            await engineDelete(note);
+            const vname = VaultUtils.getName(note.vault);
+            console.log(
+              `doctor ${DoctorActions.REMOVE_STUBS} ${note.fname} ${vname}`
+            );
             numChanges += 1;
             return;
           } else {

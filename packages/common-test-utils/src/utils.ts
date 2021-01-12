@@ -131,6 +131,12 @@ export type RunEngineTestFunction = (
   opts: RunEngineTestFunctionOpts
 ) => Promise<any>;
 
+/**
+ * Used to test a function. If this test is meant to be run
+ * both for `mocha` and `jest`, return a `TestResult` object.
+ * Otherwise, use the default assertion library of
+ * your current test runner
+ */
 export type RunEngineTestFunctionV4<T = any> = (
   opts: RunEngineTestFunctionOpts & { extra?: any }
 ) => Promise<TestResult[] | void | T>;

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.24.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.24.0...v0.24.1-alpha.0) (2021-01-12)
+
+### Bug Fixes
+
+- multi-vault publish have corret parent relationship when publishing ([4bd6845](https://github.com/dendronhq/dendron/commit/4bd68450567c2ab0d1c6a097016fe723218485b2))
+
 # [0.24.0](https://github.com/dendronhq/dendron/compare/v0.23.2-alpha.4...v0.24.0) (2021-01-11)
 
 **Note:** Version bump only for package @dendronhq/engine-server

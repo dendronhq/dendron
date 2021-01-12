@@ -33,7 +33,7 @@ export class SiteUtils {
     // check if note is in index
     const domain = DNodeUtilsV2.domainName(note.fname);
     if (
-      config.siteHierarchies !== ["root"] &&
+      config.siteHierarchies[0] !== "root" &&
       config.siteHierarchies.indexOf(domain) < 0
     ) {
       return false;

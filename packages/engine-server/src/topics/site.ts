@@ -50,6 +50,9 @@ export class SiteUtils {
     wsRoot: string;
   }) {
     const { note, hconfig, vaults, wsRoot } = opts;
+    if (note.stub) {
+      return true;
+    }
     const noteVault = VaultUtils.matchVault({
       vault: note.vault,
       vaults,
@@ -168,10 +171,12 @@ export class SiteUtils {
       noteOrName: domain,
     });
     const dupBehavior = sconfig.duplicateNoteBehavior;
+    const notesForHiearchy = _.clone(engine.notes);
+
     // get the domain note
     let notes = NoteUtilsV2.getNotesByFname({
       fname: domain,
-      notes: engine.notes,
+      notes: notesForHiearchy,
     }).filter((note) =>
       SiteUtils.canPublishFiltered({
         note,
@@ -205,6 +210,10 @@ export class SiteUtils {
         domainNote = maybeDomainNote[0];
         // merge children
         domainNote.children = notes.flatMap((ent) => ent.children);
+        // update parents
+        domainNote.children.map(
+          (id) => (notesForHiearchy[id].parent = domainNote.id)
+        );
         logger.info({
           ctx: "filterByHiearchy",
           msg: "dup-resolution: resolving dup",
@@ -243,12 +252,12 @@ export class SiteUtils {
           await engine.writeNote(note);
         }
         const siteFM = maybeNote.custom || ({} as DendronSiteFM);
-        let children = maybeNote.children.map((id) => engine.notes[id]);
+        let children = maybeNote.children.map((id) => notesForHiearchy[id]);
         if (siteFM.skipLevels) {
           let acc = 0;
           while (acc !== siteFM.skipLevels) {
             children = children.flatMap((ent) =>
-              ent.children.map((id) => engine.notes[id])
+              ent.children.map((id) => notesForHiearchy[id])
             );
             acc += 1;
           }

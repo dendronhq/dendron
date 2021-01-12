@@ -9,7 +9,6 @@ import {
 import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
 import {
   DendronASTDest,
-  dendronNoteRefPlugin,
   MDUtilsV4,
   ParserUtilsV2,
 } from "@dendronhq/engine-server";

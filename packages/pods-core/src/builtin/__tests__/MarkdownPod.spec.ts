@@ -1,13 +1,19 @@
 import { WorkspaceOpts } from "@dendronhq/common-all/";
-import { PODS_CORE, runEngineTestV4 } from "@dendronhq/common-test-utils";
+import {
+  ENGINE_HOOKS,
+  PODS_CORE,
+  runEngineTestV4,
+} from "@dendronhq/common-test-utils";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
-import { MarkdownImportPod } from "../MarkdownPod";
+import { MarkdownImportPod, MarkdownPublishPod } from "../MarkdownPod";
+import { runEngineTestV5 } from "@dendronhq/engine-test-utils";
+import { VaultUtils } from "@dendronhq/common-all";
 
 const createEngine = (opts: WorkspaceOpts) => {
   return DendronEngineV2.createV3(opts);
 };
 
-describe("MarkdownPod", () => {
+describe("MarkdownImport Pod", () => {
   const {
     ROOT_WITH_MULT_FOLDERS,
     SPECIAL_CHARS,
@@ -44,5 +50,32 @@ describe("MarkdownPod", () => {
         pod: new MarkdownImportPod(),
       },
     });
+  });
+});
+
+describe("MarkdownPublishPod", () => {
+  test("basic", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const fname = "foo";
+        const vault = vaults[0];
+        const vaultName = VaultUtils.getName(vault);
+        const resp = await new MarkdownPublishPod().execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            fname,
+            vault: vaultName,
+            dest: "stdout",
+          },
+        });
+        expect(resp).toEqual("foo body");
+      },
+      {
+        expect,
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+      }
+    );
   });
 });

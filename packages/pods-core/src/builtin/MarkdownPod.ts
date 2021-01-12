@@ -7,7 +7,12 @@ import {
   NoteUtilsV2,
 } from "@dendronhq/common-all";
 import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
-import { dendronNoteRefPlugin, ParserUtilsV2 } from "@dendronhq/engine-server";
+import {
+  DendronASTDest,
+  dendronNoteRefPlugin,
+  MDUtilsV4,
+  ParserUtilsV2,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import klaw, { Item } from "klaw";
 import _ from "lodash";
@@ -249,10 +254,11 @@ export class MarkdownPublishPod extends PublishPod {
       notes: engine.notes,
       vault,
     })!;
-    const remark = ParserUtilsV2.getRemark().use(dendronNoteRefPlugin, {
+    const remark = MDUtilsV4.procFull({
+      dest: DendronASTDest.MD_DENDRON,
       engine,
-      renderWithOutline: false,
-      replaceRefOpts: {},
+      fname: note.fname,
+      vault,
     });
     const out = remark.processSync(note.body).toString();
     return _.trim(out);

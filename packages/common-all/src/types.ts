@@ -114,6 +114,11 @@ export type DendronSiteConfig = {
   customHeaderPath?: string;
 
   /**
+   * If set, use google analytics to track users
+   */
+  ga_tracking?: string;
+
+  /**
    * Path to favicon. Relative to workspace.
    * Default: "favicon.ico"
    */

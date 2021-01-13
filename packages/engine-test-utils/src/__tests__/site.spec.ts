@@ -415,6 +415,7 @@ describe("SiteUtils", () => {
       );
     });
 
+    // TODO: fix
     test.skip("mult hiearchy, diff publishByDefault", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
@@ -440,6 +441,7 @@ describe("SiteUtils", () => {
             }
           );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
+          expect(notes).toMatchSnapshot();
           checkNotes({
             filteredNotes: notes,
             engineNotes: engine.notes,

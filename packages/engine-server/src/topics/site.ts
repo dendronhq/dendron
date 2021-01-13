@@ -33,7 +33,7 @@ export class SiteUtils {
     // check if note is in index
     const domain = DNodeUtilsV2.domainName(note.fname);
     if (
-      config.siteHierarchies !== ["root"] &&
+      config.siteHierarchies[0] !== "root" &&
       config.siteHierarchies.indexOf(domain) < 0
     ) {
       return false;
@@ -112,6 +112,7 @@ export class SiteUtils {
     config: DendronConfig;
   }): Promise<{ notes: NotePropsDictV2; domains: NotePropsV2[] }> {
     const { engine, config } = opts;
+    const notes = _.clone(engine.notes);
     config.site = DConfig.cleanSiteConfig(config.site);
     const sconfig = config.site;
     const { siteHierarchies } = sconfig;
@@ -136,9 +137,7 @@ export class SiteUtils {
     // if single hiearchy, domain includes all immediate children
     if (siteHierarchies.length === 1 && domains.length === 1) {
       const rootDomain = domains[0];
-      domains = domains.concat(
-        rootDomain.children.map((id) => engine.notes[id])
-      );
+      domains = domains.concat(rootDomain.children.map((id) => notes[id]));
     }
     logger.info({
       ctx: "filterByConfig",

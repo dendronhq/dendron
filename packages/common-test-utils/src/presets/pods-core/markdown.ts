@@ -51,11 +51,14 @@ const IMPORT = {
         nomatch: [],
       });
       return [
+        // right files are returned
         {
           expected: expectedFiles,
           actual: actualFiles,
         },
+        // pdfs are attached inline
         { expected: out, actual: true },
+        // there should be 3 assets
         {
           expected: 3,
           actual: fs.readdirSync(path.join(vpath, "assets")).length,

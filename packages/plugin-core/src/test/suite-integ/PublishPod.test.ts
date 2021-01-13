@@ -53,7 +53,8 @@ suite("PublishV2", function () {
     });
   });
 
-  test("note ref", (done) => {
+  // TODO
+  test.skip("note ref", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {

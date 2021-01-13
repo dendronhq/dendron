@@ -1,4 +1,3 @@
 #!/bin/bash
 
-cd packages/plugin-core/
- ./scripts/sync_vault.sh
+npm run-script bootstrap:build:plugin-core:sync-vault

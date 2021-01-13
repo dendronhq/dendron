@@ -21,6 +21,7 @@ module.exports = {
   modulePathIgnorePatterns: ["lib"],
   notify: true,
   notifyMode: "always",
+  snapshotSerializers: ["jest-serializer-path"],
   testEnvironment: "node",
   testPathIgnorePatterns: ["utils.ts"],
   //roots: ["<rootDir>/packages"],

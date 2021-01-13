@@ -125,7 +125,7 @@ VFile {
   </div>
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -185,7 +185,7 @@ Regular wikilink: [foo.two](foo.two.html)
   </div>
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -211,7 +211,7 @@ VFile {
   </div>
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -265,7 +265,7 @@ journal3
 </div>
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -383,7 +383,7 @@ VFile {
 ![[foo#header1:#badheader]]
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -500,7 +500,7 @@ VFile {
 ![[foo#badheader]]
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -512,7 +512,7 @@ VFile {
   "contents": "![[foo]]
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -524,7 +524,7 @@ VFile {
   "contents": "![[foo]]
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -536,7 +536,7 @@ VFile {
   "contents": "((ref:[[journal.2020.08.*]]))
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -570,7 +570,7 @@ task2
   
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -704,7 +704,7 @@ VFile {
   
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -766,7 +766,7 @@ Regular wikilink: [foo.two](foo.two.md)
   
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -794,7 +794,7 @@ VFile {
   
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -855,7 +855,7 @@ journal3
 </div>
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -974,7 +974,7 @@ task2
 
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -993,7 +993,7 @@ Regular wikilink: [foo.two](foo.two)
 
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -1006,7 +1006,7 @@ VFile {
 
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -1023,7 +1023,7 @@ journal3
 
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],

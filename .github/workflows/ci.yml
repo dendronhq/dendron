@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - github-actions
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    strategy:
+      # Allow other matrix jobs to continue after one fails, allowing us to
+      # isolate platform-specific issues.
+      fail-fast: false
+
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          #- windows-latest
+        node-version:
+          - 12.x
+          - 13.x
+        suite:
+          - cli
+          - plugin
+
+        include:
+          - os: macos-latest
+            env: env
+            versions: ''
+          - os: ubuntu-latest
+            env: env
+            versions: ''
+          # Running natively under Windows requires some further work on paths
+          # and file access patterns.
+          #- os: windows-latest
+          #  env: Get-ChildItem Env:\
+          #  versions: choco --version
+
+    timeout-minutes: 20
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      # The closest we can get to rsync natively is cwRsync. Instead let's get
+      # rsync installed via Cygwin and put that on PATH.
+      - name: Install dependencies
+        if: runner.os == 'Windows'
+        run: |
+          choco install cygwin
+          C:\tools\cygwin\cygwinsetup.exe `
+              --quiet-mode --no-desktop --upgrade-also --wait `
+              --root C:\tools\cygwin `
+              --only-site --site http://mirrors.kernel.org/sourceware/cygwin/ `
+              --packages rsync
+          "C:\tools\cygwin\bin" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+
+      - name: Gather environment data
+        run: |
+          ${{ matrix.env }}
+          node --version
+          npm --version
+          rsync --version
+
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      # Retain Node modules across builds; some packages download/build binaries
+      # here.
+      - name: Restore Node modules cache
+        uses: actions/cache@v2
+        id: node-modules-cache
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/*/.vscode-test
+          key: ${{ runner.os }}-${{ matrix.node-version }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.node-version }}-node-modules-
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Publish tests won't work if we haven't configured our committer details.
+      - name: Configure Git user
+        run: |
+          git config --global user.name CI
+          git config --global user.email ci@dendron.so
+
+      - name: Initialize
+        run: npm run-script ci:init
+
+      - name: Start Xvfb
+        if: runner.os == 'Linux' && matrix.suite == 'plugin'
+        run: |
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          echo 'DISPLAY=:99.0' >>$GITHUB_ENV
+
+      - name: Run tests
+        run: npm run-script ci:test:${{ matrix.suite }}
+        timeout-minutes: 10

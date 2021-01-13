@@ -554,6 +554,7 @@
         "lint": "eslint src --ext ts",
         "watch": "npm run compile -- --watch",
         "build": "npm run compile",
+        "sync-vault": "node ./scripts/sync_vault.js",
         "compile": "tsc -p tsconfig.build.json",
         "pretest": "npm run compile",
         "test": "node ./out/test/runTestInteg.js",

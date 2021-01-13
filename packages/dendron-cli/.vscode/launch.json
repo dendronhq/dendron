@@ -19,7 +19,7 @@
         "--noteByName",
         "dendron",
       ],
-      "env": {"LOG_DST": "/tmp/dendron-cli.log", "LOG_LEVEL": "info"},
+      "env": {"LOG_DST": "../../logs/dendron-cli.log", "LOG_LEVEL": "info"},
       "cwd": "${workspaceRoot}",
       "sourceMaps": true,
       "smartStep": true,
@@ -49,7 +49,8 @@
         "${relativeFile}",
         "--runInBand"
       ],
-      "cwd": "${workspaceRoot:dendron-cli}","env": {"LOG_DST": "/tmp/dendron-cli.txt"}
+      "cwd": "${workspaceRoot:dendron-cli}",
+      "env": {"LOG_DST": "../../logs/cli.log"}
     }
   ]
 }

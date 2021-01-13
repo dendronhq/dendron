@@ -74,7 +74,7 @@ export class SnapshotExportPod extends ExportPod<
         if (_.isEmpty(ignore)) {
           return true;
         }
-        src = _.trimStart(_.replace(src, vault.fsPath, ""), "/");
+        src = path.relative(vault.fsPath, src);
         return !_.some(ignore, (ent) => {
           return DUtils.minimatch(src, ent);
         });
@@ -100,7 +100,11 @@ export class SnapshotExportPod extends ExportPod<
     // const payload = this.prepareForExport(opts);
 
     // verify snapshot root
-    const snapshotRoot = config.dest.fsPath;
+    let snapshotRoot = config.dest.fsPath;
+    if (process.platform === "win32" && snapshotRoot[1] === ":") {
+      // We're on Windows and the path includes a drive letter; uppercase it.
+      snapshotRoot = `${snapshotRoot[0].toUpperCase()}${snapshotRoot.slice(1)}`;
+    }
     fs.ensureDirSync(snapshotRoot);
 
     // create snapshot folder

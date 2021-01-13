@@ -66,10 +66,10 @@ export class MarkdownImportPod extends ImportPod<
 
   async _collectItems(root: string): Promise<DItem[]> {
     const items: DItem[] = []; // files, directories, symlinks, etc
-    const mask = root.endsWith("/") ? root.length : root.length + 1;
+    const mask = root.endsWith(path.sep) ? root.length : root.length + 1;
     const excludeFilter = through2.obj(function (item: Item, _enc, next) {
       // check if hidden file
-      if (!_.some(item.path.split("/"), (ent) => ent.startsWith("."))) {
+      if (!_.some(item.path.split(path.sep), (ent) => ent.startsWith("."))) {
         this.push(item);
       }
       next();

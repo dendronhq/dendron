@@ -56,8 +56,31 @@ function getRoot(engine: DEngineClientV2) {
   return vault2Path({ vault, wsRoot });
 }
 
+// For use only on Windows. Transform a Windows-style path for Cygwin, since
+// the rsync module doesn't seem to correctly prefix the drive letter.
+// From: C:\Users\joe.bloggs\Dendron\vault
+// To:   /cygdrive/c/Users/joe.bloggs/Dendron/vault
+function makeCygdrivePath(pathname: string) {
+  let driveLetter = process.env.SystemDrive || 'C';
+  if (pathname[1] === ":") {
+    driveLetter = pathname[0];
+    pathname = pathname.slice(2);
+  }
+
+  driveLetter = driveLetter.toLowerCase();
+  pathname = pathname.replace(new RegExp(_.escapeRegExp(path.sep), "g"), "/");
+
+  return `/cygdrive/${driveLetter}${pathname}`;
+}
+
 function rsyncCopy(src: string, dst: string) {
+  // Generates something like:
   // rsync -a --no-times --size-only /tmp/notes/* docs/notes
+
+  if (process.platform === "win32") {
+    src = makeCygdrivePath(src);
+    dst = makeCygdrivePath(dst);
+  }
   return new Promise((resolve, reject) => {
     const rsync = new Rsync()
       .flags("a")

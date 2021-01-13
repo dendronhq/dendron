@@ -1,6 +1,10 @@
 import { DEngineClientV2, WorkspaceOpts } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
-import { NoteTestUtilsV4, runEngineTestV4 } from "@dendronhq/common-test-utils";
+import {
+  getLogFilePath,
+  NoteTestUtilsV4,
+  runEngineTestV4,
+} from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { DendronEngineV2 } from "../../../enginev2";
 import { DendronASTData, DendronASTDest } from "../../types";
@@ -46,7 +50,7 @@ describe("parse", () => {
 });
 
 const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
-  const logger = createLogger("testLogger", "/tmp/engine-server.txt");
+  const logger = createLogger("testLogger", getLogFilePath("engine-server"));
   const engine = DendronEngineV2.createV3({ vaults, wsRoot, logger });
   return engine;
 };

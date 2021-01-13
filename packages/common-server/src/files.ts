@@ -19,7 +19,9 @@ export type getAllFilesOpts = {
  * @param opts
  */
 export function cleanName(name: string): string {
-  name = name.replace(/\//g, ".").toLocaleLowerCase();
+  name = name
+    .replace(new RegExp(_.escapeRegExp(path.sep), "g"), ".")
+    .toLocaleLowerCase();
   name = name.replace(/ /g, "-");
   return name;
 }

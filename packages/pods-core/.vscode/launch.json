@@ -32,7 +32,7 @@
         "cwd": "${workspaceFolder:pods-core}",
         "args": ["--runInBand", "${relativeFile}", "-u"],
         "outFiles": ["${workspaceFolder:pods-core}/lib/*.js"],
-        "env": {"LOG_DST": "/tmp/pods-core.txt"}
+        "env": {"LOG_DST": "../../logs/pods-core.log"}
       }
     ]
   }

@@ -4,7 +4,7 @@ exports[`compilev2 HTML "alias" 1`] = `
 VFile {
   "contents": "[bar](foo.html)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -15,7 +15,7 @@ exports[`compilev2 HTML "regular" 1`] = `
 VFile {
   "contents": "[foo](foo.html)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -26,7 +26,7 @@ exports[`compilev2 HTML "regularWithAnchor" 1`] = `
 VFile {
   "contents": "[foo](foo.html#one)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -37,7 +37,7 @@ exports[`compilev2 HTML "regularWithExtension" 1`] = `
 VFile {
   "contents": "[foo](foo.html)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -48,7 +48,7 @@ exports[`compilev2 HTML "textString1" 1`] = `
 VFile {
   "contents": "See the [FAQ](dendron.faq.html) for answers for
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -59,7 +59,7 @@ exports[`compilev2 HTML "withId" 1`] = `
 VFile {
   "contents": "[foo](foo-id.html)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -70,7 +70,7 @@ exports[`compilev2 HTML "withSpace" 1`] = `
 VFile {
   "contents": "[bar](foo bar.html)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -81,7 +81,7 @@ exports[`compilev2 MD_DENDRON "alias" 1`] = `
 VFile {
   "contents": "[[bar|foo]]
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -92,7 +92,7 @@ exports[`compilev2 MD_DENDRON "regular" 1`] = `
 VFile {
   "contents": "[[foo]]
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -103,7 +103,7 @@ exports[`compilev2 MD_DENDRON "regularWithAnchor" 1`] = `
 VFile {
   "contents": "[[foo#one]]
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -114,7 +114,7 @@ exports[`compilev2 MD_DENDRON "regularWithExtension" 1`] = `
 VFile {
   "contents": "[[foo]]
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -125,7 +125,7 @@ exports[`compilev2 MD_DENDRON "textString1" 1`] = `
 VFile {
   "contents": "See the [[FAQ|dendron.faq]] for answers for
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -136,7 +136,7 @@ exports[`compilev2 MD_DENDRON "withId" 1`] = `
 VFile {
   "contents": "[[foo]]
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -147,7 +147,7 @@ exports[`compilev2 MD_DENDRON "withSpace" 1`] = `
 VFile {
   "contents": "[[bar|foo bar]]
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -158,7 +158,7 @@ exports[`compilev2 MD_ENHANCED_PREVIEW "alias" 1`] = `
 VFile {
   "contents": "[bar](foo.md)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -169,7 +169,7 @@ exports[`compilev2 MD_ENHANCED_PREVIEW "regular" 1`] = `
 VFile {
   "contents": "[foo](foo.md)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -180,7 +180,7 @@ exports[`compilev2 MD_ENHANCED_PREVIEW "regularWithAnchor" 1`] = `
 VFile {
   "contents": "[foo](foo.md)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -191,7 +191,7 @@ exports[`compilev2 MD_ENHANCED_PREVIEW "regularWithExtension" 1`] = `
 VFile {
   "contents": "[foo](foo.md)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -202,7 +202,7 @@ exports[`compilev2 MD_ENHANCED_PREVIEW "textString1" 1`] = `
 VFile {
   "contents": "See the [FAQ](dendron.faq.md) for answers for
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -213,7 +213,7 @@ exports[`compilev2 MD_ENHANCED_PREVIEW "withId" 1`] = `
 VFile {
   "contents": "[foo](foo-id.md)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -224,7 +224,7 @@ exports[`compilev2 MD_ENHANCED_PREVIEW "withSpace" 1`] = `
 VFile {
   "contents": "[bar](foo%20bar.md)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -235,7 +235,7 @@ exports[`compilev2 MD_REGULAR "alias" 1`] = `
 VFile {
   "contents": "[bar](foo)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -246,7 +246,7 @@ exports[`compilev2 MD_REGULAR "regular" 1`] = `
 VFile {
   "contents": "[foo](foo)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -257,7 +257,7 @@ exports[`compilev2 MD_REGULAR "regularWithAnchor" 1`] = `
 VFile {
   "contents": "[foo](foo)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -268,7 +268,7 @@ exports[`compilev2 MD_REGULAR "regularWithExtension" 1`] = `
 VFile {
   "contents": "[foo](foo)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -279,7 +279,7 @@ exports[`compilev2 MD_REGULAR "textString1" 1`] = `
 VFile {
   "contents": "See the [FAQ](dendron.faq) for answers for
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -290,7 +290,7 @@ exports[`compilev2 MD_REGULAR "withId" 1`] = `
 VFile {
   "contents": "[foo](foo-id)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -301,7 +301,7 @@ exports[`compilev2 MD_REGULAR "withSpace" 1`] = `
 VFile {
   "contents": "[bar](foo%20bar)
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],

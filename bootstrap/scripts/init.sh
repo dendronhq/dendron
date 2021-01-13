@@ -1,6 +1,8 @@
 #!/bin/bash
 
-./bootstrap/scripts/bootstrap.sh
-./bootstrap/scripts/build.sh
- cd packages/plugin-core/
- ./scripts/sync_vault.sh
+set -euo pipefail
+
+npm run-script bootstrap:init
+
+cd packages/plugin-core/
+./scripts/sync_vault.sh

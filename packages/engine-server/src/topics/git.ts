@@ -31,20 +31,16 @@ export class Git {
   static async createRepo(fpath: string, opts?: { initCommit: boolean }) {
     const { initCommit } = _.defaults(opts, { initCommit: false });
     fs.ensureDirSync(fpath);
-    const cmd = ["git init"];
-    await execa.command(cmd.join(" "), {
-      shell: true,
+    await execa("git", ["init"], {
       cwd: fpath,
     });
     const readmePath = path.join(fpath, "README.md");
     fs.ensureFileSync(readmePath);
     if (initCommit) {
-      await execa.command(["git add ."].join(" "), {
-        shell: true,
+      await execa("git", ["add", "."], {
         cwd: fpath,
       });
-      await execa.command(["git commit -m 'initial commit'"].join(" "), {
-        shell: true,
+      await execa("git", ["commit", "-m", "initial commit"], {
         cwd: fpath,
       });
     }

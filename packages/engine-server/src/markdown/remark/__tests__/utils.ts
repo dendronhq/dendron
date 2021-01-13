@@ -1,6 +1,7 @@
 import { NotePropsV2, WorkspaceOpts } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import {
+  getLogFilePath,
   NoteTestUtilsV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
@@ -22,7 +23,7 @@ export const basicSetup = async ({ wsRoot, vaults }: WorkspaceOpts) => {
 };
 
 export const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
-  const logger = createLogger("testLogger", "/tmp/engine-server.txt");
+  const logger = createLogger("testLogger", getLogFilePath("engine-server"));
   const engine = DendronEngineV2.createV3({ vaults, wsRoot, logger });
   return engine;
 };

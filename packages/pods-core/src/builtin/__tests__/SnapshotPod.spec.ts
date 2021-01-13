@@ -1,5 +1,6 @@
 import { DEngineClientV2 } from "@dendronhq/common-all";
 import {
+  filterDotFiles,
   EngineTestUtilsV2,
   NodeTestPresetsV2,
   PODS_CORE,
@@ -45,12 +46,12 @@ describe("SnapshotPodExport", () => {
       vaults: vaults.map((ent) => ({ fsPath: ent })),
       wsRoot,
     });
-    const snapshotDir = fs.readdirSync(snapshotDirPath);
+    const snapshotDir = filterDotFiles(fs.readdirSync(snapshotDirPath));
     expect(path.dirname(snapshotDirPath)).toEqual(customSnapshotRootPath);
     expect(snapshotDir).toMatchSnapshot();
     // backup vault
     const vaultPath = path.join(snapshotDirPath, "vault");
-    const snapshotVault = fs.readdirSync(vaultPath);
+    const snapshotVault = filterDotFiles(fs.readdirSync(vaultPath));
     expect(snapshotVault).toMatchSnapshot();
     expect(snapshotVault.length).toEqual(6);
     // copy assets
@@ -200,7 +201,7 @@ describe("SnapshotPodImport", () => {
       vaults: vaults.map((ent) => ({ fsPath: ent })),
       wsRoot,
     });
-    const vaultDir = fs.readdirSync(vaults[0]);
+    const vaultDir = filterDotFiles(fs.readdirSync(vaults[0]));
     expect(vaultDir).toMatchSnapshot();
     // no git
     expect(vaultDir.length).toEqual(6);

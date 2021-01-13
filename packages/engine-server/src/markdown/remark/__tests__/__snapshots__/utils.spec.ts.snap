@@ -43,7 +43,7 @@ VFile {
 </div>
 </div>    
 </div><p></p><p></p>",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -2217,7 +2217,7 @@ VFile {
 <p><a href=\\"bar.html\\">bar</a></p>
 </div>    
 </div><p></p><p></p>",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -2324,7 +2324,7 @@ created: '1'
 [foo bar](foo bar.html)
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -2334,7 +2334,7 @@ created: '1'
 exports[`MDUtils.proc "HTML: NOTE_W_LINK_AND_SPACE": respRehype 1`] = `
 VFile {
   "contents": "<p><a href=\\"foo bar.html\\">foo bar</a></p>",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -2557,7 +2557,7 @@ This plugin works on MDAST, a Markdown AST implemented by [remark](https://githu
 
 *[MDAST]: Markdown Abstract Syntax Tree
 *[AST]: Abstract syntax tree",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -2567,7 +2567,7 @@ This plugin works on MDAST, a Markdown AST implemented by [remark](https://githu
 exports[`MDUtils.proc "HTML: WITH_ABBR": respRehype 1`] = `
 VFile {
   "contents": "<p>This plugin works on <abbr title=\\"Markdown Abstract Syntax Tree\\">MDAST</abbr>, a Markdown <abbr title=\\"Abstract syntax tree\\">AST</abbr> implemented by <a href=\\"https://github.com/remarkjs/remark\\">remark</a></p>",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -2589,7 +2589,7 @@ Here is a footnote reference,[^1]
 [^1]: Here is the footnote.
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -2767,7 +2767,7 @@ Here is a footnote reference,[^1]
 [^1]: Here is the footnote.
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -2783,7 +2783,7 @@ VFile {
 <li id=\\"fn-1\\">Here is the footnote.<a href=\\"#fnref-1\\" class=\\"footnote-backref\\">↩</a></li>
 </ol>
 </div>",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -2795,7 +2795,7 @@ VFile {
   "contents": "![alt-text](image-url.jpg)
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -2807,7 +2807,7 @@ VFile {
   "contents": "![alt-text](/bond/image-url.jpg)
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -2829,7 +2829,7 @@ Here is a footnote reference,[^1]
 [^1]: Here is the footnote.
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3007,7 +3007,7 @@ Here is a footnote reference,[^1]
 [^1]: Here is the footnote.
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3023,7 +3023,7 @@ VFile {
 <li id=\\"fn-1\\">Here is the footnote.<a href=\\"#fnref-1\\" class=\\"footnote-backref\\">↩</a></li>
 </ol>
 </div>",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3045,7 +3045,7 @@ Here is a footnote reference,[^1]
 [^1]: Here is the footnote.
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3223,7 +3223,7 @@ Here is a footnote reference,[^1]
 [^1]: Here is the footnote.
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3239,7 +3239,7 @@ VFile {
 <li id=\\"fn-1\\">Here is the footnote.<a href=\\"#fnref-1\\" class=\\"footnote-backref\\">↩</a></li>
 </ol>
 </div>",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3396,7 +3396,7 @@ bond: 42
 Title: Foo. Bond: 42
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3406,7 +3406,7 @@ Title: Foo. Bond: 42
 exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_VARIABLE": respRehype 1`] = `
 VFile {
   "contents": "<p>Title: Foo. Bond: 42</p>",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3418,7 +3418,7 @@ VFile {
   "contents": "![alt-text](image-url.jpg)
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3430,7 +3430,7 @@ VFile {
   "contents": "![alt-text](image-url.jpg)
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3452,7 +3452,7 @@ Here is a footnote reference,[^1]
 [^1]: Here is the footnote.
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3630,7 +3630,7 @@ Here is a footnote reference,[^1]
 [^1]: Here is the footnote.
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3646,7 +3646,7 @@ VFile {
 <li id=\\"fn-1\\">Here is the footnote.<a href=\\"#fnref-1\\" class=\\"footnote-backref\\">↩</a></li>
 </ol>
 </div>",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3751,7 +3751,7 @@ created: '1'
 foo body
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3762,7 +3762,7 @@ exports[`MDUtils.proc "MD_REGULAR: WITH_TITLE": respRehype 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
 <p>foo body</p>",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3919,7 +3919,7 @@ bond: 42
 Title: Foo. Bond: 42
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3929,7 +3929,7 @@ Title: Foo. Bond: 42
 exports[`MDUtils.proc "MD_REGULAR: WITH_VARIABLE": respRehype 1`] = `
 VFile {
   "contents": "<p>Title: Foo. Bond: 42</p>",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3941,7 +3941,7 @@ VFile {
   "contents": "![alt-text](image-url.jpg)
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],
@@ -3953,7 +3953,7 @@ VFile {
   "contents": "![alt-text](image-url.jpg)
 
 ",
-  "cwd": "/Users/kevinlin/projects/dendronv2/dendron/packages/engine-server",
+  "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
   "messages": Array [],

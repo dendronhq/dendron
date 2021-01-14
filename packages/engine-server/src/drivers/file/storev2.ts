@@ -595,9 +595,10 @@ export class FileStorageV2 implements DStoreV2 {
         return n;
       })
     );
-    const newNote = {
+    const newNote: NotePropsV2 = {
       ...oldNote,
       fname: newLoc.fname,
+      vault: newLoc.vault!,
       title: NoteUtilsV2.isDefaultTitle(oldNote)
         ? NoteUtilsV2.genTitle(newLoc.fname)
         : oldNote.title,

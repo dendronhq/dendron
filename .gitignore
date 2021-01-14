@@ -24,3 +24,4 @@ packages/api-server/src/static
 packages/common-server/src/proto.ts
 .dendron.*
 meta.json
+yarn-error.*

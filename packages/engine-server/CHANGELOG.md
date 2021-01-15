@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.24.1](https://github.com/dendronhq/dendron/compare/v0.24.1-alpha.2...v0.24.1) (2021-01-15)
+
+### Bug Fixes
+
+- mult nodes and override titles ([cbd2991](https://github.com/dendronhq/dendron/commit/cbd2991d1e3c02e06c9e6fb7d6dc26ff7814186b))
+
 ## [0.24.1-alpha.2](https://github.com/dendronhq/dendron/compare/v0.24.1-alpha.1...v0.24.1-alpha.2) (2021-01-14)
 
 **Note:** Version bump only for package @dendronhq/engine-server

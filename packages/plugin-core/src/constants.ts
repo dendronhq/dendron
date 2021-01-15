@@ -500,7 +500,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Build your notes using publishing v2",
     docs: [
       "This command works by running `dendron-cli` in the background.",
-      "- NOTE: this has not yet been tested on windows ",
     ].join("\n"),
     docLink: "",
     docPreview: ``,
@@ -512,7 +511,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Preview your notes on localhost using publishing v2",
     docs: [
       "This command works by running `dendron-cli` in the background.",
-      "- NOTE: this has not yet been tested on windows ",
     ].join("\n"),
     docLink: "",
     docPreview: ``,

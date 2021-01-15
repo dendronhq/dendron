@@ -208,7 +208,7 @@ export class SiteUtils {
         }
         domainNote = maybeDomainNote[0];
         // merge children
-        domainNote.children = notes.flatMap((ent) => ent.children);
+        domainNote.children = _.uniq(notes.flatMap((ent) => ent.children));
         // update parents
         domainNote.children.map(
           (id) => (notesForHiearchy[id].parent = domainNote.id)
@@ -216,6 +216,7 @@ export class SiteUtils {
         logger.info({
           ctx: "filterByHiearchy",
           msg: "dup-resolution: resolving dup",
+          parent: domainNote.id,
           children: domainNote.children,
         });
       } else {
@@ -234,10 +235,10 @@ export class SiteUtils {
     // set domain note settings
     domainNote.custom.nav_order = navOrder;
     domainNote.parent = null;
-    domainNote.title = _.capitalize(domainNote.title);
     if (domainNote.fname === sconfig.siteIndex) {
       domainNote.custom.permalink = "/";
     }
+    logger.info({ ctx: "filterByHiearchy", domainNote });
 
     const out: NotePropsDictV2 = {};
     const processQ = [domainNote];

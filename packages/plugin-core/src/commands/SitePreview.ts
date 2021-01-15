@@ -23,12 +23,11 @@ export class SitePreviewCommand extends BasicCommand<
   }
 
   async sanityCheck() {
-    await checkPreReq();
     const sitePath = getSiteRootDirPath();
     if (!fs.existsSync(sitePath)) {
       return "no site found";
     }
-    return undefined;
+    return checkPreReq();
   }
 
   async execute(_opts?: CommandOpts) {
@@ -60,7 +59,7 @@ export class SitePreviewCommand extends BasicCommand<
             `${port}`,
             "--serve",
           ],
-          { cwd: wsRoot }
+          { cwd: wsRoot, shell: true, windowsHide: false }
         );
         subprocess.stdout?.on("data", (chunk) => {
           const msg: string = chunk.toString();
@@ -70,6 +69,7 @@ export class SitePreviewCommand extends BasicCommand<
             env.openExternal(Uri.parse("http://localhost:8080"));
           }
         });
+
         token.onCancellationRequested(() => {
           if (subprocess) {
             subprocess.kill("SIGTERM", {

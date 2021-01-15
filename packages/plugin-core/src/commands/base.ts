@@ -33,7 +33,7 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
     return;
   }
 
-  async sanityCheck(): Promise<undefined | string> {
+  async sanityCheck(): Promise<undefined | string | "cancel"> {
     return;
   }
 
@@ -42,7 +42,10 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
     const ctx = `${this.__proto__.constructor.name}:run`;
     try {
       const out = await this.sanityCheck();
-      if (!_.isUndefined(out)) {
+      if (out === "cancel") {
+        return;
+      }
+      if (!_.isUndefined(out) && out !== "cancel") {
         window.showErrorMessage(out);
         return;
       }

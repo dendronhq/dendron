@@ -42,18 +42,28 @@ export const checkPreReq = async () => {
   // check for package.json
   const pkgPath = path.join(DendronWorkspace.wsRoot(), "package.json");
   if (!fs.existsSync(pkgPath)) {
-    pkgCreate(pkgPath);
     const resp = await window.showInformationMessage(
       "install dependencies from package.json?",
       "Install",
       "Cancel"
     );
+    if (resp === "Cancel") {
+      return "cancel";
+    }
     if (resp !== "Install") {
       return undefined;
     }
-    window.showInformationMessage("installing dependencies...");
-    // TODO: show progress
-    await pkgInstall();
+    pkgCreate(pkgPath);
+    await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "installing dependencies...",
+        cancellable: false,
+      },
+      async () => {
+        return pkgInstall();
+      }
+    );
   } else {
     // check dependencies
     const pkgContents = fs.readJSONSync(pkgPath);

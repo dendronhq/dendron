@@ -175,12 +175,6 @@ export type DendronSiteConfig = {
   githubCname?: string;
 
   /**
-   * Website protocol
-   * - default: https
-   */
-  siteProtocol?: "http" | "https";
-
-  /**
    * If set, add edit on github to this site"
    */
   gh_edit_link?: string;

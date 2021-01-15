@@ -21,8 +21,8 @@ export class DConfig {
         copyAssets: true,
         siteHierarchies: ["root"],
         siteRootDir: "docs",
-        siteProtocol: "https",
         usePrettyRefs: true,
+        title: "Dendron",
       },
     };
   }
@@ -47,7 +47,6 @@ export class DConfig {
       copyAssets: true,
       usePrettyRefs: true,
       siteNotesDir: "notes",
-      siteProtocol: "https",
       siteFaviconPath: "favicon.ico",
       gh_edit_link: true,
       gh_edit_link_text: "Edit this page on GitHub",

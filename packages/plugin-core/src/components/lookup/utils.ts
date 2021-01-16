@@ -143,6 +143,14 @@ export class PickerUtilsV2 {
     });
   };
 
+  static getFnameForOpenEditor(): string | undefined {
+    const activeEditor = VSCodeUtils.getActiveTextEditor();
+    if (activeEditor) {
+      return path.basename(activeEditor.document.fileName, ".md");
+    }
+    return;
+  }
+
   static getVaultForOpenEditor(opts?: { throwIfEmpty: boolean }): DVault {
     const vaults = DendronWorkspace.instance().vaultsv4;
     let vault: DVault;

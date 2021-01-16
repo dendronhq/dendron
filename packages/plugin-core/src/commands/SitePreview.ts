@@ -1,11 +1,11 @@
+import { express } from "@dendronhq/api-server";
 import { BuildSiteV2CLICommandOpts } from "@dendronhq/dendron-cli";
-import { execa } from "@dendronhq/engine-server";
+import { execa, SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
-import stream from "stream";
 import { env, ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { checkPreReq, getSiteRootDirPath } from "../utils/site";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = Partial<BuildSiteV2CLICommandOpts>;
@@ -42,42 +42,53 @@ export class SitePreviewCommand extends BasicCommand<
         cancellable: true,
       },
       async (progress, token) => {
-        const s = new stream.Writable();
-        s.on("data", (chunk) => {
-          console.log(chunk.toString());
-        });
-        const subprocess = execa(
-          "npx",
-          [
-            "dendron-cli",
-            "buildSiteV2",
-            "--wsRoot",
+        return new Promise(async (resolve, reject) => {
+          try {
+            await execa(
+              "npx",
+              [
+                "dendron-cli",
+                "buildSiteV2",
+                "--wsRoot",
+                wsRoot,
+                "--stage",
+                "dev",
+                "--enginePort",
+                `${port}`,
+              ],
+              { cwd: wsRoot, shell: true, windowsHide: false }
+            );
+          } catch (err) {
+            window.showErrorMessage(err);
+          }
+          const siteOutput = SiteUtils.getSiteOutputPath({
+            config: getWS().config,
             wsRoot,
-            "--stage",
-            "dev",
-            "--enginePort",
-            `${port}`,
-            "--serve",
-          ],
-          { cwd: wsRoot, shell: true, windowsHide: false }
-        );
-        subprocess.stdout?.on("data", (chunk) => {
-          const msg: string = chunk.toString();
-          this.L.info({ ctx, msg });
-          if (msg.indexOf("Serving files from") >= 0) {
+            stage: "dev",
+          });
+          const app = express();
+          app.use(express.static(siteOutput));
+          const server = app.listen(8080);
+          server.on("error", (err) => {
+            window.showErrorMessage(JSON.stringify(err));
+            reject(err);
+          });
+          server.on("listening", () => {
             progress.report({ message: "preview is ready" });
             env.openExternal(Uri.parse("http://localhost:8080"));
-          }
-        });
-
-        token.onCancellationRequested(() => {
-          if (subprocess) {
-            subprocess.kill("SIGTERM", {
-              forceKillAfterTimeout: 200,
+          });
+          token.onCancellationRequested(() => {
+            server.close((err) => {
+              if (err) {
+                window.showErrorMessage(JSON.stringify(err));
+                reject(err);
+              } else {
+                this.L.info("server closed");
+                resolve(undefined);
+              }
             });
-          }
+          });
         });
-        return new Promise(() => {});
       }
     );
     return;

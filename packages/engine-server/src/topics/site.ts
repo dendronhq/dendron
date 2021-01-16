@@ -19,7 +19,11 @@ import { DEngineClientV2 } from "../types";
 import { stripLocalOnlyTags } from "../utils";
 import fs from "fs-extra";
 import path from "path";
-import { createLogger, vault2Path } from "@dendronhq/common-server";
+import {
+  createLogger,
+  resolvePath,
+  vault2Path,
+} from "@dendronhq/common-server";
 const logger = createLogger();
 
 export class SiteUtils {
@@ -343,5 +347,21 @@ export class SiteUtils {
     } else {
       return _.filter(_.values(notes), { parent: null });
     }
+  }
+
+  static getSiteOutputPath(opts: {
+    config: DendronConfig;
+    wsRoot: string;
+    stage: "dev" | "prod";
+  }) {
+    const { config, wsRoot, stage } = opts;
+    let siteRootPath: string;
+    if (stage === "dev") {
+      siteRootPath = path.join(wsRoot, "build", "site");
+      fs.ensureDirSync(siteRootPath);
+    } else {
+      siteRootPath = resolvePath(config.site.siteRootDir, wsRoot);
+    }
+    return siteRootPath;
   }
 }

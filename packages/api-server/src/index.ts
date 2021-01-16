@@ -1,4 +1,5 @@
 import { LogLvl } from "@dendronhq/common-server";
+import express from "express";
 import { getLogger, configureLogger } from "./core";
 
 function launch(opts?: {
@@ -22,4 +23,4 @@ function launch(opts?: {
     });
   });
 }
-export { launch };
+export { launch, express };

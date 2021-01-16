@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.24.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.24.1...v0.24.2-alpha.0) (2021-01-16)
+
+### Enhancements
+
+- switch to express for preview ([3cd1e75](https://github.com/dendronhq/dendron/commit/3cd1e75a03edd9e317897596927fa6e870d92eb9))
+
 ## [0.24.1](https://github.com/dendronhq/dendron/compare/v0.24.1-alpha.2...v0.24.1) (2021-01-15)
 
 ### Bug Fixes

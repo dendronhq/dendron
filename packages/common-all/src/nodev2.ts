@@ -948,6 +948,22 @@ export class SchemaUtilsV2 {
     return path.join(root, fname + ".schema.yml");
   }
 
+  static getPathV4({
+    mschema,
+    wsRoot,
+  }: {
+    mschema: SchemaModulePropsV2;
+    wsRoot: string;
+  }): string {
+    const fname = mschema.fname;
+    const vault = mschema.vault;
+    return DNodeUtilsV2.getFullPath({
+      wsRoot,
+      vault,
+      basename: fname + ".schema.yml",
+    });
+  }
+
   /**
    @deprecated
    */

@@ -5,7 +5,7 @@ import path from "path";
 import { Selection, window } from "vscode";
 import { CONFIG, DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -30,9 +30,12 @@ export class CopyNoteURLCommand extends BasicCommand<
   }
 
   async execute() {
-    const urlRoot = DendronWorkspace.configuration().get<string>(
-      CONFIG.COPY_NOTE_URL_ROOT.key
-    );
+    const urlRoot =
+      getWS().config?.site?.siteUrl ||
+      DendronWorkspace.configuration().get<string>(
+        CONFIG.COPY_NOTE_URL_ROOT.key
+      );
+
     const maybeTextEditor = VSCodeUtils.getActiveTextEditor();
     if (_.isUndefined(maybeTextEditor)) {
       window.showErrorMessage("no active document found");

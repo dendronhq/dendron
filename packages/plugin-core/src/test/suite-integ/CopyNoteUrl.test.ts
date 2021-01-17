@@ -1,81 +1,95 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
-import { DirResult, note2File, tmpDir } from "@dendronhq/common-server";
-import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
-import assert from "assert";
+import { ENGINE_HOOKS, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { CopyNoteURLCommand } from "../../commands/CopyNoteURL";
 import { CONFIG } from "../../constants";
 import { VSCodeUtils } from "../../utils";
-import { onWSInit, setupDendronWorkspace } from "../testUtils";
-import { setupBeforeAfter } from "../testUtilsV3";
+import { expect } from "../testUtilsv2";
+import {
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+  withConfig,
+} from "../testUtilsV3";
 
 suite("notes", function () {
-  let root: DirResult;
   let ctx: vscode.ExtensionContext;
-  let vaultPath: string;
   let rootUrl = "dendron.so";
 
-  ctx = setupBeforeAfter(this, {
-    beforeHook: () => {
-      root = tmpDir();
-    },
-  });
+  ctx = setupBeforeAfter(this, {});
 
   test("with override", (done) => {
-    onWSInit(async () => {
-      const notePath = path.join(vaultPath, "foo.md");
-      await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
-      const link = await new CopyNoteURLCommand().run();
-      const url = path.join(rootUrl, "notes", "foo.html");
-      assert.strictEqual(link, url);
-      done();
-    });
-
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({ vaults }) => {
+        const vault = vaults[0];
+        const fname = "foo";
+        await VSCodeUtils.openNoteByPath({ vault, fname });
+        const link = await new CopyNoteURLCommand().run();
+        const url = path.join(rootUrl, "notes", "foo.html");
+        expect(url).toEqual(link);
+        done();
+      },
       configOverride: {
         [CONFIG.COPY_NOTE_URL_ROOT.key]: rootUrl,
       },
-      useCb: async (vaultDir) => {
-        vaultPath = vaultDir;
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
+    });
+  });
+
+  test("with config override", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+      },
+      onInit: async ({ wsRoot }) => {
+        withConfig(
+          (config) => {
+            config.site.siteUrl = "https://example.com";
+            return config;
+          },
+          { wsRoot }
+        );
+        const fname = "foo";
+        const url = _.join(
+          ["https://example.com", "notes", `${fname}.html`],
+          "/"
+        );
+        const link = await new CopyNoteURLCommand().run();
+        expect(url).toEqual(link);
+        done();
+      },
+      configOverride: {
+        [CONFIG.COPY_NOTE_URL_ROOT.key]: rootUrl,
       },
     });
   });
 
   test("with selection and override", (done) => {
-    onWSInit(async () => {
-      const notePath = path.join(vaultPath, "bar.md");
-      const editor = (await VSCodeUtils.openFileInEditor(
-        vscode.Uri.file(notePath)
-      )) as vscode.TextEditor;
-      editor.selection = new vscode.Selection(7, 0, 7, 12);
-      const link = await new CopyNoteURLCommand().run();
-      const url = path.join(rootUrl, "notes", "bar.html#foo");
-      assert.strictEqual(link, url);
-      done();
-    });
-
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async (opts) => {
+        const { vaults, wsRoot } = opts;
+        const vault = vaults[0];
+        await ENGINE_HOOKS.setupBasic(opts),
+          await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.create({
+            wsRoot,
+            vault,
+          });
+      },
+      onInit: async ({ vaults }) => {
+        const vault = vaults[0];
+        const fname = NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_TARGET.fname;
+        const editor = await VSCodeUtils.openNoteByPath({ vault, fname });
+        editor.selection = new vscode.Selection(7, 0, 7, 12);
+        const link = await new CopyNoteURLCommand().run();
+        const url = path.join(rootUrl, "notes", `${fname}.html#h1`);
+        expect(url).toEqual(link);
+        done();
+      },
       configOverride: {
         [CONFIG.COPY_NOTE_URL_ROOT.key]: rootUrl,
-      },
-      useCb: async (vaultDir) => {
-        const vault = { fsPath: vaultDir };
-        vaultPath = vaultDir;
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
-        const rootName = "bar";
-        const note = NoteUtilsV2.create({
-          fname: `${rootName}`,
-          id: `${rootName}`,
-          created: "1",
-          updated: "1",
-          body: "## Foo\nfoo text\n## Header\n Header text",
-          vault,
-        });
-        await note2File({ note, vault, wsRoot: "FAKE_ROOT" });
       },
     });
   });

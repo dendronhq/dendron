@@ -96,41 +96,6 @@ suite("VaultAddCommand", function () {
   });
 
   describe("remote", function () {
-    test("basic, no gitignore", (done) => {
-      runLegacySingleWorkspaceTest({
-        ctx,
-        onInit: async ({ wsRoot, vaults }) => {
-          const vault = vaults[0];
-          const cmd = new VaultAddCommand();
-          const remote = "https://github.com/dendronhq/dendron-site-vault.git";
-          stubVaultInput({
-            cmd,
-            sourceType: "remote",
-            sourcePath: remote,
-            sourceName: "dendron",
-          });
-          const resp = await cmd.run();
-          const newVault = resp!.vaults[0];
-          checkVaults({
-            wsRoot,
-            vaults: [
-              {
-                fsPath: newVault.fsPath,
-                name: "dendron",
-                remote: {
-                  type: "git",
-                  url: remote,
-                },
-              },
-              vault,
-            ],
-          });
-          expect(fs.existsSync(path.join(wsRoot, ".gitignore"))).toBeFalsy();
-          done();
-        },
-      });
-    });
-
     test("basic, gitignore", (done) => {
       runLegacySingleWorkspaceTest({
         ctx,

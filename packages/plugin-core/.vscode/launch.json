@@ -53,7 +53,7 @@
       "args": [
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/test/suite-integ/index"
+        "--extensionTestsPath=${workspaceFolder}/out/test/suite-integ/index.js"
       ],
       "env": {
         "TEST_TO_RUN": "",

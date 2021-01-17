@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.24.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.24.2-alpha.0...v0.24.2-alpha.1) (2021-01-17)
+
+### Enhancements
+
+- update fmtitle default ([98d9b14](https://github.com/dendronhq/dendron/commit/98d9b14e0c6cd11680feae95bf7425a8aa702772))
+
+### Features
+
+- add dendron to regular md preview ([68dfdfc](https://github.com/dendronhq/dendron/commit/68dfdfc3d897210cfc05ff05de3b0137ee9de9d5))
+
 ## [0.24.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.24.1...v0.24.2-alpha.0) (2021-01-16)
 
 ### Enhancements

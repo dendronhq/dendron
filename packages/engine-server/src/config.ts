@@ -17,6 +17,7 @@ export class DConfig {
     return {
       version: 1,
       vaults: [],
+      useFMTitle: true,
       site: {
         copyAssets: true,
         siteHierarchies: ["root"],

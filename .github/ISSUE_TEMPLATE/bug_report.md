@@ -7,6 +7,30 @@ assignees: ''
 
 ---
 
+<!--
+ Do not Remove this block!
+
+ Select something by placing an 'x' or 'X' inside the brackets.
+
+ Needed for Auto labeling:
+ issue_labeler_regex_version=1
+ 
+ - [X] Bug
+ -->
+
+
+
+**Please select the area your Bug applys to. (Multiple selections are Possible)**
+
+- [ ] UI 
+- [ ] Workbench
+- [ ] Publishing
+- [ ] Pods
+- [ ] Markdown
+- [ ] Hierarchy
+- [ ] Graph
+- [ ] Misc (Choose this if your not sure)
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 

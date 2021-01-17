@@ -168,6 +168,13 @@ export class WorkspaceService {
     const { wsRoot, vaults } = opts;
     const ws = new WorkspaceService({ wsRoot });
     fs.ensureDirSync(wsRoot);
+    // add gitignore
+    const gitIgnore = path.join(wsRoot, ".gitignore");
+    fs.writeFileSync(
+      gitIgnore,
+      ["node_modules", ".dendron.*", "build"].join("\n"),
+      { encoding: "utf8" }
+    );
     await Promise.all(
       vaults.map(async (vault) => {
         return ws.createVault({ vault });

@@ -172,7 +172,7 @@ export class WorkspaceService {
     const gitIgnore = path.join(wsRoot, ".gitignore");
     fs.writeFileSync(
       gitIgnore,
-      ["node_modules", ".dendron.*", "build"].join("\n"),
+      ["node_modules", ".dendron.*", "build", "repos"].join("\n"),
       { encoding: "utf8" }
     );
     await Promise.all(

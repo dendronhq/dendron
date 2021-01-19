@@ -150,7 +150,7 @@ export class SetupWorkspaceCommandV2 extends BasicCommand<
     if (initType === InitializeType.TUTORIAL_NOTES) {
       const dendronWSTemplate = vscode.Uri.joinPath(
         getWS().extensionAssetsDir,
-        "dendronWS"
+        "dendron-ws"
       );
       const filterFunc = (src: string, _dest: string) => {
         const basename = path.basename(src, ".md");

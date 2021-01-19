@@ -376,7 +376,7 @@ async function showWelcomeOrWhatsNew(
     const uri = vscode.Uri.joinPath(
       ws.context.extensionUri,
       "assets",
-      "dendronWS",
+      "dendron-ws",
       "vault",
       "dendron.welcome.md"
     );

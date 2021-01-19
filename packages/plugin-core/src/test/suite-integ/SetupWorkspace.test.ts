@@ -20,7 +20,6 @@ import { describe, it } from "mocha";
 import path from "path";
 import { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
-import { InitializeType } from "../../commands/SetupWorkspace";
 import { DEFAULT_LEGACY_VAULT_NAME } from "../../constants";
 import { WorkspaceSettings } from "../../types";
 import { DendronWorkspace, resolveRelToWSRoot } from "../../workspace";
@@ -28,7 +27,6 @@ import {
   expect,
   genDefaultSettings,
   genEmptyWSFiles,
-  runWorkspaceTestV3,
   stubWorkspaceFolders,
 } from "../testUtilsv2";
 import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
@@ -157,23 +155,6 @@ suite("SetupWorkspace", function () {
           fs.removeSync(
             path.join(resolveRelToWSRoot(vaults[0].fsPath), "root.schema.yml")
           );
-        },
-      });
-    });
-
-    it.skip("with template", function (done) {
-      runWorkspaceTestV3({
-        ctx,
-        setupWsOverride: {
-          skipConfirmation: true,
-          emptyWs: false,
-          initType: InitializeType.TEMPLATE,
-          skipOpenWs: true,
-        },
-        onInit: async ({ wsRoot }) => {
-          const dendronRoot = path.join(wsRoot);
-          expect(fs.existsSync(dendronRoot)).toEqual(true);
-          done();
         },
       });
     });

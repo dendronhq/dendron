@@ -38,10 +38,9 @@
     "bootstrap:build:dendron-cli": "npm run-script bootstrap:build: @dendronhq/dendron-cli",
     "bootstrap:build:dendron-next-server": "npm run-script bootstrap:build: @dendronhq/dendron-next-server",
     "bootstrap:build:plugin-core": "npm run-script bootstrap:build: @dendronhq/plugin-core",
-    "bootstrap:build:plugin-core:sync-vault": "npx lerna run sync-vault --scope @dendronhq/plugin-core",
-    "bootstrap:init": "npm run-script bootstrap:bootstrap && npm run-script bootstrap:build && npm run-script bootstrap:build:plugin-core:sync-vault",
+    "bootstrap:init": "npm run-script bootstrap:bootstrap && npm run-script bootstrap:build",
     "ci:bootstrap": "npx lerna bootstrap --ci",
-    "ci:init": "npm run-script ci:bootstrap && npm run-script bootstrap:build && npm run-script bootstrap:build:plugin-core:sync-vault",
+    "ci:init": "npm run-script ci:bootstrap && npm run-script bootstrap:build",
     "ci:test:cli": "npx lerna run test --ignore @dendronhq/plugin-core --parallel --stream -- -- --forceExit",
     "ci:test:plugin": "npx lerna run test --scope @dendronhq/plugin-core --stream"
   },

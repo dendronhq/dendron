@@ -49,22 +49,26 @@ suite("Extension", function () {
       });
     });
 
-    it.skip("not active/ init, first time", function (done) {
+    it("not active/ init, first time", function (done) {
       const wsRoot = tmpDir().name;
-      _activate(ctx).then(async (resp) => {
-        expect(resp).toBeFalsy();
-        stubSetupWorkspace({ wsRoot, initType: InitializeType.EMPTY });
-        await vscode.commands.executeCommand(DENDRON_COMMANDS.INIT_WS.key, {
-          skipOpenWs: true,
-          skipConfirmation: true,
-        } as SetupWorkspaceOpts);
-
-        // first time init
-        expect(
-          fs.readdirSync(path.join(wsRoot, DEFAULT_LEGACY_VAULT_NAME))
-        ).toEqual(genTutorialWSFiles());
-        done();
-      });
+      getWS()
+        .context.globalState.update(GLOBAL_STATE.DENDRON_FIRST_WS, true)
+        .then(() => {
+          _activate(ctx).then(async () => {
+            stubSetupWorkspace({
+              wsRoot,
+              initType: InitializeType.TUTORIAL_NOTES,
+            });
+            await vscode.commands.executeCommand(DENDRON_COMMANDS.INIT_WS.key, {
+              skipOpenWs: true,
+              skipConfirmation: true,
+            } as SetupWorkspaceOpts);
+            expect(
+              fs.readdirSync(path.join(wsRoot, DEFAULT_LEGACY_VAULT_NAME))
+            ).toEqual(genTutorialWSFiles());
+            done();
+          });
+        });
     });
 
     it("not active/ init, not first time", function (done) {

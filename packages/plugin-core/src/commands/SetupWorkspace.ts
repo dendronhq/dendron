@@ -195,12 +195,11 @@ export class SetupWorkspaceCommand extends BasicCommand<
       return this.handleInitializeType({ initType, rootDir });
     }
 
-    
     // create vault
     const vaultPath = opts.vault?.fsPath || "vault";
     const vaults = [{ fsPath: vaultPath }];
     await WorkspaceService.createWorkspace({ vaults, wsRoot: rootDir });
-    const vpath = vault2Path({vault: vaults[0], wsRoot: rootDir})
+    const vpath = vault2Path({ vault: vaults[0], wsRoot: rootDir });
 
     // create dendron root
     // if (getWS().dendronRoot !== rootDir) {
@@ -209,7 +208,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
 
     const dendronWSTemplate = vscode.Uri.joinPath(
       ws.extensionAssetsDir,
-      "dendronWS"
+      "dendron-ws"
     );
     // copy over jekyll config
     const dendronJekyll = vscode.Uri.joinPath(ws.extensionAssetsDir, "jekyll");
@@ -217,14 +216,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
 
     // copy over notes
     if (!emptyWs) {
-      const filterFunc = (src: string, _dest: string) => {
-        const basename = path.basename(src, ".md");
-        const whitelist = ["dendron", "vault"];
-        return _.some(whitelist, (ent) => basename.startsWith(ent));
-      };
-      fs.copySync(path.join(dendronWSTemplate.fsPath, "vault"), vpath, {
-        filter: filterFunc,
-      });
+      fs.copySync(path.join(dendronWSTemplate.fsPath, "vault"), vpath);
     }
     // write workspace defaults
     WorkspaceConfig.write(rootDir);

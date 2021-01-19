@@ -42,6 +42,9 @@ const config = {
     new CopyPlugin({
       patterns: [{ from: path.join("assets", "static"), to: "static" }],
     }),
+    new CopyPlugin({
+      patterns: [{ from: path.join("assets", "dendron-ws"), to: "dendron-ws" }],
+    }),
     new IgnorePlugin({
       // resourceRegExp: /^\.\/locale$/,
       resourceRegExp: /^@dendronhq\/dendron-11ty$/,

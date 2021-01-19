@@ -65,7 +65,12 @@ export function genEmptyWSFiles() {
 }
 
 export function genTutorialWSFiles() {
-  return [...genEmptyWSFiles(), "dendron.md", "dendron.welcome.md"].sort();
+  return [
+    ...genEmptyWSFiles(),
+    "assets",
+    "dendron.md",
+    "dendron.welcome.md",
+  ].sort();
 }
 
 export function genDefaultConfig() {

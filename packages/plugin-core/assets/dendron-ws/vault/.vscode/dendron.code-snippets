@@ -1,0 +1,47 @@
+{
+    "date": {
+        "prefix": "date",
+        "scope": "markdown,yaml",
+        "body": "$CURRENT_YEAR.$CURRENT_MONTH.$CURRENT_DATE",
+        "description": "today's date"
+    },
+    "time": {
+        "prefix": "time",
+        "scope": "markdown,yaml",
+        "body": "$CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE $CURRENT_HOUR:$CURRENT_MINUTE",
+        "description": "time"
+    },
+    "todo": {
+        "prefix": "to",
+        "scope": "markdown,yaml",
+        "body": "- [ ] ",
+        "description": "todo box"
+    },
+    "h3": {
+        "prefix": "h3",
+        "scope": "markdown",
+        "body": "### "
+    },
+    "tag": {
+        "prefix": "#",
+        "scope": "markdown,yaml",
+        "body": "[[#${1:my-tag}|tag.${1}]]",
+        "description": "render todo box"
+    },
+    "project": {
+        "prefix": "project",
+        "body": [
+            "## Goals",
+            "",
+            "## Details",
+            "",
+            "## Discussions",
+            "",
+            "## Tasks",
+            "",
+            "## Release Notes",
+            ""
+        ],
+        "description": ""
+    }
+}

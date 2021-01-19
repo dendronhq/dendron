@@ -295,6 +295,12 @@ export function stubSetupWorkspace({
         return "initialize empty repository";
       };
       break;
+    case InitializeType.TUTORIAL_NOTES:
+      // @ts-ignore
+      VSCodeUtils.showQuickPick = () => {
+        return "initialize with dendron tutorial notes";
+      };
+      break;
     default:
       throw Error(`inittype ${initType} not handled`);
   }

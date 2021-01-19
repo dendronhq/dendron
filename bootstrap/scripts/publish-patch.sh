@@ -5,6 +5,6 @@ echo "upgrading..."
 lerna version patch
 lerna publish from-package -y
 git push
-node genMeta.js
+node bootstrap/scripts/genMeta.js
 
 

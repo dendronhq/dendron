@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.25.2](https://github.com/dendronhq/dendron/compare/v0.25.1...v0.25.2) (2021-01-19)
+
+### Enhancements
+
+- use multi-vault list to handle dups ([ee50aa5](https://github.com/dendronhq/dendron/commit/ee50aa5494f005be062a9ee40b0bfbdfe5b7607e))
+
 ## [0.25.1](https://github.com/dendronhq/dendron/compare/v0.25.1-alpha.0...v0.25.1) (2021-01-19)
 
 **Note:** Version bump only for package root

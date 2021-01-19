@@ -8,8 +8,6 @@ stub: false
 nav_order: 1
 ---
 
-# QuickStart
-
 Welcome to Dendron! This guide will help get you started with your knowledge base.
 
 ## The Trail 🥾

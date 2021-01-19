@@ -27,7 +27,6 @@
         "dendron.dendron-snippet-maker"
     ],
     "contributes": {
-        "markdown.markdownItPlugins": true,
         "languages": [
             {
                 "id": "markdown",

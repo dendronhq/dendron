@@ -78,4 +78,129 @@ describe("MarkdownPublishPod", () => {
       }
     );
   });
+
+  test("schema with template", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const vault = vaults[0];
+        const vaultName = VaultUtils.getName(vault);
+        const fnames = ["bar.template.ch1", "bar.template.ch2"];
+        const resp = await Promise.all(
+          fnames.map(async (fname) => {
+            return new MarkdownPublishPod().execute({
+              engine,
+              vaults,
+              wsRoot,
+              config: {
+                fname,
+                vault: vaultName,
+                dest: "stdout",
+              },
+            });
+          })
+        );
+        expect(resp).toEqual(["ch1 template", "ch2 template"]);
+      },
+      {
+        expect,
+        preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
+      }
+    );
+  });
+
+  test("schema with namespace template", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const vault = vaults[0];
+        const vaultName = VaultUtils.getName(vault);
+        const fnames = ["daily", "journal.template"];
+        const resp = await Promise.all(
+          fnames.map(async (fname) => {
+            return new MarkdownPublishPod().execute({
+              engine,
+              vaults,
+              wsRoot,
+              config: {
+                fname,
+                vault: vaultName,
+                dest: "stdout",
+              },
+            });
+          })
+        );
+        expect(resp).toEqual(["Journal", "Template text"]);
+      },
+      {
+        expect,
+        preSetupHook: ENGINE_HOOKS.setupSchemaPresetWithNamespaceTemplate,
+      }
+    );
+  });
+
+  test("recursive note refs", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const vault = vaults[0];
+        const vaultName = VaultUtils.getName(vault);
+        const fnames = ["foo.one", "foo.two"];
+        const resp = await Promise.all(
+          fnames.map(async (fname) => {
+            return new MarkdownPublishPod().execute({
+              engine,
+              vaults,
+              wsRoot,
+              config: {
+                fname,
+                vault: vaultName,
+                dest: "stdout",
+              },
+            });
+          })
+        );
+        const fooOneBody = `# Foo.One\n\n((ref:[[foo.two]]))\nRegular wikilink: [[foo.two]]`;
+        const fooTwoBody = `# Foo.Two\n\nblah`;
+        expect(resp).toEqual([fooOneBody, fooTwoBody]);
+      },
+      {
+        expect,
+        preSetupHook: ENGINE_HOOKS.setupNoteRefRecursive,
+      }
+    );
+  });
+
+  test("journal", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const vault = vaults[0];
+        const vaultName = VaultUtils.getName(vault);
+        const fnames = [
+          "daily",
+          "daily.journal",
+          "daily.journal.2020",
+          "daily.journal.2020.07",
+          "daily.journal.2020.07.01.one",
+          "daily.journal.2020.07.05.two",
+        ];
+        const resp = await Promise.all(
+          fnames.map(async (fname) => {
+            return new MarkdownPublishPod().execute({
+              engine,
+              vaults,
+              wsRoot,
+              config: {
+                fname,
+                vault: vaultName,
+                dest: "stdout",
+              },
+            });
+          })
+        );
+        expect(resp).toEqual(["", "", "", "", "", ""]);
+      },
+      {
+        expect,
+        preSetupHook: ENGINE_HOOKS.setupJournals,
+      }
+    );
+  });
 });

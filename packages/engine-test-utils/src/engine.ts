@@ -1,23 +1,43 @@
+import { DEngineClientV2, DVault, WorkspaceOpts } from "@dendronhq/common-all";
+import { launch } from "@dendronhq/api-server";
 import { tmpDir } from "@dendronhq/common-server";
 import {
-  CreateEngineFunction,
   RunEngineTestFunctionV4,
   runJestHarnessV2,
   SetupHookFunction,
 } from "@dendronhq/common-test-utils";
 import {
-  createEngine as defaultCreateEngine,
+  createEngine as engineServerCreateEngine,
+  DendronEngineClient,
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 
-async function setupWS(opts: { singleVault?: boolean }) {
+export type AsyncCreateEngineFunction = (
+  opts: WorkspaceOpts
+) => Promise<DEngineClientV2>;
+
+export async function createEngineFromEngine(opts: WorkspaceOpts) {
+  return engineServerCreateEngine(opts);
+}
+
+export async function createEngineFromServer(opts: WorkspaceOpts) {
+  const port = await launch({});
+  const engine: DEngineClientV2 = DendronEngineClient.create({
+    port,
+    vaultsv4: opts.vaults,
+    ws: opts.wsRoot,
+    vaults: [],
+  });
+  await engine.init();
+  return engine;
+}
+
+async function setupWS(opts: { vaults: DVault[] }) {
   const wsRoot = tmpDir().name;
-  const defaultVaults = opts?.singleVault ? ["vault1"] : ["vault1", "vault2"];
   const ws = new WorkspaceService({ wsRoot });
   const vaults = await Promise.all(
-    defaultVaults.map(async (fsPath) => {
-      const vault = { fsPath };
+    opts.vaults.map(async (vault) => {
       await ws.createVault({ vault });
       return vault;
     })
@@ -30,22 +50,23 @@ export async function runEngineTestV5<TExtra = any>(
   opts: {
     preSetupHook?: SetupHookFunction;
     //postSetupHook?: PostSetupHookFunction;
-    createEngine?: CreateEngineFunction;
+    createEngine?: AsyncCreateEngineFunction;
     extra?: TExtra;
     expect: any;
+    vaults?: DVault[];
     setupOnly?: boolean;
-    singleVault?: boolean;
   }
 ) {
-  const { preSetupHook, extra, singleVault, createEngine } = _.defaults(opts, {
+  const { preSetupHook, extra, vaults, createEngine } = _.defaults(opts, {
     preSetupHook: async ({}) => {},
     postSetupHook: async ({}) => {},
-    createEngine: defaultCreateEngine,
+    createEngine: createEngineFromEngine,
     extra: {},
+    vaults: [{ fsPath: "vault1" }, { fsPath: "vault2" }],
   });
-  const { wsRoot, vaults } = await setupWS({ singleVault });
+  const { wsRoot } = await setupWS({ vaults });
   await preSetupHook({ wsRoot, vaults });
-  const engine = createEngine({ wsRoot, vaults });
+  const engine = await createEngine({ wsRoot, vaults });
   const initResp = await engine.init();
   const testOpts = { wsRoot, vaults, engine, initResp, extra };
   if (opts.setupOnly) {

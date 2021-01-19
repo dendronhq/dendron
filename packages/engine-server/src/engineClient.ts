@@ -40,6 +40,7 @@ import { HistoryService } from "./history";
 import { getPortFilePath } from "./utils";
 
 type DendronEngineClientOpts = {
+  vaultsv4?: DVault[];
   vaults: string[];
   ws: string;
 };
@@ -64,6 +65,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     ws,
     history,
     logger,
+    vaultsv4,
   }: {
     port: number | string;
     history?: HistoryService;
@@ -74,7 +76,7 @@ export class DendronEngineClient implements DEngineClientV2 {
       apiPath: "api",
       logger,
     });
-    return new DendronEngineClient({ api, vaults, ws, history });
+    return new DendronEngineClient({ api, vaults, ws, history, vaultsv4 });
   }
 
   static getPort({ wsRoot }: { wsRoot: string }): number {
@@ -91,20 +93,24 @@ export class DendronEngineClient implements DEngineClientV2 {
     ws,
     history,
     logger,
+    vaultsv4,
   }: {
     api: DendronAPI;
-    vaults: string[];
-    ws: string;
     history?: HistoryService;
     logger?: DLogger;
-  }) {
+  } & DendronEngineClientOpts) {
     this.api = api;
     this.notes = {};
     this.schemas = {};
     this.links = [];
     this.fuseEngine = new FuseEngine({});
-    this.vaults = vaults;
-    this.vaultsv3 = vaults.map((ent) => ({ fsPath: ent }));
+    if (vaultsv4) {
+      this.vaultsv3 = vaultsv4;
+      this.vaults = vaultsv4.map((ent) => ent.fsPath);
+    } else {
+      this.vaults = vaults;
+      this.vaultsv3 = vaults.map((ent) => ({ fsPath: ent }));
+    }
     this.wsRoot = ws;
     this.ws = ws;
     this.configRoot = this.wsRoot;

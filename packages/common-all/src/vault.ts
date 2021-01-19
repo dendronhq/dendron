@@ -25,6 +25,9 @@ export class VaultUtils {
     );
   }
 
+  /**
+   @deprecated
+   */
   static getByVaultPath({
     wsRoot,
     vaults,
@@ -43,6 +46,22 @@ export class VaultUtils {
     });
     if (!vault) {
       throw new DendronError({ msg: "no vault found" });
+    }
+    return vault;
+  }
+
+  static getVaultByName({
+    vaults,
+    vname,
+  }: {
+    vname: string;
+    vaults: DVault[];
+  }) {
+    const vault = _.find(vaults, (vault) => {
+      return vname === VaultUtils.getName(vault);
+    });
+    if (!vault) {
+      throw new DendronError({ msg: `vault with name ${vname} not found` });
     }
     return vault;
   }

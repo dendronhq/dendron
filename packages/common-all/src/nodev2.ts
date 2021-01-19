@@ -584,6 +584,29 @@ export class NoteUtilsV2 {
     return out;
   }
 
+  static getNoteByFnameV5({
+    fname,
+    notes,
+    vault,
+    wsRoot,
+  }: {
+    fname: string;
+    notes: NotePropsDictV2 | NotePropsV2[];
+    vault: DVault;
+    wsRoot: string;
+  }): NotePropsV2 | undefined {
+    if (!_.isArray(notes)) {
+      notes = _.values(notes);
+    }
+    const out = _.find(notes, (ent) => {
+      return (
+        ent.fname.toLowerCase() === fname.toLowerCase() &&
+        VaultUtils.isEqual(vault, ent.vault, wsRoot)
+      );
+    });
+    return out;
+  }
+
   /**
    @deprecated
    */

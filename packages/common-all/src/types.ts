@@ -222,11 +222,11 @@ export enum DuplicateNoteAction {
   USE_VAULT = "useVault",
 }
 
-type UseVaultBehavior = {
+export type UseVaultBehaviorPayload = { vault: DVault } | string[];
+
+export type UseVaultBehavior = {
   action: DuplicateNoteAction;
-  payload: {
-    vault: DVault;
-  };
+  payload: UseVaultBehaviorPayload;
 };
 
 export type DuplicateNoteBehavior = UseVaultBehavior;

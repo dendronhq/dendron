@@ -17,14 +17,18 @@ import {
   NoteTestUtilsV4,
   SetupHookFunction,
 } from "@dendronhq/common-test-utils";
-import { createEngine, SiteUtils } from "@dendronhq/engine-server";
+import { SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { ConfigUtils } from "../config";
-import { runEngineTestV5 } from "../engine";
+import {
+  createEngineFromEngine,
+  createEngineFromServer,
+  runEngineTestV5,
+} from "../engine";
 
 const basicSetup = (preSetupHook?: SetupHookFunction) => ({
-  createEngine,
+  createEngine: createEngineFromEngine,
   expect,
   preSetupHook: async (opts: WorkspaceOpts) => {
     await ENGINE_HOOKS.setupBasic(opts);
@@ -34,15 +38,20 @@ const basicSetup = (preSetupHook?: SetupHookFunction) => ({
   },
 });
 
-const dupNote = (vault: DVault) => {
-  return {
+const dupNote = (payload: DVault | string[]) => {
+  const out: any = {
     duplicateNoteBehavior: {
       action: DuplicateNoteAction.USE_VAULT,
-      payload: {
-        vault,
-      },
     },
   };
+  if (_.isArray(payload)) {
+    out.duplicateNoteBehavior.payload = payload;
+  } else {
+    out.duplicateNoteBehavior.payload = {
+      vault: payload,
+    };
+  }
+  return out;
 };
 
 const checkNotes = (opts: {
@@ -302,7 +311,6 @@ describe("SiteUtils", () => {
           });
         },
         {
-          createEngine,
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS.setupBasic(opts);
@@ -340,7 +348,6 @@ describe("SiteUtils", () => {
           });
         },
         {
-          createEngine,
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS.setupBasic(opts);
@@ -365,7 +372,11 @@ describe("SiteUtils", () => {
               wsRoot,
             }
           );
-          const { notes } = await SiteUtils.filterByConfig({ engine, config });
+          const { notes, domains } = await SiteUtils.filterByConfig({
+            engine,
+            config,
+          });
+          expect(_.size(domains)).toEqual(2);
           checkNotes({
             filteredNotes: notes,
             engineNotes: engine.notes,
@@ -373,9 +384,61 @@ describe("SiteUtils", () => {
           });
         },
         {
-          createEngine,
           expect,
           preSetupHook: ENGINE_HOOKS.setupBasic,
+        }
+      );
+    });
+
+    test("one hiearchy, dups with list override", async () => {
+      await runEngineTestV5(
+        async ({ engine, wsRoot }) => {
+          const config = ConfigUtils.withConfig(
+            (config) => {
+              config.site = {
+                siteHierarchies: ["foo"],
+                siteRootDir,
+                ...dupNote(["vault2", "fooVault", "vault3"]),
+                config: {
+                  root: {
+                    publishByDefault: true,
+                  },
+                },
+              };
+              return config;
+            },
+            {
+              wsRoot,
+            }
+          );
+          const { notes, domains } = await SiteUtils.filterByConfig({
+            engine,
+            config,
+          });
+          expect(domains.length).toEqual(2);
+          checkNotes({
+            filteredNotes: notes,
+            engineNotes: engine.notes,
+            match: [{ id: "foo-other", parent: null }, { id: "foo.ch1" }],
+          });
+        },
+        {
+          createEngine: createEngineFromServer,
+          expect,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupBasic(opts);
+            await NoteTestUtilsV4.createNote({
+              fname: "foo",
+              vault: opts.vaults[2],
+              wsRoot: opts.wsRoot,
+              props: { id: "foo-other" },
+            });
+          },
+          vaults: [
+            { fsPath: "vault1" },
+            { fsPath: "vault2" },
+            { fsPath: "vault3", name: "fooVault" },
+          ],
         }
       );
     });
@@ -408,7 +471,6 @@ describe("SiteUtils", () => {
           });
         },
         {
-          createEngine,
           expect,
           preSetupHook: ENGINE_HOOKS.setupBasic,
         }
@@ -441,7 +503,6 @@ describe("SiteUtils", () => {
             }
           );
           const { notes } = await SiteUtils.filterByConfig({ engine, config });
-          expect(notes).toMatchSnapshot();
           checkNotes({
             filteredNotes: notes,
             engineNotes: engine.notes,
@@ -453,7 +514,6 @@ describe("SiteUtils", () => {
           });
         },
         {
-          createEngine,
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
@@ -491,7 +551,6 @@ describe("SiteUtils", () => {
           ]);
         },
         {
-          createEngine,
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS.setupJournals(opts);
@@ -558,7 +617,6 @@ describe("SiteUtils", () => {
           });
         },
         {
-          createEngine,
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);

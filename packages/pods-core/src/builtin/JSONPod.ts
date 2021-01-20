@@ -146,21 +146,25 @@ export class JSONExportPod extends ExportPod<
   void
 > {
   static id: string = ID;
-  static description: string = "export notes to snapshot";
+  static description: string = "export notes as json";
 
+  // no-op
   async clean(opts: ExportPodCleanOpts<ExportPodRawConfig>) {
     return opts.config;
   }
 
   async plant(opts: ExportPodPlantOpts<ExportPodCleanConfig>) {
     const { config, engine } = opts;
-    // verify root
+    // verify dest exist
     const podDstPath = config.dest.fsPath;
     fs.ensureDirSync(path.dirname(podDstPath));
+
+    // parse notes into NoteProps
     const notes = this.preareNotesForExport({
       config,
       notes: _.values(engine.notes),
     });
+
     fs.writeJSONSync(podDstPath, notes, { encoding: "utf8" });
   }
 }

@@ -50,12 +50,19 @@
         },
         {
             "path": "docs"
-        }
+        },
     ],
     "settings": {
         "files.exclude": {
             "*.d.ts": true,
-            "packages": true
+            "packages": true,
+            "profile": true
+        },
+        "search.exclude": {
+            "**/node_modules": true,
+            "**/bower_components": true,
+            "**/*.code-search": true,
+            "CHANGELOG.md": true
         },
         "editor.formatOnSave": false,
         "workbench.editor.showTabs": true,

@@ -135,6 +135,11 @@ export abstract class ExportPod<
     };
   }
 
+  /**
+   * Checks for some pre-sets
+   * - if not `includeBody`, then fetch notes without body
+   * - if not `includeStubs`, then ignore stub nodes
+   */
   preareNotesForExport({
     config,
     notes,

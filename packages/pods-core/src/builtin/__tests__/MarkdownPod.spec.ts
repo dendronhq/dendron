@@ -108,35 +108,6 @@ describe("MarkdownPublishPod", () => {
     );
   });
 
-  test("schema with namespace template", async () => {
-    await runEngineTestV5(
-      async ({ engine, wsRoot, vaults }) => {
-        const vault = vaults[0];
-        const vaultName = VaultUtils.getName(vault);
-        const fnames = ["daily", "journal.template"];
-        const resp = await Promise.all(
-          fnames.map(async (fname) => {
-            return new MarkdownPublishPod().execute({
-              engine,
-              vaults,
-              wsRoot,
-              config: {
-                fname,
-                vault: vaultName,
-                dest: "stdout",
-              },
-            });
-          })
-        );
-        expect(resp).toEqual(["Journal", "Template text"]);
-      },
-      {
-        expect,
-        preSetupHook: ENGINE_HOOKS.setupSchemaPresetWithNamespaceTemplate,
-      }
-    );
-  });
-
   test("recursive note refs", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
@@ -164,42 +135,6 @@ describe("MarkdownPublishPod", () => {
       {
         expect,
         preSetupHook: ENGINE_HOOKS.setupNoteRefRecursive,
-      }
-    );
-  });
-
-  test("journal", async () => {
-    await runEngineTestV5(
-      async ({ engine, wsRoot, vaults }) => {
-        const vault = vaults[0];
-        const vaultName = VaultUtils.getName(vault);
-        const fnames = [
-          "daily",
-          "daily.journal",
-          "daily.journal.2020",
-          "daily.journal.2020.07",
-          "daily.journal.2020.07.01.one",
-          "daily.journal.2020.07.05.two",
-        ];
-        const resp = await Promise.all(
-          fnames.map(async (fname) => {
-            return new MarkdownPublishPod().execute({
-              engine,
-              vaults,
-              wsRoot,
-              config: {
-                fname,
-                vault: vaultName,
-                dest: "stdout",
-              },
-            });
-          })
-        );
-        expect(resp).toEqual(["", "", "", "", "", ""]);
-      },
-      {
-        expect,
-        preSetupHook: ENGINE_HOOKS.setupJournals,
       }
     );
   });

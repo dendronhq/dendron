@@ -86,7 +86,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
               const wsRoot = engine.wsRoot;
               canPublish = SiteUtils.canPublish({
                 note,
-                config,
+                config: config.site,
                 vaults,
                 wsRoot,
               });

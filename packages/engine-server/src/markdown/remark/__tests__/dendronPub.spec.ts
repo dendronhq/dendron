@@ -1,6 +1,7 @@
-import { DendronSiteConfig, DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngineClientV2 } from "@dendronhq/common-all";
 import { ENGINE_HOOKS, runEngineTestV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
+import { DConfig } from "../../../config";
 import { createEngine } from "../../../enginev2";
 import { DendronASTData, DendronASTDest } from "../../types";
 import { MDUtilsV4 } from "../../utils";
@@ -38,7 +39,8 @@ describe("basics", () => {
     await runEngineTestV4(
       async ({ engine, vaults }) => {
         const vault = vaults[0];
-        const config: DendronSiteConfig = {
+        const config = DConfig.genDefaultConfig();
+        config.site = {
           siteHierarchies: ["foo"],
           siteRootDir: "foo",
         };

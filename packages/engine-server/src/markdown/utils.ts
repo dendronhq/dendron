@@ -1,6 +1,6 @@
 import {
+  DendronConfig,
   DendronError,
-  DendronSiteConfig,
   DEngineClientV2,
   DVault,
   getSlugger,
@@ -18,24 +18,24 @@ import raw from "rehype-raw";
 import slug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import remark from "remark";
-// @ts-ignore
-import variables from "remark-variables";
+import abbrPlugin from "remark-abbr";
+import footnotes from "remark-footnotes";
 import frontmatterPlugin from "remark-frontmatter";
 import math from "remark-math";
+// @ts-ignore
+import mermaid from "remark-mermaid";
 import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
 import remarkStringify from "remark-stringify";
+// @ts-ignore
+import variables from "remark-variables";
 import { default as unified, default as Unified, Processor } from "unified";
 import { Node, Parent } from "unist";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
+import { noteRefsV2 } from "./remark/noteRefsV2";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTData, DendronASTDest } from "./types";
-import abbrPlugin from "remark-abbr";
-import { noteRefsV2 } from "./remark/noteRefsV2";
-import footnotes from "remark-footnotes";
-// @ts-ignore
-import mermaid from "remark-mermaid";
 
 const toString = require("mdast-util-to-string");
 
@@ -160,7 +160,7 @@ export class MDUtilsV4 {
     opts: ProcOpts & {
       dest: DendronASTDest;
       vault?: DVault;
-      config?: DendronSiteConfig;
+      config?: DendronConfig;
       fname?: string;
       wikiLinksOpts?: WikiLinksOpts;
       noteRefOpts?: NoteRefsOpts;

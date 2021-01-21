@@ -6,8 +6,9 @@ import {
   runEngineTestV4,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
+import { Node } from "unist";
 import { DendronEngineV2 } from "../../../enginev2";
-import { DendronASTData, DendronASTDest } from "../../types";
+import { DendronASTData, DendronASTDest, WikiLinkNoteV4 } from "../../types";
 import { MDUtilsV4 } from "../../utils";
 import { wikiLinks, WikiLinksOpts } from "../wikiLinks";
 
@@ -21,15 +22,18 @@ function proc(
     .use(wikiLinks, opts);
 }
 
+function getWikiLink(node: Node): WikiLinkNoteV4 {
+  // @ts-ignore
+  return node.children[0].children[0];
+}
+
 describe("parse", () => {
   let engine: any;
   let dendronData = { dest: DendronASTDest.MD_REGULAR };
 
   test("basic", () => {
     const resp = proc(engine, dendronData).parse(`[[foo.md]]`);
-    expect(resp).toMatchSnapshot();
-    // @ts-ignore
-    expect(resp.children[0].children[0].type).toEqual("wikiLink");
+    expect(getWikiLink(resp).type).toEqual("wikiLink");
   });
 
   test("link with space", () => {
@@ -59,6 +63,54 @@ describe("parse", () => {
   });
 });
 
+// const checkContents = (respProcess: VFile, cmp: string) => {
+//   expect(_.trim(respProcess.contents as string)).toEqual(cmp);
+// };
+
+// const BASIC = createProcTests({
+//   name: "BASIC",
+//   setupFunc: async (opts) => {
+//     let proc = await createProc(opts, {});
+//     return processText({ proc, text: "[[foo]]" });
+//   },
+//   preSetupHook: ENGINE_HOOKS.setupBasic,
+//   verifyFuncDict: {
+//     [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+//       const { respProcess } = extra;
+//       checkContents(respProcess, "[foo](foo)");
+//     },
+//     [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+//       const { respProcess } = extra;
+//       checkContents(respProcess, "[foo](foo.md)");
+//     },
+//     [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+//       const { respProcess } = extra;
+//       checkContents(respProcess, "[[foo]]");
+//     },
+//     [DendronASTDest.HTML]: async ({ extra }) => {
+//       const { respProcess } = extra;
+//       checkContents(respProcess, "[foo](foo.html)");
+//     },
+//   },
+// });
+
+// const ALL_TEST_CASES = [
+//   ...BASIC,
+//   ...HELLO_FILTER,
+
+// describe("compile", () => {
+//   test.each(
+//     ALL_TEST_CASES.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
+//   )("%p", async (_key, testCase: TestPresetEntryV4) => {
+//     await runEngineTestV4(testCase.testFunc, {
+//       expect,
+//       createEngine,
+//       preSetupHook: testCase.preSetupHook,
+//     });
+//   });
+// });
+
+// ===
 const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
   const logger = createLogger("testLogger", getLogFilePath("engine-server"));
   const engine = DendronEngineV2.createV3({ vaults, wsRoot, logger });

@@ -73,6 +73,7 @@
     "remark-footnotes": "2",
     "remark-frontmatter": "^2.0.0",
     "remark-math": "3",
+    "remark-mermaid": "^0.2.0",
     "remark-parse": "^8.0.3",
     "remark-rehype": "^8.0.0",
     "remark-stringify": "^9.0.1",

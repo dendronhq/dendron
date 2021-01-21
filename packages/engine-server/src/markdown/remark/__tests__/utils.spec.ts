@@ -153,6 +153,42 @@ const WITH_ABBR = createProcTests({
   },
 });
 
+const WITH_MERMAID = createProcTests({
+  name: "WITH_MERMAID",
+  setupFunc: async (opts) => {
+    let proc = await createProc(opts);
+    const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
+    return readAndProcess({ npath, proc });
+  },
+  verifyFuncDict: {
+    [DendronASTDest.HTML]: async ({ extra }) => {
+      const { respRehype } = extra;
+      expect(
+        await AssertUtils.assertInString({
+          body: respRehype.contents,
+          match: [
+            `<h1 id="mermaid-code-block"><a aria-hidden="true" class="anchor-heading" href="#mermaid-code-block"><svg aria-hidden="true" viewBox="0 0 16 16"><use xlink:href="#svg-link"></use></svg></a>mermaid code block</h1>`,
+          ],
+        })
+      ).toBeTruthy();
+    },
+  },
+  preSetupHook: async (opts) => {
+    await ENGINE_HOOKS.setupBasic(opts);
+    await modifyNote(opts, (note: NotePropsV2) => {
+      note.body = `
+# mermaid code block
+
+\`\`\`mermaid
+graph LR
+Start --> Stop
+\`\`\`
+`;
+      return note;
+    });
+  },
+});
+
 const WITH_FOOTNOTES = createProcTests({
   name: "WITH_FOOTNOTES",
   setupFunc: async (opts) => {
@@ -383,6 +419,7 @@ const ALL_TEST_CASES = [
   ...WITH_TITLE,
   ...NOTE_W_LINK_AND_SPACE,
   ...WITH_FOOTNOTES,
+  ...WITH_MERMAID,
 ];
 
 describe("MDUtils.proc", () => {

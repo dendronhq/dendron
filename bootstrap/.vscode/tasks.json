@@ -37,9 +37,12 @@
       "type": "shell",
       "command": "./bootstrap/scripts/testAll.sh",
       "options": {
-        "cwd": "./.."
+        "cwd": "./..",
+        "env": {
+          "LOG_LEVEL": "error"
+        }
       },
-      "problemMatcher": []
+      "problemMatcher": [],
     },
     {
       "label": "changelog",

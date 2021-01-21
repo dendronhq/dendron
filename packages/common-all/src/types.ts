@@ -64,6 +64,11 @@ export type DendronConfig = {
    * Use the title from frontmatter
    */
   useFMTitle?: boolean;
+
+  /**
+   * Use mermaid diagrams
+   */
+  mermaid?: boolean;
 };
 
 export type HierarchyConfig = {

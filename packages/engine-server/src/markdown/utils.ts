@@ -34,6 +34,8 @@ import { DendronASTData, DendronASTDest } from "./types";
 import abbrPlugin from "remark-abbr";
 import { noteRefsV2 } from "./remark/noteRefsV2";
 import footnotes from "remark-footnotes";
+// @ts-ignore
+import mermaid from "remark-mermaid";
 
 const toString = require("mdast-util-to-string");
 
@@ -166,6 +168,7 @@ export class MDUtilsV4 {
       mathOpts?: {
         katex?: boolean;
       };
+      mermaid?: boolean;
     }
   ) {
     const { dest, vault, fname, config } = opts;
@@ -197,6 +200,9 @@ export class MDUtilsV4 {
       .use(noteRefs, { ...opts.noteRefOpts, wikiLinkOpts: opts.wikiLinksOpts });
     if (opts.mathOpts?.katex) {
       proc = proc.use(math);
+    }
+    if (opts.mermaid) {
+      proc = proc.use(mermaid, { simple: true });
     }
     // MD_DENDRON, convert back to itself, no need for transformations
     if (dest !== DendronASTDest.MD_DENDRON) {

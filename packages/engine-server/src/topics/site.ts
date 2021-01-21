@@ -104,7 +104,7 @@ export class SiteUtils {
       vault: vaults[0],
       fname: "403",
       id: "403",
-      title: "Your viewing an unpublished page",
+      title: "You are viewing an unpublished page",
       body: [
         "[Dendron](https://dendron.so/) (the tool used to generate this site) lets authors selective publish content. You will see this page whenever you click on a link to a page that is not published.",
       ].join("\n"),

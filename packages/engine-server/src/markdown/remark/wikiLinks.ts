@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { DendronError, NoteUtilsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
@@ -109,29 +109,32 @@ function attachParser(proc: Unified.Processor) {
     return value.indexOf("[", fromIndex);
   }
 
-  function parseAliasLink(pageTitle: string) {
-    const [alias, value] = pageTitle.split("|").map(_.trim);
-    return { alias, value: NoteUtilsV2.normalizeFname(value) };
-  }
-
   function parseLink(linkMatch: string) {
     linkMatch = NoteUtilsV2.normalizeFname(linkMatch);
     let out: WikiLinkProps = {
       value: linkMatch,
       alias: linkMatch,
     };
-    if (LinkUtils.isAlias(linkMatch)) {
-      out = parseAliasLink(linkMatch);
+
+    const match = LinkUtils.parseLinkV2(linkMatch);
+    if (_.isNull(match)) {
+      debugger;
+      throw new DendronError({ msg: `link is null: ${linkMatch}` });
     }
-    if (out.value.indexOf("#") !== -1) {
-      const [value, anchorHeader] = out.value.split("#").map(_.trim);
-      out.value = value;
-      out.anchorHeader = anchorHeader;
-      // if we didn't have an alias, links with a # anchor shouldn't have # portion be in the title
-      if (!LinkUtils.isAlias(linkMatch)) {
-        out.alias = value;
-      }
-    }
+    out = match;
+
+    // if (LinkUtils.isAlias(linkMatch)) {
+    //   out = parseAliasLink(linkMatch);
+    // }
+    // if (out.value.indexOf("#") !== -1) {
+    //   const [value, anchorHeader] = out.value.split("#").map(_.trim);
+    //   out.value = value;
+    //   out.anchorHeader = anchorHeader;
+    //   // if we didn't have an alias, links with a # anchor shouldn't have # portion be in the title
+    //   if (!LinkUtils.isAlias(linkMatch)) {
+    //     out.alias = value;
+    //   }
+    // }
     return out;
   }
 
@@ -139,13 +142,14 @@ function attachParser(proc: Unified.Processor) {
     const match = LINK_REGEX.exec(value);
     if (match) {
       const linkMatch = match[1].trim();
-      const { value, alias, anchorHeader } = parseLink(linkMatch);
+      const { value, alias, anchorHeader, filters } = parseLink(linkMatch);
       return eat(match[0])({
         type: "wikiLink",
         value,
         data: {
           alias,
           anchorHeader,
+          filters,
         } as WikiLinkDataV4,
       });
     }

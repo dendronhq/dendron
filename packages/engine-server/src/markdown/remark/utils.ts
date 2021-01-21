@@ -48,9 +48,45 @@ export class LinkUtils {
     return link.indexOf("|") !== -1;
   }
 
+  static hasFilter(link: string) {
+    return link.indexOf(">") !== -1;
+  }
+
   static parseAliasLink(link: string) {
     const [alias, value] = link.split("|").map(_.trim);
     return { alias, value: NoteUtilsV2.normalizeFname(value) };
+  }
+
+  static parseLinkV2(linkString: string) {
+    const LINK_NAME = "[^#\\|>]+";
+    const re = new RegExp(
+      "" +
+        // alias?
+        `(` +
+        `(?<alias>${LINK_NAME}(?=\\|))` +
+        "\\|" +
+        ")?" +
+        // name
+        `(?<value>${LINK_NAME})` +
+        // anchor?
+        `(#(?<anchor>${LINK_NAME}))?` +
+        // filters?
+        `(>(?<filtersRaw>.*))?`,
+      "i"
+    );
+    const out = linkString.match(re);
+    if (out) {
+      let { alias, value, anchor, filtersRaw } = out.groups as any;
+      const filters = (filtersRaw || "").split(">");
+      if (!alias) {
+        alias = value;
+      }
+      alias = _.trim(alias);
+      value = _.trim(value);
+      return { alias, value, anchorHeader: anchor, filters };
+    } else {
+      return null;
+    }
   }
 
   static parseLink(linkMatch: string) {

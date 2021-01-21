@@ -65,4 +65,9 @@ export type WikiLinkProps = {
   alias: string;
   value: string;
   anchorHeader?: string;
+  filters?: LinkFilter[];
+};
+
+export type LinkFilter = {
+  name: string;
 };

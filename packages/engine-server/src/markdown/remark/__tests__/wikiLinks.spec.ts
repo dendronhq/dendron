@@ -41,6 +41,16 @@ describe("parse", () => {
     expect(resp.children[0].children[0].value).toEqual("foo bar");
   });
 
+  test("link with filter", () => {
+    const resp = proc(engine, dendronData).parse(`[[foo bar>hello]]`);
+    // @ts-ignore
+    expect(resp.children[0].children[0].type).toEqual("wikiLink");
+    // @ts-ignore
+    expect(resp.children[0].children[0].value).toEqual("foo bar");
+    // @ts-ignore
+    expect(resp.children[0].children[0].data.filters).toEqual(["hello"]);
+  });
+
   test("doesn't parse inline code block", () => {
     const resp = proc(engine, dendronData).parse("`[[foo.md]]`");
     expect(resp).toMatchSnapshot("bond");

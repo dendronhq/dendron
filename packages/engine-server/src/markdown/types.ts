@@ -6,6 +6,7 @@ import {
 } from "@dendronhq/common-all";
 import { Parent } from "mdast";
 import { Processor } from "unified";
+import { LinkFilter } from "../topics/markdown/plugins/types";
 import { DendronPubOpts } from "./remark/dendronPub";
 import { WikiLinksOpts } from "./remark/wikiLinks";
 
@@ -48,6 +49,7 @@ export type WikiLinkDataV4 = {
   alias: string;
   anchorHeader?: string;
   prefix?: string;
+  filters?: LinkFilter[];
 };
 
 export type NoteRefNoteV4 = DendronASTNode & {

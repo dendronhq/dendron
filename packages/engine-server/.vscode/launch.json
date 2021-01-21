@@ -35,7 +35,7 @@
       "smartStep": true,
       "cwd": "${workspaceFolder:engine-server}",
       "env": {
-        "LOG_DST": "${env:TEMP}/dendron-engine-server.txt"
+        "LOG_DST": "stdout"
       },
       "args": [
         "--findRelatedTests",

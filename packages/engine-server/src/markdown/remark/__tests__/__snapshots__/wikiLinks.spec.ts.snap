@@ -317,6 +317,9 @@ Object {
           "data": Object {
             "alias": "foo",
             "anchorHeader": undefined,
+            "filters": Array [
+              "",
+            ],
           },
           "position": Position {
             "end": Object {
@@ -431,6 +434,9 @@ Object {
           "data": Object {
             "alias": "foo bar",
             "anchorHeader": undefined,
+            "filters": Array [
+              "",
+            ],
           },
           "position": Position {
             "end": Object {

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.25.3](https://github.com/dendronhq/dendron/compare/v0.25.3-alpha.3...v0.25.3) (2021-01-22)
+
+### Enhancements
+
+- go to definition works for `![[refs]]` ([eae4209](https://github.com/dendronhq/dendron/commit/eae4209afd460dc89009e0789c32ae46ed362f08))
+
 ## [0.25.3-alpha.3](https://github.com/dendronhq/dendron/compare/v0.25.3-alpha.2...v0.25.3-alpha.3) (2021-01-22)
 
 **Note:** Version bump only for package root

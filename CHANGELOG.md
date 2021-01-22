@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.25.3-alpha.1](https://github.com/dendronhq/dendron/compare/v0.25.3-alpha.0...v0.25.3-alpha.1) (2021-01-22)
+
+### Bug Fixes
+
+- grammar on 403 page ([f76b6d8](https://github.com/dendronhq/dendron/commit/f76b6d86428a9f613cf125a86f6d47788c8d7202))
+
+### Enhancements
+
+- copy header text if selected ([23406d6](https://github.com/dendronhq/dendron/commit/23406d6d641ccc8db5140b0e6afaeb4c38244aee))
+- support cross vault wiki links ([26ec4c4](https://github.com/dendronhq/dendron/commit/26ec4c41eb1da1ceb59409c764431931a0d54b97))
+
+### Features
+
+- support mermaid for publishing ([0313df4](https://github.com/dendronhq/dendron/commit/0313df49ed563d22fc07018c982368965f9d1938))
+
 ## [0.25.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.25.2...v0.25.3-alpha.0) (2021-01-20)
 
 **Note:** Version bump only for package root

@@ -116,7 +116,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         const exists = true;
         // for rehype
         //_node.value = newValue;
-        _node.value = alias;
+        //_node.value = alias;
         _node.data = {
           alias,
           permalink: href,

@@ -61,6 +61,10 @@ export class MDUtilsV4 {
     return proc.data("dendron") as DendronASTData;
   }
 
+  static getFM(proc: Processor) {
+    return proc.data("fm") as any;
+  }
+
   static setDendronData(proc: Processor, data: Partial<DendronASTData>) {
     const _data = proc.data("dendron") as DendronASTData;
     return proc.data("dendron", { ..._data, ...data });

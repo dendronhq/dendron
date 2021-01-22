@@ -10,8 +10,14 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DendronASTDest, Processor } from "../../types";
+import { DConfig } from "../../../config";
+import {
+  checkContents,
+  createEngine,
+  createProcTests,
+  generateVerifyFunction,
+} from "./utils";
 import { MDUtilsV4 } from "../../utils";
-import { createEngine, createProcTests, generateVerifyFunction } from "./utils";
 
 const IMAGE_LINK = `![alt-text](image-url.jpg)`;
 
@@ -409,6 +415,42 @@ const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
   },
 });
 
+const WITH_TITLE_FOR_LINK = createProcTests({
+  name: "WITH_TITLE_FOR_LINK",
+  setupFunc: async (opts) => {
+    let proc = await createProc(opts, {
+      config: { ...DConfig.genDefaultConfig(), useNoteTitleForLink: true },
+    });
+    const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
+    return readAndProcess({ npath, proc });
+  },
+  verifyFuncDict: {
+    [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+      const { respProcess } = extra;
+      await checkContents(respProcess, "[Ch1](foo.ch1)");
+    },
+    [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+      const { respProcess } = extra;
+      await checkContents(respProcess, "[[foo.ch1]]");
+    },
+    [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+      const { respProcess } = extra;
+      await checkContents(respProcess, "[Ch1](foo.ch1.md)");
+    },
+    [DendronASTDest.HTML]: async ({ extra }) => {
+      const { respRehype } = extra;
+      await checkContents(respRehype, `<p><a href="foo.ch1.html">Ch1</a></p>`);
+    },
+  },
+  preSetupHook: async (opts) => {
+    await ENGINE_HOOKS.setupBasic(opts);
+    await modifyNote(opts, (note: NotePropsV2) => {
+      note.body = `[[foo.ch1]]`;
+      return note;
+    });
+  },
+});
+
 const ALL_TEST_CASES = [
   ...WITH_ABBR,
   ...WITH_VARIABLE,
@@ -420,6 +462,8 @@ const ALL_TEST_CASES = [
   ...NOTE_W_LINK_AND_SPACE,
   ...WITH_FOOTNOTES,
   ...WITH_MERMAID,
+  // --- new
+  ...WITH_TITLE_FOR_LINK,
 ];
 
 describe("MDUtils.proc", () => {

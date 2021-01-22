@@ -2939,6 +2939,126 @@ Start --> Stop
 }
 `;
 
+exports[`MDUtils.proc "HTML: WITH_TITLE_FOR_LINK": respParse 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "position": Position {
+        "end": Object {
+          "column": 4,
+          "line": 7,
+          "offset": 61,
+        },
+        "indent": Array [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+        ],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "yaml",
+      "value": "id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "Ch1",
+            "anchorHeader": undefined,
+            "filters": Array [
+              "",
+            ],
+          },
+          "position": Position {
+            "end": Object {
+              "column": 12,
+              "line": 8,
+              "offset": 73,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 8,
+              "offset": 62,
+            },
+          },
+          "type": "wikiLink",
+          "value": "foo.ch1",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 12,
+          "line": 8,
+          "offset": 73,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 8,
+          "offset": 62,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 1,
+      "line": 9,
+      "offset": 74,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`MDUtils.proc "HTML: WITH_TITLE_FOR_LINK": respProcess 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+[Ch1](foo.ch1.html)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "HTML: WITH_TITLE_FOR_LINK": respRehype 1`] = `
+VFile {
+  "contents": "<p><a href=\\"foo.ch1.html\\">Ch1</a></p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`MDUtils.proc "HTML: asset_prefix undefined" 1`] = `
 VFile {
   "contents": "![alt-text](image-url.jpg)
@@ -3179,6 +3299,126 @@ VFile {
 }
 `;
 
+exports[`MDUtils.proc "MD_DENDRON: WITH_TITLE_FOR_LINK": respParse 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "position": Position {
+        "end": Object {
+          "column": 4,
+          "line": 7,
+          "offset": 61,
+        },
+        "indent": Array [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+        ],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "yaml",
+      "value": "id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "foo.ch1",
+            "anchorHeader": undefined,
+            "filters": Array [
+              "",
+            ],
+          },
+          "position": Position {
+            "end": Object {
+              "column": 12,
+              "line": 8,
+              "offset": 73,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 8,
+              "offset": 62,
+            },
+          },
+          "type": "wikiLink",
+          "value": "foo.ch1",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 12,
+          "line": 8,
+          "offset": 73,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 8,
+          "offset": 62,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 1,
+      "line": 9,
+      "offset": 74,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`MDUtils.proc "MD_DENDRON: WITH_TITLE_FOR_LINK": respProcess 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+[[foo.ch1]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_DENDRON: WITH_TITLE_FOR_LINK": respRehype 1`] = `
+VFile {
+  "contents": "<p>foo.ch1</p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_FOOTNOTES" 1`] = `
 VFile {
   "contents": "---
@@ -3388,6 +3628,126 @@ VFile {
 <li id=\\"fn-1\\">Here is the footnote.<a href=\\"#fnref-1\\" class=\\"footnote-backref\\">↩</a></li>
 </ol>
 </div>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_TITLE_FOR_LINK": respParse 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "position": Position {
+        "end": Object {
+          "column": 4,
+          "line": 7,
+          "offset": 61,
+        },
+        "indent": Array [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+        ],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "yaml",
+      "value": "id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "Ch1",
+            "anchorHeader": undefined,
+            "filters": Array [
+              "",
+            ],
+          },
+          "position": Position {
+            "end": Object {
+              "column": 12,
+              "line": 8,
+              "offset": 73,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 8,
+              "offset": 62,
+            },
+          },
+          "type": "wikiLink",
+          "value": "foo.ch1",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 12,
+          "line": 8,
+          "offset": 73,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 8,
+          "offset": 62,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 1,
+      "line": 9,
+      "offset": 74,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_TITLE_FOR_LINK": respProcess 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+[Ch1](foo.ch1.md)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_TITLE_FOR_LINK": respRehype 1`] = `
+VFile {
+  "contents": "<p>foo.ch1</p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -3911,6 +4271,126 @@ exports[`MDUtils.proc "MD_REGULAR: WITH_TITLE": respRehype 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
 <p>foo body</p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_TITLE_FOR_LINK": respParse 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "position": Position {
+        "end": Object {
+          "column": 4,
+          "line": 7,
+          "offset": 61,
+        },
+        "indent": Array [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+        ],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "yaml",
+      "value": "id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "Ch1",
+            "anchorHeader": undefined,
+            "filters": Array [
+              "",
+            ],
+          },
+          "position": Position {
+            "end": Object {
+              "column": 12,
+              "line": 8,
+              "offset": 73,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 8,
+              "offset": 62,
+            },
+          },
+          "type": "wikiLink",
+          "value": "foo.ch1",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 12,
+          "line": 8,
+          "offset": 73,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 8,
+          "offset": 62,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 1,
+      "line": 9,
+      "offset": 74,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_TITLE_FOR_LINK": respProcess 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+[Ch1](foo.ch1)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_TITLE_FOR_LINK": respRehype 1`] = `
+VFile {
+  "contents": "<p><a href=\\"foo.ch1.html\\">Ch1</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],

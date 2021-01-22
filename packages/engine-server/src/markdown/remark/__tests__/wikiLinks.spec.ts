@@ -38,28 +38,15 @@ describe("parse", () => {
 
   test("link with space", () => {
     const resp = proc(engine, dendronData).parse(`[[foo bar]]`);
-    expect(resp).toMatchSnapshot();
-    // @ts-ignore
-    expect(resp.children[0].children[0].type).toEqual("wikiLink");
-    // @ts-ignore
-    expect(resp.children[0].children[0].value).toEqual("foo bar");
-  });
-
-  test("link with filter", () => {
-    const resp = proc(engine, dendronData).parse(`[[foo bar>hello]]`);
-    // @ts-ignore
-    expect(resp.children[0].children[0].type).toEqual("wikiLink");
-    // @ts-ignore
-    expect(resp.children[0].children[0].value).toEqual("foo bar");
-    // @ts-ignore
-    expect(resp.children[0].children[0].data.filters).toEqual(["hello"]);
+    expect(_.pick(getWikiLink(resp), ["type", "value"])).toEqual({
+      type: "wikiLink",
+      value: "foo bar",
+    });
   });
 
   test("doesn't parse inline code block", () => {
     const resp = proc(engine, dendronData).parse("`[[foo.md]]`");
-    expect(resp).toMatchSnapshot("bond");
-    // @ts-ignore
-    expect(resp.children[0].children[0].type).toEqual("inlineCode");
+    expect(getWikiLink(resp).type).toEqual("inlineCode");
   });
 });
 

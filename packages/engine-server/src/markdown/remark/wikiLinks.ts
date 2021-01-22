@@ -118,23 +118,28 @@ function attachParser(proc: Unified.Processor) {
 
     const match = LinkUtils.parseLinkV2(linkMatch);
     if (_.isNull(match)) {
-      debugger;
       throw new DendronError({ msg: `link is null: ${linkMatch}` });
     }
     out = match;
-
-    // if (LinkUtils.isAlias(linkMatch)) {
-    //   out = parseAliasLink(linkMatch);
-    // }
-    // if (out.value.indexOf("#") !== -1) {
-    //   const [value, anchorHeader] = out.value.split("#").map(_.trim);
-    //   out.value = value;
-    //   out.anchorHeader = anchorHeader;
-    //   // if we didn't have an alias, links with a # anchor shouldn't have # portion be in the title
-    //   if (!LinkUtils.isAlias(linkMatch)) {
-    //     out.alias = value;
-    //   }
-    // }
+    const { config, vault, dest } = MDUtilsV4.getDendronData(proc);
+    if (
+      dest !== DendronASTDest.MD_DENDRON &&
+      config?.useNoteTitleForLink &&
+      out.alias === out.value &&
+      vault
+    ) {
+      const { engine } = MDUtilsV4.getEngineFromProc(proc);
+      const wsRoot = engine.wsRoot;
+      const note = NoteUtilsV2.getNoteByFnameV5({
+        fname: out.value,
+        notes: engine.notes,
+        vault,
+        wsRoot,
+      });
+      if (note) {
+        out.alias = note.title;
+      }
+    }
     return out;
   }
 

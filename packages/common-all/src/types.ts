@@ -66,6 +66,11 @@ export type DendronConfig = {
   useFMTitle?: boolean;
 
   /**
+   * If true, use the note title when displaying naked links
+   */
+  useNoteTitleForLink?: boolean;
+
+  /**
    * Use mermaid diagrams
    */
   mermaid?: boolean;

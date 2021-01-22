@@ -4,6 +4,7 @@ import {
   getLogFilePath,
   NoteTestUtilsV4,
   TestPresetEntryV4,
+  AssertUtils,
 } from "@dendronhq/common-test-utils";
 import { DendronEngineV2 } from "../../../enginev2";
 import { DendronASTDest, Processor } from "../../types";
@@ -11,6 +12,7 @@ import _ from "lodash";
 import { MDUtilsV4 } from "../../utils";
 import path from "path";
 import fs from "fs";
+import { VFile } from "vfile";
 
 export const basicSetup = async ({ wsRoot, vaults }: WorkspaceOpts) => {
   await NoteTestUtilsV4.createNote({
@@ -90,6 +92,21 @@ export const createProcTests = (opts: {
       .filter((ent) => !_.isUndefined(ent));
   }
   return allTests;
+};
+
+export const checkContents = async (
+  respProcess: VFile,
+  cmp: string | string[]
+) => {
+  if (!_.isArray(cmp)) {
+    cmp = [cmp];
+  }
+  expect(
+    await AssertUtils.assertInString({
+      body: respProcess.contents as string,
+      match: cmp,
+    })
+  ).toBeTruthy();
 };
 
 export const generateVerifyFunction = (opts: {

@@ -23,7 +23,7 @@ import footnotes from "remark-footnotes";
 import frontmatterPlugin from "remark-frontmatter";
 import math from "remark-math";
 // @ts-ignore
-import mermaid from "remark-mermaid";
+import mermaid from "@dendronhq/remark-mermaid";
 import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
 import remarkStringify from "remark-stringify";

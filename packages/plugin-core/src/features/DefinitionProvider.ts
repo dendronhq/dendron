@@ -17,9 +17,6 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     if (!refAtPos) {
       return;
     }
-    if (refAtPos.refType === "refv2") {
-      return;
-    }
     const engine = DendronWorkspace.instance().getEngine();
     const notes = NoteUtilsV2.getNotesByFname({
       fname: refAtPos.ref,

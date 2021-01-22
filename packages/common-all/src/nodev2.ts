@@ -456,11 +456,14 @@ export class NoteUtilsV2 {
     note: NotePropsV2;
     header?: string;
   }): string {
-    const { title, fname } = note;
+    let { title, fname } = note;
     let suffix = "";
     const slugger = getSlugger();
     if (header) {
       suffix = "#" + slugger.slug(header);
+    }
+    if (header) {
+      title = header;
     }
     const link = `[[${title}|${fname}${suffix}]]`;
     return link;

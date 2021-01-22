@@ -63,6 +63,7 @@
     "mdast-builder": "^1.1.1",
     "mdast-util-compact": "^2.0.1",
     "mdast-util-inject": "^1.1.0",
+    "mermaid.cli": "^0.5.1",
     "rehype-autolink-headings": "^5.0.1",
     "rehype-katex": "3",
     "rehype-raw": "^5.0.0",

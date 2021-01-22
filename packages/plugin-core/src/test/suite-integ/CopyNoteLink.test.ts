@@ -63,13 +63,13 @@ suite("notes", function () {
         const pos2 = LocationTestUtils.getPresetWikiLinkPosition({ char: 12 });
         editor.selection = new vscode.Selection(pos, pos2);
         const link = await new CopyNoteLinkCommand().run();
-        expect(link).toEqual(`[[Alpha|${noteWithTarget.fname}#h1]]`);
+        expect(link).toEqual(`[[H1|${noteWithTarget.fname}#h1]]`);
         editor.selection = new vscode.Selection(
           LocationTestUtils.getPresetWikiLinkPosition({ line: 8 }),
           LocationTestUtils.getPresetWikiLinkPosition({ line: 8, char: 12 })
         );
         const link2 = await new CopyNoteLinkCommand().run();
-        expect(link2).toEqual(`[[Alpha|${noteWithTarget.fname}#h2-8a]]`);
+        expect(link2).toEqual(`[[H2 ^8a|${noteWithTarget.fname}#h2-8a]]`);
         done();
       },
     });

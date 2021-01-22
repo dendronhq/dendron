@@ -1,2207 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MDUtils.proc "HTML: NOTE_REF_RECURSIVE_WITH_REHYPE" 1`] = `
-VFile {
-  "contents": "<p></p><p></p><div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\">
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
-<a href=\\"foo-id.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>
-
-<div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\">
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.one</span></div>
-<a href=\\"foo.one-id.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
-<h1 id=\\"fooone\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fooone\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo.One</h1>
-<div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\">
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.two</span></div>
-<a href=\\"foo.two.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
-<h1 id=\\"footwo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#footwo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo.Two</h1>
-<p>blah</p>
-</div>    
-</div>
-<p>Regular wikilink: <a href=\\"foo.two.html\\">foo.two</a></p>
-</div>    
-</div>
-</div>    
-</div><p></p><p></p>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`MDUtils.proc "HTML: NOTE_REF_RECURSIVE_WITH_REHYPE" 2`] = `
-Object {
-  "children": Array [
-    Object {
-      "children": Array [
-        Object {
-          "children": Array [
-            Object {
-              "type": "html",
-              "value": "<div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
-<a href=\\"foo-id.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>
-",
-            },
-            Object {
-              "children": Array [
-                Object {
-                  "position": Position {
-                    "end": Object {
-                      "column": 55,
-                      "line": 11,
-                      "offset": 449,
-                    },
-                    "indent": Array [
-                      1,
-                      1,
-                      1,
-                      1,
-                      1,
-                      1,
-                      1,
-                      1,
-                      1,
-                    ],
-                    "start": Object {
-                      "column": 1,
-                      "line": 2,
-                      "offset": 1,
-                    },
-                  },
-                  "type": "html",
-                  "value": "<div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.one</span></div>
-<a href=\\"foo.one-id.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        ",
-                },
-                Object {
-                  "children": Array [
-                    Object {
-                      "position": Position {
-                        "end": Object {
-                          "column": 10,
-                          "line": 13,
-                          "offset": 460,
-                        },
-                        "indent": Array [],
-                        "start": Object {
-                          "column": 3,
-                          "line": 13,
-                          "offset": 453,
-                        },
-                      },
-                      "type": "text",
-                      "value": "Foo.One",
-                    },
-                  ],
-                  "depth": 1,
-                  "position": Position {
-                    "end": Object {
-                      "column": 10,
-                      "line": 13,
-                      "offset": 460,
-                    },
-                    "indent": Array [],
-                    "start": Object {
-                      "column": 1,
-                      "line": 13,
-                      "offset": 451,
-                    },
-                  },
-                  "type": "heading",
-                },
-                Object {
-                  "position": Position {
-                    "end": Object {
-                      "column": 55,
-                      "line": 24,
-                      "offset": 907,
-                    },
-                    "indent": Array [
-                      1,
-                      1,
-                      1,
-                      1,
-                      1,
-                      1,
-                      1,
-                      1,
-                      1,
-                    ],
-                    "start": Object {
-                      "column": 1,
-                      "line": 15,
-                      "offset": 462,
-                    },
-                  },
-                  "type": "html",
-                  "value": "<div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.two</span></div>
-<a href=\\"foo.two.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        ",
-                },
-                Object {
-                  "children": Array [
-                    Object {
-                      "position": Position {
-                        "end": Object {
-                          "column": 10,
-                          "line": 26,
-                          "offset": 918,
-                        },
-                        "indent": Array [],
-                        "start": Object {
-                          "column": 3,
-                          "line": 26,
-                          "offset": 911,
-                        },
-                      },
-                      "type": "text",
-                      "value": "Foo.Two",
-                    },
-                  ],
-                  "depth": 1,
-                  "position": Position {
-                    "end": Object {
-                      "column": 10,
-                      "line": 26,
-                      "offset": 918,
-                    },
-                    "indent": Array [],
-                    "start": Object {
-                      "column": 1,
-                      "line": 26,
-                      "offset": 909,
-                    },
-                  },
-                  "type": "heading",
-                },
-                Object {
-                  "children": Array [
-                    Object {
-                      "position": Position {
-                        "end": Object {
-                          "column": 5,
-                          "line": 28,
-                          "offset": 924,
-                        },
-                        "indent": Array [],
-                        "start": Object {
-                          "column": 1,
-                          "line": 28,
-                          "offset": 920,
-                        },
-                      },
-                      "type": "text",
-                      "value": "blah",
-                    },
-                  ],
-                  "position": Position {
-                    "end": Object {
-                      "column": 5,
-                      "line": 28,
-                      "offset": 924,
-                    },
-                    "indent": Array [],
-                    "start": Object {
-                      "column": 1,
-                      "line": 28,
-                      "offset": 920,
-                    },
-                  },
-                  "type": "paragraph",
-                },
-                Object {
-                  "position": Position {
-                    "end": Object {
-                      "column": 7,
-                      "line": 31,
-                      "offset": 943,
-                    },
-                    "indent": Array [
-                      1,
-                    ],
-                    "start": Object {
-                      "column": 1,
-                      "line": 30,
-                      "offset": 926,
-                    },
-                  },
-                  "type": "html",
-                  "value": "</div>    
-</div>",
-                },
-                Object {
-                  "children": Array [
-                    Object {
-                      "position": Position {
-                        "end": Object {
-                          "column": 19,
-                          "line": 33,
-                          "offset": 963,
-                        },
-                        "indent": Array [],
-                        "start": Object {
-                          "column": 1,
-                          "line": 33,
-                          "offset": 945,
-                        },
-                      },
-                      "type": "text",
-                      "value": "Regular wikilink: ",
-                    },
-                    Object {
-                      "children": Array [
-                        Object {
-                          "position": Position {
-                            "end": Object {
-                              "column": 27,
-                              "line": 33,
-                              "offset": 971,
-                            },
-                            "indent": Array [],
-                            "start": Object {
-                              "column": 20,
-                              "line": 33,
-                              "offset": 964,
-                            },
-                          },
-                          "type": "text",
-                          "value": "foo.two",
-                        },
-                      ],
-                      "position": Position {
-                        "end": Object {
-                          "column": 42,
-                          "line": 33,
-                          "offset": 986,
-                        },
-                        "indent": Array [],
-                        "start": Object {
-                          "column": 19,
-                          "line": 33,
-                          "offset": 963,
-                        },
-                      },
-                      "title": null,
-                      "type": "link",
-                      "url": "foo.two.html",
-                    },
-                  ],
-                  "position": Position {
-                    "end": Object {
-                      "column": 42,
-                      "line": 33,
-                      "offset": 986,
-                    },
-                    "indent": Array [],
-                    "start": Object {
-                      "column": 1,
-                      "line": 33,
-                      "offset": 945,
-                    },
-                  },
-                  "type": "paragraph",
-                },
-                Object {
-                  "position": Position {
-                    "end": Object {
-                      "column": 7,
-                      "line": 36,
-                      "offset": 1005,
-                    },
-                    "indent": Array [
-                      1,
-                    ],
-                    "start": Object {
-                      "column": 1,
-                      "line": 35,
-                      "offset": 988,
-                    },
-                  },
-                  "type": "html",
-                  "value": "</div>    
-</div>",
-                },
-              ],
-              "position": Object {
-                "end": Object {
-                  "column": 1,
-                  "line": 38,
-                  "offset": 1007,
-                },
-                "start": Object {
-                  "column": 1,
-                  "line": 1,
-                  "offset": 0,
-                },
-              },
-              "type": "root",
-            },
-            Object {
-              "type": "html",
-              "value": "
-</div>    
-</div>",
-            },
-          ],
-          "type": "paragraph",
-        },
-      ],
-      "position": Position {
-        "end": Object {
-          "column": 20,
-          "line": 1,
-          "offset": 19,
-        },
-        "indent": Array [],
-        "start": Object {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
-      },
-      "type": "paragraph",
-    },
-  ],
-  "position": Object {
-    "end": Object {
-      "column": 20,
-      "line": 1,
-      "offset": 19,
-    },
-    "start": Object {
-      "column": 1,
-      "line": 1,
-      "offset": 0,
-    },
-  },
-  "type": "root",
-}
-`;
-
-exports[`MDUtils.proc "HTML: NOTE_REF_RECURSIVE_WITH_REHYPE" 3`] = `
-Object {
-  "children": Array [
-    Object {
-      "children": Array [],
-      "position": Object {
-        "end": null,
-        "start": Object {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
-      },
-      "properties": Object {},
-      "tagName": "p",
-      "type": "element",
-    },
-    Object {
-      "children": Array [],
-      "position": Object {
-        "end": Object {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
-        "start": null,
-      },
-      "properties": Object {},
-      "tagName": "p",
-      "type": "element",
-    },
-    Object {
-      "children": Array [
-        Object {
-          "position": Object {
-            "end": Object {
-              "column": 1,
-              "line": 2,
-              "offset": 31,
-            },
-            "start": Object {
-              "column": 31,
-              "line": 1,
-              "offset": 30,
-            },
-          },
-          "type": "text",
-          "value": "
-",
-        },
-        Object {
-          "children": Array [
-            Object {
-              "position": Object {
-                "end": Object {
-                  "column": 1,
-                  "line": 3,
-                  "offset": 57,
-                },
-                "start": Object {
-                  "column": 26,
-                  "line": 2,
-                  "offset": 56,
-                },
-              },
-              "type": "text",
-              "value": "
-",
-            },
-            Object {
-              "children": Array [
-                Object {
-                  "position": Object {
-                    "end": Object {
-                      "column": 1,
-                      "line": 4,
-                      "offset": 88,
-                    },
-                    "start": Object {
-                      "column": 31,
-                      "line": 3,
-                      "offset": 87,
-                    },
-                  },
-                  "type": "text",
-                  "value": "
-",
-                },
-                Object {
-                  "children": Array [
-                    Object {
-                      "position": Object {
-                        "end": Object {
-                          "column": 32,
-                          "line": 4,
-                          "offset": 119,
-                        },
-                        "start": Object {
-                          "column": 27,
-                          "line": 4,
-                          "offset": 114,
-                        },
-                      },
-                      "type": "text",
-                      "value": "From ",
-                    },
-                    Object {
-                      "children": Array [
-                        Object {
-                          "position": Object {
-                            "end": Object {
-                              "column": 67,
-                              "line": 4,
-                              "offset": 154,
-                            },
-                            "start": Object {
-                              "column": 64,
-                              "line": 4,
-                              "offset": 151,
-                            },
-                          },
-                          "type": "text",
-                          "value": "foo",
-                        },
-                      ],
-                      "position": Object {
-                        "end": Object {
-                          "column": 74,
-                          "line": 4,
-                          "offset": 161,
-                        },
-                        "start": Object {
-                          "column": 32,
-                          "line": 4,
-                          "offset": 119,
-                        },
-                      },
-                      "properties": Object {
-                        "className": Array [
-                          "portal-text-title",
-                        ],
-                      },
-                      "tagName": "span",
-                      "type": "element",
-                    },
-                  ],
-                  "position": Object {
-                    "end": Object {
-                      "column": 80,
-                      "line": 4,
-                      "offset": 167,
-                    },
-                    "start": Object {
-                      "column": 1,
-                      "line": 4,
-                      "offset": 88,
-                    },
-                  },
-                  "properties": Object {
-                    "className": Array [
-                      "portal-title",
-                    ],
-                  },
-                  "tagName": "div",
-                  "type": "element",
-                },
-                Object {
-                  "position": Object {
-                    "end": Object {
-                      "column": 1,
-                      "line": 5,
-                      "offset": 168,
-                    },
-                    "start": Object {
-                      "column": 80,
-                      "line": 4,
-                      "offset": 167,
-                    },
-                  },
-                  "type": "text",
-                  "value": "
-",
-                },
-                Object {
-                  "children": Array [
-                    Object {
-                      "position": Object {
-                        "end": Object {
-                          "column": 55,
-                          "line": 5,
-                          "offset": 222,
-                        },
-                        "start": Object {
-                          "column": 44,
-                          "line": 5,
-                          "offset": 211,
-                        },
-                      },
-                      "type": "text",
-                      "value": "Go to text ",
-                    },
-                    Object {
-                      "children": Array [
-                        Object {
-                          "position": Object {
-                            "end": Object {
-                              "column": 82,
-                              "line": 5,
-                              "offset": 249,
-                            },
-                            "start": Object {
-                              "column": 81,
-                              "line": 5,
-                              "offset": 248,
-                            },
-                          },
-                          "type": "text",
-                          "value": "→",
-                        },
-                      ],
-                      "position": Object {
-                        "end": Object {
-                          "column": 89,
-                          "line": 5,
-                          "offset": 256,
-                        },
-                        "start": Object {
-                          "column": 55,
-                          "line": 5,
-                          "offset": 222,
-                        },
-                      },
-                      "properties": Object {
-                        "className": Array [
-                          "right-arrow",
-                        ],
-                      },
-                      "tagName": "span",
-                      "type": "element",
-                    },
-                  ],
-                  "position": Object {
-                    "end": Object {
-                      "column": 93,
-                      "line": 5,
-                      "offset": 260,
-                    },
-                    "start": Object {
-                      "column": 1,
-                      "line": 5,
-                      "offset": 168,
-                    },
-                  },
-                  "properties": Object {
-                    "className": Array [
-                      "portal-arrow",
-                    ],
-                    "href": "foo-id.html",
-                  },
-                  "tagName": "a",
-                  "type": "element",
-                },
-                Object {
-                  "position": Object {
-                    "end": Object {
-                      "column": 1,
-                      "line": 6,
-                      "offset": 261,
-                    },
-                    "start": Object {
-                      "column": 93,
-                      "line": 5,
-                      "offset": 260,
-                    },
-                  },
-                  "type": "text",
-                  "value": "
-",
-                },
-              ],
-              "position": Object {
-                "end": Object {
-                  "column": 7,
-                  "line": 6,
-                  "offset": 267,
-                },
-                "start": Object {
-                  "column": 1,
-                  "line": 3,
-                  "offset": 57,
-                },
-              },
-              "properties": Object {
-                "className": Array [
-                  "portal-backlink",
-                ],
-              },
-              "tagName": "div",
-              "type": "element",
-            },
-            Object {
-              "position": Object {
-                "end": Object {
-                  "column": 1,
-                  "line": 7,
-                  "offset": 268,
-                },
-                "start": Object {
-                  "column": 7,
-                  "line": 6,
-                  "offset": 267,
-                },
-              },
-              "type": "text",
-              "value": "
-",
-            },
-          ],
-          "position": Object {
-            "end": Object {
-              "column": 7,
-              "line": 7,
-              "offset": 274,
-            },
-            "start": Object {
-              "column": 1,
-              "line": 2,
-              "offset": 31,
-            },
-          },
-          "properties": Object {
-            "className": Array [
-              "portal-head",
-            ],
-          },
-          "tagName": "div",
-          "type": "element",
-        },
-        Object {
-          "position": Object {
-            "end": Object {
-              "column": 1,
-              "line": 8,
-              "offset": 275,
-            },
-            "start": Object {
-              "column": 7,
-              "line": 7,
-              "offset": 274,
-            },
-          },
-          "type": "text",
-          "value": "
-",
-        },
-        Object {
-          "children": Array [
-            Object {
-              "position": Object {
-                "end": Object {
-                  "column": 1,
-                  "line": 9,
-                  "offset": 342,
-                },
-                "start": Object {
-                  "column": 67,
-                  "line": 8,
-                  "offset": 341,
-                },
-              },
-              "type": "text",
-              "value": "
-",
-            },
-            Object {
-              "children": Array [],
-              "position": Object {
-                "end": Object {
-                  "column": 44,
-                  "line": 9,
-                  "offset": 385,
-                },
-                "start": Object {
-                  "column": 1,
-                  "line": 9,
-                  "offset": 342,
-                },
-              },
-              "properties": Object {
-                "className": Array [
-                  "portal-parent-fader-top",
-                ],
-              },
-              "tagName": "div",
-              "type": "element",
-            },
-            Object {
-              "position": Object {
-                "end": Object {
-                  "column": 1,
-                  "line": 10,
-                  "offset": 386,
-                },
-                "start": Object {
-                  "column": 44,
-                  "line": 9,
-                  "offset": 385,
-                },
-              },
-              "type": "text",
-              "value": "
-",
-            },
-            Object {
-              "children": Array [],
-              "position": Object {
-                "end": Object {
-                  "column": 47,
-                  "line": 10,
-                  "offset": 432,
-                },
-                "start": Object {
-                  "column": 1,
-                  "line": 10,
-                  "offset": 386,
-                },
-              },
-              "properties": Object {
-                "className": Array [
-                  "portal-parent-fader-bottom",
-                ],
-              },
-              "tagName": "div",
-              "type": "element",
-            },
-            Object {
-              "position": Object {
-                "end": Object {
-                  "column": 1,
-                  "line": 2,
-                  "offset": 1,
-                },
-                "start": Object {
-                  "column": 47,
-                  "line": 10,
-                  "offset": 432,
-                },
-              },
-              "type": "text",
-              "value": "
-
-",
-            },
-            Object {
-              "children": Array [
-                Object {
-                  "position": Object {
-                    "end": Object {
-                      "column": 1,
-                      "line": 3,
-                      "offset": 32,
-                    },
-                    "start": Object {
-                      "column": 31,
-                      "line": 2,
-                      "offset": 31,
-                    },
-                  },
-                  "type": "text",
-                  "value": "
-",
-                },
-                Object {
-                  "children": Array [
-                    Object {
-                      "position": Object {
-                        "end": Object {
-                          "column": 1,
-                          "line": 4,
-                          "offset": 58,
-                        },
-                        "start": Object {
-                          "column": 26,
-                          "line": 3,
-                          "offset": 57,
-                        },
-                      },
-                      "type": "text",
-                      "value": "
-",
-                    },
-                    Object {
-                      "children": Array [
-                        Object {
-                          "position": Object {
-                            "end": Object {
-                              "column": 1,
-                              "line": 5,
-                              "offset": 89,
-                            },
-                            "start": Object {
-                              "column": 31,
-                              "line": 4,
-                              "offset": 88,
-                            },
-                          },
-                          "type": "text",
-                          "value": "
-",
-                        },
-                        Object {
-                          "children": Array [
-                            Object {
-                              "position": Object {
-                                "end": Object {
-                                  "column": 32,
-                                  "line": 5,
-                                  "offset": 120,
-                                },
-                                "start": Object {
-                                  "column": 27,
-                                  "line": 5,
-                                  "offset": 115,
-                                },
-                              },
-                              "type": "text",
-                              "value": "From ",
-                            },
-                            Object {
-                              "children": Array [
-                                Object {
-                                  "position": Object {
-                                    "end": Object {
-                                      "column": 71,
-                                      "line": 5,
-                                      "offset": 159,
-                                    },
-                                    "start": Object {
-                                      "column": 64,
-                                      "line": 5,
-                                      "offset": 152,
-                                    },
-                                  },
-                                  "type": "text",
-                                  "value": "foo.one",
-                                },
-                              ],
-                              "position": Object {
-                                "end": Object {
-                                  "column": 78,
-                                  "line": 5,
-                                  "offset": 166,
-                                },
-                                "start": Object {
-                                  "column": 32,
-                                  "line": 5,
-                                  "offset": 120,
-                                },
-                              },
-                              "properties": Object {
-                                "className": Array [
-                                  "portal-text-title",
-                                ],
-                              },
-                              "tagName": "span",
-                              "type": "element",
-                            },
-                          ],
-                          "position": Object {
-                            "end": Object {
-                              "column": 84,
-                              "line": 5,
-                              "offset": 172,
-                            },
-                            "start": Object {
-                              "column": 1,
-                              "line": 5,
-                              "offset": 89,
-                            },
-                          },
-                          "properties": Object {
-                            "className": Array [
-                              "portal-title",
-                            ],
-                          },
-                          "tagName": "div",
-                          "type": "element",
-                        },
-                        Object {
-                          "position": Object {
-                            "end": Object {
-                              "column": 1,
-                              "line": 6,
-                              "offset": 173,
-                            },
-                            "start": Object {
-                              "column": 84,
-                              "line": 5,
-                              "offset": 172,
-                            },
-                          },
-                          "type": "text",
-                          "value": "
-",
-                        },
-                        Object {
-                          "children": Array [
-                            Object {
-                              "position": Object {
-                                "end": Object {
-                                  "column": 59,
-                                  "line": 6,
-                                  "offset": 231,
-                                },
-                                "start": Object {
-                                  "column": 48,
-                                  "line": 6,
-                                  "offset": 220,
-                                },
-                              },
-                              "type": "text",
-                              "value": "Go to text ",
-                            },
-                            Object {
-                              "children": Array [
-                                Object {
-                                  "position": Object {
-                                    "end": Object {
-                                      "column": 86,
-                                      "line": 6,
-                                      "offset": 258,
-                                    },
-                                    "start": Object {
-                                      "column": 85,
-                                      "line": 6,
-                                      "offset": 257,
-                                    },
-                                  },
-                                  "type": "text",
-                                  "value": "→",
-                                },
-                              ],
-                              "position": Object {
-                                "end": Object {
-                                  "column": 93,
-                                  "line": 6,
-                                  "offset": 265,
-                                },
-                                "start": Object {
-                                  "column": 59,
-                                  "line": 6,
-                                  "offset": 231,
-                                },
-                              },
-                              "properties": Object {
-                                "className": Array [
-                                  "right-arrow",
-                                ],
-                              },
-                              "tagName": "span",
-                              "type": "element",
-                            },
-                          ],
-                          "position": Object {
-                            "end": Object {
-                              "column": 97,
-                              "line": 6,
-                              "offset": 269,
-                            },
-                            "start": Object {
-                              "column": 1,
-                              "line": 6,
-                              "offset": 173,
-                            },
-                          },
-                          "properties": Object {
-                            "className": Array [
-                              "portal-arrow",
-                            ],
-                            "href": "foo.one-id.html",
-                          },
-                          "tagName": "a",
-                          "type": "element",
-                        },
-                        Object {
-                          "position": Object {
-                            "end": Object {
-                              "column": 1,
-                              "line": 7,
-                              "offset": 270,
-                            },
-                            "start": Object {
-                              "column": 97,
-                              "line": 6,
-                              "offset": 269,
-                            },
-                          },
-                          "type": "text",
-                          "value": "
-",
-                        },
-                      ],
-                      "position": Object {
-                        "end": Object {
-                          "column": 7,
-                          "line": 7,
-                          "offset": 276,
-                        },
-                        "start": Object {
-                          "column": 1,
-                          "line": 4,
-                          "offset": 58,
-                        },
-                      },
-                      "properties": Object {
-                        "className": Array [
-                          "portal-backlink",
-                        ],
-                      },
-                      "tagName": "div",
-                      "type": "element",
-                    },
-                    Object {
-                      "position": Object {
-                        "end": Object {
-                          "column": 1,
-                          "line": 8,
-                          "offset": 277,
-                        },
-                        "start": Object {
-                          "column": 7,
-                          "line": 7,
-                          "offset": 276,
-                        },
-                      },
-                      "type": "text",
-                      "value": "
-",
-                    },
-                  ],
-                  "position": Object {
-                    "end": Object {
-                      "column": 7,
-                      "line": 8,
-                      "offset": 283,
-                    },
-                    "start": Object {
-                      "column": 1,
-                      "line": 3,
-                      "offset": 32,
-                    },
-                  },
-                  "properties": Object {
-                    "className": Array [
-                      "portal-head",
-                    ],
-                  },
-                  "tagName": "div",
-                  "type": "element",
-                },
-                Object {
-                  "position": Object {
-                    "end": Object {
-                      "column": 1,
-                      "line": 9,
-                      "offset": 284,
-                    },
-                    "start": Object {
-                      "column": 7,
-                      "line": 8,
-                      "offset": 283,
-                    },
-                  },
-                  "type": "text",
-                  "value": "
-",
-                },
-                Object {
-                  "children": Array [
-                    Object {
-                      "position": Object {
-                        "end": Object {
-                          "column": 1,
-                          "line": 10,
-                          "offset": 351,
-                        },
-                        "start": Object {
-                          "column": 67,
-                          "line": 9,
-                          "offset": 350,
-                        },
-                      },
-                      "type": "text",
-                      "value": "
-",
-                    },
-                    Object {
-                      "children": Array [],
-                      "position": Object {
-                        "end": Object {
-                          "column": 44,
-                          "line": 10,
-                          "offset": 394,
-                        },
-                        "start": Object {
-                          "column": 1,
-                          "line": 10,
-                          "offset": 351,
-                        },
-                      },
-                      "properties": Object {
-                        "className": Array [
-                          "portal-parent-fader-top",
-                        ],
-                      },
-                      "tagName": "div",
-                      "type": "element",
-                    },
-                    Object {
-                      "position": Object {
-                        "end": Object {
-                          "column": 1,
-                          "line": 11,
-                          "offset": 395,
-                        },
-                        "start": Object {
-                          "column": 44,
-                          "line": 10,
-                          "offset": 394,
-                        },
-                      },
-                      "type": "text",
-                      "value": "
-",
-                    },
-                    Object {
-                      "children": Array [],
-                      "position": Object {
-                        "end": Object {
-                          "column": 47,
-                          "line": 11,
-                          "offset": 441,
-                        },
-                        "start": Object {
-                          "column": 1,
-                          "line": 11,
-                          "offset": 395,
-                        },
-                      },
-                      "properties": Object {
-                        "className": Array [
-                          "portal-parent-fader-bottom",
-                        ],
-                      },
-                      "tagName": "div",
-                      "type": "element",
-                    },
-                    Object {
-                      "position": Object {
-                        "end": null,
-                        "start": Object {
-                          "column": 47,
-                          "line": 11,
-                          "offset": 441,
-                        },
-                      },
-                      "type": "text",
-                      "value": "        
-",
-                    },
-                    Object {
-                      "children": Array [
-                        Object {
-                          "children": Array [
-                            Object {
-                              "children": Array [
-                                Object {
-                                  "properties": Object {
-                                    "xlink:href": "#svg-link",
-                                  },
-                                  "tagName": "use",
-                                  "type": "element",
-                                },
-                              ],
-                              "properties": Object {
-                                "aria-hidden": "true",
-                                "viewBox": "0 0 16 16",
-                              },
-                              "tagName": "svg",
-                              "type": "element",
-                            },
-                          ],
-                          "properties": Object {
-                            "aria-hidden": "true",
-                            "class": "anchor-heading",
-                            "href": "#fooone",
-                          },
-                          "tagName": "a",
-                          "type": "element",
-                        },
-                        Object {
-                          "position": Object {
-                            "end": Object {
-                              "column": 10,
-                              "line": 13,
-                              "offset": 460,
-                            },
-                            "start": Object {
-                              "column": 3,
-                              "line": 13,
-                              "offset": 453,
-                            },
-                          },
-                          "type": "text",
-                          "value": "Foo.One",
-                        },
-                      ],
-                      "position": Object {
-                        "end": Object {
-                          "column": 10,
-                          "line": 13,
-                          "offset": 460,
-                        },
-                        "start": Object {
-                          "column": 1,
-                          "line": 13,
-                          "offset": 451,
-                        },
-                      },
-                      "properties": Object {
-                        "id": "fooone",
-                      },
-                      "tagName": "h1",
-                      "type": "element",
-                    },
-                    Object {
-                      "type": "text",
-                      "value": "
-",
-                    },
-                    Object {
-                      "children": Array [
-                        Object {
-                          "position": Object {
-                            "end": Object {
-                              "column": 1,
-                              "line": 16,
-                              "offset": 493,
-                            },
-                            "start": Object {
-                              "column": 31,
-                              "line": 15,
-                              "offset": 492,
-                            },
-                          },
-                          "type": "text",
-                          "value": "
-",
-                        },
-                        Object {
-                          "children": Array [
-                            Object {
-                              "position": Object {
-                                "end": Object {
-                                  "column": 1,
-                                  "line": 17,
-                                  "offset": 519,
-                                },
-                                "start": Object {
-                                  "column": 26,
-                                  "line": 16,
-                                  "offset": 518,
-                                },
-                              },
-                              "type": "text",
-                              "value": "
-",
-                            },
-                            Object {
-                              "children": Array [
-                                Object {
-                                  "position": Object {
-                                    "end": Object {
-                                      "column": 1,
-                                      "line": 18,
-                                      "offset": 550,
-                                    },
-                                    "start": Object {
-                                      "column": 31,
-                                      "line": 17,
-                                      "offset": 549,
-                                    },
-                                  },
-                                  "type": "text",
-                                  "value": "
-",
-                                },
-                                Object {
-                                  "children": Array [
-                                    Object {
-                                      "position": Object {
-                                        "end": Object {
-                                          "column": 32,
-                                          "line": 18,
-                                          "offset": 581,
-                                        },
-                                        "start": Object {
-                                          "column": 27,
-                                          "line": 18,
-                                          "offset": 576,
-                                        },
-                                      },
-                                      "type": "text",
-                                      "value": "From ",
-                                    },
-                                    Object {
-                                      "children": Array [
-                                        Object {
-                                          "position": Object {
-                                            "end": Object {
-                                              "column": 71,
-                                              "line": 18,
-                                              "offset": 620,
-                                            },
-                                            "start": Object {
-                                              "column": 64,
-                                              "line": 18,
-                                              "offset": 613,
-                                            },
-                                          },
-                                          "type": "text",
-                                          "value": "foo.two",
-                                        },
-                                      ],
-                                      "position": Object {
-                                        "end": Object {
-                                          "column": 78,
-                                          "line": 18,
-                                          "offset": 627,
-                                        },
-                                        "start": Object {
-                                          "column": 32,
-                                          "line": 18,
-                                          "offset": 581,
-                                        },
-                                      },
-                                      "properties": Object {
-                                        "className": Array [
-                                          "portal-text-title",
-                                        ],
-                                      },
-                                      "tagName": "span",
-                                      "type": "element",
-                                    },
-                                  ],
-                                  "position": Object {
-                                    "end": Object {
-                                      "column": 84,
-                                      "line": 18,
-                                      "offset": 633,
-                                    },
-                                    "start": Object {
-                                      "column": 1,
-                                      "line": 18,
-                                      "offset": 550,
-                                    },
-                                  },
-                                  "properties": Object {
-                                    "className": Array [
-                                      "portal-title",
-                                    ],
-                                  },
-                                  "tagName": "div",
-                                  "type": "element",
-                                },
-                                Object {
-                                  "position": Object {
-                                    "end": Object {
-                                      "column": 1,
-                                      "line": 19,
-                                      "offset": 634,
-                                    },
-                                    "start": Object {
-                                      "column": 84,
-                                      "line": 18,
-                                      "offset": 633,
-                                    },
-                                  },
-                                  "type": "text",
-                                  "value": "
-",
-                                },
-                                Object {
-                                  "children": Array [
-                                    Object {
-                                      "position": Object {
-                                        "end": Object {
-                                          "column": 56,
-                                          "line": 19,
-                                          "offset": 689,
-                                        },
-                                        "start": Object {
-                                          "column": 45,
-                                          "line": 19,
-                                          "offset": 678,
-                                        },
-                                      },
-                                      "type": "text",
-                                      "value": "Go to text ",
-                                    },
-                                    Object {
-                                      "children": Array [
-                                        Object {
-                                          "position": Object {
-                                            "end": Object {
-                                              "column": 83,
-                                              "line": 19,
-                                              "offset": 716,
-                                            },
-                                            "start": Object {
-                                              "column": 82,
-                                              "line": 19,
-                                              "offset": 715,
-                                            },
-                                          },
-                                          "type": "text",
-                                          "value": "→",
-                                        },
-                                      ],
-                                      "position": Object {
-                                        "end": Object {
-                                          "column": 90,
-                                          "line": 19,
-                                          "offset": 723,
-                                        },
-                                        "start": Object {
-                                          "column": 56,
-                                          "line": 19,
-                                          "offset": 689,
-                                        },
-                                      },
-                                      "properties": Object {
-                                        "className": Array [
-                                          "right-arrow",
-                                        ],
-                                      },
-                                      "tagName": "span",
-                                      "type": "element",
-                                    },
-                                  ],
-                                  "position": Object {
-                                    "end": Object {
-                                      "column": 94,
-                                      "line": 19,
-                                      "offset": 727,
-                                    },
-                                    "start": Object {
-                                      "column": 1,
-                                      "line": 19,
-                                      "offset": 634,
-                                    },
-                                  },
-                                  "properties": Object {
-                                    "className": Array [
-                                      "portal-arrow",
-                                    ],
-                                    "href": "foo.two.html",
-                                  },
-                                  "tagName": "a",
-                                  "type": "element",
-                                },
-                                Object {
-                                  "position": Object {
-                                    "end": Object {
-                                      "column": 1,
-                                      "line": 20,
-                                      "offset": 728,
-                                    },
-                                    "start": Object {
-                                      "column": 94,
-                                      "line": 19,
-                                      "offset": 727,
-                                    },
-                                  },
-                                  "type": "text",
-                                  "value": "
-",
-                                },
-                              ],
-                              "position": Object {
-                                "end": Object {
-                                  "column": 7,
-                                  "line": 20,
-                                  "offset": 734,
-                                },
-                                "start": Object {
-                                  "column": 1,
-                                  "line": 17,
-                                  "offset": 519,
-                                },
-                              },
-                              "properties": Object {
-                                "className": Array [
-                                  "portal-backlink",
-                                ],
-                              },
-                              "tagName": "div",
-                              "type": "element",
-                            },
-                            Object {
-                              "position": Object {
-                                "end": Object {
-                                  "column": 1,
-                                  "line": 21,
-                                  "offset": 735,
-                                },
-                                "start": Object {
-                                  "column": 7,
-                                  "line": 20,
-                                  "offset": 734,
-                                },
-                              },
-                              "type": "text",
-                              "value": "
-",
-                            },
-                          ],
-                          "position": Object {
-                            "end": Object {
-                              "column": 7,
-                              "line": 21,
-                              "offset": 741,
-                            },
-                            "start": Object {
-                              "column": 1,
-                              "line": 16,
-                              "offset": 493,
-                            },
-                          },
-                          "properties": Object {
-                            "className": Array [
-                              "portal-head",
-                            ],
-                          },
-                          "tagName": "div",
-                          "type": "element",
-                        },
-                        Object {
-                          "position": Object {
-                            "end": Object {
-                              "column": 1,
-                              "line": 22,
-                              "offset": 742,
-                            },
-                            "start": Object {
-                              "column": 7,
-                              "line": 21,
-                              "offset": 741,
-                            },
-                          },
-                          "type": "text",
-                          "value": "
-",
-                        },
-                        Object {
-                          "children": Array [
-                            Object {
-                              "position": Object {
-                                "end": Object {
-                                  "column": 1,
-                                  "line": 23,
-                                  "offset": 809,
-                                },
-                                "start": Object {
-                                  "column": 67,
-                                  "line": 22,
-                                  "offset": 808,
-                                },
-                              },
-                              "type": "text",
-                              "value": "
-",
-                            },
-                            Object {
-                              "children": Array [],
-                              "position": Object {
-                                "end": Object {
-                                  "column": 44,
-                                  "line": 23,
-                                  "offset": 852,
-                                },
-                                "start": Object {
-                                  "column": 1,
-                                  "line": 23,
-                                  "offset": 809,
-                                },
-                              },
-                              "properties": Object {
-                                "className": Array [
-                                  "portal-parent-fader-top",
-                                ],
-                              },
-                              "tagName": "div",
-                              "type": "element",
-                            },
-                            Object {
-                              "position": Object {
-                                "end": Object {
-                                  "column": 1,
-                                  "line": 24,
-                                  "offset": 853,
-                                },
-                                "start": Object {
-                                  "column": 44,
-                                  "line": 23,
-                                  "offset": 852,
-                                },
-                              },
-                              "type": "text",
-                              "value": "
-",
-                            },
-                            Object {
-                              "children": Array [],
-                              "position": Object {
-                                "end": Object {
-                                  "column": 47,
-                                  "line": 24,
-                                  "offset": 899,
-                                },
-                                "start": Object {
-                                  "column": 1,
-                                  "line": 24,
-                                  "offset": 853,
-                                },
-                              },
-                              "properties": Object {
-                                "className": Array [
-                                  "portal-parent-fader-bottom",
-                                ],
-                              },
-                              "tagName": "div",
-                              "type": "element",
-                            },
-                            Object {
-                              "position": Object {
-                                "end": null,
-                                "start": Object {
-                                  "column": 47,
-                                  "line": 24,
-                                  "offset": 899,
-                                },
-                              },
-                              "type": "text",
-                              "value": "        
-",
-                            },
-                            Object {
-                              "children": Array [
-                                Object {
-                                  "children": Array [
-                                    Object {
-                                      "children": Array [
-                                        Object {
-                                          "properties": Object {
-                                            "xlink:href": "#svg-link",
-                                          },
-                                          "tagName": "use",
-                                          "type": "element",
-                                        },
-                                      ],
-                                      "properties": Object {
-                                        "aria-hidden": "true",
-                                        "viewBox": "0 0 16 16",
-                                      },
-                                      "tagName": "svg",
-                                      "type": "element",
-                                    },
-                                  ],
-                                  "properties": Object {
-                                    "aria-hidden": "true",
-                                    "class": "anchor-heading",
-                                    "href": "#footwo",
-                                  },
-                                  "tagName": "a",
-                                  "type": "element",
-                                },
-                                Object {
-                                  "position": Object {
-                                    "end": Object {
-                                      "column": 10,
-                                      "line": 26,
-                                      "offset": 918,
-                                    },
-                                    "start": Object {
-                                      "column": 3,
-                                      "line": 26,
-                                      "offset": 911,
-                                    },
-                                  },
-                                  "type": "text",
-                                  "value": "Foo.Two",
-                                },
-                              ],
-                              "position": Object {
-                                "end": Object {
-                                  "column": 10,
-                                  "line": 26,
-                                  "offset": 918,
-                                },
-                                "start": Object {
-                                  "column": 1,
-                                  "line": 26,
-                                  "offset": 909,
-                                },
-                              },
-                              "properties": Object {
-                                "id": "footwo",
-                              },
-                              "tagName": "h1",
-                              "type": "element",
-                            },
-                            Object {
-                              "type": "text",
-                              "value": "
-",
-                            },
-                            Object {
-                              "children": Array [
-                                Object {
-                                  "position": Object {
-                                    "end": Object {
-                                      "column": 5,
-                                      "line": 28,
-                                      "offset": 924,
-                                    },
-                                    "start": Object {
-                                      "column": 1,
-                                      "line": 28,
-                                      "offset": 920,
-                                    },
-                                  },
-                                  "type": "text",
-                                  "value": "blah",
-                                },
-                              ],
-                              "position": Object {
-                                "end": Object {
-                                  "column": 5,
-                                  "line": 28,
-                                  "offset": 924,
-                                },
-                                "start": Object {
-                                  "column": 1,
-                                  "line": 28,
-                                  "offset": 920,
-                                },
-                              },
-                              "properties": Object {},
-                              "tagName": "p",
-                              "type": "element",
-                            },
-                            Object {
-                              "type": "text",
-                              "value": "
-",
-                            },
-                          ],
-                          "position": Object {
-                            "end": Object {
-                              "column": 7,
-                              "line": 30,
-                              "offset": 932,
-                            },
-                            "start": Object {
-                              "column": 1,
-                              "line": 22,
-                              "offset": 742,
-                            },
-                          },
-                          "properties": Object {
-                            "className": Array [
-                              "portal-parent",
-                            ],
-                            "id": "portal-parent-anchor",
-                            "markdown": "1",
-                          },
-                          "tagName": "div",
-                          "type": "element",
-                        },
-                        Object {
-                          "position": Object {
-                            "end": Object {
-                              "column": 1,
-                              "line": 31,
-                              "offset": 937,
-                            },
-                            "start": Object {
-                              "column": 7,
-                              "line": 30,
-                              "offset": 932,
-                            },
-                          },
-                          "type": "text",
-                          "value": "    
-",
-                        },
-                      ],
-                      "position": Object {
-                        "end": Object {
-                          "column": 7,
-                          "line": 31,
-                          "offset": 943,
-                        },
-                        "start": Object {
-                          "column": 1,
-                          "line": 15,
-                          "offset": 462,
-                        },
-                      },
-                      "properties": Object {
-                        "className": Array [
-                          "portal-container",
-                        ],
-                      },
-                      "tagName": "div",
-                      "type": "element",
-                    },
-                    Object {
-                      "type": "text",
-                      "value": "
-",
-                    },
-                    Object {
-                      "children": Array [
-                        Object {
-                          "position": Object {
-                            "end": Object {
-                              "column": 19,
-                              "line": 33,
-                              "offset": 963,
-                            },
-                            "start": Object {
-                              "column": 1,
-                              "line": 33,
-                              "offset": 945,
-                            },
-                          },
-                          "type": "text",
-                          "value": "Regular wikilink: ",
-                        },
-                        Object {
-                          "children": Array [
-                            Object {
-                              "position": Object {
-                                "end": Object {
-                                  "column": 27,
-                                  "line": 33,
-                                  "offset": 971,
-                                },
-                                "start": Object {
-                                  "column": 20,
-                                  "line": 33,
-                                  "offset": 964,
-                                },
-                              },
-                              "type": "text",
-                              "value": "foo.two",
-                            },
-                          ],
-                          "position": Object {
-                            "end": Object {
-                              "column": 42,
-                              "line": 33,
-                              "offset": 986,
-                            },
-                            "start": Object {
-                              "column": 19,
-                              "line": 33,
-                              "offset": 963,
-                            },
-                          },
-                          "properties": Object {
-                            "href": "foo.two.html",
-                          },
-                          "tagName": "a",
-                          "type": "element",
-                        },
-                      ],
-                      "position": Object {
-                        "end": Object {
-                          "column": 42,
-                          "line": 33,
-                          "offset": 986,
-                        },
-                        "start": Object {
-                          "column": 1,
-                          "line": 33,
-                          "offset": 945,
-                        },
-                      },
-                      "properties": Object {},
-                      "tagName": "p",
-                      "type": "element",
-                    },
-                    Object {
-                      "type": "text",
-                      "value": "
-",
-                    },
-                  ],
-                  "position": Object {
-                    "end": Object {
-                      "column": 7,
-                      "line": 35,
-                      "offset": 994,
-                    },
-                    "start": Object {
-                      "column": 1,
-                      "line": 9,
-                      "offset": 284,
-                    },
-                  },
-                  "properties": Object {
-                    "className": Array [
-                      "portal-parent",
-                    ],
-                    "id": "portal-parent-anchor",
-                    "markdown": "1",
-                  },
-                  "tagName": "div",
-                  "type": "element",
-                },
-                Object {
-                  "position": Object {
-                    "end": Object {
-                      "column": 1,
-                      "line": 36,
-                      "offset": 999,
-                    },
-                    "start": Object {
-                      "column": 7,
-                      "line": 35,
-                      "offset": 994,
-                    },
-                  },
-                  "type": "text",
-                  "value": "    
-",
-                },
-              ],
-              "position": Object {
-                "end": Object {
-                  "column": 7,
-                  "line": 36,
-                  "offset": 1005,
-                },
-                "start": Object {
-                  "column": 1,
-                  "line": 2,
-                  "offset": 1,
-                },
-              },
-              "properties": Object {
-                "className": Array [
-                  "portal-container",
-                ],
-              },
-              "tagName": "div",
-              "type": "element",
-            },
-            Object {
-              "position": Object {
-                "end": Object {
-                  "column": 1,
-                  "line": 2,
-                  "offset": 1,
-                },
-                "start": Object {
-                  "column": 1,
-                  "line": 1,
-                  "offset": 0,
-                },
-              },
-              "type": "text",
-              "value": "
-",
-            },
-          ],
-          "position": Object {
-            "end": Object {
-              "column": 7,
-              "line": 2,
-              "offset": 7,
-            },
-            "start": Object {
-              "column": 1,
-              "line": 8,
-              "offset": 275,
-            },
-          },
-          "properties": Object {
-            "className": Array [
-              "portal-parent",
-            ],
-            "id": "portal-parent-anchor",
-            "markdown": "1",
-          },
-          "tagName": "div",
-          "type": "element",
-        },
-        Object {
-          "position": Object {
-            "end": Object {
-              "column": 1,
-              "line": 3,
-              "offset": 12,
-            },
-            "start": Object {
-              "column": 7,
-              "line": 2,
-              "offset": 7,
-            },
-          },
-          "type": "text",
-          "value": "    
-",
-        },
-      ],
-      "position": Object {
-        "end": Object {
-          "column": 7,
-          "line": 3,
-          "offset": 18,
-        },
-        "start": Object {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
-      },
-      "properties": Object {
-        "className": Array [
-          "portal-container",
-        ],
-      },
-      "tagName": "div",
-      "type": "element",
-    },
-    Object {
-      "children": Array [],
-      "properties": Object {},
-      "tagName": "p",
-      "type": "element",
-    },
-    Object {
-      "children": Array [],
-      "properties": Object {},
-      "tagName": "p",
-      "type": "element",
-    },
-  ],
-  "data": Object {
-    "quirksMode": false,
-  },
-  "position": Object {
-    "end": Object {
-      "column": 1,
-      "line": 1,
-      "offset": 0,
-    },
-    "start": Object {
-      "column": 1,
-      "line": 1,
-      "offset": 0,
-    },
-  },
-  "type": "root",
-}
-`;
-
 exports[`MDUtils.proc "HTML: NOTE_REF_WITH_REHYPE": respRehype 1`] = `
 VFile {
   "contents": "<p></p><p></p><div class=\\"portal-container\\">
@@ -2261,9 +59,7 @@ created: '1'",
           "data": Object {
             "alias": "foo bar",
             "anchorHeader": undefined,
-            "filters": Array [
-              "",
-            ],
+            "vaultName": undefined,
           },
           "position": Position {
             "end": Object {
@@ -2976,9 +772,7 @@ created: '1'",
           "data": Object {
             "alias": "Ch1",
             "anchorHeader": undefined,
-            "filters": Array [
-              "",
-            ],
+            "vaultName": undefined,
           },
           "position": Position {
             "end": Object {
@@ -3052,6 +846,124 @@ created: '1'
 exports[`MDUtils.proc "HTML: WITH_TITLE_FOR_LINK": respRehype 1`] = `
 VFile {
   "contents": "<p><a href=\\"foo.ch1.html\\">Ch1</a></p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "HTML: WITH_TITLE_FOR_LINK_X_VAULT": respParse 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "position": Position {
+        "end": Object {
+          "column": 4,
+          "line": 7,
+          "offset": 61,
+        },
+        "indent": Array [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+        ],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "yaml",
+      "value": "id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "Bar",
+            "anchorHeader": undefined,
+            "vaultName": "vault2",
+          },
+          "position": Position {
+            "end": Object {
+              "column": 15,
+              "line": 8,
+              "offset": 76,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 8,
+              "offset": 62,
+            },
+          },
+          "type": "wikiLink",
+          "value": "bar",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 15,
+          "line": 8,
+          "offset": 76,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 8,
+          "offset": 62,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 1,
+      "line": 9,
+      "offset": 77,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`MDUtils.proc "HTML: WITH_TITLE_FOR_LINK_X_VAULT": respProcess 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+[Bar](bar.html)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "HTML: WITH_TITLE_FOR_LINK_X_VAULT": respRehype 1`] = `
+VFile {
+  "contents": "<p><a href=\\"bar.html\\">Bar</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -3336,9 +1248,7 @@ created: '1'",
           "data": Object {
             "alias": "foo.ch1",
             "anchorHeader": undefined,
-            "filters": Array [
-              "",
-            ],
+            "vaultName": undefined,
           },
           "position": Position {
             "end": Object {
@@ -3412,6 +1322,124 @@ created: '1'
 exports[`MDUtils.proc "MD_DENDRON: WITH_TITLE_FOR_LINK": respRehype 1`] = `
 VFile {
   "contents": "<p>foo.ch1</p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_DENDRON: WITH_TITLE_FOR_LINK_X_VAULT": respParse 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "position": Position {
+        "end": Object {
+          "column": 4,
+          "line": 7,
+          "offset": 61,
+        },
+        "indent": Array [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+        ],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "yaml",
+      "value": "id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "bar",
+            "anchorHeader": undefined,
+            "vaultName": "vault2",
+          },
+          "position": Position {
+            "end": Object {
+              "column": 15,
+              "line": 8,
+              "offset": 76,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 8,
+              "offset": 62,
+            },
+          },
+          "type": "wikiLink",
+          "value": "bar",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 15,
+          "line": 8,
+          "offset": 76,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 8,
+          "offset": 62,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 1,
+      "line": 9,
+      "offset": 77,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`MDUtils.proc "MD_DENDRON: WITH_TITLE_FOR_LINK_X_VAULT": respProcess 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+[[vault2/bar]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_DENDRON: WITH_TITLE_FOR_LINK_X_VAULT": respRehype 1`] = `
+VFile {
+  "contents": "<p>bar</p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -3672,9 +1700,7 @@ created: '1'",
           "data": Object {
             "alias": "Ch1",
             "anchorHeader": undefined,
-            "filters": Array [
-              "",
-            ],
+            "vaultName": undefined,
           },
           "position": Position {
             "end": Object {
@@ -4315,9 +2341,7 @@ created: '1'",
           "data": Object {
             "alias": "Ch1",
             "anchorHeader": undefined,
-            "filters": Array [
-              "",
-            ],
+            "vaultName": undefined,
           },
           "position": Position {
             "end": Object {
@@ -4391,6 +2415,124 @@ created: '1'
 exports[`MDUtils.proc "MD_REGULAR: WITH_TITLE_FOR_LINK": respRehype 1`] = `
 VFile {
   "contents": "<p><a href=\\"foo.ch1.html\\">Ch1</a></p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_TITLE_FOR_LINK_X_VAULT": respParse 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "position": Position {
+        "end": Object {
+          "column": 4,
+          "line": 7,
+          "offset": 61,
+        },
+        "indent": Array [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+        ],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "yaml",
+      "value": "id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "data": Object {
+            "alias": "Bar",
+            "anchorHeader": undefined,
+            "vaultName": "vault2",
+          },
+          "position": Position {
+            "end": Object {
+              "column": 15,
+              "line": 8,
+              "offset": 76,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 8,
+              "offset": 62,
+            },
+          },
+          "type": "wikiLink",
+          "value": "bar",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 15,
+          "line": 8,
+          "offset": 76,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 8,
+          "offset": 62,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 1,
+      "line": 9,
+      "offset": 77,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_TITLE_FOR_LINK_X_VAULT": respProcess 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+[Bar](bar)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_TITLE_FOR_LINK_X_VAULT": respRehype 1`] = `
+VFile {
+  "contents": "<p><a href=\\"bar.html\\">Bar</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],

@@ -2,6 +2,7 @@ import { NotePropsV2, WorkspaceOpts } from "@dendronhq/common-all";
 import {
   AssertUtils,
   ENGINE_HOOKS,
+  ENGINE_HOOKS_MULTI,
   NoteTestUtilsV4,
   runEngineTestV4,
   TestPresetEntryV4,
@@ -16,6 +17,7 @@ import {
   createEngine,
   createProcTests,
   generateVerifyFunction,
+  processText,
 } from "./utils";
 import { MDUtilsV4 } from "../../utils";
 
@@ -373,39 +375,29 @@ const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
     let proc = await createProc(opts, {
       wikiLinksOpts: { useId: true },
     });
-    const txt = `((ref: [[foo.md]]))`;
-    if (opts.extra.dest === DendronASTDest.HTML) {
-      const procRehype = MDUtilsV4.procRehype({ proc });
-      const resp = await procRehype.process(txt);
-      const respParse = await procRehype.parse(txt);
-      const respTransform = await procRehype.run(respParse);
-      return { resp, proc, respParse, respTransform };
-    } else {
-      const resp = await proc.process(txt);
-      return { resp, proc };
-    }
+    const txt1 = `((ref: [[foo.md]]))`;
+    const txt2 = `![[foo.md]]`;
+    const case1 = processText({ text: txt1, proc });
+    const case2 = processText({ text: txt2, proc });
+    return { case1, case2 };
   },
   verifyFuncDict: {
-    [DendronASTDest.MD_REGULAR]: async () => {},
     [DendronASTDest.HTML]: async ({ extra }) => {
-      const { resp, respParse, respTransform } = extra;
-      expect(resp).toMatchSnapshot();
-      expect(respParse).toMatchSnapshot();
-      expect(respTransform).toMatchSnapshot();
-      expect(
-        await AssertUtils.assertInString({
-          body: resp.contents,
-          match: [
+      const { case1, case2 } = extra;
+      const { respRehype: resp1 } = case1;
+      const { respRehype: resp2 } = case2;
+      await Promise.all(
+        [resp1, resp2].map((resp) => {
+          return checkContents(resp, [
             // link by id
             `<a href=\"foo-id.html\"`,
             // html quoted
             `Foo.One</h1>`,
             `Foo.Two</h1>`,
-          ],
+          ]);
         })
-      ).toBeTruthy();
+      );
     },
-    [DendronASTDest.MD_ENHANCED_PREVIEW]: async () => {},
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupNoteRefRecursive({
@@ -451,19 +443,57 @@ const WITH_TITLE_FOR_LINK = createProcTests({
   },
 });
 
+const WITH_TITLE_FOR_LINK_X_VAULT = createProcTests({
+  name: "WITH_TITLE_FOR_LINK_X_VAULT",
+  setupFunc: async (opts) => {
+    let proc = await createProc(opts, {
+      config: { ...DConfig.genDefaultConfig(), useNoteTitleForLink: true },
+    });
+    const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
+    return readAndProcess({ npath, proc });
+  },
+  verifyFuncDict: {
+    [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+      const { respProcess } = extra;
+      await checkContents(respProcess, "[Bar](bar)");
+    },
+    [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+      const { respProcess } = extra;
+      await checkContents(respProcess, "[[vault2/bar]]");
+    },
+    // TODO
+    // [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+    //   const { respProcess } = extra;
+    //   await checkContents(respProcess, "[Ch1](foo.ch1.md)");
+    // },
+    [DendronASTDest.HTML]: async ({ extra }) => {
+      const { respRehype } = extra;
+      await checkContents(respRehype, `<p><a href="bar.html">Bar</a></p>`);
+    },
+  },
+  preSetupHook: async (opts) => {
+    await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
+    await modifyNote(opts, (note: NotePropsV2) => {
+      note.body = `[[vault2/bar]]`;
+      return note;
+    });
+  },
+});
+
 const ALL_TEST_CASES = [
   ...WITH_ABBR,
   ...WITH_VARIABLE,
   ...WITH_ASSET_PREFIX,
   ...WITH_ASSET_PREFIX_UNDEFINED,
-  ...NOTE_REF_BASIC_WITH_REHYPE,
+  // --- note refs
   ...NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE,
+  ...NOTE_REF_BASIC_WITH_REHYPE,
   ...WITH_TITLE,
   ...NOTE_W_LINK_AND_SPACE,
   ...WITH_FOOTNOTES,
   ...WITH_MERMAID,
-  // --- new
   ...WITH_TITLE_FOR_LINK,
+  ...WITH_TITLE_FOR_LINK_X_VAULT,
 ];
 
 describe("MDUtils.proc", () => {

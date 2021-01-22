@@ -139,7 +139,8 @@ export const processText = (opts: { text: string; proc: Processor }) => {
   const { text, proc } = opts;
   const respParse = proc.parse(text);
   const respProcess = proc.processSync(text);
-  return { proc, respParse, respProcess };
+  const respRehype = MDUtilsV4.procRehype({ proc: proc() }).processSync(text);
+  return { proc, respParse, respProcess, respRehype };
 };
 
 export const processNote = (opts: {

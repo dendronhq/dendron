@@ -49,6 +49,7 @@ export type WikiLinkDataV4 = {
   alias: string;
   anchorHeader?: string;
   prefix?: string;
+  vaultName?: string;
   filters?: LinkFilter[];
 };
 

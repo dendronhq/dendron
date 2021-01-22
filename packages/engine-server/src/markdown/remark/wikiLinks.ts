@@ -1,8 +1,7 @@
-import { DendronError, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DendronError, NoteUtilsV2, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
-import { WikiLinkProps } from "../../topics/markdown";
 import { DendronASTDest, WikiLinkDataV4, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { addError, getNoteOrError, LinkUtils } from "./utils";
@@ -56,7 +55,8 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         const { alias, anchorHeader } = data;
         let link = alias !== value ? `${alias}|${value}` : value;
         let anchor = anchorHeader ? `#${anchorHeader}` : "";
-        return `[[${link}${anchor}]]`;
+        let vaultPrefix = data.vaultName ? `${data.vaultName}/` : "";
+        return `[[${vaultPrefix}${link}${anchor}]]`;
       }
       const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
       if (error) {
@@ -111,24 +111,29 @@ function attachParser(proc: Unified.Processor) {
 
   function parseLink(linkMatch: string) {
     linkMatch = NoteUtilsV2.normalizeFname(linkMatch);
-    let out: WikiLinkProps = {
-      value: linkMatch,
-      alias: linkMatch,
-    };
 
-    const match = LinkUtils.parseLinkV2(linkMatch);
-    if (_.isNull(match)) {
+    const out = LinkUtils.parseLinkV2(linkMatch);
+    if (_.isNull(out)) {
       throw new DendronError({ msg: `link is null: ${linkMatch}` });
     }
-    out = match;
-    const { config, vault, dest } = MDUtilsV4.getDendronData(proc);
+    let { config, vault, dest } = MDUtilsV4.getDendronData(proc);
+    const { engine } = MDUtilsV4.getEngineFromProc(proc);
+    if (out.vaultName) {
+      debugger;
+      vault = VaultUtils.getVaultByName({
+        vaults: engine.vaultsv3,
+        vname: out.vaultName,
+      });
+      if (!vault) {
+        throw new DendronError({ msg: `vault ${out.vaultName} not found` });
+      }
+    }
     if (
       dest !== DendronASTDest.MD_DENDRON &&
       config?.useNoteTitleForLink &&
       out.alias === out.value &&
       vault
     ) {
-      const { engine } = MDUtilsV4.getEngineFromProc(proc);
       const wsRoot = engine.wsRoot;
       const note = NoteUtilsV2.getNoteByFnameV5({
         fname: out.value,
@@ -147,14 +152,14 @@ function attachParser(proc: Unified.Processor) {
     const match = LINK_REGEX.exec(value);
     if (match) {
       const linkMatch = match[1].trim();
-      const { value, alias, anchorHeader, filters } = parseLink(linkMatch);
+      const { value, alias, anchorHeader, vaultName } = parseLink(linkMatch);
       return eat(match[0])({
         type: "wikiLink",
         value,
         data: {
           alias,
           anchorHeader,
-          filters,
+          vaultName,
         } as WikiLinkDataV4,
       });
     }

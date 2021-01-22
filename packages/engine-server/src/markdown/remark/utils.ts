@@ -76,14 +76,17 @@ export class LinkUtils {
     );
     const out = linkString.match(re);
     if (out) {
-      let { alias, value, anchor, filtersRaw } = out.groups as any;
-      const filters = (filtersRaw || "").split(">");
+      let { alias, value, anchor } = out.groups as any;
+      let vaultName: string | undefined;
+      if (value.indexOf("/") >= 0) {
+        [vaultName, value] = value.split("/");
+      }
       if (!alias) {
         alias = value;
       }
       alias = _.trim(alias);
       value = _.trim(value);
-      return { alias, value, anchorHeader: anchor, filters };
+      return { alias, value, anchorHeader: anchor, vaultName };
     } else {
       return null;
     }

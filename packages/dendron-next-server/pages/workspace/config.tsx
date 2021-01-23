@@ -9,25 +9,11 @@ import {
   FormLabel,
   Heading,
   Input,
-
-
-
-
-
-
-
-
-
-
-  ListItem, OrderedList, Stack,
+  ListItem,
+  OrderedList,
+  Stack,
   Switch,
-
-
-
-
-
-
-  useToast
+  useToast,
 } from "@chakra-ui/react";
 import { DendronConfig } from "@dendronhq/common-all";
 import { Field, FieldArray, Form, Formik } from "formik";
@@ -135,7 +121,7 @@ const saveConfigData = async (config: DendronConfig) => {
   // empty string is different from undefined
   _.forEach(config.site, (v, k) => {
     if (_.isEmpty(v) && _.isString(v)) {
-      delete config.site[k]
+      delete config.site[k];
     }
   });
   const resp = await configWrite(config);

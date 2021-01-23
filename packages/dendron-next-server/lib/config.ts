@@ -3,13 +3,6 @@ import { getEnv } from "./env";
 import { CONFIG_KEY, StageEnv } from "./types";
 
 
-export const ENV: {[key: string]: StageEnv} = {
-  dev: {
-  },
-  prod: {
-  }
-}
-
 
 type API_PATH_KEY = {[key in keyof DEngineClientV2]: string}
 

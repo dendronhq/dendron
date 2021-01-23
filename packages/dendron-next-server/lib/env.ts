@@ -1,5 +1,4 @@
 import _ from "lodash"
-import { ENV } from "./config"
 import { StageEnv } from "./types";
 
 export function getStage() {
@@ -14,7 +13,7 @@ export function getEnv(key: keyof StageEnv): any {
     //return override || ENV[stage][key]
 }
 
-export function dumpEnv(): StageEnv {
-    return ENV[getStage()];
-}
+// export function dumpEnv(): StageEnv {
+//     return ENV[getStage()];
+// }
 

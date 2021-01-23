@@ -12,8 +12,3 @@ export function getEnv(key: keyof StageEnv): any {
     return override;
     //return override || ENV[stage][key]
 }
-
-// export function dumpEnv(): StageEnv {
-//     return ENV[getStage()];
-// }
-

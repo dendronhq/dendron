@@ -53,14 +53,16 @@ export class VaultUtils {
   static getVaultByName({
     vaults,
     vname,
+    throwOnMissing,
   }: {
     vname: string;
     vaults: DVault[];
+    throwOnMissing?: boolean;
   }) {
     const vault = _.find(vaults, (vault) => {
       return vname === VaultUtils.getName(vault);
     });
-    if (!vault) {
+    if (!vault && throwOnMissing) {
       throw new DendronError({ msg: `vault with name ${vname} not found` });
     }
     return vault;

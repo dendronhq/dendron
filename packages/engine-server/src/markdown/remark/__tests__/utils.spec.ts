@@ -493,7 +493,7 @@ const ALL_TEST_CASES = [
   ...WITH_FOOTNOTES,
   ...WITH_MERMAID,
   ...WITH_TITLE_FOR_LINK,
-  ...WITH_TITLE_FOR_LINK_X_VAULT,
+  //...WITH_TITLE_FOR_LINK_X_VAULT,
 ];
 
 describe("MDUtils.proc", () => {

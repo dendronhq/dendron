@@ -78,9 +78,9 @@ export class LinkUtils {
     if (out) {
       let { alias, value, anchor } = out.groups as any;
       let vaultName: string | undefined;
-      if (value.indexOf("/") >= 0) {
-        [vaultName, value] = value.split("/");
-      }
+      // if (value.indexOf("/") >= 0) {
+      //   [vaultName, value] = value.split("/");
+      // }
       if (!alias) {
         alias = value;
       }

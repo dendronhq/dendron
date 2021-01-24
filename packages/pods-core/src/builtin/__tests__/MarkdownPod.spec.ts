@@ -79,41 +79,37 @@ describe("MarkdownPublishPod", () => {
     );
   });
 
-  test("schema with template", async () => {
+  test("empty note", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
+        const fname = "empty";
         const vault = vaults[0];
         const vaultName = VaultUtils.getName(vault);
-        const fnames = ["bar.template.ch1", "bar.template.ch2"];
-        const resp = await Promise.all(
-          fnames.map(async (fname) => {
-            return new MarkdownPublishPod().execute({
-              engine,
-              vaults,
-              wsRoot,
-              config: {
-                fname,
-                vault: vaultName,
-                dest: "stdout",
-              },
-            });
-          })
-        );
-        expect(resp).toEqual(["ch1 template", "ch2 template"]);
+        const resp = await new MarkdownPublishPod().execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            fname,
+            vault: vaultName,
+            dest: "stdout",
+          },
+        });
+        expect(resp).toEqual("");
       },
       {
         expect,
-        preSetupHook: ENGINE_HOOKS.setupSchemaPreseet,
+        preSetupHook: ENGINE_HOOKS.setupEmpty,
       }
     );
   });
 
-  test("recursive note refs", async () => {
+  test("notes with links", async () => {
     await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
         const vaultName = VaultUtils.getName(vault);
-        const fnames = ["foo.one", "foo.two"];
+        const fnames = ["alpha", "beta", "omega"];
         const resp = await Promise.all(
           fnames.map(async (fname) => {
             return new MarkdownPublishPod().execute({
@@ -128,13 +124,60 @@ describe("MarkdownPublishPod", () => {
             });
           })
         );
-        const fooOneBody = `# Foo.One\n\n((ref:[[foo.two]]))\nRegular wikilink: [[foo.two]]`;
-        const fooTwoBody = `# Foo.Two\n\nblah`;
-        expect(resp).toEqual([fooOneBody, fooTwoBody]);
+        expect(resp).toEqual([
+          "[[beta]]",
+          "[[alpha#h3]]",
+          "[[some label|beta]]",
+        ]);
       },
       {
         expect,
-        preSetupHook: ENGINE_HOOKS.setupNoteRefRecursive,
+        preSetupHook: ENGINE_HOOKS.setupLinks,
+      }
+    );
+  });
+
+  test("notes with refs", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const vault = vaults[0];
+        const vaultName = VaultUtils.getName(vault);
+        const fnames = [
+          "simple-note-ref",
+          "simple-block-ref",
+          "simple-block-range-ref",
+          "ref-offset",
+          "wildcard-child-ref",
+          "wildcard-header-ref",
+          "wildcard-complex-ref",
+        ];
+        const resp = await Promise.all(
+          fnames.map(async (fname) => {
+            return new MarkdownPublishPod().execute({
+              engine,
+              vaults,
+              wsRoot,
+              config: {
+                fname,
+                vault: vaultName,
+                dest: "stdout",
+              },
+            });
+          })
+        );
+        expect(resp).toEqual([
+          "![[simple-note-ref.one]]",
+          "![[simple-block-ref.one#intro]]",
+          "![[simple-block-range-ref.one#head1:#head3]]",
+          "![[ref-offset.one#head1,1]]",
+          "![[wildcard-child-ref.*]]",
+          "![[wildcard-header-ref.one#head1:#*]]",
+          "![[wildcard-complex.*#head1,1]]",
+        ]);
+      },
+      {
+        expect,
+        preSetupHook: ENGINE_HOOKS.setupRefs,
       }
     );
   });

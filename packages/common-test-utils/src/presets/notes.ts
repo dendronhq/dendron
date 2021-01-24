@@ -58,6 +58,7 @@ const CreateNoteFactory = (opts: CreateNoteFactoryOpts) => {
 };
 
 export const NOTE_PRESETS_V4 = {
+  NOTE_EMPTY: CreateNoteFactory({ fname: "empty", body: "" }),
   NOTE_SIMPLE: CreateNoteFactory({ fname: "foo", body: "foo body" }),
   NOTE_SIMPLE_OTHER: CreateNoteFactory({ fname: "bar", body: "bar body" }),
   NOTE_SIMPLE_CHILD: CreateNoteFactory({
@@ -99,6 +100,34 @@ export const NOTE_PRESETS_V4 = {
   NOTE_WITH_CAPS_AND_SPACE: CreateNoteFactory({
     fname: "000 Index.md",
     body: "[[alpha]]",
+  }),
+  NOTE_WITH_NOTE_REF_SIMPLE: CreateNoteFactory({
+    fname: "simple-note-ref",
+    body: "![[simple-note-ref.one]]",
+  }),
+  NOTE_WITH_BLOCK_REF_SIMPLE: CreateNoteFactory({
+    fname: "simple-block-ref",
+    body: "![[simple-block-ref.one#intro]]",
+  }),
+  NOTE_WITH_BLOCK_RANGE_REF_SIMPLE: CreateNoteFactory({
+    fname: "simple-block-range-ref",
+    body: "![[simple-block-range-ref.one#head1:#head3]]",
+  }),
+  NOTE_WITH_REF_OFFSET: CreateNoteFactory({
+    fname: "ref-offset",
+    body: "![[ref-offset.one#head1,1]]",
+  }),
+  NOTE_WITH_WILDCARD_CHILD_REF: CreateNoteFactory({
+    fname: "wildcard-child-ref",
+    body: "![[wildcard-child-ref.*]]",
+  }),
+  NOTE_WITH_WILDCARD_HEADER_REF: CreateNoteFactory({
+    fname: "wildcard-header-ref",
+    body: "![[wildcard-header-ref.one#head1:#*]]",
+  }),
+  NOTE_WITH_WILDCARD_COMPLEX: CreateNoteFactory({
+    fname: "wildcard-complex-ref",
+    body: "![[wildcard-complex.*#head1,1]]",
   }),
   // TODO: deprecate
   NOTE_WITH_NOTE_REF: CreateNoteFactory({

@@ -253,12 +253,83 @@ export const setupSchemaPresetWithNamespaceTemplate: PreSetupHookFunction = asyn
   });
 };
 
+export const setupEmpty: PreSetupHookFunction = async ({ vaults, wsRoot }) => {
+  const vault = vaults[0];
+  await NOTE_PRESETS_V4.NOTE_EMPTY.create({
+    vault,
+    wsRoot,
+  });
+};
+
+export const setupLinks: PreSetupHookFunction = async ({ vaults, wsRoot }) => {
+  const vault = vaults[0];
+  // create note with wikilink
+  await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+    vault,
+    wsRoot,
+  });
+  // create note with relative wikilink
+  await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_LINK.create({
+    vault,
+    wsRoot,
+  });
+  // create note with labeld wikilink
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    body: "[[some label|beta]]",
+    fname: "omega",
+    vault: vault,
+  });
+};
+
+export const setupRefs: PreSetupHookFunction = async ({ vaults, wsRoot }) => {
+  const vault = vaults[0];
+  // create note with note reference
+  await NOTE_PRESETS_V4.NOTE_WITH_NOTE_REF_SIMPLE.create({
+    vault,
+    wsRoot,
+  });
+  // create note with block reference
+  await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_REF_SIMPLE.create({
+    vault,
+    wsRoot,
+  });
+  // create note with block range reference
+  await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_RANGE_REF_SIMPLE.create({
+    vault,
+    wsRoot,
+  });
+  // create note with reference offset
+  await NOTE_PRESETS_V4.NOTE_WITH_REF_OFFSET.create({
+    vault,
+    wsRoot,
+  });
+  // create note with wildcard child reference
+  await NOTE_PRESETS_V4.NOTE_WITH_WILDCARD_CHILD_REF.create({
+    vault,
+    wsRoot,
+  });
+  // create note with wildcard header reference
+  await NOTE_PRESETS_V4.NOTE_WITH_WILDCARD_HEADER_REF.create({
+    vault,
+    wsRoot,
+  });
+  // create note with complex wildcard reference
+  await NOTE_PRESETS_V4.NOTE_WITH_WILDCARD_COMPLEX.create({
+    vault,
+    wsRoot,
+  });
+};
+
 export const ENGINE_HOOKS = {
   setupBasic,
   setupSchemaPreseet,
   setupSchemaPresetWithNamespaceTemplate,
   setupNoteRefRecursive,
   setupJournals,
+  setupEmpty,
+  setupLinks,
+  setupRefs,
 };
 
 export const ENGINE_HOOKS_MULTI = {

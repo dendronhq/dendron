@@ -443,6 +443,7 @@ const WITH_TITLE_FOR_LINK = createProcTests({
   },
 });
 
+// @ts-ignore
 const WITH_TITLE_FOR_LINK_X_VAULT = createProcTests({
   name: "WITH_TITLE_FOR_LINK_X_VAULT",
   setupFunc: async (opts) => {

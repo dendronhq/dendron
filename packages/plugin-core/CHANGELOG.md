@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.25.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.25.3...v0.25.4-alpha.0) (2021-01-25)
+
+### Features
+
+- add signup and signin ([0cab181](https://github.com/dendronhq/dendron/commit/0cab18136db64d6847a7dd8821ed526ffe39853d))
+
 ## [0.25.3](https://github.com/dendronhq/dendron/compare/v0.25.3-alpha.3...v0.25.3) (2021-01-22)
 
 ### Enhancements

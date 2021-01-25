@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.25.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.25.3...v0.25.4-alpha.0) (2021-01-25)
+
+### Enhancements
+
+- new landing page ([b624b7d](https://github.com/dendronhq/dendron/commit/b624b7ddd6140e2ba6aa994a673996d75dd71d50))
+
 ## [0.25.3](https://github.com/dendronhq/dendron/compare/v0.25.3-alpha.3...v0.25.3) (2021-01-22)
 
 **Note:** Version bump only for package @dendronhq/dendron-next-server

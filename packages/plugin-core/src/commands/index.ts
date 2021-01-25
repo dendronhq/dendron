@@ -34,6 +34,8 @@ import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
 import { SiteBuildCommand } from "./SiteBuild";
 import { SitePreviewCommand } from "./SitePreview";
+import { SignUpCommand } from "./SignUp";
+import { SignInCommand } from "./SignIn";
 
 const ALL_COMMANDS = [
   ArchiveHierarchyCommand,
@@ -67,6 +69,8 @@ const ALL_COMMANDS = [
   SetupWorkspaceCommand,
   ShowHelpCommand,
   ShowPreviewCommand,
+  SignInCommand,
+  SignUpCommand,
   SiteBuildCommand,
   SitePreviewCommand,
   SnapshotVaultCommand,

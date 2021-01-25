@@ -395,6 +395,16 @@
                 "docPreview": ""
             },
             {
+                "command": "dendron.signUp",
+                "title": "Dendron: Sign Up",
+                "desc": "sign up for a Dendron account"
+            },
+            {
+                "command": "dendron.signIn",
+                "title": "Dendron: Sign In",
+                "desc": "sign in to a Dendron account"
+            },
+            {
                 "command": "dendron.openLink",
                 "title": "Dendron: Open Link",
                 "desc": "Open link to external file (eg. pdf, .mov, etc) use system default",

@@ -515,6 +515,19 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "",
     docPreview: ``,
   },
+  // --- Accounts
+  SIGNUP: {
+    key: "dendron.signUp",
+    title: `${CMD_PREFIX} Sign Up`,
+    group: "workspace",
+    desc: "sign up for a Dendron account",
+  },
+  SIGNIN: {
+    key: "dendron.signIn",
+    title: `${CMD_PREFIX} Sign In`,
+    group: "workspace",
+    desc: "sign in to a Dendron account",
+  },
   // --- Misc
   OPEN_LINK: {
     key: "dendron.openLink",

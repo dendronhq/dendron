@@ -119,7 +119,6 @@ function attachParser(proc: Unified.Processor) {
     let { config, vault, dest, fname } = MDUtilsV4.getDendronData(proc);
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
     if (out.vaultName) {
-      debugger;
       vault = VaultUtils.getVaultByName({
         vaults: engine.vaultsv3,
         vname: out.vaultName,

@@ -104,9 +104,11 @@ export class SiteUtils {
       vault: vaults[0],
       fname: "403",
       id: "403",
-      title: "You are viewing an unpublished page",
+      title: "This page has not yet sprouted",
       body: [
-        "[Dendron](https://dendron.so/) (the tool used to generate this site) lets authors selective publish content. You will see this page whenever you click on a link to a page that is not published.",
+        "[Dendron](https://dendron.so/) (the tool used to generate this site) lets authors selective publish content. You will see this page whenever you click on a link to an unpublished page",
+        "",
+        "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/not-sprouted.png)",
       ].join("\n"),
     });
     return [note];

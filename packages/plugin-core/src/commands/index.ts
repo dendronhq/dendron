@@ -36,6 +36,7 @@ import { SiteBuildCommand } from "./SiteBuild";
 import { SitePreviewCommand } from "./SitePreview";
 import { SignUpCommand } from "./SignUp";
 import { SignInCommand } from "./SignIn";
+import { MoveNoteCommand } from "./MoveNoteCommand";
 
 const ALL_COMMANDS = [
   ArchiveHierarchyCommand,
@@ -61,6 +62,7 @@ const ALL_COMMANDS = [
   OpenLogsCommand,
   PublishCommand,
   PublishPodCommand,
+  MoveNoteCommand,
   RefactorHierarchyCommandV2,
   // ReloadIndexCommand,
   RenameNoteV2aCommand,

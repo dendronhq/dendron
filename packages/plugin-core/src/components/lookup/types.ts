@@ -1,4 +1,8 @@
-import { DNodePropsQuickInputV2, DNodePropsV2 } from "@dendronhq/common-all";
+import {
+  DNodePropsQuickInputV2,
+  DNodePropsV2,
+  DVault,
+} from "@dendronhq/common-all";
 import { QuickPick } from "vscode";
 import { DendronBtn } from "./buttons";
 
@@ -18,4 +22,6 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
   offset?: number;
   moreResults?: boolean;
   allResults?: DNodePropsV2[];
+  vault?: DVault;
+  nextPicker?: () => any;
 };

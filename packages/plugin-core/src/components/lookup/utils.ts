@@ -3,6 +3,7 @@ import {
   DNodePropsV2,
   DNodeUtilsV2,
   DVault,
+  NotePropsV2,
   NoteUtilsV2,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -93,7 +94,47 @@ export async function showDocAndHidePicker(
   return uris;
 }
 
+export type CreateQuickPickOpts = {
+  title: string;
+  placeholder: string;
+  ignoreFocusOut?: boolean;
+};
+
 export class PickerUtilsV2 {
+  static createDendronQuickPick(opts: CreateQuickPickOpts) {
+    const { title, placeholder, ignoreFocusOut } = _.defaults(opts, {
+      ignoreFocusOut: true,
+    });
+    const quickPick = window.createQuickPick<
+      DNodePropsQuickInputV2
+    >() as DendronQuickPickerV2;
+    quickPick.title = title;
+    quickPick.placeholder = placeholder;
+    quickPick.ignoreFocusOut = ignoreFocusOut;
+    quickPick.justActivated = true;
+    quickPick.canSelectMany = false;
+    quickPick.matchOnDescription = false;
+    quickPick.matchOnDetail = false;
+    return quickPick;
+  }
+
+  static createDendronQuickPickItem(
+    opts: DNodePropsQuickInputV2
+  ): DNodePropsQuickInputV2 {
+    return {
+      ...opts,
+    };
+  }
+
+  static createDendronQuickPickItemFromNote(
+    opts: NotePropsV2
+  ): DNodePropsQuickInputV2 {
+    return {
+      ...opts,
+      label: opts.fname,
+    };
+  }
+
   static dumpPicker(picker: DendronQuickPickerV2) {
     const activeItems = picker.activeItems.map((ent) =>
       NoteUtilsV2.toLogObj(ent)
@@ -218,6 +259,27 @@ export class PickerUtilsV2 {
       DVault | undefined
     >;
     return resp;
+  }
+
+  static refreshButtons(opts: {
+    quickpick: DendronQuickPickerV2;
+    buttons: DendronBtn[];
+    buttonsPrev: DendronBtn[];
+  }) {
+    opts.buttonsPrev = opts.quickpick.buttons.map((b: DendronBtn) => b.clone());
+    opts.quickpick.buttons = opts.buttons;
+  }
+
+  static async refreshPickerBehavior(opts: {
+    quickpick: DendronQuickPickerV2;
+    buttons: DendronBtn[];
+  }) {
+    const resp = _.filter(opts.buttons, { pressed: true });
+    return Promise.all(
+      resp.map((bt) => {
+        bt.handle({ quickPick: opts.quickpick });
+      })
+    );
   }
 
   static resetPaginationOpts(picker: DendronQuickPickerV2) {

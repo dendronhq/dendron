@@ -21,6 +21,7 @@ import _md from "markdown-it";
 import os from "os";
 import path from "path";
 import * as vscode from "vscode";
+import { CancellationTokenSource } from "vscode-languageclient";
 import { PickerUtilsV2 } from "./components/lookup/utils";
 import {
   CONFIG,
@@ -98,6 +99,15 @@ export class VSCodeUtils {
 
   static closeAllEditors() {
     return vscode.commands.executeCommand("workbench.action.closeAllEditors");
+  }
+
+  static createCancelSource(existingSource?: CancellationTokenSource) {
+    const tokenSource = new CancellationTokenSource();
+    if (existingSource) {
+      existingSource.cancel();
+      existingSource.dispose();
+    }
+    return tokenSource;
   }
 
   static createQuickPick = vscode.window.createQuickPick;

@@ -203,6 +203,11 @@
                 "docPreview": ""
             },
             {
+                "command": "dendron.moveNote",
+                "title": "Dendron: Move Note",
+                "desc": "Move a note"
+            },
+            {
                 "command": "dendron.renameNote",
                 "title": "Dendron: Rename Note",
                 "desc": "Rename a note and all backlinks",

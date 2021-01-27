@@ -12,6 +12,7 @@ import {
   SchemaPropsV2,
   SchemaUtilsV2,
   WorkspaceOpts,
+  WorkspaceVault,
 } from "@dendronhq/common-all";
 import {
   note2File,
@@ -19,6 +20,7 @@ import {
   schemaModuleOpts2File,
   schemaModuleProps2File,
   tmpDir,
+  vault2Path,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -31,7 +33,7 @@ export * from "./types";
 export * from "./utils";
 export * from "./utilsv2";
 import assert from "assert";
-import { TestPresetEntry } from "./utils";
+import { AssertUtils, TestPresetEntry } from "./utils";
 import sinon from "sinon";
 export { sinon };
 
@@ -130,6 +132,15 @@ export class EngineTestUtilsV4 {
       await opts.preSetupHook({ wsRoot, vault, vpath });
     }
     return opts.vault;
+  }
+
+  static checkVault(
+    opts: WorkspaceVault & { match?: string[]; nomatch?: string[] }
+  ) {
+    const { match, nomatch } = opts;
+    const vpath = vault2Path(opts);
+    const content = fs.readdirSync(vpath).join("\n");
+    return AssertUtils.assertInString({ body: content, match, nomatch });
   }
 }
 

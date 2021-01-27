@@ -420,6 +420,11 @@ export type DEngineV4Methods = {
 
 // === Workspace
 
+export type WorkspaceVault = {
+  wsRoot: string;
+  vault: DVault;
+};
+
 export type WorkspaceOpts = {
   wsRoot: string;
   vaults: DVault[];

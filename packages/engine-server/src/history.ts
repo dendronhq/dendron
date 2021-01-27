@@ -14,6 +14,7 @@ export type HistoryEventSource =
   | "extension"
   | "lspServer"
   | "apiServer"
+  | "lookupProvider"
   | "watcher";
 export type HistoryEventAction =
   | "delete"
@@ -23,11 +24,17 @@ export type HistoryEventAction =
   | "not_initialized"
   | "rename"
   | "upgraded"
-  | APIServerEvent;
+  | APIServerEvent
+  | "done"
+  | "error";
 
 export type APIServerEvent = "changedPort";
 
 type HistoryEventListenerFunc = (event: HistoryEvent) => void;
+type HistoryEventListenerFuncEntry = {
+  id: string;
+  listener: (event: HistoryEvent) => void;
+};
 
 interface IHistoryService {
   readonly events: HistoryEvent[];
@@ -40,7 +47,13 @@ let _HISTORY_SERVICE: undefined | HistoryService = undefined;
 
 export class HistoryService implements IHistoryService {
   public readonly events: HistoryEvent[];
+  /**
+   @deprecated
+   */
   public subscribers: { [k in HistoryEventSource]: HistoryEventListenerFunc[] };
+  public subscribersv2: {
+    [k in HistoryEventSource]: HistoryEventListenerFuncEntry[];
+  };
   public pause: boolean;
 
   static instance(): HistoryService {
@@ -59,6 +72,16 @@ export class HistoryService implements IHistoryService {
       lspServer: [],
       apiServer: [],
       watcher: [],
+      lookupProvider: [],
+    };
+    this.subscribersv2 = {
+      engine: [],
+      src: [],
+      extension: [],
+      lspServer: [],
+      apiServer: [],
+      watcher: [],
+      lookupProvider: [],
     };
     this.pause = false;
   }
@@ -67,6 +90,19 @@ export class HistoryService implements IHistoryService {
     if (!this.pause) {
       this.events.unshift(event);
       this.subscribers[event.source].forEach((f) => f(event));
+      this.subscribersv2[event.source].forEach(({ listener }) =>
+        listener(event)
+      );
+    }
+  }
+
+  remove(id: string, source: HistoryEventSource) {
+    const idx = _.findIndex(
+      this.subscribersv2[source],
+      ({ id: subId }) => subId === id
+    );
+    if (idx >= 0) {
+      this.subscribersv2[source].splice(idx, 1);
     }
   }
 
@@ -78,6 +114,16 @@ export class HistoryService implements IHistoryService {
       lspServer: [],
       apiServer: [],
       watcher: [],
+      lookupProvider: [],
+    };
+    this.subscribersv2 = {
+      engine: [],
+      src: [],
+      extension: [],
+      lspServer: [],
+      apiServer: [],
+      watcher: [],
+      lookupProvider: [],
     };
   }
 
@@ -87,5 +133,9 @@ export class HistoryService implements IHistoryService {
 
   subscribe(source: HistoryEventSource, func: HistoryEventListenerFunc) {
     this.subscribers[source].push(func);
+  }
+
+  subscribev2(source: HistoryEventSource, ent: HistoryEventListenerFuncEntry) {
+    this.subscribersv2[source].push(ent);
   }
 }

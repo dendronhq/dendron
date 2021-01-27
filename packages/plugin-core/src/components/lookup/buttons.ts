@@ -19,7 +19,8 @@ export type ButtonType =
   | LookupNoteType
   | LookupSelectionType
   | LookupSplitType
-  | LookupFilterType;
+  | LookupFilterType
+  | "v2";
 
 export type ButtonCategory =
   | "selection"
@@ -115,8 +116,8 @@ export class DendronBtn implements IDendronQuickInputButton {
     });
   }
 
-  async handle(_opts: ButtonHandleOpts) {
-    return;
+  async handle(_opts: ButtonHandleOpts): Promise<void> {
+    return undefined;
   }
 
   get iconPath() {
@@ -249,6 +250,25 @@ export class CopyNoteLinkButton extends DendronBtn {
         vscode.window.showInformationMessage(`${links.length} links copied`);
       }
     }
+  }
+}
+
+export class VaultSelectButton extends DendronBtn {
+  static create(pressed?: boolean) {
+    return new VaultSelectButton({
+      title: "Select Vault",
+      iconOff: "package",
+      iconOn: "menu-selection",
+      type: "v2" as LookupEffectType,
+      pressed,
+      canToggle: false,
+    });
+  }
+  async handle({ quickPick }: ButtonHandleOpts) {
+    quickPick.nextPicker = async () => {
+      const vault = await PickerUtilsV2.promptVault();
+      return vault;
+    };
   }
 }
 

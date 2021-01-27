@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.26.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.26.1...v0.26.2-alpha.0) (2021-01-27)
+
+### Bug Fixes
+
+- remove parent stubs when deleting a note ([dd79174](https://github.com/dendronhq/dendron/commit/dd79174d9ed7b2c870e0f0ed41e9e7c44f3c3121))
+
+### Enhancements
+
+- add image to 403 page ([1038b13](https://github.com/dendronhq/dendron/commit/1038b135fddb38320fc260a40422081aba39e872))
+
+### Features
+
+- move note command ([696eb9c](https://github.com/dendronhq/dendron/commit/696eb9c90374a0115835a100a9f580498188eae7))
+
 # [0.26.0](https://github.com/dendronhq/dendron/compare/v0.25.4...v0.26.0) (2021-01-25)
 
 **Note:** Version bump only for package @dendronhq/engine-server

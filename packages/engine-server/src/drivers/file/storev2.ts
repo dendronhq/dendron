@@ -1,4 +1,5 @@
 import {
+  assert,
   DendronError,
   DEngineDeleteSchemaRespV2,
   DEngineInitRespV2,
@@ -356,7 +357,7 @@ export class FileStorageV2 implements DStoreV2 {
     const vault = noteToDelete.vault;
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
     const fpath = path.join(vpath, noteToDelete.fname + ext);
-    const out: NoteChangeEntry[] = [];
+    let out: NoteChangeEntry[] = [];
     this.logger.info({ ctx, noteToDelete, opts });
 
     // remove from fs
@@ -379,14 +380,28 @@ export class FileStorageV2 implements DStoreV2 {
         });
       }
       // no more children, delete from parent
-      const parentNote = this.notes[noteToDelete.parent] as NotePropsV2;
+      let parentNote = this.notes[noteToDelete.parent] as NotePropsV2;
       parentNote.children = _.reject(
         parentNote.children,
         (ent) => ent === noteToDelete.id
       );
       delete this.notes[noteToDelete.id];
-      out.push({ note: parentNote, status: "update" });
+      // if parent note is stub, we'll be deleteing it too
+      if (!parentNote.stub) {
+        out.push({ note: parentNote, status: "update" });
+      }
       out.push({ note: noteToDelete, status: "delete" });
+
+      while (parentNote.stub) {
+        const newParent = parentNote.parent;
+        const resp = await this.deleteNote(parentNote.id, { metaOnly: true });
+        if (newParent) {
+          parentNote = this.notes[newParent];
+        } else {
+          assert(false, "illegal state in note delte");
+        }
+        out = out.concat(resp);
+      }
     }
     return out;
   }

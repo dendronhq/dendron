@@ -117,9 +117,13 @@ export async function runJestHarness<TOpts>(
 }
 
 export async function runJestHarnessV2(results: any, expect: any) {
-  return _.map(await results, (ent) =>
-    expect(ent.actual).toEqual(ent.expected)
-  );
+  return _.map(await results, (ent) => {
+    if (_.isBoolean(ent.expected) && ent.expected === true) {
+      expect(ent.actual).toBeTruthy();
+    } else {
+      expect(ent.actual).toEqual(ent.expected);
+    }
+  });
 }
 
 export type RunEngineTestFunctionOpts = {

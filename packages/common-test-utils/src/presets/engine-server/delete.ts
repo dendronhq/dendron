@@ -2,7 +2,7 @@ import { NoteChangeEntry, NoteUtilsV2 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import { FileTestUtils } from "../..";
+import { EngineTestUtilsV4, FileTestUtils } from "../..";
 import { NoteTestUtilsV4 } from "../../noteUtils";
 import { TestPresetEntryV4 } from "../../utilsv2";
 import { SCHEMA_PRESETS_V4 } from "../schemas";
@@ -33,6 +33,58 @@ const SCHEMAS = {
   ),
 };
 const NOTES = {
+  GRANDCHILD_WITH_ALL_STUB_PARENTS: new TestPresetEntryV4(
+    async ({ wsRoot, vaults, engine }) => {
+      const vault = vaults[0];
+      const notes = engine.notes;
+      const resp = await engine.deleteNote(
+        NoteUtilsV2.getNoteByFnameV4({ fname: "foo.ch1", vault, notes })
+          ?.id as string
+      );
+      const changed = resp.data;
+      return [
+        {
+          actual: await EngineTestUtilsV4.checkVault({
+            wsRoot,
+            vault,
+            nomatch: ["foo"],
+          }),
+          expected: true,
+        },
+        {
+          actual: _.find(
+            changed,
+            (ent) => ent.status === "delete" && ent.note.fname === "foo.ch1"
+          ),
+          expected: true,
+        },
+        {
+          actual: _.find(
+            changed,
+            (ent) => ent.status === "delete" && ent.note.fname === "foo"
+          ),
+          expected: true,
+        },
+        {
+          actual: _.find(
+            changed,
+            (ent) => ent.status === "update" && ent.note.fname === "root"
+          ),
+          expected: true,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "foo.ch1",
+          vault: vaults[0],
+          wsRoot,
+          body: "",
+        });
+      },
+    }
+  ),
   NOTE_NO_CHILDREN: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];

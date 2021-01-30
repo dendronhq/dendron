@@ -19,7 +19,7 @@ type CommandCLIOpts = {
   stage: "dev" | "prod";
   output?: string;
 };
-type CommandOpts = CommandCLIOpts & { engine: DEngineClientV2 };
+type CommandOpts = CommandCLIOpts & { engine: DEngineClientV2; compile?: any };
 type CommandOutput = {};
 
 export { CommandOpts as BuildSiteV2CLICommandOpts };
@@ -91,7 +91,9 @@ export class BuildSiteV2CLICommand extends CLICommand<
     if (output) {
       process.env["OUTPUT"] = output;
     }
-    const { compile } = require("@dendronhq/dendron-11ty");
+    const compile = opts.compile
+      ? opts.compile
+      : require("@dendronhq/dendron-11ty").compile;
     await compile({ cwd }, { serve: opts.serve, port: servePort });
     if (!opts.serve) {
       // hack, give postBuild a chance to complete

@@ -25,3 +25,4 @@ packages/common-server/src/proto.ts
 .dendron.*
 meta.json
 yarn-error.*
+proto.ts

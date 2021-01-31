@@ -7,11 +7,12 @@ import {
   SchemaUtilsV2,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { vault2Path, tmpDir } from "@dendronhq/common-server";
 import {
   ENGINE_HOOKS,
   ENGINE_QUERY_PRESETS,
   ENGINE_WRITE_PRESETS,
+  FileTestUtils,
   NOTE_PRESETS_V4,
   runJestHarnessV2,
   sinon,
@@ -27,6 +28,7 @@ import path from "path";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
+import { LookupCommand } from "../../commands/LookupCommand";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
 import {
@@ -800,6 +802,46 @@ suite("Lookup, notesv2", function () {
         },
       });
     });
+  });
+});
+
+suite("selectionExtract", function () {
+  let ctx: vscode.ExtensionContext;
+  ctx = setupBeforeAfter(this, {});
+
+  describe.only("extraction from file not in known vault", function () {
+    test("basic", (done) => {
+      runLegacySingleWorkspaceTest({
+        ctx,
+        onInit: async ({}) => {
+          // const vault = vaults[0];
+          const extDir = tmpDir().name;
+          await FileTestUtils.createFiles(extDir, [
+            { path: "outside.md", body: "non vault content" },
+          ]);
+          console.log([extDir, "outside.md"].join("/"));
+          const uri = vscode.Uri.file(path.join(extDir, "outside.md"));
+          const editor = (await VSCodeUtils.openFileInEditor(
+            uri
+          )) as vscode.TextEditor;
+          editor.selection = new vscode.Selection(0, 0, 0, 17);
+
+          const picker = await new LookupCommand().execute({
+            selectionType: "selectionExtract",
+            flavor: "note",
+            value: "from-outside",
+          });
+
+          console.log(picker);
+
+          done();
+        },
+      });
+    });
+  });
+
+  describe("extraction from file in known vault", function () {
+    test("basic", function () {});
   });
 });
 

@@ -17,7 +17,7 @@ suite("notes", function () {
       ctx,
       onInit: async ({}) => {
         await new CreateDailyJournalCommand().run();
-        assert.ok(getActiveEditorBasename().startsWith("daily"));
+        assert.ok(getActiveEditorBasename().startsWith("daily.journal"));
         done();
       },
     });

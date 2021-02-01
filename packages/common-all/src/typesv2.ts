@@ -234,6 +234,10 @@ export type GetNoteOptsV2 = {
    * If node does not exist, create it?
    */
   createIfNew?: boolean;
+  /**
+   * Override any props
+   */
+  overrides?: Partial<NotePropsV2>;
 };
 export type EngineDeleteOptsV2 = EngineDeleteOpts;
 export type EngineWriteOptsV2 = {

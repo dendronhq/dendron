@@ -197,6 +197,7 @@ export class DendronEngineV2 implements DEngineV2 {
     npath,
     createIfNew,
     vault,
+    overrides,
   }: GetNoteOptsV2): Promise<RespV2<GetNotePayloadV2>> {
     const ctx = "getNoteByPath";
     this.logger.debug({ ctx, npath, createIfNew, msg: "enter" });
@@ -222,6 +223,7 @@ export class DendronEngineV2 implements DEngineV2 {
           engine: this,
         });
       }
+      noteNew = _.merge(noteNew, overrides || {});
       changed = (await this.writeNote(noteNew, { updateExisting })).data;
     }
     if (!createIfNew && !maybeNote) {

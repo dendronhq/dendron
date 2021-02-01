@@ -20,6 +20,7 @@ type CommandOpts = {
   mode: DNodeTypeV2;
   vault: DVault;
   anchor?: DNoteAnchor;
+  overrides?: Partial<NotePropsV2>;
 };
 export { CommandOpts as GotoNoteCommandOpts };
 
@@ -47,7 +48,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const ctx = "GotoNoteCommand";
     this.L.info({ ctx, opts, msg: "enter" });
-    const { qs, vault } = opts;
+    const { qs, vault, overrides } = opts;
     let pos: undefined | Position;
     if (opts.mode === "note") {
       const client = DendronWorkspace.instance().getEngine();
@@ -57,6 +58,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
             npath: qs,
             createIfNew: true,
             vault,
+            overrides,
           });
           const note = data?.note as NotePropsV2;
           const npath = NoteUtilsV2.getPathV4({

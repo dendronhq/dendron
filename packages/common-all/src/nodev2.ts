@@ -521,6 +521,20 @@ export class NoteUtilsV2 {
     return prefixParts.join(" ");
   }
 
+  static genJournalNoteTitle(opts: { fname: string; journalName: string }) {
+    const { fname, journalName } = opts;
+    const journalIndex = fname.indexOf(journalName);
+    const normTitle = NoteUtilsV2.genTitle(fname);
+    if (journalIndex < 0) {
+      return normTitle;
+    }
+    const maybeDatePortion = fname.slice(journalIndex + journalName.length + 1);
+    if (maybeDatePortion.match(/\d\d\d\d\.\d\d\.\d\d$/)) {
+      return maybeDatePortion.replace(/\./g, "-");
+    }
+    return normTitle;
+  }
+
   static genTitle(fname: string): string {
     const titleFromBasename = DNodeUtilsV2.basename(fname, true);
     // check if title is unchanged from default. if so, add default title

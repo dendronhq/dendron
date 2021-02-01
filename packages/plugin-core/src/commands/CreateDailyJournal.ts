@@ -1,9 +1,11 @@
+import { NoteUtilsV2 } from "@dendronhq/common-all";
 import { cleanName } from "@dendronhq/common-server";
 import * as vscode from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { CONFIG, DENDRON_COMMANDS } from "../constants";
+import { CodeConfigKeys } from "../types";
 import { DendronClientUtilsV2 } from "../utils";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getConfigValue } from "../workspace";
 import { BaseCommand } from "./base";
 import { GotoNoteCommand } from "./GotoNote";
 
@@ -38,11 +40,19 @@ export class CreateDailyJournalCommand extends BaseCommand<CommandOpts> {
 
   async execute(opts: CommandOpts) {
     const { fname } = opts;
+    const journalName = getConfigValue(
+      CodeConfigKeys.DEFAULT_JOURNAL_NAME
+    ) as string;
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+    const title = NoteUtilsV2.genJournalNoteTitle({
+      fname,
+      journalName,
+    });
     await new GotoNoteCommand().execute({
       qs: fname,
       mode: "note" as const,
       vault,
+      overrides: { title },
     });
     // dummy
     return vscode.Uri.file("/tmp");

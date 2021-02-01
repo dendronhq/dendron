@@ -107,6 +107,37 @@ const NOTES = {
       },
     ];
   }),
+  NEW_NOTE_WITH_OVERRIDES: new TestPresetEntryV4(async ({ vaults, engine }) => {
+    const vault = vaults[0];
+    const { data } = await engine.getNoteByPath({
+      npath: "bar",
+      vault,
+      createIfNew: true,
+      overrides: {
+        title: "bar title",
+      },
+    });
+    return [
+      {
+        actual: data?.changed.map((ent) => ({
+          fname: ent.note.fname,
+          status: ent.status,
+        })),
+        expected: [
+          { fname: "root", status: "update" },
+          { fname: "bar", status: "create" },
+        ],
+      },
+      {
+        actual: data?.note?.fname,
+        expected: "bar",
+      },
+      {
+        actual: data?.note?.title,
+        expected: "bar title",
+      },
+    ];
+  }),
 };
 export const ENGINE_GET_NOTE_BY_PATH_PRESETS = {
   NOTES,

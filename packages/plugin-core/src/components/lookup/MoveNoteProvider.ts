@@ -1,4 +1,4 @@
-import { DNodeUtilsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DNodeUtilsV2, NoteUtilsV2, VaultUtils } from "@dendronhq/common-all";
 import { HistoryService } from "@dendronhq/engine-server";
 import { TextEditor, Uri, window } from "vscode";
 import { VSCodeUtils } from "../../utils";
@@ -41,7 +41,8 @@ export class MoveNoteProvider implements ILookupProviderV3 {
       });
       let isStub = newNote?.stub;
       if (newNote && !isStub) {
-        const errMsg = `${newVault.name}/${quickpick.value} exists`;
+        const vaultName = VaultUtils.getName(newVault);
+        const errMsg = `${vaultName}/${quickpick.value} exists`;
         window.showErrorMessage(errMsg);
         HistoryService.instance().add({
           source: "lookupProvider",

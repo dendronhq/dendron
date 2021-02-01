@@ -50,7 +50,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   createLookup() {
-    const buttons = [VaultSelectButton.create()];
+    const buttons = [VaultSelectButton.create(true)];
     const lc = new LookupControllerV3({ nodeType: "note", buttons });
     return lc;
   }

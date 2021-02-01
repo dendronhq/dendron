@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.27.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.26.2...v0.27.1-alpha.0) (2021-02-01)
+
+### Bug Fixes
+
+- issue with build-site closing prematurely ([faab22a](https://github.com/dendronhq/dendron/commit/faab22a768677201e75062110b7919bb53524dee))
+
 # [0.27.0](https://github.com/dendronhq/dendron/compare/v0.26.2...v0.27.0) (2021-02-01)
 
 **Note:** Version bump only for package root

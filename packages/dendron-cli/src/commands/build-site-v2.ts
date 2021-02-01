@@ -104,11 +104,13 @@ export class BuildSiteV2CLICommand extends CLICommand<
     await compile({ cwd }, { serve: opts.serve, port: servePort });
     if (!opts.serve) {
       this.L.info({ msg: "done compiling" });
-      server.close((err: any) => {
-        if (err) {
-          this.L.error({ msg: "error closing", payload: err });
-        }
-      });
+      setTimeout(() => {
+        server.close((err: any) => {
+          if (err) {
+            this.L.error({ msg: "error closing", payload: err });
+          }
+        });
+      }, 5000);
     }
     return {};
   }

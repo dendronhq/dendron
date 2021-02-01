@@ -199,11 +199,12 @@ export const getReferenceAtPosition = (
     const docText = document.getText(rangeForImage);
     const maybeImage = _.trim(docText.match("\\((.*)\\)")![0], "()");
     if (containsImageExt(maybeImage)) {
-      return {
-        ref: maybeImage,
-        label: "",
-        range: rangeForImage,
-      };
+      return null;
+      // return {
+      //   ref: maybeImage,
+      //   label: "",
+      //   range: rangeForImage,
+      // };
     }
   }
   if (!range) {

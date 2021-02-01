@@ -19,7 +19,11 @@ type CommandCLIOpts = {
   stage: "dev" | "prod";
   output?: string;
 };
-type CommandOpts = CommandCLIOpts & { engine: DEngineClientV2; compile?: any };
+type CommandOpts = CommandCLIOpts & {
+  engine: DEngineClientV2;
+  compile?: any;
+  server: any;
+};
 type CommandOutput = {};
 
 export { CommandOpts as BuildSiteV2CLICommandOpts };
@@ -74,7 +78,10 @@ export class BuildSiteV2CLICommand extends CLICommand<
 
   async execute(opts: CommandOpts) {
     let nmPath = goUpTo(__dirname, "node_modules");
-    let { wsRoot, port, stage, servePort, output } = _.defaults(opts, {});
+    let { wsRoot, port, stage, servePort, output, server } = _.defaults(
+      opts,
+      {}
+    );
     let cwd = opts.cwd;
     if (!cwd) {
       cwd = path.join(nmPath, "node_modules", "@dendronhq", "dendron-11ty");
@@ -96,10 +103,12 @@ export class BuildSiteV2CLICommand extends CLICommand<
       : require("@dendronhq/dendron-11ty").compile;
     await compile({ cwd }, { serve: opts.serve, port: servePort });
     if (!opts.serve) {
-      // hack, give postBuild a chance to complete
-      setTimeout(() => {
-        process.exit();
-      }, 5000);
+      this.L.info({ msg: "done compiling" });
+      server.close((err: any) => {
+        if (err) {
+          this.L.error({ msg: "error closing", payload: err });
+        }
+      });
     }
     return {};
   }

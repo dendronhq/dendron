@@ -1,4 +1,4 @@
-import { launch } from "@dendronhq/api-server";
+import { launchv2 } from "@dendronhq/api-server";
 import { LogLvl, resolvePath } from "@dendronhq/common-server";
 import {
   DendronEngineClient,
@@ -8,8 +8,9 @@ import _ from "lodash";
 import yargs from "yargs";
 import { SoilCommandCLIOptsV3, SoilCommandOptsV3, SoilCommandV3 } from "./soil";
 
-type CommandOutput = { port: number };
-type CommandOpts = SoilCommandOptsV3 & Required<CommandCLIOpts>;
+type CommandOutput = { port: number; server: any };
+type CommandOpts = SoilCommandOptsV3 &
+  Required<CommandCLIOpts> & { server: any };
 export type CommandCLIOpts = SoilCommandCLIOptsV3 & {
   port?: number;
 };
@@ -44,7 +45,7 @@ export class LaunchEngineServerCommand extends SoilCommandV3<
     const ws = new WorkspaceService({ wsRoot });
     const vaults = ws.config.vaults;
     const vaultPaths = vaults.map((v) => resolvePath(v.fsPath, wsRoot));
-    const _port = await launch({
+    const { port: _port, server } = await launchv2({
       port,
       logPath: process.env["LOG_DST"],
       logLevel: (process.env["LOG_LEVEL"] as LogLvl) || "error",
@@ -62,15 +63,16 @@ export class LaunchEngineServerCommand extends SoilCommandV3<
       wsRoot,
       vaults: vaultPaths,
       port: _port,
+      server,
     };
   }
 
   async execute(opts: CommandOpts) {
-    const { port } = opts;
-    console.log(`engine runnig on port ${port}`);
+    const { port, server } = opts;
 
     return {
       port: _.toInteger(port),
+      server,
     };
   }
 }

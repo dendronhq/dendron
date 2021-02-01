@@ -13,6 +13,7 @@ export async function setupEngine(opts: {
   let { wsRoot, enginePort, init } = _.defaults(opts, { init: true });
   let engine: DEngineClientV2;
   let port: number;
+  let server: any;
   wsRoot = resolvePath(wsRoot, process.cwd());
   if (enginePort) {
     logger.info({
@@ -28,12 +29,16 @@ export async function setupEngine(opts: {
     port = enginePort;
   } else {
     logger.info({ ctx: "setupEngine", msg: "initialize new engine" });
-    ({ engine, port } = await new LaunchEngineServerCommand().enrichArgs(opts));
+    ({
+      engine,
+      port,
+      server,
+    } = await new LaunchEngineServerCommand().enrichArgs(opts));
     if (init) {
       await engine.init();
     }
   }
-  return { wsRoot, engine, port };
+  return { wsRoot, engine, port, server };
 }
 
 export function setupEngineArgs(args: yargs.Argv) {

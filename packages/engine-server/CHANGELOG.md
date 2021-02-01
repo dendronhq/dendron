@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.26.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.26.2-alpha.0...v0.26.2-alpha.1) (2021-02-01)
+
+### Bug Fixes
+
+- daily journal note nice titles ([6cc036e](https://github.com/dendronhq/dendron/commit/6cc036edceeba6f3a4c985c7584aa492d36d24ba))
+
 ## [0.26.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.26.1...v0.26.2-alpha.0) (2021-01-27)
 
 ### Bug Fixes

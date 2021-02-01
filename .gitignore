@@ -26,3 +26,4 @@ packages/common-server/src/proto.ts
 meta.json
 yarn-error.*
 proto.ts
+dendron-main.code-workspace

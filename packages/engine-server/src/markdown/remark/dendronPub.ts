@@ -32,8 +32,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       : opts?.insertTitle;
     if (insertTitle && root.children) {
       if (!fname || !vault) {
+        // TODO: tmp
+        console.log(JSON.stringify(engine.notes));
         throw new DendronError({
-          msg: `no fname for node: ${JSON.stringify(tree)}`,
+          msg: `dendronPub - no fname or vault for node: ${JSON.stringify(
+            tree
+          )}`,
         });
       }
       const note = NoteUtilsV2.getNoteByFnameV4({

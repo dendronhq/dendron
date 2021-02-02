@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.28.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.28.1...v0.28.2-alpha.0) (2021-02-02)
+
+### Bug Fixes
+
+- server close issue ([f6cc3f9](https://github.com/dendronhq/dendron/commit/f6cc3f9f5e4f6bc530be304eaed3020a3f629361))
+
 ## [0.28.1](https://github.com/dendronhq/dendron/compare/v0.28.1-alpha.0...v0.28.1) (2021-02-02)
 
 **Note:** Version bump only for package root

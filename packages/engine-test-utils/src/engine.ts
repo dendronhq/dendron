@@ -21,6 +21,8 @@ export async function createEngineFromEngine(opts: WorkspaceOpts) {
   return engineServerCreateEngine(opts);
 }
 
+export { DEngineClientV2, DVault, WorkspaceOpts };
+
 export async function createEngineFromServer(opts: WorkspaceOpts) {
   const port = await launch({});
   const engine: DEngineClientV2 = DendronEngineClient.create({
@@ -45,6 +47,7 @@ async function setupWS(opts: { vaults: DVault[] }) {
   return { wsRoot, vaults };
 }
 
+// @ts-ignore
 export async function runEngineTestV5<TExtra = any>(
   func: RunEngineTestFunctionV4,
   opts: {
@@ -56,7 +59,7 @@ export async function runEngineTestV5<TExtra = any>(
     vaults?: DVault[];
     setupOnly?: boolean;
   }
-) {
+): Promise<any> {
   const { preSetupHook, extra, vaults, createEngine } = _.defaults(opts, {
     preSetupHook: async ({}) => {},
     postSetupHook: async ({}) => {},

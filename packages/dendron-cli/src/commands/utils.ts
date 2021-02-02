@@ -9,7 +9,7 @@ export async function setupEngine(opts: {
   wsRoot: string;
   enginePort?: number;
   init?: boolean;
-}) {
+}): Promise<any> {
   let { wsRoot, enginePort, init } = _.defaults(opts, { init: true });
   let engine: DEngineClientV2;
   let port: number;

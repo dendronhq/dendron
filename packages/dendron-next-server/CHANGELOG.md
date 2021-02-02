@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.28.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.29.0...v0.28.1-alpha.0) (2021-02-02)
+
+### Reverts
+
+- Revert "chore(release): publish" ([3b2778a](https://github.com/dendronhq/dendron/commit/3b2778a5b1ccc3c53652dcd02e6d42c38f925d2e))
+
 # [0.28.0](https://github.com/dendronhq/dendron/compare/v0.27.1-alpha.0...v0.28.0) (2021-02-02)
 
 **Note:** Version bump only for package @dendronhq/dendron-next-server

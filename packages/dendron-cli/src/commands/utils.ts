@@ -27,6 +27,10 @@ export async function setupEngine(opts: {
     await engineConnector.init({ portOverride: enginePort });
     engine = engineConnector.engine;
     port = enginePort;
+    // dummy
+    server = {
+      close: () => {},
+    };
   } else {
     logger.info({ ctx: "setupEngine", msg: "initialize new engine" });
     ({

@@ -179,7 +179,14 @@ export class SiteUtils {
     let notes = NoteUtilsV2.getNotesByFname({
       fname: domain,
       notes: notesForHiearchy,
-    }).filter((note) =>
+    });
+    logger.info({
+      ctx: "filterByHiearchy:candidates",
+      domain,
+      notes: notes.map((ent) => ent.id),
+    });
+
+    notes.filter((note) =>
       SiteUtils.canPublishFiltered({
         note,
         hconfig: hConfig,
@@ -378,6 +385,7 @@ export class SiteUtils {
     noteDict: NotePropsDictV2;
   }) {
     const { dupBehavior, engine, fname, noteCandidates, noteDict } = opts;
+    const ctx = "handleDup";
     let domainNote: NotePropsV2 | undefined;
 
     if (dupBehavior) {
@@ -404,6 +412,11 @@ export class SiteUtils {
           });
           if (maybeNote) {
             domainNote = maybeNote;
+            logger.info({
+              ctx,
+              status: "found",
+              note: NoteUtilsV2.toLogObj(domainNote),
+            });
           }
         });
         if (!domainNote) {

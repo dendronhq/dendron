@@ -74,7 +74,7 @@ export class VaultUtils {
     fsPath,
   }: {
     /**
-     * Path to note
+     * Absolute or relative path to note
      */
     fsPath: string;
     wsRoot: string;
@@ -91,6 +91,9 @@ export class VaultUtils {
     return vault;
   }
 
+  /**
+   * Match vault to vaults
+   */
   static matchVault = (opts: {
     vault: DVault;
     vaults: DVault[];

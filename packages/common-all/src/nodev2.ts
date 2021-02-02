@@ -126,15 +126,19 @@ export class DNodeUtilsV2 {
     props,
     schemas,
     vaults,
+    wsRoot,
   }: {
     props: DNodePropsV2;
     schemas: SchemaModuleDictV2;
     vaults: DVault[];
+    wsRoot: string;
   }): DNodePropsQuickInputV2 {
-    const vaultSuffix =
-      vaults.length > 1
-        ? ` (${path.basename(props.vault?.fsPath as string)})`
-        : "";
+    const vault = VaultUtils.matchVault({ vaults, wsRoot, vault: props.vault });
+    if (!vault) {
+      throw Error("enhancePropForQuickInput, no vault found");
+    }
+    const vname = VaultUtils.getName(vault);
+    const vaultSuffix = `(${vname})`;
     if (props.type === "note") {
       const isRoot = DNodeUtilsV2.isRoot(props);
       const label = isRoot ? "root" : props.fname;

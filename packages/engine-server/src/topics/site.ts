@@ -55,9 +55,6 @@ export class SiteUtils {
     wsRoot: string;
   }) {
     const { note, hconfig, vaults, wsRoot } = opts;
-    if (note.stub) {
-      return true;
-    }
     const noteVault = VaultUtils.matchVault({
       vault: note.vault,
       vaults,
@@ -226,13 +223,24 @@ export class SiteUtils {
     if (domainNote.fname === sconfig.siteIndex) {
       domainNote.custom.permalink = "/";
     }
-    logger.info({ ctx: "filterByHiearchy", domainNote });
+
+    logger.info({
+      ctx: "filterByHiearchy",
+      fname: domainNote.fname,
+      domainNote: NoteUtilsV2.toLogObj(domainNote),
+    });
 
     const out: NotePropsDictV2 = {};
     const processQ = [domainNote];
-    logger.info({ ctx: "filterByHiearchy", domainNote: domainNote.fname });
     while (!_.isEmpty(processQ)) {
       const note = processQ.pop() as NotePropsV2;
+
+      logger.debug({
+        ctx: "filterByHiearchy",
+        fname: note.fname,
+        note: NoteUtilsV2.toLogObj(note),
+      });
+
       const maybeNote = SiteUtils.filterByNote({ note, hConfig });
       if (maybeNote) {
         if (sconfig.writeStubs && maybeNote.stub) {
@@ -241,6 +249,8 @@ export class SiteUtils {
         }
         const siteFM = maybeNote.custom || ({} as DendronSiteFM);
         let children = maybeNote.children.map((id) => notesForHiearchy[id]);
+
+        // if skip levels, accumulate the grandchildren
         if (siteFM.skipLevels) {
           let acc = 0;
           while (acc !== siteFM.skipLevels) {
@@ -252,6 +262,8 @@ export class SiteUtils {
           maybeNote.children = children.map((ent) => ent.id);
           children.forEach((ent) => (ent.parent = maybeNote.id));
         }
+
+        // remove any children that shouldn't be published
         children = _.filter(children, (note: NotePropsV2) =>
           SiteUtils.canPublishFiltered({
             note,
@@ -260,7 +272,16 @@ export class SiteUtils {
             wsRoot: engine.wsRoot,
           })
         );
+        logger.debug({
+          ctx: "filterByHiearchy:post-filter-children",
+          note: note.fname,
+          children: children.map((ent) => ent.id),
+        });
+        // TODO: handle dups
+
+        // add children to Q
         children.forEach((n: NotePropsV2) => processQ.push(n));
+
         // updated children
         out[maybeNote.id] = {
           ...maybeNote,

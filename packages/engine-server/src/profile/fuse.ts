@@ -15,6 +15,7 @@ async function main() {
     vaults: ["/Users/kevinlin/Dropbox/Apps/Noah/notes"],
   });
   let engineCreate = getDurationMilliseconds(start);
+  const wsRoot = engine.wsRoot;
 
   start = process.hrtime();
   await engine.init();
@@ -39,6 +40,7 @@ async function main() {
   await Promise.all(
     nodes.map(async (ent) =>
       DNodeUtilsV2.enhancePropForQuickInput({
+        wsRoot,
         props: ent,
         schemas: engine.schemas,
         vaults: engine.vaultsv3,
@@ -51,6 +53,7 @@ async function main() {
   await Promise.all(
     nodes.slice(0, 100).map(async (ent) =>
       DNodeUtilsV2.enhancePropForQuickInput({
+        wsRoot,
         props: ent,
         schemas: engine.schemas,
         vaults: engine.vaultsv3,
@@ -63,6 +66,7 @@ async function main() {
   await Promise.all(
     nodes.slice(0, 50).map(async (ent) =>
       DNodeUtilsV2.enhancePropForQuickInput({
+        wsRoot,
         props: ent,
         schemas: engine.schemas,
         vaults: engine.vaultsv3,
@@ -74,6 +78,7 @@ async function main() {
   start = process.hrtime();
   nodes.slice(0, 50).map((ent) =>
     DNodeUtilsV2.enhancePropForQuickInput({
+      wsRoot,
       props: ent,
       schemas: engine.schemas,
       vaults: engine.vaultsv3,

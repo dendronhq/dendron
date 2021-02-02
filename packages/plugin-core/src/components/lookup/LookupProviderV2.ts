@@ -464,6 +464,7 @@ export class LookupProviderV2 {
       .slice(offset, offset + PAGINATE_LIMIT)
       .map((ent) =>
         DNodeUtilsV2.enhancePropForQuickInput({
+          wsRoot: DendronWorkspace.wsRoot(),
           props: ent,
           schemas: engine.schemas,
           vaults: DendronWorkspace.instance().vaultsv4,
@@ -514,6 +515,7 @@ export class LookupProviderV2 {
       await Promise.all(
         nodes.map(async (ent) =>
           DNodeUtilsV2.enhancePropForQuickInput({
+            wsRoot: DendronWorkspace.wsRoot(),
             props: ent,
             schemas: engine.schemas,
             vaults: DendronWorkspace.instance().vaultsv4,
@@ -666,6 +668,7 @@ export class LookupProviderV2 {
           updatedItems = updatedItems.concat(
             candidatesToAdd.map((ent) => {
               return DNodeUtilsV2.enhancePropForQuickInput({
+                wsRoot: DendronWorkspace.wsRoot(),
                 props: ent,
                 schemas: engine.schemas,
                 vaults: DendronWorkspace.instance().vaultsv4,
@@ -808,6 +811,7 @@ export class LookupProviderV2 {
     }
     return nodes.map((ent) => {
       return DNodeUtilsV2.enhancePropForQuickInput({
+        wsRoot: DendronWorkspace.wsRoot(),
         props: ent,
         schemas: engine.schemas,
         vaults: DendronWorkspace.instance().vaultsv4,

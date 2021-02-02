@@ -638,7 +638,7 @@ suite("Lookup, notesv2", function () {
         postSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupSchemaPreseet({ wsRoot, vaults });
         },
-        onInit: async ({ vaults }) => {
+        onInit: async ({ vaults, wsRoot }) => {
           const { lp, lc } = await lookupHelper("note");
           const ws = DendronWorkspace.instance();
           const client = ws.getEngine();
@@ -648,6 +648,7 @@ suite("Lookup, notesv2", function () {
             vault: vaults[0],
           }) as NotePropsV2;
           const item = DNodeUtilsV2.enhancePropForQuickInput({
+            wsRoot,
             props: note,
             schemas: client.schemas,
             vaults: DendronWorkspace.instance().config.vaults,
@@ -765,12 +766,13 @@ suite("Lookup, notesv2", function () {
         postSetupHook: async ({ wsRoot, vaults }) => {
           await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
         },
-        onInit: async ({}) => {
+        onInit: async ({ wsRoot }) => {
           const { lc, lp } = await lookupHelper(engOpts.flavor);
           const client = getWS().getEngine();
           const notes = ["foo", "foo.ch1"].map((fname) => client.notes[fname]);
           const items = notes.map((note) =>
             DNodeUtilsV2.enhancePropForQuickInput({
+              wsRoot,
               props: note,
               schemas: client.schemas,
               vaults: DendronWorkspace.instance().config.vaults,

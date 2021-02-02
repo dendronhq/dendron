@@ -231,6 +231,7 @@ suite.skip("Lookup notes, multi", function () {
           const client = ws.getEngine();
           const note = client.notes["foo"];
           const item = DNodeUtilsV2.enhancePropForQuickInput({
+            wsRoot: DendronWorkspace.wsRoot(),
             props: note,
             schemas: client.schemas,
             vaults: DendronWorkspace.instance().config.vaults,

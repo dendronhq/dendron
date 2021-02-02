@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.28.0](https://github.com/dendronhq/dendron/compare/v0.27.1-alpha.0...v0.28.0) (2021-02-02)
+
+### Bug Fixes
+
+- aliased vault names would appear with wrong name ([873627e](https://github.com/dendronhq/dendron/commit/873627eabff6ea12631dbec29e16aab00ebd3b71))
+
 ## [0.27.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.26.2...v0.27.1-alpha.0) (2021-02-01)
 
 ### Bug Fixes

@@ -186,7 +186,7 @@ export class SiteUtils {
       notes: notes.map((ent) => ent.id),
     });
 
-    notes.filter((note) =>
+    notes = notes.filter((note) =>
       SiteUtils.canPublishFiltered({
         note,
         hconfig: hConfig,

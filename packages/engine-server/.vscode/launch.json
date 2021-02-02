@@ -35,7 +35,8 @@
       "smartStep": true,
       "cwd": "${workspaceFolder:engine-server}",
       "env": {
-        "LOG_DST": "stdout"
+        "LOG_DST": "stdout",
+        "LOG_LEVEL": "error"
       },
       "args": [
         "--findRelatedTests",

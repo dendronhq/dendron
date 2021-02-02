@@ -41,7 +41,7 @@ export function filterDotFiles(filenames: string[]) {
   return filenames.filter((filename) => !/(^|\/)\.[^\/\.]/g.test(filename));
 }
 
-export function getLogFilePath(name: string) {
+export function getLogFilePath(_name: string) {
   // Placing these in the system temp directory proved difficult, as we both
   // want to generate paths here and pass them from npm in the various LOG_DST
   // environment variables. There's no consistent environment variable we can
@@ -49,8 +49,10 @@ export function getLogFilePath(name: string) {
   //
   // * TMPDIR is set for some POSIX-likes, e.g. macOS, but not Linux.
   // * TEMP is set on Windows.
-  const rootDir = path.dirname(path.dirname(path.dirname(__dirname)));
-  return path.join(rootDir, "logs", `${name}.log`);
+  // @ts-ignore
+  //const rootDir = path.dirname(path.dirname(path.dirname(__dirname)));
+  //return path.join(rootDir, "logs", `${name}.log`);
+  return "stdout";
 }
 
 type InitVaultFunc = (vaultPath: string) => void;

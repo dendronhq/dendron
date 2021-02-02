@@ -30,7 +30,7 @@
     "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
     "build": "npm run compile",
     "compile": "tsc -p tsconfig.build.json",
-    "test": "cross-env LOG_DST=../../logs/engine-server.log NODE_OPTIONS='--unhandled-rejections=strict' npx jest",
+    "test": "cross-env LOG_DST=stdout LOG_LEVEL=error NODE_OPTIONS='--unhandled-rejections=strict' npx jest",
     "test:unit:all": "cross-env LOG_LEVEL=error npm test",
     "coverage": "jest --coverage",
     "watch": "npm run compile -- --watch",

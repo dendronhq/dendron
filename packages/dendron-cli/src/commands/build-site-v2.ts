@@ -93,7 +93,7 @@ export class BuildSiteV2CLICommand extends CLICommand<
     }
     process.env["ENGINE_PORT"] = _.toString(port);
     process.env["WS_ROOT"] = wsRoot;
-    process.env["STAGE"] = stage;
+    process.env["BUILD_STAGE"] = stage;
     process.env["ELEV_PORT"] = _.toString(servePort);
     if (output) {
       process.env["OUTPUT"] = output;

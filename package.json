@@ -25,6 +25,7 @@
     "format": "prettier --ignore-path='.prettierignore' --write 'packages/**/*'",
     "bootstrap:bootstrap": "npx lerna bootstrap",
     "bootstrap:build": "npm run-script bootstrap:build:common-all && npm run-script bootstrap:build:common-server && npm run-script bootstrap:build:common-test-utils && npm run-script bootstrap:build:engine-server &&  npm run-script bootstrap:build:lsp-server && npm run-script bootstrap:build:api-server && npm run-script bootstrap:build:engine-test-utils && npm run-script bootstrap:build:pods-core && npm run-script bootstrap:build:seeds-core && npm run-script bootstrap:build:dendron-cli && npm run-script bootstrap:build:dendron-next-server && npm run-script bootstrap:build:plugin-core",
+    "bootstrap:build:fast": "npm run-script bootstrap:build:common-all && npm run-script bootstrap:build:common-server && npm run-script bootstrap:build:common-test-utils && npm run-script bootstrap:build:engine-server &&  npm run-script bootstrap:build:api-server && npm run-script bootstrap:build:engine-test-utils && npm run-script bootstrap:build:dendron-cli && npm run-script bootstrap:build:plugin-core",
     "bootstrap:build:": "npx lerna run build --scope",
     "bootstrap:build:common-all": "npm run-script bootstrap:build: -- @dendronhq/common-all",
     "bootstrap:build:common-server": "npm run-script bootstrap:build: @dendronhq/common-server",

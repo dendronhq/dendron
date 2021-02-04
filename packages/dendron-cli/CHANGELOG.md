@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.28.2-alpha.2](https://github.com/dendronhq/dendron/compare/v0.28.2-alpha.1...v0.28.2-alpha.2) (2021-02-04)
+
+### Bug Fixes
+
+- build-site shouldn't overwrite stage ([b202347](https://github.com/dendronhq/dendron/commit/b202347d6d7aa44964c7b0ae94b4ff7b32745ed3))
+
 ## [0.28.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.28.1...v0.28.2-alpha.0) (2021-02-02)
 
 ### Bug Fixes

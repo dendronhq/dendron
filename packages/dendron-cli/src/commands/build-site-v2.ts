@@ -116,6 +116,7 @@ export class BuildSiteV2CLICommand extends CLICommand<
       this.L.info({ msg: "done compiling" });
       setTimeout(() => {
         server.close((err: any) => {
+          this.L.info({ msg: "closing server" });
           if (err) {
             this.L.error({ msg: "error closing", payload: err });
           }

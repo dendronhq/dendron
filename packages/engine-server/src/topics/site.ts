@@ -95,7 +95,10 @@ export class SiteUtils {
         console.log("removing assets");
         fs.removeSync(siteAssetsDir);
       }
-      return fs.copy(path.join(vaultAssetsDir), siteAssetsDir);
+      return fs.copy(path.join(vaultAssetsDir), siteAssetsDir, {
+        overwrite: true,
+        errorOnExist: false,
+      });
     }
     return;
   }

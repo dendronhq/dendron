@@ -89,7 +89,13 @@ export class SiteUtils {
     const { wsRoot, vault, siteAssetsDir } = opts;
     const vaultAssetsDir = path.join(vault2Path({ wsRoot, vault }), "assets");
     if (fs.existsSync(vaultAssetsDir)) {
-      return fs.copy(path.join(vaultAssetsDir), path.join(siteAssetsDir));
+      // TODO: be smarter about this
+      if (fs.existsSync(siteAssetsDir)) {
+        // TODO:
+        console.log("removing assets");
+        fs.removeSync(siteAssetsDir);
+      }
+      return fs.copy(path.join(vaultAssetsDir), siteAssetsDir);
     }
     return;
   }

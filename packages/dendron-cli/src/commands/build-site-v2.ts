@@ -18,6 +18,7 @@ type CommandCLIOpts = {
   serve: boolean;
   stage: "dev" | "prod";
   output?: string;
+  custom11tyPath?: string;
 };
 type CommandOpts = CommandCLIOpts & {
   engine: DEngineClientV2;
@@ -59,6 +60,10 @@ export class BuildSiteV2CLICommand extends CLICommand<
       describe: "if set, override output from config.yml",
       type: "string",
     });
+    args.option("custom11tyPath", {
+      describe: "if set, path to custom 11ty installation",
+      type: "string",
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
@@ -98,9 +103,14 @@ export class BuildSiteV2CLICommand extends CLICommand<
     if (output) {
       process.env["OUTPUT"] = output;
     }
-    const compile = opts.compile
-      ? opts.compile
-      : require("@dendronhq/dendron-11ty").compile;
+    let compile;
+    if (opts.custom11tyPath) {
+      compile = require(opts.custom11tyPath).compile;
+    } else {
+      compile = opts.compile
+        ? opts.compile
+        : require("@dendronhq/dendron-11ty").compile;
+    }
     await compile({ cwd }, { serve: opts.serve, port: servePort });
     if (!opts.serve) {
       this.L.info({ msg: "done compiling" });

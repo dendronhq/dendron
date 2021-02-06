@@ -28,9 +28,9 @@ import path from "path";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
-import { LookupCommand } from "../../commands/LookupCommand";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
+import { createAllButtons } from "../../components/lookup/buttons";
 import {
   createNoActiveItem,
   PickerUtilsV2,
@@ -809,39 +809,59 @@ suite("selectionExtract", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this, {});
 
-  describe.only("extraction from file not in known vault", function () {
+  describe("extraction from file not in known vault", function () {
     test("basic", (done) => {
       runLegacySingleWorkspaceTest({
         ctx,
-        onInit: async ({}) => {
-          // const vault = vaults[0];
+        onInit: async ({ vaults }) => {
+          // open and create a file outside of vault.
           const extDir = tmpDir().name;
+          const extPath = "outside.md";
+          const extBody = "non vault content";
           await FileTestUtils.createFiles(extDir, [
-            { path: "outside.md", body: "non vault content" },
+            { path: extPath, body: extBody },
           ]);
-          console.log([extDir, "outside.md"].join("/"));
-          const uri = vscode.Uri.file(path.join(extDir, "outside.md"));
+          const uri = vscode.Uri.file(path.join(extDir, extPath));
           const editor = (await VSCodeUtils.openFileInEditor(
             uri
           )) as vscode.TextEditor;
-          editor.selection = new vscode.Selection(0, 0, 0, 17);
 
-          const picker = await new LookupCommand().execute({
-            selectionType: "selectionExtract",
-            flavor: "note",
-            value: "from-outside",
+          // select content from above file and do a lookup.
+          const vault = vaults[0];
+          const picker = createMockQuickPick({
+            selectedItems: [createNoActiveItem(vault)],
+            buttons: createAllButtons(["selectionExtract"]),
           });
 
-          console.log(picker);
+          let { lc, lp } = await lookupHelperForNote();
+
+          await lc.updatePickerBehavior({
+            quickPick: picker,
+            provider: lp,
+            document: editor.document,
+            range: new vscode.Range(0, 0, 0, 17),
+            quickPickValue: "from-outside",
+          });
+
+          const engOpts: EngineOpts = { flavor: "note" };
+
+          lp.onDidAccept({
+            picker,
+            opts: engOpts,
+            lc,
+          });
+
+          // original note content should not be altered.
+          const newEditor = (await VSCodeUtils.openFileInEditor(
+            uri
+          )) as vscode.TextEditor;
+
+          expect(newEditor.document.getText()).toEqual(extBody);
 
           done();
         },
       });
     });
-  });
-
-  describe("extraction from file in known vault", function () {
-    test("basic", function () {});
   });
 });
 

@@ -3,6 +3,7 @@ import {
   DNodePropsQuickInputV2,
   getSlugger,
   NotePropsV2,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
@@ -383,6 +384,17 @@ export class LookupControllerV2 {
           if (!_.isUndefined(document)) {
             const body = "\n" + document.getText(range).trim();
             note.body = body;
+            try {
+              // check if selection comes from known vault
+              VaultUtils.getVaultByNotePathV4({
+                vaults: DendronWorkspace.instance().vaultsv4,
+                wsRoot: DendronWorkspace.wsRoot(),
+                fsPath: document.uri.fsPath,
+              });
+            } catch {
+              // selection comes from a non-vault file
+              return note;
+            }
             await VSCodeUtils.deleteRange(document, range as vscode.Range);
           }
           return note;

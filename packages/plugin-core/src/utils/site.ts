@@ -12,7 +12,7 @@ const packageJson = {
   license: "MIT",
   dependencies: {
     "@dendronhq/dendron-11ty": "^1.28.3",
-    "@dendronhq/dendron-cli": "^0.28.3",
+    "@dendronhq/dendron-cli": "^0.28.2",
   },
 };
 

@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.28.2](https://github.com/dendronhq/dendron/compare/v0.28.2-alpha.2...v0.28.2) (2021-02-08)
+
+### Bug Fixes
+
+- add new vaults to .gitignore ([88dee05](https://github.com/dendronhq/dendron/commit/88dee054000ac15e5b4d479edf78569a5968e67f))
+
+### Features Dendron
+
+- add diagnostics report ([9e8dbef](https://github.com/dendronhq/dendron/commit/9e8dbef7092d7448fc824884d8fb0e9aefc0d083))
+
 ## [0.28.2-alpha.2](https://github.com/dendronhq/dendron/compare/v0.28.2-alpha.1...v0.28.2-alpha.2) (2021-02-04)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

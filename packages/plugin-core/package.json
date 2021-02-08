@@ -471,6 +471,13 @@
                 "desc": "Open Dendron logs for current session",
                 "docLink": "dendron.topic.commands.md",
                 "docPreview": ""
+            },
+            {
+                "command": "dendron.diagnosticsReport",
+                "title": "Dendron:Dev: Diagnostics Report",
+                "desc": "Generate diagnostics report",
+                "docLink": "dendron.topic.commands.md",
+                "docPreview": ""
             }
         ],
         "keybindings": [

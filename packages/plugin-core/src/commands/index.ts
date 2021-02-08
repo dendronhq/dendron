@@ -37,6 +37,7 @@ import { SitePreviewCommand } from "./SitePreview";
 import { SignUpCommand } from "./SignUp";
 import { SignInCommand } from "./SignIn";
 import { MoveNoteCommand } from "./MoveNoteCommand";
+import { DiagnosticsReportCommand } from "./DiagnosticsReport";
 
 const ALL_COMMANDS = [
   ArchiveHierarchyCommand,
@@ -50,6 +51,7 @@ const ALL_COMMANDS = [
   CopyNoteURLCommand,
   CreateDailyJournalCommand,
   DeleteNodeCommand,
+  DiagnosticsReportCommand,
   DoctorCommand,
   DumpStateCommand,
   ExportPodCommand,

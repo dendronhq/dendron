@@ -621,6 +621,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview: "",
   },
+  DEV_DIAGNOSTICS_REPORT: {
+    key: "dendron.diagnosticsReport",
+    title: `${CMD_PREFIX}Dev: Diagnostics Report`,
+    group: "dev",
+    desc: "Generate diagnostics report",
+    docLink: "dendron.topic.commands.md",
+    docPreview: "",
+  },
 };
 
 export const DENDRON_CHANNEL_NAME = "Dendron";

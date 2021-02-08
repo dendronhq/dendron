@@ -5,7 +5,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.28.3](https://github.com/dendronhq/dendron/compare/v0.28.2...v0.28.3) (2021-02-08)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.28.2](https://github.com/dendronhq/dendron/compare/v0.28.2-alpha.2...v0.28.2) (2021-02-08)
 
@@ -19,11 +19,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.28.2-alpha.2](https://github.com/dendronhq/dendron/compare/v0.28.2-alpha.1...v0.28.2-alpha.2) (2021-02-04)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- build-site shouldn't overwrite stage ([b202347](https://github.com/dendronhq/dendron/commit/b202347d6d7aa44964c7b0ae94b4ff7b32745ed3))
 
 ## [0.28.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.28.2-alpha.0...v0.28.2-alpha.1) (2021-02-02)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.28.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.28.1...v0.28.2-alpha.0) (2021-02-02)
 
@@ -33,9 +35,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.28.1](https://github.com/dendronhq/dendron/compare/v0.28.1-alpha.0...v0.28.1) (2021-02-02)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.28.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.29.0...v0.28.1-alpha.0) (2021-02-02)
+
+### Bug Fixes
+
+- site filter issues ([d38f4fc](https://github.com/dendronhq/dendron/commit/d38f4fc14e9b502946c7f0717f42cc816afa4aed))
 
 ### Reverts
 
@@ -49,15 +55,17 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.27.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.26.2...v0.27.1-alpha.0) (2021-02-01)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+### Bug Fixes
+
+- issue with build-site closing prematurely ([faab22a](https://github.com/dendronhq/dendron/commit/faab22a768677201e75062110b7919bb53524dee))
 
 # [0.27.0](https://github.com/dendronhq/dendron/compare/v0.26.2...v0.27.0) (2021-02-01)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.26.2](https://github.com/dendronhq/dendron/compare/v0.26.2-alpha.1...v0.26.2) (2021-02-01)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.26.2-alpha.1](https://github.com/dendronhq/dendron/compare/v0.26.2-alpha.0...v0.26.2-alpha.1) (2021-02-01)
 

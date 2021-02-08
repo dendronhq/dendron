@@ -1,11 +1,13 @@
 import {
   DendronConfig,
   DendronError,
+  DuplicateNoteAction,
   DUtils,
   DVault,
   NoteUtilsV2,
   SchemaUtilsV2,
   Time,
+  VaultUtils,
   WorkspaceUtilsCommon,
 } from "@dendronhq/common-all";
 import {
@@ -109,6 +111,17 @@ export class WorkspaceService {
     if (!noAddToConfig) {
       const config = this.config;
       config.vaults.unshift(vault);
+      // update dup note behavior
+      if (!config.site.duplicateNoteBehavior) {
+        config.site.duplicateNoteBehavior = {
+          action: DuplicateNoteAction.USE_VAULT,
+          payload: config.vaults.map((v) => VaultUtils.getName(v)),
+        };
+      } else if (_.isArray(config.site.duplicateNoteBehavior.payload)) {
+        config.site.duplicateNoteBehavior.payload.push(
+          VaultUtils.getName(vault)
+        );
+      }
       await this.setConfig(config);
     }
     return;

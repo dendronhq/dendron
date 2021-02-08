@@ -1,10 +1,13 @@
 import {
+  DendronConfig,
   NoteUtilsV2,
   SchemaUtilsV2,
+  VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
   note2File,
+  readYAML,
   schemaModuleOpts2File,
   tmpDir,
 } from "@dendronhq/common-server";
@@ -129,9 +132,13 @@ suite("VaultAddCommand", function () {
             ],
           });
           expect(fs.existsSync(gitIgnore)).toBeTruthy();
-          expect(fs.readFileSync(gitIgnore, { encoding: "utf8" })).toEqual(
-            "foo\nrepos/dendron-site-vault\n"
-          );
+
+          expect(
+            FileTestUtils.assertInFile({
+              fpath: gitIgnore,
+              match: ["repos/dendron-site-vault"],
+            })
+          ).toBeTruthy();
           done();
         },
       });
@@ -139,7 +146,7 @@ suite("VaultAddCommand", function () {
   });
 
   describe("local", function () {
-    test.only("add to existing folder", (done) => {
+    test("add to existing folder", (done) => {
       runSingleVaultTest({
         ctx,
         postSetupHook: async ({ wsRoot }) => {
@@ -173,14 +180,31 @@ suite("VaultAddCommand", function () {
               vault,
             ],
           });
+
+          // new file added to newline
           expect(
             FileTestUtils.assertInFile({
               fpath: path.join(wsRoot, ".gitignore"),
               match: ["\nvault2"],
             })
           ).toBeTruthy();
-          const body = fs.readFileSync(path.join(vpath, "root.md"));
-          assert.ok(body.indexOf("existing note") >= 0);
+
+          // cehck config
+          const config = readYAML(
+            path.join(wsRoot, "dendron.yml")
+          ) as DendronConfig;
+          expect(config.site.duplicateNoteBehavior).toEqual({
+            action: "useVault",
+            payload: [VaultUtils.getName(vault), "vault2"],
+          });
+
+          // check note is still existing note
+          expect(
+            FileTestUtils.assertInFile({
+              fpath: path.join(vpath, "root.md"),
+              match: ["existing note"],
+            })
+          ).toBeTruthy();
           done();
         },
       });

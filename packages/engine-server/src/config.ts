@@ -24,6 +24,7 @@ export class DConfig {
         siteRootDir: "docs",
         usePrettyRefs: true,
         title: "Dendron",
+        description: "Personal knowledge space",
       },
     };
   }
@@ -55,6 +56,7 @@ export class DConfig {
       gh_root: "docs/",
       gh_edit_view_mode: "edit",
       writeStubs: true,
+      description: "Personal knowledge space",
     });
     let { siteRootDir, siteHierarchies, siteIndex } = out;
     if (!siteRootDir) {

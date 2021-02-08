@@ -7,11 +7,12 @@ import {
   SchemaUtilsV2,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { vault2Path, tmpDir } from "@dendronhq/common-server";
 import {
   ENGINE_HOOKS,
   ENGINE_QUERY_PRESETS,
   ENGINE_WRITE_PRESETS,
+  FileTestUtils,
   NOTE_PRESETS_V4,
   runJestHarnessV2,
   sinon,
@@ -29,6 +30,7 @@ import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
+import { createAllButtons } from "../../components/lookup/buttons";
 import {
   createNoActiveItem,
   PickerUtilsV2,
@@ -798,6 +800,66 @@ suite("Lookup, notesv2", function () {
             ],
             expect
           );
+          done();
+        },
+      });
+    });
+  });
+});
+
+suite("selectionExtract", function () {
+  let ctx: vscode.ExtensionContext;
+  ctx = setupBeforeAfter(this, {});
+
+  describe("extraction from file not in known vault", function () {
+    test("basic", (done) => {
+      runLegacySingleWorkspaceTest({
+        ctx,
+        onInit: async ({ vaults }) => {
+          // open and create a file outside of vault.
+          const extDir = tmpDir().name;
+          const extPath = "outside.md";
+          const extBody = "non vault content";
+          await FileTestUtils.createFiles(extDir, [
+            { path: extPath, body: extBody },
+          ]);
+          const uri = vscode.Uri.file(path.join(extDir, extPath));
+          const editor = (await VSCodeUtils.openFileInEditor(
+            uri
+          )) as vscode.TextEditor;
+
+          // select content from above file and do a lookup.
+          const vault = vaults[0];
+          const picker = createMockQuickPick({
+            selectedItems: [createNoActiveItem(vault)],
+            buttons: createAllButtons(["selectionExtract"]),
+          });
+
+          let { lc, lp } = await lookupHelperForNote();
+
+          await lc.updatePickerBehavior({
+            quickPick: picker,
+            provider: lp,
+            document: editor.document,
+            range: new vscode.Range(0, 0, 0, 17),
+            quickPickValue: "from-outside",
+          });
+
+          const engOpts: EngineOpts = { flavor: "note" };
+
+          lp.onDidAccept({
+            picker,
+            opts: engOpts,
+            lc,
+          });
+
+          // original note content should not be altered.
+          const newEditor = (await VSCodeUtils.openFileInEditor(
+            uri
+          )) as vscode.TextEditor;
+
+          expect(newEditor.document.getText()).toEqual(extBody);
+
           done();
         },
       });

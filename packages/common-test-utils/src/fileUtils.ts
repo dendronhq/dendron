@@ -41,6 +41,19 @@ export class FileTestUtils {
     ];
   };
 
+  static assertInFile = ({
+    fpath,
+    match,
+    nomatch,
+  }: {
+    match?: string[];
+    nomatch?: string[];
+    fpath: string;
+  }) => {
+    const body = fs.readFileSync(fpath, { encoding: "utf8" });
+    return AssertUtils.assertInString({ body, match, nomatch });
+  };
+
   static assertInVault = ({
     vault,
     wsRoot,

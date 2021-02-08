@@ -8,7 +8,7 @@ import {
   schemaModuleOpts2File,
   tmpDir,
 } from "@dendronhq/common-server";
-import { sinon } from "@dendronhq/common-test-utils";
+import { FileTestUtils, sinon } from "@dendronhq/common-test-utils";
 import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -139,7 +139,7 @@ suite("VaultAddCommand", function () {
   });
 
   describe("local", function () {
-    test("add to existing folder", (done) => {
+    test.only("add to existing folder", (done) => {
       runSingleVaultTest({
         ctx,
         postSetupHook: async ({ wsRoot }) => {
@@ -173,10 +173,14 @@ suite("VaultAddCommand", function () {
               vault,
             ],
           });
-
+          expect(
+            FileTestUtils.assertInFile({
+              fpath: path.join(wsRoot, ".gitignore"),
+              match: ["\nvault2"],
+            })
+          ).toBeTruthy();
           const body = fs.readFileSync(path.join(vpath, "root.md"));
           assert.ok(body.indexOf("existing note") >= 0);
-
           done();
         },
       });

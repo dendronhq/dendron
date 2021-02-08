@@ -153,7 +153,9 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // check for .gitignore
     const gitIgnore = path.join(wsRoot, ".gitignore");
     if (fs.existsSync(gitIgnore)) {
-      fs.appendFileSync(gitIgnore, vault.fsPath + "\n", { encoding: "utf8" });
+      fs.appendFileSync(gitIgnore, "\n" + vault.fsPath + "\n", {
+        encoding: "utf8",
+      });
     }
     return;
   }

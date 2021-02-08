@@ -1,5 +1,5 @@
 import { WorkspaceUtilsCommon } from "@dendronhq/common-all";
-import { GitUtils, tmpDir } from "@dendronhq/common-server";
+import { GitUtils, readYAML, tmpDir } from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import { describe, it } from "mocha";
@@ -47,6 +47,43 @@ suite("Extension", function () {
         expect(resp).toBeFalsy();
         done();
       });
+    });
+
+    it("creates correct dendron.yml", function (done) {
+      const wsRoot = tmpDir().name;
+      getWS()
+        .context.globalState.update(GLOBAL_STATE.DENDRON_FIRST_WS, true)
+        .then(() => {
+          _activate(ctx).then(async () => {
+            stubSetupWorkspace({
+              wsRoot,
+              initType: InitializeType.TUTORIAL_NOTES,
+            });
+            await vscode.commands.executeCommand(DENDRON_COMMANDS.INIT_WS.key, {
+              skipOpenWs: true,
+              skipConfirmation: true,
+            } as SetupWorkspaceOpts);
+            const resp = readYAML(path.join(wsRoot, "dendron.yml"));
+            expect(resp).toEqual({
+              version: 1,
+              vaults: [
+                {
+                  fsPath: "vault",
+                },
+              ],
+              useFMTitle: true,
+              site: {
+                copyAssets: true,
+                siteHierarchies: ["root"],
+                siteRootDir: "docs",
+                usePrettyRefs: true,
+                title: "Dendron",
+                description: "Personal knowledge space",
+              },
+            });
+            done();
+          });
+        });
     });
 
     it("not active/ init, first time", function (done) {

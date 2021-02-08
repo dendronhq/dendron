@@ -5,4 +5,4 @@ lerna version patch
 lerna publish from-package -y
 git push
 
-./pack_and_install.sh
+./bootstrap/scripts/pack_and_install.sh

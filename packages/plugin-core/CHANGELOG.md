@@ -5,11 +5,11 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.28.5](https://github.com/dendronhq/dendron/compare/v0.28.4...v0.28.5) (2021-02-08)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.28.4](https://github.com/dendronhq/dendron/compare/v0.28.3...v0.28.4) (2021-02-08)
 
-**Note:** Version bump only for package @dendronhq/plugin-core
+**Note:** Version bump only for package root
 
 ## [0.28.3](https://github.com/dendronhq/dendron/compare/v0.28.2...v0.28.3) (2021-02-08)
 

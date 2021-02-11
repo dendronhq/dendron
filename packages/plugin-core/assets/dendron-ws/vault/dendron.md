@@ -12,22 +12,23 @@ Welcome to Dendron! This guide will help get you started with your knowledge bas
 
 ## The Trail 🥾
 
-This section covers the basics of Dendron. Get started on the right foot and start growing your knowledge base.
-
-- [ ] Go through Dendron's basic [concepts](https://www.dendron.so/notes/c6fd6bc4-7f75-4cbb-8f34-f7b99bfe2d50.html)
-- [ ] Do your first [lookup](https://www.dendron.so/notes/a7c3a810-28c8-4b47-96a6-8156b1524af3.html#lookup-menu) - a better way to find your notes
-- [ ] Learn about [schemas](https://www.dendron.so/notes/c5e5adde-5459-409b-b34d-a0d75cbb1052.html#schemas) - a flexible type system for all your notes
-- [ ] Use a [snippet](https://www.dendron.so/notes/9eca1992-7540-4d9d-97fb-328b27748b2c.html)
+Here are the basics of Dendron so you can get started growing your knowledge base.
+- [ ] Create your first note. 
+    - [ ] Dendron uses the [lookup](https://www.dendron.so/notes/a7c3a810-28c8-4b47-96a6-8156b1524af3.html#lookup-menu) command to create. So, hit CMD+L (or ctrl+L if you're on Windows) to bring up the lookup bar, type in a new note name and hit enter to create it. You can also run the lookup command through the command palette "Dendron: Lookup". 
+    - [ ] Wiki-style links are supported. If the note doesn't exist, we'll create the note for you. For example, just try [[this link]] from the editor view.
+- [ ] Find your notes. Dendron really shines when you need to look up notes quickly. For this, you use *drumroll* the lookup command (again). Just hit CMD/ctrl+L and you can search your entire set of notes.
+- [ ] To delete a note, navigate to it and use the "Dendron: Delete Node" command. As with everything else in VSCode, bring up the command palette with CMD/ctrl+shift+P and run the command.  
+- [ ] Use a [snippet](https://www.dendron.so/notes/9eca1992-7540-4d9d-97fb-328b27748b2c.html) for quick note templates
 - [ ] Insert an [image](https://www.dendron.so/notes/a91fd8da-6895-49fe-8164-a17acd8d9a17.html)
 - [ ] Create some [links](https://www.dendron.so/notes/3472226a-ff3c-432d-bf5d-10926f39f6c2.html)
-- [ ] Explore additional features from [Dendron's bundled extensions](https://www.dendron.so/notes/301e4129-6933-4be7-a4bd-8125171360d8.html)
 - [ ] [Publish](https://www.dendron.so/notes/73d395c9-5041-4d0d-9db7-080d9586136e.html) your vault 
 - [ ] Join us on [discord](https://discord.com/invite/6j85zNX) and discuss all things knowledge management with your fellow trail blazers.
-
+- [ ] For more information, see Dendron's basic [concepts](https://www.dendron.so/notes/c6fd6bc4-7f75-4cbb-8f34-f7b99bfe2d50.html)
 ## The Woods 🌲
 
 This section covers advanced functionality in Dendron. Become a seasoned backpacker by mastering these trails.
-
+- [ ] Explore additional features from [Dendron's bundled extensions](https://www.dendron.so/notes/301e4129-6933-4be7-a4bd-8125171360d8.html)
+- [ ] Learn about [schemas](https://www.dendron.so/notes/c5e5adde-5459-409b-b34d-a0d75cbb1052.html#schemas) - a flexible type system for all your notes
 - [ ] Check out our [case studies](https://www.dendron.so/notes/34ee4bcf-60e9-4031-a4c0-26113b5acb80.html)
 - [ ] Read our [FAQ](https://www.dendron.so/notes/683740e3-70ce-4a47-a1f4-1f140e80b558.html)
 - [ ] Explore the [graph view](https://www.dendron.so/notes/587e6d62-3c5b-49b0-aedc-02f62f0448e6.html)

@@ -35,7 +35,7 @@ export class BuildSiteV2CLICommand extends CLICommand<
   constructor() {
     super({
       name: "buildSiteV2",
-      desc: "build notes for publication using 11ty",
+      desc: "build notes for publication using 11ty"
     });
   }
 
@@ -45,24 +45,24 @@ export class BuildSiteV2CLICommand extends CLICommand<
     args.option("serve", {
       describe: "serve over local http server",
       default: false,
-      type: "boolean",
+      type: "boolean"
     });
     args.option("stage", {
       describe: "serve over local http server",
       default: "dev",
-      choices: ["dev", "prod"],
+      choices: ["dev", "prod"]
     });
     args.option("servePort", {
       describe: "port to serve over",
-      default: "8080",
+      default: "8080"
     });
     args.option("output", {
       describe: "if set, override output from config.yml",
-      type: "string",
+      type: "string"
     });
     args.option("custom11tyPath", {
       describe: "if set, path to custom 11ty installation",
-      type: "string",
+      type: "string"
     });
   }
 
@@ -72,9 +72,9 @@ export class BuildSiteV2CLICommand extends CLICommand<
     // add site specific notes
     if (args.enginePort) {
       const siteNotes = SiteUtils.addSiteOnlyNotes({
-        engine: engineArgs.engine,
+        engine: engineArgs.engine
       });
-      _.forEach(siteNotes, (ent) => {
+      _.forEach(siteNotes, ent => {
         engineArgs.engine.notes[ent.id] = ent;
       });
     }
@@ -104,14 +104,33 @@ export class BuildSiteV2CLICommand extends CLICommand<
       process.env["OUTPUT"] = output;
     }
     let compile;
+    let buildNav;
+    let copyAssets;
+    let buildStyles;
+    let buildSearch;
     if (opts.custom11tyPath) {
-      compile = require(opts.custom11tyPath).compile;
+      ({
+        compile,
+        buildNav,
+        copyAssets,
+        buildStyles,
+        buildSearch
+      } = require(opts.custom11tyPath));
     } else {
-      compile = opts.compile
-        ? opts.compile
-        : require("@dendronhq/dendron-11ty").compile;
+      ({
+        compile,
+        buildNav,
+        copyAssets,
+        buildStyles,
+        buildSearch
+      } = require("@dendronhq/dendron-11ty"));
     }
+    console.log("running pre-compile")
+    await Promise.all([buildNav(), copyAssets()])
+    console.log("running compile")
     await compile({ cwd }, { serve: opts.serve, port: servePort });
+    console.log("running post-compile")
+    await Promise.all([buildStyles(), buildSearch()])
     if (!opts.serve) {
       this.L.info({ msg: "done compiling" });
       setTimeout(() => {

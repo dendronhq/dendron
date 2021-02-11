@@ -38,6 +38,7 @@ const plugin: Plugin<[CompilerOpts?]> = function (
   }
 };
 
+// Parsing wiki links tokens and also compiling to markdown/html.
 function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
   const copts = _.defaults(opts || {}, {
     convertObsidianLinks: false,
@@ -91,6 +92,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
             parseAnchorIfExist(value)[0] as string
           )}.md)`;
         }
+        // convert to markdown link as rehype will do HTML conversion later
         case DendronASTDest.HTML: {
           const alias = data.alias ? data.alias : value;
           return `[${alias}](${copts.prefix || ""}${value}.html${

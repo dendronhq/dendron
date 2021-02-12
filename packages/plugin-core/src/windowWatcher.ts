@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 import { DecorationOptions, ExtensionContext, Range, window } from "vscode";
 import { Logger } from "./logger";
 import { getConfigValue } from "./workspace";
-import { CodeConfigKeys } from "./types";
+import { DateTimeFormat, CodeConfigKeys } from "./types";
 
 const tsDecorationType = window.createTextEditorDecorationType({
   //   borderWidth: "1px",
@@ -56,8 +56,8 @@ export class WindowWatcher {
       const dt = DateTime.fromMillis(ts);
       const tsConfig = getConfigValue(
         CodeConfigKeys.DEFAULT_TIMESTAMP_DECORATION_FORMAT
-      ) as string;
-      const formatOption = (DateTime as any)[tsConfig];
+      ) as DateTimeFormat;
+      const formatOption = DateTime[tsConfig];
       const decoration: DecorationOptions = {
         range: new Range(startPos, endPos),
         renderOptions: {

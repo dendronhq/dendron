@@ -108,6 +108,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       }
       return { changed };
     } finally {
+      DendronWorkspace.instance().dendronTreeView?.treeProvider.refresh();
       if (ws.vaultWatcher && !opts.noPauseWatcher) {
         setTimeout(() => {
           if (ws.vaultWatcher) {

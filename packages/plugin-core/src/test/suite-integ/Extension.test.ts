@@ -79,6 +79,10 @@ suite("Extension", function () {
                 usePrettyRefs: true,
                 title: "Dendron",
                 description: "Personal knowledge space",
+                duplicateNoteBehavior: {
+                  action: "useVault",
+                  payload: ["vault"],
+                },
               },
             });
             done();

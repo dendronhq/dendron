@@ -3,6 +3,8 @@ import _ from "lodash";
 import { DateTime } from "luxon";
 import { DecorationOptions, ExtensionContext, Range, window } from "vscode";
 import { Logger } from "./logger";
+import { getConfigValue } from "./workspace";
+import { DateTimeFormat, CodeConfigKeys } from "./types";
 
 const tsDecorationType = window.createTextEditorDecorationType({
   //   borderWidth: "1px",
@@ -52,11 +54,15 @@ export class WindowWatcher {
       const ts = _.toInteger(_.trim(tsMatch[0].split(":")[1], `'" `));
 
       const dt = DateTime.fromMillis(ts);
+      const tsConfig = getConfigValue(
+        CodeConfigKeys.DEFAULT_TIMESTAMP_DECORATION_FORMAT
+      ) as DateTimeFormat;
+      const formatOption = DateTime[tsConfig];
       const decoration: DecorationOptions = {
         range: new Range(startPos, endPos),
         renderOptions: {
           after: {
-            contentText: `  (${dt.toLocaleString(DateTime.DATETIME_MED)})`,
+            contentText: `  (${dt.toLocaleString(formatOption)})`,
           },
         },
       };

@@ -2,7 +2,9 @@
 
 exports[`basics can't publish 1`] = `
 VFile {
-  "contents": "<p><a href=\\"403.html\\">an alias</a></p>",
+  "contents": "<p><a data-toggle=\\"popover\\" title=\\"This page has not yet sprouted\\" style=\\"cursor: pointer\\" data-content=\\"<a href=&#x22;https://dendron.so/&#x22;>Dendron</a> (the tool used to generate this site) lets authors selective publish content. You will see this page whenever you click on a link to an unpublished page
+
+<img src=&#x27;https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/not-sprouted.png&#x27;></img>\\">an alias</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],

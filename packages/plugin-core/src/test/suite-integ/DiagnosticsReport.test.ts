@@ -29,7 +29,7 @@ suite("DiagnosticsReport", function () {
 
         const body = (await VSCodeUtils.getActiveTextEditor()?.document.getText()) as string;
         expect(
-          AssertUtils.assertInString({
+          await AssertUtils.assertInString({
             body,
             match: ["foobar", "Dendron Confg", "Plugin Logs"],
           })

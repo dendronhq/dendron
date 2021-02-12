@@ -1,5 +1,9 @@
 import { DEngineClientV2 } from "@dendronhq/common-all";
-import { ENGINE_HOOKS, runEngineTestV4 } from "@dendronhq/common-test-utils";
+import {
+  AssertUtils,
+  ENGINE_HOOKS,
+  runEngineTestV4,
+} from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { DConfig } from "../../../config";
 import { createEngine } from "../../../enginev2";
@@ -55,7 +59,12 @@ describe("basics", () => {
           ),
         }).process(`[[an alias|bar]]`);
         expect(resp).toMatchSnapshot();
-        expect(resp.contents).toEqual(`<p><a href="403.html">an alias</a></p>`);
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents as string,
+            match: ["This page has not yet sprouted"],
+          })
+        ).toBeTruthy();
       },
       { expect, createEngine, preSetupHook: ENGINE_HOOKS.setupBasic }
     );

@@ -183,7 +183,10 @@ suite("RefactorHiearchy", function () {
         };
         const resp = await new RefactorHierarchyCommandV2().run();
 
-        expect(resp.changed.length).toEqual(6);
+        // 3 deletes (refactor)
+        // 3 creates (bond)
+        // 1 update (root)
+        expect(resp.changed.length).toEqual(7);
 
         const vault1 = vaults[0];
         const vault2 = vaults[1];

@@ -83,7 +83,15 @@ export const NOTE_PRESETS_V4 = {
     body: "pro.foo.body",
   }),
   // START CHANGE
+  /**
+   * fname: alpha
+   * body: [[beta]]
+   */
   NOTE_WITH_TARGET: CreateNoteFactory({ fname: "alpha", body: "[[beta]]" }),
+  /**
+   *  fname: beta
+   *  body: [[alpah]]
+   */
   NOTE_WITH_LINK: CreateNoteFactory({ fname: "beta", body: "[[alpha]]" }),
   NOTE_WITH_ALIAS_LINK: CreateNoteFactory({
     fname: "beta",

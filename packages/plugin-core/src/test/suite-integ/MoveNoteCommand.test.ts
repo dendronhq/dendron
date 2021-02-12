@@ -1,5 +1,10 @@
 import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
-import { EngineTestUtilsV4, ENGINE_HOOKS } from "@dendronhq/common-test-utils";
+import {
+  AssertUtils,
+  EngineTestUtilsV4,
+  ENGINE_HOOKS,
+  NoteTestUtilsV4,
+} from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { MoveNoteCommand } from "../../commands/MoveNoteCommand";
@@ -100,6 +105,57 @@ suite("MoveNoteCommand", function () {
       },
     });
   });
+
+  test("move scratch note ", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+        await NoteTestUtilsV4.createNote({
+          fname: "scratch.2020.02.03.0123",
+          vault: vaults[0],
+          wsRoot,
+        });
+      },
+      onInit: async ({ engine, vaults, wsRoot }) => {
+        const notes = engine.notes;
+        const vault1 = vaults[0];
+        const vault2 = vaults[0];
+        const fname = "scratch.2020.02.03.0123";
+        const fooNote = NoteUtilsV2.getNoteByFnameV5({
+          fname,
+          notes,
+          vault: vault1,
+          wsRoot,
+        }) as NotePropsV2;
+        await VSCodeUtils.openNote(fooNote);
+        const cmd = new MoveNoteCommand();
+        await cmd.execute({
+          oldLoc: {
+            fname,
+            vault: vault1,
+          },
+          newLoc: {
+            fname: "bar",
+            vault: vault2,
+          },
+        });
+        expect(
+          VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
+            "vault1/bar.md"
+          )
+        ).toBeTruthy();
+        expect(
+          await AssertUtils.assertInString({
+            body: _.keys(notes).join("\n"),
+            match: [fname],
+          })
+        ).toBeTruthy();
+        done();
+      },
+    });
+  });
+
   test("move note to new vault", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,

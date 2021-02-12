@@ -373,28 +373,33 @@ export class FileStorageV2 implements DStoreV2 {
       this.updateNote(noteToDelete);
       out.push({ note: noteToDelete, status: "update" });
     } else {
+      // no children, delete reference from parent
       this.logger.info({ ctx, noteToDelete, msg: "delete from parent" });
       if (!noteToDelete.parent) {
         throw new DendronError({
           status: ENGINE_ERROR_CODES.NO_PARENT_FOR_NOTE,
         });
       }
-      // no more children, delete from parent
+      // remove from parent
       let parentNote = this.notes[noteToDelete.parent] as NotePropsV2;
       parentNote.children = _.reject(
         parentNote.children,
         (ent) => ent === noteToDelete.id
       );
+      // delete from note dictionary
       delete this.notes[noteToDelete.id];
-      // if parent note is stub, we'll be deleteing it too
+      // if parent note is not a stub, update it
       if (!parentNote.stub) {
         out.push({ note: parentNote, status: "update" });
       }
       out.push({ note: noteToDelete, status: "delete" });
-
-      while (parentNote.stub) {
+      // check all stubs
+      while (parentNote.stub && !opts?.noDeleteParentStub) {
         const newParent = parentNote.parent;
-        const resp = await this.deleteNote(parentNote.id, { metaOnly: true });
+        const resp = await this.deleteNote(parentNote.id, {
+          metaOnly: true,
+          noDeleteParentStub: true,
+        });
         if (newParent) {
           parentNote = this.notes[newParent];
         } else {
@@ -620,7 +625,9 @@ export class FileStorageV2 implements DStoreV2 {
     };
 
     // NOTE: order matters. need to delete old note, otherwise can't write new note
-    await this.deleteNote(oldNote.id, { metaOnly: true });
+    const changedFromDelete = await this.deleteNote(oldNote.id, {
+      metaOnly: true,
+    });
     await this.writeNote(newNote, { newNode: true });
     // update all new notes
     await Promise.all(
@@ -634,9 +641,11 @@ export class FileStorageV2 implements DStoreV2 {
     // remove old note only when rename is success
     fs.removeSync(oldLocPath);
 
-    out = out.concat([{ status: "delete" as const, note: oldNote }]);
-    out = out.concat([{ status: "create" as const, note: newNote }]);
-    this.logger.info({ ctx, msg: "exit", opts });
+    // create needs to be very last element added
+    out = changedFromDelete
+      .concat(out)
+      .concat([{ status: "create" as const, note: newNote }]);
+    this.logger.info({ ctx, msg: "exit", opts, out });
     return out;
   }
 

@@ -13,6 +13,10 @@ export type EngineDeleteOpts = {
    * Only delete from meta
    */
   metaOnly?: boolean;
+  /**
+   * If node is deleted and parents are stubs, default behavior is to alsod elete parents
+   */
+  noDeleteParentStub?: boolean;
 };
 
 export type SchemaData = {

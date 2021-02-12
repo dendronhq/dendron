@@ -150,6 +150,11 @@ export type DendronSiteConfig = {
   siteHierarchies: string[];
 
   /**
+   * If true, show a last modified on the site
+   */
+  siteLastModified?: boolean;
+
+  /**
    * Vaults that should never be published
    */
   privateVaults?: string[];

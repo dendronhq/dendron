@@ -85,16 +85,19 @@ export class SiteUtils {
     wsRoot: string;
     vault: DVault;
     siteAssetsDir: string;
+    /**
+     * Delete existing siteAssets
+     */
+    deleteSiteAssetsDir?: boolean;
   }) {
-    const { wsRoot, vault, siteAssetsDir } = opts;
+    const { wsRoot, vault, siteAssetsDir, deleteSiteAssetsDir } = opts;
     const vaultAssetsDir = path.join(vault2Path({ wsRoot, vault }), "assets");
+    if (fs.existsSync(siteAssetsDir) && deleteSiteAssetsDir) {
+      console.log("removing existing assets");
+      fs.removeSync(siteAssetsDir);
+    }
     if (fs.existsSync(vaultAssetsDir)) {
       // TODO: be smarter about this
-      if (fs.existsSync(siteAssetsDir)) {
-        // TODO:
-        console.log("removing assets");
-        fs.removeSync(siteAssetsDir);
-      }
       return fs.copy(path.join(vaultAssetsDir), siteAssetsDir, {
         overwrite: true,
         errorOnExist: false,

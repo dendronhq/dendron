@@ -308,7 +308,6 @@ export async function _activate(context: vscode.ExtensionContext) {
     Logger.info({ ctx, msg: "post-start-server", port });
     WSUtils.updateEngineAPI(port);
     wsService.writePort(port);
-    // startLSPClient({ context, port });
     const reloadSuccess = await reloadWorkspace();
     if (!reloadSuccess) {
       HistoryService.instance().add({

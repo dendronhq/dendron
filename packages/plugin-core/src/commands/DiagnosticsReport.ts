@@ -4,8 +4,9 @@ import path from "path";
 import { window, workspace } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { Logger } from "../logger";
-import { getWS } from "../workspace";
+import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
+import { getPortFilePath } from "@dendronhq/engine-server";
 const L = Logger;
 
 type DiagnosticsReportCommandOpts = {};
@@ -23,7 +24,8 @@ export class DiagnosticsReportCommand extends BasicCommand<
       throw Error("logPath not defined");
     }
     const logFile = fs.readFileSync(logPath, { encoding: "utf8" });
-    const lastLines = logFile.slice(-3000, -1);
+    const firstLines = logFile.slice(0, 5000);
+    const lastLines = logFile.slice(-5000, -1);
 
     const serverLogPath = path.join(
       path.dirname(logPath),
@@ -33,15 +35,22 @@ export class DiagnosticsReportCommand extends BasicCommand<
     const serverLastLines = serverLogFile.slice(-3000, -1);
 
     const config = JSON.stringify(getWS().config);
+    const wsRoot = DendronWorkspace.wsRoot();
+    const port = getPortFilePath({ wsRoot });
+    const portFromFile = fs.readFileSync(port, { encoding: "utf8" });
 
     const content = [
       "# Plugin Logs",
+      firstLines,
+      "---",
       lastLines,
       "---",
       "# Server Logs",
       serverLastLines,
       "# Dendron Confg",
       config,
+      "# Port",
+      portFromFile,
     ].join("\n");
     await workspace.openTextDocument({ language: "markdown", content });
     clipboardy.writeSync(content);

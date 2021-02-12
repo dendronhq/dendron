@@ -333,6 +333,9 @@ export class DendronWorkspace {
     return repoDir;
   }
 
+  /**
+   * The first workspace folder
+   */
   get rootWorkspace(): vscode.WorkspaceFolder {
     const wsFolders = DendronWorkspace.workspaceFolders();
     if (_.isEmpty(wsFolders) || _.isUndefined(wsFolders)) {
@@ -574,55 +577,6 @@ export class DendronWorkspace {
     this.L.info({ ctx });
     this.fsWatcher?.dispose();
     this.disposableStore.dispose();
-  }
-
-  async createServerWatcher() {
-    const ctx = "createServerWatcher";
-    const portFile = path.join(
-      path.dirname(DendronWorkspace.workspaceFile().fsPath),
-      CONSTANTS.DENDRON_SERVER_PORT
-    );
-    this.L.info({ ctx, portFile });
-    this.serverWatcher = vscode.workspace.createFileSystemWatcher(
-      portFile,
-      false,
-      false,
-      false
-    );
-    const updateServerConfig = (uri: vscode.Uri) => {
-      const port = _.trim(fs.readFileSync(uri.fsPath, { encoding: "utf-8" }));
-      DendronWorkspace.serverConfiguration()["serverPort"] = port;
-      const ctx = "updateServerConfig";
-      this.L.info({ ctx, msg: "update serverConfig", port });
-      HistoryService.instance().add({
-        source: "apiServer",
-        action: "changedPort",
-      });
-    };
-
-    // file watcher can't watch outside of workspace and our integ tests mock workspaces
-    if (getStage() === "test") {
-      fs.watchFile(portFile, () => {
-        fs.existsSync(portFile) &&
-          updateServerConfig(vscode.Uri.file(portFile));
-      });
-    }
-
-    this.disposableStore.add(
-      this.serverWatcher.onDidCreate(async (uri: vscode.Uri) => {
-        const ctx = "createServerWatcher.onDidCreate";
-        this.L.info({ ctx, uri });
-        updateServerConfig(uri);
-      }, this)
-    );
-
-    this.disposableStore.add(
-      this.serverWatcher.onDidChange(async (uri: vscode.Uri) => {
-        const ctx = "createServerWatcher.onDidChange";
-        this.L.info({ ctx, uri });
-        updateServerConfig(uri);
-      }, this)
-    );
   }
 
   /**

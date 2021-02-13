@@ -13,12 +13,13 @@
       "smartStep": true,
       "cwd": "${workspaceFolder}",
       "env": {
-        "LOG_DST": "stdout",
-        "LOG_LEVEL": "error"
+        "LOG_DST": "/tmp/out.txt",
+        "LOG_LEVEL": "info",
       },
       "args": [
         "--findRelatedTests",
         "--runInBand",
+        "--verbose",
         "${relativeFile}",
         "-u"
       ],

@@ -212,10 +212,10 @@ export interface RespV2<T> {
 
 export type RespRequiredV2<T> =
   | {
-      error: null;
+      error: null | undefined;
       data: T;
     }
-  | { error: DendronError };
+  | { error: DendronError; data: undefined };
 
 export interface QueryOptsV2 {
   /**

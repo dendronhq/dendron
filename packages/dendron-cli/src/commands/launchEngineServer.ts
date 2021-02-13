@@ -11,7 +11,7 @@ import { SoilCommandCLIOptsV3, SoilCommandOptsV3, SoilCommandV3 } from "./soil";
 type CommandOutput = { port: number; server: any };
 type CommandOpts = SoilCommandOptsV3 &
   Required<CommandCLIOpts> & { server: any };
-export type CommandCLIOpts = SoilCommandCLIOptsV3 & {
+type CommandCLIOpts = SoilCommandCLIOptsV3 & {
   port?: number;
 };
 

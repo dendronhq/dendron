@@ -88,7 +88,6 @@ const NOTES = {
   //       oldLoc: { fname: alpha, vault: vault1 },
   //       newLoc: { fname: alpha, vault: vault2 },
   //     });
-  //     debugger;
   //     const checkVault = await FileTestUtils.assertInVault({
   //       wsRoot,
   //       vault: vault1,

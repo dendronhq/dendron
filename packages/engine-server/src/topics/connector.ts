@@ -5,7 +5,11 @@ import {
   DVault,
   Time,
 } from "@dendronhq/common-all";
-import { createFileWatcher, DLogger } from "@dendronhq/common-server";
+import {
+  createFileWatcher,
+  createLogger,
+  DLogger,
+} from "@dendronhq/common-server";
 import fs, { FSWatcher } from "fs-extra";
 import _ from "lodash";
 import { DConfig } from "../config";
@@ -24,6 +28,12 @@ export type EngineConnectorInitOpts = {
 };
 
 export class EngineConnector {
+  /**
+   * Conencts to the {@link DendronEngine}
+   *
+   * @remarks
+   * Before initiating a connection, {@link EngineConnector.init} needs to be called
+   */
   public wsRoot: string;
   //public vaults: DVault[];
   public _engine: DEngineClientV2 | undefined;
@@ -32,7 +42,7 @@ export class EngineConnector {
   public serverPortWatcher?: FSWatcher;
   public initialized: boolean;
   public config: DendronConfig;
-  public logger?: DLogger;
+  public logger: DLogger;
 
   static _ENGINE_CONNECTOR: EngineConnector | undefined;
 
@@ -43,8 +53,16 @@ export class EngineConnector {
     return this._ENGINE_CONNECTOR;
   }
 
-  static getOrCreate({ wsRoot, logger }: { wsRoot: string; logger?: DLogger }) {
-    if (!this._ENGINE_CONNECTOR) {
+  static getOrCreate({
+    wsRoot,
+    logger,
+    force,
+  }: {
+    wsRoot: string;
+    logger?: DLogger;
+    force?: boolean;
+  }) {
+    if (!this._ENGINE_CONNECTOR || force) {
       return new EngineConnector({ wsRoot, logger });
     }
     return this._ENGINE_CONNECTOR;
@@ -52,7 +70,7 @@ export class EngineConnector {
 
   constructor({ wsRoot, logger }: { wsRoot: string; logger?: DLogger }) {
     this.wsRoot = wsRoot;
-    this.logger = logger;
+    this.logger = logger || createLogger("connector");
     this.config = DConfig.getOrCreate(wsRoot);
     EngineConnector._ENGINE_CONNECTOR = this;
     this.initialized = false;
@@ -63,16 +81,35 @@ export class EngineConnector {
   }
 
   async init(opts?: EngineConnectorInitOpts) {
+    const ctx = "EngineConnector:init";
     // init engine
+    this.logger.info({ ctx, msg: "enter", opts });
     this.onReady = opts?.onReady;
     if (opts?.portOverride) {
-      await this.initEngine({ port: opts.portOverride });
+      const engine = await this.tryToConnect({ port: opts.portOverride });
+      if (!engine) {
+        throw new DendronError({ msg: "error connecting" });
+      }
+      await this.initEngine({ engine, port: opts.portOverride });
     } else {
       return this.createServerWatcher({ numRetries: opts?.numRetries });
     }
   }
 
-  async initEngine({ port }: { port: number }) {
+  async initEngine(opts: { engine: DendronEngineClient; port: number }) {
+    const ctx = "EngineConnector:initEngine";
+    const { engine, port } = opts;
+    this.logger.info({ ctx, msg: "enter", port });
+    this.port = port;
+    await engine.sync();
+    this._engine = engine;
+    this.initialized = true;
+    return engine;
+  }
+
+  async tryToConnect({ port }: { port: number }) {
+    const ctx = "EngineConnector:tryToConnect";
+    this.logger.info({ ctx, port, msg: "enter" });
     const { wsRoot, vaults } = this;
     const dendronEngine = DendronEngineClient.create({
       port,
@@ -81,10 +118,14 @@ export class EngineConnector {
       vaultsv4: vaults,
       logger: this.logger,
     });
-    await dendronEngine.sync();
-    this._engine = dendronEngine;
-    this.initialized = true;
-    return dendronEngine;
+    const resp = await dendronEngine.info();
+    if (!_.isUndefined(resp.error)) {
+      this.logger.info({ ctx, msg: "can't connect", error: resp.error });
+      return false;
+    } else {
+      this.logger.info({ ctx, msg: "connected", info: resp.data });
+      return dendronEngine;
+    }
   }
 
   get engine(): DEngineClientV2 {
@@ -94,60 +135,94 @@ export class EngineConnector {
     return this._engine;
   }
 
+  async _connect(opts: {
+    wsRoot: string;
+  }): Promise<false | { engine: DendronEngineClient; port: number }> {
+    const portFilePath = getPortFilePath(opts);
+    const metaFpath = getWSMetaFilePath(opts);
+    const ctx = "EngineConnector:_connect";
+
+    const wsMeta = openWSMetaFile({ fpath: metaFpath });
+    const wsActivation = wsMeta.activationTime;
+    // get time when port was created
+    const portCreated = Time.DateTime.fromJSDate(
+      fs.statSync(portFilePath).ctime
+    ).toMillis();
+    this.logger.info({ ctx, portCreated, wsActivation });
+    // if port is created after workspace activated, we have a good port file
+    if (portCreated > wsActivation) {
+      const port = openPortFile({ fpath: portFilePath });
+      this.logger.info({ ctx, msg: "initFromExistingFile", port });
+      const maybeEngine = await this.tryToConnect({ port });
+      if (maybeEngine) {
+        return { engine: maybeEngine, port };
+      } else {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  async connectAndInit(opts: { wsRoot: string }) {
+    const ctx = "EngineConnector:connectAndInit";
+    return new Promise((resolve) => {
+      setTimeout(async () => {
+        const maybeEngine = await this._connect(opts);
+        this.logger.info({ ctx, msg: "checking for engine" });
+        if (maybeEngine) {
+          this.logger.info({ ctx, msg: "found engine" });
+          await this.initEngine(maybeEngine);
+          await (!_.isUndefined(this.onReady) && this.onReady({ ws: this }));
+          resolve(undefined);
+        }
+      }, 3000);
+    });
+  }
+
   async createServerWatcher(opts?: { numRetries?: number }) {
+    const ctx = "EngineConnector:createServerWatcher";
     const { wsRoot } = this;
     const portFilePath = getPortFilePath({ wsRoot });
+    this.logger.info({ ctx, msg: "enter", opts });
 
-    // create file watcher to get port file
+    // try to connect to file
+    while (!this.initialized) {
+      await this.connectAndInit({ wsRoot });
+    }
+
+    // create file watcher in case file changes
     const { watcher } = await createFileWatcher({
       fpath: portFilePath,
       numTries: opts?.numRetries,
       onChange: async ({ fpath }) => {
         const port = openPortFile({ fpath });
+        this.logger.info({ ctx, msg: "fileWatcher:onChange", port });
         this.onChangePort({ port });
       },
       onCreate: async ({ fpath }) => {
         const port = openPortFile({ fpath });
+        this.logger.info({ ctx, msg: "fileWatcher:onCreate", port });
         this.onChangePort({ port });
       },
     });
-
-    // file should exist at this point
-    const metaFpath = getWSMetaFilePath({ wsRoot });
-    const wsMeta = openWSMetaFile({ fpath: metaFpath });
-    const wsActivation = wsMeta.activationTime;
-
-    // get time when port was created
-    const portCreated = Time.DateTime.fromJSDate(
-      fs.statSync(portFilePath).ctime
-    ).toMillis();
-    // if port is created after workspace activated, we have a good port file
-    if (portCreated > wsActivation) {
-      const port = openPortFile({ fpath: portFilePath });
-      this.onChangePort({ port });
-    }
-
-    // race condition were old workspace file is found
-    setTimeout(() => {
-      if (fs.existsSync(portFilePath) && portCreated > wsActivation) {
-        const port = openPortFile({ fpath: portFilePath });
-        this.onChangePort({ port });
-      }
-    }, 10000);
-
-    // attach watcher
     this.serverPortWatcher = watcher;
   }
 
   async onChangePort({ port }: { port: number }) {
+    const ctx = "EngineConnector:onChangePort";
     const portPrev = this.port;
+    this.logger.info({ ctx, port, portPrev });
     if (this.port !== port) {
       this.port = port;
-      await this.initEngine({ port });
+      const maybeEngine = await this.tryToConnect({ port });
+      if (maybeEngine) {
+        this.initEngine({ engine: maybeEngine, port });
+      } else {
+        this.logger.info({ ctx, msg: "unable to connect" });
+      }
     }
     if (_.isUndefined(portPrev) && this.onReady) {
       this.onReady({ ws: this });
     }
-    this.initialized = true;
   }
 }

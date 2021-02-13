@@ -48,7 +48,6 @@
     "@dendronhq/common-all": "^0.29.0",
     "@dendronhq/common-server": "^0.29.0",
     "@dendronhq/engine-server": "^0.29.0",
-    "@dendronhq/engine-test-utils": "^0.29.0",
     "@dendronhq/pods-core": "^0.29.0",
     "@jcoreio/async-throttle": "^1.3.2",
     "fs-extra": "^9.0.1",

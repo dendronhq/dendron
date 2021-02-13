@@ -383,13 +383,10 @@ export class DendronAPI extends API {
     return resp;
   }
 
-  async engineInfo(
-    req: EngineInfoRequest
-  ): Promise<RespRequiredV2<EngineInfoResp>> {
+  async engineInfo(): Promise<RespRequiredV2<EngineInfoResp>> {
     const resp = await this._makeRequest({
       path: "note/info",
-      method: "post",
-      body: req,
+      method: "get",
     });
     return resp;
   }

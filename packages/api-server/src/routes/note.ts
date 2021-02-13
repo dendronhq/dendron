@@ -29,9 +29,8 @@ router.post("/getByPath", async (req: Request, res: Response) => {
   res.json(resp);
 });
 
-router.post("/info", async (req: Request, res: Response) => {
-  const { ws } = req.body as { ws: string };
-  const resp = await NoteController.instance().info({ ws });
+router.get("/info", async (_req: Request, res: Response) => {
+  const resp = await NoteController.instance().info();
   res.json(resp);
 });
 

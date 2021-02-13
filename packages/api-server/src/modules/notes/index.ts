@@ -13,7 +13,7 @@ import {
   EngineRenameNoteRequest,
   EngineUpdateNotePayload,
   EngineUpdateNoteRequest,
-  EngineInfoRequest,
+  NodeJSUtils,
   NoteQueryRequest,
 } from "@dendronhq/common-server";
 import { getLogger } from "../../core";
@@ -78,19 +78,23 @@ export class NoteController {
     }
   }
 
-  async info({
-    ws,
-  }: EngineInfoRequest): Promise<RespRequiredV2<EngineInfoResp>> {
+  async info(): Promise<RespRequiredV2<EngineInfoResp>> {
     const ctx = "NoteController:info";
-    getLogger().info({ ctx, msg: "enter", ws });
-    const engine = await getWS({ ws });
+    getLogger().info({ ctx, msg: "enter" });
+    // const engine = await getWS({ ws });
     try {
-      const data = await engine.info();
-      return data;
+      const version = NodeJSUtils.getVersionFromPkg();
+      return {
+        data: {
+          version,
+        },
+        error: undefined,
+      };
     } catch (err) {
       getLogger().error({ ctx, err });
       return {
         error: new DendronError({ payload: err }),
+        data: undefined,
       };
     }
   }

@@ -11,6 +11,7 @@ import {
   DVault,
   EngineDeleteNoteResp,
   EngineDeleteOptsV2,
+  EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   ERROR_CODES,
@@ -23,6 +24,7 @@ import {
   QueryNotesOpts,
   RenameNoteOptsV2,
   RenameNotePayload,
+  RespRequiredV2,
   RespV2,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
@@ -209,10 +211,8 @@ export class DendronEngineClient implements DEngineClientV2 {
     return resp;
   }
 
-  async info() {
-    const resp = await this.api.engineInfo({
-      ws: this.ws,
-    });
+  async info(): Promise<RespRequiredV2<EngineInfoResp>> {
+    const resp = await this.api.engineInfo();
     return resp;
   }
 

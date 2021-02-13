@@ -157,13 +157,6 @@ export class VSCodeUtils {
     return { text, selection, editor };
   }
 
-  static getVersionFromPkg(): string {
-    const pkgJSON = fs.readJSONSync(
-      path.join(goUpTo(__dirname), "package.json")
-    );
-    return `${pkgJSON.version}`;
-  }
-
   static createWSContext(): vscode.ExtensionContext {
     const pkgRoot = goUpTo(__dirname);
     return ({

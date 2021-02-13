@@ -210,6 +210,13 @@ export interface RespV2<T> {
   error: DendronError | null;
 }
 
+export type RespRequiredV2<T> =
+  | {
+      error: null;
+      data: T;
+    }
+  | { error: DendronError };
+
 export interface QueryOptsV2 {
   /**
    * Should add to full nodes
@@ -324,6 +331,9 @@ export type EngineDeleteNotePayload = NoteChangeEntry[];
 // TODO: KLUDGE
 export type DEngineDeleteSchemaPayloadV2 = DEngineInitPayloadV2;
 export type DEngineDeleteSchemaRespV2 = DEngineInitRespV2;
+export type EngineInfoResp = {
+  version: string;
+};
 // --- KLUDGE END
 
 export type EngineDeleteNoteResp = Required<RespV2<EngineDeleteNotePayload>>;
@@ -362,6 +372,7 @@ export type DEngineV2 = DCommonProps &
       id: string,
       opts?: EngineDeleteOptsV2
     ) => Promise<DEngineDeleteSchemaRespV2>;
+    info: () => Promise<RespRequiredV2<EngineInfoResp>>;
     sync: (opts?: DEngineV2SyncOpts) => Promise<DEngineInitRespV2>;
 
     getNoteByPath: (opts: GetNoteOptsV2) => Promise<RespV2<GetNotePayloadV2>>;

@@ -209,6 +209,13 @@ export class DendronEngineClient implements DEngineClientV2 {
     return resp;
   }
 
+  async info() {
+    const resp = await this.api.engineInfo({
+      ws: this.ws,
+    });
+    return resp;
+  }
+
   async queryNote(
     opts: Parameters<DEngineClientV2["queryNotes"]>[0]
   ): Promise<NotePropsV2[]> {

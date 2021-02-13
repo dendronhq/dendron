@@ -7,6 +7,7 @@ import {
   ResponseCode,
 } from "@dendronhq/common-all";
 import {
+  NodeJSUtils,
   readJSONWithComments,
   readMD,
   writeJSONWithComments,
@@ -223,7 +224,7 @@ export class DendronWorkspace {
   static version(): string {
     let version: string | undefined;
     if (VSCodeUtils.isDebuggingExtension()) {
-      version = VSCodeUtils.getVersionFromPkg();
+      version = NodeJSUtils.getVersionFromPkg();
     } else {
       try {
         const dendronExtension = vscode.extensions.getExtension(
@@ -231,7 +232,7 @@ export class DendronWorkspace {
         )!;
         version = dendronExtension.packageJSON.version;
       } catch (err) {
-        version = VSCodeUtils.getVersionFromPkg();
+        version = NodeJSUtils.getVersionFromPkg();
       }
     }
     if (_.isUndefined(version)) {

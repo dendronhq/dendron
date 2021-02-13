@@ -1,4 +1,9 @@
-import { ConfigWriteOpts, RespV2 } from "@dendronhq/common-all";
+import {
+  ConfigWriteOpts,
+  EngineInfoResp,
+  RespRequiredV2,
+  RespV2,
+} from "@dendronhq/common-all";
 import {
   ConfigGetPayload,
   DendronError,
@@ -140,6 +145,7 @@ export type EngineDeleteRequest = {
   opts?: EngineDeleteOptsV2;
 } & { ws: string };
 
+export type EngineInfoRequest = WorkspaceRequest;
 export type NoteQueryRequest = {
   qs: string;
 } & Partial<WorkspaceRequest>;
@@ -371,6 +377,17 @@ export class DendronAPI extends API {
   ): Promise<EngineGetNoteByPathPayload> {
     const resp = await this._makeRequest({
       path: "note/getByPath",
+      method: "post",
+      body: req,
+    });
+    return resp;
+  }
+
+  async engineInfo(
+    req: EngineInfoRequest
+  ): Promise<RespRequiredV2<EngineInfoResp>> {
+    const resp = await this._makeRequest({
+      path: "note/info",
       method: "post",
       body: req,
     });

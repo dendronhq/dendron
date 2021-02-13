@@ -1,4 +1,9 @@
-import { DendronError, EngineQueryNoteResp } from "@dendronhq/common-all";
+import {
+  DendronError,
+  EngineInfoResp,
+  EngineQueryNoteResp,
+  RespRequiredV2,
+} from "@dendronhq/common-all";
 import {
   EngineDeletePayload,
   EngineDeleteRequest,
@@ -8,6 +13,7 @@ import {
   EngineRenameNoteRequest,
   EngineUpdateNotePayload,
   EngineUpdateNoteRequest,
+  EngineInfoRequest,
   NoteQueryRequest,
 } from "@dendronhq/common-server";
 import { getLogger } from "../../core";
@@ -68,6 +74,23 @@ export class NoteController {
       return {
         error: new DendronError({ msg: JSON.stringify(err) }),
         data: [],
+      };
+    }
+  }
+
+  async info({
+    ws,
+  }: EngineInfoRequest): Promise<RespRequiredV2<EngineInfoResp>> {
+    const ctx = "NoteController:info";
+    getLogger().info({ ctx, msg: "enter", ws });
+    const engine = await getWS({ ws });
+    try {
+      const data = await engine.info();
+      return data;
+    } catch (err) {
+      getLogger().error({ ctx, err });
+      return {
+        error: new DendronError({ payload: err }),
       };
     }
   }

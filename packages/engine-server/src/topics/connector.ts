@@ -96,9 +96,11 @@ export class EngineConnector {
 
   async createServerWatcher(opts?: { numRetries?: number }) {
     const { wsRoot } = this;
-    const fpath = getPortFilePath({ wsRoot });
+    const portFilePath = getPortFilePath({ wsRoot });
+
+    // create file watcher to get port file
     const { watcher } = await createFileWatcher({
-      fpath,
+      fpath: portFilePath,
       numTries: opts?.numRetries,
       onChange: async ({ fpath }) => {
         const port = openPortFile({ fpath });
@@ -109,23 +111,26 @@ export class EngineConnector {
         this.onChangePort({ port });
       },
     });
+
     // file should exist at this point
     const metaFpath = getWSMetaFilePath({ wsRoot });
     const wsMeta = openWSMetaFile({ fpath: metaFpath });
     const wsActivation = wsMeta.activationTime;
 
-    // check if port was created after current ws
+    // get time when port was created
     const portCreated = Time.DateTime.fromJSDate(
-      fs.statSync(fpath).ctime
+      fs.statSync(portFilePath).ctime
     ).toMillis();
+    // if port is created after workspace activated, we have a good port file
     if (portCreated > wsActivation) {
-      const port = openPortFile({ fpath });
+      const port = openPortFile({ fpath: portFilePath });
       this.onChangePort({ port });
     }
+
     // race condition were old workspace file is found
     setTimeout(() => {
-      if (fs.existsSync(fpath) && portCreated > wsActivation) {
-        const port = openPortFile({ fpath });
+      if (fs.existsSync(portFilePath) && portCreated > wsActivation) {
+        const port = openPortFile({ fpath: portFilePath });
         this.onChangePort({ port });
       }
     }, 10000);

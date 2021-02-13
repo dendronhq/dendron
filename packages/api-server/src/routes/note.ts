@@ -29,6 +29,12 @@ router.post("/getByPath", async (req: Request, res: Response) => {
   res.json(resp);
 });
 
+router.post("/info", async (req: Request, res: Response) => {
+  const { ws } = req.body as { ws: string };
+  const resp = await NoteController.instance().info({ ws });
+  res.json(resp);
+});
+
 router.post("/rename", async (req: Request, res: Response) => {
   const resp = await NoteController.instance().rename(
     req.body as EngineRenameNoteRequest

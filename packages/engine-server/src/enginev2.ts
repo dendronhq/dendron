@@ -34,6 +34,7 @@ import {
 import {
   createLogger,
   DLogger,
+  NodeJSUtils,
   readYAML,
   writeYAML,
 } from "@dendronhq/common-server";
@@ -251,6 +252,15 @@ export class DendronEngineV2 implements DEngineV2 {
     this.logger.info({ ctx, msg: "exit" });
     return {
       data,
+      error: null,
+    };
+  }
+
+  async info() {
+    return {
+      data: {
+        version: NodeJSUtils.getVersionFromPkg(),
+      },
       error: null,
     };
   }

@@ -147,7 +147,7 @@ describe("engine, schemas/", () => {
   });
 });
 
-describe("engine, notes/", () => {
+describe.only("engine, notes/", () => {
   const nodeType = "NOTES";
 
   ENGINE_PRESETS.forEach((pre) => {

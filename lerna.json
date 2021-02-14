@@ -3,7 +3,7 @@
     "packages/*"
   ],
   "version": "0.28.7-alpha.0",
-  "npmClient": "npm",
+  "npmClient": "yarn",
   "command": {
     "version": {
       "conventionalCommits": true,

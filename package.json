@@ -42,7 +42,7 @@
   "scripts": {
     "release": "standard-version",
     "format": "prettier --ignore-path='.prettierignore' --write 'packages/**/*'",
-    "bootstrap:bootstrap": "npx lerna bootstrap",
+    "bootstrap:bootstrap": "npx lerna bootstrap --use-workspaces",
     "bootstrap:build": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:engine-server &&  yarn bootstrap:build:api-server && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:pods-core && yarn bootstrap:build:seeds-core && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:dendron-next-server && yarn bootstrap:build:plugin-core",
     "bootstrap:build:fast": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:engine-server &&  yarn bootstrap:build:api-server && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:plugin-core",
     "bootstrap:build:": "npx lerna run build --scope",
@@ -59,7 +59,7 @@
     "bootstrap:build:dendron-cli": "yarn bootstrap:build: @dendronhq/dendron-cli",
     "bootstrap:init": "yarn bootstrap:bootstrap && yarn bootstrap:build",
     "ci:bootstrap": "npx lerna bootstrap --ci --use-workspaces",
-    "ci:init": "yarn ci:bootstrap && yarn bootstrap:build",
+    "ci:init": "yarn bootstrap:bootstrap && yarn bootstrap:build",
     "ci:test:cli": "npx lerna run test --ignore @dendronhq/plugin-core --parallel --stream -- -- --forceExit",
     "ci:test:plugin": "npx lerna run test --scope @dendronhq/plugin-core --stream"
   },

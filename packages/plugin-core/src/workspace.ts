@@ -31,6 +31,7 @@ import BacklinksTreeDataProvider from "./features/BacklinksTreeDataProvider";
 import { completionProvider } from "./features/completionProvider";
 import DefinitionProvider from "./features/DefinitionProvider";
 import DocumentLinkProvider from "./features/DocumentLinkProvider";
+import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeProvider";
 import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
 import { VaultWatcher } from "./fileWatcher";
@@ -413,6 +414,10 @@ export class DendronWorkspace {
     vscode.languages.registerHoverProvider(
       mdLangSelector,
       new ReferenceHoverProvider()
+    );
+    vscode.languages.registerFoldingRangeProvider(
+      mdLangSelector,
+      new FrontmatterFoldingRangeProvider()
     );
     completionProvider.activate(context);
   }

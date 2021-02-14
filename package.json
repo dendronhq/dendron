@@ -17,6 +17,7 @@
     ],
     "nohoist": [
       "**/react",
+      "**/@types/mocha",
       "**/@types/hoist-non-react-statics"
     ]
   },
@@ -42,15 +43,16 @@
     "release": "standard-version",
     "format": "prettier --ignore-path='.prettierignore' --write 'packages/**/*'",
     "bootstrap:bootstrap": "npx lerna bootstrap",
-    "bootstrap:build": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:engine-server &&  yarn bootstrap:build:lsp-server && yarn bootstrap:build:api-server && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:pods-core && yarn bootstrap:build:seeds-core && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:dendron-next-server && yarn bootstrap:build:plugin-core",
+    "bootstrap:build": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:engine-server &&  yarn bootstrap:build:api-server && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:pods-core && yarn bootstrap:build:seeds-core && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:dendron-next-server && yarn bootstrap:build:plugin-core",
     "bootstrap:build:fast": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:engine-server &&  yarn bootstrap:build:api-server && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:plugin-core",
     "bootstrap:build:": "npx lerna run build --scope",
+    "bootstrap:build:dendron-next-server": "yarn bootstrap:build: -- @dendronhq/dendron-next-server",
     "bootstrap:build:common-all": "yarn bootstrap:build: -- @dendronhq/common-all",
+    "bootstrap:build:plugin-core": "yarn bootstrap:build: -- @dendronhq/plugin-core",
     "bootstrap:build:common-server": "yarn bootstrap:build: @dendronhq/common-server",
     "bootstrap:build:common-test-utils": "yarn bootstrap:build: @dendronhq/common-test-utils",
     "bootstrap:build:engine-server": "yarn bootstrap:build: @dendronhq/engine-server",
     "bootstrap:build:engine-test-utils": "yarn bootstrap:build: @dendronhq/engine-test-utils",
-    "bootstrap:build:lsp-server": "yarn bootstrap:build: @dendronhq/lsp-server",
     "bootstrap:build:api-server": "yarn bootstrap:build: @dendronhq/api-server",
     "bootstrap:build:pods-core": "yarn bootstrap:build: @dendronhq/pods-core",
     "bootstrap:build:seeds-core": "yarn bootstrap:build: @dendronhq/seeds-core",

@@ -64,6 +64,7 @@ jobs:
           ${{ matrix.env }}
           node --version
           npm --version
+          yarn --version
           rsync --version
 
       - name: Checkout source
@@ -94,6 +95,9 @@ jobs:
           git config --global user.name CI
           git config --global user.email ci@dendron.so
 
+      - name: Pre Init
+        run: yarn 
+
       - name: Initialize
         run: yarn ci:init
 
@@ -104,5 +108,5 @@ jobs:
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
 
       - name: Run tests
-        run: yarn run-script ci:test:${{ matrix.suite }}
+        run: yarn ci:test:${{ matrix.suite }}
         timeout-minutes: 10

@@ -4,6 +4,9 @@
             "path": "packages/common-all"
         },
         {
+            "path": "packages/dendron-11ty"
+        },
+        {
             "path": "packages/common-server"
         },
         {

@@ -22,7 +22,10 @@ export class WorkspaceController {
     return WorkspaceController.singleton;
   }
 
-  async init({ uri, config }: WorkspaceInitRequest) {
+  async init({
+    uri,
+    config,
+  }: WorkspaceInitRequest): Promise<InitializePayload> {
     let notes: NotePropsDictV2;
     let schemas: SchemaModuleDictV2;
     const { vaults } = config;

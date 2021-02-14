@@ -172,6 +172,9 @@ export class SiteUtils {
     };
   }
 
+  /**
+   * Filter notes to be published using hiearchy
+   */
   static async filterByHiearchy(opts: {
     domain: string;
     config: DendronConfig;
@@ -179,7 +182,7 @@ export class SiteUtils {
     navOrder: number;
   }): Promise<{ notes: NotePropsDictV2; domain: NotePropsV2 } | undefined> {
     const { domain, engine, navOrder, config } = opts;
-    logger.info({ ctx: "filterByHiearchy", domain });
+    logger.info({ ctx: "filterByHiearchy", domain, config });
     const sconfig = config.site;
     let hConfig = this.getConfigForHierarchy({
       config: sconfig,
@@ -198,6 +201,7 @@ export class SiteUtils {
       notes: notes.map((ent) => ent.id),
     });
 
+    // if multiple domain notes, figure out which one is good
     notes = notes.filter((note) =>
       SiteUtils.canPublishFiltered({
         note,
@@ -267,10 +271,13 @@ export class SiteUtils {
           await engine.writeNote(note);
         }
         const siteFM = maybeNote.custom || ({} as DendronSiteFM);
-        let children = maybeNote.children.map((id) => notesForHiearchy[id]);
+        let children = maybeNote.children
+          .map((id) => notesForHiearchy[id])
+          .filter((ent) => !_.isUndefined(ent));
 
         // if skip levels, accumulate the grandchildren
         if (siteFM.skipLevels) {
+          debugger;
           let acc = 0;
           while (acc !== siteFM.skipLevels) {
             children = children.flatMap((ent) =>

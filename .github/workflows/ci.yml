@@ -23,7 +23,7 @@ jobs:
           #- windows-latest
         node-version:
           - 12.x
-          - 13.x
+          - 14.x
         suite:
           - cli
           - plugin

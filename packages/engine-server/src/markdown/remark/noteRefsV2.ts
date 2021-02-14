@@ -229,6 +229,7 @@ function convertNoteRef(
         return data;
       }
     } catch (err) {
+      debugger;
       const msg = `error reading file, ${npath}`;
       errors.push(new DendronError({ msg }));
       return msg;
@@ -338,6 +339,7 @@ export function convertNoteRefASTV2(
         return paragraph(data);
       }
     } catch (err) {
+      debugger;
       const msg = `error reading file, ${npath}`;
       errors.push(new DendronError({ msg }));
       throw Error(msg);

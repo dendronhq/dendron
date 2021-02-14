@@ -44,7 +44,6 @@
     "@dendronhq/remark-mermaid": "^0.2.0",
     "@mapbox/rehype-prism": "^0.5.0",
     "@types/fs-extra": "^9.0.1",
-    "@types/jest": "^23.3.3",
     "@types/klaw": "^3.0.1",
     "@types/lodash": "^4.14.156",
     "@types/mdast": "^3.0.3",

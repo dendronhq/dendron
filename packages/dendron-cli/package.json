@@ -60,7 +60,6 @@
   "devDependencies": {
     "@dendronhq/common-test-utils": "^0.28.7-alpha.0",
     "@types/fs-extra": "^9.0.1",
-    "@types/jest": "^23.3.3",
     "@types/lodash": "^4.14.158",
     "@types/node": "13.11.0",
     "@types/rsync": "^0.4.30",

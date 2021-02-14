@@ -8,6 +8,9 @@
     "esModuleInterop": true,
     "strict": true,
     "declaration": true,
+    "types": [
+      "node", "jest"
+    ],
     // --- checks
     "noUnusedLocals": true,
     "noUnusedParameters": true,

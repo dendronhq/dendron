@@ -42,7 +42,6 @@
     "@dendronhq/common-test-utils": "^0.28.7-alpha.0",
     "@types/express": "^4.17.8",
     "@types/fs-extra": "^9.0.1",
-    "@types/jest": "^26.0.13",
     "@types/lodash": "^4.14.161",
     "@types/morgan": "^1.9.1",
     "@types/node": "13.11.0",

@@ -38,7 +38,6 @@
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.1",
-    "@types/jest": "^26.0.13",
     "@types/klaw": "^3.0.1",
     "@types/lodash": "^4.14.161",
     "@types/node": "13.11.0",

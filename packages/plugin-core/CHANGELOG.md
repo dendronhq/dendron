@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.28.6](https://github.com/dendronhq/dendron/compare/v0.28.5...v0.28.6) (2021-02-14)
+
+### Bug Fixes
+
+- integ test failing ([ac97c1c](https://github.com/dendronhq/dendron/commit/ac97c1c7908b9010a0d16da3ad020e5352eb819b))
+- move command error when parent is stub ([d2d6fc8](https://github.com/dendronhq/dendron/commit/d2d6fc8681c06adde03f222ba209f4916ba544a1))
+- update tree view after move cmd ([fdc1dce](https://github.com/dendronhq/dendron/commit/fdc1dcecc84603be3ad7d60ed66f2c10cd79ab01))
+
+### Features Dendron
+
+- add option to configure human readable ts formatting ([#479](https://github.com/dendronhq/dendron/issues/479)) ([2e1c22b](https://github.com/dendronhq/dendron/commit/2e1c22b7aa946a071daf2964ec76d0893ead6c8a))
+
 # [0.29.0](https://github.com/dendronhq/dendron/compare/v0.28.5...v0.29.0) (2021-02-09)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

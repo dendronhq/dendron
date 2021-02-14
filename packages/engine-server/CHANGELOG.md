@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.28.6](https://github.com/dendronhq/dendron/compare/v0.28.5...v0.28.6) (2021-02-14)
+
+### Bug Fixes
+
+- make publish work with multi-vault assets ([31dbb7b](https://github.com/dendronhq/dendron/commit/31dbb7b6134fb24ddc1c46fce7e34267bb4de0bc))
+- move command error when parent is stub ([d2d6fc8](https://github.com/dendronhq/dendron/commit/d2d6fc8681c06adde03f222ba209f4916ba544a1))
+
 # [0.29.0](https://github.com/dendronhq/dendron/compare/v0.28.5...v0.29.0) (2021-02-09)
 
 **Note:** Version bump only for package @dendronhq/engine-server

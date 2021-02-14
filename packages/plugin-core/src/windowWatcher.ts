@@ -1,4 +1,3 @@
-import vscode from "vscode";
 import { NoteUtilsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DateTime } from "luxon";
@@ -34,7 +33,6 @@ export class WindowWatcher {
         ) {
           Logger.info({ ctx, msg: "enter", uri: editor?.document.uri });
           this.triggerUpdateDecorations();
-          this.triggerFoldFrontmatter();
         }
       },
       null,
@@ -90,31 +88,5 @@ export class WindowWatcher {
       );
     }
     return;
-  }
-
-  async triggerFoldFrontmatter() {
-    // wip
-    const activeEditor = window.activeTextEditor;
-    if (!activeEditor) {
-      return;
-    }
-
-    // save original cursor selection
-    const selection = activeEditor.selection;
-    Logger.debug({ msg: "original", selection: activeEditor.selection });
-
-    // set the cursor to the start of fm
-    const position = activeEditor.selection.active;
-    const fmPosition = activeEditor.selection.active.with(0, 0);
-    const fmSelection = new vscode.Selection(fmPosition, fmPosition);
-    activeEditor.selection = fmSelection;
-    Logger.debug({ msg: "before fold", selection: activeEditor.selection });
-
-    // commence fold
-    await vscode.commands.executeCommand("editor.fold");
-
-    // set cursor / selection back to original
-    activeEditor.selection = new vscode.Selection(selection.anchor, position);
-    Logger.debug({ msg: "reset", selection: activeEditor.selection });
   }
 }

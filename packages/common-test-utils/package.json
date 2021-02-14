@@ -23,13 +23,13 @@
     "clean": "rimraf lib && rimraf coverage",
     "format": "prettier --ignore-path='../../.prettierignore' --write .",
     "lint": "echo stub",
-    "prepublishOnly": "npm run build",
-    "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
-    "build": "npm run compile",
+    "prepublishOnly": "yarn build",
+    "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
+    "build": "yarn compile",
     "compile": "tsc -p tsconfig.json",
     "test": "npx jest",
     "coverage": "jest --coverage",
-    "watch": "npm run compile -- --watch",
+    "watch": "yarn compile -- --watch",
     "test:unit": "jest ",
     "test:unit:debug": "cross-env NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:watch": "cross-env LOG_DST=../../logs/common-test-utils.log jest --watch"
@@ -44,8 +44,7 @@
     "prettier": "2.0.5",
     "rimraf": "^2.6.2",
     "ts-jest": "^23.10.3",
-    "ts-node": "^8.10.2",
-    "typescript": "^3.1.1"
+    "ts-node": "^8.10.2"
   },
   "engines": {
     "node": ">=12.0.0"

@@ -29,15 +29,15 @@
     "clean": "rimraf lib && rimraf coverage",
     "format": "echo stub",
     "lint": "echo stub",
-    "prepublishOnly": "npm run build",
-    "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
-    "build": "npm run compile",
+    "prepublishOnly": "yarn build",
+    "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
+    "build": "yarn compile",
     "compile": "tsc -p tsconfig.build.json",
     "test": "npx jest",
     "test:unit:all": "cross-env LOG_LEVEL=error npm test",
     "coverage": "jest --coverage",
-    "watch": "npm run compile -- --watch",
-    "test:watch": "cross-env LOG_PATH=\"$TEMP/dendron-cli.test.log\" npm run test -- --watch",
+    "watch": "yarn compile -- --watch",
+    "test:watch": "cross-env LOG_PATH=\"$TEMP/dendron-cli.test.log\" yarn test -- --watch",
     "test:unit:debug": "NODE_ENV=test  node --inspect node_modules/.bin/jest --runInBand"
   },
   "peerDependencies": {
@@ -73,8 +73,7 @@
     "ts-jest": "^23.10.3",
     "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
-    "tslint-config-prettier": "^1.15.0",
-    "typescript": "^3.1.1"
+    "tslint-config-prettier": "^1.15.0"
   },
   "engines": {
     "node": ">=10.0.0"

@@ -26,14 +26,14 @@
     "clean": "rimraf lib && rimraf coverage",
     "format": "prettier --ignore-path='../../.prettierignore' --write .",
     "lint": "echo stub",
-    "prepublishOnly": "npm run build",
-    "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
-    "build": "npm run compile",
+    "prepublishOnly": "yarn build",
+    "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
+    "build": "yarn compile",
     "compile": "tsc -p tsconfig.build.json",
     "test": "npx jest",
     "coverage": "jest --coverage",
-    "watch": "npm run compile -- --watch",
-    "test:watch": "npm run test -- --watch -u"
+    "watch": "yarn compile -- --watch",
+    "test:watch": "yarn test -- --watch -u"
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.28.6",
@@ -68,8 +68,7 @@
     "ts-jest": "^23.10.3",
     "ts-node": "^8.10.2",
     "tslint": "^5.11.0",
-    "tslint-config-prettier": "^1.15.0",
-    "typescript": "^3.1.1"
+    "tslint-config-prettier": "^1.15.0"
   },
   "publishConfig": {
     "access": "public"

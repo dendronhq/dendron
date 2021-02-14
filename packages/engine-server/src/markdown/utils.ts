@@ -6,7 +6,7 @@ import {
   getSlugger,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
-// @ts-ignore
+// @ts-ignor
 import rehypePrism from "@mapbox/rehype-prism";
 import _ from "lodash";
 import { Heading } from "mdast";

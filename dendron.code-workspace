@@ -1,6 +1,9 @@
 {
     "folders": [
         {
+            "path": "."
+        },
+        {
             "path": "packages/common-all"
         },
         {

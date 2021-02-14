@@ -8,7 +8,7 @@ const NOTES = {
       const info = await engine.info();
       return [
         {
-          actual: _.isEmpty(info.data.version),
+          actual: _.isEmpty(info.data!.version),
           expected: false,
         },
       ];

@@ -7,14 +7,14 @@ import path from "path";
 import yargs from "yargs";
 import { CLICommand } from "./base";
 import { setupEngine, setupEngineArgs } from "./utils";
-let {
+import {
   compile,
   buildNav,
   copyAssets,
   buildStyles,
   buildSearch,
-  // @ts-ignore
-} = require("@dendronhq/dendron-11ty");
+  // @ts-ignore;
+} from "@dendronhq/dendron-11ty";
 
 type CommandCLIOpts = {
   wsRoot: string;
@@ -119,10 +119,15 @@ export class BuildSiteV2CLICommand extends CLICommand<
     // let buildSearch;
     if (opts.custom11tyPath) {
       ({
+        // @ts-ignore
         compile,
+        // @ts-ignore
         buildNav,
+        // @ts-ignore
         copyAssets,
+        // @ts-ignore
         buildStyles,
+        // @ts-ignore
         buildSearch,
       } = require(opts.custom11tyPath));
     }

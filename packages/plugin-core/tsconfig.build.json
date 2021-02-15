@@ -12,6 +12,7 @@
     "lib",
     "local",
     ".vscode-test",
-    "out"
+    "out",
+    "dist"
   ]
 }

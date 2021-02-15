@@ -7,6 +7,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { ProgressLocation, window } from "vscode";
+import { Logger } from "../logger";
 import { DendronWorkspace, getWS } from "../workspace";
 
 const packageJson = {
@@ -42,16 +43,20 @@ const pkgUpgrade = async (pkg: string, version: string) => {
 };
 
 export const buildSite = async (opts: BuildSiteV2CLICommandCliOpts) => {
-  const eleventyPath = path.join(
-    __dirname,
-    "..",
-    "..",
-    "..",
-    "..",
-    "node_modules",
-    "@dendronhq",
-    "dendron-11ty"
-  );
+  const eleventyPath =
+    process.env.NODE_ENV !== "production"
+      ? path.join(
+          __dirname,
+          "..",
+          "..",
+          "..",
+          "..",
+          "node_modules",
+          "@dendronhq",
+          "dendron-11ty"
+        )
+      : path.join(getWS().extensionDir, "dist", "dendron-11ty");
+  Logger.info({ ctx: "buildSite", eleventyPath });
   const cmd = new BuildSiteV2CLICommand();
   const cOpts = await cmd.enrichArgs(opts);
   await cmd.execute({

@@ -34,8 +34,8 @@ const config = {
     new CopyPlugin({
       patterns: [
         {
-          from: path.join("node_modules", "@dendronhq", "lsp-server"),
-          to: "lsp-server",
+          from: path.join("node_modules", "@dendronhq", "dendron-11ty"),
+          to: "dendron-11ty",
         },
       ],
     }),

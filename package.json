@@ -13,7 +13,8 @@
       "packages/seeds-core",
       "packages/dendron-cli",
       "packages/dendron-next-server",
-      "packages/plugin-core"
+      "packages/plugin-core",
+      "packages/dendron-11ty"
     ],
     "nohoist": [
       "**/react",

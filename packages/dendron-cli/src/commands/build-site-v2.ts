@@ -1,4 +1,4 @@
-import { DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngineClientV2, Stage } from "@dendronhq/common-all";
 import { goUpTo } from "@dendronhq/common-server";
 import { SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -24,7 +24,7 @@ type CommandCLIOpts = {
   servePort?: number;
   enginePort?: number;
   serve: boolean;
-  stage: "dev" | "prod";
+  stage: Stage;
   output?: string;
   custom11tyPath?: string;
 };
@@ -36,6 +36,7 @@ type CommandOpts = CommandCLIOpts & {
 type CommandOutput = {};
 
 export { CommandOpts as BuildSiteV2CLICommandOpts };
+export { CommandCLIOpts as BuildSiteV2CLICommandCliOpts };
 export class BuildSiteV2CLICommand extends CLICommand<
   CommandOpts,
   CommandOutput

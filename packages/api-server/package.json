@@ -82,5 +82,6 @@
       "src/public"
     ],
     "exec": "ts-node --log-error ./src/start.ts"
-  }
+  },
+  "gitHead": "d2e0e1c5ada1ac4a507e2da387cf761316de76de"
 }

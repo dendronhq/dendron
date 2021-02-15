@@ -1,3 +1,3 @@
 #!/bin/bash
 
-npm run-script bootstrap:build
+yarn bootstrap:build

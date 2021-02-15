@@ -39,5 +39,6 @@
     "remark-rehype": "^8.0.0",
     "request": "^2.88.2",
     "sass": "^1.32.7"
-  }
+  },
+  "gitHead": "d2e0e1c5ada1ac4a507e2da387cf761316de76de"
 }

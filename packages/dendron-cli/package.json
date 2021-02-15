@@ -34,7 +34,7 @@
     "build": "yarn compile",
     "compile": "tsc -p tsconfig.build.json",
     "test": "npx jest",
-    "test:unit:all": "cross-env LOG_LEVEL=error npm test",
+    "test:unit:all": "cross-env LOG_LEVEL=error yarn test",
     "coverage": "jest --coverage",
     "watch": "yarn compile --watch",
     "test:watch": "cross-env LOG_PATH=\"$TEMP/dendron-cli.test.log\" yarn test --watch",
@@ -76,5 +76,5 @@
   "jest": {
     "preset": "ts-jest"
   },
-  "gitHead": "47c197f18329be43e02389fb4bd63267dfc07874"
+  "gitHead": "d2e0e1c5ada1ac4a507e2da387cf761316de76de"
 }

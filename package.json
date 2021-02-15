@@ -18,6 +18,7 @@
     ],
     "nohoist": [
       "**/react",
+      "**/dendron-next-server",
       "**/@types/mocha",
       "**/@types/hoist-non-react-statics"
     ]

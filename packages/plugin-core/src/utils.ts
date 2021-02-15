@@ -15,7 +15,6 @@ import {
   tmpDir,
   vault2Path,
 } from "@dendronhq/common-server";
-import fs from "fs-extra";
 import _ from "lodash";
 import _md from "markdown-it";
 import os from "os";

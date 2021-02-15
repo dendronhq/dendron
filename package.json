@@ -1,6 +1,26 @@
 {
   "name": "root",
-  "private": false,
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/common-all",
+      "packages/common-server",
+      "packages/common-test-utils",
+      "packages/engine-server",
+      "packages/api-server",
+      "packages/engine-test-utils",
+      "packages/pods-core",
+      "packages/seeds-core",
+      "packages/dendron-cli",
+      "packages/dendron-next-server",
+      "packages/plugin-core"
+    ],
+    "nohoist": [
+      "**/react",
+      "**/@types/mocha",
+      "**/@types/hoist-non-react-statics"
+    ]
+  },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^3.1.0",
     "@typescript-eslint/parser": "^3.1.0",
@@ -17,31 +37,28 @@
     "lint-staged": ">=10",
     "lodash": "^4.17.15",
     "prettier": "^2.0.4",
-    "standard-version": "^8.0.0",
-    "typescript": "^3.9.5"
+    "standard-version": "^8.0.0"
   },
   "scripts": {
     "release": "standard-version",
     "format": "prettier --ignore-path='.prettierignore' --write 'packages/**/*'",
-    "bootstrap:bootstrap": "npx lerna bootstrap",
-    "bootstrap:build": "npm run-script bootstrap:build:common-all && npm run-script bootstrap:build:common-server && npm run-script bootstrap:build:common-test-utils && npm run-script bootstrap:build:engine-server &&  npm run-script bootstrap:build:lsp-server && npm run-script bootstrap:build:api-server && npm run-script bootstrap:build:engine-test-utils && npm run-script bootstrap:build:pods-core && npm run-script bootstrap:build:seeds-core && npm run-script bootstrap:build:dendron-cli && npm run-script bootstrap:build:dendron-next-server && npm run-script bootstrap:build:plugin-core",
-    "bootstrap:build:fast": "npm run-script bootstrap:build:common-all && npm run-script bootstrap:build:common-server && npm run-script bootstrap:build:common-test-utils && npm run-script bootstrap:build:engine-server &&  npm run-script bootstrap:build:api-server && npm run-script bootstrap:build:engine-test-utils && npm run-script bootstrap:build:dendron-cli && npm run-script bootstrap:build:plugin-core",
+    "bootstrap:bootstrap": "npx lerna bootstrap --use-workspaces",
+    "bootstrap:build": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:engine-server &&  yarn bootstrap:build:api-server && yarn bootstrap:build:pods-core && yarn bootstrap:build:seeds-core && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:dendron-next-server && yarn bootstrap:build:plugin-core",
+    "bootstrap:build:fast": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:engine-server &&  yarn bootstrap:build:api-server && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:plugin-core",
     "bootstrap:build:": "npx lerna run build --scope",
-    "bootstrap:build:common-all": "npm run-script bootstrap:build: -- @dendronhq/common-all",
-    "bootstrap:build:common-server": "npm run-script bootstrap:build: @dendronhq/common-server",
-    "bootstrap:build:common-test-utils": "npm run-script bootstrap:build: @dendronhq/common-test-utils",
-    "bootstrap:build:engine-server": "npm run-script bootstrap:build: @dendronhq/engine-server",
-    "bootstrap:build:engine-test-utils": "npm run-script bootstrap:build: @dendronhq/engine-test-utils",
-    "bootstrap:build:lsp-server": "npm run-script bootstrap:build: @dendronhq/lsp-server",
-    "bootstrap:build:api-server": "npm run-script bootstrap:build: @dendronhq/api-server",
-    "bootstrap:build:pods-core": "npm run-script bootstrap:build: @dendronhq/pods-core",
-    "bootstrap:build:seeds-core": "npm run-script bootstrap:build: @dendronhq/seeds-core",
-    "bootstrap:build:dendron-cli": "npm run-script bootstrap:build: @dendronhq/dendron-cli",
-    "bootstrap:build:dendron-next-server": "npm run-script bootstrap:build: @dendronhq/dendron-next-server",
-    "bootstrap:build:plugin-core": "npm run-script bootstrap:build: @dendronhq/plugin-core",
-    "bootstrap:init": "npm run-script bootstrap:bootstrap && npm run-script bootstrap:build",
-    "ci:bootstrap": "npx lerna bootstrap --ci",
-    "ci:init": "npm run-script ci:bootstrap && npm run-script bootstrap:build",
+    "bootstrap:build:dendron-next-server": "yarn bootstrap:build: -- @dendronhq/dendron-next-server",
+    "bootstrap:build:common-all": "yarn bootstrap:build: -- @dendronhq/common-all",
+    "bootstrap:build:plugin-core": "yarn bootstrap:build: -- @dendronhq/plugin-core",
+    "bootstrap:build:common-server": "yarn bootstrap:build: @dendronhq/common-server",
+    "bootstrap:build:common-test-utils": "yarn bootstrap:build: @dendronhq/common-test-utils",
+    "bootstrap:build:engine-server": "yarn bootstrap:build: @dendronhq/engine-server",
+    "bootstrap:build:engine-test-utils": "yarn bootstrap:build: @dendronhq/engine-test-utils",
+    "bootstrap:build:api-server": "yarn bootstrap:build: @dendronhq/api-server",
+    "bootstrap:build:pods-core": "yarn bootstrap:build: @dendronhq/pods-core",
+    "bootstrap:build:seeds-core": "yarn bootstrap:build: @dendronhq/seeds-core",
+    "bootstrap:build:dendron-cli": "yarn bootstrap:build: @dendronhq/dendron-cli",
+    "bootstrap:init": "yarn bootstrap:bootstrap && yarn bootstrap:build",
+    "ci:init": "yarn bootstrap:bootstrap && yarn bootstrap:build",
     "ci:test:cli": "npx lerna run test --ignore @dendronhq/plugin-core --parallel --stream -- -- --forceExit",
     "ci:test:plugin": "npx lerna run test --scope @dendronhq/plugin-core --stream"
   },
@@ -60,7 +77,8 @@
   },
   "dependencies": {
     "@dendronhq/conventional-changelog-dendron": "^5.0.11",
+    "@types/jest": "^23.3.6",
     "github-slugger": "^1.3.0",
-    "nodegit": "^0.27.0"
+    "typescript": "^4.1.5"
   }
 }

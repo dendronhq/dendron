@@ -1,0 +1,114 @@
+// Clear normal iframe styles
+iframe{
+	border: none;
+}
+
+// Portal styles
+.portal-container{
+	overscroll-behavior: contain;
+	border: 1px solid #C2DFE3;
+	border-radius: 8px;
+    margin-bottom: 24px;
+    padding: 10px;
+
+  	-webkit-transition: all .20s ease;
+  	-moz-transition: all .20s ease;
+  	-ms-transition: all .20s ease;
+  	-o-transition: all .20s ease;
+  	transition: all .20s ease;	
+
+	&:hover{
+		transform: translateY(-3px);
+		box-shadow: 0px 6px 20px 0px rgba(0,0,0,.15);
+		border: 1px solid #9DB8BF;
+	}
+	
+	.portal-head{
+		border-bottom: 1px solid #C2DFE3;
+    	padding: 12px;
+		
+		.portal-backlink{
+			display: flex;
+			flex-direction: column;
+
+		  	-webkit-transition: all .20s ease;
+		  	-moz-transition: all .20s ease;
+		  	-ms-transition: all .20s ease;
+		  	-o-transition: all .20s ease;
+		  	transition: all .20s ease;	
+			// @include align-items($align: left);
+
+			@media(min-width:600px){
+				flex-direction: row;
+				justify-content: space-between;
+				align-items: center;	
+			}			
+			.portal-title{
+				font-size: 14px;
+				color: #9DB8BF;
+				.portal-text-title{
+					font-weight:700;
+					color: #5C6D73;
+				}				
+			}
+			.portal-arrow{
+				font-size: 14px;
+				color: #9DB8BF;
+				&:hover{
+					opacity:.5;
+				}
+			}
+		}
+	}
+
+	.portal-iframe{
+		overflow:hidden;
+	}
+	.portal-parent{
+		overflow:hidden;
+		position: relative;
+		width:100%;
+		box-sizing: border-box;
+		.portal-parent-fader-top{
+			position: absolute;
+			width: 100%;
+			margin-left: 0px;
+			height: 36px;
+			// background-image: linear-gradient(rgba(255,255,255,1), rgba(255,255,255,0));
+			z-index: 50;
+		}
+		.portal-parent-fader-bottom{
+			position: absolute;
+			width: 100%;
+			bottom: 6px;
+			margin-left: 0px;
+			height: 36px;
+			// background-image: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,1));
+			z-index: 50;
+		}			
+		.portal-parent-text{
+			padding:$base-line-height / 2;
+			color: #5C6D73;			
+			z-index: 40;
+		}
+		.portal-iframe{
+			width:100%;
+			height:400px;
+		}
+	}
+}
+
+// Things that happen in the iframe have to be applied to the whole site,
+// as you can't use css on iframe contents – not a major issue for the time being,
+// considering you have to own the site you're transcluding.
+// Make sure your theme's anchor text styling explicitly hits a:link and not all a tags to avoid 
+// making quoted text look like a link.
+.portal-quote-text {
+	background-color: #C2DFE3;
+	color: lighten($text-color, 15%);
+
+	// This fixes hovers behaving wrong on safari when using an <a> tag to highlight
+	&:hover {
+		text-decoration: none;
+	}
+}			

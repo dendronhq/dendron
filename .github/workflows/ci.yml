@@ -5,6 +5,7 @@ on:
     branches:
       - github-actions
       - master
+      - dev-merge11ty 
   pull_request:
     branches:
       - master
@@ -23,7 +24,7 @@ jobs:
           #- windows-latest
         node-version:
           - 12.x
-          - 13.x
+          - 14.x
         suite:
           - cli
           - plugin
@@ -64,6 +65,7 @@ jobs:
           ${{ matrix.env }}
           node --version
           npm --version
+          yarn --version
           rsync --version
 
       - name: Checkout source
@@ -95,7 +97,7 @@ jobs:
           git config --global user.email ci@dendron.so
 
       - name: Initialize
-        run: npm run-script ci:init
+        run: yarn ci:init
 
       - name: Start Xvfb
         if: runner.os == 'Linux' && matrix.suite == 'plugin'
@@ -104,5 +106,5 @@ jobs:
           echo 'DISPLAY=:99.0' >>$GITHUB_ENV
 
       - name: Run tests
-        run: npm run-script ci:test:${{ matrix.suite }}
+        run: yarn ci:test:${{ matrix.suite }}
         timeout-minutes: 10

@@ -19,6 +19,7 @@ import remark from "remark";
 import abbrPlugin from "remark-abbr";
 import frontmatterPlugin from "remark-frontmatter";
 import markdownParse from "remark-parse";
+import { Processor } from "../../markdown";
 import { ReplaceLinkOpts } from "../../types";
 import {
   DendronLinksOpts,
@@ -52,7 +53,7 @@ export class ParserUtilsV2 {
       typeof dendronNoteRefPluginForMd
     >[0];
     useDendronNoteRefPluginForMd?: boolean;
-  }) {
+  }): Processor {
     const {
       dendronLinksOpts,
       useDendronNoteRefPluginForMd,

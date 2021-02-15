@@ -1,10 +1,3 @@
-// import { DendronError } from "@dendronhq/common-all";
-// import { findInParent } from "@dendronhq/common-server";
-// import fs from "fs-extra";
-// import _ from "lodash";
-// import nodegit, { Repository } from "nodegit";
-// import os from "os";
-// import path from "path";
 import execa from "execa";
 import fs from "fs-extra";
 import _ from "lodash";

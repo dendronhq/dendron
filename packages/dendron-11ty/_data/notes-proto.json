@@ -1,0 +1,463 @@
+{
+	"b0fe6ef7-1553-4280-bc45-a71824c2ce36": {
+		"id": "b0fe6ef7-1553-4280-bc45-a71824c2ce36",
+		"title": "Dendron",
+		"vault": {
+			"fsPath": "/Users/kevinlin/projects/dendronv2/dendron-site/vault"
+		},
+		"type": "note",
+		"desc": "",
+		"links": [{
+				"type": "wiki",
+				"from": {
+					"fname": "dendron",
+					"id": "b0fe6ef7-1553-4280-bc45-a71824c2ce36"
+				},
+				"original": "dendron.topic.hierarchies",
+				"value": "dendron.topic.hierarchies",
+				"alias": "hierarchies",
+				"pos": {
+					"start": 2454,
+					"end": 2495
+				},
+				"to": {
+					"fname": "dendron.topic.hierarchies"
+				}
+			},
+			{
+				"type": "wiki",
+				"from": {
+					"fname": "dendron",
+					"id": "b0fe6ef7-1553-4280-bc45-a71824c2ce36"
+				},
+				"original": "dendron.topic.schema",
+				"value": "dendron.topic.schema",
+				"alias": "schemas",
+				"pos": {
+					"start": 2497,
+					"end": 2529
+				},
+				"to": {
+					"fname": "dendron.topic.schema"
+				}
+			},
+			{
+				"type": "wiki",
+				"from": {
+					"fname": "dendron",
+					"id": "b0fe6ef7-1553-4280-bc45-a71824c2ce36"
+				},
+				"original": " dendron.topic.lookup",
+				"value": " dendron.topic.lookup",
+				"alias": "path based lookups",
+				"pos": {
+					"start": 2535,
+					"end": 2579
+				},
+				"to": {
+					"fname": " dendron.topic.lookup"
+				}
+			},
+			{
+				"type": "wiki",
+				"from": {
+					"fname": "dendron",
+					"id": "b0fe6ef7-1553-4280-bc45-a71824c2ce36"
+				},
+				"original": "dendron.ref.transcript",
+				"value": "dendron.ref.transcript",
+				"alias": "here",
+				"pos": {
+					"start": 4048,
+					"end": 4079
+				},
+				"to": {
+					"fname": "dendron.ref.transcript"
+				}
+			},
+			{
+				"type": "wiki",
+				"from": {
+					"fname": "dendron",
+					"id": "b0fe6ef7-1553-4280-bc45-a71824c2ce36"
+				},
+				"original": " dendron.features",
+				"value": " dendron.features",
+				"alias": "features ",
+				"pos": {
+					"start": 4573,
+					"end": 4604
+				},
+				"to": {
+					"fname": " dendron.features"
+				}
+			},
+			{
+				"type": "wiki",
+				"from": {
+					"fname": "dendron",
+					"id": "b0fe6ef7-1553-4280-bc45-a71824c2ce36"
+				},
+				"original": " dendron.quickstart",
+				"value": " dendron.quickstart",
+				"alias": "quickstart ",
+				"pos": {
+					"start": 4710,
+					"end": 4745
+				},
+				"to": {
+					"fname": " dendron.quickstart"
+				}
+			},
+			{
+				"type": "wiki",
+				"from": {
+					"fname": "dendron",
+					"id": "b0fe6ef7-1553-4280-bc45-a71824c2ce36"
+				},
+				"original": " dendron.faq",
+				"value": " dendron.faq",
+				"alias": "FAQ ",
+				"pos": {
+					"start": 5589,
+					"end": 5610
+				},
+				"to": {
+					"fname": " dendron.faq"
+				}
+			}
+		],
+		"fname": "dendron",
+		"updated": 1607369254135,
+		"created": 1595952505017,
+		"parent": null,
+		"children": [
+			"05774b2e-ebf7-4bbc-8171-ad191ba0ae0a",
+			"9313b845-d9bf-42c9-aad1-0da34794ce26"
+		],
+		"body": "",
+		"data": {},
+		"custom": {
+			"stub": false,
+			"nav_order": 0,
+			"permalink": "/"
+		},
+		"schema": {
+			"schemaId": "dendron",
+			"moduleId": "dendron"
+		}
+	},
+	"9313b845-d9bf-42c9-aad1-0da34794ce26": {
+		"id": "9313b845-d9bf-42c9-aad1-0da34794ce26",
+		"title": "Workflows",
+		"vault": {
+			"fsPath": "/Users/kevinlin/projects/dendronv2/dendron-site/vault"
+		},
+		"type": "note",
+		"desc": "",
+		"links": [],
+		"fname": "dendron.workflows",
+		"updated": 1599059343888,
+		"created": 1599059343888,
+		"parent": "b0fe6ef7-1553-4280-bc45-a71824c2ce36",
+		"children": [
+			"77c8f69c-32b8-4331-b1b2-c4211dcb9fb7",
+			"e780000d-c784-4945-8e42-35218a3ecf10",
+			"e65dfe53-41f7-4b16-b870-dadec1775497",
+			"3e7baac6-f120-4378-a667-92e7a0869dca",
+			"058d298a-1b1e-4340-8ebd-7dbcc5a6f119",
+			"cebe5393-5da0-484c-a24a-0939f0cef768",
+			"8514245e-6405-4759-8dda-ab77cf173075",
+			"593206ea-5658-4874-bafd-18a138870f91"
+		],
+		"body": "\n# Workflows\n\nDifferent ways of using Dendron to accomplish specific goals\n",
+		"data": {},
+		"custom": {
+			"stub": false,
+			"nav_order": 4.6
+		}
+	},
+	"593206ea-5658-4874-bafd-18a138870f91": {
+		"id": "593206ea-5658-4874-bafd-18a138870f91",
+		"title": "Todos",
+		"vault": {
+			"fsPath": "/Users/kevinlin/projects/dendronv2/dendron-site/vault"
+		},
+		"type": "note",
+		"desc": "",
+		"links": [{
+				"type": "wiki",
+				"from": {
+					"fname": "dendron.workflows.todos",
+					"id": "593206ea-5658-4874-bafd-18a138870f91"
+				},
+				"original": " dendron.topic.special-notes",
+				"value": " dendron.topic.special-notes",
+				"alias": "journal notes ",
+				"pos": {
+					"start": 1252,
+					"end": 1299
+				},
+				"to": {
+					"fname": " dendron.topic.special-notes"
+				}
+			},
+			{
+				"type": "wiki",
+				"from": {
+					"fname": "dendron.workflows.todos",
+					"id": "593206ea-5658-4874-bafd-18a138870f91"
+				},
+				"original": " dendron.topic.snippets",
+				"value": " dendron.topic.snippets",
+				"alias": "snippets ",
+				"pos": {
+					"start": 1334,
+					"end": 1371
+				},
+				"to": {
+					"fname": " dendron.topic.snippets"
+				}
+			},
+			{
+				"type": "wiki",
+				"from": {
+					"fname": "dendron.workflows.todos",
+					"id": "593206ea-5658-4874-bafd-18a138870f91"
+				},
+				"original": " dendron.topic.special-notes",
+				"value": " dendron.topic.special-notes",
+				"alias": "scratch notes ",
+				"pos": {
+					"start": 1402,
+					"end": 1449
+				},
+				"to": {
+					"fname": " dendron.topic.special-notes"
+				}
+			}
+		],
+		"fname": "dendron.workflows.todos",
+		"updated": 1604239992242,
+		"created": 1596566533712,
+		"parent": "9313b845-d9bf-42c9-aad1-0da34794ce26",
+		"children": [],
+		"body": "",
+		"data": {},
+		"custom": {
+			"stub": false
+		}
+	},
+	"8514245e-6405-4759-8dda-ab77cf173075": {
+		"id": "8514245e-6405-4759-8dda-ab77cf173075",
+		"title": "Scripts",
+		"vault": {
+			"fsPath": "/Users/kevinlin/projects/dendronv2/dendron-site/vault"
+		},
+		"type": "note",
+		"desc": "",
+		"links": [],
+		"fname": "dendron.workflows.scripts",
+		"updated": 1600964220962,
+		"created": 1600964220962,
+		"parent": "9313b845-d9bf-42c9-aad1-0da34794ce26",
+		"children": [],
+		"body": "",
+		"data": {},
+		"custom": {
+			"stub": false
+		}
+	},
+	"cebe5393-5da0-484c-a24a-0939f0cef768": {
+		"id": "cebe5393-5da0-484c-a24a-0939f0cef768",
+		"title": "Meetings",
+		"vault": {
+			"fsPath": "/Users/kevinlin/projects/dendronv2/dendron-site/vault"
+		},
+		"type": "note",
+		"desc": "",
+		"links": [],
+		"fname": "dendron.workflows.meetings",
+		"updated": 1599059373505,
+		"created": 1599059373505,
+		"parent": "9313b845-d9bf-42c9-aad1-0da34794ce26",
+		"children": [],
+		"body": "",
+		"data": {},
+		"custom": {
+			"stub": false
+		}
+	},
+	"058d298a-1b1e-4340-8ebd-7dbcc5a6f119": {
+		"id": "058d298a-1b1e-4340-8ebd-7dbcc5a6f119",
+		"title": "Collab",
+		"vault": {
+			"fsPath": "/Users/kevinlin/projects/dendronv2/dendron-site/vault"
+		},
+		"type": "note",
+		"desc": "",
+		"links": [],
+		"fname": "dendron.workflows.collab",
+		"updated": 1599751228313,
+		"created": 1599751228313,
+		"parent": "9313b845-d9bf-42c9-aad1-0da34794ce26",
+		"children": [],
+		"body": "",
+		"data": {},
+		"custom": {
+			"stub": false
+		}
+	},
+	"3e7baac6-f120-4378-a667-92e7a0869dca": {
+		"id": "3e7baac6-f120-4378-a667-92e7a0869dca",
+		"title": "Cache",
+		"vault": {
+			"fsPath": "/Users/kevinlin/projects/dendronv2/dendron-site/vault"
+		},
+		"type": "note",
+		"desc": "",
+		"links": [{
+				"type": "wiki",
+				"from": {
+					"fname": "dendron.workflows.cache",
+					"id": "3e7baac6-f120-4378-a667-92e7a0869dca"
+				},
+				"original": "dendron.topic.lookup",
+				"value": "dendron.topic.lookup",
+				"alias": "Dendron lookups",
+				"pos": {
+					"start": 414,
+					"end": 454
+				},
+				"to": {
+					"fname": "dendron.topic.lookup"
+				}
+			},
+			{
+				"type": "wiki",
+				"from": {
+					"fname": "dendron.workflows.cache",
+					"id": "3e7baac6-f120-4378-a667-92e7a0869dca"
+				},
+				"original": "dendron.topic.schema",
+				"value": "dendron.topic.schema",
+				"alias": "Dendron schemas",
+				"pos": {
+					"start": 517,
+					"end": 557
+				},
+				"to": {
+					"fname": "dendron.topic.schema"
+				}
+			},
+			{
+				"type": "wiki",
+				"from": {
+					"fname": "dendron.workflows.cache",
+					"id": "3e7baac6-f120-4378-a667-92e7a0869dca"
+				},
+				"original": "dendron.topic.publishing",
+				"value": "dendron.topic.publishing",
+				"alias": "noindexByDefault",
+				"pos": {
+					"start": 1367,
+					"end": 1412
+				},
+				"to": {
+					"fname": "dendron.topic.publishing"
+				}
+			}
+		],
+		"fname": "dendron.workflows.cache",
+		"updated": 1604887085455,
+		"created": 1599842689882,
+		"parent": "9313b845-d9bf-42c9-aad1-0da34794ce26",
+		"children": [],
+		"body": "",
+		"data": {},
+		"custom": {
+			"stub": false
+		}
+	},
+	"e65dfe53-41f7-4b16-b870-dadec1775497": {
+		"id": "e65dfe53-41f7-4b16-b870-dadec1775497",
+		"title": "Bullet Journaling",
+		"vault": {
+			"fsPath": "/Users/kevinlin/projects/dendronv2/dendron-site/vault"
+		},
+		"type": "note",
+		"desc": "",
+		"links": [],
+		"fname": "dendron.workflows.bullet-journal",
+		"updated": 1604764944798,
+		"created": 1601684760121,
+		"parent": "9313b845-d9bf-42c9-aad1-0da34794ce26",
+		"children": [],
+		"body": "",
+		"data": {},
+		"custom": {
+			"stub": false
+		}
+	},
+	"e780000d-c784-4945-8e42-35218a3ecf10": {
+		"id": "e780000d-c784-4945-8e42-35218a3ecf10",
+		"title": "Amoeba",
+		"vault": {
+			"fsPath": "/Users/kevinlin/projects/dendronv2/dendron-site/vault"
+		},
+		"type": "note",
+		"desc": "",
+		"links": [],
+		"fname": "dendron.workflows.amoeba",
+		"updated": 1600729134898,
+		"created": 1600729134898,
+		"parent": "9313b845-d9bf-42c9-aad1-0da34794ce26",
+		"children": [],
+		"body": "",
+		"data": {},
+		"custom": {
+			"stub": false
+		}
+	},
+	"77c8f69c-32b8-4331-b1b2-c4211dcb9fb7": {
+		"id": "77c8f69c-32b8-4331-b1b2-c4211dcb9fb7",
+		"title": "Academics",
+		"vault": {
+			"fsPath": "/Users/kevinlin/projects/dendronv2/dendron-site/vault"
+		},
+		"type": "note",
+		"desc": "",
+		"links": [],
+		"fname": "dendron.workflows.academics",
+		"updated": 1600207322349,
+		"created": 1600207322349,
+		"parent": "9313b845-d9bf-42c9-aad1-0da34794ce26",
+		"children": [],
+		"body": "",
+		"data": {},
+		"custom": {
+			"stub": false
+		}
+	},
+	"05774b2e-ebf7-4bbc-8171-ad191ba0ae0a": {
+		"id": "05774b2e-ebf7-4bbc-8171-ad191ba0ae0a",
+		"title": "Welcome",
+		"vault": {
+			"fsPath": "/Users/kevinlin/projects/dendronv2/dendron-site/vault"
+		},
+		"type": "note",
+		"desc": "",
+		"links": [],
+		"fname": "dendron.welcome",
+		"updated": 1598457956604,
+		"created": 1598457956604,
+		"parent": "b0fe6ef7-1553-4280-bc45-a71824c2ce36",
+		"children": [],
+		"body": "",
+		"data": {},
+		"custom": {
+			"stub": false,
+			"nav_exclude": true
+		}
+	}
+}

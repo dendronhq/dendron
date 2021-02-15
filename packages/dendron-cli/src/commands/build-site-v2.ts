@@ -83,13 +83,14 @@ export class BuildSiteV2CLICommand extends CLICommand<
   }
 
   async execute(opts: CommandOpts) {
-    let nmPath = goUpTo(__dirname, "node_modules");
     let { wsRoot, port, stage, servePort, output, server } = _.defaults(
       opts,
       {}
     );
     let cwd = opts.cwd;
     if (!cwd) {
+      // need to be inside
+      let nmPath = goUpTo(__dirname, "node_modules");
       cwd = path.join(nmPath, "node_modules", "@dendronhq", "dendron-11ty");
       // fix for /home/runner/work/dendron-site/dendron-site/node_modules/@dendronhq/dendron-cli/node_modules/@dendronhq/dendron-11ty'
       if (!fs.existsSync(cwd)) {

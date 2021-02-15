@@ -5,6 +5,7 @@ on:
     branches:
       - github-actions
       - master
+      - dev-merge11ty 
   pull_request:
     branches:
       - master

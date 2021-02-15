@@ -2,7 +2,6 @@ import { express } from "@dendronhq/api-server";
 import { BuildSiteV2CLICommandOpts } from "@dendronhq/dendron-cli";
 import { SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
-import path from "path";
 import { env, ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { buildSite, getSiteRootDirPath } from "../utils/site";

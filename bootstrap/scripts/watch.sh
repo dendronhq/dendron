@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "watching..."
-npx lerna run watch --parallel 
+lerna run watch --parallel 
     \ --scope @dendronhq/common-all 
     \ --scope @dendronhq/common-server 
     \ --scope @dendronhq/engine-server 

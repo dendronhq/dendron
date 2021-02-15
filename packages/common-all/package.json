@@ -31,7 +31,7 @@
     "compile": "tsc -p tsconfig.build.json",
     "test": "echo 0",
     "coverage": "jest --coverage",
-    "watch": "yarn compile -- --watch",
+    "watch": "yarn compile --watch",
     "test:unit": "echo 0",
     "test:unit:debug": "echo 0",
     "test:watch": "echo 0"

@@ -32,8 +32,8 @@
     "compile": "tsc -p tsconfig.build.json",
     "test": "npx jest",
     "coverage": "jest --coverage",
-    "watch": "yarn compile -- --watch",
-    "test:watch": "yarn test -- --watch -u"
+    "watch": "yarn compile --watch",
+    "test:watch": "yarn test --watch -u"
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.28.7-alpha.1",

@@ -14,6 +14,9 @@
     "start": "next start",
     "watch": "echo 0"
   },
+  "installConfig": {
+    "hoistingLimits": "none"
+  },
   "dependencies": {
     "@chakra-ui/react": "^1.0.0",
     "@dendronhq/common-all": "^0.28.6",

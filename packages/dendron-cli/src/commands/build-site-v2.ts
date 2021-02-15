@@ -7,14 +7,6 @@ import path from "path";
 import yargs from "yargs";
 import { CLICommand } from "./base";
 import { setupEngine, setupEngineArgs } from "./utils";
-import {
-  compile,
-  buildNav,
-  copyAssets,
-  buildStyles,
-  buildSearch,
-  // @ts-ignore;
-} from "@dendronhq/dendron-11ty";
 
 type CommandCLIOpts = {
   wsRoot: string;
@@ -112,24 +104,27 @@ export class BuildSiteV2CLICommand extends CLICommand<
     if (output) {
       process.env["OUTPUT"] = output;
     }
-    // let compile;
-    // let buildNav;
-    // let copyAssets;
-    // let buildStyles;
-    // let buildSearch;
+    let compile;
+    let buildNav;
+    let copyAssets;
+    let buildStyles;
+    let buildSearch;
     if (opts.custom11tyPath) {
       ({
-        // @ts-ignore
         compile,
-        // @ts-ignore
         buildNav,
-        // @ts-ignore
         copyAssets,
-        // @ts-ignore
         buildStyles,
-        // @ts-ignore
         buildSearch,
       } = require(opts.custom11tyPath));
+    } else {
+      ({
+        compile,
+        buildNav,
+        copyAssets,
+        buildStyles,
+        buildSearch,
+      } = require("@dendronhq/dendron-11ty"));
     }
     console.log("running pre-compile");
     await Promise.all([buildNav(), copyAssets()]);

@@ -43,19 +43,12 @@ const pkgUpgrade = async (pkg: string, version: string) => {
 };
 
 export const buildSite = async (opts: BuildSiteV2CLICommandCliOpts) => {
-  const eleventyPath =
-    process.env.NODE_ENV !== "production"
-      ? path.join(
-          __dirname,
-          "..",
-          "..",
-          "..",
-          "..",
-          "node_modules",
-          "@dendronhq",
-          "dendron-11ty"
-        )
-      : path.join(getWS().extensionDir, "dist", "dendron-11ty");
+  const eleventyPath = path.join(
+    DendronWorkspace.wsRoot(),
+    "node_modules",
+    "@dendronhq",
+    "dendron-11ty"
+  );
   Logger.info({ ctx: "buildSite", eleventyPath });
   const cmd = new BuildSiteV2CLICommand();
   const cOpts = await cmd.enrichArgs(opts);

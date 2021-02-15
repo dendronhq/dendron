@@ -4,7 +4,7 @@ import { SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import { env, ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { buildSite, getSiteRootDirPath } from "../utils/site";
+import { buildSite, checkPreReq, getSiteRootDirPath } from "../utils/site";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -27,8 +27,7 @@ export class SitePreviewCommand extends BasicCommand<
     if (!fs.existsSync(sitePath)) {
       return "no site found";
     }
-    return;
-    //return checkPreReq();
+    return checkPreReq();
   }
 
   async execute(_opts?: CommandOpts) {
@@ -51,20 +50,6 @@ export class SitePreviewCommand extends BasicCommand<
               enginePort: port,
               serve: false,
             });
-            // await execa(
-            //   "npx",
-            //   [
-            //     "dendron-cli",
-            //     "buildSiteV2",
-            //     "--wsRoot",
-            //     wsRoot,
-            //     "--stage",
-            //     "dev",
-            //     "--enginePort",
-            //     `${port}`,
-            //   ],
-            //   { cwd: wsRoot, shell: true, windowsHide: false }
-            // );
           } catch (err) {
             window.showErrorMessage(err);
           }

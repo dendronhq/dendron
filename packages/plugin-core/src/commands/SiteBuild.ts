@@ -1,7 +1,7 @@
 import { BuildSiteV2CLICommandOpts } from "@dendronhq/dendron-cli";
 import { env, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { buildSite, getSiteRootDirPath } from "../utils/site";
+import { buildSite, checkPreReq, getSiteRootDirPath } from "../utils/site";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -17,8 +17,7 @@ export class SiteBuildCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async sanityCheck() {
-    return undefined;
-    //return checkPreReq();
+    return checkPreReq();
   }
 
   async execute(_opts?: CommandOpts) {

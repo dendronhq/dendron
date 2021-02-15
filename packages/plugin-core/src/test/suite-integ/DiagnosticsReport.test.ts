@@ -12,7 +12,7 @@ suite("DiagnosticsReport", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this);
 
-  test("basic", (done) => {
+  test.skip("basic", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {

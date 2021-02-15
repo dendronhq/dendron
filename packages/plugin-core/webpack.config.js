@@ -25,6 +25,7 @@ const config = {
   externals: {
     vscode: "commonjs vscode", // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
     "pino-pretty": "pino-pretty",
+    '@dendronhq/dendron-11ty': 'commonjs2 @dendronhq/dendron-11ty',
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
@@ -44,11 +45,6 @@ const config = {
     }),
     new CopyPlugin({
       patterns: [{ from: path.join("assets", "dendron-ws"), to: "dendron-ws" }],
-    }),
-    new IgnorePlugin({
-      // resourceRegExp: /^\.\/locale$/,
-      resourceRegExp: /^@dendronhq\/dendron-11ty$/,
-      contextRegExp: /commands$/
     })
   ],
   module: {

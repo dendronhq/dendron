@@ -127,11 +127,11 @@ export class BuildSiteV2CLICommand extends CLICommand<
         buildSearch,
       } = require("@dendronhq/dendron-11ty"));
     }
-    console.log("running pre-compile");
+    this.L.info("running pre-compile");
     await Promise.all([buildNav(), copyAssets()]);
-    console.log("running compile");
+    this.L.info("running compile");
     await compile({ cwd }, { serve: opts.serve, port: servePort });
-    console.log("running post-compile");
+    this.L.info("running post-compile");
     await Promise.all([buildStyles(), buildSearch()]);
     if (!opts.serve) {
       this.L.info({ msg: "done compiling" });

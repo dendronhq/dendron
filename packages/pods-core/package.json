@@ -63,7 +63,6 @@
     "@dendronhq/common-server": "^0.28.7-alpha.1",
     "@dendronhq/common-test-utils": "^0.28.7-alpha.1",
     "@dendronhq/engine-server": "^0.28.7-alpha.1",
-    "@dendronhq/engine-test-utils": "^0.28.7-alpha.2",
     "fast-csv": "^4.3.2",
     "fs-extra": "^9.0.1",
     "klaw": "^3.0.0",

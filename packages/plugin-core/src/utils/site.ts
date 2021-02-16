@@ -1,8 +1,13 @@
+import {
+  BuildSiteV2CLICommand,
+  BuildSiteV2CLICommandCliOpts,
+} from "@dendronhq/dendron-cli";
 import { execa } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { ProgressLocation, window } from "vscode";
+import { Logger } from "../logger";
 import { DendronWorkspace, getWS } from "../workspace";
 
 const packageJson = {
@@ -11,8 +16,7 @@ const packageJson = {
   main: "index.js",
   license: "MIT",
   dependencies: {
-    "@dendronhq/dendron-11ty": "^1.28.3",
-    "@dendronhq/dendron-cli": "^0.28.2",
+    "@dendronhq/dendron-11ty": "^1.29.0",
   },
 };
 
@@ -35,6 +39,25 @@ const pkgUpgrade = async (pkg: string, version: string) => {
   )}`.split(" ");
   await execa("npm", cmdInstall, {
     cwd: DendronWorkspace.wsRoot(),
+  });
+};
+
+export const buildSite = async (opts: BuildSiteV2CLICommandCliOpts) => {
+  const eleventyPath = path.join(
+    DendronWorkspace.wsRoot(),
+    "node_modules",
+    "@dendronhq",
+    "dendron-11ty"
+  );
+  const importEleventy = require(`./webpack-require-hack.js`);
+  const eleventy = importEleventy(eleventyPath);
+  Logger.info({ ctx: "buildSite", eleventyPath });
+  const cmd = new BuildSiteV2CLICommand();
+  const cOpts = await cmd.enrichArgs(opts);
+  await cmd.execute({
+    ...cOpts,
+    eleventy,
+    cwd: eleventyPath,
   });
 };
 

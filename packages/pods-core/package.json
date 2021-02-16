@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/pods-core",
-  "version": "0.28.7-alpha.2",
+  "version": "0.28.7-alpha.9",
   "description": "pods-core",
   "license": "GPLv3",
   "repository": {
@@ -31,7 +31,7 @@
     "compile": "tsc -p tsconfig.build.json",
     "test": "npx jest",
     "coverage": "jest --coverage",
-    "watch": "yarn compile -- --watch",
+    "watch": "yarn compile --watch",
     "test:unit": "jest ",
     "test:unit:debug": "NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:watch": "LOG_DST=../../logs/pods-core.log jest --watch"
@@ -59,10 +59,10 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.28.7-alpha.1",
-    "@dendronhq/common-server": "^0.28.7-alpha.1",
-    "@dendronhq/common-test-utils": "^0.28.7-alpha.1",
-    "@dendronhq/engine-server": "^0.28.7-alpha.1",
+    "@dendronhq/common-all": "^0.28.7-alpha.9",
+    "@dendronhq/common-server": "^0.28.7-alpha.9",
+    "@dendronhq/common-test-utils": "^0.28.7-alpha.9",
+    "@dendronhq/engine-server": "^0.28.7-alpha.9",
     "fast-csv": "^4.3.2",
     "fs-extra": "^9.0.1",
     "klaw": "^3.0.0",
@@ -70,5 +70,5 @@
     "through2": "^4.0.2",
     "vscode-uri": "^2.1.2"
   },
-  "gitHead": "47c197f18329be43e02389fb4bd63267dfc07874"
+  "gitHead": "d2e0e1c5ada1ac4a507e2da387cf761316de76de"
 }

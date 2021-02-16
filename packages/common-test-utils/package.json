@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-test-utils",
-  "version": "0.28.7-alpha.1",
+  "version": "0.28.7-alpha.9",
   "description": "",
   "license": "GPLv3",
   "repository": {
@@ -29,7 +29,7 @@
     "compile": "tsc -p tsconfig.json",
     "test": "npx jest",
     "coverage": "jest --coverage",
-    "watch": "yarn compile -- --watch",
+    "watch": "yarn compile --watch",
     "test:unit": "jest ",
     "test:unit:debug": "cross-env NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:watch": "cross-env LOG_DST=../../logs/common-test-utils.log jest --watch"
@@ -55,12 +55,12 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.28.7-alpha.1",
-    "@dendronhq/common-server": "^0.28.7-alpha.1",
+    "@dendronhq/common-all": "^0.28.7-alpha.9",
+    "@dendronhq/common-server": "^0.28.7-alpha.9",
     "@types/sinon": "^9.0.9",
     "fs-extra": "^9.0.1",
     "lodash": "^4.17.20",
     "sinon": "^9.2.1"
   },
-  "gitHead": "846f7aefa034a7d56a8302b682210164be109988"
+  "gitHead": "d2e0e1c5ada1ac4a507e2da387cf761316de76de"
 }

@@ -13,10 +13,12 @@
       "packages/seeds-core",
       "packages/dendron-cli",
       "packages/dendron-next-server",
-      "packages/plugin-core"
+      "packages/plugin-core",
+      "packages/dendron-11ty"
     ],
     "nohoist": [
       "**/react",
+      "**/dendron-next-server",
       "**/@types/mocha",
       "**/@types/hoist-non-react-statics"
     ]
@@ -46,9 +48,9 @@
     "bootstrap:build": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:engine-server &&  yarn bootstrap:build:api-server && yarn bootstrap:build:pods-core && yarn bootstrap:build:seeds-core && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:dendron-next-server && yarn bootstrap:build:plugin-core",
     "bootstrap:build:fast": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:engine-server &&  yarn bootstrap:build:api-server && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:plugin-core",
     "bootstrap:build:": "npx lerna run build --scope",
-    "bootstrap:build:dendron-next-server": "yarn bootstrap:build: -- @dendronhq/dendron-next-server",
-    "bootstrap:build:common-all": "yarn bootstrap:build: -- @dendronhq/common-all",
-    "bootstrap:build:plugin-core": "yarn bootstrap:build: -- @dendronhq/plugin-core",
+    "bootstrap:build:dendron-next-server": "yarn bootstrap:build: @dendronhq/dendron-next-server",
+    "bootstrap:build:common-all": "yarn bootstrap:build: @dendronhq/common-all",
+    "bootstrap:build:plugin-core": "yarn bootstrap:build: @dendronhq/plugin-core",
     "bootstrap:build:common-server": "yarn bootstrap:build: @dendronhq/common-server",
     "bootstrap:build:common-test-utils": "yarn bootstrap:build: @dendronhq/common-test-utils",
     "bootstrap:build:engine-server": "yarn bootstrap:build: @dendronhq/engine-server",
@@ -58,6 +60,7 @@
     "bootstrap:build:seeds-core": "yarn bootstrap:build: @dendronhq/seeds-core",
     "bootstrap:build:dendron-cli": "yarn bootstrap:build: @dendronhq/dendron-cli",
     "bootstrap:init": "yarn bootstrap:bootstrap && yarn bootstrap:build",
+    "publish:minor:local": "./scripts/publish-integ.sh minor",
     "ci:init": "yarn bootstrap:bootstrap && yarn bootstrap:build",
     "ci:test:cli": "npx lerna run test --ignore @dendronhq/plugin-core --parallel --stream -- -- --forceExit",
     "ci:test:plugin": "npx lerna run test --scope @dendronhq/plugin-core --stream"

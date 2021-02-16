@@ -1,4 +1,4 @@
-import { DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngineClientV2, Stage } from "@dendronhq/common-all";
 import { goUpTo } from "@dendronhq/common-server";
 import { SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -16,7 +16,7 @@ type CommandCLIOpts = {
   servePort?: number;
   enginePort?: number;
   serve: boolean;
-  stage: "dev" | "prod";
+  stage: Stage;
   output?: string;
   custom11tyPath?: string;
 };
@@ -24,10 +24,12 @@ type CommandOpts = CommandCLIOpts & {
   engine: DEngineClientV2;
   compile?: any;
   server: any;
+  eleventy?: any;
 };
 type CommandOutput = {};
 
 export { CommandOpts as BuildSiteV2CLICommandOpts };
+export { CommandCLIOpts as BuildSiteV2CLICommandCliOpts };
 export class BuildSiteV2CLICommand extends CLICommand<
   CommandOpts,
   CommandOutput
@@ -35,7 +37,7 @@ export class BuildSiteV2CLICommand extends CLICommand<
   constructor() {
     super({
       name: "buildSiteV2",
-      desc: "build notes for publication using 11ty"
+      desc: "build notes for publication using 11ty",
     });
   }
 
@@ -45,24 +47,24 @@ export class BuildSiteV2CLICommand extends CLICommand<
     args.option("serve", {
       describe: "serve over local http server",
       default: false,
-      type: "boolean"
+      type: "boolean",
     });
     args.option("stage", {
       describe: "serve over local http server",
       default: "dev",
-      choices: ["dev", "prod"]
+      choices: ["dev", "prod"],
     });
     args.option("servePort", {
       describe: "port to serve over",
-      default: "8080"
+      default: "8080",
     });
     args.option("output", {
       describe: "if set, override output from config.yml",
-      type: "string"
+      type: "string",
     });
     args.option("custom11tyPath", {
       describe: "if set, path to custom 11ty installation",
-      type: "string"
+      type: "string",
     });
   }
 
@@ -72,9 +74,9 @@ export class BuildSiteV2CLICommand extends CLICommand<
     // add site specific notes
     if (args.enginePort) {
       const siteNotes = SiteUtils.addSiteOnlyNotes({
-        engine: engineArgs.engine
+        engine: engineArgs.engine,
       });
-      _.forEach(siteNotes, ent => {
+      _.forEach(siteNotes, (ent) => {
         engineArgs.engine.notes[ent.id] = ent;
       });
     }
@@ -82,13 +84,14 @@ export class BuildSiteV2CLICommand extends CLICommand<
   }
 
   async execute(opts: CommandOpts) {
-    let nmPath = goUpTo(__dirname, "node_modules");
     let { wsRoot, port, stage, servePort, output, server } = _.defaults(
       opts,
       {}
     );
     let cwd = opts.cwd;
     if (!cwd) {
+      // need to be inside
+      let nmPath = goUpTo(__dirname, "node_modules");
       cwd = path.join(nmPath, "node_modules", "@dendronhq", "dendron-11ty");
       // fix for /home/runner/work/dendron-site/dendron-site/node_modules/@dendronhq/dendron-cli/node_modules/@dendronhq/dendron-11ty'
       if (!fs.existsSync(cwd)) {
@@ -108,29 +111,39 @@ export class BuildSiteV2CLICommand extends CLICommand<
     let copyAssets;
     let buildStyles;
     let buildSearch;
-    if (opts.custom11tyPath) {
+    if (opts.eleventy) {
       ({
         compile,
         buildNav,
         copyAssets,
         buildStyles,
-        buildSearch
-      } = require(opts.custom11tyPath));
+        buildSearch,
+      } = opts.eleventy);
     } else {
-      ({
-        compile,
-        buildNav,
-        copyAssets,
-        buildStyles,
-        buildSearch
-      } = require("@dendronhq/dendron-11ty"));
+      if (opts.custom11tyPath) {
+        ({
+          compile,
+          buildNav,
+          copyAssets,
+          buildStyles,
+          buildSearch,
+        } = require(opts.custom11tyPath));
+      } else {
+        ({
+          compile,
+          buildNav,
+          copyAssets,
+          buildStyles,
+          buildSearch,
+        } = require("@dendronhq/dendron-11ty"));
+      }
     }
-    console.log("running pre-compile")
-    await Promise.all([buildNav(), copyAssets()])
-    console.log("running compile")
+    this.L.info("running pre-compile");
+    await Promise.all([buildNav(), copyAssets()]);
+    this.L.info("running compile");
     await compile({ cwd }, { serve: opts.serve, port: servePort });
-    console.log("running post-compile")
-    await Promise.all([buildStyles(), buildSearch()])
+    this.L.info("running post-compile");
+    await Promise.all([buildStyles(), buildSearch()]);
     if (!opts.serve) {
       this.L.info({ msg: "done compiling" });
       setTimeout(() => {

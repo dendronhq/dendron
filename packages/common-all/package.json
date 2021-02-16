@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-all",
-  "version": "0.28.7-alpha.1",
+  "version": "0.28.7-alpha.9",
   "description": "common-all",
   "license": "GPLv3",
   "repository": {
@@ -31,7 +31,7 @@
     "compile": "tsc -p tsconfig.build.json",
     "test": "echo 0",
     "coverage": "jest --coverage",
-    "watch": "yarn compile -- --watch",
+    "watch": "yarn compile --watch",
     "test:unit": "echo 0",
     "test:unit:debug": "echo 0",
     "test:watch": "echo 0"
@@ -64,7 +64,7 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.28.7-alpha.1",
+    "@dendronhq/common-test-utils": "^0.28.7-alpha.9",
     "@types/js-yaml": "^3.12.5",
     "@types/request-promise": "^4.1.46",
     "coveralls": "^3.0.2",
@@ -85,5 +85,6 @@
   },
   "jest": {
     "preset": "ts-jest"
-  }
+  },
+  "gitHead": "d2e0e1c5ada1ac4a507e2da387cf761316de76de"
 }

@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-11ty",
-  "version": "1.28.4",
+  "version": "1.28.6-alpha.0",
   "main": "index.js",
   "license": "AGPLv3",
   "files": [
@@ -15,14 +15,16 @@
     "index.js",
     "docs"
   ],
-  "devDependencies": {},
+  "installConfig": {
+    "hoistingLimits": "none"
+  },
   "dependencies": {
     "@11ty/eleventy": "^0.11.1",
     "@11ty/eleventy-plugin-syntaxhighlight": "^3.0.4",
-    "@dendronhq/common-all": "0.28.2",
-    "@dendronhq/common-server": "0.28.1",
+    "@dendronhq/common-all": "^0.28.7-alpha.9",
+    "@dendronhq/common-server": "^0.28.7-alpha.9",
     "@dendronhq/eleventy-plugin-seo": "^0.5.1",
-    "@dendronhq/engine-server": "0.28.2",
+    "@dendronhq/engine-server": "^0.28.7-alpha.9",
     "@fec/eleventy-plugin-remark": "^2.1.0",
     "eleventy-xml-plugin": "^0.1.0",
     "fs-extra": "^9.0.1",
@@ -31,11 +33,12 @@
     "luxon": "^1.25.0",
     "markdown-it": "^12.0.3",
     "markdown-it-task-checkbox": "^1.0.6",
-    "node-sass": "^5.0.0",
     "rehype-raw": "^5.0.0",
     "rehype-stringify": "^8.0.0",
     "remark": "12.0.1",
     "remark-rehype": "^8.0.0",
-    "request": "^2.88.2"
-  }
+    "request": "^2.88.2",
+    "sass": "^1.32.7"
+  },
+  "gitHead": "d2e0e1c5ada1ac4a507e2da387cf761316de76de"
 }

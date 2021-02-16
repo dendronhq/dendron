@@ -3,6 +3,751 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.28.7-alpha.9 (2021-02-15)
+
+## 0.28.7-alpha.1 (2021-02-14)
+
+## 0.28.7-alpha.0 (2021-02-14)
+
+## 0.28.6 (2021-02-14)
+
+### Bug Fixes
+
+- move command error when parent is stub ([d2d6fc8](https://github.com/dendronhq/dendron/commit/d2d6fc8681c06adde03f222ba209f4916ba544a1))
+
+## 0.28.2 (2021-02-08)
+
+## 0.28.1 (2021-02-02)
+
+## 0.28.1-alpha.0 (2021-02-02)
+
+### Reverts
+
+- Revert "chore(release): publish" ([3b2778a](https://github.com/dendronhq/dendron/commit/3b2778a5b1ccc3c53652dcd02e6d42c38f925d2e))
+
+# 0.29.0 (2021-02-02)
+
+# 0.28.0 (2021-02-02)
+
+### Bug Fixes
+
+- aliased vault names would appear with wrong name ([873627e](https://github.com/dendronhq/dendron/commit/873627eabff6ea12631dbec29e16aab00ebd3b71))
+
+## 0.27.1-alpha.0 (2021-02-01)
+
+## 0.26.2 (2021-02-01)
+
+## 0.26.2-alpha.1 (2021-02-01)
+
+### Bug Fixes
+
+- daily journal note nice titles ([6cc036e](https://github.com/dendronhq/dendron/commit/6cc036edceeba6f3a4c985c7584aa492d36d24ba))
+
+## 0.26.2-alpha.0 (2021-01-27)
+
+### Features Dendron
+
+- move note command ([696eb9c](https://github.com/dendronhq/dendron/commit/696eb9c90374a0115835a100a9f580498188eae7))
+
+# 0.26.0 (2021-01-25)
+
+## 0.25.4 (2021-01-25)
+
+## 0.25.4-alpha.0 (2021-01-25)
+
+## 0.25.3 (2021-01-22)
+
+## 0.25.3-alpha.1 (2021-01-22)
+
+### Features Dendron
+
+- support mermaid for publishing ([0313df4](https://github.com/dendronhq/dendron/commit/0313df49ed563d22fc07018c982368965f9d1938))
+
+## 0.25.2 (2021-01-19)
+
+# 0.25.0 (2021-01-18)
+
+## 0.24.2-alpha.1 (2021-01-17)
+
+## 0.24.1 (2021-01-15)
+
+## 0.24.1-alpha.2 (2021-01-14)
+
+## 0.24.1-alpha.1 (2021-01-12)
+
+## 0.24.1-alpha.0 (2021-01-12)
+
+# 0.24.0 (2021-01-11)
+
+## 0.23.2-alpha.3 (2021-01-10)
+
+## 0.23.2-alpha.2 (2021-01-09)
+
+## 0.23.2-alpha.1 (2021-01-09)
+
+### Bug Fixes
+
+- don't throw error if user doesn't choose vault ([c744bc1](https://github.com/dendronhq/dendron/commit/c744bc11429c309a3d045f14039f1548bfa53478))
+
+## 0.23.1 (2021-01-08)
+
+## 0.23.1-alpha.3 (2021-01-06)
+
+# 0.23.0 (2021-01-04)
+
+## 0.22.2-alpha.1 (2021-01-03)
+
+## 0.22.2-alpha.0 (2021-01-02)
+
+## 0.22.1 (2020-12-31)
+
+## 0.22.1-alpha.2 (2020-12-30)
+
+## 0.22.1-alpha.0 (2020-12-29)
+
+# 0.22.0 (2020-12-28)
+
+## 0.21.1-alpha.9 (2020-12-27)
+
+## 0.21.1-alpha.8 (2020-12-27)
+
+## 0.21.1-alpha.5 (2020-12-26)
+
+## 0.21.1-alpha.2 (2020-12-24)
+
+## 0.21.1-alpha.1 (2020-12-23)
+
+# 0.21.0 (2020-12-21)
+
+## 0.20.1-alpha.13 (2020-12-21)
+
+## 0.20.1-alpha.12 (2020-12-21)
+
+## 0.20.1-alpha.11 (2020-12-20)
+
+## 0.20.1-alpha.6 (2020-12-19)
+
+## 0.20.1-alpha.5 (2020-12-19)
+
+## 0.20.1-alpha.0 (2020-12-17)
+
+# 0.20.0 (2020-12-14)
+
+## 0.19.3-alpha.2 (2020-12-14)
+
+### Bug Fixes
+
+- vault not being matched ([fda8d72](https://github.com/dendronhq/dendron/commit/fda8d724f4146cdadd90f2bb44c9a37a8a4d1ecd))
+
+## 0.19.3-alpha.1 (2020-12-13)
+
+## 0.19.2 (2020-12-10)
+
+## 0.19.2-alpha.2 (2020-12-10)
+
+## 0.19.2-alpha.1 (2020-12-10)
+
+## 0.19.2-alpha.0 (2020-12-09)
+
+# 0.19.0 (2020-12-07)
+
+## 0.18.2-alpha.8 (2020-12-07)
+
+### Bug Fixes
+
+- tree view adding new nodes in wrong place ([173f57b](https://github.com/dendronhq/dendron/commit/173f57bfb2730da2361950df35054a53f0aba765))
+
+## 0.18.2-alpha.7 (2020-12-07)
+
+### Bug Fixes
+
+- issue with local vault command ([fb202e9](https://github.com/dendronhq/dendron/commit/fb202e91e501cfd5506fd73c9a005807954e48d3))
+
+## 0.18.2-alpha.2 (2020-12-05)
+
+## 0.18.2-alpha.0 (2020-12-04)
+
+## 0.18.1 (2020-12-04)
+
+## 0.18.1-alpha.4 (2020-12-04)
+
+## 0.18.1-alpha.3 (2020-12-03)
+
+## 0.18.1-alpha.2 (2020-12-03)
+
+### Bug Fixes
+
+- ignore files added by engine ([f76b0ba](https://github.com/dendronhq/dendron/commit/f76b0bacf77186f1023aadb68a0f9e0cdfe74364))
+
+## 0.18.1-alpha.1 (2020-12-03)
+
+### Features Dendron
+
+- support adding remote vaults ([d7501b9](https://github.com/dendronhq/dendron/commit/d7501b9a5cb116faae64d26798cfd7ccfc73a4b0))
+
+# 0.18.0 (2020-11-29)
+
+## 0.17.2 (2020-11-29)
+
+## 0.17.2-alpha.5 (2020-11-29)
+
+## 0.17.2-alpha.1 (2020-11-29)
+
+### Features Dendron
+
+- add config apis ([f022689](https://github.com/dendronhq/dendron/commit/f0226890ff01c4e5c1746d0cee7b9e99db07d4d6))
+
+## 0.17.2-alpha.0 (2020-11-28)
+
+## 0.17.1-alpha.0 (2020-11-25)
+
+### Bug Fixes
+
+- issues with rename in multi-vault ([e26b294](https://github.com/dendronhq/dendron/commit/e26b294e8bbe1e49e44318152c247595e82639bb))
+- renaming notes with links within root note ([cb74117](https://github.com/dendronhq/dendron/commit/cb74117ae3fd3d1658e94966a4050c15cf491885))
+
+# 0.17.0 (2020-11-22)
+
+## 0.16.3-alpha.5 (2020-11-22)
+
+## 0.16.3-alpha.4 (2020-11-22)
+
+## 0.16.3-alpha.3 (2020-11-20)
+
+### Bug Fixes
+
+- add note to correct parent when writing in multi-vault ([6daeebc](https://github.com/dendronhq/dendron/commit/6daeebc7bd2bbc68fc105766d30bc10444bcaf61))
+
+## 0.16.3-alpha.2 (2020-11-18)
+
+## 0.16.3-alpha.1 (2020-11-18)
+
+## 0.16.2 (2020-11-18)
+
+## 0.16.1 (2020-11-18)
+
+## 0.16.1-alpha.2 (2020-11-18)
+
+### Bug Fixes
+
+- **engine:** resolve ntoes with same title in multiple vaults ([6326aff](https://github.com/dendronhq/dendron/commit/6326aff28b5f2ff52edf6d190c068364023be8e9))
+
+### Features Dendron
+
+- add completion provider ([9c5ab61](https://github.com/dendronhq/dendron/commit/9c5ab61213a046b7719472faca9bb5e79592fa2f))
+- **workbench:** navigate to relative wiki-links ([49c3b54](https://github.com/dendronhq/dendron/commit/49c3b5439fb34b8c6f1f5505fcd90193cbfa28cd))
+- add language features ([9c379c1](https://github.com/dendronhq/dendron/commit/9c379c1fb7beda476a8454538a318f43072ad1f0))
+
+# 0.16.0 (2020-11-15)
+
+## 0.15.3-alpha.1 (2020-11-15)
+
+## 0.15.1 (2020-11-14)
+
+## 0.15.1-alpha.5 (2020-11-13)
+
+### Features Dendron
+
+- **workspace:** vault add command ([f2bba25](https://github.com/dendronhq/dendron/commit/f2bba254b4923c97fec6b5830bff3779c533447f))
+
+## 0.15.1-alpha.4 (2020-11-13)
+
+## 0.15.1-alpha.3 (2020-11-12)
+
+## 0.15.1-alpha.2 (2020-11-12)
+
+## 0.15.1-alpha.1 (2020-11-11)
+
+## 0.15.1-alpha.0 (2020-11-10)
+
+# 0.15.0 (2020-11-09)
+
+## 0.14.2-alpha.7 (2020-11-09)
+
+## 0.14.2-alpha.5 (2020-11-08)
+
+## 0.14.2-alpha.0 (2020-11-07)
+
+### Bug Fixes
+
+- **engine:** properly handle \* in refs when refactoring ([704a14f](https://github.com/dendronhq/dendron/commit/704a14f17196e18cb5b26f5fc98ed9f8d492e16a))
+
+### Features Dendron
+
+- **markdown:** wildcard links in note refs ([b8dea8f](https://github.com/dendronhq/dendron/commit/b8dea8f4441cfc01f5acc522ffa3a6402ff50572))
+
+## 0.14.1 (2020-11-05)
+
+## 0.14.1-alpha.6 (2020-11-05)
+
+### Features Dendron
+
+- **lookup:** copy note link cmd ([e38743d](https://github.com/dendronhq/dendron/commit/e38743ddbac8486f2ac778bd546a6373a15a4f6d))
+
+## 0.14.1-alpha.3 (2020-11-04)
+
+## 0.14.1-alpha.0 (2020-11-03)
+
+# 0.14.0 (2020-11-01)
+
+## 0.13.6-alpha.0 (2020-10-31)
+
+## 0.13.5 (2020-10-28)
+
+### Bug Fixes
+
+- **workbench:** tree view can delete notes with caps ([d37926d](https://github.com/dendronhq/dendron/commit/d37926d7f38d784f847a4c2a58fb75ba7c03b0e0))
+
+## 0.13.4 (2020-10-28)
+
+## 0.13.4-alpha.0 (2020-10-27)
+
+## 0.13.3 (2020-10-24)
+
+## 0.13.3-alpha.1 (2020-10-24)
+
+### Bug Fixes
+
+- **notes:** refactor will miss links in newly created notes ([c8a5dde](https://github.com/dendronhq/dendron/commit/c8a5dde2ca46e2402bc50b1a8f635d9fb5318c9d))
+
+## 0.13.3-alpha.0 (2020-10-23)
+
+### Features Dendron
+
+- **lookup:** support direct child lookup ([1cae082](https://github.com/dendronhq/dendron/commit/1cae08294baa844c0c0ee3c8d390e337bd6172be))
+
+## 0.13.2 (2020-10-22)
+
+## 0.13.2-alpha.2 (2020-10-22)
+
+## 0.13.2-alpha.0 (2020-10-21)
+
+## 0.13.1 (2020-10-21)
+
+## 0.13.1-alpha.2 (2020-10-20)
+
+### Bug Fixes
+
+- **schemas:** show namespace schema suggestions ([30737c0](https://github.com/dendronhq/dendron/commit/30737c070cfcf6b5a7f9c2cc1f75a8760019614b))
+
+## 0.13.1-alpha.1 (2020-10-20)
+
+### Features Dendron
+
+- **publishing:** allow custom frontmatter ([782d637](https://github.com/dendronhq/dendron/commit/782d6374c55b00bcda36da9149fb2cedeac0c3d9))
+
+## 0.13.1-alpha.0 (2020-10-20)
+
+### Bug Fixes
+
+- **lookup:** schema suggestions on namespace ([56ee6c4](https://github.com/dendronhq/dendron/commit/56ee6c460dd562200931381923e72971681d1390))
+
+# 0.13.0 (2020-10-19)
+
+## 0.12.12-alpha.0 (2020-10-19)
+
+### Bug Fixes
+
+- **lookup:** display schema id if title undefined ([6c7cc70](https://github.com/dendronhq/dendron/commit/6c7cc70cf85181b11654074e17672e39a44fb874))
+
+## 0.12.11 (2020-10-18)
+
+## 0.12.11-alpha.2 (2020-10-18)
+
+## 0.12.11-alpha.1 (2020-10-17)
+
+## 0.12.10 (2020-10-16)
+
+## 0.12.10-alpha.2 (2020-10-16)
+
+## 0.12.10-alpha.0 (2020-10-16)
+
+## 0.12.9 (2020-10-15)
+
+## 0.12.9-alpha.0 (2020-10-14)
+
+### Bug Fixes
+
+- **server:** issue with goup navigation ([f3722dd](https://github.com/dendronhq/dendron/commit/f3722dd199d7aa4800f88ab5e8388a2a70b611cf))
+
+## 0.12.8 (2020-10-14)
+
+## 0.12.8-alpha.2 (2020-10-14)
+
+## 0.12.8-alpha.0 (2020-10-13)
+
+## 0.12.7 (2020-10-13)
+
+## 0.12.7-alpha.8 (2020-10-12)
+
+### Bug Fixes
+
+- **server:** issue with deleteing schemas ([2aab629](https://github.com/dendronhq/dendron/commit/2aab62961c4c2a6a073104034fc3961ed6cad2a5))
+
+## 0.12.7-alpha.7 (2020-10-12)
+
+## 0.12.7-alpha.5 (2020-10-12)
+
+## 0.12.7-alpha.4 (2020-10-12)
+
+## 0.12.7-alpha.3 (2020-10-11)
+
+## 0.12.7-alpha.0 (2020-10-11)
+
+## 0.12.5 (2020-10-07)
+
+## 0.12.5-alpha.7 (2020-10-07)
+
+## 0.12.5-alpha.6 (2020-10-07)
+
+## 0.12.5-alpha.5 (2020-10-06)
+
+### Bug Fixes
+
+- **lookup:** schemas in lookup ([b4055fd](https://github.com/dendronhq/dendron/commit/b4055fd61d4918cf4c1a44591be31be69a71b93a))
+
+## 0.12.5-alpha.2 (2020-10-05)
+
+## 0.12.5-alpha.1 (2020-10-04)
+
+## 0.12.5-alpha.0 (2020-10-04)
+
+### Bug Fixes
+
+- **server:** schema names ([c457f96](https://github.com/dendronhq/dendron/commit/c457f96cc02accd2811a73e15025f68d6796256d))
+
+## 0.12.4 (2020-09-30)
+
+## 0.12.4-alpha.5 (2020-09-30)
+
+## 0.12.4-alpha.2 (2020-09-30)
+
+## 0.12.4-alpha.0 (2020-09-29)
+
+## 0.12.3 (2020-09-26)
+
+## 0.12.3-alpha.16 (2020-09-25)
+
+## 0.12.3-alpha.11 (2020-09-25)
+
+## 0.12.3-alpha.10 (2020-09-25)
+
+## 0.12.3-alpha.0 (2020-09-24)
+
+## 0.12.2 (2020-09-24)
+
+## 0.12.2-alpha.0 (2020-09-24)
+
+### Bug Fixes
+
+- **publishing:** incremental builds not setting correct links ([e3dedf5](https://github.com/dendronhq/dendron/commit/e3dedf52d79dede98041edc77a41966cc5d6e8b5))
+
+# 0.12.0 (2020-09-20)
+
+## 0.11.5 (2020-09-19)
+
+## 0.11.5-alpha.1 (2020-09-19)
+
+## 0.11.3 (2020-09-17)
+
+## 0.11.3-alpha.3 (2020-09-16)
+
+## 0.11.3-alpha.2 (2020-09-16)
+
+## 0.11.3-alpha.1 (2020-09-16)
+
+# 0.11.0 (2020-09-13)
+
+## 0.10.7 (2020-09-13)
+
+## 0.10.7-alpha.0 (2020-09-12)
+
+## 0.10.6 (2020-09-12)
+
+## 0.10.6-alpha.0 (2020-09-11)
+
+## 0.10.4 (2020-09-10)
+
+## 0.10.4-alpha.0 (2020-09-10)
+
+### Features Dendron
+
+- **cli:** add export pod to cli ([3fbf011](https://github.com/dendronhq/dendron/commit/3fbf01139bfd4f9078906efe9e2e3c6e3f298f08))
+
+## 0.10.3 (2020-09-09)
+
+## 0.10.3-alpha.2 (2020-09-08)
+
+# 0.10.0 (2020-09-07)
+
+## 0.9.5 (2020-09-04)
+
+## 0.9.5-alpha.0 (2020-09-03)
+
+### Bug Fixes
+
+- **engine:** trouble with mixed case file names ([02bcde2](https://github.com/dendronhq/dendron/commit/02bcde2d7f8e9c6bef9753e18fffd9e15c763976))
+
+## 0.9.1 (2020-09-01)
+
+## 0.9.1-alpha.0 (2020-09-01)
+
+### Bug Fixes
+
+- **workbench:** rename note will update tree view correctly ([c98de12](https://github.com/dendronhq/dendron/commit/c98de121406590015bbb395eaa05fbbc83c50ff9))
+
+# 0.9.0 (2020-08-30)
+
+## 0.8.13 (2020-08-29)
+
+## 0.8.13-alpha.1 (2020-08-28)
+
+## 0.8.11 (2020-08-28)
+
+## 0.8.11-alpha.0 (2020-08-27)
+
+### Features Dendron
+
+- **workspace:** add dendron tree view ([73b0b82](https://github.com/dendronhq/dendron/commit/73b0b825586eca81360d92dd5e7f00239149b41e))
+
+## 0.8.6 (2020-08-26)
+
+### Features Dendron
+
+- **workspace:** lookup is MUCH FASTER!!! ([38a3661](https://github.com/dendronhq/dendron/commit/38a366146ef7ce1b47fe06a4be46f7c0e5b41144))
+
+## 0.8.2 (2020-08-25)
+
+### Features Dendron
+
+- **hierarchies:** Add Go Up Hierarchy command ([7b225b9](https://github.com/dendronhq/dendron/commit/7b225b94d2e2ac1d13e0d21f7b8b5bc6604508a9))
+
+# 0.8.0 (2020-08-24)
+
+## 0.7.14 (2020-08-24)
+
+## 0.7.12 (2020-08-23)
+
+### Bug Fixes
+
+- **schema:** autocomplete with imported schemas ([5b6a347](https://github.com/dendronhq/dendron/commit/5b6a3472d2ee895bd64ac365d6ab6f49cb768a4f))
+
+### Features Dendron
+
+- **schemas:** support match by pattern ([ba4f687](https://github.com/dendronhq/dendron/commit/ba4f687f5f837ce244e7f58f2746f06372d85a99))
+- **schemas:** support schema import ([7a38f1c](https://github.com/dendronhq/dendron/commit/7a38f1c869f5a20bf81c77682877995dd7bfce87))
+
+## 0.7.11 (2020-08-22)
+
+## 0.7.11-alpha.0 (2020-08-22)
+
+## 0.7.9 (2020-08-20)
+
+## 0.7.9-alpha.1 (2020-08-20)
+
+## 0.7.9-alpha.0 (2020-08-20)
+
+## 0.7.6 (2020-08-19)
+
+### Bug Fixes
+
+- links not being converted to ids ([7106681](https://github.com/dendronhq/dendron/commit/7106681734804ec39990abfdfe9643ba9c006aa5))
+
+## 0.7.6-alpha.0 (2020-08-19)
+
+### Features Dendron
+
+- **pods:** support per hierarchy configuration when publishing ([e68edfa](https://github.com/dendronhq/dendron/commit/e68edfa4cac21230ff77a24b65efa2031eb292dc))
+
+## 0.7.5-alpha.0 (2020-08-19)
+
+### Features Dendron
+
+- **pods:** enable image prefix when building site ([ab86573](https://github.com/dendronhq/dendron/commit/ab865730b0c2da461e2b9fe6851b8784f690be8a))
+
+## 0.7.4 (2020-08-19)
+
+# 0.7.0 (2020-08-17)
+
+## 0.6.10 (2020-08-16)
+
+### Features Dendron
+
+- **pods:** publish multiple roots ([827b2f5](https://github.com/dendronhq/dendron/commit/827b2f52c35fa650b109dc5d929554a3d5db0cf5))
+
+## 0.6.9 (2020-08-16)
+
+### Bug Fixes
+
+- issue with schemas that have same ids ([3f93b31](https://github.com/dendronhq/dendron/commit/3f93b31bffdaa6092a7c03c48db46edf0d89f65a))
+
+## 0.6.1 (2020-08-11)
+
+### Features Dendron
+
+- **commands:** Add Refactor Hierarchy Command ([4fcaf40](https://github.com/dendronhq/dendron/commit/4fcaf40a7fd7b98b658703e726dd8ccf6c14e4c4))
+
+# 0.6.0 (2020-08-09)
+
+## 0.5.15 (2020-08-09)
+
+### Bug Fixes
+
+- index notes created through rename ([40f8fb6](https://github.com/dendronhq/dendron/commit/40f8fb6dd6c810a5ead9de2dedaffd4b55c321e9))
+
+### Features Dendron
+
+- add copy note link command ([5ca2434](https://github.com/dendronhq/dendron/commit/5ca2434de3f19eaa94ef7bc876ad9b8067cdf90a))
+
+## 0.5.10 (2020-08-06)
+
+## 0.5.9 (2020-08-05)
+
+### Bug Fixes
+
+- apply schema descriptions ([e4f7238](https://github.com/dendronhq/dendron/commit/e4f723872db080a3205f305060ebae3c20cb34fb))
+
+## 0.5.8 (2020-08-05)
+
+### Features Dendron
+
+- apply schema description to new notes ([c4b9f15](https://github.com/dendronhq/dendron/commit/c4b9f158daeab5d159e5f4e690ad0c4ad1e3f549))
+
+## 0.5.4 (2020-08-04)
+
+### Features Dendron
+
+- update index when notes are deleted outside of dendron ([93ad260](https://github.com/dendronhq/dendron/commit/93ad26059009f55e4ff1c9a75cfe39c7cff0b376))
+
+## 0.5.3 (2020-08-03)
+
+## 0.5.2 (2020-08-03)
+
+## 0.5.1 (2020-08-03)
+
+# 0.5.0 (2020-08-02)
+
+## 0.4.6 (2020-08-01)
+
+### Features Dendron
+
+- support schema templates ([0205d66](https://github.com/dendronhq/dendron/commit/0205d66fc4538361322ffeabb3e532f0d541b775))
+
+## 0.4.5 (2020-08-01)
+
+## 0.4.4 (2020-08-01)
+
+### Features Dendron
+
+- support deleting schemas ([450f00d](https://github.com/dendronhq/dendron/commit/450f00d6661d1d45dbfed7392bde179a0ab0020c))
+- support deleting schemas ([7e6730a](https://github.com/dendronhq/dendron/commit/7e6730a9c3f804d7c039cf74495493839c910fed))
+- use lookups to view and create schemas ([19b4677](https://github.com/dendronhq/dendron/commit/19b46770fe6a842831692563de96ff4a823df871))
+
+## 0.4.2 (2020-07-30)
+
+### Bug Fixes
+
+- root should have no parent ([bab72fd](https://github.com/dendronhq/dendron/commit/bab72fd438c541673c128caf96174d43b8eaa43a))
+
+### Features Dendron
+
+- build pod command with github pages support ([e063732](https://github.com/dendronhq/dendron/commit/e063732d1ff082dd8520a479926e7ceb1b0893ab))
+- build-site command ([8e5ca80](https://github.com/dendronhq/dendron/commit/8e5ca801237686d70f5955c461049010480837be))
+- overwrite fields in backfill ([af504f4](https://github.com/dendronhq/dendron/commit/af504f44d73910e8687367bc203b613d774a039c))
+
+# 0.4.0 (2020-07-26)
+
+## 0.3.42 (2020-07-23)
+
+## 0.3.40 (2020-07-23)
+
+## 0.3.39 (2020-07-23)
+
+## 0.3.38 (2020-07-23)
+
+## 0.3.37 (2020-07-22)
+
+## 0.3.30 (2020-07-21)
+
+### Features Dendron
+
+- custom front matter support [docs](https://github.com/dendronhq/dendron-template/blob/master/vault/pro.dendron.topic.frontmatter.md) ([dadd3fd](https://github.com/dendronhq/dendron/commit/dadd3fd16e2814e378b7af3c097b556c92981de3))
+
+## 0.3.21 (2020-07-19)
+
+## 0.3.19 (2020-07-18)
+
+## 0.3.17 (2020-07-17)
+
+### Features Dendron
+
+- open non-markdown files using native apps. [docs](https://github.com/dendronhq/dendron-template/blob/master/vault/dendron.feature.links.md) ([7f630d1](https://github.com/dendronhq/dendron/commit/7f630d1fb95d5c0d28fc5a83f4cee27bc17d452c))
+
+## 0.3.16 (2020-07-16)
+
+### Features Dendron
+
+- implement journal notes. see details here: https://github.com/dendronhq/dendron-template/blob/master/vault/dendron.feature.journals.md ([5e1236f](https://github.com/dendronhq/dendron/commit/5e1236fddbf1e0fddf4c27d1a40e9841cc99974f))
+
+## 0.3.15 (2020-07-14)
+
+### Bug Fixes
+
+- schema suggestions not always showing ([658c9e3](https://github.com/dendronhq/dendron/commit/658c9e3215cccf1875138928a3c9a8486052b63a))
+
+### Features Dendron
+
+- show note title if differ from file name ([c0e428d](https://github.com/dendronhq/dendron/commit/c0e428d259ef116d66cbe1107d7760cbb84f8d20))
+
+## 0.3.11 (2020-07-13)
+
+## 0.3.10 (2020-07-13)
+
+### Features Dendron
+
+- auto add nodes when deleted or created outside of dendron ([8c311bd](https://github.com/dendronhq/dendron/commit/8c311bda948a1d54088c49fd70eb65d24af5d68f))
+- better schema suggestions ([03656bc](https://github.com/dendronhq/dendron/commit/03656bc007810457cb6846f0d6adacab4a7fbd3a))
+- match namespace schemas ([7a67b8b](https://github.com/dendronhq/dendron/commit/7a67b8b2fb7caa1b97ee6d492d2801782abecdf6))
+- show node descriptions ([aca86f2](https://github.com/dendronhq/dendron/commit/aca86f2a5fd6ee481f93553693a098db0e322890))
+- surface unknown schemas ([d014965](https://github.com/dendronhq/dendron/commit/d0149652c985c69a4b2607984d578902820077f1))
+- updated icons for schemas ([21804eb](https://github.com/dendronhq/dendron/commit/21804eba61c8dd49e499edd5d548d9d601224e8e))
+
+## 0.1.6 (2020-06-24)
+
+## 0.1.5 (2020-06-24)
+
+## 0.1.4 (2020-06-24)
+
+## 0.1.3 (2020-06-24)
+
+## 0.1.2 (2020-06-24)
+
+# 0.1.0 (2020-06-24)
+
+### Bug Fixes
+
+- write schema properly ([4c56d2d](https://github.com/dendronhq/dendron/commit/4c56d2d326597b8563ae5ebe6b01ce587717a68f))
+
+## [0.28.7-alpha.8](https://github.com/dendronhq/dendron/compare/v0.28.7-alpha.3...v0.28.7-alpha.8) (2021-02-15)
+
+**Note:** Version bump only for package @dendronhq/common-all
+
+## [0.28.7-alpha.7](https://github.com/dendronhq/dendron/compare/v0.28.7-alpha.3...v0.28.7-alpha.7) (2021-02-15)
+
+**Note:** Version bump only for package @dendronhq/common-all
+
+## [0.28.7-alpha.6](https://github.com/dendronhq/dendron/compare/v0.28.7-alpha.3...v0.28.7-alpha.6) (2021-02-15)
+
+**Note:** Version bump only for package @dendronhq/common-all
+
+## [0.28.7-alpha.5](https://github.com/dendronhq/dendron/compare/v0.28.7-alpha.3...v0.28.7-alpha.5) (2021-02-15)
+
+**Note:** Version bump only for package @dendronhq/common-all
+
+## [0.28.7-alpha.4](https://github.com/dendronhq/dendron/compare/v0.28.7-alpha.3...v0.28.7-alpha.4) (2021-02-15)
+
+**Note:** Version bump only for package @dendronhq/common-all
+
 ## [0.28.7-alpha.1](https://github.com/dendronhq/dendron/compare/v0.28.7-alpha.0...v0.28.7-alpha.1) (2021-02-14)
 
 **Note:** Version bump only for package @dendronhq/common-all

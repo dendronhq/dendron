@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/seeds-core",
-  "version": "0.28.7-alpha.1",
+  "version": "0.28.7-alpha.9",
   "description": "dendron seeds",
   "license": "GPLv3",
   "repository": {
@@ -29,7 +29,7 @@
     "compile": "tsc -p tsconfig.json",
     "test": "npx jest",
     "coverage": "jest --coverage",
-    "watch": "yarn compile -- --watch",
+    "watch": "yarn compile --watch",
     "test:unit": "jest ",
     "test:unit:debug": "NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:watch": "LOG_DST=../../logs/seeds-core.log jest --watch"
@@ -56,11 +56,11 @@
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.28.6",
-    "@dendronhq/common-server": "^0.28.7-alpha.1",
+    "@dendronhq/common-server": "^0.28.7-alpha.9",
     "@dendronhq/engine-server": "^0.28.6",
     "fs-extra": "^9.0.1",
     "klaw": "^3.0.0",
     "lodash": "^4.17.20"
   },
-  "gitHead": "47c197f18329be43e02389fb4bd63267dfc07874"
+  "gitHead": "d2e0e1c5ada1ac4a507e2da387cf761316de76de"
 }

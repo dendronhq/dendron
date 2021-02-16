@@ -1,10 +1,10 @@
 import { express } from "@dendronhq/api-server";
 import { BuildSiteV2CLICommandOpts } from "@dendronhq/dendron-cli";
-import { execa, SiteUtils } from "@dendronhq/engine-server";
+import { SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import { env, ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { checkPreReq, getSiteRootDirPath } from "../utils/site";
+import { buildSite, checkPreReq, getSiteRootDirPath } from "../utils/site";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -44,20 +44,12 @@ export class SitePreviewCommand extends BasicCommand<
       async (progress, token) => {
         return new Promise(async (resolve, reject) => {
           try {
-            await execa(
-              "npx",
-              [
-                "dendron-cli",
-                "buildSiteV2",
-                "--wsRoot",
-                wsRoot,
-                "--stage",
-                "dev",
-                "--enginePort",
-                `${port}`,
-              ],
-              { cwd: wsRoot, shell: true, windowsHide: false }
-            );
+            await buildSite({
+              wsRoot,
+              stage: "dev",
+              enginePort: port,
+              serve: false,
+            });
           } catch (err) {
             window.showErrorMessage(err);
           }

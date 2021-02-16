@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.29.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.28.7-alpha.9...@dendronhq/engine-server@0.29.0) (2021-02-16)
+
+**Note:** Version bump only for package @dendronhq/engine-server
+
 ## [0.28.7-alpha.9](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.6.8...@dendronhq/engine-server@0.28.7-alpha.9) (2021-02-15)
 
 ## 0.28.7-alpha.3 (2021-02-15)

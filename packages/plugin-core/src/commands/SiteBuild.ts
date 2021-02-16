@@ -18,6 +18,7 @@ export class SiteBuildCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   async sanityCheck() {
     return checkPreReq();
+    // return undefined;
   }
 
   async execute(_opts?: CommandOpts) {

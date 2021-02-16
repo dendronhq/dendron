@@ -14,3 +14,7 @@ function setRegRemote() {
     yarn config set registry https://registry.npmjs.org/
     npm set registry https://registry.npmjs.org/
 }
+
+function pweb() {
+    sed  -ibak 's/out\/extension/dist\/extension/' package.json
+}

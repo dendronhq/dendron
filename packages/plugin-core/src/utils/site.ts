@@ -49,12 +49,14 @@ export const buildSite = async (opts: BuildSiteV2CLICommandCliOpts) => {
     "@dendronhq",
     "dendron-11ty"
   );
+  const importEleventy = require(`./webpack-require-hack.js`);
+  const eleventy = importEleventy(eleventyPath);
   Logger.info({ ctx: "buildSite", eleventyPath });
   const cmd = new BuildSiteV2CLICommand();
   const cOpts = await cmd.enrichArgs(opts);
   await cmd.execute({
     ...cOpts,
-    custom11tyPath: eleventyPath,
+    eleventy,
     cwd: eleventyPath,
   });
 };

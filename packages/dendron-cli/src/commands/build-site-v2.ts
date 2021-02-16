@@ -24,6 +24,7 @@ type CommandOpts = CommandCLIOpts & {
   engine: DEngineClientV2;
   compile?: any;
   server: any;
+  eleventy?: any;
 };
 type CommandOutput = {};
 
@@ -110,22 +111,32 @@ export class BuildSiteV2CLICommand extends CLICommand<
     let copyAssets;
     let buildStyles;
     let buildSearch;
-    if (opts.custom11tyPath) {
+    if (opts.eleventy) {
       ({
         compile,
         buildNav,
         copyAssets,
         buildStyles,
         buildSearch,
-      } = require(opts.custom11tyPath));
+      } = opts.eleventy);
     } else {
-      ({
-        compile,
-        buildNav,
-        copyAssets,
-        buildStyles,
-        buildSearch,
-      } = require("@dendronhq/dendron-11ty"));
+      if (opts.custom11tyPath) {
+        ({
+          compile,
+          buildNav,
+          copyAssets,
+          buildStyles,
+          buildSearch,
+        } = require(opts.custom11tyPath));
+      } else {
+        ({
+          compile,
+          buildNav,
+          copyAssets,
+          buildStyles,
+          buildSearch,
+        } = require("@dendronhq/dendron-11ty"));
+      }
     }
     this.L.info("running pre-compile");
     await Promise.all([buildNav(), copyAssets()]);

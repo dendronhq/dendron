@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/common-server",
-  "version": "0.29.0",
+  "version": "0.29.1-alpha.0",
   "description": "common-server",
   "license": "GPLv3",
   "repository": {
@@ -36,7 +36,7 @@
     "test:watch": "yarn test --watch -u"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.29.0",
+    "@dendronhq/common-all": "^0.29.1-alpha.0",
     "@types/fs-extra": "^9.0.1",
     "@types/js-yaml": "^3.12.5",
     "@types/lodash": "^4.14.154",

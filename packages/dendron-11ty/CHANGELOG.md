@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.29.3-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-11ty@1.29.2-alpha.0...@dendronhq/dendron-11ty@1.29.3-alpha.0) (2021-02-16)
+
+**Note:** Version bump only for package @dendronhq/dendron-11ty
+
 ## [1.29.2-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-11ty@1.29.0...@dendronhq/dendron-11ty@1.29.2-alpha.0) (2021-02-16)
 
 **Note:** Version bump only for package @dendronhq/dendron-11ty

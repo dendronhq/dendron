@@ -264,6 +264,7 @@ export class SiteUtils {
         note: NoteUtilsV2.toLogObj(note),
       });
 
+      // check if we can publish this note
       const maybeNote = SiteUtils.filterByNote({ note, hConfig });
       if (maybeNote) {
         if (sconfig.writeStubs && maybeNote.stub) {
@@ -280,9 +281,9 @@ export class SiteUtils {
           debugger;
           let acc = 0;
           while (acc !== siteFM.skipLevels) {
-            children = children.flatMap((ent) =>
-              ent.children.map((id) => notesForHiearchy[id])
-            );
+            children = children
+              .flatMap((ent) => ent.children.map((id) => notesForHiearchy[id]))
+              .filter((ent) => !_.isUndefined(ent));
             acc += 1;
           }
           maybeNote.children = children.map((ent) => ent.id);
@@ -306,7 +307,13 @@ export class SiteUtils {
         // TODO: handle dups
 
         // add children to Q
-        children.forEach((n: NotePropsV2) => processQ.push(n));
+        children.forEach((n: NotePropsV2) => {
+          // update parent to be current note
+          // dup merging at the top could cause children from multiple vaults
+          // to be present
+          n.parent = maybeNote.id;
+          processQ.push(n);
+        });
 
         // updated children
         out[maybeNote.id] = {
@@ -466,7 +473,10 @@ export class SiteUtils {
         noteCandidates.flatMap((ent) => ent.children)
       );
       // update parents
-      domainNote.children.map((id) => (noteDict[id].parent = domainId));
+      domainNote.children.map((id) => {
+        const maybeNote = noteDict[id];
+        maybeNote.parent = domainId;
+      });
       logger.info({
         ctx: "filterByHiearchy",
         msg: "dup-resolution: resolving dup",

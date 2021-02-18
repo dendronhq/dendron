@@ -137,6 +137,29 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             },
           ],
         };
+
+        if (value === "403") {
+          _node.data = {
+            alias,
+            hName: "a",
+            hProperties: {
+              "data-toggle": "popover",
+              title: "This page has not yet sprouted",
+              style: "cursor: pointer",
+              "data-content": [
+                `<a href="https://dendron.so/">Dendron</a> (the tool used to generate this site) lets authors selective publish content. You will see this page whenever you click on a link to an unpublished page`,
+                "",
+                "<img src='https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/not-sprouted.png'></img>",
+              ].join("\n"),
+            },
+            hChildren: [
+              {
+                type: "text",
+                value: alias,
+              },
+            ],
+          };
+        }
       }
       if (
         node.type === "refLink" &&

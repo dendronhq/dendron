@@ -155,11 +155,6 @@ export type DendronSiteConfig = {
   siteLastModified?: boolean;
 
   /**
-   * Vaults that should never be published
-   */
-  privateVaults?: string[];
-
-  /**
    * Where your site will be published.
    * Relative to Dendron workspace
    */

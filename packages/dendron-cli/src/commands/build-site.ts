@@ -61,7 +61,7 @@ function getRoot(engine: DEngineClientV2) {
 // From: C:\Users\joe.bloggs\Dendron\vault
 // To:   /cygdrive/c/Users/joe.bloggs/Dendron/vault
 function makeCygdrivePath(pathname: string) {
-  let driveLetter = process.env.SystemDrive || 'C';
+  let driveLetter = process.env.SystemDrive || "C";
   if (pathname[1] === ":") {
     driveLetter = pathname[0];
     pathname = pathname.slice(2);
@@ -155,17 +155,6 @@ async function note2JekyllMdFile(
   const siteNotesDir = config.siteNotesDir || "notes";
 
   if (!hConfig.publishByDefault && !note.custom?.published) {
-    return [];
-  }
-  if (
-    _.some(opts.privateVaults || [], (ent) => {
-      return VaultUtils.isEqual(
-        note.vault,
-        { fsPath: ent },
-        opts.engine.wsRoot
-      );
-    })
-  ) {
     return [];
   }
 

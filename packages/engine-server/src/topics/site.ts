@@ -35,6 +35,12 @@ export class SiteUtils {
     wsRoot: string;
   }) {
     const { note, config, vaults, wsRoot } = opts;
+    if (
+      note.vault.visibility &&
+      note.vault.visibility === DVaultVisibility.PRIVATE
+    ) {
+      return false;
+    }
     // check if note is in index
     const domain = DNodeUtilsV2.domainName(note.fname);
     if (

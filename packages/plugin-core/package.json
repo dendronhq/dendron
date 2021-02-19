@@ -615,7 +615,6 @@
     },
     "devDependencies": {
         "@dendronhq/common-test-utils": "^0.29.1-alpha.0",
-        "@types/clipboardy": "^2.0.1",
         "@types/execa": "^2.0.0",
         "@types/fs-extra": "^9.0.1",
         "@types/glob": "^7.1.1",
@@ -642,7 +641,6 @@
     },
     "dependencies": {
         "@dendronhq/api-server": "^0.29.1-alpha.0",
-        "@dendronhq/clipboardy": "^2.3.0",
         "@dendronhq/common-all": "^0.29.1-alpha.0",
         "@dendronhq/common-server": "^0.29.1-alpha.0",
         "@dendronhq/dendron-cli": "^0.29.2-alpha.0",

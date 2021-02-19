@@ -1,4 +1,3 @@
-import clipboardy from "@dendronhq/clipboardy";
 import { DNodeUtilsV2, VaultUtils } from "@dendronhq/common-all";
 import { PublishPodCommandOpts } from "@dendronhq/dendron-cli";
 import {
@@ -15,6 +14,7 @@ import { VSCodeUtils } from "../utils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
+import * as vscode from "vscode";
 
 type CommandOpts = PublishPodCommandOpts;
 
@@ -80,7 +80,7 @@ export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
         wsRoot,
         engine,
       });
-      clipboardy.writeSync(link);
+      await vscode.env.clipboard.writeText(link);
       this.showResponse();
       return link;
     } catch (err) {

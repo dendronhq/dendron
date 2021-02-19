@@ -1,5 +1,4 @@
 import fs from "fs-extra";
-import clipboardy from "@dendronhq/clipboardy";
 import path from "path";
 import { window, workspace } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
@@ -7,6 +6,7 @@ import { Logger } from "../logger";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 import { getPortFilePath } from "@dendronhq/engine-server";
+import { clipboard } from "../utils";
 const L = Logger;
 
 type DiagnosticsReportCommandOpts = {};
@@ -53,7 +53,7 @@ export class DiagnosticsReportCommand extends BasicCommand<
       portFromFile,
     ].join("\n");
     await workspace.openTextDocument({ language: "markdown", content });
-    clipboardy.writeSync(content);
+    await clipboard.writeText(content);
     return;
   }
 

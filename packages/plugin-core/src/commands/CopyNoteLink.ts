@@ -1,10 +1,9 @@
-import clipboardy from "@dendronhq/clipboardy";
 import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { TextEditor, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { clipboard, VSCodeUtils } from "../utils";
 import { getHeaderFromSelection } from "../utils/editor";
 import { getEngine } from "../workspace";
 import { BasicCommand } from "./base";
@@ -45,7 +44,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
     const { header } = getHeaderFromSelection({ clean: true });
     const link = NoteUtilsV2.createWikiLink({ note, header });
     try {
-      clipboardy.writeSync(link);
+      clipboard.writeText(link);
     } catch (err) {
       this.L.error({ err, link });
       throw err;

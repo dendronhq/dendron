@@ -74,6 +74,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         const { error, note } = getNoteOrError(notes, value);
         if (error) {
           addError(proc, error);
+          debugger;
           return "error with link";
         } else {
           value = note!.id;

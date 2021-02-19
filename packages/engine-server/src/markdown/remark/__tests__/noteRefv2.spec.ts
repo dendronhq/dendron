@@ -485,7 +485,7 @@ describe("compilev2", () => {
           {
             actual: await AssertUtils.assertInString({
               body: resp.toString(),
-              match: ["# Foo", "# Foo.One", "# Foo.Two"],
+              match: ["# Foo", "# Foo.One", "# Foo.Two", "Regular wikilink"],
             }),
             expected: true,
           },
@@ -498,7 +498,13 @@ describe("compilev2", () => {
           {
             actual: await AssertUtils.assertInString({
               body: resp.toString(),
-              match: ["# Foo", "# Foo.One", "# Foo.Two", "portal"],
+              match: [
+                "# Foo",
+                "# Foo.One",
+                "# Foo.Two",
+                "portal",
+                "Regular wikilink",
+              ],
             }),
             expected: true,
           },

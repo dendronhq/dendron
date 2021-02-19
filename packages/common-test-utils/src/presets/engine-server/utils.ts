@@ -84,6 +84,18 @@ export const setupBasicMulti: PreSetupHookFunction = async ({
   await SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.create({ vault: vault1, wsRoot });
 };
 
+/**
+ * Raw:
+ * ![[foo.one]]
+ *
+ * End Format:
+ * # Foo.One
+ * <noteRef>
+ * # Foo.Two
+ * blah
+ * </noteRef>
+ * Regular wikilink: [[foo.two]]
+ */
 export const setupNoteRefRecursive: PreSetupHookFunction = async ({
   vaults,
   wsRoot,
@@ -98,17 +110,15 @@ export const setupNoteRefRecursive: PreSetupHookFunction = async ({
   await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
     vault,
     wsRoot,
-    body: "((ref: [[foo.one]]))",
+    body: "![[foo.one]]",
     props,
   });
   await NoteTestUtilsV4.createNote({
     vault,
     fname: "foo.one",
-    body: [
-      "# Foo.One",
-      `((ref: [[foo.two]]))`,
-      `Regular wikilink: [[foo.two]]`,
-    ].join("\n"),
+    body: ["# Foo.One", `![[foo.two]]`, `Regular wikilink: [[foo.two]]`].join(
+      "\n"
+    ),
     wsRoot,
     props: {
       id: "foo.one-id",

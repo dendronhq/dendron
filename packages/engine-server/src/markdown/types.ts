@@ -35,6 +35,7 @@ export type DendronASTData = {
   wikiLinkOpts?: WikiLinksOpts;
   config?: DendronConfig;
   overrides?: Partial<DendronPubOpts>;
+  shouldApplyPublishRules?: boolean;
 };
 
 // NODES

@@ -278,7 +278,6 @@ export class SiteUtils {
 
         // if skip levels, accumulate the grandchildren
         if (siteFM.skipLevels) {
-          debugger;
           let acc = 0;
           while (acc !== siteFM.skipLevels) {
             children = children

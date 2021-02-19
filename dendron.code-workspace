@@ -1,7 +1,8 @@
 {
     "folders": [
         {
-            "path": "."
+            "path": ".",
+            "name": "root"
         },
         {
             "path": "packages/common-all"

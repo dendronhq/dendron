@@ -14,6 +14,7 @@ import { html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
 import Unified, { Plugin, Processor } from "unified";
 import { Node, Parent } from "unist";
+import { SiteUtils } from "../../topics/site";
 import { parseFileLinkV2 } from "../../utils";
 import { DendronASTDest, DendronASTNode, NoteRefNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
@@ -244,7 +245,12 @@ export function convertNoteRefASTV2(
   let errors: DendronError[] = [];
   const { link, proc, compilerOpts } = opts;
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
-  const { dest, vault } = MDUtilsV4.getDendronData(proc);
+  const {
+    dest,
+    vault,
+    config,
+    shouldApplyPublishRules,
+  } = MDUtilsV4.getDendronData(proc);
   if (!vault) {
     return { error: new DendronError({ msg: "no vault specified" }), data: [] };
   }
@@ -288,6 +294,18 @@ export function convertNoteRefASTV2(
     });
     try {
       const note = file2Note(npath, vault);
+      if (
+        shouldApplyPublishRules &&
+        !SiteUtils.canPublish({
+          note,
+          config: config!.site,
+          vaults: engine.vaultsv3,
+          wsRoot: engine.wsRoot,
+        })
+      ) {
+        // TODO: in the future, add 403 pages
+        return paragraph();
+      }
       const body = note.body;
       const { error, data } = convertNoteRefHelperAST({
         body,

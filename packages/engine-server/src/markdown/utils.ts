@@ -163,6 +163,7 @@ export class MDUtilsV4 {
   static procFull(
     opts: ProcOpts & {
       dest: DendronASTDest;
+      shouldApplyPublishRules?: boolean;
       vault?: DVault;
       config?: DendronConfig;
       fname?: string;
@@ -175,7 +176,7 @@ export class MDUtilsV4 {
       mermaid?: boolean;
     }
   ) {
-    const { dest, vault, fname, config } = opts;
+    const { dest, vault, fname, config, shouldApplyPublishRules } = opts;
     let proc = this.proc(opts);
     if (vault && fname) {
       const engine = MDUtilsV4.getEngineFromProc(proc).engine;
@@ -191,7 +192,13 @@ export class MDUtilsV4 {
       proc = proc.data("fm", fm);
     }
     proc = proc
-      .data("dendron", { dest, vault, fname, config } as DendronASTData)
+      .data("dendron", {
+        dest,
+        vault,
+        fname,
+        config,
+        shouldApplyPublishRules,
+      } as DendronASTData)
       //.use(extract, { name: "fm" })
       .use(abbrPlugin)
       .use(variables)

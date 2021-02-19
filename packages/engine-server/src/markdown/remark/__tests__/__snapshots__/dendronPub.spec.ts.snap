@@ -11,3 +11,13 @@ VFile {
   "messages": Array [],
 }
 `;
+
+exports[`basics can't publish inside note ref 1`] = `
+VFile {
+  "contents": "<p></p><p></p><p></p>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;

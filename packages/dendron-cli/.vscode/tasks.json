@@ -77,7 +77,9 @@
     {
       "label": "build-site",
       "type": "shell",
-      "command": "node lib/bin/dendron-cli.js build-site --vault /Users/kevinlin/projects/dendronv2/dendron-template/vault --dendronRoot /Users/kevinlin/projects/dendronv2/dendron-template",
+      "command": "node --inspect lib/bin/dendron-cli.js buildSiteV2 --wsRoot /Users/kevinlin/Dropbox/Apps/Noah --stage dev --enginePort `cat /Users/kevinlin/Dropbox/Apps/Noah/.dendron.port`",
+      "options": {
+      },
       "problemMatcher": []
     }
   ]

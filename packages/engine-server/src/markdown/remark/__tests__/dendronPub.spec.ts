@@ -2,6 +2,7 @@ import { DEngineClientV2 } from "@dendronhq/common-all";
 import {
   AssertUtils,
   ENGINE_HOOKS,
+  NoteTestUtilsV4,
   runEngineTestV4,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
@@ -67,6 +68,50 @@ describe("basics", () => {
         ).toBeTruthy();
       },
       { expect, createEngine, preSetupHook: ENGINE_HOOKS.setupBasic }
+    );
+  });
+
+  test("can't publish inside note ref", async () => {
+    await runEngineTestV4(
+      async ({ engine, vaults }) => {
+        const vault = vaults[0];
+        const config = DConfig.genDefaultConfig();
+        config.site = {
+          siteHierarchies: ["foo"],
+          siteRootDir: "foo",
+        };
+        const resp = await MDUtilsV4.procRehype({
+          proc: proc(
+            engine,
+            {
+              ...dendronData,
+              config,
+              vault,
+              fname: "gamma",
+              shouldApplyPublishRules: true,
+            },
+            {
+              wikiLinkOpts: { useId: true },
+              transformNoPublish: true,
+            }
+          ),
+        }).process("![[alpha]]");
+        expect(resp).toMatchSnapshot();
+        expect(resp.contents as string).toEqual("<p></p><p></p><p></p>");
+      },
+      {
+        expect,
+        createEngine,
+        preSetupHook: async (opts) => {
+          await ENGINE_HOOKS.setupLinks(opts);
+          await NoteTestUtilsV4.createNote({
+            fname: "gamma",
+            body: `![[alpha]]`,
+            vault: opts.vaults[0],
+            wsRoot: opts.wsRoot,
+          });
+        },
+      }
     );
   });
 });

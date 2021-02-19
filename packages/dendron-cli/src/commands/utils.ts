@@ -5,11 +5,23 @@ import _ from "lodash";
 import yargs from "yargs";
 const logger = createLogger();
 
-export async function setupEngine(opts: {
+export type SetupEngineCLIOpts = {
   wsRoot: string;
   enginePort?: number;
   init?: boolean;
-}): Promise<any> {
+};
+
+export type SetupEngineResp = {
+  wsRoot: string;
+  engine: DEngineClientV2;
+  port: number;
+  server: any;
+};
+
+/**
+ * Setup an engine based on CLI args
+ */
+export async function setupEngine(opts: SetupEngineCLIOpts): Promise<any> {
   let { wsRoot, enginePort, init } = _.defaults(opts, { init: true });
   let engine: DEngineClientV2;
   let port: number;
@@ -45,6 +57,9 @@ export async function setupEngine(opts: {
   return { wsRoot, engine, port, server };
 }
 
+/**
+ * Add yargs based options to setup engine
+ */
 export function setupEngineArgs(args: yargs.Argv) {
   args.option("enginePort", {
     describe:

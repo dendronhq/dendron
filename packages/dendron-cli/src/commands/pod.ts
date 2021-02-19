@@ -27,7 +27,7 @@ export function fetchPodClassV4(
     pods?: PodClassEntryV4[];
     podType: PodKind;
   }
-) {
+): PodClassEntryV4 {
   const { podSource, pods } = opts;
   if (podSource === "builtin") {
     if (!pods) {
@@ -36,6 +36,9 @@ export function fetchPodClassV4(
     const podClass = _.find(pods, {
       id: podId,
     });
+    if (_.isUndefined(podClass)) {
+      throw Error("no pod found");
+    }
     return podClass;
   } else {
     const podEntry = require(podId);

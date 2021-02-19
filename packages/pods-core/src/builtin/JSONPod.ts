@@ -3,6 +3,7 @@ import {
   DVault,
   NotePropsV2,
   NoteUtilsV2,
+  PodConfig,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -147,6 +148,21 @@ export class JSONExportPod extends ExportPod<
 > {
   static id: string = ID;
   static description: string = "export notes as json";
+
+  get config(): PodConfig[] {
+    return [
+      {
+        key: "dest",
+        description: "where to export to",
+        type: "string" as const,
+      },
+      {
+        key: "includeBody",
+        description: "should body be included",
+        type: "boolean" as const,
+      },
+    ];
+  }
 
   // no-op
   async clean(opts: ExportPodCleanOpts<ExportPodRawConfig>) {

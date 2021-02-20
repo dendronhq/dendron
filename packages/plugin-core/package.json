@@ -348,13 +348,6 @@
                 "docPreview": ""
             },
             {
-                "command": "dendron.buildPod",
-                "title": "Dendron: Build Pod",
-                "desc": "Build your notes for export. Currently, only export to github pages is supported.",
-                "docLink": "dendron.topic.pod.md",
-                "docPreview": ""
-            },
-            {
                 "command": "dendron.configurePod",
                 "title": "Dendron: Configure Pod",
                 "desc": "Update your pod configuration",
@@ -405,14 +398,6 @@
                 "docs": "If you highlight a header, will copy the url with the header set as the anchor",
                 "docLink": "",
                 "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.copy-url.gif)"
-            },
-            {
-                "command": "dendron.publish",
-                "title": "Dendron: Publish",
-                "desc": "Build, commit and publish your notes with a single command",
-                "docs": "- NOTE: this is mean for v1 publishing. V2 publishing currently does not have a publish command.",
-                "docLink": "",
-                "docPreview": "<a href=\"https://www.loom.com/share/c58edf543e234a8fa164095237579ccc\"> <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/c58edf543e234a8fa164095237579ccc-with-play.gif\"> </a>"
             },
             {
                 "command": "dendron.siteBuild",

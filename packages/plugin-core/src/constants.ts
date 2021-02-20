@@ -407,15 +407,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     skipDocs: true,
   },
   // --- Pods
-  BUILD_POD: {
-    key: "dendron.buildPod",
-    title: `${CMD_PREFIX} Build Pod`,
-    group: "pods",
-    desc:
-      "Build your notes for export. Currently, only export to github pages is supported.",
-    docLink: "dendron.topic.pod.md",
-    docPreview: "",
-  },
   CONFIGURE_POD: {
     key: "dendron.configurePod",
     title: `${CMD_PREFIX} Configure Pod`,
@@ -489,16 +480,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     },
   },
   // --- Publishing
-  PUBLISH: {
-    key: "dendron.publish",
-    title: `${CMD_PREFIX} Publish`,
-    group: "publishing",
-    desc: "Build, commit and publish your notes with a single command",
-    docs:
-      "- NOTE: this is mean for v1 publishing. V2 publishing currently does not have a publish command.",
-    docLink: "",
-    docPreview: `<a href="https://www.loom.com/share/c58edf543e234a8fa164095237579ccc"> <img style="" src="https://cdn.loom.com/sessions/thumbnails/c58edf543e234a8fa164095237579ccc-with-play.gif"> </a>`,
-  },
   SITE_BUILD: {
     key: "dendron.siteBuild",
     title: `${CMD_PREFIX} Site Build`,

@@ -14,17 +14,15 @@ import _ from "lodash";
 import yargs from "yargs";
 import { CLICommand } from "./base";
 import { CommandOptsV3 } from "./soil";
-import { setupEngine, setupEngineArgs } from "./utils";
+import { setupEngine, setupEngineArgs, SetupEngineCLIOpts } from "./utils";
 
 type CommandCLIOpts = {
-  wsRoot: string;
   action: DoctorActions;
-  enginePort?: number;
   query?: string;
   limit?: number;
   dryRun?: boolean;
   exit?: boolean;
-};
+} & SetupEngineCLIOpts;
 
 type CommandOpts = CommandOptsV3 & CommandCLIOpts;
 type CommandOutput = void;
@@ -33,7 +31,6 @@ export enum DoctorActions {
   H1_TO_TITLE = "h1ToTitle",
   HI_TO_H2 = "h1ToH2",
   REMOVE_STUBS = "removeStubs",
-  // FIX_FM = "fixFM"
 }
 
 export { CommandOpts as DoctorCLICommandOpts };
@@ -45,8 +42,8 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   buildArgs(args: yargs.Argv) {
     super.buildArgs(args);
     setupEngineArgs(args);
-    args.option("actions", {
-      describe: "what actions the doctor should take",
+    args.option("action", {
+      describe: "what action the doctor should take",
       type: "string",
       requiresArg: true,
       choices: Object.values(DoctorActions),

@@ -1,45 +1,46 @@
 {
-    // Use IntelliSense to learn about possible Node.js debug attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-          "type": "node",
-          "name": "api-server:test launch server",
-          "request": "launch",
-          "runtimeArgs": [
-              "-r",
-              "ts-node/register"
-          ],
-          "env": {
-            "PORT": "3005",
-            "TS_NODE_LOG_ERROR": "1",
-            "LOG_NAME": "api-server",
-            "LOG_DST": "../../logs/api-server.log",
-            "LOG_LEVEL": "debug"
-          },
-          "args": [
-              "${workspaceFolder}/src/start.ts"
-          ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "debug one test",
+      "program": "${workspaceFolder:root}/node_modules/jest/bin/jest.js",
+      "sourceMaps": true,
+      "smartStep": true,
+      "cwd": "${workspaceFolder:api-server}",
+      "env": {
+        "LOG_DST": "stdout",
+        "LOG_LEVEL": "error"
       },
-      {
-        "type": "node",
-        "request": "launch",
-        "name": "api-server:debug test all",
-        "program": "${workspaceFolder:api-server}/node_modules/jest/bin/jest.js",
-        "cwd": "${workspaceFolder:api-server}",
-        "args": ["--runInBand"]
+      "args": [
+        "--findRelatedTests",
+        "--runInBand",
+        "${relativeFile}",
+        "-u"
+      ],
+      "outFiles": [
+        "${workspaceFolder:api-server}/lib/**/*.js"
+      ]
+    },
+    {
+      "type": "node",
+      "name": "start debug server",
+      "request": "launch",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register"
+      ],
+      "env": {
+        "PORT": "3005",
+        "TS_NODE_LOG_ERROR": "1",
+        "LOG_NAME": "api-server",
+        "LOG_DST": "../../logs/api-server.log",
+        "LOG_LEVEL": "debug"
       },
-      {
-        "type": "node",
-        "request": "launch",
-        "name": "api-server:debug test file",
-        "program": "${workspaceFolder:api-server}/node_modules/jest/bin/jest.js",
-        "cwd": "${workspaceFolder:api-server}",
-        "args": ["--runInBand", "${relativeFile}", "-u"],
-        "env": {"LOG_DST": "../../logs/api-server.log"}
-      }
-    ]
-  }
-  
+      "args": [
+        "${workspaceFolder:api-server}/src/start.ts"
+      ]
+    }
+  ]
+}

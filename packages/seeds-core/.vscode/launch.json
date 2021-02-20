@@ -1,37 +1,27 @@
 {
-    // Use IntelliSense to learn about possible Node.js debug attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "type": "node",
-        "request": "launch",
-        "name": "pods-core:test file",
-        "program": "${workspaceFolder:pods-core}/lib/${fileBasenameNoExtension}.js",
-        "cwd": "${workspaceFolder:pods-core}",
-        "sourceMaps": true,
-        "smartStep": true,
-        "preLaunchTask": "build",
-        "outFiles": ["${workspaceFolder:pods-core}/lib/*.js"]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "debug one test",
+      "program": "${workspaceFolder:root}/node_modules/jest/bin/jest.js",
+      "sourceMaps": true,
+      "smartStep": true,
+      "cwd": "${workspaceFolder:seeds-core}",
+      "env": {
+        "LOG_DST": "stdout",
+        "LOG_LEVEL": "error"
       },
-      {
-        "type": "node",
-        "request": "launch",
-        "name": "pods-core:debug test",
-        "program": "${workspaceFolder:pods-core}/node_modules/jest/bin/jest.js",
-        "cwd": "${workspaceFolder:pods-core}",
-        "args": ["--runInBand"]
-      },
-      {
-        "type": "node",
-        "request": "launch",
-        "name": "pods-core:debug test file",
-        "program": "${workspaceFolder:pods-core}/node_modules/jest/bin/jest.js",
-        "cwd": "${workspaceFolder:pods-core}",
-        "args": ["--runInBand", "${relativeFile}", "-u"],
-        "env": {"LOG_DST": "../../logs/seeds-core.log"}
-      }
-    ]
-  }
-  
+      "args": [
+        "--findRelatedTests",
+        "--runInBand",
+        "${relativeFile}",
+        "-u"
+      ],
+      "outFiles": [
+        "${workspaceFolder:seeds-core}/lib/**/*.js"
+      ]
+    }
+  ]
+}

@@ -11,6 +11,6 @@ jobs:
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
           configuration-path: .github/config/issue-labler/labeler.yml
-          not-before: 2020-01-15T00:00:00Z
+          not-before: 2020-02-21T00:00:00Z
           enable-versioned-regex: 1
           versioned-regex: 'issue_labeler_regex_version=(\d+)'

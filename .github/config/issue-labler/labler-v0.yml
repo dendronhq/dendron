@@ -8,6 +8,8 @@ area.pods:
   - '- \[(?:x|X)\] Pods'
 area.markdown:
   - '- \[(?:x|X)\] Markdown'
+area.seeds:
+  - '- \[(?:x|X)\] Seed'
 area.misc:
   - '- \[(?:x|X)\] Misc'
 area.hierarchy:

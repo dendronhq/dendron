@@ -1,58 +1,20 @@
 {
-  // See https://go.microsoft.com/fwlink/?LinkId=733558
-  // for the documentation about the tasks.json format
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Run current file",
-      "command": "ts-node ${relativeFile}",
+      "label": "test:watch",
+      "command": "yarn test:watch ${relativeFile} -u",
       "type": "shell",
-      "problemMatcher": []
-    },
-    {
-      "label": "npm:test:watch",
-      "command": "npm run test:watch -- ${relativeFile} -u",
-      "type": "shell",
-      "problemMatcher": []
-    },
-    {
-      "label": "npm:test:watch:integ",
-      "command": "npm run test:watch:integ -- ${relativeFile} -u",
-      "type": "shell",
-      "problemMatcher": [], 
-      "options": {"env": {"LOG_DST": "${env:TEMP}/dendron-api-server.log"}}
+      "problemMatcher": [],
+      "options": {
+        "env": {
+          "LOG_DST": "../../logs/api-server.log"
+        }
+      }
     },
     {
       "type": "npm",
-      "label": "clean",
-      "script": "clean",
-      "problemMatcher": []
-    },
-    {
-      "type": "npm",
-      "label": "build",
-      "script": "build",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "type": "npm",
-      "label": "format",
-      "script": "format",
-      "problemMatcher": []
-    },
-    {
-      "type": "npm",
-      "label": "coverage",
-      "script": "coverage",
-      "problemMatcher": []
-    },
-    {
-      "type": "npm",
-      "label": "test",
+      "label": "test:all",
       "script": "test",
       "group": {
         "kind": "test",
@@ -61,10 +23,15 @@
       "problemMatcher": []
     },
     {
-      "type": "npm",
-      "label": "lint",
-      "script": "lint",
-      "problemMatcher": ["$eslint-stylish"]
+      "label": "test:watch:integ",
+      "command": "yarn test:watch:integ -- ${relativeFile} -u",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "env": {
+          "LOG_DST": "${env:TEMP}/dendron-api-server.log"
+        }
+      }
     }
   ]
 }

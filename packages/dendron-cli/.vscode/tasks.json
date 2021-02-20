@@ -1,58 +1,20 @@
 {
-  // See https://go.microsoft.com/fwlink/?LinkId=733558
-  // for the documentation about the tasks.json format
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Run current file",
-      "command": "ts-node ${relativeFile}",
-      "type": "shell",
-      "problemMatcher": []
-    },
-    {
-      "label": "npm:test:watch",
+      "label": "test:watch",
       "command": "yarn test:watch ${relativeFile} -u",
       "type": "shell",
       "problemMatcher": [],
-      "options": {"env": {"LOG_DST": "../../logs/dendron-cli.log"}}
-    },
-    {
-      "label": "chmod +x",
-      "command": "chmod +x lib/bin/dendron-cli.js",
-      "type": "shell",
-      "problemMatcher": []
-    },
-    {
-      "type": "npm",
-      "label": "clean",
-      "script": "clean",
-      "problemMatcher": []
+      "options": {
+        "env": {
+          "LOG_DST": "../../logs/dendron-cli.log"
+        }
+      }
     },
     {
       "type": "npm",
-      "label": "build",
-      "script": "build",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "type": "npm",
-      "label": "format",
-      "script": "format",
-      "problemMatcher": []
-    },
-    {
-      "type": "npm",
-      "label": "coverage",
-      "script": "coverage",
-      "problemMatcher": []
-    },
-    {
-      "type": "npm",
-      "label": "test",
+      "label": "test:all",
       "script": "test",
       "group": {
         "kind": "test",
@@ -61,12 +23,10 @@
       "problemMatcher": []
     },
     {
-      "type": "npm",
-      "label": "lint",
-      "script": "lint",
-      "problemMatcher": [
-        "$eslint-stylish"
-      ]
+      "label": "chmod +x",
+      "command": "chmod +x lib/bin/dendron-cli.js",
+      "type": "shell",
+      "problemMatcher": []
     },
     {
       "label": "watch-vault-dev",
@@ -78,8 +38,7 @@
       "label": "build-site",
       "type": "shell",
       "command": "node --inspect lib/bin/dendron-cli.js buildSiteV2 --wsRoot /Users/kevinlin/Dropbox/Apps/Noah --stage dev --enginePort `cat /Users/kevinlin/Dropbox/Apps/Noah/.dendron.port`",
-      "options": {
-      },
+      "options": {},
       "problemMatcher": []
     },
     {

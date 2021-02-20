@@ -9,7 +9,7 @@ import {
 import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
-import { fetchPodClassV4 } from "./pod";
+import { fetchPodClassV4, PodSource } from "./pod";
 import { SoilCommandCLIOpts, SoilCommandOptsV2, SoilCommandV2 } from "./soil";
 
 type CommandOutput = {};
@@ -48,7 +48,7 @@ function enrichPodArgs(
   podType: PodKind
 ) {
   const { podId, wsRoot, podSource, config } = _.defaults(args, {
-    podSource: "builtin",
+    podSource: PodSource.BUILTIN,
   });
   const podsDir = path.join(wsRoot, "pods");
   const podClass = fetchPodClassV4(podId, { podSource, pods, podType });

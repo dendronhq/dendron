@@ -30,6 +30,7 @@ type CommandOutput = {};
 
 export { CommandOpts as BuildSiteV2CLICommandOpts };
 export { CommandCLIOpts as BuildSiteV2CLICommandCliOpts };
+
 export class BuildSiteV2CLICommand extends CLICommand<
   CommandOpts,
   CommandOutput

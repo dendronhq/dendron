@@ -25,6 +25,8 @@ export function fetchPodClassV4(
   opts: {
     podSource: CommandCLIOpts["podSource"];
     pods?: PodClassEntryV4[];
+    podPkg?: string;
+    wsRoot?: string;
     podType: PodKind;
   }
 ): PodClassEntryV4 {
@@ -41,8 +43,17 @@ export function fetchPodClassV4(
     }
     return podClass;
   } else {
-    const podEntry = require(podId);
-    const podClass = podEntry[opts.podType];
+    if (!opts.podPkg || !opts.wsRoot) {
+      throw Error("podPkg not defined");
+    }
+    const podEntries = require(`${path.join(
+      opts.wsRoot,
+      "node_modules",
+      opts.podPkg
+    )}`).pods as PodClassEntryV4[];
+    const podClass = _.find(podEntries, (entry) => {
+      return entry.id === podId && entry.kind === opts.podType;
+    });
     if (!podClass) {
       throw Error("no podClass found");
     }
@@ -50,11 +61,16 @@ export function fetchPodClassV4(
   }
 }
 
+export enum PodSource {
+  REMOTE = "remote",
+  BUILTIN = "builtin",
+}
+
 export type CommandCLIOpts = {
   podId: string;
   wsRoot: string;
   vault: DVault;
-  podSource?: "remote" | "builtin";
+  podSource?: PodSource;
 };
 
 export abstract class PodCLICommand extends BaseCommand<

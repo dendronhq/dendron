@@ -81,6 +81,15 @@
       "options": {
       },
       "problemMatcher": []
+    },
+    {
+      "label": "export-pod",
+      "type": "shell",
+      "command": "node --inspect /usr/local/bin/dendron-cli exportPod --wsRoot ~/Dendron --podId dendron.airtable --podPkg @dendronhq/airtable-pod --podSource remote --showConfig",
+      "options": {
+        "cwd": "/Users/kevinlin/Dendron"
+      },
+      "problemMatcher": []
     }
   ]
 }

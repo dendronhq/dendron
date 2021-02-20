@@ -1,9 +1,10 @@
 import { DendronError, DEngineClientV2, Stage } from "@dendronhq/common-all";
 import { getAllExportPods, PodUtils } from "@dendronhq/pods-core";
+import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
 import { CLICommand } from "./base";
-import { fetchPodClassV4 } from "./pod";
+import { fetchPodClassV4, PodSource } from "./pod";
 import {
   setupEngine,
   setupEngineArgs,
@@ -21,6 +22,9 @@ type CommandCLIOpts = {
   // custom
   podId: string;
   showConfig?: boolean;
+  genConfig?: boolean;
+  podSource: PodSource;
+  podPkg?: string;
 } & SetupEngineCLIOpts;
 
 type CommandOpts = CommandCLIOpts & {
@@ -51,19 +55,41 @@ export class ExportPodCLICommand extends CLICommand<
     args.option("showConfig", {
       describe: "show pod configuration",
     });
+    args.option("genConfig", {
+      describe: "show pod configuration",
+    });
+    args.option("podPkg", {
+      describe: "if specifying a remote pod, name of pkg",
+    });
+    args.option("podSource", {
+      describe: "podSource",
+      choices: _.values(PodSource),
+      default: PodSource.BUILTIN,
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
-    const { podId, wsRoot, showConfig } = args;
+    const { podId, wsRoot, showConfig, podSource, podPkg, genConfig } = args;
 
     const engineArgs = await setupEngine(args);
-    const podSource = "builtin";
     const pods = getAllExportPods();
     const podType = "export";
-    const podClass = fetchPodClassV4(podId, { podSource, pods, podType });
+    const podClass = fetchPodClassV4(podId, {
+      podSource,
+      pods,
+      podType,
+      podPkg,
+      wsRoot,
+    });
     if (showConfig) {
       const config = new podClass().config;
       console.log(config);
+      process.exit(0);
+    }
+    if (genConfig) {
+      const podsDir = PodUtils.getPodDir({ wsRoot });
+      const configPath = PodUtils.genConfigFile({ podsDir, podClass });
+      console.log(`config generated at ${configPath}`);
       process.exit(0);
     }
     const podsDir = path.join(wsRoot, "pods");

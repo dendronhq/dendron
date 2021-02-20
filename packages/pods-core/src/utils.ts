@@ -51,6 +51,14 @@ export class PodUtils {
     return path.join(podsDir, podClass.id);
   }
 
+  static getPodDir(opts: { wsRoot: string }) {
+    const podsPath = path.join(opts.wsRoot, "pods");
+    return podsPath;
+  }
+
+  /**
+   * Create config file if it doesn't exist
+   */
   static genConfigFile({
     podsDir,
     podClass,

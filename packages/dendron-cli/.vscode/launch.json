@@ -32,15 +32,20 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug test file",
-      "program": "${workspaceRoot:dendron-cli}/node_modules/jest/bin/jest.js",
+      "name": "debug one test",
+      "program": "${workspaceFolder:root}/node_modules/jest/bin/jest.js",
+      "sourceMaps": true,
+      "smartStep": true,
+      "cwd": "${workspaceRoot:dendron-cli}",
+      "env": {"LOG_DST": "../../logs/cli.log"},
       "args": [
         "--findRelatedTests",
         "${relativeFile}",
         "--runInBand"
       ],
-      "cwd": "${workspaceRoot:dendron-cli}",
-      "env": {"LOG_DST": "../../logs/cli.log"}
+      "outFiles": [
+        "${workspaceFolder:dendron-cli}/lib/**/*.js"
+      ]
     }
   ]
 }

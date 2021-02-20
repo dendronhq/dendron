@@ -11,7 +11,7 @@
     },
     {
       "label": "npm:test:watch",
-      "command": "npm run test:watch -- ${relativeFile} -u",
+      "command": "yarn test:watch ${relativeFile} -u",
       "type": "shell",
       "problemMatcher": [],
       "options": {"env": {"LOG_DST": "../../logs/dendron-cli.log"}}

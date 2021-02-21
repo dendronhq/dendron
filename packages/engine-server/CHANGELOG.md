@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.29.1](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.29.0...@dendronhq/engine-server@0.29.1) (2021-02-21)
+
+### Bug Fixes
+
+- don't publish private note refs ([67efb66](https://github.com/dendronhq/dendron/commit/67efb66a2fd3a82dd108fd621c8057a789c19f6b))
+- error with wiki links when private ([f07ca3b](https://github.com/dendronhq/dendron/commit/f07ca3b174b7047f9d5e8c1a820e9dce15120972))
+- update site ([df985a2](https://github.com/dendronhq/dendron/commit/df985a25a17b7c2f2ee19411f4a9117e769a2d93))
+
 ## [0.29.1-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.29.0...@dendronhq/engine-server@0.29.1-alpha.0) (2021-02-16)
 
 **Note:** Version bump only for package @dendronhq/engine-server

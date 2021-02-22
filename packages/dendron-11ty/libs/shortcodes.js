@@ -2,7 +2,7 @@ const {
   MDUtilsV4,
   DendronASTDest,
   nunjucks,
-  renderFromNoteProps
+  renderFromNoteProps,
 } = require("@dendronhq/engine-server");
 const { NoteUtilsV2, VaultUtils } = require("@dendronhq/common-all");
 const { DateTime } = require("luxon");
@@ -142,17 +142,17 @@ async function toMarkdown2(contents, vault, fname) {
     mermaid: config.mermaid,
   });
   const navHintElem = `<span id="navId" data="${navParent.id}"></span>`;
-  const procRehype = MDUtilsV4.procRehype({ proc, mathjax: true })
-  // let contentsClean = renderFromNoteProps({
-  //   fname,
-  //   vault,
-  //   wsRoot: engine.wsRoot,
-  //   notes: engine.notes,
-  // });
-  let out = await procRehype.process(contents)
-  return (
-    out.contents + navHintElem
-  );
+  const procRehype = MDUtilsV4.procRehype({ proc, mathjax: true });
+  if (config.useNunjucks) {
+    contents = renderFromNoteProps({
+      fname,
+      vault,
+      wsRoot: engine.wsRoot,
+      notes: engine.notes,
+    });
+  }
+  let out = await procRehype.process(contents);
+  return out.contents + navHintElem;
 }
 
 let _NAV_CACHE = undefined;

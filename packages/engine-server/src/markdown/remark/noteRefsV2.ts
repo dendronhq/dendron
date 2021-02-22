@@ -18,7 +18,7 @@ import { Node, Parent } from "unist";
 import { SiteUtils } from "../../topics/site";
 import { parseFileLinkV2 } from "../../utils";
 import { DendronASTDest, DendronASTNode, NoteRefNoteV4 } from "../types";
-import { MDUtilsV4 } from "../utils";
+import { MDUtilsV4, renderFromNoteProps } from "../utils";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
 
@@ -378,16 +378,21 @@ function convertNoteRefHelperAST(
 ): Required<RespV2<Parent>> {
   const { proc, refLvl, link, note } = opts;
   const noteRefProc = proc();
-  // const engine = MDUtilsV4.getEngineFromProc(noteRefProc);
+  const engine = MDUtilsV4.getEngineFromProc(noteRefProc);
   MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
   const procOpts = MDUtilsV4.getProcOpts(noteRefProc);
-  // let contentsClean = renderFromNoteProps({
-  //   fname: note.fname,
-  //   vault: note.vault,
-  //   wsRoot: engine!.engine.wsRoot,
-  //   notes: engine!.engine.notes,
-  // });
-  const bodyAST = noteRefProc.parse(note.body) as DendronASTNode;
+  let bodyAST: DendronASTNode;
+  if (MDUtilsV4.getProcOpts(proc).config?.useNunjucks) {
+    let contentsClean = renderFromNoteProps({
+      fname: note.fname,
+      vault: note.vault,
+      wsRoot: engine!.engine.wsRoot,
+      notes: engine!.engine.notes,
+    });
+    bodyAST = noteRefProc.parse(contentsClean) as DendronASTNode;
+  } else {
+    bodyAST = noteRefProc.parse(note.body) as DendronASTNode;
+  }
   const { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {
     anchorStartOffset: 0,
   });

@@ -13,7 +13,3 @@ Welcome to Dendron! This guide will help get you started with your knowledge bas
 ## Summary
 
 ![](/assets/images/2020-12-16-11-37-05.png)
-
-Title page
-
-- [[ {{fm.foo}} ]]

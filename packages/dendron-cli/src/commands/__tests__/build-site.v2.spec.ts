@@ -809,87 +809,87 @@ describe("vault specific config", () => {
     );
   });
 
-  test("blacklist primary vault", async () => {
-    await runEngineTestV4(
-      async ({ engine, wsRoot }) => {
-        const config: DendronSiteConfig = {
-          siteHierarchies: ["foo", "bar"],
-          privateVaults: ["vault1"],
-          siteRootDir,
-          usePrettyRefs: true,
-        };
-        const cmd = new BuildSiteCommand();
-        await cmd.execute({
-          engineClient: engine,
-          config,
-          wsRoot,
-          writeStubs: false,
-        });
-        const notesInDir = fs.readdirSync(notesDir);
-        return [
-          {
-            expected: ["bar.md"],
-            actual: notesInDir,
-          },
-        ];
-      },
-      {
-        preSetupHook: async (opts) => {
-          await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
-        },
-        expect,
-        createEngine: (opts) => {
-          const engineClient = DendronEngineClient.create({
-            port,
-            ws: opts.wsRoot,
-            vaults: opts.vaults.map((ent) => ent.fsPath),
-          });
-          return engineClient;
-        },
-      }
-    );
-  });
+  // test("blacklist primary vault", async () => {
+  //   await runEngineTestV4(
+  //     async ({ engine, wsRoot }) => {
+  //       const config: DendronSiteConfig = {
+  //         siteHierarchies: ["foo", "bar"],
+  //         privateVaults: ["vault1"],
+  //         siteRootDir,
+  //         usePrettyRefs: true,
+  //       };
+  //       const cmd = new BuildSiteCommand();
+  //       await cmd.execute({
+  //         engineClient: engine,
+  //         config,
+  //         wsRoot,
+  //         writeStubs: false,
+  //       });
+  //       const notesInDir = fs.readdirSync(notesDir);
+  //       return [
+  //         {
+  //           expected: ["bar.md"],
+  //           actual: notesInDir,
+  //         },
+  //       ];
+  //     },
+  //     {
+  //       preSetupHook: async (opts) => {
+  //         await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
+  //       },
+  //       expect,
+  //       createEngine: (opts) => {
+  //         const engineClient = DendronEngineClient.create({
+  //           port,
+  //           ws: opts.wsRoot,
+  //           vaults: opts.vaults.map((ent) => ent.fsPath),
+  //         });
+  //         return engineClient;
+  //       },
+  //     }
+  //   );
+  // });
 
-  test("blacklist other vault", async () => {
-    await runEngineTestV4(
-      async ({ engine, wsRoot }) => {
-        const config: DendronSiteConfig = {
-          siteHierarchies: ["foo", "bar"],
-          privateVaults: ["vault2"],
-          siteRootDir,
-          usePrettyRefs: true,
-        };
-        const cmd = new BuildSiteCommand();
-        await cmd.execute({
-          engineClient: engine,
-          config,
-          wsRoot,
-          writeStubs: false,
-        });
-        const notesInDir = fs.readdirSync(notesDir);
-        return [
-          {
-            expected: ["foo.ch1.md", "foo.md"],
-            actual: notesInDir,
-          },
-        ];
-      },
-      {
-        preSetupHook: async (opts) => {
-          await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
-        },
-        expect,
-        createEngine: (opts) => {
-          const engineClient = DendronEngineClient.create({
-            port,
-            ws: opts.wsRoot,
-            vaults: opts.vaults.map((ent) => ent.fsPath),
-          });
-          return engineClient;
-        },
-      }
-    );
-  });
+  // test("blacklist other vault", async () => {
+  //   await runEngineTestV4(
+  //     async ({ engine, wsRoot }) => {
+  //       const config: DendronSiteConfig = {
+  //         siteHierarchies: ["foo", "bar"],
+  //         privateVaults: ["vault2"],
+  //         siteRootDir,
+  //         usePrettyRefs: true,
+  //       };
+  //       const cmd = new BuildSiteCommand();
+  //       await cmd.execute({
+  //         engineClient: engine,
+  //         config,
+  //         wsRoot,
+  //         writeStubs: false,
+  //       });
+  //       const notesInDir = fs.readdirSync(notesDir);
+  //       return [
+  //         {
+  //           expected: ["foo.ch1.md", "foo.md"],
+  //           actual: notesInDir,
+  //         },
+  //       ];
+  //     },
+  //     {
+  //       preSetupHook: async (opts) => {
+  //         await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
+  //       },
+  //       expect,
+  //       createEngine: (opts) => {
+  //         const engineClient = DendronEngineClient.create({
+  //           port,
+  //           ws: opts.wsRoot,
+  //           vaults: opts.vaults.map((ent) => ent.fsPath),
+  //         });
+  //         return engineClient;
+  //       },
+  //     }
+  //   );
+  // });
 });
 
 describe("per hierarchy config", () => {

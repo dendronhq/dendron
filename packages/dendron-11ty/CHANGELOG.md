@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.29.3](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-11ty@1.29.2-alpha.0...@dendronhq/dendron-11ty@1.29.3) (2021-02-21)
+
+### Bug Fixes
+
+- don't publish private note refs ([67efb66](https://github.com/dendronhq/dendron/commit/67efb66a2fd3a82dd108fd621c8057a789c19f6b))
+
 ## [1.29.3-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-11ty@1.29.2-alpha.0...@dendronhq/dendron-11ty@1.29.3-alpha.0) (2021-02-16)
 
 **Note:** Version bump only for package @dendronhq/dendron-11ty

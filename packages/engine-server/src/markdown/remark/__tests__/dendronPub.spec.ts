@@ -2,6 +2,7 @@ import { DEngineClientV2 } from "@dendronhq/common-all";
 import {
   AssertUtils,
   ENGINE_HOOKS,
+  NoteTestUtilsV4,
   runEngineTestV4,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
@@ -39,34 +40,129 @@ describe("basics", () => {
     expect(_.trim(out.toString())).toEqual("![alt-text](/bond/image-url.jpg)");
   });
 
-  test("can't publish", async () => {
-    await runEngineTestV4(
-      async ({ engine, vaults }) => {
-        const vault = vaults[0];
-        const config = DConfig.genDefaultConfig();
-        config.site = {
-          siteHierarchies: ["foo"],
-          siteRootDir: "foo",
-        };
-        const resp = await MDUtilsV4.procRehype({
-          proc: proc(
-            engine,
-            { ...dendronData, config, vault },
-            {
-              wikiLinkOpts: { useId: true },
-              transformNoPublish: true,
-            }
-          ),
-        }).process(`[[an alias|bar]]`);
-        expect(resp).toMatchSnapshot();
-        expect(
-          await AssertUtils.assertInString({
-            body: resp.contents as string,
-            match: ["a data-toggle="],
-          })
-        ).toBeTruthy();
-      },
-      { expect, createEngine, preSetupHook: ENGINE_HOOKS.setupBasic }
-    );
+  describe("no publish", () => {
+    test("basic", async () => {
+      await runEngineTestV4(
+        async ({ engine, vaults }) => {
+          const vault = vaults[0];
+          const config = DConfig.genDefaultConfig();
+          config.site = {
+            siteHierarchies: ["foo"],
+            siteRootDir: "foo",
+          };
+          const resp = await MDUtilsV4.procRehype({
+            proc: proc(
+              engine,
+              { ...dendronData, config, vault },
+              {
+                wikiLinkOpts: { useId: true },
+                transformNoPublish: true,
+              }
+            ),
+          }).process(`[[an alias|bar]]`);
+          expect(resp).toMatchSnapshot();
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.contents as string,
+              match: ["a data-toggle="],
+            })
+          ).toBeTruthy();
+        },
+        { expect, createEngine, preSetupHook: ENGINE_HOOKS.setupBasic }
+      );
+    });
+
+    test("inside note ref, wikilink", async () => {
+      await runEngineTestV4(
+        async ({ engine, vaults }) => {
+          const vault = vaults[0];
+          const config = DConfig.genDefaultConfig();
+          config.site = {
+            siteHierarchies: ["foo"],
+            siteRootDir: "foo",
+          };
+          const resp = await MDUtilsV4.procRehype({
+            proc: proc(
+              engine,
+              {
+                ...dendronData,
+                config,
+                vault,
+                fname: "gamma",
+                shouldApplyPublishRules: true,
+              },
+              {
+                wikiLinkOpts: { useId: true },
+                transformNoPublish: true,
+              }
+            ),
+          }).process("[[alpha]]");
+          expect(resp).toMatchSnapshot();
+          expect(
+            await AssertUtils.assertInString({
+              body: resp.contents as string,
+              match: ["This page has not yet sprouted"],
+            })
+          ).toBeTruthy();
+        },
+        {
+          expect,
+          createEngine,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupLinks(opts);
+            await NoteTestUtilsV4.createNote({
+              fname: "gamma",
+              body: `![[alpha]]`,
+              vault: opts.vaults[0],
+              wsRoot: opts.wsRoot,
+            });
+          },
+        }
+      );
+    });
+
+    test("inside note ref, note ref link", async () => {
+      await runEngineTestV4(
+        async ({ engine, vaults }) => {
+          const vault = vaults[0];
+          const config = DConfig.genDefaultConfig();
+          config.site = {
+            siteHierarchies: ["foo"],
+            siteRootDir: "foo",
+          };
+          const resp = await MDUtilsV4.procRehype({
+            proc: proc(
+              engine,
+              {
+                ...dendronData,
+                config,
+                vault,
+                fname: "gamma",
+                shouldApplyPublishRules: true,
+              },
+              {
+                wikiLinkOpts: { useId: true },
+                transformNoPublish: true,
+              }
+            ),
+          }).process("![[alpha]]");
+          expect(resp).toMatchSnapshot();
+          expect(resp.contents as string).toEqual("<p></p><p></p><p></p>");
+        },
+        {
+          expect,
+          createEngine,
+          preSetupHook: async (opts) => {
+            await ENGINE_HOOKS.setupLinks(opts);
+            await NoteTestUtilsV4.createNote({
+              fname: "gamma",
+              body: `![[alpha]]`,
+              vault: opts.vaults[0],
+              wsRoot: opts.wsRoot,
+            });
+          },
+        }
+      );
+    });
   });
 });

@@ -115,6 +115,7 @@ async function toMarkdown2(contents, vault, fname) {
     vault,
     fname,
     wikiLinksOpts,
+    shouldApplyPublishRules: true,
     noteRefOpts: { wikiLinkOpts: wikiLinksOpts, prettyRefs: true },
     publishOpts: {
       assetsPrefix: env().stage === "prod" ? sconfig.assetsPrefix : undefined,

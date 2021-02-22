@@ -1,10 +1,9 @@
-import clipboardy from "@dendronhq/clipboardy";
 import { getSlugger, NotePropsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Selection, window } from "vscode";
 import { CONFIG, DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { clipboard, VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -69,7 +68,7 @@ export class CopyNoteURLCommand extends BasicCommand<
       }
     }
     this.showFeedback(link);
-    clipboardy.writeSync(link);
+    clipboard.writeText(link);
     return link;
   }
 }

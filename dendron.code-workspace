@@ -1,0 +1,80 @@
+{
+    "folders": [
+        {
+            "path": ".",
+            "name": "root"
+        },
+        {
+            "path": "packages/common-all"
+        },
+        {
+            "path": "packages/dendron-11ty"
+        },
+        {
+            "path": "packages/common-server"
+        },
+        {
+            "path": "packages/plugin-core"
+        },
+        {
+            "path": "packages/dendron-next-server"
+        },
+        {
+            "path": "packages/engine-server"
+        },
+        {
+            "path": "packages/dendron-cli"
+        },
+        {
+            "path": "packages/pods-core"
+        },
+        {
+            "path": "packages/seeds-core"
+        },
+        {
+            "path": "packages/dendron-cli"
+        },
+        {
+            "path": "packages/api-server"
+        },
+        {
+            "path": "packages/express-client"
+        },
+        {
+            "path": "packages/common-test-utils"
+        },
+        {
+            "path": "packages/engine-test-utils"
+        },
+        {
+            "path": "packages/dendron-next-server"
+        },
+        {
+            "path": "bootstrap"
+        },
+        {
+            "path": "fixtures"
+        },
+        {
+            "path": "docs"
+        },
+    ],
+    "settings": {
+        "files.exclude": {
+            "*.d.ts": true,
+            "packages": true,
+            "profile": true
+        },
+        "search.exclude": {
+            "**/node_modules": true,
+            "**/bower_components": true,
+            "**/*.code-search": true,
+            "CHANGELOG.md": true
+        },
+        "editor.formatOnSave": false,
+        "workbench.editor.showTabs": true,
+       
+        "editor.snippetSuggestions": "none",
+        "debug.node.autoAttach": "on"
+    }
+}

@@ -4,7 +4,7 @@
     "displayName": "dendron",
     "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
     "publisher": "dendron",
-    "version": "0.29.2-alpha.0",
+    "version": "0.29.2",
     "engines": {
         "vscode": "^1.45.0"
     },
@@ -348,13 +348,6 @@
                 "docPreview": ""
             },
             {
-                "command": "dendron.buildPod",
-                "title": "Dendron: Build Pod",
-                "desc": "Build your notes for export. Currently, only export to github pages is supported.",
-                "docLink": "dendron.topic.pod.md",
-                "docPreview": ""
-            },
-            {
                 "command": "dendron.configurePod",
                 "title": "Dendron: Configure Pod",
                 "desc": "Update your pod configuration",
@@ -405,14 +398,6 @@
                 "docs": "If you highlight a header, will copy the url with the header set as the anchor",
                 "docLink": "",
                 "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.copy-url.gif)"
-            },
-            {
-                "command": "dendron.publish",
-                "title": "Dendron: Publish",
-                "desc": "Build, commit and publish your notes with a single command",
-                "docs": "- NOTE: this is mean for v1 publishing. V2 publishing currently does not have a publish command.",
-                "docLink": "",
-                "docPreview": "<a href=\"https://www.loom.com/share/c58edf543e234a8fa164095237579ccc\"> <img style=\"\" src=\"https://cdn.loom.com/sessions/thumbnails/c58edf543e234a8fa164095237579ccc-with-play.gif\"> </a>"
             },
             {
                 "command": "dendron.siteBuild",
@@ -614,8 +599,7 @@
         "format": "prettier --write src '*.json' '*.js'"
     },
     "devDependencies": {
-        "@dendronhq/common-test-utils": "^0.29.1-alpha.0",
-        "@types/clipboardy": "^2.0.1",
+        "@dendronhq/common-test-utils": "^0.29.1",
         "@types/execa": "^2.0.0",
         "@types/fs-extra": "^9.0.1",
         "@types/glob": "^7.1.1",
@@ -641,15 +625,14 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
-        "@dendronhq/api-server": "^0.29.1-alpha.0",
-        "@dendronhq/clipboardy": "^2.3.0",
-        "@dendronhq/common-all": "^0.29.1-alpha.0",
-        "@dendronhq/common-server": "^0.29.1-alpha.0",
-        "@dendronhq/dendron-cli": "^0.29.2-alpha.0",
-        "@dendronhq/engine-server": "^0.29.1-alpha.0",
-        "@dendronhq/engine-test-utils": "^0.29.2-alpha.0",
+        "@dendronhq/api-server": "^0.29.1",
+        "@dendronhq/common-all": "^0.29.1",
+        "@dendronhq/common-server": "^0.29.1",
+        "@dendronhq/dendron-cli": "^0.29.2",
+        "@dendronhq/engine-server": "^0.29.1",
+        "@dendronhq/engine-test-utils": "^0.29.2",
         "@dendronhq/lsp-server": "^0.28.7-alpha.0",
-        "@dendronhq/pods-core": "^0.29.1-alpha.0",
+        "@dendronhq/pods-core": "^0.29.1",
         "cross-path-sort": "^1.0.0",
         "execa": "^4.0.2",
         "fs-extra": "^9.0.1",

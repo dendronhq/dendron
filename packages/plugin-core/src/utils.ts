@@ -468,3 +468,5 @@ export class DendronClientUtilsV2 {
     };
   }
 }
+
+export const clipboard = vscode.env.clipboard;

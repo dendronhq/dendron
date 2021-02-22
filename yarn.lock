@@ -1643,15 +1643,6 @@
     morgan "^1.10.0"
     nodemon "^2.0.4"
 
-"@dendronhq/clipboardy@^2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@dendronhq/clipboardy/-/clipboardy-2.3.0.tgz#cedff0c83690f45037c8f215a25936f75137fa83"
-  integrity sha512-kZznPBL6B+h4FoI2biGqFqZfzldMLUWyQcoFXoePQtpDZJPlmmzeHoOFbSYJvQEAEMVgILSPTGia0hRn1RNb/A==
-  dependencies:
-    arch "^2.1.1"
-    execa "^1.0.0"
-    is-wsl "^2.1.1"
-
 "@dendronhq/common-all@^0.28.6":
   version "0.28.6"
   resolved "https://registry.yarnpkg.com/@dendronhq/common-all/-/common-all-0.28.6.tgz#5b5604f9f2b513add38fa6c837f3e69c79ca1a4f"
@@ -3182,13 +3173,6 @@
   resolved "https://registry.yarnpkg.com/@types/caseless/-/caseless-0.12.2.tgz#f65d3d6389e01eeb458bd54dc8f52b95a9463bc8"
   integrity sha512-6ckxMjBBD8URvjB6J3NcnuAn5Pkl7t3TizAg+xdlzzQGSPSmBcXf8KoIH0ua/i+tio+ZRUHEXp0HEmvaR4kt0w==
 
-"@types/clipboardy@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@types/clipboardy/-/clipboardy-2.0.1.tgz#91f694d47c0e716da7549d3baeca58a29a46d2b4"
-  integrity sha512-vLJm1iL6jFfEd+3/J4WTC65ppyGyaRTjpoB8bPhtiSrOCD0LFDr9GQYhoYNAsbt6JaY0amYacloIEEEOYUkkFg==
-  dependencies:
-    clipboardy "*"
-
 "@types/color-name@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
@@ -4203,7 +4187,7 @@ aproba@^2.0.0:
   resolved "https://registry.yarnpkg.com/aproba/-/aproba-2.0.0.tgz#52520b8ae5b569215b354efc0caa3fe1e45a8adc"
   integrity sha512-lYe4Gx7QT+MKGbDsA+Z+he/Wtef0BiwDOlK/XkBrdfsh9J/jPPXbX0tE9x9cl27Tmu5gg3QUbUrQYa/y+KOHPQ==
 
-arch@^2.1.0, arch@^2.1.1:
+arch@^2.1.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/arch/-/arch-2.2.0.tgz#1bc47818f305764f23ab3306b0bfc086c5a29d11"
   integrity sha512-Of/R0wqp83cgHozfIYLbBMnej79U/SVGOOyuB3VVFv1NRM/PSFMK12x9KVtiYzJqmnU5WR2qp0Z5rHb7sWGnFQ==
@@ -5662,15 +5646,6 @@ clipboard@^2.0.0:
     good-listener "^1.2.2"
     select "^1.1.2"
     tiny-emitter "^2.0.0"
-
-clipboardy@*:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/clipboardy/-/clipboardy-2.3.0.tgz#3c2903650c68e46a91b388985bc2774287dba290"
-  integrity sha512-mKhiIL2DrQIsuXMgBgnfEHOZOryC7kY7YO//TN6c63wlEm3NG5tz+YgY5rVi29KCmq/QQjKYvM7a19+MDOTHOQ==
-  dependencies:
-    arch "^2.1.1"
-    execa "^1.0.0"
-    is-wsl "^2.1.1"
 
 clipboardy@1.2.2:
   version "1.2.2"

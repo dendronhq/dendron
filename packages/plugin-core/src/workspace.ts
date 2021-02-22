@@ -13,6 +13,7 @@ import {
   writeJSONWithComments,
 } from "@dendronhq/common-server";
 import { DConfig, HistoryService } from "@dendronhq/engine-server";
+import { PodUtils } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
 import open from "open";
@@ -311,7 +312,7 @@ export class DendronWorkspace {
   get config(): DendronConfig {
     const dendronRoot = getWS().configRoot;
     if (!dendronRoot) {
-      throw `dendronRoot not set when get config`;
+      throw new Error(`dendronRoot not set when get config`);
     }
     const config = DConfig.getOrCreate(dendronRoot);
     return config;
@@ -320,9 +321,9 @@ export class DendronWorkspace {
   get podsDir(): string {
     const rootDir = DendronWorkspace.wsRoot();
     if (!rootDir) {
-      throw `rootdir not set when get podsDir`;
+      throw new Error(`rootdir not set when get podsDir`);
     }
-    const podsPath = path.join(rootDir, "pods");
+    const podsPath = PodUtils.getPodDir({ wsRoot: rootDir });
     fs.ensureDirSync(podsPath);
     return podsPath;
   }

@@ -1,4 +1,3 @@
-import clipboardy from "@dendronhq/clipboardy";
 import { DNodePropsQuickInputV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
@@ -11,6 +10,7 @@ import {
   LookupSelectionType,
   LookupSplitType,
 } from "../../commands/LookupCommand";
+import { clipboard } from "../../utils";
 import { DendronQuickPickerV2 } from "./types";
 import { PickerUtilsV2 } from "./utils";
 
@@ -246,7 +246,7 @@ export class CopyNoteLinkButton extends DendronBtn {
       if (_.isEmpty(links)) {
         vscode.window.showInformationMessage(`no items selected`);
       } else {
-        clipboardy.writeSync(links.join("\n"));
+        await clipboard.writeText(links.join("\n"));
         vscode.window.showInformationMessage(`${links.length} links copied`);
       }
     }

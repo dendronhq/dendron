@@ -144,41 +144,42 @@ VFile {
   <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
   <div class=\\"portal-parent-fader-top\\"></div>
   <div class=\\"portal-parent-fader-bottom\\"></div>
+    <div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.one</span></div>
+  <a href=\\"foo.one.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>        
+  
+  # Foo.One
+
   <div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.one</span></div>
-<a href=\\"foo.one.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
-
-# Foo.One
-
-<div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.two</span></div>
-<a href=\\"foo.two.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
-
-# Foo.Two
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.two</span></div>
+  <a href=\\"foo.two.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>        
+  
+  # Foo.Two
 
 blah
 
-</div>    
-</div>
-
+  </div>    
+  </div>
+  
 Regular wikilink: [foo.two](foo.two.html)
-
-</div>    
-</div>
+  
+  </div>    
+  </div>
+  
 
 
 </div>    
@@ -726,40 +727,40 @@ VFile {
   <div class=\\"portal-parent-fader-bottom\\"></div>        
   
   <div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.one</span></div>
-<a href=\\"foo.one.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.one</span></div>
+  <a href=\\"foo.one.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>        
+  
+  # Foo.One
 
-# Foo.One
-
-<div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.two</span></div>
-<a href=\\"foo.two.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
-
-# Foo.Two
+  <div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.two</span></div>
+  <a href=\\"foo.two.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>        
+  
+  # Foo.Two
 
 blah
 
-</div>    
-</div>
-
+  </div>    
+  </div>
+  
 Regular wikilink: [foo.two](foo.two.md)
-
-</div>    
-</div>
+  
+  </div>    
+  </div>
   
   </div>    
   </div>

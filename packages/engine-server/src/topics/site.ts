@@ -35,6 +35,12 @@ export class SiteUtils {
     wsRoot: string;
   }) {
     const { note, config, vaults, wsRoot } = opts;
+    if (
+      note.vault.visibility &&
+      note.vault.visibility === DVaultVisibility.PRIVATE
+    ) {
+      return false;
+    }
     // check if note is in index
     const domain = DNodeUtilsV2.domainName(note.fname);
     if (
@@ -278,7 +284,6 @@ export class SiteUtils {
 
         // if skip levels, accumulate the grandchildren
         if (siteFM.skipLevels) {
-          debugger;
           let acc = 0;
           while (acc !== siteFM.skipLevels) {
             children = children

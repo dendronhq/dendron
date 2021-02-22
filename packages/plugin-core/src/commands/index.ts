@@ -1,6 +1,5 @@
 import { ArchiveHierarchyCommand } from "./ArchiveHierarchy";
 import { CodeCommandConstructor } from "./base";
-import { BuildPodCommand } from "./BuildPod";
 import { ChangeWorkspaceCommand } from "./ChangeWorkspace";
 import { ConfigureCommand } from "./ConfigureCommand";
 import { ConfigurePodCommand } from "./ConfigurePodCommand";
@@ -18,7 +17,6 @@ import { GotoNoteCommand } from "./GotoNote";
 import { GoUpCommand } from "./GoUpCommand";
 import { ImportPodCommand } from "./ImportPod";
 import { OpenLogsCommand } from "./OpenLogs";
-import { PublishCommand } from "./Publish";
 import { PublishPodCommand } from "./PublishPod";
 import { RefactorHierarchyCommandV2 } from "./RefactorHierarchyV2";
 import { RenameNoteV2aCommand } from "./RenameNoteV2a";
@@ -41,7 +39,6 @@ import { DiagnosticsReportCommand } from "./DiagnosticsReport";
 
 const ALL_COMMANDS = [
   ArchiveHierarchyCommand,
-  BuildPodCommand,
   ChangeWorkspaceCommand,
   ConfigureCommand,
   ConfigurePodCommand,
@@ -62,7 +59,6 @@ const ALL_COMMANDS = [
   ImportPodCommand,
   //   LookupCommand,
   OpenLogsCommand,
-  PublishCommand,
   PublishPodCommand,
   MoveNoteCommand,
   RefactorHierarchyCommandV2,

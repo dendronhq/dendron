@@ -1,0 +1,26 @@
+area.ui:
+  - '- \[(?:x|X)\] UI'
+area.workbench:
+  - '- \[(?:x|X)\] Workbench'
+area.publishing:
+  - '- \[(?:x|X)\] Publishing'
+area.pods:
+  - '- \[(?:x|X)\] Pods'
+area.markdown:
+  - '- \[(?:x|X)\] Markdown'
+area.seeds:
+  - '- \[(?:x|X)\] Seed'
+area.misc:
+  - '- \[(?:x|X)\] Misc'
+area.hierarchy:
+  - '- \[(?:x|X)\] Hierarchy'
+area.graph:
+  - '- \[(?:x|X)\] Graph'
+type.bug:
+  - '- \[(?:x|X)\] Bug'
+type.enhancement:
+  - '- \[(?:x|X)\] Feature Enhancement'
+type.feature:
+  - '- \[(?:x|X)\] Feature Request'
+status.triage-needed:
+  - "(?:.*)"

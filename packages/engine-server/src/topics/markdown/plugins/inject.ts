@@ -103,6 +103,10 @@ export function isHeading(node: Node, text: string, depth?: number) {
   return true;
 }
 
+export function isNoteRefV2(node: Node) {
+  return node.type === "refLinkV2";
+}
+
 var MAX_HEADING_DEPTH = 99999;
 
 export function bumpHeadings(root: Node, baseDepth: number) {

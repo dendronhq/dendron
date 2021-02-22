@@ -1,4 +1,3 @@
-import clipboardy from "@dendronhq/clipboardy";
 import {
   DNoteRefData,
   DNoteRefLink,
@@ -9,7 +8,7 @@ import { refLink2Stringv2 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Position, Range, Selection, TextEditor, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { VSCodeUtils } from "../utils";
+import { clipboard, VSCodeUtils } from "../utils";
 import { getHeaderFromSelection } from "../utils/editor";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -82,7 +81,7 @@ export class CopyNoteRefCommand extends BasicCommand<
     }
     const link = await this.buildLink({ fname });
     try {
-      clipboardy.writeSync(link);
+      clipboard.writeText(link);
     } catch (err) {
       this.L.error({ err, link });
       throw err;

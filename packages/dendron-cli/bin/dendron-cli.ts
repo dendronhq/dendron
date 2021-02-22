@@ -32,29 +32,15 @@ export const updateTime: RefactorRule = {
   data: {},
 };
 
-let buildYargs = yargs
-  .command<any>(
-    "exportPod",
-    "export a pod",
-    ExportPodCLICommand.buildArgs,
-    async (args: any) => {
-      return ExportPodCLICommand.run(args);
-    }
-  )
-  .command<any>(
-    "importPod",
-    "import a pod",
-    ImportPodCLICommand.buildArgs,
-    async (args: any) => {
-      return ImportPodCLICommand.run(args);
-    }
-  );
+let buildYargs = yargs;
 
 BuildSiteCommand.buildCmd(buildYargs);
 PublishNotesCommand.buildCmd(buildYargs);
 PublishPodCLICommand.buildCmd(buildYargs);
 LaunchEngineServerCommand.buildCmd(buildYargs);
 new BuildSiteV2CLICommand().buildCmd(buildYargs);
+new ExportPodCLICommand().buildCmd(buildYargs);
+new ImportPodCLICommand().buildCmd(buildYargs);
 new DoctorCLICommand().buildCmd(buildYargs);
 new WorkspaceCLICommand().buildCmd(buildYargs);
 new NoteCLICommand().buildCmd(buildYargs);

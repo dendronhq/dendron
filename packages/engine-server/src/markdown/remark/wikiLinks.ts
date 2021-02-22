@@ -75,6 +75,10 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         if (error) {
           addError(proc, error);
           return "error with link";
+          // TODO: hack
+          // currently we don't check if wiki links are publishable inside a note ref
+          // will lead to us trying to publish a ref that can't be accessed
+          return "";
         } else {
           value = note!.id;
         }

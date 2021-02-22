@@ -5,3 +5,6 @@ export * from "./publishNotes";
 export * from "./backfillV2";
 export * from "./PublishPodCLICommand";
 export * from "./launchEngineServer";
+export { ImportPodCLICommand } from "./importPod";
+export { ExportPodCLICommand } from "./exportPod";
+export { PodCLICommand, PodSource } from "./pod";

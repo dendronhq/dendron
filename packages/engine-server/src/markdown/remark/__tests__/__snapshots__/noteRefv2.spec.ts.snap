@@ -1190,13 +1190,51 @@ Object {
                 Object {
                   "children": Array [
                     Object {
+                      "position": Position {
+                        "end": Object {
+                          "column": 9,
+                          "line": 1,
+                          "offset": 8,
+                        },
+                        "indent": Array [],
+                        "start": Object {
+                          "column": 1,
+                          "line": 1,
+                          "offset": 0,
+                        },
+                      },
                       "type": "text",
-                      "value": "error processing ref",
+                      "value": "foo body",
                     },
                   ],
+                  "position": Position {
+                    "end": Object {
+                      "column": 9,
+                      "line": 1,
+                      "offset": 8,
+                    },
+                    "indent": Array [],
+                    "start": Object {
+                      "column": 1,
+                      "line": 1,
+                      "offset": 0,
+                    },
+                  },
                   "type": "paragraph",
                 },
               ],
+              "position": Object {
+                "end": Object {
+                  "column": 1,
+                  "line": 3,
+                  "offset": 10,
+                },
+                "start": Object {
+                  "column": 1,
+                  "line": 1,
+                  "offset": 0,
+                },
+              },
               "type": "root",
             },
           ],

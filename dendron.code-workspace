@@ -69,7 +69,8 @@
             "**/node_modules": true,
             "**/bower_components": true,
             "**/*.code-search": true,
-            "CHANGELOG.md": true
+            "CHANGELOG.md": true,
+            "**/raw-assets": true
         },
         "editor.formatOnSave": false,
         "workbench.editor.showTabs": true,

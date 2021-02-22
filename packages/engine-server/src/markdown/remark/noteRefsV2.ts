@@ -5,6 +5,7 @@ import {
   DNoteRefLink,
   DUtils,
   getSlugger,
+  NotePropsV2,
   NoteUtilsV2,
   RespV2,
 } from "@dendronhq/common-all";
@@ -17,7 +18,7 @@ import { Node, Parent } from "unist";
 import { SiteUtils } from "../../topics/site";
 import { parseFileLinkV2 } from "../../utils";
 import { DendronASTDest, DendronASTNode, NoteRefNoteV4 } from "../types";
-import { MDUtilsV4 } from "../utils";
+import { MDUtilsV4, renderFromNoteProps } from "../utils";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
 
@@ -38,6 +39,7 @@ type ConvertNoteRefOpts = {
 type ConvertNoteRefHelperOpts = ConvertNoteRefOpts & {
   refLvl: number;
   body: string;
+  note: NotePropsV2;
 };
 
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
@@ -180,6 +182,7 @@ function convertNoteRef(
       // MDUtilsV4.setDendronData(proc, {overrides: {insertTitle: false}});
       const { error, data } = convertNoteRefHelper({
         body,
+        note,
         link,
         refLvl: refLvl + 1,
         proc: MDUtilsV4.setDendronData(proc(), {
@@ -245,6 +248,7 @@ export function convertNoteRefASTV2(
   let errors: DendronError[] = [];
   const { link, proc, compilerOpts, procOpts } = opts;
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
+  debugger;
   const {
     dest,
     vault,
@@ -314,6 +318,7 @@ export function convertNoteRefASTV2(
         proc,
         compilerOpts,
         procOpts,
+        note,
       });
       if (error) {
         errors.push(error);
@@ -371,10 +376,18 @@ export function convertNoteRefASTV2(
 function convertNoteRefHelperAST(
   opts: ConvertNoteRefHelperOpts & { procOpts: any }
 ): Required<RespV2<Parent>> {
-  const { body, proc, refLvl, link, procOpts } = opts;
+  const { proc, refLvl, link, note } = opts;
   const noteRefProc = proc();
+  const engine = MDUtilsV4.getEngineFromProc(noteRefProc);
   MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
-  const bodyAST = noteRefProc.parse(body) as DendronASTNode;
+  const procOpts = MDUtilsV4.getProcOpts(noteRefProc);
+  let contentsClean = renderFromNoteProps({
+    fname: note.fname,
+    vault: note.vault,
+    wsRoot: engine!.engine.wsRoot,
+    notes: engine!.engine.notes,
+  });
+  const bodyAST = noteRefProc.parse(contentsClean) as DendronASTNode;
   const { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {
     anchorStartOffset: 0,
   });
@@ -416,9 +429,8 @@ function convertNoteRefHelperAST(
         anchorEndIndex
       )
     );
-    const tmpProc = MDUtilsV4.procFull(procOpts);
-    // let _proc = proc.data("procFull") as Processor;
-    // this turns it into text
+    const tmpProc = MDUtilsV4.procFull({ ...procOpts });
+    // let tmpProc = proc.data("procFull") as Processor;
     const { dest } = MDUtilsV4.getDendronData(tmpProc);
     if (dest === DendronASTDest.HTML) {
       let out3 = tmpProc.runSync(out) as Parent;

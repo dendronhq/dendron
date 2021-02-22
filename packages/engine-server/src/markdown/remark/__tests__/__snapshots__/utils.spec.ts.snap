@@ -1549,117 +1549,36 @@ exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_VARIABLE": respParse 1`] = `
 Object {
   "children": Array [
     Object {
-      "position": Position {
-        "end": Object {
-          "column": 4,
-          "line": 8,
-          "offset": 70,
-        },
-        "indent": Array [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-        ],
-        "start": Object {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
-      },
-      "type": "yaml",
-      "value": "id: foo
-title: Foo
-desc: ''
-updated: '1'
-created: '1'
-bond: 42",
-    },
-    Object {
       "children": Array [
         Object {
           "position": Position {
             "end": Object {
-              "column": 8,
-              "line": 9,
-              "offset": 78,
+              "column": 32,
+              "line": 1,
+              "offset": 31,
             },
             "indent": Array [],
             "start": Object {
               "column": 1,
-              "line": 9,
-              "offset": 71,
+              "line": 1,
+              "offset": 0,
             },
           },
           "type": "text",
-          "value": "Title: ",
-        },
-        Object {
-          "position": Position {
-            "end": Object {
-              "column": 20,
-              "line": 9,
-              "offset": 90,
-            },
-            "indent": Array [],
-            "start": Object {
-              "column": 8,
-              "line": 9,
-              "offset": 78,
-            },
-          },
-          "type": "text",
-          "value": "Foo",
-        },
-        Object {
-          "position": Position {
-            "end": Object {
-              "column": 28,
-              "line": 9,
-              "offset": 98,
-            },
-            "indent": Array [],
-            "start": Object {
-              "column": 20,
-              "line": 9,
-              "offset": 90,
-            },
-          },
-          "type": "text",
-          "value": ". Bond: ",
-        },
-        Object {
-          "position": Position {
-            "end": Object {
-              "column": 39,
-              "line": 9,
-              "offset": 109,
-            },
-            "indent": Array [],
-            "start": Object {
-              "column": 28,
-              "line": 9,
-              "offset": 98,
-            },
-          },
-          "type": "text",
-          "value": "42",
+          "value": "Title: Foo. Bond: 42 Fname: foo",
         },
       ],
       "position": Position {
         "end": Object {
-          "column": 39,
-          "line": 9,
-          "offset": 109,
+          "column": 32,
+          "line": 1,
+          "offset": 31,
         },
         "indent": Array [],
         "start": Object {
           "column": 1,
-          "line": 9,
-          "offset": 71,
+          "line": 1,
+          "offset": 0,
         },
       },
       "type": "paragraph",
@@ -1668,8 +1587,8 @@ bond: 42",
   "position": Object {
     "end": Object {
       "column": 1,
-      "line": 10,
-      "offset": 110,
+      "line": 2,
+      "offset": 32,
     },
     "start": Object {
       "column": 1,
@@ -1683,16 +1602,7 @@ bond: 42",
 
 exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_VARIABLE": respProcess 1`] = `
 VFile {
-  "contents": "---
-id: foo
-title: Foo
-desc: ''
-updated: '1'
-created: '1'
-bond: 42
----
-
-Title: Foo. Bond: 42
+  "contents": "Title: Foo. Bond: 42 Fname: foo
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -1704,7 +1614,7 @@ Title: Foo. Bond: 42
 
 exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_VARIABLE": respRehype 1`] = `
 VFile {
-  "contents": "<p>Title: Foo. Bond: 42</p>",
+  "contents": "<p>Title: Foo. Bond: 42 Fname: foo</p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -2190,117 +2100,36 @@ exports[`MDUtils.proc "MD_REGULAR: WITH_VARIABLE": respParse 1`] = `
 Object {
   "children": Array [
     Object {
-      "position": Position {
-        "end": Object {
-          "column": 4,
-          "line": 8,
-          "offset": 70,
-        },
-        "indent": Array [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-        ],
-        "start": Object {
-          "column": 1,
-          "line": 1,
-          "offset": 0,
-        },
-      },
-      "type": "yaml",
-      "value": "id: foo
-title: Foo
-desc: ''
-updated: '1'
-created: '1'
-bond: 42",
-    },
-    Object {
       "children": Array [
         Object {
           "position": Position {
             "end": Object {
-              "column": 8,
-              "line": 9,
-              "offset": 78,
+              "column": 32,
+              "line": 1,
+              "offset": 31,
             },
             "indent": Array [],
             "start": Object {
               "column": 1,
-              "line": 9,
-              "offset": 71,
+              "line": 1,
+              "offset": 0,
             },
           },
           "type": "text",
-          "value": "Title: ",
-        },
-        Object {
-          "position": Position {
-            "end": Object {
-              "column": 20,
-              "line": 9,
-              "offset": 90,
-            },
-            "indent": Array [],
-            "start": Object {
-              "column": 8,
-              "line": 9,
-              "offset": 78,
-            },
-          },
-          "type": "text",
-          "value": "Foo",
-        },
-        Object {
-          "position": Position {
-            "end": Object {
-              "column": 28,
-              "line": 9,
-              "offset": 98,
-            },
-            "indent": Array [],
-            "start": Object {
-              "column": 20,
-              "line": 9,
-              "offset": 90,
-            },
-          },
-          "type": "text",
-          "value": ". Bond: ",
-        },
-        Object {
-          "position": Position {
-            "end": Object {
-              "column": 39,
-              "line": 9,
-              "offset": 109,
-            },
-            "indent": Array [],
-            "start": Object {
-              "column": 28,
-              "line": 9,
-              "offset": 98,
-            },
-          },
-          "type": "text",
-          "value": "42",
+          "value": "Title: Foo. Bond: 42 Fname: foo",
         },
       ],
       "position": Position {
         "end": Object {
-          "column": 39,
-          "line": 9,
-          "offset": 109,
+          "column": 32,
+          "line": 1,
+          "offset": 31,
         },
         "indent": Array [],
         "start": Object {
           "column": 1,
-          "line": 9,
-          "offset": 71,
+          "line": 1,
+          "offset": 0,
         },
       },
       "type": "paragraph",
@@ -2309,8 +2138,8 @@ bond: 42",
   "position": Object {
     "end": Object {
       "column": 1,
-      "line": 10,
-      "offset": 110,
+      "line": 2,
+      "offset": 32,
     },
     "start": Object {
       "column": 1,
@@ -2324,16 +2153,7 @@ bond: 42",
 
 exports[`MDUtils.proc "MD_REGULAR: WITH_VARIABLE": respProcess 1`] = `
 VFile {
-  "contents": "---
-id: foo
-title: Foo
-desc: ''
-updated: '1'
-created: '1'
-bond: 42
----
-
-Title: Foo. Bond: 42
+  "contents": "Title: Foo. Bond: 42 Fname: foo
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -2345,7 +2165,7 @@ Title: Foo. Bond: 42
 
 exports[`MDUtils.proc "MD_REGULAR: WITH_VARIABLE": respRehype 1`] = `
 VFile {
-  "contents": "<p>Title: Foo. Bond: 42</p>",
+  "contents": "<p>Title: Foo. Bond: 42 Fname: foo</p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],

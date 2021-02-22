@@ -1,4 +1,9 @@
-const { MDUtilsV4, DendronASTDest } = require("@dendronhq/engine-server");
+const {
+  MDUtilsV4,
+  DendronASTDest,
+  nunjucks,
+  renderFromNoteProps
+} = require("@dendronhq/engine-server");
 const { NoteUtilsV2, VaultUtils } = require("@dendronhq/common-all");
 const { DateTime } = require("luxon");
 const {
@@ -17,8 +22,8 @@ const xmlFiltersPlugin = require("eleventy-xml-plugin");
 const path = require("path");
 
 async function addHeader() {
-  const hpath = getCustomHeaderOutput()
-  return fs.readFileSync(hpath, {encoding: "utf8"})
+  const hpath = getCustomHeaderOutput();
+  return fs.readFileSync(hpath, { encoding: "utf8" });
 }
 
 async function formatNote(note) {
@@ -100,7 +105,12 @@ const _frontMatterToTable = (arg) => {
   }
 };
 async function toMarkdown2(contents, vault, fname) {
-  const {notes, noteIndex} = await require(path.join(__dirname, "..", "_data", "notes.js"))();
+  const { notes, noteIndex } = await require(path.join(
+    __dirname,
+    "..",
+    "_data",
+    "notes.js"
+  ))();
   const absUrl = NOTE_UTILS.getAbsUrl();
   const config = getDendronConfig();
   const sconfig = getSiteConfig();
@@ -108,7 +118,12 @@ async function toMarkdown2(contents, vault, fname) {
   const linkPrefix = absUrl + "/" + siteNotesDir + "/";
   const engine = await getEngine();
   const wikiLinksOpts = { useId: true, prefix: linkPrefix };
-  const navParent = getClosetNavVisibleParent({ fname, vault, notes, noteIndex});
+  const navParent = getClosetNavVisibleParent({
+    fname,
+    vault,
+    notes,
+    noteIndex,
+  });
   const proc = MDUtilsV4.procFull({
     engine,
     dest: DendronASTDest.HTML,
@@ -127,9 +142,16 @@ async function toMarkdown2(contents, vault, fname) {
     mermaid: config.mermaid,
   });
   const navHintElem = `<span id="navId" data="${navParent.id}"></span>`;
+  const procRehype = MDUtilsV4.procRehype({ proc, mathjax: true })
+  let contentsClean = renderFromNoteProps({
+    fname,
+    vault,
+    wsRoot: engine.wsRoot,
+    notes: engine.notes,
+  });
+  let out = await procRehype.process(contentsClean)
   return (
-    (await MDUtilsV4.procRehype({ proc, mathjax: true }).process(contents)) +
-    navHintElem
+    out.contents + navHintElem
   );
 }
 

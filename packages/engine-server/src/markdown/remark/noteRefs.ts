@@ -399,7 +399,7 @@ function convertNoteRefHelperAST(
     out = _proc.parse(out2) as Parent;
     return { error: null, data: out };
   } catch (err) {
-    console.log("ERROR WITH RE in AST");
+    console.log("ERROR WITH RE in AST, noteRefV1");
     console.log(JSON.stringify(err));
     return {
       error: new DendronError({
@@ -457,7 +457,7 @@ function convertNoteRefHelper(
     }
     return { error: null, data: out };
   } catch (err) {
-    console.log("ERROR WITH REF++++");
+    console.log("ERROR WITH REF");
     console.log(JSON.stringify(err));
     return {
       error: new DendronError({

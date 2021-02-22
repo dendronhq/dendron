@@ -8,6 +8,7 @@ import {
   AssertUtils,
   ENGINE_HOOKS,
   ENGINE_SERVER,
+  NoteTestUtilsV4,
   runEngineTestV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
@@ -527,6 +528,44 @@ describe("compilev2", () => {
     preSetupHook: ENGINE_HOOKS.setupNoteRefRecursive,
   });
 
+  // const RECURSIVE_TOO_DEEP_TEST_CASES = createProcTests({
+  //   name: "RECURSIVE_TOO_DEEP_TEST_CASES",
+  //   setupFunc: async ({ engine, extra, vaults }) => {
+  //     const resp = await MDUtilsV4.procFull({
+  //       engine,
+  //       dest: extra.dest,
+  //       vault: vaults[0],
+  //     }).process(linkWithNoExtension);
+  //     return { resp };
+  //   },
+  //   verifyFuncDict: {
+  //     [DendronASTDest.HTML]: async ({ extra }) => {
+  //       const { resp } = extra;
+  //       expect(resp).toMatchSnapshot();
+  //       return [
+  //         {
+  //           actual: await AssertUtils.assertInString({
+  //             body: resp.toString(),
+  //             match: [
+  //               "# Foo",
+  //               "# Foo.One",
+  //               "# Foo.Two",
+  //               "portal",
+  //               "Regular wikilink",
+  //             ],
+  //           }),
+  //           expected: true,
+  //         },
+  //       ];
+  //     },
+  //   },
+  //   preSetupHook: async(opts) => {
+  //     const {wsRoot, vaults} = opts;
+  //     const vault = vaults[0];
+  //     await NoteTestUtilsV4.createNote({fname: "foo", wsRoot, vault, body: "# Head1\n![[foo]]"})
+  //   },
+  // });
+
   const WILDCARD_CASE = createProcTests({
     name: "wildcard",
     setupFunc: async ({ engine, extra, vaults }) => {
@@ -576,6 +615,7 @@ describe("compilev2", () => {
   });
 
   const ALL_TEST_CASES = [
+    // ...RECURSIVE_TOO_DEEP_TEST_CASES,
     ...REGULAR_CASE,
     ...RECURSIVE_TEST_CASES,
     ...WILDCARD_CASE,

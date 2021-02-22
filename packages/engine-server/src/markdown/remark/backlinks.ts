@@ -15,7 +15,6 @@ const plugin: Plugin = function (this: Unified.Processor) {
       vault: vault,
     });
 
-    console.log(note[0].links, "note");
     // show backlinks at the end of the page if they exist
     if (note[0].links.length > 0) {
       tree.children.push(u("heading", { depth: 2 }, [u("text", "Backlinks")]));
@@ -25,15 +24,6 @@ const plugin: Plugin = function (this: Unified.Processor) {
         }
       });
     }
-    // note[0].map(note => {
-    //     console.log(note)
-    // })
-    // tree.children.push(
-    //     // u('heading', {depth: 2}, [u('text', 'Contributors')])
-    //     u('text', "WOW"),
-    //     // u('text', "WOW")
-    //     // u('leaf', {id: 1}, [u('text', 'Contributors')])
-    // )
   }
   return transformer;
 };

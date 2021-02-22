@@ -30,7 +30,7 @@
       "type": "node",
       "request": "launch",
       "name": "debug one test",
-      "program": "${workspaceFolder:engine-server}/node_modules/jest/bin/jest.js",
+      "program": "${workspaceFolder:engine-server}/../../node_modules/jest/bin/jest.js",
       "sourceMaps": true,
       "smartStep": true,
       "cwd": "${workspaceFolder:engine-server}",

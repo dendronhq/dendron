@@ -7,6 +7,8 @@ import {
   NoteUtilsV2,
 } from "@dendronhq/common-all";
 // @ts-ignore
+import mermaid from "@dendronhq/remark-mermaid";
+// @ts-ignore
 import rehypePrism from "@mapbox/rehype-prism";
 import _ from "lodash";
 import { Heading } from "mdast";
@@ -22,8 +24,6 @@ import abbrPlugin from "remark-abbr";
 import footnotes from "remark-footnotes";
 import frontmatterPlugin from "remark-frontmatter";
 import math from "remark-math";
-// @ts-ignore
-import mermaid from "@dendronhq/remark-mermaid";
 import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
 import remarkStringify from "remark-stringify";
@@ -31,6 +31,7 @@ import remarkStringify from "remark-stringify";
 import variables from "remark-variables";
 import { default as unified, default as Unified, Processor } from "unified";
 import { Node, Parent } from "unist";
+import { backlinks } from "./remark/backlinks";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
 import { noteRefsV2 } from "./remark/noteRefsV2";
@@ -197,6 +198,7 @@ export class MDUtilsV4 {
       .use(variables)
       .use(footnotes)
       .use(wikiLinks, opts.wikiLinksOpts)
+      .use(backlinks)
       .use(noteRefsV2, {
         ...opts.noteRefOpts,
         wikiLinkOpts: opts.wikiLinksOpts,

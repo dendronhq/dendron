@@ -1,12 +1,12 @@
-import vscode from "vscode";
+import _ from "lodash";
 import path from "path";
+import vscode from "vscode";
 import {
   containsMarkdownExt,
   findReferences,
   FoundRefT,
   sortPaths,
 } from "../utils/md";
-import _ from "lodash";
 
 class Backlink extends vscode.TreeItem {
   constructor(

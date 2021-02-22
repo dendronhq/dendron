@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`backlinks backlinks render 1`] = `
+VFile {
+  "contents": "<p><a href=\\"test.html\\">test</a></p>
+<h2 id=\\"contributors\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#contributors\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Contributors</h2>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;

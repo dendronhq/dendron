@@ -149,6 +149,7 @@
               <p class="text-small text-grey-dk-000 mb-0 mr-2">
                 Page last modified: <span class="d-inline-block">{{ note.updated | ms2ShortDate }}</span>.
               </p>
+            {% endif %}
                 {% if
                   dendronConfig.site.gh_edit_link and
                   dendronConfig.site.gh_edit_link_text and
@@ -161,7 +162,6 @@
                   </p>
                 {% endif %}
               </div>
-            {% endif %}
           </footer>
         {% endif %}
     </div>

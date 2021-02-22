@@ -131,7 +131,7 @@ const WITH_VARIABLE = createProcTests({
           expect(
             await AssertUtils.assertInString({
               body: ent.contents,
-              match: ["Title: Foo", "Bond: 42", `Fname: ${"foo"}`],
+              match: ["Title: Foo", "Bond: 42"],
             })
           ).toBeTruthy();
         })

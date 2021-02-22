@@ -13,12 +13,12 @@ import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
 import { html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
-import Unified, { Plugin, Processor } from "unified";
+import Unified, { Plugin } from "unified";
 import { Node, Parent } from "unist";
 import { SiteUtils } from "../../topics/site";
 import { parseFileLinkV2 } from "../../utils";
 import { DendronASTDest, DendronASTNode, NoteRefNoteV4 } from "../types";
-import { MDUtilsV4, renderFromNoteProps } from "../utils";
+import { MDUtilsV4 } from "../utils";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
 
@@ -378,16 +378,16 @@ function convertNoteRefHelperAST(
 ): Required<RespV2<Parent>> {
   const { proc, refLvl, link, note } = opts;
   const noteRefProc = proc();
-  const engine = MDUtilsV4.getEngineFromProc(noteRefProc);
+  // const engine = MDUtilsV4.getEngineFromProc(noteRefProc);
   MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
   const procOpts = MDUtilsV4.getProcOpts(noteRefProc);
-  let contentsClean = renderFromNoteProps({
-    fname: note.fname,
-    vault: note.vault,
-    wsRoot: engine!.engine.wsRoot,
-    notes: engine!.engine.notes,
-  });
-  const bodyAST = noteRefProc.parse(contentsClean) as DendronASTNode;
+  // let contentsClean = renderFromNoteProps({
+  //   fname: note.fname,
+  //   vault: note.vault,
+  //   wsRoot: engine!.engine.wsRoot,
+  //   notes: engine!.engine.notes,
+  // });
+  const bodyAST = noteRefProc.parse(note.body) as DendronASTNode;
   const { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {
     anchorStartOffset: 0,
   });

@@ -143,13 +143,13 @@ async function toMarkdown2(contents, vault, fname) {
   });
   const navHintElem = `<span id="navId" data="${navParent.id}"></span>`;
   const procRehype = MDUtilsV4.procRehype({ proc, mathjax: true })
-  let contentsClean = renderFromNoteProps({
-    fname,
-    vault,
-    wsRoot: engine.wsRoot,
-    notes: engine.notes,
-  });
-  let out = await procRehype.process(contentsClean)
+  // let contentsClean = renderFromNoteProps({
+  //   fname,
+  //   vault,
+  //   wsRoot: engine.wsRoot,
+  //   notes: engine.notes,
+  // });
+  let out = await procRehype.process(contents)
   return (
     out.contents + navHintElem
   );

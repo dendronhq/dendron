@@ -8,7 +8,6 @@ import {
   AssertUtils,
   ENGINE_HOOKS,
   ENGINE_SERVER,
-  NoteTestUtilsV4,
   runEngineTestV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
@@ -22,8 +21,8 @@ import {
   createEngine,
   createProc,
   createProcTests,
-  modifyNote,
   generateVerifyFunction,
+  modifyNote,
   processText,
 } from "./utils";
 

@@ -31,6 +31,8 @@ import math from "remark-math";
 import remarkParse from "remark-parse";
 import remark2rehype from "remark-rehype";
 import remarkStringify from "remark-stringify";
+// @ts-ignore
+import variables from "remark-variables";
 import { default as unified, default as Unified, Processor } from "unified";
 import { Node, Parent } from "unist";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
@@ -248,6 +250,7 @@ export class MDUtilsV4 {
       } as DendronASTData)
       //.use(extract, { name: "fm" })
       .use(abbrPlugin)
+      .use(variables)
       .use(footnotes)
       .use(wikiLinks, opts.wikiLinksOpts)
       .use(noteRefsV2, {

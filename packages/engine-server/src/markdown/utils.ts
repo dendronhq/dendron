@@ -223,6 +223,7 @@ export class MDUtilsV4 {
       });
     }
     proc = proc.data("procFull", proc().freeze());
+    proc = proc.data("procOpts", opts);
     return proc;
   }
 

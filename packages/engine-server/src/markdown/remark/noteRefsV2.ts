@@ -240,10 +240,10 @@ function convertNoteRef(
 }
 
 export function convertNoteRefASTV2(
-  opts: ConvertNoteRefOpts
+  opts: ConvertNoteRefOpts & { procOpts: any }
 ): { error: DendronError | undefined; data: Parent[] | undefined } {
   let errors: DendronError[] = [];
-  const { link, proc, compilerOpts } = opts;
+  const { link, proc, compilerOpts, procOpts } = opts;
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
   const {
     dest,
@@ -313,6 +313,7 @@ export function convertNoteRefASTV2(
         refLvl: refLvl + 1,
         proc,
         compilerOpts,
+        procOpts,
       });
       if (error) {
         errors.push(error);
@@ -368,9 +369,9 @@ export function convertNoteRefASTV2(
 }
 
 function convertNoteRefHelperAST(
-  opts: ConvertNoteRefHelperOpts
+  opts: ConvertNoteRefHelperOpts & { procOpts: any }
 ): Required<RespV2<Parent>> {
-  const { body, proc, refLvl, link } = opts;
+  const { body, proc, refLvl, link, procOpts } = opts;
   const noteRefProc = proc();
   MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
   const bodyAST = noteRefProc.parse(body) as DendronASTNode;
@@ -415,11 +416,20 @@ function convertNoteRefHelperAST(
         anchorEndIndex
       )
     );
-    let _proc = proc.data("procFull") as Processor;
-    let out2 = _proc.stringify(out);
-    out = _proc.parse(out2) as Parent;
-    return { error: null, data: out };
+    const tmpProc = MDUtilsV4.procFull(procOpts);
+    // let _proc = proc.data("procFull") as Processor;
+    // this turns it into text
+    const { dest } = MDUtilsV4.getDendronData(tmpProc);
+    if (dest === DendronASTDest.HTML) {
+      let out3 = tmpProc.runSync(out) as Parent;
+      return { error: null, data: out3 };
+    } else {
+      let out2 = tmpProc.stringify(out);
+      out = tmpProc.parse(out2) as Parent;
+      return { error: null, data: out };
+    }
   } catch (err) {
+    debugger;
     console.log("ERROR WITH RE in AST");
     console.log(JSON.stringify(err));
     return {

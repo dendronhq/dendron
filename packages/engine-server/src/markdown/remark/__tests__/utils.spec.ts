@@ -375,19 +375,16 @@ const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
     let proc = await createProc(opts, {
       wikiLinksOpts: { useId: true },
     });
-    const txt1 = `((ref: [[foo.md]]))`;
     const txt2 = `![[foo.md]]`;
-    const case1 = processText({ text: txt1, proc });
     const case2 = processText({ text: txt2, proc });
-    return { case1, case2 };
+    return { case2 };
   },
   verifyFuncDict: {
     [DendronASTDest.HTML]: async ({ extra }) => {
-      const { case1, case2 } = extra;
-      const { respRehype: resp1 } = case1;
+      const { case2 } = extra;
       const { respRehype: resp2 } = case2;
       await Promise.all(
-        [resp1, resp2].map((resp) => {
+        [resp2].map((resp) => {
           return checkContents(resp, [
             // link by id
             `<a href=\"foo-id.html\"`,

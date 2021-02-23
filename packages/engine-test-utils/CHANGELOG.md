@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.30.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-test-utils@0.29.1-alpha.0...@dendronhq/engine-test-utils@0.30.0) (2021-02-23)
+
+**Note:** Version bump only for package @dendronhq/engine-test-utils
+
 ## [0.29.2](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-test-utils@0.29.1-alpha.0...@dendronhq/engine-test-utils@0.29.2) (2021-02-21)
 
 **Note:** Version bump only for package @dendronhq/engine-test-utils

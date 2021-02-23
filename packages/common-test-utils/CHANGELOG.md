@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.30.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-test-utils@0.29.0...@dendronhq/common-test-utils@0.30.0) (2021-02-23)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
 ## [0.29.1](https://github.com/dendronhq/dendron/compare/@dendronhq/common-test-utils@0.29.0...@dendronhq/common-test-utils@0.29.1) (2021-02-21)
 
 **Note:** Version bump only for package @dendronhq/common-test-utils

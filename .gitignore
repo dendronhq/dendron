@@ -28,3 +28,4 @@ yarn-error.*
 proto.ts
 dendron-main.code-workspace
 packages/common-server/proto/amplify.ts
+unpublish.sh

@@ -15,10 +15,14 @@ async function main() {
       return { name, version };
     }));
     const out = {};
+    const unpublish = [];
     meta.forEach(({name, version})=> {
         out[name] = version;
+        unpublish.push(`npm unpublish --force ${name}`)
     });
     fs.writeJSONSync(path.join(PROJ_ROOT, "meta.json"), out);
+    fs.writeFileSync("unpublish.sh", unpublish.join("\n"), {encoding: "utf-8"})
+    fs.chmodSync("unpublish.sh", "700")
 }
 
 main();

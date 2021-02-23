@@ -8,7 +8,6 @@ import {
   SchemaUtilsV2,
   Time,
   VaultUtils,
-  WorkspaceUtilsCommon,
 } from "@dendronhq/common-all";
 import {
   createLogger,
@@ -250,12 +249,10 @@ export class WorkspaceService {
     if (!vault.remote || vault.remote.type !== "git") {
       throw new DendronError({ msg: "cloning non-git vault" });
     }
-    const repoPath = WorkspaceUtilsCommon.getPathForVault({ wsRoot, vault });
-    const repoDir = WorkspaceUtilsCommon.getRepoDir(wsRoot);
-    fs.ensureDirSync(repoDir);
-    logger.info({ msg: "cloning", repoPath, repoDir });
-    const git = simpleGit({ baseDir: repoDir });
-    await git.clone(vault.remote.url);
+    const repoPath = vault2Path({ wsRoot, vault });
+    logger.info({ msg: "cloning", repoPath });
+    const git = simpleGit({ baseDir: wsRoot });
+    await git.clone(vault.remote.url, repoPath);
     return repoPath;
   }
 

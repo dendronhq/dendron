@@ -22,6 +22,7 @@ import { BasicCommand } from "./base";
 type CommandOpts = {
   type: VaultRemoteSource;
   path: string;
+  pathRemote?: string;
   name?: string;
 };
 
@@ -72,12 +73,23 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           const value = qp.value;
           const selected = qp.selectedItems[0];
           if (selected.label === "custom") {
-            if (PickerUtilsV2.isInputEmpty(value)) {
+            if (PickerUtilsV2.isStringInputEmpty(value)) {
               return window.showInformationMessage("please enter an endpoint");
             }
             selected.src = qp.value;
           }
-          sourcePath = selected.src;
+          const sourceRemotePath = selected.src;
+
+          let out = await VSCodeUtils.showInputBox({
+            prompt: "Path to your new vault (relative to your workspace root)",
+            placeHolder: localVaultPathPlaceholder,
+            value: GitUtils.getRepoNameFromURL(sourceRemotePath),
+          });
+          if (PickerUtilsV2.isStringInputEmpty(out)) {
+            return;
+          }
+          sourcePath = out!;
+
           sourceName = await VSCodeUtils.showInputBox({
             prompt: "Name of new vault (optional, press enter to skip)",
           });
@@ -87,6 +99,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
             type: sourceType!,
             name: sourceName,
             path: sourcePath,
+            pathRemote: sourceRemotePath,
           });
         });
         qp.show();
@@ -97,7 +110,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         prompt: "Path to your new vault (relative to your workspace root)",
         placeHolder: localVaultPathPlaceholder,
       });
-      if (PickerUtilsV2.isInputEmpty(out)) return;
+      if (PickerUtilsV2.isStringInputEmpty(out)) return;
       sourcePath = out!;
     }
     sourceName = await VSCodeUtils.showInputBox({
@@ -111,17 +124,14 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async handleRemoteRepo(opts: CommandOpts) {
-    const repoDir = DendronWorkspace.instance().repoDir;
-    fs.ensureDirSync(repoDir);
+    const baseDir = DendronWorkspace.wsRoot();
     // clone
-    const git = simpleGit({ baseDir: repoDir });
-    await git.clone(opts.path);
-    const repoName = GitUtils.getRepoNameFromURL(opts.path);
-    const repoPath = path.join(repoDir, repoName);
+    const git = simpleGit({ baseDir });
+    await git.clone(opts.pathRemote!, opts.path);
     const vault = GitUtils.getVaultFromRepo({
-      repoPath,
+      repoPath: path.join(baseDir, opts.path),
       wsRoot: DendronWorkspace.wsRoot(),
-      repoUrl: opts.path,
+      repoUrl: opts.pathRemote!,
     });
     if (opts.name) {
       vault.name = opts.name;

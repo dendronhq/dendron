@@ -47,7 +47,7 @@ import {
 export const DENDRON_REMOTE =
   "https://github.com/dendronhq/dendron-site-vault.git";
 export const DENDRON_REMOTE_VAULT = {
-  fsPath: "repos/dendron-site-vault",
+  fsPath: "dendron-site-vault",
   remote: {
     type: "git" as const,
     url: DENDRON_REMOTE,

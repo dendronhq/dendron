@@ -400,8 +400,10 @@ export class LocationTestUtils {
     path.basename(loc.uri.fsPath);
 }
 export const stubWorkspaceFile = (wsRoot: string) => {
+  const wsPath = path.join(wsRoot, "dendron.code-workspace");
+  fs.writeJSONSync(wsPath, {});
   DendronWorkspace.workspaceFile = () => {
-    return Uri.file(path.join(wsRoot, "dendron.code-workspace"));
+    return Uri.file(wsPath);
   };
 };
 

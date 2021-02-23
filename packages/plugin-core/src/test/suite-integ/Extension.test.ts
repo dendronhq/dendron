@@ -1,5 +1,9 @@
-import { WorkspaceUtilsCommon } from "@dendronhq/common-all";
-import { GitUtils, readYAML, tmpDir } from "@dendronhq/common-server";
+import {
+  GitUtils,
+  readYAML,
+  tmpDir,
+  vault2Path,
+} from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import { describe, it } from "mocha";
@@ -49,7 +53,7 @@ suite("Extension", function () {
       });
     });
 
-    it("creates correct dendron.yml", function (done) {
+    it("not active, initial create ws", function (done) {
       const wsRoot = tmpDir().name;
       getWS()
         .context.globalState.update(GLOBAL_STATE.DENDRON_FIRST_WS, true)
@@ -85,25 +89,6 @@ suite("Extension", function () {
                 },
               },
             });
-            done();
-          });
-        });
-    });
-
-    it("not active/ init, first time", function (done) {
-      const wsRoot = tmpDir().name;
-      getWS()
-        .context.globalState.update(GLOBAL_STATE.DENDRON_FIRST_WS, true)
-        .then(() => {
-          _activate(ctx).then(async () => {
-            stubSetupWorkspace({
-              wsRoot,
-              initType: InitializeType.TUTORIAL_NOTES,
-            });
-            await vscode.commands.executeCommand(DENDRON_COMMANDS.INIT_WS.key, {
-              skipOpenWs: true,
-              skipConfirmation: true,
-            } as SetupWorkspaceOpts);
             expect(
               fs.readdirSync(path.join(wsRoot, DEFAULT_LEGACY_VAULT_NAME))
             ).toEqual(genTutorialWSFiles());
@@ -112,7 +97,7 @@ suite("Extension", function () {
         });
     });
 
-    it("not active/ init, not first time", function (done) {
+    it("not active, not initial create ws", function (done) {
       const wsRoot = tmpDir().name;
       getWS()
         .context.globalState.update(GLOBAL_STATE.DENDRON_FIRST_WS, false)
@@ -145,7 +130,7 @@ suite("Extension", function () {
           config.vaults.push(DENDRON_REMOTE_VAULT);
           writeConfig({ config, wsRoot });
           _activate(ctx).then(async () => {
-            const rVaultPath = WorkspaceUtilsCommon.getPathForVault({
+            const rVaultPath = vault2Path({
               vault: DENDRON_REMOTE_VAULT,
               wsRoot,
             });

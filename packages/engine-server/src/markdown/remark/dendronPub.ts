@@ -6,6 +6,7 @@ import { Node } from "unist";
 import u from "unist-builder";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
+import { findIndex, isNoteRefV2 } from "../../topics/markdown/plugins/inject";
 import { SiteUtils } from "../../topics/site";
 import { DendronASTDest, NoteRefDataV4, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
@@ -183,18 +184,30 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         node.type === "refLinkV2" &&
         dest !== DendronASTDest.MD_ENHANCED_PREVIEW
       ) {
+        // we have custom compiler for markdown to handle note ref
         const ndata = node.data as NoteRefDataV4;
         const copts: NoteRefsOpts = {
           wikiLinkOpts: opts?.wikiLinkOpts,
           prettyRefs: opts?.prettyRefs,
         };
+        const procOpts = proc.data("procOpts") as any;
         const { data } = convertNoteRefASTV2({
           link: ndata.link,
           proc,
           compilerOpts: copts,
+          procOpts,
         });
         if (data) {
-          parent!.children = data;
+          if (parent!.children.length > 1) {
+            const children = parent!.children;
+            const idx = findIndex(children, isNoteRefV2);
+            parent!.children = children
+              .slice(0, idx)
+              .concat(data)
+              .concat(children.slice(idx + 1, -1));
+          } else {
+            parent!.children = data;
+          }
         }
       }
       if (node.type === "image" && dest === DendronASTDest.HTML) {

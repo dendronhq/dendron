@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/engine-server",
-  "version": "0.29.1",
+  "version": "0.30.0",
   "description": "dendron-engine",
   "license": "GPLv3",
   "repository": {
@@ -38,9 +38,9 @@
     "test:unit:debug": "NODE_ENV=test  node --inspect node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.29.1",
-    "@dendronhq/common-server": "^0.29.1",
-    "@dendronhq/common-test-utils": "^0.29.1",
+    "@dendronhq/common-all": "^0.30.0",
+    "@dendronhq/common-server": "^0.30.0",
+    "@dendronhq/common-test-utils": "^0.30.0",
     "@dendronhq/remark-mermaid": "^0.2.0",
     "@mapbox/rehype-prism": "^0.5.0",
     "@types/fs-extra": "^9.0.1",
@@ -48,6 +48,7 @@
     "@types/lodash": "^4.14.156",
     "@types/mdast": "^3.0.3",
     "@types/node": "13.11.0",
+    "@types/nunjucks": "^3.1.4",
     "@types/pino": "^6.3.0",
     "@types/remark-abbr": "^1.4.0",
     "@types/through2": "^2.0.36",
@@ -63,6 +64,7 @@
     "mdast-builder": "^1.1.1",
     "mdast-util-compact": "^2.0.1",
     "mdast-util-inject": "^1.1.0",
+    "nunjucks": "^3.2.3",
     "rehype-autolink-headings": "^5.0.1",
     "rehype-katex": "3",
     "rehype-raw": "^5.0.0",

@@ -1,10 +1,13 @@
 ---
 id: id-note-ref
-title: Simple Nste Reff
-desc: ''
+title: Note Refs
+desc: ""
 updated: 1608147857388
 created: 1608147795766
 ---
+
+# Simple
+
 ![[dendron.cat]]
 
 # Note Ref At Header

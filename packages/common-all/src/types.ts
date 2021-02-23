@@ -74,6 +74,16 @@ export type DendronConfig = {
    * Use mermaid diagrams
    */
   mermaid?: boolean;
+
+  /**
+   * Use nunjucks templating
+   */
+  useNunjucks?: boolean;
+
+  /**
+   * Use pretty refs for preview
+   */
+  usePrettyRefs?: boolean;
 };
 
 export type HierarchyConfig = {

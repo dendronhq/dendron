@@ -3408,6 +3408,11 @@
   resolved "https://registry.yarnpkg.com/@types/normalize-package-data/-/normalize-package-data-2.4.0.tgz#e486d0d97396d79beedd0a6e33f4534ff6b4973e"
   integrity sha512-f5j5b/Gf71L+dbqxIpQ4Z2WlmI/mPJ0fOkGGmFgtb6sAu97EPczzbS3/tJKxmcYDj55OX6ssqwDAWOHIYDRDGA==
 
+"@types/nunjucks@^3.1.4":
+  version "3.1.4"
+  resolved "https://registry.npmjs.org/@types/nunjucks/-/nunjucks-3.1.4.tgz#2f80e2fa5e7982b2131201d0b4474ab4d03d9de1"
+  integrity sha512-cR65PLlHKW/qxxj840dbNb3ICO+iAVQzaNKJ8TcKOVKFi+QcAkhw9SCY8VFAyU41SmJMs+2nrIN2JGhX+jYb7A==
+
 "@types/object-assign@4.0.30":
   version "4.0.30"
   resolved "https://registry.yarnpkg.com/@types/object-assign/-/object-assign-4.0.30.tgz#8949371d5a99f4381ee0f1df0a9b7a187e07e652"
@@ -12829,6 +12834,15 @@ nunjucks@^3.2.1:
     commander "^5.1.0"
   optionalDependencies:
     chokidar "^3.3.0"
+
+nunjucks@^3.2.3:
+  version "3.2.3"
+  resolved "https://registry.npmjs.org/nunjucks/-/nunjucks-3.2.3.tgz#1b33615247290e94e28263b5d855ece765648a31"
+  integrity sha512-psb6xjLj47+fE76JdZwskvwG4MYsQKXUtMsPh6U0YMvmyjRtKRFcxnlXGWglNybtNTNVmGdp94K62/+NjF5FDQ==
+  dependencies:
+    a-sync-waterfall "^1.0.0"
+    asap "^2.0.3"
+    commander "^5.1.0"
 
 nwsapi@^2.0.7, nwsapi@^2.2.0:
   version "2.2.0"

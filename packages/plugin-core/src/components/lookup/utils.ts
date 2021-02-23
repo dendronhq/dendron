@@ -246,8 +246,14 @@ export class PickerUtilsV2 {
     }
   }
 
-  static isInputEmpty(value?: any): boolean {
-    return _.some([_.isEmpty, _.isUndefined], (ent) => ent(value));
+  static isStringInputEmpty(value?: string) {
+    if (_.isUndefined(value)) {
+      return true;
+    }
+    if (_.isEmpty(value)) {
+      return true;
+    }
+    return false;
   }
 
   static promptVault(): Promise<DVault | undefined> {

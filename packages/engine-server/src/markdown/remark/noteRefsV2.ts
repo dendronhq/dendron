@@ -5,6 +5,7 @@ import {
   DNoteRefLink,
   DUtils,
   getSlugger,
+  NotePropsV2,
   NoteUtilsV2,
   RespV2,
 } from "@dendronhq/common-all";
@@ -12,12 +13,12 @@ import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
 import { html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
-import Unified, { Plugin, Processor } from "unified";
+import Unified, { Plugin } from "unified";
 import { Node, Parent } from "unist";
 import { SiteUtils } from "../../topics/site";
 import { parseFileLinkV2 } from "../../utils";
 import { DendronASTDest, DendronASTNode, NoteRefNoteV4 } from "../types";
-import { MDUtilsV4 } from "../utils";
+import { MDUtilsV4, renderFromNoteProps } from "../utils";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
 
@@ -38,6 +39,7 @@ type ConvertNoteRefOpts = {
 type ConvertNoteRefHelperOpts = ConvertNoteRefOpts & {
   refLvl: number;
   body: string;
+  note: NotePropsV2;
 };
 
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
@@ -136,13 +138,6 @@ function convertNoteRef(
     return { error: new DendronError({ msg: "no vault specified" }), data: "" };
   }
   let { prettyRefs, wikiLinkOpts } = compilerOpts;
-  if (
-    !prettyRefs &&
-    _.includes([DendronASTDest.HTML, DendronASTDest.MD_ENHANCED_PREVIEW], dest)
-  ) {
-    prettyRefs = true;
-  }
-
   if (refLvl >= MAX_REF_LVL) {
     return {
       error: new DendronError({ msg: "too many nested note refs" }),
@@ -180,6 +175,7 @@ function convertNoteRef(
       // MDUtilsV4.setDendronData(proc, {overrides: {insertTitle: false}});
       const { error, data } = convertNoteRefHelper({
         body,
+        note,
         link,
         refLvl: refLvl + 1,
         proc: MDUtilsV4.setDendronData(proc(), {
@@ -240,11 +236,12 @@ function convertNoteRef(
 }
 
 export function convertNoteRefASTV2(
-  opts: ConvertNoteRefOpts
+  opts: ConvertNoteRefOpts & { procOpts: any }
 ): { error: DendronError | undefined; data: Parent[] | undefined } {
   let errors: DendronError[] = [];
-  const { link, proc, compilerOpts } = opts;
+  const { link, proc, compilerOpts, procOpts } = opts;
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
+  debugger;
   const {
     dest,
     vault,
@@ -313,6 +310,8 @@ export function convertNoteRefASTV2(
         refLvl: refLvl + 1,
         proc,
         compilerOpts,
+        procOpts,
+        note,
       });
       if (error) {
         errors.push(error);
@@ -368,12 +367,25 @@ export function convertNoteRefASTV2(
 }
 
 function convertNoteRefHelperAST(
-  opts: ConvertNoteRefHelperOpts
+  opts: ConvertNoteRefHelperOpts & { procOpts: any }
 ): Required<RespV2<Parent>> {
-  const { body, proc, refLvl, link } = opts;
+  const { proc, refLvl, link, note } = opts;
   const noteRefProc = proc();
+  const engine = MDUtilsV4.getEngineFromProc(noteRefProc);
   MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
-  const bodyAST = noteRefProc.parse(body) as DendronASTNode;
+  const procOpts = MDUtilsV4.getProcOpts(noteRefProc);
+  let bodyAST: DendronASTNode;
+  if (MDUtilsV4.getProcOpts(proc).config?.useNunjucks) {
+    let contentsClean = renderFromNoteProps({
+      fname: note.fname,
+      vault: note.vault,
+      wsRoot: engine!.engine.wsRoot,
+      notes: engine!.engine.notes,
+    });
+    bodyAST = noteRefProc.parse(contentsClean) as DendronASTNode;
+  } else {
+    bodyAST = noteRefProc.parse(note.body) as DendronASTNode;
+  }
   const { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {
     anchorStartOffset: 0,
   });
@@ -415,11 +427,19 @@ function convertNoteRefHelperAST(
         anchorEndIndex
       )
     );
-    let _proc = proc.data("procFull") as Processor;
-    let out2 = _proc.stringify(out);
-    out = _proc.parse(out2) as Parent;
-    return { error: null, data: out };
+    const tmpProc = MDUtilsV4.procFull({ ...procOpts });
+    // let tmpProc = proc.data("procFull") as Processor;
+    const { dest } = MDUtilsV4.getDendronData(tmpProc);
+    if (dest === DendronASTDest.HTML) {
+      let out3 = tmpProc.runSync(out) as Parent;
+      return { error: null, data: out3 };
+    } else {
+      let out2 = tmpProc.stringify(out);
+      out = tmpProc.parse(out2) as Parent;
+      return { error: null, data: out };
+    }
   } catch (err) {
+    debugger;
     console.log("ERROR WITH RE in AST");
     console.log(JSON.stringify(err));
     return {

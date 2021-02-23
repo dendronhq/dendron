@@ -1,4 +1,4 @@
-import { NotePropsV2, WorkspaceOpts } from "@dendronhq/common-all";
+import { NotePropsV2, NoteUtilsV2, WorkspaceOpts } from "@dendronhq/common-all";
 import {
   AssertUtils,
   ENGINE_HOOKS,
@@ -19,7 +19,7 @@ import {
   generateVerifyFunction,
   processText,
 } from "./utils";
-import { MDUtilsV4 } from "../../utils";
+import { MDUtilsV4, renderFromNote } from "../../utils";
 
 const IMAGE_LINK = `![alt-text](image-url.jpg)`;
 
@@ -31,6 +31,21 @@ const readAndProcess = (opts: { npath: string; proc: Processor }) => {
   const respProcess = proc.processSync(noteRaw);
   const respRehype = MDUtilsV4.procRehype({ proc: proc() }).processSync(
     noteRaw
+  );
+  expect(respParse).toMatchSnapshot("respParse");
+  expect(respProcess).toMatchSnapshot("respProcess");
+  expect(respRehype).toMatchSnapshot("respRehype");
+  return { proc, respProcess, respParse, respRehype };
+};
+
+const readAndProcessV2 = (opts: { note: NotePropsV2; proc: Processor }) => {
+  const { note, proc } = opts;
+  const content = renderFromNote({ note });
+  //const noteRaw = fs.readFileSync(npath, { encoding: "utf8" });
+  const respParse = proc.parse(content);
+  const respProcess = proc.processSync(content);
+  const respRehype = MDUtilsV4.procRehype({ proc: proc() }).processSync(
+    content
   );
   expect(respParse).toMatchSnapshot("respParse");
   expect(respProcess).toMatchSnapshot("respProcess");
@@ -97,9 +112,16 @@ const WITH_TITLE = createProcTests({
 const WITH_VARIABLE = createProcTests({
   name: "WITH_VARIABLE",
   setupFunc: async (opts) => {
+    const { wsRoot, vaults, engine } = opts;
     let proc = await createProc(opts);
-    const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
-    return readAndProcess({ npath, proc });
+    //const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
+    const note = NoteUtilsV2.getNoteByFnameV5({
+      wsRoot,
+      vault: vaults[0],
+      fname: "foo",
+      notes: engine.notes,
+    });
+    return readAndProcessV2({ note: note!, proc });
   },
   verifyFuncDict: {
     [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
@@ -121,7 +143,7 @@ const WITH_VARIABLE = createProcTests({
     await ENGINE_HOOKS.setupBasic(opts);
     await modifyNote(opts, (note: NotePropsV2) => {
       note.custom = { bond: 42 };
-      note.body = `Title: {{fm.title}}. Bond: {{fm.bond}}`;
+      note.body = `Title: {{fm.title}}. Bond: {{fm.bond}} Fname: {{fname}}`;
       return note;
     });
   },
@@ -375,19 +397,16 @@ const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
     let proc = await createProc(opts, {
       wikiLinksOpts: { useId: true },
     });
-    const txt1 = `((ref: [[foo.md]]))`;
     const txt2 = `![[foo.md]]`;
-    const case1 = processText({ text: txt1, proc });
     const case2 = processText({ text: txt2, proc });
-    return { case1, case2 };
+    return { case2 };
   },
   verifyFuncDict: {
     [DendronASTDest.HTML]: async ({ extra }) => {
-      const { case1, case2 } = extra;
-      const { respRehype: resp1 } = case1;
+      const { case2 } = extra;
       const { respRehype: resp2 } = case2;
       await Promise.all(
-        [resp1, resp2].map((resp) => {
+        [resp2].map((resp) => {
           return checkContents(resp, [
             // link by id
             `<a href=\"foo-id.html\"`,

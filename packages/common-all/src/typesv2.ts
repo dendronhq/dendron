@@ -449,6 +449,13 @@ export type WorkspaceOpts = {
   vaults: DVault[];
 };
 
+/**
+ * Used to specify exact location of a note
+ */
+export type GetNoteOpts = {
+  fname: string;
+} & WorkspaceVault;
+
 // === Pods
 export type DPod<TConfig> = {
   config: PodConfig[];

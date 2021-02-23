@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.30.0](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.29.1-alpha.0...@dendronhq/plugin-core@0.30.0) (2021-02-23)
+
+### Bug Fixes
+
+- exit if no path selected when adding a new vault ([4421d51](https://github.com/dendronhq/dendron/commit/4421d51c51b78300d4488b56a82ecd39e291abdf))
+
 ## [0.29.2](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.29.1-alpha.0...@dendronhq/plugin-core@0.29.2) (2021-02-21)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

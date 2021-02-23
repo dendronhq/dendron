@@ -38,6 +38,9 @@ const config = {
     // new CopyPlugin({
     //   patterns: [{ from: path.join("assets", "static"), to: "static" }],
     // }),
+    new IgnorePlugin({
+      resourceRegExp: /fsevents/
+    }),
     new CopyPlugin({
       patterns: [{ from: path.join("assets", "dendron-ws"), to: "dendron-ws" }],
     }),

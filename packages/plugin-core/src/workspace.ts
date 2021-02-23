@@ -1,5 +1,4 @@
 import {
-  CONSTANTS,
   DendronConfig,
   DEngineClientV2,
   DVault,
@@ -326,14 +325,6 @@ export class DendronWorkspace {
     const podsPath = PodUtils.getPodDir({ wsRoot: rootDir });
     fs.ensureDirSync(podsPath);
     return podsPath;
-  }
-
-  get repoDir(): string {
-    const repoDir = path.join(
-      DendronWorkspace.wsRoot(),
-      CONSTANTS.DENDRON_REPO_DIR
-    );
-    return repoDir;
   }
 
   /**

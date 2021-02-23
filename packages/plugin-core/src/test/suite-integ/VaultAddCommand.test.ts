@@ -37,6 +37,7 @@ const stubVaultInput = (opts: {
   cmd?: VaultAddCommand;
   sourceType: VaultRemoteSource;
   sourcePath: string;
+  sourcePathRemote?: string;
   sourceName?: string;
 }): void => {
   if (opts.cmd) {
@@ -45,6 +46,7 @@ const stubVaultInput = (opts: {
         type: opts.sourceType,
         name: opts.sourceName,
         path: opts.sourcePath,
+        pathRemote: opts.sourcePathRemote,
       })
     );
   }
@@ -111,7 +113,8 @@ suite("VaultAddCommand", function () {
           stubVaultInput({
             cmd,
             sourceType: "remote",
-            sourcePath: remote,
+            sourcePath: "vaultRemote",
+            sourcePathRemote: remote,
             sourceName: "dendron",
           });
           const resp = await cmd.run();
@@ -136,7 +139,7 @@ suite("VaultAddCommand", function () {
           expect(
             FileTestUtils.assertInFile({
               fpath: gitIgnore,
-              match: ["repos/dendron-site-vault"],
+              match: ["vaultRemote"],
             })
           ).toBeTruthy();
           done();

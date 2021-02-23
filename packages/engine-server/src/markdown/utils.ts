@@ -215,7 +215,6 @@ export class MDUtilsV4 {
     const errors: DendronError[] = [];
     let _proc = remark()
       .use(remarkParse, { gfm: true })
-      //.use(remarkStringify)
       .data("errors", errors)
       .data("engine", engine)
       .use(frontmatterPlugin, ["yaml"])
@@ -240,6 +239,16 @@ export class MDUtilsV4 {
       };
       proc = proc.data("fm", fm);
     }
+
+    // set defaults
+    let usePrettyRefs: boolean | undefined = _.find(
+      [config?.usePrettyRefs, config?.site.usePrettyRefs],
+      (ent) => !_.isUndefined(ent)
+    );
+    if (_.isUndefined(usePrettyRefs)) {
+      usePrettyRefs = true;
+    }
+
     proc = proc
       .data("dendron", {
         dest,
@@ -256,6 +265,7 @@ export class MDUtilsV4 {
       .use(noteRefsV2, {
         ...opts.noteRefOpts,
         wikiLinkOpts: opts.wikiLinksOpts,
+        prettyRefs: usePrettyRefs,
       })
       .use(noteRefs, { ...opts.noteRefOpts, wikiLinkOpts: opts.wikiLinksOpts });
     if (opts.mathOpts?.katex) {
@@ -269,6 +279,7 @@ export class MDUtilsV4 {
       proc = proc.use(dendronPub, {
         ...opts.publishOpts,
         wikiLinkOpts: opts.wikiLinksOpts,
+        prettyRefs: usePrettyRefs,
       });
     }
     proc = proc.data("procFull", proc().freeze());

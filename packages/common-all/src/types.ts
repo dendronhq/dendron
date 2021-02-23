@@ -79,6 +79,11 @@ export type DendronConfig = {
    * Use nunjucks templating
    */
   useNunjucks?: boolean;
+
+  /**
+   * Use pretty refs for preview
+   */
+  usePrettyRefs?: boolean;
 };
 
 export type HierarchyConfig = {

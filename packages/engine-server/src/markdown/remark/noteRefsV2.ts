@@ -138,13 +138,6 @@ function convertNoteRef(
     return { error: new DendronError({ msg: "no vault specified" }), data: "" };
   }
   let { prettyRefs, wikiLinkOpts } = compilerOpts;
-  if (
-    !prettyRefs &&
-    _.includes([DendronASTDest.HTML, DendronASTDest.MD_ENHANCED_PREVIEW], dest)
-  ) {
-    prettyRefs = true;
-  }
-
   if (refLvl >= MAX_REF_LVL) {
     return {
       error: new DendronError({ msg: "too many nested note refs" }),

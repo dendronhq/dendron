@@ -10,7 +10,7 @@ import { NOTE_PRESETS_V4 } from "../notes";
 import fs from "fs-extra";
 import { vault2Path } from "@dendronhq/common-server";
 import path from "path";
-import { setupBasic } from "./utils";
+import { ENGINE_HOOKS, setupBasic } from "./utils";
 import _ from "lodash";
 import { SCHEMA_PRESETS_V4 } from "../schemas";
 
@@ -52,6 +52,60 @@ const SCHEMAS = {
   ),
 };
 const NOTES = {
+  LINKS: new TestPresetEntryV4(
+    async ({ engine, vaults }) => {
+      const noteAlpha = NoteUtilsV2.getNoteByFnameV4({
+        fname: "alpha",
+        notes: engine.notes,
+        vault: vaults[0],
+      }) as NotePropsV2;
+      return [
+        {
+          actual: noteAlpha.links,
+          expected: [
+            {
+              alias: "beta",
+              from: {
+                fname: "alpha",
+                id: "alpha",
+              },
+              original: "beta",
+              pos: {
+                end: 8,
+                start: 0,
+              },
+              to: {
+                anchorHeader: undefined,
+                fname: "beta",
+              },
+              type: "wiki",
+              value: "beta",
+            },
+            {
+              from: {
+                fname: "beta",
+                vault: {
+                  fsPath: "vault1",
+                },
+              },
+              original: "alpha",
+              pos: {
+                end: 12,
+                start: 0,
+              },
+              type: "backlink",
+              value: "alpha",
+            },
+          ],
+        },
+      ];
+    },
+    {
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupLinks(opts);
+      },
+    }
+  ),
   DOMAIN_STUB: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const noteRoot = NoteUtilsV2.getNoteByFnameV4({

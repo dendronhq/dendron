@@ -86,7 +86,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
             value: GitUtils.getRepoNameFromURL(sourceRemotePath),
           });
           if (PickerUtilsV2.isStringInputEmpty(out)) {
-            return;
+            resolve(undefined);
           }
           sourcePath = out!;
 

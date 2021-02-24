@@ -63,6 +63,7 @@
     "@dendronhq/common-server": "^0.30.0",
     "@dendronhq/common-test-utils": "^0.30.0",
     "@dendronhq/engine-server": "^0.30.0",
+    "emailjs": "^3.4.0",
     "fast-csv": "^4.3.2",
     "fs-extra": "^9.0.1",
     "klaw": "^3.0.0",

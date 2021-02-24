@@ -1,5 +1,4 @@
 import {
-  BasePodExecuteOpts,
   DVault,
   NotePropsV2,
   NoteUtilsV2,
@@ -130,7 +129,7 @@ export class JSONPublishPod extends PublishPodV3 {
   async plant(opts: PublishPodPlantOptsV3) {
     const note = opts.note;
     const out = JSON.stringify(note, null, 4);
-    return { data: out };
+    return out;
   }
 }
 

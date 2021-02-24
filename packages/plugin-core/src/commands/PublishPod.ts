@@ -1,5 +1,4 @@
 import { DNodeUtilsV2, VaultUtils } from "@dendronhq/common-all";
-import { PublishPodCommandOpts } from "@dendronhq/dendron-cli";
 import {
   getAllPublishPods,
   JSONPublishPod,
@@ -7,6 +6,7 @@ import {
   PodItemV4,
   PodUtils,
 } from "@dendronhq/pods-core";
+import * as vscode from "vscode";
 import { Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
@@ -14,9 +14,8 @@ import { VSCodeUtils } from "../utils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
 import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
-import * as vscode from "vscode";
 
-type CommandOpts = PublishPodCommandOpts;
+type CommandOpts = { podClass: any; noteByName: string; config: any };
 
 type CommandInput = { podChoice: PodItemV4 };
 
@@ -57,15 +56,14 @@ export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
       );
       return;
     }
-    const engine = DendronWorkspace.instance().getEngine();
-    const wsRoot = DendronWorkspace.wsRoot() as string;
-    const vault = engine.vaultsv3[0];
-    return { podClass, config: maybeConfig, noteByName, engine, wsRoot, vault };
+    return { podClass, config: maybeConfig, noteByName };
   }
 
   async execute(opts: CommandOpts) {
-    const { podClass, config, noteByName, engine, wsRoot } = opts;
+    const { podClass, config, noteByName } = opts;
 
+    const engine = DendronWorkspace.instance().getEngine();
+    const wsRoot = DendronWorkspace.wsRoot() as string;
     const pod = new podClass() as JSONPublishPod;
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
     try {
@@ -73,7 +71,7 @@ export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
         config: {
           ...config,
           fname: noteByName,
-          vault: VaultUtils.normVaultPath({ vault, wsRoot }),
+          vaultName: VaultUtils.getName(vault),
           dest: "stdout",
         },
         vaults: DendronWorkspace.instance().vaultsv4,

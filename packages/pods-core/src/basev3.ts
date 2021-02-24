@@ -3,7 +3,6 @@ import {
   NotePropsV2,
   NoteUtilsV2,
   PodConfig,
-  Resp,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -17,6 +16,7 @@ export type PodOptsV3<T> = {
 export type PublishPodExecuteOptsV3<
   T extends PublishPodConfigV3 = any
 > = PodOptsV3<T>;
+
 export type PublishPodPlantOptsV3<
   T extends PublishPodConfigV3 = any
 > = PublishPodExecuteOptsV3<T> & { note: NotePropsV2 };
@@ -83,7 +83,7 @@ export abstract class PublishPodV3<T extends PublishPodConfigV3 = any> {
     return this.plant({ ...opts, note });
   }
 
-  abstract plant(opts: PublishPodPlantOptsV3<T>): Promise<Resp<string>>;
+  abstract plant(opts: PublishPodPlantOptsV3<T>): Promise<string>;
 }
 
 // ===

@@ -1,5 +1,4 @@
 import {
-  BasePodExecuteOpts,
   DNodeUtilsV2,
   DVault,
   genUUID,
@@ -23,9 +22,8 @@ import {
   ImportPodCleanOpts,
   ImportPodPlantOpts,
   ImportPodRawConfig,
-  PublishPod,
-  PublishPodCleanConfig,
 } from "../basev2";
+import { PublishPodPlantOptsV3, PublishPodV3 } from "../basev3";
 
 const ID = "dendron.markdown";
 
@@ -241,23 +239,19 @@ export class MarkdownImportPod extends ImportPod<
   }
 }
 
-export class MarkdownPublishPod extends PublishPod {
+export class MarkdownPublishPod extends PublishPodV3 {
   static id: string = ID;
   static description: string = "publish markdown";
 
-  async plant(opts: BasePodExecuteOpts<PublishPodCleanConfig>): Promise<any> {
-    const { config, engine } = opts;
-    const { fname, vault } = config;
-    const note = NoteUtilsV2.getNoteByFnameV4({
-      fname,
-      notes: engine.notes,
-      vault,
-    })!;
+  async plant(opts: PublishPodPlantOptsV3) {
+    const { engine, note } = opts;
     const remark = MDUtilsV4.procFull({
-      dest: DendronASTDest.MD_DENDRON,
+      dest: DendronASTDest.MD_REGULAR,
       engine,
       fname: note.fname,
-      vault,
+      vault: note.vault,
+      shouldApplyPublishRules: false,
+      usePrettyRefs: false,
     });
     const out = remark.processSync(note.body).toString();
     return _.trim(out);

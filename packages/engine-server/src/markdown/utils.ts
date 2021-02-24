@@ -62,6 +62,7 @@ type ProcOptsFull = ProcOpts & {
   };
   mermaid?: boolean;
   noteRefLvl?: number;
+  usePrettyRefs?: boolean;
 };
 
 enum DendronProcDataKeys {
@@ -242,7 +243,7 @@ export class MDUtilsV4 {
 
     // set defaults
     let usePrettyRefs: boolean | undefined = _.find(
-      [config?.usePrettyRefs, config?.site.usePrettyRefs],
+      [opts.usePrettyRefs, config?.usePrettyRefs, config?.site.usePrettyRefs],
       (ent) => !_.isUndefined(ent)
     );
     if (_.isUndefined(usePrettyRefs)) {

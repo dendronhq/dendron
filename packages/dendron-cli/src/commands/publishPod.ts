@@ -46,7 +46,7 @@ export class PublishPodCLICommand extends CLICommand<
     const pod = new PodClass() as PublishPodV3;
     const resp = await pod.execute({ wsRoot, config, engine, vaults });
     if (config.dest === "stdout") {
-      console.log(resp.data);
+      console.log(resp);
     }
     server.close((err: any) => {
       if (err) {

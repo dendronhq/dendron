@@ -16,7 +16,7 @@ function proc(
 
 describe("backlinks", () => {
   let dendronData: DendronASTData = {
-    dest: DendronASTDest.HTML,
+    dest: DendronASTDest.HTML
   };
 
   test("backlinks render", async () => {
@@ -24,10 +24,9 @@ describe("backlinks", () => {
       async ({ engine, vaults }) => {
         const vault = vaults[0];
         const resp = await MDUtilsV4.procRehype({
-          proc: proc(engine, { ...dendronData, fname: "alpha", vault }),
+          proc: proc(engine, { ...dendronData, fname: "alpha", vault })
         }).process("[[test]]");
         expect(resp).toMatchSnapshot();
-        // expect(1).toEqual(2);
       },
       { expect, createEngine, preSetupHook: ENGINE_HOOKS.setupLinks }
     );

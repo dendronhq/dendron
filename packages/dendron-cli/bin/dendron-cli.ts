@@ -14,8 +14,7 @@ import { ExportPodCLICommand } from "../src/commands/exportPod";
 import { ImportPodCLICommand } from "../src/commands/importPod";
 import { LaunchEngineServerCommand } from "../src/commands/launchEngineServer";
 import { NoteCLICommand } from "../src/commands/notes";
-import { PublishNotesCommand } from "../src/commands/publishNotes";
-import { PublishPodCLICommand } from "../src/commands/PublishPodCLICommand";
+import { PublishPodCLICommand } from "../src/commands/publishPod";
 import { RefactorRule } from "../src/commands/refactorBase";
 import { WorkspaceCLICommand } from "../src/commands/workspace";
 
@@ -35,12 +34,11 @@ export const updateTime: RefactorRule = {
 let buildYargs = yargs;
 
 BuildSiteCommand.buildCmd(buildYargs);
-PublishNotesCommand.buildCmd(buildYargs);
-PublishPodCLICommand.buildCmd(buildYargs);
 LaunchEngineServerCommand.buildCmd(buildYargs);
 new BuildSiteV2CLICommand().buildCmd(buildYargs);
 new ExportPodCLICommand().buildCmd(buildYargs);
 new ImportPodCLICommand().buildCmd(buildYargs);
+new PublishPodCLICommand().buildCmd(buildYargs);
 new DoctorCLICommand().buildCmd(buildYargs);
 new WorkspaceCLICommand().buildCmd(buildYargs);
 new NoteCLICommand().buildCmd(buildYargs);

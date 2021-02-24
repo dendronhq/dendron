@@ -6,6 +6,7 @@ export * from "./builtin";
 export * from "./types";
 export * from "./utils";
 export * from "./basev2";
+export * from "./basev3";
 
 export function getAllExportPods(): PodClassEntryV4[] {
   return [JSONExportPod];

@@ -1,6 +1,6 @@
 import { NoteUtilsV2 } from "@dendronhq/common-all";
 import { MDUtilsV4 } from "@dendronhq/engine-server";
-import { list, listItem, text } from "mdast-builder";
+import { link as mdastLink } from "mdast-builder";
 import Unified, { Plugin } from "unified";
 var u = require("unist-builder");
 
@@ -18,15 +18,21 @@ const plugin: Plugin = function(this: Unified.Processor) {
     // show backlinks at the end of the page if they exist
     if (note[0].links.length > 0) {
       tree.children.push(u("heading", { depth: 2 }, [u("text", "Backlinks")]));
-      let wikiLinks = [];
+      let backlinks = [];
+      console.log(note[0].links, "links");
+      console.log(tree, "tree");
+      console.log(mdastLink, "link");
       note[0].links.map(link => {
-        if (link.type === "wiki") {
-          wikiLinks.push(listItem(text(link.value)));
+        if (link.type === "backlink" && link.from.fname) {
+          // backlinks.push(listItem(text(link.value)))
+          // TODO: should be right url
+          tree.children.push(mdastLink(link.from.fname, link.from.fname));
+          // backlinks.push(listItem(mdastLink("test", link.from.fname)));
         }
       });
-      // TODO: fix typing, not sure how
-      // TODO: should be backlinks, not wikiLinks that are tracked
-      tree.children.push(list("unordered", wikiLinks));
+      console.log(tree, "tree after");
+      // TODO: fix types
+      // tree.children.push(list("unordered", backlinks));
     }
   }
   return transformer;

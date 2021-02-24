@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { DendronError, NoteUtilsV2 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { MarkdownPublishPod } from "@dendronhq/pods-core";
 import fs from "fs";
@@ -99,7 +99,18 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
           }
 
           const fname = path.basename(foundUri.fsPath, ".md");
+          const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+          const note = NoteUtilsV2.getNoteByFnameV5({
+            fname,
+            vault,
+            notes: getWS().getEngine().notes,
+            wsRoot: DendronWorkspace.wsRoot(),
+          });
+          if (!note) {
+            throw new DendronError({ msg: `note ${fname} not found` });
+          }
           const out = await new MarkdownPublishPod().plant({
+            note,
             config: {
               fname,
               dest: "stdout",

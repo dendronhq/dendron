@@ -4,7 +4,7 @@ import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
 import { CLICommand } from "./base";
-import { fetchPodClassV4, PodSource } from "./pod";
+import { fetchPodClassV4, PodSource, setupPodArgs } from "./pod";
 import {
   setupEngine,
   setupEngineArgs,
@@ -48,24 +48,7 @@ export class ImportPodCLICommand extends CLICommand<
   buildArgs(args: yargs.Argv<CommandCLIOpts>) {
     super.buildArgs(args);
     setupEngineArgs(args);
-    args.option("podId", {
-      describe: "id of pod to use",
-      requiresArg: true,
-    });
-    args.option("showConfig", {
-      describe: "show pod configuration",
-    });
-    args.option("genConfig", {
-      describe: "show pod configuration",
-    });
-    args.option("podPkg", {
-      describe: "if specifying a remote pod, name of pkg",
-    });
-    args.option("podSource", {
-      describe: "podSource",
-      choices: _.values(PodSource),
-      default: PodSource.BUILTIN,
-    });
+    setupPodArgs(args);
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {

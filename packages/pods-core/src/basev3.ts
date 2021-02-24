@@ -8,20 +8,20 @@ import {
 } from "@dendronhq/common-all";
 import { PodKind } from "./types";
 
-export type PodOptsV3<T> = {
+export type PodOpts<T> = {
   engine: DEngineClientV2;
   config: T;
 } & WorkspaceOpts;
 
-export type PublishPodExecuteOptsV3<
-  T extends PublishPodConfigV3 = any
-> = PodOptsV3<T>;
+export type PublishPodExecuteOpts<T extends PublishPodConfig = any> = PodOpts<
+  T
+>;
 
-export type PublishPodPlantOptsV3<
-  T extends PublishPodConfigV3 = any
-> = PublishPodExecuteOptsV3<T> & { note: NotePropsV2 };
+export type PublishPodPlantOpts<
+  T extends PublishPodConfig = any
+> = PublishPodExecuteOpts<T> & { note: NotePropsV2 };
 
-export type PublishPodConfigV3 = {
+export type PublishPodConfig = {
   /**
    *  Name of file to publish
    */
@@ -36,12 +36,7 @@ export type PublishPodConfigV3 = {
   dest: string | "stdout";
 };
 
-// enum PublishPodDestType {
-//   STDOUT = "stdout",
-//   FILE = "file",
-// }
-
-export abstract class PublishPodV3<T extends PublishPodConfigV3 = any> {
+export abstract class PublishPod<T extends PublishPodConfig = any> {
   static kind = "publish" as PodKind;
 
   get config(): PodConfig[] {
@@ -64,7 +59,7 @@ export abstract class PublishPodV3<T extends PublishPodConfigV3 = any> {
     ];
   }
 
-  execute(opts: PublishPodExecuteOptsV3<T>) {
+  execute(opts: PublishPodExecuteOpts<T>) {
     const { config, engine } = opts;
     const { fname, vaultName } = config;
     const vault = VaultUtils.getVaultByName({
@@ -83,50 +78,5 @@ export abstract class PublishPodV3<T extends PublishPodConfigV3 = any> {
     return this.plant({ ...opts, note });
   }
 
-  abstract plant(opts: PublishPodPlantOptsV3<T>): Promise<string>;
+  abstract plant(opts: PublishPodPlantOpts<T>): Promise<string>;
 }
-
-// ===
-// class MarkdownPublishPod extends PublishPod {
-//   async plant(opts: PublishPodPlantOpts) {
-//     const { note, engine } = opts;
-//     const remark = MDUtilsV4.procFull({
-//       dest: DendronASTDest.MD_DENDRON,
-//       engine,
-//       fname: note.fname,
-//       vault: note.vault,
-//     });
-//     const out = remark.processSync(note.body).toString();
-//     return { data: _.trim(out) };
-//   }
-// }
-
-// type DevToConfig = {
-//   apiKey: string;
-//   canonicalUrl: string;
-// };
-
-// class DevToPublishPod extends PublishPod {
-//   async plant(opts: PublishPodExecuteOpts) {
-//     const { note } = opts;
-//     const devToProps = note.custom.devto;
-//     const canonicalUrl = "";
-
-//     const client = new Client("Your API Key");
-//     const { data } = await client.getUserByName("khaosdoctor");
-//   }
-// }
-
-// async function main() {
-//   const pod = new MarkdownPublishPod();
-//   const note = {} as any;
-//   const engine = {} as any;
-//   const out = await pod.execute({
-//     note,
-//     engine,
-//     destType: PublishPodDestType.STDOUT,
-//   });
-
-//   new DevToPublishPod().execute();
-//   // await pod.plant({note, engine, dest})
-// }

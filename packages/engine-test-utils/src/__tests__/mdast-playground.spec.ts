@@ -1,14 +1,5 @@
 import { mdastBuilder, MDUtilsV4 } from "@dendronhq/engine-server";
-const {
-  root,
-  paragraph,
-  link,
-  listItem,
-  text,
-  heading,
-  brk,
-  list,
-} = mdastBuilder;
+const { root, paragraph, link, listItem, text, heading, list } = mdastBuilder;
 
 describe("proto", () => {
   test("basic", () => {

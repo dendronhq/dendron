@@ -6,7 +6,6 @@ import {
   DVault,
   NotePropsV2,
   PodConfig,
-  VaultUtils,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, resolvePath } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -209,102 +208,6 @@ export abstract class ImportPod<
   async execute(opts: ImportPodExecuteOpts<TConfigRaw>) {
     const { config, engine, wsRoot, vaults } = opts;
     const _config = this.cleanImportConfig({ config, wsRoot });
-    const cleanConfig = await this.clean({
-      config: { ...config, ..._config },
-      wsRoot,
-    });
-    return this.plant({ config: cleanConfig, wsRoot, vaults, engine });
-  }
-}
-
-export type PublishPodRawConfig = {
-  fname: string;
-  dest?: string;
-  vault: string;
-};
-export type PublishPodCleanConfig = {
-  fname: string;
-  dest: URI | "stdout";
-  vault: DVault;
-};
-export type PublishPodCleanOpts<TConfig> = {
-  config: TConfig & PublishPodCleanConfig;
-  wsRoot: string;
-};
-export type PublishPodPlantOpts = {};
-
-export type PublishPodExecuteOpts<TConfigRaw> = BasePodExecuteOpts<
-  TConfigRaw
-> & { fname: string };
-
-export abstract class PublishPod<
-  TConfigRaw extends PublishPodRawConfig = PublishPodRawConfig,
-  TConfigClean extends PublishPodCleanConfig = PublishPodCleanConfig
-> extends BasePod<TConfigRaw & PublishPodRawConfig> {
-  static kind: PodKind = "publish";
-
-  get config(): PodConfig[] {
-    return [
-      {
-        key: "dest",
-        description: "where to export to",
-        type: "string" as const,
-        default: "stdout",
-      },
-      {
-        key: "fname",
-        description: "where to export to",
-        type: "string" as const,
-      },
-      {
-        key: "vault",
-        description: "vault path",
-        type: "string" as const,
-      },
-    ];
-  }
-
-  async clean(opts: PublishPodCleanOpts<TConfigRaw>): Promise<TConfigClean> {
-    return opts.config as any;
-  }
-
-  abstract plant(opts: BasePodExecuteOpts<TConfigClean>): Promise<any>;
-
-  cleanPublishConfig({
-    wsRoot,
-    config,
-    vaults,
-  }: {
-    config: PublishPodRawConfig;
-    wsRoot: string;
-    vaults: DVault[];
-  }): PublishPodCleanConfig {
-    let dest: URI | "stdout";
-    if (config.dest === "stdout") {
-      dest = "stdout" as const;
-    } else {
-      dest = this.getPodPath({ fpath: config.dest, wsRoot, pathKey: "src" });
-      if (!fs.existsSync(dest.fsPath)) {
-        throw new DendronError({
-          friendly: `no snapshot found at ${dest.fsPath}`,
-        });
-      }
-    }
-    const vault = VaultUtils.getByVaultPath({
-      wsRoot,
-      vaults,
-      vaultPath: config.vault,
-    });
-    return {
-      dest,
-      fname: config.fname,
-      vault,
-    };
-  }
-
-  async execute(opts: BasePodExecuteOpts<TConfigRaw>) {
-    const { config, engine, wsRoot, vaults } = opts;
-    const _config = this.cleanPublishConfig({ config, wsRoot, vaults });
     const cleanConfig = await this.clean({
       config: { ...config, ..._config },
       wsRoot,

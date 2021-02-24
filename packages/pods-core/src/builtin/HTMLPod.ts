@@ -1,6 +1,5 @@
-import { BasePodExecuteOpts, NoteUtilsV2 } from "@dendronhq/common-all";
 import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
-import { PublishPod, PublishPodCleanConfig } from "../basev2";
+import { PublishPodPlantOpts, PublishPod } from "../basev3";
 
 const ID = "dendron.html";
 
@@ -8,14 +7,9 @@ export class HTMLPublishPod extends PublishPod {
   static id: string = ID;
   static description: string = "publish html";
 
-  async plant(opts: BasePodExecuteOpts<PublishPodCleanConfig>): Promise<any> {
-    const { config, engine } = opts;
+  async plant(opts: PublishPodPlantOpts): Promise<any> {
+    const { config, engine, note } = opts;
     const { fname, vault } = config;
-    const note = NoteUtilsV2.getNoteByFnameV4({
-      fname,
-      notes: engine.notes,
-      vault,
-    });
     const { data: econfig } = await engine.getConfig();
     const proc = MDUtilsV4.procFull({
       engine,

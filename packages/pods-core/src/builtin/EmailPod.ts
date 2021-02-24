@@ -1,21 +1,17 @@
 import { Message, SMTPClient } from "emailjs";
 import _ from "lodash";
-import {
-  PublishPodConfigV3,
-  PublishPodPlantOptsV3,
-  PublishPodV3,
-} from "../basev3";
+import { PublishPodConfig, PublishPodPlantOpts, PublishPod } from "../basev3";
 
 const ID = "dendron.email";
 
-type EmailPublishConfig = PublishPodConfigV3 & {
+type EmailPublishConfig = PublishPodConfig & {
   username: string;
   password: string;
   host: string;
   from: string;
 };
 
-export class EmailPublishPod extends PublishPodV3<EmailPublishConfig> {
+export class EmailPublishPod extends PublishPod<EmailPublishConfig> {
   static id: string = ID;
   static description: string = "publish to email";
 
@@ -64,7 +60,7 @@ export class EmailPublishPod extends PublishPodV3<EmailPublishConfig> {
     ]);
   }
 
-  async plant(opts: PublishPodPlantOptsV3) {
+  async plant(opts: PublishPodPlantOpts) {
     const { note, config } = opts;
 
     const { user, password, host, from, to, subject } = _.defaults(

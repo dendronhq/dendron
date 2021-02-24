@@ -19,7 +19,7 @@ import {
   ImportPodPlantOpts,
   ImportPodRawConfig,
 } from "../basev2";
-import { PublishPodPlantOptsV3, PublishPodV3 } from "../basev3";
+import { PublishPodPlantOpts, PublishPod } from "../basev3";
 
 const ID = "dendron.json";
 
@@ -122,11 +122,11 @@ export class JSONImportPod extends ImportPod<
   }
 }
 
-export class JSONPublishPod extends PublishPodV3 {
+export class JSONPublishPod extends PublishPod {
   static id: string = ID;
   static description: string = "publish json";
 
-  async plant(opts: PublishPodPlantOptsV3) {
+  async plant(opts: PublishPodPlantOpts) {
     const note = opts.note;
     const out = JSON.stringify(note, null, 4);
     return out;

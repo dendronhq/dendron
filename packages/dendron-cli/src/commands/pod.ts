@@ -33,7 +33,7 @@ export function fetchPodClassV4(
   }
 ): PodClassEntryV4 {
   const { podSource, pods } = opts;
-  if (podSource === "builtin") {
+  if (podSource === PodSource.BUILTIN) {
     if (!pods) {
       throw Error("pods needs to be defined");
     }
@@ -75,7 +75,7 @@ export function setupPodArgs(args: yargs.Argv) {
     describe: "show pod configuration",
   });
   args.option("podPkg", {
-    describe: "if specifying a remote pod, name of pkg",
+    describe: "if specifying a custom pod, name of pkg",
   });
   args.option("config", {
     describe:
@@ -169,6 +169,6 @@ export const executePod = async (opts: PodCommandOpts) => {
   console.log("done");
 };
 export enum PodSource {
-  REMOTE = "remote",
+  CUSTOM = "custom",
   BUILTIN = "builtin",
 }

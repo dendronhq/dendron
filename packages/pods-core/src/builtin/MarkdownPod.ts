@@ -23,7 +23,7 @@ import {
   ImportPodPlantOpts,
   ImportPodRawConfig,
 } from "../basev2";
-import { PublishPodPlantOptsV3, PublishPodV3 } from "../basev3";
+import { PublishPodPlantOpts, PublishPod } from "../basev3";
 
 const ID = "dendron.markdown";
 
@@ -239,11 +239,11 @@ export class MarkdownImportPod extends ImportPod<
   }
 }
 
-export class MarkdownPublishPod extends PublishPodV3 {
+export class MarkdownPublishPod extends PublishPod {
   static id: string = ID;
   static description: string = "publish markdown";
 
-  async plant(opts: PublishPodPlantOptsV3) {
+  async plant(opts: PublishPodPlantOpts) {
     const { engine, note } = opts;
     const remark = MDUtilsV4.procFull({
       dest: DendronASTDest.MD_REGULAR,

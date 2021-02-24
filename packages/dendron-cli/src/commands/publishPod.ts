@@ -1,7 +1,7 @@
 import {
   getAllPublishPods,
-  PublishPodConfigV3,
-  PublishPodV3,
+  PublishPodConfig,
+  PublishPod,
 } from "@dendronhq/pods-core";
 import yargs from "yargs";
 import { CLICommand } from "./base";
@@ -12,7 +12,7 @@ type CommandCLIOpts = {} & SetupEngineCLIOpts & PodCLIOpts;
 
 type CommandOpts = CommandCLIOpts & {
   podClass: any;
-  config: PublishPodConfigV3;
+  config: PublishPodConfig;
 } & SetupEngineResp;
 
 type CommandOutput = void;
@@ -43,7 +43,7 @@ export class PublishPodCLICommand extends CLICommand<
   async execute(opts: CommandOpts) {
     const { podClass: PodClass, config, wsRoot, engine, server } = opts;
     const vaults = engine.vaultsv3;
-    const pod = new PodClass() as PublishPodV3;
+    const pod = new PodClass() as PublishPod;
     const resp = await pod.execute({ wsRoot, config, engine, vaults });
     if (config.dest === "stdout") {
       console.log(resp);

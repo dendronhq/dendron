@@ -1,29 +1,31 @@
-import { DendronError, DVault } from "@dendronhq/common-all";
-import { DendronEngineV2 } from "@dendronhq/engine-server";
-import {
-  PodClassEntryV4,
-  PodItemV4,
-  PodKind,
-  PodUtils,
-} from "@dendronhq/pods-core";
+import { DendronError } from "@dendronhq/common-all";
+import { PodClassEntryV4, PodKind, PodUtils } from "@dendronhq/pods-core";
 import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
-import { BaseCommand } from "./base";
+import { setupEngine, SetupEngineCLIOpts, SetupEngineResp } from "./utils";
 
-type CommandOpts = {
-  engineClient: DendronEngineV2;
-  podClass: PodClassEntryV4;
-  config: any;
-  wsRoot: string;
+export type PodCLIOpts = {
+  podId: string;
+  showConfig?: boolean;
+  genConfig?: boolean;
+  podSource: PodSource;
+  podPkg?: string;
+  config?: string;
 };
 
-type CommandOutput = void;
+export type PodCommandCLIOpts = {} & SetupEngineCLIOpts & PodCLIOpts;
+
+export type PodCommandOpts<T = any> = PodCLIOpts & {
+  podClass: any;
+  config: T;
+} & SetupEngineResp &
+  SetupEngineCLIOpts;
 
 export function fetchPodClassV4(
   podId: string,
   opts: {
-    podSource: CommandCLIOpts["podSource"];
+    podSource: PodSource;
     pods?: PodClassEntryV4[];
     podPkg?: string;
     wsRoot?: string;
@@ -61,81 +63,112 @@ export function fetchPodClassV4(
   }
 }
 
+export function setupPodArgs(args: yargs.Argv) {
+  args.option("podId", {
+    describe: "id of pod to use",
+    requiresArg: true,
+  });
+  args.option("showConfig", {
+    describe: "show pod configuration",
+  });
+  args.option("genConfig", {
+    describe: "show pod configuration",
+  });
+  args.option("podPkg", {
+    describe: "if specifying a remote pod, name of pkg",
+  });
+  args.option("config", {
+    describe:
+      "pass in config instead of reading from file. format is comma delimited {key}={value} pairs",
+  });
+  args.option("podSource", {
+    describe: "podSource",
+    choices: _.values(PodSource),
+    default: PodSource.BUILTIN,
+  });
+}
+
+export const enrichPodArgs = (opts: {
+  pods: PodClassEntryV4[];
+  podType: PodKind;
+}) => {
+  const { pods, podType } = opts;
+
+  const enrichFunc = async (
+    args: PodCommandCLIOpts
+  ): Promise<PodCommandOpts> => {
+    const {
+      podId,
+      wsRoot,
+      showConfig,
+      podSource,
+      podPkg,
+      genConfig,
+      config,
+    } = args;
+
+    const engineArgs = await setupEngine(args);
+    const podClass = fetchPodClassV4(podId, {
+      pods,
+      podType,
+      podSource,
+      podPkg,
+      wsRoot,
+    });
+    if (showConfig) {
+      const config = new podClass().config;
+      console.log(config);
+      process.exit(0);
+    }
+    if (genConfig) {
+      const podsDir = PodUtils.getPodDir({ wsRoot });
+      const configPath = PodUtils.genConfigFile({
+        podsDir,
+        podClass,
+        force: true,
+      });
+      console.log(`config generated at ${configPath}`);
+      process.exit(0);
+    }
+    const podsDir = path.join(wsRoot, "pods");
+
+    let cleanConfig: any;
+
+    if (config) {
+      cleanConfig = {};
+      config.split(",").map((ent) => {
+        const [k, v] = ent.split("=");
+        cleanConfig[k] = v;
+      });
+    } else {
+      const cleanConfig = PodUtils.getConfig({ podsDir, podClass });
+      if (!cleanConfig) {
+        const podConfigPath = PodUtils.getConfigPath({ podsDir, podClass });
+        throw new DendronError({
+          status: "no-config",
+          msg: `no config found. please create a config at ${podConfigPath}`,
+        });
+      }
+    }
+    return { ...args, ...engineArgs, podClass, config: cleanConfig };
+  };
+  return enrichFunc;
+};
+
+export const executePod = async (opts: PodCommandOpts) => {
+  const { podClass: PodClass, config, wsRoot, engine, server } = opts;
+  const vaults = engine.vaultsv3;
+  const pod = new PodClass();
+  console.log("running pod...");
+  await pod.execute({ wsRoot, config, engine, vaults });
+  server.close((err: any) => {
+    if (err) {
+      throw err;
+    }
+  });
+  console.log("done");
+};
 export enum PodSource {
   REMOTE = "remote",
   BUILTIN = "builtin",
-}
-
-export type CommandCLIOpts = {
-  podId: string;
-  wsRoot: string;
-  vault: DVault;
-  podSource?: PodSource;
-};
-
-export abstract class PodCLICommand extends BaseCommand<
-  CommandOpts,
-  CommandOutput
-> {
-  static async buildArgsCore(
-    args: yargs.Argv<CommandCLIOpts>,
-    _podItems: PodItemV4[]
-  ) {
-    args.option("podId", {
-      describe: "pod to use",
-      //choices: podItems.map(ent => ent.id)
-    });
-    args.option("vault", {
-      describe: "location of vault",
-    });
-    args.option("wsRoot", {
-      describe: "location of workspace",
-    });
-    // args.option("podSource", {
-    //   describe: "what kind of pod are you using",
-    //   choices: ["remote", "builtin"],
-    //   default: "builtin"
-    // });
-  }
-
-  async enrichArgs(
-    args: CommandCLIOpts,
-    pods: PodClassEntryV4[],
-    podType: "import" | "export"
-  ): Promise<CommandOpts> {
-    const { vault, podId, wsRoot, podSource } = _.defaults(args, {
-      podSource: "builtin",
-    });
-    const podsDir = path.join(wsRoot, "pods");
-    const logger = this.L;
-    const engineClient = DendronEngineV2.createV3({
-      vaults: [vault],
-      wsRoot,
-      logger,
-    });
-    await engineClient.init();
-
-    const podClass = fetchPodClassV4(podId, { podSource, pods, podType });
-    const maybeConfig = PodUtils.getConfig({ podsDir, podClass });
-    if (!maybeConfig) {
-      const podConfigPath = PodUtils.getConfigPath({ podsDir, podClass });
-      throw new DendronError({
-        status: "no-config",
-        msg: `no config found. please create a config at ${podConfigPath}`,
-      });
-    }
-    return {
-      podClass,
-      config: maybeConfig,
-      wsRoot,
-      engineClient,
-    };
-  }
-
-  async execute(opts: CommandOpts) {
-    const { podClass, config, wsRoot, engineClient } = opts;
-    const vaults = engineClient.vaultsv3;
-    const pod = new podClass();
-    await pod.execute({ wsRoot, config, engine: engineClient, vaults });
-  }
 }

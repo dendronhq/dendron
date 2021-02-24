@@ -1,10 +1,9 @@
 import { DendronError, DEngineClientV2, Stage } from "@dendronhq/common-all";
 import { getAllExportPods, PodUtils } from "@dendronhq/pods-core";
-import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
 import { CLICommand } from "./base";
-import { fetchPodClassV4, PodSource } from "./pod";
+import { fetchPodClassV4, PodCLIOpts, setupPodArgs } from "./pod";
 import {
   setupEngine,
   setupEngineArgs,
@@ -19,13 +18,8 @@ type CommandCLIOpts = {
   engine?: DEngineClientV2;
   cwd?: string;
   stage: Stage;
-  // custom
-  podId: string;
-  showConfig?: boolean;
-  genConfig?: boolean;
-  podSource: PodSource;
-  podPkg?: string;
-} & SetupEngineCLIOpts;
+} & SetupEngineCLIOpts &
+  PodCLIOpts;
 
 type CommandOpts = CommandCLIOpts & {
   podClass: any;
@@ -48,24 +42,7 @@ export class ExportPodCLICommand extends CLICommand<
   buildArgs(args: yargs.Argv<CommandCLIOpts>) {
     super.buildArgs(args);
     setupEngineArgs(args);
-    args.option("podId", {
-      describe: "id of pod to use",
-      requiresArg: true,
-    });
-    args.option("showConfig", {
-      describe: "show pod configuration",
-    });
-    args.option("genConfig", {
-      describe: "show pod configuration",
-    });
-    args.option("podPkg", {
-      describe: "if specifying a remote pod, name of pkg",
-    });
-    args.option("podSource", {
-      describe: "podSource",
-      choices: _.values(PodSource),
-      default: PodSource.BUILTIN,
-    });
+    setupPodArgs(args);
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {

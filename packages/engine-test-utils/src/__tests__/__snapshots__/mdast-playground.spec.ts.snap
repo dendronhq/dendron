@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`proto basic 1`] = `
+"## Begin
+
+- [bullet link](dendron.so)
+- one
+- two
+- three
+"
+`;

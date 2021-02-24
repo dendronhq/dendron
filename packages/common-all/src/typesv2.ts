@@ -466,7 +466,9 @@ export type PodConfig = {
   key: string;
   description: string;
   type: "string" | "number" | "boolean";
+  required?: boolean;
   default?: any;
+  example?: string;
 };
 
 export type BasePodExecuteOpts<TConfig> = {

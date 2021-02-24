@@ -7306,6 +7306,11 @@ elliptic@^6.5.3:
     minimalistic-assert "^1.0.1"
     minimalistic-crypto-utils "^1.0.1"
 
+emailjs@^3.4.0:
+  version "3.4.0"
+  resolved "https://registry.npmjs.org/emailjs/-/emailjs-3.4.0.tgz#35f3038bfe5dc2f32fc55837dff498b092093cc9"
+  integrity sha512-GYzxHth2mOtfjGvQQYoS7747lrGj/7qohZiY1zQe4CtzVhDuRJ/WNKlhII1tZ0YAUC6190eA7paMuB7AJj4d3w==
+
 emitter-component@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/emitter-component/-/emitter-component-1.1.1.tgz#065e2dbed6959bf470679edabeaf7981d1003ab6"

@@ -62,9 +62,11 @@ export class PodUtils {
   static genConfigFile({
     podsDir,
     podClass,
+    force,
   }: {
     podsDir: string;
     podClass: PodClassEntryV4;
+    force?: boolean;
   }) {
     const podConfigPath = PodUtils.getConfigPath({ podsDir, podClass });
     ensureDirSync(path.dirname(podConfigPath));
@@ -79,7 +81,7 @@ export class PodUtils {
         ].join("\n");
       })
       .join("\n");
-    if (!fs.existsSync(podConfigPath)) {
+    if (!fs.existsSync(podConfigPath) || force) {
       writeFileSync(podConfigPath, config);
     }
     return podConfigPath;

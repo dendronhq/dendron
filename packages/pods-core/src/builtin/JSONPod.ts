@@ -1,5 +1,4 @@
 import {
-  BasePodExecuteOpts,
   DVault,
   NotePropsV2,
   NoteUtilsV2,
@@ -19,9 +18,8 @@ import {
   ImportPodCleanOpts,
   ImportPodPlantOpts,
   ImportPodRawConfig,
-  PublishPod,
-  PublishPodCleanConfig,
 } from "../basev2";
+import { PublishPodPlantOptsV3, PublishPodV3 } from "../basev3";
 
 const ID = "dendron.json";
 
@@ -124,18 +122,12 @@ export class JSONImportPod extends ImportPod<
   }
 }
 
-export class JSONPublishPod extends PublishPod {
+export class JSONPublishPod extends PublishPodV3 {
   static id: string = ID;
   static description: string = "publish json";
 
-  async plant(opts: BasePodExecuteOpts<PublishPodCleanConfig>): Promise<any> {
-    const { config, engine } = opts;
-    const { fname, vault } = config;
-    const note = NoteUtilsV2.getNoteByFnameV4({
-      fname,
-      notes: engine.notes,
-      vault,
-    });
+  async plant(opts: PublishPodPlantOptsV3) {
+    const note = opts.note;
     const out = JSON.stringify(note, null, 4);
     return out;
   }

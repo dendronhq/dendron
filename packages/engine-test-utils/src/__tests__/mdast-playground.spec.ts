@@ -20,4 +20,11 @@ describe("proto", () => {
     );
     expect(output).toMatchSnapshot();
   });
+
+  test("basic2", async () => {
+    const proc = MDUtilsV4.remark();
+
+    const output = await proc.parse(["line one", "***", "line two"].join("\n"));
+    expect(output).toMatchSnapshot();
+  });
 });

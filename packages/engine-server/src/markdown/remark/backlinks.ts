@@ -1,4 +1,5 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteUtilsV2, VaultUtils } from "@dendronhq/common-all";
+import _ from "lodash";
 import { Content, Root } from "mdast";
 import { paragraph } from "mdast-builder";
 import Unified, { Plugin } from "unified";
@@ -23,29 +24,32 @@ const plugin: Plugin = function (this: Unified.Processor) {
       wsRoot: engine.wsRoot,
     });
 
-    if (note && note.links.length > 0) {
-      let backlinks: Node[] = [];
-      note.links.map((mdLink) => {
-        if (mdLink.type === "backlink" && mdLink.from.fname) {
-          backlinks.push(
-            paragraph({
-              type: "wikiLink",
-              value: mdLink.from.fname,
-              data: {
-                alias: mdLink.from.fname,
-                vault: note.vault,
-              },
-            })
-          );
-        }
+    const backlinks = _.uniqBy(
+      (note?.links || []).filter((ent) => ent.type === "backlink"),
+      (ent) => ent.from.fname + (ent.from.vault?.fsPath || "")
+    );
+
+    if (!_.isEmpty(backlinks)) {
+      const aliasSuffix =
+        engine.vaultsv3.length > 1 ? ` (${VaultUtils.getName(vault!)})` : "";
+      root.children.push({
+        type: "thematicBreak",
       });
-      if (backlinks.length > 0) {
-        root.children.push(
-          u("heading", { depth: 2 }, [u("text", "Backlinks")])
-        );
-        root.children.push(paragraph(backlinks) as Content);
-      }
+      root.children.push(u("heading", { depth: 2 }, [u("text", "Backlinks")]));
+      backlinks.forEach((mdLink) => {
+        const node = paragraph({
+          type: "wikiLink",
+          value: mdLink.from.fname,
+          data: {
+            alias: mdLink.from.fname + aliasSuffix,
+            vault: note!.vault,
+          },
+        });
+        root.children.push(node as Content);
+      });
     }
+
+    // end transformer
   }
   return transformer;
 };

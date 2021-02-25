@@ -9,3 +9,109 @@ exports[`proto basic 1`] = `
 - three
 "
 `;
+
+exports[`proto basic2 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 9,
+              "line": 1,
+              "offset": 8,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "type": "text",
+          "value": "line one",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 9,
+          "line": 1,
+          "offset": 8,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+    Object {
+      "position": Position {
+        "end": Object {
+          "column": 4,
+          "line": 2,
+          "offset": 12,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 2,
+          "offset": 9,
+        },
+      },
+      "type": "thematicBreak",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "position": Position {
+            "end": Object {
+              "column": 9,
+              "line": 3,
+              "offset": 21,
+            },
+            "indent": Array [],
+            "start": Object {
+              "column": 1,
+              "line": 3,
+              "offset": 13,
+            },
+          },
+          "type": "text",
+          "value": "line two",
+        },
+      ],
+      "position": Position {
+        "end": Object {
+          "column": 9,
+          "line": 3,
+          "offset": 21,
+        },
+        "indent": Array [],
+        "start": Object {
+          "column": 1,
+          "line": 3,
+          "offset": 13,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": Object {
+    "end": Object {
+      "column": 9,
+      "line": 3,
+      "offset": 21,
+    },
+    "start": Object {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}
+`;

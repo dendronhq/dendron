@@ -4,14 +4,29 @@ import { NOTE_PRESETS_V4 } from "../notes";
 
 const SCHEMAS = {};
 const NOTES = {
-  ROOT: new TestPresetEntryV4(async ({ vaults, engine }) => {
+  /**
+   * Check that we can get both roots from both vaults
+   */
+  ROOT: new TestPresetEntryV4(async ({ vaults, engine, wsRoot }) => {
     const vault = vaults[0];
-    const root = NoteUtilsV2.getNoteByFnameV4({
+    const vault2 = vaults[1];
+    const root = NoteUtilsV2.getNoteByFnameV5({
       fname: "root",
       notes: engine.notes,
       vault,
+      wsRoot,
+    });
+    const root2 = NoteUtilsV2.getNoteByFnameV5({
+      fname: "root",
+      notes: engine.notes,
+      vault: vault2,
+      wsRoot,
     });
     const { data } = await engine.getNoteByPath({ npath: "root", vault });
+    const { data: data2 } = await engine.getNoteByPath({
+      npath: "root",
+      vault: vault2,
+    });
     return [
       {
         actual: data?.changed,
@@ -20,6 +35,10 @@ const NOTES = {
       {
         actual: data?.note,
         expected: root,
+      },
+      {
+        actual: data2?.note,
+        expected: root2,
       },
     ];
   }),

@@ -36,9 +36,7 @@ describe("backlinks", () => {
         expect(
           await AssertUtils.assertInString({
             body: resp.contents as string,
-            match: [
-              `<a href="alpha.html">alpha</a></p><p><a href="omega.html">omega</a>`,
-            ],
+            match: [`<a href="alpha.html">alpha (vault1)</a></p>`],
           })
         ).toBeTruthy();
       },
@@ -59,8 +57,8 @@ describe("backlinks", () => {
           await AssertUtils.assertInString({
             body: resp.contents as string,
             match: [
-              `<a href="three.html">three</a>`,
-              `<a href="two.html">two</a>`,
+              `<a href="three.html">three (vault1)</a>`,
+              `<a href="two.html">two (vault1)</a>`,
             ],
           })
         ).toBeTruthy();

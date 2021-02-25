@@ -135,8 +135,6 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
     note: NotePropsV2,
     ndict: NotePropsDictV2
   ): Promise<TreeNote> {
-    // const ctx = "TreeViewV2:parseTree";
-    // Logger.debug({ ctx, msg: "enter" });
     const tn = createTreeNote(note);
     this.tree[note.id] = tn;
     tn.children = await Promise.all(
@@ -199,17 +197,19 @@ export class DendronTreeViewV2 {
     }
     const uri = editor.document.uri;
     const basename = path.basename(uri.fsPath);
+    const wsRoot = DendronWorkspace.wsRoot();
     if (basename.endsWith(".md")) {
       const vault = VaultUtils.getVaultByNotePathV4({
         fsPath: uri.fsPath,
-        wsRoot: DendronWorkspace.wsRoot(),
+        wsRoot,
         vaults: DendronWorkspace.instance().vaultsv4,
       });
       const fname = NoteUtilsV2.uri2Fname(uri);
-      const note = NoteUtilsV2.getNoteByFnameV4({
+      const note = NoteUtilsV2.getNoteByFnameV5({
         fname,
         vault,
         notes: getEngine().notes,
+        wsRoot,
       }) as NotePropsV2;
       if (note && !this.pause) {
         this.treeView.reveal(note.id);

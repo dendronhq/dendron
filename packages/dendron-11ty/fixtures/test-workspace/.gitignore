@@ -1,3 +1,5 @@
 build
 docs/*
 !docs/index.*
+
+vault2

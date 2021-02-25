@@ -1,6 +1,9 @@
 {
     "folders": [
         {
+            "path": "vault2"
+        },
+        {
             "path": "vault"
         },
         {

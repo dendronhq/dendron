@@ -575,6 +575,7 @@ export class NoteUtilsV2 {
 
   /**
    * Get a note.
+   @deprecated
    * If no vault is entered as a parameter, get first match
    */
   static getNoteByFnameV4({

@@ -4,6 +4,7 @@ import path from "path";
 import { window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
+import { Logger } from "../logger";
 import { DendronClientUtilsV2, VSCodeUtils } from "../utils";
 import { DendronWorkspace, getEngine } from "../workspace";
 import { BasicCommand } from "./base";
@@ -23,6 +24,7 @@ export class DeleteNodeCommand extends BasicCommand<
 
   async execute(): Promise<CommandOutput> {
     const editor = VSCodeUtils.getActiveTextEditor();
+    const ctx = "DeleteNoteCommand";
     if (!editor) {
       window.showErrorMessage("no active text editor");
       return;
@@ -34,12 +36,19 @@ export class DeleteNodeCommand extends BasicCommand<
     const client = DendronWorkspace.instance().getEngine();
     if (mode === "note") {
       const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-      const note = NoteUtilsV2.getNoteByFnameV4({
+      const note = NoteUtilsV2.getNoteByFnameV5({
         fname,
         vault,
         notes: getEngine().notes,
+        wsRoot: DendronWorkspace.wsRoot(),
       }) as NotePropsV2;
-      return (await client.deleteNote(note.id)) as EngineDeletePayload;
+      const out = (await client.deleteNote(note.id)) as EngineDeletePayload;
+      if (out.error) {
+        Logger.error({ ctx, msg: "error deleting node", err: out.error });
+        return;
+      }
+      window.showInformationMessage(`${path.basename(fsPath)} deleted`);
+      return out;
     } else {
       const smod = await DendronClientUtilsV2.getSchemaModByFname({
         fname,

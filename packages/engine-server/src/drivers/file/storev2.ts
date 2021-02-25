@@ -680,6 +680,12 @@ export class FileStorageV2 implements DStoreV2 {
     maybeNote?: NotePropsV2;
     opts?: EngineWriteOptsV2;
   }): Promise<NotePropsV2[]> {
+    const ctx = "_writeNewNote";
+    this.logger.info({
+      ctx,
+      msg: "enter",
+      note: NoteUtilsV2.toLogObj(note),
+    });
     let changed: NotePropsV2[] = [];
     // if note exists, remove from parent and transplant children
     if (maybeNote) {
@@ -707,6 +713,11 @@ export class FileStorageV2 implements DStoreV2 {
         wsRoot: this.wsRoot,
       });
     }
+    this.logger.info({
+      ctx,
+      msg: "exit",
+      changed: changed.map((n) => NoteUtilsV2.toLogObj(n)),
+    });
     return changed;
   }
 
@@ -727,6 +738,11 @@ export class FileStorageV2 implements DStoreV2 {
       notes: this.notes,
       vault: note.vault,
     });
+    this.logger.info({
+      ctx,
+      msg: "check:existing",
+      maybeNoteId: _.pick(maybeNote || {}, ["id", "stub"]),
+    });
     // don't count as delete if we're updating existing note
     let noDelete = false;
     if (maybeNote?.stub || opts?.updateExisting) {
@@ -741,6 +757,10 @@ export class FileStorageV2 implements DStoreV2 {
       notePath: note.fname,
       schemaModDict: this.schemas,
     });
+    this.logger.info({
+      ctx,
+      msg: "pre:note2File",
+    });
     // order matters - only write file after parents are established @see(_writeNewNote)
     await note2File({
       note,
@@ -750,9 +770,17 @@ export class FileStorageV2 implements DStoreV2 {
     });
 
     if (match) {
+      this.logger.info({
+        ctx,
+        msg: "pre:addSchema",
+      });
       const { schema, schemaModule } = match;
       NoteUtilsV2.addSchema({ note, schema, schemaModule });
     }
+    this.logger.info({
+      ctx,
+      msg: "pre:updateNotes",
+    });
     await Promise.all(
       [note].concat(changed).map((ent) => this.updateNote(ent))
     );
@@ -764,6 +792,10 @@ export class FileStorageV2 implements DStoreV2 {
     if (maybeNote && !noDelete) {
       changedEntries.push({ note: maybeNote, status: "delete" });
     }
+    this.logger.info({
+      ctx,
+      msg: "exit",
+    });
     return {
       error: null,
       data: changedEntries,

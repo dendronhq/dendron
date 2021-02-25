@@ -361,10 +361,11 @@ export class DendronClientUtilsV2 {
       case "childOfDomainNamespace": {
         out = DNodeUtilsV2.domainName(fname);
         const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-        const domain = NoteUtilsV2.getNoteByFnameV4({
+        const domain = NoteUtilsV2.getNoteByFnameV5({
           fname,
           notes: opts.engine.notes,
           vault,
+          wsRoot: DendronWorkspace.wsRoot(),
         });
         if (domain && domain.schema) {
           const smod = opts.engine.schemas[domain.schema.moduleId];

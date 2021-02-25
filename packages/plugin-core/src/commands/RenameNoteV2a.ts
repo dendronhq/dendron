@@ -63,10 +63,11 @@ export class RenameNoteV2aCommand extends BaseCommand<
     const ws = DendronWorkspace.instance();
     const notes = ws.getEngine().notes;
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-    let newNote = NoteUtilsV2.getNoteByFnameV4({
+    let newNote = NoteUtilsV2.getNoteByFnameV5({
       fname: inputs.dest,
       notes,
       vault,
+      wsRoot: DendronWorkspace.wsRoot(),
     });
     let isStub = newNote?.stub;
     if (newNote && !isStub) {

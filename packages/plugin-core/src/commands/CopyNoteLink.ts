@@ -5,7 +5,7 @@ import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { clipboard, VSCodeUtils } from "../utils";
 import { getHeaderFromSelection } from "../utils/editor";
-import { getEngine } from "../workspace";
+import { DendronWorkspace, getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -33,10 +33,11 @@ export class CopyNoteLinkCommand extends BasicCommand<
     let note: NotePropsV2;
 
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-    note = NoteUtilsV2.getNoteByFnameV4({
+    note = NoteUtilsV2.getNoteByFnameV5({
       fname,
       vault,
       notes: getEngine().notes,
+      wsRoot: DendronWorkspace.wsRoot(),
     }) as NotePropsV2;
     if (!note) {
       throw Error(`${fname} not found in engine`);

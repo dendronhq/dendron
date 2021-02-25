@@ -47,10 +47,11 @@ export class GoToSiblingCommand extends BasicCommand<
         wsRoot: DendronWorkspace.wsRoot(),
         fsPath: maybeTextEditor.document.uri.fsPath,
       });
-      const rootNode = NoteUtilsV2.getNoteByFnameV4({
+      const rootNode = NoteUtilsV2.getNoteByFnameV5({
         fname: value,
         vault,
         notes: client.notes,
+        wsRoot: DendronWorkspace.wsRoot(),
       }) as NotePropsV2;
       if (_.isUndefined(rootNode)) {
         throw new DendronError({ msg: "no root node found" });

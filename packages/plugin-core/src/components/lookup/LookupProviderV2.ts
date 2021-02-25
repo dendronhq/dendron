@@ -178,10 +178,11 @@ export class LookupProviderV2 {
     Logger.info({ ctx, msg: "pre:checkNoteExist" });
     // TODO: check for overwriting schema
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-    const noteExists = NoteUtilsV2.getNoteByFnameV4({
+    const noteExists = NoteUtilsV2.getNoteByFnameV5({
       fname: nodeNew.fname,
       vault,
       notes: engine.notes,
+      wsRoot: DendronWorkspace.wsRoot(),
     }) as NotePropsV2;
     if (
       noteExists &&
@@ -358,10 +359,11 @@ export class LookupProviderV2 {
       // item from pressing enter
       if (opts.flavor === "note") {
         const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-        const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+        const maybeNote = NoteUtilsV2.getNoteByFnameV5({
           fname: value,
           vault,
           notes: getEngine().notes,
+          wsRoot: DendronWorkspace.wsRoot(),
         });
         if (maybeNote) {
           uri = node2Uri(maybeNote);
@@ -394,10 +396,11 @@ export class LookupProviderV2 {
     const activeItem = picker.activeItems[0];
     const maybeNoteFname = activeItem ? activeItem.fname : value;
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-    const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+    const maybeNote = NoteUtilsV2.getNoteByFnameV5({
       fname: maybeNoteFname,
       vault,
       notes: getEngine().notes,
+      wsRoot: DendronWorkspace.wsRoot(),
     }) as NotePropsV2;
     if (_.isEmpty(selectedItems) && opts.flavor === "note") {
       if (maybeNote) {

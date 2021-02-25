@@ -55,10 +55,11 @@ export class WorkspaceWatcher {
       vaults: eclient.vaultsv3,
       wsRoot: DendronWorkspace.wsRoot(),
     });
-    const note = NoteUtilsV2.getNoteByFnameV4({
+    const note = NoteUtilsV2.getNoteByFnameV5({
       fname,
       vault,
       notes: eclient.notes,
+      wsRoot: DendronWorkspace.wsRoot(),
     }) as NotePropsV2;
 
     // if recently changed, ignore

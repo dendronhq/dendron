@@ -7,7 +7,7 @@ import {
   LookupNoteTypeEnum,
 } from "../../commands/LookupCommand";
 import { VSCodeUtils } from "../../utils";
-import { getWS } from "../../workspace";
+import { DendronWorkspace, getWS } from "../../workspace";
 import { TIMEOUT } from "../testUtils";
 import {
   expect,
@@ -36,7 +36,12 @@ suite("Scratch Notes", function () {
           const vault = vaults[0];
           const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
           const notes = getWS().getEngine().notes;
-          const note = NoteUtilsV2.getNoteByFnameV4({ fname, notes, vault });
+          const note = NoteUtilsV2.getNoteByFnameV5({
+            fname,
+            notes,
+            vault,
+            wsRoot: DendronWorkspace.wsRoot(),
+          });
           const editor = await VSCodeUtils.openNote(note!);
           const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);
           editor.selection = SIMPLE_SELECTION;
@@ -101,7 +106,12 @@ suite("Scratch Notes", function () {
           const vault = vaults[1];
           const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
           const notes = getWS().getEngine().notes;
-          const note = NoteUtilsV2.getNoteByFnameV4({ fname, notes, vault });
+          const note = NoteUtilsV2.getNoteByFnameV5({
+            fname,
+            notes,
+            vault,
+            wsRoot: DendronWorkspace.wsRoot(),
+          });
           const editor = await VSCodeUtils.openNote(note!);
           const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 12);
           editor.selection = SIMPLE_SELECTION;

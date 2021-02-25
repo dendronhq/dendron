@@ -373,7 +373,11 @@ export async function setupCodeWorkspaceV3(
 
 export const getNoteFromFname = (opts: { fname: string; vault: DVault }) => {
   const notes = getWS().getEngine().notes;
-  const note = NoteUtilsV2.getNoteByFnameV4({ ...opts, notes });
+  const note = NoteUtilsV2.getNoteByFnameV5({
+    ...opts,
+    notes,
+    wsRoot: DendronWorkspace.wsRoot(),
+  });
   return VSCodeUtils.openNote(note!);
 };
 export const getNoteFromTextEditor = (): NotePropsV2 => {

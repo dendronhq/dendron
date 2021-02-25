@@ -644,10 +644,11 @@ suite("Lookup, notesv2", function () {
           const { lp, lc } = await lookupHelper("note");
           const ws = DendronWorkspace.instance();
           const client = ws.getEngine();
-          const note = NoteUtilsV2.getNoteByFnameV4({
+          const note = NoteUtilsV2.getNoteByFnameV5({
             fname: "foo",
             notes: client.notes,
             vault: vaults[0],
+            wsRoot: DendronWorkspace.wsRoot(),
           }) as NotePropsV2;
           const item = DNodeUtilsV2.enhancePropForQuickInput({
             wsRoot,

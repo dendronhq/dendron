@@ -178,10 +178,11 @@ export class DNodeUtilsV2 {
       }
       return _node;
     }
-    const maybeNode = NoteUtilsV2.getNoteByFnameV4({
+    const maybeNode = NoteUtilsV2.getNoteByFnameV5({
       fname: dirname,
       notes: nodes,
       vault,
+      wsRoot: opts.wsRoot,
     });
     if (
       (maybeNode && !opts?.noStubs) ||

@@ -73,10 +73,11 @@ export class VaultWatcher {
       fsPath: uri.fsPath,
     });
     let note = string2Note({ content, fname, vault });
-    const noteHydrated = NoteUtilsV2.getNoteByFnameV4({
+    const noteHydrated = NoteUtilsV2.getNoteByFnameV5({
       fname,
       vault,
       notes: eclient.notes,
+      wsRoot: DendronWorkspace.wsRoot(),
     }) as NotePropsV2;
     note = NoteUtilsV2.hydrate({ noteRaw: note, noteHydrated });
     const links = ParserUtilsV2.findLinks({ note });
@@ -120,10 +121,11 @@ export class VaultWatcher {
           wsRoot: DendronWorkspace.wsRoot(),
         });
         note = file2Note(uri.fsPath, vault);
-        const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+        const maybeNote = NoteUtilsV2.getNoteByFnameV5({
           fname,
           vault,
           notes: this.engine.notes,
+          wsRoot: DendronWorkspace.wsRoot(),
         }) as NotePropsV2;
         if (maybeNote) {
           note = {

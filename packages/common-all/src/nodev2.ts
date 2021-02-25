@@ -774,12 +774,13 @@ export class NoteUtilsV2 {
   }
 
   static toLogObj(note: NotePropsV2) {
-    const { fname, id, children, vault } = note;
+    const { fname, id, children, vault, parent } = note;
     return {
       fname,
       id,
       children,
       vault,
+      parent,
     };
   }
 

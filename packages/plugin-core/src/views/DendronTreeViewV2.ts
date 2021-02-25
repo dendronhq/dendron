@@ -135,6 +135,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
     note: NotePropsV2,
     ndict: NotePropsDictV2
   ): Promise<TreeNote> {
+    const ctx = "parseTree";
     const tn = createTreeNote(note);
     this.tree[note.id] = tn;
     tn.children = await Promise.all(
@@ -143,9 +144,10 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
         if (!childNote) {
           const payload = {
             msg: `no childNote found: ${c}, current note: ${note.id}`,
+            fullDump: _.values(ndict).map((n) => NoteUtilsV2.toLogObj(n)),
           };
           const err = new DendronError({ payload });
-          Logger.error({ err });
+          Logger.error({ ctx, err });
           throw err;
         }
         return (await this.parseTree(childNote, ndict)).id;

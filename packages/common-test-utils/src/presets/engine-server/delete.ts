@@ -38,8 +38,12 @@ const NOTES = {
       const vault = vaults[0];
       const notes = engine.notes;
       const resp = await engine.deleteNote(
-        NoteUtilsV2.getNoteByFnameV4({ fname: "foo.ch1", vault, notes })
-          ?.id as string
+        NoteUtilsV2.getNoteByFnameV5({
+          fname: "foo.ch1",
+          vault,
+          notes,
+          wsRoot: engine.wsRoot,
+        })?.id as string
       );
       const changed = resp.data;
       return [
@@ -90,8 +94,12 @@ const NOTES = {
       const vault = vaults[0];
       const notes = engine.notes;
       const resp = await engine.deleteNote(
-        NoteUtilsV2.getNoteByFnameV4({ fname: "foo.ch1", vault, notes })
-          ?.id as string
+        NoteUtilsV2.getNoteByFnameV5({
+          fname: "foo.ch1",
+          vault,
+          notes,
+          wsRoot: engine.wsRoot,
+        })?.id as string
       );
       const changed = resp.data;
       const vpath = vault2Path({ vault, wsRoot });
@@ -124,10 +132,11 @@ const NOTES = {
   DOMAIN_CHILDREN: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
-      const noteToDelete = NoteUtilsV2.getNoteByFnameV4({
+      const noteToDelete = NoteUtilsV2.getNoteByFnameV5({
         fname: "foo",
         vault,
         notes: engine.notes,
+        wsRoot: engine.wsRoot,
       });
       const resp = await engine.deleteNote(noteToDelete?.id as string);
       const changed = resp.data as NoteChangeEntry[];
@@ -175,10 +184,11 @@ const NOTES = {
   DOMAIN_NO_CHILDREN: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
-      const noteToDelete = NoteUtilsV2.getNoteByFnameV4({
+      const noteToDelete = NoteUtilsV2.getNoteByFnameV5({
         fname: "foo",
         vault,
         notes: engine.notes,
+        wsRoot: engine.wsRoot,
       });
       const resp = await engine.deleteNote(noteToDelete?.id as string);
       const changed = resp.data as NoteChangeEntry[];

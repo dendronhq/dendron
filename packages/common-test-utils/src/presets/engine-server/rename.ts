@@ -278,10 +278,11 @@ const NOTES = {
         match: ["gamma.md"],
         nomatch: [`${fnameOld}.md`],
       });
-      const changedNote = NoteUtilsV2.getNoteByFnameV4({
+      const changedNote = NoteUtilsV2.getNoteByFnameV5({
         fname: "root",
         notes: engine.notes,
         vault,
+        wsRoot: engine.wsRoot,
       });
       return [
         {
@@ -506,7 +507,7 @@ const NOTES = {
   //     const vault = vaults[0];
   //     const notes = engine.notes;
   //     const alphaFname = NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname;
-  //     const noteOrig = NoteUtilsV2.getNoteByFnameV4({fname: alphaFname, vault, notes});
+  //     const noteOrig = NoteUtilsV2.getNoteByFnameV5({fname: alphaFname, vault, notes});
 
   //   let alphaNoteNew = NoteUtilsV2.create({
   //     fname: "alpha",

@@ -77,7 +77,8 @@ const NOTES = {
       const vault = vaults[0];
       const notes = engine.notes;
       const { data } = await engine.queryNotes({ qs: "", vault });
-      const expectedNote = NoteUtilsV2.getNoteByFnameV4({
+      const expectedNote = NoteUtilsV2.getNoteByFnameV5({
+        wsRoot: engine.wsRoot,
         fname: "root",
         notes,
         vault,
@@ -115,10 +116,11 @@ const NOTES = {
       const notes = engine.notes;
       const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
       const { data } = await engine.queryNotes({ qs: fname, vault });
-      const expectedNote = NoteUtilsV2.getNoteByFnameV4({
+      const expectedNote = NoteUtilsV2.getNoteByFnameV5({
         fname,
         notes,
         vault,
+        wsRoot: engine.wsRoot,
       });
       return [
         {
@@ -144,10 +146,11 @@ const NOTES = {
       const notes = engine.notes;
       const fname = NOTE_PRESETS_V4.NOTE_SIMPLE_CHILD.fname;
       const { data } = await engine.queryNotes({ qs: fname, vault });
-      const expectedNote = NoteUtilsV2.getNoteByFnameV4({
+      const expectedNote = NoteUtilsV2.getNoteByFnameV5({
         fname,
         notes,
         vault,
+        wsRoot: engine.wsRoot,
       });
       const matchNote = _.find(data, { id: expectedNote?.id });
       return [

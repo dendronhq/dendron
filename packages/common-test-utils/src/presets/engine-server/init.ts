@@ -54,10 +54,11 @@ const SCHEMAS = {
 const NOTES = {
   LINKS: new TestPresetEntryV4(
     async ({ engine, vaults }) => {
-      const noteAlpha = NoteUtilsV2.getNoteByFnameV4({
+      const noteAlpha = NoteUtilsV2.getNoteByFnameV5({
         fname: "alpha",
         notes: engine.notes,
         vault: vaults[0],
+        wsRoot: engine.wsRoot,
       }) as NotePropsV2;
       return [
         {
@@ -108,13 +109,15 @@ const NOTES = {
   ),
   DOMAIN_STUB: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
-      const noteRoot = NoteUtilsV2.getNoteByFnameV4({
+      const noteRoot = NoteUtilsV2.getNoteByFnameV5({
         fname: "root",
         notes: engine.notes,
         vault: vaults[0],
+        wsRoot: engine.wsRoot,
       }) as NotePropsV2;
 
-      const noteChild = NoteUtilsV2.getNoteByFnameV4({
+      const noteChild = NoteUtilsV2.getNoteByFnameV5({
+        wsRoot: engine.wsRoot,
         fname: "foo",
         notes: engine.notes,
         vault: vaults[0],
@@ -147,10 +150,11 @@ const NOTES = {
   ),
   NOTE_WITH_CUSTOM_ATT: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
-      const noteRoot = NoteUtilsV2.getNoteByFnameV4({
+      const noteRoot = NoteUtilsV2.getNoteByFnameV5({
         fname: "foo",
         notes: engine.notes,
         vault: vaults[0],
+        wsRoot: engine.wsRoot,
       }) as NotePropsV2;
 
       return [

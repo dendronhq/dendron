@@ -164,10 +164,11 @@ async function note2JekyllMdFile(
     linkPrefix = path.basename(siteNotesDir) + "/";
   }
   let engine = opts.engine as DendronEngineClient;
-  let parentFname = NoteUtilsV2.getNoteByFnameV4({
+  let parentFname = NoteUtilsV2.getNoteByFnameV5({
     fname: note.fname,
     notes: engine.notes,
     vault: note.vault,
+    wsRoot: engine.wsRoot,
   })?.fname;
 
   // pull children of root to the top

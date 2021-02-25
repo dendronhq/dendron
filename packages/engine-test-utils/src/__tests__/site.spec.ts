@@ -293,10 +293,11 @@ describe("SiteUtils", () => {
             engine,
             config,
           });
-          const root = NoteUtilsV2.getNoteByFnameV4({
+          const root = NoteUtilsV2.getNoteByFnameV5({
             fname: "root",
             notes: engine.notes,
             vault: vaults[0],
+            wsRoot: engine.wsRoot,
           });
           expect(domains.length).toEqual(3);
           checkNotes({

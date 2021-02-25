@@ -574,39 +574,6 @@ export class NoteUtilsV2 {
     return out;
   }
 
-  /**
-   * Get a note.
-   @deprecated
-   * If no vault is entered as a parameter, get first match
-   */
-  static getNoteByFnameV4({
-    fname,
-    notes,
-    vault,
-  }: {
-    fname: string;
-    notes: NotePropsDictV2 | NotePropsV2[];
-    vault: DVault;
-  }): NotePropsV2 | undefined {
-    if (!_.isArray(notes)) {
-      notes = _.values(notes);
-    }
-    const out = _.find(notes, (ent) => {
-      return (
-        ent.fname.toLowerCase() === fname.toLowerCase() &&
-        ((vault &&
-        (vault.fsPath.startsWith("/") || vault.fsPath.startsWith("\\"))
-          ? ent.vault.fsPath === vault.fsPath
-          : true) ||
-          // FIXME: for backward compatibility with full length vaults
-          (vault
-            ? path.basename(ent.vault.fsPath) === path.basename(vault.fsPath)
-            : true))
-      );
-    });
-    return out;
-  }
-
   static getNoteByFnameV5({
     fname,
     notes,

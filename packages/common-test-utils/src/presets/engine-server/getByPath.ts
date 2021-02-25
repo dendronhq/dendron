@@ -45,10 +45,11 @@ const NOTES = {
   EXISTING_NOTE: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
       const vault = vaults[0];
-      const note = NoteUtilsV2.getNoteByFnameV4({
+      const note = NoteUtilsV2.getNoteByFnameV5({
         fname: "foo",
         notes: engine.notes,
         vault,
+        wsRoot: engine.wsRoot,
       });
       const { data } = await engine.getNoteByPath({ npath: "foo", vault });
       return [
@@ -72,10 +73,11 @@ const NOTES = {
   NOTE_WITH_CAPS_AND_SPACES: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
       const vault = vaults[0];
-      const note = NoteUtilsV2.getNoteByFnameV4({
+      const note = NoteUtilsV2.getNoteByFnameV5({
         fname: "000 Index",
         notes: engine.notes,
         vault,
+        wsRoot: engine.wsRoot,
       });
       const { data } = await engine.getNoteByPath({
         npath: "000 Index",

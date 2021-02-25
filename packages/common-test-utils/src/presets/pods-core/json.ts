@@ -111,10 +111,11 @@ const IMPORT = {
         wsRoot,
         engine,
       });
-      const note = NoteUtilsV2.getNoteByFnameV4({
+      const note = NoteUtilsV2.getNoteByFnameV5({
         fname: "baz",
         vault,
         notes: engine.notes,
+        wsRoot: engine.wsRoot,
       });
 
       return [

@@ -6,18 +6,20 @@ import { NOTE_PRESETS_V4 } from "../notes";
 const NOTES = {
   NOTE_NO_CHILDREN: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
-      const noteOld = NoteUtilsV2.getNoteByFnameV4({
+      const noteOld = NoteUtilsV2.getNoteByFnameV5({
         fname: "foo",
         notes: engine.notes,
         vault: vaults[0],
+        wsRoot: engine.wsRoot,
       }) as NotePropsV2;
       const cnote = _.clone(noteOld);
       cnote.body = "new body";
       await engine.updateNote(cnote);
-      const noteNew = NoteUtilsV2.getNoteByFnameV4({
+      const noteNew = NoteUtilsV2.getNoteByFnameV5({
         fname: "foo",
         notes: engine.notes,
         vault: vaults[0],
+        wsRoot: engine.wsRoot,
       }) as NotePropsV2;
 
       return [

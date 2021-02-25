@@ -53,11 +53,12 @@ async function markdownfy(contents) {
 }
 
 function getClosetNavVisibleParent(opts) {
-  const { fname, notes, vault, noteIndex } = opts;
-  const maybeNode = NoteUtilsV2.getNoteByFnameV4({
+  const { fname, notes, vault, noteIndex, wsRoot } = opts;
+  const maybeNode = NoteUtilsV2.getNoteByFnameV5({
     fname,
     notes,
     vault,
+    wsRoot
   });
   if (!maybeNode) {
     //const msg = `no node found for ${fname}, ${JSON.stringify(vault)}`;
@@ -118,11 +119,13 @@ async function toMarkdown2(contents, vault, fname) {
   const linkPrefix = absUrl + "/" + siteNotesDir + "/";
   const engine = await getEngine();
   const wikiLinksOpts = { useId: true, prefix: linkPrefix };
+  const wsRoot = engine.wsRoot;
   const navParent = getClosetNavVisibleParent({
     fname,
     vault,
     notes,
     noteIndex,
+    wsRoot
   });
   const proc = MDUtilsV4.procFull({
     engine,

@@ -136,10 +136,11 @@ const NOTES = {
       noWrite: true,
     });
     await engine.writeNote(note);
-    const noteRoot = NoteUtilsV2.getNoteByFnameV4({
+    const noteRoot = NoteUtilsV2.getNoteByFnameV5({
       fname: note.fname,
       notes: engine.notes,
       vault: vaults[0],
+      wsRoot: engine.wsRoot,
     }) as NotePropsV2;
     return [
       {
@@ -154,17 +155,19 @@ const NOTES = {
   }),
   CUSTOM_ATT_ADD: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
-      const note = NoteUtilsV2.getNoteByFnameV4({
+      const note = NoteUtilsV2.getNoteByFnameV5({
         fname: "foo",
         notes: engine.notes,
         vault: vaults[0],
+        wsRoot: engine.wsRoot,
       }) as NotePropsV2;
       note.custom = { bond: 43 };
       await engine.writeNote(note, { updateExisting: true });
-      const newNote = NoteUtilsV2.getNoteByFnameV4({
+      const newNote = NoteUtilsV2.getNoteByFnameV5({
         fname: "foo",
         notes: engine.notes,
         vault: vaults[0],
+        wsRoot: engine.wsRoot,
       }) as NotePropsV2;
       return [
         {
@@ -222,10 +225,11 @@ const NOTES = {
 
       return [
         {
-          actual: NoteUtilsV2.getNoteByFnameV4({
+          actual: NoteUtilsV2.getNoteByFnameV5({
             fname: "foo.ch1",
             notes: engine.notes,
             vault,
+            wsRoot: engine.wsRoot,
           })?.schema,
           expected: {
             moduleId: "foo",
@@ -262,21 +266,23 @@ const NOTES = {
     await engine.writeNote(note);
     const { notes } = engine;
     const vault = vaults[0];
-    //const root = NoteUtilsV2.getNoteByFnameV4("root", notes) as NotePropsV2;
-    const root = NoteUtilsV2.getNoteByFnameV4({
+    const root = NoteUtilsV2.getNoteByFnameV5({
       fname: "root",
       notes,
       vault,
+      wsRoot: engine.wsRoot,
     }) as NotePropsV2;
-    const bar = NoteUtilsV2.getNoteByFnameV4({
+    const bar = NoteUtilsV2.getNoteByFnameV5({
       fname: "bar",
       notes,
       vault,
+      wsRoot: engine.wsRoot,
     }) as NotePropsV2;
-    const child = NoteUtilsV2.getNoteByFnameV4({
+    const child = NoteUtilsV2.getNoteByFnameV5({
       fname: "bar.ch1",
       notes,
       vault,
+      wsRoot: engine.wsRoot,
     }) as NotePropsV2;
     return [
       {
@@ -401,26 +407,29 @@ const NOTES = {
       await engine.writeNote(noteC);
       return [
         {
-          actual: NoteUtilsV2.getNoteByFnameV4({
+          actual: NoteUtilsV2.getNoteByFnameV5({
             fname: "Upper Upper",
             notes: engine.notes,
             vault,
+            wsRoot: engine.wsRoot,
           })?.title,
           expected: "Upper Upper",
         },
         {
-          actual: NoteUtilsV2.getNoteByFnameV4({
+          actual: NoteUtilsV2.getNoteByFnameV5({
             fname: "lower lower",
             notes: engine.notes,
             vault,
+            wsRoot: engine.wsRoot,
           })?.title,
           expected: "Lower Lower",
         },
         {
-          actual: NoteUtilsV2.getNoteByFnameV4({
+          actual: NoteUtilsV2.getNoteByFnameV5({
             fname: "lower Upper",
             notes: engine.notes,
             vault,
+            wsRoot: engine.wsRoot,
           })?.title,
           expected: "lower Upper",
         },
@@ -444,18 +453,20 @@ const NOTES = {
     await engine.writeNote(noteB);
     return [
       {
-        actual: NoteUtilsV2.getNoteByFnameV4({
+        actual: NoteUtilsV2.getNoteByFnameV5({
           fname: "foo-with-dash",
           notes: engine.notes,
           vault,
+          wsRoot: engine.wsRoot,
         })?.title,
         expected: "Foo with Dash",
       },
       {
-        actual: NoteUtilsV2.getNoteByFnameV4({
+        actual: NoteUtilsV2.getNoteByFnameV5({
           fname: "foo.foo-with-dash",
           notes: engine.notes,
           vault,
+          wsRoot: engine.wsRoot,
         })?.title,
         expected: "Foo with Dash",
       },

@@ -97,17 +97,11 @@ export const enrichPodArgs = (opts: {
   const enrichFunc = async (
     args: PodCommandCLIOpts
   ): Promise<PodCommandOpts> => {
-    const {
-      podId,
-      wsRoot,
-      showConfig,
-      podSource,
-      podPkg,
-      genConfig,
-      config,
-    } = args;
+    const { podId, showConfig, podSource, podPkg, genConfig, config } = args;
 
     const engineArgs = await setupEngine(args);
+    // normalized wsRoot
+    const wsRoot = engineArgs.wsRoot;
     const podClass = fetchPodClassV4(podId, {
       pods,
       podType,

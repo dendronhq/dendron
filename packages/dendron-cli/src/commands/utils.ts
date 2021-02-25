@@ -21,7 +21,9 @@ export type SetupEngineResp = {
 /**
  * Setup an engine based on CLI args
  */
-export async function setupEngine(opts: SetupEngineCLIOpts): Promise<any> {
+export async function setupEngine(
+  opts: SetupEngineCLIOpts
+): Promise<SetupEngineResp> {
   let { wsRoot, enginePort, init } = _.defaults(opts, { init: true });
   let engine: DEngineClientV2;
   let port: number;

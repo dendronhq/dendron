@@ -1,5 +1,5 @@
 import { NoteUtilsV2 } from "@dendronhq/common-all";
-import { Root } from "mdast";
+import { Content, Root } from "mdast";
 import { paragraph } from "mdast-builder";
 import Unified, { Plugin } from "unified";
 import { Node } from "unist";
@@ -12,9 +12,12 @@ const plugin: Plugin = function (this: Unified.Processor) {
   function transformer(tree: Node): void {
     let root = tree as Root;
     const { fname, vault } = MDUtilsV4.getDendronData(proc);
+    if (!fname) {
+      return;
+    }
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
     const note = NoteUtilsV2.getNoteByFnameV5({
-      fname: fname!,
+      fname: fname,
       notes: engine.notes,
       vault: vault!,
       wsRoot: engine.wsRoot,
@@ -40,7 +43,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
         root.children.push(
           u("heading", { depth: 2 }, [u("text", "Backlinks")])
         );
-        root.children.push(paragraph(backlinks));
+        root.children.push(paragraph(backlinks) as Content);
       }
     }
   }

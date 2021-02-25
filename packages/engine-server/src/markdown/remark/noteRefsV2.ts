@@ -295,8 +295,7 @@ export function convertNoteRefASTV2(
         shouldApplyPublishRules &&
         !SiteUtils.canPublish({
           note,
-          config: config!.site,
-          vaults: engine.vaultsv3,
+          config: config!,
           wsRoot: engine.wsRoot,
         })
       ) {

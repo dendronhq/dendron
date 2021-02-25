@@ -87,12 +87,10 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
               value = "403";
               addError(proc, new DendronError({ msg: "no note or config" }));
             } else {
-              const vaults = engine.vaultsv3;
               const wsRoot = engine.wsRoot;
               canPublish = SiteUtils.canPublish({
                 note,
-                config: config.site,
-                vaults,
+                config,
                 wsRoot,
               });
               if (!canPublish) {

@@ -605,16 +605,21 @@ describe("SiteUtils", () => {
             engine,
             config,
           });
-          const root = NoteUtilsV2.getNoteByFnameV4({
+          const root = NoteUtilsV2.getNoteByFnameV5({
             fname: "root",
             notes: engine.notes,
             vault: vaults[0],
+            wsRoot,
           });
           expect(domains.length).toEqual(2);
           checkNotes({
             filteredNotes: notes,
             engineNotes: engine.notes,
-            match: [{ id: root!.id }, { id: "foo" }, { id: "foo.ch1" }],
+            match: [
+              { id: root!.id, children: ["foo"] },
+              { id: "foo" },
+              { id: "foo.ch1" },
+            ],
           });
         },
         {

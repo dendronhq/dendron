@@ -5,6 +5,7 @@ import {
   DendronSiteConfig,
   DendronSiteFM,
   DNodeUtilsV2,
+  DuplicateNoteAction,
   DuplicateNoteBehavior,
   DVault,
   DVaultVisibility,
@@ -12,6 +13,7 @@ import {
   NotePropsDictV2,
   NotePropsV2,
   NoteUtilsV2,
+  UseVaultBehavior,
   VaultUtils,
 } from "@dendronhq/common-all";
 import {
@@ -30,61 +32,57 @@ const logger = createLogger();
 export class SiteUtils {
   static canPublish(opts: {
     note: NotePropsV2;
-    config: DendronSiteConfig;
-    vaults: DVault[];
+    config: DendronConfig;
     wsRoot: string;
   }) {
-    const { note, config, vaults, wsRoot } = opts;
-    if (
-      note.vault.visibility &&
-      note.vault.visibility === DVaultVisibility.PRIVATE
-    ) {
+    const { note, config, wsRoot } = opts;
+
+    // not private note
+    if (note.custom?.published === false) {
       return false;
     }
+
     // check if note is in index
     const domain = DNodeUtilsV2.domainName(note.fname);
     if (
-      config.siteHierarchies[0] !== "root" &&
-      config.siteHierarchies.indexOf(domain) < 0
+      config.site.siteHierarchies[0] !== "root" &&
+      config.site.siteHierarchies.indexOf(domain) < 0
     ) {
       return false;
     }
     // check if note is note blocked
-    const hconfig = this.getConfigForHierarchy({ config, noteOrName: note });
-    return this.canPublishFiltered({ note, hconfig, vaults, wsRoot });
-  }
-
-  static canPublishFiltered(opts: {
-    note: NotePropsV2;
-    hconfig: HierarchyConfig;
-    vaults: DVault[];
-    wsRoot: string;
-  }) {
-    const { note, hconfig, vaults, wsRoot } = opts;
+    const hconfig = this.getConfigForHierarchy({
+      config: config.site,
+      noteOrName: note,
+    });
     const noteVault = VaultUtils.matchVault({
       vault: note.vault,
-      vaults,
+      vaults: config.vaults,
       wsRoot,
     });
     assert(noteVault !== false, "noteVault should exist");
     const cNoteVault = noteVault as DVault;
+    // not from private vault
+    if (
+      (noteVault as DVault).visibility &&
+      (noteVault as DVault).visibility === DVaultVisibility.PRIVATE
+    ) {
+      return false;
+    }
 
+    // check if allowed in hconfig
     let publishByDefault = undefined;
-    if (hconfig?.publishByDefault) {
+    if (!_.isUndefined(hconfig?.publishByDefault)) {
+      // handle property being a boolean or an object
       publishByDefault = _.isBoolean(hconfig.publishByDefault)
         ? hconfig.publishByDefault
         : hconfig.publishByDefault[VaultUtils.getName(cNoteVault)];
     }
+    if (!publishByDefault && !(note.custom?.published === true)) {
+      return false;
+    }
 
-    return !_.some([
-      // not from private vault
-      (noteVault as DVault).visibility &&
-        (noteVault as DVault).visibility === DVaultVisibility.PRIVATE,
-      // not blacklisted
-      note?.custom?.published === false,
-      // not whitelisted
-      !publishByDefault ? !note.custom?.published : false,
-    ]);
+    return true;
   }
 
   static async copyAssets(opts: {
@@ -159,7 +157,12 @@ export class SiteUtils {
     // if single hiearchy, domain includes all immediate children
     if (siteHierarchies.length === 1 && domains.length === 1) {
       const rootDomain = domains[0];
-      domains = domains.concat(rootDomain.children.map((id) => notes[id]));
+      // special case, check if any of these children were supposed to be hidden
+      domains = domains
+        .concat(rootDomain.children.map((id) => notes[id]))
+        .filter((note) =>
+          this.canPublish({ note, config, wsRoot: engine.wsRoot })
+        );
     }
     logger.info({
       ctx: "filterByConfig",
@@ -204,23 +207,8 @@ export class SiteUtils {
     logger.info({
       ctx: "filterByHiearchy:candidates",
       domain,
-      notes: notes.map((ent) => ent.id),
-    });
-
-    // if multiple domain notes, figure out which one is good
-    notes = notes.filter((note) =>
-      SiteUtils.canPublishFiltered({
-        note,
-        hconfig: hConfig,
-        vaults: config.vaults,
-        wsRoot: engine.wsRoot,
-      })
-    );
-    logger.info({
-      ctx: "filterByHiearchy",
-      msg: "post-filter",
       hConfig,
-      filteredNotes: notes.map((ent) => ent.fname),
+      notes: notes.map((ent) => ent.id),
     });
 
     let domainNote: NotePropsV2 | undefined;
@@ -228,6 +216,7 @@ export class SiteUtils {
       domainNote = SiteUtils.handleDup({
         dupBehavior: sconfig.duplicateNoteBehavior,
         engine,
+        config,
         fname: domain,
         noteCandidates: notes,
         noteDict: notesForHiearchy,
@@ -239,7 +228,10 @@ export class SiteUtils {
     } else {
       domainNote = { ...notes[0] };
     }
-    if (_.isUndefined(domainNote)) {
+    if (
+      _.isUndefined(domainNote) ||
+      !this.canPublish({ note: domainNote, config, wsRoot: engine.wsRoot })
+    ) {
       return;
     }
 
@@ -297,10 +289,9 @@ export class SiteUtils {
 
         // remove any children that shouldn't be published
         children = _.filter(children, (note: NotePropsV2) =>
-          SiteUtils.canPublishFiltered({
+          SiteUtils.canPublish({
             note,
-            hconfig: hConfig,
-            vaults: config.vaults,
+            config,
             wsRoot: engine.wsRoot,
           })
         );
@@ -412,86 +403,114 @@ export class SiteUtils {
     dupBehavior?: DuplicateNoteBehavior;
     engine: DEngineClientV2;
     fname: string;
+    config: DendronConfig;
     noteCandidates: NotePropsV2[];
     noteDict: NotePropsDictV2;
   }) {
-    const { dupBehavior, engine, fname, noteCandidates, noteDict } = opts;
+    const {
+      engine,
+      fname,
+      noteCandidates,
+      noteDict,
+      config,
+      dupBehavior,
+    } = _.defaults(opts, {
+      dupBehavior: {
+        action: DuplicateNoteAction.USE_VAULT,
+        payload: [],
+      } as UseVaultBehavior,
+    });
     const ctx = "handleDup";
     let domainNote: NotePropsV2 | undefined;
 
-    if (dupBehavior) {
-      if (_.isArray(dupBehavior.payload)) {
-        const vaultNames = dupBehavior.payload;
-        _.forEach(vaultNames, (vname) => {
-          if (domainNote) {
-            return;
-          }
-          const vault = VaultUtils.getVaultByName({
-            vname,
-            vaults: engine.vaultsv3,
-          });
-          if (!vault) {
-            throw new DendronError({
-              msg: `no vault found for ${fname} in vaults ${vaultNames}`,
-            });
-          }
-          const maybeNote = NoteUtilsV2.getNoteByFnameV5({
-            fname,
-            notes: noteDict,
-            vault,
-            wsRoot: engine.wsRoot,
-          });
-          if (maybeNote) {
-            domainNote = maybeNote;
-            logger.info({
-              ctx,
-              status: "found",
-              note: NoteUtilsV2.toLogObj(domainNote),
-            });
-          }
+    if (_.isArray(dupBehavior.payload)) {
+      const vaultNames = dupBehavior.payload;
+      _.forEach(vaultNames, (vname) => {
+        if (domainNote) {
+          return;
+        }
+        const vault = VaultUtils.getVaultByName({
+          vname,
+          vaults: engine.vaultsv3,
         });
-        if (!domainNote) {
+        if (!vault) {
           throw new DendronError({
-            msg: `no notes found for ${fname} in vaults ${vaultNames}`,
+            msg: `no vault found for ${fname} in vaults ${vaultNames}`,
           });
         }
-      } else {
-        const vault = dupBehavior.payload.vault;
-        let maybeDomainNotes = noteCandidates.filter((n) =>
-          VaultUtils.isEqual(n.vault, vault, engine.wsRoot)
-        );
-        if (maybeDomainNotes.length < 1) {
-          logger.error({
-            ctx: "filterByHiearchy",
-            msg: "dup-resolution: no note found",
-            vault,
-          });
-          throw new DendronError({
-            msg: `no notes found for ${fname} in vault ${vault.fsPath}`,
+        const maybeNote = NoteUtilsV2.getNoteByFnameV5({
+          fname,
+          notes: noteDict,
+          vault,
+          wsRoot: engine.wsRoot,
+        });
+        if (
+          maybeNote &&
+          this.canPublish({
+            config,
+            note: maybeNote,
+            wsRoot: engine.wsRoot,
+          })
+        ) {
+          domainNote = maybeNote;
+          logger.info({
+            ctx,
+            status: "found",
+            note: NoteUtilsV2.toLogObj(domainNote),
           });
         }
-        domainNote = maybeDomainNotes[0];
+      });
+      if (!domainNote) {
+        throw new DendronError({
+          msg: `no notes found for ${fname} in vaults ${vaultNames}`,
+        });
       }
-      let domainId = domainNote.id;
-      // merge children
-      domainNote.children = _.uniq(
-        noteCandidates.flatMap((ent) => ent.children)
-      );
-      // update parents
-      domainNote.children.map((id) => {
-        const maybeNote = noteDict[id];
-        maybeNote.parent = domainId;
-      });
-      logger.info({
-        ctx: "filterByHiearchy",
-        msg: "dup-resolution: resolving dup",
-        parent: domainNote.id,
-        children: domainNote.children,
-      });
-      return domainNote;
     } else {
-      throw new DendronError({ msg: `mult notes found for ${fname}` });
+      const vault = dupBehavior.payload.vault;
+      let maybeDomainNotes = noteCandidates.filter((n) =>
+        VaultUtils.isEqual(n.vault, vault, engine.wsRoot)
+      );
+      if (maybeDomainNotes.length < 1) {
+        logger.error({
+          ctx: "filterByHiearchy",
+          msg: "dup-resolution: no note found",
+          vault,
+        });
+        throw new DendronError({
+          msg: `no notes found for ${fname} in vault ${vault.fsPath}`,
+        });
+      }
+      if (
+        !this.canPublish({
+          config,
+          note: maybeDomainNotes[0],
+          wsRoot: engine.wsRoot,
+        })
+      ) {
+        return;
+      }
+      domainNote = maybeDomainNotes[0];
     }
+    let domainId = domainNote.id;
+    // merge children
+    domainNote.children = getUniqueChildrenIds(noteCandidates);
+    // update parents
+    domainNote.children.map((id) => {
+      const maybeNote = noteDict[id];
+      maybeNote.parent = domainId;
+    });
+    logger.info({
+      ctx: "filterByHiearchy",
+      msg: "dup-resolution: resolving dup",
+      parent: domainNote.id,
+      children: domainNote.children,
+    });
+    return domainNote;
+
     return undefined;
   }
+}
+
+function getUniqueChildrenIds(notes: NotePropsV2[]): string[] {
+  return _.uniq(notes.flatMap((ent) => ent.children));
 }

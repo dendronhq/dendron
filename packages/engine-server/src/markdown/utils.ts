@@ -35,6 +35,7 @@ import remarkStringify from "remark-stringify";
 import variables from "remark-variables";
 import { default as unified, default as Unified, Processor } from "unified";
 import { Node, Parent } from "unist";
+import { backlinks } from "./remark/backlinks";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
 import { noteRefsV2 } from "./remark/noteRefsV2";
@@ -263,6 +264,7 @@ export class MDUtilsV4 {
       .use(variables)
       .use(footnotes)
       .use(wikiLinks, opts.wikiLinksOpts)
+      .use(backlinks)
       .use(noteRefsV2, {
         ...opts.noteRefOpts,
         wikiLinkOpts: opts.wikiLinksOpts,

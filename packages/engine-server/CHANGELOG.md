@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.30.1-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.29.0...@dendronhq/engine-server@0.30.1-alpha.0) (2021-02-25)
+
+### Bug Fixes
+
+- Cannot open secondary roots when using multiple vaults [#495](https://github.com/dendronhq/dendron/issues/495) ([f5dc840](https://github.com/dendronhq/dendron/commit/f5dc8400727bb5fa5d3cb7507d4a8a6d5fdcaf73))
+- don't publish private note refs ([67efb66](https://github.com/dendronhq/dendron/commit/67efb66a2fd3a82dd108fd621c8057a789c19f6b))
+- error with wiki links when private ([f07ca3b](https://github.com/dendronhq/dendron/commit/f07ca3b174b7047f9d5e8c1a820e9dce15120972))
+- issues with recursive note references ([17879ec](https://github.com/dendronhq/dendron/commit/17879ecddb1c0a65ead09ca9b0a716414e438632))
+- publish pod updates ([fd29e9a](https://github.com/dendronhq/dendron/commit/fd29e9af13bf2c41c39f32da42dba31bb65013d6))
+- support toggling prettyRef on preview ([62cd98a](https://github.com/dendronhq/dendron/commit/62cd98af09761ff9a639069b3a9848dae209cc62))
+- update site ([df985a2](https://github.com/dendronhq/dendron/commit/df985a25a17b7c2f2ee19411f4a9117e769a2d93))
+
+### Features Dendron
+
+- enable nunjucks optionally ([7e97758](https://github.com/dendronhq/dendron/commit/7e97758a4f60824e0a6f132f0f232adc0d20b9f8))
+- Show backlinks at the end of pages ([#506](https://github.com/dendronhq/dendron/issues/506)) ([54e6580](https://github.com/dendronhq/dendron/commit/54e658086cebcdc6807548393e1e98c23e1602bd))
+- variable sub v2 ([d851f7a](https://github.com/dendronhq/dendron/commit/d851f7aacd7bb051d5539175296fb6ada9da72be))
+
+### Reverts
+
+- nunjucks ([fa42045](https://github.com/dendronhq/dendron/commit/fa4204525f36675e6d5091eff5b7a8eebf7daa21))
+
 # [0.30.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.29.0...@dendronhq/engine-server@0.30.0) (2021-02-23)
 
 ### Bug Fixes

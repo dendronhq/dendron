@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.30.1-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/pods-core@0.29.0...@dendronhq/pods-core@0.30.1-alpha.0) (2021-02-25)
+
+### Bug Fixes
+
+- publish pod updates ([fd29e9a](https://github.com/dendronhq/dendron/commit/fd29e9af13bf2c41c39f32da42dba31bb65013d6))
+
+### Features Dendron
+
+- add html pod ([85c4075](https://github.com/dendronhq/dendron/commit/85c40750bfab2a711b6e1ad57dec0b7c7e9f09f5))
+
 # [0.30.0](https://github.com/dendronhq/dendron/compare/@dendronhq/pods-core@0.29.0...@dendronhq/pods-core@0.30.0) (2021-02-23)
 
 ### Features Dendron

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.30.1-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-all@0.29.0...@dendronhq/common-all@0.30.1-alpha.0) (2021-02-25)
+
+### Bug Fixes
+
+- support toggling prettyRef on preview ([62cd98a](https://github.com/dendronhq/dendron/commit/62cd98af09761ff9a639069b3a9848dae209cc62))
+
+### Features Dendron
+
+- enable nunjucks optionally ([7e97758](https://github.com/dendronhq/dendron/commit/7e97758a4f60824e0a6f132f0f232adc0d20b9f8))
+- variable sub v2 ([d851f7a](https://github.com/dendronhq/dendron/commit/d851f7aacd7bb051d5539175296fb6ada9da72be))
+
 # [0.30.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-all@0.29.0...@dendronhq/common-all@0.30.0) (2021-02-23)
 
 ### Bug Fixes

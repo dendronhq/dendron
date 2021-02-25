@@ -191,10 +191,11 @@ function convertNoteRef(
         let suffix = "";
         let href = fname;
         if (wikiLinkOpts?.useId) {
-          const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+          const maybeNote = NoteUtilsV2.getNoteByFnameV5({
             fname,
             notes: engine.notes,
             vault,
+            wsRoot: engine.wsRoot,
           });
           if (!maybeNote) {
             return `error with ${ref}`;
@@ -202,10 +203,11 @@ function convertNoteRef(
           href = maybeNote?.id;
         }
         if (dest === DendronASTDest.HTML) {
-          const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+          const maybeNote = NoteUtilsV2.getNoteByFnameV5({
             fname,
             notes: engine.notes,
             vault,
+            wsRoot: engine.wsRoot,
           });
           suffix = ".html";
           if (maybeNote?.custom.permalink === "/") {
@@ -319,10 +321,11 @@ export function convertNoteRefASTV2(
         let suffix = "";
         let href = fname;
         if (wikiLinkOpts?.useId) {
-          const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+          const maybeNote = NoteUtilsV2.getNoteByFnameV5({
             fname,
             notes: engine.notes,
             vault,
+            wsRoot: engine.wsRoot,
           });
           if (!maybeNote) {
             throw Error("error with ref");
@@ -331,10 +334,11 @@ export function convertNoteRefASTV2(
           href = maybeNote?.id;
         }
         if (dest === DendronASTDest.HTML) {
-          const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+          const maybeNote = NoteUtilsV2.getNoteByFnameV5({
             fname,
             notes: engine.notes,
             vault,
+            wsRoot: engine.wsRoot,
           });
           suffix = ".html";
           if (maybeNote?.custom.permalink === "/") {

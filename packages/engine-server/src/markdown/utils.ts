@@ -230,10 +230,11 @@ export class MDUtilsV4 {
     let proc = this.proc(opts);
     if (vault && fname) {
       const engine = MDUtilsV4.getEngineFromProc(proc).engine;
-      const note = NoteUtilsV2.getNoteByFnameV4({
+      const note = NoteUtilsV2.getNoteByFnameV5({
         fname,
         notes: engine.notes,
         vault,
+        wsRoot: engine.wsRoot,
       });
       const fm = {
         ...note?.custom,

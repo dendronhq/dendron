@@ -733,10 +733,11 @@ export class FileStorageV2 implements DStoreV2 {
       opts,
       note: NoteUtilsV2.toLogObj(note),
     });
-    const maybeNote = NoteUtilsV2.getNoteByFnameV4({
+    const maybeNote = NoteUtilsV2.getNoteByFnameV5({
       fname: note.fname,
       notes: this.notes,
       vault: note.vault,
+      wsRoot: this.wsRoot,
     });
     this.logger.info({
       ctx,

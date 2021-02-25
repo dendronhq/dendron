@@ -28,15 +28,16 @@ const preSetupHook: SetupHookFunction = async ({ vaults, wsRoot }) => {
 describe("note", () => {
   const vault = { fsPath: tmpdir() };
 
-  describe("getNoteByFnameV4", async () => {
+  describe("getNoteByFnameV5", async () => {
     test("basic", async () => {
       await runEngineTestV4(
-        async ({ vaults, engine }) => {
+        async ({ vaults, engine, wsRoot }) => {
           const fname = "foo";
-          const resp = NoteUtilsV2.getNoteByFnameV4({
+          const resp = NoteUtilsV2.getNoteByFnameV5({
             fname,
             notes: engine.notes,
             vault: vaults[0],
+            wsRoot,
           });
           expect(resp).toEqual(engine.notes["foo"]);
           return [];
@@ -53,10 +54,11 @@ describe("note", () => {
       await runEngineTestV4(
         async ({ vaults, engine, wsRoot }) => {
           const fname = "foo";
-          const resp = NoteUtilsV2.getNoteByFnameV4({
+          const resp = NoteUtilsV2.getNoteByFnameV5({
             fname,
             notes: engine.notes,
             vault: { fsPath: path.join(wsRoot, vaults[0].fsPath) },
+            wsRoot,
           });
           expect(resp).toEqual(engine.notes["foo"]);
           return [];
@@ -73,10 +75,11 @@ describe("note", () => {
       await runEngineTestV4(
         async ({ vaults, engine, wsRoot }) => {
           const fname = "foo";
-          const resp = NoteUtilsV2.getNoteByFnameV4({
+          const resp = NoteUtilsV2.getNoteByFnameV5({
             fname,
             notes: engine.notes,
             vault: { fsPath: path.join(wsRoot, vaults[0].fsPath) },
+            wsRoot,
           });
           expect(resp).toEqual(engine.notes["foo"]);
           return [];

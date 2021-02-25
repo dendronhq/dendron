@@ -41,10 +41,11 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           )}`,
         });
       }
-      const note = NoteUtilsV2.getNoteByFnameV4({
+      const note = NoteUtilsV2.getNoteByFnameV5({
         fname,
         notes: engine.notes,
         vault: vault,
+        wsRoot: engine.wsRoot,
       });
       if (!note) {
         throw new DendronError({ msg: `no note found for ${fname}` });

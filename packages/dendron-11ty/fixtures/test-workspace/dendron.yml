@@ -7,7 +7,6 @@ vaults:
 useFMTitle: true
 useNoteTitleForLink: true
 mermaid: true
-useNunjucks: true
 site:
     copyAssets: true
     siteHierarchies:

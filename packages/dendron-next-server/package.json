@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-next-server",
-  "version": "0.30.1-alpha.0",
+  "version": "0.30.1",
   "license": "GPLv3",
   "repository": {
     "type": "git",

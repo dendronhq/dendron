@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.30.1](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.29.1-alpha.0...@dendronhq/plugin-core@0.30.1) (2021-02-26)
+
+### Bug Fixes
+
+- Cannot open secondary roots when using multiple vaults [#495](https://github.com/dendronhq/dendron/issues/495) ([f5dc840](https://github.com/dendronhq/dendron/commit/f5dc8400727bb5fa5d3cb7507d4a8a6d5fdcaf73))
+- exit if no path selected when adding a new vault ([4421d51](https://github.com/dendronhq/dendron/commit/4421d51c51b78300d4488b56a82ecd39e291abdf))
+- publish pod updates ([fd29e9a](https://github.com/dendronhq/dendron/commit/fd29e9af13bf2c41c39f32da42dba31bb65013d6))
+
 ## [0.30.1-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.29.1-alpha.0...@dendronhq/plugin-core@0.30.1-alpha.0) (2021-02-25)
 
 ### Bug Fixes

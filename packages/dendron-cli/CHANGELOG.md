@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.30.1](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-cli@0.29.1-alpha.0...@dendronhq/dendron-cli@0.30.1) (2021-02-26)
+
+### Bug Fixes
+
+- don't publish private note refs ([67efb66](https://github.com/dendronhq/dendron/commit/67efb66a2fd3a82dd108fd621c8057a789c19f6b))
+- publish pod updates ([fd29e9a](https://github.com/dendronhq/dendron/commit/fd29e9af13bf2c41c39f32da42dba31bb65013d6))
+
 ## [0.30.1-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-cli@0.29.1-alpha.0...@dendronhq/dendron-cli@0.30.1-alpha.0) (2021-02-25)
 
 ### Bug Fixes

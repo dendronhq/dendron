@@ -1,18 +1,18 @@
 import { NotePropsV2, WorkspaceOpts } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import {
+  AssertUtils,
   getLogFilePath,
   NoteTestUtilsV4,
   TestPresetEntryV4,
-  AssertUtils,
 } from "@dendronhq/common-test-utils";
-import { DendronEngineV2 } from "../../../enginev2";
-import { DendronASTDest, Processor } from "../../types";
-import _ from "lodash";
-import { MDUtilsV4 } from "../../utils";
-import path from "path";
 import fs from "fs";
+import _ from "lodash";
+import path from "path";
 import { VFile } from "vfile";
+import { DendronEngineV2 } from "../../../enginev2";
+import { DendronASTData, DendronASTDest, Processor } from "../../types";
+import { MDUtilsV4 } from "../../utils";
 
 export const basicSetup = async ({ wsRoot, vaults }: WorkspaceOpts) => {
   await NoteTestUtilsV4.createNote({
@@ -108,6 +108,10 @@ export const checkContents = async (
     })
   ).toBeTruthy();
 };
+
+export function genDendronData(opts?: Partial<DendronASTData>): DendronASTData {
+  return { ...opts } as any;
+}
 
 export const generateVerifyFunction = (opts: {
   target: DendronASTDest;

@@ -22,6 +22,20 @@ function proc(
     .use(wikiLinks, opts);
 }
 
+function genDendronData(opts?: Partial<DendronASTData>): DendronASTData {
+  return { ...opts } as any;
+}
+
+// export type DendronASTData = {
+//   dest: DendronASTDest;
+//   vault: DVault;
+//   fname?: string;
+//   wikiLinkOpts?: WikiLinksOpts;
+//   config: DendronConfig;
+//   overrides?: Partial<DendronPubOpts>;
+//   shouldApplyPublishRules?: boolean;
+// };
+
 function getWikiLink(node: Node): WikiLinkNoteV4 {
   // @ts-ignore
   return node.children[0].children[0];
@@ -32,12 +46,12 @@ describe("parse", () => {
   let dendronData = { dest: DendronASTDest.MD_REGULAR };
 
   test("basic", () => {
-    const resp = proc(engine, dendronData).parse(`[[foo.md]]`);
+    const resp = proc(engine, genDendronData(dendronData)).parse(`[[foo.md]]`);
     expect(getWikiLink(resp).type).toEqual("wikiLink");
   });
 
   test("link with space", () => {
-    const resp = proc(engine, dendronData).parse(`[[foo bar]]`);
+    const resp = proc(engine, genDendronData(dendronData)).parse(`[[foo bar]]`);
     expect(_.pick(getWikiLink(resp), ["type", "value"])).toEqual({
       type: "wikiLink",
       value: "foo bar",
@@ -45,7 +59,9 @@ describe("parse", () => {
   });
 
   test("doesn't parse inline code block", () => {
-    const resp = proc(engine, dendronData).parse("`[[foo.md]]`");
+    const resp = proc(engine, genDendronData(dendronData)).parse(
+      "`[[foo.md]]`"
+    );
     expect(getWikiLink(resp).type).toEqual("inlineCode");
   });
 });
@@ -266,9 +282,9 @@ describe("compilev2", () => {
             async ({ engine }) => {
               const resp = await proc(
                 engine,
-                {
+                genDendronData({
                   dest,
-                },
+                }),
                 procOpts
               ).process(linkProcess);
               expect(resp).toMatchSnapshot();

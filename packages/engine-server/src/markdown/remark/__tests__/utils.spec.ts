@@ -47,9 +47,9 @@ const readAndProcessV2 = (opts: { note: NotePropsV2; proc: Processor }) => {
   const respRehype = MDUtilsV4.procRehype({ proc: proc() }).processSync(
     content
   );
-  expect(respParse).toMatchSnapshot("respParse");
-  expect(respProcess).toMatchSnapshot("respProcess");
-  expect(respRehype).toMatchSnapshot("respRehype");
+  // expect(respParse).toMatchSnapshot("respParse");
+  // expect(respProcess).toMatchSnapshot("respProcess");
+  // expect(respRehype).toMatchSnapshot("respRehype");
   return { proc, respProcess, respParse, respRehype };
 };
 
@@ -480,12 +480,9 @@ const WITH_TITLE_FOR_LINK_X_VAULT = createProcTests({
       const { respProcess } = extra;
       await checkContents(respProcess, "[[dendron://vault2/bar]]");
     },
-    [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra, wsRoot }) => {
+    [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
       const { respProcess } = extra;
-      await checkContents(
-        respProcess,
-        `[Bar](${path.join(wsRoot, "vault2", "bar.md")})`
-      );
+      await checkContents(respProcess, `[Bar](../vault2/bar.md)`);
     },
     [DendronASTDest.HTML]: async ({ extra }) => {
       const { respRehype } = extra;

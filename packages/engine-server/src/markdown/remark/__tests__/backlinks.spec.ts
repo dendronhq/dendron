@@ -9,6 +9,7 @@ import { createEngine } from "../../../enginev2";
 import { DendronASTData, DendronASTDest } from "../../types";
 import { MDUtilsV4 } from "../../utils";
 import { DendronPubOpts } from "../dendronPub";
+import { genDendronData } from "./utils";
 
 // runs all the processes
 function proc(
@@ -20,7 +21,7 @@ function proc(
 }
 
 describe("backlinks", () => {
-  let dendronData: DendronASTData = {
+  let dendronData = {
     dest: DendronASTDest.HTML,
   };
 
@@ -29,7 +30,10 @@ describe("backlinks", () => {
       async ({ engine, vaults }) => {
         const vault = vaults[0];
         const resp = await MDUtilsV4.procRehype({
-          proc: proc(engine, { ...dendronData, fname: "beta", vault }),
+          proc: proc(
+            engine,
+            genDendronData({ ...dendronData, fname: "beta", vault })
+          ),
         }).process("");
         // should be one backlink
         expect(resp).toMatchSnapshot();
@@ -49,7 +53,10 @@ describe("backlinks", () => {
       async ({ engine, vaults }) => {
         const vault = vaults[0];
         const resp = await MDUtilsV4.procRehype({
-          proc: proc(engine, { ...dendronData, fname: "one", vault }),
+          proc: proc(
+            engine,
+            genDendronData({ ...dendronData, fname: "one", vault })
+          ),
         }).process("");
         // should be one backlink
         expect(resp).toMatchSnapshot();

@@ -21,6 +21,7 @@ import {
   createEngine,
   createProc,
   createProcTests,
+  genDendronData,
   generateVerifyFunction,
   modifyNote,
   processText,
@@ -67,20 +68,20 @@ describe("parse", () => {
   let dest: DendronASTDest.MD_REGULAR;
 
   test("init", () => {
-    const resp = proc(engine, { dest }).parse(`![[foo.md]]))`);
+    const resp = proc(engine, genDendronData({ dest })).parse(`![[foo.md]]))`);
     expect(resp).toMatchSnapshot();
     // @ts-ignore
     expect(resp.children[0].children[0].type).toEqual("refLinkV2");
   });
 
   test("without extension", () => {
-    const resp = proc(engine, { dest }).parse(`![[foo]]))`);
+    const resp = proc(engine, genDendronData({ dest })).parse(`![[foo]]))`);
     expect(resp).toMatchSnapshot();
     checkLink(resp, createLink({ fname: "foo" }));
   });
 
   test("with start anchor", () => {
-    const resp = proc(engine, { dest }).parse(`![[foo#h1]]))`);
+    const resp = proc(engine, genDendronData({ dest })).parse(`![[foo#h1]]))`);
     expect(resp).toMatchSnapshot();
     checkLink(
       resp,
@@ -97,7 +98,9 @@ describe("parse", () => {
   });
 
   test("with start and end", () => {
-    const resp = proc(engine, { dest }).parse(`![[foo#h1:#h2]]))`);
+    const resp = proc(engine, genDendronData({ dest })).parse(
+      `![[foo#h1:#h2]]))`
+    );
     expect(resp).toMatchSnapshot();
     checkLink(
       resp,
@@ -117,7 +120,10 @@ describe("parse", () => {
   test("init with inject", async () => {
     await runEngineTestV4(
       async ({ engine, vaults }) => {
-        let _proc = proc(engine, { dest, vault: vaults[0] }).use(dendronPub);
+        let _proc = proc(
+          engine,
+          genDendronData({ dest, vault: vaults[0] })
+        ).use(dendronPub);
         const resp = _proc.parse(`![[foo.md]]`);
         expect(resp).toMatchSnapshot();
         const resp2 = _proc.runSync(resp);
@@ -133,7 +139,7 @@ describe("parse", () => {
   });
 
   test("doesn't parse inline code block", () => {
-    const resp = proc(engine, { dest }).parse("`![[foo.md]]`");
+    const resp = proc(engine, genDendronData({ dest })).parse("`![[foo.md]]`");
     // @ts-ignore
     expect(resp.children[0].children[0].type).toEqual("inlineCode");
   });

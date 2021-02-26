@@ -17,6 +17,7 @@ import { noteRefs, NoteRefsOpts } from "../noteRefs";
 import {
   createEngine,
   createProcTests,
+  genDendronData,
   modifyNote,
   processText,
 } from "./utils";
@@ -36,7 +37,9 @@ describe("parse", () => {
   let dest: DendronASTDest.MD_REGULAR;
 
   test("init", () => {
-    const resp = proc(engine, { dest }).parse(`((ref: [[foo.md]]))`);
+    const resp = proc(engine, genDendronData({ dest })).parse(
+      `((ref: [[foo.md]]))`
+    );
     expect(resp).toMatchSnapshot();
     // @ts-ignore
     expect(resp.children[0].children[0].type).toEqual("refLink");
@@ -45,7 +48,10 @@ describe("parse", () => {
   test("init with inject", async () => {
     await runEngineTestV4(
       async ({ engine, vaults }) => {
-        let _proc = proc(engine, { dest, vault: vaults[0] }).use(dendronPub);
+        let _proc = proc(
+          engine,
+          genDendronData({ dest, vault: vaults[0] })
+        ).use(dendronPub);
         const resp = _proc.parse(`((ref: [[foo.md]]))`);
         expect(resp).toMatchSnapshot();
         const resp2 = _proc.runSync(resp);
@@ -61,7 +67,9 @@ describe("parse", () => {
   });
 
   test("doesn't parse inline code block", () => {
-    const resp = proc(engine, { dest }).parse("`((ref: [[foo.md]]))`");
+    const resp = proc(engine, genDendronData({ dest })).parse(
+      "`((ref: [[foo.md]]))`"
+    );
     expect(resp).toMatchSnapshot("bond");
     // @ts-ignore
     expect(resp.children[0].children[0].type).toEqual("inlineCode");

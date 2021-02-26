@@ -83,9 +83,9 @@ export async function runEngineTestV5(
 export function testWithEngine(
   prompt: string,
   func: RunEngineTestFunctionV4,
-  opts: Omit<RunEngineTestV5Opts, "expect"> & { only?: boolean }
+  opts?: Omit<RunEngineTestV5Opts, "expect"> & { only?: boolean }
 ) {
-  if (opts.only) {
+  if (opts?.only) {
     test.only(prompt, async () => {
       await runEngineTestV5(func, {
         ...opts,

@@ -1,3 +1,4 @@
+import { DNoteLoc } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { ParserUtilsV2 } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -101,5 +102,120 @@ describe("parserUtils", () => {
         },
       }
     );
+  });
+
+  describe("replaceLinks", async () => {
+    testWithEngine("one", async () => {
+      const content = ["[[bond]]"].join("\n");
+      const from: DNoteLoc = {
+        fname: "bond",
+        vault: {
+          fsPath: "/tmp",
+        },
+      };
+      const to: DNoteLoc = {
+        fname: "bar",
+        vault: {
+          fsPath: "/tmp",
+        },
+      };
+      const out = await ParserUtilsV2.replaceLinks({ content, from, to });
+      expect(out).toMatchSnapshot();
+      expect(_.trim(out)).toEqual("[[bar]]");
+    });
+
+    testWithEngine("ref", async ({ vaults }) => {
+      const vault = vaults[0];
+      const content = ["![[bond]]"].join("\n");
+      const from: DNoteLoc = {
+        fname: "bond",
+        vault,
+      };
+      const to: DNoteLoc = {
+        fname: "bar",
+        vault,
+      };
+      const out = await ParserUtilsV2.replaceLinks({ content, from, to });
+      expect(out).toMatchSnapshot();
+      expect(_.trim(out)).toEqual("![[bar]]");
+    });
+
+    testWithEngine("multiple", async ({ vaults }) => {
+      const vault = vaults[0];
+      const content = ["[[bond]]", "[[bond]]"].join("\n");
+      const from: DNoteLoc = {
+        fname: "bond",
+        vault,
+      };
+      const to: DNoteLoc = {
+        fname: "bar",
+        vault,
+      };
+      const out = await ParserUtilsV2.replaceLinks({ content, from, to });
+      expect(out).toMatchSnapshot();
+    });
+
+    testWithEngine("inline code", async ({ vaults }) => {
+      const vault = vaults[0];
+      const content = ["`[[bond]]`"].join("\n");
+      const from: DNoteLoc = {
+        fname: "bond",
+        vault,
+      };
+      const to: DNoteLoc = {
+        fname: "bar",
+        vault,
+      };
+      const out = await ParserUtilsV2.replaceLinks({ content, from, to });
+      expect(out).toMatchSnapshot();
+      expect(_.trim(out)).toEqual("`[[bond]]`");
+    });
+
+    testWithEngine("fenced code", async ({ vaults }) => {
+      const vault = vaults[0];
+      const content = ["```", "[[bond]]", "```"].join("\n");
+      const from: DNoteLoc = {
+        fname: "bond",
+        vault,
+      };
+      const to: DNoteLoc = {
+        fname: "bar",
+        vault,
+      };
+      const out = await ParserUtilsV2.replaceLinks({ content, from, to });
+      expect(out).toMatchSnapshot();
+    });
+
+    testWithEngine("with alias", async ({ vaults }) => {
+      const content = ["[[hero|bond]]"].join("\n");
+      const vault = vaults[0];
+      const from: DNoteLoc = {
+        fname: "bond",
+        vault,
+      };
+      const to: DNoteLoc = {
+        fname: "bar",
+        vault,
+      };
+      const out = await ParserUtilsV2.replaceLinks({ content, from, to });
+      expect(out).toMatchSnapshot();
+      expect(_.trim(out)).toEqual("[[hero|bar]]");
+    });
+
+    testWithEngine("with offset ", async ({ vaults }) => {
+      const vault = vaults[0];
+      const content = ["   [[bond]]"].join("\n");
+      const from: DNoteLoc = {
+        fname: "bond",
+        vault,
+      };
+      const to: DNoteLoc = {
+        fname: "bar",
+        vault,
+      };
+      const out = await ParserUtilsV2.replaceLinks({ content, from, to });
+      expect(out).toMatchSnapshot();
+      expect(_.trim(out)).toEqual("[[bar]]");
+    });
   });
 });

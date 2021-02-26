@@ -116,7 +116,7 @@ describe("parse", () => {
 // ===
 const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
   const logger = createLogger("testLogger", getLogFilePath("engine-server"));
-  const engine = DendronEngineV2.createV3({ vaults, wsRoot, logger });
+  const engine = DendronEngineV2.create({ vaults, wsRoot, logger });
   return engine;
 };
 

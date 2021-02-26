@@ -22,19 +22,19 @@ import {
   tmpDir,
   vault2Path,
 } from "@dendronhq/common-server";
+import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import sinon from "sinon";
 import { PreSetupHookFunctionV4, TestResult } from "./types";
+import { AssertUtils, TestPresetEntry } from "./utils";
 export * from "./fileUtils";
 export * from "./noteUtils";
 export * from "./presets";
 export * from "./types";
 export * from "./utils";
 export * from "./utilsv2";
-import assert from "assert";
-import { AssertUtils, TestPresetEntry } from "./utils";
-import sinon from "sinon";
 export { sinon };
 
 export function filterDotFiles(filenames: string[]) {
@@ -89,6 +89,10 @@ export type SetupVaultsOptsV4 = {
 };
 
 export class EngineTestUtilsV4 {
+  /**
+   * Setup a workspace with three vaults
+   * The third vault has a different path than name
+   */
   static async setupWS(
     opts?: { wsRoot?: string } & {
       setupVaultsOpts?: SetupVaultsOptsV4[];
@@ -96,11 +100,16 @@ export class EngineTestUtilsV4 {
     }
   ): Promise<WorkspaceOpts> {
     const wsRoot = opts?.wsRoot || tmpDir().name;
-    const defaultVaults = opts?.singleVault ? ["vault1"] : ["vault1", "vault2"];
+    const defaultVaults = opts?.singleVault
+      ? ["vault1"]
+      : ["vault1", "vault2", "vault3"];
     const setupVaultsOpts: SetupVaultsOptsV4[] =
       opts?.setupVaultsOpts ||
       defaultVaults.map((ent) => ({
-        vault: { fsPath: ent },
+        vault: {
+          fsPath: ent,
+          name: ent === "vault3" ? "vaultThree" : undefined,
+        },
         preSetupHook: async ({ vpath, vault, wsRoot }) => {
           const rootModule = SchemaUtilsV2.createRootModule({
             created: "1",
@@ -123,6 +132,11 @@ export class EngineTestUtilsV4 {
         return this.setupVault({ ...ent, wsRoot });
       })
     );
+    vaults.map((ent) => {
+      if (_.isUndefined(ent.name)) {
+        delete ent.name;
+      }
+    });
     return { wsRoot, vaults };
   }
 

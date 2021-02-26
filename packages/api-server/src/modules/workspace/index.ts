@@ -22,17 +22,12 @@ export class WorkspaceController {
     return WorkspaceController.singleton;
   }
 
-  async init({
-    uri,
-    config,
-  }: WorkspaceInitRequest): Promise<InitializePayload> {
+  async init({ uri }: WorkspaceInitRequest): Promise<InitializePayload> {
     let notes: NotePropsDictV2;
     let schemas: SchemaModuleDictV2;
-    const { vaults } = config;
     const logger = getLogger();
-    const engine = DendronEngineV2.createV3({
+    const engine = DendronEngineV2.create({
       wsRoot: uri,
-      vaults: vaults.map((ent) => ({ fsPath: ent })),
       logger,
     });
     const { error } = await engine.init();

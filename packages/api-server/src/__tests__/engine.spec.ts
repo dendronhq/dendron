@@ -1,4 +1,3 @@
-import _ from "lodash";
 import {
   CreateEngineFunction,
   ENGINE_CONFIG_PRESETS,
@@ -6,6 +5,7 @@ import {
   runEngineTestV4,
 } from "@dendronhq/common-test-utils";
 import { DendronEngineClient } from "@dendronhq/engine-server";
+import _ from "lodash";
 
 const createEngine: CreateEngineFunction = ({ wsRoot, vaults }) => {
   return DendronEngineClient.create({

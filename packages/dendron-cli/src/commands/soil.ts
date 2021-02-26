@@ -65,7 +65,7 @@ export abstract class SoilCommand<
 
     const logger = this.L;
 
-    const engineClient = DendronEngineV2.createV3({
+    const engineClient = DendronEngineV2.create({
       vaults: [vault],
       wsRoot,
       logger,
@@ -114,7 +114,7 @@ export abstract class SoilCommandV2<
     const cwd = process.cwd();
     wsRoot = resolvePath(wsRoot, cwd);
     const logger = this.L;
-    const engine = DendronEngineV2.createV3({
+    const engine = DendronEngineV2.create({
       vaults: [vault],
       logger,
       wsRoot,

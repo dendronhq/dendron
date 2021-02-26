@@ -9,6 +9,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { FileTestUtils } from "../../fileUtils";
+import { NoteTestUtilsV4 } from "../../noteUtils";
 import { TestPresetEntryV4 } from "../../utilsv2";
 import { NOTE_PRESETS_V4 } from "../notes";
 import { SCHEMA_PRESETS_V4 } from "../schemas";
@@ -52,6 +53,68 @@ const SCHEMAS = {
   ),
 };
 const NOTES = {
+  BASIC: new TestPresetEntryV4(
+    async ({ engine }) => {
+      return [
+        {
+          actual: _.omit(engine.notes["one"], ["body", "parent"]),
+          expected: {
+            children: [],
+            created: "1",
+            custom: {},
+            data: {},
+            desc: "",
+            fname: "one",
+            id: "one",
+            links: [],
+            title: "One",
+            type: "note",
+            updated: "1",
+            vault: {
+              fsPath: "vault1",
+              name: undefined,
+            },
+          },
+        },
+        {
+          actual: _.omit(engine.notes["three"], ["body", "parent"]),
+          expected: {
+            children: [],
+            created: "1",
+            custom: {},
+            data: {},
+            desc: "",
+            fname: "three",
+            id: "three",
+            links: [],
+            title: "Three",
+            type: "note",
+            updated: "1",
+            vault: {
+              fsPath: "vault3",
+              name: "vaultThree",
+            },
+          },
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        const vault1 = vaults[0];
+        const vault3 = vaults[2];
+        await NoteTestUtilsV4.createNote({
+          fname: "one",
+          vault: vault1,
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "three",
+          vault: vault3,
+          wsRoot,
+        });
+      },
+    }
+  ),
   LINKS: new TestPresetEntryV4(
     async ({ engine, vaults }) => {
       const noteAlpha = NoteUtilsV2.getNoteByFnameV5({

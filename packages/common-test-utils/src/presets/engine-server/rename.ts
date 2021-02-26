@@ -196,10 +196,10 @@ const NOTES = {
           actual: changed.data?.length,
           expected: 7,
         },
-        // 3 notes, gamma and 2 roots
+        // 3 notes, gamma and 3 roots
         {
           actual: _.size(notes),
-          expected: 3,
+          expected: _.size(vaults) + 1,
         },
         {
           actual: checkVault,

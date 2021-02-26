@@ -9,7 +9,6 @@ describe.skip("connector", () => {
       async ({ wsRoot }) => {
         const connector = EngineConnector.getOrCreate({ wsRoot, force: true });
         await connector.init();
-        debugger;
         expect(_.size(connector.engine.notes)).toEqual(5);
       },
       {

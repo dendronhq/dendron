@@ -105,7 +105,7 @@ const NOTES = {
       const vpath = vault2Path({ vault, wsRoot });
       return [
         { actual: changed[0].note.id, expected: "foo" },
-        { actual: _.size(notes), expected: 3 },
+        { actual: _.size(notes), expected: 4 },
         { actual: notes["foo"].children, expected: [] },
         {
           actual: _.includes(fs.readdirSync(vpath), "foo.ch1.md"),
@@ -150,7 +150,7 @@ const NOTES = {
         },
         {
           actual: _.size(notes),
-          expected: 4,
+          expected: 5,
           msg: "same number of notes",
         },
         {
@@ -205,7 +205,7 @@ const NOTES = {
           expected: [],
           msg: "root does not have children",
         },
-        { actual: _.size(notes), expected: 2 },
+        { actual: _.size(notes), expected: 3 },
         { actual: notes["foo"], expected: undefined },
         {
           actual: _.includes(fs.readdirSync(vpath), "foo.md"),

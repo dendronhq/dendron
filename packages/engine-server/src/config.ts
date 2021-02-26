@@ -29,11 +29,14 @@ export class DConfig {
     };
   }
 
-  static getOrCreate(dendronRoot: string): DendronConfig {
+  static getOrCreate(
+    dendronRoot: string,
+    defaults?: Partial<DendronConfig>
+  ): DendronConfig {
     const configPath = DConfig.configPath(dendronRoot);
     let config: DendronConfig;
     if (!fs.existsSync(configPath)) {
-      config = DConfig.genDefaultConfig();
+      config = { ...defaults, ...DConfig.genDefaultConfig() };
       writeYAML(configPath, config);
     } else {
       config = readYAML(configPath) as DendronConfig;

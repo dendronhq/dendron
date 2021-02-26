@@ -15,7 +15,7 @@ import _ from "lodash";
 import { runEngineTestV5 } from "../../engine";
 
 const createEngine: CreateEngineFunction = (opts) => {
-  return DendronEngineV2.createV3(opts);
+  return DendronEngineV2.create(opts);
 };
 
 const podsDict = {

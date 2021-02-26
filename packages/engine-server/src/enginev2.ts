@@ -81,17 +81,13 @@ export class DendronEngineV2 implements DEngineV2 {
     this.store = props.createStore(this);
   }
 
-  static createV3({
-    vaults,
-    wsRoot,
-    logger,
-  }: WorkspaceOpts & { logger?: DLogger }) {
+  static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
     const LOGGER = logger || createLogger();
     const cpath = DConfig.configPath(wsRoot);
     const config = readYAML(cpath) as DendronConfig;
     return new DendronEngineV2({
       wsRoot,
-      vaultsv3: vaults,
+      vaultsv3: config.vaults,
       forceNew: true,
       createStore: (engine) =>
         new FileStorageV2({
@@ -104,9 +100,9 @@ export class DendronEngineV2 implements DEngineV2 {
     });
   }
 
-  static instance({ vaults, wsRoot }: { vaults: DVault[]; wsRoot: string }) {
+  static instance({ wsRoot }: { wsRoot: string }) {
     if (!DendronEngineV2._instance) {
-      DendronEngineV2._instance = DendronEngineV2.createV3({ vaults, wsRoot });
+      DendronEngineV2._instance = DendronEngineV2.create({ wsRoot });
     }
     return DendronEngineV2._instance;
   }
@@ -432,7 +428,7 @@ export class DendronEngineV2 implements DEngineV2 {
   }
 }
 
-export const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
-  const engine = DendronEngineV2.createV3({ vaults, wsRoot });
+export const createEngine = ({ wsRoot }: WorkspaceOpts) => {
+  const engine = DendronEngineV2.create({ wsRoot });
   return engine;
 };

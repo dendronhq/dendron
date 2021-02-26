@@ -81,9 +81,9 @@ export abstract class DendronSoil {
     if (!_.isUndefined(this.opts.engine)) {
       this.engine = this.opts.engine;
     } else {
-      this.engine = DendronEngineV2.createV3({
+      // @ts-ignore
+      this.engine = DendronEngineV2.create({
         wsRoot: opts.wsRoot,
-        vaults: this.opts.roots.map((fsPath) => ({ fsPath })),
       });
     }
   }

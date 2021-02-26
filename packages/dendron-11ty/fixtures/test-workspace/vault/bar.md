@@ -7,3 +7,5 @@ created: 1595170096361
 ---
 
 This is the bar note
+
+[[dendron.ref.links]]

@@ -2,7 +2,7 @@
 id: nunjucks
 title: Nunjucks
 desc: ""
-updated: 1611629056261
+updated: 1614304717429
 created: 1608518909864
 alist: ["one", "two", "three"]
 ---
@@ -11,7 +11,7 @@ alist: ["one", "two", "three"]
 
 - special variables: {{fname}}
 - special variable as link: [[{{fname}}]]
-- special variable as note ref: ![[{{fname}}#footer]]
+<!-- - special variable as note ref: ![[{{fname}}#footer]] -->
 
 ## Loops
 

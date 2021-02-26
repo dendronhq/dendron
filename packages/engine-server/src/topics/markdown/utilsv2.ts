@@ -1,10 +1,12 @@
 import {
   DendronError,
+  DEngineClientV2,
   DLink,
   DNoteLink,
   DNoteLoc,
   NotePropsV2,
   NoteUtilsV2,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Heading } from "mdast";
@@ -19,14 +21,18 @@ import remark from "remark";
 import abbrPlugin from "remark-abbr";
 import frontmatterPlugin from "remark-frontmatter";
 import markdownParse from "remark-parse";
-import { Processor } from "../../markdown";
+import {
+  DendronASTDest,
+  MDUtilsV4,
+  Processor,
+  WikiLinkNoteV4,
+} from "../../markdown";
 import { ReplaceLinkOpts } from "../../types";
 import {
   DendronLinksOpts,
   dendronLinksPlugin,
 } from "./plugins/dendronLinksPlugin";
 import { dendronNoteRefPluginForMd } from "./plugins/dendronNoteRefPlugin";
-import { WikiLinkNote } from "./plugins/types";
 
 export const WIKI_LINK_VALUE_RE = /(^\])/;
 
@@ -89,24 +95,41 @@ export class ParserUtilsV2 {
    * Currently, just look for wiki links
    * @param param0
    */
-  static findLinks({ note }: { note: NotePropsV2 }): DLink[] {
+  static findLinks({
+    note,
+    engine,
+  }: {
+    note: NotePropsV2;
+    engine: DEngineClientV2;
+  }): DLink[] {
     const content = note.body;
-    let remark = ParserUtilsV2.getRemark();
+    let remark = MDUtilsV4.procParse({
+      dest: DendronASTDest.MD_DENDRON,
+      engine,
+    });
     let out = remark.parse(content);
-    let out2: WikiLinkNote[] = selectAll("wikiLink", out);
-    // let refLink = selectAll("refLink", out)
+    let out2: WikiLinkNoteV4[] = selectAll("wikiLink", out);
     const dlinks = out2.map(
-      (m: WikiLinkNote) =>
+      (m: WikiLinkNoteV4) =>
         ({
           type: "wiki",
-          from: NoteUtilsV2.toLoc(note),
+          from: NoteUtilsV2.toNoteLoc(note),
           original: m.value,
           value: m.value,
           alias: m.data.alias,
-          pos: { start: m.position?.start.offset, end: m.position?.end.offset },
+          pos: {
+            start: m.position?.start.offset,
+            end: m.position?.end.offset,
+          },
           to: {
             fname: m.value,
             anchorHeader: m.data.anchorHeader,
+            vault: m.data.vaultName
+              ? VaultUtils.getVaultByName({
+                  vaults: engine.vaultsv3,
+                  vname: m.data.vaultName,
+                })
+              : undefined,
           },
         } as DLink)
     );

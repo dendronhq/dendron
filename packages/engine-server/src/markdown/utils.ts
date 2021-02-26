@@ -49,6 +49,10 @@ type ProcOpts = {
   engine: DEngineClientV2;
 };
 
+type ProcParseOpts = {
+  dest: DendronASTDest;
+} & ProcOpts;
+
 type ProcOptsFull = ProcOpts & {
   dest: DendronASTDest;
   shouldApplyPublishRules?: boolean;
@@ -69,6 +73,7 @@ type ProcOptsFull = ProcOpts & {
 enum DendronProcDataKeys {
   PROC_OPTS = "procOpts",
   NOTE_REF_LVL = "noteRefLvl",
+  ENGINE = "engine",
 }
 
 export const renderFromNoteProps = (
@@ -146,6 +151,10 @@ export class MDUtilsV4 {
     return procOpts;
   }
 
+  static setEngine(proc: Unified.Processor, engine: DEngineClientV2) {
+    proc.data(DendronProcDataKeys.ENGINE, engine);
+  }
+
   static setNoteRefLvl(proc: Unified.Processor, lvl: number) {
     this.setProcOpts(proc, { noteRefLvl: lvl });
   }
@@ -204,11 +213,28 @@ export class MDUtilsV4 {
     return true;
   }
 
+  /**
+   * Get remark processor with a few extras
+   */
   static remark() {
     let _proc = remark()
       .use(remarkParse, { gfm: true })
       .use(frontmatterPlugin, ["yaml"])
       .use({ settings: { listItemIndent: "1", fences: true, bullet: "-" } });
+    return _proc;
+  }
+
+  /**
+   * Simple proc just for parsing docs
+   */
+  static procParse(opts: ProcParseOpts) {
+    const errors: DendronError[] = [];
+    let _proc = remark()
+      .use(remarkParse, { gfm: true })
+      .use(wikiLinks)
+      .data("errors", errors);
+    this.setDendronData(_proc, { dest: opts.dest });
+    this.setEngine(_proc, opts.engine);
     return _proc;
   }
 

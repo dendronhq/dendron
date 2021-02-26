@@ -4,15 +4,15 @@ import {
   NotePropsV2,
   NoteUtilsV2,
 } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
+import fs from "fs-extra";
+import _ from "lodash";
+import path from "path";
 import { FileTestUtils } from "../../fileUtils";
 import { TestPresetEntryV4 } from "../../utilsv2";
 import { NOTE_PRESETS_V4 } from "../notes";
-import fs from "fs-extra";
-import { vault2Path } from "@dendronhq/common-server";
-import path from "path";
-import { ENGINE_HOOKS, setupBasic } from "./utils";
-import _ from "lodash";
 import { SCHEMA_PRESETS_V4 } from "../schemas";
+import { ENGINE_HOOKS, setupBasic } from "./utils";
 
 const SCHEMAS = {
   BASICS: new TestPresetEntryV4(
@@ -69,6 +69,9 @@ const NOTES = {
               from: {
                 fname: "alpha",
                 id: "alpha",
+                vault: {
+                  fsPath: "vault1",
+                },
               },
               original: "beta",
               pos: {
@@ -78,6 +81,7 @@ const NOTES = {
               to: {
                 anchorHeader: undefined,
                 fname: "beta",
+                vault: undefined,
               },
               type: "wiki",
               value: "beta",

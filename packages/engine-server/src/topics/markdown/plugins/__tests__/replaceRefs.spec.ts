@@ -12,7 +12,7 @@ const getProc = (opts: ReplaceRefOptions) => {
   return ParserUtilsV2.getRemark().use(replaceRefs, opts);
 };
 
-describe("replaceRefs", () => {
+describe.skip("replaceRefs", () => {
   test("imagePrefix", () => {
     const out = getProc({ imageRefPrefix: "bond/", scratch: "" }).processSync(
       `![alt-text](image-url.jpg)`

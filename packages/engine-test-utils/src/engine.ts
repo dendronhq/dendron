@@ -48,16 +48,17 @@ async function setupWS(opts: { vaults: DVault[] }) {
   return { wsRoot, vaults };
 }
 
-export async function runEngineTestV5<TExtra = any>(
+export type RunEngineTestV5Opts = {
+  preSetupHook?: SetupHookFunction;
+  createEngine?: AsyncCreateEngineFunction;
+  extra?: any;
+  expect: any;
+  vaults?: DVault[];
+  setupOnly?: boolean;
+};
+export async function runEngineTestV5(
   func: RunEngineTestFunctionV4,
-  opts: {
-    preSetupHook?: SetupHookFunction;
-    createEngine?: AsyncCreateEngineFunction;
-    extra?: TExtra;
-    expect: any;
-    vaults?: DVault[];
-    setupOnly?: boolean;
-  }
+  opts: RunEngineTestV5Opts
 ): Promise<any> {
   const { preSetupHook, extra, vaults, createEngine } = _.defaults(opts, {
     preSetupHook: async ({}) => {},
@@ -77,4 +78,26 @@ export async function runEngineTestV5<TExtra = any>(
   const results = (await func(testOpts)) || [];
   await runJestHarnessV2(results, expect);
   return { opts: testOpts, resp: undefined };
+}
+
+export function testWithEngine(
+  prompt: string,
+  func: RunEngineTestFunctionV4,
+  opts: Omit<RunEngineTestV5Opts, "expect"> & { only?: boolean }
+) {
+  if (opts.only) {
+    test.only(prompt, async () => {
+      await runEngineTestV5(func, {
+        ...opts,
+        expect,
+      });
+    });
+  } else {
+    test(prompt, async () => {
+      await runEngineTestV5(func, {
+        ...opts,
+        expect,
+      });
+    });
+  }
 }

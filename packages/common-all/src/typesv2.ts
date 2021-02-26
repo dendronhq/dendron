@@ -297,6 +297,7 @@ export type DCommonProps = {
   configRoot: string;
   vaultsv3: DVault[];
   links: DLink[];
+  config: DendronConfig;
 };
 
 export type NoteChangeEntry = {

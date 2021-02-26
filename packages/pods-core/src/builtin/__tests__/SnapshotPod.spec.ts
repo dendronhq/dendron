@@ -1,7 +1,7 @@
 import { DEngineClientV2 } from "@dendronhq/common-all";
 import {
-  filterDotFiles,
   EngineTestUtilsV2,
+  filterDotFiles,
   NodeTestPresetsV2,
   PODS_CORE,
 } from "@dendronhq/common-test-utils";
@@ -10,7 +10,7 @@ import fs from "fs-extra";
 import path from "path";
 import { SnapshotExportPod, SnapshotImportPod } from "../SnapshotPod";
 
-describe("SnapshotPodExport", () => {
+describe.skip("SnapshotPodExport", () => {
   let vaults: string[];
   let wsRoot: string;
   let engine: DEngineClientV2;
@@ -130,7 +130,7 @@ describe("SnapshotPodExport", () => {
   });
 });
 
-describe("SnapshotPodImport", () => {
+describe.skip("SnapshotPodImport", () => {
   let vaults: string[];
   let wsRoot: string;
   let engine: DEngineClientV2;

@@ -1,6 +1,8 @@
 import {
   assert,
+  DendronConfig,
   DendronError,
+  DEngineClientV2,
   DEngineDeleteSchemaRespV2,
   DEngineInitRespV2,
   DEngineInitSchemaRespV2,
@@ -298,9 +300,12 @@ export class FileStorageV2 implements DStoreV2 {
   public vaultsv3: DVault[];
   public wsRoot: string;
   public configRoot: string;
+  public config: DendronConfig;
+  private engine: DEngineClientV2;
 
-  constructor(props: { wsRoot: string; logger: DLogger; vaultsv3: DVault[] }) {
-    const { vaultsv3, logger, wsRoot } = props;
+  constructor(props: { engine: DEngineClientV2; logger: DLogger }) {
+    const { vaultsv3, wsRoot, config } = props.engine;
+    const { logger } = props;
     this.wsRoot = wsRoot;
     this.configRoot = wsRoot;
     this.vaultsv3 = vaultsv3;
@@ -312,6 +317,8 @@ export class FileStorageV2 implements DStoreV2 {
     this.logger = logger;
     const ctx = "FileStorageV2";
     this.logger.info({ ctx, wsRoot, vaultsv3, level: this.logger.level });
+    this.config = config;
+    this.engine = props.engine;
   }
 
   async init(): Promise<DEngineInitRespV2> {
@@ -558,7 +565,7 @@ export class FileStorageV2 implements DStoreV2 {
         if (n.stub) {
           return;
         }
-        const links = ParserUtilsV2.findLinks({ note: n });
+        const links = ParserUtilsV2.findLinks({ note: n, engine: this.engine });
         n.links = links;
         return;
       })

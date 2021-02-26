@@ -44,13 +44,15 @@ import { FileStorageV2 } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
 import { ParserUtilsV2 } from "./topics/markdown/utilsv2";
 
+type CreateStoreFunc = (engine: DEngineClientV2) => DStoreV2;
 type DendronEngineOptsV2 = {
   wsRoot: string;
   vaultsv3: DVault[];
   forceNew?: boolean;
-  store?: any;
+  createStore?: CreateStoreFunc;
   mode?: DEngineMode;
   logger?: DLogger;
+  config: DendronConfig;
 };
 type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
 
@@ -63,18 +65,20 @@ export class DendronEngineV2 implements DEngineV2 {
   public links: DLink[];
   public vaultsv3: DVault[];
   public configRoot: string;
+  public config: DendronConfig;
 
   static _instance: DendronEngineV2 | undefined;
 
   constructor(props: DendronEnginePropsV2) {
     this.wsRoot = props.wsRoot;
     this.configRoot = props.wsRoot;
-    this.store = props.store;
     this.logger = props.logger;
     this.props = props;
     this.fuseEngine = new FuseEngine({});
     this.links = [];
     this.vaultsv3 = props.vaultsv3;
+    this.config = props.config;
+    this.store = props.createStore(this);
   }
 
   static createV3({
@@ -83,17 +87,20 @@ export class DendronEngineV2 implements DEngineV2 {
     logger,
   }: WorkspaceOpts & { logger?: DLogger }) {
     const LOGGER = logger || createLogger();
+    const cpath = DConfig.configPath(wsRoot);
+    const config = readYAML(cpath) as DendronConfig;
     return new DendronEngineV2({
       wsRoot,
       vaultsv3: vaults,
       forceNew: true,
-      store: new FileStorageV2({
-        wsRoot,
-        vaultsv3: vaults,
-        logger: LOGGER,
-      }),
+      createStore: (engine) =>
+        new FileStorageV2({
+          engine,
+          logger: LOGGER,
+        }),
       mode: "fuzzy",
       logger: LOGGER,
+      config,
     });
   }
 
@@ -354,7 +361,7 @@ export class DendronEngineV2 implements DEngineV2 {
           // this.history &&
           //   this.history.add({ source: "engine", action: "create", uri });
         }
-        const links = ParserUtilsV2.findLinks({ note: ent.note });
+        const links = ParserUtilsV2.findLinks({ note: ent.note, engine: this });
         ent.note.links = links;
         this.notes[id] = ent.note;
       }

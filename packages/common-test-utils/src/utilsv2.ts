@@ -8,6 +8,7 @@ import {
   runJestHarnessV2,
   SetupTestFunctionV4,
 } from ".";
+import { DConfig } from "../../engine-server/lib";
 import {
   PostSetupHookFunction,
   PreSetupHookFunction,
@@ -104,6 +105,7 @@ export async function runEngineTestV4(
   });
 
   await preSetupHook({ wsRoot, vaults: vaults });
+  DConfig.getOrCreate(wsRoot);
   const engine = createEngine({ wsRoot, vaults: vaults });
   const initResp = await engine.init();
   const testOpts = { wsRoot, vaults, engine, initResp, extra };

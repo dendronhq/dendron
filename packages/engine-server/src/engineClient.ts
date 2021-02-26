@@ -1,6 +1,7 @@
 import {
   ConfigGetPayload,
   ConfigWriteOpts,
+  DendronConfig,
   DendronError,
   DEngineClientV2,
   DEngineDeleteSchemaRespV2,
@@ -33,9 +34,15 @@ import {
   VaultUtils,
   WriteNoteResp,
 } from "@dendronhq/common-all";
-import { createLogger, DendronAPI, DLogger } from "@dendronhq/common-server";
+import {
+  createLogger,
+  DendronAPI,
+  DLogger,
+  readYAML,
+} from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
+import { DConfig } from "./config";
 import { FileStorageV2 } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
 import { HistoryService } from "./history";
@@ -60,6 +67,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   public history?: HistoryService;
   public logger: DLogger;
   public store: FileStorageV2;
+  public config: DendronConfig;
 
   static create({
     port,
@@ -118,9 +126,10 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.configRoot = this.wsRoot;
     this.history = history;
     this.logger = logger || createLogger();
+    const cpath = DConfig.configPath(ws);
+    this.config = readYAML(cpath) as DendronConfig;
     this.store = new FileStorageV2({
-      wsRoot: this.ws,
-      vaultsv3: this.vaultsv3,
+      engine: this,
       logger: this.logger,
     });
   }

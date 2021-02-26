@@ -2,10 +2,9 @@ import { tmpDir, vault2Path, writeYAML } from "@dendronhq/common-server";
 import { FileTestUtils } from "@dendronhq/common-test-utils";
 import { ImportPodCLICommand, PodSource } from "@dendronhq/dendron-cli";
 import { MarkdownImportPod, PodUtils } from "@dendronhq/pods-core";
-import { ensureDirSync } from "fs-extra";
+import fs, { ensureDirSync } from "fs-extra";
 import path from "path";
-import { runEngineTestV5 } from "../../engine";
-import fs from "fs-extra";
+import { runEngineTestV5 } from "../../../engine";
 
 const { createFiles } = FileTestUtils;
 describe("ImportPodCLICommand", () => {

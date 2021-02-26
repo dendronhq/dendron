@@ -110,6 +110,7 @@ export type DNoteRefData = {
   anchorStart?: string;
   anchorEnd?: string;
   anchorStartOffset?: number;
+  vaultName?: string;
   /**
    * File link: wiki based links (eg. [[foo]])
    * Id link: TBD (eg. ^1234)

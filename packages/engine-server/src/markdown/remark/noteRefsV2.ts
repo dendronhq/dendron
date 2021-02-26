@@ -1,4 +1,5 @@
 import {
+  CONSTANTS,
   DendronError,
   DNodeUtilsV2,
   DNoteLoc,
@@ -8,6 +9,7 @@ import {
   NotePropsV2,
   NoteUtilsV2,
   RespV2,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -16,8 +18,14 @@ import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { Node, Parent } from "unist";
 import { SiteUtils } from "../../topics/site";
-import { parseFileLinkV2 } from "../../utils";
-import { DendronASTDest, DendronASTNode, NoteRefNoteV4 } from "../types";
+import { parseNoteRefV2 } from "../../utils";
+import {
+  DendronASTDest,
+  DendronASTNode,
+  DendronASTTypes,
+  NoteRefNoteV4,
+  NoteRefNoteV4_LEGACY,
+} from "../types";
 import { MDUtilsV4, renderFromNoteProps } from "../utils";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
@@ -58,16 +66,18 @@ function attachParser(proc: Unified.Processor) {
     const match = LINK_REGEX.exec(value);
     if (match) {
       const linkMatch = match[1].trim();
-      const link = parseFileLinkV2(linkMatch);
+      const link = parseNoteRefV2(linkMatch);
       const { value } = LinkUtils.parseLink(linkMatch);
 
-      return eat(match[0])({
-        type: "refLinkV2",
-        value,
+      let refNote: NoteRefNoteV4 = {
+        type: DendronASTTypes.REF_LINK_V2,
         data: {
           link,
         },
-      });
+        value,
+      };
+
+      return eat(match[0])(refNote);
     }
     return;
   }
@@ -89,13 +99,19 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
   const { dest } = MDUtilsV4.getDendronData(proc);
 
   if (visitors) {
-    visitors.refLinkV2 = function (node: NoteRefNoteV4) {
+    visitors.refLinkV2 = function (node: NoteRefNoteV4_LEGACY) {
       const ndata = node.data;
       if (dest === DendronASTDest.MD_DENDRON) {
         const { fname, alias } = ndata.link.from;
+
         const { anchorStart, anchorStartOffset, anchorEnd } = ndata.link.data;
         let link = alias ? `${alias}|${fname}` : fname;
         let suffix = "";
+
+        let vaultPrefix = ndata.link.data.vaultName
+          ? `${CONSTANTS.DENDRON_DELIMETER}${ndata.link.data.vaultName}/`
+          : "";
+
         if (anchorStart) {
           suffix += `#${anchorStart}`;
         }
@@ -105,9 +121,10 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         if (anchorEnd) {
           suffix += `:#${anchorEnd}`;
         }
-        return `![[${link}${suffix}]]`;
+        return `![[${vaultPrefix}${link}${suffix}]]`;
       }
 
+      debugger;
       const { error, data } = convertNoteRef({
         link: ndata.link,
         proc,
@@ -132,8 +149,16 @@ function convertNoteRef(
   let data: string | undefined;
   let errors: DendronError[] = [];
   const { link, proc, compilerOpts } = opts;
+  const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
-  const { dest, vault } = MDUtilsV4.getDendronData(proc);
+  let { dest, vault } = MDUtilsV4.getDendronData(proc);
+  if (link.data.vaultName) {
+    vault = VaultUtils.getVaultByName({
+      vaults: engine.vaultsv3,
+      vname: link.data.vaultName,
+      throwOnMissing: true,
+    })!;
+  }
   if (!vault) {
     return { error: new DendronError({ msg: "no vault specified" }), data: "" };
   }
@@ -144,7 +169,6 @@ function convertNoteRef(
       data,
     };
   }
-  const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
 
   let noteRefs: DNoteLoc[] = [];
   if (link.from.fname.endsWith("*")) {
@@ -242,14 +266,22 @@ export function convertNoteRefASTV2(
 ): { error: DendronError | undefined; data: Parent[] | undefined } {
   let errors: DendronError[] = [];
   const { link, proc, compilerOpts, procOpts } = opts;
+  const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
-  debugger;
-  const {
+  let {
     dest,
     vault,
     config,
     shouldApplyPublishRules,
   } = MDUtilsV4.getDendronData(proc);
+  if (link.data.vaultName) {
+    vault = VaultUtils.getVaultByName({
+      vaults: engine.vaultsv3,
+      vname: link.data.vaultName,
+      throwOnMissing: true,
+    })!;
+  }
+
   if (!vault) {
     return { error: new DendronError({ msg: "no vault specified" }), data: [] };
   }
@@ -267,7 +299,6 @@ export function convertNoteRefASTV2(
       data: [MDUtilsV4.genMDMsg("too many nested note refs")],
     };
   }
-  const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
 
   let noteRefs: DNoteLoc[] = [];
   if (link.from.fname.endsWith("*")) {

@@ -8,7 +8,12 @@ import visit from "unist-util-visit";
 import { VFile } from "vfile";
 import { findIndex, isNoteRefV2 } from "../../topics/markdown/plugins/inject";
 import { SiteUtils } from "../../topics/site";
-import { DendronASTDest, NoteRefDataV4, WikiLinkNoteV4 } from "../types";
+import {
+  DendronASTDest,
+  NoteRefDataV4,
+  NoteRefDataV4_LEGACY,
+  WikiLinkNoteV4,
+} from "../types";
 import { MDUtilsV4 } from "../utils";
 import { convertNoteRefAST, NoteRefsOpts } from "./noteRefs";
 import { convertNoteRefASTV2 } from "./noteRefsV2";
@@ -165,7 +170,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         node.type === "refLink" &&
         dest !== DendronASTDest.MD_ENHANCED_PREVIEW
       ) {
-        const ndata = node.data as NoteRefDataV4;
+        const ndata = node.data as NoteRefDataV4_LEGACY;
         const copts: NoteRefsOpts = {
           wikiLinkOpts: opts?.wikiLinkOpts,
           prettyRefs: opts?.prettyRefs,

@@ -20,6 +20,7 @@ export type DendronASTNode = Parent & {
 export enum DendronASTTypes {
   WIKI_LINK = "wikiLink",
   REF_LINK = "refLink",
+  REF_LINK_V2 = "refLinkV2",
   PARAGRAPH = "paragraph",
 }
 
@@ -56,12 +57,23 @@ export type WikiLinkDataV4 = {
   filters?: LinkFilter[];
 };
 
-export type NoteRefNoteV4 = DendronASTNode & {
+export type NoteRefNoteV4_LEGACY = DendronASTNode & {
   type: DendronASTTypes.REF_LINK;
+  value: string;
+  data: NoteRefDataV4_LEGACY;
+};
+
+export type NoteRefNoteV4 = Omit<DendronASTNode, "children"> & {
+  type: DendronASTTypes.REF_LINK_V2;
   value: string;
   data: NoteRefDataV4;
 };
 
 export type NoteRefDataV4 = {
+  link: DNoteRefLink;
+  vaultName?: string;
+};
+
+export type NoteRefDataV4_LEGACY = {
   link: DNoteRefLink;
 };

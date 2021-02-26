@@ -8,6 +8,7 @@ import {
   AssertUtils,
   ENGINE_HOOKS,
   ENGINE_SERVER,
+  NoteTestUtilsV4,
   runEngineTestV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
@@ -618,6 +619,78 @@ describe("compilev2", () => {
     },
     preSetupHook: ENGINE_SERVER.NOTE_REF.WILDCARD_LINK_V4.preSetupHook,
   });
+  const XVAULT_CASE = createProcTests({
+    name: "XVAULT_CASE",
+    setupFunc: async ({ engine, extra, vaults }) => {
+      const note = engine.notes["one"];
+      const resp = await MDUtilsV4.procFull({
+        engine,
+        dest: extra.dest,
+        vault: vaults[0],
+      }).process(note.body);
+      return { resp };
+    },
+    verifyFuncDict: {
+      [DendronASTDest.MD_DENDRON]: async ({ extra, engine }) => {
+        const note = engine.notes["one"];
+        const { resp } = extra;
+        expect(resp).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents,
+            match: [note.body],
+          })
+        ).toBeTruthy();
+      },
+      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+        // should have contents
+        const { resp } = extra;
+        expect(resp).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents,
+            match: ["two content"],
+          })
+        ).toBeTruthy();
+      },
+      [DendronASTDest.HTML]: async ({ extra }) => {
+        const { resp } = extra;
+        expect(resp).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents,
+            match: ["two content"],
+          })
+        ).toBeTruthy();
+      },
+      [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+        const { resp } = extra;
+        expect(resp).toMatchSnapshot();
+        expect(
+          await AssertUtils.assertInString({
+            body: resp.contents,
+            match: ["two content"],
+          })
+        ).toBeTruthy();
+      },
+    },
+    preSetupHook: async ({ wsRoot, vaults }) => {
+      const vault1 = vaults[0];
+      const vault2 = vaults[1];
+      await NoteTestUtilsV4.createNote({
+        fname: "one",
+        vault: vault1,
+        wsRoot,
+        body: "![[dendron://vault2/two]]",
+      });
+      await NoteTestUtilsV4.createNote({
+        fname: "two",
+        vault: vault2,
+        wsRoot,
+        body: "two content",
+      });
+    },
+  });
 
   const ALL_TEST_CASES = [
     // ...RECURSIVE_TOO_DEEP_TEST_CASES,
@@ -630,6 +703,7 @@ describe("compilev2", () => {
     ...WITH_START_ANCHOR_INVALID,
     ...WITH_END_ANCHOR_INVALID,
     ...WITH_START_ANCHOR_OFFSET,
+    ...XVAULT_CASE,
   ];
 
   describe("compile", () => {

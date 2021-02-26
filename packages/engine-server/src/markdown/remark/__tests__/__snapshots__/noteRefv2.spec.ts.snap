@@ -132,6 +132,32 @@ VFile {
 }
 `;
 
+exports[`compilev2 compile "HTML: XVAULT_CASE" 1`] = `
+VFile {
+  "contents": "<div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">two</span></div>
+  <a href=\\"two.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+  two content
+
+
+</div>    
+  </div>
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`compilev2 compile "HTML: recursive" 1`] = `
 VFile {
   "contents": "<div class=\\"portal-container\\">
@@ -506,6 +532,18 @@ VFile {
 }
 `;
 
+exports[`compilev2 compile "MD_DENDRON: XVAULT_CASE" 1`] = `
+VFile {
+  "contents": "![[dendron://vault2/two]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`compilev2 compile "MD_DENDRON: recursive" 1`] = `
 VFile {
   "contents": "![[foo]]
@@ -697,6 +735,34 @@ VFile {
   <div class=\\"portal-parent-fader-bottom\\"></div>        
   
   task2
+  
+  </div>    
+  </div>
+  
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 compile "MD_ENHANCED_PREVIEW: XVAULT_CASE" 1`] = `
+VFile {
+  "contents": "
+  <div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">two</span></div>
+  <a href=\\"two.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>        
+  
+  two content
   
   </div>    
   </div>
@@ -980,6 +1046,32 @@ VFile {
   <div class=\\"portal-parent-fader-top\\"></div>
   <div class=\\"portal-parent-fader-bottom\\"></div>
   task2
+
+
+</div>    
+  </div>
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`compilev2 compile "MD_REGULAR: XVAULT_CASE" 1`] = `
+VFile {
+  "contents": "<div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">two</span></div>
+  <a href=\\"two\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+  two content
 
 
 </div>    

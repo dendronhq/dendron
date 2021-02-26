@@ -14,7 +14,7 @@ import { Eat } from "remark-parse";
 import Unified, { Plugin, Processor } from "unified";
 import { Node, Parent } from "unist";
 import { parseDendronRef } from "../../utils";
-import { DendronASTDest, DendronASTNode, NoteRefNoteV4 } from "../types";
+import { DendronASTDest, DendronASTNode, NoteRefNoteV4_LEGACY } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
@@ -88,7 +88,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
   const { dest } = MDUtilsV4.getDendronData(proc);
 
   if (visitors) {
-    visitors.refLink = function (node: NoteRefNoteV4) {
+    visitors.refLink = function (node: NoteRefNoteV4_LEGACY) {
       const ndata = node.data;
       if (dest === DendronASTDest.MD_DENDRON) {
         const { fname, alias } = ndata.link.from;

@@ -58,6 +58,21 @@ export class LinkUtils {
     return { alias, value: NoteUtilsV2.normalizeFname(value) };
   }
 
+  static parseDendronURI(linkString: string) {
+    if (linkString.startsWith(CONSTANTS.DENDRON_DELIMETER)) {
+      const [vaultName, link] = linkString
+        .split(CONSTANTS.DENDRON_DELIMETER)[1]
+        .split("/");
+      return {
+        vaultName,
+        link,
+      };
+    }
+    return {
+      link: linkString,
+    };
+  }
+
   static parseLinkV2(linkString: string) {
     const LINK_NAME = "[^#\\|>]+";
     const re = new RegExp(
@@ -79,11 +94,7 @@ export class LinkUtils {
     if (out) {
       let { alias, value, anchor } = out.groups as any;
       let vaultName: string | undefined;
-      if ((value as string).startsWith(CONSTANTS.DENDRON_DELIMETER)) {
-        [vaultName, value] = value
-          .split(CONSTANTS.DENDRON_DELIMETER)[1]
-          .split("/");
-      }
+      ({ vaultName, link: value } = this.parseDendronURI(value));
       if (!alias) {
         alias = value;
       }

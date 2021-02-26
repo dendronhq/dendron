@@ -11,6 +11,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DendronEngineClient } from "./engineClient";
+import { LinkUtils } from "./markdown/remark/utils";
 import { WSMeta } from "./types";
 
 function normalize(text: string) {
@@ -198,7 +199,7 @@ export function parseFileLink(ref: string): DNoteRefLink {
   return { from: { fname }, data: clean, type: "ref" };
 }
 
-export function parseFileLinkV2(ref: string): DNoteRefLink {
+export function parseNoteRefV2(ref: string): DNoteRefLink {
   const wikiFileName = /([^\]:#]+)/.source;
   const reLink = new RegExp(
     "" +
@@ -215,6 +216,8 @@ export function parseFileLinkV2(ref: string): DNoteRefLink {
       })?`,
     "i"
   );
+  let vaultName: string | undefined = undefined;
+  ({ vaultName, link: ref } = LinkUtils.parseDendronURI(ref));
   const groups = reLink.exec(ref)?.groups;
   const clean: DNoteRefData = {
     type: "file",
@@ -238,6 +241,9 @@ export function parseFileLinkV2(ref: string): DNoteRefLink {
     const [anchorStart, offset] = clean.anchorStart.split(",");
     clean.anchorStart = anchorStart;
     clean.anchorStartOffset = parseInt(offset);
+  }
+  if (vaultName) {
+    clean.vaultName = vaultName;
   }
   return { from: { fname }, data: clean, type: "ref" };
 }

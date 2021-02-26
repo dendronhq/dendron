@@ -76,7 +76,6 @@ const NOTES = {
     async ({ vaults, engine }) => {
       const vault = vaults[0];
       const notes = engine.notes;
-      debugger;
       const { data } = await engine.queryNotes({ qs: "", vault });
       const expectedNote = NoteUtilsV2.getNoteByFnameV5({
         wsRoot: engine.wsRoot,

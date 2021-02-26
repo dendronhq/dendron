@@ -1,5 +1,12 @@
-import { DendronError, NoteUtilsV2, VaultUtils } from "@dendronhq/common-all";
+import {
+  CONSTANTS,
+  DendronError,
+  NoteUtilsV2,
+  VaultUtils,
+} from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
+import path from "path";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { DendronASTDest, WikiLinkDataV4, WikiLinkNoteV4 } from "../types";
@@ -45,19 +52,24 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
   });
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
-  const { dest, vault } = MDUtilsV4.getDendronData(proc);
+  let { dest, vault } = MDUtilsV4.getDendronData(proc);
 
   if (visitors) {
     visitors.wikiLink = function (node: WikiLinkNoteV4) {
       const data = node.data;
       let value = node.value;
+
+      // if converting back to dendron md, no further processing
       if (dest === DendronASTDest.MD_DENDRON) {
         const { alias, anchorHeader } = data;
         let link = alias !== value ? `${alias}|${value}` : value;
         let anchor = anchorHeader ? `#${anchorHeader}` : "";
-        let vaultPrefix = data.vaultName ? `${data.vaultName}/` : "";
+        let vaultPrefix = data.vaultName
+          ? `${CONSTANTS.DENDRON_DELIMETER}${data.vaultName}/`
+          : "";
         return `[[${vaultPrefix}${link}${anchor}]]`;
       }
+
       const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
       if (error) {
         addError(proc, error);
@@ -91,9 +103,20 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         }
         case DendronASTDest.MD_ENHANCED_PREVIEW: {
           const alias = data.alias ? data.alias : value;
-          return `[${alias}](${copts.prefix || ""}${normalizeSpaces(
+          let cleanValue = normalizeSpaces(
             parseAnchorIfExist(value)[0] as string
-          )}.md)`;
+          );
+          if (data.vaultName) {
+            const vaultByName = VaultUtils.getVaultByName({
+              vaults: engine.vaultsv3,
+              vname: data.vaultName,
+            });
+            cleanValue = path.join(
+              vault2Path({ vault: vaultByName!, wsRoot: engine.wsRoot }),
+              cleanValue
+            );
+          }
+          return `[${alias}](${copts.prefix || ""}${cleanValue}.md)`;
         }
         case DendronASTDest.HTML: {
           const alias = data.alias ? data.alias : value;
@@ -123,17 +146,18 @@ function attachParser(proc: Unified.Processor) {
     let { config, vault, dest, fname } = MDUtilsV4.getDendronData(proc);
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
     if (out.vaultName) {
-      vault = VaultUtils.getVaultByName({
+      const maybeVault = VaultUtils.getVaultByName({
         vaults: engine.vaultsv3,
         vname: out.vaultName,
       });
-      if (!vault) {
+      if (_.isUndefined(maybeVault)) {
         throw new DendronError({
           msg: `fname: ${fname}, vault ${
             out.vaultName
           } not found in ${JSON.stringify(out)}`,
         });
       }
+      vault = maybeVault;
     }
     if (
       dest !== DendronASTDest.MD_DENDRON &&

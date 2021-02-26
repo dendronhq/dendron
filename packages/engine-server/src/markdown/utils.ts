@@ -245,7 +245,7 @@ export class MDUtilsV4 {
 
     // set defaults
     let usePrettyRefs: boolean | undefined = _.find(
-      [opts.usePrettyRefs, config?.usePrettyRefs, config?.site.usePrettyRefs],
+      [opts.usePrettyRefs, config?.usePrettyRefs, config?.site?.usePrettyRefs],
       (ent) => !_.isUndefined(ent)
     );
     if (_.isUndefined(usePrettyRefs)) {

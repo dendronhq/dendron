@@ -24,6 +24,10 @@ describe("basics", () => {
   let engine: any;
   let dendronData: DendronASTData = {
     dest: DendronASTDest.HTML,
+    vault: {
+      fsPath: "vault",
+    },
+    config: {} as any,
   };
 
   test("imagePrefix", () => {

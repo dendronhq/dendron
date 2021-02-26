@@ -10,6 +10,7 @@ import { LinkFilter } from "../topics/markdown/plugins/types";
 import { DendronPubOpts } from "./remark/dendronPub";
 import { WikiLinksOpts } from "./remark/wikiLinks";
 export { VFile } from "vfile";
+export { Processor };
 
 export type DendronASTNode = Parent & {
   notes?: NotePropsV2[];
@@ -31,10 +32,10 @@ export enum DendronASTDest {
 
 export type DendronASTData = {
   dest: DendronASTDest;
-  vault?: DVault;
+  vault: DVault;
   fname?: string;
   wikiLinkOpts?: WikiLinksOpts;
-  config?: DendronConfig;
+  config: DendronConfig;
   overrides?: Partial<DendronPubOpts>;
   shouldApplyPublishRules?: boolean;
 };
@@ -64,5 +65,3 @@ export type NoteRefNoteV4 = DendronASTNode & {
 export type NoteRefDataV4 = {
   link: DNoteRefLink;
 };
-
-export { Processor };

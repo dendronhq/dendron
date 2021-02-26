@@ -1,4 +1,5 @@
 import {
+  CONSTANTS,
   DendronError,
   NoteChangeEntry,
   NotePropsV2,
@@ -78,9 +79,11 @@ export class LinkUtils {
     if (out) {
       let { alias, value, anchor } = out.groups as any;
       let vaultName: string | undefined;
-      // if (value.indexOf("/") >= 0) {
-      //   [vaultName, value] = value.split("/");
-      // }
+      if ((value as string).startsWith(CONSTANTS.DENDRON_DELIMETER)) {
+        [vaultName, value] = value
+          .split(CONSTANTS.DENDRON_DELIMETER)[1]
+          .split("/");
+      }
       if (!alias) {
         alias = value;
       }

@@ -5,6 +5,7 @@ import { paragraph } from "mdast-builder";
 import Unified, { Plugin } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
+import { WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
 
 // Plugin that adds backlinks at the end of each page if they exist
@@ -30,8 +31,6 @@ const plugin: Plugin = function (this: Unified.Processor) {
     );
 
     if (!_.isEmpty(backlinks)) {
-      const aliasSuffix =
-        engine.vaultsv3.length > 1 ? ` (${VaultUtils.getName(vault!)})` : "";
       root.children.push({
         type: "thematicBreak",
       });
@@ -41,10 +40,15 @@ const plugin: Plugin = function (this: Unified.Processor) {
           type: "wikiLink",
           value: mdLink.from.fname,
           data: {
-            alias: mdLink.from.fname + aliasSuffix,
-            vault: note!.vault,
+            alias:
+              mdLink.from.fname +
+              (engine.vaultsv3.length > 1
+                ? ` (${VaultUtils.getName(mdLink.from.vault!)})`
+                : ""),
+            vaultName: VaultUtils.getName(mdLink.from.vault!),
           },
-        });
+          children: [],
+        } as WikiLinkNoteV4);
         root.children.push(node as Content);
       });
     }

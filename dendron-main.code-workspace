@@ -62,7 +62,6 @@
     "settings": {
         "files.exclude": {
             "*.d.ts": true,
-            "packages": true,
             "profile": true
         },
         "editor.codeActionsOnSave": {
@@ -77,8 +76,6 @@
         },
         "editor.formatOnSave": false,
         "workbench.editor.showTabs": true,
-       
         "editor.snippetSuggestions": "none",
-        "debug.node.autoAttach": "on"
     }
 }

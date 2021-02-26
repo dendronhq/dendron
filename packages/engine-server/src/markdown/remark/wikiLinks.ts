@@ -111,10 +111,12 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
               vaults: engine.vaultsv3,
               vname: data.vaultName,
             });
-            cleanValue = path.join(
-              vault2Path({ vault: vaultByName!, wsRoot: engine.wsRoot }),
-              cleanValue
-            );
+            const cpath = vault2Path({ wsRoot: engine.wsRoot, vault });
+            const npath = vault2Path({
+              vault: vaultByName!,
+              wsRoot: engine.wsRoot,
+            });
+            cleanValue = path.join(path.relative(cpath, npath), cleanValue);
           }
           return `[${alias}](${copts.prefix || ""}${cleanValue}.md)`;
         }

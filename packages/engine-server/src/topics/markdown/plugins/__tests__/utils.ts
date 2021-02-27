@@ -18,7 +18,7 @@ export function createRefLink({
   };
 }
 
-export const createEngine = ({ vaults, wsRoot }: WorkspaceOpts) => {
-  const engine = DendronEngineV2.create({ vaults, wsRoot });
+export const createEngine = ({ wsRoot }: WorkspaceOpts) => {
+  const engine = DendronEngineV2.create({ wsRoot });
   return engine;
 };

@@ -61,12 +61,11 @@ export abstract class SoilCommand<
   };
 
   _enrichArgs(args: TCLIOpts): CommandOpts {
-    let { vault, wsRoot } = args;
+    let { wsRoot } = args;
 
     const logger = this.L;
 
     const engineClient = DendronEngineV2.create({
-      vaults: [vault],
       wsRoot,
       logger,
     });
@@ -110,12 +109,11 @@ export abstract class SoilCommandV2<
   };
 
   _enrichArgs(args: TCLIOpts): CommandOptsV2 {
-    let { vault, wsRoot } = args;
+    let { wsRoot } = args;
     const cwd = process.cwd();
     wsRoot = resolvePath(wsRoot, cwd);
     const logger = this.L;
     const engine = DendronEngineV2.create({
-      vaults: [vault],
       logger,
       wsRoot,
     });

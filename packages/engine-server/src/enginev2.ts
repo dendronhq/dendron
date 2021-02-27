@@ -430,5 +430,5 @@ export class DendronEngineV2 implements DEngineV2 {
 
 export const createEngine = ({ wsRoot }: WorkspaceOpts) => {
   const engine = DendronEngineV2.create({ wsRoot });
-  return engine;
+  return engine as DEngineClientV2;
 };

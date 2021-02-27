@@ -20,7 +20,7 @@ export type AsyncCreateEngineFunction = (
  * Create an {@link DendronEngine}
  */
 export async function createEngineFromEngine(opts: WorkspaceOpts) {
-  return engineServerCreateEngine(opts);
+  return engineServerCreateEngine(opts) as DEngineClientV2;
 }
 
 export { DEngineClientV2, DVault, WorkspaceOpts };
@@ -69,9 +69,9 @@ export async function runEngineTestV5(
   });
   const { wsRoot } = await setupWS({ vaults });
   await preSetupHook({ wsRoot, vaults });
-  const engine = await createEngine({ wsRoot, vaults });
+  const engine: DEngineClientV2 = await createEngine({ wsRoot, vaults });
   const initResp = await engine.init();
-  const testOpts = { wsRoot, vaults, engine, initResp, extra };
+  const testOpts = { wsRoot, vaults, engine, initResp, extra, config: engine };
   if (opts.setupOnly) {
     return testOpts;
   }

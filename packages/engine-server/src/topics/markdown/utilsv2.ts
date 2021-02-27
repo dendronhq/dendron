@@ -3,7 +3,6 @@ import {
   DEngineClientV2,
   DLink,
   DNoteLink,
-  DNoteLoc,
   NotePropsV2,
   NoteUtilsV2,
   VaultUtils,
@@ -147,24 +146,6 @@ export class ParserUtilsV2 {
       heading(3, text(title)),
       paragraph([paragraph(text(msg)), brk]),
     ]);
-  }
-
-  static async replaceLinks(opts: {
-    content: string;
-    from: DNoteLoc;
-    to: DNoteLoc;
-  }) {
-    const { content, from, to } = opts;
-    let remark = ParserUtilsV2.getRemark({
-      dendronLinksOpts: {
-        replaceLink: { from, to },
-      },
-      dendronNoteRefPluginForMdOpts: {
-        replaceLink: { from, to },
-      },
-    });
-    const out = await remark.process(content);
-    return out.toString();
   }
 }
 

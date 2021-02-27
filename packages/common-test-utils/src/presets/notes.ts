@@ -13,7 +13,7 @@ type CreateNotePresetOptsV4 = {
 };
 
 export const NOTE_BODY_PRESETS_V4 = {
-  NOTE_REF: `((ref: [[dendron.pro.dendron-next-server]]#quickstart,1:#*))`,
+  NOTE_REF: `![[dendron.pro.dendron-next-server#quickstart,1:#*]]`,
   NOTE_REF_TARGET_BODY: "# Header1\nbody1\n# \nbody2",
 };
 
@@ -137,18 +137,12 @@ export const NOTE_PRESETS_V4 = {
     fname: "wildcard-complex-ref",
     body: "![[wildcard-complex.*#head1,1]]",
   }),
-  // TODO: deprecate
-  NOTE_WITH_NOTE_REF: CreateNoteFactory({
-    fname: "alpha",
-    body:
-      "[[foo]]\n((ref: [[dendron.pro.dendron-next-server]]#quickstart,1:#*))",
-  }),
   NOTE_WITH_NOTE_REF_TARGET: CreateNoteFactory({
     fname: "alpha",
     body: NOTE_BODY_PRESETS_V4.NOTE_REF_TARGET_BODY,
   }),
   NOTE_WITH_NOTE_REF_LINK: CreateNoteFactory({
     fname: "beta",
-    body: "((ref: [[alpha]]))",
+    body: "![[alpha]]",
   }),
 };

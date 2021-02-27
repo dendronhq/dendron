@@ -41,6 +41,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import YAML from "yamljs";
+import { MDUtilsV4 } from "../../markdown";
 import { ParserUtilsV2 } from "../../topics/markdown/utilsv2";
 
 type BulkAddNoteOpts = {
@@ -613,12 +614,11 @@ export class FileStorageV2 implements DStoreV2 {
         const vaultPath = vault2Path({ vault, wsRoot });
         // read note in case its changed
         const _n = file2Note(path.join(vaultPath, n.fname + ".md"), vault);
-        n.body = await ParserUtilsV2.replaceLinks({
-          content: _n.body,
-          from: oldLoc,
-          to: newLoc,
-        });
-
+        const resp = await MDUtilsV4.procTransform(
+          { engine: this.engine, fname: n.fname, vault: n.vault },
+          { from: oldLoc, to: newLoc }
+        ).process(_n.body);
+        n.body = resp.contents as string;
         return n;
       })
     );

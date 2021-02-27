@@ -1,0 +1,99 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`replaceLinks single basic 1`] = `
+VFile {
+  "contents": "[[bar]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`replaceLinks single fenced code 1`] = `
+VFile {
+  "contents": "\`\`\`
+[[bond]]
+\`\`\`
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`replaceLinks single inline code 1`] = `
+VFile {
+  "contents": "\`[[bond]]\`
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`replaceLinks single multiple 1`] = `
+VFile {
+  "contents": "[[bar]] [[bar]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`replaceLinks single ref 1`] = `
+VFile {
+  "contents": "![[bar]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`replaceLinks single with alias 1`] = `
+VFile {
+  "contents": "[[hero|bar]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`replaceLinks single with offset  1`] = `
+VFile {
+  "contents": "   [[bar]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`replaceLinks single with vault prefix 1`] = `
+VFile {
+  "contents": "[[dendron://vault1/bar]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;

@@ -1,7 +1,17 @@
 import { DEngineClientV2, DVault } from "@dendronhq/common-all";
-import { TestPresetEntryV4 } from "@dendronhq/common-test-utils";
-import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
+import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
+import { DendronASTDest, MDUtilsV4, VFile } from "@dendronhq/engine-server";
 import _ from "lodash";
+
+export async function checkVFile(resp: VFile, ...match: string[]) {
+  expect(resp).toMatchSnapshot();
+  expect(
+    await AssertUtils.assertInString({
+      body: resp.toString(),
+      match,
+    })
+  ).toBeTruthy();
+}
 
 export const createProcForTest = (opts: {
   engine: DEngineClientV2;

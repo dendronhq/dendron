@@ -2,6 +2,7 @@ import {
   DendronConfig,
   DendronError,
   DEngineClientV2,
+  DNoteLoc,
   DVault,
   GetNoteOpts,
   getSlugger,
@@ -40,6 +41,7 @@ import { backlinks } from "./remark/backlinks";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
 import { noteRefsV2 } from "./remark/noteRefsV2";
+import { transformLinks } from "./remark/transformLinks";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTData, DendronASTDest } from "./types";
 
@@ -58,8 +60,8 @@ type ProcOptsFull = ProcOpts & {
   dest: DendronASTDest;
   shouldApplyPublishRules?: boolean;
   vault: DVault;
-  config?: DendronConfig;
   fname: string;
+  config?: DendronConfig;
   mathOpts?: {
     katex?: boolean;
   };
@@ -390,5 +392,19 @@ export class MDUtilsV4 {
       _proc = _proc.use(katex);
     }
     return _proc.use(rehypeStringify);
+  }
+
+  /**
+   * Used to refactor text
+   */
+  static procTransform(
+    procOpts: Omit<ProcOptsFull, "dest">,
+    transformOpts: { from: DNoteLoc; to: DNoteLoc }
+  ) {
+    const proc = this.procFull({
+      dest: DendronASTDest.MD_DENDRON,
+      ...procOpts,
+    });
+    return proc.use(transformLinks, transformOpts);
   }
 }

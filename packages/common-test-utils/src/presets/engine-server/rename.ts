@@ -54,7 +54,7 @@ const NOTES = {
         {
           actual: _.trim(barChange?.note.body),
           expected:
-            "[[baz]]\n((ref: [[dendron.pro.dendron-next-server]]#quickstart,1:#*))",
+            "[[baz]]\n![[dendron.pro.dendron-next-server#quickstart,1:#*]]",
         },
         {
           actual: checkVault,

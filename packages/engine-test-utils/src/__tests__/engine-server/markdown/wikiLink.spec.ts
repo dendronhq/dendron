@@ -1,5 +1,4 @@
 import {
-  AssertUtils,
   ENGINE_HOOKS,
   NoteTestUtilsV4,
   TestPresetEntryV4,
@@ -10,14 +9,13 @@ import {
   DEngineClientV2,
   MDUtilsV4,
   UnistNode,
-  VFile,
   WikiLinkNoteV4,
   wikiLinks,
   WikiLinksOpts,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
-import { createProcForTest, createProcTests } from "./utils";
+import { checkVFile, createProcForTest, createProcTests } from "./utils";
 
 function proc(
   engine: DEngineClientV2,
@@ -36,16 +34,6 @@ function genDendronData(opts?: Partial<DendronASTData>): DendronASTData {
 function getWikiLink(node: UnistNode): WikiLinkNoteV4 {
   // @ts-ignore
   return node.children[0].children[0];
-}
-
-async function checkVFile(resp: VFile, ...match: string[]) {
-  expect(resp).toMatchSnapshot();
-  expect(
-    await AssertUtils.assertInString({
-      body: resp.toString(),
-      match,
-    })
-  ).toBeTruthy();
 }
 
 describe("wikiLinks", () => {

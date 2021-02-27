@@ -5,7 +5,7 @@ import { paragraph } from "mdast-builder";
 import Unified, { Plugin } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
-import { WikiLinkNoteV4 } from "../types";
+import { DendronASTDest, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
 
 // Plugin that adds backlinks at the end of each page if they exist
@@ -13,8 +13,11 @@ const plugin: Plugin = function (this: Unified.Processor) {
   const proc = this;
   function transformer(tree: Node): void {
     let root = tree as Root;
-    const { fname, vault } = MDUtilsV4.getDendronData(proc);
+    const { fname, vault, dest } = MDUtilsV4.getDendronData(proc);
     if (!fname) {
+      return;
+    }
+    if (dest !== DendronASTDest.HTML) {
       return;
     }
     const { engine } = MDUtilsV4.getEngineFromProc(proc);

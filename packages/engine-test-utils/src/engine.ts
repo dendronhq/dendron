@@ -1,6 +1,7 @@
 import { DEngineClientV2, DVault, WorkspaceOpts } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import {
+  ENGINE_HOOKS,
   RunEngineTestFunctionV4,
   runJestHarnessV2,
   SetupHookFunction,
@@ -88,6 +89,7 @@ export function testWithEngine(
   if (opts?.only) {
     test.only(prompt, async () => {
       await runEngineTestV5(func, {
+        preSetupHook: ENGINE_HOOKS.setupBasic,
         ...opts,
         expect,
       });
@@ -95,6 +97,7 @@ export function testWithEngine(
   } else {
     test(prompt, async () => {
       await runEngineTestV5(func, {
+        preSetupHook: ENGINE_HOOKS.setupBasic,
         ...opts,
         expect,
       });

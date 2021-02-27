@@ -491,7 +491,7 @@ export class NodeTestPresetsV2 {
     await NodeTestUtilsV2.createNote({
       vaultDir,
       noteProps: {
-        body: "((ref: [[foo]]))",
+        body: "![[foo]]",
         fname: "bar",
         vault: { fsPath: vaultDir },
       },

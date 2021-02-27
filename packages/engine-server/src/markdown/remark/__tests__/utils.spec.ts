@@ -324,7 +324,7 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
       wikiLinksOpts: { useId: true },
     });
 
-    const txt = `((ref: [[foo.md]]))`;
+    const txt = `![[foo.md]]`;
     if (opts.extra.dest === DendronASTDest.HTML) {
       const procRehype = MDUtilsV4.procRehype({ proc });
       const resp = await procRehype.process(txt);

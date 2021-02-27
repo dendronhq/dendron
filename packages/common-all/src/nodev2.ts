@@ -5,13 +5,12 @@ import minimatch from "minimatch";
 import path from "path";
 import title from "title";
 import { URI } from "vscode-uri";
-import { Time } from "./time";
 import { ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
+import { Time } from "./time";
 import {
   DEngineClientV2,
   DLink,
-  DLoc,
   DNodeOptsV2,
   DNodePropsDictV2,
   DNodePropsQuickInputV2,
@@ -730,14 +729,6 @@ export class NoteUtilsV2 {
     }
     const meta = _.omit(NoteUtilsV2.serializeMeta(props), blacklist);
     return matter.stringify(body || "", meta);
-  }
-
-  static toLoc(note: NotePropsV2): DLoc {
-    const { fname, id } = note;
-    return {
-      fname,
-      id,
-    };
   }
 
   static toLogObj(note: NotePropsV2) {

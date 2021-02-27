@@ -80,7 +80,7 @@ export class VaultWatcher {
       wsRoot: DendronWorkspace.wsRoot(),
     }) as NotePropsV2;
     note = NoteUtilsV2.hydrate({ noteRaw: note, noteHydrated });
-    const links = ParserUtilsV2.findLinks({ note });
+    const links = ParserUtilsV2.findLinks({ note, engine: eclient });
     note.links = links;
     this.L.info({ ctx, fname, msg: "exit" });
     return await eclient.updateNote(note);

@@ -34,7 +34,7 @@ export async function callSetupHook(
     const link1 = createLink("beta", {
       vaultPrefix: withVaultPrefix ? cVaults[1] : undefined,
     });
-    const note1 = await NoteTestUtilsV4.createNote({
+    await NoteTestUtilsV4.createNote({
       fname: "alpha",
       wsRoot,
       vault: cVaults[0],
@@ -43,7 +43,7 @@ export async function callSetupHook(
     const link2 = createLink("alpha", {
       vaultPrefix: withVaultPrefix ? cVaults[0] : undefined,
     });
-    const note2 = await NoteTestUtilsV4.createNote({
+    await NoteTestUtilsV4.createNote({
       fname: "beta",
       wsRoot,
       vault: cVaults[1],

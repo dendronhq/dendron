@@ -2,7 +2,7 @@
 id: 73eb67ea-0291-45e7-8f2f-193fd6f00643
 title: Links
 desc: ""
-updated: 1611629056261
+updated: 1614386308909
 created: 1608518909864
 ---
 
@@ -14,7 +14,16 @@ created: 1608518909864
 
 ## XVault Link
 
-- [[dendron://vault/bar]]
+- vault1 bar: [[dendron://vault/bar]]
+- vault2 bar: [[dendron://vault2/bar]]
+
+## XVault Note Ref
+
+Vault1
+![[dendron://vault/bar]]
+
+Vault2
+![[dendron://vault2/bar]]
 
 ## Unpublished page
 

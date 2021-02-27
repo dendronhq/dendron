@@ -8,6 +8,7 @@ import {
   NotePropsDictV2,
   NotePropsV2,
   NoteUtilsV2,
+  VaultUtils,
 } from "@dendronhq/common-all";
 // @ts-ignore
 import mermaid from "@dendronhq/remark-mermaid";
@@ -119,6 +120,19 @@ export class MDUtilsV4 {
 
   static getDendronData(proc: Processor) {
     return proc.data("dendron") as DendronASTData;
+  }
+
+  static getVault(proc: Processor, vaultName?: string) {
+    let { vault } = MDUtilsV4.getDendronData(proc);
+    const { engine } = MDUtilsV4.getEngineFromProc(proc);
+    if (vaultName) {
+      vault = VaultUtils.getVaultByName({
+        vaults: engine.vaultsv3,
+        vname: vaultName,
+        throwOnMissing: true,
+      })!;
+    }
+    return vault;
   }
 
   static getFM(proc: Processor) {

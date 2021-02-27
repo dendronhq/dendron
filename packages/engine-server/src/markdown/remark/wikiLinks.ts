@@ -52,22 +52,24 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
   });
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
-  let { dest, vault } = MDUtilsV4.getDendronData(proc);
+  let { dest } = MDUtilsV4.getDendronData(proc);
 
   if (visitors) {
     visitors.wikiLink = function (node: WikiLinkNoteV4) {
       const data = node.data;
       let value = node.value;
+      const vault = MDUtilsV4.getVault(proc, data.vaultName);
 
       // if converting back to dendron md, no further processing
       if (dest === DendronASTDest.MD_DENDRON) {
         const { alias, anchorHeader } = data;
-        let link = alias !== value ? `${alias}|${value}` : value;
+        let link = value;
+        let calias = alias !== value ? `${alias}|` : "";
         let anchor = anchorHeader ? `#${anchorHeader}` : "";
         let vaultPrefix = data.vaultName
           ? `${CONSTANTS.DENDRON_DELIMETER}${data.vaultName}/`
           : "";
-        return `[[${vaultPrefix}${link}${anchor}]]`;
+        return `[[${calias}${vaultPrefix}${link}${anchor}]]`;
       }
 
       const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
@@ -76,7 +78,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         return "error with engine";
       }
 
-      if (copts.useId) {
+      if (copts.useId && dest === DendronASTDest.HTML) {
         // TODO: check for vault
         const notes = NoteUtilsV2.getNotesByFname({
           fname: value,
@@ -87,10 +89,6 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         if (error) {
           addError(proc, error);
           return "error with link";
-          // TODO: hack
-          // currently we don't check if wiki links are publishable inside a note ref
-          // will lead to us trying to publish a ref that can't be accessed
-          return "";
         } else {
           value = note!.id;
         }
@@ -111,7 +109,10 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
               vaults: engine.vaultsv3,
               vname: data.vaultName,
             });
-            const cpath = vault2Path({ wsRoot: engine.wsRoot, vault });
+            const cpath = vault2Path({
+              wsRoot: engine.wsRoot,
+              vault: MDUtilsV4.getVault(proc),
+            });
             const npath = vault2Path({
               vault: vaultByName!,
               wsRoot: engine.wsRoot,

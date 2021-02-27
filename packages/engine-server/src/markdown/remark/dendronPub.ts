@@ -27,7 +27,7 @@ type PluginOpts = NoteRefsOpts & {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  const { dest, vault, fname, config, overrides } = MDUtilsV4.getDendronData(
+  let { dest, vault, fname, config, overrides } = MDUtilsV4.getDendronData(
     proc
   );
   function transformer(tree: Node, _file: VFile) {
@@ -73,6 +73,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         let valueOrig = value;
         let canPublish = true;
         const data = _node.data;
+        vault = MDUtilsV4.getVault(proc, data.vaultName);
         if (error) {
           addError(proc, error);
         }

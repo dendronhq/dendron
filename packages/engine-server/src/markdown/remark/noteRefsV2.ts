@@ -124,7 +124,6 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         return `![[${vaultPrefix}${link}${suffix}]]`;
       }
 
-      debugger;
       const { error, data } = convertNoteRef({
         link: ndata.link,
         proc,

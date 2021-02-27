@@ -9,6 +9,7 @@ import { Processor } from "unified";
 import { LinkFilter } from "../topics/markdown/plugins/types";
 import { DendronPubOpts } from "./remark/dendronPub";
 import { WikiLinksOpts } from "./remark/wikiLinks";
+export { Node as UnistNode } from "unist";
 export { VFile } from "vfile";
 export { Processor };
 

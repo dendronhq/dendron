@@ -11,6 +11,7 @@ site:
     copyAssets: true
     siteHierarchies:
         - dendron
+        - bar
     siteRootDir: docs
     logo: vault/assets/images/logo.png
     siteFaviconPath: vault/assets/images/favicon.ico

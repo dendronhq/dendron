@@ -1,5 +1,10 @@
 import { getSlugger, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
-import { NoteTestUtilsV3, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
+import {
+  ENGINE_HOOKS_MULTI,
+  NoteTestUtilsV4,
+  NOTE_PRESETS_V4,
+} from "@dendronhq/common-test-utils";
+import { callSetupHook, SETUP_HOOK_KEYS } from "@dendronhq/engine-test-utils";
 import assert from "assert";
 import { describe } from "mocha";
 import path from "path";
@@ -8,11 +13,8 @@ import { TextEditor } from "vscode";
 import DefinitionProvider from "../../features/DefinitionProvider";
 import { VSCodeUtils } from "../../utils";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
-import { LINKS_PRESETS } from "../presets/LinkPresets";
 import { expect, LocationTestUtils } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-
-const { NOTES_DIFF_VAULT } = LINKS_PRESETS;
 
 async function provide(editor: TextEditor) {
   const doc = editor?.document as vscode.TextDocument;
@@ -25,7 +27,7 @@ async function provide(editor: TextEditor) {
   return locations;
 }
 
-suite.skip("DefinitionProvider", function () {
+suite("DefinitionProvider", function () {
   let ctx: vscode.ExtensionContext;
 
   ctx = setupBeforeAfter(this, {
@@ -63,23 +65,46 @@ suite.skip("DefinitionProvider", function () {
       });
     });
 
+    test("basic with vault prefix", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        onInit: async ({ engine, wsRoot }) => {
+          const note = engine.notes["alpha"];
+          const beta = engine.notes["beta"];
+          const editor = await VSCodeUtils.openNote(note);
+          const location = (await provide(editor)) as vscode.Location;
+          expect(location.uri.fsPath).toEqual(
+            NoteUtilsV2.getPathV4({ wsRoot, note: beta })
+          );
+          done();
+        },
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await callSetupHook(SETUP_HOOK_KEYS.WITH_LINKS, {
+            workspaceType: "single",
+            wsRoot,
+            vaults,
+            withVaultPrefix: true,
+          });
+        },
+      });
+    });
+
     test("with anchor", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ wsRoot, vaults }) => {
           const vault = vaults[0];
           await GOTO_NOTE_PRESETS.ANCHOR.preSetupHook({ wsRoot, vaults });
-          await NoteTestUtilsV3.createNote({
+          await NoteTestUtilsV4.createNote({
             fname: "beta",
             vault,
             body: `[[alpha#h3]]`,
+            wsRoot,
           });
         },
-        onInit: async ({ vaults }) => {
-          const notePath = path.join(vaults[0].fsPath, "beta.md");
-          const editor = await VSCodeUtils.openFileInEditor(
-            vscode.Uri.file(notePath)
-          );
+        onInit: async ({ engine }) => {
+          const note = engine.notes["beta"];
+          const editor = await VSCodeUtils.openNote(note);
           const doc = editor?.document as vscode.TextDocument;
           const provider = new DefinitionProvider();
           const pos = LocationTestUtils.getPresetWikiLinkPosition();
@@ -118,7 +143,7 @@ suite.skip("DefinitionProvider", function () {
           const editor = await VSCodeUtils.openNote(noteWithLink);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath).toEqual(
-            NoteUtilsV2.getPathV4({ wsRoot: _wsRoot, note: noteWithLink })
+            NoteUtilsV2.getPathV4({ wsRoot: _wsRoot, note: noteWithTarget })
           );
           done();
         },
@@ -138,17 +163,16 @@ suite.skip("DefinitionProvider", function () {
             wsRoot,
             vaults: [vault],
           }));
-          await NoteTestUtilsV3.createNote({
+          await NoteTestUtilsV4.createNote({
             fname: "beta",
             vault,
             body: `[[alpha#${getSlugger().slug(specialCharsHeader)}]]`,
+            wsRoot,
           });
         },
-        onInit: async ({ vaults }) => {
-          const notePath = path.join(vaults[0].fsPath, "beta.md");
-          const editor = await VSCodeUtils.openFileInEditor(
-            vscode.Uri.file(notePath)
-          );
+        onInit: async ({ engine }) => {
+          const note = engine.notes["beta"];
+          const editor = await VSCodeUtils.openNote(note);
           const doc = editor?.document as vscode.TextDocument;
           const provider = new DefinitionProvider();
           const pos = LocationTestUtils.getPresetWikiLinkPosition();
@@ -172,13 +196,12 @@ suite.skip("DefinitionProvider", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         preSetupHook: async ({ vaults, wsRoot }) => {
-          await NOTES_DIFF_VAULT.preSetupHook({ wsRoot, vaults });
+          await ENGINE_HOOKS_MULTI.setupLinksMulti({ wsRoot, vaults });
         },
-        onInit: async ({ vaults }) => {
-          const editor = await VSCodeUtils.openNoteByPath({
-            vault: vaults[0],
-            fname: "alpha",
-          });
+        onInit: async ({ engine, vaults, wsRoot }) => {
+          const note = engine.notes["alpha"];
+          const editor = await VSCodeUtils.openNote(note);
+
           const doc = editor?.document as vscode.TextDocument;
           const provider = new DefinitionProvider();
           const locations = (await provider.provideDefinition(
@@ -186,9 +209,38 @@ suite.skip("DefinitionProvider", function () {
             LocationTestUtils.getPresetWikiLinkPosition(),
             null as any
           )) as vscode.Location;
-          assert.strictEqual(
-            locations.uri.fsPath,
-            path.join(vaults[1].fsPath, "beta.md")
+          expect(locations.uri.fsPath).toEqual(
+            path.join(wsRoot, vaults[1].fsPath, "beta.md")
+          );
+          done();
+        },
+      });
+    });
+
+    test("basic with vault prefix", (done) => {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: async ({ vaults, wsRoot }) => {
+          await callSetupHook(SETUP_HOOK_KEYS.WITH_LINKS, {
+            workspaceType: "multi",
+            wsRoot,
+            vaults,
+            withVaultPrefix: true,
+          });
+        },
+        onInit: async ({ engine, vaults, wsRoot }) => {
+          const note = engine.notes["alpha"];
+          const editor = await VSCodeUtils.openNote(note);
+
+          const doc = editor?.document as vscode.TextDocument;
+          const provider = new DefinitionProvider();
+          const locations = (await provider.provideDefinition(
+            doc,
+            LocationTestUtils.getPresetWikiLinkPosition(),
+            null as any
+          )) as vscode.Location;
+          expect(locations.uri.fsPath).toEqual(
+            path.join(wsRoot, vaults[1].fsPath, "beta.md")
           );
           done();
         },

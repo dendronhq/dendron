@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteUtilsV2, VaultUtils } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import vscode, { Location, Position, Uri } from "vscode";
@@ -17,10 +17,18 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     if (!refAtPos) {
       return;
     }
+    let vault = undefined;
     const engine = DendronWorkspace.instance().getEngine();
+    if (refAtPos.vaultName) {
+      vault = VaultUtils.getVaultByName({
+        vaults: engine.vaultsv3,
+        vname: refAtPos.vaultName,
+      });
+    }
     const notes = NoteUtilsV2.getNotesByFname({
       fname: refAtPos.ref,
       notes: engine.notes,
+      vault,
     });
     const uris = notes.map((note) =>
       Uri.file(
@@ -34,7 +42,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       const loc = out[0];
       if (refAtPos.anchor) {
         const text = fs.readFileSync(loc.uri.fsPath, { encoding: "utf8" });
-        const pos = await findHeaderPos({
+        const pos = findHeaderPos({
           anchor: refAtPos.anchor.value,
           text,
         });

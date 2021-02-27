@@ -1,5 +1,6 @@
 import _ from "lodash";
 import path from "path";
+import { CONSTANTS } from "./constants";
 import { DendronError } from "./error";
 import { DVault } from "./typesv2";
 
@@ -122,4 +123,8 @@ export class VaultUtils {
   static normPathByWsRoot = (opts: { fsPath: string; wsRoot: string }) => {
     return path.relative(opts.wsRoot, opts.fsPath);
   };
+
+  static toURIPrefix(vault: DVault) {
+    return CONSTANTS.DENDRON_DELIMETER + VaultUtils.getName(vault);
+  }
 }

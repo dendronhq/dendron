@@ -8,7 +8,7 @@ import { ENGINE_QUERY_PRESETS } from "./query";
 import { ENGINE_RENAME_PRESETS } from "./rename";
 import { ENGINE_UPDATE_PRESETS } from "./update";
 import { ENGINE_WRITE_PRESETS, ENGINE_WRITE_PRESETS_MULTI } from "./write";
-export { ENGINE_HOOKS, ENGINE_HOOKS_MULTI } from "./utils";
+export { ENGINE_HOOKS, ENGINE_HOOKS_BASE, ENGINE_HOOKS_MULTI } from "./utils";
 export { ENGINE_RENAME_PRESETS };
 export { ENGINE_QUERY_PRESETS };
 export { ENGINE_WRITE_PRESETS };

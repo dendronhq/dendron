@@ -1,5 +1,5 @@
-import { DNoteAnchor, NoteUtilsV2 } from "@dendronhq/common-all";
-import { DLinkType } from "@dendronhq/common-all";
+import { DLinkType, DNoteAnchor, NoteUtilsV2 } from "@dendronhq/common-all";
+import { LinkUtils } from "@dendronhq/engine-server";
 import { sort as sortPaths } from "cross-path-sort";
 import fs from "fs";
 import _ from "lodash";
@@ -19,6 +19,7 @@ export type RefT = {
   label: string;
   ref: string;
   anchor?: DNoteAnchor;
+  vaultName?: string;
 };
 
 export type FoundRefT = {
@@ -177,6 +178,7 @@ export const getReferenceAtPosition = (
   label: string;
   anchor?: DNoteAnchor;
   refType?: DLinkType;
+  vaultName?: string;
 } | null => {
   let refType: DLinkType | undefined;
   if (
@@ -212,7 +214,9 @@ export const getReferenceAtPosition = (
   }
 
   const docText = document.getText(range);
-  const { ref, label, anchor } = parseRef(
+
+  // don't incldue surrounding fluff for definition
+  const { ref, label, anchor, vaultName } = parseRef(
     docText.replace("![[", "").replace("[[", "").replace("]]", "")
   );
 
@@ -232,6 +236,7 @@ export const getReferenceAtPosition = (
     range,
     anchor,
     refType,
+    vaultName,
   };
 };
 
@@ -256,6 +261,11 @@ export const parseRef = (rawRef: string): RefT => {
     const [ref, ...anchor] = out.ref.split("#");
     out.ref = ref;
     out.anchor = { type: "header", value: anchor[0] };
+  }
+  const { link, vaultName } = LinkUtils.parseDendronURI(out.ref);
+  if (vaultName) {
+    out.vaultName = vaultName;
+    out.ref = link;
   }
   return out;
 };

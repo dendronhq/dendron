@@ -272,15 +272,30 @@ export const setupEmpty: PreSetupHookFunction = async ({ vaults, wsRoot }) => {
 };
 
 export const setupLinks: PreSetupHookFunction = async ({ vaults, wsRoot }) => {
-  const vault = vaults[0];
+  return setupLinksBase({ wsRoot, vaults: [vaults[0], vaults[0]] });
+};
+
+export const setupLinksMulti: PreSetupHookFunction = async ({
+  vaults,
+  wsRoot,
+}) => {
+  return setupLinksBase({ wsRoot, vaults });
+};
+
+export const setupLinksBase: PreSetupHookFunction = async ({
+  vaults,
+  wsRoot,
+}) => {
+  const vault1 = vaults[0];
+  const vault2 = vaults[1];
   // create note with wikilink
   await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
-    vault,
+    vault: vault1,
     wsRoot,
   });
   // create note with relative wikilink
   await NOTE_PRESETS_V4.NOTE_WITH_ANCHOR_LINK.create({
-    vault,
+    vault: vault2,
     wsRoot,
   });
   // create note with labeld wikilink
@@ -288,8 +303,15 @@ export const setupLinks: PreSetupHookFunction = async ({ vaults, wsRoot }) => {
     wsRoot,
     body: "[[some label|beta]]",
     fname: "omega",
-    vault: vault,
+    vault: vault1,
   });
+};
+
+export const setupLinksWithVaultBase: PreSetupHookFunction = async ({
+  vaults,
+  wsRoot,
+}) => {
+  await setupLinksBase({ vaults, wsRoot });
 };
 
 export const setupRefs: PreSetupHookFunction = async ({ vaults, wsRoot }) => {
@@ -331,6 +353,10 @@ export const setupRefs: PreSetupHookFunction = async ({ vaults, wsRoot }) => {
   });
 };
 
+export const ENGINE_HOOKS_BASE = {
+  WITH_LINKS: setupLinksBase,
+};
+
 export const ENGINE_HOOKS = {
   setupBasic,
   setupSchemaPreseet,
@@ -344,5 +370,6 @@ export const ENGINE_HOOKS = {
 
 export const ENGINE_HOOKS_MULTI = {
   setupBasicMulti,
+  setupLinksMulti,
   setupSchemaPresetWithNamespaceTemplateMulti,
 };

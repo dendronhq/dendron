@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`basics no publish basic 1`] = `
+exports[`dendronPub no publish basic 1`] = `
 VFile {
   "contents": "<p><a data-toggle=\\"popover\\" title=\\"This page has not yet sprouted\\" style=\\"cursor: pointer\\" data-content=\\"<a href=&#x22;https://dendron.so/&#x22;>Dendron</a> (the tool used to generate this site) lets authors selective publish content. You will see this page whenever you click on a link to an unpublished page
 
@@ -12,7 +12,7 @@ VFile {
 }
 `;
 
-exports[`basics no publish inside note ref, note ref link 1`] = `
+exports[`dendronPub no publish inside note ref, note ref link 1`] = `
 VFile {
   "contents": "<p></p><p></p><p></p>",
   "cwd": "<PROJECT_ROOT>",
@@ -22,7 +22,7 @@ VFile {
 }
 `;
 
-exports[`basics no publish inside note ref, wikilink 1`] = `
+exports[`dendronPub no publish inside note ref, wikilink 1`] = `
 VFile {
   "contents": "<p><a data-toggle=\\"popover\\" title=\\"This page has not yet sprouted\\" style=\\"cursor: pointer\\" data-content=\\"<a href=&#x22;https://dendron.so/&#x22;>Dendron</a> (the tool used to generate this site) lets authors selective publish content. You will see this page whenever you click on a link to an unpublished page
 

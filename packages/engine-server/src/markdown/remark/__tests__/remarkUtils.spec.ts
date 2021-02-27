@@ -12,6 +12,8 @@ describe("h1ToTitle", () => {
         const proc = MDUtilsV4.procFull({
           dest: DendronASTDest.MD_REGULAR,
           engine,
+          fname: "",
+          vault: {} as any,
         });
         // @ts-ignore
         const notes = await Promise.all(

@@ -9,7 +9,7 @@ import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
-suite("notes", function () {
+suite("GoToSibling", function () {
   let ctx: vscode.ExtensionContext;
   let direction = "next" as const;
 
@@ -252,6 +252,7 @@ suite("notes", function () {
       postSetupHook: async ({ wsRoot, vaults }) => {
         await createNotes(wsRoot, vaults[0]);
         await createNotes(wsRoot, vaults[1]);
+        await createNotes(wsRoot, vaults[2]);
       },
       onInit: async ({ vaults, wsRoot }) => {
         await _.reduce(

@@ -17,7 +17,12 @@ function proc(
   dendron: DendronASTData,
   opts?: DendronPubOpts
 ) {
-  return MDUtilsV4.procFull({ engine, ...dendron, publishOpts: opts });
+  return MDUtilsV4.procFull({
+    fname: "PLACEHOLDER",
+    engine,
+    ...dendron,
+    publishOpts: opts,
+  });
 }
 
 describe("backlinks", () => {

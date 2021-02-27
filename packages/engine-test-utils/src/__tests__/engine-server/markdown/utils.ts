@@ -13,6 +13,7 @@ export const createProcForTest = (opts: {
   const proc2 = MDUtilsV4.procFull({
     engine,
     dest,
+    fname: "PLACEHOLDER",
     vault,
     wikiLinksOpts: {
       useId: opts.useIdAsLink,

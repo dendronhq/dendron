@@ -73,11 +73,6 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       limit: 99999,
       exit: true,
     });
-    const proc = MDUtilsV4.procFull({
-      dest: DendronASTDest.MD_DENDRON,
-      engine,
-      mathOpts: { katex: true },
-    });
     let notes = query
       ? engine.queryNotesSync({ qs: query }).data
       : _.values(engine.notes);
@@ -100,6 +95,13 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       case DoctorActions.H1_TO_TITLE: {
         doctorAction = async (note: NotePropsV2) => {
           let changes: NoteChangeEntry[] = [];
+          const proc = MDUtilsV4.procFull({
+            dest: DendronASTDest.MD_DENDRON,
+            engine,
+            mathOpts: { katex: true },
+            fname: note.fname,
+            vault: note.vault,
+          });
           const newBody = await proc()
             .use(RemarkUtils.h1ToTitle(note, changes))
             .process(note.body);
@@ -119,6 +121,13 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
       case DoctorActions.HI_TO_H2: {
         doctorAction = async (note: NotePropsV2) => {
           let changes: NoteChangeEntry[] = [];
+          const proc = MDUtilsV4.procFull({
+            dest: DendronASTDest.MD_DENDRON,
+            engine,
+            mathOpts: { katex: true },
+            fname: note.fname,
+            vault: note.vault,
+          });
           const newBody = await proc()
             .use(RemarkUtils.h1ToH2(note, changes))
             .process(note.body);

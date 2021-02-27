@@ -8,7 +8,7 @@ import { WindowWatcher } from "../../windowWatcher";
 import { runSingleVaultTest } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 
-suite("notes", function () {
+suite("WindowWatcher", function () {
   let ctx: vscode.ExtensionContext;
   let watcher: WindowWatcher;
 

@@ -154,6 +154,7 @@ describe("compilev2", () => {
     setupFunc: async ({ engine, vaults, extra }) => {
       const proc2 = await MDUtilsV4.procFull({
         engine,
+        fname: "foo",
         wikiLinksOpts: { useId: true },
         dest: extra.dest,
         vault: vaults[0],
@@ -471,6 +472,7 @@ describe("compilev2", () => {
         engine,
         dest: extra.dest,
         vault: vaults[0],
+        fname: "PLACEHOLDER",
       }).process(linkWithNoExtension);
       return { resp };
     },
@@ -584,6 +586,7 @@ describe("compilev2", () => {
         engine,
         dest: extra.dest,
         vault: vaults[0],
+        fname: "PLACEHOLDER",
       }).process(note.body);
       return { resp };
     },
@@ -627,6 +630,7 @@ describe("compilev2", () => {
         engine,
         dest: extra.dest,
         vault: vaults[0],
+        fname: "PLACEHOLDER",
       }).process(note.body);
       return { resp };
     },

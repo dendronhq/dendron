@@ -57,18 +57,19 @@ type ProcParseOpts = {
 type ProcOptsFull = ProcOpts & {
   dest: DendronASTDest;
   shouldApplyPublishRules?: boolean;
-  vault?: DVault;
+  vault: DVault;
   config?: DendronConfig;
-  fname?: string;
-  wikiLinksOpts?: WikiLinksOpts;
-  noteRefOpts?: NoteRefsOpts;
-  publishOpts?: DendronPubOpts;
+  fname: string;
   mathOpts?: {
     katex?: boolean;
   };
   mermaid?: boolean;
   noteRefLvl?: number;
   usePrettyRefs?: boolean;
+  // shouldn't need to be used
+  wikiLinksOpts?: WikiLinksOpts;
+  noteRefOpts?: NoteRefsOpts;
+  publishOpts?: DendronPubOpts;
 };
 
 enum DendronProcDataKeys {
@@ -228,7 +229,7 @@ export class MDUtilsV4 {
   }
 
   /**
-   * Get remark processor with a few extras
+   * Get remark processor with a few default plugins
    */
   static remark() {
     let _proc = remark()
@@ -252,6 +253,9 @@ export class MDUtilsV4 {
     return _proc;
   }
 
+  /**
+   * Used to build other proces from
+   */
   static proc(opts: ProcOpts) {
     const { engine } = opts;
     const errors: DendronError[] = [];
@@ -266,7 +270,8 @@ export class MDUtilsV4 {
   }
 
   static procFull(opts: ProcOptsFull) {
-    const { dest, vault, fname, config, shouldApplyPublishRules } = opts;
+    const { dest, vault, fname, shouldApplyPublishRules, engine } = opts;
+    const config = opts.config || engine.config;
     let proc = this.proc(opts);
     if (vault && fname) {
       const engine = MDUtilsV4.getEngineFromProc(proc).engine;
@@ -331,12 +336,18 @@ export class MDUtilsV4 {
     return proc;
   }
 
+  /**
+   * Just parse markdown
+   */
   static procRemark(opts: { proc?: Processor }) {
     const { proc } = opts;
     let _proc = proc || this.remark();
     return _proc.use(remarkParse, { gfm: true }).use(remarkStringify);
   }
 
+  /**
+   * markdown -> html
+   */
   static procRehype(opts: {
     proc?: Processor;
     mdPlugins?: Processor[];

@@ -94,6 +94,7 @@ describe("compilev2", () => {
         wikiLinksOpts: { useId: true },
         dest: extra.dest,
         vault: vaults[0],
+        fname: "PLACEHOLDER",
       });
       const resp = await proc2.process(linkWithNoExtension);
       return { resp, proc };
@@ -225,6 +226,7 @@ describe("compilev2", () => {
         engine,
         dest: extra.dest,
         vault: vaults[0],
+        fname: "PLACEHOLDER",
       }).process(linkWithNoExtension);
       return { resp };
     },
@@ -294,6 +296,7 @@ describe("compilev2", () => {
         engine,
         dest: extra.dest,
         vault: vaults[0],
+        fname: "PLACEHOLDER",
       }).process(note.body);
       return { resp };
     },

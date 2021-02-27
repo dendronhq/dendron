@@ -50,6 +50,7 @@ export class ParserUtilsV2 {
 
   /**
    * - parse frontmatter
+   @deprecated
    * - parse wiki links
    * @param opts
    */

@@ -42,6 +42,7 @@ export const createProc = async (
         dest: extra.dest,
         fname: "foo",
         vault: vaults[0],
+        config: engine.config,
       },
       procOverride
     )

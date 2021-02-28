@@ -609,6 +609,7 @@
         "@types/mocha": "^7.0.2",
         "@types/node": "^13.11.0",
         "@types/open": "^6.2.1",
+        "@types/open-graph-scraper": "^4.7.0",
         "@types/semver": "^7.3.1",
         "@types/vscode": "^1.45.0",
         "@typescript-eslint/eslint-plugin": "^2.30.0",
@@ -641,6 +642,7 @@
         "markdown-it": "^11.0.0",
         "markdown-it-regex": "^0.2.0",
         "open": "^7.0.4",
+        "open-graph-scraper": "^4.7.1",
         "semver": "^7.3.2",
         "vscode-languageclient": "^6.1.3"
     }

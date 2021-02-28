@@ -38,7 +38,11 @@ router.post("/rename", async (req: Request, res: Response) => {
   const resp = await NoteController.instance().rename(
     req.body as EngineRenameNoteRequest
   );
-  res.json(resp);
+  if (resp.error) {
+    res.status(400).json({ error: resp.error });
+  } else {
+    res.json(resp);
+  }
 });
 
 router.get("/query", async (req: Request, res: Response) => {

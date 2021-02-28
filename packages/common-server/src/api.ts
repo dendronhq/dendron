@@ -1,17 +1,13 @@
 import {
-  ConfigWriteOpts,
-  EngineInfoResp,
-  RespRequiredV2,
-  RespV2,
-} from "@dendronhq/common-all";
-import {
   ConfigGetPayload,
+  ConfigWriteOpts,
   DendronError,
   DEngineDeleteSchemaPayloadV2,
   DEngineQuery,
   DNodePropsV2,
   EngineDeleteNotePayload,
   EngineDeleteOptsV2,
+  EngineInfoResp,
   EngineQueryNoteResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
@@ -21,6 +17,8 @@ import {
   NotePropsV2,
   RenameNoteOptsV2,
   RenameNotePayload,
+  RespRequiredV2,
+  RespV2,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
   WriteNoteResp,
@@ -285,7 +283,12 @@ export abstract class API {
         }
 
         // trigger handler
-        this._log({ ctx: "post-request-exit", resp, respHandler }, "debug");
+        const { statusCode, body } = resp;
+        const { error } = body;
+        this._log(
+          { ctx: "post-request-exit", statusCode, error, respHandler },
+          "debug"
+        );
         return respHandler({ resp });
       }
     );

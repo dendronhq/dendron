@@ -607,6 +607,7 @@ export class FileStorageV2 implements DStoreV2 {
       note: oldNote,
       notes: this.notes,
     });
+    this.logger.info({ ctx, msg: "notesToChange:gather" });
     // update note body of all notes that have changed
     const notesChanged = await Promise.all(
       notesToChange.map(async (n) => {
@@ -632,13 +633,31 @@ export class FileStorageV2 implements DStoreV2 {
     };
 
     // NOTE: order matters. need to delete old note, otherwise can't write new note
+    this.logger.info({
+      ctx,
+      msg: "deleteNote:meta:pre",
+      note: NoteUtilsV2.toLogObj(oldNote),
+    });
     const changedFromDelete = await this.deleteNote(oldNote.id, {
       metaOnly: true,
     });
+    this.logger.info({
+      ctx,
+      msg: "writeNewNote:pre",
+      note: NoteUtilsV2.toLogObj(newNote),
+    });
     await this.writeNote(newNote, { newNode: true });
+    this.logger.info({ ctx, msg: "updateAllNotes:pre" });
     // update all new notes
     await Promise.all(
-      notesChanged.map(async (n) => this.writeNote(n, { updateExisting: true }))
+      notesChanged.map(async (n) => {
+        this.logger.info({
+          ctx,
+          msg: "writeNote:pre",
+          note: NoteUtilsV2.toLogObj(n),
+        });
+        return this.writeNote(n, { updateExisting: true });
+      })
     );
     let out: NoteChangeEntry[] = notesChanged.map((note) => ({
       status: "update" as const,
@@ -666,7 +685,7 @@ export class FileStorageV2 implements DStoreV2 {
       note = NoteUtilsV2.hydrate({ noteRaw: note, noteHydrated: maybeNote });
     }
     // TODO: remove
-    this.logger.debug({ ctx, note });
+    this.logger.debug({ ctx, note: NoteUtilsV2.toLogObj(note) });
     this.notes[note.id] = note;
     return;
   }

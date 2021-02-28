@@ -81,26 +81,6 @@ const genLaunchJSON = (opts) => {
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     version: "0.2.0",
     configurations: [
-      //   {
-      //     type: "node",
-      //     request: "launch",
-      //     name: "test file",
-      //     program:
-      //       "${workspaceFolder:engine-server}/lib/${fileBasenameNoExtension}.js",
-      //     cwd: "${workspaceFolder:engine-server}",
-      //     sourceMaps: true,
-      //     smartStep: true,
-      //     outFiles: ["${workspaceFolder:engine-server}/lib/*.js"],
-      //   },
-      //   {
-      //     type: "node",
-      //     request: "launch",
-      //     name: "debug all tests",
-      //     program:
-      //       "${workspaceFolder:engine-server}/node_modules/jest/bin/jest.js",
-      //     cwd: "${workspaceFolder:engine-server}",
-      //     args: ["--runInBand"],
-      //   },
       {
         type: "node",
         request: "launch",

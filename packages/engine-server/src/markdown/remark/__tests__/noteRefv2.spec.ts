@@ -472,7 +472,7 @@ describe("compilev2", () => {
         engine,
         dest: extra.dest,
         vault: vaults[0],
-        fname: "PLACEHOLDER",
+        fname: "root",
       }).process(linkWithNoExtension);
       return { resp };
     },
@@ -586,7 +586,7 @@ describe("compilev2", () => {
         engine,
         dest: extra.dest,
         vault: vaults[0],
-        fname: "PLACEHOLDER",
+        fname: "root",
       }).process(note.body);
       return { resp };
     },
@@ -630,7 +630,7 @@ describe("compilev2", () => {
         engine,
         dest: extra.dest,
         vault: vaults[0],
-        fname: "PLACEHOLDER",
+        fname: "root",
       }).process(note.body);
       return { resp };
     },

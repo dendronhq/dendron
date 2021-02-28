@@ -95,11 +95,10 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
               value = "403";
               addError(proc, new DendronError({ msg: "no note or config" }));
             } else {
-              const wsRoot = engine.wsRoot;
               canPublish = SiteUtils.canPublish({
                 note,
                 config,
-                wsRoot,
+                engine,
               });
               if (!canPublish) {
                 value = "403";

@@ -1,4 +1,9 @@
-import { mdastBuilder, MDUtilsV4 } from "@dendronhq/engine-server";
+import {
+  DendronASTDest,
+  mdastBuilder,
+  MDUtilsV4,
+} from "@dendronhq/engine-server";
+import { testWithEngine } from "../engine";
 const { root, paragraph, link, listItem, text, heading, list } = mdastBuilder;
 
 describe("proto", () => {
@@ -25,6 +30,17 @@ describe("proto", () => {
     const proc = MDUtilsV4.remark();
 
     const output = await proc.parse(["line one", "***", "line two"].join("\n"));
+    expect(output).toMatchSnapshot();
+  });
+
+  testWithEngine("wiilinks as list", async ({ engine, vaults }) => {
+    const proc = MDUtilsV4.procFull({
+      dest: DendronASTDest.MD_DENDRON,
+      engine,
+      fname: "foo",
+      vault: vaults[0],
+    });
+    const output = await proc.parse(["- [[one]]", "- [[two]]"].join("\n"));
     expect(output).toMatchSnapshot();
   });
 });

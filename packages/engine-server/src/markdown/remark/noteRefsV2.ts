@@ -328,7 +328,7 @@ export function convertNoteRefASTV2(
         !SiteUtils.canPublish({
           note,
           config: config!,
-          wsRoot: engine.wsRoot,
+          engine,
         })
       ) {
         // TODO: in the future, add 403 pages

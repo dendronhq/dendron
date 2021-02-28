@@ -33,9 +33,10 @@ export class SiteUtils {
   static canPublish(opts: {
     note: NotePropsV2;
     config: DendronConfig;
-    wsRoot: string;
+    engine: DEngineClientV2;
   }) {
-    const { note, config, wsRoot } = opts;
+    const { note, config, engine } = opts;
+    const { wsRoot, vaultsv3: vaults } = engine;
 
     // not private note
     if (note.custom?.published === false) {
@@ -57,10 +58,10 @@ export class SiteUtils {
     });
     const noteVault = VaultUtils.matchVault({
       vault: note.vault,
-      vaults: config.vaults,
+      vaults,
       wsRoot,
     });
-    assert(noteVault !== false, "noteVault should exist");
+    assert(noteVault !== false, `noteVault ${note.vault.fsPath} should exist`);
     const cNoteVault = noteVault as DVault;
     // not from private vault
     if (
@@ -160,9 +161,7 @@ export class SiteUtils {
       // special case, check if any of these children were supposed to be hidden
       domains = domains
         .concat(rootDomain.children.map((id) => notes[id]))
-        .filter((note) =>
-          this.canPublish({ note, config, wsRoot: engine.wsRoot })
-        );
+        .filter((note) => this.canPublish({ note, config, engine }));
     }
     logger.info({
       ctx: "filterByConfig",
@@ -230,7 +229,7 @@ export class SiteUtils {
     }
     if (
       _.isUndefined(domainNote) ||
-      !this.canPublish({ note: domainNote, config, wsRoot: engine.wsRoot })
+      !this.canPublish({ note: domainNote, config, engine })
     ) {
       return;
     }
@@ -292,7 +291,7 @@ export class SiteUtils {
           SiteUtils.canPublish({
             note,
             config,
-            wsRoot: engine.wsRoot,
+            engine,
           })
         );
         logger.debug({
@@ -449,7 +448,7 @@ export class SiteUtils {
           this.canPublish({
             config,
             note: maybeNote,
-            wsRoot: engine.wsRoot,
+            engine,
           })
         ) {
           domainNote = maybeNote;
@@ -484,7 +483,7 @@ export class SiteUtils {
         !this.canPublish({
           config,
           note: maybeDomainNotes[0],
-          wsRoot: engine.wsRoot,
+          engine,
         })
       ) {
         return;

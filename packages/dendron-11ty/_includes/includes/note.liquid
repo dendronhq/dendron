@@ -14,6 +14,4 @@ layout: layouts/single.liquid
 
 {% if note.custom.has_collection %}
 {{ note | toCollection: notesOnly}}
-{% else %}
-{{ note | toToc: notesOnly}}
 {% endif %}

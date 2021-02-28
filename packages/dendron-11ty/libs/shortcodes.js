@@ -173,28 +173,6 @@ function toNav() {
   return _NAV_CACHE[1];
 }
 
-function toToc(note, notesDict) {
-  if (note.children.length <= 0) {
-    return "";
-  }
-  const out = [`<hr>`, `<h2 class="text-delta">Table of contents</h2>`, `<ul>`];
-  // copied from bin/build-nav.js
-  let notesAtLevel = note.children.map((ent) => notesDict[ent]);
-  notesAtLevel = _.filter(notesAtLevel, (ent) => {
-    return !_.get(ent, "custom.nav_exclude", false);
-  });
-  notesAtLevel = _.sortBy(notesAtLevel, ["custom.nav_order", "title"]);
-  const allLevels = _.map(notesAtLevel, (node) => {
-    let level = [`<li>`];
-    let href = NOTE_UTILS.getAbsUrl(NOTE_UTILS.getUrl(node));
-
-    level.push(`<a href="${href}">${node.title}</a>`);
-    level.push(`</li>`);
-    return level;
-  });
-  return _.flatMap(out.concat(allLevels).concat(["</ul>"])).join("\n");
-}
-
 function genTemplate(node) {
   let out = [];
   let include = {};
@@ -304,7 +282,6 @@ module.exports = {
     eleventyConfig.addLiquidShortcode("nav", toNav);
     eleventyConfig.addLiquidShortcode("githubUrl", githubUrl);
     eleventyConfig.addLiquidShortcode("addHeader", addHeader);
-    eleventyConfig.addLiquidFilter("toToc", toToc);
     eleventyConfig.addLiquidFilter("ms2Date", ms2Date);
     eleventyConfig.addLiquidFilter("ms2ShortDate", ms2ShortDate);
     eleventyConfig.addLiquidFilter("markdownify", markdownfy);

@@ -22,6 +22,12 @@ VFile {
 </div>    
 </div>
 
+* * *
+
+## Children
+
+1. [Ch1](foo.ch1.html)
+
 ",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -70,18 +76,35 @@ VFile {
 
 blah
 
-  </div>    
-  </div>
-  
+* * *
+
+## Children
+
+1. [Foo](foo.html)
+
+   </div>    
+   </div>
+
 Regular wikilink: [foo.two](foo.two.html)
-  
-  </div>    
-  </div>
-  
+
+* * *
+
+## Children
+
+1. [Foo](foo.html)
+
+   </div>    
+   </div>
 
 
 </div>    
 </div>
+
+* * *
+
+## Children
+
+1. [Foo](foo.html)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -108,6 +131,13 @@ foo body
 
 </div>    
 </div>
+
+* * *
+
+## Children
+
+1. [Bar](bar.html)
+2. [Foo](foo.html)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -162,6 +192,12 @@ journal3
 
 </div>    
 </div>
+
+* * *
+
+## Children
+
+1. [Journal](journal.html)
 
 ",
   "cwd": "<PROJECT_ROOT>",

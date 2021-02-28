@@ -120,9 +120,21 @@ VFile {
   <div class=\\"portal-parent-fader-bottom\\"></div>
   task2
 
+* * *
+
+## Children
+
+1. [Ch1](foo.ch1.html)
+
 
 </div>    
   </div>
+
+* * *
+
+## Children
+
+1. [Ch1](foo.ch1.html)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -146,9 +158,21 @@ VFile {
   <div class=\\"portal-parent-fader-bottom\\"></div>
   two content
 
+* * *
+
+## Children
+
+1. [One](one.html)
+
 
 </div>    
   </div>
+
+* * *
+
+## Children
+
+1. [One](one.html)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -196,18 +220,42 @@ VFile {
 
 blah
 
+* * *
+
+## Children
+
+1. [Foo](foo.html)
+
 
 </div>    
   </div>
 Regular wikilink: 
 
+* * *
+
+## Children
+
+1. [Foo](foo.html)
+
 
 </div>    
   </div>
 
+* * *
+
+## Children
+
+1. [Foo](foo.html)
+
 
 </div>    
   </div>
+
+* * *
+
+## Children
+
+1. [Foo](foo.html)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -231,9 +279,21 @@ VFile {
   <div class=\\"portal-parent-fader-bottom\\"></div>
   foo body
 
+* * *
+
+## Children
+
+1. [Ch1](foo.ch1.html)
+
 
 </div>    
   </div>
+
+* * *
+
+## Children
+
+1. [Ch1](foo.ch1.html)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -288,6 +348,12 @@ journal3
 
 </div>    
 </div>
+
+* * *
+
+## Children
+
+1. [Journal](journal.html)
 
 ",
   "cwd": "<PROJECT_ROOT>",

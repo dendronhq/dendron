@@ -596,6 +596,32 @@ export class NoteUtilsV2 {
     return out;
   }
 
+  static getNoteOrThrow({
+    fname,
+    notes,
+    vault,
+    wsRoot,
+  }: {
+    fname: string;
+    notes: NotePropsDictV2 | NotePropsV2[];
+    vault: DVault;
+    wsRoot: string;
+  }): NotePropsV2 {
+    if (!_.isArray(notes)) {
+      notes = _.values(notes);
+    }
+    const out = _.find(notes, (ent) => {
+      return (
+        ent.fname.toLowerCase() === fname.toLowerCase() &&
+        VaultUtils.isEqual(vault, ent.vault, wsRoot)
+      );
+    });
+    if (!out) {
+      throw new DendronError({ msg: `note ${fname} not found` });
+    }
+    return out;
+  }
+
   /**
    @deprecated
    */

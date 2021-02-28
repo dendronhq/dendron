@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`hierarchies single basic 1`] = `
+VFile {
+  "contents": "foo body
+
+* * *
+
+## Children
+
+1. [Ch1](foo.ch1.html)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;

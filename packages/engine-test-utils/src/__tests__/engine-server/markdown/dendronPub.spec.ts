@@ -11,8 +11,8 @@ import {
   DendronPubOpts,
   MDUtilsV4,
 } from "@dendronhq/engine-server";
-import _ from "lodash";
 import { testWithEngine } from "../../../engine";
+import { checkVFile } from "./utils";
 
 function proc(
   engine: DEngineClientV2,
@@ -20,7 +20,7 @@ function proc(
   opts?: DendronPubOpts
 ) {
   return MDUtilsV4.procFull({
-    fname: "PLACEHOLDER",
+    fname: "root",
     engine,
     ...dendron,
     publishOpts: opts,
@@ -41,27 +41,26 @@ describe("dendronPub", () => {
           assetsPrefix: "bond/",
         }
       ).processSync(`![alt-text](image-url.jpg)`);
-      expect(_.trim(out.toString())).toEqual(
-        "![alt-text](/bond/image-url.jpg)"
-      );
+      await checkVFile(out, "![alt-text](/bond/image-url.jpg)");
     });
 
-    testWithEngine("imagePrefix2", async ({ engine, vaults }) => {
-      const out = proc(
-        engine,
-        {
-          dest: DendronASTDest.HTML,
-          vault: vaults[0],
-          config: engine.config,
-        },
-        {
-          assetsPrefix: "/bond/",
-        }
-      ).processSync(`![alt-text](/image-url.jpg)`);
-      expect(_.trim(out.toString())).toEqual(
-        "![alt-text](/bond/image-url.jpg)"
-      );
-    });
+    testWithEngine(
+      "imagePrefix with forward slash",
+      async ({ engine, vaults }) => {
+        const out = proc(
+          engine,
+          {
+            dest: DendronASTDest.HTML,
+            vault: vaults[0],
+            config: engine.config,
+          },
+          {
+            assetsPrefix: "/bond/",
+          }
+        ).processSync(`![alt-text](/image-url.jpg)`);
+        await checkVFile(out, "![alt-text](/bond/image-url.jpg)");
+      }
+    );
   });
 
   describe("no publish", () => {

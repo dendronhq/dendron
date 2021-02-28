@@ -3,11 +3,9 @@ import {
   DEngineInitRespV2,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { tmpDir } from "@dendronhq/common-server";
 import assert from "assert";
 import _ from "lodash";
-import { EngineTestUtilsV3, NotePresetsUtils } from ".";
-import { PostSetupHookFunction, SetupHookFunction, TestResult } from "./types";
+import { SetupHookFunction, TestResult } from "./types";
 
 export const toPlainObject = <R>(value: unknown): R =>
   value !== undefined ? JSON.parse(JSON.stringify(value)) : value;
@@ -154,33 +152,3 @@ export type GenTestResults = (
 ) => Promise<TestResult[]>;
 
 export type CreateEngineFunction = (opts: WorkspaceOpts) => DEngineClientV2;
-
-// @deprecated
-export async function runEngineTest(
-  func: RunEngineTestFunction,
-  opts: {
-    preSetupHook?: SetupHookFunction;
-    postSetupHook?: PostSetupHookFunction;
-    createEngine: CreateEngineFunction;
-  }
-) {
-  const { preSetupHook, createEngine } = _.defaults(opts, {
-    preSetupHook: async ({}) => {},
-    postSetupHook: async ({}) => {},
-  });
-
-  const wsRoot = tmpDir().name;
-  const vaults = await EngineTestUtilsV3.setupVaults({
-    wsRoot,
-    initVault1: async (vaultDir: string) => {
-      await NotePresetsUtils.createBasic({ vaultDir, fname: "foo" });
-    },
-    initVault2: async (vaultDir: string) => {
-      await NotePresetsUtils.createBasic({ vaultDir, fname: "bar" });
-    },
-  });
-  await preSetupHook({ wsRoot, vaults });
-  const engine = createEngine({ wsRoot, vaults });
-  const initResp = await engine.init();
-  await func({ wsRoot, vaults, engine, initResp });
-}

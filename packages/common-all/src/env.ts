@@ -1,12 +1,13 @@
-import { ConfigKey, config } from "./config";
-
-import { Stage } from "./types";
 import _ from "lodash";
+import { config, ConfigKey } from "./config";
+import { Stage } from "./types";
 
 export function getStage(): Stage {
   // CRA overrides NODE_ENV to be dev by default
-  const { stage, NODE_ENV, STAGE, REACT_APP_STAGE } = process.env;
-  let stageOut = REACT_APP_STAGE || stage || STAGE || NODE_ENV;
+  // build_STAGE is from 11ty
+  const { stage, NODE_ENV, STAGE, REACT_APP_STAGE, BUILD_STAGE } = process.env;
+  //stage: process.env.BUILD_STAGE || process.env.STAGE || "dev",
+  let stageOut = REACT_APP_STAGE || BUILD_STAGE || stage || STAGE || NODE_ENV;
   // TODO
   if (stageOut === "development") {
     stageOut = "dev";

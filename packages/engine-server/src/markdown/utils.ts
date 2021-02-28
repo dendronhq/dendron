@@ -6,6 +6,7 @@ import {
   DVault,
   GetNoteOpts,
   getSlugger,
+  getStage,
   NotePropsDictV2,
   NotePropsV2,
   NoteUtilsV2,
@@ -19,6 +20,7 @@ import _ from "lodash";
 import { Heading } from "mdast";
 import { paragraph, root, text } from "mdast-builder";
 import nunjucks from "nunjucks";
+import path from "path";
 import link from "rehype-autolink-headings";
 // @ts-ignore
 import katex from "rehype-katex";
@@ -407,4 +409,65 @@ export class MDUtilsV4 {
     });
     return proc.use(transformLinks, transformOpts);
   }
+
+  static procHTML(procOpts: Omit<ProcOptsFull, "dest">) {
+    const { engine, vault, fname } = procOpts;
+    const config = procOpts.config || engine.config;
+    const siteNotesDir = config.site.siteNotesDir;
+    const absUrl = PublishUtils.getAbsUrlForAsset({ config });
+    const linkPrefix = absUrl + "/" + siteNotesDir + "/";
+    const wikiLinksOpts = { useId: true, prefix: linkPrefix };
+    const proc = MDUtilsV4.procFull({
+      engine,
+      dest: DendronASTDest.HTML,
+      vault,
+      fname,
+      wikiLinksOpts,
+      shouldApplyPublishRules: true,
+      noteRefOpts: { wikiLinkOpts: wikiLinksOpts, prettyRefs: true },
+      publishOpts: {
+        assetsPrefix:
+          getStage() === "prod" ? config.site.assetsPrefix : undefined,
+        insertTitle: config.useFMTitle,
+        transformNoPublish: true,
+      },
+      mathOpts: { katex: true },
+      mermaid: config.mermaid,
+      config,
+    });
+    return MDUtilsV4.procRehype({ proc, mathjax: true });
+  }
+}
+
+export class PublishUtils {
+  static getAbsUrlForAsset(opts: { suffix?: string; config: DendronConfig }) {
+    const suffix = opts.suffix || "";
+    const { config } = opts;
+    const { assetsPrefix } = config.site;
+    const siteUrl = this.getSiteUrl(config);
+    let sitePrefix = _.trimEnd(siteUrl, "/");
+    if (assetsPrefix) {
+      sitePrefix = _.join(
+        [_.trimEnd(siteUrl, "/"), _.trim(assetsPrefix, "/")],
+        "/"
+      );
+    }
+    if (siteUrl && getStage() !== "dev") {
+      const out = _.trimEnd(
+        _.join([sitePrefix, _.trim(suffix, "/")], "/"),
+        "/"
+      );
+      return out;
+    } else {
+      return (
+        "http://" +
+        path.posix.join(`localhost:${process.env.ELEV_PORT || 8080}`, suffix)
+      );
+    }
+  }
+
+  static getSiteUrl = (config: DendronConfig) => {
+    const siteUrl = process.env["SITE_URL"] || config.site.siteUrl;
+    return siteUrl;
+  };
 }

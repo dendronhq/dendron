@@ -1,0 +1,144 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SiteUtils xvault links can publish all 1`] = `
+Object {
+  "alpha": Object {
+    "body": "[[dendron://vault2/beta]]
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {
+      "nav_order": 0,
+      "permalink": "/",
+    },
+    "data": Object {},
+    "desc": "",
+    "fname": "alpha",
+    "id": "alpha",
+    "links": Array [
+      Object {
+        "alias": "beta",
+        "from": Object {
+          "fname": "alpha",
+          "id": "alpha",
+          "vault": Object {
+            "fsPath": "vault1",
+          },
+        },
+        "original": "beta",
+        "pos": Object {
+          "end": 25,
+          "start": 0,
+        },
+        "to": Object {
+          "anchorHeader": undefined,
+          "fname": "beta",
+          "vault": Object {
+            "fsPath": "vault2",
+          },
+        },
+        "type": "wiki",
+        "value": "beta",
+      },
+      Object {
+        "from": Object {
+          "fname": "beta",
+          "vault": Object {
+            "fsPath": "vault2",
+          },
+        },
+        "original": "alpha",
+        "pos": Object {
+          "end": 26,
+          "start": 0,
+        },
+        "type": "backlink",
+        "value": "alpha",
+      },
+      Object {
+        "from": Object {
+          "fname": "beta",
+          "vault": Object {
+            "fsPath": "vault1",
+          },
+        },
+        "original": "alpha",
+        "pos": Object {
+          "end": 26,
+          "start": 0,
+        },
+        "type": "backlink",
+        "value": "alpha",
+      },
+    ],
+    "parent": null,
+    "title": "Alpha",
+    "type": "note",
+    "updated": "1",
+    "vault": Object {
+      "fsPath": "vault1",
+    },
+  },
+  "beta": Object {
+    "body": "[[dendron://vault1/alpha]]
+",
+    "children": Array [],
+    "created": "1",
+    "custom": Object {
+      "nav_order": 1,
+    },
+    "data": Object {},
+    "desc": "",
+    "fname": "beta",
+    "id": "beta",
+    "links": Array [
+      Object {
+        "alias": "alpha",
+        "from": Object {
+          "fname": "beta",
+          "id": "beta",
+          "vault": Object {
+            "fsPath": "vault2",
+          },
+        },
+        "original": "alpha",
+        "pos": Object {
+          "end": 26,
+          "start": 0,
+        },
+        "to": Object {
+          "anchorHeader": undefined,
+          "fname": "alpha",
+          "vault": Object {
+            "fsPath": "vault1",
+          },
+        },
+        "type": "wiki",
+        "value": "alpha",
+      },
+      Object {
+        "from": Object {
+          "fname": "alpha",
+          "vault": Object {
+            "fsPath": "vault1",
+          },
+        },
+        "original": "beta",
+        "pos": Object {
+          "end": 25,
+          "start": 0,
+        },
+        "type": "backlink",
+        "value": "beta",
+      },
+    ],
+    "parent": null,
+    "title": "Beta",
+    "type": "note",
+    "updated": "1",
+    "vault": Object {
+      "fsPath": "vault2",
+    },
+  },
+}
+`;

@@ -17,7 +17,7 @@ import {
   NoteTestUtilsV4,
   SetupHookFunction,
 } from "@dendronhq/common-test-utils";
-import { SiteUtils } from "@dendronhq/engine-server";
+import { MDUtilsV4, SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import { ConfigUtils } from "../config";
@@ -25,7 +25,20 @@ import {
   createEngineFromEngine,
   createEngineFromServer,
   runEngineTestV5,
+  testWithEngine,
 } from "../engine";
+import { callSetupHook, SETUP_HOOK_KEYS } from "../presets";
+import { checkString } from "../utils";
+
+const getNotPublished = (body: string) => {
+  const matches = body
+    .split("\n")
+    .map((ent) => ent.match(/not-sprouted.*>beta</))
+    .filter((ent) => !_.isNull);
+  return matches;
+};
+// await checkString(resp.contents as string, "images/not-sprouted.png&#x27;></img>">beta</a></p>");
+// _.filter(resp.contents as string).indexOf())
 
 const basicSetup = (preSetupHook?: SetupHookFunction) => ({
   createEngine: createEngineFromEngine,
@@ -86,6 +99,108 @@ describe("SiteUtils", () => {
 
   beforeEach(() => {
     siteRootDir = tmpDir().name;
+  });
+
+  describe.only("xvault links", () => {
+    testWithEngine(
+      "can publish all",
+      async ({ engine, wsRoot, vaults }) => {
+        debugger;
+        const config = ConfigUtils.withConfig(
+          (config) => {
+            config.site = {
+              siteHierarchies: ["alpha", "beta"],
+              siteRootDir,
+              siteNotesDir: "docs",
+              ...dupNote(vaults[1]),
+            };
+            return config;
+          },
+          {
+            wsRoot,
+          }
+        );
+        const { notes } = await SiteUtils.filterByConfig({
+          engine,
+          config,
+        });
+        const alpha = notes["alpha"];
+        const beta = notes["beta"];
+        expect(notes).toMatchSnapshot();
+
+        const resp = await MDUtilsV4.procHTML({
+          config,
+          engine,
+          fname: "alpha",
+          vault: vaults[0],
+        }).process(alpha.body);
+        await checkString(
+          resp.contents as string,
+          "http://localhost:8080/docs/beta.html"
+        );
+        const resp2 = await MDUtilsV4.procHTML({
+          config,
+          engine,
+          fname: "beta",
+          vault: vaults[0],
+        }).process(beta.body);
+        await checkString(
+          resp2.contents as string,
+          "http://localhost:8080/docs/alpha.html"
+        );
+      },
+      {
+        preSetupHook: (opts) =>
+          callSetupHook(SETUP_HOOK_KEYS.WITH_LINKS, {
+            workspaceType: "multi",
+            ...opts,
+            withVaultPrefix: true,
+          }),
+      }
+    );
+
+    testWithEngine(
+      "can publish alpha",
+      async ({ engine, wsRoot, vaults }) => {
+        const config = ConfigUtils.withConfig(
+          (config) => {
+            config.site = {
+              siteHierarchies: ["alpha"],
+              siteRootDir,
+              ...dupNote(vaults[1]),
+            };
+            return config;
+          },
+          {
+            wsRoot,
+          }
+        );
+        const { notes } = await SiteUtils.filterByConfig({
+          engine,
+          config,
+        });
+        const alpha = notes["alpha"];
+        expect(_.values(notes)).toEqual([alpha]);
+        const resp = await MDUtilsV4.procHTML({
+          config,
+          engine,
+          fname: "alpha",
+          vault: vaults[0],
+        }).process(alpha.body);
+        await checkString(
+          resp.contents as string,
+          'images/not-sprouted.png&#x27;></img>">beta</a></p>'
+        );
+      },
+      {
+        preSetupHook: (opts) =>
+          callSetupHook(SETUP_HOOK_KEYS.WITH_LINKS, {
+            workspaceType: "multi",
+            ...opts,
+            withVaultPrefix: true,
+          }),
+      }
+    );
   });
 
   describe("gen", () => {

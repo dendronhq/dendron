@@ -87,6 +87,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           });
           const { error, note } = getNoteOrError(notes, value);
           if (error) {
+            debugger;
             value = "403";
             addError(proc, error);
           } else {

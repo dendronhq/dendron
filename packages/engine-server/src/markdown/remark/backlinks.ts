@@ -1,7 +1,7 @@
 import { NoteUtilsV2, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Content, Root } from "mdast";
-import { paragraph } from "mdast-builder";
+import { list, listItem, paragraph } from "mdast-builder";
 import Unified, { Plugin } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
@@ -38,22 +38,28 @@ const plugin: Plugin = function (this: Unified.Processor) {
         type: "thematicBreak",
       });
       root.children.push(u("heading", { depth: 2 }, [u("text", "Backlinks")]));
-      backlinks.forEach((mdLink) => {
-        const node = paragraph({
-          type: "wikiLink",
-          value: mdLink.from.fname,
-          data: {
-            alias:
-              mdLink.from.fname +
-              (engine.vaultsv3.length > 1
-                ? ` (${VaultUtils.getName(mdLink.from.vault!)})`
-                : ""),
-            vaultName: VaultUtils.getName(mdLink.from.vault!),
-          },
-          children: [],
-        } as WikiLinkNoteV4);
-        root.children.push(node as Content);
-      });
+      root.children.push(
+        list(
+          "unordered",
+          backlinks.map((mdLink) => {
+            return listItem(
+              paragraph({
+                type: "wikiLink",
+                value: mdLink.from.fname,
+                data: {
+                  alias:
+                    mdLink.from.fname +
+                    (engine.vaultsv3.length > 1
+                      ? ` (${VaultUtils.getName(mdLink.from.vault!)})`
+                      : ""),
+                  vaultName: VaultUtils.getName(mdLink.from.vault!),
+                },
+                children: [],
+              } as WikiLinkNoteV4)
+            );
+          })
+        ) as Content
+      );
     }
 
     // end transformer

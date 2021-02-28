@@ -21,8 +21,6 @@ import {
   processText,
 } from "./utils";
 
-const IMAGE_LINK = `![alt-text](image-url.jpg)`;
-
 // --- Utils
 const readAndProcess = (opts: { npath: string; proc: Processor }) => {
   const { npath, proc } = opts;

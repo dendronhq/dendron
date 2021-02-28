@@ -1,17 +1,13 @@
 import { WorkspaceOpts } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
-import {
-  AssertUtils,
-  NoteTestUtilsV4,
-  runEngineTestV4,
-} from "@dendronhq/common-test-utils";
-import { createEngine } from "@dendronhq/engine-server";
-import path from "path";
+import { AssertUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DoctorActions,
   DoctorCLICommand,
   DoctorCLICommandOpts,
-} from "../doctor";
+} from "@dendronhq/dendron-cli";
+import path from "path";
+import { createEngineFromServer, runEngineTestV5 } from "../../../engine";
 
 const setupBasic = async (opts: WorkspaceOpts) => {
   const { wsRoot, vaults } = opts;
@@ -29,27 +25,20 @@ const setupBasic = async (opts: WorkspaceOpts) => {
   });
 };
 
-const runDoctor = (opts: DoctorCLICommandOpts) => {
+const runDoctor = (opts: Omit<DoctorCLICommandOpts, "server">) => {
   const cmd = new DoctorCLICommand();
   return cmd.execute({
     exit: false,
     ...opts,
+    server: {} as any,
   });
 };
-
-// const setupNoFM= async (opts: WorkspaceOpts) => {
-//   const { wsRoot, vaults } = opts;
-//   const vpath = path.join(wsRoot, vaults[0].fsPath)
-
-//   fs.writeFileSync( path.join(vpath, "foo.md"), "Foo Body", {encoding: "utf8"})
-//   fs.writeFileSync( path.join(vpath, "bar.md"), "Bar Body", {encoding: "utf8"})
-// };
 
 describe(DoctorActions.HI_TO_H2, () => {
   const action = DoctorActions.HI_TO_H2;
 
   test("basic", async () => {
-    await runEngineTestV4(
+    await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
         await runDoctor({
@@ -77,7 +66,7 @@ describe(DoctorActions.HI_TO_H2, () => {
         );
       },
       {
-        createEngine,
+        createEngine: createEngineFromServer,
         expect,
         preSetupHook: setupBasic,
       }
@@ -85,7 +74,7 @@ describe(DoctorActions.HI_TO_H2, () => {
   });
 
   test("dry run", async () => {
-    await runEngineTestV4(
+    await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
         await runDoctor({
@@ -114,7 +103,7 @@ describe(DoctorActions.HI_TO_H2, () => {
         );
       },
       {
-        createEngine,
+        createEngine: createEngineFromServer,
         expect,
         preSetupHook: setupBasic,
       }
@@ -125,7 +114,7 @@ describe(DoctorActions.HI_TO_H2, () => {
 describe("H1_TO_TITLE", () => {
   const action = DoctorActions.H1_TO_TITLE;
   test("basic", async () => {
-    await runEngineTestV4(
+    await runEngineTestV5(
       async ({ engine, wsRoot, vaults }) => {
         const vault = vaults[0];
         await runDoctor({
@@ -148,44 +137,10 @@ describe("H1_TO_TITLE", () => {
         );
       },
       {
-        createEngine,
+        createEngine: createEngineFromServer,
         expect,
         preSetupHook: setupBasic,
       }
     );
   });
 });
-
-// describe.only(DoctorActions.FIX_FM, () => {
-//   const action = DoctorActions.FIX_FM;
-//   test("basic", async () => {
-//     await runEngineTestV4(
-//       async ({ engine, wsRoot, vaults }) => {
-//         const vault = vaults[0];
-//         const cmd = new DoctorCLICommand();
-//         await cmd.execute({
-//           wsRoot,
-//           engine,
-//           action,
-//         });
-//         const names = ["Foo", "Bar"];
-//         await Promise.all(
-//           names.map(async (nm) => {
-//             const fpath = path.join(
-//               wsRoot,
-//               vault.fsPath,
-//               `${nm.toLowerCase()}.md`
-//             );
-//             const note = file2Note(fpath, vault);
-//             expect(note).toMatchSnapshot();
-//           })
-//         );
-//       },
-//       {
-//         createEngine,
-//         expect,
-//         preSetupHook: setupNoFM,
-//       }
-//     );
-//   });
-// });

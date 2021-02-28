@@ -1,8 +1,8 @@
 import { createLogger, resolvePath } from "@dendronhq/common-server";
 import { DEngineClientV2, EngineConnector } from "@dendronhq/engine-server";
-import { LaunchEngineServerCommand } from "./launchEngineServer";
 import _ from "lodash";
 import yargs from "yargs";
+import { LaunchEngineServerCommand } from "./launchEngineServer";
 const logger = createLogger();
 
 export type SetupEngineCLIOpts = {
@@ -15,6 +15,13 @@ export type SetupEngineResp = {
   wsRoot: string;
   engine: DEngineClientV2;
   port: number;
+  server: any;
+};
+
+export type SetupEngineOpts = {
+  wsRoot: string;
+  engine: DEngineClientV2;
+  port?: number;
   server: any;
 };
 
@@ -41,7 +48,7 @@ export async function setupEngine(
     await engineConnector.init({ portOverride: enginePort });
     engine = engineConnector.engine;
     port = enginePort;
-    // dummy
+    // dummy since server is remote
     server = {
       close: () => {},
     };
@@ -65,6 +72,6 @@ export async function setupEngine(
 export function setupEngineArgs(args: yargs.Argv) {
   args.option("enginePort", {
     describe:
-      "If set, connecto to running engine. If not set, create new instance of Dendron Engine",
+      "If set, connect to to running engine. If not set, create new instance of Dendron Engine",
   });
 }

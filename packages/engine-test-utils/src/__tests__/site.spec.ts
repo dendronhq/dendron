@@ -30,16 +30,6 @@ import {
 import { callSetupHook, SETUP_HOOK_KEYS } from "../presets";
 import { checkString } from "../utils";
 
-const getNotPublished = (body: string) => {
-  const matches = body
-    .split("\n")
-    .map((ent) => ent.match(/not-sprouted.*>beta</))
-    .filter((ent) => !_.isNull);
-  return matches;
-};
-// await checkString(resp.contents as string, "images/not-sprouted.png&#x27;></img>">beta</a></p>");
-// _.filter(resp.contents as string).indexOf())
-
 const basicSetup = (preSetupHook?: SetupHookFunction) => ({
   createEngine: createEngineFromEngine,
   expect,

@@ -1,13 +1,7 @@
 #!/usr/bin/env node
 
 import { env, setEnv } from "@dendronhq/common-all";
-
-if (!env("LOG_LEVEL", { shouldThrow: false })) {
-  setEnv("LOG_LEVEL", "error");
-}
-
 import yargs from "yargs";
-import { BuildSiteCommand } from "../src";
 import { BuildSiteV2CLICommand } from "../src/commands/build-site-v2";
 import { DoctorCLICommand } from "../src/commands/doctor";
 import { ExportPodCLICommand } from "../src/commands/exportPod";
@@ -17,6 +11,10 @@ import { NoteCLICommand } from "../src/commands/notes";
 import { PublishPodCLICommand } from "../src/commands/publishPod";
 import { RefactorRule } from "../src/commands/refactorBase";
 import { WorkspaceCLICommand } from "../src/commands/workspace";
+
+if (!env("LOG_LEVEL", { shouldThrow: false })) {
+  setEnv("LOG_LEVEL", "error");
+}
 
 export const addLayout: RefactorRule = {
   name: "add fm",
@@ -33,10 +31,9 @@ export const updateTime: RefactorRule = {
 
 let buildYargs = yargs;
 
-BuildSiteCommand.buildCmd(buildYargs);
-LaunchEngineServerCommand.buildCmd(buildYargs);
 new BuildSiteV2CLICommand().buildCmd(buildYargs);
 new ExportPodCLICommand().buildCmd(buildYargs);
+new LaunchEngineServerCommand().buildCmd(buildYargs);
 new ImportPodCLICommand().buildCmd(buildYargs);
 new PublishPodCLICommand().buildCmd(buildYargs);
 new DoctorCLICommand().buildCmd(buildYargs);

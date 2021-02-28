@@ -13,8 +13,12 @@ import throttle from "@jcoreio/async-throttle";
 import _ from "lodash";
 import yargs from "yargs";
 import { CLICommand } from "./base";
-import { CommandOptsV3 } from "./soil";
-import { setupEngine, setupEngineArgs, SetupEngineCLIOpts } from "./utils";
+import {
+  setupEngine,
+  setupEngineArgs,
+  SetupEngineCLIOpts,
+  SetupEngineOpts,
+} from "./utils";
 
 type CommandCLIOpts = {
   action: DoctorActions;
@@ -24,7 +28,7 @@ type CommandCLIOpts = {
   exit?: boolean;
 } & SetupEngineCLIOpts;
 
-type CommandOpts = CommandOptsV3 & CommandCLIOpts;
+type CommandOpts = CommandCLIOpts & SetupEngineOpts;
 type CommandOutput = void;
 
 export enum DoctorActions {

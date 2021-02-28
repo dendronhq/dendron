@@ -3,7 +3,6 @@ import { WorkspaceService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
 import { CLICommand } from "./base";
-import { CommandOptsV3 } from "./soil";
 import { setupEngine } from "./utils";
 
 type CommandCLIOpts = {
@@ -14,7 +13,7 @@ type CommandCLIOpts = {
   useGithubAccessToken?: boolean;
 };
 
-type CommandOpts = CommandOptsV3 & CommandCLIOpts;
+type CommandOpts = CommandCLIOpts;
 type CommandOutput = void;
 
 export enum Action {

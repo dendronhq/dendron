@@ -6,31 +6,27 @@ import {
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
-import { SoilCommandCLIOptsV3, SoilCommandOptsV3, SoilCommandV3 } from "./soil";
+import { CLICommand } from "./base";
 
 type CommandOutput = { port: number; server: any };
-type CommandOpts = SoilCommandOptsV3 &
-  Required<CommandCLIOpts> & { server: any };
-type CommandCLIOpts = SoilCommandCLIOptsV3 & {
+type CommandOpts = Required<CommandCLIOpts> & { server: any };
+type CommandCLIOpts = {
   port?: number;
+  wsRoot: string;
 };
 
-export class LaunchEngineServerCommand extends SoilCommandV3<
-  CommandCLIOpts,
+export class LaunchEngineServerCommand extends CLICommand<
   CommandOpts,
   CommandOutput
 > {
-  static buildCmd(yargs: yargs.Argv): yargs.Argv {
-    const _cmd = new LaunchEngineServerCommand();
-    return yargs.command(
-      "launchEngineServer",
-      "port to launch from",
-      _cmd.buildArgs,
-      _cmd.eval
-    );
+  constructor() {
+    super({
+      name: "launchEngineServer",
+      desc: "launch instance of dendron engine",
+    });
   }
 
-  buildArgs(args: yargs.Argv) {
+  buildArgs(args: yargs.Argv<CommandCLIOpts>) {
     super.buildArgs(args);
     args.option("port", {
       describe: "port to launch server",
@@ -40,8 +36,7 @@ export class LaunchEngineServerCommand extends SoilCommandV3<
 
   async enrichArgs(args: CommandCLIOpts) {
     let { wsRoot, port } = args;
-    const cwd = process.cwd();
-    wsRoot = resolvePath(wsRoot, cwd);
+    wsRoot = resolvePath(wsRoot, process.cwd());
     const ws = new WorkspaceService({ wsRoot });
     const vaults = ws.config.vaults;
     const vaultPaths = vaults.map((v) => resolvePath(v.fsPath, wsRoot));

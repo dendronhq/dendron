@@ -494,6 +494,13 @@
                 "desc": "Generate diagnostics report",
                 "docLink": "dendron.topic.commands.md",
                 "docPreview": ""
+            },
+            {
+                "command": "dendron.pasteLink",
+                "title": "Dendron: Paste Link",
+                "desc": "Fetch metadata for a web link and format as markdown",
+                "docLink": "dendron.topic.commands.md",
+                "docPreview": ""
             }
         ],
         "keybindings": [

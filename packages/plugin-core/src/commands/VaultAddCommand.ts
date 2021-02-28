@@ -93,7 +93,6 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           sourceName = await VSCodeUtils.showInputBox({
             prompt: "Name of new vault (optional, press enter to skip)",
           });
-          window.showInformationMessage(JSON.stringify(selected));
           qp.hide();
           return resolve({
             type: sourceType!,
@@ -128,16 +127,24 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // clone
     const git = simpleGit({ baseDir });
     await git.clone(opts.pathRemote!, opts.path);
-    const vault = GitUtils.getVaultFromRepo({
+    const { vaults } = GitUtils.getVaultsFromRepo({
       repoPath: path.join(baseDir, opts.path),
       wsRoot: DendronWorkspace.wsRoot(),
       repoUrl: opts.pathRemote!,
     });
-    if (opts.name) {
-      vault.name = opts.name;
+    if (_.size(vaults) === 1 && opts.name) {
+      vaults[0].name = opts.name;
     }
-    await this.addVaultToWorkspace(vault);
-    return [vault];
+    // add all vaults
+    await _.reduce(
+      vaults,
+      async (resp: any, vault: DVault) => {
+        await resp;
+        return this.addVaultToWorkspace(vault);
+      },
+      Promise.resolve()
+    );
+    return vaults;
   }
 
   async addVaultToWorkspace(vault: DVault) {

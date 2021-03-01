@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-cli@0.30.1...@dendronhq/dendron-cli@0.31.0) (2021-03-01)
+
+### Bug Fixes
+
+- pass vaults with names into engine api ([c9a42c6](https://github.com/dendronhq/dendron/commit/c9a42c6c2f1f8a7752b1c54441180237085de52f))
+
 ## [0.30.2-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-cli@0.30.1...@dendronhq/dendron-cli@0.30.2-alpha.0) (2021-02-28)
 
 **Note:** Version bump only for package @dendronhq/dendron-cli

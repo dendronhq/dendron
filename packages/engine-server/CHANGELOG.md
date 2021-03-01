@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.30.1...@dendronhq/engine-server@0.31.0) (2021-03-01)
+
+### Bug Fixes
+
+- pass vaults with names into engine api ([c9a42c6](https://github.com/dendronhq/dendron/commit/c9a42c6c2f1f8a7752b1c54441180237085de52f))
+
+### Features Dendron
+
+- move child notes generation into remark ([c4b12cf](https://github.com/dendronhq/dendron/commit/c4b12cf91ea48d662b30713033b2b70e10094131))
+
 ## [0.30.2-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.30.1...@dendronhq/engine-server@0.30.2-alpha.0) (2021-02-28)
 
 **Note:** Version bump only for package @dendronhq/engine-server

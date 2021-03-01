@@ -155,11 +155,11 @@ describe("SiteUtils", () => {
         const noteIndex = engine.notes["alpha"];
         const config = ConfigUtils.withConfig(
           (config) => {
-            config.site = {
+            config.site = createSiteConfig({
               siteHierarchies: ["alpha"],
               siteRootDir,
               ...dupNote(vaults[1]),
-            };
+            });
             return config;
           },
           {
@@ -201,10 +201,10 @@ describe("SiteUtils", () => {
         async ({ engine, vaults, wsRoot }) => {
           const config = ConfigUtils.withConfig(
             (config) => {
-              config.site = {
+              config.site = createSiteConfig({
                 siteHierarchies: ["foo", "foobar"],
                 siteRootDir,
-              };
+              });
               return config;
             },
             {
@@ -245,11 +245,11 @@ describe("SiteUtils", () => {
         async ({ engine, vaults, wsRoot }) => {
           const config = ConfigUtils.withConfig(
             (config) => {
-              config.site = {
+              config.site = createSiteConfig({
                 siteHierarchies: ["foo", "foobar"],
                 siteRootDir,
                 writeStubs: false,
-              };
+              });
               return config;
             },
             {
@@ -289,11 +289,11 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = ConfigUtils.withConfig(
             (config) => {
-              config.site = {
+              config.site = createSiteConfig({
                 siteHierarchies: ["foo"],
                 siteRootDir,
                 usePrettyRefs: true,
-              };
+              });
               return config;
             },
             {
@@ -331,11 +331,11 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = ConfigUtils.withConfig(
             (config) => {
-              config.site = {
+              config.site = createSiteConfig({
                 siteHierarchies: ["foo"],
                 siteRootDir,
                 usePrettyRefs: true,
-              };
+              });
               return config;
             },
             {
@@ -379,7 +379,7 @@ describe("SiteUtils", () => {
         async ({ engine, vaults, wsRoot }) => {
           const config = ConfigUtils.withConfig(
             (config) => {
-              config.site = {
+              config.site = createSiteConfig({
                 siteHierarchies: ["root"],
                 siteRootDir,
                 ...dupNote(vaults[0]),
@@ -388,7 +388,7 @@ describe("SiteUtils", () => {
                     publishByDefault: true,
                   },
                 },
-              };
+              });
               return config;
             },
             {
@@ -432,7 +432,7 @@ describe("SiteUtils", () => {
         async ({ engine, vaults, wsRoot }) => {
           const config = ConfigUtils.withConfig(
             (config) => {
-              config.site = {
+              config.site = createSiteConfig({
                 siteHierarchies: ["root"],
                 siteRootDir,
                 ...dupNote(vaults[0]),
@@ -441,7 +441,7 @@ describe("SiteUtils", () => {
                     publishByDefault: false,
                   },
                 },
-              };
+              });
               return config;
             },
             {
@@ -469,11 +469,11 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = ConfigUtils.withConfig(
             (config) => {
-              config.site = {
+              config.site = createSiteConfig({
                 siteHierarchies: ["foo"],
                 siteRootDir,
                 usePrettyRefs: true,
-              };
+              });
               return config;
             },
             {
@@ -504,7 +504,7 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = ConfigUtils.withConfig(
             (config) => {
-              config.site = {
+              config.site = createSiteConfig({
                 siteHierarchies: ["foo"],
                 siteRootDir,
                 ...dupNote(["vault2", "fooVault", "vault3"]),
@@ -513,7 +513,7 @@ describe("SiteUtils", () => {
                     publishByDefault: true,
                   },
                 },
-              };
+              });
               return config;
             },
             {
@@ -557,11 +557,11 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = ConfigUtils.withConfig(
             (config) => {
-              config.site = {
+              config.site = createSiteConfig({
                 siteHierarchies: ["foo", "bar"],
                 siteRootDir,
                 usePrettyRefs: true,
-              };
+              });
               return config;
             },
             {
@@ -592,7 +592,7 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot, vaults }) => {
           const config = ConfigUtils.withConfig(
             (config) => {
-              config.site = {
+              config.site = createSiteConfig({
                 siteHierarchies: ["foo", "bar"],
                 siteRootDir,
                 ...dupNote(vaults[0]),
@@ -604,7 +604,7 @@ describe("SiteUtils", () => {
                     },
                   },
                 },
-              };
+              });
               return config;
             },
             {
@@ -641,10 +641,10 @@ describe("SiteUtils", () => {
         async ({ engine, wsRoot }) => {
           const config = ConfigUtils.withConfig(
             (config) => {
-              config.site = {
+              config.site = createSiteConfig({
                 siteHierarchies: ["daily"],
                 siteRootDir,
-              };
+              });
               return config;
             },
             {
@@ -729,7 +729,7 @@ describe("SiteUtils", () => {
                     },
                   },
                 };
-                config.site = sconfig;
+                config.site = createSiteConfig(sconfig);
                 return config;
               },
               { wsRoot: opts.wsRoot }

@@ -115,6 +115,33 @@ const NOTES = {
       },
     }
   ),
+  MIXED_CASE_PARENT: new TestPresetEntryV4(
+    async ({ engine }) => {
+      const notes = engine.notes;
+      return [
+        {
+          actual: _.size(notes),
+          // 3 root, 1 foo, 1 foo.one, 1 foo.two
+          expected: 6,
+        },
+      ];
+    },
+    {
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        await NoteTestUtilsV4.createNote({
+          fname: "foo.one",
+          vault,
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "Foo.two",
+          vault,
+          wsRoot,
+        });
+      },
+    }
+  ),
   LINKS: new TestPresetEntryV4(
     async ({ engine, vaults }) => {
       const noteAlpha = NoteUtilsV2.getNoteByFnameV5({

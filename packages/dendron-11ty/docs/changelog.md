@@ -1,0 +1,3 @@
+---
+layout: includes/changelog.liquid
+---

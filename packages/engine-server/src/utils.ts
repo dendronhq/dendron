@@ -6,6 +6,7 @@ import {
   DNoteRefLink,
   DVault,
   getSlugger,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -60,12 +61,21 @@ export function refLink2String(
   return linkParts.join("");
 }
 
-export function refLink2Stringv2(link: DNoteRefLink): string {
+export function refLink2Stringv2(opts: {
+  link: DNoteRefLink;
+  useVaultPrefix?: boolean;
+}): string {
+  const { link, useVaultPrefix } = opts;
   const slugger = getSlugger();
   const { anchorStart, anchorStartOffset, anchorEnd } = link.data;
   const { fname: name } = link.from;
   // [[foo]]#head1:#*"
-  const linkParts = [`![[`, name];
+
+  const linkParts = [`![[`];
+  if (useVaultPrefix) {
+    linkParts.push(VaultUtils.toURIPrefix(link.from.vault!) + "/");
+  }
+  linkParts.push(name);
   if (anchorStart) {
     linkParts.push(`#${normalizev2(anchorStart, slugger)}`);
   }

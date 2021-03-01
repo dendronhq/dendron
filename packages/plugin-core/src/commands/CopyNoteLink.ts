@@ -43,7 +43,8 @@ export class CopyNoteLinkCommand extends BasicCommand<
       throw Error(`${fname} not found in engine`);
     }
     const { header } = getHeaderFromSelection({ clean: true });
-    const link = NoteUtilsV2.createWikiLink({ note, header });
+    const useVaultPrefix = _.size(getEngine().vaultsv3) > 1;
+    const link = NoteUtilsV2.createWikiLink({ note, header, useVaultPrefix });
     try {
       clipboard.writeText(link);
     } catch (err) {

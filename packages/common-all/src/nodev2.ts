@@ -5,7 +5,7 @@ import minimatch from "minimatch";
 import path from "path";
 import title from "title";
 import { URI } from "vscode-uri";
-import { ENGINE_ERROR_CODES } from "./constants";
+import { CONSTANTS, ENGINE_ERROR_CODES } from "./constants";
 import { DendronError } from "./error";
 import { Time } from "./time";
 import {
@@ -456,11 +456,13 @@ export class NoteUtilsV2 {
   static createWikiLink({
     note,
     header,
+    useVaultPrefix,
   }: {
     note: NotePropsV2;
     header?: string;
+    useVaultPrefix?: boolean;
   }): string {
-    let { title, fname } = note;
+    let { title, fname, vault } = note;
     let suffix = "";
     const slugger = getSlugger();
     if (header) {
@@ -469,7 +471,10 @@ export class NoteUtilsV2 {
     if (header) {
       title = header;
     }
-    const link = `[[${title}|${fname}${suffix}]]`;
+    const vaultPrefix = useVaultPrefix
+      ? `${CONSTANTS.DENDRON_DELIMETER}${VaultUtils.getName(vault)}/`
+      : "";
+    const link = `[[${title}|${vaultPrefix}${fname}${suffix}]]`;
     return link;
   }
 

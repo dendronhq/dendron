@@ -7,10 +7,11 @@ import {
 import { refLink2Stringv2 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Position, Range, Selection, TextEditor, window } from "vscode";
+import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { clipboard, VSCodeUtils } from "../utils";
 import { getHeaderFromSelection } from "../utils/editor";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -46,8 +47,9 @@ export class CopyNoteRefCommand extends BasicCommand<
     return !_.isNull(text.match(/^#+\s/m));
   }
 
-  async buildLink(opts: { fname: string }) {
-    const { fname } = opts;
+  async buildLink(opts: { note: NotePropsV2; useVaultPrefix?: boolean }) {
+    const { note, useVaultPrefix } = opts;
+    const { fname, vault } = note;
     const linkData: DNoteRefData = {
       type: "file",
     };
@@ -56,9 +58,10 @@ export class CopyNoteRefCommand extends BasicCommand<
       type: "ref",
       from: {
         fname,
+        vault,
       },
     };
-    let refLinkString: string = refLink2Stringv2(link);
+    let refLinkString: string = refLink2Stringv2({ link, useVaultPrefix });
     const { header, selection } = getHeaderFromSelection();
     if (header && selection) {
       linkData.anchorStart = header;
@@ -66,7 +69,7 @@ export class CopyNoteRefCommand extends BasicCommand<
         linkData.anchorEnd = "*";
       }
       linkData.anchorStartOffset = 1;
-      refLinkString = refLink2Stringv2(link);
+      refLinkString = refLink2Stringv2({ link, useVaultPrefix });
     }
     return refLinkString;
   }
@@ -74,12 +77,16 @@ export class CopyNoteRefCommand extends BasicCommand<
   async execute(_opts: CommandOpts) {
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const fname = NoteUtilsV2.uri2Fname(editor.document.uri);
-    let note: NotePropsV2 | undefined;
-    note = _.find(DendronWorkspace.instance().getEngine().notes, { fname });
-    if (!note) {
-      throw Error(`${fname} not found in engine`);
-    }
-    const link = await this.buildLink({ fname });
+    const wsRoot = DendronWorkspace.wsRoot();
+    const vault = PickerUtilsV2.getVaultForOpenEditor();
+    let note: NotePropsV2 = NoteUtilsV2.getNoteOrThrow({
+      fname,
+      notes: getEngine().notes,
+      wsRoot,
+      vault,
+    });
+    const useVaultPrefix = _.size(getEngine().vaultsv3) > 1;
+    const link = await this.buildLink({ note, useVaultPrefix });
     try {
       clipboard.writeText(link);
     } catch (err) {

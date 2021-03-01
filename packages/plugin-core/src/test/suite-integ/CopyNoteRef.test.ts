@@ -1,25 +1,50 @@
 import { DVault, NoteUtilsV2 } from "@dendronhq/common-all";
-import { DirResult, note2File, tmpDir } from "@dendronhq/common-server";
-import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
+import {
+  DirResult,
+  note2File,
+  tmpDir,
+  vault2Path,
+} from "@dendronhq/common-server";
+import { ENGINE_HOOKS, NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import assert from "assert";
+import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
 import { CopyNoteRefCommand } from "../../commands/CopyNoteRef";
 import { VSCodeUtils } from "../../utils";
-import { onWSInit, setupDendronWorkspace, TIMEOUT } from "../testUtils";
+import { onWSInit, setupDendronWorkspace } from "../testUtils";
+import { expect, runMultiVaultTest } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 
-suite("notes", function () {
+suite("CopyNoteRef", function () {
   let root: DirResult;
   let ctx: vscode.ExtensionContext;
   let vaultPath: string;
   let vault: DVault;
-  this.timeout(TIMEOUT);
 
   ctx = setupBeforeAfter(this, {
     beforeHook: () => {
       root = tmpDir();
     },
+  });
+
+  describe("multi", function () {
+    test("basic", (done) => {
+      runMultiVaultTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults }) => {
+          const notePath = path.join(
+            vault2Path({ vault: vaults[0], wsRoot }),
+            "foo.md"
+          );
+          await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+          const link = await new CopyNoteRefCommand().run();
+          expect(link).toEqual("![[dendron://main/foo]]");
+          done();
+        },
+        preSetupHook: ENGINE_HOOKS.setupBasic,
+      });
+    });
   });
 
   test("basic", (done) => {

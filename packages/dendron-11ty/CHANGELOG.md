@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.31.0](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-11ty@1.30.1...@dendronhq/dendron-11ty@1.31.0) (2021-03-01)
+
+### Bug Fixes
+
+- handle links to home page for backlinks ([5d6303b](https://github.com/dendronhq/dendron/commit/5d6303b0155617b940ba489ee7e20f5aa28d42cf))
+
+### Features Dendron
+
+- move child notes generation into remark ([c4b12cf](https://github.com/dendronhq/dendron/commit/c4b12cf91ea48d662b30713033b2b70e10094131))
+
+### Reverts
+
+- Revert "integ: publish minor" ([38ff5dd](https://github.com/dendronhq/dendron/commit/38ff5dd049cecd939fbd70744ef76a704aec3400))
+
 ## [1.30.2-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-11ty@1.30.1...@dendronhq/dendron-11ty@1.30.2-alpha.0) (2021-02-28)
 
 **Note:** Version bump only for package @dendronhq/dendron-11ty

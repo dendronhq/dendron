@@ -5,6 +5,7 @@ import {
   DEngineDeleteSchemaPayloadV2,
   DEngineQuery,
   DNodePropsV2,
+  DVault,
   EngineDeleteNotePayload,
   EngineDeleteOptsV2,
   EngineInfoResp,
@@ -120,7 +121,7 @@ const STATUS_HANDLERS = {
 export type WorkspaceInitRequest = {
   uri: string;
   config: {
-    vaults: string[];
+    vaults: DVault[];
   };
 };
 export type WorkspaceSyncRequest = WorkspaceRequest;

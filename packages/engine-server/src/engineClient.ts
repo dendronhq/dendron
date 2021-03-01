@@ -49,15 +49,13 @@ import { HistoryService } from "./history";
 import { getPortFilePath } from "./utils";
 
 type DendronEngineClientOpts = {
-  vaultsv4?: DVault[];
-  vaults: string[];
+  vaults: DVault[];
   ws: string;
 };
 export class DendronEngineClient implements DEngineClientV2 {
   public notes: NotePropsDictV2;
   public wsRoot: string;
   public schemas: SchemaModuleDictV2;
-  public vaults: string[];
   public links: DLink[];
   public ws: string;
   public fuseEngine: FuseEngine;
@@ -75,7 +73,6 @@ export class DendronEngineClient implements DEngineClientV2 {
     ws,
     history,
     logger,
-    vaultsv4,
   }: {
     port: number | string;
     history?: HistoryService;
@@ -86,7 +83,7 @@ export class DendronEngineClient implements DEngineClientV2 {
       apiPath: "api",
       logger,
     });
-    return new DendronEngineClient({ api, vaults, ws, history, vaultsv4 });
+    return new DendronEngineClient({ api, vaults, ws, history });
   }
 
   static getPort({ wsRoot }: { wsRoot: string }): number {
@@ -103,7 +100,6 @@ export class DendronEngineClient implements DEngineClientV2 {
     ws,
     history,
     logger,
-    vaultsv4,
   }: {
     api: DendronAPI;
     history?: HistoryService;
@@ -114,13 +110,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.schemas = {};
     this.links = [];
     this.fuseEngine = new FuseEngine({});
-    if (vaultsv4) {
-      this.vaultsv3 = vaultsv4;
-      this.vaults = vaultsv4.map((ent) => ent.fsPath);
-    } else {
-      this.vaults = vaults;
-      this.vaultsv3 = vaults.map((ent) => ({ fsPath: ent }));
-    }
+    this.vaultsv3 = vaults;
     this.wsRoot = ws;
     this.ws = ws;
     this.configRoot = this.wsRoot;
@@ -140,7 +130,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   async init(): Promise<DEngineInitRespV2> {
     const resp = await this.api.workspaceInit({
       uri: this.ws,
-      config: { vaults: this.vaults },
+      config: { vaults: this.vaultsv3 },
     });
 
     if (resp.error && resp.error.code !== ERROR_CODES.MINOR) {

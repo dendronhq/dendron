@@ -4,8 +4,10 @@ exports[`backlinks basic 1`] = `
 VFile {
   "contents": "<hr>
 <h2 id=\\"backlinks\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#backlinks\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Backlinks</h2>
-<p><a href=\\"alpha.html\\">alpha (vault1)</a></p>
-<p><a href=\\"omega.html\\">omega (vault1)</a></p>",
+<ul>
+<li><a href=\\"alpha.html\\">alpha (vault1)</a></li>
+<li><a href=\\"omega.html\\">omega (vault1)</a></li>
+</ul>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -17,8 +19,10 @@ exports[`backlinks multiple links 1`] = `
 VFile {
   "contents": "<hr>
 <h2 id=\\"backlinks\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#backlinks\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Backlinks</h2>
-<p><a href=\\"three.html\\">three (vault1)</a></p>
-<p><a href=\\"two.html\\">two (vault1)</a></p>",
+<ul>
+<li><a href=\\"three.html\\">three (vault1)</a></li>
+<li><a href=\\"two.html\\">two (vault1)</a></li>
+</ul>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],

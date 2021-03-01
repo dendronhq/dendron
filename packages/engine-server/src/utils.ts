@@ -106,7 +106,7 @@ export async function getEngine(opts: {
       const dendronEngine = DendronEngineClient.create({
         port,
         ws: wsRoot,
-        vaults: vaults.map((ent) => ent.fsPath),
+        vaults,
       });
       resolve({
         data: dendronEngine,

@@ -49,7 +49,7 @@ export class LaunchEngineServerCommand extends CLICommand<
     ws.writePort(_port);
     const engine = DendronEngineClient.create({
       port: _port,
-      vaults: vaultPaths,
+      vaults,
       ws: wsRoot,
     });
     return {

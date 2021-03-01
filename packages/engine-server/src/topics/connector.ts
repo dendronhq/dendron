@@ -114,8 +114,7 @@ export class EngineConnector {
     const dendronEngine = DendronEngineClient.create({
       port,
       ws: wsRoot,
-      vaults: vaults.map((ent) => ent.fsPath),
-      vaultsv4: vaults,
+      vaults: vaults,
       logger: this.logger,
     });
     const resp = await dendronEngine.info();

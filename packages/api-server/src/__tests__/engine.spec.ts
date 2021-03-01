@@ -11,7 +11,7 @@ const createEngine: CreateEngineFunction = ({ wsRoot, vaults }) => {
   return DendronEngineClient.create({
     port: "3005",
     ws: wsRoot,
-    vaults: vaults.map((ent) => ent.fsPath),
+    vaults,
   });
 };
 

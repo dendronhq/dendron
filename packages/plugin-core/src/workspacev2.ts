@@ -65,7 +65,7 @@ export class DWorkspace {
     const dendronEngine = DendronEngineClient.create({
       port,
       ws: wsRoot,
-      vaults: vaults.map((ent) => ent.fsPath),
+      vaults,
     });
     await dendronEngine.sync();
     this._engine = dendronEngine;

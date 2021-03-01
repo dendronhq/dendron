@@ -48,7 +48,12 @@ const plugin: Plugin = function (this: Unified.Processor) {
                 value: mdLink.from.fname,
                 data: {
                   alias:
-                    mdLink.from.fname +
+                    NoteUtilsV2.getNoteOrThrow({
+                      fname: mdLink.from.fname!,
+                      notes: engine.notes,
+                      vault: mdLink.from.vault!,
+                      wsRoot: engine.wsRoot,
+                    }).title +
                     (engine.vaultsv3.length > 1
                       ? ` (${VaultUtils.getName(mdLink.from.vault!)})`
                       : ""),

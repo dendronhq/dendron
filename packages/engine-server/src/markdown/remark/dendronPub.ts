@@ -22,6 +22,9 @@ import { addError, getNoteOrError } from "./utils";
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
   insertTitle?: boolean;
+  /**
+   * Don't publish pages that are dis-allowd by dendron.yml
+   */
   transformNoPublish?: boolean;
 };
 

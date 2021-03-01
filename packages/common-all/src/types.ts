@@ -116,6 +116,9 @@ export type DendronSiteFM = {
   skipLevels?: number;
 };
 
+export type CleanDendronSiteConfig = DendronSiteConfig &
+  Required<Pick<DendronSiteConfig, "siteIndex" | "siteUrl">>;
+
 export type DendronSiteConfig = {
   /**
    * If set, add prefix to all asset links

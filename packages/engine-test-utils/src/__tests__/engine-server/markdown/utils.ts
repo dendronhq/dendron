@@ -1,4 +1,8 @@
-import { DEngineClientV2, DVault } from "@dendronhq/common-all";
+import {
+  DEngineClientV2,
+  DuplicateNoteAction,
+  DVault,
+} from "@dendronhq/common-all";
 import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
 import { DendronASTDest, MDUtilsV4, VFile } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -84,4 +88,20 @@ export const createProcTests = (opts: {
       .filter((ent) => !_.isUndefined(ent));
   }
   return allTests;
+};
+
+export const dupNote = (payload: DVault | string[]) => {
+  const out: any = {
+    duplicateNoteBehavior: {
+      action: DuplicateNoteAction.USE_VAULT,
+    },
+  };
+  if (_.isArray(payload)) {
+    out.duplicateNoteBehavior.payload = payload;
+  } else {
+    out.duplicateNoteBehavior.payload = {
+      vault: payload,
+    };
+  }
+  return out;
 };

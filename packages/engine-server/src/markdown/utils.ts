@@ -44,6 +44,7 @@ import { backlinks } from "./remark/backlinks";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
 import { noteRefsV2 } from "./remark/noteRefsV2";
+import { publishSite } from "./remark/publishSite";
 import { transformLinks } from "./remark/transformLinks";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { DendronASTData, DendronASTDest } from "./types";
@@ -412,14 +413,16 @@ export class MDUtilsV4 {
     return proc.use(transformLinks, transformOpts);
   }
 
-  static procHTML(procOpts: Omit<ProcOptsFull, "dest">) {
-    const { engine, vault, fname } = procOpts;
+  static procHTML(
+    procOpts: Omit<ProcOptsFull, "dest"> & { noteIndex: NotePropsV2 }
+  ) {
+    const { engine, vault, fname, noteIndex } = procOpts;
     const config = procOpts.config || engine.config;
     const siteNotesDir = config.site.siteNotesDir;
     const absUrl = PublishUtils.getAbsUrlForAsset({ config });
     const linkPrefix = absUrl + "/" + siteNotesDir + "/";
     const wikiLinksOpts = { useId: true, prefix: linkPrefix };
-    const proc = MDUtilsV4.procFull({
+    let proc = MDUtilsV4.procFull({
       engine,
       dest: DendronASTDest.HTML,
       vault,
@@ -437,6 +440,7 @@ export class MDUtilsV4 {
       mermaid: config.mermaid,
       config,
     });
+    proc = proc.use(publishSite, { noteIndex });
     return MDUtilsV4.procRehype({ proc, mathjax: true });
   }
 }
@@ -454,22 +458,19 @@ export class PublishUtils {
         "/"
       );
     }
-    if (siteUrl && getStage() !== "dev") {
-      const out = _.trimEnd(
-        _.join([sitePrefix, _.trim(suffix, "/")], "/"),
-        "/"
-      );
-      return out;
-    } else {
-      return (
-        "http://" +
-        path.posix.join(`localhost:${process.env.ELEV_PORT || 8080}`, suffix)
-      );
-    }
+    const out = _.trimEnd(_.join([sitePrefix, _.trim(suffix, "/")], "/"), "/");
+    return out;
   }
 
   static getSiteUrl = (config: DendronConfig) => {
-    const siteUrl = process.env["SITE_URL"] || config.site.siteUrl;
-    return siteUrl;
+    if (getStage() !== "dev") {
+      const siteUrl = process.env["SITE_URL"] || config.site.siteUrl;
+      return siteUrl;
+    } else {
+      return (
+        "http://" +
+        path.posix.join(`localhost:${process.env.ELEV_PORT || 8080}`)
+      );
+    }
   };
 }

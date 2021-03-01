@@ -1,4 +1,5 @@
 import {
+  CleanDendronSiteConfig,
   CONSTANTS,
   DendronConfig,
   DendronSiteConfig,
@@ -44,10 +45,15 @@ export class DConfig {
     return config;
   }
 
+  static getSiteIndex(sconfig: DendronSiteConfig) {
+    let { siteIndex, siteHierarchies } = sconfig;
+    return siteIndex || siteHierarchies[0];
+  }
+
   /**
    * fill in defaults
    */
-  static cleanSiteConfig(config: DendronSiteConfig): DendronSiteConfig {
+  static cleanSiteConfig(config: DendronSiteConfig): CleanDendronSiteConfig {
     let out: DendronSiteConfig = _.defaults(config, {
       copyAssets: true,
       usePrettyRefs: true,
@@ -61,15 +67,22 @@ export class DConfig {
       writeStubs: true,
       description: "Personal knowledge space",
     });
-    let { siteRootDir, siteHierarchies, siteIndex } = out;
+    let { siteRootDir, siteHierarchies, siteIndex, siteUrl } = out;
     if (!siteRootDir) {
       throw `siteRootDir is undefined`;
+    }
+    if (!siteUrl) {
+      throw `siteURL is undefined`;
     }
     if (_.size(siteHierarchies) < 1) {
       throw `siteHiearchies must have at least one hiearchy`;
     }
-    out.siteIndex = siteIndex || siteHierarchies[0];
-    return out;
+    siteIndex = this.getSiteIndex(config);
+    return {
+      ...out,
+      siteIndex,
+      siteUrl,
+    };
   }
 
   static writeConfig({

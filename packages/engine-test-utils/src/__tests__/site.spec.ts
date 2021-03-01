@@ -24,6 +24,7 @@ import { ConfigUtils } from "../config";
 import {
   createEngineFromEngine,
   createEngineFromServer,
+  createSiteConfig,
   runEngineTestV5,
   testWithEngine,
 } from "../engine";
@@ -91,19 +92,19 @@ describe("SiteUtils", () => {
     siteRootDir = tmpDir().name;
   });
 
-  describe.only("xvault links", () => {
+  describe("xvault links", () => {
     testWithEngine(
       "can publish all",
       async ({ engine, wsRoot, vaults }) => {
-        debugger;
+        const noteIndex = engine.notes["alpha"];
         const config = ConfigUtils.withConfig(
           (config) => {
-            config.site = {
+            config.site = createSiteConfig({
               siteHierarchies: ["alpha", "beta"],
               siteRootDir,
               siteNotesDir: "docs",
               ...dupNote(vaults[1]),
-            };
+            });
             return config;
           },
           {
@@ -123,21 +124,20 @@ describe("SiteUtils", () => {
           engine,
           fname: "alpha",
           vault: vaults[0],
+          noteIndex,
         }).process(alpha.body);
         await checkString(
           resp.contents as string,
-          "http://localhost:8080/docs/beta.html"
+          "https://localhost:8080/docs/beta.html"
         );
         const resp2 = await MDUtilsV4.procHTML({
           config,
           engine,
           fname: "beta",
           vault: vaults[0],
+          noteIndex,
         }).process(beta.body);
-        await checkString(
-          resp2.contents as string,
-          "http://localhost:8080/docs/alpha.html"
-        );
+        await checkString(resp2.contents as string, "https://localhost:8080");
       },
       {
         preSetupHook: (opts) =>
@@ -152,6 +152,7 @@ describe("SiteUtils", () => {
     testWithEngine(
       "can publish alpha",
       async ({ engine, wsRoot, vaults }) => {
+        const noteIndex = engine.notes["alpha"];
         const config = ConfigUtils.withConfig(
           (config) => {
             config.site = {
@@ -176,6 +177,7 @@ describe("SiteUtils", () => {
           engine,
           fname: "alpha",
           vault: vaults[0],
+          noteIndex,
         }).process(alpha.body);
         await checkString(
           resp.contents as string,
@@ -686,30 +688,9 @@ describe("SiteUtils", () => {
     test("blacklist vault", async () => {
       await runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {
-          const config = ConfigUtils.withConfig(
-            (config) => {
-              const bvault = config.vaults.find(
-                (ent) => ent.fsPath === "vault2"
-              );
-              bvault!.visibility = DVaultVisibility.PRIVATE;
-              const sconfig: DendronSiteConfig = {
-                siteHierarchies: ["root"],
-                siteRootDir,
-                ...dupNote(vaults[0]),
-                config: {
-                  root: {
-                    publishByDefault: true,
-                  },
-                },
-              };
-              config.site = sconfig;
-              return config;
-            },
-            { wsRoot }
-          );
           const { notes, domains } = await SiteUtils.filterByConfig({
             engine,
-            config,
+            config: engine.config,
           });
           const root = NoteUtilsV2.getNoteByFnameV5({
             fname: "root",
@@ -732,6 +713,27 @@ describe("SiteUtils", () => {
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
+            ConfigUtils.withConfig(
+              (config) => {
+                const bvault = config.vaults.find(
+                  (ent) => ent.fsPath === "vault2"
+                );
+                bvault!.visibility = DVaultVisibility.PRIVATE;
+                const sconfig: DendronSiteConfig = {
+                  siteHierarchies: ["root"],
+                  siteRootDir,
+                  ...dupNote(opts.vaults[0]),
+                  config: {
+                    root: {
+                      publishByDefault: true,
+                    },
+                  },
+                };
+                config.site = sconfig;
+                return config;
+              },
+              { wsRoot: opts.wsRoot }
+            );
           },
         }
       );

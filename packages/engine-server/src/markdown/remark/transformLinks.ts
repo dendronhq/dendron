@@ -10,6 +10,9 @@ type PluginOpts = {
   to: DNoteLoc;
 };
 
+/**
+ * Used from renaming wikilinks
+ */
 function plugin(this: Unified.Processor, opts: PluginOpts): Transformer {
   // @ts-ignore
   const proc = this;

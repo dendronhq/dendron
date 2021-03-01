@@ -1,4 +1,9 @@
-import { DEngineClientV2, DVault, WorkspaceOpts } from "@dendronhq/common-all";
+import {
+  CleanDendronSiteConfig,
+  DEngineClientV2,
+  DVault,
+  WorkspaceOpts,
+} from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import {
   ENGINE_HOOKS,
@@ -9,6 +14,7 @@ import {
 import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
 import {
   createEngine as engineServerCreateEngine,
+  DConfig,
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -35,6 +41,21 @@ export async function createEngineFromServer(opts: WorkspaceOpts) {
   });
   await engine.init();
   return engine;
+}
+
+export function createSiteConfig(
+  opts: Partial<CleanDendronSiteConfig> &
+    Required<Pick<CleanDendronSiteConfig, "siteRootDir" | "siteHierarchies">>
+): CleanDendronSiteConfig {
+  let copts = {
+    siteNotesDir: "docs",
+    siteUrl: "https://localhost:8080",
+    ...opts,
+  };
+  return {
+    ...copts,
+    siteIndex: DConfig.getSiteIndex(copts),
+  };
 }
 
 async function setupWS(opts: { vaults: DVault[] }) {

@@ -22,11 +22,6 @@ export class UpgradeSettingsCommand extends BasicCommand<
   async execute(_opts: UpgradeSettingsCommandOpts) {
     const ctx = "Upgrade:execute";
     L.info({ ctx });
-    const config = DendronWorkspace.configuration();
-    if (!config) {
-      throw Error("no ws config found");
-    }
-
     const newConfig = await WorkspaceConfig.update(
       path.dirname(DendronWorkspace.workspaceFile().fsPath)
     );

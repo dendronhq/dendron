@@ -1,4 +1,9 @@
-import { DendronConfig, DendronError, getStage } from "@dendronhq/common-all";
+import {
+  DendronConfig,
+  DendronError,
+  getStage,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import { readJSONWithComments, vault2Path } from "@dendronhq/common-server";
 import {
   HistoryEvent,
@@ -170,6 +175,9 @@ function subscribeToPortChange() {
   );
 }
 
+/**
+ * Clone any remote vaults that have not been initialized
+ */
 async function syncVaults(opts: {
   config: DendronConfig;
   wsService: WorkspaceService;
@@ -239,9 +247,32 @@ export async function _activate(context: vscode.ExtensionContext) {
       return;
     }
 
-    // migrate legacy config files
     const configMigrated = migrateConfig({ config, wsRoot });
     Logger.info({ ctx, config, configMigrated, msg: "read dendron config" });
+
+    // check for vaults with same name
+    const uniqVaults = _.uniqBy(config.vaults, (vault) =>
+      VaultUtils.getName(vault)
+    );
+    if (_.size(uniqVaults) < _.size(config.vaults)) {
+      let txt = "Fix it";
+      await vscode.window
+        .showErrorMessage(
+          "Multiple Vaults with the same name. See https://dendron.so/notes/a6c03f9b-8959-4d67-8394-4d204ab69bfe.html#multiple-vaults-with-the-same-name to fix",
+          txt
+        )
+        .then((resp) => {
+          if (resp === txt) {
+            vscode.commands.executeCommand(
+              "vscode.open",
+              vscode.Uri.parse(
+                "https://dendron.so/notes/a6c03f9b-8959-4d67-8394-4d204ab69bfe.html#multiple-vaults-with-the-same-name"
+              )
+            );
+          }
+        });
+      return;
+    }
 
     // migrate legacy settings
     const wsConfig = (await readJSONWithComments(

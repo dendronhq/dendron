@@ -38,6 +38,9 @@ export async function migrateSettings({
   return { changed, settings };
 }
 
+/**
+ * Migrate dendron.yml if necessary
+ */
 export function migrateConfig({
   config,
   wsRoot,
@@ -62,7 +65,8 @@ export function migrateConfig({
     config.version = 0;
     changed = true;
   }
-  // check if vaults are relative path, if so, change
+
+  // check if vaults are absolute path, if so, change
   config.vaults.forEach((ent) => {
     if (path.isAbsolute(ent.fsPath)) {
       ent.fsPath = path.relative(wsRoot, ent.fsPath);

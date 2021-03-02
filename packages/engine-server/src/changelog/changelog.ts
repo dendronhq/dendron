@@ -1,48 +1,45 @@
 import { DEngineClientV2 } from "@dendronhq/common-all";
-import { exec } from "child_process";
+import execa from "execa";
 
 // gets list of notes that were changed. using git.
 export async function generateChangelog(engine: DEngineClientV2) {
   // TODO: works only on one vault, make it work for multiple
   let vault = engine.vaultsv3[0].fsPath;
-  let changes = getChanges(vault);
-  console.log(changes, "changes");
+  getChanges(vault).then(function (changes) {
+    console.log(changes, "changes");
+  });
 }
 
 // get files changed/added for a given vault
-function getChanges(vault: any) {
+async function getChanges(vault: any) {
   let filesChanged: string[] = [];
   let filesAdded: string[] = [];
   let changelogDate: string = "";
-
-  exec(`git status ${vault}`, (error, stdout, stderr) => {
-    if (error) {
-      console.log(`error: ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      console.log(`stderr: ${stderr}`);
-      return;
-    }
-    let results = stdout.split("\n");
-    results.map((result) => {
+  try {
+    const { stdout } = await execa("git", ["status", vault]);
+    let status = stdout.split("\n");
+    status.map((result) => {
       if (result.startsWith(" M")) {
         filesChanged.push(result.replace(` M ${vault}/`, ""));
       } else if (result.startsWith("??")) {
         filesAdded.push(result.replace(`?? ${vault}/`, ""));
       }
     });
-  });
+  } catch (error) {
+    console.log(error);
+  }
 
   // get the date of the last commit
-  exec(`git log -1 --format=%cd`, (error, stdout, stderr) => {
+  try {
+    const { stdout } = await execa("git", ["log", "-1", "--format=%cd"]);
     let date = stdout.split(/\s+/).slice(1, 5);
     let day = date[0];
     let month = date[1];
     let year = date[3];
     changelogDate = `${day} ${month} ${year}`;
-  });
-
+  } catch (error) {
+    console.log(error);
+  }
   return {
     filesAdded: filesAdded,
     filesChanged: filesChanged,

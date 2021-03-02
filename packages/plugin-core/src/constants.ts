@@ -521,6 +521,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.links.md",
     docPreview: `<a href="https://www.loom.com/share/01250485e20a4cdca2a053dd6047ac68"><img src="https://cdn.loom.com/sessions/thumbnails/01250485e20a4cdca2a053dd6047ac68-with-play.gif"> </a>`,
   },
+  PASTE_LINK: {
+    key: "dendron.pasteLink",
+    title: `${CMD_PREFIX} Paste Link`,
+    group: "workspace",
+    desc: "Fetch metadata for a web link and format as markdown",
+  },
   SHOW_HELP: {
     key: "dendron.showHelp",
     title: `${CMD_PREFIX} Show Help`,

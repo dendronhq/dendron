@@ -170,8 +170,10 @@ export class WorkspaceService {
     const config = this.config;
     config.vaults = _.reject(config.vaults, { fsPath: vault.fsPath });
 
-    if (!config.site.duplicateNoteBehavior) {
-    } else if (_.isArray(config.site.duplicateNoteBehavior.payload)) {
+    if (
+      config.site.duplicateNoteBehavior &&
+      _.isArray(config.site.duplicateNoteBehavior.payload)
+    ) {
       if (config.vaults.length == 1) {
         // if there is only one vault left, remove duplicateNoteBehavior setting
         config.site = _.omit(config.site, ["duplicateNoteBehavior"]);

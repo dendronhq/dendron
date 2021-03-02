@@ -1,4 +1,5 @@
 import { sinon } from "@dendronhq/common-test-utils";
+import _ from "lodash";
 import ogs from "open-graph-scraper";
 import * as vscode from "vscode";
 import { PasteLinkCommand } from "../../commands/PasteLink";
@@ -29,11 +30,20 @@ const DEFAULT_OPENGRAPH_RESPONSE_FAIL = { error: true } as ogs.ErrorResult;
 suite("pasteLink", function () {
   let ctx: vscode.ExtensionContext;
 
-  ctx = setupBeforeAfter(this, {});
+  ctx = setupBeforeAfter(this, {
+    beforeHook: () => {},
+    afterHook: () => {
+      sinon.restore();
+    },
+  });
   test("basic", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
-      onInit: async () => {
+      onInit: async ({ engine }) => {
+        // Need note to open
+        const note = _.values(engine.notes)[0];
+        await utils.VSCodeUtils.openNote(note);
+
         sinon
           .stub(clipboard, "readText")
           .returns(Promise.resolve("https://dendron.so"));
@@ -51,7 +61,10 @@ suite("pasteLink", function () {
   test("basic failure (internet down)", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,
-      onInit: async () => {
+      onInit: async ({ engine }) => {
+        const note = _.values(engine.notes)[0];
+        await utils.VSCodeUtils.openNote(note);
+
         sinon
           .stub(clipboard, "readText")
           .returns(Promise.resolve("https://dendron.so"));
@@ -60,9 +73,7 @@ suite("pasteLink", function () {
           .returns(Promise.resolve(DEFAULT_OPENGRAPH_RESPONSE_FAIL));
 
         const formattedLink = await new PasteLinkCommand().run();
-        expect(formattedLink).toEqual(
-          `[https://dendron.so](https://dendron.so)`
-        );
+        expect(formattedLink).toEqual(`<https://dendron.so>`);
         done();
       },
     });

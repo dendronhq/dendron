@@ -72,7 +72,7 @@ export class DConfig {
       throw `siteRootDir is undefined`;
     }
     if (!siteUrl) {
-      throw `siteURL is undefined`;
+      throw `siteUrl is undefined`;
     }
     if (_.size(siteHierarchies) < 1) {
       throw `siteHiearchies must have at least one hiearchy`;

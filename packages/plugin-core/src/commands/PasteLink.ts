@@ -2,7 +2,7 @@ import _ from "lodash";
 import ogs from "open-graph-scraper";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
-import { clipboard, VSCodeUtils } from "../utils";
+import { clipboard, getOpenGraphMetadata, VSCodeUtils } from "../utils";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -50,7 +50,7 @@ export class PasteLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // Second: get metadata + put into a markdown string.
     let formattedLink = `<${url}>`;
     try {
-      const data = await ogs({ url });
+      const data = await getOpenGraphMetadata({ url });
       // Third: combine metadata with markdown
       if (!data.error) {
         formattedLink = this.getFormattedLinkFromOpenGraphResult(
@@ -74,6 +74,8 @@ export class PasteLinkCommand extends BasicCommand<CommandOpts, CommandOutput> {
     });
 
     this.showFeedback(formattedLink);
+
+    // The return is used for testing, but not by the main app.
     return formattedLink;
   }
 }

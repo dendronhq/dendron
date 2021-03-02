@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.31.1](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.31.0...@dendronhq/engine-server@0.31.1) (2021-03-02)
+
+### Bug Fixes
+
+- deleted notes don't require reload for publishing ([9a10462](https://github.com/dendronhq/dendron/commit/9a1046290c2c3111dacb08401c108bf790ae617d))
+- issue with mixed case files ([9b72299](https://github.com/dendronhq/dendron/commit/9b7229930b9efe4c68c6bc1f71bce6a03a6d568e))
+- siteUrl typo in cli error output ([#515](https://github.com/dendronhq/dendron/issues/515)) ([59084fd](https://github.com/dendronhq/dendron/commit/59084fd0975618eeac045913cdb74108f57f4fc1))
+
 # [0.31.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.30.1...@dendronhq/engine-server@0.31.0) (2021-03-01)
 
 ### Bug Fixes

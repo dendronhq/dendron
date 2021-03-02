@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.31.1](https://github.com/dendronhq/dendron/compare/@dendronhq/common-all@0.31.0...@dendronhq/common-all@0.31.1) (2021-03-02)
+
+### Bug Fixes
+
+- issue with mixed case files ([9b72299](https://github.com/dendronhq/dendron/commit/9b7229930b9efe4c68c6bc1f71bce6a03a6d568e))
+
 # [0.31.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-all@0.30.1...@dendronhq/common-all@0.31.0) (2021-03-01)
 
 ### Bug Fixes

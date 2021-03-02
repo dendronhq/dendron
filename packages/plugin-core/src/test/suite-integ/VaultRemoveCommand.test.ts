@@ -100,7 +100,6 @@ suite("VaultRemoveCommand", function () {
     runSingleVaultTest({
       ctx,
       onInit: async ({ wsRoot, vault }) => {
-        // // add 2 vaults in workspace root
         // add two more vaults
 
         const vpath2 = path.join(wsRoot, "vault2");

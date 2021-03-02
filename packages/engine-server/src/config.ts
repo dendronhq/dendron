@@ -2,7 +2,7 @@ import {
   CleanDendronSiteConfig,
   CONSTANTS,
   DendronConfig,
-  DendronSiteConfig,
+  DendronSiteConfig
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -72,7 +72,7 @@ export class DConfig {
       throw `siteRootDir is undefined`;
     }
     if (!siteUrl) {
-      throw `siteUrl is undefined`;
+      throw `siteUrl is undefined. See https://dendron.so/notes/f2ed8639-a604-4a9d-b76c-41e205fb8713.html#siteurl  for details`;
     }
     if (_.size(siteHierarchies) < 1) {
       throw `siteHiearchies must have at least one hiearchy`;

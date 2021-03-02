@@ -330,12 +330,12 @@ export class NoteUtilsV2 {
     wsRoot: string;
   }): NotePropsV2[] {
     const { note, notesList, createStubs, wsRoot } = opts;
-    const parentPath = DNodeUtilsV2.dirName(note.fname);
+    const parentPath = DNodeUtilsV2.dirName(note.fname).toLowerCase();
     let parent =
       _.find(
         notesList,
         (p) =>
-          p.fname === parentPath &&
+          p.fname.toLowerCase() === parentPath &&
           VaultUtils.isEqual(p.vault.fsPath, note.vault.fsPath, wsRoot)
       ) || null;
     const changed: NotePropsV2[] = [];

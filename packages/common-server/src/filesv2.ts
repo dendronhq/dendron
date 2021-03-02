@@ -148,10 +148,15 @@ export function string2Note({
   return note;
 }
 
-export function file2Note(fpath: string, vault: DVault): NotePropsV2 {
+export function file2Note(
+  fpath: string,
+  vault: DVault,
+  toLowercase?: boolean
+): NotePropsV2 {
   const content = fs.readFileSync(fpath, { encoding: "utf8" });
   const { name } = path.parse(fpath);
-  return string2Note({ content, fname: name.toLowerCase(), vault });
+  const fname = toLowercase ? name.toLowerCase() : name;
+  return string2Note({ content, fname, vault });
 }
 
 /**

@@ -14,7 +14,9 @@ export async function generateChangelog(engine: DEngineClientV2) {
 async function getChanges(vault: any) {
   let filesChanged: string[] = [];
   let filesAdded: string[] = [];
-  let changelogDate: string = "";
+  let commitDate: string = "";
+  let commitHash: string = "";
+
   try {
     const { stdout } = await execa("git", ["status", vault]);
     let status = stdout.split("\n");
@@ -29,21 +31,36 @@ async function getChanges(vault: any) {
     console.log(error);
   }
 
-  // get the date of the last commit
+  // get date of last commit
   try {
     const { stdout } = await execa("git", ["log", "-1", "--format=%cd"]);
     let date = stdout.split(/\s+/).slice(1, 5);
     let day = date[0];
     let month = date[1];
     let year = date[3];
-    changelogDate = `${day} ${month} ${year}`;
+    commitDate = `${day} ${month} ${year}`;
   } catch (error) {
     console.log(error);
   }
+
+  // get last commit hash
+  try {
+    const { stdout } = await execa("git", [
+      `log`,
+      `--pretty=format:'%h'`,
+      `-n`,
+      `1`,
+    ]);
+    commitHash = stdout;
+  } catch (error) {
+    console.log(error);
+  }
+
   return {
     filesAdded: filesAdded,
     filesChanged: filesChanged,
-    changelogDate: changelogDate,
+    commitDate: commitDate,
+    commitHash: commitHash,
   };
 }
 

@@ -23,7 +23,8 @@ const {generateChangelog} = require("@dendronhq/engine-server")
 // only generate last changelog, save everything else on disk
 
 async function getChangelog() {
-  let changedFiles = generateChangelog(process.env.WS_ROOT)
+  // let changedFiles = generateChangelog(process.env.WS_ROOT)
+  let changedFiles = []
   return changedFiles
 }
 

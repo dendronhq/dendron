@@ -1,15 +1,60 @@
-/**
- *  @returns list of notes that were changed (via git status)
- */
-export async function generateChangelog(wsRoot: string) {
-  // const engine = MDUtilsV4.getEngineFromProc(proc).engine;
-  console.log(wsRoot, "root");
+import { DEngineClientV2 } from "@dendronhq/common-all";
+import { exec } from "child_process";
 
-  // return [{
-  //   commit: "hhhh",
-  //   data: "12/04"
-  // }]
+// gets list of notes that were changed. using git.
+export async function generateChangelog(engine: DEngineClientV2) {
+  // TODO: works only on one vault, make it work for multiple
+  let vault = engine.vaultsv3[0].fsPath;
+  let changes = getChanges(vault);
+  console.log(changes, "changes");
 }
+
+// get files changed/added for a given vault
+function getChanges(vault: any) {
+  let filesChanged: string[] = [];
+  let filesAdded: string[] = [];
+  let changelogDate: string = "";
+
+  exec(`git status ${vault}`, (error, stdout, stderr) => {
+    if (error) {
+      console.log(`error: ${error.message}`);
+      return;
+    }
+    if (stderr) {
+      console.log(`stderr: ${stderr}`);
+      return;
+    }
+    let results = stdout.split("\n");
+    results.map((result) => {
+      if (result.startsWith(" M")) {
+        filesChanged.push(result.replace(` M ${vault}/`, ""));
+      } else if (result.startsWith("??")) {
+        filesAdded.push(result.replace(`?? ${vault}/`, ""));
+      }
+    });
+  });
+
+  // get the date of the last commit
+  exec(`git log -1 --format=%cd`, (error, stdout, stderr) => {
+    let date = stdout.split(/\s+/).slice(1, 5);
+    let day = date[0];
+    let month = date[1];
+    let year = date[3];
+    changelogDate = `${day} ${month} ${year}`;
+  });
+
+  return {
+    filesAdded: filesAdded,
+    filesChanged: filesChanged,
+    changelogDate: changelogDate,
+  };
+}
+
+// console.log(wsRoot, "ROOT");
+// return [{
+//   commit: "hhhh",
+//   data: "12/04"
+// }]
 
 // const wsRoot = process.env.WS_ROOT
 
@@ -43,44 +88,3 @@ export async function generateChangelog(wsRoot: string) {
 // } else {
 //   return
 // }
-
-// read dendron.yml to check for public vaults and return a list of public vaults
-// const getPublicVaults = () => {
-//   let vaults = [] as Object[]
-//   try {
-//     let fileContents = fs.readFileSync("dendron.yml", "utf8");
-//     let data = yaml.safeLoad(fileContents);
-//     data.vaults.map((vault: any) => {
-//       vaults.push(vault.fsPath);
-//     });
-//     return vaults;
-//   } catch (e) {
-//     return e
-//   }
-// };
-
-// get files changed/added for a given vault
-// const getChanges = (vault: any) => {
-//   let filesChanged = [];
-//   let filesAdded = [];
-//   exec(`git status ${vault}`, (error, stdout, stderr) => {
-//     if (error) {
-//       console.log(`error: ${error.message}`);
-//       return;
-//     }
-//     if (stderr) {
-//       console.log(`stderr: ${stderr}`);
-//       return;
-//     }
-//     let results = stdout.split("\n");
-//     results.map((result) => {
-//       if (result.startsWith(" M")) {
-//         filesChanged.push(result.replace(` M ${vault}/`, ""));
-//       } else if (result.startsWith("??")) {
-//         filesAdded.push(result.replace(`?? ${vault}/`, ""));
-//       }
-//     });
-//     console.log({ filesChanged });
-//     console.log({ filesAdded });
-//   });
-// };

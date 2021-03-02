@@ -1,6 +1,6 @@
 import { DEngineClientV2, Stage } from "@dendronhq/common-all";
 import { goUpTo } from "@dendronhq/common-server";
-import { SiteUtils } from "@dendronhq/engine-server";
+import { generateChangelog, SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -141,6 +141,7 @@ export class BuildSiteV2CLICommand extends CLICommand<
     }
     this.L.info("running pre-compile");
     await Promise.all([buildNav(), copyAssets()]);
+    generateChangelog(opts.engine);
     this.L.info("running compile");
     await compile({ cwd }, { serve: opts.serve, port: servePort });
     this.L.info("running post-compile");

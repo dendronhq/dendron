@@ -18,12 +18,8 @@ import _ from "lodash";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
-import {
-  VaultAddCommand,
-  VaultRemoteSource,
-} from "../../commands/VaultAddCommand";
+import { VaultAddCommand } from "../../commands/VaultAddCommand";
 import { WorkspaceFolderRaw, WorkspaceSettings } from "../../types";
-import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import {
@@ -31,43 +27,8 @@ import {
   getConfig,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
+  stubVaultInput,
 } from "../testUtilsV3";
-
-const stubVaultInput = (opts: {
-  cmd?: VaultAddCommand;
-  sourceType: VaultRemoteSource;
-  sourcePath: string;
-  sourcePathRemote?: string;
-  sourceName?: string;
-}): void => {
-  if (opts.cmd) {
-    sinon.stub(opts.cmd, "gatherInputs").returns(
-      Promise.resolve({
-        type: opts.sourceType,
-        name: opts.sourceName,
-        path: opts.sourcePath,
-        pathRemote: opts.sourcePathRemote,
-      })
-    );
-  }
-
-  let acc = 0;
-  // @ts-ignore
-  VSCodeUtils.showQuickPick = async () => ({ label: opts.sourceType });
-
-  VSCodeUtils.showInputBox = async () => {
-    if (acc === 0) {
-      acc += 1;
-      return opts.sourcePath;
-    } else if (acc === 1) {
-      acc += 1;
-      return opts.sourceName;
-    } else {
-      throw Error("exceed acc limit");
-    }
-  };
-  return;
-};
 
 const getWorkspaceFolders = () => {
   const wsPath = DendronWorkspace.workspaceFile().fsPath;

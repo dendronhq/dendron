@@ -1,11 +1,23 @@
 import { DEngineClientV2 } from "@dendronhq/common-all";
 import execa from "execa";
+var fs = require("fs");
 
 // TODO: works only on one vault, make it work for multiple
 // gets list of notes that were changed. using git.
 export async function generateChangelog(engine: DEngineClientV2) {
   let gitRepoPath = engine.wsRoot.substring(0, engine.wsRoot.lastIndexOf("/"));
   getChanges(gitRepoPath).then(function (changes) {
+    fs.writeFileSync(
+      "/tmp/changes.json",
+      JSON.stringify(changes, null, 2),
+      "utf-8",
+      function (err: any) {
+        if (err) {
+          return console.log(err);
+        }
+        console.log("file created");
+      }
+    );
     return changes;
   });
 }

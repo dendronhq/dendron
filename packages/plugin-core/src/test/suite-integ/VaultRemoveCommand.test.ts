@@ -10,7 +10,7 @@ import { VaultRemoveCommand } from "../../commands/VaultRemoveCommand";
 import { WorkspaceSettings } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
-import { runMultiVaultTest, runSingleVaultTest } from "../testUtilsv2";
+import { expect, runMultiVaultTest, runSingleVaultTest } from "../testUtilsv2";
 import { setupBeforeAfter, stubVaultInput } from "../testUtilsV3";
 
 suite("VaultRemoveCommand", function () {
@@ -77,7 +77,7 @@ suite("VaultRemoveCommand", function () {
 
         const config = readYAML(configPath) as DendronConfig;
         // confirm that duplicateNoteBehavior option exists
-        assert(config.site.duplicateNoteBehavior);
+        expect(config.site.duplicateNoteBehavior).toBeTruthy();
 
         const vaults = DendronWorkspace.instance().vaultsv4;
 
@@ -89,7 +89,7 @@ suite("VaultRemoveCommand", function () {
 
         const configNew = readYAML(configPath) as DendronConfig;
         // confirm that duplicateNoteBehavior setting is gone
-        assert(!configNew.site.duplicateNoteBehavior);
+        expect(configNew.site.duplicateNoteBehavior).toBeFalsy();
 
         done();
       },
@@ -118,10 +118,11 @@ suite("VaultRemoveCommand", function () {
         );
         const configOrig = readYAML(configPathOrig) as DendronConfig;
         // check what we are starting from.
-        assert.deepStrictEqual(
-          configOrig.vaults.map((ent) => ent.fsPath),
-          [vaults[0].fsPath, vaults[1].fsPath, vaults[2].fsPath]
-        );
+        expect(configOrig.vaults.map((ent) => ent.fsPath)).toEqual([
+          vaults[0].fsPath,
+          vaults[1].fsPath,
+          vaults[2].fsPath,
+        ]);
 
         // @ts-ignore
         VSCodeUtils.showQuickPick = () => {
@@ -135,7 +136,7 @@ suite("VaultRemoveCommand", function () {
         const config = readYAML(configPath) as DendronConfig;
 
         // check that "vault2" is gone from payload
-        assert.deepStrictEqual(config.site.duplicateNoteBehavior?.payload, [
+        expect(config.site.duplicateNoteBehavior!.payload).toEqual([
           vault.fsPath.replace("../", ""),
           "vault3",
         ]);

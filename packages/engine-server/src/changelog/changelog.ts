@@ -76,7 +76,6 @@ async function getChanges(path: string) {
           ["show", commitHash.slice(1, -1), "--", change.fname],
           { cwd: path }
         );
-        console.log(stdout, "DIFF");
         change.diff = stdout;
         return stdout;
       } catch (error) {

@@ -141,7 +141,7 @@ export class BuildSiteV2CLICommand extends CLICommand<
     }
     this.L.info("running pre-compile");
     await Promise.all([buildNav(), copyAssets()]);
-    generateChangelog(opts.engine);
+    await generateChangelog(opts.engine);
     this.L.info("running compile");
     await compile({ cwd }, { serve: opts.serve, port: servePort });
     this.L.info("running post-compile");

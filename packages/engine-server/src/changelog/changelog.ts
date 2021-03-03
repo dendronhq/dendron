@@ -4,17 +4,14 @@ import execa from "execa";
 // TODO: works only on one vault, make it work for multiple
 // gets list of notes that were changed. using git.
 export async function generateChangelog(engine: DEngineClientV2) {
-  // let vault = engine.vaultsv3[0].fsPath;
   let gitRepoPath = engine.wsRoot.substring(0, engine.wsRoot.lastIndexOf("/"));
   getChanges(gitRepoPath).then(function (changes) {
-    console.log(changes, "changes");
+    return changes;
   });
 }
 
 // get files changed/added for a repo for the last commit
 async function getChanges(path: string) {
-  // let filesChanged: string[] = [];
-  // let filesAdded: string[] = [];
   let commitDate: string = "";
   let commitHash: string = "";
   let changes: any[] = [];
@@ -67,6 +64,7 @@ async function getChanges(path: string) {
           ["show", commitHash.slice(1, -1), "--", change.fname],
           { cwd: path }
         );
+        console.log(stdout, "DIFF");
         change.diff = stdout;
         return stdout;
       } catch (error) {

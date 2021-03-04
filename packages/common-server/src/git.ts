@@ -8,12 +8,22 @@ export { simpleGit, SimpleGit };
 
 // comment
 export class GitUtils {
+  /**
+   * Convert a github repo orul to access token format
+   */
   static getGithubAccessTokenUrl(opts: {
     remotePath: string;
     accessToken: string;
   }) {
-    const repoPath = opts.remotePath.split(":").slice(-1)[0];
-    return `https://${opts.accessToken}:x-oauth-basic@github.com/${repoPath}`;
+    const { remotePath, accessToken } = opts;
+    let repoPath: string;
+    debugger;
+    if (remotePath.startsWith("https://")) {
+      repoPath = remotePath.split("/").slice(-2).join("/");
+    } else {
+      repoPath = opts.remotePath.split(":").slice(-1)[0];
+    }
+    return `https://${accessToken}:x-oauth-basic@github.com/${repoPath}`;
   }
 
   static getRepoNameFromURL(url: string): string {

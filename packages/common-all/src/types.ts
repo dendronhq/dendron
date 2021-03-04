@@ -239,6 +239,11 @@ export type DendronSiteConfig = {
   author?: string;
   twitter?: string;
   image?: string;
+
+  /**
+   * Use {@link https://github.com/Nevenall/remark-containers} in published site
+   */
+  useContainers?: boolean;
 };
 
 export enum DuplicateNoteAction {

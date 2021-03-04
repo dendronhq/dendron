@@ -29,6 +29,8 @@ import slug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import remark from "remark";
 import abbrPlugin from "remark-abbr";
+// @ts-ignore
+import containers from "remark-containers";
 import footnotes from "remark-footnotes";
 import frontmatterPlugin from "remark-frontmatter";
 import math from "remark-math";
@@ -324,6 +326,7 @@ export class MDUtilsV4 {
         prettyRefs: usePrettyRefs,
       })
       .use(noteRefs, { ...opts.noteRefOpts, wikiLinkOpts: opts.wikiLinksOpts });
+
     if (opts.mathOpts?.katex) {
       proc = proc.use(math);
     }
@@ -441,6 +444,9 @@ export class MDUtilsV4 {
       config,
     });
     proc = proc.use(publishSite, { noteIndex });
+    if (config.site.useContainers) {
+      proc = proc.use(containers);
+    }
     return MDUtilsV4.procRehype({ proc, mathjax: true });
   }
 }

@@ -14939,6 +14939,11 @@ remark-abbr@^1.4.0:
   dependencies:
     unist-util-visit "^2.0.3"
 
+remark-containers@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.npmjs.org/remark-containers/-/remark-containers-1.2.0.tgz#e7d135181182d47a20a25adb2f8dbee15a7dd694"
+  integrity sha512-4RDgyvBxERd6oAOV0UKmOvlupqxpB2rkojfxFKab2MJkKoN3CDxdmSvrn7LllX1ZhkEz3UJ1979TEuf9fJ+HFQ==
+
 remark-footnotes@2:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/remark-footnotes/-/remark-footnotes-2.0.0.tgz#9001c4c2ffebba55695d2dd80ffb8b82f7e6303f"

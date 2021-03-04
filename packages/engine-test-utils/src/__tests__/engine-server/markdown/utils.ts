@@ -17,6 +17,16 @@ export async function checkVFile(resp: VFile, ...match: string[]) {
   ).toBeTruthy();
 }
 
+export async function checkNotInVFile(resp: VFile, ...nomatch: string[]) {
+  expect(resp).toMatchSnapshot();
+  expect(
+    await AssertUtils.assertInString({
+      body: resp.toString(),
+      nomatch,
+    })
+  ).toBeTruthy();
+}
+
 export const createProcForTest = (opts: {
   engine: DEngineClientV2;
   dest: DendronASTDest;

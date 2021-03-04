@@ -2,7 +2,8 @@ import {
   CleanDendronSiteConfig,
   CONSTANTS,
   DendronConfig,
-  DendronSiteConfig
+  DendronSiteConfig,
+  getStage,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -68,11 +69,18 @@ export class DConfig {
       description: "Personal knowledge space",
     });
     let { siteRootDir, siteHierarchies, siteIndex, siteUrl } = out;
+    if (process.env["SITE_URL"]) {
+      siteUrl = process.env["SITE_URL"];
+    }
     if (!siteRootDir) {
       throw `siteRootDir is undefined`;
     }
+    if (!siteUrl && getStage() === "dev") {
+      // this gets overridden in dev so doesn't matter
+      siteUrl = "https://foo";
+    }
     if (!siteUrl) {
-      throw `siteUrl is undefined. See https://dendron.so/notes/f2ed8639-a604-4a9d-b76c-41e205fb8713.html#siteurl  for details`;
+      throw `siteUrl is undefined. See https://dendron.so/notes/f2ed8639-a604-4a9d-b76c-41e205fb8713.html#siteurl for more details`;
     }
     if (_.size(siteHierarchies) < 1) {
       throw `siteHiearchies must have at least one hiearchy`;

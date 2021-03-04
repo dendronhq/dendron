@@ -7,16 +7,17 @@ pagination:
 templateEngineOverride: liquid
 ---
 
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css" />
+
 <div id="main" role="main">
     <h2>Changelog</h2>
 
     {%- for item in pagination.items %}
         <h3>{{item.commitDate}}</h3>
         {%- for change in item.changes %}
-            <li>{{change.action}}: {{change.fname}}</li>
             <details>
-                <summary>Changes</summary>
-                <p>{{change.diff}}</p>
+                <summary>{{change.action}}: {{change.fname}}</summary>
+                <p style="white-space: pre-line">{{change.diff}}</p>
             </details>
         {% endfor -%}
     {% endfor -%}

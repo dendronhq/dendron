@@ -1,4 +1,5 @@
 import { DEngineClientV2 } from "@dendronhq/common-all";
+import * as Diff2Html from "diff2html";
 import execa from "execa";
 var fs = require("fs");
 
@@ -68,13 +69,8 @@ async function getChanges(path: string) {
           ["show", commitHash.slice(1, -1), "--", change.fname],
           { cwd: path }
         );
-        let splitString = stdout.split("\n");
-        console.log(splitString, "split");
-        // TODO: is different for modified files..
-        let justDiff = splitString.splice(10);
-        console.log(justDiff, "DIFF");
-        change.diff = justDiff;
-        return stdout;
+        change.diff = Diff2Html.html(stdout);
+        return Diff2Html.html(stdout);
       } catch (error) {
         console.log(error);
         return error;

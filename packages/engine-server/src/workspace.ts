@@ -169,6 +169,22 @@ export class WorkspaceService {
   async removeVault({ vault }: { vault: DVault }) {
     const config = this.config;
     config.vaults = _.reject(config.vaults, { fsPath: vault.fsPath });
+
+    if (
+      config.site.duplicateNoteBehavior &&
+      _.isArray(config.site.duplicateNoteBehavior.payload)
+    ) {
+      if (config.vaults.length == 1) {
+        // if there is only one vault left, remove duplicateNoteBehavior setting
+        config.site = _.omit(config.site, ["duplicateNoteBehavior"]);
+      } else {
+        // otherwise pull the removed vault from payload
+        config.site.duplicateNoteBehavior.payload = _.pull(
+          config.site.duplicateNoteBehavior.payload,
+          vault.fsPath
+        );
+      }
+    }
     await this.setConfig(config);
   }
 

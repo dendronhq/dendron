@@ -1,10 +1,5 @@
-import {
-  DendronConfig,
-  DendronError,
-  getStage,
-  VaultUtils,
-} from "@dendronhq/common-all";
-import { readJSONWithComments, vault2Path } from "@dendronhq/common-server";
+import { DendronError, getStage, VaultUtils } from "@dendronhq/common-all";
+import { readJSONWithComments } from "@dendronhq/common-server";
 import {
   HistoryEvent,
   HistoryService,
@@ -175,42 +170,6 @@ function subscribeToPortChange() {
   );
 }
 
-/**
- * Clone any remote vaults that have not been initialized
- */
-async function syncVaults(opts: {
-  config: DendronConfig;
-  wsService: WorkspaceService;
-  wsRoot: string;
-}) {
-  const { config, wsService, wsRoot } = opts;
-  // check for remotes
-  const emptyRemoteVaults = config.vaults.filter(
-    (vault) =>
-      !_.isUndefined(vault.remote) &&
-      !fs.existsSync(vault2Path({ vault, wsRoot }))
-  );
-  const shouldSyncVaults = !_.isEmpty(emptyRemoteVaults);
-  if (shouldSyncVaults) {
-    vscode.window.showInformationMessage(
-      `the following remote vaults have not been initialized: ${emptyRemoteVaults
-        .map((ent) => ent.remote!.url)
-        .join(", ")}. Initializing now`
-    );
-
-    await Promise.all(
-      emptyRemoteVaults.map(async (vault) => {
-        return wsService.cloneVault({ vault });
-      })
-    );
-    vscode.window.showInformationMessage(
-      "finish initializing remote vaults. reloading workspace"
-    );
-    setTimeout(VSCodeUtils.reloadWindow, 200);
-  }
-  return shouldSyncVaults;
-}
-
 export async function _activate(context: vscode.ExtensionContext) {
   const isDebug = VSCodeUtils.isDebuggingExtension();
   const ctx = "_activate";
@@ -242,8 +201,19 @@ export async function _activate(context: vscode.ExtensionContext) {
     const wsRoot = DendronWorkspace.wsRoot() as string;
     const wsService = new WorkspaceService({ wsRoot });
 
-    const shouldSync = await syncVaults({ wsRoot, config, wsService });
+    const shouldSync = await wsService.syncVaults({
+      config,
+      progressIndicator: () => {
+        vscode.window.showInformationMessage(
+          "found empty remote vaults that need initializing"
+        );
+      },
+    });
     if (shouldSync) {
+      vscode.window.showInformationMessage(
+        "finish initializing remote vaults. reloading workspace"
+      );
+      setTimeout(VSCodeUtils.reloadWindow, 200);
       return;
     }
 

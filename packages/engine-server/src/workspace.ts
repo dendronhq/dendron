@@ -35,6 +35,8 @@ export type WorkspaceServiceOpts = {
   wsRoot: string;
 };
 
+type UrlTransformerFunc = (url: string) => string;
+
 export class WorkspaceService {
   static isNewVersionGreater({
     oldVersion,
@@ -259,8 +261,18 @@ export class WorkspaceService {
     await git.clone(remotePath, localPath);
   }
 
-  async cloneVault(opts: { vault: DVault }) {
-    const { vault } = opts;
+  /**
+   * Clone a vault from a remote source
+   * @param opts.vault vaults field
+   * @param opts.urlTransformer modify the git url
+   */
+  async cloneVault(opts: {
+    vault: DVault;
+    urlTransformer?: UrlTransformerFunc;
+  }) {
+    const { vault, urlTransformer } = _.defaults(opts, {
+      urlTransformer: _.identity,
+    });
     const wsRoot = this.wsRoot;
     if (!vault.remote || vault.remote.type !== "git") {
       throw new DendronError({ msg: "cloning non-git vault" });
@@ -268,8 +280,37 @@ export class WorkspaceService {
     const repoPath = vault2Path({ wsRoot, vault });
     logger.info({ msg: "cloning", repoPath });
     const git = simpleGit({ baseDir: wsRoot });
-    await git.clone(vault.remote.url, repoPath);
+    await git.clone(urlTransformer(vault.remote.url), repoPath);
     return repoPath;
+  }
+
+  /**
+   * Make sure all vaults are present on file system
+   */
+  async syncVaults(opts: {
+    config: DendronConfig;
+    progressIndicator?: () => void;
+    urlTransformer?: UrlTransformerFunc;
+  }) {
+    const { config, progressIndicator, urlTransformer } = opts;
+    const { wsRoot } = this;
+
+    // clone all missing vaults
+    const emptyRemoteVaults = config.vaults.filter(
+      (vault) =>
+        !_.isUndefined(vault.remote) &&
+        !fs.existsSync(vault2Path({ vault, wsRoot }))
+    );
+    const shouldSyncVaults = !_.isEmpty(emptyRemoteVaults);
+    if (progressIndicator) {
+      progressIndicator();
+    }
+    await Promise.all(
+      emptyRemoteVaults.map(async (vault) => {
+        return this.cloneVault({ vault, urlTransformer });
+      })
+    );
+    return shouldSyncVaults;
   }
 
   writePort(port: number) {

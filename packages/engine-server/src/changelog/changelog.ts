@@ -44,14 +44,14 @@ async function getChanges(path: string) {
         let filePath = result.split(" ")[0].substring(2);
         filesChanged.push(filePath);
         changes.push({
-          action: "modified",
+          action: "Modified",
           fname: filePath,
         });
       } else if (result.startsWith("A")) {
         let filePath = result.split(" ")[0].substring(2);
         filesChanged.push(filePath);
         changes.push({
-          action: "added",
+          action: "Added",
           fname: filePath,
         });
       }
@@ -68,7 +68,12 @@ async function getChanges(path: string) {
           ["show", commitHash.slice(1, -1), "--", change.fname],
           { cwd: path }
         );
-        change.diff = stdout;
+        let splitString = stdout.split("\n");
+        console.log(splitString, "split");
+        // TODO: is different for modified files..
+        let justDiff = splitString.splice(10);
+        console.log(justDiff, "DIFF");
+        change.diff = justDiff;
         return stdout;
       } catch (error) {
         console.log(error);

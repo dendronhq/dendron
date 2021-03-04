@@ -1,4 +1,5 @@
 ---
+layout: layouts/default.liquid
 pagination:
     data: changelog
     size: 30
@@ -6,10 +7,18 @@ pagination:
 templateEngineOverride: liquid
 ---
 
-<!-- {%- for item in pagination.items %}
-  <li>{{ item }}</li>
-{% endfor -%} -->
+<div id="main" role="main">
+    <h2>Changelog</h2>
 
-{{ change }}
-<!-- {{ change | jsonfy }} -->
+    {%- for item in pagination.items %}
+        <h3>{{item.commitDate}}</h3>
+        {%- for change in item.changes %}
+            <li>{{change.action}}: {{change.fname}}</li>
+            <details>
+                <summary>Changes</summary>
+                <p>{{change.diff}}</p>
+            </details>
+        {% endfor -%}
+    {% endfor -%}
+</div>
 

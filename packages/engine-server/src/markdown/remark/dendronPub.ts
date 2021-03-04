@@ -12,6 +12,7 @@ import {
   DendronASTDest,
   NoteRefDataV4,
   NoteRefDataV4_LEGACY,
+  VaultMissingBehavior,
   WikiLinkNoteV4,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
@@ -76,8 +77,11 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         let valueOrig = value;
         let canPublish = true;
         const data = _node.data;
-        vault = MDUtilsV4.getVault(proc, data.vaultName);
+        vault = MDUtilsV4.getVault(proc, data.vaultName, {
+          vaultMissingBehavior: VaultMissingBehavior.FALLBACK_TO_ORIGINAL_VAULT,
+        });
         if (error) {
+          debugger;
           addError(proc, error);
         }
 
@@ -96,6 +100,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           } else {
             if (!note || !config) {
               value = "403";
+              debugger;
               addError(proc, new DendronError({ msg: "no note or config" }));
             } else {
               canPublish = SiteUtils.canPublish({
@@ -104,6 +109,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
                 engine,
               });
               if (!canPublish) {
+                debugger;
                 value = "403";
               }
             }

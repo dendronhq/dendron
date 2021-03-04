@@ -32,6 +32,11 @@ export enum DendronASTDest {
   HTML = "HTML",
 }
 
+export enum VaultMissingBehavior {
+  FALLBACK_TO_ORIGINAL_VAULT,
+  THROW_ERROR,
+}
+
 export type DendronASTData = {
   dest: DendronASTDest;
   vault: DVault;

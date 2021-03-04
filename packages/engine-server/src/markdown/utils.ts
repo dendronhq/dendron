@@ -49,7 +49,7 @@ import { noteRefsV2 } from "./remark/noteRefsV2";
 import { publishSite } from "./remark/publishSite";
 import { transformLinks } from "./remark/transformLinks";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
-import { DendronASTData, DendronASTDest } from "./types";
+import { DendronASTData, DendronASTDest, VaultMissingBehavior } from "./types";
 
 const toString = require("mdast-util-to-string");
 export { nunjucks };
@@ -131,15 +131,30 @@ export class MDUtilsV4 {
     return proc.data("dendron") as DendronASTData;
   }
 
-  static getVault(proc: Processor, vaultName?: string) {
+  /**
+   * Get the vault name, either from processor or passed in vaultName
+   * @param opts.vaultMissingBehavior how to respond if no vault is found. See {@link VaultMissingBehavior}
+   */
+  static getVault(
+    proc: Processor,
+    vaultName?: string,
+    opts?: { vaultMissingBehavior?: VaultMissingBehavior }
+  ) {
+    const copts = _.defaults(opts || {}, {
+      vaultMissingBehavior: VaultMissingBehavior.THROW_ERROR,
+    });
     let { vault } = MDUtilsV4.getDendronData(proc);
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
     if (vaultName) {
-      vault = VaultUtils.getVaultByName({
+      let maybeVault = VaultUtils.getVaultByName({
         vaults: engine.vaultsv3,
         vname: vaultName,
-        throwOnMissing: true,
-      })!;
+        throwOnMissing:
+          copts.vaultMissingBehavior === VaultMissingBehavior.THROW_ERROR,
+      });
+      if (maybeVault) {
+        vault = maybeVault;
+      }
     }
     return vault;
   }

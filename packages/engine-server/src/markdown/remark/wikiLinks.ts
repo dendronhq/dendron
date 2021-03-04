@@ -154,13 +154,16 @@ function attachParser(proc: Unified.Processor) {
         vname: out.vaultName,
       });
       if (_.isUndefined(maybeVault)) {
-        throw new DendronError({
-          msg: `fname: ${fname}, vault ${
-            out.vaultName
-          } not found in ${JSON.stringify(out)}`,
-        });
+        addError(
+          proc,
+          new DendronError({
+            msg: `fname: ${fname}, vault ${
+              out.vaultName
+            } not found in ${JSON.stringify(out)}`,
+          })
+        );
       }
-      vault = maybeVault;
+      // default to current note
     }
     if (
       dest !== DendronASTDest.MD_DENDRON &&

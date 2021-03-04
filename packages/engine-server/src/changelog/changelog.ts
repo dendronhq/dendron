@@ -7,17 +7,9 @@ var fs = require("fs");
 export async function generateChangelog(engine: DEngineClientV2) {
   let gitRepoPath = engine.wsRoot.substring(0, engine.wsRoot.lastIndexOf("/"));
   getChanges(gitRepoPath).then(function (changes) {
-    fs.writeFileSync(
-      "/tmp/changes.json",
-      JSON.stringify(changes, null, 2),
-      "utf-8",
-      function (err: any) {
-        if (err) {
-          return console.log(err);
-        }
-        console.log("file created");
-      }
-    );
+    fs.writeFileSync("/tmp/changes.json", JSON.stringify(changes, null, 2), {
+      encoding: "utf-8",
+    });
     return changes;
   });
 }

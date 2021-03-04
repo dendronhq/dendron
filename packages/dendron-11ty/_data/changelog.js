@@ -1,10 +1,7 @@
-const {generateChangelog} = require("@dendronhq/engine-server")
 const fs = require("fs-extra");
 
 async function getChangelog() {
-  const changes = fs.readJSONSync("/tmp/changes.json");
-  console.log(changes, "changes")
-  return changes
+  return fs.readJSONSync("/tmp/changes.json");
 }
 
 module.exports = async function () {

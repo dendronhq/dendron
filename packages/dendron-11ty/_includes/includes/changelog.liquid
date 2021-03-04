@@ -1,11 +1,15 @@
 ---
 pagination:
     data: changelog
-    size: 1
+    size: 30
     alias: change
-    addAllPagesToCollections: true
 templateEngineOverride: liquid
 ---
 
+<!-- {%- for item in pagination.items %}
+  <li>{{ item }}</li>
+{% endfor -%} -->
+
 {{ change }}
+<!-- {{ change | jsonfy }} -->
 

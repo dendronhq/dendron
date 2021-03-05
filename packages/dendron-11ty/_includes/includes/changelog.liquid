@@ -12,20 +12,14 @@ templateEngineOverride: liquid
 <div id="main" role="main">
     <h2>Changelog</h2>
     {%- for commit in commits %}
-        <!-- {{commit}} -->
-        <li>{{commit.commitDate}}</li>
+        <h3>Date: {{commit.commitDate}}</h3>
+        <h4>Commit: {{commit.commitHash}}</h4>
+        {%- for change in commit.changes %}
+        <details>
+            <summary>{{change.action}}: {{change.fname}}</summary>
+            <p style="white-space: pre-line">{{change.diff}}</p>
+        </details>
+        {% endfor -%}
     {% endfor -%}
-
-    <!-- {%- for item in pagination.items %} -->
-        <!-- {{item}} -->
-
-        <!-- <h3>{{item.commitDate}}</h3> -->
-        <!-- {%- for commit in commits %}
-            <details>
-                <summary>{{commit.action}}: {{commit.fname}}</summary>
-                <p style="white-space: pre-line">{{commit.diff}}</p>
-            </details>
-        {% endfor -%} -->
-    <!-- {% endfor -%} -->
 </div>
 

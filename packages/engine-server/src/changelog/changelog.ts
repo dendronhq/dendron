@@ -11,7 +11,6 @@ export async function generateChangelog(engine: DEngineClientV2) {
     changes
   ) {
     if (!fs.existsSync("/tmp/changes.json")) {
-      console.log("here???????????????????????????????");
       fs.writeFileSync(
         "/tmp/changes.json",
         JSON.stringify({ commits: [changes] }, null, 2),
@@ -58,7 +57,8 @@ async function getChanges(path: string, vaults: DVault[], wsRoot: string) {
       [`log`, `--pretty=format:'%h'`, `-n`, `1`],
       { cwd: path }
     );
-    commitHash = stdout;
+    // use slice as there are quotes around the commit hash
+    commitHash = stdout.slice(1, -1);
   } catch (error) {
     console.log(error);
   }

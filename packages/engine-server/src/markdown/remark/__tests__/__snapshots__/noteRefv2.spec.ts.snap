@@ -120,12 +120,6 @@ VFile {
   <div class=\\"portal-parent-fader-bottom\\"></div>
   task2
 
-* * *
-
-## Children
-
-1. [Ch1](foo.ch1.html)
-
 
 </div>    
   </div>
@@ -157,12 +151,6 @@ VFile {
   <div class=\\"portal-parent-fader-top\\"></div>
   <div class=\\"portal-parent-fader-bottom\\"></div>
   two content
-
-* * *
-
-## Children
-
-1. [One](one.html)
 
 
 </div>    
@@ -220,32 +208,14 @@ VFile {
 
 blah
 
-* * *
-
-## Children
-
-1. [Foo](foo.html)
-
 
 </div>    
   </div>
 Regular wikilink: 
 
-* * *
-
-## Children
-
-1. [Foo](foo.html)
-
 
 </div>    
   </div>
-
-* * *
-
-## Children
-
-1. [Foo](foo.html)
 
 
 </div>    
@@ -278,12 +248,6 @@ VFile {
   <div class=\\"portal-parent-fader-top\\"></div>
   <div class=\\"portal-parent-fader-bottom\\"></div>
   foo body
-
-* * *
-
-## Children
-
-1. [Ch1](foo.ch1.html)
 
 
 </div>    

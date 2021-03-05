@@ -162,6 +162,8 @@ function attachParser(proc: Unified.Processor) {
             } not found in ${JSON.stringify(out)}`,
           })
         );
+      } else {
+        vault = maybeVault;
       }
       // default to current note
     }

@@ -201,7 +201,7 @@ export async function _activate(context: vscode.ExtensionContext) {
     const wsRoot = DendronWorkspace.wsRoot() as string;
     const wsService = new WorkspaceService({ wsRoot });
 
-    const shouldSync = await wsService.syncVaults({
+    const { didClone } = await wsService.syncVaults({
       config,
       progressIndicator: () => {
         vscode.window.showInformationMessage(
@@ -209,7 +209,7 @@ export async function _activate(context: vscode.ExtensionContext) {
         );
       },
     });
-    if (shouldSync) {
+    if (didClone) {
       vscode.window.showInformationMessage(
         "finish initializing remote vaults. reloading workspace"
       );

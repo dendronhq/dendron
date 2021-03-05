@@ -4,6 +4,7 @@ import {
   DuplicateNoteAction,
   DUtils,
   DVault,
+  DVaultVisibility,
   NoteUtilsV2,
   SchemaUtilsV2,
   Time,
@@ -284,24 +285,51 @@ export class WorkspaceService {
     return repoPath;
   }
 
+  async pullVault(opts: { vault: DVault }) {
+    const { vault } = _.defaults(opts, {
+      urlTransformer: _.identity,
+    });
+    const wsRoot = this.wsRoot;
+    if (!vault.remote || vault.remote.type !== "git") {
+      throw new DendronError({ msg: "pulling non-git vault" });
+    }
+    const repoPath = vault2Path({ wsRoot, vault });
+    logger.info({ msg: "pulling ", repoPath });
+    const git = simpleGit({ baseDir: repoPath });
+    await git.pull();
+    return repoPath;
+  }
+
   /**
    * Make sure all vaults are present on file system
+   * @param fetchAndPull for repositories that exist, should we also do a fetch? default: false
+   * @param skipPrivate skip cloning and pulling of private vaults. default: false
    */
   async syncVaults(opts: {
     config: DendronConfig;
     progressIndicator?: () => void;
     urlTransformer?: UrlTransformerFunc;
+    fetchAndPull?: boolean;
+    skipPrivate?: boolean;
   }) {
-    const { config, progressIndicator, urlTransformer } = opts;
+    const ctx = "syncVaults";
+    const {
+      config,
+      progressIndicator,
+      urlTransformer,
+      fetchAndPull,
+      skipPrivate,
+    } = _.defaults(opts, { fetchAndPull: false, skipPrivate: false });
     const { wsRoot } = this;
 
     // clone all missing vaults
     const emptyRemoteVaults = config.vaults.filter(
       (vault) =>
         !_.isUndefined(vault.remote) &&
-        !fs.existsSync(vault2Path({ vault, wsRoot }))
+        !fs.existsSync(vault2Path({ vault, wsRoot })) &&
+        (skipPrivate ? vault.visibility !== DVaultVisibility.PRIVATE : true)
     );
-    const shouldSyncVaults = !_.isEmpty(emptyRemoteVaults);
+    const didClone = !_.isEmpty(emptyRemoteVaults);
     if (progressIndicator) {
       progressIndicator();
     }
@@ -310,7 +338,23 @@ export class WorkspaceService {
         return this.cloneVault({ vault, urlTransformer });
       })
     );
-    return shouldSyncVaults;
+    if (fetchAndPull) {
+      const vaultsToFetch = _.difference(
+        config.vaults.filter(
+          (vault) =>
+            !_.isUndefined(vault.remote) &&
+            (skipPrivate ? vault.visibility !== DVaultVisibility.PRIVATE : true)
+        ),
+        emptyRemoteVaults
+      );
+      logger.info({ ctx, msg: "fetching vaults", vaultsToFetch });
+      await Promise.all(
+        vaultsToFetch.map(async (vault) => {
+          return this.pullVault({ vault });
+        })
+      );
+    }
+    return { didClone };
   }
 
   writePort(port: number) {

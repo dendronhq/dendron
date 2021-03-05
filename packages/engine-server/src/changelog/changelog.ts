@@ -11,10 +11,25 @@ export async function generateChangelog(engine: DEngineClientV2) {
   getChanges(gitRepoPath, engine.vaultsv3, engine.wsRoot).then(function (
     changes
   ) {
-    fs.writeFileSync("/tmp/changes.json", JSON.stringify(changes, null, 2), {
-      encoding: "utf-8",
-    });
-
+    if (!fs.existsSync("/tmp/changes.json")) {
+      fs.writeFileSync("/tmp/changes.json", JSON.stringify(changes, null, 2), {
+        encoding: "utf-8",
+      });
+    } else {
+      fs.readFile("/tmp/changes.json", function (err: Error, data: string) {
+        if (err) throw err;
+        if (!data.includes(changes.commitHash)) {
+          // append to file as this commit hash doesn't yet exist in the changelog
+          fs.appendFile(
+            "/tmp/changes.json",
+            JSON.stringify(changes, null, 2),
+            function (err: Error) {
+              if (err) throw err;
+            }
+          );
+        }
+      });
+    }
     return changes;
   });
 }
@@ -77,7 +92,6 @@ async function getChanges(path: string, vaults: DVault[], wsRoot: string) {
             return false;
           }
         });
-        console.log(accepted, "accept");
         if (accepted) {
           filesChanged.push(filePath);
           changes.push({

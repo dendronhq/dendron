@@ -3,12 +3,25 @@ import {
   CONSTANTS,
   DendronConfig,
   DendronSiteConfig,
-  getStage,
+  getStage
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+
+export class ConfigUtils {
+  static usePrettyRef(config: DendronConfig) {
+    let usePrettyRefs: boolean | undefined = _.find(
+      [config?.usePrettyRefs, config?.site?.usePrettyRefs],
+      (ent) => !_.isUndefined(ent)
+    );
+    if (_.isUndefined(usePrettyRefs)) {
+      usePrettyRefs = true;
+    }
+    return usePrettyRefs;
+  }
+}
 
 export class DConfig {
   static configPath(configRoot: string): string {

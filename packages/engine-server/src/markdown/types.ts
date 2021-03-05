@@ -2,7 +2,7 @@ import {
   DendronConfig,
   DNoteRefLink,
   DVault,
-  NotePropsV2,
+  NotePropsV2
 } from "@dendronhq/common-all";
 import { Parent } from "mdast";
 import { Processor } from "unified";
@@ -45,6 +45,10 @@ export type DendronASTData = {
   config: DendronConfig;
   overrides?: Partial<DendronPubOpts>;
   shouldApplyPublishRules?: boolean;
+  /**
+   * Inidicate that we are currently inside a note ref
+   */
+  insideNoteRef?: boolean;
 };
 
 // NODES

@@ -41,6 +41,7 @@ import remarkStringify from "remark-stringify";
 import variables from "remark-variables";
 import { default as unified, default as Unified, Processor } from "unified";
 import { Node, Parent } from "unist";
+import { ConfigUtils } from "../config";
 import { hierarchies } from "./remark";
 import { backlinks } from "./remark/backlinks";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
@@ -312,13 +313,11 @@ export class MDUtilsV4 {
     }
 
     // set defaults
-    let usePrettyRefs: boolean | undefined = _.find(
-      [opts.usePrettyRefs, config?.usePrettyRefs, config?.site?.usePrettyRefs],
-      (ent) => !_.isUndefined(ent)
-    );
-    if (_.isUndefined(usePrettyRefs)) {
-      usePrettyRefs = true;
-    }
+    let usePrettyRefs = opts.usePrettyRefs || ConfigUtils.usePrettyRef(config);
+    // let usePrettyRefs: boolean | undefined = _.find(
+    //   [opts.usePrettyRefs, config?.usePrettyRefs, config?.site?.usePrettyRefs],
+    //   (ent) => !_.isUndefined(ent)
+    // );
 
     proc = proc
       .data("dendron", {

@@ -13,7 +13,7 @@ import {
   NoteRefDataV4,
   NoteRefDataV4_LEGACY,
   VaultMissingBehavior,
-  WikiLinkNoteV4,
+  WikiLinkNoteV4
 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { convertNoteRefAST, NoteRefsOpts } from "./noteRefs";
@@ -31,7 +31,7 @@ type PluginOpts = NoteRefsOpts & {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  let { dest, vault, fname, config, overrides } = MDUtilsV4.getDendronData(
+  let { dest, vault, fname, config, overrides, insideNoteRef } = MDUtilsV4.getDendronData(
     proc
   );
   function transformer(tree: Node, _file: VFile) {
@@ -40,7 +40,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
     const insertTitle = !_.isUndefined(overrides?.insertTitle)
       ? overrides?.insertTitle
       : opts?.insertTitle;
-    if (insertTitle && root.children) {
+    if (!insideNoteRef && insertTitle && root.children) {
       if (!fname || !vault) {
         // TODO: tmp
         console.log(JSON.stringify(engine.notes));
@@ -94,13 +94,11 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           });
           const { error, note } = getNoteOrError(notes, value);
           if (error) {
-            debugger;
             value = "403";
             addError(proc, error);
           } else {
             if (!note || !config) {
               value = "403";
-              debugger;
               addError(proc, new DendronError({ msg: "no note or config" }));
             } else {
               canPublish = SiteUtils.canPublish({
@@ -109,7 +107,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
                 engine,
               });
               if (!canPublish) {
-                debugger;
                 value = "403";
               }
             }
@@ -242,3 +239,4 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
 
 export { plugin as dendronPub };
 export { PluginOpts as DendronPubOpts };
+

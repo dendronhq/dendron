@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.31.2-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-test-utils@0.31.1...@dendronhq/engine-test-utils@0.31.2-alpha.0) (2021-03-05)
+
+### Bug Fixes
+
+- multi-link wikilink not resolving ([cfaf2c0](https://github.com/dendronhq/dendron/commit/cfaf2c0ae58464ceef2edcd2b5c182b93136fa80))
+
 ## [0.31.1](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-test-utils@0.31.0...@dendronhq/engine-test-utils@0.31.1) (2021-03-02)
 
 **Note:** Version bump only for package @dendronhq/engine-test-utils

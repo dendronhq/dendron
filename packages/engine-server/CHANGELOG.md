@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.31.2-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.31.1...@dendronhq/engine-server@0.31.2-alpha.0) (2021-03-05)
+
+### Bug Fixes
+
+- Clean up config after vault remove command ([#517](https://github.com/dendronhq/dendron/issues/517)) ([96fd09b](https://github.com/dendronhq/dendron/commit/96fd09ba43b009444d3ed313f93724311b020f24))
+- multi-link wikilink not resolving ([cfaf2c0](https://github.com/dendronhq/dendron/commit/cfaf2c0ae58464ceef2edcd2b5c182b93136fa80))
+
 ## [0.31.1](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.31.0...@dendronhq/engine-server@0.31.1) (2021-03-02)
 
 ### Bug Fixes

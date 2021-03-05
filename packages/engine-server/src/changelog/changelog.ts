@@ -1,4 +1,4 @@
-import { DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngineClientV2, DVault } from "@dendronhq/common-all";
 import * as Diff2Html from "diff2html";
 import execa from "execa";
 var fs = require("fs");
@@ -7,16 +7,27 @@ var fs = require("fs");
 // gets list of notes that were changed. using git.
 export async function generateChangelog(engine: DEngineClientV2) {
   let gitRepoPath = engine.wsRoot.substring(0, engine.wsRoot.lastIndexOf("/"));
-  getChanges(gitRepoPath).then(function (changes) {
+
+  getChanges(gitRepoPath, engine.vaultsv3, engine.wsRoot).then(function (
+    changes
+  ) {
     fs.writeFileSync("/tmp/changes.json", JSON.stringify(changes, null, 2), {
       encoding: "utf-8",
     });
+
     return changes;
   });
 }
 
+// TODO: make it array of commits to hold many, append
+
 // get files changed/added for a repo for the last commit
-async function getChanges(path: string) {
+async function getChanges(path: string, vaults: DVault[], wsRoot: string) {
+  let publicVaultPaths: string[] = [];
+  vaults.map((vault) => {
+    publicVaultPaths.push(wsRoot.replace(path + "/", "") + "/" + vault.fsPath);
+  });
+
   let commitDate: string = "";
   let commitHash: string = "";
   let changes: any[] = [];
@@ -43,18 +54,37 @@ async function getChanges(path: string) {
     status.map((result) => {
       if (result.startsWith("M")) {
         let filePath = result.split(" ")[0].substring(2);
-        filesChanged.push(filePath);
-        changes.push({
-          action: "Modified",
-          fname: filePath,
+        let accepted = publicVaultPaths.some((vaultPath) => {
+          if (filePath.startsWith(vaultPath)) {
+            return true;
+          } else {
+            return false;
+          }
         });
+        if (accepted) {
+          filesChanged.push(filePath);
+          changes.push({
+            action: "Modified",
+            fname: filePath,
+          });
+        }
       } else if (result.startsWith("A")) {
         let filePath = result.split(" ")[0].substring(2);
-        filesChanged.push(filePath);
-        changes.push({
-          action: "Added",
-          fname: filePath,
+        let accepted = publicVaultPaths.some((vaultPath) => {
+          if (filePath.startsWith(vaultPath)) {
+            return true;
+          } else {
+            return false;
+          }
         });
+        console.log(accepted, "accept");
+        if (accepted) {
+          filesChanged.push(filePath);
+          changes.push({
+            action: "Added",
+            fname: filePath,
+          });
+        }
       }
     });
   } catch (error) {

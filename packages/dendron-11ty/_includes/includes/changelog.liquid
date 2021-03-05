@@ -3,7 +3,7 @@ layout: layouts/default.liquid
 pagination:
     data: changelog
     size: 30
-    alias: change
+    alias: commits
 templateEngineOverride: liquid
 ---
 
@@ -11,15 +11,21 @@ templateEngineOverride: liquid
 
 <div id="main" role="main">
     <h2>Changelog</h2>
-
-    {%- for item in pagination.items %}
-        <h3>{{item.commitDate}}</h3>
-        {%- for change in item.changes %}
-            <details>
-                <summary>{{change.action}}: {{change.fname}}</summary>
-                <p style="white-space: pre-line">{{change.diff}}</p>
-            </details>
-        {% endfor -%}
+    {%- for commit in commits %}
+        <!-- {{commit}} -->
+        <li>{{commit.commitDate}}</li>
     {% endfor -%}
+
+    <!-- {%- for item in pagination.items %} -->
+        <!-- {{item}} -->
+
+        <!-- <h3>{{item.commitDate}}</h3> -->
+        <!-- {%- for commit in commits %}
+            <details>
+                <summary>{{commit.action}}: {{commit.fname}}</summary>
+                <p style="white-space: pre-line">{{commit.diff}}</p>
+            </details>
+        {% endfor -%} -->
+    <!-- {% endfor -%} -->
 </div>
 

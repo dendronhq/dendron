@@ -3,7 +3,6 @@ import * as Diff2Html from "diff2html";
 import execa from "execa";
 var fs = require("fs");
 
-// TODO: works only on one vault, make it work for multiple
 // gets list of notes that were changed. using git.
 export async function generateChangelog(engine: DEngineClientV2) {
   let gitRepoPath = engine.wsRoot.substring(0, engine.wsRoot.lastIndexOf("/"));
@@ -12,29 +11,33 @@ export async function generateChangelog(engine: DEngineClientV2) {
     changes
   ) {
     if (!fs.existsSync("/tmp/changes.json")) {
-      fs.writeFileSync("/tmp/changes.json", JSON.stringify(changes, null, 2), {
-        encoding: "utf-8",
-      });
+      console.log("here???????????????????????????????");
+      fs.writeFileSync(
+        "/tmp/changes.json",
+        JSON.stringify({ commits: [changes] }, null, 2),
+        {
+          encoding: "utf-8",
+        }
+      );
     } else {
+      // changes.commitHash = "test"
+      // if file already exists, append the commit to commits. but check if commit is already logged first.
       fs.readFile("/tmp/changes.json", function (err: Error, data: string) {
         if (err) throw err;
         if (!data.includes(changes.commitHash)) {
-          // append to file as this commit hash doesn't yet exist in the changelog
-          fs.appendFile(
-            "/tmp/changes.json",
-            JSON.stringify(changes, null, 2),
-            function (err: Error) {
-              if (err) throw err;
-            }
-          );
+          let json = JSON.parse(data);
+          json.commits.push(changes);
+          fs.writeFile("/tmp/changes.json", JSON.stringify(json), function (
+            err: Error
+          ) {
+            if (err) throw err;
+          });
         }
       });
     }
     return changes;
   });
 }
-
-// TODO: make it array of commits to hold many, append
 
 // get files changed/added for a repo for the last commit
 async function getChanges(path: string, vaults: DVault[], wsRoot: string) {

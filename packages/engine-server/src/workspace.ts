@@ -330,7 +330,7 @@ export class WorkspaceService {
         (skipPrivate ? vault.visibility !== DVaultVisibility.PRIVATE : true)
     );
     const didClone = !_.isEmpty(emptyRemoteVaults);
-    if (progressIndicator) {
+    if (progressIndicator && didClone) {
       progressIndicator();
     }
     await Promise.all(

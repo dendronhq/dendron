@@ -26,6 +26,11 @@ export class GitUtils {
     return `https://${accessToken}:x-oauth-basic@github.com/${repoPath}`;
   }
 
+  static getOwnerAndRepoFromURL(url: string) {
+    const [owner, repo] = url.split("/").slice(-2);
+    return { owner, repo };
+  }
+
   static getRepoNameFromURL(url: string): string {
     return path.basename(url, ".git");
   }

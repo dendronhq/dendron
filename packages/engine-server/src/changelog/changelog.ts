@@ -2,14 +2,13 @@ import { DEngineClientV2, DVault } from "@dendronhq/common-all";
 import * as Diff2Html from "diff2html";
 import execa from "execa";
 var fs = require("fs");
+const fsExtra = require("fs-extra");
 
-// gets list of notes that were changed. using git.
+// gets list of notes that were changed + commit hash and save it to file in build/ dir.
 export async function generateChangelog(engine: DEngineClientV2) {
   let changesPath = engine.wsRoot + "/build/changes.json";
 
-  getChanges(engine.wsRoot, engine.vaultsv3, engine.wsRoot).then(function (
-    changes
-  ) {
+  getChanges(engine.wsRoot, engine.vaultsv3).then(function (changes) {
     if (!fs.existsSync(changesPath)) {
       fs.writeFileSync(
         changesPath,
@@ -20,25 +19,21 @@ export async function generateChangelog(engine: DEngineClientV2) {
       );
     } else {
       // if file already exists, append the commit to commits. but check if commit is already logged first.
-      fs.readFile(changesPath, function (err: Error, data: string) {
-        if (err) throw err;
-        if (!data.includes(changes.commitHash)) {
-          let json = JSON.parse(data);
-          json.commits.push(changes);
-          fs.writeFile(changesPath, JSON.stringify(json), function (
-            err: Error
-          ) {
-            if (err) throw err;
-          });
-        }
-      });
+      const data = fsExtra.readFileSync(changesPath, "utf8");
+      if (!data.includes(changes.commitHash)) {
+        let json = JSON.parse(data);
+        json.commits.push(changes);
+        fs.writeFileSync(changesPath, JSON.stringify(json), {
+          encoding: "utf-8",
+        });
+      }
     }
     return changes;
   });
 }
 
 // get files changed/added for a repo for the last commit
-async function getChanges(path: string, vaults: DVault[], wsRoot: string) {
+async function getChanges(path: string, vaults: DVault[]) {
   // holds paths to public vaults, relative to git repo path
   // let publicVaultPaths: string[] = [];
   console.log(vaults, "vaults");

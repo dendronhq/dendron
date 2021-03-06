@@ -1,7 +1,9 @@
 const fs = require("fs-extra");
+const {env} = require("../libs/utils")
 
 async function getChangelog() {
-  const changes = fs.readJSONSync("/tmp/changes.json");
+  const changes = fs.readJSONSync(env().wsRoot + "/build/changes.json");
+  // return []
   return changes.commits
 }
 

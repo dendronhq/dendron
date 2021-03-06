@@ -5,28 +5,27 @@ var fs = require("fs");
 
 // gets list of notes that were changed. using git.
 export async function generateChangelog(engine: DEngineClientV2) {
-  let gitRepoPath = engine.wsRoot.substring(0, engine.wsRoot.lastIndexOf("/"));
+  let changesPath = engine.wsRoot + "/build/changes.json";
 
-  getChanges(gitRepoPath, engine.vaultsv3, engine.wsRoot).then(function (
+  getChanges(engine.wsRoot, engine.vaultsv3, engine.wsRoot).then(function (
     changes
   ) {
-    if (!fs.existsSync("/tmp/changes.json")) {
+    if (!fs.existsSync(changesPath)) {
       fs.writeFileSync(
-        "/tmp/changes.json",
+        changesPath,
         JSON.stringify({ commits: [changes] }, null, 2),
         {
           encoding: "utf-8",
         }
       );
     } else {
-      // changes.commitHash = "test"
       // if file already exists, append the commit to commits. but check if commit is already logged first.
-      fs.readFile("/tmp/changes.json", function (err: Error, data: string) {
+      fs.readFile(changesPath, function (err: Error, data: string) {
         if (err) throw err;
         if (!data.includes(changes.commitHash)) {
           let json = JSON.parse(data);
           json.commits.push(changes);
-          fs.writeFile("/tmp/changes.json", JSON.stringify(json), function (
+          fs.writeFile(changesPath, JSON.stringify(json), function (
             err: Error
           ) {
             if (err) throw err;
@@ -40,10 +39,13 @@ export async function generateChangelog(engine: DEngineClientV2) {
 
 // get files changed/added for a repo for the last commit
 async function getChanges(path: string, vaults: DVault[], wsRoot: string) {
-  let publicVaultPaths: string[] = [];
-  vaults.map((vault) => {
-    publicVaultPaths.push(wsRoot.replace(path + "/", "") + "/" + vault.fsPath);
-  });
+  // holds paths to public vaults, relative to git repo path
+  // let publicVaultPaths: string[] = [];
+  console.log(vaults, "vaults");
+  // vaults.map((vault) => {
+  //   publicVaultPaths.push(wsRoot.replace(path + "/", "") + "/" + vault.fsPath);
+  // });
+  // console.log(publicVaultPaths, "public vaults")
 
   let commitDate: string = "";
   let commitHash: string = "";
@@ -72,8 +74,8 @@ async function getChanges(path: string, vaults: DVault[], wsRoot: string) {
     status.map((result) => {
       if (result.startsWith("M")) {
         let filePath = result.split(" ")[0].substring(2);
-        let accepted = publicVaultPaths.some((vaultPath) => {
-          if (filePath.startsWith(vaultPath)) {
+        let accepted = vaults.some((vaultPath) => {
+          if (filePath.startsWith(vaultPath.fsPath)) {
             return true;
           } else {
             return false;
@@ -88,8 +90,8 @@ async function getChanges(path: string, vaults: DVault[], wsRoot: string) {
         }
       } else if (result.startsWith("A")) {
         let filePath = result.split(" ")[0].substring(2);
-        let accepted = publicVaultPaths.some((vaultPath) => {
-          if (filePath.startsWith(vaultPath)) {
+        let accepted = vaults.some((vaultPath) => {
+          if (filePath.startsWith(vaultPath.fsPath)) {
             return true;
           } else {
             return false;

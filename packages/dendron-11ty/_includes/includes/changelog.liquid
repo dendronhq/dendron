@@ -12,15 +12,17 @@ permalink: "notes/changelog/"
 
 <div id="main" role="main">
     <h2>Changelog</h2>
-    {%- for commit in commits %}
-        <h3>Date: {{commit.commitDate}}</h3>
-        <h4>Commit: {{commit.commitHash}}</h4>
-        {%- for change in commit.changes %}
-        <details>
-            <summary>{{change.action}}: {{change.fname}}</summary>
-            <p style="white-space: pre-line">{{change.diff}}</p>
-        </details>
+        {%- for commit in commits %}
+            {% if commit.changes.length > 0 %}
+                <h3>Date: {{commit.commitDate}}</h3>
+                <h4>Commit: {{commit.commitHash}}</h4>
+                {%- for change in commit.changes %}
+                <details>
+                    <summary>{{change.action}}: {{change.fname}}</summary>
+                    <p style="white-space: pre-line">{{change.diff}}</p>
+                </details>
+                {% endfor -%}
+            {% endif %}
         {% endfor -%}
-    {% endfor -%}
 </div>
 

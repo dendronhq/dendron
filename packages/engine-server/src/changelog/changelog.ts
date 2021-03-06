@@ -32,7 +32,7 @@ export async function generateChangelog(engine: DEngineClientV2) {
 }
 
 // get files changed/added for a repo for the last commit
-async function getChanges(path: string, vaults: DVault[]) {
+async function getChanges(wsRootPath: string, vaults: DVault[]) {
   let commitDate: string = "";
   let commitHash: string = "";
   let changes: any[] = [];
@@ -43,18 +43,18 @@ async function getChanges(path: string, vaults: DVault[]) {
     const { stdout } = await execa(
       "git",
       [`log`, `--pretty=format:'%h'`, `-n`, `1`],
-      { cwd: path }
+      { cwd: wsRootPath }
     );
     // use slice as there are quotes around the commit hash
     commitHash = stdout.slice(1, -1);
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 
   // get files changed/added
   try {
     const { stdout } = await execa("git", ["show", "--name-status"], {
-      cwd: path,
+      cwd: wsRootPath,
     });
     let status = stdout.split("\n");
     status.map((result) => {
@@ -93,7 +93,7 @@ async function getChanges(path: string, vaults: DVault[]) {
       }
     });
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 
   await Promise.all(
@@ -102,13 +102,12 @@ async function getChanges(path: string, vaults: DVault[]) {
         const { stdout } = await execa(
           "git",
           ["show", commitHash, "--", change.fname],
-          { cwd: path }
+          { cwd: wsRootPath }
         );
         change.diff = Diff2Html.html(stdout);
         return Diff2Html.html(stdout);
       } catch (error) {
-        console.log(error);
-        return error;
+        throw error;
       }
     })
   );
@@ -116,7 +115,7 @@ async function getChanges(path: string, vaults: DVault[]) {
   // get date of last commit
   try {
     const { stdout } = await execa("git", ["log", "-1", "--format=%cd"], {
-      cwd: path,
+      cwd: wsRootPath,
     });
     let date = stdout.split(/\s+/).slice(1, 5);
     let day = date[0];
@@ -124,7 +123,7 @@ async function getChanges(path: string, vaults: DVault[]) {
     let year = date[3];
     commitDate = `${day} ${month} ${year}`;
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 
   return {

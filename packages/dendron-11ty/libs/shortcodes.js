@@ -1,7 +1,5 @@
 const {
   MDUtilsV4,
-  DendronASTDest,
-  nunjucks,
   renderFromNoteProps,
 } = require("@dendronhq/engine-server");
 const { NoteUtilsV2, VaultUtils } = require("@dendronhq/common-all");
@@ -112,13 +110,8 @@ async function toMarkdown2(contents, vault, fname) {
     "_data",
     "notes.js"
   ))();
-  const absUrl = NOTE_UTILS.getAbsUrl();
   const config = getDendronConfig();
-  const sconfig = getSiteConfig();
-  const siteNotesDir = sconfig.siteNotesDir;
-  const linkPrefix = absUrl + "/" + siteNotesDir + "/";
   const engine = await getEngine();
-  const wikiLinksOpts = { useId: true, prefix: linkPrefix };
   const wsRoot = engine.wsRoot;
   const navParent = getClosetNavVisibleParent({
     fname,
@@ -127,25 +120,15 @@ async function toMarkdown2(contents, vault, fname) {
     noteIndex,
     wsRoot
   });
-  const proc = MDUtilsV4.procFull({
+  const proc = MDUtilsV4.procHTML({
     engine,
-    dest: DendronASTDest.HTML,
     vault,
     fname,
-    wikiLinksOpts,
-    shouldApplyPublishRules: true,
-    noteRefOpts: { wikiLinkOpts: wikiLinksOpts, prettyRefs: true },
-    publishOpts: {
-      assetsPrefix: env().stage === "prod" ? sconfig.assetsPrefix : undefined,
-      insertTitle: config.useFMTitle,
-      transformNoPublish: true,
-    },
-    mathOpts: { katex: true },
     config: config,
     mermaid: config.mermaid,
+    noteIndex,
   });
   const navHintElem = `<span id="navId" data="${navParent.id}"></span>`;
-  const procRehype = MDUtilsV4.procRehype({ proc, mathjax: true });
   if (config.useNunjucks) {
     contents = renderFromNoteProps({
       fname,
@@ -154,7 +137,7 @@ async function toMarkdown2(contents, vault, fname) {
       notes: engine.notes,
     });
   }
-  let out = await procRehype.process(contents);
+  let out = await proc.process(contents);
   return out.contents + navHintElem;
 }
 

@@ -29,6 +29,8 @@ import slug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import remark from "remark";
 import abbrPlugin from "remark-abbr";
+// @ts-ignore
+import containers from "remark-containers";
 import footnotes from "remark-footnotes";
 import frontmatterPlugin from "remark-frontmatter";
 import math from "remark-math";
@@ -39,14 +41,16 @@ import remarkStringify from "remark-stringify";
 import variables from "remark-variables";
 import { default as unified, default as Unified, Processor } from "unified";
 import { Node, Parent } from "unist";
+import { ConfigUtils } from "../config";
 import { hierarchies } from "./remark";
 import { backlinks } from "./remark/backlinks";
 import { dendronPub, DendronPubOpts } from "./remark/dendronPub";
 import { noteRefs, NoteRefsOpts } from "./remark/noteRefs";
 import { noteRefsV2 } from "./remark/noteRefsV2";
+import { publishSite } from "./remark/publishSite";
 import { transformLinks } from "./remark/transformLinks";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
-import { DendronASTData, DendronASTDest } from "./types";
+import { DendronASTData, DendronASTDest, VaultMissingBehavior } from "./types";
 
 const toString = require("mdast-util-to-string");
 export { nunjucks };
@@ -128,15 +132,30 @@ export class MDUtilsV4 {
     return proc.data("dendron") as DendronASTData;
   }
 
-  static getVault(proc: Processor, vaultName?: string) {
+  /**
+   * Get the vault name, either from processor or passed in vaultName
+   * @param opts.vaultMissingBehavior how to respond if no vault is found. See {@link VaultMissingBehavior}
+   */
+  static getVault(
+    proc: Processor,
+    vaultName?: string,
+    opts?: { vaultMissingBehavior?: VaultMissingBehavior }
+  ) {
+    const copts = _.defaults(opts || {}, {
+      vaultMissingBehavior: VaultMissingBehavior.THROW_ERROR,
+    });
     let { vault } = MDUtilsV4.getDendronData(proc);
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
     if (vaultName) {
-      vault = VaultUtils.getVaultByName({
+      let maybeVault = VaultUtils.getVaultByName({
         vaults: engine.vaultsv3,
         vname: vaultName,
-        throwOnMissing: true,
-      })!;
+        throwOnMissing:
+          copts.vaultMissingBehavior === VaultMissingBehavior.THROW_ERROR,
+      });
+      if (maybeVault) {
+        vault = maybeVault;
+      }
     }
     return vault;
   }
@@ -294,13 +313,11 @@ export class MDUtilsV4 {
     }
 
     // set defaults
-    let usePrettyRefs: boolean | undefined = _.find(
-      [opts.usePrettyRefs, config?.usePrettyRefs, config?.site?.usePrettyRefs],
-      (ent) => !_.isUndefined(ent)
-    );
-    if (_.isUndefined(usePrettyRefs)) {
-      usePrettyRefs = true;
-    }
+    let usePrettyRefs = opts.usePrettyRefs || ConfigUtils.usePrettyRef(config);
+    // let usePrettyRefs: boolean | undefined = _.find(
+    //   [opts.usePrettyRefs, config?.usePrettyRefs, config?.site?.usePrettyRefs],
+    //   (ent) => !_.isUndefined(ent)
+    // );
 
     proc = proc
       .data("dendron", {
@@ -323,6 +340,7 @@ export class MDUtilsV4 {
         prettyRefs: usePrettyRefs,
       })
       .use(noteRefs, { ...opts.noteRefOpts, wikiLinkOpts: opts.wikiLinksOpts });
+
     if (opts.mathOpts?.katex) {
       proc = proc.use(math);
     }
@@ -412,14 +430,16 @@ export class MDUtilsV4 {
     return proc.use(transformLinks, transformOpts);
   }
 
-  static procHTML(procOpts: Omit<ProcOptsFull, "dest">) {
-    const { engine, vault, fname } = procOpts;
+  static procHTML(
+    procOpts: Omit<ProcOptsFull, "dest"> & { noteIndex: NotePropsV2 }
+  ) {
+    const { engine, vault, fname, noteIndex } = procOpts;
     const config = procOpts.config || engine.config;
     const siteNotesDir = config.site.siteNotesDir;
     const absUrl = PublishUtils.getAbsUrlForAsset({ config });
     const linkPrefix = absUrl + "/" + siteNotesDir + "/";
     const wikiLinksOpts = { useId: true, prefix: linkPrefix };
-    const proc = MDUtilsV4.procFull({
+    let proc = MDUtilsV4.procFull({
       engine,
       dest: DendronASTDest.HTML,
       vault,
@@ -437,6 +457,10 @@ export class MDUtilsV4 {
       mermaid: config.mermaid,
       config,
     });
+    proc = proc.use(publishSite, { noteIndex });
+    if (config.site.useContainers) {
+      proc = proc.use(containers);
+    }
     return MDUtilsV4.procRehype({ proc, mathjax: true });
   }
 }
@@ -454,22 +478,19 @@ export class PublishUtils {
         "/"
       );
     }
-    if (siteUrl && getStage() !== "dev") {
-      const out = _.trimEnd(
-        _.join([sitePrefix, _.trim(suffix, "/")], "/"),
-        "/"
-      );
-      return out;
-    } else {
-      return (
-        "http://" +
-        path.posix.join(`localhost:${process.env.ELEV_PORT || 8080}`, suffix)
-      );
-    }
+    const out = _.trimEnd(_.join([sitePrefix, _.trim(suffix, "/")], "/"), "/");
+    return out;
   }
 
   static getSiteUrl = (config: DendronConfig) => {
-    const siteUrl = process.env["SITE_URL"] || config.site.siteUrl;
-    return siteUrl;
+    if (getStage() !== "dev") {
+      const siteUrl = process.env["SITE_URL"] || config.site.siteUrl;
+      return siteUrl;
+    } else {
+      return (
+        "http://" +
+        path.posix.join(`localhost:${process.env.ELEV_PORT || 8080}`)
+      );
+    }
   };
 }

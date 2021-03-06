@@ -213,6 +213,7 @@ export class SiteUtils {
     let domainNote: NotePropsV2 | undefined;
     if (notes.length > 1) {
       domainNote = SiteUtils.handleDup({
+        allowStubs: false,
         dupBehavior: sconfig.duplicateNoteBehavior,
         engine,
         config,
@@ -400,6 +401,7 @@ export class SiteUtils {
 
   static handleDup(opts: {
     dupBehavior?: DuplicateNoteBehavior;
+    allowStubs?: boolean;
     engine: DEngineClientV2;
     fname: string;
     config: DendronConfig;
@@ -413,11 +415,13 @@ export class SiteUtils {
       noteDict,
       config,
       dupBehavior,
+      allowStubs,
     } = _.defaults(opts, {
       dupBehavior: {
         action: DuplicateNoteAction.USE_VAULT,
         payload: [],
       } as UseVaultBehavior,
+      allowStubs: true,
     });
     const ctx = "handleDup";
     let domainNote: NotePropsV2 | undefined;
@@ -443,6 +447,9 @@ export class SiteUtils {
           vault,
           wsRoot: engine.wsRoot,
         });
+        if (maybeNote && maybeNote.stub && !allowStubs) {
+          return;
+        }
         if (
           maybeNote &&
           this.canPublish({
@@ -505,8 +512,6 @@ export class SiteUtils {
       children: domainNote.children,
     });
     return domainNote;
-
-    return undefined;
   }
 }
 

@@ -2,7 +2,7 @@ import {
   DendronConfig,
   DNoteRefLink,
   DVault,
-  NotePropsV2,
+  NotePropsV2
 } from "@dendronhq/common-all";
 import { Parent } from "mdast";
 import { Processor } from "unified";
@@ -32,6 +32,11 @@ export enum DendronASTDest {
   HTML = "HTML",
 }
 
+export enum VaultMissingBehavior {
+  FALLBACK_TO_ORIGINAL_VAULT,
+  THROW_ERROR,
+}
+
 export type DendronASTData = {
   dest: DendronASTDest;
   vault: DVault;
@@ -40,6 +45,10 @@ export type DendronASTData = {
   config: DendronConfig;
   overrides?: Partial<DendronPubOpts>;
   shouldApplyPublishRules?: boolean;
+  /**
+   * Inidicate that we are currently inside a note ref
+   */
+  insideNoteRef?: boolean;
 };
 
 // NODES

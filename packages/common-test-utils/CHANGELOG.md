@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.31.1](https://github.com/dendronhq/dendron/compare/@dendronhq/common-test-utils@0.31.0...@dendronhq/common-test-utils@0.31.1) (2021-03-02)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+# [0.31.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-test-utils@0.30.1...@dendronhq/common-test-utils@0.31.0) (2021-03-01)
+
+### Bug Fixes
+
+- multi-case parent hiearchies ([aca4df1](https://github.com/dendronhq/dendron/commit/aca4df178b6fa8eb5703afdca4ddc36a46e81134))
+
+### Reverts
+
+- Revert "integ: publish minor" ([38ff5dd](https://github.com/dendronhq/dendron/commit/38ff5dd049cecd939fbd70744ef76a704aec3400))
+
 ## [0.30.2-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-test-utils@0.30.1...@dendronhq/common-test-utils@0.30.2-alpha.0) (2021-02-28)
 
 **Note:** Version bump only for package @dendronhq/common-test-utils

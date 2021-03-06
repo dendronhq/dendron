@@ -15,6 +15,7 @@ import {
   EngineTestUtilsV4,
   PreSetupCmdHookFunction,
   PreSetupHookFunction,
+  sinon,
 } from "@dendronhq/common-test-utils";
 import {
   DConfig,
@@ -30,6 +31,10 @@ import {
   SetupWorkspaceCommand,
   SetupWorkspaceOpts,
 } from "../commands/SetupWorkspace";
+import {
+  VaultAddCommand,
+  VaultRemoteSource,
+} from "../commands/VaultAddCommand";
 import { WorkspaceConfig } from "../settings";
 import { WorkspaceFolderRaw, WorkspaceSettings } from "../types";
 import { VSCodeUtils } from "../utils";
@@ -333,4 +338,40 @@ export const createEngineFactory = (
     return engine;
   };
   return createEngine;
+};
+
+export const stubVaultInput = (opts: {
+  cmd?: VaultAddCommand;
+  sourceType: VaultRemoteSource;
+  sourcePath: string;
+  sourcePathRemote?: string;
+  sourceName?: string;
+}): void => {
+  if (opts.cmd) {
+    sinon.stub(opts.cmd, "gatherInputs").returns(
+      Promise.resolve({
+        type: opts.sourceType,
+        name: opts.sourceName,
+        path: opts.sourcePath,
+        pathRemote: opts.sourcePathRemote,
+      })
+    );
+  }
+
+  let acc = 0;
+  // @ts-ignore
+  VSCodeUtils.showQuickPick = async () => ({ label: opts.sourceType });
+
+  VSCodeUtils.showInputBox = async () => {
+    if (acc === 0) {
+      acc += 1;
+      return opts.sourcePath;
+    } else if (acc === 1) {
+      acc += 1;
+      return opts.sourceName;
+    } else {
+      throw Error("exceed acc limit");
+    }
+  };
+  return;
 };

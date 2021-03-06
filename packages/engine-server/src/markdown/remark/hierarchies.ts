@@ -14,8 +14,8 @@ const plugin: Plugin = function (this: Unified.Processor) {
   const proc = this;
   function transformer(tree: Node): void {
     let root = tree as Root;
-    const { fname, vault, dest, config } = MDUtilsV4.getDendronData(proc);
-    if (!fname) {
+    const { fname, vault, dest, config, insideNoteRef } = MDUtilsV4.getDendronData(proc);
+    if (!fname || insideNoteRef) {
       return;
     }
     if (dest !== DendronASTDest.HTML) {

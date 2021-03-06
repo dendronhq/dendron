@@ -16,7 +16,7 @@ import YAML from "js-yaml";
 import _ from "lodash";
 import path from "path";
 // @ts-ignore
-import tmp, { DirResult, dirSync, setGracefulCleanup } from "tmp";
+import tmp, { DirResult, dirSync } from "tmp";
 import { resolvePath } from "./files";
 import { SchemaParserV2 } from "./parser";
 
@@ -148,9 +148,14 @@ export function string2Note({
   return note;
 }
 
-export function file2Note(fpath: string, vault: DVault): NotePropsV2 {
+export function file2Note(
+  fpath: string,
+  vault: DVault,
+  toLowercase?: boolean
+): NotePropsV2 {
   const content = fs.readFileSync(fpath, { encoding: "utf8" });
-  const { name: fname } = path.parse(fpath);
+  const { name } = path.parse(fpath);
+  const fname = toLowercase ? name.toLowerCase() : name;
   return string2Note({ content, fname, vault });
 }
 

@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.31.1](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.31.0...@dendronhq/engine-server@0.31.1) (2021-03-02)
+
+### Bug Fixes
+
+- deleted notes don't require reload for publishing ([9a10462](https://github.com/dendronhq/dendron/commit/9a1046290c2c3111dacb08401c108bf790ae617d))
+- issue with mixed case files ([9b72299](https://github.com/dendronhq/dendron/commit/9b7229930b9efe4c68c6bc1f71bce6a03a6d568e))
+- siteUrl typo in cli error output ([#515](https://github.com/dendronhq/dendron/issues/515)) ([59084fd](https://github.com/dendronhq/dendron/commit/59084fd0975618eeac045913cdb74108f57f4fc1))
+
+# [0.31.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.30.1...@dendronhq/engine-server@0.31.0) (2021-03-01)
+
+### Bug Fixes
+
+- handle links to home page for backlinks ([5d6303b](https://github.com/dendronhq/dendron/commit/5d6303b0155617b940ba489ee7e20f5aa28d42cf))
+- pass vaults with names into engine api ([c9a42c6](https://github.com/dendronhq/dendron/commit/c9a42c6c2f1f8a7752b1c54441180237085de52f))
+
+### Features Dendron
+
+- move child notes generation into remark ([c4b12cf](https://github.com/dendronhq/dendron/commit/c4b12cf91ea48d662b30713033b2b70e10094131))
+
+### Reverts
+
+- Revert "integ: publish minor" ([38ff5dd](https://github.com/dendronhq/dendron/commit/38ff5dd049cecd939fbd70744ef76a704aec3400))
+
 ## [0.30.2-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.30.1...@dendronhq/engine-server@0.30.2-alpha.0) (2021-02-28)
 
 **Note:** Version bump only for package @dendronhq/engine-server

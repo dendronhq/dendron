@@ -9,25 +9,11 @@ import { ImportPodCLICommand } from "../src/commands/importPod";
 import { LaunchEngineServerCommand } from "../src/commands/launchEngineServer";
 import { NoteCLICommand } from "../src/commands/notes";
 import { PublishPodCLICommand } from "../src/commands/publishPod";
-import { RefactorRule } from "../src/commands/refactorBase";
 import { WorkspaceCLICommand } from "../src/commands/workspace";
 
 if (!env("LOG_LEVEL", { shouldThrow: false })) {
   setEnv("LOG_LEVEL", "error");
 }
-
-export const addLayout: RefactorRule = {
-  name: "add fm",
-  operation: "add",
-  data: {
-    from: { key: "layout" },
-    to: { value: "single" },
-  },
-};
-export const updateTime: RefactorRule = {
-  operation: "title2time",
-  data: {},
-};
 
 let buildYargs = yargs;
 

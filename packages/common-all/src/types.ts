@@ -116,6 +116,9 @@ export type DendronSiteFM = {
   skipLevels?: number;
 };
 
+export type CleanDendronSiteConfig = DendronSiteConfig &
+  Required<Pick<DendronSiteConfig, "siteIndex" | "siteUrl">>;
+
 export type DendronSiteConfig = {
   /**
    * If set, add prefix to all asset links
@@ -236,6 +239,11 @@ export type DendronSiteConfig = {
   author?: string;
   twitter?: string;
   image?: string;
+
+  /**
+   * Use {@link https://github.com/Nevenall/remark-containers} in published site
+   */
+  useContainers?: boolean;
 };
 
 export enum DuplicateNoteAction {

@@ -12,7 +12,8 @@ import {
   DendronASTDest,
   NoteRefDataV4,
   NoteRefDataV4_LEGACY,
-  WikiLinkNoteV4,
+  VaultMissingBehavior,
+  WikiLinkNoteV4
 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { convertNoteRefAST, NoteRefsOpts } from "./noteRefs";
@@ -22,12 +23,15 @@ import { addError, getNoteOrError } from "./utils";
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
   insertTitle?: boolean;
+  /**
+   * Don't publish pages that are dis-allowd by dendron.yml
+   */
   transformNoPublish?: boolean;
 };
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  let { dest, vault, fname, config, overrides } = MDUtilsV4.getDendronData(
+  let { dest, vault, fname, config, overrides, insideNoteRef } = MDUtilsV4.getDendronData(
     proc
   );
   function transformer(tree: Node, _file: VFile) {
@@ -36,7 +40,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
     const insertTitle = !_.isUndefined(overrides?.insertTitle)
       ? overrides?.insertTitle
       : opts?.insertTitle;
-    if (insertTitle && root.children) {
+    if (!insideNoteRef && insertTitle && root.children) {
       if (!fname || !vault) {
         // TODO: tmp
         console.log(JSON.stringify(engine.notes));
@@ -73,8 +77,11 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         let valueOrig = value;
         let canPublish = true;
         const data = _node.data;
-        vault = MDUtilsV4.getVault(proc, data.vaultName);
+        vault = MDUtilsV4.getVault(proc, data.vaultName, {
+          vaultMissingBehavior: VaultMissingBehavior.FALLBACK_TO_ORIGINAL_VAULT,
+        });
         if (error) {
+          debugger;
           addError(proc, error);
         }
 
@@ -87,7 +94,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           });
           const { error, note } = getNoteOrError(notes, value);
           if (error) {
-            debugger;
             value = "403";
             addError(proc, error);
           } else {
@@ -233,3 +239,4 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
 
 export { plugin as dendronPub };
 export { PluginOpts as DendronPubOpts };
+

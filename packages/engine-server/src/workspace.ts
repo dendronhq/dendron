@@ -4,6 +4,7 @@ import {
   DuplicateNoteAction,
   DUtils,
   DVault,
+  DVaultVisibility,
   NoteUtilsV2,
   SchemaUtilsV2,
   Time,
@@ -34,6 +35,8 @@ export type WorkspaceServiceCreateOpts = {
 export type WorkspaceServiceOpts = {
   wsRoot: string;
 };
+
+type UrlTransformerFunc = (url: string) => string;
 
 export class WorkspaceService {
   static isNewVersionGreater({
@@ -169,6 +172,22 @@ export class WorkspaceService {
   async removeVault({ vault }: { vault: DVault }) {
     const config = this.config;
     config.vaults = _.reject(config.vaults, { fsPath: vault.fsPath });
+
+    if (
+      config.site.duplicateNoteBehavior &&
+      _.isArray(config.site.duplicateNoteBehavior.payload)
+    ) {
+      if (config.vaults.length == 1) {
+        // if there is only one vault left, remove duplicateNoteBehavior setting
+        config.site = _.omit(config.site, ["duplicateNoteBehavior"]);
+      } else {
+        // otherwise pull the removed vault from payload
+        config.site.duplicateNoteBehavior.payload = _.pull(
+          config.site.duplicateNoteBehavior.payload,
+          vault.fsPath
+        );
+      }
+    }
     await this.setConfig(config);
   }
 
@@ -243,8 +262,18 @@ export class WorkspaceService {
     await git.clone(remotePath, localPath);
   }
 
-  async cloneVault(opts: { vault: DVault }) {
-    const { vault } = opts;
+  /**
+   * Clone a vault from a remote source
+   * @param opts.vault vaults field
+   * @param opts.urlTransformer modify the git url
+   */
+  async cloneVault(opts: {
+    vault: DVault;
+    urlTransformer?: UrlTransformerFunc;
+  }) {
+    const { vault, urlTransformer } = _.defaults(opts, {
+      urlTransformer: _.identity,
+    });
     const wsRoot = this.wsRoot;
     if (!vault.remote || vault.remote.type !== "git") {
       throw new DendronError({ msg: "cloning non-git vault" });
@@ -252,8 +281,80 @@ export class WorkspaceService {
     const repoPath = vault2Path({ wsRoot, vault });
     logger.info({ msg: "cloning", repoPath });
     const git = simpleGit({ baseDir: wsRoot });
-    await git.clone(vault.remote.url, repoPath);
+    await git.clone(urlTransformer(vault.remote.url), repoPath);
     return repoPath;
+  }
+
+  async pullVault(opts: { vault: DVault }) {
+    const { vault } = _.defaults(opts, {
+      urlTransformer: _.identity,
+    });
+    const wsRoot = this.wsRoot;
+    if (!vault.remote || vault.remote.type !== "git") {
+      throw new DendronError({ msg: "pulling non-git vault" });
+    }
+    const repoPath = vault2Path({ wsRoot, vault });
+    logger.info({ msg: "pulling ", repoPath });
+    const git = simpleGit({ baseDir: repoPath });
+    await git.pull();
+    return repoPath;
+  }
+
+  /**
+   * Make sure all vaults are present on file system
+   * @param fetchAndPull for repositories that exist, should we also do a fetch? default: false
+   * @param skipPrivate skip cloning and pulling of private vaults. default: false
+   */
+  async syncVaults(opts: {
+    config: DendronConfig;
+    progressIndicator?: () => void;
+    urlTransformer?: UrlTransformerFunc;
+    fetchAndPull?: boolean;
+    skipPrivate?: boolean;
+  }) {
+    const ctx = "syncVaults";
+    const {
+      config,
+      progressIndicator,
+      urlTransformer,
+      fetchAndPull,
+      skipPrivate,
+    } = _.defaults(opts, { fetchAndPull: false, skipPrivate: false });
+    const { wsRoot } = this;
+
+    // clone all missing vaults
+    const emptyRemoteVaults = config.vaults.filter(
+      (vault) =>
+        !_.isUndefined(vault.remote) &&
+        !fs.existsSync(vault2Path({ vault, wsRoot })) &&
+        (skipPrivate ? vault.visibility !== DVaultVisibility.PRIVATE : true)
+    );
+    const didClone = !_.isEmpty(emptyRemoteVaults);
+    if (progressIndicator) {
+      progressIndicator();
+    }
+    await Promise.all(
+      emptyRemoteVaults.map(async (vault) => {
+        return this.cloneVault({ vault, urlTransformer });
+      })
+    );
+    if (fetchAndPull) {
+      const vaultsToFetch = _.difference(
+        config.vaults.filter(
+          (vault) =>
+            !_.isUndefined(vault.remote) &&
+            (skipPrivate ? vault.visibility !== DVaultVisibility.PRIVATE : true)
+        ),
+        emptyRemoteVaults
+      );
+      logger.info({ ctx, msg: "fetching vaults", vaultsToFetch });
+      await Promise.all(
+        vaultsToFetch.map(async (vault) => {
+          return this.pullVault({ vault });
+        })
+      );
+    }
+    return { didClone };
   }
 
   writePort(port: number) {

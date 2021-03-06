@@ -17,6 +17,7 @@ import {
 } from "@dendronhq/common-server";
 import _ from "lodash";
 import _md from "markdown-it";
+import ogs from "open-graph-scraper";
 import os from "os";
 import path from "path";
 import * as vscode from "vscode";
@@ -471,3 +472,9 @@ export class DendronClientUtilsV2 {
 }
 
 export const clipboard = vscode.env.clipboard;
+
+// This layer of indirection is only here enable stubbing a top level function that's the default export of a module // https://github.com/sinonjs/sinon/issues/562#issuecomment-399090111
+// Otherwise, we can't mock it for testing.
+export const getOpenGraphMetadata = (opts: ogs.Options) => {
+  return ogs(opts);
+};

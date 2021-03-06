@@ -34,14 +34,6 @@ export async function generateChangelog(engine: DEngineClientV2) {
 
 // get files changed/added for a repo for the last commit
 async function getChanges(path: string, vaults: DVault[]) {
-  // holds paths to public vaults, relative to git repo path
-  // let publicVaultPaths: string[] = [];
-  console.log(vaults, "vaults");
-  // vaults.map((vault) => {
-  //   publicVaultPaths.push(wsRoot.replace(path + "/", "") + "/" + vault.fsPath);
-  // });
-  // console.log(publicVaultPaths, "public vaults")
-
   let commitDate: string = "";
   let commitHash: string = "";
   let changes: any[] = [];
@@ -110,7 +102,7 @@ async function getChanges(path: string, vaults: DVault[]) {
       try {
         const { stdout } = await execa(
           "git",
-          ["show", commitHash.slice(1, -1), "--", change.fname],
+          ["show", commitHash, "--", change.fname],
           { cwd: path }
         );
         change.diff = Diff2Html.html(stdout);

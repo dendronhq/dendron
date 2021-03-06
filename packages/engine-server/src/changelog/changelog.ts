@@ -7,8 +7,7 @@ const fsExtra = require("fs-extra");
 // gets list of notes that were changed + commit hash and save it to file in build/ dir.
 export async function generateChangelog(engine: DEngineClientV2) {
   let changesPath = engine.wsRoot + "/build/changes.json";
-
-  getChanges(engine.wsRoot, engine.vaultsv3).then(function (changes) {
+  await getChanges(engine.wsRoot, engine.vaultsv3).then(function (changes) {
     if (!fs.existsSync(changesPath)) {
       fs.writeFileSync(
         changesPath,

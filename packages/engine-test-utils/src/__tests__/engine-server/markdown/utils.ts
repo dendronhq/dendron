@@ -55,6 +55,13 @@ export const createProcForTest = (opts: {
   }
 };
 
+/**
+ * Generator for processor tests
+ *
+ * @param name name of test
+ * @param setupFunc function {@link SetupTestFunctionV4} with `extra` param of {dest: {@link DendronASTDest}}
+ * @param verifyFuncDict hash of various test functions
+ */
 export const createProcTests = (opts: {
   name: string;
   setupFunc: TestPresetEntryV4["testFunc"];

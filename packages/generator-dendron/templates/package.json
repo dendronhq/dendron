@@ -1,0 +1,38 @@
+{
+    "name": "@dendronhq/<%= name %>",
+    "description": "",
+    "license": "GPLv3",
+    "repository": {
+      "type": "git",
+      "url": "ssh://git@github.com/dendronhq/dendron.git",
+      "directory": "packages/<%= name %>"
+    },
+    "author": {
+      "name": "Kevin Lin",
+      "email": "kevin@dendron.so",
+      "url": "https://kevinslin.com"
+    },
+    "keywords": [
+    ],
+    "files": [
+      "lib"
+    ],
+    "main": "lib/index.js",
+    "types": "lib/index.d.ts",
+    "scripts": {
+    },
+    "dependencies": {
+    },
+    "devDependencies": {
+    },
+    "engines": {
+      "node": ">=12.0.0"
+    },
+    "publishConfig": {
+      "access": "public"
+    },
+    "jest": {
+      "preset": "ts-jest"
+    }
+  }
+  

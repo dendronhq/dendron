@@ -5,15 +5,14 @@ import {
   readYAML,
   tmpDir,
   writeJSONWithComments,
-  writeYAML,
+  writeYAML
 } from "@dendronhq/common-server";
 import {
   DConfig,
   getPortFilePath,
   getWSMetaFilePath,
-  openWSMetaFile,
+  openWSMetaFile
 } from "@dendronhq/engine-server";
-import * as assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import { describe, it } from "mocha";
@@ -27,7 +26,7 @@ import {
   expect,
   genDefaultSettings,
   genEmptyWSFiles,
-  stubWorkspaceFolders,
+  stubWorkspaceFolders
 } from "../testUtilsv2";
 import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
@@ -52,12 +51,12 @@ suite("SetupWorkspace", function () {
           const port = getPortFilePath({ wsRoot });
           const fpath = getWSMetaFilePath({ wsRoot });
           const meta = openWSMetaFile({ fpath });
-          assert.ok(
+          expect(
             _.toInteger(fs.readFileSync(port, { encoding: "utf8" })) > 0
-          );
-          assert.strictEqual(meta.version, "0.0.1");
-          assert.ok(meta.activationTime < Time.now().toMillis());
-          assert.strictEqual(_.values(engine.notes).length, 1);
+          ).toBeTruthy();
+          expect(meta.version).toEqual("0.0.1");
+          expect(meta.activationTime < Time.now().toMillis()).toBeTruthy();
+          expect(_.values(engine.notes).length).toEqual(1);
           const vault = resolveRelToWSRoot(vaults[0].fsPath);
 
           const settings = fs.readJSONSync(

@@ -1,4 +1,3 @@
-import * as assert from "assert";
 import _ from "lodash";
 import { describe, it } from "mocha";
 import { ExtensionContext } from "vscode";
@@ -6,7 +5,7 @@ import { ResetConfigCommand } from "../../commands/ResetConfig";
 import { DendronWorkspace } from "../../workspace";
 import { _activate } from "../../_extension";
 import { onExtension } from "../testUtils";
-import { setupCodeWorkspaceV2 } from "../testUtilsv2";
+import { expect, setupCodeWorkspaceV2 } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 
 const TIMEOUT = 60 * 1000 * 5;
@@ -56,8 +55,7 @@ suite("upgrade", function () {
       onExtension({
         action: "upgraded",
         cb: async (ev: { data: any }) => {
-          assert.deepStrictEqual(
-            ev.data.changes.configUpdate,
+          expect(ev.data.changes.configUpdate).toEqual(
             exepctedUpgradeSettings()
           );
           done();
@@ -83,9 +81,9 @@ suite("upgrade", function () {
             exepctedUpgradeSettings(),
             "pasteImage.prefix"
           );
-          assert.deepStrictEqual(ev.data.changes.configUpdate, expected);
+          expect(ev.data.changes.configUpdate).toEqual(expected);
           const config = DendronWorkspace.configuration();
-          assert.strictEqual(config.get<string>("pasteImage.prefix"), "/foo");
+          expect(config.get<string>("pasteImage.prefix")).toEqual("/foo");
           done();
         },
       });

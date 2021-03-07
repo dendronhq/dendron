@@ -3,9 +3,8 @@ import { DirResult, note2File, tmpDir } from "@dendronhq/common-server";
 import {
   AssertUtils,
   ENGINE_HOOKS_MULTI,
-  NodeTestPresetsV2,
+  NodeTestPresetsV2
 } from "@dendronhq/common-test-utils";
-import assert from "assert";
 import _ from "lodash";
 import { describe } from "mocha";
 import path from "path";
@@ -114,7 +113,7 @@ suite("notes", function () {
         const notePath = path.join(vaultPath, "bar.md");
         const uri = vscode.Uri.file(notePath);
         const note = await watcher.onDidCreate(uri);
-        assert.ok(_.isUndefined(note));
+        expect(_.isUndefined(note)).toBeTruthy();
         done();
       });
       setupDendronWorkspace(root.name, ctx, {

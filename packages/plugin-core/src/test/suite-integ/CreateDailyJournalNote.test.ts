@@ -1,10 +1,7 @@
-import assert from "assert";
-// // You can import and use all API from the 'vscode' module
-// // as well as import your extension to test it
 import * as vscode from "vscode";
 import { CreateDailyJournalCommand } from "../../commands/CreateDailyJournal";
 import { getActiveEditorBasename } from "../testUtils";
-import { runSingleVaultTest } from "../testUtilsv2";
+import { expect, runSingleVaultTest } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 
 suite("notes", function () {
@@ -17,7 +14,7 @@ suite("notes", function () {
       ctx,
       onInit: async ({}) => {
         await new CreateDailyJournalCommand().run();
-        assert.ok(getActiveEditorBasename().startsWith("daily.journal"));
+        expect(getActiveEditorBasename().startsWith("daily.journal")).toBeTruthy();
         done();
       },
     });

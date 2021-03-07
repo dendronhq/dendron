@@ -1,6 +1,5 @@
 import { FileTestUtils } from "@dendronhq/common-test-utils";
 import { EngineConnector, getPortFilePath } from "@dendronhq/engine-server";
-import * as assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import { beforeEach, describe, it } from "mocha";
@@ -9,7 +8,7 @@ import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { _activate } from "../../_extension";
 import { onExtension } from "../testUtils";
-import { setupCodeWorkspaceV2 } from "../testUtilsv2";
+import { expect, setupCodeWorkspaceV2 } from "../testUtilsv2";
 
 const TIMEOUT = 60 * 1000 * 5;
 
@@ -39,7 +38,7 @@ suite.skip("startup", function () {
           numRetries: 0,
         })
         .catch((err) => {
-          assert.strictEqual(err.msg, "exceeded numTries");
+          expect(err.msg).toEqual("exceeded numTries");
           done();
         });
     });
@@ -47,7 +46,7 @@ suite.skip("startup", function () {
     it("server file created after init", function (done) {
       cengine.init({
         onReady: async () => {
-          assert.ok(!_.isUndefined(cengine.engine));
+          expect(_.isUndefined(cengine.engine)).toBeFalsy();
           done();
         },
       });
@@ -65,7 +64,7 @@ suite.skip("startup", function () {
           cengine
             .init({
               onReady: async () => {
-                assert.ok(!_.isUndefined(cengine.engine));
+                expect(_.isUndefined(cengine.engine)).toBeFalsy();
                 done();
               },
               numRetries: 0,

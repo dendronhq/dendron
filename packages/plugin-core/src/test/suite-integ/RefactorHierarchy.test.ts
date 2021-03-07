@@ -2,9 +2,8 @@ import { vault2Path } from "@dendronhq/common-server";
 import {
   AssertUtils,
   FileTestUtils,
-  NoteTestUtilsV4,
+  NoteTestUtilsV4
 } from "@dendronhq/common-test-utils";
-import assert from "assert";
 import fs from "fs-extra";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
@@ -60,7 +59,7 @@ suite("RefactorHiearchy", function () {
           return "proceed";
         };
         const resp = await new RefactorHierarchyCommandV2().run();
-        assert.strictEqual(resp.changed.length, 6);
+        expect(resp.changed.length).toEqual(6);
         const vault = vaults[0];
         const vpath = vault2Path({ vault, wsRoot });
         const notes = fs.readdirSync(vpath).join("");

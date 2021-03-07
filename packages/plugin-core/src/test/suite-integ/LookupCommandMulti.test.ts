@@ -1,7 +1,6 @@
 import { DNodeUtilsV2, DVault, NotePropsV2 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import { NodeTestPresetsV2, PLUGIN_CORE } from "@dendronhq/common-test-utils";
-import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import { describe } from "mocha";
@@ -20,8 +19,8 @@ import { DendronWorkspace } from "../../workspace";
 import { _activate } from "../../_extension";
 import { createMockQuickPick, onWSInit, TIMEOUT } from "../testUtils";
 import {
-  getNoteFromTextEditor,
-  setupCodeWorkspaceMultiVaultV2,
+  expect, getNoteFromTextEditor,
+  setupCodeWorkspaceMultiVaultV2
 } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 
@@ -170,7 +169,7 @@ suite.skip("Lookup notes, multi", function () {
         onInitCb: async ({ quickpick, lp, lc }) => {
           quickpick.value = "";
           await lp.onUpdatePickerItem(quickpick, engOpts, "manual", token);
-          assert.strictEqual(lc.quickPick?.items.length, 4);
+          expect(lc.quickPick?.items.length).toEqual(4);
           done();
         },
       });
@@ -185,8 +184,8 @@ suite.skip("Lookup notes, multi", function () {
           quickpick.value = "";
           await lp.onUpdatePickerItem(quickpick, engOpts, "manual", token);
           quickpick.onDidChangeActive(() => {
-            assert.strictEqual(lc.quickPick?.activeItems.length, 1);
-            assert.strictEqual(lc.quickPick?.activeItems[0].fname, "foo");
+            expect(lc.quickPick?.activeItems.length).toEqual(1);
+            expect(lc.quickPick?.activeItems[0].fname).toEqual("foo");
             done();
           });
         },
@@ -203,17 +202,14 @@ suite.skip("Lookup notes, multi", function () {
             "manual",
             token
           );
-          assert.deepStrictEqual(quickpick.items.length, 4);
-          assert.deepStrictEqual(
-            _.pick(_.find(quickpick.items, { fname: "foo.ch1" }), [
-              "fname",
-              "schemaStub",
-            ]),
-            {
-              fname: "foo.ch1",
-              schemaStub: true,
-            }
-          );
+          expect(quickpick.items.length).toEqual(4);
+          expect(_.pick(_.find(quickpick.items, { fname: "foo.ch1" }), [
+            "fname",
+            "schemaStub",
+          ])).toEqual({
+            fname: "foo.ch1",
+            schemaStub: true,
+          });
           done();
         },
         beforeActivateCb: async ({ vaults }) => {
@@ -271,17 +267,14 @@ suite.skip("Lookup notes, multi", function () {
             selectedItems: [createNoActiveItem(vaults[0])],
           });
           await lp.onDidAccept({ picker: quickpick, opts: engOpts, lc });
-          assert.strictEqual(
-            DNodeUtilsV2.fname(
-              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-            ),
-            "bond"
-          );
+          expect(DNodeUtilsV2.fname(
+            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+          )).toEqual("bond");
           const txtPath = vscode.window.activeTextEditor?.document.uri
             .fsPath as string;
           const vault = { fsPath: path.dirname(txtPath) };
           const node = file2Note(txtPath, vault);
-          assert.strictEqual(node.title, "Bond");
+          expect(node.title).toEqual("Bond");
           console.log("onInitCb:exit");
           done();
         },
@@ -308,17 +301,14 @@ suite.skip("Lookup notes, multi", function () {
             selectedItems: [createNoActiveItem(vaults[0])],
           });
           await lp.onDidAccept({ picker: quickpick, opts: engOpts, lc });
-          assert.strictEqual(
-            DNodeUtilsV2.fname(
-              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-            ),
-            "bond"
-          );
+          expect(DNodeUtilsV2.fname(
+            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+          )).toEqual("bond");
           const txtPath = vscode.window.activeTextEditor?.document.uri
             .fsPath as string;
           const vault = { fsPath: path.dirname(txtPath) };
           const node = file2Note(txtPath, vault);
-          assert.strictEqual(node.title, "Bond");
+          expect(node.title).toEqual("Bond");
           console.log("onInitCb:exit");
           done();
         },

@@ -5,9 +5,9 @@ import {
   NoteUtilsV2,
   SchemaModulePropsV2,
   SchemaUtilsV2,
-  WorkspaceOpts,
+  WorkspaceOpts
 } from "@dendronhq/common-all";
-import { vault2Path, tmpDir } from "@dendronhq/common-server";
+import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
   ENGINE_HOOKS,
   ENGINE_QUERY_PRESETS,
@@ -16,10 +16,9 @@ import {
   NOTE_PRESETS_V4,
   runJestHarnessV2,
   sinon,
-  TestPresetEntryV4,
+  TestPresetEntryV4
 } from "@dendronhq/common-test-utils";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
-import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import { describe } from "mocha";
@@ -28,12 +27,12 @@ import path from "path";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
+import { createAllButtons } from "../../components/lookup/buttons";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
-import { createAllButtons } from "../../components/lookup/buttons";
 import {
   createNoActiveItem,
-  PickerUtilsV2,
+  PickerUtilsV2
 } from "../../components/lookup/utils";
 import { EngineFlavor, EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
@@ -46,7 +45,7 @@ import {
   runLegacyMultiWorkspaceTest,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
-  withConfig,
+  withConfig
 } from "../testUtilsV3";
 
 const createEngineForSchemaUpdateItems = createEngineFactory({
@@ -395,8 +394,8 @@ suite("Lookup, notesv2", function () {
           );
           const quickpick = await lc.show();
           quickpick.onDidChangeActive(() => {
-            assert.equal(lc.quickPick?.activeItems.length, 1);
-            assert.equal(lc.quickPick?.activeItems[0].fname, "foo");
+            expect(lc.quickPick?.activeItems.length).toEqual(1);
+            expect(lc.quickPick?.activeItems[0].fname).toEqual("foo");
             done();
           });
           await lp.onUpdatePickerItem(
@@ -427,22 +426,19 @@ suite("Lookup, notesv2", function () {
           let note = _.find(quickpick.items, {
             fname: "foo",
           }) as DNodePropsQuickInputV2;
-          assert.ok(note.stub);
+          expect(note.stub).toBeTruthy();
           quickpick.selectedItems = [note];
           await lp.onDidAccept({ picker: quickpick, opts: engOpts, lc });
           lc.onDidHide(async () => {
-            assert.equal(
-              path.basename(
-                VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-              ),
-              "foo.md"
-            );
+            expect(path.basename(
+              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+            )).toEqual("foo.md");
             const lc2 = new LookupControllerV2(engOpts);
             const quickpick2 = await lc2.show();
             note = _.find(quickpick2.items, {
               fname: "foo",
             }) as DNodePropsQuickInputV2;
-            assert.ok(!note.stub);
+            expect(note.stub).toBeFalsy();
             done();
           });
           quickpick.hide();
@@ -508,9 +504,8 @@ suite("Lookup, notesv2", function () {
             "manual",
             lc.cancelToken.token
           );
-          assert.deepStrictEqual(quickpick.items.length, 4);
-          assert.deepStrictEqual(
-            _.find(quickpick.items, { fname: "foo.ch1.gch1" }),
+          expect(quickpick.items.length).toEqual(4);
+          expect(_.find(quickpick.items, { fname: "foo.ch1.gch1" })).toEqual(
             undefined
           );
           done();

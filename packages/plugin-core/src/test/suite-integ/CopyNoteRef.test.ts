@@ -3,10 +3,9 @@ import {
   DirResult,
   note2File,
   tmpDir,
-  vault2Path,
+  vault2Path
 } from "@dendronhq/common-server";
 import { ENGINE_HOOKS, NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
-import assert from "assert";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
@@ -52,7 +51,7 @@ suite("CopyNoteRef", function () {
       const notePath = path.join(vaultPath, "foo.md");
       await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
       const link = await new CopyNoteRefCommand().run();
-      assert.deepStrictEqual(link, "![[foo]]");
+      expect(link).toEqual("![[foo]]");
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
@@ -72,7 +71,7 @@ suite("CopyNoteRef", function () {
       )) as vscode.TextEditor;
       editor.selection = new vscode.Selection(7, 0, 7, 12);
       const link = await new CopyNoteRefCommand().run();
-      assert.equal(link, "![[bar#foo,1:#*]]");
+      expect(link).toEqual("![[bar#foo,1:#*]]");
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
@@ -103,7 +102,7 @@ suite("CopyNoteRef", function () {
       )) as vscode.TextEditor;
       editor.selection = new vscode.Selection(7, 0, 7, 4);
       const link = await new CopyNoteRefCommand().run();
-      assert.equal(link, "![[bar#foo,1:#*]]");
+      expect(link).toEqual("![[bar#foo,1:#*]]");
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
@@ -134,7 +133,7 @@ suite("CopyNoteRef", function () {
       )) as vscode.TextEditor;
       editor.selection = new vscode.Selection(7, 0, 7, 12);
       const link = await new CopyNoteRefCommand().run();
-      assert.equal(link, "![[bar#foo,1]]");
+      expect(link).toEqual("![[bar#foo,1]]");
       done();
     });
     setupDendronWorkspace(root.name, ctx, {

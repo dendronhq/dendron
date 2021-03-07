@@ -2,10 +2,9 @@ import { getSlugger, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import {
   ENGINE_HOOKS_MULTI,
   NoteTestUtilsV4,
-  NOTE_PRESETS_V4,
+  NOTE_PRESETS_V4
 } from "@dendronhq/common-test-utils";
 import { callSetupHook, SETUP_HOOK_KEYS } from "@dendronhq/engine-test-utils";
-import assert from "assert";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
@@ -113,8 +112,7 @@ suite("DefinitionProvider", function () {
             pos,
             null as any
           )) as vscode.Location;
-          assert.strictEqual(
-            LocationTestUtils.getBasenameFromLocation(loc),
+          expect(LocationTestUtils.getBasenameFromLocation(loc)).toEqual(
             "alpha.md"
           );
           done();
@@ -181,8 +179,7 @@ suite("DefinitionProvider", function () {
             pos,
             null as any
           )) as vscode.Location;
-          assert.strictEqual(
-            LocationTestUtils.getBasenameFromLocation(loc),
+          expect(LocationTestUtils.getBasenameFromLocation(loc)).toEqual(
             "alpha.md"
           );
           done();
@@ -275,9 +272,8 @@ suite("DefinitionProvider", function () {
         onInit: async () => {
           const editor = await VSCodeUtils.openNote(noteWithLink);
           const locations = (await provide(editor)) as vscode.Location[];
-          assert.deepStrictEqual(locations.length, 2);
-          assert.deepStrictEqual(
-            locations.map((l) => l.uri.fsPath),
+          expect(locations.length).toEqual(2);
+          expect(locations.map((l) => l.uri.fsPath)).toEqual(
             [
               NoteUtilsV2.getPathV4({ wsRoot: _wsRoot, note: noteTarget1 }),
               NoteUtilsV2.getPathV4({ wsRoot: _wsRoot, note: noteTarget2 }),
@@ -318,8 +314,7 @@ suite("DefinitionProvider", function () {
             pos,
             null as any
           )) as vscode.Location;
-          assert.strictEqual(
-            loc.uri.fsPath,
+          expect(loc.uri.fsPath).toEqual(
             NoteUtilsV2.getPathV4({ wsRoot: _wsRoot, note: noteWithTarget })
           );
           done();

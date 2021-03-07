@@ -1,6 +1,5 @@
 import { vault2Path } from "@dendronhq/common-server";
 import { ENGINE_HOOKS } from "@dendronhq/common-test-utils";
-import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -8,6 +7,7 @@ import path from "path";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
+import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("ReloadIndex", function () {
@@ -32,7 +32,7 @@ suite("ReloadIndex", function () {
         ];
         rootFiles.map((ent) => fs.removeSync(ent));
         await new ReloadIndexCommand().run();
-        assert.ok(_.every(rootFiles.map((ent) => fs.existsSync(ent))));
+        expect(_.every(rootFiles.map((ent) => fs.existsSync(ent)))).toBeTruthy();
         done();
       },
     });
@@ -53,11 +53,9 @@ suite("ReloadIndex", function () {
         fs.appendFileSync(rootFiles[0], "bond", { encoding: "utf8" });
         fs.appendFileSync(rootFiles[1], "# bond", { encoding: "utf8" });
         await new ReloadIndexCommand().run();
-        assert.ok(
-          _.every(
-            rootFiles.map((ent) => fs.readFileSync(ent).indexOf("bond") >= 0)
-          )
-        );
+        expect(_.every(
+          rootFiles.map((ent) => fs.readFileSync(ent).indexOf("bond") >= 0)
+        )).toBeTruthy();
         done();
       },
     });

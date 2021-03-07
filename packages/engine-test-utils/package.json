@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/engine-test-utils",
-  "version": "0.31.2",
+  "version": "0.31.3-alpha.0",
   "description": "",
   "license": "GPLv3",
   "repository": {
@@ -59,7 +59,7 @@
     "@dendronhq/common-all": "^0.31.2",
     "@dendronhq/common-server": "^0.31.2",
     "@dendronhq/common-test-utils": "^0.31.2",
-    "@dendronhq/dendron-cli": "^0.31.2",
+    "@dendronhq/dendron-cli": "^0.31.3-alpha.0",
     "@dendronhq/engine-server": "^0.31.2",
     "@dendronhq/pods-core": "^0.31.2",
     "@types/sinon": "^9.0.9",

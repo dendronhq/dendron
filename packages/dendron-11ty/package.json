@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/dendron-11ty",
-  "version": "1.31.2",
+  "version": "1.31.3-alpha.0",
   "main": "index.js",
   "license": "AGPLv3",
   "files": [

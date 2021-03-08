@@ -121,7 +121,7 @@ async function getChanges(opts: {
   engine: DEngineClientV2;
 }) {
   const { engine, commitHash } = opts;
-  const { wsRoot, vaultsv3: vaults } = engine;
+  const { wsRoot } = engine;
   let commitDate: string = "";
   let changes: any[] = [];
   let filesChanged: string[] = [];

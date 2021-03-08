@@ -16,27 +16,22 @@ module.exports = class extends Generator<Options> {
   }
 
   async prompting() {
-    // this.name = (await this.prompt([{
-    //   type    : 'input',
-    //   name    : 'name',
-    //   message : 'Your project name',
-    // }])).name;
-    // console.log("got name", this.name)
-  }
-
-  method1() {
-    this.log("method 1 just ran: name: ", this.name);
-  }
-
-  method2() {
-    this.log("method 2 just ran");
+    this.name = (
+      await this.prompt([
+        {
+          type: "input",
+          name: "name",
+          message: "Your project name",
+        },
+      ])
+    ).name;
   }
 
   writing() {
     this.fs.copyTpl(
       this.templatePath("package.json"),
       this.destinationPath("package.json"),
-      { name: "foo" }
+      { name: this.name }
     );
     this.fs.copy(
       [

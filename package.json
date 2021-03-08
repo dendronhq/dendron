@@ -64,7 +64,8 @@
     "publish:minor:local": "./scripts/publish-integ.sh minor",
     "ci:init": "yarn bootstrap:bootstrap && yarn bootstrap:build",
     "ci:test:cli": "npx lerna run test --ignore @dendronhq/plugin-core --parallel --stream -- -- --forceExit",
-    "ci:test:plugin": "npx lerna run test --scope @dendronhq/plugin-core --stream"
+    "ci:test:plugin": "npx lerna run test --scope @dendronhq/plugin-core --stream",
+    "watch": "npx lerna exec --scope $pkg -- tsc -p tsconfig.build.json --watch"
   },
   "packages": [
     "packages/*",

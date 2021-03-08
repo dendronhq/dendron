@@ -1,0 +1,9 @@
+{
+    "extends": "../../tsconfig.build.json",
+    "compilerOptions": {
+      "outDir": "generators",
+      "rootDir": "src"
+    },
+    "exclude": ["node_modules", "**/*-spec.ts", "**/*.d.ts", "generators"]
+  }
+  

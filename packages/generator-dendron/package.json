@@ -1,0 +1,21 @@
+{
+  "name": "generator-dendron",
+  "version": "0.1.0",
+  "description": "",
+  "files": [
+    "generators",
+    "templates"
+  ],
+  "keywords": [
+    "yeoman-generator"
+  ],
+  "dependencies": {
+    "fs-extra": "^9.1.0",
+    "yeoman-generator": "^3.1.1"
+  },
+  "scripts": {},
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.8",
+    "@types/yeoman-generator": "^4.11.3"
+  }
+}

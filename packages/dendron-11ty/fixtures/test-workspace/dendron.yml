@@ -9,6 +9,7 @@ useNoteTitleForLink: true
 mermaid: true
 site:
     copyAssets: true
+    generateChangelog: true
     siteHierarchies:
         - dendron
         - bar

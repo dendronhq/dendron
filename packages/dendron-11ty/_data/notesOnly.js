@@ -19,7 +19,9 @@ async function getNotes() {
   let {notes} = await SiteUtils.filterByConfig({ engine, config });
   const siteNotes = SiteUtils.addSiteOnlyNotes({engine})
   _.forEach(siteNotes, ent => {
-    notes[ent.id] = ent;
+    if (ent.id !== "changelog") {
+      notes[ent.id] = ent;
+    }
   });
   return notes;
 }

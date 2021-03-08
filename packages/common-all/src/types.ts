@@ -244,6 +244,12 @@ export type DendronSiteConfig = {
    * Use {@link https://github.com/Nevenall/remark-containers} in published site
    */
   useContainers?: boolean;
+
+  /**
+   * Generate changelog for published site
+   * Default: false
+   */
+  generateChangelog?: boolean;
 };
 
 export enum DuplicateNoteAction {

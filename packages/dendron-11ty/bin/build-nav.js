@@ -48,7 +48,10 @@ function createNav(noteIdsAtLevel, notesDict) {
 }
 
 async function buildNav() {
-  const { notes, domains } = await require("../_data/notes.js")();
+  let { notes, domains } = await require("../_data/notes.js")();
+  if (getSiteConfig().generateChangelog) {
+    domains.push(notes["changelog"]);
+  }
   const nav = createNav(
     domains.map((ent) => ent.id),
     notes

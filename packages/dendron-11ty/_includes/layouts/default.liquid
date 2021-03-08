@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 
 <html lang="{{ site.lang | default: 'en-US' }}">
-{%- assign nodeCurrent = page.url | urlToNote: notesOnly -%}
+{%- assign nodeCurrent = page.url | urlToNote: notes.notes -%}
 {% include includes/head.liquid %}
 
-<body style="">
+<body>
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
       <symbol id="svg-link" viewBox="0 0 24 24">
         <title>Link</title>
@@ -147,7 +147,7 @@
             {% if site.siteLastModified  %}
               <div class="d-flex mt-2">
               <p class="text-small text-grey-dk-000 mb-0 mr-2">
-                Page last modified: <span class="d-inline-block">{{ note.updated | ms2ShortDate }}</span>.
+                Page last modified: <span class="d-inline-block">{{ nodeCurrent.updated | ms2ShortDate }}</span>.
               </p>
             {% endif %}
                 {% if

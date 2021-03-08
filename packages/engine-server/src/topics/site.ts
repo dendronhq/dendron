@@ -125,7 +125,14 @@ export class SiteUtils {
         "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/not-sprouted.png)",
       ].join("\n"),
     });
-    return [note];
+    const changelog = NoteUtilsV2.create({
+      vault: vaults[0],
+      fname: "root.changelog",
+      id: "changelog",
+      title: "Changelog",
+      body: [].join("\n"),
+    });
+    return [note, changelog];
   }
 
   static async filterByConfig(opts: {

@@ -3,16 +3,15 @@ import {
   NoteUtilsV2,
   SchemaUtilsV2,
   VaultUtils,
-  WorkspaceOpts,
+  WorkspaceOpts
 } from "@dendronhq/common-all";
 import {
   note2File,
   readYAML,
   schemaModuleOpts2File,
-  tmpDir,
+  tmpDir
 } from "@dendronhq/common-server";
 import { FileTestUtils, sinon } from "@dendronhq/common-test-utils";
-import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import { describe } from "mocha";
@@ -27,7 +26,7 @@ import {
   getConfig,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
-  stubVaultInput,
+  stubVaultInput
 } from "../testUtilsV3";
 
 const getWorkspaceFolders = () => {
@@ -130,7 +129,7 @@ suite("VaultAddCommand", function () {
           const vpath = path.join(wsRoot, "vault2");
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
           await new VaultAddCommand().run();
-          assert.deepStrictEqual(fs.readdirSync(vpath), [
+          expect(fs.readdirSync(vpath)).toEqual([
             "root.md",
             "root.schema.yml",
           ]);
@@ -181,7 +180,7 @@ suite("VaultAddCommand", function () {
           const vpath = path.join(wsRoot, "vault2");
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
           await new VaultAddCommand().run();
-          assert.deepStrictEqual(fs.readdirSync(vpath), [
+          expect(fs.readdirSync(vpath)).toEqual([
             "root.md",
             "root.schema.yml",
           ]);
@@ -207,7 +206,7 @@ suite("VaultAddCommand", function () {
           stubVaultInput({ sourceType: "local", sourcePath });
           await new VaultAddCommand().run();
           const vpath = path.join(wsRoot, sourcePath);
-          assert.deepStrictEqual(fs.readdirSync(vpath), [
+          expect(fs.readdirSync(vpath)).toEqual([
             "root.md",
             "root.schema.yml",
           ]);
@@ -233,7 +232,7 @@ suite("VaultAddCommand", function () {
           const vaultRelPath = path.relative(wsRoot, vpath);
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
           await new VaultAddCommand().run();
-          assert.deepStrictEqual(fs.readdirSync(vpath), [
+          expect(fs.readdirSync(vpath)).toEqual([
             "root.md",
             "root.schema.yml",
           ]);

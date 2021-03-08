@@ -1,6 +1,5 @@
 import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import { ENGINE_HOOKS } from "@dendronhq/common-test-utils";
-import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -12,7 +11,7 @@ import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { getActiveEditorBasename } from "../testUtils";
-import { runSingleVaultTest } from "../testUtilsv2";
+import { expect, runSingleVaultTest } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 
 const { ANCHOR_WITH_SPECIAL_CHARS, ANCHOR } = GOTO_NOTE_PRESETS;
@@ -32,8 +31,8 @@ suite("GotoNote", function () {
           mode: "note",
           vault,
         })) as { note: NotePropsV2 };
-        assert.deepStrictEqual(out, note);
-        assert.strictEqual(getActiveEditorBasename(), "foo.md");
+        expect(out).toEqual(note);
+        expect(getActiveEditorBasename()).toEqual("foo.md");
         done();
       },
     });
@@ -55,7 +54,7 @@ suite("GotoNote", function () {
           vault,
           wsRoot: DendronWorkspace.wsRoot(),
         }) as NotePropsV2;
-        assert.deepStrictEqual(_.pick(note, ["fname", "stub"]), {
+        expect(_.pick(note, ["fname", "stub"])).toEqual({
           fname: "foo",
           stub: true,
         });
@@ -65,11 +64,11 @@ suite("GotoNote", function () {
           mode: "note",
           vault,
         })) as { note: NotePropsV2 };
-        assert.deepStrictEqual(_.pick(out, ["fname", "stub", "id"]), {
+        expect(_.pick(out, ["fname", "stub", "id"])).toEqual({
           fname: "foo",
           id: note.id,
         });
-        assert.strictEqual(getActiveEditorBasename(), "foo.md");
+        expect(getActiveEditorBasename()).toEqual("foo.md");
         done();
       },
     });
@@ -84,10 +83,10 @@ suite("GotoNote", function () {
           mode: "note",
           vault,
         })) as { note: NotePropsV2 };
-        assert.deepStrictEqual(_.pick(out, ["fname", "stub"]), {
-          fname: "foo.ch2",
+        expect(_.pick(out, ["fname", "stub"])).toEqual({
+          fname: "foo.ch2"
         });
-        assert.strictEqual(getActiveEditorBasename(), "foo.ch2.md");
+        expect(getActiveEditorBasename()).toEqual("foo.ch2.md");
         done();
       },
     });
@@ -105,9 +104,9 @@ suite("GotoNote", function () {
           mode: "note",
           vault,
         });
-        assert.deepStrictEqual(getActiveEditorBasename(), "bar.ch1.md");
+        expect(getActiveEditorBasename()).toEqual("bar.ch1.md");
         const content = VSCodeUtils.getActiveTextEditor()?.document.getText() as string;
-        assert.ok(content.indexOf("ch1 template") >= 0);
+        expect(content.indexOf("ch1 template") >= 0).toBeTruthy();
         done();
       },
     });
@@ -132,10 +131,10 @@ suite("GotoNote", function () {
             value: "H3",
           },
         });
-        assert.deepStrictEqual(getActiveEditorBasename(), "alpha.md");
+        expect(getActiveEditorBasename()).toEqual("alpha.md");
         const selection = VSCodeUtils.getActiveTextEditor()?.selection;
-        assert.strictEqual(selection?.start.line, 9);
-        assert.strictEqual(selection?.start.character, 0);
+        expect(selection?.start.line).toEqual(9);
+        expect(selection?.start.character).toEqual(0);
         done();
       },
     });
@@ -161,10 +160,10 @@ suite("GotoNote", function () {
             value: specialCharsHeader,
           },
         });
-        assert.deepStrictEqual(getActiveEditorBasename(), "alpha.md");
+        expect(getActiveEditorBasename()).toEqual("alpha.md");
         const selection = VSCodeUtils.getActiveTextEditor()?.selection;
-        assert.strictEqual(selection?.start.line, 9);
-        assert.strictEqual(selection?.start.character, 0);
+        expect(selection?.start.line).toEqual(9);
+        expect(selection?.start.character).toEqual(0);
         done();
       },
     });

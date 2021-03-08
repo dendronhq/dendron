@@ -1,7 +1,6 @@
 import { DendronConfig } from "@dendronhq/common-all";
 import { readYAML } from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
-import assert from "assert";
 import fs from "fs-extra";
 import path from "path";
 import * as vscode from "vscode";
@@ -30,32 +29,28 @@ suite("VaultRemoveCommand", function () {
         await new VaultRemoveCommand().run();
 
         // check no files deleted
-        assert.deepStrictEqual(
-          fs.readdirSync(path.join(wsRoot, vaults[1].fsPath)),
-          [
-            "bar.ch1.md",
-            "bar.md",
-            "bar.schema.yml",
-            "root.md",
-            "root.schema.yml",
-          ]
-        );
+        expect(fs.readdirSync(path.join(wsRoot, vaults[1].fsPath))).toEqual([
+          "bar.ch1.md",
+          "bar.md",
+          "bar.schema.yml",
+          "root.md",
+          "root.schema.yml",
+        ]);
 
         // check config updated
         const configPath = DConfig.configPath(
           DendronWorkspace.wsRoot() as string
         );
         const config = readYAML(configPath) as DendronConfig;
-        assert.deepStrictEqual(
-          config.vaults.map((ent) => ent.fsPath),
-          [vaults[0].fsPath]
-        );
+        expect(config.vaults.map((ent) => ent.fsPath)).toEqual([
+          vaults[0].fsPath
+        ]);
 
         // check vscode settings updated
         const settings = fs.readJSONSync(
           DendronWorkspace.workspaceFile().fsPath
         ) as WorkspaceSettings;
-        assert.deepStrictEqual(settings.folders, [{ path: vaults[0].fsPath }]);
+        expect(settings.folders).toEqual([{ path: vaults[0].fsPath }]);
         done();
       },
     });

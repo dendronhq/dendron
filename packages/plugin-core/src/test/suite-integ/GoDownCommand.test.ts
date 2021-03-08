@@ -1,12 +1,12 @@
 import { DirResult, tmpDir } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
-import assert from "assert";
 import path from "path";
 import * as vscode from "vscode";
 import { GoDownCommand } from "../../commands/GoDownCommand";
 import { DendronQuickPickerV2 } from "../../components/lookup/types";
 import { VSCodeUtils } from "../../utils";
 import { onWSInit, setupDendronWorkspace } from "../testUtils";
+import { expect } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 
 suite("notes", function () {
@@ -29,7 +29,7 @@ suite("notes", function () {
       quickpick.onDidChangeSelection(() => {});
       quickpick.onDidChangeActive(() => {
         const item = quickpick.activeItems[0];
-        assert.strictEqual(item.id, "foo.ch1");
+        expect(item.id).toEqual("foo.ch1");
         done();
       });
     });

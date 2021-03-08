@@ -1,16 +1,14 @@
 import { NoteUtilsV2 } from "@dendronhq/common-all";
 import { DirResult, tmpDir } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
-import assert from "assert";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-// // You can import and use all API from the 'vscode' module
-// // as well as import your extension to test it
 import * as vscode from "vscode";
 import { DoctorCommand } from "../../commands/Doctor";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import { onWSInit, setupDendronWorkspace } from "../testUtils";
+import { expect } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 
 suite("notes", function () {
@@ -31,9 +29,9 @@ suite("notes", function () {
       await new DoctorCommand().run();
       // cehck that frontmatter is added
       const resp = fs.readFileSync(testFile, { encoding: "utf8" });
-      assert.ok(NoteUtilsV2.RE_FM.exec(resp));
-      assert.ok(NoteUtilsV2.RE_FM_UPDATED.exec(resp));
-      assert.ok(NoteUtilsV2.RE_FM_CREATED.exec(resp));
+      expect(NoteUtilsV2.RE_FM.exec(resp)).toBeTruthy();
+      expect(NoteUtilsV2.RE_FM_UPDATED.exec(resp)).toBeTruthy();
+      expect(NoteUtilsV2.RE_FM_CREATED.exec(resp)).toBeTruthy();
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
@@ -225,16 +223,18 @@ suite("notes", function () {
       fs.removeSync(path.join(root.name, "docs"));
       await new ReloadIndexCommand().run();
       const findings = await new DoctorCommand().run();
-      assert.ok(_.find(findings?.data, { issue: "no siteRoot found" }));
+      expect(_.find(findings?.data, { issue: "no siteRoot found" })).toBeTruthy();
       const docsDir = path.join(root.name, "docs");
-      assert.ok(fs.existsSync(docsDir));
-      assert.deepStrictEqual(fs.readdirSync(docsDir), [
-        "404.md",
-        "Gemfile",
-        "_config.yml",
-        "assets",
-        "favicon.ico",
-      ]);
+      expect(fs.existsSync(docsDir)).toBeTruthy();
+      expect(fs.readdirSync(docsDir)).toEqual(
+        [
+          "404.md",
+          "Gemfile",
+          "_config.yml",
+          "assets",
+          "favicon.ico",
+        ]
+      );
       done();
     });
     setupDendronWorkspace(root.name, ctx, {

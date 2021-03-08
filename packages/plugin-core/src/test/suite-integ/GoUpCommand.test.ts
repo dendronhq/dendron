@@ -1,12 +1,12 @@
 import { DirResult } from "@dendronhq/common-server";
 import { FileTestUtils, NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
-import assert from "assert";
 import fs from "fs-extra";
 import path from "path";
 import * as vscode from "vscode";
 import { GoUpCommand } from "../../commands/GoUpCommand";
 import { VSCodeUtils } from "../../utils";
 import { onWSInit, setupDendronWorkspace } from "../testUtils";
+import { expect } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 
 suite("GoUpCommand", function () {
@@ -25,11 +25,9 @@ suite("GoUpCommand", function () {
       const notePath = path.join(vaultPath, "foo.md");
       await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
       await new GoUpCommand().run();
-      assert.ok(
-        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-          "root.md"
-        )
-      );
+      expect(VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+        "root.md"
+      )).toBeTruthy();
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
@@ -46,11 +44,9 @@ suite("GoUpCommand", function () {
       const notePath = path.join(vaultPath, "foo.ch1.md");
       await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
       await new GoUpCommand().run();
-      assert.ok(
-        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
-          "root.md"
-        )
-      );
+      expect(VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+        "root.md"
+      )).toBeTruthy();
       done();
     });
     setupDendronWorkspace(root.name, ctx, {

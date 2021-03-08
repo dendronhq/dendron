@@ -3,9 +3,8 @@ import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import {
   JSONExportPod,
   podClassEntryToPodItemV4,
-  PodUtils,
+  PodUtils
 } from "@dendronhq/pods-core";
-import assert from "assert";
 import { ensureDirSync } from "fs-extra";
 import path from "path";
 // // You can import and use all API from the 'vscode' module
@@ -14,6 +13,7 @@ import * as vscode from "vscode";
 import { ConfigurePodCommand } from "../../commands/ConfigurePodCommand";
 import { VSCodeUtils } from "../../utils";
 import { onWSInit, setupDendronWorkspace } from "../testUtils";
+import { expect } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 
 suite("ConfigurePod", function () {
@@ -38,7 +38,7 @@ suite("ConfigurePod", function () {
       };
       await cmd.run();
       const activePath = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
-      assert.ok(activePath?.endsWith("pods/dendron.json/config.export.yml"));
+      expect(activePath?.endsWith("pods/dendron.json/config.export.yml")).toBeTruthy();
       done();
     });
 
@@ -73,7 +73,7 @@ suite("ConfigurePod", function () {
       writeYAML(configPath, { dest: exportDest });
       await cmd.run();
       const activePath = VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath;
-      assert.ok(activePath?.endsWith("pods/dendron.json/config.export.yml"));
+      expect(activePath?.endsWith("pods/dendron.json/config.export.yml")).toBeTruthy();
       done();
     });
 

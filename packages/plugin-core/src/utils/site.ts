@@ -64,6 +64,7 @@ export const buildSite = async (opts: BuildSiteV2CLICommandCliOpts) => {
 export const checkPreReq = async () => {
   // check for package.json
   const pkgPath = path.join(DendronWorkspace.wsRoot(), "package.json");
+  const nmPath = path.join(DendronWorkspace.wsRoot(), "node_modules");
   if (!fs.existsSync(pkgPath)) {
     const resp = await window.showInformationMessage(
       "install dependencies from package.json?",
@@ -128,6 +129,32 @@ export const checkPreReq = async () => {
         }
       );
       window.showInformationMessage("finish updating dependencies");
+    } else if (
+      !fs.existsSync(nmPath) ||
+      !fs.existsSync(path.join(nmPath, "@dendronhq"))
+    ) {
+      // user has package.json but never installed
+      const resp = await window.showInformationMessage(
+        "install dependencies from package.json?",
+        "Install",
+        "Cancel"
+      );
+      if (resp === "Cancel") {
+        return "cancel";
+      }
+      if (resp !== "Install") {
+        return undefined;
+      }
+      await window.withProgress(
+        {
+          location: ProgressLocation.Notification,
+          title: "installing dependencies...",
+          cancellable: false,
+        },
+        async () => {
+          return pkgInstall();
+        }
+      );
     } else {
       return undefined;
       // check NODE_MODULES TODO

@@ -32,6 +32,23 @@ VFile {
 }
 `;
 
+exports[`hierarchies "HTML: SKIP_LEVELS" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"daily\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#daily\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Daily</h1>
+<p><a href=\\"foo.ch1.html\\">Ch1</a></p>
+<hr>
+<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<ol>
+<li><a href=\\"/undefined/daily.journal.2020.07.01.one.html\\">One</a></li>
+<li><a href=\\"/undefined/daily.journal.2020.07.05.two.html\\">Two</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`hierarchies "MD_DENDRON: BASIC" 1`] = `
 VFile {
   "contents": "[Ch1](foo.ch1.html)
@@ -44,7 +61,7 @@ VFile {
 }
 `;
 
-exports[`hierarchies "MD_DENDRON: DIFF_HIERARCHY_TITLE" 1`] = `
+exports[`hierarchies "MD_DENDRON: SKIP_LEVELS" 1`] = `
 VFile {
   "contents": "[Ch1](foo.ch1.html)
 

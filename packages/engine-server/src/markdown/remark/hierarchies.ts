@@ -6,6 +6,7 @@ import Unified, { Plugin } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
 import { SiteUtils } from "../../topics/site";
+import { HierarchyUtils } from "../../utils";
 import { DendronASTDest, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
 
@@ -16,7 +17,6 @@ type PluginOpts = {
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
   const proc = this;
   const hiearchyDisplayTitle = opts?.hiearchyDisplayTitle || "Children";
-  debugger;
   function transformer(tree: Node): void {
     let root = tree as Root;
     const {
@@ -43,9 +43,11 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
     if (note.children.length <= 0 || note.custom?.has_collection) {
       return;
     }
-
-    const children = note.children
-      .map((id) => engine.notes[id])
+    const children = HierarchyUtils.getChildren({
+      skipLevels: note.custom.skipLevels || 0,
+      note,
+      notes: engine.notes,
+    })
       .filter((note) => SiteUtils.canPublish({ note, engine, config }))
       .filter(
         (note) =>

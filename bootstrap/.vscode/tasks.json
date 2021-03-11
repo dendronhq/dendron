@@ -35,9 +35,8 @@
     {
       "label": "Test",
       "type": "shell",
-      "command": "./bootstrap/scripts/testAll.sh",
+      "command": "./scripts/testAll.sh",
       "options": {
-        "cwd": "./..",
         "env": {
           "LOG_LEVEL": "error"
         }

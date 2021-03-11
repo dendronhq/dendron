@@ -6,6 +6,7 @@ on:
       - github-actions
       - master
       - integ-publish
+      - kevin-dev
   pull_request:
     branches:
       - master

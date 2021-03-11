@@ -1,5 +1,9 @@
 import { DendronConfig } from "@dendronhq/common-all";
-import { ENGINE_HOOKS, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
+import {
+  ENGINE_HOOKS,
+  NoteTestUtilsV4,
+  TestPresetEntryV4,
+} from "@dendronhq/common-test-utils";
 import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
 import { runEngineTestV5 } from "../../../engine";
 import { checkVFile, createProcTests } from "./utils";
@@ -72,10 +76,10 @@ describe("hierarchies", () => {
       }
     },
     verifyFuncDict: {
-      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { resp } = extra;
-        await checkVFile(resp, BASIC_TEXT);
-      },
+      // [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+      //   const { resp } = extra;
+      //   await checkVFile(resp, BASIC_TEXT);
+      // },
       [DendronASTDest.HTML]: async ({ extra }) => {
         const { resp } = extra;
         await checkVFile(resp, "Better Children");
@@ -84,7 +88,58 @@ describe("hierarchies", () => {
     preSetupHook: ENGINE_HOOKS.setupBasic,
   });
 
-  const ALL_TEST_CASES = [...BASIC, ...DIFF_HIERARCHY_TITLE];
+  const SKIP_LEVELS = createProcTests({
+    name: "SKIP_LEVELS",
+    setupFunc: async ({ engine, vaults, extra }) => {
+      if (extra.dest !== DendronASTDest.HTML) {
+        const proc = MDUtilsV4.procDendron({
+          engine,
+          fname: "daily",
+          dest: extra.dest,
+          vault: vaults[0],
+        });
+        const resp = await proc.process(BASIC_TEXT);
+        return { resp };
+      } else {
+        debugger;
+        const proc = MDUtilsV4.procDendronForPublish({
+          engine,
+          fname: "daily",
+          noteIndex: engine.notes["daily"],
+          vault: vaults[0],
+        });
+        const resp = await proc.process(BASIC_TEXT);
+        return { resp };
+      }
+    },
+    verifyFuncDict: {
+      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+        const { resp } = extra;
+        await checkVFile(resp, BASIC_TEXT);
+      },
+      [DendronASTDest.HTML]: async ({ extra }) => {
+        const { resp } = extra;
+        await checkVFile(
+          resp,
+          "daily.journal.2020.07.01.one",
+          "daily.journal.2020.07.05.two"
+        );
+      },
+    },
+    preSetupHook: async (opts) => {
+      await ENGINE_HOOKS.setupJournals(opts);
+      await NoteTestUtilsV4.modifyNoteByPath(
+        { fname: "daily", vault: opts.vaults[0], wsRoot: opts.wsRoot },
+        (note) => {
+          note.custom.skipLevels = 4;
+          return note;
+        }
+      );
+    },
+  });
+
+  const ALL_TEST_CASES = [...BASIC, ...DIFF_HIERARCHY_TITLE, ...SKIP_LEVELS];
+
   test.each(
     ALL_TEST_CASES.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
   )("%p", async (_key, testCase: TestPresetEntryV4) => {

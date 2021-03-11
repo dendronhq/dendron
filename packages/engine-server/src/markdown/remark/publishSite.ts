@@ -12,6 +12,7 @@ type PluginOpts = {
 
 /**
  * Used when publishing
+ * Rewrite index note
  */
 function plugin(this: Unified.Processor, opts: PluginOpts): Transformer {
   const proc = this;

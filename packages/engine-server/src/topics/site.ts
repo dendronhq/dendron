@@ -26,7 +26,7 @@ import _ from "lodash";
 import path from "path";
 import { DConfig } from "../config";
 import { DEngineClientV2 } from "../types";
-import { stripLocalOnlyTags } from "../utils";
+import { HierarchyUtils, stripLocalOnlyTags } from "../utils";
 const logger = createLogger();
 
 export class SiteUtils {
@@ -277,19 +277,14 @@ export class SiteUtils {
           await engine.writeNote(note);
         }
         const siteFM = maybeNote.custom || ({} as DendronSiteFM);
-        let children = maybeNote.children
-          .map((id) => notesForHiearchy[id])
-          .filter((ent) => !_.isUndefined(ent));
 
-        // if skip levels, accumulate the grandchildren
-        if (siteFM.skipLevels) {
-          let acc = 0;
-          while (acc !== siteFM.skipLevels) {
-            children = children
-              .flatMap((ent) => ent.children.map((id) => notesForHiearchy[id]))
-              .filter((ent) => !_.isUndefined(ent));
-            acc += 1;
-          }
+        // if we skip, wire new children to current note
+        let children = HierarchyUtils.getChildren({
+          skipLevels: siteFM.skipLevels || 0,
+          note: maybeNote,
+          notes: notesForHiearchy,
+        });
+        if (siteFM.skipLevels && siteFM.skipLevels > 0) {
           maybeNote.children = children.map((ent) => ent.id);
           children.forEach((ent) => (ent.parent = maybeNote.id));
         }

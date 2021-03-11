@@ -1,11 +1,21 @@
 import {
+  DendronConfig,
   DEngineClientV2,
   DuplicateNoteAction,
   DVault,
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { AssertUtils, TestPresetEntryV4 } from "@dendronhq/common-test-utils";
-import { DendronASTDest, MDUtilsV4, VFile } from "@dendronhq/engine-server";
+import {
+  DendronASTData,
+  DendronASTDest,
+  MDUtilsV4,
+  Processor,
+  VFile,
+} from "@dendronhq/engine-server";
+import fs from "fs-extra";
 import _ from "lodash";
+import path from "path";
 
 export async function checkVFile(resp: VFile, ...match: string[]) {
   expect(resp).toMatchSnapshot();
@@ -121,4 +131,77 @@ export const dupNote = (payload: DVault | string[]) => {
     };
   }
   return out;
+};
+
+export function genDendronData(
+  opts?: Partial<DendronASTData>
+): DendronASTData & { fname: string } {
+  return { ...opts } as any;
+}
+
+export const generateVerifyFunction = (opts: {
+  target: DendronASTDest;
+  exclude?: DendronASTDest[];
+}) => {
+  const { target, exclude } = _.defaults(opts, { exclude: [] });
+  const out: any = {};
+  const excludeList = exclude.concat(target);
+  Object.values(DendronASTDest)
+    .filter((ent) => !_.includes(excludeList, ent))
+    .forEach((ent) => {
+      out[ent] = target;
+    });
+  return out;
+};
+
+export const processText = (opts: { text: string; proc: Processor }) => {
+  const { text, proc } = opts;
+  const respParse = proc.parse(text);
+  const respProcess = proc.processSync(text);
+  const respRehype = MDUtilsV4.procRehype({ proc: proc() }).processSync(text);
+  return { proc, respParse, respProcess, respRehype };
+};
+
+export const processTextV2 = async (opts: {
+  text: string;
+  dest: DendronASTDest.HTML;
+  engine: DEngineClientV2;
+  fname: string;
+  vault: DVault;
+  configOverride?: DendronConfig;
+}) => {
+  const { engine, text, fname, vault, configOverride } = opts;
+  debugger;
+  if (opts.dest !== DendronASTDest.HTML) {
+    const proc = MDUtilsV4.procDendron({
+      engine,
+      configOverride,
+      fname,
+      dest: opts.dest,
+      vault,
+    });
+    const resp = await proc.process(text);
+    return { resp };
+  } else {
+    const proc = MDUtilsV4.procDendronForPublish({
+      engine,
+      configOverride,
+      fname,
+      noteIndex: engine.notes["foo"],
+      vault,
+    });
+    const resp = await proc.process(text);
+    return { resp };
+  }
+};
+
+export const processNote = (opts: {
+  fname: string;
+  proc: Processor;
+  wopts: WorkspaceOpts;
+}) => {
+  const { fname, wopts, proc } = opts;
+  const npath = path.join(wopts.wsRoot, wopts.vaults[0].fsPath, fname + ".md");
+  const text = fs.readFileSync(npath, { encoding: "utf8" });
+  return processText({ text, proc });
 };

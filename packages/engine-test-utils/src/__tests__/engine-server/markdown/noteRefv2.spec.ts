@@ -1,5 +1,5 @@
 import {
-  DEngineClientV2,
+  DendronConfig,
   DNoteRefLink,
   NotePropsV2,
   WorkspaceOpts,
@@ -9,34 +9,21 @@ import {
   ENGINE_HOOKS,
   ENGINE_SERVER,
   NoteTestUtilsV4,
-  runEngineTestV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
+import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { DendronASTData, DendronASTDest } from "../../types";
-import { MDUtilsV4 } from "../../utils";
-import { dendronPub } from "../dendronPub";
-import { NoteRefsOpts } from "../noteRefs";
-import { noteRefsV2 } from "../noteRefsV2";
+import { runEngineTestV5 } from "../../../engine";
 import {
-  createEngine,
-  createProc,
+  checkNotInVFile,
+  checkVFile,
   createProcTests,
-  genDendronData,
   generateVerifyFunction,
-  modifyNote,
-  processText,
+  processTextV2,
 } from "./utils";
 
-function proc(
-  engine: DEngineClientV2,
-  dendron: DendronASTData,
-  opts?: NoteRefsOpts
-) {
-  return MDUtilsV4.proc({ engine })
-    .data("dendron", dendron)
-    .use(noteRefsV2, opts);
-}
+const proc = MDUtilsV4.procDendron;
+const createProc = MDUtilsV4.procDendron;
 
 function createLink(opts: {
   fname: string;
@@ -64,89 +51,98 @@ function checkLink(node: any, link: { link: DNoteRefLink }) {
   expect(refNode.data).toEqual(link);
 }
 
-describe("parse", () => {
-  let engine: any;
-  let dest: DendronASTDest.MD_REGULAR;
+export const modifyNote = async (
+  opts: WorkspaceOpts,
+  fname: string,
+  cb: (note: NotePropsV2) => NotePropsV2
+) => {
+  await NoteTestUtilsV4.modifyNoteByPath(
+    { wsRoot: opts.wsRoot, vault: opts.vaults[0], fname },
+    cb
+  );
+};
 
-  test("init", () => {
-    const resp = proc(engine, genDendronData({ dest })).parse(`![[foo.md]]))`);
-    expect(resp).toMatchSnapshot();
-    // @ts-ignore
-    expect(resp.children[0].children[0].type).toEqual("refLinkV2");
-  });
+// describe("parse", () => {
+//     let engine: any;
+//     let dest: DendronASTDest.MD_REGULAR;
 
-  test("without extension", () => {
-    const resp = proc(engine, genDendronData({ dest })).parse(`![[foo]]))`);
-    expect(resp).toMatchSnapshot();
-    checkLink(resp, createLink({ fname: "foo" }));
-  });
+//     test("init", () => {
+//         const resp = proc({ engine, ...genDendronData({ dest }) }).parse(`![[foo.md]]))`);
+//         expect(resp).toMatchSnapshot();
+//         // @ts-ignore
+//         expect(resp.children[0].children[0].type).toEqual("refLinkV2");
+//     });
 
-  test("with start anchor", () => {
-    const resp = proc(engine, genDendronData({ dest })).parse(`![[foo#h1]]))`);
-    expect(resp).toMatchSnapshot();
-    checkLink(
-      resp,
-      createLink({
-        fname: "foo",
-        extra: {
-          data: {
-            type: "file",
-            anchorStart: "h1",
-          },
-        },
-      })
-    );
-  });
+//     test("without extension", () => {
+//         const resp = proc({engine, ...genDendronData({ dest })}).parse(`![[foo]]))`);
+//         expect(resp).toMatchSnapshot();
+//         checkLink(resp, createLink({ fname: "foo" }));
+//     });
 
-  test("with start and end", () => {
-    const resp = proc(engine, genDendronData({ dest })).parse(
-      `![[foo#h1:#h2]]))`
-    );
-    expect(resp).toMatchSnapshot();
-    checkLink(
-      resp,
-      createLink({
-        fname: "foo",
-        extra: {
-          data: {
-            type: "file",
-            anchorStart: "h1",
-            anchorEnd: "h2",
-          },
-        },
-      })
-    );
-  });
+//     test("with start anchor", () => {
+//         const resp = proc({engine, ...genDendronData({ dest })}).parse(`![[foo#h1]]))`);
+//         expect(resp).toMatchSnapshot();
+//         checkLink(
+//             resp,
+//             createLink({
+//                 fname: "foo",
+//                 extra: {
+//                     data: {
+//                         type: "file",
+//                         anchorStart: "h1",
+//                     },
+//                 },
+//             })
+//         );
+//     });
 
-  test("init with inject", async () => {
-    await runEngineTestV4(
-      async ({ engine, vaults }) => {
-        let _proc = proc(
-          engine,
-          genDendronData({ dest, vault: vaults[0] })
-        ).use(dendronPub);
-        const resp = _proc.parse(`![[foo.md]]`);
-        expect(resp).toMatchSnapshot();
-        const resp2 = _proc.runSync(resp);
-        expect(resp2).toMatchSnapshot();
-        return;
-      },
-      {
-        expect,
-        createEngine,
-        preSetupHook: ENGINE_HOOKS.setupBasic,
-      }
-    );
-  });
+//     test("with start and end", () => {
+//         const resp = proc({engine, ...genDendronData({ dest })}).parse(
+//             `![[foo#h1:#h2]]))`
+//         );
+//         expect(resp).toMatchSnapshot();
+//         checkLink(
+//             resp,
+//             createLink({
+//                 fname: "foo",
+//                 extra: {
+//                     data: {
+//                         type: "file",
+//                         anchorStart: "h1",
+//                         anchorEnd: "h2",
+//                     },
+//                 },
+//             })
+//         );
+//     });
 
-  test("doesn't parse inline code block", () => {
-    const resp = proc(engine, genDendronData({ dest })).parse("`![[foo.md]]`");
-    // @ts-ignore
-    expect(resp.children[0].children[0].type).toEqual("inlineCode");
-  });
-});
+//     test("init with inject", async () => {
+//         await runEngineTestV4(
+//             async ({ engine, vaults }) => {
+//                 let _proc = proc( engine, genDendronData({ dest, vault: vaults[0] })
+//                 ).use(dendronPub);
+//                 const resp = _proc.parse(`![[foo.md]]`);
+//                 expect(resp).toMatchSnapshot();
+//                 const resp2 = _proc.runSync(resp);
+//                 expect(resp2).toMatchSnapshot();
+//                 return;
+//             },
+//             {
+//                 expect,
+//                 createEngine,
+//                 preSetupHook: ENGINE_HOOKS.setupBasic,
+//             }
+//         );
+//     });
 
-describe("compilev2", () => {
+//     test("doesn't parse inline code block", () => {
+//         const resp = proc(engine, genDendronData({ dest })).parse("`![[foo.md]]`");
+//         // @ts-ignore
+//         expect(resp.children[0].children[0].type).toEqual("inlineCode");
+//     });
+// });
+
+describe("noteRefV2", () => {
   const linkWithNoExtension = "![[foo]]";
 
   const REGULAR_CASE = createProcTests({
@@ -160,7 +156,7 @@ describe("compilev2", () => {
         vault: vaults[0],
       });
       const resp = await proc2.process(linkWithNoExtension);
-      return { resp, proc };
+      return { resp };
     },
     verifyFuncDict: {
       [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
@@ -256,26 +252,27 @@ describe("compilev2", () => {
   const WITH_ANCHOR = createProcTests({
     name: "WITH_ANCHOR",
     setupFunc: async (opts) => {
-      let proc = await createProc(opts, {});
-      return processText({ proc, text: "# Foo Bar\n![[foo#header2]]" });
+      const text = "# Foo Bar\n![[foo#header2]]";
+      return processTextV2({
+        dest: opts.extra.dest,
+        engine: opts.engine,
+        text,
+        fname: "foo",
+        vault: opts.vaults[0],
+      });
     },
     preSetupHook: WITH_ANCHOR_PRE_SETUP,
     verifyFuncDict: {
       [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { respProcess } = extra;
-        expect(
-          await AssertUtils.assertInString({
-            body: respProcess.toString(),
-            match: ["task2"],
-            nomatch: ["task1"],
-          })
-        ).toBeTruthy();
+        const { resp } = extra;
+        await checkVFile(resp, "task2");
+        await checkNotInVFile(resp, "task1");
       },
       [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { respProcess } = extra;
+        const { resp } = extra;
         expect(
           await AssertUtils.assertInString({
-            body: respProcess.toString(),
+            body: resp.toString(),
             match: ["![[foo#header2]]"],
           })
         ).toBeTruthy();
@@ -290,61 +287,65 @@ describe("compilev2", () => {
   const WITH_FM_TITLE = createProcTests({
     name: "WITH_FM_TITLE",
     setupFunc: async (opts) => {
-      let proc = await createProc(opts, { publishOpts: { insertTitle: true } });
-      return processText({ proc, text: "# Foo Bar\n![[foo#header2]]" });
+      const { engine, vaults } = opts;
+      const configOverride: DendronConfig = {
+        ...opts.engine.config,
+        useFMTitle: true,
+      };
+      return processTextV2({
+        text: "# Foo Bar\n![[foo#header2]]",
+        dest: opts.extra.dest,
+        engine,
+        configOverride,
+        vault: vaults[0],
+        fname: "foo",
+      });
     },
     preSetupHook: WITH_ANCHOR_PRE_SETUP,
     verifyFuncDict: {
       [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
-        const { respProcess } = extra;
-        expect(respProcess).toMatchSnapshot("bond");
+        const { resp } = extra;
+        expect(resp).toMatchSnapshot("bond");
         expect(
           await AssertUtils.assertInString({
-            body: respProcess.toString(),
+            body: resp.toString(),
             match: ["task2"],
             nomatch: ["task1"],
           })
         ).toBeTruthy();
       },
-      //   [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-      //     const { respProcess } = extra;
-      //     expect(
-      //       await AssertUtils.assertInString({
-      //         body: respProcess.toString(),
-      //         match: ["![[foo#header2]]"],
-      //       })
-      //     ).toBeTruthy();
-      //   },
-      //   ...generateVerifyFunction({
-      //     target: DendronASTDest.MD_REGULAR,
-      //     exclude: [DendronASTDest.MD_DENDRON],
-      //   }),
     },
   });
 
   const WITH_ANCHOR_WITH_SPACE = createProcTests({
-    name: "WITH_ANCHOR",
+    name: "WITH_ANCHOR_WITH_SPACE",
     setupFunc: async (opts) => {
-      let proc = await createProc(opts, {});
-      return processText({ proc, text: "# Foo Bar\n![[foo#header-2]]" });
+      const { engine, vaults } = opts;
+      return processTextV2({
+        text: "# Foo Bar\n![[foo#header-2]]",
+        dest: opts.extra.dest,
+        engine,
+        vault: vaults[0],
+        fname: "foo",
+      });
     },
     preSetupHook: ANCHOR_WITH_SPACE_PRE_SETUP,
     verifyFuncDict: {
       [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { respProcess } = extra;
+        const { resp } = extra;
         expect(
           await AssertUtils.assertInString({
-            body: respProcess.toString(),
+            body: resp.toString(),
             match: ["task2"],
             nomatch: ["task1"],
           })
         ).toBeTruthy();
       },
       [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { respProcess } = extra;
+        const { resp } = extra;
         expect(
           await AssertUtils.assertInString({
-            body: respProcess.toString(),
+            body: resp.toString(),
             match: ["![[foo#header-2]]"],
           })
         ).toBeTruthy();
@@ -359,27 +360,31 @@ describe("compilev2", () => {
   const WITH_START_ANCHOR_INVALID = createProcTests({
     name: "WITH_START_ANCHOR_INVALID",
     setupFunc: async (opts) => {
-      let proc = await createProc(opts, {});
-      return processText({ proc, text: "# Foo Bar\n![[foo#badheader]]" });
+      const { engine, vaults } = opts;
+      return processTextV2({
+        text: "# Foo Bar\n![[foo#badheader]]",
+        dest: opts.extra.dest,
+        engine,
+        vault: vaults[0],
+        fname: "foo",
+      });
     },
     preSetupHook: WITH_ANCHOR_PRE_SETUP,
     verifyFuncDict: {
       [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { respProcess } = extra;
+        const { resp } = extra;
         expect(
           await AssertUtils.assertInString({
-            body: respProcess.toString(),
+            body: resp.toString(),
             match: ["badheader not found"],
           })
         ).toBeTruthy();
       },
       [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { respParse, respProcess } = extra;
-        expect(respParse).toMatchSnapshot();
-        expect(respProcess).toMatchSnapshot();
+        const { resp } = extra;
         expect(
           await AssertUtils.assertInString({
-            body: respProcess.toString(),
+            body: resp.toString(),
             match: ["![[foo#badheader]]"],
           })
         ).toBeTruthy();
@@ -394,30 +399,31 @@ describe("compilev2", () => {
   const WITH_END_ANCHOR_INVALID = createProcTests({
     name: "WITH_END_ANCHOR_INVALID",
     setupFunc: async (opts) => {
-      let proc = await createProc(opts, {});
-      return processText({
-        proc,
+      const { engine, vaults } = opts;
+      return processTextV2({
         text: "# Foo Bar\n![[foo#header1:#badheader]]",
+        dest: opts.extra.dest,
+        engine,
+        vault: vaults[0],
+        fname: "foo",
       });
     },
     preSetupHook: WITH_ANCHOR_PRE_SETUP,
     verifyFuncDict: {
       [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { respProcess } = extra;
+        const { resp } = extra;
         expect(
           await AssertUtils.assertInString({
-            body: respProcess.toString(),
+            body: resp.toString(),
             match: ["badheader not found"],
           })
         ).toBeTruthy();
       },
       [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { respParse, respProcess } = extra;
-        expect(respParse).toMatchSnapshot();
-        expect(respProcess).toMatchSnapshot();
+        const { resp } = extra;
         expect(
           await AssertUtils.assertInString({
-            body: respProcess.toString(),
+            body: resp.toString(),
             match: ["![[foo#header1:#badheader]]"],
           })
         ).toBeTruthy();
@@ -432,27 +438,33 @@ describe("compilev2", () => {
   const WITH_START_ANCHOR_OFFSET = createProcTests({
     name: "WITH_START_ANCHOR_OFFSET",
     setupFunc: async (opts) => {
-      let proc = await createProc(opts, {});
-      return processText({ proc, text: "# Foo Bar\n![[foo#header2,1]]" });
+      // let proc = await createProc(opts, {});
+      // return processText({ proc, text: "# Foo Bar\n![[foo#header2,1]]" });
+      const { engine, vaults } = opts;
+      return processTextV2({
+        text: "# Foo Bar\n![[foo#header2,1]]",
+        dest: opts.extra.dest,
+        engine,
+        vault: vaults[0],
+        fname: "foo",
+      });
     },
     preSetupHook: WITH_ANCHOR_PRE_SETUP,
     verifyFuncDict: {
       [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
-        const { respProcess } = extra;
+        const { resp } = extra;
         expect(
           await AssertUtils.assertInString({
-            body: respProcess.toString(),
+            body: resp.toString(),
             match: ["[[foo#header2,1]]"],
           })
         ).toBeTruthy();
       },
       [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
-        const { respParse, respProcess } = extra;
-        expect(respParse).toMatchSnapshot();
-        expect(respProcess).toMatchSnapshot();
+        const { resp } = extra;
         expect(
           await AssertUtils.assertInString({
-            body: respProcess.toString(),
+            body: resp.toString(),
             match: ["task2"],
             nomatch: ["Header2", "task1"],
           })
@@ -710,13 +722,16 @@ describe("compilev2", () => {
     ...XVAULT_CASE,
   ];
 
+  // const ALL_TEST_CASES = [
+  //     ...WITH_ANCHOR
+  // ];
+
   describe("compile", () => {
     test.each(
       ALL_TEST_CASES.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
     )("%p", async (_key, testCase: TestPresetEntryV4) => {
-      await runEngineTestV4(testCase.testFunc, {
+      await runEngineTestV5(testCase.testFunc, {
         expect,
-        createEngine,
         preSetupHook: testCase.preSetupHook,
       });
     });

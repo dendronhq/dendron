@@ -340,6 +340,7 @@ export class MDUtilsV4 {
         ...opts.noteRefOpts,
         wikiLinkOpts: opts.wikiLinksOpts,
         prettyRefs: usePrettyRefs,
+        insertTitle: config.useFMTitle,
       })
       .use(noteRefs, { ...opts.noteRefOpts, wikiLinkOpts: opts.wikiLinksOpts });
 

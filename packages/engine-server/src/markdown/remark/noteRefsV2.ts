@@ -9,7 +9,7 @@ import {
   NotePropsV2,
   NoteUtilsV2,
   RespV2,
-  VaultUtils
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -24,7 +24,7 @@ import {
   DendronASTNode,
   DendronASTTypes,
   NoteRefNoteV4,
-  NoteRefNoteV4_LEGACY
+  NoteRefNoteV4_LEGACY,
 } from "../types";
 import { MDUtilsV4, renderFromNoteProps } from "../utils";
 import { LinkUtils } from "./utils";
@@ -194,8 +194,6 @@ function convertNoteRef(
     try {
       const note = file2Note(npath, vault);
       const body = note.body;
-      // let noteRefProc = proc();
-      // MDUtilsV4.setDendronData(proc, {overrides: {insertTitle: false}});
       const { error, data } = convertNoteRefHelper({
         body,
         note,
@@ -461,7 +459,7 @@ function convertNoteRefHelperAST(
       )
     );
     let tmpProc = MDUtilsV4.procFull({ ...procOpts });
-    tmpProc = MDUtilsV4.setDendronData(tmpProc, {insideNoteRef: true})
+    tmpProc = MDUtilsV4.setDendronData(tmpProc, { insideNoteRef: true });
 
     // let tmpProc = proc.data("procFull") as Processor;
     const { dest } = MDUtilsV4.getDendronData(tmpProc);
@@ -606,4 +604,3 @@ function renderPrettyAST(opts: {
 
 export { plugin as noteRefsV2 };
 export { PluginOpts as NoteRefsOptsV2 };
-

@@ -79,7 +79,6 @@ type ProcOptsFull = ProcOpts & {
   wikiLinksOpts?: WikiLinksOpts;
   noteRefOpts?: NoteRefsOpts;
   publishOpts?: DendronPubOpts;
-  hiearchyDisplayTitle?: string;
 };
 
 type ProcDendron = ProcOpts & {
@@ -87,12 +86,6 @@ type ProcDendron = ProcOpts & {
   vault: DVault;
   fname: string;
   configOverride?: DendronConfig;
-  // toggle lang options
-  hiearchyDisplayTitle?: string;
-  // toggle lang features
-  useKatex?: boolean;
-  useMermaid?: boolean;
-  usePrettyRefs?: boolean;
 };
 
 enum DendronProcDataKeys {
@@ -326,12 +319,7 @@ export class MDUtilsV4 {
       proc = proc.data("fm", fm);
     }
 
-    // set defaults
     let usePrettyRefs = opts.usePrettyRefs || ConfigUtils.usePrettyRef(config);
-    // let usePrettyRefs: boolean | undefined = _.find(
-    //   [opts.usePrettyRefs, config?.usePrettyRefs, config?.site?.usePrettyRefs],
-    //   (ent) => !_.isUndefined(ent)
-    // );
 
     proc = proc
       .data("dendron", {
@@ -346,7 +334,7 @@ export class MDUtilsV4 {
       .use(variables)
       .use(footnotes)
       .use(wikiLinks, opts.wikiLinksOpts)
-      .use(hierarchies, { hiearchyDisplayTitle: opts.hiearchyDisplayTitle })
+      .use(hierarchies, { hiearchyDisplayTitle: config.hiearchyDisplayTitle })
       .use(backlinks)
       .use(noteRefsV2, {
         ...opts.noteRefOpts,
@@ -483,7 +471,7 @@ export class MDUtilsV4 {
    * @param opts
    * @returns
    */
-  procDendron(opts: ProcDendron) {
+  static procDendron(opts: ProcDendron) {
     const { dest, engine, configOverride, fname, vault } = opts;
     if (dest === DendronASTDest.HTML) {
       throw Error("use procDendronHTML");
@@ -498,11 +486,10 @@ export class MDUtilsV4 {
     return proc;
   }
 
-  procDendronForPublish(opts: ProcDendron & { noteIndex: NotePropsV2 }) {
-    const { dest, engine, configOverride, fname, vault, noteIndex } = opts;
-    if (dest !== DendronASTDest.HTML) {
-      throw Error("use procDendron");
-    }
+  static procDendronForPublish(
+    opts: Omit<ProcDendron, "dest"> & { noteIndex: NotePropsV2 }
+  ) {
+    const { engine, configOverride, fname, vault, noteIndex } = opts;
     const proc = MDUtilsV4.procHTML({
       engine,
       config: configOverride,

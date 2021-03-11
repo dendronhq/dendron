@@ -79,6 +79,20 @@ type ProcOptsFull = ProcOpts & {
   wikiLinksOpts?: WikiLinksOpts;
   noteRefOpts?: NoteRefsOpts;
   publishOpts?: DendronPubOpts;
+  hiearchyDisplayTitle?: string;
+};
+
+type ProcDendron = ProcOpts & {
+  dest: DendronASTDest;
+  vault: DVault;
+  fname: string;
+  configOverride?: DendronConfig;
+  // toggle lang options
+  hiearchyDisplayTitle?: string;
+  // toggle lang features
+  useKatex?: boolean;
+  useMermaid?: boolean;
+  usePrettyRefs?: boolean;
 };
 
 enum DendronProcDataKeys {
@@ -332,7 +346,7 @@ export class MDUtilsV4 {
       .use(variables)
       .use(footnotes)
       .use(wikiLinks, opts.wikiLinksOpts)
-      .use(hierarchies)
+      .use(hierarchies, { hiearchyDisplayTitle: opts.hiearchyDisplayTitle })
       .use(backlinks)
       .use(noteRefsV2, {
         ...opts.noteRefOpts,
@@ -462,6 +476,41 @@ export class MDUtilsV4 {
       proc = proc.use(containers);
     }
     return MDUtilsV4.procRehype({ proc, mathjax: true });
+  }
+
+  /**
+   * Return a dendron processor
+   * @param opts
+   * @returns
+   */
+  procDendron(opts: ProcDendron) {
+    const { dest, engine, configOverride, fname, vault } = opts;
+    if (dest === DendronASTDest.HTML) {
+      throw Error("use procDendronHTML");
+    }
+    const proc = MDUtilsV4.procFull({
+      engine,
+      config: configOverride,
+      fname,
+      dest,
+      vault,
+    });
+    return proc;
+  }
+
+  procDendronForPublish(opts: ProcDendron & { noteIndex: NotePropsV2 }) {
+    const { dest, engine, configOverride, fname, vault, noteIndex } = opts;
+    if (dest !== DendronASTDest.HTML) {
+      throw Error("use procDendron");
+    }
+    const proc = MDUtilsV4.procHTML({
+      engine,
+      config: configOverride,
+      fname,
+      vault,
+      noteIndex,
+    });
+    return proc;
   }
 }
 

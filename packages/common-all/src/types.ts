@@ -84,6 +84,12 @@ export type DendronConfig = {
    * Use pretty refs for preview
    */
   usePrettyRefs?: boolean;
+
+  /**
+   * Title used for hiearchies
+   * Default: Children
+   */
+  hiearchyDisplayTitle?: string;
 };
 
 export type HierarchyConfig = {

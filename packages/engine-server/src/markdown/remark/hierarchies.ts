@@ -9,12 +9,23 @@ import { SiteUtils } from "../../topics/site";
 import { DendronASTDest, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
 
-// Plugin that adds backlinks at the end of each page if they exist
-const plugin: Plugin = function (this: Unified.Processor) {
+type PluginOpts = {
+  hiearchyDisplayTitle?: string;
+};
+
+const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
   const proc = this;
+  const hiearchyDisplayTitle = opts?.hiearchyDisplayTitle || "Children";
+  debugger;
   function transformer(tree: Node): void {
     let root = tree as Root;
-    const { fname, vault, dest, config, insideNoteRef } = MDUtilsV4.getDendronData(proc);
+    const {
+      fname,
+      vault,
+      dest,
+      config,
+      insideNoteRef,
+    } = MDUtilsV4.getDendronData(proc);
     if (!fname || insideNoteRef) {
       return;
     }
@@ -45,7 +56,9 @@ const plugin: Plugin = function (this: Unified.Processor) {
       root.children.push({
         type: "thematicBreak",
       });
-      root.children.push(u("heading", { depth: 2 }, [u("text", "Children")]));
+      root.children.push(
+        u("heading", { depth: 2 }, [u("text", hiearchyDisplayTitle)])
+      );
       root.children.push(
         list(
           "ordered",
@@ -72,3 +85,4 @@ const plugin: Plugin = function (this: Unified.Processor) {
 };
 
 export { plugin as hierarchies };
+export { PluginOpts as HierarchiesOpts };

@@ -17,3 +17,21 @@ VFile {
   "messages": Array [],
 }
 `;
+
+exports[`hierarchies single with updated name 1`] = `
+VFile {
+  "contents": "foo body
+
+* * *
+
+## Better Children
+
+1. [Ch1](foo.ch1.html)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;

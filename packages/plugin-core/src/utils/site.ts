@@ -22,7 +22,7 @@ const packageJson = {
 
 type NPMDep = { pkg: string; version: string };
 
-const pkgCreate = (pkgPath: string) => {
+export const pkgCreate = (pkgPath: string) => {
   return fs.writeJSONSync(pkgPath, packageJson);
 };
 const pkgInstall = async () => {

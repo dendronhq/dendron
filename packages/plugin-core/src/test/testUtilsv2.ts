@@ -94,7 +94,6 @@ export function genDefaultSettings() {
     extensions: {
       recommendations: [
         "dendron.dendron-paste-image",
-        "equinusocio.vsc-material-theme",
         "dendron.dendron-markdown-shortcuts",
         "dendron.dendron-markdown-preview-enhanced",
         "dendron.dendron-markdown-links",

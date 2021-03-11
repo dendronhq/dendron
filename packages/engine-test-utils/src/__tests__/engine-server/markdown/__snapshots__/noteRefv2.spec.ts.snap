@@ -60,6 +60,36 @@ VFile {
 }
 `;
 
+exports[`noteRefV2 compile "HTML: WITH_NOTE_LINK_TITLE" 1`] = `
+VFile {
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
+<p></p><p></p><div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\">
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
+  <a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+  <h2 id=\\"header2\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#header2\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Header2</h2>
+<p>task2</p>
+</div>    
+  </div><p></p><p></p>
+<hr>
+<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<ol>
+<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`noteRefV2 compile "HTML: XVAULT_CASE" 1`] = `
 VFile {
   "contents": "<div class=\\"portal-container\\">
@@ -371,6 +401,38 @@ VFile {
   <div class=\\"portal-backlink\\" >
   <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
   <a href=\\"foo.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>        
+  
+  ## Header2
+
+task2
+  
+  </div>    
+  </div>
+  
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: WITH_NOTE_LINK_TITLE" 1`] = `
+VFile {
+  "contents": "# Foo Bar
+
+
+  <div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
+  <a href=\\"foo.ch1.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
   <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">

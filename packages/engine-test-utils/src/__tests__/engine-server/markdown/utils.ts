@@ -171,7 +171,6 @@ export const processTextV2 = async (opts: {
   configOverride?: DendronConfig;
 }) => {
   const { engine, text, fname, vault, configOverride } = opts;
-  debugger;
   if (opts.dest !== DendronASTDest.HTML) {
     const proc = MDUtilsV4.procDendron({
       engine,

@@ -1,6 +1,5 @@
 import {
   DendronConfig,
-  DNoteRefLink,
   NotePropsV2,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -12,7 +11,6 @@ import {
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
 import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
-import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
 import {
   checkNotInVFile,
@@ -22,34 +20,34 @@ import {
   processTextV2,
 } from "./utils";
 
-const proc = MDUtilsV4.procDendron;
-const createProc = MDUtilsV4.procDendron;
+// const proc = MDUtilsV4.procDendron;
+// const createProc = MDUtilsV4.procDendron;
 
-function createLink(opts: {
-  fname: string;
-  extra?: Partial<DNoteRefLink>;
-}): { link: DNoteRefLink } {
-  const { fname, extra } = opts;
-  const out: { link: DNoteRefLink } = {
-    link: {
-      data: {
-        type: "file",
-      },
-      from: {
-        fname,
-      },
-      type: "ref",
-    },
-  };
-  out.link = _.merge(out.link, extra);
-  return out;
-}
+// function createLink(opts: {
+//   fname: string;
+//   extra?: Partial<DNoteRefLink>;
+// }): { link: DNoteRefLink } {
+//   const { fname, extra } = opts;
+//   const out: { link: DNoteRefLink } = {
+//     link: {
+//       data: {
+//         type: "file",
+//       },
+//       from: {
+//         fname,
+//       },
+//       type: "ref",
+//     },
+//   };
+//   out.link = _.merge(out.link, extra);
+//   return out;
+// }
 
-function checkLink(node: any, link: { link: DNoteRefLink }) {
-  const refNode = node.children[0].children[0];
-  expect(refNode.type).toEqual("refLinkV2");
-  expect(refNode.data).toEqual(link);
-}
+// function checkLink(node: any, link: { link: DNoteRefLink }) {
+//   const refNode = node.children[0].children[0];
+//   expect(refNode.type).toEqual("refLinkV2");
+//   expect(refNode.data).toEqual(link);
+// }
 
 export const modifyNote = async (
   opts: WorkspaceOpts,
@@ -313,6 +311,43 @@ describe("noteRefV2", () => {
             nomatch: ["task1"],
           })
         ).toBeTruthy();
+      },
+    },
+  });
+
+  const WITH_NOTE_LINK_TITLE = createProcTests({
+    name: "WITH_NOTE_LINK_TITLE",
+    setupFunc: async (opts) => {
+      const { engine, vaults } = opts;
+      const configOverride: DendronConfig = {
+        ...opts.engine.config,
+        useNoteTitleForLink: true,
+      };
+      return processTextV2({
+        text: "# Foo Bar\n![[foo.ch1#header2]]",
+        dest: opts.extra.dest,
+        engine,
+        configOverride,
+        vault: vaults[0],
+        fname: "foo",
+      });
+    },
+    preSetupHook: async (opts) => {
+      await ENGINE_HOOKS.setupBasic(opts);
+      await modifyNote(opts, "foo.ch1", (note: NotePropsV2) => {
+        const txt = [`# Tasks`, "## Header1", "task1", "## Header2", "task2"];
+        note.body = txt.join("\n");
+        return note;
+      });
+    },
+    verifyFuncDict: {
+      [DendronASTDest.HTML]: async ({ extra }) => {
+        const { resp } = extra;
+        await checkVFile(resp, `<span class="portal-text-title">Ch1</span>`);
+      },
+      [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
+        const { resp } = extra;
+        await checkVFile(resp, `<span class="portal-text-title">Ch1</span>`);
       },
     },
   });
@@ -720,6 +755,7 @@ describe("noteRefV2", () => {
     ...WITH_END_ANCHOR_INVALID,
     ...WITH_START_ANCHOR_OFFSET,
     ...XVAULT_CASE,
+    ...WITH_NOTE_LINK_TITLE,
   ];
 
   // const ALL_TEST_CASES = [

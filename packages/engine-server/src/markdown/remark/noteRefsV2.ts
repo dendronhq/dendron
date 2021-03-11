@@ -1,5 +1,6 @@
 import {
   CONSTANTS,
+  DendronConfig,
   DendronError,
   DNodeUtilsV2,
   DNoteLoc,
@@ -150,7 +151,7 @@ function convertNoteRef(
   const { link, proc, compilerOpts } = opts;
   const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
-  let { dest, vault } = MDUtilsV4.getDendronData(proc);
+  let { dest, vault, config } = MDUtilsV4.getDendronData(proc);
   if (link.data.vaultName) {
     vault = VaultUtils.getVaultByName({
       vaults: engine.vaultsv3,
@@ -210,19 +211,7 @@ function convertNoteRef(
       }
       if (prettyRefs) {
         let suffix = "";
-        let href = fname;
-        if (wikiLinkOpts?.useId) {
-          const maybeNote = NoteUtilsV2.getNoteByFnameV5({
-            fname,
-            notes: engine.notes,
-            vault,
-            wsRoot: engine.wsRoot,
-          });
-          if (!maybeNote) {
-            return `error with ${ref}`;
-          }
-          href = maybeNote?.id;
-        }
+        let href = wikiLinkOpts?.useId ? note.id : fname;
         if (dest === DendronASTDest.HTML) {
           const maybeNote = NoteUtilsV2.getNoteByFnameV5({
             fname,
@@ -240,9 +229,10 @@ function convertNoteRef(
           suffix = ".md";
         }
         const link = `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`;
+        let title = getTitle({ config, note, loc: ref });
         return renderPretty({
           content: data,
-          title: alias || fname || "no title",
+          title,
           link,
         });
       } else {
@@ -312,7 +302,6 @@ export function convertNoteRefASTV2(
   }
   const out: Parent[] = noteRefs.map((ref) => {
     const fname = ref.fname;
-    const alias = ref.alias;
     // TODO: find first unit with path
     const npath = DNodeUtilsV2.getFullPath({
       wsRoot: engine.wsRoot,
@@ -347,29 +336,11 @@ export function convertNoteRefASTV2(
       }
       if (prettyRefs) {
         let suffix = "";
-        let href = fname;
-        if (wikiLinkOpts?.useId) {
-          const maybeNote = NoteUtilsV2.getNoteByFnameV5({
-            fname,
-            notes: engine.notes,
-            vault,
-            wsRoot: engine.wsRoot,
-          });
-          if (!maybeNote) {
-            throw Error("error with ref");
-            //return `error with ${ref}`;
-          }
-          href = maybeNote?.id;
-        }
+        let href = wikiLinkOpts?.useId ? note.id : fname;
+        let title = getTitle({ config, note, loc: ref });
         if (dest === DendronASTDest.HTML) {
-          const maybeNote = NoteUtilsV2.getNoteByFnameV5({
-            fname,
-            notes: engine.notes,
-            vault,
-            wsRoot: engine.wsRoot,
-          });
           suffix = ".html";
-          if (maybeNote?.custom.permalink === "/") {
+          if (note.custom.permalink === "/") {
             href = "";
             suffix = "";
           }
@@ -380,7 +351,7 @@ export function convertNoteRefASTV2(
         const link = `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`;
         return renderPrettyAST({
           content: data,
-          title: alias || fname || "no title",
+          title,
           link,
         });
       } else {
@@ -578,6 +549,16 @@ function renderPretty(opts: { content: string; title: string; link: string }) {
   </div>    
   </div>
   `;
+}
+
+function getTitle(opts: {
+  config: DendronConfig;
+  note: NotePropsV2;
+  loc: DNoteLoc;
+}) {
+  const { config, note, loc } = opts;
+  const { alias, fname } = loc;
+  return config.useNoteTitleForLink ? note.title : alias || fname || "no title";
 }
 
 function renderPrettyAST(opts: {

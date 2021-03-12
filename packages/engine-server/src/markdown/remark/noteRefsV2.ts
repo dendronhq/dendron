@@ -156,7 +156,6 @@ function convertNoteRef(
     vault = VaultUtils.getVaultByName({
       vaults: engine.vaultsv3,
       vname: link.data.vaultName,
-      throwOnMissing: true,
     })!;
   }
   if (!vault) {
@@ -265,7 +264,6 @@ export function convertNoteRefASTV2(
     vault = VaultUtils.getVaultByName({
       vaults: engine.vaultsv3,
       vname: link.data.vaultName,
-      throwOnMissing: true,
     })!;
   }
 

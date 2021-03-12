@@ -4,6 +4,7 @@ import _ from "lodash";
 import vscode, { Location, Position, Uri } from "vscode";
 import { findHeaderPos, GotoNoteCommand } from "../commands/GotoNote";
 import { PickerUtilsV2 } from "../components/lookup/utils";
+import { Logger } from "../logger";
 import { getReferenceAtPosition } from "../utils/md";
 import { DendronWorkspace } from "../workspace";
 
@@ -20,10 +21,14 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     let vault = undefined;
     const engine = DendronWorkspace.instance().getEngine();
     if (refAtPos.vaultName) {
-      vault = VaultUtils.getVaultByName({
-        vaults: engine.vaultsv3,
-        vname: refAtPos.vaultName,
-      });
+      try {
+        vault = VaultUtils.getVaultByName({
+          vaults: engine.vaultsv3,
+          vname: refAtPos.vaultName,
+        });
+      } catch (err) {
+        Logger.error({ msg: `${refAtPos.vaultName} is not defined` });
+      }
     }
     const notes = NoteUtilsV2.getNotesByFname({
       fname: refAtPos.ref,

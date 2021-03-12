@@ -154,14 +154,15 @@ export class MDUtilsV4 {
     let { vault } = MDUtilsV4.getDendronData(proc);
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
     if (vaultName) {
-      let maybeVault = VaultUtils.getVaultByName({
-        vaults: engine.vaultsv3,
-        vname: vaultName,
-        throwOnMissing:
-          copts.vaultMissingBehavior === VaultMissingBehavior.THROW_ERROR,
-      });
-      if (maybeVault) {
-        vault = maybeVault;
+      try {
+        vault = VaultUtils.getVaultByName({
+          vaults: engine.vaultsv3,
+          vname: vaultName,
+        });
+      } catch (err) {
+        if (copts.vaultMissingBehavior === VaultMissingBehavior.THROW_ERROR) {
+          throw err;
+        }
       }
     }
     return vault;

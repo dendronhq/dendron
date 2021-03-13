@@ -6,11 +6,11 @@ import {
   PodItemV4,
   PodUtils,
 } from "@dendronhq/pods-core";
-import { Uri, window } from "vscode";
+import { ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { showPodQuickPickItemsV4 } from "../utils/pods";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWS } from "../workspace";
 import { BaseCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
 
@@ -65,8 +65,24 @@ export class ImportPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
     const engine = DendronWorkspace.instance().getEngine();
     const vaults = DendronWorkspace.instance().vaultsv4;
     const pod = new opts.podChoice.podClass() as ImportPod;
-    await pod.execute({ config: opts.config, engine, wsRoot, vaults });
+    const vaultWatcher = getWS().vaultWatcher;
+    if (vaultWatcher) {
+      vaultWatcher.pause = true;
+    }
+    await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "importing",
+        cancellable: false,
+      },
+      async () => {
+        await pod.execute({ config: opts.config, engine, wsRoot, vaults });
+      }
+    );
     await new ReloadIndexCommand().execute();
+    if (vaultWatcher) {
+      vaultWatcher.pause = false;
+    }
     window.showInformationMessage(`done importing.`);
   }
 }

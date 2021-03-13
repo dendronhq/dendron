@@ -1,26 +1,26 @@
 area.ui:
-  - '- \[(?:x|X)\] UI'
+  - '- \[ ?(?:x|X) ?\] UI'
 area.workbench:
-  - '- \[(?:x|X)\] Workbench'
+  - '- \[ ?(?:x|X) ?\] Workbench'
 area.publishing:
-  - '- \[(?:x|X)\] Publishing'
+  - '- \[ ?(?:x|X) ?\] Publishing'
 area.pods:
-  - '- \[(?:x|X)\] Pods'
+  - '- \[ ?(?:x|X) ?\] Pods'
 area.markdown:
-  - '- \[(?:x|X)\] Markdown'
+  - '- \[ ?(?:x|X) ?\] Markdown'
 area.seeds:
-  - '- \[(?:x|X)\] Seed'
+  - '- \[ ?(?:x|X) ?\] Seed'
 area.misc:
-  - '- \[(?:x|X)\] Misc'
+  - '- \[ ?(?:x|X) ?\] Misc'
 area.hierarchy:
-  - '- \[(?:x|X)\] Hierarchy'
+  - '- \[ ?(?:x|X) ?\] Hierarchy'
 area.graph:
-  - '- \[(?:x|X)\] Graph'
+  - '- \[ ?(?:x|X) ?\] Graph'
 type.bug:
-  - '- \[(?:x|X)\] Bug'
+  - '- \[ ?(?:x|X) ?\] Bug'
 type.enhancement:
-  - '- \[(?:x|X)\] Feature Enhancement'
+  - '- \[ ?(?:x|X) ?\] Enhancement of an existing Feature.'
 type.feature:
-  - '- \[(?:x|X)\] Feature Request'
+  - '- \[ ?(?:x|X) ?\] Request of a new feature.'
 status.triage-needed:
   - "(?:.*)"

@@ -30,10 +30,10 @@
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
     "build": "yarn compile",
     "compile": "tsc -p tsconfig.build.json",
-    "test": "npx jest",
-    "coverage": "jest --coverage",
-    "watch": "yarn compile --watch",
-    "test:watch": "yarn test --watch -u"
+    "test": "echo nop",
+    "coverage": "echo nop",
+    "watch": "echo nop",
+    "test:watch": "echo nop"
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.32.1",

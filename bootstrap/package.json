@@ -1,9 +1,0 @@
-{
-  "name": "bootstrap",
-  "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
-  "dependencies": {
-    "fs-extra": "^9.0.1"
-  }
-}

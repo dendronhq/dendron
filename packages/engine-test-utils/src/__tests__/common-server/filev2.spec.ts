@@ -2,15 +2,15 @@ import {
   DNodeUtilsV2 as _du,
   SchemaUtilsV2 as _su,
 } from "@dendronhq/common-all";
-import fs from "fs-extra";
-import _ from "lodash";
-import path from "path";
 import {
   file2Schema,
   goUpTo,
   schemaModuleProps2File,
   tmpDir,
-} from "../filesv2";
+} from "@dendronhq/common-server";
+import fs from "fs-extra";
+import _ from "lodash";
+import path from "path";
 
 describe("goUpTo", () => {
   let root: string;
@@ -81,32 +81,32 @@ describe("file2Schema", () => {
     fs.writeFileSync(
       fpath,
       `
-version: 1
-schemas:
-- id: pro
-  desc: projects
-  parent: root
-  namespace: true
-  children:
-    - quickstart
-    - concepts
-    - tips
-    - faq
-    - upgrading
-    - topic
-    - install
-- id: quickstart
-  desc: getting started with a project
-- id: concepts
-  desc: basic concepts to do with the project
-- id: tips
-- id: faq
-- id: upgrading
-- id: install
-- id: topic
-  desc: important areas of a project
-  namespace: true
-`,
+  version: 1
+  schemas:
+  - id: pro
+    desc: projects
+    parent: root
+    namespace: true
+    children:
+      - quickstart
+      - concepts
+      - tips
+      - faq
+      - upgrading
+      - topic
+      - install
+  - id: quickstart
+    desc: getting started with a project
+  - id: concepts
+    desc: basic concepts to do with the project
+  - id: tips
+  - id: faq
+  - id: upgrading
+  - id: install
+  - id: topic
+    desc: important areas of a project
+    namespace: true
+  `,
       { encoding: "utf-8" }
     );
     const schema = file2Schema(fpath, root);

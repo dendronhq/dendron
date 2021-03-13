@@ -1,26 +1,4 @@
 {
   "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "test:watch",
-      "command": "yarn test:watch ${relativeFile} -u",
-      "type": "shell",
-      "problemMatcher": [],
-      "options": {
-        "env": {
-          "LOG_DST": "../../logs/engine-server.log"
-        }
-      }
-    },
-    {
-      "type": "npm",
-      "label": "test:all",
-      "script": "test",
-      "group": {
-        "kind": "test",
-        "isDefault": true
-      },
-      "problemMatcher": []
-    }
-  ]
+  "tasks": []
 }

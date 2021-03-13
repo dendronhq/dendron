@@ -1,27 +1,4 @@
 {
   "version": "0.2.0",
-  "configurations": [
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "debug one test",
-      "program": "${workspaceFolder:root}/node_modules/jest/bin/jest.js",
-      "sourceMaps": true,
-      "smartStep": true,
-      "cwd": "${workspaceFolder:common-server}",
-      "env": {
-        "LOG_DST": "stdout",
-        "LOG_LEVEL": "error"
-      },
-      "args": [
-        "--findRelatedTests",
-        "--runInBand",
-        "${relativeFile}",
-        "-u"
-      ],
-      "outFiles": [
-        "${workspaceFolder:common-server}/lib/**/*.js"
-      ]
-    }
-  ]
+  "configurations": []
 }

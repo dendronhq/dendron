@@ -10,8 +10,8 @@
       "smartStep": true,
       "cwd": "${workspaceFolder:api-server}",
       "env": {
-        "LOG_DST": "stdout",
-        "LOG_LEVEL": "error"
+        "LOG_DST": "../../logs/${fileWorkspaceFolder}.log",
+        "LOG_LEVEL": "info"
       },
       "args": [
         "--findRelatedTests",

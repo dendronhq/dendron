@@ -18,6 +18,7 @@ const fs = require("fs");
 const _ = require("lodash");
 const xmlFiltersPlugin = require("eleventy-xml-plugin");
 const path = require("path");
+const { GitUtils } = require("@dendronhq/common-server");
 
 async function addHeader() {
   const hpath = getCustomHeaderOutput();
@@ -218,44 +219,10 @@ function toCollection(note, notesDict) {
   return children.map((ch) => genTemplate(ch)).join("\n");
 }
 
-// gh_edit_repository: 'https://github.com/kevinslin/dendron-yc'
-// url: 'git@github.com:kevinslin/dendron-vault.git'
-function git2Github(gitUrl) {
-  // 'git@github.com:kevinslin/dendron-vault.git'
-  const [_, userAndRepo] = gitUrl.split(":");
-  const [user, repo] = userAndRepo.split("/");
-  return `https://github.com/${user}/${path.basename(repo, ".git")}`;
-}
-
-function githubUrl(node) {
-  const vault = node.vault;
+function githubUrl(note) {
   const wsRoot = env().wsRoot;
   const config = getDendronConfig();
-  const vaults = config.vaults;
-  const mvault = VaultUtils.matchVault({ wsRoot, vault, vaults });
-  const vaultUrl = _.get(mvault, "remote.url", false);
-  const gitRepoUrl = config.site.gh_edit_repository;
-  if (mvault && vaultUrl) {
-    return _.join(
-      [
-        git2Github(vaultUrl),
-        config.site.gh_edit_view_mode,
-        config.site.gh_edit_branch,
-        node.fname + ".md",
-      ],
-      "/"
-    );
-  }
-  return _.join(
-    [
-      gitRepoUrl,
-      config.site.gh_edit_view_mode,
-      config.site.gh_edit_branch,
-      path.basename(vault.fsPath),
-      node.fname + ".md",
-    ],
-    "/"
-  );
+  return GitUtils.getGithubEditUrl({note, config, wsRoot})
 }
 
 module.exports = {

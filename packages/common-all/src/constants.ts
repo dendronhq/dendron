@@ -25,3 +25,7 @@ export const ENGINE_ERROR_CODES = {
 export enum ERROR_CODES {
   MINOR,
 }
+
+export enum RESERVED_KEYS {
+  GIT_DIR_PATH = "gitDirPath",
+}

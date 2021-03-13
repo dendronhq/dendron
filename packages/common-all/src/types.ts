@@ -209,7 +209,7 @@ export type DendronSiteConfig = {
   gh_edit_link?: string;
   gh_edit_link_text?: string;
   gh_edit_branch?: string;
-  gh_edit_view_mode?: string;
+  gh_edit_view_mode?: "tree" | "edit";
   gh_edit_repository?: string;
 
   /**

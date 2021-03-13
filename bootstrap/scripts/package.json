@@ -1,0 +1,41 @@
+{
+    "name": "@dendronhq/bootstrap",
+    "description": "",
+    "private": true,
+    "license": "GPLv3",
+    "repository": {
+      "type": "git",
+      "url": "ssh://git@github.com/dendronhq/dendron.git",
+      "directory": "bootstrap/scripts"
+    },
+    "author": {
+      "name": "Kevin Lin",
+      "email": "kevin@dendron.so",
+      "url": "https://kevinslin.com"
+    },
+    "keywords": [
+    ],
+    "files": [
+      "lib"
+    ],
+    "main": "lib/index.js",
+    "types": "lib/index.d.ts",
+    "scripts": {
+      "compile": "tsc -p tsconfig.build.json",
+      "watch": "yarn compile --watch"
+    },
+    "dependencies": {
+    },
+    "devDependencies": {
+    },
+    "engines": {
+      "node": ">=12.0.0"
+    },
+    "publishConfig": {
+      "access": "public"
+    },
+    "jest": {
+      "preset": "ts-jest"
+    }
+  }
+  

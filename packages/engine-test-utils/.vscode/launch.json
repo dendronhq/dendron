@@ -10,7 +10,7 @@
       "smartStep": true,
       "cwd": "${workspaceFolder:engine-test-utils}",
       "env": {
-        "LOG_DST": "../../logs/engine-test-utils.log",
+        "LOG_DST": "../../logs/${fileWorkspaceFolder}.log",
         "LOG_LEVEL": "info"
       },
       "args": [

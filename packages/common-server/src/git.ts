@@ -1,5 +1,13 @@
-import { CONSTANTS, DendronConfig, DVault } from "@dendronhq/common-all";
+import {
+  CONSTANTS,
+  DendronConfig,
+  DVault,
+  NotePropsV2,
+  RESERVED_KEYS,
+  VaultUtils,
+} from "@dendronhq/common-all";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
 import simpleGit, { SimpleGit } from "simple-git";
 import { readYAML } from "./files";
@@ -24,6 +32,55 @@ export class GitUtils {
       repoPath = opts.remotePath.split(":").slice(-1)[0];
     }
     return `https://${accessToken}:x-oauth-basic@github.com/${repoPath}`;
+  }
+
+  static git2Github(gitUrl: string) {
+    // 'git@github.com:kevinslin/dendron-vault.git'
+    const [_, userAndRepo] = gitUrl.split(":");
+    const [user, repo] = userAndRepo.split("/");
+    return `https://github.com/${user}/${path.basename(repo, ".git")}`;
+  }
+
+  static getGithubEditUrl(opts: {
+    note: NotePropsV2;
+    config: DendronConfig;
+    wsRoot: string;
+  }) {
+    const { note, config, wsRoot } = opts;
+    const vault = note.vault;
+    const vaults = config.vaults;
+    const mvault = VaultUtils.matchVault({ wsRoot, vault, vaults });
+    const vaultUrl = _.get(mvault, "remote.url", false);
+    const gitRepoUrl = config.site.gh_edit_repository;
+
+    // if we have a vault, we don't need to include the vault name as an offset
+    if (mvault && vaultUrl) {
+      return _.join(
+        [
+          this.git2Github(vaultUrl),
+          config.site.gh_edit_view_mode,
+          config.site.gh_edit_branch,
+          note.fname + ".md",
+        ],
+        "/"
+      );
+    }
+
+    const gitDirPath = _.get(
+      note.custom,
+      RESERVED_KEYS.GIT_DIR_PATH,
+      _.join([path.basename(vault.fsPath), note.fname + ".md"], "/")
+    );
+    // this assumes we have a workspace url
+    return _.join(
+      [
+        gitRepoUrl,
+        config.site.gh_edit_view_mode,
+        config.site.gh_edit_branch,
+        gitDirPath,
+      ],
+      "/"
+    );
   }
 
   static getOwnerAndRepoFromURL(url: string) {

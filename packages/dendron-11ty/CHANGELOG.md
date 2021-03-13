@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.32.2](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-11ty@1.32.0...@dendronhq/dendron-11ty@1.32.2) (2021-03-13)
+
+### Bug Fixes
+
+- issues with search overlay ([a4fbe70](https://github.com/dendronhq/dendron/commit/a4fbe7060a157e69827d52f1dd0e7a6ec2df98fa))
+
 ## [1.32.1](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-11ty@1.32.0...@dendronhq/dendron-11ty@1.32.1) (2021-03-13)
 
 **Note:** Version bump only for package @dendronhq/dendron-11ty

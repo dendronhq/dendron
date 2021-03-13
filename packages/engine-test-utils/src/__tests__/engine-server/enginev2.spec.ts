@@ -7,8 +7,8 @@ import {
   getLogFilePath,
   runEngineTestV4,
 } from "@dendronhq/common-test-utils";
+import { DendronEngineV2 } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { DendronEngineV2 } from "../enginev2";
 
 const createEngine = ({ wsRoot }: WorkspaceOpts) => {
   const logger = createLogger("testLogger", getLogFilePath("engine-server"));

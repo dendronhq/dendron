@@ -1,0 +1,272 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MDUtils.proc "HTML: NOTE_REF_RECURSIVE_WITH_REHYPE" 1`] = `
+VFile {
+  "contents": "<p></p><p></p><div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\">
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+  <a href=\\"foo-id.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+  <p></p><p></p><div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\">
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.one</span></div>
+  <a href=\\"foo.one-id.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+  <h1 id=\\"fooone\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#fooone\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo.One</h1>
+<p></p><p></p><div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\">
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.two</span></div>
+  <a href=\\"foo.two.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+  <h1 id=\\"footwo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#footwo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo.Two</h1>
+<p>blah</p>
+</div>    
+  </div><p></p>
+Regular wikilink: <p></p>
+</div>    
+  </div><p></p><p></p>
+</div>    
+  </div><p></p><p></p>
+<hr>
+<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<ol>
+<li><a href=\\"foo.one-id.html\\">One</a></li>
+<li><a href=\\"foo.two.html\\">Two</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "HTML: NOTE_REF_WITH_REHYPE": respRehype 1`] = `
+VFile {
+  "contents": "<p></p><p></p><div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\">
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+  <a href=\\"foo-id.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+  <p><a href=\\"bar.html\\">bar</a></p>
+</div>    
+  </div><p></p><p></p>
+<hr>
+<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<ol>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "HTML: WITH_FOOTNOTES" 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+Here is a footnote reference,[^1]
+
+[^1]: Here is the footnote.
+
+* * *
+
+## Children
+
+1. [Ch1](foo.ch1.html)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "HTML: WITH_TITLE_FOR_LINK" 1`] = `
+VFile {
+  "contents": "<p><a href=\\"foo.ch1.html\\">Ch1</a></p>
+<hr>
+<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<ol>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
+</ol>",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_DENDRON: WITH_FOOTNOTES" 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+Here is a footnote reference,[^1]
+
+[^1]: Here is the footnote.
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_DENDRON: WITH_TITLE_FOR_LINK" 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+[[foo.ch1]]
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_FOOTNOTES" 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+Here is a footnote reference,[^1]
+
+[^1]: Here is the footnote.
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_ENHANCED_PREVIEW: WITH_TITLE_FOR_LINK" 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+[Ch1](foo.ch1.md)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_FOOTNOTES" 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+Here is a footnote reference,[^1]
+
+[^1]: Here is the footnote.
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_TITLE_FOR_LINK" 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+[Ch1](foo.ch1)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`MDUtils.proc "MD_REGULAR: WITH_TITLE_FOR_LINK_X_VAULT" 1`] = `
+VFile {
+  "contents": "---
+id: foo
+title: Foo
+desc: ''
+updated: '1'
+created: '1'
+---
+
+[Bar](bar)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;

@@ -4,18 +4,21 @@ import {
   ENGINE_HOOKS,
   ENGINE_HOOKS_MULTI,
   NoteTestUtilsV4,
-  runEngineTestV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
+import {
+  DConfig,
+  DendronASTDest,
+  MDUtilsV4,
+  Processor,
+  renderFromNote,
+} from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { DConfig } from "../../../config";
-import { DendronASTDest, Processor } from "../../types";
-import { MDUtilsV4, renderFromNote } from "../../utils";
+import { runEngineTestV5 } from "../../../engine";
 import {
-  checkContents,
-  createEngine,
+  checkVFile,
   createProcTests,
   generateVerifyFunction,
   processText,
@@ -338,13 +341,13 @@ const NOTE_REF_RECURSIVE_BASIC_WITH_REHYPE = createProcTests({
       const { respRehype: resp2 } = case2;
       await Promise.all(
         [resp2].map((resp) => {
-          return checkContents(resp, [
-            // link by id
+          checkVFile(
+            resp,
             `<a href=\"foo-id.html\"`,
             // html quoted
             `Foo.One</h1>`,
-            `Foo.Two</h1>`,
-          ]);
+            `Foo.Two</h1>`
+          );
         })
       );
     },
@@ -369,19 +372,19 @@ const WITH_TITLE_FOR_LINK = createProcTests({
   verifyFuncDict: {
     [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
       const { respProcess } = extra;
-      await checkContents(respProcess, "[Ch1](foo.ch1)");
+      await checkVFile(respProcess, "[Ch1](foo.ch1)");
     },
     [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
       const { respProcess } = extra;
-      await checkContents(respProcess, "[[foo.ch1]]");
+      await checkVFile(respProcess, "[[foo.ch1]]");
     },
     [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
       const { respProcess } = extra;
-      await checkContents(respProcess, "[Ch1](foo.ch1.md)");
+      await checkVFile(respProcess, "[Ch1](foo.ch1.md)");
     },
     [DendronASTDest.HTML]: async ({ extra }) => {
       const { respRehype } = extra;
-      await checkContents(respRehype, `<p><a href="foo.ch1.html">Ch1</a></p>`);
+      await checkVFile(respRehype, `<p><a href="foo.ch1.html">Ch1</a></p>`);
     },
   },
   preSetupHook: async (opts) => {
@@ -405,19 +408,19 @@ const WITH_TITLE_FOR_LINK_X_VAULT = createProcTests({
   verifyFuncDict: {
     [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
       const { respProcess } = extra;
-      await checkContents(respProcess, "[Bar](bar)");
+      await checkVFile(respProcess, "[Bar](bar)");
     },
     // [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
     //   const { respProcess } = extra;
-    //   await checkContents(respProcess, "[[dendron://vault2/bar]]");
+    //   await checkVFile(respProcess, "[[dendron://vault2/bar]]");
     // },
     // [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
     //   const { respProcess } = extra;
-    //   await checkContents(respProcess, `[Bar](../vault2/bar.md)`);
+    //   await checkVFile(respProcess, `[Bar](../vault2/bar.md)`);
     // },
     // [DendronASTDest.HTML]: async ({ extra }) => {
     //   const { respRehype } = extra;
-    //   await checkContents(respRehype, `<p><a href="bar.html">Bar</a></p>`);
+    //   await checkVFile(respRehype, `<p><a href="bar.html">Bar</a></p>`);
     // },
   },
   preSetupHook: async (opts) => {
@@ -447,9 +450,8 @@ describe("MDUtils.proc", () => {
   test.each(
     ALL_TEST_CASES.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
   )("%p", async (_key, testCase: TestPresetEntryV4) => {
-    await runEngineTestV4(testCase.testFunc, {
+    await runEngineTestV5(testCase.testFunc, {
       expect,
-      createEngine,
       preSetupHook: testCase.preSetupHook,
     });
   });

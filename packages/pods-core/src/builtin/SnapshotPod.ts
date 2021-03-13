@@ -190,8 +190,7 @@ export class SnapshotImportPod extends ImportPod {
 
   async plant(opts: ImportPodPlantOpts) {
     const ctx = "SnapshotImportPod:plant";
-    const { config, wsRoot, vaults } = opts;
-    const { src } = config;
+    const { wsRoot, vaults, src } = opts;
     const vaultSnapshots = fs.readdirSync(src.fsPath);
     this.L.info({ ctx, src: src.fsPath });
 

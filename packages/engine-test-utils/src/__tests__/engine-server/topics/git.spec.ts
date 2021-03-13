@@ -1,5 +1,5 @@
 import { tmpDir } from "@dendronhq/common-server";
-import { Git } from "../git";
+import { Git } from "@dendronhq/engine-server";
 // import fs from "fs-extra";
 // import path from "path";
 

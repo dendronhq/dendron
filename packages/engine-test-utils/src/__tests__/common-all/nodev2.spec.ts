@@ -5,9 +5,9 @@ import {
   runEngineTestV4,
   SetupHookFunction,
 } from "@dendronhq/common-test-utils";
+import { createEngine } from "@dendronhq/engine-server";
 import { tmpdir } from "os";
 import path from "path";
-import { createEngine } from "../enginev2";
 
 const preSetupHook: SetupHookFunction = async ({ vaults, wsRoot }) => {
   await NoteTestUtilsV4.createNote({ fname: "foo", vault: vaults[0], wsRoot });

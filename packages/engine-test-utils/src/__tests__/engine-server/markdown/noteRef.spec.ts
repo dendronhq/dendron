@@ -7,20 +7,19 @@ import {
   AssertUtils,
   ENGINE_HOOKS,
   ENGINE_SERVER,
-  runEngineTestV4,
   TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
-import { DendronASTData, DendronASTDest } from "../../types";
-import { MDUtilsV4 } from "../../utils";
-import { dendronPub } from "../dendronPub";
-import { noteRefs, NoteRefsOpts } from "../noteRefs";
 import {
-  createEngine,
-  createProcTests,
-  genDendronData,
-  modifyNote,
-  processText,
-} from "./utils";
+  DendronASTData,
+  DendronASTDest,
+  dendronPub,
+  MDUtilsV4,
+  noteRefs,
+  NoteRefsOpts,
+} from "@dendronhq/engine-server";
+import { runEngineTestV5 } from "../../../engine";
+import { modifyNote } from "./noteRefv2.spec";
+import { createProcTests, genDendronData, processText } from "./utils";
 
 function proc(
   engine: DEngineClientV2,
@@ -46,7 +45,7 @@ describe("parse", () => {
   });
 
   test("init with inject", async () => {
-    await runEngineTestV4(
+    await runEngineTestV5(
       async ({ engine, vaults }) => {
         let _proc = proc(
           engine,
@@ -60,7 +59,6 @@ describe("parse", () => {
       },
       {
         expect,
-        createEngine,
         preSetupHook: ENGINE_HOOKS.setupBasic,
       }
     );
@@ -344,9 +342,8 @@ describe("compilev2", () => {
     test.each(
       ALL_TEST_CASES.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
     )("%p", async (_key, testCase: TestPresetEntryV4) => {
-      await runEngineTestV4(testCase.testFunc, {
+      await runEngineTestV5(testCase.testFunc, {
         expect,
-        createEngine,
         preSetupHook: testCase.preSetupHook,
       });
     });

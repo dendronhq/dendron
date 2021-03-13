@@ -9,6 +9,7 @@ function stubWindow(returnValue: string) {
   // @ts-ignore
   sinon
     .stub(window, "showInformationMessage")
+    // @ts-ignore
     .returns(Promise.resolve(returnValue));
 }
 

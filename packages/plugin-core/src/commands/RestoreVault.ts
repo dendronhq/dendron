@@ -1,4 +1,4 @@
-import { Time } from "@dendronhq/common-all";
+import { Time, VaultUtils } from "@dendronhq/common-all";
 import { SnapshotImportPod } from "@dendronhq/pods-core";
 import fs, { readdirSync } from "fs-extra";
 import path from "path";
@@ -69,7 +69,7 @@ export class RestoreVaultCommand extends BaseCommand<
         vaults: [vault],
         wsRoot,
         engine,
-        config: { src },
+        config: { src, vaultName: VaultUtils.getName(vault) },
       });
       window.showInformationMessage(`restored from snapshot`);
       await ws.reloadWorkspace();

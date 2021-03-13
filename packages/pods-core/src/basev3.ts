@@ -109,15 +109,18 @@ export type ImportPodConfig = {
   concatenate?: boolean;
   destName?: string;
   ignore?: boolean;
+  frontmatter?: any;
+  fnameAsId?: boolean;
 };
-export type ImportPodExecuteOpts<T extends ImportPodConfig = any> = PodOpts<T>;
+export type ImportPodExecuteOpts<
+  T extends ImportPodConfig = ImportPodConfig
+> = PodOpts<T>;
 
-export type ImportPodPlantOpts<T extends ImportPodConfig = any> = Omit<
-  ImportPodExecuteOpts<T>,
-  "src"
-> & { src: URI; vault: DVault };
+export type ImportPodPlantOpts<
+  T extends ImportPodConfig = ImportPodConfig
+> = Omit<ImportPodExecuteOpts<T>, "src"> & { src: URI; vault: DVault };
 
-export abstract class ImportPod<T extends ImportPodConfig = any> {
+export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
   public L: DLogger;
   static kind = "import" as PodKind;
   get config(): PodConfig[] {
@@ -145,6 +148,16 @@ export abstract class ImportPod<T extends ImportPodConfig = any> {
         type: "boolean",
       },
       {
+        key: "frontmatter",
+        description: "frontmatter to add to each note",
+        type: "object",
+      },
+      {
+        key: "fnameAsId",
+        description: "use the file name as the id",
+        type: "boolean",
+      },
+      {
         key: "destName",
         description: "If concatenate is set, name of destination path",
         type: "string" as const,
@@ -155,15 +168,15 @@ export abstract class ImportPod<T extends ImportPodConfig = any> {
     this.L = createLogger("ImportPod");
   }
 
-  async execute(opts: ImportPodExecuteOpts<T>) {
-    const { config, engine } = opts;
+  validate(config: Partial<T>) {
     const { src, vaultName, concatenate } = _.defaults(config, {
       concatenate: false,
     });
-
-    // validate config
+    const configJSON = JSON.stringify(config);
     if (_.isUndefined(src)) {
-      throw new DendronError({ msg: "no src specified" });
+      throw new DendronError({
+        msg: `no src specified. config: ${configJSON}`,
+      });
     }
     if (_.isUndefined(vaultName)) {
       throw new DendronError({ msg: "no vaultName specified" });
@@ -173,16 +186,22 @@ export abstract class ImportPod<T extends ImportPodConfig = any> {
         msg: "destName must be specified if concatenate is enabled",
       });
     }
+  }
 
+  async execute(opts: ImportPodExecuteOpts<T>) {
+    const { config, engine } = opts;
+    this.validate(config);
+    const { src, vaultName } = _.defaults(config, {
+      concatenate: false,
+    });
+
+    // validate config
     const vault = VaultUtils.getVaultByName({
       vaults: engine.vaultsv3,
       vname: vaultName,
     });
     const srcURL = URI.file(resolvePath(src, engine.wsRoot));
-    this.L.info({ msg: "pre:plant", src: srcURL.fsPath });
-    const out = await this.plant({ ...opts, src: srcURL, vault });
-    this.L.info({ msg: "post:plant", src: srcURL.fsPath });
-    return out;
+    return await this.plant({ ...opts, src: srcURL, vault });
   }
   abstract plant(opts: ImportPodPlantOpts<T>): Promise<NotePropsV2[]>;
 }

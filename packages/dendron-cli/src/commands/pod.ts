@@ -135,7 +135,7 @@ export const enrichPodArgs = (opts: {
         cleanConfig[k] = v;
       });
     } else {
-      const cleanConfig = PodUtils.getConfig({ podsDir, podClass });
+      cleanConfig = PodUtils.getConfig({ podsDir, podClass });
       if (!cleanConfig) {
         const podConfigPath = PodUtils.getConfigPath({ podsDir, podClass });
         throw new DendronError({

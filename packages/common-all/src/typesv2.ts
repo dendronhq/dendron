@@ -314,7 +314,9 @@ export type WriteNoteResp = Required<RespV2<NoteChangeEntry[]>>;
 export type ConfigGetPayload = DendronConfig;
 
 export type DCommonMethods = {
-  bulkAddNotes: (opts: BulkAddNoteOpts) => Promise<RespV2<void>>;
+  bulkAddNotes: (
+    opts: BulkAddNoteOpts
+  ) => Promise<Required<RespV2<NoteChangeEntry[]>>>;
   // TODO
   // configGet(): RespV2<ConfigGetPayload>
   updateNote(note: NotePropsV2, opts?: EngineUpdateNodesOptsV2): Promise<void>;
@@ -472,7 +474,7 @@ export type DPod<TConfig> = {
 export type PodConfig = {
   key: string;
   description: string;
-  type: "string" | "number" | "boolean";
+  type: "string" | "number" | "boolean" | "object";
   required?: boolean;
   default?: any;
   example?: string;

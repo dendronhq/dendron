@@ -142,7 +142,9 @@ export class DendronEngineV2 implements DEngineV2 {
   }
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {
-    return this.store.bulkAddNotes(opts);
+    const changed = await this.store.bulkAddNotes(opts);
+    await this.refreshNotesV2(changed.data);
+    return changed;
   }
 
   async deleteNote(

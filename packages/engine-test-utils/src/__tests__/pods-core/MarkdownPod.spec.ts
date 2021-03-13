@@ -1,4 +1,4 @@
-import { VaultUtils } from "@dendronhq/common-all";
+import { NoteUtilsV2, VaultUtils } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import { ENGINE_HOOKS, FileTestUtils } from "@dendronhq/common-test-utils";
 import { MarkdownImportPod, MarkdownPublishPod } from "@dendronhq/pods-core";
@@ -31,6 +31,113 @@ describe("markdown publish pod", () => {
 });
 
 describe("markdown import pod", () => {
+  test("fname as id ", async () => {
+    let importSrc: string;
+    importSrc = tmpDir().name;
+
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new MarkdownImportPod();
+        const vaultName = VaultUtils.getName(vaults[0]);
+        await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            concatenate: false,
+            src: importSrc,
+            vaultName,
+            fnameAsId: true,
+          },
+        });
+        const vault = vaults[0];
+        const vpath = vault2Path({ wsRoot, vault });
+        let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(vpath, [
+          "project.p1.n1.md",
+          "project.p1.n2.md",
+          "project.p2.n1.md",
+          "project.p-3.n1.md",
+          "root.md",
+          "root.schema.yml",
+        ]);
+        expect(expectedFiles).toEqual(actualFiles);
+        debugger;
+        const note = NoteUtilsV2.getNoteOrThrow({
+          fname: "project.p1.n1",
+          notes: engine.notes,
+          vault: vaults[0],
+          wsRoot,
+        });
+        expect(note.id).toEqual("project.p1.n1");
+      },
+      {
+        expect,
+        preSetupHook: async () => {
+          await FileTestUtils.createFiles(importSrc, [
+            { path: "project/p2/n1.md" },
+            { path: "project/p1/n1.md" },
+            { path: "project/p1/n2.md" },
+            { path: "project/p.3/n1.md" },
+          ]);
+        },
+      }
+    );
+  });
+
+  test("with frontmatter ", async () => {
+    let importSrc: string;
+    importSrc = tmpDir().name;
+
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new MarkdownImportPod();
+        const vaultName = VaultUtils.getName(vaults[0]);
+        await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            concatenate: false,
+            src: importSrc,
+            vaultName,
+            frontmatter: {
+              banana: 42,
+            },
+          },
+        });
+        const vault = vaults[0];
+        const vpath = vault2Path({ wsRoot, vault });
+        let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(vpath, [
+          "project.p1.n1.md",
+          "project.p1.n2.md",
+          "project.p2.n1.md",
+          "project.p-3.n1.md",
+          "root.md",
+          "root.schema.yml",
+        ]);
+        expect(expectedFiles).toEqual(actualFiles);
+        debugger;
+        const note = NoteUtilsV2.getNoteOrThrow({
+          fname: "project.p1.n1",
+          notes: engine.notes,
+          vault: vaults[0],
+          wsRoot,
+        });
+        expect(note.custom).toEqual({ banana: 42 });
+      },
+      {
+        expect,
+        preSetupHook: async () => {
+          await FileTestUtils.createFiles(importSrc, [
+            { path: "project/p2/n1.md" },
+            { path: "project/p1/n1.md" },
+            { path: "project/p1/n2.md" },
+            { path: "project/p.3/n1.md" },
+          ]);
+        },
+      }
+    );
+  });
   test("basic", async () => {
     let importSrc: string;
     importSrc = tmpDir().name;

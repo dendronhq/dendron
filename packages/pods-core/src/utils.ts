@@ -84,9 +84,9 @@ export class PodUtils {
           configPrefix = "";
         }
         args.push(`${configPrefix}${ent.key}: ${ent.default}`);
-        return args.join("\n\n");
+        return args.join("\n");
       })
-      .join("\n");
+      .join("\n\n");
     if (!fs.existsSync(podConfigPath) || force) {
       writeFileSync(podConfigPath, config);
     }

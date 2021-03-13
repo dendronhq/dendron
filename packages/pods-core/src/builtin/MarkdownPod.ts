@@ -191,7 +191,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     opts: MarkdownImportPodPlantOpts
   ): Promise<MarkdownImportPodResp> {
     const ctx = "MarkdownPod";
-    const { wsRoot, engine, src, vault } = opts;
+    const { wsRoot, engine, src, vault, config } = opts;
     this.L.info({ ctx, wsRoot, src: src.fsPath, msg: "enter" });
     // get all items
     const items = await this._collectItems(src.fsPath);
@@ -212,6 +212,12 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
             dendronLinksOpts: { convertObsidianLinks: true },
           }).process(n.body);
           n.body = cBody.toString();
+          if (config.frontmatter) {
+            n.custom = _.merge(n.custom, config.frontmatter);
+          }
+          if (config.fnameAsId) {
+            n.id = n.fname;
+          }
           return n;
         })
     );

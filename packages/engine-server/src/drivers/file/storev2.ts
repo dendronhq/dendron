@@ -583,9 +583,12 @@ export class FileStorageV2 implements DStoreV2 {
         });
       })
     );
-    this.logger.info({ ctx: "bulkAddNotes", msg: "exit" });
+    const notesChanged: NoteChangeEntry[] = opts.notes.map((n) => {
+      return { note: n, status: "create" as const };
+    });
     return {
       error: null,
+      data: notesChanged,
     };
   }
 

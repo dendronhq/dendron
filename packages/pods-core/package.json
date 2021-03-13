@@ -61,7 +61,6 @@
   "dependencies": {
     "@dendronhq/common-all": "^0.32.0",
     "@dendronhq/common-server": "^0.32.0",
-    "@dendronhq/common-test-utils": "^0.32.0",
     "@dendronhq/engine-server": "^0.32.0",
     "emailjs": "^3.4.0",
     "fast-csv": "^4.3.2",

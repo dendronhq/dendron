@@ -13,79 +13,43 @@ import {
   ExportPodCleanOpts,
   ExportPodPlantOpts,
   ExportPodRawConfig,
-  ImportPod,
-  ImportPodCleanConfig,
-  ImportPodCleanOpts,
-  ImportPodPlantOpts,
-  ImportPodRawConfig,
 } from "../basev2";
-import { PublishPodPlantOpts, PublishPod } from "../basev3";
+import {
+  ImportPod,
+  ImportPodConfig,
+  ImportPodPlantOpts,
+  PublishPod,
+  PublishPodPlantOpts,
+} from "../basev3";
 
 const ID = "dendron.json";
 
-export type JSONImportPodRawConfig = ImportPodRawConfig & {
-  concatenate: boolean;
-  destName?: string;
-};
-export type JSONImportPodCleanConfig = ImportPodCleanConfig & {
-  concatenate: boolean;
-  destName?: string;
-};
-export type JSONImportPodResp = any[];
+export type JSONImportPodPlantOpts = ImportPodPlantOpts;
 
-export type JSONImportPodPlantOpts = ImportPodPlantOpts<
-  JSONImportPodCleanConfig
->;
-
-export class JSONImportPod extends ImportPod<
-  JSONImportPodRawConfig,
-  JSONImportPodCleanConfig
-> {
+export class JSONImportPod extends ImportPod {
   static id: string = ID;
   static description: string = "import json";
 
-  get config() {
-    return super.config.concat([
-      {
-        key: "concatenate",
-        description:
-          "concatenate all entries into one note? if set to true, need to set `destName`",
-        type: "boolean",
-        default: false,
-      },
-      {
-        key: "destName",
-        description:
-          "if `concatenate: true`, specify name of concatenated note",
-        type: "string",
-      },
-    ]);
-  }
-
-  async clean(opts: ImportPodCleanOpts<JSONImportPodRawConfig>) {
-    return opts.config;
-  }
-
-  async plant(opts: JSONImportPodPlantOpts): Promise<JSONImportPodResp> {
+  async plant(opts: JSONImportPodPlantOpts) {
     const ctx = "JSONPod";
     this.L.info({ ctx, opts, msg: "enter" });
-    const engine = opts.engine;
-    const { src, destName, concatenate } = opts.config;
+    const { engine, vault, src } = opts;
+    const { destName, concatenate } = opts.config;
     const entries = fs.readJSONSync(src.fsPath);
-    const vault = engine.vaultsv3[0];
     const notes = await this._entries2Notes(entries, {
       vault,
       destName,
       concatenate,
     });
-    return Promise.all(
+    await Promise.all(
       _.map(notes, (n) => engine.writeNote(n, { newNode: true }))
     );
+    return notes;
   }
 
   async _entries2Notes(
     entries: Partial<NotePropsV2>[],
-    opts: Pick<JSONImportPodCleanConfig, "concatenate" | "destName"> & {
+    opts: Pick<ImportPodConfig, "concatenate" | "destName"> & {
       vault: DVault;
     }
   ): Promise<NotePropsV2[]> {

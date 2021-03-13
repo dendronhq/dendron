@@ -1,7 +1,7 @@
-import { DPod, DVault, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DPod, DVault, NoteUtilsV2, VaultUtils } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
+import { ImportPod, ImportPodConfig } from "@dendronhq/pods-core";
 import fs from "fs-extra";
-import _ from "lodash";
 import path from "path";
 import {
   AssertUtils,
@@ -44,6 +44,10 @@ const assertInNote = ({
   return AssertUtils.assertInString({ body: importedNote, match, nomatch });
 };
 
+const getImportPod = (extra: any) => {
+  return extra.pod as ImportPod;
+};
+
 const IMPORT = {
   BASIC: new TestPresetEntryV4(async ({ wsRoot, engine, vaults, extra }) => {
     const { pod } = extra as { pod: DPod<any> };
@@ -59,9 +63,10 @@ const IMPORT = {
         body: "bar body",
       },
     ]);
-    const config = {
+    const config: ImportPodConfig = {
       src: importSrc,
       concatenate: false,
+      vaultName: VaultUtils.getName(vault),
     };
     await pod.execute({
       config,
@@ -93,7 +98,7 @@ const IMPORT = {
   }),
   BASIC_W_STUBS: new TestPresetEntryV4(
     async ({ wsRoot, engine, vaults, extra }) => {
-      const { pod } = extra as { pod: DPod<any> };
+      const pod = getImportPod(extra);
       const vault = vaults[0];
       const importSrc = createJSONEntries([
         {
@@ -104,6 +109,7 @@ const IMPORT = {
       const config = {
         src: importSrc,
         concatenate: false,
+        vaultName: VaultUtils.getName(vault),
       };
       await pod.execute({
         config,
@@ -137,7 +143,7 @@ const IMPORT = {
   ),
   BASIC_W_REL_PATH: new TestPresetEntryV4(
     async ({ wsRoot, engine, vaults, extra }) => {
-      const { pod } = extra as { pod: DPod<any> };
+      const pod = getImportPod(extra);
       const vault = vaults[0];
       const importSrc = createJSONEntries(
         [
@@ -152,6 +158,7 @@ const IMPORT = {
       const config = {
         src: `./${basename}`,
         concatenate: false,
+        vaultName: VaultUtils.getName(vault),
       };
       await pod.execute({
         config,
@@ -174,7 +181,7 @@ const IMPORT = {
   ),
   CONCATENATE: new TestPresetEntryV4(
     async ({ wsRoot, engine, vaults, extra }) => {
-      const { pod } = extra as { pod: DPod<any> };
+      const pod = getImportPod(extra);
       const vault = vaults[0];
       const importSrc = createJSONEntries([
         {
@@ -191,6 +198,7 @@ const IMPORT = {
         src: importSrc,
         concatenate: true,
         destName: "results",
+        vaultName: VaultUtils.getName(vault),
       };
       await pod.execute({
         config,
@@ -222,7 +230,7 @@ const IMPORT = {
   ),
   CONCATENATE_W_NO_DEST: new TestPresetEntryV4(
     async ({ wsRoot, engine, vaults, extra }) => {
-      const { pod } = extra as { pod: DPod<any> };
+      const pod = getImportPod(extra);
       const importSrc = createJSONEntries([
         {
           fname: "foo",
@@ -233,9 +241,11 @@ const IMPORT = {
           body: "bar body",
         },
       ]);
+      const vault = vaults[0];
 
       const config = {
         src: importSrc,
+        vaultName: VaultUtils.getName(vault),
         concatenate: true,
       };
       try {
@@ -283,8 +293,8 @@ const setupTestForExportBasic: SetupTestFunctionV4 = async (opts) => {
   const destPath = path.join(destDir, "export.json");
   const config = { dest: destPath };
   await pod.execute({
-    config,
     ...opts,
+    config,
   });
   return { destPath };
 };

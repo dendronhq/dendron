@@ -1,11 +1,5 @@
 import { NotePropsV2, VaultUtils } from "@dendronhq/common-all";
-import {
-  CreateEngineFunction,
-  ENGINE_HOOKS,
-  PODS_CORE,
-  runEngineTestV4,
-} from "@dendronhq/common-test-utils";
-import { DendronEngineV2 } from "@dendronhq/engine-server";
+import { ENGINE_HOOKS, PODS_CORE } from "@dendronhq/common-test-utils";
 import {
   JSONExportPod,
   JSONImportPod,
@@ -13,10 +7,6 @@ import {
 } from "@dendronhq/pods-core";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../engine";
-
-const createEngine: CreateEngineFunction = (opts) => {
-  return DendronEngineV2.create(opts);
-};
 
 const podsDict = {
   IMPORT: () => new JSONImportPod(),
@@ -58,9 +48,8 @@ _.map(JSON_PRESETS, (presets, name) => {
       const { testFunc, ...opts } = TestCase;
       // @ts-ignore
       const pod = podsDict[name]();
-      await runEngineTestV4(testFunc, {
+      await runEngineTestV5(testFunc, {
         ...opts,
-        createEngine,
         expect,
         extra: { pod },
       });

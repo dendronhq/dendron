@@ -1,5 +1,9 @@
 import { createLogger, resolvePath } from "@dendronhq/common-server";
-import { DEngineClientV2, EngineConnector } from "@dendronhq/engine-server";
+import {
+  DendronEngineV2,
+  DEngineClientV2,
+  EngineConnector,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
 import { LaunchEngineServerCommand } from "./launchEngineServer";
@@ -8,6 +12,7 @@ const logger = createLogger();
 export type SetupEngineCLIOpts = {
   wsRoot: string;
   enginePort?: number;
+  useLocalEngine?: boolean;
   init?: boolean;
 };
 
@@ -25,17 +30,28 @@ export type SetupEngineOpts = {
   server: any;
 };
 
+const createDummyServer = () => ({
+  close: () => {},
+});
 /**
  * Setup an engine based on CLI args
  */
 export async function setupEngine(
   opts: SetupEngineCLIOpts
 ): Promise<SetupEngineResp> {
-  let { wsRoot, enginePort, init } = _.defaults(opts, { init: true });
+  let { wsRoot, enginePort, init, useLocalEngine } = _.defaults(opts, {
+    init: true,
+    useLocalEngine: false,
+  });
   let engine: DEngineClientV2;
   let port: number;
   let server: any;
   wsRoot = resolvePath(wsRoot, process.cwd());
+  if (useLocalEngine) {
+    const engine = DendronEngineV2.create({ wsRoot, logger });
+    await engine.init();
+    return { wsRoot, engine, port: -1, server: createDummyServer() };
+  }
   if (enginePort) {
     logger.info({
       ctx: "setupEngine",
@@ -48,10 +64,7 @@ export async function setupEngine(
     await engineConnector.init({ portOverride: enginePort });
     engine = engineConnector.engine;
     port = enginePort;
-    // dummy since server is remote
-    server = {
-      close: () => {},
-    };
+    server = createDummyServer();
   } else {
     logger.info({ ctx: "setupEngine", msg: "initialize new engine" });
     ({
@@ -73,5 +86,9 @@ export function setupEngineArgs(args: yargs.Argv) {
   args.option("enginePort", {
     describe:
       "If set, connect to to running engine. If not set, create new instance of Dendron Engine",
+  });
+  args.option("useLocalEngine", {
+    type: "boolean",
+    describe: "If set, use in memory engine instead of connecting to a server",
   });
 }

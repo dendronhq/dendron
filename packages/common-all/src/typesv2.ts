@@ -314,6 +314,7 @@ export type WriteNoteResp = Required<RespV2<NoteChangeEntry[]>>;
 export type ConfigGetPayload = DendronConfig;
 
 export type DCommonMethods = {
+  bulkAddNotes: (opts: BulkAddNoteOpts) => Promise<RespV2<void>>;
   // TODO
   // configGet(): RespV2<ConfigGetPayload>
   updateNote(note: NotePropsV2, opts?: EngineUpdateNodesOptsV2): Promise<void>;
@@ -359,6 +360,10 @@ export type DEngineInitSchemaRespV2 = Required<RespV2<SchemaModulePropsV2[]>>;
 
 export type DEngineV2SyncOpts = {
   metaOnly?: boolean;
+};
+
+export type BulkAddNoteOpts = {
+  notes: NotePropsV2[];
 };
 
 export type DEngineV2 = DCommonProps &

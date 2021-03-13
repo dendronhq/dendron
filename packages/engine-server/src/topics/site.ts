@@ -438,11 +438,6 @@ export class SiteUtils {
           vname,
           vaults: engine.vaultsv3,
         });
-        if (!vault) {
-          throw new DendronError({
-            msg: `no vault found for ${fname} in vaults ${vaultNames}`,
-          });
-        }
         const maybeNote = NoteUtilsV2.getNoteByFnameV5({
           fname,
           notes: noteDict,

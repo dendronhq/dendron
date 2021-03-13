@@ -8,12 +8,8 @@ import {
   ExportPodCleanOpts,
   ExportPodPlantOpts,
   ExportPodRawConfig,
-  ImportPod,
-  ImportPodCleanConfig,
-  ImportPodCleanOpts,
-  ImportPodPlantOpts,
-  ImportPodRawConfig,
 } from "../basev2";
+import { ImportPod, ImportPodPlantOpts } from "../basev3";
 
 const ID = "dendron.snapshot";
 
@@ -163,27 +159,13 @@ class SnapshotUtils {
   }
 }
 
-export type SnapshotImportPodRawConfig = ImportPodRawConfig & {
-  ignore?: string;
-};
-export type SnapshotImportPodCleanConfig = ImportPodCleanConfig & {};
 export type SnapshotImportPodResp = {
   snapshotDirPath: string;
 };
-export type SnapshotImportPodPlantOpts = ImportPodPlantOpts<
-  SnapshotImportPodCleanConfig
->;
 
-export class SnapshotImportPod extends ImportPod<
-  SnapshotImportPodRawConfig,
-  SnapshotImportPodCleanConfig
-> {
+export class SnapshotImportPod extends ImportPod {
   static id: string = ID;
   static description: string = "import snapshot";
-
-  get config() {
-    return [];
-  }
 
   async restoreVault({
     wsRoot,
@@ -206,14 +188,7 @@ export class SnapshotImportPod extends ImportPod<
     });
   }
 
-  async clean(
-    opts: ImportPodCleanOpts<SnapshotImportPodRawConfig>
-  ): Promise<SnapshotImportPodCleanConfig> {
-    const { config } = opts;
-    return config;
-  }
-
-  async plant(opts: SnapshotImportPodPlantOpts): Promise<void> {
+  async plant(opts: ImportPodPlantOpts) {
     const ctx = "SnapshotImportPod:plant";
     const { config, wsRoot, vaults } = opts;
     const { src } = config;
@@ -229,5 +204,6 @@ export class SnapshotImportPod extends ImportPod<
         });
       })
     );
+    return [];
   }
 }

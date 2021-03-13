@@ -184,7 +184,6 @@ function convertNoteRef(
   }
   const out = noteRefs.map((ref) => {
     const fname = ref.fname;
-    const alias = ref.alias;
     // TODO: find first unit with path
     const npath = DNodeUtilsV2.getFullPath({
       wsRoot: engine.wsRoot,

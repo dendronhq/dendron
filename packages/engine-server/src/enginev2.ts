@@ -1,4 +1,5 @@
 import {
+  BulkAddNoteOpts,
   ConfigWriteOpts,
   DendronConfig,
   DendronError,
@@ -138,6 +139,10 @@ export class DendronEngineV2 implements DEngineV2 {
         },
       };
     }
+  }
+
+  async bulkAddNotes(opts: BulkAddNoteOpts) {
+    return this.store.bulkAddNotes(opts);
   }
 
   async deleteNote(

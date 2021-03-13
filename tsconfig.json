@@ -3,6 +3,8 @@
 
     "compilerOptions": {
         "baseUrl": ".",
+        "strict": true,
+        "noImplicitAny": true,
         "paths": {
             //"@dendronhq/*": ["packages/*/src"],
             "@dendronhq/api-server": ["packages/api-server/src"],

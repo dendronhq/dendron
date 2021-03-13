@@ -1,4 +1,5 @@
 import {
+  BulkAddNoteOpts,
   ConfigGetPayload,
   ConfigWriteOpts,
   DendronConfig,
@@ -153,6 +154,11 @@ export class DendronEngineClient implements DEngineClientV2 {
       error: resp.error,
       data: { notes, schemas },
     };
+  }
+
+  async bulkAddNotes(_opts: BulkAddNoteOpts): Promise<RespV2<void>> {
+    // TODO
+    throw Error("bulk add notes not implemented");
   }
 
   async deleteNote(

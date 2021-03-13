@@ -10,8 +10,8 @@
       "smartStep": true,
       "cwd": "${workspaceFolder:engine-test-utils}",
       "env": {
-        "LOG_DST": "stdout",
-        "LOG_LEVEL": "error"
+        "LOG_DST": "../../logs/engine-test-utils.log",
+        "LOG_LEVEL": "info"
       },
       "args": [
         "--findRelatedTests",

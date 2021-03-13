@@ -18,27 +18,17 @@ import path from "path";
 import through2 from "through2";
 import {
   ImportPod,
-  ImportPodCleanConfig,
-  ImportPodCleanOpts,
+  ImportPodConfig,
   ImportPodPlantOpts,
-  ImportPodRawConfig,
-} from "../basev2";
-import { PublishPodPlantOpts, PublishPod } from "../basev3";
+  PublishPod,
+  PublishPodPlantOpts,
+} from "../basev3";
 
 const ID = "dendron.markdown";
 
-export type MarkdownImportPodRawConfig = ImportPodRawConfig & {
-  concatenate: boolean;
-  destName?: string;
-};
-export type MarkdownImportPodCleanConfig = ImportPodCleanConfig & {
-  concatenate: boolean;
-  destName?: string;
-};
+export type MarkdownImportPodPlantOpts = ImportPodPlantOpts;
 
-export type MarkdownImportPodPlantOpts = ImportPodPlantOpts<
-  MarkdownImportPodCleanConfig
->;
+type MarkdownImportPodConfig = ImportPodConfig;
 
 export type MarkdownImportPodResp = any[];
 
@@ -55,28 +45,25 @@ const toMarkdownLink = (assetPath: string, opts?: { name?: string }) => {
   return `- [${name}](${assetPath})`;
 };
 
-export class MarkdownImportPod extends ImportPod<
-  MarkdownImportPodRawConfig,
-  MarkdownImportPodCleanConfig
-> {
+export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
   static id: string = ID;
   static description: string = "import markdown";
 
   async _collectItems(root: string): Promise<DItem[]> {
     const items: DItem[] = []; // files, directories, symlinks, etc
     const mask = root.endsWith(path.sep) ? root.length : root.length + 1;
-    const excludeFilter = through2.obj(function (item: Item, _enc, next) {
+    const excludeFilter = through2.obj(function (item: Item, _enc, _next) {
       // check if hidden file
       if (!_.some(item.path.split(path.sep), (ent) => ent.startsWith("."))) {
         this.push(item);
       }
-      next();
+      _next();
     });
-    return await new Promise((resolve, _reject) => {
+    return new Promise((resolve, _reject) => {
       klaw(root)
         .pipe(excludeFilter)
         // eslint-disable-next-line prefer-arrow-callback
-        .on("data", function (item: Item) {
+        .on("data", (item: Item) => {
           const out: DItem = { ...item, entries: [] };
           if (item.path.endsWith(".md")) {
             const { data, content } = readMD(item.path);
@@ -87,6 +74,7 @@ export class MarkdownImportPod extends ImportPod<
           items.push(out);
         })
         .on("end", () => {
+          this.L.info({ msg: "done collecting items" });
           resolve(items);
         });
     });
@@ -199,29 +187,24 @@ export class MarkdownImportPod extends ImportPod<
     return _.values(noteDict);
   }
 
-  async clean(opts: ImportPodCleanOpts<MarkdownImportPodRawConfig>) {
-    return opts.config;
-  }
-
   async plant(
     opts: MarkdownImportPodPlantOpts
   ): Promise<MarkdownImportPodResp> {
-    const ctx = "FilePod";
-    const { wsRoot, engine } = opts;
-    const { src } = opts.config;
-    this.L.info({ ctx, wsRoot, src, msg: "enter" });
+    const ctx = "MarkdownPod";
+    const { wsRoot, engine, src, vault } = opts;
+    this.L.info({ ctx, wsRoot, src: src.fsPath, msg: "enter" });
     // get all items
     const items = await this._collectItems(src.fsPath);
+    this.L.info({ ctx, wsRoot, numItems: _.size(items), msg: "collectItems" });
     const { engineFileDict } = await this._prepareItems(items);
-    const mainVault = engine.vaultsv3[0];
     const hDict = this._files2HierarichalDict({
       files: _.values(engineFileDict),
       src: src.fsPath,
-      vault: mainVault,
+      vault,
       wsRoot,
     });
     const notes = this.hDict2Notes(hDict);
-    const out = await Promise.all(
+    const notesClean = await Promise.all(
       notes
         .filter((n) => !n.stub)
         .map(async (n) => {
@@ -229,13 +212,17 @@ export class MarkdownImportPod extends ImportPod<
             dendronLinksOpts: { convertObsidianLinks: true },
           }).process(n.body);
           n.body = cBody.toString();
-          return engine.writeNote(n, {
-            newNode: true,
-            noAddParent: true,
-          });
+          return n;
         })
     );
-    return out;
+    await engine.bulkAddNotes({ notes: notesClean });
+    this.L.info({
+      ctx,
+      wsRoot,
+      src: src.fsPath,
+      msg: `${_.size(notesClean)} notes imported`,
+    });
+    return notesClean;
   }
 }
 

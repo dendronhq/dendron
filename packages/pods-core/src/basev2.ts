@@ -8,7 +8,6 @@ import {
   PodConfig,
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, resolvePath } from "@dendronhq/common-server";
-import fs from "fs-extra";
 import _ from "lodash";
 import { URI } from "vscode-uri";
 import { PodKind } from "./types";
@@ -72,27 +71,6 @@ export type ExportPodPlantOpts<TConfig> = {
 };
 export type ExportPodExecuteOpts<TConfig> = BasePodExecuteOpts<
   TConfig & ExportPodRawConfig
->;
-
-// IMPORT
-export type ImportPodRawConfig = {
-  src?: string;
-};
-export type ImportPodCleanConfig = {
-  src: URI;
-};
-export type ImportPodCleanOpts<TConfig> = {
-  config: TConfig & ImportPodCleanConfig;
-  wsRoot: string;
-};
-export type ImportPodPlantOpts<TConfig> = {
-  wsRoot: string;
-  vaults: DVault[];
-  engine: DEngineClientV2;
-  config: TConfig;
-};
-export type ImportPodExecuteOpts<TConfig> = BasePodExecuteOpts<
-  TConfig & ImportPodRawConfig
 >;
 
 export abstract class ExportPod<
@@ -159,55 +137,6 @@ export abstract class ExportPod<
   async execute(opts: ExportPodExecuteOpts<TConfigRaw>): Promise<TOutput> {
     const { config, engine, wsRoot, vaults } = opts;
     const _config = this.cleanExportConfig({ config, wsRoot });
-    const cleanConfig = await this.clean({
-      config: { ...config, ..._config },
-      wsRoot,
-    });
-    return this.plant({ config: cleanConfig, wsRoot, vaults, engine });
-  }
-}
-
-export abstract class ImportPod<
-  TConfigRaw,
-  TConfigClean extends ImportPodCleanConfig
-> extends BasePod<TConfigRaw & ImportPodRawConfig> {
-  static kind: PodKind = "import";
-
-  get config(): PodConfig[] {
-    return [
-      {
-        key: "src",
-        description: "where to import from",
-        type: "string" as const,
-      },
-    ];
-  }
-
-  abstract clean(opts: ImportPodCleanOpts<TConfigRaw>): Promise<TConfigClean>;
-
-  abstract plant(opts: ImportPodPlantOpts<TConfigClean>): Promise<any>;
-
-  cleanImportConfig({
-    wsRoot,
-    config,
-  }: {
-    config: ImportPodRawConfig;
-    wsRoot: string;
-  }): ImportPodCleanConfig {
-    let src = this.getPodPath({ fpath: config.src, wsRoot, pathKey: "src" });
-    if (!fs.existsSync(src.fsPath)) {
-      throw new DendronError({
-        friendly: `no snapshot found at ${src.fsPath}`,
-      });
-    }
-    return {
-      src,
-    };
-  }
-
-  async execute(opts: ImportPodExecuteOpts<TConfigRaw>) {
-    const { config, engine, wsRoot, vaults } = opts;
-    const _config = this.cleanImportConfig({ config, wsRoot });
     const cleanConfig = await this.clean({
       config: { ...config, ..._config },
       wsRoot,

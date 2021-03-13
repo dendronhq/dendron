@@ -1,5 +1,6 @@
 import {
   assert,
+  BulkAddNoteOpts,
   DendronConfig,
   DendronError,
   DEngineClientV2,
@@ -44,9 +45,6 @@ import YAML from "yamljs";
 import { MDUtilsV4 } from "../../markdown";
 import { ParserUtilsV2 } from "../../topics/markdown/utilsv2";
 
-type BulkAddNoteOpts = {
-  notes: NotePropsV2[];
-};
 type FileMetaV2 = {
   // file name: eg. foo.md, name = foo
   prefix: string;
@@ -575,15 +573,20 @@ export class FileStorageV2 implements DStoreV2 {
   }
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {
-    return Promise.all(
-      opts.notes.map(async (note) => {
-        await note2File({
+    this.logger.info({ ctx: "bulkAddNotes", msg: "enter" });
+    await Promise.all(
+      opts.notes.map((note) => {
+        return note2File({
           note,
           vault: note.vault,
           wsRoot: this.wsRoot,
         });
       })
     );
+    this.logger.info({ ctx: "bulkAddNotes", msg: "exit" });
+    return {
+      error: null,
+    };
   }
 
   async renameNote(opts: RenameNoteOptsV2): Promise<RenameNotePayload> {

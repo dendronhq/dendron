@@ -1,5 +1,6 @@
 import {
   getAllImportPods,
+  ImportPod,
   podClassEntryToPodItemV4,
   PodClassEntryV4,
   PodItemV4,
@@ -63,7 +64,7 @@ export class ImportPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
     }
     const engine = DendronWorkspace.instance().getEngine();
     const vaults = DendronWorkspace.instance().vaultsv4;
-    const pod = new opts.podChoice.podClass();
+    const pod = new opts.podChoice.podClass() as ImportPod;
     await pod.execute({ config: opts.config, engine, wsRoot, vaults });
     await new ReloadIndexCommand().execute();
     window.showInformationMessage(`done importing.`);

@@ -72,13 +72,19 @@ export class PodUtils {
     ensureDirSync(path.dirname(podConfigPath));
     const pod = new podClass();
     const config = pod.config
-      .map((ent: any) => {
+      .map((ent) => {
         ent = _.defaults(ent, { default: "TODO" });
-        return [
+        const args = [
           `# description: ${ent.description}`,
           `# type: ${ent.type}`,
-          `${ent.key}: ${ent.default}`,
-        ].join("\n");
+        ];
+        let configPrefix = "# ";
+        if (ent.required) {
+          args.push(`# required: true`);
+          configPrefix = "";
+        }
+        args.push(`${configPrefix}${ent.key}: ${ent.default}`);
+        return args.join("\n\n");
       })
       .join("\n");
     if (!fs.existsSync(podConfigPath) || force) {

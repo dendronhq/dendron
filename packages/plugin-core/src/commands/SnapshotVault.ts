@@ -33,10 +33,11 @@ export class SnapshotVaultCommand extends BaseCommand<
     const engine = DendronWorkspace.instance().getEngine();
     const vault = engine.vaultsv3[0];
     const wsRoot = DendronWorkspace.wsRoot() as string;
-    const { snapshotDirPath } = await pod.execute({
+    const { data: snapshotDirPath } = await pod.execute({
       vaults: [vault],
       wsRoot,
       engine,
+      // @ts-ignore
       config: {},
     });
     window.showInformationMessage(`snapshot made to ${snapshotDirPath}`);

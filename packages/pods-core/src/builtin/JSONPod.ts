@@ -1,20 +1,10 @@
-import {
-  DVault,
-  NotePropsV2,
-  NoteUtilsV2,
-  PodConfig,
-} from "@dendronhq/common-all";
+import { DVault, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import {
   ExportPod,
-  ExportPodCleanConfig,
-  ExportPodCleanOpts,
   ExportPodPlantOpts,
-  ExportPodRawConfig,
-} from "../basev2";
-import {
   ImportPod,
   ImportPodConfig,
   ImportPodPlantOpts,
@@ -97,46 +87,18 @@ export class JSONPublishPod extends PublishPod {
   }
 }
 
-export class JSONExportPod extends ExportPod<
-  ExportPodRawConfig,
-  ExportPodCleanConfig,
-  void
-> {
+export class JSONExportPod extends ExportPod {
   static id: string = ID;
   static description: string = "export notes as json";
 
-  get config(): PodConfig[] {
-    return [
-      {
-        key: "dest",
-        description: "where to export to",
-        type: "string" as const,
-      },
-      {
-        key: "includeBody",
-        description: "should body be included",
-        type: "boolean" as const,
-      },
-    ];
-  }
+  async plant(opts: ExportPodPlantOpts) {
+    const { dest, notes } = opts;
 
-  // no-op
-  async clean(opts: ExportPodCleanOpts<ExportPodRawConfig>) {
-    return opts.config;
-  }
-
-  async plant(opts: ExportPodPlantOpts<ExportPodCleanConfig>) {
-    const { config, engine } = opts;
     // verify dest exist
-    const podDstPath = config.dest.fsPath;
+    const podDstPath = dest.fsPath;
     fs.ensureDirSync(path.dirname(podDstPath));
 
-    // parse notes into NoteProps
-    const notes = this.preareNotesForExport({
-      config,
-      notes: _.values(engine.notes),
-    });
-
     fs.writeJSONSync(podDstPath, notes, { encoding: "utf8" });
+    return { notes };
   }
 }

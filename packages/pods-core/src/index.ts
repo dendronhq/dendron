@@ -1,7 +1,6 @@
 import { JSONExportPod, JSONImportPod, JSONPublishPod } from "./builtin";
 import { MarkdownImportPod, MarkdownPublishPod } from "./builtin/MarkdownPod";
 import { PodClassEntryV4 } from "./types";
-export * from "./basev2";
 export * from "./basev3";
 export * from "./builtin";
 export * from "./types";

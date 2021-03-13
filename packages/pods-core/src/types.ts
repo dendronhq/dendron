@@ -1,4 +1,4 @@
-import { DPod } from "./basev2";
+import { DPod } from "@dendronhq/common-all";
 
 export interface PodClassEntryV4 {
   id: string;

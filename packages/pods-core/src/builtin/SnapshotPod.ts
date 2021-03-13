@@ -4,12 +4,10 @@ import _ from "lodash";
 import path from "path";
 import {
   ExportPod,
-  ExportPodCleanConfig,
-  ExportPodCleanOpts,
   ExportPodPlantOpts,
-  ExportPodRawConfig,
-} from "../basev2";
-import { ImportPod, ImportPodPlantOpts } from "../basev3";
+  ImportPod,
+  ImportPodPlantOpts,
+} from "../basev3";
 
 const ID = "dendron.snapshot";
 
@@ -17,43 +15,14 @@ function genVaultId(vaultPath: string) {
   return path.basename(vaultPath);
 }
 
-export type SnapshotExportPodRawConfig = ExportPodRawConfig & {
-  ignore?: string;
-};
-export type SnapshotExportPodCleanConfig = ExportPodCleanConfig & {
-  ignore: string[];
-};
 export type SnapshotExportPodResp = {
   snapshotDirPath: string;
 };
-export type SnapshotExportPodPlantOpts = ExportPodPlantOpts<
-  SnapshotExportPodCleanConfig
->;
+export type SnapshotExportPodPlantOpts = ExportPodPlantOpts;
 
-export class SnapshotExportPod extends ExportPod<
-  SnapshotExportPodRawConfig,
-  SnapshotExportPodCleanConfig,
-  SnapshotExportPodResp
-> {
+export class SnapshotExportPod extends ExportPod {
   static id: string = ID;
   static description: string = "export notes to snapshot";
-
-  get config() {
-    return [
-      {
-        key: "dest",
-        description: "where will output be stored",
-        type: "string" as const,
-        default: "snapshots",
-      },
-      {
-        key: "ignore",
-        description: "what files will be ignored during snapshot",
-        type: "string" as const,
-        default: ".git",
-      },
-    ];
-  }
 
   async backupVault({
     vault,
@@ -78,25 +47,14 @@ export class SnapshotExportPod extends ExportPod<
     });
   }
 
-  async clean(opts: ExportPodCleanOpts<SnapshotExportPodRawConfig>) {
-    // set ignore
+  async plant(opts: SnapshotExportPodPlantOpts) {
+    const { vaults, dest } = opts;
     const { ignore } = _.defaults(opts.config, { ignore: ".git" });
     let cIgnore = _.reject(ignore.split(","), (ent) => _.isEmpty(ent));
-    return {
-      ...opts.config,
-      ignore: cIgnore,
-    };
-  }
-
-  async plant(
-    opts: SnapshotExportPodPlantOpts
-  ): Promise<SnapshotExportPodResp> {
-    const { config, vaults } = opts;
-    const { ignore } = config;
     // const payload = this.prepareForExport(opts);
 
     // verify snapshot root
-    let snapshotRoot = config.dest.fsPath;
+    let snapshotRoot = dest.fsPath;
     if (process.platform === "win32" && snapshotRoot[1] === ":") {
       // We're on Windows and the path includes a drive letter; uppercase it.
       snapshotRoot = `${snapshotRoot[0].toUpperCase()}${snapshotRoot.slice(1)}`;
@@ -113,11 +71,11 @@ export class SnapshotExportPod extends ExportPod<
         return this.backupVault({
           vault,
           snapshotDirPath,
-          ignore,
+          ignore: cIgnore,
         });
       })
     );
-    return { snapshotDirPath };
+    return { notes: [], data: snapshotDirPath };
   }
 }
 

@@ -205,3 +205,132 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
   }
   abstract plant(opts: ImportPodPlantOpts<T>): Promise<NotePropsV2[]>;
 }
+
+// === Export Pod
+
+export type ExportPodConfig = {
+  /**
+   * Where to import from
+   */
+  dest: string;
+  /**
+   * Name of vault
+   */
+  vaultNames: string[];
+  includeBody?: boolean;
+  includeStubs?: boolean;
+  ignore?: string[];
+};
+export type ExportPodExecuteOpts<
+  T extends ExportPodConfig = ExportPodConfig
+> = PodOpts<T>;
+
+export type ExportPodPlantOpts<
+  T extends ExportPodConfig = ExportPodConfig
+> = Omit<ExportPodExecuteOpts<T>, "dest"> & {
+  dest: URI;
+  vaults: DVault[];
+  notes: NotePropsV2[];
+};
+
+export abstract class ExportPod<
+  T extends ExportPodConfig = ExportPodConfig,
+  TData = any
+> {
+  public L: DLogger;
+  static kind = "export" as PodKind;
+  get config(): PodConfig[] {
+    return [
+      {
+        key: "dest",
+        description: "Where to export to",
+        type: "string" as const,
+        required: true,
+      },
+      {
+        key: "vaultNames",
+        description: "name of vault to export",
+        type: "string",
+      },
+      {
+        key: "ignore",
+        description: "files to ignore during export",
+        type: "string",
+      },
+      {
+        key: "includeBody",
+        description: "should body be included",
+        type: "boolean",
+      },
+      {
+        key: "includeStubs",
+        description: "should stubs be included",
+        type: "boolean",
+      },
+    ];
+  }
+  constructor() {
+    this.L = createLogger("ExportPod");
+  }
+
+  validate(config: Partial<T>) {
+    const { dest, vaultNames } = config;
+    const configJSON = JSON.stringify(config);
+    if (_.isUndefined(dest)) {
+      throw new DendronError({
+        msg: `no dest specified. config: ${configJSON}`,
+      });
+    }
+    if (_.isUndefined(vaultNames)) {
+      throw new DendronError({ msg: "no vaultName specified" });
+    }
+  }
+
+  /**
+   * Checks for some pre-sets
+   * - if not `includeBody`, then fetch notes without body
+   * - if not `includeStubs`, then ignore stub nodes
+   */
+  preareNotesForExport({
+    config,
+    notes,
+  }: {
+    config: ExportPodConfig;
+    notes: NotePropsV2[];
+  }) {
+    const hideBody = config.includeBody ? false : true;
+    if (!config.includeStubs) {
+      notes = _.reject(notes, { stub: true });
+    }
+    if (hideBody) {
+      notes = notes.map((ent) => ({ ...ent, body: "" }));
+    }
+    return notes;
+  }
+
+  async execute(opts: ExportPodExecuteOpts<T>) {
+    const { config, engine } = opts;
+    this.validate(config);
+    const { dest, vaultNames } = config;
+
+    // validate config
+    const vaults = vaultNames.map((vaultName) =>
+      VaultUtils.getVaultByName({
+        vaults: engine.vaultsv3,
+        vname: vaultName,
+      })
+    );
+    const destURL = URI.file(resolvePath(dest, engine.wsRoot));
+
+    // parse notes into NoteProps
+    const notes = this.preareNotesForExport({
+      config,
+      notes: _.values(engine.notes),
+    });
+
+    return await this.plant({ ...opts, dest: destURL, vaults, notes });
+  }
+  abstract plant(
+    opts: ExportPodPlantOpts<T>
+  ): Promise<{ notes: NotePropsV2[]; data?: TData }>;
+}

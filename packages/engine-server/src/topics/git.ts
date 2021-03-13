@@ -3,19 +3,6 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 
-type GitOpts = {
-  cwd: string;
-};
-export class GitV2 {
-  static async clone(cmd: string, opts?: GitOpts) {
-    const cmdParts = ["git clone", cmd];
-    return await execa.command(cmdParts.join(" "), {
-      shell: true,
-      cwd: opts?.cwd,
-    });
-  }
-}
-
 export class Git {
   static async getRepo(fpath: string): Promise<any | false> {
     return fs.existsSync(path.join(fpath, ".git"));

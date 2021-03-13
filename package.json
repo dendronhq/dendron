@@ -46,7 +46,7 @@
     "format": "prettier --ignore-path='.prettierignore' --write 'packages/**/*'",
     "lerna:typecheck": "lerna exec --parallel --ignore @dendronhq/dendron-next-server --ignore @dendronhq/seeds-core --ignore @dendronhq/dendron-11ty -- tsc -p tsconfig.build.json --noEmit",
     "bootstrap:bootstrap": "npx lerna bootstrap --use-workspaces",
-    "bootstrap:build": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:engine-server &&  yarn bootstrap:build:api-server && yarn bootstrap:build:pods-core && yarn bootstrap:build:seeds-core && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:dendron-next-server && yarn bootstrap:build:plugin-core",
+    "bootstrap:build": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server &&  yarn bootstrap:build:engine-server &&  yarn bootstrap:build:pods-core && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:api-server && yarn bootstrap:build:seeds-core && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:dendron-next-server && yarn bootstrap:build:plugin-core",
     "bootstrap:build:fast": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:engine-server &&  yarn bootstrap:build:api-server && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:plugin-core",
     "bootstrap:build:": "npx lerna run build --scope",
     "bootstrap:build:dendron-next-server": "yarn bootstrap:build: @dendronhq/dendron-next-server",

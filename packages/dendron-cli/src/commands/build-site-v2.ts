@@ -35,9 +35,9 @@ export class BuildSiteV2CLICommand extends CLICommand<
   CommandOpts,
   CommandOutput
 > {
-  constructor() {
+  constructor(name?: string) {
     super({
-      name: "buildSiteV2",
+      name: name || "buildSiteV2",
       desc: "build notes for publication using 11ty",
     });
   }

@@ -15,7 +15,7 @@
   },
   "scripts": {},
   "devDependencies": {
-    "@types/fs-extra": "^9.0.8",
+    "@types/fs-extra": "^9.0.1",
     "@types/yeoman-generator": "^4.11.3"
   }
 }

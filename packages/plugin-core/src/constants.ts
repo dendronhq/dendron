@@ -70,7 +70,11 @@ export const DENDRON_REMOTE_VAULTS: Entry[] = [
     description: "aws notes",
     data: "https://github.com/dendronhq/dendron-aws-vault.git",
   },
-  //{ name: "cli", description: "cli notes", data: "" },
+  {
+    name: "tldr",
+    description: "cli tld",
+    data: "https://github.com/kevinslin/seed-tldr.git",
+  },
 ];
 
 export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {

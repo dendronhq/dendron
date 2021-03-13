@@ -79,11 +79,16 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
             selected.src = qp.value;
           }
           const sourceRemotePath = selected.src;
+          const path2Vault =
+            selected.label === "custom"
+              ? GitUtils.getRepoNameFromURL(sourceRemotePath)
+              : selected.label;
+          const placeHolder = path2Vault;
 
           let out = await VSCodeUtils.showInputBox({
             prompt: "Path to your new vault (relative to your workspace root)",
             placeHolder: localVaultPathPlaceholder,
-            value: GitUtils.getRepoNameFromURL(sourceRemotePath),
+            value: path2Vault,
           });
           if (PickerUtilsV2.isStringInputEmpty(out)) {
             resolve(undefined);
@@ -92,6 +97,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
           sourceName = await VSCodeUtils.showInputBox({
             prompt: "Name of new vault (optional, press enter to skip)",
+            value: placeHolder,
           });
           qp.hide();
           return resolve({

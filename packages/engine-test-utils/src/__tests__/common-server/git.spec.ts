@@ -41,10 +41,10 @@ describe("GitUtils", () => {
       config.site.gh_edit_view_mode = "edit";
       config.site.gh_edit_branch = "main";
       config.site.gh_edit_repository = gitUrl;
-      const note = engine.notes["foo"];
-      note.custom[RESERVED_KEYS.GIT_URL] = "bar/gamma.md";
+      const note = engine.notes["foo.ch1"];
+      note.custom[RESERVED_KEYS.GIT_NOTE_PATH] = "{{ noteHiearchy }}.md";
       expect(GitUtils.getGithubEditUrl({ note, config, wsRoot })).toEqual(
-        "https://github.com/dendronhq/dendron-site/edit/main/bar/gamma.md"
+        "https://github.com/dendronhq/dendron-site/edit/main/foo/ch1.md"
       );
     });
   });

@@ -1,16 +1,14 @@
 const _ = require("lodash");
+const { GitUtils } = require("@dendronhq/common-server");
 const path = require("path");
 const shortcodes = require("./libs/shortcodes");
 const markdown = require("./libs/remark");
-const { buildSearch } = require("./bin/build-search.js");
-const { buildStyles } = require("./bin/build-styles.js");
-const { buildNav } = require("./bin/build-nav.js");
-const { copyAssets } = require("./bin/copy-assets.js");
 const {
   getSiteOutputPath,
   getSiteConfig,
   NOTE_UTILS,
   getSiteUrl,
+  getDendronConfig
 } = require("./libs/utils");
 const pluginSEO = require("@dendronhq/eleventy-plugin-seo");
 
@@ -51,6 +49,15 @@ module.exports = function (eleventyConfig) {
   });
   eleventyConfig.addLiquidFilter("sort", function (array, field) {
     return _.sortBy(array, field);
+  });
+
+  eleventyConfig.addLiquidFilter("gitShowLink", function (note) {
+      const config = getDendronConfig();
+      if (note) {
+        return GitUtils.canShowGitLink({note, config})
+      } else {
+        return false;
+      }
   });
 
   eleventyConfig.addLiquidFilter("where_exp", function (collection, expr) {

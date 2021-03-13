@@ -10,7 +10,7 @@
       "smartStep": true,
       "cwd": "${workspaceFolder:api-server}",
       "env": {
-        "LOG_DST": "../../logs/${fileWorkspaceFolder}.log",
+        "LOG_DST": "stdout",
         "LOG_LEVEL": "info"
       },
       "args": [

@@ -32,7 +32,7 @@
     "compile": "tsc -p tsconfig.build.json",
     "test": "echo nop",
     "coverage": "echo nop",
-    "watch": "echo nop",
+    "watch": "yarn compile --watch",
     "test:watch": "echo nop"
   },
   "dependencies": {

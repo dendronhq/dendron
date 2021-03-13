@@ -27,5 +27,6 @@ export enum ERROR_CODES {
 }
 
 export enum RESERVED_KEYS {
-  GIT_DIR_PATH = "gitDirPath",
+  GIT_NOTE_PATH = "gitNotePath",
+  GIT_NO_LINK = "gitNoLink",
 }

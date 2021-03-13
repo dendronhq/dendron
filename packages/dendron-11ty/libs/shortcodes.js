@@ -6,7 +6,6 @@ const { NoteUtilsV2, VaultUtils } = require("@dendronhq/common-all");
 const { DateTime } = require("luxon");
 const {
   getEngine,
-  getSiteConfig,
   getDendronConfig,
   NOTE_UTILS,
   getNavOutput,
@@ -222,8 +221,10 @@ function toCollection(note, notesDict) {
 function githubUrl(note) {
   const wsRoot = env().wsRoot;
   const config = getDendronConfig();
-  return GitUtils.getGithubEditUrl({note, config, wsRoot})
+  const url = GitUtils.getGithubEditUrl({note, config, wsRoot})
+  return url;
 }
+
 
 module.exports = {
   configFunction: function (eleventyConfig, options = {}) {

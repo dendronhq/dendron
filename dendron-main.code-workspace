@@ -65,7 +65,6 @@
             "profile": true
         },
         "editor.codeActionsOnSave": {
-            "source.organizeImports": true
           },
         "search.exclude": {
             "**/node_modules": true,

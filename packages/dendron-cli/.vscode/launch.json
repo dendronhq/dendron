@@ -10,7 +10,7 @@
       "smartStep": true,
       "cwd": "${workspaceFolder:dendron-cli}",
       "env": {
-        "LOG_DST": "../../logs/${fileWorkspaceFolder}.log",
+        "LOG_DST": "stdout",
         "LOG_LEVEL": "info"
       },
       "args": [

@@ -14,3 +14,4 @@ lerna run watch --parallel
     \ --scope @dendronhq/dendron-next-server
     \ --scope @dendronhq/common-test-utils
     \ --scope @dendronhq/engine-test-utils
+    \ --scope @dendronhq/bootstrap

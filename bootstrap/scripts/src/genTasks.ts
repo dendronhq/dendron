@@ -127,7 +127,7 @@ const genLaunchJSON = (opts: GenConfigOpts) => {
       smartStep: true,
       cwd: "${workspaceFolder:" + pkgName + "}",
       env: {
-        LOG_DST: "../../logs/${fileWorkspaceFolder}.log",
+        LOG_DST: "stdout",
         LOG_LEVEL: "info",
       },
       args: ["--findRelatedTests", "--runInBand", "${relativeFile}", "-u"],

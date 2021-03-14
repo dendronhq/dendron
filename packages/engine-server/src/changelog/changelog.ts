@@ -35,22 +35,6 @@ async function getLastCommit(wsRoot: string) {
   }
 }
 
-// @ts-ignore
-async function getCommitUpTo(wsRoot: string, commit?: string) {
-  const suffix = commit ? [`${commit}..HEAD`] : [];
-  console.log(suffix);
-  try {
-    const { stdout } = await execa(
-      "git",
-      [`log`, `--pretty=format:'%H'`].concat(suffix),
-      { cwd: wsRoot }
-    );
-    return stdout.split("\n").filter((ent) => !_.isEmpty(ent));
-  } catch (error) {
-    throw error;
-  }
-}
-
 function canShowDiff(opts: {
   engine: DEngineClientV2;
   filePath: string;

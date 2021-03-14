@@ -1,4 +1,9 @@
-import { JSONExportPod, JSONImportPod, JSONPublishPod } from "./builtin";
+import {
+  GitPunchCardExportPod,
+  JSONExportPod,
+  JSONImportPod,
+  JSONPublishPod,
+} from "./builtin";
 import { MarkdownImportPod, MarkdownPublishPod } from "./builtin/MarkdownPod";
 import { PodClassEntryV4 } from "./types";
 export * from "./basev3";
@@ -6,7 +11,7 @@ export * from "./builtin";
 export * from "./types";
 export * from "./utils";
 export function getAllExportPods(): PodClassEntryV4[] {
-  return [JSONExportPod];
+  return [JSONExportPod, GitPunchCardExportPod];
 }
 export function getAllPublishPods(): PodClassEntryV4[] {
   return [JSONPublishPod, MarkdownPublishPod];

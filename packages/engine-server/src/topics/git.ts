@@ -33,6 +33,12 @@ export class Git {
     return Git.getRepo(this.opts.localUrl);
   }
 
+  async client(gitArgs: string[]) {
+    const { localUrl: cwd } = this.opts;
+    const { stdout } = await execa("git", gitArgs, { cwd });
+    return stdout;
+  }
+
   async clone(destOverride?: string) {
     const { localUrl, remoteUrl } = this.opts;
     const cmdParts = ["git clone", remoteUrl];
@@ -68,5 +74,20 @@ export class Git {
       shell: true,
       cwd,
     });
+  }
+
+  async getCommitUpTo(commit?: string) {
+    const { localUrl: cwd } = this.opts;
+    const suffix = commit ? [`${commit}..HEAD`] : [];
+    console.log(suffix);
+    const { stdout } = await execa(
+      "git",
+      [`log`, `--pretty=format:'%H'`].concat(suffix),
+      { cwd }
+    );
+    return stdout
+      .split("\n")
+      .filter((ent) => !_.isEmpty(ent))
+      .map((ent) => _.trim(ent));
   }
 }

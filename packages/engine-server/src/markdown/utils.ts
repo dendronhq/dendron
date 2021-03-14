@@ -354,6 +354,7 @@ export class MDUtilsV4 {
     // MD_DENDRON, convert back to itself, no need for transformations
     if (dest !== DendronASTDest.MD_DENDRON) {
       proc = proc.use(dendronPub, {
+        insertTitle: config.useFMTitle,
         ...opts.publishOpts,
         wikiLinkOpts: opts.wikiLinksOpts,
         prettyRefs: usePrettyRefs,

@@ -5,6 +5,7 @@ import { MarkdownImportPod, MarkdownPublishPod } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import path from "path";
 import { runEngineTestV5 } from "../../engine";
+import { checkString } from "../../utils";
 
 describe("markdown publish pod", () => {
   test("basic", async () => {
@@ -23,7 +24,7 @@ describe("markdown publish pod", () => {
           },
         });
         expect(resp).toMatchSnapshot();
-        expect(resp).toEqual("foo body");
+        checkString(resp, "foo body", "# Foo");
       },
       { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
     );

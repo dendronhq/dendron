@@ -12,6 +12,7 @@ import {
   MDUtilsV4,
 } from "@dendronhq/engine-server";
 import { testWithEngine } from "../../../engine";
+import { checkString } from "../../../utils";
 import { checkVFile } from "./utils";
 
 function proc(
@@ -169,7 +170,7 @@ describe("dendronPub", () => {
           ),
         }).process("![[alpha]]");
         expect(resp).toMatchSnapshot();
-        expect(resp.contents as string).toEqual("<p></p><p></p><p></p>");
+        checkVFile(resp, "<p></p><p></p><p></p>");
       },
       {
         preSetupHook: async (opts) => {

@@ -1,3 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`markdown publish pod basic 1`] = `"foo body"`;
+exports[`markdown export pod basic: foo contents 1`] = `
+"# Foo
+
+foo body"
+`;
+
+exports[`markdown publish pod basic 1`] = `
+"# Foo
+
+foo body"
+`;

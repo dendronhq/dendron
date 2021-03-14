@@ -12,17 +12,16 @@ import { runEngineTestV5 } from "../../../engine";
 // import { createEngine } from "./utils";
 
 describe("h1ToTitle", () => {
-  test("basic", async () => {
+  test.only("basic", async () => {
     await runEngineTestV5(
-      async ({ engine }) => {
+      async ({ engine, vaults }) => {
         const proc = MDUtilsV4.procFull({
           dest: DendronASTDest.MD_REGULAR,
           engine,
-          fname: "",
-          vault: {} as any,
+          fname: "foo",
+          vault: vaults[0],
         });
-        // @ts-ignore
-        const notes = await Promise.all(
+        await Promise.all(
           _.values(engine.notes).map(async (note) => {
             const newBody = await proc()
               .use(RemarkUtils.h1ToTitle(note, []))
@@ -31,8 +30,6 @@ describe("h1ToTitle", () => {
             return note;
           })
         );
-        // TODO
-        // expect(notes).toMatchSnapshot();
       },
       {
         expect,

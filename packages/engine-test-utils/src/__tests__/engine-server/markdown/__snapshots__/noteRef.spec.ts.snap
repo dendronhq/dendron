@@ -38,7 +38,9 @@ VFile {
 
 exports[`compilev2 compile "HTML: recursive" 1`] = `
 VFile {
-  "contents": "<div class=\\"portal-container\\">
+  "contents": "# Root
+
+<div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
@@ -116,7 +118,9 @@ Regular wikilink: [foo.two](foo.two.html)
 
 exports[`compilev2 compile "HTML: regular" 1`] = `
 VFile {
-  "contents": "<div class=\\"portal-container\\">
+  "contents": "# Root
+
+<div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
@@ -149,7 +153,9 @@ foo body
 
 exports[`compilev2 compile "HTML: wildcard" 1`] = `
 VFile {
-  "contents": "<div class=\\"portal-container\\">
+  "contents": "# Root
+
+<div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
@@ -292,7 +298,9 @@ VFile {
 
 exports[`compilev2 compile "MD_ENHANCED_PREVIEW: recursive" 1`] = `
 VFile {
-  "contents": "
+  "contents": "# Root
+
+
 <div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
@@ -304,7 +312,9 @@ VFile {
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
 
-<div class=\\"portal-container\\">
+# Root
+
+  <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
   <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.one</span></div>
@@ -353,7 +363,9 @@ Regular wikilink: [foo.two](foo.two.md)
 
 exports[`compilev2 compile "MD_ENHANCED_PREVIEW: regular" 1`] = `
 VFile {
-  "contents": "
+  "contents": "# Root
+
+
 <div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
@@ -364,6 +376,8 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
+
+# Root
 
 foo body
 
@@ -380,7 +394,9 @@ foo body
 
 exports[`compilev2 compile "MD_ENHANCED_PREVIEW: wildcard" 1`] = `
 VFile {
-  "contents": "
+  "contents": "# Root
+
+
 <div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
@@ -391,6 +407,8 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
+
+# Root
 
 journal1
 
@@ -409,6 +427,8 @@ journal1
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
 
+# Root
+
 journal2
 
 </div>    
@@ -426,6 +446,8 @@ journal2
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
 
+# Root
+
 journal3
 
 </div>    
@@ -441,7 +463,9 @@ journal3
 
 exports[`compilev2 compile "MD_REGULAR: recursive" 1`] = `
 VFile {
-  "contents": "<div class=\\"portal-container\\">
+  "contents": "# Root
+
+<div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
@@ -502,7 +526,9 @@ Regular wikilink: [foo.two](foo.two)
 
 exports[`compilev2 compile "MD_REGULAR: regular" 1`] = `
 VFile {
-  "contents": "<div class=\\"portal-container\\">
+  "contents": "# Root
+
+<div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
@@ -528,7 +554,9 @@ foo body
 
 exports[`compilev2 compile "MD_REGULAR: wildcard" 1`] = `
 VFile {
-  "contents": "<div class=\\"portal-container\\">
+  "contents": "# Root
+
+<div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
@@ -672,7 +700,9 @@ VFile {
 
 exports[`noteRefV2 compile "HTML: XVAULT_CASE" 1`] = `
 VFile {
-  "contents": "<div class=\\"portal-container\\">
+  "contents": "# Root
+
+<div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
   <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">two</span></div>
@@ -704,7 +734,9 @@ VFile {
 
 exports[`noteRefV2 compile "HTML: recursive" 1`] = `
 VFile {
-  "contents": "<div class=\\"portal-container\\">
+  "contents": "# Root
+
+<div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
   <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
@@ -769,7 +801,9 @@ Regular wikilink:
 
 exports[`noteRefV2 compile "HTML: regular" 1`] = `
 VFile {
-  "contents": "<div class=\\"portal-container\\">
+  "contents": "# Foo
+
+<div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
   <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
@@ -801,7 +835,9 @@ VFile {
 
 exports[`noteRefV2 compile "HTML: wildcard" 1`] = `
 VFile {
-  "contents": "<div class=\\"portal-container\\">
+  "contents": "# Root
+
+<div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
@@ -909,7 +945,9 @@ VFile {
 
 exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: WITH_ANCHOR" 1`] = `
 VFile {
-  "contents": "# Foo Bar
+  "contents": "# Foo
+
+# Foo Bar
 
 
   <div class=\\"portal-container\\">
@@ -941,7 +979,9 @@ task2
 
 exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: WITH_ANCHOR" 2`] = `
 VFile {
-  "contents": "# Foo Bar
+  "contents": "# Foo
+
+# Foo Bar
 
 
   <div class=\\"portal-container\\">
@@ -973,7 +1013,9 @@ task2
 
 exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: WITH_FM_TITLE": bond 1`] = `
 VFile {
-  "contents": "# Foo Bar
+  "contents": "# Foo
+
+# Foo Bar
 
 
   <div class=\\"portal-container\\">
@@ -1005,7 +1047,9 @@ task2
 
 exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: WITH_NOTE_LINK_TITLE" 1`] = `
 VFile {
-  "contents": "# Foo Bar
+  "contents": "# Foo
+
+# Foo Bar
 
 
   <div class=\\"portal-container\\">
@@ -1037,7 +1081,9 @@ task2
 
 exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: XVAULT_CASE" 1`] = `
 VFile {
-  "contents": "
+  "contents": "# Root
+
+
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
@@ -1065,7 +1111,9 @@ VFile {
 
 exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: recursive" 1`] = `
 VFile {
-  "contents": "
+  "contents": "# Root
+
+
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
@@ -1127,7 +1175,9 @@ Regular wikilink: [foo.two](foo.two.md)
 
 exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: regular" 1`] = `
 VFile {
-  "contents": "
+  "contents": "# Foo
+
+
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
@@ -1155,7 +1205,9 @@ VFile {
 
 exports[`noteRefV2 compile "MD_ENHANCED_PREVIEW: wildcard" 1`] = `
 VFile {
-  "contents": "
+  "contents": "# Root
+
+
 <div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
@@ -1166,6 +1218,8 @@ VFile {
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
+
+# Root
 
 journal1
 
@@ -1184,6 +1238,8 @@ journal1
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
 
+# Root
+
 journal2
 
 </div>    
@@ -1201,6 +1257,8 @@ journal2
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div>        
 
+# Root
+
 journal3
 
 </div>    
@@ -1216,7 +1274,9 @@ journal3
 
 exports[`noteRefV2 compile "MD_REGULAR: WITH_ANCHOR" 1`] = `
 VFile {
-  "contents": "# Foo Bar
+  "contents": "# Foo
+
+# Foo Bar
 
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
@@ -1246,7 +1306,9 @@ task2
 
 exports[`noteRefV2 compile "MD_REGULAR: WITH_ANCHOR" 2`] = `
 VFile {
-  "contents": "# Foo Bar
+  "contents": "# Foo
+
+# Foo Bar
 
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
@@ -1276,7 +1338,9 @@ task2
 
 exports[`noteRefV2 compile "MD_REGULAR: XVAULT_CASE" 1`] = `
 VFile {
-  "contents": "<div class=\\"portal-container\\">
+  "contents": "# Root
+
+<div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
   <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">two</span></div>
@@ -1302,7 +1366,9 @@ VFile {
 
 exports[`noteRefV2 compile "MD_REGULAR: recursive" 1`] = `
 VFile {
-  "contents": "<div class=\\"portal-container\\">
+  "contents": "# Root
+
+<div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
   <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
@@ -1363,7 +1429,9 @@ Regular wikilink: [foo.two](foo.two)
 
 exports[`noteRefV2 compile "MD_REGULAR: regular" 1`] = `
 VFile {
-  "contents": "<div class=\\"portal-container\\">
+  "contents": "# Foo
+
+<div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
   <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
@@ -1389,7 +1457,9 @@ VFile {
 
 exports[`noteRefV2 compile "MD_REGULAR: wildcard" 1`] = `
 VFile {
-  "contents": "<div class=\\"portal-container\\">
+  "contents": "# Root
+
+<div class=\\"portal-container\\">
 <div class=\\"portal-head\\">
 <div class=\\"portal-backlink\\" >
 <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>

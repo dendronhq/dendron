@@ -4,8 +4,14 @@ import {
   genUUID,
   NotePropsV2,
   NoteUtilsV2,
+  VaultUtils,
 } from "@dendronhq/common-all";
-import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
+import {
+  cleanFileName,
+  dot2Slash,
+  readMD,
+  vault2Path,
+} from "@dendronhq/common-server";
 import {
   DendronASTDest,
   MDUtilsV4,
@@ -253,20 +259,36 @@ export class MarkdownPublishPod extends PublishPod {
   }
 }
 
+/**
+ *
+ */
 export class MarkdownExportPod extends ExportPod {
   static id: string = ID;
   static description: string = "export notes as markdown";
 
   async plant(opts: ExportPodPlantOpts) {
+    const ctx = "MarkdownExportPod:plant";
     const { dest, notes } = opts;
     // verify dest exist
     const podDstPath = dest.fsPath;
     fs.ensureDirSync(path.dirname(podDstPath));
     const mdPublishPod = new MarkdownPublishPod();
 
-    notes.map((note) => {
-      const body = mdPublishPod.plant({ ...opts, note });
-    });
+    this.L.info({ ctx, msg: "pre:iterate_notes" });
+    await Promise.all(
+      notes.map(async (note) => {
+        const body = await mdPublishPod.plant({ ...opts, note });
+        const hpath = dot2Slash(note.fname);
+        const vname = VaultUtils.getName(note.vault);
+        let fpath = path.join(podDstPath, vname, hpath);
+        fpath = _.isEmpty(note.children)
+          ? fpath + ".md"
+          : path.join(fpath, "index.md");
+        this.L.info({ ctx, fpath, msg: "pre:write" });
+        await fs.ensureDir(path.dirname(fpath));
+        return fs.writeFile(fpath, body);
+      })
+    );
     return { notes };
   }
 }

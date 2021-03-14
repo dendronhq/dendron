@@ -1,7 +1,11 @@
 import { NoteUtilsV2, VaultUtils } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import { ENGINE_HOOKS, FileTestUtils } from "@dendronhq/common-test-utils";
-import { MarkdownImportPod, MarkdownPublishPod } from "@dendronhq/pods-core";
+import {
+  MarkdownExportPod,
+  MarkdownImportPod,
+  MarkdownPublishPod,
+} from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import path from "path";
 import { runEngineTestV5 } from "../../engine";
@@ -193,6 +197,57 @@ describe("markdown import pod", () => {
           ]);
         },
       }
+    );
+  });
+});
+
+describe("markdown export pod", () => {
+  let exportDest: string;
+
+  beforeAll(() => {
+    exportDest = tmpDir().name;
+  });
+
+  test("basic", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new MarkdownExportPod();
+        engine.config.useFMTitle = true;
+        await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            dest: exportDest,
+          },
+        });
+
+        // check folder contents
+        let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(exportDest, [
+          "vault1",
+          "vault2",
+        ]);
+        expect(expectedFiles).toEqual(actualFiles);
+        [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
+          path.join(exportDest, "vault1"),
+          ["bar.md", "foo", "root"]
+        );
+        expect(expectedFiles).toEqual(actualFiles);
+        [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
+          path.join(exportDest, "vault1", "foo"),
+          ["index.md", "ch1.md"]
+        );
+        expect(expectedFiles).toEqual(actualFiles);
+
+        // check contents
+        const foo = fs.readFileSync(
+          path.join(exportDest, "vault1", "foo", "index.md"),
+          { encoding: "utf8" }
+        );
+        expect(foo).toMatchSnapshot("foo contents");
+        await checkString(foo, "foo body");
+      },
+      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
     );
   });
 });

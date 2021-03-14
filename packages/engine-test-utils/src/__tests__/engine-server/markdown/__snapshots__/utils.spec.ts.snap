@@ -2,7 +2,8 @@
 
 exports[`MDUtils.proc "HTML: NOTE_REF_RECURSIVE_WITH_REHYPE" 1`] = `
 VFile {
-  "contents": "<p></p><p></p><div class=\\"portal-container\\">
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+<p></p><p></p><div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\">
   <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
@@ -57,7 +58,8 @@ Regular wikilink: <p></p>
 
 exports[`MDUtils.proc "HTML: NOTE_REF_WITH_REHYPE": respRehype 1`] = `
 VFile {
-  "contents": "<p></p><p></p><div class=\\"portal-container\\">
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+<p></p><p></p><div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\">
   <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
@@ -92,6 +94,8 @@ updated: '1'
 created: '1'
 ---
 
+# Foo
+
 Here is a footnote reference,[^1]
 
 [^1]: Here is the footnote.
@@ -112,7 +116,8 @@ Here is a footnote reference,[^1]
 
 exports[`MDUtils.proc "HTML: WITH_TITLE_FOR_LINK" 1`] = `
 VFile {
-  "contents": "<p><a href=\\"foo.ch1.html\\">Ch1</a></p>
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
+<p><a href=\\"foo.ch1.html\\">Ch1</a></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
 <ol>
@@ -177,6 +182,8 @@ updated: '1'
 created: '1'
 ---
 
+# Foo
+
 Here is a footnote reference,[^1]
 
 [^1]: Here is the footnote.
@@ -199,6 +206,8 @@ updated: '1'
 created: '1'
 ---
 
+# Foo
+
 [Ch1](foo.ch1.md)
 
 ",
@@ -218,6 +227,8 @@ desc: ''
 updated: '1'
 created: '1'
 ---
+
+# Foo
 
 Here is a footnote reference,[^1]
 
@@ -241,6 +252,8 @@ updated: '1'
 created: '1'
 ---
 
+# Foo
+
 [Ch1](foo.ch1)
 
 ",
@@ -260,6 +273,8 @@ desc: ''
 updated: '1'
 created: '1'
 ---
+
+# Foo
 
 [Bar](bar)
 

@@ -20,7 +20,8 @@ VFile {
 
 exports[`backlinks basic 1`] = `
 VFile {
-  "contents": "<hr>
+  "contents": "<h1 id=\\"beta\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#beta\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Beta</h1>
+<hr>
 <h2 id=\\"backlinks\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#backlinks\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Backlinks</h2>
 <ul>
 <li><a href=\\"alpha.html\\">Alpha (vault1)</a></li>
@@ -35,7 +36,8 @@ VFile {
 
 exports[`backlinks multiple links 1`] = `
 VFile {
-  "contents": "<hr>
+  "contents": "<h1 id=\\"one\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#one\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>One</h1>
+<hr>
 <h2 id=\\"backlinks\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#backlinks\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Backlinks</h2>
 <ul>
 <li><a href=\\"three.html\\">Three (vault1)</a></li>

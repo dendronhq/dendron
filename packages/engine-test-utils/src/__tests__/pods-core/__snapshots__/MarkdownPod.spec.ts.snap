@@ -11,3 +11,11 @@ exports[`markdown publish pod basic 1`] = `
 
 foo body"
 `;
+
+exports[`markdown publish pod ref 1`] = `
+"# Simple Note Ref
+
+# Header
+
+body text"
+`;

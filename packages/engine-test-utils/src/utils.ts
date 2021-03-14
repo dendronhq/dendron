@@ -8,3 +8,12 @@ export async function checkString(body: string, ...match: string[]) {
     })
   ).toBeTruthy();
 }
+
+export async function checkNotInString(body: string, ...nomatch: string[]) {
+  expect(
+    await AssertUtils.assertInString({
+      body,
+      nomatch,
+    })
+  ).toBeTruthy();
+}

@@ -9,7 +9,7 @@ import {
 import fs from "fs-extra";
 import path from "path";
 import { runEngineTestV5 } from "../../engine";
-import { checkString } from "../../utils";
+import { checkNotInString, checkString } from "../../utils";
 
 describe("markdown publish pod", () => {
   test("basic", async () => {
@@ -28,9 +28,33 @@ describe("markdown publish pod", () => {
           },
         });
         expect(resp).toMatchSnapshot();
-        checkString(resp, "foo body", "# Foo");
+        await checkString(resp, "foo body", "# Foo");
       },
       { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+    );
+  });
+
+  test("ref", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new MarkdownPublishPod();
+        const vaultName = VaultUtils.getName(vaults[0]);
+        debugger;
+        const resp = await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            fname: "simple-note-ref",
+            vaultName,
+            dest: "stdout",
+          },
+        });
+        expect(resp).toMatchSnapshot();
+        await checkString(resp, "# Header", "body text");
+        await checkNotInString(resp, "portal");
+      },
+      { expect, preSetupHook: ENGINE_HOOKS.setupRefs }
     );
   });
 });
@@ -209,6 +233,48 @@ describe("markdown export pod", () => {
   });
 
   test("basic", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new MarkdownExportPod();
+        engine.config.useFMTitle = true;
+        await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            dest: exportDest,
+          },
+        });
+
+        // check folder contents
+        let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(exportDest, [
+          "vault1",
+          "vault2",
+        ]);
+        expect(expectedFiles).toEqual(actualFiles);
+        [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
+          path.join(exportDest, "vault1"),
+          ["bar.md", "foo.ch1.md", "foo.md", "root.md"]
+        );
+        expect(expectedFiles).toEqual(actualFiles);
+        // [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(
+        //   path.join(exportDest, "vault1", "foo"),
+        //   ["index.md", "ch1.md"]
+        // );
+        // expect(expectedFiles).toEqual(actualFiles);
+
+        // check contents
+        const foo = fs.readFileSync(path.join(exportDest, "vault1", "foo.md"), {
+          encoding: "utf8",
+        });
+        expect(foo).toMatchSnapshot("foo contents");
+        await checkString(foo, "foo body");
+      },
+      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+    );
+  });
+
+  test.skip("using folders", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {
         const pod = new MarkdownExportPod();

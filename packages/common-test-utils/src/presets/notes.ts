@@ -113,6 +113,10 @@ export const NOTE_PRESETS_V4 = {
     fname: "simple-note-ref",
     body: "![[simple-note-ref.one]]",
   }),
+  NOTE_WITH_NOTE_REF_SIMPLE_TARGET: CreateNoteFactory({
+    fname: "simple-note-ref.one",
+    body: ["# Header ", "body text"].join("\n"),
+  }),
   NOTE_WITH_BLOCK_REF_SIMPLE: CreateNoteFactory({
     fname: "simple-block-ref",
     body: "![[simple-block-ref.one#intro]]",

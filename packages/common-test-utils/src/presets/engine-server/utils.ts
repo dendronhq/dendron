@@ -321,6 +321,10 @@ export const setupRefs: PreSetupHookFunction = async ({ vaults, wsRoot }) => {
     vault,
     wsRoot,
   });
+  await NOTE_PRESETS_V4.NOTE_WITH_NOTE_REF_SIMPLE_TARGET.create({
+    vault,
+    wsRoot,
+  });
   // create note with block reference
   await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_REF_SIMPLE.create({
     vault,

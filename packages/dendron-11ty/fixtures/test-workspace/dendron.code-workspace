@@ -21,7 +21,8 @@
         "editor.suggest.snippetsPreventQuickSuggestions": false,
         "editor.suggest.showSnippets": true,
         "editor.tabCompletion": "on",
-        "dendron.logLevel": "debug"
+        "dendron.logLevel": "debug",
+        "gitdoc.enabled": false
     },
     "extensions": {
         "recommendations": [

@@ -248,11 +248,14 @@ export class MarkdownPublishPod extends PublishPod {
     const { engine, note } = opts;
     const remark = MDUtilsV4.procFull({
       dest: DendronASTDest.MD_REGULAR,
+      config: {
+        ...engine.config,
+        usePrettyRefs: false,
+      },
       engine,
       fname: note.fname,
       vault: note.vault,
       shouldApplyPublishRules: false,
-      usePrettyRefs: false,
     });
     const out = remark.processSync(note.body).toString();
     return _.trim(out);
@@ -278,12 +281,13 @@ export class MarkdownExportPod extends ExportPod {
     await Promise.all(
       notes.map(async (note) => {
         const body = await mdPublishPod.plant({ ...opts, note });
-        const hpath = dot2Slash(note.fname);
+        const hpath = note.fname + ".md";
+        // const hpath = dot2Slash(note.fname);
         const vname = VaultUtils.getName(note.vault);
         let fpath = path.join(podDstPath, vname, hpath);
-        fpath = _.isEmpty(note.children)
-          ? fpath + ".md"
-          : path.join(fpath, "index.md");
+        // fpath = _.isEmpty(note.children)
+        //   ? fpath + ".md"
+        //   : path.join(fpath, "index.md");
         this.L.info({ ctx, fpath, msg: "pre:write" });
         await fs.ensureDir(path.dirname(fpath));
         return fs.writeFile(fpath, body);

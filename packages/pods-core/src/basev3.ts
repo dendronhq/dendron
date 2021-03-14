@@ -143,11 +143,6 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
         type: "boolean",
       },
       {
-        key: "ignore",
-        description: "whether to ignore a given file",
-        type: "boolean",
-      },
-      {
         key: "frontmatter",
         description: "frontmatter to add to each note",
         type: "object",
@@ -213,10 +208,6 @@ export type ExportPodConfig = {
    * Where to import from
    */
   dest: string;
-  /**
-   * Name of vault
-   */
-  vaultNames: string[];
   includeBody?: boolean;
   includeStubs?: boolean;
   ignore?: string[];
@@ -248,18 +239,9 @@ export abstract class ExportPod<
         required: true,
       },
       {
-        key: "vaultNames",
-        description: "name of vault to export",
-        type: "string",
-      },
-      {
-        key: "ignore",
-        description: "files to ignore during export",
-        type: "string",
-      },
-      {
         key: "includeBody",
         description: "should body be included",
+        default: true,
         type: "boolean",
       },
       {
@@ -274,15 +256,12 @@ export abstract class ExportPod<
   }
 
   validate(config: Partial<T>) {
-    const { dest, vaultNames } = config;
+    const { dest } = config;
     const configJSON = JSON.stringify(config);
     if (_.isUndefined(dest)) {
       throw new DendronError({
         msg: `no dest specified. config: ${configJSON}`,
       });
-    }
-    if (_.isUndefined(vaultNames)) {
-      throw new DendronError({ msg: "no vaultName specified" });
     }
   }
 
@@ -298,11 +277,11 @@ export abstract class ExportPod<
     config: ExportPodConfig;
     notes: NotePropsV2[];
   }) {
-    const hideBody = config.includeBody ? false : true;
+    const { includeBody } = _.defaults(config, { includeBody: true });
     if (!config.includeStubs) {
       notes = _.reject(notes, { stub: true });
     }
-    if (hideBody) {
+    if (!includeBody) {
       notes = notes.map((ent) => ({ ...ent, body: "" }));
     }
     return notes;
@@ -311,15 +290,9 @@ export abstract class ExportPod<
   async execute(opts: ExportPodExecuteOpts<T>) {
     const { config, engine } = opts;
     this.validate(config);
-    const { dest, vaultNames } = config;
+    const { dest } = config;
 
     // validate config
-    const vaults = vaultNames.map((vaultName) =>
-      VaultUtils.getVaultByName({
-        vaults: engine.vaultsv3,
-        vname: vaultName,
-      })
-    );
     const destURL = URI.file(resolvePath(dest, engine.wsRoot));
 
     // parse notes into NoteProps
@@ -328,7 +301,7 @@ export abstract class ExportPod<
       notes: _.values(engine.notes),
     });
 
-    return await this.plant({ ...opts, dest: destURL, vaults, notes });
+    return await this.plant({ ...opts, dest: destURL, notes });
   }
   abstract plant(
     opts: ExportPodPlantOpts<T>

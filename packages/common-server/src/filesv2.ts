@@ -254,4 +254,11 @@ export function writeJSONWithComments(fpath: string, data: any) {
   return fs.writeFileSync(fpath, payload);
 }
 
+/**
+ * Turn . delimited file to / separated
+ */
+export function dot2Slash(fname: string) {
+  return fname.replace(/\./g, "/");
+}
+
 export { tmp, DirResult };

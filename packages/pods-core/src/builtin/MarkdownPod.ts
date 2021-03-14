@@ -17,6 +17,8 @@ import _ from "lodash";
 import path from "path";
 import through2 from "through2";
 import {
+  ExportPod,
+  ExportPodPlantOpts,
   ImportPod,
   ImportPodConfig,
   ImportPodPlantOpts,
@@ -248,5 +250,23 @@ export class MarkdownPublishPod extends PublishPod {
     });
     const out = remark.processSync(note.body).toString();
     return _.trim(out);
+  }
+}
+
+export class MarkdownExportPod extends ExportPod {
+  static id: string = ID;
+  static description: string = "export notes as markdown";
+
+  async plant(opts: ExportPodPlantOpts) {
+    const { dest, notes } = opts;
+    // verify dest exist
+    const podDstPath = dest.fsPath;
+    fs.ensureDirSync(path.dirname(podDstPath));
+    const mdPublishPod = new MarkdownPublishPod();
+
+    notes.map((note) => {
+      const body = mdPublishPod.plant({ ...opts, note });
+    });
+    return { notes };
   }
 }

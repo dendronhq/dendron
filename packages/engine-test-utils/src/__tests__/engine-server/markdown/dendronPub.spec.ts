@@ -12,7 +12,6 @@ import {
   MDUtilsV4,
 } from "@dendronhq/engine-server";
 import { testWithEngine } from "../../../engine";
-import { checkString } from "../../../utils";
 import { checkVFile } from "./utils";
 
 function proc(

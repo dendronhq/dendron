@@ -6,12 +6,7 @@ import {
   NoteUtilsV2,
   VaultUtils,
 } from "@dendronhq/common-all";
-import {
-  cleanFileName,
-  dot2Slash,
-  readMD,
-  vault2Path,
-} from "@dendronhq/common-server";
+import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
 import {
   DendronASTDest,
   MDUtilsV4,

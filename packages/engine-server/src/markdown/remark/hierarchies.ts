@@ -44,7 +44,7 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
       return;
     }
     const children = HierarchyUtils.getChildren({
-      skipLevels: note.custom.skipLevels || 0,
+      skipLevels: note.custom?.skipLevels || 0,
       note,
       notes: engine.notes,
     })

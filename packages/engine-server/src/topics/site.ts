@@ -434,7 +434,7 @@ export class SiteUtils {
         if (domainNote) {
           return;
         }
-        const vault = VaultUtils.getVaultByName({
+        const vault = VaultUtils.getVaultByNameOrThrow({
           vname,
           vaults: engine.vaultsv3,
         });

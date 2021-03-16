@@ -109,6 +109,9 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
               vaults: engine.vaultsv3,
               vname: data.vaultName,
             });
+            if (_.isUndefined(vaultByName)) {
+              return `ERROR: ${vaultByName} is not a vault in this workspace`;
+            }
             const cpath = vault2Path({
               wsRoot: engine.wsRoot,
               vault: MDUtilsV4.getVault(proc),

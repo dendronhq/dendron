@@ -121,6 +121,7 @@ export class ParserUtilsV2 {
             start: m.position?.start.offset,
             end: m.position?.end.offset,
           },
+          // TODO: error if vault not found
           to: {
             fname: m.value,
             anchorHeader: m.data.anchorHeader,

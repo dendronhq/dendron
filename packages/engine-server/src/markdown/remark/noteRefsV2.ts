@@ -153,7 +153,7 @@ function convertNoteRef(
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
   let { dest, vault, config } = MDUtilsV4.getDendronData(proc);
   if (link.data.vaultName) {
-    vault = VaultUtils.getVaultByName({
+    vault = VaultUtils.getVaultByNameOrThrow({
       vaults: engine.vaultsv3,
       vname: link.data.vaultName,
     })!;
@@ -260,7 +260,7 @@ export function convertNoteRefASTV2(
     shouldApplyPublishRules,
   } = MDUtilsV4.getDendronData(proc);
   if (link.data.vaultName) {
-    vault = VaultUtils.getVaultByName({
+    vault = VaultUtils.getVaultByNameOrThrow({
       vaults: engine.vaultsv3,
       vname: link.data.vaultName,
     })!;

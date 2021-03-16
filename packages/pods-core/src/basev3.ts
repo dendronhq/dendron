@@ -76,7 +76,7 @@ export abstract class PublishPod<T extends PublishPodConfig = any> {
       throw new DendronError({ msg: "no fname" });
     }
 
-    const vault = VaultUtils.getVaultByName({
+    const vault = VaultUtils.getVaultByNameOrThrow({
       vaults: engine.vaultsv3,
       vname: vaultName,
     });
@@ -191,7 +191,7 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
     });
 
     // validate config
-    const vault = VaultUtils.getVaultByName({
+    const vault = VaultUtils.getVaultByNameOrThrow({
       vaults: engine.vaultsv3,
       vname: vaultName,
     });

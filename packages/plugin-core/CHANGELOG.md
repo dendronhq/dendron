@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.33.1](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.32.2...@dendronhq/plugin-core@0.33.1) (2021-03-17)
+
+**Note:** Version bump only for package @dendronhq/plugin-core
+
 # [0.33.0](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.32.2...@dendronhq/plugin-core@0.33.0) (2021-03-15)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

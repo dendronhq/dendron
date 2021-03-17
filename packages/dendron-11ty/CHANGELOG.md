@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.33.1](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-11ty@1.32.2...@dendronhq/dendron-11ty@1.33.1) (2021-03-17)
+
+### Bug Fixes
+
+- disable pretty ref when exporting markdown ([c0791da](https://github.com/dendronhq/dendron/commit/c0791da911b665ca66f1b3829784cf8a95ef9952))
+- link wrap in samll viewport [#535](https://github.com/dendronhq/dendron/issues/535) ([b8366e8](https://github.com/dendronhq/dendron/commit/b8366e89733181971584f92280b9e5e238f27351))
+
 # [1.33.0](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-11ty@1.32.2...@dendronhq/dendron-11ty@1.33.0) (2021-03-15)
 
 ### Bug Fixes

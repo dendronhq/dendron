@@ -1,6 +1,6 @@
 import {
   DNodePropsQuickInputV2,
-  DNodePropsV2,
+  DNodeProps,
   DNodeUtils,
   DVault,
   NoteProps,
@@ -48,7 +48,7 @@ export function createMoreResults(): DNodePropsQuickInputV2 {
   };
 }
 
-export function node2Uri(node: DNodePropsV2): Uri {
+export function node2Uri(node: DNodeProps): Uri {
   const ext = node.type === "note" ? ".md" : ".yml";
   const nodePath = node.fname + ext;
   const wsRoot = DendronWorkspace.wsRoot();

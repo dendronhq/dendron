@@ -65,8 +65,8 @@ export class NoteTestUtilsV4 {
      * Make sure snapshots stay consistent
      */
     const defaultOpts = {
-      created: "1",
-      updated: "1",
+      created: 1,
+      updated: 1,
       id: genRandomId ? genUUID() : fname,
     };
 

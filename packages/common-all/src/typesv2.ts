@@ -124,15 +124,15 @@ export type SchemaDataV2 = SchemaData;
 /**
  * Props are the official interface for a node
  */
-export type DNodePropsV2<T = any, TCustom = any> = {
+export type DNodeProps<T = any, TCustom = any> = {
   id: string;
   title: string;
   desc: string;
   links: DLink[];
   fname: string;
   type: DNodeTypeV2;
-  updated: string;
-  created: string;
+  updated: number;
+  created: number;
   stub?: boolean;
   schemaStub?: boolean;
   parent: DNodePointerV2 | null;
@@ -148,12 +148,12 @@ export type DNodePropsV2<T = any, TCustom = any> = {
  * Opts are arguments used when creating a node
  */
 export type DNodeOptsV2<T = any> = Partial<
-  Omit<DNodePropsV2<T>, "fname|type|vault">
+  Omit<DNodeProps<T>, "fname|type|vault">
 > & { fname: string; type: DNodeTypeV2; vault: DVault };
 
 export type SchemaRawV2 = Pick<SchemaProps, "id"> &
   Partial<SchemaDataV2> & { title?: string; desc?: string } & Partial<
-    Pick<DNodePropsV2, "children">
+    Pick<DNodeProps, "children">
   >;
 
 export type SchemaOptsV2 = Omit<DNodeOptsV2<SchemaData>, "type" | "id"> & {
@@ -161,17 +161,17 @@ export type SchemaOptsV2 = Omit<DNodeOptsV2<SchemaData>, "type" | "id"> & {
 };
 export type NoteOptsV2 = Omit<DNodeOptsV2, "type">;
 
-export type DNodePropsQuickInputV2<T = any> = DNodePropsV2<T> & {
+export type DNodePropsQuickInputV2<T = any> = DNodeProps<T> & {
   label: string;
   detail?: string;
   alwaysShow?: boolean;
 };
 
-export type SchemaProps = DNodePropsV2<SchemaData>;
-export type NoteProps = DNodePropsV2<any, DendronSiteFM & any>;
+export type SchemaProps = DNodeProps<SchemaData>;
+export type NoteProps = DNodeProps<any, DendronSiteFM & any>;
 
 export type DNodePropsDictV2 = {
-  [key: string]: DNodePropsV2;
+  [key: string]: DNodeProps;
 };
 
 export type NotePropsDictV2 = {
@@ -342,7 +342,7 @@ export type EngineInfoResp = {
 // --- KLUDGE END
 
 export type EngineDeleteNoteResp = Required<RespV2<EngineDeleteNotePayload>>;
-export type EngineQueryNoteResp = Required<RespV2<DNodePropsV2[]>>;
+export type EngineQueryNoteResp = Required<RespV2<DNodeProps[]>>;
 export type NoteQueryResp = Required<RespV2<NoteProps[]>>;
 export type SchemaQueryResp = Required<RespV2<SchemaModulePropsV2[]>>;
 export type StoreDeleteNoteResp = EngineDeleteNotePayload;

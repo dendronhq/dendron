@@ -81,7 +81,7 @@ export class WorkspaceWatcher {
       const startPos = ev.document.positionAt(match.index);
       const endPos = ev.document.positionAt(match.index + match[0].length);
       const p = new Promise(async (resolve) => {
-        note.updated = now.toString();
+        note.updated = now;
         await eclient.updateNote(note);
         resolve([
           TextEdit.replace(new Range(startPos, endPos), `updated: ${now}`),

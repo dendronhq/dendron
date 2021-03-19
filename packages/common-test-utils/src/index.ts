@@ -111,15 +111,15 @@ export class EngineTestUtilsV4 {
         },
         preSetupHook: async ({ vpath, vault, wsRoot }) => {
           const rootModule = SchemaUtils.createRootModule({
-            created: "1",
-            updated: "1",
+            created: 1,
+            updated: 1,
             vault,
           });
           await schemaModuleOpts2File(rootModule, vpath, "root");
 
           const rootNote = await NoteUtils.createRoot({
-            created: "1",
-            updated: "1",
+            created: 1,
+            updated: 1,
             vault,
           });
           await note2File({ note: rootNote, vault, wsRoot });
@@ -258,8 +258,8 @@ export class NodeTestUtilsV2 {
     const foo = NoteUtils.create({
       fname: `${rootName}`,
       id: `${rootName}`,
-      created: "1",
-      updated: "1",
+      created: 1,
+      updated: 1,
       children: ["ch1"],
       ...props,
       vault,
@@ -267,8 +267,8 @@ export class NodeTestUtilsV2 {
     const ch1 = NoteUtils.create({
       fname: `${rootName}.ch1`,
       id: `${rootName}.ch1`,
-      created: "1",
-      updated: "1",
+      created: 1,
+      updated: 1,
       vault,
       ...props,
     });
@@ -295,8 +295,8 @@ export class NodeTestUtilsV2 {
       noteProps: [] as NoteOptsV2[],
     });
     const defaultOpts = {
-      created: "1",
-      updated: "1",
+      created: 1,
+      updated: 1,
     };
     const n = cleanOpts.noteProps;
     const body = cleanOpts.withBody ? n.fname + " body" : "";
@@ -321,8 +321,8 @@ export class NodeTestUtilsV2 {
     });
     const vault = { fsPath: cleanOpts.vaultPath };
     const defaultOpts = {
-      created: "1",
-      updated: "1",
+      created: 1,
+      updated: 1,
     };
     const rootNote = await NoteUtils.createRoot({
       ...defaultOpts,
@@ -382,8 +382,8 @@ export class NodeTestUtilsV2 {
     const { vaultPath, schemaMO } = cleanOpts;
     const vault = { fsPath: vaultPath };
     const rootModule = SchemaUtils.createRootModule({
-      created: "1",
-      updated: "1",
+      created: 1,
+      updated: 1,
       vault,
     });
     await schemaModuleOpts2File(rootModule, vaultPath, "root");
@@ -408,8 +408,8 @@ export class NodeTestUtilsV2 {
       fname: `${rootName}`,
       id: `${rootName}`,
       parent: "root",
-      created: "1",
-      updated: "1",
+      created: 1,
+      updated: 1,
       children: ["ch1"],
       vault,
       ...rootOpts,
@@ -418,8 +418,8 @@ export class NodeTestUtilsV2 {
       fname: `${rootName}`,
       vault,
       id: "ch1",
-      created: "1",
-      updated: "1",
+      created: 1,
+      updated: 1,
     });
     DNodeUtils.addChild(schema, ch1);
     const schemaModuleProps: [SchemaModuleOptsV2, string][] = [

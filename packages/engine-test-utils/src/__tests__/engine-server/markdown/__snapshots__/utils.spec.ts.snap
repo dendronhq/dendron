@@ -90,8 +90,8 @@ VFile {
 id: foo
 title: Foo
 desc: ''
-updated: '1'
-created: '1'
+updated: 1
+created: 1
 ---
 
 # Foo
@@ -136,8 +136,8 @@ VFile {
 id: foo
 title: Foo
 desc: ''
-updated: '1'
-created: '1'
+updated: 1
+created: 1
 ---
 
 Here is a footnote reference,[^1]
@@ -158,8 +158,8 @@ VFile {
 id: foo
 title: Foo
 desc: ''
-updated: '1'
-created: '1'
+updated: 1
+created: 1
 ---
 
 [[foo.ch1]]
@@ -178,8 +178,8 @@ VFile {
 id: foo
 title: Foo
 desc: ''
-updated: '1'
-created: '1'
+updated: 1
+created: 1
 ---
 
 # Foo
@@ -202,8 +202,8 @@ VFile {
 id: foo
 title: Foo
 desc: ''
-updated: '1'
-created: '1'
+updated: 1
+created: 1
 ---
 
 # Foo
@@ -224,8 +224,8 @@ VFile {
 id: foo
 title: Foo
 desc: ''
-updated: '1'
-created: '1'
+updated: 1
+created: 1
 ---
 
 # Foo
@@ -248,8 +248,8 @@ VFile {
 id: foo
 title: Foo
 desc: ''
-updated: '1'
-created: '1'
+updated: 1
+created: 1
 ---
 
 # Foo
@@ -270,8 +270,8 @@ VFile {
 id: foo
 title: Foo
 desc: ''
-updated: '1'
-created: '1'
+updated: 1
+created: 1
 ---
 
 # Foo

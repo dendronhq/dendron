@@ -1,8 +1,5 @@
-const {
-  MDUtilsV4,
-  renderFromNoteProps,
-} = require("@dendronhq/engine-server");
-const { NoteUtilsV2, VaultUtils } = require("@dendronhq/common-all");
+const { MDUtilsV4, renderFromNoteProps } = require("@dendronhq/engine-server");
+const { NoteUtils } = require("@dendronhq/common-all");
 const { DateTime } = require("luxon");
 const {
   getEngine,
@@ -52,11 +49,11 @@ async function markdownfy(contents) {
 
 function getClosetNavVisibleParent(opts) {
   const { fname, notes, vault, noteIndex, wsRoot } = opts;
-  const maybeNode = NoteUtilsV2.getNoteByFnameV5({
+  const maybeNode = NoteUtils.getNoteByFnameV5({
     fname,
     notes,
     vault,
-    wsRoot
+    wsRoot,
   });
   if (!maybeNode) {
     //const msg = `no node found for ${fname}, ${JSON.stringify(vault)}`;
@@ -118,7 +115,7 @@ async function toMarkdown2(contents, vault, fname) {
     vault,
     notes,
     noteIndex,
-    wsRoot
+    wsRoot,
   });
   const proc = MDUtilsV4.procHTML({
     engine,
@@ -221,10 +218,9 @@ function toCollection(note, notesDict) {
 function githubUrl(note) {
   const wsRoot = env().wsRoot;
   const config = getDendronConfig();
-  const url = GitUtils.getGithubEditUrl({note, config, wsRoot})
+  const url = GitUtils.getGithubEditUrl({ note, config, wsRoot });
   return url;
 }
-
 
 module.exports = {
   configFunction: function (eleventyConfig, options = {}) {

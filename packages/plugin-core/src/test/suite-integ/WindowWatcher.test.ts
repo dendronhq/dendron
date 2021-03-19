@@ -1,5 +1,4 @@
-import { NoteUtils } from "@dendronhq/common-all";
-import { note2File } from "@dendronhq/common-server";
+import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
@@ -22,15 +21,12 @@ suite("WindowWatcher", function () {
         ctx,
         postSetupHook: async ({ vaults, wsRoot }) => {
           const vault = vaults[0];
-          const bar = NoteUtils.create({
-            fname: `bar`,
-            id: `bar`,
+          await NoteTestUtilsV4.createNote({
+            fname: "bar",
             body: "bar body",
-            updated: "1",
-            created: "1",
             vault,
+            wsRoot,
           });
-          await note2File({ note: bar, vault, wsRoot });
         },
         onInit: async ({ vault, wsRoot }) => {
           const vaultPath = vault.fsPath;

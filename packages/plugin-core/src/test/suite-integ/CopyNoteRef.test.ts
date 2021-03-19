@@ -1,11 +1,10 @@
-import { DVault, NoteUtils } from "@dendronhq/common-all";
+import { DVault } from "@dendronhq/common-all";
+import { DirResult, tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
-  DirResult,
-  note2File,
-  tmpDir,
-  vault2Path,
-} from "@dendronhq/common-server";
-import { ENGINE_HOOKS, NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
+  ENGINE_HOOKS,
+  NodeTestPresetsV2,
+  NoteTestUtilsV4,
+} from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import path from "path";
 import * as vscode from "vscode";
@@ -81,15 +80,15 @@ suite("CopyNoteRef", function () {
         vault = { fsPath: vaultDir };
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         const rootName = "bar";
-        const note = NoteUtils.create({
+        await NoteTestUtilsV4.createNote({
           fname: `${rootName}`,
-          id: `${rootName}`,
-          created: "1",
-          updated: "1",
           body: "## Foo\nfoo text\n## Header\n Header text",
           vault,
+          props: {
+            id: `${rootName}`,
+          },
+          wsRoot: "FAKE_ROOT",
         });
-        await note2File({ note, vault, wsRoot: "FAKE_ROOT" });
       },
     });
   });
@@ -112,15 +111,15 @@ suite("CopyNoteRef", function () {
         vault = { fsPath: vaultDir };
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         const rootName = "bar";
-        const note = NoteUtils.create({
+        await NoteTestUtilsV4.createNote({
           fname: `${rootName}`,
-          id: `${rootName}`,
-          created: "1",
-          updated: "1",
           body: "## Foo\nfoo text\n## Header\n Header text",
           vault,
+          props: {
+            id: `${rootName}`,
+          },
+          wsRoot: "FAKE_ROOT",
         });
-        await note2File({ note, vault, wsRoot: "FAKE_ROOT" });
       },
     });
   });
@@ -143,15 +142,15 @@ suite("CopyNoteRef", function () {
         vault = { fsPath: vaultDir };
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         const rootName = "bar";
-        const note = NoteUtils.create({
+        await NoteTestUtilsV4.createNote({
           fname: `${rootName}`,
-          id: `${rootName}`,
-          created: "1",
-          updated: "1",
           body: "## Foo\nfoo text\n",
           vault,
+          props: {
+            id: `${rootName}`,
+          },
+          wsRoot: "FAKE_ROOT",
         });
-        await note2File({ note, vault, wsRoot: "FAKE_ROOT" });
       },
     });
   });

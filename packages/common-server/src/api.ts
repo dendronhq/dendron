@@ -4,7 +4,7 @@ import {
   DendronError,
   DEngineDeleteSchemaPayloadV2,
   DEngineQuery,
-  DNodePropsV2,
+  DNodeProps,
   DVault,
   EngineDeleteNotePayload,
   EngineDeleteOptsV2,
@@ -136,7 +136,7 @@ export type EngineUpdateNoteRequest = { ws: string } & {
   opts?: EngineUpdateNodesOptsV2;
 };
 export type EngineWriteRequest = {
-  node: DNodePropsV2;
+  node: DNodeProps;
   opts?: EngineWriteOptsV2;
 } & { ws: string };
 export type EngineDeleteRequest = {
@@ -173,7 +173,7 @@ export type InitializePayload = APIPayload<{
 
 export type WorkspaceSyncPayload = InitializePayload;
 
-export type EngineQueryPayload = APIPayload<DNodePropsV2[]>;
+export type EngineQueryPayload = APIPayload<DNodeProps[]>;
 export type EngineGetNoteByPathPayload = APIPayload<GetNotePayloadV2>;
 export type EngineRenameNotePayload = APIPayload<RenameNotePayload>;
 export type EngineUpdateNotePayload = APIPayload<void>;

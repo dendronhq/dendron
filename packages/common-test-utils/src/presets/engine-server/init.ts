@@ -60,7 +60,7 @@ const NOTES = {
           actual: _.omit(engine.notes["one"], ["body", "parent"]),
           expected: {
             children: [],
-            created: "1",
+            created: 1,
             custom: {},
             data: {},
             desc: "",
@@ -69,7 +69,7 @@ const NOTES = {
             links: [],
             title: "One",
             type: "note",
-            updated: "1",
+            updated: 1,
             vault: {
               fsPath: "vault1",
               name: undefined,
@@ -80,7 +80,7 @@ const NOTES = {
           actual: _.omit(engine.notes["three"], ["body", "parent"]),
           expected: {
             children: [],
-            created: "1",
+            created: 1,
             custom: {},
             data: {},
             desc: "",
@@ -89,7 +89,7 @@ const NOTES = {
             links: [],
             title: "Three",
             type: "note",
-            updated: "1",
+            updated: 1,
             vault: {
               fsPath: "vault3",
               name: "vaultThree",

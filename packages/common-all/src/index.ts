@@ -1,6 +1,6 @@
 export * from "./types";
 export * from "./typesv2";
-export * from "./nodev2";
+export * from "./dnode";
 export * from "./helpers";
 export * from "./env";
 export * from "./assert";

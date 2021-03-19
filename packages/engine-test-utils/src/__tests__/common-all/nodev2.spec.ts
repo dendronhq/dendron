@@ -98,8 +98,8 @@ describe("note", () => {
       const note = NoteUtils.create({
         id: "foo",
         fname: "foo",
-        created: "1",
-        updated: "1",
+        created: 1,
+        updated: 1,
         vault,
       });
       const serialized = NoteUtils.serialize(note);
@@ -111,8 +111,8 @@ describe("note", () => {
       const note = NoteUtils.create({
         id: "foo",
         fname: "foo",
-        created: "1",
-        updated: "1",
+        created: 1,
+        updated: 1,
         children: ["ch1", "ch2"],
         vault,
       });
@@ -124,8 +124,8 @@ describe("note", () => {
       const note = NoteUtils.create({
         id: "foo",
         fname: "foo",
-        created: "1",
-        updated: "1",
+        created: 1,
+        updated: 1,
         parent: "root",
         vault,
       });
@@ -137,8 +137,8 @@ describe("note", () => {
       const note = NoteUtils.create({
         id: "foo",
         fname: "foo",
-        created: "1",
-        updated: "1",
+        created: 1,
+        updated: 1,
         custom: {
           bond: 42,
         },
@@ -154,8 +154,8 @@ describe("note", () => {
       const note = NoteUtils.create({
         id: "foo",
         fname: "foo",
-        created: "1",
-        updated: "1",
+        created: 1,
+        updated: 1,
         children: ["ch1", "ch2"],
         parent: "root",
         vault,
@@ -171,8 +171,8 @@ describe("note", () => {
       const note = NoteUtils.create({
         id: "foo",
         fname: "foo",
-        created: "1",
-        updated: "1",
+        created: 1,
+        updated: 1,
         children: ["ch1", "ch2"],
         parent: null,
         vault,

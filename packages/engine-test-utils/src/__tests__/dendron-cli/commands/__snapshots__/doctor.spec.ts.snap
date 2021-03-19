@@ -6,7 +6,7 @@ Object {
 
 ",
   "children": Array [],
-  "created": "1",
+  "created": 1,
   "custom": Object {},
   "data": Object {},
   "desc": "",
@@ -16,7 +16,7 @@ Object {
   "parent": null,
   "title": "Foo Header",
   "type": "note",
-  "updated": "1",
+  "updated": 1,
   "vault": Object {
     "fsPath": "vault1",
   },
@@ -29,7 +29,7 @@ Object {
 
 ",
   "children": Array [],
-  "created": "1",
+  "created": 1,
   "custom": Object {},
   "data": Object {},
   "desc": "",
@@ -39,7 +39,7 @@ Object {
   "parent": null,
   "title": "Bar Header",
   "type": "note",
-  "updated": "1",
+  "updated": 1,
   "vault": Object {
     "fsPath": "vault1",
   },
@@ -54,7 +54,7 @@ Object {
 
 ",
   "children": Array [],
-  "created": "1",
+  "created": 1,
   "custom": Object {},
   "data": Object {},
   "desc": "",
@@ -64,7 +64,7 @@ Object {
   "parent": null,
   "title": "Foo",
   "type": "note",
-  "updated": "1",
+  "updated": 1,
   "vault": Object {
     "fsPath": "vault1",
   },
@@ -79,7 +79,7 @@ Object {
 
 ",
   "children": Array [],
-  "created": "1",
+  "created": 1,
   "custom": Object {},
   "data": Object {},
   "desc": "",
@@ -89,7 +89,7 @@ Object {
   "parent": null,
   "title": "Bar",
   "type": "note",
-  "updated": "1",
+  "updated": 1,
   "vault": Object {
     "fsPath": "vault1",
   },
@@ -102,7 +102,7 @@ Object {
 ## Foo Content
 ",
   "children": Array [],
-  "created": "1",
+  "created": 1,
   "custom": Object {},
   "data": Object {},
   "desc": "",
@@ -112,7 +112,7 @@ Object {
   "parent": null,
   "title": "Foo",
   "type": "note",
-  "updated": "1",
+  "updated": 1,
   "vault": Object {
     "fsPath": "vault1",
   },
@@ -125,7 +125,7 @@ Object {
 ## Bar Content
 ",
   "children": Array [],
-  "created": "1",
+  "created": 1,
   "custom": Object {},
   "data": Object {},
   "desc": "",
@@ -135,7 +135,7 @@ Object {
   "parent": null,
   "title": "Bar",
   "type": "note",
-  "updated": "1",
+  "updated": 1,
   "vault": Object {
     "fsPath": "vault1",
   },

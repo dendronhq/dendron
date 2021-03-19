@@ -9,7 +9,7 @@ import {
   DEngineInitRespV2,
   DEngineV2,
   DLink,
-  DNodePropsV2,
+  DNodeProps,
   DVault,
   EngineDeleteNoteResp,
   EngineDeleteOptsV2,
@@ -273,7 +273,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   }
 
   async refreshNotes(notes: NoteProps[]) {
-    notes.forEach((node: DNodePropsV2) => {
+    notes.forEach((node: DNodeProps) => {
       const { id } = node;
       this.notes[id] = node;
     });

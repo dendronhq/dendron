@@ -512,8 +512,8 @@ const NOTES = {
   //   let alphaNoteNew = NoteUtils.create({
   //     fname: "alpha",
   //     id: "alpha",
-  //     created: "1",
-  //     updated: "1",
+  //     created: 1
+  //     updated: 1
   //     body: "[[beta]]",
   //     vault,
   //   });

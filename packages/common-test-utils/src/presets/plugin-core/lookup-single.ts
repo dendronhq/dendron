@@ -47,7 +47,7 @@ const ACCEPT_ITEMS = {
           actual: _.pick(activeNote, ["title", "created"]),
           expected: {
             title: "Foo",
-            created: "1",
+            created: 1,
           },
         },
       ];

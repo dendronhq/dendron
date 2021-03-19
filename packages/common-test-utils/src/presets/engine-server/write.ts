@@ -4,15 +4,15 @@ import {
   NoteUtils,
   SchemaUtils,
 } from "@dendronhq/common-all";
+import { vault2Path } from "@dendronhq/common-server";
+import fs from "fs-extra";
 import _ from "lodash";
+import path from "path";
+import { FileTestUtils, NOTE_PRESETS_V4 } from "../..";
 import { NoteTestUtilsV4 } from "../../noteUtils";
 import { TestPresetEntryV4 } from "../../utilsv2";
-import fs from "fs-extra";
-import path from "path";
-import { vault2Path } from "@dendronhq/common-server";
-import { FileTestUtils, NOTE_PRESETS_V4 } from "../..";
-import { setupBasic } from "./utils";
 import { SCHEMA_PRESETS_V4 } from "../schemas";
+import { setupBasic } from "./utils";
 
 const SCHEMAS = {
   ADD_NEW_SCHEMA: new TestPresetEntryV4(
@@ -109,8 +109,8 @@ const NOTES = {
       const noteNew = NoteUtils.create({
         fname: "foo.ch1",
         id: "foo.ch1",
-        created: "1",
-        updated: "1",
+        created: 1,
+        updated: 1,
         vault: vaults[0],
       });
       await engine.writeNote(noteNew, { writeHierarchy: true });
@@ -191,8 +191,8 @@ const NOTES = {
     const noteNew = NoteUtils.create({
       id: "bar",
       fname: "bar",
-      created: "1",
-      updated: "1",
+      created: 1,
+      updated: 1,
       vault: vaults[0],
     });
     await engine.writeNote(noteNew);
@@ -217,8 +217,8 @@ const NOTES = {
       const vault = vaults[0];
       const noteNew = NoteUtils.create({
         fname: "foo.ch1",
-        created: "1",
-        updated: "1",
+        created: 1,
+        updated: 1,
         vault,
       });
       await engine.writeNote(noteNew);
@@ -306,8 +306,8 @@ const NOTES = {
     async ({ vaults, wsRoot, engine }) => {
       const noteNew = NoteUtils.create({
         fname: "bond.ch1",
-        created: "1",
-        updated: "1",
+        created: 1,
+        updated: 1,
         vault: vaults[0],
       });
       await engine.writeNote(noteNew);
@@ -479,8 +479,8 @@ const NOTES_MULTI = {
     const noteNew = NoteUtils.create({
       id: "bar",
       fname: "bar",
-      created: "1",
-      updated: "1",
+      created: 1,
+      updated: 1,
       vault: vaults[1],
     });
     await engine.writeNote(noteNew);
@@ -507,8 +507,8 @@ const NOTES_MULTI = {
       const noteNew = NoteUtils.create({
         id: "bar",
         fname: "bar",
-        created: "1",
-        updated: "1",
+        created: 1,
+        updated: 1,
         vault: vaults[1],
       });
       await engine.writeNote(noteNew);

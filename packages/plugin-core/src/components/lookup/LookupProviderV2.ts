@@ -3,7 +3,7 @@ import {
   DEngineClientV2,
   DNodePropsDictV2,
   DNodePropsQuickInputV2,
-  DNodePropsV2,
+  DNodeProps,
   DNodeUtils,
   DVault,
   getStage,
@@ -127,7 +127,7 @@ export class LookupProviderV2 {
     const ctx = "onAcceptNewNode";
     const fname = PickerUtilsV2.getValue(picker);
     Logger.info({ ctx, msg: "createNewPick", value: fname });
-    let nodeNew: DNodePropsV2;
+    let nodeNew: DNodeProps;
     let foundStub = false;
     const ws = DendronWorkspace.instance();
     const engine = ws.getEngine();
@@ -495,7 +495,7 @@ export class LookupProviderV2 {
     const { picker, qs } = opts;
     const engine = getWS().getEngine();
     Logger.info({ ctx, msg: "first query" });
-    let nodes: DNodePropsV2[];
+    let nodes: DNodeProps[];
     if (opts.flavor === "note") {
       // if we are doing a query, reset pagination options
       PickerUtilsV2.resetPaginationOpts(picker);
@@ -800,7 +800,7 @@ export class LookupProviderV2 {
     engine: DEngineClientV2
   ): DNodePropsQuickInputV2[] {
     let nodeDict: DNodePropsDictV2;
-    let nodes: DNodePropsV2[];
+    let nodes: DNodeProps[];
     if (flavor === "note") {
       nodeDict = engine.notes;
       const roots = NoteUtils.getRoots(nodeDict);

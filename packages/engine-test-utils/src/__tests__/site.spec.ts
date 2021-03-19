@@ -5,8 +5,8 @@ import {
   DVault,
   DVaultVisibility,
   NotePropsDictV2,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
@@ -63,7 +63,7 @@ const checkNotes = (opts: {
   engineNotes: NotePropsDictV2;
   match: ({
     id: string;
-  } & Partial<NotePropsV2>)[];
+  } & Partial<NoteProps>)[];
   noMatch?: {
     id: string;
   }[];
@@ -400,7 +400,7 @@ describe("SiteUtils", () => {
             engine,
             config,
           });
-          const root = NoteUtilsV2.getNoteByFnameV5({
+          const root = NoteUtils.getNoteByFnameV5({
             fname: "root",
             notes: engine.notes,
             vault: vaults[0],
@@ -692,7 +692,7 @@ describe("SiteUtils", () => {
             engine,
             config: engine.config,
           });
-          const root = NoteUtilsV2.getNoteByFnameV5({
+          const root = NoteUtils.getNoteByFnameV5({
             fname: "root",
             notes: engine.notes,
             vault: vaults[0],

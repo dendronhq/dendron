@@ -1,9 +1,9 @@
-import { NotePropsV2 } from "@dendronhq/common-all";
+import { NoteProps } from "@dendronhq/common-all";
 import _ from "lodash";
 import { SourceAttr } from "./basev2";
 
 export class SeedUtils {
-  static async addToSource(note: NotePropsV2, source: SourceAttr) {
+  static async addToSource(note: NoteProps, source: SourceAttr) {
     if (!note.custom) {
       note.custom = {};
     }

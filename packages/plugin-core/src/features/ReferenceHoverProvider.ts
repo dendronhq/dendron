@@ -1,4 +1,4 @@
-import { DendronError, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DendronError, NoteUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { MarkdownPublishPod } from "@dendronhq/pods-core";
 import fs from "fs";
@@ -53,13 +53,13 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
         // }
         foundUri = Uri.file(fullPath);
       } else {
-        const notes = NoteUtilsV2.getNotesByFname({
+        const notes = NoteUtils.getNotesByFname({
           fname: refAtPos.ref,
           notes: engine.notes,
         });
         const uris = notes.map((note) =>
           Uri.file(
-            NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+            NoteUtils.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
           )
         );
         foundUri = uris[0];
@@ -100,7 +100,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
 
           const fname = path.basename(foundUri.fsPath, ".md");
           const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-          const note = NoteUtilsV2.getNoteByFnameV5({
+          const note = NoteUtils.getNoteByFnameV5({
             fname,
             vault,
             notes: getWS().getEngine().notes,

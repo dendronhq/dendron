@@ -1,4 +1,4 @@
-import { NotePropsV2 } from "@dendronhq/common-all";
+import { NoteProps } from "@dendronhq/common-all";
 import Unified, { Transformer } from "unified";
 import { Node } from "unist";
 import visit from "unist-util-visit";
@@ -7,7 +7,7 @@ import { DendronASTDest, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4, PublishUtils } from "../utils";
 
 type PluginOpts = {
-  noteIndex: NotePropsV2;
+  noteIndex: NoteProps;
 };
 
 /**

@@ -1,4 +1,4 @@
-import { DVault, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DVault, NoteUtils } from "@dendronhq/common-all";
 import { note2File, vault2Path } from "@dendronhq/common-server";
 import { runJestHarnessV2 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
@@ -18,17 +18,17 @@ suite("GoToSibling", function () {
   const createNotes = (wsRoot: string, vault: DVault) => {
     return Promise.all([
       note2File({
-        note: NoteUtilsV2.create({ fname: "foo.journal.2020.08.29", vault }),
+        note: NoteUtils.create({ fname: "foo.journal.2020.08.29", vault }),
         vault,
         wsRoot,
       }),
       note2File({
-        note: NoteUtilsV2.create({ fname: "foo.journal.2020.08.30", vault }),
+        note: NoteUtils.create({ fname: "foo.journal.2020.08.30", vault }),
         vault,
         wsRoot,
       }),
       note2File({
-        note: NoteUtilsV2.create({ fname: "foo.journal.2020.08.31", vault }),
+        note: NoteUtils.create({ fname: "foo.journal.2020.08.31", vault }),
         vault,
         wsRoot,
       }),
@@ -74,12 +74,12 @@ suite("GoToSibling", function () {
         const vault = vaults[0];
         await createNotes(wsRoot, vault);
         await note2File({
-          note: NoteUtilsV2.create({ fname: "foo.journal.2020.08", vault }),
+          note: NoteUtils.create({ fname: "foo.journal.2020.08", vault }),
           vault,
           wsRoot,
         });
         await note2File({
-          note: NoteUtilsV2.create({ fname: "foo.journal.2020.09", vault }),
+          note: NoteUtils.create({ fname: "foo.journal.2020.09", vault }),
           vault,
           wsRoot,
         });
@@ -148,7 +148,7 @@ suite("GoToSibling", function () {
       postSetupHook: async ({ wsRoot, vaults }) => {
         const vault = vaults[0];
         await note2File({
-          note: NoteUtilsV2.create({ fname: "foo.journal.2020.08.29", vault }),
+          note: NoteUtils.create({ fname: "foo.journal.2020.08.29", vault }),
           vault,
           wsRoot,
         });
@@ -186,7 +186,7 @@ suite("GoToSibling", function () {
       postSetupHook: async ({ wsRoot, vaults }) => {
         const vault = vaults[0];
         await note2File({
-          note: NoteUtilsV2.create({ fname: "foo.journal.2020.08.29", vault }),
+          note: NoteUtils.create({ fname: "foo.journal.2020.08.29", vault }),
           vault,
           wsRoot,
         });
@@ -214,7 +214,7 @@ suite("GoToSibling", function () {
       postSetupHook: async ({ wsRoot, vaults }) => {
         const vault = vaults[0];
         await note2File({
-          note: NoteUtilsV2.create({ fname: "gamma", vault }),
+          note: NoteUtils.create({ fname: "gamma", vault }),
           vault,
           wsRoot,
         });

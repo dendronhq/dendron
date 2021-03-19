@@ -1,4 +1,4 @@
-import { NotePropsV2, NoteUtilsV2, WorkspaceOpts } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils, WorkspaceOpts } from "@dendronhq/common-all";
 import {
   AssertUtils,
   ENGINE_HOOKS,
@@ -39,7 +39,7 @@ const readAndProcess = (opts: { npath: string; proc: Processor }) => {
   return { proc, respProcess, respParse, respRehype };
 };
 
-const readAndProcessV2 = (opts: { note: NotePropsV2; proc: Processor }) => {
+const readAndProcessV2 = (opts: { note: NoteProps; proc: Processor }) => {
   const { note, proc } = opts;
   const content = renderFromNote({ note });
   //const noteRaw = fs.readFileSync(npath, { encoding: "utf8" });
@@ -56,7 +56,7 @@ const readAndProcessV2 = (opts: { note: NotePropsV2; proc: Processor }) => {
 
 const modifyNote = async (
   opts: WorkspaceOpts,
-  cb: (note: NotePropsV2) => NotePropsV2
+  cb: (note: NoteProps) => NoteProps
 ) => {
   await NoteTestUtilsV4.modifyNoteByPath(
     { wsRoot: opts.wsRoot, vault: opts.vaults[0], fname: "foo" },
@@ -114,7 +114,7 @@ const WITH_VARIABLE = createProcTests({
     const { wsRoot, vaults, engine } = opts;
     let proc = await createProc(opts);
     //const npath = path.join(opts.wsRoot, opts.vaults[0].fsPath, "foo.md");
-    const note = NoteUtilsV2.getNoteByFnameV5({
+    const note = NoteUtils.getNoteByFnameV5({
       wsRoot,
       vault: vaults[0],
       fname: "foo",
@@ -140,7 +140,7 @@ const WITH_VARIABLE = createProcTests({
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupBasic(opts);
-    await modifyNote(opts, (note: NotePropsV2) => {
+    await modifyNote(opts, (note: NoteProps) => {
       note.custom = { bond: 42 };
       note.body = `Title: {{fm.title}}. Bond: {{fm.bond}} Fname: {{fname}}`;
       return note;
@@ -170,7 +170,7 @@ const WITH_ABBR = createProcTests({
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupBasic(opts);
-    await modifyNote(opts, (note: NotePropsV2) => {
+    await modifyNote(opts, (note: NoteProps) => {
       note.body = [
         "This plugin works on MDAST, a Markdown AST implemented by [remark](https://github.com/remarkjs/remark)",
         "",
@@ -204,7 +204,7 @@ const WITH_MERMAID = createProcTests({
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupBasic(opts);
-    await modifyNote(opts, (note: NotePropsV2) => {
+    await modifyNote(opts, (note: NoteProps) => {
       note.body = `
 # mermaid code block
 
@@ -242,7 +242,7 @@ const WITH_FOOTNOTES = createProcTests({
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupBasic(opts);
-    await modifyNote(opts, (note: NotePropsV2) => {
+    await modifyNote(opts, (note: NoteProps) => {
       note.body = [
         "Here is a footnote reference,[^1]",
         "",
@@ -290,7 +290,7 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
-    await modifyNote(opts, (note: NotePropsV2) => {
+    await modifyNote(opts, (note: NoteProps) => {
       note.body = `[[bar]]`;
       return note;
     });
@@ -318,7 +318,7 @@ const NOTE_W_LINK_AND_SPACE = createProcTests({
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupBasic({ ...opts, extra: { idv2: true } });
-    await modifyNote(opts, (note: NotePropsV2) => {
+    await modifyNote(opts, (note: NoteProps) => {
       note.body = `[[foo bar]]`;
       return note;
     });
@@ -389,7 +389,7 @@ const WITH_TITLE_FOR_LINK = createProcTests({
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS.setupBasic(opts);
-    await modifyNote(opts, (note: NotePropsV2) => {
+    await modifyNote(opts, (note: NoteProps) => {
       note.body = `[[foo.ch1]]`;
       return note;
     });
@@ -425,7 +425,7 @@ const WITH_TITLE_FOR_LINK_X_VAULT = createProcTests({
   },
   preSetupHook: async (opts) => {
     await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
-    await modifyNote(opts, (note: NotePropsV2) => {
+    await modifyNote(opts, (note: NoteProps) => {
       note.body = `[[dendron://vault2/bar]]`;
       return note;
     });

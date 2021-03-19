@@ -1,11 +1,11 @@
 import {
   DendronError,
   DEngineClientV2,
-  DNodeUtilsV2,
+  DNodeUtils,
   DNoteLoc,
   DNoteRefLink,
   DUtils,
-  NoteUtilsV2,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import { removeMDExtension, vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -98,7 +98,7 @@ function convertNoteRef(opts: ConvertNoteRefOpts) {
       DUtils.minimatch(ent.fname, link.from.fname)
     );
     noteRefs = _.sortBy(
-      out.map((ent) => NoteUtilsV2.toNoteLoc(ent)),
+      out.map((ent) => NoteUtils.toNoteLoc(ent)),
       "fname"
     );
   } else {
@@ -109,7 +109,7 @@ function convertNoteRef(opts: ConvertNoteRefOpts) {
     const name = ref.fname;
     const alias = ref.alias;
 
-    const npath = DNodeUtilsV2.getFullPath({
+    const npath = DNodeUtils.getFullPath({
       wsRoot: engine.wsRoot,
       vault: { fsPath: vaultPath },
       basename: name + ".md",

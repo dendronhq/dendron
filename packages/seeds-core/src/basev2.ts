@@ -1,4 +1,4 @@
-import { DVault, NotePropsV2 } from "@dendronhq/common-all";
+import { DVault, NoteProps } from "@dendronhq/common-all";
 import {
   createLogger,
   DLogger,
@@ -37,7 +37,7 @@ export type Asset = {
 };
 
 type DendronSeedOpts = { wsRoot: string };
-export type PrepareOutput = { notes: NotePropsV2[]; assets: Asset[] };
+export type PrepareOutput = { notes: NoteProps[]; assets: Asset[] };
 
 export abstract class DendronSeed<TConfig extends SeedConfig = SeedConfig> {
   public L: DLogger;
@@ -101,13 +101,13 @@ export abstract class DendronSeed<TConfig extends SeedConfig = SeedConfig> {
 
   abstract prepare(opts: PrepareOpts): Promise<PrepareOutput>;
 
-  async enrichNotes(notes: NotePropsV2[], opts: PlantOpts) {
+  async enrichNotes(notes: NoteProps[], opts: PlantOpts) {
     const source = this.config.source;
     if (!source) {
       return notes;
     }
     return Promise.all(
-      notes.map(async (n: NotePropsV2) => {
+      notes.map(async (n: NoteProps) => {
         let sources: SourceAttr[] = n?.custom?.sources;
         n.vault = opts.vault;
         if (!n.custom) {

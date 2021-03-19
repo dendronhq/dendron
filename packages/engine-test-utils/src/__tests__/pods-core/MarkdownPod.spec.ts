@@ -1,4 +1,4 @@
-import { NoteUtilsV2, VaultUtils } from "@dendronhq/common-all";
+import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import { ENGINE_HOOKS, FileTestUtils } from "@dendronhq/common-test-utils";
 import {
@@ -91,7 +91,7 @@ describe("markdown import pod", () => {
         ]);
         expect(expectedFiles).toEqual(actualFiles);
         debugger;
-        const note = NoteUtilsV2.getNoteOrThrow({
+        const note = NoteUtils.getNoteOrThrow({
           fname: "project.p1.n1",
           notes: engine.notes,
           vault: vaults[0],
@@ -146,7 +146,7 @@ describe("markdown import pod", () => {
         ]);
         expect(expectedFiles).toEqual(actualFiles);
         debugger;
-        const note = NoteUtilsV2.getNoteOrThrow({
+        const note = NoteUtils.getNoteOrThrow({
           fname: "project.p1.n1",
           notes: engine.notes,
           vault: vaults[0],

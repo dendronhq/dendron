@@ -608,6 +608,30 @@ journal3
 }
 `;
 
+exports[`legacy note ref compile "MD_DENDRON: BAD_REF" 1`] = `
+VFile {
+  "contents": "((foo))
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
+exports[`legacy note ref compile "MD_DENDRON: BAD_REF" 2`] = `
+VFile {
+  "contents": "((foo))
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`noteRefV2 compile "HTML: WITH_ANCHOR" 1`] = `
 VFile {
   "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>

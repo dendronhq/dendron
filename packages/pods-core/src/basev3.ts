@@ -2,8 +2,8 @@ import {
   DendronError,
   DEngineClientV2,
   DVault,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   PodConfig,
   VaultUtils,
   WorkspaceOpts,
@@ -26,7 +26,7 @@ export type PublishPodExecuteOpts<T extends PublishPodConfig = any> = PodOpts<
 
 export type PublishPodPlantOpts<
   T extends PublishPodConfig = any
-> = PublishPodExecuteOpts<T> & { note: NotePropsV2 };
+> = PublishPodExecuteOpts<T> & { note: NoteProps };
 
 export type PublishPodConfig = {
   /**
@@ -80,7 +80,7 @@ export abstract class PublishPod<T extends PublishPodConfig = any> {
       vaults: engine.vaultsv3,
       vname: vaultName,
     });
-    const note = NoteUtilsV2.getNoteByFnameV5({
+    const note = NoteUtils.getNoteByFnameV5({
       fname,
       notes: engine.notes,
       vault: vault!,
@@ -198,7 +198,7 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
     const srcURL = URI.file(resolvePath(src, engine.wsRoot));
     return await this.plant({ ...opts, src: srcURL, vault });
   }
-  abstract plant(opts: ImportPodPlantOpts<T>): Promise<NotePropsV2[]>;
+  abstract plant(opts: ImportPodPlantOpts<T>): Promise<NoteProps[]>;
 }
 
 // === Export Pod
@@ -221,7 +221,7 @@ export type ExportPodPlantOpts<
 > = Omit<ExportPodExecuteOpts<T>, "dest"> & {
   dest: URI;
   vaults: DVault[];
-  notes: NotePropsV2[];
+  notes: NoteProps[];
 };
 
 export abstract class ExportPod<
@@ -275,7 +275,7 @@ export abstract class ExportPod<
     notes,
   }: {
     config: ExportPodConfig;
-    notes: NotePropsV2[];
+    notes: NoteProps[];
   }) {
     const { includeBody } = _.defaults(config, { includeBody: true });
     if (!config.includeStubs) {
@@ -305,5 +305,5 @@ export abstract class ExportPod<
   }
   abstract plant(
     opts: ExportPodPlantOpts<T>
-  ): Promise<{ notes: NotePropsV2[]; data?: TData }>;
+  ): Promise<{ notes: NoteProps[]; data?: TData }>;
 }

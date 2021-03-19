@@ -1,4 +1,4 @@
-import { DEngineClientV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DEngineClientV2, NoteUtils } from "@dendronhq/common-all";
 import * as Diff2Html from "diff2html";
 import execa from "execa";
 import fs from "fs-extra";
@@ -44,7 +44,7 @@ function canShowDiff(opts: {
   return vaults.some((vault) => {
     if (filePath.startsWith(vault.fsPath) && filePath.endsWith(".md")) {
       const fname = path.basename(filePath.split(vault.fsPath)[1], ".md");
-      const note = NoteUtilsV2.getNoteByFnameV5({
+      const note = NoteUtils.getNoteByFnameV5({
         fname,
         notes: engine.notes,
         vault,

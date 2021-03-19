@@ -1,4 +1,4 @@
-import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { TestPresetEntryV4 } from "../../utilsv2";
 import { NOTE_PRESETS_V4 } from "../notes";
@@ -6,21 +6,21 @@ import { NOTE_PRESETS_V4 } from "../notes";
 const NOTES = {
   NOTE_NO_CHILDREN: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
-      const noteOld = NoteUtilsV2.getNoteByFnameV5({
+      const noteOld = NoteUtils.getNoteByFnameV5({
         fname: "foo",
         notes: engine.notes,
         vault: vaults[0],
         wsRoot: engine.wsRoot,
-      }) as NotePropsV2;
+      }) as NoteProps;
       const cnote = _.clone(noteOld);
       cnote.body = "new body";
       await engine.updateNote(cnote);
-      const noteNew = NoteUtilsV2.getNoteByFnameV5({
+      const noteNew = NoteUtils.getNoteByFnameV5({
         fname: "foo",
         notes: engine.notes,
         vault: vaults[0],
         wsRoot: engine.wsRoot,
-      }) as NotePropsV2;
+      }) as NoteProps;
 
       return [
         {

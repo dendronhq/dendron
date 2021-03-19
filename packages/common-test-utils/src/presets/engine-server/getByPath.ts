@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteUtils } from "@dendronhq/common-all";
 import { TestPresetEntryV4 } from "../../utilsv2";
 import { NOTE_PRESETS_V4 } from "../notes";
 
@@ -10,13 +10,13 @@ const NOTES = {
   ROOT: new TestPresetEntryV4(async ({ vaults, engine, wsRoot }) => {
     const vault = vaults[0];
     const vault2 = vaults[1];
-    const root = NoteUtilsV2.getNoteByFnameV5({
+    const root = NoteUtils.getNoteByFnameV5({
       fname: "root",
       notes: engine.notes,
       vault,
       wsRoot,
     });
-    const root2 = NoteUtilsV2.getNoteByFnameV5({
+    const root2 = NoteUtils.getNoteByFnameV5({
       fname: "root",
       notes: engine.notes,
       vault: vault2,
@@ -45,7 +45,7 @@ const NOTES = {
   EXISTING_NOTE: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
       const vault = vaults[0];
-      const note = NoteUtilsV2.getNoteByFnameV5({
+      const note = NoteUtils.getNoteByFnameV5({
         fname: "foo",
         notes: engine.notes,
         vault,
@@ -73,7 +73,7 @@ const NOTES = {
   NOTE_WITH_CAPS_AND_SPACES: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
       const vault = vaults[0];
-      const note = NoteUtilsV2.getNoteByFnameV5({
+      const note = NoteUtils.getNoteByFnameV5({
         fname: "000 Index",
         notes: engine.notes,
         vault,

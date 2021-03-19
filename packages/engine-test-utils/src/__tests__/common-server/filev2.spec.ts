@@ -1,7 +1,4 @@
-import {
-  DNodeUtilsV2 as _du,
-  SchemaUtilsV2 as _su,
-} from "@dendronhq/common-all";
+import { DNodeUtils as _du, SchemaUtils as _su } from "@dendronhq/common-all";
 import {
   file2Schema,
   goUpTo,

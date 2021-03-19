@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteUtils } from "@dendronhq/common-all";
 import { cleanName } from "@dendronhq/common-server";
 import * as vscode from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
@@ -44,7 +44,7 @@ export class CreateDailyJournalCommand extends BaseCommand<CommandOpts> {
       CodeConfigKeys.DEFAULT_JOURNAL_NAME
     ) as string;
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-    const title = NoteUtilsV2.genJournalNoteTitle({
+    const title = NoteUtils.genJournalNoteTitle({
       fname,
       journalName,
     });

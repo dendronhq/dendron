@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
@@ -31,7 +31,7 @@ export class ArchiveHierarchyCommand extends BasicCommand<
     let value = "";
     const editor = VSCodeUtils.getActiveTextEditor();
     if (editor) {
-      value = NoteUtilsV2.uri2Fname(editor.document.uri);
+      value = NoteUtils.uri2Fname(editor.document.uri);
     }
     let match = await VSCodeUtils.showInputBox({
       prompt: "Enter hierarchy to archive",

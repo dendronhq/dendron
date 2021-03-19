@@ -1,4 +1,4 @@
-import { DNodeTypeV2, NotePropsV2 } from "@dendronhq/common-all";
+import { DNodeTypeV2, NoteProps } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -17,18 +17,18 @@ function getCacheFile(type: DNodeTypeV2, checkpoint: Checkpoint) {
 
 export class GitCache implements DEngineCache {
   public git: Git;
-  public entries: { [key: string]: NotePropsV2 };
+  public entries: { [key: string]: NoteProps };
 
   constructor(public opts: GitCacheOpts) {
     this.git = new Git({ localUrl: opts.root });
     this.entries = {};
   }
 
-  async get(key: string): Promise<NotePropsV2 | null> {
+  async get(key: string): Promise<NoteProps | null> {
     return _.get(this.entries, key, null);
   }
 
-  async getAll(type: DNodeTypeV2, checkpoint: any): Promise<NotePropsV2[]> {
+  async getAll(type: DNodeTypeV2, checkpoint: any): Promise<NoteProps[]> {
     const fpath = this.opts.root;
     if (!fs.existsSync(fpath)) {
       return [];
@@ -40,7 +40,7 @@ export class GitCache implements DEngineCache {
 
   async setAll(
     type: DNodeTypeV2,
-    entries: NotePropsV2[],
+    entries: NoteProps[],
     checkpoint: any
   ): Promise<void> {
     const fpath = this.opts.root;

@@ -1,15 +1,15 @@
 import {
   DendronConfig,
-  NoteUtilsV2,
-  SchemaUtilsV2,
+  NoteUtils,
+  SchemaUtils,
   VaultUtils,
-  WorkspaceOpts
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
   note2File,
   readYAML,
   schemaModuleOpts2File,
-  tmpDir
+  tmpDir,
 } from "@dendronhq/common-server";
 import { FileTestUtils, sinon } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
@@ -26,7 +26,7 @@ import {
   getConfig,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
-  stubVaultInput
+  stubVaultInput,
 } from "../testUtilsV3";
 
 const getWorkspaceFolders = () => {
@@ -117,22 +117,19 @@ suite("VaultAddCommand", function () {
           fs.ensureDirSync(vpath);
           const vault = { fsPath: vpath };
 
-          const note = NoteUtilsV2.createRoot({
+          const note = NoteUtils.createRoot({
             vault: { fsPath: vpath },
             body: ["existing note"].join("\n"),
           });
           await note2File({ note, vault, wsRoot });
-          const schema = SchemaUtilsV2.createRootModule({ vault });
+          const schema = SchemaUtils.createRootModule({ vault });
           await schemaModuleOpts2File(schema, vault.fsPath, "root");
         },
         onInit: async ({ vault, wsRoot }) => {
           const vpath = path.join(wsRoot, "vault2");
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
           await new VaultAddCommand().run();
-          expect(fs.readdirSync(vpath)).toEqual([
-            "root.md",
-            "root.schema.yml",
-          ]);
+          expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
 
           checkVaults({
             wsRoot,
@@ -180,10 +177,7 @@ suite("VaultAddCommand", function () {
           const vpath = path.join(wsRoot, "vault2");
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
           await new VaultAddCommand().run();
-          expect(fs.readdirSync(vpath)).toEqual([
-            "root.md",
-            "root.schema.yml",
-          ]);
+          expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
           checkVaults({
             wsRoot,
             vaults: [
@@ -206,10 +200,7 @@ suite("VaultAddCommand", function () {
           stubVaultInput({ sourceType: "local", sourcePath });
           await new VaultAddCommand().run();
           const vpath = path.join(wsRoot, sourcePath);
-          expect(fs.readdirSync(vpath)).toEqual([
-            "root.md",
-            "root.schema.yml",
-          ]);
+          expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
           checkVaults({
             wsRoot,
             vaults: [
@@ -232,10 +223,7 @@ suite("VaultAddCommand", function () {
           const vaultRelPath = path.relative(wsRoot, vpath);
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
           await new VaultAddCommand().run();
-          expect(fs.readdirSync(vpath)).toEqual([
-            "root.md",
-            "root.schema.yml",
-          ]);
+          expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
 
           checkVaults({
             wsRoot,

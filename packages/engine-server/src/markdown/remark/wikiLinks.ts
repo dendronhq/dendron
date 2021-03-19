@@ -1,7 +1,7 @@
 import {
   CONSTANTS,
   DendronError,
-  NoteUtilsV2,
+  NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -80,7 +80,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
 
       if (copts.useId && dest === DendronASTDest.HTML) {
         // TODO: check for vault
-        const notes = NoteUtilsV2.getNotesByFname({
+        const notes = NoteUtils.getNotesByFname({
           fname: value,
           notes: engine.notes,
           vault,
@@ -143,7 +143,7 @@ function attachParser(proc: Unified.Processor) {
   }
 
   function parseLink(linkMatch: string) {
-    linkMatch = NoteUtilsV2.normalizeFname(linkMatch);
+    linkMatch = NoteUtils.normalizeFname(linkMatch);
 
     const out = LinkUtils.parseLinkV2(linkMatch);
     if (_.isNull(out)) {
@@ -177,7 +177,7 @@ function attachParser(proc: Unified.Processor) {
       vault
     ) {
       const wsRoot = engine.wsRoot;
-      const note = NoteUtilsV2.getNoteByFnameV5({
+      const note = NoteUtils.getNoteByFnameV5({
         fname: out.value,
         notes: engine.notes,
         vault,

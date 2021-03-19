@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DateTime } from "luxon";
 import { DecorationOptions, ExtensionContext, Range, window } from "vscode";
@@ -70,11 +70,11 @@ export class WindowWatcher {
     };
     text = text || activeEditor.document.getText();
 
-    let match = NoteUtilsV2.RE_FM.exec(text);
+    let match = NoteUtils.RE_FM.exec(text);
     if (!_.isNull(match)) {
       const decorations = [
-        NoteUtilsV2.RE_FM_UPDATED,
-        NoteUtilsV2.RE_FM_CREATED,
+        NoteUtils.RE_FM_UPDATED,
+        NoteUtils.RE_FM_CREATED,
       ].map((RE) => {
         const tsMatch = RE.exec((match as RegExpExecArray)[0]);
         if (tsMatch) {

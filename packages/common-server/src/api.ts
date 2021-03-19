@@ -15,7 +15,7 @@ import {
   GetNoteOptsV2,
   GetNotePayloadV2,
   NotePropsDictV2,
-  NotePropsV2,
+  NoteProps,
   RenameNoteOptsV2,
   RenameNotePayload,
   RespRequiredV2,
@@ -132,7 +132,7 @@ export type EngineQueryRequest = DEngineQuery & { ws: string };
 export type EngineGetNoteByPathRequest = GetNoteOptsV2 & { ws: string };
 export type EngineRenameNoteRequest = RenameNoteOptsV2 & { ws: string };
 export type EngineUpdateNoteRequest = { ws: string } & {
-  note: NotePropsV2;
+  note: NoteProps;
   opts?: EngineUpdateNodesOptsV2;
 };
 export type EngineWriteRequest = {

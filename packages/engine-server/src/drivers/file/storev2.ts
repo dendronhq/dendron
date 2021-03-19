@@ -8,7 +8,7 @@ import {
   DEngineInitRespV2,
   DEngineInitSchemaRespV2,
   DLink,
-  DNodeUtilsV2,
+  DNodeUtils,
   DStoreV2,
   DVault,
   EngineDeleteOptsV2,
@@ -18,13 +18,13 @@ import {
   ERROR_CODES,
   NoteChangeEntry,
   NotePropsDictV2,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   RenameNoteOptsV2,
   RenameNotePayload,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
-  SchemaUtilsV2,
+  SchemaUtils,
   StoreDeleteNoteResp,
   WriteNoteResp,
 } from "@dendronhq/common-all";
@@ -84,7 +84,7 @@ export class NoteParserV2 extends ParserBaseV2 {
     this.cache = opts.cache;
   }
 
-  async parseFile(fpath: string[], vault: DVault): Promise<NotePropsV2[]> {
+  async parseFile(fpath: string[], vault: DVault): Promise<NoteProps[]> {
     const ctx = "parseFile";
     const fileMetaDict: FileMetaDictV2 = getFileMetaV2(fpath);
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
@@ -114,7 +114,7 @@ export class NoteParserV2 extends ParserBaseV2 {
 
     // get root of hiearchies
     let lvl = 2;
-    let prevNodes: NotePropsV2[] = fileMetaDict[1]
+    let prevNodes: NoteProps[] = fileMetaDict[1]
       // don't count root node
       .filter((n) => n.fpath !== "root.md")
       .flatMap((ent) => {
@@ -126,14 +126,14 @@ export class NoteParserV2 extends ParserBaseV2 {
         return notes;
       });
     prevNodes.forEach((ent) => {
-      DNodeUtilsV2.addChild(rootNote, ent);
+      DNodeUtils.addChild(rootNote, ent);
       notesByFname[ent.fname] = ent;
       notesById[ent.id] = ent;
     });
 
     // get everything else
     while (lvl <= maxLvl) {
-      const currNodes: NotePropsV2[] = (fileMetaDict[lvl] || [])
+      const currNodes: NoteProps[] = (fileMetaDict[lvl] || [])
         .filter((ent) => {
           return !globMatch(["root.*"], ent.fpath);
         })
@@ -161,11 +161,11 @@ export class NoteParserV2 extends ParserBaseV2 {
     const out = _.values(notesByFname);
     const domains = rootNote.children.map(
       (ent) => notesById[ent]
-    ) as NotePropsV2[];
+    ) as NoteProps[];
     const schemas = this.opts.store.schemas;
     await Promise.all(
       domains.map(async (d) => {
-        return SchemaUtilsV2.matchDomain(d, notesById, schemas);
+        return SchemaUtils.matchDomain(d, notesById, schemas);
       })
     );
     return out;
@@ -174,24 +174,24 @@ export class NoteParserV2 extends ParserBaseV2 {
   parseNoteProps(opts: {
     fileMeta: FileMetaV2;
     notesByFname?: NotePropsDictV2;
-    parents?: NotePropsV2[];
+    parents?: NoteProps[];
     addParent: boolean;
     createStubs?: boolean;
     vault: DVault;
-  }): NotePropsV2[] {
+  }): NoteProps[] {
     const cleanOpts = _.defaults(opts, {
       addParent: true,
       createStubs: true,
       notesByFname: {},
-      parents: [] as NotePropsV2[],
+      parents: [] as NoteProps[],
     });
     const { fileMeta, parents, notesByFname, vault } = cleanOpts;
     const ctx = "parseNoteProps";
     this.logger.debug({ ctx, msg: "enter", fileMeta });
     const wsRoot = this.opts.store.wsRoot;
     const vpath = vault2Path({ vault, wsRoot });
-    let out: NotePropsV2[] = [];
-    let noteProps: NotePropsV2;
+    let out: NoteProps[] = [];
+    let noteProps: NoteProps;
 
     // get note props
     try {
@@ -210,7 +210,7 @@ export class NoteParserV2 extends ParserBaseV2 {
 
     // add parent
     if (cleanOpts.addParent) {
-      const stubs = NoteUtilsV2.addParent({
+      const stubs = NoteUtils.addParent({
         note: noteProps,
         notesList: _.uniqBy(_.values(notesByFname).concat(parents), "id"),
         createStubs: cleanOpts.createStubs,
@@ -222,7 +222,7 @@ export class NoteParserV2 extends ParserBaseV2 {
     return out;
   }
 
-  async parse(fpaths: string[], vault: DVault): Promise<NotePropsV2[]> {
+  async parse(fpaths: string[], vault: DVault): Promise<NoteProps[]> {
     return this.parseFile(fpaths, vault);
   }
 }
@@ -387,7 +387,7 @@ export class FileStorageV2 implements DStoreV2 {
         });
       }
       // remove from parent
-      let parentNote = this.notes[noteToDelete.parent] as NotePropsV2;
+      let parentNote = this.notes[noteToDelete.parent] as NoteProps;
       parentNote.children = _.reject(
         parentNote.children,
         (ent) => ent === noteToDelete.id
@@ -496,10 +496,10 @@ export class FileStorageV2 implements DStoreV2 {
     };
   }
 
-  async initNotes(): Promise<NotePropsV2[]> {
+  async initNotes(): Promise<NoteProps[]> {
     const ctx = "initNotes";
     this.logger.info({ ctx, msg: "enter" });
-    let notesWithLinks: NotePropsV2[] = [];
+    let notesWithLinks: NoteProps[] = [];
     const out = await Promise.all(
       (this.vaultsv3 as DVault[]).map(async (vault) => {
         const notes = await this._initNotes(vault);
@@ -518,20 +518,20 @@ export class FileStorageV2 implements DStoreV2 {
     notesWithLinks,
     allNotes,
   }: {
-    notesWithLinks: NotePropsV2[];
-    allNotes: NotePropsV2[];
+    notesWithLinks: NoteProps[];
+    allNotes: NoteProps[];
   }) {
     return _.map(notesWithLinks, async (noteFrom) => {
       return Promise.all(
         noteFrom.links.map(async (link) => {
           const fname = link.to?.fname;
           if (fname) {
-            const notes = NoteUtilsV2.getNotesByFname({
+            const notes = NoteUtils.getNotesByFname({
               fname,
               notes: allNotes,
             });
             return notes.map((noteTo) => {
-              return NoteUtilsV2.addBacklink({
+              return NoteUtils.addBacklink({
                 from: noteFrom,
                 to: noteTo,
                 link,
@@ -544,7 +544,7 @@ export class FileStorageV2 implements DStoreV2 {
     });
   }
 
-  async _initNotes(vault: DVault): Promise<NotePropsV2[]> {
+  async _initNotes(vault: DVault): Promise<NoteProps[]> {
     const ctx = "initNotes";
     this.logger.info({ ctx, msg: "enter" });
     const wsRoot = this.wsRoot;
@@ -605,11 +605,11 @@ export class FileStorageV2 implements DStoreV2 {
     const oldLocPath = path.join(vpath, oldLoc.fname + ".md");
     // read from disk since contents migh have changed
     const noteRaw = file2Note(oldLocPath, oldVault);
-    const oldNote = NoteUtilsV2.hydrate({
+    const oldNote = NoteUtils.hydrate({
       noteRaw,
       noteHydrated: this.notes[noteRaw.id],
     });
-    const notesToChange = await NoteUtilsV2.getNotesWithLinkTo({
+    const notesToChange = await NoteUtils.getNotesWithLinkTo({
       note: oldNote,
       notes: this.notes,
     });
@@ -629,12 +629,12 @@ export class FileStorageV2 implements DStoreV2 {
         return n;
       })
     );
-    const newNote: NotePropsV2 = {
+    const newNote: NoteProps = {
       ...oldNote,
       fname: newLoc.fname,
       vault: newLoc.vault!,
-      title: NoteUtilsV2.isDefaultTitle(oldNote)
-        ? NoteUtilsV2.genTitle(newLoc.fname)
+      title: NoteUtils.isDefaultTitle(oldNote)
+        ? NoteUtils.genTitle(newLoc.fname)
         : oldNote.title,
     };
 
@@ -642,7 +642,7 @@ export class FileStorageV2 implements DStoreV2 {
     this.logger.info({
       ctx,
       msg: "deleteNote:meta:pre",
-      note: NoteUtilsV2.toLogObj(oldNote),
+      note: NoteUtils.toLogObj(oldNote),
     });
     const changedFromDelete = await this.deleteNote(oldNote.id, {
       metaOnly: true,
@@ -650,7 +650,7 @@ export class FileStorageV2 implements DStoreV2 {
     this.logger.info({
       ctx,
       msg: "writeNewNote:pre",
-      note: NoteUtilsV2.toLogObj(newNote),
+      note: NoteUtils.toLogObj(newNote),
     });
     await this.writeNote(newNote, { newNode: true });
     this.logger.info({ ctx, msg: "updateAllNotes:pre" });
@@ -660,7 +660,7 @@ export class FileStorageV2 implements DStoreV2 {
         this.logger.info({
           ctx,
           msg: "writeNote:pre",
-          note: NoteUtilsV2.toLogObj(n),
+          note: NoteUtils.toLogObj(n),
         });
         return this.writeNote(n, { updateExisting: true });
       })
@@ -682,16 +682,16 @@ export class FileStorageV2 implements DStoreV2 {
   }
 
   async updateNote(
-    note: NotePropsV2,
+    note: NoteProps,
     _opts?: EngineUpdateNodesOptsV2
   ): Promise<void> {
     const ctx = "updateNote";
     const maybeNote = this.notes[note.id];
     if (maybeNote) {
-      note = NoteUtilsV2.hydrate({ noteRaw: note, noteHydrated: maybeNote });
+      note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: maybeNote });
     }
     // TODO: remove
-    this.logger.debug({ ctx, note: NoteUtilsV2.toLogObj(note) });
+    this.logger.debug({ ctx, note: NoteUtils.toLogObj(note) });
     this.notes[note.id] = note;
     return;
   }
@@ -708,21 +708,21 @@ export class FileStorageV2 implements DStoreV2 {
     maybeNote,
     opts,
   }: {
-    note: NotePropsV2;
-    maybeNote?: NotePropsV2;
+    note: NoteProps;
+    maybeNote?: NoteProps;
     opts?: EngineWriteOptsV2;
-  }): Promise<NotePropsV2[]> {
+  }): Promise<NoteProps[]> {
     const ctx = "_writeNewNote";
     this.logger.info({
       ctx,
       msg: "enter",
-      note: NoteUtilsV2.toLogObj(note),
+      note: NoteUtils.toLogObj(note),
     });
-    let changed: NotePropsV2[] = [];
+    let changed: NoteProps[] = [];
     // if note exists, remove from parent and transplant children
     if (maybeNote) {
       // update changed
-      const parentNote = this.notes[maybeNote.parent as string] as NotePropsV2;
+      const parentNote = this.notes[maybeNote.parent as string] as NoteProps;
 
       // remove existing note from parent's children
       parentNote.children = _.reject<string[]>(
@@ -738,7 +738,7 @@ export class FileStorageV2 implements DStoreV2 {
     }
     // after we have deleted parent, add the current note as a parent
     if (!opts?.noAddParent) {
-      changed = NoteUtilsV2.addParent({
+      changed = NoteUtils.addParent({
         note,
         notesList: _.values(this.notes),
         createStubs: true,
@@ -748,24 +748,24 @@ export class FileStorageV2 implements DStoreV2 {
     this.logger.info({
       ctx,
       msg: "exit",
-      changed: changed.map((n) => NoteUtilsV2.toLogObj(n)),
+      changed: changed.map((n) => NoteUtils.toLogObj(n)),
     });
     return changed;
   }
 
   async writeNote(
-    note: NotePropsV2,
+    note: NoteProps,
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
     const ctx = "FileStore:writeNote";
-    let changed: NotePropsV2[] = [];
+    let changed: NoteProps[] = [];
     this.logger.info({
       ctx,
       msg: "enter",
       opts,
-      note: NoteUtilsV2.toLogObj(note),
+      note: NoteUtils.toLogObj(note),
     });
-    const maybeNote = NoteUtilsV2.getNoteByFnameV5({
+    const maybeNote = NoteUtils.getNoteByFnameV5({
       fname: note.fname,
       notes: this.notes,
       vault: note.vault,
@@ -786,7 +786,7 @@ export class FileStorageV2 implements DStoreV2 {
     }
 
     // add schema if applicable
-    const match = SchemaUtilsV2.matchPath({
+    const match = SchemaUtils.matchPath({
       notePath: note.fname,
       schemaModDict: this.schemas,
     });
@@ -808,7 +808,7 @@ export class FileStorageV2 implements DStoreV2 {
         msg: "pre:addSchema",
       });
       const { schema, schemaModule } = match;
-      NoteUtilsV2.addSchema({ note, schema, schemaModule });
+      NoteUtils.addSchema({ note, schema, schemaModule });
     }
     this.logger.info({
       ctx,

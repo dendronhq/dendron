@@ -7,7 +7,7 @@ import {
   DVault,
   getSlugger,
   NotePropsDictV2,
-  NotePropsV2,
+  NoteProps,
   VaultUtils,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
@@ -294,7 +294,7 @@ export class HierarchyUtils {
    */
   static getChildren = (opts: {
     skipLevels: number;
-    note: NotePropsV2;
+    note: NoteProps;
     notes: NotePropsDictV2;
   }) => {
     const { skipLevels, note, notes } = opts;

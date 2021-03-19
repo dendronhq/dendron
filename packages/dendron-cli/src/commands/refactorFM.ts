@@ -1,4 +1,4 @@
-import { DVault, NotePropsV2 } from "@dendronhq/common-all";
+import { DVault, NoteProps } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import path from "path";
 import { RefactorBaseCommand, RefactorRule } from "./refactorBase";
@@ -12,7 +12,7 @@ type CommonOpts = {
   overwriteFields?: string[];
 };
 
-type TFile = NotePropsV2;
+type TFile = NoteProps;
 
 export class RefactorFMCommand extends RefactorBaseCommand<TFile, any> {
   constructor() {
@@ -46,7 +46,7 @@ export class RefactorFMCommand extends RefactorBaseCommand<TFile, any> {
     return file;
   }
 
-  readFile(fpath: string): NotePropsV2 {
+  readFile(fpath: string): NoteProps {
     return file2Note(fpath, { fsPath: path.dirname(fpath) });
   }
 

@@ -1,4 +1,4 @@
-import { DPod, DVault, NoteUtilsV2, VaultUtils } from "@dendronhq/common-all";
+import { DPod, DVault, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import { ImportPod, ImportPodConfig } from "@dendronhq/pods-core";
 import fs from "fs-extra";
@@ -117,7 +117,7 @@ const IMPORT = {
         wsRoot,
         engine,
       });
-      const note = NoteUtilsV2.getNoteByFnameV5({
+      const note = NoteUtils.getNoteByFnameV5({
         fname: "baz",
         vault,
         notes: engine.notes,

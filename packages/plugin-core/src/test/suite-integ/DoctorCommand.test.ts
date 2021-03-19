@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteUtils } from "@dendronhq/common-all";
 import { DirResult, tmpDir } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
@@ -29,9 +29,9 @@ suite("notes", function () {
       await new DoctorCommand().run();
       // cehck that frontmatter is added
       const resp = fs.readFileSync(testFile, { encoding: "utf8" });
-      expect(NoteUtilsV2.RE_FM.exec(resp)).toBeTruthy();
-      expect(NoteUtilsV2.RE_FM_UPDATED.exec(resp)).toBeTruthy();
-      expect(NoteUtilsV2.RE_FM_CREATED.exec(resp)).toBeTruthy();
+      expect(NoteUtils.RE_FM.exec(resp)).toBeTruthy();
+      expect(NoteUtils.RE_FM_UPDATED.exec(resp)).toBeTruthy();
+      expect(NoteUtils.RE_FM_CREATED.exec(resp)).toBeTruthy();
       done();
     });
     setupDendronWorkspace(root.name, ctx, {
@@ -203,9 +203,9 @@ suite("notes", function () {
   //   //   await new DoctorCommand().run();
   //   //   // cehck that frontmatter is added
   //   //   const resp = fs.readFileSync(testFile, { encoding: "utf8" });
-  //   //   assert.ok(NoteUtilsV2.RE_FM.exec(resp));
-  //   //   assert.ok(NoteUtilsV2.RE_FM_UPDATED.exec(resp));
-  //   //   assert.ok(NoteUtilsV2.RE_FM_CREATED.exec(resp));
+  //   //   assert.ok(NoteUtils.RE_FM.exec(resp));
+  //   //   assert.ok(NoteUtils.RE_FM_UPDATED.exec(resp));
+  //   //   assert.ok(NoteUtils.RE_FM_CREATED.exec(resp));
   //   //   done();
   //   // });
   //   // setupDendronWorkspace(root.name, ctx, {
@@ -223,18 +223,18 @@ suite("notes", function () {
       fs.removeSync(path.join(root.name, "docs"));
       await new ReloadIndexCommand().run();
       const findings = await new DoctorCommand().run();
-      expect(_.find(findings?.data, { issue: "no siteRoot found" })).toBeTruthy();
+      expect(
+        _.find(findings?.data, { issue: "no siteRoot found" })
+      ).toBeTruthy();
       const docsDir = path.join(root.name, "docs");
       expect(fs.existsSync(docsDir)).toBeTruthy();
-      expect(fs.readdirSync(docsDir)).toEqual(
-        [
-          "404.md",
-          "Gemfile",
-          "_config.yml",
-          "assets",
-          "favicon.ico",
-        ]
-      );
+      expect(fs.readdirSync(docsDir)).toEqual([
+        "404.md",
+        "Gemfile",
+        "_config.yml",
+        "assets",
+        "favicon.ico",
+      ]);
       done();
     });
     setupDendronWorkspace(root.name, ctx, {

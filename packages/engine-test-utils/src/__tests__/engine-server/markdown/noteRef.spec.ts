@@ -1,6 +1,6 @@
 import {
   DEngineClientV2,
-  NotePropsV2,
+  NoteProps,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
@@ -153,7 +153,7 @@ describe("compilev2", () => {
 
   const WITH_ANCHOR_PRE_SETUP = async (opts: WorkspaceOpts) => {
     await ENGINE_HOOKS.setupBasic(opts);
-    await modifyNote(opts, "foo", (note: NotePropsV2) => {
+    await modifyNote(opts, "foo", (note: NoteProps) => {
       const txt = [
         "---",
         "id: foo",

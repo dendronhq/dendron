@@ -1,4 +1,4 @@
-import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { TextEditor, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
@@ -29,22 +29,22 @@ export class CopyNoteLinkCommand extends BasicCommand<
 
   async execute(_opts: CommandOpts) {
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
-    const fname = NoteUtilsV2.uri2Fname(editor.document.uri);
-    let note: NotePropsV2;
+    const fname = NoteUtils.uri2Fname(editor.document.uri);
+    let note: NoteProps;
 
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-    note = NoteUtilsV2.getNoteByFnameV5({
+    note = NoteUtils.getNoteByFnameV5({
       fname,
       vault,
       notes: getEngine().notes,
       wsRoot: DendronWorkspace.wsRoot(),
-    }) as NotePropsV2;
+    }) as NoteProps;
     if (!note) {
       throw Error(`${fname} not found in engine`);
     }
     const { header } = getHeaderFromSelection({ clean: true });
     const useVaultPrefix = _.size(getEngine().vaultsv3) > 1;
-    const link = NoteUtilsV2.createWikiLink({ note, header, useVaultPrefix });
+    const link = NoteUtils.createWikiLink({ note, header, useVaultPrefix });
     try {
       clipboard.writeText(link);
     } catch (err) {

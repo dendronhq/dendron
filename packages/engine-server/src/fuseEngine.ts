@@ -2,11 +2,11 @@ import {
   DEngineMode,
   DVault,
   NotePropsDictV2,
-  NotePropsV2,
+  NoteProps,
   SchemaModuleDictV2,
   SchemaModulePropsV2,
-  SchemaPropsV2,
-  SchemaUtilsV2,
+  SchemaProps,
+  SchemaUtils,
 } from "@dendronhq/common-all";
 import Fuse from "fuse.js";
 import _ from "lodash";
@@ -49,21 +49,21 @@ type FuseEngineOpts = {
 
 export class FuseEngine {
   public notesIndex: Fuse<NoteIndexProps>;
-  public schemaIndex: Fuse<SchemaPropsV2>;
+  public schemaIndex: Fuse<SchemaProps>;
 
   constructor(opts: FuseEngineOpts) {
-    this.notesIndex = createFuse<NotePropsV2>([], {
+    this.notesIndex = createFuse<NoteProps>([], {
       exactMatch: opts.mode === "exact",
       preset: "note",
     });
-    this.schemaIndex = createFuse<SchemaPropsV2>([], {
+    this.schemaIndex = createFuse<SchemaProps>([], {
       exactMatch: opts.mode === "exact",
       preset: "schema",
     });
   }
 
-  async querySchema({ qs }: { qs: string }): Promise<SchemaPropsV2[]> {
-    let items: SchemaPropsV2[];
+  async querySchema({ qs }: { qs: string }): Promise<SchemaProps[]> {
+    let items: SchemaProps[];
     if (qs === "") {
       const results = this.schemaIndex.search("root");
       items = [results[0].item];
@@ -84,7 +84,7 @@ export class FuseEngine {
       items = [results[0].item];
     } else if (qs === "*") {
       // @ts-ignore
-      items = this.notesIndex._docs as NotePropsV2[];
+      items = this.notesIndex._docs as NoteProps[];
     } else {
       const results = this.notesIndex.search(qs);
       items = _.map(results, (resp) => resp.item);
@@ -94,7 +94,7 @@ export class FuseEngine {
 
   async updateSchemaIndex(schemas: SchemaModuleDictV2) {
     this.schemaIndex.setCollection(
-      _.map(_.values(schemas), (ent) => SchemaUtilsV2.getModuleRoot(ent))
+      _.map(_.values(schemas), (ent) => SchemaUtils.getModuleRoot(ent))
     );
   }
 
@@ -109,7 +109,7 @@ export class FuseEngine {
     );
   }
 
-  async removeNoteFromIndex(note: NotePropsV2) {
+  async removeNoteFromIndex(note: NoteProps) {
     this.notesIndex.remove((doc) => {
       // FIXME: can be undefined, dunno why
       if (!doc) {
@@ -120,12 +120,12 @@ export class FuseEngine {
   }
 
   async removeSchemaFromIndex(smod: SchemaModulePropsV2) {
-    this.schemaIndex.remove((doc: SchemaPropsV2) => {
+    this.schemaIndex.remove((doc: SchemaProps) => {
       // FIXME: can be undefined, dunno why
       if (!doc) {
         return false;
       }
-      return doc.id === SchemaUtilsV2.getModuleRoot(smod).id;
+      return doc.id === SchemaUtils.getModuleRoot(smod).id;
     });
   }
 }

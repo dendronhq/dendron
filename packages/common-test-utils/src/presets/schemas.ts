@@ -1,8 +1,8 @@
 import {
-  DNodeUtilsV2,
+  DNodeUtils,
   DVault,
   SchemaModulePropsV2,
-  SchemaUtilsV2,
+  SchemaUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -36,9 +36,9 @@ export const SCHEMA_PRESETS_V4 = {
     fname: "foo",
     modifier: (schema) => {
       const vault = schema.root.vault;
-      const child = SchemaUtilsV2.create({ id: "ch1", vault });
+      const child = SchemaUtils.create({ id: "ch1", vault });
       schema.schemas["ch1"] = child;
-      DNodeUtilsV2.addChild(schema.root, child);
+      DNodeUtils.addChild(schema.root, child);
       return schema;
     },
   }),
@@ -46,9 +46,9 @@ export const SCHEMA_PRESETS_V4 = {
     fname: "bar",
     modifier: (schema) => {
       const vault = schema.root.vault;
-      const child = SchemaUtilsV2.create({ id: "ch1", vault });
+      const child = SchemaUtils.create({ id: "ch1", vault });
       schema.schemas["ch1"] = child;
-      DNodeUtilsV2.addChild(schema.root, child);
+      DNodeUtils.addChild(schema.root, child);
       return schema;
     },
   }),

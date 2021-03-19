@@ -1,4 +1,4 @@
-import { NoteChangeEntry, NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteChangeEntry, NoteUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -38,7 +38,7 @@ const NOTES = {
       const vault = vaults[0];
       const notes = engine.notes;
       const resp = await engine.deleteNote(
-        NoteUtilsV2.getNoteByFnameV5({
+        NoteUtils.getNoteByFnameV5({
           fname: "foo.ch1",
           vault,
           notes,
@@ -94,7 +94,7 @@ const NOTES = {
       const vault = vaults[0];
       const notes = engine.notes;
       const resp = await engine.deleteNote(
-        NoteUtilsV2.getNoteByFnameV5({
+        NoteUtils.getNoteByFnameV5({
           fname: "foo.ch1",
           vault,
           notes,
@@ -132,7 +132,7 @@ const NOTES = {
   DOMAIN_CHILDREN: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
-      const noteToDelete = NoteUtilsV2.getNoteByFnameV5({
+      const noteToDelete = NoteUtils.getNoteByFnameV5({
         fname: "foo",
         vault,
         notes: engine.notes,
@@ -184,7 +184,7 @@ const NOTES = {
   DOMAIN_NO_CHILDREN: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
       const vault = vaults[0];
-      const noteToDelete = NoteUtilsV2.getNoteByFnameV5({
+      const noteToDelete = NoteUtils.getNoteByFnameV5({
         fname: "foo",
         vault,
         notes: engine.notes,

@@ -19,8 +19,8 @@ import {
   GetNotePayloadV2,
   NoteChangeEntry,
   NotePropsDictV2,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   QueryNotesOpts,
   RenameNoteOptsV2,
   RenameNotePayload,
@@ -212,14 +212,14 @@ export class DendronEngineV2 implements DEngineV2 {
   }: GetNoteOptsV2): Promise<RespV2<GetNotePayloadV2>> {
     const ctx = "getNoteByPath";
     this.logger.debug({ ctx, npath, createIfNew, msg: "enter" });
-    const maybeNote = NoteUtilsV2.getNoteByFnameV5({
+    const maybeNote = NoteUtils.getNoteByFnameV5({
       fname: npath,
       notes: this.notes,
       vault,
       wsRoot: this.wsRoot,
     });
     this.logger.debug({ ctx, maybeNote, msg: "post-query" });
-    let noteNew: NotePropsV2 | undefined = maybeNote;
+    let noteNew: NoteProps | undefined = maybeNote;
     let changed: NoteChangeEntry[] = [];
     let error = null;
     let updateExisting = false;
@@ -230,7 +230,7 @@ export class DendronEngineV2 implements DEngineV2 {
         delete noteNew.stub;
         updateExisting = true;
       } else {
-        noteNew = NoteUtilsV2.createWithSchema({
+        noteNew = NoteUtils.createWithSchema({
           noteOpts: { fname: npath, vault },
           engine: this,
         });
@@ -317,7 +317,7 @@ export class DendronEngineV2 implements DEngineV2 {
     let items = await this.fuseEngine.queryNote({ qs });
     let item = this.notes[items[0].id];
     if (createIfNew) {
-      let noteNew: NotePropsV2;
+      let noteNew: NoteProps;
       if (item?.fname === qs && item?.stub) {
         noteNew = item;
         noteNew.stub = false;
@@ -328,7 +328,7 @@ export class DendronEngineV2 implements DEngineV2 {
             data: null as any,
           };
         }
-        noteNew = NoteUtilsV2.create({ fname: qs, vault });
+        noteNew = NoteUtils.create({ fname: qs, vault });
       }
       const changed = await this.writeNote(noteNew, { newNode: true });
       await this.refreshNotesV2(changed.data);
@@ -354,7 +354,7 @@ export class DendronEngineV2 implements DEngineV2 {
   async refreshNotesV2(notes: NoteChangeEntry[]) {
     notes.forEach((ent: NoteChangeEntry) => {
       const { id } = ent.note;
-      //const uri = NoteUtilsV2.getURI({ note: ent.note, wsRoot: this.wsRoot });
+      //const uri = NoteUtils.getURI({ note: ent.note, wsRoot: this.wsRoot });
       if (ent.status === "delete") {
         delete this.notes[id];
         // this.history &&
@@ -388,7 +388,7 @@ export class DendronEngineV2 implements DEngineV2 {
   }
 
   async updateNote(
-    note: NotePropsV2,
+    note: NoteProps,
     opts?: EngineUpdateNodesOptsV2
   ): Promise<void> {
     const out = this.store.updateNote(note, opts);
@@ -422,7 +422,7 @@ export class DendronEngineV2 implements DEngineV2 {
   }
 
   async writeNote(
-    note: NotePropsV2,
+    note: NoteProps,
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
     const out = await this.store.writeNote(note, opts);

@@ -1,10 +1,10 @@
 import {
   DendronError,
-  DNodeUtilsV2,
+  DNodeUtils,
   DNoteLoc,
   DNoteRefLink,
   DUtils,
-  NoteUtilsV2,
+  NoteUtils,
   RespV2,
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
@@ -159,7 +159,7 @@ function convertNoteRef(
       DUtils.minimatch(ent.fname, link.from.fname)
     );
     noteRefs = _.sortBy(
-      out.map((ent) => NoteUtilsV2.toNoteLoc(ent)),
+      out.map((ent) => NoteUtils.toNoteLoc(ent)),
       "fname"
     );
   } else {
@@ -169,7 +169,7 @@ function convertNoteRef(
     const fname = ref.fname;
     const alias = ref.alias;
     // TODO: find first unit with path
-    const npath = DNodeUtilsV2.getFullPath({
+    const npath = DNodeUtils.getFullPath({
       wsRoot: engine.wsRoot,
       vault,
       basename: fname + ".md",
@@ -193,7 +193,7 @@ function convertNoteRef(
         let suffix = "";
         let href = fname;
         if (wikiLinkOpts?.useId) {
-          const maybeNote = NoteUtilsV2.getNoteByFnameV5({
+          const maybeNote = NoteUtils.getNoteByFnameV5({
             fname,
             notes: engine.notes,
             vault,
@@ -205,7 +205,7 @@ function convertNoteRef(
           href = maybeNote?.id;
         }
         if (dest === DendronASTDest.HTML) {
-          const maybeNote = NoteUtilsV2.getNoteByFnameV5({
+          const maybeNote = NoteUtils.getNoteByFnameV5({
             fname,
             notes: engine.notes,
             vault,
@@ -271,7 +271,7 @@ export function convertNoteRefAST(
       DUtils.minimatch(ent.fname, link.from.fname)
     );
     noteRefs = _.sortBy(
-      out.map((ent) => NoteUtilsV2.toNoteLoc(ent)),
+      out.map((ent) => NoteUtils.toNoteLoc(ent)),
       "fname"
     );
   } else {
@@ -281,7 +281,7 @@ export function convertNoteRefAST(
     const fname = ref.fname;
     const alias = ref.alias;
     // TODO: find first unit with path
-    const npath = DNodeUtilsV2.getFullPath({
+    const npath = DNodeUtils.getFullPath({
       wsRoot: engine.wsRoot,
       vault,
       basename: fname + ".md",
@@ -304,7 +304,7 @@ export function convertNoteRefAST(
         let suffix = "";
         let href = fname;
         if (wikiLinkOpts?.useId) {
-          const maybeNote = NoteUtilsV2.getNoteByFnameV5({
+          const maybeNote = NoteUtils.getNoteByFnameV5({
             fname,
             notes: engine.notes,
             vault,
@@ -317,7 +317,7 @@ export function convertNoteRefAST(
           href = maybeNote?.id;
         }
         if (dest === DendronASTDest.HTML) {
-          const maybeNote = NoteUtilsV2.getNoteByFnameV5({
+          const maybeNote = NoteUtils.getNoteByFnameV5({
             fname,
             notes: engine.notes,
             vault,

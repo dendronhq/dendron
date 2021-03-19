@@ -1,10 +1,10 @@
 import {
   DVault,
   genUUID,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   SchemaModulePropsV2,
-  SchemaUtilsV2,
+  SchemaUtils,
 } from "@dendronhq/common-all";
 import {
   file2Note,
@@ -21,7 +21,7 @@ export type CreateNoteOptsV4 = {
   wsRoot: string;
   fname: string;
   body?: string;
-  props?: Partial<Omit<NotePropsV2, "vault|fname|body">>;
+  props?: Partial<Omit<NoteProps, "vault|fname|body">>;
   genRandomId?: boolean;
   noWrite?: boolean;
 };
@@ -40,7 +40,7 @@ export class NoteTestUtilsV4 {
       noWrite: false,
     });
 
-    let schema = SchemaUtilsV2.createModuleProps({ fname, vault });
+    let schema = SchemaUtils.createModuleProps({ fname, vault });
     if (opts.modifier) {
       schema = opts.modifier(schema);
     }
@@ -70,7 +70,7 @@ export class NoteTestUtilsV4 {
       id: genRandomId ? genUUID() : fname,
     };
 
-    const note = NoteUtilsV2.create({
+    const note = NoteUtils.create({
       ...defaultOpts,
       ...props,
       fname,
@@ -85,7 +85,7 @@ export class NoteTestUtilsV4 {
 
   static async modifyNoteByPath(
     opts: { wsRoot: string; vault: DVault; fname: string },
-    cb: (note: NotePropsV2) => NotePropsV2
+    cb: (note: NoteProps) => NoteProps
   ) {
     const { fname, vault, wsRoot } = opts;
     const npath = path.join(vault2Path({ vault, wsRoot }), fname + ".md");

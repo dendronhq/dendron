@@ -1,8 +1,8 @@
 import {
   ENGINE_ERROR_CODES,
   ERROR_CODES,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -144,12 +144,12 @@ const NOTES = {
   ),
   LINKS: new TestPresetEntryV4(
     async ({ engine, vaults }) => {
-      const noteAlpha = NoteUtilsV2.getNoteByFnameV5({
+      const noteAlpha = NoteUtils.getNoteByFnameV5({
         fname: "alpha",
         notes: engine.notes,
         vault: vaults[0],
         wsRoot: engine.wsRoot,
-      }) as NotePropsV2;
+      }) as NoteProps;
       return [
         {
           actual: noteAlpha.links,
@@ -203,19 +203,19 @@ const NOTES = {
   ),
   DOMAIN_STUB: new TestPresetEntryV4(
     async ({ wsRoot, vaults, engine }) => {
-      const noteRoot = NoteUtilsV2.getNoteByFnameV5({
+      const noteRoot = NoteUtils.getNoteByFnameV5({
         fname: "root",
         notes: engine.notes,
         vault: vaults[0],
         wsRoot: engine.wsRoot,
-      }) as NotePropsV2;
+      }) as NoteProps;
 
-      const noteChild = NoteUtilsV2.getNoteByFnameV5({
+      const noteChild = NoteUtils.getNoteByFnameV5({
         wsRoot: engine.wsRoot,
         fname: "foo",
         notes: engine.notes,
         vault: vaults[0],
-      }) as NotePropsV2;
+      }) as NoteProps;
       const checkVault = await FileTestUtils.assertInVault({
         wsRoot,
         vault: vaults[0],
@@ -244,12 +244,12 @@ const NOTES = {
   ),
   NOTE_WITH_CUSTOM_ATT: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
-      const noteRoot = NoteUtilsV2.getNoteByFnameV5({
+      const noteRoot = NoteUtils.getNoteByFnameV5({
         fname: "foo",
         notes: engine.notes,
         vault: vaults[0],
         wsRoot: engine.wsRoot,
-      }) as NotePropsV2;
+      }) as NoteProps;
 
       return [
         {

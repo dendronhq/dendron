@@ -1,11 +1,11 @@
 import {
   DendronError,
   DEngineClientV2,
-  DNodeUtilsV2,
+  DNodeUtils,
   DVault,
   getStage,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   SchemaModulePropsV2,
   Time,
 } from "@dendronhq/common-all";
@@ -241,7 +241,7 @@ export class VSCodeUtils {
     return editor as vscode.TextEditor;
   }
 
-  static async openNote(note: NotePropsV2) {
+  static async openNote(note: NoteProps) {
     const { vault, fname } = note;
     const wsRoot = DendronWorkspace.wsRoot();
     const vpath = vault2Path({ vault, wsRoot });
@@ -356,13 +356,13 @@ export class DendronClientUtilsV2 {
     let out: string;
     switch (addBehavior) {
       case "childOfDomain": {
-        out = DNodeUtilsV2.domainName(fname);
+        out = DNodeUtils.domainName(fname);
         break;
       }
       case "childOfDomainNamespace": {
-        out = DNodeUtilsV2.domainName(fname);
+        out = DNodeUtils.domainName(fname);
         const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-        const domain = NoteUtilsV2.getNoteByFnameV5({
+        const domain = NoteUtils.getNoteByFnameV5({
           fname,
           notes: opts.engine.notes,
           vault,
@@ -372,7 +372,7 @@ export class DendronClientUtilsV2 {
           const smod = opts.engine.schemas[domain.schema.moduleId];
           const schema = smod.schemas[domain.schema.schemaId];
           if (schema && schema.data.namespace) {
-            out = NoteUtilsV2.getPathUpTo(fname, 2);
+            out = NoteUtils.getPathUpTo(fname, 2);
           }
         }
         break;

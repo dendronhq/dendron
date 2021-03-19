@@ -1,4 +1,4 @@
-import { DVault, NotePropsV2 } from "@dendronhq/common-all";
+import { DVault, NoteProps } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -10,7 +10,7 @@ const UPDATE_ITEMS = {
     before: async ({ vault }: { vault: DVault }) => {
       fs.removeSync(path.join(vault.fsPath, "foo.ch1.md"));
     },
-    results: async ({ items }: { items: NotePropsV2 }) => {
+    results: async ({ items }: { items: NoteProps }) => {
       const schemaItem = _.pick(_.find(items, { fname: "foo.ch1" }), [
         "fname",
         "schemaStub",
@@ -36,7 +36,7 @@ const ACCEPT_ITEMS = {
       activeNote,
     }: {
       activeFileName: string;
-      activeNote: NotePropsV2;
+      activeNote: NoteProps;
     }) => {
       return [
         {

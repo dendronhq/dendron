@@ -1,15 +1,15 @@
 import {
-  DNodeUtilsV2,
+  DNodeUtils,
   DVault,
   NoteChangeEntry,
   NoteOptsV2,
   NotePropsDictV2,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   SchemaModuleOptsV2,
   SchemaModulePropsV2,
-  SchemaPropsV2,
-  SchemaUtilsV2,
+  SchemaProps,
+  SchemaUtils,
   WorkspaceOpts,
   WorkspaceVault,
 } from "@dendronhq/common-all";
@@ -110,14 +110,14 @@ export class EngineTestUtilsV4 {
           name: ent === "vault3" ? "vaultThree" : undefined,
         },
         preSetupHook: async ({ vpath, vault, wsRoot }) => {
-          const rootModule = SchemaUtilsV2.createRootModule({
+          const rootModule = SchemaUtils.createRootModule({
             created: "1",
             updated: "1",
             vault,
           });
           await schemaModuleOpts2File(rootModule, vpath, "root");
 
-          const rootNote = await NoteUtilsV2.createRoot({
+          const rootNote = await NoteUtils.createRoot({
             created: "1",
             updated: "1",
             vault,
@@ -251,11 +251,11 @@ export class NodeTestUtilsV2 {
   static createNoteProps = async (opts: {
     rootName: string;
     vaultPath: string;
-    props?: Partial<NotePropsV2>;
+    props?: Partial<NoteProps>;
   }) => {
     const { rootName, vaultPath, props } = opts;
     const vault = { fsPath: vaultPath };
-    const foo = NoteUtilsV2.create({
+    const foo = NoteUtils.create({
       fname: `${rootName}`,
       id: `${rootName}`,
       created: "1",
@@ -264,7 +264,7 @@ export class NodeTestUtilsV2 {
       ...props,
       vault,
     });
-    const ch1 = NoteUtilsV2.create({
+    const ch1 = NoteUtils.create({
       fname: `${rootName}.ch1`,
       id: `${rootName}.ch1`,
       created: "1",
@@ -289,7 +289,7 @@ export class NodeTestUtilsV2 {
     withBody?: boolean;
     vaultDir: string;
     noteProps?: Omit<NoteOptsV2, "vault"> & { vault?: DVault };
-  }): Promise<NotePropsV2> => {
+  }): Promise<NoteProps> => {
     const cleanOpts = _.defaults(opts, {
       withBody: true,
       noteProps: [] as NoteOptsV2[],
@@ -301,7 +301,7 @@ export class NodeTestUtilsV2 {
     const n = cleanOpts.noteProps;
     const body = cleanOpts.withBody ? n.fname + " body" : "";
     const vault = { fsPath: cleanOpts.vaultDir };
-    const _n = NoteUtilsV2.create({ ...defaultOpts, body, ...n, vault });
+    const _n = NoteUtils.create({ ...defaultOpts, body, ...n, vault });
     await note2File({
       note: _n,
       vault: { fsPath: cleanOpts.vaultDir },
@@ -324,7 +324,7 @@ export class NodeTestUtilsV2 {
       created: "1",
       updated: "1",
     };
-    const rootNote = await NoteUtilsV2.createRoot({
+    const rootNote = await NoteUtils.createRoot({
       ...defaultOpts,
       vault,
     });
@@ -334,8 +334,8 @@ export class NodeTestUtilsV2 {
     await Promise.all(
       cleanOpts.noteProps.map(async (n) => {
         const body = cleanOpts.withBody ? n.fname + " body" : "";
-        const _n = NoteUtilsV2.create({ ...defaultOpts, body, ...n, vault });
-        DNodeUtilsV2.addChild(rootNote, _n);
+        const _n = NoteUtils.create({ ...defaultOpts, body, ...n, vault });
+        DNodeUtils.addChild(rootNote, _n);
         if (cleanOpts.vaultPath) {
           await note2File({
             note: _n,
@@ -358,10 +358,10 @@ export class NodeTestUtilsV2 {
   static createSchema = async (opts: {
     vaultDir: string;
     fname: string;
-    schemas: SchemaPropsV2[];
+    schemas: SchemaProps[];
   }): Promise<SchemaModulePropsV2> => {
     const { vaultDir, schemas, fname } = opts;
-    const schema = SchemaUtilsV2.createModuleProps({
+    const schema = SchemaUtils.createModuleProps({
       fname,
       vault: { fsPath: vaultDir },
     });
@@ -381,7 +381,7 @@ export class NodeTestUtilsV2 {
     });
     const { vaultPath, schemaMO } = cleanOpts;
     const vault = { fsPath: vaultPath };
-    const rootModule = SchemaUtilsV2.createRootModule({
+    const rootModule = SchemaUtils.createRootModule({
       created: "1",
       updated: "1",
       vault,
@@ -400,11 +400,11 @@ export class NodeTestUtilsV2 {
   static createSchemaModuleOpts = async (opts: {
     vaultDir: string;
     rootName: string;
-    rootOpts?: Partial<SchemaPropsV2>;
+    rootOpts?: Partial<SchemaProps>;
   }) => {
     const { vaultDir, rootName, rootOpts } = opts;
     const vault = { fsPath: vaultDir };
-    const schema = SchemaUtilsV2.create({
+    const schema = SchemaUtils.create({
       fname: `${rootName}`,
       id: `${rootName}`,
       parent: "root",
@@ -414,17 +414,17 @@ export class NodeTestUtilsV2 {
       vault,
       ...rootOpts,
     });
-    const ch1 = SchemaUtilsV2.create({
+    const ch1 = SchemaUtils.create({
       fname: `${rootName}`,
       vault,
       id: "ch1",
       created: "1",
       updated: "1",
     });
-    DNodeUtilsV2.addChild(schema, ch1);
+    DNodeUtils.addChild(schema, ch1);
     const schemaModuleProps: [SchemaModuleOptsV2, string][] = [
       [
-        SchemaUtilsV2.createModule({
+        SchemaUtils.createModule({
           version: 1,
           schemas: [schema, ch1],
         }),
@@ -440,7 +440,7 @@ export class NodeTestUtilsV2 {
     return schemaModuleProps[0][0];
   };
 
-  static normalizeNote({ note }: { note: NotePropsV2 }): Partial<NotePropsV2> {
+  static normalizeNote({ note }: { note: NoteProps }): Partial<NoteProps> {
     return {
       ..._.omit(note, ["body", "parent", "id", "vault"]),
       body: _.trim(note.body),
@@ -448,8 +448,8 @@ export class NodeTestUtilsV2 {
   }
 
   static normalizeNotes(
-    notes: NotePropsV2[] | NotePropsDictV2
-  ): Partial<NotePropsV2>[] {
+    notes: NoteProps[] | NotePropsDictV2
+  ): Partial<NoteProps>[] {
     if (!_.isArray(notes)) {
       notes = _.values(notes);
     }
@@ -504,18 +504,18 @@ export class NodeTestPresetsV2 {
     await NodeTestUtilsV2.createSchema({
       vaultDir,
       schemas: [
-        SchemaUtilsV2.create({
+        SchemaUtils.create({
           id: "bar",
           parent: "root",
           children: ["ch1", "ch2"],
           vault,
         }),
-        SchemaUtilsV2.create({
+        SchemaUtils.create({
           id: "ch1",
           template: { id: "bar.template.ch1", type: "note" },
           vault,
         }),
-        SchemaUtilsV2.create({
+        SchemaUtils.create({
           id: "ch2",
           template: { id: "bar.template.ch2", type: "note" },
           namespace: true,
@@ -631,14 +631,11 @@ export class NoteTestPresetsV2 {
             fs.removeSync(path.join(vaultDir, "foo.md"));
           },
           results: async ({ notes }: { notes: NotePropsDictV2 }) => {
-            const note = NoteUtilsV2.getNoteByFname(
-              "foo",
-              notes
-            ) as NotePropsV2;
+            const note = NoteUtils.getNoteByFname("foo", notes) as NoteProps;
             const vault = note.vault;
-            const root = NoteUtilsV2.getNoteByFname("root", notes, {
+            const root = NoteUtils.getNoteByFname("root", notes, {
               vault,
-            }) as NotePropsV2;
+            }) as NoteProps;
             const scenarios = [
               { actual: _.size(notes), expected: 3 },
               { actual: root.children, expected: [note.id] },
@@ -731,7 +728,7 @@ export class NoteTestPresetsV2 {
         domainStub: new TestPresetEntry({
           label: "write child, parent stub",
           before: async ({ vaultDir }: { vaultDir: string }) => {
-            const note = NoteUtilsV2.create({
+            const note = NoteUtils.create({
               fname: "bar.ch1",
               vault: { fsPath: vaultDir },
             });
@@ -742,15 +739,12 @@ export class NoteTestPresetsV2 {
             });
           },
           results: async ({ notes }: { notes: NotePropsDictV2 }) => {
-            const root = NoteUtilsV2.getNoteByFname(
-              "root",
-              notes
-            ) as NotePropsV2;
-            const bar = NoteUtilsV2.getNoteByFname("bar", notes) as NotePropsV2;
-            const child = NoteUtilsV2.getNoteByFname(
+            const root = NoteUtils.getNoteByFname("root", notes) as NoteProps;
+            const bar = NoteUtils.getNoteByFname("bar", notes) as NoteProps;
+            const child = NoteUtils.getNoteByFname(
               "bar.ch1",
               notes
-            ) as NotePropsV2;
+            ) as NoteProps;
             return [
               {
                 actual: _.size(root.children),

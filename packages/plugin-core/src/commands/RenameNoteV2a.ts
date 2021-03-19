@@ -1,9 +1,9 @@
 import {
   DendronError,
-  DNodeUtilsV2,
+  DNodeUtils,
   ENGINE_ERROR_CODES,
   NoteChangeEntry,
-  NoteUtilsV2,
+  NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -63,7 +63,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
     const ws = DendronWorkspace.instance();
     const notes = ws.getEngine().notes;
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-    let newNote = NoteUtilsV2.getNoteByFnameV5({
+    let newNote = NoteUtils.getNoteByFnameV5({
       fname: inputs.dest,
       notes,
       vault,
@@ -76,7 +76,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
         friendly: `${inputs.dest} exists`,
       });
     }
-    newNote = NoteUtilsV2.create({
+    newNote = NoteUtils.create({
       fname: inputs.dest,
       id: newNote?.id,
       vault,
@@ -117,7 +117,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
         ws.vaultWatcher.pause = true;
       }
       const engine = ws.getEngine();
-      const oldFname = DNodeUtilsV2.fname(oldUri.fsPath);
+      const oldFname = DNodeUtils.fname(oldUri.fsPath);
       const vault = VaultUtils.getVaultByNotePathV4({
         fsPath: oldUri.fsPath,
         wsRoot: DendronWorkspace.wsRoot(),
@@ -130,7 +130,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
           vault,
         },
         newLoc: {
-          fname: DNodeUtilsV2.fname(newUri.fsPath),
+          fname: DNodeUtils.fname(newUri.fsPath),
           vault,
         },
       });

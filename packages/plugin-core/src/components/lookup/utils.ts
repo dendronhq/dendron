@@ -1,10 +1,10 @@
 import {
   DNodePropsQuickInputV2,
   DNodePropsV2,
-  DNodeUtilsV2,
+  DNodeUtils,
   DVault,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -27,7 +27,7 @@ export const UPDATET_SOURCE = {
 };
 
 export function createNoActiveItem(vault: DVault): DNodePropsQuickInputV2 {
-  const props = DNodeUtilsV2.create({
+  const props = DNodeUtils.create({
     fname: CREATE_NEW_LABEL,
     type: "note",
     vault,
@@ -127,7 +127,7 @@ export class PickerUtilsV2 {
   }
 
   static createDendronQuickPickItemFromNote(
-    opts: NotePropsV2
+    opts: NoteProps
   ): DNodePropsQuickInputV2 {
     return {
       ...opts,
@@ -137,10 +137,10 @@ export class PickerUtilsV2 {
 
   static dumpPicker(picker: DendronQuickPickerV2) {
     const activeItems = picker.activeItems.map((ent) =>
-      NoteUtilsV2.toLogObj(ent)
+      NoteUtils.toLogObj(ent)
     );
     const selectedItems = picker.selectedItems.map((ent) =>
-      NoteUtilsV2.toLogObj(ent)
+      NoteUtils.toLogObj(ent)
     );
     const value = picker.value;
     return { activeItems, selectedItems, value };
@@ -180,7 +180,7 @@ export class PickerUtilsV2 {
     depth: number
   ): DNodePropsQuickInputV2[] => {
     return _.reject(items, (ent) => {
-      return DNodeUtilsV2.getDepth(ent) > depth;
+      return DNodeUtils.getDepth(ent) > depth;
     });
   };
 

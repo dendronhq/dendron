@@ -1,8 +1,8 @@
-import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
   NOTE_PRESETS_V4,
-  toPlainObject
+  toPlainObject,
 } from "@dendronhq/common-test-utils";
 import path from "path";
 import * as vscode from "vscode";
@@ -41,7 +41,7 @@ suite("BacklinksTreeDataProvider", function () {
   });
 
   test("basics", function (done) {
-    let noteWithTarget: NotePropsV2;
+    let noteWithTarget: NoteProps;
 
     runLegacyMultiWorkspaceTest({
       ctx,
@@ -60,7 +60,7 @@ suite("BacklinksTreeDataProvider", function () {
         const out = toPlainObject(await getChildren()) as any;
         expect(out[0].command.arguments[0].path as string).toEqual(
           path.join(wsRoot, vaults[0].fsPath, "beta.md")
-        )
+        );
         expect(out.length).toEqual(1);
         done();
       },
@@ -90,16 +90,16 @@ suite("BacklinksTreeDataProvider", function () {
         const out = toPlainObject(await getChildren()) as any;
         expect(out[0].command.arguments[0].path as string).toEqual(
           path.join(wsRoot, vaults[1].fsPath, "beta.md")
-        )
-        expect(out.length).toEqual(1)
+        );
+        expect(out.length).toEqual(1);
         done();
       },
     });
   });
 
   test("with anchor", function (done) {
-    let noteWithTarget: NotePropsV2;
-    let noteWithLink: NotePropsV2;
+    let noteWithTarget: NoteProps;
+    let noteWithLink: NoteProps;
 
     runMultiVaultTest({
       ctx,
@@ -117,7 +117,7 @@ suite("BacklinksTreeDataProvider", function () {
         await VSCodeUtils.openNote(noteWithTarget);
         const out = toPlainObject(await getChildren()) as any;
         expect(out[0].command.arguments[0].path as string).toEqual(
-          NoteUtilsV2.getPathV4({
+          NoteUtils.getPathV4({
             note: noteWithLink,
             wsRoot: DendronWorkspace.wsRoot(),
           })
@@ -129,8 +129,8 @@ suite("BacklinksTreeDataProvider", function () {
   });
 
   test("with alias", function (done) {
-    let noteWithTarget: NotePropsV2;
-    let noteWithLink: NotePropsV2;
+    let noteWithTarget: NoteProps;
+    let noteWithLink: NoteProps;
 
     runMultiVaultTest({
       ctx,
@@ -149,10 +149,10 @@ suite("BacklinksTreeDataProvider", function () {
         const out = toPlainObject(await getChildren()) as any;
         // assert.strictEqual(
         //   out[0].command.arguments[0].path as string,
-        //   NoteUtilsV2.getPathV4({ note: noteWithLink, wsRoot })
+        //   NoteUtils.getPathV4({ note: noteWithLink, wsRoot })
         // );
         expect(out[0].command.arguments[0].path as string).toEqual(
-          NoteUtilsV2.getPathV4({ note: noteWithLink, wsRoot })
+          NoteUtils.getPathV4({ note: noteWithLink, wsRoot })
         );
         // assert.strictEqual(out.length, 1);
         expect(out.length).toEqual(1);

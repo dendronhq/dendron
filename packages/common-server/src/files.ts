@@ -164,7 +164,7 @@ export function resolvePath(filePath: string, root?: string): string {
   }
 }
 
-// @deprecate, NoteUtilsV2.normalizeFname
+// @deprecate, NoteUtils.normalizeFname
 export function removeMDExtension(nodePath: string) {
   const idx = nodePath.lastIndexOf(".md");
   if (idx > 0) {

@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteUtils } from "@dendronhq/common-all";
 import {
   ENGINE_HOOKS_MULTI,
   NOTE_PRESETS_V4,
@@ -37,7 +37,7 @@ suite("Scratch Notes", function () {
           const vault = vaults[1];
           const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
           const notes = getWS().getEngine().notes;
-          const note = NoteUtilsV2.getNoteByFnameV5({
+          const note = NoteUtils.getNoteByFnameV5({
             fname,
             notes,
             vault,
@@ -69,7 +69,7 @@ suite("Scratch Notes", function () {
           const vault = vaults[1];
           const fname = "daily";
           const notes = getWS().getEngine().notes;
-          const note = NoteUtilsV2.getNoteByFnameV5({
+          const note = NoteUtils.getNoteByFnameV5({
             fname,
             notes,
             vault,

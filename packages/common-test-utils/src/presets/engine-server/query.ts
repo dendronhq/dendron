@@ -1,8 +1,4 @@
-import {
-  DNodeUtilsV2,
-  NoteUtilsV2,
-  SchemaUtilsV2,
-} from "@dendronhq/common-all";
+import { DNodeUtils, NoteUtils, SchemaUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { TestPresetEntryV4 } from "../../utilsv2";
 import { NOTE_PRESETS_V4 } from "../notes";
@@ -15,7 +11,7 @@ const SCHEMAS = {
       const vault = vaults[0];
       const schemas = engine.schemas;
       const { data } = await engine.querySchema("");
-      const expectedNote = SchemaUtilsV2.getSchemaModuleByFnameV4({
+      const expectedNote = SchemaUtils.getSchemaModuleByFnameV4({
         fname: "root",
         schemas,
         wsRoot,
@@ -52,7 +48,7 @@ const SCHEMAS = {
       const vault = vaults[0];
       const sid = SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname;
       const { data } = await engine.querySchema(sid);
-      const expectedSchema = SchemaUtilsV2.getSchemaModuleByFnameV4({
+      const expectedSchema = SchemaUtils.getSchemaModuleByFnameV4({
         fname: sid,
         wsRoot,
         schemas,
@@ -77,7 +73,7 @@ const NOTES = {
       const vault = vaults[0];
       const notes = engine.notes;
       const { data } = await engine.queryNotes({ qs: "", vault });
-      const expectedNote = NoteUtilsV2.getNoteByFnameV5({
+      const expectedNote = NoteUtils.getNoteByFnameV5({
         wsRoot: engine.wsRoot,
         fname: "root",
         notes,
@@ -116,7 +112,7 @@ const NOTES = {
       const notes = engine.notes;
       const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
       const { data } = await engine.queryNotes({ qs: fname, vault });
-      const expectedNote = NoteUtilsV2.getNoteByFnameV5({
+      const expectedNote = NoteUtils.getNoteByFnameV5({
         fname,
         notes,
         vault,
@@ -146,7 +142,7 @@ const NOTES = {
       const notes = engine.notes;
       const fname = NOTE_PRESETS_V4.NOTE_SIMPLE_CHILD.fname;
       const { data } = await engine.queryNotes({ qs: fname, vault });
-      const expectedNote = NoteUtilsV2.getNoteByFnameV5({
+      const expectedNote = NoteUtils.getNoteByFnameV5({
         fname,
         notes,
         vault,
@@ -162,7 +158,7 @@ const NOTES = {
           actual: matchNote?.schema,
           expected: {
             moduleId: SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname,
-            schemaId: DNodeUtilsV2.basename(
+            schemaId: DNodeUtils.basename(
               NOTE_PRESETS_V4.NOTE_SIMPLE_CHILD.fname
             ),
           },

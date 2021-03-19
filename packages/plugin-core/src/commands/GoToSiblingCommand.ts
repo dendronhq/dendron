@@ -1,7 +1,7 @@
 import {
   DendronError,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -38,7 +38,7 @@ export class GoToSiblingCommand extends BasicCommand<
     }
     let value = "";
     value = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
-    let respNodes: NotePropsV2[];
+    let respNodes: NoteProps[];
 
     const client = DendronWorkspace.instance().getEngine();
     if (value === "root") {
@@ -47,12 +47,12 @@ export class GoToSiblingCommand extends BasicCommand<
         wsRoot: DendronWorkspace.wsRoot(),
         fsPath: maybeTextEditor.document.uri.fsPath,
       });
-      const rootNode = NoteUtilsV2.getNoteByFnameV5({
+      const rootNode = NoteUtils.getNoteByFnameV5({
         fname: value,
         vault,
         notes: client.notes,
         wsRoot: DendronWorkspace.wsRoot(),
-      }) as NotePropsV2;
+      }) as NoteProps;
       if (_.isUndefined(rootNode)) {
         throw new DendronError({ msg: "no root node found" });
       }
@@ -61,11 +61,11 @@ export class GoToSiblingCommand extends BasicCommand<
         .concat([rootNode]);
     } else {
       const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-      const note = NoteUtilsV2.getNotesByFname({
+      const note = NoteUtils.getNotesByFname({
         fname: value,
         notes: client.notes,
         vault,
-      })[0] as NotePropsV2;
+      })[0] as NoteProps;
       respNodes = client.notes[note.parent as string].children
         .map((id) => client.notes[id])
         .filter((ent) => _.isUndefined(ent.stub));

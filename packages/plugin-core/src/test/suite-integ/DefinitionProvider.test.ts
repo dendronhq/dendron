@@ -1,8 +1,8 @@
-import { getSlugger, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { getSlugger, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import {
   ENGINE_HOOKS_MULTI,
   NoteTestUtilsV4,
-  NOTE_PRESETS_V4
+  NOTE_PRESETS_V4,
 } from "@dendronhq/common-test-utils";
 import { callSetupHook, SETUP_HOOK_KEYS } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
@@ -34,8 +34,8 @@ suite("DefinitionProvider", function () {
   });
 
   describe("same vault", function () {
-    let noteWithLink: NotePropsV2;
-    let noteWithTarget: NotePropsV2;
+    let noteWithLink: NoteProps;
+    let noteWithTarget: NoteProps;
     let _wsRoot: string;
 
     test("basic", (done) => {
@@ -57,7 +57,7 @@ suite("DefinitionProvider", function () {
           const editor = await VSCodeUtils.openNote(noteWithTarget);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath).toEqual(
-            NoteUtilsV2.getPathV4({ wsRoot: _wsRoot, note: noteWithLink })
+            NoteUtils.getPathV4({ wsRoot: _wsRoot, note: noteWithLink })
           );
           done();
         },
@@ -73,7 +73,7 @@ suite("DefinitionProvider", function () {
           const editor = await VSCodeUtils.openNote(note);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath).toEqual(
-            NoteUtilsV2.getPathV4({ wsRoot, note: beta })
+            NoteUtils.getPathV4({ wsRoot, note: beta })
           );
           done();
         },
@@ -121,7 +121,7 @@ suite("DefinitionProvider", function () {
     });
 
     test("with alias", (done) => {
-      let noteWithLink: NotePropsV2;
+      let noteWithLink: NoteProps;
       let _wsRoot: string;
 
       runLegacyMultiWorkspaceTest({
@@ -141,7 +141,7 @@ suite("DefinitionProvider", function () {
           const editor = await VSCodeUtils.openNote(noteWithLink);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath).toEqual(
-            NoteUtilsV2.getPathV4({ wsRoot: _wsRoot, note: noteWithTarget })
+            NoteUtils.getPathV4({ wsRoot: _wsRoot, note: noteWithTarget })
           );
           done();
         },
@@ -245,9 +245,9 @@ suite("DefinitionProvider", function () {
     });
 
     test("with same name", function (done) {
-      let noteWithLink: NotePropsV2;
-      let noteTarget1: NotePropsV2;
-      let noteTarget2: NotePropsV2;
+      let noteWithLink: NoteProps;
+      let noteTarget1: NoteProps;
+      let noteTarget2: NoteProps;
       let _wsRoot: string;
 
       runLegacyMultiWorkspaceTest({
@@ -273,20 +273,18 @@ suite("DefinitionProvider", function () {
           const editor = await VSCodeUtils.openNote(noteWithLink);
           const locations = (await provide(editor)) as vscode.Location[];
           expect(locations.length).toEqual(2);
-          expect(locations.map((l) => l.uri.fsPath)).toEqual(
-            [
-              NoteUtilsV2.getPathV4({ wsRoot: _wsRoot, note: noteTarget1 }),
-              NoteUtilsV2.getPathV4({ wsRoot: _wsRoot, note: noteTarget2 }),
-            ]
-          );
+          expect(locations.map((l) => l.uri.fsPath)).toEqual([
+            NoteUtils.getPathV4({ wsRoot: _wsRoot, note: noteTarget1 }),
+            NoteUtils.getPathV4({ wsRoot: _wsRoot, note: noteTarget2 }),
+          ]);
           done();
         },
       });
     });
 
     test("with anchor", (done) => {
-      let noteWithTarget: NotePropsV2;
-      let noteWithLink: NotePropsV2;
+      let noteWithTarget: NoteProps;
+      let noteWithLink: NoteProps;
       let _wsRoot: string;
 
       runLegacyMultiWorkspaceTest({
@@ -315,7 +313,7 @@ suite("DefinitionProvider", function () {
             null as any
           )) as vscode.Location;
           expect(loc.uri.fsPath).toEqual(
-            NoteUtilsV2.getPathV4({ wsRoot: _wsRoot, note: noteWithTarget })
+            NoteUtils.getPathV4({ wsRoot: _wsRoot, note: noteWithTarget })
           );
           done();
         },

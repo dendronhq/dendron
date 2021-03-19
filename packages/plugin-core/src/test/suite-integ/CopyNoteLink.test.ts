@@ -1,4 +1,4 @@
-import { NotePropsV2 } from "@dendronhq/common-all";
+import { NoteProps } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { ENGINE_HOOKS, NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
@@ -37,7 +37,7 @@ suite("CopyNoteLink", function () {
     });
 
     test("with anchor", function (done) {
-      let noteWithTarget: NotePropsV2;
+      let noteWithTarget: NoteProps;
 
       runSingleVaultTest({
         ctx,
@@ -93,8 +93,8 @@ suite("CopyNoteLink", function () {
     });
 
     test("with anchor", function (done) {
-      let noteWithTarget: NotePropsV2;
-      let noteWithAnchor: NotePropsV2;
+      let noteWithTarget: NoteProps;
+      let noteWithAnchor: NoteProps;
 
       runMultiVaultTest({
         ctx,

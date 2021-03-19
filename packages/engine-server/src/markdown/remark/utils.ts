@@ -2,8 +2,8 @@ import {
   CONSTANTS,
   DendronError,
   NoteChangeEntry,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Heading, Root } from "mdast";
@@ -21,11 +21,11 @@ export function addError(proc: Processor, err: DendronError) {
 }
 
 export function getNoteOrError(
-  notes: NotePropsV2[],
+  notes: NoteProps[],
   hint: any
-): { error: DendronError | undefined; note: undefined | NotePropsV2 } {
+): { error: DendronError | undefined; note: undefined | NoteProps } {
   let error: DendronError | undefined;
-  let note: NotePropsV2 | undefined;
+  let note: NoteProps | undefined;
   if (_.isUndefined(notes)) {
     error = new DendronError({ msg: `no note found. ${hint}` });
     return { error, note };
@@ -55,7 +55,7 @@ export class LinkUtils {
 
   static parseAliasLink(link: string) {
     const [alias, value] = link.split("|").map(_.trim);
-    return { alias, value: NoteUtilsV2.normalizeFname(value) };
+    return { alias, value: NoteUtils.normalizeFname(value) };
   }
 
   static parseDendronURI(linkString: string) {
@@ -107,7 +107,7 @@ export class LinkUtils {
   }
 
   static parseLink(linkMatch: string) {
-    linkMatch = NoteUtilsV2.normalizeFname(linkMatch);
+    linkMatch = NoteUtils.normalizeFname(linkMatch);
     let out: WikiLinkProps = {
       value: linkMatch,
       alias: linkMatch,
@@ -129,7 +129,7 @@ export class LinkUtils {
 }
 
 export class RemarkUtils {
-  static h1ToTitle(note: NotePropsV2, changes: NoteChangeEntry[]) {
+  static h1ToTitle(note: NoteProps, changes: NoteChangeEntry[]) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         let root = tree as Root;
@@ -150,7 +150,7 @@ export class RemarkUtils {
       };
     };
   }
-  static h1ToH2(note: NotePropsV2, changes: NoteChangeEntry[]) {
+  static h1ToH2(note: NoteProps, changes: NoteChangeEntry[]) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
         let root = tree as Root;

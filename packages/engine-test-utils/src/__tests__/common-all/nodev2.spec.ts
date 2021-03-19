@@ -1,4 +1,4 @@
-import { NoteUtilsV2, SchemaUtilsV2 } from "@dendronhq/common-all";
+import { NoteUtils, SchemaUtils } from "@dendronhq/common-all";
 import {
   ENGINE_HOOKS,
   NoteTestUtilsV4,
@@ -16,7 +16,7 @@ const preSetupHook: SetupHookFunction = async ({ vaults, wsRoot }) => {
     vault: vaults[0],
     wsRoot,
     modifier: (schema) => {
-      schema.schemas["ch1"] = SchemaUtilsV2.create({
+      schema.schemas["ch1"] = SchemaUtils.create({
         id: "ch1",
         vault: vaults[0],
       });
@@ -33,7 +33,7 @@ describe("note", () => {
       await runEngineTestV4(
         async ({ vaults, engine, wsRoot }) => {
           const fname = "foo";
-          const resp = NoteUtilsV2.getNoteByFnameV5({
+          const resp = NoteUtils.getNoteByFnameV5({
             fname,
             notes: engine.notes,
             vault: vaults[0],
@@ -54,7 +54,7 @@ describe("note", () => {
       await runEngineTestV4(
         async ({ vaults, engine, wsRoot }) => {
           const fname = "foo";
-          const resp = NoteUtilsV2.getNoteByFnameV5({
+          const resp = NoteUtils.getNoteByFnameV5({
             fname,
             notes: engine.notes,
             vault: { fsPath: path.join(wsRoot, vaults[0].fsPath) },
@@ -75,7 +75,7 @@ describe("note", () => {
       await runEngineTestV4(
         async ({ vaults, engine, wsRoot }) => {
           const fname = "foo";
-          const resp = NoteUtilsV2.getNoteByFnameV5({
+          const resp = NoteUtils.getNoteByFnameV5({
             fname,
             notes: engine.notes,
             vault: { fsPath: path.join(wsRoot, vaults[0].fsPath) },
@@ -95,20 +95,20 @@ describe("note", () => {
 
   describe("serialize", () => {
     test("basic", () => {
-      const note = NoteUtilsV2.create({
+      const note = NoteUtils.create({
         id: "foo",
         fname: "foo",
         created: "1",
         updated: "1",
         vault,
       });
-      const serialized = NoteUtilsV2.serialize(note);
+      const serialized = NoteUtils.serialize(note);
       expect(serialized).toMatchSnapshot();
       expect(serialized.indexOf("stub") >= 0).toBeFalsy();
     });
 
     test("with children", () => {
-      const note = NoteUtilsV2.create({
+      const note = NoteUtils.create({
         id: "foo",
         fname: "foo",
         created: "1",
@@ -116,12 +116,12 @@ describe("note", () => {
         children: ["ch1", "ch2"],
         vault,
       });
-      const serialized = NoteUtilsV2.serialize(note);
+      const serialized = NoteUtils.serialize(note);
       expect(serialized).toMatchSnapshot();
     });
 
     test("with parent", () => {
-      const note = NoteUtilsV2.create({
+      const note = NoteUtils.create({
         id: "foo",
         fname: "foo",
         created: "1",
@@ -129,12 +129,12 @@ describe("note", () => {
         parent: "root",
         vault,
       });
-      const serialized = NoteUtilsV2.serialize(note);
+      const serialized = NoteUtils.serialize(note);
       expect(serialized).toMatchSnapshot();
     });
 
     test("with custom", () => {
-      const note = NoteUtilsV2.create({
+      const note = NoteUtils.create({
         id: "foo",
         fname: "foo",
         created: "1",
@@ -144,14 +144,14 @@ describe("note", () => {
         },
         vault,
       });
-      const serialized = NoteUtilsV2.serialize(note);
+      const serialized = NoteUtils.serialize(note);
       expect(serialized).toMatchSnapshot();
       // should be at beginning of line
       expect(serialized.match(/^bond/gm)).toBeTruthy();
     });
 
     test("with hierarchy", () => {
-      const note = NoteUtilsV2.create({
+      const note = NoteUtils.create({
         id: "foo",
         fname: "foo",
         created: "1",
@@ -160,7 +160,7 @@ describe("note", () => {
         parent: "root",
         vault,
       });
-      const serialized = NoteUtilsV2.serialize(note, { writeHierarchy: true });
+      const serialized = NoteUtils.serialize(note, { writeHierarchy: true });
       expect(serialized).toMatchSnapshot();
       expect(serialized.match(/^parent: root/gm)).toBeTruthy();
       expect(serialized.match(/ch1/gm)).toBeTruthy();
@@ -168,7 +168,7 @@ describe("note", () => {
     });
 
     test("with hierarchy and null parent", () => {
-      const note = NoteUtilsV2.create({
+      const note = NoteUtils.create({
         id: "foo",
         fname: "foo",
         created: "1",
@@ -177,7 +177,7 @@ describe("note", () => {
         parent: null,
         vault,
       });
-      const serialized = NoteUtilsV2.serialize(note, { writeHierarchy: true });
+      const serialized = NoteUtils.serialize(note, { writeHierarchy: true });
       expect(serialized).toMatchSnapshot();
       expect(serialized.match(/^parent: null/gm)).toBeTruthy();
       expect(serialized.match(/ch1/gm)).toBeTruthy();
@@ -190,7 +190,7 @@ describe("matchPath", () => {
   it("match path on domain, reg", async () => {
     await runEngineTestV4(
       async ({ engine }) => {
-        const resp = SchemaUtilsV2.matchPath({
+        const resp = SchemaUtils.matchPath({
           notePath: "foo",
           schemaModDict: engine.schemas,
         });
@@ -204,7 +204,7 @@ describe("matchPath", () => {
   it("match path on domain as namespace", async () => {
     await runEngineTestV4(
       async ({ engine }) => {
-        const resp = SchemaUtilsV2.matchPath({
+        const resp = SchemaUtils.matchPath({
           notePath: "bond",
           schemaModDict: engine.schemas,
         });
@@ -233,7 +233,7 @@ describe("matchPath", () => {
   it("match path on domain as namespace, child", async () => {
     await runEngineTestV4(
       async ({ engine }) => {
-        const resp = SchemaUtilsV2.matchPath({
+        const resp = SchemaUtils.matchPath({
           notePath: "bond.foo",
           schemaModDict: engine.schemas,
         });

@@ -65,6 +65,12 @@ export const createProcForTest = (opts: {
   }
 };
 
+export type ProcTests = {
+  name: string;
+  dest: DendronASTDest;
+  testCase: TestPresetEntryV4;
+};
+
 /**
  * Generator for processor tests
  *
@@ -79,9 +85,9 @@ export const createProcTests = (opts: {
     [key in DendronASTDest]?: TestPresetEntryV4["testFunc"] | DendronASTDest;
   };
   preSetupHook?: TestPresetEntryV4["preSetupHook"];
-}) => {
+}): ProcTests[] => {
   const { name, setupFunc, verifyFuncDict } = opts;
-  let allTests: any = [];
+  let allTests: ProcTests[] = [];
   if (verifyFuncDict) {
     allTests = Object.values(DendronASTDest)
       .map((dest) => {
@@ -112,7 +118,7 @@ export const createProcTests = (opts: {
           ),
         };
       })
-      .filter((ent) => !_.isUndefined(ent));
+      .filter((ent) => !_.isUndefined(ent)) as ProcTests[];
   }
   return allTests;
 };

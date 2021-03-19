@@ -18,36 +18,22 @@ import {
   createProcTests,
   generateVerifyFunction,
   processTextV2,
+  ProcTests,
 } from "./utils";
 
-// const proc = MDUtilsV4.procDendron;
-// const createProc = MDUtilsV4.procDendron;
-
-// function createLink(opts: {
-//   fname: string;
-//   extra?: Partial<DNoteRefLink>;
-// }): { link: DNoteRefLink } {
-//   const { fname, extra } = opts;
-//   const out: { link: DNoteRefLink } = {
-//     link: {
-//       data: {
-//         type: "file",
-//       },
-//       from: {
-//         fname,
-//       },
-//       type: "ref",
-//     },
-//   };
-//   out.link = _.merge(out.link, extra);
-//   return out;
-// }
-
-// function checkLink(node: any, link: { link: DNoteRefLink }) {
-//   const refNode = node.children[0].children[0];
-//   expect(refNode.type).toEqual("refLinkV2");
-//   expect(refNode.data).toEqual(link);
-// }
+function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
+  const { name, testCases } = opts;
+  describe(name, () => {
+    test.each(
+      testCases.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
+    )("%p", async (_key, testCase: TestPresetEntryV4) => {
+      await runEngineTestV5(testCase.testFunc, {
+        expect,
+        preSetupHook: testCase.preSetupHook,
+      });
+    });
+  });
+}
 
 export const modifyNote = async (
   opts: WorkspaceOpts,
@@ -60,85 +46,37 @@ export const modifyNote = async (
   );
 };
 
-// describe("parse", () => {
-//     let engine: any;
-//     let dest: DendronASTDest.MD_REGULAR;
+describe("legacy note ref", () => {
+  const badRef = "((foo))";
+  const BAD_REF = createProcTests({
+    name: "BAD_REF",
+    setupFunc: async ({ engine, vaults, extra }) => {
+      const proc2 = await MDUtilsV4.procFull({
+        config: {
+          ...engine.config,
+          noLegacyNoteRef: true,
+        },
+        engine,
+        fname: "foo",
+        wikiLinksOpts: { useId: true },
+        dest: extra.dest,
+        vault: vaults[0],
+      });
+      const resp = await proc2.process(badRef);
+      return { resp };
+    },
+    verifyFuncDict: {
+      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+        const { resp } = extra;
+        expect(resp).toMatchSnapshot();
+        checkVFile(resp, badRef);
+      },
+    },
+    preSetupHook: ENGINE_HOOKS.setupBasic,
+  });
 
-//     test("init", () => {
-//         const resp = proc({ engine, ...genDendronData({ dest }) }).parse(`![[foo.md]]))`);
-//         expect(resp).toMatchSnapshot();
-//         // @ts-ignore
-//         expect(resp.children[0].children[0].type).toEqual("refLinkV2");
-//     });
-
-//     test("without extension", () => {
-//         const resp = proc({engine, ...genDendronData({ dest })}).parse(`![[foo]]))`);
-//         expect(resp).toMatchSnapshot();
-//         checkLink(resp, createLink({ fname: "foo" }));
-//     });
-
-//     test("with start anchor", () => {
-//         const resp = proc({engine, ...genDendronData({ dest })}).parse(`![[foo#h1]]))`);
-//         expect(resp).toMatchSnapshot();
-//         checkLink(
-//             resp,
-//             createLink({
-//                 fname: "foo",
-//                 extra: {
-//                     data: {
-//                         type: "file",
-//                         anchorStart: "h1",
-//                     },
-//                 },
-//             })
-//         );
-//     });
-
-//     test("with start and end", () => {
-//         const resp = proc({engine, ...genDendronData({ dest })}).parse(
-//             `![[foo#h1:#h2]]))`
-//         );
-//         expect(resp).toMatchSnapshot();
-//         checkLink(
-//             resp,
-//             createLink({
-//                 fname: "foo",
-//                 extra: {
-//                     data: {
-//                         type: "file",
-//                         anchorStart: "h1",
-//                         anchorEnd: "h2",
-//                     },
-//                 },
-//             })
-//         );
-//     });
-
-//     test("init with inject", async () => {
-//         await runEngineTestV4(
-//             async ({ engine, vaults }) => {
-//                 let _proc = proc( engine, genDendronData({ dest, vault: vaults[0] })
-//                 ).use(dendronPub);
-//                 const resp = _proc.parse(`![[foo.md]]`);
-//                 expect(resp).toMatchSnapshot();
-//                 const resp2 = _proc.runSync(resp);
-//                 expect(resp2).toMatchSnapshot();
-//                 return;
-//             },
-//             {
-//                 expect,
-//                 createEngine,
-//                 preSetupHook: ENGINE_HOOKS.setupBasic,
-//             }
-//         );
-//     });
-
-//     test("doesn't parse inline code block", () => {
-//         const resp = proc(engine, genDendronData({ dest })).parse("`![[foo.md]]`");
-//         // @ts-ignore
-//         expect(resp.children[0].children[0].type).toEqual("inlineCode");
-//     });
-// });
+  runAllTests({ name: "compile", testCases: BAD_REF });
+});
 
 describe("noteRefV2", () => {
   const linkWithNoExtension = "![[foo]]";
@@ -762,14 +700,5 @@ describe("noteRefV2", () => {
   //     ...WITH_ANCHOR
   // ];
 
-  describe("compile", () => {
-    test.each(
-      ALL_TEST_CASES.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
-    )("%p", async (_key, testCase: TestPresetEntryV4) => {
-      await runEngineTestV5(testCase.testFunc, {
-        expect,
-        preSetupHook: testCase.preSetupHook,
-      });
-    });
-  });
+  runAllTests({ name: "compile", testCases: ALL_TEST_CASES });
 });

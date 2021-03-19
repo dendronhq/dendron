@@ -321,8 +321,8 @@ export class MDUtilsV4 {
     }
 
     let usePrettyRefs = opts.usePrettyRefs || ConfigUtils.usePrettyRef(config);
-    let noLegacyNoteRef = _.isBoolean(opts.noteRefLvl)
-      ? opts.noteRefLvl
+    let noLegacyNoteRef = _.isBoolean(config.noLegacyNoteRef)
+      ? config.noLegacyNoteRef
       : false;
 
     proc = proc

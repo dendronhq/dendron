@@ -90,6 +90,11 @@ export type DendronConfig = {
    * Default: Children
    */
   hiearchyDisplayTitle?: string;
+
+  /**
+   * Turn off legacy note refs;
+   */
+  noLegacyNoteRef?: boolean;
 };
 
 export type HierarchyConfig = {

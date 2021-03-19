@@ -155,7 +155,7 @@ export class MDUtilsV4 {
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
     if (vaultName) {
       try {
-        vault = VaultUtils.getVaultByName({
+        vault = VaultUtils.getVaultByNameOrThrow({
           vaults: engine.vaultsv3,
           vname: vaultName,
         });
@@ -321,6 +321,9 @@ export class MDUtilsV4 {
     }
 
     let usePrettyRefs = opts.usePrettyRefs || ConfigUtils.usePrettyRef(config);
+    let noLegacyNoteRef = _.isBoolean(opts.noteRefLvl)
+      ? opts.noteRefLvl
+      : false;
 
     proc = proc
       .data("dendron", {
@@ -342,8 +345,13 @@ export class MDUtilsV4 {
         wikiLinkOpts: opts.wikiLinksOpts,
         prettyRefs: usePrettyRefs,
         insertTitle: config.useFMTitle,
-      })
-      .use(noteRefs, { ...opts.noteRefOpts, wikiLinkOpts: opts.wikiLinksOpts });
+      });
+    if (!noLegacyNoteRef) {
+      proc = proc.use(noteRefs, {
+        ...opts.noteRefOpts,
+        wikiLinkOpts: opts.wikiLinksOpts,
+      });
+    }
 
     if (opts.mathOpts?.katex) {
       proc = proc.use(math);

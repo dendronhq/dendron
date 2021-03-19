@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.32.5-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-all@0.32.2...@dendronhq/common-all@0.32.5-alpha.0) (2021-03-19)
+
+### Bug Fixes
+
+- display hiearchies for stub nodes ([db02dcc](https://github.com/dendronhq/dendron/commit/db02dccc18e60bdcf8fa0015bbdcddbd6ceefa0f))
+- more forgiving link parser ([38c973c](https://github.com/dendronhq/dendron/commit/38c973cb2bfc45881778e86c985156da64450249))
+
 ## [0.32.4-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-all@0.32.2...@dendronhq/common-all@0.32.4-alpha.0) (2021-03-19)
 
 ### Bug Fixes

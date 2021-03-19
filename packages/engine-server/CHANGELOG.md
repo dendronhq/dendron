@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.33.3-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.32.2...@dendronhq/engine-server@0.33.3-alpha.0) (2021-03-19)
+
+### Bug Fixes
+
+- display hiearchies for stub nodes ([db02dcc](https://github.com/dendronhq/dendron/commit/db02dccc18e60bdcf8fa0015bbdcddbd6ceefa0f))
+- more forgiving link parser ([38c973c](https://github.com/dendronhq/dendron/commit/38c973cb2bfc45881778e86c985156da64450249))
+
+### Features Dendron
+
+- add git punchcard pod ([50019c0](https://github.com/dendronhq/dendron/commit/50019c0f6405be449b446901809a9d2b787aa625))
+
 ## [0.33.2-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.32.2...@dendronhq/engine-server@0.33.2-alpha.0) (2021-03-19)
 
 ### Bug Fixes

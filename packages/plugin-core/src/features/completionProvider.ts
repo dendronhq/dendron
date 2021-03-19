@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import {
   CompletionItem,
@@ -50,7 +50,7 @@ export const provideCompletionItems = (
   const completionItems: CompletionItem[] = [];
   const notes = DendronWorkspace.instance().getEngine().notes;
   const uris: Uri[] = _.values(notes).map((note) =>
-    Uri.file(NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() }))
+    Uri.file(NoteUtils.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() }))
   );
 
   uris.forEach((uri, index) => {

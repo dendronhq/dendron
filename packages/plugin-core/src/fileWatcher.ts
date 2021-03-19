@@ -1,8 +1,8 @@
 import {
   DEngineClientV2,
   DVault,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   VaultUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -73,20 +73,20 @@ export class VaultWatcher {
       fsPath: uri.fsPath,
     });
     let note = string2Note({ content, fname, vault });
-    const noteHydrated = NoteUtilsV2.getNoteByFnameV5({
+    const noteHydrated = NoteUtils.getNoteByFnameV5({
       fname,
       vault,
       notes: eclient.notes,
       wsRoot: DendronWorkspace.wsRoot(),
-    }) as NotePropsV2;
-    note = NoteUtilsV2.hydrate({ noteRaw: note, noteHydrated });
+    }) as NoteProps;
+    note = NoteUtils.hydrate({ noteRaw: note, noteHydrated });
     const links = ParserUtilsV2.findLinks({ note, engine: eclient });
     note.links = links;
     this.L.info({ ctx, fname, msg: "exit" });
     return await eclient.updateNote(note);
   }
 
-  async onDidCreate(uri: vscode.Uri): Promise<NotePropsV2 | undefined> {
+  async onDidCreate(uri: vscode.Uri): Promise<NoteProps | undefined> {
     const ctx = "VaultWatcher:onDidCreate";
     if (this.pause) {
       this.L.info({ ctx, uri, msg: "paused" });
@@ -98,7 +98,7 @@ export class VaultWatcher {
     // check if ignore
     const recentEvents = HistoryService.instance().lookBack();
     this.L.debug({ ctx, recentEvents, fname });
-    let note: NotePropsV2 | undefined;
+    let note: NoteProps | undefined;
     try {
       if (
         _.find(recentEvents, (event) => {
@@ -121,21 +121,21 @@ export class VaultWatcher {
           wsRoot: DendronWorkspace.wsRoot(),
         });
         note = file2Note(uri.fsPath, vault);
-        const maybeNote = NoteUtilsV2.getNoteByFnameV5({
+        const maybeNote = NoteUtils.getNoteByFnameV5({
           fname,
           vault,
           notes: this.engine.notes,
           wsRoot: DendronWorkspace.wsRoot(),
-        }) as NotePropsV2;
+        }) as NoteProps;
         if (maybeNote) {
           note = {
             ...note,
             stub: false,
             schemaStub: false,
             ..._.pick(maybeNote, ["children", "parent"]),
-          } as NotePropsV2;
+          } as NoteProps;
         }
-        await this.engine.updateNote(note as NotePropsV2, {
+        await this.engine.updateNote(note as NoteProps, {
           newNode: true,
         });
         this.L.debug({ ctx, uri, msg: "post-add-to-engine", note });

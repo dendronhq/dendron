@@ -2,7 +2,7 @@ import {
   DendronError,
   DNodePropsQuickInputV2,
   getSlugger,
-  NotePropsV2,
+  NoteProps,
   VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -362,8 +362,8 @@ export class LookupControllerV2 {
     }
 
     // handle selection resp
-    quickPick.onCreate = async (note: NotePropsV2) => {
-      const resp = await when<undefined | NotePropsV2>(
+    quickPick.onCreate = async (note: NoteProps) => {
+      const resp = await when<undefined | NoteProps>(
         "lookupConfirmVaultOnCreate",
         async () => {
           const maybeVault = await PickerUtilsV2.promptVault();

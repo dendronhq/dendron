@@ -1,8 +1,8 @@
 import {
   DNoteRefData,
   DNoteRefLink,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import { refLink2Stringv2 } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -47,7 +47,7 @@ export class CopyNoteRefCommand extends BasicCommand<
     return !_.isNull(text.match(/^#+\s/m));
   }
 
-  async buildLink(opts: { note: NotePropsV2; useVaultPrefix?: boolean }) {
+  async buildLink(opts: { note: NoteProps; useVaultPrefix?: boolean }) {
     const { note, useVaultPrefix } = opts;
     const { fname, vault } = note;
     const linkData: DNoteRefData = {
@@ -76,10 +76,10 @@ export class CopyNoteRefCommand extends BasicCommand<
 
   async execute(_opts: CommandOpts) {
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
-    const fname = NoteUtilsV2.uri2Fname(editor.document.uri);
+    const fname = NoteUtils.uri2Fname(editor.document.uri);
     const wsRoot = DendronWorkspace.wsRoot();
     const vault = PickerUtilsV2.getVaultForOpenEditor();
-    let note: NotePropsV2 = NoteUtilsV2.getNoteOrThrow({
+    let note: NoteProps = NoteUtils.getNoteOrThrow({
       fname,
       notes: getEngine().notes,
       wsRoot,

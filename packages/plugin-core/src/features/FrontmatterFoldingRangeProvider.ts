@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteUtils } from "@dendronhq/common-all";
 import vscode from "vscode";
 
 export default class FrontmatterFoldingRangeProvider
@@ -12,7 +12,7 @@ export default class FrontmatterFoldingRangeProvider
     document: vscode.TextDocument
   ): Promise<vscode.FoldingRange[]> {
     const content = document.getText();
-    const fmMatch = content.match(NoteUtilsV2.RE_FM);
+    const fmMatch = content.match(NoteUtils.RE_FM);
     if (!fmMatch) {
       return [];
     }

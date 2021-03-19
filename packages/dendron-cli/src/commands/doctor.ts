@@ -1,8 +1,4 @@
-import {
-  NoteChangeEntry,
-  NotePropsV2,
-  VaultUtils,
-} from "@dendronhq/common-all";
+import { NoteChangeEntry, NoteProps, VaultUtils } from "@dendronhq/common-all";
 import {
   DendronASTDest,
   MDUtilsV4,
@@ -97,7 +93,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     let doctorAction: any;
     switch (action) {
       case DoctorActions.H1_TO_TITLE: {
-        doctorAction = async (note: NotePropsV2) => {
+        doctorAction = async (note: NoteProps) => {
           let changes: NoteChangeEntry[] = [];
           const proc = MDUtilsV4.procFull({
             dest: DendronASTDest.MD_DENDRON,
@@ -123,7 +119,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         break;
       }
       case DoctorActions.HI_TO_H2: {
-        doctorAction = async (note: NotePropsV2) => {
+        doctorAction = async (note: NoteProps) => {
           let changes: NoteChangeEntry[] = [];
           const proc = MDUtilsV4.procFull({
             dest: DendronASTDest.MD_DENDRON,
@@ -149,7 +145,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         break;
       }
       case DoctorActions.REMOVE_STUBS: {
-        doctorAction = async (note: NotePropsV2) => {
+        doctorAction = async (note: NoteProps) => {
           let changes: NoteChangeEntry[] = [];
           if (_.trim(note.body) === "") {
             changes.push({

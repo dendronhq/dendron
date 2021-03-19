@@ -3,8 +3,8 @@ import {
   DEngineClientV2,
   DLink,
   DNoteLink,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
@@ -99,7 +99,7 @@ export class ParserUtilsV2 {
     note,
     engine,
   }: {
-    note: NotePropsV2;
+    note: NoteProps;
     engine: DEngineClientV2;
   }): DLink[] {
     const content = note.body;
@@ -113,7 +113,7 @@ export class ParserUtilsV2 {
       (m: WikiLinkNoteV4) =>
         ({
           type: "wiki",
-          from: NoteUtilsV2.toNoteLoc(note),
+          from: NoteUtils.toNoteLoc(note),
           original: m.value,
           value: m.value,
           alias: m.data.alias,

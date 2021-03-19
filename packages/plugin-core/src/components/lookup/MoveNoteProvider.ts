@@ -1,4 +1,4 @@
-import { DNodeUtilsV2, NoteUtilsV2, VaultUtils } from "@dendronhq/common-all";
+import { DNodeUtils, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import { HistoryService } from "@dendronhq/engine-server";
 import { TextEditor, Uri, window } from "vscode";
 import { VSCodeUtils } from "../../utils";
@@ -30,10 +30,10 @@ export class MoveNoteProvider implements ILookupProviderV3 {
       // get old note
       const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
       const oldUri: Uri = editor.document.uri;
-      const oldFname = DNodeUtilsV2.fname(oldUri.fsPath);
+      const oldFname = DNodeUtils.fname(oldUri.fsPath);
 
       // get new note
-      let newNote = NoteUtilsV2.getNoteByFnameV5({
+      let newNote = NoteUtils.getNoteByFnameV5({
         fname: quickpick.value,
         notes,
         vault: newVault,

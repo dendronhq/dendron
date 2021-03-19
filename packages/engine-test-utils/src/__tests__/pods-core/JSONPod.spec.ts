@@ -1,4 +1,4 @@
-import { NotePropsV2, VaultUtils } from "@dendronhq/common-all";
+import { NoteProps, VaultUtils } from "@dendronhq/common-all";
 import { ENGINE_HOOKS, PODS_CORE } from "@dendronhq/common-test-utils";
 import {
   JSONExportPod,
@@ -29,7 +29,7 @@ describe("json publish pod", () => {
             dest: "stdout",
           },
         });
-        const noteProps = JSON.parse(resp) as NotePropsV2;
+        const noteProps = JSON.parse(resp) as NoteProps;
         expect(noteProps.children).toEqual(["foo.ch1"]);
       },
       { expect, preSetupHook: ENGINE_HOOKS.setupBasic }

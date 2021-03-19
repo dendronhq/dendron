@@ -1,8 +1,8 @@
 import {
-  DNodeUtilsV2,
-  NotePropsV2,
-  NoteUtilsV2,
-  SchemaUtilsV2,
+  DNodeUtils,
+  NoteProps,
+  NoteUtils,
+  SchemaUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { NoteTestUtilsV4 } from "../../noteUtils";
@@ -20,8 +20,8 @@ const SCHEMAS = {
       const schemaModId = SCHEMA_PRESETS_V4.SCHEMA_SIMPLE.fname;
       const module = engine.schemas[schemaModId];
       const vault = vaults[0];
-      const schema = SchemaUtilsV2.create({ id: "ch2", vault });
-      DNodeUtilsV2.addChild(module.root, schema);
+      const schema = SchemaUtils.create({ id: "ch2", vault });
+      DNodeUtils.addChild(module.root, schema);
       module.schemas[schema.id] = schema;
       await engine.updateSchema(module);
       const resp = await engine.querySchema("*");
@@ -106,7 +106,7 @@ const SCHEMAS = {
 const NOTES = {
   SERIALIZE_CHILD_WITH_HIERARCHY: new TestPresetEntryV4(
     async ({ vaults, wsRoot, engine }) => {
-      const noteNew = NoteUtilsV2.create({
+      const noteNew = NoteUtils.create({
         fname: "foo.ch1",
         id: "foo.ch1",
         created: "1",
@@ -136,12 +136,12 @@ const NOTES = {
       noWrite: true,
     });
     await engine.writeNote(note);
-    const noteRoot = NoteUtilsV2.getNoteByFnameV5({
+    const noteRoot = NoteUtils.getNoteByFnameV5({
       fname: note.fname,
       notes: engine.notes,
       vault: vaults[0],
       wsRoot: engine.wsRoot,
-    }) as NotePropsV2;
+    }) as NoteProps;
     return [
       {
         actual: noteRoot.fname,
@@ -155,20 +155,20 @@ const NOTES = {
   }),
   CUSTOM_ATT_ADD: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
-      const note = NoteUtilsV2.getNoteByFnameV5({
+      const note = NoteUtils.getNoteByFnameV5({
         fname: "foo",
         notes: engine.notes,
         vault: vaults[0],
         wsRoot: engine.wsRoot,
-      }) as NotePropsV2;
+      }) as NoteProps;
       note.custom = { bond: 43 };
       await engine.writeNote(note, { updateExisting: true });
-      const newNote = NoteUtilsV2.getNoteByFnameV5({
+      const newNote = NoteUtils.getNoteByFnameV5({
         fname: "foo",
         notes: engine.notes,
         vault: vaults[0],
         wsRoot: engine.wsRoot,
-      }) as NotePropsV2;
+      }) as NoteProps;
       return [
         {
           actual: newNote,
@@ -188,7 +188,7 @@ const NOTES = {
   ),
   NEW_DOMAIN: new TestPresetEntryV4(async ({ vaults, engine }) => {
     const vault = vaults[0];
-    const noteNew = NoteUtilsV2.create({
+    const noteNew = NoteUtils.create({
       id: "bar",
       fname: "bar",
       created: "1",
@@ -207,7 +207,7 @@ const NOTES = {
         msg: "bar should be written in engine",
       },
       {
-        actual: DNodeUtilsV2.isRoot(engine.notes[note.parent as string]),
+        actual: DNodeUtils.isRoot(engine.notes[note.parent as string]),
         expected: true,
       },
     ];
@@ -215,7 +215,7 @@ const NOTES = {
   MATCH_SCHEMA: new TestPresetEntryV4(
     async ({ vaults, engine }) => {
       const vault = vaults[0];
-      const noteNew = NoteUtilsV2.create({
+      const noteNew = NoteUtils.create({
         fname: "foo.ch1",
         created: "1",
         updated: "1",
@@ -225,7 +225,7 @@ const NOTES = {
 
       return [
         {
-          actual: NoteUtilsV2.getNoteByFnameV5({
+          actual: NoteUtils.getNoteByFnameV5({
             fname: "foo.ch1",
             notes: engine.notes,
             vault,
@@ -245,11 +245,11 @@ const NOTES = {
           vault: vaults[0],
           wsRoot,
           modifier: (schema) => {
-            schema.schemas["ch1"] = SchemaUtilsV2.create({
+            schema.schemas["ch1"] = SchemaUtils.create({
               id: "ch1",
               vault: vaults[0],
             });
-            DNodeUtilsV2.addChild(schema.root, schema.schemas["ch1"]);
+            DNodeUtils.addChild(schema.root, schema.schemas["ch1"]);
             return schema;
           },
         });
@@ -266,24 +266,24 @@ const NOTES = {
     await engine.writeNote(note);
     const { notes } = engine;
     const vault = vaults[0];
-    const root = NoteUtilsV2.getNoteByFnameV5({
+    const root = NoteUtils.getNoteByFnameV5({
       fname: "root",
       notes,
       vault,
       wsRoot: engine.wsRoot,
-    }) as NotePropsV2;
-    const bar = NoteUtilsV2.getNoteByFnameV5({
+    }) as NoteProps;
+    const bar = NoteUtils.getNoteByFnameV5({
       fname: "bar",
       notes,
       vault,
       wsRoot: engine.wsRoot,
-    }) as NotePropsV2;
-    const child = NoteUtilsV2.getNoteByFnameV5({
+    }) as NoteProps;
+    const child = NoteUtils.getNoteByFnameV5({
       fname: "bar.ch1",
       notes,
       vault,
       wsRoot: engine.wsRoot,
-    }) as NotePropsV2;
+    }) as NoteProps;
     return [
       {
         actual: _.size(root.children),
@@ -304,7 +304,7 @@ const NOTES = {
   }),
   GRANDCHILD_OF_ROOT_AND_CHILD_IS_STUB: new TestPresetEntryV4(
     async ({ vaults, wsRoot, engine }) => {
-      const noteNew = NoteUtilsV2.create({
+      const noteNew = NoteUtils.create({
         fname: "bond.ch1",
         created: "1",
         updated: "1",
@@ -327,7 +327,7 @@ const NOTES = {
   ),
   CHILD_OF_DOMAIN: new TestPresetEntryV4(
     async ({ vaults, wsRoot, engine }) => {
-      const noteNew = NoteUtilsV2.create({
+      const noteNew = NoteUtils.create({
         fname: "foo.ch2",
         vault: vaults[0],
       });
@@ -356,7 +356,7 @@ const NOTES = {
   ),
   GRANDCHILD_OF_DOMAIN_AND_CHILD_IS_STUB: new TestPresetEntryV4(
     async ({ vaults, wsRoot, engine }) => {
-      const noteNew = NoteUtilsV2.create({
+      const noteNew = NoteUtils.create({
         fname: "foo.ch2.gch1",
         vault: vaults[0],
       });
@@ -407,7 +407,7 @@ const NOTES = {
       await engine.writeNote(noteC);
       return [
         {
-          actual: NoteUtilsV2.getNoteByFnameV5({
+          actual: NoteUtils.getNoteByFnameV5({
             fname: "Upper Upper",
             notes: engine.notes,
             vault,
@@ -416,7 +416,7 @@ const NOTES = {
           expected: "Upper Upper",
         },
         {
-          actual: NoteUtilsV2.getNoteByFnameV5({
+          actual: NoteUtils.getNoteByFnameV5({
             fname: "lower lower",
             notes: engine.notes,
             vault,
@@ -425,7 +425,7 @@ const NOTES = {
           expected: "Lower Lower",
         },
         {
-          actual: NoteUtilsV2.getNoteByFnameV5({
+          actual: NoteUtils.getNoteByFnameV5({
             fname: "lower Upper",
             notes: engine.notes,
             vault,
@@ -453,7 +453,7 @@ const NOTES = {
     await engine.writeNote(noteB);
     return [
       {
-        actual: NoteUtilsV2.getNoteByFnameV5({
+        actual: NoteUtils.getNoteByFnameV5({
           fname: "foo-with-dash",
           notes: engine.notes,
           vault,
@@ -462,7 +462,7 @@ const NOTES = {
         expected: "Foo with Dash",
       },
       {
-        actual: NoteUtilsV2.getNoteByFnameV5({
+        actual: NoteUtils.getNoteByFnameV5({
           fname: "foo.foo-with-dash",
           notes: engine.notes,
           vault,
@@ -476,7 +476,7 @@ const NOTES = {
 const NOTES_MULTI = {
   NEW_DOMAIN: new TestPresetEntryV4(async ({ vaults, engine }) => {
     const vault = vaults[1];
-    const noteNew = NoteUtilsV2.create({
+    const noteNew = NoteUtils.create({
       id: "bar",
       fname: "bar",
       created: "1",
@@ -495,7 +495,7 @@ const NOTES_MULTI = {
         msg: "bar should be written in engine",
       },
       {
-        actual: DNodeUtilsV2.isRoot(engine.notes[note.parent as string]),
+        actual: DNodeUtils.isRoot(engine.notes[note.parent as string]),
         expected: true,
       },
     ];
@@ -504,7 +504,7 @@ const NOTES_MULTI = {
     async ({ wsRoot, vaults, engine }) => {
       const vault = { ...vaults[1] };
       vault.fsPath = path.join(wsRoot, vault.fsPath);
-      const noteNew = NoteUtilsV2.create({
+      const noteNew = NoteUtils.create({
         id: "bar",
         fname: "bar",
         created: "1",
@@ -523,7 +523,7 @@ const NOTES_MULTI = {
           msg: "bar should be written in engine",
         },
         {
-          actual: DNodeUtilsV2.isRoot(engine.notes[note.parent as string]),
+          actual: DNodeUtils.isRoot(engine.notes[note.parent as string]),
           expected: true,
         },
       ];

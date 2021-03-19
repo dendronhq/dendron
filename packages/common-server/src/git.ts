@@ -2,7 +2,7 @@ import {
   CONSTANTS,
   DendronConfig,
   DVault,
-  NotePropsV2,
+  NoteProps,
   RESERVED_KEYS,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -14,7 +14,7 @@ import { readYAML } from "./files";
 import { vault2Path } from "./filesv2";
 export { simpleGit, SimpleGit };
 
-const formatString = (opts: { txt: string; note: NotePropsV2 }) => {
+const formatString = (opts: { txt: string; note: NoteProps }) => {
   const { txt, note } = opts;
   _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
   const noteHiearchy = note.fname.replace(/\./g, "/");
@@ -23,7 +23,7 @@ const formatString = (opts: { txt: string; note: NotePropsV2 }) => {
 
 // comment
 export class GitUtils {
-  static canShowGitLink(opts: { config: DendronConfig; note: NotePropsV2 }) {
+  static canShowGitLink(opts: { config: DendronConfig; note: NoteProps }) {
     const { config, note } = opts;
 
     if (
@@ -67,7 +67,7 @@ export class GitUtils {
   }
 
   static getGithubEditUrl(opts: {
-    note: NotePropsV2;
+    note: NoteProps;
     config: DendronConfig;
     wsRoot: string;
   }) {

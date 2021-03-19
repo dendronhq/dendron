@@ -1,9 +1,9 @@
-import { DVault, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DVault, NoteUtils } from "@dendronhq/common-all";
 import { DirResult, note2File, tmpDir } from "@dendronhq/common-server";
 import {
   AssertUtils,
   ENGINE_HOOKS_MULTI,
-  NodeTestPresetsV2
+  NodeTestPresetsV2,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { describe } from "mocha";
@@ -34,7 +34,7 @@ suite("notes", function () {
         ctx,
         postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
         onInit: async ({ vaults, wsRoot }) => {
-          const bar = NoteUtilsV2.create({
+          const bar = NoteUtils.create({
             fname: `bar`,
             id: `bar`,
             body: "bar body",
@@ -97,7 +97,7 @@ suite("notes", function () {
           vaults: [{ fsPath: vaultPath }],
         });
         watcher.pause = true;
-        const bar = NoteUtilsV2.create({
+        const bar = NoteUtils.create({
           fname: `bar`,
           id: `bar`,
           body: "bar body",

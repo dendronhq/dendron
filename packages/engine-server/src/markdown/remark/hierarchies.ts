@@ -1,4 +1,4 @@
-import { NoteUtilsV2, VaultUtils } from "@dendronhq/common-all";
+import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Content, Root } from "mdast";
 import { list, listItem, paragraph } from "mdast-builder";
@@ -33,7 +33,7 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
       return;
     }
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
-    const note = NoteUtilsV2.getNoteOrThrow({
+    const note = NoteUtils.getNoteOrThrow({
       fname: fname,
       notes: engine.notes,
       vault: vault!,

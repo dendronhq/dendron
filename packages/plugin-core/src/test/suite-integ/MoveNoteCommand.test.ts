@@ -1,4 +1,4 @@
-import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import {
   AssertUtils,
   EngineTestUtilsV4,
@@ -26,12 +26,12 @@ suite("MoveNoteCommand", function () {
   //       const notes = engine.notes;
   //       const vault1 = vaults[0];
   //       const vault2 = vaults[0];
-  //       const fooNote = NoteUtilsV2.getNoteByFnameV5({
+  //       const fooNote = NoteUtils.getNoteByFnameV5({
   //         fname: "foo",
   //         notes,
   //         vault: vault1,
   //         wsRoot,
-  //       }) as NotePropsV2;
+  //       }) as NoteProps;
   //       await VSCodeUtils.openNote(fooNote);
   //       const cmd = new MoveNoteCommand();
   //       await cmd.gatherInputs();
@@ -49,12 +49,12 @@ suite("MoveNoteCommand", function () {
         const notes = engine.notes;
         const vault1 = vaults[0];
         const vault2 = vaults[0];
-        const fooNote = NoteUtilsV2.getNoteByFnameV5({
+        const fooNote = NoteUtils.getNoteByFnameV5({
           fname: "foo",
           notes,
           vault: vault1,
           wsRoot,
-        }) as NotePropsV2;
+        }) as NoteProps;
         await VSCodeUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
         await cmd.execute({
@@ -83,7 +83,7 @@ suite("MoveNoteCommand", function () {
         ).toBeTruthy();
         expect(
           _.isUndefined(
-            NoteUtilsV2.getNoteByFnameV5({
+            NoteUtils.getNoteByFnameV5({
               fname: "foo",
               notes,
               vault: vault1,
@@ -93,7 +93,7 @@ suite("MoveNoteCommand", function () {
         ).toBeTruthy();
         expect(
           _.isUndefined(
-            NoteUtilsV2.getNoteByFnameV5({
+            NoteUtils.getNoteByFnameV5({
               fname: "bar",
               notes,
               vault: vault1,
@@ -122,12 +122,12 @@ suite("MoveNoteCommand", function () {
         const vault1 = vaults[0];
         const vault2 = vaults[0];
         const fname = "scratch.2020.02.03.0123";
-        const fooNote = NoteUtilsV2.getNoteByFnameV5({
+        const fooNote = NoteUtils.getNoteByFnameV5({
           fname,
           notes,
           vault: vault1,
           wsRoot,
-        }) as NotePropsV2;
+        }) as NoteProps;
         await VSCodeUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
         await cmd.execute({
@@ -166,12 +166,12 @@ suite("MoveNoteCommand", function () {
         const notes = engine.notes;
         const vault1 = vaults[0];
         const vault2 = vaults[1];
-        const fooNote = NoteUtilsV2.getNoteByFnameV5({
+        const fooNote = NoteUtils.getNoteByFnameV5({
           fname: "foo",
           notes,
           vault: vault1,
           wsRoot,
-        }) as NotePropsV2;
+        }) as NoteProps;
         await VSCodeUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
         await cmd.execute({
@@ -206,7 +206,7 @@ suite("MoveNoteCommand", function () {
         ).toBeTruthy();
         expect(
           _.isUndefined(
-            NoteUtilsV2.getNoteByFnameV5({
+            NoteUtils.getNoteByFnameV5({
               fname: "foo",
               notes,
               vault: vault1,
@@ -216,7 +216,7 @@ suite("MoveNoteCommand", function () {
         ).toBeTruthy();
         expect(
           _.isUndefined(
-            NoteUtilsV2.getNoteByFnameV5({
+            NoteUtils.getNoteByFnameV5({
               fname: "foo",
               notes,
               vault: vault2,

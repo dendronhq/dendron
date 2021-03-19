@@ -1,9 +1,9 @@
 import {
-  DNodeUtilsV2,
+  DNodeUtils,
   DVault,
   genUUID,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
@@ -41,7 +41,7 @@ type DItem = Item & {
   entries: DItem[];
 };
 
-type HierarichalDict = { [k: string]: NotePropsV2[] };
+type HierarichalDict = { [k: string]: NoteProps[] };
 
 const toMarkdownLink = (assetPath: string, opts?: { name?: string }) => {
   const name = opts?.name ? opts.name : path.parse(assetPath).name;
@@ -123,7 +123,7 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
         out[lvl] = [];
       }
       const stub = item.stats.isDirectory() && _.isEmpty(item.entries);
-      const noteProps = NoteUtilsV2.create({ fname, stub, vault });
+      const noteProps = NoteUtils.create({ fname, stub, vault });
       if (item?.body) {
         noteProps.body = item.body;
       }
@@ -161,13 +161,13 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     return out;
   }
 
-  hDict2Notes(hdict: HierarichalDict): NotePropsV2[] {
-    const noteDict: { [k: string]: NotePropsV2 } = {};
+  hDict2Notes(hdict: HierarichalDict): NoteProps[] {
+    const noteDict: { [k: string]: NoteProps } = {};
     // TODO: currently don't handle stuff attached to root
     hdict[1]
       .filter((n) => !_.isEmpty(n.fname))
       .forEach((props) => {
-        const n = NoteUtilsV2.create({ ...props });
+        const n = NoteUtils.create({ ...props });
         noteDict[n.fname] = n;
       });
 
@@ -175,10 +175,10 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     let currRawNodes = hdict[lvl];
     while (!_.isEmpty(currRawNodes)) {
       currRawNodes.forEach((props) => {
-        const parentPath = DNodeUtilsV2.dirName(props.fname);
+        const parentPath = DNodeUtils.dirName(props.fname);
         if (_.has(noteDict, parentPath)) {
-          const n = NoteUtilsV2.create({ ...props });
-          DNodeUtilsV2.addChild(noteDict[parentPath], n);
+          const n = NoteUtils.create({ ...props });
+          DNodeUtils.addChild(noteDict[parentPath], n);
           noteDict[n.fname] = n;
         } else {
           throw Error("missing notes not supported yet");

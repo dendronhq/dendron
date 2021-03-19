@@ -1,4 +1,4 @@
-import { DLinkType, DNoteAnchor, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DLinkType, DNoteAnchor, NoteUtils } from "@dendronhq/common-all";
 import { LinkUtils } from "@dendronhq/engine-server";
 import { sort as sortPaths } from "cross-path-sort";
 import fs from "fs";
@@ -305,10 +305,10 @@ export const findReferences = async (
   engine.notes;
   // clean for anchor
   const fname = ref;
-  const notes = NoteUtilsV2.getNotesByFname({ fname, notes: engine.notes });
+  const notes = NoteUtils.getNotesByFname({ fname, notes: engine.notes });
   const notesWithRefs = await Promise.all(
     notes.flatMap((note) => {
-      return NoteUtilsV2.getNotesWithLinkTo({
+      return NoteUtils.getNotesWithLinkTo({
         note,
         notes: engine.notes,
       });
@@ -316,7 +316,7 @@ export const findReferences = async (
   );
 
   _.forEach(notesWithRefs, (note) => {
-    const fsPath = NoteUtilsV2.getPathV4({
+    const fsPath = NoteUtils.getPathV4({
       note,
       wsRoot: DendronWorkspace.wsRoot(),
     });

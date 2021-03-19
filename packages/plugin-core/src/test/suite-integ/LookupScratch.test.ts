@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteUtils } from "@dendronhq/common-all";
 import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
 import * as vscode from "vscode";
@@ -36,7 +36,7 @@ suite("Scratch Notes", function () {
           const vault = vaults[0];
           const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
           const notes = getWS().getEngine().notes;
-          const note = NoteUtilsV2.getNoteByFnameV5({
+          const note = NoteUtils.getNoteByFnameV5({
             fname,
             notes,
             vault,
@@ -106,7 +106,7 @@ suite("Scratch Notes", function () {
           const vault = vaults[1];
           const fname = NOTE_PRESETS_V4.NOTE_SIMPLE.fname;
           const notes = getWS().getEngine().notes;
-          const note = NoteUtilsV2.getNoteByFnameV5({
+          const note = NoteUtils.getNoteByFnameV5({
             fname,
             notes,
             vault,

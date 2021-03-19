@@ -2,13 +2,13 @@ import {
   CONSTANTS,
   DendronConfig,
   DendronError,
-  DNodeUtilsV2,
+  DNodeUtils,
   DNoteLoc,
   DNoteRefLink,
   DUtils,
   getSlugger,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   RespV2,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -48,7 +48,7 @@ type ConvertNoteRefOpts = {
 type ConvertNoteRefHelperOpts = ConvertNoteRefOpts & {
   refLvl: number;
   body: string;
-  note: NotePropsV2;
+  note: NoteProps;
 };
 
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
@@ -176,7 +176,7 @@ function convertNoteRef(
       DUtils.minimatch(ent.fname, link.from.fname)
     );
     noteRefs = _.sortBy(
-      out.map((ent) => NoteUtilsV2.toNoteLoc(ent)),
+      out.map((ent) => NoteUtils.toNoteLoc(ent)),
       "fname"
     );
   } else {
@@ -185,7 +185,7 @@ function convertNoteRef(
   const out = noteRefs.map((ref) => {
     const fname = ref.fname;
     // TODO: find first unit with path
-    const npath = DNodeUtilsV2.getFullPath({
+    const npath = DNodeUtils.getFullPath({
       wsRoot: engine.wsRoot,
       vault,
       basename: fname + ".md",
@@ -211,7 +211,7 @@ function convertNoteRef(
         let suffix = "";
         let href = wikiLinkOpts?.useId ? note.id : fname;
         if (dest === DendronASTDest.HTML) {
-          const maybeNote = NoteUtilsV2.getNoteByFnameV5({
+          const maybeNote = NoteUtils.getNoteByFnameV5({
             fname,
             notes: engine.notes,
             vault,
@@ -291,7 +291,7 @@ export function convertNoteRefASTV2(
       DUtils.minimatch(ent.fname, link.from.fname)
     );
     noteRefs = _.sortBy(
-      out.map((ent) => NoteUtilsV2.toNoteLoc(ent)),
+      out.map((ent) => NoteUtils.toNoteLoc(ent)),
       "fname"
     );
   } else {
@@ -300,7 +300,7 @@ export function convertNoteRefASTV2(
   const out: Parent[] = noteRefs.map((ref) => {
     const fname = ref.fname;
     // TODO: find first unit with path
-    const npath = DNodeUtilsV2.getFullPath({
+    const npath = DNodeUtils.getFullPath({
       wsRoot: engine.wsRoot,
       vault,
       basename: fname + ".md",
@@ -550,7 +550,7 @@ function renderPretty(opts: { content: string; title: string; link: string }) {
 
 function getTitle(opts: {
   config: DendronConfig;
-  note: NotePropsV2;
+  note: NoteProps;
   loc: DNoteLoc;
 }) {
   const { config, note, loc } = opts;

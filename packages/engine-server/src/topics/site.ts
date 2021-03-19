@@ -4,15 +4,15 @@ import {
   DendronError,
   DendronSiteConfig,
   DendronSiteFM,
-  DNodeUtilsV2,
+  DNodeUtils,
   DuplicateNoteAction,
   DuplicateNoteBehavior,
   DVault,
   DVaultVisibility,
   HierarchyConfig,
   NotePropsDictV2,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   UseVaultBehavior,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -31,7 +31,7 @@ const logger = createLogger();
 
 export class SiteUtils {
   static canPublish(opts: {
-    note: NotePropsV2;
+    note: NoteProps;
     config: DendronConfig;
     engine: DEngineClientV2;
   }) {
@@ -44,7 +44,7 @@ export class SiteUtils {
     }
 
     // check if note is in index
-    const domain = DNodeUtilsV2.domainName(note.fname);
+    const domain = DNodeUtils.domainName(note.fname);
     if (
       config.site.siteHierarchies[0] !== "root" &&
       config.site.siteHierarchies.indexOf(domain) < 0
@@ -114,7 +114,7 @@ export class SiteUtils {
   static addSiteOnlyNotes(opts: { engine: DEngineClientV2 }) {
     const { engine } = opts;
     const vaults = engine.vaultsv3;
-    const note = NoteUtilsV2.create({
+    const note = NoteUtils.create({
       vault: vaults[0],
       fname: "403",
       id: "403",
@@ -125,7 +125,7 @@ export class SiteUtils {
         "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/not-sprouted.png)",
       ].join("\n"),
     });
-    const changelog = NoteUtilsV2.create({
+    const changelog = NoteUtils.create({
       vault: vaults[0],
       fname: "root.changelog",
       id: "changelog",
@@ -138,14 +138,14 @@ export class SiteUtils {
   static async filterByConfig(opts: {
     engine: DEngineClientV2;
     config: DendronConfig;
-  }): Promise<{ notes: NotePropsDictV2; domains: NotePropsV2[] }> {
+  }): Promise<{ notes: NotePropsDictV2; domains: NoteProps[] }> {
     const { engine, config } = opts;
     const notes = _.clone(engine.notes);
     config.site = DConfig.cleanSiteConfig(config.site);
     const sconfig = config.site;
     const { siteHierarchies } = sconfig;
     logger.info({ ctx: "filterByConfig", config });
-    let domains: NotePropsV2[] = [];
+    let domains: NoteProps[] = [];
     // TODO: return domains from here
     const hiearchiesToPublish = await Promise.all(
       siteHierarchies.map(async (domain, idx) => {
@@ -195,7 +195,7 @@ export class SiteUtils {
     config: DendronConfig;
     engine: DEngineClientV2;
     navOrder: number;
-  }): Promise<{ notes: NotePropsDictV2; domain: NotePropsV2 } | undefined> {
+  }): Promise<{ notes: NotePropsDictV2; domain: NoteProps } | undefined> {
     const { domain, engine, navOrder, config } = opts;
     logger.info({ ctx: "filterByHiearchy", domain, config });
     const sconfig = config.site;
@@ -206,7 +206,7 @@ export class SiteUtils {
     const notesForHiearchy = _.clone(engine.notes);
 
     // get the domain note
-    let notes = NoteUtilsV2.getNotesByFname({
+    let notes = NoteUtils.getNotesByFname({
       fname: domain,
       notes: notesForHiearchy,
     });
@@ -217,7 +217,7 @@ export class SiteUtils {
       notes: notes.map((ent) => ent.id),
     });
 
-    let domainNote: NotePropsV2 | undefined;
+    let domainNote: NoteProps | undefined;
     if (notes.length > 1) {
       domainNote = SiteUtils.handleDup({
         allowStubs: false,
@@ -255,18 +255,18 @@ export class SiteUtils {
     logger.info({
       ctx: "filterByHiearchy",
       fname: domainNote.fname,
-      domainNote: NoteUtilsV2.toLogObj(domainNote),
+      domainNote: NoteUtils.toLogObj(domainNote),
     });
 
     const out: NotePropsDictV2 = {};
     const processQ = [domainNote];
     while (!_.isEmpty(processQ)) {
-      const note = processQ.pop() as NotePropsV2;
+      const note = processQ.pop() as NoteProps;
 
       logger.debug({
         ctx: "filterByHiearchy",
         fname: note.fname,
-        note: NoteUtilsV2.toLogObj(note),
+        note: NoteUtils.toLogObj(note),
       });
 
       // check if we can publish this note
@@ -290,7 +290,7 @@ export class SiteUtils {
         }
 
         // remove any children that shouldn't be published
-        children = _.filter(children, (note: NotePropsV2) =>
+        children = _.filter(children, (note: NoteProps) =>
           SiteUtils.canPublish({
             note,
             config,
@@ -305,7 +305,7 @@ export class SiteUtils {
         // TODO: handle dups
 
         // add children to Q
-        children.forEach((n: NotePropsV2) => {
+        children.forEach((n: NoteProps) => {
           // update parent to be current note
           // dup merging at the top could cause children from multiple vaults
           // to be present
@@ -324,9 +324,9 @@ export class SiteUtils {
   }
 
   static filterByNote(opts: {
-    note: NotePropsV2;
+    note: NoteProps;
     hConfig: HierarchyConfig;
-  }): NotePropsV2 | undefined {
+  }): NoteProps | undefined {
     const { note, hConfig } = opts;
 
     // apply custom frontmatter if exist
@@ -348,11 +348,11 @@ export class SiteUtils {
 
   static getConfigForHierarchy(opts: {
     config: DendronSiteConfig;
-    noteOrName: NotePropsV2 | string;
+    noteOrName: NoteProps | string;
   }) {
     const { config, noteOrName } = opts;
     const fname = _.isString(noteOrName) ? noteOrName : noteOrName.fname;
-    const domain = DNodeUtilsV2.domainName(fname);
+    const domain = DNodeUtils.domainName(fname);
     const siteConfig = config;
     // get config
     let rConfig: HierarchyConfig = _.defaults(
@@ -372,11 +372,11 @@ export class SiteUtils {
   static getDomains(opts: {
     notes: NotePropsDictV2;
     config: DendronSiteConfig;
-  }): NotePropsV2[] {
+  }): NoteProps[] {
     const { notes, config } = opts;
     if (config.siteHierarchies.length === 1) {
       const fname = config.siteHierarchies[0];
-      const rootNotes = NoteUtilsV2.getNotesByFname({ fname, notes });
+      const rootNotes = NoteUtils.getNotesByFname({ fname, notes });
       return [rootNotes[0]].concat(
         rootNotes[0].children.map((ent) => notes[ent])
       );
@@ -407,7 +407,7 @@ export class SiteUtils {
     engine: DEngineClientV2;
     fname: string;
     config: DendronConfig;
-    noteCandidates: NotePropsV2[];
+    noteCandidates: NoteProps[];
     noteDict: NotePropsDictV2;
   }) {
     const {
@@ -426,7 +426,7 @@ export class SiteUtils {
       allowStubs: true,
     });
     const ctx = "handleDup";
-    let domainNote: NotePropsV2 | undefined;
+    let domainNote: NoteProps | undefined;
 
     if (_.isArray(dupBehavior.payload)) {
       const vaultNames = dupBehavior.payload;
@@ -438,7 +438,7 @@ export class SiteUtils {
           vname,
           vaults: engine.vaultsv3,
         });
-        const maybeNote = NoteUtilsV2.getNoteByFnameV5({
+        const maybeNote = NoteUtils.getNoteByFnameV5({
           fname,
           notes: noteDict,
           vault,
@@ -459,7 +459,7 @@ export class SiteUtils {
           logger.info({
             ctx,
             status: "found",
-            note: NoteUtilsV2.toLogObj(domainNote),
+            note: NoteUtils.toLogObj(domainNote),
           });
         }
       });
@@ -512,6 +512,6 @@ export class SiteUtils {
   }
 }
 
-function getUniqueChildrenIds(notes: NotePropsV2[]): string[] {
+function getUniqueChildrenIds(notes: NoteProps[]): string[] {
   return _.uniq(notes.flatMap((ent) => ent.children));
 }

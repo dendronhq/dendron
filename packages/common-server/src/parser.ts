@@ -1,6 +1,6 @@
 import {
   DendronError,
-  DNodeUtilsV2,
+  DNodeUtils,
   DStoreV2,
   DVault,
   ENGINE_ERROR_CODES,
@@ -8,8 +8,8 @@ import {
   SchemaModulePropsV2,
   SchemaOptsV2,
   SchemaPropsDictV2,
-  SchemaPropsV2,
-  SchemaUtilsV2,
+  SchemaProps,
+  SchemaUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
@@ -40,12 +40,12 @@ export class SchemaParserV2 extends ParserBaseV2 {
       // TODO: legacy
       const schemaDict: SchemaPropsDictV2 = {};
       ((schemaOpts as unknown) as SchemaOptsV2[]).map((ent) => {
-        const schema = SchemaUtilsV2.create(ent);
+        const schema = SchemaUtils.create(ent);
         schemaDict[schema.id] = schema;
       });
       const maybeRoot = _.find(_.values(schemaDict), {
         parent: "root",
-      }) as SchemaPropsV2;
+      }) as SchemaProps;
       return {
         version: 0,
         root: maybeRoot,
@@ -82,7 +82,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
     });
     logger.debug({ ctx: "parseSchemaModuleOpts", schemaPropsFromImport });
     const schemaPropsFromFile = schemas.map((ent) => {
-      return SchemaUtilsV2.create({ ...ent, vault: root });
+      return SchemaUtils.create({ ...ent, vault: root });
     });
     logger.debug({ ctx: "parseSchemaModuleOpts", schemaPropsFromFile });
     const schemasAll = schemaPropsFromImport.concat(schemaPropsFromFile);
@@ -92,9 +92,9 @@ export class SchemaParserV2 extends ParserBaseV2 {
       schemasDict[ent.id] = ent;
     });
 
-    const rootModule = SchemaUtilsV2.getModuleRoot(schemaModuleProps);
+    const rootModule = SchemaUtils.getModuleRoot(schemaModuleProps);
 
-    const addConnections = (parent: SchemaPropsV2) => {
+    const addConnections = (parent: SchemaProps) => {
       _.map(parent.children, (ch) => {
         const child = schemasDict[ch];
         if (!child) {
@@ -103,7 +103,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
             msg: JSON.stringify({ parent, missingChild: ch }),
           });
         }
-        DNodeUtilsV2.addChild(parent, child);
+        DNodeUtils.addChild(parent, child);
         return addConnections(child);
       });
     };

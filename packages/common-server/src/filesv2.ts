@@ -1,12 +1,12 @@
 import {
   DendronError,
-  DNodeUtilsV2,
+  DNodeUtils,
   DVault,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   SchemaModuleOptsV2,
   SchemaModulePropsV2,
-  SchemaUtilsV2,
+  SchemaUtils,
 } from "@dendronhq/common-all";
 import { assign, parse, stringify } from "comment-json";
 import { FSWatcher } from "fs";
@@ -136,8 +136,8 @@ export function string2Note({
     },
   };
   const { data, content: body } = matter(content, options);
-  const custom = DNodeUtilsV2.getCustomProps(data);
-  const note = DNodeUtilsV2.create({
+  const custom = DNodeUtils.getCustomProps(data);
+  const note = DNodeUtils.create({
     ...data,
     custom,
     fname,
@@ -152,7 +152,7 @@ export function file2Note(
   fpath: string,
   vault: DVault,
   toLowercase?: boolean
-): NotePropsV2 {
+): NoteProps {
   const content = fs.readFileSync(fpath, { encoding: "utf8" });
   const { name } = path.parse(fpath);
   const fname = toLowercase ? name.toLowerCase() : name;
@@ -183,14 +183,14 @@ export function note2File({
   wsRoot,
   opts,
 }: {
-  note: NotePropsV2;
+  note: NoteProps;
   vault: DVault;
   wsRoot: string;
   opts?: { writeHierarchy?: boolean };
 }) {
   const { fname } = note;
   const ext = ".md";
-  const payload = NoteUtilsV2.serialize(note, opts);
+  const payload = NoteUtils.serialize(note, opts);
   const vpath = vault2Path({ vault, wsRoot });
   return fs.writeFile(path.join(vpath, fname + ext), payload);
 }
@@ -203,7 +203,7 @@ export function schemaModuleOpts2File(
   const ext = ".schema.yml";
   return fs.writeFile(
     path.join(vaultPath, fname + ext),
-    SchemaUtilsV2.serializeModuleOpts(schemaFile)
+    SchemaUtils.serializeModuleOpts(schemaFile)
   );
 }
 
@@ -215,7 +215,7 @@ export function schemaModuleProps2File(
   const ext = ".schema.yml";
   return fs.writeFile(
     path.join(vpath, fname + ext),
-    SchemaUtilsV2.serializeModuleProps(schemaMProps)
+    SchemaUtils.serializeModuleProps(schemaMProps)
   );
 }
 

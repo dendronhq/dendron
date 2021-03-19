@@ -1,4 +1,4 @@
-import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { NOTE_PRESETS_V4 } from "@dendronhq/common-test-utils";
 import * as vscode from "vscode";
 import ReferenceProvider from "../../features/ReferenceProvider";
@@ -24,8 +24,8 @@ suite("DocumentLinkProvider", function () {
   });
 
   test("basic", (done) => {
-    let noteWithTarget1: NotePropsV2;
-    let noteWithTarget2: NotePropsV2;
+    let noteWithTarget1: NoteProps;
+    let noteWithTarget2: NoteProps;
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {
@@ -45,7 +45,7 @@ suite("DocumentLinkProvider", function () {
         const links = await provide(editor);
         expect(links.map((l) => l.uri.fsPath)).toEqual(
           [noteWithTarget1, noteWithTarget2].map((note) =>
-            NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+            NoteUtils.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
           )
         );
         done();
@@ -54,8 +54,8 @@ suite("DocumentLinkProvider", function () {
   });
 
   test("with multiple vaults", (done) => {
-    let noteWithTarget1: NotePropsV2;
-    let noteWithTarget2: NotePropsV2;
+    let noteWithTarget1: NoteProps;
+    let noteWithTarget2: NoteProps;
     runLegacyMultiWorkspaceTest({
       ctx,
       preSetupHook: async ({ wsRoot, vaults }) => {
@@ -75,7 +75,7 @@ suite("DocumentLinkProvider", function () {
         const links = await provide(editor);
         expect(links.map((l) => l.uri.fsPath)).toEqual(
           [noteWithTarget1, noteWithTarget2].map((note) =>
-            NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+            NoteUtils.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
           )
         );
         done();
@@ -84,7 +84,7 @@ suite("DocumentLinkProvider", function () {
   });
 
   test("with anchor", (done) => {
-    let noteWithLink: NotePropsV2;
+    let noteWithLink: NoteProps;
 
     runLegacyMultiWorkspaceTest({
       ctx,
@@ -103,7 +103,7 @@ suite("DocumentLinkProvider", function () {
         const links = await provide(editor);
         expect(links.map((l) => l.uri.fsPath)).toEqual(
           [noteWithLink].map((note) =>
-            NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+            NoteUtils.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
           )
         );
         done();
@@ -112,7 +112,7 @@ suite("DocumentLinkProvider", function () {
   });
 
   test("with alias", (done) => {
-    let noteWithLink: NotePropsV2;
+    let noteWithLink: NoteProps;
 
     runLegacyMultiWorkspaceTest({
       ctx,
@@ -132,7 +132,7 @@ suite("DocumentLinkProvider", function () {
         const links = await provide(editor);
         expect(links.map((l) => l.uri.fsPath)).toEqual(
           [noteWithLink].map((note) =>
-            NoteUtilsV2.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+            NoteUtils.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
           )
         );
         done();

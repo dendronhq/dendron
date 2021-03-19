@@ -1,6 +1,6 @@
 import {
   DendronError,
-  DNodeUtilsV2,
+  DNodeUtils,
   DVault,
   ENGINE_ERROR_CODES,
   WorkspaceOpts,
@@ -128,7 +128,7 @@ suite("RenameNote", function () {
           const resp = await new RenameNoteV2aCommand().run();
           expect(resp?.changed?.length).toEqual(2);
           active = VSCodeUtils.getActiveTextEditor() as vscode.TextEditor;
-          expect(DNodeUtilsV2.fname(active.document.uri.fsPath)).toEqual(
+          expect(DNodeUtils.fname(active.document.uri.fsPath)).toEqual(
             "foobar"
           );
           expect(active.document.getText().indexOf("hello") >= 0).toBeTruthy();

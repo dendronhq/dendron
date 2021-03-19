@@ -1,4 +1,4 @@
-import { DNodeUtilsV2, DVault, NotePropsV2 } from "@dendronhq/common-all";
+import { DNodeUtils, DVault, NoteProps } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import { NodeTestPresetsV2, PLUGIN_CORE } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
@@ -19,8 +19,9 @@ import { DendronWorkspace } from "../../workspace";
 import { _activate } from "../../_extension";
 import { createMockQuickPick, onWSInit, TIMEOUT } from "../testUtils";
 import {
-  expect, getNoteFromTextEditor,
-  setupCodeWorkspaceMultiVaultV2
+  expect,
+  getNoteFromTextEditor,
+  setupCodeWorkspaceMultiVaultV2,
 } from "../testUtilsv2";
 import { setupBeforeAfter } from "../testUtilsV3";
 
@@ -203,10 +204,12 @@ suite.skip("Lookup notes, multi", function () {
             token
           );
           expect(quickpick.items.length).toEqual(4);
-          expect(_.pick(_.find(quickpick.items, { fname: "foo.ch1" }), [
-            "fname",
-            "schemaStub",
-          ])).toEqual({
+          expect(
+            _.pick(_.find(quickpick.items, { fname: "foo.ch1" }), [
+              "fname",
+              "schemaStub",
+            ])
+          ).toEqual({
             fname: "foo.ch1",
             schemaStub: true,
           });
@@ -226,7 +229,7 @@ suite.skip("Lookup notes, multi", function () {
           const ws = DendronWorkspace.instance();
           const client = ws.getEngine();
           const note = client.notes["foo"];
-          const item = DNodeUtilsV2.enhancePropForQuickInput({
+          const item = DNodeUtils.enhancePropForQuickInput({
             wsRoot: DendronWorkspace.wsRoot(),
             props: note,
             schemas: client.schemas,
@@ -239,7 +242,7 @@ suite.skip("Lookup notes, multi", function () {
           await lp.onDidAccept({ picker: quickpick, opts: engOpts, lc });
           await NodeTestPresetsV2.runMochaHarness({
             opts: {
-              activeFileName: DNodeUtilsV2.fname(
+              activeFileName: DNodeUtils.fname(
                 VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
               ),
               activeNote: getNoteFromTextEditor(),
@@ -267,9 +270,11 @@ suite.skip("Lookup notes, multi", function () {
             selectedItems: [createNoActiveItem(vaults[0])],
           });
           await lp.onDidAccept({ picker: quickpick, opts: engOpts, lc });
-          expect(DNodeUtilsV2.fname(
-            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-          )).toEqual("bond");
+          expect(
+            DNodeUtils.fname(
+              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+            )
+          ).toEqual("bond");
           const txtPath = vscode.window.activeTextEditor?.document.uri
             .fsPath as string;
           const vault = { fsPath: path.dirname(txtPath) };
@@ -292,7 +297,7 @@ suite.skip("Lookup notes, multi", function () {
             return (
               ent.vault.fsPath === vaults[1].fsPath && ent.fname === "root"
             );
-          }) as NotePropsV2;
+          }) as NoteProps;
           await VSCodeUtils.openFileInEditor(
             vscode.Uri.file(path.join(note.vault.fsPath, note.fname + ".md"))
           );
@@ -301,9 +306,11 @@ suite.skip("Lookup notes, multi", function () {
             selectedItems: [createNoActiveItem(vaults[0])],
           });
           await lp.onDidAccept({ picker: quickpick, opts: engOpts, lc });
-          expect(DNodeUtilsV2.fname(
-            VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-          )).toEqual("bond");
+          expect(
+            DNodeUtils.fname(
+              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+            )
+          ).toEqual("bond");
           const txtPath = vscode.window.activeTextEditor?.document.uri
             .fsPath as string;
           const vault = { fsPath: path.dirname(txtPath) };

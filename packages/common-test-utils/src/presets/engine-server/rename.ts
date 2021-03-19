@@ -1,4 +1,4 @@
-import { NoteChangeEntry, NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteChangeEntry, NoteUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -278,7 +278,7 @@ const NOTES = {
         match: ["gamma.md"],
         nomatch: [`${fnameOld}.md`],
       });
-      const changedNote = NoteUtilsV2.getNoteByFnameV5({
+      const changedNote = NoteUtils.getNoteByFnameV5({
         fname: "root",
         notes: engine.notes,
         vault,
@@ -507,9 +507,9 @@ const NOTES = {
   //     const vault = vaults[0];
   //     const notes = engine.notes;
   //     const alphaFname = NOTE_PRESETS_V4.NOTE_WITH_TARGET.fname;
-  //     const noteOrig = NoteUtilsV2.getNoteByFnameV5({fname: alphaFname, vault, notes});
+  //     const noteOrig = NoteUtils.getNoteByFnameV5({fname: alphaFname, vault, notes});
 
-  //   let alphaNoteNew = NoteUtilsV2.create({
+  //   let alphaNoteNew = NoteUtils.create({
   //     fname: "alpha",
   //     id: "alpha",
   //     created: "1",

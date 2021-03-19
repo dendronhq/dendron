@@ -1,9 +1,4 @@
-import {
-  NotePropsV2,
-  NoteUtilsV2,
-  Time,
-  VaultUtils,
-} from "@dendronhq/common-all";
+import { NoteProps, NoteUtils, Time, VaultUtils } from "@dendronhq/common-all";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
@@ -55,12 +50,12 @@ export class WorkspaceWatcher {
       vaults: eclient.vaultsv3,
       wsRoot: DendronWorkspace.wsRoot(),
     });
-    const note = NoteUtilsV2.getNoteByFnameV5({
+    const note = NoteUtils.getNoteByFnameV5({
       fname,
       vault,
       notes: eclient.notes,
       wsRoot: DendronWorkspace.wsRoot(),
-    }) as NotePropsV2;
+    }) as NoteProps;
 
     // if recently changed, ignore
     const recentEvents = HistoryService.instance().lookBack();
@@ -75,12 +70,12 @@ export class WorkspaceWatcher {
     }
 
     const content = ev.document.getText();
-    const matchFM = NoteUtilsV2.RE_FM;
+    const matchFM = NoteUtils.RE_FM;
     const matchOuter = content.match(matchFM);
     if (!matchOuter) {
       return;
     }
-    const match = NoteUtilsV2.RE_FM_UPDATED.exec(content);
+    const match = NoteUtils.RE_FM_UPDATED.exec(content);
     if (match) {
       Logger.info({ ctx, match, msg: "update activeText editor" });
       const startPos = ev.document.positionAt(match.index);

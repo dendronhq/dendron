@@ -1,4 +1,4 @@
-import { DNodePropsQuickInputV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DNodePropsQuickInputV2, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
@@ -242,7 +242,7 @@ export class CopyNoteLinkButton extends DendronBtn {
       }
       let links = items
         .filter((ent) => !PickerUtilsV2.isCreateNewNotePick(ent))
-        .map((note) => NoteUtilsV2.createWikiLink({ note }));
+        .map((note) => NoteUtils.createWikiLink({ note }));
       if (_.isEmpty(links)) {
         vscode.window.showInformationMessage(`no items selected`);
       } else {

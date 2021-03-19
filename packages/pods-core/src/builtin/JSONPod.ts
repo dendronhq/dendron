@@ -1,4 +1,4 @@
-import { DVault, NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DVault, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -38,18 +38,18 @@ export class JSONImportPod extends ImportPod {
   }
 
   async _entries2Notes(
-    entries: Partial<NotePropsV2>[],
+    entries: Partial<NoteProps>[],
     opts: Pick<ImportPodConfig, "concatenate" | "destName"> & {
       vault: DVault;
     }
-  ): Promise<NotePropsV2[]> {
+  ): Promise<NoteProps[]> {
     const { vault } = opts;
     const notes = _.map(entries, (ent) => {
       if (!ent.fname) {
         throw Error("fname not defined");
       }
       let fname = ent.fname;
-      return NoteUtilsV2.create({ ...ent, fname, vault });
+      return NoteUtils.create({ ...ent, fname, vault });
     });
     if (opts.concatenate) {
       if (!opts.destName) {
@@ -64,7 +64,7 @@ export class JSONImportPod extends ImportPod {
         acc.push("---");
       });
       return [
-        NoteUtilsV2.create({
+        NoteUtils.create({
           fname: opts.destName,
           body: acc.join("\n"),
           vault,

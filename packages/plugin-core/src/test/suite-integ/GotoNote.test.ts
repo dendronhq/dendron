@@ -1,4 +1,4 @@
-import { NotePropsV2, NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { ENGINE_HOOKS } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -30,7 +30,7 @@ suite("GotoNote", function () {
           qs: "foo",
           mode: "note",
           vault,
-        })) as { note: NotePropsV2 };
+        })) as { note: NoteProps };
         expect(out).toEqual(note);
         expect(getActiveEditorBasename()).toEqual("foo.md");
         done();
@@ -48,12 +48,12 @@ suite("GotoNote", function () {
       onInit: async ({ vault }) => {
         const ws = DendronWorkspace.instance();
         const engine = ws.getEngine();
-        let note = NoteUtilsV2.getNoteByFnameV5({
+        let note = NoteUtils.getNoteByFnameV5({
           fname: "foo",
           notes: engine.notes,
           vault,
           wsRoot: DendronWorkspace.wsRoot(),
-        }) as NotePropsV2;
+        }) as NoteProps;
         expect(_.pick(note, ["fname", "stub"])).toEqual({
           fname: "foo",
           stub: true,
@@ -63,7 +63,7 @@ suite("GotoNote", function () {
           qs: "foo",
           mode: "note",
           vault,
-        })) as { note: NotePropsV2 };
+        })) as { note: NoteProps };
         expect(_.pick(out, ["fname", "stub", "id"])).toEqual({
           fname: "foo",
           id: note.id,
@@ -82,9 +82,9 @@ suite("GotoNote", function () {
           qs: "foo.ch2",
           mode: "note",
           vault,
-        })) as { note: NotePropsV2 };
+        })) as { note: NoteProps };
         expect(_.pick(out, ["fname", "stub"])).toEqual({
-          fname: "foo.ch2"
+          fname: "foo.ch2",
         });
         expect(getActiveEditorBasename()).toEqual("foo.ch2.md");
         done();

@@ -1,4 +1,4 @@
-import { NoteUtilsV2, VaultUtils } from "@dendronhq/common-all";
+import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Content, Root } from "mdast";
 import { list, listItem, paragraph } from "mdast-builder";
@@ -13,7 +13,9 @@ const plugin: Plugin = function (this: Unified.Processor) {
   const proc = this;
   function transformer(tree: Node): void {
     let root = tree as Root;
-    const { fname, vault, dest, insideNoteRef } = MDUtilsV4.getDendronData(proc);
+    const { fname, vault, dest, insideNoteRef } = MDUtilsV4.getDendronData(
+      proc
+    );
     if (!fname || insideNoteRef) {
       return;
     }
@@ -21,7 +23,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
       return;
     }
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
-    const note = NoteUtilsV2.getNoteByFnameV5({
+    const note = NoteUtils.getNoteByFnameV5({
       fname: fname,
       notes: engine.notes,
       vault: vault!,
@@ -48,7 +50,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
                 value: mdLink.from.fname,
                 data: {
                   alias:
-                    NoteUtilsV2.getNoteOrThrow({
+                    NoteUtils.getNoteOrThrow({
                       fname: mdLink.from.fname!,
                       notes: engine.notes,
                       vault: mdLink.from.vault!,

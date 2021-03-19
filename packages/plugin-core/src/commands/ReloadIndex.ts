@@ -1,8 +1,8 @@
 import {
   DEngineClientV2,
   ERROR_CODES,
-  NoteUtilsV2,
-  SchemaUtilsV2,
+  NoteUtils,
+  SchemaUtils,
 } from "@dendronhq/common-all";
 import {
   note2File,
@@ -39,12 +39,12 @@ export class ReloadIndexCommand extends BasicCommand<
         const rootNotePath = path.join(vaultDir, "root.md");
         const rootSchemaPath = path.join(vaultDir, "root.schema.yml");
         if (!(await fs.pathExists(rootSchemaPath))) {
-          const schema = SchemaUtilsV2.createRootModule({ vault });
+          const schema = SchemaUtils.createRootModule({ vault });
           this.L.info({ ctx, vaultDir, msg: "creating root schema" });
           await schemaModuleOpts2File(schema, vaultDir, "root");
         }
         if (!fs.pathExistsSync(rootNotePath)) {
-          const note = NoteUtilsV2.createRoot({ vault });
+          const note = NoteUtils.createRoot({ vault });
           this.L.info({ ctx, vaultDir, msg: "creating root note" });
           await note2File({ note, vault, wsRoot: DendronWorkspace.wsRoot() });
         }

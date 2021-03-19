@@ -1,11 +1,11 @@
 import {
   DNodePropsQuickInputV2,
-  DNodeUtilsV2,
-  NotePropsV2,
-  NoteUtilsV2,
+  DNodeUtils,
+  NoteProps,
+  NoteUtils,
   SchemaModulePropsV2,
-  SchemaUtilsV2,
-  WorkspaceOpts
+  SchemaUtils,
+  WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
@@ -16,7 +16,7 @@ import {
   NOTE_PRESETS_V4,
   runJestHarnessV2,
   sinon,
-  TestPresetEntryV4
+  TestPresetEntryV4,
 } from "@dendronhq/common-test-utils";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -32,7 +32,7 @@ import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
 import {
   createNoActiveItem,
-  PickerUtilsV2
+  PickerUtilsV2,
 } from "../../components/lookup/utils";
 import { EngineFlavor, EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
@@ -45,7 +45,7 @@ import {
   runLegacyMultiWorkspaceTest,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
-  withConfig
+  withConfig,
 } from "../testUtilsV3";
 
 const createEngineForSchemaUpdateItems = createEngineFactory({
@@ -140,7 +140,7 @@ const schemaAcceptHelper = async (qs: string) => {
   const ws = DendronWorkspace.instance();
   const client = ws.getEngine();
   let schemaModule = client.schemas[qs];
-  const schemaInput = SchemaUtilsV2.enhanceForQuickInput({
+  const schemaInput = SchemaUtils.enhanceForQuickInput({
     props: schemaModule,
     vaults: DendronWorkspace.instance().config.vaults,
   });
@@ -181,7 +181,7 @@ const createEngineForSchemaAcceptQuery = createEngineFactory({
     const querySchema: DendronEngineV2["querySchema"] = async (qs) => {
       const uris = await schemaAcceptHelper(qs);
       const schemas = uris?.map((ent) => {
-        return SchemaUtilsV2.getSchemaModuleByFnameV4({
+        return SchemaUtils.getSchemaModuleByFnameV4({
           fname: path.basename(ent.fsPath, ".schema.yml"),
           schemas: getWS().getEngine().schemas,
           vault: { fsPath: path.dirname(ent.fsPath) },
@@ -430,9 +430,11 @@ suite("Lookup, notesv2", function () {
           quickpick.selectedItems = [note];
           await lp.onDidAccept({ picker: quickpick, opts: engOpts, lc });
           lc.onDidHide(async () => {
-            expect(path.basename(
-              VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
-            )).toEqual("foo.md");
+            expect(
+              path.basename(
+                VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath as string
+              )
+            ).toEqual("foo.md");
             const lc2 = new LookupControllerV2(engOpts);
             const quickpick2 = await lc2.show();
             note = _.find(quickpick2.items, {
@@ -639,13 +641,13 @@ suite("Lookup, notesv2", function () {
           const { lp, lc } = await lookupHelper("note");
           const ws = DendronWorkspace.instance();
           const client = ws.getEngine();
-          const note = NoteUtilsV2.getNoteByFnameV5({
+          const note = NoteUtils.getNoteByFnameV5({
             fname: "foo",
             notes: client.notes,
             vault: vaults[0],
             wsRoot: DendronWorkspace.wsRoot(),
-          }) as NotePropsV2;
-          const item = DNodeUtilsV2.enhancePropForQuickInput({
+          }) as NoteProps;
+          const item = DNodeUtils.enhancePropForQuickInput({
             wsRoot,
             props: note,
             schemas: client.schemas,
@@ -664,7 +666,7 @@ suite("Lookup, notesv2", function () {
           await runJestHarnessV2(
             [
               {
-                actual: DNodeUtilsV2.fname(
+                actual: DNodeUtils.fname(
                   VSCodeUtils.getActiveTextEditor()?.document.uri
                     .fsPath as string
                 ),
@@ -769,7 +771,7 @@ suite("Lookup, notesv2", function () {
           const client = getWS().getEngine();
           const notes = ["foo", "foo.ch1"].map((fname) => client.notes[fname]);
           const items = notes.map((note) =>
-            DNodeUtilsV2.enhancePropForQuickInput({
+            DNodeUtils.enhancePropForQuickInput({
               wsRoot,
               props: note,
               schemas: client.schemas,
@@ -1025,7 +1027,7 @@ suite("selectionExtract", function () {
 //         const client = DendronWorkspace.instance().getEngine();
 //         const notes = ["foo", "foo.ch1"].map((fname) => client.notes[fname]);
 //         const items = notes.map((note) =>
-//           DNodeUtilsV2.enhancePropForQuickInput({
+//           DNodeUtils.enhancePropForQuickInput({
 //             props: note,
 //             schemas: client.schemas,
 //             vaults: DendronWorkspace.instance().config.vaults,

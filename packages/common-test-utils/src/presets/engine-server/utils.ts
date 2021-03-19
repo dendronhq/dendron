@@ -1,4 +1,4 @@
-import { SchemaUtilsV2 } from "@dendronhq/common-all";
+import { SchemaUtils } from "@dendronhq/common-all";
 import { NoteTestUtilsV4 } from "../../noteUtils";
 import { PreSetupHookFunction } from "../../types";
 import { NOTE_PRESETS_V4 } from "../notes";
@@ -142,18 +142,18 @@ export const setupSchemaPreseet: PreSetupHookFunction = async (opts) => {
     vault,
     modifier: (schema) => {
       const schemas = [
-        SchemaUtilsV2.create({
+        SchemaUtils.create({
           id: "bar",
           parent: "root",
           children: ["ch1", "ch2"],
           vault,
         }),
-        SchemaUtilsV2.create({
+        SchemaUtils.create({
           id: "ch1",
           template: { id: "bar.template.ch1", type: "note" },
           vault,
         }),
-        SchemaUtilsV2.create({
+        SchemaUtils.create({
           id: "ch2",
           template: { id: "bar.template.ch2", type: "note" },
           namespace: true,
@@ -193,30 +193,30 @@ export const setupSchemaPresetWithNamespaceTemplateBase: PreSetupHookFunction = 
     vault: vault1,
     modifier: (schema) => {
       const schemas = [
-        SchemaUtilsV2.create({
+        SchemaUtils.create({
           id: "daily",
           parent: "root",
           children: ["journal"],
           vault: vault1,
         }),
-        SchemaUtilsV2.create({
+        SchemaUtils.create({
           id: "journal",
           children: ["year"],
           vault: vault1,
         }),
-        SchemaUtilsV2.create({
+        SchemaUtils.create({
           id: "year",
           pattern: "[0-2][0-9][0-9][0-9]",
           children: ["month"],
           vault: vault1,
         }),
-        SchemaUtilsV2.create({
+        SchemaUtils.create({
           id: "month",
           pattern: "[0-9][0-9]",
           children: ["day"],
           vault: vault1,
         }),
-        SchemaUtilsV2.create({
+        SchemaUtils.create({
           id: "day",
           pattern: "[0-9][0-9]",
           namespace: true,

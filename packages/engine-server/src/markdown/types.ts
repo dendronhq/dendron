@@ -2,7 +2,7 @@ import {
   DendronConfig,
   DNoteRefLink,
   DVault,
-  NotePropsV2
+  NoteProps,
 } from "@dendronhq/common-all";
 import { Parent } from "mdast";
 import { Processor } from "unified";
@@ -14,7 +14,7 @@ export { VFile } from "vfile";
 export { Processor };
 
 export type DendronASTNode = Parent & {
-  notes?: NotePropsV2[];
+  notes?: NoteProps[];
   children?: Parent["children"] | DendronASTNode[];
 };
 

@@ -1,4 +1,4 @@
-import { DNodeUtilsV2, VaultUtils } from "@dendronhq/common-all";
+import { DNodeUtils, VaultUtils } from "@dendronhq/common-all";
 import {
   getAllPublishPods,
   JSONPublishPod,
@@ -46,7 +46,7 @@ export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
       );
       return;
     }
-    noteByName = DNodeUtilsV2.fname(noteByName);
+    noteByName = DNodeUtils.fname(noteByName);
 
     if (!maybeConfig && PodUtils.hasRequiredOpts(podClass)) {
       const configPath = PodUtils.genConfigFile({ podsDir, podClass });

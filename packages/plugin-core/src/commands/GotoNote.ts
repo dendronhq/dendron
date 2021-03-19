@@ -4,8 +4,8 @@ import {
   DNoteAnchor,
   DVault,
   getSlugger,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import { Heading, ParserUtilsV2 } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -20,11 +20,11 @@ type CommandOpts = {
   mode: DNodeTypeV2;
   vault: DVault;
   anchor?: DNoteAnchor;
-  overrides?: Partial<NotePropsV2>;
+  overrides?: Partial<NoteProps>;
 };
 export { CommandOpts as GotoNoteCommandOpts };
 
-type CommandOutput = { note: NotePropsV2; pos?: Position } | undefined;
+type CommandOutput = { note: NoteProps; pos?: Position } | undefined;
 
 export const findHeaderPos = (opts: { anchor: string; text: string }) => {
   const { anchor, text } = opts;
@@ -60,8 +60,8 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
             vault,
             overrides,
           });
-          const note = data?.note as NotePropsV2;
-          const npath = NoteUtilsV2.getPathV4({
+          const note = data?.note as NoteProps;
+          const npath = NoteUtils.getPathV4({
             note,
             wsRoot: DendronWorkspace.wsRoot(),
           });

@@ -1,4 +1,4 @@
-import { NoteUtilsV2 } from "@dendronhq/common-all";
+import { NoteUtils } from "@dendronhq/common-all";
 import { note2File } from "@dendronhq/common-server";
 import { describe } from "mocha";
 import path from "path";
@@ -22,7 +22,7 @@ suite("WindowWatcher", function () {
         ctx,
         postSetupHook: async ({ vaults, wsRoot }) => {
           const vault = vaults[0];
-          const bar = NoteUtilsV2.create({
+          const bar = NoteUtils.create({
             fname: `bar`,
             id: `bar`,
             body: "bar body",

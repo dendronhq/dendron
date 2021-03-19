@@ -151,7 +151,7 @@ export type DNodeOptsV2<T = any> = Partial<
   Omit<DNodePropsV2<T>, "fname|type|vault">
 > & { fname: string; type: DNodeTypeV2; vault: DVault };
 
-export type SchemaRawV2 = Pick<SchemaPropsV2, "id"> &
+export type SchemaRawV2 = Pick<SchemaProps, "id"> &
   Partial<SchemaDataV2> & { title?: string; desc?: string } & Partial<
     Pick<DNodePropsV2, "children">
   >;
@@ -167,19 +167,19 @@ export type DNodePropsQuickInputV2<T = any> = DNodePropsV2<T> & {
   alwaysShow?: boolean;
 };
 
-export type SchemaPropsV2 = DNodePropsV2<SchemaData>;
-export type NotePropsV2 = DNodePropsV2<any, DendronSiteFM & any>;
+export type SchemaProps = DNodePropsV2<SchemaData>;
+export type NoteProps = DNodePropsV2<any, DendronSiteFM & any>;
 
 export type DNodePropsDictV2 = {
   [key: string]: DNodePropsV2;
 };
 
 export type NotePropsDictV2 = {
-  [key: string]: NotePropsV2;
+  [key: string]: NoteProps;
 };
 
 export type SchemaPropsDictV2 = {
-  [key: string]: SchemaPropsV2;
+  [key: string]: SchemaProps;
 };
 
 export type SchemaModuleDictV2 = {
@@ -199,7 +199,7 @@ export type SchemaModulePropsV2 = {
   version: number;
   imports?: SchemaImportV2;
   schemas: SchemaPropsDictV2;
-  root: SchemaPropsV2;
+  root: SchemaProps;
   fname: string;
   vault: DVault;
 };
@@ -249,7 +249,7 @@ export type GetNoteOptsV2 = {
   /**
    * Override any props
    */
-  overrides?: Partial<NotePropsV2>;
+  overrides?: Partial<NoteProps>;
 };
 export type EngineDeleteOptsV2 = EngineDeleteOpts;
 export type EngineWriteOptsV2 = {
@@ -302,7 +302,7 @@ export type DCommonProps = {
 };
 
 export type NoteChangeEntry = {
-  note: NotePropsV2;
+  note: NoteProps;
   status: "create" | "update" | "delete";
 };
 /**
@@ -319,11 +319,11 @@ export type DCommonMethods = {
   ) => Promise<Required<RespV2<NoteChangeEntry[]>>>;
   // TODO
   // configGet(): RespV2<ConfigGetPayload>
-  updateNote(note: NotePropsV2, opts?: EngineUpdateNodesOptsV2): Promise<void>;
+  updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2): Promise<void>;
   updateSchema: (schema: SchemaModulePropsV2) => Promise<void>;
 
   writeNote: (
-    note: NotePropsV2,
+    note: NoteProps,
     opts?: EngineWriteOptsV2
   ) => Promise<WriteNoteResp>;
   writeSchema: (schema: SchemaModulePropsV2) => Promise<void>;
@@ -343,13 +343,13 @@ export type EngineInfoResp = {
 
 export type EngineDeleteNoteResp = Required<RespV2<EngineDeleteNotePayload>>;
 export type EngineQueryNoteResp = Required<RespV2<DNodePropsV2[]>>;
-export type NoteQueryResp = Required<RespV2<NotePropsV2[]>>;
+export type NoteQueryResp = Required<RespV2<NoteProps[]>>;
 export type SchemaQueryResp = Required<RespV2<SchemaModulePropsV2[]>>;
 export type StoreDeleteNoteResp = EngineDeleteNotePayload;
 export type RenameNotePayload = NoteChangeEntry[];
 
 export type GetNotePayloadV2 = {
-  note: NotePropsV2 | undefined;
+  note: NoteProps | undefined;
   changed: NoteChangeEntry[];
 };
 export type QueryNotesOpts = {
@@ -365,7 +365,7 @@ export type DEngineV2SyncOpts = {
 };
 
 export type BulkAddNoteOpts = {
-  notes: NotePropsV2[];
+  notes: NoteProps[];
 };
 
 export type DEngineV2 = DCommonProps &

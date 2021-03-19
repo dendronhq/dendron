@@ -1,4 +1,4 @@
-import { DEngineClientV2, NotePropsV2 } from "@dendronhq/common-all";
+import { DEngineClientV2, NoteProps } from "@dendronhq/common-all";
 import { createLogger, vault2Path } from "@dendronhq/common-server";
 import { DendronEngineV2, Git } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -35,7 +35,7 @@ export type Asset = {
   srcPath: string;
   dstPath: string;
 };
-export type PrepareOutput = { notes: NotePropsV2[]; assets: Asset[] };
+export type PrepareOutput = { notes: NoteProps[]; assets: Asset[] };
 
 type DendronSoilOpts = {
   name: string;
@@ -135,7 +135,7 @@ export abstract class DendronSeed<
     return;
   }
 
-  async mergeNote(note: NotePropsV2): Promise<NotePropsV2> {
+  async mergeNote(note: NoteProps): Promise<NoteProps> {
     const { mergeStrategy } = _.defaults(this.config(), {
       mergeStrategy: "appendToBottom",
     });
@@ -146,7 +146,7 @@ export abstract class DendronSeed<
     if (!resp.data) {
       throw Error("no note found");
     }
-    let noteFromEngine = resp.data.note as NotePropsV2;
+    let noteFromEngine = resp.data.note as NoteProps;
     let body = noteFromEngine.body;
     switch (mergeStrategy) {
       case "insertAtTop":
@@ -178,11 +178,11 @@ export abstract class DendronSeed<
     );
   }
 
-  async writeNotes(notes: NotePropsV2[], opts?: PlantOpts) {
+  async writeNotes(notes: NoteProps[], opts?: PlantOpts) {
     const source = this.config().source;
     const wsRoot = this.opts.wsRoot;
     return Promise.all(
-      notes.map(async (n: NotePropsV2) => {
+      notes.map(async (n: NoteProps) => {
         const vpath = vault2Path({ wsRoot, vault: this.engine.vaultsv3[0] });
         const notePath = path.join(vpath, n.fname + ".md");
         if (fs.existsSync(notePath)) {

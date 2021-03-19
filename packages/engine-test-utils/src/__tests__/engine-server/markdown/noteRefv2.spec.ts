@@ -1,8 +1,4 @@
-import {
-  DendronConfig,
-  NotePropsV2,
-  WorkspaceOpts,
-} from "@dendronhq/common-all";
+import { DendronConfig, NoteProps, WorkspaceOpts } from "@dendronhq/common-all";
 import {
   AssertUtils,
   ENGINE_HOOKS,
@@ -38,7 +34,7 @@ function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
 export const modifyNote = async (
   opts: WorkspaceOpts,
   fname: string,
-  cb: (note: NotePropsV2) => NotePropsV2
+  cb: (note: NoteProps) => NoteProps
 ) => {
   await NoteTestUtilsV4.modifyNoteByPath(
     { wsRoot: opts.wsRoot, vault: opts.vaults[0], fname },
@@ -150,7 +146,7 @@ describe("noteRefV2", () => {
 
   const WITH_ANCHOR_PRE_SETUP = async (opts: WorkspaceOpts) => {
     await ENGINE_HOOKS.setupBasic(opts);
-    await modifyNote(opts, "foo", (note: NotePropsV2) => {
+    await modifyNote(opts, "foo", (note: NoteProps) => {
       const txt = [
         "---",
         "id: foo",
@@ -169,7 +165,7 @@ describe("noteRefV2", () => {
 
   const ANCHOR_WITH_SPACE_PRE_SETUP = async (opts: WorkspaceOpts) => {
     await ENGINE_HOOKS.setupBasic(opts);
-    await modifyNote(opts, "foo", (note: NotePropsV2) => {
+    await modifyNote(opts, "foo", (note: NoteProps) => {
       const txt = [
         "---",
         "id: foo",
@@ -272,7 +268,7 @@ describe("noteRefV2", () => {
     },
     preSetupHook: async (opts) => {
       await ENGINE_HOOKS.setupBasic(opts);
-      await modifyNote(opts, "foo.ch1", (note: NotePropsV2) => {
+      await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
         const txt = [`# Tasks`, "## Header1", "task1", "## Header2", "task2"];
         note.body = txt.join("\n");
         return note;

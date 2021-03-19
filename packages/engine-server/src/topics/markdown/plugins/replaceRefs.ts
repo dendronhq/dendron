@@ -1,7 +1,7 @@
 import {
   DendronError,
   DEngineClientV2,
-  NoteUtilsV2,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -104,7 +104,7 @@ export function replaceRefs(options: ReplaceRefOptions) {
           if (!engine) {
             throw Error(`need engine when wikiLinkUseId is set`);
           }
-          const notes = NoteUtilsV2.getNotesByFname({
+          const notes = NoteUtils.getNotesByFname({
             fname: data.permalink,
             notes: (engine as DEngineClientV2).notes,
           });

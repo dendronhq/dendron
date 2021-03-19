@@ -1,4 +1,4 @@
-import { DVault, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DVault, NoteUtils } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -38,7 +38,7 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
     let value: string = "";
     const editor = VSCodeUtils.getActiveTextEditor();
     if (editor) {
-      value = NoteUtilsV2.uri2Fname(editor.document.uri);
+      value = NoteUtils.uri2Fname(editor.document.uri);
     }
     match = await VSCodeUtils.showInputBox({
       prompt: "Enter match text",

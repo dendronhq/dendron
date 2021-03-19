@@ -5,8 +5,8 @@ import {
   DUtils,
   DVault,
   DVaultVisibility,
-  NoteUtilsV2,
-  SchemaUtilsV2,
+  NoteUtils,
+  SchemaUtils,
   Time,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -89,7 +89,7 @@ export class WorkspaceService {
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
     fs.ensureDirSync(vpath);
 
-    const note = NoteUtilsV2.createRoot({
+    const note = NoteUtils.createRoot({
       vault,
       body: [
         "# Welcome to Dendron",
@@ -97,15 +97,13 @@ export class WorkspaceService {
         `This is the root of your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top. `,
       ].join("\n"),
     });
-    const schema = SchemaUtilsV2.createRootModule({ vault });
+    const schema = SchemaUtils.createRootModule({ vault });
 
-    if (!fs.existsSync(NoteUtilsV2.getPathV4({ note, wsRoot: this.wsRoot }))) {
+    if (!fs.existsSync(NoteUtils.getPathV4({ note, wsRoot: this.wsRoot }))) {
       await note2File({ note, vault, wsRoot: this.wsRoot });
     }
     if (
-      !fs.existsSync(
-        SchemaUtilsV2.getPath({ root: this.wsRoot, fname: "root" })
-      )
+      !fs.existsSync(SchemaUtils.getPath({ root: this.wsRoot, fname: "root" }))
     ) {
       await schemaModuleOpts2File(schema, vpath, "root");
     }
@@ -137,7 +135,7 @@ export class WorkspaceService {
     fs.ensureDirSync(vaultFullPath);
     const wsRoot = this.wsRoot;
 
-    const note = NoteUtilsV2.createRoot({
+    const note = NoteUtils.createRoot({
       vault,
       body: [
         "# Welcome to Dendron",
@@ -145,15 +143,13 @@ export class WorkspaceService {
         `This is the root of your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top. `,
       ].join("\n"),
     });
-    const schema = SchemaUtilsV2.createRootModule({ vault });
-    const notePath = NoteUtilsV2.getPathV4({ note, wsRoot });
+    const schema = SchemaUtils.createRootModule({ vault });
+    const notePath = NoteUtils.getPathV4({ note, wsRoot });
     if (!fs.existsSync(notePath)) {
       await note2File({ note, vault, wsRoot: this.wsRoot });
     }
     if (
-      !fs.existsSync(
-        SchemaUtilsV2.getPath({ root: this.wsRoot, fname: "root" })
-      )
+      !fs.existsSync(SchemaUtils.getPath({ root: this.wsRoot, fname: "root" }))
     ) {
       await schemaModuleOpts2File(schema, vaultFullPath, "root");
     }

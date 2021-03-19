@@ -1,4 +1,4 @@
-import { DendronError, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DendronError, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Image, Root } from "mdast";
 import Unified, { Transformer } from "unified";
@@ -13,7 +13,7 @@ import {
   NoteRefDataV4,
   NoteRefDataV4_LEGACY,
   VaultMissingBehavior,
-  WikiLinkNoteV4
+  WikiLinkNoteV4,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { convertNoteRefAST, NoteRefsOpts } from "./noteRefs";
@@ -31,9 +31,14 @@ type PluginOpts = NoteRefsOpts & {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  let { dest, vault, fname, config, overrides, insideNoteRef } = MDUtilsV4.getDendronData(
-    proc
-  );
+  let {
+    dest,
+    vault,
+    fname,
+    config,
+    overrides,
+    insideNoteRef,
+  } = MDUtilsV4.getDendronData(proc);
   function transformer(tree: Node, _file: VFile) {
     let root = tree as Root;
     const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
@@ -50,7 +55,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           )}`,
         });
       }
-      const note = NoteUtilsV2.getNoteByFnameV5({
+      const note = NoteUtils.getNoteByFnameV5({
         fname,
         notes: engine.notes,
         vault: vault,
@@ -87,7 +92,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
 
         const copts = opts?.wikiLinkOpts;
         if (opts?.transformNoPublish) {
-          const notes = NoteUtilsV2.getNotesByFname({
+          const notes = NoteUtils.getNotesByFname({
             fname: valueOrig,
             notes: engine.notes,
             vault,
@@ -113,7 +118,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           }
         }
         if (copts?.useId && canPublish) {
-          const notes = NoteUtilsV2.getNotesByFname({
+          const notes = NoteUtils.getNotesByFname({
             fname: valueOrig,
             notes: engine.notes,
             vault,
@@ -239,4 +244,3 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
 
 export { plugin as dendronPub };
 export { PluginOpts as DendronPubOpts };
-

@@ -21,8 +21,8 @@ import {
   GetNotePayloadV2,
   NoteChangeEntry,
   NotePropsDictV2,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   QueryNotesOpts,
   RenameNoteOptsV2,
   RenameNotePayload,
@@ -31,7 +31,7 @@ import {
   SchemaModuleDictV2,
   SchemaModulePropsV2,
   SchemaQueryResp,
-  SchemaUtilsV2,
+  SchemaUtils,
   VaultUtils,
   WriteNoteResp,
 } from "@dendronhq/common-all";
@@ -157,7 +157,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   }
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {
-    const data = await _.reduce<NotePropsV2, Promise<NoteChangeEntry[]>>(
+    const data = await _.reduce<NoteProps, Promise<NoteChangeEntry[]>>(
       opts.notes,
       async (resp, note) => {
         await resp;
@@ -237,7 +237,7 @@ export class DendronEngineClient implements DEngineClientV2 {
 
   async queryNote(
     opts: Parameters<DEngineClientV2["queryNotes"]>[0]
-  ): Promise<NotePropsV2[]> {
+  ): Promise<NoteProps[]> {
     const { qs, vault } = opts;
     let noteIndexProps = await this.fuseEngine.queryNote({ qs });
     // TODO: hack
@@ -272,7 +272,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     };
   }
 
-  async refreshNotes(notes: NotePropsV2[]) {
+  async refreshNotes(notes: NoteProps[]) {
     notes.forEach((node: DNodePropsV2) => {
       const { id } = node;
       this.notes[id] = node;
@@ -283,7 +283,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   async refreshNotesV2(notes: NoteChangeEntry[]) {
     notes.forEach((ent: NoteChangeEntry) => {
       const { id } = ent.note;
-      const uri = NoteUtilsV2.getURI({ note: ent.note, wsRoot: this.wsRoot });
+      const uri = NoteUtils.getURI({ note: ent.note, wsRoot: this.wsRoot });
       if (ent.status === "delete") {
         delete this.notes[id];
         this.history &&
@@ -301,7 +301,7 @@ export class DendronEngineClient implements DEngineClientV2 {
 
   async refreshSchemas(smods: SchemaModulePropsV2[]) {
     smods.forEach((smod) => {
-      const id = SchemaUtilsV2.getModuleRoot(smod).id;
+      const id = SchemaUtils.getModuleRoot(smod).id;
       this.schemas[id] = smod;
     });
   }
@@ -329,7 +329,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   }
 
   async updateNote(
-    note: NotePropsV2,
+    note: NoteProps,
     opts?: EngineUpdateNodesOptsV2
   ): Promise<void> {
     await this.api.engineUpdateNote({ ws: this.ws, note, opts });
@@ -342,7 +342,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   }
 
   async writeNote(
-    note: NotePropsV2,
+    note: NoteProps,
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
     const resp = await this.api.engineWrite({

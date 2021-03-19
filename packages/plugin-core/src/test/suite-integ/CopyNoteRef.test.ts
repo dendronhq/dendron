@@ -1,9 +1,9 @@
-import { DVault, NoteUtilsV2 } from "@dendronhq/common-all";
+import { DVault, NoteUtils } from "@dendronhq/common-all";
 import {
   DirResult,
   note2File,
   tmpDir,
-  vault2Path
+  vault2Path,
 } from "@dendronhq/common-server";
 import { ENGINE_HOOKS, NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
 import { describe } from "mocha";
@@ -81,7 +81,7 @@ suite("CopyNoteRef", function () {
         vault = { fsPath: vaultDir };
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         const rootName = "bar";
-        const note = NoteUtilsV2.create({
+        const note = NoteUtils.create({
           fname: `${rootName}`,
           id: `${rootName}`,
           created: "1",
@@ -112,7 +112,7 @@ suite("CopyNoteRef", function () {
         vault = { fsPath: vaultDir };
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         const rootName = "bar";
-        const note = NoteUtilsV2.create({
+        const note = NoteUtils.create({
           fname: `${rootName}`,
           id: `${rootName}`,
           created: "1",
@@ -143,7 +143,7 @@ suite("CopyNoteRef", function () {
         vault = { fsPath: vaultDir };
         await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
         const rootName = "bar";
-        const note = NoteUtilsV2.create({
+        const note = NoteUtils.create({
           fname: `${rootName}`,
           id: `${rootName}`,
           created: "1",

@@ -1,4 +1,4 @@
-import { getSlugger, NotePropsV2 } from "@dendronhq/common-all";
+import { getSlugger, NoteProps } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
 import { Selection, window } from "vscode";
@@ -50,7 +50,7 @@ export class CopyNoteURLCommand extends BasicCommand<
     const notePrefix = "notes";
     const fname = path.basename(maybeTextEditor.document.uri.fsPath, ".md");
 
-    let note: NotePropsV2 | undefined;
+    let note: NoteProps | undefined;
     note = _.find(DendronWorkspace.instance().getEngine().notes, { fname });
     if (!note) {
       throw Error(`${fname} not found in engine`);

@@ -4,13 +4,13 @@ import {
   DNodePropsDictV2,
   DNodePropsQuickInputV2,
   DNodePropsV2,
-  DNodeUtilsV2,
+  DNodeUtils,
   DVault,
   getStage,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   SchemaModulePropsV2,
-  SchemaUtilsV2,
+  SchemaUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -40,7 +40,7 @@ const PAGINATE_LIMIT = 50;
 type OnDidAcceptReturn = Promise<
   | {
       uris: Uri[];
-      node: NotePropsV2 | SchemaModulePropsV2 | undefined;
+      node: NoteProps | SchemaModulePropsV2 | undefined;
       resp?: any;
     }
   | undefined
@@ -48,7 +48,7 @@ type OnDidAcceptReturn = Promise<
 type OnDidAcceptNewNodeReturn = Promise<
   | {
       uri: Uri;
-      node: NotePropsV2 | SchemaModulePropsV2;
+      node: NoteProps | SchemaModulePropsV2;
       resp?: any | undefined;
     }
   | undefined
@@ -143,13 +143,13 @@ export class LookupProviderV2 {
     } else {
       const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
       Logger.info({ ctx, msg: "create normal node" });
-      nodeNew = NoteUtilsV2.create({ fname, vault });
-      const result = SchemaUtilsV2.matchPath({
+      nodeNew = NoteUtils.create({ fname, vault });
+      const result = SchemaUtils.matchPath({
         notePath: fname,
         schemaModDict: engine.schemas,
       });
       if (result) {
-        NoteUtilsV2.addSchema({
+        NoteUtils.addSchema({
           note: nodeNew,
           schemaModule: result.schemaModule,
           schema: result.schema,
@@ -157,14 +157,14 @@ export class LookupProviderV2 {
       }
       Logger.info({ ctx, msg: "post:maybeAddSchema", schema: result });
     }
-    const maybeSchema = SchemaUtilsV2.getSchemaFromNote({
+    const maybeSchema = SchemaUtils.getSchemaFromNote({
       note: nodeNew,
       engine,
     });
     const maybeTemplate =
       maybeSchema?.schemas[nodeNew.schema?.schemaId as string].data.template;
     if (maybeSchema && maybeTemplate) {
-      SchemaUtilsV2.applyTemplate({
+      SchemaUtils.applyTemplate({
         template: maybeTemplate,
         note: nodeNew,
         engine,
@@ -178,12 +178,12 @@ export class LookupProviderV2 {
     Logger.info({ ctx, msg: "pre:checkNoteExist" });
     // TODO: check for overwriting schema
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-    const noteExists = NoteUtilsV2.getNoteByFnameV5({
+    const noteExists = NoteUtils.getNoteByFnameV5({
       fname: nodeNew.fname,
       vault,
       notes: engine.notes,
       wsRoot: DendronWorkspace.wsRoot(),
-    }) as NotePropsV2;
+    }) as NoteProps;
     if (
       noteExists &&
       !foundStub &&
@@ -205,7 +205,7 @@ export class LookupProviderV2 {
       }
     }
     // NOTE: this needs to be after picker.onCreate since uri can still be modified at that point
-    let uri = NoteUtilsV2.getURI({
+    let uri = NoteUtils.getURI({
       note: nodeNew,
       wsRoot: DendronWorkspace.wsRoot(),
     });
@@ -237,9 +237,9 @@ export class LookupProviderV2 {
     const ws = DendronWorkspace.instance();
     const engine = ws.getEngine();
     Logger.info({ ctx, msg: "create normal node" });
-    smodNew = SchemaUtilsV2.createModuleProps({ fname, vault });
+    smodNew = SchemaUtils.createModuleProps({ fname, vault });
     const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
-    const uri = Uri.file(SchemaUtilsV2.getPath({ root: vpath, fname }));
+    const uri = Uri.file(SchemaUtils.getPath({ root: vpath, fname }));
     const resp = await engine.writeSchema(smodNew);
     Logger.info({ ctx, msg: "engine.write", profile });
     return { uri, node: smodNew, resp };
@@ -310,12 +310,12 @@ export class LookupProviderV2 {
       value,
       opts,
       noteOverrides,
-      selectedItems: selectedItems.map((ent) => NoteUtilsV2.toLogObj(ent)),
-      activeItems: picker.activeItems.map((ent) => NoteUtilsV2.toLogObj(ent)),
+      selectedItems: selectedItems.map((ent) => NoteUtils.toLogObj(ent)),
+      activeItems: picker.activeItems.map((ent) => NoteUtils.toLogObj(ent)),
     });
     const resp = this.validate(picker.value, opts.flavor);
     let uri: Uri;
-    let newNode: NotePropsV2 | SchemaModulePropsV2 | undefined;
+    let newNode: NoteProps | SchemaModulePropsV2 | undefined;
     if (resp) {
       window.showErrorMessage(resp);
       return;
@@ -346,7 +346,7 @@ export class LookupProviderV2 {
             selectedItem.id
           ];
           uri = Uri.file(
-            SchemaUtilsV2.getPath({
+            SchemaUtils.getPath({
               root: vpath,
               fname: smod.fname,
             })
@@ -359,7 +359,7 @@ export class LookupProviderV2 {
       // item from pressing enter
       if (opts.flavor === "note") {
         const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-        const maybeNote = NoteUtilsV2.getNoteByFnameV5({
+        const maybeNote = NoteUtils.getNoteByFnameV5({
           fname: value,
           vault,
           notes: getEngine().notes,
@@ -396,12 +396,12 @@ export class LookupProviderV2 {
     const activeItem = picker.activeItems[0];
     const maybeNoteFname = activeItem ? activeItem.fname : value;
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-    const maybeNote = NoteUtilsV2.getNoteByFnameV5({
+    const maybeNote = NoteUtils.getNoteByFnameV5({
       fname: maybeNoteFname,
       vault,
       notes: getEngine().notes,
       wsRoot: DendronWorkspace.wsRoot(),
-    }) as NotePropsV2;
+    }) as NoteProps;
     if (_.isEmpty(selectedItems) && opts.flavor === "note") {
       if (maybeNote) {
         if (maybeNote.stub) {
@@ -441,7 +441,7 @@ export class LookupProviderV2 {
         );
         uris = smods.map((smod) =>
           Uri.file(
-            SchemaUtilsV2.getPath({
+            SchemaUtils.getPath({
               root: vault2Path({
                 vault: smod.vault,
                 wsRoot: DendronWorkspace.wsRoot(),
@@ -466,7 +466,7 @@ export class LookupProviderV2 {
     const newItems = allResults!
       .slice(offset, offset + PAGINATE_LIMIT)
       .map((ent) =>
-        DNodeUtilsV2.enhancePropForQuickInput({
+        DNodeUtils.enhancePropForQuickInput({
           wsRoot: DendronWorkspace.wsRoot(),
           props: ent,
           schemas: engine.schemas,
@@ -504,7 +504,7 @@ export class LookupProviderV2 {
       Logger.info({ ctx, msg: "post:queryNotes" });
     } else {
       const resp = await engine.querySchema(qs);
-      nodes = resp.data.map((ent) => SchemaUtilsV2.getModuleRoot(ent));
+      nodes = resp.data.map((ent) => SchemaUtils.getModuleRoot(ent));
     }
     if (nodes.length > PAGINATE_LIMIT) {
       picker.allResults = nodes;
@@ -517,7 +517,7 @@ export class LookupProviderV2 {
     const updatedItems = this.createDefaultItems({ picker }).concat(
       await Promise.all(
         nodes.map(async (ent) =>
-          DNodeUtilsV2.enhancePropForQuickInput({
+          DNodeUtils.enhancePropForQuickInput({
             wsRoot: DendronWorkspace.wsRoot(),
             props: ent,
             schemas: engine.schemas,
@@ -633,7 +633,7 @@ export class LookupProviderV2 {
 
       // add schema suggestions
       if (opts.flavor === "note" && !_.isUndefined(queryUpToLastDot)) {
-        const results = SchemaUtilsV2.matchPath({
+        const results = SchemaUtils.matchPath({
           notePath: queryUpToLastDot,
           schemaModDict: engine.schemas,
         });
@@ -645,15 +645,15 @@ export class LookupProviderV2 {
             .map((ent) => {
               const mschema = schemaModule.schemas[ent];
               if (
-                SchemaUtilsV2.hasSimplePattern(mschema, {
+                SchemaUtils.hasSimplePattern(mschema, {
                   isNotNamespace: true,
                 })
               ) {
-                const pattern = SchemaUtilsV2.getPattern(mschema, {
+                const pattern = SchemaUtils.getPattern(mschema, {
                   isNotNamespace: true,
                 });
                 const fname = [dirName, pattern].join(".");
-                return NoteUtilsV2.fromSchema({
+                return NoteUtils.fromSchema({
                   schemaModule,
                   schemaId: ent,
                   fname,
@@ -662,7 +662,7 @@ export class LookupProviderV2 {
               }
               return;
             })
-            .filter(Boolean) as NotePropsV2[];
+            .filter(Boolean) as NoteProps[];
           const candidatesToAdd = _.differenceBy(
             candidates,
             updatedItems,
@@ -670,7 +670,7 @@ export class LookupProviderV2 {
           );
           updatedItems = updatedItems.concat(
             candidatesToAdd.map((ent) => {
-              return DNodeUtilsV2.enhancePropForQuickInput({
+              return DNodeUtils.enhancePropForQuickInput({
                 wsRoot: DendronWorkspace.wsRoot(),
                 props: ent,
                 schemas: engine.schemas,
@@ -803,17 +803,17 @@ export class LookupProviderV2 {
     let nodes: DNodePropsV2[];
     if (flavor === "note") {
       nodeDict = engine.notes;
-      const roots = NoteUtilsV2.getRoots(nodeDict);
+      const roots = NoteUtils.getRoots(nodeDict);
       const childrenOfRoot = roots.flatMap((ent) => ent.children);
       nodes = _.map(childrenOfRoot, (ent) => nodeDict[ent]).concat(roots);
     } else {
       nodeDict = _.mapValues(engine.schemas, (ent) => ent.root);
       nodes = _.map(_.values(engine.schemas), (ent: SchemaModulePropsV2) => {
-        return SchemaUtilsV2.getModuleRoot(ent);
+        return SchemaUtils.getModuleRoot(ent);
       });
     }
     return nodes.map((ent) => {
-      return DNodeUtilsV2.enhancePropForQuickInput({
+      return DNodeUtils.enhancePropForQuickInput({
         wsRoot: DendronWorkspace.wsRoot(),
         props: ent,
         schemas: engine.schemas,

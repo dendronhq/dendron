@@ -8,8 +8,8 @@ import {
   getSlugger,
   getStage,
   NotePropsDictV2,
-  NotePropsV2,
-  NoteUtilsV2,
+  NoteProps,
+  NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 // @ts-ignore
@@ -97,14 +97,14 @@ enum DendronProcDataKeys {
 export const renderFromNoteProps = (
   opts: { notes: NotePropsDictV2 } & GetNoteOpts
 ) => {
-  const note = NoteUtilsV2.getNoteByFnameV5(opts);
+  const note = NoteUtils.getNoteByFnameV5(opts);
   if (!note) {
     throw Error("no note found");
   }
   return renderFromNote({ note });
 };
 
-export const renderFromNote = (opts: { note: NotePropsV2 }) => {
+export const renderFromNote = (opts: { note: NoteProps }) => {
   const { note } = opts;
   const contents = nunjucks.renderString(note.body, {
     fm: { ...note.custom, title: note.title },
@@ -114,7 +114,7 @@ export const renderFromNote = (opts: { note: NotePropsV2 }) => {
 };
 
 export const renderFromNoteWithCustomBody = (opts: {
-  note: NotePropsV2;
+  note: NoteProps;
   body: string;
 }) => {
   const { note, body } = opts;
@@ -307,7 +307,7 @@ export class MDUtilsV4 {
     let proc = this.proc(opts);
     if (vault && fname) {
       const engine = MDUtilsV4.getEngineFromProc(proc).engine;
-      const note = NoteUtilsV2.getNoteByFnameV5({
+      const note = NoteUtils.getNoteByFnameV5({
         fname,
         notes: engine.notes,
         vault,
@@ -444,7 +444,7 @@ export class MDUtilsV4 {
   }
 
   static procHTML(
-    procOpts: Omit<ProcOptsFull, "dest"> & { noteIndex: NotePropsV2 }
+    procOpts: Omit<ProcOptsFull, "dest"> & { noteIndex: NoteProps }
   ) {
     const { engine, vault, fname, noteIndex } = procOpts;
     const config = procOpts.config || engine.config;
@@ -498,7 +498,7 @@ export class MDUtilsV4 {
   }
 
   static procDendronForPublish(
-    opts: Omit<ProcDendron, "dest"> & { noteIndex: NotePropsV2 }
+    opts: Omit<ProcDendron, "dest"> & { noteIndex: NoteProps }
   ) {
     const { engine, configOverride, fname, vault, noteIndex } = opts;
     const proc = MDUtilsV4.procHTML({

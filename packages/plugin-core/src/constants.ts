@@ -75,6 +75,11 @@ export const DENDRON_REMOTE_VAULTS: Entry[] = [
     description: "cli tld",
     data: "https://github.com/kevinslin/seed-tldr.git",
   },
+  {
+    name: "xkcd",
+    description: "all xkcd comics",
+    data: "https://github.com/kevinslin/seed-xkcd.git",
+  },
 ];
 
 export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {

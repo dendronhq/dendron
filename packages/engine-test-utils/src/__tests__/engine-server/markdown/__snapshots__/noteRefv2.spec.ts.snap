@@ -254,48 +254,48 @@ VFile {
   "contents": "# Root
 
 <div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
-<a href=\\"journal.2020.08.01.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>
-journal1
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
+  <a href=\\"journal.2020.08.01.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+  journal1
 
 
 </div>    
-</div><div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.02</span></div>
-<a href=\\"journal.2020.08.02.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>
-journal2
+  </div><div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.02</span></div>
+  <a href=\\"journal.2020.08.02.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+  journal2
 
 
 </div>    
-</div><div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.03</span></div>
-<a href=\\"journal.2020.08.03.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>
-journal3
+  </div><div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.03</span></div>
+  <a href=\\"journal.2020.08.03.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+  journal3
 
 
 </div>    
-</div>
+  </div>
 
 * * *
 
@@ -349,7 +349,7 @@ VFile {
 
 exports[`noteRefV2 compile "MD_DENDRON: wildcard" 1`] = `
 VFile {
-  "contents": "((ref:[[journal.2020.08.*]]))
+  "contents": "![[journal.2020.08.*]]
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -624,61 +624,56 @@ VFile {
   "contents": "# Root
 
 
-<div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
-<a href=\\"journal.2020.08.01.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
+  <div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
+  <a href=\\"journal.2020.08.01.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>        
+  
+  journal1
+  
+  </div>    
+  </div>
+  
 
-# Root
+  <div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.02</span></div>
+  <a href=\\"journal.2020.08.02.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>        
+  
+  journal2
+  
+  </div>    
+  </div>
+  
 
-journal1
-
-</div>    
-</div>
-
-
-<div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.02</span></div>
-<a href=\\"journal.2020.08.02.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
-
-# Root
-
-journal2
-
-</div>    
-</div>
-
-
-<div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.03</span></div>
-<a href=\\"journal.2020.08.03.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>        
-
-# Root
-
-journal3
-
-</div>    
-</div>
+  <div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.03</span></div>
+  <a href=\\"journal.2020.08.03.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>        
+  
+  journal3
+  
+  </div>    
+  </div>
+  
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -876,48 +871,48 @@ VFile {
   "contents": "# Root
 
 <div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
-<a href=\\"journal.2020.08.01\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>
-journal1
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
+  <a href=\\"journal.2020.08.01\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+  journal1
 
 
 </div>    
-</div><div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.02</span></div>
-<a href=\\"journal.2020.08.02\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>
-journal2
+  </div><div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.02</span></div>
+  <a href=\\"journal.2020.08.02\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+  journal2
 
 
 </div>    
-</div><div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\" >
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.03</span></div>
-<a href=\\"journal.2020.08.03\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div>
-journal3
+  </div><div class=\\"portal-container\\">
+  <div class=\\"portal-head\\">
+  <div class=\\"portal-backlink\\" >
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.03</span></div>
+  <a href=\\"journal.2020.08.03\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
+  </div>
+  </div>
+  <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
+  <div class=\\"portal-parent-fader-top\\"></div>
+  <div class=\\"portal-parent-fader-bottom\\"></div>
+  journal3
 
 
 </div>    
-</div>
+  </div>
 
 ",
   "cwd": "<PROJECT_ROOT>",

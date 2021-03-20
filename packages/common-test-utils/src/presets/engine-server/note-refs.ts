@@ -45,7 +45,7 @@ const WILDCARD_LINK_V4 = new TestPresetEntryV4(
         props: {
           id: "id.journal",
         },
-        body: "((ref:[[journal.2020.08.*]]))",
+        body: "![[journal.2020.08.*]]",
         fname: "journal",
       });
       return { note };

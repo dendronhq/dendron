@@ -559,10 +559,6 @@ describe("noteRefV2", () => {
     name: "wildcard",
     setupFunc: async ({ engine, extra, vaults }) => {
       const note = engine.notes["id.journal"];
-      // const resp = await proc(engine, {
-      //   dest: extra.dest,
-      //   vault: vaults[0],
-      // }).process(note.body);
       const resp = await MDUtilsV4.procFull({
         engine,
         dest: extra.dest,

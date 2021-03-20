@@ -3,7 +3,7 @@ import {
   CONSTANTS,
   DendronConfig,
   DendronSiteConfig,
-  getStage
+  getStage,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import fs from "fs-extra";
@@ -33,6 +33,7 @@ export class DConfig {
       version: 1,
       vaults: [],
       useFMTitle: true,
+      noLegacyNoteRef: true,
       site: {
         copyAssets: true,
         siteHierarchies: ["root"],

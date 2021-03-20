@@ -38,6 +38,7 @@
   "dependencies": {
     "@dendronhq/common-all": "^0.32.4-alpha.0",
     "@types/analytics-node": "^3.1.4",
+    "@types/execa": "^2.0.0",
     "@types/fs-extra": "^9.0.1",
     "@types/js-yaml": "^3.12.5",
     "@types/lodash": "^4.14.154",
@@ -47,6 +48,7 @@
     "@types/tmp": "^0.2.0",
     "analytics-node": "^4.0.0",
     "comment-json": "^4.1.0",
+    "execa": "^5.0.0",
     "fs-extra": "^9.0.1",
     "gray-matter": "^4.0.2",
     "js-yaml": "^3.14.0",

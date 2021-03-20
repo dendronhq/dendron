@@ -47,7 +47,7 @@ suite("PublishV2", function () {
 
         // this runs the command
         const out = await cmd.run();
-        expect(out).toEqual("foo body");
+        expect(out?.endsWith("foo body")).toBeTruthy();
         done();
       },
     });

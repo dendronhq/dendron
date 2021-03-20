@@ -194,6 +194,11 @@
         },
         "commands": [
             {
+                "command": "dendron.browseNote",
+                "title": "Dendron: Browse Note",
+                "desc": "Browse note on github"
+            },
+            {
                 "command": "dendron.contributeToCause",
                 "title": "Dendron: Contribute",
                 "desc": "Become an environmentalist and keep Dendron sustainable",
@@ -249,7 +254,6 @@
                 "command": "dendron.lookup",
                 "title": "Dendron: Lookup",
                 "desc": "Initiate note lookup",
-                "docs": "((ref: [[dendron.topic.lookup]]#notes,1:#schemas))",
                 "docLink": "dendron.topic.lookup.md",
                 "docPreview": ""
             },
@@ -433,6 +437,11 @@
                 "docPreview": "<a href=\"https://www.loom.com/share/01250485e20a4cdca2a053dd6047ac68\"><img src=\"https://cdn.loom.com/sessions/thumbnails/01250485e20a4cdca2a053dd6047ac68-with-play.gif\"> </a>"
             },
             {
+                "command": "dendron.pasteLink",
+                "title": "Dendron: Paste Link",
+                "desc": "Fetch metadata for a web link and format as markdown"
+            },
+            {
                 "command": "dendron.showHelp",
                 "title": "Dendron: Show Help",
                 "desc": "Dendron will open your current browser to the [[cheatsheet|dendron.cheatsheet]] page. ",
@@ -492,13 +501,6 @@
                 "command": "dendron.diagnosticsReport",
                 "title": "Dendron:Dev: Diagnostics Report",
                 "desc": "Generate diagnostics report",
-                "docLink": "dendron.topic.commands.md",
-                "docPreview": ""
-            },
-            {
-                "command": "dendron.pasteLink",
-                "title": "Dendron: Paste Link",
-                "desc": "Fetch metadata for a web link and format as markdown",
                 "docLink": "dendron.topic.commands.md",
                 "docPreview": ""
             }

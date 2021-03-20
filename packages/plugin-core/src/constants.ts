@@ -79,6 +79,14 @@ export const DENDRON_REMOTE_VAULTS: Entry[] = [
 
 export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   // --- Notes
+  BROWSE_NOTE: {
+    key: "dendron.browseNote",
+    // no prefix, we don't want to show this command
+    title: `${CMD_PREFIX} Browse Note`,
+    group: "notes",
+    desc: "Browse note on github",
+    skipDocs: false,
+  },
   CONTRIBUTE: {
     key: "dendron.contributeToCause",
     // no prefix, we don't want to show this command

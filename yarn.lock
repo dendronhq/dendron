@@ -7981,7 +7981,7 @@ exec-sh@^0.2.0:
   dependencies:
     merge "^1.2.0"
 
-execa@*:
+execa@*, execa@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/execa/-/execa-5.0.0.tgz#4029b0007998a841fbd1032e5f4de86a3c1e3376"
   integrity sha512-ov6w/2LCiuyO4RLYGdpFGjkcs0wMTgGE8PrkTHikeUy5iJekXyPIKUjifk5CsE0pt7sMCrMZ3YNqoCj6idQOnQ==

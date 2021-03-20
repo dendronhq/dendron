@@ -3,6 +3,7 @@ import {
   assignJSONWithComment,
   GitUtils,
   readJSONWithComments,
+  SimpleGit,
   simpleGit,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
@@ -32,8 +33,17 @@ export type VaultRemoteSource = "local" | "remote";
 export { CommandOpts as VaultAddCommandOpts };
 
 type SourceQuickPickEntry = QuickPickItem & { src: string };
+
 export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   static key = DENDRON_COMMANDS.VAULT_ADD.key;
+
+  public git: SimpleGit;
+
+  constructor() {
+    super();
+    const baseDir = DendronWorkspace.wsRoot();
+    this.git = simpleGit({ baseDir });
+  }
 
   generateRemoteEntries = (): SourceQuickPickEntry[] => {
     return (DENDRON_REMOTE_VAULTS.map(
@@ -130,9 +140,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   async handleRemoteRepo(opts: CommandOpts) {
     const baseDir = DendronWorkspace.wsRoot();
-    // clone
-    const git = simpleGit({ baseDir });
-    await git.clone(opts.pathRemote!, opts.path);
+    await this.git.clone(opts.pathRemote!, opts.path);
     const { vaults } = GitUtils.getVaultsFromRepo({
       repoPath: path.join(baseDir, opts.path),
       wsRoot: DendronWorkspace.wsRoot(),

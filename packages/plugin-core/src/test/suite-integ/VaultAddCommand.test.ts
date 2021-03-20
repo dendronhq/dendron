@@ -60,7 +60,8 @@ suite("VaultAddCommand", function () {
     },
   });
 
-  describe("remote", function () {
+  // TODO: need to stub git clone with side effects
+  describe.skip("remote", function () {
     test("basic, gitignore", (done) => {
       runLegacySingleWorkspaceTest({
         ctx,

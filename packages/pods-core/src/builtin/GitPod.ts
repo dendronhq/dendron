@@ -62,7 +62,7 @@ export class GitPunchCardExportPod extends ExportPod {
 
     // verify dest exist
     const podDstPath = dest.fsPath;
-    fs.ensureDirSync(path.dirname(podDstPath));
+    fs.ensureDirSync(podDstPath);
     const git = new Git({ localUrl: wsRoot });
     const commits = await git.client([
       "log",

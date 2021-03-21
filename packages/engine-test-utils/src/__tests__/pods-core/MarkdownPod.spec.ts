@@ -250,6 +250,7 @@ describe("markdown export pod", () => {
         let [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(exportDest, [
           "vault1",
           "vault2",
+          "vaultThree",
         ]);
         expect(expectedFiles).toEqual(actualFiles);
         [expectedFiles, actualFiles] = FileTestUtils.cmpFiles(

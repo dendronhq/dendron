@@ -7,6 +7,7 @@ import NOTE_REF from "./note-refs";
 import { ENGINE_QUERY_PRESETS } from "./query";
 import { ENGINE_RENAME_PRESETS } from "./rename";
 import { ENGINE_UPDATE_PRESETS } from "./update";
+import { ENGINE_BULK_ADD_NOTES_PRESETS } from "./bulkAddNotes";
 import { ENGINE_WRITE_PRESETS, ENGINE_WRITE_PRESETS_MULTI } from "./write";
 export { ENGINE_HOOKS, ENGINE_HOOKS_BASE, ENGINE_HOOKS_MULTI } from "./utils";
 export { ENGINE_RENAME_PRESETS };
@@ -24,9 +25,14 @@ export const ENGINE_SERVER = {
   ENGINE_GET_NOTE_BY_PATH_PRESETS,
   ENGINE_RENAME_PRESETS,
   ENGINE_QUERY_PRESETS,
+  ENGINE_BULK_ADD_NOTES_PRESETS,
 };
 
 export const ENGINE_PRESETS = [
+  {
+    name: "bulkAddNotes",
+    presets: ENGINE_SERVER.ENGINE_BULK_ADD_NOTES_PRESETS,
+  },
   { name: "init", presets: ENGINE_SERVER.ENGINE_INIT_PRESETS },
   { name: "delete", presets: ENGINE_SERVER.ENGINE_DELETE_PRESETS },
   { name: "getByPath", presets: ENGINE_SERVER.ENGINE_GET_NOTE_BY_PATH_PRESETS },

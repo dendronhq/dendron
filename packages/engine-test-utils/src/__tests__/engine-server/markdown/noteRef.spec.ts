@@ -342,9 +342,9 @@ describe("compilev2", () => {
 
   const ALL_TEST_CASES = [
     ...REGULAR_CASE,
-    // ...RECURSIVE_TEST_CASES,
-    // ...WILDCARD_CASE,
-    // ...TITLE_IN_FM,
+    ...RECURSIVE_TEST_CASES,
+    ...WILDCARD_CASE,
+    ...TITLE_IN_FM,
   ];
   //const ALL_TEST_CASES = WILDCARD_CASE;
   describe("compile", () => {

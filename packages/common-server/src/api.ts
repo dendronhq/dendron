@@ -23,6 +23,7 @@ import {
   SchemaModuleDictV2,
   SchemaModulePropsV2,
   WriteNoteResp,
+  BulkAddNoteOpts,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { createLogger } from "./logger";
@@ -143,6 +144,9 @@ export type EngineDeleteRequest = {
   id: string;
   opts?: EngineDeleteOptsV2;
 } & { ws: string };
+export type EngineBulkAddRequest = {
+  opts: BulkAddNoteOpts;
+} & { ws: string };
 
 export type EngineInfoRequest = WorkspaceRequest;
 export type NoteQueryRequest = {
@@ -172,6 +176,7 @@ export type InitializePayload = APIPayload<{
 }>;
 
 export type WorkspaceSyncPayload = InitializePayload;
+export type WorkspaceListPayload = APIPayload<{ workspaces: string[] }>;
 
 export type EngineQueryPayload = APIPayload<DNodeProps[]>;
 export type EngineGetNoteByPathPayload = APIPayload<GetNotePayloadV2>;
@@ -350,17 +355,26 @@ export class DendronAPI extends API {
     return resp;
   }
 
-  async workspaceList(): Promise<InitializePayload> {
+  async workspaceList(): Promise<WorkspaceListPayload> {
     const resp = await this._makeRequest({
       path: "workspace/all",
       method: "get",
     });
-    return this._createPayload(resp);
+    return resp;
   }
 
   async workspaceSync(req: WorkspaceSyncRequest): Promise<InitializePayload> {
     const resp = await this._makeRequest({
       path: "workspace/sync",
+      method: "post",
+      body: req,
+    });
+    return resp;
+  }
+
+  async engineBulkAdd(req: EngineBulkAddRequest): Promise<WriteNoteResp> {
+    const resp = await this._makeRequest({
+      path: "note/bulkAdd",
       method: "post",
       body: req,
     });

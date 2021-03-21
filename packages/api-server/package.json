@@ -28,28 +28,23 @@
     "build": "yarn compile",
     "compile": "tsc -p tsconfig.build.json",
     "test": "echo stub",
-    "coverage": "jest --coverage",
+    "coverage": "echo no-op",
     "watch": "yarn compile --watch",
-    "test:unit": "jest ",
-    "test:unit:debug": "NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:unit": "echo no-op",
+    "test:unit:debug": "echo no-op",
     "test:watch": "echo no-op",
-    "test:watch:integ": "cross-env LOG_DST=../../logs/api-server.log jest --watch -u",
     "start:integ": "cross-env PORT=3005 npx ts-node ./src/start.ts",
     "start:integ:debug": "cross-env PORT=3005 TS_NODE_LOG_ERROR=1 node --inspect -r ts-node/register ./src/start.ts",
     "start:integ:watch": "cross-env PORT=3005 LOG_DST=../../logs/api-server.log LOG_LEVEL=debug npx nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts'"
   },
   "devDependencies": {
-    "@dendronhq/common-test-utils": "^0.33.3-alpha.0",
     "@types/express": "^4.17.8",
     "@types/fs-extra": "^9.0.1",
     "@types/lodash": "^4.14.161",
     "@types/morgan": "^1.9.1",
     "@types/node": "13.11.0",
-    "jest": "^23.6.0",
-    "jest-serializer-path": "^0.1.15",
     "prettier": "2.0.5",
     "rimraf": "^2.6.2",
-    "ts-jest": "^23.10.3",
     "ts-node": "^8.10.2"
   },
   "engines": {
@@ -57,9 +52,6 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "jest": {
-    "preset": "ts-jest"
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.32.5-alpha.0",

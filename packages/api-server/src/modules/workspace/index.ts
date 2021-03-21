@@ -25,19 +25,23 @@ export class WorkspaceController {
   async init({ uri }: WorkspaceInitRequest): Promise<InitializePayload> {
     let notes: NotePropsDictV2;
     let schemas: SchemaModuleDictV2;
+    const ctx = "WorkspaceController:init";
     const logger = getLogger();
+    logger.info({ ctx, msg: "enter", uri });
     const engine = DendronEngineV2.create({
       wsRoot: uri,
       logger,
     });
     const { error } = await engine.init();
     if (error && error.code !== ERROR_CODES.MINOR) {
+      logger.error({ ctx, msg: "error initializing notes" });
       error.friendly = "error initializing notes";
       return { error };
     }
     notes = engine.notes;
     schemas = engine.schemas;
     await putWS({ ws: uri, engine });
+    logger.info({ ctx, msg: "finish init", uri });
     const payload: InitializePayload = {
       error,
       data: { notes, schemas },

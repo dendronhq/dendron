@@ -44,7 +44,7 @@ Object {
         "from": Object {
           "fname": "beta",
           "vault": Object {
-            "fsPath": "vault2",
+            "fsPath": "vault1",
           },
         },
         "original": "alpha",
@@ -59,7 +59,7 @@ Object {
         "from": Object {
           "fname": "beta",
           "vault": Object {
-            "fsPath": "vault1",
+            "fsPath": "vault2",
           },
         },
         "original": "alpha",

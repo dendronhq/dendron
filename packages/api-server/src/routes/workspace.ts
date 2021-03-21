@@ -1,10 +1,10 @@
 import { DendronError, ENGINE_ERROR_CODES } from "@dendronhq/common-all";
 import {
   WorkspaceInitRequest,
+  WorkspaceListPayload,
   WorkspaceSyncRequest,
 } from "@dendronhq/common-server";
 import { Request, Response, Router } from "express";
-import { OK } from "http-status-codes";
 import _ from "lodash";
 import { WorkspaceController } from "../modules/workspace";
 import { MemoryStore } from "../store/memoryStore";
@@ -21,7 +21,11 @@ router.post("/initialize", async (req: Request, res: Response) => {
 router.get("/all", async (_req: Request, res: Response) => {
   const workspaces = await MemoryStore.instance().list("ws");
   const data = _.keys(workspaces);
-  return res.status(OK).json({ workspaces: data });
+  const payload: WorkspaceListPayload = {
+    error: null,
+    data: { workspaces: data },
+  };
+  return res.json(payload);
 });
 
 router.post("/sync", async (req: Request, res: Response) => {

@@ -1,15 +1,15 @@
 import {
-  CreateEngineFunction,
   ENGINE_CONFIG_PRESETS,
   ENGINE_PRESETS,
-  runEngineTestV4,
 } from "@dendronhq/common-test-utils";
 import { DendronEngineClient } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { createServer, runEngineTestV5, WorkspaceOpts } from "../../engine";
 
-const createEngine: CreateEngineFunction = ({ wsRoot, vaults }) => {
+const createEngine = async ({ wsRoot, vaults }: WorkspaceOpts) => {
+  const { port } = await createServer({ wsRoot, vaults });
   return DendronEngineClient.create({
-    port: "3005",
+    port,
     ws: wsRoot,
     vaults,
   });
@@ -28,7 +28,7 @@ describe("engine, schemas/", () => {
         })
       )("%p", async (_key, TestCase) => {
         const { testFunc, ...opts } = TestCase;
-        await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+        await runEngineTestV5(testFunc, { ...opts, createEngine, expect });
       });
     });
   });
@@ -47,7 +47,7 @@ describe("engine, notes/", () => {
       )("%p", async (_key, TestCase) => {
         // @ts-ignore
         const { testFunc, ...opts } = TestCase;
-        await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+        await runEngineTestV5(testFunc, { ...opts, createEngine, expect });
       });
     });
   });
@@ -63,7 +63,7 @@ describe("engine, config/", () => {
       )("%p", async (_key, TestCase) => {
         // @ts-ignore
         const { testFunc, ...opts } = TestCase;
-        await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+        await runEngineTestV5(testFunc, { ...opts, createEngine, expect });
       });
     });
   });

@@ -157,22 +157,10 @@ export class DendronEngineClient implements DEngineClientV2 {
   }
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {
-    const data = await _.reduce<NoteProps, Promise<NoteChangeEntry[]>>(
-      opts.notes,
-      async (resp, note) => {
-        await resp;
-        const { data } = await this.writeNote(note, {
-          newNode: true,
-          noAddParent: true,
-        });
-        return data;
-      },
-      Promise.resolve([])
-    );
-    return {
-      data,
-      error: null,
-    };
+    const resp = await this.api.engineBulkAdd({ opts, ws: this.ws });
+    let changed = resp.data;
+    await this.refreshNotesV2(changed);
+    return resp;
   }
 
   async deleteNote(

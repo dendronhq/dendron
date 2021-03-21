@@ -33,12 +33,21 @@ export async function createEngineFromEngine(opts: WorkspaceOpts) {
 export { DEngineClientV2, DVault, WorkspaceOpts };
 
 /**
+ * Create a server
+ * @param opts
+ * @returns
+ */
+export async function createServer(opts: WorkspaceOpts) {
+  return await new LaunchEngineServerCommand().enrichArgs({
+    wsRoot: opts.wsRoot,
+  });
+}
+
+/**
  * Create an {@link DendronEngineClient}
  */
 export async function createEngineFromServer(opts: WorkspaceOpts) {
-  const { engine } = await new LaunchEngineServerCommand().enrichArgs({
-    wsRoot: opts.wsRoot,
-  });
+  const { engine } = await createServer(opts);
   await engine.init();
   return engine;
 }
@@ -87,7 +96,12 @@ export async function runEngineTestV5(
     postSetupHook: async ({}) => {},
     createEngine: createEngineFromEngine,
     extra: {},
-    vaults: [{ fsPath: "vault1" }, { fsPath: "vault2" }],
+    // third vault has diff name
+    vaults: [
+      { fsPath: "vault1" },
+      { fsPath: "vault2" },
+      { fsPath: "vault3", name: "vaultThree" },
+    ],
   });
   const { wsRoot } = await setupWS({ vaults });
   await preSetupHook({ wsRoot, vaults });

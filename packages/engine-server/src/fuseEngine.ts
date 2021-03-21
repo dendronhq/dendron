@@ -77,11 +77,19 @@ export class FuseEngine {
     return items;
   }
 
+  /**
+   * If qs = "", return root note
+   * @param param0
+   * @returns
+   */
   queryNote({ qs }: { qs: string }): NoteIndexProps[] {
     let items: NoteIndexProps[];
     if (qs === "") {
       const results = this.notesIndex.search("root");
-      items = [results[0].item];
+      items = _.map(
+        _.filter(results, (ent) => ent.item.fname === "root"),
+        (ent) => ent.item
+      );
     } else if (qs === "*") {
       // @ts-ignore
       items = this.notesIndex._docs as NoteProps[];

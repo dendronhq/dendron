@@ -1,5 +1,6 @@
 import { DendronError, WriteNoteResp } from "@dendronhq/common-all";
 import {
+  EngineBulkAddRequest,
   EngineDeleteRequest,
   EngineGetNoteByPathRequest,
   EngineRenameNoteRequest,
@@ -66,6 +67,20 @@ router.post("/write", async (req: Request, res: Response<WriteNoteResp>) => {
   const engine = await getWS({ ws: ws || "" });
   try {
     const out = await engine.writeNote(node, opts);
+    res.json(out);
+  } catch (err) {
+    res.json({
+      error: new DendronError({ msg: JSON.stringify(err) }),
+      data: [],
+    });
+  }
+});
+
+router.post("/bulkAdd", async (req: Request, res: Response<WriteNoteResp>) => {
+  const { ws, opts } = req.body as EngineBulkAddRequest;
+  const engine = await getWS({ ws: ws || "" });
+  try {
+    const out = await engine.bulkAddNotes(opts);
     res.json(out);
   } catch (err) {
     res.json({

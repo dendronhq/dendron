@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`memory store basic 1`] = `
-Object {
-  "foo": 1,
-}
-`;

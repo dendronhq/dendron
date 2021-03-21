@@ -6,28 +6,30 @@ import { SCHEMA_PRESETS_V4 } from "../schemas";
 import { setupBasic } from "./utils";
 
 const SCHEMAS = {
-  EMPTY_QS: new TestPresetEntryV4(
-    async ({ vaults, engine, wsRoot }) => {
-      const vault = vaults[0];
-      const schemas = engine.schemas;
-      const { data } = await engine.querySchema("");
-      const expectedNote = SchemaUtils.getSchemaModuleByFnameV4({
-        fname: "root",
-        schemas,
-        wsRoot,
-        vault,
-      });
-      return [
-        {
-          actual: data[0],
-          expected: expectedNote,
-        },
-      ];
-    },
-    {
-      preSetupHook: setupBasic,
-    }
-  ),
+  // TODO: multi-vault, this gets overwritten
+  // EMPTY_QS: new TestPresetEntryV4(
+  //   async ({ vaults, engine, wsRoot }) => {
+  //     const vault = vaults[0];
+  //     const schemas = engine.schemas;
+  //     const { data } = await engine.querySchema("");
+  //     debugger;
+  //     const expectedNote = SchemaUtils.getSchemaModuleByFnameV4({
+  //       fname: "root",
+  //       schemas,
+  //       wsRoot,
+  //       vault,
+  //     });
+  //     return [
+  //       {
+  //         actual: data[0],
+  //         expected: expectedNote,
+  //       },
+  //     ];
+  //   },
+  //   {
+  //     preSetupHook: setupBasic,
+  //   }
+  // ),
   STAR_QUERY: new TestPresetEntryV4(
     async ({ engine }) => {
       const { data } = await engine.querySchema("*");

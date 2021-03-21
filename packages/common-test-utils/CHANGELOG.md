@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.33.4-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-test-utils@0.32.2...@dendronhq/common-test-utils@0.33.4-alpha.0) (2021-03-21)
+
+### Bug Fixes
+
+- disable pretty ref when exporting markdown ([c0791da](https://github.com/dendronhq/dendron/commit/c0791da911b665ca66f1b3829784cf8a95ef9952))
+
 ## [0.33.3-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-test-utils@0.32.2...@dendronhq/common-test-utils@0.33.3-alpha.0) (2021-03-19)
 
 ### Bug Fixes

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.33.4-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.32.2...@dendronhq/plugin-core@0.33.4-alpha.0) (2021-03-21)
+
+### Features Dendron
+
+- browse note command ([c69ae9d](https://github.com/dendronhq/dendron/commit/c69ae9df5ff36f3a21465e91f0463012477f93ef))
+
 ## [0.33.3-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.32.2...@dendronhq/plugin-core@0.33.3-alpha.0) (2021-03-19)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

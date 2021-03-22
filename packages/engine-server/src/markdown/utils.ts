@@ -69,9 +69,6 @@ type ProcOptsFull = ProcOpts & {
   vault: DVault;
   fname: string;
   config?: DendronConfig;
-  mathOpts?: {
-    katex?: boolean;
-  };
   mermaid?: boolean;
   noteRefLvl?: number;
   usePrettyRefs?: boolean;
@@ -353,7 +350,8 @@ export class MDUtilsV4 {
       });
     }
 
-    if (opts.mathOpts?.katex) {
+    const useKatex = _.isUndefined(config.useKatex) ? true : config.useKatex;
+    if (useKatex) {
       proc = proc.use(math);
     }
     if (opts.mermaid) {
@@ -466,7 +464,6 @@ export class MDUtilsV4 {
         insertTitle: config.useFMTitle,
         transformNoPublish: true,
       },
-      mathOpts: { katex: true },
       mermaid: config.mermaid,
       config,
     });

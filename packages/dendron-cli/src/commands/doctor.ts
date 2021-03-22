@@ -98,7 +98,6 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           const proc = MDUtilsV4.procFull({
             dest: DendronASTDest.MD_DENDRON,
             engine,
-            mathOpts: { katex: true },
             fname: note.fname,
             vault: note.vault,
           });
@@ -124,7 +123,6 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           const proc = MDUtilsV4.procFull({
             dest: DendronASTDest.MD_DENDRON,
             engine,
-            mathOpts: { katex: true },
             fname: note.fname,
             vault: note.vault,
           });

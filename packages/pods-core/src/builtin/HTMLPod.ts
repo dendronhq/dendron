@@ -20,7 +20,6 @@ export class HTMLPublishPod extends PublishPod {
       publishOpts: {
         insertTitle: econfig!.useFMTitle!,
       },
-      mathOpts: { katex: true },
       config: econfig!,
       mermaid: econfig!.mermaid,
     });

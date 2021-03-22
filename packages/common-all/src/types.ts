@@ -86,6 +86,12 @@ export type DendronConfig = {
   usePrettyRefs?: boolean;
 
   /**
+   * Use katex for rendering math
+   * default: true
+   */
+  useKatex?: boolean;
+
+  /**
    * Title used for hiearchies
    * Default: Children
    */

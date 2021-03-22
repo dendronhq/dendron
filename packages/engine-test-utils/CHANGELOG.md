@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.33.5-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-test-utils@0.32.2...@dendronhq/engine-test-utils@0.33.5-alpha.0) (2021-03-22)
+
+### Bug Fixes
+
+- disable pretty ref when exporting markdown ([c0791da](https://github.com/dendronhq/dendron/commit/c0791da911b665ca66f1b3829784cf8a95ef9952))
+
+### Features Dendron
+
+- markdown export pod ([552e01f](https://github.com/dendronhq/dendron/commit/552e01fa21bb6d6da1e243696a67382afda23194))
+
 ## [0.33.4-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-test-utils@0.32.2...@dendronhq/engine-test-utils@0.33.4-alpha.0) (2021-03-21)
 
 ### Bug Fixes

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-server@0.32.2...@dendronhq/common-server@0.34.0) (2021-03-22)
+
+### Features Dendron
+
+- browse note command ([c69ae9d](https://github.com/dendronhq/dendron/commit/c69ae9df5ff36f3a21465e91f0463012477f93ef))
+
 ## [0.33.5-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-server@0.32.2...@dendronhq/common-server@0.33.5-alpha.0) (2021-03-22)
 
 ### Features Dendron

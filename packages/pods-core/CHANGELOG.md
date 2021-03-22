@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0](https://github.com/dendronhq/dendron/compare/@dendronhq/pods-core@0.32.2...@dendronhq/pods-core@0.34.0) (2021-03-22)
+
+### Bug Fixes
+
+- disable pretty ref when exporting markdown ([c0791da](https://github.com/dendronhq/dendron/commit/c0791da911b665ca66f1b3829784cf8a95ef9952))
+- more forgiving link parser ([38c973c](https://github.com/dendronhq/dendron/commit/38c973cb2bfc45881778e86c985156da64450249))
+
+### Features Dendron
+
+- add git punchcard pod ([50019c0](https://github.com/dendronhq/dendron/commit/50019c0f6405be449b446901809a9d2b787aa625))
+- markdown export pod ([552e01f](https://github.com/dendronhq/dendron/commit/552e01fa21bb6d6da1e243696a67382afda23194))
+
 ## [0.33.5-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/pods-core@0.32.2...@dendronhq/pods-core@0.33.5-alpha.0) (2021-03-22)
 
 ### Bug Fixes

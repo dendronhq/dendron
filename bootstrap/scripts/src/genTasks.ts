@@ -16,7 +16,6 @@ const enum PACKAGE {
   //   'LSP_SERVER'='lsp-server',
   "plugin-core" = "plugin-core",
   "pods-core" = "pods-core",
-  //   'SEEDS_CORE'='seeds-core'
 }
 
 const PACKAGE_SETTINGS = {
@@ -34,15 +33,6 @@ type GenConfigOpts = {
 };
 
 const TASK_OVERRIDES = {
-  "api-server": [
-    {
-      label: "test:watch:integ",
-      command: "yarn test:watch:integ -- ${relativeFile} -u",
-      type: "shell",
-      problemMatcher: [],
-      options: { env: { LOG_DST: "${env:TEMP}/dendron-api-server.log" } },
-    },
-  ],
   "dendron-cli": [
     {
       label: "chmod +x",

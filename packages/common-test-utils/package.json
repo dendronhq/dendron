@@ -6,7 +6,7 @@
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/dendronhq/dendron.git",
-    "directory": "packages/seeds-core"
+    "directory": "packages/common-test-utils"
   },
   "author": {
     "name": "Kevin Lin",

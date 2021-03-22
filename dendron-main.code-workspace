@@ -29,9 +29,6 @@
             "path": "packages/pods-core"
         },
         {
-            "path": "packages/seeds-core"
-        },
-        {
             "path": "packages/dendron-cli"
         },
         {

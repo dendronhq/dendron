@@ -16,7 +16,6 @@
         "@dendronhq/engine-server",
         "@dendronhq/dendron-cli",
         "@dendronhq/pods-core",
-        "@dendronhq/seeds-core",
         "@dendronhq/lsp-server",
         "@dendronhq/plugin-core"
       ]

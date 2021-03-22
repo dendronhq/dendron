@@ -1,6 +1,0 @@
-coverage/
-node_modules/
-npm-debug.log*
-.nyc_output
-lib
-lib_test

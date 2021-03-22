@@ -19,7 +19,6 @@
             "@dendronhq/lsp-server": ["packages/lsp-server/src"],
             "@dendronhq/plugin-core": ["packages/plugin-core/src"],
             "@dendronhq/pods-core": ["packages/pods-core/src"],
-            "@dendronhq/seeds-core": ["packages/seeds-core/src"]
         }
     }
 }

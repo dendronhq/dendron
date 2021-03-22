@@ -18,9 +18,6 @@
     {
       "path": "packages/common-all"
     },
-    {
-      "path": "packages/seeds-core"
-    }
   ],
   "settings": {
     "files.exclude": {

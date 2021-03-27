@@ -3,27 +3,17 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { ExportPod, ExportPodPlantOpts } from "../basev3";
-import * as csv from "fast-csv";
 import { Time } from "@dendronhq/common-all";
+import { createObjectCsvWriter } from "csv-writer";
+import { GitUtils, vault2Path } from "@dendronhq/common-server";
 
-const writeCSV = (opts: { dest: string; data: any[] }) => {
-  return new Promise((resolve) => {
-    const { dest, data } = opts;
-    const writeStream = fs.createWriteStream(dest);
-    const csvStream = csv.format({ headers: true });
-    csvStream
-      .pipe(writeStream)
-      .on("end", () => {
-        resolve(0);
-      })
-      .on("error", (error) => {
-        throw error;
-      });
-    data.map((ent) => csvStream.write(ent));
-    writeStream.end();
-    csvStream.end();
-    resolve(0);
+const writeCSV = (opts: { dest: string; data: any[]; header: any[] }) => {
+  const { dest, data, header } = opts;
+  const csvWriter = createObjectCsvWriter({
+    path: dest,
+    header,
   });
+  return csvWriter.writeRecords(data);
 };
 
 export class GitPunchCardExportPod extends ExportPod {
@@ -58,38 +48,66 @@ export class GitPunchCardExportPod extends ExportPod {
   }
 
   async plant(opts: ExportPodPlantOpts) {
-    const { dest, notes, wsRoot } = opts;
+    const { dest, notes, wsRoot, vaults } = opts;
 
     // verify dest exist
     const podDstPath = dest.fsPath;
     fs.ensureDirSync(podDstPath);
-    const git = new Git({ localUrl: wsRoot });
-    const commits = await git.client([
-      "log",
-      "--pretty=commit%n%h, %at",
-      "--shortstat",
-    ]);
-    const cleanCommits = commits
-      .split("commit")
-      .filter((ent) => !_.isEmpty(ent));
-    const data = cleanCommits
-      .map((chunk) => {
-        const cleanChunk = chunk
-          .split("\n")
-          .filter((ent) => !_.isEmpty(ent))
-          .map((ent) => _.trim(ent));
-        if (_.size(cleanChunk) == 2) {
-          const resp = this.parseChunk(cleanChunk);
-          return resp;
-        }
-        return undefined;
-      })
-      .filter((ent) => !_.isUndefined(ent));
+
+    const repoPaths = _.uniq(
+      await Promise.all(
+        vaults.map(async (vault) => {
+          const vpath = vault2Path({ vault, wsRoot });
+          return GitUtils.getGitRoot(vpath);
+        })
+      )
+    );
+
+    const getAllCommits = async (root: string) => {
+      const git = new Git({ localUrl: root });
+      const commits = await git.client([
+        "log",
+        "--pretty=commit%n%h, %at",
+        "--shortstat",
+      ]);
+      const cleanCommits = commits
+        .split("commit")
+        .filter((ent) => !_.isEmpty(ent));
+      const data = cleanCommits
+        .map((chunk) => {
+          const cleanChunk = chunk
+            .split("\n")
+            .filter((ent) => !_.isEmpty(ent))
+            .map((ent) => _.trim(ent));
+          if (_.size(cleanChunk) == 2) {
+            const resp = this.parseChunk(cleanChunk);
+            return resp;
+          }
+          return undefined;
+        })
+        .filter((ent) => !_.isUndefined(ent));
+      return data;
+    };
+
+    const data = _.flatten(
+      await Promise.all(repoPaths.flatMap((root) => getAllCommits(root)))
+    );
+
     const csvDest = path.join(podDstPath, "commits.csv");
     const htmlDest = path.join(podDstPath, "index.html");
-    await writeCSV({ dest: csvDest, data });
+    debugger;
+    await writeCSV({
+      dest: csvDest,
+      data,
+      header: [
+        { id: "commit", title: "commit" },
+        { id: "delete", title: "delete" },
+        { id: "files", title: "files" },
+        { id: "insert", title: "insert" },
+        { id: "time", title: "time" },
+      ],
+    });
     fs.writeFileSync(htmlDest, template);
-    // fs.writeJSONSync(podDstPath, notes, { encoding: "utf8" });
     return { notes };
   }
 }

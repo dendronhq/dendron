@@ -12,7 +12,7 @@ describe("isRepo", async () => {
 
   test("yes repo", async () => {
     const root = tmpDir().name;
-    GitTestUtils.createRepoWithReadme(root);
+    await GitTestUtils.createRepoWithReadme(root);
     const repo = await Git.getRepo(root);
     expect(repo).toMatchSnapshot();
     expect(repo).toBeTruthy();

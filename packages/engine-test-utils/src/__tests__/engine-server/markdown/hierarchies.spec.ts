@@ -6,7 +6,7 @@ import {
 } from "@dendronhq/common-test-utils";
 import { DendronASTDest, MDUtilsV4 } from "@dendronhq/engine-server";
 import { runEngineTestV5 } from "../../../engine";
-import { checkVFile, createProcTests } from "./utils";
+import { checkNotInVFile, checkVFile, createProcTests } from "./utils";
 
 describe("hierarchies", () => {
   const BASIC_TEXT = "[Ch1](foo.ch1.html)";
@@ -41,6 +41,48 @@ describe("hierarchies", () => {
       [DendronASTDest.HTML]: async ({ extra }) => {
         const { resp } = extra;
         await checkVFile(resp, "Children");
+      },
+    },
+    preSetupHook: ENGINE_HOOKS.setupBasic,
+  });
+
+  const NO_HIERARCHY = createProcTests({
+    name: "NO_HIERARCHY",
+    setupFunc: async ({ engine, vaults, extra }) => {
+      const configOverride: DendronConfig = {
+        ...engine.config,
+        hierarchyDisplay: false,
+      };
+      if (extra.dest !== DendronASTDest.HTML) {
+        const proc = MDUtilsV4.procDendron({
+          engine,
+          fname: "foo",
+          configOverride,
+          dest: extra.dest,
+          vault: vaults[0],
+        });
+        const resp = await proc.process(BASIC_TEXT);
+        return { resp };
+      } else {
+        const proc = MDUtilsV4.procDendronForPublish({
+          engine,
+          configOverride,
+          fname: "foo",
+          noteIndex: engine.notes["foo"],
+          vault: vaults[0],
+        });
+        const resp = await proc.process(BASIC_TEXT);
+        return { resp };
+      }
+    },
+    verifyFuncDict: {
+      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+        const { resp } = extra;
+        await checkVFile(resp, BASIC_TEXT);
+      },
+      [DendronASTDest.HTML]: async ({ extra }) => {
+        const { resp } = extra;
+        await checkNotInVFile(resp, "Children");
       },
     },
     preSetupHook: ENGINE_HOOKS.setupBasic,
@@ -138,7 +180,12 @@ describe("hierarchies", () => {
     },
   });
 
-  const ALL_TEST_CASES = [...BASIC, ...DIFF_HIERARCHY_TITLE, ...SKIP_LEVELS];
+  const ALL_TEST_CASES = [
+    ...NO_HIERARCHY,
+    ...BASIC,
+    ...DIFF_HIERARCHY_TITLE,
+    ...SKIP_LEVELS,
+  ];
 
   test.each(
     ALL_TEST_CASES.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])

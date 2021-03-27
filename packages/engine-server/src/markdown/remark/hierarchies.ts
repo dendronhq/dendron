@@ -12,11 +12,16 @@ import { MDUtilsV4 } from "../utils";
 
 type PluginOpts = {
   hierarchyDisplayTitle?: string;
+  hierarchyDisplay?: boolean;
 };
 
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
   const proc = this;
   const hierarchyDisplayTitle = opts?.hierarchyDisplayTitle || "Children";
+  const hierarchyDisplay = _.isUndefined(opts?.hierarchyDisplay)
+    ? true
+    : opts?.hierarchyDisplay;
+
   function transformer(tree: Node): void {
     let root = tree as Root;
     const {
@@ -32,6 +37,10 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
     if (dest !== DendronASTDest.HTML) {
       return;
     }
+    if (!hierarchyDisplay) {
+      return;
+    }
+
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
     const note = NoteUtils.getNoteOrThrow({
       fname: fname,

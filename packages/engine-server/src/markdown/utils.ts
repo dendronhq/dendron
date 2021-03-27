@@ -338,7 +338,10 @@ export class MDUtilsV4 {
       .use(variables)
       .use(footnotes)
       .use(wikiLinks, opts.wikiLinksOpts)
-      .use(hierarchies, { hierarchyDisplayTitle: config.hierarchyDisplayTitle })
+      .use(hierarchies, {
+        hierarchyDisplayTitle: config.hierarchyDisplayTitle,
+        hierarchyDisplay: config.hierarchyDisplay,
+      })
       .use(backlinks)
       .use(noteRefsV2, {
         ...opts.noteRefOpts,

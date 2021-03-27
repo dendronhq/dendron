@@ -92,6 +92,11 @@ export type DendronConfig = {
   useKatex?: boolean;
 
   /**
+   * Shoud show hiearchy
+   */
+  hierarchyDisplay?: boolean;
+
+  /**
    * Title used for hiearchies
    * Default: Children
    */

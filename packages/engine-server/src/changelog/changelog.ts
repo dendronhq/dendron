@@ -20,6 +20,14 @@ type CommitChangeEntry = {
   diff: string;
 };
 
+export class ChangelogGenerator {
+  static getChangelogDataPath(wsRoot: string) {
+    const buildDir = path.join(wsRoot, "build");
+    fs.ensureDirSync(buildDir);
+    return path.join(buildDir, "changes.json");
+  }
+}
+
 async function getLastCommit(wsRoot: string) {
   // get last commit hash
   try {
@@ -80,9 +88,7 @@ function getLastChangelogCommit(engine: DEngineClientV2): undefined | string {
  */
 export async function generateChangelog(engine: DEngineClientV2) {
   const { wsRoot, vaultsv3: vaults } = engine;
-  const buildDir = path.join(wsRoot, "build");
-  fs.ensureDirSync(buildDir);
-  const changesPath = path.join(buildDir, "changes.json");
+  const changesPath = ChangelogGenerator.getChangelogDataPath(wsRoot);
   // const lastCommit = getLastChangelogCommit(engine);
   //const commits = await getCommitUpTo(wsRoot, lastCommit);
   const commits = [await getLastCommit(wsRoot)];

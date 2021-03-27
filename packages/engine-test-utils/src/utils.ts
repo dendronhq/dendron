@@ -1,4 +1,7 @@
 import { AssertUtils } from "@dendronhq/common-test-utils";
+import { Git } from "@dendronhq/engine-server";
+import fs from "fs-extra";
+import path from "path";
 
 export async function checkString(body: string, ...match: string[]) {
   expect(
@@ -16,4 +19,15 @@ export async function checkNotInString(body: string, ...nomatch: string[]) {
       nomatch,
     })
   ).toBeTruthy();
+}
+
+export class GitTestUtils {
+  static async createRepoWithReadme(root: string) {
+    const git = new Git({ localUrl: root });
+    await git.init();
+    const readmePath = path.join(root, "README.md");
+    fs.ensureFileSync(readmePath);
+    await git.add(".");
+    await git.commit({ msg: "init" });
+  }
 }

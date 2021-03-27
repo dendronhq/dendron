@@ -11,26 +11,12 @@ export class Git {
     return fs.existsSync(path.join(fpath, ".git"));
   }
 
-  static async createRepo(fpath: string, opts?: { initCommit: boolean }) {
-    const { initCommit } = _.defaults(opts, { initCommit: false });
-    fs.ensureDirSync(fpath);
-    await execa("git", ["init"], {
-      cwd: fpath,
-    });
-    const readmePath = path.join(fpath, "README.md");
-    fs.ensureFileSync(readmePath);
-    if (initCommit) {
-      await execa("git", ["add", "."], {
-        cwd: fpath,
-      });
-      await execa("git", ["commit", "-m", "initial commit"], {
-        cwd: fpath,
-      });
-    }
-    return;
-  }
-
   constructor(public opts: { localUrl: string; remoteUrl?: string }) {}
+
+  async _execute(cmd: string): Promise<{ stdout: string; stderr: string }> {
+    const [git, ...args] = cmd.split(" ");
+    return execa(git, args, { cwd: this.opts.localUrl });
+  }
 
   async isRepo(): Promise<boolean> {
     return Git.getRepo(this.opts.localUrl);
@@ -40,6 +26,19 @@ export class Git {
     const { localUrl: cwd } = this.opts;
     const { stdout } = await execa("git", gitArgs, { cwd });
     return stdout;
+  }
+
+  async commit(opts: { msg: string }) {
+    const { msg } = opts;
+    const { localUrl: cwd } = this.opts;
+    await execa.command([`git commit -m '${msg}'`].join(" "), {
+      shell: true,
+      cwd,
+    });
+  }
+
+  async add(args: string) {
+    await this._execute(`git add ${args}`);
   }
 
   async clone(destOverride?: string) {
@@ -55,20 +54,8 @@ export class Git {
     return localUrl;
   }
 
-  async addAll() {
-    await execa.command(["git add ."].join(" "), {
-      shell: true,
-      cwd: this.opts.localUrl,
-    });
-  }
-
-  async commit(opts: { msg: string }) {
-    const { msg } = opts;
-    const { localUrl: cwd } = this.opts;
-    await execa.command([`git commit -m '${msg}'`].join(" "), {
-      shell: true,
-      cwd,
-    });
+  async init() {
+    await this._execute("git init");
   }
 
   async push() {
@@ -76,6 +63,15 @@ export class Git {
     await execa.command([`git push`].join(" "), {
       shell: true,
       cwd,
+    });
+  }
+
+  // === extra commands
+
+  async addAll() {
+    await execa.command(["git add ."].join(" "), {
+      shell: true,
+      cwd: this.opts.localUrl,
     });
   }
 

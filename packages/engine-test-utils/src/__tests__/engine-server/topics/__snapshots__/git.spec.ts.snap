@@ -1,3 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`isRepo no repo 1`] = `false`;
+
+exports[`isRepo yes repo 1`] = `true`;

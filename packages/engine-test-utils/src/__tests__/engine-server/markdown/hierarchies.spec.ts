@@ -51,7 +51,7 @@ describe("hierarchies", () => {
     setupFunc: async ({ engine, vaults, extra }) => {
       const configOverride: DendronConfig = {
         ...engine.config,
-        hiearchyDisplayTitle: "Better Children",
+        hierarchyDisplayTitle: "Better Children",
       };
       if (extra.dest !== DendronASTDest.HTML) {
         const proc = MDUtilsV4.procDendron({

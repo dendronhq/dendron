@@ -11,12 +11,12 @@ import { DendronASTDest, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
 
 type PluginOpts = {
-  hiearchyDisplayTitle?: string;
+  hierarchyDisplayTitle?: string;
 };
 
 const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
   const proc = this;
-  const hiearchyDisplayTitle = opts?.hiearchyDisplayTitle || "Children";
+  const hierarchyDisplayTitle = opts?.hierarchyDisplayTitle || "Children";
   function transformer(tree: Node): void {
     let root = tree as Root;
     const {
@@ -59,7 +59,7 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
         type: "thematicBreak",
       });
       root.children.push(
-        u("heading", { depth: 2 }, [u("text", hiearchyDisplayTitle)])
+        u("heading", { depth: 2 }, [u("text", hierarchyDisplayTitle)])
       );
       root.children.push(
         list(

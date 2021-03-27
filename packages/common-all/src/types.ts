@@ -95,7 +95,7 @@ export type DendronConfig = {
    * Title used for hiearchies
    * Default: Children
    */
-  hiearchyDisplayTitle?: string;
+  hierarchyDisplayTitle?: string;
 
   /**
    * Turn off legacy note refs;

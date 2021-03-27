@@ -69,6 +69,9 @@ type ProcOptsFull = ProcOpts & {
   vault: DVault;
   fname: string;
   config?: DendronConfig;
+  mathOpts?: {
+    katex?: boolean;
+  };
   mermaid?: boolean;
   noteRefLvl?: number;
   usePrettyRefs?: boolean;
@@ -335,7 +338,7 @@ export class MDUtilsV4 {
       .use(variables)
       .use(footnotes)
       .use(wikiLinks, opts.wikiLinksOpts)
-      .use(hierarchies, { hiearchyDisplayTitle: config.hiearchyDisplayTitle })
+      .use(hierarchies, { hierarchyDisplayTitle: config.hierarchyDisplayTitle })
       .use(backlinks)
       .use(noteRefsV2, {
         ...opts.noteRefOpts,
@@ -350,8 +353,7 @@ export class MDUtilsV4 {
       });
     }
 
-    const useKatex = _.isUndefined(config.useKatex) ? true : config.useKatex;
-    if (useKatex) {
+    if (opts.mathOpts?.katex) {
       proc = proc.use(math);
     }
     if (opts.mermaid) {
@@ -464,6 +466,7 @@ export class MDUtilsV4 {
         insertTitle: config.useFMTitle,
         transformNoPublish: true,
       },
+      mathOpts: { katex: true },
       mermaid: config.mermaid,
       config,
     });

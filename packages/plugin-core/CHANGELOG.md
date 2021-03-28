@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.34.2-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.34.0...@dendronhq/plugin-core@0.34.2-alpha.0) (2021-03-28)
+
+### Bug Fixes
+
+- spurious getVault errors ([b00e25b](https://github.com/dendronhq/dendron/commit/b00e25b0a7ef41eaa14a7e5f6cf5db194fd85879))
+
 ## [0.34.1-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.34.0...@dendronhq/plugin-core@0.34.1-alpha.0) (2021-03-28)
 
 ### Bug Fixes

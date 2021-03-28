@@ -217,6 +217,7 @@ export async function _activate(context: vscode.ExtensionContext) {
       return;
     }
 
+    ws.workspaceService = wsService;
     const configMigrated = migrateConfig({ config, wsRoot });
     Logger.info({ ctx, config, configMigrated, msg: "read dendron config" });
 

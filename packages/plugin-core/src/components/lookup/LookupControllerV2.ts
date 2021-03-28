@@ -3,7 +3,6 @@ import {
   DNodePropsQuickInputV2,
   getSlugger,
   NoteProps,
-  VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
@@ -19,7 +18,7 @@ import { Logger } from "../../logger";
 import { EngineOpts } from "../../types";
 import { DendronClientUtilsV2, VSCodeUtils } from "../../utils";
 import { getDurationMilliseconds } from "../../utils/system";
-import { DendronWorkspace, when } from "../../workspace";
+import { DendronWorkspace, getWS, when } from "../../workspace";
 import {
   ButtonCategory,
   ButtonType,
@@ -320,6 +319,7 @@ export class LookupControllerV2 {
     changed?: DendronBtn;
   }) {
     const ctx = "updatePickerBehavior";
+    const ws = getWS();
     const {
       document,
       range,
@@ -384,15 +384,8 @@ export class LookupControllerV2 {
           if (!_.isUndefined(document)) {
             const body = "\n" + document.getText(range).trim();
             note.body = body;
-            try {
-              // check if selection comes from known vault
-              VaultUtils.getVaultByNotePathV4({
-                vaults: DendronWorkspace.instance().vaultsv4,
-                wsRoot: DendronWorkspace.wsRoot(),
-                fsPath: document.uri.fsPath,
-              });
-            } catch {
-              // selection comes from a non-vault file
+            // don't delete if original file is not in workspace
+            if (!ws.workspaceService?.isPathInWorkspace(document.uri.fsPath)) {
               return note;
             }
             await VSCodeUtils.deleteRange(document, range as vscode.Range);

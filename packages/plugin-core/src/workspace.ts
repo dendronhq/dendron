@@ -11,7 +11,11 @@ import {
   readMD,
   writeJSONWithComments,
 } from "@dendronhq/common-server";
-import { DConfig, HistoryService } from "@dendronhq/engine-server";
+import {
+  DConfig,
+  HistoryService,
+  WorkspaceService,
+} from "@dendronhq/engine-server";
 import { PodUtils } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -121,6 +125,7 @@ export class DendronWorkspace {
   public dendronTreeView: DendronTreeViewV2 | undefined;
   public vaultWatcher?: VaultWatcher;
   public port?: number;
+  public workspaceService?: WorkspaceService;
 
   static instance(): DendronWorkspace {
     if (!_DendronWorkspace) {

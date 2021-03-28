@@ -249,6 +249,23 @@ export class WorkspaceService {
     return repoPath;
   }
 
+  /**
+   * Check if a path belongs to a workspace
+   */
+  isPathInWorkspace(fpath: string) {
+    try {
+      // check if selection comes from known vault
+      VaultUtils.getVaultByNotePathV4({
+        vaults: this.config.vaults,
+        wsRoot: this.wsRoot,
+        fsPath: fpath,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async pullVault(opts: { vault: DVault }) {
     const { vault } = _.defaults(opts, {
       urlTransformer: _.identity,

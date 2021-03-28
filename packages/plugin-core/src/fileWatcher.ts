@@ -12,7 +12,7 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
-import { DendronWorkspace } from "./workspace";
+import { DendronWorkspace, getWS } from "./workspace";
 
 export class VaultWatcher {
   public watchers: { vault: DVault; watcher: vscode.FileSystemWatcher }[];
@@ -67,6 +67,10 @@ export class VaultWatcher {
     const fname = path.basename(uri.fsPath, ".md");
     const doc = await vscode.workspace.openTextDocument(uri);
     const content = doc.getText();
+    if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
+      return;
+    }
     const vault = VaultUtils.getVaultByNotePathV4({
       vaults: eclient.vaultsv3,
       wsRoot: DendronWorkspace.wsRoot(),

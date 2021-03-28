@@ -19,7 +19,7 @@ import vscode, {
 import { GotoNoteCommandOpts } from "../commands/GotoNote";
 import { DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
-import { DendronWorkspace, getEngine } from "../workspace";
+import { DendronWorkspace, getEngine, getWS } from "../workspace";
 import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
 import { vault2Path } from "@dendronhq/common-server";
 
@@ -197,6 +197,10 @@ export class DendronTreeViewV2 {
     const uri = editor.document.uri;
     const basename = path.basename(uri.fsPath);
     const wsRoot = DendronWorkspace.wsRoot();
+    const ws = getWS();
+    if (!ws.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      return;
+    }
     if (basename.endsWith(".md")) {
       const vault = VaultUtils.getVaultByNotePathV4({
         fsPath: uri.fsPath,

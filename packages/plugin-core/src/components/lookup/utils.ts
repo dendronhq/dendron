@@ -13,7 +13,7 @@ import path from "path";
 import { Uri, ViewColumn, window } from "vscode";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
-import { DendronWorkspace } from "../../workspace";
+import { DendronWorkspace, getWS } from "../../workspace";
 import { DendronBtn, getButtonCategory } from "./buttons";
 import {
   CREATE_NEW_DETAIL,
@@ -192,23 +192,24 @@ export class PickerUtilsV2 {
     return;
   }
 
-  static getVaultForOpenEditor(opts?: { throwIfEmpty: boolean }): DVault {
+  /**
+   * Defaults to first vault if current note is not part of a vault
+   * @returns
+   */
+  static getVaultForOpenEditor(): DVault {
     const vaults = DendronWorkspace.instance().vaultsv4;
     let vault: DVault;
-    if (vaults.length > 1 && VSCodeUtils.getActiveTextEditor()?.document) {
-      try {
-        vault = VaultUtils.getVaultByNotePathV4({
-          vaults,
-          wsRoot: DendronWorkspace.wsRoot(),
-          fsPath: VSCodeUtils.getActiveTextEditor()?.document.uri
-            .fsPath as string,
-        });
-      } catch (err) {
-        if (opts?.throwIfEmpty) {
-          throw err;
-        }
-        return vaults[0];
-      }
+    const activeDocument = VSCodeUtils.getActiveTextEditor()?.document;
+    if (
+      activeDocument &&
+      getWS().workspaceService?.isPathInWorkspace(activeDocument.uri.fsPath)
+    ) {
+      vault = VaultUtils.getVaultByNotePathV4({
+        vaults,
+        wsRoot: DendronWorkspace.wsRoot(),
+        fsPath: VSCodeUtils.getActiveTextEditor()?.document.uri
+          .fsPath as string,
+      });
     } else {
       vault = vaults[0];
     }

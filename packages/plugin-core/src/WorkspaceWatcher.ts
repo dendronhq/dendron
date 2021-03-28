@@ -12,7 +12,7 @@ import {
   workspace,
 } from "vscode";
 import { Logger } from "./logger";
-import { DendronWorkspace } from "./workspace";
+import { DendronWorkspace, getWS } from "./workspace";
 
 export class WorkspaceWatcher {
   activate(context: ExtensionContext) {
@@ -41,10 +41,13 @@ export class WorkspaceWatcher {
     const uri = ev.document.uri;
     const reason = ev.reason;
     Logger.info({ ctx, url: uri.fsPath, reason, msg: "enter" });
+    if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      Logger.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
+      return;
+    }
     const eclient = DendronWorkspace.instance().getEngine();
     const fname = path.basename(uri.fsPath, ".md");
     const now = Time.now().toMillis();
-
     const vault = VaultUtils.getVaultByNotePathV4({
       fsPath: uri.fsPath,
       vaults: eclient.vaultsv3,

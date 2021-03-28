@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.34.1-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-test-utils@0.34.0...@dendronhq/engine-test-utils@0.34.1-alpha.0) (2021-03-28)
+
+### Bug Fixes
+
+- typo in config option ([2be82e8](https://github.com/dendronhq/dendron/commit/2be82e8116e2bf5698abb7660795044ffa3f405d))
+
 # [0.34.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-test-utils@0.32.2...@dendronhq/engine-test-utils@0.34.0) (2021-03-22)
 
 ### Bug Fixes

@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.34.1-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-server@0.34.0...@dendronhq/common-server@0.34.1-alpha.0) (2021-03-28)
+
+**Note:** Version bump only for package @dendronhq/common-server
+
 # [0.34.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-server@0.32.2...@dendronhq/common-server@0.34.0) (2021-03-22)
 
 ### Features Dendron

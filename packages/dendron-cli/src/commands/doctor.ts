@@ -31,6 +31,7 @@ export enum DoctorActions {
   H1_TO_TITLE = "h1ToTitle",
   HI_TO_H2 = "h1ToH2",
   REMOVE_STUBS = "removeStubs",
+  OLD_NOTE_REF_TO_NEW = "oldNoteRefToNew",
 }
 
 export { CommandOpts as DoctorCLICommandOpts };
@@ -157,6 +158,31 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             console.log(
               `doctor ${DoctorActions.REMOVE_STUBS} ${note.fname} ${vname}`
             );
+            numChanges += 1;
+            return;
+          } else {
+            return;
+          }
+        };
+        break;
+      }
+      case DoctorActions.OLD_NOTE_REF_TO_NEW: {
+        doctorAction = async (note: NoteProps) => {
+          let changes: NoteChangeEntry[] = [];
+          const proc = MDUtilsV4.procFull({
+            dest: DendronASTDest.MD_DENDRON,
+            engine,
+            fname: note.fname,
+            vault: note.vault,
+          });
+          const newBody = await proc()
+            .use(RemarkUtils.oldNoteRef2NewNoteRef(note, changes))
+            .process(note.body);
+          note.body = newBody.toString();
+          if (!_.isEmpty(changes)) {
+            await engineWrite(note, { updateExisting: true });
+            console.log(`doctor changing ${note.fname}`);
+            this.L.info({ msg: `changes ${note.fname}`, changes });
             numChanges += 1;
             return;
           } else {

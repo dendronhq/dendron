@@ -1,16 +1,24 @@
 import {
   CONSTANTS,
   DendronError,
+  getSlugger,
   NoteChangeEntry,
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
+import { normalizev2 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Heading, Root } from "mdast";
 import { Processor } from "unified";
 import { Node } from "unist";
+import { selectAll } from "unist-util-select";
 import { VFile } from "vfile";
 import { WikiLinkProps } from "../../topics/markdown";
+import {
+  DendronASTRoot,
+  DendronASTTypes,
+  NoteRefNoteV4_LEGACY,
+} from "../types";
 
 export const ALIAS_DIVIDER = "|";
 
@@ -129,6 +137,58 @@ export class LinkUtils {
 }
 
 export class RemarkUtils {
+  static oldNoteRef2NewNoteRef(note: NoteProps, changes: NoteChangeEntry[]) {
+    return function (this: Processor) {
+      return (tree: Node, _vfile: VFile) => {
+        let root = tree as DendronASTRoot;
+        //@ts-ignore
+        let notesRefLegacy: NoteRefNoteV4_LEGACY[] = selectAll("refLink", root);
+        const slugger = getSlugger();
+        notesRefLegacy.map((noteRefLegacy) => {
+          // @ts-ignore;
+          noteRefLegacy.type = DendronASTTypes.REF_LINK_V2;
+          const { anchorStart, anchorEnd } = noteRefLegacy.data.link.data;
+          if (anchorStart) {
+            noteRefLegacy.data.link.data.anchorStart = normalizev2(
+              anchorStart,
+              slugger
+            );
+          }
+          if (anchorEnd) {
+            noteRefLegacy.data.link.data.anchorEnd = normalizev2(
+              anchorEnd,
+              slugger
+            );
+          }
+        });
+        changes.push({
+          note,
+          status: "update",
+        });
+        // if (out2.length > 0) {
+        //   // const noteRefLegacy = root.children.splice(idx, 1)[0] as unknown as  NoteRefNoteV4_LEGACY;
+        //   const noteRefLegacy = out2[0];
+        //   // root.children[idx] as unknown as NoteRefNoteV4_LEGACY;
+        //   // const noteRefNew: NoteRefNoteV4= {
+        //   //   type: DendronASTTypes.REF_LINK_V2,
+        //   //   data: {
+        //   //     link: noteRefLegacy.data.link,
+        //   //   },
+        //   //   value: noteRefLegacy.value
+        //   // }
+        //   // @ts-ignore;
+        //   noteRefLegacy.type = DendronASTTypes.REF_LINK_V2;
+        //   // // @ts-ignore
+        //   // root.children.splice(idx, 1, noteRefNew);
+        //   changes.push({
+        //     note,
+        //     status: "update",
+        //   });
+        // }
+      };
+    };
+  }
+
   static h1ToTitle(note: NoteProps, changes: NoteChangeEntry[]) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {
@@ -150,6 +210,7 @@ export class RemarkUtils {
       };
     };
   }
+
   static h1ToH2(note: NoteProps, changes: NoteChangeEntry[]) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {

@@ -4,7 +4,7 @@ import {
   DVault,
   NoteProps,
 } from "@dendronhq/common-all";
-import { Parent } from "mdast";
+import { Parent, Root } from "mdast";
 import { Processor } from "unified";
 import { LinkFilter } from "../topics/markdown/plugins/types";
 import { DendronPubOpts } from "./remark/dendronPub";
@@ -12,6 +12,10 @@ import { WikiLinksOpts } from "./remark/wikiLinks";
 export { Node as UnistNode } from "unist";
 export { VFile } from "vfile";
 export { Processor };
+
+export type DendronASTRoot = Root & {
+  children: DendronASTNode;
+};
 
 export type DendronASTNode = Parent & {
   notes?: NoteProps[];

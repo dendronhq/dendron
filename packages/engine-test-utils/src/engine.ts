@@ -122,7 +122,7 @@ export function testWithEngine(
   opts?: Omit<RunEngineTestV5Opts, "expect"> & { only?: boolean }
 ) {
   if (opts?.only) {
-    test.only(prompt, async () => {
+    return test.only(prompt, async () => {
       await runEngineTestV5(func, {
         preSetupHook: ENGINE_HOOKS.setupBasic,
         ...opts,
@@ -130,7 +130,7 @@ export function testWithEngine(
       });
     });
   } else {
-    test(prompt, async () => {
+    return test(prompt, async () => {
       await runEngineTestV5(func, {
         preSetupHook: ENGINE_HOOKS.setupBasic,
         ...opts,

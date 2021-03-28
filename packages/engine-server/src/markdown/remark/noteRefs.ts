@@ -56,7 +56,6 @@ function attachParser(proc: Unified.Processor) {
     if (match) {
       const linkMatch = match[1].trim();
       const { link } = parseDendronRef(linkMatch);
-      //const { name, displayName } = LinkUtils.parseLink(linkMatch);
       const { value, alias } = LinkUtils.parseLink(linkMatch);
 
       return eat(match[0])({

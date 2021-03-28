@@ -21,7 +21,10 @@ function normalize(text: string) {
   return _.toLower(_.trim(text, " #"));
 }
 
-function normalizev2(text: string, slugger: ReturnType<typeof getSlugger>) {
+export function normalizev2(
+  text: string,
+  slugger: ReturnType<typeof getSlugger>
+) {
   const u = _.trim(text, " #");
   if (u === "*") {
     return u;

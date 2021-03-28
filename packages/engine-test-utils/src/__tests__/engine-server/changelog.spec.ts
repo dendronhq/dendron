@@ -12,7 +12,6 @@ describe("genChangelog", async () => {
     await generateChangelog(engine);
     const fpath = ChangelogGenerator.getChangelogDataPath(wsRoot);
     const data = fs.readFileSync(fpath, { encoding: "utf8" });
-    expect(data).toMatchSnapshot();
     await checkString(data, "vault1/foo.ch1.md");
   });
 });

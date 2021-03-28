@@ -314,7 +314,7 @@ export class DendronWorkspace {
       throw new Error(`dendronRoot not set when get config`);
     }
     const config = DConfig.getOrCreate(dendronRoot);
-    return config;
+    return DConfig.defaults(config);
   }
 
   get podsDir(): string {

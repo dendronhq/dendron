@@ -28,6 +28,10 @@ export class DConfig {
     return path.join(configRoot, CONSTANTS.DENDRON_CONFIG_FILE);
   }
 
+  static defaults(config: DendronConfig): DendronConfig {
+    return _.defaults(config, { initializeRemoteVaults: true });
+  }
+
   static genDefaultConfig(): DendronConfig {
     return {
       version: 1,

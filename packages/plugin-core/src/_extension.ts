@@ -200,20 +200,20 @@ export async function _activate(context: vscode.ExtensionContext) {
     const config = ws.config;
     const wsRoot = DendronWorkspace.wsRoot() as string;
     const wsService = new WorkspaceService({ wsRoot });
-
-    const { didClone } = await wsService.syncVaults({
-      config,
-      progressIndicator: () => {
+    const didClone = wsService.initialize({
+      onSyncVaultsProgress: () => {
         vscode.window.showInformationMessage(
           "found empty remote vaults that need initializing"
         );
       },
+      onSyncVaultsEnd: () => {
+        vscode.window.showInformationMessage(
+          "finish initializing remote vaults. reloading workspace"
+        );
+        setTimeout(VSCodeUtils.reloadWindow, 200);
+      },
     });
     if (didClone) {
-      vscode.window.showInformationMessage(
-        "finish initializing remote vaults. reloading workspace"
-      );
-      setTimeout(VSCodeUtils.reloadWindow, 200);
       return;
     }
 

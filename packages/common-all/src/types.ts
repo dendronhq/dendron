@@ -106,6 +106,12 @@ export type DendronConfig = {
    * Turn off legacy note refs;
    */
   noLegacyNoteRef?: boolean;
+
+  /**
+   * Initialize remote vaults on startup
+   * Default: true
+   */
+  initializeRemoteVaults?: boolean;
 };
 
 export type HierarchyConfig = {

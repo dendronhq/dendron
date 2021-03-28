@@ -56,7 +56,7 @@ export class WorkspaceService {
   }
 
   get config(): DendronConfig {
-    return DConfig.getOrCreate(this.wsRoot);
+    return DConfig.defaults(DConfig.getOrCreate(this.wsRoot));
   }
 
   get configV2(): DendronConfig {
@@ -68,11 +68,6 @@ export class WorkspaceService {
 
   async setConfig(config: DendronConfig) {
     const wsRoot = this.wsRoot;
-    return DConfig.writeConfig({ wsRoot, config });
-  }
-
-  async setConfigV2(config: DendronConfig) {
-    const wsRoot = this.dendronRoot;
     return DConfig.writeConfig({ wsRoot, config });
   }
 
@@ -128,37 +123,23 @@ export class WorkspaceService {
   }
 
   /**
-   * Not fully resolved vault
+   * Return if vaults have been cloned
+   * @param opts
+   * @returns
    */
-  async createVaultV2({ vault }: { vault: DVault }) {
-    const vaultFullPath = vault2Path({ vault, wsRoot: this.wsRoot });
-    fs.ensureDirSync(vaultFullPath);
-    const wsRoot = this.wsRoot;
-
-    const note = NoteUtils.createRoot({
-      vault,
-      body: [
-        "# Welcome to Dendron",
-        "",
-        `This is the root of your dendron vault. If you decide to publish your entire vault, this will be your landing page. You are free to customize any part of this page except the frontmatter on top. `,
-      ].join("\n"),
-    });
-    const schema = SchemaUtils.createRootModule({ vault });
-    const notePath = NoteUtils.getPathV4({ note, wsRoot });
-    if (!fs.existsSync(notePath)) {
-      await note2File({ note, vault, wsRoot: this.wsRoot });
+  async initialize(opts: { onSyncVaultsProgress: any; onSyncVaultsEnd: any }) {
+    const { onSyncVaultsProgress, onSyncVaultsEnd } = opts;
+    if (this.config.initializeRemoteVaults) {
+      const { didClone } = await this.syncVaults({
+        config: this.config,
+        progressIndicator: onSyncVaultsProgress,
+      });
+      if (didClone) {
+        onSyncVaultsEnd();
+      }
+      return didClone;
     }
-    if (
-      !fs.existsSync(SchemaUtils.getPath({ root: this.wsRoot, fname: "root" }))
-    ) {
-      await schemaModuleOpts2File(schema, vaultFullPath, "root");
-    }
-
-    // update config
-    const config = this.configV2;
-    config.vaults.push(vault);
-    await this.setConfigV2(config);
-    return;
+    return false;
   }
 
   /**
@@ -210,26 +191,13 @@ export class WorkspaceService {
     return ws;
   }
 
-  static async createWorkspaceV2(opts: WorkspaceServiceCreateOpts) {
-    const { wsRoot, vaults } = opts;
-    const ws = new WorkspaceService({ wsRoot });
-    fs.ensureDirSync(wsRoot);
-    fs.ensureDirSync(ws.dendronRoot);
-    await Promise.all(
-      vaults.map(async (vault) => {
-        return ws.createVaultV2({ vault });
-      })
-    );
-    return ws;
-  }
-
   static async createFromConfig(opts: { wsRoot: string }) {
     const { wsRoot } = opts;
     const config = DConfig.getOrCreate(wsRoot);
     const ws = new WorkspaceService({ wsRoot });
     await Promise.all(
       config.vaults.map(async (vault) => {
-        return ws.cloneVaultV2({ vault });
+        return ws.cloneVaultWithAccessToken({ vault });
       })
     );
     return;
@@ -238,7 +206,7 @@ export class WorkspaceService {
   /**
    * Used in createFromConfig
    */
-  async cloneVaultV2(opts: { vault: DVault }) {
+  async cloneVaultWithAccessToken(opts: { vault: DVault }) {
     const { vault } = opts;
     if (!vault.remote || vault.remote.type !== "git") {
       throw new DendronError({ msg: "cloning non-git vault" });

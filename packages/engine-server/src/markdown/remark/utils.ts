@@ -143,8 +143,8 @@ export class RemarkUtils {
         let root = tree as DendronASTRoot;
         //@ts-ignore
         let notesRefLegacy: NoteRefNoteV4_LEGACY[] = selectAll("refLink", root);
-        const slugger = getSlugger();
         notesRefLegacy.map((noteRefLegacy) => {
+          const slugger = getSlugger();
           // @ts-ignore;
           noteRefLegacy.type = DendronASTTypes.REF_LINK_V2;
           const { anchorStart, anchorEnd } = noteRefLegacy.data.link.data;
@@ -161,30 +161,12 @@ export class RemarkUtils {
             );
           }
         });
-        changes.push({
-          note,
-          status: "update",
-        });
-        // if (out2.length > 0) {
-        //   // const noteRefLegacy = root.children.splice(idx, 1)[0] as unknown as  NoteRefNoteV4_LEGACY;
-        //   const noteRefLegacy = out2[0];
-        //   // root.children[idx] as unknown as NoteRefNoteV4_LEGACY;
-        //   // const noteRefNew: NoteRefNoteV4= {
-        //   //   type: DendronASTTypes.REF_LINK_V2,
-        //   //   data: {
-        //   //     link: noteRefLegacy.data.link,
-        //   //   },
-        //   //   value: noteRefLegacy.value
-        //   // }
-        //   // @ts-ignore;
-        //   noteRefLegacy.type = DendronASTTypes.REF_LINK_V2;
-        //   // // @ts-ignore
-        //   // root.children.splice(idx, 1, noteRefNew);
-        //   changes.push({
-        //     note,
-        //     status: "update",
-        //   });
-        // }
+        if (!_.isEmpty(notesRefLegacy)) {
+          changes.push({
+            note,
+            status: "update",
+          });
+        }
       };
     };
   }

@@ -28,6 +28,7 @@ type CommandOpts = CommandCLIOpts & SetupEngineOpts;
 type CommandOutput = void;
 
 export enum DoctorActions {
+  FIX_FRONTMATTER = "fixFrontmatter",
   H1_TO_TITLE = "h1ToTitle",
   HI_TO_H2 = "h1ToH2",
   REMOVE_STUBS = "removeStubs",
@@ -93,6 +94,12 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
 
     let doctorAction: any;
     switch (action) {
+      case DoctorActions.FIX_FRONTMATTER: {
+        console.log(
+          "the CLI currently doesn't support this action. please run this using the plugin"
+        );
+        process.exit();
+      }
       case DoctorActions.H1_TO_TITLE: {
         doctorAction = async (note: NoteProps) => {
           let changes: NoteChangeEntry[] = [];

@@ -26,26 +26,4 @@ new PublishPodCLICommand().buildCmd(buildYargs);
 new DoctorCLICommand().buildCmd(buildYargs);
 new WorkspaceCLICommand().buildCmd(buildYargs);
 new NoteCLICommand().buildCmd(buildYargs);
-
-/**
- * new Command().build(buildYargs)
- */
-// .command<RefactorFMCliOpts>(
-//   "refactorFM",
-//   "refactor frontmatter",
-//   (args) => {
-//     args.option("vault", {
-//       describe: "location of vault",
-//     });
-//   },
-//   async (args) => {
-//     const { vault } = args;
-//     const cmd = new RefactorFMCommand();
-//     await cmd.execute({
-//       root: vault,
-//       include: ["blog.thoughts.*"],
-//       rule: updateTime,
-//     });
-//   }
-// )
 buildYargs.demandCommand(1).help().argv;

@@ -1,9 +1,11 @@
 import { NoteUtils } from "@dendronhq/common-all";
 import { DirResult, tmpDir } from "@dendronhq/common-server";
 import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
+import { DoctorActions } from "@dendronhq/dendron-cli";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
+import sinon from "sinon";
 import * as vscode from "vscode";
 import { DoctorCommand } from "../../commands/Doctor";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
@@ -19,6 +21,9 @@ suite("notes", function () {
     beforeHook: () => {
       root = tmpDir();
     },
+    afterHook: () => {
+      sinon.restore();
+    },
   });
 
   test("basic", (done) => {
@@ -26,8 +31,14 @@ suite("notes", function () {
       const testFile = path.join(root.name, "vault", "bond2.md");
       fs.writeFileSync(testFile, "bond", { encoding: "utf8" });
       await new ReloadIndexCommand().run();
-      await new DoctorCommand().run();
-      // cehck that frontmatter is added
+      const cmd = new DoctorCommand();
+      sinon.stub(cmd, "gatherInputs").returns(
+        Promise.resolve({
+          action: DoctorActions.FIX_FRONTMATTER,
+        })
+      );
+      await cmd.run();
+      // check that frontmatter is added
       const resp = fs.readFileSync(testFile, { encoding: "utf8" });
       expect(NoteUtils.RE_FM.exec(resp)).toBeTruthy();
       expect(NoteUtils.RE_FM_UPDATED.exec(resp)).toBeTruthy();
@@ -215,35 +226,6 @@ suite("notes", function () {
   //   //   },
   //   // });
   // });
-
-  test("missing doc folder", (done) => {
-    onWSInit(async () => {
-      const testFile = path.join(root.name, "vault", "bond2.md");
-      fs.writeFileSync(testFile, "bond", { encoding: "utf8" });
-      fs.removeSync(path.join(root.name, "docs"));
-      await new ReloadIndexCommand().run();
-      const findings = await new DoctorCommand().run();
-      expect(
-        _.find(findings?.data, { issue: "no siteRoot found" })
-      ).toBeTruthy();
-      const docsDir = path.join(root.name, "docs");
-      expect(fs.existsSync(docsDir)).toBeTruthy();
-      expect(fs.readdirSync(docsDir)).toEqual([
-        "404.md",
-        "Gemfile",
-        "_config.yml",
-        "assets",
-        "favicon.ico",
-      ]);
-      done();
-    });
-    setupDendronWorkspace(root.name, ctx, {
-      lsp: true,
-      useCb: async (vaultDir) => {
-        await NodeTestPresetsV2.createOneNoteOneSchemaPreset({ vaultDir });
-      },
-    });
-  });
 });
 
 // describe("DoctorCommand", function () {

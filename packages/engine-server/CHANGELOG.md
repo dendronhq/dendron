@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.34.0...@dendronhq/engine-server@0.35.0) (2021-03-29)
+
+### Bug Fixes
+
+- spurious getVault errors ([b00e25b](https://github.com/dendronhq/dendron/commit/b00e25b0a7ef41eaa14a7e5f6cf5db194fd85879))
+- typo in config option ([2be82e8](https://github.com/dendronhq/dendron/commit/2be82e8116e2bf5698abb7660795044ffa3f405d))
+- update slugger rules ([18b0090](https://github.com/dendronhq/dendron/commit/18b0090bd1f13168d33d66c1bcbda02e39b98124))
+
 ## [0.34.2-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.34.0...@dendronhq/engine-server@0.34.2-alpha.0) (2021-03-28)
 
 ### Bug Fixes

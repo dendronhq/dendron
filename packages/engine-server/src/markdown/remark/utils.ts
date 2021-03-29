@@ -6,7 +6,6 @@ import {
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
-import { normalizev2 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Heading, Root } from "mdast";
 import { Processor } from "unified";
@@ -14,6 +13,7 @@ import { Node } from "unist";
 import { selectAll } from "unist-util-select";
 import { VFile } from "vfile";
 import { WikiLinkProps } from "../../topics/markdown";
+import { normalizev2 } from "../../utils";
 import {
   DendronASTRoot,
   DendronASTTypes,

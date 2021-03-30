@@ -78,7 +78,7 @@ describe("WorkspaceService", () => {
         wsRoot,
       });
       const resp = await new WorkspaceService({ wsRoot }).commidAndAddAll();
-      expect(resp).toMatchSnapshot();
+      expect(resp.length).toEqual(2);
     },
     { initGit: true }
   );

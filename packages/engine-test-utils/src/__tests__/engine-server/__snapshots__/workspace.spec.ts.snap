@@ -1,8 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`WorkspaceService commitAll 1`] = `
-Array [
-  "<TEMP_DIR>/tmp-5830-wQXk10hv7yY4/vault2",
-  "<TEMP_DIR>/tmp-5830-wQXk10hv7yY4/vault1",
-]
-`;

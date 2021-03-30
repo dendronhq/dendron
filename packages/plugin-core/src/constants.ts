@@ -362,6 +362,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-down.gif)",
   },
   // --- Workspace
+  ADD_AND_COMMIT: {
+    key: "dendron.addAndCommit",
+    title: `${CMD_PREFIX} Workspace: Add and Commit`,
+    group: "workspace",
+    desc: "add and commit all files",
+  },
   VAULT_ADD: {
     key: "dendron.vaultAdd",
     title: `${CMD_PREFIX} Vault Add`,

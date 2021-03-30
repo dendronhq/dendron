@@ -4,7 +4,7 @@ import {
   DVault,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { tmpDir } from "@dendronhq/common-server";
+import { tmpDir, vault2Path } from "@dendronhq/common-server";
 import {
   ENGINE_HOOKS,
   RunEngineTestFunctionV4,
@@ -18,6 +18,7 @@ import {
   WorkspaceService,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { GitTestUtils } from "./utils";
 
 export type AsyncCreateEngineFunction = (
   opts: WorkspaceOpts
@@ -86,28 +87,39 @@ export type RunEngineTestV5Opts = {
   expect: any;
   vaults?: DVault[];
   setupOnly?: boolean;
+  initGit?: boolean;
 };
 export async function runEngineTestV5(
   func: RunEngineTestFunctionV4,
   opts: RunEngineTestV5Opts
 ): Promise<any> {
-  const { preSetupHook, extra, vaults, createEngine } = _.defaults(opts, {
-    preSetupHook: async ({}) => {},
-    postSetupHook: async ({}) => {},
-    createEngine: createEngineFromEngine,
-    extra: {},
-    // third vault has diff name
-    vaults: [
-      { fsPath: "vault1" },
-      { fsPath: "vault2" },
-      { fsPath: "vault3", name: "vaultThree" },
-    ],
-  });
+  const { preSetupHook, extra, vaults, createEngine, initGit } = _.defaults(
+    opts,
+    {
+      preSetupHook: async ({}) => {},
+      postSetupHook: async ({}) => {},
+      createEngine: createEngineFromEngine,
+      extra: {},
+      // third vault has diff name
+      vaults: [
+        { fsPath: "vault1" },
+        { fsPath: "vault2" },
+        { fsPath: "vault3", name: "vaultThree" },
+      ],
+    }
+  );
   const { wsRoot } = await setupWS({ vaults });
   await preSetupHook({ wsRoot, vaults });
   const engine: DEngineClientV2 = await createEngine({ wsRoot, vaults });
   const initResp = await engine.init();
   const testOpts = { wsRoot, vaults, engine, initResp, extra, config: engine };
+  if (initGit) {
+    await Promise.all(
+      vaults.map((vault) => {
+        return GitTestUtils.createRepoWithReadme(vault2Path({ vault, wsRoot }));
+      })
+    );
+  }
   if (opts.setupOnly) {
     return testOpts;
   }

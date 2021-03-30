@@ -316,6 +316,11 @@
                 "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-down.gif)"
             },
             {
+                "command": "dendron.addAndCommit",
+                "title": "Dendron: Workspace: Add and Commit",
+                "desc": "add and commit all files"
+            },
+            {
                 "command": "dendron.vaultAdd",
                 "title": "Dendron: Vault Add",
                 "desc": "Add a new vault",

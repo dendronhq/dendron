@@ -22,6 +22,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DConfig } from "./config";
+import { Git } from "./topics/git";
 import { getPortFilePath, getWSMetaFilePath, writeWSMetaFile } from "./utils";
 
 const logger = createLogger();
@@ -120,6 +121,22 @@ export class WorkspaceService {
       await this.setConfig(config);
     }
     return;
+  }
+
+  async commidAndAddAll() {
+    const allRepos = await this.getAllRepos();
+    const out = await Promise.all(
+      allRepos.map(async (root) => {
+        const git = new Git({ localUrl: root });
+        if (await git.hasChanges()) {
+          await git.addAll();
+          await git.commit({ msg: "update" });
+          return root;
+        }
+        return undefined;
+      })
+    );
+    return _.filter(out, (ent) => !_.isUndefined(ent));
   }
 
   /**
@@ -247,6 +264,19 @@ export class WorkspaceService {
     const git = simpleGit({ baseDir: wsRoot });
     await git.clone(urlTransformer(vault.remote.url), repoPath);
     return repoPath;
+  }
+
+  async getAllRepos() {
+    const vaults = this.config.vaults;
+    const wsRoot = this.wsRoot;
+    return _.uniq(
+      await Promise.all(
+        vaults.map(async (vault) => {
+          const vpath = vault2Path({ vault, wsRoot });
+          return GitUtils.getGitRoot(vpath);
+        })
+      )
+    );
   }
 
   /**

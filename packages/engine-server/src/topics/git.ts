@@ -89,4 +89,9 @@ export class Git {
       .filter((ent) => !_.isEmpty(ent))
       .map((ent) => _.trim(ent));
   }
+
+  async hasChanges() {
+    const { stdout } = await this._execute("git status --short");
+    return !_.isEmpty(stdout);
+  }
 }

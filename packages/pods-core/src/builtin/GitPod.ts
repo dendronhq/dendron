@@ -132,7 +132,7 @@ const template = `<!DOCTYPE html>
       var vlSpec = {
           "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
           "description": "Punchcard Visualization like on Github. The day on y-axis uses a custom order from Monday to Sunday.  The sort property supports both full day names (e.g., 'Monday') and their three letter initials (e.g., 'mon') -- both of which are case insensitive.",
-          "data": { "url": "./out.csv"},
+          "data": { "url": "./commits.csv"},
           "mark": "rect",
           "width": "container",
           "encoding": {

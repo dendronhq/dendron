@@ -37,6 +37,7 @@ export class DConfig {
       version: 1,
       vaults: [],
       useFMTitle: true,
+      useNoteTitleForLink: true,
       noLegacyNoteRef: true,
       site: {
         copyAssets: true,

@@ -4,6 +4,7 @@ import {
   genUUID,
   NoteProps,
   NoteUtils,
+  PodConfig,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { cleanFileName, readMD, vault2Path } from "@dendronhq/common-server";
@@ -31,7 +32,10 @@ const ID = "dendron.markdown";
 
 export type MarkdownImportPodPlantOpts = ImportPodPlantOpts;
 
-type MarkdownImportPodConfig = ImportPodConfig;
+type MarkdownImportPodConfig = ImportPodConfig & {
+  noAddUUID?: boolean;
+  indexName?: string;
+};
 
 export type MarkdownImportPodResp = any[];
 
@@ -51,6 +55,22 @@ const toMarkdownLink = (assetPath: string, opts?: { name?: string }) => {
 export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
   static id: string = ID;
   static description: string = "import markdown";
+
+  get config(): PodConfig[] {
+    return super.config.concat([
+      {
+        key: "noAddUUID",
+        description: "Don't add uuid to assets",
+        type: "boolean",
+      },
+      {
+        key: "indexName",
+        description:
+          "If you have an index file per directory, merge that file with the directory note",
+        type: "string",
+      },
+    ]);
+  }
 
   async _collectItems(root: string): Promise<DItem[]> {
     const items: DItem[] = []; // files, directories, symlinks, etc
@@ -111,8 +131,9 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     src: string;
     vault: DVault;
     wsRoot: string;
+    config: MarkdownImportPodConfig;
   }): HierarichalDict {
-    const { files, src, vault, wsRoot } = opts;
+    const { files, src, vault, wsRoot, config } = opts;
     const out: HierarichalDict = {};
     _.forEach(files, (item) => {
       const fname = cleanFileName(item.path, {
@@ -122,8 +143,14 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
       if (!_.has(out, lvl)) {
         out[lvl] = [];
       }
+      const isDir = item.stats.isDirectory();
       const stub = item.stats.isDirectory() && _.isEmpty(item.entries);
-      const noteProps = NoteUtils.create({ fname, stub, vault });
+      const noteProps = NoteUtils.create({
+        fname,
+        stub,
+        vault,
+        custom: { isDir },
+      });
       if (item?.body) {
         noteProps.body = item.body;
       }
@@ -141,19 +168,22 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
         fs.ensureDirSync(assetDir);
         const mdLinks: string[] = [];
         item.entries.map((_item) => {
-          const uuid = genUUID();
           const { ext, name } = path.parse(_item.path);
-          // const { ext, name } = path.parse(cleanFileName(_item.path));
-          const assetBaseNew = `${cleanFileName(name)}-${uuid}${ext}`;
+          let assetBaseNew: string;
+          if (config.noAddUUID) {
+            assetBaseNew = `${cleanFileName(name)}${ext}`;
+          } else {
+            const uuid = genUUID();
+            assetBaseNew = `${cleanFileName(name)}-${uuid}${ext}`;
+          }
           const assetPathFull = path.join(assetDir, assetBaseNew);
           const assetPathRel = path.join(assetDirName, assetBaseNew);
-          // TODO: make sure to append uuid
           fs.copyFileSync(path.join(src, _item.path), assetPathFull);
-          mdLinks.push(toMarkdownLink(assetPathRel, { name: `${name}${ext}` }));
+          mdLinks.push(
+            toMarkdownLink(`/${assetPathRel}`, { name: `${name}${ext}` })
+          );
         });
-
-        // TODO
-        noteProps.body = `# Imported Assets\n${mdLinks.join("\n")}`;
+        noteProps.body = `## Imported Assets\n${mdLinks.join("\n")}`;
       }
 
       out[lvl].push(noteProps);
@@ -161,7 +191,10 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     return out;
   }
 
-  hDict2Notes(hdict: HierarichalDict): NoteProps[] {
+  hDict2Notes(
+    hdict: HierarichalDict,
+    config: MarkdownImportPodConfig
+  ): NoteProps[] {
     const noteDict: { [k: string]: NoteProps } = {};
     // TODO: currently don't handle stuff attached to root
     hdict[1]
@@ -176,7 +209,15 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
     while (!_.isEmpty(currRawNodes)) {
       currRawNodes.forEach((props) => {
         const parentPath = DNodeUtils.dirName(props.fname);
-        if (_.has(noteDict, parentPath)) {
+        if (
+          noteDict[parentPath].custom.isDir &&
+          DNodeUtils.basename(props.fname.toLowerCase(), true) ===
+            config.indexName?.toLowerCase()
+        ) {
+          const n = noteDict[parentPath];
+          n.body = [props.body, "***", n.body].join("\n");
+          n.custom = props.custom;
+        } else if (_.has(noteDict, parentPath)) {
           const n = NoteUtils.create({ ...props });
           DNodeUtils.addChild(noteDict[parentPath], n);
           noteDict[n.fname] = n;
@@ -205,8 +246,9 @@ export class MarkdownImportPod extends ImportPod<MarkdownImportPodConfig> {
       src: src.fsPath,
       vault,
       wsRoot,
+      config,
     });
-    const notes = this.hDict2Notes(hDict);
+    const notes = this.hDict2Notes(hDict, config);
     const notesClean = await Promise.all(
       notes
         .filter((n) => !n.stub)

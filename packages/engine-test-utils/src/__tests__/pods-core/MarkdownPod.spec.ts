@@ -152,7 +152,7 @@ describe("markdown import pod", () => {
           vault: vaults[0],
           wsRoot,
         });
-        expect(note.custom).toEqual({ banana: 42 });
+        expect(note.custom.banana).toEqual(42);
       },
       {
         expect,

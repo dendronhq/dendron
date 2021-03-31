@@ -197,6 +197,7 @@ export class PickerUtilsV2 {
    * @returns
    */
   static getVaultForOpenEditor(): DVault {
+    const ctx = "getVaultForOpenEditor";
     const vaults = DendronWorkspace.instance().vaultsv4;
     let vault: DVault;
     const activeDocument = VSCodeUtils.getActiveTextEditor()?.document;
@@ -204,15 +205,18 @@ export class PickerUtilsV2 {
       activeDocument &&
       getWS().workspaceService?.isPathInWorkspace(activeDocument.uri.fsPath)
     ) {
+      Logger.info({ ctx, activeDocument: activeDocument.fileName });
       vault = VaultUtils.getVaultByNotePathV4({
         vaults,
         wsRoot: DendronWorkspace.wsRoot(),
-        fsPath: VSCodeUtils.getActiveTextEditor()?.document.uri
-          .fsPath as string,
+        fsPath: activeDocument.uri.fsPath,
       });
     } else {
+      Logger.info({ ctx, msg: "no active doc" });
       vault = vaults[0];
     }
+    // TODO: remove
+    Logger.info({ ctx, msg: "exit", vault });
     return vault;
   }
 

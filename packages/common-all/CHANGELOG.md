@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.34.1-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-all@0.34.0...@dendronhq/common-all@0.34.1-alpha.0) (2021-03-31)
+
+**Note:** Version bump only for package @dendronhq/common-all
+
 # [0.34.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-all@0.33.0...@dendronhq/common-all@0.34.0) (2021-03-29)
 
 ### Bug Fixes

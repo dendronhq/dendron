@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.35.2-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.35.0...@dendronhq/plugin-core@0.35.2-alpha.0) (2021-03-31)
+
+### Features Dendron
+
+- and and commit cmd ([9b9d86c](https://github.com/dendronhq/dendron/commit/9b9d86ccf54fdb8b58f4c04bd57700d8c4c84cf7))
+
 ## [0.35.1-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.35.0...@dendronhq/plugin-core@0.35.1-alpha.0) (2021-03-30)
 
 ### Features Dendron

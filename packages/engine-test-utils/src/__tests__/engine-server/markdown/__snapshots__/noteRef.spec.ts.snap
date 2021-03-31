@@ -53,7 +53,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.one</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">One</span></div>
   <a href=\\"foo.one.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -66,7 +66,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.two</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Two</span></div>
   <a href=\\"foo.two.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -87,7 +87,7 @@ blah
    </div>    
    </div>
 
-Regular wikilink: [foo.two](foo.two.html)
+Regular wikilink: [Two](foo.two.html)
 
 * * *
 
@@ -158,7 +158,7 @@ VFile {
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">01</span></div>
   <a href=\\"journal.2020.08.01.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -172,7 +172,7 @@ VFile {
   </div><div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.02</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">02</span></div>
   <a href=\\"journal.2020.08.02.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -186,7 +186,7 @@ VFile {
   </div><div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.03</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">03</span></div>
   <a href=\\"journal.2020.08.03.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -317,7 +317,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.one</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">One</span></div>
   <a href=\\"foo.one.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -330,7 +330,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.two</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Two</span></div>
   <a href=\\"foo.two.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -345,7 +345,7 @@ blah
   </div>    
   </div>
   
-Regular wikilink: [foo.two](foo.two.md)
+Regular wikilink: [Two](foo.two.md)
   
   </div>    
   </div>
@@ -400,7 +400,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">01</span></div>
   <a href=\\"journal.2020.08.01.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -417,7 +417,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.02</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">02</span></div>
   <a href=\\"journal.2020.08.02.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -434,7 +434,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.03</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">03</span></div>
   <a href=\\"journal.2020.08.03.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -473,7 +473,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.one</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">One</span></div>
   <a href=\\"foo.one\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -486,7 +486,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.two</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Two</span></div>
   <a href=\\"foo.two\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -501,7 +501,7 @@ blah
   </div>    
   </div>
   
-Regular wikilink: [foo.two](foo.two)
+Regular wikilink: [Two](foo.two)
   
   </div>    
   </div>
@@ -554,7 +554,7 @@ VFile {
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">01</span></div>
   <a href=\\"journal.2020.08.01\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -568,7 +568,7 @@ VFile {
   </div><div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.02</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">02</span></div>
   <a href=\\"journal.2020.08.02\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -582,7 +582,7 @@ VFile {
   </div><div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.03</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">03</span></div>
   <a href=\\"journal.2020.08.03\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -634,7 +634,7 @@ VFile {
 <p></p><p></p><div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\">
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
   <a href=\\"/undefined/foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -664,7 +664,7 @@ VFile {
 <p></p><p></p><div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\">
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
   <a href=\\"/undefined/foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -724,7 +724,7 @@ VFile {
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">two</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Two</span></div>
   <a href=\\"two.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -758,7 +758,7 @@ VFile {
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
   <a href=\\"foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -768,7 +768,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.one</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">One</span></div>
   <a href=\\"foo.one.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -780,7 +780,7 @@ VFile {
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.two</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Two</span></div>
   <a href=\\"foo.two.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -825,7 +825,7 @@ VFile {
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
   <a href=\\"foo.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -859,7 +859,7 @@ VFile {
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">01</span></div>
   <a href=\\"journal.2020.08.01.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -873,7 +873,7 @@ VFile {
   </div><div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.02</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">02</span></div>
   <a href=\\"journal.2020.08.02.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -887,7 +887,7 @@ VFile {
   </div><div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.03</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">03</span></div>
   <a href=\\"journal.2020.08.03.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -972,7 +972,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
   <a href=\\"foo.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1006,7 +1006,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
   <a href=\\"foo.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1040,7 +1040,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
   <a href=\\"foo.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1106,7 +1106,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">two</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Two</span></div>
   <a href=\\"two.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1136,7 +1136,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
   <a href=\\"foo.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1147,7 +1147,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.one</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">One</span></div>
   <a href=\\"foo.one.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1160,7 +1160,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.two</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Two</span></div>
   <a href=\\"foo.two.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1175,7 +1175,7 @@ blah
   </div>    
   </div>
   
-Regular wikilink: [foo.two](foo.two.md)
+Regular wikilink: [Two](foo.two.md)
   
   </div>    
   </div>
@@ -1200,7 +1200,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
   <a href=\\"foo.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1230,7 +1230,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">01</span></div>
   <a href=\\"journal.2020.08.01.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1247,7 +1247,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.02</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">02</span></div>
   <a href=\\"journal.2020.08.02.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1264,7 +1264,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.03</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">03</span></div>
   <a href=\\"journal.2020.08.03.md\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1295,7 +1295,7 @@ VFile {
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
   <a href=\\"foo\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1327,7 +1327,7 @@ VFile {
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
   <a href=\\"foo\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1357,7 +1357,7 @@ VFile {
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">two</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Two</span></div>
   <a href=\\"two\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1385,7 +1385,7 @@ VFile {
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
   <a href=\\"foo\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1395,7 +1395,7 @@ VFile {
     <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.one</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">One</span></div>
   <a href=\\"foo.one\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1408,7 +1408,7 @@ VFile {
   <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo.two</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Two</span></div>
   <a href=\\"foo.two\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1423,7 +1423,7 @@ blah
   </div>    
   </div>
   
-Regular wikilink: [foo.two](foo.two)
+Regular wikilink: [Two](foo.two)
   
   </div>    
   </div>
@@ -1448,7 +1448,7 @@ VFile {
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">foo</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Foo</span></div>
   <a href=\\"foo\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1476,7 +1476,7 @@ VFile {
 <div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.01</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">01</span></div>
   <a href=\\"journal.2020.08.01\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1490,7 +1490,7 @@ VFile {
   </div><div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.02</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">02</span></div>
   <a href=\\"journal.2020.08.02\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>
@@ -1504,7 +1504,7 @@ VFile {
   </div><div class=\\"portal-container\\">
   <div class=\\"portal-head\\">
   <div class=\\"portal-backlink\\" >
-  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">journal.2020.08.03</span></div>
+  <div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">03</span></div>
   <a href=\\"journal.2020.08.03\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
   </div>
   </div>

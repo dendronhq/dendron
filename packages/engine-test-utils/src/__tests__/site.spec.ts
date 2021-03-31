@@ -181,7 +181,7 @@ describe("SiteUtils", () => {
         }).process(alpha.body);
         await checkString(
           resp.contents as string,
-          'images/not-sprouted.png&#x27;></img>">beta</a></p>'
+          'images/not-sprouted.png&#x27;></img>">Beta</a></p>'
         );
       },
       {

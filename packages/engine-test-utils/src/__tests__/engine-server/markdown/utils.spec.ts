@@ -282,7 +282,7 @@ const NOTE_REF_BASIC_WITH_REHYPE = createProcTests({
             // link by id
             `<a href=\"foo-id.html\"`,
             // html quoted
-            `<p><a href=\"bar.html\">bar</a></p>`,
+            `<p><a href=\"bar.html\">Bar</a></p>`,
           ],
         })
       ).toBeTruthy();

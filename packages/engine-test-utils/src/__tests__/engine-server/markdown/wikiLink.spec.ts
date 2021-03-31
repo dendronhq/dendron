@@ -87,15 +87,15 @@ describe("wikiLinks", () => {
         },
         [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, "[foo](foo)");
+          await checkVFile(resp, "[Foo](foo)");
         },
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, '<a href="foo.html">foo</a>');
+          await checkVFile(resp, '<a href="foo.html">Foo</a>');
         },
         [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, "[foo](foo.md)");
+          await checkVFile(resp, "[Foo](foo.md)");
         },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
@@ -120,15 +120,15 @@ describe("wikiLinks", () => {
         },
         [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, "[foo](foo)");
+          await checkVFile(resp, "[Foo](foo)");
         },
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, '<a href="foo.html#one">foo</a>');
+          await checkVFile(resp, '<a href="foo.html#one">Foo</a>');
         },
         [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, "[foo](foo.md)");
+          await checkVFile(resp, "[Foo](foo.md)");
         },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
@@ -153,15 +153,15 @@ describe("wikiLinks", () => {
         },
         [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, "[foo](foo)");
+          await checkVFile(resp, "[Foo](foo)");
         },
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, '<a href="foo.html">foo</a>');
+          await checkVFile(resp, '<a href="foo.html">Foo</a>');
         },
         [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, "[foo](foo.md)");
+          await checkVFile(resp, "[Foo](foo.md)");
         },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
@@ -219,7 +219,7 @@ describe("wikiLinks", () => {
         },
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, '<a href="foo-id.html">foo</a>');
+          await checkVFile(resp, '<a href="foo-id.html">Foo</a>');
         },
       },
       preSetupHook: async ({ wsRoot, vaults }) => {
@@ -313,15 +313,15 @@ describe("wikiLinks", () => {
         },
         [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, "[foo](foo)");
+          await checkVFile(resp, "[Foo](foo)");
         },
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, '<a href="foo.html">foo</a>');
+          await checkVFile(resp, '<a href="foo.html">Foo</a>');
         },
         [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, "[foo](foo.md)");
+          await checkVFile(resp, "[Foo](foo.md)");
         },
       },
       preSetupHook: ENGINE_HOOKS.setupBasic,
@@ -347,15 +347,15 @@ describe("wikiLinks", () => {
         },
         [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, "[foo](foo)");
+          await checkVFile(resp, "[Foo](foo)");
         },
         [DendronASTDest.HTML]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, '<a href="foo-2.html">foo</a>');
+          await checkVFile(resp, '<a href="foo-2.html">Foo</a>');
         },
         [DendronASTDest.MD_ENHANCED_PREVIEW]: async ({ extra }) => {
           const { resp } = extra;
-          await checkVFile(resp, "[foo](../vault2/foo.md)");
+          await checkVFile(resp, "[Foo](../vault2/foo.md)");
         },
       },
       preSetupHook: async ({ wsRoot, vaults }) => {

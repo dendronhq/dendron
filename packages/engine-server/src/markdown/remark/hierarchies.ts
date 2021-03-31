@@ -52,6 +52,12 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
     if (note.children.length <= 0 || note.custom?.has_collection) {
       return;
     }
+    if (
+      _.isBoolean(note.custom?.hierarchyDisplay) &&
+      !note.custom.hierarchyDisplay
+    ) {
+      return;
+    }
     const children = HierarchyUtils.getChildren({
       skipLevels: note.custom?.skipLevels || 0,
       note,

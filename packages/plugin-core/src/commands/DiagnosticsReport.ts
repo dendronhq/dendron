@@ -39,6 +39,9 @@ export class DiagnosticsReportCommand extends BasicCommand<
     const port = getPortFilePath({ wsRoot });
     const portFromFile = fs.readFileSync(port, { encoding: "utf8" });
 
+    const workspaceFile = DendronWorkspace.workspaceFile().fsPath;
+    const wsFile = fs.readFileSync(workspaceFile, { encoding: "utf8" });
+
     const content = [
       "# Plugin Logs",
       firstLines,
@@ -51,6 +54,8 @@ export class DiagnosticsReportCommand extends BasicCommand<
       config,
       "# Port",
       portFromFile,
+      "# Workspace File",
+      wsFile,
     ].join("\n");
     await workspace.openTextDocument({ language: "markdown", content });
     await clipboard.writeText(content);

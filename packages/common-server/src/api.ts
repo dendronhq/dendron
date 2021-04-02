@@ -313,6 +313,9 @@ export abstract class API {
     } catch (err) {
       payload.error = err;
     }
+    if (payload.error) {
+      this._log(payload.error, "error");
+    }
     return payload;
   }
 }

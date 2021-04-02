@@ -221,12 +221,7 @@ export class PickerUtilsV2 {
   }
 
   static getOrPromptVaultForOpenEditor(): DVault {
-    try {
-      return PickerUtilsV2.getVaultForOpenEditor();
-    } catch (err) {
-      throw err;
-      // TODO
-    }
+    return PickerUtilsV2.getVaultForOpenEditor();
   }
 
   static isCreateNewNotePickForSingle(node: DNodePropsQuickInputV2): boolean {

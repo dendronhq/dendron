@@ -689,11 +689,16 @@ export class NoteUtils {
     note: NoteProps;
     wsRoot: string;
   }): string {
-    return DNodeUtils.getFullPath({
-      wsRoot,
-      vault: note.vault,
-      basename: note.fname + ".md",
-    });
+    try {
+      const fpath = DNodeUtils.getFullPath({
+        wsRoot,
+        vault: note.vault,
+        basename: note.fname + ".md",
+      });
+      return fpath;
+    } catch (err) {
+      throw new DendronError({ payload: { note, wsRoot } });
+    }
   }
 
   static getURI({ note, wsRoot }: { note: NoteProps; wsRoot: string }): URI {

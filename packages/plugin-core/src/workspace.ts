@@ -152,23 +152,27 @@ export class DendronWorkspace {
   }
 
   async pauseWatchers<T = void>(cb: () => Promise<T>) {
+    const ctx = "pauseWatchers";
     if (this.vaultWatcher) {
       this.vaultWatcher.pause = true;
     }
     if (this.dendronTreeView) {
       this.dendronTreeView.pause = true;
     }
-    const out = await cb();
-    if (this.vaultWatcher) {
-      this.vaultWatcher.pause = false;
+    try {
+      const out = await cb();
+      return out;
+    } catch (err) {
+      Logger.error({ ctx, err });
+      throw err;
+    } finally {
+      if (this.vaultWatcher) {
+        this.vaultWatcher.pause = false;
+      }
+      if (this.dendronTreeView) {
+        this.dendronTreeView.pause = false;
+      }
     }
-    if (this.dendronTreeView) {
-      this.dendronTreeView.pause = false;
-      // force refresh
-      // this.dendronTreeView.treeProvider.getChildren();
-      // VaultWatcher.refreshTree();
-    }
-    return out;
   }
 
   /**

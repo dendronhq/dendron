@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "license": "MIT",
+  "license": "GPLv3",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [

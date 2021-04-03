@@ -19,7 +19,8 @@
     "size": "size-limit",
     "analyze": "size-limit --why",
     "storybook": "start-storybook -p 6006 --no-manager-cache",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "deploy-storybook": "yarn build && yarn build-storybook"
   },
   "peerDependencies": {
     "react": ">=16"

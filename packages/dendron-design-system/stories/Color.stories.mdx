@@ -1,0 +1,25 @@
+import { Meta, ColorPalette, ColorItem } from '@storybook/addon-docs/blocks';
+
+import { colors } from '../src/theme/colors';
+
+<Meta title="Colors" />
+
+# Colors
+
+<ColorPalette>
+  <ColorItem
+    title="colors.brand.lightGreen"
+    subtitle="lightGreen"
+    colors={[colors.brand.lightGreen]}
+  />
+  <ColorItem
+    title="colors.brand.darkGreen"
+    subtitle="darkGreen"
+    colors={[colors.brand.darkGreen]}
+  />
+  <ColorItem
+    title="colors.brand.neutralBlack"
+    subtitle="neutralBlack"
+    colors={[colors.brand.neutralBlack]}
+  />
+</ColorPalette>

@@ -2323,7 +2323,7 @@
     core-js "^3.8.2"
     ts-dedent "^2.0.0"
 
-"@storybook/addon-docs@6.2.2":
+"@storybook/addon-docs@6.2.2", "@storybook/addon-docs@^6.2.2":
   version "6.2.2"
   resolved "https://registry.yarnpkg.com/@storybook/addon-docs/-/addon-docs-6.2.2.tgz#c47a3f61e2bb31826bc80ede81c4f33807e44f05"
   integrity sha512-1aOH2BuqTuyvk3Ik8zcK/aTFAc0NSkaOxqYjiiAzyOLmflUG6DxQcpfZWYI158733kjl9+r0+IGEh+ceIH6k0Q==

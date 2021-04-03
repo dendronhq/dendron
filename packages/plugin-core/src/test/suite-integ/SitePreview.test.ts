@@ -20,7 +20,7 @@ suite("SitePreview", function () {
     afterHook: () => {},
   });
 
-  describe("checkPreReq", function () {
+  describe.skip("checkPreReq", function () {
     test("cancel", function (done) {
       runLegacySingleWorkspaceTest({
         ctx,

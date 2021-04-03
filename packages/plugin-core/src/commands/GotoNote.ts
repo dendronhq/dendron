@@ -68,7 +68,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     this.L.info({ ctx, opts, msg: "enter" });
     let { overrides } = opts;
     let qs: string;
-    let vault: DVault;
+    let vault: DVault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
     if (!opts.qs) {
       const maybeLink = this.getLinkFromSelection();
       if (!maybeLink) {
@@ -82,16 +82,15 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           vaults,
           vname: maybeLink.vaultName,
         });
-      } else {
-        vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
       }
-
       if (maybeLink.anchorHeader) {
         opts.anchor = {
           type: "header",
           value: maybeLink.anchorHeader,
         };
       }
+    } else {
+      qs = opts.qs;
     }
     let pos: undefined | Position;
     const client = DendronWorkspace.instance().getEngine();

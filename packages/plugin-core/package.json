@@ -206,7 +206,7 @@
             },
             {
                 "command": "dendron.gotoNote",
-                "title": "Dendron:: Goto Note",
+                "title": "Dendron: Goto Note",
                 "desc": "Go to a note"
             },
             {

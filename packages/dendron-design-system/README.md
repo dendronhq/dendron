@@ -4,6 +4,8 @@
 
 As `Montserrat` was already in use on the current dendron.so website, I have included it as the header font, along with a recommended pairing from Google Fonts called `Roboto` for the body font.
 
+![](assets/README/2021-04-03-16-44-56.png)
+
 Technical Details:
 Went with the 1st recommendation on including this font in the design system from Chakra-UI. [Using Fonts](https://chakra-ui.com/guides/using-fonts#option-2-using-font-face) using the `Fontsource` library.
 [fontsource/fontsource](https://github.com/fontsource/fontsource)

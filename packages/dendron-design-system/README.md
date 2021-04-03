@@ -1,5 +1,23 @@
 # Dendron Design System
 
+## Fonts
+
+As `Montserrat` was already in use on the current dendron.so website, I have included it as the header font, along with a recommended pairing from Google Fonts called `Roboto` for the body font.
+
+Technical Details:
+Went with the 1st recommendation on including this font in the design system from Chakra-UI. [Using Fonts](https://chakra-ui.com/guides/using-fonts#option-2-using-font-face) using the `Fontsource` library.
+[fontsource/fontsource](https://github.com/fontsource/fontsource)
+
+The fonts will be bundled in the design system and then all that would need to be done on the host projects is to include the following imports
+
+```
+import '@fontsource/montserrat';
+import '@fontsource/roboto';
+```
+
+at the lowest app level. ie. for next.js `_app.tsx`.
+This is already done in this project in the `preview.tsx` file.
+
 ## Commands
 
 TSDX scaffolds your new library inside `/src`, and also sets up a [Parcel-based](https://parceljs.org) playground for it inside `/example`.

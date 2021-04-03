@@ -107,10 +107,13 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   GOTO_NOTE: {
     key: "dendron.gotoNote",
     // no prefix, we don't want to show this command
-    title: `Goto Note`,
+    title: `${CMD_PREFIX}: Goto Note`,
     group: "notes",
     desc: "Go to a note",
     skipDocs: true,
+    keybindings: {
+      key: "ctrl+enter",
+    },
   },
   CREATE_DAILY_JOURNAL_NOTE: {
     key: "dendron.createDailyJournalNote",

@@ -1,24 +1,27 @@
 import {
-  DendronError,
-  DNodeTypeV2,
   DNoteAnchor,
   DVault,
   getSlugger,
   NoteProps,
   NoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
-import { Heading, ParserUtilsV2 } from "@dendronhq/engine-server";
+import {
+  Heading,
+  matchWikiLink,
+  ParserUtilsV2,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
-import { Position, Selection, Uri } from "vscode";
+import { Position, Selection, Uri, window } from "vscode";
+import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
-  qs: string;
-  mode: DNodeTypeV2;
-  vault: DVault;
+  qs?: string;
+  vault?: DVault;
   anchor?: DNoteAnchor;
   overrides?: Partial<NoteProps>;
 };
@@ -45,16 +48,55 @@ export const findHeaderPos = (opts: { anchor: string; text: string }) => {
 export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   static key = DENDRON_COMMANDS.GOTO_NOTE.key;
 
+  getLinkFromSelection() {
+    const { selection, editor } = VSCodeUtils.getSelection();
+    if (!_.isEmpty(selection) && selection?.start) {
+      const currentLine = editor?.document.getText().split("\n")[
+        selection.start.line
+      ];
+      if (currentLine) {
+        const out = matchWikiLink(currentLine);
+        if (out && _.inRange(selection.start.character, out.start, out.end)) {
+          return out.link;
+        }
+      }
+    }
+    return;
+  }
   async execute(opts: CommandOpts): Promise<CommandOutput> {
     const ctx = "GotoNoteCommand";
     this.L.info({ ctx, opts, msg: "enter" });
-    const { qs, vault, overrides } = opts;
+    let { overrides } = opts;
+    let qs: string;
+    let vault: DVault;
+    if (!opts.qs) {
+      const maybeLink = this.getLinkFromSelection();
+      if (!maybeLink) {
+        window.showErrorMessage("selection is not a valid link");
+        return;
+      }
+      qs = maybeLink.value as string;
+      const vaults = getWS().vaultsv4;
+      if (maybeLink.vaultName) {
+        vault = VaultUtils.getVaultByNameOrThrow({
+          vaults,
+          vname: maybeLink.vaultName,
+        });
+      } else {
+        vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+      }
+
+      if (maybeLink.anchorHeader) {
+        opts.anchor = {
+          type: "header",
+          value: maybeLink.anchorHeader,
+        };
+      }
+    }
     let pos: undefined | Position;
-    if (opts.mode === "note") {
-      const client = DendronWorkspace.instance().getEngine();
-      const out = await DendronWorkspace.instance().pauseWatchers<
-        CommandOutput
-      >(async () => {
+    const client = DendronWorkspace.instance().getEngine();
+    const out = await DendronWorkspace.instance().pauseWatchers<CommandOutput>(
+      async () => {
         const { data } = await client.getNoteByPath({
           npath: qs,
           createIfNew: true,
@@ -76,10 +118,8 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           editor.revealRange(editor.selection);
         }
         return { note, pos };
-      });
-      return out;
-    } else {
-      throw new DendronError({ msg: "goto schema not implemented" });
-    }
+      }
+    );
+    return out;
   }
 }

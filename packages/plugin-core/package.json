@@ -206,7 +206,7 @@
             },
             {
                 "command": "dendron.gotoNote",
-                "title": "Goto Note",
+                "title": "Dendron:: Goto Note",
                 "desc": "Go to a note"
             },
             {
@@ -511,6 +511,10 @@
             }
         ],
         "keybindings": [
+            {
+                "command": "dendron.gotoNote",
+                "key": "ctrl+enter"
+            },
             {
                 "command": "dendron.createDailyJournalNote",
                 "key": "ctrl+shift+i",

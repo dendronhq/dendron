@@ -14,6 +14,24 @@ import { MDUtilsV4 } from "../utils";
 import { addError, getNoteOrError, LinkUtils } from "./utils";
 
 export const LINK_REGEX = /^\[\[(.+?)\]\]/;
+export const LINK_REGEX_LOOSE = /\[\[(.+?)\]\]/;
+
+const parseWikiLink = (linkMatch: string) => {
+  linkMatch = NoteUtils.normalizeFname(linkMatch);
+  return LinkUtils.parseLinkV2(linkMatch);
+};
+
+export const matchWikiLink = (text: string) => {
+  const match = LINK_REGEX_LOOSE.exec(text);
+  if (match) {
+    const start = match.index;
+    const end = match.index + match[0].length;
+    const linkMatch = match[1].trim();
+    const link = parseWikiLink(linkMatch);
+    return { link, start, end };
+  }
+  return false;
+};
 
 type PluginOpts = CompilerOpts;
 

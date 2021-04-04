@@ -24,8 +24,8 @@ export class DiagnosticsReportCommand extends BasicCommand<
       throw Error("logPath not defined");
     }
     const logFile = fs.readFileSync(logPath, { encoding: "utf8" });
-    const firstLines = logFile.slice(0, 5000);
-    const lastLines = logFile.slice(-5000, -1);
+    const firstLines = logFile.slice(0, 10000);
+    const lastLines = logFile.slice(-10000, -1);
 
     const serverLogPath = path.join(
       path.dirname(logPath),

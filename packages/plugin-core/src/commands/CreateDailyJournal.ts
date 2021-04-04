@@ -39,9 +39,11 @@ export class CreateDailyJournalCommand extends BaseCommand<CommandOpts> {
 
   async execute(opts: CommandOpts) {
     const { fname } = opts;
+    const ctx = "CreateDailyJournal";
     const journalName = getConfigValue(
       CodeConfigKeys.DEFAULT_JOURNAL_NAME
     ) as string;
+    this.L.info({ ctx, journalName, fname });
     const title = NoteUtils.genJournalNoteTitle({
       fname,
       journalName,
@@ -50,7 +52,5 @@ export class CreateDailyJournalCommand extends BaseCommand<CommandOpts> {
       qs: fname,
       overrides: { title },
     });
-    // dummy
-    return vscode.Uri.file("/tmp");
   }
 }

@@ -815,7 +815,6 @@ export class SchemaUtils {
         // @ts-ignore
         note[k] = v;
       });
-
       return true;
     }
     return false;

@@ -1,0 +1,83 @@
+{
+  "version": "0.1.0",
+  "license": "GPLv3",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "start": "tsdx watch",
+    "build": "tsdx build",
+    "test": "tsdx test --passWithNoTests",
+    "lint": "tsdx lint",
+    "prepare": "tsdx build",
+    "size": "size-limit",
+    "analyze": "size-limit --why",
+    "storybook": "start-storybook -p 6006 --no-manager-cache",
+    "build-storybook": "build-storybook",
+    "deploy-storybook": "yarn build && yarn build-storybook"
+  },
+  "peerDependencies": {
+    "react": ">=16"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "name": "dendron-design-system",
+  "author": "8brandon",
+  "module": "dist/dendron-design-system.esm.js",
+  "size-limit": [
+    {
+      "path": "dist/dendron-design-system.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/dendron-design-system.esm.js",
+      "limit": "10 KB"
+    }
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.13.14",
+    "@size-limit/preset-small-lib": "^4.10.2",
+    "@storybook/addon-docs": "^6.2.2",
+    "@storybook/addon-essentials": "^6.2.2",
+    "@storybook/addon-info": "^5.3.21",
+    "@storybook/addon-links": "^6.2.2",
+    "@storybook/addons": "^6.2.2",
+    "@storybook/react": "^6.2.2",
+    "@storybook/theming": "^6.2.2",
+    "@types/react": "^17.0.3",
+    "@types/react-dom": "^17.0.3",
+    "babel-loader": "^8.2.2",
+    "husky": "^6.0.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-is": "^17.0.2",
+    "size-limit": "^4.10.2",
+    "storybook-addon-performance": "^0.15.2",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.1.0",
+    "typescript": "^4.2.3"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^1.4.2",
+    "@emotion/react": "^11",
+    "@emotion/styled": "^11",
+    "@fontsource/montserrat": "^4.2.2",
+    "@fontsource/roboto": "^4.2.2",
+    "framer-motion": "^4"
+  }
+}

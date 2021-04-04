@@ -306,8 +306,6 @@ export class NoteUtils {
     to: NoteProps;
     link: DLink;
   }) {
-    // const backlinks = _.filter(to.links, { type: "backlink" });
-    // if (!_.find(backlinks, (ent) => ent.from.fname === from.fname)) {
     to.links.push({
       from: { fname: from.fname, vault: from.vault },
       type: "backlink",

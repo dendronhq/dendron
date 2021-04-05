@@ -513,7 +513,8 @@
         "keybindings": [
             {
                 "command": "dendron.gotoNote",
-                "key": "ctrl+enter"
+                "key": "ctrl+enter",
+                "when": "editorFocus"
             },
             {
                 "command": "dendron.createDailyJournalNote",

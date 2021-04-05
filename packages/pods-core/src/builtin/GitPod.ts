@@ -1,11 +1,10 @@
-import { Git } from "@dendronhq/engine-server";
+import { Time } from "@dendronhq/common-all";
+import { Git, WorkspaceService } from "@dendronhq/engine-server";
+import { createObjectCsvWriter } from "csv-writer";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { ExportPod, ExportPodPlantOpts } from "../basev3";
-import { Time } from "@dendronhq/common-all";
-import { createObjectCsvWriter } from "csv-writer";
-import { GitUtils, vault2Path } from "@dendronhq/common-server";
 
 const writeCSV = (opts: { dest: string; data: any[]; header: any[] }) => {
   const { dest, data, header } = opts;
@@ -48,20 +47,13 @@ export class GitPunchCardExportPod extends ExportPod {
   }
 
   async plant(opts: ExportPodPlantOpts) {
-    const { dest, notes, wsRoot, vaults } = opts;
+    const { dest, notes, wsRoot } = opts;
 
     // verify dest exist
     const podDstPath = dest.fsPath;
     fs.ensureDirSync(podDstPath);
 
-    const repoPaths = _.uniq(
-      await Promise.all(
-        vaults.map(async (vault) => {
-          const vpath = vault2Path({ vault, wsRoot });
-          return GitUtils.getGitRoot(vpath);
-        })
-      )
-    );
+    const repoPaths = await new WorkspaceService({ wsRoot }).getAllRepos();
 
     const getAllCommits = async (root: string) => {
       const git = new Git({ localUrl: root });
@@ -140,7 +132,7 @@ const template = `<!DOCTYPE html>
       var vlSpec = {
           "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
           "description": "Punchcard Visualization like on Github. The day on y-axis uses a custom order from Monday to Sunday.  The sort property supports both full day names (e.g., 'Monday') and their three letter initials (e.g., 'mon') -- both of which are case insensitive.",
-          "data": { "url": "./out.csv"},
+          "data": { "url": "./commits.csv"},
           "mark": "rect",
           "width": "container",
           "encoding": {

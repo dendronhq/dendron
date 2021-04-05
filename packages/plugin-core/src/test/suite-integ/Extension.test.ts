@@ -64,7 +64,9 @@ suite("Extension", function () {
                 },
               ],
               useFMTitle: true,
+              useNoteTitleForLink: true,
               initializeRemoteVaults: true,
+              noAutoCreateOnDefinition: true,
               noLegacyNoteRef: true,
               site: {
                 copyAssets: true,

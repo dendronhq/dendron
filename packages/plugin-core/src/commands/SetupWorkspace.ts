@@ -206,12 +206,12 @@ export class SetupWorkspaceCommand extends BasicCommand<
     //   fs.ensureDirSync(getWS().dendronRoot);
     // }
 
-    const dendronWSTemplate = vscode.Uri.joinPath(
+    const dendronWSTemplate = VSCodeUtils.joinPath(
       ws.extensionAssetsDir,
       "dendron-ws"
     );
     // copy over jekyll config
-    const dendronJekyll = vscode.Uri.joinPath(ws.extensionAssetsDir, "jekyll");
+    const dendronJekyll = VSCodeUtils.joinPath(ws.extensionAssetsDir, "jekyll");
     fs.copySync(path.join(dendronJekyll.fsPath), path.join(rootDir, "docs"));
 
     // copy over notes

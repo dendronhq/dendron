@@ -28,7 +28,6 @@ suite("GotoNote", function () {
         const note = DendronWorkspace.instance().getEngine().notes["foo"];
         const { note: out } = (await new GotoNoteCommand().run({
           qs: "foo",
-          mode: "note",
           vault,
         })) as { note: NoteProps };
         expect(out).toEqual(note);
@@ -61,7 +60,6 @@ suite("GotoNote", function () {
 
         const { note: out } = (await new GotoNoteCommand().run({
           qs: "foo",
-          mode: "note",
           vault,
         })) as { note: NoteProps };
         expect(_.pick(out, ["fname", "stub", "id"])).toEqual({
@@ -80,7 +78,6 @@ suite("GotoNote", function () {
       onInit: async ({ vault }) => {
         const { note: out } = (await new GotoNoteCommand().run({
           qs: "foo.ch2",
-          mode: "note",
           vault,
         })) as { note: NoteProps };
         expect(_.pick(out, ["fname", "stub"])).toEqual({
@@ -101,7 +98,6 @@ suite("GotoNote", function () {
       onInit: async ({ vault }) => {
         await new GotoNoteCommand().run({
           qs: "bar.ch1",
-          mode: "note",
           vault,
         });
         expect(getActiveEditorBasename()).toEqual("bar.ch1.md");
@@ -124,7 +120,6 @@ suite("GotoNote", function () {
       onInit: async ({ vault }) => {
         await new GotoNoteCommand().run({
           qs: "alpha",
-          mode: "note",
           vault,
           anchor: {
             type: "header",
@@ -153,7 +148,6 @@ suite("GotoNote", function () {
       onInit: async ({ vault }) => {
         await new GotoNoteCommand().run({
           qs: "alpha",
-          mode: "note",
           vault,
           anchor: {
             type: "header",

@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.36.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-test-utils@0.35.0...@dendronhq/common-test-utils@0.36.0) (2021-04-05)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+## [0.35.4-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-test-utils@0.35.0...@dendronhq/common-test-utils@0.35.4-alpha.0) (2021-04-02)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+## [0.35.3](https://github.com/dendronhq/dendron/compare/@dendronhq/common-test-utils@0.35.0...@dendronhq/common-test-utils@0.35.3) (2021-04-02)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+## [0.35.3-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-test-utils@0.35.0...@dendronhq/common-test-utils@0.35.3-alpha.0) (2021-03-31)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+## [0.35.2-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-test-utils@0.35.0...@dendronhq/common-test-utils@0.35.2-alpha.0) (2021-03-31)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
+## [0.35.1-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-test-utils@0.35.0...@dendronhq/common-test-utils@0.35.1-alpha.0) (2021-03-30)
+
+**Note:** Version bump only for package @dendronhq/common-test-utils
+
 # [0.35.0](https://github.com/dendronhq/dendron/compare/@dendronhq/common-test-utils@0.34.0...@dendronhq/common-test-utils@0.35.0) (2021-03-29)
 
 **Note:** Version bump only for package @dendronhq/common-test-utils

@@ -31,7 +31,7 @@ suite("DiagnosticsReport", function () {
         expect(
           AssertUtils.assertInString({
             body,
-            match: ["foobar", "Dendron Confg", "Plugin Logs"],
+            match: ["foobar", "Dendron Confg", "Plugin Logs", "Workspace File"],
           })
         ).toBeTruthy();
         done();

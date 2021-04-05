@@ -20,7 +20,7 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_ANCHOR" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
-<p><a href=\\"foo.html#one\\">foo</a></p>
+<p><a href=\\"foo.html#one\\">Foo</a></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
 <ol>
@@ -37,7 +37,7 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_EXTENSION" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
-<p><a href=\\"foo.html\\">foo</a></p>
+<p><a href=\\"foo.html\\">Foo</a></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
 <ol>
@@ -54,7 +54,7 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_ID_AS_LINK" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
-<p><a href=\\"foo-id.html\\">foo</a></p>
+<p><a href=\\"foo-id.html\\">Foo</a></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
 <ol>
@@ -70,7 +70,7 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_XVAULT_LINK_TO_OTHER_VAULT" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
-<p><a href=\\"foo-2.html\\">foo</a></p>",
+<p><a href=\\"foo-2.html\\">Foo</a></p>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -81,7 +81,7 @@ VFile {
 exports[`wikiLinks compile "HTML: WITH_XVAULT_LINK_TO_SAME_VAULT" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
-<p><a href=\\"foo.html\\">foo</a></p>
+<p><a href=\\"foo.html\\">Foo</a></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
 <ol>
@@ -115,7 +115,7 @@ VFile {
 exports[`wikiLinks compile "HTML: regular" 1`] = `
 VFile {
   "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
-<p><a href=\\"foo.html\\">foo</a></p>
+<p><a href=\\"foo.html\\">Foo</a></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
 <ol>
@@ -255,7 +255,7 @@ exports[`wikiLinks compile "MD_ENHANCED_PREVIEW: WITH_ANCHOR" 1`] = `
 VFile {
   "contents": "# Root
 
-[foo](foo.md)
+[Foo](foo.md)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -269,7 +269,7 @@ exports[`wikiLinks compile "MD_ENHANCED_PREVIEW: WITH_EXTENSION" 1`] = `
 VFile {
   "contents": "# Root
 
-[foo](foo.md)
+[Foo](foo.md)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -297,7 +297,7 @@ exports[`wikiLinks compile "MD_ENHANCED_PREVIEW: WITH_XVAULT_LINK_TO_OTHER_VAULT
 VFile {
   "contents": "# Root
 
-[foo](../vault2/foo.md)
+[Foo](../vault2/foo.md)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -311,7 +311,7 @@ exports[`wikiLinks compile "MD_ENHANCED_PREVIEW: WITH_XVAULT_LINK_TO_SAME_VAULT"
 VFile {
   "contents": "# Root
 
-[foo](foo.md)
+[Foo](foo.md)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -339,7 +339,7 @@ exports[`wikiLinks compile "MD_ENHANCED_PREVIEW: regular" 1`] = `
 VFile {
   "contents": "# Root
 
-[foo](foo.md)
+[Foo](foo.md)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -367,7 +367,7 @@ exports[`wikiLinks compile "MD_REGULAR: WITH_ANCHOR" 1`] = `
 VFile {
   "contents": "# Root
 
-[foo](foo)
+[Foo](foo)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -381,7 +381,7 @@ exports[`wikiLinks compile "MD_REGULAR: WITH_EXTENSION" 1`] = `
 VFile {
   "contents": "# Root
 
-[foo](foo)
+[Foo](foo)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -409,7 +409,7 @@ exports[`wikiLinks compile "MD_REGULAR: WITH_XVAULT_LINK_TO_OTHER_VAULT" 1`] = `
 VFile {
   "contents": "# Root
 
-[foo](foo)
+[Foo](foo)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -423,7 +423,7 @@ exports[`wikiLinks compile "MD_REGULAR: WITH_XVAULT_LINK_TO_SAME_VAULT" 1`] = `
 VFile {
   "contents": "# Root
 
-[foo](foo)
+[Foo](foo)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -451,7 +451,7 @@ exports[`wikiLinks compile "MD_REGULAR: regular" 1`] = `
 VFile {
   "contents": "# Root
 
-[foo](foo)
+[Foo](foo)
 
 ",
   "cwd": "<PROJECT_ROOT>",

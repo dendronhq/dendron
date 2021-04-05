@@ -306,8 +306,6 @@ export class NoteUtils {
     to: NoteProps;
     link: DLink;
   }) {
-    // const backlinks = _.filter(to.links, { type: "backlink" });
-    // if (!_.find(backlinks, (ent) => ent.from.fname === from.fname)) {
     to.links.push({
       from: { fname: from.fname, vault: from.vault },
       type: "backlink",
@@ -689,11 +687,16 @@ export class NoteUtils {
     note: NoteProps;
     wsRoot: string;
   }): string {
-    return DNodeUtils.getFullPath({
-      wsRoot,
-      vault: note.vault,
-      basename: note.fname + ".md",
-    });
+    try {
+      const fpath = DNodeUtils.getFullPath({
+        wsRoot,
+        vault: note.vault,
+        basename: note.fname + ".md",
+      });
+      return fpath;
+    } catch (err) {
+      throw new DendronError({ payload: { note, wsRoot } });
+    }
   }
 
   static getURI({ note, wsRoot }: { note: NoteProps; wsRoot: string }): URI {
@@ -810,7 +813,6 @@ export class SchemaUtils {
         // @ts-ignore
         note[k] = v;
       });
-
       return true;
     }
     return false;

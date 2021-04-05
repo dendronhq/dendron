@@ -3,10 +3,9 @@ import fs from "fs-extra";
 import _ from "lodash";
 import vscode, { Location, Position, Uri } from "vscode";
 import { findHeaderPos, GotoNoteCommand } from "../commands/GotoNote";
-import { PickerUtilsV2 } from "../components/lookup/utils";
 import { Logger } from "../logger";
 import { getReferenceAtPosition } from "../utils/md";
-import { DendronWorkspace } from "../workspace";
+import { DendronWorkspace, getWS } from "../workspace";
 
 export default class DefinitionProvider implements vscode.DefinitionProvider {
   public async provideDefinition(
@@ -53,11 +52,11 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       }
       return loc;
     } else {
-      const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+      if (getWS().config.noAutoCreateOnDefinition) {
+        return;
+      }
       const out = await new GotoNoteCommand().execute({
         qs: refAtPos.ref,
-        mode: "note" as const,
-        vault,
         anchor: refAtPos.anchor,
       });
       if (_.isUndefined(out)) {

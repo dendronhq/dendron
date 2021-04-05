@@ -128,10 +128,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
         return new vscode.Hover(content, hoverRange);
       }
 
-      return new vscode.Hover(
-        `"${ref}" is not created yet. Click to create.`,
-        hoverRange
-      );
+      return new vscode.Hover(`"${ref}" is not created yet`, hoverRange);
     }
 
     return null;

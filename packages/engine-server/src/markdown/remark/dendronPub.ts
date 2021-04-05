@@ -80,7 +80,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         let value = node.value as string;
         // we change this later
         let valueOrig = value;
-        let canPublish = true;
+        let isPublished = true;
         const data = _node.data;
         vault = MDUtilsV4.getVault(proc, data.vaultName, {
           vaultMissingBehavior: VaultMissingBehavior.FALLBACK_TO_ORIGINAL_VAULT,
@@ -106,18 +106,18 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
               value = "403";
               addError(proc, new DendronError({ msg: "no note or config" }));
             } else {
-              canPublish = SiteUtils.canPublish({
+              isPublished = SiteUtils.isPublished({
                 note,
                 config,
                 engine,
               });
-              if (!canPublish) {
+              if (!isPublished) {
                 value = "403";
               }
             }
           }
         }
-        if (copts?.useId && canPublish) {
+        if (copts?.useId && isPublished) {
           const notes = NoteUtils.getNotesByFname({
             fname: valueOrig,
             notes: engine.notes,

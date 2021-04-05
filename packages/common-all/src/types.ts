@@ -103,6 +103,11 @@ export type DendronConfig = {
   hierarchyDisplayTitle?: string;
 
   /**
+   * Don't automatically create note when looking up definition
+   */
+  noAutoCreateOnDefinition?: boolean;
+
+  /**
    * Turn off legacy note refs;
    */
   noLegacyNoteRef?: boolean;

@@ -1,3 +1,4 @@
+import { AddAndCommit } from "./AddAndCommit";
 import { ArchiveHierarchyCommand } from "./ArchiveHierarchy";
 import { BrowseNoteCommand } from "./BrowseNoteCommand";
 import { CodeCommandConstructor } from "./base";
@@ -40,6 +41,7 @@ import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
 
 const ALL_COMMANDS = [
+  AddAndCommit,
   ArchiveHierarchyCommand,
   BrowseNoteCommand,
   ChangeWorkspaceCommand,

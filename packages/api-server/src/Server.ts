@@ -8,7 +8,7 @@ import { baseRouter } from "./routes";
 
 export function appModule({ logPath }: { logPath: string }) {
   const app = express();
-  app.use(express.json());
+  app.use(express.json({ limit: "500mb" }));
   app.use(express.urlencoded({ extended: true }));
   if (logPath !== "stdout") {
     const accessLogStream = fs.createWriteStream(logPath, { flags: "a" });

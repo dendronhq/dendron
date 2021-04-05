@@ -1,4 +1,4 @@
-import { NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import {
   NoteTestUtilsV4,
   NOTE_PRESETS_V4,
@@ -80,6 +80,36 @@ suite("BacklinksTreeDataProvider", function () {
         await NoteTestUtilsV4.createNote({
           fname: "beta",
           body: `[[alpha]]`,
+          vault: vaults[1],
+          wsRoot,
+        });
+      },
+      onInit: async ({ wsRoot, vaults }) => {
+        const notePath = path.join(wsRoot, vaults[0].fsPath, "alpha.md");
+        await VSCodeUtils.openFileInEditor(Uri.file(notePath));
+        const out = toPlainObject(await getChildren()) as any;
+        expect(out[0].command.arguments[0].path as string).toEqual(
+          path.join(wsRoot, vaults[1].fsPath, "beta.md")
+        );
+        expect(out.length).toEqual(1);
+        done();
+      },
+    });
+  });
+
+  test("xvault link", function (done) {
+    runMultiVaultTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await NoteTestUtilsV4.createNote({
+          fname: "alpha",
+          body: `[[beta]]`,
+          vault: vaults[0],
+          wsRoot,
+        });
+        await NoteTestUtilsV4.createNote({
+          fname: "beta",
+          body: `[[dendron://${VaultUtils.getName(vaults[0])}/alpha]]`,
           vault: vaults[1],
           wsRoot,
         });

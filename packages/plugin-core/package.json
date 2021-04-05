@@ -4,7 +4,7 @@
     "displayName": "dendron",
     "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
     "publisher": "dendron",
-    "version": "0.35.0",
+    "version": "0.36.0",
     "engines": {
         "vscode": "^1.45.0"
     },
@@ -206,7 +206,7 @@
             },
             {
                 "command": "dendron.gotoNote",
-                "title": "Goto Note",
+                "title": "Dendron: Goto Note",
                 "desc": "Go to a note"
             },
             {
@@ -314,6 +314,11 @@
                 "desc": "Go down the hierarchy",
                 "docLink": "dendron.topic.commands.md",
                 "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-down.gif)"
+            },
+            {
+                "command": "dendron.addAndCommit",
+                "title": "Dendron: Workspace: Add and Commit",
+                "desc": "add and commit all files"
             },
             {
                 "command": "dendron.vaultAdd",
@@ -507,6 +512,11 @@
         ],
         "keybindings": [
             {
+                "command": "dendron.gotoNote",
+                "key": "ctrl+enter",
+                "when": "editorFocus"
+            },
+            {
                 "command": "dendron.createDailyJournalNote",
                 "key": "ctrl+shift+i",
                 "mac": "cmd+shift+i",
@@ -608,7 +618,7 @@
         "format": "prettier --write src '*.json' '*.js'"
     },
     "devDependencies": {
-        "@dendronhq/common-test-utils": "^0.35.0",
+        "@dendronhq/common-test-utils": "^0.36.0",
         "@types/execa": "^2.0.0",
         "@types/fs-extra": "^9.0.1",
         "@types/glob": "^7.1.1",
@@ -635,14 +645,14 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
-        "@dendronhq/api-server": "^0.35.0",
-        "@dendronhq/common-all": "^0.34.0",
-        "@dendronhq/common-server": "^0.35.0",
-        "@dendronhq/dendron-cli": "^0.35.0",
-        "@dendronhq/engine-server": "^0.35.0",
-        "@dendronhq/engine-test-utils": "^0.35.0",
+        "@dendronhq/api-server": "^0.36.0",
+        "@dendronhq/common-all": "^0.35.0",
+        "@dendronhq/common-server": "^0.36.0",
+        "@dendronhq/dendron-cli": "^0.36.0",
+        "@dendronhq/engine-server": "^0.36.0",
+        "@dendronhq/engine-test-utils": "^0.36.0",
         "@dendronhq/lsp-server": "^0.28.7-alpha.0",
-        "@dendronhq/pods-core": "^0.35.0",
+        "@dendronhq/pods-core": "^0.36.0",
         "cross-path-sort": "^1.0.0",
         "execa": "^4.0.2",
         "fs-extra": "^9.0.1",

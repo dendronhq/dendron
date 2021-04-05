@@ -42,15 +42,6 @@ export class SiteUtils {
     if (note.custom?.published === false) {
       return false;
     }
-
-    // check if note is in index
-    const domain = DNodeUtils.domainName(note.fname);
-    if (
-      config.site.siteHierarchies[0] !== "root" &&
-      config.site.siteHierarchies.indexOf(domain) < 0
-    ) {
-      return false;
-    }
     // check if note is note blocked
     const hconfig = this.getConfigForHierarchy({
       config: config.site,
@@ -84,6 +75,23 @@ export class SiteUtils {
     }
 
     return true;
+  }
+
+  static isPublished(opts: {
+    note: NoteProps;
+    config: DendronConfig;
+    engine: DEngineClientV2;
+  }) {
+    const { note, config } = opts;
+    // check if note is in index
+    const domain = DNodeUtils.domainName(note.fname);
+    if (
+      config.site.siteHierarchies[0] !== "root" &&
+      config.site.siteHierarchies.indexOf(domain) < 0
+    ) {
+      return false;
+    }
+    return this.canPublish(opts);
   }
 
   static async copyAssets(opts: {

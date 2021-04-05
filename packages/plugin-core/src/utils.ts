@@ -226,6 +226,15 @@ export class VSCodeUtils {
     };
   }
 
+  /**
+   * URI.joinPath currentl'y doesn't work in theia
+   * @param uri
+   * @param path
+   */
+  static joinPath(uri: vscode.Uri, ...fpath: string[]) {
+    return vscode.Uri.file(path.join(uri.fsPath, ...fpath));
+  }
+
   static async openNoteByPath({
     vault,
     fname,

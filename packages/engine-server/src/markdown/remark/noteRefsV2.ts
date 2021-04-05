@@ -345,7 +345,14 @@ export function convertNoteRefASTV2(
         if (dest === DendronASTDest.MD_ENHANCED_PREVIEW) {
           suffix = ".md";
         }
-        const link = `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`;
+        const isPublished = SiteUtils.isPublished({
+          note,
+          config: config!,
+          engine,
+        });
+        const link = isPublished
+          ? `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`
+          : undefined;
         return renderPrettyAST({
           content: data,
           title,
@@ -561,14 +568,17 @@ function getTitle(opts: {
 function renderPrettyAST(opts: {
   content: Parent;
   title: string;
-  link: string;
+  link?: string;
 }) {
   const { content, title, link } = opts;
+  let linkLine = _.isUndefined(link)
+    ? ""
+    : `<a href=${link} class="portal-arrow">Go to text <span class="right-arrow">→</span></a>`;
   const top = `<div class="portal-container">
   <div class="portal-head">
   <div class="portal-backlink" >
   <div class="portal-title">From <span class="portal-text-title">${title}</span></div>
-  <a href=${link} class="portal-arrow">Go to text <span class="right-arrow">→</span></a>
+  ${linkLine}
   </div>
   </div>
   <div id="portal-parent-anchor" class="portal-parent" markdown="1">

@@ -13,7 +13,6 @@ import vscode, {
   TextDocument,
 } from "vscode";
 import { DendronWorkspace } from "../workspace";
-import { matchAll } from "./strings";
 
 export type RefT = {
   label: string;
@@ -302,7 +301,6 @@ export const findReferences = async (
 
   // TODO: sanitize reference
   const engine = DendronWorkspace.instance().getEngine();
-  engine.notes;
   // clean for anchor
   const fname = ref;
   const notes = NoteUtils.getNotesByFname({ fname, notes: engine.notes });
@@ -316,6 +314,7 @@ export const findReferences = async (
   );
 
   _.forEach(notesWithRefs, (note) => {
+    const linksMatch = note.links.filter((l) => l.to?.fname === fname);
     const fsPath = NoteUtils.getPathV4({
       note,
       wsRoot: DendronWorkspace.wsRoot(),
@@ -324,42 +323,24 @@ export const findReferences = async (
     if (excludePaths.includes(fsPath) || !fs.existsSync(fsPath)) {
       return;
     }
-
     const fileContent = fs.readFileSync(fsPath).toString();
-    const refRegexp = new RegExp(
-      `\\[\\[([^\\[\\]]+?\\|)?(${escapeForRegExp(ref)}(\\#[^\\[\\]]+?)?)\\]\\]`,
-      "gi"
-    );
-    const fileContentLines = fileContent.split(/\r?\n/g);
+    // we are assuming there won't be a `\n---\n` key inside the frontmatter
+    const fmOffset = fileContent.indexOf("\n---") + 4;
+    linksMatch.forEach((link) => {
+      const { start } = link.pos;
+      const lines = fileContent.slice(0, fmOffset + start).split("\n");
+      const lineNum = lines.length;
 
-    fileContentLines.forEach((lineText, lineNum) => {
-      for (const match of matchAll(refRegexp, lineText)) {
-        const reference = match[2].split("#")[0];
-        const offset = (match.index || 0) + 2;
-
-        if (
-          isInFencedCodeBlock(fileContent, lineNum) ||
-          isInCodeSpan(fileContent, lineNum, offset)
-        ) {
-          return;
-        }
-
-        const matchText = lineText.slice(
-          Math.max(offset - 2, 0),
-          lineText.length
-        );
-
-        refs.push({
-          location: new vscode.Location(
-            vscode.Uri.file(fsPath),
-            new vscode.Range(
-              new vscode.Position(lineNum, offset),
-              new vscode.Position(lineNum, offset + reference.length)
-            )
-          ),
-          matchText: matchText,
-        });
-      }
+      refs.push({
+        location: new vscode.Location(
+          vscode.Uri.file(fsPath),
+          new vscode.Range(
+            new vscode.Position(lineNum, 0),
+            new vscode.Position(lineNum + 1, 0)
+          )
+        ),
+        matchText: lines.slice(-1)[0],
+      });
     });
   });
 

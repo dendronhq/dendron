@@ -1,4 +1,4 @@
-import { DendronConfig } from "@dendronhq/common-all";
+import { DendronConfig, NoteProps } from "@dendronhq/common-all";
 import {
   ENGINE_HOOKS,
   NoteTestUtilsV4,
@@ -86,6 +86,51 @@ describe("hierarchies", () => {
       },
     },
     preSetupHook: ENGINE_HOOKS.setupBasic,
+  });
+
+  const NO_HIERARCHY_VIA_FM = createProcTests({
+    name: "NO_HIERARCHY_VIA_FM",
+    setupFunc: async ({ engine, vaults, extra }) => {
+      if (extra.dest !== DendronASTDest.HTML) {
+        const proc = MDUtilsV4.procDendron({
+          engine,
+          fname: "foo",
+          dest: extra.dest,
+          vault: vaults[0],
+        });
+        const resp = await proc.process(BASIC_TEXT);
+        return { resp };
+      } else {
+        const proc = MDUtilsV4.procDendronForPublish({
+          engine,
+          fname: "foo",
+          noteIndex: engine.notes["foo"],
+          vault: vaults[0],
+        });
+        const resp = await proc.process(BASIC_TEXT);
+        return { resp };
+      }
+    },
+    verifyFuncDict: {
+      [DendronASTDest.MD_DENDRON]: async ({ extra }) => {
+        const { resp } = extra;
+        await checkVFile(resp, BASIC_TEXT);
+      },
+      [DendronASTDest.HTML]: async ({ extra }) => {
+        const { resp } = extra;
+        await checkNotInVFile(resp, "Children");
+      },
+    },
+    preSetupHook: async (opts) => {
+      await ENGINE_HOOKS.setupBasic(opts);
+      await NoteTestUtilsV4.modifyNoteByPath(
+        { wsRoot: opts.wsRoot, vault: opts.vaults[0], fname: "foo" },
+        (note: NoteProps) => {
+          note.custom.hierarchyDisplay = false;
+          return note;
+        }
+      );
+    },
   });
 
   const DIFF_HIERARCHY_TITLE = createProcTests({
@@ -182,6 +227,7 @@ describe("hierarchies", () => {
 
   const ALL_TEST_CASES = [
     ...NO_HIERARCHY,
+    ...NO_HIERARCHY_VIA_FM,
     ...BASIC,
     ...DIFF_HIERARCHY_TITLE,
     ...SKIP_LEVELS,

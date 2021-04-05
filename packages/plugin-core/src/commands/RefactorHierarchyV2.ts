@@ -146,8 +146,8 @@ export class RefactorHierarchyCommandV2 extends BasicCommand<
       const vault = note.vault;
       const vpath = vault2Path({ wsRoot, vault });
       const rootUri = Uri.file(vpath);
-      const oldUri = Uri.joinPath(rootUri, src + ".md");
-      const newUri = Uri.joinPath(rootUri, dst + ".md");
+      const oldUri = VSCodeUtils.joinPath(rootUri, src + ".md");
+      const newUri = VSCodeUtils.joinPath(rootUri, dst + ".md");
       return { oldUri, newUri, vault: note.vault };
     });
     // NOTE: async version doesn't work, not sure why

@@ -107,10 +107,14 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
   GOTO_NOTE: {
     key: "dendron.gotoNote",
     // no prefix, we don't want to show this command
-    title: `Goto Note`,
+    title: `${CMD_PREFIX} Goto Note`,
     group: "notes",
     desc: "Go to a note",
     skipDocs: true,
+    keybindings: {
+      key: "ctrl+enter",
+      when: "editorFocus",
+    },
   },
   CREATE_DAILY_JOURNAL_NOTE: {
     key: "dendron.createDailyJournalNote",
@@ -362,6 +366,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/hierarchy.go-down.gif)",
   },
   // --- Workspace
+  ADD_AND_COMMIT: {
+    key: "dendron.addAndCommit",
+    title: `${CMD_PREFIX} Workspace: Add and Commit`,
+    group: "workspace",
+    desc: "add and commit all files",
+  },
   VAULT_ADD: {
     key: "dendron.vaultAdd",
     title: `${CMD_PREFIX} Vault Add`,

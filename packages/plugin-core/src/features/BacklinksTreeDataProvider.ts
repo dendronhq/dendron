@@ -57,7 +57,7 @@ export default class BacklinksTreeDataProvider
         return [];
       }
 
-      const collapsibleState = true //getMemoConfigProperty('backlinksPanel.collapseParentItems', false)
+      const collapsibleState = true
         ? vscode.TreeItemCollapsibleState.Collapsed
         : vscode.TreeItemCollapsibleState.Expanded;
 

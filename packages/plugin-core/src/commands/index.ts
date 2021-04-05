@@ -1,5 +1,6 @@
 import { ArchiveHierarchyCommand } from "./ArchiveHierarchy";
 import { BrowseNoteCommand } from "./BrowseNoteCommand";
+import { CapitalizeSelectionCommand } from "./CapitalizeSelectionCommand";
 import { CodeCommandConstructor } from "./base";
 import { ChangeWorkspaceCommand } from "./ChangeWorkspace";
 import { ConfigureCommand } from "./ConfigureCommand";
@@ -42,6 +43,7 @@ import { VaultRemoveCommand } from "./VaultRemoveCommand";
 const ALL_COMMANDS = [
   ArchiveHierarchyCommand,
   BrowseNoteCommand,
+  CapitalizeSelectionCommand,
   ChangeWorkspaceCommand,
   ConfigureCommand,
   ConfigurePodCommand,

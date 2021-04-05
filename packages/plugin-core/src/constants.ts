@@ -565,6 +565,13 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview: "",
   },
+  CAPITALIZE_SELECTION: {
+    key: "dendron.capitalizeSelection",
+    title: `${CMD_PREFIX} Capitalize Selection`,
+    group: "notes",
+    desc:
+      "Capitalizes the first letter of every word in the current text selection",
+  },
   // -- Workbench
   CONFIGURE_RAW: {
     key: "dendron.configureRaw",

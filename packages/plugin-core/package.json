@@ -456,6 +456,11 @@
                 "docPreview": ""
             },
             {
+                "command": "dendron.capitalizeSelection",
+                "title": "Dendron: Capitalize Selection",
+                "desc": "Capitalizes the current text selection"
+            },
+            {
                 "command": "dendron.configureRaw",
                 "title": "Dendron: Configure (yaml)",
                 "desc": "Modify Dendron Config as raw YAML",

@@ -68,7 +68,8 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     this.L.info({ ctx, opts, msg: "enter" });
     let { overrides } = opts;
     let qs: string;
-    let vault: DVault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+    let vault: DVault =
+      opts.vault || PickerUtilsV2.getOrPromptVaultForOpenEditor();
     if (!opts.qs) {
       const maybeLink = this.getLinkFromSelection();
       if (!maybeLink) {

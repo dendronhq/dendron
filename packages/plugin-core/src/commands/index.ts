@@ -39,6 +39,7 @@ import { SnapshotVaultCommand } from "./SnapshotVault";
 import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
+import { CapitalizeCommand } from "./Capitalize";
 
 const ALL_COMMANDS = [
   AddAndCommit,
@@ -75,6 +76,7 @@ const ALL_COMMANDS = [
   SetupWorkspaceCommand,
   ShowHelpCommand,
   ShowPreviewCommand,
+  CapitalizeCommand,
   SignInCommand,
   SignUpCommand,
   SiteBuildCommand,

@@ -117,8 +117,6 @@ describe("SiteUtils", () => {
         });
         const alpha = notes["alpha"];
         const beta = notes["beta"];
-        expect(notes).toMatchSnapshot();
-
         const resp = await MDUtilsV4.procHTML({
           config,
           engine,

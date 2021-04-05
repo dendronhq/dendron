@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.36.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-test-utils@0.35.0...@dendronhq/engine-test-utils@0.36.0) (2021-04-05)
+
+### Features Dendron
+
+- and and commit cmd ([9b9d86c](https://github.com/dendronhq/dendron/commit/9b9d86ccf54fdb8b58f4c04bd57700d8c4c84cf7))
+
 ## [0.35.4-alpha.0](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-test-utils@0.35.0...@dendronhq/engine-test-utils@0.35.4-alpha.0) (2021-04-02)
 
 ### Features Dendron

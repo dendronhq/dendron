@@ -7,7 +7,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { Uri, window } from "vscode";
+import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
@@ -85,7 +85,10 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     // create site root, used for publication
     if (!fs.existsSync(siteRoot)) {
       const f: Finding = { issue: "no siteRoot found" };
-      const dendronJekyll = Uri.joinPath(ws.extensionAssetsDir, "jekyll");
+      const dendronJekyll = VSCodeUtils.joinPath(
+        ws.extensionAssetsDir,
+        "jekyll"
+      );
       fs.copySync(dendronJekyll.fsPath, siteRoot);
       f.fix = `created siteRoot at ${siteRoot}`;
       findings.push(f);

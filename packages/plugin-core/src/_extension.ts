@@ -53,7 +53,7 @@ async function reloadWorkspace() {
   // check if first time install workspace, if so, show tutorial
   if (isFirstInstall(ws.context)) {
     Logger.info({ ctx, msg: "first dendron ws, show welcome" });
-    const welcomeUri = vscode.Uri.joinPath(ws.rootWorkspace.uri, "dendron.md");
+    const welcomeUri = VSCodeUtils.joinPath(ws.rootWorkspace.uri, "dendron.md");
     if (getStage() !== "test" && fs.pathExistsSync(welcomeUri.fsPath)) {
       await vscode.window.showTextDocument(welcomeUri);
       await MarkdownUtils.openPreview({ reuseWindow: false });
@@ -383,7 +383,7 @@ async function showWelcomeOrWhatsNew(
   if (_.isUndefined(previousVersion)) {
     Logger.info({ ctx, msg: "first time install" });
     // NOTE: this needs to be from extension because no workspace might exist at this point
-    const uri = vscode.Uri.joinPath(
+    const uri = VSCodeUtils.joinPath(
       ws.context.extensionUri,
       "assets",
       "dendron-ws",

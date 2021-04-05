@@ -1,6 +1,5 @@
 import { NoteUtils } from "@dendronhq/common-all";
 import { cleanName } from "@dendronhq/common-server";
-import * as vscode from "vscode";
 import { CONFIG, DENDRON_COMMANDS } from "../constants";
 import { CodeConfigKeys } from "../types";
 import { DendronClientUtilsV2 } from "../utils";

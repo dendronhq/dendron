@@ -101,7 +101,7 @@ export class GoToSiblingCommand extends BasicCommand<
       wsRoot: DendronWorkspace.wsRoot(),
     });
     await VSCodeUtils.openFileInEditor(
-      Uri.joinPath(Uri.file(vpath), siblingNote.fname + ".md")
+      VSCodeUtils.joinPath(Uri.file(vpath), siblingNote.fname + ".md")
     );
     return { msg: "ok" as const };
   }

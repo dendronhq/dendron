@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.36.1](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.36.0...@dendronhq/plugin-core@0.36.1) (2021-04-05)
+
+### Bug Fixes
+
+- goto note default to current vault ([43fabbb](https://github.com/dendronhq/dendron/commit/43fabbbe87a4efaba7b1fea98f38392a4e4d73e9))
+
 # [0.36.0](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.35.0...@dendronhq/plugin-core@0.36.0) (2021-04-05)
 
 ### Features Dendron

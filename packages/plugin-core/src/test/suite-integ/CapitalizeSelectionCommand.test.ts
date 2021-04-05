@@ -25,13 +25,9 @@ suite("CapitalizeSelectionCommand", function () {
       },
       onInit: async ({ vaults, wsRoot }) => {
         const notePath = path.join(wsRoot, vaults[0].fsPath, "gamma.md");
-        const editor = await VSCodeUtils.openFileInEditor(
+        const editor = (await VSCodeUtils.openFileInEditor(
           vscode.Uri.file(notePath)
-        );
-
-        if (!editor) {
-          throw new Error("Editor is not defined.");
-        }
+        ))!;
 
         const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 11);
         editor.selection = SIMPLE_SELECTION;

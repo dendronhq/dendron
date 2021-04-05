@@ -24,7 +24,7 @@ export class CapitalizeSelectionCommand extends BasicCommand<
 
       const transformedText = text
         .split(" ")
-        .map((token) => `${token[0].toUpperCase()}${token.slice(1)}`)
+        .map((token) => `${token[0].toLocaleUpperCase()}${token.slice(1)}`)
         .join(" ");
 
       await maybeTextEditor.edit((editBuilder) => {

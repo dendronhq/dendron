@@ -17,7 +17,7 @@ async function provide(editor: vscode.TextEditor) {
   return links;
 }
 
-suite("DocumentLinkProvider", function () {
+suite("ReferenceProvider", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this, {
     beforeHook: () => {},

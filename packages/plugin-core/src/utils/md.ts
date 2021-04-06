@@ -1,4 +1,10 @@
-import { DLinkType, DNoteAnchor, NoteUtils } from "@dendronhq/common-all";
+import {
+  DLink,
+  DLinkType,
+  DNoteAnchor,
+  NoteProps,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import { LinkUtils } from "@dendronhq/engine-server";
 import { sort as sortPaths } from "cross-path-sort";
 import fs from "fs";
@@ -285,13 +291,38 @@ export const containsNonMdExt = (ref: string) => {
   );
 };
 
-// export const findNonMdURI = (uri: Uri, ref: string) => {
-//   const basenameLowerCased = path.basename(uri.fsPath).toLowerCase();
-//   return (
-//     basenameLowerCased === ref.toLowerCase() ||
-//     basenameLowerCased === `${ref.toLowerCase()}.md`
-//   );
-// };
+export const noteLinks2Locations = (note: NoteProps) => {
+  const refs: {
+    location: Location;
+    matchText: string;
+    link: DLink;
+  }[] = [];
+  const linksMatch = note.links.filter((l) => l.type !== "backlink");
+  const fsPath = NoteUtils.getPathV4({
+    note,
+    wsRoot: DendronWorkspace.wsRoot(),
+  });
+  const fileContent = fs.readFileSync(fsPath).toString();
+  const fmOffset = fileContent.indexOf("\n---") + 4;
+  linksMatch.forEach((link) => {
+    const { start } = link.pos;
+    const lines = fileContent.slice(0, fmOffset + start).split("\n");
+    const lineNum = lines.length;
+
+    refs.push({
+      location: new vscode.Location(
+        vscode.Uri.file(fsPath),
+        new vscode.Range(
+          new vscode.Position(lineNum, 0),
+          new vscode.Position(lineNum + 1, 0)
+        )
+      ),
+      matchText: lines.slice(-1)[0],
+      link,
+    });
+  });
+  return refs;
+};
 
 export const findReferences = async (
   ref: string,
@@ -299,7 +330,6 @@ export const findReferences = async (
 ): Promise<FoundRefT[]> => {
   const refs: FoundRefT[] = [];
 
-  // TODO: sanitize reference
   const engine = DendronWorkspace.instance().getEngine();
   // clean for anchor
   const fname = ref;

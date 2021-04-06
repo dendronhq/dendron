@@ -8,6 +8,7 @@ import {
   NoteUtils,
   SchemaModulePropsV2,
   Time,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import {
   goUpTo,
@@ -31,7 +32,7 @@ import {
 } from "./constants";
 import { FileItem } from "./external/fileutils/FileItem";
 import { EngineAPIService } from "./services/EngineAPIService";
-import { DendronWorkspace } from "./workspace";
+import { DendronWorkspace, getWS } from "./workspace";
 
 export class DisposableStore {
   private _toDispose = new Set<vscode.Disposable>();
@@ -196,6 +197,25 @@ export class VSCodeUtils {
       } as unknown) as vscode.ExtensionContext;
     }
     return _MOCK_CONTEXT;
+  }
+
+  static getNoteFromDocument(document: vscode.TextDocument) {
+    const engine = getWS().getEngine();
+    const txtPath = document.uri.fsPath;
+    const wsRoot = DendronWorkspace.wsRoot();
+    const fsPath = path.dirname(txtPath);
+    const fname = path.basename(txtPath, ".md");
+    const vault = VaultUtils.getVaultByNotePathV4({
+      wsRoot,
+      vaults: getWS().getEngine().vaultsv3,
+      fsPath,
+    });
+    return NoteUtils.getNoteByFnameV5({
+      fname,
+      vault,
+      wsRoot,
+      notes: engine.notes,
+    });
   }
 
   static createMockState(settings: any): vscode.WorkspaceConfiguration {

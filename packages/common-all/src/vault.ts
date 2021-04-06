@@ -97,8 +97,7 @@ export class VaultUtils {
     const vault = _.find(vaults, { fsPath: normPath });
     if (!vault) {
       throw new DendronError({
-        msg: "no vault found",
-        payload: { wsRoot, fsPath, vaults, normPath },
+        payload: { wsRoot, fsPath, vaults, normPath, msg: "no vault found" },
       });
     }
     return vault;

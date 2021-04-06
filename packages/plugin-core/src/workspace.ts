@@ -35,7 +35,6 @@ import {
 import BacklinksTreeDataProvider from "./features/BacklinksTreeDataProvider";
 import { completionProvider } from "./features/completionProvider";
 import DefinitionProvider from "./features/DefinitionProvider";
-import DocumentLinkProvider from "./features/DocumentLinkProvider";
 import FrontmatterFoldingRangeProvider from "./features/FrontmatterFoldingRangeProvider";
 import ReferenceHoverProvider from "./features/ReferenceHoverProvider";
 import ReferenceProvider from "./features/ReferenceProvider";
@@ -404,10 +403,6 @@ export class DendronWorkspace {
 
   setupLanguageFeatures(context: vscode.ExtensionContext) {
     const mdLangSelector = { language: "markdown", scheme: "*" };
-    vscode.languages.registerDocumentLinkProvider(
-      mdLangSelector,
-      new DocumentLinkProvider()
-    );
     vscode.languages.registerReferenceProvider(
       mdLangSelector,
       new ReferenceProvider()

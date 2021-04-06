@@ -1,7 +1,7 @@
 import {
   DNodeUtils,
   DVault,
-  SchemaModulePropsV2,
+  SchemaModuleProps,
   SchemaUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
@@ -16,7 +16,7 @@ type CreateSchemaPresetOptsV4 = {
   genRandomId?: boolean;
   fname?: string;
   noWrite?: boolean;
-  modifier?: (schema: SchemaModulePropsV2) => SchemaModulePropsV2;
+  modifier?: (schema: SchemaModuleProps) => SchemaModuleProps;
 };
 const CreateSchemaFactory = (opts: CreateSchemaFactoryOpts) => {
   const func = ({ vault, wsRoot, noWrite }: CreateSchemaPresetOptsV4) => {

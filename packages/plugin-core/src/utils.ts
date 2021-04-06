@@ -6,7 +6,7 @@ import {
   getStage,
   NoteProps,
   NoteUtils,
-  SchemaModulePropsV2,
+  SchemaModuleProps,
   Time,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -480,7 +480,7 @@ export class DendronClientUtilsV2 {
   }: {
     fname: string;
     client: DEngineClientV2;
-  }): Promise<SchemaModulePropsV2> => {
+  }): Promise<SchemaModuleProps> => {
     const smod = _.find(client.schemas, { fname });
     if (!smod) {
       throw new DendronError({ msg: "no note found" });

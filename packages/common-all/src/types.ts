@@ -1,10 +1,10 @@
-import { DNodeTypeV2, DVault } from "./typesv2";
+import { DNodeType, DVault } from "./typesv2";
 
 export type Stage = "dev" | "prod" | "test";
 
 export type DEngineQuery = {
   queryString: string;
-  mode: DNodeTypeV2;
+  mode: DNodeType;
   opts?: QueryOpts;
 };
 
@@ -33,7 +33,7 @@ export interface QueryOpts {
   // DEPPRECATE
   webClient?: boolean;
   initialQuery?: boolean;
-  mode?: DNodeTypeV2;
+  mode?: DNodeType;
 }
 
 export interface Resp<T> {

@@ -1,4 +1,4 @@
-import { DNodeTypeV2 } from "@dendronhq/common-all";
+import { DNodeType } from "@dendronhq/common-all";
 import _ from "lodash";
 import { QuickInputButton } from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
@@ -10,11 +10,11 @@ import { CreateQuickPickOpts, PickerUtilsV2 } from "./utils";
 
 export class LookupControllerV3 {
   public state: LookupControllerState;
-  public nodeType: DNodeTypeV2;
+  public nodeType: DNodeType;
   protected _cancelTokenSource?: CancellationTokenSource;
   public quickpick?: DendronQuickPickerV2;
 
-  constructor(opts: { nodeType: DNodeTypeV2; buttons: DendronBtn[] }) {
+  constructor(opts: { nodeType: DNodeType; buttons: DendronBtn[] }) {
     const { buttons, nodeType } = opts;
     this.nodeType = nodeType;
     this.state = {

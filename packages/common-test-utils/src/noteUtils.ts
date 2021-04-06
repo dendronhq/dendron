@@ -3,7 +3,7 @@ import {
   genUUID,
   NoteProps,
   NoteUtils,
-  SchemaModulePropsV2,
+  SchemaModuleProps,
   SchemaUtils,
 } from "@dendronhq/common-all";
 import {
@@ -31,7 +31,7 @@ export type CreateSchemaOptsV4 = {
   wsRoot: string;
   fname: string;
   noWrite?: boolean;
-  modifier?: (schema: SchemaModulePropsV2) => SchemaModulePropsV2;
+  modifier?: (schema: SchemaModuleProps) => SchemaModuleProps;
 };
 
 export class NoteTestUtilsV4 {

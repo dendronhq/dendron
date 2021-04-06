@@ -4,8 +4,8 @@ import {
   DVault,
   NoteProps,
   NoteUtils,
-  SchemaModuleOptsV2,
-  SchemaModulePropsV2,
+  SchemaModuleOpts,
+  SchemaModuleProps,
   SchemaUtils,
 } from "@dendronhq/common-all";
 import { assign, parse, stringify } from "comment-json";
@@ -86,10 +86,7 @@ async function _createFileWatcher(
   });
 }
 
-export function file2Schema(
-  fpath: string,
-  wsRoot: string
-): SchemaModulePropsV2 {
+export function file2Schema(fpath: string, wsRoot: string): SchemaModuleProps {
   const root = { fsPath: path.dirname(fpath) };
   const fname = path.basename(fpath, ".schema.yml");
   const schemaOpts = YAML.safeLoad(
@@ -97,7 +94,7 @@ export function file2Schema(
     {
       schema: YAML.JSON_SCHEMA,
     }
-  ) as SchemaModuleOptsV2;
+  ) as SchemaModuleOpts;
   return SchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
 }
 export function string2Schema({
@@ -113,7 +110,7 @@ export function string2Schema({
 }) {
   const schemaOpts = YAML.safeLoad(content, {
     schema: YAML.JSON_SCHEMA,
-  }) as SchemaModuleOptsV2;
+  }) as SchemaModuleOpts;
   return SchemaParserV2.parseRaw(schemaOpts, { root: vault, fname, wsRoot });
 }
 
@@ -196,7 +193,7 @@ export function note2File({
 }
 
 export function schemaModuleOpts2File(
-  schemaFile: SchemaModuleOptsV2,
+  schemaFile: SchemaModuleOpts,
   vaultPath: string,
   fname: string
 ) {
@@ -208,7 +205,7 @@ export function schemaModuleOpts2File(
 }
 
 export function schemaModuleProps2File(
-  schemaMProps: SchemaModulePropsV2,
+  schemaMProps: SchemaModuleProps,
   vpath: string,
   fname: string
 ) {

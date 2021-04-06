@@ -2,12 +2,12 @@ import {
   DNodeUtils,
   DVault,
   NoteChangeEntry,
-  NoteOptsV2,
-  NotePropsDictV2,
+  NoteOpts,
+  NotePropsDict,
   NoteProps,
   NoteUtils,
-  SchemaModuleOptsV2,
-  SchemaModulePropsV2,
+  SchemaModuleOpts,
+  SchemaModuleProps,
   SchemaProps,
   SchemaUtils,
   WorkspaceOpts,
@@ -288,11 +288,11 @@ export class NodeTestUtilsV2 {
   static createNote = async (opts: {
     withBody?: boolean;
     vaultDir: string;
-    noteProps?: Omit<NoteOptsV2, "vault"> & { vault?: DVault };
+    noteProps?: Omit<NoteOpts, "vault"> & { vault?: DVault };
   }): Promise<NoteProps> => {
     const cleanOpts = _.defaults(opts, {
       withBody: true,
-      noteProps: [] as NoteOptsV2[],
+      noteProps: [] as NoteOpts[],
     });
     const defaultOpts = {
       created: 1,
@@ -313,11 +313,11 @@ export class NodeTestUtilsV2 {
   static createNotes = async (opts: {
     withBody?: boolean;
     vaultPath: string;
-    noteProps?: (Omit<NoteOptsV2, "vault"> & { vault?: DVault })[];
-  }): Promise<NotePropsDictV2> => {
+    noteProps?: (Omit<NoteOpts, "vault"> & { vault?: DVault })[];
+  }): Promise<NotePropsDict> => {
     const cleanOpts = _.defaults(opts, {
       withBody: true,
-      noteProps: [] as NoteOptsV2[],
+      noteProps: [] as NoteOpts[],
     });
     const vault = { fsPath: cleanOpts.vaultPath };
     const defaultOpts = {
@@ -328,7 +328,7 @@ export class NodeTestUtilsV2 {
       ...defaultOpts,
       vault,
     });
-    const out: NotePropsDictV2 = {
+    const out: NotePropsDict = {
       root: rootNote,
     };
     await Promise.all(
@@ -359,7 +359,7 @@ export class NodeTestUtilsV2 {
     vaultDir: string;
     fname: string;
     schemas: SchemaProps[];
-  }): Promise<SchemaModulePropsV2> => {
+  }): Promise<SchemaModuleProps> => {
     const { vaultDir, schemas, fname } = opts;
     const schema = SchemaUtils.createModuleProps({
       fname,
@@ -374,10 +374,10 @@ export class NodeTestUtilsV2 {
 
   static createSchemas = async (opts: {
     vaultPath: string;
-    schemaMO?: [SchemaModuleOptsV2, string][];
+    schemaMO?: [SchemaModuleOpts, string][];
   }) => {
     const cleanOpts = _.defaults(opts, {
-      schemaMO: [] as [SchemaModuleOptsV2, string][],
+      schemaMO: [] as [SchemaModuleOpts, string][],
     });
     const { vaultPath, schemaMO } = cleanOpts;
     const vault = { fsPath: vaultPath };
@@ -422,7 +422,7 @@ export class NodeTestUtilsV2 {
       updated: 1,
     });
     DNodeUtils.addChild(schema, ch1);
-    const schemaModuleProps: [SchemaModuleOptsV2, string][] = [
+    const schemaModuleProps: [SchemaModuleOpts, string][] = [
       [
         SchemaUtils.createModule({
           version: 1,
@@ -448,7 +448,7 @@ export class NodeTestUtilsV2 {
   }
 
   static normalizeNotes(
-    notes: NoteProps[] | NotePropsDictV2
+    notes: NoteProps[] | NotePropsDict
   ): Partial<NoteProps>[] {
     if (!_.isArray(notes)) {
       notes = _.values(notes);
@@ -591,12 +591,12 @@ type NoteTestPresetCollectionDict<TBeforeOpts = any, TResultsOpts = any> = {
 
 type DeleteNoteTestOptsV2 = {
   changed: NoteChangeEntry[];
-  notes: NotePropsDictV2;
+  notes: NotePropsDict;
   vaultDir: string;
 };
 
 type UpdateNoteTestOptsV2 = {
-  notes: NotePropsDictV2;
+  notes: NotePropsDict;
   vaultDir: string;
 };
 
@@ -630,7 +630,7 @@ export class NoteTestPresetsV2 {
           before: async ({ vaultDir }: { vaultDir: string }) => {
             fs.removeSync(path.join(vaultDir, "foo.md"));
           },
-          results: async ({ notes }: { notes: NotePropsDictV2 }) => {
+          results: async ({ notes }: { notes: NotePropsDict }) => {
             const note = NoteUtils.getNoteByFname("foo", notes) as NoteProps;
             const vault = note.vault;
             const root = NoteUtils.getNoteByFname("root", notes, {
@@ -738,7 +738,7 @@ export class NoteTestPresetsV2 {
               wsRoot: "FAKE",
             });
           },
-          results: async ({ notes }: { notes: NotePropsDictV2 }) => {
+          results: async ({ notes }: { notes: NotePropsDict }) => {
             const root = NoteUtils.getNoteByFname("root", notes) as NoteProps;
             const bar = NoteUtils.getNoteByFname("bar", notes) as NoteProps;
             const child = NoteUtils.getNoteByFname(
@@ -772,7 +772,7 @@ export class NoteTestPresetsV2 {
           results: async ({
             vaultDir,
           }: {
-            notes: NotePropsDictV2;
+            notes: NotePropsDict;
             vaultDir: string;
           }) => {
             const rawNote = fs.readFileSync(path.join(vaultDir, "foo.ch1.md"), {

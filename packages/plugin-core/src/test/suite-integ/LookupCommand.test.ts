@@ -3,7 +3,7 @@ import {
   DNodeUtils,
   NoteProps,
   NoteUtils,
-  SchemaModulePropsV2,
+  SchemaModuleProps,
   SchemaUtils,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -187,7 +187,7 @@ const createEngineForSchemaAcceptQuery = createEngineFactory({
           vault: { fsPath: path.dirname(ent.fsPath) },
           wsRoot: _opts.wsRoot,
         });
-      }) as SchemaModulePropsV2[];
+      }) as SchemaModuleProps[];
       return {
         error: null,
         data: schemas,

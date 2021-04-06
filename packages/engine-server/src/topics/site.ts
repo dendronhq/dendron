@@ -10,7 +10,7 @@ import {
   DVault,
   DVaultVisibility,
   HierarchyConfig,
-  NotePropsDictV2,
+  NotePropsDict,
   NoteProps,
   NoteUtils,
   UseVaultBehavior,
@@ -146,7 +146,7 @@ export class SiteUtils {
   static async filterByConfig(opts: {
     engine: DEngineClientV2;
     config: DendronConfig;
-  }): Promise<{ notes: NotePropsDictV2; domains: NoteProps[] }> {
+  }): Promise<{ notes: NotePropsDict; domains: NoteProps[] }> {
     const { engine, config } = opts;
     const notes = _.clone(engine.notes);
     config.site = DConfig.cleanSiteConfig(config.site);
@@ -203,7 +203,7 @@ export class SiteUtils {
     config: DendronConfig;
     engine: DEngineClientV2;
     navOrder: number;
-  }): Promise<{ notes: NotePropsDictV2; domain: NoteProps } | undefined> {
+  }): Promise<{ notes: NotePropsDict; domain: NoteProps } | undefined> {
     const { domain, engine, navOrder, config } = opts;
     logger.info({ ctx: "filterByHiearchy", domain, config });
     const sconfig = config.site;
@@ -266,7 +266,7 @@ export class SiteUtils {
       domainNote: NoteUtils.toLogObj(domainNote),
     });
 
-    const out: NotePropsDictV2 = {};
+    const out: NotePropsDict = {};
     const processQ = [domainNote];
     while (!_.isEmpty(processQ)) {
       const note = processQ.pop() as NoteProps;
@@ -378,7 +378,7 @@ export class SiteUtils {
   }
 
   static getDomains(opts: {
-    notes: NotePropsDictV2;
+    notes: NotePropsDict;
     config: DendronSiteConfig;
   }): NoteProps[] {
     const { notes, config } = opts;
@@ -416,7 +416,7 @@ export class SiteUtils {
     fname: string;
     config: DendronConfig;
     noteCandidates: NoteProps[];
-    noteDict: NotePropsDictV2;
+    noteDict: NotePropsDict;
   }) {
     const {
       engine,

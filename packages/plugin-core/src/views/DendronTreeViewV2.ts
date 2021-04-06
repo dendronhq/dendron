@@ -1,7 +1,7 @@
 import {
   DendronError,
   DNodeUtils,
-  NotePropsDictV2,
+  NotePropsDict,
   NoteProps,
   NoteUtils,
   VaultUtils,
@@ -131,7 +131,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
     return maybeParent ? maybeParent.id : null;
   }
 
-  async parseTree(note: NoteProps, ndict: NotePropsDictV2): Promise<TreeNote> {
+  async parseTree(note: NoteProps, ndict: NotePropsDict): Promise<TreeNote> {
     const ctx = "parseTree";
     const tn = createTreeNote(note);
     this.tree[note.id] = tn;

@@ -1,7 +1,7 @@
 import {
   DendronError,
   NoteChangeEntry,
-  RenameNoteOptsV2,
+  RenameNoteOpts,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
@@ -20,7 +20,7 @@ import { BasicCommand } from "./base";
 
 type CommandInput = any;
 
-type CommandOpts = RenameNoteOptsV2 & {
+type CommandOpts = RenameNoteOpts & {
   /**
    * Show notification message
    */

@@ -1,7 +1,7 @@
 import {
   DendronError,
   DEngineClientV2,
-  DNodePropsDictV2,
+  DNodePropsDict,
   DNodePropsQuickInputV2,
   DNodeProps,
   DNodeUtils,
@@ -9,7 +9,7 @@ import {
   getStage,
   NoteProps,
   NoteUtils,
-  SchemaModulePropsV2,
+  SchemaModuleProps,
   SchemaUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -40,7 +40,7 @@ const PAGINATE_LIMIT = 50;
 type OnDidAcceptReturn = Promise<
   | {
       uris: Uri[];
-      node: NoteProps | SchemaModulePropsV2 | undefined;
+      node: NoteProps | SchemaModuleProps | undefined;
       resp?: any;
     }
   | undefined
@@ -48,7 +48,7 @@ type OnDidAcceptReturn = Promise<
 type OnDidAcceptNewNodeReturn = Promise<
   | {
       uri: Uri;
-      node: NoteProps | SchemaModulePropsV2;
+      node: NoteProps | SchemaModuleProps;
       resp?: any | undefined;
     }
   | undefined
@@ -233,7 +233,7 @@ export class LookupProviderV2 {
     const ctx = "onAcceptNewSchema";
     const fname = PickerUtilsV2.getValue(picker);
     Logger.info({ ctx, msg: "createNewPick", value: fname });
-    let smodNew: SchemaModulePropsV2;
+    let smodNew: SchemaModuleProps;
     const ws = DendronWorkspace.instance();
     const engine = ws.getEngine();
     Logger.info({ ctx, msg: "create normal node" });
@@ -315,7 +315,7 @@ export class LookupProviderV2 {
     });
     const resp = this.validate(picker.value, opts.flavor);
     let uri: Uri;
-    let newNode: NoteProps | SchemaModulePropsV2 | undefined;
+    let newNode: NoteProps | SchemaModuleProps | undefined;
     if (resp) {
       window.showErrorMessage(resp);
       return;
@@ -799,7 +799,7 @@ export class LookupProviderV2 {
     flavor: EngineFlavor,
     engine: DEngineClientV2
   ): DNodePropsQuickInputV2[] {
-    let nodeDict: DNodePropsDictV2;
+    let nodeDict: DNodePropsDict;
     let nodes: DNodeProps[];
     if (flavor === "note") {
       nodeDict = engine.notes;
@@ -808,7 +808,7 @@ export class LookupProviderV2 {
       nodes = _.map(childrenOfRoot, (ent) => nodeDict[ent]).concat(roots);
     } else {
       nodeDict = _.mapValues(engine.schemas, (ent) => ent.root);
-      nodes = _.map(_.values(engine.schemas), (ent: SchemaModulePropsV2) => {
+      nodes = _.map(_.values(engine.schemas), (ent: SchemaModuleProps) => {
         return SchemaUtils.getModuleRoot(ent);
       });
     }

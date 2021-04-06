@@ -1,7 +1,7 @@
 import {
   ERROR_CODES,
-  NotePropsDictV2,
-  SchemaModuleDictV2,
+  NotePropsDict,
+  SchemaModuleDict,
 } from "@dendronhq/common-all";
 import {
   InitializePayload,
@@ -23,8 +23,8 @@ export class WorkspaceController {
   }
 
   async init({ uri }: WorkspaceInitRequest): Promise<InitializePayload> {
-    let notes: NotePropsDictV2;
-    let schemas: SchemaModuleDictV2;
+    let notes: NotePropsDict;
+    let schemas: SchemaModuleDict;
     const ctx = "WorkspaceController:init";
     const logger = getLogger();
     logger.info({ ctx, msg: "enter", uri });

@@ -7,7 +7,7 @@ import {
   GetNoteOpts,
   getSlugger,
   getStage,
-  NotePropsDictV2,
+  NotePropsDict,
   NoteProps,
   NoteUtils,
   VaultUtils,
@@ -95,7 +95,7 @@ enum DendronProcDataKeys {
 }
 
 export const renderFromNoteProps = (
-  opts: { notes: NotePropsDictV2 } & GetNoteOpts
+  opts: { notes: NotePropsDict } & GetNoteOpts
 ) => {
   const note = NoteUtils.getNoteByFnameV5(opts);
   if (!note) {

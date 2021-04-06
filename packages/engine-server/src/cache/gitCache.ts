@@ -1,4 +1,4 @@
-import { DNodeTypeV2, NoteProps } from "@dendronhq/common-all";
+import { DNodeType, NoteProps } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -11,7 +11,7 @@ type GitCacheOpts = {
   root: string;
 };
 
-function getCacheFile(type: DNodeTypeV2, checkpoint: Checkpoint) {
+function getCacheFile(type: DNodeType, checkpoint: Checkpoint) {
   return `.dendron.cache.${type}.${checkpoint}.json`;
 }
 
@@ -28,7 +28,7 @@ export class GitCache implements DEngineCache {
     return _.get(this.entries, key, null);
   }
 
-  async getAll(type: DNodeTypeV2, checkpoint: any): Promise<NoteProps[]> {
+  async getAll(type: DNodeType, checkpoint: any): Promise<NoteProps[]> {
     const fpath = this.opts.root;
     if (!fs.existsSync(fpath)) {
       return [];
@@ -39,7 +39,7 @@ export class GitCache implements DEngineCache {
   }
 
   async setAll(
-    type: DNodeTypeV2,
+    type: DNodeType,
     entries: NoteProps[],
     checkpoint: any
   ): Promise<void> {

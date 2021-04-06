@@ -4,29 +4,29 @@ import {
   DendronConfig,
   DendronError,
   DEngineClientV2,
-  DEngineDeleteSchemaRespV2,
-  DEngineInitRespV2,
+  DEngineDeleteSchemaResp,
+  DEngineInitResp,
   DEngineMode,
-  DEngineV2,
+  DEngine,
   DLink,
-  DNodeTypeV2,
+  DNodeType,
   DStoreV2,
   DVault,
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   GetNoteOptsV2,
-  GetNotePayloadV2,
+  GetNotePayload,
   NoteChangeEntry,
-  NotePropsDictV2,
+  NotePropsDict,
   NoteProps,
   NoteUtils,
   QueryNotesOpts,
-  RenameNoteOptsV2,
+  RenameNoteOpts,
   RenameNotePayload,
   RespV2,
-  SchemaModuleDictV2,
-  SchemaModulePropsV2,
+  SchemaModuleDict,
+  SchemaModuleProps,
   SchemaQueryResp,
   VaultUtils,
   WorkspaceOpts,
@@ -57,7 +57,7 @@ type DendronEngineOptsV2 = {
 };
 type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
 
-export class DendronEngineV2 implements DEngineV2 {
+export class DendronEngineV2 implements DEngine {
   public wsRoot: string;
   public store: DStoreV2;
   protected props: DendronEnginePropsV2;
@@ -108,17 +108,17 @@ export class DendronEngineV2 implements DEngineV2 {
     return DendronEngineV2._instance;
   }
 
-  get notes(): NotePropsDictV2 {
+  get notes(): NotePropsDict {
     return this.store.notes;
   }
-  get schemas(): SchemaModuleDictV2 {
+  get schemas(): SchemaModuleDict {
     return this.store.schemas;
   }
 
   /**
    * Does not throw error but returns it
    */
-  async init(): Promise<DEngineInitRespV2> {
+  async init(): Promise<DEngineInitResp> {
     try {
       const { data, error } = await this.store.init();
       const { notes, schemas } = data;
@@ -176,12 +176,12 @@ export class DendronEngineV2 implements DEngineV2 {
   async deleteSchema(
     id: string,
     opts?: EngineDeleteOptsV2
-  ): Promise<DEngineDeleteSchemaRespV2> {
+  ): Promise<DEngineDeleteSchemaResp> {
     try {
       const data = (await this.store.deleteSchema(
         id,
         opts
-      )) as DEngineDeleteSchemaRespV2;
+      )) as DEngineDeleteSchemaResp;
       // deleted schema might affect notes
       await this.updateIndex("note");
       await this.updateIndex("schema");
@@ -209,7 +209,7 @@ export class DendronEngineV2 implements DEngineV2 {
     createIfNew,
     vault,
     overrides,
-  }: GetNoteOptsV2): Promise<RespV2<GetNotePayloadV2>> {
+  }: GetNoteOptsV2): Promise<RespV2<GetNotePayload>> {
     const ctx = "getNoteByPath";
     this.logger.debug({ ctx, npath, createIfNew, msg: "enter" });
     const maybeNote = NoteUtils.getNoteByFnameV5({
@@ -257,7 +257,7 @@ export class DendronEngineV2 implements DEngineV2 {
     };
   }
 
-  async getSchema(id: string): Promise<RespV2<SchemaModulePropsV2>> {
+  async getSchema(id: string): Promise<RespV2<SchemaModuleProps>> {
     const ctx = "getSchema";
     const data = this.schemas[id];
     this.logger.info({ ctx, msg: "exit" });
@@ -291,7 +291,7 @@ export class DendronEngineV2 implements DEngineV2 {
   async querySchema(queryString: string): Promise<SchemaQueryResp> {
     const ctx = "querySchema";
 
-    let items: SchemaModulePropsV2[] = [];
+    let items: SchemaModuleProps[] = [];
     const results = await this.fuseEngine.querySchema({ qs: queryString });
     items = results.map((ent) => this.schemas[ent.id]);
     // if (queryString === "") {
@@ -372,7 +372,7 @@ export class DendronEngineV2 implements DEngineV2 {
     this.fuseEngine.updateNotesIndex(this.notes);
   }
 
-  async renameNote(opts: RenameNoteOptsV2): Promise<RespV2<RenameNotePayload>> {
+  async renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {
     try {
       const resp = await this.store.renameNote(opts);
       await this.refreshNotesV2(resp);
@@ -396,7 +396,7 @@ export class DendronEngineV2 implements DEngineV2 {
     return out;
   }
 
-  async updateIndex(mode: DNodeTypeV2) {
+  async updateIndex(mode: DNodeType) {
     if (mode === "schema") {
       this.fuseEngine.updateSchemaIndex(this.schemas);
     } else {
@@ -404,15 +404,13 @@ export class DendronEngineV2 implements DEngineV2 {
     }
   }
 
-  async updateSchema(schemaModule: SchemaModulePropsV2) {
+  async updateSchema(schemaModule: SchemaModuleProps) {
     const out = await this.store.updateSchema(schemaModule);
     await this.updateIndex("schema");
     return out;
   }
 
-  async writeConfig(
-    opts: ConfigWriteOpts
-  ): ReturnType<DEngineV2["writeConfig"]> {
+  async writeConfig(opts: ConfigWriteOpts): ReturnType<DEngine["writeConfig"]> {
     const { configRoot } = this;
     const cpath = DConfig.configPath(configRoot);
     writeYAML(cpath, opts.config);
@@ -430,7 +428,7 @@ export class DendronEngineV2 implements DEngineV2 {
     return out;
   }
 
-  async writeSchema(schema: SchemaModulePropsV2) {
+  async writeSchema(schema: SchemaModuleProps) {
     return this.store.writeSchema(schema);
   }
 }

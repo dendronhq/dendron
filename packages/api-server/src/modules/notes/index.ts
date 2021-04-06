@@ -2,7 +2,7 @@ import {
   DendronError,
   EngineInfoResp,
   EngineQueryNoteResp,
-  RespRequiredV2,
+  RespRequired,
 } from "@dendronhq/common-all";
 import {
   EngineDeletePayload,
@@ -78,7 +78,7 @@ export class NoteController {
     }
   }
 
-  async info(): Promise<RespRequiredV2<EngineInfoResp>> {
+  async info(): Promise<RespRequired<EngineInfoResp>> {
     const ctx = "NoteController:info";
     getLogger().info({ ctx, msg: "enter" });
     // const engine = await getWS({ ws });

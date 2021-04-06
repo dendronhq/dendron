@@ -4,9 +4,9 @@ import {
   DendronConfig,
   DendronError,
   DEngineClientV2,
-  DEngineDeleteSchemaRespV2,
-  DEngineInitRespV2,
-  DEngineInitSchemaRespV2,
+  DEngineDeleteSchemaResp,
+  DEngineInitResp,
+  DEngineInitSchemaResp,
   DLink,
   DNodeUtils,
   DStoreV2,
@@ -17,13 +17,13 @@ import {
   ENGINE_ERROR_CODES,
   ERROR_CODES,
   NoteChangeEntry,
-  NotePropsDictV2,
+  NotePropsDict,
   NoteProps,
   NoteUtils,
-  RenameNoteOptsV2,
+  RenameNoteOpts,
   RenameNotePayload,
-  SchemaModuleDictV2,
-  SchemaModulePropsV2,
+  SchemaModuleDict,
+  SchemaModuleProps,
   SchemaUtils,
   StoreDeleteNoteResp,
   WriteNoteResp,
@@ -88,8 +88,8 @@ export class NoteParserV2 extends ParserBaseV2 {
     const ctx = "parseFile";
     const fileMetaDict: FileMetaDictV2 = getFileMetaV2(fpath);
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
-    const notesByFname: NotePropsDictV2 = {};
-    const notesById: NotePropsDictV2 = {};
+    const notesByFname: NotePropsDict = {};
+    const notesById: NotePropsDict = {};
     this.logger.debug({ ctx, msg: "enter", fpath });
 
     // get root note
@@ -173,7 +173,7 @@ export class NoteParserV2 extends ParserBaseV2 {
 
   parseNoteProps(opts: {
     fileMeta: FileMetaV2;
-    notesByFname?: NotePropsDictV2;
+    notesByFname?: NotePropsDict;
     parents?: NoteProps[];
     addParent: boolean;
     createStubs?: boolean;
@@ -228,7 +228,7 @@ export class NoteParserV2 extends ParserBaseV2 {
 }
 
 export class SchemaParserV2 extends ParserBaseV2 {
-  parseFile(fpath: string, root: DVault): SchemaModulePropsV2 {
+  parseFile(fpath: string, root: DVault): SchemaModuleProps {
     const fname = path.basename(fpath, ".schema.yml");
     const wsRoot = this.opts.store.wsRoot;
     const vpath = vault2Path({ vault: root, wsRoot });
@@ -242,7 +242,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
     fpaths: string[],
     vault: DVault
   ): Promise<{
-    schemas: SchemaModulePropsV2[];
+    schemas: SchemaModuleProps[];
     errors: DendronError[] | null;
   }> {
     const ctx = "parse";
@@ -268,7 +268,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
       schemas: _.reject(
         out,
         (ent) => ent instanceof DendronError
-      ) as SchemaModulePropsV2[],
+      ) as SchemaModuleProps[],
       errors: _.isEmpty(errors) ? null : errors,
     };
   }
@@ -291,8 +291,8 @@ type NotePropsCacheV2 = {};
 
 export class FileStorageV2 implements DStoreV2 {
   public vaults: string[];
-  public notes: NotePropsDictV2;
-  public schemas: SchemaModuleDictV2;
+  public notes: NotePropsDict;
+  public schemas: SchemaModuleDict;
   public notesCache: NotePropsCacheV2;
   public logger: DLogger;
   public links: DLink[];
@@ -320,7 +320,7 @@ export class FileStorageV2 implements DStoreV2 {
     this.engine = props.engine;
   }
 
-  async init(): Promise<DEngineInitRespV2> {
+  async init(): Promise<DEngineInitResp> {
     try {
       let error: DendronError | null = null;
       const resp = await this.initSchema();
@@ -337,10 +337,6 @@ export class FileStorageV2 implements DStoreV2 {
       _notes.map((ent) => {
         this.notes[ent.id] = ent;
       });
-
-      // FIXME: for testing
-      // const _notes = await fs.readJSON("/tmp/notes.json") as NotePropsDictV2;
-      // this.notes = _notes;
 
       const { notes, schemas } = this;
       return { data: { notes, schemas }, error };
@@ -420,7 +416,7 @@ export class FileStorageV2 implements DStoreV2 {
   async deleteSchema(
     id: string,
     opts?: EngineDeleteOptsV2
-  ): Promise<DEngineDeleteSchemaRespV2> {
+  ): Promise<DEngineDeleteSchemaResp> {
     const ctx = "deleteSchema";
     this.logger.info({ ctx, msg: "enter", id });
     if (id === "root") {
@@ -443,7 +439,7 @@ export class FileStorageV2 implements DStoreV2 {
     return {};
   }
 
-  async initSchema(): Promise<DEngineInitSchemaRespV2> {
+  async initSchema(): Promise<DEngineInitSchemaResp> {
     const ctx = "initSchema";
     this.logger.info({ ctx, msg: "enter" });
     const out = await Promise.all(
@@ -452,8 +448,8 @@ export class FileStorageV2 implements DStoreV2 {
       })
     );
     const _out = _.reduce<
-      { data: SchemaModulePropsV2[]; errors: any[] },
-      { data: SchemaModulePropsV2[]; errors: any[] }
+      { data: SchemaModuleProps[]; errors: any[] },
+      { data: SchemaModuleProps[]; errors: any[] }
     >(
       out,
       (ent, acc) => {
@@ -474,7 +470,7 @@ export class FileStorageV2 implements DStoreV2 {
 
   async _initSchema(
     vault: DVault
-  ): Promise<{ data: SchemaModulePropsV2[]; errors: any[] }> {
+  ): Promise<{ data: SchemaModuleProps[]; errors: any[] }> {
     const ctx = "initSchema";
     this.logger.info({ ctx, msg: "enter" });
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
@@ -592,7 +588,7 @@ export class FileStorageV2 implements DStoreV2 {
     };
   }
 
-  async renameNote(opts: RenameNoteOptsV2): Promise<RenameNotePayload> {
+  async renameNote(opts: RenameNoteOpts): Promise<RenameNotePayload> {
     const ctx = "Store:renameNote";
     const { oldLoc, newLoc } = opts;
     const { wsRoot } = this;
@@ -696,7 +692,7 @@ export class FileStorageV2 implements DStoreV2 {
     return;
   }
 
-  async updateSchema(schemaModule: SchemaModulePropsV2) {
+  async updateSchema(schemaModule: SchemaModuleProps) {
     this.schemas[schemaModule.root.id] = schemaModule;
     // const vaultDir = this.vaults[0];
     // await schemaModuleProps2File(schemaModule, vaultDir, schemaModule.fname);
@@ -835,7 +831,7 @@ export class FileStorageV2 implements DStoreV2 {
     };
   }
 
-  async writeSchema(schemaModule: SchemaModulePropsV2) {
+  async writeSchema(schemaModule: SchemaModuleProps) {
     this.schemas[schemaModule.root.id] = schemaModule;
     const vault = schemaModule.vault;
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });

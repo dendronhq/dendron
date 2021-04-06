@@ -5,9 +5,9 @@ import {
   DendronConfig,
   DendronError,
   DEngineClientV2,
-  DEngineDeleteSchemaRespV2,
-  DEngineInitRespV2,
-  DEngineV2,
+  DEngineDeleteSchemaResp,
+  DEngineInitResp,
+  DEngine,
   DLink,
   DNodeProps,
   DVault,
@@ -18,18 +18,18 @@ import {
   EngineWriteOptsV2,
   ERROR_CODES,
   GetNoteOptsV2,
-  GetNotePayloadV2,
+  GetNotePayload,
   NoteChangeEntry,
-  NotePropsDictV2,
+  NotePropsDict,
   NoteProps,
   NoteUtils,
   QueryNotesOpts,
-  RenameNoteOptsV2,
+  RenameNoteOpts,
   RenameNotePayload,
-  RespRequiredV2,
+  RespRequired,
   RespV2,
-  SchemaModuleDictV2,
-  SchemaModulePropsV2,
+  SchemaModuleDict,
+  SchemaModuleProps,
   SchemaQueryResp,
   SchemaUtils,
   VaultUtils,
@@ -54,9 +54,9 @@ type DendronEngineClientOpts = {
   ws: string;
 };
 export class DendronEngineClient implements DEngineClientV2 {
-  public notes: NotePropsDictV2;
+  public notes: NotePropsDict;
   public wsRoot: string;
-  public schemas: SchemaModuleDictV2;
+  public schemas: SchemaModuleDict;
   public links: DLink[];
   public ws: string;
   public fuseEngine: FuseEngine;
@@ -128,7 +128,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   /**
    * Load all nodes
    */
-  async init(): Promise<DEngineInitRespV2> {
+  async init(): Promise<DEngineInitResp> {
     const resp = await this.api.workspaceInit({
       uri: this.ws,
       config: { vaults: this.vaultsv3 },
@@ -182,7 +182,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   async deleteSchema(
     id: string,
     opts?: EngineDeleteOptsV2
-  ): Promise<DEngineDeleteSchemaRespV2> {
+  ): Promise<DEngineDeleteSchemaResp> {
     const ws = this.ws;
     const resp = await this.api.schemaDelete({ id, opts, ws });
     delete this.schemas[id];
@@ -207,7 +207,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     return resp;
   }
 
-  async getNoteByPath(opts: GetNoteOptsV2): Promise<RespV2<GetNotePayloadV2>> {
+  async getNoteByPath(opts: GetNoteOptsV2): Promise<RespV2<GetNotePayload>> {
     const resp = await this.api.engineGetNoteByPath({
       ...opts,
       ws: this.ws,
@@ -218,7 +218,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     return resp;
   }
 
-  async info(): Promise<RespRequiredV2<EngineInfoResp>> {
+  async info(): Promise<RespRequired<EngineInfoResp>> {
     const resp = await this.api.engineInfo();
     return resp;
   }
@@ -287,20 +287,20 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.fuseEngine.updateNotesIndex(this.notes);
   }
 
-  async refreshSchemas(smods: SchemaModulePropsV2[]) {
+  async refreshSchemas(smods: SchemaModuleProps[]) {
     smods.forEach((smod) => {
       const id = SchemaUtils.getModuleRoot(smod).id;
       this.schemas[id] = smod;
     });
   }
 
-  async renameNote(opts: RenameNoteOptsV2): Promise<RespV2<RenameNotePayload>> {
+  async renameNote(opts: RenameNoteOpts): Promise<RespV2<RenameNotePayload>> {
     const resp = await this.api.engineRenameNote({ ...opts, ws: this.ws });
     await this.refreshNotesV2(resp.data as NoteChangeEntry[]);
     return resp;
   }
 
-  async sync(): Promise<DEngineInitRespV2> {
+  async sync(): Promise<DEngineInitResp> {
     const resp = await this.api.workspaceSync({ ws: this.ws });
     if (!resp.data) {
       throw new DendronError({ msg: "no data", payload: resp });
@@ -348,7 +348,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   }
 
   // ~~~ schemas
-  async getSchema(_qs: string): Promise<RespV2<SchemaModulePropsV2>> {
+  async getSchema(_qs: string): Promise<RespV2<SchemaModuleProps>> {
     throw Error("not implemetned");
   }
 
@@ -357,22 +357,20 @@ export class DendronEngineClient implements DEngineClientV2 {
     return _.defaults(out, { data: [] });
   }
 
-  async updateSchema(schema: SchemaModulePropsV2): Promise<void> {
+  async updateSchema(schema: SchemaModuleProps): Promise<void> {
     await this.api.schemaUpdate({ schema, ws: this.ws });
     await this.refreshSchemas([schema]);
     return;
   }
 
-  async writeConfig(
-    opts: ConfigWriteOpts
-  ): ReturnType<DEngineV2["writeConfig"]> {
+  async writeConfig(opts: ConfigWriteOpts): ReturnType<DEngine["writeConfig"]> {
     await this.api.configWrite({ ...opts, ws: this.ws });
     return {
       error: null,
     };
   }
 
-  async writeSchema(schema: SchemaModulePropsV2): Promise<void> {
+  async writeSchema(schema: SchemaModuleProps): Promise<void> {
     await this.api.schemaWrite({ schema, ws: this.ws });
     await this.refreshSchemas([schema]);
     return;

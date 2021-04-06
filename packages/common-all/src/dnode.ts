@@ -11,23 +11,23 @@ import { Time } from "./time";
 import {
   DEngineClientV2,
   DLink,
-  DNodeOptsV2,
-  DNodePropsDictV2,
+  DNodeOpts,
+  DNodePropsDict,
   DNodePropsQuickInputV2,
   DNodeProps,
   DNoteLoc,
   DVault,
-  NoteOptsV2,
-  NotePropsDictV2,
+  NoteOpts,
+  NotePropsDict,
   NoteProps,
-  SchemaDataV2,
-  SchemaModuleDictV2,
-  SchemaModuleOptsV2,
-  SchemaModulePropsV2,
-  SchemaOptsV2,
-  SchemaPropsDictV2,
+  SchemaData,
+  SchemaModuleDict,
+  SchemaModuleOpts,
+  SchemaModuleProps,
+  SchemaOpts,
+  SchemaPropsDict,
   SchemaProps,
-  SchemaRawV2,
+  SchemaRaw,
   SchemaTemplate,
 } from "./typesv2";
 import { getSlugger } from "./utils";
@@ -40,7 +40,7 @@ export class DNodeUtils {
     child.parent = parent.id;
   }
 
-  static create(opts: DNodeOptsV2): DNodeProps {
+  static create(opts: DNodeOpts): DNodeProps {
     const {
       id,
       type,
@@ -84,7 +84,7 @@ export class DNodeUtils {
     };
 
     // don't include optional props
-    const optionalProps: (keyof DNodeOptsV2)[] = [
+    const optionalProps: (keyof DNodeOpts)[] = [
       "stub",
       "schema",
       "schemaStub",
@@ -129,7 +129,7 @@ export class DNodeUtils {
     wsRoot,
   }: {
     props: DNodeProps;
-    schemas: SchemaModuleDictV2;
+    schemas: SchemaModuleDict;
     vaults: DVault[];
     wsRoot: string;
   }): DNodePropsQuickInputV2 {
@@ -224,7 +224,7 @@ export class DNodeUtils {
   static getDomain(
     node: DNodeProps,
     opts: {
-      nodeDict: DNodePropsDictV2;
+      nodeDict: DNodePropsDict;
     }
   ): DNodeProps {
     if (node.fname === "root") {
@@ -252,7 +252,7 @@ export class DNodeUtils {
   static getParent(
     node: DNodeProps,
     opts: {
-      nodeDict: DNodePropsDictV2;
+      nodeDict: DNodePropsDict;
     }
   ): DNodeProps {
     if (DNodeUtils.isRoot(node)) {
@@ -269,7 +269,7 @@ export class DNodeUtils {
     node: DNodeProps,
     opts: {
       recursive?: boolean;
-      nodeDict: DNodePropsDictV2;
+      nodeDict: DNodePropsDict;
     }
   ): DNodeProps[] {
     const { nodeDict, recursive } = opts;
@@ -367,14 +367,14 @@ export class NoteUtils {
 
   static addSchema(opts: {
     note: NoteProps;
-    schemaModule: SchemaModulePropsV2;
+    schemaModule: SchemaModuleProps;
     schema: SchemaProps;
   }) {
     const { note, schema, schemaModule } = opts;
     note.schema = { schemaId: schema.id, moduleId: schemaModule.root.id };
   }
 
-  static create(opts: NoteOptsV2): NoteProps {
+  static create(opts: NoteOpts): NoteProps {
     const cleanOpts = _.defaults(opts, {
       schemaStub: false,
     });
@@ -385,7 +385,7 @@ export class NoteUtils {
     noteOpts,
     engine,
   }: {
-    noteOpts: NoteOptsV2;
+    noteOpts: NoteOpts;
     engine: DEngineClientV2;
   }): NoteProps {
     const note = NoteUtils.create(noteOpts);
@@ -404,7 +404,7 @@ export class NoteUtils {
     return note;
   }
 
-  static createRoot(opts: Partial<NoteOptsV2> & { vault: DVault }): NoteProps {
+  static createRoot(opts: Partial<NoteOpts> & { vault: DVault }): NoteProps {
     return DNodeUtils.create({
       ...opts,
       type: "note",
@@ -482,7 +482,7 @@ export class NoteUtils {
     vault,
   }: {
     fname: string;
-    schemaModule: SchemaModulePropsV2;
+    schemaModule: SchemaModuleProps;
     schemaId: string;
     vault: DVault;
   }) {
@@ -499,10 +499,7 @@ export class NoteUtils {
     });
   }
 
-  static genSchemaDesc(
-    note: NoteProps,
-    schemaMod?: SchemaModulePropsV2
-  ): string {
+  static genSchemaDesc(note: NoteProps, schemaMod?: SchemaModuleProps): string {
     const prefixParts = [];
     if (note.title !== note.fname) {
       prefixParts.push(note.title);
@@ -560,7 +557,7 @@ export class NoteUtils {
     vault,
   }: {
     fname: string;
-    notes: NotePropsDictV2 | NoteProps[];
+    notes: NotePropsDict | NoteProps[];
     vault?: DVault;
   }): NoteProps[] {
     if (!_.isArray(notes)) {
@@ -582,7 +579,7 @@ export class NoteUtils {
     wsRoot,
   }: {
     fname: string;
-    notes: NotePropsDictV2 | NoteProps[];
+    notes: NotePropsDict | NoteProps[];
     vault: DVault;
     wsRoot: string;
   }): NoteProps | undefined {
@@ -605,7 +602,7 @@ export class NoteUtils {
     wsRoot,
   }: {
     fname: string;
-    notes: NotePropsDictV2 | NoteProps[];
+    notes: NotePropsDict | NoteProps[];
     vault: DVault;
     wsRoot: string;
   }): NoteProps {
@@ -629,7 +626,7 @@ export class NoteUtils {
    */
   static getNoteByFname(
     fname: string,
-    notes: NotePropsDictV2,
+    notes: NotePropsDict,
     opts?: { throwIfEmpty?: boolean; vault?: DVault }
   ): NoteProps | undefined {
     const _out = _.filter(_.values(notes), (ent) => {
@@ -664,7 +661,7 @@ export class NoteUtils {
     notes,
   }: {
     note: NoteProps;
-    notes: NotePropsDictV2;
+    notes: NotePropsDict;
   }): NoteProps[] {
     const maybe = _.values(notes).map((ent) => {
       if (
@@ -707,7 +704,7 @@ export class NoteUtils {
     return hpath.split(".").slice(0, numCompoenents).join(".");
   }
 
-  static getRoots(notes: NotePropsDictV2): NoteProps[] {
+  static getRoots(notes: NotePropsDict): NoteProps[] {
     return _.filter(_.values(notes), DNodeUtils.isRoot);
   }
 
@@ -790,7 +787,7 @@ export class NoteUtils {
 }
 
 type SchemaMatchResult = {
-  schemaModule: SchemaModulePropsV2;
+  schemaModule: SchemaModuleProps;
   schema: SchemaProps;
   namespace: boolean;
   notePath: string;
@@ -819,9 +816,9 @@ export class SchemaUtils {
   }
 
   static create(
-    opts: (SchemaOptsV2 | SchemaRawV2) & { vault: DVault }
+    opts: (SchemaOpts | SchemaRaw) & { vault: DVault }
   ): SchemaProps {
-    const schemaDataOpts: (keyof SchemaDataV2)[] = [
+    const schemaDataOpts: (keyof SchemaData)[] = [
       "namespace",
       "pattern",
       "template",
@@ -840,14 +837,14 @@ export class SchemaUtils {
     });
   }
 
-  static createModule(opts: SchemaModuleOptsV2): SchemaModuleOptsV2 {
+  static createModule(opts: SchemaModuleOpts): SchemaModuleOpts {
     return opts;
   }
 
   static createModuleProps(opts: {
     fname: string;
     vault: DVault;
-  }): SchemaModulePropsV2 {
+  }): SchemaModuleProps {
     const { fname, vault } = opts;
     const root = SchemaUtils.create({
       id: `${fname}`,
@@ -870,7 +867,7 @@ export class SchemaUtils {
 
   static createRootModule(
     opts: Partial<SchemaProps> & { vault: DVault }
-  ): SchemaModuleOptsV2 {
+  ): SchemaModuleOpts {
     const schema = SchemaUtils.create({
       id: "root",
       title: "root",
@@ -890,7 +887,7 @@ export class SchemaUtils {
     fname: string,
     vault: DVault,
     opts?: Partial<SchemaProps>
-  ): SchemaModulePropsV2 {
+  ): SchemaModuleProps {
     const schema = SchemaUtils.create({
       id: "root",
       title: "root",
@@ -914,7 +911,7 @@ export class SchemaUtils {
     props,
     vaults,
   }: {
-    props: SchemaModulePropsV2;
+    props: SchemaModuleProps;
     vaults: DVault[];
   }): DNodePropsQuickInputV2 {
     const vaultSuffix =
@@ -935,7 +932,7 @@ export class SchemaUtils {
   }
 
   static getModuleRoot(
-    module: SchemaModuleOptsV2 | SchemaModulePropsV2
+    module: SchemaModuleOpts | SchemaModuleProps
   ): SchemaProps {
     const maybeRoot = _.find(module.schemas, { parent: "root" });
     if (!maybeRoot) {
@@ -968,7 +965,7 @@ export class SchemaUtils {
 
   static getPatternRecursive = (
     schema: SchemaProps,
-    schemas: SchemaPropsDictV2
+    schemas: SchemaPropsDict
   ): string => {
     const part = SchemaUtils.getPattern(schema);
     if (_.isNull(schema.parent)) {
@@ -991,7 +988,7 @@ export class SchemaUtils {
     mschema,
     wsRoot,
   }: {
-    mschema: SchemaModulePropsV2;
+    mschema: SchemaModuleProps;
     wsRoot: string;
   }): string {
     const fname = mschema.fname;
@@ -1013,10 +1010,10 @@ export class SchemaUtils {
     vault,
   }: {
     fname: string;
-    schemas: SchemaModuleDictV2 | SchemaModulePropsV2[];
+    schemas: SchemaModuleDict | SchemaModuleProps[];
     wsRoot: string;
     vault: DVault;
-  }): SchemaModulePropsV2 | undefined {
+  }): SchemaModuleProps | undefined {
     if (!_.isArray(schemas)) {
       schemas = _.values(schemas);
     }
@@ -1063,8 +1060,8 @@ export class SchemaUtils {
    */
   static matchDomain(
     domain: NoteProps,
-    notes: NotePropsDictV2,
-    schemas: SchemaModuleDictV2
+    notes: NotePropsDict,
+    schemas: SchemaModuleDict
   ) {
     const match = schemas[domain.fname];
     if (!match) {
@@ -1082,9 +1079,9 @@ export class SchemaUtils {
 
   static matchDomainWithSchema(opts: {
     noteCandidates: NoteProps[];
-    notes: NotePropsDictV2;
+    notes: NotePropsDict;
     schemaCandidates: SchemaProps[];
-    schemaModule: SchemaModulePropsV2;
+    schemaModule: SchemaModuleProps;
     matchNamespace?: boolean;
   }) {
     const {
@@ -1127,7 +1124,7 @@ export class SchemaUtils {
 
   static matchPath(opts: {
     notePath: string;
-    schemaModDict: SchemaModuleDictV2;
+    schemaModDict: SchemaModuleDict;
   }): SchemaMatchResult | undefined {
     const { notePath, schemaModDict } = opts;
     const domainName = DNodeUtils.domainName(notePath);
@@ -1172,7 +1169,7 @@ export class SchemaUtils {
     notePath: string;
     matched: string;
     schemaCandidates: SchemaProps[];
-    schemaModule: SchemaModulePropsV2;
+    schemaModule: SchemaModuleProps;
     matchNamespace?: boolean;
   }): SchemaMatchResult | undefined {
     const getChildOfPath = (notePath: string, matched: string) => {
@@ -1227,7 +1224,7 @@ export class SchemaUtils {
   }: {
     notePath: string;
     schemas: SchemaProps[];
-    schemaModule: SchemaModulePropsV2;
+    schemaModule: SchemaModuleProps;
     matchNamespace?: boolean;
   }): SchemaMatchResult | undefined {
     const notePathClean = notePath.replace(/\./g, "/");
@@ -1252,12 +1249,12 @@ export class SchemaUtils {
     return;
   }
 
-  static serializeSchemaProps(props: SchemaProps | SchemaOptsV2): SchemaRawV2 {
-    const builtinProps: Omit<SchemaOptsV2, "fname" | "vault"> = _.pick(props, [
+  static serializeSchemaProps(props: SchemaProps | SchemaOpts): SchemaRaw {
+    const builtinProps: Omit<SchemaOpts, "fname" | "vault"> = _.pick(props, [
       "id",
       "children",
     ]);
-    const optional: (keyof Omit<SchemaOptsV2, "fname" | "vault">)[] = [
+    const optional: (keyof Omit<SchemaOpts, "fname" | "vault">)[] = [
       "title",
       "desc",
     ];
@@ -1274,7 +1271,7 @@ export class SchemaUtils {
     return { ...builtinProps, ...dataProps };
   }
 
-  static serializeModuleProps(moduleProps: SchemaModulePropsV2) {
+  static serializeModuleProps(moduleProps: SchemaModuleProps) {
     const { version, imports, schemas } = moduleProps;
     // TODO: filter out imported schemas
     const out: any = {
@@ -1287,7 +1284,7 @@ export class SchemaUtils {
     }
     return YAML.safeDump(out, { schema: JSON_SCHEMA });
   }
-  static serializeModuleOpts(moduleOpts: SchemaModuleOptsV2) {
+  static serializeModuleOpts(moduleOpts: SchemaModuleOpts) {
     const { version, imports, schemas } = _.defaults(moduleOpts, {
       imports: [],
     });

@@ -6,7 +6,7 @@ import {
   DNoteRefLink,
   DVault,
   getSlugger,
-  NotePropsDictV2,
+  NotePropsDict,
   NoteProps,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -298,7 +298,7 @@ export class HierarchyUtils {
   static getChildren = (opts: {
     skipLevels: number;
     note: NoteProps;
-    notes: NotePropsDictV2;
+    notes: NotePropsDict;
   }) => {
     const { skipLevels, note, notes } = opts;
     let children = note.children

@@ -36,7 +36,7 @@ export type NoteLink = {
 };
 
 // === New
-export type DNodePointerV2 = string;
+export type DNodePointer = string;
 
 export type DLoc = {
   fname?: string;
@@ -105,7 +105,7 @@ export type DNoteLink<TData = any> = {
   to?: DNoteLoc;
   data: TData;
 };
-export type DNodeTypeV2 = "note" | "schema";
+export type DNodeType = "note" | "schema";
 export type DNoteRefData = {
   anchorStart?: string;
   anchorEnd?: string;
@@ -119,8 +119,6 @@ export type DNoteRefData = {
 };
 export type DNoteRefLink = DNoteLink<DNoteRefData>;
 
-export type SchemaDataV2 = SchemaData;
-
 /**
  * Props are the official interface for a node
  */
@@ -130,13 +128,13 @@ export type DNodeProps<T = any, TCustom = any> = {
   desc: string;
   links: DLink[];
   fname: string;
-  type: DNodeTypeV2;
+  type: DNodeType;
   updated: number;
   created: number;
   stub?: boolean;
   schemaStub?: boolean;
-  parent: DNodePointerV2 | null;
-  children: DNodePointerV2[];
+  parent: DNodePointer | null;
+  children: DNodePointer[];
   data: T;
   body: string;
   custom?: TCustom;
@@ -147,19 +145,19 @@ export type DNodeProps<T = any, TCustom = any> = {
 /**
  * Opts are arguments used when creating a node
  */
-export type DNodeOptsV2<T = any> = Partial<
+export type DNodeOpts<T = any> = Partial<
   Omit<DNodeProps<T>, "fname|type|vault">
-> & { fname: string; type: DNodeTypeV2; vault: DVault };
+> & { fname: string; type: DNodeType; vault: DVault };
 
-export type SchemaRawV2 = Pick<SchemaProps, "id"> &
-  Partial<SchemaDataV2> & { title?: string; desc?: string } & Partial<
+export type SchemaRaw = Pick<SchemaProps, "id"> &
+  Partial<SchemaData> & { title?: string; desc?: string } & Partial<
     Pick<DNodeProps, "children">
   >;
 
-export type SchemaOptsV2 = Omit<DNodeOptsV2<SchemaData>, "type" | "id"> & {
+export type SchemaOpts = Omit<DNodeOpts<SchemaData>, "type" | "id"> & {
   id: string;
 };
-export type NoteOptsV2 = Omit<DNodeOptsV2, "type">;
+export type NoteOpts = Omit<DNodeOpts, "type">;
 
 export type DNodePropsQuickInputV2<T = any> = DNodeProps<T> & {
   label: string;
@@ -170,35 +168,35 @@ export type DNodePropsQuickInputV2<T = any> = DNodeProps<T> & {
 export type SchemaProps = DNodeProps<SchemaData>;
 export type NoteProps = DNodeProps<any, DendronSiteFM & any>;
 
-export type DNodePropsDictV2 = {
+export type DNodePropsDict = {
   [key: string]: DNodeProps;
 };
 
-export type NotePropsDictV2 = {
+export type NotePropsDict = {
   [key: string]: NoteProps;
 };
 
-export type SchemaPropsDictV2 = {
+export type SchemaPropsDict = {
   [key: string]: SchemaProps;
 };
 
-export type SchemaModuleDictV2 = {
-  [key: string]: SchemaModulePropsV2;
+export type SchemaModuleDict = {
+  [key: string]: SchemaModuleProps;
 };
 
 // ---
 
-export type SchemaImportV2 = string[];
-export type SchemaModuleOptsV2 = {
+export type SchemaImport = string[];
+export type SchemaModuleOpts = {
   version: number;
-  imports?: SchemaImportV2;
-  schemas: SchemaOptsV2[];
+  imports?: SchemaImport;
+  schemas: SchemaOpts[];
 };
 
-export type SchemaModulePropsV2 = {
+export type SchemaModuleProps = {
   version: number;
-  imports?: SchemaImportV2;
-  schemas: SchemaPropsDictV2;
+  imports?: SchemaImport;
+  schemas: SchemaPropsDict;
   root: SchemaProps;
   fname: string;
   vault: DVault;
@@ -211,7 +209,7 @@ export interface RespV2<T> {
   error: DendronError | null;
 }
 
-export type RespRequiredV2<T> =
+export type RespRequired<T> =
   | {
       error: null | undefined;
       data: T;
@@ -273,11 +271,11 @@ export type EngineWriteOptsV2 = {
   updateExisting?: boolean;
 } & Partial<EngineUpdateNodesOptsV2>;
 
-export type DEngineInitPayloadV2 = {
-  notes: NotePropsDictV2;
-  schemas: SchemaModuleDictV2;
+export type DEngineInitPayload = {
+  notes: NotePropsDict;
+  schemas: SchemaModuleDict;
 };
-export type RenameNoteOptsV2 = {
+export type RenameNoteOpts = {
   oldLoc: DNoteLoc;
   newLoc: DNoteLoc;
 };
@@ -289,8 +287,8 @@ export type ConfigWriteOpts = {
 // === Engine and Store Main
 
 export type DCommonProps = {
-  notes: NotePropsDictV2;
-  schemas: SchemaModuleDictV2;
+  notes: NotePropsDict;
+  schemas: SchemaModuleDict;
   wsRoot: string;
   /**
    * NOTE: currently same as wsRoot. in the future, the two will be decoupled
@@ -320,22 +318,22 @@ export type DCommonMethods = {
   // TODO
   // configGet(): RespV2<ConfigGetPayload>
   updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2): Promise<void>;
-  updateSchema: (schema: SchemaModulePropsV2) => Promise<void>;
+  updateSchema: (schema: SchemaModuleProps) => Promise<void>;
 
   writeNote: (
     note: NoteProps,
     opts?: EngineWriteOptsV2
   ) => Promise<WriteNoteResp>;
-  writeSchema: (schema: SchemaModulePropsV2) => Promise<void>;
+  writeSchema: (schema: SchemaModuleProps) => Promise<void>;
 };
 
 // --- Engine
 
-export type DEngineInitRespV2 = Required<RespV2<DEngineInitPayloadV2>>;
+export type DEngineInitResp = Required<RespV2<DEngineInitPayload>>;
 export type EngineDeleteNotePayload = NoteChangeEntry[];
 // TODO: KLUDGE
-export type DEngineDeleteSchemaPayloadV2 = DEngineInitPayloadV2;
-export type DEngineDeleteSchemaRespV2 = DEngineInitRespV2;
+export type DEngineDeleteSchemaPayload = DEngineInitPayload;
+export type DEngineDeleteSchemaResp = DEngineInitResp;
 export type EngineInfoResp = {
   version: string;
 };
@@ -344,11 +342,11 @@ export type EngineInfoResp = {
 export type EngineDeleteNoteResp = Required<RespV2<EngineDeleteNotePayload>>;
 export type EngineQueryNoteResp = Required<RespV2<DNodeProps[]>>;
 export type NoteQueryResp = Required<RespV2<NoteProps[]>>;
-export type SchemaQueryResp = Required<RespV2<SchemaModulePropsV2[]>>;
+export type SchemaQueryResp = Required<RespV2<SchemaModuleProps[]>>;
 export type StoreDeleteNoteResp = EngineDeleteNotePayload;
 export type RenameNotePayload = NoteChangeEntry[];
 
-export type GetNotePayloadV2 = {
+export type GetNotePayload = {
   note: NoteProps | undefined;
   changed: NoteChangeEntry[];
 };
@@ -358,9 +356,9 @@ export type QueryNotesOpts = {
   createIfNew?: boolean;
 };
 
-export type DEngineInitSchemaRespV2 = Required<RespV2<SchemaModulePropsV2[]>>;
+export type DEngineInitSchemaResp = Required<RespV2<SchemaModuleProps[]>>;
 
-export type DEngineV2SyncOpts = {
+export type DEngineSyncOpts = {
   metaOnly?: boolean;
 };
 
@@ -368,11 +366,11 @@ export type BulkAddNoteOpts = {
   notes: NoteProps[];
 };
 
-export type DEngineV2 = DCommonProps &
+export type DEngine = DCommonProps &
   DCommonMethods & {
     store: DStoreV2;
 
-    init: () => Promise<DEngineInitRespV2>;
+    init: () => Promise<DEngineInitResp>;
     deleteNote: (
       id: string,
       opts?: EngineDeleteOptsV2
@@ -380,27 +378,27 @@ export type DEngineV2 = DCommonProps &
     deleteSchema: (
       id: string,
       opts?: EngineDeleteOptsV2
-    ) => Promise<DEngineDeleteSchemaRespV2>;
-    info: () => Promise<RespRequiredV2<EngineInfoResp>>;
-    sync: (opts?: DEngineV2SyncOpts) => Promise<DEngineInitRespV2>;
+    ) => Promise<DEngineDeleteSchemaResp>;
+    info: () => Promise<RespRequired<EngineInfoResp>>;
+    sync: (opts?: DEngineSyncOpts) => Promise<DEngineInitResp>;
 
-    getNoteByPath: (opts: GetNoteOptsV2) => Promise<RespV2<GetNotePayloadV2>>;
-    getSchema: (qs: string) => Promise<RespV2<SchemaModulePropsV2>>;
+    getNoteByPath: (opts: GetNoteOptsV2) => Promise<RespV2<GetNotePayload>>;
+    getSchema: (qs: string) => Promise<RespV2<SchemaModuleProps>>;
     querySchema: (qs: string) => Promise<SchemaQueryResp>;
     queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;
     queryNotesSync({ qs }: { qs: string; vault?: DVault }): NoteQueryResp;
-    renameNote: (opts: RenameNoteOptsV2) => Promise<RespV2<RenameNotePayload>>;
+    renameNote: (opts: RenameNoteOpts) => Promise<RespV2<RenameNotePayload>>;
 
     // config
     writeConfig: (opts: ConfigWriteOpts) => Promise<RespV2<void>>;
     getConfig: () => Promise<RespV2<ConfigGetPayload>>;
   };
 
-export type DEngineClientV2 = Omit<DEngineV2, "store">;
+export type DEngineClientV2 = Omit<DEngine, "store">;
 
 export type DStoreV2 = DCommonProps &
   DCommonMethods & {
-    init: () => Promise<DEngineInitRespV2>;
+    init: () => Promise<DEngineInitResp>;
     deleteNote: (
       id: string,
       opts?: EngineDeleteOptsV2
@@ -408,22 +406,22 @@ export type DStoreV2 = DCommonProps &
     deleteSchema: (
       id: string,
       opts?: EngineDeleteOptsV2
-    ) => Promise<DEngineDeleteSchemaRespV2>;
-    renameNote: (opts: RenameNoteOptsV2) => Promise<RenameNotePayload>;
+    ) => Promise<DEngineDeleteSchemaResp>;
+    renameNote: (opts: RenameNoteOpts) => Promise<RenameNotePayload>;
   };
 
 // TODO: not used yet
 export type DEngineV4 = {
   // Properties
-  notes: NotePropsDictV2;
-  schemas: SchemaModuleDictV2;
+  notes: NotePropsDict;
+  schemas: SchemaModuleDict;
   wsRoot: string;
   vaults: DVault[];
   initialized: boolean;
 } & DEngineV4Methods;
 
 export type DEngineV4Methods = {
-  init: () => Promise<DEngineInitRespV2>;
+  init: () => Promise<DEngineInitResp>;
   deleteNote: (
     id: string,
     opts?: EngineDeleteOptsV2
@@ -431,15 +429,15 @@ export type DEngineV4Methods = {
   deleteSchema: (
     id: string,
     opts?: EngineDeleteOptsV2
-  ) => Promise<DEngineDeleteSchemaRespV2>;
-  sync: (opts?: DEngineV2SyncOpts) => Promise<DEngineInitRespV2>;
+  ) => Promise<DEngineDeleteSchemaResp>;
+  sync: (opts?: DEngineSyncOpts) => Promise<DEngineInitResp>;
 
-  getNoteByPath: (opts: GetNoteOptsV2) => Promise<RespV2<GetNotePayloadV2>>;
-  getSchema: (qs: string) => Promise<RespV2<SchemaModulePropsV2>>;
+  getNoteByPath: (opts: GetNoteOptsV2) => Promise<RespV2<GetNotePayload>>;
+  getSchema: (qs: string) => Promise<RespV2<SchemaModuleProps>>;
   querySchema: (qs: string) => Promise<SchemaQueryResp>;
   queryNotes: (opts: QueryNotesOpts) => Promise<NoteQueryResp>;
   queryNotesSync({ qs }: { qs: string }): NoteQueryResp;
-  renameNote: (opts: RenameNoteOptsV2) => Promise<RespV2<RenameNotePayload>>;
+  renameNote: (opts: RenameNoteOpts) => Promise<RespV2<RenameNotePayload>>;
 
   // config
   writeConfig: (opts: ConfigWriteOpts) => Promise<RespV2<void>>;

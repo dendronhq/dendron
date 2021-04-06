@@ -1,10 +1,10 @@
 import {
   DEngineMode,
   DVault,
-  NotePropsDictV2,
+  NotePropsDict,
   NoteProps,
-  SchemaModuleDictV2,
-  SchemaModulePropsV2,
+  SchemaModuleDict,
+  SchemaModuleProps,
   SchemaProps,
   SchemaUtils,
 } from "@dendronhq/common-all";
@@ -100,13 +100,13 @@ export class FuseEngine {
     return items;
   }
 
-  async updateSchemaIndex(schemas: SchemaModuleDictV2) {
+  async updateSchemaIndex(schemas: SchemaModuleDict) {
     this.schemaIndex.setCollection(
       _.map(_.values(schemas), (ent) => SchemaUtils.getModuleRoot(ent))
     );
   }
 
-  async updateNotesIndex(notes: NotePropsDictV2) {
+  async updateNotesIndex(notes: NotePropsDict) {
     this.notesIndex.setCollection(
       _.map(notes, ({ fname, title, id, vault }, _key) => ({
         fname,
@@ -127,7 +127,7 @@ export class FuseEngine {
     });
   }
 
-  async removeSchemaFromIndex(smod: SchemaModulePropsV2) {
+  async removeSchemaFromIndex(smod: SchemaModuleProps) {
     this.schemaIndex.remove((doc: SchemaProps) => {
       // FIXME: can be undefined, dunno why
       if (!doc) {

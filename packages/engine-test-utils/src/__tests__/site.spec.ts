@@ -4,7 +4,7 @@ import {
   DuplicateNoteAction,
   DVault,
   DVaultVisibility,
-  NotePropsDictV2,
+  NotePropsDict,
   NoteProps,
   NoteUtils,
   WorkspaceOpts,
@@ -59,8 +59,8 @@ const dupNote = (payload: DVault | string[]) => {
 };
 
 const checkNotes = (opts: {
-  filteredNotes: NotePropsDictV2;
-  engineNotes: NotePropsDictV2;
+  filteredNotes: NotePropsDict;
+  engineNotes: NotePropsDict;
   match: ({
     id: string;
   } & Partial<NoteProps>)[];

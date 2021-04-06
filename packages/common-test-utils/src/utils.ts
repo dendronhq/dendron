@@ -1,6 +1,6 @@
 import {
   DEngineClientV2,
-  DEngineInitRespV2,
+  DEngineInitResp,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import assert from "assert";
@@ -126,7 +126,7 @@ export async function runJestHarnessV2(results: any, expect: any) {
 
 export type RunEngineTestFunctionOpts = {
   engine: DEngineClientV2;
-  initResp: DEngineInitRespV2;
+  initResp: DEngineInitResp;
 } & WorkspaceOpts;
 
 export type RunEngineTestFunction = (

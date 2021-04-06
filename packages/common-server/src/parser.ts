@@ -4,10 +4,10 @@ import {
   DStoreV2,
   DVault,
   ENGINE_ERROR_CODES,
-  SchemaModuleOptsV2,
-  SchemaModulePropsV2,
-  SchemaOptsV2,
-  SchemaPropsDictV2,
+  SchemaModuleOpts,
+  SchemaModuleProps,
+  SchemaOpts,
+  SchemaPropsDict,
   SchemaProps,
   SchemaUtils,
 } from "@dendronhq/common-all";
@@ -27,19 +27,19 @@ export class ParserBaseV2 {
 
 export class SchemaParserV2 extends ParserBaseV2 {
   static parseRaw(
-    schemaOpts: SchemaModuleOptsV2,
+    schemaOpts: SchemaModuleOpts,
     opts: { root: DVault; fname: string; wsRoot: string }
-  ): SchemaModulePropsV2 {
+  ): SchemaModuleProps {
     const version = _.isArray(schemaOpts) ? 0 : 1;
     if (version > 0) {
       return SchemaParserV2.parseSchemaModuleOpts(
-        schemaOpts as SchemaModuleOptsV2,
+        schemaOpts as SchemaModuleOpts,
         opts
       );
     } else {
       // TODO: legacy
-      const schemaDict: SchemaPropsDictV2 = {};
-      ((schemaOpts as unknown) as SchemaOptsV2[]).map((ent) => {
+      const schemaDict: SchemaPropsDict = {};
+      ((schemaOpts as unknown) as SchemaOpts[]).map((ent) => {
         const schema = SchemaUtils.create(ent);
         schemaDict[schema.id] = schema;
       });
@@ -57,9 +57,9 @@ export class SchemaParserV2 extends ParserBaseV2 {
   }
 
   static parseSchemaModuleOpts(
-    schemaModuleProps: SchemaModuleOptsV2,
+    schemaModuleProps: SchemaModuleOpts,
     opts: { fname: string; root: DVault; wsRoot: string }
-  ): SchemaModulePropsV2 {
+  ): SchemaModuleProps {
     const { imports, schemas, version } = schemaModuleProps;
     const { fname, root, wsRoot } = opts;
     logger.info({ ctx: "parseSchemaModuleOpts", fname, root, imports });
@@ -87,7 +87,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
     logger.debug({ ctx: "parseSchemaModuleOpts", schemaPropsFromFile });
     const schemasAll = schemaPropsFromImport.concat(schemaPropsFromFile);
 
-    const schemasDict: SchemaPropsDictV2 = {};
+    const schemasDict: SchemaPropsDict = {};
     schemasAll.forEach((ent) => {
       schemasDict[ent.id] = ent;
     });

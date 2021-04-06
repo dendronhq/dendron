@@ -1,4 +1,4 @@
-import { DEngineV2 } from "@dendronhq/common-all";
+import { DEngine } from "@dendronhq/common-all";
 import { DendronEngineV2 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { MemoryStore } from "./store/memoryStore";
@@ -18,7 +18,7 @@ export async function putWS({
 }
 
 export async function getWS({ ws }: { ws: string }) {
-  const engine = await MemoryStore.instance().get<DEngineV2>(
+  const engine = await MemoryStore.instance().get<DEngine>(
     `ws:${getWSKey(ws)}`
   );
   if (!engine) {

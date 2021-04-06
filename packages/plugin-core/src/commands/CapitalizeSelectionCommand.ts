@@ -20,6 +20,10 @@ export class CapitalizeSelectionCommand extends BasicCommand<
     const maybeTextEditor = VSCodeUtils.getActiveTextEditor();
 
     if (maybeTextEditor) {
+      if (maybeTextEditor.selection.isEmpty) {
+        return;
+      }
+
       const text = maybeTextEditor.document.getText(maybeTextEditor.selection);
 
       const transformedText = text

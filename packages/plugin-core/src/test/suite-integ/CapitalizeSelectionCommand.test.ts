@@ -12,7 +12,7 @@ suite("CapitalizeSelectionCommand", function () {
   ctx = setupBeforeAfter(this, {
     beforeHook: () => {},
   });
-  test("basic", (done) => {
+  test("capitalizes selection", (done) => {
     runMultiVaultTest({
       ctx,
       preSetupHook: async ({ vaults, wsRoot }) => {
@@ -36,6 +36,37 @@ suite("CapitalizeSelectionCommand", function () {
 
         expect(editor.document.getText(SIMPLE_SELECTION)).toEqual(
           "Hello World"
+        );
+
+        done();
+      },
+    });
+  });
+
+  test("doesn't error when no selection is made", (done) => {
+    runMultiVaultTest({
+      ctx,
+      preSetupHook: async ({ vaults, wsRoot }) => {
+        await NoteTestUtilsV4.createNote({
+          vault: vaults[0],
+          wsRoot,
+          fname: "gamma",
+          body: "hello world",
+        });
+      },
+      onInit: async ({ vaults, wsRoot }) => {
+        const notePath = path.join(wsRoot, vaults[0].fsPath, "gamma.md");
+        const editor = (await VSCodeUtils.openFileInEditor(
+          vscode.Uri.file(notePath)
+        ))!;
+
+        const SIMPLE_SELECTION = new vscode.Selection(7, 0, 7, 11);
+        // editor.selection = SIMPLE_SELECTION;
+
+        await new CapitalizeSelectionCommand().execute();
+
+        expect(editor.document.getText(SIMPLE_SELECTION)).toEqual(
+          "hello world"
         );
 
         done();

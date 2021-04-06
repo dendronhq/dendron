@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.36.2](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.36.1...@dendronhq/plugin-core@0.36.2) (2021-04-06)
+
+### Bug Fixes
+
+- bad document link provider ([3de7979](https://github.com/dendronhq/dendron/commit/3de797907a76cb320a853634de5085c0f190cfcc))
+
 ## [0.36.1](https://github.com/dendronhq/dendron/compare/@dendronhq/plugin-core@0.36.0...@dendronhq/plugin-core@0.36.1) (2021-04-05)
 
 ### Bug Fixes

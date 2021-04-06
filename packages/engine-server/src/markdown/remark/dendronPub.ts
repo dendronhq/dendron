@@ -11,12 +11,11 @@ import { SiteUtils } from "../../topics/site";
 import {
   DendronASTDest,
   NoteRefDataV4,
-  NoteRefDataV4_LEGACY,
   VaultMissingBehavior,
   WikiLinkNoteV4,
 } from "../types";
 import { MDUtilsV4 } from "../utils";
-import { convertNoteRefAST, NoteRefsOpts } from "./noteRefs";
+import { NoteRefsOpts } from "./noteRefs";
 import { convertNoteRefASTV2 } from "./noteRefsV2";
 import { addError, getNoteOrError } from "./utils";
 
@@ -176,24 +175,6 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
               },
             ],
           };
-        }
-      }
-      if (
-        node.type === "refLink" &&
-        dest !== DendronASTDest.MD_ENHANCED_PREVIEW
-      ) {
-        const ndata = node.data as NoteRefDataV4_LEGACY;
-        const copts: NoteRefsOpts = {
-          wikiLinkOpts: opts?.wikiLinkOpts,
-          prettyRefs: opts?.prettyRefs,
-        };
-        const { data } = convertNoteRefAST({
-          link: ndata.link,
-          proc,
-          compilerOpts: copts,
-        });
-        if (data) {
-          parent!.children = data;
         }
       }
       if (

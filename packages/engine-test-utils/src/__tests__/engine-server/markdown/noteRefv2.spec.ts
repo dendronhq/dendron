@@ -50,7 +50,6 @@ describe("legacy note ref", () => {
       const proc2 = await MDUtilsV4.procFull({
         config: {
           ...engine.config,
-          noLegacyNoteRef: true,
         },
         engine,
         fname: "foo",

@@ -1,4 +1,4 @@
-import { DVault, VaultUtils } from "@dendronhq/common-all";
+import { DVault, NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import yargs from "yargs";
 import { CLICommand } from "./base";
@@ -18,9 +18,26 @@ type CommandOutput = any;
 
 export enum NoteCommands {
   LOOKUP = "lookup",
+  DELETE = "delete",
 }
 
 export { CommandOpts as NoteCLICommandOpts };
+
+function checkQueryAndVault(opts: CommandOpts) {
+  const vaults = opts.engine.vaultsv3;
+  let vault: DVault;
+  if (!opts.query) {
+    throw Error("no query found");
+  }
+  if (_.size(opts.engine.vaultsv3) > 1 && !opts.vault) {
+    throw Error("need to specify vault");
+  } else {
+    vault = opts.vault
+      ? VaultUtils.getVaultByNameOrThrow({ vaults, vname: opts.vault })
+      : vaults[0];
+  }
+  return { query: opts.query, vault };
+}
 
 export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   constructor() {
@@ -32,31 +49,13 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     setupEngineArgs(args);
     args.positional("cmd", {
       describe: "a command to run",
-      choices: ["lookup"],
+      choices: Object.values(NoteCommands),
       type: "string",
     });
-    // args.option("action", {
-    //   describe: "what action to perform on notes",
-    //   type: "string",
-    //   requiresArg: true,
-    //   choices: Object.values(NoteActions),
-    // });
     args.option("query", {
       describe: "the query to run",
       type: "string",
     });
-    // args.option("limit", {
-    //   describe: "limit num changes",
-    //   type: "number",
-    // });
-    // args.option("dryRun", {
-    //   describe: "dry run",
-    //   type: "boolean",
-    // });
-    // args.option("filter", {
-    //   describe: "filter operations",
-    //   type: "array",
-    // });
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
@@ -65,30 +64,31 @@ export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   async execute(opts: CommandOpts) {
-    const { cmd, engine } = opts;
-    const vaults = opts.engine.vaultsv3;
+    const { cmd, engine, wsRoot } = opts;
 
     try {
       switch (cmd) {
         case NoteCommands.LOOKUP: {
-          let vault: DVault;
-          if (!opts.query) {
-            throw Error("no query found");
-          }
-          if (_.size(opts.engine.vaultsv3) > 1 && !opts.vault) {
-            throw Error("need to specify vault");
-          } else {
-            vault = opts.vault
-              ? VaultUtils.getVaultByNameOrThrow({ vaults, vname: opts.vault })
-              : vaults[0];
-          }
+          const { query, vault } = checkQueryAndVault(opts);
           const { data } = await engine.getNoteByPath({
-            npath: opts.query,
+            npath: query,
             createIfNew: true,
             vault,
           });
           this.print(JSON.stringify(data, null, 4));
           return data;
+        }
+        case NoteCommands.DELETE: {
+          const { query, vault } = checkQueryAndVault(opts);
+          const note = NoteUtils.getNoteOrThrow({
+            fname: query,
+            notes: engine.notes,
+            vault,
+            wsRoot,
+          });
+          const resp = await engine.deleteNote(note.id);
+          this.print(`deleted ${note.fname}`);
+          return resp;
         }
         default: {
           throw Error("bad option");

@@ -4,14 +4,14 @@ import _ from "lodash";
 import fs from "fs-extra";
 import path from "path";
 
-type BaseCommandOpts = { log2Stdout?: boolean; quiet?: boolean };
+type BaseCommandOpts = { quiet?: boolean };
 
 export abstract class BaseCommand<TOpts, TOut = any> {
   public L: ReturnType<typeof createLogger>;
-  protected opts: BaseCommandOpts;
+  public opts: BaseCommandOpts;
 
   constructor(name?: string, opts?: BaseCommandOpts) {
-    this.opts = _.defaults(opts, { log2Stdout: false });
+    this.opts = opts || {};
     this.L = createLogger(name || "Command");
   }
   abstract execute(opts?: TOpts): Promise<TOut>;

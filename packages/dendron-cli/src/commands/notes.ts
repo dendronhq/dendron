@@ -1,89 +1,102 @@
-import { DEngineClientV2 } from "@dendronhq/common-all";
+import { DVault, VaultUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import yargs from "yargs";
 import { CLICommand } from "./base";
-import { setupEngine, setupEngineArgs } from "./utils";
+import { setupEngine, setupEngineArgs, SetupEngineResp } from "./utils";
 
-type FilterRule = {
-  key: string;
-  value: string;
-  operator: "in";
-};
 type CommandCLIOpts = {
   wsRoot: string;
+  vault?: string;
   enginePort?: number;
-  action: NoteActions;
   query?: string;
-  limit?: number;
-  dryRun?: boolean;
-  filter?: string[];
+  cmd: NoteCommands;
 };
 
-type CommandOpts = CommandCLIOpts & {
-  engine: DEngineClientV2;
-  filters: FilterRule[];
-};
-type CommandOutput = void;
+type CommandOpts = CommandCLIOpts & SetupEngineResp & {};
 
-export enum NoteActions {
-  QUERY = "query",
+type CommandOutput = any;
+
+export enum NoteCommands {
+  LOOKUP = "lookup",
 }
 
-function constructFilters(filter?: string[]): FilterRule[] {
-  console.log(filter);
-  return [];
-}
+export { CommandOpts as NoteCLICommandOpts };
 
 export class NoteCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   constructor() {
-    super({ name: "note", desc: "note related command" });
+    super({ name: "note <cmd>", desc: "note related commands" });
   }
 
   buildArgs(args: yargs.Argv) {
     super.buildArgs(args);
     setupEngineArgs(args);
-    args.option("action", {
-      describe: "what action to perform on notes",
+    args.positional("cmd", {
+      describe: "a command to run",
+      choices: ["lookup"],
       type: "string",
-      requiresArg: true,
-      choices: Object.values(NoteActions),
     });
+    // args.option("action", {
+    //   describe: "what action to perform on notes",
+    //   type: "string",
+    //   requiresArg: true,
+    //   choices: Object.values(NoteActions),
+    // });
     args.option("query", {
-      describe: "run doctor over a query",
+      describe: "the query to run",
       type: "string",
     });
-    args.option("limit", {
-      describe: "limit num changes",
-      type: "number",
-    });
-    args.option("dryRun", {
-      describe: "dry run",
-      type: "boolean",
-    });
-    args.option("filter", {
-      describe: "filter operations",
-      type: "array",
-    });
+    // args.option("limit", {
+    //   describe: "limit num changes",
+    //   type: "number",
+    // });
+    // args.option("dryRun", {
+    //   describe: "dry run",
+    //   type: "boolean",
+    // });
+    // args.option("filter", {
+    //   describe: "filter operations",
+    //   type: "array",
+    // });
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
     const engineArgs = await setupEngine(args);
-    const filters = constructFilters(args.filter);
-    return { ...args, ...engineArgs, filters };
+    return { ...args, ...engineArgs };
   }
 
   async execute(opts: CommandOpts) {
-    const { action, engine, query } = _.defaults(opts, {
-      limit: 99999,
-      exit: true,
-    });
-    switch (action) {
-      case NoteActions.QUERY: {
-        let notes = query
-          ? engine.queryNotesSync({ qs: query }).data
-          : _.values(engine.notes);
-        console.log(JSON.stringify(notes));
-        break;
+    const { cmd, engine } = opts;
+    const vaults = opts.engine.vaultsv3;
+
+    try {
+      switch (cmd) {
+        case NoteCommands.LOOKUP: {
+          let vault: DVault;
+          if (!opts.query) {
+            throw Error("no query found");
+          }
+          if (_.size(opts.engine.vaultsv3) > 1 && !opts.vault) {
+            throw Error("need to specify vault");
+          } else {
+            vault = opts.vault
+              ? VaultUtils.getVaultByNameOrThrow({ vaults, vname: opts.vault })
+              : vaults[0];
+          }
+          const { data } = await engine.getNoteByPath({
+            npath: opts.query,
+            createIfNew: true,
+            vault,
+          });
+          this.print(JSON.stringify(data, null, 4));
+          return data;
+        }
+        default: {
+          throw Error("bad option");
+        }
+      }
+    } finally {
+      if (opts.server.close) {
+        opts.server.close();
       }
     }
   }

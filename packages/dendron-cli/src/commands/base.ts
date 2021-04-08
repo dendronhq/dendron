@@ -4,13 +4,14 @@ import _ from "lodash";
 import fs from "fs-extra";
 import path from "path";
 
-type BaseCommandOpts = { log2Stdout?: boolean };
+type BaseCommandOpts = { log2Stdout?: boolean; quiet?: boolean };
 
 export abstract class BaseCommand<TOpts, TOut = any> {
   public L: ReturnType<typeof createLogger>;
+  protected opts: BaseCommandOpts;
 
   constructor(name?: string, opts?: BaseCommandOpts) {
-    opts = _.defaults(opts, { log2Stdout: false });
+    this.opts = _.defaults(opts, { log2Stdout: false });
     this.L = createLogger(name || "Command");
   }
   abstract execute(opts?: TOpts): Promise<TOut>;
@@ -29,6 +30,12 @@ export abstract class CLICommand<TOpts, TOut> extends BaseCommand<TOpts, TOut> {
   buildArgs(args: yargs.Argv) {
     args.option("wsRoot", {
       describe: "location of workspace",
+    });
+    args.option("vault", {
+      describe: "name of vault",
+    });
+    args.option("quiet", {
+      describe: "don't print output to stdout",
     });
   }
 
@@ -50,7 +57,16 @@ export abstract class CLICommand<TOpts, TOut> extends BaseCommand<TOpts, TOut> {
         args.wsRoot = cwd;
       }
     }
+    if (args.quiet) {
+      this.opts.quiet = true;
+    }
     const opts = await this.enrichArgs(args);
     return this.execute(opts);
   };
+
+  print(obj: any) {
+    if (!this.opts.quiet) {
+      console.log(obj);
+    }
+  }
 }

@@ -7,7 +7,6 @@ import {
 import _ from "lodash";
 import yargs from "yargs";
 import { LaunchEngineServerCommand } from "./launchEngineServer";
-const logger = createLogger();
 
 export type SetupEngineCLIOpts = {
   wsRoot: string;
@@ -39,6 +38,7 @@ const createDummyServer = () => ({
 export async function setupEngine(
   opts: SetupEngineCLIOpts
 ): Promise<SetupEngineResp> {
+  const logger = createLogger();
   let { wsRoot, enginePort, init, useLocalEngine } = _.defaults(opts, {
     init: true,
     useLocalEngine: false,

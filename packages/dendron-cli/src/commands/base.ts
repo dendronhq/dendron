@@ -1,6 +1,8 @@
 import { createLogger } from "@dendronhq/common-server";
 import yargs from "yargs";
 import _ from "lodash";
+import fs from "fs-extra";
+import path from "path";
 
 type BaseCommandOpts = { log2Stdout?: boolean };
 
@@ -27,7 +29,6 @@ export abstract class CLICommand<TOpts, TOut> extends BaseCommand<TOpts, TOut> {
   buildArgs(args: yargs.Argv) {
     args.option("wsRoot", {
       describe: "location of workspace",
-      demandOption: true,
     });
   }
 
@@ -39,6 +40,16 @@ export abstract class CLICommand<TOpts, TOut> extends BaseCommand<TOpts, TOut> {
 
   eval = async (args: any) => {
     this.L.info({ args });
+    // add wsRoot if not exist
+    if (!args.wsRoot) {
+      const cwd = process.cwd();
+      if (!fs.existsSync(path.join(cwd, "dendron.yml"))) {
+        console.log("no workspace deted. --wsRoot must be set");
+        process.exit(1);
+      } else {
+        args.wsRoot = cwd;
+      }
+    }
     const opts = await this.enrichArgs(args);
     return this.execute(opts);
   };

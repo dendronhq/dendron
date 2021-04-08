@@ -113,6 +113,11 @@ export type DendronConfig = {
   noLegacyNoteRef?: boolean;
 
   /**
+   * Disable xvault wiki links
+   */
+  noXVaultWikiLink?: boolean;
+
+  /**
    * Initialize remote vaults on startup
    * Default: true
    */

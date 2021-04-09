@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.36.3](https://github.com/dendronhq/dendron/compare/@dendronhq/pods-core@0.36.1...@dendronhq/pods-core@0.36.3) (2021-04-09)
+
+**Note:** Version bump only for package @dendronhq/pods-core
+
 ## [0.36.2](https://github.com/dendronhq/dendron/compare/@dendronhq/pods-core@0.36.1...@dendronhq/pods-core@0.36.2) (2021-04-06)
 
 **Note:** Version bump only for package @dendronhq/pods-core

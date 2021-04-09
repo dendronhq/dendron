@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.36.3](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-cli@0.36.1...@dendronhq/dendron-cli@0.36.3) (2021-04-09)
+
+### Features Dendron
+
+- create notes from cli ([ee2afa1](https://github.com/dendronhq/dendron/commit/ee2afa1ba1299d4e42bf4642010dc14381ad943a))
+- delete note via cli ([87139ad](https://github.com/dendronhq/dendron/commit/87139addf0d804dbd903196b0e5e7bb7aca9a492))
+
 ## [0.36.2](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-cli@0.36.1...@dendronhq/dendron-cli@0.36.2) (2021-04-06)
 
 **Note:** Version bump only for package @dendronhq/dendron-cli

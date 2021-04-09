@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.35.3](https://github.com/dendronhq/dendron/compare/@dendronhq/common-all@0.35.1...@dendronhq/common-all@0.35.3) (2021-04-09)
+
+### Bug Fixes
+
+- bad document link provider ([3de7979](https://github.com/dendronhq/dendron/commit/3de797907a76cb320a853634de5085c0f190cfcc))
+
 ## [0.35.2](https://github.com/dendronhq/dendron/compare/@dendronhq/common-all@0.35.1...@dendronhq/common-all@0.35.2) (2021-04-06)
 
 ### Bug Fixes

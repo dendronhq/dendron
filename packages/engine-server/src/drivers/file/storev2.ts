@@ -609,7 +609,11 @@ export class FileStorageV2 implements DStoreV2 {
       note: oldNote,
       notes: this.notes,
     });
-    this.logger.info({ ctx, msg: "notesToChange:gather" });
+    this.logger.info({
+      ctx,
+      msg: "notesToChange:gather",
+      notes: notesToChange.map((n) => NoteUtils.toLogObj(n)),
+    });
     // update note body of all notes that have changed
     const notesChanged = await Promise.all(
       notesToChange.map(async (n) => {
@@ -624,7 +628,10 @@ export class FileStorageV2 implements DStoreV2 {
         n.body = resp.contents as string;
         return n;
       })
-    );
+    ).catch((err) => {
+      this.logger.error({ err });
+      throw new DendronError({ payload: err });
+    });
     const newNote: NoteProps = {
       ...oldNote,
       fname: newLoc.fname,

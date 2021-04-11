@@ -362,21 +362,23 @@ export class FileStorageV2 implements DStoreV2 {
     let out: NoteChangeEntry[] = [];
     this.logger.info({ ctx, noteToDelete, opts });
 
+    const noteAsLog = NoteUtils.toLogObj(noteToDelete);
+
     // remove from fs
     if (!opts?.metaOnly) {
-      this.logger.info({ ctx, noteToDelete, msg: "removing from disk", fpath });
+      this.logger.info({ ctx, noteAsLog, msg: "removing from disk", fpath });
       fs.unlinkSync(fpath);
     }
 
     // if have children, keep this node around as a stub
     if (!_.isEmpty(noteToDelete.children)) {
-      this.logger.info({ ctx, noteToDelete, msg: "keep as stub" });
+      this.logger.info({ ctx, noteAsLog, msg: "keep as stub" });
       noteToDelete.stub = true;
       this.updateNote(noteToDelete);
       out.push({ note: noteToDelete, status: "update" });
     } else {
       // no children, delete reference from parent
-      this.logger.info({ ctx, noteToDelete, msg: "delete from parent" });
+      this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
       if (!noteToDelete.parent) {
         throw new DendronError({
           status: ENGINE_ERROR_CODES.NO_PARENT_FOR_NOTE,

@@ -37,3 +37,7 @@ export class DendronError extends Error {
 }
 
 export class IllegalOperationError extends DendronError {}
+
+export function stringifyError(err: Error) {
+  return JSON.stringify(err, Object.getOwnPropertyNames(err));
+}

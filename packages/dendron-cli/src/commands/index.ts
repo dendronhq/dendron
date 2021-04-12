@@ -8,3 +8,4 @@ export * from "./launchEngineServer";
 export { PodSource } from "./pod";
 export { PublishPodCLICommand } from "./publishPod";
 export * from "./notes";
+export * from "./vaultCLICommand";

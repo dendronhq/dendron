@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { env, setEnv } from "@dendronhq/common-all";
+import { VaultCLICommand } from "@dendronhq/dendron-cli";
 import yargs from "yargs";
 import { BuildSiteV2CLICommand } from "../src/commands/build-site-v2";
 import { DoctorCLICommand } from "../src/commands/doctor";
@@ -26,4 +27,5 @@ new PublishPodCLICommand().buildCmd(buildYargs);
 new DoctorCLICommand().buildCmd(buildYargs);
 // new WorkspaceCLICommand().buildCmd(buildYargs);
 new NoteCLICommand().buildCmd(buildYargs);
+new VaultCLICommand().buildCmd(buildYargs);
 buildYargs.demandCommand(1).help().argv;

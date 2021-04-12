@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.36.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.28.7-alpha.3...v0.36.5-alpha.0) (2021-04-12)
+
+### Bug Fixes
+
+- don't publish private note refs ([67efb66](https://github.com/dendronhq/dendron/commit/67efb66a2fd3a82dd108fd621c8057a789c19f6b))
+- pass vaults with names into engine api ([c9a42c6](https://github.com/dendronhq/dendron/commit/c9a42c6c2f1f8a7752b1c54441180237085de52f))
+- publish pod updates ([fd29e9a](https://github.com/dendronhq/dendron/commit/fd29e9af13bf2c41c39f32da42dba31bb65013d6))
+- update changelog generation ([58b1a43](https://github.com/dendronhq/dendron/commit/58b1a43630ae26f677f18ac51534f5760f80aec4))
+
+### Features Dendron
+
+- Changelog support ([#514](https://github.com/dendronhq/dendron/issues/514)) ([60f103b](https://github.com/dendronhq/dendron/commit/60f103b7b9c5f23fe0cdcc6321447381b087c653))
+- create notes from cli ([ee2afa1](https://github.com/dendronhq/dendron/commit/ee2afa1ba1299d4e42bf4642010dc14381ad943a))
+- delete note via cli ([87139ad](https://github.com/dendronhq/dendron/commit/87139addf0d804dbd903196b0e5e7bb7aca9a492))
+
+### Reverts
+
+- Revert "integ: publish minor" ([38ff5dd](https://github.com/dendronhq/dendron/commit/38ff5dd049cecd939fbd70744ef76a704aec3400))
+
 ## [0.36.3](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-cli@0.36.1...@dendronhq/dendron-cli@0.36.3) (2021-04-09)
 
 ### Features Dendron

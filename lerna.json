@@ -12,5 +12,6 @@
       "changelogPreset": "@dendronhq/conventional-changelog-dendron",
       "yes": true
     }
-  }
+  },
+  "version": "0.36.5-alpha.0"
 }

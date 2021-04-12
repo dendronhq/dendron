@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.36.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.28.7-alpha.3...v0.36.5-alpha.0) (2021-04-12)
+
+### Bug Fixes
+
+- bad document link provider ([3de7979](https://github.com/dendronhq/dendron/commit/3de797907a76cb320a853634de5085c0f190cfcc))
+- disable pretty ref when exporting markdown ([c0791da](https://github.com/dendronhq/dendron/commit/c0791da911b665ca66f1b3829784cf8a95ef9952))
+- handle links to home page for backlinks ([5d6303b](https://github.com/dendronhq/dendron/commit/5d6303b0155617b940ba489ee7e20f5aa28d42cf))
+- multi-case parent hiearchies ([aca4df1](https://github.com/dendronhq/dendron/commit/aca4df178b6fa8eb5703afdca4ddc36a46e81134))
+- multi-link wikilink not resolving ([cfaf2c0](https://github.com/dendronhq/dendron/commit/cfaf2c0ae58464ceef2edcd2b5c182b93136fa80))
+- publish pod updates ([fd29e9a](https://github.com/dendronhq/dendron/commit/fd29e9af13bf2c41c39f32da42dba31bb65013d6))
+- typo in config option ([2be82e8](https://github.com/dendronhq/dendron/commit/2be82e8116e2bf5698abb7660795044ffa3f405d))
+
+### Features Dendron
+
+- and and commit cmd ([9b9d86c](https://github.com/dendronhq/dendron/commit/9b9d86ccf54fdb8b58f4c04bd57700d8c4c84cf7))
+- create notes from cli ([ee2afa1](https://github.com/dendronhq/dendron/commit/ee2afa1ba1299d4e42bf4642010dc14381ad943a))
+- delete note via cli ([87139ad](https://github.com/dendronhq/dendron/commit/87139addf0d804dbd903196b0e5e7bb7aca9a492))
+- markdown export pod ([552e01f](https://github.com/dendronhq/dendron/commit/552e01fa21bb6d6da1e243696a67382afda23194))
+- move child notes generation into remark ([c4b12cf](https://github.com/dendronhq/dendron/commit/c4b12cf91ea48d662b30713033b2b70e10094131))
+
+### Reverts
+
+- Revert "integ: publish minor" ([38ff5dd](https://github.com/dendronhq/dendron/commit/38ff5dd049cecd939fbd70744ef76a704aec3400))
+
 ## [0.36.3](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-test-utils@0.36.1...@dendronhq/engine-test-utils@0.36.3) (2021-04-09)
 
 ### Bug Fixes

@@ -3,6 +3,48 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.36.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.28.7-alpha.3...v0.36.5-alpha.0) (2021-04-12)
+
+### Bug Fixes
+
+- Cannot open secondary roots when using multiple vaults [#495](https://github.com/dendronhq/dendron/issues/495) ([f5dc840](https://github.com/dendronhq/dendron/commit/f5dc8400727bb5fa5d3cb7507d4a8a6d5fdcaf73))
+- Clean up config after vault remove command ([#517](https://github.com/dendronhq/dendron/issues/517)) ([96fd09b](https://github.com/dendronhq/dendron/commit/96fd09ba43b009444d3ed313f93724311b020f24))
+- deleted notes don't require reload for publishing ([9a10462](https://github.com/dendronhq/dendron/commit/9a1046290c2c3111dacb08401c108bf790ae617d))
+- display hiearchies for stub nodes ([db02dcc](https://github.com/dendronhq/dendron/commit/db02dccc18e60bdcf8fa0015bbdcddbd6ceefa0f))
+- don't publish private note refs ([67efb66](https://github.com/dendronhq/dendron/commit/67efb66a2fd3a82dd108fd621c8057a789c19f6b))
+- error with wiki links when private ([f07ca3b](https://github.com/dendronhq/dendron/commit/f07ca3b174b7047f9d5e8c1a820e9dce15120972))
+- handle links to home page for backlinks ([5d6303b](https://github.com/dendronhq/dendron/commit/5d6303b0155617b940ba489ee7e20f5aa28d42cf))
+- issue with mixed case files ([9b72299](https://github.com/dendronhq/dendron/commit/9b7229930b9efe4c68c6bc1f71bce6a03a6d568e))
+- issues with recursive note references ([17879ec](https://github.com/dendronhq/dendron/commit/17879ecddb1c0a65ead09ca9b0a716414e438632))
+- more forgiving link parser ([38c973c](https://github.com/dendronhq/dendron/commit/38c973cb2bfc45881778e86c985156da64450249))
+- multi-link wikilink not resolving ([cfaf2c0](https://github.com/dendronhq/dendron/commit/cfaf2c0ae58464ceef2edcd2b5c182b93136fa80))
+- pass vaults with names into engine api ([c9a42c6](https://github.com/dendronhq/dendron/commit/c9a42c6c2f1f8a7752b1c54441180237085de52f))
+- publish pod updates ([fd29e9a](https://github.com/dendronhq/dendron/commit/fd29e9af13bf2c41c39f32da42dba31bb65013d6))
+- siteUrl typo in cli error output ([#515](https://github.com/dendronhq/dendron/issues/515)) ([59084fd](https://github.com/dendronhq/dendron/commit/59084fd0975618eeac045913cdb74108f57f4fc1))
+- spurious getVault errors ([b00e25b](https://github.com/dendronhq/dendron/commit/b00e25b0a7ef41eaa14a7e5f6cf5db194fd85879))
+- support toggling prettyRef on preview ([62cd98a](https://github.com/dendronhq/dendron/commit/62cd98af09761ff9a639069b3a9848dae209cc62))
+- typo in config option ([2be82e8](https://github.com/dendronhq/dendron/commit/2be82e8116e2bf5698abb7660795044ffa3f405d))
+- update changelog generation ([58b1a43](https://github.com/dendronhq/dendron/commit/58b1a43630ae26f677f18ac51534f5760f80aec4))
+- update site ([df985a2](https://github.com/dendronhq/dendron/commit/df985a25a17b7c2f2ee19411f4a9117e769a2d93))
+- update slugger rules ([18b0090](https://github.com/dendronhq/dendron/commit/18b0090bd1f13168d33d66c1bcbda02e39b98124))
+
+### Features Dendron
+
+- add git punchcard pod ([50019c0](https://github.com/dendronhq/dendron/commit/50019c0f6405be449b446901809a9d2b787aa625))
+- and and commit cmd ([9b9d86c](https://github.com/dendronhq/dendron/commit/9b9d86ccf54fdb8b58f4c04bd57700d8c4c84cf7))
+- browse note command ([c69ae9d](https://github.com/dendronhq/dendron/commit/c69ae9df5ff36f3a21465e91f0463012477f93ef))
+- Changelog support ([#514](https://github.com/dendronhq/dendron/issues/514)) ([60f103b](https://github.com/dendronhq/dendron/commit/60f103b7b9c5f23fe0cdcc6321447381b087c653))
+- enable nunjucks optionally ([7e97758](https://github.com/dendronhq/dendron/commit/7e97758a4f60824e0a6f132f0f232adc0d20b9f8))
+- move child notes generation into remark ([c4b12cf](https://github.com/dendronhq/dendron/commit/c4b12cf91ea48d662b30713033b2b70e10094131))
+- Show backlinks at the end of pages ([#506](https://github.com/dendronhq/dendron/issues/506)) ([54e6580](https://github.com/dendronhq/dendron/commit/54e658086cebcdc6807548393e1e98c23e1602bd))
+- variable sub v2 ([d851f7a](https://github.com/dendronhq/dendron/commit/d851f7aacd7bb051d5539175296fb6ada9da72be))
+- xvault links for wikilink ([d72b4a0](https://github.com/dendronhq/dendron/commit/d72b4a05d7182bef5ec508192d8f2180ac558937))
+
+### Reverts
+
+- Revert "integ: publish minor" ([38ff5dd](https://github.com/dendronhq/dendron/commit/38ff5dd049cecd939fbd70744ef76a704aec3400))
+- nunjucks ([fa42045](https://github.com/dendronhq/dendron/commit/fa4204525f36675e6d5091eff5b7a8eebf7daa21))
+
 ## [0.36.3](https://github.com/dendronhq/dendron/compare/@dendronhq/engine-server@0.36.1...@dendronhq/engine-server@0.36.3) (2021-04-09)
 
 **Note:** Version bump only for package @dendronhq/engine-server

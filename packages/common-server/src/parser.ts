@@ -14,8 +14,17 @@ import {
 import _ from "lodash";
 import path from "path";
 import { file2Schema, vault2Path } from "./filesv2";
+import { DLogger } from "./logger";
 import { createLogger } from "./logger";
-const logger = createLogger();
+
+let _LOGGER: DLogger | undefined;
+
+function getLogger() {
+  if (!_LOGGER) {
+    _LOGGER = createLogger();
+  }
+  return _LOGGER;
+}
 
 export class ParserBaseV2 {
   constructor(public opts: { store: DStoreV2; logger: any }) {}
@@ -62,7 +71,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
   ): SchemaModuleProps {
     const { imports, schemas, version } = schemaModuleProps;
     const { fname, root, wsRoot } = opts;
-    logger.info({ ctx: "parseSchemaModuleOpts", fname, root, imports });
+    getLogger().info({ ctx: "parseSchemaModuleOpts", fname, root, imports });
     const vpath = vault2Path({ vault: root, wsRoot });
     let schemaModulesFromImport = _.flatMap(imports, (ent) => {
       const fpath = path.join(vpath, ent + ".schema.yml");
@@ -80,11 +89,11 @@ export class SchemaParserV2 extends ParserBaseV2 {
         return ent;
       });
     });
-    logger.debug({ ctx: "parseSchemaModuleOpts", schemaPropsFromImport });
+    getLogger().debug({ ctx: "parseSchemaModuleOpts", schemaPropsFromImport });
     const schemaPropsFromFile = schemas.map((ent) => {
       return SchemaUtils.create({ ...ent, vault: root });
     });
-    logger.debug({ ctx: "parseSchemaModuleOpts", schemaPropsFromFile });
+    getLogger().debug({ ctx: "parseSchemaModuleOpts", schemaPropsFromFile });
     const schemasAll = schemaPropsFromImport.concat(schemaPropsFromFile);
 
     const schemasDict: SchemaPropsDict = {};

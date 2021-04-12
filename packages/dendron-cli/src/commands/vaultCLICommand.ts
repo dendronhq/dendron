@@ -63,7 +63,9 @@ export class VaultCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             fsPath: vaultPath,
           };
           const wsService = new WorkspaceService({ wsRoot });
-          return await wsService.createVault({ vault, noAddToConfig });
+          const resp = await wsService.createVault({ vault, noAddToConfig });
+          this.print(`${vaultPath} crated`);
+          return resp;
         }
         default: {
           throw Error("bad option");

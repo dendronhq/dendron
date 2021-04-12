@@ -67,6 +67,7 @@ suite("Extension", function () {
               useNoteTitleForLink: true,
               initializeRemoteVaults: true,
               noAutoCreateOnDefinition: true,
+              noLegacyNoteRef: true,
               site: {
                 copyAssets: true,
                 siteHierarchies: ["root"],

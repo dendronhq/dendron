@@ -269,7 +269,7 @@ export class LookupControllerV2 {
         break;
       }
       default:
-        if (quickPickValue) {
+        if (quickPickValue !== undefined) {
           onUpdateValue = quickPickValue;
         } else {
           let editorPath = vscode.window.activeTextEditor?.document.uri.fsPath;

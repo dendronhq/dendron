@@ -122,6 +122,11 @@ export type DendronConfig = {
    * Default: true
    */
   initializeRemoteVaults?: boolean;
+
+  /**
+   * If true, enable feedback widget
+   */
+  feedback?: boolean;
 };
 
 export type HierarchyConfig = {

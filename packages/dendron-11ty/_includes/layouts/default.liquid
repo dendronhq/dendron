@@ -104,9 +104,13 @@
         {% endif %}
 
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+        {% if site.feedback %}
+        <link rel="stylesheet" type="text/css" href="/assets/css/jquery.feedback_me.css">
+        <script type="text/javascript" src="/assets/js/jquery.feedback_me.js"></script>
+        {% endif %}
 
         {% if nodeCurrent.custom.sources %}
         <div class="alert alert-primary" role="alert">
@@ -172,5 +176,31 @@
   <div class="search-overlay"></div>
 {% endif %}
 </div>
+{% if site.feedback %}
+<script>
+  $(document).ready(function(){
+    fm_options = {
+      jQueryUI : true,
+      position : "right-bottom",
+      custom_params: {
+        user_id: "john_doe",
+    },
+    name_required: false,
+      bootstrap : true,
+      name_placeholder:"Name please",						
+      trigger_label : "Feedback",
+      message_required : false,
+      show_asterisk_for_required : true,
+      feedback_url : "/api/feedback",
+      show_radio_button_list: true,
+      radio_button_list_labels : ["1", "2", "3", "4", "5"],
+      radio_button_list_title : "Quality",
+    };
+  
+    fm.init(fm_options);
+  });
+</script>
+{% endif %}
+
 </body>
 </html>

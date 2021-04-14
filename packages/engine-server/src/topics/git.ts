@@ -58,6 +58,14 @@ export class Git {
     await this._execute("git init");
   }
 
+  async pull() {
+    const { localUrl: cwd } = this.opts;
+    await execa.command([`git pull --rebase`].join(" "), {
+      shell: true,
+      cwd,
+    });
+  }
+
   async push() {
     const { localUrl: cwd } = this.opts;
     await execa.command([`git push`].join(" "), {

@@ -311,6 +311,28 @@ export class WorkspaceService {
     return repoPath;
   }
 
+  async pullVaults() {
+    const allRepos = await this.getAllRepos();
+    const out = await Promise.all(
+      allRepos.map(async (root) => {
+        const git = new Git({ localUrl: root });
+        await git.pull();
+      })
+    );
+    return _.filter(out, (ent) => !_.isUndefined(ent));
+  }
+
+  async pushVaults() {
+    const allRepos = await this.getAllRepos();
+    const out = await Promise.all(
+      allRepos.map(async (root) => {
+        const git = new Git({ localUrl: root });
+        await git.push();
+      })
+    );
+    return _.filter(out, (ent) => !_.isUndefined(ent));
+  }
+
   /**
    * Make sure all vaults are present on file system
    * @param fetchAndPull for repositories that exist, should we also do a fetch? default: false

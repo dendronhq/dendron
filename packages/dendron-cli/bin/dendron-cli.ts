@@ -11,6 +11,7 @@ import { LaunchEngineServerCommand } from "../src/commands/launchEngineServer";
 import { NoteCLICommand } from "../src/commands/notes";
 import { PublishPodCLICommand } from "../src/commands/publishPod";
 import { VaultCLICommand } from "../src/commands/vaultCLICommand";
+import { WorkspaceCLICommand } from "../src/commands/workspaceCLICommand";
 // import { WorkspaceCLICommand } from "../src/commands/workspace";
 
 if (_.isUndefined(env("LOG_LEVEL", { shouldThrow: false }))) {
@@ -29,4 +30,5 @@ new DoctorCLICommand().buildCmd(buildYargs);
 // new WorkspaceCLICommand().buildCmd(buildYargs);
 new NoteCLICommand().buildCmd(buildYargs);
 new VaultCLICommand().buildCmd(buildYargs);
+new WorkspaceCLICommand().buildCmd(buildYargs);
 buildYargs.demandCommand(1).help().argv;

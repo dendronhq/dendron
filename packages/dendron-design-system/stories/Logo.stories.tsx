@@ -8,7 +8,7 @@ const meta: Meta = {
   component: Logo,
   argTypes: {
     boxSize: {
-      control: { type: 'range', min: 8, max: 400, step: 8 },
+      control: { type: 'range', min: 8, max: 80, step: 8 },
     },
   },
   parameters: {
@@ -22,4 +22,4 @@ const Template: Story<ImgProps> = (args) => <Logo {...args} />;
 
 export const Default = Template.bind({});
 
-Default.args = { boxSize: 20 };
+Default.args = { boxSize: 24 };

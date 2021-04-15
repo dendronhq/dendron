@@ -23,6 +23,8 @@ type CommandOutput = any;
 export enum WorkspaceCommands {
   PULL = "pull",
   PUSH = "push",
+  ADD_AND_COMMIT = "addAndCommit",
+  SYNC = "sync",
 }
 
 export { CommandOpts as WorkspaceCLICommandOpts };
@@ -46,10 +48,7 @@ export class WorkspaceCLICommand extends CLICommand<
   }
 
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
-    const engineOpts: SetupEngineCLIOpts = { ...args };
-    if (_.includes(["pull", "push"], args.cmd)) {
-      engineOpts.init = false;
-    }
+    const engineOpts: SetupEngineCLIOpts = { ...args, init: false };
     const engineArgs = await setupEngine(engineOpts);
     return { ...args, ...engineArgs };
   }
@@ -64,9 +63,25 @@ export class WorkspaceCLICommand extends CLICommand<
           await ws.pullVaults();
           break;
         }
+        case WorkspaceCommands.ADD_AND_COMMIT: {
+          const ws = new WorkspaceService({ wsRoot });
+          await ws.commidAndAddAll();
+          break;
+        }
         case WorkspaceCommands.PUSH: {
           const ws = new WorkspaceService({ wsRoot });
           await ws.pushVaults();
+          break;
+        }
+        case WorkspaceCommands.SYNC: {
+          const ws = new WorkspaceService({ wsRoot });
+          this.print("commit and add...");
+          await ws.commidAndAddAll();
+          this.print("pull...");
+          await ws.pullVaults();
+          this.print("push...");
+          await ws.pushVaults();
+          this.print("done...");
           break;
         }
         default: {

@@ -127,6 +127,11 @@ export type DendronConfig = {
    * If true, enable feedback widget
    */
   feedback?: boolean;
+
+  /**
+   * If using backend API functionality
+   */
+  apiEndpoint?: string;
 };
 
 export type HierarchyConfig = {
@@ -298,6 +303,11 @@ export type DendronSiteConfig = {
    * Default: 8080
    */
   previewPort?: boolean;
+
+  /**
+   * If set, value of your segment key
+   */
+  segmentKey?: string;
 };
 
 export enum DuplicateNoteAction {

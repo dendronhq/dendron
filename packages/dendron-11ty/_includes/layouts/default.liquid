@@ -107,7 +107,8 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
-        {% if site.feedback %}
+        
+        {% if dendronConfig.feedback %}
         <link rel="stylesheet" type="text/css" href="/assets/css/jquery.feedback_me.css">
         <script type="text/javascript" src="/assets/js/jquery.feedback_me.js"></script>
         {% endif %}
@@ -176,8 +177,9 @@
   <div class="search-overlay"></div>
 {% endif %}
 </div>
-{% if site.feedback %}
+{% if dendronConfig.feedback %}
 <script>
+  const base_url = "{{ dendronConfig | getValue: "apiEndpoint" }}";
   $(document).ready(function(){
     fm_options = {
       jQueryUI : true,
@@ -191,16 +193,14 @@
       trigger_label : "Feedback",
       message_required : false,
       show_asterisk_for_required : true,
-      feedback_url : "/api/feedback",
+      feedback_url : `${base_url}/api/v1/feedback/`,
       show_radio_button_list: true,
       radio_button_list_labels : ["1", "2", "3", "4", "5"],
       radio_button_list_title : "Quality",
     };
-  
     fm.init(fm_options);
   });
 </script>
 {% endif %}
-
 </body>
 </html>

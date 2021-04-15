@@ -7,6 +7,8 @@ vaults:
 useFMTitle: true
 useNoteTitleForLink: true
 mermaid: true
+feedback: true
+apiEndpoint: http://localhost:3005
 site:
     copyAssets: true
     generateChangelog: true

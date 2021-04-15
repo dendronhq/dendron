@@ -222,6 +222,10 @@ function githubUrl(note) {
   return url;
 }
 
+function getValue(obj, key) {
+  return _.get(obj, key)
+}
+
 module.exports = {
   configFunction: function (eleventyConfig, options = {}) {
     eleventyConfig.addPairedShortcode("markdown", toMarkdown2);
@@ -229,6 +233,7 @@ module.exports = {
     eleventyConfig.addLiquidShortcode("nav", toNav);
     eleventyConfig.addLiquidShortcode("githubUrl", githubUrl);
     eleventyConfig.addLiquidShortcode("addHeader", addHeader);
+    eleventyConfig.addLiquidFilter("getValue", getValue);
     eleventyConfig.addLiquidFilter("ms2Date", ms2Date);
     eleventyConfig.addLiquidFilter("ms2ShortDate", ms2ShortDate);
     eleventyConfig.addLiquidFilter("markdownify", markdownfy);

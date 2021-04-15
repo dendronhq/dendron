@@ -18,8 +18,8 @@
     "prepare": "tsdx build",
     "size": "size-limit",
     "analyze": "size-limit --why",
-    "storybook": "start-storybook -p 6006 --no-manager-cache",
-    "build-storybook": "build-storybook",
+    "storybook": "start-storybook -s ./public -p 6006",
+    "build-storybook": "build-storybook -s ./public",
     "deploy-storybook": "yarn build && yarn build-storybook"
   },
   "peerDependencies": {
@@ -51,6 +51,7 @@
   ],
   "devDependencies": {
     "@babel/core": "^7.13.14",
+    "@rollup/plugin-image": "^2.0.6",
     "@size-limit/preset-small-lib": "^4.10.2",
     "@storybook/addon-docs": "^6.2.2",
     "@storybook/addon-essentials": "^6.2.2",

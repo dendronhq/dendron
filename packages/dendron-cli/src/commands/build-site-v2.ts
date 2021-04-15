@@ -55,10 +55,6 @@ export class BuildSiteV2CLICommand extends CLICommand<
       default: "dev",
       choices: ["dev", "prod"],
     });
-    args.option("servePort", {
-      describe: "port to serve over",
-      default: "8080",
-    });
     args.option("output", {
       describe: "if set, override output from config.yml",
       type: "string",
@@ -85,10 +81,7 @@ export class BuildSiteV2CLICommand extends CLICommand<
   }
 
   async execute(opts: CommandOpts) {
-    let { wsRoot, port, stage, servePort, output, server, engine } = _.defaults(
-      opts,
-      {}
-    );
+    let { wsRoot, port, stage, output, server, engine } = _.defaults(opts);
     let cwd = opts.cwd;
     if (!cwd) {
       // need to be inside
@@ -103,7 +96,6 @@ export class BuildSiteV2CLICommand extends CLICommand<
     process.env["ENGINE_PORT"] = _.toString(port);
     process.env["WS_ROOT"] = wsRoot;
     process.env["BUILD_STAGE"] = stage;
-    process.env["ELEV_PORT"] = _.toString(servePort);
     if (output) {
       process.env["OUTPUT"] = output;
     }
@@ -145,7 +137,10 @@ export class BuildSiteV2CLICommand extends CLICommand<
       await generateChangelog(opts.engine);
     }
     this.L.info("running compile");
-    await compile({ cwd }, { serve: opts.serve, port: servePort });
+    await compile(
+      { cwd },
+      { serve: opts.serve, port: engine.config.site.previewPort || 8080 }
+    );
     this.L.info("running post-compile");
     await Promise.all([buildStyles(), buildSearch()]);
     if (!opts.serve) {

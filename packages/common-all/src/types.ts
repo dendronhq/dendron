@@ -293,6 +293,11 @@ export type DendronSiteConfig = {
    * Default: false
    */
   generateChangelog?: boolean;
+  /**
+   * Set alternate port for preview
+   * Default: 8080
+   */
+  previewPort?: boolean;
 };
 
 export enum DuplicateNoteAction {

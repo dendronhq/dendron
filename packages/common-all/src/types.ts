@@ -312,3 +312,8 @@ export type UseVaultBehavior = {
 };
 
 export type DuplicateNoteBehavior = UseVaultBehavior;
+
+export enum DendronUserSpecial {
+  "everyone" = "everyone",
+  "anonymous" = "anonymous",
+}

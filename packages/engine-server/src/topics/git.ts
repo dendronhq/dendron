@@ -102,4 +102,9 @@ export class Git {
     const { stdout } = await this._execute("git status --short");
     return !_.isEmpty(stdout);
   }
+
+  async hasRemote() {
+    const { stdout } = await this._execute("git remote");
+    return !_.isEmpty(stdout);
+  }
 }

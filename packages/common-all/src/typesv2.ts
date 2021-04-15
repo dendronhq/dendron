@@ -79,6 +79,16 @@ export type DVault = {
   //  */
   // uri: string;
   remote?: VaultRemote;
+  userPermission?: DPermission;
+  /**
+   * If this is enabled, don't apply workspace push commands
+   */
+  noAutoPush?: boolean;
+};
+
+export type DPermission = {
+  read: string[];
+  write: string[];
 };
 
 export type DLinkType = "wiki" | "refv2";

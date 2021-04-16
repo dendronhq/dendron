@@ -1,13 +1,13 @@
 area.onboard:
-  - '- \[ ?(?:x|X) ?\] **Onboard.**'
+  - '- \[ ?(?:x|X) ?\] Onboard.'
 area.create:
-  - '- \[ ?(?:x|X) ?\] **Create.**'
+  - '- \[ ?(?:x|X) ?\] Create.'
 area.retrieve:
-  - '- \[ ?(?:x|X) ?\] **Retrieve.**'
+  - '- \[ ?(?:x|X) ?\] Retrieve.'
 area.structure:
-  - '- \[ ?(?:x|X) ?\] **Structure.**'
+  - '- \[ ?(?:x|X) ?\] Structure.'
 area.publish:
-  - '- \[ ?(?:x|X) ?\] **Publish.**'
+  - '- \[ ?(?:x|X) ?\] Publish.'
 area.misc:
   - '- \[ ?(?:x|X) ?\] Misc'
 type.bug:

@@ -14,20 +14,18 @@ assignees: ''
  Look here -> [triage](https://dendron.so/notes/1e6c8b49-ef88-4e79-b2df-e9d614c38a53.html) 
  for help with choosing.
  Needed for Auto labeling:
- issue_labeler_regex_version=1
+ issue_labeler_regex_version=2
  
  - [X] Bug
  -->
 
 ## Please select the area your Bug applys to. (Multiple selections are Possible)
 
-- [ ] UI
-- [ ] Workbench
-- [ ] Publishing
-- [ ] Pods
-- [ ] Markdown
-- [ ] Hierarchy
-- [ ] Graph
+- [ ] **Onboard.** Initial vault setup and import/export pods 
+- [ ] **Create.** Note creation, lookup, snippets and templates
+- [ ] **Retrieve.** Backlinks, references, graph view
+- [ ] **Structure.** Refactoring, multi-vault and schemas
+- [ ] **Publish.** Sharing your repo with the world
 - [ ] Misc (Choose this if your not sure)
 
 ## Describe the bug

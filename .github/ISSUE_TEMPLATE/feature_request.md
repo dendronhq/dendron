@@ -28,11 +28,11 @@ assignees: ''
 
 ## Please select the area your request applys to. (Multiple selections are Possible) ##
 
-- [ ] **Onboard.** Initial vault setup and import/export pods 
-- [ ] **Create.** Note creation, lookup, snippets and templates
-- [ ] **Retrieve.** Backlinks, references, graph view
-- [ ] **Structure.** Refactoring, multi-vault and schemas
-- [ ] **Publish.** Sharing your repo with the world
+- [ ] Onboard. Initial vault setup and import/export pods 
+- [ ] Create. Note creation, lookup, snippets and templates
+- [ ] Retrieve. Backlinks, references, graph view
+- [ ] Structure. Refactoring, multi-vault and schemas
+- [ ] Publish. Sharing your repo with the world
 - [ ] Misc (Choose this if your not sure)
 
 

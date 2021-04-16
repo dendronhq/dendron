@@ -17,7 +17,7 @@ assignees: ''
  for help with choosing.
 
  Needed for Auto labeling:
- issue_labeler_regex_version=1
+ issue_labeler_regex_version=2
 
  -->
 

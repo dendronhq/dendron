@@ -14,7 +14,7 @@ assignees: ''
  Look here -> [triage](https://dendron.so/notes/1e6c8b49-ef88-4e79-b2df-e9d614c38a53.html) 
  for help with choosing.
  Needed for Auto labeling:
- issue_labeler_regex_version=1
+ issue_labeler_regex_version=2
  
  - [X] Bug
  -->

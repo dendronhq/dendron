@@ -1,14 +1,13 @@
+const path = require("path");
+let mode = (process.env.stage === "prod") ? "production" : "development";
 module.exports = {
-	// Example setup for your project:
-	// The entry module that requires or imports the rest of your project.
-	// Must start with `./`!
-    mode: "development",
+    mode,
 	entry: './libs/auth.js',
     devServer: {
         contentBase: './dist',
       },
 	output: {
-		path: __dirname + '/dist',
+		path: path.join(__dirname, "assets", "js"),
 		filename: 'auth.js',
 	},
 };

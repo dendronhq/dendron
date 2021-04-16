@@ -17,9 +17,6 @@
             "path": "packages/plugin-core"
         },
         {
-            "path": "packages/dendron-next-server"
-        },
-        {
             "path": "packages/engine-server"
         },
         {

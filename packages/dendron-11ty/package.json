@@ -16,7 +16,7 @@
     "docs"
   ],
   "scripts": {
-    "build:auth": "webpack",
+    "build:auth": "env STAGE=prod webpack",
     "watch:auth": "webpack --watch",
     "start:auth": "webpack serve --port 8000"
   },

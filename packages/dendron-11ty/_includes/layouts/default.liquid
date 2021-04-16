@@ -113,6 +113,33 @@
         <script type="text/javascript" src="/assets/js/jquery.feedback_me.js"></script>
         {% endif %}
 
+        {% if site.segmentKey %}
+        <script>
+          !function(){var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware"];analytics.factory=function(e){return function(){var t=Array.prototype.slice.call(arguments);t.unshift(e);analytics.push(t);return analytics}};for(var e=0;e<analytics.methods.length;e++){var key=analytics.methods[e];analytics[key]=analytics.factory(key)}analytics.load=function(key,e){var t=document.createElement("script");t.type="text/javascript";t.async=!0;t.src="https://cdn.segment.com/analytics.js/v1/" + key + "/analytics.min.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n);analytics._loadOptions=e};analytics._writeKey="{{site.segmentKey}}";analytics.SNIPPET_VERSION="4.13.2";
+          analytics.load("{{site.segmentKey}}");
+          analytics.page();
+          }}();
+        </script>
+        {% endif %}
+
+        {% if site.cognitoUserPoolId %}
+          {% if processEnv.stage == "dev" %}
+            <script src="http://localhost:8000/auth.js"></script>
+          {% else %}
+            <script src="/assets/js/auth.js"></script>
+          {% endif %}
+          <script>
+            let UserPoolId, ClientId, domain;
+            UserPoolId = "{{site.cognitoUserPoolId}}";
+            ClientId = "{{site.cognitoClientId}}";
+            domain = "{{site.siteUrl}}";
+            const currentUser = window.getCurrentUser(UserPoolId, ClientId, domain);
+            if (currentUser && window.analytics) {
+              window.identifyUser(currentUser);
+            }
+          </script>
+        {% endif %}
+
         {% if nodeCurrent.custom.sources %}
         <div class="alert alert-primary" role="alert">
           This page was generated from content adapted from the following <a href="#" data-html="true" data-toggle="popover" title="Attributions">sources</a>

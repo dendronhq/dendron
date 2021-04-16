@@ -308,6 +308,12 @@ export type DendronSiteConfig = {
    * If set, value of your segment key
    */
   segmentKey?: string;
+
+  /**
+   * Required for auth
+   */
+  cognitoUserPoolId?: string;
+  cognitoClientId?: string;
 };
 
 export enum DuplicateNoteAction {

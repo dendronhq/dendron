@@ -1,21 +1,15 @@
-area.ui:
-  - '- \[ ?(?:x|X) ?\] UI'
-area.workbench:
-  - '- \[ ?(?:x|X) ?\] Workbench'
-area.publishing:
-  - '- \[ ?(?:x|X) ?\] Publishing'
-area.pods:
-  - '- \[ ?(?:x|X) ?\] Pods'
-area.markdown:
-  - '- \[ ?(?:x|X) ?\] Markdown'
-area.seeds:
-  - '- \[ ?(?:x|X) ?\] Seed'
+area.onboard:
+  - '- \[ ?(?:x|X) ?\] **Onboard.**'
+area.create:
+  - '- \[ ?(?:x|X) ?\] **Create.**'
+area.retrieve:
+  - '- \[ ?(?:x|X) ?\] **Retrieve.**'
+area.structure:
+  - '- \[ ?(?:x|X) ?\] **Structure.**'
+area.publish:
+  - '- \[ ?(?:x|X) ?\] **Publish.**'
 area.misc:
   - '- \[ ?(?:x|X) ?\] Misc'
-area.hierarchy:
-  - '- \[ ?(?:x|X) ?\] Hierarchy'
-area.graph:
-  - '- \[ ?(?:x|X) ?\] Graph'
 type.bug:
   - '- \[ ?(?:x|X) ?\] Bug'
 type.enhancement:
@@ -24,3 +18,4 @@ type.feature:
   - '- \[ ?(?:x|X) ?\] Request of a new feature.'
 status.triage-needed:
   - "(?:.*)"
+

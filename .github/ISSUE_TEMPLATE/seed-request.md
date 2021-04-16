@@ -15,7 +15,7 @@ assignees: ''
  Needed for Auto labeling:
  issue_labeler_regex_version=1
 
- - [X] Seed
+ - [X] **Onboard.** 
  - [X] Feature Request
  -->
 

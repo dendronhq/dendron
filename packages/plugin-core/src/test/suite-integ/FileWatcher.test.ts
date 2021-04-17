@@ -1,3 +1,4 @@
+import { NoteUtils } from "@dendronhq/common-all";
 import {
   AssertUtils,
   ENGINE_HOOKS_MULTI,
@@ -24,10 +25,10 @@ suite("notes", function () {
       runLegacyMultiWorkspaceTest({
         ctx,
         postSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
-        onInit: async ({ vaults, wsRoot }) => {
-          const bar = await NoteTestUtilsV4.createNote({
-            fname: "bar",
-            body: "bar body",
+        onInit: async ({ vaults, wsRoot, engine }) => {
+          await NoteTestUtilsV4.createNote({
+            fname: "newbar",
+            body: "newbar body",
             vault: vaults[0],
             wsRoot,
           });
@@ -36,10 +37,17 @@ suite("notes", function () {
             vaults,
           });
 
-          const notePath = path.join(wsRoot, vaults[0].fsPath, "bar.md");
+          const notePath = path.join(wsRoot, vaults[0].fsPath, "newbar.md");
           const uri = vscode.Uri.file(notePath);
-          const note = await watcher.onDidCreate(uri);
-          expect(note!.id).toEqual(bar.id);
+          await watcher.onDidCreate(uri);
+          const note = engine.notes["newbar"];
+          const root = NoteUtils.getNoteOrThrow({
+            fname: "root",
+            vault: vaults[0],
+            wsRoot,
+            notes: engine.notes,
+          });
+          expect(note.parent).toEqual(root.id);
           done();
         },
       });

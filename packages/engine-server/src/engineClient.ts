@@ -316,17 +316,14 @@ export class DendronEngineClient implements DEngineClientV2 {
     };
   }
 
-  async updateNote(
-    note: NoteProps,
-    opts?: EngineUpdateNodesOptsV2
-  ): Promise<void> {
-    await this.api.engineUpdateNote({ ws: this.ws, note, opts });
-    const maybeNote = this.notes[note.id];
-    if (maybeNote) {
-      note = { ...maybeNote, ...note };
+  async updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2) {
+    const resp = await this.api.engineUpdateNote({ ws: this.ws, note, opts });
+    const noteClean = resp.data;
+    if (_.isUndefined(noteClean)) {
+      throw new DendronError({ msg: "error updating note", payload: resp });
     }
-    await this.refreshNotes([note]);
-    return;
+    await this.refreshNotes([noteClean]);
+    return noteClean;
   }
 
   async writeNote(

@@ -332,7 +332,16 @@ export type DCommonMethods = {
   ) => Promise<Required<RespV2<NoteChangeEntry[]>>>;
   // TODO
   // configGet(): RespV2<ConfigGetPayload>
-  updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2): Promise<void>;
+  /**
+   *
+   * @param note
+   * @param opts
+   * @returns The updated note. If `newNode` is set, this will have the updated parent id
+   */
+  updateNote(
+    note: NoteProps,
+    opts?: EngineUpdateNodesOptsV2
+  ): Promise<NoteProps>;
   updateSchema: (schema: SchemaModuleProps) => Promise<void>;
 
   writeNote: (

@@ -125,8 +125,8 @@ export class NoteController {
   }: EngineUpdateNoteRequest): Promise<EngineUpdateNotePayload> {
     const engine = await getWS({ ws });
     try {
-      await engine.updateNote(note, opts);
-      return { error: null };
+      const data = await engine.updateNote(note, opts);
+      return { error: null, data };
     } catch (err) {
       return {
         error: new DendronError({ msg: JSON.stringify(err) }),

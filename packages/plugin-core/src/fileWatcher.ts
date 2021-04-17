@@ -56,6 +56,11 @@ export class VaultWatcher {
     });
   }
 
+  /**
+   * Update note links
+   * @param uri
+   * @returns
+   */
   async onDidChange(uri: vscode.Uri) {
     const ctx = "VaultWatcher:onDidChange";
     this.L.debug({ ctx, uri: uri.fsPath });
@@ -90,7 +95,7 @@ export class VaultWatcher {
     return await eclient.updateNote(note);
   }
 
-  async onDidCreate(uri: vscode.Uri): Promise<NoteProps | undefined> {
+  async onDidCreate(uri: vscode.Uri): Promise<void> {
     const ctx = "VaultWatcher:onDidCreate";
     if (this.pause) {
       this.L.info({ ctx, uri, msg: "paused" });
@@ -125,6 +130,8 @@ export class VaultWatcher {
           wsRoot: DendronWorkspace.wsRoot(),
         });
         note = file2Note(uri.fsPath, vault);
+
+        // check if note exist as
         const maybeNote = NoteUtils.getNoteByFnameV5({
           fname,
           vault,
@@ -134,24 +141,23 @@ export class VaultWatcher {
         if (maybeNote) {
           note = {
             ...note,
-            stub: false,
-            schemaStub: false,
             ..._.pick(maybeNote, ["children", "parent"]),
           } as NoteProps;
+          delete note["stub"];
+          delete note["schemaStub"];
         }
+
+        // add note
         await this.engine.updateNote(note as NoteProps, {
           newNode: true,
         });
-        this.L.debug({ ctx, uri, msg: "post-add-to-engine", note });
-        return note;
+        VaultWatcher.refreshTree();
       } catch (err) {
         this.L.error({ ctx, err });
-        return note;
+        throw err;
       }
     } finally {
       this.L.debug({ ctx, uri, msg: "refreshTree" });
-      VaultWatcher.refreshTree();
-      return note;
     }
   }
 

@@ -708,6 +708,11 @@ export class NoteUtils {
     return _.filter(_.values(notes), DNodeUtils.isRoot);
   }
 
+  /**
+   * Add props from @param noteHydrated to @param noteRaw
+   * @param param0
+   * @returns
+   */
   static hydrate({
     noteRaw,
     noteHydrated,

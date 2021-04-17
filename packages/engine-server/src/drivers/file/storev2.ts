@@ -686,19 +686,23 @@ export class FileStorageV2 implements DStoreV2 {
     return out;
   }
 
-  async updateNote(
-    note: NoteProps,
-    _opts?: EngineUpdateNodesOptsV2
-  ): Promise<void> {
+  async updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2) {
     const ctx = "updateNote";
     const maybeNote = this.notes[note.id];
     if (maybeNote) {
       note = NoteUtils.hydrate({ noteRaw: note, noteHydrated: maybeNote });
     }
-    // TODO: remove
+    if (opts?.newNode) {
+      NoteUtils.addParent({
+        note,
+        notesList: _.values(this.notes),
+        createStubs: true,
+        wsRoot: this.wsRoot,
+      });
+    }
     this.logger.debug({ ctx, note: NoteUtils.toLogObj(note) });
     this.notes[note.id] = note;
-    return;
+    return note;
   }
 
   async updateSchema(schemaModule: SchemaModuleProps) {
@@ -781,6 +785,7 @@ export class FileStorageV2 implements DStoreV2 {
       msg: "check:existing",
       maybeNoteId: _.pick(maybeNote || {}, ["id", "stub"]),
     });
+
     // don't count as delete if we're updating existing note
     let noDelete = false;
     if (maybeNote?.stub || opts?.updateExisting) {

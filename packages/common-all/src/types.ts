@@ -132,6 +132,11 @@ export type DendronConfig = {
    * If using backend API functionality
    */
   apiEndpoint?: string;
+
+  /**
+   * Default is templates
+   */
+  defaultInsertHierarchy?: string;
 };
 
 export type HierarchyConfig = {

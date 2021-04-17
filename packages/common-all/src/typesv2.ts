@@ -174,6 +174,11 @@ export type DNodePropsQuickInputV2<T = any> = DNodeProps<T> & {
   detail?: string;
   alwaysShow?: boolean;
 };
+export type NoteQuickInput = NoteProps & {
+  label: string;
+  detail?: string;
+  alwaysShow?: boolean;
+};
 
 export type SchemaProps = DNodeProps<SchemaData>;
 export type NoteProps = DNodeProps<any, DendronSiteFM & any>;

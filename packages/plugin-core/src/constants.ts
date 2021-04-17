@@ -176,6 +176,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.lookup.md",
     docPreview: "",
   },
+  INSERT_NOTE: {
+    key: "dendron.insertNote",
+    title: `${CMD_PREFIX} Insert Note`,
+    group: "notes",
+    desc: "Insert note contents",
+  },
   MOVE_NOTE: {
     key: "dendron.moveNote",
     title: `${CMD_PREFIX} Move Note`,

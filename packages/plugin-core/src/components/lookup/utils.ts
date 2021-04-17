@@ -6,6 +6,8 @@ import {
   NoteProps,
   NoteUtils,
   VaultUtils,
+  DEngineClientV2,
+  NoteQuickInput,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -13,6 +15,7 @@ import path from "path";
 import { Uri, ViewColumn, window } from "vscode";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
+import { getDurationMilliseconds } from "../../utils/system";
 import { DendronWorkspace, getWS } from "../../workspace";
 import { DendronBtn, getButtonCategory } from "./buttons";
 import {
@@ -22,6 +25,7 @@ import {
 } from "./constants";
 import { DendronQuickPickerV2 } from "./types";
 
+const PAGINATE_LIMIT = 50;
 export const UPDATET_SOURCE = {
   UPDATE_PICKER_FILTER: "UPDATE_PICKER_FILTER",
 };
@@ -101,6 +105,22 @@ export type CreateQuickPickOpts = {
 };
 
 export class PickerUtilsV2 {
+  static createDefaultItems = ({
+    picker,
+    vault,
+  }: {
+    picker: DendronQuickPickerV2;
+    vault: DVault;
+  }) => {
+    let out = [];
+    if (_.find(picker.buttons, { type: "multiSelect" })?.pressed) {
+      return [];
+    } else {
+      out.push(createNoActiveItem(vault));
+    }
+    return out;
+  };
+
   static createDendronQuickPick(opts: CreateQuickPickOpts) {
     const { title, placeholder, ignoreFocusOut } = _.defaults(opts, {
       ignoreFocusOut: true,
@@ -296,5 +316,65 @@ export class PickerUtilsV2 {
 
   static slashToDot(ent: string) {
     return ent.replace(/\//g, ".");
+  }
+}
+
+export class NotePickerUtils {
+  static getSelection(picker: DendronQuickPickerV2): NoteQuickInput[] {
+    return [...picker.selectedItems];
+  }
+
+  static fetchRootResults = (opts: { engine: DEngineClientV2 }) => {
+    const { engine } = opts;
+    const nodeDict = engine.notes;
+    const roots = NoteUtils.getRoots(nodeDict);
+    const childrenOfRoot = roots.flatMap((ent) => ent.children);
+    const nodes = _.map(childrenOfRoot, (ent) => nodeDict[ent]).concat(roots);
+    return nodes.map((ent) => {
+      return DNodeUtils.enhancePropForQuickInput({
+        wsRoot: DendronWorkspace.wsRoot(),
+        props: ent,
+        schemas: engine.schemas,
+        vaults: DendronWorkspace.instance().vaultsv4,
+      });
+    });
+  };
+
+  static async fetchPickerResults(opts: {
+    picker: DendronQuickPickerV2;
+    qs: string;
+  }) {
+    const ctx = "createPickerItemsFromEngine";
+    const start = process.hrtime();
+    const { picker, qs } = opts;
+    const engine = getWS().getEngine();
+    Logger.info({ ctx, msg: "first query" });
+    let nodes: NoteProps[];
+    // if we are doing a query, reset pagination options
+    PickerUtilsV2.resetPaginationOpts(picker);
+    const resp = await engine.queryNotes({ qs });
+    nodes = resp.data;
+    Logger.info({ ctx, msg: "post:queryNotes" });
+    if (nodes.length > PAGINATE_LIMIT) {
+      picker.allResults = nodes;
+      picker.offset = PAGINATE_LIMIT;
+      picker.moreResults = true;
+      nodes = nodes.slice(0, PAGINATE_LIMIT);
+    } else {
+      PickerUtilsV2.resetPaginationOpts(picker);
+    }
+    const updatedItems = await Promise.all(
+      nodes.map(async (ent) =>
+        DNodeUtils.enhancePropForQuickInput({
+          wsRoot: DendronWorkspace.wsRoot(),
+          props: ent,
+          schemas: engine.schemas,
+          vaults: DendronWorkspace.instance().vaultsv4,
+        })
+      )
+    );
+    const profile = getDurationMilliseconds(start);
+    Logger.info({ ctx, msg: "engine.query", profile });
+    return updatedItems;
   }
 }

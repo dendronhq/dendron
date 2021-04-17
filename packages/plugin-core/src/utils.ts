@@ -147,6 +147,14 @@ export class VSCodeUtils {
     return vscode.window.activeTextEditor;
   }
 
+  static getActiveTextEditorOrThrow() {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      throw new DendronError({ msg: "no active editor" });
+    }
+    return editor;
+  }
+
   static getFsPathFromTextEditor(editor: vscode.TextEditor) {
     return editor.document.uri.fsPath;
   }

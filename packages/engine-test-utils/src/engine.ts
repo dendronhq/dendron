@@ -68,7 +68,7 @@ export function createSiteConfig(
   };
 }
 
-async function setupWS(opts: { vaults: DVault[] }) {
+export async function setupWS(opts: { vaults: DVault[] }) {
   const wsRoot = tmpDir().name;
   const ws = new WorkspaceService({ wsRoot });
   const vaults = await Promise.all(
@@ -114,6 +114,7 @@ export async function runEngineTestV5(
   const initResp = await engine.init();
   const testOpts = { wsRoot, vaults, engine, initResp, extra, config: engine };
   if (initGit) {
+    await GitTestUtils.createRepoForWorkspace(wsRoot);
     await Promise.all(
       vaults.map((vault) => {
         return GitTestUtils.createRepoWithReadme(vault2Path({ vault, wsRoot }));
@@ -125,7 +126,7 @@ export async function runEngineTestV5(
   }
   const results = (await func(testOpts)) || [];
   await runJestHarnessV2(results, expect);
-  return { opts: testOpts, resp: undefined };
+  return { opts: testOpts, resp: undefined, wsRoot };
 }
 
 export function testWithEngine(

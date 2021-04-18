@@ -495,17 +495,6 @@ export class DendronClientUtilsV2 {
     }
     return smod;
   };
-
-  static getVault({
-    dirname,
-  }: {
-    dirname: string;
-    engine: DEngineClientV2;
-  }): DVault {
-    return {
-      fsPath: dirname,
-    };
-  }
 }
 
 export const clipboard = vscode.env.clipboard;

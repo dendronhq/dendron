@@ -170,12 +170,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const wsPath = DendronWorkspace.workspaceFile().fsPath;
     let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
     if (!_.find(out.folders, (ent) => ent.path === vault.fsPath)) {
-      const vault2Folder: WorkspaceFolderRaw = {
-        path: vault.fsPath,
-      };
-      if (vault.name) {
-        vault2Folder.name = vault.name;
-      }
+      const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
       const folders = [vault2Folder].concat(out.folders);
       out = assignJSONWithComment({ folders }, out);
       writeJSONWithComments(wsPath, out);

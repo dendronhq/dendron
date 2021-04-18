@@ -12,7 +12,7 @@ import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
-suite("notes", function () {
+suite("FileWatcher", function () {
   let ctx: vscode.ExtensionContext;
   let watcher: VaultWatcher;
 

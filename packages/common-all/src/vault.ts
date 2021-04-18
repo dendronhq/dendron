@@ -137,4 +137,15 @@ export class VaultUtils {
   static toURIPrefix(vault: DVault) {
     return CONSTANTS.DENDRON_DELIMETER + VaultUtils.getName(vault);
   }
+
+  static toWorkspaceFolder(vault: DVault): WorkspaceFolderRaw {
+    return {
+      path: vault.fsPath,
+      name: vault.name,
+    };
+  }
 }
+export type WorkspaceFolderRaw = {
+  path: string;
+  name?: string;
+};

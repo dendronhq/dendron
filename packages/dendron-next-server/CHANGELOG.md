@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.38.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.38.0) (2021-04-19)
+
+**Note:** Version bump only for package @dendronhq/dendron-next-server
+
 ## [0.30.1](https://github.com/dendronhq/dendron/compare/@dendronhq/dendron-next-server@0.29.0...@dendronhq/dendron-next-server@0.30.1) (2021-02-26)
 
 **Note:** Version bump only for package @dendronhq/dendron-next-server

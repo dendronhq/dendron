@@ -17,9 +17,6 @@
             "path": "packages/plugin-core"
         },
         {
-            "path": "packages/dendron-next-server"
-        },
-        {
             "path": "packages/engine-server"
         },
         {
@@ -68,6 +65,13 @@
             "**/bower_components": true,
             "**/*.code-search": true,
             "CHANGELOG.md": true
+        },
+        "files.watcherExclude": {
+            "**/.git/objects/**": true,
+            "**/.git/subtree-cache/**": true,
+            "**/node_modules/**": true,
+            "**/.hg/store/**": true,
+            "**/*.js": true
         },
         "editor.formatOnSave": false,
         "workbench.editor.showTabs": true,

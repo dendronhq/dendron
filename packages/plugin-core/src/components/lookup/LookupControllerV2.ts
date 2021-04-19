@@ -84,6 +84,7 @@ export class LookupControllerV2 {
     return tokenSource;
   }
 
+  // exposed for testing
   onDidHide = (cb: () => void) => {
     this._onDidHide = cb;
   };

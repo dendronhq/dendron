@@ -15,7 +15,7 @@ import { commands, QuickPickItem, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS, DENDRON_REMOTE_VAULTS } from "../constants";
 import { Logger } from "../logger";
-import { WorkspaceFolderRaw, WorkspaceSettings } from "../types";
+import { WorkspaceSettings } from "../types";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
@@ -170,12 +170,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const wsPath = DendronWorkspace.workspaceFile().fsPath;
     let out = (await readJSONWithComments(wsPath)) as WorkspaceSettings;
     if (!_.find(out.folders, (ent) => ent.path === vault.fsPath)) {
-      const vault2Folder: WorkspaceFolderRaw = {
-        path: vault.fsPath,
-      };
-      if (vault.name) {
-        vault2Folder.name = vault.name;
-      }
+      const vault2Folder = VaultUtils.toWorkspaceFolder(vault);
       const folders = [vault2Folder].concat(out.folders);
       out = assignJSONWithComment({ folders }, out);
       writeJSONWithComments(wsPath, out);

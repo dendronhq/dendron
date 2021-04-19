@@ -15,6 +15,11 @@
     "index.js",
     "docs"
   ],
+  "scripts": {
+    "build:auth": "env STAGE=prod webpack",
+    "watch:auth": "webpack --watch",
+    "start:auth": "webpack serve --port 8000"
+  },
   "installConfig": {
     "hoistingLimits": "none"
   },
@@ -40,5 +45,9 @@
     "request": "^2.88.2",
     "sass": "^1.32.7"
   },
-  "gitHead": "d2e0e1c5ada1ac4a507e2da387cf761316de76de"
+  "devDependencies": {
+    "amazon-cognito-identity-js": "^4.6.0",
+    "webpack-cli": "^4.6.0",
+    "webpack-dev-server": "^3.11.2"
+  }
 }

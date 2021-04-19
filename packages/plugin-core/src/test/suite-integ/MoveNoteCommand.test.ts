@@ -16,29 +16,6 @@ suite("MoveNoteCommand", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this);
 
-  // test.only("move note over itself", (done) => {
-  //   runLegacyMultiWorkspaceTest({
-  //     ctx,
-  //     preSetupHook: async ({ wsRoot, vaults }) => {
-  //       ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-  //     },
-  //     onInit: async ({ engine, vaults, wsRoot }) => {
-  //       const notes = engine.notes;
-  //       const vault1 = vaults[0];
-  //       const vault2 = vaults[0];
-  //       const fooNote = NoteUtils.getNoteByFnameV5({
-  //         fname: "foo",
-  //         notes,
-  //         vault: vault1,
-  //         wsRoot,
-  //       }) as NoteProps;
-  //       await VSCodeUtils.openNote(fooNote);
-  //       const cmd = new MoveNoteCommand();
-  //       await cmd.gatherInputs();
-  //     },
-  //   });
-  // });
-
   test("move note in same vault", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,

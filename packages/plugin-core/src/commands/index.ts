@@ -1,7 +1,7 @@
 import { AddAndCommit } from "./AddAndCommit";
 import { ArchiveHierarchyCommand } from "./ArchiveHierarchy";
-import { BrowseNoteCommand } from "./BrowseNoteCommand";
 import { CodeCommandConstructor } from "./base";
+import { BrowseNoteCommand } from "./BrowseNoteCommand";
 import { ChangeWorkspaceCommand } from "./ChangeWorkspace";
 import { ConfigureCommand } from "./ConfigureCommand";
 import { ConfigurePodCommand } from "./ConfigurePodCommand";
@@ -20,6 +20,7 @@ import { GoDownCommand } from "./GoDownCommand";
 import { GotoNoteCommand } from "./GotoNote";
 import { GoUpCommand } from "./GoUpCommand";
 import { ImportPodCommand } from "./ImportPod";
+import { InsertNoteCommand } from "./InsertNoteCommand";
 import { MoveNoteCommand } from "./MoveNoteCommand";
 import { OpenLogsCommand } from "./OpenLogs";
 import { PasteLinkCommand } from "./PasteLink";
@@ -62,6 +63,7 @@ const ALL_COMMANDS = [
   GoUpCommand,
   GotoNoteCommand,
   ImportPodCommand,
+  InsertNoteCommand,
   //   LookupCommand,
   OpenLogsCommand,
   PasteLinkCommand,

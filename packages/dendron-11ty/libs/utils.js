@@ -23,7 +23,6 @@ const env = () => {
     enginePort: process.env.ENGINE_PORT,
     proto: process.env.PROTO,
     stage: process.env.BUILD_STAGE || process.env.STAGE || "dev",
-    elevPort: process.env.ELEV_PORT,
     /**
      * Override output of config.yml
      */
@@ -127,7 +126,7 @@ class NOTE_UTILS {
       );
       return out;
     } else {
-      return "http://" + path.posix.join(`localhost:${env().elevPort || 8080}`, suffix);
+      return "http://" + path.posix.join(`localhost:${getSiteConfig().previewPort || 8080}`, suffix);
     }
   }
 

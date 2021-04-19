@@ -122,6 +122,21 @@ export type DendronConfig = {
    * Default: true
    */
   initializeRemoteVaults?: boolean;
+
+  /**
+   * If true, enable feedback widget
+   */
+  feedback?: boolean;
+
+  /**
+   * If using backend API functionality
+   */
+  apiEndpoint?: string;
+
+  /**
+   * Default is templates
+   */
+  defaultInsertHierarchy?: string;
 };
 
 export type HierarchyConfig = {
@@ -288,6 +303,22 @@ export type DendronSiteConfig = {
    * Default: false
    */
   generateChangelog?: boolean;
+  /**
+   * Set alternate port for preview
+   * Default: 8080
+   */
+  previewPort?: boolean;
+
+  /**
+   * If set, value of your segment key
+   */
+  segmentKey?: string;
+
+  /**
+   * Required for auth
+   */
+  cognitoUserPoolId?: string;
+  cognitoClientId?: string;
 };
 
 export enum DuplicateNoteAction {
@@ -302,3 +333,8 @@ export type UseVaultBehavior = {
 };
 
 export type DuplicateNoteBehavior = UseVaultBehavior;
+
+export enum DendronUserSpecial {
+  "everyone" = "everyone",
+  "anonymous" = "anonymous",
+}

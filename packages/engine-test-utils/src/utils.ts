@@ -22,6 +22,12 @@ export async function checkNotInString(body: string, ...nomatch: string[]) {
 }
 
 export class GitTestUtils {
+  static async createRepoForWorkspace(wsRoot: string) {
+    const git = new Git({ localUrl: wsRoot });
+    await git.init();
+    await git.add("dendron.yml");
+    await git.commit({ msg: "init" });
+  }
   static async createRepoWithReadme(root: string) {
     const git = new Git({ localUrl: root });
     await git.init();

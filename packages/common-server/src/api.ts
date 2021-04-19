@@ -181,7 +181,7 @@ export type WorkspaceListPayload = APIPayload<{ workspaces: string[] }>;
 export type EngineQueryPayload = APIPayload<DNodeProps[]>;
 export type EngineGetNoteByPathPayload = APIPayload<GetNotePayload>;
 export type EngineRenameNotePayload = APIPayload<RenameNotePayload>;
-export type EngineUpdateNotePayload = APIPayload<void>;
+export type EngineUpdateNotePayload = APIPayload<NoteProps>;
 export type EngineDeletePayload = APIPayload<EngineDeleteNotePayload>;
 
 export type SchemaDeletePayload = APIPayload<DEngineDeleteSchemaPayload>;

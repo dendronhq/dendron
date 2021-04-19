@@ -19,7 +19,7 @@ suite("notes", function () {
     },
   });
 
-  // TODO: none of these quickpick methods work
+  // TODO: currently this opens a quickpick
   test.skip("basic", (done) => {
     onWSInit(async () => {
       const notePath = path.join(vaultPath, "foo.md");

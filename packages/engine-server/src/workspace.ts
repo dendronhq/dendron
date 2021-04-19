@@ -1,7 +1,9 @@
 import {
+  CONSTANTS,
   DendronConfig,
   DendronError,
   DuplicateNoteAction,
+  DUser,
   DUtils,
   DVault,
   DVaultVisibility,
@@ -50,19 +52,29 @@ export class WorkspaceService {
     return DUtils.semver.lt(oldVersion, newVersion);
   }
 
+  static isWorkspaceVault(fpath: string) {
+    return fs.existsSync(path.join(fpath, CONSTANTS.DENDRON_CONFIG_FILE));
+  }
+
   public wsRoot: string;
 
   constructor({ wsRoot }: WorkspaceServiceOpts) {
     this.wsRoot = wsRoot;
   }
 
+  get user(): DUser {
+    const fpath = path.join(this.wsRoot, CONSTANTS.DENDRON_USER_FILE);
+    if (fs.existsSync(fpath)) {
+      return new DUser(_.trim(fs.readFileSync(fpath, { encoding: "utf8" })));
+    } else {
+      return DUser.createAnonymous();
+    }
+  }
+
   get config(): DendronConfig {
     return DConfig.defaults(DConfig.getOrCreate(this.wsRoot));
   }
 
-  get configV2(): DendronConfig {
-    return DConfig.getOrCreate(this.dendronRoot);
-  }
   get dendronRoot(): string {
     return path.join(this.wsRoot, "dendron");
   }
@@ -309,6 +321,44 @@ export class WorkspaceService {
     const git = simpleGit({ baseDir: repoPath });
     await git.pull();
     return repoPath;
+  }
+
+  async pullVaults() {
+    const allRepos = await this.getAllRepos();
+    const out = await Promise.all(
+      allRepos.map(async (root) => {
+        const git = new Git({ localUrl: root });
+        if (await git.hasRemote()) {
+          await git.pull();
+        }
+      })
+    );
+    return _.filter(out, (ent) => !_.isUndefined(ent));
+  }
+
+  async pushVaults() {
+    const allRepos = await this.getAllRepos();
+    const vaults = this.config.vaults;
+    const wsRoot = this.wsRoot;
+    const out = await Promise.all(
+      allRepos.map(async (root) => {
+        const git = new Git({ localUrl: root });
+        if (WorkspaceService.isWorkspaceVault(root)) {
+          return;
+        }
+        const vault = VaultUtils.getVaultByPath({
+          vaults,
+          wsRoot,
+          fsPath: root,
+        });
+        if ((await git.hasRemote()) && this.user.canPushVault(vault)) {
+          await git.push().catch((err) => {
+            throw new DendronError({ payload: { err, repoPath: root } });
+          });
+        }
+      })
+    );
+    return _.filter(out, (ent) => !_.isUndefined(ent));
   }
 
   /**

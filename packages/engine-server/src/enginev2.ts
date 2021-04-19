@@ -387,10 +387,7 @@ export class DendronEngineV2 implements DEngine {
     }
   }
 
-  async updateNote(
-    note: NoteProps,
-    opts?: EngineUpdateNodesOptsV2
-  ): Promise<void> {
+  async updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2) {
     const out = this.store.updateNote(note, opts);
     await this.updateIndex("note");
     return out;

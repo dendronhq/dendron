@@ -7,6 +7,7 @@ export const CONSTANTS = {
   DENDRON_WS_META: ".dendron.ws",
   DENDRON_CONFIG_FILE: "dendron.yml",
   DENDRON_DELIMETER: "dendron://",
+  DENDRON_USER_FILE: ".dendron.user",
 };
 
 export const ENGINE_ERROR_CODES = {

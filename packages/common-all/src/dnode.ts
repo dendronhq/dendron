@@ -708,6 +708,11 @@ export class NoteUtils {
     return _.filter(_.values(notes), DNodeUtils.isRoot);
   }
 
+  /**
+   * Add props from @param noteHydrated to @param noteRaw
+   * @param param0
+   * @returns
+   */
   static hydrate({
     noteRaw,
     noteHydrated,
@@ -980,24 +985,12 @@ export class SchemaUtils {
     }
   };
 
+  /**
+   * @param param0
+   * @returns
+   */
   static getPath({ root, fname }: { root: string; fname: string }): string {
     return path.join(root, fname + ".schema.yml");
-  }
-
-  static getPathV4({
-    mschema,
-    wsRoot,
-  }: {
-    mschema: SchemaModuleProps;
-    wsRoot: string;
-  }): string {
-    const fname = mschema.fname;
-    const vault = mschema.vault;
-    return DNodeUtils.getFullPath({
-      wsRoot,
-      vault,
-      basename: fname + ".schema.yml",
-    });
   }
 
   /**

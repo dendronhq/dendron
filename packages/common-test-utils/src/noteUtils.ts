@@ -8,6 +8,7 @@ import {
 } from "@dendronhq/common-all";
 import {
   file2Note,
+  file2Schema,
   note2File,
   resolvePath,
   schemaModuleProps2File,
@@ -92,5 +93,17 @@ export class NoteTestUtilsV4 {
     const note = file2Note(npath, vault);
     const newNote = cb(note);
     return await note2File({ note: newNote, vault, wsRoot });
+  }
+
+  static async modifySchemaByPath(
+    opts: { wsRoot: string; vault: DVault; fname: string },
+    cb: (schema: SchemaModuleProps) => SchemaModuleProps
+  ) {
+    const { fname, vault, wsRoot } = opts;
+    const vpath = vault2Path({ vault, wsRoot });
+    const npath = path.join(vpath, fname + ".schema.yml");
+    const schema = file2Schema(npath, wsRoot);
+    const newSchema = cb(schema);
+    return await schemaModuleProps2File(newSchema, vpath, fname);
   }
 }

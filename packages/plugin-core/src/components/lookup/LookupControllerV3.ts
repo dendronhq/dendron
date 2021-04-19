@@ -1,4 +1,4 @@
-import { DNodeType } from "@dendronhq/common-all";
+import { DendronError, DNodeType } from "@dendronhq/common-all";
 import _ from "lodash";
 import { QuickInputButton } from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
@@ -24,6 +24,23 @@ export class LookupControllerV3 {
     this._cancelTokenSource = VSCodeUtils.createCancelSource();
   }
 
+  get cancelToken() {
+    if (_.isUndefined(this._cancelTokenSource)) {
+      throw new DendronError({ msg: "no cancel token" });
+    }
+    return this._cancelTokenSource;
+  }
+
+  createCancelSource() {
+    const tokenSource = new CancellationTokenSource();
+    if (this._cancelTokenSource) {
+      this._cancelTokenSource.cancel();
+      this._cancelTokenSource.dispose();
+    }
+    this._cancelTokenSource = tokenSource;
+    return tokenSource;
+  }
+
   async show(
     opts: CreateQuickPickOpts & {
       nonInteractive?: boolean;
@@ -31,6 +48,7 @@ export class LookupControllerV3 {
       provider: ILookupProviderV3;
     }
   ) {
+    const cancelToken = this.createCancelSource();
     const { nonInteractive, initialValue, provider } = _.defaults(opts, {
       nonInteractive: false,
     });
@@ -45,6 +63,10 @@ export class LookupControllerV3 {
       quickpick.value = initialValue;
     }
     provider.provide(this);
+    provider.onUpdatePickerItems({
+      picker: quickpick,
+      token: cancelToken.token,
+    });
     if (!nonInteractive) {
       quickpick.show();
     }

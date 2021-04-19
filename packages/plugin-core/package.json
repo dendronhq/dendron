@@ -239,6 +239,11 @@
                 "docPreview": ""
             },
             {
+                "command": "dendron.insertNote",
+                "title": "Dendron: Insert Note",
+                "desc": "Insert note contents"
+            },
+            {
                 "command": "dendron.moveNote",
                 "title": "Dendron: Move Note",
                 "desc": "Move a note"

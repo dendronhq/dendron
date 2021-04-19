@@ -26,31 +26,6 @@ export class VaultUtils {
     );
   }
 
-  /**
-   @deprecated
-   */
-  static getByVaultPath({
-    wsRoot,
-    vaults,
-    vaultPath,
-  }: {
-    wsRoot: string;
-    vaultPath: string;
-    vaults: DVault[];
-  }) {
-    // get diname
-    const vault = _.find(vaults, (ent) => {
-      let cmp = path.isAbsolute(vaultPath)
-        ? path.relative(wsRoot, vaultPath)
-        : vaultPath;
-      return ent.fsPath === cmp;
-    });
-    if (!vault) {
-      throw new DendronError({ msg: "no vault found" });
-    }
-    return vault;
-  }
-
   static getVaultByName({
     vaults,
     vname,
@@ -78,7 +53,7 @@ export class VaultUtils {
     return vault;
   }
 
-  static getVaultByNotePathV4({
+  static getVaultByPath({
     vaults,
     wsRoot,
     fsPath,
@@ -92,7 +67,7 @@ export class VaultUtils {
   }) {
     const normPath = this.normPathByWsRoot({
       wsRoot,
-      fsPath: path.dirname(fsPath),
+      fsPath,
     });
     const vault = _.find(vaults, { fsPath: normPath });
     if (!vault) {
@@ -101,6 +76,25 @@ export class VaultUtils {
       });
     }
     return vault;
+  }
+
+  static getVaultByNotePathV4({
+    vaults,
+    wsRoot,
+    fsPath,
+  }: {
+    /**
+     * Absolute or relative path to note
+     */
+    fsPath: string;
+    wsRoot: string;
+    vaults: DVault[];
+  }) {
+    return this.getVaultByPath({
+      vaults,
+      wsRoot,
+      fsPath: path.dirname(fsPath),
+    });
   }
 
   /**
@@ -131,6 +125,11 @@ export class VaultUtils {
       : opts.vault.fsPath;
   };
 
+  /**
+   * Get relative path to vault
+   * @param opts
+   * @returns
+   */
   static normPathByWsRoot = (opts: { fsPath: string; wsRoot: string }) => {
     return path.relative(opts.wsRoot, opts.fsPath);
   };
@@ -138,4 +137,15 @@ export class VaultUtils {
   static toURIPrefix(vault: DVault) {
     return CONSTANTS.DENDRON_DELIMETER + VaultUtils.getName(vault);
   }
+
+  static toWorkspaceFolder(vault: DVault): WorkspaceFolderRaw {
+    return {
+      path: vault.fsPath,
+      name: vault.name,
+    };
+  }
 }
+export type WorkspaceFolderRaw = {
+  path: string;
+  name?: string;
+};

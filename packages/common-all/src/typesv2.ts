@@ -79,6 +79,16 @@ export type DVault = {
   //  */
   // uri: string;
   remote?: VaultRemote;
+  userPermission?: DPermission;
+  /**
+   * If this is enabled, don't apply workspace push commands
+   */
+  noAutoPush?: boolean;
+};
+
+export type DPermission = {
+  read: string[];
+  write: string[];
 };
 
 export type DLinkType = "wiki" | "refv2";
@@ -160,6 +170,11 @@ export type SchemaOpts = Omit<DNodeOpts<SchemaData>, "type" | "id"> & {
 export type NoteOpts = Omit<DNodeOpts, "type">;
 
 export type DNodePropsQuickInputV2<T = any> = DNodeProps<T> & {
+  label: string;
+  detail?: string;
+  alwaysShow?: boolean;
+};
+export type NoteQuickInput = NoteProps & {
   label: string;
   detail?: string;
   alwaysShow?: boolean;
@@ -317,7 +332,16 @@ export type DCommonMethods = {
   ) => Promise<Required<RespV2<NoteChangeEntry[]>>>;
   // TODO
   // configGet(): RespV2<ConfigGetPayload>
-  updateNote(note: NoteProps, opts?: EngineUpdateNodesOptsV2): Promise<void>;
+  /**
+   *
+   * @param note
+   * @param opts
+   * @returns The updated note. If `newNode` is set, this will have the updated parent id
+   */
+  updateNote(
+    note: NoteProps,
+    opts?: EngineUpdateNodesOptsV2
+  ): Promise<NoteProps>;
   updateSchema: (schema: SchemaModuleProps) => Promise<void>;
 
   writeNote: (

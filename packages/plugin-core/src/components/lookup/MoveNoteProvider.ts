@@ -4,10 +4,13 @@ import { TextEditor, Uri, window } from "vscode";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
 import { LookupControllerV3 } from "./LookupControllerV3";
-import { ILookupProviderV3 } from "./LookupProviderV3";
+import { ILookupProviderV3, OnUpdatePickerItemsOpts } from "./LookupProviderV3";
 import { PickerUtilsV2 } from "./utils";
 
 export class MoveNoteProvider implements ILookupProviderV3 {
+  async onUpdatePickerItems(_opts: OnUpdatePickerItemsOpts) {
+    return;
+  }
   async provide(lc: LookupControllerV3) {
     const quickpick = lc.quickpick;
     if (!quickpick) {

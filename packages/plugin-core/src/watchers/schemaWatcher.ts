@@ -1,10 +1,9 @@
-import { DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngineClientV2, VaultUtils } from "@dendronhq/common-all";
 import { string2Schema } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { Logger } from "../logger";
-import { DendronClientUtilsV2 } from "../utils";
 import { DendronWorkspace } from "../workspace";
 
 export class SchemaWatcher {
@@ -45,9 +44,14 @@ export class SchemaWatcher {
     }
     this.L.info({ ctx, uri });
     const engine = DendronWorkspace.instance().getEngine();
+    const { vaultsv3: vaults, wsRoot } = engine;
     const fname = path.basename(uri.fsPath, ".schema.yml");
     const dirname = path.dirname(uri.fsPath);
-    const vault = DendronClientUtilsV2.getVault({ dirname, engine });
+    const vault = VaultUtils.getVaultByPath({
+      vaults,
+      wsRoot,
+      fsPath: dirname,
+    });
     const document = await vscode.workspace.openTextDocument(uri);
     const content = document.getText();
 

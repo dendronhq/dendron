@@ -3,7 +3,6 @@ module.exports = {
   enginePort: process.env.ENGINE_PORT,
   proto: process.env.PROTO,
   stage: process.env.BUILD_STAGE || process.env.STAGE || "dev",
-  elevPort: process.env.ELEV_PORT,
   /**
    * Override output of config.yml
    */

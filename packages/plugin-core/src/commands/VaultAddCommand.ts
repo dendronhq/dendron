@@ -15,7 +15,7 @@ import { commands, QuickPickItem, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS, DENDRON_REMOTE_VAULTS } from "../constants";
 import { Logger } from "../logger";
-import { WorkspaceFolderRaw, WorkspaceSettings } from "../types";
+import { WorkspaceSettings } from "../types";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";

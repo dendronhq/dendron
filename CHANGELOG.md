@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.38.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.38.0) (2021-04-19)
+
+### Bug Fixes
+
+- go-down at root matches itself only ([#623](https://github.com/dendronhq/dendron/issues/623)) ([d70c120](https://github.com/dendronhq/dendron/commit/d70c1203085a1a00b135999c669d18cb500fcfb3)), closes [#619](https://github.com/dendronhq/dendron/issues/619)
+- notes added outside of Dendron get initialized with correct metadata ([5390f2f](https://github.com/dendronhq/dendron/commit/5390f2f893d02a89fe905784a82bba4590c894e7))
+
+### Features Dendron
+
+- add svg and rollup image ([#625](https://github.com/dendronhq/dendron/issues/625)) ([44c0103](https://github.com/dendronhq/dendron/commit/44c010305a830dfc06f78ffd171f741b86308770))
+- insert note command ([70065f8](https://github.com/dendronhq/dendron/commit/70065f859db745c725b252c34b452c9d16cf13a4))
+- workspace push and pull commands ([e1a4ab3](https://github.com/dendronhq/dendron/commit/e1a4ab38329bbfe4bf190b019c2d855f0b239ab8))
+
 # [0.37.0](https://github.com/dendronhq/dendron/compare/v0.28.7-alpha.3...v0.37.0) (2021-04-12)
 
 ### Bug Fixes

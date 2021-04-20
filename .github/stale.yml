@@ -2,6 +2,7 @@
 daysUntilStale: 60
 # Number of days of inactivity before a stale issue is closed
 daysUntilClose: 7
+onlyLabels: ["status.pending-requester-info"]
 # Issues with these labels will never be considered stale
 exemptLabels:
   - type.epic

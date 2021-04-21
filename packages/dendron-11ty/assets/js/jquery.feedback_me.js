@@ -617,9 +617,9 @@ var fm = (function ($) {
 
 		dataArray = {
 			name: $fm_content.find(".feedback_name").val(),
-			message: $fm_content.find(".feedback_message").val(),
+			comment: $fm_content.find(".feedback_message").val(),
 			email: $fm_content.find(".feedback_email").val(),
-			radio_list_value: $fm_content.find(".feedback_me_form input[name=feedback_radio]:checked").val()
+			rating: $fm_content.find(".feedback_me_form input[name=feedback_radio]:checked").val()
 		};
 
 		dataArray = $.extend(fm_options.custom_params, dataArray);

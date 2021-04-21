@@ -206,17 +206,26 @@
 </div>
 {% if dendronConfig.feedback %}
 <script>
-  const base_url = "{{ dendronConfig | getValue: "apiEndpoint" }}";
+  {% if processEnv.stage == "dev" %}
+  const base_url = "http://localhost:3005";
+  {% else %}
+  const base_url = "https://api.dendron.app";
+  {% endif %}
+  let noteId = window.location.pathname.split("/").pop().replace(/.html$/, "")
+  if (noteId === "") {
+      noteId = "index";
+  }
   $(document).ready(function(){
     fm_options = {
       jQueryUI : true,
       position : "right-bottom",
       custom_params: {
-        user_id: "john_doe",
+        domain: window.location.hostname,
+        noteId,
     },
     name_required: false,
       bootstrap : true,
-      name_placeholder:"Name please",						
+      show_email: true,
       trigger_label : "Feedback",
       message_required : false,
       show_asterisk_for_required : true,

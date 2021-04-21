@@ -3,14 +3,21 @@ import {
   AssertUtils,
   EngineTestUtilsV4,
   ENGINE_HOOKS,
+  FileTestUtils,
   NoteTestUtilsV4,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
+import path from "path";
 import * as vscode from "vscode";
 import { MoveNoteCommand } from "../../commands/MoveNoteCommand";
+import { MoveNoteProvider } from "../../components/lookup/MoveNoteProvider";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
-import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
+import {
+  runLegacySingleWorkspaceTest,
+  runLegacyMultiWorkspaceTest,
+  setupBeforeAfter,
+} from "../testUtilsV3";
 
 suite("MoveNoteCommand", function () {
   let ctx: vscode.ExtensionContext;
@@ -201,6 +208,81 @@ suite("MoveNoteCommand", function () {
             })
           )
         ).toBeFalsy();
+        done();
+      },
+    });
+  });
+
+  test("don't prompt vault selection if single vault", (done) => {
+    runLegacySingleWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      },
+      onInit: async ({ engine, wsRoot, vaults }) => {
+        const vault = vaults[0];
+        const notes = engine.notes;
+        const fooNote = NoteUtils.getNoteByFnameV5({
+          fname: "foo",
+          notes,
+          vault: vault,
+          wsRoot,
+        }) as NoteProps;
+
+        await VSCodeUtils.openNote(fooNote);
+        const cmd = new MoveNoteCommand();
+        const lc = cmd.createLookup();
+        const provider = new MoveNoteProvider();
+        const initialValue = path.basename(
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
+          ".md"
+        );
+        lc.show({
+          title: "Move note",
+          placeholder: "foo",
+          provider,
+          initialValue,
+        });
+        expect(lc.quickpick!.buttons[0].pressed).toBeFalsy();
+
+        done();
+      },
+    });
+  });
+
+  test("prompt vault selection if multi vault", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      },
+      onInit: async ({ engine, wsRoot, vaults }) => {
+        const notes = engine.notes;
+        const vault1 = vaults[0];
+        // const vault2 = vaults[1];
+        const fooNote = NoteUtils.getNoteByFnameV5({
+          fname: "foo",
+          notes,
+          vault: vault1,
+          wsRoot,
+        }) as NoteProps;
+
+        await VSCodeUtils.openNote(fooNote);
+        const cmd = new MoveNoteCommand();
+        const lc = cmd.createLookup();
+        const provider = new MoveNoteProvider();
+        const initialValue = path.basename(
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
+          ".md"
+        );
+        lc.show({
+          title: "Move note",
+          placeholder: "foo",
+          provider,
+          initialValue,
+        });
+        expect(lc.quickpick!.buttons[0].pressed).toBeTruthy();
+
         done();
       },
     });

@@ -50,7 +50,9 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   createLookup() {
-    const buttons = [VaultSelectButton.create(true)];
+    const vaults = getWS().config.vaults;
+    const isMultiVault = vaults.length > 1;
+    const buttons = [VaultSelectButton.create(isMultiVault)];
     const lc = new LookupControllerV3({ nodeType: "note", buttons });
     return lc;
   }
@@ -75,6 +77,7 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           if (event.action === "done") {
             HistoryService.instance().remove("move", "lookupProvider");
             resolve(event.data);
+            lc.onHide();
           } else if (event.action === "error") {
             return;
           } else {

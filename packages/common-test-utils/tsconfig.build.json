@@ -1,10 +1,9 @@
 {
-    "extends": "../../tsconfig.build.json",
-    "compilerOptions": {
-      "outDir": "./lib",
-      "rootDir": "src",
-      "skipLibCheck": true
-    },
-    "exclude": ["node_modules", "**/*-spec.ts"]
-  }
-  
+  "extends": "../../tsconfig.build.json",
+  "compilerOptions": {
+    "outDir": "./lib",
+    "rootDir": "src",
+    "skipLibCheck": true
+  },
+  "exclude": ["node_modules", "**/*-spec.ts"]
+}

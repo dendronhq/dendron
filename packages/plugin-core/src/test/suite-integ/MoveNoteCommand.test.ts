@@ -3,7 +3,6 @@ import {
   AssertUtils,
   EngineTestUtilsV4,
   ENGINE_HOOKS,
-  FileTestUtils,
   NoteTestUtilsV4,
 } from "@dendronhq/common-test-utils";
 import _ from "lodash";

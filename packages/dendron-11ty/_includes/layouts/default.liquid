@@ -210,7 +210,23 @@
   const base_url = "http://localhost:3005";
   {% else %}
   const base_url = "https://api.dendron.app";
+  function readCookie(name) {
+      var nameEQ = name + "=";
+      var ca = document.cookie.split(';');
+      for (var i = 0; i < ca.length; i++) {
+          var c = ca[i];
+          while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+          if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+      }
+      return null;
+  }
+  var cookieName = ["CognitoIdentityServiceProvider", cognitoUser.pool.clientId, cognitoUser.username, "idToken"].join(".");
+  var headers = {Authorization: readCookie(cookieName)};
+  $.ajaxSetup({
+      headers,
+  });
   {% endif %}
+
   let noteId = window.location.pathname.split("/").pop().replace(/.html$/, "")
   if (noteId === "") {
       noteId = "index";
@@ -222,7 +238,7 @@
       custom_params: {
         domain: window.location.hostname,
         noteId,
-    },
+      },
     name_required: false,
       bootstrap : true,
       show_email: true,

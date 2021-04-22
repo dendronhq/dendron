@@ -145,14 +145,17 @@ export class BuildSiteV2CLICommand extends CLICommand<
     await Promise.all([buildStyles(), buildSearch()]);
     if (!opts.serve) {
       this.L.info({ msg: "done compiling" });
-      setTimeout(() => {
-        server.close((err: any) => {
-          this.L.info({ msg: "closing server" });
-          if (err) {
-            this.L.error({ msg: "error closing", payload: err });
-          }
-        });
-      }, 5000);
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          server.close((err: any) => {
+            this.L.info({ msg: "closing server" });
+            if (err) {
+              this.L.error({ msg: "error closing", payload: err });
+            }
+            resolve({});
+          });
+        }, 5000);
+      });
     }
     return {};
   }

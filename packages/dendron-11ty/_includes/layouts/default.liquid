@@ -109,22 +109,13 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
         
         {% if dendronConfig.feedback %}
+        <script type="text/javascript" src="/assets/js/rater.js"></script>
         <link rel="stylesheet" type="text/css" href="/assets/css/jquery.feedback_me.css">
         <script type="text/javascript" src="/assets/js/jquery.feedback_me.js"></script>
         {% endif %}
 
-        {% if site.segmentKey %}
-        <script>
-          !function(){var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware"];analytics.factory=function(e){return function(){var t=Array.prototype.slice.call(arguments);t.unshift(e);analytics.push(t);return analytics}};for(var e=0;e<analytics.methods.length;e++){var key=analytics.methods[e];analytics[key]=analytics.factory(key)}analytics.load=function(key,e){var t=document.createElement("script");t.type="text/javascript";t.async=!0;t.src="https://cdn.segment.com/analytics.js/v1/" + key + "/analytics.min.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n);analytics._loadOptions=e};analytics._writeKey="{{site.segmentKey}}";analytics.SNIPPET_VERSION="4.13.2";
-          analytics.load("{{site.segmentKey}}");
-          analytics.page();
-          }}();
-        </script>
-        {% endif %}
-
         {% if site.cognitoUserPoolId %}
           {% if processEnv.stage == "dev" %}
-            <script src="http://localhost:8000/auth.js"></script>
           {% else %}
             <script src="/assets/js/auth.js"></script>
           {% endif %}
@@ -133,11 +124,20 @@
             UserPoolId = "{{site.cognitoUserPoolId}}";
             ClientId = "{{site.cognitoClientId}}";
             domain = "{{site.siteUrl}}";
-            const currentUser = window.getCurrentUser(UserPoolId, ClientId, domain);
-            if (currentUser && window.analytics) {
-              window.identifyUser(currentUser);
-            }
+            window.currentUser = window.getCurrentUser(UserPoolId, ClientId, domain);
           </script>
+        {% endif %}
+
+        {% if site.segmentKey %}
+        <script>
+          !function(){var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware"];analytics.factory=function(e){return function(){var t=Array.prototype.slice.call(arguments);t.unshift(e);analytics.push(t);return analytics}};for(var e=0;e<analytics.methods.length;e++){var key=analytics.methods[e];analytics[key]=analytics.factory(key)}analytics.load=function(key,e){var t=document.createElement("script");t.type="text/javascript";t.async=!0;t.src="https://cdn.segment.com/analytics.js/v1/" + key + "/analytics.min.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n);analytics._loadOptions=e};analytics._writeKey="{{site.segmentKey}}";analytics.SNIPPET_VERSION="4.13.2";
+          analytics.load("{{site.segmentKey}}");
+          if (window.currentUser) {
+            analytics.identify(window.currentUser.username);
+          }
+          analytics.page({userId: window.currentUser.username});
+          }}();
+        </script>
         {% endif %}
 
         {% if nodeCurrent.custom.sources %}
@@ -248,7 +248,7 @@
       feedback_url : `${base_url}/api/v1/feedback/`,
       show_radio_button_list: true,
       radio_button_list_labels : ["1", "2", "3", "4", "5"],
-      radio_button_list_title : "Quality",
+      radio_button_list_title : "Rating",
     };
     fm.init(fm_options);
   });

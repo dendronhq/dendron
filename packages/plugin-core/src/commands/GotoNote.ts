@@ -54,9 +54,22 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       const currentLine = editor?.document.getText().split("\n")[
         selection.start.line
       ];
+
       if (currentLine) {
-        const out = matchWikiLink(currentLine);
-        if (out && _.inRange(selection.start.character, out.start, out.end)) {
+        const lastIdx = currentLine
+          .slice(0, selection.start.character)
+          .lastIndexOf("[[");
+        const padding = Math.max(lastIdx - 3, 0);
+        const txtToMatch = currentLine.slice(padding);
+        const out = matchWikiLink(txtToMatch);
+        if (
+          out &&
+          _.inRange(
+            selection.start.character,
+            out.start + padding,
+            out.end + padding
+          )
+        ) {
           return out.link;
         }
       }

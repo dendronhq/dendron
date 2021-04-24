@@ -392,7 +392,7 @@ export type BulkAddNoteOpts = {
 
 export type DEngine = DCommonProps &
   DCommonMethods & {
-    store: DStoreV2;
+    store: DStore;
 
     init: () => Promise<DEngineInitResp>;
     deleteNote: (
@@ -420,7 +420,7 @@ export type DEngine = DCommonProps &
 
 export type DEngineClientV2 = Omit<DEngine, "store">;
 
-export type DStoreV2 = DCommonProps &
+export type DStore = DCommonProps &
   DCommonMethods & {
     init: () => Promise<DEngineInitResp>;
     deleteNote: (

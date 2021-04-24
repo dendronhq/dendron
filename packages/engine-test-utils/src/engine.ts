@@ -4,12 +4,18 @@ import {
   DVault,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
-import { tmpDir, vault2Path } from "@dendronhq/common-server";
+import {
+  getDurationMilliseconds,
+  tmpDir,
+  vault2Path,
+} from "@dendronhq/common-server";
 import {
   ENGINE_HOOKS,
+  RunEngineTestFunctionOpts,
   RunEngineTestFunctionV4,
   runJestHarnessV2,
   SetupHookFunction,
+  TestResult,
 } from "@dendronhq/common-test-utils";
 import { LaunchEngineServerCommand } from "@dendronhq/dendron-cli";
 import {
@@ -89,8 +95,20 @@ export type RunEngineTestV5Opts = {
   setupOnly?: boolean;
   initGit?: boolean;
 };
+
+export type RunEngineTestFunctionV5<T = any> = (
+  opts: RunEngineTestFunctionOpts & { extra?: any; engineInitDuration: number }
+) => Promise<TestResult[] | void | T>;
+
+/**
+ *
+ * @param func
+ * @param opts.vaults: By default, initiate 3 vaults {vault1, vault2, (vault3, "vaultThree")}
+ * @param opts.preSetupHook: By default, initiate empty
+ * @returns
+ */
 export async function runEngineTestV5(
-  func: RunEngineTestFunctionV4,
+  func: RunEngineTestFunctionV5,
   opts: RunEngineTestV5Opts
 ): Promise<any> {
   const { preSetupHook, extra, vaults, createEngine, initGit } = _.defaults(
@@ -111,8 +129,18 @@ export async function runEngineTestV5(
   const { wsRoot } = await setupWS({ vaults });
   await preSetupHook({ wsRoot, vaults });
   const engine: DEngineClientV2 = await createEngine({ wsRoot, vaults });
+  const start = process.hrtime();
   const initResp = await engine.init();
-  const testOpts = { wsRoot, vaults, engine, initResp, extra, config: engine };
+  const engineInitDuration = getDurationMilliseconds(start);
+  const testOpts = {
+    wsRoot,
+    vaults,
+    engine,
+    initResp,
+    extra,
+    config: engine,
+    engineInitDuration,
+  };
   if (initGit) {
     await GitTestUtils.createRepoForWorkspace(wsRoot);
     await Promise.all(

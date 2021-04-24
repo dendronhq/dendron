@@ -1,5 +1,5 @@
 import { DendronError, getStage, VaultUtils } from "@dendronhq/common-all";
-import { readJSONWithComments } from "@dendronhq/common-server";
+import { getOS, readJSONWithComments } from "@dendronhq/common-server";
 import {
   HistoryEvent,
   HistoryService,
@@ -22,7 +22,6 @@ import { Extensions } from "./settings";
 import { WorkspaceSettings } from "./types";
 import { VSCodeUtils, WSUtils } from "./utils";
 import { MarkdownUtils } from "./utils/md";
-import { getOS } from "./utils/system";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { DendronWorkspace } from "./workspace";
 

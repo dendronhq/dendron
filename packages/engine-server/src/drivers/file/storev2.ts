@@ -9,7 +9,7 @@ import {
   DEngineInitSchemaResp,
   DLink,
   DNodeUtils,
-  DStoreV2,
+  DStore,
   DVault,
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
@@ -45,16 +45,21 @@ import YAML from "yamljs";
 import { MDUtilsV4 } from "../../markdown";
 import { ParserUtilsV2 } from "../../topics/markdown/utilsv2";
 
-type FileMetaV2 = {
+type FileMeta = {
   // file name: eg. foo.md, name = foo
   prefix: string;
   // fpath: full path, eg: foo.md, fpath: foo.md
   fpath: string;
 };
-type FileMetaDictV2 = { [key: string]: FileMetaV2[] };
+type FileMetaDict = { [key: string]: FileMeta[] };
 
-function getFileMetaV2(fpaths: string[]): FileMetaDictV2 {
-  const metaDict: FileMetaDictV2 = {};
+/**
+ * Get hierarchy of each file
+ * @param fpaths
+ * @returns
+ */
+function getFileMeta(fpaths: string[]): FileMetaDict {
+  const metaDict: FileMetaDict = {};
   _.forEach(fpaths, (fpath) => {
     const { name } = path.parse(fpath);
     const lvl = name.split(".").length;
@@ -66,19 +71,19 @@ function getFileMetaV2(fpaths: string[]): FileMetaDictV2 {
   return metaDict;
 }
 
-export class ParserBaseV2 {
-  constructor(public opts: { store: DStoreV2; logger: DLogger }) {}
+export class ParserBase {
+  constructor(public opts: { store: DStore; logger: DLogger }) {}
 
   get logger() {
     return this.opts.logger;
   }
 }
 
-export class NoteParserV2 extends ParserBaseV2 {
-  public cache: NotePropsCacheV2;
+export class NoteParser extends ParserBase {
+  public cache: NotePropsCache;
 
   constructor(
-    public opts: { store: DStoreV2; cache: NotePropsCacheV2; logger: DLogger }
+    public opts: { store: DStore; cache: NotePropsCache; logger: DLogger }
   ) {
     super(opts);
     this.cache = opts.cache;
@@ -86,7 +91,7 @@ export class NoteParserV2 extends ParserBaseV2 {
 
   async parseFile(fpath: string[], vault: DVault): Promise<NoteProps[]> {
     const ctx = "parseFile";
-    const fileMetaDict: FileMetaDictV2 = getFileMetaV2(fpath);
+    const fileMetaDict: FileMetaDict = getFileMeta(fpath);
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
     const notesByFname: NotePropsDict = {};
     const notesById: NotePropsDict = {};
@@ -98,7 +103,7 @@ export class NoteParserV2 extends ParserBaseV2 {
     }
     const rootFile = fileMetaDict[1].find(
       (n) => n.fpath === "root.md"
-    ) as FileMetaV2;
+    ) as FileMeta;
     if (!rootFile) {
       throw new DendronError({ status: ENGINE_ERROR_CODES.NO_ROOT_NOTE_FOUND });
     }
@@ -171,8 +176,13 @@ export class NoteParserV2 extends ParserBaseV2 {
     return out;
   }
 
+  /**
+   *
+   * @param opts
+   * @returns List of all notes added. If a note has no direct parents, stub notes are added instead
+   */
   parseNoteProps(opts: {
-    fileMeta: FileMetaV2;
+    fileMeta: FileMeta;
     notesByFname?: NotePropsDict;
     parents?: NoteProps[];
     addParent: boolean;
@@ -227,7 +237,7 @@ export class NoteParserV2 extends ParserBaseV2 {
   }
 }
 
-export class SchemaParserV2 extends ParserBaseV2 {
+export class SchemaParser extends ParserBase {
   parseFile(fpath: string, root: DVault): SchemaModuleProps {
     const fname = path.basename(fpath, ".schema.yml");
     const wsRoot = this.opts.store.wsRoot;
@@ -274,7 +284,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
   }
 }
 
-type NotePropsCacheV2 = {};
+type NotePropsCache = {};
 
 // type NoteEntryV2 = {
 //   mtime: number;
@@ -289,11 +299,11 @@ type NotePropsCacheV2 = {};
 //   headings: any[];
 // };
 
-export class FileStorageV2 implements DStoreV2 {
+export class FileStorage implements DStore {
   public vaults: string[];
   public notes: NotePropsDict;
   public schemas: SchemaModuleDict;
-  public notesCache: NotePropsCacheV2;
+  public notesCache: NotePropsCache;
   public logger: DLogger;
   public links: DLink[];
   public vaultsv3: DVault[];
@@ -437,7 +447,7 @@ export class FileStorageV2 implements DStoreV2 {
     return this.init();
   }
 
-  loadNotesCache(): NotePropsCacheV2 {
+  loadNotesCache(): NotePropsCache {
     return {};
   }
 
@@ -484,7 +494,7 @@ export class FileStorageV2 implements DStoreV2 {
     if (_.isEmpty(schemaFiles)) {
       throw new DendronError({ status: ENGINE_ERROR_CODES.NO_SCHEMA_FOUND });
     }
-    const { schemas, errors } = await new SchemaParserV2({
+    const { schemas, errors } = await new SchemaParser({
       store: this,
       logger: this.logger,
     }).parse(schemaFiles, vault);
@@ -552,7 +562,7 @@ export class FileStorageV2 implements DStoreV2 {
       include: ["*.md"],
     }) as string[];
     const cache = this.loadNotesCache();
-    const notes = await new NoteParserV2({
+    const notes = await new NoteParser({
       store: this,
       cache,
       logger: this.logger,

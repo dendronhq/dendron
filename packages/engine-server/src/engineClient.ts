@@ -44,7 +44,7 @@ import {
 import fs from "fs-extra";
 import _ from "lodash";
 import { DConfig } from "./config";
-import { FileStorageV2 } from "./drivers/file/storev2";
+import { FileStorage } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
 import { HistoryService } from "./history";
 import { getPortFilePath } from "./utils";
@@ -65,7 +65,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   public configRoot: string;
   public history?: HistoryService;
   public logger: DLogger;
-  public store: FileStorageV2;
+  public store: FileStorage;
   public config: DendronConfig;
 
   static create({
@@ -119,7 +119,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.logger = logger || createLogger();
     const cpath = DConfig.configPath(ws);
     this.config = readYAML(cpath) as DendronConfig;
-    this.store = new FileStorageV2({
+    this.store = new FileStorage({
       engine: this,
       logger: this.logger,
     });

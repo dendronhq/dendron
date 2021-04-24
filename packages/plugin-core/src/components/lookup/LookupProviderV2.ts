@@ -13,13 +13,12 @@ import {
   SchemaUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
 import _, { DebouncedFunc } from "lodash";
 import { CancellationToken, Uri, window } from "vscode";
 import { LookupNoteTypeEnum } from "../../commands/LookupCommand";
 import { Logger } from "../../logger";
 import { CodeConfigKeys, EngineFlavor, EngineOpts } from "../../types";
-import { getDurationMilliseconds, profile } from "../../utils/system";
 import {
   DendronWorkspace,
   getConfigValue,

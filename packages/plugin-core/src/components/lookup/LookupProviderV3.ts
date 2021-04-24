@@ -1,9 +1,9 @@
 import { NoteQuickInput } from "@dendronhq/common-all";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { CancellationToken, window } from "vscode";
 import { Logger } from "../../logger";
-import { getDurationMilliseconds } from "../../utils/system";
 import { DendronWorkspace } from "../../workspace";
 import { LookupControllerV3 } from "./LookupControllerV3";
 import { DendronQuickPickerV2 } from "./types";

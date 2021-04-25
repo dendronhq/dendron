@@ -610,7 +610,7 @@
     },
     "icon": "assets/images/logo.png",
     "scripts": {
-        "vscode:prepublish": "webpack:prod",
+        "vscode:prepublish": "yarn webpack:prod",
         "webpack": "webpack --mode development",
         "webpack:prod": "webpack --mode production",
         "webpack:dev:watch": "webpack --mode development --watch",

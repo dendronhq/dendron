@@ -297,7 +297,7 @@ export class FileStorage implements DStore {
         const newCache = _.merge(cache, cacheUpdates);
         const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
         // OPT:make async and don't wait for return
-        if (this.engine.config.enableCaching) {
+        if (!this.engine.config.noCaching) {
           writeNotesToCache(vpath, newCache);
         }
         return notes;
@@ -355,7 +355,7 @@ export class FileStorage implements DStore {
       include: ["*.md"],
     }) as string[];
 
-    const cache: NotesCache = this.engine.config.enableCaching
+    const cache: NotesCache = !this.engine.config.noCaching
       ? readNotesFromCache(vpath)
       : { version: 0, notes: {} };
     const { notes, cacheUpdates } = await new NoteParser({

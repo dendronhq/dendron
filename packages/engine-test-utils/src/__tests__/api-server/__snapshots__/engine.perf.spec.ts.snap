@@ -2056,5 +2056,3 @@ Array [
   "root.schema.yml",
 ]
 `;
-
-exports[`engine perf basic: BOND 1`] = `2090`;

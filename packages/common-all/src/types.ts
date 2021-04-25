@@ -56,9 +56,9 @@ export type NotesCacheEntry = {
 
 export type DendronConfig = {
   /**
-   * Enable caching behavior
+   * Disable caching behavior
    */
-  enableCaching?: boolean;
+  noCaching?: boolean;
   /**
    * Disable telemetry
    */

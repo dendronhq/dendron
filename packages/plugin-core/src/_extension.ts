@@ -1,6 +1,7 @@
 import {
   DendronError,
   getStage,
+  setStageIfUndefined,
   VaultUtils,
   VSCodeEvents,
 } from "@dendronhq/common-all";
@@ -37,6 +38,16 @@ import { DendronWorkspace } from "./workspace";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
+
+function getCommonProps() {
+  return {
+    os: getOS(),
+    extensionVersion: DendronWorkspace.version(),
+    vscodeVersion: vscode.version,
+    vscodeFlavor: vscode.env.appName,
+  };
+}
+
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   const stage = getStage();
@@ -46,6 +57,7 @@ export function activate(context: vscode.ExtensionContext) {
     wordPattern: MARKDOWN_WORD_PATTERN,
   });
   if (stage !== "test") {
+    setStageIfUndefined("prod");
     _activate(context);
   }
   return;
@@ -334,10 +346,11 @@ export async function _activate(context: vscode.ExtensionContext) {
     wsService.writePort(port);
     const reloadSuccess = await reloadWorkspace();
     const durationReloadWorkspace = getDurationMilliseconds(start);
+
     SegmentClient.instance().track(VSCodeEvents.InitializeWorkspace, {
       duration: durationReloadWorkspace,
-      os: getOS(),
-      version: DendronWorkspace.version(),
+      noCaching: config.noCaching || false,
+      ...getCommonProps(),
     });
     if (!reloadSuccess) {
       HistoryService.instance().add({
@@ -408,8 +421,7 @@ async function showWelcomeOrWhatsNew(
       "dendron.welcome.md"
     );
     SegmentClient.instance().track(VSCodeEvents.Install, {
-      os: getOS(),
-      version: DendronWorkspace.version(),
+      ...getCommonProps(),
     });
     await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
     await ws.context.globalState.update(GLOBAL_STATE.VERSION_PREV, "0.0.0");
@@ -424,8 +436,7 @@ async function showWelcomeOrWhatsNew(
         previousVersion
       );
       SegmentClient.instance().track(VSCodeEvents.Upgrade, {
-        os: getOS(),
-        version: DendronWorkspace.version(),
+        ...getCommonProps(),
         previousVersion,
       });
       vscode.window

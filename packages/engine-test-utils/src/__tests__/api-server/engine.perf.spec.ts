@@ -18,7 +18,7 @@ describe("engine perf", () => {
   // regular: 400ms
   // before: 285
   // 261ms
-  test("basic", async () => {
+  test.skip("basic", async () => {
     /**
      * Evenly spread out
      * Hierarchies:

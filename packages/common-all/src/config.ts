@@ -21,7 +21,7 @@ export const prod: StageConfig = {
   COGNITO_POOL_ID: "us-west-2_X6icVFghe",
   COGNITO_CLIENT_ID: "19vkp969ss471e424pfh7trq33",
   SEGMENT_WEB_KEY: "TODO",
-  SEGMENT_VSCODE_KEY: "XCn096A31Z2HwjdoJXFN2sURj105ZID6",
+  SEGMENT_VSCODE_KEY: "TVO9BpMkMjzJcHaG3nZb5xc9Gm6BGsdB",
 };
 export const config = { global, test, local, dev, prod };
 

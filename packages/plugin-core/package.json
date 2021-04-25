@@ -610,9 +610,10 @@
     },
     "icon": "assets/images/logo.png",
     "scripts": {
-        "vscode:prepublish": "webpack --mode production",
+        "vscode:prepublish": "webpack:prod",
         "webpack": "webpack --mode development",
-        "webpack-dev": "webpack --mode development --watch",
+        "webpack:prod": "webpack --mode production",
+        "webpack:dev:watch": "webpack --mode development --watch",
         "lint": "eslint src --ext ts",
         "watch": "yarn compile --watch",
         "build": "yarn compile",

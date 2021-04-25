@@ -11,7 +11,7 @@ import { WorkspaceService } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { commands, QuickPickItem, window } from "vscode";
+import { commands, ProgressLocation, QuickPickItem, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS, DENDRON_REMOTE_VAULTS } from "../constants";
 import { Logger } from "../logger";
@@ -140,23 +140,39 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   async handleRemoteRepo(opts: CommandOpts) {
     const baseDir = DendronWorkspace.wsRoot();
-    await this.git.clone(opts.pathRemote!, opts.path);
-    const { vaults } = GitUtils.getVaultsFromRepo({
-      repoPath: path.join(baseDir, opts.path),
-      wsRoot: DendronWorkspace.wsRoot(),
-      repoUrl: opts.pathRemote!,
-    });
-    if (_.size(vaults) === 1 && opts.name) {
-      vaults[0].name = opts.name;
-    }
-    // add all vaults
-    await _.reduce(
-      vaults,
-      async (resp: any, vault: DVault) => {
-        await resp;
-        return this.addVaultToWorkspace(vault);
+    const vaults = await window.withProgress(
+      {
+        location: ProgressLocation.Notification,
+        title: "Adding remote vault",
+        cancellable: true,
       },
-      Promise.resolve()
+      async (progress) => {
+        progress.report({
+          message: "cloning repo",
+        });
+        await this.git.clone(opts.pathRemote!, opts.path);
+        const { vaults } = GitUtils.getVaultsFromRepo({
+          repoPath: path.join(baseDir, opts.path),
+          wsRoot: DendronWorkspace.wsRoot(),
+          repoUrl: opts.pathRemote!,
+        });
+        if (_.size(vaults) === 1 && opts.name) {
+          vaults[0].name = opts.name;
+        }
+        // add all vaults
+        progress.report({
+          message: "adding vault",
+        });
+        await _.reduce(
+          vaults,
+          async (resp: any, vault: DVault) => {
+            await resp;
+            return this.addVaultToWorkspace(vault);
+          },
+          Promise.resolve()
+        );
+        return vaults;
+      }
     );
     return vaults;
   }

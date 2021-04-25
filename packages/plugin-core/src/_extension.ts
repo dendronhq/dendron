@@ -1,5 +1,9 @@
 import { DendronError, getStage, VaultUtils } from "@dendronhq/common-all";
-import { getOS, readJSONWithComments } from "@dendronhq/common-server";
+import {
+  getDurationMilliseconds,
+  getOS,
+  readJSONWithComments,
+} from "@dendronhq/common-server";
 import {
   HistoryEvent,
   HistoryService,
@@ -196,6 +200,7 @@ export async function _activate(context: vscode.ExtensionContext) {
     GLOBAL_STATE.VERSION
   );
   if (DendronWorkspace.isActive()) {
+    let start = process.hrtime();
     const config = ws.config;
     const wsRoot = DendronWorkspace.wsRoot() as string;
     const wsService = new WorkspaceService({ wsRoot });
@@ -315,10 +320,12 @@ export async function _activate(context: vscode.ExtensionContext) {
       }
     );
     const port: number = await startServer();
-    Logger.info({ ctx, msg: "post-start-server", port });
+    const durationStartServer = getDurationMilliseconds(start);
+    Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
     WSUtils.updateEngineAPI(port);
     wsService.writePort(port);
     const reloadSuccess = await reloadWorkspace();
+    const durationReloadWorkspace = getDurationMilliseconds(start);
     if (!reloadSuccess) {
       HistoryService.instance().add({
         source: "extension",
@@ -327,10 +334,8 @@ export async function _activate(context: vscode.ExtensionContext) {
       return;
     }
     await ws.activateWatchers();
-
     toggleViews(true);
-
-    Logger.info({ ctx, msg: "fin startClient" });
+    Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
   } else {
     // ws not active
     Logger.info({ ctx: "dendron not active" });

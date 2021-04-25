@@ -218,7 +218,6 @@ export class LookupProviderV2 {
       Logger.error({ err: resp.error });
       throw Error();
     }
-    Logger.info({ ctx, msg: "engine.write", profile });
     return { uri, node: nodeNew, resp };
   }
 
@@ -240,7 +239,6 @@ export class LookupProviderV2 {
     const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
     const uri = Uri.file(SchemaUtils.getPath({ root: vpath, fname }));
     const resp = await engine.writeSchema(smodNew);
-    Logger.info({ ctx, msg: "engine.write", profile });
     return { uri, node: smodNew, resp };
   }
 

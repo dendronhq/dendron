@@ -8,6 +8,7 @@
       "problemMatcher": [],
       "options": {
         "env": {
+          "LOG_LEVEL": "error",
           "LOG_DST": "../../logs/engine-test-utils.log"
         }
       }

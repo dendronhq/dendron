@@ -2057,4 +2057,4 @@ Array [
 ]
 `;
 
-exports[`engine perf basic: BOND 1`] = `1543`;
+exports[`engine perf basic: BOND 1`] = `2090`;

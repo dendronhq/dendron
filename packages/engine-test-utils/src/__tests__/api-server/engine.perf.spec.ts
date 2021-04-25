@@ -1,6 +1,4 @@
-import { vault2Path } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
-import fs from "fs-extra";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../engine";
 

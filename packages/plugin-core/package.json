@@ -524,8 +524,7 @@
             {
                 "command": "dendron.createDailyJournalNote",
                 "key": "ctrl+shift+i",
-                "mac": "cmd+shift+i",
-                "when": "editorFocus"
+                "mac": "cmd+shift+i"
             },
             {
                 "command": "dendron.copyNoteLink",

@@ -123,7 +123,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       key: "ctrl+shift+i",
       mac: "cmd+shift+i",
-      when: "editorFocus",
     },
     desc: "Create a global journal note",
     docLink: "dendron.topic.special-notes.md",

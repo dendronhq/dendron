@@ -60,6 +60,10 @@ export type DendronConfig = {
    */
   enableCaching?: boolean;
   /**
+   * Disable telemetry
+   */
+  noTelemetry?: boolean;
+  /**
    * Dendron version. Setup by plugin
    */
   version: number;

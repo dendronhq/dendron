@@ -12,3 +12,4 @@ export * from "./utils";
 export * from "./md";
 export * from "./vault";
 export * from "./user";
+export * from "./analytics";

@@ -1,6 +1,10 @@
-import { env } from "@dendronhq/common-all";
+import { CONSTANTS, env, genUUID } from "@dendronhq/common-all";
 import Analytics from "analytics-node";
+import fs from "fs-extra";
 import _ from "lodash";
+import os from "os";
+import path from "path";
+import { createLogger, DLogger } from "./logger";
 
 enum SiteEvents {
   PUBLISH_CLICKED = "sitePublishClick",
@@ -53,26 +57,84 @@ enum UserTier {
   SEED = "seed",
 }
 
+export type SegmentClientOpts = {
+  optOut?: boolean;
+  key?: string;
+  forceNew?: boolean;
+};
+
 export const SEGMENT_EVENTS = {
   SiteEvents,
   SubscriptionEvents,
 };
 
 export class SegmentClient {
-  public client: Analytics;
+  public _segmentInstance: Analytics;
+  private _anonymousId: string;
+  public _hasOptedOut: boolean;
+  private logger: DLogger;
 
   static _singleton: undefined | SegmentClient;
 
-  static instance() {
-    if (_.isUndefined(this._singleton)) {
-      this._singleton = new SegmentClient();
+  static instance(opts?: SegmentClientOpts) {
+    if (_.isUndefined(this._singleton) || opts?.forceNew) {
+      this._singleton = new SegmentClient(opts);
     }
     return this._singleton;
   }
 
-  constructor() {
-    const key = env("SEGMENT_WEB_KEY");
-    this.client = new Analytics(key);
+  constructor(opts?: SegmentClientOpts) {
+    const key = env("SEGMENT_VSCODE_KEY");
+    this.logger = createLogger("SegmentClient");
+    this._segmentInstance = new Analytics(key);
+    this._hasOptedOut = opts?.optOut || false;
+
+    const uuidPath = path.join(os.homedir(), CONSTANTS.DENDRON_ID);
+    this.logger.info({ msg: "telemetry initializing" });
+    if (fs.existsSync(uuidPath)) {
+      this.logger.info({ msg: "using existing id" });
+      this._anonymousId = _.trim(
+        fs.readFileSync(uuidPath, { encoding: "utf8" })
+      );
+    } else {
+      this.logger.info({ msg: "creating new id" });
+      this._anonymousId = genUUID();
+      fs.writeFileSync(uuidPath, this._anonymousId);
+    }
+  }
+
+  identify(_id: string, props?: { [key: string]: any }) {
+    if (this._hasOptedOut || this._segmentInstance == null) {
+      return;
+    }
+    try {
+      this._segmentInstance.identify({
+        anonymousId: this._anonymousId,
+        traits: props,
+      });
+      this._segmentInstance.flush();
+    } catch (ex) {
+      this.logger.error(ex);
+    }
+  }
+
+  track(event: string, data?: { [key: string]: string | number | boolean }) {
+    if (this._hasOptedOut || this._segmentInstance == null) {
+      return;
+    }
+
+    const payload: { [key: string]: any } = { ...data };
+
+    try {
+      this._segmentInstance.track({
+        anonymousId: this._anonymousId,
+        event,
+        properties: payload,
+      });
+      this._segmentInstance.flush();
+    } catch (ex) {
+      this.logger.error(ex);
+    }
   }
 }
 
@@ -80,17 +142,17 @@ export class SegmentClient {
 function demoPublishFunnel() {
   const seg = SegmentClient.instance();
   const userId = "test-user3";
-  seg.client.identify({ userId });
-  seg.client.track({ userId, event: SiteEvents.PUBLISH_CLICKED });
-  seg.client.track({ userId, event: SiteEvents.SOURCE_INFO_ENTER });
-  seg.client.track({ userId, event: SiteEvents.UPDATE_START });
-  seg.client.track({ userId, event: SiteEvents.VISIT_SITE });
+  seg._segmentInstance.identify({ userId });
+  seg._segmentInstance.track({ userId, event: SiteEvents.PUBLISH_CLICKED });
+  seg._segmentInstance.track({ userId, event: SiteEvents.SOURCE_INFO_ENTER });
+  seg._segmentInstance.track({ userId, event: SiteEvents.UPDATE_START });
+  seg._segmentInstance.track({ userId, event: SiteEvents.VISIT_SITE });
 }
 
 function demoRevenueEvent() {
   const seg = SegmentClient.instance();
   const userId = "test-user3";
-  seg.client.track({
+  seg._segmentInstance.track({
     userId,
     event: REVENUE_EVENT,
     properties: {

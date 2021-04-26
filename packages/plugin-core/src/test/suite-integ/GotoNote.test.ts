@@ -1,5 +1,5 @@
 import { NoteProps, NoteUtils } from "@dendronhq/common-all";
-import { ENGINE_HOOKS } from "@dendronhq/common-test-utils";
+import { ENGINE_HOOKS, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -12,7 +12,7 @@ import { DendronWorkspace } from "../../workspace";
 import { GOTO_NOTE_PRESETS } from "../presets/GotoNotePreset";
 import { getActiveEditorBasename } from "../testUtils";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
-import { setupBeforeAfter } from "../testUtilsV3";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 const { ANCHOR_WITH_SPECIAL_CHARS, ANCHOR } = GOTO_NOTE_PRESETS;
 suite("GotoNote", function () {
@@ -158,6 +158,40 @@ suite("GotoNote", function () {
         const selection = VSCodeUtils.getActiveTextEditor()?.selection;
         expect(selection?.start.line).toEqual(9);
         expect(selection?.start.character).toEqual(0);
+        done();
+      },
+    });
+  });
+
+  test("note from selection ", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        const { wsRoot } = opts;
+        const vault = opts.vaults[0];
+        await NoteTestUtilsV4.modifyNoteByPath(
+          { wsRoot, vault, fname: "foo" },
+          (note) => {
+            note.body =
+              "this is a [[foolink]]. this is another link [[foo.ch1]]";
+            return note;
+          }
+        );
+      },
+      onInit: async ({ engine, vaults }) => {
+        const note = engine.notes["foo"];
+        const editor = await VSCodeUtils.openNote(note);
+        // put cursor in location on 48
+        editor.selection = new vscode.Selection(
+          new vscode.Position(7, 48),
+          new vscode.Position(7, 48)
+        );
+        // foo.ch1.md
+        await new GotoNoteCommand().run({
+          vault: vaults[0],
+        });
+        expect(getActiveEditorBasename()).toEqual("foo.ch1.md");
         done();
       },
     });

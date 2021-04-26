@@ -1,7 +1,7 @@
 import {
   DendronError,
   DNodeUtils,
-  DStoreV2,
+  DStore,
   DVault,
   ENGINE_ERROR_CODES,
   SchemaModuleOpts,
@@ -27,7 +27,7 @@ function getLogger() {
 }
 
 export class ParserBaseV2 {
-  constructor(public opts: { store: DStoreV2; logger: any }) {}
+  constructor(public opts: { store: DStore; logger: any }) {}
 
   get logger() {
     return this.opts.logger;

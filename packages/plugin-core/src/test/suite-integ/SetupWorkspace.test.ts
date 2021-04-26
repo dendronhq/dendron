@@ -1,17 +1,17 @@
-import { DendronConfig, Time } from "@dendronhq/common-all";
+import { CONSTANTS, DendronConfig, Time } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   readJSONWithComments,
   readYAML,
   tmpDir,
   writeJSONWithComments,
-  writeYAML
+  writeYAML,
 } from "@dendronhq/common-server";
 import {
   DConfig,
   getPortFilePath,
   getWSMetaFilePath,
-  openWSMetaFile
+  openWSMetaFile,
 } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -26,7 +26,7 @@ import {
   expect,
   genDefaultSettings,
   genEmptyWSFiles,
-  stubWorkspaceFolders
+  stubWorkspaceFolders,
 } from "../testUtilsv2";
 import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
@@ -63,7 +63,9 @@ suite("SetupWorkspace", function () {
             path.join(wsRoot, "dendron.code-workspace")
           );
           expect(settings).toEqual(genDefaultSettings());
-          expect(fs.readdirSync(vault)).toEqual(genEmptyWSFiles());
+          expect(fs.readdirSync(vault)).toEqual(
+            [CONSTANTS.DENDRON_CACHE_FILE].concat(genEmptyWSFiles())
+          );
           done();
         },
       });
@@ -147,7 +149,9 @@ suite("SetupWorkspace", function () {
         ctx,
         onInit: async ({ vaults }) => {
           const vault = resolveRelToWSRoot(vaults[0].fsPath);
-          expect(fs.readdirSync(vault)).toEqual(genEmptyWSFiles());
+          expect(fs.readdirSync(vault)).toEqual(
+            [CONSTANTS.DENDRON_CACHE_FILE].concat(genEmptyWSFiles())
+          );
           done();
         },
         postSetupHook: async ({ vaults }) => {

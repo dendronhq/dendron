@@ -1,5 +1,16 @@
-import { DendronError, getStage, VaultUtils } from "@dendronhq/common-all";
-import { readJSONWithComments } from "@dendronhq/common-server";
+import {
+  DendronError,
+  getStage,
+  setStageIfUndefined,
+  VaultUtils,
+  VSCodeEvents,
+} from "@dendronhq/common-all";
+import {
+  getDurationMilliseconds,
+  getOS,
+  readJSONWithComments,
+  SegmentClient,
+} from "@dendronhq/common-server";
 import {
   HistoryEvent,
   HistoryService,
@@ -22,12 +33,23 @@ import { Extensions } from "./settings";
 import { WorkspaceSettings } from "./types";
 import { VSCodeUtils, WSUtils } from "./utils";
 import { MarkdownUtils } from "./utils/md";
-import { getOS } from "./utils/system";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
-import { DendronWorkspace } from "./workspace";
+import { DendronWorkspace, getEngine } from "./workspace";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
+
+function getCommonProps() {
+  return {
+    os: getOS(),
+    arch: process.arch,
+    nodeVersion: process.version,
+    extensionVersion: DendronWorkspace.version(),
+    ideVersion: vscode.version,
+    ideFlavor: vscode.env.appName,
+  };
+}
+
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   const stage = getStage();
@@ -37,6 +59,7 @@ export function activate(context: vscode.ExtensionContext) {
     wordPattern: MARKDOWN_WORD_PATTERN,
   });
   if (stage !== "test") {
+    setStageIfUndefined("prod");
     _activate(context);
   }
   return;
@@ -197,7 +220,10 @@ export async function _activate(context: vscode.ExtensionContext) {
     GLOBAL_STATE.VERSION
   );
   if (DendronWorkspace.isActive()) {
+    let start = process.hrtime();
     const config = ws.config;
+    // initialize client
+    SegmentClient.instance({ optOut: ws.config.noTelemetry, forceNew: true });
     const wsRoot = DendronWorkspace.wsRoot() as string;
     const wsService = new WorkspaceService({ wsRoot });
     const didClone = await wsService.initialize({
@@ -316,10 +342,13 @@ export async function _activate(context: vscode.ExtensionContext) {
       }
     );
     const port: number = await startServer();
-    Logger.info({ ctx, msg: "post-start-server", port });
+    const durationStartServer = getDurationMilliseconds(start);
+    Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
     WSUtils.updateEngineAPI(port);
     wsService.writePort(port);
     const reloadSuccess = await reloadWorkspace();
+    const durationReloadWorkspace = getDurationMilliseconds(start);
+
     if (!reloadSuccess) {
       HistoryService.instance().add({
         source: "extension",
@@ -327,11 +356,18 @@ export async function _activate(context: vscode.ExtensionContext) {
       });
       return;
     }
+
+    SegmentClient.instance().identifyAnonymous();
+    SegmentClient.instance().track(VSCodeEvents.InitializeWorkspace, {
+      duration: durationReloadWorkspace,
+      noCaching: config.noCaching || false,
+      numNotes: _.size(getEngine().notes),
+      numVaults: _.size(getEngine().vaultsv3),
+      ...getCommonProps(),
+    });
     await ws.activateWatchers();
-
     toggleViews(true);
-
-    Logger.info({ ctx, msg: "fin startClient" });
+    Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });
   } else {
     // ws not active
     Logger.info({ ctx: "dendron not active" });
@@ -390,6 +426,9 @@ async function showWelcomeOrWhatsNew(
       "vault",
       "dendron.welcome.md"
     );
+    SegmentClient.instance().track(VSCodeEvents.Install, {
+      ...getCommonProps(),
+    });
     await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
     await ws.context.globalState.update(GLOBAL_STATE.VERSION_PREV, "0.0.0");
     await ws.showWelcome(uri, { reuseWindow: true });
@@ -402,6 +441,10 @@ async function showWelcomeOrWhatsNew(
         GLOBAL_STATE.VERSION_PREV,
         previousVersion
       );
+      SegmentClient.instance().track(VSCodeEvents.Upgrade, {
+        ...getCommonProps(),
+        previousVersion,
+      });
       vscode.window
         .showInformationMessage(
           `Dendron has been upgraded to ${version} from ${previousVersion}`,

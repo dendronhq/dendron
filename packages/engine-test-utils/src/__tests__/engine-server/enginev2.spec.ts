@@ -1,14 +1,16 @@
 import { WorkspaceOpts } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-server";
+import { createLogger, vault2Path } from "@dendronhq/common-server";
 import {
   ENGINE_CONFIG_PRESETS,
+  ENGINE_HOOKS,
   ENGINE_PRESETS,
   ENGINE_PRESETS_MULTI,
   getLogFilePath,
   runEngineTestV4,
 } from "@dendronhq/common-test-utils";
-import { DendronEngineV2 } from "@dendronhq/engine-server";
+import { DendronEngineV2, readNotesFromCache } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { runEngineTestV5 } from "../../engine";
 
 const createEngine = ({ wsRoot }: WorkspaceOpts) => {
   const logger = createLogger("testLogger", getLogFilePath("engine-server"));
@@ -32,6 +34,26 @@ describe("engine, schemas/", () => {
         await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
       });
     });
+  });
+});
+
+describe("engine, cache", () => {
+  test.skip("basic", async () => {
+    await runEngineTestV5(
+      async ({ engine, wsRoot, vaults }) => {
+        const cache = readNotesFromCache(
+          vault2Path({ wsRoot, vault: vaults[0] })
+        );
+        expect(_.size(cache)).toEqual(6);
+        expect(_.size(cache)).toEqual(_.size(engine.notes));
+      },
+      {
+        expect,
+        preSetupHook: async (opts) => {
+          await ENGINE_HOOKS.setupBasic(opts);
+        },
+      }
+    );
   });
 });
 

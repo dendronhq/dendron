@@ -3,14 +3,14 @@ import {
   ConfigWriteOpts,
   DendronConfig,
   DendronError,
+  DEngine,
   DEngineClientV2,
   DEngineDeleteSchemaResp,
   DEngineInitResp,
   DEngineMode,
-  DEngine,
   DLink,
   DNodeType,
-  DStoreV2,
+  DStore,
   DVault,
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
@@ -18,8 +18,8 @@ import {
   GetNoteOptsV2,
   GetNotePayload,
   NoteChangeEntry,
-  NotePropsDict,
   NoteProps,
+  NotePropsDict,
   NoteUtils,
   QueryNotesOpts,
   RenameNoteOpts,
@@ -41,11 +41,11 @@ import {
 } from "@dendronhq/common-server";
 import _ from "lodash";
 import { DConfig } from "./config";
-import { FileStorageV2 } from "./drivers/file/storev2";
+import { FileStorage } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
 import { ParserUtilsV2 } from "./topics/markdown/utilsv2";
 
-type CreateStoreFunc = (engine: DEngineClientV2) => DStoreV2;
+type CreateStoreFunc = (engine: DEngineClientV2) => DStore;
 type DendronEngineOptsV2 = {
   wsRoot: string;
   vaultsv3: DVault[];
@@ -59,7 +59,7 @@ type DendronEnginePropsV2 = Required<DendronEngineOptsV2>;
 
 export class DendronEngineV2 implements DEngine {
   public wsRoot: string;
-  public store: DStoreV2;
+  public store: DStore;
   protected props: DendronEnginePropsV2;
   public logger: DLogger;
   public fuseEngine: FuseEngine;
@@ -91,7 +91,7 @@ export class DendronEngineV2 implements DEngine {
       vaultsv3: config.vaults,
       forceNew: true,
       createStore: (engine) =>
-        new FileStorageV2({
+        new FileStorage({
           engine,
           logger: LOGGER,
         }),

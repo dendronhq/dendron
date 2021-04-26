@@ -1,8 +1,8 @@
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { LookupControllerV2 } from "../components/lookup/LookupControllerV2";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
-import { getDurationMilliseconds } from "../utils/system";
 import { BasicCommand } from "./base";
 
 export type LookupEffectType = "copyNoteLink" | "copyNoteRef" | "multiSelect";

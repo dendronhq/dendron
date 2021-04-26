@@ -9,13 +9,12 @@ import {
   DEngineClientV2,
   NoteQuickInput,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import { Uri, ViewColumn, window } from "vscode";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
-import { getDurationMilliseconds } from "../../utils/system";
 import { DendronWorkspace, getWS } from "../../workspace";
 import { DendronBtn, getButtonCategory } from "./buttons";
 import {

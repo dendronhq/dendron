@@ -2,6 +2,7 @@ import { DendronConfig } from "@dendronhq/common-all";
 import { readYAML } from "@dendronhq/common-server";
 import { DConfig } from "@dendronhq/engine-server";
 import fs from "fs-extra";
+import { FileTestUtils } from "@dendronhq/common-test-utils";
 import path from "path";
 import * as vscode from "vscode";
 import { VaultAddCommand } from "../../commands/VaultAddCommand";
@@ -28,14 +29,15 @@ suite("VaultRemoveCommand", function () {
         };
         await new VaultRemoveCommand().run();
 
-        // check no files deleted
-        expect(fs.readdirSync(path.join(wsRoot, vaults[1].fsPath))).toEqual([
-          "bar.ch1.md",
-          "bar.md",
-          "bar.schema.yml",
-          "root.md",
-          "root.schema.yml",
-        ]);
+        expect(
+          FileTestUtils.cmpFilesV2(path.join(wsRoot, vaults[1].fsPath), [
+            "bar.ch1.md",
+            "bar.md",
+            "bar.schema.yml",
+            "root.md",
+            "root.schema.yml",
+          ])
+        ).toBeTruthy();
 
         // check config updated
         const configPath = DConfig.configPath(
@@ -43,7 +45,7 @@ suite("VaultRemoveCommand", function () {
         );
         const config = readYAML(configPath) as DendronConfig;
         expect(config.vaults.map((ent) => ent.fsPath)).toEqual([
-          vaults[0].fsPath
+          vaults[0].fsPath,
         ]);
 
         // check vscode settings updated

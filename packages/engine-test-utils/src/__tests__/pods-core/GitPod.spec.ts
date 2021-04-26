@@ -30,7 +30,7 @@ describe("GitPod", async () => {
     const csvOutput = fs.readFileSync(path.join(dest, "commits.csv"), {
       encoding: "utf8",
     });
-    await checkString(csvOutput, "0,7,52");
+    await checkString(csvOutput, "0,8,53");
     expect(csvOutput.split("\n").length).toEqual(5);
   });
 });

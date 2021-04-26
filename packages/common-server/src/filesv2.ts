@@ -3,6 +3,7 @@ import {
   DNodeUtils,
   DVault,
   NoteProps,
+  NotesCache,
   NoteUtils,
   SchemaModuleOpts,
   SchemaModuleProps,
@@ -19,6 +20,7 @@ import path from "path";
 import tmp, { DirResult, dirSync } from "tmp";
 import { resolvePath } from "./files";
 import { SchemaParserV2 } from "./parser";
+import SparkMD5 from "spark-md5";
 
 type FileWatcherCb = {
   fpath: string;
@@ -97,6 +99,11 @@ export function file2Schema(fpath: string, wsRoot: string): SchemaModuleProps {
   ) as SchemaModuleOpts;
   return SchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
 }
+
+export function genHash(contents: any) {
+  return SparkMD5.hash(contents); // OR raw hash (binary string)
+}
+
 export function string2Schema({
   vault,
   content,
@@ -154,6 +161,34 @@ export function file2Note(
   const { name } = path.parse(fpath);
   const fname = toLowercase ? name.toLowerCase() : name;
   return string2Note({ content, fname, vault });
+}
+
+export function file2NoteWithCache({
+  fpath,
+  vault,
+  cache,
+  toLowercase,
+}: {
+  fpath: string;
+  vault: DVault;
+  cache: NotesCache;
+  toLowercase?: boolean;
+}): { note: NoteProps; matchHash: boolean; noteHash: string } {
+  const content = fs.readFileSync(fpath, { encoding: "utf8" });
+  const { name } = path.parse(fpath);
+  const sig = genHash(content);
+  const matchHash = cache.notes[name]?.hash === sig;
+  const fname = toLowercase ? name.toLowerCase() : name;
+  // if (matchHash) {
+  //   let capture  = content.match(/^---[\s\S]+?---/);
+  //   if (capture) {
+  //     let offset = capture[0].length;
+  //     let body = content.slice(offset + 1);
+  //     //note = cache.notes[]
+  //   }
+  // }
+  const note = string2Note({ content, fname, vault });
+  return { note, matchHash, noteHash: sig };
 }
 
 /**

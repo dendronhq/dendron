@@ -3,6 +3,84 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.38.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.38.6-alpha.0) (2021-04-26)
+
+### Bug Fixes
+
+- create daily journal note without open note ([25f2f59](https://github.com/dendronhq/dendron/commit/25f2f59615105882565a48c6f16ed335b83a3fe8))
+- fix goto note issue `Dendron: Goto Note` fails on one link, but `Goto Definition` works [#662](https://github.com/dendronhq/dendron/issues/662) ([b116a4e](https://github.com/dendronhq/dendron/commit/b116a4e54212ab58dabeaa6957118f0f980f345a))
+- go-down at root matches itself only ([#623](https://github.com/dendronhq/dendron/issues/623)) ([d70c120](https://github.com/dendronhq/dendron/commit/d70c1203085a1a00b135999c669d18cb500fcfb3)), closes [#619](https://github.com/dendronhq/dendron/issues/619)
+- issues with caching notes ([6a65d4e](https://github.com/dendronhq/dendron/commit/6a65d4e179f755324d68c01a3ca9d767e71b7dfc))
+- notes added outside of Dendron get initialized with correct metadata ([5390f2f](https://github.com/dendronhq/dendron/commit/5390f2f893d02a89fe905784a82bba4590c894e7))
+
+### Features Dendron
+
+- insert note command ([70065f8](https://github.com/dendronhq/dendron/commit/70065f859db745c725b252c34b452c9d16cf13a4))
+
+## [0.38.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.38.5-alpha.0) (2021-04-26)
+
+### Bug Fixes
+
+- create daily journal note without open note ([25f2f59](https://github.com/dendronhq/dendron/commit/25f2f59615105882565a48c6f16ed335b83a3fe8))
+- fix goto note issue `Dendron: Goto Note` fails on one link, but `Goto Definition` works [#662](https://github.com/dendronhq/dendron/issues/662) ([b116a4e](https://github.com/dendronhq/dendron/commit/b116a4e54212ab58dabeaa6957118f0f980f345a))
+- go-down at root matches itself only ([#623](https://github.com/dendronhq/dendron/issues/623)) ([d70c120](https://github.com/dendronhq/dendron/commit/d70c1203085a1a00b135999c669d18cb500fcfb3)), closes [#619](https://github.com/dendronhq/dendron/issues/619)
+- issues with caching notes ([6a65d4e](https://github.com/dendronhq/dendron/commit/6a65d4e179f755324d68c01a3ca9d767e71b7dfc))
+- notes added outside of Dendron get initialized with correct metadata ([5390f2f](https://github.com/dendronhq/dendron/commit/5390f2f893d02a89fe905784a82bba4590c894e7))
+
+### Features Dendron
+
+- insert note command ([70065f8](https://github.com/dendronhq/dendron/commit/70065f859db745c725b252c34b452c9d16cf13a4))
+
+## [0.38.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.38.4-alpha.0) (2021-04-26)
+
+### Bug Fixes
+
+- create daily journal note without open note ([25f2f59](https://github.com/dendronhq/dendron/commit/25f2f59615105882565a48c6f16ed335b83a3fe8))
+- fix goto note issue `Dendron: Goto Note` fails on one link, but `Goto Definition` works [#662](https://github.com/dendronhq/dendron/issues/662) ([b116a4e](https://github.com/dendronhq/dendron/commit/b116a4e54212ab58dabeaa6957118f0f980f345a))
+- go-down at root matches itself only ([#623](https://github.com/dendronhq/dendron/issues/623)) ([d70c120](https://github.com/dendronhq/dendron/commit/d70c1203085a1a00b135999c669d18cb500fcfb3)), closes [#619](https://github.com/dendronhq/dendron/issues/619)
+- notes added outside of Dendron get initialized with correct metadata ([5390f2f](https://github.com/dendronhq/dendron/commit/5390f2f893d02a89fe905784a82bba4590c894e7))
+
+### Features Dendron
+
+- insert note command ([70065f8](https://github.com/dendronhq/dendron/commit/70065f859db745c725b252c34b452c9d16cf13a4))
+
+## [0.38.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.38.3-alpha.0) (2021-04-25)
+
+### Bug Fixes
+
+- create daily journal note without open note ([25f2f59](https://github.com/dendronhq/dendron/commit/25f2f59615105882565a48c6f16ed335b83a3fe8))
+- fix goto note issue `Dendron: Goto Note` fails on one link, but `Goto Definition` works [#662](https://github.com/dendronhq/dendron/issues/662) ([b116a4e](https://github.com/dendronhq/dendron/commit/b116a4e54212ab58dabeaa6957118f0f980f345a))
+- go-down at root matches itself only ([#623](https://github.com/dendronhq/dendron/issues/623)) ([d70c120](https://github.com/dendronhq/dendron/commit/d70c1203085a1a00b135999c669d18cb500fcfb3)), closes [#619](https://github.com/dendronhq/dendron/issues/619)
+- notes added outside of Dendron get initialized with correct metadata ([5390f2f](https://github.com/dendronhq/dendron/commit/5390f2f893d02a89fe905784a82bba4590c894e7))
+
+### Features Dendron
+
+- insert note command ([70065f8](https://github.com/dendronhq/dendron/commit/70065f859db745c725b252c34b452c9d16cf13a4))
+
+## [0.38.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.38.2-alpha.0) (2021-04-25)
+
+### Bug Fixes
+
+- create daily journal note without open note ([25f2f59](https://github.com/dendronhq/dendron/commit/25f2f59615105882565a48c6f16ed335b83a3fe8))
+- fix goto note issue `Dendron: Goto Note` fails on one link, but `Goto Definition` works [#662](https://github.com/dendronhq/dendron/issues/662) ([b116a4e](https://github.com/dendronhq/dendron/commit/b116a4e54212ab58dabeaa6957118f0f980f345a))
+- go-down at root matches itself only ([#623](https://github.com/dendronhq/dendron/issues/623)) ([d70c120](https://github.com/dendronhq/dendron/commit/d70c1203085a1a00b135999c669d18cb500fcfb3)), closes [#619](https://github.com/dendronhq/dendron/issues/619)
+- notes added outside of Dendron get initialized with correct metadata ([5390f2f](https://github.com/dendronhq/dendron/commit/5390f2f893d02a89fe905784a82bba4590c894e7))
+
+### Features Dendron
+
+- insert note command ([70065f8](https://github.com/dendronhq/dendron/commit/70065f859db745c725b252c34b452c9d16cf13a4))
+
+## [0.38.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.38.1-alpha.0) (2021-04-23)
+
+### Bug Fixes
+
+- go-down at root matches itself only ([#623](https://github.com/dendronhq/dendron/issues/623)) ([d70c120](https://github.com/dendronhq/dendron/commit/d70c1203085a1a00b135999c669d18cb500fcfb3)), closes [#619](https://github.com/dendronhq/dendron/issues/619)
+- notes added outside of Dendron get initialized with correct metadata ([5390f2f](https://github.com/dendronhq/dendron/commit/5390f2f893d02a89fe905784a82bba4590c894e7))
+
+### Features Dendron
+
+- insert note command ([70065f8](https://github.com/dendronhq/dendron/commit/70065f859db745c725b252c34b452c9d16cf13a4))
+
 # [0.38.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.38.0) (2021-04-19)
 
 ### Bug Fixes

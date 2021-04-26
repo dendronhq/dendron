@@ -1,0 +1,17 @@
+echo "update meta..."
+VERSION=`cat lerna.json | jq -r ".version"`
+PUBLISH_VERSION=`echo "$VERSION" | sed 's/^./1/'`;
+sed  -ibak "s/$VERSION/independent/" lerna.json
+sed  -ibak "s/\"$VERSION/\"$PUBLISH_VERSION/" packages/dendron-11ty/package.json
+
+echo "create commit..."
+git clean -f
+git add . 
+git commit -m "chore: update 11ty"
+
+echo "publish..."
+lerna publish from-package --ignore-scripts 
+node bootstrap/scripts/genMeta.js
+
+echo "reset..."
+git reset --hard HEAD^

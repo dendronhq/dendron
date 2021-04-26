@@ -41,6 +41,33 @@ export class FileTestUtils {
     ];
   };
 
+  /**
+   *
+   * @param root
+   * @param expected
+   * @param opts
+   * @returns true if expected and root are equal
+   */
+  static cmpFilesV2 = (
+    root: string,
+    expected: string[],
+    opts?: { add?: string[]; remove?: string[]; ignore?: string[] }
+  ) => {
+    const cleanOpts = _.defaults(opts, { add: [], remove: [], ignore: [] });
+    const dirEnts = fs
+      .readdirSync(root)
+      .filter((ent) => !_.includes(cleanOpts.ignore, ent));
+    const allExpected = expected.concat(cleanOpts.add).filter((ent) => {
+      return !_.includes(cleanOpts?.remove, ent);
+    });
+    const out =
+      _.intersection(allExpected, dirEnts).length === allExpected.length;
+    if (!out) {
+      console.log({ dirEnts, allExpected });
+    }
+    return out;
+  };
+
   static assertInFile = ({
     fpath,
     match,

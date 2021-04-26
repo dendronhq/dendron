@@ -9,6 +9,8 @@ import {
   NotePropsDict,
   NoteProps,
   VaultUtils,
+  NotesCache,
+  NotesCacheEntry,
 } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -273,6 +275,33 @@ function parseLink(ref: string): DNoteRefLink | undefined {
 
 export const matchRefMarker = (txt: string) => {
   return txt.match(/\(\((?<ref>[^)]+)\)\)/);
+};
+
+export function createCacheEntry(opts: {
+  noteProps: NoteProps;
+  hash: string;
+}): NotesCacheEntry {
+  const { noteProps, hash } = opts;
+  return {
+    data: _.omit(noteProps, "body"),
+    hash,
+  };
+}
+
+export const readNotesFromCache = (vpath: string): NotesCache => {
+  const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
+  if (fs.existsSync(cachePath)) {
+    return fs.readJSONSync(cachePath) as NotesCache;
+  }
+  return {
+    version: 0,
+    notes: {},
+  };
+};
+
+export const writeNotesToCache = (vpath: string, cache: NotesCache) => {
+  const cachePath = path.join(vpath, CONSTANTS.DENDRON_CACHE_FILE);
+  return fs.writeJSONSync(cachePath, cache);
 };
 
 export function stripLocalOnlyTags(doc: string) {

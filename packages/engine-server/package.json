@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/engine-server",
-  "version": "0.38.0",
+  "version": "0.38.6-alpha.0",
   "description": "dendron-engine",
   "license": "GPLv3",
   "repository": {
@@ -38,8 +38,8 @@
     "test:unit:debug": "echo nop"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.38.0",
-    "@dendronhq/common-server": "^0.38.0",
+    "@dendronhq/common-all": "^0.38.6-alpha.0",
+    "@dendronhq/common-server": "^0.38.6-alpha.0",
     "@dendronhq/remark-mermaid": "^0.2.0",
     "@mapbox/rehype-prism": "^0.5.0",
     "@types/fs-extra": "^9.0.1",
@@ -50,6 +50,7 @@
     "@types/nunjucks": "^3.1.4",
     "@types/pino": "^6.3.0",
     "@types/remark-abbr": "^1.4.0",
+    "@types/spark-md5": "^3.0.2",
     "@types/through2": "^2.0.36",
     "@types/unist": "^2.0.3",
     "@types/yamljs": "^0.2.31",
@@ -82,6 +83,7 @@
     "remark-toc": "^7.0.0",
     "remark-variables": "^1.4.9",
     "remark-wiki-link": "^0.0.4",
+    "spark-md5": "^3.0.1",
     "stream": "^0.0.2",
     "through2": "^4.0.2",
     "unified": "^9.1.0",

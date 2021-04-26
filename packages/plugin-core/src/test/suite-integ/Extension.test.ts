@@ -133,24 +133,4 @@ suite("Extension", function () {
     //     });
     // });
   });
-
-  describe.skip("setup workspace v2", function () {
-    it("not active/ init", function (done) {
-      const wsRoot = tmpDir().name;
-      _activate(ctx).then(async (resp) => {
-        expect(resp).toBeFalsy();
-        stubSetupWorkspace({ wsRoot, initType: InitializeType.EMPTY });
-        await vscode.commands.executeCommand(DENDRON_COMMANDS.INIT_WS_V2.key, {
-          skipOpenWs: true,
-          skipConfirmation: true,
-        } as SetupWorkspaceOpts);
-        expect(fs.readdirSync(wsRoot)).toEqual([
-          "dendron",
-          "docs",
-          "vault-main",
-        ]);
-        done();
-      });
-    });
-  });
 });

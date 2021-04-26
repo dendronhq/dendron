@@ -478,28 +478,20 @@ var fm = (function ($) {
 
 		if (fm_options.show_radio_button_list === true) {
 			radio_button_list_html = "<li><div class=\"radio_button_list_title_wrapper\"><div class=\"radio_button_list_title\">" + fm_options.radio_button_list_title + radio_button_list_asterisk + "</div></div><div class=\"radio_button_list_wrapper\">";
-			radio_button_list_html += "    <div class=\"radio_button_wrapper\">";
-			radio_button_list_html += "        <input value=\"1\" type=\"radio\" name=\"feedback_radio\" class=\"feedback_radio_1\" " + radio_button_list_required + "\/>";
-			radio_button_list_html += "        <label for=\"feedback_radio_1\">" + fm_options.radio_button_list_labels[0] + "<\/label>";
-			radio_button_list_html += "    <\/div>";
-			radio_button_list_html += "    <div class=\"radio_button_wrapper\">";
-			radio_button_list_html += "        <input value=\"2\" type=\"radio\" name=\"feedback_radio\" class=\"feedback_radio_2\"\/>";
-			radio_button_list_html += "        <label for=\"feedback_radio_2\">" + fm_options.radio_button_list_labels[1] + "<\/label>";
-			radio_button_list_html += "    <\/div>";
-			radio_button_list_html += "    <div class=\"radio_button_wrapper\">";
-			radio_button_list_html += "        <input value=\"3\" type=\"radio\" name=\"feedback_radio\" class=\"feedback_radio_3\"\/>";
-			radio_button_list_html += "        <label for=\"feedback_radio_3\">" + fm_options.radio_button_list_labels[2] + "<\/label>";
-			radio_button_list_html += "    <\/div>";
-			radio_button_list_html += "    <div class=\"radio_button_wrapper\">";
-			radio_button_list_html += "        <input value=\"4\" type=\"radio\" name=\"feedback_radio\" class=\"feedback_radio_4\"\/>";
-			radio_button_list_html += "        <label for=\"feedback_radio_4\">" + fm_options.radio_button_list_labels[3] + "<\/label>";
-			radio_button_list_html += "    <\/div>";
-			radio_button_list_html += "    <div class=\"radio_button_wrapper\">";
-			radio_button_list_html += "        <input value=\"5\" type=\"radio\" name=\"feedback_radio\" class=\"feedback_radio_5\"\/>";
-			radio_button_list_html += "        <label for=\"feedback_radio_5\">" + fm_options.radio_button_list_labels[4] + "<\/label>";
-			radio_button_list_html += "    <\/div>";
+			radio_button_list_html += "<div class='rating'></div>"
 			radio_button_list_html += "<\/div></li>";
-
+			// Options
+			// var options = {
+			// 	max_value: 5,
+			// 	step_size: 0.5,
+			// 	initial_value: 0,
+			// 	selected_symbol_type: 'utf8_star', // Must be a key from symbols
+			// 	cursor: 'default',
+			// 	readonly: false,
+			// 	change_once: false, // Determines if the rating can only be set once
+			// 	additional_data: {} // Additional data to send to the server
+			// }
+			// $(".rating").rate(options);
 			radio_button_list_class = " radio_button_list_present";
 		}
 
@@ -617,9 +609,9 @@ var fm = (function ($) {
 
 		dataArray = {
 			name: $fm_content.find(".feedback_name").val(),
-			message: $fm_content.find(".feedback_message").val(),
+			comment: $fm_content.find(".feedback_message").val(),
 			email: $fm_content.find(".feedback_email").val(),
-			radio_list_value: $fm_content.find(".feedback_me_form input[name=feedback_radio]:checked").val()
+			rating: $(".rating").rate("getValue")
 		};
 
 		dataArray = $.extend(fm_options.custom_params, dataArray);
@@ -647,9 +639,9 @@ var fm = (function ($) {
 						}
 						$fm_content.find('.feedback_submit').text(fm_options.submit_label);
 						slideBack(fm_options, $fm_trigger, $fm_content);
-						$("body").append('<div ' + st + ' class="feedback-delayed-dlg success" onclick="fm.stopPropagation(event);"><span class="feedback-dlg-close" onclick="fm.closeFeedbackDelayedDlg();">X</span><span class="feedback-success-message">' +
-							'<span class="feedback-success-fail-message-inner"><span>' + fm_options.delayed_options.send_success + '</span></span></span></div>');
-						setTimeout(function () {$(".feedback-delayed-dlg").fadeOut(function () { $(this).remove(); }); }, fm_options.delayed_options.delay_success_milliseconds);
+						// $("body").append('<div ' + st + ' class="feedback-delayed-dlg success" onclick="fm.stopPropagation(event);"><span class="feedback-dlg-close" onclick="fm.closeFeedbackDelayedDlg();">X</span><span class="feedback-success-message">' +
+						// 	'<span class="feedback-success-fail-message-inner"><span>' + fm_options.delayed_options.send_success + '</span></span></span></div>');
+						// setTimeout(function () {$(".feedback-delayed-dlg").fadeOut(function () { $(this).remove(); }); }, fm_options.delayed_options.delay_success_milliseconds);
 					} else {
 						$fm_content.find('.feedback_submit').text(fm_options.submit_label);
 						slideBack(fm_options, $fm_trigger, $fm_content);
@@ -766,6 +758,17 @@ var fm = (function ($) {
 		appendFeedbackToBody(tmp_options);
 
 		detectTransitionSupport(tmp_options);
+		var options = {
+		max_value: 5,
+		step_size: 0.5,
+		initial_value: 3,
+		selected_symbol_type: 'utf8_star', // Must be a key from symbols
+		cursor: 'default',
+		readonly: false,
+		change_once: false, // Determines if the rating can only be set once
+		additional_data: {} // Additional data to send to the server
+		}
+		$(".rating").rate(options);
 	}
 
     return {

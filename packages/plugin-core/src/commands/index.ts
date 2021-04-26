@@ -13,6 +13,9 @@ import { CopyNoteURLCommand } from "./CopyNoteURL";
 import { CreateDailyJournalCommand } from "./CreateDailyJournal";
 import { DeleteNodeCommand } from "./DeleteNodeCommand";
 import { DiagnosticsReportCommand } from "./DiagnosticsReport";
+import { DisableTelemetryCommand } from "./DisableTelemetry";
+import { EnableTelemetryCommand } from "./EnableTelemetry";
+
 import { DoctorCommand } from "./Doctor";
 import { DumpStateCommand } from "./DumpStateCommand";
 import { ExportPodCommand } from "./ExportPod";
@@ -55,6 +58,8 @@ const ALL_COMMANDS = [
   CreateDailyJournalCommand,
   DeleteNodeCommand,
   DiagnosticsReportCommand,
+  DisableTelemetryCommand,
+  EnableTelemetryCommand,
   DoctorCommand,
   DumpStateCommand,
   ExportPodCommand,

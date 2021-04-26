@@ -1,4 +1,4 @@
-import { DNodeType, DVault } from "./typesv2";
+import { DNodeType, DVault, NoteProps } from "./typesv2";
 
 export type Stage = "dev" | "prod" | "test";
 
@@ -41,7 +41,28 @@ export interface Resp<T> {
   error?: Error | null;
 }
 
+export type NotesCacheAll = {
+  [key: string]: { cache: NotesCache; cacheUpdates: NotesCacheEntryMap };
+};
+export type NotesCache = {
+  version: number;
+  notes: NotesCacheEntryMap;
+};
+export type NotesCacheEntryMap = { [key: string]: NotesCacheEntry };
+export type NotesCacheEntry = {
+  hash: string;
+  data: Omit<NoteProps, "body">;
+};
+
 export type DendronConfig = {
+  /**
+   * Disable caching behavior
+   */
+  noCaching?: boolean;
+  /**
+   * Disable telemetry
+   */
+  noTelemetry?: boolean;
   /**
    * Dendron version. Setup by plugin
    */

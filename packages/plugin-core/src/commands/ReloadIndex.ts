@@ -5,6 +5,7 @@ import {
   SchemaUtils,
 } from "@dendronhq/common-all";
 import {
+  getDurationMilliseconds,
   note2File,
   schemaModuleOpts2File,
   vault2Path,
@@ -50,7 +51,10 @@ export class ReloadIndexCommand extends BasicCommand<
         }
       })
     );
+    const start = process.hrtime();
     const { error } = await engine.init();
+    const durationEngineInit = getDurationMilliseconds(start);
+    this.L.info({ ctx, durationEngineInit });
     if (error && error.code !== ERROR_CODES.MINOR) {
       this.L.error({ ctx, error, msg: "unable to initialize engine" });
       return;

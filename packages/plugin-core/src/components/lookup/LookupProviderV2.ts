@@ -13,13 +13,12 @@ import {
   SchemaUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { vault2Path } from "@dendronhq/common-server";
+import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
 import _, { DebouncedFunc } from "lodash";
 import { CancellationToken, Uri, window } from "vscode";
 import { LookupNoteTypeEnum } from "../../commands/LookupCommand";
 import { Logger } from "../../logger";
 import { CodeConfigKeys, EngineFlavor, EngineOpts } from "../../types";
-import { getDurationMilliseconds, profile } from "../../utils/system";
 import {
   DendronWorkspace,
   getConfigValue,
@@ -219,7 +218,6 @@ export class LookupProviderV2 {
       Logger.error({ err: resp.error });
       throw Error();
     }
-    Logger.info({ ctx, msg: "engine.write", profile });
     return { uri, node: nodeNew, resp };
   }
 
@@ -241,7 +239,6 @@ export class LookupProviderV2 {
     const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
     const uri = Uri.file(SchemaUtils.getPath({ root: vpath, fname }));
     const resp = await engine.writeSchema(smodNew);
-    Logger.info({ ctx, msg: "engine.write", profile });
     return { uri, node: smodNew, resp };
   }
 

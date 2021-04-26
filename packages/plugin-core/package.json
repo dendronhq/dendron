@@ -4,7 +4,7 @@
     "displayName": "dendron",
     "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
     "publisher": "dendron",
-    "version": "0.38.0",
+    "version": "0.38.6-alpha.0",
     "engines": {
         "vscode": "^1.45.0"
     },
@@ -440,6 +440,16 @@
                 "desc": "sign in to a Dendron account"
             },
             {
+                "command": "dendron.enableTelemetry",
+                "title": "Dendron: Enable Telemetry",
+                "desc": "Enable telemetry"
+            },
+            {
+                "command": "dendron.disableTelemetry",
+                "title": "Dendron: Disable Telemetry",
+                "desc": "Disable telemetry"
+            },
+            {
                 "command": "dendron.openLink",
                 "title": "Dendron: Open Link",
                 "desc": "Open link to external file (eg. pdf, .mov, etc) use system default",
@@ -524,8 +534,7 @@
             {
                 "command": "dendron.createDailyJournalNote",
                 "key": "ctrl+shift+i",
-                "mac": "cmd+shift+i",
-                "when": "editorFocus"
+                "mac": "cmd+shift+i"
             },
             {
                 "command": "dendron.copyNoteLink",
@@ -611,9 +620,10 @@
     },
     "icon": "assets/images/logo.png",
     "scripts": {
-        "vscode:prepublish": "webpack --mode production",
+        "vscode:prepublish": "yarn webpack:prod",
         "webpack": "webpack --mode development",
-        "webpack-dev": "webpack --mode development --watch",
+        "webpack:prod": "webpack --mode production",
+        "webpack:dev:watch": "webpack --mode development --watch",
         "lint": "eslint src --ext ts",
         "watch": "yarn compile --watch",
         "build": "yarn compile",
@@ -623,7 +633,7 @@
         "format": "prettier --write src '*.json' '*.js'"
     },
     "devDependencies": {
-        "@dendronhq/common-test-utils": "^0.38.0",
+        "@dendronhq/common-test-utils": "^0.38.6-alpha.0",
         "@types/execa": "^2.0.0",
         "@types/fs-extra": "^9.0.1",
         "@types/glob": "^7.1.1",
@@ -650,14 +660,14 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
-        "@dendronhq/api-server": "^0.38.0",
-        "@dendronhq/common-all": "^0.38.0",
-        "@dendronhq/common-server": "^0.38.0",
-        "@dendronhq/dendron-cli": "^0.38.0",
-        "@dendronhq/engine-server": "^0.38.0",
-        "@dendronhq/engine-test-utils": "^0.38.0",
+        "@dendronhq/api-server": "^0.38.6-alpha.0",
+        "@dendronhq/common-all": "^0.38.6-alpha.0",
+        "@dendronhq/common-server": "^0.38.6-alpha.0",
+        "@dendronhq/dendron-cli": "^0.38.6-alpha.0",
+        "@dendronhq/engine-server": "^0.38.6-alpha.0",
+        "@dendronhq/engine-test-utils": "^0.38.6-alpha.0",
         "@dendronhq/lsp-server": "^0.28.7-alpha.0",
-        "@dendronhq/pods-core": "^0.38.0",
+        "@dendronhq/pods-core": "^0.38.6-alpha.0",
         "cross-path-sort": "^1.0.0",
         "execa": "^4.0.2",
         "fs-extra": "^9.0.1",

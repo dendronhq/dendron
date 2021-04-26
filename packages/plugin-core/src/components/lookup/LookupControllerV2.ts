@@ -4,6 +4,7 @@ import {
   getSlugger,
   NoteProps,
 } from "@dendronhq/common-all";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
@@ -17,7 +18,6 @@ import { CONFIG } from "../../constants";
 import { Logger } from "../../logger";
 import { EngineOpts } from "../../types";
 import { DendronClientUtilsV2, VSCodeUtils } from "../../utils";
-import { getDurationMilliseconds } from "../../utils/system";
 import { DendronWorkspace, getWS, when } from "../../workspace";
 import {
   ButtonCategory,

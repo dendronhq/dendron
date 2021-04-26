@@ -8,8 +8,7 @@ import {
   DEngineInitResp,
   DEngineInitSchemaResp,
   DLink,
-  DNodeUtils,
-  DStoreV2,
+  DStore,
   DVault,
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
@@ -17,8 +16,11 @@ import {
   ENGINE_ERROR_CODES,
   ERROR_CODES,
   NoteChangeEntry,
-  NotePropsDict,
   NoteProps,
+  NotePropsDict,
+  NotesCache,
+  NotesCacheAll,
+  NotesCacheEntryMap,
   NoteUtils,
   RenameNoteOpts,
   RenameNotePayload,
@@ -26,255 +28,33 @@ import {
   SchemaModuleProps,
   SchemaUtils,
   StoreDeleteNoteResp,
+  VaultUtils,
   WriteNoteResp,
 } from "@dendronhq/common-all";
 import {
   DLogger,
   file2Note,
   getAllFiles,
-  globMatch,
   note2File,
   schemaModuleProps2File,
-  SchemaParserV2 as cSchemaParserV2,
   vault2Path,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import YAML from "yamljs";
 import { MDUtilsV4 } from "../../markdown";
 import { ParserUtilsV2 } from "../../topics/markdown/utilsv2";
+import { readNotesFromCache, writeNotesToCache } from "../../utils";
+import { NoteParser } from "./noteParser";
+import { SchemaParser } from "./schemaParser";
 
-type FileMetaV2 = {
+export type FileMeta = {
   // file name: eg. foo.md, name = foo
   prefix: string;
   // fpath: full path, eg: foo.md, fpath: foo.md
   fpath: string;
 };
-type FileMetaDictV2 = { [key: string]: FileMetaV2[] };
-
-function getFileMetaV2(fpaths: string[]): FileMetaDictV2 {
-  const metaDict: FileMetaDictV2 = {};
-  _.forEach(fpaths, (fpath) => {
-    const { name } = path.parse(fpath);
-    const lvl = name.split(".").length;
-    if (!_.has(metaDict, lvl)) {
-      metaDict[lvl] = [];
-    }
-    metaDict[lvl].push({ prefix: name, fpath });
-  });
-  return metaDict;
-}
-
-export class ParserBaseV2 {
-  constructor(public opts: { store: DStoreV2; logger: DLogger }) {}
-
-  get logger() {
-    return this.opts.logger;
-  }
-}
-
-export class NoteParserV2 extends ParserBaseV2 {
-  public cache: NotePropsCacheV2;
-
-  constructor(
-    public opts: { store: DStoreV2; cache: NotePropsCacheV2; logger: DLogger }
-  ) {
-    super(opts);
-    this.cache = opts.cache;
-  }
-
-  async parseFile(fpath: string[], vault: DVault): Promise<NoteProps[]> {
-    const ctx = "parseFile";
-    const fileMetaDict: FileMetaDictV2 = getFileMetaV2(fpath);
-    const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
-    const notesByFname: NotePropsDict = {};
-    const notesById: NotePropsDict = {};
-    this.logger.debug({ ctx, msg: "enter", fpath });
-
-    // get root note
-    if (_.isUndefined(fileMetaDict[1])) {
-      throw new DendronError({ status: ENGINE_ERROR_CODES.NO_ROOT_NOTE_FOUND });
-    }
-    const rootFile = fileMetaDict[1].find(
-      (n) => n.fpath === "root.md"
-    ) as FileMetaV2;
-    if (!rootFile) {
-      throw new DendronError({ status: ENGINE_ERROR_CODES.NO_ROOT_NOTE_FOUND });
-    }
-    const rootNote = this.parseNoteProps({
-      fileMeta: rootFile,
-      addParent: false,
-      vault,
-    })[0];
-    this.logger.debug({ ctx, rootNote, msg: "post-parse-rootNote" });
-
-    notesByFname[rootNote.fname] = rootNote;
-    notesById[rootNote.id] = rootNote;
-
-    // get root of hiearchies
-    let lvl = 2;
-    let prevNodes: NoteProps[] = fileMetaDict[1]
-      // don't count root node
-      .filter((n) => n.fpath !== "root.md")
-      .flatMap((ent) => {
-        const notes = this.parseNoteProps({
-          fileMeta: ent,
-          addParent: false,
-          vault,
-        });
-        return notes;
-      });
-    prevNodes.forEach((ent) => {
-      DNodeUtils.addChild(rootNote, ent);
-      notesByFname[ent.fname] = ent;
-      notesById[ent.id] = ent;
-    });
-
-    // get everything else
-    while (lvl <= maxLvl) {
-      const currNodes: NoteProps[] = (fileMetaDict[lvl] || [])
-        .filter((ent) => {
-          return !globMatch(["root.*"], ent.fpath);
-        })
-        .flatMap((ent) => {
-          const node = this.parseNoteProps({
-            fileMeta: ent,
-            parents: prevNodes,
-            notesByFname,
-            addParent: true,
-            vault,
-          });
-          // need to be inside this loop
-          // deal with `src/__tests__/enginev2.spec.ts`, with stubs/ test case
-          node.forEach((ent) => {
-            notesByFname[ent.fname] = ent;
-            notesById[ent.id] = ent;
-          });
-          return node;
-        });
-      lvl += 1;
-      prevNodes = currNodes;
-    }
-
-    // add schemas
-    const out = _.values(notesByFname);
-    const domains = rootNote.children.map(
-      (ent) => notesById[ent]
-    ) as NoteProps[];
-    const schemas = this.opts.store.schemas;
-    await Promise.all(
-      domains.map(async (d) => {
-        return SchemaUtils.matchDomain(d, notesById, schemas);
-      })
-    );
-    return out;
-  }
-
-  parseNoteProps(opts: {
-    fileMeta: FileMetaV2;
-    notesByFname?: NotePropsDict;
-    parents?: NoteProps[];
-    addParent: boolean;
-    createStubs?: boolean;
-    vault: DVault;
-  }): NoteProps[] {
-    const cleanOpts = _.defaults(opts, {
-      addParent: true,
-      createStubs: true,
-      notesByFname: {},
-      parents: [] as NoteProps[],
-    });
-    const { fileMeta, parents, notesByFname, vault } = cleanOpts;
-    const ctx = "parseNoteProps";
-    this.logger.debug({ ctx, msg: "enter", fileMeta });
-    const wsRoot = this.opts.store.wsRoot;
-    const vpath = vault2Path({ vault, wsRoot });
-    let out: NoteProps[] = [];
-    let noteProps: NoteProps;
-
-    // get note props
-    try {
-      noteProps = file2Note(path.join(vpath, fileMeta.fpath), vault);
-    } catch (_err) {
-      const err = {
-        status: ENGINE_ERROR_CODES.BAD_PARSE_FOR_NOTE,
-        msg: JSON.stringify({
-          fname: fileMeta.fpath,
-          error: _err.message,
-        }),
-      };
-      this.logger.error({ ctx, fileMeta, err });
-      throw new DendronError(err);
-    }
-
-    // add parent
-    if (cleanOpts.addParent) {
-      const stubs = NoteUtils.addParent({
-        note: noteProps,
-        notesList: _.uniqBy(_.values(notesByFname).concat(parents), "id"),
-        createStubs: cleanOpts.createStubs,
-        wsRoot: this.opts.store.wsRoot,
-      });
-      out = out.concat(stubs);
-    }
-    out.push(noteProps);
-    return out;
-  }
-
-  async parse(fpaths: string[], vault: DVault): Promise<NoteProps[]> {
-    return this.parseFile(fpaths, vault);
-  }
-}
-
-export class SchemaParserV2 extends ParserBaseV2 {
-  parseFile(fpath: string, root: DVault): SchemaModuleProps {
-    const fname = path.basename(fpath, ".schema.yml");
-    const wsRoot = this.opts.store.wsRoot;
-    const vpath = vault2Path({ vault: root, wsRoot });
-    const schemaOpts: any = YAML.parse(
-      fs.readFileSync(path.join(vpath, fpath), "utf8")
-    );
-    return cSchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
-  }
-
-  async parse(
-    fpaths: string[],
-    vault: DVault
-  ): Promise<{
-    schemas: SchemaModuleProps[];
-    errors: DendronError[] | null;
-  }> {
-    const ctx = "parse";
-    this.logger.info({ ctx, msg: "enter", fpaths, vault });
-
-    const out = await Promise.all(
-      fpaths.flatMap((fpath) => {
-        try {
-          return this.parseFile(fpath, vault);
-        } catch (err) {
-          return new DendronError({
-            msg: ENGINE_ERROR_CODES.BAD_PARSE_FOR_SCHEMA,
-            payload: { fpath },
-          });
-        }
-      })
-    );
-    let errors = _.filter(
-      out,
-      (ent) => ent instanceof DendronError
-    ) as DendronError[];
-    return {
-      schemas: _.reject(
-        out,
-        (ent) => ent instanceof DendronError
-      ) as SchemaModuleProps[],
-      errors: _.isEmpty(errors) ? null : errors,
-    };
-  }
-}
-
-type NotePropsCacheV2 = {};
+export type FileMetaDict = { [key: string]: FileMeta[] };
 
 // type NoteEntryV2 = {
 //   mtime: number;
@@ -289,11 +69,11 @@ type NotePropsCacheV2 = {};
 //   headings: any[];
 // };
 
-export class FileStorageV2 implements DStoreV2 {
+export class FileStorage implements DStore {
   public vaults: string[];
   public notes: NotePropsDict;
   public schemas: SchemaModuleDict;
-  public notesCache: NotePropsCacheV2;
+  public notesCache: NotesCache;
   public logger: DLogger;
   public links: DLink[];
   public vaultsv3: DVault[];
@@ -311,7 +91,10 @@ export class FileStorageV2 implements DStoreV2 {
     this.vaults = vaultsv3.map((ent) => ent.fsPath);
     this.notes = {};
     this.schemas = {};
-    this.notesCache = {};
+    this.notesCache = {
+      version: 0,
+      notes: {},
+    };
     this.links = [];
     this.logger = logger;
     const ctx = "FileStorageV2";
@@ -437,10 +220,6 @@ export class FileStorageV2 implements DStoreV2 {
     return this.init();
   }
 
-  loadNotesCache(): NotePropsCacheV2 {
-    return {};
-  }
-
   async initSchema(): Promise<DEngineInitSchemaResp> {
     const ctx = "initSchema";
     this.logger.info({ ctx, msg: "enter" });
@@ -484,7 +263,7 @@ export class FileStorageV2 implements DStoreV2 {
     if (_.isEmpty(schemaFiles)) {
       throw new DendronError({ status: ENGINE_ERROR_CODES.NO_SCHEMA_FOUND });
     }
-    const { schemas, errors } = await new SchemaParserV2({
+    const { schemas, errors } = await new SchemaParser({
       store: this,
       logger: this.logger,
     }).parse(schemaFiles, vault);
@@ -498,17 +277,37 @@ export class FileStorageV2 implements DStoreV2 {
     const ctx = "initNotes";
     this.logger.info({ ctx, msg: "enter" });
     let notesWithLinks: NoteProps[] = [];
+    const allNotesCache: NotesCacheAll = {};
     const out = await Promise.all(
       (this.vaultsv3 as DVault[]).map(async (vault) => {
-        const notes = await this._initNotes(vault);
+        const { notes, cacheUpdates, cache } = await this._initNotes(vault);
         notesWithLinks = notesWithLinks.concat(
           _.filter(notes, (n) => !_.isEmpty(n.links))
         );
+        allNotesCache[VaultUtils.getName(vault)] = {
+          cache,
+          cacheUpdates,
+        };
+        this.logger.info({
+          ctx,
+          vault,
+          numEntries: _.size(notes),
+          numCacheUpdates: _.size(cacheUpdates),
+        });
+        const newCache: NotesCache = {
+          version: cache.version,
+          notes: _.merge(cache.notes, cacheUpdates),
+        };
+        const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
+        // OPT:make async and don't wait for return
+        if (!this.engine.config.noCaching) {
+          writeNotesToCache(vpath, newCache);
+        }
         return notes;
       })
     );
     const allNotes = _.flatten(out);
-    this._addBacklinks({ notesWithLinks, allNotes });
+    this._addBacklinks({ notesWithLinks, allNotes, allNotesCache });
     return allNotes;
   }
 
@@ -518,6 +317,7 @@ export class FileStorageV2 implements DStoreV2 {
   }: {
     notesWithLinks: NoteProps[];
     allNotes: NoteProps[];
+    allNotesCache: NotesCacheAll;
   }) {
     return _.map(notesWithLinks, async (noteFrom) => {
       return Promise.all(
@@ -542,7 +342,13 @@ export class FileStorageV2 implements DStoreV2 {
     });
   }
 
-  async _initNotes(vault: DVault): Promise<NoteProps[]> {
+  async _initNotes(
+    vault: DVault
+  ): Promise<{
+    notes: NoteProps[];
+    cacheUpdates: NotesCacheEntryMap;
+    cache: NotesCache;
+  }> {
     const ctx = "initNotes";
     this.logger.info({ ctx, msg: "enter" });
     const wsRoot = this.wsRoot;
@@ -551,23 +357,33 @@ export class FileStorageV2 implements DStoreV2 {
       root: vpath,
       include: ["*.md"],
     }) as string[];
-    const cache = this.loadNotesCache();
-    const notes = await new NoteParserV2({
+
+    const cache: NotesCache = !this.engine.config.noCaching
+      ? readNotesFromCache(vpath)
+      : { version: 0, notes: {} };
+    const { notes, cacheUpdates } = await new NoteParser({
       store: this,
       cache,
       logger: this.logger,
-    }).parse(noteFiles, vault);
+    }).parseFile(noteFiles, vault);
     await Promise.all(
       notes.map(async (n) => {
         if (n.stub) {
           return;
         }
-        const links = ParserUtilsV2.findLinks({ note: n, engine: this.engine });
-        n.links = links;
+        if (_.has(cacheUpdates, n.fname)) {
+          const links = ParserUtilsV2.findLinks({
+            note: n,
+            engine: this.engine,
+          });
+          n.links = links;
+        } else {
+          n.links = cache.notes[n.fname].data.links;
+        }
         return;
       })
     );
-    return notes;
+    return { notes, cacheUpdates, cache };
   }
 
   async bulkAddNotes(opts: BulkAddNoteOpts) {

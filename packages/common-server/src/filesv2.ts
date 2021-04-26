@@ -179,15 +179,17 @@ export function file2NoteWithCache({
   const sig = genHash(content);
   const matchHash = cache.notes[name]?.hash === sig;
   const fname = toLowercase ? name.toLowerCase() : name;
-  // if (matchHash) {
-  //   let capture  = content.match(/^---[\s\S]+?---/);
-  //   if (capture) {
-  //     let offset = capture[0].length;
-  //     let body = content.slice(offset + 1);
-  //     //note = cache.notes[]
-  //   }
-  // }
-  const note = string2Note({ content, fname, vault });
+  let note: NoteProps;
+  if (matchHash) {
+    let capture = content.match(/^---[\s\S]+?---/);
+    if (capture) {
+      let offset = capture[0].length;
+      let body = content.slice(offset + 1);
+      note = { ...cache.notes[name].data, body };
+      return { note, matchHash, noteHash: sig };
+    }
+  }
+  note = string2Note({ content, fname, vault });
   return { note, matchHash, noteHash: sig };
 }
 

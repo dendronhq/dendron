@@ -34,7 +34,7 @@ import { WorkspaceSettings } from "./types";
 import { VSCodeUtils, WSUtils } from "./utils";
 import { MarkdownUtils } from "./utils/md";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
-import { DendronWorkspace } from "./workspace";
+import { DendronWorkspace, getEngine } from "./workspace";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
@@ -42,9 +42,11 @@ const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 function getCommonProps() {
   return {
     os: getOS(),
+    arch: process.arch,
+    nodeVersion: process.version,
     extensionVersion: DendronWorkspace.version(),
-    vscodeVersion: vscode.version,
-    vscodeFlavor: vscode.env.appName,
+    ideVersion: vscode.version,
+    ideFlavor: vscode.env.appName,
   };
 }
 
@@ -347,11 +349,6 @@ export async function _activate(context: vscode.ExtensionContext) {
     const reloadSuccess = await reloadWorkspace();
     const durationReloadWorkspace = getDurationMilliseconds(start);
 
-    SegmentClient.instance().track(VSCodeEvents.InitializeWorkspace, {
-      duration: durationReloadWorkspace,
-      noCaching: config.noCaching || false,
-      ...getCommonProps(),
-    });
     if (!reloadSuccess) {
       HistoryService.instance().add({
         source: "extension",
@@ -359,6 +356,14 @@ export async function _activate(context: vscode.ExtensionContext) {
       });
       return;
     }
+
+    SegmentClient.instance().track(VSCodeEvents.InitializeWorkspace, {
+      duration: durationReloadWorkspace,
+      noCaching: config.noCaching || false,
+      numNotes: _.size(getEngine().notes),
+      numVaults: _.size(getEngine().vaultsv3),
+      ...getCommonProps(),
+    });
     await ws.activateWatchers();
     toggleViews(true);
     Logger.info({ ctx, msg: "fin startClient", durationReloadWorkspace });

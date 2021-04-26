@@ -88,6 +88,10 @@ export class SegmentClient {
     this.logger = createLogger("SegmentClient");
     this._segmentInstance = new Analytics(key);
     this._hasOptedOut = opts?.optOut || false;
+    if (opts?.optOut) {
+      this.logger.info({ msg: "user opted out of telemetry" });
+      return;
+    }
 
     const uuidPath = path.join(os.homedir(), CONSTANTS.DENDRON_ID);
     this.logger.info({ msg: "telemetry initializing" });

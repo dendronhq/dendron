@@ -16,7 +16,7 @@ const packageJson = {
   main: "index.js",
   license: "MIT",
   dependencies: {
-    "@dendronhq/dendron-11ty": "^1.38.0",
+    "@dendronhq/dendron-11ty": "^1.39.0",
   },
 };
 
@@ -49,7 +49,12 @@ export const buildSite = async (opts: BuildSiteV2CLICommandCliOpts) => {
     "@dendronhq",
     "dendron-11ty"
   );
-  const importEleventy = require(`./webpack-require-hack.js`);
+  let importEleventy: any;
+  try {
+    importEleventy = require(`./webpack-require-hack.js`);
+  } catch (error) {
+    importEleventy = require;
+  }
   const eleventy = importEleventy(eleventyPath);
   Logger.info({ ctx: "buildSite", eleventyPath });
   const cmd = new BuildSiteV2CLICommand();

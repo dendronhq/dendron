@@ -144,7 +144,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       {
         location: ProgressLocation.Notification,
         title: "Adding remote vault",
-        cancellable: true,
+        cancellable: false,
       },
       async (progress) => {
         progress.report({

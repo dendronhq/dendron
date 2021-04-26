@@ -74,6 +74,15 @@ export class FileUtils {
   static escape(fpath: string) {
     return fpath.replace(/(\s+)/g, "\\$1");
   }
+
+  /**
+   * Given a full fname, return the leaf
+   * @param fname fname
+   * @returns name of leaf node
+   */
+  static getLeafNameFromFname(fname: string) {
+    return _.split(fname, ".").pop();
+  }
 }
 
 // NOTE: used for tests

@@ -10,9 +10,10 @@ import path from "path";
 import { Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { UNKNOWN_ERROR_MSG } from "../logger";
-import { VSCodeUtils } from "../utils";
+import { VSCodeUtils, FileUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
+import { isNumeric } from "../utils/strings";
 
 type CommandOpts = { direction: "next" | "prev" };
 export { CommandOpts as GoToSiblingCommandOpts };
@@ -79,31 +80,29 @@ export class GoToSiblingCommand extends BasicCommand<
         msg: "no_siblings" as const,
       };
     }
-    // https://stackoverflow.com/questions/18082/validate-decimal-numbers-in-javascript-isnumeric/1830844#1830844
-    const isNumeric = (n: any) => {
-      return !isNaN(parseInt(n)) && isFinite(n);
-    };
+
+    // check if there are numeric-only nodes
     const numericNodes = _.filter(respNodes, (o) => {
-      const leafName = _.split(o.fname, ".").pop();
-      console.log(o.fname);
-      console.log(leafName);
+      const leafName = FileUtils.getLeafNameFromFname(o.fname);
       return isNumeric(leafName);
     }) as NoteProps[];
-    const numsSorted = _.orderBy(
-      numericNodes,
-      (o) => {
-        const leafName = _.split(o.fname, ".").pop();
-        return leafName!.length;
-      },
-      "desc"
-    );
+
+    // determine how much we want to zero-pad the numeric-only node names
     let padLength = 0;
-    if (numsSorted) {
-      const leafName = numsSorted[0].fname;
-      padLength = leafName.length;
+    if (numericNodes) {
+      const sortedNumericNodes = _.orderBy(
+        numericNodes,
+        (o) => {
+          return FileUtils.getLeafNameFromFname(o.fname)!.length;
+        },
+        "desc"
+      );
+      padLength = sortedNumericNodes[0].fname.length;
     }
+
+    // zero-pad numeric-only nodes before sorting
     const sorted = _.sortBy(respNodes, (o) => {
-      const leafName = _.split(o.fname, ".").pop();
+      const leafName = FileUtils.getLeafNameFromFname(o.fname);
       if (isNumeric(leafName)) {
         return _.padStart(leafName, padLength, "0");
       }

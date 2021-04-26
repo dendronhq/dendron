@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.39.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.39.0) (2021-04-26)
+
+### Bug Fixes
+
+- create daily journal note without open note ([eb792cb](https://github.com/dendronhq/dendron/commit/eb792cbe22e6297c20d66362791a597e9e99ff8b))
+- go-down at root matches itself only ([#623](https://github.com/dendronhq/dendron/issues/623)) ([d70c120](https://github.com/dendronhq/dendron/commit/d70c1203085a1a00b135999c669d18cb500fcfb3)), closes [#619](https://github.com/dendronhq/dendron/issues/619)
+- goto note issue [#662](https://github.com/dendronhq/dendron/issues/662) ([952b41e](https://github.com/dendronhq/dendron/commit/952b41e0183d5b0a304a1824c7d8fb9b25fb2b02))
+- issues with caching notes ([f6e3825](https://github.com/dendronhq/dendron/commit/f6e38250e6fa5c57bfdaaba1a0be87ff933620c5))
+- notes added outside of Dendron get initialized with correct metadata ([5390f2f](https://github.com/dendronhq/dendron/commit/5390f2f893d02a89fe905784a82bba4590c894e7))
+
+### Features Dendron
+
+- initialize notes from cache ([a0a2a1e](https://github.com/dendronhq/dendron/commit/a0a2a1eaeeeee45248ee3cadcda1b033df88d695))
+- insert note command ([70065f8](https://github.com/dendronhq/dendron/commit/70065f859db745c725b252c34b452c9d16cf13a4))
+
 ## [0.38.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.38.6-alpha.0) (2021-04-26)
 
 ### Bug Fixes

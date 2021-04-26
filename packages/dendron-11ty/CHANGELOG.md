@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.39.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.39.0) (2021-04-26)
+
+### Features Dendron
+
+- add auth based analytics ([39f8f6b](https://github.com/dendronhq/dendron/commit/39f8f6b57c7acfcb5435debfeee128019c748529))
+- add feedback to site ([aebbab9](https://github.com/dendronhq/dendron/commit/aebbab980eb846a0f81f993de422f42b6b4a6708))
+
 ## [0.38.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.38.6-alpha.0) (2021-04-26)
 
 **Note:** Version bump only for package @dendronhq/dendron-11ty

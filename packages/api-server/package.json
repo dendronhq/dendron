@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/api-server",
-  "version": "0.38.6-alpha.0",
+  "version": "0.39.0",
   "description": "",
   "license": "GPLv3",
   "repository": {
@@ -54,9 +54,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@dendronhq/common-all": "^0.38.6-alpha.0",
-    "@dendronhq/common-server": "^0.38.6-alpha.0",
-    "@dendronhq/engine-server": "^0.38.6-alpha.0",
+    "@dendronhq/common-all": "^0.39.0",
+    "@dendronhq/common-server": "^0.39.0",
+    "@dendronhq/engine-server": "^0.39.0",
     "express": "^4.17.1",
     "fs-extra": "^9.0.1",
     "http-status-codes": "^2.1.4",

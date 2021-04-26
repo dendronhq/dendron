@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.39.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.39.0) (2021-04-26)
+
+### Features Dendron
+
+- workspace push and pull commands ([e1a4ab3](https://github.com/dendronhq/dendron/commit/e1a4ab38329bbfe4bf190b019c2d855f0b239ab8))
+
 ## [0.38.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.38.6-alpha.0) (2021-04-26)
 
 ### Features Dendron

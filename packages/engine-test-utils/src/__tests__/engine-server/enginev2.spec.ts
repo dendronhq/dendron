@@ -10,7 +10,6 @@ import {
 } from "@dendronhq/common-test-utils";
 import { DendronEngineV2, readNotesFromCache } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { ConfigUtils } from "../../config";
 import { runEngineTestV5 } from "../../engine";
 
 const createEngine = ({ wsRoot }: WorkspaceOpts) => {

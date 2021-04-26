@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.38.6-alpha.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.38.6-alpha.0) (2021-04-26)
+
+### Bug Fixes
+
+- issues with caching notes ([6a65d4e](https://github.com/dendronhq/dendron/commit/6a65d4e179f755324d68c01a3ca9d767e71b7dfc))
+
+## [0.38.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.38.5-alpha.0) (2021-04-26)
+
+### Bug Fixes
+
+- issues with caching notes ([6a65d4e](https://github.com/dendronhq/dendron/commit/6a65d4e179f755324d68c01a3ca9d767e71b7dfc))
+
 ## [0.38.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.37.0...v0.38.4-alpha.0) (2021-04-26)
 
 **Note:** Version bump only for package @dendronhq/engine-test-utils

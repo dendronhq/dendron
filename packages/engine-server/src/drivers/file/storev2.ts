@@ -294,7 +294,10 @@ export class FileStorage implements DStore {
           numEntries: _.size(notes),
           numCacheUpdates: _.size(cacheUpdates),
         });
-        const newCache = _.merge(cache, cacheUpdates);
+        const newCache: NotesCache = {
+          version: cache.version,
+          notes: _.merge(cache.notes, cacheUpdates),
+        };
         const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
         // OPT:make async and don't wait for return
         if (!this.engine.config.noCaching) {

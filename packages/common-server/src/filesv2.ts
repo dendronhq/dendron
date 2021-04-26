@@ -100,8 +100,8 @@ export function file2Schema(fpath: string, wsRoot: string): SchemaModuleProps {
   return SchemaParserV2.parseRaw(schemaOpts, { root, fname, wsRoot });
 }
 
-export function hash(contents: any) {
-  return SparkMD5.hash(contents, true); // OR raw hash (binary string)
+export function genHash(contents: any) {
+  return SparkMD5.hash(contents); // OR raw hash (binary string)
 }
 
 export function string2Schema({
@@ -176,9 +176,17 @@ export function file2NoteWithCache({
 }): { note: NoteProps; matchHash: boolean; noteHash: string } {
   const content = fs.readFileSync(fpath, { encoding: "utf8" });
   const { name } = path.parse(fpath);
-  const sig = hash(content);
-  const matchHash = cache.notes["name"]?.hash === sig;
+  const sig = genHash(content);
+  const matchHash = cache.notes[name]?.hash === sig;
   const fname = toLowercase ? name.toLowerCase() : name;
+  // if (matchHash) {
+  //   let capture  = content.match(/^---[\s\S]+?---/);
+  //   if (capture) {
+  //     let offset = capture[0].length;
+  //     let body = content.slice(offset + 1);
+  //     //note = cache.notes[]
+  //   }
+  // }
   const note = string2Note({ content, fname, vault });
   return { note, matchHash, noteHash: sig };
 }

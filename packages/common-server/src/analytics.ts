@@ -107,7 +107,22 @@ export class SegmentClient {
     }
   }
 
-  identify(_id: string, props?: { [key: string]: any }) {
+  identifyAnonymous(props?: { [key: string]: any }) {
+    if (this._hasOptedOut || this._segmentInstance == null) {
+      return;
+    }
+    try {
+      this._segmentInstance.identify({
+        anonymousId: this._anonymousId,
+        traits: props,
+      });
+      this._segmentInstance.flush();
+    } catch (ex) {
+      this.logger.error(ex);
+    }
+  }
+
+  identify(_id?: string, props?: { [key: string]: any }) {
     if (this._hasOptedOut || this._segmentInstance == null) {
       return;
     }

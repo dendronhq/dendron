@@ -1,5 +1,6 @@
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
+import { ConfigUtils } from "../../config";
 import { runEngineTestV5 } from "../../engine";
 
 async function genHierarchy(opts: {
@@ -18,7 +19,7 @@ describe("engine perf", () => {
   // regular: 400ms
   // before: 285
   // 261ms
-  test.skip("basic", async () => {
+  test.only("basic", async () => {
     /**
      * Evenly spread out
      * Hierarchies:
@@ -27,7 +28,8 @@ describe("engine perf", () => {
      */
     await runEngineTestV5(
       async ({ engineInitDuration }) => {
-        expect(engineInitDuration < 2100).toBeTruthy();
+        expect(engineInitDuration).toMatchSnapshot();
+        // expect(engineInitDuration < 2100).toBeTruthy();
         // expect(engineInitDuration).toMatchSnapshot("BOND");
         // const vpath = vault2Path({ wsRoot, vault: vaults[0] });
         // expect(fs.readdirSync(vpath)).toMatchSnapshot();
@@ -46,6 +48,13 @@ describe("engine perf", () => {
                 })
               );
             })
+          );
+          await ConfigUtils.withConfig(
+            (config) => {
+              config.noCaching = true;
+              return config;
+            },
+            { wsRoot: wsRoot }
           );
         },
         expect,

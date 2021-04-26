@@ -357,6 +357,7 @@ export async function _activate(context: vscode.ExtensionContext) {
       return;
     }
 
+    SegmentClient.instance().identifyAnonymous();
     SegmentClient.instance().track(VSCodeEvents.InitializeWorkspace, {
       duration: durationReloadWorkspace,
       noCaching: config.noCaching || false,

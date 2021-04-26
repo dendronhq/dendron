@@ -10,6 +10,7 @@ export const CONSTANTS = {
   DENDRON_USER_FILE: ".dendron.user",
   DENDRON_CACHE_FILE: ".dendron.cache.json",
   DENDRON_ID: ".dendron.uuid",
+  DENDRON_NO_TELEMETRY: ".dendron.no-telemetry",
 };
 
 export const ENGINE_ERROR_CODES = {

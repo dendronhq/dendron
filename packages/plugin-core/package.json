@@ -440,6 +440,16 @@
                 "desc": "sign in to a Dendron account"
             },
             {
+                "command": "dendron.enableTelemetry",
+                "title": "Dendron: Enable Telemetry",
+                "desc": "Enable telemetry"
+            },
+            {
+                "command": "dendron.disableTelemetry",
+                "title": "Dendron: Disable Telemetry",
+                "desc": "Disable telemetry"
+            },
+            {
                 "command": "dendron.openLink",
                 "title": "Dendron: Open Link",
                 "desc": "Open link to external file (eg. pdf, .mov, etc) use system default",

@@ -545,6 +545,18 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "sign in to a Dendron account",
   },
   // --- Misc
+  ENABLE_TELEMETRY: {
+    key: "dendron.enableTelemetry",
+    title: `${CMD_PREFIX} Enable Telemetry`,
+    group: "workspace",
+    desc: "Enable telemetry",
+  },
+  DISABLE_TELEMETRY: {
+    key: "dendron.disableTelemetry",
+    title: `${CMD_PREFIX} Disable Telemetry`,
+    group: "workspace",
+    desc: "Disable telemetry",
+  },
   OPEN_LINK: {
     key: "dendron.openLink",
     title: `${CMD_PREFIX} Open Link`,

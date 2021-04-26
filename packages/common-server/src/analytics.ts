@@ -83,13 +83,30 @@ export class SegmentClient {
     return this._singleton;
   }
 
+  static getConfigPath() {
+    return path.join(os.homedir(), CONSTANTS.DENDRON_NO_TELEMETRY);
+  }
+
+  static isDisabled() {
+    return fs.existsSync(this.getConfigPath());
+  }
+
+  static disable() {
+    fs.writeFileSync(this.getConfigPath(), "");
+  }
+
+  static enable() {
+    fs.removeSync(this.getConfigPath());
+  }
+
   constructor(opts?: SegmentClientOpts) {
     const key = env("SEGMENT_VSCODE_KEY");
     this.logger = createLogger("SegmentClient");
     this._segmentInstance = new Analytics(key);
-    this._hasOptedOut = opts?.optOut || false;
-    if (opts?.optOut) {
+    this._hasOptedOut = opts?.optOut || SegmentClient.isDisabled() || false;
+    if (this._hasOptedOut) {
       this.logger.info({ msg: "user opted out of telemetry" });
+      this._anonymousId = "";
       return;
     }
 

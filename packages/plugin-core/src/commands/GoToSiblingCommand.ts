@@ -79,7 +79,36 @@ export class GoToSiblingCommand extends BasicCommand<
         msg: "no_siblings" as const,
       };
     }
-    const sorted = _.sortBy(respNodes, "fname");
+    // https://stackoverflow.com/questions/18082/validate-decimal-numbers-in-javascript-isnumeric/1830844#1830844
+    const isNumeric = (n: any) => {
+      return !isNaN(parseInt(n)) && isFinite(n);
+    };
+    const numericNodes = _.filter(respNodes, (o) => {
+      const leafName = _.split(o.fname, ".").pop();
+      console.log(o.fname);
+      console.log(leafName);
+      return isNumeric(leafName);
+    }) as NoteProps[];
+    const numsSorted = _.orderBy(
+      numericNodes,
+      (o) => {
+        const leafName = _.split(o.fname, ".").pop();
+        return leafName!.length;
+      },
+      "desc"
+    );
+    let padLength = 0;
+    if (numsSorted) {
+      const leafName = numsSorted[0].fname;
+      padLength = leafName.length;
+    }
+    const sorted = _.sortBy(respNodes, (o) => {
+      const leafName = _.split(o.fname, ".").pop();
+      if (isNumeric(leafName)) {
+        return _.padStart(leafName, padLength, "0");
+      }
+      return leafName;
+    });
     const indexOfCurrentNote = _.findIndex(sorted, { fname: value });
     if (indexOfCurrentNote < 0) {
       throw new Error(`${ctx}: ${UNKNOWN_ERROR_MSG}`);

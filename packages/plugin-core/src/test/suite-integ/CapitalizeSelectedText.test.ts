@@ -31,10 +31,12 @@ suite("CapitalizeSelectedText", function () {
           editBuilder.insert(start, lowercaseText);
         });
 
+        // Since there are no selections, this command should do nothing
         await new CapitalizeSelectedTextCommand().run();
 
         const changedText = editor.document.getText(selection);
 
+        // Expect that the text is not changed
         expect(changedText).toEqual(lowercaseText);
         done();
       },

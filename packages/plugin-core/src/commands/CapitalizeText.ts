@@ -1,5 +1,5 @@
 import { VSCodeUtils } from "../utils";
-import { window } from "vscode";
+import { window, env } from "vscode";
 import _ from "lodash";
 import { DENDRON_COMMANDS } from "../constants";
 import { BasicCommand } from "./base";
@@ -30,7 +30,7 @@ export class CapitalizeTextCommand extends BasicCommand<
       textEditor.selections.forEach((selection) => {
         // Get the text of the selection
         const text = textEditor.document.getText(selection);
-        const capitalizedText = text.toUpperCase();
+        const capitalizedText = text.toLocaleUpperCase(env.language);
 
         // Swap the old text with the capitalized text
         editBuilder.replace(selection, capitalizedText);

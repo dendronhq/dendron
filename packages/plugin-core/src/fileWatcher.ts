@@ -151,12 +151,12 @@ export class VaultWatcher {
         await this.engine.updateNote(note as NoteProps, {
           newNode: true,
         });
-        VaultWatcher.refreshTree();
       } catch (err) {
         this.L.error({ ctx, err });
         throw err;
       }
     } finally {
+      VaultWatcher.refreshTree();
       this.L.debug({ ctx, uri, msg: "refreshTree" });
     }
   }

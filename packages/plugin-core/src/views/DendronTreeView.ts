@@ -156,7 +156,7 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
   }
 }
 
-export class DendronTreeViewV2 {
+export class DendronTreeView {
   public pause?: boolean;
 
   static register(_context: ExtensionContext) {
@@ -171,7 +171,7 @@ export class DendronTreeViewV2 {
             treeDataProvider,
             showCollapseAll: true,
           });
-          const _class = new DendronTreeViewV2(treeView, treeDataProvider);
+          const _class = new DendronTreeView(treeView, treeDataProvider);
           ws.dendronTreeView = _class;
         }
       }

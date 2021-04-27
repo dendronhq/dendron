@@ -33,7 +33,7 @@ import { Extensions } from "./settings";
 import { WorkspaceSettings } from "./types";
 import { VSCodeUtils, WSUtils } from "./utils";
 import { MarkdownUtils } from "./utils/md";
-import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
+import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronWorkspace, getEngine } from "./workspace";
 
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
@@ -53,7 +53,7 @@ function getCommonProps() {
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   const stage = getStage();
-  DendronTreeViewV2.register(context);
+  DendronTreeView.register(context);
   // override default word pattern
   vscode.languages.setLanguageConfiguration("markdown", {
     wordPattern: MARKDOWN_WORD_PATTERN,

@@ -43,7 +43,7 @@ import { Logger } from "./logger";
 import { CodeConfigKeys, WorkspaceSettings } from "./types";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
-import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
+import { DendronTreeView } from "./views/DendronTreeView";
 import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
@@ -121,7 +121,7 @@ export class DendronWorkspace {
   static DENDRON_WORKSPACE_FILE: string = "dendron.code-workspace";
   static _SERVER_CONFIGURATION: Partial<ServerConfiguration>;
 
-  public dendronTreeView: DendronTreeViewV2 | undefined;
+  public dendronTreeView: DendronTreeView | undefined;
   public vaultWatcher?: VaultWatcher;
   public port?: number;
   public workspaceService?: WorkspaceService;

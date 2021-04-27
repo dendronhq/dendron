@@ -42,6 +42,7 @@ export function createNoActiveItem(vault: DVault): DNodePropsQuickInputV2 {
     alwaysShow: true,
   };
 }
+
 export function createMoreResults(): DNodePropsQuickInputV2 {
   // @ts-ignore
   return {
@@ -115,7 +116,7 @@ export class PickerUtilsV2 {
     if (_.find(picker.buttons, { type: "multiSelect" })?.pressed) {
       return [];
     } else {
-      out.push(createNoActiveItem(vault));
+      out.push(NotePickerUtils.createNoActiveItem(vault));
     }
     return out;
   };
@@ -319,6 +320,20 @@ export class PickerUtilsV2 {
 }
 
 export class NotePickerUtils {
+  static createNoActiveItem(vault: DVault): DNodePropsQuickInputV2 {
+    const props = DNodeUtils.create({
+      fname: CREATE_NEW_LABEL,
+      type: "note",
+      vault,
+    });
+    return {
+      ...props,
+      label: CREATE_NEW_LABEL,
+      detail: CREATE_NEW_DETAIL,
+      alwaysShow: true,
+    };
+  }
+
   static getSelection(picker: DendronQuickPickerV2): NoteQuickInput[] {
     return [...picker.selectedItems];
   }

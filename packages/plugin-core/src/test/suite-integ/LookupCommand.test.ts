@@ -30,10 +30,7 @@ import { CancellationTokenSource } from "vscode-languageclient";
 import { createAllButtons } from "../../components/lookup/buttons";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
-import {
-  createNoActiveItem,
-  PickerUtilsV2,
-} from "../../components/lookup/utils";
+import { NotePickerUtils, PickerUtilsV2 } from "../../components/lookup/utils";
 import { EngineFlavor, EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
@@ -47,6 +44,7 @@ import {
   setupBeforeAfter,
   withConfig,
 } from "../testUtilsV3";
+const { createNoActiveItem } = NotePickerUtils;
 
 const createEngineForSchemaUpdateItems = createEngineFactory({
   querySchema: (_opts: WorkspaceOpts) => {
@@ -164,7 +162,7 @@ const createEngineForSchemaAcceptQuery = createEngineFactory({
       const engOpts: EngineOpts = { flavor: "schema" };
       const quickpick = createMockQuickPick({
         value: schema.fname,
-        selectedItems: [createNoActiveItem(schema.vault)],
+        selectedItems: [NotePickerUtils.createNoActiveItem(schema.vault)],
       });
       const lc = new LookupControllerV2(engOpts);
       const lp = new LookupProviderV2(engOpts);

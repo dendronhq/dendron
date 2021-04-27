@@ -12,7 +12,7 @@ import { CancellationToken } from "vscode-languageclient";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
 import { DendronQuickPickerV2 } from "../../components/lookup/types";
-import { createNoActiveItem } from "../../components/lookup/utils";
+import { NotePickerUtils } from "../../components/lookup/utils";
 import { EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
@@ -26,6 +26,7 @@ import {
 import { setupBeforeAfter } from "../testUtilsV3";
 
 const { LOOKUP_SINGLE_TEST_PRESET } = PLUGIN_CORE;
+const { createNoActiveItem } = NotePickerUtils;
 
 // suite("Lookup Schema, Multi/", function () {
 //   let ctx: vscode.ExtensionContext;

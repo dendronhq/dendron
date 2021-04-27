@@ -1,9 +1,9 @@
 import {
   DendronError,
   DEngineClientV2,
+  DNodeProps,
   DNodePropsDict,
   DNodePropsQuickInputV2,
-  DNodeProps,
   DNodeUtils,
   DVault,
   getStage,
@@ -29,8 +29,8 @@ import { MORE_RESULTS_LABEL } from "./constants";
 import { LookupControllerV2 } from "./LookupControllerV2";
 import { DendronQuickPickerV2 } from "./types";
 import {
-  createNoActiveItem,
   node2Uri,
+  NotePickerUtils,
   PickerUtilsV2,
   showDocAndHidePicker,
 } from "./utils";
@@ -106,7 +106,11 @@ export class LookupProviderV2 {
     if (_.find(picker.buttons, { type: "multiSelect" })?.pressed) {
       return [];
     } else {
-      out.push(createNoActiveItem(PickerUtilsV2.getVaultForOpenEditor()));
+      out.push(
+        NotePickerUtils.createNoActiveItem(
+          PickerUtilsV2.getVaultForOpenEditor()
+        )
+      );
     }
     // if (picker.moreResults) {
     //   out.push(createMoreResults());

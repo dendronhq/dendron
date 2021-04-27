@@ -15,14 +15,31 @@ export type OnUpdatePickerItemsOpts = {
   enableCreateNew?: boolean;
 };
 
+type OnAcceptHook = (opts: {
+  quickpick: DendronQuickPickerV2;
+  selectedItems: NoteQuickInput[];
+}) => Promise<any>;
+
 export type ILookupProviderV3 = {
   id: string;
   provide: (lc: LookupControllerV3) => Promise<void>;
   onUpdatePickerItems: (opts: OnUpdatePickerItemsOpts) => Promise<void>;
+  registerOnAcceptHook: (hoook: OnAcceptHook) => void;
+};
+
+export type ILookupProviderOptsV3 = {
+  allowNewNote: boolean;
 };
 
 export class NoteLookupProvider implements ILookupProviderV3 {
-  constructor(public id: string) {}
+  private _onAcceptHooks: OnAcceptHook[];
+  public opts: ILookupProviderOptsV3;
+
+  constructor(public id: string, opts: ILookupProviderOptsV3) {
+    this._onAcceptHooks = [];
+    this.opts = opts;
+  }
+
   async provide(lc: LookupControllerV3) {
     const quickpick = lc.quickpick;
     if (!quickpick) {
@@ -48,16 +65,29 @@ export class NoteLookupProvider implements ILookupProviderV3 {
   }) {
     return async () => {
       const { quickpick: picker, lc } = opts;
+      const nextPicker = picker.nextPicker;
+      if (nextPicker) {
+        picker.vault = await nextPicker();
+      }
       const selectedItems = NotePickerUtils.getSelection(picker);
       lc.cancelToken.cancel();
       picker.hide();
+      const onAcceptHookResp = await Promise.all(
+        await this._onAcceptHooks.map((hook) =>
+          hook({ quickpick: picker, selectedItems })
+        )
+      );
       HistoryService.instance().add({
         source: "lookupProvider",
         action: "done",
-        data: selectedItems,
+        data: { selectedItems, onAcceptHookResp },
       });
       return;
     };
+  }
+
+  registerOnAcceptHook(hook: OnAcceptHook) {
+    this._onAcceptHooks.push(hook);
   }
 
   async onUpdatePickerItems(opts: OnUpdatePickerItemsOpts) {
@@ -132,7 +162,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       } else {
         // regular result
         Logger.debug({ ctx, msg: "active != qs" });
-        picker.items = updatedItems;
+        picker.items = this.opts.allowNewNote
+          ? updatedItems.concat(NotePickerUtils.createNoActiveItem({} as any))
+          : updatedItems;
       }
     } catch (err) {
       window.showErrorMessage(err);

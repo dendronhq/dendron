@@ -9,7 +9,6 @@ import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
 import { MoveNoteCommand } from "../../commands/MoveNoteCommand";
-import { MoveNoteProvider } from "../../components/lookup/MoveNoteProvider";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import {
@@ -41,14 +40,18 @@ suite("MoveNoteCommand", function () {
         await VSCodeUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
         await cmd.execute({
-          oldLoc: {
-            fname: "foo",
-            vault: vault1,
-          },
-          newLoc: {
-            fname: "bar",
-            vault: vault2,
-          },
+          moves: [
+            {
+              oldLoc: {
+                fname: "foo",
+                vault: vault1,
+              },
+              newLoc: {
+                fname: "bar",
+                vault: vault2,
+              },
+            },
+          ],
         });
         expect(
           VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
@@ -114,14 +117,18 @@ suite("MoveNoteCommand", function () {
         await VSCodeUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
         await cmd.execute({
-          oldLoc: {
-            fname,
-            vault: vault1,
-          },
-          newLoc: {
-            fname: "bar",
-            vault: vault2,
-          },
+          moves: [
+            {
+              oldLoc: {
+                fname,
+                vault: vault1,
+              },
+              newLoc: {
+                fname: "bar",
+                vault: vault2,
+              },
+            },
+          ],
         });
         expect(
           VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
@@ -158,14 +165,18 @@ suite("MoveNoteCommand", function () {
         await VSCodeUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
         await cmd.execute({
-          oldLoc: {
-            fname: "foo",
-            vault: vault1,
-          },
-          newLoc: {
-            fname: "foo",
-            vault: vault2,
-          },
+          moves: [
+            {
+              oldLoc: {
+                fname: "foo",
+                vault: vault1,
+              },
+              newLoc: {
+                fname: "foo",
+                vault: vault2,
+              },
+            },
+          ],
         });
         expect(
           VSCodeUtils.getActiveTextEditor()?.document.fileName.endsWith(
@@ -231,7 +242,7 @@ suite("MoveNoteCommand", function () {
         await VSCodeUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
         const lc = cmd.createLookup();
-        const provider = new MoveNoteProvider();
+        const provider = {} as any;
         const initialValue = path.basename(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
           ".md"
@@ -269,7 +280,7 @@ suite("MoveNoteCommand", function () {
         await VSCodeUtils.openNote(fooNote);
         const cmd = new MoveNoteCommand();
         const lc = cmd.createLookup();
-        const provider = new MoveNoteProvider();
+        const provider = {} as any;
         const initialValue = path.basename(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
           ".md"

@@ -6,7 +6,7 @@ import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
-suite("notes", function () {
+suite("CapitalizeText", function () {
   let ctx: ExtensionContext;
 
   ctx = setupBeforeAfter(this, {});

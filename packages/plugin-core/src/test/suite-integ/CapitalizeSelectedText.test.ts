@@ -1,12 +1,12 @@
 import { ENGINE_HOOKS } from "@dendronhq/common-test-utils";
 import _ from "lodash";
 import { ExtensionContext, Position, Selection } from "vscode";
-import { CapitalizeTextCommand } from "../../commands/CapitalizeText";
+import { CapitalizeSelectedTextCommand } from "../../commands/CapitalizeSelectedText";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
-suite("CapitalizeText", function () {
+suite("CapitalizeSelectedText", function () {
   let ctx: ExtensionContext;
 
   ctx = setupBeforeAfter(this, {});
@@ -31,7 +31,7 @@ suite("CapitalizeText", function () {
           editBuilder.insert(start, lowercaseText);
         });
 
-        await new CapitalizeTextCommand().run();
+        await new CapitalizeSelectedTextCommand().run();
 
         const changedText = editor.document.getText(selection);
 
@@ -64,7 +64,7 @@ suite("CapitalizeText", function () {
 
         editor.selection = selection;
 
-        await new CapitalizeTextCommand().run();
+        await new CapitalizeSelectedTextCommand().run();
 
         const changedText = editor.document.getText(selection);
 
@@ -109,7 +109,7 @@ suite("CapitalizeText", function () {
 
         editor.selections = selections;
 
-        await new CapitalizeTextCommand().run();
+        await new CapitalizeSelectedTextCommand().run();
 
         selections.forEach((selection) => {
           const changedText = editor.document.getText(selection);

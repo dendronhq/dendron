@@ -10,7 +10,7 @@ type CommandInput = {};
 
 type CommandOutput = void;
 
-export class CapitalizeTextCommand extends BasicCommand<
+export class CapitalizeSelectedTextCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {

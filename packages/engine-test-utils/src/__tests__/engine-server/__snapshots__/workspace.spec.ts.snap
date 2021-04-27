@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WorkspaceService create basic 1`] = `
+"node_modules
+.dendron.*
+build
+.dendron.cache.json
+
+"
+`;

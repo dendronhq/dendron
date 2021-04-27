@@ -8,6 +8,18 @@ import { testWithEngine } from "../../engine";
 import { GitTestUtils } from "../../utils";
 
 describe("WorkspaceService", () => {
+  describe("create", () => {
+    test.only("basic", async () => {
+      const wsRoot = tmpDir().name;
+      const vaults = [{ fsPath: "vault1" }];
+      await WorkspaceService.createWorkspace({ wsRoot, vaults });
+      const gitignore = path.join(wsRoot, ".gitignore");
+      expect(
+        fs.readFileSync(gitignore, { encoding: "utf8" })
+      ).toMatchSnapshot();
+    });
+  });
+
   describe("initialize", () => {
     testWithEngine("remoteVaults present", async ({ wsRoot, engine }) => {
       const root = tmpDir().name;

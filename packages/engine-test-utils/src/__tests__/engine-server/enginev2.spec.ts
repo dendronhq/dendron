@@ -58,7 +58,7 @@ describe("engine, cache", () => {
     );
   });
 
-  test("links", async () => {
+  test("links and body", async () => {
     await runEngineTestV5(
       async ({ wsRoot, vaults, engine }) => {
         const cache: NotesCacheEntryMap = {};
@@ -66,7 +66,7 @@ describe("engine, cache", () => {
           const out = readNotesFromCache(vault2Path({ wsRoot, vault }));
           _.merge(cache, out.notes);
         });
-        const alpha = engine.notes["alpha"];
+        const alpha = { ...engine.notes["alpha"] };
         const omitKeys = ["body", "links", "parent", "children"];
         expect(_.omit(cache["alpha"].data, ...omitKeys)).toEqual(
           _.omit(alpha, ...omitKeys)
@@ -74,6 +74,9 @@ describe("engine, cache", () => {
         expect(
           _.filter(cache["alpha"].data.links, (l) => l.type !== "backlink")
         ).toEqual(_.filter(alpha.links, (l) => l.type !== "backlink"));
+        await engine.init();
+        const alpha2 = engine.notes["alpha"];
+        expect(alpha2).toEqual(alpha);
       },
       {
         expect,

@@ -38,11 +38,11 @@ export class InsertNoteCommand extends BasicCommand<
 
   async gatherInputs(): Promise<CommandInput | undefined> {
     const lc = this.createLookup();
-    const provider = new NoteLookupProvider();
+    const provider = new NoteLookupProvider("insert");
     const tempPrefix = getWS().config.defaultInsertHierarchy;
     const initialValue = tempPrefix ? `${tempPrefix}.` : undefined;
     lc.show({
-      title: "Move note",
+      title: "Insert note",
       placeholder: "foo",
       provider,
       initialValue,

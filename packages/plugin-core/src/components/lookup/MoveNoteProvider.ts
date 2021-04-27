@@ -8,6 +8,10 @@ import { ILookupProviderV3, OnUpdatePickerItemsOpts } from "./LookupProviderV3";
 import { PickerUtilsV2 } from "./utils";
 
 export class MoveNoteProvider implements ILookupProviderV3 {
+  public id: string;
+  constructor() {
+    this.id = "TODO";
+  }
   async onUpdatePickerItems(_opts: OnUpdatePickerItemsOpts) {
     return;
   }
@@ -68,6 +72,7 @@ export class MoveNoteProvider implements ILookupProviderV3 {
       HistoryService.instance().add({
         source: "lookupProvider",
         action: "done",
+        id: "move",
         data,
       });
     });

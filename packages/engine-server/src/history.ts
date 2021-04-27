@@ -4,6 +4,7 @@ import { URI } from "vscode-uri";
 export type HistoryEvent = {
   action: HistoryEventAction;
   source: HistoryEventSource;
+  id?: string;
   uri?: URI;
   data?: any;
 };
@@ -90,9 +91,11 @@ export class HistoryService implements IHistoryService {
     if (!this.pause) {
       this.events.unshift(event);
       this.subscribers[event.source].forEach((f) => f(event));
-      this.subscribersv2[event.source].forEach(({ listener }) =>
-        listener(event)
-      );
+      this.subscribersv2[event.source].forEach(({ listener, id }) => {
+        if (!event.id || event.id === id) {
+          listener(event);
+        }
+      });
     }
   }
 

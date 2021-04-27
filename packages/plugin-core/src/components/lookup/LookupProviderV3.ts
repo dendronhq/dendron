@@ -16,11 +16,13 @@ export type OnUpdatePickerItemsOpts = {
 };
 
 export type ILookupProviderV3 = {
+  id: string;
   provide: (lc: LookupControllerV3) => Promise<void>;
   onUpdatePickerItems: (opts: OnUpdatePickerItemsOpts) => Promise<void>;
 };
 
 export class NoteLookupProvider implements ILookupProviderV3 {
+  constructor(public id: string) {}
   async provide(lc: LookupControllerV3) {
     const quickpick = lc.quickpick;
     if (!quickpick) {

@@ -7,6 +7,7 @@ import {
 import path from "path";
 import * as vscode from "vscode";
 import { Uri } from "vscode";
+import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import BacklinksTreeDataProvider from "../../features/BacklinksTreeDataProvider";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
@@ -56,6 +57,35 @@ suite("BacklinksTreeDataProvider", function () {
         });
       },
       onInit: async ({ wsRoot, vaults }) => {
+        await VSCodeUtils.openNote(noteWithTarget);
+        const out = toPlainObject(await getChildren()) as any;
+        expect(out[0].command.arguments[0].path as string).toEqual(
+          path.join(wsRoot, vaults[0].fsPath, "beta.md")
+        );
+        expect(out.length).toEqual(1);
+        done();
+      },
+    });
+  });
+
+  test("from cache", function (done) {
+    let noteWithTarget: NoteProps;
+
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        noteWithTarget = await NOTE_PRESETS_V4.NOTE_WITH_TARGET.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+        await NOTE_PRESETS_V4.NOTE_WITH_LINK.create({
+          wsRoot,
+          vault: vaults[0],
+        });
+      },
+      onInit: async ({ wsRoot, vaults }) => {
+        // re-initialize engine from cache
+        await new ReloadIndexCommand().run();
         await VSCodeUtils.openNote(noteWithTarget);
         const out = toPlainObject(await getChildren()) as any;
         expect(out[0].command.arguments[0].path as string).toEqual(

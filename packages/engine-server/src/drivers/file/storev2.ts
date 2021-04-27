@@ -376,6 +376,7 @@ export class FileStorage implements DStore {
             note: n,
             engine: this.engine,
           });
+          cacheUpdates[n.fname].data.links = links;
           n.links = links;
         } else {
           n.links = cache.notes[n.fname].data.links;

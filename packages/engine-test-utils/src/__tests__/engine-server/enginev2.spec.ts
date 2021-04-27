@@ -1,4 +1,4 @@
-import { WorkspaceOpts } from "@dendronhq/common-all";
+import { NotesCacheEntryMap, WorkspaceOpts } from "@dendronhq/common-all";
 import { createLogger, vault2Path } from "@dendronhq/common-server";
 import {
   ENGINE_CONFIG_PRESETS,
@@ -38,19 +38,47 @@ describe("engine, schemas/", () => {
 });
 
 describe("engine, cache", () => {
-  test.skip("basic", async () => {
+  test("basic", async () => {
     await runEngineTestV5(
-      async ({ engine, wsRoot, vaults }) => {
-        const cache = readNotesFromCache(
-          vault2Path({ wsRoot, vault: vaults[0] })
-        );
-        expect(_.size(cache)).toEqual(6);
-        expect(_.size(cache)).toEqual(_.size(engine.notes));
+      async ({ wsRoot, vaults }) => {
+        const cache = {};
+        vaults.map((vault) => {
+          const out = readNotesFromCache(vault2Path({ wsRoot, vault }));
+          _.merge(cache, out.notes);
+        });
+        // cache is based on unique filenames so don't count roots
+        expect(_.size(cache)).toEqual(4);
       },
       {
         expect,
         preSetupHook: async (opts) => {
           await ENGINE_HOOKS.setupBasic(opts);
+        },
+      }
+    );
+  });
+
+  test("links", async () => {
+    await runEngineTestV5(
+      async ({ wsRoot, vaults, engine }) => {
+        const cache: NotesCacheEntryMap = {};
+        vaults.map((vault) => {
+          const out = readNotesFromCache(vault2Path({ wsRoot, vault }));
+          _.merge(cache, out.notes);
+        });
+        const alpha = engine.notes["alpha"];
+        const omitKeys = ["body", "links", "parent", "children"];
+        expect(_.omit(cache["alpha"].data, ...omitKeys)).toEqual(
+          _.omit(alpha, ...omitKeys)
+        );
+        expect(
+          _.filter(cache["alpha"].data.links, (l) => l.type !== "backlink")
+        ).toEqual(_.filter(alpha.links, (l) => l.type !== "backlink"));
+      },
+      {
+        expect,
+        preSetupHook: async (opts) => {
+          await ENGINE_HOOKS.setupLinks(opts);
         },
       }
     );

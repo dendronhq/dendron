@@ -1,7 +1,7 @@
 # Change Log
 
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+For up to date changes, please go to our published changelog [here](https://wiki.dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html).
+The changelog below lists changes that follow the [conventional commits](https://conventionalcommits.org) guidelines but may be incomplete.
 
 ## [0.39.1](https://github.com/dendronhq/dendron/compare/v0.39.0...v0.39.1) (2021-04-27)
 

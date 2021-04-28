@@ -83,6 +83,8 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     let qs: string;
     let vault: DVault =
       opts.vault || PickerUtilsV2.getOrPromptVaultForOpenEditor();
+    const client = DendronWorkspace.instance().getEngine();
+
     if (!opts.qs) {
       const maybeLink = this.getLinkFromSelection();
       if (!maybeLink) {
@@ -103,11 +105,27 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           value: maybeLink.anchorHeader,
         };
       }
+      // check if note exist in a different vault
+      const notes = NoteUtils.getNotesByFname({
+        fname: qs,
+        notes: client.notes,
+      });
+      if (notes.length === 1) {
+        vault = notes[0].vault;
+      } else if (notes.length > 1) {
+        // prompt for vault
+        const resp = await PickerUtilsV2.promptVault(
+          notes.map((ent) => ent.vault)
+        );
+        if (_.isUndefined(resp)) {
+          return;
+        }
+        vault = resp;
+      }
     } else {
       qs = opts.qs;
     }
     let pos: undefined | Position;
-    const client = DendronWorkspace.instance().getEngine();
     const out = await DendronWorkspace.instance().pauseWatchers<CommandOutput>(
       async () => {
         const { data } = await client.getNoteByPath({

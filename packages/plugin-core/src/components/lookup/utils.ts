@@ -1,13 +1,13 @@
 import {
-  DNodePropsQuickInputV2,
+  DEngineClientV2,
   DNodeProps,
+  DNodePropsQuickInputV2,
   DNodeUtils,
   DVault,
   NoteProps,
+  NoteQuickInput,
   NoteUtils,
   VaultUtils,
-  DEngineClientV2,
-  NoteQuickInput,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -276,8 +276,9 @@ export class PickerUtilsV2 {
     return false;
   }
 
-  static promptVault(): Promise<DVault | undefined> {
-    const items = DendronWorkspace.instance().vaultsv4.map((ent) => ({
+  static promptVault(overrides?: DVault[]): Promise<DVault | undefined> {
+    const vaults = overrides ? overrides : DendronWorkspace.instance().vaultsv4;
+    const items = vaults.map((ent) => ({
       ...ent,
       label: ent.fsPath,
     }));

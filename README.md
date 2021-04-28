@@ -176,6 +176,18 @@ Hopefully, this has been enough to give you a sense of what you can do with Dend
 
 If you are reading this, you too, are now part of the journey. Let's take back control of our information and use it to build something better, together!
 
+# Telemetry
+
+Dendron comes with opt-out telemetry. Telemetry helps us better understand _how many users_ are using our products and _how often_ they are using our products. Unlike many telemetry services, our telemetry implementation is intentionally **limited in scope**.
+
+We use telemetry to answer the following questions:
+
+- how many people are actively using Dendron?
+- how performant is Dendron over time and how do new changes impact performance?
+- what features are most useful for users?
+
+You can see what data we collect, why we do it, and how to opt out [here](https://wiki.dendron.so/notes/84df871b-9442-42fd-b4c3-0024e35b5f3c.html)
+
 # Getting Started
 
 Dendron can be installed as a [vscode plugin](https://marketplace.visualstudio.com/items?itemName=dendron.dendron). If you don't already have VSCode, you can download it [here](https://code.visualstudio.com/).

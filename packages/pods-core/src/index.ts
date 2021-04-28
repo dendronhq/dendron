@@ -4,6 +4,7 @@ import {
   JSONImportPod,
   JSONPublishPod,
 } from "./builtin";
+import { HTMLPublishPod } from "./builtin/HTMLPod";
 import {
   MarkdownImportPod,
   MarkdownPublishPod,
@@ -18,7 +19,7 @@ export function getAllExportPods(): PodClassEntryV4[] {
   return [JSONExportPod, GitPunchCardExportPod, MarkdownExportPod];
 }
 export function getAllPublishPods(): PodClassEntryV4[] {
-  return [JSONPublishPod, MarkdownPublishPod];
+  return [JSONPublishPod, MarkdownPublishPod, HTMLPublishPod];
 }
 export function getAllImportPods(): PodClassEntryV4[] {
   return [JSONImportPod, MarkdownImportPod];

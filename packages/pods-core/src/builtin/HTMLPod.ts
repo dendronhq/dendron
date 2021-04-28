@@ -9,12 +9,12 @@ export class HTMLPublishPod extends PublishPod {
 
   async plant(opts: PublishPodPlantOpts): Promise<any> {
     const { config, engine, note } = opts;
-    const { fname, vault } = config;
+    const { fname } = config;
     const { data: econfig } = await engine.getConfig();
     const proc = MDUtilsV4.procFull({
       engine,
       dest: DendronASTDest.HTML,
-      vault,
+      vault: note.vault,
       fname,
       shouldApplyPublishRules: false,
       publishOpts: {

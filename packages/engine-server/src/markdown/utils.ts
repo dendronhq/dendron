@@ -211,28 +211,6 @@ export class MDUtilsV4 {
     return proc.data(DendronProcDataKeys.PROC_OPTS, { ...procOpts, ...data });
   }
 
-  // @deprecate
-  static isHeading(node: Node, text: string, depth?: number) {
-    if (node.type !== "heading") {
-      return false;
-    }
-
-    // wildcard is always true
-    if (text === "*") {
-      return true;
-    }
-    if (text) {
-      var headingText = toString(node);
-      return text.trim().toLowerCase() === headingText.trim().toLowerCase();
-    }
-
-    if (depth) {
-      return (node as Heading).depth <= depth;
-    }
-
-    return true;
-  }
-
   static matchHeading(
     node: Node,
     text: string,

@@ -43,7 +43,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { MDUtilsV4 } from "../../markdown";
-import { ParserUtilsV2 } from "../../topics/markdown/utilsv2";
+import { LinkUtils } from "../../markdown/remark/utils";
 import { readNotesFromCache, writeNotesToCache } from "../../utils";
 import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
@@ -372,7 +372,7 @@ export class FileStorage implements DStore {
           return;
         }
         if (_.has(cacheUpdates, n.fname)) {
-          const links = ParserUtilsV2.findLinks({
+          const links = LinkUtils.findLinks({
             note: n,
             engine: this.engine,
           });

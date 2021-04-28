@@ -9,7 +9,7 @@ import { GitTestUtils } from "../../utils";
 
 describe("WorkspaceService", () => {
   describe("create", () => {
-    test.only("basic", async () => {
+    test("basic", async () => {
       const wsRoot = tmpDir().name;
       const vaults = [{ fsPath: "vault1" }];
       await WorkspaceService.createWorkspace({ wsRoot, vaults });

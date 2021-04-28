@@ -6,7 +6,6 @@ import { Node } from "unist";
 import u from "unist-builder";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
-import { findIndex, isNoteRefV2 } from "../../topics/markdown/plugins/inject";
 import { SiteUtils } from "../../topics/site";
 import {
   DendronASTDest,
@@ -17,6 +16,7 @@ import {
 import { MDUtilsV4 } from "../utils";
 import { NoteRefsOpts } from "./noteRefs";
 import { convertNoteRefASTV2 } from "./noteRefsV2";
+import { RemarkUtils } from "./utils";
 import { addError, getNoteOrError } from "./utils";
 
 type PluginOpts = NoteRefsOpts & {
@@ -197,7 +197,10 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         if (data) {
           if (parent!.children.length > 1) {
             const children = parent!.children;
-            const idx = findIndex(children, isNoteRefV2);
+            const idx = RemarkUtils.findIndex(
+              children,
+              RemarkUtils.isNoteRefV2
+            );
             parent!.children = children
               .slice(0, idx)
               .concat(data)

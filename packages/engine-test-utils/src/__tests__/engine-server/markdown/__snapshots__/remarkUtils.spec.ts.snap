@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`parserUtils findHeaders one header: bond 1`] = `
+exports[`utils findHeaders one header: bond 1`] = `
 Array [
   Object {
     "children": Array [
@@ -41,9 +41,9 @@ Array [
 ]
 `;
 
-exports[`parserUtils findLinks empty link 1`] = `Array []`;
+exports[`utils findLinks empty link 1`] = `Array []`;
 
-exports[`parserUtils findLinks one link: bond 1`] = `
+exports[`utils findLinks one link: bond 1`] = `
 Array [
   Object {
     "alias": "bar",
@@ -70,7 +70,7 @@ Array [
 ]
 `;
 
-exports[`parserUtils findLinks xvault link 1`] = `
+exports[`utils findLinks xvault link 1`] = `
 Array [
   Object {
     "alias": "bar",

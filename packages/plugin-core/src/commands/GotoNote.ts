@@ -6,11 +6,7 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import {
-  Heading,
-  matchWikiLink,
-  ParserUtilsV2,
-} from "@dendronhq/engine-server";
+import { Heading, matchWikiLink, RemarkUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { Position, Selection, Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
@@ -33,7 +29,7 @@ export const findHeaderPos = (opts: { anchor: string; text: string }) => {
   const { anchor, text } = opts;
   const anchorSlug = getSlugger().slug(anchor);
   // TODO: optimize by doing this on startup
-  const headers = ParserUtilsV2.findHeaders(text);
+  const headers = RemarkUtils.findHeaders(text);
   const headerMatch: Heading | undefined = _.find(headers, (h) => {
     return getSlugger().slug(h.children[0].value as string) === anchorSlug;
   });

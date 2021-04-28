@@ -43,7 +43,7 @@ import _ from "lodash";
 import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
-import { ParserUtilsV2 } from "./topics/markdown/utilsv2";
+import { LinkUtils } from "./markdown";
 
 type CreateStoreFunc = (engine: DEngineClientV2) => DStore;
 type DendronEngineOptsV2 = {
@@ -364,7 +364,7 @@ export class DendronEngineV2 implements DEngine {
           // this.history &&
           //   this.history.add({ source: "engine", action: "create", uri });
         }
-        const links = ParserUtilsV2.findLinks({ note: ent.note, engine: this });
+        const links = LinkUtils.findLinks({ note: ent.note, engine: this });
         ent.note.links = links;
         this.notes[id] = ent.note;
       }

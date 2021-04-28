@@ -27,7 +27,7 @@
     "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
     "build": "yarn compile",
     "compile": "tsc -p tsconfig.build.json",
-    "test": "npx jest",
+    "test": "env LOG_LEVEL=error npx jest --bail",
     "coverage": "jest --coverage",
     "watch": "yarn compile --watch",
     "test:unit": "jest ",

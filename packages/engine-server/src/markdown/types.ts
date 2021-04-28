@@ -6,15 +6,27 @@ import {
 } from "@dendronhq/common-all";
 import { Parent, Root } from "mdast";
 import { Processor } from "unified";
-import { LinkFilter } from "../topics/markdown/plugins/types";
 import { DendronPubOpts } from "./remark/dendronPub";
 import { WikiLinksOpts } from "./remark/wikiLinks";
 export { Node as UnistNode } from "unist";
 export { VFile } from "vfile";
 export { Processor };
 
+// --- General
+
 export type DendronASTRoot = Root & {
   children: DendronASTNode;
+};
+
+export type LinkFilter = {
+  name: string;
+};
+
+export type WikiLinkProps = {
+  alias: string;
+  value: string;
+  anchorHeader?: string;
+  filters?: LinkFilter[];
 };
 
 export type DendronASTNode = Parent & {
@@ -55,7 +67,7 @@ export type DendronASTData = {
   insideNoteRef?: boolean;
 };
 
-// NODES
+// --- NODES
 
 export type WikiLinkNoteV4 = DendronASTNode & {
   type: DendronASTTypes.WIKI_LINK;

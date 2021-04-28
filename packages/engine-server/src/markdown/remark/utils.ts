@@ -1,10 +1,13 @@
 import {
   CONSTANTS,
   DendronError,
+  DEngineClientV2,
+  DLink,
   getSlugger,
   NoteChangeEntry,
   NoteProps,
   NoteUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Heading, Root } from "mdast";
@@ -12,13 +15,19 @@ import { Processor } from "unified";
 import { Node } from "unist";
 import { selectAll } from "unist-util-select";
 import { VFile } from "vfile";
-import { WikiLinkProps } from "../../topics/markdown";
 import { normalizev2 } from "../../utils";
 import {
+  DendronASTDest,
   DendronASTRoot,
   DendronASTTypes,
   NoteRefNoteV4_LEGACY,
+  WikiLinkNoteV4,
+  WikiLinkProps,
 } from "../types";
+import { MDUtilsV4 } from "../utils";
+const toString = require("mdast-util-to-string");
+import * as mdastBuilder from "mdast-builder";
+export { mdastBuilder };
 
 export const ALIAS_DIVIDER = "|";
 
@@ -53,6 +62,52 @@ export function getNoteOrError(
 }
 
 export class LinkUtils {
+  /**
+   * Get all links from the note body
+   * Currently, just look for wiki links
+   * @param param0
+   */
+  static findLinks({
+    note,
+    engine,
+  }: {
+    note: NoteProps;
+    engine: DEngineClientV2;
+  }): DLink[] {
+    const content = note.body;
+    let remark = MDUtilsV4.procParse({
+      dest: DendronASTDest.MD_DENDRON,
+      engine,
+    });
+    let out = remark.parse(content);
+    let out2: WikiLinkNoteV4[] = selectAll("wikiLink", out) as WikiLinkNoteV4[];
+    const dlinks = out2.map(
+      (m: WikiLinkNoteV4) =>
+        ({
+          type: "wiki",
+          from: NoteUtils.toNoteLoc(note),
+          original: m.value,
+          value: m.value,
+          alias: m.data.alias,
+          pos: {
+            start: m.position?.start.offset,
+            end: m.position?.end.offset,
+          },
+          // TODO: error if vault not found
+          to: {
+            fname: m.value,
+            anchorHeader: m.data.anchorHeader,
+            vault: m.data.vaultName
+              ? VaultUtils.getVaultByName({
+                  vaults: engine.vaultsv3,
+                  vname: m.data.vaultName,
+                })
+              : undefined,
+          },
+        } as DLink)
+    );
+    return dlinks as DLink[];
+  }
   static isAlias(link: string) {
     return link.indexOf("|") !== -1;
   }
@@ -136,7 +191,78 @@ export class LinkUtils {
   }
 }
 
+function walk(node: Node, fn: any) {
+  fn(node);
+  if (node.children) {
+    (node.children as Node[]).forEach(function (n) {
+      walk(n, fn);
+    });
+  }
+}
+
+const MAX_HEADING_DEPTH = 99999;
+
 export class RemarkUtils {
+  static bumpHeadings(root: Node, baseDepth: number) {
+    var headings: Heading[] = [];
+    walk(root, function (node: Node) {
+      if (node.type === "heading") {
+        headings.push(node as Heading);
+      }
+    });
+
+    var minDepth = headings.reduce(function (memo, h) {
+      return Math.min(memo, h.depth);
+    }, MAX_HEADING_DEPTH);
+
+    var diff = baseDepth + 1 - minDepth;
+
+    headings.forEach(function (h) {
+      h.depth += diff;
+    });
+  }
+
+  static findHeaders(content: string): Heading[] {
+    const remark = MDUtilsV4.remark();
+    let out = remark.parse(content);
+    let out2: Heading[] = selectAll("heading", out) as Heading[];
+    return out2;
+  }
+
+  static findIndex(array: Node[], fn: any) {
+    for (var i = 0; i < array.length; i++) {
+      if (fn(array[i], i)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  static isHeading(node: Node, text: string, depth?: number) {
+    if (node.type !== "heading") {
+      return false;
+    }
+
+    // wildcard is always true
+    if (text === "*") {
+      return true;
+    }
+    if (text) {
+      var headingText = toString(node);
+      return text.trim().toLowerCase() === headingText.trim().toLowerCase();
+    }
+
+    if (depth) {
+      return (node as Heading).depth <= depth;
+    }
+
+    return true;
+  }
+
+  static isNoteRefV2(node: Node) {
+    return node.type === "refLinkV2";
+  }
+
   static oldNoteRef2NewNoteRef(note: NoteProps, changes: NoteChangeEntry[]) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {

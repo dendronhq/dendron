@@ -7,7 +7,7 @@ import {
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { file2Note, string2Note } from "@dendronhq/common-server";
-import { HistoryService, ParserUtilsV2 } from "@dendronhq/engine-server";
+import { HistoryService, LinkUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import * as vscode from "vscode";
@@ -89,7 +89,7 @@ export class VaultWatcher {
       wsRoot: DendronWorkspace.wsRoot(),
     }) as NoteProps;
     note = NoteUtils.hydrate({ noteRaw: note, noteHydrated });
-    const links = ParserUtilsV2.findLinks({ note, engine: eclient });
+    const links = LinkUtils.findLinks({ note, engine: eclient });
     note.links = links;
     this.L.info({ ctx, fname, msg: "exit" });
     return await eclient.updateNote(note);

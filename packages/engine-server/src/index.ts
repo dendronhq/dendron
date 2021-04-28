@@ -10,7 +10,6 @@ export * from "./history";
 export * from "./markdown";
 export * from "./topics/connector";
 export * from "./topics/git";
-export * from "./topics/markdown";
 export * from "./topics/site";
 export * from "./types";
 export * from "./utils";

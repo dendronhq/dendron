@@ -12,7 +12,7 @@ import path from "path";
 import { runEngineTestV5 } from "../../engine";
 import { checkNotInString, checkString } from "../../utils";
 
-describe("markdown publish pod", () => {
+describe.only("markdown publish pod", () => {
   test("basic", async () => {
     await runEngineTestV5(
       async ({ engine, vaults, wsRoot }) => {

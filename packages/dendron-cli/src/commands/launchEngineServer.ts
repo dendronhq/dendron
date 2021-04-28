@@ -12,6 +12,7 @@ type CommandOutput = { port: number; server: any };
 type CommandOpts = Required<CommandCLIOpts> & { server: any };
 type CommandCLIOpts = {
   port?: number;
+  init?: boolean;
   wsRoot: string;
 };
 
@@ -32,10 +33,15 @@ export class LaunchEngineServerCommand extends CLICommand<
       describe: "port to launch server",
       type: "number",
     });
+    args.option("init", {
+      describe: "initialize server",
+      type: "boolean",
+    });
   }
 
   async enrichArgs(args: CommandCLIOpts) {
-    let { wsRoot, port } = args;
+    const ctx = "enrichArgs";
+    let { wsRoot, port, init } = _.defaults(args, { init: false });
     wsRoot = resolvePath(wsRoot, process.cwd());
     const ws = new WorkspaceService({ wsRoot });
     const vaults = ws.config.vaults;
@@ -52,10 +58,15 @@ export class LaunchEngineServerCommand extends CLICommand<
       vaults,
       ws: wsRoot,
     });
+    if (init) {
+      this.L.info({ ctx, msg: "pre:engine.init" });
+      await engine.init();
+    }
     return {
       ...args,
       engine,
       wsRoot,
+      init,
       vaults: vaultPaths,
       port: _port,
       server,

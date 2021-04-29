@@ -1,5 +1,20 @@
 # Change Log
 
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [0.39.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.39.0...v0.39.2-alpha.0) (2021-04-29)
+
+### Bug Fixes
+
+- goto note prefer existing note for multi-vault workspace ([e0f8bb7](https://github.com/dendronhq/dendron/commit/e0f8bb77c1d0558d37b55fe775813aa821e1798e))
+- insert note resulting in error ([b48721d](https://github.com/dendronhq/dendron/commit/b48721db9518100868a34278a5dfd2beac16f207))
+- properly initialize links from cache ([a0e9680](https://github.com/dendronhq/dendron/commit/a0e9680821a275d97771538c8ffeef14fcb63f4e))
+- tree view not refreshing on new note ([11882ca](https://github.com/dendronhq/dendron/commit/11882ca9d20cbb87faca784989eab9a5fafd2c4c))
+- use new remark plugins for markdown pod ([c19c500](https://github.com/dendronhq/dendron/commit/c19c500525dce79f10a7d98866fe292cf84060a4))
+
+# Change Log
+
 For up to date changes, please go to our published changelog [here](https://wiki.dendron.so/notes/9bc92432-a24c-492b-b831-4d5378c1692b.html).
 The changelog below lists changes that follow the [conventional commits](https://conventionalcommits.org) guidelines but may be incomplete.
 

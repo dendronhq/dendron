@@ -1,6 +1,6 @@
 {
   "name": "@dendronhq/pods-core",
-  "version": "0.39.1",
+  "version": "0.39.2-alpha.0",
   "description": "pods-core",
   "license": "GPLv3",
   "repository": {
@@ -60,8 +60,8 @@
   },
   "dependencies": {
     "@dendronhq/common-all": "^0.39.0",
-    "@dendronhq/common-server": "^0.39.0",
-    "@dendronhq/engine-server": "^0.39.1",
+    "@dendronhq/common-server": "^0.39.2-alpha.0",
+    "@dendronhq/engine-server": "^0.39.2-alpha.0",
     "csv-writer": "^1.6.0",
     "emailjs": "^3.4.0",
     "fs-extra": "^9.0.1",

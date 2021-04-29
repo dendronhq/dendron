@@ -5,6 +5,7 @@
 {%- assign canShowGit =  nodeCurrent | gitShowLink %}
 {% include includes/head.liquid %}
 
+
 <body>
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
       <symbol id="svg-link" viewBox="0 0 24 24">
@@ -111,21 +112,22 @@
         {% if dendronConfig.feedback %}
         <script type="text/javascript" src="/assets/js/rater.js"></script>
         <link rel="stylesheet" type="text/css" href="/assets/css/jquery.feedback_me.css">
-        <script type="text/javascript" src="/assets/js/jquery.feedback_me.js"></script>
+        <script type="text/javascript" src="/assets/js/jquery.thumbs.js"></script>
+        <link rel="stylesheet" type="text/css" href="/assets/css/jquery.thumbs.css">
         {% endif %}
 
         {% if site.cognitoUserPoolId %}
           {% if processEnv.stage == "dev" %}
           {% else %}
             <script src="/assets/js/auth.js"></script>
+            <script>
+              let UserPoolId, ClientId, domain;
+              UserPoolId = "{{site.cognitoUserPoolId}}";
+              ClientId = "{{site.cognitoClientId}}";
+              domain = "{{site.siteUrl}}";
+              window.currentUser = window.getCurrentUser(UserPoolId, ClientId, domain);
+            </script>
           {% endif %}
-          <script>
-            let UserPoolId, ClientId, domain;
-            UserPoolId = "{{site.cognitoUserPoolId}}";
-            ClientId = "{{site.cognitoClientId}}";
-            domain = "{{site.siteUrl}}";
-            window.currentUser = window.getCurrentUser(UserPoolId, ClientId, domain);
-          </script>
         {% endif %}
 
         {% if site.segmentKey %}
@@ -135,7 +137,7 @@
           if (window.currentUser) {
             analytics.identify(window.currentUser.username);
           }
-          analytics.page({userId: window.currentUser.username});
+          analytics.page({userId: window?.currentUser?.username});
           }}();
         </script>
         {% endif %}
@@ -166,6 +168,7 @@
         </script>
 
         {{ content }}
+        <div class="thumbs feedback_trigger right-bottom"></div>
 
         {% if site.footer_content != nil or site.last_edit_timestamp or dendronConfig.site.gh_edit_link %}
           <hr>
@@ -205,6 +208,37 @@
 {% endif %}
 </div>
 {% if dendronConfig.feedback %}
+
+<div class="modal fade" id="feedbackForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Thanks for the vote</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p> To provide additional details, fill out the form below. </p>
+        <form>
+          <div class="form-group">
+            <label for="comment">Feedback</label>
+            <textarea class="form-control" id="dendronComment" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="email">Email address (optional) </label>
+            <input type="email" class="form-control" id="dendronEmail" aria-describedby="emailHelp" placeholder="Enter email">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button id="submitFeedback" type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   {% if processEnv.stage == "dev" %}
   const base_url = "http://localhost:3005";
@@ -220,8 +254,11 @@
       }
       return null;
   }
-  var cookieName = ["CognitoIdentityServiceProvider", cognitoUser.pool.clientId, cognitoUser.username, "idToken"].join(".");
-  var headers = {Authorization: readCookie(cookieName)};
+  let headers = {};
+  if (window.cognitoUser) {
+    var cookieName = ["CognitoIdentityServiceProvider", cognitoUser.pool.clientId, cognitoUser.username, "idToken"].join(".");
+    headers = {Authorization: readCookie(cookieName)};
+  } 
   $.ajaxSetup({
       headers,
   });
@@ -232,25 +269,59 @@
       noteId = "index";
   }
   $(document).ready(function(){
-    fm_options = {
-      jQueryUI : true,
-      position : "right-bottom",
-      custom_params: {
+    let feedback_url = `${base_url}/api/v1/feedback/`;
+
+    function genFeedbackData() {
+      return {
         domain: window.location.hostname,
         noteId,
+      }
+    }
+
+    function sendRating(thumbsUp) {
+      let rating = thumbsUp ? 1 : -1;
+      $.post( feedback_url, {rating, 
+        domain: window.location.hostname,
+        pathname: window.location.pathname,
+        noteId,
+      })
+        .done(function( data ) {
+          console.log("done", data);
+      });
+    }
+
+    function sendFeedback() {
+      return $.post( feedback_url, {
+        domain: window.location.hostname,
+        pathname: window.location.pathname,
+        noteId,
+        comment: $("#dendronComment").val(),
+        email: $("#dendronEmail").val(),
+      })
+      .done(function( data ) {
+        console.log("done", data);
+        return;
+      });
+    }
+
+    $('.thumbs').thumbs({
+      onLike: function (value) {
+          sendRating(true);
+          $("#feedbackForm").modal();
       },
-    name_required: false,
-      bootstrap : true,
-      show_email: true,
-      trigger_label : "Feedback",
-      message_required : false,
-      show_asterisk_for_required : true,
-      feedback_url : `${base_url}/api/v1/feedback/`,
-      show_radio_button_list: true,
-      radio_button_list_labels : ["1", "2", "3", "4", "5"],
-      radio_button_list_title : "Rating",
-    };
-    fm.init(fm_options);
+      onDislike: function(value) {
+          sendRating(false);
+          $("#feedbackForm").modal();
+      }
+    });
+    $( "#submitFeedback" ).click(function() {
+      sendFeedback().then(function() {
+        $("#feedbackForm").modal('hide');
+      }).catch((err) => {
+        console.log("error with form;")
+        $("#feedbackForm").modal('hide');
+      });
+    });
   });
 </script>
 {% endif %}

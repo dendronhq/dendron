@@ -1,0 +1,72 @@
+.sprite {
+    background-image: url(/assets/images/icons.png);
+    background-repeat: no-repeat;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.sprite-fa-thumbs-down-green {
+    width: 21px;
+    height: 20px;
+    background-position: -5px -5px;
+}
+
+.sprite-fa-thumbs-down-grey {
+    width: 21px;
+    height: 20px;
+    background-position: -5px -35px;
+}
+
+.sprite-fa-thumbs-o-down-green {
+    width: 21px;
+    height: 22px;
+    background-position: -5px -65px;
+}
+
+.sprite-fa-thumbs-o-down-grey {
+    width: 21px;
+    height: 22px;
+    background-position: -5px -97px;
+}
+
+.sprite-fa-thumbs-o-up-green {
+    width: 21px;
+    height: 22px;
+    background-position: -5px -129px;
+}
+
+.sprite-fa-thumbs-o-up-grey {
+    width: 21px;
+    height: 22px;
+    background-position: -5px -161px;
+}
+
+.sprite-fa-thumbs-up-green {
+    width: 21px;
+    height: 20px;
+    background-position: -5px -193px;
+}
+
+.sprite-fa-thumbs-up-grey {
+    width: 21px;
+    height: 20px;
+    background-position: -5px -223px;
+}
+
+.jq-rating {
+    padding: 5px 10px;
+}
+
+.jq-rating div {
+    display: inline-block;
+    vertical-align: middle;
+    padding: 0 7px;
+}
+
+.sprite-fa-thumbs-down-grey:hover {
+    background-position: -5px -5px;
+}
+
+.sprite-fa-thumbs-up-grey:hover {
+    background-position: -5px -193px;
+}

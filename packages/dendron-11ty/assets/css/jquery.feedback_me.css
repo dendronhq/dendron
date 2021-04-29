@@ -1,6 +1,4 @@
 .feedback_content, .feedback_trigger {
-	border: 1px solid black;
-	background: white;
 	font-size: 16px;
 	font-family: 'Helvetica Neue', Helvetica, Tahoma, Arial, sans-serif;
 	
@@ -27,8 +25,7 @@
 }
 
 .feedback_trigger.left-top, .feedback_trigger.left-bottom , .feedback_trigger.right-top, .feedback_trigger.right-bottom { 
-	width: 40px;
-	height: 100px;
+	width: 80px;
 }
 
 .feedback_trigger.bottom-left{ 
@@ -86,7 +83,7 @@
 .left-top .feedback_trigger_text , .left-bottom .feedback_trigger_text , .right-top .feedback_trigger_text , .right-bottom .feedback_trigger_text { 
 	white-space: nowrap;
 	position: absolute;
-	top: 40px;
+	top: 80px;
 	letter-spacing: 2px;
 	font-size: 17px;
 	-webkit-transform: rotate(-90deg);
@@ -359,7 +356,7 @@
 
 .feedback_trigger.right-bottom {
 	position: fixed;
-	bottom: 100px;
+	bottom: 20px;
 	right: 0;
 }
 

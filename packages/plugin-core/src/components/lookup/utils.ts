@@ -1,18 +1,21 @@
 import {
+  DendronError,
   DEngineClientV2,
   DNodeProps,
   DNodePropsQuickInputV2,
   DNodeUtils,
+  DNoteLoc,
   DVault,
   NoteProps,
   NoteQuickInput,
   NoteUtils,
+  RespRequired,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
-import { Uri, ViewColumn, window } from "vscode";
+import { TextEditor, Uri, ViewColumn, window } from "vscode";
 import { Logger } from "../../logger";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
@@ -22,6 +25,7 @@ import {
   CREATE_NEW_LABEL,
   MORE_RESULTS_LABEL,
 } from "./constants";
+import { OnAcceptHook } from "./LookupProviderV3";
 import { DendronQuickPickerV2 } from "./types";
 
 const PAGINATE_LIMIT = 50;
@@ -103,6 +107,70 @@ export type CreateQuickPickOpts = {
   placeholder: string;
   ignoreFocusOut?: boolean;
 };
+
+export type OldNewLocation = {
+  oldLoc: DNoteLoc;
+  newLoc: DNoteLoc & { note?: NoteProps };
+};
+
+export class ProviderAcceptHooks {
+  /**
+   * Returns current location and new location for note
+   * @param param0
+   * @returns
+   */
+  static oldNewLocationHook: OnAcceptHook = async ({
+    quickpick,
+    selectedItems,
+  }): Promise<RespRequired<OldNewLocation>> => {
+    // setup vars
+    const oldVault = PickerUtilsV2.getVaultForOpenEditor();
+    const newVault = quickpick.vault ? quickpick.vault : oldVault;
+    const wsRoot = DendronWorkspace.wsRoot();
+    const ws = getWS();
+    const engine = ws.getEngine();
+    const notes = engine.notes;
+
+    // get old note
+    const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
+    const oldUri: Uri = editor.document.uri;
+    const oldFname = DNodeUtils.fname(oldUri.fsPath);
+
+    const selectedItem = selectedItems[0];
+    const fname = PickerUtilsV2.isCreateNewNotePickForSingle(selectedItem)
+      ? quickpick.value
+      : selectedItem.fname;
+
+    // get new note
+    let newNote = NoteUtils.getNoteByFnameV5({
+      fname,
+      notes,
+      vault: newVault,
+      wsRoot,
+    });
+    let isStub = newNote?.stub;
+    if (newNote && !isStub) {
+      const vaultName = VaultUtils.getName(newVault);
+      const errMsg = `${vaultName}/${quickpick.value} exists`;
+      window.showErrorMessage(errMsg);
+      return {
+        error: new DendronError({ msg: errMsg }),
+      };
+    }
+    const data = {
+      oldLoc: {
+        fname: oldFname,
+        vault: oldVault,
+      },
+      newLoc: {
+        fname: quickpick.value,
+        vault: newVault,
+        note: newNote,
+      },
+    };
+    return { data, error: undefined };
+  };
+}
 
 export class PickerUtilsV2 {
   static createDefaultItems = ({

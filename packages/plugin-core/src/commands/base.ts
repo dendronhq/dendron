@@ -21,7 +21,7 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
 
   static showInput = window.showInputBox;
 
-  async gatherInputs(): Promise<TInput | undefined> {
+  async gatherInputs(_opts?: TOpts): Promise<TInput | undefined> {
     return {} as any;
   }
 
@@ -50,7 +50,8 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
         return;
       }
 
-      const inputs = await this.gatherInputs();
+      // @ts-ignore
+      const inputs = await this.gatherInputs(args);
       if (!_.isUndefined(inputs)) {
         const opts: TOpts | undefined = await this.enrichInputs(inputs);
         if (_.isUndefined(opts)) {

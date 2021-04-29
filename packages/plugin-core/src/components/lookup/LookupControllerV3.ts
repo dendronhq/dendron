@@ -3,16 +3,28 @@ import _ from "lodash";
 import { QuickInputButton } from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
 import { VSCodeUtils } from "../../utils";
-import { DendronBtn, IDendronQuickInputButton } from "./buttons";
+import { getWS } from "../../workspace";
+import {
+  DendronBtn,
+  IDendronQuickInputButton,
+  VaultSelectButton,
+} from "./buttons";
 import { ILookupProviderV3 } from "./LookupProviderV3";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";
-import { CreateQuickPickOpts, PickerUtilsV2 } from "./utils";
+import { CreateQuickPickOpts, NotePickerUtils, PickerUtilsV2 } from "./utils";
 
 export class LookupControllerV3 {
   public state: LookupControllerState;
   public nodeType: DNodeType;
   protected _cancelTokenSource?: CancellationTokenSource;
   public quickpick?: DendronQuickPickerV2;
+
+  static create(opts?: { buttons: DendronBtn[] }) {
+    const vaults = getWS().getEngine().vaults;
+    const isMultiVault = vaults.length > 1;
+    const buttons = opts?.buttons || [VaultSelectButton.create(isMultiVault)];
+    return new LookupControllerV3({ nodeType: "note", buttons });
+  }
 
   constructor(opts: { nodeType: DNodeType; buttons: DendronBtn[] }) {
     const { buttons, nodeType } = opts;
@@ -63,12 +75,27 @@ export class LookupControllerV3 {
       quickpick.value = initialValue;
     }
     provider.provide(this);
-    provider.onUpdatePickerItems({
-      picker: quickpick,
-      token: cancelToken.token,
-    });
     if (!nonInteractive) {
+      provider.onUpdatePickerItems({
+        picker: quickpick,
+        token: cancelToken.token,
+      });
       quickpick.show();
+    } else {
+      // FIXME: this always get first item
+      quickpick.items = [
+        NotePickerUtils.createNoActiveItem(
+          PickerUtilsV2.getVaultForOpenEditor()
+        ),
+      ];
+      quickpick.selectedItems = quickpick.items;
+      await provider.onDidAccept({ quickpick, lc: this })();
+      // // FIXME: used for testing
+      // if (quickPick.value && _.isEmpty(quickPick.items)) {
+      //   const items = provider.createDefaultItems({ picker: quickPick });
+      //   quickPick.items = items;
+      //   quickPick.selectedItems = items;
+      // }
     }
   }
 

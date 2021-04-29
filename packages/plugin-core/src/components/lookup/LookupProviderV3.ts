@@ -1,4 +1,4 @@
-import { NoteQuickInput } from "@dendronhq/common-all";
+import { NoteQuickInput, RespRequired } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -15,16 +15,20 @@ export type OnUpdatePickerItemsOpts = {
   enableCreateNew?: boolean;
 };
 
-type OnAcceptHook = (opts: {
+export type OnAcceptHook = (opts: {
   quickpick: DendronQuickPickerV2;
   selectedItems: NoteQuickInput[];
-}) => Promise<any>;
+}) => Promise<RespRequired<any>>;
 
 export type ILookupProviderV3 = {
   id: string;
   provide: (lc: LookupControllerV3) => Promise<void>;
   onUpdatePickerItems: (opts: OnUpdatePickerItemsOpts) => Promise<void>;
   registerOnAcceptHook: (hoook: OnAcceptHook) => void;
+  onDidAccept(opts: {
+    quickpick: DendronQuickPickerV2;
+    lc: LookupControllerV3;
+  }): any;
 };
 
 export type ILookupProviderOptsV3 = {
@@ -77,12 +81,22 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           hook({ quickpick: picker, selectedItems })
         )
       );
-      HistoryService.instance().add({
-        source: "lookupProvider",
-        action: "done",
-        data: { selectedItems, onAcceptHookResp },
-      });
-      return;
+      const errors = _.filter(onAcceptHookResp, (ent) => ent.error);
+      if (!_.isEmpty(errors)) {
+        HistoryService.instance().add({
+          source: "lookupProvider",
+          action: "error",
+          id: this.id,
+          data: { error: errors[0] },
+        });
+      } else {
+        HistoryService.instance().add({
+          source: "lookupProvider",
+          action: "done",
+          id: this.id,
+          data: { selectedItems, onAcceptHookResp },
+        });
+      }
     };
   }
 

@@ -5,15 +5,18 @@ import {
   ENGINE_HOOKS,
   NoteTestUtilsV4,
 } from "@dendronhq/common-test-utils";
+import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
+import sinon from "sinon";
 import * as vscode from "vscode";
 import { MoveNoteCommand } from "../../commands/MoveNoteCommand";
+import { LookupControllerV3 } from "../../components/lookup/LookupControllerV3";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import {
-  runLegacySingleWorkspaceTest,
   runLegacyMultiWorkspaceTest,
+  runLegacySingleWorkspaceTest,
   setupBeforeAfter,
 } from "../testUtilsV3";
 
@@ -29,12 +32,12 @@ suite("MoveNoteCommand", function () {
       },
       onInit: async ({ engine, vaults, wsRoot }) => {
         const notes = engine.notes;
-        const vault1 = vaults[0];
-        const vault2 = vaults[0];
+        const vaultFrom = vaults[0];
+        const vaultTo = vaults[0];
         const fooNote = NoteUtils.getNoteByFnameV5({
           fname: "foo",
           notes,
-          vault: vault1,
+          vault: vaultFrom,
           wsRoot,
         }) as NoteProps;
         await VSCodeUtils.openNote(fooNote);
@@ -44,11 +47,11 @@ suite("MoveNoteCommand", function () {
             {
               oldLoc: {
                 fname: "foo",
-                vault: vault1,
+                vault: vaultFrom,
               },
               newLoc: {
                 fname: "bar",
-                vault: vault2,
+                vault: vaultTo,
               },
             },
           ],
@@ -62,32 +65,68 @@ suite("MoveNoteCommand", function () {
         expect(
           await EngineTestUtilsV4.checkVault({
             wsRoot,
-            vault: vault1,
+            vault: vaultFrom,
             match: ["bar.md"],
             nomatch: ["foo.md"],
           })
         ).toBeTruthy();
+        // note note in engine
         expect(
           _.isUndefined(
             NoteUtils.getNoteByFnameV5({
               fname: "foo",
               notes,
-              vault: vault1,
+              vault: vaultFrom,
               wsRoot,
             })
           )
         ).toBeTruthy();
+        // bar isn't in the first vault
         expect(
           _.isUndefined(
             NoteUtils.getNoteByFnameV5({
               fname: "bar",
               notes,
-              vault: vault1,
+              vault: vaultFrom,
               wsRoot,
             })
           )
         ).toBeFalsy();
         done();
+      },
+    });
+  });
+
+  test("replace existing note", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      preSetupHook: async ({ wsRoot, vaults }) => {
+        ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
+      },
+      onInit: async ({ engine, vaults, wsRoot }) => {
+        const notes = engine.notes;
+        const vaultFrom = vaults[0];
+        const vaultTo = vaults[0];
+        const fooNote = NoteUtils.getNoteByFnameV5({
+          fname: "foo",
+          notes,
+          vault: vaultFrom,
+          wsRoot,
+        }) as NoteProps;
+        await VSCodeUtils.openNote(fooNote);
+        const cmd = new MoveNoteCommand();
+        HistoryService.instance().subscribev2("lookupProvider", {
+          id: "move",
+          listener: async (event) => {
+            expect(event.action).toEqual("error");
+            done();
+          },
+        });
+        await cmd.run({
+          nonInteractive: true,
+          initialValue: "bar",
+          vaultName: vaultTo.fsPath,
+        });
       },
     });
   });
@@ -240,8 +279,7 @@ suite("MoveNoteCommand", function () {
         }) as NoteProps;
 
         await VSCodeUtils.openNote(fooNote);
-        const cmd = new MoveNoteCommand();
-        const lc = cmd.createLookup();
+        const lc = LookupControllerV3.create();
         const provider = {} as any;
         const initialValue = path.basename(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
@@ -278,8 +316,7 @@ suite("MoveNoteCommand", function () {
         }) as NoteProps;
 
         await VSCodeUtils.openNote(fooNote);
-        const cmd = new MoveNoteCommand();
-        const lc = cmd.createLookup();
+        const lc = LookupControllerV3.create();
         const provider = {} as any;
         const initialValue = path.basename(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",

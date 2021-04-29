@@ -229,7 +229,7 @@ export type RespRequired<T> =
       error: null | undefined;
       data: T;
     }
-  | { error: DendronError; data: undefined };
+  | { error: DendronError };
 
 export interface QueryOptsV2 {
   /**

@@ -1,16 +1,21 @@
 import {
   DendronError,
   DNodeUtils,
-  ENGINE_ERROR_CODES,
   NoteChangeEntry,
-  NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
+import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { TextEditor, Uri, window } from "vscode";
-import { PickerUtilsV2 } from "../components/lookup/utils";
+import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
+import { NoteLookupProvider } from "../components/lookup/LookupProviderV3";
+import {
+  OldNewLocation,
+  PickerUtilsV2,
+  ProviderAcceptHooks,
+} from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileItem } from "../external/fileutils/FileItem";
 import { VSCodeUtils } from "../utils";
@@ -18,8 +23,9 @@ import { DendronWorkspace } from "../workspace";
 import { BaseCommand } from "./base";
 
 type CommandInput = {
-  dest: string;
+  move: OldNewLocation[];
 };
+
 type CommandOpts = {
   files: { oldUri: Uri; newUri: Uri }[];
   silent: boolean;
@@ -41,49 +47,46 @@ export class RenameNoteV2aCommand extends BaseCommand<
   public silent?: boolean;
 
   async gatherInputs(): Promise<CommandInput | undefined> {
-    const resp = await VSCodeUtils.showInputBox({
-      prompt: "Rename file",
-      ignoreFocusOut: true,
-      value: path.basename(
-        VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
-        ".md"
-      ),
+    const lc = LookupControllerV3.create();
+    const provider = new NoteLookupProvider("rename", { allowNewNote: true });
+    provider.registerOnAcceptHook(ProviderAcceptHooks.oldNewLocationHook);
+
+    const initialValue = path.basename(
+      VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
+      ".md"
+    );
+    lc.show({
+      title: "Rename note",
+      placeholder: "foo",
+      provider,
+      initialValue,
     });
-    if (_.isUndefined(resp)) {
-      return;
-    }
-    return {
-      dest: resp as string,
-    };
+    return new Promise((resolve) => {
+      HistoryService.instance().subscribev2("lookupProvider", {
+        id: "rename",
+        listener: async (event) => {
+          if (event.action === "done") {
+            HistoryService.instance().remove("rename", "lookupProvider");
+            resolve({ move: event.data.onAcceptHookResp });
+            lc.onHide();
+          } else if (event.action === "error") {
+            return;
+          } else {
+            throw new DendronError({ msg: `unexpected event: ${event}` });
+          }
+        },
+      });
+    });
   }
 
   async enrichInputs(inputs: CommandInput): Promise<CommandOpts> {
     const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
     const oldUri: Uri = editor.document.uri;
-    const ws = DendronWorkspace.instance();
-    const notes = ws.getEngine().notes;
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-    let newNote = NoteUtils.getNoteByFnameV5({
-      fname: inputs.dest,
-      notes,
-      vault,
-      wsRoot: DendronWorkspace.wsRoot(),
-    });
-    let isStub = newNote?.stub;
-    if (newNote && !isStub) {
-      throw new DendronError({
-        status: ENGINE_ERROR_CODES.NODE_EXISTS,
-        friendly: `${inputs.dest} exists`,
-      });
-    }
-    newNote = NoteUtils.create({
-      fname: inputs.dest,
-      id: newNote?.id,
-      vault,
-    });
-
+    const move = inputs.move[0];
+    const fname = move.newLoc.fname;
     const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
-    const newUri = Uri.file(path.join(vpath, inputs.dest + ".md"));
+    const newUri = Uri.file(path.join(vpath, fname + ".md"));
     return {
       files: [{ oldUri, newUri }],
       silent: false,

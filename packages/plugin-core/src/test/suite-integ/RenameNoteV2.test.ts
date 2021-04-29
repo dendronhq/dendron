@@ -1,10 +1,4 @@
-import {
-  DendronError,
-  DNodeUtils,
-  DVault,
-  ENGINE_ERROR_CODES,
-  WorkspaceOpts,
-} from "@dendronhq/common-all";
+import { DNodeUtils, DVault, WorkspaceOpts } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import {
   ENGINE_HOOKS,
@@ -15,6 +9,7 @@ import {
 import { DendronEngineV2 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
+import sinon from "sinon";
 // // You can import and use all API from the 'vscode' module
 // // as well as import your extension to test it
 import * as vscode from "vscode";
@@ -35,6 +30,21 @@ const createEngine = createEngineFactory({
       newLoc,
     }) => {
       const cmd = new RenameNoteV2aCommand();
+      sinon.stub(cmd, "gatherInputs").returns(
+        Promise.resolve({
+          move: [
+            {
+              oldLoc: {
+                fname: oldLoc.fname,
+              },
+              newLoc: {
+                fname: newLoc.fname,
+              },
+            },
+          ],
+        })
+      );
+
       const vpathOld = vault2Path({
         vault: oldLoc.vault as DVault,
         wsRoot: opts.wsRoot,
@@ -42,7 +52,6 @@ const createEngine = createEngineFactory({
       await VSCodeUtils.openFileInEditor(
         vscode.Uri.file(path.join(vpathOld, oldLoc.fname + ".md"))
       );
-      VSCodeUtils.showInputBox = async () => newLoc.fname;
       const resp = await cmd.run();
       return {
         error: null,
@@ -57,47 +66,16 @@ suite("RenameNote", function () {
   let ctx: vscode.ExtensionContext;
 
   // mocks workspac context needed for extension to start
-  ctx = setupBeforeAfter(this);
+  ctx = setupBeforeAfter(this, {
+    afterHook: () => {
+      sinon.restore();
+    },
+  });
 
   /**
    * When renaing a note, Dendron should throw an error if the note already exists.
    * We pass in `done` to the test because it is asynchronous.
    */
-  test("note exists", (done) => {
-    // start a workspace with a single vault
-    runLegacySingleWorkspaceTest({
-      // this is needed to setup the mock workspace
-      ctx,
-      // code that runs after the workspace and vault folders have been created
-      postSetupHook: async ({ wsRoot, vaults }) => {
-        // ENGINE_HOOKS creates a bunch of preset note fixtures
-        // `setupBasic` creates a basic workspace with  `foo.md`, `foo.ch1.md, and `bar.md`
-        await ENGINE_HOOKS.setupBasic({ wsRoot, vaults });
-      },
-      // this runs when the workspace is activated
-      // the test code goes here
-      onInit: async ({ vaults, wsRoot }) => {
-        // right now, vaultPaths can be absolute or relative depending on what version of Dendron
-        // is running. this method normalizes the path relative to the workspace root
-        const vaultDir = vault2Path({ vault: vaults[0], wsRoot });
-        try {
-          // this will open `foo.ch1` in the editor
-          await VSCodeUtils.openFileInEditor(
-            vscode.Uri.file(path.join(vaultDir, "foo.ch1.md"))
-          );
-          // we expect the command to throw an error when checking the inputs
-          // see command lifecycle here: https://dendron.so/notes/d410c0d6-9ede-42ef-9c96-662902e4f488.html#running-a-command
-          await new RenameNoteV2aCommand().enrichInputs({ dest: "foo" });
-        } catch (err) {
-          expect((err as DendronError).status).toEqual(
-            ENGINE_ERROR_CODES.NODE_EXISTS
-          );
-          done();
-        }
-      },
-    });
-  });
-
   test("update body", (done) => {
     runLegacySingleWorkspaceTest({
       ctx,
@@ -124,8 +102,22 @@ suite("RenameNote", function () {
           await vscode.commands.executeCommand("type", { text: "hello" });
           await active.document.save();
 
-          VSCodeUtils.showInputBox = async () => "foobar";
-          const resp = await new RenameNoteV2aCommand().run();
+          const cmd = new RenameNoteV2aCommand();
+          sinon.stub(cmd, "gatherInputs").returns(
+            Promise.resolve({
+              move: [
+                {
+                  oldLoc: {
+                    fname: "foo",
+                  },
+                  newLoc: {
+                    fname: "foobar",
+                  },
+                },
+              ],
+            })
+          );
+          const resp = await cmd.run();
           expect(resp?.changed?.length).toEqual(2);
           active = VSCodeUtils.getActiveTextEditor() as vscode.TextEditor;
           expect(DNodeUtils.fname(active.document.uri.fsPath)).toEqual(

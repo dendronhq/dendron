@@ -149,6 +149,11 @@ export class EngineTestUtilsV4 {
     return opts.vault;
   }
 
+  /**
+   * Check disk for note
+   * @param opts
+   * @returns
+   */
   static checkVault(
     opts: WorkspaceVault & { match?: string[]; nomatch?: string[] }
   ) {

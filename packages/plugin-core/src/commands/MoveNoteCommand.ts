@@ -1,8 +1,6 @@
 import {
   DendronError,
-  DNodeUtils,
   NoteChangeEntry,
-  NoteUtils,
   RenameNoteOpts,
   VaultUtils,
 } from "@dendronhq/common-all";
@@ -10,11 +8,10 @@ import { vault2Path } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
-import { TextEditor, Uri, window } from "vscode";
-import { VaultSelectButton } from "../components/lookup/buttons";
+import { Uri, window } from "vscode";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import { NoteLookupProvider } from "../components/lookup/LookupProviderV3";
-import { PickerUtilsV2 } from "../components/lookup/utils";
+import { ProviderAcceptHooks } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileItem } from "../external/fileutils/FileItem";
 import { Logger } from "../logger";
@@ -38,6 +35,9 @@ type CommandOpts = {
    * Pause all watchers
    */
   noPauseWatcher?: boolean;
+  nonInteractive?: boolean;
+  initialValue?: string;
+  vaultName?: string;
 };
 
 type CommandOutput = {
@@ -54,62 +54,17 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return;
   }
 
-  createLookup() {
-    const vaults = getWS().config.vaults;
-    const isMultiVault = vaults.length > 1;
-    const buttons = [VaultSelectButton.create(isMultiVault)];
-    const lc = new LookupControllerV3({ nodeType: "note", buttons });
-    return lc;
-  }
-
-  async gatherInputs(): Promise<CommandInput | undefined> {
-    const lc = this.createLookup();
+  async gatherInputs(opts?: CommandOpts): Promise<CommandInput | undefined> {
+    const engine = getWS().getEngine();
+    const vault = opts?.vaultName
+      ? VaultUtils.getVaultByName({
+          vaults: engine.vaults,
+          vname: opts.vaultName,
+        })
+      : undefined;
+    const lc = LookupControllerV3.create(vault ? { buttons: [] } : undefined);
     const provider = new NoteLookupProvider("move", { allowNewNote: true });
-    provider.registerOnAcceptHook(async ({ quickpick, selectedItems }) => {
-      // setup vars
-      const oldVault = PickerUtilsV2.getVaultForOpenEditor();
-      const newVault = quickpick.vault ? quickpick.vault : oldVault;
-      const wsRoot = DendronWorkspace.wsRoot();
-      const ws = getWS();
-      const engine = ws.getEngine();
-      const notes = engine.notes;
-
-      // get old note
-      const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
-      const oldUri: Uri = editor.document.uri;
-      const oldFname = DNodeUtils.fname(oldUri.fsPath);
-
-      const fname = selectedItems[0].fname;
-      // get new note
-      let newNote = NoteUtils.getNoteByFnameV5({
-        fname,
-        notes,
-        vault: newVault,
-        wsRoot,
-      });
-      let isStub = newNote?.stub;
-      if (newNote && !isStub) {
-        const vaultName = VaultUtils.getName(newVault);
-        const errMsg = `${vaultName}/${quickpick.value} exists`;
-        window.showErrorMessage(errMsg);
-        HistoryService.instance().add({
-          source: "lookupProvider",
-          action: "error",
-        });
-        return;
-      }
-      const data = {
-        oldLoc: {
-          fname: oldFname,
-          vault: oldVault,
-        },
-        newLoc: {
-          fname: quickpick.value,
-          vault: newVault,
-        },
-      };
-      return data;
-    });
+    provider.registerOnAcceptHook(ProviderAcceptHooks.oldNewLocationHook);
     const initialValue = path.basename(
       VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
       ".md"
@@ -118,7 +73,8 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
       title: "Move note",
       placeholder: "foo",
       provider,
-      initialValue,
+      initialValue: opts?.initialValue || initialValue,
+      nonInteractive: opts?.nonInteractive,
     });
     return new Promise((resolve) => {
       HistoryService.instance().subscribev2("lookupProvider", {
@@ -129,7 +85,10 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
             resolve({ moves: event.data.onAcceptHookResp });
             lc.onHide();
           } else if (event.action === "error") {
-            return;
+            const error = event.data.error as DendronError;
+            lc.onHide();
+            window.showErrorMessage(error.msg);
+            resolve(undefined);
           } else {
             throw new DendronError({ msg: `unexpected event: ${event}` });
           }

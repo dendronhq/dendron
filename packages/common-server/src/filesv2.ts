@@ -185,7 +185,8 @@ export function file2NoteWithCache({
     if (capture) {
       let offset = capture[0].length;
       let body = content.slice(offset + 1);
-      note = { ...cache.notes[name].data, body };
+      // vault can change without note changing so we need to add this
+      note = { ...cache.notes[name].data, body, vault };
       return { note, matchHash, noteHash: sig };
     }
   }

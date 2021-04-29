@@ -64,6 +64,9 @@ export class DendronEngineV2 implements DEngine {
   public logger: DLogger;
   public fuseEngine: FuseEngine;
   public links: DLink[];
+  /**
+   @deprecated
+   */
   public vaultsv3: DVault[];
   public configRoot: string;
   public config: DendronConfig;
@@ -108,11 +111,23 @@ export class DendronEngineV2 implements DEngine {
     return DendronEngineV2._instance;
   }
 
+  get vaults(): DVault[] {
+    return this.store.vaultsv3;
+  }
+
   get notes(): NotePropsDict {
     return this.store.notes;
   }
   get schemas(): SchemaModuleDict {
     return this.store.schemas;
+  }
+
+  set notes(notes: NotePropsDict) {
+    this.store.notes = notes;
+  }
+
+  set vaults(vaults: DVault[]) {
+    this.store.vaultsv3 = vaults;
   }
 
   /**

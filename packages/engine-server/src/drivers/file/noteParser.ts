@@ -61,7 +61,7 @@ export class NoteParser extends ParserBase {
     const maxLvl = _.max(_.keys(fileMetaDict).map((e) => _.toInteger(e))) || 2;
     const notesByFname: NotePropsDict = {};
     const notesById: NotePropsDict = {};
-    this.logger.debug({ ctx, msg: "enter", fpath });
+    this.logger.info({ ctx, msg: "enter", fpath });
     const cacheUpdates: { [key: string]: NotesCacheEntry } = {};
 
     // get root note
@@ -80,14 +80,13 @@ export class NoteParser extends ParserBase {
       vault,
     });
     const rootNote = rootProps.propsList[0];
-    this.logger.debug({ ctx, rootNote, msg: "post-parse-rootNote" });
+    this.logger.info({ ctx, msg: "post:parseRootNote" });
     if (!rootProps.matchHash) {
       cacheUpdates[rootNote.fname] = createCacheEntry({
         noteProps: rootNote,
         hash: rootProps.noteHash,
       });
     }
-
     notesByFname[rootNote.fname] = rootNote;
     notesById[rootNote.id] = rootNote;
 
@@ -116,6 +115,7 @@ export class NoteParser extends ParserBase {
       notesByFname[ent.fname] = ent;
       notesById[ent.id] = ent;
     });
+    this.logger.info({ ctx, msg: "post:parseDomainNotes" });
 
     // get everything else
     while (lvl <= maxLvl) {
@@ -149,6 +149,7 @@ export class NoteParser extends ParserBase {
       lvl += 1;
       prevNodes = currNodes;
     }
+    this.logger.info({ ctx, msg: "post:parseAllNotes" });
 
     // add schemas
     const out = _.values(notesByFname);
@@ -161,6 +162,7 @@ export class NoteParser extends ParserBase {
         return SchemaUtils.matchDomain(d, notesById, schemas);
       })
     );
+    this.logger.info({ ctx, msg: "post:matchSchemas" });
     return { notes: out, cacheUpdates };
   }
 

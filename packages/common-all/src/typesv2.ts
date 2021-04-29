@@ -393,6 +393,7 @@ export type BulkAddNoteOpts = {
 export type DEngine = DCommonProps &
   DCommonMethods & {
     store: DStore;
+    vaults: DVault[];
 
     init: () => Promise<DEngineInitResp>;
     deleteNote: (

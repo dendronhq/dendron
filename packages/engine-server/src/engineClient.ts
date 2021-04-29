@@ -125,6 +125,10 @@ export class DendronEngineClient implements DEngineClientV2 {
     });
   }
 
+  get vaults(): DVault[] {
+    return this.store.vaultsv3;
+  }
+
   /**
    * Load all nodes
    */

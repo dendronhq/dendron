@@ -47,12 +47,12 @@
                 {
                     "id": "dendronTreeView",
                     "name": "Dendron Tree View",
-                    "when": "dendron:showTreeView"
+                    "when": "dendron:pluginActive"
                 },
                 {
                     "id": "dendron.backlinksPanel",
                     "name": "Backlinks",
-                    "when": "dendron:showBacklinksPanel"
+                    "when": "dendron:pluginActive"
                 }
             ]
         },

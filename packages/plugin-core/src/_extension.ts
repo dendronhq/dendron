@@ -23,6 +23,7 @@ import semver from "semver";
 import * as vscode from "vscode";
 import {
   CONFIG,
+  DendronContext,
   DENDRON_COMMANDS,
   GLOBAL_STATE,
   WORKSPACE_STATE,
@@ -391,10 +392,15 @@ export async function _activate(context: vscode.ExtensionContext) {
 function toggleViews(enabled: boolean) {
   const ctx = "toggleViews";
   Logger.info({ ctx, msg: `views enabled: ${enabled}` });
-  vscode.commands.executeCommand("setContext", "dendron:showTreeView", enabled);
+
   vscode.commands.executeCommand(
     "setContext",
-    "dendron:showBacklinksPanel",
+    DendronContext.PLUGIN_ACTIVE,
+    enabled
+  );
+  vscode.commands.executeCommand(
+    "setContext",
+    DendronContext.PLUGIN_ACTIVE,
     enabled
   );
 }

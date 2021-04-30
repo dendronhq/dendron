@@ -4,6 +4,10 @@ export const DENDRON_WS_NAME = "dendron.code-workspace";
 export const extensionQualifiedId = `dendron.dendron`;
 export const DEFAULT_LEGACY_VAULT_NAME = "vault";
 
+export enum DendronContext {
+  PLUGIN_ACTIVE = "dendron:pluginActive",
+}
+
 type KeyBinding = {
   key?: string;
   mac?: string;

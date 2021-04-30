@@ -369,10 +369,16 @@ export class PickerUtilsV2 {
     quickpick: DendronQuickPickerV2;
     buttons: DendronBtn[];
   }) {
-    const resp = _.filter(opts.buttons, { pressed: true });
-    return Promise.all(
-      resp.map((bt) => {
+    const buttonsEnabled = _.filter(opts.buttons, { pressed: true });
+    const buttonsDisabled = _.filter(opts.buttons, { pressed: false });
+    await Promise.all(
+      buttonsEnabled.map((bt) => {
         bt.handle({ quickPick: opts.quickpick });
+      })
+    );
+    await Promise.all(
+      buttonsDisabled.map((bt) => {
+        bt.onDisable({ quickPick: opts.quickpick });
       })
     );
   }

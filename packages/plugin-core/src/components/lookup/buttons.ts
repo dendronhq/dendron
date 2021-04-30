@@ -120,6 +120,10 @@ export class DendronBtn implements IDendronQuickInputButton {
     return undefined;
   }
 
+  async onDisable(_opts: ButtonHandleOpts): Promise<void> {
+    return undefined;
+  }
+
   get iconPath() {
     return !this.pressed ? this.iconPathNormal : this.iconPathPressed;
   }
@@ -269,6 +273,12 @@ export class VaultSelectButton extends DendronBtn {
       const vault = await PickerUtilsV2.promptVault();
       return vault;
     };
+  }
+
+  async onDisable({ quickPick }: ButtonHandleOpts) {
+    if (quickPick.nextPicker) {
+      delete quickPick["nextPicker"];
+    }
   }
 }
 

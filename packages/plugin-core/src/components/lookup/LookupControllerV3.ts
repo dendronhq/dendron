@@ -90,12 +90,6 @@ export class LookupControllerV3 {
       ];
       quickpick.selectedItems = quickpick.items;
       await provider.onDidAccept({ quickpick, lc: this })();
-      // // FIXME: used for testing
-      // if (quickPick.value && _.isEmpty(quickPick.items)) {
-      //   const items = provider.createDefaultItems({ picker: quickPick });
-      //   quickPick.items = items;
-      //   quickPick.selectedItems = items;
-      // }
     }
   }
 

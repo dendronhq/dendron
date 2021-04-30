@@ -9,7 +9,7 @@ import {
   NoteProps,
   NoteQuickInput,
   NoteUtils,
-  RespRequired,
+  RespV2,
   VaultUtils,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
@@ -122,7 +122,7 @@ export class ProviderAcceptHooks {
   static oldNewLocationHook: OnAcceptHook = async ({
     quickpick,
     selectedItems,
-  }): Promise<RespRequired<OldNewLocation>> => {
+  }): Promise<RespV2<OldNewLocation>> => {
     // setup vars
     const oldVault = PickerUtilsV2.getVaultForOpenEditor();
     const newVault = quickpick.vault ? quickpick.vault : oldVault;
@@ -168,7 +168,7 @@ export class ProviderAcceptHooks {
         note: newNote,
       },
     };
-    return { data, error: undefined };
+    return { data, error: null };
   };
 }
 

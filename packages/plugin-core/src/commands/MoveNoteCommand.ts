@@ -10,8 +10,14 @@ import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
-import { NoteLookupProvider } from "../components/lookup/LookupProviderV3";
-import { ProviderAcceptHooks } from "../components/lookup/utils";
+import {
+  NoteLookupProvider,
+  NoteLookupProviderSuccessResp,
+} from "../components/lookup/LookupProviderV3";
+import {
+  OldNewLocation,
+  ProviderAcceptHooks,
+} from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { FileItem } from "../external/fileutils/FileItem";
 import { Logger } from "../logger";
@@ -82,7 +88,13 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         listener: async (event) => {
           if (event.action === "done") {
             HistoryService.instance().remove("move", "lookupProvider");
-            resolve({ moves: event.data.onAcceptHookResp });
+            const data = event.data as NoteLookupProviderSuccessResp<
+              OldNewLocation
+            >;
+            const opts: CommandOpts = {
+              moves: data.onAcceptHookResp,
+            };
+            resolve(opts);
             lc.onHide();
           } else if (event.action === "error") {
             const error = event.data.error as DendronError;

@@ -14,10 +14,9 @@ import { CreateDailyJournalCommand } from "./CreateDailyJournal";
 import { DeleteNodeCommand } from "./DeleteNodeCommand";
 import { DiagnosticsReportCommand } from "./DiagnosticsReport";
 import { DisableTelemetryCommand } from "./DisableTelemetry";
-import { EnableTelemetryCommand } from "./EnableTelemetry";
-
 import { DoctorCommand } from "./Doctor";
 import { DumpStateCommand } from "./DumpStateCommand";
+import { EnableTelemetryCommand } from "./EnableTelemetry";
 import { ExportPodCommand } from "./ExportPod";
 import { GoDownCommand } from "./GoDownCommand";
 import { GotoNoteCommand } from "./GotoNote";
@@ -29,7 +28,6 @@ import { OpenLogsCommand } from "./OpenLogs";
 import { PasteLinkCommand } from "./PasteLink";
 import { PublishPodCommand } from "./PublishPod";
 import { RefactorHierarchyCommandV2 } from "./RefactorHierarchyV2";
-import { RenameNoteV2aCommand } from "./RenameNoteV2a";
 import { ResetConfigCommand } from "./ResetConfig";
 import { RestoreVaultCommand } from "./RestoreVault";
 import { SetupWorkspaceCommand } from "./SetupWorkspace";
@@ -76,7 +74,6 @@ const ALL_COMMANDS = [
   MoveNoteCommand,
   RefactorHierarchyCommandV2,
   // ReloadIndexCommand,
-  RenameNoteV2aCommand,
   ResetConfigCommand,
   RestoreVaultCommand,
   SetupWorkspaceCommand,

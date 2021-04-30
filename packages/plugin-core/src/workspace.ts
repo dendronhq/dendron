@@ -25,6 +25,7 @@ import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
 import { GoToSiblingCommand } from "./commands/GoToSiblingCommand";
 import { LookupCommand } from "./commands/LookupCommand";
+import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import {
   CONFIG,
@@ -503,11 +504,12 @@ export class DendronWorkspace {
       )
     );
 
+    // RENAME is alias to MOVE
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
-        DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
-        async () => {
-          await new GoToSiblingCommand().execute({ direction: "prev" });
+        DENDRON_COMMANDS.RENAME_NOTE.key,
+        async (args: any) => {
+          await new MoveNoteCommand().run(args);
         }
       )
     );

@@ -1,4 +1,4 @@
-import { NoteQuickInput, RespRequired } from "@dendronhq/common-all";
+import { NoteQuickInput, RespV2 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -7,7 +7,7 @@ import { Logger } from "../../logger";
 import { DendronWorkspace } from "../../workspace";
 import { LookupControllerV3 } from "./LookupControllerV3";
 import { DendronQuickPickerV2 } from "./types";
-import { NotePickerUtils, PickerUtilsV2 } from "./utils";
+import { NotePickerUtils, OldNewLocation, PickerUtilsV2 } from "./utils";
 
 export type OnUpdatePickerItemsOpts = {
   picker: DendronQuickPickerV2;
@@ -18,7 +18,7 @@ export type OnUpdatePickerItemsOpts = {
 export type OnAcceptHook = (opts: {
   quickpick: DendronQuickPickerV2;
   selectedItems: NoteQuickInput[];
-}) => Promise<RespRequired<any>>;
+}) => Promise<RespV2<any>>;
 
 export type ILookupProviderV3 = {
   id: string;
@@ -33,6 +33,11 @@ export type ILookupProviderV3 = {
 
 export type ILookupProviderOptsV3 = {
   allowNewNote: boolean;
+};
+
+export type NoteLookupProviderSuccessResp<T> = {
+  selectedItems: NoteQuickInput[];
+  onAcceptHookResp: T[];
 };
 
 export class NoteLookupProvider implements ILookupProviderV3 {
@@ -94,7 +99,10 @@ export class NoteLookupProvider implements ILookupProviderV3 {
           source: "lookupProvider",
           action: "done",
           id: this.id,
-          data: { selectedItems, onAcceptHookResp },
+          data: {
+            selectedItems,
+            onAcceptHookResp: _.map(onAcceptHookResp, (ent) => ent.data!),
+          } as NoteLookupProviderSuccessResp<OldNewLocation>,
         });
       }
     };

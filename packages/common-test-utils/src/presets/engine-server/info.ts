@@ -6,6 +6,9 @@ const NOTES = {
   BASIC: new TestPresetEntryV4(
     async ({ engine }) => {
       const info = await engine.info();
+      if (info.error) {
+        throw Error();
+      }
       return [
         {
           actual: _.isEmpty(info.data!.version),

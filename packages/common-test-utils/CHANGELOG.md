@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.39.2](https://github.com/dendronhq/dendron/compare/v0.39.0...v0.39.2) (2021-04-30)
+
+### Bug Fixes
+
+- better error message when moving note results in overwritten note ([a98787a](https://github.com/dendronhq/dendron/commit/a98787afbca2d8c850a399dc656fa7449e7507a3))
+
 ## [0.39.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.39.0...v0.39.2-alpha.0) (2021-04-29)
 
 **Note:** Version bump only for package @dendronhq/common-test-utils

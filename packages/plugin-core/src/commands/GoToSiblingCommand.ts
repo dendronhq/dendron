@@ -89,7 +89,7 @@ export class GoToSiblingCommand extends BasicCommand<
 
     // determine how much we want to zero-pad the numeric-only node names
     let padLength = 0;
-    if (numericNodes) {
+    if (numericNodes.length > 0) {
       const sortedNumericNodes = _.orderBy(
         numericNodes,
         (o) => {

@@ -9,7 +9,10 @@ import { HistoryService } from "@dendronhq/engine-server";
 import _ from "lodash";
 import path from "path";
 import { Uri, window } from "vscode";
-import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
+import {
+  LookupControllerV3,
+  LookupControllerV3CreateOpts,
+} from "../components/lookup/LookupControllerV3";
 import {
   NoteLookupProvider,
   NoteLookupProviderSuccessResp,
@@ -44,6 +47,7 @@ type CommandOpts = {
   nonInteractive?: boolean;
   initialValue?: string;
   vaultName?: string;
+  useSameVault?: boolean;
 };
 
 type CommandOutput = {
@@ -62,13 +66,19 @@ export class MoveNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
   async gatherInputs(opts?: CommandOpts): Promise<CommandInput | undefined> {
     const engine = getWS().getEngine();
-    const vault = opts?.vaultName
+    let vault = opts?.vaultName
       ? VaultUtils.getVaultByName({
           vaults: engine.vaults,
           vname: opts.vaultName,
         })
       : undefined;
-    const lc = LookupControllerV3.create(vault ? { buttons: [] } : undefined);
+    const lookupCreateOpts: LookupControllerV3CreateOpts = {
+      disableVaultSelection: opts?.useSameVault,
+    };
+    if (vault) {
+      lookupCreateOpts.buttons = [];
+    }
+    const lc = LookupControllerV3.create(lookupCreateOpts);
     const provider = new NoteLookupProvider("move", { allowNewNote: true });
     provider.registerOnAcceptHook(ProviderAcceptHooks.oldNewLocationHook);
     const initialValue = path.basename(

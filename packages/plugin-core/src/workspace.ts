@@ -509,7 +509,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RENAME_NOTE.key,
         async (args: any) => {
-          await new MoveNoteCommand().run(args);
+          await new MoveNoteCommand().run({ useSameVault: true, ...args });
         }
       )
     );

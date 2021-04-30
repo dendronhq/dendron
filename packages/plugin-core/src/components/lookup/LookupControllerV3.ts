@@ -13,15 +13,22 @@ import { ILookupProviderV3 } from "./LookupProviderV3";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";
 import { CreateQuickPickOpts, NotePickerUtils, PickerUtilsV2 } from "./utils";
 
+export type LookupControllerV3CreateOpts = {
+  buttons?: DendronBtn[];
+  disableVaultSelection?: boolean;
+};
+
 export class LookupControllerV3 {
   public state: LookupControllerState;
   public nodeType: DNodeType;
   protected _cancelTokenSource?: CancellationTokenSource;
   public quickpick?: DendronQuickPickerV2;
 
-  static create(opts?: { buttons: DendronBtn[] }) {
+  static create(opts?: LookupControllerV3CreateOpts) {
     const vaults = getWS().getEngine().vaults;
-    const isMultiVault = vaults.length > 1;
+    const disableVaultSelection =
+      _.isBoolean(opts?.disableVaultSelection) && opts?.disableVaultSelection;
+    const isMultiVault = vaults.length > 1 && !disableVaultSelection;
     const buttons = opts?.buttons || [VaultSelectButton.create(isMultiVault)];
     return new LookupControllerV3({ nodeType: "note", buttons });
   }

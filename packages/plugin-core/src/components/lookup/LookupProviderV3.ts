@@ -38,6 +38,7 @@ export type ILookupProviderOptsV3 = {
 export type NoteLookupProviderSuccessResp<T> = {
   selectedItems: NoteQuickInput[];
   onAcceptHookResp: T[];
+  cancel?: boolean;
 };
 
 export class NoteLookupProvider implements ILookupProviderV3 {
@@ -77,6 +78,15 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       const nextPicker = picker.nextPicker;
       if (nextPicker) {
         picker.vault = await nextPicker();
+        if (_.isUndefined(picker.vault)) {
+          HistoryService.instance().add({
+            source: "lookupProvider",
+            action: "done",
+            id: this.id,
+            data: { cancel: true },
+          });
+          return;
+        }
       }
       const selectedItems = NotePickerUtils.getSelection(picker);
       lc.cancelToken.cancel();

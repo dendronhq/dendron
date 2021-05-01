@@ -45,6 +45,7 @@ import { CodeConfigKeys, WorkspaceSettings } from "./types";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
 import { DendronTreeView } from "./views/DendronTreeView";
+import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
@@ -387,6 +388,16 @@ export class DendronWorkspace {
     const ctx = "setupViews";
     HistoryService.instance().subscribe("extension", async (event) => {
       if (event.action === "initialized") {
+        Logger.info({ ctx, msg: "init:treeViewV2" });
+        const provider = new DendronTreeViewV2(context.extensionUri);
+        context.subscriptions.push(
+          vscode.window.registerWebviewViewProvider(
+            DendronTreeViewV2.viewType,
+            provider
+          )
+        );
+
+        // backlinks
         Logger.info({ ctx, msg: "init:backlinks" });
         const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
         vscode.window.onDidChangeActiveTextEditor(

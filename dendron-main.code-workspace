@@ -76,5 +76,6 @@
         "editor.formatOnSave": false,
         "workbench.editor.showTabs": true,
         "editor.snippetSuggestions": "none",
+        "liveFrame.url": "http://localhost:3000/proto"
     }
 }

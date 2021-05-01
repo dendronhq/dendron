@@ -53,7 +53,13 @@
                     "id": "dendron.backlinksPanel",
                     "name": "Backlinks",
                     "when": "dendron:pluginActive"
-                }
+                },
+                {
+					"type": "webview",
+					"id": "dendron.treeViewV2",
+					"name": "Tree View V2",
+                    "when": "dendron:pluginActive"
+				}
             ]
         },
         "configuration": {

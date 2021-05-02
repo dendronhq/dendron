@@ -1,8 +1,10 @@
 import {
   DendronError,
+  DNodeUtils,
   NoteProps,
   NoteUtils,
   VaultUtils,
+  isNumeric,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -79,7 +81,34 @@ export class GoToSiblingCommand extends BasicCommand<
         msg: "no_siblings" as const,
       };
     }
-    const sorted = _.sortBy(respNodes, "fname");
+
+    // check if there are numeric-only nodes
+    const numericNodes = _.filter(respNodes, (o) => {
+      const leafName = DNodeUtils.getLeafName(o);
+      return isNumeric(leafName);
+    }) as NoteProps[];
+
+    // determine how much we want to zero-pad the numeric-only node names
+    let padLength = 0;
+    if (numericNodes.length > 0) {
+      const sortedNumericNodes = _.orderBy(
+        numericNodes,
+        (o) => {
+          return DNodeUtils.getLeafName(o)!.length;
+        },
+        "desc"
+      );
+      padLength = sortedNumericNodes[0].fname.length;
+    }
+
+    // zero-pad numeric-only nodes before sorting
+    const sorted = _.sortBy(respNodes, (o) => {
+      const leafName = DNodeUtils.getLeafName(o);
+      if (isNumeric(leafName)) {
+        return _.padStart(leafName, padLength, "0");
+      }
+      return leafName;
+    });
     const indexOfCurrentNote = _.findIndex(sorted, { fname: value });
     if (indexOfCurrentNote < 0) {
       throw new Error(`${ctx}: ${UNKNOWN_ERROR_MSG}`);

@@ -142,6 +142,126 @@ suite("GoToSibling", function () {
     });
   });
 
+  test("numeric siblings sort correctly", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        await note2File({
+          note: NoteUtils.create({ fname: "foo.journal.2021.04.3", vault }),
+          vault,
+          wsRoot,
+        });
+        await note2File({
+          note: NoteUtils.create({ fname: "foo.journal.2021.04.29", vault }),
+          vault,
+          wsRoot,
+        });
+        await note2File({
+          note: NoteUtils.create({ fname: "foo.journal.2021.04.30", vault }),
+          vault,
+          wsRoot,
+        });
+      },
+      onInit: async ({ vaults, wsRoot }) => {
+        const vault = vaults[0];
+        const vpath = vault2Path({ wsRoot, vault });
+
+        const notePath = path.join(vpath, "foo.journal.2021.04.29.md");
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+        const resp = await new GoToSiblingCommand().execute({ direction });
+        expect(resp).toEqual({ msg: "ok" });
+        expect(
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+            "foo.journal.2021.04.30.md"
+          )
+        ).toBeTruthy();
+
+        done();
+      },
+    });
+  });
+
+  test("numeric and alphabetic siblings", (done) => {
+    runLegacyMultiWorkspaceTest({
+      ctx,
+      postSetupHook: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        await note2File({
+          note: NoteUtils.create({ fname: "foo.journal.2021.04.3", vault }),
+          vault,
+          wsRoot,
+        });
+        await note2File({
+          note: NoteUtils.create({ fname: "foo.journal.2021.04.zlob", vault }),
+          vault,
+          wsRoot,
+        });
+        await note2File({
+          note: NoteUtils.create({ fname: "foo.journal.2021.04.29", vault }),
+          vault,
+          wsRoot,
+        });
+        await note2File({
+          note: NoteUtils.create({ fname: "foo.journal.2021.04.baz", vault }),
+          vault,
+          wsRoot,
+        });
+        await note2File({
+          note: NoteUtils.create({ fname: "foo.journal.2021.04.300", vault }),
+          vault,
+          wsRoot,
+        });
+        await note2File({
+          note: NoteUtils.create({ fname: "foo.journal.2021.04.bar", vault }),
+          vault,
+          wsRoot,
+        });
+      },
+      onInit: async ({ vaults, wsRoot }) => {
+        const vault = vaults[0];
+        const vpath = vault2Path({ wsRoot, vault });
+
+        const notePath = path.join(vpath, "foo.journal.2021.04.300.md");
+        await VSCodeUtils.openFileInEditor(vscode.Uri.file(notePath));
+
+        const resp1 = await new GoToSiblingCommand().execute({ direction });
+        expect(resp1).toEqual({ msg: "ok" });
+        expect(
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+            "foo.journal.2021.04.bar.md"
+          )
+        ).toBeTruthy();
+
+        const resp2 = await new GoToSiblingCommand().execute({ direction });
+        expect(resp2).toEqual({ msg: "ok" });
+        expect(
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+            "foo.journal.2021.04.baz.md"
+          )
+        ).toBeTruthy();
+
+        const resp3 = await new GoToSiblingCommand().execute({ direction });
+        expect(resp3).toEqual({ msg: "ok" });
+        expect(
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+            "foo.journal.2021.04.zlob.md"
+          )
+        ).toBeTruthy();
+
+        const resp4 = await new GoToSiblingCommand().execute({ direction });
+        expect(resp4).toEqual({ msg: "ok" });
+        expect(
+          VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath.endsWith(
+            "foo.journal.2021.04.3.md"
+          )
+        ).toBeTruthy();
+
+        done();
+      },
+    });
+  });
+
   test("no siblings", (done) => {
     runLegacyMultiWorkspaceTest({
       ctx,

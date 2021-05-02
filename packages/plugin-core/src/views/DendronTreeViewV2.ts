@@ -70,10 +70,10 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
 				<meta charset="UTF-8">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-				<title>Cat Colors</title>
+				<title>Tree View</title>
 			</head>
 			<body>
-                <iframe src="http://localhost:3000/vscode/tree-view" style="border: none;">
+                <iframe src="http://localhost:3000/vscode/tree-view" style="border: none; width: 100%;">
 			</body>
 			</html>`;
   }

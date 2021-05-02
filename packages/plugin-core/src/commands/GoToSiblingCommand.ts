@@ -1,8 +1,10 @@
 import {
   DendronError,
+  DNodeUtils,
   NoteProps,
   NoteUtils,
   VaultUtils,
+  isNumeric,
 } from "@dendronhq/common-all";
 import { vault2Path } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -10,10 +12,9 @@ import path from "path";
 import { Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { UNKNOWN_ERROR_MSG } from "../logger";
-import { VSCodeUtils, FileUtils } from "../utils";
+import { VSCodeUtils } from "../utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
-import { isNumeric } from "../utils/strings";
 
 type CommandOpts = { direction: "next" | "prev" };
 export { CommandOpts as GoToSiblingCommandOpts };
@@ -83,7 +84,7 @@ export class GoToSiblingCommand extends BasicCommand<
 
     // check if there are numeric-only nodes
     const numericNodes = _.filter(respNodes, (o) => {
-      const leafName = FileUtils.getLeafNameFromFname(o.fname);
+      const leafName = DNodeUtils.getLeafName(o);
       return isNumeric(leafName);
     }) as NoteProps[];
 
@@ -93,7 +94,7 @@ export class GoToSiblingCommand extends BasicCommand<
       const sortedNumericNodes = _.orderBy(
         numericNodes,
         (o) => {
-          return FileUtils.getLeafNameFromFname(o.fname)!.length;
+          return DNodeUtils.getLeafName(o)!.length;
         },
         "desc"
       );
@@ -102,7 +103,7 @@ export class GoToSiblingCommand extends BasicCommand<
 
     // zero-pad numeric-only nodes before sorting
     const sorted = _.sortBy(respNodes, (o) => {
-      const leafName = FileUtils.getLeafNameFromFname(o.fname);
+      const leafName = DNodeUtils.getLeafName(o);
       if (isNumeric(leafName)) {
         return _.padStart(leafName, padLength, "0");
       }

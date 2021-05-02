@@ -290,6 +290,15 @@ export class DNodeUtils {
   static isRoot(note: DNodeProps) {
     return note.fname === "root";
   }
+
+  /**
+   * Given a note, return the leaf name
+   * @param note DNodeProps
+   * @returns name of leaf node
+   */
+  static getLeafName(note: DNodeProps) {
+    return _.split(note.fname, ".").pop();
+  }
 }
 
 export class NoteUtils {

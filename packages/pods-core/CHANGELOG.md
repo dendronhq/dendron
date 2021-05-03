@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.40.0](https://github.com/dendronhq/dendron/compare/v0.39.0...v0.40.0) (2021-05-03)
+
+### Bug Fixes
+
+- use new remark plugins for markdown pod ([c19c500](https://github.com/dendronhq/dendron/commit/c19c500525dce79f10a7d98866fe292cf84060a4))
+
 ## [0.39.2](https://github.com/dendronhq/dendron/compare/v0.39.0...v0.39.2) (2021-04-30)
 
 ### Bug Fixes

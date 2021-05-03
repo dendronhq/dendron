@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.40.0](https://github.com/dendronhq/dendron/compare/v0.39.0...v0.40.0) (2021-05-03)
+
+### Bug Fixes
+
+- caching for vaults ([c24651a](https://github.com/dendronhq/dendron/commit/c24651a83d002830d837ab94301e54d214a04286))
+- insert note resulting in error ([b48721d](https://github.com/dendronhq/dendron/commit/b48721db9518100868a34278a5dfd2beac16f207))
+- nested note refs in preview not rendering well ([372f6f3](https://github.com/dendronhq/dendron/commit/372f6f3f77d4a2d5310cf2dd9536bddb007271c5))
+- properly initialize links from cache ([a0e9680](https://github.com/dendronhq/dendron/commit/a0e9680821a275d97771538c8ffeef14fcb63f4e))
+- use new remark plugins for markdown pod ([c19c500](https://github.com/dendronhq/dendron/commit/c19c500525dce79f10a7d98866fe292cf84060a4))
+
 ## [0.39.2](https://github.com/dendronhq/dendron/compare/v0.39.0...v0.39.2) (2021-04-30)
 
 ### Bug Fixes

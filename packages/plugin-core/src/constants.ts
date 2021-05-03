@@ -54,6 +54,7 @@ type CommandEntry = {
   docLink?: string;
   docAnchor?: string;
   docPreview?: string;
+  when?: string;
 };
 
 const CMD_PREFIX = "Dendron:";
@@ -127,6 +128,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       key: "ctrl+shift+i",
       mac: "cmd+shift+i",
+      when: DendronContext.PLUGIN_ACTIVE,
     },
     desc: "Create a global journal note",
     docLink: "dendron.topic.special-notes.md",
@@ -144,7 +146,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       key: "ctrl+shift+c",
       mac: "cmd+shift+c",
-      when: "editorFocus",
+      when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
   },
   COPY_NOTE_REF: {
@@ -164,7 +166,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       key: "ctrl+shift+r",
       mac: "cmd+shift+r",
-      when: "editorFocus",
+      when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
   },
   DELETE_NODE: {
@@ -174,6 +176,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       key: "ctrl+shift+d",
       mac: "cmd+shift+d",
+      when: DendronContext.PLUGIN_ACTIVE,
     },
     desc: "Delete a note or schema",
     docLink: "dendron.topic.lookup.md",
@@ -208,10 +211,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       mac: "cmd+L",
       key: "ctrl+l",
+      when: DendronContext.PLUGIN_ACTIVE,
     },
     desc: "Initiate note lookup",
     docLink: "dendron.topic.lookup.md",
     docPreview: "",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   LOOKUP_JOURNAL: {
     key: "dendron.lookup",
@@ -224,6 +229,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       args: {
         noteType: "journal",
       },
+      when: DendronContext.PLUGIN_ACTIVE,
     },
     desc: "Initiate note lookup with journal note pre-selected",
     docLink: "dendron.topic.lookup.md",
@@ -259,6 +265,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
         noteType: "scratch",
         selectionType: "selection2link",
       },
+      when: DendronContext.PLUGIN_ACTIVE,
     },
     desc: "Initiate note lookup with scratch note pre-selected",
     docLink: "dendron.topic.lookup.md",
@@ -271,6 +278,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       mac: "cmd+shift+L",
       key: "ctrl+shift+l",
+      when: DendronContext.PLUGIN_ACTIVE,
     },
     desc: "Initiate schema lookup",
     docLink: "dendron.topic.lookup.md",
@@ -327,7 +335,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       mac: "cmd+shift+up",
       key: "ctrl+shift+up",
-      when: "editorFocus",
+      when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
     desc: "Go to closet non-stub parent of the currently open note",
     docLink: "dendron.topic.commands.md",
@@ -340,7 +348,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "hierarchies",
     keybindings: {
       key: "ctrl+shift+]",
-      when: "editorFocus",
+      when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
     desc: "Go to the next sibling",
     docLink: "dendron.topic.commands.md",
@@ -353,7 +361,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "hierarchies",
     keybindings: {
       key: "ctrl+shift+[",
-      when: "editorFocus",
+      when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
     desc: "Go to the previous sibling",
     docLink: "dendron.topic.commands.md",
@@ -367,7 +375,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       mac: "cmd+shift+down",
       key: "ctrl+shift+down",
-      when: "editorFocus",
+      when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
     desc: "Go down the hierarchy",
     docLink: "dendron.topic.commands.md",
@@ -510,6 +518,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     keybindings: {
       mac: "cmd+shift+u",
       windows: "ctrl+shift+u",
+      when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
   },
   // --- Publishing

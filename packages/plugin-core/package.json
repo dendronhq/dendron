@@ -260,7 +260,8 @@
                 "title": "Dendron: Lookup",
                 "desc": "Initiate note lookup",
                 "docLink": "dendron.topic.lookup.md",
-                "docPreview": ""
+                "docPreview": "",
+                "when": "dendron:pluginActive"
             },
             {
                 "command": "dendron.lookupSchema",
@@ -534,29 +535,32 @@
             {
                 "command": "dendron.createDailyJournalNote",
                 "key": "ctrl+shift+i",
-                "mac": "cmd+shift+i"
+                "mac": "cmd+shift+i",
+                "when": "dendron:pluginActive"
             },
             {
                 "command": "dendron.copyNoteLink",
                 "key": "ctrl+shift+c",
                 "mac": "cmd+shift+c",
-                "when": "editorFocus"
+                "when": "editorFocus && dendron:pluginActive"
             },
             {
                 "command": "dendron.copyNoteRef",
                 "key": "ctrl+shift+r",
                 "mac": "cmd+shift+r",
-                "when": "editorFocus"
+                "when": "editorFocus && dendron:pluginActive"
             },
             {
                 "command": "dendron.deleteNode",
                 "key": "ctrl+shift+d",
-                "mac": "cmd+shift+d"
+                "mac": "cmd+shift+d",
+                "when": "dendron:pluginActive"
             },
             {
                 "command": "dendron.lookup",
                 "mac": "cmd+L",
-                "key": "ctrl+l"
+                "key": "ctrl+l",
+                "when": "dendron:pluginActive"
             },
             {
                 "command": "dendron.lookup",
@@ -564,7 +568,8 @@
                 "mac": "cmd+shift+j",
                 "args": {
                     "noteType": "journal"
-                }
+                },
+                "when": "dendron:pluginActive"
             },
             {
                 "command": "dendron.lookup",
@@ -573,39 +578,42 @@
                 "args": {
                     "noteType": "scratch",
                     "selectionType": "selection2link"
-                }
+                },
+                "when": "dendron:pluginActive"
             },
             {
                 "command": "dendron.lookupSchema",
                 "mac": "cmd+shift+L",
-                "key": "ctrl+shift+l"
+                "key": "ctrl+shift+l",
+                "when": "dendron:pluginActive"
             },
             {
                 "command": "dendron.goUpHierarchy",
                 "mac": "cmd+shift+up",
                 "key": "ctrl+shift+up",
-                "when": "editorFocus"
+                "when": "editorFocus && dendron:pluginActive"
             },
             {
                 "command": "dendron.goNextHierarchy",
                 "key": "ctrl+shift+]",
-                "when": "editorFocus"
+                "when": "editorFocus && dendron:pluginActive"
             },
             {
                 "command": "dendron.goPrevHierarchy",
                 "key": "ctrl+shift+[",
-                "when": "editorFocus"
+                "when": "editorFocus && dendron:pluginActive"
             },
             {
                 "command": "dendron.goDownHierarchy",
                 "mac": "cmd+shift+down",
                 "key": "ctrl+shift+down",
-                "when": "editorFocus"
+                "when": "editorFocus && dendron:pluginActive"
             },
             {
                 "command": "dendron.copyNoteURL",
                 "mac": "cmd+shift+u",
-                "windows": "ctrl+shift+u"
+                "windows": "ctrl+shift+u",
+                "when": "editorFocus && dendron:pluginActive"
             },
             {
                 "command": "dendron.showPreview",

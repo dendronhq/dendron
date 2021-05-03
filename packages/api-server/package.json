@@ -57,6 +57,8 @@
     "@dendronhq/common-all": "^0.39.2",
     "@dendronhq/common-server": "^0.39.2",
     "@dendronhq/engine-server": "^0.39.2",
+    "@types/cors": "^2.8.10",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "fs-extra": "^9.0.1",
     "http-status-codes": "^2.1.4",

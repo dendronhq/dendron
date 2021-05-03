@@ -41,9 +41,11 @@ const config = {
     new IgnorePlugin({
       resourceRegExp: /fsevents/
     }),
+    // @ts-ignore
     new CopyPlugin({
       patterns: [{ from: path.join("assets", "dendron-ws"), to: "dendron-ws" }],
     }),
+    // @ts-ignore
     new CopyPlugin({
       patterns: [{ from: "webpack-require-hack.js", to: "webpack-require-hack.js" }],
     }),

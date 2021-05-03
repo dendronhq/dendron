@@ -23,6 +23,7 @@ import semver from "semver";
 import * as vscode from "vscode";
 import {
   CONFIG,
+  DendronContext,
   DENDRON_COMMANDS,
   GLOBAL_STATE,
   WORKSPACE_STATE,
@@ -357,11 +358,17 @@ export async function _activate(context: vscode.ExtensionContext) {
       return;
     }
 
-    SegmentClient.instance().identifyAnonymous();
+    // round to nearest 10th
+    let numNotes = _.size(getEngine().notes);
+    if (numNotes > 10) {
+      numNotes = Math.round(numNotes / 10) * 10;
+    }
+
+    SegmentClient.instance().identifyAnonymous(getCommonProps());
     SegmentClient.instance().track(VSCodeEvents.InitializeWorkspace, {
       duration: durationReloadWorkspace,
       noCaching: config.noCaching || false,
-      numNotes: _.size(getEngine().notes),
+      numNotes,
       numVaults: _.size(getEngine().vaultsv3),
       ...getCommonProps(),
     });
@@ -391,10 +398,15 @@ export async function _activate(context: vscode.ExtensionContext) {
 function toggleViews(enabled: boolean) {
   const ctx = "toggleViews";
   Logger.info({ ctx, msg: `views enabled: ${enabled}` });
-  vscode.commands.executeCommand("setContext", "dendron:showTreeView", enabled);
+
   vscode.commands.executeCommand(
     "setContext",
-    "dendron:showBacklinksPanel",
+    DendronContext.PLUGIN_ACTIVE,
+    enabled
+  );
+  vscode.commands.executeCommand(
+    "setContext",
+    DendronContext.PLUGIN_ACTIVE,
     enabled
   );
 }

@@ -358,11 +358,17 @@ export async function _activate(context: vscode.ExtensionContext) {
       return;
     }
 
-    SegmentClient.instance().identifyAnonymous();
+    // round to nearest 10th
+    let numNotes = _.size(getEngine().notes);
+    if (numNotes > 10) {
+      numNotes = Math.round(numNotes / 10) * 10;
+    }
+
+    SegmentClient.instance().identifyAnonymous(getCommonProps());
     SegmentClient.instance().track(VSCodeEvents.InitializeWorkspace, {
       duration: durationReloadWorkspace,
       noCaching: config.noCaching || false,
-      numNotes: _.size(getEngine().notes),
+      numNotes,
       numVaults: _.size(getEngine().vaultsv3),
       ...getCommonProps(),
     });

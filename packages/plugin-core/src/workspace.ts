@@ -504,6 +504,15 @@ export class DendronWorkspace {
       )
     );
 
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
+        async () => {
+          await new GoToSiblingCommand().execute({ direction: "prev" });
+        }
+      )
+    );
+
     // RENAME is alias to MOVE
     this.context.subscriptions.push(
       vscode.commands.registerCommand(

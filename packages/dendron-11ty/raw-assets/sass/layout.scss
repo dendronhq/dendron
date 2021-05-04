@@ -184,7 +184,6 @@ body {
 
 .site-footer {
   @include container;
-  position: absolute;
   bottom: 0;
   left: 0;
   padding-top: $sp-4;

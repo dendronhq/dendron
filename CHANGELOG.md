@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.40.1](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.40.1) (2021-05-04)
+
+### Bug Fixes
+
+- go prev hierarchy accidentally removed ([08d7e93](https://github.com/dendronhq/dendron/commit/08d7e93143761285f247fc9e5087f126be93066d))
+
 # [0.40.0](https://github.com/dendronhq/dendron/compare/v0.39.0...v0.40.0) (2021-05-03)
 
 ### Bug Fixes

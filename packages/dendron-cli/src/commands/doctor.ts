@@ -33,6 +33,7 @@ export enum DoctorActions {
   HI_TO_H2 = "h1ToH2",
   REMOVE_STUBS = "removeStubs",
   OLD_NOTE_REF_TO_NEW = "oldNoteRefToNew",
+  CREATE_MISSING_LINKED_NOTES = "createMissingLinkedNotes",
 }
 
 export { CommandOpts as DoctorCLICommandOpts };

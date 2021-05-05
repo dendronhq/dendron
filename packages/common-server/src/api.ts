@@ -1,5 +1,4 @@
 import {
-  BulkAddNoteOpts,
   ConfigGetPayload,
   ConfigWriteOpts,
   DendronError,
@@ -15,8 +14,8 @@ import {
   EngineWriteOptsV2,
   GetNoteOptsV2,
   GetNotePayload,
-  NoteProps,
   NotePropsDict,
+  NoteProps,
   RenameNoteOpts,
   RenameNotePayload,
   RespRequired,
@@ -28,10 +27,11 @@ import {
   DendronErrorPlainObj,
   ERROR_STATUS,
 } from "@dendronhq/common-all";
-import axios, { AxiosInstance } from "axios";
 import _ from "lodash";
-import * as querystring from "qs";
-import { createLogger, createNoOpLogger } from "./logger";
+import { createLogger } from "./logger";
+const requests = require("request-promise");
+
+const L = createLogger("api");
 
 // === Types
 
@@ -59,7 +59,7 @@ interface IAPIPayload {
 interface IAPIOpts {
   endpoint: string;
   apiPath: string;
-  _request: AxiosInstance;
+  _request: any;
   logger: any;
   statusHandlers: any;
   onAuth: (opts: IRequestArgs) => Promise<any>;
@@ -208,7 +208,8 @@ export abstract class API {
 
   constructor(opts: IAPIConstructor) {
     opts = _.defaults(opts, {
-      logger: createLogger(),
+      // _request: request,
+      logger: L,
       statusHandlers: {},
       onAuth: async ({ headers }: IRequestArgs): Promise<any> => headers,
       onBuildHeaders: ({ headers }: IRequestArgs): Promise<any> => headers,
@@ -217,7 +218,7 @@ export abstract class API {
       },
     });
     if (!opts._request) {
-      opts._request = axios.create({});
+      opts._request = requests;
     }
 
     this.opts = opts as IAPIOpts;
@@ -256,68 +257,58 @@ export abstract class API {
       ...headers,
     };
     this._log({ ctx: "pre-request", requestParams }, "debug");
-    const str = querystring.stringify(requestParams.qs);
-    if (method === "get") {
-      return _request.get(requestParams.url + `?${str}`, {
-        headers,
-      });
-    } else {
-      return _request.post(requestParams.url + `?${str}`, body, {
-        headers,
-      });
-    }
+    return _request[method](
+      requestParams,
+      async (err: any, resp: any, respBody: any) => {
+        const { statusHandlers, onError } = this.opts;
+        let foundError: boolean = false;
+        // tslint:disable-next-line: no-shadowed-variable
+        let respHandler = ({ resp }: IStatusHandler) => {
+          const out = resp;
+          return out;
+        };
 
-    // return _request[method](
-    //   async (err: any, resp: any, respBody: any) => {
-    //     const { statusHandlers, onError } = this.opts;
-    //     let foundError: boolean = false;
-    //     // tslint:disable-next-line: no-shadowed-variable
-    //     let respHandler = ({ resp }: IStatusHandler) => {
-    //       const out = resp;
-    //       return out;
-    //     };
+        // check if we have a handler based on return code
+        if (
+          _.has(_.defaults(statusHandlers, STATUS_HANDLERS), resp.statusCode)
+        ) {
+          const { statusCode } = resp;
+          this._log({
+            ctx: "post-request",
+            msg: "use statusHandler",
+            statusCode,
+          });
+          const { isErr, handler } = statusHandlers[resp.statusCode];
+          respHandler = handler;
+          if (isErr) {
+            foundError = true;
+          }
+        }
 
-    //     // check if we have a handler based on return code
-    //     if (
-    //       _.has(_.defaults(statusHandlers, STATUS_HANDLERS), resp.statusCode)
-    //     ) {
-    //       const { statusCode } = resp;
-    //       this._log({
-    //         ctx: "post-request",
-    //         msg: "use statusHandler",
-    //         statusCode,
-    //       });
-    //       const { isErr, handler } = statusHandlers[resp.statusCode];
-    //       respHandler = handler;
-    //       if (isErr) {
-    //         foundError = true;
-    //       }
-    //     }
+        // log error if we have on
+        if (foundError) {
+          this._log({ ctx: "post-request-foundError", err });
+          onError({
+            headers,
+            qs,
+            path,
+            method,
+            err,
+            body: respBody,
+            resp,
+          });
+        }
 
-    //     // log error if we have on
-    //     if (foundError) {
-    //       this._log({ ctx: "post-request-foundError", err });
-    //       onError({
-    //         headers,
-    //         qs,
-    //         path,
-    //         method,
-    //         err,
-    //         body: respBody,
-    //         resp,
-    //       });
-    //     }
-
-    //     // trigger handler
-    //     const { statusCode, body } = resp;
-    //     const { error } = body;
-    //     this._log(
-    //       { ctx: "post-request-exit", statusCode, error, respHandler },
-    //       "debug"
-    //     );
-    //     return respHandler({ resp });
-    //   }
-    // );
+        // trigger handler
+        const { statusCode, body } = resp;
+        const { error } = body;
+        this._log(
+          { ctx: "post-request-exit", statusCode, error, respHandler },
+          "debug"
+        );
+        return respHandler({ resp });
+      }
+    );
   }
 
   async _makeRequest<T extends IAPIPayload>(
@@ -327,7 +318,9 @@ export abstract class API {
     let payload = this._createPayload(paylaodData) as T;
     try {
       const resp = await this._doRequest(args);
-      payload.data = resp.data;
+      const { error, data } = resp;
+      payload.data = data;
+      payload.error = error;
     } catch (err) {
       // request.js will wrap errors
       if (err?.error?.error) {
@@ -520,5 +513,3 @@ export class DendronAPI extends API {
     return resp;
   }
 }
-
-export const DendronApiV2 = DendronAPI;

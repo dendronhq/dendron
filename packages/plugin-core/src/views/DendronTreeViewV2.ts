@@ -91,7 +91,8 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
         return;
       } else if (message.source === 'vscode') {
         console.log("got message from vscode", message)
-        document.getElementById('iframeView').contentWindow.postMessage(message);
+        const iframe = document.getElementById('iframeView');
+        iframe.contentWindow.postMessage(message, "*");
       } else  {
         window.dispatchEvent(new KeyboardEvent('keydown', JSON.parse(e.data)));
       }

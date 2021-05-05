@@ -1,4 +1,3 @@
-import path from "path";
 import * as vscode from "vscode";
 
 export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
@@ -40,51 +39,47 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     }
   }
 
-  private _getHtmlForWebview(webview: vscode.Webview) {
-    const baseDir = path.join(
-      this._extensionUri.fsPath,
-      "assets",
-      "dendronTreeViewV2"
-    );
-    // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
-    const scriptUri = webview.asWebviewUri(
-      vscode.Uri.file(path.join(baseDir, "js", "main.js"))
-    );
-    // Do the same for the stylesheet.
-    const styleResetUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "reset.css")
-    );
-    const styleVSCodeUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
-    );
-    const styleMainUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "main.css")
-    );
-
-    // Use a nonce to only allow a specific script to be run.
-    const nonce = getNonce();
-
+  private _getHtmlForWebview(_webview: vscode.Webview) {
     return `<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8">
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tree View</title>
+  <style>
+    html, body, iframe { 
+      margin: 0; 
+      padding: 0; 
+      border: 0; 
+      height: 100vh; 
+      width: 100vw; 
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <iframe src="http://75c072eb44fc.ngrok.io/vscode/tree-view?port=3001&ws=%2FUsers%2Fkevinlin%2Fprojects%2Fdendronv2%2Foneoffs%2Faws-yc-user-manual"></iframe>
 
-				<title>Tree View</title>
-			</head>
-			<body>
-                <iframe src="http://localhost:3000/vscode/tree-view" style="border: none; width: 100%;">
-			</body>
-			</html>`;
-  }
-}
+  <script>
+    const vscode = acquireVsCodeApi();
 
-function getNonce() {
-  let text = "";
-  const possible =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
+    window.addEventListener("message", (e) => {
+      if (e.data.type && e.data.type === 'portal') {
+        const data = e.data.data;
+        console.log("got portal event", data)
+        vscode.postMessage({
+          type: 'bond',
+          data,
+        })
+        return;
+      } else {
+        window.dispatchEvent(new KeyboardEvent('keydown', JSON.parse(e.data)));
+      }
+    }, false);
+  </script>
+
+</body>
+
+</html>`;
   }
-  return text;
 }

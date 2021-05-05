@@ -24,16 +24,22 @@ import {
   SchemaModuleDict,
   SchemaModuleProps,
   WriteNoteResp,
-  BulkAddNoteOpts,
-  DendronErrorPlainObj,
-  ERROR_STATUS,
 } from "@dendronhq/common-all";
 import axios, { AxiosInstance } from "axios";
 import _ from "lodash";
 import * as querystring from "qs";
-import { createLogger, createNoOpLogger } from "./logger";
 
 // === Types
+
+export function createNoOpLogger() {
+  const logMethod = (_msg: any) => {};
+  return {
+    level: "",
+    debug: logMethod,
+    info: logMethod,
+    error: logMethod,
+  };
+}
 
 export type APIErrorType =
   | "does_not_exist_error"
@@ -94,7 +100,7 @@ interface IStatusHandler {
 }
 
 type APIPayload<T = any> = {
-  error: DendronErrorPlainObj | null;
+  error: DendronError | null;
   data?: T;
 };
 
@@ -106,26 +112,17 @@ const STATUS_HANDLERS = {
   401: {
     isErr: true,
     handler: ({ resp }: IStatusHandler) =>
-      APIError.createFromStatus({
-        status: ERROR_STATUS.NOT_AUTHORIZED,
-        code: resp.statusCode,
-      }),
+      new APIError({ status: "not_authorized_error", code: resp.statusCode }),
   },
   404: {
     isErr: true,
     handler: ({ resp }: IStatusHandler) =>
-      APIError.createFromStatus({
-        code: resp.statusCode,
-        status: ERROR_STATUS.DOES_NOT_EXIST,
-      }),
+      new APIError({ code: resp.statusCode, status: "does_not_exist_error" }),
   },
   502: {
     isErr: true,
     handler: ({ resp }: IStatusHandler) =>
-      APIError.createFromStatus({
-        code: resp.statusCode,
-        status: ERROR_STATUS.UNKNOWN,
-      }),
+      new APIError({ code: resp.statusCode, status: "unknown_error" }),
   },
 };
 
@@ -203,12 +200,12 @@ export type SchemaUpdatePayload = APIPayload<void>;
 
 // === Base
 
-export abstract class API {
+abstract class API {
   public opts: IAPIOpts;
 
   constructor(opts: IAPIConstructor) {
     opts = _.defaults(opts, {
-      logger: createLogger(),
+      logger: createNoOpLogger(),
       statusHandlers: {},
       onAuth: async ({ headers }: IRequestArgs): Promise<any> => headers,
       onBuildHeaders: ({ headers }: IRequestArgs): Promise<any> => headers,
@@ -266,58 +263,6 @@ export abstract class API {
         headers,
       });
     }
-
-    // return _request[method](
-    //   async (err: any, resp: any, respBody: any) => {
-    //     const { statusHandlers, onError } = this.opts;
-    //     let foundError: boolean = false;
-    //     // tslint:disable-next-line: no-shadowed-variable
-    //     let respHandler = ({ resp }: IStatusHandler) => {
-    //       const out = resp;
-    //       return out;
-    //     };
-
-    //     // check if we have a handler based on return code
-    //     if (
-    //       _.has(_.defaults(statusHandlers, STATUS_HANDLERS), resp.statusCode)
-    //     ) {
-    //       const { statusCode } = resp;
-    //       this._log({
-    //         ctx: "post-request",
-    //         msg: "use statusHandler",
-    //         statusCode,
-    //       });
-    //       const { isErr, handler } = statusHandlers[resp.statusCode];
-    //       respHandler = handler;
-    //       if (isErr) {
-    //         foundError = true;
-    //       }
-    //     }
-
-    //     // log error if we have on
-    //     if (foundError) {
-    //       this._log({ ctx: "post-request-foundError", err });
-    //       onError({
-    //         headers,
-    //         qs,
-    //         path,
-    //         method,
-    //         err,
-    //         body: respBody,
-    //         resp,
-    //       });
-    //     }
-
-    //     // trigger handler
-    //     const { statusCode, body } = resp;
-    //     const { error } = body;
-    //     this._log(
-    //       { ctx: "post-request-exit", statusCode, error, respHandler },
-    //       "debug"
-    //     );
-    //     return respHandler({ resp });
-    //   }
-    // );
   }
 
   async _makeRequest<T extends IAPIPayload>(
@@ -327,14 +272,10 @@ export abstract class API {
     let payload = this._createPayload(paylaodData) as T;
     try {
       const resp = await this._doRequest(args);
-      payload.data = resp.data;
+      payload.data = resp.data.data;
+      payload.error = resp.data.error;
     } catch (err) {
-      // request.js will wrap errors
-      if (err?.error?.error) {
-        payload.error = err.error.error;
-      } else {
-        payload.error = err;
-      }
+      payload.error = err;
     }
     if (payload.error) {
       this._log(payload.error, "error");
@@ -345,7 +286,7 @@ export abstract class API {
 
 // === DendronAPI
 
-export class DendronAPI extends API {
+class DendronAPI extends API {
   static instance: DendronAPI;
 
   async configGet(

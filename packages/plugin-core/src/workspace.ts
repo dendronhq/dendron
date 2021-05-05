@@ -124,6 +124,7 @@ export class DendronWorkspace {
   static _SERVER_CONFIGURATION: Partial<ServerConfiguration>;
 
   public dendronTreeView: DendronTreeView | undefined;
+  public dendronTreeViewV2: DendronTreeViewV2 | undefined;
   public vaultWatcher?: VaultWatcher;
   public port?: number;
   public workspaceService?: WorkspaceService;

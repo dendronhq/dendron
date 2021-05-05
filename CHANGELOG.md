@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.40.2](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.40.2) (2021-05-05)
+
+### Bug Fixes
+
+- fix footer occlusion in mobile ([7bcc72a](https://github.com/dendronhq/dendron/commit/7bcc72ab6ca59fd8de16056779b09776b1d6f10d))
+- go prev hierarchy accidentally removed ([08d7e93](https://github.com/dendronhq/dendron/commit/08d7e93143761285f247fc9e5087f126be93066d))
+
+## [0.40.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.40.2-alpha.0) (2021-05-05)
+
+### Bug Fixes
+
+- fix footer occlusion in mobile ([7bcc72a](https://github.com/dendronhq/dendron/commit/7bcc72ab6ca59fd8de16056779b09776b1d6f10d))
+- go prev hierarchy accidentally removed ([08d7e93](https://github.com/dendronhq/dendron/commit/08d7e93143761285f247fc9e5087f126be93066d))
+
 ## [0.40.1](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.40.1) (2021-05-04)
 
 ### Bug Fixes

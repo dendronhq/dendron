@@ -33,10 +33,11 @@ export class CopyNoteLinkCommand extends BasicCommand<
     let note: NoteProps;
 
     const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+    const notes = getEngine().notes;
     note = NoteUtils.getNoteByFnameV5({
       fname,
       vault,
-      notes: getEngine().notes,
+      notes,
       wsRoot: DendronWorkspace.wsRoot(),
     }) as NoteProps;
     if (!note) {

@@ -34,6 +34,9 @@ import { getSlugger } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
 
+/**
+ * Utilities for dealing with nodes
+ */
 export class DNodeUtils {
   static addChild(parent: DNodeProps, child: DNodeProps) {
     parent.children = Array.from(new Set(parent.children).add(child.id));

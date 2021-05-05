@@ -1,33 +1,33 @@
-import {
-  BulkAddNoteOpts,
-  ConfigGetPayload,
-  ConfigWriteOpts,
-  DendronError,
-  DEngineDeleteSchemaPayload,
-  DEngineQuery,
-  DNodeProps,
-  DVault,
-  EngineDeleteNotePayload,
-  EngineDeleteOptsV2,
-  EngineInfoResp,
-  EngineQueryNoteResp,
-  EngineUpdateNodesOptsV2,
-  EngineWriteOptsV2,
-  GetNoteOptsV2,
-  GetNotePayload,
-  NoteProps,
-  NotePropsDict,
-  RenameNoteOpts,
-  RenameNotePayload,
-  RespRequired,
-  RespV2,
-  SchemaModuleDict,
-  SchemaModuleProps,
-  WriteNoteResp,
-} from "@dendronhq/common-all";
 import axios, { AxiosInstance } from "axios";
 import _ from "lodash";
 import * as querystring from "qs";
+import {
+  DVault,
+  DEngineQuery,
+  GetNoteOptsV2,
+  RenameNoteOpts,
+  NoteProps,
+  EngineUpdateNodesOptsV2,
+  DNodeProps,
+  EngineWriteOptsV2,
+  EngineDeleteOptsV2,
+  BulkAddNoteOpts,
+  SchemaModuleProps,
+  NotePropsDict,
+  SchemaModuleDict,
+  GetNotePayload,
+  RenameNotePayload,
+  EngineDeleteNotePayload,
+  DEngineDeleteSchemaPayload,
+  ConfigGetPayload,
+  ConfigWriteOpts,
+  RespV2,
+  WriteNoteResp,
+  RespRequired,
+  EngineInfoResp,
+  EngineQueryNoteResp,
+} from ".";
+import { DendronError } from "./error";
 
 // === Types
 
@@ -95,35 +95,9 @@ interface IDoRequestArgs {
   json?: boolean;
 }
 
-interface IStatusHandler {
-  resp: any;
-}
-
 type APIPayload<T = any> = {
   error: DendronError | null;
   data?: T;
-};
-
-// === Utilities
-
-const APIError = DendronError;
-
-const STATUS_HANDLERS = {
-  401: {
-    isErr: true,
-    handler: ({ resp }: IStatusHandler) =>
-      new APIError({ status: "not_authorized_error", code: resp.statusCode }),
-  },
-  404: {
-    isErr: true,
-    handler: ({ resp }: IStatusHandler) =>
-      new APIError({ code: resp.statusCode, status: "does_not_exist_error" }),
-  },
-  502: {
-    isErr: true,
-    handler: ({ resp }: IStatusHandler) =>
-      new APIError({ code: resp.statusCode, status: "unknown_error" }),
-  },
 };
 
 // --- Requests

@@ -1,4 +1,4 @@
-import { DendronError } from "../error";
+import { DendronError, IDendronError } from "../error";
 import {
   DLink,
   DNodeProps,
@@ -7,6 +7,7 @@ import {
   SchemaData,
   SchemaProps,
 } from "./foundation";
+import { DHookDict } from "./hooks";
 import { DendronConfig, DVault } from "./workspace";
 
 export enum ResponseCode {
@@ -140,7 +141,7 @@ export type SchemaModuleProps = {
 
 export interface RespV2<T> {
   data?: T;
-  error: DendronError | null;
+  error: IDendronError | null;
 }
 
 export type RespRequired<T> =
@@ -313,6 +314,7 @@ export type DEngine = DCommonProps &
   DCommonMethods & {
     store: DStore;
     vaults: DVault[];
+    hooks: DHookDict;
 
     init: () => Promise<DEngineInitResp>;
     deleteNote: (

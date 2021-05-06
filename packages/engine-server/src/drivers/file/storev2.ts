@@ -7,6 +7,7 @@ import {
   DEngineDeleteSchemaResp,
   DEngineInitResp,
   DEngineInitSchemaResp,
+  DHookEntry,
   DLink,
   DStore,
   DVault,
@@ -14,7 +15,7 @@ import {
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   ENGINE_ERROR_CODES,
-  ERROR_CODES,
+  ERROR_SEVERITY,
   NoteChangeEntry,
   NoteProps,
   NotePropsDict,
@@ -44,6 +45,7 @@ import _ from "lodash";
 import path from "path";
 import { MDUtilsV4 } from "../../markdown";
 import { LinkUtils } from "../../markdown/remark/utils";
+import { HookUtils } from "../../topics/hooks";
 import { readNotesFromCache, writeNotesToCache } from "../../utils";
 import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
@@ -109,7 +111,7 @@ export class FileStorage implements DStore {
       const resp = await this.initSchema();
       if (!_.isNull(resp.error)) {
         error = new DendronError({
-          code: ERROR_CODES.MINOR,
+          code: ERROR_SEVERITY.MINOR,
           payload: { schema: resp.error },
         });
       }
@@ -621,6 +623,22 @@ export class FileStorage implements DStore {
       ctx,
       msg: "pre:note2File",
     });
+
+    const hooks = _.filter(this.engine.hooks.onCreate, (hook) =>
+      NoteUtils.match({ notePath: note.fname, pattern: hook.pattern })
+    );
+    note = await _.reduce<DHookEntry, Promise<NoteProps>>(
+      hooks,
+      async (notePromise, hook) => {
+        const note = await notePromise;
+        const script = HookUtils.findScript({
+          wsRoot: this.wsRoot,
+          scriptPath: hook.id + ".js",
+        });
+        return await HookUtils.requireHook({ note, fpath: script });
+      },
+      Promise.resolve(note)
+    );
     // order matters - only write file after parents are established @see(_writeNewNote)
     await note2File({
       note,

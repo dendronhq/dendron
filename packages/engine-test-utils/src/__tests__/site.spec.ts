@@ -20,7 +20,7 @@ import {
 import { MDUtilsV4, SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
-import { ConfigUtils } from "../config";
+import { TestConfigUtils } from "../config";
 import {
   createEngineFromEngine,
   createEngineFromServer,
@@ -97,7 +97,7 @@ describe("SiteUtils", () => {
       "can publish all",
       async ({ engine, wsRoot, vaults }) => {
         const noteIndex = engine.notes["alpha"];
-        const config = ConfigUtils.withConfig(
+        const config = TestConfigUtils.withConfig(
           (config) => {
             config.site = createSiteConfig({
               siteHierarchies: ["alpha", "beta"],
@@ -151,7 +151,7 @@ describe("SiteUtils", () => {
       "can publish alpha",
       async ({ engine, wsRoot, vaults }) => {
         const noteIndex = engine.notes["alpha"];
-        const config = ConfigUtils.withConfig(
+        const config = TestConfigUtils.withConfig(
           (config) => {
             config.site = createSiteConfig({
               siteHierarchies: ["alpha"],
@@ -197,7 +197,7 @@ describe("SiteUtils", () => {
     test("write stub", async () => {
       await runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {
-          const config = ConfigUtils.withConfig(
+          const config = TestConfigUtils.withConfig(
             (config) => {
               config.site = createSiteConfig({
                 siteHierarchies: ["foo", "foobar"],
@@ -241,7 +241,7 @@ describe("SiteUtils", () => {
     test("no write stub", async () => {
       await runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {
-          const config = ConfigUtils.withConfig(
+          const config = TestConfigUtils.withConfig(
             (config) => {
               config.site = createSiteConfig({
                 siteHierarchies: ["foo", "foobar"],
@@ -285,7 +285,7 @@ describe("SiteUtils", () => {
     test("blacklist note", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
-          const config = ConfigUtils.withConfig(
+          const config = TestConfigUtils.withConfig(
             (config) => {
               config.site = createSiteConfig({
                 siteHierarchies: ["foo"],
@@ -327,7 +327,7 @@ describe("SiteUtils", () => {
     test("nav_exclude", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
-          const config = ConfigUtils.withConfig(
+          const config = TestConfigUtils.withConfig(
             (config) => {
               config.site = createSiteConfig({
                 siteHierarchies: ["foo"],
@@ -375,7 +375,7 @@ describe("SiteUtils", () => {
     test("root, publish all with dup", async () => {
       await runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {
-          const config = ConfigUtils.withConfig(
+          const config = TestConfigUtils.withConfig(
             (config) => {
               config.site = createSiteConfig({
                 siteHierarchies: ["root"],
@@ -428,7 +428,7 @@ describe("SiteUtils", () => {
     test("root, publish none with dup", async () => {
       await runEngineTestV5(
         async ({ engine, vaults, wsRoot }) => {
-          const config = ConfigUtils.withConfig(
+          const config = TestConfigUtils.withConfig(
             (config) => {
               config.site = createSiteConfig({
                 siteHierarchies: ["root"],
@@ -465,7 +465,7 @@ describe("SiteUtils", () => {
     test("one hiearchy", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
-          const config = ConfigUtils.withConfig(
+          const config = TestConfigUtils.withConfig(
             (config) => {
               config.site = createSiteConfig({
                 siteHierarchies: ["foo"],
@@ -500,7 +500,7 @@ describe("SiteUtils", () => {
     test.skip("one hiearchy, dups with list override", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
-          const config = ConfigUtils.withConfig(
+          const config = TestConfigUtils.withConfig(
             (config) => {
               config.site = createSiteConfig({
                 siteHierarchies: ["foo"],
@@ -553,7 +553,7 @@ describe("SiteUtils", () => {
     test("mult hiearchy", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
-          const config = ConfigUtils.withConfig(
+          const config = TestConfigUtils.withConfig(
             (config) => {
               config.site = createSiteConfig({
                 siteHierarchies: ["foo", "bar"],
@@ -588,7 +588,7 @@ describe("SiteUtils", () => {
     test.skip("mult hiearchy, diff publishByDefault", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot, vaults }) => {
-          const config = ConfigUtils.withConfig(
+          const config = TestConfigUtils.withConfig(
             (config) => {
               config.site = createSiteConfig({
                 siteHierarchies: ["foo", "bar"],
@@ -637,7 +637,7 @@ describe("SiteUtils", () => {
     test("skip levels", async () => {
       await runEngineTestV5(
         async ({ engine, wsRoot }) => {
-          const config = ConfigUtils.withConfig(
+          const config = TestConfigUtils.withConfig(
             (config) => {
               config.site = createSiteConfig({
                 siteHierarchies: ["daily"],
@@ -711,7 +711,7 @@ describe("SiteUtils", () => {
           expect,
           preSetupHook: async (opts) => {
             await ENGINE_HOOKS_MULTI.setupBasicMulti(opts);
-            ConfigUtils.withConfig(
+            TestConfigUtils.withConfig(
               (config) => {
                 const bvault = config.vaults.find(
                   (ent) => ent.fsPath === "vault2"

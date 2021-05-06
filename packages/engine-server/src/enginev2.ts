@@ -1,6 +1,7 @@
 import {
   BulkAddNoteOpts,
   ConfigWriteOpts,
+  DendronCompositeError,
   DendronConfig,
   DendronError,
   DEngine,
@@ -8,6 +9,7 @@ import {
   DEngineDeleteSchemaResp,
   DEngineInitResp,
   DEngineMode,
+  DHookDict,
   DLink,
   DNodeType,
   DStore,
@@ -44,6 +46,7 @@ import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
 import { LinkUtils } from "./markdown";
+import { HookUtils } from "./topics/hooks";
 
 type CreateStoreFunc = (engine: DEngineClientV2) => DStore;
 type DendronEngineOptsV2 = {
@@ -70,6 +73,7 @@ export class DendronEngineV2 implements DEngine {
   public vaultsv3: DVault[];
   public configRoot: string;
   public config: DendronConfig;
+  public hooks: DHookDict;
 
   static _instance: DendronEngineV2 | undefined;
 
@@ -83,6 +87,10 @@ export class DendronEngineV2 implements DEngine {
     this.vaultsv3 = props.vaultsv3;
     this.config = props.config;
     this.store = props.createStore(this);
+    const hooks: DHookDict = _.get(props.config, "hooks", {
+      onCreate: [],
+    });
+    this.hooks = hooks;
   }
 
   static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
@@ -135,10 +143,25 @@ export class DendronEngineV2 implements DEngine {
    */
   async init(): Promise<DEngineInitResp> {
     try {
-      const { data, error } = await this.store.init();
+      const { data, error: storeError } = await this.store.init();
       const { notes, schemas } = data;
       this.updateIndex("note");
       this.updateIndex("schema");
+      const hookErrors: DendronError[] = [];
+      this.hooks.onCreate = this.hooks.onCreate.filter((hook) => {
+        const { valid, error } = HookUtils.validateHook({
+          hook,
+          wsRoot: this.wsRoot,
+        });
+        if (!valid && error) {
+          this.logger.error({ msg: "bad hook", hook });
+          hookErrors.push(error);
+        }
+        return valid;
+      });
+      const error = new DendronCompositeError(
+        (_.isNull(storeError) ? [] : [storeError]).concat(hookErrors)
+      );
       return {
         error,
         data: { notes, schemas },

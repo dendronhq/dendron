@@ -1,3 +1,5 @@
+import { DHookDict } from "./hooks";
+
 // === Promitives
 export type DPermission = {
   read: string[];
@@ -52,6 +54,7 @@ export type DendronConfig = {
    * Setup by plugin.
    */
   vaults: DVault[];
+  hooks?: DHookDict;
   /**
    * Pick vault when creating new note.
    * Docs: https://dendron.so/notes/24b176f1-685d-44e1-a1b0-1704b1a92ca0.html#specify-vault-location-when-creating-a-note

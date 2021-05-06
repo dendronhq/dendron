@@ -1,6 +1,6 @@
 import {
   DEngineClientV2,
-  ERROR_CODES,
+  ERROR_SEVERITY,
   NoteUtils,
   SchemaUtils,
 } from "@dendronhq/common-all";
@@ -55,7 +55,7 @@ export class ReloadIndexCommand extends BasicCommand<
     const { error } = await engine.init();
     const durationEngineInit = getDurationMilliseconds(start);
     this.L.info({ ctx, durationEngineInit });
-    if (error && error.code !== ERROR_CODES.MINOR) {
+    if (error && error.severity !== ERROR_SEVERITY.MINOR) {
       this.L.error({ ctx, error, msg: "unable to initialize engine" });
       return;
     }

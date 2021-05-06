@@ -11,6 +11,7 @@ export const CONSTANTS = {
   DENDRON_CACHE_FILE: ".dendron.cache.json",
   DENDRON_ID: ".dendron.uuid",
   DENDRON_NO_TELEMETRY: ".dendron.no-telemetry",
+  DENDRON_HOOKS_BASE: "hooks",
 };
 
 export const ENGINE_ERROR_CODES = {
@@ -26,8 +27,9 @@ export const ENGINE_ERROR_CODES = {
   ENGINE_NOT_SET: "no_engine_set",
 };
 
-export enum ERROR_CODES {
+export enum ERROR_SEVERITY {
   MINOR,
+  FATAL,
 }
 
 export enum RESERVED_KEYS {

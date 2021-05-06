@@ -4,10 +4,11 @@ import {
   ConfigWriteOpts,
   DendronConfig,
   DendronError,
+  DEngine,
   DEngineClientV2,
   DEngineDeleteSchemaResp,
   DEngineInitResp,
-  DEngine,
+  DHookDict,
   DLink,
   DNodeProps,
   DVault,
@@ -16,12 +17,12 @@ import {
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
-  ERROR_CODES,
+  ERROR_SEVERITY,
   GetNoteOptsV2,
   GetNotePayload,
   NoteChangeEntry,
-  NotePropsDict,
   NoteProps,
+  NotePropsDict,
   NoteUtils,
   QueryNotesOpts,
   RenameNoteOpts,
@@ -53,6 +54,7 @@ type DendronEngineClientOpts = {
   vaults: DVault[];
   ws: string;
 };
+
 export class DendronEngineClient implements DEngineClientV2 {
   public notes: NotePropsDict;
   public wsRoot: string;
@@ -67,6 +69,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   public logger: DLogger;
   public store: FileStorage;
   public config: DendronConfig;
+  public hooks: DHookDict;
 
   static create({
     port,
@@ -123,6 +126,7 @@ export class DendronEngineClient implements DEngineClientV2 {
       engine: this,
       logger: this.logger,
     });
+    this.hooks = this.config.hooks || { onCreate: [] };
   }
 
   get vaults(): DVault[] {
@@ -138,7 +142,7 @@ export class DendronEngineClient implements DEngineClientV2 {
       config: { vaults: this.vaultsv3 },
     });
 
-    if (resp.error && resp.error.code !== ERROR_CODES.MINOR) {
+    if (resp.error && resp.error.severity !== ERROR_SEVERITY.MINOR) {
       return {
         error: resp.error,
         data: { notes: {}, schemas: {} },

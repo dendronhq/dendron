@@ -736,6 +736,11 @@ export class NoteUtils {
     return { ...noteRaw, ...hydrateProps };
   }
 
+  static match({ notePath, pattern }: { notePath: string; pattern: string }) {
+    const notePathClean = notePath.replace(/\./g, "/");
+    return minimatch(notePathClean, pattern);
+  }
+
   static isDefaultTitle(props: NoteProps) {
     return props.title === NoteUtils.genTitle(props.fname);
   }

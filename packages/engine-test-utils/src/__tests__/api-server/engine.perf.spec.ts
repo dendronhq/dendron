@@ -1,6 +1,6 @@
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import _ from "lodash";
-import { ConfigUtils } from "../../config";
+import { TestConfigUtils } from "../../config";
 import { runEngineTestV5 } from "../../engine";
 
 async function genHierarchy(opts: {
@@ -49,7 +49,7 @@ describe("engine perf", () => {
               );
             })
           );
-          await ConfigUtils.withConfig(
+          await TestConfigUtils.withConfig(
             (config) => {
               config.noCaching = true;
               return config;

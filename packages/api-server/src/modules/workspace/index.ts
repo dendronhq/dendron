@@ -1,5 +1,5 @@
 import {
-  ERROR_CODES,
+  ERROR_SEVERITY,
   NotePropsDict,
   SchemaModuleDict,
 } from "@dendronhq/common-all";
@@ -33,9 +33,8 @@ export class WorkspaceController {
       logger,
     });
     const { error } = await engine.init();
-    if (error && error.code !== ERROR_CODES.MINOR) {
-      logger.error({ ctx, msg: "error initializing notes" });
-      error.friendly = "error initializing notes";
+    if (error && error.severity === ERROR_SEVERITY.FATAL) {
+      logger.error({ ctx, msg: "fatal error initializing notes", error });
       return { error };
     }
     notes = engine.notes;

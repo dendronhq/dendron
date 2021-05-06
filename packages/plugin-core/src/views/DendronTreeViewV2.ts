@@ -1,6 +1,14 @@
-import { NoteProps } from "@dendronhq/common-all";
+import {
+  DMessage,
+  DMessageSource,
+  NoteProps,
+  TreeViewMessage,
+  TreeViewMessageType,
+} from "@dendronhq/common-all";
 import * as vscode from "vscode";
-import { getWS } from "../workspace";
+import { GotoNoteCommand } from "../commands/GotoNote";
+import { Logger } from "../logger";
+import { getEngine, getWS } from "../workspace";
 
 export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
   public static readonly viewType = "dendron.treeViewV2";
@@ -27,10 +35,19 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-    webviewView.webview.onDidReceiveMessage((data) => {
-      switch (data.type) {
+    webviewView.webview.onDidReceiveMessage(async (msg: TreeViewMessage) => {
+      switch (msg.type) {
+        case TreeViewMessageType.onSelect: {
+          Logger.info({ ctx: "onDidReceiveMessage", data: msg });
+          const note = getEngine().notes[msg.data.id];
+          await new GotoNoteCommand().execute({
+            qs: note.fname,
+            vault: note.vault,
+          });
+          break;
+        }
         default:
-          console.log("got data", data);
+          console.log("got data", msg);
           break;
       }
     });
@@ -43,14 +60,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
         type: "onDidChangeActiveTextEditor",
         data: note,
         source: "vscode",
-      });
-    }
-  }
-
-  public addColor() {
-    if (this._view) {
-      this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-      this._view.webview.postMessage({ type: "addColor" });
+      } as DMessage);
     }
   }
 
@@ -81,13 +91,9 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     window.addEventListener("message", (e) => {
       console.log("got message", e);
       const message = e.data;
-      if (e.data.type && e.data.type === 'portal') {
-        const data = e.data.data;
-        console.log("got portal event", data)
-        vscode.postMessage({
-          type: 'bond',
-          data,
-        })
+      if (message.type && message.source === '${DMessageSource.webClient}') {
+        console.log("got webclient event", message)
+        vscode.postMessage(message);
         return;
       } else if (message.source === 'vscode') {
         console.log("got message from vscode", message)

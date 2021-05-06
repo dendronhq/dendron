@@ -430,3 +430,25 @@ export type BasePodExecuteOpts<TConfig> = {
   wsRoot: string;
   vaults: DVault[];
 };
+
+// --- Messages
+
+export type DMessage<TType = string, TData = any, TSource = string> = {
+  type: TType; // "onDidChangeActiveTextEditor"
+  data: TData;
+  source: TSource;
+};
+
+export enum DMessageSource {
+  vscode = "vscode",
+  webClient = "webClient",
+}
+
+export enum TreeViewMessageType {
+  "onSelect" = "onSelect",
+  "onExpand" = "onExpand",
+}
+
+export type VSCodeMessage = DMessage;
+
+export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;

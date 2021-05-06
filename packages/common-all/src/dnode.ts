@@ -29,7 +29,7 @@ import {
   SchemaProps,
   SchemaRaw,
   SchemaTemplate,
-} from "./typesv2";
+} from "./types";
 import { getSlugger } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";

@@ -8,19 +8,17 @@ import { describe } from "mocha";
 import * as vscode from "vscode";
 import { SchemaWatcher } from "../../watchers/schemaWatcher";
 import { getEngine } from "../../workspace";
-import { expect, runMultiVaultTest } from "../testUtilsv2";
-import { setupBeforeAfter } from "../testUtilsV3";
+import { expect } from "../testUtilsv2";
+import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("SchemaWatcher", function () {
   let ctx: vscode.ExtensionContext;
 
-  ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
-  });
+  ctx = setupBeforeAfter(this, {});
 
   describe("onDidChange", function () {
     test("basic", function (done) {
-      runMultiVaultTest({
+      runLegacyMultiWorkspaceTest({
         ctx,
         onInit: async ({ vaults, wsRoot }) => {
           const vault = vaults[0];

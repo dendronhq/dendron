@@ -306,7 +306,7 @@ export class LookupControllerV2 {
     );
     await Promise.all(
       effectResp.map(async (effect) => {
-        return effect.handle({ quickPick });
+        return effect.onEnable({ quickPick });
       })
     );
   }

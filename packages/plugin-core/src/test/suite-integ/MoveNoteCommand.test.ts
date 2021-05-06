@@ -123,7 +123,10 @@ suite("MoveNoteCommand", function () {
           await vscode.commands.executeCommand("cursorDown");
           await vscode.commands.executeCommand("cursorDown");
           await vscode.commands.executeCommand("cursorDown");
-          await vscode.commands.executeCommand("type", { text: "hello" });
+          await active.edit((builder) => {
+            const pos = active.selection.active;
+            builder.insert(pos, "hello");
+          });
           await active.document.save();
 
           const cmd = new MoveNoteCommand();

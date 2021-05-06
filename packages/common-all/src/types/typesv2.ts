@@ -1,6 +1,13 @@
-import { URI } from "vscode-uri";
-import { DendronError } from "./error";
-import { DendronConfig, DendronSiteFM } from "./types";
+import { DendronError } from "../error";
+import {
+  DLink,
+  DNodeProps,
+  DNodeType,
+  NoteProps,
+  SchemaData,
+  SchemaProps,
+} from "./foundation";
+import { DendronConfig, DVault } from "./workspace";
 
 export enum ResponseCode {
   OK = 200,
@@ -19,32 +26,13 @@ export type EngineDeleteOpts = {
   noDeleteParentStub?: boolean;
 };
 
-export type SchemaData = {
-  namespace?: boolean;
-  pattern?: string;
-  template?: SchemaTemplate;
-};
-
-export type SchemaTemplate = {
-  id: string;
-  type: "snippet" | "note";
-};
-
 export type NoteLink = {
   type: "note";
   id: string;
 };
 
 // === New
-export type DNodePointer = string;
 
-export type DLoc = {
-  fname?: string;
-  id?: string;
-  vault?: DVault;
-  uri?: URI;
-  anchorHeader?: string;
-};
 export type DNoteLoc = {
   fname: string;
   alias?: string;
@@ -60,51 +48,9 @@ export type DNoteAnchor = {
   type: "header";
   value: string;
 };
-export type VaultRemote = {
-  type: "git";
-  url: string;
-};
-export enum DVaultVisibility {
-  PRIVATE = "private",
-}
-
-export type DVault = {
-  /** Name of vault */
-  name?: string;
-  visibility?: DVaultVisibility;
-  /** Filesystem path to fault */
-  fsPath: string;
-  // /**
-  //  * Uri which is relative from root
-  //  */
-  // uri: string;
-  remote?: VaultRemote;
-  userPermission?: DPermission;
-  /**
-   * If this is enabled, don't apply workspace push commands
-   */
-  noAutoPush?: boolean;
-};
-
-export type DPermission = {
-  read: string[];
-  write: string[];
-};
 
 export type DLinkType = "wiki" | "refv2";
 
-export type DLink = {
-  type: "ref" | "wiki" | "md" | "backlink";
-  original: string;
-  value: string;
-  alias?: string;
-  pos: {
-    start: number;
-    end: number;
-  };
-  from: DLoc;
-  to?: DLoc;
-};
 export type DNoteLink<TData = any> = {
   type: "ref" | "wiki" | "md";
   pos?: {
@@ -115,7 +61,6 @@ export type DNoteLink<TData = any> = {
   to?: DNoteLoc;
   data: TData;
 };
-export type DNodeType = "note" | "schema";
 export type DNoteRefData = {
   anchorStart?: string;
   anchorEnd?: string;
@@ -128,29 +73,6 @@ export type DNoteRefData = {
   type: "file" | "id";
 };
 export type DNoteRefLink = DNoteLink<DNoteRefData>;
-
-/**
- * Props are the official interface for a node
- */
-export type DNodeProps<T = any, TCustom = any> = {
-  id: string;
-  title: string;
-  desc: string;
-  links: DLink[];
-  fname: string;
-  type: DNodeType;
-  updated: number;
-  created: number;
-  stub?: boolean;
-  schemaStub?: boolean;
-  parent: DNodePointer | null;
-  children: DNodePointer[];
-  data: T;
-  body: string;
-  custom?: TCustom;
-  schema?: { moduleId: string; schemaId: string };
-  vault: DVault;
-};
 
 /**
  * Opts are arguments used when creating a node
@@ -179,9 +101,6 @@ export type NoteQuickInput = NoteProps & {
   detail?: string;
   alwaysShow?: boolean;
 };
-
-export type SchemaProps = DNodeProps<SchemaData>;
-export type NoteProps = DNodeProps<any, DendronSiteFM & any>;
 
 export type DNodePropsDict = {
   [key: string]: DNodeProps;

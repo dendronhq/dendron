@@ -34,7 +34,7 @@ import { NotePickerUtils, PickerUtilsV2 } from "../../components/lookup/utils";
 import { EngineFlavor, EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
-import { createMockQuickPick, TIMEOUT } from "../testUtils";
+import { createMockQuickPick } from "../testUtils";
 import { expect, getNoteFromTextEditor } from "../testUtilsv2";
 import {
   createEngineFactory,
@@ -332,7 +332,6 @@ suite("Lookup, schemas", function () {
 
 suite("Lookup, notesv2", function () {
   let ctx: vscode.ExtensionContext;
-  this.timeout(TIMEOUT);
   const engOpts: EngineOpts = { flavor: "note" };
 
   ctx = setupBeforeAfter(this, {
@@ -554,6 +553,7 @@ suite("Lookup, notesv2", function () {
         },
       });
     });
+
     test("with lookupPrompt on other vault", function (done) {
       runLegacyMultiWorkspaceTest({
         ctx,

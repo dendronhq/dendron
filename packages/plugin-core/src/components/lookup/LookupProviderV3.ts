@@ -12,7 +12,7 @@ import { NotePickerUtils, OldNewLocation, PickerUtilsV2 } from "./utils";
 export type OnUpdatePickerItemsOpts = {
   picker: DendronQuickPickerV2;
   token: CancellationToken;
-  enableCreateNew?: boolean;
+  fuzzThreshold?: number;
 };
 
 export type OnAcceptHook = (opts: {
@@ -24,7 +24,7 @@ export type ILookupProviderV3 = {
   id: string;
   provide: (lc: LookupControllerV3) => Promise<void>;
   onUpdatePickerItems: (opts: OnUpdatePickerItemsOpts) => Promise<void>;
-  registerOnAcceptHook: (hoook: OnAcceptHook) => void;
+  registerOnAcceptHook: (hook: OnAcceptHook) => void;
   onDidAccept(opts: {
     quickpick: DendronQuickPickerV2;
     lc: LookupControllerV3;
@@ -59,7 +59,11 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       _.debounce(_.bind(this.onUpdatePickerItems, this), 60, {
         leading: true,
         maxWait: 120,
-      })({ picker: quickpick, token: lc.createCancelSource().token });
+      })({
+        picker: quickpick,
+        token: lc.createCancelSource().token,
+        fuzzThreshold: lc.fuzzThreshold,
+      } as OnUpdatePickerItemsOpts);
     });
     quickpick.onDidAccept(this.onDidAccept({ quickpick, lc }));
     return;
@@ -78,6 +82,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       const nextPicker = picker.nextPicker;
       if (nextPicker) {
         picker.vault = await nextPicker();
+        // check if we exited from selecting a vault
         if (_.isUndefined(picker.vault)) {
           HistoryService.instance().add({
             source: "lookupProvider",
@@ -89,6 +94,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         }
       }
       const selectedItems = NotePickerUtils.getSelection(picker);
+      // last chance to cancel
       lc.cancelToken.cancel();
       picker.hide();
       const onAcceptHookResp = await Promise.all(
@@ -128,7 +134,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     picker.busy = true;
     let pickerValue = picker.value;
     const start = process.hrtime();
-    if (picker.justActivated) {
+    if (picker.justActivated && !picker.nonInteractive) {
       // no hiearchy, query everything
       const lastDotIndex = pickerValue.lastIndexOf(".");
       if (lastDotIndex < 0) {
@@ -186,18 +192,20 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // const perfectMatch = _.find(updatedItems, { fname: queryOrig });
       // // NOTE: we modify this later so need to track this here
       // const noUpdatedItems = updatedItems.length === 0;
-
-      if (queryEndsWithDot) {
-        // don't show noActiveItem for dot queries
-        Logger.debug({ ctx, msg: "active != qs, end with ." });
-        picker.items = PickerUtilsV2.filterCreateNewItem(updatedItems);
-      } else {
-        // regular result
-        Logger.debug({ ctx, msg: "active != qs" });
-        picker.items = this.opts.allowNewNote
+      // regular result
+      Logger.debug({ ctx, msg: "active != qs" });
+      // we currently always offer a new
+      updatedItems =
+        this.opts.allowNewNote && !queryEndsWithDot
           ? updatedItems.concat(NotePickerUtils.createNoActiveItem({} as any))
           : updatedItems;
+
+      // check fuzz threshold
+      // TODO: in the future this should be done in the engine
+      if (opts.fuzzThreshold === 1) {
+        updatedItems = updatedItems.filter((ent) => ent.fname === picker.value);
       }
+      picker.items = updatedItems;
     } catch (err) {
       window.showErrorMessage(err);
       throw Error(err);

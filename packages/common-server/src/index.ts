@@ -7,3 +7,4 @@ export * from "./git";
 export * from "./etc";
 export * from "./system";
 export * from "./analytics";
+export * from "./types";

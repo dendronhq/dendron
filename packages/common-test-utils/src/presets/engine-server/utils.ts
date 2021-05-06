@@ -1,4 +1,5 @@
 import { SchemaUtils } from "@dendronhq/common-all";
+import _ from "lodash";
 import { NoteTestUtilsV4 } from "../../noteUtils";
 import { PreSetupHookFunction } from "../../types";
 import { NOTE_PRESETS_V4 } from "../notes";
@@ -67,8 +68,8 @@ export const setupBasicMulti: PreSetupHookFunction = async ({
   vaults,
   wsRoot,
 }) => {
-  const vault1 = vaults[0];
-  const vault2 = vaults[1];
+  const vault1 = _.find(vaults, { fsPath: "vault1" })!;
+  const vault2 = _.find(vaults, { fsPath: "vault2" })!;
   await NOTE_PRESETS_V4.NOTE_SIMPLE.create({
     vault: vault1,
     wsRoot,

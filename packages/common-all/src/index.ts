@@ -1,5 +1,3 @@
-export * from "./types";
-export * from "./typesv2";
 export * from "./dnode";
 export * from "./helpers";
 export * from "./env";
@@ -13,3 +11,4 @@ export * from "./md";
 export * from "./vault";
 export * from "./user";
 export * from "./analytics";
+export * from "./types";

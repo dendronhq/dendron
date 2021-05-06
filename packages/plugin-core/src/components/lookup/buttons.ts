@@ -116,7 +116,7 @@ export class DendronBtn implements IDendronQuickInputButton {
     });
   }
 
-  async handle(_opts: ButtonHandleOpts): Promise<void> {
+  async onEnable(_opts: ButtonHandleOpts): Promise<void> {
     return undefined;
   }
 
@@ -218,7 +218,7 @@ export class MultiSelectBtn extends DendronBtn {
     });
   }
 
-  async handle({ quickPick }: ButtonHandleOpts) {
+  async onEnable({ quickPick }: ButtonHandleOpts) {
     quickPick.canSelectMany = this.pressed;
     return;
   }
@@ -236,7 +236,7 @@ export class CopyNoteLinkButton extends DendronBtn {
     });
   }
 
-  async handle({ quickPick }: ButtonHandleOpts) {
+  async onEnable({ quickPick }: ButtonHandleOpts) {
     if (this.pressed) {
       let items: readonly DNodePropsQuickInputV2[];
       if (quickPick.canSelectMany) {
@@ -268,7 +268,7 @@ export class VaultSelectButton extends DendronBtn {
       canToggle: false,
     });
   }
-  async handle({ quickPick }: ButtonHandleOpts) {
+  async onEnable({ quickPick }: ButtonHandleOpts) {
     quickPick.nextPicker = async () => {
       const vault = await PickerUtilsV2.promptVault();
       return vault;

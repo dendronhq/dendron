@@ -1,57 +1,33 @@
-import { DNodeType, DVault, NoteProps } from "./typesv2";
-
-export type Stage = "dev" | "prod" | "test";
-
-export type DEngineQuery = {
-  queryString: string;
-  mode: DNodeType;
-  opts?: QueryOpts;
+// === Promitives
+export type DPermission = {
+  read: string[];
+  write: string[];
 };
-
-export type DEngineMode = "exact" | "fuzzy";
-
-export interface QueryOpts {
-  /**
-   * Should add to full nodes
-   */
-  fullNode?: boolean;
-  /**
-   * Just get one result
-   */
-  queryOne?: boolean;
-  /**
-   * Use with `createIfNew`
-   * If true, create a stub node.
-   * A stub node is not written to disk
-   */
-  stub?: boolean;
-  /**
-   * If node does not exist, create it?
-   */
-  createIfNew?: boolean;
-  // --- hints
-  // DEPPRECATE
-  webClient?: boolean;
-  initialQuery?: boolean;
-  mode?: DNodeType;
+// === Vaults
+export type VaultRemote = {
+  type: "git";
+  url: string;
+};
+export enum DVaultVisibility {
+  PRIVATE = "private",
 }
 
-export interface Resp<T> {
-  data: T;
-  error?: Error | null;
-}
-
-export type NotesCacheAll = {
-  [key: string]: { cache: NotesCache; cacheUpdates: NotesCacheEntryMap };
-};
-export type NotesCache = {
-  version: number;
-  notes: NotesCacheEntryMap;
-};
-export type NotesCacheEntryMap = { [key: string]: NotesCacheEntry };
-export type NotesCacheEntry = {
-  hash: string;
-  data: Omit<NoteProps, "body">;
+export type DVault = {
+  /** Name of vault */
+  name?: string;
+  visibility?: DVaultVisibility;
+  /** Filesystem path to fault */
+  fsPath: string;
+  // /**
+  //  * Uri which is relative from root
+  //  */
+  // uri: string;
+  remote?: VaultRemote;
+  userPermission?: DPermission;
+  /**
+   * If this is enabled, don't apply workspace push commands
+   */
+  noAutoPush?: boolean;
 };
 
 export type DendronConfig = {
@@ -159,39 +135,6 @@ export type DendronConfig = {
    */
   defaultInsertHierarchy?: string;
 };
-
-export type HierarchyConfig = {
-  publishByDefault?: boolean | { [key: string]: boolean };
-  noindexByDefault?: boolean;
-  customFrontmatter?: CustomFMEntry[];
-};
-
-export type CustomFMEntry = {
-  key: string;
-  value: any;
-};
-
-export type DendronSiteFM = {
-  published?: boolean;
-  noindex?: boolean;
-  nav_order?: number;
-  nav_exclude?: boolean;
-  permalink?: string;
-  /**
-   * If collection, don't show in nav
-   * and have custom sorting rules
-   */
-  has_collection?: boolean;
-  /**
-   * Default: created
-   */
-  sort_by?: "created" | "title";
-  sort_order?: "reverse" | "normal";
-  skipLevels?: number;
-};
-
-export type CleanDendronSiteConfig = DendronSiteConfig &
-  Required<Pick<DendronSiteConfig, "siteIndex" | "siteUrl">>;
 
 export type DendronSiteConfig = {
   /**
@@ -342,6 +285,20 @@ export type DendronSiteConfig = {
   cognitoClientId?: string;
 };
 
+export type HierarchyConfig = {
+  publishByDefault?: boolean | { [key: string]: boolean };
+  noindexByDefault?: boolean;
+  customFrontmatter?: CustomFMEntry[];
+};
+
+export type CustomFMEntry = {
+  key: string;
+  value: any;
+};
+
+export type CleanDendronSiteConfig = DendronSiteConfig &
+  Required<Pick<DendronSiteConfig, "siteIndex" | "siteUrl">>;
+
 export enum DuplicateNoteAction {
   USE_VAULT = "useVault",
 }
@@ -354,8 +311,3 @@ export type UseVaultBehavior = {
 };
 
 export type DuplicateNoteBehavior = UseVaultBehavior;
-
-export enum DendronUserSpecial {
-  "everyone" = "everyone",
-  "anonymous" = "anonymous",
-}

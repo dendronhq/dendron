@@ -2,7 +2,7 @@ import _ from "lodash";
 import path from "path";
 import { CONSTANTS } from "./constants";
 import { DendronError } from "./error";
-import { DVault } from "./typesv2";
+import { DVault } from "./types";
 
 export class VaultUtils {
   static getName(vault: DVault): string {

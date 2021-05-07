@@ -415,6 +415,12 @@
                 "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.copy-url.gif)"
             },
             {
+                "command": "dendron.createHook",
+                "title": "Dendron: Hook Create",
+                "desc": "Create a hook",
+                "when": "dendron:pluginActive"
+            },
+            {
                 "command": "dendron.siteBuild",
                 "title": "Dendron: Site Build",
                 "desc": "Build your notes using publishing v2",

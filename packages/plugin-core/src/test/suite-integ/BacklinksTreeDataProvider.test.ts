@@ -177,7 +177,7 @@ suite("BacklinksTreeDataProvider", function () {
         await VSCodeUtils.openNote(noteWithTarget);
         const out = toPlainObject(await getChildren()) as any;
         expect(out[0].command.arguments[0].path as string).toEqual(
-          NoteUtils.getPathV4({
+          NoteUtils.getFullPath({
             note: noteWithLink,
             wsRoot: DendronWorkspace.wsRoot(),
           })
@@ -212,7 +212,7 @@ suite("BacklinksTreeDataProvider", function () {
         //   NoteUtils.getPathV4({ note: noteWithLink, wsRoot })
         // );
         expect(out[0].command.arguments[0].path as string).toEqual(
-          NoteUtils.getPathV4({ note: noteWithLink, wsRoot })
+          NoteUtils.getFullPath({ note: noteWithLink, wsRoot })
         );
         // assert.strictEqual(out.length, 1);
         expect(out.length).toEqual(1);

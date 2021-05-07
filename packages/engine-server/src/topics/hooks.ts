@@ -4,31 +4,43 @@ import {
   DHookEntry,
   ERROR_SEVERITY,
   NoteProps,
+  NoteUtils,
 } from "@dendronhq/common-all";
 import execa from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 
+export type RequireHookResp = {
+  note: NoteProps;
+  payload?: any;
+};
+
 export class HookUtils {
-  static findScript({
+  static getHookDir(wsRoot: string) {
+    return path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE);
+  }
+
+  static getHookScriptPath({
     wsRoot,
-    scriptPath,
+    basename,
   }: {
-    scriptPath: string;
+    basename: string;
     wsRoot: string;
   }) {
-    return path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE, scriptPath);
+    return path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE, basename);
   }
 
   static requireHook = async ({
     note,
     fpath,
+    wsRoot,
   }: {
     note: NoteProps;
     fpath: string;
-  }) => {
-    return await require(fpath)({ note, execa, _ });
+    wsRoot: string;
+  }): Promise<RequireHookResp> => {
+    return await require(fpath)({ wsRoot, note, execa, _, NoteUtils });
   };
 
   static validateHook = ({
@@ -39,7 +51,10 @@ export class HookUtils {
     wsRoot: string;
   }) => {
     const scriptPath = hook.id + "." + hook.type;
-    const hookPath = HookUtils.findScript({ wsRoot, scriptPath });
+    const hookPath = HookUtils.getHookScriptPath({
+      wsRoot,
+      basename: scriptPath,
+    });
     if (!fs.existsSync(hookPath)) {
       return {
         error: new DendronError({

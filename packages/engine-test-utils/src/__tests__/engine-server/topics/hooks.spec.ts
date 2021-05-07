@@ -5,8 +5,7 @@ import {
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
-import { AssertUtils, FileTestUtils } from "@dendronhq/common-test-utils";
-import { HookUtils } from "@dendronhq/engine-server";
+import { AssertUtils } from "@dendronhq/common-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
@@ -16,33 +15,15 @@ import {
   runEngineTestV5,
   testWithEngine,
 } from "../../../engine";
+import { TestHookUtils } from "../../../topics";
 
-const { requireHook } = HookUtils;
-
-const jsHookPayload = `module.exports = async function({note, execa}) {
-    note.body = note.body + " hello";
-    return note;
-};
-`;
 const execaHookPayload = `module.exports = async function({note, execa, _}) {
     const {stdout} = await execa('echo', ['hello']);
     note.body = note.body + " " + _.trim(stdout);
     return note;
 };
 `;
-
-const genJsHookPayload = (
-  canary: string
-) => `module.exports = async function({note, execa}) {
-    note.body = note.body + " ${canary}";
-    return note;
-};
-`;
-
-const writeJSHook = (root: string, fname: string, canary = "hello") => {
-  const hookPath = path.join(root, `${fname}.js`);
-  fs.writeFileSync(hookPath, genJsHookPayload(canary));
-};
+const { writeJSHook } = TestHookUtils;
 
 const writeExecaHook = (root: string, fname: string) => {
   const hookPath = path.join(root, `${fname}.js`);
@@ -82,34 +63,6 @@ const expectNote = async ({
   expect(ok).toBeTruthy();
 };
 
-describe("basic", () => {
-  test("use js", async () => {
-    const root = FileTestUtils.tmpDir();
-    const hookPath = path.join(root.name, "hook.js");
-    fs.writeFileSync(hookPath, jsHookPayload);
-    const note = NoteUtils.create({
-      fname: "foo",
-      vault: { fsPath: "foo" },
-      body: "foo body",
-    });
-    const out = await requireHook({ fpath: hookPath, note });
-    expect(out.body).toEqual("foo body hello");
-  });
-
-  test("use execa", async () => {
-    const root = FileTestUtils.tmpDir();
-    const hookPath = path.join(root.name, "hook.js");
-    fs.writeFileSync(hookPath, execaHookPayload);
-    const note = NoteUtils.create({
-      fname: "foo",
-      vault: { fsPath: "foo" },
-      body: "foo body",
-    });
-    const out = await requireHook({ fpath: hookPath, note });
-    expect(out.body).toEqual("foo body hello");
-  });
-});
-
 describe("engine", async () => {
   testWithEngine(
     "use js ",
@@ -133,7 +86,7 @@ describe("engine", async () => {
     {
       initHooks: true,
       preSetupHook: async ({ wsRoot }) => {
-        writeJSHook(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE), "hello");
+        writeJSHook({ wsRoot, fname: "hello", canary: "hello" });
         TestConfigUtils.withConfig(
           (config) => {
             config.hooks = {
@@ -175,12 +128,8 @@ describe("engine", async () => {
     {
       initHooks: true,
       preSetupHook: async ({ wsRoot }) => {
-        writeJSHook(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE), "hello");
-        writeJSHook(
-          path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE),
-          "goodbye",
-          "goodbye"
-        );
+        writeJSHook({ wsRoot, fname: "hello", canary: "hello" });
+        writeJSHook({ wsRoot, fname: "goodbye", canary: "goodbye" });
         TestConfigUtils.withConfig(
           (config) => {
             config.hooks = {

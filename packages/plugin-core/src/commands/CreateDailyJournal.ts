@@ -15,7 +15,11 @@ type CommandInput = {
   title: string;
 };
 
-export class CreateDailyJournalCommand extends BaseCommand<CommandOpts> {
+export class CreateDailyJournalCommand extends BaseCommand<
+  CommandOpts,
+  any,
+  CommandInput
+> {
   static key = DENDRON_COMMANDS.CREATE_DAILY_JOURNAL_NOTE.key;
   async gatherInputs(): Promise<CommandInput | undefined> {
     const dailyJournalDomain = DendronWorkspace.configuration().get<string>(

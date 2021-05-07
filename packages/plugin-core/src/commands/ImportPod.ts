@@ -20,7 +20,11 @@ type CommandInput = { podChoice: PodItemV4 };
 
 type CommandOpts = CommandInput & { config: any };
 
-export class ImportPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
+export class ImportPodCommand extends BaseCommand<
+  CommandOpts,
+  CommandOutput,
+  CommandInput
+> {
   public pods: PodClassEntryV4[];
   static key = DENDRON_COMMANDS.IMPORT_POD.key;
 
@@ -29,7 +33,7 @@ export class ImportPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
     this.pods = getAllImportPods();
   }
 
-  async gatherInputs(): Promise<CommandInput | undefined> {
+  async gatherInputs() {
     const pods = getAllImportPods();
     const podItems: PodItemV4[] = pods.map((p) => podClassEntryToPodItemV4(p));
     const podChoice = await showPodQuickPickItemsV4(podItems);

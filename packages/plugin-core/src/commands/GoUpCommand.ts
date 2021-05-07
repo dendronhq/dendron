@@ -33,7 +33,7 @@ export class GoUpCommand extends BasicCommand<CommandOpts, CommandOutput> {
         wsRoot: DendronWorkspace.wsRoot(),
       }
     ) as NoteProps;
-    const nppath = NoteUtils.getPathV4({
+    const nppath = NoteUtils.getFullPath({
       note: nparent,
       wsRoot: DendronWorkspace.wsRoot(),
     });

@@ -45,7 +45,7 @@ suite("ReferenceProvider", function () {
         const links = await provide(editor);
         expect(links.map((l) => l.uri.fsPath)).toEqual(
           [noteWithTarget1, noteWithTarget2].map((note) =>
-            NoteUtils.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+            NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() })
           )
         );
         done();
@@ -75,7 +75,7 @@ suite("ReferenceProvider", function () {
         const links = await provide(editor);
         expect(links.map((l) => l.uri.fsPath)).toEqual(
           [noteWithTarget1, noteWithTarget2].map((note) =>
-            NoteUtils.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+            NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() })
           )
         );
         done();
@@ -103,7 +103,7 @@ suite("ReferenceProvider", function () {
         const links = await provide(editor);
         expect(links.map((l) => l.uri.fsPath)).toEqual(
           [noteWithLink].map((note) =>
-            NoteUtils.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+            NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() })
           )
         );
         done();
@@ -132,7 +132,7 @@ suite("ReferenceProvider", function () {
         const links = await provide(editor);
         expect(links.map((l) => l.uri.fsPath)).toEqual(
           [noteWithLink].map((note) =>
-            NoteUtils.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+            NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() })
           )
         );
         done();

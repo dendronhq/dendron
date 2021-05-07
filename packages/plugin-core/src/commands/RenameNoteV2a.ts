@@ -41,12 +41,13 @@ export { CommandOutput as RenameNoteOutputV2a };
 
 export class RenameNoteV2aCommand extends BaseCommand<
   CommandOpts,
-  CommandOutput
+  CommandOutput,
+  CommandInput
 > {
   static key = DENDRON_COMMANDS.RENAME_NOTE.key;
   public silent?: boolean;
 
-  async gatherInputs(): Promise<CommandInput | undefined> {
+  async gatherInputs(): Promise<CommandInput> {
     const lc = LookupControllerV3.create();
     const provider = new NoteLookupProvider("rename", { allowNewNote: true });
     provider.registerOnAcceptHook(ProviderAcceptHooks.oldNewLocationHook);

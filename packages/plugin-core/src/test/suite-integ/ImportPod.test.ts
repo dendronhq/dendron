@@ -41,8 +41,9 @@ suite("ImportPod", function () {
 
               const cmd = new ImportPodCommand();
               const podChoice = podClassEntryToPodItemV4(JSONImportPod);
+              // @ts-ignore
               cmd.gatherInputs = async () => {
-                return { podChoice };
+                return { label: "", podChoice };
               };
               await cmd.run();
             },

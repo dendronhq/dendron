@@ -22,7 +22,7 @@ export type CodeCommandInstance = {
 export abstract class BaseCommand<
   TOpts,
   TOut = any,
-  TGatherOutput = any,
+  TGatherOutput = TOpts,
   TRunOpts = TOpts
 > {
   public L: DLogger;
@@ -100,7 +100,7 @@ export abstract class BasicCommand<
   TOpts,
   TOut = any,
   TRunOpts = any
-> extends BaseCommand<TOpts, TOut, TOpts | undefined, TRunOpts> {
+> extends BaseCommand<TOpts, TOut, TOpts, TRunOpts> {
   async enrichInputs(inputs: TOpts): Promise<TOpts> {
     return inputs;
   }

@@ -689,7 +689,7 @@ export class NoteUtils {
     return _.reject(maybe, _.isUndefined) as NoteProps[];
   }
 
-  static getPathV4({
+  static getFullPath({
     note,
     wsRoot,
   }: {
@@ -712,7 +712,7 @@ export class NoteUtils {
   }
 
   static getURI({ note, wsRoot }: { note: NoteProps; wsRoot: string }): URI {
-    return URI.file(this.getPathV4({ note, wsRoot }));
+    return URI.file(this.getFullPath({ note, wsRoot }));
   }
 
   static getPathUpTo(hpath: string, numCompoenents: number) {

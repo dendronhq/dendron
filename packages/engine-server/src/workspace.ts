@@ -107,7 +107,7 @@ export class WorkspaceService {
     });
     const schema = SchemaUtils.createRootModule({ vault });
 
-    if (!fs.existsSync(NoteUtils.getPathV4({ note, wsRoot: this.wsRoot }))) {
+    if (!fs.existsSync(NoteUtils.getFullPath({ note, wsRoot: this.wsRoot }))) {
       await note2File({ note, vault, wsRoot: this.wsRoot });
     }
     if (

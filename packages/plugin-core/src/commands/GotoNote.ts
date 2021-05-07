@@ -131,7 +131,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           overrides,
         });
         const note = data?.note as NoteProps;
-        const npath = NoteUtils.getPathV4({
+        const npath = NoteUtils.getFullPath({
           note,
           wsRoot: DendronWorkspace.wsRoot(),
         });

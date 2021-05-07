@@ -93,7 +93,10 @@ export class NoteController {
     } catch (err) {
       getLogger().error({ ctx, err });
       return {
-        error: new DendronError({ payload: err }),
+        error: DendronError.createPlainError({
+          payload: err,
+          message: "unknown error",
+        }),
         data: undefined,
       };
     }
@@ -112,7 +115,10 @@ export class NoteController {
     } catch (err) {
       getLogger().error({ ctx, err });
       return {
-        error: new DendronError({ payload: err }),
+        error: DendronError.createPlainError({
+          payload: err,
+          message: "unknown error",
+        }),
         data: undefined,
       };
     }

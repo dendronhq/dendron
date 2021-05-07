@@ -31,6 +31,7 @@ import {
   StoreDeleteNoteResp,
   VaultUtils,
   WriteNoteResp,
+  stringifyError,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -45,7 +46,7 @@ import _ from "lodash";
 import path from "path";
 import { MDUtilsV4 } from "../../markdown";
 import { LinkUtils } from "../../markdown/remark/utils";
-import { HookUtils } from "../../topics/hooks";
+import { HookUtils, RequireHookResp } from "../../topics/hooks";
 import { readNotesFromCache, writeNotesToCache } from "../../utils";
 import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
@@ -595,6 +596,7 @@ export class FileStorage implements DStore {
   ): Promise<WriteNoteResp> {
     const ctx = "FileStore:writeNote";
     let changed: NoteProps[] = [];
+    let error: DendronError | null = null;
     this.logger.info({
       ctx,
       msg: "enter",
@@ -635,18 +637,36 @@ export class FileStorage implements DStore {
     const hooks = _.filter(this.engine.hooks.onCreate, (hook) =>
       NoteUtils.match({ notePath: note.fname, pattern: hook.pattern })
     );
-    note = await _.reduce<DHookEntry, Promise<NoteProps>>(
+    const resp = await _.reduce<DHookEntry, Promise<RequireHookResp>>(
       hooks,
       async (notePromise, hook) => {
-        const note = await notePromise;
-        const script = HookUtils.findScript({
+        const { note } = await notePromise;
+        const script = HookUtils.getHookScriptPath({
           wsRoot: this.wsRoot,
-          scriptPath: hook.id + ".js",
+          basename: hook.id + ".js",
         });
-        return await HookUtils.requireHook({ note, fpath: script });
+        return await HookUtils.requireHook({
+          note,
+          fpath: script,
+          wsRoot: this.wsRoot,
+        });
       },
-      Promise.resolve(note)
+      Promise.resolve({ note })
+    ).catch(
+      (err) =>
+        new DendronError({
+          severity: ERROR_SEVERITY.MINOR,
+          message: "error with hook",
+          payload: stringifyError(err),
+        })
     );
+    if (resp instanceof DendronError) {
+      error = resp;
+      this.logger.info({ ctx, error });
+    } else {
+      note = resp.note;
+      this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });
+    }
     // order matters - only write file after parents are established @see(_writeNewNote)
     await note2File({
       note,
@@ -683,7 +703,7 @@ export class FileStorage implements DStore {
       msg: "exit",
     });
     return {
-      error: null,
+      error,
       data: changedEntries,
     };
   }

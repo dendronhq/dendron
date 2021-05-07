@@ -32,7 +32,7 @@ export class ImportPodCLICommand extends CLICommand<
     setupPodArgs(args);
   }
 
-  async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
+  async enrichArgs(args: CommandCLIOpts) {
     return enrichPodArgs({ pods: getAllImportPods(), podType: "import" })(args);
   }
 

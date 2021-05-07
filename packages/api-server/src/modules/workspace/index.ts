@@ -1,4 +1,5 @@
 import {
+  error2PlainObject,
   ERROR_SEVERITY,
   NotePropsDict,
   SchemaModuleDict,
@@ -32,7 +33,7 @@ export class WorkspaceController {
       wsRoot: uri,
       logger,
     });
-    const { error } = await engine.init();
+    let { error } = await engine.init();
     if (error && error.severity === ERROR_SEVERITY.FATAL) {
       logger.error({ ctx, msg: "fatal error initializing notes", error });
       return { error };
@@ -40,7 +41,10 @@ export class WorkspaceController {
     notes = engine.notes;
     schemas = engine.schemas;
     await putWS({ ws: uri, engine });
-    logger.info({ ctx, msg: "finish init", uri });
+    logger.info({ ctx, msg: "finish init", uri, error });
+    if (error) {
+      error = error2PlainObject(error);
+    }
     const payload: InitializePayload = {
       error,
       data: { notes, schemas },

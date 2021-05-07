@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`note serialize basic 1`] = `
+exports[`NoteUtils serialize basic 1`] = `
 "---
 id: foo
 title: Foo
@@ -12,7 +12,7 @@ created: 1
 "
 `;
 
-exports[`note serialize with children 1`] = `
+exports[`NoteUtils serialize with children 1`] = `
 "---
 id: foo
 title: Foo
@@ -24,7 +24,7 @@ created: 1
 "
 `;
 
-exports[`note serialize with custom 1`] = `
+exports[`NoteUtils serialize with custom 1`] = `
 "---
 id: foo
 title: Foo
@@ -37,7 +37,7 @@ bond: 42
 "
 `;
 
-exports[`note serialize with hierarchy 1`] = `
+exports[`NoteUtils serialize with hierarchy 1`] = `
 "---
 id: foo
 title: Foo
@@ -53,7 +53,7 @@ children:
 "
 `;
 
-exports[`note serialize with hierarchy and null parent 1`] = `
+exports[`NoteUtils serialize with hierarchy and null parent 1`] = `
 "---
 id: foo
 title: Foo
@@ -69,7 +69,7 @@ children:
 "
 `;
 
-exports[`note serialize with parent 1`] = `
+exports[`NoteUtils serialize with parent 1`] = `
 "---
 id: foo
 title: Foo

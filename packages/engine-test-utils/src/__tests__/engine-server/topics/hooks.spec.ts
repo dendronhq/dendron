@@ -1,11 +1,21 @@
-import { CONSTANTS, NoteUtils } from "@dendronhq/common-all";
+import {
+  CONSTANTS,
+  DEngineClientV2,
+  NoteOpts,
+  NoteProps,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import { AssertUtils, FileTestUtils } from "@dendronhq/common-test-utils";
 import { HookUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { TestConfigUtils } from "../../../config";
-import { createEngineFromServer, testWithEngine } from "../../../engine";
+import {
+  createEngineFromServer,
+  runEngineTestV5,
+  testWithEngine,
+} from "../../../engine";
 
 const { requireHook } = HookUtils;
 
@@ -37,6 +47,39 @@ const writeJSHook = (root: string, fname: string, canary = "hello") => {
 const writeExecaHook = (root: string, fname: string) => {
   const hookPath = path.join(root, `${fname}.js`);
   fs.writeFileSync(hookPath, execaHookPayload);
+};
+
+const writeNote = async ({
+  noteOpts,
+  engine,
+}: {
+  noteOpts: NoteOpts;
+  engine: DEngineClientV2;
+}) => {
+  const note = NoteUtils.create(noteOpts);
+  await engine.writeNote(note, { newNode: true });
+  const out = engine.notes[note.id];
+  return { note: out };
+};
+
+const expectNote = async ({
+  note,
+  match,
+  nomatch,
+}: {
+  note: NoteProps;
+  match?: string[];
+  nomatch?: string[];
+}) => {
+  const ok = await AssertUtils.assertInString({
+    body: note.body,
+    match,
+    nomatch,
+  });
+  if (!ok) {
+    console.log(note.body);
+  }
+  expect(ok).toBeTruthy();
 };
 
 describe("basic", () => {
@@ -206,6 +249,60 @@ describe("engine", async () => {
       },
     }
   );
+
+  test("custom filter rules", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults }) => {
+        const vault = _.find(vaults, { fsPath: "vault1" })!;
+        let { note } = await writeNote({
+          noteOpts: {
+            id: "hooked",
+            fname: "hooked",
+            body: "hooked body",
+            vault,
+          },
+          engine,
+        });
+        await expectNote({ note, nomatch: ["hooked body hello"] });
+        ({ note } = await writeNote({
+          noteOpts: {
+            id: "daily.journal",
+            fname: "daily.journal",
+            body: "daily body",
+            vault,
+          },
+          engine,
+        }));
+        debugger;
+        await expectNote({ note, match: ["daily body hello"] });
+      },
+      {
+        expect,
+        initHooks: true,
+        preSetupHook: async ({ wsRoot }) => {
+          writeExecaHook(
+            path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE),
+            "hello"
+          );
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.hooks = {
+                onCreate: [
+                  {
+                    id: "hello",
+                    pattern: "daily.*",
+                    type: "js",
+                  },
+                ],
+              };
+              return config;
+            },
+            { wsRoot }
+          );
+        },
+      }
+    );
+  });
 });
 
 describe("remote engine", async () => {
@@ -213,7 +310,7 @@ describe("remote engine", async () => {
     "bad hook",
     async ({ initResp }) => {
       expect(
-        initResp.error!.payload![0].msg.startsWith(
+        initResp.error!.payload![0].message.startsWith(
           "hook hello has missing script"
         )
       ).toBeTruthy();

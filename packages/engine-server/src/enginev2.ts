@@ -162,6 +162,7 @@ export class DendronEngineV2 implements DEngine {
       const error = new DendronCompositeError(
         (_.isNull(storeError) ? [] : [storeError]).concat(hookErrors)
       );
+      this.logger.info({ ctx: "init:ext", error, storeError, hookErrors });
       return {
         error,
         data: { notes, schemas },

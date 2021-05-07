@@ -24,7 +24,7 @@ import {
   SchemaModuleProps,
   WriteNoteResp,
   BulkAddNoteOpts,
-  IDendronError,
+  DendronErrorPlainObj,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { createLogger } from "./logger";
@@ -93,7 +93,7 @@ interface IStatusHandler {
 }
 
 type APIPayload<T = any> = {
-  error: IDendronError | null;
+  error: DendronErrorPlainObj | null;
   data?: T;
 };
 

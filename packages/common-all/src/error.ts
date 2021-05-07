@@ -1,6 +1,6 @@
 import { ERROR_SEVERITY } from "./constants";
 
-export type IDendronError = {
+export type DendronErrorPlainObj = {
   name: string;
   message: string;
   isComposite: boolean;
@@ -12,11 +12,26 @@ export type IDendronError = {
   status?: string;
 };
 
+export type IDendronError = DendronErrorPlainObj & {};
+
+export const error2PlainObject = (err: IDendronError): DendronErrorPlainObj => {
+  const { name, message, isComposite, severity, payload, status } = err;
+  return {
+    name,
+    isComposite,
+    status,
+    payload,
+    severity,
+    message,
+  };
+};
+
 export class DendronError extends Error implements IDendronError {
   public status?: string;
   public friendly?: string;
   public payload?: string;
   public severity?: ERROR_SEVERITY;
+  public message: string;
   isComposite = false;
 
   constructor({
@@ -34,6 +49,7 @@ export class DendronError extends Error implements IDendronError {
   }) {
     super(message);
     this.status = status || "unknown";
+    this.message = message || "";
     this.friendly = friendly;
     if (payload?.message && payload?.stack) {
       this.payload = JSON.stringify({
@@ -48,13 +64,13 @@ export class DendronError extends Error implements IDendronError {
 }
 
 export class DendronCompositeError extends Error implements IDendronError {
-  public payload: IDendronError[];
+  public payload: DendronErrorPlainObj[];
   public message: string;
   isComposite = true;
 
   constructor(errors: IDendronError[]) {
     super("multiple errors");
-    this.payload = errors;
+    this.payload = errors.map((err) => error2PlainObject(err));
     this.message = "multiple errors";
   }
 }

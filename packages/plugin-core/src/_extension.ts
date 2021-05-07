@@ -138,7 +138,7 @@ async function postReloadWorkspace() {
       } catch (err) {
         Logger.error({
           msg: "error upgrading",
-          err: new DendronError({ msg: JSON.stringify(err) }),
+          err: new DendronError({ message: JSON.stringify(err) }),
         });
         return;
       }

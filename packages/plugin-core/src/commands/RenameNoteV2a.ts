@@ -72,7 +72,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
           } else if (event.action === "error") {
             return;
           } else {
-            throw new DendronError({ msg: `unexpected event: ${event}` });
+            throw new DendronError({ message: `unexpected event: ${event}` });
           }
         },
       });

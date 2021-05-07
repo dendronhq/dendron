@@ -177,7 +177,7 @@ export class DNodeUtils {
           VaultUtils.isEqual(ent.vault, vault, opts.wsRoot)
       );
       if (_.isUndefined(_node)) {
-        throw new DendronError({ msg: `no root found for ${fpath}` });
+        throw new DendronError({ message: `no root found for ${fpath}` });
       }
       return _node;
     }
@@ -628,7 +628,7 @@ export class NoteUtils {
       );
     });
     if (!out) {
-      throw new DendronError({ msg: `note ${fname} not found` });
+      throw new DendronError({ message: `note ${fname} not found` });
     }
     return out;
   }
@@ -648,7 +648,7 @@ export class NoteUtils {
     if (_out.length > 1) {
       if (!opts?.vault) {
         throw new DendronError({
-          msg: `multiple nodes found and no vault given for ${fname}`,
+          message: `multiple nodes found and no vault given for ${fname}`,
         });
       }
       out = _.find(
@@ -657,7 +657,7 @@ export class NoteUtils {
       ) as NoteProps;
       if (_.isUndefined(out)) {
         throw new DendronError({
-          msg: `no note found for vault: ${opts.vault.fsPath}`,
+          message: `no note found for vault: ${opts.vault.fsPath}`,
         });
       }
     } else {

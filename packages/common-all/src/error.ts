@@ -1,7 +1,8 @@
 import { ERROR_SEVERITY } from "./constants";
 
 export type IDendronError = {
-  msg: string;
+  name: string;
+  message: string;
   isComposite: boolean;
   severity?: ERROR_SEVERITY;
   payload?: any;
@@ -13,7 +14,6 @@ export type IDendronError = {
 
 export class DendronError extends Error implements IDendronError {
   public status?: string;
-  public msg: string;
   public friendly?: string;
   public payload?: string;
   public severity?: ERROR_SEVERITY;
@@ -21,20 +21,19 @@ export class DendronError extends Error implements IDendronError {
 
   constructor({
     friendly,
-    msg,
+    message,
     status,
     payload,
     code,
   }: {
     friendly?: string;
-    msg?: string;
+    message?: string;
     status?: string;
     code?: number;
     payload?: any;
   }) {
-    super(msg);
+    super(message);
     this.status = status || "unknown";
-    this.msg = msg || "";
     this.friendly = friendly;
     if (payload?.message && payload?.stack) {
       this.payload = JSON.stringify({
@@ -50,13 +49,13 @@ export class DendronError extends Error implements IDendronError {
 
 export class DendronCompositeError extends Error implements IDendronError {
   public payload: IDendronError[];
-  public msg: string;
+  public message: string;
   isComposite = true;
 
   constructor(errors: IDendronError[]) {
     super("multiple errors");
     this.payload = errors;
-    this.msg = "multiple errors";
+    this.message = "multiple errors";
   }
 }
 

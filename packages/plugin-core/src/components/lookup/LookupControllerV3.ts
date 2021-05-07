@@ -76,7 +76,7 @@ export class LookupControllerV3 {
 
   get cancelToken() {
     if (_.isUndefined(this._cancelTokenSource)) {
-      throw new DendronError({ msg: "no cancel token" });
+      throw new DendronError({ message: "no cancel token" });
     }
     return this._cancelTokenSource;
   }

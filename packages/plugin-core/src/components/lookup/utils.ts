@@ -173,7 +173,7 @@ export class ProviderAcceptHooks {
       const errMsg = `${vaultName}/${quickpick.value} exists`;
       window.showErrorMessage(errMsg);
       return {
-        error: new DendronError({ msg: errMsg }),
+        error: new DendronError({ message: errMsg }),
       };
     }
     const data = {

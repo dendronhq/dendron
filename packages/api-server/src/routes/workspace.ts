@@ -37,7 +37,7 @@ router.post("/sync", async (req: Request, res: Response) => {
   } catch (err) {
     res.json({
       error: new DendronError({
-        msg: ENGINE_ERROR_CODES.ENGINE_NOT_SET,
+        message: ENGINE_ERROR_CODES.ENGINE_NOT_SET,
         payload: err,
       }),
     });

@@ -371,7 +371,7 @@ export class LookupProviderV2 {
           await showDocAndHidePicker([uri], picker);
           return { uris: [uri], node: maybeNote };
         } else {
-          throw new DendronError({ msg: `note ${value} not found` });
+          throw new DendronError({ message: `note ${value} not found` });
         }
       }
       return;
@@ -784,7 +784,7 @@ export class LookupProviderV2 {
 
     picker.onDidChangeValue(() => {
       if (_.isUndefined(this.onDidChangeValueDebounced)) {
-        throw new DendronError({ msg: "onAccept already called" });
+        throw new DendronError({ message: "onAccept already called" });
       }
 
       this.onDidChangeValueDebounced(

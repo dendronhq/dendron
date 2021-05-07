@@ -165,7 +165,7 @@ function attachParser(proc: Unified.Processor) {
 
     const out = LinkUtils.parseLinkV2(linkMatch);
     if (_.isNull(out)) {
-      throw new DendronError({ msg: `link is null: ${linkMatch}` });
+      throw new DendronError({ message: `link is null: ${linkMatch}` });
     }
     let { config, vault, dest, fname } = MDUtilsV4.getDendronData(proc);
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
@@ -178,7 +178,7 @@ function attachParser(proc: Unified.Processor) {
         addError(
           proc,
           new DendronError({
-            msg: `fname: ${fname}, vault ${
+            message: `fname: ${fname}, vault ${
               out.vaultName
             } not found in ${JSON.stringify(out)}`,
           })

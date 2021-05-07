@@ -48,7 +48,7 @@ export class VaultUtils {
   }) {
     const vault = this.getVaultByName({ vaults, vname });
     if (!vault) {
-      throw new DendronError({ msg: `vault with name ${vname} not found` });
+      throw new DendronError({ message: `vault with name ${vname} not found` });
     }
     return vault;
   }

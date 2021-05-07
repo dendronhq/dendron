@@ -109,7 +109,7 @@ export class SchemaParserV2 extends ParserBaseV2 {
         if (!child) {
           throw new DendronError({
             status: ENGINE_ERROR_CODES.MISSING_SCHEMA,
-            msg: JSON.stringify({ parent, missingChild: ch }),
+            message: JSON.stringify({ parent, missingChild: ch }),
           });
         }
         DNodeUtils.addChild(parent, child);

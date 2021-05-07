@@ -52,7 +52,7 @@ export function migrateConfig({
     Logger.info({ ctx, msg: "config.vaults empty" });
     const wsFolders = DendronWorkspace.workspaceFolders();
     if (_.isUndefined(wsFolders)) {
-      throw new DendronError({ msg: "no vaults detected" });
+      throw new DendronError({ message: "no vaults detected" });
     }
     const vault = {
       fsPath: path.relative(wsRoot, wsFolders[0].uri.fsPath),

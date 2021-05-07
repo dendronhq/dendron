@@ -109,10 +109,10 @@ export class NoteLookupCommand extends BaseCommand<
           } else if (event.action === "error") {
             const error = event.data.error as DendronError;
             lc.onHide();
-            window.showErrorMessage(error.msg);
+            window.showErrorMessage(error.message);
             resolve(undefined);
           } else {
-            throw new DendronError({ msg: `unexpected event: ${event}` });
+            throw new DendronError({ message: `unexpected event: ${event}` });
           }
         },
       });

@@ -152,7 +152,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
       //   const vaults = await Promise.all(
       //     config.vaults.map(async (ent) => {
       //       if (!ent.remote) {
-      //         throw new DendronError({ msg: "no remote found for vault" });
+      //         throw new DendronError({ message: "no remote found for vault" });
       //       }
       //       const { url } = ent.remote;
       //       await GitV2.clone(`${url} ${ent.fsPath}`, { cwd: rootDir });
@@ -166,7 +166,9 @@ export class SetupWorkspaceCommand extends BasicCommand<
       //   );
       //   return _.map(vaults, (ent) => ent.vault);
       default:
-        throw new DendronError({ msg: `init type ${initType} not supported` });
+        throw new DendronError({
+          message: `init type ${initType} not supported`,
+        });
     }
   };
 

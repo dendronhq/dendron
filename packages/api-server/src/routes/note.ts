@@ -70,7 +70,7 @@ router.post("/write", async (req: Request, res: Response<WriteNoteResp>) => {
     res.json(out);
   } catch (err) {
     res.json({
-      error: new DendronError({ msg: JSON.stringify(err) }),
+      error: new DendronError({ message: JSON.stringify(err) }),
       data: [],
     });
   }
@@ -84,7 +84,7 @@ router.post("/bulkAdd", async (req: Request, res: Response<WriteNoteResp>) => {
     res.json(out);
   } catch (err) {
     res.json({
-      error: new DendronError({ msg: JSON.stringify(err) }),
+      error: new DendronError({ message: JSON.stringify(err) }),
       data: [],
     });
   }

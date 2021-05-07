@@ -48,7 +48,7 @@ export class EngineConnector {
 
   static instance() {
     if (!this._ENGINE_CONNECTOR) {
-      throw new DendronError({ msg: "no workspace" });
+      throw new DendronError({ message: "no workspace" });
     }
     return this._ENGINE_CONNECTOR;
   }
@@ -88,7 +88,7 @@ export class EngineConnector {
     if (opts?.portOverride) {
       const engine = await this.tryToConnect({ port: opts.portOverride });
       if (!engine) {
-        throw new DendronError({ msg: "error connecting" });
+        throw new DendronError({ message: "error connecting" });
       }
       await this.initEngine({ engine, port: opts.portOverride });
     } else {

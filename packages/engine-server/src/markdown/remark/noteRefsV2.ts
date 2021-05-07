@@ -131,7 +131,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
         compilerOpts: copts,
       });
       if (error) {
-        return `ERROR converting ref: ${error.msg}`;
+        return `ERROR converting ref: ${error.message}`;
       }
       return data;
     };
@@ -159,12 +159,15 @@ function convertNoteRef(
     })!;
   }
   if (!vault) {
-    return { error: new DendronError({ msg: "no vault specified" }), data: "" };
+    return {
+      error: new DendronError({ message: "no vault specified" }),
+      data: "",
+    };
   }
   let { prettyRefs, wikiLinkOpts } = compilerOpts;
   if (refLvl >= MAX_REF_LVL) {
     return {
-      error: new DendronError({ msg: "too many nested note refs" }),
+      error: new DendronError({ message: "too many nested note refs" }),
       data,
     };
   }
@@ -239,7 +242,7 @@ function convertNoteRef(
     } catch (err) {
       debugger;
       const msg = `error reading file, ${npath}`;
-      errors.push(new DendronError({ msg }));
+      errors.push(new DendronError({ message: msg }));
       return msg;
     }
   });
@@ -267,7 +270,10 @@ export function convertNoteRefASTV2(
   }
 
   if (!vault) {
-    return { error: new DendronError({ msg: "no vault specified" }), data: [] };
+    return {
+      error: new DendronError({ message: "no vault specified" }),
+      data: [],
+    };
   }
   let { prettyRefs, wikiLinkOpts } = compilerOpts;
   if (
@@ -279,7 +285,7 @@ export function convertNoteRefASTV2(
 
   if (refLvl >= MAX_REF_LVL) {
     return {
-      error: new DendronError({ msg: "too many nested note refs" }),
+      error: new DendronError({ message: "too many nested note refs" }),
       data: [MDUtilsV4.genMDMsg("too many nested note refs")],
     };
   }
@@ -364,7 +370,7 @@ export function convertNoteRefASTV2(
     } catch (err) {
       debugger;
       const msg = `error reading file, ${npath}`;
-      errors.push(new DendronError({ msg }));
+      errors.push(new DendronError({ message: msg }));
       throw Error(msg);
       // return msg;
     }
@@ -452,7 +458,7 @@ function convertNoteRefHelperAST(
     console.log(JSON.stringify(err));
     return {
       error: new DendronError({
-        msg: "error processing note ref",
+        message: "error processing note ref",
         payload: err,
       }),
       data: MDUtilsV4.genMDMsg("error processing ref"),
@@ -511,7 +517,7 @@ function convertNoteRefHelper(
     console.log(JSON.stringify(err));
     return {
       error: new DendronError({
-        msg: "error processing note ref",
+        message: "error processing note ref",
         payload: err,
       }),
       data: "error processing ref",

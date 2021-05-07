@@ -107,7 +107,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
             wsRoot: DendronWorkspace.wsRoot(),
           });
           if (!note) {
-            throw new DendronError({ msg: `note ${fname} not found` });
+            throw new DendronError({ message: `note ${fname} not found` });
           }
           const out = await new MarkdownPublishPod().plant({
             note,

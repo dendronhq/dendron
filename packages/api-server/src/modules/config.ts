@@ -27,7 +27,7 @@ export class ConfigController {
       return resp;
     } catch (err) {
       return {
-        error: new DendronError({ msg: JSON.stringify(err) }),
+        error: new DendronError({ message: JSON.stringify(err) }),
         data: undefined,
       };
     }
@@ -45,7 +45,7 @@ export class ConfigController {
       return resp;
     } catch (err) {
       return {
-        error: new DendronError({ msg: JSON.stringify(err) }),
+        error: new DendronError({ message: JSON.stringify(err) }),
         data: undefined,
       };
     }

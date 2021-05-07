@@ -41,7 +41,7 @@ export class NoteController {
       return data;
     } catch (err) {
       return {
-        error: new DendronError({ msg: JSON.stringify(err) }),
+        error: new DendronError({ message: JSON.stringify(err) }),
         data: undefined,
       };
     }
@@ -57,7 +57,7 @@ export class NoteController {
       return data;
     } catch (err) {
       return {
-        error: new DendronError({ msg: JSON.stringify(err) }),
+        error: new DendronError({ message: JSON.stringify(err) }),
         data: undefined,
       };
     }
@@ -72,7 +72,7 @@ export class NoteController {
       return data;
     } catch (err) {
       return {
-        error: new DendronError({ msg: JSON.stringify(err) }),
+        error: new DendronError({ message: JSON.stringify(err) }),
         data: [],
       };
     }
@@ -129,7 +129,7 @@ export class NoteController {
       return { error: null, data };
     } catch (err) {
       return {
-        error: new DendronError({ msg: JSON.stringify(err) }),
+        error: new DendronError({ message: JSON.stringify(err) }),
         data: undefined,
       };
     }

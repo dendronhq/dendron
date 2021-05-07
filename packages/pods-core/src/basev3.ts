@@ -70,10 +70,10 @@ export abstract class PublishPod<T extends PublishPodConfig = any> {
     const { config, engine } = opts;
     const { fname, vaultName } = config;
     if (_.isUndefined(vaultName)) {
-      throw new DendronError({ msg: "no vaultName" });
+      throw new DendronError({ message: "no vaultName" });
     }
     if (_.isUndefined(fname)) {
-      throw new DendronError({ msg: "no fname" });
+      throw new DendronError({ message: "no fname" });
     }
 
     const vault = VaultUtils.getVaultByNameOrThrow({
@@ -170,15 +170,15 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
     const configJSON = JSON.stringify(config);
     if (_.isUndefined(src)) {
       throw new DendronError({
-        msg: `no src specified. config: ${configJSON}`,
+        message: `no src specified. config: ${configJSON}`,
       });
     }
     if (_.isUndefined(vaultName)) {
-      throw new DendronError({ msg: "no vaultName specified" });
+      throw new DendronError({ message: "no vaultName specified" });
     }
     if (concatenate && _.isUndefined(config?.destName)) {
       throw new DendronError({
-        msg: "destName must be specified if concatenate is enabled",
+        message: "destName must be specified if concatenate is enabled",
       });
     }
   }
@@ -260,7 +260,7 @@ export abstract class ExportPod<
     const configJSON = JSON.stringify(config);
     if (_.isUndefined(dest)) {
       throw new DendronError({
-        msg: `no dest specified. config: ${configJSON}`,
+        message: `no dest specified. config: ${configJSON}`,
       });
     }
   }

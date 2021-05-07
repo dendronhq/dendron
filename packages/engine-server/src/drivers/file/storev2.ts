@@ -247,7 +247,7 @@ export class FileStorage implements DStore {
       data,
       error: _.isEmpty(errors)
         ? null
-        : new DendronError({ msg: "multiple errors", payload: errors }),
+        : new DendronError({ message: "multiple errors", payload: errors }),
     };
   }
 
@@ -416,7 +416,7 @@ export class FileStorage implements DStore {
     this.logger.info({ ctx, msg: "enter", opts });
     const oldVault = oldLoc.vault;
     if (!oldVault) {
-      throw new DendronError({ msg: "vault not set for loation" });
+      throw new DendronError({ message: "vault not set for loation" });
     }
     const vpath = vault2Path({ wsRoot, vault: oldVault });
     const oldLocPath = path.join(vpath, oldLoc.fname + ".md");

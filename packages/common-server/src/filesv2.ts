@@ -71,7 +71,7 @@ async function _createFileWatcher(
     numTries: 5,
   });
   if (numTries <= 0) {
-    throw new DendronError({ msg: "exceeded numTries" });
+    throw new DendronError({ message: "exceeded numTries" });
   }
   return new Promise(async (resolve, _reject) => {
     if (!fs.existsSync(fpath)) {

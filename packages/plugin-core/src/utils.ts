@@ -150,7 +150,7 @@ export class VSCodeUtils {
   static getActiveTextEditorOrThrow() {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
-      throw new DendronError({ msg: "no active editor" });
+      throw new DendronError({ message: "no active editor" });
     }
     return editor;
   }
@@ -491,7 +491,7 @@ export class DendronClientUtilsV2 {
   }): Promise<SchemaModuleProps> => {
     const smod = _.find(client.schemas, { fname });
     if (!smod) {
-      throw new DendronError({ msg: "no note found" });
+      throw new DendronError({ message: "no note found" });
     }
     return smod;
   };

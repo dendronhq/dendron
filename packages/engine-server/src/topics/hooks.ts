@@ -42,7 +42,7 @@ export class HookUtils {
     if (!fs.existsSync(hookPath)) {
       return {
         error: new DendronError({
-          msg: `hook ${hook.id} has missing script. ${hookPath} doesn't exist`,
+          message: `hook ${hook.id} has missing script. ${hookPath} doesn't exist`,
         }),
         valid: false,
       };

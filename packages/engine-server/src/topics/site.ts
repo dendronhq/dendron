@@ -473,7 +473,7 @@ export class SiteUtils {
       });
       if (!domainNote) {
         throw new DendronError({
-          msg: `no notes found for ${fname} in vaults ${vaultNames}`,
+          message: `no notes found for ${fname} in vaults ${vaultNames}`,
         });
       }
     } else {
@@ -488,7 +488,7 @@ export class SiteUtils {
           vault,
         });
         throw new DendronError({
-          msg: `no notes found for ${fname} in vault ${vault.fsPath}`,
+          message: `no notes found for ${fname} in vault ${vault.fsPath}`,
         });
       }
       if (

@@ -49,7 +49,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         // TODO: tmp
         console.log(JSON.stringify(engine.notes));
         throw new DendronError({
-          msg: `dendronPub - no fname or vault for node: ${JSON.stringify(
+          message: `dendronPub - no fname or vault for node: ${JSON.stringify(
             tree
           )}`,
         });
@@ -61,7 +61,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         wsRoot: engine.wsRoot,
       });
       if (!note) {
-        throw new DendronError({ msg: `no note found for ${fname}` });
+        throw new DendronError({ message: `no note found for ${fname}` });
       }
       const idx = _.findIndex(root.children, (ent) => ent.type !== "yaml");
       root.children.splice(
@@ -103,7 +103,10 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           } else {
             if (!note || !config) {
               value = "403";
-              addError(proc, new DendronError({ msg: "no note or config" }));
+              addError(
+                proc,
+                new DendronError({ message: "no note or config" })
+              );
             } else {
               isPublished = SiteUtils.isPublished({
                 note,

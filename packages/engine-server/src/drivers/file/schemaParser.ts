@@ -41,7 +41,7 @@ export class SchemaParser extends ParserBase {
           return this.parseFile(fpath, vault);
         } catch (err) {
           return new DendronError({
-            msg: ENGINE_ERROR_CODES.BAD_PARSE_FOR_SCHEMA,
+            message: ENGINE_ERROR_CODES.BAD_PARSE_FOR_SCHEMA,
             payload: { fpath },
           });
         }

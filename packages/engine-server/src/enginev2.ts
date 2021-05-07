@@ -167,10 +167,10 @@ export class DendronEngineV2 implements DEngine {
         data: { notes, schemas },
       };
     } catch (error) {
-      const { message, stack, msg, status, friendly } = error;
+      const { message, stack, status, friendly } = error;
       let payload = { message, stack };
       return {
-        error: new DendronError({ payload, msg, status, friendly }),
+        error: new DendronError({ payload, message, status, friendly }),
         data: {
           notes: {},
           schemas: {},
@@ -362,7 +362,7 @@ export class DendronEngineV2 implements DEngine {
       } else {
         if (_.isUndefined(vault)) {
           return {
-            error: new DendronError({ msg: "no vault specified" }),
+            error: new DendronError({ message: "no vault specified" }),
             data: null as any,
           };
         }

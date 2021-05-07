@@ -353,7 +353,10 @@ export class WorkspaceService {
         });
         if ((await git.hasRemote()) && this.user.canPushVault(vault)) {
           await git.push().catch((err) => {
-            throw new DendronError({ payload: { err, repoPath: root } });
+            throw new DendronError({
+              message: "error pushing vault",
+              payload: { err, repoPath: root },
+            });
           });
         }
       })

@@ -1,7 +1,7 @@
 export type DHookEntry = {
   id: string;
   pattern: string;
-  type: string;
+  type: "js";
 };
 
 export type DHookDict = {

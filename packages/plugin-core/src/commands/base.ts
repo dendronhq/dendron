@@ -80,8 +80,14 @@ export abstract class BaseCommand<
         return resp;
       }
       return;
-    } catch (err) {
-      Logger.error({ ctx, err: new DendronError({ payload: err }) });
+    } catch (error) {
+      Logger.error({
+        ctx,
+        error: new DendronError({
+          message: `error running command: ${error.message}`,
+          payload: { error },
+        }),
+      });
       return;
     }
   }

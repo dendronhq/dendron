@@ -10,7 +10,7 @@ export type TraceLevel = "debug" | "info" | "warn" | "error" | "fatal";
 const levels = ["debug", "info", "warn", "error", "fatal"];
 export type LogPayload = Partial<{
   ctx: string;
-  err: DendronError;
+  error: DendronError;
   msg: string;
 }>;
 
@@ -63,41 +63,32 @@ export class Logger {
       this.output || window.createOutputChannel(DENDRON_CHANNEL_NAME);
   }
 
-  // private static lvl2Method = (lvl: TraceLevel) => {
-  //     return {
-  //         [NoSilentTraceLevel.Debug]: 'debug',
-  //         [NoSilentTraceLevel.Info]: 'info',
-  //         [NoSilentTraceLevel.Warn]: 'warn',
-  //         [NoSilentTraceLevel.Error]: 'error',
-  //         [NoSilentTraceLevel.Fatal]: 'fatal',
-  //     }[lvl];
-  // }
-
-  static error(msg: LogPayload) {
-    Logger.log(msg, "error");
+  static error(payload: LogPayload) {
+    Logger.log(payload, "error");
   }
 
-  static info(msg: any, show?: boolean) {
-    Logger.log(msg, "info", { show });
+  static info(payload: any, show?: boolean) {
+    Logger.log(payload, "info", { show });
   }
 
-  static debug(msg: any) {
-    Logger.log(msg, "debug");
+  static debug(payload: any) {
+    Logger.log(payload, "debug");
   }
 
   static log = (
-    msg: LogPayload,
+    payload: LogPayload,
     lvl: TraceLevel,
     _opts?: { show?: boolean }
   ) => {
     if (Logger.cmpLevel(lvl)) {
-      let stringMsg = customStringify(msg);
-      Logger.logger && Logger.logger[lvl](msg);
+      let stringMsg = customStringify(payload);
+      Logger.logger && Logger.logger[lvl](payload);
       Logger.output?.appendLine(lvl + ": " + stringMsg);
       // FIXME: disable for now
       const shouldShow = false; // getStage() === "dev" && cleanOpts.show;
       if (shouldShow || Logger.cmpLevels(lvl, "error")) {
-        let cleanMsg = stringMsg;
+        let cleanMsg =
+          (payload.error ? payload.error.message : payload.msg) || stringMsg;
         if (Logger.cmpLevels(lvl, "error")) {
           window.showErrorMessage(cleanMsg);
         } else if (Logger.cmpLevels(lvl, "info")) {

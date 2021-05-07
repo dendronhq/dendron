@@ -2,6 +2,7 @@ import {
   CONSTANTS,
   DendronError,
   DHookEntry,
+  ERROR_SEVERITY,
   NoteProps,
 } from "@dendronhq/common-all";
 import execa from "execa";
@@ -42,6 +43,7 @@ export class HookUtils {
     if (!fs.existsSync(hookPath)) {
       return {
         error: new DendronError({
+          severity: ERROR_SEVERITY.MINOR,
           message: `hook ${hook.id} has missing script. ${hookPath} doesn't exist`,
         }),
         valid: false,

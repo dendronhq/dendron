@@ -17,6 +17,7 @@ import {
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
+  ERROR_SEVERITY,
   GetNoteOptsV2,
   GetNotePayload,
   IDendronError,
@@ -185,7 +186,12 @@ export class DendronEngineV2 implements DEngine {
       const { message, stack, status } = error;
       let payload = { message, stack };
       return {
-        error: new DendronError({ payload, message, status }),
+        error: DendronError.createPlainError({
+          payload,
+          message,
+          status,
+          severity: ERROR_SEVERITY.FATAL,
+        }),
         data: {
           notes: {},
           schemas: {},

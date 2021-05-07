@@ -55,17 +55,15 @@ export class ReloadIndexCommand extends BasicCommand<
     const { error } = await engine.init();
     const durationEngineInit = getDurationMilliseconds(start);
     this.L.info({ ctx, durationEngineInit });
+
+    // if fatal, stop initialization
     if (error && error.severity !== ERROR_SEVERITY.MINOR) {
       this.L.error({ ctx, error, msg: "unable to initialize engine" });
       return;
     }
     if (error) {
       let msg = "init error";
-      if (error.payload) {
-        const payload = JSON.parse(error.payload).schema.payload;
-        msg = `Error with parsing some schemas during initialization. Please go to https://dendron.so/notes/c5e5adde-5459-409b-b34d-a0d75cbb1052.html#troubleshooting to resolve. ${payload}`;
-      }
-      this.L.error({ ctx, error, msg: `init error` });
+      this.L.error({ ctx, error, msg });
     }
     this.L.info({ ctx, msg: "exit" });
     ws.dendronTreeView?.treeProvider.refresh();

@@ -25,6 +25,13 @@ export enum ERROR_STATUS {
   NO_PARENT_FOR_NOTE = "no_parent_for_note",
   CANT_DELETE_ROOT = "no_delete_root_node",
   ENGINE_NOT_SET = "no_engine_set",
+  // --- 400
+  // 401
+  NOT_AUTHORIZED = "not_authorized",
+  // 402
+  DOES_NOT_EXIST = "does_not_exist_error",
+  // --- 500
+  UNKNOWN = "unknown",
 }
 
 /**

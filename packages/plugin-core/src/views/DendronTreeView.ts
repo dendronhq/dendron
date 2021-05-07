@@ -143,8 +143,11 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
             msg: `no childNote found: ${c}, current note: ${note.id}`,
             fullDump: _.values(ndict).map((n) => NoteUtils.toLogObj(n)),
           };
-          const err = new DendronError({ payload });
-          Logger.error({ ctx, err });
+          const err = new DendronError({
+            message: "error updating tree view",
+            payload,
+          });
+          Logger.error({ ctx, error: err });
           throw err;
         }
         return (await this.parseTree(childNote, ndict)).id;

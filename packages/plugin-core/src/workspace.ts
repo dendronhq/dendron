@@ -163,7 +163,7 @@ export class DendronWorkspace {
       const out = await cb();
       return out;
     } catch (err) {
-      Logger.error({ ctx, err });
+      Logger.error({ ctx, error: err });
       throw err;
     } finally {
       if (this.vaultWatcher) {

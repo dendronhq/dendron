@@ -93,7 +93,7 @@ export async function showDocAndHidePicker(
           return;
         },
         (err) => {
-          Logger.error({ ctx, err, msg: "exit" });
+          Logger.error({ ctx, error: err, msg: "exit" });
           throw err;
         }
       );

@@ -219,7 +219,7 @@ export class LookupProviderV2 {
       newNode: true,
     });
     if (resp.error) {
-      Logger.error({ err: resp.error });
+      Logger.error({ error: resp.error });
       throw Error();
     }
     return { uri, node: nodeNew, resp };
@@ -759,7 +759,7 @@ export class LookupProviderV2 {
       this.onDidAccept({ picker, opts, lc }).catch((err) => {
         Logger.error({
           ctx,
-          err: new DendronError({
+          error: new DendronError({
             message:
               "something went wrong. please submit a bug report to https://github.com/dendronhq/dendron/issues/new?assignees=&labels=&template=bug_report.md&title= with the output of `Dendron: Open Log`",
             payload: err,

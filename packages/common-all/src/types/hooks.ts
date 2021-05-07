@@ -7,3 +7,7 @@ export type DHookEntry = {
 export type DHookDict = {
   onCreate: DHookEntry[];
 };
+
+export enum DHookType {
+  onCreate = "onCreate",
+}

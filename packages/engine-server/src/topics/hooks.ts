@@ -1,7 +1,9 @@
 import {
   CONSTANTS,
+  DendronConfig,
   DendronError,
   DHookEntry,
+  DHookType,
   ERROR_SEVERITY,
   NoteProps,
   NoteUtils,
@@ -17,6 +19,24 @@ export type RequireHookResp = {
 };
 
 export class HookUtils {
+  static addToConfig({
+    config,
+    hookType,
+    hookEntry,
+  }: {
+    config: DendronConfig;
+    hookType: DHookType;
+    hookEntry: DHookEntry;
+  }) {
+    let onCreate: DHookEntry[] = _.get(
+      config.hooks,
+      hookType,
+      [] as DHookEntry[]
+    ).concat([hookEntry]);
+    config.hooks = config.hooks || { onCreate: [] };
+    config.hooks.onCreate = onCreate;
+    return config;
+  }
   static getHookDir(wsRoot: string) {
     return path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE);
   }

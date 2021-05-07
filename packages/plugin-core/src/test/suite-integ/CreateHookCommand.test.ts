@@ -1,6 +1,7 @@
+import { IDendronError } from "@dendronhq/common-all";
 import { AssertUtils, ENGINE_HOOKS } from "@dendronhq/common-test-utils";
+import { DConfig, HookUtils } from "@dendronhq/engine-server";
 import { TestHookUtils } from "@dendronhq/engine-test-utils";
-import { HookUtils } from "@dendronhq/engine-server";
 import { describe } from "mocha";
 import path from "path";
 import sinon from "sinon";
@@ -11,7 +12,6 @@ import { CreateHookCommand } from "../../commands/CreateHookCommand";
 import { VSCodeUtils } from "../../utils";
 import { expect } from "../testUtilsv2";
 import { runLegacyMultiWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
-import { IDendronError } from "@dendronhq/common-all";
 
 suite(CreateHookCommand.key, function () {
   let ctx: vscode.ExtensionContext;
@@ -30,11 +30,17 @@ suite(CreateHookCommand.key, function () {
           await ENGINE_HOOKS.setupBasic(opts);
         },
         onInit: async ({ wsRoot }) => {
-          sinon
-            .stub(VSCodeUtils, "showInputBox")
-            .returns(Promise.resolve(hook));
+          const stub = sinon.stub(VSCodeUtils, "showInputBox");
+
+          stub.onCall(0).returns(Promise.resolve(hook));
+          stub.onCall(1).returns(Promise.resolve("*"));
+
           await new CreateHookCommand().run();
           const editor = VSCodeUtils.getActiveTextEditorOrThrow();
+          const config = DConfig.getOrCreate(wsRoot);
+          expect(config.hooks).toEqual({
+            onCreate: [{ id: hook, pattern: "*", type: "js" }],
+          });
           expect(editor.document.uri.fsPath).toEqual(
             path.join(
               HookUtils.getHookScriptPath({ basename: `${hook}.js`, wsRoot })

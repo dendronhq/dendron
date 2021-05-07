@@ -1,5 +1,5 @@
-import { DendronError, IDendronError } from "@dendronhq/common-all";
-import { HookUtils } from "@dendronhq/engine-server";
+import { DendronError, DHookType, IDendronError } from "@dendronhq/common-all";
+import { DConfig, HookUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import path from "path";
 import { Uri } from "vscode";
@@ -8,7 +8,7 @@ import { VSCodeUtils } from "../utils";
 import { getEngine } from "../workspace";
 import { BasicCommand } from "./base";
 
-type CommandOpts = { scriptName: string };
+type CommandOpts = { hookName: string; hookFilter: string };
 
 type CommandOutput = { error: IDendronError } | void;
 
@@ -20,11 +20,10 @@ const hookTemplate = `
  @params execa: instance of [execa](https://github.com/sindresorhus/execa#execacommandcommand-options)
  @params _: instance of [lodash](https://lodash.com/docs)
  */
-module.exports = async function({note, execa, _}) {
+module.exports = async function({wsRoot, note, NoteUtils, execa, _}) {
     // do some changes
     return {note};
 };
-
 `;
 
 export class CreateHookCommand extends BasicCommand<
@@ -34,21 +33,28 @@ export class CreateHookCommand extends BasicCommand<
   static key = DENDRON_COMMANDS.CREATE_HOOK.key;
 
   async gatherInputs() {
-    const scriptName = await VSCodeUtils.showInputBox({
+    const hookName = await VSCodeUtils.showInputBox({
       placeHolder: "name of hook",
     });
-    if (!scriptName) {
+    if (!hookName) {
       return undefined;
     }
-    return { scriptName };
+    const hookFilter = await VSCodeUtils.showInputBox({
+      placeHolder: "filter for hook",
+      value: "*",
+    });
+    if (!hookFilter) {
+      return undefined;
+    }
+    return { hookName, hookFilter };
   }
 
-  async execute({ scriptName }: CommandOpts) {
+  async execute({ hookName, hookFilter }: CommandOpts) {
     const engine = getEngine();
     const { wsRoot } = engine;
     const scriptPath = HookUtils.getHookScriptPath({
       wsRoot,
-      basename: scriptName + ".js",
+      basename: hookName + ".js",
     });
     fs.ensureDirSync(path.dirname(scriptPath));
     if (fs.existsSync(scriptPath)) {
@@ -59,6 +65,16 @@ export class CreateHookCommand extends BasicCommand<
       return { error };
     }
     fs.writeFileSync(scriptPath, hookTemplate);
+    const config = HookUtils.addToConfig({
+      config: engine.config,
+      hookEntry: {
+        id: hookName,
+        pattern: hookFilter,
+        type: "js",
+      },
+      hookType: DHookType.onCreate,
+    });
+    DConfig.writeConfig({ wsRoot, config });
     await VSCodeUtils.openFileInEditor(Uri.file(scriptPath));
     return;
   }

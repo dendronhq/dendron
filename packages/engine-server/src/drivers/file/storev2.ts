@@ -14,7 +14,7 @@ import {
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
-  ENGINE_ERROR_CODES,
+  ERROR_STATUS,
   ERROR_SEVERITY,
   NoteChangeEntry,
   NoteProps,
@@ -110,8 +110,9 @@ export class FileStorage implements DStore {
       let error: DendronError | null = null;
       const resp = await this.initSchema();
       if (!_.isNull(resp.error)) {
-        error = new DendronError({
-          code: ERROR_SEVERITY.MINOR,
+        error = DendronError.createPlainError({
+          message: "schema malformed",
+          severity: ERROR_SEVERITY.MINOR,
           payload: { schema: resp.error },
         });
       }
@@ -137,7 +138,10 @@ export class FileStorage implements DStore {
   ): Promise<StoreDeleteNoteResp> {
     const ctx = "deleteNote";
     if (id === "root") {
-      throw new DendronError({ status: ENGINE_ERROR_CODES.CANT_DELETE_ROOT });
+      throw new DendronError({
+        message: "",
+        status: ERROR_STATUS.CANT_DELETE_ROOT,
+      });
     }
     const noteToDelete = this.notes[id];
     const ext = ".md";
@@ -165,8 +169,8 @@ export class FileStorage implements DStore {
       // no children, delete reference from parent
       this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
       if (!noteToDelete.parent) {
-        throw new DendronError({
-          status: ENGINE_ERROR_CODES.NO_PARENT_FOR_NOTE,
+        throw DendronError.createFromStatus({
+          status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
         });
       }
       // remove from parent
@@ -207,7 +211,9 @@ export class FileStorage implements DStore {
     const ctx = "deleteSchema";
     this.logger.info({ ctx, msg: "enter", id });
     if (id === "root") {
-      throw new DendronError({ status: ENGINE_ERROR_CODES.CANT_DELETE_ROOT });
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.CANT_DELETE_ROOT,
+      });
     }
     const schemaToDelete = this.schemas[id];
     const ext = ".schema.yml";
@@ -263,7 +269,9 @@ export class FileStorage implements DStore {
     }) as string[];
     this.logger.info({ ctx, schemaFiles });
     if (_.isEmpty(schemaFiles)) {
-      throw new DendronError({ status: ENGINE_ERROR_CODES.NO_SCHEMA_FOUND });
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.NO_SCHEMA_FOUND,
+      });
     }
     const { schemas, errors } = await new SchemaParser({
       store: this,
@@ -451,7 +459,7 @@ export class FileStorage implements DStore {
       })
     ).catch((err) => {
       this.logger.error({ err });
-      throw new DendronError({ payload: err });
+      throw new DendronError({ message: " error rename note", payload: err });
     });
     const newNote: NoteProps = {
       ...oldNote,

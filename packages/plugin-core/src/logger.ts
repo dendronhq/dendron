@@ -12,7 +12,6 @@ export type LogPayload = Partial<{
   ctx: string;
   err: DendronError;
   msg: string;
-  friendly: string;
 }>;
 
 export const UNKNOWN_ERROR_MSG = `You found a bug! We didn't think this could happen but you proved us wrong. Please file the bug here -->  https://github.com/dendronhq/dendron/issues/new?assignees=&labels=&template=bug_report.md&title= We will put our best bug exterminators on this right away!`;
@@ -100,12 +99,6 @@ export class Logger {
       if (shouldShow || Logger.cmpLevels(lvl, "error")) {
         let cleanMsg = stringMsg;
         if (Logger.cmpLevels(lvl, "error")) {
-          if (!_.isUndefined(msg?.friendly)) {
-            cleanMsg = msg.friendly;
-          }
-          if (!_.isUndefined(msg?.err?.friendly)) {
-            cleanMsg = msg.err!.friendly;
-          }
           window.showErrorMessage(cleanMsg);
         } else if (Logger.cmpLevels(lvl, "info")) {
           window.showInformationMessage(cleanMsg);

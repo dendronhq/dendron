@@ -760,7 +760,7 @@ export class LookupProviderV2 {
         Logger.error({
           ctx,
           err: new DendronError({
-            friendly:
+            message:
               "something went wrong. please submit a bug report to https://github.com/dendronhq/dendron/issues/new?assignees=&labels=&template=bug_report.md&title= with the output of `Dendron: Open Log`",
             payload: err,
           }),

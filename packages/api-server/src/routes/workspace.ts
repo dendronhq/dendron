@@ -1,4 +1,4 @@
-import { DendronError, ENGINE_ERROR_CODES } from "@dendronhq/common-all";
+import { DendronError, ERROR_STATUS } from "@dendronhq/common-all";
 import {
   WorkspaceInitRequest,
   WorkspaceListPayload,
@@ -37,7 +37,7 @@ router.post("/sync", async (req: Request, res: Response) => {
   } catch (err) {
     res.json({
       error: new DendronError({
-        message: ENGINE_ERROR_CODES.ENGINE_NOT_SET,
+        message: ERROR_STATUS.ENGINE_NOT_SET,
         payload: err,
       }),
     });

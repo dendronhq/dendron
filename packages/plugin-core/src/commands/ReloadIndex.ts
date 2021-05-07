@@ -60,12 +60,12 @@ export class ReloadIndexCommand extends BasicCommand<
       return;
     }
     if (error) {
-      let friendly: string | undefined;
+      let msg = "init error";
       if (error.payload) {
         const payload = JSON.parse(error.payload).schema.payload;
-        friendly = `Error with parsing some schemas during initialization. Please go to https://dendron.so/notes/c5e5adde-5459-409b-b34d-a0d75cbb1052.html#troubleshooting to resolve. ${payload}`;
+        msg = `Error with parsing some schemas during initialization. Please go to https://dendron.so/notes/c5e5adde-5459-409b-b34d-a0d75cbb1052.html#troubleshooting to resolve. ${payload}`;
       }
-      this.L.error({ ctx, error, msg: `init error`, friendly });
+      this.L.error({ ctx, error, msg: `init error` });
     }
     this.L.info({ ctx, msg: "exit" });
     ws.dendronTreeView?.treeProvider.refresh();

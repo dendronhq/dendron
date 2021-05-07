@@ -19,6 +19,7 @@ import {
   EngineWriteOptsV2,
   GetNoteOptsV2,
   GetNotePayload,
+  IDendronError,
   NoteChangeEntry,
   NoteProps,
   NotePropsDict,
@@ -159,19 +160,32 @@ export class DendronEngineV2 implements DEngine {
         }
         return valid;
       });
-      const error = new DendronCompositeError(
-        (_.isNull(storeError) ? [] : [storeError]).concat(hookErrors)
+      const allErrors = (_.isNull(storeError) ? [] : [storeError]).concat(
+        hookErrors
       );
+      let error: IDendronError | null;
+      switch (_.size(allErrors)) {
+        case 0: {
+          error = null;
+          break;
+        }
+        case 1: {
+          error = new DendronError(allErrors[0]);
+          break;
+        }
+        default:
+          error = new DendronCompositeError(allErrors);
+      }
       this.logger.info({ ctx: "init:ext", error, storeError, hookErrors });
       return {
         error,
         data: { notes, schemas },
       };
     } catch (error) {
-      const { message, stack, status, friendly } = error;
+      const { message, stack, status } = error;
       let payload = { message, stack };
       return {
-        error: new DendronError({ payload, message, status, friendly }),
+        error: new DendronError({ payload, message, status }),
         data: {
           notes: {},
           schemas: {},
@@ -278,7 +292,7 @@ export class DendronEngineV2 implements DEngine {
       changed = (await this.writeNote(noteNew, { updateExisting })).data;
     }
     if (!createIfNew && !maybeNote) {
-      error = new DendronError({ status: "no_note_found" });
+      error = new DendronError({ message: "no_note_found" });
     }
     await this.refreshNotesV2(changed);
     return {
@@ -421,7 +435,7 @@ export class DendronEngineV2 implements DEngine {
       };
     } catch (err) {
       return {
-        error: new DendronError({ payload: err }),
+        error: new DendronError({ message: "rename error", payload: err }),
       };
     }
   }

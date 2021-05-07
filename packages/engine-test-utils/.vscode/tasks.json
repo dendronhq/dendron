@@ -3,12 +3,12 @@
   "tasks": [
     {
       "label": "test:watch",
-      "command": "yarn test:watch ${relativeFile} -u",
+      "command": "yarn test:watch ${relativeFile} --bail -u",
       "type": "shell",
       "problemMatcher": [],
       "options": {
         "env": {
-          "LOG_LEVEL": "info",
+          "LOG_LEVEL": "error",
           "LOG_DST": "../../logs/engine-test-utils.log"
         }
       }

@@ -28,7 +28,6 @@ const createEngine = ({ wsRoot }: WorkspaceOpts) => {
 
 describe("engine, schemas/", () => {
   const nodeType = "SCHEMAS";
-
   ENGINE_PRESETS.forEach((pre) => {
     const { name, presets } = pre;
     describe(name, () => {

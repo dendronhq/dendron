@@ -1,18 +1,31 @@
-import { ERROR_SEVERITY } from "./constants";
+import { ERROR_SEVERITY, ERROR_STATUS } from "./constants";
 
-export type DendronErrorPlainObj = {
+export type DendronErrorProps = {
   name: string;
+  /**
+   * General message
+   */
   message: string;
-  isComposite: boolean;
-  severity?: ERROR_SEVERITY;
   payload?: any;
+  /**
+   * See {@link ERROR_SEVERITY}
+   */
+  severity?: ERROR_SEVERITY;
+  /**
+   * Optional HTTP status code for error
+   */
+  code?: number;
   /**
    * status messages
    */
   status?: string;
 };
 
-export type IDendronError = DendronErrorPlainObj & {};
+export type DendronErrorPlainObj = {
+  isComposite: boolean;
+} & DendronErrorProps;
+
+export type IDendronError = DendronErrorPlainObj;
 
 export const error2PlainObject = (err: IDendronError): DendronErrorPlainObj => {
   const { name, message, isComposite, severity, payload, status } = err;
@@ -28,29 +41,44 @@ export const error2PlainObject = (err: IDendronError): DendronErrorPlainObj => {
 
 export class DendronError extends Error implements IDendronError {
   public status?: string;
-  public friendly?: string;
   public payload?: string;
   public severity?: ERROR_SEVERITY;
+  public code?: number;
   public message: string;
   isComposite = false;
 
+  static createPlainError(props: Omit<DendronErrorProps, "name">) {
+    return error2PlainObject({
+      ...props,
+      isComposite: false,
+      name: "DendronError",
+    });
+  }
+
+  static createFromStatus({
+    status,
+    ...rest
+  }: { status: ERROR_STATUS } & Partial<DendronErrorProps>) {
+    return error2PlainObject({
+      isComposite: false,
+      name: "DendronError",
+      message: status,
+      status,
+      ...rest,
+    });
+  }
+
   constructor({
-    friendly,
     message,
     status,
     payload,
+    severity,
     code,
-  }: {
-    friendly?: string;
-    message?: string;
-    status?: string;
-    code?: number;
-    payload?: any;
-  }) {
+  }: Omit<DendronErrorProps, "name">) {
     super(message);
     this.status = status || "unknown";
+    this.severity = severity;
     this.message = message || "";
-    this.friendly = friendly;
     if (payload?.message && payload?.stack) {
       this.payload = JSON.stringify({
         msg: payload.message,
@@ -59,7 +87,7 @@ export class DendronError extends Error implements IDendronError {
     } else {
       this.payload = JSON.stringify(payload || {});
     }
-    this.severity = code;
+    this.code = code;
   }
 }
 

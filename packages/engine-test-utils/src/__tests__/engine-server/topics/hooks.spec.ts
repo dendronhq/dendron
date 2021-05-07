@@ -306,35 +306,35 @@ describe("engine", async () => {
 });
 
 describe("remote engine", async () => {
-  testWithEngine(
-    "bad hook",
-    async ({ initResp }) => {
-      expect(
-        initResp.error!.payload![0].message.startsWith(
-          "hook hello has missing script"
-        )
-      ).toBeTruthy();
-    },
-    {
-      initHooks: true,
-      createEngine: createEngineFromServer,
-      preSetupHook: async ({ wsRoot }) => {
-        TestConfigUtils.withConfig(
-          (config) => {
-            config.hooks = {
-              onCreate: [
-                {
-                  id: "hello",
-                  pattern: "*",
-                  type: "js",
-                },
-              ],
-            };
-            return config;
-          },
-          { wsRoot }
-        );
+  test("bad hook", async () => {
+    await runEngineTestV5(
+      async ({ initResp }) => {
+        expect(
+          initResp.error!.message.startsWith("hook hello has missing script")
+        ).toBeTruthy();
       },
-    }
-  );
+      {
+        initHooks: true,
+        expect,
+        createEngine: createEngineFromServer,
+        preSetupHook: async ({ wsRoot }) => {
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.hooks = {
+                onCreate: [
+                  {
+                    id: "hello",
+                    pattern: "*",
+                    type: "js",
+                  },
+                ],
+              };
+              return config;
+            },
+            { wsRoot }
+          );
+        },
+      }
+    );
+  });
 });

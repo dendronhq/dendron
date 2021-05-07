@@ -1,5 +1,5 @@
 import {
-  ENGINE_ERROR_CODES,
+  ERROR_STATUS,
   ERROR_SEVERITY,
   NoteProps,
   NoteUtils,
@@ -276,7 +276,7 @@ const NOTES = {
       return [
         {
           actual: initResp.error?.status,
-          expected: ENGINE_ERROR_CODES.BAD_PARSE_FOR_NOTE,
+          expected: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
         },
       ];
     },

@@ -1,7 +1,7 @@
 import {
   DendronError,
   DVault,
-  ENGINE_ERROR_CODES,
+  ERROR_STATUS,
   SchemaModuleProps,
 } from "@dendronhq/common-all";
 import {
@@ -41,7 +41,7 @@ export class SchemaParser extends ParserBase {
           return this.parseFile(fpath, vault);
         } catch (err) {
           return new DendronError({
-            message: ENGINE_ERROR_CODES.BAD_PARSE_FOR_SCHEMA,
+            message: ERROR_STATUS.BAD_PARSE_FOR_SCHEMA,
             payload: { fpath },
           });
         }

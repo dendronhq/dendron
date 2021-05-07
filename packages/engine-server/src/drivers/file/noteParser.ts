@@ -3,7 +3,7 @@ import {
   DNodeUtils,
   DStore,
   DVault,
-  ENGINE_ERROR_CODES,
+  ERROR_STATUS,
   NoteProps,
   NotePropsDict,
   NotesCache,
@@ -66,13 +66,13 @@ export class NoteParser extends ParserBase {
 
     // get root note
     if (_.isUndefined(fileMetaDict[1])) {
-      throw new DendronError({ status: ENGINE_ERROR_CODES.NO_ROOT_NOTE_FOUND });
+      throw new DendronError({ status: ERROR_STATUS.NO_ROOT_NOTE_FOUND });
     }
     const rootFile = fileMetaDict[1].find(
       (n) => n.fpath === "root.md"
     ) as FileMeta;
     if (!rootFile) {
-      throw new DendronError({ status: ENGINE_ERROR_CODES.NO_ROOT_NOTE_FOUND });
+      throw new DendronError({ status: ERROR_STATUS.NO_ROOT_NOTE_FOUND });
     }
     const rootProps = this.parseNoteProps({
       fileMeta: rootFile,
@@ -205,7 +205,7 @@ export class NoteParser extends ParserBase {
       }));
     } catch (_err) {
       const err = {
-        status: ENGINE_ERROR_CODES.BAD_PARSE_FOR_NOTE,
+        status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
         msg: JSON.stringify({
           fname: fileMeta.fpath,
           error: _err.message,

@@ -5,7 +5,7 @@ import minimatch from "minimatch";
 import path from "path";
 import title from "title";
 import { URI } from "vscode-uri";
-import { CONSTANTS, ENGINE_ERROR_CODES } from "./constants";
+import { CONSTANTS, ERROR_STATUS } from "./constants";
 import { DendronError } from "./error";
 import { Time } from "./time";
 import {
@@ -356,12 +356,12 @@ export class NoteUtils {
     }
     if (!parent && !createStubs) {
       const err = {
-        status: ENGINE_ERROR_CODES.NO_PARENT_FOR_NOTE,
+        status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
         msg: JSON.stringify({
           fname: note.fname,
         }),
       };
-      throw new DendronError(err);
+      throw DendronError.createFromStatus(err);
     }
     if (!parent) {
       parent = DNodeUtils.findClosestParent(note.fname, notesList, {
@@ -704,7 +704,10 @@ export class NoteUtils {
       });
       return fpath;
     } catch (err) {
-      throw new DendronError({ payload: { note, wsRoot } });
+      throw new DendronError({
+        message: "bad path",
+        payload: { note, wsRoot },
+      });
     }
   }
 
@@ -962,8 +965,8 @@ export class SchemaUtils {
         id: "root",
       });
       if (!rootSchemaRoot) {
-        throw new DendronError({
-          status: ENGINE_ERROR_CODES.NO_ROOT_SCHEMA_FOUND,
+        throw DendronError.createFromStatus({
+          status: ERROR_STATUS.NO_ROOT_SCHEMA_FOUND,
         });
       } else {
         return rootSchemaRoot as SchemaProps;

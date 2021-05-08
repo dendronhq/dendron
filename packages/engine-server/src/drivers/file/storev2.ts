@@ -594,7 +594,7 @@ export class FileStorage implements DStore {
     note: NoteProps,
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
-    const ctx = "FileStore:writeNote";
+    const ctx = `FileStore:writeNote:${note.fname}`;
     let changed: NoteProps[] = [];
     let error: DendronError | null = null;
     this.logger.info({

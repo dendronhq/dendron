@@ -9,6 +9,7 @@ import {
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
+import { createLogger } from "@dendronhq/common-server";
 import execa from "execa";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -85,12 +86,17 @@ export class HookUtils {
     wsRoot: string;
   }): Promise<RequireHookResp> => {
     let req = require;
+    const logger = createLogger();
     if (getStage() === "prod") {
       const webReq = require(`./webpack-require-hack.js`);
       if (webReq) {
+        logger.info({ ctx: "requireHook", msg: "using webpack require" });
         req = webReq;
+      } else {
+        logger.info({ ctx: "requireHook", msg: "using regular require" });
       }
     }
+    logger.info({ ctx: "requireHook", fpath, wsRoot });
     return await req(fpath)({
       wsRoot,
       note: { ...note },

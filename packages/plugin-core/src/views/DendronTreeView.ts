@@ -99,6 +99,10 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
     return _.sortBy(notes, "label");
   }
 
+  sortChildren(children: string[], noteDict: NotePropsDict) {
+    return _.sortBy(children, (id) => noteDict[id].title);
+  }
+
   getTreeItem(id: string): vscode.TreeItem {
     return this.tree[id];
   }
@@ -113,7 +117,9 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
       return Promise.resolve([]);
     }
     if (id) {
-      return Promise.resolve(this.tree[id].children);
+      const children = this.tree[id].children;
+      this.sortChildren(children, client.notes);
+      return Promise.resolve(children);
     } else {
       Logger.info({ ctx, msg: "reconstructing tree" });
       return Promise.all(
@@ -135,8 +141,10 @@ export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
     const ctx = "parseTree";
     const tn = createTreeNote(note);
     this.tree[note.id] = tn;
+    const children = note.children;
+    this.sortChildren(children, ndict);
     tn.children = await Promise.all(
-      note.children.map(async (c) => {
+      children.map(async (c) => {
         const childNote = ndict[c];
         if (!childNote) {
           const payload = {

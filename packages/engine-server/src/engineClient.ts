@@ -289,6 +289,19 @@ export class DendronEngineClient implements DEngineClientV2 {
           this.history &&
             this.history.add({ source: "engine", action: "create", uri });
         }
+        if (ent.status === "update") {
+          ent.note.children = _.sortBy(
+            ent.note.children,
+            (id) =>
+              _.get(
+                this.notes,
+                id,
+                _.find(notes, (ent) => ent.note.id === id)?.note || {
+                  title: "foo",
+                }
+              ).title
+          );
+        }
         this.notes[id] = ent.note;
       }
     });

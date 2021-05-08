@@ -1,8 +1,10 @@
+import { VSCodeEvents } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
 import { LookupControllerV2 } from "../components/lookup/LookupControllerV2";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
+import { AnalyticsUtils } from "../utils/analytics";
 import { BasicCommand } from "./base";
 
 export type LookupEffectType = "copyNoteLink" | "copyNoteRef" | "multiSelect";
@@ -63,6 +65,10 @@ export class LookupCommand extends BasicCommand<CommandOpts, CommandOutput> {
       value: opts.value,
     });
     profile = getDurationMilliseconds(start);
+    AnalyticsUtils.track(VSCodeEvents.Lookup_Show, {
+      duration: profile,
+      flavor: opts.flavor,
+    });
     Logger.info({ ctx, profile, msg: "post:show" });
     return out;
   }

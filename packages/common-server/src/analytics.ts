@@ -17,7 +17,6 @@ enum SiteEvents {
 enum SubscriptionEvents {
   CREATED = "subscriptionCreated",
 }
-const REVENUE_EVENT = "revenue";
 
 // === PROPS
 

@@ -2,6 +2,7 @@ import { VSCodeEvents } from "@dendronhq/common-all";
 import { SegmentClient } from "@dendronhq/common-server";
 import { window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
+import { AnalyticsUtils } from "../utils/analytics";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {};
@@ -19,7 +20,7 @@ export class DisableTelemetryCommand extends BasicCommand<
     return {};
   }
   async execute() {
-    SegmentClient.instance().track(VSCodeEvents.DisableTelemetry);
+    AnalyticsUtils.track(VSCodeEvents.DisableTelemetry);
     SegmentClient.disable();
     window.showInformationMessage("telemetry disabled");
   }

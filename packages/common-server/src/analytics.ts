@@ -68,6 +68,10 @@ export const SEGMENT_EVENTS = {
   SubscriptionEvents,
 };
 
+type SegmentExtraArg = {
+  context?: any;
+};
+
 export class SegmentClient {
   public _segmentInstance: Analytics;
   private _anonymousId: string;
@@ -124,90 +128,56 @@ export class SegmentClient {
     }
   }
 
-  identifyAnonymous(props?: { [key: string]: any }) {
+  identifyAnonymous(props?: { [key: string]: any }, opts?: SegmentExtraArg) {
+    this.identify(undefined, props, opts);
+  }
+
+  identify(
+    id?: string,
+    props?: { [key: string]: any },
+    opts?: SegmentExtraArg
+  ) {
     if (this._hasOptedOut || this._segmentInstance == null) {
       return;
     }
     try {
-      this._segmentInstance.identify({
+      const { context } = opts || {};
+      const identifyOpts: any = {
         anonymousId: this._anonymousId,
         traits: props,
-      });
+        context,
+      };
+      if (id) {
+        identifyOpts.userId = id;
+      }
+      this._segmentInstance.identify(identifyOpts);
       this._segmentInstance.flush();
     } catch (ex) {
       this.logger.error(ex);
     }
   }
 
-  identify(_id?: string, props?: { [key: string]: any }) {
-    if (this._hasOptedOut || this._segmentInstance == null) {
-      return;
-    }
-    try {
-      this._segmentInstance.identify({
-        anonymousId: this._anonymousId,
-        traits: props,
-      });
-      this._segmentInstance.flush();
-    } catch (ex) {
-      this.logger.error(ex);
-    }
-  }
-
-  track(event: string, data?: { [key: string]: string | number | boolean }) {
+  track(
+    event: string,
+    data?: { [key: string]: string | number | boolean },
+    opts?: { context: any }
+  ) {
     if (this._hasOptedOut || this._segmentInstance == null) {
       return;
     }
 
     const payload: { [key: string]: any } = { ...data };
+    const { context } = opts || {};
 
     try {
       this._segmentInstance.track({
         anonymousId: this._anonymousId,
         event,
         properties: payload,
+        context,
       });
-      this._segmentInstance.flush();
     } catch (ex) {
       this.logger.error(ex);
     }
   }
 }
-
-// EXAMPLES:
-function demoPublishFunnel() {
-  const seg = SegmentClient.instance();
-  const userId = "test-user3";
-  seg._segmentInstance.identify({ userId });
-  seg._segmentInstance.track({ userId, event: SiteEvents.PUBLISH_CLICKED });
-  seg._segmentInstance.track({ userId, event: SiteEvents.SOURCE_INFO_ENTER });
-  seg._segmentInstance.track({ userId, event: SiteEvents.UPDATE_START });
-  seg._segmentInstance.track({ userId, event: SiteEvents.VISIT_SITE });
-}
-
-function demoRevenueEvent() {
-  const seg = SegmentClient.instance();
-  const userId = "test-user3";
-  seg._segmentInstance.track({
-    userId,
-    event: REVENUE_EVENT,
-    properties: {
-      $price: 4,
-      $quantity: 1,
-      $revenue: "4",
-      source: UserTier.SEED,
-    },
-  });
-}
-
-export function main() {
-  demoPublishFunnel();
-  demoRevenueEvent();
-  console.log("done");
-}
-
-/**
- * Uncomment the below
- * ts-node --log-error ./src/analytics.ts
- */
-// main();

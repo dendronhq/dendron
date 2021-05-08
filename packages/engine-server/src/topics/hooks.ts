@@ -85,17 +85,18 @@ export class HookUtils {
     fpath: string;
     wsRoot: string;
   }): Promise<RequireHookResp> => {
-    let req = require;
     const logger = createLogger();
-    if (getStage() === "prod") {
-      const webReq = require(`./webpack-require-hack.js`);
-      if (webReq) {
-        logger.info({ ctx: "requireHook", msg: "using webpack require" });
-        req = webReq;
-      } else {
-        logger.info({ ctx: "requireHook", msg: "using regular require" });
-      }
-    }
+    logger.info({ ctx: "requireHook", msg: "using webpack require" });
+    const req = require(`./webpack-require-hack.js`);
+    // if (getStage() === "prod") {
+    //   const webReq = require(`./webpack-require-hack.js`);
+    //   if (webReq) {
+    //     logger.info({ ctx: "requireHook", msg: "using webpack require" });
+    //     req = webReq;
+    //   } else {
+    //     logger.info({ ctx: "requireHook", msg: "using regular require" });
+    //   }
+    // }
     logger.info({ ctx: "requireHook", fpath, wsRoot });
     return await req(fpath)({
       wsRoot,

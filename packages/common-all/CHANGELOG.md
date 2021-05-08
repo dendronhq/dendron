@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.40.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.40.4-alpha.0) (2021-05-08)
+
+### Bug Fixes
+
+- make requireHook work with webpack ([c0835d2](https://github.com/dendronhq/dendron/commit/c0835d2e34fde992c5484ac4be7f4eb0ae43dd6a))
+
 ## [0.40.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.40.3-alpha.0) (2021-05-08)
 
 ### Bug Fixes

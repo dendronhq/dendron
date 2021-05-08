@@ -37,6 +37,7 @@ export class HookUtils {
     config.hooks.onCreate = onCreate;
     return config;
   }
+
   static getHookDir(wsRoot: string) {
     return path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE);
   }
@@ -49,6 +50,28 @@ export class HookUtils {
     wsRoot: string;
   }) {
     return path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE, basename);
+  }
+
+  static removeFromConfig({
+    config,
+    hookType,
+    hookId,
+  }: {
+    config: DendronConfig;
+    hookType: DHookType;
+    hookId: string;
+  }) {
+    let onCreate: DHookEntry[] = _.get(
+      config.hooks,
+      hookType,
+      [] as DHookEntry[]
+    );
+    config.hooks = config.hooks || { onCreate: [] };
+    onCreate = _.remove(onCreate, { id: hookId });
+    const idx = _.findIndex(onCreate, { id: hookId });
+    onCreate.splice(idx, 1);
+    config.hooks.onCreate = onCreate;
+    return config;
   }
 
   static requireHook = async ({

@@ -12,6 +12,7 @@ import { CopyNoteRefCommand } from "./CopyNoteRef";
 import { CopyNoteURLCommand } from "./CopyNoteURL";
 import { CreateDailyJournalCommand } from "./CreateDailyJournal";
 import { CreateHookCommand } from "./CreateHookCommand";
+import { DeleteHookCommand } from "./DeleteHookCommand";
 import { DeleteNodeCommand } from "./DeleteNodeCommand";
 import { DiagnosticsReportCommand } from "./DiagnosticsReport";
 import { DisableTelemetryCommand } from "./DisableTelemetry";
@@ -56,6 +57,7 @@ const ALL_COMMANDS = [
   CopyNoteURLCommand,
   CreateDailyJournalCommand,
   CreateHookCommand,
+  DeleteHookCommand,
   DeleteNodeCommand,
   DiagnosticsReportCommand,
   DisableTelemetryCommand,

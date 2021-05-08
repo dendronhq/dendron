@@ -530,6 +530,13 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Create a hook",
     when: DendronContext.PLUGIN_ACTIVE,
   },
+  DELETE_HOOK: {
+    key: "dendron.deleteHook",
+    title: `${CMD_PREFIX} Hook Delete`,
+    group: "hooks",
+    desc: "Delete a hook",
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
   // --- Publishing
   SITE_BUILD: {
     key: "dendron.siteBuild",

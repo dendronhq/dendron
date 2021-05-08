@@ -99,7 +99,7 @@ export abstract class BaseCommand<
 export abstract class BasicCommand<
   TOpts,
   TOut = any,
-  TRunOpts = any
+  TRunOpts = TOpts
 > extends BaseCommand<TOpts, TOut, TOpts, TRunOpts> {
   async enrichInputs(inputs: TOpts): Promise<TOpts> {
     return inputs;

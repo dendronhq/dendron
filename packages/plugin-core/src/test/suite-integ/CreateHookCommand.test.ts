@@ -5,8 +5,6 @@ import { TestHookUtils } from "@dendronhq/engine-test-utils";
 import { describe } from "mocha";
 import path from "path";
 import sinon from "sinon";
-// // You can import and use all API from the 'vscode' module
-// // as well as import your extension to test it
 import * as vscode from "vscode";
 import { CreateHookCommand } from "../../commands/CreateHookCommand";
 import { VSCodeUtils } from "../../utils";

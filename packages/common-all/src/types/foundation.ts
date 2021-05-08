@@ -83,10 +83,16 @@ export type DNodeProps<T = any, TCustom = any> = {
    */
   body: string;
   /**
-   * Custom frontmatter
+   * Custom frontmatter. Add additional fields here and they will show up in the note frontmatter
    */
   custom?: TCustom;
+  /**
+   * Schemas that apply to the note
+   */
   schema?: { moduleId: string; schemaId: string };
+  /**
+   * The vault that a note belongs to
+   */
   vault: DVault;
 };
 

@@ -1,5 +1,5 @@
-const importEleventy = (importPath) => {
-    const eleventy = require(importPath);
-    return eleventy;
+const webpackRequire = (importPath) => {
+    const module = require(importPath);
+    return module;
 };
-module.exports = importEleventy;
+module.exports = webpackRequire;

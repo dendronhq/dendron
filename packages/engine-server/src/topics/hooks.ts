@@ -5,6 +5,7 @@ import {
   DHookEntry,
   DHookType,
   ERROR_SEVERITY,
+  getStage,
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
@@ -83,7 +84,14 @@ export class HookUtils {
     fpath: string;
     wsRoot: string;
   }): Promise<RequireHookResp> => {
-    return await require(fpath)({
+    let req = require;
+    if (getStage() === "prod") {
+      const webReq = require(`./webpack-require-hack.js`);
+      if (webReq) {
+        req = webReq;
+      }
+    }
+    return await req(fpath)({
       wsRoot,
       note: { ...note },
       execa,

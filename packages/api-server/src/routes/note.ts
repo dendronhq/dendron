@@ -1,4 +1,8 @@
-import { DendronError, WriteNoteResp } from "@dendronhq/common-all";
+import {
+  DendronError,
+  stringifyError,
+  WriteNoteResp,
+} from "@dendronhq/common-all";
 import {
   EngineBulkAddRequest,
   EngineDeleteRequest,
@@ -6,6 +10,7 @@ import {
   EngineRenameNoteRequest,
   EngineUpdateNoteRequest,
   EngineWriteRequest,
+  ExpressUtils,
   NoteQueryRequest,
 } from "@dendronhq/common-server";
 import { Request, Response, Router } from "express";
@@ -67,11 +72,15 @@ router.post("/write", async (req: Request, res: Response<WriteNoteResp>) => {
   const engine = await getWS({ ws: ws || "" });
   try {
     const out = await engine.writeNote(node, opts);
-    res.json(out);
+    if (!ExpressUtils.handleError(res, out)) {
+      res.json(out);
+    }
   } catch (err) {
-    res.json({
-      error: new DendronError({ message: JSON.stringify(err) }),
-      data: [],
+    ExpressUtils.handleError(res, {
+      error: DendronError.createPlainError({
+        message: err.message,
+        payload: stringifyError(err),
+      }),
     });
   }
 });

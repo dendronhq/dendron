@@ -156,7 +156,7 @@ export class DendronEngineV2 implements DEngine {
           wsRoot: this.wsRoot,
         });
         if (!valid && error) {
-          this.logger.error({ msg: "bad hook", hook });
+          this.logger.error({ msg: "bad hook", hook, error });
           hookErrors.push(error);
         }
         return valid;

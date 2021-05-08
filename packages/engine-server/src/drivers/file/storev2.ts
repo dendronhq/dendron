@@ -662,10 +662,16 @@ export class FileStorage implements DStore {
     );
     if (resp instanceof DendronError) {
       error = resp;
-      this.logger.info({ ctx, error });
+      this.logger.error({ ctx, error: stringifyError(error) });
     } else {
-      note = resp.note;
-      this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });
+      const valResp = NoteUtils.validate(resp.note);
+      if (valResp instanceof DendronError) {
+        error = valResp;
+        this.logger.error({ ctx, error: stringifyError(error) });
+      } else {
+        note = resp.note;
+        this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });
+      }
     }
     // order matters - only write file after parents are established @see(_writeNewNote)
     await note2File({

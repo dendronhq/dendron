@@ -83,7 +83,13 @@ export class HookUtils {
     fpath: string;
     wsRoot: string;
   }): Promise<RequireHookResp> => {
-    return await require(fpath)({ wsRoot, note, execa, _, NoteUtils });
+    return await require(fpath)({
+      wsRoot,
+      note: { ...note },
+      execa,
+      _,
+      NoteUtils,
+    });
   };
 
   static validateHook = ({

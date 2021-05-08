@@ -808,6 +808,22 @@ export class NoteUtils {
   static uri2Fname(uri: URI) {
     return path.basename(uri.fsPath, ".md");
   }
+
+  static validate(noteProps: Partial<NoteProps>) {
+    if (_.isUndefined(noteProps)) {
+      return DendronError.createFromStatus({
+        status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
+        message: "NoteProps is undefined",
+      });
+    }
+    if (_.isUndefined(noteProps.vault)) {
+      return DendronError.createFromStatus({
+        status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
+        message: "note vault is undefined",
+      });
+    }
+    return true;
+  }
 }
 
 type SchemaMatchResult = {

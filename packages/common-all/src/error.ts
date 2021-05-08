@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { ERROR_SEVERITY, ERROR_STATUS } from "./constants";
 
 export type DendronErrorProps = {
@@ -6,6 +7,9 @@ export type DendronErrorProps = {
    * General message
    */
   message: string;
+  /**
+   * Arbitrary payload
+   */
   payload?: any;
   /**
    * See {@link ERROR_SEVERITY}
@@ -16,7 +20,7 @@ export type DendronErrorProps = {
    */
   code?: number;
   /**
-   * status messages
+   * Custom status errors
    */
   status?: string;
 };
@@ -26,18 +30,6 @@ export type DendronErrorPlainObj = {
 } & DendronErrorProps;
 
 export type IDendronError = DendronErrorPlainObj;
-
-export const error2PlainObject = (err: IDendronError): DendronErrorPlainObj => {
-  const { name, message, isComposite, severity, payload, status } = err;
-  return {
-    name,
-    isComposite,
-    status,
-    payload,
-    severity,
-    message,
-  };
-};
 
 export class DendronError extends Error implements IDendronError {
   public status?: string;
@@ -59,8 +51,7 @@ export class DendronError extends Error implements IDendronError {
     status,
     ...rest
   }: { status: ERROR_STATUS } & Partial<DendronErrorProps>) {
-    return error2PlainObject({
-      isComposite: false,
+    return new DendronError({
       name: "DendronError",
       message: status,
       status,
@@ -108,3 +99,12 @@ export class IllegalOperationError extends DendronError {}
 export function stringifyError(err: Error) {
   return JSON.stringify(err, Object.getOwnPropertyNames(err));
 }
+
+export const error2PlainObject = (err: IDendronError): DendronErrorPlainObj => {
+  const out: Partial<DendronErrorPlainObj> = {};
+  Object.getOwnPropertyNames(err).forEach((k) => {
+    // @ts-ignore
+    out[k] = err[k];
+  });
+  return out as DendronErrorPlainObj;
+};

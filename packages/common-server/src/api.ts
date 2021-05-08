@@ -322,7 +322,12 @@ export abstract class API {
       payload.data = data;
       payload.error = error;
     } catch (err) {
-      payload.error = err;
+      // request.js will wrap errors
+      if (err?.error?.error) {
+        payload.error = err.error.error;
+      } else {
+        payload.error = err;
+      }
     }
     if (payload.error) {
       this._log(payload.error, "error");

@@ -20,7 +20,7 @@ import { TestHookUtils } from "../../../topics";
 const execaHookPayload = `module.exports = async function({note, execa, _}) {
     const {stdout} = await execa('echo', ['hello']);
     note.body = note.body + " " + _.trim(stdout);
-    return note;
+    return {note};
 };
 `;
 const { writeJSHook } = TestHookUtils;
@@ -267,6 +267,51 @@ describe("remote engine", async () => {
         expect,
         createEngine: createEngineFromServer,
         preSetupHook: async ({ wsRoot }) => {
+          TestConfigUtils.withConfig(
+            (config) => {
+              config.hooks = {
+                onCreate: [
+                  {
+                    id: "hello",
+                    pattern: "*",
+                    type: "js",
+                  },
+                ],
+              };
+              return config;
+            },
+            { wsRoot }
+          );
+        },
+      }
+    );
+  });
+
+  test("bad hook function", async () => {
+    await runEngineTestV5(
+      async ({ vaults, engine }) => {
+        const vault = _.find(vaults, { fsPath: "vault1" })!;
+        const note = NoteUtils.create({
+          id: "hooked",
+          fname: "hooked",
+          body: "hooked body",
+          vault,
+        });
+        const resp = await engine.writeNote(note, { newNode: true });
+        expect(
+          resp.error!.message.startsWith("NoteProps is undefined")
+        ).toBeTruthy();
+      },
+      {
+        initHooks: true,
+        expect,
+        createEngine: createEngineFromServer,
+        preSetupHook: async ({ wsRoot }) => {
+          TestHookUtils.writeJSHook({
+            wsRoot,
+            fname: "hello",
+            hookPayload: TestHookUtils.genBadJsHookPayload(),
+          });
           TestConfigUtils.withConfig(
             (config) => {
               config.hooks = {

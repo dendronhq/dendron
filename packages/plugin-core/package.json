@@ -6,7 +6,7 @@
     "publisher": "dendron",
     "version": "0.40.2",
     "engines": {
-        "vscode": "^1.45.0"
+        "vscode": "^1.54.0"
     },
     "categories": [
         "Other"
@@ -421,6 +421,12 @@
                 "when": "dendron:pluginActive"
             },
             {
+                "command": "dendron.deleteHook",
+                "title": "Dendron: Hook Delete",
+                "desc": "Delete a hook",
+                "when": "dendron:pluginActive"
+            },
+            {
                 "command": "dendron.siteBuild",
                 "title": "Dendron: Site Build",
                 "desc": "Build your notes using publishing v2",
@@ -659,7 +665,6 @@
         "@types/open": "^6.2.1",
         "@types/open-graph-scraper": "^4.7.0",
         "@types/semver": "^7.3.1",
-        "@types/vscode": "^1.45.0",
         "@typescript-eslint/eslint-plugin": "^2.30.0",
         "@typescript-eslint/parser": "^2.30.0",
         "copy-webpack-plugin": "^6.0.4",
@@ -682,6 +687,7 @@
         "@dendronhq/engine-test-utils": "^0.40.2",
         "@dendronhq/lsp-server": "^0.28.7-alpha.0",
         "@dendronhq/pods-core": "^0.40.2",
+        "@types/vscode": "1.54",
         "cross-path-sort": "^1.0.0",
         "execa": "^4.0.2",
         "fs-extra": "^9.0.1",

@@ -613,7 +613,7 @@ export class DendronWorkspace {
 
   async showWelcome(
     welcomeUri?: vscode.Uri,
-    _opts?: { reuseWindow?: boolean }
+    opts?: { reuseWindow?: boolean; rawHTML: boolean }
   ) {
     welcomeUri =
       welcomeUri ||
@@ -621,7 +621,11 @@ export class DendronWorkspace {
     try {
       const { content } = readMD(welcomeUri.fsPath);
       if (getStage() !== "test") {
-        VSCodeUtils.showWebView({ title: "Welcome", content });
+        VSCodeUtils.showWebView({
+          title: "Welcome",
+          content,
+          rawHTML: opts?.rawHTML,
+        });
       }
     } catch (err) {
       vscode.window.showErrorMessage(JSON.stringify(err));

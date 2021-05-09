@@ -424,7 +424,7 @@ async function showWelcomeOrWhatsNew(
       "assets",
       "dendron-ws",
       "vault",
-      "dendron.welcome.md"
+      "welcome.html"
     );
     AnalyticsUtils.track(VSCodeEvents.Install);
     await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
@@ -447,7 +447,7 @@ async function showWelcomeOrWhatsNew(
           );
         }
       });
-    await ws.showWelcome(uri, { reuseWindow: true });
+    await ws.showWelcome(uri, { reuseWindow: true, rawHTML: true });
   } else {
     Logger.info({ ctx, msg: "not first time install" });
     if (version !== previousVersion) {

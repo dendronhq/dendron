@@ -320,6 +320,10 @@ export class VSCodeUtils {
     return editor;
   }
 
+  static openLink(link: string) {
+    vscode.commands.executeCommand("vscode.open", vscode.Uri.parse(link));
+  }
+
   static async openWS(wsFile: string) {
     return vscode.commands.executeCommand(
       "vscode.openFolder",

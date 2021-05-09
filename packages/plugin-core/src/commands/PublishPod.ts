@@ -83,7 +83,6 @@ export class PublishPodCommand extends BaseCommand<
         engine,
       });
       await vscode.env.clipboard.writeText(link);
-      this.showResponse();
       return link;
     } catch (err) {
       this.L.error({ err });

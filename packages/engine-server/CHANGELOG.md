@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.40.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.40.4-alpha.0) (2021-05-09)
+
+### Bug Fixes
+
+- maintain alphabetical sort order for trees ([b7b2b59](https://github.com/dendronhq/dendron/commit/b7b2b59686326603281013fe128b095cff0868b8))
+- make requireHook work with webpack ([c0835d2](https://github.com/dendronhq/dendron/commit/c0835d2e34fde992c5484ac4be7f4eb0ae43dd6a))
+
+### Features Dendron
+
+- delete hook command ([59c078a](https://github.com/dendronhq/dendron/commit/59c078a200b15953d60de978952ec50429be9313))
+
 ## [0.40.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.40.4-alpha.0) (2021-05-08)
 
 ### Bug Fixes

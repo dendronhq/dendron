@@ -32,11 +32,16 @@ const env = () => {
   return out;
 }
 
-const getEngine = async () => {
+/**
+ * 
+ * @param force: force engine initialization
+ * @returns 
+ */
+const getEngine = async (force) => {
   const engineConnector = EngineConnector.getOrCreate({
     wsRoot: env().wsRoot,
   });
-  if (!engineConnector.initialized) {
+  if (!engineConnector.initialized || force) {
     await engineConnector.init({ portOverride: env().enginePort });
     const siteNotes = SiteUtils.addSiteOnlyNotes({
       engine: engineConnector.engine,

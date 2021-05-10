@@ -25,6 +25,8 @@ type CommandCLIOpts = {
   wsRoot: string;
 } & CommandCLIOnlyOpts;
 
+export { CommandCLIOpts as LaunchEngineServerCLIOpts };
+
 export class LaunchEngineServerCommand extends CLICommand<
   CommandOpts,
   CommandOutput

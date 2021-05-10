@@ -104,6 +104,7 @@ export class BuildSiteV2CLICommand extends CLICommand<
     let copyAssets;
     let buildStyles;
     let buildSearch;
+    let getEngine;
     if (opts.eleventy) {
       ({
         compile,
@@ -111,6 +112,7 @@ export class BuildSiteV2CLICommand extends CLICommand<
         copyAssets,
         buildStyles,
         buildSearch,
+        getEngine,
       } = opts.eleventy);
     } else {
       if (opts.custom11tyPath) {
@@ -120,6 +122,7 @@ export class BuildSiteV2CLICommand extends CLICommand<
           copyAssets,
           buildStyles,
           buildSearch,
+          getEngine,
         } = require(opts.custom11tyPath));
       } else {
         ({
@@ -128,8 +131,15 @@ export class BuildSiteV2CLICommand extends CLICommand<
           copyAssets,
           buildStyles,
           buildSearch,
+          getEngine,
         } = require("@dendronhq/dendron-11ty"));
       }
+    }
+    debugger;
+    // introduced in version 0.41
+    if (getEngine) {
+      // force re-initialization
+      await getEngine(true);
     }
     this.L.info("running pre-compile");
     await Promise.all([buildNav(), copyAssets()]);

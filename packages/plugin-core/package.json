@@ -55,11 +55,11 @@
                     "when": "dendron:pluginActive"
                 },
                 {
-					"type": "webview",
-					"id": "dendron.treeViewV2",
-					"name": "Tree View V2",
+                    "type": "webview",
+                    "id": "dendron.treeViewV2",
+                    "name": "Tree View V2",
                     "when": "dendron:pluginActive"
-				}
+                }
             ]
         },
         "configuration": {

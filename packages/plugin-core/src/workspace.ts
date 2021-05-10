@@ -612,12 +612,9 @@ export class DendronWorkspace {
   }
 
   async showWelcome(
-    welcomeUri?: vscode.Uri,
+    welcomeUri: vscode.Uri,
     opts?: { reuseWindow?: boolean; rawHTML: boolean }
   ) {
-    welcomeUri =
-      welcomeUri ||
-      VSCodeUtils.joinPath(this.rootWorkspace.uri, "dendron.quickstart.md");
     try {
       const { content } = readMD(welcomeUri.fsPath);
       if (getStage() !== "test") {

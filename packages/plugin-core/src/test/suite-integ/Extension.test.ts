@@ -4,10 +4,7 @@ import { describe, it } from "mocha";
 import path from "path";
 import vscode, { ExtensionContext } from "vscode";
 import { ResetConfigCommand } from "../../commands/ResetConfig";
-import {
-  InitializeType,
-  SetupWorkspaceOpts,
-} from "../../commands/SetupWorkspace";
+import { SetupWorkspaceOpts } from "../../commands/SetupWorkspace";
 import {
   DEFAULT_LEGACY_VAULT_NAME,
   DENDRON_COMMANDS,
@@ -15,12 +12,7 @@ import {
 } from "../../constants";
 import { getWS } from "../../workspace";
 import { _activate } from "../../_extension";
-import {
-  expect,
-  genEmptyWSFiles,
-  genTutorialWSFiles,
-  resetCodeWorkspace,
-} from "../testUtilsv2";
+import { expect, genEmptyWSFiles, resetCodeWorkspace } from "../testUtilsv2";
 import { setupBeforeAfter, stubSetupWorkspace } from "../testUtilsV3";
 
 suite("Extension", function () {
@@ -49,7 +41,6 @@ suite("Extension", function () {
           _activate(ctx).then(async () => {
             stubSetupWorkspace({
               wsRoot,
-              initType: InitializeType.TUTORIAL_NOTES,
             });
             await vscode.commands.executeCommand(DENDRON_COMMANDS.INIT_WS.key, {
               skipOpenWs: true,
@@ -81,28 +72,6 @@ suite("Extension", function () {
                 },
               },
             });
-            expect(
-              fs.readdirSync(path.join(wsRoot, DEFAULT_LEGACY_VAULT_NAME))
-            ).toEqual(genTutorialWSFiles());
-            done();
-          });
-        });
-    });
-
-    it("not active, not initial create ws", function (done) {
-      const wsRoot = tmpDir().name;
-      getWS()
-        .context.globalState.update(GLOBAL_STATE.DENDRON_FIRST_WS, false)
-        .then(() => {
-          _activate(ctx).then(async (resp) => {
-            expect(resp).toBeFalsy();
-            stubSetupWorkspace({ wsRoot, initType: InitializeType.EMPTY });
-            await vscode.commands.executeCommand(DENDRON_COMMANDS.INIT_WS.key, {
-              skipOpenWs: true,
-              skipConfirmation: true,
-            } as SetupWorkspaceOpts);
-
-            // first time init
             expect(
               fs.readdirSync(path.join(wsRoot, DEFAULT_LEGACY_VAULT_NAME))
             ).toEqual(genEmptyWSFiles());

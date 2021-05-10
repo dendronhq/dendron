@@ -1,6 +1,7 @@
 import {
   DMessage,
   DMessageSource,
+  DUtils,
   NoteProps,
   TreeViewMessage,
   TreeViewMessageType,
@@ -8,7 +9,7 @@ import {
 import * as vscode from "vscode";
 import { GotoNoteCommand } from "../commands/GotoNote";
 import { Logger } from "../logger";
-import { getEngine, getWS } from "../workspace";
+import { DendronWorkspace, getEngine, getWS } from "../workspace";
 
 export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
   public static readonly viewType = "dendron.treeViewV2";
@@ -65,6 +66,14 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(_webview: vscode.Webview) {
+    const ws = getWS();
+    const qs = DUtils.querystring.stringify({
+      ws: DendronWorkspace.wsRoot(),
+      port: ws.port,
+    });
+    const src = `${ws.getClientAPIRootUrl()}/vscode/tree-view.html?${qs}`;
+    Logger.info({ ctx: "DendronTreeViewV2", src });
+    // http://75c072eb44fc.ngrok.io/vscode/tree-view?port=3001&ws=%2FUsers%2Fkevinlin%2Fprojects%2Fdendronv2%2Foneoffs%2Faws-yc-user-manual
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,7 +92,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
   </style>
 </head>
 <body>
-  <iframe id="iframeView" src="http://75c072eb44fc.ngrok.io/vscode/tree-view?port=3001&ws=%2FUsers%2Fkevinlin%2Fprojects%2Fdendronv2%2Foneoffs%2Faws-yc-user-manual"></iframe>
+  <iframe id="iframeView" src="${src}"></iframe>
 
   <script>
     const vscode = acquireVsCodeApi();

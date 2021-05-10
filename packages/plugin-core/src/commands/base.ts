@@ -81,12 +81,16 @@ export abstract class BaseCommand<
       }
       return;
     } catch (error) {
+      let cerror: DendronError =
+        error instanceof DendronError
+          ? error
+          : new DendronError({
+              message: `error running command: ${error.message}`,
+              payload: { error },
+            });
       Logger.error({
         ctx,
-        error: new DendronError({
-          message: `error running command: ${error.message}`,
-          payload: { error },
-        }),
+        error: cerror,
       });
       return;
     }

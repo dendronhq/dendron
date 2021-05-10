@@ -32,6 +32,7 @@ export enum ERROR_STATUS {
   NOT_AUTHORIZED = "not_authorized",
   // 402
   DOES_NOT_EXIST = "does_not_exist_error",
+  INVALID_CONFIG = "invalid_config",
   // --- 500
   UNKNOWN = "unknown",
 }

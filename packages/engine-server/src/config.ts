@@ -2,7 +2,9 @@ import {
   CleanDendronSiteConfig,
   CONSTANTS,
   DendronConfig,
+  DendronError,
   DendronSiteConfig,
+  ERROR_STATUS,
   getStage,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
@@ -100,10 +102,17 @@ export class DConfig {
       siteUrl = "https://foo";
     }
     if (!siteUrl) {
-      throw `siteUrl is undefined. See https://dendron.so/notes/f2ed8639-a604-4a9d-b76c-41e205fb8713.html#siteurl for more details`;
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.INVALID_CONFIG,
+        message:
+          "siteUrl is undefined. See https://dendron.so/notes/f2ed8639-a604-4a9d-b76c-41e205fb8713.html#siteurl for more details",
+      });
     }
     if (_.size(siteHierarchies) < 1) {
-      throw `siteHiearchies must have at least one hiearchy`;
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.INVALID_CONFIG,
+        message: `siteHiearchies must have at least one hiearchy`,
+      });
     }
     siteIndex = this.getSiteIndex(config);
     return {

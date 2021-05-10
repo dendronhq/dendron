@@ -1,7 +1,9 @@
 import {
   DendronConfig,
+  DendronError,
   DEngineClientV2,
   DVault,
+  ERROR_STATUS,
   getStage,
   ResponseCode,
 } from "@dendronhq/common-all";
@@ -175,6 +177,16 @@ export class DendronWorkspace {
         this.dendronTreeView.pause = false;
       }
     }
+  }
+
+  getClientAPIRootUrl() {
+    const port = this.port;
+    if (!port) {
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.ENGINE_NOT_SET,
+      });
+    }
+    return `http://localhost:${port}`;
   }
 
   /**

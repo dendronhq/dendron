@@ -1,4 +1,4 @@
-import { findInParent } from "@dendronhq/common-server";
+import { createLogger, findInParent } from "@dendronhq/common-server";
 import express, { NextFunction, Request, Response } from "express";
 import fs from "fs-extra";
 import { BAD_REQUEST } from "http-status-codes";
@@ -6,8 +6,10 @@ import morgan from "morgan";
 import path from "path";
 import { baseRouter } from "./routes";
 import cors from "cors";
+import { LOGGER_NAME } from "./constants";
 
 export function appModule({ logPath }: { logPath: string }) {
+  const logger = createLogger(LOGGER_NAME);
   const app = express();
   app.use(cors());
   app.use(express.json({ limit: "500mb" }));
@@ -24,6 +26,7 @@ export function appModule({ logPath }: { logPath: string }) {
     );
   }
 
+  logger.info({ ctx: "appModule:start", __dirname });
   const staticDir = path.join(__dirname, "static");
   app.use(express.static(staticDir));
 

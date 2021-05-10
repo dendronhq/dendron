@@ -1,10 +1,12 @@
 import minimatch from "minimatch";
 import semver from "semver";
 import GithubSlugger from "github-slugger";
+import querystring from "querystring";
 
 export class DUtils {
   static minimatch = minimatch;
   static semver = semver;
+  static querystring = querystring;
 }
 
 export const getSlugger = () => {

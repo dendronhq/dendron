@@ -135,7 +135,6 @@ export class BuildSiteV2CLICommand extends CLICommand<
         } = require("@dendronhq/dendron-11ty"));
       }
     }
-    debugger;
     // introduced in version 0.41
     if (getEngine) {
       // force re-initialization

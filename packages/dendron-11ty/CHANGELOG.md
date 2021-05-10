@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.41.0](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.41.0) (2021-05-10)
+
+### Bug Fixes
+
+- fix footer occlusion in mobile ([7bcc72a](https://github.com/dendronhq/dendron/commit/7bcc72ab6ca59fd8de16056779b09776b1d6f10d))
+
 ## [0.40.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.40.4-alpha.0) (2021-05-09)
 
 ### Bug Fixes

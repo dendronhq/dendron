@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.41.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.41.0...v0.41.1-alpha.0) (2021-05-10)
+
+### Bug Fixes
+
+- bad import ([2089e28](https://github.com/dendronhq/dendron/commit/2089e28579ed637333115a85756bb056cf4a2ce5))
+
 # [0.41.0](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.41.0) (2021-05-10)
 
 ### Bug Fixes

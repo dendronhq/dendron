@@ -18,7 +18,11 @@ type CommandInput = { podChoice: PodItemV4 };
 
 type CommandOpts = CommandInput & { config: any };
 
-export class ExportPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
+export class ExportPodCommand extends BaseCommand<
+  CommandOpts,
+  CommandOutput,
+  CommandInput
+> {
   public pods: PodClassEntryV4[];
   static key = DENDRON_COMMANDS.EXPORT_POD.key;
 

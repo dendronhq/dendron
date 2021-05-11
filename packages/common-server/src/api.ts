@@ -24,6 +24,8 @@ import {
   SchemaModuleProps,
   WriteNoteResp,
   BulkAddNoteOpts,
+  DendronErrorPlainObj,
+  ERROR_STATUS,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { createLogger } from "./logger";
@@ -92,7 +94,7 @@ interface IStatusHandler {
 }
 
 type APIPayload<T = any> = {
-  error: DendronError | null;
+  error: DendronErrorPlainObj | null;
   data?: T;
 };
 
@@ -104,17 +106,26 @@ const STATUS_HANDLERS = {
   401: {
     isErr: true,
     handler: ({ resp }: IStatusHandler) =>
-      new APIError({ status: "not_authorized_error", code: resp.statusCode }),
+      APIError.createFromStatus({
+        status: ERROR_STATUS.NOT_AUTHORIZED,
+        code: resp.statusCode,
+      }),
   },
   404: {
     isErr: true,
     handler: ({ resp }: IStatusHandler) =>
-      new APIError({ code: resp.statusCode, status: "does_not_exist_error" }),
+      APIError.createFromStatus({
+        code: resp.statusCode,
+        status: ERROR_STATUS.DOES_NOT_EXIST,
+      }),
   },
   502: {
     isErr: true,
     handler: ({ resp }: IStatusHandler) =>
-      new APIError({ code: resp.statusCode, status: "unknown_error" }),
+      APIError.createFromStatus({
+        code: resp.statusCode,
+        status: ERROR_STATUS.UNKNOWN,
+      }),
   },
 };
 
@@ -311,7 +322,12 @@ export abstract class API {
       payload.data = data;
       payload.error = error;
     } catch (err) {
-      payload.error = err;
+      // request.js will wrap errors
+      if (err?.error?.error) {
+        payload.error = err.error.error;
+      } else {
+        payload.error = err;
+      }
     }
     if (payload.error) {
       this._log(payload.error, "error");

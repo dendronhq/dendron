@@ -35,7 +35,9 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       vault,
     });
     const uris = notes.map((note) =>
-      Uri.file(NoteUtils.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() }))
+      Uri.file(
+        NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() })
+      )
     );
     const out = uris.map((uri) => new Location(uri, new Position(0, 0)));
     if (out.length > 1) {
@@ -65,7 +67,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       const { note, pos } = out;
       return new Location(
         Uri.file(
-          NoteUtils.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+          NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() })
         ),
         pos ? pos : new Position(0, 0)
       );

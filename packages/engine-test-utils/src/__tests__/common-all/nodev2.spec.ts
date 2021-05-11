@@ -25,8 +25,28 @@ const preSetupHook: SetupHookFunction = async ({ vaults, wsRoot }) => {
   });
 };
 
-describe("note", () => {
+describe("NoteUtils", () => {
   const vault = { fsPath: tmpdir() };
+
+  describe("match", async () => {
+    test("exact", () => {
+      expect(NoteUtils.match({ notePath: "foo", pattern: "foo" })).toBeTruthy();
+    });
+
+    test("*", () => {
+      expect(NoteUtils.match({ notePath: "foo", pattern: "*" })).toBeTruthy();
+    });
+
+    test("partial", () => {
+      expect(NoteUtils.match({ notePath: "foo", pattern: "fo*" })).toBeTruthy();
+    });
+
+    test("with dot", () => {
+      expect(
+        NoteUtils.match({ notePath: "foo.one", pattern: "foo.*" })
+      ).toBeTruthy();
+    });
+  });
 
   describe("getNoteByFnameV5", async () => {
     test("basic", async () => {

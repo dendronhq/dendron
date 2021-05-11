@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.41.0](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.41.0) (2021-05-10)
+
+**Note:** Version bump only for package @dendronhq/api-server
+
+## [0.40.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.40.4-alpha.0) (2021-05-09)
+
+**Note:** Version bump only for package @dendronhq/api-server
+
+## [0.40.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.40.4-alpha.0) (2021-05-08)
+
+**Note:** Version bump only for package @dendronhq/api-server
+
+## [0.40.3-alpha.0](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.40.3-alpha.0) (2021-05-08)
+
+**Note:** Version bump only for package @dendronhq/api-server
+
+## [0.40.2](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.40.2) (2021-05-05)
+
+**Note:** Version bump only for package @dendronhq/api-server
+
+## [0.40.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.40.2-alpha.0) (2021-05-05)
+
+**Note:** Version bump only for package @dendronhq/api-server
+
 # [0.40.0](https://github.com/dendronhq/dendron/compare/v0.39.0...v0.40.0) (2021-05-03)
 
 **Note:** Version bump only for package @dendronhq/api-server

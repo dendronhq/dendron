@@ -1,6 +1,7 @@
 import {
   BulkAddNoteOpts,
   ConfigWriteOpts,
+  DendronCompositeError,
   DendronConfig,
   DendronError,
   DEngine,
@@ -8,6 +9,7 @@ import {
   DEngineDeleteSchemaResp,
   DEngineInitResp,
   DEngineMode,
+  DHookDict,
   DLink,
   DNodeType,
   DStore,
@@ -15,8 +17,10 @@ import {
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
+  ERROR_SEVERITY,
   GetNoteOptsV2,
   GetNotePayload,
+  IDendronError,
   NoteChangeEntry,
   NoteProps,
   NotePropsDict,
@@ -44,6 +48,7 @@ import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
 import { LinkUtils } from "./markdown";
+import { HookUtils } from "./topics/hooks";
 
 type CreateStoreFunc = (engine: DEngineClientV2) => DStore;
 type DendronEngineOptsV2 = {
@@ -70,6 +75,7 @@ export class DendronEngineV2 implements DEngine {
   public vaultsv3: DVault[];
   public configRoot: string;
   public config: DendronConfig;
+  public hooks: DHookDict;
 
   static _instance: DendronEngineV2 | undefined;
 
@@ -83,6 +89,10 @@ export class DendronEngineV2 implements DEngine {
     this.vaultsv3 = props.vaultsv3;
     this.config = props.config;
     this.store = props.createStore(this);
+    const hooks: DHookDict = _.get(props.config, "hooks", {
+      onCreate: [],
+    });
+    this.hooks = hooks;
   }
 
   static create({ wsRoot, logger }: { logger?: DLogger; wsRoot: string }) {
@@ -135,19 +145,53 @@ export class DendronEngineV2 implements DEngine {
    */
   async init(): Promise<DEngineInitResp> {
     try {
-      const { data, error } = await this.store.init();
+      const { data, error: storeError } = await this.store.init();
       const { notes, schemas } = data;
       this.updateIndex("note");
       this.updateIndex("schema");
+      const hookErrors: DendronError[] = [];
+      this.hooks.onCreate = this.hooks.onCreate.filter((hook) => {
+        const { valid, error } = HookUtils.validateHook({
+          hook,
+          wsRoot: this.wsRoot,
+        });
+        if (!valid && error) {
+          this.logger.error({ msg: "bad hook", hook, error });
+          hookErrors.push(error);
+        }
+        return valid;
+      });
+      const allErrors = (_.isNull(storeError) ? [] : [storeError]).concat(
+        hookErrors
+      );
+      let error: IDendronError | null;
+      switch (_.size(allErrors)) {
+        case 0: {
+          error = null;
+          break;
+        }
+        case 1: {
+          error = new DendronError(allErrors[0]);
+          break;
+        }
+        default:
+          error = new DendronCompositeError(allErrors);
+      }
+      this.logger.info({ ctx: "init:ext", error, storeError, hookErrors });
       return {
         error,
         data: { notes, schemas },
       };
     } catch (error) {
-      const { message, stack, msg, status, friendly } = error;
+      const { message, stack, status } = error;
       let payload = { message, stack };
       return {
-        error: new DendronError({ payload, msg, status, friendly }),
+        error: DendronError.createPlainError({
+          payload,
+          message,
+          status,
+          severity: ERROR_SEVERITY.FATAL,
+        }),
         data: {
           notes: {},
           schemas: {},
@@ -254,7 +298,7 @@ export class DendronEngineV2 implements DEngine {
       changed = (await this.writeNote(noteNew, { updateExisting })).data;
     }
     if (!createIfNew && !maybeNote) {
-      error = new DendronError({ status: "no_note_found" });
+      error = new DendronError({ message: "no_note_found" });
     }
     await this.refreshNotesV2(changed);
     return {
@@ -339,7 +383,7 @@ export class DendronEngineV2 implements DEngine {
       } else {
         if (_.isUndefined(vault)) {
           return {
-            error: new DendronError({ msg: "no vault specified" }),
+            error: new DendronError({ message: "no vault specified" }),
             data: null as any,
           };
         }
@@ -397,7 +441,7 @@ export class DendronEngineV2 implements DEngine {
       };
     } catch (err) {
       return {
-        error: new DendronError({ payload: err }),
+        error: new DendronError({ message: "rename error", payload: err }),
       };
     }
   }

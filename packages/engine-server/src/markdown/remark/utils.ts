@@ -44,16 +44,18 @@ export function getNoteOrError(
   let error: DendronError | undefined;
   let note: NoteProps | undefined;
   if (_.isUndefined(notes)) {
-    error = new DendronError({ msg: `no note found. ${hint}` });
+    error = new DendronError({ message: `no note found. ${hint}` });
     return { error, note };
   }
   if (notes.length > 1) {
-    error = new DendronError({ msg: `multiple notes found for link: ${hint}` });
+    error = new DendronError({
+      message: `multiple notes found for link: ${hint}`,
+    });
     return { error, note };
   }
   if (notes.length < 1) {
     error = new DendronError({
-      msg: `no notes found for link: ${JSON.stringify(hint)}`,
+      message: `no notes found for link: ${JSON.stringify(hint)}`,
     });
     return { error, note };
   }

@@ -1,11 +1,12 @@
 import { express } from "@dendronhq/api-server";
+import { CONSTANTS } from "@dendronhq/common-all";
 import { BuildSiteV2CLICommandOpts } from "@dendronhq/dendron-cli";
 import { SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
 import { env, ProgressLocation, Uri, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { buildSite, checkPreReq, getSiteRootDirPath } from "../utils/site";
-import { DendronWorkspace, getWS } from "../workspace";
+import { DendronWorkspace, getEngine, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = Partial<BuildSiteV2CLICommandOpts>;
@@ -60,14 +61,17 @@ export class SitePreviewCommand extends BasicCommand<
           });
           const app = express();
           app.use(express.static(siteOutput));
-          const server = app.listen(8080);
+          const serverPort =
+            getEngine().config.site.previewPort ||
+            CONSTANTS.DENDRON_LOCAL_SITE_PORT;
+          const server = app.listen(serverPort);
           server.on("error", (err) => {
             window.showErrorMessage(JSON.stringify(err));
             reject(err);
           });
           server.on("listening", () => {
             progress.report({ message: "preview is ready" });
-            env.openExternal(Uri.parse("http://localhost:8080"));
+            env.openExternal(Uri.parse(`http://localhost:${serverPort}`));
           });
           token.onCancellationRequested(() => {
             server.close((err) => {

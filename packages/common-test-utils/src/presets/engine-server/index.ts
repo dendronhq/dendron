@@ -9,6 +9,7 @@ import { ENGINE_RENAME_PRESETS } from "./rename";
 import { ENGINE_UPDATE_PRESETS } from "./update";
 import { ENGINE_BULK_ADD_NOTES_PRESETS } from "./bulkAddNotes";
 import { ENGINE_WRITE_PRESETS, ENGINE_WRITE_PRESETS_MULTI } from "./write";
+import _ from "lodash";
 export { ENGINE_HOOKS, ENGINE_HOOKS_BASE, ENGINE_HOOKS_MULTI } from "./utils";
 export { ENGINE_RENAME_PRESETS };
 export { ENGINE_QUERY_PRESETS };
@@ -26,6 +27,37 @@ export const ENGINE_SERVER = {
   ENGINE_RENAME_PRESETS,
   ENGINE_QUERY_PRESETS,
   ENGINE_BULK_ADD_NOTES_PRESETS,
+};
+
+/**
+ * 
+ @example
+ *  test.only("", async () => {
+ *    const TestCase= getPreset({presets: ENGINE_PRESETS, nodeType, presetName: "init", key: 'BAD_SCHEMA'})
+ *    const { testFunc, ...opts } = TestCase;;
+ *    await runEngineTestV4(testFunc, { ...opts, createEngine, expect });
+ *});
+ * @param param0 
+ * @returns 
+ */
+export const getPreset = ({
+  presets,
+  presetName,
+  nodeType,
+  key,
+}: {
+  presets: typeof ENGINE_PRESETS;
+  presetName: string;
+  nodeType: "SCHEMAS" | "NOTES";
+  key: string;
+}) => {
+  const ent = _.find(presets, { name: presetName })!;
+  // @ts-ignore
+  const out = _.get(ent.presets[nodeType], key);
+  if (!out) {
+    throw Error(`no key ${key} found in ${presetName}`);
+  }
+  return out;
 };
 
 export const ENGINE_PRESETS = [

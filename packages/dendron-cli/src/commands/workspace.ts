@@ -57,7 +57,7 @@ export class WorkspaceCLICommand extends CLICommand<
         }
       }
       default: {
-        throw new DendronError({ msg: `unsupported action: ${action}` });
+        throw new DendronError({ message: `unsupported action: ${action}` });
       }
     }
   }

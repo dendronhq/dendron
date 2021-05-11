@@ -25,7 +25,7 @@ import {
   CREATE_NEW_LABEL,
   MORE_RESULTS_LABEL,
 } from "./constants";
-import { OnAcceptHook } from "./LookupProviderV3";
+import { ILookupProviderV3, OnAcceptHook } from "./LookupProviderV3";
 import { DendronQuickPickerV2 } from "./types";
 
 const PAGINATE_LIMIT = 50;
@@ -93,7 +93,7 @@ export async function showDocAndHidePicker(
           return;
         },
         (err) => {
-          Logger.error({ ctx, err, msg: "exit" });
+          Logger.error({ ctx, error: err, msg: "exit" });
           throw err;
         }
       );
@@ -105,7 +105,26 @@ export async function showDocAndHidePicker(
 export type CreateQuickPickOpts = {
   title: string;
   placeholder: string;
+  /**
+   * QuickPick.ignoreFocusOut prop
+   */
   ignoreFocusOut?: boolean;
+  /**
+   * Initial value for quickpick
+   */
+  initialValue?: string;
+  nonInteractive?: boolean;
+};
+
+export type PrepareQuickPickOpts = CreateQuickPickOpts & {
+  provider: ILookupProviderV3;
+};
+
+export type ShowQuickPickOpts = {
+  quickpick: DendronQuickPickerV2;
+  provider: ILookupProviderV3;
+  nonInteractive?: boolean;
+  fuzzThreshold?: number;
 };
 
 export type OldNewLocation = {
@@ -154,7 +173,7 @@ export class ProviderAcceptHooks {
       const errMsg = `${vaultName}/${quickpick.value} exists`;
       window.showErrorMessage(errMsg);
       return {
-        error: new DendronError({ msg: errMsg }),
+        error: new DendronError({ message: errMsg }),
       };
     }
     const data = {
@@ -190,19 +209,26 @@ export class PickerUtilsV2 {
   };
 
   static createDendronQuickPick(opts: CreateQuickPickOpts) {
-    const { title, placeholder, ignoreFocusOut } = _.defaults(opts, {
-      ignoreFocusOut: true,
-    });
+    const { title, placeholder, ignoreFocusOut, initialValue } = _.defaults(
+      opts,
+      {
+        ignoreFocusOut: true,
+      }
+    );
     const quickPick = window.createQuickPick<
       DNodePropsQuickInputV2
     >() as DendronQuickPickerV2;
     quickPick.title = title;
+    quickPick.nonInteractive = opts.nonInteractive;
     quickPick.placeholder = placeholder;
     quickPick.ignoreFocusOut = ignoreFocusOut;
     quickPick.justActivated = true;
     quickPick.canSelectMany = false;
     quickPick.matchOnDescription = false;
     quickPick.matchOnDetail = false;
+    if (initialValue) {
+      quickPick.value = initialValue;
+    }
     return quickPick;
   }
 
@@ -365,6 +391,10 @@ export class PickerUtilsV2 {
     opts.quickpick.buttons = opts.buttons;
   }
 
+  /**
+   * Toggle all button enablement effects
+   * @param opts
+   */
   static async refreshPickerBehavior(opts: {
     quickpick: DendronQuickPickerV2;
     buttons: DendronBtn[];
@@ -373,7 +403,7 @@ export class PickerUtilsV2 {
     const buttonsDisabled = _.filter(opts.buttons, { pressed: false });
     await Promise.all(
       buttonsEnabled.map((bt) => {
-        bt.handle({ quickPick: opts.quickpick });
+        bt.onEnable({ quickPick: opts.quickpick });
       })
     );
     await Promise.all(

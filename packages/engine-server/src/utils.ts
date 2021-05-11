@@ -104,7 +104,7 @@ export async function getEngine(opts: {
   const { numTries, wsRoot, vaults } = _.defaults(opts, { numTries: 5 });
   if (numTries <= 0) {
     return {
-      error: new DendronError({ msg: "exceeded numTries" }),
+      error: new DendronError({ message: "exceeded numTries" }),
     };
   }
   return new Promise((resolve, _reject) => {
@@ -206,7 +206,7 @@ export function parseFileLink(ref: string): DNoteRefLink {
     }
   });
   if (_.isUndefined(fname)) {
-    throw new DendronError({ msg: `fname for ${ref} is undefined` });
+    throw new DendronError({ message: `fname for ${ref} is undefined` });
   }
   if (clean.anchorStart && clean.anchorStart.indexOf(",") >= 0) {
     const [anchorStart, offset] = clean.anchorStart.split(",");
@@ -252,7 +252,7 @@ export function parseNoteRefV2(ref: string): DNoteRefLink {
     }
   });
   if (_.isUndefined(fname)) {
-    throw new DendronError({ msg: `fname for ${ref} is undefined` });
+    throw new DendronError({ message: `fname for ${ref} is undefined` });
   }
   if (clean.anchorStart && clean.anchorStart.indexOf(",") >= 0) {
     const [anchorStart, offset] = clean.anchorStart.split(",");

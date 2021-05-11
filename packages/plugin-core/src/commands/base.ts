@@ -12,7 +12,19 @@ export type CodeCommandInstance = {
   run: (opts?: any) => Promise<void>;
 };
 
-export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
+/**
+ * Generics:
+ *   - TOpts: passed into {@link BaseCommand.execute}
+ *   - TGatherOutput: returned by {@link Basecommand.gatherInput}
+ *   - TOut: returned by {@link BaseCommand.execute}
+ *   - TRunOpts: returned by command
+ */
+export abstract class BaseCommand<
+  TOpts,
+  TOut = any,
+  TGatherOutput = TOpts,
+  TRunOpts = TOpts
+> {
   public L: DLogger;
 
   constructor(_name?: string) {
@@ -21,11 +33,11 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
 
   static showInput = window.showInputBox;
 
-  async gatherInputs(_opts?: TOpts): Promise<TInput | undefined> {
+  async gatherInputs(_opts?: TRunOpts): Promise<TGatherOutput | undefined> {
     return {} as any;
   }
 
-  abstract enrichInputs(inputs: TInput): Promise<TOpts | undefined>;
+  abstract enrichInputs(inputs: TGatherOutput): Promise<TOpts | undefined>;
 
   abstract execute(opts: TOpts): Promise<TOut>;
 
@@ -33,11 +45,15 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
     return;
   }
 
+  /**
+   * Basic error checking
+   * @returns
+   */
   async sanityCheck(): Promise<undefined | string | "cancel"> {
     return;
   }
 
-  async run(args?: Partial<TOpts>): Promise<TOut | undefined> {
+  async run(args?: Partial<TRunOpts>): Promise<TOut | undefined> {
     // @ts-ignore
     const ctx = `${this.__proto__.constructor.name}:run`;
     try {
@@ -64,18 +80,31 @@ export abstract class BaseCommand<TOpts, TOut = any, TInput = any> {
         return resp;
       }
       return;
-    } catch (err) {
-      Logger.error({ ctx, err: new DendronError({ payload: err }) });
+    } catch (error) {
+      let cerror: DendronError =
+        error instanceof DendronError
+          ? error
+          : new DendronError({
+              message: `error running command: ${error.message}`,
+              payload: { error },
+            });
+      Logger.error({
+        ctx,
+        error: cerror,
+      });
       return;
     }
   }
 }
 
-export abstract class BasicCommand<TOpts, TOut = any> extends BaseCommand<
+/**
+ * Command with no enriched inputs
+ */
+export abstract class BasicCommand<
   TOpts,
-  TOut,
-  TOpts | undefined
-> {
+  TOut = any,
+  TRunOpts = TOpts
+> extends BaseCommand<TOpts, TOut, TOpts, TRunOpts> {
   async enrichInputs(inputs: TOpts): Promise<TOpts> {
     return inputs;
   }

@@ -22,7 +22,11 @@ type CommandInput = { podChoice: PodItemV4 };
 type CommandOutput = string;
 export { CommandOpts as PublishPodCommandOpts };
 
-export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
+export class PublishPodCommand extends BaseCommand<
+  CommandOpts,
+  CommandOutput,
+  CommandInput
+> {
   static key = DENDRON_COMMANDS.PUBLISH_POD.key;
   async gatherInputs(): Promise<any> {
     const pods = getAllPublishPods();
@@ -34,7 +38,7 @@ export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
     return { podChoice };
   }
 
-  async enrichInputs(inputs: CommandInput): Promise<CommandOpts | undefined> {
+  async enrichInputs(inputs: CommandInput) {
     const podChoice = inputs.podChoice;
     const podsDir = DendronWorkspace.instance().podsDir;
     const podClass = podChoice.podClass;
@@ -79,7 +83,6 @@ export class PublishPodCommand extends BaseCommand<CommandOpts, CommandOutput> {
         engine,
       });
       await vscode.env.clipboard.writeText(link);
-      this.showResponse();
       return link;
     } catch (err) {
       this.L.error({ err });

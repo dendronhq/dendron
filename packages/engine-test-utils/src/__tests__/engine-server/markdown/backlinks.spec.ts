@@ -11,7 +11,7 @@ import {
   DendronPubOpts,
   MDUtilsV4,
 } from "@dendronhq/engine-server";
-import { ConfigUtils, runEngineTestV5 } from "../../..";
+import { TestConfigUtils, runEngineTestV5 } from "../../..";
 
 // runs all the processes
 function proc(
@@ -85,7 +85,7 @@ describe("backlinks", () => {
         preSetupHook: async (opts) => {
           const { wsRoot } = opts;
           await ENGINE_HOOKS.setupLinks(opts);
-          ConfigUtils.withConfig(
+          TestConfigUtils.withConfig(
             (config) => {
               config.site = {
                 siteHierarchies: ["alpha"],

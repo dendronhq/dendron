@@ -2,7 +2,7 @@ import { DConfig } from "@dendronhq/engine-server";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
 import { DendronConfig } from "@dendronhq/common-all";
 
-export class ConfigUtils {
+export class TestConfigUtils {
   static getConfig = (opts: { wsRoot: string }) => {
     const configPath = DConfig.configPath(opts.wsRoot);
     const config = readYAML(configPath) as DendronConfig;
@@ -13,10 +13,10 @@ export class ConfigUtils {
     func: (config: DendronConfig) => DendronConfig,
     opts: { wsRoot: string }
   ) => {
-    const config = ConfigUtils.getConfig(opts);
+    const config = TestConfigUtils.getConfig(opts);
 
     const newConfig = func(config);
-    ConfigUtils.writeConfig({ config: newConfig, wsRoot: opts.wsRoot });
+    TestConfigUtils.writeConfig({ config: newConfig, wsRoot: opts.wsRoot });
     return newConfig;
   };
 

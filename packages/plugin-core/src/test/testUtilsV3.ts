@@ -27,7 +27,6 @@ import _ from "lodash";
 import { afterEach, beforeEach } from "mocha";
 import { ExtensionContext, Uri } from "vscode";
 import {
-  InitializeType,
   SetupWorkspaceCommand,
   SetupWorkspaceOpts,
 } from "../commands/SetupWorkspace";
@@ -282,33 +281,11 @@ export function setupBeforeAfter(
   return ctx;
 }
 
-export function stubSetupWorkspace({
-  wsRoot,
-  initType,
-}: {
-  wsRoot: string;
-  initType: InitializeType;
-}) {
+export function stubSetupWorkspace({ wsRoot }: { wsRoot: string }) {
   // @ts-ignore
   VSCodeUtils.gatherFolderPath = () => {
     return wsRoot;
   };
-  switch (initType) {
-    case InitializeType.EMPTY:
-      // @ts-ignore
-      VSCodeUtils.showQuickPick = () => {
-        return "initialize empty repository";
-      };
-      break;
-    case InitializeType.TUTORIAL_NOTES:
-      // @ts-ignore
-      VSCodeUtils.showQuickPick = () => {
-        return "initialize with dendron tutorial notes";
-      };
-      break;
-    default:
-      throw Error(`inittype ${initType} not handled`);
-  }
 }
 
 class FakeEngine {

@@ -163,7 +163,7 @@ export class DendronWorkspace {
       const out = await cb();
       return out;
     } catch (err) {
-      Logger.error({ ctx, err });
+      Logger.error({ ctx, error: err });
       throw err;
     } finally {
       if (this.vaultWatcher) {
@@ -504,6 +504,15 @@ export class DendronWorkspace {
       )
     );
 
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand(
+        DENDRON_COMMANDS.GO_PREV_HIERARCHY.key,
+        async () => {
+          await new GoToSiblingCommand().execute({ direction: "prev" });
+        }
+      )
+    );
+
     // RENAME is alias to MOVE
     this.context.subscriptions.push(
       vscode.commands.registerCommand(
@@ -558,7 +567,6 @@ export class DendronWorkspace {
       this.L.error({
         ctx,
         msg: "no folders set for workspace",
-        friendly: "Please set folder",
       });
       throw Error("no folders set for workspace");
     }
@@ -604,16 +612,17 @@ export class DendronWorkspace {
   }
 
   async showWelcome(
-    welcomeUri?: vscode.Uri,
-    _opts?: { reuseWindow?: boolean }
+    welcomeUri: vscode.Uri,
+    opts?: { reuseWindow?: boolean; rawHTML: boolean }
   ) {
-    welcomeUri =
-      welcomeUri ||
-      VSCodeUtils.joinPath(this.rootWorkspace.uri, "dendron.quickstart.md");
     try {
       const { content } = readMD(welcomeUri.fsPath);
       if (getStage() !== "test") {
-        VSCodeUtils.showWebView({ title: "Welcome", content });
+        VSCodeUtils.showWebView({
+          title: "Welcome",
+          content,
+          rawHTML: opts?.rawHTML,
+        });
       }
     } catch (err) {
       vscode.window.showErrorMessage(JSON.stringify(err));

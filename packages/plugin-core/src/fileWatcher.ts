@@ -152,7 +152,7 @@ export class VaultWatcher {
           newNode: true,
         });
       } catch (err) {
-        this.L.error({ ctx, err });
+        this.L.error({ ctx, error: err });
         throw err;
       }
     } finally {

@@ -12,6 +12,7 @@ import {
   SchemaModuleProps,
   SchemaUtils,
   VaultUtils,
+  VSCodeEvents,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds, vault2Path } from "@dendronhq/common-server";
 import _, { DebouncedFunc } from "lodash";
@@ -19,6 +20,7 @@ import { CancellationToken, Uri, window } from "vscode";
 import { LookupNoteTypeEnum } from "../../commands/LookupCommand";
 import { Logger } from "../../logger";
 import { CodeConfigKeys, EngineFlavor, EngineOpts } from "../../types";
+import { AnalyticsUtils } from "../../utils/analytics";
 import {
   DendronWorkspace,
   getConfigValue,
@@ -219,7 +221,7 @@ export class LookupProviderV2 {
       newNode: true,
     });
     if (resp.error) {
-      Logger.error({ err: resp.error });
+      Logger.error({ error: resp.error });
       throw Error();
     }
     return { uri, node: nodeNew, resp };
@@ -296,85 +298,104 @@ export class LookupProviderV2 {
     lc: LookupControllerV2
   ): OnDidAcceptReturn {
     const ctx = "onDidAcceptSingle";
-    const value = PickerUtilsV2.getValue(picker);
-    const selectedItems = PickerUtilsV2.getSelection(picker);
-    const selectedItem = selectedItems[0];
+    const start = process.hrtime();
+    let createNewNote = false;
+    let error = false;
+    try {
+      const value = PickerUtilsV2.getValue(picker);
+      const selectedItems = PickerUtilsV2.getSelection(picker);
+      const selectedItem = selectedItems[0];
 
-    const noteOverrides = checkAndCreateNoteOverrides({
-      lc,
-      pickerValue: value,
-    });
+      const noteOverrides = checkAndCreateNoteOverrides({
+        lc,
+        pickerValue: value,
+      });
 
-    Logger.info({
-      ctx,
-      msg: "enter",
-      value,
-      opts,
-      noteOverrides,
-      selectedItems: selectedItems.map((ent) => NoteUtils.toLogObj(ent)),
-      activeItems: picker.activeItems.map((ent) => NoteUtils.toLogObj(ent)),
-    });
-    const resp = this.validate(picker.value, opts.flavor);
-    let uri: Uri;
-    let newNode: NoteProps | SchemaModuleProps | undefined;
-    if (resp) {
-      window.showErrorMessage(resp);
-      return;
-    }
-    if (selectedItem) {
-      if (PickerUtilsV2.isCreateNewNotePickForSingle(selectedItem)) {
-        const acceptResp = await this.onAcceptNewNode({
-          picker,
-          opts: { flavor: opts.flavor, overrides: noteOverrides },
-          selectedItem,
-        });
-        if (_.isUndefined(acceptResp)) {
-          return;
-        }
-        ({ uri, node: newNode } = acceptResp);
-        // TODO: not used
-      } else if (selectedItem.label === MORE_RESULTS_LABEL) {
-        await this.paginatePickerItems({ picker });
+      Logger.info({
+        ctx,
+        msg: "enter",
+        value,
+        opts,
+        noteOverrides,
+        selectedItems: selectedItems.map((ent) => NoteUtils.toLogObj(ent)),
+        activeItems: picker.activeItems.map((ent) => NoteUtils.toLogObj(ent)),
+      });
+      const resp = this.validate(picker.value, opts.flavor);
+      let uri: Uri;
+      let newNode: NoteProps | SchemaModuleProps | undefined;
+      if (resp) {
+        window.showErrorMessage(resp);
         return;
-      } else {
-        uri = node2Uri(selectedItem);
-        const vpath = vault2Path({
-          vault: selectedItem.vault,
-          wsRoot: DendronWorkspace.wsRoot(),
-        });
-        if (opts.flavor === "schema") {
-          const smod = DendronWorkspace.instance().getEngine().schemas[
-            selectedItem.id
-          ];
-          uri = Uri.file(
-            SchemaUtils.getPath({
-              root: vpath,
-              fname: smod.fname,
-            })
-          );
-        }
       }
-      await showDocAndHidePicker([uri], picker);
-      return { uris: [uri], node: newNode };
-    } else {
-      // item from pressing enter
-      if (opts.flavor === "note") {
-        const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
-        const maybeNote = NoteUtils.getNoteByFnameV5({
-          fname: value,
-          vault,
-          notes: getEngine().notes,
-          wsRoot: DendronWorkspace.wsRoot(),
-        });
-        if (maybeNote) {
-          uri = node2Uri(maybeNote);
-          await showDocAndHidePicker([uri], picker);
-          return { uris: [uri], node: maybeNote };
+      if (selectedItem) {
+        if (PickerUtilsV2.isCreateNewNotePickForSingle(selectedItem)) {
+          createNewNote = true;
+          const acceptResp = await this.onAcceptNewNode({
+            picker,
+            opts: { flavor: opts.flavor, overrides: noteOverrides },
+            selectedItem,
+          });
+          if (_.isUndefined(acceptResp)) {
+            return;
+          }
+          ({ uri, node: newNode } = acceptResp);
+          // TODO: not used
+        } else if (selectedItem.label === MORE_RESULTS_LABEL) {
+          await this.paginatePickerItems({ picker });
+          return;
         } else {
-          throw new DendronError({ msg: `note ${value} not found` });
+          uri = node2Uri(selectedItem);
+          const vpath = vault2Path({
+            vault: selectedItem.vault,
+            wsRoot: DendronWorkspace.wsRoot(),
+          });
+          if (opts.flavor === "schema") {
+            const smod = DendronWorkspace.instance().getEngine().schemas[
+              selectedItem.id
+            ];
+            uri = Uri.file(
+              SchemaUtils.getPath({
+                root: vpath,
+                fname: smod.fname,
+              })
+            );
+          }
         }
+        await showDocAndHidePicker([uri], picker);
+        return { uris: [uri], node: newNode };
+      } else {
+        // item from pressing enter
+        if (opts.flavor === "note") {
+          const vault = PickerUtilsV2.getOrPromptVaultForOpenEditor();
+          const maybeNote = NoteUtils.getNoteByFnameV5({
+            fname: value,
+            vault,
+            notes: getEngine().notes,
+            wsRoot: DendronWorkspace.wsRoot(),
+          });
+          if (maybeNote) {
+            uri = node2Uri(maybeNote);
+            await showDocAndHidePicker([uri], picker);
+            return { uris: [uri], node: maybeNote };
+          } else {
+            error = true;
+            throw new DendronError({ message: `note ${value} not found` });
+          }
+        }
+        return;
       }
-      return;
+    } catch (err) {
+      error = true;
+      Logger.error({ ctx, error: err });
+      throw err;
+    } finally {
+      const profile = getDurationMilliseconds(start);
+      AnalyticsUtils.track(VSCodeEvents.Lookup_Accept, {
+        duration: profile,
+        flavor: opts.flavor,
+        createNewNote,
+        error,
+      });
     }
   }
 
@@ -737,6 +758,11 @@ export class LookupProviderV2 {
         profile,
         cancelled: token.isCancellationRequested,
       });
+      AnalyticsUtils.track(VSCodeEvents.Lookup_Update, {
+        duration: profile,
+        source,
+        flavor: opts.flavor,
+      });
       return picker;
     }
   };
@@ -759,8 +785,8 @@ export class LookupProviderV2 {
       this.onDidAccept({ picker, opts, lc }).catch((err) => {
         Logger.error({
           ctx,
-          err: new DendronError({
-            friendly:
+          error: new DendronError({
+            message:
               "something went wrong. please submit a bug report to https://github.com/dendronhq/dendron/issues/new?assignees=&labels=&template=bug_report.md&title= with the output of `Dendron: Open Log`",
             payload: err,
           }),
@@ -784,7 +810,7 @@ export class LookupProviderV2 {
 
     picker.onDidChangeValue(() => {
       if (_.isUndefined(this.onDidChangeValueDebounced)) {
-        throw new DendronError({ msg: "onAccept already called" });
+        throw new DendronError({ message: "onAccept already called" });
       }
 
       this.onDidChangeValueDebounced(

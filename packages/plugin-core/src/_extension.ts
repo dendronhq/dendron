@@ -33,23 +33,12 @@ import { migrateConfig, migrateSettings } from "./migration";
 import { Extensions } from "./settings";
 import { WorkspaceSettings } from "./types";
 import { VSCodeUtils, WSUtils } from "./utils";
+import { AnalyticsUtils } from "./utils/analytics";
 import { MarkdownUtils } from "./utils/md";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronWorkspace, getEngine } from "./workspace";
-
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
-
-function getCommonProps() {
-  return {
-    os: getOS(),
-    arch: process.arch,
-    nodeVersion: process.version,
-    extensionVersion: DendronWorkspace.version(),
-    ideVersion: vscode.version,
-    ideFlavor: vscode.env.appName,
-  };
-}
 
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
@@ -138,7 +127,7 @@ async function postReloadWorkspace() {
       } catch (err) {
         Logger.error({
           msg: "error upgrading",
-          err: new DendronError({ msg: JSON.stringify(err) }),
+          error: new DendronError({ message: JSON.stringify(err) }),
         });
         return;
       }
@@ -364,13 +353,12 @@ export async function _activate(context: vscode.ExtensionContext) {
       numNotes = Math.round(numNotes / 10) * 10;
     }
 
-    SegmentClient.instance().identifyAnonymous(getCommonProps());
-    SegmentClient.instance().track(VSCodeEvents.InitializeWorkspace, {
+    AnalyticsUtils.identify();
+    AnalyticsUtils.track(VSCodeEvents.InitializeWorkspace, {
       duration: durationReloadWorkspace,
       noCaching: config.noCaching || false,
       numNotes,
       numVaults: _.size(getEngine().vaultsv3),
-      ...getCommonProps(),
     });
     await ws.activateWatchers();
     toggleViews(true);
@@ -436,14 +424,30 @@ async function showWelcomeOrWhatsNew(
       "assets",
       "dendron-ws",
       "vault",
-      "dendron.welcome.md"
+      "welcome.html"
     );
-    SegmentClient.instance().track(VSCodeEvents.Install, {
-      ...getCommonProps(),
-    });
+    AnalyticsUtils.track(VSCodeEvents.Install);
     await ws.context.globalState.update(GLOBAL_STATE.VERSION, version);
     await ws.context.globalState.update(GLOBAL_STATE.VERSION_PREV, "0.0.0");
-    await ws.showWelcome(uri, { reuseWindow: true });
+    vscode.window
+      .showInformationMessage(
+        `Dendron collects limited usage data to help improve the quality of our software`,
+        "See Details",
+        "Opt Out"
+      )
+      .then((resp) => {
+        if (resp === "See Details") {
+          VSCodeUtils.openLink(
+            "https://wiki.dendron.so/notes/84df871b-9442-42fd-b4c3-0024e35b5f3c.html"
+          );
+        }
+        if (resp === "Opt Out") {
+          VSCodeUtils.openLink(
+            "https://wiki.dendron.so/notes/84df871b-9442-42fd-b4c3-0024e35b5f3c.html#how-to-opt-out-of-data-collection"
+          );
+        }
+      });
+    await ws.showWelcome(uri, { reuseWindow: true, rawHTML: true });
   } else {
     Logger.info({ ctx, msg: "not first time install" });
     if (version !== previousVersion) {
@@ -453,8 +457,7 @@ async function showWelcomeOrWhatsNew(
         GLOBAL_STATE.VERSION_PREV,
         previousVersion
       );
-      SegmentClient.instance().track(VSCodeEvents.Upgrade, {
-        ...getCommonProps(),
+      AnalyticsUtils.track(VSCodeEvents.Upgrade, {
         previousVersion,
       });
       vscode.window

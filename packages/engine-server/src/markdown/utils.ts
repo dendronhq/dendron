@@ -181,7 +181,7 @@ export class MDUtilsV4 {
     const engine = proc.data("engine") as DEngineClientV2;
     let error: DendronError | undefined;
     if (_.isUndefined(engine) || _.isNull(engine)) {
-      error = new DendronError({ msg: "engine not defined" });
+      error = new DendronError({ message: "engine not defined" });
     }
     return {
       error,

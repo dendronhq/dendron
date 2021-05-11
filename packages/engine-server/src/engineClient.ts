@@ -4,10 +4,11 @@ import {
   ConfigWriteOpts,
   DendronConfig,
   DendronError,
+  DEngine,
   DEngineClientV2,
   DEngineDeleteSchemaResp,
   DEngineInitResp,
-  DEngine,
+  DHookDict,
   DLink,
   DNodeProps,
   DVault,
@@ -16,12 +17,12 @@ import {
   EngineInfoResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
-  ERROR_CODES,
+  ERROR_SEVERITY,
   GetNoteOptsV2,
   GetNotePayload,
   NoteChangeEntry,
-  NotePropsDict,
   NoteProps,
+  NotePropsDict,
   NoteUtils,
   QueryNotesOpts,
   RenameNoteOpts,
@@ -53,6 +54,7 @@ type DendronEngineClientOpts = {
   vaults: DVault[];
   ws: string;
 };
+
 export class DendronEngineClient implements DEngineClientV2 {
   public notes: NotePropsDict;
   public wsRoot: string;
@@ -67,6 +69,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   public logger: DLogger;
   public store: FileStorage;
   public config: DendronConfig;
+  public hooks: DHookDict;
 
   static create({
     port,
@@ -90,7 +93,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   static getPort({ wsRoot }: { wsRoot: string }): number {
     const portFile = getPortFilePath({ wsRoot });
     if (!fs.pathExistsSync(portFile)) {
-      throw new DendronError({ msg: "no port file" });
+      throw new DendronError({ message: "no port file" });
     }
     return _.toInteger(_.trim(fs.readFileSync(portFile, { encoding: "utf8" })));
   }
@@ -123,6 +126,7 @@ export class DendronEngineClient implements DEngineClientV2 {
       engine: this,
       logger: this.logger,
     });
+    this.hooks = this.config.hooks || { onCreate: [] };
   }
 
   get vaults(): DVault[] {
@@ -138,14 +142,14 @@ export class DendronEngineClient implements DEngineClientV2 {
       config: { vaults: this.vaultsv3 },
     });
 
-    if (resp.error && resp.error.code !== ERROR_CODES.MINOR) {
+    if (resp.error && resp.error.severity !== ERROR_SEVERITY.MINOR) {
       return {
         error: resp.error,
         data: { notes: {}, schemas: {} },
       };
     }
     if (!resp.data) {
-      throw new DendronError({ msg: "no data" });
+      throw new DendronError({ message: "no data" });
     }
     const { notes, schemas } = resp.data;
     this.notes = notes;
@@ -174,7 +178,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     const ws = this.ws;
     const resp = await this.api.engineDelete({ id, opts, ws });
     if (!resp.data) {
-      throw new DendronError({ msg: "no data" });
+      throw new DendronError({ message: "no data" });
     }
     await this.refreshNotesV2(resp.data);
     return {
@@ -191,7 +195,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     const resp = await this.api.schemaDelete({ id, opts, ws });
     delete this.schemas[id];
     if (!resp?.data?.notes || !resp?.data?.schemas) {
-      throw new DendronError({ msg: "bad delete operation" });
+      throw new DendronError({ message: "bad delete operation" });
     }
     const { notes, schemas } = resp.data;
     this.notes = notes;
@@ -285,6 +289,19 @@ export class DendronEngineClient implements DEngineClientV2 {
           this.history &&
             this.history.add({ source: "engine", action: "create", uri });
         }
+        if (ent.status === "update") {
+          ent.note.children = _.sortBy(
+            ent.note.children,
+            (id) =>
+              _.get(
+                this.notes,
+                id,
+                _.find(notes, (ent) => ent.note.id === id)?.note || {
+                  title: "foo",
+                }
+              ).title
+          );
+        }
         this.notes[id] = ent.note;
       }
     });
@@ -307,7 +324,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   async sync(): Promise<DEngineInitResp> {
     const resp = await this.api.workspaceSync({ ws: this.ws });
     if (!resp.data) {
-      throw new DendronError({ msg: "no data", payload: resp });
+      throw new DendronError({ message: "no data", payload: resp });
     }
     const { notes, schemas } = resp.data;
     this.notes = notes;
@@ -324,7 +341,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     const resp = await this.api.engineUpdateNote({ ws: this.ws, note, opts });
     const noteClean = resp.data;
     if (_.isUndefined(noteClean)) {
-      throw new DendronError({ msg: "error updating note", payload: resp });
+      throw new DendronError({ message: "error updating note", payload: resp });
     }
     await this.refreshNotes([noteClean]);
     return noteClean;
@@ -340,6 +357,9 @@ export class DendronEngineClient implements DEngineClientV2 {
       ws: this.ws,
     });
     let changed = resp.data;
+    if (resp.error) {
+      return resp;
+    }
     // we are updating in place, remove deletes
     if (opts?.updateExisting) {
       changed = _.reject(changed, (ent) => ent.status === "delete");

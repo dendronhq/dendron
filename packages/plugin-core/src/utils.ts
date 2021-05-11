@@ -150,7 +150,7 @@ export class VSCodeUtils {
   static getActiveTextEditorOrThrow() {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
-      throw new DendronError({ msg: "no active editor" });
+      throw new DendronError({ message: "no active editor" });
     }
     return editor;
   }
@@ -320,6 +320,10 @@ export class VSCodeUtils {
     return editor;
   }
 
+  static openLink(link: string) {
+    vscode.commands.executeCommand("vscode.open", vscode.Uri.parse(link));
+  }
+
   static async openWS(wsFile: string) {
     return vscode.commands.executeCommand(
       "vscode.openFolder",
@@ -362,15 +366,19 @@ export class VSCodeUtils {
 
   static showInputBox = vscode.window.showInputBox;
   static showQuickPick = vscode.window.showQuickPick;
-  static showWebView = (opts: { title: string; content: string }) => {
-    const { title, content } = opts;
+  static showWebView = (opts: {
+    title: string;
+    content: string;
+    rawHTML?: boolean;
+  }) => {
+    const { title, content, rawHTML } = opts;
     const panel = vscode.window.createWebviewPanel(
       _.kebabCase(title),
       title, // Title of the panel displayed to the user
       vscode.ViewColumn.One, // Editor column to show the new webview panel in.
       {} // Webview options. More on these later.
     );
-    panel.webview.html = _md().render(content);
+    panel.webview.html = rawHTML ? content : _md().render(content);
   };
 }
 
@@ -491,7 +499,7 @@ export class DendronClientUtilsV2 {
   }): Promise<SchemaModuleProps> => {
     const smod = _.find(client.schemas, { fname });
     if (!smod) {
-      throw new DendronError({ msg: "no note found" });
+      throw new DendronError({ message: "no note found" });
     }
     return smod;
   };

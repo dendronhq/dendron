@@ -2,7 +2,7 @@ import _ from "lodash";
 import path from "path";
 import { CONSTANTS } from "./constants";
 import { DendronError } from "./error";
-import { DVault } from "./typesv2";
+import { DVault } from "./types";
 
 export class VaultUtils {
   static getName(vault: DVault): string {
@@ -48,7 +48,7 @@ export class VaultUtils {
   }) {
     const vault = this.getVaultByName({ vaults, vname });
     if (!vault) {
-      throw new DendronError({ msg: `vault with name ${vname} not found` });
+      throw new DendronError({ message: `vault with name ${vname} not found` });
     }
     return vault;
   }
@@ -72,6 +72,7 @@ export class VaultUtils {
     const vault = _.find(vaults, { fsPath: normPath });
     if (!vault) {
       throw new DendronError({
+        message: "no vault found",
         payload: { wsRoot, fsPath, vaults, normPath, msg: "no vault found" },
       });
     }

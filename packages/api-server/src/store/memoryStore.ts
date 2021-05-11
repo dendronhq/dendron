@@ -25,7 +25,7 @@ export class MemoryStore {
   getEngine(): DendronEngineV2 {
     const out = _.values(STORE)[0];
     if (!out) {
-      throw new DendronError({ msg: "STORE is empty" });
+      throw new DendronError({ message: "STORE is empty" });
     }
     return out;
   }

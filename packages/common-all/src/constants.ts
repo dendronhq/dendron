@@ -11,23 +11,38 @@ export const CONSTANTS = {
   DENDRON_CACHE_FILE: ".dendron.cache.json",
   DENDRON_ID: ".dendron.uuid",
   DENDRON_NO_TELEMETRY: ".dendron.no-telemetry",
+  DENDRON_HOOKS_BASE: "hooks",
+  DENDRON_LOCAL_SITE_PORT: 8080,
 };
 
-export const ENGINE_ERROR_CODES = {
-  NODE_EXISTS: "node_exists",
-  NO_SCHEMA_FOUND: "no_schema_found",
-  NO_ROOT_SCHEMA_FOUND: "no_root_schema_found",
-  MISSING_SCHEMA: "missing_schema",
-  NO_ROOT_NOTE_FOUND: "no_root_note_found",
-  BAD_PARSE_FOR_NOTE: "bad_parse_for_note",
-  BAD_PARSE_FOR_SCHEMA: "bad_parse_for_schema",
-  NO_PARENT_FOR_NOTE: "no_parent_for_note",
-  CANT_DELETE_ROOT: "no_delete_root_node",
-  ENGINE_NOT_SET: "no_engine_set",
-};
+export enum ERROR_STATUS {
+  NODE_EXISTS = "node_exists",
+  NO_SCHEMA_FOUND = "no_schema_found",
+  NO_ROOT_SCHEMA_FOUND = "no_root_schema_found",
+  MISSING_SCHEMA = "missing_schema",
+  NO_ROOT_NOTE_FOUND = "no_root_note_found",
+  BAD_PARSE_FOR_SCHEMA = "bad_parse_for_schema",
+  NO_PARENT_FOR_NOTE = "no_parent_for_note",
+  CANT_DELETE_ROOT = "no_delete_root_node",
+  ENGINE_NOT_SET = "no_engine_set",
+  // --- 400, client errors
+  // Bucket
+  BAD_PARSE_FOR_NOTE = "bad_parse_for_note",
+  // 401
+  NOT_AUTHORIZED = "not_authorized",
+  // 402
+  DOES_NOT_EXIST = "does_not_exist_error",
+  INVALID_CONFIG = "invalid_config",
+  // --- 500
+  UNKNOWN = "unknown",
+}
 
-export enum ERROR_CODES {
-  MINOR,
+/**
+ * Labels whether error is recoverable or not
+ */
+export enum ERROR_SEVERITY {
+  MINOR = "minor",
+  FATAL = "fatal",
 }
 
 export enum RESERVED_KEYS {

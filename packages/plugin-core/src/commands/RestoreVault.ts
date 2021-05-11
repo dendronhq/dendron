@@ -17,7 +17,8 @@ export { CommandOpts as RestoreVaultCommandOpts };
 
 export class RestoreVaultCommand extends BaseCommand<
   CommandOpts,
-  CommandOutput
+  CommandOutput,
+  CommandInput
 > {
   static key = DENDRON_COMMANDS.RESTORE_VAULT.key;
   async gatherInputs(): Promise<any> {

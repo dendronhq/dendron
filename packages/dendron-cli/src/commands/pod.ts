@@ -140,7 +140,7 @@ export const enrichPodArgs = (opts: {
         const podConfigPath = PodUtils.getConfigPath({ podsDir, podClass });
         throw new DendronError({
           status: "no-config",
-          msg: `no config found. please create a config at ${podConfigPath}`,
+          message: `no config found. please create a config at ${podConfigPath}`,
         });
       }
     }

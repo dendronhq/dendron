@@ -56,7 +56,7 @@ export class GoToSiblingCommand extends BasicCommand<
         wsRoot: DendronWorkspace.wsRoot(),
       }) as NoteProps;
       if (_.isUndefined(rootNode)) {
-        throw new DendronError({ msg: "no root node found" });
+        throw new DendronError({ message: "no root node found" });
       }
       respNodes = rootNode.children
         .map((ent) => client.notes[ent])

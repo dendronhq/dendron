@@ -6,14 +6,15 @@ import {
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import yargs from "yargs";
-import { LaunchEngineServerCommand } from "./launchEngineServer";
+import {
+  LaunchEngineServerCLIOpts,
+  LaunchEngineServerCommand,
+} from "./launchEngineServer";
 
 export type SetupEngineCLIOpts = {
-  wsRoot: string;
   enginePort?: number;
   useLocalEngine?: boolean;
-  init?: boolean;
-};
+} & LaunchEngineServerCLIOpts;
 
 export type SetupEngineResp = {
   wsRoot: string;

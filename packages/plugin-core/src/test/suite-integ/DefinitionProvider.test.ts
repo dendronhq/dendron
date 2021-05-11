@@ -57,7 +57,7 @@ suite("DefinitionProvider", function () {
           const editor = await VSCodeUtils.openNote(noteWithTarget);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath).toEqual(
-            NoteUtils.getPathV4({ wsRoot: _wsRoot, note: noteWithLink })
+            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithLink })
           );
           done();
         },
@@ -73,7 +73,7 @@ suite("DefinitionProvider", function () {
           const editor = await VSCodeUtils.openNote(note);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath).toEqual(
-            NoteUtils.getPathV4({ wsRoot, note: beta })
+            NoteUtils.getFullPath({ wsRoot, note: beta })
           );
           done();
         },
@@ -141,7 +141,7 @@ suite("DefinitionProvider", function () {
           const editor = await VSCodeUtils.openNote(noteWithLink);
           const location = (await provide(editor)) as vscode.Location;
           expect(location.uri.fsPath).toEqual(
-            NoteUtils.getPathV4({ wsRoot: _wsRoot, note: noteWithTarget })
+            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithTarget })
           );
           done();
         },
@@ -274,8 +274,8 @@ suite("DefinitionProvider", function () {
           const locations = (await provide(editor)) as vscode.Location[];
           expect(locations.length).toEqual(2);
           expect(locations.map((l) => l.uri.fsPath)).toEqual([
-            NoteUtils.getPathV4({ wsRoot: _wsRoot, note: noteTarget1 }),
-            NoteUtils.getPathV4({ wsRoot: _wsRoot, note: noteTarget2 }),
+            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteTarget1 }),
+            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteTarget2 }),
           ]);
           done();
         },
@@ -313,7 +313,7 @@ suite("DefinitionProvider", function () {
             null as any
           )) as vscode.Location;
           expect(loc.uri.fsPath).toEqual(
-            NoteUtils.getPathV4({ wsRoot: _wsRoot, note: noteWithTarget })
+            NoteUtils.getFullPath({ wsRoot: _wsRoot, note: noteWithTarget })
           );
           done();
         },

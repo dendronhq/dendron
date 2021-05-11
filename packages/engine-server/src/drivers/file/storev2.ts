@@ -7,14 +7,15 @@ import {
   DEngineDeleteSchemaResp,
   DEngineInitResp,
   DEngineInitSchemaResp,
+  DHookEntry,
   DLink,
   DStore,
   DVault,
   EngineDeleteOptsV2,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
-  ENGINE_ERROR_CODES,
-  ERROR_CODES,
+  ERROR_STATUS,
+  ERROR_SEVERITY,
   NoteChangeEntry,
   NoteProps,
   NotePropsDict,
@@ -30,6 +31,7 @@ import {
   StoreDeleteNoteResp,
   VaultUtils,
   WriteNoteResp,
+  stringifyError,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -44,6 +46,7 @@ import _ from "lodash";
 import path from "path";
 import { MDUtilsV4 } from "../../markdown";
 import { LinkUtils } from "../../markdown/remark/utils";
+import { HookUtils, RequireHookResp } from "../../topics/hooks";
 import { readNotesFromCache, writeNotesToCache } from "../../utils";
 import { NoteParser } from "./noteParser";
 import { SchemaParser } from "./schemaParser";
@@ -108,8 +111,9 @@ export class FileStorage implements DStore {
       let error: DendronError | null = null;
       const resp = await this.initSchema();
       if (!_.isNull(resp.error)) {
-        error = new DendronError({
-          code: ERROR_CODES.MINOR,
+        error = DendronError.createPlainError({
+          message: "schema malformed",
+          severity: ERROR_SEVERITY.MINOR,
           payload: { schema: resp.error },
         });
       }
@@ -135,7 +139,10 @@ export class FileStorage implements DStore {
   ): Promise<StoreDeleteNoteResp> {
     const ctx = "deleteNote";
     if (id === "root") {
-      throw new DendronError({ status: ENGINE_ERROR_CODES.CANT_DELETE_ROOT });
+      throw new DendronError({
+        message: "",
+        status: ERROR_STATUS.CANT_DELETE_ROOT,
+      });
     }
     const noteToDelete = this.notes[id];
     const ext = ".md";
@@ -163,8 +170,8 @@ export class FileStorage implements DStore {
       // no children, delete reference from parent
       this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
       if (!noteToDelete.parent) {
-        throw new DendronError({
-          status: ENGINE_ERROR_CODES.NO_PARENT_FOR_NOTE,
+        throw DendronError.createFromStatus({
+          status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
         });
       }
       // remove from parent
@@ -205,7 +212,9 @@ export class FileStorage implements DStore {
     const ctx = "deleteSchema";
     this.logger.info({ ctx, msg: "enter", id });
     if (id === "root") {
-      throw new DendronError({ status: ENGINE_ERROR_CODES.CANT_DELETE_ROOT });
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.CANT_DELETE_ROOT,
+      });
     }
     const schemaToDelete = this.schemas[id];
     const ext = ".schema.yml";
@@ -245,7 +254,7 @@ export class FileStorage implements DStore {
       data,
       error: _.isEmpty(errors)
         ? null
-        : new DendronError({ msg: "multiple errors", payload: errors }),
+        : new DendronError({ message: "multiple errors", payload: errors }),
     };
   }
 
@@ -261,7 +270,9 @@ export class FileStorage implements DStore {
     }) as string[];
     this.logger.info({ ctx, schemaFiles });
     if (_.isEmpty(schemaFiles)) {
-      throw new DendronError({ status: ENGINE_ERROR_CODES.NO_SCHEMA_FOUND });
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.NO_SCHEMA_FOUND,
+      });
     }
     const { schemas, errors } = await new SchemaParser({
       store: this,
@@ -414,7 +425,7 @@ export class FileStorage implements DStore {
     this.logger.info({ ctx, msg: "enter", opts });
     const oldVault = oldLoc.vault;
     if (!oldVault) {
-      throw new DendronError({ msg: "vault not set for loation" });
+      throw new DendronError({ message: "vault not set for loation" });
     }
     const vpath = vault2Path({ wsRoot, vault: oldVault });
     const oldLocPath = path.join(vpath, oldLoc.fname + ".md");
@@ -449,7 +460,7 @@ export class FileStorage implements DStore {
       })
     ).catch((err) => {
       this.logger.error({ err });
-      throw new DendronError({ payload: err });
+      throw new DendronError({ message: " error rename note", payload: err });
     });
     const newNote: NoteProps = {
       ...oldNote,
@@ -583,8 +594,9 @@ export class FileStorage implements DStore {
     note: NoteProps,
     opts?: EngineWriteOptsV2
   ): Promise<WriteNoteResp> {
-    const ctx = "FileStore:writeNote";
+    const ctx = `FileStore:writeNote:${note.fname}`;
     let changed: NoteProps[] = [];
+    let error: DendronError | null = null;
     this.logger.info({
       ctx,
       msg: "enter",
@@ -621,6 +633,46 @@ export class FileStorage implements DStore {
       ctx,
       msg: "pre:note2File",
     });
+
+    const hooks = _.filter(this.engine.hooks.onCreate, (hook) =>
+      NoteUtils.match({ notePath: note.fname, pattern: hook.pattern })
+    );
+    const resp = await _.reduce<DHookEntry, Promise<RequireHookResp>>(
+      hooks,
+      async (notePromise, hook) => {
+        const { note } = await notePromise;
+        const script = HookUtils.getHookScriptPath({
+          wsRoot: this.wsRoot,
+          basename: hook.id + ".js",
+        });
+        return await HookUtils.requireHook({
+          note,
+          fpath: script,
+          wsRoot: this.wsRoot,
+        });
+      },
+      Promise.resolve({ note })
+    ).catch(
+      (err) =>
+        new DendronError({
+          severity: ERROR_SEVERITY.MINOR,
+          message: "error with hook",
+          payload: stringifyError(err),
+        })
+    );
+    if (resp instanceof DendronError) {
+      error = resp;
+      this.logger.error({ ctx, error: stringifyError(error) });
+    } else {
+      const valResp = NoteUtils.validate(resp.note);
+      if (valResp instanceof DendronError) {
+        error = valResp;
+        this.logger.error({ ctx, error: stringifyError(error) });
+      } else {
+        note = resp.note;
+        this.logger.info({ ctx, msg: "fin:RunHooks", payload: resp.payload });
+      }
+    }
     // order matters - only write file after parents are established @see(_writeNewNote)
     await note2File({
       note,
@@ -657,7 +709,7 @@ export class FileStorage implements DStore {
       msg: "exit",
     });
     return {
-      error: null,
+      error,
       data: changedEntries,
     };
   }

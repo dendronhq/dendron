@@ -44,7 +44,7 @@ export class DeleteNodeCommand extends BasicCommand<
       }) as NoteProps;
       const out = (await client.deleteNote(note.id)) as EngineDeletePayload;
       if (out.error) {
-        Logger.error({ ctx, msg: "error deleting node", err: out.error });
+        Logger.error({ ctx, msg: "error deleting node", error: out.error });
         return;
       }
       window.showInformationMessage(`${path.basename(fsPath)} deleted`);

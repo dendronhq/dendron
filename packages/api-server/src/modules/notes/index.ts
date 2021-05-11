@@ -41,7 +41,7 @@ export class NoteController {
       return data;
     } catch (err) {
       return {
-        error: new DendronError({ msg: JSON.stringify(err) }),
+        error: new DendronError({ message: JSON.stringify(err) }),
         data: undefined,
       };
     }
@@ -57,7 +57,7 @@ export class NoteController {
       return data;
     } catch (err) {
       return {
-        error: new DendronError({ msg: JSON.stringify(err) }),
+        error: new DendronError({ message: JSON.stringify(err) }),
         data: undefined,
       };
     }
@@ -72,7 +72,7 @@ export class NoteController {
       return data;
     } catch (err) {
       return {
-        error: new DendronError({ msg: JSON.stringify(err) }),
+        error: new DendronError({ message: JSON.stringify(err) }),
         data: [],
       };
     }
@@ -93,7 +93,10 @@ export class NoteController {
     } catch (err) {
       getLogger().error({ ctx, err });
       return {
-        error: new DendronError({ payload: err }),
+        error: DendronError.createPlainError({
+          payload: err,
+          message: "unknown error",
+        }),
         data: undefined,
       };
     }
@@ -112,7 +115,10 @@ export class NoteController {
     } catch (err) {
       getLogger().error({ ctx, err });
       return {
-        error: new DendronError({ payload: err }),
+        error: DendronError.createPlainError({
+          payload: err,
+          message: "unknown error",
+        }),
         data: undefined,
       };
     }
@@ -129,7 +135,7 @@ export class NoteController {
       return { error: null, data };
     } catch (err) {
       return {
-        error: new DendronError({ msg: JSON.stringify(err) }),
+        error: new DendronError({ message: JSON.stringify(err) }),
         data: undefined,
       };
     }

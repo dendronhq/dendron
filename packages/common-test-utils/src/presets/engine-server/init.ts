@@ -1,6 +1,6 @@
 import {
-  ENGINE_ERROR_CODES,
-  ERROR_CODES,
+  ERROR_STATUS,
+  ERROR_SEVERITY,
   NoteProps,
   NoteUtils,
 } from "@dendronhq/common-all";
@@ -40,7 +40,7 @@ const SCHEMAS = {
           expected: ["foo", "root"],
           msg: "bad schema not included",
         },
-        { actual: initResp.error?.code, expected: ERROR_CODES.MINOR },
+        { actual: initResp.error?.severity, expected: ERROR_SEVERITY.MINOR },
       ];
     },
     {
@@ -276,7 +276,7 @@ const NOTES = {
       return [
         {
           actual: initResp.error?.status,
-          expected: ENGINE_ERROR_CODES.BAD_PARSE_FOR_NOTE,
+          expected: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
         },
       ];
     },

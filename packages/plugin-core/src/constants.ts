@@ -38,6 +38,7 @@ type CommandEntry = {
   shortcut?: boolean;
   group:
     | "notes"
+    | "hooks"
     | "lookup"
     | "workspace"
     | "pods"
@@ -520,6 +521,21 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
       windows: "ctrl+shift+u",
       when: `editorFocus && ${DendronContext.PLUGIN_ACTIVE}`,
     },
+  },
+  // --- Hooks
+  CREATE_HOOK: {
+    key: "dendron.createHook",
+    title: `${CMD_PREFIX} Hook Create`,
+    group: "hooks",
+    desc: "Create a hook",
+    when: DendronContext.PLUGIN_ACTIVE,
+  },
+  DELETE_HOOK: {
+    key: "dendron.deleteHook",
+    title: `${CMD_PREFIX} Hook Delete`,
+    group: "hooks",
+    desc: "Delete a hook",
+    when: DendronContext.PLUGIN_ACTIVE,
   },
   // --- Publishing
   SITE_BUILD: {

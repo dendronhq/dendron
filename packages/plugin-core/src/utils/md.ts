@@ -298,7 +298,7 @@ export const noteLinks2Locations = (note: NoteProps) => {
     link: DLink;
   }[] = [];
   const linksMatch = note.links.filter((l) => l.type !== "backlink");
-  const fsPath = NoteUtils.getPathV4({
+  const fsPath = NoteUtils.getFullPath({
     note,
     wsRoot: DendronWorkspace.wsRoot(),
   });
@@ -345,7 +345,7 @@ export const findReferences = async (
 
   _.forEach(notesWithRefs, (note) => {
     const linksMatch = note.links.filter((l) => l.to?.fname === fname);
-    const fsPath = NoteUtils.getPathV4({
+    const fsPath = NoteUtils.getFullPath({
       note,
       wsRoot: DendronWorkspace.wsRoot(),
     });

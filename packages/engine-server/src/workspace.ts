@@ -107,7 +107,7 @@ export class WorkspaceService {
     });
     const schema = SchemaUtils.createRootModule({ vault });
 
-    if (!fs.existsSync(NoteUtils.getPathV4({ note, wsRoot: this.wsRoot }))) {
+    if (!fs.existsSync(NoteUtils.getFullPath({ note, wsRoot: this.wsRoot }))) {
       await note2File({ note, vault, wsRoot: this.wsRoot });
     }
     if (
@@ -238,7 +238,7 @@ export class WorkspaceService {
   async cloneVaultWithAccessToken(opts: { vault: DVault }) {
     const { vault } = opts;
     if (!vault.remote || vault.remote.type !== "git") {
-      throw new DendronError({ msg: "cloning non-git vault" });
+      throw new DendronError({ message: "cloning non-git vault" });
     }
     let remotePath = vault.remote.url;
     const localPath = vault2Path({ vault, wsRoot: this.wsRoot });
@@ -269,7 +269,7 @@ export class WorkspaceService {
     });
     const wsRoot = this.wsRoot;
     if (!vault.remote || vault.remote.type !== "git") {
-      throw new DendronError({ msg: "cloning non-git vault" });
+      throw new DendronError({ message: "cloning non-git vault" });
     }
     const repoPath = vault2Path({ wsRoot, vault });
     logger.info({ msg: "cloning", repoPath });
@@ -314,7 +314,7 @@ export class WorkspaceService {
     });
     const wsRoot = this.wsRoot;
     if (!vault.remote || vault.remote.type !== "git") {
-      throw new DendronError({ msg: "pulling non-git vault" });
+      throw new DendronError({ message: "pulling non-git vault" });
     }
     const repoPath = vault2Path({ wsRoot, vault });
     logger.info({ msg: "pulling ", repoPath });
@@ -353,7 +353,10 @@ export class WorkspaceService {
         });
         if ((await git.hasRemote()) && this.user.canPushVault(vault)) {
           await git.push().catch((err) => {
-            throw new DendronError({ payload: { err, repoPath: root } });
+            throw new DendronError({
+              message: "error pushing vault",
+              payload: { err, repoPath: root },
+            });
           });
         }
       })

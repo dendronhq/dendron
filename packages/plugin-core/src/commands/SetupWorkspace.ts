@@ -5,10 +5,10 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import vscode from "vscode";
-import { DENDRON_COMMANDS, DENDRON_WS_NAME, GLOBAL_STATE } from "../constants";
+import { DENDRON_COMMANDS, DENDRON_WS_NAME } from "../constants";
 import { Snippets, WorkspaceConfig } from "../settings";
 import { VSCodeUtils } from "../utils";
-import { DendronWorkspace, getGlobalState } from "../workspace";
+import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
 type CommandOpts = {
@@ -52,31 +52,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
     if (_.isUndefined(rootDirRaw)) {
       return;
     }
-    // if first workspace, don't prompt
-    //const globalState = DendronWorkspace.instance().context.globalState;
-    const firstWs = _.isUndefined(
-      getGlobalState(GLOBAL_STATE.DENDRON_FIRST_WS)
-    );
-    if (firstWs) {
-      return { rootDirRaw, emptyWs: false };
-    }
-
-    const options = [
-      "initialize with dendron tutorial notes",
-      "initialize empty repository",
-    ];
-
-    const initializeChoice = await VSCodeUtils.showQuickPick(options, {
-      placeHolder: "initialize with dendron tutorial notes",
-      ignoreFocusOut: true,
-    });
-    if (!initializeChoice) {
-      return;
-    }
-    InitializeType;
-    const initType = options.indexOf(initializeChoice) as InitializeType;
-    const emptyWs = initializeChoice === options[1];
-    return { rootDirRaw, emptyWs, initType };
+    return { rootDirRaw, emptyWs: true };
   }
 
   handleExistingRoot = async ({
@@ -152,7 +128,7 @@ export class SetupWorkspaceCommand extends BasicCommand<
       //   const vaults = await Promise.all(
       //     config.vaults.map(async (ent) => {
       //       if (!ent.remote) {
-      //         throw new DendronError({ msg: "no remote found for vault" });
+      //         throw new DendronError({ message: "no remote found for vault" });
       //       }
       //       const { url } = ent.remote;
       //       await GitV2.clone(`${url} ${ent.fsPath}`, { cwd: rootDir });
@@ -166,7 +142,9 @@ export class SetupWorkspaceCommand extends BasicCommand<
       //   );
       //   return _.map(vaults, (ent) => ent.vault);
       default:
-        throw new DendronError({ msg: `init type ${initType} not supported` });
+        throw new DendronError({
+          message: `init type ${initType} not supported`,
+        });
     }
   };
 
@@ -200,11 +178,6 @@ export class SetupWorkspaceCommand extends BasicCommand<
     const vaults = [{ fsPath: vaultPath }];
     await WorkspaceService.createWorkspace({ vaults, wsRoot: rootDir });
     const vpath = vault2Path({ vault: vaults[0], wsRoot: rootDir });
-
-    // create dendron root
-    // if (getWS().dendronRoot !== rootDir) {
-    //   fs.ensureDirSync(getWS().dendronRoot);
-    // }
 
     const dendronWSTemplate = VSCodeUtils.joinPath(
       ws.extensionAssetsDir,

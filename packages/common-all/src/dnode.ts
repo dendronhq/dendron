@@ -5,7 +5,7 @@ import minimatch from "minimatch";
 import path from "path";
 import title from "title";
 import { URI } from "vscode-uri";
-import { CONSTANTS, ENGINE_ERROR_CODES } from "./constants";
+import { CONSTANTS, ERROR_STATUS } from "./constants";
 import { DendronError } from "./error";
 import { Time } from "./time";
 import {
@@ -29,11 +29,14 @@ import {
   SchemaProps,
   SchemaRaw,
   SchemaTemplate,
-} from "./typesv2";
+} from "./types";
 import { getSlugger } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
 
+/**
+ * Utilities for dealing with nodes
+ */
 export class DNodeUtils {
   static addChild(parent: DNodeProps, child: DNodeProps) {
     parent.children = Array.from(new Set(parent.children).add(child.id));
@@ -174,7 +177,7 @@ export class DNodeUtils {
           VaultUtils.isEqual(ent.vault, vault, opts.wsRoot)
       );
       if (_.isUndefined(_node)) {
-        throw new DendronError({ msg: `no root found for ${fpath}` });
+        throw new DendronError({ message: `no root found for ${fpath}` });
       }
       return _node;
     }
@@ -353,12 +356,12 @@ export class NoteUtils {
     }
     if (!parent && !createStubs) {
       const err = {
-        status: ENGINE_ERROR_CODES.NO_PARENT_FOR_NOTE,
+        status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
         msg: JSON.stringify({
           fname: note.fname,
         }),
       };
-      throw new DendronError(err);
+      throw DendronError.createFromStatus(err);
     }
     if (!parent) {
       parent = DNodeUtils.findClosestParent(note.fname, notesList, {
@@ -625,7 +628,7 @@ export class NoteUtils {
       );
     });
     if (!out) {
-      throw new DendronError({ msg: `note ${fname} not found` });
+      throw new DendronError({ message: `note ${fname} not found` });
     }
     return out;
   }
@@ -645,7 +648,7 @@ export class NoteUtils {
     if (_out.length > 1) {
       if (!opts?.vault) {
         throw new DendronError({
-          msg: `multiple nodes found and no vault given for ${fname}`,
+          message: `multiple nodes found and no vault given for ${fname}`,
         });
       }
       out = _.find(
@@ -654,7 +657,7 @@ export class NoteUtils {
       ) as NoteProps;
       if (_.isUndefined(out)) {
         throw new DendronError({
-          msg: `no note found for vault: ${opts.vault.fsPath}`,
+          message: `no note found for vault: ${opts.vault.fsPath}`,
         });
       }
     } else {
@@ -686,7 +689,7 @@ export class NoteUtils {
     return _.reject(maybe, _.isUndefined) as NoteProps[];
   }
 
-  static getPathV4({
+  static getFullPath({
     note,
     wsRoot,
   }: {
@@ -701,12 +704,15 @@ export class NoteUtils {
       });
       return fpath;
     } catch (err) {
-      throw new DendronError({ payload: { note, wsRoot } });
+      throw new DendronError({
+        message: "bad path",
+        payload: { note, wsRoot },
+      });
     }
   }
 
   static getURI({ note, wsRoot }: { note: NoteProps; wsRoot: string }): URI {
-    return URI.file(this.getPathV4({ note, wsRoot }));
+    return URI.file(this.getFullPath({ note, wsRoot }));
   }
 
   static getPathUpTo(hpath: string, numCompoenents: number) {
@@ -731,6 +737,10 @@ export class NoteUtils {
   }) {
     const hydrateProps = _.pick(noteHydrated, ["parent", "children"]);
     return { ...noteRaw, ...hydrateProps };
+  }
+
+  static match({ notePath, pattern }: { notePath: string; pattern: string }) {
+    return minimatch(notePath, pattern);
   }
 
   static isDefaultTitle(props: NoteProps) {
@@ -797,6 +807,22 @@ export class NoteUtils {
 
   static uri2Fname(uri: URI) {
     return path.basename(uri.fsPath, ".md");
+  }
+
+  static validate(noteProps: Partial<NoteProps>) {
+    if (_.isUndefined(noteProps)) {
+      return DendronError.createFromStatus({
+        status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
+        message: "NoteProps is undefined",
+      });
+    }
+    if (_.isUndefined(noteProps.vault)) {
+      return DendronError.createFromStatus({
+        status: ERROR_STATUS.BAD_PARSE_FOR_NOTE,
+        message: "note vault is undefined",
+      });
+    }
+    return true;
   }
 }
 
@@ -955,8 +981,8 @@ export class SchemaUtils {
         id: "root",
       });
       if (!rootSchemaRoot) {
-        throw new DendronError({
-          status: ENGINE_ERROR_CODES.NO_ROOT_SCHEMA_FOUND,
+        throw DendronError.createFromStatus({
+          status: ERROR_STATUS.NO_ROOT_SCHEMA_FOUND,
         });
       } else {
         return rootSchemaRoot as SchemaProps;

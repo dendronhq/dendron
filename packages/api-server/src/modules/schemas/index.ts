@@ -29,7 +29,7 @@ export class SchemaController {
       return { error: null, data: undefined };
     } catch (err) {
       return {
-        error: new DendronError({ msg: JSON.stringify(err) }),
+        error: new DendronError({ message: JSON.stringify(err) }),
         data: undefined,
       };
     }
@@ -46,7 +46,7 @@ export class SchemaController {
       return data;
     } catch (err) {
       return {
-        error: new DendronError({ msg: JSON.stringify(err) }),
+        error: new DendronError({ message: JSON.stringify(err) }),
         data: undefined,
       };
     }
@@ -67,7 +67,7 @@ export class SchemaController {
       return { error: null };
     } catch (err) {
       return {
-        error: new DendronError({ msg: JSON.stringify(err) }),
+        error: new DendronError({ message: JSON.stringify(err) }),
         data: undefined,
       };
     }

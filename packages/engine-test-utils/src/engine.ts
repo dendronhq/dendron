@@ -1,5 +1,6 @@
 import {
   CleanDendronSiteConfig,
+  CONSTANTS,
   DEngineClientV2,
   DVault,
   WorkspaceOpts,
@@ -25,6 +26,8 @@ import {
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { GitTestUtils } from "./utils";
+import fs from "fs-extra";
+import path from "path";
 
 export type AsyncCreateEngineFunction = (
   opts: WorkspaceOpts
@@ -94,6 +97,7 @@ export type RunEngineTestV5Opts = {
   vaults?: DVault[];
   setupOnly?: boolean;
   initGit?: boolean;
+  initHooks?: boolean;
 };
 
 export type RunEngineTestFunctionV5<T = any> = (
@@ -127,6 +131,9 @@ export async function runEngineTestV5(
     }
   );
   const { wsRoot } = await setupWS({ vaults });
+  if (opts.initHooks) {
+    fs.mkdirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));
+  }
   await preSetupHook({ wsRoot, vaults });
   const engine: DEngineClientV2 = await createEngine({ wsRoot, vaults });
   const start = process.hrtime();

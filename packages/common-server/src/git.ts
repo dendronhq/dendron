@@ -222,7 +222,7 @@ export class GitUtils {
       const remotes = await this.getRemoteNames(uri);
       if (!remotes.includes(remoteName)) {
         throw new DendronError({
-          msg: `Your configuration contains an invalid remoteName. You should probably use one of these:\n ${remotes.join(
+          message: `Your configuration contains an invalid remoteName. You should probably use one of these:\n ${remotes.join(
             "\n"
           )}`,
         });

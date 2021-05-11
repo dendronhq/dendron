@@ -11,6 +11,7 @@ export * from "./markdown";
 export * from "./topics/connector";
 export * from "./topics/git";
 export * from "./topics/site";
+export * from "./topics/hooks";
 export * from "./types";
 export * from "./utils";
 export * from "./workspace";

@@ -125,26 +125,6 @@ module.exports = function (eleventyConfig) {
 
   // --- plugins
   eleventyConfig.addPlugin(shortcodes);
-
-  //let run = false;
-  //// --- events
-  //eleventyConfig.on("beforeBuild", async () => {
-    //if (!run) {
-      //await buildNav();
-      //await copyAssets();
-      //run = true;
-    //}
-  //});
-
-  //let run2 = false;
-  //eleventyConfig.on("afterBuild", async () => {
-    //if (!run2) {
-      //await buildStyles();
-      //await buildSearch();
-      //run2 = true;
-    //}
-  //});
-
   return {
     dir: {
       input: ".",

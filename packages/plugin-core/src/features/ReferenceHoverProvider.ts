@@ -59,7 +59,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
         });
         const uris = notes.map((note) =>
           Uri.file(
-            NoteUtils.getPathV4({ note, wsRoot: DendronWorkspace.wsRoot() })
+            NoteUtils.getFullPath({ note, wsRoot: DendronWorkspace.wsRoot() })
           )
         );
         foundUri = uris[0];
@@ -107,7 +107,7 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
             wsRoot: DendronWorkspace.wsRoot(),
           });
           if (!note) {
-            throw new DendronError({ msg: `note ${fname} not found` });
+            throw new DendronError({ message: `note ${fname} not found` });
           }
           const out = await new MarkdownPublishPod().plant({
             note,

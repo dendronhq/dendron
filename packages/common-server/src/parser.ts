@@ -3,7 +3,7 @@ import {
   DNodeUtils,
   DStore,
   DVault,
-  ENGINE_ERROR_CODES,
+  ERROR_STATUS,
   SchemaModuleOpts,
   SchemaModuleProps,
   SchemaOpts,
@@ -108,8 +108,8 @@ export class SchemaParserV2 extends ParserBaseV2 {
         const child = schemasDict[ch];
         if (!child) {
           throw new DendronError({
-            status: ENGINE_ERROR_CODES.MISSING_SCHEMA,
-            msg: JSON.stringify({ parent, missingChild: ch }),
+            status: ERROR_STATUS.MISSING_SCHEMA,
+            message: JSON.stringify({ parent, missingChild: ch }),
           });
         }
         DNodeUtils.addChild(parent, child);

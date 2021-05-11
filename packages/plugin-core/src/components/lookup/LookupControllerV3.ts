@@ -11,11 +11,31 @@ import {
 } from "./buttons";
 import { ILookupProviderV3 } from "./LookupProviderV3";
 import { DendronQuickPickerV2, LookupControllerState } from "./types";
-import { CreateQuickPickOpts, NotePickerUtils, PickerUtilsV2 } from "./utils";
+import {
+  CreateQuickPickOpts,
+  PickerUtilsV2,
+  PrepareQuickPickOpts,
+  ShowQuickPickOpts,
+} from "./utils";
 
 export type LookupControllerV3CreateOpts = {
+  /**
+   * Replace default buttons
+   */
   buttons?: DendronBtn[];
+  /**
+   * When true, don't enable vault selection
+   */
   disableVaultSelection?: boolean;
+  /**
+   * Additional buttons
+   */
+  extraButtons?: DendronBtn[];
+  /**
+   * 0.0 = exact match
+   * 1.0 = match anything
+   */
+  fuzzThreshold?: number;
 };
 
 export class LookupControllerV3 {
@@ -23,6 +43,7 @@ export class LookupControllerV3 {
   public nodeType: DNodeType;
   protected _cancelTokenSource?: CancellationTokenSource;
   public quickpick?: DendronQuickPickerV2;
+  public fuzzThreshold: number;
 
   static create(opts?: LookupControllerV3CreateOpts) {
     const vaults = getWS().getEngine().vaults;
@@ -30,22 +51,32 @@ export class LookupControllerV3 {
       _.isBoolean(opts?.disableVaultSelection) && opts?.disableVaultSelection;
     const isMultiVault = vaults.length > 1 && !disableVaultSelection;
     const buttons = opts?.buttons || [VaultSelectButton.create(isMultiVault)];
-    return new LookupControllerV3({ nodeType: "note", buttons });
+    const extraButtons = opts?.extraButtons || [];
+    return new LookupControllerV3({
+      nodeType: "note",
+      fuzzThreshold: opts?.fuzzThreshold,
+      buttons: buttons.concat(extraButtons),
+    });
   }
 
-  constructor(opts: { nodeType: DNodeType; buttons: DendronBtn[] }) {
+  constructor(opts: {
+    nodeType: DNodeType;
+    buttons: DendronBtn[];
+    fuzzThreshold?: number;
+  }) {
     const { buttons, nodeType } = opts;
     this.nodeType = nodeType;
     this.state = {
       buttons,
       buttonsPrev: [],
     };
+    this.fuzzThreshold = opts.fuzzThreshold || 0.6;
     this._cancelTokenSource = VSCodeUtils.createCancelSource();
   }
 
   get cancelToken() {
     if (_.isUndefined(this._cancelTokenSource)) {
-      throw new DendronError({ msg: "no cancel token" });
+      throw new DendronError({ message: "no cancel token" });
     }
     return this._cancelTokenSource;
   }
@@ -60,15 +91,11 @@ export class LookupControllerV3 {
     return tokenSource;
   }
 
-  async show(
-    opts: CreateQuickPickOpts & {
-      nonInteractive?: boolean;
-      initialValue?: string;
-      provider: ILookupProviderV3;
-    }
-  ) {
-    const cancelToken = this.createCancelSource();
-    const { nonInteractive, initialValue, provider } = _.defaults(opts, {
+  /**
+   * Wire up quickpick
+   */
+  async prepareQuickPick(opts: PrepareQuickPickOpts) {
+    const { provider } = _.defaults(opts, {
       nonInteractive: false,
     });
     const { buttonsPrev, buttons } = this.state;
@@ -78,26 +105,70 @@ export class LookupControllerV3 {
     await PickerUtilsV2.refreshPickerBehavior({ quickpick, buttons });
     quickpick.onDidTriggerButton(this.onTriggerButton);
     quickpick.onDidHide(this.onHide);
-    if (initialValue) {
-      quickpick.value = initialValue;
-    }
     provider.provide(this);
+    return { quickpick };
+  }
+
+  async showQuickPick(opts: ShowQuickPickOpts) {
+    const cancelToken = this.createCancelSource();
+    const { nonInteractive, provider, quickpick } = _.defaults(opts, {
+      nonInteractive: false,
+    });
+    await provider.onUpdatePickerItems({
+      picker: quickpick,
+      token: cancelToken.token,
+      fuzzThreshold: this.fuzzThreshold,
+    });
     if (!nonInteractive) {
-      provider.onUpdatePickerItems({
+      quickpick.show();
+    } else {
+      quickpick.selectedItems = quickpick.items;
+      await provider.onDidAccept({ quickpick, lc: this })();
+    }
+    return quickpick;
+  }
+
+  async show(
+    opts: CreateQuickPickOpts & {
+      /**
+       * Don't show quickpick
+       */
+      nonInteractive?: boolean;
+      /**
+       * Initial value for quickpick
+       */
+      initialValue?: string;
+      provider: ILookupProviderV3;
+    }
+  ) {
+    const { provider, nonInteractive } = _.defaults(opts, {
+      nonInteractive: false,
+    });
+    const cancelToken = this.createCancelSource();
+    const { quickpick } = await this.prepareQuickPick(opts);
+    if (!nonInteractive) {
+      await provider.onUpdatePickerItems({
         picker: quickpick,
         token: cancelToken.token,
       });
       quickpick.show();
     } else {
+      // don't want just activated behavior
+      quickpick.justActivated = false;
+      await provider.onUpdatePickerItems({
+        picker: quickpick,
+        token: cancelToken.token,
+      });
       // FIXME: this always get first item
-      quickpick.items = [
-        NotePickerUtils.createNoActiveItem(
-          PickerUtilsV2.getVaultForOpenEditor()
-        ),
-      ];
+      // quickpick.items = [
+      //   NotePickerUtils.createNoActiveItem(
+      //     PickerUtilsV2.getVaultForOpenEditor()
+      //   ),
+      // ];
       quickpick.selectedItems = quickpick.items;
       await provider.onDidAccept({ quickpick, lc: this })();
     }
+    return quickpick;
   }
 
   onHide() {

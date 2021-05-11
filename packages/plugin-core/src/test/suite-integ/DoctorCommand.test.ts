@@ -1,6 +1,10 @@
 import { NoteUtils } from "@dendronhq/common-all";
 import { DirResult, tmpDir } from "@dendronhq/common-server";
-import { NodeTestPresetsV2 } from "@dendronhq/common-test-utils";
+import {
+  ENGINE_HOOKS,
+  NodeTestPresetsV2,
+  NoteTestUtilsV4,
+} from "@dendronhq/common-test-utils";
 import { DoctorActions } from "@dendronhq/dendron-cli";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -11,7 +15,7 @@ import { DoctorCommand } from "../../commands/Doctor";
 import { ReloadIndexCommand } from "../../commands/ReloadIndex";
 import { onWSInit, setupDendronWorkspace } from "../testUtils";
 import { expect } from "../testUtilsv2";
-import { setupBeforeAfter } from "../testUtilsV3";
+import { runLegacySingleWorkspaceTest, setupBeforeAfter } from "../testUtilsV3";
 
 suite("notes", function () {
   let root: DirResult;
@@ -266,3 +270,37 @@ suite("notes", function () {
 //       setupDendronWorkspace(root.name, ctx);
 //     });
 //   });
+
+suite("CREATE_MISSING_LINKED_NOTES", function () {
+  let ctx: vscode.ExtensionContext;
+
+  ctx = setupBeforeAfter(this, {
+    afterHook: () => {
+      sinon.restore();
+    },
+  });
+
+  test.only("basic", (done) => {
+    runLegacySingleWorkspaceTest({
+      ctx,
+      postSetupHook: ENGINE_HOOKS.setupBasic,
+      onInit: async ({ wsRoot, vaults }) => {
+        const vault = vaults[0];
+        await NoteTestUtilsV4.createNote({
+          fname: "real",
+          body: "[[real.fake]]\n",
+          vault: vault,
+          wsRoot,
+        });
+        const cmd = new DoctorCommand();
+        sinon.stub(cmd, "gatherInputs").returns(
+          Promise.resolve({
+            action: DoctorActions.CREATE_MISSING_LINKED_NOTES,
+          })
+        );
+        await cmd.run();
+        done();
+      },
+    });
+  });
+});

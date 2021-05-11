@@ -1,7 +1,7 @@
 // import { DVault, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
-import { NoteProps } from "packages/common-all/src/types";
+import { DLink, NoteProps } from "@dendronhq/common-all";
 import path from "path";
 import {
   ExportPod,
@@ -36,23 +36,26 @@ export class GraphvizExportPod extends ExportPod {
   ): [string[], ParentDictionary] {
     if (!note) return [connections, parentDictionary];
 
-    let parentConnection: string = "";
     let localConnections: string[] = [
+      // Initial node with label
       `${this.parseText(note.id)} [label="${note.title}"]`,
     ];
 
     // Parent -> Child connection
     const parentID: string | undefined = parentDictionary[note.id];
-    if (parentID)
-      parentConnection = `${this.parseText(parentID)} -- ${this.parseText(
-        note.id
-      )}`;
+    if (parentID) {
+      localConnections.push(
+        `${this.parseText(parentID)} -- ${this.parseText(note.id)}`
+      );
+    }
 
     // Prepare Parent -> Child connection for this note's children
-    note.children.forEach((child) => (parentDictionary[child] = note.id));
+    note.children.forEach(
+      (child: string) => (parentDictionary[child] = note.id)
+    );
 
     // Note -> Linked Notes connections
-    note.links.forEach((link) => {
+    note.links.forEach((link: DLink) => {
       if (link.to) {
         // If the link is not currently also a child, add it to the links
         // TODO: This logic makes sense, but "to" links don't have an id for some reason
@@ -66,11 +69,6 @@ export class GraphvizExportPod extends ExportPod {
       }
     });
 
-    if (parentConnection !== "")
-      return [
-        [...connections, ...localConnections, parentConnection],
-        parentDictionary,
-      ];
     return [[...connections, ...localConnections], parentDictionary];
   }
 
@@ -81,13 +79,9 @@ export class GraphvizExportPod extends ExportPod {
     const podDstPath = dest.fsPath;
     fs.ensureDirSync(path.dirname(podDstPath));
 
-    const [connections, _] = notes.reduce<[string[], ParentDictionary]>(
-      ([previousConnections, previousDictionary], current) => {
-        return this.processNote(
-          current,
-          previousConnections,
-          previousDictionary
-        );
+    const [connections] = notes.reduce<[string[], ParentDictionary]>(
+      ([connections, dictionary], note) => {
+        return this.processNote(note, connections, dictionary);
       },
       [[], {}]
     );

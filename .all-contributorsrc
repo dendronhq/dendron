@@ -167,6 +167,17 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "maxkrieger",
+      "name": "Max Krieger",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2660634?v=4",
+      "profile": "http://a9.io/",
+      "contributions": [
+        "doc",
+        "blog",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7

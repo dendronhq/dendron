@@ -2,7 +2,7 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-30-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-31-orange.svg?style=flat-square)](#contributors-)
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
@@ -102,6 +102,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
   <tr>
     <td align="center"><a href="https://skrider.dendron.wiki/"><img src="https://avatars.githubusercontent.com/u/72541272?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Stephen Krider</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=skrider" title="Documentation">📖</a></td>
     <td align="center"><a href="https://nikitavoloboev.xyz/"><img src="https://avatars.githubusercontent.com/u/6391776?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nikita Voloboev</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=nikitavoloboev" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/jasonsjones"><img src="https://avatars.githubusercontent.com/u/515798?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jason Jones</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=jasonsjones" title="Documentation">📖</a></td>
   </tr>
 </table>
 

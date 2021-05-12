@@ -287,6 +287,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "jasonsjones",
+      "name": "Jason Jones",
+      "avatar_url": "https://avatars.githubusercontent.com/u/515798?v=4",
+      "profile": "https://github.com/jasonsjones",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7

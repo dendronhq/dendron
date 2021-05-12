@@ -84,6 +84,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "zhanghanduo",
+      "name": "Zhang Handuo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8006682?v=4",
+      "profile": "https://github.com/zhanghanduo",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7

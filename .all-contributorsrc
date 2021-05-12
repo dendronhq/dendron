@@ -93,6 +93,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "hydrosquall",
+      "name": "Cameron Yick",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9020979?v=4",
+      "profile": "https://serendipidata.com/",
+      "contributions": [
+        "blog",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7

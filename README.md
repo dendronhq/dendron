@@ -2,7 +2,7 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-26-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-27-orange.svg?style=flat-square)](#contributors-)
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
@@ -96,6 +96,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://boa.nu/"><img src="https://avatars.githubusercontent.com/u/682676?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Lars Solberg</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Axeor" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/8brandon"><img src="https://avatars.githubusercontent.com/u/34548660?v=4?s=100" width="100px;" alt=""/><br /><sub><b>8brandon</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=8brandon" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/aleksey-rowan"><img src="https://avatars.githubusercontent.com/u/79934725?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Aleksey Rowan</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=aleksey-rowan" title="Code">💻</a> <a href="https://github.com/dendronhq/dendron/commits?author=aleksey-rowan" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/pwright"><img src="https://avatars.githubusercontent.com/u/5154224?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Paul Wright</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=pwright" title="Documentation">📖</a></td>
   </tr>
 </table>
 

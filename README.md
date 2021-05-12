@@ -2,7 +2,7 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-35-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-36-orange.svg?style=flat-square)](#contributors-)
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
@@ -107,6 +107,9 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="http://de.linkedin.com/in/spex66/"><img src="https://avatars.githubusercontent.com/u/1098323?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Peter Arwanitis</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aspex66" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/flammehawk"><img src="https://avatars.githubusercontent.com/u/57394581?v=4?s=100" width="100px;" alt=""/><br /><sub><b>flammehawk</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=flammehawk" title="Documentation">📖</a> <a href="#financial-flammehawk" title="Financial">💵</a></td>
     <td align="center"><a href="https://thence.io/"><img src="https://avatars.githubusercontent.com/u/409321?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kevin Lin</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=kevinslin" title="Code">💻</a> <a href="#mentoring-kevinslin" title="Mentoring">🧑‍🏫</a> <a href="https://github.com/dendronhq/dendron/commits?author=kevinslin" title="Documentation">📖</a> <a href="#blog-kevinslin" title="Blogposts">📝</a> <a href="https://github.com/dendronhq/dendron/issues?q=author%3Akevinslin" title="Bug reports">🐛</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/kpathakota"><img src="https://avatars.githubusercontent.com/u/1484475?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kiran Pathakota</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=kpathakota" title="Code">💻</a> <a href="#mentoring-kpathakota" title="Mentoring">🧑‍🏫</a> <a href="https://github.com/dendronhq/dendron/commits?author=kpathakota" title="Documentation">📖</a> <a href="#blog-kpathakota" title="Blogposts">📝</a> <a href="https://github.com/dendronhq/dendron/issues?q=author%3Akpathakota" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

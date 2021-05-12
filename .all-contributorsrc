@@ -296,6 +296,19 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "hikchoi",
+      "name": "Mark Hyunik Choi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1219789?v=4",
+      "profile": "https://github.com/hikchoi",
+      "contributions": [
+        "code",
+        "bug",
+        "mentoring",
+        "doc",
+        "blog"
+      ]
     }
   ],
   "contributorsPerLine": 7

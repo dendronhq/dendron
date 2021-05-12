@@ -328,6 +328,19 @@
         "doc",
         "financial"
       ]
+    },
+    {
+      "login": "kevinslin",
+      "name": "Kevin Lin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/409321?v=4",
+      "profile": "https://thence.io/",
+      "contributions": [
+        "code",
+        "mentoring",
+        "doc",
+        "blog",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7

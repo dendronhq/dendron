@@ -241,6 +241,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "aleksey-rowan",
+      "name": "Aleksey Rowan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/79934725?v=4",
+      "profile": "https://github.com/aleksey-rowan",
+      "contributions": [
+        "code",
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7

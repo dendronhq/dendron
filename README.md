@@ -2,7 +2,7 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-32-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-33-orange.svg?style=flat-square)](#contributors-)
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
@@ -104,6 +104,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://nikitavoloboev.xyz/"><img src="https://avatars.githubusercontent.com/u/6391776?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Nikita Voloboev</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=nikitavoloboev" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/jasonsjones"><img src="https://avatars.githubusercontent.com/u/515798?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Jason Jones</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=jasonsjones" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/hikchoi"><img src="https://avatars.githubusercontent.com/u/1219789?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Mark Hyunik Choi</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=hikchoi" title="Code">💻</a> <a href="https://github.com/dendronhq/dendron/issues?q=author%3Ahikchoi" title="Bug reports">🐛</a> <a href="#mentoring-hikchoi" title="Mentoring">🧑‍🏫</a> <a href="https://github.com/dendronhq/dendron/commits?author=hikchoi" title="Documentation">📖</a> <a href="#blog-hikchoi" title="Blogposts">📝</a></td>
+    <td align="center"><a href="http://de.linkedin.com/in/spex66/"><img src="https://avatars.githubusercontent.com/u/1098323?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Peter Arwanitis</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aspex66" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

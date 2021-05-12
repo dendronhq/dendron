@@ -2,7 +2,7 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-19-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-20-orange.svg?style=flat-square)](#contributors-)
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
@@ -87,6 +87,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://github.com/iterating"><img src="https://avatars.githubusercontent.com/u/6834401?v=4?s=100" width="100px;" alt=""/><br /><sub><b>John Young</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aiterating" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://a9.io/"><img src="https://avatars.githubusercontent.com/u/2660634?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Max Krieger</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=maxkrieger" title="Documentation">📖</a> <a href="#blog-maxkrieger" title="Blogposts">📝</a> <a href="https://github.com/dendronhq/dendron/issues?q=author%3Amaxkrieger" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://alanionita.github.io/"><img src="https://avatars.githubusercontent.com/u/8453106?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Alan Ionita</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=alanionita" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://www.xypnox.com/"><img src="https://avatars.githubusercontent.com/u/25076171?v=4?s=100" width="100px;" alt=""/><br /><sub><b> Aditya</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Axypnox" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

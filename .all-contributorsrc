@@ -19,6 +19,15 @@
         "bug",
         "financial"
       ]
+    },
+    {
+      "login": "SeriousBug",
+      "name": "Kaan Genç",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1008124?v=4",
+      "profile": "http://kaangenc.me/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7

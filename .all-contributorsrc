@@ -112,6 +112,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "wind13",
+      "name": "Simon J S Liu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1387020?v=4",
+      "profile": "https://wind13.gitee.io/",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7

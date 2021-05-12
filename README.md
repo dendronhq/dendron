@@ -2,7 +2,7 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-14-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg?style=flat-square)](#contributors-)
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
@@ -80,6 +80,9 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://wind13.gitee.io/"><img src="https://avatars.githubusercontent.com/u/1387020?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Simon J S Liu</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Awind13" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/b0xian"><img src="https://avatars.githubusercontent.com/u/53197915?v=4?s=100" width="100px;" alt=""/><br /><sub><b>b0xian</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ab0xian" title="Bug reports">🐛</a></td>
     <td align="center"><a href="http://orcomp.github.io/Blog"><img src="https://avatars.githubusercontent.com/u/2459973?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Orcomp</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3AOrcomp" title="Bug reports">🐛</a> <a href="https://github.com/dendronhq/dendron/commits?author=Orcomp" title="Documentation">📖</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://github.com/neupsh"><img src="https://avatars.githubusercontent.com/u/5186871?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Shekhar Neupane</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=neupsh" title="Documentation">📖</a></td>
   </tr>
 </table>
 

@@ -66,6 +66,15 @@
         "bug",
         "financial"
       ]
+    },
+    {
+      "login": "Simon-Claudius",
+      "name": "Simon-Claudius",
+      "avatar_url": "https://avatars.githubusercontent.com/u/45047368?v=4",
+      "profile": "https://github.com/Simon-Claudius",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7

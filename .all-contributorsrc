@@ -28,6 +28,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "mandarvaze",
+      "name": "Mandar Vaze",
+      "avatar_url": "https://avatars.githubusercontent.com/u/46438?v=4",
+      "profile": "https://mandarvaze.bitbucket.io/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7

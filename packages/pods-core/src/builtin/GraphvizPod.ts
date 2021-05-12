@@ -1,7 +1,6 @@
-// import { DVault, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
-import { DLink, NoteProps } from "@dendronhq/common-all";
+import { DLink, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import path from "path";
 import {
   ExportPod,
@@ -29,11 +28,15 @@ export class GraphvizExportPod extends ExportPod {
   // Initial numbers mess with rendering, so each entry is prefixed with "note"
   parseText = (s: string) => (s ? `note_${s.split("-").join("")}` : "");
 
-  processNote(
-    note: NoteProps,
-    connections: string[],
-    parentDictionary: ParentDictionary
-  ): [string[], ParentDictionary] {
+  processNote(opts: {
+    note: NoteProps;
+    notes: NoteProps[];
+    connections: string[];
+    parentDictionary: ParentDictionary;
+    wsRoot: string;
+  }): [string[], ParentDictionary] {
+    const { note, notes, connections, parentDictionary, wsRoot } = opts;
+
     if (!note) return [connections, parentDictionary];
 
     let localConnections: string[] = [
@@ -49,6 +52,9 @@ export class GraphvizExportPod extends ExportPod {
       );
     }
 
+    // common-all/src/dnode.ts
+    // src/__tests__/pods-core/JSONPod.spec.ts
+
     // Prepare Parent -> Child connection for this note's children
     note.children.forEach(
       (child: string) => (parentDictionary[child] = note.id)
@@ -59,12 +65,22 @@ export class GraphvizExportPod extends ExportPod {
       if (link.to) {
         // If the link is not currently also a child, add it to the links
         // TODO: This logic makes sense, but "to" links don't have an id for some reason
-        if (link.to.id && !note.children.includes(link.to.id)) {
-          localConnections.push(
-            `${this.parseText(note.id)} -- ${this.parseText(
-              link.to.id
-            )} [style=dotted]`
-          );
+
+        const destinationNote = NoteUtils.getNoteByFnameV5({
+          fname: link.to!.fname as string,
+          vault: note.vault,
+          notes: notes,
+          wsRoot,
+        });
+
+        if (!_.isUndefined(destinationNote)) {
+          if (!note.children.includes(destinationNote.id)) {
+            localConnections.push(
+              `${this.parseText(note.id)} -- ${this.parseText(
+                destinationNote.id
+              )} [style=dotted]`
+            );
+          }
         }
       }
     });
@@ -73,7 +89,7 @@ export class GraphvizExportPod extends ExportPod {
   }
 
   async plant(opts: ExportPodPlantOpts) {
-    const { dest, notes } = opts;
+    const { dest, notes, wsRoot } = opts;
 
     // verify dest exist
     const podDstPath = dest.fsPath;
@@ -81,7 +97,13 @@ export class GraphvizExportPod extends ExportPod {
 
     const [connections] = notes.reduce<[string[], ParentDictionary]>(
       ([connections, dictionary], note) => {
-        return this.processNote(note, connections, dictionary);
+        return this.processNote({
+          note,
+          notes,
+          connections,
+          parentDictionary: dictionary,
+          wsRoot,
+        });
       },
       [[], {}]
     );

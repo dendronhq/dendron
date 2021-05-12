@@ -56,6 +56,16 @@
         "doc",
         "bug"
       ]
+    },
+    {
+      "login": "BASSMAN",
+      "name": "Ronald",
+      "avatar_url": "https://avatars.githubusercontent.com/u/363783?v=4",
+      "profile": "https://github.com/BASSMAN",
+      "contributions": [
+        "bug",
+        "financial"
+      ]
     }
   ],
   "contributorsPerLine": 7

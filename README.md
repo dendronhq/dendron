@@ -2,7 +2,7 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-10-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-11-orange.svg?style=flat-square)](#contributors-)
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
@@ -76,6 +76,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://scottspence.com/"><img src="https://avatars.githubusercontent.com/u/234708?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Scott Spence</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aspences10" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/zhanghanduo"><img src="https://avatars.githubusercontent.com/u/8006682?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Zhang Handuo</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Azhanghanduo" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://serendipidata.com/"><img src="https://avatars.githubusercontent.com/u/9020979?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Cameron Yick</b></sub></a><br /><a href="#blog-hydrosquall" title="Blogposts">📝</a> <a href="https://github.com/dendronhq/dendron/commits?author=hydrosquall" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/tallguyjenks"><img src="https://avatars.githubusercontent.com/u/29872822?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Bryan Jenks</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=tallguyjenks" title="Documentation">📖</a></td>
   </tr>
 </table>
 

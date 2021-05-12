@@ -46,6 +46,16 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "d3vr",
+      "name": "Fayçal",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1549990?v=4",
+      "profile": "https://d3vr.me/",
+      "contributions": [
+        "doc",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7

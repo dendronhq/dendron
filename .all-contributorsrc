@@ -149,6 +149,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "af4jm",
+      "name": "John Meyer",
+      "avatar_url": "https://avatars.githubusercontent.com/u/849948?v=4",
+      "profile": "https://github.com/af4jm",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7

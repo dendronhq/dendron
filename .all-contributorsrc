@@ -269,6 +269,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "skrider",
+      "name": "Stephen Krider",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72541272?v=4",
+      "profile": "https://skrider.dendron.wiki/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7

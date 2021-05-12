@@ -2,7 +2,7 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-16-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-17-orange.svg?style=flat-square)](#contributors-)
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
@@ -84,6 +84,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
   <tr>
     <td align="center"><a href="https://github.com/neupsh"><img src="https://avatars.githubusercontent.com/u/5186871?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Shekhar Neupane</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=neupsh" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/af4jm"><img src="https://avatars.githubusercontent.com/u/849948?v=4?s=100" width="100px;" alt=""/><br /><sub><b>John Meyer</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aaf4jm" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/iterating"><img src="https://avatars.githubusercontent.com/u/6834401?v=4?s=100" width="100px;" alt=""/><br /><sub><b>John Young</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aiterating" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

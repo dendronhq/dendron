@@ -158,6 +158,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "iterating",
+      "name": "John Young",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6834401?v=4",
+      "profile": "https://github.com/iterating",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7

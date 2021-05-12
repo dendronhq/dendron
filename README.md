@@ -2,7 +2,7 @@
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-7-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
@@ -71,6 +71,9 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://d3vr.me/"><img src="https://avatars.githubusercontent.com/u/1549990?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Fayçal</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=d3vr" title="Documentation">📖</a> <a href="https://github.com/dendronhq/dendron/issues?q=author%3Ad3vr" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/BASSMAN"><img src="https://avatars.githubusercontent.com/u/363783?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Ronald</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3ABASSMAN" title="Bug reports">🐛</a> <a href="#financial-BASSMAN" title="Financial">💵</a></td>
     <td align="center"><a href="https://github.com/Simon-Claudius"><img src="https://avatars.githubusercontent.com/u/45047368?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Simon-Claudius</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3ASimon-Claudius" title="Bug reports">🐛</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://scottspence.com/"><img src="https://avatars.githubusercontent.com/u/234708?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Scott Spence</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Aspences10" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

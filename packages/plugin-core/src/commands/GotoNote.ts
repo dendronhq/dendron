@@ -8,7 +8,7 @@ import {
 } from "@dendronhq/common-all";
 import { Heading, matchWikiLink, RemarkUtils } from "@dendronhq/engine-server";
 import _ from "lodash";
-import { Position, Selection, Uri, window } from "vscode";
+import { TextEditor, Position, Selection, Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
@@ -87,7 +87,14 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         window.showErrorMessage("selection is not a valid link");
         return;
       }
-      qs = maybeLink.value as string;
+      if (maybeLink.value) {
+        // Reference to another file
+        qs = maybeLink.value as string;
+      } else {
+        // Same-file block reference, implicitly current file
+        const editor = VSCodeUtils.getActiveTextEditor() as TextEditor;
+        qs = NoteUtils.uri2Fname(editor.document.uri);
+      }
       const vaults = getWS().vaultsv4;
       if (maybeLink.vaultName) {
         vault = VaultUtils.getVaultByNameOrThrow({

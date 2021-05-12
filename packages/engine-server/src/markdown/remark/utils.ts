@@ -148,7 +148,7 @@ export class LinkUtils {
         "\\|" +
         ")?" +
         // name
-        `(?<value>${LINK_NAME})` +
+        `(?<value>${LINK_NAME})?` +
         // anchor?
         `(#(?<anchor>${LINK_NAME}))?` +
         // filters?
@@ -158,13 +158,16 @@ export class LinkUtils {
     const out = linkString.match(re);
     if (out) {
       let { alias, value, anchor } = out.groups as any;
+      if (!value && !anchor) return null; // Does not actually link to anything
       let vaultName: string | undefined;
-      ({ vaultName, link: value } = this.parseDendronURI(value));
-      if (!alias) {
-        alias = value;
+      if (value) {
+        ({ vaultName, link: value } = this.parseDendronURI(value));
+        if (!alias) {
+          alias = value;
+        }
+        alias = _.trim(alias);
+        value = _.trim(value);
       }
-      alias = _.trim(alias);
-      value = _.trim(value);
       return { alias, value, anchorHeader: anchor, vaultName };
     } else {
       return null;

@@ -22,7 +22,8 @@ import { DendronWorkspace } from "../workspace";
 
 export type RefT = {
   label: string;
-  ref: string;
+  /** If undefined, then the file this reference is located in is the ref */
+  ref?: string;
   anchor?: DNoteAnchor;
   vaultName?: string;
 };
@@ -236,7 +237,8 @@ export const getReferenceAtPosition = (
   }
 
   return {
-    ref,
+    // If ref is missing, it's implicitly the current file
+    ref: ref ? ref : document.fileName,
     label,
     range,
     anchor,

@@ -1,5 +1,4 @@
 import {
-  assert,
   CONSTANTS,
   DendronError,
   NoteUtils,
@@ -191,7 +190,6 @@ function attachParser(proc: Unified.Processor) {
     }
     if (!out.value) {
       // same file block reference, value is implicitly current file
-      assert(out.anchorHeader, "Link has no value or anchor"); // should never happen
       out.value = _.trim(NoteUtils.normalizeFname(fname)); // recreate what value (and alias) would have been parsed
       if (!out.alias) out.alias = out.value;
     }

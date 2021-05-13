@@ -20,7 +20,6 @@ function proc(
   opts?: DendronPubOpts
 ) {
   return MDUtilsV4.procFull({
-    fname: "root",
     engine,
     ...dendron,
     publishOpts: opts,
@@ -33,6 +32,7 @@ describe("dendronPub", () => {
       const out = proc(
         engine,
         {
+          fname: "placeholder.md",
           dest: DendronASTDest.HTML,
           vault: vaults[0],
           config: engine.config,
@@ -50,6 +50,7 @@ describe("dendronPub", () => {
         const out = proc(
           engine,
           {
+            fname: "placeholder.md",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
             config: engine.config,
@@ -76,6 +77,7 @@ describe("dendronPub", () => {
           proc: proc(
             engine,
             {
+              fname: "placeholder.md",
               dest: DendronASTDest.HTML,
               vault: vaults[0],
               config,

@@ -20,7 +20,6 @@ function proc(
   opts?: DendronPubOpts
 ) {
   return MDUtilsV4.procFull({
-    fname: "PLACEHOLDER",
     engine,
     ...dendron,
     publishOpts: opts,

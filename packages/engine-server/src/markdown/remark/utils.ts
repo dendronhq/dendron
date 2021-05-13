@@ -138,7 +138,26 @@ export class LinkUtils {
     };
   }
 
-  static parseLinkV2(linkString: string) {
+  /**Either value or anchorHeader will always be present if the function did not
+   * return null. A missing value means that the file containing this link is
+   * the value.
+   */
+  static parseLinkV2(
+    linkString: string
+  ):
+    | {
+        alias?: string;
+        value: string;
+        anchorHeader?: string;
+        vaultName?: string;
+      }
+    | {
+        alias?: string;
+        value?: string;
+        anchorHeader: string;
+        vaultName?: string;
+      }
+    | null {
     const LINK_NAME = "[^#\\|>]+";
     const re = new RegExp(
       "" +

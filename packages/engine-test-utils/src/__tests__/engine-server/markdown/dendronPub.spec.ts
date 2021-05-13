@@ -169,7 +169,7 @@ describe("dendronPub", () => {
           ),
         }).process("![[alpha]]");
         expect(resp).toMatchSnapshot();
-        checkVFile(resp, "<p></p><p></p><p></p>");
+        await checkVFile(resp, "<p></p><p></p>");
       },
       {
         preSetupHook: async (opts) => {

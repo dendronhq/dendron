@@ -56,7 +56,7 @@ export enum VaultMissingBehavior {
 export type DendronASTData = {
   dest: DendronASTDest;
   vault: DVault;
-  fname?: string;
+  fname: string;
   wikiLinkOpts?: WikiLinksOpts;
   config: DendronConfig;
   overrides?: Partial<DendronPubOpts>;

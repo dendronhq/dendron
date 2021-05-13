@@ -108,11 +108,15 @@ export class GraphvizExportPod extends ExportPod {
       [[], {}]
     );
 
-    const gv = `graph {
+    // Create file output
+    const graphvizOutput = `graph {
     ${connections.join(";\n\t")};
 }`;
 
-    fs.writeFileSync(podDstPath, gv);
+    // Write file
+    const filePath = path.join(podDstPath, "graphviz.dot");
+    fs.writeFileSync(filePath, graphvizOutput);
+
     return { notes };
   }
 }

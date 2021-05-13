@@ -248,33 +248,16 @@ export const getReferenceAtPosition = (
 };
 
 export const parseRef = (rawRef: string): RefT => {
-  const escapedDividerPosition = rawRef.indexOf("\\|");
-  const dividerPosition =
-    escapedDividerPosition !== -1
-      ? escapedDividerPosition
-      : rawRef.indexOf("|");
+  const parsed = LinkUtils.parseLinkV2(rawRef);
+  if (_.isNull(parsed)) throw new Error(`Unable to parse reference ${rawRef}`);
+  const { alias, value, anchorHeader, vaultName } = parsed;
 
-  const out: RefT = {
-    label: dividerPosition !== -1 ? rawRef.slice(0, dividerPosition) : "",
-    ref:
-      dividerPosition !== -1
-        ? rawRef.slice(
-            dividerPosition + (escapedDividerPosition !== -1 ? 2 : 1),
-            rawRef.length
-          )
-        : rawRef,
+  return {
+    label: alias ? alias : "",
+    ref: value,
+    anchor: anchorHeader ? { type: "header", value: anchorHeader } : undefined,
+    vaultName,
   };
-  if (out.ref.indexOf("#") >= 0) {
-    const [ref, ...anchor] = out.ref.split("#");
-    out.ref = ref;
-    out.anchor = { type: "header", value: anchor[0] };
-  }
-  const { link, vaultName } = LinkUtils.parseDendronURI(out.ref);
-  if (vaultName) {
-    out.vaultName = vaultName;
-    out.ref = link;
-  }
-  return out;
 };
 
 export const containsUnknownExt = (pathParam: string): boolean =>

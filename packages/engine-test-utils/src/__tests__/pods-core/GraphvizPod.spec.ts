@@ -65,8 +65,8 @@ describe("graphviz export pod", () => {
             dest: exportDest,
             includeBody: true,
             includeStubs: true,
-            includeHierarchy: true,
-            includeLinks: false,
+            showGraphByHierarchy: true,
+            showGraphByEdges: false,
           },
         });
 
@@ -106,8 +106,8 @@ describe("graphviz export pod", () => {
             dest: exportDest,
             includeBody: true,
             includeStubs: true,
-            includeHierarchy: true,
-            includeLinks: false,
+            showGraphByHierarchy: true,
+            showGraphByEdges: false,
           } as GraphvizExportConfig,
         });
 
@@ -137,8 +137,8 @@ describe("graphviz export pod", () => {
             dest: exportDest,
             includeBody: true,
             includeStubs: true,
-            includeHierarchy: false,
-            includeLinks: true,
+            showGraphByHierarchy: false,
+            showGraphByEdges: true,
           } as GraphvizExportConfig,
         });
 
@@ -167,8 +167,8 @@ describe("graphviz export pod", () => {
             dest: exportDest,
             includeBody: true,
             includeStubs: true,
-            includeHierarchy: true,
-            includeLinks: true,
+            showGraphByHierarchy: true,
+            showGraphByEdges: true,
           } as GraphvizExportConfig,
         });
 

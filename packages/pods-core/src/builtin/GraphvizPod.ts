@@ -12,8 +12,8 @@ type ParentDictionary = {
 };
 
 type GraphvizExportPodCustomOpts = {
-  includeHierarchy: boolean;
-  includeLinks: boolean;
+  showGraphByHierarchy: boolean;
+  showGraphByEdges: boolean;
 };
 
 export type GraphvizExportConfig = ExportPodConfig &
@@ -34,14 +34,14 @@ export class GraphvizExportPod extends ExportPod<GraphvizExportConfig> {
   get config() {
     return super.config.concat([
       {
-        key: "includeHierarchy",
+        key: "showGraphByHierarchy",
         description:
           "Include hierarchical note connections (e.g. parent -> child connections)",
         default: true,
         type: "boolean",
       },
       {
-        key: "includeLinks",
+        key: "showGraphByEdges",
         description:
           "Include linked note relationships, e.g. note with [[link]] -> another note",
         default: false,
@@ -63,8 +63,8 @@ export class GraphvizExportPod extends ExportPod<GraphvizExportConfig> {
       connections,
       parentDictionary,
       wsRoot,
-      includeHierarchy,
-      includeLinks,
+      showGraphByHierarchy,
+      showGraphByEdges,
     } = opts;
 
     if (!note) return [connections, parentDictionary];
@@ -75,7 +75,7 @@ export class GraphvizExportPod extends ExportPod<GraphvizExportConfig> {
     ];
 
     // Parent -> Child connection
-    if (includeHierarchy) {
+    if (showGraphByHierarchy) {
       const parentID: string | undefined = parentDictionary[note.id];
 
       if (parentID) {
@@ -91,7 +91,7 @@ export class GraphvizExportPod extends ExportPod<GraphvizExportConfig> {
     );
 
     // Note -> Linked Notes connections
-    if (includeLinks) {
+    if (showGraphByEdges) {
       note.links.forEach((link: DLink) => {
         if (link.to) {
           const destinationNote = NoteUtils.getNoteByFnameV5({
@@ -103,7 +103,7 @@ export class GraphvizExportPod extends ExportPod<GraphvizExportConfig> {
 
           if (!_.isUndefined(destinationNote)) {
             if (
-              (includeLinks && !includeHierarchy) ||
+              (showGraphByEdges && !showGraphByHierarchy) ||
               !note.children.includes(destinationNote.id)
             ) {
               localConnections.push(
@@ -124,8 +124,8 @@ export class GraphvizExportPod extends ExportPod<GraphvizExportConfig> {
     const { dest, notes, wsRoot, config } = opts;
 
     const {
-      includeHierarchy = true,
-      includeLinks = false,
+      showGraphByHierarchy = true,
+      showGraphByEdges = false,
     } = config as GraphvizExportConfig;
 
     // verify dest exist
@@ -140,8 +140,8 @@ export class GraphvizExportPod extends ExportPod<GraphvizExportConfig> {
           connections,
           parentDictionary: dictionary,
           wsRoot,
-          includeHierarchy,
-          includeLinks,
+          showGraphByHierarchy,
+          showGraphByEdges,
         });
       },
       [[], {}]

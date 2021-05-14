@@ -16,10 +16,8 @@ interface GraphvizExportPodCustomOpts {
   includeLinks: boolean;
 }
 
-export type GraphvizExportPodPlantOpts = ExportPodPlantOpts &
+export type GraphvizExportConfig = ExportPodConfig &
   GraphvizExportPodCustomOpts;
-
-type GraphvizExportConfig = ExportPodConfig & GraphvizExportPodCustomOpts;
 
 interface GraphvizExportPodProcessProps extends GraphvizExportPodCustomOpts {
   note: NoteProps;

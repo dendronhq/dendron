@@ -1,11 +1,33 @@
 import { tmpDir } from "@dendronhq/common-server";
-import { ENGINE_HOOKS, FileTestUtils } from "@dendronhq/common-test-utils";
-import { GraphvizExportPod } from "@dendronhq/pods-core";
+import { FileTestUtils, NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
+import { GraphvizExportConfig, GraphvizExportPod } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
-import { runEngineTestV5 } from "../../engine";
+import { runEngineTestV5, WorkspaceOpts } from "../../engine";
 import { checkNotInString, checkString } from "../../utils";
+
+const setupBasic = async (opts: WorkspaceOpts) => {
+  const { wsRoot, vaults } = opts;
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    vault: vaults[0],
+    fname: "parent",
+    body: [`[[foo.linked]]`].join("\n"),
+  });
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    vault: vaults[0],
+    fname: "parent.linked",
+    body: [`[[foo]]`].join("\n"),
+  });
+  await NoteTestUtilsV4.createNote({
+    wsRoot,
+    vault: vaults[0],
+    fname: "unlinked",
+    body: [`[[parent]]`].join("\n"),
+  });
+};
 
 describe("graphviz export pod", () => {
   let exportDest: string;
@@ -19,6 +41,7 @@ describe("graphviz export pod", () => {
       async ({ engine, vaults, wsRoot }) => {
         const pod = new GraphvizExportPod();
         engine.config.useFMTitle = true;
+
         await pod.execute({
           engine,
           vaults,
@@ -37,13 +60,13 @@ describe("graphviz export pod", () => {
         expect(expectedFiles).toEqual(actualFiles);
 
         // check contents of graphviz file
-        const foo = fs.readFileSync(path.join(exportDest, "graphviz.dot"), {
+        const dotFile = fs.readFileSync(path.join(exportDest, "graphviz.dot"), {
           encoding: "utf8",
         });
 
         // TODO: IDs of files switch between test runs, which causes the snapshot
         // to fail when it shouldn't
-        // expect(foo).toMatchSnapshot("graphviz contents");
+        // expect(dotFile).toMatchSnapshot("graphviz contents");
 
         // Check for:
         // 1. start of file -> "graph {"
@@ -51,9 +74,9 @@ describe("graphviz export pod", () => {
         // 3. a labeled note -> "[label=\""
         // 4. a connection -> "--"
         // 5. end of graph -> "}"
-        await checkString(foo, "graph {", "note_", '[label="', "--", "}");
+        await checkString(dotFile, "graph {", "note_", '[label="', "--", "}");
       },
-      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+      { expect, preSetupHook: setupBasic }
     );
   });
 
@@ -70,7 +93,40 @@ describe("graphviz export pod", () => {
             dest: exportDest,
             includeBody: true,
             includeStubs: true,
-          },
+            includeHierarchy: true,
+            includeLinks: false,
+          } as GraphvizExportConfig,
+        });
+
+        // check contents of graphviz file
+        const dotFile = fs.readFileSync(path.join(exportDest, "graphviz.dot"), {
+          encoding: "utf8",
+        });
+
+        // check for hierarchical-specific elements
+        await checkString(dotFile, "--");
+        await checkNotInString(dotFile, "dotted");
+      },
+      { expect, preSetupHook: setupBasic }
+    );
+  });
+
+  test("include link connections only", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new GraphvizExportPod();
+        engine.config.useFMTitle = true;
+        await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            dest: exportDest,
+            includeBody: true,
+            includeStubs: true,
+            includeHierarchy: false,
+            includeLinks: true,
+          } as GraphvizExportConfig,
         });
 
         // check contents of graphviz file
@@ -78,68 +134,40 @@ describe("graphviz export pod", () => {
           encoding: "utf8",
         });
 
-        // check for hierarchical-specific elements
-        await checkNotInString(foo, "dotted");
+        // check for link-specific elements
+        await checkString(foo, "--", "dotted");
       },
-      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+      { expect, preSetupHook: setupBasic }
     );
   });
 
-  // TODO: Add link to one of the engine test files so this works correctly
-  // test("include link connections only", async () => {
-  //   await runEngineTestV5(
-  //     async ({ engine, vaults, wsRoot }) => {
-  //       const pod = new GraphvizExportPod();
-  //       engine.config.useFMTitle = true;
-  //       await pod.execute({
-  //         engine,
-  //         vaults,
-  //         wsRoot,
-  //         config: {
-  //           dest: exportDest,
-  //           includeBody: true,
-  //           includeStubs: true,
-  //         },
-  //       });
+  test("include both hierarchical and link connections", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new GraphvizExportPod();
+        engine.config.useFMTitle = true;
+        await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            dest: exportDest,
+            includeBody: true,
+            includeStubs: true,
+            includeHierarchy: true,
+            includeLinks: true,
+          } as GraphvizExportConfig,
+        });
 
-  //       // check contents of graphviz file
-  //       const foo = fs.readFileSync(path.join(exportDest, "graphviz.dot"), {
-  //         encoding: "utf8",
-  //       });
+        // check contents of graphviz file
+        const foo = fs.readFileSync(path.join(exportDest, "graphviz.dot"), {
+          encoding: "utf8",
+        });
 
-  //       // check for hierarchical-specific elements
-  //       await checkString(foo, "dotted");
-  //     },
-  //     { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
-  //   );
-  // });
-
-  // TODO: Find more specific ways to test this as opposed to the above test case
-  // test("include both hierarchical and link connections", async () => {
-  //   await runEngineTestV5(
-  //     async ({ engine, vaults, wsRoot }) => {
-  //       const pod = new GraphvizExportPod();
-  //       engine.config.useFMTitle = true;
-  //       await pod.execute({
-  //         engine,
-  //         vaults,
-  //         wsRoot,
-  //         config: {
-  //           dest: exportDest,
-  //           includeBody: true,
-  //           includeStubs: true,
-  //         },
-  //       });
-
-  //       // check contents of graphviz file
-  //       const foo = fs.readFileSync(path.join(exportDest, "graphviz.dot"), {
-  //         encoding: "utf8",
-  //       });
-
-  //       // check for hierarchical-specific elements
-  //       // TODO: await checkString(foo, "dotted");
-  //     },
-  //     { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
-  //   );
-  // });
+        // check for both hierarchical and link elements
+        await checkString(foo, "--", "dotted");
+      },
+      { expect, preSetupHook: setupBasic }
+    );
+  });
 });

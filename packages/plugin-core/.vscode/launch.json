@@ -28,7 +28,6 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--disable-extensions",
       ],
       "outFiles": ["${workspaceFolder:plugin-core}/out/**/*.js"],
       "env": {
@@ -98,6 +97,21 @@
       "args": [
         //"${workspaceFolder}/fixtures/fake-workspace/dendron.code-workspace",
         "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionTestsPath=${workspaceFolder}/out/test/suite-integ/index",
+      ],
+      "env": {
+        "STAGE": "test",
+        "TEST_TO_RUN": "${fileBasenameNoExtension}"
+      },
+      "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
+    },
+    {
+      "name": "Extension Integ Tests - File Remote",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
         "--extensionDevelopmentPath=${workspaceFolder}",
         "--extensionTestsPath=${workspaceFolder}/out/test/suite-integ/index",
       ],

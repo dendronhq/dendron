@@ -124,10 +124,6 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     };
   }
 
-  registerOnAcceptHook(hook: OnAcceptHook) {
-    this._onAcceptHooks.push(hook);
-  }
-
   async onUpdatePickerItems(opts: OnUpdatePickerItemsOpts) {
     const { picker, token } = opts;
     const ctx = "updatePickerItems";
@@ -196,7 +192,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       Logger.debug({ ctx, msg: "active != qs" });
       // we currently always offer a new
       updatedItems =
-        this.opts.allowNewNote && !queryEndsWithDot
+        this.opts.allowNewNote && (!queryEndsWithDot || picker.canSelectMany)
           ? updatedItems.concat(NotePickerUtils.createNoActiveItem({} as any))
           : updatedItems;
 
@@ -222,5 +218,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       });
       return;
     }
+  }
+
+  registerOnAcceptHook(hook: OnAcceptHook) {
+    this._onAcceptHooks.push(hook);
   }
 }

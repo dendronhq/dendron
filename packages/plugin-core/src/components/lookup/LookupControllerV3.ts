@@ -141,34 +141,25 @@ export class LookupControllerV3 {
       provider: ILookupProviderV3;
     }
   ) {
-    const { provider, nonInteractive } = _.defaults(opts, {
-      nonInteractive: false,
-    });
-    const cancelToken = this.createCancelSource();
     const { quickpick } = await this.prepareQuickPick(opts);
-    if (!nonInteractive) {
-      await provider.onUpdatePickerItems({
-        picker: quickpick,
-        token: cancelToken.token,
-      });
-      quickpick.show();
-    } else {
-      // don't want just activated behavior
-      quickpick.justActivated = false;
-      await provider.onUpdatePickerItems({
-        picker: quickpick,
-        token: cancelToken.token,
-      });
-      // FIXME: this always get first item
-      // quickpick.items = [
-      //   NotePickerUtils.createNoActiveItem(
-      //     PickerUtilsV2.getVaultForOpenEditor()
-      //   ),
-      // ];
-      quickpick.selectedItems = quickpick.items;
-      await provider.onDidAccept({ quickpick, lc: this })();
-    }
-    return quickpick;
+    return this.showQuickPick({ ...opts, quickpick });
+    // if (!nonInteractive) {
+    //   await provider.onUpdatePickerItems({
+    //     picker: quickpick,
+    //     token: cancelToken.token,
+    //   });
+    //   quickpick.show();
+    // } else {
+    //   // don't want just activated behavior
+    //   quickpick.justActivated = false;
+    //   await provider.onUpdatePickerItems({
+    //     picker: quickpick,
+    //     token: cancelToken.token,
+    //   });
+    //   quickpick.selectedItems = quickpick.items;
+    //   await provider.onDidAccept({ quickpick, lc: this })();
+    // }
+    // return quickpick;
   }
 
   onHide() {

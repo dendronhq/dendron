@@ -80,6 +80,7 @@ export class LinkUtils {
     let remark = MDUtilsV4.procParse({
       dest: DendronASTDest.MD_DENDRON,
       engine,
+      fname: note.fname,
     });
     let out = remark.parse(content);
     let out2: WikiLinkNoteV4[] = selectAll("wikiLink", out) as WikiLinkNoteV4[];

@@ -61,6 +61,7 @@ type ProcOpts = {
 
 type ProcParseOpts = {
   dest: DendronASTDest;
+  fname: string;
 } & ProcOpts;
 
 type ProcOptsFull = ProcOpts & {
@@ -258,7 +259,7 @@ export class MDUtilsV4 {
       .use(remarkParse, { gfm: true })
       .use(wikiLinks)
       .data("errors", errors);
-    this.setDendronData(_proc, { dest: opts.dest });
+    this.setDendronData(_proc, { dest: opts.dest, fname: opts.fname });
     this.setEngine(_proc, opts.engine);
     return _proc;
   }

@@ -375,6 +375,7 @@ suite("Lookup, notesv2", function () {
       }
     );
 
+    // migrated
     test("opened note", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
@@ -405,6 +406,7 @@ suite("Lookup, notesv2", function () {
       });
     });
 
+    // migrated
     test("remove stub status after creation", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,
@@ -445,6 +447,7 @@ suite("Lookup, notesv2", function () {
       });
     });
 
+    // skip
     test("schema suggestion", (done) => {
       runLegacyMultiWorkspaceTest({
         ctx,

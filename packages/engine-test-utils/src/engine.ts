@@ -187,3 +187,9 @@ export function testWithEngine(
     });
   }
 }
+
+export class TestEngineUtils {
+  static vault1(vaults: DVault[]) {
+    return _.find(vaults, { fsPath: "vault1" })!;
+  }
+}

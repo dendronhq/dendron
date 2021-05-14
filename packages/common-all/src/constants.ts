@@ -33,6 +33,7 @@ export enum ERROR_STATUS {
   // 402
   DOES_NOT_EXIST = "does_not_exist_error",
   INVALID_CONFIG = "invalid_config",
+  INVALID_STATE = "invalid_state",
   // --- 500
   UNKNOWN = "unknown",
 }

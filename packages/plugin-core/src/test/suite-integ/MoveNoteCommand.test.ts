@@ -423,7 +423,7 @@ suite("MoveNoteCommand", function () {
           provider,
           initialValue,
         });
-        expect(lc.quickpick!.buttons[0].pressed).toBeFalsy();
+        expect(lc.quickpick.buttons[0].pressed).toBeFalsy();
 
         done();
       },
@@ -460,7 +460,7 @@ suite("MoveNoteCommand", function () {
           provider,
           initialValue,
         });
-        expect(lc.quickpick!.buttons[0].pressed).toBeTruthy();
+        expect(lc.quickpick.buttons[0].pressed).toBeTruthy();
 
         done();
       },

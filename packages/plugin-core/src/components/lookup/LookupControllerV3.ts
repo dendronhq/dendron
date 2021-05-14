@@ -1,4 +1,4 @@
-import { DendronError, DNodeType } from "@dendronhq/common-all";
+import { DendronError, DNodeType, ERROR_STATUS } from "@dendronhq/common-all";
 import _ from "lodash";
 import { QuickInputButton } from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
@@ -42,7 +42,7 @@ export class LookupControllerV3 {
   public state: LookupControllerState;
   public nodeType: DNodeType;
   protected _cancelTokenSource?: CancellationTokenSource;
-  public quickpick?: DendronQuickPickerV2;
+  public _quickpick?: DendronQuickPickerV2;
   public fuzzThreshold: number;
 
   static create(opts?: LookupControllerV3CreateOpts) {
@@ -74,6 +74,16 @@ export class LookupControllerV3 {
     this._cancelTokenSource = VSCodeUtils.createCancelSource();
   }
 
+  get quickpick(): DendronQuickPickerV2 {
+    if (_.isUndefined(this._quickpick)) {
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.INVALID_STATE,
+        message: "quickpick not initialized",
+      });
+    }
+    return this._quickpick;
+  }
+
   get cancelToken() {
     if (_.isUndefined(this._cancelTokenSource)) {
       throw new DendronError({ message: "no cancel token" });
@@ -92,7 +102,7 @@ export class LookupControllerV3 {
   }
 
   /**
-   * Wire up quickpick
+   * Wire up quickpick and initialize buttons
    */
   async prepareQuickPick(opts: PrepareQuickPickOpts) {
     const { provider } = _.defaults(opts, {
@@ -100,7 +110,7 @@ export class LookupControllerV3 {
     });
     const { buttonsPrev, buttons } = this.state;
     const quickpick = PickerUtilsV2.createDendronQuickPick(opts);
-    this.quickpick = quickpick;
+    this._quickpick = quickpick;
     PickerUtilsV2.refreshButtons({ quickpick, buttons, buttonsPrev });
     await PickerUtilsV2.refreshPickerBehavior({ quickpick, buttons });
     quickpick.onDidTriggerButton(this.onTriggerButton);
@@ -143,37 +153,20 @@ export class LookupControllerV3 {
   ) {
     const { quickpick } = await this.prepareQuickPick(opts);
     return this.showQuickPick({ ...opts, quickpick });
-    // if (!nonInteractive) {
-    //   await provider.onUpdatePickerItems({
-    //     picker: quickpick,
-    //     token: cancelToken.token,
-    //   });
-    //   quickpick.show();
-    // } else {
-    //   // don't want just activated behavior
-    //   quickpick.justActivated = false;
-    //   await provider.onUpdatePickerItems({
-    //     picker: quickpick,
-    //     token: cancelToken.token,
-    //   });
-    //   quickpick.selectedItems = quickpick.items;
-    //   await provider.onDidAccept({ quickpick, lc: this })();
-    // }
-    // return quickpick;
   }
 
   onHide() {
-    const { quickpick } = this;
+    const { _quickpick: quickpick } = this;
     if (!quickpick) {
       return;
     }
     quickpick.dispose();
-    this.quickpick = undefined;
+    this._quickpick = undefined;
     this._cancelTokenSource?.dispose();
   }
 
   onTriggerButton = async (btn: QuickInputButton) => {
-    const { quickpick } = this;
+    const { _quickpick: quickpick } = this;
     const { buttons, buttonsPrev } = this.state;
     if (!quickpick) {
       return;

@@ -1,4 +1,8 @@
-import { DNodePropsQuickInputV2, NoteUtils } from "@dendronhq/common-all";
+import {
+  DNodePropsQuickInputV2,
+  NoteQuickInput,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import * as vscode from "vscode";
 import { QuickInputButton, ThemeIcon } from "vscode";
@@ -195,15 +199,31 @@ class HorizontalSplitBtn extends DendronBtn {
     });
   }
 }
-class DirectChildFilterBtn extends DendronBtn {
+
+export class DirectChildFilterBtn extends DendronBtn {
   static create(pressed?: boolean) {
-    return new DendronBtn({
+    return new DirectChildFilterBtn({
       title: "Direct Child Filter",
       iconOff: "git-branch",
       iconOn: "menu-selection",
       type: "directChildOnly" as LookupFilterType,
       pressed,
     });
+  }
+
+  async onEnable({ quickPick }: ButtonHandleOpts) {
+    quickPick.filterMiddleware = (items: NoteQuickInput[]) => {
+      const depth = PickerUtilsV2.slashToDot(
+        PickerUtilsV2.getValue(quickPick)
+      ).split(".").length;
+      items = PickerUtilsV2.filterByDepth(items, depth);
+      return items;
+    };
+    return;
+  }
+
+  async onDisable({ quickPick }: ButtonHandleOpts) {
+    quickPick.filterMiddleware = undefined;
   }
 }
 
@@ -221,6 +241,10 @@ export class MultiSelectBtn extends DendronBtn {
   async onEnable({ quickPick }: ButtonHandleOpts) {
     quickPick.canSelectMany = this.pressed;
     return;
+  }
+
+  async onDisable({ quickPick }: ButtonHandleOpts) {
+    quickPick.canSelectMany = this.pressed;
   }
 }
 

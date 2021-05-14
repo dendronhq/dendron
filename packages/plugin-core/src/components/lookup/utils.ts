@@ -226,6 +226,7 @@ export class PickerUtilsV2 {
     quickPick.canSelectMany = false;
     quickPick.matchOnDescription = false;
     quickPick.matchOnDetail = false;
+    quickPick.showNote = async (uri) => window.showTextDocument(uri);
     if (initialValue) {
       quickPick.value = initialValue;
     }
@@ -437,6 +438,14 @@ export class NotePickerUtils {
       detail: CREATE_NEW_DETAIL,
       alwaysShow: true,
     };
+  }
+
+  static getInitialValueFromOpenEditor() {
+    const initialValue = path.basename(
+      VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
+      ".md"
+    );
+    return initialValue;
   }
 
   static getSelection(picker: DendronQuickPickerV2): NoteQuickInput[] {

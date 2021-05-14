@@ -39,7 +39,10 @@ function getWikiLink(node: UnistNode): WikiLinkNoteV4 {
 describe("wikiLinks", () => {
   describe("parse", () => {
     let engine: any;
-    let dendronData = { dest: DendronASTDest.MD_REGULAR };
+    let dendronData = {
+      fname: "placeholder.md",
+      dest: DendronASTDest.MD_REGULAR,
+    };
 
     test("basic", () => {
       const resp = proc(engine, genDendronData(dendronData)).parse(
@@ -63,6 +66,32 @@ describe("wikiLinks", () => {
         "`[[foo.md]]`"
       );
       expect(getWikiLink(resp).type).toEqual("inlineCode");
+    });
+
+    describe("block references", () => {
+      test("block reference to different file", () => {
+        const resp = proc(engine, genDendronData(dendronData)).parse(
+          `[[lorem-ipsum#^block-id]]`
+        );
+        const wikiLink = getWikiLink(resp);
+        expect(_.pick(wikiLink, ["type", "value"])).toEqual({
+          type: "wikiLink",
+          value: "lorem-ipsum",
+        });
+        expect(wikiLink.data.anchorHeader).toEqual("^block-id");
+      });
+
+      test("block reference to same file", () => {
+        const resp = proc(engine, genDendronData(dendronData)).parse(
+          `[[#^block-id]]`
+        );
+        const wikiLink = getWikiLink(resp);
+        expect(_.pick(wikiLink, ["type", "value"])).toEqual({
+          type: "wikiLink",
+          value: "placeholder",
+        });
+        expect(wikiLink.data.anchorHeader).toEqual("^block-id");
+      });
     });
   });
 

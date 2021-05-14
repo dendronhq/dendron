@@ -50,6 +50,8 @@ describe("graphviz export pod", () => {
             dest: exportDest,
             includeBody: true,
             includeStubs: true,
+            includeHierarchy: true,
+            includeLinks: false,
           },
         });
 

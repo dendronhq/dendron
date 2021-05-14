@@ -1,6 +1,13 @@
-import { DendronError, NoteQuickInput } from "@dendronhq/common-all";
+import {
+  DendronError,
+  ERROR_STATUS,
+  NoteProps,
+  NoteQuickInput,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import { HistoryService } from "@dendronhq/engine-server";
-import { window } from "vscode";
+import _ from "lodash";
+import { Uri, window } from "vscode";
 import { MultiSelectBtn } from "../components/lookup/buttons";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import {
@@ -9,41 +16,25 @@ import {
   NoteLookupProviderSuccessResp,
 } from "../components/lookup/LookupProviderV3";
 import { DendronQuickPickerV2 } from "../components/lookup/types";
-import { OldNewLocation } from "../components/lookup/utils";
-import { Logger } from "../logger";
-import { BaseCommand } from "./base";
 import {
-  LookupEffectType,
-  LookupFilterType,
-  LookupNoteExistBehavior,
-  LookupNoteType,
-  LookupSelectionType,
-  LookupSplitType,
-} from "./LookupCommand";
+  NotePickerUtils,
+  OldNewLocation,
+  PickerUtilsV2,
+} from "../components/lookup/utils";
+import { Logger } from "../logger";
+import { DendronWorkspace, getEngine } from "../workspace";
+import { BaseCommand } from "./base";
 
 type CommandRunOpts = {
-  /**
-   * When creating new note, controls
-   * behavior of selected text
-   */
-  selectionType?: LookupSelectionType;
-  filterType?: LookupFilterType;
-  /**
-   * If set, controls path of note
-   */
-  noteType?: LookupNoteType;
-  /**
-   * If set, open note in a new split
-   */
-  splitType?: LookupSplitType;
-  flavor: any;
   initialValue?: string;
-  noteExistBehavior?: LookupNoteExistBehavior;
-  effectType?: LookupEffectType;
   noConfirm?: boolean;
   fuzzThreshold?: number;
+  multiSelect?: boolean;
 };
 
+/**
+ * Everything that's necessary to initialize the quickpick
+ */
 type CommandGatherOutput = {
   quickpick: DendronQuickPickerV2;
   controller: LookupControllerV3;
@@ -52,14 +43,23 @@ type CommandGatherOutput = {
   fuzzThreshold?: number;
 };
 
+/**
+ * Passed into execute command
+ */
 type CommandOpts = {
-  selectedItems: NoteQuickInput[];
+  selectedItems: readonly NoteQuickInput[];
 } & CommandGatherOutput;
 
 type CommandOutput = {
   quickpick: DendronQuickPickerV2;
   controller: LookupControllerV3;
   provider: ILookupProviderV3;
+};
+
+type OnDidAcceptReturn = {
+  uri: Uri;
+  node: NoteProps;
+  resp?: any;
 };
 
 export { CommandOpts as LookupCommandOptsV3 };
@@ -70,22 +70,70 @@ export class NoteLookupCommand extends BaseCommand<
   CommandGatherOutput,
   CommandRunOpts
 > {
-  protected controller: LookupControllerV3;
-  protected provider: ILookupProviderV3;
+  protected _controller: LookupControllerV3 | undefined;
+  protected _provider: ILookupProviderV3 | undefined;
 
   constructor() {
     super("LookupCommandV3");
-    this.controller = LookupControllerV3.create({
-      extraButtons: [MultiSelectBtn.create()],
+  }
+
+  protected get controller(): LookupControllerV3 {
+    if (_.isUndefined(this._controller)) {
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.INVALID_STATE,
+        message: "controller not set",
+      });
+    }
+    return this._controller;
+  }
+
+  protected get provider(): ILookupProviderV3 {
+    if (_.isUndefined(this._provider)) {
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.INVALID_STATE,
+        message: "provider not set",
+      });
+    }
+    return this._provider;
+  }
+
+  async gatherInputs(opts: CommandRunOpts): Promise<CommandGatherOutput> {
+    const ctx = "LookupCommand:execute";
+    Logger.info({ ctx, opts, msg: "enter" });
+    // initialize controller and provider
+    this._controller = LookupControllerV3.create({
+      extraButtons: [MultiSelectBtn.create(opts.multiSelect)],
     });
-    this.provider = new NoteLookupProvider("lookup", { allowNewNote: true });
+    this._provider = new NoteLookupProvider("lookup", {
+      allowNewNote: true,
+      noHidePickerOnAccept: true,
+    });
+    const lc = this.controller;
+    if (opts.fuzzThreshold) {
+      lc.fuzzThreshold = opts.fuzzThreshold;
+    }
+    const { quickpick } = await lc.prepareQuickPick({
+      title: "Lookup",
+      placeholder: "a seed",
+      provider: this.provider,
+      initialValue:
+        opts.initialValue || NotePickerUtils.getInitialValueFromOpenEditor(),
+      nonInteractive: opts.noConfirm,
+    });
+
+    return {
+      controller: this.controller,
+      provider: this.provider,
+      quickpick,
+      noConfirm: opts.noConfirm,
+      fuzzThreshold: opts.fuzzThreshold,
+    };
   }
 
   async enrichInputs(
     opts: CommandGatherOutput
   ): Promise<CommandOpts | undefined> {
     return new Promise((resolve) => {
-      const lc = opts.controller;
       HistoryService.instance().subscribev2("lookupProvider", {
         id: "lookup",
         listener: async (event) => {
@@ -105,10 +153,8 @@ export class NoteLookupCommand extends BaseCommand<
               ...opts,
             };
             resolve(_opts);
-            lc.onHide();
           } else if (event.action === "error") {
             const error = event.data.error as DendronError;
-            lc.onHide();
             window.showErrorMessage(error.message);
             resolve(undefined);
           } else {
@@ -127,30 +173,68 @@ export class NoteLookupCommand extends BaseCommand<
     });
   }
 
-  async gatherInputs(opts: CommandRunOpts): Promise<CommandGatherOutput> {
-    const ctx = "LookupCommand:execute";
-    Logger.info({ ctx, opts, msg: "enter" });
-    const lc = this.controller;
-    if (opts.fuzzThreshold) {
-      lc.fuzzThreshold = opts.fuzzThreshold;
-    }
-    const { quickpick } = await lc.prepareQuickPick({
-      title: "Lookup",
-      placeholder: "a seed",
-      provider: this.provider,
-      initialValue: opts.initialValue,
-      nonInteractive: opts.noConfirm,
-    });
-    return {
-      controller: this.controller,
-      provider: this.provider,
-      quickpick,
-      noConfirm: opts.noConfirm,
-      fuzzThreshold: opts.fuzzThreshold,
-    };
+  async execute(opts: CommandOpts) {
+    const { quickpick } = opts;
+    const selected = quickpick.canSelectMany
+      ? quickpick.selectedItems
+      : quickpick.selectedItems.slice(0, 1);
+    // if not selecting many, we want to check for a perfect match
+    const out = await Promise.all(
+      selected.map((item) => {
+        return this.acceptItem(item);
+      })
+    );
+    const outClean = out.filter(
+      (ent) => !_.isUndefined(ent)
+    ) as OnDidAcceptReturn[];
+    await _.reduce(
+      outClean,
+      async (acc, item) => {
+        await acc;
+        return quickpick.showNote!(item.uri);
+      },
+      Promise.resolve({})
+    );
+    return opts;
   }
 
-  async execute(opts: CommandOpts) {
-    return opts;
+  async acceptItem(
+    item: NoteQuickInput
+  ): Promise<OnDidAcceptReturn | undefined> {
+    if (PickerUtilsV2.isCreateNewNotePick(item)) {
+      return this.acceptNewItem(item);
+    } else {
+      throw "not implemented";
+    }
+  }
+  async acceptNewItem(
+    item: NoteQuickInput
+  ): Promise<OnDidAcceptReturn | undefined> {
+    const ctx = "acceptNewItem";
+    const picker = this.controller.quickpick;
+    const fname = PickerUtilsV2.getValue(picker);
+    const engine = getEngine();
+    let nodeNew: NoteProps;
+    if (item.stub) {
+      Logger.info({ ctx, msg: "create stub" });
+      nodeNew = engine.notes[item.id];
+    } else {
+      let vault = picker.vault
+        ? picker.vault
+        : PickerUtilsV2.getOrPromptVaultForOpenEditor();
+      nodeNew = NoteUtils.create({ fname, vault });
+    }
+    const resp = await engine.writeNote(nodeNew, {
+      newNode: true,
+    });
+    if (resp.error) {
+      Logger.error({ ctx, error: resp.error });
+      return;
+    }
+    let uri = NoteUtils.getURI({
+      note: nodeNew,
+      wsRoot: DendronWorkspace.wsRoot(),
+    });
+    return { uri, node: nodeNew, resp };
   }
 }

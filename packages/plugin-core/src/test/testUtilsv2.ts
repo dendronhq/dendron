@@ -430,6 +430,9 @@ export function expect(value: any) {
     toEqual: (value2: any) => {
       assert.deepStrictEqual(value, value2);
     },
+    toNotEqual: (value2: any) => {
+      assert.notDeepStrictEqual(value, value2);
+    },
     toBeTruthy: () => {
       assert.ok(value);
     },

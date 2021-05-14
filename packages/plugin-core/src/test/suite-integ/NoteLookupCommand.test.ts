@@ -1,3 +1,4 @@
+import { DVault } from "@dendronhq/common-all";
 import {
   ENGINE_HOOKS_MULTI,
   NOTE_PRESETS_V4,
@@ -10,6 +11,7 @@ import { describe } from "mocha";
 import * as vscode from "vscode";
 import { NoteLookupCommand } from "../../commands/NoteLookupCommand";
 import { PickerUtilsV2 } from "../../components/lookup/utils";
+import { VSCodeUtils } from "../../utils";
 import { TIMEOUT } from "../testUtils";
 import { expect } from "../testUtilsv2";
 import {
@@ -17,6 +19,12 @@ import {
   setupBeforeAfter,
   withConfig,
 } from "../testUtilsV3";
+
+const stubVaultPick = (vaults: DVault[]) => {
+  const vault = _.find(vaults, { fsPath: "vault1" });
+  sinon.stub(PickerUtilsV2, "promptVault").returns(Promise.resolve(vault));
+  return vault;
+};
 
 suite("LookupCommandV3", function () {
   let ctx: vscode.ExtensionContext;
@@ -26,7 +34,75 @@ suite("LookupCommandV3", function () {
       sinon.restore();
     },
   });
-  describe("onAccept with modifiers", function () {
+
+  describe("pickerItems", function () {
+    test("picker has value of opened note by default", function (done) {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        onInit: async ({ vaults, engine }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          await VSCodeUtils.openNote(engine.notes["foo"]);
+          const opts = (await cmd.run({ noConfirm: true }))!;
+          expect(opts.quickpick.value).toEqual("foo");
+          expect(_.first(opts.quickpick.selectedItems)?.fname).toEqual("foo");
+          done();
+        },
+      });
+    });
+  });
+
+  describe("onAccept", function () {
+    test("regular, pick new", function (done) {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        onInit: async ({ vaults }) => {
+          const cmd = new NoteLookupCommand();
+          stubVaultPick(vaults);
+          const opts = (await cmd.run({
+            noConfirm: true,
+            initialValue: "foobar",
+          }))!;
+          expect(opts.quickpick.selectedItems.length).toEqual(4);
+          expect(_.first(opts.quickpick.selectedItems)?.title).toEqual(
+            "Create New"
+          );
+          expect(
+            VSCodeUtils.getNoteFromDocument(
+              VSCodeUtils.getActiveTextEditorOrThrow().document
+            )?.fname
+          ).toEqual("foobar");
+          done();
+        },
+      });
+    });
+
+    test("regular multi-select, no pick new", function (done) {
+      runLegacyMultiWorkspaceTest({
+        ctx,
+        preSetupHook: ENGINE_HOOKS_MULTI.setupBasicMulti,
+        onInit: async ({ vaults }) => {
+          const vault = _.find(vaults, { fsPath: "vault2" });
+          const cmd = new NoteLookupCommand();
+          sinon
+            .stub(PickerUtilsV2, "promptVault")
+            .returns(Promise.resolve(vault));
+          const opts = (await cmd.run({
+            noConfirm: true,
+            initialValue: "foobar",
+            multiSelect: true,
+          }))!;
+          expect(opts.quickpick.selectedItems.length).toEqual(3);
+          expect(_.last(opts.quickpick.selectedItems)?.title).toNotEqual(
+            "Create New"
+          );
+          done();
+        },
+      });
+    });
+
     test("lookupConfirmVaultOnCreate = true, existing vault", function (done) {
       runLegacyMultiWorkspaceTest({
         ctx,

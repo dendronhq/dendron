@@ -160,7 +160,7 @@ export class LookupControllerV2 {
     quickPick.title = title.join(" ");
     quickPick.placeholder = "eg. hello.world";
     quickPick.ignoreFocusOut = cleanOpts.ignoreFocusOut;
-    quickPick.justActivated = true;
+    quickPick.justActivated = opts?.noConfirm ? false : true;
     quickPick.canSelectMany = false;
     quickPick.matchOnDescription = false;
     quickPick.matchOnDetail = false;

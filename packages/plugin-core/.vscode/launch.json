@@ -90,6 +90,21 @@
       "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
     },
     {
+      "name": "Extension Integ Tests Remote",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionTestsPath=${workspaceFolder}/out/test/suite-integ/index.js"
+      ],
+      "env": {
+        "TEST_TO_RUN": "",
+        "STAGE": "test"
+      },
+      "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
+    },
+    {
       "name": "Extension Integ Tests - File",
       "type": "extensionHost",
       "request": "launch",

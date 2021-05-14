@@ -33,10 +33,11 @@ export type ILookupProviderV3 = {
 
 export type ILookupProviderOptsV3 = {
   allowNewNote: boolean;
+  noHidePickerOnAccept?: boolean;
 };
 
 export type NoteLookupProviderSuccessResp<T> = {
-  selectedItems: NoteQuickInput[];
+  selectedItems: readonly NoteQuickInput[];
   onAcceptHookResp: T[];
   cancel?: boolean;
 };
@@ -52,9 +53,6 @@ export class NoteLookupProvider implements ILookupProviderV3 {
 
   async provide(lc: LookupControllerV3) {
     const quickpick = lc.quickpick;
-    if (!quickpick) {
-      return;
-    }
     quickpick.onDidChangeValue(() => {
       _.debounce(_.bind(this.onUpdatePickerItems, this), 60, {
         leading: true,
@@ -69,10 +67,11 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     return;
   }
 
-  getVault() {
-    return PickerUtilsV2.getVaultForOpenEditor();
-  }
-
+  /**
+   * Takes selection and runs accept, followed by hooks.
+   * @param opts
+   * @returns
+   */
   onDidAccept(opts: {
     quickpick: DendronQuickPickerV2;
     lc: LookupControllerV3;
@@ -96,7 +95,9 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       const selectedItems = NotePickerUtils.getSelection(picker);
       // last chance to cancel
       lc.cancelToken.cancel();
-      picker.hide();
+      if (!this.opts.noHidePickerOnAccept) {
+        picker.hide();
+      }
       const onAcceptHookResp = await Promise.all(
         await this._onAcceptHooks.map((hook) =>
           hook({ quickpick: picker, selectedItems })
@@ -177,6 +178,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       if (token.isCancellationRequested) {
         return;
       }
+      const perfectMatch = _.find(updatedItems, { fname: queryOrig });
 
       // check if single item query, vscode doesn't surface single letter queries
       if (picker.activeItems.length === 0 && querystring.length === 1) {
@@ -190,10 +192,13 @@ export class NoteLookupProvider implements ILookupProviderV3 {
       // const noUpdatedItems = updatedItems.length === 0;
       // regular result
       Logger.debug({ ctx, msg: "active != qs" });
-      // we currently always offer a new
+      // NOTE: order matters. we always pick the first item in single select mode
       updatedItems =
-        this.opts.allowNewNote && (!queryEndsWithDot || picker.canSelectMany)
-          ? updatedItems.concat(NotePickerUtils.createNoActiveItem({} as any))
+        this.opts.allowNewNote &&
+        !queryEndsWithDot &&
+        !picker.canSelectMany &&
+        !perfectMatch
+          ? [NotePickerUtils.createNoActiveItem({} as any)].concat(updatedItems)
           : updatedItems;
 
       // check fuzz threshold

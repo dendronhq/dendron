@@ -3,7 +3,7 @@ import {
   DNodeProps,
   DVault,
 } from "@dendronhq/common-all";
-import { QuickPick } from "vscode";
+import { QuickPick, TextEditor, Uri } from "vscode";
 import { DendronBtn } from "./buttons";
 
 export type LookupControllerState = {
@@ -25,4 +25,5 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
   allResults?: DNodeProps[];
   vault?: DVault;
   nextPicker?: () => any;
+  showNote?: (uri: Uri) => Promise<TextEditor>;
 };

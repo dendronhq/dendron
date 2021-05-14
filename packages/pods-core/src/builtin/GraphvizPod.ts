@@ -2,58 +2,90 @@ import fs from "fs-extra";
 import _ from "lodash";
 import { DLink, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import path from "path";
-import {
-  ExportPod,
-  ExportPodPlantOpts,
-  // ImportPod,
-  // ImportPodConfig,
-  ImportPodPlantOpts,
-  // PublishPod,
-  // PublishPodPlantOpts,
-} from "../basev3";
+import { ExportPod, ExportPodPlantOpts } from "../basev3";
+import { ExportPodConfig } from "packages/pods-core/lib";
 
 const ID = "dendron.graphviz";
-
-export type GraphvizImportPodPlantOpts = ImportPodPlantOpts;
 
 interface ParentDictionary {
   [childID: string]: string;
 }
 
-export class GraphvizExportPod extends ExportPod {
+interface GraphvizExportPodCustomOpts {
+  includeHierarchy: boolean;
+  includeLinks: boolean;
+}
+
+export type GraphvizExportPodPlantOpts = ExportPodPlantOpts &
+  GraphvizExportPodCustomOpts;
+
+type GraphvizExportConfig = ExportPodConfig & GraphvizExportPodCustomOpts;
+
+interface GraphvizExportPodProcessProps extends GraphvizExportPodCustomOpts {
+  note: NoteProps;
+  notes: NoteProps[];
+  connections: string[];
+  parentDictionary: ParentDictionary;
+  wsRoot: string;
+}
+
+export class GraphvizExportPod extends ExportPod<GraphvizExportConfig> {
   static id: string = ID;
   static description: string = "export notes in Graphviz DOT format";
+
+  get config() {
+    return super.config.concat([
+      {
+        key: "includeHierarchy",
+        description:
+          "Include hierarchical note connections (e.g. parent -> child connections)",
+        default: true,
+        type: "boolean",
+      },
+      {
+        key: "includeLinks",
+        description:
+          "Include linked note relationships, e.g. note with [[link]] -> another note",
+        default: false,
+        type: "boolean",
+      },
+    ]);
+  }
 
   // Dashes are not allowed, so they are removed.
   // Initial numbers mess with rendering, so each entry is prefixed with "note"
   parseText = (s: string) => (s ? `note_${s.split("-").join("")}` : "");
 
-  processNote(opts: {
-    note: NoteProps;
-    notes: NoteProps[];
-    connections: string[];
-    parentDictionary: ParentDictionary;
-    wsRoot: string;
-  }): [string[], ParentDictionary] {
-    const { note, notes, connections, parentDictionary, wsRoot } = opts;
+  processNote(
+    opts: GraphvizExportPodProcessProps
+  ): [string[], ParentDictionary] {
+    const {
+      note,
+      notes,
+      connections,
+      parentDictionary,
+      wsRoot,
+      includeHierarchy,
+      includeLinks,
+    } = opts;
 
     if (!note) return [connections, parentDictionary];
 
-    let localConnections: string[] = [
+    const localConnections: string[] = [
       // Initial node with label
       `${this.parseText(note.id)} [label="${note.title}"]`,
     ];
 
     // Parent -> Child connection
-    const parentID: string | undefined = parentDictionary[note.id];
-    if (parentID) {
-      localConnections.push(
-        `${this.parseText(parentID)} -- ${this.parseText(note.id)}`
-      );
-    }
+    if (includeHierarchy) {
+      const parentID: string | undefined = parentDictionary[note.id];
 
-    // common-all/src/dnode.ts
-    // src/__tests__/pods-core/JSONPod.spec.ts
+      if (parentID) {
+        localConnections.push(
+          `${this.parseText(parentID)} -- ${this.parseText(note.id)}`
+        );
+      }
+    }
 
     // Prepare Parent -> Child connection for this note's children
     note.children.forEach(
@@ -61,35 +93,42 @@ export class GraphvizExportPod extends ExportPod {
     );
 
     // Note -> Linked Notes connections
-    note.links.forEach((link: DLink) => {
-      if (link.to) {
-        // If the link is not currently also a child, add it to the links
-        // TODO: This logic makes sense, but "to" links don't have an id for some reason
+    if (includeLinks) {
+      note.links.forEach((link: DLink) => {
+        if (link.to) {
+          const destinationNote = NoteUtils.getNoteByFnameV5({
+            fname: link.to!.fname as string,
+            vault: note.vault,
+            notes: notes,
+            wsRoot,
+          });
 
-        const destinationNote = NoteUtils.getNoteByFnameV5({
-          fname: link.to!.fname as string,
-          vault: note.vault,
-          notes: notes,
-          wsRoot,
-        });
-
-        if (!_.isUndefined(destinationNote)) {
-          if (!note.children.includes(destinationNote.id)) {
-            localConnections.push(
-              `${this.parseText(note.id)} -- ${this.parseText(
-                destinationNote.id
-              )} [style=dotted]`
-            );
+          if (!_.isUndefined(destinationNote)) {
+            if (
+              (includeLinks && !includeHierarchy) ||
+              !note.children.includes(destinationNote.id)
+            ) {
+              localConnections.push(
+                `${this.parseText(note.id)} -- ${this.parseText(
+                  destinationNote.id
+                )} [style=dotted]`
+              );
+            }
           }
         }
-      }
-    });
+      });
+    }
 
     return [[...connections, ...localConnections], parentDictionary];
   }
 
   async plant(opts: ExportPodPlantOpts) {
-    const { dest, notes, wsRoot } = opts;
+    const { dest, notes, wsRoot, config } = opts;
+
+    const {
+      includeHierarchy = true,
+      includeLinks = false,
+    } = config as GraphvizExportConfig;
 
     // verify dest exist
     const podDstPath = dest.fsPath;
@@ -103,6 +142,8 @@ export class GraphvizExportPod extends ExportPod {
           connections,
           parentDictionary: dictionary,
           wsRoot,
+          includeHierarchy,
+          includeLinks,
         });
       },
       [[], {}]

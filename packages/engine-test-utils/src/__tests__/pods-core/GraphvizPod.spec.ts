@@ -5,7 +5,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { runEngineTestV5 } from "../../engine";
-import { checkString } from "../../utils";
+import { checkNotInString, checkString } from "../../utils";
 
 describe("graphviz export pod", () => {
   let exportDest: string;
@@ -56,4 +56,90 @@ describe("graphviz export pod", () => {
       { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
     );
   });
+
+  test("include hierarchical connections only", async () => {
+    await runEngineTestV5(
+      async ({ engine, vaults, wsRoot }) => {
+        const pod = new GraphvizExportPod();
+        engine.config.useFMTitle = true;
+        await pod.execute({
+          engine,
+          vaults,
+          wsRoot,
+          config: {
+            dest: exportDest,
+            includeBody: true,
+            includeStubs: true,
+          },
+        });
+
+        // check contents of graphviz file
+        const foo = fs.readFileSync(path.join(exportDest, "graphviz.dot"), {
+          encoding: "utf8",
+        });
+
+        // check for hierarchical-specific elements
+        await checkNotInString(foo, "dotted");
+      },
+      { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+    );
+  });
+
+  // TODO: Add link to one of the engine test files so this works correctly
+  // test("include link connections only", async () => {
+  //   await runEngineTestV5(
+  //     async ({ engine, vaults, wsRoot }) => {
+  //       const pod = new GraphvizExportPod();
+  //       engine.config.useFMTitle = true;
+  //       await pod.execute({
+  //         engine,
+  //         vaults,
+  //         wsRoot,
+  //         config: {
+  //           dest: exportDest,
+  //           includeBody: true,
+  //           includeStubs: true,
+  //         },
+  //       });
+
+  //       // check contents of graphviz file
+  //       const foo = fs.readFileSync(path.join(exportDest, "graphviz.dot"), {
+  //         encoding: "utf8",
+  //       });
+
+  //       // check for hierarchical-specific elements
+  //       await checkString(foo, "dotted");
+  //     },
+  //     { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+  //   );
+  // });
+
+  // TODO: Find more specific ways to test this as opposed to the above test case
+  // test("include both hierarchical and link connections", async () => {
+  //   await runEngineTestV5(
+  //     async ({ engine, vaults, wsRoot }) => {
+  //       const pod = new GraphvizExportPod();
+  //       engine.config.useFMTitle = true;
+  //       await pod.execute({
+  //         engine,
+  //         vaults,
+  //         wsRoot,
+  //         config: {
+  //           dest: exportDest,
+  //           includeBody: true,
+  //           includeStubs: true,
+  //         },
+  //       });
+
+  //       // check contents of graphviz file
+  //       const foo = fs.readFileSync(path.join(exportDest, "graphviz.dot"), {
+  //         encoding: "utf8",
+  //       });
+
+  //       // check for hierarchical-specific elements
+  //       // TODO: await checkString(foo, "dotted");
+  //     },
+  //     { expect, preSetupHook: ENGINE_HOOKS.setupBasic }
+  //   );
+  // });
 });

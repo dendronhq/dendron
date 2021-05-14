@@ -7,25 +7,25 @@ import { ExportPodConfig } from "../basev3";
 
 const ID = "dendron.graphviz";
 
-interface ParentDictionary {
+type ParentDictionary = {
   [childID: string]: string;
-}
+};
 
-interface GraphvizExportPodCustomOpts {
+type GraphvizExportPodCustomOpts = {
   includeHierarchy: boolean;
   includeLinks: boolean;
-}
+};
 
 export type GraphvizExportConfig = ExportPodConfig &
   GraphvizExportPodCustomOpts;
 
-interface GraphvizExportPodProcessProps extends GraphvizExportPodCustomOpts {
+type GraphvizExportPodProcessProps = GraphvizExportPodCustomOpts & {
   note: NoteProps;
   notes: NoteProps[];
   connections: string[];
   parentDictionary: ParentDictionary;
   wsRoot: string;
-}
+};
 
 export class GraphvizExportPod extends ExportPod<GraphvizExportConfig> {
   static id: string = ID;

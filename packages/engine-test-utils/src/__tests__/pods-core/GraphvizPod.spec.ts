@@ -29,6 +29,21 @@ const setupBasic = async (opts: WorkspaceOpts) => {
   });
 };
 
+/*
+At the moment, there are some issues with snapshots and these tests
+In lieu of a snapshot, here is the structure of a basic graph:
+
+graph {
+  note_NOTEIDHERE [label="Note One"];                     // create node with label
+  note_ANOTHERNOTEID [label="Note Two"];                  // create node with label
+  note_NOTEIDHERE -- note_ANOTHERNOTEID;                  // hierarchical connection
+  note_NOTEIDHERE -- note_ANOTHERNOTEID [style=dotted];   // link connection
+}
+
+A hierarchical graph will have only hierarchical connections, and a link graph
+will have only link connections.
+*/
+
 describe("graphviz export pod", () => {
   let exportDest: string;
 
@@ -132,12 +147,12 @@ describe("graphviz export pod", () => {
         });
 
         // check contents of graphviz file
-        const foo = fs.readFileSync(path.join(exportDest, "graphviz.dot"), {
+        const dotFile = fs.readFileSync(path.join(exportDest, "graphviz.dot"), {
           encoding: "utf8",
         });
 
         // check for link-specific elements
-        await checkString(foo, "--", "dotted");
+        await checkString(dotFile, "--", "dotted");
       },
       { expect, preSetupHook: setupBasic }
     );
@@ -162,12 +177,12 @@ describe("graphviz export pod", () => {
         });
 
         // check contents of graphviz file
-        const foo = fs.readFileSync(path.join(exportDest, "graphviz.dot"), {
+        const dotFile = fs.readFileSync(path.join(exportDest, "graphviz.dot"), {
           encoding: "utf8",
         });
 
         // check for both hierarchical and link elements
-        await checkString(foo, "--", "dotted");
+        await checkString(dotFile, "--", "dotted");
       },
       { expect, preSetupHook: setupBasic }
     );

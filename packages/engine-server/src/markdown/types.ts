@@ -39,6 +39,7 @@ export enum DendronASTTypes {
   REF_LINK = "refLink",
   REF_LINK_V2 = "refLinkV2",
   PARAGRAPH = "paragraph",
+  BLOCK_ANCHOR = "blockAnchor",
 }
 
 export enum DendronASTDest {
@@ -102,4 +103,9 @@ export type NoteRefDataV4 = {
 
 export type NoteRefDataV4_LEGACY = {
   link: DNoteRefLink;
+};
+
+export type BlockAnchor = {
+  type: DendronASTTypes.BLOCK_ANCHOR;
+  id: string;
 };

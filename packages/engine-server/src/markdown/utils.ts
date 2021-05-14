@@ -50,6 +50,7 @@ import { noteRefsV2 } from "./remark/noteRefsV2";
 import { publishSite } from "./remark/publishSite";
 import { transformLinks } from "./remark/transformLinks";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
+import { blockAnchors } from "./remark/blockAnchors";
 import { DendronASTData, DendronASTDest, VaultMissingBehavior } from "./types";
 
 const toString = require("mdast-util-to-string");
@@ -322,6 +323,7 @@ export class MDUtilsV4 {
         hierarchyDisplay: config.hierarchyDisplay,
       })
       .use(backlinks)
+      .use(blockAnchors)
       .use(noteRefsV2, {
         ...opts.noteRefOpts,
         wikiLinkOpts: opts.wikiLinksOpts,

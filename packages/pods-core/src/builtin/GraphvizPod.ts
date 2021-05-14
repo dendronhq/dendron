@@ -3,7 +3,7 @@ import _ from "lodash";
 import { DLink, NoteProps, NoteUtils } from "@dendronhq/common-all";
 import path from "path";
 import { ExportPod, ExportPodPlantOpts } from "../basev3";
-import { ExportPodConfig } from "packages/pods-core/lib";
+import { ExportPodConfig } from "../basev3";
 
 const ID = "dendron.graphviz";
 

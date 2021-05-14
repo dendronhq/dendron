@@ -81,10 +81,6 @@ describe("graphviz export pod", () => {
           encoding: "utf8",
         });
 
-        // TODO: IDs of files switch between test runs, which causes the snapshot
-        // to fail when it shouldn't
-        // expect(dotFile).toMatchSnapshot("graphviz contents");
-
         // Check for:
         // 1. start of file -> "graph {"
         // 2. existence of a note -> "note_"

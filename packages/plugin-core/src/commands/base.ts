@@ -86,7 +86,7 @@ export abstract class BaseCommand<
           ? error
           : new DendronError({
               message: `error running command: ${error.message}`,
-              payload: { error },
+              error,
             });
       Logger.error({
         ctx,

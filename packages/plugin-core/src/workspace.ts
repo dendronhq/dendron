@@ -508,7 +508,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RELOAD_INDEX.key,
         async (silent?: boolean) => {
-          const out = await new ReloadIndexCommand().execute();
+          const out = await new ReloadIndexCommand().run();
           if (!silent) {
             vscode.window.showInformationMessage(`finish reload`);
           }
@@ -629,9 +629,7 @@ export class DendronWorkspace {
       );
       return out;
     } catch (err) {
-      vscode.window.showErrorMessage(
-        `error initializing dendron: ${JSON.stringify(err)}`
-      );
+      Logger.error({ error: err });
     }
   }
 

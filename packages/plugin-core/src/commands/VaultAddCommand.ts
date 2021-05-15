@@ -1,4 +1,4 @@
-import { DVault, getStage, VaultUtils } from "@dendronhq/common-all";
+import { DVault, VaultUtils } from "@dendronhq/common-all";
 import {
   assignJSONWithComment,
   GitUtils,
@@ -222,9 +222,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
       vaults = [vault];
     }
     window.showInformationMessage("finished adding vault");
-    if (getStage() !== "test") {
-      await commands.executeCommand("workbench.action.reloadWindow");
-    }
+    await commands.executeCommand("workbench.action.reloadWindow");
     return { vaults };
   }
 }

@@ -160,7 +160,7 @@ export class LookupControllerV2 {
     quickPick.title = title.join(" ");
     quickPick.placeholder = "eg. hello.world";
     quickPick.ignoreFocusOut = cleanOpts.ignoreFocusOut;
-    quickPick.justActivated = opts?.noConfirm ? false : true;
+    quickPick._justActivated = opts?.noConfirm ? false : true;
     quickPick.canSelectMany = false;
     quickPick.matchOnDescription = false;
     quickPick.matchOnDetail = false;
@@ -260,12 +260,16 @@ export class LookupControllerV2 {
 
     switch (noteResp?.type) {
       case "journal": {
-        onUpdateValue = DendronClientUtilsV2.genNoteName("JOURNAL");
+        onUpdateValue = DendronClientUtilsV2.genNoteName("JOURNAL", {
+          overrides: { domain: quickPickValue },
+        });
         onUpdateReason = "updatePickerBehavior:journal";
         break;
       }
       case "scratch": {
-        onUpdateValue = DendronClientUtilsV2.genNoteName("SCRATCH");
+        onUpdateValue = DendronClientUtilsV2.genNoteName("SCRATCH", {
+          overrides: { domain: quickPickValue },
+        });
         onUpdateReason = "updatePickerBehavior:scratch";
         break;
       }

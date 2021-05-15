@@ -1,4 +1,4 @@
-import { DVault, getStage, VaultUtils } from "@dendronhq/common-all";
+import { DVault, VaultUtils } from "@dendronhq/common-all";
 import { assignJSONWithComment } from "@dendronhq/common-server";
 import { WorkspaceService } from "@dendronhq/engine-server";
 import _ from "lodash";
@@ -60,9 +60,7 @@ export class VaultRemoveCommand extends BasicCommand<
     window.showInformationMessage(
       "finished removing vault (from dendron). you will still need to delete the notes from your disk"
     );
-    if (getStage() !== "test") {
-      await commands.executeCommand("workbench.action.reloadWindow");
-    }
+    await commands.executeCommand("workbench.action.reloadWindow");
     return { vault };
   }
 }

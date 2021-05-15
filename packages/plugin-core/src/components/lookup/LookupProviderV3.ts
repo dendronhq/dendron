@@ -131,7 +131,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     picker.busy = true;
     let pickerValue = picker.value;
     const start = process.hrtime();
-    if (picker.justActivated && !picker.nonInteractive) {
+    if (picker._justActivated && !picker.nonInteractive) {
       // no hiearchy, query everything
       const lastDotIndex = pickerValue.lastIndexOf(".");
       if (lastDotIndex < 0) {
@@ -217,7 +217,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
     } finally {
       profile = getDurationMilliseconds(start);
       picker.busy = false;
-      picker.justActivated = false;
+      picker._justActivated = false;
       Logger.info({
         ctx,
         msg: "exit",

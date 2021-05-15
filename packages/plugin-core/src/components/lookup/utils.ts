@@ -222,7 +222,7 @@ export class PickerUtilsV2 {
     quickPick.nonInteractive = opts.nonInteractive;
     quickPick.placeholder = placeholder;
     quickPick.ignoreFocusOut = ignoreFocusOut;
-    quickPick.justActivated = true;
+    quickPick._justActivated = true;
     quickPick.canSelectMany = false;
     quickPick.matchOnDescription = false;
     quickPick.matchOnDetail = false;

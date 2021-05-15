@@ -12,13 +12,20 @@ import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace } from "../../workspace";
 import { expect, runMultiVaultTest, runSingleVaultTest } from "../testUtilsv2";
 import { setupBeforeAfter, stubVaultInput } from "../testUtilsV3";
+import sinon from "sinon";
 
 suite("VaultRemoveCommand", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
+    beforeHook: () => {
+      sinon
+        .stub(vscode.commands, "executeCommand")
+        .returns(Promise.resolve({}));
+    },
+    afterHook: () => {
+      sinon.restore();
+    },
   });
-
   test("basic", (done) => {
     runMultiVaultTest({
       ctx,

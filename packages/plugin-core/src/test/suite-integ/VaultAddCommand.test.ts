@@ -54,7 +54,11 @@ function checkVaults(opts: WorkspaceOpts) {
 suite("VaultAddCommand", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this, {
-    beforeHook: () => {},
+    beforeHook: () => {
+      sinon
+        .stub(vscode.commands, "executeCommand")
+        .returns(Promise.resolve({}));
+    },
     afterHook: () => {
       sinon.restore();
     },
@@ -129,6 +133,7 @@ suite("VaultAddCommand", function () {
         onInit: async ({ vault, wsRoot }) => {
           const vpath = path.join(wsRoot, "vault2");
           stubVaultInput({ sourceType: "local", sourcePath: vpath });
+
           await new VaultAddCommand().run();
           expect(fs.readdirSync(vpath)).toEqual(["root.md", "root.schema.yml"]);
 

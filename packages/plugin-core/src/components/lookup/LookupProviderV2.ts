@@ -521,9 +521,14 @@ export class LookupProviderV2 {
     if (opts.flavor === "note") {
       // if we are doing a query, reset pagination options
       PickerUtilsV2.resetPaginationOpts(picker);
-      const resp = await engine.queryNotes({ qs });
-      nodes = resp.data;
-      Logger.info({ ctx, msg: "post:queryNotes" });
+      try {
+        const resp = await engine.queryNotes({ qs });
+        nodes = resp.data;
+        Logger.info({ ctx, msg: "post:queryNotes" });
+      } catch (err) {
+        debugger;
+        throw err;
+      }
     } else {
       const resp = await engine.querySchema(qs);
       nodes = resp.data.map((ent) => SchemaUtils.getModuleRoot(ent));
@@ -570,7 +575,7 @@ export class LookupProviderV2 {
     picker.busy = true;
     let pickerValue = picker.value;
     // if we just started, show all results of current parent
-    if (picker.justActivated) {
+    if (picker._justActivated && !picker.nonInteractive) {
       // no hiearchy, query everything
       const lastDotIndex = pickerValue.lastIndexOf(".");
       if (lastDotIndex < 0) {
@@ -749,7 +754,7 @@ export class LookupProviderV2 {
     } finally {
       profile = getDurationMilliseconds(start);
       picker.busy = false;
-      picker.justActivated = false;
+      picker._justActivated = false;
       Logger.info({
         ctx,
         msg: "exit",

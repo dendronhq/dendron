@@ -27,6 +27,10 @@ import path from "path";
 // // as well as import your extension to test it
 import * as vscode from "vscode";
 import { CancellationTokenSource } from "vscode-languageclient";
+import {
+  LookupCommand,
+  LookupNoteTypeEnum,
+} from "../../commands/LookupCommand";
 import { createAllButtons } from "../../components/lookup/buttons";
 import { LookupControllerV2 } from "../../components/lookup/LookupControllerV2";
 import { LookupProviderV2 } from "../../components/lookup/LookupProviderV2";
@@ -35,7 +39,11 @@ import { EngineFlavor, EngineOpts } from "../../types";
 import { VSCodeUtils } from "../../utils";
 import { DendronWorkspace, getWS } from "../../workspace";
 import { createMockQuickPick } from "../testUtils";
-import { expect, getNoteFromTextEditor } from "../testUtilsv2";
+import {
+  expect,
+  getNoteFromTextEditor,
+  runSingleVaultTest,
+} from "../testUtilsv2";
 import {
   createEngineFactory,
   EditorUtils,
@@ -631,6 +639,31 @@ suite("Lookup, notesv2", function () {
         });
       }
     );
+
+    test("with override", function (done) {
+      runSingleVaultTest({
+        ctx,
+        onInit: async () => {
+          const cmd = new LookupCommand();
+          const note = getWS().getEngine().notes["foo"];
+          await VSCodeUtils.openNote(note);
+          await cmd.run({
+            noConfirm: true,
+            value: "gamma",
+            noteType: LookupNoteTypeEnum.journal,
+            flavor: "note",
+          });
+          expect(
+            path
+              .basename(
+                VSCodeUtils.getActiveTextEditorOrThrow().document.uri.fsPath
+              )
+              .startsWith("gamma.journal")
+          ).toBeTruthy();
+          done();
+        },
+      });
+    });
 
     test("existing note", (done) => {
       runLegacyMultiWorkspaceTest({

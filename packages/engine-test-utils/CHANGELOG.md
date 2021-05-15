@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.42.0-alpha.0](https://github.com/dendronhq/dendron/compare/v0.41.0...v0.42.0-alpha.0) (2021-05-15)
+
+### Bug Fixes
+
+- bad test ([712a76f](https://github.com/dendronhq/dendron/commit/712a76f46f567f6646e44f6dc548d16b250bf9c6))
+
 ## [0.41.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.41.0...v0.41.1-alpha.0) (2021-05-10)
 
 **Note:** Version bump only for package @dendronhq/engine-test-utils

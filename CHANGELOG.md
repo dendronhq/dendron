@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.42.0-alpha.0](https://github.com/dendronhq/dendron/compare/v0.41.0...v0.42.0-alpha.0) (2021-05-15)
+
+### Bug Fixes
+
+- bad import ([53658eb](https://github.com/dendronhq/dendron/commit/53658ebc4fe647637225f079fb58b76e02223e4e))
+- bad test ([712a76f](https://github.com/dendronhq/dendron/commit/712a76f46f567f6646e44f6dc548d16b250bf9c6))
+
+### Features Dendron
+
+- pass custom values to lookup ([9a74fb0](https://github.com/dendronhq/dendron/commit/9a74fb0ded9218a931981f8148bff2b6fc542582))
+
 ## [0.41.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.41.0...v0.41.1-alpha.0) (2021-05-10)
 
 ### Bug Fixes

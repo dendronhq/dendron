@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.42.0-alpha.0](https://github.com/dendronhq/dendron/compare/v0.41.0...v0.42.0-alpha.0) (2021-05-15)
+
+### Features Dendron
+
+- pass custom values to lookup ([9a74fb0](https://github.com/dendronhq/dendron/commit/9a74fb0ded9218a931981f8148bff2b6fc542582))
+
 ## [0.41.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.41.0...v0.41.1-alpha.0) (2021-05-10)
 
 **Note:** Version bump only for package @dendronhq/plugin-core

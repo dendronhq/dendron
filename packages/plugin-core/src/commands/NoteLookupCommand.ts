@@ -258,44 +258,4 @@ export class NoteLookupCommand extends BaseCommand<
     });
     return { uri, node: nodeNew, resp };
   }
-
-  async acceptItem(
-    item: NoteQuickInput
-  ): Promise<OnDidAcceptReturn | undefined> {
-    if (PickerUtilsV2.isCreateNewNotePick(item)) {
-      return this.acceptNewItem(item);
-    } else {
-      throw "not implemented";
-    }
-  }
-  async acceptNewItem(
-    item: NoteQuickInput
-  ): Promise<OnDidAcceptReturn | undefined> {
-    const ctx = "acceptNewItem";
-    const picker = this.controller.quickpick;
-    const fname = PickerUtilsV2.getValue(picker);
-    const engine = getEngine();
-    let nodeNew: NoteProps;
-    if (item.stub) {
-      Logger.info({ ctx, msg: "create stub" });
-      nodeNew = engine.notes[item.id];
-    } else {
-      let vault = picker.vault
-        ? picker.vault
-        : PickerUtilsV2.getOrPromptVaultForOpenEditor();
-      nodeNew = NoteUtils.create({ fname, vault });
-    }
-    const resp = await engine.writeNote(nodeNew, {
-      newNode: true,
-    });
-    if (resp.error) {
-      Logger.error({ ctx, error: resp.error });
-      return;
-    }
-    let uri = NoteUtils.getURI({
-      note: nodeNew,
-      wsRoot: DendronWorkspace.wsRoot(),
-    });
-    return { uri, node: nodeNew, resp };
-  }
 }

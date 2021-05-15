@@ -390,6 +390,16 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "workspace",
     desc: "add and commit all files",
   },
+  SYNC: {
+    key: "dendron.sync",
+    title: `${CMD_PREFIX} Workspace: Sync`,
+    group: "workspace",
+    desc: "Sync all files",
+    docPreview: [
+      `Sync all files in your workspace, across all vaults.`,
+      `This will add and commit all changes, then pull and push to sync all changes.`,
+    ].join("\n"),
+  },
   VAULT_ADD: {
     key: "dendron.vaultAdd",
     title: `${CMD_PREFIX} Vault Add`,

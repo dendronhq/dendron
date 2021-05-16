@@ -37,15 +37,21 @@
     "test:watch": "echo 0"
   },
   "dependencies": {
+    "@aws-amplify/core": "^4.0.2",
     "@dendronhq/common-all": "^0.42.0-alpha.0",
     "@reduxjs/toolkit": "^1.5.1",
-    "lodash": "^4.17.20",
-    "aws-amplify": "^3.3.23",
-    "react": "17.0.1",
-    "react-redux": "^7.2.3",
+    "@types/lodash": "^4.14.161",
     "@types/node": "^14.11.2",
-    "@types/lodash": "^4.14.161"
+    "@types/react": "^17.0.5",
+    "lodash": "^4.17.20",
+    "react": "17.0.1",
+    "react-dom": "^17.0.2",
+    "react-redux": "^7.2.3"
   },
+  "nohoist": [
+    "**/common-all",
+    "**/common-all/**"
+  ],
   "engines": {
     "node": ">=12.0.0"
   },

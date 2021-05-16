@@ -14,6 +14,7 @@
     "dev": "next dev",
     "prod": "env STAGE=prod next dev",
     "watch": "echo 0",
+    "build": "yarn build:prod",
     "build:dev": "env CDN_BUILD=1 STAGE=dev next build && next export",
     "build:prod": "env CDN_BUILD=1 STAGE=prod next build && next export",
     "start": "next start",
@@ -21,9 +22,10 @@
     "deploy:dev": "env STAGE=dev amplify publish",
     "deploy:prod": "env STAGE=prod amplify publish"
   },
-  "installConfig": {
-    "hoistingLimits": "none"
-  },
+  "nohoist": [
+    "**/common-all",
+    "**/common-all/**"
+  ],
   "dependencies": {
     "@chakra-ui/react": "^1.0.0",
     "@dendronhq/common-all": "^0.28.6",
@@ -33,6 +35,7 @@
     "@emotion/styled": "^11.0.0",
     "@reduxjs/toolkit": "^1.5.1",
     "@types/jest": "^26.0.20",
+    "@types/react": "^17.0.5",
     "antd": "^4.15.4",
     "autoprefixer": "^10.2.5",
     "aws-amplify": "^3.3.23",
@@ -47,7 +50,7 @@
     "jest": "23.6.0",
     "less-plugin-npm-import": "^2.1.0",
     "lodash": "^4.17.20",
-    "next": "10.0.0",
+    "next": "^10.2.0",
     "postcss": "^8.2.13",
     "react": "17.0.1",
     "react-css-theme-switcher": "^0.2.3",

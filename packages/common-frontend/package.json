@@ -1,0 +1,58 @@
+{
+  "name": "@dendronhq/common-frontend",
+  "version": "0.42.0-alpha.0",
+  "description": "common-frontend",
+  "license": "GPLv3",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/dendronhq/dendron.git",
+    "directory": "packages/common-frontend"
+  },
+  "author": {
+    "name": "Kevin Lin",
+    "email": "kevin@thence.io",
+    "url": "https://kevinslin.com"
+  },
+  "keywords": [
+    "common"
+  ],
+  "files": [
+    "lib"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "clean": "rimraf lib && rimraf coverage",
+    "format": "prettier --ignore-path='../../.prettierignore' --write .",
+    "lint": "echo stub",
+    "prepublishOnly": "yarn build",
+    "prebuild": "yarn clean && yarn format && yarn lint && echo Using TypeScript && tsc --version",
+    "build": "yarn compile",
+    "compile": "tsc -p tsconfig.build.json",
+    "test": "echo 0",
+    "coverage": "jest --coverage",
+    "watch": "yarn compile --watch",
+    "test:unit": "echo 0",
+    "test:unit:debug": "echo 0",
+    "test:watch": "echo 0"
+  },
+  "dependencies": {
+    "@dendronhq/common-all": "^0.42.0-alpha.0",
+    "@reduxjs/toolkit": "^1.5.1",
+    "lodash": "^4.17.20",
+    "aws-amplify": "^3.3.23",
+    "react": "17.0.1",
+    "react-redux": "^7.2.3",
+    "@types/node": "^14.11.2",
+    "@types/lodash": "^4.14.161"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "jest": {
+    "preset": "ts-jest"
+  }
+}

@@ -8,11 +8,18 @@
     "directory": "packages/dendron-next-server"
   },
   "scripts": {
+    "local:dev": "env LOCAL=true STAGE=dev next dev",
+    "local:prod": "env LOCAL=true STAGE=prod next dev",
+    "local:prod:aws": "env LOCAL=true STAGE=oneoff_aws_prod next dev",
     "dev": "next dev",
-    "dev:inspect": "NODE_OPTIONS='--inspect' next",
-    "build": "next build && next export",
+    "prod": "env STAGE=prod next dev",
+    "watch": "echo 0",
+    "build:dev": "env CDN_BUILD=1 STAGE=dev next build && next export",
+    "build:prod": "env CDN_BUILD=1 STAGE=prod next build && next export",
     "start": "next start",
-    "watch": "echo 0"
+    "checkout:dev": "amplify env checkout dev",
+    "deploy:dev": "env STAGE=dev amplify publish",
+    "deploy:prod": "env STAGE=prod amplify publish"
   },
   "installConfig": {
     "hoistingLimits": "none"
@@ -20,18 +27,36 @@
   "dependencies": {
     "@chakra-ui/react": "^1.0.0",
     "@dendronhq/common-all": "^0.28.6",
+    "@dendronhq/common-frontend": "^0.42.0-alpha.0",
     "@dendronhq/engine-server": "^0.28.6",
     "@emotion/react": "^11.1.1",
     "@emotion/styled": "^11.0.0",
+    "@reduxjs/toolkit": "^1.5.1",
+    "@types/jest": "^26.0.20",
+    "antd": "^4.15.4",
+    "autoprefixer": "^10.2.5",
+    "aws-amplify": "^3.3.23",
+    "babel-plugin-import": "^1.13.3",
     "formik": "^2.2.5",
-    "framer-motion": "^2.9.4",
+    "framer-motion": "^3.2.2-rc.1",
+    "gulp": "^4.0.2",
+    "gulp-csso": "^4.0.1",
+    "gulp-debug": "^4.0.0",
+    "gulp-less": "^4.0.1",
+    "gulp-postcss": "^9.0.0",
+    "jest": "23.6.0",
+    "less-plugin-npm-import": "^2.1.0",
     "lodash": "^4.17.20",
     "next": "10.0.0",
+    "postcss": "^8.2.13",
     "react": "17.0.1",
+    "react-css-theme-switcher": "^0.2.3",
     "react-d3-tree": "^1.16.1",
     "react-dom": "17.0.1",
     "react-icons": "^3.11.0",
-    "swr": "^0.3.9"
+    "react-redux": "^7.2.3",
+    "swr": "^0.3.9",
+    "webpack-bundle-analyzer": "^4.4.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.161",

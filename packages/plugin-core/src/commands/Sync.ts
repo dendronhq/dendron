@@ -9,8 +9,11 @@ import { BasicCommand } from "./base";
 const L = Logger;
 
 type CommandOpts = {};
+type CommandReturns =
+  | { committed: string[]; pulled: string[]; pushed: string[] }
+  | undefined;
 
-export class SyncCommand extends BasicCommand<CommandOpts, void> {
+export class SyncCommand extends BasicCommand<CommandOpts, CommandReturns> {
   static key = DENDRON_COMMANDS.SYNC.key;
 
   async execute(opts?: CommandOpts) {
@@ -33,6 +36,10 @@ export class SyncCommand extends BasicCommand<CommandOpts, void> {
     L.info(`Pushed changes for ${pushed.length} vaults`);
 
     window.showInformationMessage("finish sync");
-    return;
+    return {
+      committed,
+      pulled,
+      pushed,
+    };
   }
 }

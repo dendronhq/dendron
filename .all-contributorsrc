@@ -354,7 +354,17 @@
         "blog",
         "bug"
       ]
+    },
+    {
+      "login": "jn64",
+      "name": "jn64",
+      "avatar_url": "https://avatars.githubusercontent.com/u/23169302?v=4",
+      "profile": "https://github.com/jn64",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
-  "contributorsPerLine": 7
+  "contributorsPerLine": 7,
+  "skipCi": true
 }

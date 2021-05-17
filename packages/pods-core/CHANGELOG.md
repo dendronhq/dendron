@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.42.0](https://github.com/dendronhq/dendron/compare/v0.41.0...v0.42.0) (2021-05-17)
+
+### Features Dendron
+
+- add graphviz pod to export notes as a graph in dot language ([#721](https://github.com/dendronhq/dendron/issues/721)) ([c1a7632](https://github.com/dendronhq/dendron/commit/c1a76320171809d987652afe203b36fe506b7c31))
+
 # [0.41.0](https://github.com/dendronhq/dendron/compare/v0.40.0...v0.41.0) (2021-05-10)
 
 **Note:** Version bump only for package @dendronhq/pods-core

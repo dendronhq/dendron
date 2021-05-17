@@ -363,6 +363,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "RafaelCotrim",
+      "name": "Thelusion",
+      "avatar_url": "https://avatars.githubusercontent.com/u/46679150?v=4",
+      "profile": "https://github.com/RafaelCotrim",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

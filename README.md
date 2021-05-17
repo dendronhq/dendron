@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-37-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-38-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -109,6 +109,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
   <tr>
     <td align="center"><a href="https://github.com/kpathakota"><img src="https://avatars.githubusercontent.com/u/1484475?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kiran Pathakota</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/commits?author=kpathakota" title="Code">💻</a> <a href="#mentoring-kpathakota" title="Mentoring">🧑‍🏫</a> <a href="https://github.com/dendronhq/dendron/commits?author=kpathakota" title="Documentation">📖</a> <a href="#blog-kpathakota" title="Blogposts">📝</a> <a href="https://github.com/dendronhq/dendron/issues?q=author%3Akpathakota" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/jn64"><img src="https://avatars.githubusercontent.com/u/23169302?v=4?s=100" width="100px;" alt=""/><br /><sub><b>jn64</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Ajn64" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/RafaelCotrim"><img src="https://avatars.githubusercontent.com/u/46679150?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Thelusion</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3ARafaelCotrim" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

@@ -2,6 +2,7 @@ import { createLogger, engineSlice } from "@dendronhq/common-frontend";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import _ from "lodash";
 import React from "react";
+import { Button } from "antd";
 
 export default function Sample({
   engine,
@@ -28,7 +29,7 @@ export default function Sample({
   return (
     <>
       <h4>Current theme: {currentTheme}</h4>
-      <button onClick={toggleDarkMode}>Toggle Theme</button>
+      <Button type="primary" onClick={toggleDarkMode}>Toggle Theme</Button>
       <br />
       Notes:{" "}
       {_.values(notes)

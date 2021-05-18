@@ -59,6 +59,12 @@
                     "id": "dendron.treeViewV2",
                     "name": "Tree View V2",
                     "when": "dendron:pluginActive"
+                },
+                {
+                    "type": "webview",
+                    "id": "dendron.sample",
+                    "name": "Sample View",
+                    "when": "dendron:devMode"
                 }
             ]
         },

@@ -6,6 +6,11 @@ export const DEFAULT_LEGACY_VAULT_NAME = "vault";
 
 export enum DendronContext {
   PLUGIN_ACTIVE = "dendron:pluginActive",
+  DEV_MODE = "dendron:devMode"
+}
+
+export enum DendronWebViewKey {
+  SAMPLE_VIEW = "sample",
 }
 
 type KeyBinding = {

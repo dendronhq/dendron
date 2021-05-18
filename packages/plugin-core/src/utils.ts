@@ -358,7 +358,7 @@ export class VSCodeUtils {
     return resolvePath(folderPath);
   }
 
-  static isDebuggingExtension(): boolean {
+  static isDevMode(): boolean {
     // HACK: vscode does not save env variables btw workspaces
     return process.env.VSCODE_DEBUGGING_EXTENSION ? true : false;
   }

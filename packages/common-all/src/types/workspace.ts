@@ -137,7 +137,23 @@ export type DendronConfig = {
    * Default is templates
    */
   defaultInsertHierarchy?: string;
+
+  /**
+   * Development related options
+   */
+  dev?: DendronDevConfig;
 };
+
+export type DendronDevConfig = {
+  /**
+   * Custom next server
+   */
+  nextServerUrl?: string;
+  /**
+   * Static assets for next
+   */
+  nextStaticRoot?: string;
+}
 
 export type DendronSiteConfig = {
   /**

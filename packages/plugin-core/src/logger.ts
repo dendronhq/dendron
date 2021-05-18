@@ -1,12 +1,10 @@
 import {
   DendronError,
   error2PlainObject,
-  setEnv,
-  stringifyError,
+  setEnv
 } from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
-import _ from "lodash";
 import path from "path";
 import { ExtensionContext, OutputChannel, window, workspace } from "vscode";
 import { CONFIG, DENDRON_CHANNEL_NAME } from "./constants";

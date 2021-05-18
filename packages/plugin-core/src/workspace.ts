@@ -31,6 +31,7 @@ import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import {
   CONFIG,
+  DendronWebViewKey,
   DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
@@ -48,6 +49,7 @@ import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
+import { SampleView } from "./views/SampleView";
 import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
@@ -130,6 +132,7 @@ export class DendronWorkspace {
   public vaultWatcher?: VaultWatcher;
   public port?: number;
   public workspaceService?: WorkspaceService;
+  protected views: {[key: string]: vscode.WebviewViewProvider}
 
   static instance(): DendronWorkspace {
     if (!_DendronWorkspace) {
@@ -247,7 +250,7 @@ export class DendronWorkspace {
 
   static version(): string {
     let version: string | undefined;
-    if (VSCodeUtils.isDebuggingExtension()) {
+    if (VSCodeUtils.isDevMode()) {
       version = NodeJSUtils.getVersionFromPkg();
     } else {
       try {
@@ -315,6 +318,7 @@ export class DendronWorkspace {
     this.disposableStore = new DisposableStore();
     this._setupCommands();
     this.setupLanguageFeatures(context);
+    this.views = {};
     this.setupViews(context);
     const ctx = "DendronWorkspace";
     this.L.info({ ctx, msg: "initialized" });
@@ -331,6 +335,9 @@ export class DendronWorkspace {
     }
   }
 
+  /**
+   * @remark: We need to get the config from disk because the engine might not be initialized yet
+   */
   get config(): DendronConfig {
     const dendronRoot = getWS().configRoot;
     if (!dendronRoot) {
@@ -386,6 +393,14 @@ export class DendronWorkspace {
     }));
   }
 
+  getWebView(key: DendronWebViewKey) {
+    return this.views[key];
+  }
+
+  setWebView(key: DendronWebViewKey, view: vscode.WebviewViewProvider) {
+    this.views[key] = view;
+  }
+
   getEngine(): DEngineClientV2 {
     if (!this._enginev2) {
       throw Error("engine not set");
@@ -403,6 +418,15 @@ export class DendronWorkspace {
       if (event.action === "initialized") {
         Logger.info({ ctx, msg: "init:treeViewV2" });
         const provider = new DendronTreeViewV2(context.extensionUri);
+        // TODO:
+        const sampleView = new SampleView();
+        context.subscriptions.push(
+          vscode.window.registerWebviewViewProvider(
+            SampleView.viewType,
+            sampleView
+          )
+        );
+
         context.subscriptions.push(
           vscode.window.registerWebviewViewProvider(
             DendronTreeViewV2.viewType,

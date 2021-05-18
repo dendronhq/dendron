@@ -11,7 +11,9 @@ export class Git {
     return fs.existsSync(path.join(fpath, ".git"));
   }
 
-  constructor(public opts: { localUrl: string; remoteUrl?: string }) {}
+  constructor(
+    public opts: { localUrl: string; remoteUrl?: string; bare?: boolean }
+  ) {}
 
   async _execute(cmd: string): Promise<{ stdout: string; stderr: string }> {
     const [git, ...args] = cmd.split(" ");
@@ -54,8 +56,15 @@ export class Git {
     return localUrl;
   }
 
+  /** Adds the `remoteUrl` set in the constructor as a remote, and sets it as the upstream for the main/master branch. */
+  async remoteAddUpstream() {
+    const { remoteUrl } = this.opts;
+    await this._execute(`git remote add origin ${remoteUrl}`);
+    await this._execute(`git branch --set-upstream-to=origin`);
+  }
+
   async init() {
-    await this._execute("git init");
+    await this._execute(`git init${this.opts.bare ? " --bare" : ""}`);
   }
 
   async pull() {

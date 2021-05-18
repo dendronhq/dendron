@@ -40,6 +40,7 @@ import { SignUpCommand } from "./SignUp";
 import { SiteBuildCommand } from "./SiteBuild";
 import { SitePreviewCommand } from "./SitePreview";
 import { SnapshotVaultCommand } from "./SnapshotVault";
+import { SyncCommand } from "./Sync";
 import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
@@ -88,6 +89,7 @@ const ALL_COMMANDS = [
   SiteBuildCommand,
   SitePreviewCommand,
   SnapshotVaultCommand,
+  SyncCommand,
   ConfigureWithUICommand,
   UpgradeSettingsCommand,
   VaultAddCommand,

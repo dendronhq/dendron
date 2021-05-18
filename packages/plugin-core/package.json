@@ -327,6 +327,12 @@
                 "desc": "add and commit all files"
             },
             {
+                "command": "dendron.sync",
+                "title": "Dendron: Workspace: Sync",
+                "desc": "Sync all files",
+                "docPreview": "Sync all files in your workspace, across all vaults.\nThis will add and commit all changes, then pull and push to sync all changes."
+            },
+            {
                 "command": "dendron.vaultAdd",
                 "title": "Dendron: Vault Add",
                 "desc": "Add a new vault",

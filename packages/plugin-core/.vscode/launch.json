@@ -6,7 +6,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run Extension -- disable extensions",
+      "name": "Run Extension:Local",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
@@ -22,7 +22,7 @@
       }
     },
     {
-      "name": "Run Extension",
+      "name": "Run Extension:Remote",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",

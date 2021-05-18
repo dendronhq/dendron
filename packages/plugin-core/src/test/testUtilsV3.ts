@@ -1,6 +1,6 @@
 import {
   DendronConfig,
-  DEngineClientV2,
+  DEngineClient,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import {
@@ -306,8 +306,8 @@ export const createEngineFactory = (
 ): CreateEngineFunction => {
   const createEngine: CreateEngineFunction = (
     opts: WorkspaceOpts
-  ): DEngineClientV2 => {
-    const engine = new FakeEngine() as DEngineClientV2;
+  ): DEngineClient => {
+    const engine = new FakeEngine() as DEngineClient;
     _.map(overrides || {}, (method, key: keyof DendronEngineV2) => {
       // @ts-ignore
       engine[key] = method(opts);

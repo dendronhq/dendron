@@ -1,7 +1,7 @@
 import {
   CONSTANTS,
   DendronError,
-  DEngineClientV2,
+  DEngineClient,
   DNoteRefData,
   DNoteRefLink,
   DVault,
@@ -100,7 +100,7 @@ export async function getEngine(opts: {
   numTries?: number;
   wsRoot: string;
   vaults: DVault[];
-}): Promise<{ error?: DendronError; data?: DEngineClientV2 }> {
+}): Promise<{ error?: DendronError; data?: DEngineClient }> {
   const { numTries, wsRoot, vaults } = _.defaults(opts, { numTries: 5 });
   if (numTries <= 0) {
     return {

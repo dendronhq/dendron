@@ -2,7 +2,7 @@ import {
   CONSTANTS,
   DendronConfig,
   DendronSiteConfig,
-  DEngineClientV2,
+  DEngineClient,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
 import { readYAML, writeYAML } from "@dendronhq/common-server";
@@ -24,7 +24,7 @@ import {
 } from "./types";
 
 type EngineOverride = {
-  [P in keyof DEngineClientV2]: (opts: WorkspaceOpts) => DEngineClientV2[P];
+  [P in keyof DEngineClient]: (opts: WorkspaceOpts) => DEngineClient[P];
 };
 
 export const createEngineFactoryFactory = ({
@@ -36,9 +36,9 @@ export const createEngineFactoryFactory = ({
 }): CreateEngineFunction => {
   const createEngine: CreateEngineFunction = (
     opts: WorkspaceOpts
-  ): DEngineClientV2 => {
-    const engine = new EngineClass() as DEngineClientV2;
-    _.map(overrides || {}, (method, key: keyof DEngineClientV2) => {
+  ): DEngineClient => {
+    const engine = new EngineClass() as DEngineClient;
+    _.map(overrides || {}, (method, key: keyof DEngineClient) => {
       // @ts-ignore
       engine[key] = method(opts);
     });

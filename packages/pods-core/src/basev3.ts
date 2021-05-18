@@ -1,6 +1,6 @@
 import {
   DendronError,
-  DEngineClientV2,
+  DEngineClient,
   DVault,
   NoteProps,
   NoteUtils,
@@ -14,7 +14,7 @@ import { URI } from "vscode-uri";
 import { PodKind } from "./types";
 
 export type PodOpts<T> = {
-  engine: DEngineClientV2;
+  engine: DEngineClient;
   config: T;
 } & WorkspaceOpts;
 

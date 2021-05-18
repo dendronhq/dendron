@@ -1,4 +1,4 @@
-import { DEngineClientV2, DVault, WorkspaceOpts } from "@dendronhq/common-all";
+import { DEngineClient, DVault, WorkspaceOpts } from "@dendronhq/common-all";
 
 export type TestResult = {
   actual: any;
@@ -7,12 +7,12 @@ export type TestResult = {
 };
 
 export type EngineOpt = {
-  engine: DEngineClientV2;
+  engine: DEngineClient;
 };
 
 export type SetupHookFunction<T = any> = (
   opts: {
-    engine?: DEngineClientV2;
+    engine?: DEngineClient;
   } & WorkspaceOpts
 ) => Promise<T>;
 
@@ -31,7 +31,7 @@ export type PreSetupCmdHookFunction<T = any> = (
 
 export type PostSetupHookFunction<T = any> = (
   opts: {
-    engine: DEngineClientV2;
+    engine: DEngineClient;
     extra?: any;
   } & WorkspaceOpts
 ) => Promise<T>;

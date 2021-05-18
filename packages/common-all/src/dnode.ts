@@ -9,7 +9,7 @@ import { CONSTANTS, ERROR_STATUS } from "./constants";
 import { DendronError } from "./error";
 import { Time } from "./time";
 import {
-  DEngineClientV2,
+  DEngineClient,
   DLink,
   DNodeOpts,
   DNodePropsDict,
@@ -398,7 +398,7 @@ export class NoteUtils {
     engine,
   }: {
     noteOpts: NoteOpts;
-    engine: DEngineClientV2;
+    engine: DEngineClient;
   }): NoteProps {
     const note = NoteUtils.create(noteOpts);
     const maybeMatch = SchemaUtils.matchPath({
@@ -837,7 +837,7 @@ export class SchemaUtils {
   static applyTemplate(opts: {
     template: SchemaTemplate;
     note: NoteProps;
-    engine: DEngineClientV2;
+    engine: DEngineClient;
   }) {
     const { template, note, engine } = opts;
     if (template.type === "note") {
@@ -1062,7 +1062,7 @@ export class SchemaUtils {
     engine,
   }: {
     note: NoteProps;
-    engine: DEngineClientV2;
+    engine: DEngineClient;
   }) {
     if (note.schema) {
       return engine.schemas[note.schema.moduleId];

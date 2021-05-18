@@ -1,7 +1,7 @@
 import {
   DendronConfig,
   DendronError,
-  DEngineClientV2,
+  DEngineClient,
   DVault,
   ERROR_STATUS,
   getStage,
@@ -282,7 +282,7 @@ export class DendronWorkspace {
   public serverWatcher?: vscode.FileSystemWatcher;
   public schemaWatcher?: SchemaWatcher;
   public L: typeof Logger;
-  public _enginev2?: DEngineClientV2;
+  public _enginev2?: DEngineClient;
   private disposableStore: DisposableStore;
 
   static getOrCreate(
@@ -400,14 +400,14 @@ export class DendronWorkspace {
     this.views[key] = view;
   }
 
-  getEngine(): DEngineClientV2 {
+  getEngine(): DEngineClient {
     if (!this._enginev2) {
       throw Error("engine not set");
     }
     return this._enginev2;
   }
 
-  setEngine(engine: DEngineClientV2) {
+  setEngine(engine: DEngineClient) {
     this._enginev2 = engine;
   }
 

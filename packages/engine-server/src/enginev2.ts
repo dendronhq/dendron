@@ -5,7 +5,7 @@ import {
   DendronConfig,
   DendronError,
   DEngine,
-  DEngineClientV2,
+  DEngineClient,
   DEngineDeleteSchemaResp,
   DEngineInitResp,
   DEngineMode,
@@ -50,7 +50,7 @@ import { FuseEngine } from "./fuseEngine";
 import { LinkUtils } from "./markdown";
 import { HookUtils } from "./topics/hooks";
 
-type CreateStoreFunc = (engine: DEngineClientV2) => DStore;
+type CreateStoreFunc = (engine: DEngineClient) => DStore;
 type DendronEngineOptsV2 = {
   wsRoot: string;
   vaults: DVault[];
@@ -207,7 +207,7 @@ export class DendronEngineV2 implements DEngine {
   async deleteNote(
     id: string,
     opts?: EngineDeleteOptsV2
-  ): ReturnType<DEngineClientV2["deleteNote"]> {
+  ): ReturnType<DEngineClient["deleteNote"]> {
     try {
       const note = this.notes[id];
       const changed = await this.store.deleteNote(id, opts);
@@ -337,7 +337,7 @@ export class DendronEngineV2 implements DEngine {
     qs,
   }: {
     qs: string;
-  }): ReturnType<DEngineClientV2["queryNotesSync"]> {
+  }): ReturnType<DEngineClient["queryNotesSync"]> {
     const items = this.fuseEngine.queryNote({ qs });
     return {
       error: null,
@@ -368,7 +368,7 @@ export class DendronEngineV2 implements DEngine {
 
   async queryNotes(
     opts: QueryNotesOpts
-  ): ReturnType<DEngineClientV2["queryNotes"]> {
+  ): ReturnType<DEngineClient["queryNotes"]> {
     const ctx = "Engine:queryNotes";
     const { qs, vault, createIfNew } = opts;
     let items = await this.fuseEngine.queryNote({ qs });
@@ -489,5 +489,5 @@ export class DendronEngineV2 implements DEngine {
 
 export const createEngine = ({ wsRoot }: WorkspaceOpts) => {
   const engine = DendronEngineV2.create({ wsRoot });
-  return engine as DEngineClientV2;
+  return engine as DEngineClient;
 };

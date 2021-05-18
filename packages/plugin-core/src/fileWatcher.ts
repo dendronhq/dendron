@@ -1,5 +1,5 @@
 import {
-  DEngineClientV2,
+  DEngineClient,
   DVault,
   NoteProps,
   NoteUtils,
@@ -22,7 +22,7 @@ export class VaultWatcher {
   public pause: boolean;
   public L = Logger;
   public ws: DendronWorkspace;
-  public engine: DEngineClientV2;
+  public engine: DEngineClient;
 
   constructor(opts: WorkspaceOpts) {
     const { vaults, wsRoot } = opts;

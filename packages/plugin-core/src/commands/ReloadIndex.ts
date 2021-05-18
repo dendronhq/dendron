@@ -1,5 +1,5 @@
 import {
-  DEngineClientV2,
+  DEngineClient,
   ERROR_SEVERITY,
   NoteUtils,
   SchemaUtils,
@@ -20,14 +20,14 @@ type ReloadIndexCommandOpts = {};
 
 export class ReloadIndexCommand extends BasicCommand<
   ReloadIndexCommandOpts,
-  DEngineClientV2 | undefined
+  DEngineClient | undefined
 > {
   static key = DENDRON_COMMANDS.RELOAD_INDEX.key;
   /**
    * Update index
    * @param opts
    */
-  async execute(): Promise<DEngineClientV2 | undefined> {
+  async execute(): Promise<DEngineClient | undefined> {
     const ctx = "ReloadIndex.execute";
     this.L.info({ ctx, msg: "enter" });
     const ws = DendronWorkspace.instance();

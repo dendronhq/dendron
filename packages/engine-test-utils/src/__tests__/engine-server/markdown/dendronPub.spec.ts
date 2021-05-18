@@ -1,4 +1,4 @@
-import { DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngineClient } from "@dendronhq/common-all";
 import {
   AssertUtils,
   ENGINE_HOOKS,
@@ -15,7 +15,7 @@ import { testWithEngine } from "../../../engine";
 import { checkVFile } from "./utils";
 
 function proc(
-  engine: DEngineClientV2,
+  engine: DEngineClient,
   dendron: DendronASTData,
   opts?: DendronPubOpts
 ) {

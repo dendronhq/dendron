@@ -1,4 +1,4 @@
-import { DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngineClient } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import {
   AssertUtils,
@@ -15,7 +15,7 @@ import { TestConfigUtils, runEngineTestV5 } from "../../..";
 
 // runs all the processes
 function proc(
-  engine: DEngineClientV2,
+  engine: DEngineClient,
   dendron: DendronASTData,
   opts?: DendronPubOpts
 ) {

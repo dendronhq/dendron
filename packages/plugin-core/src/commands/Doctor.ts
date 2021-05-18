@@ -1,4 +1,4 @@
-import { DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngineClient } from "@dendronhq/common-all";
 import {
   BackfillV2Command,
   DoctorActions,
@@ -58,7 +58,8 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     const siteRoot = path.join(wsRoot, config.site.siteRootDir);
     ws.vaultWatcher!.pause = true;
     this.L.info({ ctx, msg: "pre:Reload" });
-    const engine: DEngineClientV2 = (await new ReloadIndexCommand().execute()) as DEngineClientV2;
+    const engine: DEngineClient =
+      (await new ReloadIndexCommand().execute()) as DEngineClient;
 
     switch (opts.action) {
       case DoctorActions.FIX_FRONTMATTER: {

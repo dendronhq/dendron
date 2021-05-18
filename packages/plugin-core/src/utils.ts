@@ -1,6 +1,6 @@
 import {
   DendronError,
-  DEngineClientV2,
+  DEngineClient,
   DNodeUtils,
   DVault,
   getStage,
@@ -382,7 +382,7 @@ export class VSCodeUtils {
 }
 
 export class WSUtils {
-  static updateEngineAPI(port: number | string): DEngineClientV2 {
+  static updateEngineAPI(port: number | string): DEngineClient {
     const ws = DendronWorkspace.instance();
     ws.setEngine(EngineAPIService.create({ port }));
     ws.port = _.toInteger(port);
@@ -395,7 +395,7 @@ export class DendronClientUtilsV2 {
   static genNotePrefix(
     fname: string,
     addBehavior: AddBehavior,
-    opts: { engine: DEngineClientV2 }
+    opts: { engine: DEngineClient }
   ) {
     let out: string;
     switch (addBehavior) {
@@ -494,7 +494,7 @@ export class DendronClientUtilsV2 {
     client,
   }: {
     fname: string;
-    client: DEngineClientV2;
+    client: DEngineClient;
   }): Promise<SchemaModuleProps> => {
     const smod = _.find(client.schemas, { fname });
     if (!smod) {

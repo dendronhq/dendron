@@ -3,7 +3,7 @@ import {
   BulkAddNoteOpts,
   DendronConfig,
   DendronError,
-  DEngineClientV2,
+  DEngineClient,
   DEngineDeleteSchemaResp,
   DEngineInitResp,
   DEngineInitSchemaResp,
@@ -82,9 +82,9 @@ export class FileStorage implements DStore {
   public wsRoot: string;
   public configRoot: string;
   public config: DendronConfig;
-  private engine: DEngineClientV2;
+  private engine: DEngineClient;
 
-  constructor(props: { engine: DEngineClientV2; logger: DLogger }) {
+  constructor(props: { engine: DEngineClient; logger: DLogger }) {
     const { vaults, wsRoot, config } = props.engine;
     const { logger } = props;
     this.wsRoot = wsRoot;

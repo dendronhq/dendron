@@ -1,6 +1,6 @@
 import {
   CONSTANTS,
-  DEngineClientV2,
+  DEngineClient,
   NoteOpts,
   NoteProps,
   NoteUtils,
@@ -35,7 +35,7 @@ const writeNote = async ({
   engine,
 }: {
   noteOpts: NoteOpts;
-  engine: DEngineClientV2;
+  engine: DEngineClient;
 }) => {
   const note = NoteUtils.create(noteOpts);
   await engine.writeNote(note, { newNode: true });

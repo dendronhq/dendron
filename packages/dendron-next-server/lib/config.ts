@@ -1,10 +1,10 @@
-import { DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngineClient } from "@dendronhq/common-all";
 import { getEnv } from "./env";
 import { CONFIG_KEY, StageEnv } from "./types";
 
 
 
-type API_PATH_KEY = {[key in keyof DEngineClientV2]: string}
+type API_PATH_KEY = {[key in keyof DEngineClient]: string}
 
 // @ts-ignore
 const API_PATH_MAP: API_PATH_KEY = {
@@ -18,7 +18,7 @@ const API_REMOTE_PATH_MAP = {
 
 type API_REMOTE_KEY =  keyof typeof API_REMOTE_PATH_MAP;;
 
-export function api(key: keyof DEngineClientV2): string {
+export function api(key: keyof DEngineClient): string {
   const port = process.env.ENGINE_ENDPOINT_PORT;
   const suffix = port ? `http://localhost:${port}`: ``;
   return suffix + API_PATH_MAP[key]

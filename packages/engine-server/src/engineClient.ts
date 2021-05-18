@@ -5,7 +5,7 @@ import {
   DendronConfig,
   DendronError,
   DEngine,
-  DEngineClientV2,
+  DEngineClient,
   DEngineDeleteSchemaResp,
   DEngineInitResp,
   DHookDict,
@@ -55,7 +55,7 @@ type DendronEngineClientOpts = {
   ws: string;
 };
 
-export class DendronEngineClient implements DEngineClientV2 {
+export class DendronEngineClient implements DEngineClient {
   public notes: NotePropsDict;
   public wsRoot: string;
   public schemas: SchemaModuleDict;
@@ -228,7 +228,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   }
 
   async queryNote(
-    opts: Parameters<DEngineClientV2["queryNotes"]>[0]
+    opts: Parameters<DEngineClient["queryNotes"]>[0]
   ): Promise<NoteProps[]> {
     const { qs, vault } = opts;
     let noteIndexProps = await this.fuseEngine.queryNote({ qs });

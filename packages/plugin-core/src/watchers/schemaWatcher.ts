@@ -1,4 +1,4 @@
-import { DEngineClientV2, VaultUtils } from "@dendronhq/common-all";
+import { DEngineClient, VaultUtils } from "@dendronhq/common-all";
 import { string2Schema } from "@dendronhq/common-server";
 import _ from "lodash";
 import path from "path";
@@ -14,7 +14,7 @@ export class SchemaWatcher {
   public pause: boolean;
   public L = Logger;
   public ws: DendronWorkspace;
-  public engine: DEngineClientV2;
+  public engine: DEngineClient;
 
   constructor({ vaults }: { vaults: vscode.WorkspaceFolder[] }) {
     const rootFolder = vaults[0];

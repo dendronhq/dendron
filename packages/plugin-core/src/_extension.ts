@@ -369,7 +369,7 @@ export async function _activate(context: vscode.ExtensionContext) {
       duration: durationReloadWorkspace,
       noCaching: config.noCaching || false,
       numNotes,
-      numVaults: _.size(getEngine().vaultsv3),
+      numVaults: _.size(getEngine().vaults),
     });
     await ws.activateWatchers();
     toggleViews(true);

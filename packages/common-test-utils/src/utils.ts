@@ -1,5 +1,5 @@
 import {
-  DEngineClientV2,
+  DEngineClient,
   DEngineInitResp,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -43,12 +43,12 @@ export class AssertUtils {
 export abstract class EngineTest<TPreSetupOut = any, TPostSetupOut = any> {
   public preSetupHook: SetupHookFunction<TPreSetupOut>;
   public postSetupHook: SetupHookFunction<TPostSetupOut>;
-  public engine: DEngineClientV2;
+  public engine: DEngineClient;
 
   constructor(opts: {
     preSetupHook?: SetupHookFunction<TPreSetupOut>;
     postSetupHook?: SetupHookFunction<TPostSetupOut>;
-    engine: DEngineClientV2;
+    engine: DEngineClient;
   }) {
     const { preSetupHook, postSetupHook, engine } = _.defaults(opts, {
       preSetupHook: async () => {},
@@ -125,7 +125,7 @@ export async function runJestHarnessV2(results: any, expect: any) {
 }
 
 export type RunEngineTestFunctionOpts = {
-  engine: DEngineClientV2;
+  engine: DEngineClient;
   initResp: DEngineInitResp;
 } & WorkspaceOpts;
 
@@ -151,4 +151,4 @@ export type GenTestResults = (
   opts: RunEngineTestFunctionOpts & { extra?: any }
 ) => Promise<TestResult[]>;
 
-export type CreateEngineFunction = (opts: WorkspaceOpts) => DEngineClientV2;
+export type CreateEngineFunction = (opts: WorkspaceOpts) => DEngineClient;

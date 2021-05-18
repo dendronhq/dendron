@@ -340,7 +340,7 @@ export type DEngine = DCommonProps &
     getConfig: () => Promise<RespV2<ConfigGetPayload>>;
   };
 
-export type DEngineClientV2 = Omit<DEngine, "store">;
+export type DEngineClient = Omit<DEngine, "store">;
 
 export type DStore = DCommonProps &
   DCommonMethods & {
@@ -426,7 +426,7 @@ export type PodConfig = {
 
 export type BasePodExecuteOpts<TConfig> = {
   config: TConfig;
-  engine: DEngineClientV2;
+  engine: DEngineClient;
   wsRoot: string;
   vaults: DVault[];
 };

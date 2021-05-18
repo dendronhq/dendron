@@ -20,7 +20,8 @@
     "start": "next start",
     "checkout:dev": "amplify env checkout dev",
     "deploy:dev": "env STAGE=dev amplify publish",
-    "deploy:prod": "env STAGE=prod amplify publish"
+    "deploy:prod": "env STAGE=prod amplify publish",
+    "gen:theme": "gulp less"
   },
   "nohoist": [
     "**/common-all",

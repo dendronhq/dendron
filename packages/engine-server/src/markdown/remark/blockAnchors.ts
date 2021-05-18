@@ -50,7 +50,7 @@ function attachParser(proc: Unified.Processor) {
         type: "blockAnchor",
         value,
         id: match[1],
-      } as BlockAnchor);
+      });
     }
     return;
   }

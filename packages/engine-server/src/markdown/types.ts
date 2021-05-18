@@ -105,7 +105,7 @@ export type NoteRefDataV4_LEGACY = {
   link: DNoteRefLink;
 };
 
-export type BlockAnchor = {
+export type BlockAnchor = DendronASTNode & {
   type: DendronASTTypes.BLOCK_ANCHOR;
   id: string;
 };

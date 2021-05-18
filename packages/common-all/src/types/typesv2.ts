@@ -229,7 +229,7 @@ export type DCommonProps = {
    * NOTE: currently same as wsRoot. in the future, the two will be decoupled
    */
   configRoot: string;
-  vaultsv3: DVault[];
+  vaults: DVault[];
   links: DLink[];
   config: DendronConfig;
 };

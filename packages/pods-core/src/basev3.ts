@@ -20,13 +20,11 @@ export type PodOpts<T> = {
 
 // === Publish Pod
 
-export type PublishPodExecuteOpts<T extends PublishPodConfig = any> = PodOpts<
-  T
->;
+export type PublishPodExecuteOpts<T extends PublishPodConfig = any> =
+  PodOpts<T>;
 
-export type PublishPodPlantOpts<
-  T extends PublishPodConfig = any
-> = PublishPodExecuteOpts<T> & { note: NoteProps };
+export type PublishPodPlantOpts<T extends PublishPodConfig = any> =
+  PublishPodExecuteOpts<T> & { note: NoteProps };
 
 export type PublishPodConfig = {
   /**
@@ -77,7 +75,7 @@ export abstract class PublishPod<T extends PublishPodConfig = any> {
     }
 
     const vault = VaultUtils.getVaultByNameOrThrow({
-      vaults: engine.vaultsv3,
+      vaults: engine.vaults,
       vname: vaultName,
     });
     const note = NoteUtils.getNoteByFnameV5({
@@ -112,13 +110,11 @@ export type ImportPodConfig = {
   frontmatter?: any;
   fnameAsId?: boolean;
 };
-export type ImportPodExecuteOpts<
-  T extends ImportPodConfig = ImportPodConfig
-> = PodOpts<T>;
+export type ImportPodExecuteOpts<T extends ImportPodConfig = ImportPodConfig> =
+  PodOpts<T>;
 
-export type ImportPodPlantOpts<
-  T extends ImportPodConfig = ImportPodConfig
-> = Omit<ImportPodExecuteOpts<T>, "src"> & { src: URI; vault: DVault };
+export type ImportPodPlantOpts<T extends ImportPodConfig = ImportPodConfig> =
+  Omit<ImportPodExecuteOpts<T>, "src"> & { src: URI; vault: DVault };
 
 export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
   public L: DLogger;
@@ -192,7 +188,7 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
 
     // validate config
     const vault = VaultUtils.getVaultByNameOrThrow({
-      vaults: engine.vaultsv3,
+      vaults: engine.vaults,
       vname: vaultName,
     });
     const srcURL = URI.file(resolvePath(src, engine.wsRoot));
@@ -212,17 +208,15 @@ export type ExportPodConfig = {
   includeStubs?: boolean;
   ignore?: string[];
 };
-export type ExportPodExecuteOpts<
-  T extends ExportPodConfig = ExportPodConfig
-> = PodOpts<T>;
+export type ExportPodExecuteOpts<T extends ExportPodConfig = ExportPodConfig> =
+  PodOpts<T>;
 
-export type ExportPodPlantOpts<
-  T extends ExportPodConfig = ExportPodConfig
-> = Omit<ExportPodExecuteOpts<T>, "dest"> & {
-  dest: URI;
-  vaults: DVault[];
-  notes: NoteProps[];
-};
+export type ExportPodPlantOpts<T extends ExportPodConfig = ExportPodConfig> =
+  Omit<ExportPodExecuteOpts<T>, "dest"> & {
+    dest: URI;
+    vaults: DVault[];
+    notes: NoteProps[];
+  };
 
 export abstract class ExportPod<
   T extends ExportPodConfig = ExportPodConfig,

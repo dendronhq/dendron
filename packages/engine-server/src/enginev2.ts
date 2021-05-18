@@ -53,7 +53,7 @@ import { HookUtils } from "./topics/hooks";
 type CreateStoreFunc = (engine: DEngineClientV2) => DStore;
 type DendronEngineOptsV2 = {
   wsRoot: string;
-  vaultsv3: DVault[];
+  vaults: DVault[];
   forceNew?: boolean;
   createStore?: CreateStoreFunc;
   mode?: DEngineMode;
@@ -69,13 +69,10 @@ export class DendronEngineV2 implements DEngine {
   public logger: DLogger;
   public fuseEngine: FuseEngine;
   public links: DLink[];
-  /**
-   @deprecated
-   */
-  public vaultsv3: DVault[];
   public configRoot: string;
   public config: DendronConfig;
   public hooks: DHookDict;
+  private _vaults: DVault[];
 
   static _instance: DendronEngineV2 | undefined;
 
@@ -86,8 +83,8 @@ export class DendronEngineV2 implements DEngine {
     this.props = props;
     this.fuseEngine = new FuseEngine({});
     this.links = [];
-    this.vaultsv3 = props.vaultsv3;
     this.config = props.config;
+    this._vaults = props.vaults;
     this.store = props.createStore(this);
     const hooks: DHookDict = _.get(props.config, "hooks", {
       onCreate: [],
@@ -101,7 +98,7 @@ export class DendronEngineV2 implements DEngine {
     const config = readYAML(cpath) as DendronConfig;
     return new DendronEngineV2({
       wsRoot,
-      vaultsv3: config.vaults,
+      vaults: config.vaults,
       forceNew: true,
       createStore: (engine) =>
         new FileStorage({
@@ -121,10 +118,6 @@ export class DendronEngineV2 implements DEngine {
     return DendronEngineV2._instance;
   }
 
-  get vaults(): DVault[] {
-    return this.store.vaultsv3;
-  }
-
   get notes(): NotePropsDict {
     return this.store.notes;
   }
@@ -132,12 +125,17 @@ export class DendronEngineV2 implements DEngine {
     return this.store.schemas;
   }
 
+  get vaults(): DVault[] {
+    return this._vaults;
+  }
+
   set notes(notes: NotePropsDict) {
     this.store.notes = notes;
   }
 
   set vaults(vaults: DVault[]) {
-    this.store.vaultsv3 = vaults;
+    this._vaults = vaults;
+    this.store.vaults = vaults;
   }
 
   /**

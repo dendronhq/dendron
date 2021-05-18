@@ -46,7 +46,7 @@ export class CopyNoteLinkCommand extends BasicCommand<
     const { header } = getHeaderFromSelection({ clean: true });
     const noXVaultLink = getEngine().config.noXVaultWikiLink;
     const useVaultPrefix =
-      _.size(getEngine().vaultsv3) > 1 &&
+      _.size(getEngine().vaults) > 1 &&
       (_.isBoolean(noXVaultLink) ? !noXVaultLink : true);
     const link = NoteUtils.createWikiLink({ note, header, useVaultPrefix });
     try {

@@ -22,7 +22,7 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
     if (refAtPos.vaultName) {
       try {
         vault = VaultUtils.getVaultByName({
-          vaults: engine.vaultsv3,
+          vaults: engine.vaults,
           vname: refAtPos.vaultName,
         });
       } catch (err) {

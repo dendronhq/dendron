@@ -38,7 +38,7 @@ export class ImportPodCLICommand extends CLICommand<
 
   async execute(opts: CommandOpts) {
     const { podClass: PodClass, config, wsRoot, engine, server } = opts;
-    const vaults = engine.vaultsv3;
+    const vaults = engine.vaults;
     const pod = new PodClass();
     console.log("running pod...", config);
     await pod.execute({ wsRoot, config, engine, vaults });

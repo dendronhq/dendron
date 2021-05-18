@@ -26,11 +26,11 @@ describe("GitUtils", () => {
       config.site.gh_edit_repository = gitUrl;
       const note = engine.notes["foo"];
       const vault = _.find(
-        engine.vaultsv3,
+        engine.vaults,
         (ent) => ent.fsPath === note.vault.fsPath
       )!;
       vault.remote = { url: "git@github.com:kevin/foo.git", type: "git" };
-      config.vaults = engine.vaultsv3;
+      config.vaults = engine.vaults;
       expect(GitUtils.getGithubEditUrl({ note, config, wsRoot })).toEqual(
         "https://github.com/kevin/foo/edit/main/foo.md"
       );

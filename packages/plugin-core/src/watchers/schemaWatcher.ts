@@ -44,7 +44,7 @@ export class SchemaWatcher {
     }
     this.L.info({ ctx, uri });
     const engine = DendronWorkspace.instance().getEngine();
-    const { vaultsv3: vaults, wsRoot } = engine;
+    const { vaults: vaults, wsRoot } = engine;
     const fname = path.basename(uri.fsPath, ".schema.yml");
     const dirname = path.dirname(uri.fsPath);
     const vault = VaultUtils.getVaultByPath({

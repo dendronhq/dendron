@@ -125,7 +125,7 @@ export class RenameNoteV2aCommand extends BaseCommand<
       const vault = VaultUtils.getVaultByNotePathV4({
         fsPath: oldUri.fsPath,
         wsRoot: DendronWorkspace.wsRoot(),
-        vaults: engine.vaultsv3,
+        vaults: engine.vaults,
       });
 
       const resp = await engine.renameNote({

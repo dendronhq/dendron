@@ -30,20 +30,6 @@ export default class ReferenceHoverProvider implements vscode.HoverProvider {
       let foundUri: Uri;
       const engine = DendronWorkspace.instance().getEngine();
 
-      // if (containsNonMdExt(ref)) {
-      //   let fpath: string | undefined;
-      //   const v = _.find(engine.vaultsv3, (v) => {
-      //     fpath = path.join(resolveRelToWSRoot(v.fsPath), ref);
-      //     return fs.existsSync(fpath);
-      //   });
-      //   if (v && fpath) {
-      //     foundUri = Uri.file(fpath);
-      //   } else {
-      //     return new vscode.Hover(
-      //       `"${ref}" is not created yet. Click to create.`,
-      //       hoverRange
-      //     );
-      //   }
       if (containsImageExt(refAtPos.ref)) {
         // check for /assests
         // if (path.isAbsolute(refAtPos.ref)) {

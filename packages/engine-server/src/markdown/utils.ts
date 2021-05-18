@@ -156,7 +156,7 @@ export class MDUtilsV4 {
     if (vaultName) {
       try {
         vault = VaultUtils.getVaultByNameOrThrow({
-          vaults: engine.vaultsv3,
+          vaults: engine.vaults,
           vname: vaultName,
         });
       } catch (err) {

@@ -101,7 +101,7 @@ export class LinkUtils {
             anchorHeader: m.data.anchorHeader,
             vault: m.data.vaultName
               ? VaultUtils.getVaultByName({
-                  vaults: engine.vaultsv3,
+                  vaults: engine.vaults,
                   vname: m.data.vaultName,
                 })
               : undefined,

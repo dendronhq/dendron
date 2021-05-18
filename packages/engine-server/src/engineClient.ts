@@ -63,7 +63,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   public ws: string;
   public fuseEngine: FuseEngine;
   public api: DendronAPI;
-  public vaultsv3: DVault[];
+  public vaults: DVault[];
   public configRoot: string;
   public history?: HistoryService;
   public logger: DLogger;
@@ -114,7 +114,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.schemas = {};
     this.links = [];
     this.fuseEngine = new FuseEngine({});
-    this.vaultsv3 = vaults;
+    this.vaults = vaults;
     this.wsRoot = ws;
     this.ws = ws;
     this.configRoot = this.wsRoot;
@@ -129,17 +129,13 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.hooks = this.config.hooks || { onCreate: [] };
   }
 
-  get vaults(): DVault[] {
-    return this.store.vaultsv3;
-  }
-
   /**
    * Load all nodes
    */
   async init(): Promise<DEngineInitResp> {
     const resp = await this.api.workspaceInit({
       uri: this.ws,
-      config: { vaults: this.vaultsv3 },
+      config: { vaults: this.vaults },
     });
 
     if (resp.error && resp.error.severity !== ERROR_SEVERITY.MINOR) {

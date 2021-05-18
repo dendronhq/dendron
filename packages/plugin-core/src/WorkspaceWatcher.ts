@@ -50,7 +50,7 @@ export class WorkspaceWatcher {
     const now = Time.now().toMillis();
     const vault = VaultUtils.getVaultByNotePathV4({
       fsPath: uri.fsPath,
-      vaults: eclient.vaultsv3,
+      vaults: eclient.vaults,
       wsRoot: DendronWorkspace.wsRoot(),
     });
     const note = NoteUtils.getNoteByFnameV5({

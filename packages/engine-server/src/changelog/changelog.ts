@@ -48,7 +48,7 @@ function canShowDiff(opts: {
   filePath: string;
 }): boolean {
   const { engine, filePath } = opts;
-  const { wsRoot, vaultsv3: vaults } = engine;
+  const { wsRoot, vaults: vaults } = engine;
   return vaults.some((vault) => {
     if (filePath.startsWith(vault.fsPath) && filePath.endsWith(".md")) {
       const fname = path.basename(filePath.split(vault.fsPath)[1], ".md");
@@ -87,7 +87,7 @@ function getLastChangelogCommit(engine: DEngineClientV2): undefined | string {
  * Gets list of notes that were changed + commit hash and save it to file in build/ dir.
  */
 export async function generateChangelog(engine: DEngineClientV2) {
-  const { wsRoot, vaultsv3: vaults } = engine;
+  const { wsRoot, vaults: vaults } = engine;
   const changesPath = ChangelogGenerator.getChangelogDataPath(wsRoot);
   // const lastCommit = getLastChangelogCommit(engine);
   //const commits = await getCommitUpTo(wsRoot, lastCommit);

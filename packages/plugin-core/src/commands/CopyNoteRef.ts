@@ -85,7 +85,7 @@ export class CopyNoteRefCommand extends BasicCommand<
       wsRoot,
       vault,
     });
-    const useVaultPrefix = _.size(getEngine().vaultsv3) > 1;
+    const useVaultPrefix = _.size(getEngine().vaults) > 1;
     const link = await this.buildLink({ note, useVaultPrefix });
     try {
       clipboard.writeText(link);

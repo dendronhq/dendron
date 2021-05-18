@@ -168,7 +168,7 @@ export class VSCodeUtils {
 
   static createWSContext(): vscode.ExtensionContext {
     const pkgRoot = goUpTo(__dirname);
-    return ({
+    return {
       extensionMode: vscode.ExtensionMode.Development,
       logPath: tmpDir().name,
       subscriptions: [] as any[],
@@ -182,13 +182,13 @@ export class VSCodeUtils {
       storagePath: tmpDir().name,
       globalStoragePath: tmpDir().name,
       asAbsolutePath: {} as any, //vscode.Uri.file(wsPath)
-    } as unknown) as vscode.ExtensionContext;
+    } as unknown as vscode.ExtensionContext;
   }
 
   static getOrCreateMockContext(): vscode.ExtensionContext {
     if (!_MOCK_CONTEXT) {
       const pkgRoot = goUpTo(__dirname);
-      _MOCK_CONTEXT = ({
+      _MOCK_CONTEXT = {
         extensionMode: vscode.ExtensionMode.Development,
         logPath: tmpDir().name,
         subscriptions: [],
@@ -202,7 +202,7 @@ export class VSCodeUtils {
         storagePath: tmpDir().name,
         globalStoragePath: tmpDir().name,
         asAbsolutePath: {} as any, //vscode.Uri.file(wsPath)
-      } as unknown) as vscode.ExtensionContext;
+      } as unknown as vscode.ExtensionContext;
     }
     return _MOCK_CONTEXT;
   }
@@ -214,7 +214,7 @@ export class VSCodeUtils {
     const fname = path.basename(txtPath, ".md");
     const vault = VaultUtils.getVaultByNotePathV4({
       wsRoot,
-      vaults: getWS().getEngine().vaultsv3,
+      vaults: getWS().getEngine().vaults,
       fsPath: txtPath,
     });
     return NoteUtils.getNoteByFnameV5({

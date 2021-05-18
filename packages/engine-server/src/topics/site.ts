@@ -36,7 +36,7 @@ export class SiteUtils {
     engine: DEngineClientV2;
   }) {
     const { note, config, engine } = opts;
-    const { wsRoot, vaultsv3: vaults } = engine;
+    const { wsRoot, vaults: vaults } = engine;
 
     // not private note
     if (note.custom?.published === false) {
@@ -121,7 +121,7 @@ export class SiteUtils {
 
   static addSiteOnlyNotes(opts: { engine: DEngineClientV2 }) {
     const { engine } = opts;
-    const vaults = engine.vaultsv3;
+    const vaults = engine.vaults;
     const note = NoteUtils.create({
       vault: vaults[0],
       fname: "403",
@@ -444,7 +444,7 @@ export class SiteUtils {
         }
         const vault = VaultUtils.getVaultByNameOrThrow({
           vname,
-          vaults: engine.vaultsv3,
+          vaults: engine.vaults,
         });
         const maybeNote = NoteUtils.getNoteByFnameV5({
           fname,

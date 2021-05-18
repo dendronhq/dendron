@@ -1,18 +1,27 @@
 import { DMessageSource, DUtils } from "@dendronhq/common-all";
-import { DendronWebViewKey } from "../constants";
+import { DendronViewKey } from "../constants";
 import { Logger } from "../logger";
 import { DendronWorkspace, getWS } from "../workspace";
 
 export class WebViewUtils {
-    static genHTML = ({ title, view}: { title: string, view: DendronWebViewKey}) => {
-        const ws = getWS();
-        const qs = DUtils.querystring.stringify({
-            ws: DendronWorkspace.wsRoot(),
-            port: ws.port,
-        });
-        const src = `${ws.getClientAPIRootUrl()}/vscode/${view}.html?${qs}`;
-        Logger.info({ctx: "genHTML", view, src})
-        return `<!DOCTYPE html>
+  static genHTML = ({
+    title,
+    view,
+  }: {
+    title: string;
+    view: DendronViewKey;
+  }) => {
+    const ws = getWS();
+    const qs = DUtils.querystring.stringify({
+      ws: DendronWorkspace.wsRoot(),
+      port: ws.port,
+    });
+    const src = `${ws.getClientAPIRootUrl()}/vscode/${view.replace(
+      /^dendron\./,
+      ""
+    )}.html?${qs}`;
+    Logger.info({ ctx: "genHTML", view, src });
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -55,6 +64,5 @@ export class WebViewUtils {
 </body>
 
 </html>`;
-
-    };
+  };
 }

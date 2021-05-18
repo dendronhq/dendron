@@ -8,11 +8,12 @@ import {
 } from "@dendronhq/common-all";
 import * as vscode from "vscode";
 import { GotoNoteCommand } from "../commands/GotoNote";
+import { DendronViewKey } from "../constants";
 import { Logger } from "../logger";
 import { DendronWorkspace, getEngine, getWS } from "../workspace";
 
 export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
-  public static readonly viewType = "dendron.treeViewV2";
+  public static readonly viewType = DendronViewKey.TREE_VIEW_V2;
 
   private _view?: vscode.WebviewView;
 

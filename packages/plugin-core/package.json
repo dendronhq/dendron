@@ -45,26 +45,26 @@
         "views": {
             "explorer": [
                 {
-                    "id": "dendronTreeView",
-                    "name": "Dendron Tree View",
-                    "when": "dendron:pluginActive"
-                },
-                {
-                    "id": "dendron.backlinksPanel",
-                    "name": "Backlinks",
-                    "when": "dendron:pluginActive"
-                },
-                {
-                    "type": "webview",
-                    "id": "dendron.treeViewV2",
-                    "name": "Tree View V2",
-                    "when": "dendron:pluginActive"
-                },
-                {
-                    "type": "webview",
                     "id": "dendron.sample",
                     "name": "Sample View",
-                    "when": "dendron:devMode"
+                    "when": "dendron:devMode",
+                    "type": "webview"
+                },
+                {
+                    "id": "dendron.treeView",
+                    "name": "Tree View",
+                    "when": "dendron:pluginActive"
+                },
+                {
+                    "id": "dendron.treeViewV2",
+                    "name": "Tree View V2",
+                    "when": "dendron:devMode",
+                    "type": "webview"
+                },
+                {
+                    "id": "dendron.backlinks",
+                    "name": "Backlinks",
+                    "when": "dendron:pluginActive"
                 }
             ]
         },

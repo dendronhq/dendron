@@ -1,7 +1,12 @@
-const { CONFIG, DENDRON_COMMANDS } = require("../out/constants");
+const {
+  CONFIG,
+  DENDRON_COMMANDS,
+  DENDRON_VIEWS,
+} = require("../out/constants");
 const _ = require("lodash");
 const fs = require("fs-extra");
 const path = require("path");
+const { entries } = require("lodash");
 
 function genEntry(entryDict) {
   const configGenerated = {};
@@ -22,19 +27,22 @@ function updateConfig(configuration) {
 
 function updateCommands(contributes) {
   console.log("update commands...");
-  const commands = _.map(_.filter(DENDRON_COMMANDS, ent => _.isUndefined(ent.shortcut)), (ent) => {
-    const configProps = _.omit(ent, [
-      "key",
-      "keybindings",
-      "group",
-      "skipDocs",
-    ]);
-    const key = ent["key"];
-    return {
-      command: key,
-      ...configProps,
-    };
-  });
+  const commands = _.map(
+    _.filter(DENDRON_COMMANDS, (ent) => _.isUndefined(ent.shortcut)),
+    (ent) => {
+      const configProps = _.omit(ent, [
+        "key",
+        "keybindings",
+        "group",
+        "skipDocs",
+      ]);
+      const key = ent["key"];
+      return {
+        command: key,
+        ...configProps,
+      };
+    }
+  );
   contributes.commands = commands;
 }
 
@@ -54,14 +62,30 @@ function updateKeybindings(contributes) {
   contributes.keybindings = bindings;
 }
 
+function updateViews(contributes) {
+  const out = _.groupBy(DENDRON_VIEWS, "where");
+  contributes.views = {};
+  _.map(out, (views, k) => {
+    contributes.views[k] = _.map(views, ent => _.omit(ent, "where"));
+  });
+}
+
 function main() {
+  let dryRun = false;
   const pkg = fs.readJSONSync("package.json");
   const { contributes } = pkg;
   const { configuration } = contributes;
   const config = updateConfig(configuration);
   updateCommands(contributes);
   updateKeybindings(contributes);
+  updateViews(contributes);
   const commands = DENDRON_COMMANDS;
+  if (dryRun) {
+    // console.log(JSON.stringify(pkg, null, 44));
+    return;
+  }
+
+  // write to docs
   fs.writeJSONSync("package.json", pkg, { spaces: 4 });
   const pathToDocs = path.join("../../../dendron-site");
   if (fs.existsSync(pathToDocs)) {

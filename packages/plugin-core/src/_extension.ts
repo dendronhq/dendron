@@ -163,7 +163,7 @@ async function startServer() {
       port: maybePort,
       logPath: path.join(logPath, "dendron.server.log"),
       nextServerUrl,
-      nextStaticRoot
+      nextStaticRoot,
     });
   }
   return maybePort;
@@ -397,12 +397,6 @@ export async function _activate(context: vscode.ExtensionContext) {
 function toggleViews(enabled: boolean) {
   const ctx = "toggleViews";
   Logger.info({ ctx, msg: `views enabled: ${enabled}` });
-
-  vscode.commands.executeCommand(
-    "setContext",
-    DendronContext.PLUGIN_ACTIVE,
-    enabled
-  );
   vscode.commands.executeCommand(
     "setContext",
     DendronContext.PLUGIN_ACTIVE,

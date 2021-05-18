@@ -31,7 +31,7 @@ import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import {
   CONFIG,
-  DendronWebViewKey,
+  DendronViewKey,
   DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
@@ -132,7 +132,7 @@ export class DendronWorkspace {
   public vaultWatcher?: VaultWatcher;
   public port?: number;
   public workspaceService?: WorkspaceService;
-  protected views: {[key: string]: vscode.WebviewViewProvider}
+  protected views: { [key: string]: vscode.WebviewViewProvider };
 
   static instance(): DendronWorkspace {
     if (!_DendronWorkspace) {
@@ -254,9 +254,8 @@ export class DendronWorkspace {
       version = NodeJSUtils.getVersionFromPkg();
     } else {
       try {
-        const dendronExtension = vscode.extensions.getExtension(
-          extensionQualifiedId
-        )!;
+        const dendronExtension =
+          vscode.extensions.getExtension(extensionQualifiedId)!;
         version = dendronExtension.packageJSON.version;
       } catch (err) {
         version = NodeJSUtils.getVersionFromPkg();
@@ -393,11 +392,11 @@ export class DendronWorkspace {
     }));
   }
 
-  getWebView(key: DendronWebViewKey) {
+  getWebView(key: DendronViewKey) {
     return this.views[key];
   }
 
-  setWebView(key: DendronWebViewKey, view: vscode.WebviewViewProvider) {
+  setWebView(key: DendronViewKey, view: vscode.WebviewViewProvider) {
     this.views[key] = view;
   }
 
@@ -441,7 +440,7 @@ export class DendronWorkspace {
           async () => await backlinksTreeDataProvider.refresh()
         );
         context.subscriptions.push(
-          vscode.window.createTreeView("dendron.backlinksPanel", {
+          vscode.window.createTreeView(DendronViewKey.BACKLINKS, {
             treeDataProvider: backlinksTreeDataProvider,
             showCollapseAll: true,
           })

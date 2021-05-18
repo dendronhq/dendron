@@ -6,12 +6,44 @@ export const DEFAULT_LEGACY_VAULT_NAME = "vault";
 
 export enum DendronContext {
   PLUGIN_ACTIVE = "dendron:pluginActive",
-  DEV_MODE = "dendron:devMode"
+  DEV_MODE = "dendron:devMode",
 }
 
-export enum DendronWebViewKey {
-  SAMPLE_VIEW = "sample",
+export enum DendronViewKey {
+  SAMPLE_VIEW = "dendron.sample",
+  TREE_VIEW = "dendron.treeView",
+  TREE_VIEW_V2 = "dendron.treeViewV2",
+  BACKLINKS = "dendron.backlinks",
 }
+
+export const DENDRON_VIEWS = [
+  {
+    id: DendronViewKey.SAMPLE_VIEW,
+    name: "Sample View",
+    when: DendronContext.DEV_MODE,
+    where: "explorer",
+    type: "webview",
+  },
+  {
+    id: DendronViewKey.TREE_VIEW,
+    name: "Tree View",
+    when: DendronContext.PLUGIN_ACTIVE,
+    where: "explorer",
+  },
+  {
+    id: DendronViewKey.TREE_VIEW_V2,
+    name: "Tree View V2",
+    when: DendronContext.DEV_MODE,
+    where: "explorer",
+    type: "webview",
+  },
+  {
+    id: DendronViewKey.BACKLINKS,
+    name: "Backlinks",
+    when: DendronContext.PLUGIN_ACTIVE,
+    where: "explorer",
+  },
+];
 
 type KeyBinding = {
   key?: string;
@@ -295,8 +327,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.reloadIndex",
     title: `${CMD_PREFIX} Reload Index`,
     group: "hierarchies",
-    desc:
-      "Reload the index. Necessary for Dendron to pick up on schema changes.",
+    desc: "Reload the index. Necessary for Dendron to pick up on schema changes.",
     docLink: "dendron.topic.commands.md",
     docPreview: "",
   },
@@ -447,8 +478,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.upgradeSettings",
     title: `${CMD_PREFIX} Upgrade Settings`,
     group: "workspace",
-    desc:
-      "Upgrade to the latest Dendron settings. You shouldn't need to run this manually. Its run everytime you get a Dendron update.",
+    desc: "Upgrade to the latest Dendron settings. You shouldn't need to run this manually. Its run everytime you get a Dendron update.",
     docLink: "dendron.topic.commands.md",
     docPreview: "",
     skipDocs: true,
@@ -467,8 +497,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.importPod",
     title: `${CMD_PREFIX} Import Pod`,
     group: "pods",
-    desc:
-      "Import notes from an external data source. Currently, only the local file system is supported",
+    desc: "Import notes from an external data source. Currently, only the local file system is supported",
     docLink: "dendron.topic.pod.md",
     docPreview: "",
   },
@@ -476,8 +505,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.exportPod",
     title: `${CMD_PREFIX} Export Pod`,
     group: "pods",
-    desc:
-      "Export notes to an external data source. Currently only JSON is supported. ",
+    desc: "Export notes to an external data source. Currently only JSON is supported. ",
     docLink: "dendron.topic.pod.md",
     docPreview: `<a href="https://www.loom.com/share/d49e5f4155af485cadc9cd810b6cab28"> <img src="https://cdn.loom.com/sessions/thumbnails/d49e5f4155af485cadc9cd810b6cab28-with-play.gif"> </a>`,
   },
@@ -517,8 +545,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Copy Note URL`,
     group: "pods",
     desc: "Get URL of current note from published site",
-    docs:
-      "If you highlight a header, will copy the url with the header set as the anchor",
+    docs: "If you highlight a header, will copy the url with the header set as the anchor",
     docLink: "",
     docPreview: `![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/notes.copy-url.gif)`,
     keybindings: {
@@ -609,8 +636,7 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     key: "dendron.showHelp",
     title: `${CMD_PREFIX} Show Help`,
     group: "workspace",
-    desc:
-      "Dendron will open your current browser to the [[cheatsheet|dendron.cheatsheet]] page. ",
+    desc: "Dendron will open your current browser to the [[cheatsheet|dendron.cheatsheet]] page. ",
     docLink: "dendron.topic.commands.md",
     docPreview: `![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.help.gif)`,
   },

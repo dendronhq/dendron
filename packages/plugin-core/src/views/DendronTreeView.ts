@@ -17,7 +17,7 @@ import vscode, {
   window,
 } from "vscode";
 import { GotoNoteCommandOpts } from "../commands/GotoNote";
-import { DENDRON_COMMANDS, ICONS } from "../constants";
+import { DendronViewKey, DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
 import { DendronWorkspace, getEngine, getWS } from "../workspace";
 import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";
@@ -81,11 +81,10 @@ export class TreeNote extends vscode.TreeItem {
 }
 
 export class EngineNoteProvider implements vscode.TreeDataProvider<string> {
-  private _onDidChangeTreeData: vscode.EventEmitter<
-    string | undefined | void
-  > = new vscode.EventEmitter<string | undefined | void>();
-  readonly onDidChangeTreeData: vscode.Event<string | undefined | void> = this
-    ._onDidChangeTreeData.event;
+  private _onDidChangeTreeData: vscode.EventEmitter<string | undefined | void> =
+    new vscode.EventEmitter<string | undefined | void>();
+  readonly onDidChangeTreeData: vscode.Event<string | undefined | void> =
+    this._onDidChangeTreeData.event;
   public tree: { [key: string]: TreeNote } = {};
   public active: string | undefined;
 
@@ -178,7 +177,7 @@ export class DendronTreeView {
           const ws = DendronWorkspace.instance();
           const treeDataProvider = new EngineNoteProvider();
           await treeDataProvider.getChildren();
-          const treeView = window.createTreeView("dendronTreeView", {
+          const treeView = window.createTreeView(DendronViewKey.TREE_VIEW, {
             treeDataProvider,
             showCollapseAll: true,
           });

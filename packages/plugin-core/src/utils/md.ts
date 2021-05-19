@@ -238,7 +238,7 @@ export const getReferenceAtPosition = (
 
   return {
     // If ref is missing, it's implicitly the current file
-    ref: ref ? ref : document.fileName,
+    ref: ref ? ref : NoteUtils.uri2Fname(document.uri),
     label,
     range,
     anchor,

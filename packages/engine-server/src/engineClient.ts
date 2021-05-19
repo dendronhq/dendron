@@ -141,7 +141,6 @@ export class DendronEngineClient implements DEngineClient {
     if (resp.error && resp.error.severity !== ERROR_SEVERITY.MINOR) {
       return {
         error: resp.error,
-        data: { notes: {}, schemas: {} },
       };
     }
     if (!resp.data) {
@@ -156,7 +155,13 @@ export class DendronEngineClient implements DEngineClient {
     this.store.schemas = schemas;
     return {
       error: resp.error,
-      data: { notes, schemas },
+      data: {
+        notes,
+        schemas,
+        config: this.config,
+        wsRoot: this.wsRoot,
+        vaults: this.vaults,
+      },
     };
   }
 
@@ -329,7 +334,13 @@ export class DendronEngineClient implements DEngineClient {
     await this.fuseEngine.updateSchemaIndex(schemas);
     return {
       error: resp.error,
-      data: { notes, schemas },
+      data: {
+        notes,
+        schemas,
+        vaults: this.vaults,
+        wsRoot: this.wsRoot,
+        config: this.config,
+      },
     };
   }
 

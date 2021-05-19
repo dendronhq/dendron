@@ -1,5 +1,9 @@
 import { Logger } from "@aws-amplify/core";
-import { DendronApiV2, NotePropsDict } from "@dendronhq/common-all";
+import {
+  DendronApiV2,
+  DEngineInitPayload,
+  NotePropsDict,
+} from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
 
@@ -19,38 +23,45 @@ export const initNotes = createAsyncThunk(
     logger.info({ state: "pre:workspaceSync" });
     const resp = await api.workspaceSync({ ws });
     logger.info({ state: "post:workspaceSync" });
-    if (resp.error || _.isUndefined(resp.data)) {
+    const data = resp.data;
+    if (resp.error || _.isUndefined(data)) {
       dispatch(setError(resp.error));
       return resp;
     }
     logger.info({ state: "pre:setNotes" });
-    dispatch(setNotes(resp.data.notes));
+    dispatch(setFromInit(data));
     logger.info({ state: "post:setNotes" });
-    resp.data.notes;
     return resp;
   }
 );
 
 export type InitNoteOpts = Parameters<typeof initNotes>[0];
 
-type InitialState = {
-  notes: NotePropsDict;
+type InitialState = InitializedState;
+type InitializedState = {
   error: any;
   loading: "idle" | "pending" | "fulfilled";
   currentRequestId: string | undefined;
-};
+} & Partial<DEngineInitPayload>;
 
-export type EngineState = InitialState;
+export type EngineState = InitializedState;
 export const engineSlice = createSlice({
   name: "engine",
   initialState: {
     loading: "idle" as const,
-    currentRequestId: undefined,
-    error: null,
     notes: {},
     schemas: {},
+    error: null,
   } as InitialState,
   reducers: {
+    setFromInit: (state, action: PayloadAction<DEngineInitPayload>) => {
+      const { notes, wsRoot, schemas, vaults, config } = action.payload;
+      state.notes = notes;
+      state.wsRoot = wsRoot;
+      state.schemas = schemas;
+      state.vaults = vaults;
+      state.config = config;
+    },
     setNotes: (state, action: PayloadAction<NotePropsDict>) => {
       state.notes = action.payload;
     },
@@ -84,8 +95,12 @@ export const engineSlice = createSlice({
 
 export class EngineSliceUtils {
   static hasInitialized(engine: InitialState) {
-    return engine.loading === "idle" && !_.isEmpty(engine.notes);
+    return (
+      engine.loading === "idle" &&
+      !_.isUndefined(engine.notes) &&
+      !_.isUndefined(engine.vaults)
+    );
   }
 }
-export const { setNotes, setError } = engineSlice.actions;
+export const { setNotes, setError, setFromInit } = engineSlice.actions;
 export const reducer = engineSlice.reducer;

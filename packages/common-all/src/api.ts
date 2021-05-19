@@ -2,32 +2,31 @@ import axios, { AxiosInstance } from "axios";
 import _ from "lodash";
 import * as querystring from "qs";
 import {
-  DVault,
-  DEngineQuery,
-  GetNoteOptsV2,
-  RenameNoteOpts,
-  NoteProps,
-  EngineUpdateNodesOptsV2,
-  DNodeProps,
-  EngineWriteOptsV2,
-  EngineDeleteOptsV2,
   BulkAddNoteOpts,
-  SchemaModuleProps,
-  NotePropsDict,
-  SchemaModuleDict,
-  GetNotePayload,
-  RenameNotePayload,
-  EngineDeleteNotePayload,
-  DEngineDeleteSchemaPayload,
   ConfigGetPayload,
   ConfigWriteOpts,
-  RespV2,
-  WriteNoteResp,
-  RespRequired,
+  DEngineDeleteSchemaPayload,
+  DEngineQuery,
+  DNodeProps,
+  DVault,
+  EngineDeleteNotePayload,
+  EngineDeleteOptsV2,
   EngineInfoResp,
   EngineQueryNoteResp,
+  EngineUpdateNodesOptsV2,
+  EngineWriteOptsV2,
+  GetNoteOptsV2,
+  GetNotePayload,
+  NoteProps,
+  RenameNoteOpts,
+  RenameNotePayload,
+  RespRequired,
+  RespV2,
+  SchemaModuleProps,
+  WriteNoteResp,
 } from ".";
 import { DendronError } from "./error";
+import { DEngineInitPayload } from "./types";
 
 // === Types
 
@@ -152,10 +151,7 @@ export type SchemaWriteRequest = {
 export type SchemaUpdateRequest = SchemaWriteRequest;
 
 // --- Payload
-export type InitializePayload = APIPayload<{
-  notes: NotePropsDict;
-  schemas: SchemaModuleDict;
-}>;
+export type InitializePayload = APIPayload<DEngineInitPayload>;
 
 export type WorkspaceSyncPayload = InitializePayload;
 export type WorkspaceListPayload = APIPayload<{ workspaces: string[] }>;

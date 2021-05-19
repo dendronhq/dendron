@@ -18,6 +18,7 @@ import {
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
   ERROR_SEVERITY,
+  ERROR_STATUS,
   GetNoteOptsV2,
   GetNotePayload,
   IDendronError,
@@ -144,6 +145,14 @@ export class DendronEngineV2 implements DEngine {
   async init(): Promise<DEngineInitResp> {
     try {
       const { data, error: storeError } = await this.store.init();
+      if (_.isUndefined(data)) {
+        return {
+          error: DendronError.createFromStatus({
+            status: ERROR_STATUS.UNKNOWN,
+            severity: ERROR_SEVERITY.FATAL,
+          }),
+        };
+      }
       const { notes, schemas } = data;
       this.updateIndex("note");
       this.updateIndex("schema");
@@ -178,7 +187,13 @@ export class DendronEngineV2 implements DEngine {
       this.logger.info({ ctx: "init:ext", error, storeError, hookErrors });
       return {
         error,
-        data: { notes, schemas },
+        data: {
+          notes,
+          schemas,
+          wsRoot: this.wsRoot,
+          vaults: this.vaults,
+          config: this.config,
+        },
       };
     } catch (error) {
       const { message, stack, status } = error;
@@ -190,10 +205,6 @@ export class DendronEngineV2 implements DEngine {
           status,
           severity: ERROR_SEVERITY.FATAL,
         }),
-        data: {
-          notes: {},
-          schemas: {},
-        },
       };
     }
   }
@@ -252,10 +263,6 @@ export class DendronEngineV2 implements DEngine {
       // };
     } catch (err) {
       return {
-        data: {
-          notes: {},
-          schemas: {},
-        },
         error: err,
       };
     }

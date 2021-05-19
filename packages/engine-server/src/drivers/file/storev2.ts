@@ -124,7 +124,16 @@ export class FileStorage implements DStore {
       });
 
       const { notes, schemas } = this;
-      return { data: { notes, schemas }, error };
+      return {
+        data: {
+          notes,
+          schemas,
+          wsRoot: this.wsRoot,
+          config: this.config,
+          vaults: this.vaults,
+        },
+        error,
+      };
     } catch (err) {
       this.logger.error(err);
       throw err;

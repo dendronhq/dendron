@@ -1,13 +1,12 @@
 import {
   Box,
   Button,
+  Center,
   Grid,
   Heading,
-  Image,
-  Text,
   Link,
+  Text,
   VStack,
-  Center,
 } from "@chakra-ui/react";
 import _ from "lodash";
 import Head from "next/head";

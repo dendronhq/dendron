@@ -209,6 +209,9 @@ export type EngineWriteOptsV2 = {
 export type DEngineInitPayload = {
   notes: NotePropsDict;
   schemas: SchemaModuleDict;
+  wsRoot: string;
+  vaults: DVault[];
+  config: DendronConfig;
 };
 export type RenameNoteOpts = {
   oldLoc: DNoteLoc;
@@ -273,7 +276,7 @@ export type DCommonMethods = {
 
 // --- Engine
 
-export type DEngineInitResp = Required<RespV2<DEngineInitPayload>>;
+export type DEngineInitResp = RespV2<DEngineInitPayload>;
 export type EngineDeleteNotePayload = NoteChangeEntry[];
 // TODO: KLUDGE
 export type DEngineDeleteSchemaPayload = DEngineInitPayload;
@@ -340,6 +343,9 @@ export type DEngine = DCommonProps &
     getConfig: () => Promise<RespV2<ConfigGetPayload>>;
   };
 
+/**
+ * Implements the engine interface but has no backend store
+ */
 export type DEngineClient = Omit<DEngine, "store">;
 
 export type DStore = DCommonProps &

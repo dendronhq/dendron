@@ -46,7 +46,7 @@ export type DNoteAnchor = {
   /**
    * In the future, we could have ID based anchors
    */
-  type: "header";
+  type: "header" | "block";
   value: string;
 };
 

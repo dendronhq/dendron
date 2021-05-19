@@ -66,10 +66,10 @@ function attachParser(proc: Unified.Processor) {
 function attachCompiler(proc: Unified.Processor, _opts?: CompilerOpts) {
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
-  let { dest } = MDUtilsV4.getDendronData(proc);
 
   if (visitors) {
     visitors.blockAnchor = function (node: BlockAnchor) {
+      const { dest } = MDUtilsV4.getDendronData(proc);
       switch (dest) {
         case DendronASTDest.MD_DENDRON:
         case DendronASTDest.MD_REGULAR:

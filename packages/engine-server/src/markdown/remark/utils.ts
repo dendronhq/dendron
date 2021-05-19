@@ -17,6 +17,7 @@ import { selectAll } from "unist-util-select";
 import { VFile } from "vfile";
 import { normalizev2 } from "../../utils";
 import {
+  BlockAnchor,
   DendronASTDest,
   DendronASTRoot,
   DendronASTTypes,
@@ -27,6 +28,7 @@ import {
 import { MDUtilsV4 } from "../utils";
 const toString = require("mdast-util-to-string");
 import * as mdastBuilder from "mdast-builder";
+import { blockAnchors } from "./blockAnchors";
 export { mdastBuilder };
 
 export const ALIAS_DIVIDER = "|";
@@ -252,6 +254,12 @@ export class RemarkUtils {
     let out = remark.parse(content);
     let out2: Heading[] = selectAll("heading", out) as Heading[];
     return out2;
+  }
+
+  static findBlockAnchors(content: string): BlockAnchor[] {
+    const parser = MDUtilsV4.remark().use(blockAnchors);
+    const parsed = parser.parse(content);
+    return selectAll("blockAnchor", parsed) as BlockAnchor[];
   }
 
   static findIndex(array: Node[], fn: any) {

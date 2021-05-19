@@ -255,9 +255,20 @@ export const parseRef = (rawRef: string): RefT => {
   return {
     label: alias ? alias : "",
     ref: value,
-    anchor: anchorHeader ? { type: "header", value: anchorHeader } : undefined,
+    anchor: parseAnchor(anchorHeader),
     vaultName,
   };
+};
+
+export const parseAnchor = (anchorValue?: string): DNoteAnchor | undefined => {
+  // If undefined or empty string
+  if (!anchorValue) return undefined;
+
+  if (anchorValue[0] === "^") {
+    return { type: "block", value: anchorValue.slice(1) };
+  } else {
+    return { type: "header", value: anchorValue };
+  }
 };
 
 export const containsUnknownExt = (pathParam: string): boolean =>

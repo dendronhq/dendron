@@ -6,12 +6,18 @@ import {
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { Heading, matchWikiLink, RemarkUtils } from "@dendronhq/engine-server";
+import {
+  BlockAnchor,
+  Heading,
+  matchWikiLink,
+  RemarkUtils,
+} from "@dendronhq/engine-server";
 import _ from "lodash";
 import { TextEditor, Position, Selection, Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
+import { parseAnchor } from "../utils/md";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -25,19 +31,31 @@ export { CommandOpts as GotoNoteCommandOpts };
 
 type CommandOutput = { note: NoteProps; pos?: Position } | undefined;
 
-export const findHeaderPos = (opts: { anchor: string; text: string }) => {
+export const findAnchorPos = (opts: { anchor: DNoteAnchor; text: string }) => {
   const { anchor, text } = opts;
-  const anchorSlug = getSlugger().slug(anchor);
-  // TODO: optimize by doing this on startup
-  const headers = RemarkUtils.findHeaders(text);
-  const headerMatch: Heading | undefined = _.find(headers, (h) => {
-    return getSlugger().slug(h.children[0].value as string) === anchorSlug;
-  });
-  if (headerMatch) {
-    const line = (headerMatch.position?.start.line as number) - 1;
-    const pos = new Position(line, 0);
-    return pos;
+  let match: Heading | BlockAnchor | undefined = undefined;
+
+  if (anchor.type === "block") {
+    // Anchor leads to a block anchor
+    // TODO: optimize by doing this on startup
+    const blockAnchors = RemarkUtils.findBlockAnchors(text);
+    match = _.find(blockAnchors, (b) => {
+      return b.id == anchor.value;
+    });
+  } else {
+    const anchorSlug = getSlugger().slug(anchor.value);
+    // TODO: optimize by doing this on startup
+    const headers = RemarkUtils.findHeaders(text);
+    match = _.find(headers, (h) => {
+      return getSlugger().slug(h.children[0].value as string) === anchorSlug;
+    });
   }
+
+  if (match && match.position) {
+    const line = match.position.start.line - 1;
+    return new Position(line, 0);
+  }
+
   return new Position(0, 0);
 };
 
@@ -102,12 +120,8 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
           vname: maybeLink.vaultName,
         });
       }
-      if (maybeLink.anchorHeader) {
-        opts.anchor = {
-          type: "header",
-          value: maybeLink.anchorHeader,
-        };
-      }
+      if (maybeLink.anchorHeader)
+        opts.anchor = parseAnchor(maybeLink.anchorHeader);
       // check if note exist in a different vault
       const notes = NoteUtils.getNotesByFname({
         fname: qs,
@@ -147,7 +161,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         this.L.info({ ctx, opts, msg: "exit" });
         if (opts.anchor && editor) {
           const text = editor.document.getText();
-          const pos = findHeaderPos({ anchor: opts.anchor.value, text });
+          const pos = findAnchorPos({ anchor: opts.anchor, text });
           editor.selection = new Selection(pos, pos);
           editor.revealRange(editor.selection);
         }

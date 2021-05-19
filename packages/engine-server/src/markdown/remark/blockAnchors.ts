@@ -6,8 +6,8 @@ import { MDUtilsV4 } from "../utils";
 
 // Letters, digits, dashes, and underscores.
 // The underscores are an extension over Obsidian.
-export const LINK_REGEX = /^\^([\w-]+)$/;
-export const LINK_REGEX_LOOSE = /\^([\w-]+)/;
+export const BLOCK_LINK_REGEX = /^\^([\w-]+)$/;
+export const BLOCK_LINK_REGEX_LOOSE = /\^([\w-]+)/;
 
 /**
  *
@@ -19,7 +19,9 @@ export const matchBlockAnchor = (
   text: string,
   matchLoose: boolean = true
 ): string | undefined => {
-  const match = (matchLoose ? LINK_REGEX_LOOSE : LINK_REGEX).exec(text);
+  const match = (matchLoose ? BLOCK_LINK_REGEX_LOOSE : BLOCK_LINK_REGEX).exec(
+    text
+  );
   if (match && match.length == 1) return match[1];
   return undefined;
 };
@@ -44,7 +46,7 @@ function attachParser(proc: Unified.Processor) {
   }
 
   function inlineTokenizer(eat: Eat, value: string) {
-    const match = LINK_REGEX.exec(value);
+    const match = BLOCK_LINK_REGEX.exec(value);
     if (match) {
       return eat(match[0])({
         type: "blockAnchor",

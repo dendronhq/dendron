@@ -31,7 +31,7 @@ function genDendronData(opts?: Partial<DendronASTData>): DendronASTData {
  * @param indices Left-to-right indexes for children, e.g. first index is for the root, second is for the child of the root...
  * @returns Requested child. Note that this function has no way of checking types, so the child you get might not be of the right type.
  */
-function getDescendentNode<Child extends DendronASTNode>(
+function getDescendantNode<Child extends DendronASTNode>(
   node: UnistNode,
   ...indices: number[]
 ): Child {
@@ -39,14 +39,13 @@ function getDescendentNode<Child extends DendronASTNode>(
   if (_.isUndefined(index)) return node as Child;
   expect(node).toHaveProperty("children");
   expect(node.children).toHaveProperty("length");
-  // @ts-ignore
-  expect(node.children.length).toBeGreaterThanOrEqual(index);
-  // @ts-ignore
-  return getDescendentNode<Child>(node.children[index], ...indices);
+  const children = node.children as UnistNode[];
+  expect(children.length).toBeGreaterThanOrEqual(index);
+  return getDescendantNode<Child>(children[index], ...indices);
 }
 
 function getBlockAnchor(node: UnistNode): BlockAnchor {
-  return getDescendentNode<BlockAnchor>(node, 0, 0);
+  return getDescendantNode<BlockAnchor>(node, 0, 0);
 }
 
 describe("blockAnchors", () => {
@@ -76,19 +75,17 @@ describe("blockAnchors", () => {
       const resp = proc(engine, genDendronData(dendronData)).parse(
         "^block-id Lorem ipsum"
       );
-      expect(getDescendentNode(resp, 0, 0).type).toEqual("text");
-      // @ts-ignore
-      expect(resp.children[0].children.length).toEqual(1); // text only, nothing else
+      expect(getDescendantNode(resp, 0, 0).type).toEqual("text");
+      expect(getDescendantNode(resp, 0).children.length).toEqual(1); // text only, nothing else
     });
 
     test("parses anchors at the end of the line", () => {
       const resp = proc(engine, genDendronData(dendronData)).parse(
         "Lorem ipsum ^block-id"
       );
-      // @ts-ignore
-      const text = getDescendentNode(resp, 0, 0);
+      const text = getDescendantNode(resp, 0, 0);
       expect(text.type).toEqual("text");
-      const anchor = getDescendentNode<BlockAnchor>(resp, 0, 1);
+      const anchor = getDescendantNode<BlockAnchor>(resp, 0, 1);
       expect(anchor.type).toEqual("blockAnchor");
       expect(anchor.id).toEqual("block-id");
     });

@@ -141,13 +141,11 @@ export class LinkUtils {
     };
   }
 
-  /**Either value or anchorHeader will always be present if the function did not
-   * return null. A missing value means that the file containing this link is
-   * the value.
+  /** Either value or anchorHeader will always be present if the function did not
+   *  return null. A missing value means that the file containing this link is
+   *  the value.
    */
-  static parseLinkV2(
-    linkString: string
-  ):
+  static parseLinkV2(linkString: string):
     | {
         alias?: string;
         value: string;

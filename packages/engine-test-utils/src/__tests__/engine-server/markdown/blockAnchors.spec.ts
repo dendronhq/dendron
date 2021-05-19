@@ -1,7 +1,7 @@
 import {
   DendronASTData,
   DendronASTDest,
-  DEngineClientV2,
+  DEngineClient,
   MDUtilsV4,
   UnistNode,
   BlockAnchor,
@@ -12,7 +12,7 @@ import {
 import _ from "lodash";
 
 function proc(
-  engine: DEngineClientV2,
+  engine: DEngineClient,
   dendron: DendronASTData,
   opts?: BlockAnchorOpts
 ) {

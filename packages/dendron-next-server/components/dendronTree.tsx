@@ -1,4 +1,4 @@
-import { SchemaPropsV2 } from "@dendronhq/common-all";
+import { SchemaProps } from "@dendronhq/common-all";
 import { Button } from "@chakra-ui/react";
 import _ from "lodash";
 import dynamic from "next/dynamic";
@@ -14,7 +14,7 @@ const Tree = dynamic(
 );
 
 type SchemaTreeItem = ReactD3TreeItem &
-  Omit<Partial<SchemaPropsV2>, "children">;
+  Omit<Partial<SchemaProps>, "children">;
 
 const myTreeData = [
   {

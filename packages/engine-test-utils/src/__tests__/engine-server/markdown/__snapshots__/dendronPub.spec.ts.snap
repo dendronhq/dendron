@@ -2,17 +2,14 @@
 
 exports[`dendronPub no publish basic 1`] = `
 VFile {
-  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
 <p><a data-toggle=\\"popover\\" title=\\"This page has not yet sprouted\\" style=\\"cursor: pointer\\" data-content=\\"<a href=&#x22;https://dendron.so/&#x22;>Dendron</a> (the tool used to generate this site) lets authors selective publish content. You will see this page whenever you click on a link to an unpublished page
 
 <img src=&#x27;https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/not-sprouted.png&#x27;></img>\\">an alias</a></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
 <ol>
-<li><a data-toggle=\\"popover\\" title=\\"This page has not yet sprouted\\" style=\\"cursor: pointer\\" data-content=\\"<a href=&#x22;https://dendron.so/&#x22;>Dendron</a> (the tool used to generate this site) lets authors selective publish content. You will see this page whenever you click on a link to an unpublished page
-
-<img src=&#x27;https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/not-sprouted.png&#x27;></img>\\">Bar</a></li>
-<li><a href=\\"foo.html\\">Foo</a></li>
+<li><a href=\\"foo.ch1.html\\">Ch1</a></li>
 </ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
@@ -82,7 +79,7 @@ VFile {
 
 exports[`dendronPub prefix imagePrefix 1`] = `
 VFile {
-  "contents": "# Root
+  "contents": "# Foo
 
 ![alt-text](/bond/image-url.jpg)
 
@@ -90,8 +87,7 @@ VFile {
 
 ## Children
 
-1. [Bar](bar.html)
-2. [Foo](foo.html)
+1. [Ch1](foo.ch1.html)
 
 ",
   "cwd": "<PROJECT_ROOT>",
@@ -103,7 +99,7 @@ VFile {
 
 exports[`dendronPub prefix imagePrefix with forward slash 1`] = `
 VFile {
-  "contents": "# Root
+  "contents": "# Foo
 
 ![alt-text](/bond/image-url.jpg)
 
@@ -111,8 +107,7 @@ VFile {
 
 ## Children
 
-1. [Bar](bar.html)
-2. [Foo](foo.html)
+1. [Ch1](foo.ch1.html)
 
 ",
   "cwd": "<PROJECT_ROOT>",

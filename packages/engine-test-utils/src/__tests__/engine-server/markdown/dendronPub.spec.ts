@@ -32,7 +32,7 @@ describe("dendronPub", () => {
       const out = proc(
         engine,
         {
-          fname: "placeholder.md",
+          fname: "foo",
           dest: DendronASTDest.HTML,
           vault: vaults[0],
           config: engine.config,
@@ -50,7 +50,7 @@ describe("dendronPub", () => {
         const out = proc(
           engine,
           {
-            fname: "placeholder.md",
+            fname: "foo",
             dest: DendronASTDest.HTML,
             vault: vaults[0],
             config: engine.config,
@@ -77,7 +77,7 @@ describe("dendronPub", () => {
           proc: proc(
             engine,
             {
-              fname: "placeholder.md",
+              fname: "foo",
               dest: DendronASTDest.HTML,
               vault: vaults[0],
               config,

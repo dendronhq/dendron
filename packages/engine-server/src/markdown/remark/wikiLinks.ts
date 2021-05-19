@@ -124,7 +124,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
           );
           if (data.vaultName) {
             const vaultByName = VaultUtils.getVaultByName({
-              vaults: engine.vaultsv3,
+              vaults: engine.vaults,
               vname: data.vaultName,
             });
             if (_.isUndefined(vaultByName)) {
@@ -171,7 +171,7 @@ function attachParser(proc: Unified.Processor) {
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
     if (out.vaultName) {
       const maybeVault = VaultUtils.getVaultByName({
-        vaults: engine.vaultsv3,
+        vaults: engine.vaults,
         vname: out.vaultName,
       });
       if (_.isUndefined(maybeVault)) {

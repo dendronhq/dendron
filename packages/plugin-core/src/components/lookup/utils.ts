@@ -1,6 +1,6 @@
 import {
   DendronError,
-  DEngineClientV2,
+  DEngineClient,
   DNodeProps,
   DNodePropsQuickInputV2,
   DNodeUtils,
@@ -215,9 +215,8 @@ export class PickerUtilsV2 {
         ignoreFocusOut: true,
       }
     );
-    const quickPick = window.createQuickPick<
-      DNodePropsQuickInputV2
-    >() as DendronQuickPickerV2;
+    const quickPick =
+      window.createQuickPick<DNodePropsQuickInputV2>() as DendronQuickPickerV2;
     quickPick.title = title;
     quickPick.nonInteractive = opts.nonInteractive;
     quickPick.placeholder = placeholder;
@@ -452,7 +451,7 @@ export class NotePickerUtils {
     return [...picker.selectedItems];
   }
 
-  static fetchRootResults = (opts: { engine: DEngineClientV2 }) => {
+  static fetchRootResults = (opts: { engine: DEngineClient }) => {
     const { engine } = opts;
     const nodeDict = engine.notes;
     const roots = NoteUtils.getRoots(nodeDict);

@@ -1,7 +1,7 @@
 import {
   DendronConfig,
   DendronError,
-  DEngineClientV2,
+  DEngineClient,
   DNoteLoc,
   DVault,
   GetNoteOpts,
@@ -56,7 +56,7 @@ const toString = require("mdast-util-to-string");
 export { nunjucks };
 
 type ProcOpts = {
-  engine: DEngineClientV2;
+  engine: DEngineClient;
 };
 
 type ProcParseOpts = {
@@ -156,7 +156,7 @@ export class MDUtilsV4 {
     if (vaultName) {
       try {
         vault = VaultUtils.getVaultByNameOrThrow({
-          vaults: engine.vaultsv3,
+          vaults: engine.vaults,
           vname: vaultName,
         });
       } catch (err) {
@@ -178,7 +178,7 @@ export class MDUtilsV4 {
   }
 
   static getEngineFromProc(proc: Unified.Processor) {
-    const engine = proc.data("engine") as DEngineClientV2;
+    const engine = proc.data("engine") as DEngineClient;
     let error: DendronError | undefined;
     if (_.isUndefined(engine) || _.isNull(engine)) {
       error = new DendronError({ message: "engine not defined" });
@@ -198,7 +198,7 @@ export class MDUtilsV4 {
     return procOpts;
   }
 
-  static setEngine(proc: Unified.Processor, engine: DEngineClientV2) {
+  static setEngine(proc: Unified.Processor, engine: DEngineClient) {
     proc.data(DendronProcDataKeys.ENGINE, engine);
   }
 

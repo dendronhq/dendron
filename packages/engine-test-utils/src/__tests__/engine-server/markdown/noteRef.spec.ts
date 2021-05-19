@@ -1,4 +1,4 @@
-import { DEngineClientV2 } from "@dendronhq/common-all";
+import { DEngineClient } from "@dendronhq/common-all";
 import { ENGINE_HOOKS } from "@dendronhq/common-test-utils";
 import {
   DendronASTData,
@@ -12,7 +12,7 @@ import { runEngineTestV5 } from "../../../engine";
 import { genDendronData } from "./utils";
 
 function proc(
-  engine: DEngineClientV2,
+  engine: DEngineClient,
   dendron: DendronASTData,
   opts?: NoteRefsOpts
 ) {

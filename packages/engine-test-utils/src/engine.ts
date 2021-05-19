@@ -1,7 +1,7 @@
 import {
   CleanDendronSiteConfig,
   CONSTANTS,
-  DEngineClientV2,
+  DEngineClient,
   DVault,
   WorkspaceOpts,
 } from "@dendronhq/common-all";
@@ -31,16 +31,16 @@ import path from "path";
 
 export type AsyncCreateEngineFunction = (
   opts: WorkspaceOpts
-) => Promise<DEngineClientV2>;
+) => Promise<DEngineClient>;
 
 /**
  * Create an {@link DendronEngine}
  */
 export async function createEngineFromEngine(opts: WorkspaceOpts) {
-  return engineServerCreateEngine(opts) as DEngineClientV2;
+  return engineServerCreateEngine(opts) as DEngineClient;
 }
 
-export { DEngineClientV2, DVault, WorkspaceOpts };
+export { DEngineClient as DEngineClient, DVault, WorkspaceOpts };
 
 /**
  * Create a server
@@ -135,7 +135,7 @@ export async function runEngineTestV5(
     fs.mkdirSync(path.join(wsRoot, CONSTANTS.DENDRON_HOOKS_BASE));
   }
   await preSetupHook({ wsRoot, vaults });
-  const engine: DEngineClientV2 = await createEngine({ wsRoot, vaults });
+  const engine: DEngineClient = await createEngine({ wsRoot, vaults });
   const start = process.hrtime();
   const initResp = await engine.init();
   const engineInitDuration = getDurationMilliseconds(start);

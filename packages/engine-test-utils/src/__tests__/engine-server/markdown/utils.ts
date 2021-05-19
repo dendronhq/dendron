@@ -1,6 +1,6 @@
 import {
   DendronConfig,
-  DEngineClientV2,
+  DEngineClient,
   DuplicateNoteAction,
   DVault,
   WorkspaceOpts,
@@ -38,7 +38,7 @@ export async function checkNotInVFile(resp: VFile, ...nomatch: string[]) {
 }
 
 export const createProcForTest = (opts: {
-  engine: DEngineClientV2;
+  engine: DEngineClient;
   dest: DendronASTDest;
   vault: DVault;
   useIdAsLink?: boolean;
@@ -171,7 +171,7 @@ export const processText = (opts: { text: string; proc: Processor }) => {
 export const processTextV2 = async (opts: {
   text: string;
   dest: DendronASTDest.HTML;
-  engine: DEngineClientV2;
+  engine: DEngineClient;
   fname: string;
   vault: DVault;
   configOverride?: DendronConfig;

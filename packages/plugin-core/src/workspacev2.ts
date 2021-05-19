@@ -2,7 +2,7 @@ import { DVault, Time } from "@dendronhq/common-all";
 import { createFileWatcher } from "@dendronhq/common-server";
 import {
   DendronEngineClient,
-  DEngineClientV2,
+  DEngineClient,
   getPortFilePath,
   openPortFile,
 } from "@dendronhq/engine-server";
@@ -19,7 +19,7 @@ export type DWorkspaceInitOpts = {
 export class DWorkspace {
   public wsRoot: string;
   public vaults: DVault[];
-  public _engine: DEngineClientV2 | undefined;
+  public _engine: DEngineClient | undefined;
   public port: number | undefined;
   public onReady?: ({ ws }: { ws: DWorkspace }) => Promise<void>;
   public serverPortWatcher?: FSWatcher;
@@ -72,7 +72,7 @@ export class DWorkspace {
     return dendronEngine;
   }
 
-  get engine(): DEngineClientV2 {
+  get engine(): DEngineClient {
     if (!this._engine) {
       throw Error("engine not set");
     }

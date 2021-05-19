@@ -1,7 +1,10 @@
-import { DendronError, setEnv } from "@dendronhq/common-all";
+import {
+  DendronError,
+  error2PlainObject,
+  setEnv
+} from "@dendronhq/common-all";
 import { createLogger } from "@dendronhq/common-server";
 import fs from "fs-extra";
-import _ from "lodash";
 import path from "path";
 import { ExtensionContext, OutputChannel, window, workspace } from "vscode";
 import { CONFIG, DENDRON_CHANNEL_NAME } from "./constants";
@@ -81,6 +84,9 @@ export class Logger {
     _opts?: { show?: boolean }
   ) => {
     if (Logger.cmpLevel(lvl)) {
+      if (payload.error) {
+        payload.error = error2PlainObject(payload.error);
+      }
       let stringMsg = customStringify(payload);
       Logger.logger && Logger.logger[lvl](payload);
       Logger.output?.appendLine(lvl + ": " + stringMsg);

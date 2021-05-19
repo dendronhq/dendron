@@ -23,6 +23,10 @@ export type DendronErrorProps = {
    * Custom status errors
    */
   status?: string;
+  /**
+   * Raw Error object
+   */
+  error?: Error;
 };
 
 export type DendronErrorPlainObj = {
@@ -36,6 +40,7 @@ export class DendronError extends Error implements IDendronError {
   public payload?: string;
   public severity?: ERROR_SEVERITY;
   public code?: number;
+  public error?: Error;
   public message: string;
   isComposite = false;
 
@@ -65,6 +70,7 @@ export class DendronError extends Error implements IDendronError {
     payload,
     severity,
     code,
+    error,
   }: Omit<DendronErrorProps, "name">) {
     super(message);
     this.status = status || "unknown";
@@ -79,6 +85,7 @@ export class DendronError extends Error implements IDendronError {
       this.payload = JSON.stringify(payload || {});
     }
     this.code = code;
+    this.error = error;
   }
 }
 

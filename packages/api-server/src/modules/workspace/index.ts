@@ -47,7 +47,13 @@ export class WorkspaceController {
     }
     const payload: InitializePayload = {
       error,
-      data: { notes, schemas },
+      data: {
+        notes,
+        schemas,
+        config: engine.config,
+        vaults: engine.vaults,
+        wsRoot: engine.wsRoot,
+      },
     };
     return payload;
   }
@@ -57,7 +63,13 @@ export class WorkspaceController {
     const { notes, schemas } = engine;
     return {
       error: null,
-      data: { notes, schemas },
+      data: {
+        notes,
+        schemas,
+        config: engine.config,
+        vaults: engine.vaults,
+        wsRoot: engine.wsRoot,
+      },
     };
   }
 }

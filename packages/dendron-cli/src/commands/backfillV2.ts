@@ -1,8 +1,8 @@
-import { DEngineClientV2, NoteUtils } from "@dendronhq/common-all";
+import { DEngineClient, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { BaseCommand } from "./base";
 
-type CommandOpts = { engine: DEngineClientV2 } & CommonOpts;
+type CommandOpts = { engine: DEngineClient } & CommonOpts;
 
 type CommonOpts = {
   overwriteFields?: string[];

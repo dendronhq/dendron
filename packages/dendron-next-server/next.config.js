@@ -1,42 +1,54 @@
-const {
-  PHASE_DEVELOPMENT_SERVER,
-  PHASE_PRODUCTION_BUILD,
-} = require("next/constants");
-const {} = "./lib/";
 const _ = require("lodash");
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 
 module.exports = (phase) => {
-  // when started in development mode `next dev` or `npm run dev` regardless of the value of STAGING environmental variable
-  const isDev = phase === PHASE_DEVELOPMENT_SERVER;
-  // when `next build` or `npm run build` is used
-  const isProd =
-    phase === PHASE_PRODUCTION_BUILD && process.env.STAGING !== "1";
-  // when `next build` or `npm run build` is used
-  const isStaging =
-    phase === PHASE_PRODUCTION_BUILD && process.env.STAGING === "1";
-
-  console.log(`isDev:${isDev}  isProd:${isProd}   isStaging:${isStaging}`);
-  const CONFIG = ["ENGINE_ENDPOINT_PORT", "REMOTE_API_ENDPOINT"];
-
   const env = {
-    ..._.pick(process.env, CONFIG),
-    STAGE: isDev ? "dev" : "prod",
+    STAGE: process.env.STAGE || "dev",
+    LOCAL: JSON.stringify(process.env["LOCAL"] === 'true')
   };
-
-  // next.config.js object
+  console.log("build env:", env);
   return {
     env,
+    // support the dev server to allow CORS
+    async headers() {
+      return [
+        {
+          source: '/(.*)?',
+          headers: [
+            {
+              key: 'Access-Control-Allow-Origin',
+              value: '*'
+            },
+            {
+              key: 'Access-Control-Allow-Methods',
+              value: 'GET,HEAD,PUT,PATCH,POST,DELETE'
+            },
+          ]
+        }
+      ]
+    },
     webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-      // Note: we provide webpack above so you should not `require` it
-      // Perform customizations to webpack config
       config.plugins.push(new webpack.IgnorePlugin(/\/__tests__\//));
+      if (env.STAGE === 'dev') {
+        config.optimization.minimize = false;
+      }
       config.node = {
         ...config.node,
         fs: "empty",
+        tls: 'empty',
         net: "empty",
         "cross-spawn": "empty",
         child_process: "empty",
       };
+      if (process.env.ANALYZE) {
+        config.plugins.push(
+          new BundleAnalyzerPlugin({
+            analyzerMode: 'server',
+            analyzerPort: isServer ? 8888 : 8889,
+            openAnalyzer: true,
+          })
+        )
+       }
       // Important: return the modified config
       return config;
     },

@@ -1,7 +1,7 @@
 import {
   CONSTANTS,
   DendronError,
-  DEngineClientV2,
+  DEngineClient,
   DLink,
   getSlugger,
   NoteChangeEntry,
@@ -74,7 +74,7 @@ export class LinkUtils {
     engine,
   }: {
     note: NoteProps;
-    engine: DEngineClientV2;
+    engine: DEngineClient;
   }): DLink[] {
     const content = note.body;
     let remark = MDUtilsV4.procParse({
@@ -101,7 +101,7 @@ export class LinkUtils {
             anchorHeader: m.data.anchorHeader,
             vault: m.data.vaultName
               ? VaultUtils.getVaultByName({
-                  vaults: engine.vaultsv3,
+                  vaults: engine.vaults,
                   vname: m.data.vaultName,
                 })
               : undefined,

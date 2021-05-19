@@ -24,12 +24,12 @@ export enum NoteCommands {
 export { CommandOpts as NoteCLICommandOpts };
 
 function checkQueryAndVault(opts: CommandOpts) {
-  const vaults = opts.engine.vaultsv3;
+  const vaults = opts.engine.vaults;
   let vault: DVault;
   if (!opts.query) {
     throw Error("no query found");
   }
-  if (_.size(opts.engine.vaultsv3) > 1 && !opts.vault) {
+  if (_.size(opts.engine.vaults) > 1 && !opts.vault) {
     throw Error("need to specify vault");
   } else {
     vault = opts.vault

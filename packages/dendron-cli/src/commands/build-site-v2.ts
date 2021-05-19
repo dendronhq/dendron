@@ -1,4 +1,4 @@
-import { DEngineClientV2, Stage } from "@dendronhq/common-all";
+import { DEngineClient, Stage } from "@dendronhq/common-all";
 import { goUpTo } from "@dendronhq/common-server";
 import { generateChangelog, SiteUtils } from "@dendronhq/engine-server";
 import fs from "fs-extra";
@@ -11,7 +11,7 @@ import { setupEngine, setupEngineArgs } from "./utils";
 type CommandCLIOpts = {
   wsRoot: string;
   port?: number;
-  engine?: DEngineClientV2;
+  engine?: DEngineClient;
   cwd?: string;
   servePort?: number;
   enginePort?: number;
@@ -21,7 +21,7 @@ type CommandCLIOpts = {
   custom11tyPath?: string;
 };
 type CommandOpts = CommandCLIOpts & {
-  engine: DEngineClientV2;
+  engine: DEngineClient;
   compile?: any;
   server: any;
   eleventy?: any;
@@ -106,14 +106,8 @@ export class BuildSiteV2CLICommand extends CLICommand<
     let buildSearch;
     let getEngine;
     if (opts.eleventy) {
-      ({
-        compile,
-        buildNav,
-        copyAssets,
-        buildStyles,
-        buildSearch,
-        getEngine,
-      } = opts.eleventy);
+      ({ compile, buildNav, copyAssets, buildStyles, buildSearch, getEngine } =
+        opts.eleventy);
     } else {
       if (opts.custom11tyPath) {
         ({

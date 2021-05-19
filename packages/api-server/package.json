@@ -33,7 +33,9 @@
     "test:unit": "echo no-op",
     "test:unit:debug": "echo no-op",
     "test:watch": "echo no-op",
-    "start:integ": "cross-env PORT=3005 npx ts-node ./src/start.ts",
+    "start:local:old": "cross-env PORT=3005 LOG_LEVEL=info npx ts-node ./src/start.ts",
+    "start:local": "cross-env PORT=3005 LOG_LEVEL=info nodemon --watch 'src/**/*.ts' lib/start.js",
+    "local:dev:custom": "env AWS_PROFILE=dendron-dev LOCAL=true PORT=3005 LOG_LEVEL=info nodemon --watch 'server/**/*.ts' dist/server/index.js | pino-pretty | tee /tmp/out.txt",
     "start:integ:debug": "cross-env PORT=3005 TS_NODE_LOG_ERROR=1 node --inspect -r ts-node/register ./src/start.ts",
     "start:integ:watch": "cross-env PORT=3005 LOG_DST=../../logs/api-server.log LOG_LEVEL=debug npx nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts'"
   },
@@ -65,7 +67,8 @@
     "klaw": "^3.0.0",
     "lodash": "^4.17.20",
     "morgan": "^1.10.0",
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.4",
+    "querystring": "^0.2.1"
   },
   "nodemonConfig": {
     "watch": [

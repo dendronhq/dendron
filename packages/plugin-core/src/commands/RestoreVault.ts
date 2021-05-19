@@ -58,7 +58,7 @@ export class RestoreVaultCommand extends BaseCommand<
       const { src } = opts;
       const pod = new SnapshotImportPod();
       const engine = DendronWorkspace.instance().getEngine();
-      const vault = engine.vaultsv3[0];
+      const vault = engine.vaults[0];
       const wsRoot = DendronWorkspace.wsRoot() as string;
       if (ws.vaultWatcher) {
         ws.vaultWatcher.pause = true;

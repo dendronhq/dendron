@@ -13,9 +13,8 @@ const plugin: Plugin = function (this: Unified.Processor) {
   const proc = this;
   function transformer(tree: Node): void {
     let root = tree as Root;
-    const { fname, vault, dest, insideNoteRef } = MDUtilsV4.getDendronData(
-      proc
-    );
+    const { fname, vault, dest, insideNoteRef } =
+      MDUtilsV4.getDendronData(proc);
     if (!fname || insideNoteRef) {
       return;
     }
@@ -56,7 +55,7 @@ const plugin: Plugin = function (this: Unified.Processor) {
                       vault: mdLink.from.vault!,
                       wsRoot: engine.wsRoot,
                     }).title +
-                    (engine.vaultsv3.length > 1
+                    (engine.vaults.length > 1
                       ? ` (${VaultUtils.getName(mdLink.from.vault!)})`
                       : ""),
                   vaultName: VaultUtils.getName(mdLink.from.vault!),

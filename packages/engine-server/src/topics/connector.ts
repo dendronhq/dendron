@@ -1,7 +1,7 @@
 import {
   DendronConfig,
   DendronError,
-  DEngineClientV2,
+  DEngineClient,
   DVault,
   Time,
 } from "@dendronhq/common-all";
@@ -36,7 +36,7 @@ export class EngineConnector {
    */
   public wsRoot: string;
   //public vaults: DVault[];
-  public _engine: DEngineClientV2 | undefined;
+  public _engine: DEngineClient | undefined;
   public port: number | undefined;
   public onReady?: ({ ws }: { ws: EngineConnector }) => Promise<void>;
   public serverPortWatcher?: FSWatcher;
@@ -127,7 +127,7 @@ export class EngineConnector {
     }
   }
 
-  get engine(): DEngineClientV2 {
+  get engine(): DEngineClient {
     if (!this._engine) {
       throw Error("engine not set");
     }

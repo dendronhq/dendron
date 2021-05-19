@@ -143,9 +143,10 @@ const MAX_REF_LVL = 3;
 /**
  * Look at links and do initial pass
  */
-function convertNoteRef(
-  opts: ConvertNoteRefOpts
-): { error: DendronError | undefined; data: string | undefined } {
+function convertNoteRef(opts: ConvertNoteRefOpts): {
+  error: DendronError | undefined;
+  data: string | undefined;
+} {
   let data: string | undefined;
   let errors: DendronError[] = [];
   const { link, proc, compilerOpts } = opts;
@@ -154,7 +155,7 @@ function convertNoteRef(
   let { dest, vault, config } = MDUtilsV4.getDendronData(proc);
   if (link.data.vaultName) {
     vault = VaultUtils.getVaultByNameOrThrow({
-      vaults: engine.vaultsv3,
+      vaults: engine.vaults,
       vname: link.data.vaultName,
     })!;
   }
@@ -256,15 +257,11 @@ export function convertNoteRefASTV2(
   const { link, proc, compilerOpts, procOpts } = opts;
   const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
-  let {
-    dest,
-    vault,
-    config,
-    shouldApplyPublishRules,
-  } = MDUtilsV4.getDendronData(proc);
+  let { dest, vault, config, shouldApplyPublishRules } =
+    MDUtilsV4.getDendronData(proc);
   if (link.data.vaultName) {
     vault = VaultUtils.getVaultByNameOrThrow({
-      vaults: engine.vaultsv3,
+      vaults: engine.vaults,
       vname: link.data.vaultName,
     })!;
   }

@@ -3,7 +3,7 @@ import {
   BulkAddNoteOpts,
   DendronConfig,
   DendronError,
-  DEngineClientV2,
+  DEngineClient,
   DEngineDeleteSchemaResp,
   DEngineInitResp,
   DEngineInitSchemaResp,
@@ -73,25 +73,23 @@ export type FileMetaDict = { [key: string]: FileMeta[] };
 // };
 
 export class FileStorage implements DStore {
-  public vaults: string[];
+  public vaults: DVault[];
   public notes: NotePropsDict;
   public schemas: SchemaModuleDict;
   public notesCache: NotesCache;
   public logger: DLogger;
   public links: DLink[];
-  public vaultsv3: DVault[];
   public wsRoot: string;
   public configRoot: string;
   public config: DendronConfig;
-  private engine: DEngineClientV2;
+  private engine: DEngineClient;
 
-  constructor(props: { engine: DEngineClientV2; logger: DLogger }) {
-    const { vaultsv3, wsRoot, config } = props.engine;
+  constructor(props: { engine: DEngineClient; logger: DLogger }) {
+    const { vaults, wsRoot, config } = props.engine;
     const { logger } = props;
     this.wsRoot = wsRoot;
     this.configRoot = wsRoot;
-    this.vaultsv3 = vaultsv3;
-    this.vaults = vaultsv3.map((ent) => ent.fsPath);
+    this.vaults = vaults;
     this.notes = {};
     this.schemas = {};
     this.notesCache = {
@@ -101,7 +99,7 @@ export class FileStorage implements DStore {
     this.links = [];
     this.logger = logger;
     const ctx = "FileStorageV2";
-    this.logger.info({ ctx, wsRoot, vaultsv3, level: this.logger.level });
+    this.logger.info({ ctx, wsRoot, vaults, level: this.logger.level });
     this.config = config;
     this.engine = props.engine;
   }
@@ -126,7 +124,16 @@ export class FileStorage implements DStore {
       });
 
       const { notes, schemas } = this;
-      return { data: { notes, schemas }, error };
+      return {
+        data: {
+          notes,
+          schemas,
+          wsRoot: this.wsRoot,
+          config: this.config,
+          vaults: this.vaults,
+        },
+        error,
+      };
     } catch (err) {
       this.logger.error(err);
       throw err;
@@ -233,7 +240,7 @@ export class FileStorage implements DStore {
     const ctx = "initSchema";
     this.logger.info({ ctx, msg: "enter" });
     const out = await Promise.all(
-      (this.vaultsv3 as DVault[]).map(async (vault) => {
+      (this.vaults as DVault[]).map(async (vault) => {
         return this._initSchema(vault);
       })
     );
@@ -290,7 +297,7 @@ export class FileStorage implements DStore {
     let notesWithLinks: NoteProps[] = [];
     const allNotesCache: NotesCacheAll = {};
     const out = await Promise.all(
-      (this.vaultsv3 as DVault[]).map(async (vault) => {
+      (this.vaults as DVault[]).map(async (vault) => {
         const { notes, cacheUpdates, cache } = await this._initNotes(vault);
         notesWithLinks = notesWithLinks.concat(
           _.filter(notes, (n) => !_.isEmpty(n.links))
@@ -353,9 +360,7 @@ export class FileStorage implements DStore {
     });
   }
 
-  async _initNotes(
-    vault: DVault
-  ): Promise<{
+  async _initNotes(vault: DVault): Promise<{
     notes: NoteProps[];
     cacheUpdates: NotesCacheEntryMap;
     cache: NotesCache;

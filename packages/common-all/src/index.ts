@@ -8,6 +8,7 @@ export * from "./error";
 export * from "./time";
 export * from "./utils";
 export * from "./md";
+export * from "./api";
 export * from "./vault";
 export * from "./user";
 export * from "./analytics";

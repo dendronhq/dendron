@@ -1,4 +1,4 @@
-import { DEngineClientV2, DNoteLoc, DVault } from "@dendronhq/common-all";
+import { DEngineClient, DNoteLoc, DVault } from "@dendronhq/common-all";
 import {
   DendronASTDest,
   MDUtilsV4,
@@ -9,7 +9,7 @@ import { testWithEngine } from "../../../engine";
 import { checkVFile } from "./utils";
 
 function cproc(
-  opts: { engine: DEngineClientV2; vault: DVault } & TransformLinkOpts
+  opts: { engine: DEngineClient; vault: DVault } & TransformLinkOpts
 ) {
   const { engine, vault, from, to } = opts;
   const proc = MDUtilsV4.procFull({

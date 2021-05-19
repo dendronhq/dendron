@@ -1,6 +1,6 @@
 import {
   DendronError,
-  DEngineClientV2,
+  DEngineClient,
   DNodeProps,
   DNodePropsDict,
   DNodePropsQuickInputV2,
@@ -350,9 +350,8 @@ export class LookupProviderV2 {
             wsRoot: DendronWorkspace.wsRoot(),
           });
           if (opts.flavor === "schema") {
-            const smod = DendronWorkspace.instance().getEngine().schemas[
-              selectedItem.id
-            ];
+            const smod =
+              DendronWorkspace.instance().getEngine().schemas[selectedItem.id];
             uri = Uri.file(
               SchemaUtils.getPath({
                 root: vpath,
@@ -829,7 +828,7 @@ export class LookupProviderV2 {
 
   showRootResults(
     flavor: EngineFlavor,
-    engine: DEngineClientV2
+    engine: DEngineClient
   ): DNodePropsQuickInputV2[] {
     let nodeDict: DNodePropsDict;
     let nodes: DNodeProps[];

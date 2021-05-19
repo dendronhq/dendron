@@ -42,7 +42,7 @@ export class PublishPodCLICommand extends CLICommand<
 
   async execute(opts: CommandOpts) {
     const { podClass: PodClass, config, wsRoot, engine, server } = opts;
-    const vaults = engine.vaultsv3;
+    const vaults = engine.vaults;
     const pod = new PodClass() as PublishPod;
     const resp = await pod.execute({ wsRoot, config, engine, vaults });
     if (config.dest === "stdout") {

@@ -6,7 +6,7 @@ import {
 import {
   DendronASTData,
   DendronASTDest,
-  DEngineClientV2,
+  DEngineClient,
   MDUtilsV4,
   UnistNode,
   WikiLinkNoteV4,
@@ -18,7 +18,7 @@ import { runEngineTestV5 } from "../../../engine";
 import { checkVFile, createProcForTest, createProcTests } from "./utils";
 
 function proc(
-  engine: DEngineClientV2,
+  engine: DEngineClient,
   dendron: DendronASTData,
   opts?: WikiLinksOpts
 ) {

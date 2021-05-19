@@ -62,12 +62,14 @@ export class LaunchEngineServerCommand extends CLICommand<
     });
     wsRoot = resolvePath(wsRoot, process.cwd());
     const ws = new WorkspaceService({ wsRoot });
-    const vaults = ws.config.vaults;
+    const {vaults, dev} = ws.config;
     const vaultPaths = vaults.map((v) => resolvePath(v.fsPath, wsRoot));
     const { port: _port, server } = await launchv2({
       port,
       logPath: process.env["LOG_DST"],
       logLevel: (process.env["LOG_LEVEL"] as LogLvl) || "error",
+      nextServerUrl: dev?.nextServerUrl,
+      nextStaticRoot: dev?.nextStaticRoot
     });
     ws.writeMeta({ version: "dendron-cli" });
 

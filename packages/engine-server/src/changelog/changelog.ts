@@ -1,4 +1,4 @@
-import { DEngineClientV2, NoteUtils } from "@dendronhq/common-all";
+import { DEngineClient, NoteUtils } from "@dendronhq/common-all";
 import * as Diff2Html from "diff2html";
 import execa from "execa";
 import fs from "fs-extra";
@@ -44,11 +44,11 @@ async function getLastCommit(wsRoot: string) {
 }
 
 function canShowDiff(opts: {
-  engine: DEngineClientV2;
+  engine: DEngineClient;
   filePath: string;
 }): boolean {
   const { engine, filePath } = opts;
-  const { wsRoot, vaultsv3: vaults } = engine;
+  const { wsRoot, vaults: vaults } = engine;
   return vaults.some((vault) => {
     if (filePath.startsWith(vault.fsPath) && filePath.endsWith(".md")) {
       const fname = path.basename(filePath.split(vault.fsPath)[1], ".md");
@@ -72,7 +72,7 @@ function canShowDiff(opts: {
  * Return undefined if no changes, otherwise string with last commit
  */
 // @ts-ignore
-function getLastChangelogCommit(engine: DEngineClientV2): undefined | string {
+function getLastChangelogCommit(engine: DEngineClient): undefined | string {
   const buildDir = path.join(engine.wsRoot, "build");
   const changesPath = path.join(buildDir, "changes.json");
   if (!fs.existsSync(changesPath)) {
@@ -86,8 +86,8 @@ function getLastChangelogCommit(engine: DEngineClientV2): undefined | string {
 /**
  * Gets list of notes that were changed + commit hash and save it to file in build/ dir.
  */
-export async function generateChangelog(engine: DEngineClientV2) {
-  const { wsRoot, vaultsv3: vaults } = engine;
+export async function generateChangelog(engine: DEngineClient) {
+  const { wsRoot, vaults: vaults } = engine;
   const changesPath = ChangelogGenerator.getChangelogDataPath(wsRoot);
   // const lastCommit = getLastChangelogCommit(engine);
   //const commits = await getCommitUpTo(wsRoot, lastCommit);
@@ -106,10 +106,7 @@ export async function generateChangelog(engine: DEngineClientV2) {
 }
 
 // get files changed/added for a repo for the last commit
-async function getChanges(opts: {
-  commitHash: string;
-  engine: DEngineClientV2;
-}) {
+async function getChanges(opts: { commitHash: string; engine: DEngineClient }) {
   const { engine, commitHash } = opts;
   const { wsRoot } = engine;
   let commitDate: string = "";

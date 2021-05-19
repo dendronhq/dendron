@@ -1,7 +1,9 @@
 import {
   DendronConfig,
-  DEngineClientV2,
+  DendronError,
+  DEngineClient,
   DVault,
+  ERROR_STATUS,
   getStage,
   ResponseCode,
 } from "@dendronhq/common-all";
@@ -29,6 +31,7 @@ import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import {
   CONFIG,
+  DendronViewKey,
   DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
@@ -45,6 +48,8 @@ import { CodeConfigKeys, WorkspaceSettings } from "./types";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
 import { isAnythingSelected } from "./utils/editor";
 import { DendronTreeView } from "./views/DendronTreeView";
+import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
+import { SampleView } from "./views/SampleView";
 import { SchemaWatcher } from "./watchers/schemaWatcher";
 import { WindowWatcher } from "./windowWatcher";
 import { WorkspaceWatcher } from "./WorkspaceWatcher";
@@ -123,9 +128,11 @@ export class DendronWorkspace {
   static _SERVER_CONFIGURATION: Partial<ServerConfiguration>;
 
   public dendronTreeView: DendronTreeView | undefined;
+  public dendronTreeViewV2: DendronTreeViewV2 | undefined;
   public vaultWatcher?: VaultWatcher;
   public port?: number;
   public workspaceService?: WorkspaceService;
+  protected views: { [key: string]: vscode.WebviewViewProvider };
 
   static instance(): DendronWorkspace {
     if (!_DendronWorkspace) {
@@ -173,6 +180,16 @@ export class DendronWorkspace {
         this.dendronTreeView.pause = false;
       }
     }
+  }
+
+  getClientAPIRootUrl() {
+    const port = this.port;
+    if (!port) {
+      throw DendronError.createFromStatus({
+        status: ERROR_STATUS.ENGINE_NOT_SET,
+      });
+    }
+    return `http://localhost:${port}`;
   }
 
   /**
@@ -233,13 +250,12 @@ export class DendronWorkspace {
 
   static version(): string {
     let version: string | undefined;
-    if (VSCodeUtils.isDebuggingExtension()) {
+    if (VSCodeUtils.isDevMode()) {
       version = NodeJSUtils.getVersionFromPkg();
     } else {
       try {
-        const dendronExtension = vscode.extensions.getExtension(
-          extensionQualifiedId
-        )!;
+        const dendronExtension =
+          vscode.extensions.getExtension(extensionQualifiedId)!;
         version = dendronExtension.packageJSON.version;
       } catch (err) {
         version = NodeJSUtils.getVersionFromPkg();
@@ -266,7 +282,7 @@ export class DendronWorkspace {
   public serverWatcher?: vscode.FileSystemWatcher;
   public schemaWatcher?: SchemaWatcher;
   public L: typeof Logger;
-  public _enginev2?: DEngineClientV2;
+  public _enginev2?: DEngineClient;
   private disposableStore: DisposableStore;
 
   static getOrCreate(
@@ -301,6 +317,7 @@ export class DendronWorkspace {
     this.disposableStore = new DisposableStore();
     this._setupCommands();
     this.setupLanguageFeatures(context);
+    this.views = {};
     this.setupViews(context);
     const ctx = "DendronWorkspace";
     this.L.info({ ctx, msg: "initialized" });
@@ -317,6 +334,9 @@ export class DendronWorkspace {
     }
   }
 
+  /**
+   * @remark: We need to get the config from disk because the engine might not be initialized yet
+   */
   get config(): DendronConfig {
     const dendronRoot = getWS().configRoot;
     if (!dendronRoot) {
@@ -372,14 +392,22 @@ export class DendronWorkspace {
     }));
   }
 
-  getEngine(): DEngineClientV2 {
+  getWebView(key: DendronViewKey) {
+    return this.views[key];
+  }
+
+  setWebView(key: DendronViewKey, view: vscode.WebviewViewProvider) {
+    this.views[key] = view;
+  }
+
+  getEngine(): DEngineClient {
     if (!this._enginev2) {
       throw Error("engine not set");
     }
     return this._enginev2;
   }
 
-  setEngine(engine: DEngineClientV2) {
+  setEngine(engine: DEngineClient) {
     this._enginev2 = engine;
   }
 
@@ -387,13 +415,32 @@ export class DendronWorkspace {
     const ctx = "setupViews";
     HistoryService.instance().subscribe("extension", async (event) => {
       if (event.action === "initialized") {
+        Logger.info({ ctx, msg: "init:treeViewV2" });
+        const provider = new DendronTreeViewV2(context.extensionUri);
+        // TODO:
+        const sampleView = new SampleView();
+        context.subscriptions.push(
+          vscode.window.registerWebviewViewProvider(
+            SampleView.viewType,
+            sampleView
+          )
+        );
+
+        context.subscriptions.push(
+          vscode.window.registerWebviewViewProvider(
+            DendronTreeViewV2.viewType,
+            provider
+          )
+        );
+
+        // backlinks
         Logger.info({ ctx, msg: "init:backlinks" });
         const backlinksTreeDataProvider = new BacklinksTreeDataProvider();
         vscode.window.onDidChangeActiveTextEditor(
           async () => await backlinksTreeDataProvider.refresh()
         );
         context.subscriptions.push(
-          vscode.window.createTreeView("dendron.backlinksPanel", {
+          vscode.window.createTreeView(DendronViewKey.BACKLINKS, {
             treeDataProvider: backlinksTreeDataProvider,
             showCollapseAll: true,
           })
@@ -484,7 +531,7 @@ export class DendronWorkspace {
       vscode.commands.registerCommand(
         DENDRON_COMMANDS.RELOAD_INDEX.key,
         async (silent?: boolean) => {
-          const out = await new ReloadIndexCommand().execute();
+          const out = await new ReloadIndexCommand().run();
           if (!silent) {
             vscode.window.showInformationMessage(`finish reload`);
           }
@@ -605,9 +652,7 @@ export class DendronWorkspace {
       );
       return out;
     } catch (err) {
-      vscode.window.showErrorMessage(
-        `error initializing dendron: ${JSON.stringify(err)}`
-      );
+      Logger.error({ error: err });
     }
   }
 

@@ -25,7 +25,7 @@ import fs from "fs-extra";
 import _ from "lodash";
 import path from "path";
 import { DConfig } from "../config";
-import { DEngineClientV2 } from "../types";
+import { DEngineClient } from "../types";
 import { HierarchyUtils, stripLocalOnlyTags } from "../utils";
 const logger = createLogger();
 
@@ -33,10 +33,10 @@ export class SiteUtils {
   static canPublish(opts: {
     note: NoteProps;
     config: DendronConfig;
-    engine: DEngineClientV2;
+    engine: DEngineClient;
   }) {
     const { note, config, engine } = opts;
-    const { wsRoot, vaultsv3: vaults } = engine;
+    const { wsRoot, vaults: vaults } = engine;
 
     // not private note
     if (note.custom?.published === false) {
@@ -80,7 +80,7 @@ export class SiteUtils {
   static isPublished(opts: {
     note: NoteProps;
     config: DendronConfig;
-    engine: DEngineClientV2;
+    engine: DEngineClient;
   }) {
     const { note, config } = opts;
     // check if note is in index
@@ -119,9 +119,9 @@ export class SiteUtils {
     return;
   }
 
-  static addSiteOnlyNotes(opts: { engine: DEngineClientV2 }) {
+  static addSiteOnlyNotes(opts: { engine: DEngineClient }) {
     const { engine } = opts;
-    const vaults = engine.vaultsv3;
+    const vaults = engine.vaults;
     const note = NoteUtils.create({
       vault: vaults[0],
       fname: "403",
@@ -144,7 +144,7 @@ export class SiteUtils {
   }
 
   static async filterByConfig(opts: {
-    engine: DEngineClientV2;
+    engine: DEngineClient;
     config: DendronConfig;
   }): Promise<{ notes: NotePropsDict; domains: NoteProps[] }> {
     const { engine, config } = opts;
@@ -201,7 +201,7 @@ export class SiteUtils {
   static async filterByHiearchy(opts: {
     domain: string;
     config: DendronConfig;
-    engine: DEngineClientV2;
+    engine: DEngineClient;
     navOrder: number;
   }): Promise<{ notes: NotePropsDict; domain: NoteProps } | undefined> {
     const { domain, engine, navOrder, config } = opts;
@@ -412,7 +412,7 @@ export class SiteUtils {
   static handleDup(opts: {
     dupBehavior?: DuplicateNoteBehavior;
     allowStubs?: boolean;
-    engine: DEngineClientV2;
+    engine: DEngineClient;
     fname: string;
     config: DendronConfig;
     noteCandidates: NoteProps[];
@@ -444,7 +444,7 @@ export class SiteUtils {
         }
         const vault = VaultUtils.getVaultByNameOrThrow({
           vname,
-          vaults: engine.vaultsv3,
+          vaults: engine.vaults,
         });
         const maybeNote = NoteUtils.getNoteByFnameV5({
           fname,

@@ -1,5 +1,5 @@
 import {
-  DEngineClientV2,
+  DEngineClient,
   DVault,
   NoteProps,
   NoteUtils,
@@ -22,7 +22,7 @@ export class VaultWatcher {
   public pause: boolean;
   public L = Logger;
   public ws: DendronWorkspace;
-  public engine: DEngineClientV2;
+  public engine: DEngineClient;
 
   constructor(opts: WorkspaceOpts) {
     const { vaults, wsRoot } = opts;
@@ -77,7 +77,7 @@ export class VaultWatcher {
       return;
     }
     const vault = VaultUtils.getVaultByNotePathV4({
-      vaults: eclient.vaultsv3,
+      vaults: eclient.vaults,
       wsRoot: DendronWorkspace.wsRoot(),
       fsPath: uri.fsPath,
     });
@@ -125,7 +125,7 @@ export class VaultWatcher {
       try {
         this.L.debug({ ctx, uri, msg: "pre-add-to-engine" });
         const vault = VaultUtils.getVaultByNotePathV4({
-          vaults: this.engine.vaultsv3,
+          vaults: this.engine.vaults,
           fsPath: uri.fsPath,
           wsRoot: DendronWorkspace.wsRoot(),
         });

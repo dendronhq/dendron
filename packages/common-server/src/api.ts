@@ -1,8 +1,11 @@
 import {
+  BulkAddNoteOpts,
   ConfigGetPayload,
   ConfigWriteOpts,
   DendronError,
+  DendronErrorPlainObj,
   DEngineDeleteSchemaPayload,
+  DEngineInitPayload,
   DEngineQuery,
   DNodeProps,
   DVault,
@@ -12,20 +15,16 @@ import {
   EngineQueryNoteResp,
   EngineUpdateNodesOptsV2,
   EngineWriteOptsV2,
+  ERROR_STATUS,
   GetNoteOptsV2,
   GetNotePayload,
-  NotePropsDict,
   NoteProps,
   RenameNoteOpts,
   RenameNotePayload,
   RespRequired,
   RespV2,
-  SchemaModuleDict,
   SchemaModuleProps,
   WriteNoteResp,
-  BulkAddNoteOpts,
-  DendronErrorPlainObj,
-  ERROR_STATUS,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import { createLogger } from "./logger";
@@ -181,10 +180,7 @@ export type SchemaWriteRequest = {
 export type SchemaUpdateRequest = SchemaWriteRequest;
 
 // --- Payload
-export type InitializePayload = APIPayload<{
-  notes: NotePropsDict;
-  schemas: SchemaModuleDict;
-}>;
+export type InitializePayload = APIPayload<DEngineInitPayload>;
 
 export type WorkspaceSyncPayload = InitializePayload;
 export type WorkspaceListPayload = APIPayload<{ workspaces: string[] }>;

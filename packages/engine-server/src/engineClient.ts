@@ -5,7 +5,7 @@ import {
   DendronConfig,
   DendronError,
   DEngine,
-  DEngineClientV2,
+  DEngineClient,
   DEngineDeleteSchemaResp,
   DEngineInitResp,
   DHookDict,
@@ -55,7 +55,7 @@ type DendronEngineClientOpts = {
   ws: string;
 };
 
-export class DendronEngineClient implements DEngineClientV2 {
+export class DendronEngineClient implements DEngineClient {
   public notes: NotePropsDict;
   public wsRoot: string;
   public schemas: SchemaModuleDict;
@@ -63,7 +63,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   public ws: string;
   public fuseEngine: FuseEngine;
   public api: DendronAPI;
-  public vaultsv3: DVault[];
+  public vaults: DVault[];
   public configRoot: string;
   public history?: HistoryService;
   public logger: DLogger;
@@ -114,7 +114,7 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.schemas = {};
     this.links = [];
     this.fuseEngine = new FuseEngine({});
-    this.vaultsv3 = vaults;
+    this.vaults = vaults;
     this.wsRoot = ws;
     this.ws = ws;
     this.configRoot = this.wsRoot;
@@ -129,23 +129,18 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.hooks = this.config.hooks || { onCreate: [] };
   }
 
-  get vaults(): DVault[] {
-    return this.store.vaultsv3;
-  }
-
   /**
    * Load all nodes
    */
   async init(): Promise<DEngineInitResp> {
     const resp = await this.api.workspaceInit({
       uri: this.ws,
-      config: { vaults: this.vaultsv3 },
+      config: { vaults: this.vaults },
     });
 
     if (resp.error && resp.error.severity !== ERROR_SEVERITY.MINOR) {
       return {
         error: resp.error,
-        data: { notes: {}, schemas: {} },
       };
     }
     if (!resp.data) {
@@ -160,7 +155,13 @@ export class DendronEngineClient implements DEngineClientV2 {
     this.store.schemas = schemas;
     return {
       error: resp.error,
-      data: { notes, schemas },
+      data: {
+        notes,
+        schemas,
+        config: this.config,
+        wsRoot: this.wsRoot,
+        vaults: this.vaults,
+      },
     };
   }
 
@@ -232,7 +233,7 @@ export class DendronEngineClient implements DEngineClientV2 {
   }
 
   async queryNote(
-    opts: Parameters<DEngineClientV2["queryNotes"]>[0]
+    opts: Parameters<DEngineClient["queryNotes"]>[0]
   ): Promise<NoteProps[]> {
     const { qs, vault } = opts;
     let noteIndexProps = await this.fuseEngine.queryNote({ qs });
@@ -333,7 +334,13 @@ export class DendronEngineClient implements DEngineClientV2 {
     await this.fuseEngine.updateSchemaIndex(schemas);
     return {
       error: resp.error,
-      data: { notes, schemas },
+      data: {
+        notes,
+        schemas,
+        vaults: this.vaults,
+        wsRoot: this.wsRoot,
+        config: this.config,
+      },
     };
   }
 

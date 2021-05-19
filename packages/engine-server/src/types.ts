@@ -1,11 +1,11 @@
-import { DEngineClientV2, DNoteLoc } from "@dendronhq/common-all";
+import { DEngineClient, DNoteLoc } from "@dendronhq/common-all";
 import { Heading } from "mdast";
 import {
   Literal as UnistLiteral,
   Node as UnistNode,
   Parent as UnistParent,
 } from "unist";
-export { DEngineClientV2 };
+export { DEngineClient as DEngineClient };
 export { Heading };
 export { UnistNode as Node };
 

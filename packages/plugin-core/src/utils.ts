@@ -1,6 +1,6 @@
 import {
   DendronError,
-  DEngineClientV2,
+  DEngineClient,
   DNodeUtils,
   DVault,
   getStage,
@@ -168,7 +168,7 @@ export class VSCodeUtils {
 
   static createWSContext(): vscode.ExtensionContext {
     const pkgRoot = goUpTo(__dirname);
-    return ({
+    return {
       extensionMode: vscode.ExtensionMode.Development,
       logPath: tmpDir().name,
       subscriptions: [] as any[],
@@ -182,13 +182,13 @@ export class VSCodeUtils {
       storagePath: tmpDir().name,
       globalStoragePath: tmpDir().name,
       asAbsolutePath: {} as any, //vscode.Uri.file(wsPath)
-    } as unknown) as vscode.ExtensionContext;
+    } as unknown as vscode.ExtensionContext;
   }
 
   static getOrCreateMockContext(): vscode.ExtensionContext {
     if (!_MOCK_CONTEXT) {
       const pkgRoot = goUpTo(__dirname);
-      _MOCK_CONTEXT = ({
+      _MOCK_CONTEXT = {
         extensionMode: vscode.ExtensionMode.Development,
         logPath: tmpDir().name,
         subscriptions: [],
@@ -202,7 +202,7 @@ export class VSCodeUtils {
         storagePath: tmpDir().name,
         globalStoragePath: tmpDir().name,
         asAbsolutePath: {} as any, //vscode.Uri.file(wsPath)
-      } as unknown) as vscode.ExtensionContext;
+      } as unknown as vscode.ExtensionContext;
     }
     return _MOCK_CONTEXT;
   }
@@ -214,7 +214,7 @@ export class VSCodeUtils {
     const fname = path.basename(txtPath, ".md");
     const vault = VaultUtils.getVaultByNotePathV4({
       wsRoot,
-      vaults: getWS().getEngine().vaultsv3,
+      vaults: getWS().getEngine().vaults,
       fsPath: txtPath,
     });
     return NoteUtils.getNoteByFnameV5({
@@ -358,7 +358,7 @@ export class VSCodeUtils {
     return resolvePath(folderPath);
   }
 
-  static isDebuggingExtension(): boolean {
+  static isDevMode(): boolean {
     // HACK: vscode does not save env variables btw workspaces
     return process.env.VSCODE_DEBUGGING_EXTENSION ? true : false;
   }
@@ -382,7 +382,7 @@ export class VSCodeUtils {
 }
 
 export class WSUtils {
-  static updateEngineAPI(port: number | string): DEngineClientV2 {
+  static updateEngineAPI(port: number | string): DEngineClient {
     const ws = DendronWorkspace.instance();
     ws.setEngine(EngineAPIService.create({ port }));
     ws.port = _.toInteger(port);
@@ -395,7 +395,7 @@ export class DendronClientUtilsV2 {
   static genNotePrefix(
     fname: string,
     addBehavior: AddBehavior,
-    opts: { engine: DEngineClientV2 }
+    opts: { engine: DEngineClient }
   ) {
     let out: string;
     switch (addBehavior) {
@@ -494,7 +494,7 @@ export class DendronClientUtilsV2 {
     client,
   }: {
     fname: string;
-    client: DEngineClientV2;
+    client: DEngineClient;
   }): Promise<SchemaModuleProps> => {
     const smod = _.find(client.schemas, { fname });
     if (!smod) {

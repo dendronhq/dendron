@@ -36,7 +36,7 @@ import { VSCodeUtils, WSUtils } from "./utils";
 import { AnalyticsUtils } from "./utils/analytics";
 import { MarkdownUtils } from "./utils/md";
 import { DendronTreeView } from "./views/DendronTreeView";
-import { DendronWorkspace, getEngine } from "./workspace";
+import { DendronWorkspace, getEngine, getWS } from "./workspace";
 const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // === Main
 
@@ -156,11 +156,14 @@ async function startServer() {
   );
   const logPath = DendronWorkspace.instance().context.logPath;
   Logger.info({ ctx: ctx, logLevel: process.env["LOG_LEVEL"] });
+  const { nextServerUrl, nextStaticRoot } = getWS().config.dev || {};
   if (!maybePort) {
-    const { launch } = require("@dendronhq/api-server");
-    return await launch({
+    const { launchv2 } = require("@dendronhq/api-server");
+    return await launchv2({
       port: maybePort,
       logPath: path.join(logPath, "dendron.server.log"),
+      nextServerUrl,
+      nextStaticRoot,
     });
   }
   return maybePort;
@@ -184,7 +187,7 @@ function subscribeToPortChange() {
 }
 
 export async function _activate(context: vscode.ExtensionContext) {
-  const isDebug = VSCodeUtils.isDebuggingExtension();
+  const isDebug = VSCodeUtils.isDevMode();
   const ctx = "_activate";
   const stage = getStage();
   const { workspaceFile, workspaceFolders } = vscode.workspace;
@@ -331,7 +334,7 @@ export async function _activate(context: vscode.ExtensionContext) {
         return p;
       }
     );
-    const port: number = await startServer();
+    const { port } = await startServer();
     const durationStartServer = getDurationMilliseconds(start);
     Logger.info({ ctx, msg: "post-start-server", port, durationStartServer });
     WSUtils.updateEngineAPI(port);
@@ -347,6 +350,14 @@ export async function _activate(context: vscode.ExtensionContext) {
       return;
     }
 
+    if (VSCodeUtils.isDevMode()) {
+      vscode.commands.executeCommand(
+        "setContext",
+        DendronContext.DEV_MODE,
+        true
+      );
+    }
+
     // round to nearest 10th
     let numNotes = _.size(getEngine().notes);
     if (numNotes > 10) {
@@ -358,7 +369,7 @@ export async function _activate(context: vscode.ExtensionContext) {
       duration: durationReloadWorkspace,
       noCaching: config.noCaching || false,
       numNotes,
-      numVaults: _.size(getEngine().vaultsv3),
+      numVaults: _.size(getEngine().vaults),
     });
     await ws.activateWatchers();
     toggleViews(true);
@@ -386,12 +397,6 @@ export async function _activate(context: vscode.ExtensionContext) {
 function toggleViews(enabled: boolean) {
   const ctx = "toggleViews";
   Logger.info({ ctx, msg: `views enabled: ${enabled}` });
-
-  vscode.commands.executeCommand(
-    "setContext",
-    DendronContext.PLUGIN_ACTIVE,
-    enabled
-  );
   vscode.commands.executeCommand(
     "setContext",
     DendronContext.PLUGIN_ACTIVE,

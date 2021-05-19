@@ -13,13 +13,11 @@
       "packages/dendron-cli",
       "packages/dendron-next-server",
       "packages/plugin-core",
-      "packages/dendron-11ty"
+      "packages/dendron-11ty",
+      "packages/common-frontend"
     ],
     "nohoist": [
-      "**/react",
-      "**/dendron-next-server",
-      "**/@types/mocha",
-      "**/@types/hoist-non-react-statics"
+      "**/@types/mocha"
     ]
   },
   "devDependencies": {

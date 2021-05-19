@@ -1,7 +1,7 @@
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import {
   DendronASTDest,
-  DEngineClientV2,
+  DEngineClient,
   MDUtilsV4,
   RemarkUtils,
   LinkUtils,
@@ -154,7 +154,7 @@ describe("h1ToTitle", () => {
 });
 
 describe("convert old note ref", () => {
-  const setup = async (opts: { engine: DEngineClientV2; vaults: DVault[] }) => {
+  const setup = async (opts: { engine: DEngineClient; vaults: DVault[] }) => {
     const { engine, vaults } = opts;
     const config = { ...engine.config, noLegacyNoteRef: false };
     const proc = MDUtilsV4.procFull({

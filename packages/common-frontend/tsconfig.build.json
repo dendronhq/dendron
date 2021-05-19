@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "lib": ["DOM"]
+    "lib": ["DOM", "ES2019"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "**/*-spec.ts", "**/*.d.ts"]

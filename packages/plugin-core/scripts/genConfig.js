@@ -63,6 +63,7 @@ function updateKeybindings(contributes) {
 }
 
 function updateViews(contributes) {
+  console.log("update views")
   const out = _.groupBy(DENDRON_VIEWS, "where");
   contributes.views = {};
   _.map(out, (views, k) => {

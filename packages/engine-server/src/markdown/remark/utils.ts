@@ -17,6 +17,7 @@ import { selectAll } from "unist-util-select";
 import { VFile } from "vfile";
 import { normalizev2 } from "../../utils";
 import {
+  BlockAnchor,
   DendronASTDest,
   DendronASTRoot,
   DendronASTTypes,
@@ -27,6 +28,7 @@ import {
 import { MDUtilsV4 } from "../utils";
 const toString = require("mdast-util-to-string");
 import * as mdastBuilder from "mdast-builder";
+import { blockAnchors } from "./blockAnchors";
 export { mdastBuilder };
 
 export const ALIAS_DIVIDER = "|";
@@ -80,6 +82,7 @@ export class LinkUtils {
     let remark = MDUtilsV4.procParse({
       dest: DendronASTDest.MD_DENDRON,
       engine,
+      fname: note.fname,
     });
     let out = remark.parse(content);
     let out2: WikiLinkNoteV4[] = selectAll("wikiLink", out) as WikiLinkNoteV4[];
@@ -138,7 +141,24 @@ export class LinkUtils {
     };
   }
 
-  static parseLinkV2(linkString: string) {
+  /** Either value or anchorHeader will always be present if the function did not
+   *  return null. A missing value means that the file containing this link is
+   *  the value.
+   */
+  static parseLinkV2(linkString: string):
+    | {
+        alias?: string;
+        value: string;
+        anchorHeader?: string;
+        vaultName?: string;
+      }
+    | {
+        alias?: string;
+        value?: string;
+        anchorHeader: string;
+        vaultName?: string;
+      }
+    | null {
     const LINK_NAME = "[^#\\|>]+";
     const re = new RegExp(
       "" +
@@ -148,7 +168,7 @@ export class LinkUtils {
         "\\|" +
         ")?" +
         // name
-        `(?<value>${LINK_NAME})` +
+        `(?<value>${LINK_NAME})?` +
         // anchor?
         `(#(?<anchor>${LINK_NAME}))?` +
         // filters?
@@ -158,13 +178,16 @@ export class LinkUtils {
     const out = linkString.match(re);
     if (out) {
       let { alias, value, anchor } = out.groups as any;
+      if (!value && !anchor) return null; // Does not actually link to anything
       let vaultName: string | undefined;
-      ({ vaultName, link: value } = this.parseDendronURI(value));
-      if (!alias) {
-        alias = value;
+      if (value) {
+        ({ vaultName, link: value } = this.parseDendronURI(value));
+        if (!alias) {
+          alias = value;
+        }
+        alias = _.trim(alias);
+        value = _.trim(value);
       }
-      alias = _.trim(alias);
-      value = _.trim(value);
       return { alias, value, anchorHeader: anchor, vaultName };
     } else {
       return null;
@@ -229,6 +252,12 @@ export class RemarkUtils {
     let out = remark.parse(content);
     let out2: Heading[] = selectAll("heading", out) as Heading[];
     return out2;
+  }
+
+  static findBlockAnchors(content: string): BlockAnchor[] {
+    const parser = MDUtilsV4.remark().use(blockAnchors);
+    const parsed = parser.parse(content);
+    return selectAll("blockAnchor", parsed) as BlockAnchor[];
   }
 
   static findIndex(array: Node[], fn: any) {

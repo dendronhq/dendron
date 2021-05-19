@@ -39,6 +39,7 @@ export enum DendronASTTypes {
   REF_LINK = "refLink",
   REF_LINK_V2 = "refLinkV2",
   PARAGRAPH = "paragraph",
+  BLOCK_ANCHOR = "blockAnchor",
 }
 
 export enum DendronASTDest {
@@ -56,7 +57,7 @@ export enum VaultMissingBehavior {
 export type DendronASTData = {
   dest: DendronASTDest;
   vault: DVault;
-  fname?: string;
+  fname: string;
   wikiLinkOpts?: WikiLinksOpts;
   config: DendronConfig;
   overrides?: Partial<DendronPubOpts>;
@@ -102,4 +103,9 @@ export type NoteRefDataV4 = {
 
 export type NoteRefDataV4_LEGACY = {
   link: DNoteRefLink;
+};
+
+export type BlockAnchor = DendronASTNode & {
+  type: DendronASTTypes.BLOCK_ANCHOR;
+  id: string;
 };

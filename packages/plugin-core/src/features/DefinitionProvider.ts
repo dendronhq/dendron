@@ -2,7 +2,7 @@ import { NoteUtils, VaultUtils } from "@dendronhq/common-all";
 import fs from "fs-extra";
 import _ from "lodash";
 import vscode, { Location, Position, Uri } from "vscode";
-import { findHeaderPos, GotoNoteCommand } from "../commands/GotoNote";
+import { findAnchorPos, GotoNoteCommand } from "../commands/GotoNote";
 import { Logger } from "../logger";
 import { getReferenceAtPosition } from "../utils/md";
 import { DendronWorkspace, getWS } from "../workspace";
@@ -46,8 +46,8 @@ export default class DefinitionProvider implements vscode.DefinitionProvider {
       const loc = out[0];
       if (refAtPos.anchor) {
         const text = fs.readFileSync(loc.uri.fsPath, { encoding: "utf8" });
-        const pos = findHeaderPos({
-          anchor: refAtPos.anchor.value,
+        const pos = findAnchorPos({
+          anchor: refAtPos.anchor,
           text,
         });
         return new Location(loc.uri, pos);

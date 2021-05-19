@@ -22,7 +22,8 @@ import { DendronWorkspace } from "../workspace";
 
 export type RefT = {
   label: string;
-  ref: string;
+  /** If undefined, then the file this reference is located in is the ref */
+  ref?: string;
   anchor?: DNoteAnchor;
   vaultName?: string;
 };
@@ -236,7 +237,8 @@ export const getReferenceAtPosition = (
   }
 
   return {
-    ref,
+    // If ref is missing, it's implicitly the current file
+    ref: ref ? ref : NoteUtils.uri2Fname(document.uri),
     label,
     range,
     anchor,
@@ -246,33 +248,27 @@ export const getReferenceAtPosition = (
 };
 
 export const parseRef = (rawRef: string): RefT => {
-  const escapedDividerPosition = rawRef.indexOf("\\|");
-  const dividerPosition =
-    escapedDividerPosition !== -1
-      ? escapedDividerPosition
-      : rawRef.indexOf("|");
+  const parsed = LinkUtils.parseLinkV2(rawRef);
+  if (_.isNull(parsed)) throw new Error(`Unable to parse reference ${rawRef}`);
+  const { alias, value, anchorHeader, vaultName } = parsed;
 
-  const out: RefT = {
-    label: dividerPosition !== -1 ? rawRef.slice(0, dividerPosition) : "",
-    ref:
-      dividerPosition !== -1
-        ? rawRef.slice(
-            dividerPosition + (escapedDividerPosition !== -1 ? 2 : 1),
-            rawRef.length
-          )
-        : rawRef,
+  return {
+    label: alias ? alias : "",
+    ref: value,
+    anchor: parseAnchor(anchorHeader),
+    vaultName,
   };
-  if (out.ref.indexOf("#") >= 0) {
-    const [ref, ...anchor] = out.ref.split("#");
-    out.ref = ref;
-    out.anchor = { type: "header", value: anchor[0] };
+};
+
+export const parseAnchor = (anchorValue?: string): DNoteAnchor | undefined => {
+  // If undefined or empty string
+  if (!anchorValue) return undefined;
+
+  if (anchorValue[0] === "^") {
+    return { type: "block", value: anchorValue.slice(1) };
+  } else {
+    return { type: "header", value: anchorValue };
   }
-  const { link, vaultName } = LinkUtils.parseDendronURI(out.ref);
-  if (vaultName) {
-    out.vaultName = vaultName;
-    out.ref = link;
-  }
-  return out;
 };
 
 export const containsUnknownExt = (pathParam: string): boolean =>

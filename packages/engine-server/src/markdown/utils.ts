@@ -50,6 +50,7 @@ import { noteRefsV2 } from "./remark/noteRefsV2";
 import { publishSite } from "./remark/publishSite";
 import { transformLinks } from "./remark/transformLinks";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
+import { blockAnchors } from "./remark/blockAnchors";
 import { DendronASTData, DendronASTDest, VaultMissingBehavior } from "./types";
 
 const toString = require("mdast-util-to-string");
@@ -61,6 +62,7 @@ type ProcOpts = {
 
 type ProcParseOpts = {
   dest: DendronASTDest;
+  fname: string;
 } & ProcOpts;
 
 type ProcOptsFull = ProcOpts & {
@@ -258,7 +260,7 @@ export class MDUtilsV4 {
       .use(remarkParse, { gfm: true })
       .use(wikiLinks)
       .data("errors", errors);
-    this.setDendronData(_proc, { dest: opts.dest });
+    this.setDendronData(_proc, { dest: opts.dest, fname: opts.fname });
     this.setEngine(_proc, opts.engine);
     return _proc;
   }
@@ -321,6 +323,7 @@ export class MDUtilsV4 {
         hierarchyDisplay: config.hierarchyDisplay,
       })
       .use(backlinks)
+      .use(blockAnchors)
       .use(noteRefsV2, {
         ...opts.noteRefOpts,
         wikiLinkOpts: opts.wikiLinksOpts,

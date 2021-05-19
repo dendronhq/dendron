@@ -105,6 +105,17 @@ export const NOTE_PRESETS_V4 = {
     fname: "beta",
     body: `[[alpha#h3]]`,
   }),
+  NOTE_WITH_BLOCK_ANCHOR_TARGET: CreateNoteFactory({
+    fname: "anchor-target",
+    body: [
+      "Lorem ipsum dolor amet",
+      "Maiores exercitationem officiis adipisci voluptate",
+      "",
+      "^block-id",
+      "",
+      "Alias eos velit aspernatur",
+    ].join("\n"),
+  }),
   NOTE_WITH_CAPS_AND_SPACE: CreateNoteFactory({
     fname: "000 Index.md",
     body: "[[alpha]]",

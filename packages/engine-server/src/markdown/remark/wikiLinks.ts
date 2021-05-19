@@ -188,6 +188,11 @@ function attachParser(proc: Unified.Processor) {
       }
       // default to current note
     }
+    if (!out.value) {
+      // same file block reference, value is implicitly current file
+      out.value = _.trim(NoteUtils.normalizeFname(fname)); // recreate what value (and alias) would have been parsed
+      if (!out.alias) out.alias = out.value;
+    }
     if (
       dest !== DendronASTDest.MD_DENDRON &&
       config?.useNoteTitleForLink &&

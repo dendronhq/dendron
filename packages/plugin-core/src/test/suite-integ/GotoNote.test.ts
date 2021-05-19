@@ -175,6 +175,33 @@ suite("GotoNote", function () {
         },
       });
     });
+
+    test("block anchor", (done) => {
+      runSingleVaultTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.create({
+            wsRoot,
+            vault: vaults[0],
+          });
+        },
+        onInit: async ({ vault }) => {
+          await new GotoNoteCommand().run({
+            qs: "anchor-target",
+            vault,
+            anchor: {
+              type: "block",
+              value: "block-id",
+            },
+          });
+          expect(getActiveEditorBasename()).toEqual("anchor-target.md");
+          const selection = VSCodeUtils.getActiveTextEditor()?.selection;
+          expect(selection?.start.line).toEqual(10);
+          expect(selection?.start.character).toEqual(0);
+          done();
+        },
+      });
+    });
   });
 
   describe("using selection", () => {

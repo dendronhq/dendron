@@ -1,4 +1,10 @@
-import { NoteChangeEntry, NoteProps, VaultUtils } from "@dendronhq/common-all";
+import {
+  NoteChangeEntry,
+  NoteProps,
+  VaultUtils,
+  DLink,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import {
   DendronASTDest,
   MDUtilsV4,
@@ -198,6 +204,49 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           }
         };
         break;
+      }
+      case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
+        // pick out wild wikilinks
+        let wildWikiLinks = [] as DLink[];
+        _.forEach(notes, (note) => {
+          const links = note.links;
+          if (_.isEmpty(links)) {
+            return;
+          }
+          wildWikiLinks = wildWikiLinks.concat(
+            _.filter(links, (link) => {
+              if (link.type !== "wiki") {
+                return false;
+              }
+              const noteExists = NoteUtils.getNoteByFnameV5({
+                fname: link.to!.fname as string,
+                vault: note.vault,
+                notes: notes,
+                wsRoot: engine.wsRoot,
+              }) as NoteProps;
+              return !noteExists;
+            })
+          );
+          return true;
+        });
+        const uniqueCandidates = _.map(
+          _.uniqBy(wildWikiLinks, "to.fname"),
+          (link) => {
+            return {
+              fname: link.to!.fname,
+              vault: link.from.vault,
+            };
+          }
+        ) as NoteProps[];
+        notes = uniqueCandidates;
+        doctorAction = async (note: NoteProps) => {
+          await engineWrite(note);
+          const vname = VaultUtils.getName(note.vault);
+          console.log(
+            `doctor ${DoctorActions.CREATE_MISSING_LINKED_NOTES} ${note.fname} ${vname}`
+          );
+          numChanges += 1;
+        };
       }
     }
     await _.reduce<any, Promise<any>>(

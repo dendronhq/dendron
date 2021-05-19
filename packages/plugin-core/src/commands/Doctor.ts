@@ -1,8 +1,8 @@
 import {
   DEngineClient,
-  NoteUtils,
+  // NoteUtils,
   NoteProps,
-  DLink,
+  // DLink,
 } from "@dendronhq/common-all";
 import {
   BackfillV2Command,
@@ -49,15 +49,16 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   async showPreview(candidates: NoteProps[]) {
-    const vault = candidates[0].vault.fsPath;
     let content = [
       "# Create Missing Linked Notes Preview",
       "",
-      `## The following files will be created in \'${vault}\'`,
+      `## The following files will be created`,
     ];
 
-    _.forEach(candidates, (candidate) => {
-      content = content.concat(`- ${candidate.fname}\n`);
+    _.forEach(_.sortBy(candidates, ["vault.fsPath"]), (candidate) => {
+      content = content.concat(
+        `- ${candidate.vault.fsPath}/${candidate.fname}\n`
+      );
     });
 
     const panel = window.createWebviewPanel(
@@ -97,71 +98,43 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         });
         break;
       }
-      case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
-        const notes = engine.notes;
-        // pick out wild wikilinks
-        let wildWikiLinks = [] as DLink[];
-        _.forEach(notes, (note) => {
-          const links = note.links;
-          if (_.isEmpty(links)) {
-            return false;
-          }
-          const wsRoot = DendronWorkspace.wsRoot();
-          wildWikiLinks = wildWikiLinks.concat(
-            _.filter(links, (link) => {
-              if (link.type != "wiki") {
-                return false;
-              }
-              const noteExists = NoteUtils.getNoteByFnameV5({
-                fname: link.to!.fname as string,
-                vault: note.vault,
-                notes: notes,
-                wsRoot: wsRoot,
-              }) as NoteProps;
-              return !noteExists;
-            })
-          );
-          return true;
-        });
+      // case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
 
-        // pick out unique candidate notes to create
-        const uniqueCandidates = _.map(
-          _.uniqBy(wildWikiLinks, "to.fname"),
-          (link) => {
-            return {
-              fname: link.to!.fname,
-              vault: link.from.vault,
-            };
-          }
-        ) as NoteProps[];
-        if (uniqueCandidates.length > 0) {
-          // show preview before creating
-          await this.showPreview(uniqueCandidates);
-          const options = ["proceed", "cancel"];
-          const shouldProceed = await VSCodeUtils.showQuickPick(options, {
-            placeHolder: "proceed",
-            ignoreFocusOut: true,
-          });
-          if (shouldProceed !== "proceed") {
-            window.showInformationMessage("cancelled");
-            break;
-          }
-          window.showInformationMessage("creating missing links...");
-          if (ws.vaultWatcher) {
-            ws.vaultWatcher.pause = true;
-          }
-          _.forEach(uniqueCandidates, async ({ fname, vault }) => {
-            await engine.getNoteByPath({
-              npath: fname,
-              createIfNew: true,
-              vault: vault,
-            });
-          });
-        } else {
-          window.showInformationMessage(`There are no missing links!`);
-        }
-        break;
-      }
+      //   // if (uniqueCandidates.length > 0) {
+      //   //   // show preview before creating
+      //   //   await this.showPreview(uniqueCandidates);
+      //   //   const options = ["proceed", "cancel"];
+      //   //   const shouldProceed = await VSCodeUtils.showQuickPick(options, {
+      //   //     placeHolder: "proceed",
+      //   //     ignoreFocusOut: true,
+      //   //   });
+      //   //   if (shouldProceed !== "proceed") {
+      //   //     window.showInformationMessage("cancelled");
+      //   //     break;
+      //   //   }
+      //   //   window.showInformationMessage("creating missing links...");
+      //   //   if (ws.vaultWatcher) {
+      //   //     ws.vaultWatcher.pause = true;
+      //   //   }
+      //     // _.forEach(uniqueCandidates, async ({ fname, vault }) => {
+      //     //   await engine.getNoteByPath({
+      //     //     npath: fname,
+      //     //     createIfNew: true,
+      //     //     vault: vault,
+      //     //   });
+      //     // });
+      //   // } else {
+      //   //   window.showInformationMessage(`There are no missing links!`);
+      //   // }
+      //   // if (ws.vaultWatcher) {
+      //   //   ws.vaultWatcher.pause = false;
+      //   // }
+      //   const cmd = new DoctorCLICommand();
+      //   await cmd.execute({
+      //     action: opts.action[Symbol]
+      //   })
+      //   break;
+      // }
       default: {
         const cmd = new DoctorCLICommand();
         await cmd.execute({

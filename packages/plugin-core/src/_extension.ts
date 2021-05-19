@@ -151,12 +151,14 @@ function isFirstInstall(context: vscode.ExtensionContext): boolean {
 
 async function startServer() {
   const ctx = "startServer";
-  const maybePort = DendronWorkspace.configuration().get<number | undefined>(
-    CONFIG.SERVER_PORT.key
-  );
+  const { nextServerUrl, nextStaticRoot, engineServerPort } =
+    getWS().config.dev || {};
+  const maybePort =
+    DendronWorkspace.configuration().get<number | undefined>(
+      CONFIG.SERVER_PORT.key
+    ) || engineServerPort;
   const logPath = DendronWorkspace.instance().context.logPath;
-  Logger.info({ ctx: ctx, logLevel: process.env["LOG_LEVEL"] });
-  const { nextServerUrl, nextStaticRoot } = getWS().config.dev || {};
+  Logger.info({ ctx: ctx, logLevel: process.env["LOG_LEVEL"], maybePort });
   if (!maybePort) {
     const { launchv2 } = require("@dendronhq/api-server");
     return await launchv2({
@@ -166,7 +168,7 @@ async function startServer() {
       nextStaticRoot,
     });
   }
-  return maybePort;
+  return { port: maybePort };
 }
 
 // @ts-ignore

@@ -16,10 +16,14 @@ export class WebViewUtils {
       ws: DendronWorkspace.wsRoot(),
       port: ws.port,
     });
+
+    // View is `dendron.{camelCase}`
+    // we want to remove `dendron` and transform camelCase to snake case
+    // In addition, if we are serving using a live nextjs server, don't append .html at the end
     const src = `${ws.getClientAPIRootUrl()}/vscode/${view.replace(
       /^dendron\./,
       ""
-    )}.html?${qs}`;
+    )}${ws.config.dev?.nextServerUrl ? "" : ".html"}?${qs}`;
     Logger.info({ ctx: "genHTML", view, src });
     return `<!DOCTYPE html>
 <html lang="en">

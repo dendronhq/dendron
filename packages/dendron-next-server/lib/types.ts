@@ -14,6 +14,6 @@ export type StageEnv = typeof CONFIG_KEY;
 
 
 export type DendronProps = {
-  engine: Required<engineSlice.EngineState>,
+  engine: engineSlice.EngineState,
   ide: ideSlice.IDEState;
 };

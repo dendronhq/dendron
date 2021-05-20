@@ -5,7 +5,7 @@ export function useWindowSize() {
 
   // Learn more here: https://joshwcomeau.com/react/the-perils-of-rehydration/
 
-  const [windowSize, setWindowSize] = useState({
+  const [windowSize, setWindowSize] = useState<{width: number|undefined, height: number|undefined}>({
     width: undefined,
 
     height: undefined,
@@ -18,9 +18,8 @@ export function useWindowSize() {
       // Set window width/height to state
 
       setWindowSize({
-        width: window.innerWidth,
-
-        height: window.innerHeight,
+        width: window.innerWidth! as number,
+        height: window.innerHeight! as number,
       });
     }
 

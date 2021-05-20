@@ -5,6 +5,28 @@
         "**/*.ts",
         "**/*.tsx"
       ],
+      "compilerOptions": {
+        "module": "commonjs",
+        "target": "ES2019",
+        "lib": ["es2019", "es2020.string"],
+        "sourceMap": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "strict": false,
+        "declaration": true,
+        "types": [
+          "node", "jest"
+        ],
+        // --- checks
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        // --- language features
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
+      },
     "exclude": ["node_modules", "**/*-spec.ts"]
   }
   

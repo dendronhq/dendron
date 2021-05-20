@@ -1,11 +1,14 @@
 import {
+  BookOutlined, PlusOutlined
+} from '@ant-design/icons';
+import {
   DMessageSource,
   DNodeUtils,
   NoteProps,
   NotePropsDict,
   TreeViewMessage,
   TreeViewMessageType,
-  VaultUtils,
+  VaultUtils
 } from "@dendronhq/common-all";
 import { createLogger, engineSlice, VSCodeUtils } from "@dendronhq/common-frontend";
 import { Tree, TreeProps } from "antd";
@@ -51,9 +54,17 @@ class TreeViewUtils {
   }): DataNode {
     const note = noteDict[noteId];
     const vname = VaultUtils.getName(note.vault);
+    let icon = undefined;
+    if (note.stub) {
+      icon = <PlusOutlined />;
+    }
+    if (note.schema) {
+      icon = <BookOutlined />;
+    }
     return {
       key: note.id,
       title: note.title + (showVaultName ? ` (${vname})` : ""),
+      icon,
       children: note.children.map((ent) =>
         TreeViewUtils.note2TreeDatanote({ noteId: ent, noteDict })
       ),
@@ -189,6 +200,7 @@ function TreeView({
     <>
       {treeData.length ? (
         <Tree
+          showIcon
           expandedKeys={defaultExpandKeys}
           selectedKeys={defaultExpandKeys.slice(-1)}
           onExpand={onExpand}

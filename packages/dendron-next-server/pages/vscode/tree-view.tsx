@@ -7,7 +7,7 @@ import {
   TreeViewMessageType,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { createLogger, VSCodeUtils } from "@dendronhq/common-frontend";
+import { createLogger, engineSlice, VSCodeUtils } from "@dendronhq/common-frontend";
 import { Tree, TreeProps } from "antd";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
@@ -61,65 +61,100 @@ class TreeViewUtils {
   }
 }
 
-export default function TreeViewContainer({ engine, ide }: DendronProps) {
-  // --- hooks
+const { EngineSliceUtils } = engineSlice;
+
+
+function areEqual(prevProps: DendronProps, nextProps: DendronProps) {
+  const logger = createLogger("treeViewContainer");
+  const isDiff = _.some([
+    // active note changed
+    prevProps.ide.noteActive?.id !== nextProps.ide.noteActive?.id,
+    // engine initialized for first time
+    (_.isUndefined(prevProps.engine.notes) || _.isEmpty(prevProps.engine.notes) && !_.isEmpty(nextProps.engine.notes)),
+    // engine just went from pending to loading 
+    (prevProps.engine.loading === "pending" && nextProps.engine.loading === "idle")
+  ])
+  logger.info({state:"areEqual", isDiff, prevProps, nextProps})
+  return !isDiff;
+};
+
+const TreeViewContainer = React.memo(TreeViewParent, areEqual);
+export default TreeViewContainer;
+
+function TreeViewParent({ engine, ide }: DendronProps) {
+  // --- init
+  const ctx = "TreeViewContainer";
   const logger = createLogger("treeViewContainer");
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
   logger.info({
-    ctx: "TreeViewContainer:enter",
+    ctx,
+    state: "enter",
     engine,
     ide,
   });
-
-  // --- init
   const onExpand: OnExpandFunc = (expandedKeys, { node, expanded }) => {
     const id = node.key as string;
     logger.info({ ctx: "onExpand", expandedKeys, id, expanded });
     // open up
     if (expanded) {
       setActiveNoteIds(
-        TreeViewUtils.getAllParents({ notes: engine.notes, noteId: id })
+        TreeViewUtils.getAllParents({ notes: engine.notes!, noteId: id })
       );
     } else {
       setActiveNoteIds(
-        TreeViewUtils.getAllParents({ notes: engine.notes, noteId: id }).slice(
+        TreeViewUtils.getAllParents({ notes: engine.notes!, noteId: id }).slice(
           0,
           -1
         )
       );
     }
   };
-
+  const engineInitialized = EngineSliceUtils.hasInitialized(engine);
   // what keys shod be open
   const { noteActive } = ide;
+  // --- effects
   React.useEffect(() => {
-    if (noteActive) {
+    if (noteActive && engineInitialized) {
       logger.info({
-        ctx: "TreeViewContainer",
+        ctx,
         state: "useEffect:preCalculateTree",
       });
       const _activeNoteIds = TreeViewUtils.getAllParents({
-        notes: engine.notes,
+        notes: engine.notes!,
         noteId: noteActive.id,
       });
       setActiveNoteIds(_activeNoteIds);
       logger.info({
-        ctx: "TreeViewContainer:cacluateActiveNoteId:exit",
+        ctx,
+        state: "useEffect:postCalculateTree",
         activeNoteIds,
       });
     }
-  }, [noteActive?.id]);
+  }, [noteActive?.id, engineInitialized]);
+
+  // --- render
+  if (!engineInitialized) {
+    logger.info({
+      ctx,
+      state: "exit:engineNoInit",
+    });
+    return <></>;
+  }
   const roots = _.filter(_.values(engine.notes), DNodeUtils.isRoot).map(
     (ent) => {
       return TreeViewUtils.note2TreeDatanote({
         noteId: ent.id,
-        noteDict: engine.notes,
+        noteDict: engine.notes!,
         showVaultName: true,
       });
     }
   );
   // controlled compo: what keys should be expanded
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
+  logger.info({
+    ctx,
+    state: "exit",
+  });
 
   // --- render
   return (

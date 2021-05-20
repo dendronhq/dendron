@@ -7,11 +7,11 @@ import {
 
   ideHooks, ideSlice,
 
-  setLogLevel,
-  useVSCodeMessage,
-  querystring
+
+
+  querystring, setLogLevel,
+  useVSCodeMessage
 } from "@dendronhq/common-frontend";
-import _ from "lodash";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { ThemeSwitcherProvider } from "react-css-theme-switcher";
@@ -24,11 +24,11 @@ const themes = {
 };
 
 const { useEngineAppSelector, useEngine } = engineHooks;
-const { EngineSliceUtils } = engineSlice;
+
 
 function AppVSCode({ Component, pageProps }: any) {
 
-  // --- hooks
+  // --- init
   const router = useRouter();
   const { query, isReady } = router;
   const ide = ideHooks.useIDEAppSelector((state) => state.ide);
@@ -40,7 +40,9 @@ function AppVSCode({ Component, pageProps }: any) {
   });
   useEngine({ engineState: engine, opts: query });
   const logger = createLogger("AppVSCode");
+  logger.info({ state: "enter", query });
 
+  // --- effects
   // listen to vscode events
   useVSCodeMessage(async (msg) => {
     const ctx = "useVSCodeMsg";
@@ -63,6 +65,7 @@ function AppVSCode({ Component, pageProps }: any) {
       }
       logger.info({ ctx, msg: "syncEngine:post"});
       dispatch(ideSlice.actions.setNoteActive(note));
+      logger.info({ ctx, msg: "setNote:post"});
     } else {
       logger.error({ctx, msg: "unknown message"});
     }
@@ -70,12 +73,10 @@ function AppVSCode({ Component, pageProps }: any) {
 
   // --- render
   if (!isReady) {
+    logger.info({ ctx: "exit", state: "router:notInitialized"});
     return <> </>;
   }
-  logger.info({ ctx: "enter", query });
-  if (!EngineSliceUtils.hasInitialized(engine)) {
-    return null;
-  }
+  logger.info({ ctx: "exit", state: "render:child", engine, ide});
   return <Component engine={engine} ide={ide} {...pageProps} />;
 }
 

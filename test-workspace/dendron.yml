@@ -41,3 +41,9 @@ site:
         payload:
             - vault2
             - vault
+dev:
+  #nextServerUrl: http://localhost:3000
+  # engineServerPort: 3005
+  enableWebUI: true
+  # used when testing 
+  #nextStaticRoot: /Users/kevinlin/projects/dendronv2/dendron/packages/dendron-next-server/out

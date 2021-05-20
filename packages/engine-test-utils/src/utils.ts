@@ -44,7 +44,9 @@ export class GitTestUtils {
    */
   static async remoteAdd(wsRoot: string, remoteDir: string) {
     const git = new Git({ localUrl: wsRoot, remoteUrl: remoteDir });
-    await git.remoteAddUpstream();
+    await git.remoteAdd();
+    // Need to push to be able to set up remote tracking branch
+    git.push({ remote: "origin", branch: await git.getCurrentBranch() });
   }
 
   /** Set up a workspace with a remote, intended to be used when testing pull or push functionality.

@@ -25,14 +25,14 @@ export class DiagnosticsReportCommand extends BasicCommand<
     }
     const logFile = fs.readFileSync(logPath, { encoding: "utf8" });
     const firstLines = logFile.slice(0, 10000);
-    const lastLines = logFile.slice(-10000, -1);
+    const lastLines = logFile.slice(-10000);
 
     const serverLogPath = path.join(
       path.dirname(logPath),
       "dendron.server.log"
     );
     const serverLogFile = fs.readFileSync(serverLogPath, { encoding: "utf8" });
-    const serverLastLines = serverLogFile.slice(-3000, -1);
+    const serverLastLines = serverLogFile.slice(-3000);
 
     const config = JSON.stringify(getWS().config);
     const wsRoot = DendronWorkspace.wsRoot();
@@ -57,7 +57,11 @@ export class DiagnosticsReportCommand extends BasicCommand<
       "# Workspace File",
       wsFile,
     ].join("\n");
-    await workspace.openTextDocument({ language: "markdown", content });
+    const document = await workspace.openTextDocument({
+      language: "markdown",
+      content,
+    });
+    await window.showTextDocument(document);
     await clipboard.writeText(content);
     return;
   }

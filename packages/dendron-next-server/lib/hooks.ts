@@ -1,6 +1,6 @@
 import { DendronConfig } from "@dendronhq/common-all";
 import useSWR from "swr";
-import { api, apiRemote } from "./config";
+import { api } from "./config";
 
 // @ts-ignore
 const fetcher = (...args) => fetch(...args).then((res) => res.json());

@@ -1,5 +1,4 @@
 import {
-  DMessage,
   DMessageSource,
   DNodeUtils,
   NoteProps,
@@ -8,12 +7,12 @@ import {
   TreeViewMessageType,
   VaultUtils,
 } from "@dendronhq/common-all";
-import { engineSlice, useVSCodeMessage, VSCodeUtils } from "@dendronhq/common-frontend";
+import { createLogger, VSCodeUtils } from "@dendronhq/common-frontend";
 import { Tree, TreeProps } from "antd";
-import { Logger } from "aws-amplify";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useState } from "react";
+import { DendronProps } from "../../lib/types";
 
 type OnExpandFunc = TreeProps["onExpand"];
 type OnSelectFunc = TreeProps["onSelect"];
@@ -36,7 +35,7 @@ class TreeViewUtils {
     let activeNoteIds: string[] = [];
     do {
       activeNoteIds.unshift(pNote.id);
-      pNote = notes[pNote.parent];
+      pNote = notes[pNote.parent as string];
     } while (pNote);
     return activeNoteIds;
   };
@@ -62,20 +61,17 @@ class TreeViewUtils {
   }
 }
 
-export default function TreeViewContainer({
-  engine,
-}: {
-  engine: engineSlice.EngineState;
-}) {
-  const [msg, setMsg] = useState<DMessage>();
+export default function TreeViewContainer({ engine, ide }: DendronProps) {
+  // --- hooks
+  const logger = createLogger("treeViewContainer");
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
-  useVSCodeMessage((msg) => {
-    setMsg(msg);
+  logger.info({
+    ctx: "TreeViewContainer:enter",
+    engine,
+    ide,
   });
-  const logger = new Logger("treeViewContainer");
-  logger.info({ ctx: "TreeViewContainer", state: "enter", engine });
 
-  // --- Setup
+  // --- init
   const onExpand: OnExpandFunc = (expandedKeys, { node, expanded }) => {
     const id = node.key as string;
     logger.info({ ctx: "onExpand", expandedKeys, id, expanded });
@@ -94,33 +90,25 @@ export default function TreeViewContainer({
     }
   };
 
-  // --- Logic
   // what keys shod be open
+  const { noteActive } = ide;
   React.useEffect(() => {
-    logger.info({
-      ctx: "TreeViewContainer",
-      state: "useEffect:preCalculateTree",
-    });
-    // check if we got a message
-    if (!_.isUndefined(msg)) {
+    if (noteActive) {
       logger.info({
-        ctx: "TreeViewContainer:cacluateActiveNoteId",
-        state: "enter",
+        ctx: "TreeViewContainer",
+        state: "useEffect:preCalculateTree",
       });
       const _activeNoteIds = TreeViewUtils.getAllParents({
         notes: engine.notes,
-        noteId: msg.data.id,
+        noteId: noteActive.id,
       });
       setActiveNoteIds(_activeNoteIds);
       logger.info({
-        ctx: "TreeViewContainer:cacluateActiveNoteId",
-        state: "exit",
+        ctx: "TreeViewContainer:cacluateActiveNoteId:exit",
         activeNoteIds,
       });
-      setMsg(undefined);
     }
-  }, [msg, engine.notes]);
-
+  }, [noteActive?.id]);
   const roots = _.filter(_.values(engine.notes), DNodeUtils.isRoot).map(
     (ent) => {
       return TreeViewUtils.note2TreeDatanote({
@@ -133,6 +121,7 @@ export default function TreeViewContainer({
   // controlled compo: what keys should be expanded
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
 
+  // --- render
   return (
     <>
       <TreeView
@@ -153,7 +142,7 @@ function TreeView({
   defaultExpandKeys: string[];
   onExpand: OnExpandFunc;
 }) {
-  const onSelect: OnSelectFunc = (selectedKeys, { node }) => {
+  const onSelect: OnSelectFunc = (_selectedKeys, { node }) => {
     const id = node.key;
     VSCodeUtils.postMessage({
       type: TreeViewMessageType.onSelect,

@@ -1,11 +1,12 @@
-import { Logger } from "@aws-amplify/core";
 import {
   DendronApiV2,
   DEngineInitPayload,
   NotePropsDict,
+  stringifyError,
 } from "@dendronhq/common-all";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import _ from "lodash";
+import { createLogger } from "../../utils";
 
 /**
  * Equivalent to engine.init
@@ -13,21 +14,22 @@ import _ from "lodash";
 export const initNotes = createAsyncThunk(
   "engine/init",
   async ({ port, ws }: { port: number; ws: string }, { dispatch }) => {
-    const logger = new Logger("initNotesThunk");
-    logger.info({ state: "enter" });
+    const logger = createLogger("initNotesThunk");
+    const endpoint = `http://localhost:${port}`;
+    logger.info({ state: "enter", endpoint, port, ws });
     const api = new DendronApiV2({
-      endpoint: `http://localhost:${port}`,
+      endpoint,
       apiPath: "api",
       logger,
     });
     logger.info({ state: "pre:workspaceSync" });
     const resp = await api.workspaceSync({ ws });
     logger.info({ state: "post:workspaceSync" });
-    const data = resp.data;
-    if (resp.error || _.isUndefined(data)) {
-      dispatch(setError(resp.error));
+    if (resp.error) {
+      dispatch(setError(stringifyError(resp.error)));
       return resp;
     }
+    const data = resp.data!;
     logger.info({ state: "pre:setNotes" });
     dispatch(setFromInit(data));
     logger.info({ state: "post:setNotes" });
@@ -70,7 +72,7 @@ export const engineSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    const logger = new Logger("engineSlice");
+    const logger = createLogger("engineSlice");
     builder.addCase(initNotes.pending, (state, { meta }) => {
       logger.info({ state: "start:initNotes", requestId: meta.requestId });
       if (state.loading === "idle") {

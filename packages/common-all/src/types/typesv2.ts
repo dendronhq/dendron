@@ -455,6 +455,15 @@ export enum TreeViewMessageType {
   "onExpand" = "onExpand",
 }
 
+export type OnDidChangeActiveTextEditorData = {
+  note: NoteProps;
+  sync?: boolean;
+};
+
 export type VSCodeMessage = DMessage;
+export type OnDidChangeActiveTextEditorMsg = DMessage<
+  "onDidChangeActiveTextEditor",
+  OnDidChangeActiveTextEditorData
+>;
 
 export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;

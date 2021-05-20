@@ -1,15 +1,22 @@
+import { OnDidChangeActiveTextEditorMsg } from "@dendronhq/common-all";
 import {
-  createLogger,
+  combinedStore, createLogger,
   engineHooks,
   engineSlice,
-  engineStore,
+
+
+  ideHooks, ideSlice,
+
   setLogLevel,
+  useVSCodeMessage,
+  querystring
 } from "@dendronhq/common-frontend";
+import _ from "lodash";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
+import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 import { Provider } from "react-redux";
 import Layout from "../components/layout";
-import { ThemeSwitcherProvider } from "react-css-theme-switcher";
 
 const themes = {
   dark: `/dark-theme.css`,
@@ -19,32 +26,66 @@ const themes = {
 const { useEngineAppSelector, useEngine } = engineHooks;
 const { EngineSliceUtils } = engineSlice;
 
-function AppVSCode({ Component, pageProps }) {
+function AppVSCode({ Component, pageProps }: any) {
+
+  // --- hooks
   const router = useRouter();
   const { query, isReady } = router;
+  const ide = ideHooks.useIDEAppSelector((state) => state.ide);
+  const engine = useEngineAppSelector((state) => state.engine);
+  const dispatch = ideHooks.useIDEAppDispatch();
+  // set logging
   useEffect(() => {
     setLogLevel("INFO");
   });
-  const engine = useEngineAppSelector((state) => state.engine);
-  useEngine({ engine, opts: query });
+  useEngine({ engineState: engine, opts: query });
+  const logger = createLogger("AppVSCode");
+
+  // listen to vscode events
+  useVSCodeMessage(async (msg) => {
+    const ctx = "useVSCodeMsg";
+    const { query } = router;
+    // when we get a msg from vscode, update our msg state
+    logger.info({ ctx, msg, query});
+
+    if (msg.type === "onDidChangeActiveTextEditor") {
+      let cmsg = msg as OnDidChangeActiveTextEditorMsg;
+      const {sync, note} = cmsg.data;
+      if (sync) {
+        // skip the initial ?
+        const {port, ws} = querystring.parse(window.location.search.slice(1)) as {port: string, ws: string}
+        logger.info({
+          ctx,
+          msg: "syncEngine:pre",
+          port, ws
+        })
+        await dispatch(engineSlice.initNotes({ port: parseInt(port as string), ws}));
+      }
+      logger.info({ ctx, msg: "syncEngine:post"});
+      dispatch(ideSlice.actions.setNoteActive(note));
+    } else {
+      logger.error({ctx, msg: "unknown message"});
+    }
+  });
+
+  // --- render
   if (!isReady) {
     return <> </>;
   }
-  const logger = createLogger("AppVSCode");
   logger.info({ ctx: "enter", query });
   if (!EngineSliceUtils.hasInitialized(engine)) {
     return null;
   }
-  return <Component engine={engine} {...pageProps} />;
+  return <Component engine={engine} ide={ide} {...pageProps} />;
 }
 
-function App({ Component, pageProps }) {
+function App({ Component, pageProps }: any) {
   // TODO: temporary as we're refactoring some things
   const router = useRouter();
   if (router.pathname.startsWith("/vscode")) {
     return (
       <ThemeSwitcherProvider themeMap={themes} defaultTheme="dark">
-        <Provider store={engineStore}>
+        <Provider store={combinedStore}>
           <AppVSCode Component={Component} pageProps={pageProps} />
         </Provider>
       </ThemeSwitcherProvider>

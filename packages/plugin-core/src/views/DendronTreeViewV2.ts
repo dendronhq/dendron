@@ -1,8 +1,8 @@
 import {
-  DMessage,
   DMessageSource,
   DUtils,
   NoteProps,
+  OnDidChangeActiveTextEditorMsg,
   TreeViewMessage,
   TreeViewMessageType,
 } from "@dendronhq/common-all";
@@ -60,9 +60,12 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
       this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
       this._view.webview.postMessage({
         type: "onDidChangeActiveTextEditor",
-        data: note,
+        data: {
+          note,
+          sync: true,
+        },
         source: "vscode",
-      } as DMessage);
+      } as OnDidChangeActiveTextEditorMsg);
     }
   }
 

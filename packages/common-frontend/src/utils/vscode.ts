@@ -1,6 +1,10 @@
 import { DMessage, VSCodeMessage } from "@dendronhq/common-all";
 import { useEffect } from "react";
 
+/**
+ * Listen to vscode messages
+ * @param setMsgHook
+ */
 export const useVSCodeMessage = (setMsgHook: (msg: VSCodeMessage) => void) => {
   const listener = (msg: DMessage) => {
     const payload = msg.data || {}; // The JSON data our extension sent

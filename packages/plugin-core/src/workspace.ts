@@ -31,6 +31,7 @@ import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import {
   CONFIG,
+  DendronContext,
   DendronViewKey,
   DENDRON_COMMANDS,
   extensionQualifiedId,
@@ -425,13 +426,16 @@ export class DendronWorkspace {
             sampleView
           )
         );
-
-        context.subscriptions.push(
-          vscode.window.registerWebviewViewProvider(
-            DendronTreeViewV2.viewType,
-            provider
-          )
-        );
+        if (getWS().config.dev?.enableWebUI) {
+          Logger.info({ ctx, msg: "initWebUI" });
+          context.subscriptions.push(
+            vscode.window.registerWebviewViewProvider(
+              DendronTreeViewV2.viewType,
+              provider
+            )
+          );
+          VSCodeUtils.setContext(DendronContext.WEB_UI_ENABLED, true);
+        }
 
         // backlinks
         Logger.info({ ctx, msg: "init:backlinks" });

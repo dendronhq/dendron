@@ -399,11 +399,7 @@ export async function _activate(context: vscode.ExtensionContext) {
 function toggleViews(enabled: boolean) {
   const ctx = "toggleViews";
   Logger.info({ ctx, msg: `views enabled: ${enabled}` });
-  vscode.commands.executeCommand(
-    "setContext",
-    DendronContext.PLUGIN_ACTIVE,
-    enabled
-  );
+  VSCodeUtils.setContext(DendronContext.PLUGIN_ACTIVE, enabled);
 }
 
 // this method is called when your extension is deactivated

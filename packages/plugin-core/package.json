@@ -58,7 +58,7 @@
                 {
                     "id": "dendron.treeViewV2",
                     "name": "Tree View V2",
-                    "when": "dendron:devMode",
+                    "when": "dendron:webUIEnabled",
                     "type": "webview"
                 },
                 {

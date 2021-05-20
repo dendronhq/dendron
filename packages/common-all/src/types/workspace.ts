@@ -153,7 +153,14 @@ export type DendronDevConfig = {
    * Static assets for next
    */
   nextStaticRoot?: string;
+  /**
+   * What port to use for engine server. Default behavior is to create at startup
+   */
   engineServerPort?: number;
+  /**
+   * Enable experimental web ui. Default is false
+   */
+  enableWebUI?: boolean;
 };
 
 export type DendronSiteConfig = {

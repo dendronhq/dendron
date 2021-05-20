@@ -6,6 +6,7 @@ export const DEFAULT_LEGACY_VAULT_NAME = "vault";
 
 export enum DendronContext {
   PLUGIN_ACTIVE = "dendron:pluginActive",
+  WEB_UI_ENABLED = "dendron:webUIEnabled",
   DEV_MODE = "dendron:devMode",
 }
 
@@ -33,7 +34,7 @@ export const DENDRON_VIEWS = [
   {
     id: DendronViewKey.TREE_VIEW_V2,
     name: "Tree View V2",
-    when: DendronContext.DEV_MODE,
+    when: DendronContext.WEB_UI_ENABLED,
     where: "explorer",
     type: "webview",
   },

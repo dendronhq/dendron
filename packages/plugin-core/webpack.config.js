@@ -35,9 +35,9 @@ const config = {
     extensions: [".ts", ".js"],
   },
   plugins: [
-    // new CopyPlugin({
-    //   patterns: [{ from: path.join("assets", "static"), to: "static" }],
-    // }),
+    new CopyPlugin({
+      patterns: [{ from: path.join("assets", "static"), to: "static" }],
+    }),
     new IgnorePlugin({
       resourceRegExp: /fsevents/
     }),

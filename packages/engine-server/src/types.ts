@@ -5,7 +5,7 @@ import {
   Node as UnistNode,
   Parent as UnistParent,
 } from "unist";
-export { DEngineClient as DEngineClient };
+export { DEngineClient };
 export { Heading };
 export { UnistNode as Node };
 

@@ -40,7 +40,7 @@ export async function createEngineFromEngine(opts: WorkspaceOpts) {
   return engineServerCreateEngine(opts) as DEngineClient;
 }
 
-export { DEngineClient as DEngineClient, DVault, WorkspaceOpts };
+export { DEngineClient, DVault, WorkspaceOpts };
 
 /**
  * Create a server

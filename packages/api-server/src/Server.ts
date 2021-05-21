@@ -10,8 +10,16 @@ import querystring from "querystring";
 import { LOGGER_NAME } from "./constants";
 import { baseRouter } from "./routes";
 
-export function appModule({ logPath, nextServerUrl, nextStaticRoot }: { logPath: string, nextServerUrl?: string, nextStaticRoot?: string }) {
-  const ctx = "appModule:start"
+export function appModule({
+  logPath,
+  nextServerUrl,
+  nextStaticRoot,
+}: {
+  logPath: string;
+  nextServerUrl?: string;
+  nextStaticRoot?: string;
+}) {
+  const ctx = "appModule:start";
   const logger = createLogger(LOGGER_NAME);
   const app = express();
   app.use(cors());
@@ -31,18 +39,23 @@ export function appModule({ logPath, nextServerUrl, nextStaticRoot }: { logPath:
 
   logger.info({ ctx, dirPath: __dirname });
   const staticDir = path.join(__dirname, "static");
-  app.use(express.static(staticDir, { fallthrough: true,  }));
+  app.use(express.static(staticDir, { fallthrough: true }));
 
   if (nextStaticRoot) {
-    logger.info({ctx, msg: "nextStaticRoot:add", nextStaticRoot})
+    logger.info({ ctx, msg: "nextStaticRoot:add", nextStaticRoot });
     app.use(express.static(nextStaticRoot));
   }
 
   if (nextServerUrl) {
-    logger.info({ctx, msg: "adding nextServerUrl", nextServerUrl})
+    logger.info({ ctx, msg: "adding nextServerUrl", nextServerUrl });
     app.use("/vscode", (req, res) => {
-      const redirectUrl = nextServerUrl + "/vscode" + req.path.replace(/.html/, "") + "?" + querystring.stringify(req.query as any);
-      logger.info({ctx, msg: "redirecting", redirectUrl})
+      const redirectUrl =
+        nextServerUrl +
+        "/vscode" +
+        req.path.replace(/.html/, "") +
+        "?" +
+        querystring.stringify(req.query as any);
+      logger.info({ ctx, msg: "redirecting", redirectUrl });
       return res.redirect(redirectUrl);
     });
   }

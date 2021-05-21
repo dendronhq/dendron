@@ -153,7 +153,7 @@ export type DendronDevConfig = {
    * Static assets for next
    */
   nextStaticRoot?: string;
-}
+};
 
 export type DendronSiteConfig = {
   /**

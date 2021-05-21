@@ -454,6 +454,10 @@ export enum TreeViewMessageType {
   "onSelect" = "onSelect",
   "onExpand" = "onExpand",
 }
+export enum ThemeMessageType {
+  "onThemeChange" = "onThemeChange",
+  "getTheme" = "getTheme",
+}
 
 export type OnDidChangeActiveTextEditorData = {
   note: NoteProps;

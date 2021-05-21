@@ -1,6 +1,7 @@
 import {
   BookOutlined, PlusOutlined
 } from '@ant-design/icons';
+import { Spin } from 'antd';
 import {
   DMessageSource,
   DNodeUtils,
@@ -10,7 +11,7 @@ import {
   TreeViewMessageType,
   VaultUtils
 } from "@dendronhq/common-all";
-import { createLogger, engineSlice, VSCodeUtils } from "@dendronhq/common-frontend";
+import { createLogger, engineSlice, postVSCodeMessage} from "@dendronhq/common-frontend";
 import { Tree, TreeProps } from "antd";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
@@ -149,7 +150,7 @@ function TreeViewParent({ engine, ide }: DendronProps) {
       ctx,
       state: "exit:engineNoInit",
     });
-    return <></>;
+    return <Spin/>;
   }
   const roots = _.filter(_.values(engine.notes), DNodeUtils.isRoot).map(
     (ent) => {
@@ -190,7 +191,7 @@ function TreeView({
 }) {
   const onSelect: OnSelectFunc = (_selectedKeys, { node }) => {
     const id = node.key;
-    VSCodeUtils.postMessage({
+    postVSCodeMessage({
       type: TreeViewMessageType.onSelect,
       data: { id },
       source: DMessageSource.webClient,
@@ -208,7 +209,7 @@ function TreeView({
           treeData={treeData}
         ></Tree>
       ) : (
-        "Loading..."
+        <Spin/>
       )}
     </>
   );

@@ -28,7 +28,7 @@ export const DENDRON_VIEWS = [
   {
     id: DendronViewKey.TREE_VIEW,
     name: "Tree View",
-    when: DendronContext.PLUGIN_ACTIVE,
+    when: `${DendronContext.PLUGIN_ACTIVE} && !${DendronContext.WEB_UI_ENABLED}`,
     where: "explorer",
   },
   {

@@ -431,7 +431,12 @@ export class DendronWorkspace {
           context.subscriptions.push(
             vscode.window.registerWebviewViewProvider(
               DendronTreeViewV2.viewType,
-              provider
+              provider,
+              {
+                webviewOptions: {
+                  retainContextWhenHidden: true,
+                },
+              }
             )
           );
           VSCodeUtils.setContext(DendronContext.WEB_UI_ENABLED, true);

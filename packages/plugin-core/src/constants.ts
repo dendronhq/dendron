@@ -13,7 +13,7 @@ export enum DendronContext {
 export enum DendronViewKey {
   SAMPLE_VIEW = "dendron.sample",
   TREE_VIEW = "dendron.treeView",
-  TREE_VIEW_V2 = "dendron.treeViewV2",
+  TREE_VIEW_V2 = "dendron.tree-view",
   BACKLINKS = "dendron.backlinks",
 }
 

@@ -1,11 +1,6 @@
 version: 1
 vaults:
     -
-        fsPath: vault2
-        remote: 
-          type: git
-          url: "https://github.com/kevin-dendron-dev/vault2.git"
-    -
         fsPath: vault
 useFMTitle: true
 useNoteTitleForLink: true
@@ -42,8 +37,10 @@ site:
             - vault2
             - vault
 dev:
+  enableWebUI: true
   nextServerUrl: http://localhost:3000
   engineServerPort: 3005
-  enableWebUI: true
+  # nextServerUrl: http://9e88b347fffc.ngrok.io
+#   engineServerUrl: "http://2fbf35e29cea.ngrok.io"
   # used when testing 
   #nextStaticRoot: /Users/kevinlin/projects/dendronv2/dendron/packages/dendron-next-server/out

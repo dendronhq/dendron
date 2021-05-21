@@ -53,6 +53,9 @@
             "path": "fixtures"
         },
         {
+            "path": "test-workspace"
+        },
+        {
             "path": "docs"
         },
     ],

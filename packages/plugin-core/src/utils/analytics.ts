@@ -38,6 +38,7 @@ export class AnalyticsUtils {
       arch: process.arch,
       nodeVersion: process.version,
       ideVersion: vscode.version,
+      ideFlavor: vscode.env.appName,
     };
   }
   static getContext(): Partial<SegmentContext> {

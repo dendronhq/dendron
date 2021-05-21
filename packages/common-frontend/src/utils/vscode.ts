@@ -22,12 +22,10 @@ export const useVSCodeMessage = (setMsgHook: (msg: VSCodeMessage) => void) => {
   }, []);
 };
 
-export class VSCodeUtils {
-  static postMessage(msg: DMessage) {
+export const postVSCodeMessage = (msg: DMessage) => {
+  // @ts-ignore
+  if (window) {
     // @ts-ignore
-    if (window) {
-      // @ts-ignore
-      window.parent.postMessage(msg, "*");
-    }
+    window.parent.postMessage(msg, "*");
   }
-}
+};

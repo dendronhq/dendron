@@ -1,14 +1,11 @@
-import { OnDidChangeActiveTextEditorMsg } from "@dendronhq/common-all";
+import { DMessageSource, OnDidChangeActiveTextEditorMsg, ThemeMessageType } from "@dendronhq/common-all";
+import { Spin } from 'antd';
 import {
   combinedStore, createLogger,
   engineHooks,
   engineSlice,
-
-
   ideHooks, ideSlice,
-
-
-
+  postVSCodeMessage,
   querystring, setLogLevel,
   useVSCodeMessage
 } from "@dendronhq/common-frontend";
@@ -33,14 +30,19 @@ function AppVSCode({ Component, pageProps }: any) {
   const { query, isReady } = router;
   const ide = ideHooks.useIDEAppSelector((state) => state.ide);
   const engine = useEngineAppSelector((state) => state.engine);
-  const dispatch = ideHooks.useIDEAppDispatch();
+  const ideDispatch = ideHooks.useIDEAppDispatch();
   // set logging
   useEffect(() => {
     setLogLevel("INFO");
-  });
+    postVSCodeMessage({
+      type: ThemeMessageType["getTheme"],
+      data: {},
+      source: DMessageSource.webClient,
+    })
+  }, []);
   useEngine({ engineState: engine, opts: query });
   const logger = createLogger("AppVSCode");
-  logger.info({ state: "enter", query });
+  logger.info({ state: "enter!", query });
 
   // --- effects
   // listen to vscode events
@@ -61,11 +63,16 @@ function AppVSCode({ Component, pageProps }: any) {
           msg: "syncEngine:pre",
           port, ws
         })
-        await dispatch(engineSlice.initNotes({ port: parseInt(port as string), ws}));
+        await ideDispatch(engineSlice.initNotes({ port: parseInt(port as string), ws}));
       }
       logger.info({ ctx, msg: "syncEngine:post"});
-      dispatch(ideSlice.actions.setNoteActive(note));
+      ideDispatch(ideSlice.actions.setNoteActive(note));
       logger.info({ ctx, msg: "setNote:post"});
+    } else if (msg.type === ThemeMessageType.onThemeChange) {
+      let cmsg = msg; 
+      const {theme} = cmsg.data;
+      logger.info({ ctx, theme, msg: "theme"});
+      ideDispatch(ideSlice.actions.setTheme(theme))
     } else {
       logger.error({ctx, msg: "unknown message"});
     }
@@ -74,10 +81,18 @@ function AppVSCode({ Component, pageProps }: any) {
   // --- render
   if (!isReady) {
     logger.info({ ctx: "exit", state: "router:notInitialized"});
-    return <> </>;
+    return <Spin/>
   }
   logger.info({ ctx: "exit", state: "render:child", engine, ide});
-  return <Component engine={engine} ide={ide} {...pageProps} />;
+  let defaultTheme = "light";
+  if (ide.theme !== "unknown") {
+    defaultTheme = ide.theme;
+  }
+  return (
+    <ThemeSwitcherProvider themeMap={themes} defaultTheme={defaultTheme} >
+        <Component engine={engine} ide={ide} {...pageProps} />
+    </ThemeSwitcherProvider>
+  );
 }
 
 function App({ Component, pageProps }: any) {
@@ -85,11 +100,9 @@ function App({ Component, pageProps }: any) {
   const router = useRouter();
   if (router.pathname.startsWith("/vscode")) {
     return (
-      <ThemeSwitcherProvider themeMap={themes} defaultTheme="dark">
         <Provider store={combinedStore}>
           <AppVSCode Component={Component} pageProps={pageProps} />
         </Provider>
-      </ThemeSwitcherProvider>
     );
   }
   return (

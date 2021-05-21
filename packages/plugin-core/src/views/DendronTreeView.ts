@@ -5,6 +5,7 @@ import {
   NoteProps,
   NoteUtils,
   VaultUtils,
+  DendronViewKey,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
@@ -17,7 +18,7 @@ import vscode, {
   window,
 } from "vscode";
 import { GotoNoteCommandOpts } from "../commands/GotoNote";
-import { DendronViewKey, DENDRON_COMMANDS, ICONS } from "../constants";
+import { DENDRON_COMMANDS, ICONS } from "../constants";
 import { Logger } from "../logger";
 import { DendronWorkspace, getEngine, getWS } from "../workspace";
 import { HistoryEvent, HistoryService } from "@dendronhq/engine-server";

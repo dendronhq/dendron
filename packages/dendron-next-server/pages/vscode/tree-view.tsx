@@ -1,22 +1,27 @@
+import { BookOutlined, PlusOutlined } from "@ant-design/icons";
+import { Spin } from "antd";
 import {
-  BookOutlined, PlusOutlined
-} from '@ant-design/icons';
-import { Spin } from 'antd';
-import {
+  DendronViewKey,
   DMessageSource,
   DNodeUtils,
   NoteProps,
   NotePropsDict,
   TreeViewMessage,
   TreeViewMessageType,
-  VaultUtils
+  VaultUtils,
 } from "@dendronhq/common-all";
-import { createLogger, engineSlice, postVSCodeMessage} from "@dendronhq/common-frontend";
+import {
+  createLogger,
+  engineSlice,
+  ideHooks,
+  postVSCodeMessage,
+} from "@dendronhq/common-frontend";
 import { Tree, TreeProps } from "antd";
 import _ from "lodash";
 import { DataNode } from "rc-tree/lib/interface";
 import React, { useState } from "react";
 import { DendronProps } from "../../lib/types";
+import { ideSlice } from "@dendronhq/common-frontend/lib/features/ide/slice";
 
 type OnExpandFunc = TreeProps["onExpand"];
 type OnSelectFunc = TreeProps["onSelect"];
@@ -75,20 +80,21 @@ class TreeViewUtils {
 
 const { EngineSliceUtils } = engineSlice;
 
-
 function areEqual(prevProps: DendronProps, nextProps: DendronProps) {
   const logger = createLogger("treeViewContainer");
   const isDiff = _.some([
     // active note changed
     prevProps.ide.noteActive?.id !== nextProps.ide.noteActive?.id,
     // engine initialized for first time
-    (_.isUndefined(prevProps.engine.notes) || _.isEmpty(prevProps.engine.notes) && !_.isEmpty(nextProps.engine.notes)),
-    // engine just went from pending to loading 
-    (prevProps.engine.loading === "pending" && nextProps.engine.loading === "idle")
-  ])
-  logger.info({state:"areEqual", isDiff, prevProps, nextProps})
+    _.isUndefined(prevProps.engine.notes) ||
+      (_.isEmpty(prevProps.engine.notes) && !_.isEmpty(nextProps.engine.notes)),
+    // engine just went from pending to loading
+    prevProps.engine.loading === "pending" &&
+      nextProps.engine.loading === "idle",
+  ]);
+  logger.info({ state: "areEqual", isDiff, prevProps, nextProps });
   return !isDiff;
-};
+}
 
 const TreeViewContainer = React.memo(TreeViewParent, areEqual);
 export default TreeViewContainer;
@@ -150,7 +156,7 @@ function TreeViewParent({ engine, ide }: DendronProps) {
       ctx,
       state: "exit:engineNoInit",
     });
-    return <Spin/>;
+    return <Spin />;
   }
   const roots = _.filter(_.values(engine.notes), DNodeUtils.isRoot).map(
     (ent) => {
@@ -163,6 +169,24 @@ function TreeViewParent({ engine, ide }: DendronProps) {
   );
   // controlled compo: what keys should be expanded
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
+  if (!ide.views[DendronViewKey.TREE_VIEW_V2].ready) {
+    const ideDispatch = ideHooks.useIDEAppDispatch();
+    logger.info({
+      ctx,
+      state: "setViewReady",
+    });
+    ideDispatch(
+      ideSlice.actions.setViewReady({
+        key: DendronViewKey.TREE_VIEW_V2,
+        ready: true,
+      })
+    );
+    postVSCodeMessage({
+      source: DMessageSource.webClient,
+      type: TreeViewMessageType.onReady,
+      data: {},
+    });
+  }
   logger.info({
     ctx,
     state: "exit",
@@ -209,7 +233,7 @@ function TreeView({
           treeData={treeData}
         ></Tree>
       ) : (
-        <Spin/>
+        <Spin />
       )}
     </>
   );

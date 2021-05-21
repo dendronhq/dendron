@@ -27,13 +27,13 @@ suite("DiagnosticsReport", function () {
         const cmd = new DiagnosticsReportCommand();
         await cmd.execute();
 
-        const body = (await VSCodeUtils.getActiveTextEditor()?.document.getText()) as string;
-        expect(
-          AssertUtils.assertInString({
-            body,
-            match: ["foobar", "Dendron Confg", "Plugin Logs", "Workspace File"],
-          })
-        ).toBeTruthy();
+        const editor = VSCodeUtils.getActiveTextEditor();
+        const body = editor?.document.getText() as string;
+        const isInString = await AssertUtils.assertInString({
+          body,
+          match: ["foobar", "Dendron Confg", "Plugin Logs", "Workspace File"],
+        });
+        expect(isInString).toBeTruthy();
         done();
       },
     });

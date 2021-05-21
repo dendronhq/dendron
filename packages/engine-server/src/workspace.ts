@@ -323,6 +323,7 @@ export class WorkspaceService {
     return repoPath;
   }
 
+  /** Returns the list of vaults that were attempted to be pulled, even if there was nothing to pull. */
   async pullVaults(): Promise<string[]> {
     const allRepos = await this.getAllRepos();
     const out = await Promise.all(
@@ -338,6 +339,7 @@ export class WorkspaceService {
     return _.filter(out, (ent) => !_.isUndefined(ent)) as string[];
   }
 
+  /** Returns the list of vaults that were attempted to be pushed, even if there was nothing to push. */
   async pushVaults(): Promise<string[]> {
     const allRepos = await this.getAllRepos();
     const vaults = this.config.vaults;

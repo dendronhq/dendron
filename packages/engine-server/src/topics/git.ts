@@ -57,10 +57,9 @@ export class Git {
   }
 
   /** Adds the `remoteUrl` set in the constructor as a remote, and sets it as the upstream for the main/master branch. */
-  async remoteAddUpstream() {
+  async remoteAdd() {
     const { remoteUrl } = this.opts;
     await this._execute(`git remote add origin ${remoteUrl}`);
-    await this._execute(`git branch --set-upstream-to=origin`);
   }
 
   async init() {
@@ -75,9 +74,12 @@ export class Git {
     });
   }
 
-  async push() {
+  async push(setUpstream?: { remote: string; branch: string }) {
     const { localUrl: cwd } = this.opts;
-    await execa.command([`git push`].join(" "), {
+    let setUpstremArg = "";
+    if (setUpstream)
+      setUpstremArg = ` --set-upstream ${setUpstream.remote} ${setUpstream.branch}`;
+    await execa.command([`git push${setUpstremArg}`].join(" "), {
       shell: true,
       cwd,
     });
@@ -105,6 +107,14 @@ export class Git {
       .split("\n")
       .filter((ent) => !_.isEmpty(ent))
       .map((ent) => _.trim(ent));
+  }
+
+  async getCurrentBranch() {
+    const { localUrl: cwd } = this.opts;
+    const { stdout } = await execa("git", [`branch`, `--show-current`], {
+      cwd,
+    });
+    return stdout.trim();
   }
 
   async hasChanges() {

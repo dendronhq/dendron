@@ -394,6 +394,12 @@ suite("MoveNoteCommand", function () {
     });
   });
 
+  const mockProvider: any = {
+    provide: () => {},
+    onUpdatePickerItems: () => {},
+    onDidAccept: () => {},
+  };
+
   test("don't prompt vault selection if single vault", (done) => {
     runLegacySingleWorkspaceTest({
       ctx,
@@ -412,15 +418,14 @@ suite("MoveNoteCommand", function () {
 
         await VSCodeUtils.openNote(fooNote);
         const lc = LookupControllerV3.create();
-        const provider = {} as any;
         const initialValue = path.basename(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
           ".md"
         );
-        lc.show({
+        await lc.show({
           title: "Move note",
           placeholder: "foo",
-          provider,
+          provider: mockProvider,
           initialValue,
         });
         expect(lc.quickpick.buttons[0].pressed).toBeFalsy();
@@ -449,15 +454,14 @@ suite("MoveNoteCommand", function () {
 
         await VSCodeUtils.openNote(fooNote);
         const lc = LookupControllerV3.create();
-        const provider = {} as any;
         const initialValue = path.basename(
           VSCodeUtils.getActiveTextEditor()?.document.uri.fsPath || "",
           ".md"
         );
-        lc.show({
+        await lc.show({
           title: "Move note",
           placeholder: "foo",
-          provider,
+          provider: mockProvider,
           initialValue,
         });
         expect(lc.quickpick.buttons[0].pressed).toBeTruthy();

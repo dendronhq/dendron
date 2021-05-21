@@ -54,6 +54,16 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
         case TreeViewMessageType.onGetActiveEditor: {
           const document = VSCodeUtils.getActiveTextEditor()?.document;
           if (document) {
+            if (
+              !getWS().workspaceService?.isPathInWorkspace(document.uri.fsPath)
+            ) {
+              Logger.info({
+                ctx,
+                uri: document.uri.fsPath,
+                msg: "not in workspace",
+              });
+              return;
+            }
             const note = VSCodeUtils.getNoteFromDocument(document);
             if (note) {
               Logger.info({

@@ -1,5 +1,6 @@
 import {
   NoteProps,
+  NoteUtils,
   OnDidChangeActiveTextEditorMsg,
   TreeViewMessage,
   TreeViewMessageType,
@@ -8,6 +9,7 @@ import * as vscode from "vscode";
 import { GotoNoteCommand } from "../commands/GotoNote";
 import { DendronViewKey } from "../constants";
 import { Logger } from "../logger";
+import { VSCodeUtils } from "../utils";
 import { getEngine, getWS } from "../workspace";
 import { WebViewUtils } from "./utils";
 
@@ -36,14 +38,29 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     webviewView.webview.onDidReceiveMessage(async (msg: TreeViewMessage) => {
+      Logger.info({ ctx: "onDidReceiveMessage", data: msg });
       switch (msg.type) {
         case TreeViewMessageType.onSelect: {
-          Logger.info({ ctx: "onDidReceiveMessage", data: msg });
           const note = getEngine().notes[msg.data.id];
           await new GotoNoteCommand().execute({
             qs: note.fname,
             vault: note.vault,
           });
+          break;
+        }
+        case TreeViewMessageType.onGetActiveEditor: {
+          const document = VSCodeUtils.getActiveTextEditor()?.document;
+          if (document) {
+            const note = VSCodeUtils.getNoteFromDocument(document);
+            if (note) {
+              Logger.info({
+                ctx: "onDidReceiveMessage",
+                msg: "refresh note",
+                note: NoteUtils.toLogObj(note),
+              });
+              this.refresh(note);
+            }
+          }
           break;
         }
         default:

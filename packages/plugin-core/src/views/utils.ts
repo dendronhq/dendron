@@ -72,14 +72,20 @@ export class WebViewUtils {
         const message = e.data;
         if (message.type && message.source === "webClient") {
             // check if we need a theme
-            if (message.type === "getTheme") {
-              console.log("sending theme to client");
+            if (message.type === "init") {
+              console.log("initilizing client");
               postMsg({
                   type: "onThemeChange",
                   source: "vscode",
                   data: {
                       theme: getTheme().dendronTheme
                   }
+              });
+              // get active editor from vscode
+              vscode.postMessage({
+                  type: "onGetActiveEditor",
+                  source: "webClient",
+                  data: {}
               });
             } else {
               console.log("got webclient event", message)

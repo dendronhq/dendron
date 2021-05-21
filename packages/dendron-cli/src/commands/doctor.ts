@@ -21,6 +21,13 @@ type CommandCLIOpts = {
   query?: string;
   limit?: number;
   dryRun?: boolean;
+  /**
+   * When set to true, calls process.exit when command is done.
+   *
+   * This is done for CLI commands to keep the server from running
+   * forever. when run from the plugin, we re-use the existing server
+   * so we don't want it to exit.
+   */
   exit?: boolean;
 } & SetupEngineCLIOpts;
 

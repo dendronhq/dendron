@@ -14,7 +14,7 @@
     "dev": "next dev",
     "prod": "env STAGE=prod next dev",
     "watch": "echo 0",
-    "build": "yarn build:prod",
+    "build": "yarn build:prod && yarn gen:theme",
     "build:dev": "env CDN_BUILD=1 STAGE=dev next build && next export",
     "build:prod": "env CDN_BUILD=1 STAGE=prod next build && next export",
     "start": "next start",

@@ -38,9 +38,10 @@ site:
             - vault
 dev:
   enableWebUI: true
-  nextServerUrl: http://localhost:3000
-  engineServerPort: 3005
-  # nextServerUrl: http://9e88b347fffc.ngrok.io
-#   engineServerUrl: "http://2fbf35e29cea.ngrok.io"
-  # used when testing 
-  #nextStaticRoot: /Users/kevinlin/projects/dendronv2/dendron/packages/dendron-next-server/out
+  # nextServerUrl: http://localhost:3000
+  # engineServerPort: 3005
+
+  # --- local
+  # nextStaticRoot: /Users/kevinlin/projects/dendronv2/dendron/packages/dendron-next-server/out
+  # --- remote 
+  # nextStaticRoot: /home/kevinlin/workspace/dendron/packages/dendron-next-server/out

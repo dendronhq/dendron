@@ -103,6 +103,7 @@ function TreeViewParent({ engine, ide }: DendronProps) {
   // --- init
   const ctx = "TreeViewContainer";
   const logger = createLogger("treeViewContainer");
+  const ideDispatch = ideHooks.useIDEAppDispatch();
   const [activeNoteIds, setActiveNoteIds] = useState<string[]>([]);
   logger.info({
     ctx,
@@ -170,7 +171,6 @@ function TreeViewParent({ engine, ide }: DendronProps) {
   // controlled compo: what keys should be expanded
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
   if (!ide.views[DendronViewKey.TREE_VIEW_V2].ready) {
-    const ideDispatch = ideHooks.useIDEAppDispatch();
     logger.info({
       ctx,
       state: "setViewReady",

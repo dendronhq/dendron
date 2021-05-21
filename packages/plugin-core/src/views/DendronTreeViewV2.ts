@@ -1,15 +1,18 @@
 import {
+  DendronViewKey,
   NoteProps,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
   TreeViewMessage,
   TreeViewMessageType,
+  VSCodeEvents,
 } from "@dendronhq/common-all";
+import { getDurationMilliseconds } from "@dendronhq/common-server";
 import * as vscode from "vscode";
 import { GotoNoteCommand } from "../commands/GotoNote";
-import { DendronViewKey } from "../constants";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
+import { AnalyticsUtils } from "../utils/analytics";
 import { getEngine, getWS } from "../workspace";
 import { WebViewUtils } from "./utils";
 
@@ -27,16 +30,16 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     _context: vscode.WebviewViewResolveContext,
     _token: vscode.CancellationToken
   ) {
+    const ctx = "DendronTreeViewV2:resolveWebView";
     this._view = webviewView;
-
+    let start = process.hrtime();
+    Logger.info({ ctx, msg: "enter", start });
     webviewView.webview.options = {
       // Allow scripts in the webview
       enableScripts: true,
       localResourceRoots: [this._extensionUri],
     };
-
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-
     webviewView.webview.onDidReceiveMessage(async (msg: TreeViewMessage) => {
       Logger.info({ ctx: "onDidReceiveMessage", data: msg });
       switch (msg.type) {
@@ -61,6 +64,14 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
               this.refresh(note);
             }
           }
+          break;
+        }
+        case TreeViewMessageType.onReady: {
+          const profile = getDurationMilliseconds(start);
+          Logger.info({ ctx, msg: "treeViewLoaded", profile, start });
+          AnalyticsUtils.track(VSCodeEvents.TreeView_Ready, {
+            duration: profile,
+          });
           break;
         }
         default:

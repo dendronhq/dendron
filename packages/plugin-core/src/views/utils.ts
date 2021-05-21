@@ -1,5 +1,4 @@
-import { DUtils } from "@dendronhq/common-all";
-import { DendronViewKey } from "../constants";
+import { DendronViewKey, DUtils } from "@dendronhq/common-all";
 import { Logger } from "../logger";
 import { DendronWorkspace, getWS } from "../workspace";
 

@@ -1,6 +1,7 @@
 import {
   DendronConfig,
   DendronError,
+  DendronViewKey,
   DEngineClient,
   DVault,
   ERROR_STATUS,
@@ -32,7 +33,6 @@ import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import {
   CONFIG,
   DendronContext,
-  DendronViewKey,
   DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,

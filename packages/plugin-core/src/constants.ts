@@ -1,3 +1,4 @@
+import { DendronViewKey } from "@dendronhq/common-all";
 import { CodeConfigKeys } from "./types";
 
 export const DENDRON_WS_NAME = "dendron.code-workspace";
@@ -8,13 +9,6 @@ export enum DendronContext {
   PLUGIN_ACTIVE = "dendron:pluginActive",
   WEB_UI_ENABLED = "dendron:webUIEnabled",
   DEV_MODE = "dendron:devMode",
-}
-
-export enum DendronViewKey {
-  SAMPLE_VIEW = "dendron.sample",
-  TREE_VIEW = "dendron.treeView",
-  TREE_VIEW_V2 = "dendron.tree-view",
-  BACKLINKS = "dendron.backlinks",
 }
 
 export const DENDRON_VIEWS = [

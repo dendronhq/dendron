@@ -450,9 +450,14 @@ export enum DMessageSource {
   webClient = "webClient",
 }
 
+export enum DMessageType {
+  init = "init",
+}
+
 export enum TreeViewMessageType {
   "onSelect" = "onSelect",
   "onExpand" = "onExpand",
+  "onGetActiveEditor" = "onGetActiveEditor",
 }
 export enum ThemeMessageType {
   "onThemeChange" = "onThemeChange",

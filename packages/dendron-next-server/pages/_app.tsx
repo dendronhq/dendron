@@ -1,4 +1,4 @@
-import { DMessageSource, OnDidChangeActiveTextEditorMsg, ThemeMessageType } from "@dendronhq/common-all";
+import { DMessageSource, OnDidChangeActiveTextEditorMsg, ThemeMessageType, DMessageType } from "@dendronhq/common-all";
 import { Spin } from 'antd';
 import {
   combinedStore, createLogger,
@@ -31,11 +31,12 @@ function AppVSCode({ Component, pageProps }: any) {
   const ide = ideHooks.useIDEAppSelector((state) => state.ide);
   const engine = useEngineAppSelector((state) => state.engine);
   const ideDispatch = ideHooks.useIDEAppDispatch();
-  // set logging
+
   useEffect(() => {
     setLogLevel("INFO");
+    // get variables from vscode parent
     postVSCodeMessage({
-      type: ThemeMessageType["getTheme"],
+      type: DMessageType.init,
       data: {},
       source: DMessageSource.webClient,
     })

@@ -1,9 +1,4 @@
-import {
-  DEngineClient,
-  // NoteUtils,
-  NoteProps,
-  // DLink,
-} from "@dendronhq/common-all";
+import { DEngineClient, NoteProps } from "@dendronhq/common-all";
 import {
   BackfillV2Command,
   DoctorActions,
@@ -48,7 +43,7 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
     return;
   }
 
-  async showPreview(candidates: NoteProps[]) {
+  async showMissingNotePreview(candidates: NoteProps[]) {
     let content = [
       "# Create Missing Linked Notes Preview",
       "",
@@ -98,43 +93,45 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         });
         break;
       }
-      // case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
-
-      //   // if (uniqueCandidates.length > 0) {
-      //   //   // show preview before creating
-      //   //   await this.showPreview(uniqueCandidates);
-      //   //   const options = ["proceed", "cancel"];
-      //   //   const shouldProceed = await VSCodeUtils.showQuickPick(options, {
-      //   //     placeHolder: "proceed",
-      //   //     ignoreFocusOut: true,
-      //   //   });
-      //   //   if (shouldProceed !== "proceed") {
-      //   //     window.showInformationMessage("cancelled");
-      //   //     break;
-      //   //   }
-      //   //   window.showInformationMessage("creating missing links...");
-      //   //   if (ws.vaultWatcher) {
-      //   //     ws.vaultWatcher.pause = true;
-      //   //   }
-      //     // _.forEach(uniqueCandidates, async ({ fname, vault }) => {
-      //     //   await engine.getNoteByPath({
-      //     //     npath: fname,
-      //     //     createIfNew: true,
-      //     //     vault: vault,
-      //     //   });
-      //     // });
-      //   // } else {
-      //   //   window.showInformationMessage(`There are no missing links!`);
-      //   // }
-      //   // if (ws.vaultWatcher) {
-      //   //   ws.vaultWatcher.pause = false;
-      //   // }
-      //   const cmd = new DoctorCLICommand();
-      //   await cmd.execute({
-      //     action: opts.action[Symbol]
-      //   })
-      //   break;
-      // }
+      case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
+        const cmd = new DoctorCLICommand();
+        let notes = _.values(engine.notes);
+        notes = notes.filter((note) => !note.stub);
+        const uniqueCandidates = cmd.getWildLinkDestinations(
+          notes,
+          engine.wsRoot
+        );
+        if (uniqueCandidates.length > 0) {
+          // show preview before creating
+          await this.showMissingNotePreview(uniqueCandidates);
+          const options = ["proceed", "cancel"];
+          const shouldProceed = await VSCodeUtils.showQuickPick(options, {
+            placeHolder: "proceed",
+            ignoreFocusOut: true,
+          });
+          if (shouldProceed !== "proceed") {
+            window.showInformationMessage("cancelled");
+            break;
+          }
+          window.showInformationMessage("creating missing links...");
+          if (ws.vaultWatcher) {
+            ws.vaultWatcher.pause = true;
+          }
+          await cmd.execute({
+            action: opts.action,
+            engine,
+            wsRoot,
+            server: {},
+            exit: false,
+          });
+        } else {
+          window.showInformationMessage(`There are no missing links!`);
+        }
+        if (ws.vaultWatcher) {
+          ws.vaultWatcher.pause = false;
+        }
+        break;
+      }
       default: {
         const cmd = new DoctorCLICommand();
         await cmd.execute({

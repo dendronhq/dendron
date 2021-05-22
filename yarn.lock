@@ -13197,6 +13197,11 @@ mdast-util-toc@^5.0.0:
     unist-util-is "^4.0.0"
     unist-util-visit "^2.0.0"
 
+mdast@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/mdast/-/mdast-3.0.0.tgz#626bce9603ed43fb6fb053245a6e4a17f4457aa8"
+  integrity sha1-YmvOlgPtQ/tvsFMkWm5KF/RFeqg=
+
 mdn-data@2.0.14:
   version "2.0.14"
   resolved "https://registry.npmjs.org/mdn-data/-/mdn-data-2.0.14.tgz#7113fc4281917d63ce29b43446f701e68c25ba50"

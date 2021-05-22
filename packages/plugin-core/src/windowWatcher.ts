@@ -4,7 +4,6 @@ import { DateTime } from "luxon";
 import { DecorationOptions, ExtensionContext, Range, window } from "vscode";
 import { Logger } from "./logger";
 import { CodeConfigKeys, DateTimeFormat } from "./types";
-import { VSCodeUtils } from "./utils";
 import { getConfigValue, getWS } from "./workspace";
 
 const tsDecorationType = window.createTextEditorDecorationType({
@@ -24,8 +23,6 @@ const tsDecorationType = window.createTextEditorDecorationType({
 
 export class WindowWatcher {
   activate(context: ExtensionContext) {
-    const ws = getWS();
-
     window.onDidChangeActiveTextEditor(
       (editor) => {
         const ctx = "WindowWatcher:onDidChangeActiveTextEditor";
@@ -41,10 +38,6 @@ export class WindowWatcher {
             return;
           }
           this.triggerUpdateDecorations();
-          const note = VSCodeUtils.getNoteFromDocument(editor.document);
-          if (ws.dendronTreeViewV2 && note) {
-            ws.dendronTreeViewV2.refresh(note);
-          }
         }
       },
       null,

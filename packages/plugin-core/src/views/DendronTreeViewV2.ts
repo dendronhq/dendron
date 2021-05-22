@@ -8,12 +8,14 @@ import {
   VSCodeEvents,
 } from "@dendronhq/common-all";
 import { getDurationMilliseconds } from "@dendronhq/common-server";
+import _ from "lodash";
+import path from "path";
 import * as vscode from "vscode";
 import { GotoNoteCommand } from "../commands/GotoNote";
 import { Logger } from "../logger";
 import { VSCodeUtils } from "../utils";
 import { AnalyticsUtils } from "../utils/analytics";
-import { getEngine, getWS } from "../workspace";
+import { DendronWorkspace, getEngine, getWS } from "../workspace";
 import { WebViewUtils } from "./utils";
 
 export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
@@ -23,6 +25,30 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
 
   constructor(private readonly _extensionUri: vscode.Uri) {
     getWS().dendronTreeViewV2 = this;
+    DendronWorkspace.instance().addDisposable(
+      vscode.window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
+    );
+  }
+
+  async onOpenTextDocument(editor: vscode.TextEditor | undefined) {
+    if (_.isUndefined(editor) || _.isUndefined(this._view)) {
+      return;
+    }
+    if (!this._view.visible) {
+      return;
+    }
+    const uri = editor.document.uri;
+    const basename = path.basename(uri.fsPath);
+    const ws = getWS();
+    if (!ws.workspaceService?.isPathInWorkspace(uri.fsPath)) {
+      return;
+    }
+    if (basename.endsWith(".md")) {
+      const note = VSCodeUtils.getNoteFromDocument(editor.document);
+      if (note) {
+        this.refresh(note);
+      }
+    }
   }
 
   public resolveWebviewView(

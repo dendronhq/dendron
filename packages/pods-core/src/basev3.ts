@@ -6,7 +6,7 @@ import {
   NoteUtils,
   PodConfig,
   VaultUtils,
-  WorkspaceOpts,
+  WorkspaceOpts
 } from "@dendronhq/common-all";
 import { createLogger, DLogger, resolvePath } from "@dendronhq/common-server";
 import _ from "lodash";
@@ -20,11 +20,13 @@ export type PodOpts<T> = {
 
 // === Publish Pod
 
-export type PublishPodExecuteOpts<T extends PublishPodConfig = any> =
-  PodOpts<T>;
+export type PublishPodExecuteOpts<T extends PublishPodConfig = any> = PodOpts<
+  T
+>;
 
-export type PublishPodPlantOpts<T extends PublishPodConfig = any> =
-  PublishPodExecuteOpts<T> & { note: NoteProps };
+export type PublishPodPlantOpts<
+  T extends PublishPodConfig = any
+> = PublishPodExecuteOpts<T> & { note: NoteProps };
 
 export type PublishPodConfig = {
   /**
@@ -49,18 +51,18 @@ export abstract class PublishPod<T extends PublishPodConfig = any> {
       {
         key: "fname",
         description: "name of src file",
-        type: "string" as const,
+        type: "string" as const
       },
       {
         key: "vaultName",
         description: "name of src vault",
-        type: "string" as const,
+        type: "string" as const
       },
       {
         key: "dest",
         description: "where to export to",
-        type: "string" as const,
-      },
+        type: "string" as const
+      }
     ];
   }
 
@@ -76,13 +78,13 @@ export abstract class PublishPod<T extends PublishPodConfig = any> {
 
     const vault = VaultUtils.getVaultByNameOrThrow({
       vaults: engine.vaults,
-      vname: vaultName,
+      vname: vaultName
     });
     const note = NoteUtils.getNoteByFnameV5({
       fname,
       notes: engine.notes,
       vault: vault!,
-      wsRoot: engine.wsRoot,
+      wsRoot: engine.wsRoot
     });
     if (!note) {
       throw Error("no note found");
@@ -110,11 +112,13 @@ export type ImportPodConfig = {
   frontmatter?: any;
   fnameAsId?: boolean;
 };
-export type ImportPodExecuteOpts<T extends ImportPodConfig = ImportPodConfig> =
-  PodOpts<T>;
+export type ImportPodExecuteOpts<
+  T extends ImportPodConfig = ImportPodConfig
+> = PodOpts<T>;
 
-export type ImportPodPlantOpts<T extends ImportPodConfig = ImportPodConfig> =
-  Omit<ImportPodExecuteOpts<T>, "src"> & { src: URI; vault: DVault };
+export type ImportPodPlantOpts<
+  T extends ImportPodConfig = ImportPodConfig
+> = Omit<ImportPodExecuteOpts<T>, "src"> & { src: URI; vault: DVault };
 
 export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
   public L: DLogger;
@@ -125,34 +129,34 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
         key: "src",
         description: "Where to import from",
         type: "string" as const,
-        required: true,
+        required: true
       },
       {
         key: "vaultName",
         description: "name of vault to import into",
         type: "string" as const,
-        required: true,
+        required: true
       },
       {
         key: "concatenate",
         description: "whether to concatenate everything into one note",
-        type: "boolean",
+        type: "boolean"
       },
       {
         key: "frontmatter",
         description: "frontmatter to add to each note",
-        type: "object",
+        type: "object"
       },
       {
         key: "fnameAsId",
         description: "use the file name as the id",
-        type: "boolean",
+        type: "boolean"
       },
       {
         key: "destName",
         description: "If concatenate is set, name of destination path",
-        type: "string" as const,
-      },
+        type: "string" as const
+      }
     ];
   }
   constructor() {
@@ -161,12 +165,12 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
 
   validate(config: Partial<T>) {
     const { src, vaultName, concatenate } = _.defaults(config, {
-      concatenate: false,
+      concatenate: false
     });
     const configJSON = JSON.stringify(config);
     if (_.isUndefined(src)) {
       throw new DendronError({
-        message: `no src specified. config: ${configJSON}`,
+        message: `no src specified. config: ${configJSON}`
       });
     }
     if (_.isUndefined(vaultName)) {
@@ -174,7 +178,7 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
     }
     if (concatenate && _.isUndefined(config?.destName)) {
       throw new DendronError({
-        message: "destName must be specified if concatenate is enabled",
+        message: "destName must be specified if concatenate is enabled"
       });
     }
   }
@@ -183,13 +187,13 @@ export abstract class ImportPod<T extends ImportPodConfig = ImportPodConfig> {
     const { config, engine } = opts;
     this.validate(config);
     const { src, vaultName } = _.defaults(config, {
-      concatenate: false,
+      concatenate: false
     });
 
     // validate config
     const vault = VaultUtils.getVaultByNameOrThrow({
       vaults: engine.vaults,
-      vname: vaultName,
+      vname: vaultName
     });
     const srcURL = URI.file(resolvePath(src, engine.wsRoot));
     return await this.plant({ ...opts, src: srcURL, vault });
@@ -208,15 +212,17 @@ export type ExportPodConfig = {
   includeStubs?: boolean;
   ignore?: string[];
 };
-export type ExportPodExecuteOpts<T extends ExportPodConfig = ExportPodConfig> =
-  PodOpts<T>;
+export type ExportPodExecuteOpts<
+  T extends ExportPodConfig = ExportPodConfig
+> = PodOpts<T>;
 
-export type ExportPodPlantOpts<T extends ExportPodConfig = ExportPodConfig> =
-  Omit<ExportPodExecuteOpts<T>, "dest"> & {
-    dest: URI;
-    vaults: DVault[];
-    notes: NoteProps[];
-  };
+export type ExportPodPlantOpts<
+  T extends ExportPodConfig = ExportPodConfig
+> = Omit<ExportPodExecuteOpts<T>, "dest"> & {
+  dest: URI;
+  vaults: DVault[];
+  notes: NoteProps[];
+};
 
 export abstract class ExportPod<
   T extends ExportPodConfig = ExportPodConfig,
@@ -230,19 +236,19 @@ export abstract class ExportPod<
         key: "dest",
         description: "Where to export to",
         type: "string" as const,
-        required: true,
+        required: true
       },
       {
         key: "includeBody",
         description: "should body be included",
         default: true,
-        type: "boolean",
+        type: "boolean"
       },
       {
         key: "includeStubs",
         description: "should stubs be included",
-        type: "boolean",
-      },
+        type: "boolean"
+      }
     ];
   }
   constructor() {
@@ -254,7 +260,7 @@ export abstract class ExportPod<
     const configJSON = JSON.stringify(config);
     if (_.isUndefined(dest)) {
       throw new DendronError({
-        message: `no dest specified. config: ${configJSON}`,
+        message: `no dest specified. config: ${configJSON}`
       });
     }
   }
@@ -266,7 +272,7 @@ export abstract class ExportPod<
    */
   preareNotesForExport({
     config,
-    notes,
+    notes
   }: {
     config: ExportPodConfig;
     notes: NoteProps[];
@@ -276,7 +282,7 @@ export abstract class ExportPod<
       notes = _.reject(notes, { stub: true });
     }
     if (!includeBody) {
-      notes = notes.map((ent) => ({ ...ent, body: "" }));
+      notes = notes.map(ent => ({ ...ent, body: "" }));
     }
     return notes;
   }
@@ -292,7 +298,7 @@ export abstract class ExportPod<
     // parse notes into NoteProps
     const notes = this.preareNotesForExport({
       config,
-      notes: _.values(engine.notes),
+      notes: _.values(engine.notes)
     });
 
     return await this.plant({ ...opts, dest: destURL, notes });

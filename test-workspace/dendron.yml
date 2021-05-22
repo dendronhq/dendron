@@ -38,8 +38,8 @@ site:
             - vault
 dev:
   enableWebUI: true
-  # nextServerUrl: http://localhost:3000
-  # engineServerPort: 3005
+  nextServerUrl: http://localhost:3000
+  engineServerPort: 3005
 
   # --- local
   # nextStaticRoot: /Users/kevinlin/projects/dendronv2/dendron/packages/dendron-next-server/out

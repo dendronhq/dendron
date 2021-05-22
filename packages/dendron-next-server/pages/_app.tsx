@@ -110,7 +110,7 @@ function AppVSCode({ Component, pageProps }: any) {
 function App({ Component, pageProps }: any) {
   // TODO: temporary as we're refactoring some things
   const router = useRouter();
-  if (router.pathname.startsWith("/vscode")) {
+  if (router.pathname.startsWith('/vscode')) {
     return (
       <Provider store={combinedStore}>
         <AppVSCode Component={Component} pageProps={pageProps} />

@@ -18,7 +18,7 @@ import {
   DendronASTNode,
   DendronASTTypes,
   NoteRefNoteV4,
-  NoteRefNoteV4_LEGACY,
+  NoteRefNoteV4_LEGACY
 } from "../types";
 import { file2Note } from "@dendronhq/common-server";
 import { MDUtilsV4, ParentWithIndex, renderFromNoteProps } from "../utils";
@@ -52,7 +52,7 @@ type ConvertNoteRefHelperOpts = ConvertNoteRefOpts & {
   note: NoteProps;
 };
 
-const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
+const plugin: Plugin = function(this: Unified.Processor, opts?: PluginOpts) {
   attachParser(this);
   if (this.Compiler != null) {
     attachCompiler(this, opts);
@@ -77,9 +77,9 @@ function attachParser(proc: Unified.Processor) {
       let refNote: NoteRefNoteV4 = {
         type: DendronASTTypes.REF_LINK_V2,
         data: {
-          link,
+          link
         },
-        value,
+        value
       };
 
       return eat(match[0])(refNote);
@@ -104,7 +104,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
   const { dest } = MDUtilsV4.getDendronData(proc);
 
   if (visitors) {
-    visitors.refLinkV2 = function (node: NoteRefNoteV4_LEGACY) {
+    visitors.refLinkV2 = function(node: NoteRefNoteV4_LEGACY) {
       const ndata = node.data;
       if (dest === DendronASTDest.MD_DENDRON) {
         const { fname, alias } = ndata.link.from;
@@ -132,7 +132,7 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
       const { error, data } = convertNoteRef({
         link: ndata.link,
         proc,
-        compilerOpts: copts,
+        compilerOpts: copts
       });
       if (error) {
         return `ERROR converting ref: ${error.message}`;
@@ -147,7 +147,9 @@ const MAX_REF_LVL = 3;
 /**
  * Look at links and do initial pass
  */
-function convertNoteRef(opts: ConvertNoteRefOpts): {
+function convertNoteRef(
+  opts: ConvertNoteRefOpts
+): {
   error: DendronError | undefined;
   data: string | undefined;
 } {
@@ -160,43 +162,43 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
   if (link.data.vaultName) {
     vault = VaultUtils.getVaultByNameOrThrow({
       vaults: engine.vaults,
-      vname: link.data.vaultName,
+      vname: link.data.vaultName
     })!;
   }
   if (!vault) {
     return {
       error: new DendronError({ message: "no vault specified" }),
-      data: "",
+      data: ""
     };
   }
   let { prettyRefs, wikiLinkOpts } = compilerOpts;
   if (refLvl >= MAX_REF_LVL) {
     return {
       error: new DendronError({ message: "too many nested note refs" }),
-      data,
+      data
     };
   }
 
   let noteRefs: DNoteLoc[] = [];
   if (link.from.fname.endsWith("*")) {
     const resp = engine.queryNotesSync({ qs: link.from.fname, vault });
-    const out = _.filter(resp.data, (ent) =>
+    const out = _.filter(resp.data, ent =>
       DUtils.minimatch(ent.fname, link.from.fname)
     );
     noteRefs = _.sortBy(
-      out.map((ent) => NoteUtils.toNoteLoc(ent)),
+      out.map(ent => NoteUtils.toNoteLoc(ent)),
       "fname"
     );
   } else {
     noteRefs.push(link.from);
   }
-  const out = noteRefs.map((ref) => {
+  const out = noteRefs.map(ref => {
     const fname = ref.fname;
     // TODO: find first unit with path
     const npath = DNodeUtils.getFullPath({
       wsRoot: engine.wsRoot,
       vault,
-      basename: fname + ".md",
+      basename: fname + ".md"
     });
     try {
       const note = file2Note(npath, vault);
@@ -207,10 +209,10 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
         link,
         refLvl: refLvl + 1,
         proc: MDUtilsV4.setDendronData(proc(), {
-          overrides: { insertTitle: false },
+          overrides: { insertTitle: false }
         }),
         //proc,
-        compilerOpts,
+        compilerOpts
       });
       if (error) {
         errors.push(error);
@@ -223,7 +225,7 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
             fname,
             notes: engine.notes,
             vault,
-            wsRoot: engine.wsRoot,
+            wsRoot: engine.wsRoot
           });
           suffix = ".html";
           if (maybeNote?.custom.permalink === "/") {
@@ -239,7 +241,7 @@ function convertNoteRef(opts: ConvertNoteRefOpts): {
         return renderPretty({
           content: data,
           title,
-          link,
+          link
         });
       } else {
         return data;
@@ -260,19 +262,23 @@ export function convertNoteRefASTV2(
   const { link, proc, compilerOpts, procOpts } = opts;
   const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
   const refLvl = MDUtilsV4.getNoteRefLvl(proc());
-  let { dest, vault, config, shouldApplyPublishRules } =
-    MDUtilsV4.getDendronData(proc);
+  let {
+    dest,
+    vault,
+    config,
+    shouldApplyPublishRules
+  } = MDUtilsV4.getDendronData(proc);
   if (link.data.vaultName) {
     vault = VaultUtils.getVaultByNameOrThrow({
       vaults: engine.vaults,
-      vname: link.data.vaultName,
+      vname: link.data.vaultName
     })!;
   }
 
   if (!vault) {
     return {
       error: new DendronError({ message: "no vault specified" }),
-      data: [],
+      data: []
     };
   }
   let { prettyRefs, wikiLinkOpts } = compilerOpts;
@@ -286,30 +292,30 @@ export function convertNoteRefASTV2(
   if (refLvl >= MAX_REF_LVL) {
     return {
       error: new DendronError({ message: "too many nested note refs" }),
-      data: [MDUtilsV4.genMDMsg("too many nested note refs")],
+      data: [MDUtilsV4.genMDMsg("too many nested note refs")]
     };
   }
 
   let noteRefs: DNoteLoc[] = [];
   if (link.from.fname.endsWith("*")) {
     const resp = engine.queryNotesSync({ qs: link.from.fname, vault });
-    const out = _.filter(resp.data, (ent) =>
+    const out = _.filter(resp.data, ent =>
       DUtils.minimatch(ent.fname, link.from.fname)
     );
     noteRefs = _.sortBy(
-      out.map((ent) => NoteUtils.toNoteLoc(ent)),
+      out.map(ent => NoteUtils.toNoteLoc(ent)),
       "fname"
     );
   } else {
     noteRefs.push(link.from);
   }
-  const out: Parent[] = noteRefs.map((ref) => {
+  const out: Parent[] = noteRefs.map(ref => {
     const fname = ref.fname;
     // TODO: find first unit with path
     const npath = DNodeUtils.getFullPath({
       wsRoot: engine.wsRoot,
       vault,
-      basename: fname + ".md",
+      basename: fname + ".md"
     });
     try {
       const note = file2Note(npath, vault);
@@ -318,7 +324,7 @@ export function convertNoteRefASTV2(
         !SiteUtils.canPublish({
           note,
           config: config!,
-          engine,
+          engine
         })
       ) {
         // TODO: in the future, add 403 pages
@@ -332,7 +338,7 @@ export function convertNoteRefASTV2(
         proc,
         compilerOpts,
         procOpts,
-        note,
+        note
       });
       if (error) {
         errors.push(error);
@@ -354,7 +360,7 @@ export function convertNoteRefASTV2(
         const isPublished = SiteUtils.isPublished({
           note,
           config: config!,
-          engine,
+          engine
         });
         const link = isPublished
           ? `"${wikiLinkOpts?.prefix || ""}${href}${suffix}"`
@@ -362,7 +368,7 @@ export function convertNoteRefASTV2(
         return renderPrettyAST({
           content: data,
           title,
-          link,
+          link
         });
       } else {
         return paragraph(data);
@@ -529,14 +535,14 @@ function convertNoteRefHelperAST(
       fname: note.fname,
       vault: note.vault,
       wsRoot: engine!.engine.wsRoot,
-      notes: engine!.engine.notes,
+      notes: engine!.engine.notes
     });
     bodyAST = noteRefProc.parse(contentsClean) as DendronASTNode;
   } else {
     bodyAST = noteRefProc.parse(note.body) as DendronASTNode;
   }
   const { anchorStart, anchorEnd, anchorStartOffset } = _.defaults(link.data, {
-    anchorStartOffset: 0,
+    anchorStartOffset: 0
   });
 
   let { start, end, data, error } = prepareNoteRefIndices({
@@ -576,9 +582,9 @@ function convertNoteRefHelperAST(
     return {
       error: new DendronError({
         message: "error processing note ref",
-        payload: err,
+        payload: err
       }),
-      data: MDUtilsV4.genMDMsg("error processing ref"),
+      data: MDUtilsV4.genMDMsg("error processing ref")
     };
   }
 }
@@ -611,7 +617,10 @@ function convertNoteRefHelper(
       .processSync(noteRefProc.stringify(bodyAST))
       .toString();
     if (anchorStartOffset) {
-      out = out.split("\n").slice(anchorStartOffset).join("\n");
+      out = out
+        .split("\n")
+        .slice(anchorStartOffset)
+        .join("\n");
     }
     return { error: null, data: out };
   } catch (err) {
@@ -620,9 +629,9 @@ function convertNoteRefHelper(
     return {
       error: new DendronError({
         message: "error processing note ref",
-        payload: err,
+        payload: err
       }),
-      data: "error processing ref",
+      data: "error processing ref"
     };
   }
 }
@@ -663,7 +672,7 @@ function findAnchor({
 function findHeader({
   nodes,
   match,
-  slugger,
+  slugger
 }: {
   nodes: DendronASTNode["children"];
   match: string;

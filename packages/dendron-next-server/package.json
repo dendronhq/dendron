@@ -42,6 +42,7 @@
     "autoprefixer": "^10.2.5",
     "aws-amplify": "^3.3.23",
     "babel-plugin-import": "^1.13.3",
+    "cytoscape": "^3.19.0",
     "formik": "^2.2.5",
     "formik-antd": "^2.0.1",
     "framer-motion": "^3.2.2-rc.1",
@@ -65,6 +66,7 @@
     "webpack-bundle-analyzer": "^4.4.1"
   },
   "devDependencies": {
+    "@types/cytoscape": "^3.14.15",
     "@types/lodash": "^4.14.161",
     "@types/node": "^14.11.2",
     "@types/react": "^16.9.50",

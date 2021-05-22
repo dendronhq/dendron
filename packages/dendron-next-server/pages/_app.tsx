@@ -34,7 +34,6 @@ function AppVSCode({ Component, pageProps }) {
   logger.info({ ctx: 'enter', query });
   return <Component engine={engine} {...pageProps} />;
   if (!EngineSliceUtils.hasInitialized(engine)) {
-    logger.log('oh no');
     return null;
   }
 }
@@ -42,7 +41,7 @@ function AppVSCode({ Component, pageProps }) {
 function App({ Component, pageProps }) {
   // TODO: temporary as we're refactoring some things
   const router = useRouter();
-  if (router.pathname.startsWith('/vscode') || router.pathname.startsWith('/graph')) {
+  if (router.pathname.startsWith('/vscode')) {
     return (
       <ThemeSwitcherProvider themeMap={themes} defaultTheme='dark'>
         <Provider store={engineStore}>
@@ -50,13 +49,6 @@ function App({ Component, pageProps }) {
         </Provider>
       </ThemeSwitcherProvider>
     );
-  }
-  if (router.pathname.startsWith('/graph')) {
-    <ThemeSwitcherProvider themeMap={themes} defaultTheme='dark'>
-      <Provider store={engineStore}>
-        <AppVSCode Component={Component} pageProps={pageProps} />
-      </Provider>
-    </ThemeSwitcherProvider>;
   }
   return (
     <Layout>

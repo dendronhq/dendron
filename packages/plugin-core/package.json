@@ -667,7 +667,7 @@
         "build": "yarn compile",
         "compile": "tsc -p tsconfig.build.json",
         "pretest": "yarn compile",
-        "test": "node ./out/test/runTestInteg.js",
+        "test": "node ./out/src/test/runTestInteg.js",
         "format": "prettier --write src '*.json' '*.js'"
     },
     "devDependencies": {

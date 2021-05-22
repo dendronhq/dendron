@@ -5,8 +5,8 @@ git clean -f
 git pull
 
 # don't install in workspace
-rm ../../package.json
 # conform to vscode naming  convention
+rm ../../package.json
 sed  -ibak 's/@dendronhq.plugin-core/dendron/' package.json
 sed  -ibak 's/out\/extension/dist\/extension/' package.json
 

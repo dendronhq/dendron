@@ -81,13 +81,13 @@
       "args": [
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/test/suite-integ/index.js"
+        "--extensionTestsPath=${workspaceFolder}/out/src/test/suite-integ/index.js"
       ],
       "env": {
         "TEST_TO_RUN": "",
         "STAGE": "test"
       },
-      "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
+      "outFiles": ["${workspaceFolder}/out/src/test/**/*.js"]
     },
     {
       "name": "Extension Integ Tests Remote",
@@ -96,13 +96,13 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/test/suite-integ/index.js"
+        "--extensionTestsPath=${workspaceFolder}/out/src/test/suite-integ/index.js"
       ],
       "env": {
         "TEST_TO_RUN": "",
         "STAGE": "test"
       },
-      "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
+      "outFiles": ["${workspaceFolder}/out/src/test/**/*.js"]
     },
     {
       "name": "Extension Integ Tests - File",
@@ -113,13 +113,13 @@
         //"${workspaceFolder}/fixtures/fake-workspace/dendron.code-workspace",
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/test/suite-integ/index",
+        "--extensionTestsPath=${workspaceFolder}/out/src/test/suite-integ/index",
       ],
       "env": {
         "STAGE": "test",
         "TEST_TO_RUN": "${fileBasenameNoExtension}"
       },
-      "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
+      "outFiles": ["${workspaceFolder}/out/src/test/**/*.js"]
     },
     {
       "name": "Extension Integ Tests - File Remote",
@@ -128,13 +128,13 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}",
-        "--extensionTestsPath=${workspaceFolder}/out/test/suite-integ/index",
+        "--extensionTestsPath=${workspaceFolder}/out/src/test/suite-integ/index",
       ],
       "env": {
         "STAGE": "test",
         "TEST_TO_RUN": "${fileBasenameNoExtension}"
       },
-      "outFiles": ["${workspaceFolder}/out/test/**/*.js"]
+      "outFiles": ["${workspaceFolder}/out/src/test/**/*.js"]
     }
   ],
   "compounds": [

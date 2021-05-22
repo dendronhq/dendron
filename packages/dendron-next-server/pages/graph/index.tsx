@@ -34,7 +34,7 @@ export default function FullGraph({
           id: `${notes.id}-${child}`,
           source: note.id,
           target: child,
-          classes: ['edge--hierarchy'],
+          classes: ['hierarchy'],
         },
       }));
 
@@ -63,6 +63,7 @@ export default function FullGraph({
     .flat();
 
   useEffect(() => {
+      logger.log(!!graphRef.current)
     if (graphRef.current) {
       setCy(
         cytoscape({
@@ -87,32 +88,12 @@ export default function FullGraph({
               selector: 'edge',
               style: {
                 width: 3,
-                'line-color': '#ccc',
-                'target-arrow-color': '#ccc',
-                'target-arrow-shape': 'triangle',
-                'curve-style': 'bezier',
-              },
-            },
-            {
-              selector: 'edge--hierarchy',
-              style: {
-                width: 3,
                 'line-color': '#54B758',
                 'target-arrow-color': '#54B758',
                 'target-arrow-shape': 'none',
                 'curve-style': 'bezier',
               },
             },
-            // {
-            //   selector: 'edge--link',
-            //   style: {
-            //     width: 2,
-            //     'line-color': '#548fb7',
-            //     'target-arrow-color': '#548fb7',
-            //     'target-arrow-shape': 'triangle',
-            //     'curve-style': 'bezier',
-            //   },
-            // },
           ],
 
           layout: {
@@ -121,7 +102,7 @@ export default function FullGraph({
         })
       );
     }
-  }, [graphRef]);
+  }, [graphRef, notes]);
 
   return <Box w='100vw' h='100vh' id='graph' ref={graphRef}></Box>;
 }

@@ -72,6 +72,43 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
   }
 
+  getWildLinkDestinations(notes: NoteProps[], wsRoot: string) {
+    let wildWikiLinks = [] as DLink[];
+    _.forEach(notes, (note) => {
+      const links = note.links;
+      if (_.isEmpty(links)) {
+        return;
+      }
+      wildWikiLinks = wildWikiLinks.concat(
+        _.filter(links, (link) => {
+          if (link.type !== "wiki") {
+            return false;
+          }
+          const destVault = link.to!.vault ? link.to!.vault : note.vault;
+          const noteExists = NoteUtils.getNoteByFnameV5({
+            fname: link.to!.fname as string,
+            vault: destVault,
+            notes: notes,
+            wsRoot: wsRoot,
+          }) as NoteProps;
+          return !noteExists;
+        })
+      );
+      return true;
+    });
+    const uniqueCandidates = _.map(
+      _.uniqBy(wildWikiLinks, "to.fname"),
+      (link) => {
+        const destVault = link.to!.vault ? link.to!.vault : link.from.vault;
+        return {
+          fname: link.to!.fname,
+          vault: destVault,
+        };
+      }
+    ) as NoteProps[];
+    return uniqueCandidates;
+  }
+
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
     const engineArgs = await setupEngine(args);
     return { ...args, ...engineArgs };
@@ -96,6 +133,11 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     let engineDelete = dryRun
       ? () => {}
       : throttle(_.bind(engine.deleteNote, engine), 300, {
+          leading: true,
+        });
+    let engineGetNoteByPath = dryRun
+      ? () => {}
+      : throttle(_.bind(engine.getNoteByPath, engine), 300, {
           leading: true,
         });
 
@@ -206,42 +248,14 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
         break;
       }
       case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
-        // pick out wild wikilinks
-        let wildWikiLinks = [] as DLink[];
-        _.forEach(notes, (note) => {
-          const links = note.links;
-          if (_.isEmpty(links)) {
-            return;
-          }
-          wildWikiLinks = wildWikiLinks.concat(
-            _.filter(links, (link) => {
-              if (link.type !== "wiki") {
-                return false;
-              }
-              const noteExists = NoteUtils.getNoteByFnameV5({
-                fname: link.to!.fname as string,
-                vault: note.vault,
-                notes: notes,
-                wsRoot: engine.wsRoot,
-              }) as NoteProps;
-              return !noteExists;
-            })
-          );
-          return true;
-        });
-        const uniqueCandidates = _.map(
-          _.uniqBy(wildWikiLinks, "to.fname"),
-          (link) => {
-            return {
-              fname: link.to!.fname,
-              vault: link.from.vault,
-            };
-          }
-        ) as NoteProps[];
-        notes = uniqueCandidates;
+        notes = this.getWildLinkDestinations(notes, engine.wsRoot);
         doctorAction = async (note: NoteProps) => {
-          await engineWrite(note);
           const vname = VaultUtils.getName(note.vault);
+          await engineGetNoteByPath({
+            npath: note.fname,
+            createIfNew: true,
+            vault: note.vault,
+          });
           console.log(
             `doctor ${DoctorActions.CREATE_MISSING_LINKED_NOTES} ${note.fname} ${vname}`
           );

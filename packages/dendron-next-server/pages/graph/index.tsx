@@ -38,32 +38,32 @@ export default function FullGraph({
         },
       }));
 
-      const linkConnections: EdgeDefinition[]  = []
-    //   = note.links.map((link) => {
-    //     if (link.to) {
-    //       const to = NoteUtils.getNoteByFnameV5({
-    //         fname: link.to!.fname as string,
-    //         vault: note.vault,
-    //         notes: notes,
-    //         wsRoot: router.query.ws,
-    //       });
-    //       return {
-    //         data: {
-    //           id: `${notes.id}-${to.id}`,
-    //           source: note.id,
-    //           target: to.id,
-    //           classes: ['edge--hierarchy'],
-    //         },
-    //       };
-    //     }
-    //   });
+      const linkConnections: EdgeDefinition[] = [];
+      //   = note.links.map((link) => {
+      //     if (link.to) {
+      //       const to = NoteUtils.getNoteByFnameV5({
+      //         fname: link.to!.fname as string,
+      //         vault: note.vault,
+      //         notes: notes,
+      //         wsRoot: router.query.ws,
+      //       });
+      //       return {
+      //         data: {
+      //           id: `${notes.id}-${to.id}`,
+      //           source: note.id,
+      //           target: to.id,
+      //           classes: ['edge--hierarchy'],
+      //         },
+      //       };
+      //     }
+      //   });
 
       return [...childConnections, ...linkConnections];
     })
     .flat();
 
   useEffect(() => {
-      logger.log(!!graphRef.current)
+    logger.log(!!graphRef.current);
     if (graphRef.current) {
       setCy(
         cytoscape({
@@ -78,9 +78,12 @@ export default function FullGraph({
             {
               selector: 'node',
               style: {
+                width: 30,
+                height: 30,
                 'background-color': '#666',
                 color: '#fff',
                 label: 'data(label)',
+                'font-size': 12,
               },
             },
 

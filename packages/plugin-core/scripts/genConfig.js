@@ -2,7 +2,7 @@ const {
   CONFIG,
   DENDRON_COMMANDS,
   DENDRON_VIEWS,
-} = require("../out/constants");
+} = require("../out/src/constants");
 const _ = require("lodash");
 const fs = require("fs-extra");
 const path = require("path");

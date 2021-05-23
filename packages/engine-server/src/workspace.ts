@@ -291,17 +291,21 @@ export class WorkspaceService {
     );
   }
 
+  getVaultForPath(fpath: string) {
+    return VaultUtils.getVaultByNotePathV4({
+      vaults: this.config.vaults,
+      wsRoot: this.wsRoot,
+      fsPath: fpath,
+    });
+  }
+
   /**
    * Check if a path belongs to a workspace
    */
   isPathInWorkspace(fpath: string) {
     try {
-      // check if selection comes from known vault
-      VaultUtils.getVaultByNotePathV4({
-        vaults: this.config.vaults,
-        wsRoot: this.wsRoot,
-        fsPath: fpath,
-      });
+      // if not error, then okay
+      this.getVaultForPath(fpath);
       return true;
     } catch {
       return false;

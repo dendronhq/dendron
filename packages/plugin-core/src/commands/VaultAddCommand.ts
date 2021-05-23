@@ -46,11 +46,11 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
   }
 
   generateRemoteEntries = (): SourceQuickPickEntry[] => {
-    return (DENDRON_REMOTE_VAULTS.map(
-      ({ name: label, description, data: src }) => {
+    return (
+      DENDRON_REMOTE_VAULTS.map(({ name: label, description, data: src }) => {
         return { label, description, src };
-      }
-    ) as SourceQuickPickEntry[]).concat([
+      }) as SourceQuickPickEntry[]
+    ).concat([
       {
         label: "custom",
         description: "custom endpoint",
@@ -83,7 +83,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
           const value = qp.value;
           const selected = qp.selectedItems[0];
           if (selected.label === "custom") {
-            if (PickerUtilsV2.isStringInputEmpty(value)) {
+            if (PickerUtilsV2.isInputEmpty(value)) {
               return window.showInformationMessage("please enter an endpoint");
             }
             selected.src = qp.value;
@@ -100,7 +100,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
             placeHolder: localVaultPathPlaceholder,
             value: path2Vault,
           });
-          if (PickerUtilsV2.isStringInputEmpty(out)) {
+          if (PickerUtilsV2.isInputEmpty(out)) {
             resolve(undefined);
           }
           sourcePath = out!;
@@ -125,7 +125,7 @@ export class VaultAddCommand extends BasicCommand<CommandOpts, CommandOutput> {
         prompt: "Path to your new vault (relative to your workspace root)",
         placeHolder: localVaultPathPlaceholder,
       });
-      if (PickerUtilsV2.isStringInputEmpty(out)) return;
+      if (PickerUtilsV2.isInputEmpty(out)) return;
       sourcePath = out!;
     }
     sourceName = await VSCodeUtils.showInputBox({

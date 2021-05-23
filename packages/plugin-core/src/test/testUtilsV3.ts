@@ -268,6 +268,7 @@ export function setupBeforeAfter(
   opts?: { beforeHook?: any; afterHook?: any }
 ) {
   let ctx: ExtensionContext;
+  // allows for debugging
   _this.timeout(TIMEOUT);
   ctx = VSCodeUtils.getOrCreateMockContext();
   beforeEach(async function () {

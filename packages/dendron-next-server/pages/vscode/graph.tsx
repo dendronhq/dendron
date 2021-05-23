@@ -19,52 +19,55 @@ export default function FullGraph({
   logger.info({ ctx: 'Graph', notes });
   const { switcher, themes, currentTheme, status } = useThemeSwitcher();
   const [_isDarkMode, setIsDarkMode] = React.useState(false);
-
-  const [cy, setCy] = useState<Core>();
   const graphRef = useRef();
-
-  const nodes = Object.values(notes).map((note) => ({
-    data: { id: note.id, label: note.title },
-  }));
-
-  const edges = Object.values(notes)
-    .map((note) => {
-      const childConnections: EdgeDefinition[] = note.children.map((child) => ({
-        data: {
-          id: `${notes.id}-${child}`,
-          source: note.id,
-          target: child,
-          classes: ['hierarchy'],
-        },
-      }));
-
-      const linkConnections: EdgeDefinition[] = [];
-      //   = note.links.map((link) => {
-      //     if (link.to) {
-      //       const to = NoteUtils.getNoteByFnameV5({
-      //         fname: link.to!.fname as string,
-      //         vault: note.vault,
-      //         notes: notes,
-      //         wsRoot: router.query.ws,
-      //       });
-      //       return {
-      //         data: {
-      //           id: `${notes.id}-${to.id}`,
-      //           source: note.id,
-      //           target: to.id,
-      //           classes: ['edge--hierarchy'],
-      //         },
-      //       };
-      //     }
-      //   });
-
-      return [...childConnections, ...linkConnections];
-    })
-    .flat();
+  const [cy, setCy] = useState<Core>();
 
   useEffect(() => {
-    logger.log(!!graphRef.current);
     if (graphRef.current) {
+      logger.log('Getting nodes...');
+      const nodes = Object.values(notes).map((note) => ({
+        data: { id: note.id, label: note.title },
+      }));
+
+      logger.log('Getting edges...');
+      const edges = Object.values(notes)
+        .map((note) => {
+          const childConnections: EdgeDefinition[] = note.children.map(
+            (child) => ({
+              data: {
+                id: `${notes.id}-${child}`,
+                source: note.id,
+                target: child,
+                classes: ['hierarchy'],
+              },
+            })
+          );
+
+          const linkConnections: EdgeDefinition[] = [];
+          //   = note.links.map((link) => {
+          //     if (link.to) {
+          //       const to = NoteUtils.getNoteByFnameV5({
+          //         fname: link.to!.fname as string,
+          //         vault: note.vault,
+          //         notes: notes,
+          //         wsRoot: router.query.ws,
+          //       });
+          //       return {
+          //         data: {
+          //           id: `${notes.id}-${to.id}`,
+          //           source: note.id,
+          //           target: to.id,
+          //           classes: ['edge--hierarchy'],
+          //         },
+          //       };
+          //     }
+          //   });
+
+          return [...childConnections, ...linkConnections];
+        })
+        .flat();
+
+      logger.log('Rendering graph...');
       setCy(
         cytoscape({
           container: graphRef.current,
@@ -78,30 +81,38 @@ export default function FullGraph({
             {
               selector: 'node',
               style: {
-                width: 30,
-                height: 30,
+                width: 15,
+                height: 15,
                 'background-color': '#666',
                 color: '#fff',
                 label: 'data(label)',
                 'font-size': 12,
+                'min-zoomed-font-size': 12,
               },
             },
 
             {
               selector: 'edge',
               style: {
-                width: 3,
+                width: 2,
                 'line-color': '#54B758',
                 'target-arrow-color': '#54B758',
                 'target-arrow-shape': 'none',
-                'curve-style': 'bezier',
+                'curve-style': 'haystack', // for lesser performance, use 'bezier',
               },
             },
           ],
 
           layout: {
-            name: 'cose',
+            name: 'cose', // 'cose'
+            animate: false,
+            ready: () => logger.log('Layout ready'),
           },
+
+          // Options to improve performance
+          textureOnViewport: true,
+          hideEdgesOnViewport: true,
+          hideLabelsOnViewport: true,
         })
       );
     }

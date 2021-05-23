@@ -4,7 +4,6 @@ import {
   VaultUtils,
   DLink,
   NoteUtils,
-  DVault,
 } from "@dendronhq/common-all";
 import {
   DendronASTDest,

@@ -4,6 +4,7 @@ import {
   VaultUtils,
   DLink,
   NoteUtils,
+  DVault,
 } from "@dendronhq/common-all";
 import {
   DendronASTDest,
@@ -73,7 +74,7 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
   }
 
   getWildLinkDestinations(notes: NoteProps[], wsRoot: string) {
-    let wildWikiLinks = [] as DLink[];
+    let wildWikiLinks: DLink[] = [];
     _.forEach(notes, (note) => {
       const links = note.links;
       if (_.isEmpty(links)) {
@@ -90,22 +91,22 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
             vault: destVault,
             notes: notes,
             wsRoot: wsRoot,
-          }) as NoteProps;
+          });
           return !noteExists;
         })
       );
       return true;
     });
-    const uniqueCandidates = _.map(
+    const uniqueCandidates: NoteProps[] = _.map(
       _.uniqBy(wildWikiLinks, "to.fname"),
       (link) => {
         const destVault = link.to!.vault ? link.to!.vault : link.from.vault;
-        return {
-          fname: link.to!.fname,
-          vault: destVault,
-        };
+        return NoteUtils.create({
+          fname: link.to!.fname!,
+          vault: destVault!,
+        });
       }
-    ) as NoteProps[];
+    );
     return uniqueCandidates;
   }
 

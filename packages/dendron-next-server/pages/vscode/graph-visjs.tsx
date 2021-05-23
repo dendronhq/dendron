@@ -4,7 +4,7 @@ import _ from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { Box } from '@chakra-ui/layout';
 import { useRouter } from 'next/router';
-import { Data, Network, Options } from 'vis-network';
+import { Data, DataSet, Network, Options } from 'vis-network';
 
 export default function FullGraphVizjs({
   engine,
@@ -47,14 +47,34 @@ export default function FullGraphVizjs({
       };
       const options: Options = {
         edges: {
-          smooth: true,
+          width: 0.15,
+          color: { inherit: 'from' },
+          smooth: {
+            enabled: true,
+            type: 'continuous',
+            roundness: 1,
+          },
         },
         nodes: {
-            // color: '#666666',
-            // shape: 'circle'
+          shape: 'dot',
+          scaling: {
+            min: 10,
+            max: 30,
+            label: {
+              min: 8,
+              max: 30,
+              drawThreshold: 12,
+              maxVisible: 20,
+            },
+          },
         },
-        layout: {
-          improvedLayout: true,
+        // Taken from https://visjs.github.io/vis-network/examples/static/jsfiddle.7610fcbd32f0ad59a94ac116ccfd21ebc4842436d2bb73c23c54626ed9ec1e23.html
+        // https://visjs.github.io/vis-network/examples/static/jsfiddle.a6eacda850dfe6c88d8ea581887b67b263eb310301cdd593e76f7cabd6df4800.html
+        physics: false,
+        interaction: {
+          tooltipDelay: 200,
+          hideEdgesOnDrag: true,
+          hideEdgesOnZoom: true,
         },
       };
 

@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { DendronError } from "@dendronhq/common-all";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { BlockAnchor, DendronASTDest } from "../types";
@@ -76,13 +77,11 @@ function attachCompiler(proc: Unified.Processor, _opts?: CompilerOpts) {
         case DendronASTDest.MD_DENDRON:
         case DendronASTDest.MD_REGULAR:
         case DendronASTDest.MD_ENHANCED_PREVIEW:
-        case DendronASTDest.HTML: {
-          // Anything more to do here? Can we embed HTML into the preview?
-          // Prints ^{\^block-id} so that it gets rendered small.
-          return `^\{\\^${node.id}\}`;
-        }
+        case DendronASTDest.HTML:
+          // Just hiding the anchor.'
+          return `<a href="#^${node.id}" style="font-size: 0.8em; opacity: 75%;" id="^${node.id}">^${node.id}</a>`;
         default:
-          return `unhandled case: ${dest}`;
+          throw new DendronError({ message: "Unable to render block anchor" });
       }
     };
   }

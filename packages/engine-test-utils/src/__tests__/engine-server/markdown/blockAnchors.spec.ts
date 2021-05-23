@@ -1,4 +1,9 @@
 import {
+  AssertUtils,
+  ENGINE_HOOKS,
+  TestPresetEntryV4,
+} from "@dendronhq/common-test-utils";
+import {
   DendronASTData,
   DendronASTDest,
   DEngineClient,
@@ -10,6 +15,8 @@ import {
   DendronASTNode,
 } from "@dendronhq/engine-server";
 import _ from "lodash";
+import { runEngineTestV5 } from "../../../engine";
+import { createProcTests, ProcTests } from "./utils";
 
 function proc(
   engine: DEngineClient,
@@ -23,6 +30,20 @@ function proc(
 
 function genDendronData(opts?: Partial<DendronASTData>): DendronASTData {
   return { ...opts } as any;
+}
+
+function runAllTests(opts: { name: string; testCases: ProcTests[] }) {
+  const { name, testCases } = opts;
+  describe(name, () => {
+    test.each(
+      testCases.map((ent) => [`${ent.dest}: ${ent.name}`, ent.testCase])
+    )("%p", async (_key, testCase: TestPresetEntryV4) => {
+      await runEngineTestV5(testCase.testFunc, {
+        expect,
+        preSetupHook: testCase.preSetupHook,
+      });
+    });
+  });
 }
 
 /** Gets the descendent (child, or child of child...) node of a given node.
@@ -89,5 +110,42 @@ describe("blockAnchors", () => {
       expect(anchor.type).toEqual("blockAnchor");
       expect(anchor.id).toEqual("block-id");
     });
+  });
+
+  describe.only("rendering", () => {
+    const anchor = "^my-block-anchor-0";
+    const REGULAR_CASE = createProcTests({
+      name: "regular",
+      setupFunc: async ({ engine, vaults, extra }) => {
+        const proc2 = MDUtilsV4.procFull({
+          engine,
+          fname: "foo",
+          wikiLinksOpts: { useId: true },
+          dest: extra.dest,
+          vault: vaults[0],
+        });
+        const resp = await proc2.process(anchor);
+        return { resp };
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          return [
+            {
+              actual: await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: ["<a", `href="#${anchor}"`, `id="${anchor}"`, "</a>"],
+              }),
+              expected: true,
+            },
+          ];
+        },
+      },
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    });
+
+    const ALL_TEST_CASES = [...REGULAR_CASE];
+    runAllTests({ name: "compile", testCases: ALL_TEST_CASES });
   });
 });

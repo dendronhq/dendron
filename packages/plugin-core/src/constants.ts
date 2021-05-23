@@ -77,6 +77,7 @@ type CommandEntry = {
     | "dev"
     | "hierarchies"
     | "navigation"
+    | "misc"
     | "publishing";
   /**
    * Skip doc generation
@@ -656,6 +657,13 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Show Markdown Preview",
     docLink: "dendron.topic.commands.md",
     docPreview: "",
+  },
+  PASTE_FILE: {
+    key: "dendron.pasteFile",
+    title: `${CMD_PREFIX} Paste File`,
+    group: "misc",
+    keybindings: {},
+    desc: "Paste file",
   },
   // -- Workbench
   CONFIGURE_RAW: {

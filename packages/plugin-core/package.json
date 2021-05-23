@@ -507,6 +507,11 @@
                 "docPreview": ""
             },
             {
+                "command": "dendron.pasteFile",
+                "title": "Dendron: Paste File",
+                "desc": "Paste file"
+            },
+            {
                 "command": "dendron.configureRaw",
                 "title": "Dendron: Configure (yaml)",
                 "desc": "Modify Dendron Config as raw YAML",

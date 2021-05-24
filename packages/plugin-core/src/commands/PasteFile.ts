@@ -35,6 +35,7 @@ export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
     if (PickerUtilsV2.isInputEmpty(out)) return;
     return { filePath: out };
   }
+
   async execute(opts: CommandOpts) {
     const { filePath } = opts;
 

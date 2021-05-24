@@ -20,7 +20,9 @@ suite("PasteFile", function () {
       preSetupHook: ENGINE_HOOKS.setupBasic,
       onInit: async ({}) => {
         await VSCodeUtils.closeAllEditors();
-        const resp = await new PasteFileCommand().run();
+        const resp = await new PasteFileCommand().execute({
+          filePath: "foobar",
+        });
         expect(resp?.error?.status).toEqual(ERROR_STATUS.INVALID_STATE);
         done();
       },

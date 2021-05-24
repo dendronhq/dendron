@@ -3,6 +3,42 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.43.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.2-alpha.0) (2021-05-25)
+
+### Bug Fixes
+
+- extension packaging ([48f79c5](https://github.com/dendronhq/dendron/commit/48f79c50fde74d85e843fbfce563a17c75b7e705))
+- only refresh treeview if visible ([1471cb9](https://github.com/dendronhq/dendron/commit/1471cb9fa196e912edcc7a834a7babc433966c24))
+- only refresh treeview if visible ([6b55bc1](https://github.com/dendronhq/dendron/commit/6b55bc16592b678e7385d140885d22a81325aad9))
+- show welcome on first install ([9a29117](https://github.com/dendronhq/dendron/commit/9a29117ce3036683dc41c072aff404cedb94882d))
+- sync test ([40c8958](https://github.com/dendronhq/dendron/commit/40c89580cd6729db1e103deba070ce0babe36e0a))
+
+### Features Dendron
+
+- Add Doctor command to create missing linked notes ([#713](https://github.com/dendronhq/dendron/issues/713)) ([9558353](https://github.com/dendronhq/dendron/commit/9558353c8a636c8a8d400fc3109f75b387da37a6))
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+- paste file cmd ([3e3f419](https://github.com/dendronhq/dendron/commit/3e3f41971607c12705df4830f3ff88e67a2788e0))
+- paste file cmd ([51ab5aa](https://github.com/dendronhq/dendron/commit/51ab5aaf4d440f7e7f5bd765b9b5378f346076b8))
+- Workspace Sync command ([#738](https://github.com/dendronhq/dendron/issues/738)) ([7e462c0](https://github.com/dendronhq/dendron/commit/7e462c07ecec73982f3293ff80cfa3041d0ceabf))
+
+## [0.43.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.1-alpha.0) (2021-05-24)
+
+### Bug Fixes
+
+- extension packaging ([48f79c5](https://github.com/dendronhq/dendron/commit/48f79c50fde74d85e843fbfce563a17c75b7e705))
+- only refresh treeview if visible ([1471cb9](https://github.com/dendronhq/dendron/commit/1471cb9fa196e912edcc7a834a7babc433966c24))
+- only refresh treeview if visible ([6b55bc1](https://github.com/dendronhq/dendron/commit/6b55bc16592b678e7385d140885d22a81325aad9))
+- show welcome on first install ([9a29117](https://github.com/dendronhq/dendron/commit/9a29117ce3036683dc41c072aff404cedb94882d))
+- sync test ([40c8958](https://github.com/dendronhq/dendron/commit/40c89580cd6729db1e103deba070ce0babe36e0a))
+
+### Features Dendron
+
+- Add Doctor command to create missing linked notes ([#713](https://github.com/dendronhq/dendron/issues/713)) ([9558353](https://github.com/dendronhq/dendron/commit/9558353c8a636c8a8d400fc3109f75b387da37a6))
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+- paste file cmd ([3e3f419](https://github.com/dendronhq/dendron/commit/3e3f41971607c12705df4830f3ff88e67a2788e0))
+- paste file cmd ([51ab5aa](https://github.com/dendronhq/dendron/commit/51ab5aaf4d440f7e7f5bd765b9b5378f346076b8))
+- Workspace Sync command ([#738](https://github.com/dendronhq/dendron/issues/738)) ([7e462c0](https://github.com/dendronhq/dendron/commit/7e462c07ecec73982f3293ff80cfa3041d0ceabf))
+
 # [0.43.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.0) (2021-05-24)
 
 ### Bug Fixes

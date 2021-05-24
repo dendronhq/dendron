@@ -4,8 +4,7 @@
 
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
-const { IgnorePlugin } = require("webpack");
-
+const { IgnorePlugin, DefinePlugin } = require("webpack");
 /**@type {import('webpack').Configuration}*/
 const config = {
   target: "node", // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/

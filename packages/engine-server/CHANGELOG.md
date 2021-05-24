@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.43.2-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.2-alpha.0) (2021-05-25)
+
+### Bug Fixes
+
+- caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
+- sync test ([40c8958](https://github.com/dendronhq/dendron/commit/40c89580cd6729db1e103deba070ce0babe36e0a))
+
+### Features Dendron
+
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+- paste file cmd ([3e3f419](https://github.com/dendronhq/dendron/commit/3e3f41971607c12705df4830f3ff88e67a2788e0))
+- Workspace Sync command ([#738](https://github.com/dendronhq/dendron/issues/738)) ([7e462c0](https://github.com/dendronhq/dendron/commit/7e462c07ecec73982f3293ff80cfa3041d0ceabf))
+
+## [0.43.1-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.1-alpha.0) (2021-05-24)
+
+### Bug Fixes
+
+- caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
+- sync test ([40c8958](https://github.com/dendronhq/dendron/commit/40c89580cd6729db1e103deba070ce0babe36e0a))
+
+### Features Dendron
+
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+- paste file cmd ([3e3f419](https://github.com/dendronhq/dendron/commit/3e3f41971607c12705df4830f3ff88e67a2788e0))
+- Workspace Sync command ([#738](https://github.com/dendronhq/dendron/issues/738)) ([7e462c0](https://github.com/dendronhq/dendron/commit/7e462c07ecec73982f3293ff80cfa3041d0ceabf))
+
 # [0.43.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.0) (2021-05-24)
 
 ### Bug Fixes

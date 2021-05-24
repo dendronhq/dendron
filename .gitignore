@@ -28,6 +28,5 @@ yarn-error.*
 proto.ts
 packages/common-server/proto/amplify.ts
 unpublish.sh
-test-workspace
 workspaces
 tmp

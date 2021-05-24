@@ -439,7 +439,7 @@ export type BasePodExecuteOpts<TConfig> = {
 
 // --- Messages
 
-export type DMessage<TType = string, TData = any, TSource = string> = {
+export type DMessage<TType = string, TData = any, TSource = DMessageSource> = {
   type: TType; // "onDidChangeActiveTextEditor"
   data: TData;
   source: TSource;
@@ -450,11 +450,42 @@ export enum DMessageSource {
   webClient = "webClient",
 }
 
+export enum DMessageType {
+  init = "init",
+}
+
 export enum TreeViewMessageType {
   "onSelect" = "onSelect",
   "onExpand" = "onExpand",
+  "onGetActiveEditor" = "onGetActiveEditor",
+  /**
+   * View is ready
+   */
+  "onReady" = "onReady",
+}
+export enum ThemeMessageType {
+  "onThemeChange" = "onThemeChange",
+  "getTheme" = "getTheme",
 }
 
+export type OnDidChangeActiveTextEditorData = {
+  note: NoteProps;
+  sync?: boolean;
+};
+
 export type VSCodeMessage = DMessage;
+export type OnDidChangeActiveTextEditorMsg = DMessage<
+  "onDidChangeActiveTextEditor",
+  OnDidChangeActiveTextEditorData
+>;
 
 export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;
+
+// --- Views
+
+export enum DendronViewKey {
+  SAMPLE_VIEW = "dendron.sample",
+  TREE_VIEW = "dendron.treeView",
+  TREE_VIEW_V2 = "dendron.tree-view",
+  BACKLINKS = "dendron.backlinks",
+}

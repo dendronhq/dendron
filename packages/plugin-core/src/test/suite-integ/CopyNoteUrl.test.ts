@@ -12,7 +12,7 @@ import {
   withConfig,
 } from "../testUtilsV3";
 
-suite("notes", function () {
+suite("CopyNoteUrl", function () {
   let ctx: vscode.ExtensionContext;
   let rootUrl = "dendron.so";
 

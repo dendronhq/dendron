@@ -1,15 +1,10 @@
-const {
-  CONFIG,
-  DENDRON_COMMANDS,
-  DENDRON_VIEWS,
-} = require("../out/constants");
-const _ = require("lodash");
-const fs = require("fs-extra");
-const path = require("path");
-const { entries } = require("lodash");
+import _ from "lodash";
+import fs from "fs-extra";
+import path from "path";
+import { CONFIG, DENDRON_COMMANDS, DENDRON_VIEWS } from "../src/constants";
 
-function genEntry(entryDict) {
-  const configGenerated = {};
+function genEntry(entryDict: any) {
+  const configGenerated: any = {};
   _.forEach(entryDict, (ent) => {
     const configProps = _.omit(ent, ["key", "scope"]);
     const configKey = ent["key"];
@@ -18,14 +13,14 @@ function genEntry(entryDict) {
   return configGenerated;
 }
 
-function updateConfig(configuration) {
+function updateConfig(configuration: any) {
   console.log("update config...");
   const config = genEntry(CONFIG);
   configuration["properties"] = config;
   return config;
 }
 
-function updateCommands(contributes) {
+function updateCommands(contributes: any) {
   console.log("update commands...");
   const commands = _.map(
     _.filter(DENDRON_COMMANDS, (ent) => _.isUndefined(ent.shortcut)),
@@ -46,7 +41,7 @@ function updateCommands(contributes) {
   contributes.commands = commands;
 }
 
-function updateKeybindings(contributes) {
+function updateKeybindings(contributes: any) {
   console.log("update keybindings...");
   const bindings = _.filter(
     DENDRON_COMMANDS,
@@ -62,11 +57,12 @@ function updateKeybindings(contributes) {
   contributes.keybindings = bindings;
 }
 
-function updateViews(contributes) {
+function updateViews(contributes: any) {
+  console.log("update views");
   const out = _.groupBy(DENDRON_VIEWS, "where");
   contributes.views = {};
   _.map(out, (views, k) => {
-    contributes.views[k] = _.map(views, ent => _.omit(ent, "where"));
+    contributes.views[k] = _.map(views, (ent) => _.omit(ent, "where"));
   });
 }
 

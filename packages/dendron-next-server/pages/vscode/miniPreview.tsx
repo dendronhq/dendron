@@ -26,7 +26,7 @@ export default function MiniPreview({
     const webEngine = new WebEngine(engine)
     const [note, setNote] = React.useState<NoteProps>();
     const router = useRouter();
-    const { query, isReady } = router;
+    const { isReady } = router;
     if (!isReady) {
         return <> </>;
       }

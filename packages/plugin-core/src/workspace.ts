@@ -1,6 +1,7 @@
 import {
   DendronConfig,
   DendronError,
+  DendronViewKey,
   DEngineClient,
   DVault,
   ERROR_STATUS,
@@ -31,7 +32,7 @@ import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import {
   CONFIG,
-  DendronViewKey,
+  DendronContext,
   DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
@@ -425,13 +426,21 @@ export class DendronWorkspace {
             sampleView
           )
         );
-
-        context.subscriptions.push(
-          vscode.window.registerWebviewViewProvider(
-            DendronTreeViewV2.viewType,
-            provider
-          )
-        );
+        if (getWS().config.dev?.enableWebUI) {
+          Logger.info({ ctx, msg: "initWebUI" });
+          context.subscriptions.push(
+            vscode.window.registerWebviewViewProvider(
+              DendronTreeViewV2.viewType,
+              provider,
+              {
+                webviewOptions: {
+                  retainContextWhenHidden: true,
+                },
+              }
+            )
+          );
+          VSCodeUtils.setContext(DendronContext.WEB_UI_ENABLED, true);
+        }
 
         // backlinks
         Logger.info({ ctx, msg: "init:backlinks" });

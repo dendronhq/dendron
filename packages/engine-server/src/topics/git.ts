@@ -111,9 +111,13 @@ export class Git {
 
   async getCurrentBranch() {
     const { localUrl: cwd } = this.opts;
-    const { stdout } = await execa("git", [`branch`, `--show-current`], {
-      cwd,
-    });
+    const { stdout } = await execa(
+      "git",
+      [`rev-parse`, `--abbrev-ref`, `HEAD`],
+      {
+        cwd,
+      }
+    );
     return stdout.trim();
   }
 

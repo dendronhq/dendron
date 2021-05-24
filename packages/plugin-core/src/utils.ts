@@ -27,6 +27,7 @@ import { PickerUtilsV2 } from "./components/lookup/utils";
 import {
   CONFIG,
   ConfigKey,
+  DendronContext,
   GLOBAL_STATE,
   _noteAddBehaviorEnum,
 } from "./constants";
@@ -361,6 +362,10 @@ export class VSCodeUtils {
   static isDevMode(): boolean {
     // HACK: vscode does not save env variables btw workspaces
     return process.env.VSCODE_DEBUGGING_EXTENSION ? true : false;
+  }
+
+  static setContext(key: DendronContext, status: boolean) {
+    vscode.commands.executeCommand("setContext", key, status);
   }
 
   static showInputBox = vscode.window.showInputBox;

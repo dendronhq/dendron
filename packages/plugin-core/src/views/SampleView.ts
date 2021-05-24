@@ -1,6 +1,5 @@
-import { DMessage } from "@dendronhq/common-all";
+import { DendronViewKey, DMessage } from "@dendronhq/common-all";
 import * as vscode from "vscode";
-import { DendronViewKey } from "../constants";
 import { getWS } from "../workspace";
 import { WebViewUtils } from "./utils";
 

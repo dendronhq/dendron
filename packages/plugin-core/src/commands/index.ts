@@ -28,6 +28,7 @@ import { InsertNoteCommand } from "./InsertNoteCommand";
 import { MoveNoteCommand } from "./MoveNoteCommand";
 import { OpenLogsCommand } from "./OpenLogs";
 import { PasteLinkCommand } from "./PasteLink";
+import { PasteFileCommand } from "./PasteFile";
 import { PublishPodCommand } from "./PublishPod";
 import { RefactorHierarchyCommandV2 } from "./RefactorHierarchyV2";
 import { ResetConfigCommand } from "./ResetConfig";
@@ -67,18 +68,16 @@ const ALL_COMMANDS = [
   DumpStateCommand,
   ExportPodCommand,
   GoDownCommand,
-  //   GoToSiblingCommand,
   GoUpCommand,
   GotoNoteCommand,
   ImportPodCommand,
   InsertNoteCommand,
-  //   LookupCommand,
   OpenLogsCommand,
+  PasteFileCommand,
   PasteLinkCommand,
   PublishPodCommand,
   MoveNoteCommand,
   RefactorHierarchyCommandV2,
-  // ReloadIndexCommand,
   ResetConfigCommand,
   RestoreVaultCommand,
   SetupWorkspaceCommand,

@@ -360,7 +360,7 @@ export class PickerUtilsV2 {
     }
   }
 
-  static isStringInputEmpty(value?: string) {
+  static isInputEmpty(value?: string): value is undefined {
     if (_.isUndefined(value)) {
       return true;
     }

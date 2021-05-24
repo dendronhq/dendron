@@ -43,6 +43,7 @@
     "aws-amplify": "^3.3.23",
     "babel-plugin-import": "^1.13.3",
     "cytoscape": "^3.19.0",
+    "cytoscape-euler": "^1.2.2",
     "formik": "^2.2.5",
     "formik-antd": "^2.0.1",
     "framer-motion": "^3.2.2-rc.1",

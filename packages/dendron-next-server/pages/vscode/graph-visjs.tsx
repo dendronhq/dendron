@@ -47,8 +47,14 @@ export default function FullGraphVizjs({
       };
       const options: Options = {
         edges: {
-          width: 0.15,
-          color: { inherit: 'from' },
+          width: 5,
+          hoverWidth: 10,
+          // color: '#54b7577d', //54B758
+          color: {
+            color:'#54b7577d',
+            highlight:'#54B758',
+            hover: '#54B758',
+          },
           smooth: {
             enabled: true,
             type: 'continuous',
@@ -59,18 +65,30 @@ export default function FullGraphVizjs({
           shape: 'dot',
           scaling: {
             min: 10,
-            max: 30,
+            max: 50,
             label: {
               min: 8,
               max: 30,
-              drawThreshold: 12,
-              maxVisible: 20,
+              drawThreshold: 4,
+              maxVisible: 30,
             },
           },
+          color: '#666666',
+          font: {
+            size: 14,
+            color: "white",
+            // face: "courier",
+            // strokeWidth: 3,
+            // strokeColor: "#ffffff",
+          },
         },
-        // Taken from https://visjs.github.io/vis-network/examples/static/jsfiddle.7610fcbd32f0ad59a94ac116ccfd21ebc4842436d2bb73c23c54626ed9ec1e23.html
         // https://visjs.github.io/vis-network/examples/static/jsfiddle.a6eacda850dfe6c88d8ea581887b67b263eb310301cdd593e76f7cabd6df4800.html
         physics: false,
+        // physics: {
+        //   hierarchicalRepulsion: {
+        //     avoidOverlap: 1,
+        //   },
+        // },
         interaction: {
           tooltipDelay: 200,
           hideEdgesOnDrag: true,

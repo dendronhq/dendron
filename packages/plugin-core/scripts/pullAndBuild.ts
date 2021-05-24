@@ -6,6 +6,7 @@ import { execa } from "@dendronhq/dendron-cli";
 
 const $ = execa.commandSync;
 
+// @ts-ignore
 function checkoutInteg() {
   console.log("checkout...");
   $(`echo "checkout..."`);
@@ -36,11 +37,16 @@ function updatePkgJSON() {
   fs.writeJSONSync("package.json", pkg, { spaces: 4 });
 }
 
-function installAndPkg() {
+function vscePackage() {
   console.log("installing...");
-  $(`yarn install --no-lockfile`);
   console.log("packaging...");
   $(`vsce package --yarn`);
+}
+
+// @ts-ignore
+function install() {
+  console.log("installing...");
+  $(`yarn install --no-lockfile`);
 }
 
 function getVersion() {
@@ -52,12 +58,11 @@ function main() {
     alias: "S",
     description: "don't compile static assets",
   }).argv;
-  checkoutInteg();
   if (!args["--no-sync-static"]) {
     syncStatic();
   }
   updatePkgJSON();
-  installAndPkg();
+  vscePackage();
   const version = getVersion();
   console.log(`build ${version}`);
 }

@@ -34,6 +34,7 @@ import {
   VaultAddCommand,
   VaultRemoteSource,
 } from "../commands/VaultAddCommand";
+import { Logger } from "../logger";
 import { WorkspaceConfig } from "../settings";
 import { WorkspaceFolderRaw, WorkspaceSettings } from "../types";
 import { VSCodeUtils } from "../utils";
@@ -274,6 +275,7 @@ export function setupBeforeAfter(
   beforeEach(async function () {
     DendronWorkspace.getOrCreate(ctx);
     opts?.beforeHook && (await opts.beforeHook());
+    Logger.configure(ctx, "info");
   });
   afterEach(async function () {
     HistoryService.instance().clearSubscriptions();

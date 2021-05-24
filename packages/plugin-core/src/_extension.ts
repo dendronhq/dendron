@@ -379,18 +379,17 @@ export async function _activate(context: vscode.ExtensionContext) {
   } else {
     // ws not active
     Logger.info({ ctx: "dendron not active" });
-
     toggleViews(false);
-
-    return false;
   }
 
   showWelcomeOrWhatsNew(DendronWorkspace.version(), migratedGlobalVersion).then(
     () => {
-      HistoryService.instance().add({
-        source: "extension",
-        action: "activate",
-      });
+      if (DendronWorkspace.isActive()) {
+        HistoryService.instance().add({
+          source: "extension",
+          action: "activate",
+        });
+      }
     }
   );
   return true;

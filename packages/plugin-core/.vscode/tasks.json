@@ -21,7 +21,7 @@
     {
       "label": "gen:config",
       "type": "shell",
-      "command": "node scripts/genConfig.js",
+      "command": "node out/scripts/genConfig.js",
       "problemMatcher": []
     }
   ]

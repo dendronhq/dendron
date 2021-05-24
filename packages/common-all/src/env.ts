@@ -6,7 +6,14 @@ export function getStage(): Stage {
   // CRA overrides NODE_ENV to be dev by default
   // build_STAGE is from 11ty
   const { stage, NODE_ENV, STAGE, REACT_APP_STAGE, BUILD_STAGE } = process.env;
-  let stageOut = REACT_APP_STAGE || BUILD_STAGE || stage || STAGE || NODE_ENV;
+  let stageOut =
+    REACT_APP_STAGE ||
+    BUILD_STAGE ||
+    stage ||
+    STAGE ||
+    NODE_ENV ||
+    process.env.NODE_ENV;
+  console.log("BOND123", process.env.NODE_ENV);
   // TODO
   if (stageOut === "development") {
     stageOut = "dev";

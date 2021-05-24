@@ -1,7 +1,6 @@
 import {
   DendronError,
   getStage,
-  setStageIfUndefined,
   VaultUtils,
   VSCodeEvents,
 } from "@dendronhq/common-all";
@@ -43,13 +42,14 @@ const MARKDOWN_WORD_PATTERN = new RegExp("([\\w\\.\\#]+)");
 // this method is called when your extension is activated
 export function activate(context: vscode.ExtensionContext) {
   const stage = getStage();
+  console.log("process.env", process.env);
+  console.log("stage", stage);
   DendronTreeView.register(context);
   // override default word pattern
   vscode.languages.setLanguageConfiguration("markdown", {
     wordPattern: MARKDOWN_WORD_PATTERN,
   });
   if (stage !== "test") {
-    setStageIfUndefined("prod");
     _activate(context);
   }
   return;

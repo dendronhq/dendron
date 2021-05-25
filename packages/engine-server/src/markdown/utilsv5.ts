@@ -4,7 +4,7 @@ import remarkParse from "remark-parse";
 import frontmatterPlugin from "remark-frontmatter";
 import abbrPlugin from "remark-abbr";
 import { wikiLinks } from "./remark/wikiLinks";
-import { Processor } from "./types";
+import { Processor } from "unified";
 
 type ProcOptsV5 = {
   /**

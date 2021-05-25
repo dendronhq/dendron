@@ -13,7 +13,6 @@ export function getStage(): Stage {
     STAGE ||
     NODE_ENV ||
     process.env.NODE_ENV;
-  console.log("BOND123", process.env.NODE_ENV);
   // TODO
   if (stageOut === "development") {
     stageOut = "dev";

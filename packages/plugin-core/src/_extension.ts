@@ -188,7 +188,9 @@ function subscribeToPortChange() {
   );
 }
 
-export async function _activate(context: vscode.ExtensionContext) {
+export async function _activate(
+  context: vscode.ExtensionContext
+): Promise<boolean> {
   const isDebug = VSCodeUtils.isDevMode();
   const ctx = "_activate";
   const stage = getStage();
@@ -235,7 +237,7 @@ export async function _activate(context: vscode.ExtensionContext) {
       },
     });
     if (didClone) {
-      return;
+      return false;
     }
 
     ws.workspaceService = wsService;
@@ -263,7 +265,7 @@ export async function _activate(context: vscode.ExtensionContext) {
             );
           }
         });
-      return;
+      return false;
     }
 
     // migrate legacy settings
@@ -349,7 +351,7 @@ export async function _activate(context: vscode.ExtensionContext) {
         source: "extension",
         action: "not_initialized",
       });
-      return;
+      return false;
     }
 
     if (VSCodeUtils.isDevMode()) {
@@ -382,17 +384,18 @@ export async function _activate(context: vscode.ExtensionContext) {
     toggleViews(false);
   }
 
-  showWelcomeOrWhatsNew(DendronWorkspace.version(), migratedGlobalVersion).then(
-    () => {
-      if (DendronWorkspace.isActive()) {
-        HistoryService.instance().add({
-          source: "extension",
-          action: "activate",
-        });
-      }
+  return showWelcomeOrWhatsNew(
+    DendronWorkspace.version(),
+    migratedGlobalVersion
+  ).then(() => {
+    if (DendronWorkspace.isActive()) {
+      HistoryService.instance().add({
+        source: "extension",
+        action: "activate",
+      });
     }
-  );
-  return true;
+    return false;
+  });
 }
 
 function toggleViews(enabled: boolean) {

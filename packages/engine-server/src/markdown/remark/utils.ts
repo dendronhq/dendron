@@ -294,6 +294,34 @@ export class RemarkUtils {
     return node.type === "refLinkV2";
   }
 
+  // --- conversion
+
+  static convertObsidianLinks(note: NoteProps, changes: NoteChangeEntry[]) {
+    return function (this: Processor) {
+      return (tree: Node, _vfile: VFile) => {
+        let root = tree as DendronASTRoot;
+        let wikiLinks: WikiLinkNoteV4[] = selectAll(
+          DendronASTTypes.WIKI_LINK,
+          root
+        ) as WikiLinkNoteV4[];
+        wikiLinks.forEach((linkNode) => {
+          debugger;
+          if (linkNode.value.indexOf("/") >= 0) {
+            const newValue = _.replace(linkNode.value, /\//g, ".");
+            if (linkNode.data.alias === linkNode.value) {
+              linkNode.data.alias = newValue;
+            }
+            linkNode.value = newValue;
+            changes.push({
+              note: note,
+              status: "update",
+            });
+          }
+        });
+      };
+    };
+  }
+
   static oldNoteRef2NewNoteRef(note: NoteProps, changes: NoteChangeEntry[]) {
     return function (this: Processor) {
       return (tree: Node, _vfile: VFile) => {

@@ -11,6 +11,7 @@ import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { DendronASTDest, WikiLinkDataV4, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
+import { MDUtilsV5 } from "../utilsv5";
 import { addError, getNoteOrError, LinkUtils } from "./utils";
 
 export const LINK_REGEX = /^\[\[(.+?)\]\]/;
@@ -70,14 +71,25 @@ function attachCompiler(proc: Unified.Processor, opts?: CompilerOpts) {
   });
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
-  let { dest } = MDUtilsV4.getDendronData(proc);
-
   if (visitors) {
     visitors.wikiLink = function (node: WikiLinkNoteV4) {
+      const pOpts = MDUtilsV5.getProcOpts(proc);
       const data = node.data;
       let value = node.value;
-      const vault = MDUtilsV4.getVault(proc, data.vaultName);
 
+      if (pOpts.useRaw) {
+        const { alias, anchorHeader } = data;
+        let link = value;
+        let calias = alias !== value ? `${alias}|` : "";
+        let anchor = anchorHeader ? `#${anchorHeader}` : "";
+        let vaultPrefix = data.vaultName
+          ? `${CONSTANTS.DENDRON_DELIMETER}${data.vaultName}/`
+          : "";
+        return `[[${calias}${vaultPrefix}${link}${anchor}]]`;
+      }
+
+      let { dest } = MDUtilsV4.getDendronData(proc);
+      const vault = MDUtilsV4.getVault(proc, data.vaultName);
       // if converting back to dendron md, no further processing
       if (dest === DendronASTDest.MD_DENDRON) {
         const { alias, anchorHeader } = data;
@@ -161,12 +173,16 @@ function attachParser(proc: Unified.Processor) {
   }
 
   function parseLink(linkMatch: string) {
+    const pOpts = MDUtilsV5.getProcOpts(proc);
     linkMatch = NoteUtils.normalizeFname(linkMatch);
-
     const out = LinkUtils.parseLinkV2(linkMatch);
     if (_.isNull(out)) {
       throw new DendronError({ message: `link is null: ${linkMatch}` });
     }
+    if (pOpts.useRaw) {
+      return out;
+    }
+
     let { config, vault, dest, fname } = MDUtilsV4.getDendronData(proc);
     const { engine } = MDUtilsV4.getEngineFromProc(proc);
     if (out.vaultName) {

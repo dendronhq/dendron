@@ -223,34 +223,40 @@ export class AnchorUtils {
   static async findAnchors(opts: {
     note: NoteProps;
     wsRoot: string;
-  }): Promise<DNoteAnchorPositioned[]> {
-    if (opts.note.stub) return [];
+  }): Promise<{ [index: string]: DNoteAnchorPositioned }> {
+    if (opts.note.stub) return {};
     const noteContents = await NoteUtils.readFullNote(opts);
     const noteAnchors = RemarkUtils.findAnchors(noteContents);
-    const anchors: DNoteAnchorPositioned[] = [];
+    const anchors: [string, DNoteAnchorPositioned][] = [];
     noteAnchors.forEach((anchor) => {
       if (_.isUndefined(anchor.position)) return;
       const { line, column } = anchor.position.start;
       if (anchor.type === "heading") {
         const value = getSlugger().slug(anchor.children[0].value as string);
-        anchors.push({
-          type: "header",
+        anchors.push([
           value,
-          line: line - 1,
-          column: column - 1,
-        });
+          {
+            type: "header",
+            value,
+            line: line - 1,
+            column: column - 1,
+          },
+        ]);
       } else if (anchor.type === DendronASTTypes.BLOCK_ANCHOR) {
-        anchors.push({
-          type: "block",
-          value: anchor.id,
-          line: line - 1,
-          column: column - 1,
-        });
+        anchors.push([
+          `^${anchor.id}`,
+          {
+            type: "block",
+            value: anchor.id,
+            line: line - 1,
+            column: column - 1,
+          },
+        ]);
       } else {
         assertUnreachable(anchor);
       }
     });
-    return anchors;
+    return Object.fromEntries(anchors);
   }
 }
 

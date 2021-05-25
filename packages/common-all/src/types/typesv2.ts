@@ -1,4 +1,3 @@
-import { Position } from "unist";
 import { DendronError, IDendronError } from "../error";
 import {
   DLink,

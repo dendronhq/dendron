@@ -49,7 +49,7 @@ export type DNodeProps<T = any, TCustom = any> = {
   /**
    * Anchors within the node (headings, block anchors)
    */
-  anchors: DNoteAnchorPositioned[];
+  anchors: { [index: string]: DNoteAnchorPositioned | undefined };
   /**
    * Name of the node. This corresponds to the name of the file minus the extension
    */

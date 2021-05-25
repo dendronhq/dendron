@@ -1,6 +1,6 @@
 import {
+  assertUnreachable,
   DNoteAnchor,
-  DNoteAnchorPositioned,
   DVault,
   getSlugger,
   NoteProps,
@@ -32,11 +32,12 @@ export const findAnchorPos = (opts: {
   note: NoteProps;
 }): Position => {
   const { anchor: findAnchor, note } = opts;
-  findAnchor.value = getSlugger().slug(findAnchor.value);
-  // TODO: note.anchors could be a map instead. Just need to update `storev2.ts` to write and read maps.
-  const found = _.find(note.anchors, findAnchor) as
-    | DNoteAnchorPositioned
-    | undefined;
+  let key: string;
+  if (findAnchor.type === "header") key = getSlugger().slug(findAnchor.value);
+  else if (findAnchor.type === "block") key = `^${findAnchor.value}`;
+  else assertUnreachable(findAnchor.type);
+
+  const found = note.anchors[key];
 
   if (_.isUndefined(found)) return new Position(0, 0);
   return new Position(found.line, found.column);

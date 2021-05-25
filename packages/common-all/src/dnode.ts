@@ -65,7 +65,7 @@ export class DNodeUtils {
       id: genUUID(),
       desc: "",
       links: [],
-      anchors: [],
+      anchors: {},
       children: [],
       parent: null,
       body: "",

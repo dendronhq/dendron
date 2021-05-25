@@ -224,6 +224,7 @@ export class AnchorUtils {
     note: NoteProps;
     wsRoot: string;
   }): Promise<DNoteAnchorPositioned[]> {
+    if (opts.note.stub) return [];
     const noteContents = await NoteUtils.readFullNote(opts);
     const noteAnchors = RemarkUtils.findAnchors(noteContents);
     const anchors: DNoteAnchorPositioned[] = [];

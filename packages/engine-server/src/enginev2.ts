@@ -417,7 +417,7 @@ export class DendronEngineV2 implements DEngine {
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {
-    Promise.all(
+    await Promise.all(
       notes.map(async (ent: NoteChangeEntry) => {
         const { id } = ent.note;
         //const uri = NoteUtils.getURI({ note: ent.note, wsRoot: this.wsRoot });

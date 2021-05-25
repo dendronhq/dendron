@@ -1,3 +1,4 @@
+import { DNoteAnchorPositioned } from "./typesv2";
 import { URI } from "vscode-uri";
 import { DVault } from "./workspace";
 
@@ -45,6 +46,10 @@ export type DNodeProps<T = any, TCustom = any> = {
    * Node links (eg. backlinks, wikilinks, etc)
    */
   links: DLink[];
+  /**
+   * Anchors within the node (headings, block anchors)
+   */
+  anchors: DNoteAnchorPositioned[];
   /**
    * Name of the node. This corresponds to the name of the file minus the extension
    */

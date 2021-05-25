@@ -1,3 +1,4 @@
+import { Position } from "unist";
 import { DendronError, IDendronError } from "../error";
 import {
   DLink,
@@ -48,6 +49,11 @@ export type DNoteAnchor = {
    */
   type: "header" | "block";
   value: string;
+};
+
+export type DNoteAnchorPositioned = DNoteAnchor & {
+  line: number;
+  column: number;
 };
 
 export type DLinkType = "wiki" | "refv2";

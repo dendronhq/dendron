@@ -1,17 +1,13 @@
 import {
   DNoteAnchor,
+  DNoteAnchorPositioned,
   DVault,
   getSlugger,
   NoteProps,
   NoteUtils,
   VaultUtils,
 } from "@dendronhq/common-all";
-import {
-  BlockAnchor,
-  Heading,
-  matchWikiLink,
-  RemarkUtils,
-} from "@dendronhq/engine-server";
+import { matchWikiLink } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { TextEditor, Position, Selection, Uri, window } from "vscode";
 import { PickerUtilsV2 } from "../components/lookup/utils";
@@ -31,32 +27,19 @@ export { CommandOpts as GotoNoteCommandOpts };
 
 type CommandOutput = { note: NoteProps; pos?: Position } | undefined;
 
-export const findAnchorPos = (opts: { anchor: DNoteAnchor; text: string }) => {
-  const { anchor, text } = opts;
-  let match: Heading | BlockAnchor | undefined = undefined;
+export const findAnchorPos = (opts: {
+  anchor: DNoteAnchor;
+  note: NoteProps;
+}): Position => {
+  const { anchor: findAnchor, note } = opts;
+  findAnchor.value = getSlugger().slug(findAnchor.value);
+  // TODO: note.anchors could be a map instead. Just need to update `storev2.ts` to write and read maps.
+  const found = _.find(note.anchors, findAnchor) as
+    | DNoteAnchorPositioned
+    | undefined;
 
-  if (anchor.type === "block") {
-    // Anchor leads to a block anchor
-    // TODO: optimize by doing this on startup
-    const blockAnchors = RemarkUtils.findBlockAnchors(text);
-    match = _.find(blockAnchors, (b) => {
-      return b.id == anchor.value;
-    });
-  } else {
-    const anchorSlug = getSlugger().slug(anchor.value);
-    // TODO: optimize by doing this on startup
-    const headers = RemarkUtils.findHeaders(text);
-    match = _.find(headers, (h) => {
-      return getSlugger().slug(h.children[0].value as string) === anchorSlug;
-    });
-  }
-
-  if (match && match.position) {
-    const line = match.position.start.line - 1;
-    return new Position(line, 0);
-  }
-
-  return new Position(0, 0);
+  if (_.isUndefined(found)) return new Position(0, 0);
+  return new Position(found.line, found.column);
 };
 
 export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
@@ -160,8 +143,7 @@ export class GotoNoteCommand extends BasicCommand<CommandOpts, CommandOutput> {
         const editor = await VSCodeUtils.openFileInEditor(uri);
         this.L.info({ ctx, opts, msg: "exit" });
         if (opts.anchor && editor) {
-          const text = editor.document.getText();
-          const pos = findAnchorPos({ anchor: opts.anchor, text });
+          const pos = findAnchorPos({ anchor: opts.anchor, note });
           editor.selection = new Selection(pos, pos);
           editor.revealRange(editor.selection);
         }

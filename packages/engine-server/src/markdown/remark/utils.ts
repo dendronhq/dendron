@@ -1,4 +1,5 @@
 import {
+  assertUnreachable,
   CONSTANTS,
   DendronError,
   DEngineClient,
@@ -17,6 +18,7 @@ import { selectAll } from "unist-util-select";
 import { VFile } from "vfile";
 import { normalizev2 } from "../../utils";
 import {
+  Anchor,
   BlockAnchor,
   DendronASTDest,
   DendronASTRoot,
@@ -29,6 +31,7 @@ import { MDUtilsV4 } from "../utils";
 const toString = require("mdast-util-to-string");
 import * as mdastBuilder from "mdast-builder";
 import { blockAnchors } from "./blockAnchors";
+import { DNoteAnchorPositioned } from "@dendronhq/common-all";
 export { mdastBuilder };
 
 export const ALIAS_DIVIDER = "|";
@@ -216,6 +219,40 @@ export class LinkUtils {
   }
 }
 
+export class AnchorUtils {
+  static async findAnchors(opts: {
+    note: NoteProps;
+    wsRoot: string;
+  }): Promise<DNoteAnchorPositioned[]> {
+    const noteContents = await NoteUtils.readFullNote(opts);
+    const noteAnchors = RemarkUtils.findAnchors(noteContents);
+    const anchors: DNoteAnchorPositioned[] = [];
+    noteAnchors.forEach((anchor) => {
+      if (_.isUndefined(anchor.position)) return;
+      const { line, column } = anchor.position.start;
+      if (anchor.type === "heading") {
+        const value = getSlugger().slug(anchor.children[0].value as string);
+        anchors.push({
+          type: "header",
+          value,
+          line: line - 1,
+          column: column - 1,
+        });
+      } else if (anchor.type === DendronASTTypes.BLOCK_ANCHOR) {
+        anchors.push({
+          type: "block",
+          value: anchor.id,
+          line: line - 1,
+          column: column - 1,
+        });
+      } else {
+        assertUnreachable(anchor);
+      }
+    });
+    return anchors;
+  }
+}
+
 function walk(node: Node, fn: any) {
   fn(node);
   if (node.children) {
@@ -258,6 +295,15 @@ export class RemarkUtils {
     const parser = MDUtilsV4.remark().use(blockAnchors);
     const parsed = parser.parse(content);
     return selectAll("blockAnchor", parsed) as BlockAnchor[];
+  }
+
+  static findAnchors(content: string): Anchor[] {
+    const parser = MDUtilsV4.remark().use(blockAnchors);
+    const parsed = parser.parse(content);
+    return [
+      ...(selectAll("heading", parsed) as Heading[]),
+      ...(selectAll("blockAnchor", parsed) as BlockAnchor[]),
+    ];
   }
 
   static findIndex(array: Node[], fn: any) {

@@ -259,6 +259,7 @@ export class MDUtilsV4 {
     let _proc = remark()
       .use(remarkParse, { gfm: true })
       .use(wikiLinks)
+      .use(blockAnchors)
       .data("errors", errors);
     this.setDendronData(_proc, { dest: opts.dest, fname: opts.fname });
     this.setEngine(_proc, opts.engine);

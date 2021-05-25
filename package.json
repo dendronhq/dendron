@@ -62,7 +62,8 @@
     "ci:init": "yarn bootstrap:bootstrap && yarn bootstrap:build",
     "ci:test:cli": "npx lerna run test --ignore @dendronhq/plugin-core --parallel --stream -- -- --forceExit",
     "ci:test:plugin": "npx lerna run test --scope @dendronhq/plugin-core --stream",
-    "watch": "npx lerna exec --scope $pkg -- tsc -p tsconfig.build.json --watch"
+    "watch": "npx lerna exec --scope $pkg -- tsc -p tsconfig.build.json --watch",
+    "hooks:pre-commit": "node ./hooks/pre-commit.js"
   },
   "packages": [
     "packages/*",
@@ -71,7 +72,7 @@
   "useWorkspaces": false,
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged && yarn hooks:pre-commit"
     }
   },
   "lint-staged": {
@@ -80,6 +81,8 @@
   "dependencies": {
     "@dendronhq/conventional-changelog-dendron": "^5.0.11",
     "@types/jest": "^23.3.6",
+    "chalk": "^4.1.1",
+    "execa": "^5.0.0",
     "github-slugger": "^1.3.0",
     "typescript": "^4.1.5"
   }

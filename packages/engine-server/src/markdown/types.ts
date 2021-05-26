@@ -40,6 +40,7 @@ export enum DendronASTTypes {
   REF_LINK_V2 = "refLinkV2",
   PARAGRAPH = "paragraph",
   BLOCK_ANCHOR = "blockAnchor",
+  HEADING = "heading", // Not dendron-specific, included here for convenience
 }
 
 export enum DendronASTDest {

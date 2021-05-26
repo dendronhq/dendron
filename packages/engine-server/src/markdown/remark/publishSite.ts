@@ -3,7 +3,7 @@ import Unified, { Transformer } from "unified";
 import { Node } from "unist";
 import visit from "unist-util-visit";
 import { VFile } from "vfile";
-import { DendronASTDest, WikiLinkNoteV4 } from "../types";
+import { DendronASTDest, WikiLinkNoteV4, DendronASTTypes } from "../types";
 import { MDUtilsV4, PublishUtils } from "../utils";
 
 type PluginOpts = {
@@ -22,7 +22,7 @@ function plugin(this: Unified.Processor, opts: PluginOpts): Transformer {
       return;
     }
     visit(tree, (node, _idx, _parent) => {
-      if (node.type === "wikiLink") {
+      if (node.type === DendronASTTypes.WIKI_LINK) {
         const cnode = node as WikiLinkNoteV4;
         const value = cnode.value;
         const href = PublishUtils.getSiteUrl(config);

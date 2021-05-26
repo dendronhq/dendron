@@ -7,7 +7,7 @@ import { Node } from "unist";
 import u from "unist-builder";
 import { SiteUtils } from "../../topics/site";
 import { HierarchyUtils } from "../../utils";
-import { DendronASTDest, WikiLinkNoteV4 } from "../types";
+import { DendronASTDest, WikiLinkNoteV4, DendronASTTypes } from "../types";
 import { MDUtilsV4 } from "../utils";
 
 type PluginOpts = {
@@ -24,13 +24,8 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
 
   function transformer(tree: Node): void {
     let root = tree as Root;
-    const {
-      fname,
-      vault,
-      dest,
-      config,
-      insideNoteRef,
-    } = MDUtilsV4.getDendronData(proc);
+    const { fname, vault, dest, config, insideNoteRef } =
+      MDUtilsV4.getDendronData(proc);
     if (!fname || insideNoteRef) {
       return;
     }
@@ -74,7 +69,9 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
         type: "thematicBreak",
       });
       root.children.push(
-        u("heading", { depth: 2 }, [u("text", hierarchyDisplayTitle)])
+        u(DendronASTTypes.HEADING, { depth: 2 }, [
+          u("text", hierarchyDisplayTitle),
+        ])
       );
       root.children.push(
         list(
@@ -82,7 +79,7 @@ const plugin: Plugin = function (this: Unified.Processor, opts?: PluginOpts) {
           _.sortBy(children, ["custom.nav_order", "title"]).map((note) => {
             return listItem(
               paragraph({
-                type: "wikiLink",
+                type: DendronASTTypes.WIKI_LINK,
                 value: note.fname,
                 data: {
                   alias: note.title,

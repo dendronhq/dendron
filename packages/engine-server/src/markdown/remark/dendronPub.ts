@@ -1,6 +1,7 @@
 import { DendronError, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Image, Root } from "mdast";
+import { DendronASTTypes } from "../types";
 import Unified, { Transformer } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
@@ -30,14 +31,8 @@ type PluginOpts = NoteRefsOpts & {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  let {
-    dest,
-    vault,
-    fname,
-    config,
-    overrides,
-    insideNoteRef,
-  } = MDUtilsV4.getDendronData(proc);
+  let { dest, vault, fname, config, overrides, insideNoteRef } =
+    MDUtilsV4.getDendronData(proc);
   function transformer(tree: Node, _file: VFile) {
     let root = tree as Root;
     const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
@@ -67,12 +62,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       root.children.splice(
         idx,
         0,
-        u("heading", { depth: 1 }, [u("text", note.title)])
+        u(DendronASTTypes.HEADING, { depth: 1 }, [u("text", note.title)])
       );
     }
     visit(tree, (node, _idx, parent) => {
       if (
-        node.type === "wikiLink" &&
+        node.type === DendronASTTypes.WIKI_LINK &&
         dest !== DendronASTDest.MD_ENHANCED_PREVIEW
       ) {
         let _node = node as WikiLinkNoteV4;

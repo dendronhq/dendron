@@ -6,6 +6,7 @@ import {
 import {
   DendronASTData,
   DendronASTDest,
+  DendronASTTypes,
   DEngineClient,
   MDUtilsV4,
   UnistNode,
@@ -56,7 +57,7 @@ describe("wikiLinks", () => {
         `[[foo bar]]`
       );
       expect(_.pick(getWikiLink(resp), ["type", "value"])).toEqual({
-        type: "wikiLink",
+        type: DendronASTTypes.WIKI_LINK,
         value: "foo bar",
       });
     });
@@ -75,7 +76,7 @@ describe("wikiLinks", () => {
         );
         const wikiLink = getWikiLink(resp);
         expect(_.pick(wikiLink, ["type", "value"])).toEqual({
-          type: "wikiLink",
+          type: DendronASTTypes.WIKI_LINK,
           value: "lorem-ipsum",
         });
         expect(wikiLink.data.anchorHeader).toEqual("^block-id");
@@ -87,7 +88,7 @@ describe("wikiLinks", () => {
         );
         const wikiLink = getWikiLink(resp);
         expect(_.pick(wikiLink, ["type", "value"])).toEqual({
-          type: "wikiLink",
+          type: DendronASTTypes.WIKI_LINK,
           value: "placeholder",
         });
         expect(wikiLink.data.anchorHeader).toEqual("^block-id");

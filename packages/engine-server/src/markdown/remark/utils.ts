@@ -233,9 +233,10 @@ export class AnchorUtils {
     const anchors: [string, DNoteAnchorPositioned][] = [];
     noteAnchors.forEach((anchor) => {
       if (_.isUndefined(anchor.position)) return;
+      const slugger = getSlugger();
       const { line, column } = anchor.position.start;
-      if (anchor.type === "heading") {
-        const value = getSlugger().slug(anchor.children[0].value as string);
+      if (anchor.type === DendronASTTypes.HEADING) {
+        const value = slugger.slug(anchor.children[0].value as string);
         anchors.push([
           value,
           {

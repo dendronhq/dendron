@@ -1,74 +1,75 @@
 import { createLogger, engineSlice } from '@dendronhq/common-frontend';
-import { useThemeSwitcher } from 'react-css-theme-switcher';
 import _ from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
-import { Button } from 'antd';
 import { Box, Text } from '@chakra-ui/layout';
-import cytoscape, { Core, EdgeDefinition } from 'cytoscape';
+import cytoscape, { Core, EdgeDefinition, ElementsDefinition } from 'cytoscape';
 import euler from 'cytoscape-euler';
-import { NoteUtils } from '@dendronhq/common-all';
-import { useRouter } from 'next/router';
 
 export default function FullGraph({
   engine,
 }: {
   engine: engineSlice.EngineState;
 }) {
-  const router = useRouter();
   const notes = engine ? engine.notes : {};
   const logger = createLogger('Graph');
   logger.info({ ctx: 'Graph', notes });
-  const { switcher, themes, currentTheme, status } = useThemeSwitcher();
-  const [_isDarkMode, setIsDarkMode] = React.useState(false);
   const graphRef = useRef();
+
+  const [elements, setElements] = useState<ElementsDefinition>();
+
   const [cy, setCy] = useState<Core>();
 
+  // Process note notes and edges
   useEffect(() => {
-    if (graphRef.current) {
-      logger.log('Getting nodes...');
-      const nodes = Object.values(notes).map((note) => ({
-        data: { id: note.id, label: note.title },
-      }));
+    logger.log('Getting nodes...');
+    const nodes = Object.values(notes).map((note) => ({
+      data: { id: note.id, label: note.title },
+    }));
 
-      logger.log('Getting edges...');
-      const edges = Object.values(notes)
-        .map((note) => {
-          const childConnections: EdgeDefinition[] = note.children.map(
-            (child) => ({
-              data: {
-                id: `${notes.id}-${child}`,
-                source: note.id,
-                target: child,
-                classes: ['hierarchy'],
-              },
-            })
-          );
+    logger.log('Getting edges...');
+    const edges = Object.values(notes)
+      .map((note) => {
+        const childConnections: EdgeDefinition[] = note.children.map(
+          (child) => ({
+            data: {
+              id: `${notes.id}-${child}`,
+              source: note.id,
+              target: child,
+              classes: ['hierarchy'],
+            },
+          })
+        );
 
-          const linkConnections: EdgeDefinition[] = [];
-          //   = note.links.map((link) => {
-          //     if (link.to) {
-          //       const to = NoteUtils.getNoteByFnameV5({
-          //         fname: link.to!.fname as string,
-          //         vault: note.vault,
-          //         notes: notes,
-          //         wsRoot: router.query.ws,
-          //       });
-          //       return {
-          //         data: {
-          //           id: `${notes.id}-${to.id}`,
-          //           source: note.id,
-          //           target: to.id,
-          //           classes: ['edge--hierarchy'],
-          //         },
-          //       };
-          //     }
-          //   });
+        const linkConnections: EdgeDefinition[] = [];
+        //   = note.links.map((link) => {
+        //     if (link.to) {
+        //       const to = NoteUtils.getNoteByFnameV5({
+        //         fname: link.to!.fname as string,
+        //         vault: note.vault,
+        //         notes: notes,
+        //         wsRoot: router.query.ws,
+        //       });
+        //       return {
+        //         data: {
+        //           id: `${notes.id}-${to.id}`,
+        //           source: note.id,
+        //           target: to.id,
+        //           classes: ['edge--hierarchy'],
+        //         },
+        //       };
+        //     }
+        //   });
 
-          return [...childConnections, ...linkConnections];
-        })
-        .flat();
+        return [...childConnections, ...linkConnections];
+      })
+      .flat();
 
-        const isLargeGraph = nodes.length + edges.length > 1000
+    setElements({ nodes, edges });
+  }, [notes]);
+
+  useEffect(() => {
+    if (graphRef.current && elements) {
+      const isLargeGraph = elements.nodes.length + elements.edges.length > 1000;
 
       logger.log('Rendering graph...');
 
@@ -76,10 +77,7 @@ export default function FullGraph({
 
       const network = cytoscape({
         container: graphRef.current,
-        elements: {
-          nodes,
-          edges,
-        },
+        elements,
 
         style: [
           // the stylesheet for the graph
@@ -213,7 +211,15 @@ export default function FullGraph({
 
       setCy(network);
     }
-  }, [graphRef, notes]);
+  }, [graphRef, elements]);
 
-  return <Box w='100vw' h='100vh' id='graph' ref={graphRef}></Box>;
+  return (
+    <Box w='100vw' h='100vh' id='graph' position='relative'>
+      <Box w='100%' h='100%' ref={graphRef} zIndex={1}></Box>
+      {elements && <Box position='absolute' bottom={8} right={8} zIndex={2}>
+        <Text  m={0} p={0}>Nodes: {elements.nodes.length}</Text>
+        <Text  m={0} p={0}>Edges: {elements.edges.length}</Text>
+        </Box>}
+    </Box>
+  );
 }

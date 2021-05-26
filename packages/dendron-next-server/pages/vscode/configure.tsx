@@ -1,15 +1,11 @@
 import { createLogger, engineSlice } from "@dendronhq/common-frontend";
-import { Formik, FieldArray } from "formik";
-import { useThemeSwitcher } from "react-css-theme-switcher";
-import _ from "lodash";
+import { List, Typography } from "antd";
+import { FieldArray, Formik } from "formik";
+import { Field, Form, Input } from 'formik-antd';
 import React from "react";
-import { Button, List } from "antd";
-import { DendronConfig } from "@dendronhq/common-all";
-import { Form, Input, InputNumber, Checkbox, Field } from 'formik-antd'
-import { Typography, Divider } from 'antd';
 const { Title, Paragraph, Text, Link } = Typography;
 
-const createFormItem = ({name, label}: { name: string, placeholder?: string, label: string }) => {
+const createFormItem = ({ name, label }: { name: string, placeholder?: string, label: string }) => {
     return <Form.Item
         name={name}
         label={label}
@@ -42,15 +38,15 @@ const renderArray = (arrayEnts: any[], arrayHelpers: any) => {
 
         );
     return <List
-    itemLayout="vertical"
-    dataSource={data}
-    bordered={false}
-    renderItem={item => (
-      <List.Item style={{borderBottom:'none'}}>
-          {item}
-      </List.Item>
-    )}
-  />
+        itemLayout="vertical"
+        dataSource={data}
+        bordered={false}
+        renderItem={item => (
+            <List.Item style={{ borderBottom: 'none' }}>
+                {item}
+            </List.Item>
+        )}
+    />
 
 }
 
@@ -97,7 +93,7 @@ export default function Config({
                             name="site.siteHierarchies"
                             render={(arrayHelpers) => (renderArray(values.site.siteHierarchies, arrayHelpers))} />
                     </Form.Item>
-                    {createFormItem({name: "site.siteRootDir", label: "Site Root Dir"})}
+                    {createFormItem({ name: "site.siteRootDir", label: "Site Root Dir" })}
                 </Form>
             )}
         </Formik>

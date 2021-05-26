@@ -4,12 +4,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Box, Text } from '@chakra-ui/layout';
 import cytoscape, { Core, EdgeDefinition, ElementsDefinition } from 'cytoscape';
 import euler from 'cytoscape-euler';
+import { NoteUtils } from '@dendronhq/common-all';
+import { useRouter } from 'next/router';
 
 export default function FullGraph({
   engine,
 }: {
   engine: engineSlice.EngineState;
 }) {
+  const router = useRouter()
   const notes = engine ? engine.notes : {};
   const logger = createLogger('Graph');
   logger.info({ ctx: 'Graph', notes });
@@ -40,25 +43,28 @@ export default function FullGraph({
           })
         );
 
-        const linkConnections: EdgeDefinition[] = [];
-        //   = note.links.map((link) => {
-        //     if (link.to) {
-        //       const to = NoteUtils.getNoteByFnameV5({
-        //         fname: link.to!.fname as string,
-        //         vault: note.vault,
-        //         notes: notes,
-        //         wsRoot: router.query.ws,
-        //       });
-        //       return {
-        //         data: {
-        //           id: `${notes.id}-${to.id}`,
-        //           source: note.id,
-        //           target: to.id,
-        //           classes: ['edge--hierarchy'],
-        //         },
-        //       };
-        //     }
-        //   });
+        const linkConnections: EdgeDefinition[] = []
+        
+        // Find and add linked notes
+        note.links.forEach((link) => {
+            if (link.to && note.id) {
+              const to = NoteUtils.getNoteByFnameV5({
+                fname: link.to!.fname as string,
+                vault: note.vault,
+                notes: notes,
+                wsRoot: router.query.ws as string,
+              });
+              if (!to) return;
+              linkConnections.push({
+                data: {
+                  id: `${note.id}_${to.id}`,
+                  source: note.id,
+                  target: to.id,
+                  classes: ['link'],
+                },
+              });
+            }
+          });
 
         return [...childConnections, ...linkConnections];
       })
@@ -78,6 +84,30 @@ export default function FullGraph({
       const network = cytoscape({
         container: graphRef.current,
         elements,
+
+        // style: `
+        //   node {
+        //     width: 15;
+        //     height: 15;
+        //     background-color: #666;
+        //     color: #fff;
+        //     label: data(label);
+        //     font-size: 10;
+        //     min-zoomed-font-size: 12;
+        //   }
+        //   .hierarchy {
+        //     width: 2;
+        //     line-color: #54B758;
+        //     target-arrow-shape: none;
+        //     curve-style: haystack;
+        //   }
+        //   .link {
+        //     width: 2;
+        //     line-color: #548fb7;
+        //     target-arrow-shape: none;
+        //     curve-style: haystack;
+        //   }
+        // `,
 
         style: [
           // the stylesheet for the graph
@@ -99,12 +129,20 @@ export default function FullGraph({
             style: {
               width: 2,
               'line-color': '#54B758',
-              'target-arrow-color': '#54B758',
               'target-arrow-shape': 'none',
               'curve-style': 'haystack', // for lesser performance, use 'bezier',
             },
           },
+          {
+            selector: '.link',
+            style: {
+              width: 2,
+              'line-color': '#548fb7',
+            },
+          },
         ],
+
+        // style: cytoscape.stylesheet().selector('.link').style() ,
 
         // Options to improve performance
         textureOnViewport: isLargeGraph,

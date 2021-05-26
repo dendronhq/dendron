@@ -42,6 +42,7 @@
     "aws-amplify": "^3.3.23",
     "babel-plugin-import": "^1.13.3",
     "formik": "^2.2.5",
+    "formik-antd": "^2.0.1",
     "framer-motion": "^3.2.2-rc.1",
     "gulp": "^4.0.2",
     "gulp-csso": "^4.0.1",

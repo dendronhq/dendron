@@ -49,6 +49,7 @@ import { DConfig } from "./config";
 import { FileStorage } from "./drivers/file/storev2";
 import { FuseEngine } from "./fuseEngine";
 import { LinkUtils } from "./markdown";
+import { AnchorUtils } from "./markdown/remark/utils";
 import { HookUtils } from "./topics/hooks";
 
 type CreateStoreFunc = (engine: DEngineClient) => DStore;
@@ -416,23 +417,30 @@ export class DendronEngineV2 implements DEngine {
   }
 
   async refreshNotesV2(notes: NoteChangeEntry[]) {
-    notes.forEach((ent: NoteChangeEntry) => {
-      const { id } = ent.note;
-      //const uri = NoteUtils.getURI({ note: ent.note, wsRoot: this.wsRoot });
-      if (ent.status === "delete") {
-        delete this.notes[id];
-        // this.history &&
-        //   this.history.add({ source: "engine", action: "delete", uri });
-      } else {
-        if (ent.status === "create") {
+    await Promise.all(
+      notes.map(async (ent: NoteChangeEntry) => {
+        const { id } = ent.note;
+        //const uri = NoteUtils.getURI({ note: ent.note, wsRoot: this.wsRoot });
+        if (ent.status === "delete") {
+          delete this.notes[id];
           // this.history &&
-          //   this.history.add({ source: "engine", action: "create", uri });
+          //   this.history.add({ source: "engine", action: "delete", uri });
+        } else {
+          if (ent.status === "create") {
+            // this.history &&
+            //   this.history.add({ source: "engine", action: "create", uri });
+          }
+          const links = LinkUtils.findLinks({ note: ent.note, engine: this });
+          const anchors = await AnchorUtils.findAnchors({
+            note: ent.note,
+            wsRoot: this.wsRoot,
+          });
+          ent.note.links = links;
+          ent.note.anchors = anchors;
+          this.notes[id] = ent.note;
         }
-        const links = LinkUtils.findLinks({ note: ent.note, engine: this });
-        ent.note.links = links;
-        this.notes[id] = ent.note;
-      }
-    });
+      })
+    );
     this.fuseEngine.updateNotesIndex(this.notes);
   }
 

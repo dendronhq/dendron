@@ -50,6 +50,11 @@ export type DNoteAnchor = {
   value: string;
 };
 
+export type DNoteAnchorPositioned = DNoteAnchor & {
+  line: number;
+  column: number;
+};
+
 export type DLinkType = "wiki" | "refv2";
 
 export type DNoteLink<TData = any> = {

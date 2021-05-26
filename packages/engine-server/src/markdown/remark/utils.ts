@@ -1,4 +1,5 @@
 import {
+  assertUnreachable,
   CONSTANTS,
   DendronError,
   DEngineClient,
@@ -17,6 +18,7 @@ import { selectAll } from "unist-util-select";
 import { VFile } from "vfile";
 import { normalizev2 } from "../../utils";
 import {
+  Anchor,
   BlockAnchor,
   DendronASTDest,
   DendronASTRoot,
@@ -29,6 +31,7 @@ import { MDUtilsV4 } from "../utils";
 const toString = require("mdast-util-to-string");
 import * as mdastBuilder from "mdast-builder";
 import { blockAnchors } from "./blockAnchors";
+import { DNoteAnchorPositioned } from "@dendronhq/common-all";
 export { mdastBuilder };
 
 export const ALIAS_DIVIDER = "|";
@@ -85,7 +88,10 @@ export class LinkUtils {
       fname: note.fname,
     });
     let out = remark.parse(content);
-    let out2: WikiLinkNoteV4[] = selectAll("wikiLink", out) as WikiLinkNoteV4[];
+    let out2: WikiLinkNoteV4[] = selectAll(
+      DendronASTTypes.WIKI_LINK,
+      out
+    ) as WikiLinkNoteV4[];
     const dlinks = out2.map(
       (m: WikiLinkNoteV4) =>
         ({
@@ -216,6 +222,48 @@ export class LinkUtils {
   }
 }
 
+export class AnchorUtils {
+  static async findAnchors(opts: {
+    note: NoteProps;
+    wsRoot: string;
+  }): Promise<{ [index: string]: DNoteAnchorPositioned }> {
+    if (opts.note.stub) return {};
+    const noteContents = await NoteUtils.readFullNote(opts);
+    const noteAnchors = RemarkUtils.findAnchors(noteContents);
+    const anchors: [string, DNoteAnchorPositioned][] = [];
+    noteAnchors.forEach((anchor) => {
+      if (_.isUndefined(anchor.position)) return;
+      const slugger = getSlugger();
+      const { line, column } = anchor.position.start;
+      if (anchor.type === DendronASTTypes.HEADING) {
+        const value = slugger.slug(anchor.children[0].value as string);
+        anchors.push([
+          value,
+          {
+            type: "header",
+            value,
+            line: line - 1,
+            column: column - 1,
+          },
+        ]);
+      } else if (anchor.type === DendronASTTypes.BLOCK_ANCHOR) {
+        anchors.push([
+          `^${anchor.id}`,
+          {
+            type: "block",
+            value: anchor.id,
+            line: line - 1,
+            column: column - 1,
+          },
+        ]);
+      } else {
+        assertUnreachable(anchor);
+      }
+    });
+    return Object.fromEntries(anchors);
+  }
+}
+
 function walk(node: Node, fn: any) {
   fn(node);
   if (node.children) {
@@ -231,7 +279,7 @@ export class RemarkUtils {
   static bumpHeadings(root: Node, baseDepth: number) {
     var headings: Heading[] = [];
     walk(root, function (node: Node) {
-      if (node.type === "heading") {
+      if (node.type === DendronASTTypes.HEADING) {
         headings.push(node as Heading);
       }
     });
@@ -250,14 +298,23 @@ export class RemarkUtils {
   static findHeaders(content: string): Heading[] {
     const remark = MDUtilsV4.remark();
     let out = remark.parse(content);
-    let out2: Heading[] = selectAll("heading", out) as Heading[];
+    let out2: Heading[] = selectAll(DendronASTTypes.HEADING, out) as Heading[];
     return out2;
   }
 
   static findBlockAnchors(content: string): BlockAnchor[] {
     const parser = MDUtilsV4.remark().use(blockAnchors);
     const parsed = parser.parse(content);
-    return selectAll("blockAnchor", parsed) as BlockAnchor[];
+    return selectAll(DendronASTTypes.BLOCK_ANCHOR, parsed) as BlockAnchor[];
+  }
+
+  static findAnchors(content: string): Anchor[] {
+    const parser = MDUtilsV4.remark().use(blockAnchors);
+    const parsed = parser.parse(content);
+    return [
+      ...(selectAll(DendronASTTypes.HEADING, parsed) as Heading[]),
+      ...(selectAll(DendronASTTypes.BLOCK_ANCHOR, parsed) as BlockAnchor[]),
+    ];
   }
 
   static findIndex(array: Node[], fn: any) {
@@ -270,7 +327,7 @@ export class RemarkUtils {
   }
 
   static isHeading(node: Node, text: string, depth?: number) {
-    if (node.type !== "heading") {
+    if (node.type !== DendronASTTypes.HEADING) {
       return false;
     }
 
@@ -291,7 +348,7 @@ export class RemarkUtils {
   }
 
   static isNoteRefV2(node: Node) {
-    return node.type === "refLinkV2";
+    return node.type === DendronASTTypes.REF_LINK_V2;
   }
 
   static oldNoteRef2NewNoteRef(note: NoteProps, changes: NoteChangeEntry[]) {
@@ -299,7 +356,10 @@ export class RemarkUtils {
       return (tree: Node, _vfile: VFile) => {
         let root = tree as DendronASTRoot;
         //@ts-ignore
-        let notesRefLegacy: NoteRefNoteV4_LEGACY[] = selectAll("refLink", root);
+        let notesRefLegacy: NoteRefNoteV4_LEGACY[] = selectAll(
+          DendronASTTypes.REF_LINK,
+          root
+        );
         notesRefLegacy.map((noteRefLegacy) => {
           const slugger = getSlugger();
           // @ts-ignore;
@@ -334,7 +394,7 @@ export class RemarkUtils {
         let root = tree as Root;
         const idx = _.findIndex(
           root.children,
-          (ent) => ent.type === "heading" && ent.depth === 1
+          (ent) => ent.type === DendronASTTypes.HEADING && ent.depth === 1
         );
         if (idx >= 0) {
           const head = root.children.splice(idx, 1)[0] as Heading;
@@ -356,7 +416,7 @@ export class RemarkUtils {
         let root = tree as Root;
         const idx = _.findIndex(
           root.children,
-          (ent) => ent.type === "heading" && ent.depth === 1
+          (ent) => ent.type === DendronASTTypes.HEADING && ent.depth === 1
         );
         if (idx >= 0) {
           const head = root.children[idx] as Heading;

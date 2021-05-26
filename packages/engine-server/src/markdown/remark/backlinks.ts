@@ -5,7 +5,7 @@ import { list, listItem, paragraph } from "mdast-builder";
 import Unified, { Plugin } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
-import { DendronASTDest, WikiLinkNoteV4 } from "../types";
+import { DendronASTDest, WikiLinkNoteV4, DendronASTTypes } from "../types";
 import { MDUtilsV4 } from "../utils";
 
 // Plugin that adds backlinks at the end of each page if they exist
@@ -38,14 +38,16 @@ const plugin: Plugin = function (this: Unified.Processor) {
       root.children.push({
         type: "thematicBreak",
       });
-      root.children.push(u("heading", { depth: 2 }, [u("text", "Backlinks")]));
+      root.children.push(
+        u(DendronASTTypes.HEADING, { depth: 2 }, [u("text", "Backlinks")])
+      );
       root.children.push(
         list(
           "unordered",
           backlinks.map((mdLink) => {
             return listItem(
               paragraph({
-                type: "wikiLink",
+                type: DendronASTTypes.WIKI_LINK,
                 value: mdLink.from.fname,
                 data: {
                   alias:

@@ -4,7 +4,7 @@ import {
   DVault,
   NoteProps,
 } from "@dendronhq/common-all";
-import { Parent, Root } from "mdast";
+import { Heading, Parent, Root } from "mdast";
 import { Processor } from "unified";
 import { DendronPubOpts } from "./remark/dendronPub";
 import { WikiLinksOpts } from "./remark/wikiLinks";
@@ -40,6 +40,7 @@ export enum DendronASTTypes {
   REF_LINK_V2 = "refLinkV2",
   PARAGRAPH = "paragraph",
   BLOCK_ANCHOR = "blockAnchor",
+  HEADING = "heading", // Not dendron-specific, included here for convenience
 }
 
 export enum DendronASTDest {
@@ -109,3 +110,5 @@ export type BlockAnchor = DendronASTNode & {
   type: DendronASTTypes.BLOCK_ANCHOR;
   id: string;
 };
+
+export type Anchor = BlockAnchor | Heading;

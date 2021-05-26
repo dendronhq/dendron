@@ -51,7 +51,12 @@ import { publishSite } from "./remark/publishSite";
 import { transformLinks } from "./remark/transformLinks";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
 import { blockAnchors } from "./remark/blockAnchors";
-import { DendronASTData, DendronASTDest, VaultMissingBehavior } from "./types";
+import {
+  DendronASTData,
+  DendronASTDest,
+  VaultMissingBehavior,
+  DendronASTTypes,
+} from "./types";
 
 const toString = require("mdast-util-to-string");
 export { nunjucks };
@@ -219,7 +224,7 @@ export class MDUtilsV4 {
     opts: { depth?: number; slugger: ReturnType<typeof getSlugger> }
   ) {
     const { depth, slugger } = opts;
-    if (node.type !== "heading") {
+    if (node.type !== DendronASTTypes.HEADING) {
       return false;
     }
 
@@ -259,6 +264,7 @@ export class MDUtilsV4 {
     let _proc = remark()
       .use(remarkParse, { gfm: true })
       .use(wikiLinks)
+      .use(blockAnchors)
       .data("errors", errors);
     this.setDendronData(_proc, { dest: opts.dest, fname: opts.fname });
     this.setEngine(_proc, opts.engine);

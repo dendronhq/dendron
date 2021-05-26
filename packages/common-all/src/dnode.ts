@@ -33,6 +33,7 @@ import {
 import { getSlugger } from "./utils";
 import { genUUID } from "./uuid";
 import { VaultUtils } from "./vault";
+import fs from "fs-extra";
 
 /**
  * Utilities for dealing with nodes
@@ -49,6 +50,7 @@ export class DNodeUtils {
       type,
       desc,
       links,
+      anchors,
       fname,
       updated,
       created,
@@ -63,6 +65,7 @@ export class DNodeUtils {
       id: genUUID(),
       desc: "",
       links: [],
+      anchors: {},
       children: [],
       parent: null,
       body: "",
@@ -77,6 +80,7 @@ export class DNodeUtils {
       type,
       desc,
       links,
+      anchors,
       fname,
       updated,
       created,
@@ -721,6 +725,21 @@ export class NoteUtils {
 
   static getRoots(notes: NotePropsDict): NoteProps[] {
     return _.filter(_.values(notes), DNodeUtils.isRoot);
+  }
+
+  /** Reads the full note contents from the file, including the frontmatter. */
+  static async readFullNote(opts: {
+    note: NoteProps;
+    wsRoot: string;
+  }): Promise<string> {
+    const notePath = this.getFullPath(opts);
+    return await fs.readFile(notePath, { encoding: "utf8" });
+  }
+
+  /** Reads the full note contents from the file, including the frontmatter. */
+  static readFullNoteSync(opts: { note: NoteProps; wsRoot: string }): string {
+    const notePath = this.getFullPath(opts);
+    return fs.readFileSync(notePath, { encoding: "utf8" });
   }
 
   /**

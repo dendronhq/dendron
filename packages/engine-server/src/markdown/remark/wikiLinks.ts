@@ -9,7 +9,12 @@ import _ from "lodash";
 import path from "path";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
-import { DendronASTDest, WikiLinkDataV4, WikiLinkNoteV4 } from "../types";
+import {
+  DendronASTDest,
+  WikiLinkDataV4,
+  WikiLinkNoteV4,
+  DendronASTTypes,
+} from "../types";
 import { MDUtilsV4 } from "../utils";
 import { addError, getNoteOrError, LinkUtils } from "./utils";
 
@@ -219,7 +224,7 @@ function attachParser(proc: Unified.Processor) {
       const linkMatch = match[1].trim();
       const { value, alias, anchorHeader, vaultName } = parseLink(linkMatch);
       return eat(match[0])({
-        type: "wikiLink",
+        type: DendronASTTypes.WIKI_LINK,
         value,
         data: {
           alias,

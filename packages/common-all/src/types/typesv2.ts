@@ -483,9 +483,13 @@ export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;
 
 // --- Views
 
-export enum DendronViewKey {
+export enum DendronWebViewKey {
+  CONFIGURE = "dendron.configure"
+}
+
+export enum DendronTreeViewKey {
   SAMPLE_VIEW = "dendron.sample",
   TREE_VIEW = "dendron.treeView",
   TREE_VIEW_V2 = "dendron.tree-view",
   BACKLINKS = "dendron.backlinks",
-}
+} 

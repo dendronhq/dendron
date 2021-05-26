@@ -1,14 +1,14 @@
-import { DendronViewKey, DUtils } from "@dendronhq/common-all";
+import { DendronTreeViewKey, DendronWebViewKey, DUtils } from "@dendronhq/common-all";
 import { Logger } from "../logger";
 import { DendronWorkspace, getWS } from "../workspace";
 
 export class WebViewUtils {
-  static genHTML = ({
+  static genHTMLForView = ({
     title,
     view,
   }: {
     title: string;
-    view: DendronViewKey;
+    view: DendronTreeViewKey | DendronWebViewKey
   }) => {
     const ws = getWS();
     const qs = DUtils.querystring.stringify({
@@ -107,5 +107,28 @@ export class WebViewUtils {
 </body>
 
 </html>`;
+  };
+
+  static genHTMLForTreeView = ({
+    title,
+    view,
+  }: {
+    title: string;
+    view: DendronTreeViewKey
+  }) => {
+    return WebViewUtils.genHTMLForView({title, view});
+  };
+
+  static genHTMLForWebView = ({
+    title,
+    view,
+  }: {
+    title: string;
+    view: DendronWebViewKey;
+  }) => { 
+    /**
+     * Implementation might differ in the future
+     */
+    return WebViewUtils.genHTMLForView({title, view});
   };
 }

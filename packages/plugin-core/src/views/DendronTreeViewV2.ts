@@ -1,5 +1,5 @@
 import {
-  DendronViewKey,
+  DendronTreeViewKey,
   NoteProps,
   NoteUtils,
   OnDidChangeActiveTextEditorMsg,
@@ -19,7 +19,7 @@ import { DendronWorkspace, getEngine, getWS } from "../workspace";
 import { WebViewUtils } from "./utils";
 
 export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
-  public static readonly viewType = DendronViewKey.TREE_VIEW_V2;
+  public static readonly viewType = DendronTreeViewKey.TREE_VIEW_V2;
 
   private _view?: vscode.WebviewView;
 
@@ -132,9 +132,9 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(_webview: vscode.Webview) {
-    return WebViewUtils.genHTML({
+    return WebViewUtils.genHTMLForTreeView({
       title: "Tree View",
-      view: DendronViewKey.TREE_VIEW_V2,
+      view: DendronTreeViewKey.TREE_VIEW_V2,
     });
   }
 }

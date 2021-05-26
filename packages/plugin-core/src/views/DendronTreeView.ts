@@ -5,7 +5,7 @@ import {
   NoteProps,
   NoteUtils,
   VaultUtils,
-  DendronViewKey,
+  DendronTreeViewKey,
 } from "@dendronhq/common-all";
 import _ from "lodash";
 import path from "path";
@@ -178,7 +178,7 @@ export class DendronTreeView {
           const ws = DendronWorkspace.instance();
           const treeDataProvider = new EngineNoteProvider();
           await treeDataProvider.getChildren();
-          const treeView = window.createTreeView(DendronViewKey.TREE_VIEW, {
+          const treeView = window.createTreeView(DendronTreeViewKey.TREE_VIEW, {
             treeDataProvider,
             showCollapseAll: true,
           });

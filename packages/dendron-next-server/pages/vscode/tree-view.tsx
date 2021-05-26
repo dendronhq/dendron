@@ -1,7 +1,7 @@
 import { BookOutlined, PlusOutlined } from "@ant-design/icons";
 import { Spin } from "antd";
 import {
-  DendronViewKey,
+  DendronTreeViewKey,
   DMessageSource,
   DNodeUtils,
   NoteProps,
@@ -170,14 +170,14 @@ function TreeViewParent({ engine, ide }: DendronProps) {
   );
   // controlled compo: what keys should be expanded
   const expandKeys = _.isEmpty(activeNoteIds) ? [] : activeNoteIds;
-  if (!ide.views[DendronViewKey.TREE_VIEW_V2].ready) {
+  if (!ide.views[DendronTreeViewKey.TREE_VIEW_V2].ready) {
     logger.info({
       ctx,
       state: "setViewReady",
     });
     ideDispatch(
       ideSlice.actions.setViewReady({
-        key: DendronViewKey.TREE_VIEW_V2,
+        key: DendronTreeViewKey.TREE_VIEW_V2,
         ready: true,
       })
     );

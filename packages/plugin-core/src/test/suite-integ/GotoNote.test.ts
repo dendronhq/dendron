@@ -112,7 +112,8 @@ suite("GotoNote", function () {
             vault,
           });
           expect(getActiveEditorBasename()).toEqual("bar.ch1.md");
-          const content = VSCodeUtils.getActiveTextEditor()?.document.getText() as string;
+          const content =
+            VSCodeUtils.getActiveTextEditor()?.document.getText() as string;
           expect(content.indexOf("ch1 template") >= 0).toBeTruthy();
           done();
         },
@@ -151,12 +152,11 @@ suite("GotoNote", function () {
       runSingleVaultTest({
         ctx,
         initDirCb: async (vaultDir) => {
-          ({
-            specialCharsHeader,
-          } = await ANCHOR_WITH_SPECIAL_CHARS.preSetupHook({
-            wsRoot: "",
-            vaults: [{ fsPath: vaultDir }],
-          }));
+          ({ specialCharsHeader } =
+            await ANCHOR_WITH_SPECIAL_CHARS.preSetupHook({
+              wsRoot: "",
+              vaults: [{ fsPath: vaultDir }],
+            }));
         },
         onInit: async ({ vault }) => {
           await new GotoNoteCommand().run({
@@ -170,6 +170,33 @@ suite("GotoNote", function () {
           expect(getActiveEditorBasename()).toEqual("alpha.md");
           const selection = VSCodeUtils.getActiveTextEditor()?.selection;
           expect(selection?.start.line).toEqual(9);
+          expect(selection?.start.character).toEqual(0);
+          done();
+        },
+      });
+    });
+
+    test("block anchor", (done) => {
+      runSingleVaultTest({
+        ctx,
+        preSetupHook: async ({ wsRoot, vaults }) => {
+          await NOTE_PRESETS_V4.NOTE_WITH_BLOCK_ANCHOR_TARGET.create({
+            wsRoot,
+            vault: vaults[0],
+          });
+        },
+        onInit: async ({ vault }) => {
+          await new GotoNoteCommand().run({
+            qs: "anchor-target",
+            vault,
+            anchor: {
+              type: "block",
+              value: "block-id",
+            },
+          });
+          expect(getActiveEditorBasename()).toEqual("anchor-target.md");
+          const selection = VSCodeUtils.getActiveTextEditor()?.selection;
+          expect(selection?.start.line).toEqual(10);
           expect(selection?.start.character).toEqual(0);
           done();
         },

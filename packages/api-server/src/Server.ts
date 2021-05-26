@@ -39,7 +39,7 @@ export function appModule({
 
   logger.info({ ctx, dirPath: __dirname });
   const staticDir = path.join(__dirname, "static");
-  app.use(express.static(staticDir, { fallthrough: true }));
+  app.use(express.static(staticDir));
 
   if (nextStaticRoot) {
     logger.info({ ctx, msg: "nextStaticRoot:add", nextStaticRoot });

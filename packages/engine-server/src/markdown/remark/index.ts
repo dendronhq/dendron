@@ -4,3 +4,8 @@ export * from "./noteRefs";
 export * from "./transformLinks";
 export { LinkUtils, RemarkUtils, mdastBuilder } from "./utils";
 export { wikiLinks, WikiLinksOpts, matchWikiLink } from "./wikiLinks";
+export {
+  blockAnchors,
+  BlockAnchorOpts,
+  matchBlockAnchor,
+} from "./blockAnchors";

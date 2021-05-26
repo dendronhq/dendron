@@ -135,7 +135,7 @@ export class WorkspaceService {
     return;
   }
 
-  async commidAndAddAll() {
+  async commidAndAddAll(): Promise<string[]> {
     const allRepos = await this.getAllRepos();
     const out = await Promise.all(
       allRepos.map(async (root) => {
@@ -148,7 +148,7 @@ export class WorkspaceService {
         return undefined;
       })
     );
-    return _.filter(out, (ent) => !_.isUndefined(ent));
+    return _.filter(out, (ent) => !_.isUndefined(ent)) as string[];
   }
 
   /**
@@ -291,17 +291,21 @@ export class WorkspaceService {
     );
   }
 
+  getVaultForPath(fpath: string) {
+    return VaultUtils.getVaultByNotePathV4({
+      vaults: this.config.vaults,
+      wsRoot: this.wsRoot,
+      fsPath: fpath,
+    });
+  }
+
   /**
    * Check if a path belongs to a workspace
    */
   isPathInWorkspace(fpath: string) {
     try {
-      // check if selection comes from known vault
-      VaultUtils.getVaultByNotePathV4({
-        vaults: this.config.vaults,
-        wsRoot: this.wsRoot,
-        fsPath: fpath,
-      });
+      // if not error, then okay
+      this.getVaultForPath(fpath);
       return true;
     } catch {
       return false;
@@ -323,20 +327,24 @@ export class WorkspaceService {
     return repoPath;
   }
 
-  async pullVaults() {
+  /** Returns the list of vaults that were attempted to be pulled, even if there was nothing to pull. */
+  async pullVaults(): Promise<string[]> {
     const allRepos = await this.getAllRepos();
     const out = await Promise.all(
       allRepos.map(async (root) => {
         const git = new Git({ localUrl: root });
         if (await git.hasRemote()) {
           await git.pull();
+          return root;
         }
+        return undefined;
       })
     );
-    return _.filter(out, (ent) => !_.isUndefined(ent));
+    return _.filter(out, (ent) => !_.isUndefined(ent)) as string[];
   }
 
-  async pushVaults() {
+  /** Returns the list of vaults that were attempted to be pushed, even if there was nothing to push. */
+  async pushVaults(): Promise<string[]> {
     const allRepos = await this.getAllRepos();
     const vaults = this.config.vaults;
     const wsRoot = this.wsRoot;
@@ -344,7 +352,7 @@ export class WorkspaceService {
       allRepos.map(async (root) => {
         const git = new Git({ localUrl: root });
         if (WorkspaceService.isWorkspaceVault(root)) {
-          return;
+          return undefined;
         }
         const vault = VaultUtils.getVaultByPath({
           vaults,
@@ -352,16 +360,20 @@ export class WorkspaceService {
           fsPath: root,
         });
         if ((await git.hasRemote()) && this.user.canPushVault(vault)) {
-          await git.push().catch((err) => {
+          try {
+            await git.push();
+            return root;
+          } catch (err) {
             throw new DendronError({
               message: "error pushing vault",
               payload: { err, repoPath: root },
             });
-          });
+          }
         }
+        return undefined;
       })
     );
-    return _.filter(out, (ent) => !_.isUndefined(ent));
+    return _.filter(out, (ent) => !_.isUndefined(ent)) as string[];
   }
 
   /**

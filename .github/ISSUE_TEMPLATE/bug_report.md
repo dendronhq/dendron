@@ -14,9 +14,10 @@ assignees: ''
  Look here -> [triage](https://dendron.so/notes/1e6c8b49-ef88-4e79-b2df-e9d614c38a53.html) 
  for help with choosing.
  Needed for Auto labeling:
- issue_labeler_regex_version=2
+ issue_labeler_regex_version=3
  
  - [X] Bug
+ - [ ] IsTriaged
  -->
 
 ## Please select the area your Bug applys to. (Multiple selections are Possible)
@@ -51,8 +52,9 @@ If applicable, add screenshots to help explain your problem.
 
 ## Desktop (please complete the following information)
 
-- OS: [e.g. mac/windows]
-- Version [e.g. v41]
+- OS: [e.g. iOS]
+- Browser [e.g. chrome, safari]
+- Version [e.g. 22]
 
 ## Additional context
 

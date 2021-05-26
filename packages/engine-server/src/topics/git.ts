@@ -11,7 +11,9 @@ export class Git {
     return fs.existsSync(path.join(fpath, ".git"));
   }
 
-  constructor(public opts: { localUrl: string; remoteUrl?: string }) {}
+  constructor(
+    public opts: { localUrl: string; remoteUrl?: string; bare?: boolean }
+  ) {}
 
   async _execute(cmd: string): Promise<{ stdout: string; stderr: string }> {
     const [git, ...args] = cmd.split(" ");
@@ -54,8 +56,14 @@ export class Git {
     return localUrl;
   }
 
+  /** Adds the `remoteUrl` set in the constructor as a remote, and sets it as the upstream for the main/master branch. */
+  async remoteAdd() {
+    const { remoteUrl } = this.opts;
+    await this._execute(`git remote add origin ${remoteUrl}`);
+  }
+
   async init() {
-    await this._execute("git init");
+    await this._execute(`git init${this.opts.bare ? " --bare" : ""}`);
   }
 
   async pull() {
@@ -66,9 +74,12 @@ export class Git {
     });
   }
 
-  async push() {
+  async push(setUpstream?: { remote: string; branch: string }) {
     const { localUrl: cwd } = this.opts;
-    await execa.command([`git push`].join(" "), {
+    let setUpstremArg = "";
+    if (setUpstream)
+      setUpstremArg = ` --set-upstream ${setUpstream.remote} ${setUpstream.branch}`;
+    await execa.command([`git push${setUpstremArg}`].join(" "), {
       shell: true,
       cwd,
     });
@@ -96,6 +107,18 @@ export class Git {
       .split("\n")
       .filter((ent) => !_.isEmpty(ent))
       .map((ent) => _.trim(ent));
+  }
+
+  async getCurrentBranch() {
+    const { localUrl: cwd } = this.opts;
+    const { stdout } = await execa(
+      "git",
+      [`rev-parse`, `--abbrev-ref`, `HEAD`],
+      {
+        cwd,
+      }
+    );
+    return stdout.trim();
   }
 
   async hasChanges() {

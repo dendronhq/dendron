@@ -3,9 +3,8 @@ import _ from "lodash";
 import { DateTime } from "luxon";
 import { DecorationOptions, ExtensionContext, Range, window } from "vscode";
 import { Logger } from "./logger";
+import { CodeConfigKeys, DateTimeFormat } from "./types";
 import { getConfigValue, getWS } from "./workspace";
-import { DateTimeFormat, CodeConfigKeys } from "./types";
-import { VSCodeUtils } from "./utils";
 
 const tsDecorationType = window.createTextEditorDecorationType({
   //   borderWidth: "1px",
@@ -24,8 +23,6 @@ const tsDecorationType = window.createTextEditorDecorationType({
 
 export class WindowWatcher {
   activate(context: ExtensionContext) {
-    const ws = getWS();
-
     window.onDidChangeActiveTextEditor(
       (editor) => {
         const ctx = "WindowWatcher:onDidChangeActiveTextEditor";
@@ -34,12 +31,13 @@ export class WindowWatcher {
           editor.document.uri.fsPath ===
             window.activeTextEditor?.document.uri.fsPath
         ) {
+          const uri = editor.document.uri;
           Logger.info({ ctx, msg: "enter", uri: editor?.document.uri });
-          this.triggerUpdateDecorations();
-          const note = VSCodeUtils.getNoteFromDocument(editor.document);
-          if (ws.dendronTreeViewV2 && note) {
-            ws.dendronTreeViewV2.refresh(note);
+          if (!getWS().workspaceService?.isPathInWorkspace(uri.fsPath)) {
+            Logger.info({ ctx, uri: uri.fsPath, msg: "not in workspace" });
+            return;
           }
+          this.triggerUpdateDecorations();
         }
       },
       null,

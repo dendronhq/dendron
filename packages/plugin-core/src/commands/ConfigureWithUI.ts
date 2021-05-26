@@ -1,7 +1,9 @@
+import { DendronWebViewKey, getStage } from "@dendronhq/common-all";
 import _ from "lodash";
 import { ViewColumn, window } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { EngineAPIService } from "../services/EngineAPIService";
+import { WebViewUtils } from "../views/utils";
 import { DendronWorkspace } from "../workspace";
 import { BasicCommand } from "./base";
 
@@ -56,6 +58,7 @@ export class ConfigureWithUICommand extends BasicCommand<
   }
   async execute() {
     const title = "Dendron Configuration";
+
     const panel = window.createWebviewPanel(
       "dendronIframe", // Identifies the type of the webview. Used internally
       title, // Title of the panel displayed to the user
@@ -64,7 +67,16 @@ export class ConfigureWithUICommand extends BasicCommand<
         enableScripts: true,
       } // Webview options. More on these later.
     );
-    const resp = await getWebviewContent2({ title });
+
+    let resp: string;
+    if (getStage() === "dev") {
+      resp = WebViewUtils.genHTMLForWebView({
+        title: "Dendron Config",
+        view: DendronWebViewKey.CONFIGURE,
+      });
+    } else {
+      resp = await getWebviewContent2({ title });
+    }
     panel.webview.html = resp;
   }
 }

@@ -1,4 +1,4 @@
-import { DEngineClient } from "@dendronhq/common-all";
+import { DEngineClient, NoteProps } from "@dendronhq/common-all";
 import {
   BackfillV2Command,
   DoctorActions,
@@ -6,13 +6,16 @@ import {
 } from "@dendronhq/dendron-cli";
 import fs from "fs-extra";
 import _ from "lodash";
+import _md from "markdown-it";
 import path from "path";
-import { window } from "vscode";
+import { window, ViewColumn } from "vscode";
 import { DENDRON_COMMANDS } from "../constants";
 import { VSCodeUtils } from "../utils";
 import { DendronWorkspace, getWS } from "../workspace";
 import { BasicCommand } from "./base";
 import { ReloadIndexCommand } from "./ReloadIndex";
+
+const md = _md();
 
 type Finding = {
   issue: string;
@@ -38,6 +41,28 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
       return { action: doctorAction.label };
     }
     return;
+  }
+
+  async showMissingNotePreview(candidates: NoteProps[]) {
+    let content = [
+      "# Create Missing Linked Notes Preview",
+      "",
+      `## The following files will be created`,
+    ];
+
+    _.forEach(_.sortBy(candidates, ["vault.fsPath"]), (candidate) => {
+      content = content.concat(
+        `- ${candidate.vault.fsPath}/${candidate.fname}\n`
+      );
+    });
+
+    const panel = window.createWebviewPanel(
+      "doctorCreateMissingLinkedNotesPreview",
+      "Create MissingLinked Notes Preview",
+      ViewColumn.One,
+      {}
+    );
+    panel.webview.html = md.render(content.join("\n"));
   }
 
   async execute(opts: CommandOpts) {
@@ -66,6 +91,45 @@ export class DoctorCommand extends BasicCommand<CommandOpts, CommandOutput> {
         await new BackfillV2Command().execute({
           engine: engine,
         });
+        break;
+      }
+      case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
+        const cmd = new DoctorCLICommand();
+        let notes = _.values(engine.notes);
+        notes = notes.filter((note) => !note.stub);
+        const uniqueCandidates = cmd.getWildLinkDestinations(
+          notes,
+          engine.wsRoot
+        );
+        if (uniqueCandidates.length > 0) {
+          // show preview before creating
+          await this.showMissingNotePreview(uniqueCandidates);
+          const options = ["proceed", "cancel"];
+          const shouldProceed = await VSCodeUtils.showQuickPick(options, {
+            placeHolder: "proceed",
+            ignoreFocusOut: true,
+          });
+          if (shouldProceed !== "proceed") {
+            window.showInformationMessage("cancelled");
+            break;
+          }
+          window.showInformationMessage("creating missing links...");
+          if (ws.vaultWatcher) {
+            ws.vaultWatcher.pause = true;
+          }
+          await cmd.execute({
+            action: opts.action,
+            engine,
+            wsRoot,
+            server: {},
+            exit: false,
+          });
+        } else {
+          window.showInformationMessage(`There are no missing links!`);
+        }
+        if (ws.vaultWatcher) {
+          ws.vaultWatcher.pause = false;
+        }
         break;
       }
       default: {

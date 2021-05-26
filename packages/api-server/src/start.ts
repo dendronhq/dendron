@@ -1,5 +1,5 @@
 import process from "process";
-const { launch } = require("./index");
+import { launchv2 } from "./index";
 const port = process.env.PORT || 3000;
 const logPath = process.env.LOG_DST;
-launch({ port: port as number, logPath });
+launchv2({ port: port as number, logPath });

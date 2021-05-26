@@ -31,7 +31,7 @@ import {
   StoreDeleteNoteResp,
   VaultUtils,
   WriteNoteResp,
-  stringifyError
+  stringifyError,
 } from "@dendronhq/common-all";
 import {
   DLogger,
@@ -39,7 +39,7 @@ import {
   getAllFiles,
   note2File,
   schemaModuleProps2File,
-  vault2Path
+  vault2Path,
 } from "@dendronhq/common-server";
 import fs from "fs-extra";
 import _ from "lodash";
@@ -94,7 +94,7 @@ export class FileStorage implements DStore {
     this.schemas = {};
     this.notesCache = {
       version: 0,
-      notes: {}
+      notes: {},
     };
     this.links = [];
     this.logger = logger;
@@ -112,14 +112,14 @@ export class FileStorage implements DStore {
         error = DendronError.createPlainError({
           message: "schema malformed",
           severity: ERROR_SEVERITY.MINOR,
-          payload: { schema: resp.error }
+          payload: { schema: resp.error },
         });
       }
-      resp.data.map(ent => {
+      resp.data.map((ent) => {
         this.schemas[ent.root.id] = ent;
       });
       const _notes = await this.initNotes();
-      _notes.map(ent => {
+      _notes.map((ent) => {
         this.notes[ent.id] = ent;
       });
 
@@ -130,9 +130,9 @@ export class FileStorage implements DStore {
           schemas,
           wsRoot: this.wsRoot,
           config: this.config,
-          vaults: this.vaults
+          vaults: this.vaults,
         },
-        error
+        error,
       };
     } catch (err) {
       this.logger.error(err);
@@ -148,7 +148,7 @@ export class FileStorage implements DStore {
     if (id === "root") {
       throw new DendronError({
         message: "",
-        status: ERROR_STATUS.CANT_DELETE_ROOT
+        status: ERROR_STATUS.CANT_DELETE_ROOT,
       });
     }
     const noteToDelete = this.notes[id];
@@ -178,14 +178,14 @@ export class FileStorage implements DStore {
       this.logger.info({ ctx, noteAsLog, msg: "delete from parent" });
       if (!noteToDelete.parent) {
         throw DendronError.createFromStatus({
-          status: ERROR_STATUS.NO_PARENT_FOR_NOTE
+          status: ERROR_STATUS.NO_PARENT_FOR_NOTE,
         });
       }
       // remove from parent
       let parentNote = this.notes[noteToDelete.parent] as NoteProps;
       parentNote.children = _.reject(
         parentNote.children,
-        ent => ent === noteToDelete.id
+        (ent) => ent === noteToDelete.id
       );
       // delete from note dictionary
       delete this.notes[noteToDelete.id];
@@ -199,7 +199,7 @@ export class FileStorage implements DStore {
         const newParent = parentNote.parent;
         const resp = await this.deleteNote(parentNote.id, {
           metaOnly: true,
-          noDeleteParentStub: true
+          noDeleteParentStub: true,
         });
         if (newParent) {
           parentNote = this.notes[newParent];
@@ -220,7 +220,7 @@ export class FileStorage implements DStore {
     this.logger.info({ ctx, msg: "enter", id });
     if (id === "root") {
       throw DendronError.createFromStatus({
-        status: ERROR_STATUS.CANT_DELETE_ROOT
+        status: ERROR_STATUS.CANT_DELETE_ROOT,
       });
     }
     const schemaToDelete = this.schemas[id];
@@ -240,7 +240,7 @@ export class FileStorage implements DStore {
     const ctx = "initSchema";
     this.logger.info({ ctx, msg: "enter" });
     const out = await Promise.all(
-      (this.vaults as DVault[]).map(async vault => {
+      (this.vaults as DVault[]).map(async (vault) => {
         return this._initSchema(vault);
       })
     );
@@ -261,7 +261,7 @@ export class FileStorage implements DStore {
       data,
       error: _.isEmpty(errors)
         ? null
-        : new DendronError({ message: "multiple errors", payload: errors })
+        : new DendronError({ message: "multiple errors", payload: errors }),
     };
   }
 
@@ -273,21 +273,21 @@ export class FileStorage implements DStore {
     const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
     const schemaFiles = getAllFiles({
       root: vpath,
-      include: ["*.schema.yml"]
+      include: ["*.schema.yml"],
     }) as string[];
     this.logger.info({ ctx, schemaFiles });
     if (_.isEmpty(schemaFiles)) {
       throw DendronError.createFromStatus({
-        status: ERROR_STATUS.NO_SCHEMA_FOUND
+        status: ERROR_STATUS.NO_SCHEMA_FOUND,
       });
     }
     const { schemas, errors } = await new SchemaParser({
       store: this,
-      logger: this.logger
+      logger: this.logger,
     }).parse(schemaFiles, vault);
     return {
       data: schemas,
-      errors: _.isNull(errors) ? [] : errors
+      errors: _.isNull(errors) ? [] : errors,
     };
   }
 
@@ -297,24 +297,24 @@ export class FileStorage implements DStore {
     let notesWithLinks: NoteProps[] = [];
     const allNotesCache: NotesCacheAll = {};
     const out = await Promise.all(
-      (this.vaults as DVault[]).map(async vault => {
+      (this.vaults as DVault[]).map(async (vault) => {
         const { notes, cacheUpdates, cache } = await this._initNotes(vault);
         notesWithLinks = notesWithLinks.concat(
-          _.filter(notes, n => !_.isEmpty(n.links))
+          _.filter(notes, (n) => !_.isEmpty(n.links))
         );
         allNotesCache[VaultUtils.getName(vault)] = {
           cache,
-          cacheUpdates
+          cacheUpdates,
         };
         this.logger.info({
           ctx,
           vault,
           numEntries: _.size(notes),
-          numCacheUpdates: _.size(cacheUpdates)
+          numCacheUpdates: _.size(cacheUpdates),
         });
         const newCache: NotesCache = {
           version: cache.version,
-          notes: _.merge(cache.notes, cacheUpdates)
+          notes: _.defaults(cacheUpdates, cache.notes),
         };
         const vpath = vault2Path({ vault, wsRoot: this.wsRoot });
         // OPT:make async and don't wait for return
@@ -331,26 +331,26 @@ export class FileStorage implements DStore {
 
   async _addBacklinks({
     notesWithLinks,
-    allNotes
+    allNotes,
   }: {
     notesWithLinks: NoteProps[];
     allNotes: NoteProps[];
     allNotesCache: NotesCacheAll;
   }) {
-    return _.map(notesWithLinks, async noteFrom => {
+    return _.map(notesWithLinks, async (noteFrom) => {
       return Promise.all(
-        noteFrom.links.map(async link => {
+        noteFrom.links.map(async (link) => {
           const fname = link.to?.fname;
           if (fname) {
             const notes = NoteUtils.getNotesByFname({
               fname,
-              notes: allNotes
+              notes: allNotes,
             });
-            return notes.map(noteTo => {
+            return notes.map((noteTo) => {
               return NoteUtils.addBacklink({
                 from: noteFrom,
                 to: noteTo,
-                link
+                link,
               });
             });
           }
@@ -360,9 +360,7 @@ export class FileStorage implements DStore {
     });
   }
 
-  async _initNotes(
-    vault: DVault
-  ): Promise<{
+  async _initNotes(vault: DVault): Promise<{
     notes: NoteProps[];
     cacheUpdates: NotesCacheEntryMap;
     cache: NotesCache;
@@ -373,7 +371,7 @@ export class FileStorage implements DStore {
     const vpath = vault2Path({ vault, wsRoot });
     const noteFiles = getAllFiles({
       root: vpath,
-      include: ["*.md"]
+      include: ["*.md"],
     }) as string[];
 
     const cache: NotesCache = !this.engine.config.noCaching
@@ -382,17 +380,17 @@ export class FileStorage implements DStore {
     const { notes, cacheUpdates } = await new NoteParser({
       store: this,
       cache,
-      logger: this.logger
+      logger: this.logger,
     }).parseFile(noteFiles, vault);
     await Promise.all(
-      notes.map(async n => {
+      notes.map(async (n) => {
         if (n.stub) {
           return;
         }
         if (_.has(cacheUpdates, n.fname)) {
           const links = LinkUtils.findLinks({
             note: n,
-            engine: this.engine
+            engine: this.engine,
           });
           cacheUpdates[n.fname].data.links = links;
           n.links = links;
@@ -408,20 +406,20 @@ export class FileStorage implements DStore {
   async bulkAddNotes(opts: BulkAddNoteOpts) {
     this.logger.info({ ctx: "bulkAddNotes", msg: "enter" });
     await Promise.all(
-      opts.notes.map(note => {
+      opts.notes.map((note) => {
         return note2File({
           note,
           vault: note.vault,
-          wsRoot: this.wsRoot
+          wsRoot: this.wsRoot,
         });
       })
     );
-    const notesChanged: NoteChangeEntry[] = opts.notes.map(n => {
+    const notesChanged: NoteChangeEntry[] = opts.notes.map((n) => {
       return { note: n, status: "create" as const };
     });
     return {
       error: null,
-      data: notesChanged
+      data: notesChanged,
     };
   }
 
@@ -440,20 +438,20 @@ export class FileStorage implements DStore {
     const noteRaw = file2Note(oldLocPath, oldVault);
     const oldNote = NoteUtils.hydrate({
       noteRaw,
-      noteHydrated: this.notes[noteRaw.id]
+      noteHydrated: this.notes[noteRaw.id],
     });
     const notesToChange = await NoteUtils.getNotesWithLinkTo({
       note: oldNote,
-      notes: this.notes
+      notes: this.notes,
     });
     this.logger.info({
       ctx,
       msg: "notesToChange:gather",
-      notes: notesToChange.map(n => NoteUtils.toLogObj(n))
+      notes: notesToChange.map((n) => NoteUtils.toLogObj(n)),
     });
     // update note body of all notes that have changed
     const notesChanged = await Promise.all(
-      notesToChange.map(async n => {
+      notesToChange.map(async (n) => {
         const vault = n.vault;
         const vaultPath = vault2Path({ vault, wsRoot });
         // read note in case its changed
@@ -465,7 +463,7 @@ export class FileStorage implements DStore {
         n.body = resp.contents as string;
         return n;
       })
-    ).catch(err => {
+    ).catch((err) => {
       this.logger.error({ err });
       throw new DendronError({ message: " error rename note", payload: err });
     });
@@ -475,39 +473,39 @@ export class FileStorage implements DStore {
       vault: newLoc.vault!,
       title: NoteUtils.isDefaultTitle(oldNote)
         ? NoteUtils.genTitle(newLoc.fname)
-        : oldNote.title
+        : oldNote.title,
     };
 
     // NOTE: order matters. need to delete old note, otherwise can't write new note
     this.logger.info({
       ctx,
       msg: "deleteNote:meta:pre",
-      note: NoteUtils.toLogObj(oldNote)
+      note: NoteUtils.toLogObj(oldNote),
     });
     const changedFromDelete = await this.deleteNote(oldNote.id, {
-      metaOnly: true
+      metaOnly: true,
     });
     this.logger.info({
       ctx,
       msg: "writeNewNote:pre",
-      note: NoteUtils.toLogObj(newNote)
+      note: NoteUtils.toLogObj(newNote),
     });
     await this.writeNote(newNote, { newNode: true });
     this.logger.info({ ctx, msg: "updateAllNotes:pre" });
     // update all new notes
     await Promise.all(
-      notesChanged.map(async n => {
+      notesChanged.map(async (n) => {
         this.logger.info({
           ctx,
           msg: "writeNote:pre",
-          note: NoteUtils.toLogObj(n)
+          note: NoteUtils.toLogObj(n),
         });
         return this.writeNote(n, { updateExisting: true });
       })
     );
-    let out: NoteChangeEntry[] = notesChanged.map(note => ({
+    let out: NoteChangeEntry[] = notesChanged.map((note) => ({
       status: "update" as const,
-      note
+      note,
     }));
 
     // remove old note only when rename is success
@@ -532,7 +530,7 @@ export class FileStorage implements DStore {
         note,
         notesList: _.values(this.notes),
         createStubs: true,
-        wsRoot: this.wsRoot
+        wsRoot: this.wsRoot,
       });
     }
     this.logger.debug({ ctx, note: NoteUtils.toLogObj(note) });
@@ -550,7 +548,7 @@ export class FileStorage implements DStore {
   async _writeNewNote({
     note,
     maybeNote,
-    opts
+    opts,
   }: {
     note: NoteProps;
     maybeNote?: NoteProps;
@@ -560,7 +558,7 @@ export class FileStorage implements DStore {
     this.logger.info({
       ctx,
       msg: "enter",
-      note: NoteUtils.toLogObj(note)
+      note: NoteUtils.toLogObj(note),
     });
     let changed: NoteProps[] = [];
     // if note exists, remove from parent and transplant children
@@ -586,13 +584,13 @@ export class FileStorage implements DStore {
         note,
         notesList: _.values(this.notes),
         createStubs: true,
-        wsRoot: this.wsRoot
+        wsRoot: this.wsRoot,
       });
     }
     this.logger.info({
       ctx,
       msg: "exit",
-      changed: changed.map(n => NoteUtils.toLogObj(n))
+      changed: changed.map((n) => NoteUtils.toLogObj(n)),
     });
     return changed;
   }
@@ -608,18 +606,18 @@ export class FileStorage implements DStore {
       ctx,
       msg: "enter",
       opts,
-      note: NoteUtils.toLogObj(note)
+      note: NoteUtils.toLogObj(note),
     });
     const maybeNote = NoteUtils.getNoteByFnameV5({
       fname: note.fname,
       notes: this.notes,
       vault: note.vault,
-      wsRoot: this.wsRoot
+      wsRoot: this.wsRoot,
     });
     this.logger.info({
       ctx,
       msg: "check:existing",
-      maybeNoteId: _.pick(maybeNote || {}, ["id", "stub"])
+      maybeNoteId: _.pick(maybeNote || {}, ["id", "stub"]),
     });
 
     // don't count as delete if we're updating existing note
@@ -634,14 +632,14 @@ export class FileStorage implements DStore {
     // add schema if applicable
     const match = SchemaUtils.matchPath({
       notePath: note.fname,
-      schemaModDict: this.schemas
+      schemaModDict: this.schemas,
     });
     this.logger.info({
       ctx,
-      msg: "pre:note2File"
+      msg: "pre:note2File",
     });
 
-    const hooks = _.filter(this.engine.hooks.onCreate, hook =>
+    const hooks = _.filter(this.engine.hooks.onCreate, (hook) =>
       NoteUtils.match({ notePath: note.fname, pattern: hook.pattern })
     );
     const resp = await _.reduce<DHookEntry, Promise<RequireHookResp>>(
@@ -650,21 +648,21 @@ export class FileStorage implements DStore {
         const { note } = await notePromise;
         const script = HookUtils.getHookScriptPath({
           wsRoot: this.wsRoot,
-          basename: hook.id + ".js"
+          basename: hook.id + ".js",
         });
         return await HookUtils.requireHook({
           note,
           fpath: script,
-          wsRoot: this.wsRoot
+          wsRoot: this.wsRoot,
         });
       },
       Promise.resolve({ note })
     ).catch(
-      err =>
+      (err) =>
         new DendronError({
           severity: ERROR_SEVERITY.MINOR,
           message: "error with hook",
-          payload: stringifyError(err)
+          payload: stringifyError(err),
         })
     );
     if (resp instanceof DendronError) {
@@ -685,25 +683,27 @@ export class FileStorage implements DStore {
       note,
       vault: note.vault,
       wsRoot: this.wsRoot,
-      opts: { writeHierarchy: opts?.writeHierarchy }
+      opts: { writeHierarchy: opts?.writeHierarchy },
     });
 
     if (match) {
       this.logger.info({
         ctx,
-        msg: "pre:addSchema"
+        msg: "pre:addSchema",
       });
       const { schema, schemaModule } = match;
       NoteUtils.addSchema({ note, schema, schemaModule });
     }
     this.logger.info({
       ctx,
-      msg: "pre:updateNotes"
+      msg: "pre:updateNotes",
     });
-    await Promise.all([note].concat(changed).map(ent => this.updateNote(ent)));
-    const changedEntries = changed.map(ent => ({
+    await Promise.all(
+      [note].concat(changed).map((ent) => this.updateNote(ent))
+    );
+    const changedEntries = changed.map((ent) => ({
       note: ent,
-      status: "update" as const
+      status: "update" as const,
     })) as NoteChangeEntry[];
     changedEntries.push({ note, status: "create" });
     if (maybeNote && !noDelete) {
@@ -711,11 +711,11 @@ export class FileStorage implements DStore {
     }
     this.logger.info({
       ctx,
-      msg: "exit"
+      msg: "exit",
     });
     return {
       error,
-      data: changedEntries
+      data: changedEntries,
     };
   }
 

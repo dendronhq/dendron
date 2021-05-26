@@ -28,6 +28,7 @@ import { InsertNoteCommand } from "./InsertNoteCommand";
 import { MoveNoteCommand } from "./MoveNoteCommand";
 import { OpenLogsCommand } from "./OpenLogs";
 import { PasteLinkCommand } from "./PasteLink";
+import { PasteFileCommand } from "./PasteFile";
 import { PublishPodCommand } from "./PublishPod";
 import { RefactorHierarchyCommandV2 } from "./RefactorHierarchyV2";
 import { ResetConfigCommand } from "./ResetConfig";
@@ -40,6 +41,7 @@ import { SignUpCommand } from "./SignUp";
 import { SiteBuildCommand } from "./SiteBuild";
 import { SitePreviewCommand } from "./SitePreview";
 import { SnapshotVaultCommand } from "./SnapshotVault";
+import { SyncCommand } from "./Sync";
 import { UpgradeSettingsCommand } from "./UpgradeSettings";
 import { VaultAddCommand } from "./VaultAddCommand";
 import { VaultRemoveCommand } from "./VaultRemoveCommand";
@@ -66,18 +68,16 @@ const ALL_COMMANDS = [
   DumpStateCommand,
   ExportPodCommand,
   GoDownCommand,
-  //   GoToSiblingCommand,
   GoUpCommand,
   GotoNoteCommand,
   ImportPodCommand,
   InsertNoteCommand,
-  //   LookupCommand,
   OpenLogsCommand,
+  PasteFileCommand,
   PasteLinkCommand,
   PublishPodCommand,
   MoveNoteCommand,
   RefactorHierarchyCommandV2,
-  // ReloadIndexCommand,
   ResetConfigCommand,
   RestoreVaultCommand,
   SetupWorkspaceCommand,
@@ -88,6 +88,7 @@ const ALL_COMMANDS = [
   SiteBuildCommand,
   SitePreviewCommand,
   SnapshotVaultCommand,
+  SyncCommand,
   ConfigureWithUICommand,
   UpgradeSettingsCommand,
   VaultAddCommand,

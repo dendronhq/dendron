@@ -1,3 +1,4 @@
+import { DendronTreeViewKey } from "@dendronhq/common-all";
 import { CodeConfigKeys } from "./types";
 
 export const DENDRON_WS_NAME = "dendron.code-workspace";
@@ -6,39 +7,33 @@ export const DEFAULT_LEGACY_VAULT_NAME = "vault";
 
 export enum DendronContext {
   PLUGIN_ACTIVE = "dendron:pluginActive",
+  WEB_UI_ENABLED = "dendron:webUIEnabled",
   DEV_MODE = "dendron:devMode",
-}
-
-export enum DendronViewKey {
-  SAMPLE_VIEW = "dendron.sample",
-  TREE_VIEW = "dendron.treeView",
-  TREE_VIEW_V2 = "dendron.treeViewV2",
-  BACKLINKS = "dendron.backlinks",
 }
 
 export const DENDRON_VIEWS = [
   {
-    id: DendronViewKey.SAMPLE_VIEW,
+    id: DendronTreeViewKey.SAMPLE_VIEW,
     name: "Sample View",
     when: DendronContext.DEV_MODE,
     where: "explorer",
     type: "webview",
   },
   {
-    id: DendronViewKey.TREE_VIEW,
+    id: DendronTreeViewKey.TREE_VIEW,
     name: "Tree View",
-    when: DendronContext.PLUGIN_ACTIVE,
+    when: `${DendronContext.PLUGIN_ACTIVE} && !${DendronContext.WEB_UI_ENABLED}`,
     where: "explorer",
   },
   {
-    id: DendronViewKey.TREE_VIEW_V2,
+    id: DendronTreeViewKey.TREE_VIEW_V2,
     name: "Tree View V2",
-    when: DendronContext.DEV_MODE,
+    when: DendronContext.WEB_UI_ENABLED,
     where: "explorer",
     type: "webview",
   },
   {
-    id: DendronViewKey.BACKLINKS,
+    id: DendronTreeViewKey.BACKLINKS,
     name: "Backlinks",
     when: DendronContext.PLUGIN_ACTIVE,
     where: "explorer",
@@ -82,6 +77,7 @@ type CommandEntry = {
     | "dev"
     | "hierarchies"
     | "navigation"
+    | "misc"
     | "publishing";
   /**
    * Skip doc generation
@@ -426,6 +422,16 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "workspace",
     desc: "add and commit all files",
   },
+  SYNC: {
+    key: "dendron.sync",
+    title: `${CMD_PREFIX} Workspace: Sync`,
+    group: "workspace",
+    desc: "Sync all files",
+    docPreview: [
+      `Sync all files in your workspace, across all vaults.`,
+      `This will add and commit all changes, then pull and push to sync all changes.`,
+    ].join("\n"),
+  },
   VAULT_ADD: {
     key: "dendron.vaultAdd",
     title: `${CMD_PREFIX} Vault Add`,
@@ -651,6 +657,13 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     desc: "Show Markdown Preview",
     docLink: "dendron.topic.commands.md",
     docPreview: "",
+  },
+  PASTE_FILE: {
+    key: "dendron.pasteFile",
+    title: `${CMD_PREFIX} Paste File`,
+    group: "misc",
+    keybindings: {},
+    desc: "Paste file",
   },
   // -- Workbench
   CONFIGURE_RAW: {

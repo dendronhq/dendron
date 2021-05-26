@@ -17,7 +17,9 @@ assignees: ''
  for help with choosing.
 
  Needed for Auto labeling:
- issue_labeler_regex_version=2
+ issue_labeler_regex_version=3
+ 
+ - [ ] IsTriaged
 
  -->
 

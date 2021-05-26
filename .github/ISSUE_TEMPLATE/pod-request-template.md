@@ -13,10 +13,11 @@ assignees: kpathakota
  Select something by placing an 'x' or 'X' inside the brackets.
 
  Needed for Auto labeling:
- issue_labeler_regex_version=2
+ issue_labeler_regex_version=3
 
  - [X] Onboard. 
  - [X] Feature Request
+ - [ ] IsTriaged
 
  -->
 

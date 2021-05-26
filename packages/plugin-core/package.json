@@ -4,7 +4,7 @@
     "displayName": "dendron",
     "description": "Dendron is a hierarchal note taking tool that grows as you do. ",
     "publisher": "dendron",
-    "version": "0.42.0",
+    "version": "0.43.1",
     "engines": {
         "vscode": "^1.54.0"
     },
@@ -24,7 +24,7 @@
     "activationEvents": [
         "*"
     ],
-    "main": "./out/extension.js",
+    "main": "./out/src/extension.js",
     "extensionPack": [
         "dendron.dendron-markdown-preview-enhanced",
         "dendron.dendron-snippet-maker"
@@ -53,12 +53,12 @@
                 {
                     "id": "dendron.treeView",
                     "name": "Tree View",
-                    "when": "dendron:pluginActive"
+                    "when": "dendron:pluginActive && !dendron:webUIEnabled"
                 },
                 {
-                    "id": "dendron.treeViewV2",
+                    "id": "dendron.tree-view",
                     "name": "Tree View V2",
-                    "when": "dendron:devMode",
+                    "when": "dendron:webUIEnabled",
                     "type": "webview"
                 },
                 {
@@ -339,6 +339,12 @@
                 "desc": "add and commit all files"
             },
             {
+                "command": "dendron.sync",
+                "title": "Dendron: Workspace: Sync",
+                "desc": "Sync all files",
+                "docPreview": "Sync all files in your workspace, across all vaults.\nThis will add and commit all changes, then pull and push to sync all changes."
+            },
+            {
                 "command": "dendron.vaultAdd",
                 "title": "Dendron: Vault Add",
                 "desc": "Add a new vault",
@@ -501,6 +507,11 @@
                 "docPreview": ""
             },
             {
+                "command": "dendron.pasteFile",
+                "title": "Dendron: Paste File",
+                "desc": "Paste file"
+            },
+            {
                 "command": "dendron.configureRaw",
                 "title": "Dendron: Configure (yaml)",
                 "desc": "Modify Dendron Config as raw YAML",
@@ -661,11 +672,11 @@
         "build": "yarn compile",
         "compile": "tsc -p tsconfig.build.json",
         "pretest": "yarn compile",
-        "test": "node ./out/test/runTestInteg.js",
+        "test": "node ./out/src/test/runTestInteg.js",
         "format": "prettier --write src '*.json' '*.js'"
     },
     "devDependencies": {
-        "@dendronhq/common-test-utils": "^0.42.0",
+        "@dendronhq/common-test-utils": "^0.43.1",
         "@types/execa": "^2.0.0",
         "@types/fs-extra": "^9.0.1",
         "@types/glob": "^7.1.1",
@@ -691,14 +702,14 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
-        "@dendronhq/api-server": "^0.42.0",
-        "@dendronhq/common-all": "^0.42.0",
-        "@dendronhq/common-server": "^0.42.0",
-        "@dendronhq/dendron-cli": "^0.42.0",
-        "@dendronhq/engine-server": "^0.42.0",
-        "@dendronhq/engine-test-utils": "^0.42.0",
+        "@dendronhq/api-server": "^0.43.1",
+        "@dendronhq/common-all": "^0.43.1",
+        "@dendronhq/common-server": "^0.43.1",
+        "@dendronhq/dendron-cli": "^0.43.1",
+        "@dendronhq/engine-server": "^0.43.1",
+        "@dendronhq/engine-test-utils": "^0.43.1",
         "@dendronhq/lsp-server": "^0.28.7-alpha.0",
-        "@dendronhq/pods-core": "^0.42.0",
+        "@dendronhq/pods-core": "^0.43.1",
         "@types/vscode": "1.54",
         "cross-path-sort": "^1.0.0",
         "execa": "^4.0.2",

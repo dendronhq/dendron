@@ -11,7 +11,6 @@ export default function Sample({
 }) {
   const notes = engine.notes;
   const logger = createLogger("Sample");
-  logger.info({ ctx: "Sample", notes });
   const { switcher, themes, currentTheme, status } = useThemeSwitcher();
   const [_isDarkMode, setIsDarkMode] = React.useState(false);
 

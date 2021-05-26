@@ -1,25 +1,32 @@
-import { DMessageSource, DUtils } from "@dendronhq/common-all";
-import { DendronViewKey } from "../constants";
+import {
+  DendronTreeViewKey,
+  DendronWebViewKey,
+  DUtils,
+} from "@dendronhq/common-all";
 import { Logger } from "../logger";
 import { DendronWorkspace, getWS } from "../workspace";
 
 export class WebViewUtils {
-  static genHTML = ({
+  static genHTMLForView = ({
     title,
     view,
   }: {
     title: string;
-    view: DendronViewKey;
+    view: DendronTreeViewKey | DendronWebViewKey;
   }) => {
     const ws = getWS();
     const qs = DUtils.querystring.stringify({
       ws: DendronWorkspace.wsRoot(),
       port: ws.port,
     });
+
+    // View is `dendron.{camelCase}`
+    // we want to remove `dendron` and transform camelCase to snake case
+    // In addition, if we are serving using a live nextjs server, don't append .html at the end
     const src = `${ws.getClientAPIRootUrl()}/vscode/${view.replace(
       /^dendron\./,
       ""
-    )}.html?${qs}`;
+    )}${ws.config.dev?.nextServerUrl ? "" : ".html"}?${qs}`;
     Logger.info({ ctx: "genHTML", view, src });
     return `<!DOCTYPE html>
 <html lang="en">
@@ -42,27 +49,90 @@ export class WebViewUtils {
   <iframe id="iframeView" src="${src}"></iframe>
 
   <script>
-    const vscode = acquireVsCodeApi();
-
-    window.addEventListener("message", (e) => {
-      console.log("got message", e);
-      const message = e.data;
-      if (message.type && message.source === '${DMessageSource.webClient}') {
-        console.log("got webclient event", message)
-        vscode.postMessage(message);
-        return;
-      } else if (message.source === 'vscode') {
-        console.log("got message from vscode", message)
+    console.log("check1");
+    function main() {
+      const vscode = acquireVsCodeApi();
+  
+      function postMsg(msg) {
         const iframe = document.getElementById('iframeView');
-        iframe.contentWindow.postMessage(message, "*");
-      } else  {
-        window.dispatchEvent(new KeyboardEvent('keydown', JSON.parse(e.data)));
+        iframe.contentWindow.postMessage(msg, "*");
+      };
+  
+      function getTheme() {
+          // get theme
+          let vsTheme = document.body.className;
+          let dendronTheme;
+          if (vsTheme.endsWith("dark")) {
+              dendronTheme = "dark";
+          } else {
+              dendronTheme = "light";
+          }
+          return {vsTheme, dendronTheme};
       }
-    }, false);
+  
+      window.addEventListener("message", (e) => {
+        console.log("got message", e);
+        const message = e.data;
+        if (message.type && message.source === "webClient") {
+            // check if we need a theme
+            if (message.type === "init") {
+              console.log("initilizing client");
+              postMsg({
+                  type: "onThemeChange",
+                  source: "vscode",
+                  data: {
+                      theme: getTheme().dendronTheme
+                  }
+              });
+              // get active editor from vscode
+              vscode.postMessage({
+                  type: "onGetActiveEditor",
+                  source: "webClient",
+                  data: {}
+              });
+            } else {
+              console.log("got webclient event", message)
+              vscode.postMessage(message);
+            }
+            return;
+        } else if (message.source === 'vscode') {
+          console.log("got message from vscode", message);
+          postMsg(message);
+        } else  {
+          window.dispatchEvent(new KeyboardEvent('keydown', JSON.parse(e.data)));
+        }
+      }, false);
+  }
+    console.log("check22");
+    main();
+
   </script>
 
 </body>
 
 </html>`;
+  };
+
+  static genHTMLForTreeView = ({
+    title,
+    view,
+  }: {
+    title: string;
+    view: DendronTreeViewKey;
+  }) => {
+    return WebViewUtils.genHTMLForView({ title, view });
+  };
+
+  static genHTMLForWebView = ({
+    title,
+    view,
+  }: {
+    title: string;
+    view: DendronWebViewKey;
+  }) => {
+    /**
+     * Implementation might differ in the future
+     */
+    return WebViewUtils.genHTMLForView({ title, view });
   };
 }

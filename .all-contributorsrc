@@ -26,7 +26,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/1008124?v=4",
       "profile": "http://kaangenc.me/",
       "contributions": [
-        "doc"
+        "doc",
+        "code"
       ]
     },
     {
@@ -369,6 +370,24 @@
       "name": "Thelusion",
       "avatar_url": "https://avatars.githubusercontent.com/u/46679150?v=4",
       "profile": "https://github.com/RafaelCotrim",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "vicrdguez",
+      "name": "Víctor Reyes Rodríguez",
+      "avatar_url": "https://avatars.githubusercontent.com/u/52254255?v=4",
+      "profile": "https://github.com/vicrdguez",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "funnym0nk3y",
+      "name": "funnym0nk3y",
+      "avatar_url": "https://avatars.githubusercontent.com/u/41870754?v=4",
+      "profile": "https://github.com/funnym0nk3y",
       "contributions": [
         "bug"
       ]

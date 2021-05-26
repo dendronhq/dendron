@@ -28,6 +28,38 @@ export class GitTestUtils {
     await git.add("dendron.yml");
     await git.commit({ msg: "init" });
   }
+
+  /** Creates a "bare" git repository, to be used as the remote for a workspace.
+   *
+   * You'll probably want to just use `createRepoForRemoteWorkspace` instead, but this is provided if you are testing something it can't handle.
+   */
+  static async remoteCreate(remoteDir: string) {
+    const git = new Git({ localUrl: remoteDir, bare: true });
+    await git.init();
+  }
+
+  /** Adds a bare repository created with `createRemote` as the remote for the workspace.
+   *
+   * You'll probably want to just use `createRepoForRemoteWorkspace` instead, but this is provided if you are testing something it can't handle.
+   */
+  static async remoteAdd(wsRoot: string, remoteDir: string) {
+    const git = new Git({ localUrl: wsRoot, remoteUrl: remoteDir });
+    await git.remoteAdd();
+    // Need to push to be able to set up remote tracking branch
+    git.push({ remote: "origin", branch: await git.getCurrentBranch() });
+  }
+
+  /** Set up a workspace with a remote, intended to be used when testing pull or push functionality.
+   *
+   * @param wsRoot Directory where the workspace will be stored.
+   * @param remoteDir Directory where the remote will be stored. The workspace will pull and push to this remote.
+   */
+  static async createRepoForRemoteWorkspace(wsRoot: string, remoteDir: string) {
+    await this.createRepoForWorkspace(wsRoot);
+    await this.remoteCreate(remoteDir);
+    await this.remoteAdd(wsRoot, remoteDir);
+  }
+
   static async createRepoWithReadme(root: string) {
     const git = new Git({ localUrl: root });
     await git.init();

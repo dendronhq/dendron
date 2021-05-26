@@ -991,6 +991,13 @@ export class SchemaUtils {
     return maybeRoot as SchemaProps;
   }
 
+  /**
+   * If no pattern field, get the id.
+   * If pattern field, check if namespace and translate into glob pattern
+   * @param schema
+   * @param opts
+   * @returns
+   */
   static getPattern = (
     schema: SchemaProps,
     opts?: { isNotNamespace?: boolean }
@@ -1003,6 +1010,12 @@ export class SchemaUtils {
     return part;
   };
 
+  /**
+   * Get full pattern starting from the root
+   * @param schema
+   * @param schemas
+   * @returns
+   */
   static getPatternRecursive = (
     schema: SchemaProps,
     schemas: SchemaPropsDict

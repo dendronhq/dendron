@@ -1,6 +1,7 @@
 import {
   DendronConfig,
   DendronError,
+  DendronTreeViewKey,
   DEngineClient,
   DVault,
   ERROR_STATUS,
@@ -31,7 +32,7 @@ import { MoveNoteCommand } from "./commands/MoveNoteCommand";
 import { ReloadIndexCommand } from "./commands/ReloadIndex";
 import {
   CONFIG,
-  DendronViewKey,
+  DendronContext,
   DENDRON_COMMANDS,
   extensionQualifiedId,
   GLOBAL_STATE,
@@ -132,7 +133,7 @@ export class DendronWorkspace {
   public vaultWatcher?: VaultWatcher;
   public port?: number;
   public workspaceService?: WorkspaceService;
-  protected views: { [key: string]: vscode.WebviewViewProvider };
+  protected treeViews: { [key: string]: vscode.WebviewViewProvider };
 
   static instance(): DendronWorkspace {
     if (!_DendronWorkspace) {
@@ -317,7 +318,7 @@ export class DendronWorkspace {
     this.disposableStore = new DisposableStore();
     this._setupCommands();
     this.setupLanguageFeatures(context);
-    this.views = {};
+    this.treeViews = {};
     this.setupViews(context);
     const ctx = "DendronWorkspace";
     this.L.info({ ctx, msg: "initialized" });
@@ -392,12 +393,12 @@ export class DendronWorkspace {
     }));
   }
 
-  getWebView(key: DendronViewKey) {
-    return this.views[key];
+  getTreeView(key: DendronTreeViewKey) {
+    return this.treeViews[key];
   }
 
-  setWebView(key: DendronViewKey, view: vscode.WebviewViewProvider) {
-    this.views[key] = view;
+  setTreeView(key: DendronTreeViewKey, view: vscode.WebviewViewProvider) {
+    this.treeViews[key] = view;
   }
 
   getEngine(): DEngineClient {
@@ -425,13 +426,21 @@ export class DendronWorkspace {
             sampleView
           )
         );
-
-        context.subscriptions.push(
-          vscode.window.registerWebviewViewProvider(
-            DendronTreeViewV2.viewType,
-            provider
-          )
-        );
+        if (getWS().config.dev?.enableWebUI) {
+          Logger.info({ ctx, msg: "initWebUI" });
+          context.subscriptions.push(
+            vscode.window.registerWebviewViewProvider(
+              DendronTreeViewV2.viewType,
+              provider,
+              {
+                webviewOptions: {
+                  retainContextWhenHidden: true,
+                },
+              }
+            )
+          );
+          VSCodeUtils.setContext(DendronContext.WEB_UI_ENABLED, true);
+        }
 
         // backlinks
         Logger.info({ ctx, msg: "init:backlinks" });
@@ -440,7 +449,7 @@ export class DendronWorkspace {
           async () => await backlinksTreeDataProvider.refresh()
         );
         context.subscriptions.push(
-          vscode.window.createTreeView(DendronViewKey.BACKLINKS, {
+          vscode.window.createTreeView(DendronTreeViewKey.BACKLINKS, {
             treeDataProvider: backlinksTreeDataProvider,
             showCollapseAll: true,
           })

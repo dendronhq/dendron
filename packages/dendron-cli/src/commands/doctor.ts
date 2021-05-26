@@ -1,4 +1,10 @@
-import { NoteChangeEntry, NoteProps, VaultUtils } from "@dendronhq/common-all";
+import {
+  NoteChangeEntry,
+  NoteProps,
+  VaultUtils,
+  DLink,
+  NoteUtils,
+} from "@dendronhq/common-all";
 import {
   DendronASTDest,
   MDUtilsV4,
@@ -21,6 +27,13 @@ type CommandCLIOpts = {
   query?: string;
   limit?: number;
   dryRun?: boolean;
+  /**
+   * When set to true, calls process.exit when command is done.
+   *
+   * This is done for CLI commands to keep the server from running
+   * forever. when run from the plugin, we re-use the existing server
+   * so we don't want it to exit.
+   */
   exit?: boolean;
 } & SetupEngineCLIOpts;
 
@@ -33,6 +46,7 @@ export enum DoctorActions {
   HI_TO_H2 = "h1ToH2",
   REMOVE_STUBS = "removeStubs",
   OLD_NOTE_REF_TO_NEW = "oldNoteRefToNew",
+  CREATE_MISSING_LINKED_NOTES = "createMissingLinkedNotes",
 }
 
 export { CommandOpts as DoctorCLICommandOpts };
@@ -65,6 +79,43 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     });
   }
 
+  getWildLinkDestinations(notes: NoteProps[], wsRoot: string) {
+    let wildWikiLinks: DLink[] = [];
+    _.forEach(notes, (note) => {
+      const links = note.links;
+      if (_.isEmpty(links)) {
+        return;
+      }
+      wildWikiLinks = wildWikiLinks.concat(
+        _.filter(links, (link) => {
+          if (link.type !== "wiki") {
+            return false;
+          }
+          const destVault = link.to!.vault ? link.to!.vault : note.vault;
+          const noteExists = NoteUtils.getNoteByFnameV5({
+            fname: link.to!.fname as string,
+            vault: destVault,
+            notes: notes,
+            wsRoot: wsRoot,
+          });
+          return !noteExists;
+        })
+      );
+      return true;
+    });
+    const uniqueCandidates: NoteProps[] = _.map(
+      _.uniqBy(wildWikiLinks, "to.fname"),
+      (link) => {
+        const destVault = link.to!.vault ? link.to!.vault : link.from.vault;
+        return NoteUtils.create({
+          fname: link.to!.fname!,
+          vault: destVault!,
+        });
+      }
+    );
+    return uniqueCandidates;
+  }
+
   async enrichArgs(args: CommandCLIOpts): Promise<CommandOpts> {
     const engineArgs = await setupEngine(args);
     return { ...args, ...engineArgs };
@@ -89,6 +140,11 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
     let engineDelete = dryRun
       ? () => {}
       : throttle(_.bind(engine.deleteNote, engine), 300, {
+          leading: true,
+        });
+    let engineGetNoteByPath = dryRun
+      ? () => {}
+      : throttle(_.bind(engine.getNoteByPath, engine), 300, {
           leading: true,
         });
 
@@ -197,6 +253,21 @@ export class DoctorCLICommand extends CLICommand<CommandOpts, CommandOutput> {
           }
         };
         break;
+      }
+      case DoctorActions.CREATE_MISSING_LINKED_NOTES: {
+        notes = this.getWildLinkDestinations(notes, engine.wsRoot);
+        doctorAction = async (note: NoteProps) => {
+          const vname = VaultUtils.getName(note.vault);
+          await engineGetNoteByPath({
+            npath: note.fname,
+            createIfNew: true,
+            vault: note.vault,
+          });
+          console.log(
+            `doctor ${DoctorActions.CREATE_MISSING_LINKED_NOTES} ${note.fname} ${vname}`
+          );
+          numChanges += 1;
+        };
       }
     }
     await _.reduce<any, Promise<any>>(

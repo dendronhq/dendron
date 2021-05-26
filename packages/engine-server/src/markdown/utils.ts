@@ -50,7 +50,7 @@ import { noteRefsV2 } from "./remark/noteRefsV2";
 import { publishSite } from "./remark/publishSite";
 import { transformLinks } from "./remark/transformLinks";
 import { wikiLinks, WikiLinksOpts } from "./remark/wikiLinks";
-import { blockAnchors } from "./remark/blockAnchors";
+import { BlockAnchorOpts, blockAnchors } from "./remark/blockAnchors";
 import {
   DendronASTData,
   DendronASTDest,
@@ -86,6 +86,7 @@ type ProcOptsFull = ProcOpts & {
   wikiLinksOpts?: WikiLinksOpts;
   noteRefOpts?: NoteRefsOpts;
   publishOpts?: DendronPubOpts;
+  blockAnchorsOpts?: BlockAnchorOpts;
 };
 
 type ProcDendron = ProcOpts & {
@@ -329,7 +330,13 @@ export class MDUtilsV4 {
         hierarchyDisplay: config.hierarchyDisplay,
       })
       .use(backlinks)
-      .use(blockAnchors)
+      .use(
+        blockAnchors,
+        _.merge(
+          { hideBlockAnchors: config.site.hideBlockAnchors },
+          opts.blockAnchorsOpts
+        )
+      )
       .use(noteRefsV2, {
         ...opts.noteRefOpts,
         wikiLinkOpts: opts.wikiLinksOpts,

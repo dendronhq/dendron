@@ -27,11 +27,11 @@ export const matchBlockAnchor = (
   return undefined;
 };
 
-type PluginOpts = {};
+type PluginOpts = {
+  hideBlockAnchors?: boolean;
+};
 
-type CompilerOpts = {};
-
-const plugin: Plugin<[CompilerOpts?]> = function (
+const plugin: Plugin<[PluginOpts?]> = function (
   this: Unified.Processor,
   opts?: PluginOpts
 ) {
@@ -66,7 +66,7 @@ function attachParser(proc: Unified.Processor) {
   inlineMethods.splice(inlineMethods.indexOf("link"), 0, "blockAnchor");
 }
 
-function attachCompiler(proc: Unified.Processor, _opts?: CompilerOpts) {
+function attachCompiler(proc: Unified.Processor, opts?: PluginOpts) {
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
 
@@ -78,8 +78,10 @@ function attachCompiler(proc: Unified.Processor, _opts?: CompilerOpts) {
         case DendronASTDest.MD_REGULAR:
         case DendronASTDest.MD_ENHANCED_PREVIEW:
         case DendronASTDest.HTML:
-          // Just hiding the anchor.'
-          return `<a href="#^${node.id}" style="font-size: 0.8em; opacity: 75%;" id="^${node.id}">^${node.id}</a>`;
+          const style = opts?.hideBlockAnchors
+            ? "visibility: hidden; width: 0; height: 0;"
+            : "font-size: 0.8em; opacity: 75%;";
+          return `<a href="#^${node.id}" style="${style}" id="^${node.id}">^${node.id}</a>`;
         default:
           throw new DendronError({ message: "Unable to render block anchor" });
       }

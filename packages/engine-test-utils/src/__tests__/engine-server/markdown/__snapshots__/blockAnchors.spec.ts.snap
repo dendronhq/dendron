@@ -1,5 +1,25 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`blockAnchors rendering compile "HTML: hidden" 1`] = `
+VFile {
+  "contents": "# Foo
+
+<a href=\\"#^my-block-anchor-0\\" style=\\"visibility: hidden; width: 0; height: 0;\\" id=\\"^my-block-anchor-0\\">^my-block-anchor-0</a>
+
+* * *
+
+## Children
+
+1. [Ch1](foo.ch1.html)
+
+",
+  "cwd": "<PROJECT_ROOT>",
+  "data": Object {},
+  "history": Array [],
+  "messages": Array [],
+}
+`;
+
 exports[`blockAnchors rendering compile "HTML: regular" 1`] = `
 VFile {
   "contents": "# Foo

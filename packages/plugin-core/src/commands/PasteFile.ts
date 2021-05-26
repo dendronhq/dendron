@@ -17,7 +17,15 @@ type CommandInput = {
 
 type CommandOpts = CommandInput;
 
-type CommandOutput = { error?: DendronError };
+/**
+ * fpath: full path to copied file
+ */
+type CommandOutput = { error?: DendronError, fpath?: string };
+
+const cleanFname = (basename: string) => {
+  const {name, ext} = path.parse(basename)
+  return _.kebabCase(name) +  ext;
+}
 
 export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
   static key = DENDRON_COMMANDS.PASTE_FILE.key;
@@ -62,7 +70,7 @@ export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
 
     const vault = ws.workspaceService.getVaultForPath(uri.fsPath);
     const vpath = vault2Path({ vault, wsRoot: DendronWorkspace.wsRoot() });
-    const suffix = path.join("assets", path.basename(filePath));
+    const suffix = path.join("assets", cleanFname(path.basename(filePath)));
     const dstPath = path.join(vpath, suffix);
 
     if (!fs.existsSync(filePath)) {
@@ -93,6 +101,8 @@ export class PasteFileCommand extends BasicCommand<CommandOpts, CommandOutput> {
       const selection = new Selection(pos, pos);
       builder.replace(selection, txt);
     });
-    return {};
+    return {
+      fpath: dstPath
+    };
   }
 }

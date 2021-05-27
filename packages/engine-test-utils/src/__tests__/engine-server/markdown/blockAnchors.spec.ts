@@ -112,7 +112,7 @@ describe("blockAnchors", () => {
     });
   });
 
-  describe.only("rendering", () => {
+  describe("rendering", () => {
     const anchor = "^my-block-anchor-0";
     const REGULAR_ANCHOR = createProcTests({
       name: "regular",
@@ -122,10 +122,7 @@ describe("blockAnchors", () => {
           dest: extra.dest,
           vault: vaults[0],
         });
-        const parsed = proc2.parse(anchor);
-        const ran = await proc2.run(parsed);
-        const resp = proc2.stringify(ran);
-        debugger;
+        const resp = await proc2.process(anchor);
         return { resp };
       },
       verifyFuncDict: {

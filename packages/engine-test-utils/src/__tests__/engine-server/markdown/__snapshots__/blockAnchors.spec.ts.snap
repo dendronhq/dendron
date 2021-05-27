@@ -2,17 +2,14 @@
 
 exports[`blockAnchors rendering compile "HTML: hidden" 1`] = `
 VFile {
-  "contents": "# Foo
-
-<a href=\\"#^my-block-anchor-0\\" style=\\"visibility: hidden; width: 0; height: 0;\\" id=\\"^my-block-anchor-0\\">^my-block-anchor-0</a>
-
-* * *
-
-## Children
-
-1. [Ch1](foo.ch1.html)
-
-",
+  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+<p><a id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\" style=\\"visibility: hidden; width: 0; height: 0;\\">^my-block-anchor-0</a></p>
+<hr>
+<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<ol>
+<li><a href=\\"bar.html\\">Bar</a></li>
+<li><a href=\\"foo.html\\">Foo</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],
@@ -22,17 +19,14 @@ VFile {
 
 exports[`blockAnchors rendering compile "HTML: regular" 1`] = `
 VFile {
-  "contents": "# Foo
-
-<a href=\\"#^my-block-anchor-0\\" style=\\"font-size: 0.8em; opacity: 75%;\\" id=\\"^my-block-anchor-0\\">^my-block-anchor-0</a>
-
-* * *
-
-## Children
-
-1. [Ch1](foo.ch1.html)
-
-",
+  "contents": "<h1 id=\\"root\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#root\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Root</h1>
+<p><a id=\\"^my-block-anchor-0\\" href=\\"#^my-block-anchor-0\\" style=\\"font-size: 0.8em; opacity: 75%;\\">^my-block-anchor-0</a></p>
+<hr>
+<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
+<ol>
+<li><a href=\\"bar.html\\">Bar</a></li>
+<li><a href=\\"foo.html\\">Foo</a></li>
+</ol>",
   "cwd": "<PROJECT_ROOT>",
   "data": Object {},
   "history": Array [],

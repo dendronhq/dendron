@@ -1,7 +1,7 @@
 import { DendronError, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { Image, Root } from "mdast";
-import { DendronASTTypes } from "../types";
+import { BlockAnchor, DendronASTTypes } from "../types";
 import Unified, { Transformer } from "unified";
 import { Node } from "unist";
 import u from "unist-builder";
@@ -19,6 +19,7 @@ import { NoteRefsOpts } from "./noteRefs";
 import { convertNoteRefASTV2 } from "./noteRefsV2";
 import { RemarkUtils } from "./utils";
 import { addError, getNoteOrError } from "./utils";
+import { blockAnchor2html } from "./blockAnchors";
 
 type PluginOpts = NoteRefsOpts & {
   assetsPrefix?: string;
@@ -176,7 +177,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
       }
       if (
-        node.type === "refLinkV2" &&
+        node.type === DendronASTTypes.REF_LINK_V2 &&
         dest !== DendronASTDest.MD_ENHANCED_PREVIEW
       ) {
         // we have custom compiler for markdown to handle note ref
@@ -207,6 +208,12 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
             parent!.children = data;
           }
         }
+      }
+      if (node.type === DendronASTTypes.BLOCK_ANCHOR) {
+        const procOpts = proc.data("procOpts") as any;
+        parent!.children = [
+          blockAnchor2html(node as BlockAnchor, procOpts.blockAnchorsOpts),
+        ];
       }
       if (node.type === "image" && dest === DendronASTDest.HTML) {
         let imageNode = node as Image;

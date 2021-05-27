@@ -5,6 +5,7 @@ import Unified, { Plugin } from "unified";
 import { BlockAnchor, DendronASTDest } from "../types";
 import { MDUtilsV4 } from "../utils";
 import { Element } from "hast";
+import { html } from "mdast-builder";
 
 // Letters, digits, dashes, and underscores.
 // The underscores are an extension over Obsidian.
@@ -67,7 +68,7 @@ function attachParser(proc: Unified.Processor) {
   inlineMethods.splice(inlineMethods.indexOf("link"), 0, "blockAnchor");
 }
 
-function attachCompiler(proc: Unified.Processor, opts?: PluginOpts) {
+function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
   const Compiler = proc.Compiler;
   const visitors = Compiler.prototype.visitors;
 
@@ -75,31 +76,28 @@ function attachCompiler(proc: Unified.Processor, opts?: PluginOpts) {
     visitors.blockAnchor = function (node: BlockAnchor): string | Element {
       debugger;
       const { dest } = MDUtilsV4.getDendronData(proc);
-      const fullId = `^${node.id}`;
       switch (dest) {
         case DendronASTDest.MD_DENDRON:
         case DendronASTDest.MD_REGULAR:
         case DendronASTDest.MD_ENHANCED_PREVIEW:
-          return `^${node.id}`;
         case DendronASTDest.HTML:
-          const style = opts?.hideBlockAnchors
-            ? "visibility: hidden; width: 0; height: 0;"
-            : "font-size: 0.8em; opacity: 75%;";
-          return {
-            type: "element",
-            tagName: "a",
-            properties: {
-              href: `#${fullId}`,
-              id: fullId,
-              style: style,
-            },
-            children: [{ type: "text", value: fullId }],
-          };
+          return `^${node.id}`;
         default:
           throw new DendronError({ message: "Unable to render block anchor" });
       }
     };
   }
+}
+
+export function blockAnchor2html(node: BlockAnchor, opts?: PluginOpts) {
+  const fullId = `^${node.id}`;
+  const style =
+    opts && opts.hideBlockAnchors
+      ? "visibility: hidden; width: 0; height: 0;"
+      : "font-size: 0.8em; opacity: 75%;";
+  return html(
+    `<a id="${fullId}" href="#${fullId}" style="${style}">${fullId}</a>`
+  );
 }
 
 export { plugin as blockAnchors };

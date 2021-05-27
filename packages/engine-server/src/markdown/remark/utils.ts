@@ -307,19 +307,6 @@ export class RemarkUtils {
     });
   }
 
-  static findHeaders(content: string): Heading[] {
-    const remark = MDUtilsV4.remark();
-    let out = remark.parse(content);
-    let out2: Heading[] = selectAll(DendronASTTypes.HEADING, out) as Heading[];
-    return out2;
-  }
-
-  static findBlockAnchors(content: string): BlockAnchor[] {
-    const parser = MDUtilsV4.remark().use(blockAnchors);
-    const parsed = parser.parse(content);
-    return selectAll(DendronASTTypes.BLOCK_ANCHOR, parsed) as BlockAnchor[];
-  }
-
   static findAnchors(content: string): Anchor[] {
     const parser = MDUtilsV4.remark().use(blockAnchors);
     const parsed = parser.parse(content);

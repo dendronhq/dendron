@@ -1,6 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`utils findHeaders one header: bond 1`] = `
+exports[`RemarkUtils and LinkUtils findAnchors one block anchor: bond 1`] = `
+Array [
+  Object {
+    "id": "block-anchor",
+    "position": Position {
+      "end": Object {
+        "column": 53,
+        "line": 2,
+        "offset": 98,
+      },
+      "indent": Array [],
+      "start": Object {
+        "column": 40,
+        "line": 2,
+        "offset": 85,
+      },
+    },
+    "type": "blockAnchor",
+    "value": "^block-anchor",
+  },
+]
+`;
+
+exports[`RemarkUtils and LinkUtils findAnchors one header: bond 1`] = `
 Array [
   Object {
     "children": Array [
@@ -41,9 +64,9 @@ Array [
 ]
 `;
 
-exports[`utils findLinks empty link 1`] = `Array []`;
+exports[`RemarkUtils and LinkUtils findLinks empty link 1`] = `Array []`;
 
-exports[`utils findLinks one link: bond 1`] = `
+exports[`RemarkUtils and LinkUtils findLinks one link: bond 1`] = `
 Array [
   Object {
     "alias": "bar",
@@ -70,7 +93,7 @@ Array [
 ]
 `;
 
-exports[`utils findLinks xvault link 1`] = `
+exports[`RemarkUtils and LinkUtils findLinks xvault link 1`] = `
 Array [
   Object {
     "alias": "bar",

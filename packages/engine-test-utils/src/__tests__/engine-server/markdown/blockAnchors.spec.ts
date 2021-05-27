@@ -16,7 +16,7 @@ import {
 } from "@dendronhq/engine-server";
 import _ from "lodash";
 import { runEngineTestV5 } from "../../../engine";
-import { createProcTests, ProcTests } from "./utils";
+import { createProcForTest, createProcTests, ProcTests } from "./utils";
 
 function proc(
   engine: DEngineClient,
@@ -117,13 +117,15 @@ describe("blockAnchors", () => {
     const REGULAR_ANCHOR = createProcTests({
       name: "regular",
       setupFunc: async ({ engine, vaults, extra }) => {
-        const proc2 = MDUtilsV4.procFull({
+        const proc2 = createProcForTest({
           engine,
-          fname: "foo",
           dest: extra.dest,
           vault: vaults[0],
         });
-        const resp = await proc2.process(anchor);
+        const parsed = proc2.parse(anchor);
+        const ran = await proc2.run(parsed);
+        const resp = proc2.stringify(ran);
+        debugger;
         return { resp };
       },
       verifyFuncDict: {
@@ -148,11 +150,10 @@ describe("blockAnchors", () => {
     const HIDDEN_ANCHOR = createProcTests({
       name: "hidden",
       setupFunc: async ({ engine, vaults, extra }) => {
-        const proc2 = MDUtilsV4.procFull({
+        const proc2 = createProcForTest({
           engine,
-          fname: "foo",
           dest: extra.dest,
-          blockAnchorsOpts: { hideBlockAnchors: true },
+          hideBlockAnchors: true,
           vault: vaults[0],
         });
         const resp = await proc2.process(anchor);

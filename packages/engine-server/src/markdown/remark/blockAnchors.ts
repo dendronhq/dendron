@@ -4,6 +4,7 @@ import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { BlockAnchor, DendronASTDest } from "../types";
 import { MDUtilsV4 } from "../utils";
+import { Element } from "hast";
 
 // Letters, digits, dashes, and underscores.
 // The underscores are an extension over Obsidian.
@@ -71,17 +72,29 @@ function attachCompiler(proc: Unified.Processor, opts?: PluginOpts) {
   const visitors = Compiler.prototype.visitors;
 
   if (visitors) {
-    visitors.blockAnchor = function (node: BlockAnchor) {
+    visitors.blockAnchor = function (node: BlockAnchor): string | Element {
+      debugger;
       const { dest } = MDUtilsV4.getDendronData(proc);
+      const fullId = `^${node.id}`;
       switch (dest) {
         case DendronASTDest.MD_DENDRON:
         case DendronASTDest.MD_REGULAR:
         case DendronASTDest.MD_ENHANCED_PREVIEW:
+          return `^${node.id}`;
         case DendronASTDest.HTML:
           const style = opts?.hideBlockAnchors
             ? "visibility: hidden; width: 0; height: 0;"
             : "font-size: 0.8em; opacity: 75%;";
-          return `<a href="#^${node.id}" style="${style}" id="^${node.id}">^${node.id}</a>`;
+          return {
+            type: "element",
+            tagName: "a",
+            properties: {
+              href: `#${fullId}`,
+              id: fullId,
+              style: style,
+            },
+            children: [{ type: "text", value: fullId }],
+          };
         default:
           throw new DendronError({ message: "Unable to render block anchor" });
       }

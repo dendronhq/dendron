@@ -30,3 +30,4 @@ packages/common-server/proto/amplify.ts
 unpublish.sh
 workspaces
 tmp
+storage/.verdaccio-db.json

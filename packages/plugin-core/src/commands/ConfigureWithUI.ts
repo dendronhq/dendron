@@ -65,7 +65,10 @@ export class ConfigureWithUICommand extends BasicCommand<
       ViewColumn.One, // Editor column to show the new webview panel in.
       {
         enableScripts: true,
-      } // Webview options. More on these later.
+        enableCommandUris: true,
+        enableFindWidget: true,
+        localResourceRoots: [],
+      }
     );
 
     let resp: string;

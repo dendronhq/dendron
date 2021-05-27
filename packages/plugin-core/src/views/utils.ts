@@ -45,7 +45,6 @@ export class WebViewUtils {
   <iframe id="iframeView" src="${src}"></iframe>
 
   <script>
-    console.log("check1");
     function main() {
       const vscode = acquireVsCodeApi();
   
@@ -95,11 +94,12 @@ export class WebViewUtils {
           console.log("got message from vscode", message);
           postMsg(message);
         } else  {
+          console.log("got keyboard event", e.data);
           window.dispatchEvent(new KeyboardEvent('keydown', JSON.parse(e.data)));
         }
       }, false);
   }
-    console.log("check22");
+    console.log("initialized webview");
     main();
 
   </script>

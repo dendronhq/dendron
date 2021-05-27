@@ -61,9 +61,10 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     let start = process.hrtime();
     Logger.info({ ctx, msg: "enter", start });
     webviewView.webview.options = {
-      // Allow scripts in the webview
       enableScripts: true,
-      localResourceRoots: [this._extensionUri],
+      enableCommandUris: true,
+      enableFindWidget: true,
+      localResourceRoots: [],
     };
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
     webviewView.webview.onDidReceiveMessage(async (msg: TreeViewMessage) => {

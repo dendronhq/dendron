@@ -435,6 +435,7 @@ export class DendronWorkspace {
               {
                 webviewOptions: {
                   retainContextWhenHidden: true,
+                  
                 },
               }
             )

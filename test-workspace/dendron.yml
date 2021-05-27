@@ -1,6 +1,8 @@
 version: 1
 vaults:
     -
+        fsPath: vault2
+    -
         fsPath: vault
 useFMTitle: true
 useNoteTitleForLink: true
@@ -36,12 +38,9 @@ site:
         payload:
             - vault2
             - vault
+            - vault2
 dev:
-  enableWebUI: true
-  nextServerUrl: http://localhost:3000
-  engineServerPort: 3005
-
-  # --- local
-  # nextStaticRoot: /Users/kevinlin/projects/dendronv2/dendron/packages/dendron-next-server/out
-  # --- remote 
-  # nextStaticRoot: /home/kevinlin/workspace/dendron/packages/dendron-next-server/out
+    enableWebUI: true
+    nextServerUrl: 'http://localhost:3000'
+    engineServerPort: 3005
+initializeRemoteVaults: true

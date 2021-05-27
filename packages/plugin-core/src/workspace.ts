@@ -22,7 +22,6 @@ import {
 import { PodUtils } from "@dendronhq/pods-core";
 import fs from "fs-extra";
 import _ from "lodash";
-import open from "open";
 import path from "path";
 import * as vscode from "vscode";
 import { ALL_COMMANDS } from "./commands";
@@ -47,7 +46,6 @@ import { VaultWatcher } from "./fileWatcher";
 import { Logger } from "./logger";
 import { CodeConfigKeys, WorkspaceSettings } from "./types";
 import { DisposableStore, resolvePath, VSCodeUtils } from "./utils";
-import { isAnythingSelected } from "./utils/editor";
 import { DendronTreeView } from "./views/DendronTreeView";
 import { DendronTreeViewV2 } from "./views/DendronTreeViewV2";
 import { SampleView } from "./views/SampleView";
@@ -504,34 +502,6 @@ export class DendronWorkspace {
         DENDRON_COMMANDS.LOOKUP_SCHEMA.key,
         async () => {
           return new LookupCommand().run({ flavor: "schema" });
-        }
-      )
-    );
-
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand(
-        DENDRON_COMMANDS.OPEN_LINK.key,
-        async () => {
-          const ctx = DENDRON_COMMANDS.OPEN_LINK;
-          this.L.info({ ctx });
-          if (!isAnythingSelected()) {
-            return vscode.window.showErrorMessage("nothing selected");
-          }
-          const { text } = VSCodeUtils.getSelection();
-          if (_.isUndefined(text)) {
-            return vscode.window.showErrorMessage("nothing selected");
-          }
-          const assetPath = resolvePath(text, this.rootWorkspace.uri.fsPath);
-          if (!fs.existsSync(assetPath)) {
-            return vscode.window.showErrorMessage(
-              `${assetPath} does not exist`
-            );
-          }
-          return open(assetPath).catch((err) => {
-            vscode.window.showInformationMessage(
-              "error: " + JSON.stringify(err)
-            );
-          });
         }
       )
     );

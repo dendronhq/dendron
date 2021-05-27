@@ -417,7 +417,7 @@ export class DendronWorkspace {
     HistoryService.instance().subscribe("extension", async (event) => {
       if (event.action === "initialized") {
         Logger.info({ ctx, msg: "init:treeViewV2" });
-        const provider = new DendronTreeViewV2(context.extensionUri);
+        const provider = new DendronTreeViewV2();
         // TODO:
         const sampleView = new SampleView();
         context.subscriptions.push(
@@ -435,7 +435,6 @@ export class DendronWorkspace {
               {
                 webviewOptions: {
                   retainContextWhenHidden: true,
-                  
                 },
               }
             )

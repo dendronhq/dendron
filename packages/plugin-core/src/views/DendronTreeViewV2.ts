@@ -23,7 +23,7 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
 
   private _view?: vscode.WebviewView;
 
-  constructor(private readonly _extensionUri: vscode.Uri) {
+  constructor() {
     getWS().dendronTreeViewV2 = this;
     DendronWorkspace.instance().addDisposable(
       vscode.window.onDidChangeActiveTextEditor(this.onOpenTextDocument, this)
@@ -63,7 +63,6 @@ export class DendronTreeViewV2 implements vscode.WebviewViewProvider {
     webviewView.webview.options = {
       enableScripts: true,
       enableCommandUris: true,
-      enableFindWidget: true,
       localResourceRoots: [],
     };
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);

@@ -65,7 +65,8 @@
     "watch": "npx lerna exec --scope $pkg -- tsc -p tsconfig.build.json --watch",
     "hooks:pre-commit": "node ./hooks/pre-commit.js",
     "gen:meta": "node ./bootstrap/scripts/genMeta.js",
-    "gen:links": "node ./bootstrap/scripts/linkAll.js"
+    "gen:links": "node ./bootstrap/scripts/linkAll.js",
+    "backend:updateDendronDeps": "node bootstrap/backend/updateDendronhqDeps.js"
   },
   "packages": [
     "packages/*",

@@ -1,6 +1,6 @@
 const fs = require("fs-extra");
 const path = require("path");
-const {getMetaPath, getProjRoot} = require("./utils");
+const {getMetaPath} = require("./utils");
 
 async function main() {
   const PKG_ROOT = path.join(__dirname, "..", "..", "packages");

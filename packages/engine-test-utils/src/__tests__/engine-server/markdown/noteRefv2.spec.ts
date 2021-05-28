@@ -691,4 +691,457 @@ describe("noteRefV2", () => {
   // ];
 
   runAllTests({ name: "compile", testCases: ALL_TEST_CASES });
+
+  describe.only("with block anchors", () => {
+    const IN_PARAGRAPH = createProcTests({
+      name: "in paragraph",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo.ch1#^block-anchor]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = [
+            "Sapiente sed accusamus eum.",
+            "Ullam optio est quia.",
+            "",
+            "Reprehenderit doloribus.",
+            "Sint minus fuga omnis non. ^block-anchor",
+            "",
+            "Soluta ex qui.",
+          ];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(
+            resp,
+            "Reprehenderit doloribus.",
+            "Sint minus fuga omnis non.",
+            "Soluta ex qui."
+          );
+          await checkNotInVFile(
+            resp,
+            "Sapiente sed accusamus eum.",
+            "Ullam optio est quia."
+          );
+        },
+      },
+    });
+
+    const AFTER_PARAGRAPH = createProcTests({
+      name: "immediately after a paragraph",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo.ch1#^block-anchor]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = [
+            "Sapiente sed accusamus eum.",
+            "Ullam optio est quia.",
+            "",
+            "Reprehenderit doloribus.",
+            "Sint minus fuga omnis non.",
+            "^block-anchor",
+            "",
+            "Soluta ex qui.",
+          ];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(
+            resp,
+            "Reprehenderit doloribus.",
+            "Sint minus fuga omnis non.",
+            "Soluta ex qui."
+          );
+          await checkNotInVFile(
+            resp,
+            "Sapiente sed accusamus eum.",
+            "Ullam optio est quia."
+          );
+        },
+      },
+    });
+
+    const AFTER_PARAGRAPH_BLOCK = createProcTests({
+      name: "after a paragraph block",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo.ch1#^block-anchor]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = [
+            "Sapiente sed accusamus eum.",
+            "Ullam optio est quia.",
+            "",
+            "Reprehenderit doloribus.",
+            "Sint minus fuga omnis non.",
+            "",
+            "^block-anchor",
+            "",
+            "Soluta ex qui.",
+          ];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(
+            resp,
+            "Reprehenderit doloribus.",
+            "Sint minus fuga omnis non.",
+            "Soluta ex qui."
+          );
+          await checkNotInVFile(
+            resp,
+            "Sapiente sed accusamus eum.",
+            "Ullam optio est quia."
+          );
+        },
+      },
+    });
+
+    /** When the anchor is on a list element, it only references that element. */
+    const LIST_ELEMENT = createProcTests({
+      name: "list element",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo.ch1#^block-anchor]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = [
+            "* Sapiente sed accusamus eum.",
+            "* Ullam optio est quia.",
+            "* Reprehenderit doloribus. ^block-anchor",
+            "* Sint minus fuga omnis non.",
+          ];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "Reprehenderit doloribus.");
+          await checkNotInVFile(
+            resp,
+            "Sapiente sed accusamus eum.",
+            "Ullam optio est quia.",
+            "Sint minus fuga omnis non."
+          );
+        },
+      },
+    });
+
+    /** When the anchor is immediately after the last list element, it only references the last element. */
+    const AFTER_LIST = createProcTests({
+      name: "immediately after last list element",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo.ch1#^block-anchor]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = [
+            "* Sapiente sed accusamus eum.",
+            "* Ullam optio est quia.",
+            "* Reprehenderit doloribus.",
+            "* Sint minus fuga omnis non.",
+            "^block-anchor",
+          ];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "Sint minus fuga omnis non.");
+          await checkNotInVFile(
+            resp,
+            "Sapiente sed accusamus eum.",
+            "Ullam optio est quia.",
+            "Reprehenderit doloribus."
+          );
+        },
+      },
+    });
+
+    /** When the anchor is after the list and there is some space in between, it references the whole list. */
+    const AFTER_LIST_BLOCK = createProcTests({
+      name: "after list block",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo.ch1#^block-anchor]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = [
+            "Laborum libero quia ducimus.",
+            "",
+            "* Sapiente sed accusamus eum.",
+            "* Ullam optio est quia.",
+            "",
+            "^block-anchor",
+            "",
+            "Iure neque alias dolorem.",
+          ];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(
+            resp,
+            "Sint minus fuga omnis non.",
+            "Ullam optio est quia."
+          );
+          await checkNotInVFile(
+            resp,
+            "Laborum libero quia ducimus.",
+            "Iure neque alias dolorem."
+          );
+        },
+      },
+    });
+
+    /** When the anchor is anywhere in or after a table, it references the whole table. */
+    const IN_TABLE = createProcTests({
+      name: "in table",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo.ch1#^block-anchor]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = [
+            "Minima expedita vero.",
+            "",
+            "| Sapiente | accusamus |",
+            "|----------|-----------|",
+            "| Laborum  | libero    | ^block-anchor",
+            "| Ullam    | optio     |",
+            "",
+            "Iure neque alias dolorem.",
+          ];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(
+            resp,
+            "Sapiente",
+            "accusamus",
+            "Laborum",
+            "libero",
+            "Ullam",
+            "optio"
+          );
+          await checkNotInVFile(
+            resp,
+            "Minima expedita vero.",
+            "Iure neque alias dolorem."
+          );
+        },
+      },
+    });
+
+    /** When the anchor is anywhere in or after a table, it references the whole table. */
+    const AFTER_TABLE = createProcTests({
+      name: "after table",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo.ch1#^block-anchor]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = [
+            "Laborum libero quia ducimus.",
+            "",
+            "| Sapiente | accusamus |",
+            "|----------|-----------|",
+            "| Laborum  | libero    |",
+            "| Ullam    | optio     |",
+            "^block-anchor",
+            "",
+            "Iure neque alias dolorem.",
+          ];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(
+            resp,
+            "Sapiente",
+            "accusamus",
+            "Laborum",
+            "libero",
+            "Ullam",
+            "optio"
+          );
+          await checkNotInVFile(
+            resp,
+            "Minima expedita vero.",
+            "Iure neque alias dolorem."
+          );
+        },
+      },
+    });
+
+    /** When the anchor is anywhere in or after a table, it references the whole table. */
+    const AFTER_TABLE_BLOCK = createProcTests({
+      name: "after table block",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo.ch1#^block-anchor]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = [
+            "Laborum libero quia ducimus.",
+            "",
+            "| Sapiente | accusamus |",
+            "|----------|-----------|",
+            "| Laborum  | libero    |",
+            "| Ullam    | optio     |",
+            "",
+            "^block-anchor",
+            "",
+            "Iure neque alias dolorem.",
+          ];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(
+            resp,
+            "Sapiente",
+            "accusamus",
+            "Laborum",
+            "libero",
+            "Ullam",
+            "optio"
+          );
+          await checkNotInVFile(
+            resp,
+            "Minima expedita vero.",
+            "Iure neque alias dolorem."
+          );
+        },
+      },
+    });
+
+    runAllTests({
+      name: "compile",
+      testCases: [
+        ...LIST_ELEMENT,
+        ...AFTER_LIST,
+        ...AFTER_LIST_BLOCK,
+        ...IN_TABLE,
+        ...AFTER_TABLE,
+        ...AFTER_TABLE_BLOCK,
+      ],
+    });
+    runAllTests({
+      name: "compile",
+      testCases: [
+        ...IN_PARAGRAPH,
+        ...AFTER_PARAGRAPH,
+        ...AFTER_PARAGRAPH_BLOCK,
+        ...LIST_ELEMENT,
+        ...AFTER_LIST,
+        ...AFTER_LIST_BLOCK,
+        ...IN_TABLE,
+        ...AFTER_TABLE,
+        ...AFTER_TABLE_BLOCK,
+      ],
+    });
+  });
 });

@@ -274,6 +274,10 @@ export class AnchorUtils {
       return {};
     }
   }
+
+  static isBlockAnchor(anchor?: string): boolean {
+    return !!anchor && anchor[0] === "^";
+  }
 }
 
 function walk(node: Node, fn: any) {

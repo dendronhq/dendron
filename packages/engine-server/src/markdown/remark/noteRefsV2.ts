@@ -18,9 +18,11 @@ import { html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
 import { Node, Parent } from "unist";
+import visit from "unist-util-visit";
 import { SiteUtils } from "../../topics/site";
 import { parseNoteRefV2 } from "../../utils";
 import {
+  BlockAnchor,
   DendronASTDest,
   DendronASTNode,
   DendronASTTypes,
@@ -28,7 +30,7 @@ import {
   NoteRefNoteV4_LEGACY,
 } from "../types";
 import { MDUtilsV4, renderFromNoteProps } from "../utils";
-import { LinkUtils } from "./utils";
+import { AnchorUtils, LinkUtils } from "./utils";
 import { WikiLinksOpts } from "./wikiLinks";
 
 const LINK_REGEX = /^\!\[\[(.+?)\]\]/;
@@ -402,13 +404,11 @@ function convertNoteRefHelperAST(
   // TODO: can i just strip frontmatter when reading?
   let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
   let anchorEndIndex = bodyAST.children.length;
-  const slugger = getSlugger();
 
   if (anchorStart) {
-    anchorStartIndex = findHeader({
+    anchorStartIndex = findAnchor({
       nodes: bodyAST.children,
       match: anchorStart,
-      slugger,
     });
     if (anchorStartIndex < 0) {
       const data = MDUtilsV4.genMDMsg(`Start anchor ${anchorStart} not found`);
@@ -417,10 +417,9 @@ function convertNoteRefHelperAST(
   }
 
   if (anchorEnd) {
-    anchorEndIndex = findHeader({
+    anchorEndIndex = findAnchor({
       nodes: bodyAST.children.slice(anchorStartIndex + 1),
       match: anchorEnd,
-      slugger,
     });
     if (anchorEndIndex < 0) {
       const data = MDUtilsV4.genMDMsg(`end anchor ${anchorEnd} not found`);
@@ -475,24 +474,24 @@ function convertNoteRefHelper(
   // TODO: can i just strip frontmatter when reading?
   let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
   let anchorEndIndex = bodyAST.children.length;
-  const slugger = getSlugger();
 
   if (anchorStart) {
-    anchorStartIndex = findHeader({
-      nodes: bodyAST.children,
-      match: anchorStart,
-      slugger,
-    });
+    if (anchorStart[0] === "^") {
+    } else {
+      anchorStartIndex = findAnchor({
+        nodes: bodyAST.children,
+        match: anchorStart,
+      });
+    }
     if (anchorStartIndex < 0) {
       return { data: `Start anchor ${anchorStart} not found`, error: null };
     }
   }
 
   if (anchorEnd) {
-    anchorEndIndex = findHeader({
+    anchorEndIndex = findAnchor({
       nodes: bodyAST.children.slice(anchorStartIndex + 1),
       match: anchorEnd,
-      slugger,
     });
     if (anchorEndIndex < 0) {
       return { data: `end anchor ${anchorEnd} not found`, error: null };
@@ -522,6 +521,23 @@ function convertNoteRefHelper(
   }
 }
 
+function findAnchor({
+  nodes,
+  match,
+}: {
+  nodes: DendronASTNode["children"];
+  match: string;
+}) {
+  if (AnchorUtils.isBlockAnchor(match)) {
+    const anchorId = match.slice(1);
+    const found = findBlockAnchor({ nodes, match: anchorId });
+    debugger;
+    return found;
+  } else {
+    return findHeader({ nodes, match, slugger: getSlugger() });
+  }
+}
+
 function findHeader({
   nodes,
   match,
@@ -534,6 +550,36 @@ function findHeader({
   const foundIndex = MDUtilsV4.findIndex(nodes, function (node: Node) {
     return MDUtilsV4.matchHeading(node, match, { slugger });
   });
+  return foundIndex;
+}
+
+/** Recursively searches for block anchors, then returns the index for the top-level parent. */
+function findBlockAnchor({
+  nodes,
+  match,
+}: {
+  nodes: DendronASTNode["children"];
+  match: string;
+}) {
+  let foundIndex = MDUtilsV4.findIndex(nodes, function (node: Node) {
+    let found = false;
+    visit(node, DendronASTTypes.BLOCK_ANCHOR, (anchor: BlockAnchor) => {
+      found = anchor.id === match;
+      if (found) return false; // stop traversal
+      return; // continue traversal
+    });
+    return found;
+  });
+
+  if (foundIndex >= 0) {
+    const parent = nodes[foundIndex] as Parent;
+    // If located independently after a block, then the block anchor refers to the previous block
+    if (parent.children.length === 1) foundIndex -= 1;
+    // TODO: For lists, if the anchor is on a list item then we have to cut out that item.
+    // Actually in general, block anchors reference a whole block, and we should cut out that block rather than doing start--end.
+    // Wait, how do the existing tests work? They should return more than requested (for end, not start).
+    // TODO: Check the tests!
+  }
   return foundIndex;
 }
 

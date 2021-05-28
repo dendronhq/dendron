@@ -257,8 +257,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Lookup Note`,
     group: "navigation",
     desc: "Initiate note lookup",
-    docLink: "dendron.topic.lookup.md",
-    docPreview: "",
     when: DendronContext.PLUGIN_ACTIVE,
   },
   LOOKUP_JOURNAL: {

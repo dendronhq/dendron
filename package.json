@@ -42,7 +42,7 @@
     "release": "standard-version",
     "format": "prettier --ignore-path='.prettierignore' --write 'packages/**/*'",
     "lerna:typecheck": "lerna exec --parallel --ignore @dendronhq/dendron-next-server --ignore @dendronhq/dendron-11ty -- tsc -p tsconfig.build.json --noEmit",
-    "bootstrap:bootstrap": "npx lerna bootstrap --use-workspaces",
+    "bootstrap:bootstrap": "npx lerna bootstrap --use-workspaces && yarn gen:meta",
     "bootstrap:build": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server &&  yarn bootstrap:build:engine-server &&  yarn bootstrap:build:pods-core && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:api-server && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:common-frontend && yarn bootstrap:build:dendron-next-server && yarn bootstrap:build:plugin-core",
     "bootstrap:build:fast": "yarn bootstrap:build:common-all && yarn bootstrap:build:common-server && yarn bootstrap:build:common-test-utils && yarn bootstrap:build:engine-server &&  yarn bootstrap:build:api-server && yarn bootstrap:build:engine-test-utils && yarn bootstrap:build:dendron-cli && yarn bootstrap:build:plugin-core",
     "bootstrap:build:": "npx lerna run build --scope",
@@ -63,7 +63,9 @@
     "ci:test:cli": "npx lerna run test --ignore @dendronhq/plugin-core --parallel --stream -- -- --forceExit",
     "ci:test:plugin": "npx lerna run test --scope @dendronhq/plugin-core --stream",
     "watch": "npx lerna exec --scope $pkg -- tsc -p tsconfig.build.json --watch",
-    "hooks:pre-commit": "node ./hooks/pre-commit.js"
+    "hooks:pre-commit": "node ./hooks/pre-commit.js",
+    "gen:meta": "node ./bootstrap/scripts/genMeta.js",
+    "gen:links": "node ./bootstrap/scripts/linkAll.js"
   },
   "packages": [
     "packages/*",

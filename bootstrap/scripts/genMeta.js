@@ -1,8 +1,8 @@
 const fs = require("fs-extra");
 const path = require("path");
+const {getMetaPath, getProjRoot} = require("./utils");
 
 async function main() {
-  const PROJ_ROOT = path.join(__dirname, "..", "..");
   const PKG_ROOT = path.join(__dirname, "..", "..", "packages");
   const projects = fs.readdirSync(PKG_ROOT);
   const exclude = [".DS_Store"];
@@ -20,7 +20,7 @@ async function main() {
         out[name] = version;
         unpublish.push(`npm unpublish --force ${name}`)
     });
-    fs.writeJSONSync(path.join(PROJ_ROOT, "meta.json"), out);
+    fs.writeJSONSync(getMetaPath(), out);
     fs.writeFileSync("unpublish.sh", unpublish.join("\n"), {encoding: "utf-8"})
     fs.chmodSync("unpublish.sh", "700")
 }

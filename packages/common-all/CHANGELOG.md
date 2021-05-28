@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.43.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.5-alpha.0) (2021-05-28)
+
+### Bug Fixes
+
+- bad import ([9f04493](https://github.com/dendronhq/dendron/commit/9f04493388e921ac1eab687f9f79c438836cba1e))
+- import markdown pod has bad body ([7649309](https://github.com/dendronhq/dendron/commit/7649309f6e953826e9a3f8e7c0c9ce53d6e869a4))
+
+### Features Dendron
+
+- Add block anchor HTML generation ([#766](https://github.com/dendronhq/dendron/issues/766)) ([bb0ff8e](https://github.com/dendronhq/dendron/commit/bb0ff8ee53a50768f1908bbabd625c1c2434df39))
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+
 ## [0.43.4-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.4-alpha.0) (2021-05-28)
 
 ### Bug Fixes

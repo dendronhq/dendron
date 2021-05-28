@@ -2,6 +2,7 @@ import {
   DendronConfig,
   DendronError,
   DendronTreeViewKey,
+  DendronWebViewKey,
   DEngineClient,
   DVault,
   ERROR_STATUS,
@@ -133,6 +134,7 @@ export class DendronWorkspace {
   public port?: number;
   public workspaceService?: WorkspaceService;
   protected treeViews: { [key: string]: vscode.WebviewViewProvider };
+  protected webViews: { [key: string]: vscode.WebviewPanel | undefined };
 
   static instance(): DendronWorkspace {
     if (!_DendronWorkspace) {
@@ -318,6 +320,7 @@ export class DendronWorkspace {
     this._setupCommands();
     this.setupLanguageFeatures(context);
     this.treeViews = {};
+    this.webViews = {};
     this.setupViews(context);
     const ctx = "DendronWorkspace";
     this.L.info({ ctx, msg: "initialized" });
@@ -393,6 +396,14 @@ export class DendronWorkspace {
 
   setTreeView(key: DendronTreeViewKey, view: vscode.WebviewViewProvider) {
     this.treeViews[key] = view;
+  }
+
+  getWebView(key: DendronWebViewKey) {
+    return this.webViews[key];
+  }
+
+  setWebView(key: DendronWebViewKey, view: vscode.WebviewPanel) {
+    this.webViews[key] = view;
   }
 
   getEngine(): DEngineClient {

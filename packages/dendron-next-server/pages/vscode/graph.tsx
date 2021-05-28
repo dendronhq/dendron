@@ -1,22 +1,73 @@
-import { createLogger, engineSlice } from '@dendronhq/common-frontend';
+import {
+  createLogger,
+  engineSlice,
+  postVSCodeMessage,
+} from '@dendronhq/common-frontend';
 import _ from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { Box, Text } from '@chakra-ui/layout';
-import cytoscape, { Core, EdgeDefinition, ElementsDefinition } from 'cytoscape';
+import cytoscape, {
+  Core,
+  EdgeDefinition,
+  ElementsDefinition,
+  EventHandler,
+} from 'cytoscape';
+// @ts-ignore
 import euler from 'cytoscape-euler';
-import { NoteUtils } from '@dendronhq/common-all';
+import {
+  DMessageSource,
+  GraphViewMessage,
+  GraphViewMessageType,
+  NoteUtils,
+} from '@dendronhq/common-all';
 import { useRouter } from 'next/router';
+import { useThemeSwitcher } from 'react-css-theme-switcher';
+
+const getCytoscapeStyle = (themes: any, theme: string | undefined) => `
+  node {
+    width: 10;
+    height: 10;
+    background-color: ${theme === themes.dark ? '#666' : '#c2c2c2'};
+    color: ${theme === themes.dark ? '#fff' : '#333'};
+    label: data(label);
+    border-width: 1;
+    border-color: ${theme === themes.dark ? '#fff' : '#A0A0A0'};
+    font-size: 8;
+    min-zoomed-font-size: 12;
+    font-weight: 500;
+  }
+
+  edge {
+    width: 1;
+    line-color: ${theme === themes.dark ? '#333' : '#c2c2c2'};
+    target-arrow-shape: none;
+    curve-style: haystack;
+  }
+
+  node:selected {
+    background-color: #54B758;
+    border-color: #208d24;
+  }
+
+  edge[type = 'link'] {
+    line-style: dashed;
+  }
+
+  edge[type = 'hierarchy'] {
+  }
+`
 
 export default function FullGraph({
   engine,
 }: {
   engine: engineSlice.EngineState;
 }) {
-  const router = useRouter()
-  const notes = engine ? engine.notes : {};
+  const router = useRouter();
+  const notes = engine ? engine.notes || {} : {};
   const logger = createLogger('Graph');
   logger.info({ ctx: 'Graph', notes });
-  const graphRef = useRef();
+  const graphRef = useRef<HTMLDivElement>(null);
+  const { switcher, themes, currentTheme, status } = useThemeSwitcher();
 
   const [elements, setElements] = useState<ElementsDefinition>();
 
@@ -26,7 +77,7 @@ export default function FullGraph({
   useEffect(() => {
     logger.log('Getting nodes...');
     const nodes = Object.values(notes).map((note) => ({
-      data: { id: note.id, label: note.title },
+      data: { id: note.id, label: note.title, group: 'nodes' },
     }));
 
     logger.log('Getting edges...');
@@ -35,36 +86,39 @@ export default function FullGraph({
         const childConnections: EdgeDefinition[] = note.children.map(
           (child) => ({
             data: {
-              id: `${notes.id}-${child}`,
+              group: 'edges',
+              id: `${notes.id}_${child}`,
               source: note.id,
               target: child,
-              classes: ['hierarchy'],
+              type: 'hierarchy',
             },
           })
         );
 
-        const linkConnections: EdgeDefinition[] = []
-        
+        const linkConnections: EdgeDefinition[] = [];
+
         // Find and add linked notes
         note.links.forEach((link) => {
-            if (link.to && note.id) {
-              const to = NoteUtils.getNoteByFnameV5({
-                fname: link.to!.fname as string,
-                vault: note.vault,
-                notes: notes,
-                wsRoot: router.query.ws as string,
-              });
-              if (!to) return;
-              linkConnections.push({
-                data: {
-                  id: `${note.id}_${to.id}`,
-                  source: note.id,
-                  target: to.id,
-                  classes: ['link'],
-                },
-              });
-            }
-          });
+          if (link.to && note.id) {
+            const to = NoteUtils.getNoteByFnameV5({
+              fname: link.to!.fname as string,
+              vault: note.vault,
+              notes: notes,
+              wsRoot: router.query.ws as string,
+            });
+
+            if (!to) return;
+            linkConnections.push({
+              data: {
+                group: 'edges',
+                id: `${note.id}_${to.id}`,
+                source: note.id,
+                target: to.id,
+                type: 'link'
+              },
+            });
+          }
+        });
 
         return [...childConnections, ...linkConnections];
       })
@@ -86,64 +140,30 @@ export default function FullGraph({
         elements,
 
         // style: `
-        //   node {
-        //     width: 15;
-        //     height: 15;
-        //     background-color: #666;
-        //     color: #fff;
-        //     label: data(label);
-        //     font-size: 10;
-        //     min-zoomed-font-size: 12;
-        //   }
-        //   .hierarchy {
-        //     width: 2;
-        //     line-color: #54B758;
-        //     target-arrow-shape: none;
-        //     curve-style: haystack;
-        //   }
-        //   .link {
-        //     width: 2;
-        //     line-color: #548fb7;
-        //     target-arrow-shape: none;
-        //     curve-style: haystack;
-        //   }
+        // node {
+        //   width: 15;
+        //   height: 15;
+        //   background-color: #666;
+        //   color: #fff;
+        //   label: data(label);
+        //   font-size: 10;
+        //   min-zoomed-font-size: 12;
+        // }
+        // .hierarchy {
+        //   width: 2;
+        //   line-color: #54B758;
+        //   target-arrow-shape: none;
+        //   curve-style: haystack;
+        // }
+        // .link {
+        //   width: 2;
+        //   line-color: #548fb7;
+        //   target-arrow-shape: none;
+        //   curve-style: haystack;
+        // }
         // `,
 
-        style: [
-          // the stylesheet for the graph
-          {
-            selector: 'node',
-            style: {
-              width: 15,
-              height: 15,
-              'background-color': '#666',
-              color: '#fff',
-              label: 'data(label)',
-              'font-size': 10,
-              'min-zoomed-font-size': 12,
-            },
-          },
-
-          {
-            selector: 'edge',
-            style: {
-              width: 2,
-              'line-color': '#54B758',
-              'target-arrow-shape': 'none',
-              'curve-style': 'haystack', // for lesser performance, use 'bezier',
-            },
-          },
-          // TODO: Figure out how to style selectors
-          // {
-          //   selector: '.link',
-          //   style: {
-          //     width: 2,
-          //     'line-color': '#548fb7',
-          //   },
-          // },
-        ],
-
-        // style: cytoscape.stylesheet().selector('.link').style() ,
+        style: getCytoscapeStyle(themes, currentTheme),
 
         // Options to improve performance
         textureOnViewport: isLargeGraph,
@@ -155,9 +175,9 @@ export default function FullGraph({
         .layout({
           name: 'euler',
           // @ts-ignore
-          springLength: (edge) => 80,
-          springCoeff: (edge) => 0.0008,
-          mass: (node) => 4,
+          springLength: () => 80,
+          springCoeff: () => 0.0008,
+          mass: () => 4,
           gravity: -1.2,
           pull: 0.0001,
           theta: 0.666,
@@ -178,17 +198,45 @@ export default function FullGraph({
         })
         .run();
 
+      network.on('select', onSelect);
+
       setCy(network);
     }
   }, [graphRef, elements]);
 
+  const onSelect: EventHandler = (e) => {
+    const { id, source } = e.target[0]._private.data;
+
+    const isNode = !source;
+    if (!isNode) return;
+    // if (_.isUndefined(cy)) return;
+
+    // const j = cy.$(`#${id}`);
+    // logger.log('Connected edges:', j.connectedEdges())
+
+    logger.log('Selected Node ID:', id);
+    logger.log('Selected Node ID:', e.target[0]._private);
+
+    postVSCodeMessage({
+      type: GraphViewMessageType.onSelect,
+      data: { id },
+      source: DMessageSource.webClient,
+    } as GraphViewMessage);
+  };
+
   return (
     <Box w='100vw' h='100vh' id='graph' position='relative'>
       <Box w='100%' h='100%' ref={graphRef} zIndex={1}></Box>
-      {elements && <Box position='absolute' bottom={8} right={8} zIndex={2}>
-        <Text  m={0} p={0}>Nodes: {elements.nodes.length}</Text>
-        <Text  m={0} p={0}>Edges: {elements.edges.length}</Text>
-        </Box>}
+      {elements && (
+        <Box position='absolute' bottom={8} right={8} zIndex={2}>
+          <Text m={0} p={0}>
+            Nodes: {elements.nodes.length}
+          </Text>
+          <Text m={0} p={0}>
+            Edges: {elements.edges.length}
+          </Text>
+        </Box>
+      )}
     </Box>
   );
 }

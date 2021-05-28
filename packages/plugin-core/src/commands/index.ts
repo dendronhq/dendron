@@ -30,6 +30,7 @@ import { MoveNoteCommand } from "./MoveNoteCommand";
 import { NoteLookupCommand } from "./NoteLookupCommand";
 import { OpenLinkCommand } from "./OpenLink";
 import { OpenLogsCommand } from "./OpenLogs";
+import { ShowNoteGraphCommand } from "./ShowNoteGraph";
 import { PasteFileCommand } from "./PasteFile";
 import { PasteLinkCommand } from "./PasteLink";
 import { PublishPodCommand } from "./PublishPod";
@@ -79,6 +80,7 @@ const ALL_COMMANDS = [
   NoteLookupCommand,
   OpenLinkCommand,
   OpenLogsCommand,
+  ShowNoteGraphCommand,
   PasteFileCommand,
   PasteLinkCommand,
   PublishPodCommand,

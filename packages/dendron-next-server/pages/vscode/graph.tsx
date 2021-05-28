@@ -49,11 +49,11 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => `
     border-color: #208d24;
   }
 
-  edge[type = 'link'] {
+  edge.link {
     line-style: dashed;
   }
 
-  edge[type = 'hierarchy'] {
+  edge.hierarchy {
   }
 `
 
@@ -90,8 +90,8 @@ export default function FullGraph({
               id: `${notes.id}_${child}`,
               source: note.id,
               target: child,
-              type: 'hierarchy',
             },
+            classes: 'hierarchy'
           })
         );
 
@@ -114,8 +114,8 @@ export default function FullGraph({
                 id: `${note.id}_${to.id}`,
                 source: note.id,
                 target: to.id,
-                type: 'link'
               },
+              classes: 'link'
             });
           }
         });
@@ -138,33 +138,8 @@ export default function FullGraph({
       const network = cytoscape({
         container: graphRef.current,
         elements,
-
-        // style: `
-        // node {
-        //   width: 15;
-        //   height: 15;
-        //   background-color: #666;
-        //   color: #fff;
-        //   label: data(label);
-        //   font-size: 10;
-        //   min-zoomed-font-size: 12;
-        // }
-        // .hierarchy {
-        //   width: 2;
-        //   line-color: #54B758;
-        //   target-arrow-shape: none;
-        //   curve-style: haystack;
-        // }
-        // .link {
-        //   width: 2;
-        //   line-color: #548fb7;
-        //   target-arrow-shape: none;
-        //   curve-style: haystack;
-        // }
-        // `,
-
-        style: getCytoscapeStyle(themes, currentTheme),
-
+        style: getCytoscapeStyle(themes, currentTheme) as any,
+        
         // Options to improve performance
         textureOnViewport: isLargeGraph,
         hideEdgesOnViewport: isLargeGraph,

@@ -42,6 +42,7 @@ export const createProcForTest = (opts: {
   dest: DendronASTDest;
   vault: DVault;
   useIdAsLink?: boolean;
+  hideBlockAnchors?: boolean;
 }) => {
   const { engine, dest, vault } = opts;
   const proc2 = MDUtilsV4.procFull({
@@ -51,6 +52,9 @@ export const createProcForTest = (opts: {
     vault,
     wikiLinksOpts: {
       useId: opts.useIdAsLink,
+    },
+    blockAnchorsOpts: {
+      hideBlockAnchors: opts.hideBlockAnchors,
     },
     publishOpts: {
       wikiLinkOpts: {

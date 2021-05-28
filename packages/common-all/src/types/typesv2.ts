@@ -481,10 +481,22 @@ export type OnDidChangeActiveTextEditorMsg = DMessage<
 
 export type TreeViewMessage = DMessage<TreeViewMessageType, { id: string }>;
 
+export enum GraphViewMessageType {
+  "onSelect" = "onSelect",
+  "onGetActiveEditor" = "onGetActiveEditor",
+  /**
+   * View is ready
+   */
+  "onReady" = "onReady",
+}
+
+export type GraphViewMessage = DMessage<GraphViewMessageType, { id: string }>;
+
 // --- Views
 
 export enum DendronWebViewKey {
   CONFIGURE = "dendron.configure",
+  NOTE_GRAPH = "dendron.graph",
 }
 
 export enum DendronTreeViewKey {

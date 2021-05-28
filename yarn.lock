@@ -7442,13 +7442,6 @@ cytoscape-euler@^1.2.2:
   resolved "https://registry.yarnpkg.com/cytoscape-euler/-/cytoscape-euler-1.2.2.tgz#d599aa0656c022216f93a5c3ac8fce1ad69ef9b4"
   integrity sha512-A24ZGrFpqCOutTIlGoXA5kmjFj68iy7HvqXuhcZUL1a7Z8bL59Bl2bB7hkSvFcCZBVCNcArxKr+YlB8bJo9Ftw==
 
-cytoscape-spread@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/cytoscape-spread/-/cytoscape-spread-3.0.0.tgz#9d2cf43eee9a3b92dd518a4a2db8567584a1dd2e"
-  integrity sha512-ekuo4ByFRTZ4TOJylE2bPOMcVVyi8rD+qjvEjMWS2BHcyan40pmhlA4ramz/nTxZR+EtlxEa1asnmfiN8R5HyQ==
-  dependencies:
-    weaverjs "^1.2.0"
-
 cytoscape@^3.19.0:
   version "3.19.0"
   resolved "https://registry.yarnpkg.com/cytoscape/-/cytoscape-3.19.0.tgz#b3e3136f823ca00a1c7752741c2a349e52545f57"
@@ -9352,7 +9345,7 @@ format@^0.2.0:
 
 formik-antd@^2.0.1:
   version "2.0.1"
-  resolved "http://localhost:4873/formik-antd/-/formik-antd-2.0.1.tgz#0f50ee1141c299187132fd7641e3467a2261e58d"
+  resolved "https://registry.yarnpkg.com/formik-antd/-/formik-antd-2.0.1.tgz#0f50ee1141c299187132fd7641e3467a2261e58d"
   integrity sha512-KyDRqzPUchYvKLLku5/yphzIDkAFDT8ViKo6+9wXYJf0duwcuCmsNZlgQiEdlCrm1IWN3XMLUCPV/MUm0iLKww==
 
 formik@^2.2.5:
@@ -19813,11 +19806,6 @@ wcwidth@^1.0.0:
   integrity sha1-8LDc+RW8X/FSivrbLA4XtTLaL+g=
   dependencies:
     defaults "^1.0.3"
-
-weaverjs@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/weaverjs/-/weaverjs-1.2.0.tgz#654c15cc735b660a1dae4c7c263cd7c746512fa0"
-  integrity sha1-ZUwVzHNbZgodrkx8JjzXx0ZRL6A=
 
 web-namespaces@^1.0.0, web-namespaces@^1.1.2:
   version "1.1.4"

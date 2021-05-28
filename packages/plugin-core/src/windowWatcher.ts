@@ -1,4 +1,4 @@
-import { NoteUtils } from "@dendronhq/common-all";
+import { DendronWebViewKey, NoteUtils } from "@dendronhq/common-all";
 import _ from "lodash";
 import { DateTime } from "luxon";
 import { DecorationOptions, ExtensionContext, Range, window } from "vscode";
@@ -91,6 +91,16 @@ export class WindowWatcher {
         tsDecorationType,
         decorations.filter((ent) => !_.isUndefined(ent)) as DecorationOptions[]
       );
+    }
+    return;
+  }
+
+  async triggerGraphViewUpdate() {
+    const noteGraphPanel = getWS().getWebView(DendronWebViewKey.NOTE_GRAPH);
+    if (!_.isUndefined(noteGraphPanel)) {
+      if (noteGraphPanel.visible) {
+        // TODO Logic here + test
+      }
     }
     return;
   }

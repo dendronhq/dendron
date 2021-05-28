@@ -500,6 +500,11 @@
                 "docPreview": "![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/images/workbench.help.gif)"
             },
             {
+                "command": "dendron.showNoteGraph",
+                "title": "Dendron: Show Note Graph",
+                "desc": "Show graph of workspace notes"
+            },
+            {
                 "command": "dendron.showPreview",
                 "title": "Dendron: Show Preview",
                 "desc": "Show Markdown Preview",

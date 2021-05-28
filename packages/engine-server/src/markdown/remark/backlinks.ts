@@ -9,13 +9,12 @@ import { DendronASTDest, WikiLinkNoteV4 } from "../types";
 import { MDUtilsV4 } from "../utils";
 
 // Plugin that adds backlinks at the end of each page if they exist
-const plugin: Plugin = function(this: Unified.Processor) {
+const plugin: Plugin = function (this: Unified.Processor) {
   const proc = this;
   function transformer(tree: Node): void {
     let root = tree as Root;
-    const { fname, vault, dest, insideNoteRef } = MDUtilsV4.getDendronData(
-      proc
-    );
+    const { fname, vault, dest, insideNoteRef } =
+      MDUtilsV4.getDendronData(proc);
     if (!fname || insideNoteRef) {
       return;
     }
@@ -27,23 +26,23 @@ const plugin: Plugin = function(this: Unified.Processor) {
       fname: fname,
       notes: engine.notes,
       vault: vault!,
-      wsRoot: engine.wsRoot
+      wsRoot: engine.wsRoot,
     });
 
     const backlinks = _.uniqBy(
-      (note?.links || []).filter(ent => ent.type === "backlink"),
-      ent => ent.from.fname + (ent.from.vault?.fsPath || "")
+      (note?.links || []).filter((ent) => ent.type === "backlink"),
+      (ent) => ent.from.fname + (ent.from.vault?.fsPath || "")
     );
 
     if (!_.isEmpty(backlinks)) {
       root.children.push({
-        type: "thematicBreak"
+        type: "thematicBreak",
       });
       root.children.push(u("heading", { depth: 2 }, [u("text", "Backlinks")]));
       root.children.push(
         list(
           "unordered",
-          backlinks.map(mdLink => {
+          backlinks.map((mdLink) => {
             return listItem(
               paragraph({
                 type: "wikiLink",
@@ -54,14 +53,14 @@ const plugin: Plugin = function(this: Unified.Processor) {
                       fname: mdLink.from.fname!,
                       notes: engine.notes,
                       vault: mdLink.from.vault!,
-                      wsRoot: engine.wsRoot
+                      wsRoot: engine.wsRoot,
                     }).title +
                     (engine.vaults.length > 1
                       ? ` (${VaultUtils.getName(mdLink.from.vault!)})`
                       : ""),
-                  vaultName: VaultUtils.getName(mdLink.from.vault!)
+                  vaultName: VaultUtils.getName(mdLink.from.vault!),
                 },
-                children: []
+                children: [],
               } as WikiLinkNoteV4)
             );
           })

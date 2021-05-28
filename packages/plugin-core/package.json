@@ -276,6 +276,14 @@
                 "when": "dendron:pluginActive"
             },
             {
+                "command": "dendron.lookupNote",
+                "title": "Dendron: Lookup Note",
+                "desc": "Initiate note lookup",
+                "docLink": "dendron.topic.lookup.md",
+                "docPreview": "",
+                "when": "dendron:pluginActive"
+            },
+            {
                 "command": "dendron.lookupSchema",
                 "title": "Dendron: Lookup Schema",
                 "desc": "Initiate schema lookup",

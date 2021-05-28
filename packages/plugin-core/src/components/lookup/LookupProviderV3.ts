@@ -202,7 +202,7 @@ export class NoteLookupProvider implements ILookupProviderV3 {
         !queryEndsWithDot &&
         !picker.canSelectMany &&
         !perfectMatch
-          ? [NotePickerUtils.createNoActiveItem({} as any)].concat(updatedItems)
+          ? updatedItems.concat([NotePickerUtils.createNoActiveItem({} as any)])
           : updatedItems;
 
       // check fuzz threshold

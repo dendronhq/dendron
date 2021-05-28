@@ -162,6 +162,15 @@ export class DNodeUtils {
     }
   }
 
+  static enhancePropForQuickInputV3(opts: {
+    props: DNodeProps;
+    schemas: SchemaModuleDict;
+    vaults: DVault[];
+    wsRoot: string;
+  }): DNodePropsQuickInputV2 {
+    return { ...this.enhancePropForQuickInput(opts), alwaysShow: true };
+  }
+
   static findClosestParent(
     fpath: string,
     nodes: DNodeProps[],

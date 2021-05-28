@@ -18,6 +18,9 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
   // --- Private State
   _justActivated?: boolean;
 
+  // see https://github.com/microsoft/vscode/issues/73904#issuecomment-680298036
+  sortByLabel?: boolean;
+
   // --- Public Props
   /**
    * Buttons control modifiers for lookup

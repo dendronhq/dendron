@@ -186,7 +186,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
           wikiLinkOpts: opts?.wikiLinkOpts,
           prettyRefs: opts?.prettyRefs,
         };
-        const procOpts = proc.data("procOpts") as any;
+        const procOpts = MDUtilsV4.getProcOpts(proc);
         const { data } = convertNoteRefASTV2({
           link: ndata.link,
           proc,
@@ -210,7 +210,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         }
       }
       if (node.type === DendronASTTypes.BLOCK_ANCHOR) {
-        const procOpts = proc.data("procOpts") as any;
+        const procOpts = MDUtilsV4.getProcOpts(proc);
         parent!.children = [
           blockAnchor2html(node as BlockAnchor, procOpts.blockAnchorsOpts),
         ];

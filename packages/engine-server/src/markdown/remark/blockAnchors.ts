@@ -74,13 +74,11 @@ function attachCompiler(proc: Unified.Processor, _opts?: PluginOpts) {
 
   if (visitors) {
     visitors.blockAnchor = function (node: BlockAnchor): string | Element {
-      debugger;
       const { dest } = MDUtilsV4.getDendronData(proc);
       switch (dest) {
         case DendronASTDest.MD_DENDRON:
         case DendronASTDest.MD_REGULAR:
         case DendronASTDest.MD_ENHANCED_PREVIEW:
-        case DendronASTDest.HTML:
           return `^${node.id}`;
         default:
           throw new DendronError({ message: "Unable to render block anchor" });

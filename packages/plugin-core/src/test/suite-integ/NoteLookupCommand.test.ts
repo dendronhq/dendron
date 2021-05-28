@@ -28,7 +28,7 @@ const stubVaultPick = (vaults: DVault[]) => {
   return vault;
 };
 
-suite("LookupCommandV3", function () {
+suite("NoteLookupCommand", function () {
   let ctx: vscode.ExtensionContext;
   this.timeout(TIMEOUT);
   ctx = setupBeforeAfter(this, {

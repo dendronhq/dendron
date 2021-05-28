@@ -14,6 +14,7 @@ import {
 } from "@dendronhq/common-all";
 import { file2Note } from "@dendronhq/common-server";
 import _ from "lodash";
+import { List } from "mdast";
 import { html, paragraph, root } from "mdast-builder";
 import { Eat } from "remark-parse";
 import Unified, { Plugin } from "unified";
@@ -403,10 +404,12 @@ function convertNoteRefHelperAST(
 
   // TODO: can i just strip frontmatter when reading?
   let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
+  let secondaryStartIndex: number | undefined;
   let anchorEndIndex = bodyAST.children.length;
+  let secondaryEndIndex: number | undefined;
 
   if (anchorStart) {
-    anchorStartIndex = findAnchor({
+    [anchorStartIndex, secondaryStartIndex] = findAnchor({
       nodes: bodyAST.children,
       match: anchorStart,
     });
@@ -417,7 +420,7 @@ function convertNoteRefHelperAST(
   }
 
   if (anchorEnd) {
-    anchorEndIndex = findAnchor({
+    [anchorEndIndex, secondaryEndIndex] = findAnchor({
       nodes: bodyAST.children.slice(anchorStartIndex + 1),
       match: anchorEnd,
     });
@@ -426,7 +429,35 @@ function convertNoteRefHelperAST(
       return { data, error: null };
     }
     anchorEndIndex += anchorStartIndex + 1;
+  } else if (AnchorUtils.isBlockAnchor(anchorStart)) {
+    // If no end is specified and the start is a block anchor, the end is implicitly the end of the referenced block.
+    anchorEndIndex = anchorStartIndex + 1;
   }
+
+  if (bodyAST.children[anchorStartIndex].type === "list") {
+    if (anchorStartIndex === anchorEndIndex) {
+      // Within the same list
+      (bodyAST.children[anchorStartIndex] as List).children.slice(
+        secondaryStartIndex,
+        secondaryEndIndex
+      );
+    } else {
+      // Start anchor is in the list, but the end anchor is either not in the list, or is in a different list
+      (bodyAST.children[anchorStartIndex] as List).children.slice(
+        secondaryStartIndex
+      );
+    }
+  }
+  if (
+    bodyAST.children[anchorEndIndex].type === "list" &&
+    anchorStartIndex !== anchorEndIndex
+  ) {
+    // The end anchor is in the list, but the start anchor is either not in the list, or is in a different list
+    (bodyAST.children[anchorEndIndex] as List).children.slice(
+      secondaryEndIndex
+    );
+  }
+
   // slice of interested range
   try {
     let out = root(
@@ -473,12 +504,14 @@ function convertNoteRefHelper(
 
   // TODO: can i just strip frontmatter when reading?
   let anchorStartIndex = bodyAST.children[0].type === "yaml" ? 1 : 0;
+  let secondaryStartIndex: number | undefined;
   let anchorEndIndex = bodyAST.children.length;
+  let secondaryEndIndex: number | undefined;
 
   if (anchorStart) {
     if (anchorStart[0] === "^") {
     } else {
-      anchorStartIndex = findAnchor({
+      [anchorStartIndex, secondaryStartIndex] = findAnchor({
         nodes: bodyAST.children,
         match: anchorStart,
       });
@@ -489,7 +522,7 @@ function convertNoteRefHelper(
   }
 
   if (anchorEnd) {
-    anchorEndIndex = findAnchor({
+    [anchorEndIndex, secondaryEndIndex] = findAnchor({
       nodes: bodyAST.children.slice(anchorStartIndex + 1),
       match: anchorEnd,
     });
@@ -497,7 +530,35 @@ function convertNoteRefHelper(
       return { data: `end anchor ${anchorEnd} not found`, error: null };
     }
     anchorEndIndex += anchorStartIndex + 1;
+  } else if (AnchorUtils.isBlockAnchor(anchorStart)) {
+    // If no end is specified and the start is a block anchor, the end is implicitly the end of the referenced block.
+    anchorEndIndex = anchorStartIndex + 1;
   }
+
+  if (bodyAST.children[anchorStartIndex].type === "list") {
+    if (anchorStartIndex === anchorEndIndex) {
+      // Within the same list
+      (bodyAST.children[anchorStartIndex] as List).children.slice(
+        secondaryStartIndex,
+        secondaryEndIndex
+      );
+    } else {
+      // Start anchor is in the list, but the end anchor is either not in the list, or is in a different list
+      (bodyAST.children[anchorStartIndex] as List).children.slice(
+        secondaryStartIndex
+      );
+    }
+  }
+  if (
+    bodyAST.children[anchorEndIndex].type === "list" &&
+    anchorStartIndex !== anchorEndIndex
+  ) {
+    // The end anchor is in the list, but the start anchor is either not in the list, or is in a different list
+    (bodyAST.children[anchorEndIndex] as List).children.slice(
+      secondaryEndIndex
+    );
+  }
+
   // slice of interested range
   try {
     bodyAST.children = bodyAST.children.slice(anchorStartIndex, anchorEndIndex);
@@ -521,20 +582,26 @@ function convertNoteRefHelper(
   }
 }
 
+/** Searches for anchors, then returns the index for the top-level ancestor.
+ *
+ * @param nodes The list of nodes to search through.
+ * @param match The block anchor string, like "header-anchor" or "^block-anchor"
+ * @returns The index of the top-level ancestor node in the list where the anchor was found.
+ *   If the anchor was a block anchor and was found in a list, then the second index is the
+ *   index of the list element where the anchor was found.
+ */
 function findAnchor({
   nodes,
   match,
 }: {
   nodes: DendronASTNode["children"];
   match: string;
-}) {
+}): [number] | [number, number] {
   if (AnchorUtils.isBlockAnchor(match)) {
     const anchorId = match.slice(1);
-    const found = findBlockAnchor({ nodes, match: anchorId });
-    debugger;
-    return found;
+    return findBlockAnchor({ nodes, match: anchorId });
   } else {
-    return findHeader({ nodes, match, slugger: getSlugger() });
+    return [findHeader({ nodes, match, slugger: getSlugger() })];
   }
 }
 
@@ -553,15 +620,22 @@ function findHeader({
   return foundIndex;
 }
 
-/** Recursively searches for block anchors, then returns the index for the top-level parent. */
+/** Searches for block anchors, then returns the index for the top-level ancestor.
+ *
+ * @param nodes The list of nodes to search through.
+ * @param match The block anchor string, like "header-anchor" or "^block-anchor"
+ * @returns The index of the top-level ancestor node in the list where the anchor was found.
+ *   If the anchor was found in a list, then the second index is the index of the list element
+ *   where the anchor was found.
+ */
 function findBlockAnchor({
   nodes,
   match,
 }: {
-  nodes: DendronASTNode["children"];
+  nodes: Node[];
   match: string;
-}) {
-  let foundIndex = MDUtilsV4.findIndex(nodes, function (node: Node) {
+}): [number] | [number, number] {
+  function findMatch(node: Node) {
     let found = false;
     visit(node, DendronASTTypes.BLOCK_ANCHOR, (anchor: BlockAnchor) => {
       found = anchor.id === match;
@@ -569,18 +643,20 @@ function findBlockAnchor({
       return; // continue traversal
     });
     return found;
-  });
+  }
 
+  let foundIndex = MDUtilsV4.findIndex(nodes, findMatch);
   if (foundIndex >= 0) {
     const parent = nodes[foundIndex] as Parent;
+    if (parent.type === "list") {
+      // If it's in a list, we'll need to slice the children of the list so we need that index too.
+      const listItemIndex = MDUtilsV4.findIndex(parent.children, findMatch);
+      return [foundIndex, listItemIndex];
+    }
     // If located independently after a block, then the block anchor refers to the previous block
-    if (parent.children.length === 1) foundIndex -= 1;
-    // TODO: For lists, if the anchor is on a list item then we have to cut out that item.
-    // Actually in general, block anchors reference a whole block, and we should cut out that block rather than doing start--end.
-    // Wait, how do the existing tests work? They should return more than requested (for end, not start).
-    // TODO: Check the tests!
+    if (parent.children.length === 1) return [foundIndex - 1];
   }
-  return foundIndex;
+  return [foundIndex];
 }
 
 function renderPretty(opts: { content: string; title: string; link: string }) {

@@ -844,8 +844,6 @@ VFile {
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p>Reprehenderit doloribus.
 Sint minus fuga omnis non.</p>
-<p>^block-anchor</p>
-<p>Soluta ex qui.</p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -874,8 +872,6 @@ VFile {
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p>Reprehenderit doloribus.
 Sint minus fuga omnis non.</p>
-<p>^block-anchor</p>
-<p>Soluta ex qui.</p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -906,8 +902,6 @@ VFile {
 <li>Sapiente sed accusamus eum.</li>
 <li>Ullam optio est quia.</li>
 </ul>
-<p>^block-anchor</p>
-<p>Iure neque alias dolorem.</p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -934,7 +928,10 @@ VFile {
 </div>
 <div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
 <div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Start anchor ^block-anchor not found</p>
+<div class=\\"portal-parent-fader-bottom\\"></div><ul>
+<li>Sapiente sed accusamus eum.</li>
+<li>Ullam optio est quia.</li>
+</ul>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -979,8 +976,6 @@ VFile {
 
 
 <table><thead><tr><th>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
-<p>^block-anchor</p>
-<p>Iure neque alias dolorem.</p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1025,8 +1020,6 @@ VFile {
 
 
 <table><thead><tr><th>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
-<p>^block-anchor</p>
-<p>Iure neque alias dolorem.</p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1071,8 +1064,6 @@ VFile {
 
 
 <table><thead><tr><th>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
-<p>^block-anchor</p>
-<p>Iure neque alias dolorem.</p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1117,8 +1108,6 @@ VFile {
 
 
 <table><thead><tr><th>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
-<p>^block-anchor</p>
-<p>Iure neque alias dolorem.</p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1148,7 +1137,6 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><p>Reprehenderit doloribus.
 Sint minus fuga omnis non.
 ^block-anchor</p>
-<p>Soluta ex qui.</p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1178,7 +1166,6 @@ VFile {
 <div class=\\"portal-parent-fader-bottom\\"></div><p>Reprehenderit doloribus.
 Sint minus fuga omnis non.
 ^block-anchor</p>
-<p>Soluta ex qui.</p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1273,7 +1260,6 @@ VFile {
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p>Reprehenderit doloribus.
 Sint minus fuga omnis non. ^block-anchor</p>
-<p>Soluta ex qui.</p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1302,7 +1288,6 @@ VFile {
 <div class=\\"portal-parent-fader-top\\"></div>
 <div class=\\"portal-parent-fader-bottom\\"></div><p>Reprehenderit doloribus.
 Sint minus fuga omnis non. ^block-anchor</p>
-<p>Soluta ex qui.</p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1347,7 +1332,6 @@ VFile {
 
 
 <table><thead><tr><th>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
-<p>Iure neque alias dolorem.</p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
@@ -1392,34 +1376,6 @@ VFile {
 
 
 <table><thead><tr><th>Sapiente</th><th>accusamus</th></tr></thead><tbody><tr><td>Laborum</td><td>libero</td></tr><tr><td>Ullam</td><td>optio</td></tr></tbody></table>
-<p>Iure neque alias dolorem.</p>
-</div></div><p></p><p></p>
-<hr>
-<h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>
-<ol>
-<li><a href=\\"/undefined/foo.ch1.html\\">Ch1</a></li>
-</ol>",
-  "cwd": "<PROJECT_ROOT>",
-  "data": Object {},
-  "history": Array [],
-  "messages": Array [],
-}
-`;
-
-exports[`noteRefV2 with block anchors compile "HTML: in table" 3`] = `
-VFile {
-  "contents": "<h1 id=\\"foo\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo</h1>
-<h1 id=\\"foo-bar\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#foo-bar\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Foo Bar</h1>
-<p></p><p></p><div class=\\"portal-container\\">
-<div class=\\"portal-head\\">
-<div class=\\"portal-backlink\\">
-<div class=\\"portal-title\\">From <span class=\\"portal-text-title\\">Ch1</span></div>
-<a href=\\"/undefined/foo.ch1.html\\" class=\\"portal-arrow\\">Go to text <span class=\\"right-arrow\\">→</span></a>
-</div>
-</div>
-<div id=\\"portal-parent-anchor\\" class=\\"portal-parent\\" markdown=\\"1\\">
-<div class=\\"portal-parent-fader-top\\"></div>
-<div class=\\"portal-parent-fader-bottom\\"></div><p>Start anchor ^block-anchor not found</p>
 </div></div><p></p><p></p>
 <hr>
 <h2 id=\\"children\\"><a aria-hidden=\\"true\\" class=\\"anchor-heading\\" href=\\"#children\\"><svg aria-hidden=\\"true\\" viewBox=\\"0 0 16 16\\"><use xlink:href=\\"#svg-link\\"></use></svg></a>Children</h2>

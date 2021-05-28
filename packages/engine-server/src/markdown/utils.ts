@@ -130,7 +130,7 @@ export const renderFromNoteWithCustomBody = (opts: {
   return contents;
 };
 export class MDUtilsV4 {
-  static findIndex(array: Node[], fn: (node: Node, index: number) => boolean) {
+  static findIndex<T>(array: T[], fn: (node: T, index: number) => boolean) {
     for (var i = 0; i < array.length; i++) {
       if (fn(array[i], i)) {
         return i;

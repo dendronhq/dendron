@@ -727,13 +727,13 @@ describe("noteRefV2", () => {
           await checkVFile(
             resp,
             "Reprehenderit doloribus.",
-            "Sint minus fuga omnis non.",
-            "Soluta ex qui."
+            "Sint minus fuga omnis non."
           );
           await checkNotInVFile(
             resp,
             "Sapiente sed accusamus eum.",
-            "Ullam optio est quia."
+            "Ullam optio est quia.",
+            "Soluta ex qui."
           );
         },
       },
@@ -774,13 +774,13 @@ describe("noteRefV2", () => {
           await checkVFile(
             resp,
             "Reprehenderit doloribus.",
-            "Sint minus fuga omnis non.",
-            "Soluta ex qui."
+            "Sint minus fuga omnis non."
           );
           await checkNotInVFile(
             resp,
             "Sapiente sed accusamus eum.",
-            "Ullam optio est quia."
+            "Ullam optio est quia.",
+            "Soluta ex qui."
           );
         },
       },
@@ -822,13 +822,13 @@ describe("noteRefV2", () => {
           await checkVFile(
             resp,
             "Reprehenderit doloribus.",
-            "Sint minus fuga omnis non.",
-            "Soluta ex qui."
+            "Sint minus fuga omnis non."
           );
           await checkNotInVFile(
             resp,
             "Sapiente sed accusamus eum.",
-            "Ullam optio est quia."
+            "Ullam optio est quia.",
+            "Soluta ex qui."
           );
         },
       },
@@ -950,7 +950,7 @@ describe("noteRefV2", () => {
           const { resp } = extra;
           await checkVFile(
             resp,
-            "Sint minus fuga omnis non.",
+            "Sapiente sed accusamus eum.",
             "Ullam optio est quia."
           );
           await checkNotInVFile(
@@ -1118,17 +1118,6 @@ describe("noteRefV2", () => {
       },
     });
 
-    runAllTests({
-      name: "compile",
-      testCases: [
-        ...LIST_ELEMENT,
-        ...AFTER_LIST,
-        ...AFTER_LIST_BLOCK,
-        ...IN_TABLE,
-        ...AFTER_TABLE,
-        ...AFTER_TABLE_BLOCK,
-      ],
-    });
     runAllTests({
       name: "compile",
       testCases: [

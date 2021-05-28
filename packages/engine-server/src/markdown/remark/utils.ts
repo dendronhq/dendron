@@ -276,6 +276,7 @@ export class AnchorUtils {
   }
 
   static isBlockAnchor(anchor?: string): boolean {
+    // not undefined, not an empty string, and the first character is ^
     return !!anchor && anchor[0] === "^";
   }
 }

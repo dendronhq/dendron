@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.43.5-alpha.2](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.5-alpha.2) (2021-05-29)
+
+### Bug Fixes
+
+- Block anchors hide sibling nodes in HTML ([#773](https://github.com/dendronhq/dendron/issues/773)) ([4803441](https://github.com/dendronhq/dendron/commit/480344173cf113407e358ba89f841880b6da6be4))
+- caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
+- import markdown pod has bad body ([7649309](https://github.com/dendronhq/dendron/commit/7649309f6e953826e9a3f8e7c0c9ce53d6e869a4))
+- lookupConfirmVaultOnCreate not set in note lookup ([f67ee2b](https://github.com/dendronhq/dendron/commit/f67ee2b42f6353331c714b034c6b48b5761d74f9))
+- sync test ([40c8958](https://github.com/dendronhq/dendron/commit/40c89580cd6729db1e103deba070ce0babe36e0a))
+
+### Features Dendron
+
+- Add block anchor HTML generation ([#766](https://github.com/dendronhq/dendron/issues/766)) ([bb0ff8e](https://github.com/dendronhq/dendron/commit/bb0ff8ee53a50768f1908bbabd625c1c2434df39))
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+- paste file cmd ([3e3f419](https://github.com/dendronhq/dendron/commit/3e3f41971607c12705df4830f3ff88e67a2788e0))
+- Workspace Sync command ([#738](https://github.com/dendronhq/dendron/issues/738)) ([7e462c0](https://github.com/dendronhq/dendron/commit/7e462c07ecec73982f3293ff80cfa3041d0ceabf))
+
+## [0.43.5-alpha.1](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.5-alpha.1) (2021-05-29)
+
+### Bug Fixes
+
+- Block anchors hide sibling nodes in HTML ([#773](https://github.com/dendronhq/dendron/issues/773)) ([4803441](https://github.com/dendronhq/dendron/commit/480344173cf113407e358ba89f841880b6da6be4))
+- caching old links ([16e43c3](https://github.com/dendronhq/dendron/commit/16e43c3fb6154d58d59ddbaf6fe55c1bf21b81e3))
+- import markdown pod has bad body ([7649309](https://github.com/dendronhq/dendron/commit/7649309f6e953826e9a3f8e7c0c9ce53d6e869a4))
+- lookupConfirmVaultOnCreate not set in note lookup ([f67ee2b](https://github.com/dendronhq/dendron/commit/f67ee2b42f6353331c714b034c6b48b5761d74f9))
+- sync test ([40c8958](https://github.com/dendronhq/dendron/commit/40c89580cd6729db1e103deba070ce0babe36e0a))
+
+### Features Dendron
+
+- Add block anchor HTML generation ([#766](https://github.com/dendronhq/dendron/issues/766)) ([bb0ff8e](https://github.com/dendronhq/dendron/commit/bb0ff8ee53a50768f1908bbabd625c1c2434df39))
+- Basic block reference link functionality ([#742](https://github.com/dendronhq/dendron/issues/742)) ([416e382](https://github.com/dendronhq/dendron/commit/416e3825254b57625f7dc2b6063f1e8bc731bf3b))
+- paste file cmd ([3e3f419](https://github.com/dendronhq/dendron/commit/3e3f41971607c12705df4830f3ff88e67a2788e0))
+- Workspace Sync command ([#738](https://github.com/dendronhq/dendron/issues/738)) ([7e462c0](https://github.com/dendronhq/dendron/commit/7e462c07ecec73982f3293ff80cfa3041d0ceabf))
+
 ## [0.43.5-alpha.0](https://github.com/dendronhq/dendron/compare/v0.42.0...v0.43.5-alpha.0) (2021-05-28)
 
 ### Bug Fixes

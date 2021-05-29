@@ -3,7 +3,8 @@
 git branch -D integ-publish
 git checkout -b integ-publish
 
-version=prepatch
+version=prerelease
+lerna version $version --no-git-tag-version 
 lerna version $version --no-git-tag-version 
 
 git add .

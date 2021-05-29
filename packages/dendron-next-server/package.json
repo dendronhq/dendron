@@ -64,8 +64,6 @@
     "react-icons": "^3.11.0",
     "react-redux": "^7.2.3",
     "swr": "^0.3.9",
-    "vis-data": "^7.1.2",
-    "vis-network": "^9.0.4",
     "webpack-bundle-analyzer": "^4.4.1"
   },
   "devDependencies": {

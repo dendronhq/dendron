@@ -25,35 +25,40 @@ import { useThemeSwitcher } from 'react-css-theme-switcher';
 
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => `
   node {
-    width: 10;
-    height: 10;
-    background-color: ${theme === themes.dark ? '#666' : '#c2c2c2'};
-    color: ${theme === themes.dark ? '#fff' : '#333'};
+    width: 5;
+    height: 5;
+    background-color: ${theme === themes.dark ? '#666262' : '#999393'};
+    border-color: ${theme === themes.dark ? '#666262' : '#999393'};
+    color: ${theme === themes.dark ? '#fff' : '#2F3438'};
     label: data(label);
     border-width: 1;
-    border-color: ${theme === themes.dark ? '#fff' : '#A0A0A0'};
-    font-size: 8;
+    font-size: 6;
     min-zoomed-font-size: 12;
-    font-weight: 500;
+    font-weight: 400;
   }
 
   edge {
-    width: 1;
-    line-color: ${theme === themes.dark ? '#333' : '#c2c2c2'};
+    width: 0.5;
+    // line-color: ${theme === themes.dark ? '#666' : '#c2c2c2'};
+    line-color: ${theme === themes.dark ? '#666262' : '#999393'};
     target-arrow-shape: none;
     curve-style: haystack;
   }
 
   node:selected {
-    background-color: #54B758;
-    border-color: #208d24;
+    background-color: ${theme === themes.dark ? '#36B73B' : '#27AC2C'};
+    border-color: ${theme === themes.dark ? '#36B73B' : '#27AC2C'};
   }
 
   edge.link {
+    width: 0.25;
     line-style: dashed;
+    line-color: ${theme === themes.dark ? '#333131' : '#CCC4C4'};
   }
 
   edge.hierarchy {
+    width: 0.25;
+    line-color: ${theme === themes.dark ? '#4D4A4A' : '#B3ACAC'};
   }
 `
 
@@ -98,27 +103,27 @@ export default function FullGraph({
         const linkConnections: EdgeDefinition[] = [];
 
         // Find and add linked notes
-        note.links.forEach((link) => {
-          if (link.to && note.id) {
-            const to = NoteUtils.getNoteByFnameV5({
-              fname: link.to!.fname as string,
-              vault: note.vault,
-              notes: notes,
-              wsRoot: router.query.ws as string,
-            });
+        // note.links.forEach((link) => {
+        //   if (link.to && note.id) {
+        //     const to = NoteUtils.getNoteByFnameV5({
+        //       fname: link.to!.fname as string,
+        //       vault: note.vault,
+        //       notes: notes,
+        //       wsRoot: router.query.ws as string,
+        //     });
 
-            if (!to) return;
-            linkConnections.push({
-              data: {
-                group: 'edges',
-                id: `${note.id}_${to.id}`,
-                source: note.id,
-                target: to.id,
-              },
-              classes: 'link'
-            });
-          }
-        });
+        //     if (!to) return;
+        //     linkConnections.push({
+        //       data: {
+        //         group: 'edges',
+        //         id: `${note.id}_${to.id}`,
+        //         source: note.id,
+        //         target: to.id,
+        //       },
+        //       classes: 'link'
+        //     });
+        //   }
+        // });
 
         return [...childConnections, ...linkConnections];
       })

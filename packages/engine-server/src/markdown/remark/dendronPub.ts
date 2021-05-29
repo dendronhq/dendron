@@ -32,8 +32,14 @@ type PluginOpts = NoteRefsOpts & {
 
 function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
   const proc = this;
-  let { dest, vault, fname, config, overrides, insideNoteRef } =
-    MDUtilsV4.getDendronData(proc);
+  let {
+    dest,
+    vault,
+    fname,
+    config,
+    overrides,
+    insideNoteRef,
+  } = MDUtilsV4.getDendronData(proc);
   function transformer(tree: Node, _file: VFile) {
     let root = tree as Root;
     const { error, engine } = MDUtilsV4.getEngineFromProc(proc);
@@ -66,7 +72,7 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
         u(DendronASTTypes.HEADING, { depth: 1 }, [u("text", note.title)])
       );
     }
-    visit(tree, (node, _idx, parent) => {
+    visit(tree, (node, index, parent) => {
       if (
         node.type === DendronASTTypes.WIKI_LINK &&
         dest !== DendronASTDest.MD_ENHANCED_PREVIEW
@@ -211,9 +217,10 @@ function plugin(this: Unified.Processor, opts?: PluginOpts): Transformer {
       }
       if (node.type === DendronASTTypes.BLOCK_ANCHOR) {
         const procOpts = MDUtilsV4.getProcOpts(proc);
-        parent!.children = [
-          blockAnchor2html(node as BlockAnchor, procOpts.blockAnchorsOpts),
-        ];
+        parent!.children[index] = blockAnchor2html(
+          node as BlockAnchor,
+          procOpts.blockAnchorsOpts
+        );
       }
       if (node.type === "image" && dest === DendronASTDest.HTML) {
         let imageNode = node as Image;

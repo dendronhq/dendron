@@ -114,8 +114,8 @@ describe("blockAnchors", () => {
 
   describe("rendering", () => {
     const anchor = "^my-block-anchor-0";
-    const REGULAR_ANCHOR = createProcTests({
-      name: "regular",
+    const SIMPLE = createProcTests({
+      name: "simple",
       setupFunc: async ({ engine, vaults, extra }) => {
         const proc2 = createProcForTest({
           engine,
@@ -123,6 +123,36 @@ describe("blockAnchors", () => {
           vault: vaults[0],
         });
         const resp = await proc2.process(anchor);
+        return { resp };
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          expect(resp).toMatchSnapshot();
+          return [
+            {
+              actual: await AssertUtils.assertInString({
+                body: resp.toString(),
+                match: ["<a", `href="#${anchor}"`, `id="${anchor}"`, "</a>"],
+                nomatch: ["visibility: hidden"],
+              }),
+              expected: true,
+            },
+          ];
+        },
+      },
+      preSetupHook: ENGINE_HOOKS.setupBasic,
+    });
+
+    const END_OF_PARAGRAPH = createProcTests({
+      name: "end of paragraph",
+      setupFunc: async ({ engine, vaults, extra }) => {
+        const proc2 = createProcForTest({
+          engine,
+          dest: extra.dest,
+          vault: vaults[0],
+        });
+        const resp = await proc2.process(`Lorem ipsum dolor amet ${anchor}`);
         return { resp };
       },
       verifyFuncDict: {
@@ -180,7 +210,7 @@ describe("blockAnchors", () => {
       preSetupHook: ENGINE_HOOKS.setupBasic,
     });
 
-    const ALL_TEST_CASES = [...REGULAR_ANCHOR, ...HIDDEN_ANCHOR];
+    const ALL_TEST_CASES = [...SIMPLE, ...END_OF_PARAGRAPH, ...HIDDEN_ANCHOR];
     runAllTests({ name: "compile", testCases: ALL_TEST_CASES });
   });
 });

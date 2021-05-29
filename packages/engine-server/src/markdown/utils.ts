@@ -129,7 +129,27 @@ export const renderFromNoteWithCustomBody = (opts: {
   const contents = nunjucks.renderString(body, { fm: note.custom });
   return contents;
 };
+
+type ParentWithIndex = {
+  ancestor: Parent;
+  index: number;
+};
+
+type VisitorParentsIndices = ({
+  node,
+  index,
+  ancestors,
+}: {
+  node: Node;
+  index: number;
+  ancestors: ParentWithIndex[];
+}) => boolean | undefined | "skip";
+
 export class MDUtilsV4 {
+  /** Find the index of the list element for which the predicate `fn` returns true.
+   *
+   * @returns The index where the element was found, -1 otherwise.
+   */
   static findIndex<T>(array: T[], fn: (node: T, index: number) => boolean) {
     for (var i = 0; i < array.length; i++) {
       if (fn(array[i], i)) {
@@ -137,6 +157,50 @@ export class MDUtilsV4 {
       }
     }
     return -1;
+  }
+
+  /** A simplified and adapted version of visitParents from unist-utils-visit-parents, that also keeps track of indices of the ancestors as well.
+   *
+   * The limitations are:
+   * * `test`, if used, can only be a string representing the type of the node that you want to visit
+   * * Adding or removing siblings is undefined behavior
+   * Please modify this function to add support for these if needed.
+   */
+  static visitParentsIndices({
+    nodes,
+    test,
+    visitor,
+  }: {
+    nodes: Node[];
+    test?: string;
+    visitor: VisitorParentsIndices;
+  }) {
+    function recursiveTraversal(
+      nodes: Node[],
+      ancestors: ParentWithIndex[]
+    ): boolean | undefined {
+      for (let i = 0; i < nodes.length; i++) {
+        // visit the current node
+        const node = nodes[i];
+        let action: boolean | undefined | "skip" = undefined;
+        if (_.isUndefined(test) || node.type === test) {
+          action = visitor({ node, index: i, ancestors });
+        }
+        if (action === "skip") return; // don't traverse the children of this node
+        if (action === false) return false; // stop traversing completely
+
+        // visit the children of this node, if any
+        if (node.children) {
+          const parent = node as Parent;
+          const newAncestors = [...ancestors, { ancestor: parent, index: i }];
+          const action = recursiveTraversal(parent.children, newAncestors);
+          if (action === false) return; // stopping traversal
+        }
+      }
+      return true; // continue traversal if needed
+    }
+    // Start recursion with no ancestors (everything is top level)
+    recursiveTraversal(nodes, []);
   }
 
   static genMDMsg(msg: string): Parent {

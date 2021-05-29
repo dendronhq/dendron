@@ -692,7 +692,7 @@ describe("noteRefV2", () => {
 
   runAllTests({ name: "compile", testCases: ALL_TEST_CASES });
 
-  describe.only("with block anchors", () => {
+  describe("with block anchors", () => {
     const IN_PARAGRAPH = createProcTests({
       name: "in paragraph",
       setupFunc: async (opts) => {
@@ -868,6 +868,48 @@ describe("noteRefV2", () => {
             resp,
             "Sapiente sed accusamus eum.",
             "Ullam optio est quia.",
+            "Sint minus fuga omnis non."
+          );
+        },
+      },
+    });
+
+    /** When the anchor is on a list element nested in another list, only the nested element is referenced. */
+    const NESTED_LIST_ELEMENT = createProcTests({
+      name: "nested list element",
+      setupFunc: async (opts) => {
+        const { engine, vaults } = opts;
+        return processTextV2({
+          text: "# Foo Bar\n![[foo.ch1#^block-anchor]]",
+          dest: opts.extra.dest,
+          engine,
+          vault: vaults[0],
+          fname: "foo",
+        });
+      },
+      preSetupHook: async (opts) => {
+        await ENGINE_HOOKS.setupBasic(opts);
+        await modifyNote(opts, "foo.ch1", (note: NoteProps) => {
+          const txt = [
+            "* Ullam optio est quia.",
+            "  * Laborum libero quia ducimus.",
+            "  * Reprehenderit doloribus. ^block-anchor",
+            "  * Iure neque alias dolorem.",
+            "* Sint minus fuga omnis non.",
+          ];
+          note.body = txt.join("\n");
+          return note;
+        });
+      },
+      verifyFuncDict: {
+        [DendronASTDest.HTML]: async ({ extra }) => {
+          const { resp } = extra;
+          await checkVFile(resp, "Reprehenderit doloribus.");
+          await checkNotInVFile(
+            resp,
+            "Ullam optio est quia.",
+            "Laborum libero quia ducimus.",
+            "Iure neque alias dolorem.",
             "Sint minus fuga omnis non."
           );
         },
@@ -1125,6 +1167,7 @@ describe("noteRefV2", () => {
         ...AFTER_PARAGRAPH,
         ...AFTER_PARAGRAPH_BLOCK,
         ...LIST_ELEMENT,
+        ...NESTED_LIST_ELEMENT,
         ...AFTER_LIST,
         ...AFTER_LIST_BLOCK,
         ...IN_TABLE,

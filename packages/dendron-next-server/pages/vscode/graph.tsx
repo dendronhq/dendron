@@ -39,7 +39,6 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => `
 
   edge {
     width: 0.5;
-    // line-color: ${theme === themes.dark ? '#666' : '#c2c2c2'};
     line-color: ${theme === themes.dark ? '#666262' : '#999393'};
     target-arrow-shape: none;
     curve-style: haystack;

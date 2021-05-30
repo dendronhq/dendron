@@ -32,8 +32,8 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => `
     color: ${theme === themes.dark ? '#fff' : '#2F3438'};
     label: data(label);
     border-width: 1;
-    font-size: 6;
-    min-zoomed-font-size: 12;
+    font-size: 10;
+    min-zoomed-font-size: 10;
     font-weight: 400;
   }
 

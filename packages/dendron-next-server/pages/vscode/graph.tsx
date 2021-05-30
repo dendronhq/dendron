@@ -144,6 +144,9 @@ export default function FullGraph({
         container: graphRef.current,
         elements,
         style: getCytoscapeStyle(themes, currentTheme) as any,
+
+        minZoom: 0.1,
+        maxZoom: 10,
         
         // Options to improve performance
         textureOnViewport: isLargeGraph,

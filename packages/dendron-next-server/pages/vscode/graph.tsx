@@ -138,6 +138,7 @@ export default function FullGraph({
 
       logger.log('Rendering graph...');
 
+      // Add layout middleware
       cytoscape.use(euler);
 
       const network = cytoscape({
@@ -145,6 +146,7 @@ export default function FullGraph({
         elements,
         style: getCytoscapeStyle(themes, currentTheme) as any,
 
+        // Zoom levels
         minZoom: 0.1,
         maxZoom: 10,
         
@@ -154,6 +156,7 @@ export default function FullGraph({
         hideLabelsOnViewport: isLargeGraph,
       });
 
+      // Layout graph nodes
       network
         .layout({
           name: 'euler',

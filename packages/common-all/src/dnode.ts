@@ -167,8 +167,10 @@ export class DNodeUtils {
     schemas: SchemaModuleDict;
     vaults: DVault[];
     wsRoot: string;
+    alwaysShow?: boolean;
   }): DNodePropsQuickInputV2 {
-    return { ...this.enhancePropForQuickInput(opts), alwaysShow: true };
+    const { alwaysShow } = _.defaults(opts, { alwaysShow: false });
+    return { ...this.enhancePropForQuickInput(opts), alwaysShow };
   }
 
   static findClosestParent(

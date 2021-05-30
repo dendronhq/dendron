@@ -114,6 +114,10 @@ export type CreateQuickPickOpts = {
    */
   initialValue?: string;
   nonInteractive?: boolean;
+  /**
+   * See {@link DendronQuickPickerV2["alwaysShow"]}
+   */
+  alwaysShow?: boolean;
 };
 
 export type PrepareQuickPickOpts = CreateQuickPickOpts & {
@@ -498,6 +502,7 @@ export class NotePickerUtils {
           props: ent,
           schemas: engine.schemas,
           vaults: DendronWorkspace.instance().vaultsv4,
+          alwaysShow: picker.alwaysShowAll,
         })
       )
     );

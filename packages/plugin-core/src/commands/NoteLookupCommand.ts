@@ -144,6 +144,7 @@ export class NoteLookupCommand extends BaseCommand<
       provider: this.provider,
       initialValue: copts.initialValue,
       nonInteractive: copts.noConfirm,
+      alwaysShow: true,
     });
 
     return {

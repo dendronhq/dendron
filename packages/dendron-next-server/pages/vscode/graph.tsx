@@ -48,6 +48,7 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => `
   node:selected {
     background-color: ${theme === themes.dark ? '#36B73B' : '#27AC2C'};
     border-color: ${theme === themes.dark ? '#36B73B' : '#27AC2C'};
+    color: ${theme === themes.dark ? '#36B73B' : '#27AC2C'};
   }
 
   edge.link {

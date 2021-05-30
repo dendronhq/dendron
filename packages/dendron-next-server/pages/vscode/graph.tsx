@@ -5,7 +5,6 @@ import {
 } from '@dendronhq/common-frontend';
 import _ from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Text } from '@chakra-ui/layout';
 import cytoscape, {
   Core,
   EdgeDefinition,
@@ -22,6 +21,7 @@ import {
 } from '@dendronhq/common-all';
 import { useRouter } from 'next/router';
 import { useThemeSwitcher } from 'react-css-theme-switcher';
+import { Space, Typography } from 'antd';
 
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => `
   node {
@@ -60,7 +60,7 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => `
     width: 0.25;
     line-color: ${theme === themes.dark ? '#4D4A4A' : '#B3ACAC'};
   }
-`
+`;
 
 export default function FullGraph({
   engine,
@@ -96,7 +96,7 @@ export default function FullGraph({
               source: note.id,
               target: child,
             },
-            classes: 'hierarchy'
+            classes: 'hierarchy',
           })
         );
 
@@ -149,7 +149,7 @@ export default function FullGraph({
         // Zoom levels
         minZoom: 0.1,
         maxZoom: 10,
-        
+
         // Options to improve performance
         textureOnViewport: isLargeGraph,
         hideEdgesOnViewport: isLargeGraph,
@@ -211,18 +211,36 @@ export default function FullGraph({
   };
 
   return (
-    <Box w='100vw' h='100vh' id='graph' position='relative'>
-      <Box w='100%' h='100%' ref={graphRef} zIndex={1}></Box>
+    <div
+      id='graph'
+      style={{
+        width: '100vw',
+        height: '100vh',
+        position: 'relative',
+      }}
+    >
+      <div
+        ref={graphRef}
+        style={{
+          width: '100%',
+          height: '100%',
+          zIndex: 1,
+        }}
+      ></div>
       {elements && (
-        <Box position='absolute' bottom={8} right={8} zIndex={2}>
-          <Text m={0} p={0}>
-            Nodes: {elements.nodes.length}
-          </Text>
-          <Text m={0} p={0}>
-            Edges: {elements.edges.length}
-          </Text>
-        </Box>
+        <Space
+          style={{
+            position: 'absolute',
+            bottom: 8,
+            right: 8,
+            zIndex: 2,
+          }}
+          direction='vertical'
+        >
+          <Typography.Text>Nodes: {elements.nodes.length}</Typography.Text>
+          <Typography.Text>Edges: {elements.edges.length}</Typography.Text>
+        </Space>
       )}
-    </Box>
+    </div>
   );
 }

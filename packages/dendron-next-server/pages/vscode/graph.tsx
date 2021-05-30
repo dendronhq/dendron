@@ -22,6 +22,7 @@ import {
 import { useRouter } from 'next/router';
 import { useThemeSwitcher } from 'react-css-theme-switcher';
 import { Space, Typography } from 'antd';
+import Head from 'next/head';
 
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => `
   node {
@@ -211,6 +212,10 @@ export default function FullGraph({
   };
 
   return (
+    <>
+    <Head>
+      <title>Dendron Graph</title>
+    </Head>
     <div
       id='graph'
       style={{
@@ -242,5 +247,6 @@ export default function FullGraph({
         </Space>
       )}
     </div>
+    </>
   );
 }

@@ -42,7 +42,7 @@ export class ShowNoteGraphCommand extends BasicCommand<
     );
 
     const resp: string = WebViewUtils.genHTMLForWebView({
-      title: "Dendron Note Graph",
+      title: "Dendron Graph",
       view: DendronWebViewKey.NOTE_GRAPH,
     });
 

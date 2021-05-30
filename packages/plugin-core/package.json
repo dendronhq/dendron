@@ -256,6 +256,11 @@
                 "desc": "Insert note contents"
             },
             {
+                "command": "dendron.insertNoteLink",
+                "title": "Dendron: Insert Note Link",
+                "desc": "Insert note link"
+            },
+            {
                 "command": "dendron.moveNote",
                 "title": "Dendron: Move Note",
                 "desc": "Move a note"
@@ -279,8 +284,6 @@
                 "command": "dendron.lookupNote",
                 "title": "Dendron: Lookup Note",
                 "desc": "Initiate note lookup",
-                "docLink": "dendron.topic.lookup.md",
-                "docPreview": "",
                 "when": "dendron:pluginActive"
             },
             {

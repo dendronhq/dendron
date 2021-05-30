@@ -36,7 +36,7 @@ export type ILookupProviderOptsV3 = {
   noHidePickerOnAccept?: boolean;
 };
 
-export type NoteLookupProviderSuccessResp<T> = {
+export type NoteLookupProviderSuccessResp<T = never> = {
   selectedItems: readonly NoteQuickInput[];
   onAcceptHookResp: T[];
   cancel?: boolean;

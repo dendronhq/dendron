@@ -28,8 +28,8 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => `
   node {
     width: 5;
     height: 5;
-    background-color: ${theme === themes.dark ? '#666262' : '#999393'};
-    border-color: ${theme === themes.dark ? '#666262' : '#999393'};
+    background-color: ${theme === themes.dark ? '#807B7B' : '#999393'};
+    border-color: ${theme === themes.dark ? '#807B7B' : '#999393'};
     color: ${theme === themes.dark ? '#fff' : '#2F3438'};
     label: data(label);
     border-width: 1;
@@ -39,27 +39,16 @@ const getCytoscapeStyle = (themes: any, theme: string | undefined) => `
   }
 
   edge {
-    width: 0.5;
-    line-color: ${theme === themes.dark ? '#666262' : '#999393'};
+    width: 0.25;
+    line-color: ${theme === themes.dark ? '#807B7B' : '#999393'};
     target-arrow-shape: none;
     curve-style: haystack;
   }
 
-  node:selected {
+  :selected, .open {
     background-color: ${theme === themes.dark ? '#36B73B' : '#27AC2C'};
     border-color: ${theme === themes.dark ? '#36B73B' : '#27AC2C'};
     color: ${theme === themes.dark ? '#36B73B' : '#27AC2C'};
-  }
-
-  edge.link {
-    width: 0.25;
-    line-style: dashed;
-    line-color: ${theme === themes.dark ? '#333131' : '#CCC4C4'};
-  }
-
-  edge.hierarchy {
-    width: 0.25;
-    line-color: ${theme === themes.dark ? '#4D4A4A' : '#B3ACAC'};
   }
 `;
 
@@ -172,7 +161,7 @@ export default function FullGraph({
           movementThreshold: 1,
           timeStep: 20,
           refresh: 10,
-          animate: !isLargeGraph,
+          animate: false, //!isLargeGraph,
           animationDuration: undefined,
           animationEasing: undefined,
           maxIterations: 1000,
@@ -195,14 +184,16 @@ export default function FullGraph({
     const { id, source } = e.target[0]._private.data;
 
     const isNode = !source;
-    if (!isNode) return;
+    if (!isNode || _.isUndefined(cy)) return;
     // if (_.isUndefined(cy)) return;
 
-    // const j = cy.$(`#${id}`);
     // logger.log('Connected edges:', j.connectedEdges())
+    
+    cy.$('.open').removeClass('open')
 
-    logger.log('Selected Node ID:', id);
-    logger.log('Selected Node ID:', e.target[0]._private);
+    cy.getElementById(id).addClass('open');
+
+    // TODO: .open class not affecting rendered output
 
     postVSCodeMessage({
       type: GraphViewMessageType.onSelect,

@@ -1,9 +1,14 @@
-import { DendronWebViewKey, NoteUtils } from "@dendronhq/common-all";
+import {
+  DendronWebViewKey,
+  NoteUtils,
+  OnDidChangeActiveTextEditorMsg,
+} from "@dendronhq/common-all";
 import _ from "lodash";
 import { DateTime } from "luxon";
 import { DecorationOptions, ExtensionContext, Range, window } from "vscode";
 import { Logger } from "./logger";
 import { CodeConfigKeys, DateTimeFormat } from "./types";
+import { VSCodeUtils } from "./utils";
 import { getConfigValue, getWS } from "./workspace";
 
 const tsDecorationType = window.createTextEditorDecorationType({
@@ -38,6 +43,7 @@ export class WindowWatcher {
             return;
           }
           this.triggerUpdateDecorations();
+          this.triggerGraphViewUpdate();
         }
       },
       null,
@@ -100,6 +106,22 @@ export class WindowWatcher {
     if (!_.isUndefined(noteGraphPanel)) {
       if (noteGraphPanel.visible) {
         // TODO Logic here + test
+
+        const activeEditor = window.activeTextEditor;
+        if (!activeEditor) {
+          return;
+        }
+
+        const note = VSCodeUtils.getNoteFromDocument(activeEditor.document);
+
+        noteGraphPanel.webview.postMessage({
+          type: "onDidChangeActiveTextEditor",
+          data: {
+            note,
+            sync: true,
+          },
+          source: "vscode",
+        } as OnDidChangeActiveTextEditorMsg);
       }
     }
     return;

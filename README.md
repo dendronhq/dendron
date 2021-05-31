@@ -1,7 +1,7 @@
 ![](https://foundation-prod-assetspublic53c57cce-8cpvgjldwysl.s3-us-west-2.amazonaws.com/assets/logo-256.png)
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-41-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-42-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # Welcome to Dendron!
@@ -113,6 +113,7 @@ Dendron wouldn't be what it is today without help from these wonderful gardeners
     <td align="center"><a href="https://github.com/vicrdguez"><img src="https://avatars.githubusercontent.com/u/52254255?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Víctor Reyes Rodríguez</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Avicrdguez" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/funnym0nk3y"><img src="https://avatars.githubusercontent.com/u/41870754?v=4?s=100" width="100px;" alt=""/><br /><sub><b>funnym0nk3y</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Afunnym0nk3y" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/sidwellr"><img src="https://avatars.githubusercontent.com/u/28679642?v=4?s=100" width="100px;" alt=""/><br /><sub><b>sidwellr</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Asidwellr" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/ddbrierton"><img src="https://avatars.githubusercontent.com/u/7255543?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Darren Brierton</b></sub></a><br /><a href="https://github.com/dendronhq/dendron/issues?q=author%3Addbrierton" title="Bug reports">🐛</a></td>
   </tr>
 </table>
 

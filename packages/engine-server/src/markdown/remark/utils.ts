@@ -4,6 +4,7 @@ import {
   DendronError,
   DEngineClient,
   DLink,
+  ERROR_STATUS,
   getSlugger,
   NoteChangeEntry,
   NoteProps,
@@ -32,6 +33,7 @@ const toString = require("mdast-util-to-string");
 import * as mdastBuilder from "mdast-builder";
 import { blockAnchors } from "./blockAnchors";
 import { DNoteAnchorPositioned } from "@dendronhq/common-all";
+import { createLogger } from "@dendronhq/common-server";
 export { mdastBuilder };
 
 export const ALIAS_DIVIDER = "|";
@@ -228,39 +230,48 @@ export class AnchorUtils {
     wsRoot: string;
   }): Promise<{ [index: string]: DNoteAnchorPositioned }> {
     if (opts.note.stub) return {};
-    const noteContents = await NoteUtils.readFullNote(opts);
-    const noteAnchors = RemarkUtils.findAnchors(noteContents);
-    const anchors: [string, DNoteAnchorPositioned][] = [];
-    noteAnchors.forEach((anchor) => {
-      if (_.isUndefined(anchor.position)) return;
-      const slugger = getSlugger();
-      const { line, column } = anchor.position.start;
-      if (anchor.type === DendronASTTypes.HEADING) {
-        const value = slugger.slug(anchor.children[0].value as string);
-        anchors.push([
-          value,
-          {
-            type: "header",
+    try {
+      const noteContents = await NoteUtils.readFullNote(opts);
+      const noteAnchors = RemarkUtils.findAnchors(noteContents);
+      const anchors: [string, DNoteAnchorPositioned][] = [];
+      noteAnchors.forEach((anchor) => {
+        if (_.isUndefined(anchor.position)) return;
+        const slugger = getSlugger();
+        const { line, column } = anchor.position.start;
+        if (anchor.type === DendronASTTypes.HEADING) {
+          const value = slugger.slug(anchor.children[0].value as string);
+          anchors.push([
             value,
-            line: line - 1,
-            column: column - 1,
-          },
-        ]);
-      } else if (anchor.type === DendronASTTypes.BLOCK_ANCHOR) {
-        anchors.push([
-          `^${anchor.id}`,
-          {
-            type: "block",
-            value: anchor.id,
-            line: line - 1,
-            column: column - 1,
-          },
-        ]);
-      } else {
-        assertUnreachable(anchor);
-      }
-    });
-    return Object.fromEntries(anchors);
+            {
+              type: "header",
+              value,
+              line: line - 1,
+              column: column - 1,
+            },
+          ]);
+        } else if (anchor.type === DendronASTTypes.BLOCK_ANCHOR) {
+          anchors.push([
+            `^${anchor.id}`,
+            {
+              type: "block",
+              value: anchor.id,
+              line: line - 1,
+              column: column - 1,
+            },
+          ]);
+        } else {
+          assertUnreachable(anchor);
+        }
+      });
+      return Object.fromEntries(anchors);
+    } catch (err) {
+      const error = DendronError.createFromStatus({
+        status: ERROR_STATUS.UNKNOWN,
+        error: err,
+      });
+      createLogger("AnchorUtils").error(error);
+      return {};
+    }
   }
 }
 

@@ -400,6 +400,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "ddbrierton",
+      "name": "Darren Brierton",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7255543?v=4",
+      "profile": "https://github.com/ddbrierton",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

@@ -267,6 +267,7 @@ export class AnchorUtils {
     } catch (err) {
       const error = DendronError.createFromStatus({
         status: ERROR_STATUS.UNKNOWN,
+        payload: { note: NoteUtils.toLogObj(opts.note), wsRoot: opts.wsRoot },
         error: err,
       });
       createLogger("AnchorUtils").error(error);

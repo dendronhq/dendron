@@ -1,4 +1,4 @@
-import { DendronError, NoteProps, NoteUtils } from "@dendronhq/common-all";
+import { NoteProps, NoteUtils } from "@dendronhq/common-all";
 import { HistoryService } from "@dendronhq/engine-server";
 import { LookupControllerV3 } from "../components/lookup/LookupControllerV3";
 import {
@@ -22,7 +22,8 @@ export class InsertNoteLinkCommand extends BasicCommand<
   CommandInput
 > {
   static key = DENDRON_COMMANDS.INSERT_NOTE_LINK.key;
-  async gatherInputs(): Promise<CommandOpts> {
+
+  async gatherInputs(): Promise<CommandOpts | undefined> {
     const lc = LookupControllerV3.create({
       disableVaultSelection: true,
     });
@@ -49,9 +50,11 @@ export class InsertNoteLinkCommand extends BasicCommand<
             resolve({ notes: cdata.selectedItems });
             lc.onHide();
           } else if (event.action === "error") {
-            return;
+            this.L.error({ msg: `error: ${event.data}` });
+            resolve(undefined);
           } else {
-            throw new DendronError({ message: `unexpected event: ${event}` });
+            this.L.error({ msg: `unhandled error: ${event.data}` });
+            resolve(undefined);
           }
         },
       });

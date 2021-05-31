@@ -162,6 +162,17 @@ export class DNodeUtils {
     }
   }
 
+  static enhancePropForQuickInputV3(opts: {
+    props: DNodeProps;
+    schemas: SchemaModuleDict;
+    vaults: DVault[];
+    wsRoot: string;
+    alwaysShow?: boolean;
+  }): DNodePropsQuickInputV2 {
+    const { alwaysShow } = _.defaults(opts, { alwaysShow: false });
+    return { ...this.enhancePropForQuickInput(opts), alwaysShow };
+  }
+
   static findClosestParent(
     fpath: string,
     nodes: DNodeProps[],
@@ -466,15 +477,15 @@ export class NoteUtils {
     return stubNodes;
   }
 
-  static createWikiLink({
-    note,
-    header,
-    useVaultPrefix,
-  }: {
+  static createWikiLink(opts: {
     note: NoteProps;
     header?: string;
     useVaultPrefix?: boolean;
+    useTitle?: boolean;
   }): string {
+    const { note, header, useVaultPrefix, useTitle } = _.defaults(opts, {
+      useTitle: true,
+    });
     let { title, fname, vault } = note;
     let suffix = "";
     const slugger = getSlugger();
@@ -487,7 +498,8 @@ export class NoteUtils {
     const vaultPrefix = useVaultPrefix
       ? `${CONSTANTS.DENDRON_DELIMETER}${VaultUtils.getName(vault)}/`
       : "";
-    const link = `[[${title}|${vaultPrefix}${fname}${suffix}]]`;
+    const titlePrefix = useTitle ? title + "|" : "";
+    const link = `[[${titlePrefix}${vaultPrefix}${fname}${suffix}]]`;
     return link;
   }
 

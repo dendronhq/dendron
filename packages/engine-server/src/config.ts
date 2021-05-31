@@ -78,7 +78,7 @@ export class DConfig {
     key: K
   ): DendronConfig[K] {
     const cConfig = _.defaults(
-      { config },
+      config,
       this.genDefaultConfig()
     ) as Required<DendronConfig>;
     return cConfig[key];

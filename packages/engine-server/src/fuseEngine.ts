@@ -25,16 +25,17 @@ function createFuse<T>(
     preset: "schema" | "note";
   }
 ) {
-  const options = {
+  const options: Fuse.IFuseOptions<any> = {
     shouldSort: true,
-    threshold: opts.exactMatch ? 0.0 : 0.6,
+    threshold: opts.exactMatch ? 0.0 : 0.5,
     location: 0,
-    distance: 50,
-    maxPatternLength: 32,
+    distance: 15,
     minMatchCharLength: 2,
     keys: ["fname"],
     useExtendedSearch: true,
     includeScore: true,
+    ignoreLocation: true,
+    ignoreFieldNorm: true,
   };
   if (opts.preset === "schema") {
     options.keys = ["fname", "id"];

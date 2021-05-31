@@ -20,6 +20,11 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
 
   // --- Public Props
   /**
+   * Quickpick will hide results that aren't matched by VSCode internal filter.
+   * Setting this true will always show ALL results that lookup returns
+   */
+  alwaysShowAll?: boolean;
+  /**
    * Buttons control modifiers for lookup
    */
   buttons: DendronBtn[];
@@ -34,6 +39,11 @@ export type DendronQuickPickerV2 = DendronQuickPickItemV2 & {
   offset?: number;
   moreResults?: boolean;
   allResults?: DNodeProps[];
+  /**
+   * Should VSCode managing sorting of results?
+   * Supported in VSCode but not added to the type definition files, see https://github.com/microsoft/vscode/issues/73904#issuecomment-680298036
+   */
+  sortByLabel?: boolean;
   /**
    * Vault for newly created note. If not specified in picker,
    * will be prmpted

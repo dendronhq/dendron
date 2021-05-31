@@ -114,6 +114,10 @@ export type CreateQuickPickOpts = {
    */
   initialValue?: string;
   nonInteractive?: boolean;
+  /**
+   * See {@link DendronQuickPickerV2["alwaysShow"]}
+   */
+  alwaysShow?: boolean;
 };
 
 export type PrepareQuickPickOpts = CreateQuickPickOpts & {
@@ -225,6 +229,7 @@ export class PickerUtilsV2 {
     quickPick.canSelectMany = false;
     quickPick.matchOnDescription = false;
     quickPick.matchOnDetail = false;
+    quickPick.sortByLabel = false;
     quickPick.showNote = async (uri) => window.showTextDocument(uri);
     if (initialValue) {
       quickPick.value = initialValue;
@@ -492,11 +497,12 @@ export class NotePickerUtils {
     }
     const updatedItems = await Promise.all(
       nodes.map(async (ent) =>
-        DNodeUtils.enhancePropForQuickInput({
+        DNodeUtils.enhancePropForQuickInputV3({
           wsRoot: DendronWorkspace.wsRoot(),
           props: ent,
           schemas: engine.schemas,
           vaults: DendronWorkspace.instance().vaultsv4,
+          alwaysShow: picker.alwaysShowAll,
         })
       )
     );

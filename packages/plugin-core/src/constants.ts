@@ -222,6 +222,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     group: "notes",
     desc: "Insert note contents",
   },
+  INSERT_NOTE_LINK: {
+    key: "dendron.insertNoteLink",
+    title: `${CMD_PREFIX} Insert Note Link`,
+    group: "notes",
+    desc: "Insert note link",
+  },
   MOVE_NOTE: {
     key: "dendron.moveNote",
     title: `${CMD_PREFIX} Move Note`,
@@ -257,8 +263,6 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     title: `${CMD_PREFIX} Lookup Note`,
     group: "navigation",
     desc: "Initiate note lookup",
-    docLink: "dendron.topic.lookup.md",
-    docPreview: "",
     when: DendronContext.PLUGIN_ACTIVE,
   },
   LOOKUP_JOURNAL: {

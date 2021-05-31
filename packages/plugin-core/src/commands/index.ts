@@ -25,6 +25,7 @@ import { GotoNoteCommand } from "./GotoNote";
 import { GoUpCommand } from "./GoUpCommand";
 import { ImportPodCommand } from "./ImportPod";
 import { InsertNoteCommand } from "./InsertNoteCommand";
+import { InsertNoteLinkCommand } from "./InsertNoteLink";
 import { MoveNoteCommand } from "./MoveNoteCommand";
 import { NoteLookupCommand } from "./NoteLookupCommand";
 import { OpenLinkCommand } from "./OpenLink";
@@ -74,6 +75,7 @@ const ALL_COMMANDS = [
   GotoNoteCommand,
   ImportPodCommand,
   InsertNoteCommand,
+  InsertNoteLinkCommand,
   NoteLookupCommand,
   OpenLinkCommand,
   OpenLogsCommand,

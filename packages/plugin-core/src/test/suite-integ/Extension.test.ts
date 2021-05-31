@@ -59,6 +59,7 @@ suite("Extension", function () {
               initializeRemoteVaults: true,
               noAutoCreateOnDefinition: true,
               noLegacyNoteRef: true,
+              lookupConfirmVaultOnCreate: false,
               site: {
                 copyAssets: true,
                 siteHierarchies: ["root"],

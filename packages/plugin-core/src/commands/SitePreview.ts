@@ -26,7 +26,7 @@ export class SitePreviewCommand extends BasicCommand<
   async sanityCheck() {
     const sitePath = getSiteRootDirPath();
     if (!fs.existsSync(sitePath)) {
-      return "no site found";
+      return "site root dir not found";
     }
     return checkPreReq();
   }

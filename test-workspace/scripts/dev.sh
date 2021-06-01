@@ -1,5 +1,6 @@
 #!/bin/sh
 
-LOG_LEVEL=error dendron-cli buildSiteV2 --wsRoot .  --stage dev --serve
+PORT=3005
+env LOG_LEVEL=info dendron launchEngineServer --init --port $PORT
 
 #| tee /tmp/out.txt

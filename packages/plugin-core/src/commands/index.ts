@@ -31,6 +31,7 @@ import { NoteLookupCommand } from "./NoteLookupCommand";
 import { OpenLinkCommand } from "./OpenLink";
 import { OpenLogsCommand } from "./OpenLogs";
 import { ShowNoteGraphCommand } from "./ShowNoteGraph";
+import { ShowSchemaGraphCommand } from "./ShowSchemaGraph";
 import { PasteFileCommand } from "./PasteFile";
 import { PasteLinkCommand } from "./PasteLink";
 import { PublishPodCommand } from "./PublishPod";
@@ -81,6 +82,7 @@ const ALL_COMMANDS = [
   OpenLinkCommand,
   OpenLogsCommand,
   ShowNoteGraphCommand,
+  ShowSchemaGraphCommand,
   PasteFileCommand,
   PasteLinkCommand,
   PublishPodCommand,

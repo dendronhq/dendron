@@ -58,19 +58,21 @@ export default function FullGraph({
   engine: engineSlice.EngineState;
 }) {
   const router = useRouter();
-
+  
   const isNoteGraph = router.query.type !== 'schema';
   const notes = engine ? engine.notes || {} : {};
   const schemas = engine ? engine.schemas || {} : {};
-
+  
   const logger = createLogger('Graph');
   logger.info({ ctx: 'Graph', notes });
   const graphRef = useRef<HTMLDivElement>(null);
   const { switcher, themes, currentTheme, status } = useThemeSwitcher();
-
+  
   const [elements, setElements] = useState<ElementsDefinition>();
-
+  
   const [cy, setCy] = useState<Core>();
+  
+  logger.log(router.query,router.query.type, isNoteGraph)
 
   // Process note notes and edges
   useEffect(() => {
@@ -182,7 +184,7 @@ export default function FullGraph({
 
       setElements({ nodes, edges });
     }
-  }, [notes]);
+  }, [engine]);
 
   useEffect(() => {
     if (graphRef.current && elements) {
@@ -257,11 +259,13 @@ export default function FullGraph({
 
     // TODO: .open class not affecting rendered output
 
-    postVSCodeMessage({
-      type: GraphViewMessageType.onSelect,
-      data: { id },
-      source: DMessageSource.webClient,
-    } as GraphViewMessage);
+    if (isNoteGraph) {
+      postVSCodeMessage({
+        type: GraphViewMessageType.onSelect,
+        data: { id },
+        source: DMessageSource.webClient,
+      } as GraphViewMessage);
+    }
   };
 
   return (

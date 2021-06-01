@@ -75,7 +75,7 @@ export default function FullGraph({
   logger.log(router.query,router.query.type, isNoteGraph)
 
   // Process note notes and edges
-  useEffect(() => {
+  useEffect(() => {    
     // NOTE GRAPH
     if (isNoteGraph) {
       logger.log('Getting nodes...');
@@ -188,6 +188,9 @@ export default function FullGraph({
 
   useEffect(() => {
     if (graphRef.current && elements) {
+      // Naive check to prevent full graph re-renders when selecting a node
+      if (cy && cy.elements('*').length > 5) return;
+
       const isLargeGraph = elements.nodes.length + elements.edges.length > 1000;
 
       logger.log('Rendering graph...');

@@ -1,57 +1,14 @@
 import {
   createLogger,
   engineSlice,
-  postVSCodeMessage,
 } from '@dendronhq/common-frontend';
 import _ from 'lodash';
-import React, { useEffect, useRef, useState } from 'react';
-import cytoscape, {
-  Core,
-  EdgeDefinition,
+import React, { useEffect, useState } from 'react';
+import  {
   ElementsDefinition,
   EventHandler,
 } from 'cytoscape';
-// @ts-ignore
-import euler from 'cytoscape-euler';
-import {
-  DMessageSource,
-  GraphViewMessage,
-  GraphViewMessageType,
-  NoteUtils,
-} from '@dendronhq/common-all';
-import { useRouter } from 'next/router';
-import { useThemeSwitcher } from 'react-css-theme-switcher';
-import { Space, Typography } from 'antd';
-import Head from 'next/head';
 import Graph from '../../components/graph';
-
-const getCytoscapeStyle = (themes: any, theme: string | undefined) => `
-    node {
-      width: 5;
-      height: 5;
-      background-color: ${theme === themes.dark ? '#807B7B' : '#999393'};
-      border-color: ${theme === themes.dark ? '#807B7B' : '#999393'};
-      color: ${theme === themes.dark ? '#fff' : '#2F3438'};
-      label: data(label);
-      border-width: 1;
-      font-size: 10;
-      min-zoomed-font-size: 10;
-      font-weight: 400;
-    }
-  
-    edge {
-      width: 0.25;
-      line-color: ${theme === themes.dark ? '#807B7B' : '#999393'};
-      target-arrow-shape: none;
-      curve-style: haystack;
-    }
-  
-    :selected, .open {
-      background-color: ${theme === themes.dark ? '#36B73B' : '#27AC2C'};
-      border-color: ${theme === themes.dark ? '#36B73B' : '#27AC2C'};
-      color: ${theme === themes.dark ? '#36B73B' : '#27AC2C'};
-    }
-  `;
 
 export default function FullSchemaGraph({
   engine,
@@ -61,11 +18,8 @@ export default function FullSchemaGraph({
   const schemas = engine ? engine.schemas || {} : {};
 
   const logger = createLogger('Graph');
-  const { switcher, themes, currentTheme, status } = useThemeSwitcher();
 
-  const graphRef = useRef<HTMLDivElement>(null);
   const [elements, setElements] = useState<ElementsDefinition>();
-  const [cy, setCy] = useState<Core>();
 
   // Process schemas
   useEffect(() => {
@@ -126,14 +80,7 @@ export default function FullSchemaGraph({
     const { id, source } = e.target[0]._private.data;
 
     const isNode = !source;
-    if (!isNode || _.isUndefined(cy)) return;
-    // if (_.isUndefined(cy)) return;
-
-    // logger.log('Connected edges:', j.connectedEdges())
-
-    cy.$('.open').removeClass('open');
-
-    cy.getElementById(id).addClass('open');
+    if (!isNode) return;
 
     // TODO: Implement schema opening
     //   postVSCodeMessage({

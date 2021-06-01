@@ -115,7 +115,7 @@ export default function Graph({
         })
         .run();
 
-      network.on('select', onSelect);
+      network.on('select', (e) => onSelect(e));
 
       setCy(network);
     }

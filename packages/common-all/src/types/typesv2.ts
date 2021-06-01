@@ -497,7 +497,7 @@ export type GraphViewMessage = DMessage<GraphViewMessageType, { id: string }>;
 export enum DendronWebViewKey {
   CONFIGURE = "dendron.configure",
   NOTE_GRAPH = "dendron.graph",
-  SCHEMA_GRAPH = "dendron.graph",
+  SCHEMA_GRAPH = "dendron.graph-schema",
 }
 
 export enum DendronTreeViewKey {

@@ -28,6 +28,7 @@ import { InsertNoteCommand } from "./InsertNoteCommand";
 import { MoveNoteCommand } from "./MoveNoteCommand";
 import { OpenLogsCommand } from "./OpenLogs";
 import { ShowNoteGraphCommand } from "./ShowNoteGraph";
+import { ShowSchemaGraphCommand } from "./ShowSchemaGraph";
 import { PasteLinkCommand } from "./PasteLink";
 import { PasteFileCommand } from "./PasteFile";
 import { PublishPodCommand } from "./PublishPod";
@@ -75,6 +76,7 @@ const ALL_COMMANDS = [
   InsertNoteCommand,
   OpenLogsCommand,
   ShowNoteGraphCommand,
+  ShowSchemaGraphCommand,
   PasteFileCommand,
   PasteLinkCommand,
   PublishPodCommand,

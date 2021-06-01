@@ -10,14 +10,19 @@ export class WebViewUtils {
   static genHTMLForView = ({
     title,
     view,
+    query = {},
   }: {
     title: string;
     view: DendronTreeViewKey | DendronWebViewKey;
+    query?: {
+      [key: string]: string;
+    };
   }) => {
     const ws = getWS();
     const qs = DUtils.querystring.stringify({
       ws: DendronWorkspace.wsRoot(),
       port: ws.port,
+      ...query,
     });
 
     // View is `dendron.{camelCase}`
@@ -126,13 +131,17 @@ export class WebViewUtils {
   static genHTMLForWebView = ({
     title,
     view,
+    query,
   }: {
     title: string;
     view: DendronWebViewKey;
+    query?: {
+      [key: string]: string;
+    };
   }) => {
     /**
      * Implementation might differ in the future
      */
-    return WebViewUtils.genHTMLForView({ title, view });
+    return WebViewUtils.genHTMLForView({ title, view, query });
   };
 }

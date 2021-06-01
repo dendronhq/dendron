@@ -512,6 +512,11 @@
                 "docPreview": ""
             },
             {
+                "command": "dendron.showSchemaGraph",
+                "title": "Dendron: Show Schema Graph",
+                "desc": "Show graph of workspace schemas"
+            },
+            {
                 "command": "dendron.pasteFile",
                 "title": "Dendron: Paste File",
                 "desc": "Paste file"

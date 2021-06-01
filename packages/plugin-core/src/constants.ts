@@ -664,6 +664,12 @@ export const DENDRON_COMMANDS: { [key: string]: CommandEntry } = {
     docLink: "dendron.topic.commands.md",
     docPreview: "",
   },
+  SHOW_SCHEMA_GRAPH: {
+    key: "dendron.showSchemaGraph",
+    title: `${CMD_PREFIX} Show Schema Graph`,
+    group: "navigation",
+    desc: "Show graph of workspace schemas",
+  },
   PASTE_FILE: {
     key: "dendron.pasteFile",
     title: `${CMD_PREFIX} Paste File`,

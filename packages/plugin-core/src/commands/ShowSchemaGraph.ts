@@ -15,22 +15,22 @@ type CommandOpts = {};
 
 type CommandOutput = void;
 
-export class ShowNoteGraphCommand extends BasicCommand<
+export class ShowSchemaGraphCommand extends BasicCommand<
   CommandOpts,
   CommandOutput
 > {
-  static key = DENDRON_COMMANDS.SHOW_NOTE_GRAPH.key;
+  static key = DENDRON_COMMANDS.SHOW_SCHEMA_GRAPH.key;
   async gatherInputs(): Promise<any> {
     return {};
   }
   async execute() {
-    const title = "Note Graph";
+    const title = "Schema Graph";
 
     // Get workspace information
     const ws = getWS();
 
     // If panel already exists
-    const existingPanel = ws.getWebView(DendronWebViewKey.NOTE_GRAPH);
+    const existingPanel = ws.getWebView(DendronWebViewKey.SCHEMA_GRAPH);
 
     if (!_.isUndefined(existingPanel)) {
       try {
@@ -53,7 +53,10 @@ export class ShowNoteGraphCommand extends BasicCommand<
 
     const resp: string = WebViewUtils.genHTMLForWebView({
       title: "Dendron Graph",
-      view: DendronWebViewKey.NOTE_GRAPH,
+      view: DendronWebViewKey.SCHEMA_GRAPH,
+      query: {
+        type: "schema",
+      },
     });
 
     panel.webview.html = resp;
@@ -62,10 +65,10 @@ export class ShowNoteGraphCommand extends BasicCommand<
     panel.webview.onDidReceiveMessage(async (msg: GraphViewMessage) => {
       switch (msg.type) {
         case GraphViewMessageType.onSelect: {
-          const note = getEngine().notes[msg.data.id];
+          const schema = getEngine().schemas[msg.data.id];
           await new GotoNoteCommand().execute({
-            qs: note.fname,
-            vault: note.vault,
+            qs: schema.fname,
+            vault: schema.vault,
           });
           break;
         }
@@ -101,6 +104,6 @@ export class ShowNoteGraphCommand extends BasicCommand<
     });
 
     // Update workspace-wide graph panel
-    ws.setWebView(DendronWebViewKey.NOTE_GRAPH, panel);
+    ws.setWebView(DendronWebViewKey.SCHEMA_GRAPH, panel);
   }
 }

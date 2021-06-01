@@ -33,7 +33,7 @@ const toString = require("mdast-util-to-string");
 import * as mdastBuilder from "mdast-builder";
 import { blockAnchors } from "./blockAnchors";
 import { DNoteAnchorPositioned } from "@dendronhq/common-all";
-import { createLogger } from "@dendronhq/common-server";
+import { createLogger, file2String } from "@dendronhq/common-server";
 export { mdastBuilder };
 
 export const ALIAS_DIVIDER = "|";
@@ -231,7 +231,7 @@ export class AnchorUtils {
   }): Promise<{ [index: string]: DNoteAnchorPositioned }> {
     if (opts.note.stub) return {};
     try {
-      const noteContents = await NoteUtils.readFullNote(opts);
+      const noteContents = await file2String(opts);
       const noteAnchors = RemarkUtils.findAnchors(noteContents);
       const anchors: [string, DNoteAnchorPositioned][] = [];
       noteAnchors.forEach((anchor) => {

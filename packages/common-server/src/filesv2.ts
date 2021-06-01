@@ -194,6 +194,14 @@ export function file2NoteWithCache({
   return { note, matchHash, noteHash: sig };
 }
 
+export function file2String(opts: {
+  note: NoteProps;
+  wsRoot: string;
+}): Promise<string> {
+  const notePath = NoteUtils.getFullPath(opts);
+  return fs.readFile(notePath, { encoding: "utf8" });
+}
+
 /**
  * Go to dirname that {fname} is contained in
  */

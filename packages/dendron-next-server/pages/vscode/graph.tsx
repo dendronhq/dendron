@@ -134,8 +134,9 @@ export default function FullGraph({
 
       const ROOT_NODE = {
         data: { id: 'graph_root', label: 'Schemas', group: 'nodes' },
+        selectable: false,
       };
-      const nodes = [ROOT_NODE];
+      const nodes: any[] = [ROOT_NODE];
       const edges: any[] = [];
 
       schemaArray.forEach((schema) => {
@@ -159,7 +160,7 @@ export default function FullGraph({
 
         // Children schemas
         Object.values(schema.schemas).forEach((subschema) => {
-          const SUBSCHEMA_ID = `${SCHEMA_ID}_${subschema.id}`
+          const SUBSCHEMA_ID = `${schema.vault.name}_${subschema.id}`
 
           // Subschema node
           nodes.push({

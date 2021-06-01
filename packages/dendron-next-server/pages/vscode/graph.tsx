@@ -23,6 +23,7 @@ import { useRouter } from 'next/router';
 import { useThemeSwitcher } from 'react-css-theme-switcher';
 import { Space, Typography } from 'antd';
 import Head from 'next/head';
+import Graph from '../../components/graph';
 
 const getCytoscapeStyle = (themes: any, theme: string | undefined) => `
   node {
@@ -58,27 +59,20 @@ export default function FullGraph({
   engine: engineSlice.EngineState;
 }) {
   const router = useRouter();
-  
-  const isNoteGraph = router.query.type !== 'schema';
+
   const notes = engine ? engine.notes || {} : {};
-  const schemas = engine ? engine.schemas || {} : {};
   
   const logger = createLogger('Graph');
   logger.info({ ctx: 'Graph', notes });
-  const graphRef = useRef<HTMLDivElement>(null);
   const { switcher, themes, currentTheme, status } = useThemeSwitcher();
   
+  const graphRef = useRef<HTMLDivElement>(null);
   const [elements, setElements] = useState<ElementsDefinition>();
-  
   const [cy, setCy] = useState<Core>();
   
-  logger.log(router.query,router.query.type, isNoteGraph)
-
   // Process note notes and edges
   useEffect(() => {    
-    // NOTE GRAPH
-    if (isNoteGraph) {
-      logger.log('Getting nodes...');
+    logger.log('Getting nodes...');
       const nodes = Object.values(notes).map((note) => ({
         data: { id: note.id, label: note.title, group: 'nodes' },
       }));
@@ -128,124 +122,7 @@ export default function FullGraph({
         .flat();
 
       setElements({ nodes, edges });
-    }
-    
-    // SCHEMA GRAPH
-    else {
-      const schemaArray = Object.values(schemas);
-
-      const ROOT_NODE = {
-        data: { id: 'graph_root', label: 'Schemas', group: 'nodes' },
-        selectable: false,
-      };
-      const nodes: any[] = [ROOT_NODE];
-      const edges: any[] = [];
-
-      schemaArray.forEach((schema) => {
-        const SCHEMA_ID = `${schema.vault.name}_${schema.fname}`;
-
-        // Base schema node
-        nodes.push({
-          data: { id: SCHEMA_ID, label: schema.fname, group: 'nodes' },
-        });
-
-        // Schema node -> root connection
-        edges.push({
-          data: {
-            group: 'edges',
-            id: `${ROOT_NODE.data.id}_${SCHEMA_ID}`,
-            source: ROOT_NODE.data.id,
-            target: SCHEMA_ID,
-          },
-          classes: 'hierarchy',
-        });
-
-        // Children schemas
-        Object.values(schema.schemas).forEach((subschema) => {
-          const SUBSCHEMA_ID = `${schema.vault.name}_${subschema.id}`
-
-          // Subschema node
-          nodes.push({
-            data: { id: SUBSCHEMA_ID, label: subschema.title, group: 'nodes' },
-          });
-
-          // Schema -> subschema connection
-          edges.push({
-            data: {
-              group: 'edges',
-              id: `${SCHEMA_ID}_${SUBSCHEMA_ID}`,
-              source: SCHEMA_ID,
-              target: SUBSCHEMA_ID,
-            },
-            classes: 'hierarchy',
-          });
-        });
-      });
-
-      setElements({ nodes, edges });
-    }
   }, [engine]);
-
-  useEffect(() => {
-    if (graphRef.current && elements) {
-      // Naive check to prevent full graph re-renders when selecting a node
-      if (cy && cy.elements('*').length > 5) return;
-
-      const isLargeGraph = elements.nodes.length + elements.edges.length > 1000;
-
-      logger.log('Rendering graph...');
-
-      // Add layout middleware
-      cytoscape.use(euler);
-
-      const network = cytoscape({
-        container: graphRef.current,
-        elements,
-        style: getCytoscapeStyle(themes, currentTheme) as any,
-
-        // Zoom levels
-        minZoom: 0.1,
-        maxZoom: 10,
-
-        // Options to improve performance
-        textureOnViewport: isLargeGraph,
-        hideEdgesOnViewport: isLargeGraph,
-        hideLabelsOnViewport: isLargeGraph,
-      });
-
-      // Layout graph nodes
-      network
-        .layout({
-          name: 'euler',
-          // @ts-ignore
-          springLength: () => 80,
-          springCoeff: () => 0.0008,
-          mass: () => 4,
-          gravity: -1.2,
-          pull: 0.0001,
-          theta: 0.666,
-          dragCoeff: 0.02,
-          movementThreshold: 1,
-          timeStep: 20,
-          refresh: 10,
-          animate: false, //!isLargeGraph,
-          animationDuration: undefined,
-          animationEasing: undefined,
-          maxIterations: 1000,
-          maxSimulationTime: 4000,
-          ungrabifyWhileSimulating: false,
-          fit: true,
-          padding: 30,
-          boundingBox: undefined,
-          randomize: false,
-        })
-        .run();
-
-      network.on('select', onSelect);
-
-      setCy(network);
-    }
-  }, [graphRef, elements]);
 
   const onSelect: EventHandler = (e) => {
     const { id, source } = e.target[0]._private.data;
@@ -262,51 +139,12 @@ export default function FullGraph({
 
     // TODO: .open class not affecting rendered output
 
-    if (isNoteGraph) {
-      postVSCodeMessage({
-        type: GraphViewMessageType.onSelect,
-        data: { id },
-        source: DMessageSource.webClient,
-      } as GraphViewMessage);
-    }
+    postVSCodeMessage({
+      type: GraphViewMessageType.onSelect,
+      data: { id },
+      source: DMessageSource.webClient,
+    } as GraphViewMessage);
   };
 
-  return (
-    <>
-      <Head>
-        <title>Dendron Graph</title>
-      </Head>
-      <div
-        id='graph'
-        style={{
-          width: '100vw',
-          height: '100vh',
-          position: 'relative',
-        }}
-      >
-        <div
-          ref={graphRef}
-          style={{
-            width: '100%',
-            height: '100%',
-            zIndex: 1,
-          }}
-        ></div>
-        {elements && (
-          <Space
-            style={{
-              position: 'absolute',
-              bottom: 8,
-              right: 8,
-              zIndex: 2,
-            }}
-            direction='vertical'
-          >
-            <Typography.Text>Nodes: {elements.nodes.length}</Typography.Text>
-            <Typography.Text>Edges: {elements.edges.length}</Typography.Text>
-          </Space>
-        )}
-      </div>
-    </>
-  );
+  return <Graph elements={elements} onSelect={onSelect} />;
 }

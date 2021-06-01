@@ -52,11 +52,8 @@ export class ShowSchemaGraphCommand extends BasicCommand<
     );
 
     const resp: string = WebViewUtils.genHTMLForWebView({
-      title: "Dendron Graph",
+      title: "Schema Graph",
       view: DendronWebViewKey.SCHEMA_GRAPH,
-      query: {
-        type: "schema",
-      },
     });
 
     panel.webview.html = resp;

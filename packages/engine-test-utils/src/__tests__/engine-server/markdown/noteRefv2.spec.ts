@@ -12,6 +12,7 @@ import {
   checkVFile,
   createProcTests,
   generateVerifyFunction,
+  processNote,
   processTextV2,
   ProcTests,
 } from "./utils";
@@ -321,6 +322,63 @@ describe("noteRefV2", () => {
         target: DendronASTDest.MD_REGULAR,
         exclude: [DendronASTDest.MD_DENDRON],
       }),
+    },
+  });
+
+  const WITH_ANCHOR_TO_SAME_FILE = createProcTests({
+    name: "WITH_ANCHOR_TO_SAME_FILE",
+    preSetupHook: async (opts) => {
+      await ENGINE_HOOKS.setupBasic(opts);
+      await modifyNote(opts, "foo", (note: NoteProps) => {
+        const txt = [
+          "---",
+          "id: foo",
+          "---",
+          "![[#header-2]]",
+          "",
+          "## Header 1",
+          "task1",
+          "## HeadeR 2",
+          "task2",
+        ];
+        note.body = txt.join("\n");
+        return note;
+      });
+    },
+    setupFunc: async (opts) => {
+      const { engine, vaults } = opts;
+      return await processNote({
+        dest: opts.extra.dest,
+        engine,
+        vault: vaults[0],
+        fname: "foo",
+      });
+    },
+    verifyFuncDict: {
+      [DendronASTDest.MD_REGULAR]: async ({ extra }) => {
+        const { resp } = extra;
+        expect(
+          await AssertUtils.assertTimesInString({
+            body: resp.toString(),
+            match: [
+              [2, "task2"],
+              [1, "task1"],
+            ],
+          })
+        ).toBeTruthy();
+      },
+      [DendronASTDest.HTML]: async ({ extra }) => {
+        const { resp } = extra;
+        expect(
+          await AssertUtils.assertTimesInString({
+            body: resp.toString(),
+            match: [
+              [2, "task2"],
+              [1, "task1"],
+            ],
+          })
+        ).toBeTruthy();
+      },
     },
   });
 
@@ -684,6 +742,7 @@ describe("noteRefV2", () => {
     ...WITH_START_ANCHOR_OFFSET,
     ...XVAULT_CASE,
     ...WITH_NOTE_LINK_TITLE,
+    ...WITH_ANCHOR_TO_SAME_FILE,
   ];
 
   // const ALL_TEST_CASES = [

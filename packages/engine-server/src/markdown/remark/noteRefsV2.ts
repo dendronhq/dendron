@@ -69,6 +69,9 @@ function attachParser(proc: Unified.Processor) {
     if (match) {
       const linkMatch = match[1].trim();
       const link = parseNoteRefV2(linkMatch);
+      // If the link is same file [[#header]], it's implicitly to the same file it's located in
+      if (link.from.fname === "")
+        link.from.fname = MDUtilsV4.getDendronData(proc).fname;
       const { value } = LinkUtils.parseLink(linkMatch);
 
       let refNote: NoteRefNoteV4 = {

@@ -58,7 +58,11 @@ export default function FullGraph({
   engine: engineSlice.EngineState;
 }) {
   const router = useRouter();
+
+  const isNoteGraph = router.query.type !== 'schema';
   const notes = engine ? engine.notes || {} : {};
+  const schemas = engine ? engine.schemas || {} : {};
+
   const logger = createLogger('Graph');
   logger.info({ ctx: 'Graph', notes });
   const graphRef = useRef<HTMLDivElement>(null);
@@ -70,56 +74,113 @@ export default function FullGraph({
 
   // Process note notes and edges
   useEffect(() => {
-    logger.log('Getting nodes...');
-    const nodes = Object.values(notes).map((note) => ({
-      data: { id: note.id, label: note.title, group: 'nodes' },
-    }));
+    // NOTE GRAPH
+    if (isNoteGraph) {
+      logger.log('Getting nodes...');
+      const nodes = Object.values(notes).map((note) => ({
+        data: { id: note.id, label: note.title, group: 'nodes' },
+      }));
 
-    logger.log('Getting edges...');
-    const edges = Object.values(notes)
-      .map((note) => {
-        const childConnections: EdgeDefinition[] = note.children.map(
-          (child) => ({
+      logger.log('Getting edges...');
+      const edges = Object.values(notes)
+        .map((note) => {
+          const childConnections: EdgeDefinition[] = note.children.map(
+            (child) => ({
+              data: {
+                group: 'edges',
+                id: `${notes.id}_${child}`,
+                source: note.id,
+                target: child,
+              },
+              classes: 'hierarchy',
+            })
+          );
+
+          const linkConnections: EdgeDefinition[] = [];
+
+          // Find and add linked notes
+          // note.links.forEach((link) => {
+          //   if (link.to && note.id) {
+          //     const to = NoteUtils.getNoteByFnameV5({
+          //       fname: link.to!.fname as string,
+          //       vault: note.vault,
+          //       notes: notes,
+          //       wsRoot: router.query.ws as string,
+          //     });
+
+          //     if (!to) return;
+          //     linkConnections.push({
+          //       data: {
+          //         group: 'edges',
+          //         id: `${note.id}_${to.id}`,
+          //         source: note.id,
+          //         target: to.id,
+          //       },
+          //       classes: 'link'
+          //     });
+          //   }
+          // });
+
+          return [...childConnections, ...linkConnections];
+        })
+        .flat();
+
+      setElements({ nodes, edges });
+    }
+    
+    // SCHEMA GRAPH
+    else {
+      const schemaArray = Object.values(schemas);
+
+      const ROOT_NODE = {
+        data: { id: 'graph_root', label: 'Schemas', group: 'nodes' },
+      };
+      const nodes = [ROOT_NODE];
+      const edges: any[] = [];
+
+      schemaArray.forEach((schema) => {
+        const SCHEMA_ID = `${schema.vault.name}_${schema.fname}`;
+
+        // Base schema node
+        nodes.push({
+          data: { id: SCHEMA_ID, label: schema.fname, group: 'nodes' },
+        });
+
+        // Schema node -> root connection
+        edges.push({
+          data: {
+            group: 'edges',
+            id: `${ROOT_NODE.data.id}_${SCHEMA_ID}`,
+            source: ROOT_NODE.data.id,
+            target: SCHEMA_ID,
+          },
+          classes: 'hierarchy',
+        });
+
+        // Children schemas
+        Object.values(schema.schemas).forEach((subschema) => {
+          const SUBSCHEMA_ID = `${SCHEMA_ID}_${subschema.id}`
+
+          // Subschema node
+          nodes.push({
+            data: { id: SUBSCHEMA_ID, label: subschema.title, group: 'nodes' },
+          });
+
+          // Schema -> subschema connection
+          edges.push({
             data: {
               group: 'edges',
-              id: `${notes.id}_${child}`,
-              source: note.id,
-              target: child,
+              id: `${SCHEMA_ID}_${SUBSCHEMA_ID}`,
+              source: SCHEMA_ID,
+              target: SUBSCHEMA_ID,
             },
             classes: 'hierarchy',
-          })
-        );
+          });
+        });
+      });
 
-        const linkConnections: EdgeDefinition[] = [];
-
-        // Find and add linked notes
-        // note.links.forEach((link) => {
-        //   if (link.to && note.id) {
-        //     const to = NoteUtils.getNoteByFnameV5({
-        //       fname: link.to!.fname as string,
-        //       vault: note.vault,
-        //       notes: notes,
-        //       wsRoot: router.query.ws as string,
-        //     });
-
-        //     if (!to) return;
-        //     linkConnections.push({
-        //       data: {
-        //         group: 'edges',
-        //         id: `${note.id}_${to.id}`,
-        //         source: note.id,
-        //         target: to.id,
-        //       },
-        //       classes: 'link'
-        //     });
-        //   }
-        // });
-
-        return [...childConnections, ...linkConnections];
-      })
-      .flat();
-
-    setElements({ nodes, edges });
+      setElements({ nodes, edges });
+    }
   }, [notes]);
 
   useEffect(() => {
@@ -188,8 +249,8 @@ export default function FullGraph({
     // if (_.isUndefined(cy)) return;
 
     // logger.log('Connected edges:', j.connectedEdges())
-    
-    cy.$('.open').removeClass('open')
+
+    cy.$('.open').removeClass('open');
 
     cy.getElementById(id).addClass('open');
 
@@ -204,40 +265,40 @@ export default function FullGraph({
 
   return (
     <>
-    <Head>
-      <title>Dendron Graph</title>
-    </Head>
-    <div
-      id='graph'
-      style={{
-        width: '100vw',
-        height: '100vh',
-        position: 'relative',
-      }}
-    >
+      <Head>
+        <title>Dendron Graph</title>
+      </Head>
       <div
-        ref={graphRef}
+        id='graph'
         style={{
-          width: '100%',
-          height: '100%',
-          zIndex: 1,
+          width: '100vw',
+          height: '100vh',
+          position: 'relative',
         }}
-      ></div>
-      {elements && (
-        <Space
+      >
+        <div
+          ref={graphRef}
           style={{
-            position: 'absolute',
-            bottom: 8,
-            right: 8,
-            zIndex: 2,
+            width: '100%',
+            height: '100%',
+            zIndex: 1,
           }}
-          direction='vertical'
-        >
-          <Typography.Text>Nodes: {elements.nodes.length}</Typography.Text>
-          <Typography.Text>Edges: {elements.edges.length}</Typography.Text>
-        </Space>
-      )}
-    </div>
+        ></div>
+        {elements && (
+          <Space
+            style={{
+              position: 'absolute',
+              bottom: 8,
+              right: 8,
+              zIndex: 2,
+            }}
+            direction='vertical'
+          >
+            <Typography.Text>Nodes: {elements.nodes.length}</Typography.Text>
+            <Typography.Text>Edges: {elements.edges.length}</Typography.Text>
+          </Space>
+        )}
+      </div>
     </>
   );
 }

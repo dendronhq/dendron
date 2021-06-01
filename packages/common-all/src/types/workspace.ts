@@ -6,7 +6,7 @@ export type DPermission = {
   write: string[];
 };
 // === Vaults
-export type VaultRemote = {
+export type RemoteEndpoint = {
   type: "git";
   url: string;
 };
@@ -20,17 +20,25 @@ export type DVault = {
   visibility?: DVaultVisibility;
   /** Filesystem path to fault */
   fsPath: string;
-  // /**
-  //  * Uri which is relative from root
-  //  */
-  // uri: string;
-  remote?: VaultRemote;
+  /**
+   * Indicate the workspace that this vault is part of
+   */
+  workspace?: string;
+  remote?: RemoteEndpoint;
+  // TODO
   userPermission?: DPermission;
   /**
    * If this is enabled, don't apply workspace push commands
    */
   noAutoPush?: boolean;
 };
+
+export type DWorkspace = {
+  name: string;
+  remote?: RemoteEndpoint;
+};
+
+export type DWorkspaceEntry = Omit<DWorkspace, "name">;
 
 export type DendronConfig = {
   /**
@@ -49,6 +57,11 @@ export type DendronConfig = {
    * Configuration related to publishing notes
    */
   site: DendronSiteConfig;
+
+  /**
+   * Workspaces
+   */
+  workspaces?: { [key: string]: DWorkspaceEntry | undefined };
   /**
    * Dendron vaults in workspace.
    * Setup by plugin.

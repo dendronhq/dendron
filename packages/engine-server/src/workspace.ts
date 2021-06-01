@@ -7,6 +7,7 @@ import {
   DUtils,
   DVault,
   DVaultVisibility,
+  DWorkspace,
   NoteUtils,
   SchemaUtils,
   Time,
@@ -84,6 +85,15 @@ export class WorkspaceService {
     return DConfig.writeConfig({ wsRoot, config });
   }
 
+  async addWorkspace({ workspace }: { workspace: DWorkspace }) {
+    const allWorkspaces = this.config.workspaces || {};
+    allWorkspaces[workspace.name] = _.omit(workspace, "name");
+    const config = this.config;
+
+    config.workspaces = allWorkspaces;
+    this.setConfig(config);
+  }
+
   /**
    * Create vault files if it does not exist
    */
@@ -110,9 +120,7 @@ export class WorkspaceService {
     if (!fs.existsSync(NoteUtils.getFullPath({ note, wsRoot: this.wsRoot }))) {
       await note2File({ note, vault, wsRoot: this.wsRoot });
     }
-    if (
-      !fs.existsSync(SchemaUtils.getPath({ root: this.wsRoot, fname: "root" }))
-    ) {
+    if (!fs.existsSync(SchemaUtils.getPath({ root: vpath, fname: "root" }))) {
       await schemaModuleOpts2File(schema, vpath, "root");
     }
 
@@ -292,7 +300,7 @@ export class WorkspaceService {
   }
 
   getVaultForPath(fpath: string) {
-    return VaultUtils.getVaultByNotePathV4({
+    return VaultUtils.getVaultByNotePath({
       vaults: this.config.vaults,
       wsRoot: this.wsRoot,
       fsPath: fpath,
@@ -354,7 +362,7 @@ export class WorkspaceService {
         if (WorkspaceService.isWorkspaceVault(root)) {
           return undefined;
         }
-        const vault = VaultUtils.getVaultByPath({
+        const vault = VaultUtils.getVaultByDirPath({
           vaults,
           wsRoot,
           fsPath: root,

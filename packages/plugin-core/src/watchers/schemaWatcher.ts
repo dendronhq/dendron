@@ -47,7 +47,7 @@ export class SchemaWatcher {
     const { vaults: vaults, wsRoot } = engine;
     const fname = path.basename(uri.fsPath, ".schema.yml");
     const dirname = path.dirname(uri.fsPath);
-    const vault = VaultUtils.getVaultByPath({
+    const vault = VaultUtils.getVaultByDirPath({
       vaults,
       wsRoot,
       fsPath: dirname,

@@ -3,6 +3,9 @@ const execa = require("execa");
 const path = require("path");
 const {getMetaPath, getProjRoot} = require("./utils");
 
+/**
+ * Create a global symlink for all packages
+ */
 async function main() {
     const base = path.join(getProjRoot(), "packages");
     const packages = fs.readdirSync(base);

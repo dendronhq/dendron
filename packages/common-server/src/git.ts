@@ -3,6 +3,7 @@ import {
   DendronConfig,
   DendronError,
   DVault,
+  DWorkspace,
   NoteProps,
   RESERVED_KEYS,
   VaultUtils,
@@ -58,7 +59,6 @@ export class GitUtils {
   }) {
     const { remotePath, accessToken } = opts;
     let repoPath: string;
-    debugger;
     if (remotePath.startsWith("https://")) {
       repoPath = remotePath.split("/").slice(-2).join("/");
     } else {
@@ -146,21 +146,30 @@ export class GitUtils {
     repoPath: string;
     repoUrl: string;
     wsRoot: string;
-  }): { vaults: DVault[] } {
-    const { repoPath, wsRoot } = opts;
+  }): { vaults: DVault[]; workspace?: DWorkspace } {
+    const { repoPath, wsRoot, repoUrl } = opts;
     // is workspace root
     if (fs.existsSync(path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE))) {
       const config = readYAML(
         path.join(repoPath, CONSTANTS.DENDRON_CONFIG_FILE)
       ) as DendronConfig;
+      const workspace = path.basename(repoPath);
       const vaults = config.vaults.map((ent) => {
         const vpath = vault2Path({ vault: ent, wsRoot: repoPath });
         return {
           ...ent,
-          fsPath: path.relative(wsRoot, vpath),
+          workspace,
+          fsPath: path.relative(path.join(wsRoot, workspace), vpath),
         };
       });
       return {
+        workspace: {
+          name: workspace,
+          remote: {
+            type: "git",
+            url: repoUrl,
+          },
+        },
         vaults,
       };
     } else {

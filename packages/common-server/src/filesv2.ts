@@ -8,6 +8,7 @@ import {
   SchemaModuleOpts,
   SchemaModuleProps,
   SchemaUtils,
+  VaultUtils,
 } from "@dendronhq/common-all";
 import { assign, parse, stringify } from "comment-json";
 import { FSWatcher } from "fs";
@@ -289,7 +290,7 @@ export const vault2Path = ({
   vault: DVault;
   wsRoot: string;
 }) => {
-  return resolvePath(vault.fsPath, wsRoot);
+  return resolvePath(VaultUtils.getRelPath(vault), wsRoot);
 };
 
 export function writeJSONWithComments(fpath: string, data: any) {

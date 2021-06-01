@@ -325,7 +325,7 @@ export class PickerUtilsV2 {
       getWS().workspaceService?.isPathInWorkspace(activeDocument.uri.fsPath)
     ) {
       Logger.info({ ctx, activeDocument: activeDocument.fileName });
-      vault = VaultUtils.getVaultByNotePathV4({
+      vault = VaultUtils.getVaultByNotePath({
         vaults,
         wsRoot: DendronWorkspace.wsRoot(),
         fsPath: activeDocument.uri.fsPath,

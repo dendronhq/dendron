@@ -26,6 +26,12 @@ export class VaultUtils {
     );
   }
 
+  static getRelPath(vault: DVault) {
+    return vault.workspace
+      ? path.join(vault.workspace, vault.fsPath)
+      : vault.fsPath;
+  }
+
   static getVaultByName({
     vaults,
     vname,
@@ -39,6 +45,11 @@ export class VaultUtils {
     return vault;
   }
 
+  /**
+   * Like {@link getVaultByName} except throw error if undefined
+   * @param param0
+   * @returns
+   */
   static getVaultByNameOrThrow({
     vaults,
     vname,
@@ -53,7 +64,12 @@ export class VaultUtils {
     return vault;
   }
 
-  static getVaultByPath({
+  /**
+   * See if a dir path matches that of an existing vault
+   * @param param0
+   * @returns
+   */
+  static getVaultByDirPath({
     vaults,
     wsRoot,
     fsPath,
@@ -69,7 +85,9 @@ export class VaultUtils {
       wsRoot,
       fsPath,
     });
-    const vault = _.find(vaults, { fsPath: normPath });
+    const vault = _.find(vaults, (ent) => {
+      return VaultUtils.getRelPath(ent) === normPath;
+    });
     if (!vault) {
       throw new DendronError({
         message: "no vault found",
@@ -79,7 +97,7 @@ export class VaultUtils {
     return vault;
   }
 
-  static getVaultByNotePathV4({
+  static getVaultByNotePath({
     vaults,
     wsRoot,
     fsPath,
@@ -91,7 +109,7 @@ export class VaultUtils {
     wsRoot: string;
     vaults: DVault[];
   }) {
-    return this.getVaultByPath({
+    return this.getVaultByDirPath({
       vaults,
       wsRoot,
       fsPath: path.dirname(fsPath),
@@ -141,7 +159,7 @@ export class VaultUtils {
 
   static toWorkspaceFolder(vault: DVault): WorkspaceFolderRaw {
     return {
-      path: vault.fsPath,
+      path: VaultUtils.getRelPath(vault),
       name: vault.name,
     };
   }

@@ -213,7 +213,7 @@ export class DendronTreeView {
       return;
     }
     if (basename.endsWith(".md")) {
-      const vault = VaultUtils.getVaultByNotePathV4({
+      const vault = VaultUtils.getVaultByNotePath({
         fsPath: uri.fsPath,
         wsRoot,
         vaults: DendronWorkspace.instance().vaultsv4,

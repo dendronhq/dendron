@@ -76,7 +76,7 @@ export class VaultWatcher {
       this.L.debug({ ctx, uri: uri.fsPath, msg: "not in workspace, ignoring" });
       return;
     }
-    const vault = VaultUtils.getVaultByNotePathV4({
+    const vault = VaultUtils.getVaultByNotePath({
       vaults: eclient.vaults,
       wsRoot: DendronWorkspace.wsRoot(),
       fsPath: uri.fsPath,
@@ -124,7 +124,7 @@ export class VaultWatcher {
 
       try {
         this.L.debug({ ctx, uri, msg: "pre-add-to-engine" });
-        const vault = VaultUtils.getVaultByNotePathV4({
+        const vault = VaultUtils.getVaultByNotePath({
           vaults: this.engine.vaults,
           fsPath: uri.fsPath,
           wsRoot: DendronWorkspace.wsRoot(),

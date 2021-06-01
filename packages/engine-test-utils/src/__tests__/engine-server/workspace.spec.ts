@@ -1,4 +1,4 @@
-import { NoteProps } from "@dendronhq/common-all";
+import { DVault, NoteProps } from "@dendronhq/common-all";
 import { tmpDir } from "@dendronhq/common-server";
 import { NoteTestUtilsV4 } from "@dendronhq/common-test-utils";
 import { DConfig, WorkspaceService } from "@dendronhq/engine-server";
@@ -17,6 +17,13 @@ describe("WorkspaceService", () => {
       expect(
         fs.readFileSync(gitignore, { encoding: "utf8" })
       ).toMatchSnapshot();
+    });
+
+    test("workspace Vault", async () => {
+      const wsRoot = tmpDir().name;
+      const vaults: DVault[] = [{ fsPath: "vault1", workspace: "foo" }];
+      await WorkspaceService.createWorkspace({ wsRoot, vaults });
+      expect(fs.existsSync(path.join(wsRoot, "foo", "vault1"))).toBeTruthy();
     });
   });
 
@@ -118,7 +125,9 @@ describe("WorkspaceService", () => {
         vault: vaults[1],
         wsRoot,
       });
-      const resp = await new WorkspaceService({ wsRoot }).commidAndAddAll();
+      const resp = await new WorkspaceService({
+        wsRoot,
+      }).commidAndAddAll();
       expect(resp.length).toEqual(2);
     },
     { initGit: true }

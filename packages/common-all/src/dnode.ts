@@ -261,8 +261,8 @@ export class DNodeUtils {
     basename: string;
   }) {
     const root = path.isAbsolute(opts.vault.fsPath)
-      ? opts.vault.fsPath
-      : path.join(opts.wsRoot, opts.vault.fsPath);
+      ? VaultUtils.getRelPath(opts.vault)
+      : path.join(opts.wsRoot, VaultUtils.getRelPath(opts.vault));
     return path.join(root, opts.basename);
   }
 

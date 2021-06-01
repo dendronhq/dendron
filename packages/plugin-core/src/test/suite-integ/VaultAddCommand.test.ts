@@ -1,5 +1,7 @@
 import {
   DendronConfig,
+  DVault,
+  DWorkspace,
   NoteUtils,
   SchemaUtils,
   VaultUtils,
@@ -12,6 +14,8 @@ import {
   tmpDir,
 } from "@dendronhq/common-server";
 import { FileTestUtils, sinon } from "@dendronhq/common-test-utils";
+import { DConfig, WorkspaceService } from "@dendronhq/engine-server";
+import { GitTestUtils } from "@dendronhq/engine-test-utils";
 import fs from "fs-extra";
 import _ from "lodash";
 import { describe } from "mocha";
@@ -22,7 +26,6 @@ import { WorkspaceFolderRaw, WorkspaceSettings } from "../../types";
 import { DendronWorkspace } from "../../workspace";
 import { expect, runSingleVaultTest } from "../testUtilsv2";
 import {
-  DENDRON_REMOTE,
   getConfig,
   runLegacySingleWorkspaceTest,
   setupBeforeAfter,
@@ -42,7 +45,7 @@ function checkVaults(opts: WorkspaceOpts) {
   const wsFolders = getWorkspaceFolders();
   expect(wsFolders).toEqual(
     vaults.map((ent) => {
-      const out: WorkspaceFolderRaw = { path: ent.fsPath };
+      const out: WorkspaceFolderRaw = { path: VaultUtils.getRelPath(ent) };
       if (ent.name) {
         out.name = ent.name;
       }
@@ -55,6 +58,7 @@ suite("VaultAddCommand", function () {
   let ctx: vscode.ExtensionContext;
   ctx = setupBeforeAfter(this, {
     beforeHook: () => {
+      // prevents a ReloadWorkspace
       sinon
         .stub(vscode.commands, "executeCommand")
         .returns(Promise.resolve({}));
@@ -65,21 +69,23 @@ suite("VaultAddCommand", function () {
   });
 
   // TODO: need to stub git clone with side effects
-  describe.skip("remote", function () {
-    test("basic, gitignore", (done) => {
+  describe("remote", function () {
+    test("basic", (done) => {
       runLegacySingleWorkspaceTest({
         ctx,
         onInit: async ({ wsRoot, vaults }) => {
+          const remoteDir = tmpDir().name;
+
+          await GitTestUtils.createRepoForRemoteWorkspace(wsRoot, remoteDir);
           const gitIgnore = path.join(wsRoot, ".gitignore");
-          fs.writeFileSync(gitIgnore, "foo\n");
-          const vault = vaults[0];
+
           const cmd = new VaultAddCommand();
-          const remote = DENDRON_REMOTE;
+          const remote = remoteDir;
           stubVaultInput({
             cmd,
             sourceType: "remote",
             sourcePath: "vaultRemote",
-            sourcePathRemote: remote,
+            sourcePathRemote: remoteDir,
             sourceName: "dendron",
           });
           const resp = await cmd.run();
@@ -92,19 +98,130 @@ suite("VaultAddCommand", function () {
                 fsPath: newVault.fsPath,
                 name: "dendron",
                 remote: {
-                  type: "git",
+                  type: "git" as const,
                   url: remote,
                 },
               },
-              vault,
+              vaults[0],
             ],
           });
-          expect(fs.existsSync(gitIgnore)).toBeTruthy();
-
           expect(
             FileTestUtils.assertInFile({
               fpath: gitIgnore,
               match: ["vaultRemote"],
+            })
+          ).toBeTruthy();
+          done();
+        },
+      });
+    });
+
+    test("add vault inside workspace", (done) => {
+      runLegacySingleWorkspaceTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults }) => {
+          // create remote repo
+          const remoteDir = tmpDir().name;
+          const vaultsRemote: DVault[] = [{ fsPath: "vault1" }];
+          await WorkspaceService.createWorkspace({
+            wsRoot: remoteDir,
+            vaults: vaultsRemote,
+          });
+          await GitTestUtils.createRepoWithReadme(remoteDir);
+
+          // stub
+          const gitIgnore = path.join(wsRoot, ".gitignore");
+          const cmd = new VaultAddCommand();
+          const wsName = "wsRemote";
+          stubVaultInput({
+            cmd,
+            sourceType: "remote",
+            sourcePath: wsName,
+            sourcePathRemote: remoteDir,
+            sourceName: "dendron",
+          });
+          await cmd.run();
+
+          expect(DConfig.getOrCreate(wsRoot).workspaces).toEqual({
+            [wsName]: {
+              remote: {
+                type: "git",
+                url: remoteDir,
+              },
+            },
+          });
+          checkVaults({
+            wsRoot,
+            vaults: [
+              {
+                fsPath: "vault1",
+                workspace: wsName,
+                name: "dendron",
+              },
+              vaults[0],
+            ],
+          });
+          expect(
+            FileTestUtils.assertInFile({
+              fpath: gitIgnore,
+              match: [wsName],
+            })
+          ).toBeTruthy();
+          done();
+        },
+      });
+    });
+
+    test("add workspace vault with same name as existing vault", (done) => {
+      runLegacySingleWorkspaceTest({
+        ctx,
+        onInit: async ({ wsRoot, vaults }) => {
+          // create remote repo
+          const remoteDir = tmpDir().name;
+          const vaultPath = "vault";
+          const vaultsRemote: DVault[] = [{ fsPath: vaultPath }];
+          await WorkspaceService.createWorkspace({
+            wsRoot: remoteDir,
+            vaults: vaultsRemote,
+          });
+          await GitTestUtils.createRepoWithReadme(remoteDir);
+
+          // stub
+          const gitIgnore = path.join(wsRoot, ".gitignore");
+          const cmd = new VaultAddCommand();
+          const wsName = "wsRemote";
+          stubVaultInput({
+            cmd,
+            sourceType: "remote",
+            sourcePath: wsName,
+            sourcePathRemote: remoteDir,
+            sourceName: "dendron",
+          });
+          await cmd.run();
+
+          expect(DConfig.getOrCreate(wsRoot).workspaces).toEqual({
+            [wsName]: {
+              remote: {
+                type: "git",
+                url: remoteDir,
+              },
+            },
+          });
+          checkVaults({
+            wsRoot,
+            vaults: [
+              {
+                fsPath: vaultPath,
+                workspace: wsName,
+                name: "dendron",
+              },
+              vaults[0],
+            ],
+          });
+          expect(
+            FileTestUtils.assertInFile({
+              fpath: gitIgnore,
+              match: [wsName],
             })
           ).toBeTruthy();
           done();
@@ -155,7 +272,7 @@ suite("VaultAddCommand", function () {
             })
           ).toBeTruthy();
 
-          // cehck config
+          // check config
           const config = readYAML(
             path.join(wsRoot, "dendron.yml")
           ) as DendronConfig;

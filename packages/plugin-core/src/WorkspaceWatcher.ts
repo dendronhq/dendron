@@ -48,7 +48,7 @@ export class WorkspaceWatcher {
     const eclient = DendronWorkspace.instance().getEngine();
     const fname = path.basename(uri.fsPath, ".md");
     const now = Time.now().toMillis();
-    const vault = VaultUtils.getVaultByNotePathV4({
+    const vault = VaultUtils.getVaultByNotePath({
       fsPath: uri.fsPath,
       vaults: eclient.vaults,
       wsRoot: DendronWorkspace.wsRoot(),

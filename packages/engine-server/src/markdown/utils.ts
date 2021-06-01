@@ -130,7 +130,7 @@ export const renderFromNoteWithCustomBody = (opts: {
   return contents;
 };
 
-type ParentWithIndex = {
+export type ParentWithIndex = {
   ancestor: Parent;
   index: number;
 };

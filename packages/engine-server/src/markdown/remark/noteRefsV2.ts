@@ -518,6 +518,8 @@ function convertNoteRefHelperAST(
 ): Required<RespV2<Parent>> {
   const { proc, refLvl, link, note } = opts;
   const noteRefProc = proc();
+  // proc is the parser that was parsing the note the reference was in, so need to update fname to reflect that we are parsing the referred note
+  MDUtilsV4.setDendronData(noteRefProc, { fname: link.from.fname });
   const engine = MDUtilsV4.getEngineFromProc(noteRefProc);
   MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
   const procOpts = MDUtilsV4.getProcOpts(noteRefProc);
@@ -586,6 +588,8 @@ function convertNoteRefHelper(
 ): Required<RespV2<string>> {
   const { body, proc, refLvl, link } = opts;
   const noteRefProc = proc();
+  // proc is the parser that was parsing the note the reference was in, so need to update fname to reflect that we are parsing the referred note
+  MDUtilsV4.setDendronData(noteRefProc, { fname: link.from.fname });
   MDUtilsV4.setNoteRefLvl(noteRefProc, refLvl);
   const bodyAST = noteRefProc.parse(body) as DendronASTNode;
   const { anchorStart, anchorEnd, anchorStartOffset } = link.data;

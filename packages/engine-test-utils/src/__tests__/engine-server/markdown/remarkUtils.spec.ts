@@ -18,7 +18,7 @@ describe("RemarkUtils and LinkUtils", () => {
         async ({ engine }) => {
           const body = engine.notes["foo"].body;
           const out = RemarkUtils.findAnchors(body);
-          expect(out).toMatchSnapshot("bond");
+          expect(out).toMatchSnapshot();
           expect(_.size(out)).toEqual(1);
           expect(out[0].depth).toEqual(1);
           expect(out[0].type).toEqual(DendronASTTypes.HEADING);
@@ -44,9 +44,8 @@ describe("RemarkUtils and LinkUtils", () => {
       await runEngineTestV5(
         async ({ engine }) => {
           const body = engine.notes["foo"].body;
-          debugger;
           const out = RemarkUtils.findAnchors(body);
-          expect(out).toMatchSnapshot("bond");
+          expect(out).toMatchSnapshot();
           expect(_.size(out)).toEqual(1);
           expect(out[0].type).toEqual(DendronASTTypes.BLOCK_ANCHOR);
         },
@@ -76,7 +75,7 @@ describe("RemarkUtils and LinkUtils", () => {
       async ({ engine }) => {
         const note = engine.notes["foo"];
         const links = LinkUtils.findLinks({ note, engine });
-        expect(links).toMatchSnapshot("bond");
+        expect(links).toMatchSnapshot();
         expect(links[0].to?.fname).toEqual("bar");
       },
       {
